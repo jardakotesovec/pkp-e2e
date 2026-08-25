@@ -38,7 +38,7 @@ const {
     SendInvitationWizard,
     AcceptInvitationWizard,
 } = require('../pages/UserInvitationPages.js');
-const {LoginPage} = require('../../lib/pkp/playwright/pages/LoginPage.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 
 const ROLE = 'Copyeditor'; // offered role under test (assistant-level, masthead selectable)
 

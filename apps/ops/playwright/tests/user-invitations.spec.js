@@ -32,7 +32,7 @@
  *   expiry scenario key (PRINCIPLES D9), not a config edit.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {LoginPage} = require('../../lib/pkp/playwright/pages/LoginPage.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {
     UsersRolesPage,
     SendInvitationWizard,

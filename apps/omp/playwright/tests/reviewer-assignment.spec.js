@@ -56,7 +56,7 @@
  * nothing here mutates shared singletons.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {getEmail} = require('../../lib/pkp/playwright/data/users.js');
+const {getEmail} = require('../../../../shared/playwright/data/users.js');
 const {
     STATUS,
     decisionButton,

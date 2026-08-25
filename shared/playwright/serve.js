@@ -12,7 +12,7 @@ const path = require('path');
 const {spawn} = require('child_process');
 const {loadEnv} = require('./support/env.js');
 
-const appRoot = process.cwd();
+const appRoot = process.env.PKP_APP_ROOT || process.cwd();
 loadEnv(appRoot);
 
 const port = parseInt(process.env.PLAYWRIGHT_BASE_PORT || '8000', 10);

@@ -8,7 +8,7 @@
  * two reviewer groups (julia/paul → External, amara/adam → Internal); series
  * `monographs`/`textbooks` are identified by path (no abbrev).
  */
-const {getEmail} = require('../../lib/pkp/playwright/data/users.js');
+const {getEmail} = require('../../../../shared/playwright/data/users.js');
 
 const user = (username, givenName, familyName, roles, extra = {}) => ({
     username,

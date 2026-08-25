@@ -18,7 +18,7 @@ const path = require('path');
 const {execFileSync} = require('child_process');
 const {loadEnv} = require('./support/env.js');
 
-const appRoot = process.cwd();
+const appRoot = process.env.PKP_APP_ROOT || process.cwd();
 loadEnv(appRoot);
 
 const configFile =
@@ -50,7 +50,10 @@ if (filesDir && /test/.test(path.basename(filesDir)) && fs.existsSync(filesDir))
     console.log(`reset: leaving files dir alone (${filesDir} — name does not contain "test" or missing)`);
 }
 
-const authDir = path.join(appRoot, 'playwright', '.auth');
+const authDir = path.join(
+    process.env.PKP_SUITE_DIR || path.join(appRoot, 'playwright'),
+    '.auth'
+);
 if (fs.existsSync(authDir)) {
     console.log(`reset: wiping ${authDir}`);
     fs.rmSync(authDir, {recursive: true, force: true});

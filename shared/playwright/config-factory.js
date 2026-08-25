@@ -65,12 +65,16 @@ function detectWorkers() {
     return Math.max(2, os.cpus().length - 2);
 }
 
-function definePkpConfig({appName, appRoot, basePort}) {
+function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
     loadEnv(appRoot);
+    // The suite (tests, POMs, runtime state) lives in the pkp-e2e repo;
+    // appRoot is the app checkout the fleet serves and installs into.
+    suiteDir = suiteDir || path.join(appRoot, 'playwright');
 
     // base-test.js and subprocesses (installTest, reset) read these.
     process.env.PKP_APP_NAME = appName;
     process.env.PKP_APP_ROOT = appRoot;
+    process.env.PKP_SUITE_DIR = suiteDir;
     process.env.PKP_CONFIG_FILE =
         process.env.PKP_CONFIG_FILE || path.join(appRoot, 'config.test.inc.php');
     basePort = parseInt(process.env.PLAYWRIGHT_BASE_PORT || String(basePort), 10);
@@ -83,7 +87,7 @@ function definePkpConfig({appName, appRoot, basePort}) {
         10,
     );
     const sharedTestDir = path.join(__dirname, 'tests');
-    const appTestDir = path.join(appRoot, 'playwright', 'tests');
+    const appTestDir = path.join(suiteDir, 'tests');
 
     const serverEnv = {
         PKP_CONFIG_FILE: process.env.PKP_CONFIG_FILE,
@@ -91,7 +95,7 @@ function definePkpConfig({appName, appRoot, basePort}) {
     };
 
     return defineConfig({
-        outputDir: path.join(appRoot, 'playwright', 'test-results'),
+        outputDir: path.join(suiteDir, 'test-results'),
         workers,
         fullyParallel: true,
         reporter: [['list']],
@@ -142,7 +146,7 @@ function definePkpConfig({appName, appRoot, basePort}) {
         // alive by reuseExistingServer holds its old log open, so the file is
         // only truncated when a server actually (re)starts.
         webServer: Array.from({length: workers}, (_, i) => {
-            const logDir = path.join(appRoot, 'playwright', '.server-logs');
+            const logDir = path.join(suiteDir, '.server-logs');
             fs.mkdirSync(logDir, {recursive: true});
             const logFile = path.join(logDir, `server-${basePort + i}.log`);
             return {

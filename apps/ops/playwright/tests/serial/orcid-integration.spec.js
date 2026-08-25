@@ -30,7 +30,7 @@ const {
     openContributorEditor,
     orcidField,
 } = require('../../pages/OrcidPages.js');
-const {runJobs} = require('../../../lib/pkp/playwright/support/jobs.js');
+const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
 
 /** Unique per-run tag: single alphanumeric token, carries app + scenario. */
 function makeTag(scenario, testInfo) {

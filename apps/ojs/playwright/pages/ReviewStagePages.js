@@ -22,7 +22,7 @@
  */
 const path = require('path');
 const {expect} = require('@playwright/test');
-const {BasePage} = require('../../lib/pkp/playwright/pages/BasePage.js');
+const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
 
 /** Default upload fixture (app-local). */

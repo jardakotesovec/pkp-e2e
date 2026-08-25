@@ -18,7 +18,7 @@
  * (lib/pkp/docs/e2e/specs/U04-orcid-integration.md).
  */
 const {expect} = require('@playwright/test');
-const {BasePage} = require('../../lib/pkp/playwright/pages/BasePage.js');
+const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
 
 exports.OrcidSettingsTab = class OrcidSettingsTab extends BasePage {
     /**

@@ -16,7 +16,7 @@
  * "* Required" suffix in their accessible name, hence the ^-anchored regexes.
  */
 const {expect} = require('@playwright/test');
-const {BasePage} = require('../../lib/pkp/playwright/pages/BasePage.js');
+const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
 
 exports.UsersRolesPage = class UsersRolesPage extends BasePage {
     /**

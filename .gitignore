@@ -1,0 +1,7 @@
+node_modules/
+.env
+apps/*/playwright/.auth/
+apps/*/playwright/test-results/
+apps/*/playwright/.server-logs/
+apps/*/playwright/.last-run.json
+docs/tracking/.reports/

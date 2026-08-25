@@ -61,7 +61,7 @@ const {
     selectReviewer,
     waitForJQueryIdle,
 } = require('../pages/ReviewStagePages.js');
-const {LoginPage} = require('../../lib/pkp/playwright/pages/LoginPage.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 
 const JOURNAL = 'publicknowledge';
 

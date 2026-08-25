@@ -42,8 +42,8 @@
  * no hard-coded sleeps.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {LoginPage} = require('../../lib/pkp/playwright/pages/LoginPage.js');
-const {getPassword} = require('../../lib/pkp/playwright/data/users.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {
     WorkflowPage,
     waitForJQueryIdle,

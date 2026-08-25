@@ -12,7 +12,7 @@
  * A change here requires checking every implemented spec against the new
  * defaults — do it deliberately.
  */
-const {getEmail} = require('../../lib/pkp/playwright/data/users.js');
+const {getEmail} = require('../../../../shared/playwright/data/users.js');
 
 const user = (username, givenName, familyName, roles, extra = {}) => ({
     username,

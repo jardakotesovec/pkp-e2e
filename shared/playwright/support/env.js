@@ -9,10 +9,12 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * @param {string} appRoot Absolute path to the app repo root
+ * @param {string} dir Directory holding the env file
+ * @param {string} [fileName] env file name (default .env.playwright; the
+ *   pkp-e2e repo root uses plain .env for app roots and shared values)
  */
-function loadEnv(appRoot) {
-    const envFile = path.join(appRoot, '.env.playwright');
+function loadEnv(dir, fileName = '.env.playwright') {
+    const envFile = path.join(dir, fileName);
     if (!fs.existsSync(envFile)) {
         return;
     }

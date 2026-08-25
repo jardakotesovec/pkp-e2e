@@ -1,24 +1,26 @@
 # Harness Guide
 
 Single home for how the Playwright e2e harness is laid out, configured, and
-run — shared by OJS, OMP, and OPS via the lib/pkp submodule. Paths are given
-relative to an app repo root (`lib/pkp/...` = inside the submodule). The
+run — one pkp-e2e repo covering OJS, OMP, and OPS. Everything lives HERE and
+runs against plain app checkouts named in the repo `.env`
+(`OJS_ROOT`/`OMP_ROOT`/`OPS_ROOT`); `bin/mount.js` copies the few PHP
+overlays into a checkout (see README). Paths below are repo-relative. The
 test-authoring rules live in `PRINCIPLES.md`; coding conventions and
 pitfalls in `patterns.md`; the seeding API in `scenarios.md`; identities in
 `users.md`.
 
-## The two playwright folders
+## The two playwright layers
 
 Every app has two Playwright layers. Picking the wrong one puts a test in the
-wrong repo.
+wrong folder.
 
-**`playwright/` (app repo root) — the app's feature suites.** Every feature
+**`apps/<app>/playwright/` — the app's feature suites.** Every feature
 test lives here, even when the scenario is common to all three apps
 (maintainer ruling 2026-07-26: per-app suites are derived from the spec;
 duplication between apps is acceptable — the spec is the maintained artifact).
 
 ```
-playwright/
+apps/<app>/playwright/
 ├── tests/             # Spec files — flat, no subfolder taxonomy
 │   └── serial/        # <app>-serial project — globally-scanning specs (queue drains etc.)
 ├── support/
@@ -35,12 +37,12 @@ playwright/
 Both test folders stay **flat** — no subfolder taxonomy until ~25–30 specs
 make natural clusters obvious.
 
-**`lib/pkp/playwright/` — shared infrastructure only.** Base fixtures, shared
+**`shared/playwright/` — shared infrastructure only.** Base fixtures, shared
 POMs, the bootstrap + login smoke specs. Feature suites never live here. Be
-conservative: when in doubt, it belongs in the app repo.
+conservative: when in doubt, it belongs in the app's tree.
 
 ```
-lib/pkp/playwright/
+shared/playwright/
 ├── tests/                   # bootstrap.setup.js (setup project), login.spec.js (smoke)
 ├── support/
 │   ├── base-test.js         # The extended `test` fixture — start here

@@ -32,8 +32,10 @@ const {disableMotion} = require('./motion.js');
  * @returns {Promise<string>} path to the storage-state JSON file
  */
 async function ensureAuthStateFor(browser, username, {baseURL}) {
-    const appRoot = process.env.PKP_APP_ROOT;
-    const authDir = path.join(appRoot, 'playwright', '.auth');
+    const suiteDir =
+        process.env.PKP_SUITE_DIR ||
+        path.join(process.env.PKP_APP_ROOT, 'playwright');
+    const authDir = path.join(suiteDir, '.auth');
     const statePath = path.join(authDir, `${username}.json`);
 
     if (fs.existsSync(statePath)) {

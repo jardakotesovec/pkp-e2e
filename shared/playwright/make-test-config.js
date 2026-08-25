@@ -25,7 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const appRoot = process.cwd();
+const appRoot = process.env.PKP_APP_ROOT || process.cwd();
 const port = process.env.PLAYWRIGHT_BASE_PORT || '8000';
 const dbName = process.env.TEST_DB_NAME || 'ojs_test';
 if (!/test/i.test(dbName)) {

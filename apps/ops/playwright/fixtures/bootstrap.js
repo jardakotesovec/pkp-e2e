@@ -10,7 +10,7 @@
  * visibility control; assistant.rita is an Editorial Board Member (no stage
  * access).
  */
-const {getEmail} = require('../../lib/pkp/playwright/data/users.js');
+const {getEmail} = require('../../../../shared/playwright/data/users.js');
 
 const user = (username, givenName, familyName, roles, extra = {}) => ({
     username,

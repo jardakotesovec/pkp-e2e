@@ -3,7 +3,7 @@
  *
  * The OMP test extension — layers OMP fixtures on top of the shared base.
  */
-const base = require('../../lib/pkp/playwright/support/base-test.js');
+const base = require('../../../../shared/playwright/support/base-test.js');
 
 const test = base.test.extend({
     // OMP alias for the shared test-API client.
