@@ -30,8 +30,10 @@ if (!appRoot) {
         'PKP_APP_ROOT is not set — run tests through the app playwright.config.js (config-factory sets it).'
     );
 }
+const suiteDir =
+    process.env.PKP_SUITE_DIR || path.join(appRoot, 'playwright');
 // eslint-disable-next-line import/no-dynamic-require
-const appContext = require(path.join(appRoot, 'playwright', 'support', 'app.context.js'));
+const appContext = require(path.join(suiteDir, 'support', 'app.context.js'));
 
 const test = base.test.extend({
     user: [null, {option: true}],
