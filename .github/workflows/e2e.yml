@@ -22,18 +22,24 @@ concurrency:
 
 jobs:
   ojs:
+    # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
+    if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: ojs
       app_repo: jardakotesovec/ojs
       app_ref: e2e_ng_2
   omp:
+    # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
+    if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: omp
       app_repo: jardakotesovec/omp
       app_ref: e2e_ng_2
   ops:
+    # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
+    if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: ops
