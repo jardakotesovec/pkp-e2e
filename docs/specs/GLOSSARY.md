@@ -5,7 +5,7 @@ so a QA or product person can read any spec without a developer — written in
 OJS voice; where OMP/OPS use a different NAME for the same thing, the entry
 says "cross-app names: Part II" rather than repeating the mapping. **Part II**
 is the cross-app term map and the shared-test capability names. Specs follow
-TEMPLATE rule 10 (`lib/pkp/docs/e2e/process/TEMPLATE.md`): on-screen names win,
+TEMPLATE rule 10 (`docs/process/TEMPLATE.md`): on-screen names win,
 first use of a coined term carries a gloss or pointer here, and authors add
 missing terms as part of writing. **Settled usage** entries record which of
 two competing words the specs use going forward; shipped specs are aligned
@@ -335,12 +335,12 @@ confirmed in live OPS Moderator sessions, 2026-07-26.
 
 ## 2. Capability names (`app.context.js` — canonical, verbatim)
 
-These flags serve the SHARED `lib/pkp` layer (base fixtures, POMs,
+These flags serve the SHARED `shared/playwright/` layer (base fixtures, POMs,
 bootstrap/smoke specs), which gates on capabilities, never app names
 (`if (!ctx.hasReviewStage)`, never `if (app === 'ops')`). Per-app suites don't
-need them — a suite living in an app's own repo names that app's roles, stages
+need them — a suite living in an app's own tree names that app's roles, stages
 and data directly. The names below are the canonical spelling; `app.context.js`
-in each app repo (recreated by the harness rebuild) must use them verbatim.
+in each app's tree (`apps/<app>/playwright/support/`) must use them verbatim.
 
 | Capability | Gates | OJS | OMP | OPS |
 |---|---|:-:|:-:|:-:|
@@ -360,7 +360,7 @@ Spec badges are reader-facing and name apps. Under per-app suites the
 translation is direct: a scenario badged `{OJS OMP}` is implemented in the OJS
 and OMP suites and simply absent from OPS's — plus one absence test where the
 spec calls for it (PRINCIPLES M4). Only the shared
-`lib/pkp` layer translates badges to capability gates, via this table:
+`shared/playwright/` layer translates badges to capability gates, via this table:
 
 | Spec marking (typical) | Shared-layer gate |
 |---|---|

@@ -3,7 +3,7 @@
 > Append-only ledger: rows are dated records — corrected by dated follow-up
 > notes, never rewritten.
 
-Per `lib/pkp/docs/e2e/process/RUNBOOK.md` "What goes where", this file records ONLY:
+Per `docs/process/RUNBOOK.md` "What goes where", this file records ONLY:
 
 - **actual app-code changes** made by the campaign (what, why, where, commit);
 - **build blockers**: app defects that prevented tests from running green

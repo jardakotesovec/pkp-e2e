@@ -96,7 +96,7 @@ durations are 0.01ms, not 0, because presence helpers wait on
 - **API-triggered updates**: arm `page.waitForResponse(...)` before the click,
   await it after. Prefer this over toast assertions (parallel lesson 2).
 - **Legacy jQuery flows** (AjaxModal saves, Smarty grid refreshes, tab-handler
-  clicks): call `waitForJQueryIdle(page)` from `playwright/support/legacy.js`
+  clicks): call `waitForJQueryIdle(page)` from `apps/ojs/playwright/support/legacy.js`
   (OJS app-local — the shared layer deliberately ships no jQuery helper;
   promote it when a second app suite needs it). It waits until jQuery is
   absent or `jQuery.active` reaches 0. No-op on Vue-only surfaces — prefer
@@ -129,7 +129,7 @@ contention.
    Off). A spec needing a scheduled task invokes
    `php lib/pkp/tools/scheduler.php run`; one needing a queued job's side
    effect (job-dispatched mail: ORCID mailables, deposits) invokes
-   `runJobs()` (`lib/pkp/playwright/support/jobs.js`). Both belong in the
+   `runJobs()` (`shared/playwright/support/jobs.js`). Both belong in the
    serial project ONLY: an explicit runner drains the SHARED queue and can pop
    other tests' pending jobs — even inside a `Mail::fake()` seeding window,
    committing side effects while swallowing the message. Never run either
@@ -180,9 +180,9 @@ Apply: `test('name', {tag: ['@smoke']}, async ({page}) => {...})`.
 
 ## Page Object Model
 
-Inherit from `BasePage` (`lib/pkp/playwright/pages/BasePage.js`); POMs hold
+Inherit from `BasePage` (`shared/playwright/pages/BasePage.js`); POMs hold
 `page` and locators as instance properties. Placement: shared mechanics →
-`lib/pkp/playwright/pages/`; app-specific → `playwright/pages/`. OJS POMs
+`shared/playwright/pages/`; app-specific → `apps/<app>/playwright/pages/`. OJS POMs
 live today: `OrcidPages.js`, `ReviewStagePages.js`, `UserInvitationPages.js`.
 **(recorded design)** `EditorialWorkflowPage.js` (decisions, Publication
 side-nav, publish, galleys — helpers `clickDecision`,
@@ -226,7 +226,7 @@ alternative.
   role changes, flag changes). Need special attributes? Create a throwaway
   user in a scratch journal. No baseline account is `mustChangePassword`-
   flagged; `manager.maya` logs straight in.
-- **Running `test:e2e:serve` alongside a Playwright run** (fights over the
+- **Running `serve:<app>` alongside a Playwright run** (fights over the
   base port — see `harness.md`).
 - **Committing `.auth/` files** (session cookies; gitignored — un-stage if
   you see one staged).

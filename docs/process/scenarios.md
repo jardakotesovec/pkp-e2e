@@ -13,7 +13,7 @@ and every builder change needs a parity entry in
 Routes are site-wide (`/index.php/index/api/v1/_test/…`), gated by
 `X-Test-Key` (env `TEST_API_KEY`; the namespace 404s when the server lacks the
 env var, 403s on a wrong header). **Validation is the strict `Spec` reader**
-(`lib/pkp/classes/testing/Spec.php`) — there is no JSON-schema layer; every
+(`shared/php/classes/testing/Spec.php`) — there is no JSON-schema layer; every
 key a builder does not consume → 400 with a dotted `specKey`, so the builders
 themselves are the authoritative field list.
 
@@ -60,11 +60,13 @@ Facts tests rely on (parity-verified — see the parity ledger):
 - Multilingual fields (`name`, section `title`/`abbrev`, publication `title`)
   must be locale maps (`{"en": …}`); a bare string 400s.
 
-Implementation: shared base `lib/pkp/api/v1/_test/PKPTestController.php` +
-builders in `lib/pkp/classes/testing/` (`PKPBootstrapSeeder`,
+Implementation: shared base `shared/php/api/v1/_test/PKPTestController.php` +
+builders in `shared/php/classes/testing/` (`PKPBootstrapSeeder`,
 `scenario/PKPContextScenarioBuilder`, `scenario/PKPSubmissionScenarioBuilder`,
 `Spec`, `UserSeeder`, `ContextFactory`); each app subclasses them under
-`api/v1/_test/` and `classes/testing/`.
+`apps/<app>/php/api/v1/_test/` and `apps/<app>/php/classes/testing/`.
+`bin/mount.js` copies it all into the app checkout at the runtime paths
+(`lib/pkp/…`, app root) — edit here, then re-run mount.
 
 ## Recorded designs (not live — field shapes to grow back into)
 
@@ -81,7 +83,7 @@ publication), `metrics` (OJS-only: {views?, downloads?, months?} — compiled
 `metrics_submission` rows spread backwards from the current month).
 
 Per publication: `galleys[]` ({label, locale?, file?, urlRemote?} — `file` is
-a basename under `lib/pkp/playwright/fixtures/files/`; the two are mutually
+a basename under `apps/<app>/playwright/fixtures/files/`; the two are mutually
 exclusive), `metadata.datePublished` (survives `published: true`; without it
 publish stamps today), `mediaFiles[]` ({variantType*: 'web'|'high_resolution',
 file?, name?, genre?, group?} — `group` links pairs via `VariantGroup`, first
@@ -106,7 +108,7 @@ lowercased class name); `reviewForms[]`; OJS-only `issues[]` (incl.
 `accessStatus`) and `subscriptions[]` (`'expired'` seeds an ACTIVE-status row
 with a past `date_end` — a state unreachable through the create form).
 
-Spec-builder fixtures (`playwright/fixtures/scenarios/`) are also recorded:
+Spec-builder fixtures (`apps/<app>/playwright/fixtures/scenarios/`) are also recorded:
 `submission-draft`, `submission-in-review`, `submission-in-round-2`,
 `submission-published` — until they return, specs POST via
 `pkpApi.createContext()`/`createSubmission()` directly. There is deliberately
@@ -114,7 +116,7 @@ no typed scenario client; build one only when a feature suite demonstrates
 the need.
 
 The baseline `publicknowledge` journal is seeded with enriched defaults
-(`playwright/fixtures/bootstrap.js`): announcements, public comments,
+(`apps/ojs/playwright/fixtures/bootstrap.js`): announcements, public comments,
 categories-in-wizard, keywords/citations on request, reviewer suggestions,
 DOIs auto-assigned on publish, CSL plugin, double-anonymous review with
 deadlines. Tests needing any of these OFF use a scratch journal.
@@ -137,7 +139,7 @@ deadlines. Tests needing any of these OFF use a scratch journal.
 
 ## Mailpit
 
-`pkpMail` (fixture; `lib/pkp/playwright/support/mail.js`) wraps Mailpit's HTTP
+`pkpMail` (fixture; `shared/playwright/support/mail.js`) wraps Mailpit's HTTP
 API. Mailpit is ONE shared instance across every worker and all three fleets.
 
 **There are no Mailpit tags on this install** (verified 2026-07-29:

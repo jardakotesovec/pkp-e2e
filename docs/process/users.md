@@ -54,7 +54,7 @@ Traps:
 
 ## 3. The seeded roster
 
-Home: `lib/pkp/playwright/data/users.js`. All 18 users are enrolled in
+Home: `shared/playwright/data/users.js`. All 18 users are enrolled in
 `publicknowledge` (admin is site-level, created by the installer; the other 17
 by the bootstrap seed). Usernames are `role.firstname`; one account per
 permission archetype; **use the first listed account for a role** unless the
@@ -102,9 +102,9 @@ around).
 ## Login flow internals
 
 `ensureAuthStateFor(browser, username, {baseURL})`
-(`lib/pkp/playwright/support/auth.js`):
+(`shared/playwright/support/auth.js`):
 
-1. If `playwright/.auth/<username>.json` exists, **probe** it: replay the
+1. If `apps/<app>/playwright/.auth/<username>.json` exists, **probe** it: replay the
    cookies, GET the profile URL FOLLOWING redirects, and judge by where the
    request ends (`ok() && !url.includes('/login')` → live). Status-with-
    redirects-disabled cannot work here — even a signed-in profile request
@@ -131,8 +131,8 @@ Auth works only after the setup project ran. It probes
 `tools/installTest.php` (empty DB → install; install debris → drop all tables
 and reinstall; refuses any DB whose name lacks "test") then seeds
 `publicknowledge` + the 17 non-admin users from
-`playwright/fixtures/bootstrap.js`. Stale `.auth/` files are recreated on
-demand; `npm run test:e2e:reset` forces a full cold bootstrap.
+`apps/<app>/playwright/fixtures/bootstrap.js`. Stale `.auth/` files are recreated on
+demand; `npm run reset:<app>` forces a full cold bootstrap.
 
 ## The `publicknowledge` context
 

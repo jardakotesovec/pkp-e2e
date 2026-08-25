@@ -1,6 +1,6 @@
 # Spec template
 
-Copy this file to `lib/pkp/docs/e2e/specs/U<nn>-<feature>.md` (zero-padded FEATURE-MAP row number) and fill every section (or mark it `N/A —
+Copy this file to `docs/specs/U<nn>-<feature>.md` (zero-padded FEATURE-MAP row number) and fill every section (or mark it `N/A —
 <reason>`). HTML comments are guidance — delete them in the real spec.
 
 **Who these specs are for** (the maintainer's standing principle): a QA person or
@@ -21,7 +21,7 @@ an inline marker linking to the Findings register. A feature an app lacks
 entirely: title badge (`{OJS OMP}`) + one absence paragraph up front, written as
 an install fact ("OPS does not install X by default"), never an impossibility.
 Cross-app vocabulary (press/server for journal, monograph/preprint for
-submission…) follows `lib/pkp/docs/e2e/specs/GLOSSARY.md` Part II; write the OJS term once with the recast
+submission…) follows `docs/specs/GLOSSARY.md` Part II; write the OJS term once with the recast
 noted in the preamble, not re-badged on every mention.
 
 **Altitude — two principles, no length quota** (maintainer, 2026-07-10). (1)
@@ -155,7 +155,7 @@ subset above; the rest bind by the writer's judgment):
    The author's entry route (View on My Submissions) belongs to the
    author-dashboard feature; everything after it belongs to the workflow
    features.
-10. **Glossary discipline.** `lib/pkp/docs/e2e/specs/GLOSSARY.md` is the living definition home for
+10. **Glossary discipline.** `docs/specs/GLOSSARY.md` is the living definition home for
     the product vocabulary the specs use — the terms as OJS/OMP/OPS screens
     use them, defined so a QA/PO reader can follow any spec, plus the
     settled resolutions of term collisions (which of two competing words the

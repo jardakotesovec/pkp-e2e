@@ -54,15 +54,17 @@ shared/playwright/
 │   └── env.js               # loadEnv(appRoot) — .env.playwright parser (shell exports win)
 ├── pages/                   # BasePage, LoginPage, DashboardPage
 ├── data/users.js            # The 18 baseline identities + getPassword()/getEmail()
-├── reset.js                 # test:e2e:reset — drop+recreate DB, wipe files dir + .auth/
-├── serve.js                 # test:e2e:serve — manual PHP server on the fleet's base port
+├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir + .auth/
+├── serve.js                 # serve:<app> — manual PHP server on the fleet's base port
 └── config-factory.js        # definePkpConfig({appName, appRoot, basePort}) — all three apps
 ```
 
-The PHP side: shared builders in `lib/pkp/classes/testing/` + the gated
-controller `lib/pkp/api/v1/_test/PKPTestController.php`; each app adds
+The PHP side: shared builders in `shared/php/classes/testing/` + the gated
+controller `shared/php/api/v1/_test/PKPTestController.php`; each app adds
 `api/v1/_test/{index.php,TestController.php}`, `classes/testing/*` subclasses,
-and `tools/installTest.php`.
+and `tools/installTest.php` under `apps/<app>/php/`. `bin/mount.js` copies
+all of it into the app checkout at its runtime paths (`lib/pkp/…`, app root)
+— edit here, then re-run mount.
 
 ## The fleets
 
@@ -97,10 +99,10 @@ access), and has no editor/reviewer/copyeditor/layout/proofreader accounts
   hybrid sysfs), else CPU cores − 2, minimum 2. The measured knee matches the
   P-core count (2026-08-21); small CI runners want workers = cores and pin the
   env var explicitly.
-- **Server output** goes to `playwright/.server-logs/server-<port>.log`
+- **Server output** goes to `apps/<app>/playwright/.server-logs/server-<port>.log`
   (request log + PHP warnings) — check there when debugging server-side
   errors. A server adopted via `reuseExistingServer` (e.g. left over from
-  `test:e2e:serve`) keeps logging wherever it was started.
+  `serve:<app>`) keeps logging wherever it was started.
 - **Projects chain**: `setup → {shared, <app>} → <app>-serial`. The setup
   project probes `GET /api/v1/_test/bootstrap` (warm: <1s no-op; cold:
   installs schema via `tools/installTest.php` + seeds). The serial project
@@ -117,9 +119,10 @@ access), and has no editor/reviewer/copyeditor/layout/proofreader accounts
 Each app has a **local, gitignored** `config.test.inc.php`; the app reads it
 via the `PKP_CONFIG_FILE` env var, which is the whole switch between the dev
 and test installs. Generate it from the app's own template —
-`node lib/pkp/playwright/make-test-config.js > config.test.inc.php` (env
-inputs documented in the script; CI uses the same generator) — or write it by
-hand. It must carry, besides its own Postgres `<app>_test` DB and
+`npm run config:<app> > "$APP_ROOT/config.test.inc.php"` (env inputs
+documented in `shared/playwright/make-test-config.js`; CI uses the same
+generator) — or write it by hand. It must carry, besides its own Postgres
+`<app>_test` DB and
 files dir:
 
 - `allowed_hosts` pinned to `127.0.0.1` (+ the fleet's port)
@@ -139,7 +142,7 @@ files dir:
   blocks on long-standing style nits — run the final compile step directly).
 
 Never delete `config.test.inc.php` alone (the template resets
-`installed=Off`); `npm run test:e2e:reset` is the sanctioned nuke — it refuses
+`installed=Off`); `npm run reset:<app>` is the sanctioned nuke — it refuses
 any DB whose name lacks "test".
 
 **Always drive the fleets via `127.0.0.1`, never `localhost`.** A page request
@@ -162,28 +165,30 @@ the browser step dies.
 
 ## Running
 
+All from the pkp-e2e root (`ojs` below — likewise `omp`/`ops`):
+
 ```bash
-npm run test:e2e:install    # one-time, installs Chromium
-npm run test:e2e:setup      # seed the test DB (cold ~1-3 min; warm <1s no-op)
-npm run test:e2e            # full run
-npm run test:e2e:ojs        # only the app project (name varies per app)
-npm run test:e2e:ui         # Playwright UI mode — best for iterating
-npm run test:e2e:debug      # PWDEBUG=1 step-through
-npm run test:e2e:reset      # nuke the test DB (forces cold bootstrap next run)
-npm run test:e2e:serve      # manual PHP server on the fleet's base port
+npx playwright install chromium      # one-time, installs Chromium
+npm run test:ojs -- --project=setup  # seed the test DB (cold ~1-3 min; warm <1s no-op)
+npm run test:ojs                     # full run for one fleet
+npm run test:ojs -- --project=ojs    # only the app project (name varies per app)
+npm run test:ojs -- --ui             # Playwright UI mode — best for iterating
+PWDEBUG=1 npm run test:ojs           # step-through
+npm run reset:ojs                    # nuke the test DB (forces cold bootstrap next run)
+npm run serve:ojs                    # manual PHP server on the fleet's base port
 ```
 
 Reset the DB before any full-suite timing run and every ~8–10 features —
 long-lived DBs accumulate state that pollutes COUNT assertions and tag
 searches. After a reset, the first run can die on a webServer start race —
-relaunch. Don't run `test:e2e:serve` while a Playwright run is live (same
+relaunch. Don't run `serve:<app>` while a Playwright run is live (same
 port). After a killed run, kill orphan chromium/php processes before
 re-running.
 
 ## Quick start: writing a new test
 
-1. **Folder**: feature test → the app's `playwright/tests/`; shared
-   infrastructure only → `lib/pkp/playwright/`.
+1. **Folder**: feature test → the app's `apps/<app>/playwright/tests/`;
+   shared infrastructure only → `shared/playwright/`.
 2. **Import**: shared spec `require('../support/base-test.js')`; app spec
    `require('../support/fixtures.js')` (adds the app's api fixture).
 3. **User**: see `users.md`; `test.use({user: 'sectioneditor.ana'})` sets the
@@ -198,7 +203,7 @@ re-running.
 ## Pointers (single homes elsewhere)
 
 - Commit discipline, push rules, what-goes-where routing:
-  `lib/pkp/docs/e2e/process/RUNBOOK.md`.
+  `RUNBOOK.md`.
 - Security-shaped observations: never into public artifacts — RUNBOOK "What
   goes where" names the private destination.
 - Test-authoring rules and the scenario-endpoint design record:
@@ -209,5 +214,5 @@ re-running.
 File paths, selectors, and schema fields cited across these docs are
 snapshots; UIs drift faster than docs. Before finalizing a test, open the
 named component/class and confirm, re-grep moved line numbers, and run the
-test (`npm run test:e2e:ui`) before claiming it works. Treat every doc here as
-a map, not a GPS.
+test (`npm run test:<app> -- --ui`) before claiming it works. Treat every doc
+here as a map, not a GPS.

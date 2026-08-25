@@ -1,14 +1,15 @@
 # Runbook — spec + Playwright build loop (OJS · OMP · OPS)
 
-**This file + `lib/pkp/docs/e2e/tracking/PROGRESS.md` are the source of truth for
+**This file + `docs/tracking/PROGRESS.md` are the source of truth for
 the build.** Any session — fresh, restarted, cleared, or resumed after
 compaction — becomes correct by reading these two files. Never rely on
 conversation memory.
 
-Campaign docs live centrally in the lib/pkp submodule, one copy shared by all
-three apps; tests live in each app's own repo. **Doc paths in every campaign
-file are written as seen from an app repo root** (`lib/pkp/docs/...`);
-`../e2e_ng/` is the maintainer's private directory outside every repo.
+Campaign docs live centrally in this repo's `docs/`, one copy shared by all
+three apps; tests live in this repo too, under `apps/<app>/playwright/`.
+**Doc paths in every campaign file are written relative to the pkp-e2e repo
+root** (`docs/...`); `../e2e_ng/` is the maintainer's private directory
+outside every repo.
 
 **The spec is the source of truth for the product.** Everything the campaign
 knows about a feature — its behavior in all three apps, its divergences, its
@@ -45,7 +46,7 @@ inline HTML only where structure needs it.
 
 **Method** — enumerate mechanically, then document, then map coverage ("did
 we miss a feature?" must be a grep): Phase 0, the surface atlas
-(`lib/pkp/docs/e2e/tracking/atlas/` — complete 2026-07-28: 2,163 atoms, assigned
+(`docs/tracking/atlas/` — complete 2026-07-28: 2,163 atoms, assigned
 in `FEATURE-MAP.md`, parked in `UNASSIGNED.md`); Phase 1, feature specs
 (current — this file's loop); Phase 2, the coverage crosswalk (every spec
 scenario mapped against the suite).
@@ -206,11 +207,11 @@ are short and outcome-shaped — context budgeting, not a wording rule.
   concerns", not "never checked". At session end, after the verification
   pass, the orchestrator leaves the file tidy: dismissed entries deleted,
   duplicates merged, every remaining Open entry distinct and `verified`.
-- **Build blockers** → `lib/pkp/docs/e2e/tracking/app-changes.md`: an app defect that
+- **Build blockers** → `docs/tracking/app-changes.md`: an app defect that
   had to be worked around or fixed to get tests green (races,
   nondeterministic UI, harness-hostile behavior), plus the record of actual
   app-code changes the campaign made. Nothing else.
-- **Scenario-builder parity notes** → `lib/pkp/docs/e2e/tracking/parity-ledger.md`.
+- **Scenario-builder parity notes** → `docs/tracking/parity-ledger.md`.
 - **Cross-feature mechanisms** → described fully in ONE owning spec; other
   specs link (TEMPLATE rule 6).
 - **Process learnings** → this file or TEMPLATE (via maintainer review),
@@ -253,12 +254,12 @@ maintenance never moves routed content.
 - **The floor, every iteration**: this file + `PROGRESS.md` + the target
   feature's row in `FEATURE-MAP.md` (its atom list).
 - **When authoring the spec**: `TEMPLATE.md`,
-  `lib/pkp/docs/e2e/specs/GLOSSARY.md` (Part I reader vocabulary; Part II
+  `docs/specs/GLOSSARY.md` (Part I reader vocabulary; Part II
   cross-app substitution), the feature's
   atoms in `atlas/` (`affordances-{workflow,management,user,reader}.md` per
   surface).
-- **When authoring tests**: `lib/pkp/docs/e2e/process/PRINCIPLES.md` + the
-  shared harness docs (`lib/pkp/docs/e2e/process/` — start at `harness.md`;
+- **When authoring tests**: `docs/process/PRINCIPLES.md` + the
+  shared harness docs (`docs/process/` — start at `harness.md`;
   per-app deltas live inside them, not in per-app files).
 - Beyond the floor, read whatever helps — subject to context hygiene: a
   spec-writing agent works from the draft plus the digest (step 3b) and pulls
@@ -353,12 +354,12 @@ policy in Model discipline). The orchestrator briefs them (each brief points
 at TEMPLATE / PRINCIPLES — never paraphrases the rules), judges results, and
 is the ONLY writer of PROGRESS rows, atlas `Claimed by:` markers, and
 `app-changes.md` entries. EVERY subagent brief carries verbatim: "Do NOT
-write to PROGRESS.md, atlas files, or lib/pkp/docs/e2e/tracking/app-changes.md; return
+write to PROGRESS.md, atlas files, or docs/tracking/app-changes.md; return
 proposed content in your report instead." Every probe, claim-check and test
 brief ALSO opens with the **Frame** paragraph, verbatim, before the task.
 
 1. **Claim it** — set the feature's PROGRESS row to `in_progress`.
-2. **Author the spec** → `lib/pkp/docs/e2e/specs/U<nn>-<feature>.md` (zero-padded
+2. **Author the spec** → `docs/specs/U<nn>-<feature>.md` (zero-padded
    FEATURE-MAP row number first, so files sort in map order) per
    TEMPLATE, covering all three apps from the start. Draw from the feature's
    atlas atoms + the code, including its `atlas/affordances-*.md` rows —
@@ -461,17 +462,19 @@ brief ALSO opens with the **Frame** paragraph, verbatim, before the task.
     lines): register highlights are welcome (🐞/❓ counts, the finding a
     reviewer should read first, anything low-confidence — it drives sampling
     review); finding DETAIL stays in the register.
-11. **Commit** — single home of the commit rule (PRINCIPLES points here). `lib/pkp` and app root commit **separately**; NEVER bump
-    submodule pointers in ANY app repo (`git restore --staged lib/pkp
-    lib/ui-library plugins` before any root commit; stage files explicitly,
-    never `git add -A` at an app root). Specs, campaign docs, and shared
-    test/POM/builder changes commit inside `lib/pkp` — but never `.reports/`
-    scratch (retention rule below); app-only tests commit in each app's
-    root. Shared-change flow: commit in `ojs-main/lib/pkp` → push the
-    campaign branch (`e2e_ng_2`) to the `jardakotesovec` fork → in OMP/OPS
-    `lib/pkp` fetch and check out the SAME branch. That checkout IS the sync
-    — no re-pin commit follows (maintainer ruling 2026-07-28); `M lib/pkp`
-    in app status is normal and stays uncommitted.
+11. **Commit** — single home of the commit rule (PRINCIPLES points here).
+    Everything the campaign produces — specs, campaign docs, shared and
+    app-side tests, POMs, builders, PHP overlays — commits in THIS repo
+    (pkp-e2e), one commit stream; never `.reports/` scratch (retention rule
+    below). The app checkouts are read-only from the campaign's perspective:
+    the mounted copies belong to `bin/mount.js` (edit here, re-run mount —
+    never commit them app-side), and the only main-repo changes are the
+    minimal reviewed ones on the reduced `e2e_ng_2` branches (the
+    `Config.php` `PKP_CONFIG_FILE` line; the OPS wordCount cast; the thin CI
+    hook workflows), which change only via maintainer-reviewed edits. The
+    former submodule-sync flow (separate `lib/pkp` commits, push to fork,
+    fetch in OMP/OPS, no-re-pin ruling 2026-07-28) is superseded by the
+    extraction into this repo (2026-08-25).
 12. **Report** — what was built, register highlights, anything
     low-confidence. If anything was routed to the security file this
     session, the verification pass ("What goes where") has already run and
@@ -554,7 +557,7 @@ files count. If a stage's completion is undecidable from files, re-run it.
 ## Ops & campaign safeguards
 
 Environment facts (fleets, ports, config contract, env vars, run commands,
-recovery) have ONE home: `lib/pkp/docs/e2e/process/harness.md`. Campaign-side
+recovery) have ONE home: `docs/process/harness.md`. Campaign-side
 rules that stay here:
 
 - **Live-probe etiquette** (campaign invariant): scratch contexts for anything
@@ -562,9 +565,10 @@ rules that stay here:
   `clearAll()` Mailpit.
 - **DB hygiene cadence**: reset before any full-suite timing run and every
   ~8–10 features.
-- **Git**: push only to `jardakotesovec` remotes, campaign branch `e2e_ng_2`;
-  verify the remote URL before every push; a bad pushed commit gets a
-  follow-up commit, never a force-push.
+- **Git**: the pkp-e2e repo is the ONLY push target for campaign work; the
+  reduced `e2e_ng_2` app branches change only via maintainer-reviewed edits,
+  never from a campaign session. Verify the remote URL before every push; a
+  bad pushed commit gets a follow-up commit, never a force-push.
 - **`.reports/` retention** (maintainer ruling 2026-07-31): per-feature
   reports — probe reports, `digest.md`, claim-check chunks and merge — are
   SESSION-LOCAL SCRATCH: required during the loop, never committed (the

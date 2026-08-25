@@ -4,7 +4,7 @@
 highlights (🐞/❓ counts, the headline finding, low-confidence flags); finding
 DETAIL lives in each spec's Findings register, never here. Read together with
 `RUNBOOK.md` (the loop); style rules in `TEMPLATE.md`; test rules in
-`lib/pkp/docs/e2e/process/PRINCIPLES.md`.
+`docs/process/PRINCIPLES.md`.
 
 **This run**: branch `e2e_ng_2`, started 2026-07-31 as a clean-room rebuild
 (FULL RESET #2 — the previous build survives on branch `e2e_ng` and in git

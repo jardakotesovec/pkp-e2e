@@ -2,15 +2,14 @@
 
 The **test-authoring contract** for the Playwright e2e suite, and the design
 record a clean-room rebuild starts from. Every test-writing session follows
-this file. Paths here are relative to an app repo root (`lib/pkp/...` =
-inside the submodule).
+this file. Paths here are relative to the pkp-e2e repo root.
 
 Related contracts: the campaign manual (loop, mission, invariants, budgets,
-definition-of-done) is `lib/pkp/docs/e2e/process/RUNBOOK.md`; spec style
-`lib/pkp/docs/e2e/process/TEMPLATE.md`; progress state
-`lib/pkp/docs/e2e/tracking/PROGRESS.md`, never in conversation memory.
+definition-of-done) is `docs/process/RUNBOOK.md`; spec style
+`docs/process/TEMPLATE.md`; progress state
+`docs/tracking/PROGRESS.md`, never in conversation memory.
 Harness layout and env facts: `harness.md`. Parity verdicts:
-`lib/pkp/docs/e2e/tracking/parity-ledger.md` (append-only ledger).
+`docs/tracking/parity-ledger.md` (append-only ledger).
 
 **Terms.** "Scenario builder" (historically "Processor") = the PHP classes
 behind `/api/v1/_test/*` (`PKPBootstrapSeeder`, `PKP*ScenarioBuilder`,
@@ -24,7 +23,7 @@ application's own screens would not send. The `/api/v1/_test/*` endpoints are
 the exception that proves it — harness plumbing for *getting to* a state
 (A4), never the behavior under test.
 
-The **legacy Cypress suite** still ships on this branch: out of scope — never
+The **legacy Cypress suite** still ships in the app repositories: out of scope — never
 maintained, never run by the campaign, deleted only when the maintainer
 decides the Playwright suite has replaced it.
 
@@ -46,7 +45,7 @@ test-only scenario endpoints.
 - **A2 — Scenario builders must be accurate.** A seeded scenario leaves the
   same database state, fires the same hooks, and produces the same
   notifications as a user doing the equivalent through the UI/REST API. Any
-  builder change requires a parity entry in `lib/pkp/docs/e2e/tracking/parity-ledger.md`
+  builder change requires a parity entry in `docs/tracking/parity-ledger.md`
   before it merges.
 - **A3 — Builder scope stays balanced.** Extend a builder only when multiple
   tests need the same state; one-off states are reached by driving the UI in
@@ -78,15 +77,15 @@ test-only scenario endpoints.
   `scenarios.md`.
 - **A9 — Globally-scanning operations run serially.** Scheduled tasks,
   site-level plugin toggles, site-settings mutations, cache clears, queue
-  drains: serial project only (`playwright/tests/serial/`), which depends on
+  drains: serial project only (`apps/<app>/playwright/tests/serial/`), which depends on
   the parallel projects and runs alone at the end.
 
 ## Organization
 
 Tests are organized by feature — one spec file (or small set) per feature;
-the feature list and budgets live in `lib/pkp/docs/e2e/tracking/PROGRESS.md`. Placement:
-genuinely app-agnostic infrastructure → `lib/pkp/playwright/`; every feature
-suite → its app's own `playwright/tests/`. Folders stay flat until ~25–30
+the feature list and budgets live in `docs/tracking/PROGRESS.md`. Placement:
+genuinely app-agnostic infrastructure → `shared/playwright/`; every feature
+suite → its app's own `apps/<app>/playwright/tests/`. Folders stay flat until ~25–30
 specs make natural clusters obvious.
 
 ## Multi-app conventions (M1–M5)
@@ -98,14 +97,14 @@ authoring conventions:
   2026-07-26). The spec lists common scenarios first, then app-specific ones;
   each app's suite implements every common scenario in that app's own context
   (its roles, users, stages, vocabulary — not an OJS transplant) plus its own
-  specifics, in that app's repo. Duplication between app suites is acceptable
+  specifics, in that app's suite tree. Duplication between app suites is acceptable
   — the spec is the maintained artifact; don't build sharing machinery. A test
   may name its own app's seeded users and stages directly.
 - **M2 — The shared tree gates on capabilities, never app names.**
-  `lib/pkp/playwright/` code uses `appContext.hasReviewStage` etc. and
+  `shared/playwright/` code uses `appContext.hasReviewStage` etc. and
   resolves personas through `appContext.seed.actors` (archetype →
   username-or-null). Capability names are canonical in
-  GLOSSARY.md Part II §2 (`lib/pkp/docs/e2e/specs/GLOSSARY.md`): glossary row first, then the same key in
+  GLOSSARY.md Part II §2 (`docs/specs/GLOSSARY.md`): glossary row first, then the same key in
   all three `app.context.js` files.
 - **M3 — Never write a test asserting a 🐞 register finding** (that freezes
   the defect as contract), and **never a test that demonstrates a potential
@@ -175,7 +174,7 @@ must stand alone when everything else is scratched.)
   seed still means "expired" when the configured window changes.
 
 Per-feature scenario keys are documented as they land in `scenarios.md`
-(LIVE surface) with their parity rationale in `lib/pkp/docs/e2e/tracking/parity-ledger.md` —
+(LIVE surface) with their parity rationale in `docs/tracking/parity-ledger.md` —
 not here.
 
 ## Rebuild acceptance
@@ -190,7 +189,7 @@ the rebuilt harness — or harness.md is updated in the same commit.
 
 ## Bootstrap data policy
 
-Base seed: `playwright/fixtures/bootstrap.js` (journal `publicknowledge`, 18
+Base seed: `apps/<app>/playwright/fixtures/bootstrap.js` (journal `publicknowledge`, 18
 users, sections, categories, issues — documented in `users.md`). Richer
 defaults are encouraged — enable what most real journals use, so tests
 exercise representative configuration. A bootstrap change requires checking
@@ -199,8 +198,8 @@ every implemented spec against the new defaults — deliberately, not casually.
 ## Findings and changes — where they go
 
 Owned by RUNBOOK "What goes where"; the authoring-side summary: app-code
-changes and build blockers → `lib/pkp/docs/e2e/tracking/app-changes.md` (ledger); builder parity notes →
-`lib/pkp/docs/e2e/tracking/parity-ledger.md`; product findings → the feature spec's Findings
+changes and build blockers → `docs/tracking/app-changes.md` (ledger); builder parity notes →
+`docs/tracking/parity-ledger.md`; product findings → the feature spec's Findings
 register — and a test result that contradicts the spec (permissions included)
 means the SPEC is wrong: report it to the register, never park it as a
 skipped/`fixme` test or a "not covered" note. Commit discipline and budgets:
