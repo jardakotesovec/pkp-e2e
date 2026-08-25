@@ -183,12 +183,15 @@ Apply: `test('name', {tag: ['@smoke']}, async ({page}) => {...})`.
 Inherit from `BasePage` (`shared/playwright/pages/BasePage.js`); POMs hold
 `page` and locators as instance properties. Placement: shared mechanics →
 `shared/playwright/pages/`; app-specific → `apps/<app>/playwright/pages/`. OJS POMs
-live today: `OrcidPages.js`, `ReviewStagePages.js`, `UserInvitationPages.js`.
+live today: `OrcidPages.js`, `ReviewStagePages.js`, `UserInvitationPages.js`,
+`SubmissionWizardPage.js` (start form + wizard: collapse-aware
+`gotoStep`/`expectStep`, dropzone `uploadFile`, TinyMCE fill, the
+submit/cancel dialogs).
 **(recorded design)** `EditorialWorkflowPage.js` (decisions, Publication
 side-nav, publish, galleys — helpers `clickDecision`,
 `clickRequestRevisions({newRound})`, `awaitEmailTemplateLoaded`,
 `recordDecision`, `publishCurrentPanel`, `addGalley`, `deleteGalley`),
-`SubmissionWizardPage.js`, `IssuePage.js`.
+`IssuePage.js`.
 
 ## Decision flow
 
@@ -252,7 +255,8 @@ alternative.
   `page.evaluate((id) => window.tinymce?.get(id)?.getContent(), fieldId)`.
 - **The wizard Steps rail collapses when it overflows** (non-current pills
   1px-clipped; `force: true` clicks are silent no-ops). Use
-  `SubmissionWizardPage.gotoStep()`/`expectStep()` (recorded design) — the
+  `SubmissionWizardPage.gotoStep()`/`expectStep()` (live —
+  `apps/ojs/playwright/pages/SubmissionWizardPage.js`) — the
   pattern handles expansion, end-anchored name matching, and re-render-
   swallowed clicks.
 - **`useFetch` tunnels DELETE and PUT via POST + `X-Http-Method-Override`;

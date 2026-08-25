@@ -10,7 +10,7 @@ spec, confirmed dead (stays here with evidence), or ruled out of scope.
 Sources (removed from the tip 2026-08-25, reachable in git history — RUNBOOK
 ".reports/ retention"): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **6 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **7 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -149,3 +149,11 @@ until their specs exist. Do not force-claim the defects themselves.
    the panel absence; the template mismatch is U30's / the mail templates').
    Resolves: U30 spec-time register entry; reconcile template with the press
    roster.
+7. **AFFW-068 dead-in-context** — attached to **U21** (claimed; the
+   submission-wizard spec's footnote a + Reference row document the verdict).
+   The legacy `SubmissionsListPanel` "New Submission" button renders on none
+   of its remaining mounts: the Native XML import/export screen is the
+   panel's only server-side mount and blanks the panel's add URL by
+   construction (`PKPNativeImportExportPlugin`); the button renders only when
+   an add URL is set. Live-verified 2026-08-25 as manager on OJS, OMP and
+   OPS. Resolves: maintainer confirmation as dead code (removal candidate).

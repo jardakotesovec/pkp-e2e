@@ -27,6 +27,12 @@
  * Richer keys return per feature, each with a parity entry.
  *
  * Feature passthroughs so far (each with a parity-ledger entry):
+ * - participants[] {username*, role*} — non-submitter stage assignments
+ *   (U21: an assigned Section Editor opening another author's draft), the
+ *   same Repo::stageAssignment()->build() row the workflow's Assign
+ *   Participant form writes, with the user group's own recommendOnly /
+ *   permitMetadataEdit defaults; the assignment email and notification the
+ *   UI flow sends are deliberately absent (seed-side, Mail::fake anyway).
  * - author {orcid*, orcidIsVerified?} — ORCID iD fixture state on the
  *   submitter's contributor record (U4): a connected iD is only reachable
  *   through ORCID's own OAuth sign-in, which can never complete in the test
@@ -75,6 +81,17 @@ abstract class PKPSubmissionScenarioBuilder
      * ['seriesId' => …, 'seriesPosition' => …] OMP). Parse-phase: no writes.
      */
     abstract protected function parsePublicationOverlay(Context $context, Spec $root): array;
+
+    /**
+     * App keys stored on the submission record itself at creation (OMP:
+     * `workType` — the start form always posts one, so a wizard-created
+     * submission never carries the bare column/schema state a direct
+     * repository add leaves). Parse-phase: no writes.
+     */
+    protected function parseSubmissionOverlay(Context $context, Spec $root): array
+    {
+        return [];
+    }
 
     /** The review stage a round spec seeds into (OMP reads its per-round overlay). */
     protected function reviewStageIdForRound(Spec $roundSpec): int
@@ -125,6 +142,7 @@ abstract class PKPSubmissionScenarioBuilder
         $submitted = (bool) $root->get('submitted', true);
         $published = (bool) $root->get('published', false);
         $publicationProps = $this->parsePublicationOverlay($context, $root);
+        $submissionProps = $this->parseSubmissionOverlay($context, $root);
 
         $decisionNames = (array) $root->get('decisions', []);
         $decisionTypes = [];
@@ -156,6 +174,23 @@ abstract class PKPSubmissionScenarioBuilder
             ];
         }
 
+        $participantPlans = [];
+        if ($root->has('participants')) {
+            $userSeeder = new UserSeeder();
+            foreach ($root->childList('participants') as $participantSpec) {
+                $username = (string) $participantSpec->require('username');
+                $roleKey = (string) $participantSpec->require('role');
+                $participant = Repo::user()->getByUsername($username, true);
+                if (!$participant) {
+                    throw new SpecException("{$participantSpec->path}.username", "Unknown participant username \"{$username}\"");
+                }
+                $participantPlans[] = [
+                    'user' => $participant,
+                    'userGroup' => $userSeeder->resolveUserGroup($context, $roleKey, "{$participantSpec->path}.role"),
+                ];
+            }
+        }
+
         $authorPlan = null;
         if (($authorSpec = $root->child('author')) !== null) {
             $authorPlan = [
@@ -180,7 +215,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = $this->forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -212,11 +247,13 @@ abstract class PKPSubmissionScenarioBuilder
         ?array $abstract,
         bool $submitted,
         bool $published,
+        array $submissionProps,
         array $publicationProps,
         array $decisionTypes,
         array $roundPlans,
         array $publishOverlayPlan,
-        ?array $authorPlan = null
+        ?array $authorPlan = null,
+        array $participantPlans = []
     ): array {
         $request = Application::get()->getRequest();
 
@@ -226,7 +263,10 @@ abstract class PKPSubmissionScenarioBuilder
         try {
             $submitAsUserGroup = $this->resolveSubmitAsUserGroup($context, $submitter);
 
-            $submissionParams = ['contextId' => $context->getId(), 'locale' => $locale];
+            $submissionParams = array_merge(
+                ['contextId' => $context->getId(), 'locale' => $locale],
+                $submissionProps
+            );
             $submission = Repo::submission()->newDataObject($submissionParams);
             $publication = Repo::publication()->newDataObject($publicationProps);
             $submissionId = Repo::submission()->add($submission, $publication, $context);
@@ -302,6 +342,20 @@ abstract class PKPSubmissionScenarioBuilder
             }
         } finally {
             Registry::set('user', $previousActingUser);
+        }
+
+        // Non-submitter participants: the same stage-assignment row the
+        // workflow's Assign Participant form writes (group defaults for
+        // recommendOnly / permitMetadataEdit; no email or notification —
+        // recorded parity deviation).
+        foreach ($participantPlans as $plan) {
+            Repo::stageAssignment()->build(
+                $submissionId,
+                $plan['userGroup']->id,
+                $plan['user']->getId(),
+                $plan['userGroup']->recommendOnly,
+                $plan['userGroup']->permitMetadataEdit
+            );
         }
 
         // Decisions + review rounds, acting as the editor (admin).

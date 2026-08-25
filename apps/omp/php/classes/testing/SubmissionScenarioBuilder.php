@@ -23,6 +23,23 @@ use PKP\testing\SpecException;
 
 class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
 {
+    /**
+     * `workType` ('monograph' | 'editedVolume', default monograph) — the OMP
+     * start form always posts a work type (the Monograph radio arrives
+     * preselected and the field is required), so every wizard-created
+     * submission stores one; a direct repository add leaves it null, a state
+     * no UI path produces (parity fix, U21).
+     */
+    protected function parseSubmissionOverlay(Context $context, Spec $root): array
+    {
+        $workType = (string) $root->get('workType', 'monograph');
+        return match ($workType) {
+            'monograph' => ['workType' => \APP\submission\Submission::WORK_TYPE_AUTHORED_WORK],
+            'editedVolume' => ['workType' => \APP\submission\Submission::WORK_TYPE_EDITED_VOLUME],
+            default => throw new SpecException('workType', 'workType must be "monograph" or "editedVolume"'),
+        };
+    }
+
     protected function parsePublicationOverlay(Context $context, Spec $root): array
     {
         $props = [];

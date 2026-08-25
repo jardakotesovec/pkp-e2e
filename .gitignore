@@ -5,3 +5,4 @@ apps/*/playwright/test-results/
 apps/*/playwright/.server-logs/
 apps/*/playwright/.last-run.json
 docs/tracking/.reports/
+.reports/

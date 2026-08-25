@@ -2,7 +2,7 @@
  * @file playwright/support/legacy.js
  *
  * Re-export of the shared legacy-jQuery helpers (see
- * shared/playwright/support/legacy.js — the helper lived here app-local until
- * the OPS suite became its second consumer and it was promoted).
+ * shared/playwright/support/legacy.js — promoted there when this suite became
+ * the second consumer).
  */
 module.exports = require('../../../../shared/playwright/support/legacy.js');

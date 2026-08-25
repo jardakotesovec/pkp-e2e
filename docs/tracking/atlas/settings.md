@@ -50,7 +50,7 @@
 | SET-022 | ojs omp ops | lib/pkp/schemas/ror.json | Ror — cached institution record from the ror.org data dump (7 props). |
 | SET-023 | ojs omp ops | lib/pkp/schemas/section.json | Section — journal/server section or press series (6 props). Overlaid by all three apps (SET-033, SET-038, SET-044). |
 | SET-024 | ojs omp ops | lib/pkp/schemas/site.json | Site — overall site hosting one or more contexts; site-level settings entity (37 props). |
-| SET-025 | ojs omp ops | lib/pkp/schemas/submission.json | Submission — a submission to the journal/press/server (32 props). Overlaid by all three apps (SET-034, SET-039, SET-045). |
+| SET-025 | ojs omp ops | lib/pkp/schemas/submission.json | Submission — a submission to the journal/press/server (32 props). Overlaid by all three apps (SET-034, SET-039, SET-045). Claimed by: submission-wizard. |
 | SET-026 | ojs omp ops | lib/pkp/schemas/submissionFile.json | Submission File — submission file incl. metadata (43 props). Overlaid by OMP (SET-040). |
 | SET-027 | ojs omp ops | lib/pkp/schemas/user.json | User — a registered user (49 props). |
 | SET-028 | ojs omp ops | lib/pkp/schemas/userGroup.json | UserGroup — user group assigned to one of the allowed roles (14 props). |
@@ -64,18 +64,18 @@
 | SET-031 | ojs | ojs-main/schemas/issue.json | Issue — OJS app-only schema, no shared counterpart in lib/pkp/schemas (31 props). |
 | SET-032 | ojs | ojs-main/schemas/publication.json | OJS overlay of shared publication.json (8 props, no title key in file). |
 | SET-033 | ojs | ojs-main/schemas/section.json | OJS overlay of shared section.json (10 props). |
-| SET-034 | ojs | ojs-main/schemas/submission.json | OJS overlay of shared submission.json (4 props). |
+| SET-034 | ojs | ojs-main/schemas/submission.json | OJS overlay of shared submission.json (4 props). Claimed by: submission-wizard. |
 | SET-035 | omp | omp-main/schemas/context.json | Press — OMP overlay of shared context.json (24 props). |
 | SET-036 | omp | omp-main/schemas/eventLog.json | OMP overlay of shared eventLog.json (1 prop). |
 | SET-037 | omp | omp-main/schemas/publication.json | OMP overlay of shared publication.json (6 props). |
 | SET-038 | omp | omp-main/schemas/section.json | Series — OMP overlay of shared section.json (11 props). |
-| SET-039 | omp | omp-main/schemas/submission.json | OMP overlay of shared submission.json (9 props). |
+| SET-039 | omp | omp-main/schemas/submission.json | OMP overlay of shared submission.json (9 props). Claimed by: submission-wizard. |
 | SET-040 | omp | omp-main/schemas/submissionFile.json | OMP overlay of shared submissionFile.json (6 props). |
 | SET-041 | ops | ops-main/schemas/context.json | Server — OPS overlay of shared context.json (10 props). |
 | SET-042 | ops | ops-main/schemas/galley.json | Galley — OPS app-only schema, no shared counterpart in lib/pkp/schemas (14 props). |
 | SET-043 | ops | ops-main/schemas/publication.json | OPS overlay of shared publication.json (7 props, no title key in file). |
 | SET-044 | ops | ops-main/schemas/section.json | OPS overlay of shared section.json (12 props). |
-| SET-045 | ops | ops-main/schemas/submission.json | OPS overlay of shared submission.json (2 props). |
+| SET-045 | ops | ops-main/schemas/submission.json | OPS overlay of shared submission.json (2 props). Claimed by: submission-wizard. |
 
 ## Atoms — config.TEMPLATE.inc.php sections
 

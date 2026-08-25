@@ -40,13 +40,13 @@
 | VUE-020 | omp | components/Container/ManageCatalogPage.vue | OMP catalog management page (omp ManageCatalogHandler; only in omp js/load.js) |
 | VUE-021 | ojs,omp,ops | components/Container/ManageEmailsPage.vue | Emails (mailables + templates) management page (ManagementHandler) |
 | VUE-022 | ojs,omp,ops | components/Container/SettingsPage.vue | Settings pages container (context/website/workflow/distribution; ManagementHandler) |
-| VUE-023 | ojs,omp,ops | components/Container/StartSubmissionPage.vue | Begin-submission page (title/language checklist; lib/pkp PKPSubmissionHandler) |
+| VUE-023 | ojs,omp,ops | components/Container/StartSubmissionPage.vue | Begin-submission page (title/language checklist; lib/pkp PKPSubmissionHandler) Claimed by: submission-wizard. |
 | VUE-024 | ojs,omp,ops | components/Container/StatsEditorialPage.vue | Editorial activity stats page (PKPStatsHandler::editorial; OPS registers it with chart view removed) |
 | VUE-025 | ojs,omp,ops | components/Container/StatsPublicationsPage.vue | Publication/article usage stats page (PKPStatsHandler::publications) |
 | VUE-026 | ojs,omp,ops | components/Container/StatsContextPage.vue | Context (journal/press/server) usage stats page (PKPStatsHandler::context) |
 | VUE-027 | ojs | components/Container/StatsIssuesPage.vue | Issue usage stats page (ojs StatsHandler::issues; only in ojs js/load.js) |
 | VUE-028 | ojs,omp,ops | components/Container/StatsUsersPage.vue | Users-by-role stats page (PKPStatsHandler::users) |
-| VUE-029 | ojs,omp,ops | components/Container/SubmissionWizardPage.vue (variants SubmissionWizardPageOMP/OPS) | Multi-step submission wizard; per-app variant registered as `SubmissionWizardPage` in each app's js/load.js (PKPSubmissionHandler) |
+| VUE-029 | ojs,omp,ops | components/Container/SubmissionWizardPage.vue (variants SubmissionWizardPageOMP/OPS) | Multi-step submission wizard; per-app variant registered as `SubmissionWizardPage` in each app's js/load.js (PKPSubmissionHandler) Claimed by: submission-wizard. |
 
 ## Managers
 
@@ -108,7 +108,7 @@
 | VUE-078 | ojs | pages/statsIssues/IssueDownloadReportModal.vue | Issue stats download-report side modal (OJS-only stats page) |
 | VUE-079 | ojs,omp,ops | pages/statsPublications/PublicationsDownloadReportModal.vue | Publication stats download-report side modal |
 | VUE-080 | ojs,omp,ops | pages/statsUsers/UserExportModal.vue | Users stats export side modal |
-| VUE-081 | ojs,omp,ops | pages/submissionWizard/ReconfigureSubmissionModal.vue | Change section/language mid-wizard side modal (SubmissionWizardPage) |
+| VUE-081 | ojs,omp,ops | pages/submissionWizard/ReconfigureSubmissionModal.vue | Change section/language mid-wizard side modal (SubmissionWizardPage) Claimed by: submission-wizard. |
 | VUE-082 | ojs,omp,ops | pages/userComments/UserCommentDetailModal.vue | User comment detail/moderation side modal |
 | VUE-083 | ojs,omp,ops | pages/userComments/UserCommentReportDetailModal.vue | User comment report detail side modal |
 | VUE-084 | ojs,omp,ops | pages/workflow/components/publication/WorkflowVersionSideModal.vue | Create/edit publication version side modal (useWorkflowActions) |

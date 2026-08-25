@@ -54,7 +54,7 @@ maintainer adjusts on review. Statuses: pending / in_progress / done / parked.
 | U18 | Web feeds | OJS OMP OPS | L | pending | |
 | U19 | OAI-PMH | OJS OMP OPS | M | pending | |
 | U20 | Search-engine metadata & analytics | OJS OMP OPS | L | pending | |
-| U21 | Submission wizard | OJS OMP OPS | H | pending | |
+| U21 | Submission wizard | OJS OMP OPS | H | done | Spec verified; 13 tests OJS, 14 OMP, 14 OPS (+setup each), green ×2 + post-fold confirm; register 9🐞+7❓+2✅ (headliners: A8 silent editor-auto-assignment failure on every journal but the install's first, OPS3 silent author-cancel refusal; A9 ❓ silent Author enrolment carries an unprobed Site-Administrator half for maintainer ruling); AFFW-068 waived dead-in-context (UNASSIGNED #7); builder passthroughs + workType overlay in parity ledger; nothing routed to the private security file; 2 readability frictions left open (Rule 13 registry-identifier recognizer, scenario 4's cross-spec address dependency); maintainer review pending |
 | U22 | My Submissions (author dashboard) | OJS OMP OPS | L | pending | |
 | U23 | Submissions dashboard (editorial) | OJS OMP OPS | H | pending | |
 | U24 | Workflow screen & stage access | OJS OMP OPS | M | pending | |

@@ -62,11 +62,11 @@
 | MAIL-046 | ojs omp | `PKP\mail\mailables\ReviewResponseRemindAuto` | Automatic reminder to a reviewer after the response deadline. Key: `REVIEW_RESPONSE_OVERDUE_AUTO` Claimed by: reviewer-assignment-and-management. |
 | MAIL-047 | ojs omp | `PKP\mail\mailables\RevisedVersionNotify` | Automatic email to the assigned editor when an author uploads a revised version. Key: `REVISED_VERSION_NOTIFY` Claimed by: review-stage-and-rounds. |
 | MAIL-048 | ojs omp ops | `PKP\mail\mailables\StatisticsReportNotify` | Scheduled editorial/statistics report email (class docblock @brief is a copy-paste of AnnouncementNotify's). Key: `STATISTICS_REPORT_NOTIFICATION` |
-| MAIL-049 | ojs omp ops | `PKP\mail\mailables\SubmissionAcknowledgement` | Acknowledgement to the submitting author on submission. Key: `SUBMISSION_ACK` |
-| MAIL-050 | ojs omp ops | `PKP\mail\mailables\SubmissionAcknowledgementNotAuthor` | Acknowledgement to contributors named on a new submission. Key: `SUBMISSION_ACK_NOT_USER` |
-| MAIL-051 | ojs omp ops | `PKP\mail\mailables\SubmissionAcknowledgementOtherAuthors` | Acknowledgement to other authors named as contributors on a new submission (in no `Repository::map()` — dispatched directly; shares its template key with MAIL-050). Key: `SUBMISSION_ACK_NOT_USER` |
-| MAIL-052 | ojs omp | `PKP\mail\mailables\SubmissionNeedsEditor` | Email to managers when a new submission has no assigned editor. Key: `SUBMISSION_NEEDS_EDITOR` |
-| MAIL-053 | ojs omp | `PKP\mail\mailables\SubmissionSavedForLater` | Email to a submitting author when they save an incomplete submission for later. Key: `SUBMISSION_SAVED_FOR_LATER` |
+| MAIL-049 | ojs omp ops | `PKP\mail\mailables\SubmissionAcknowledgement` | Acknowledgement to the submitting author on submission. Key: `SUBMISSION_ACK` Claimed by: submission-wizard. |
+| MAIL-050 | ojs omp ops | `PKP\mail\mailables\SubmissionAcknowledgementNotAuthor` | Acknowledgement to contributors named on a new submission. Key: `SUBMISSION_ACK_NOT_USER` Claimed by: submission-wizard. |
+| MAIL-051 | ojs omp ops | `PKP\mail\mailables\SubmissionAcknowledgementOtherAuthors` | Acknowledgement to other authors named as contributors on a new submission (in no `Repository::map()` — dispatched directly; shares its template key with MAIL-050). Key: `SUBMISSION_ACK_NOT_USER` Claimed by: submission-wizard. |
+| MAIL-052 | ojs omp | `PKP\mail\mailables\SubmissionNeedsEditor` | Email to managers when a new submission has no assigned editor. Key: `SUBMISSION_NEEDS_EDITOR` Claimed by: submission-wizard. |
+| MAIL-053 | ojs omp | `PKP\mail\mailables\SubmissionSavedForLater` | Email to a submitting author when they save an incomplete submission for later. Key: `SUBMISSION_SAVED_FOR_LATER` Claimed by: submission-wizard. |
 | MAIL-054 | ojs omp ops | `PKP\mail\mailables\UserCreated` | Email to a new user created from the user management screen. Key: `USER_REGISTER` |
 | MAIL-055 | ojs omp | `PKP\mail\mailables\UserRoleAssignmentInvitationNotify` | Invitation email for a user to take on specific roles. Key: `USER_ROLE_ASSIGNMENT_INVITATION`. Badge is `ojs omp` deliberately — OPS's `APP\mail\Repository::map()` omits this mailable, so it has no row on the OPS email-templates screen, though the template key is still seeded in OPS `registry/emailTemplates.xml` and sending works. Do not "fix" the badge. Claimed by: user-invitations. |
 | MAIL-056 | ojs omp ops | `PKP\mail\mailables\UserRoleEndNotify` | Email when a user is removed from a role. Key: `USER_ROLE_END`. Badge corrected to all three apps (2026-07-29): the notice is sent on OPS too — watched live in the Users management claim check; only its row on the OPS email-templates screen is missing |
@@ -102,7 +102,7 @@
 |---|---|---|---|
 | MAIL-072 | ops | `APP\mail\mailables\PostedAcknowledgement` | Email to the submitting author when their preprint is posted (gated by context setting `postedAcknowledgement` via OPS `Repository::isMailableEnabled()`). Key: `POSTED_ACK` |
 | MAIL-073 | ops | `APP\mail\mailables\PostedNewVersionAcknowledgement` | Email to the submitting author when a new version of their preprint is posted. Key: `POSTED_NEW_VERSION_ACK` |
-| MAIL-074 | ops | `APP\mail\mailables\SubmissionAcknowledgementCanPost` | Submission acknowledgement variant for authors who can post the preprint themselves. Key: `SUBMISSION_ACK_CAN_POST` |
+| MAIL-074 | ops | `APP\mail\mailables\SubmissionAcknowledgementCanPost` | Submission acknowledgement variant for authors who can post the preprint themselves. Key: `SUBMISSION_ACK_CAN_POST` Claimed by: submission-wizard. |
 
 ## Mailables — bundled plugin (found via registry `find`)
 

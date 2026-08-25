@@ -29,7 +29,8 @@ class ContextFactory
 {
     /**
      * @param Spec $spec context keys: path*, name, acronym, description,
-     *   primaryLocale, supportedLocales, contactName, contactEmail, enabled
+     *   primaryLocale, supportedLocales, supportedSubmissionLocales,
+     *   contactName, contactEmail, enabled
      */
     public function parseParams(Spec $spec): array
     {
@@ -37,6 +38,7 @@ class ContextFactory
         $site = $request->getSite();
         $primaryLocale = (string) $spec->get('primaryLocale', $site->getPrimaryLocale());
         $supportedLocales = (array) $spec->get('supportedLocales', [$primaryLocale]);
+        $supportedSubmissionLocales = $spec->get('supportedSubmissionLocales');
         $path = (string) $spec->require('path');
 
         $params = array_filter([
@@ -50,6 +52,16 @@ class ContextFactory
             'contactEmail' => (string) $spec->get('contactEmail', 'admin@mail.test'),
         ], fn ($value) => $value !== null);
         $params['enabled'] = (bool) $spec->get('enabled', true);
+
+        if ($supportedSubmissionLocales !== null) {
+            // The Languages settings grid's submission toggles: enabling a
+            // locale for submissions also keeps the metadata-locale list a
+            // superset (LanguageGridHandler::saveLanguageSetting) and records
+            // it among the added submission locales.
+            $params['supportedSubmissionLocales'] = (array) $supportedSubmissionLocales;
+            $params['supportedSubmissionMetadataLocales'] = (array) $supportedSubmissionLocales;
+            $params['supportedAddedSubmissionLocales'] = (array) $supportedSubmissionLocales;
+        }
 
         $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
         $errors = $contextService->validate(

@@ -26,7 +26,7 @@
 | PLUG-002 | OJS, OMP, OPS | blocks/developedBy | blocks; "Developed By" (PKP link) sidebar block (`DevelopedByBlockPlugin`); no settings form; install default enabled=false (all 3 apps) |
 | PLUG-003 | OJS, OMP | blocks/information | blocks; information block — For Readers/Authors/Librarians links (`InformationBlockPlugin`); no settings form; install default enabled=true |
 | PLUG-004 | OJS, OMP, OPS | blocks/languageToggle | blocks; language selector sidebar block (`LanguageToggleBlockPlugin`); no settings form; install default enabled=true |
-| PLUG-005 | OJS, OMP | blocks/makeSubmission | blocks; "Make a Submission" call-to-action block (`MakeSubmissionBlockPlugin`); no settings form; install default enabled=true |
+| PLUG-005 | OJS, OMP | blocks/makeSubmission | blocks; "Make a Submission" call-to-action block (`MakeSubmissionBlockPlugin`); no settings form; install default enabled=true Claimed by: submission-wizard. |
 | PLUG-006 | OJS | blocks/subscription | blocks; subscription status/login sidebar block (`SubscriptionBlockPlugin`); no settings form; install default enabled=true |
 | PLUG-007 | OJS | generic/announcementFeed | generic; announcement RSS/Atom feeds via block + gateway child plugins (`AnnouncementFeedBlockPlugin`/`AnnouncementFeedGatewayPlugin`); settings form (`AnnouncementFeedSettingsForm`); install default enabled=true |
 | PLUG-008 | OJS, OMP, OPS | generic/citationStyleLanguage | generic; CSL "How to Cite" citation display + citation-format downloads (`CitationStyleLanguagePlugin`); settings form (`CitationStyleLanguageSettingsForm`); lazy-load, no install default declared |

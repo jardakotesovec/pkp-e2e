@@ -43,7 +43,7 @@
 | ROUTE-024 | ojs omp ops | `PKP\pages\search\SearchHandler` | Public search base. Ops: index, search. Subclassed by app `SearchHandler` in all three (ROUTE-048/067/083). |
 | ROUTE-025 | ojs omp ops | `PKP\pages\sitemap\PKPSitemapHandler` | Sitemap XML base. Op: index. Subclassed by app `SitemapHandler` in all three (ROUTE-049/068/084). |
 | ROUTE-026 | ojs omp ops | `PKP\pages\stats\PKPStatsHandler` | Statistics pages (roles: admin/manager/sub-editor). Role-assigned ops: editorial, publications, context, users, reports, counterR5; additional public op methods: displayReports, report. Subclassed by app `StatsHandler` in all three (ROUTE-050/069/085). |
-| ROUTE-027 | ojs omp ops | `PKP\pages\submission\PKPSubmissionHandler` | Submission wizard (roles: author/sub-editor/manager/admin). Ops: index, wizard, saved, cancelled. Subclassed by app `SubmissionHandler` in all three (ROUTE-051/070/086). |
+| ROUTE-027 | ojs omp ops | `PKP\pages\submission\PKPSubmissionHandler` | Submission wizard (roles: author/sub-editor/manager/admin). Ops: index, wizard, saved, cancelled. Subclassed by app `SubmissionHandler` in all three (ROUTE-051/070/086). Claimed by: submission-wizard. |
 | ROUTE-028 | ojs omp ops | `PKP\pages\user\PKPUserHandler` | User page base. Ops: index, authorizationDenied. Subclassed by app `UserHandler` in all three (ROUTE-052/071/087). |
 | ROUTE-029 | ojs omp ops | `PKP\pages\user\ProfileHandler` | User profile (extends UserHandler; dispatched by `lib/pkp/pages/user/index.php`). Op: profile. |
 | ROUTE-030 | ojs omp ops | `PKP\pages\user\RegistrationHandler` | User registration (extends UserHandler; dispatched by `lib/pkp/pages/user/index.php`). Ops: register, registerUser, activateUser (plus `validate` lifecycle override). |
@@ -67,7 +67,7 @@
 | ROUTE-048 | ojs | `APP\pages\search\SearchHandler` (OJS) | Extends `PKP\pages\search\SearchHandler` (ROUTE-024); adds authorize only, no new ops. |
 | ROUTE-049 | ojs | `APP\pages\sitemap\SitemapHandler` (OJS) | Extends `PKPSitemapHandler` (ROUTE-025); overrides context sitemap generation; no new ops. |
 | ROUTE-050 | ojs | `APP\pages\stats\StatsHandler` (OJS) | Extends `PKPStatsHandler` (ROUTE-026). Adds op (admin/manager/sub-editor): issues. |
-| ROUTE-051 | ojs | `APP\pages\submission\SubmissionHandler` (OJS) | Extends `PKPSubmissionHandler` (ROUTE-027); no new ops. |
+| ROUTE-051 | ojs | `APP\pages\submission\SubmissionHandler` (OJS) | Extends `PKPSubmissionHandler` (ROUTE-027); no new ops. Claimed by: submission-wizard. |
 | ROUTE-052 | ojs | `APP\pages\user\UserHandler` (OJS) | Extends `PKPUserHandler` (ROUTE-028). Adds ops: subscriptions, purchaseSubscription, payPurchaseSubscription, completePurchaseSubscription, payRenewSubscription, payMembership. |
 | ROUTE-053 | ojs | `APP\pages\workflow\WorkflowHandler` (OJS) | Extends `PKPWorkflowHandler` (ROUTE-031). Role assignment (sub-editor/manager/admin/assistant): access, index, submission, externalReview, editorial, production. |
 | ROUTE-054 | omp | `APP\pages\authorDashboard\AuthorDashboardHandler` (OMP) | Extends `PKPAuthorDashboardHandler` (ROUTE-005); overrides submission op and setupTemplate; no new ops. |
@@ -86,7 +86,7 @@
 | ROUTE-067 | omp | `APP\pages\search\SearchHandler` (OMP) | Extends `PKP\pages\search\SearchHandler` (ROUTE-024); no new ops. |
 | ROUTE-068 | omp | `APP\pages\sitemap\SitemapHandler` (OMP) | Extends `PKPSitemapHandler` (ROUTE-025); overrides context sitemap generation; no new ops. |
 | ROUTE-069 | omp | `APP\pages\stats\StatsHandler` (OMP) | Extends `PKPStatsHandler` (ROUTE-026); overrides section (series) filters; no new ops. |
-| ROUTE-070 | omp | `APP\pages\submission\SubmissionHandler` (OMP) | Extends `PKPSubmissionHandler` (ROUTE-027); no new ops. |
+| ROUTE-070 | omp | `APP\pages\submission\SubmissionHandler` (OMP) | Extends `PKPSubmissionHandler` (ROUTE-027); no new ops. Claimed by: submission-wizard. |
 | ROUTE-071 | omp | `APP\pages\user\UserHandler` (OMP) | Extends `PKPUserHandler` (ROUTE-028); no new ops. |
 | ROUTE-072 | omp | `APP\pages\workflow\WorkflowHandler` (OMP) | Extends `PKPWorkflowHandler` (ROUTE-031). Role assignment (sub-editor/manager/admin/assistant): access, index, submission, internalReview, externalReview, editorial, production. Adds op: internalReview. |
 | ROUTE-073 | ops | `APP\pages\authorDashboard\AuthorDashboardHandler` (OPS) | Extends `PKPAuthorDashboardHandler` (ROUTE-005); overrides setupTemplate; no new ops. |
@@ -102,6 +102,6 @@
 | ROUTE-083 | ops | `APP\pages\search\SearchHandler` (OPS) | Extends `PKP\pages\search\SearchHandler` (ROUTE-024); adds authorize only, no new ops. |
 | ROUTE-084 | ops | `APP\pages\sitemap\SitemapHandler` (OPS) | Extends `PKPSitemapHandler` (ROUTE-025); overrides context sitemap generation; no new ops. |
 | ROUTE-085 | ops | `APP\pages\stats\StatsHandler` (OPS) | Extends `PKPStatsHandler` (ROUTE-026); overrides section filters and removes the editorial stats chart view; no new ops. |
-| ROUTE-086 | ops | `APP\pages\submission\SubmissionHandler` (OPS) | Extends `PKPSubmissionHandler` (ROUTE-027); no new ops. |
+| ROUTE-086 | ops | `APP\pages\submission\SubmissionHandler` (OPS) | Extends `PKPSubmissionHandler` (ROUTE-027); no new ops. Claimed by: submission-wizard. |
 | ROUTE-087 | ops | `APP\pages\user\UserHandler` (OPS) | Extends `PKPUserHandler` (ROUTE-028); overrides incomplete-setup check; no new ops. |
 | ROUTE-088 | ops | `APP\pages\workflow\WorkflowHandler` (OPS) | Extends `PKPWorkflowHandler` (ROUTE-031). Role assignment (sub-editor/manager/admin/assistant): access, index, submission, editorDecisionActions, externalReview, editorial, production (editorDecisionActions has no method in this hierarchy). |

@@ -20,6 +20,15 @@
  * entries). Setting passthroughs return per feature, each with a parity entry.
  *
  * Feature passthroughs so far (each with a parity-ledger entry):
+ * - sections[] / series[] (the app's structure key; U21) — same shape and
+ *   machinery as the bootstrap seed's structure list (the FIRST declared
+ *   entry renames the hook-created default, further entries are added), so
+ *   scratch contexts can carry more than the one default section. Seeded
+ *   before users[] so sub-editor assignments resolve.
+ * - context.supportedSubmissionLocales (U21) — the Languages settings grid's
+ *   submission-locale toggles: sets supportedSubmissionLocales and keeps
+ *   supportedSubmissionMetadataLocales / supportedAddedSubmissionLocales in
+ *   step, as the grid handler does when a locale is enabled for submissions.
  * - orcid {enabled?, apiType?, clientId?, clientSecret?, city?,
  *   sendMailToAuthorsOnPublication?} — the "ORCID" settings-tab state (U4);
  *   written through PKPContextService::edit(), the same service the tab's
@@ -58,6 +67,27 @@ abstract class PKPContextScenarioBuilder
     /** Resolve a structure identifier within the scratch context. */
     abstract protected function resolveStructureId(Context $context, string $identifier): ?int;
 
+    /**
+     * Read one declared section/series spec (no writes). Apps that support
+     * the structure list override this pair; the default refuses the key.
+     */
+    protected function parseStructure(Spec $spec): array
+    {
+        throw new SpecException(
+            $spec->path,
+            "The \"{$this->structureKey()}\" list is not supported by this app's context scenario yet"
+        );
+    }
+
+    /** Create one declared section/series from its parsed plan. */
+    protected function addStructure(Context $context, array $plan, int $sequence): int
+    {
+        throw new SpecException(
+            $this->structureKey(),
+            "The \"{$this->structureKey()}\" list is not supported by this app's context scenario yet"
+        );
+    }
+
     public function build(array $data): array
     {
         $root = new Spec($data);
@@ -76,6 +106,10 @@ abstract class PKPContextScenarioBuilder
         // Parse phase — unknown keys 400 before any write.
         $contextParams = $this->contextFactory->parseParams($contextSpec);
         $contextSpec->assertConsumed();
+        $structurePlans = array_map(
+            fn (Spec $spec) => $this->parseStructure($spec),
+            $root->childList($this->structureKey())
+        );
         $userPlans = array_map(
             fn (Spec $spec) => $this->userSeeder->parse($spec, $this->structureKey()),
             $root->childList('users')
@@ -96,6 +130,11 @@ abstract class PKPContextScenarioBuilder
             // the client-secret encryption exactly as the UI path does).
             $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
             $context = $contextService->edit($context, $orcidSettings, Application::get()->getRequest());
+        }
+
+        $sequence = 1;
+        foreach ($structurePlans as $plan) {
+            $this->addStructure($context, $plan, $sequence++);
         }
 
         $users = [];

@@ -81,3 +81,23 @@ No current seed is affected (all use the default version stage). Otherwise the
 rebase left every audited parity path untouched (`HasReviewDueDate`,
 `ReviewerForm::execute`, `EditorAction::addReviewer`,
 `DecisionType::createReviewRound`, the publish tail).
+
+Row appended 2026-08-25 (U21 OMP suite):
+
+| Date | App | Builder path | Parity check | Verdict | Notes |
+|---|---|---|---|---|---|
+| 2026-08-25 | omp | submission `workType` (`SubmissionScenarioBuilder::parseSubmissionOverlay`, new shared hook `parseSubmissionOverlay`) | the OMP start form always posts a work type (the Monograph radio arrives preselected and the field is required), so every wizard-created monograph stores `workType` = 2; the builder's direct `Repo::submission()->add()` left it NULL — a state no UI path produces, and the wizard header then read "Submitting an Edited Volume." on seeded drafts (`getSubmittingTo()` strict-compares against WORK_TYPE_AUTHORED_WORK) | DEFECT → FIXED | New optional spec key `workType: 'monograph' \| 'editedVolume'` (default monograph — the form's preselected value); unknown values 400. Verified live: a seeded OMP draft's wizard header reads "Submitting a Monograph." (U21 S5 asserts it) |
+
+Rows appended 2026-08-25 (U21 OJS suite):
+
+| Date | App | Builder path | Parity check | Verdict | Notes |
+|---|---|---|---|---|---|
+| 2026-08-25 | all | submission `participants[]` (`PKPSubmissionScenarioBuilder`) | new optional key `participants: [{username*, role*}]` — writes the same `Repo::stageAssignment()->build()` row the workflow's Assign Participant form writes, with the resolved user group's own `recommendOnly`/`permitMetadataEdit` defaults. Verified live (U21 S4): a seeded `sectionEditor` participant opens another author's draft wizard with Save for Later/Continue but no Cancel — the fn-f-probed assignment state | DELIBERATE DEVIATION (documented) | The UI flow additionally sends the assignment notification/email (`StageParticipantGridHandler`); the seed writes neither (seed-side, and `Mail::fake()` would drop the mail anyway). Add a mail-bearing variant only when a spec asserts the assignment email |
+| 2026-08-25 | ojs (shared hook) | context scenario `sections[]` (`PKPContextScenarioBuilder` structure hook + OJS `ContextScenarioBuilder`) | scratch contexts can now declare a section list with the SAME shape and machinery as the bootstrap seed (`BootstrapSeeder::addSection`): the first declared section renames the hook-created default, later ones are added; seeded before `users[]` so sub-editor assignments resolve. Verified live (U21 S5/S12): declared sections appear on the start form and wizard exactly as UI-created ones | PASS | Apps without an override 400 on the key (`parseStructure` default throws) — never silently dropped. Section flags (`editorRestricted`, `isInactive`) deliberately NOT seedable: the closure tests drive the section form UI (the flag change IS the behavior under test) |
+| 2026-08-25 | all | context `supportedSubmissionLocales` (`ContextFactory::parseParams`) | new optional context key mirroring the Languages settings grid's submission toggles: sets `supportedSubmissionLocales` and keeps `supportedSubmissionMetadataLocales` in step (the grid handler unions an enabled submission locale into the metadata locales — `LanguageGridHandler::saveLanguageSetting` ~105-110), plus `supportedAddedSubmissionLocales`. Verified live (U21 S5): a `['en','fr_CA']` scratch journal shows the start form's Submission Language radio and the wizard's "Submitting to the {section} section in {language}." line with the Change control, and reconfigure to fr_CA behaves as the UI-configured bilingual journal probed for the spec | PASS | Passes through `PKPContextService` validation like every other context param; bootstrap specs are unaffected (key absent) |
+
+Row appended 2026-08-26 (U21 OPS suite):
+
+| Date | App | Builder path | Parity check | Verdict | Notes |
+|---|---|---|---|---|---|
+| 2026-08-26 | ops | context scenario `sections[]` (OPS `ContextScenarioBuilder::parseStructure`/`addStructure`) | mirrors the OJS override on the same shared structure hook, reusing OPS `BootstrapSeeder::addSection` (field roster kept in step with the OPS bootstrap seeder: abbrev*, path, title, policy — OPS sections carry a path). Verified live (U21 OPS S5/S12): declared sections render on the start form, the reconfigure panel and the sections grid exactly as UI-created ones; the first declared entry renames the hook-created default "Preprints" | PASS | Same deliberate limit as the OJS row: `editorRestricted`/`isInactive` flags are NOT seedable — the closure tests flip them through the section form/grid UI (the flag change is scenario 12's own step) |

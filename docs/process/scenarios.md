@@ -26,7 +26,11 @@ themselves are the authoritative field list.
 - **`POST scenarios/context`** — scratch context: `tag*` (≤32 chars, single
   hyphenless alphanumeric token — see `patterns.md` tag conventions; defaults
   the urlPath), `context` object (path, name, acronym, description, locales,
-  contact, enabled), `users[]` throwaways. Setting passthroughs return per
+  contact, enabled, `supportedSubmissionLocales` — the Languages grid's
+  submission toggles, metadata locales kept in step; U21 rows in the parity
+  ledger), `sections[]` (OJS — bootstrap-shaped structure list, first entry
+  renames the hook default; apps without the override 400 on the key),
+  `users[]` throwaways. Setting passthroughs return per
   feature; live today: `orcid` (settings-tab state incl. encrypted secret —
   see the parity ledger's 2026-08-07 rows).
 - **`POST scenarios/submission`** — `tag*`, `context*` (urlPath),
@@ -40,7 +44,9 @@ themselves are the authoritative field list.
   (`{username, status: invited|accepted|declined}` + per-reviewer
   `status`/`method`/`responseDueDate`/`reviewDueDate`), `published`, and the
   `author: {orcid, orcidIsVerified}` passthrough (pre-verified ORCID without
-  the OAuth flow). Overlays: OJS `section` (abbrev; defaults to the first
+  the OAuth flow), and `participants[]` (`{username, role}` non-submitter
+  stage assignments — the Assign Participant row without its notification or
+  email; U21 parity row). Overlays: OJS `section` (abbrev; defaults to the first
   section) / `issue` ({volume, number, year} matching a seeded issue); OMP
   `series` (path) / `seriesPosition` + per-round `stage: internal|external`;
   OPS `section` — and `reviewRounds` is REJECTED (no review stage).
@@ -52,8 +58,11 @@ Facts tests rely on (parity-verified — see the parity ledger):
   mail does.
 - Submitted seeds carry the submit endpoint's notifications and the author as
   publication primary contact.
-- Every seeded submission gets a real Article Text file — but NO review-round
-  files (review files are grant-based; see `patterns.md`).
+- Seeded submissions carry NO files (corrected 2026-08-25 — the step-2
+  rebuild never seeded one): a test needing "the author's uploaded file"
+  uploads it through the panel under test, and the wizard's required-genre
+  gate blocks a seeded draft's submit until one is uploaded. Review-round
+  files are additionally grant-based (see `patterns.md`).
 - The submission scenario resolves usernames but never creates them — users
   are minted only by the context scenario's `users[]` (explicit `password`
   honored, else `username+username`).
