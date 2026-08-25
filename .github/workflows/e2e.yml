@@ -104,7 +104,9 @@ jobs:
         run: |
           composer --no-ansi --no-interaction --no-progress --working-dir=lib/pkp install --no-dev --optimize-autoloader
           for dir in plugins/generic/citationStyleLanguage plugins/paymethod/paypal; do
-            [ -f "$dir/composer.json" ] && composer --no-ansi --no-interaction --no-progress --working-dir="$dir" install --no-dev --optimize-autoloader
+            if [ -f "$dir/composer.json" ]; then
+              composer --no-ansi --no-interaction --no-progress --working-dir="$dir" install --no-dev --optimize-autoloader
+            fi
           done
 
       - name: Set up Node 20
