@@ -77,6 +77,9 @@ all of it into the app checkout at its runtime paths (`lib/pkp/…`, app root)
 Sibling checkouts under one parent dir, all on the campaign branch. Test DBs
 are **PostgreSQL** locally (harness code is DB-driver-agnostic —
 PRINCIPLES design-record D8); Postgres-specific defects reproduce in-env.
+Note for search-adjacent features: PDF full-text is NOT indexed on the test
+installs (probe finding, 2026-08) — galley-content search assertions need
+their own indexing arrangements.
 Same scenario endpoints and `publicknowledge` context path everywhere.
 
 **One shared roster, subset-enrolled per app** (see `users.md` for the
