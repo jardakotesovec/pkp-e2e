@@ -1,0 +1,174 @@
+# Reusable single-app runner: everything needed to run one app's Playwright
+# suite — services, app + pkp-e2e checkouts, mount, config generation, run.
+# Called by this repo's e2e.yml matrix AND by the thin per-app hook workflows
+# in the application repositories (which pass their own repo/sha).
+name: run-app
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: ojs | omp | ops
+        required: true
+        type: string
+      app_repo:
+        description: owner/name of the app repository to test
+        required: true
+        type: string
+      app_ref:
+        description: git ref of the app repository to test
+        required: true
+        type: string
+
+jobs:
+  e2e:
+    name: e2e (${{ inputs.app }})
+    runs-on: ubuntu-latest
+    env:
+      APP_REPO: ${{ inputs.app_repo }}
+      APP_REF: ${{ inputs.app_ref }}
+      PKPLIB_REPO: https://github.com/jardakotesovec/pkp-lib
+      PKPLIB_REF: e2e_ng_2
+      PKP_CONFIG_FILE: ${{ github.workspace }}/app/config.test.inc.php
+      TEST_API_KEY: ci-test-key
+      MAILPIT_URL: http://127.0.0.1:8025
+      PLAYWRIGHT_WORKERS: 4
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pkp
+          POSTGRES_PASSWORD: pkp
+          POSTGRES_DB: ${{ inputs.app }}_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U pkp"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit
+        ports:
+          - 8025:8025
+          - 1025:1025
+
+    steps:
+      # Explicit repository: when called from an app repo's hook workflow,
+      # the default checkout target would be the CALLER's repo.
+      - uses: actions/checkout@v4
+        with:
+          repository: jardakotesovec/pkp-e2e
+          ref: main
+          path: e2e
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.APP_REPO }}
+          ref: ${{ env.APP_REF }}
+          path: app
+          submodules: recursive
+          fetch-depth: 1
+
+      # TEMPORARY — remove once the pkp-lib PKP_CONFIG_FILE one-liner is
+      # merged (the recorded submodule pointer then satisfies the mount's
+      # prerequisite check by itself).
+      - name: "TEMPORARY: lib/pkp at the reduced e2e_ng_2 branch"
+        run: |
+          cd app/lib/pkp
+          git fetch --depth 1 "$PKPLIB_REPO" "$PKPLIB_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --depth 1
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: bcmath, bz2, curl, gd, intl, mbstring, opcache, pdo_pgsql, pgsql, soap, xml, zip
+          coverage: none
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config --global cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ inputs.app }}-${{ hashFiles('app/lib/pkp/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-${{ inputs.app }}-
+
+      - name: Install PHP dependencies
+        working-directory: app
+        run: |
+          composer --no-ansi --no-interaction --no-progress --working-dir=lib/pkp install --no-dev --optimize-autoloader
+          for dir in plugins/generic/citationStyleLanguage plugins/paymethod/paypal; do
+            if [ -f "$dir/composer.json" ]; then
+              composer --no-ansi --no-interaction --no-progress --working-dir="$dir" install --no-dev --optimize-autoloader
+            fi
+          done
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build the app UI
+        working-directory: app
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: npm ci
+
+      - name: Resolve Playwright version
+        id: playwright-version
+        working-directory: e2e
+        run: echo "version=$(node -e "console.log(require('@playwright/test/package.json').version)")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium (+ system deps)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Mount overlays and generate config.test.inc.php
+        working-directory: e2e
+        env:
+          OJS_ROOT: ${{ github.workspace }}/app
+          OMP_ROOT: ${{ github.workspace }}/app
+          OPS_ROOT: ${{ github.workspace }}/app
+          TEST_DB_NAME: ${{ inputs.app }}_test
+          TEST_DB_USERNAME: pkp
+          TEST_DB_PASSWORD: pkp
+          TEST_FILES_DIR: ${{ runner.temp }}/files-test
+        run: |
+          mkdir -p "$TEST_FILES_DIR"
+          node bin/mount.js ${{ inputs.app }}
+          node bin/with-app.js ${{ inputs.app }} shared/playwright/make-test-config.js > "$PKP_CONFIG_FILE"
+
+      - name: Run Playwright suite
+        working-directory: e2e
+        env:
+          OJS_ROOT: ${{ github.workspace }}/app
+          OMP_ROOT: ${{ github.workspace }}/app
+          OPS_ROOT: ${{ github.workspace }}/app
+        run: npx playwright test -c configs/${{ inputs.app }}.config.js --retries=1
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ inputs.app }}
+          path: |
+            e2e/apps/${{ inputs.app }}/playwright/test-results/
+            e2e/apps/${{ inputs.app }}/playwright/.server-logs/
+          if-no-files-found: ignore
