@@ -91,7 +91,8 @@ function mount(appName) {
             if (targetHash !== known && targetHash !== sourceHash) {
                 console.error(
                     `${appName}: ${rel} was modified in the app checkout — ` +
-                        `edits belong in pkp-e2e. Reconcile, then re-mount.`
+                        `edits belong in pkp-e2e. Port the change here, delete ` +
+                        `the copy (rm "${target}"), then re-mount.`
                 );
                 process.exit(1);
             }
