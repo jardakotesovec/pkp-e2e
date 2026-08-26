@@ -12,12 +12,15 @@ suites for OJS/OMP/OPS. ALL process rules live in the docs, not here:
 
 Operational facts:
 
-- App checkouts are named in `.env` (`OJS_ROOT`/`OMP_ROOT`/`OPS_ROOT`).
+- App checkouts are named in `.env` (`OJS_ROOT`/`OMP_ROOT`/`OPS_ROOT`) —
+  default: the self-contained, gitignored `checkouts/<app>` clones from
+  `npm run fetch-apps` (pkp upstream `main`, push URLs to pkp disabled).
   `npm run mount` copies the PHP overlays into them (drift-guarded); suites
   run from here: `npm run test:ojs|omp|ops`, `reset:<app>`, `serve:<app>`.
 - Commit ONLY in this repo. App checkouts are read-only for campaign work
-  (RUNBOOK step 11); their reduced `e2e_ng_2` branches change only via
-  maintainer-reviewed edits.
+  (RUNBOOK step 11). App code is fetched from the pkp remotes (`main`);
+  never push commits or branches there — branches, rarely needed, go to
+  the `jardakotesovec` fork.
 - CI: `.github/workflows/e2e.yml` (matrix) + `run-app.yml` (reusable, also
   called by the app repos' thin hooks at run time — a broken `main` here
   breaks every app PR check, so keep `main` green).

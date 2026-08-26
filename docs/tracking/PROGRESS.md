@@ -12,6 +12,10 @@ history; **never read the scratched artifacts back** — regenerating on this
 run's own evidence is the point). The harness rebuild (the restart's first step) passed
 PRINCIPLES' Rebuild-acceptance on all three fleets 2026-07-31; since then,
 features run one per session under the RUNBOOK loop, maintainer-picked.
+Since 2026-08-26 the fleets are the self-contained `checkouts/<app>` clones
+of pkp `main` (`npm run fetch-apps` — harness.md "The fleets"; everything
+campaign-related is merged upstream, so latest code is fetched from the pkp
+remotes and never pushed or branched there).
 
 **The process contract**: Fable runs every role — no per-role model split, no
 fallback; a safeguard flag/refusal/downgrade PAUSES the feature for

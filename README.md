@@ -6,15 +6,21 @@ nothing test-related lives on (or ships from) the application repositories.
 
 ## How it works
 
-The suites run **from this repo** against plain app checkouts:
+The suites run **from this repo** against its own self-contained app
+checkouts (gitignored under `checkouts/`):
 
 ```
-cp .env.example .env          # point OJS_ROOT / OMP_ROOT / OPS_ROOT at your checkouts
+cp .env.example .env          # defaults to the checkouts/<app> clones below
 npm ci
+npm run fetch-apps            # clone pkp main into checkouts/<app> (push-protected),
+                              # install deps, build the UI, create test DB + configs
 npm run mount                 # copy the PHP overlays (seeding API, installers) into the checkouts
-npm run config:ojs > "$OJS_ROOT/config.test.inc.php"   # once per app (or write it by hand)
 npm run test:ojs              # also: test:omp, test:ops
 ```
+
+Pointing `<APP>_ROOT` at an external checkout still works — `fetch-apps` is
+just the provisioner for the default, isolated layout (see
+`docs/process/harness.md` "The fleets" for its push-protection details).
 
 - `bin/mount.js` copies `apps/<app>/php/` + `shared/php/` into the app
   checkout (`classes/testing`, `api/v1/_test`, `tools/installTest.php`,
@@ -23,8 +29,8 @@ npm run test:ojs              # also: test:omp, test:ops
   after changing any PHP overlay; `npm run unmount` removes everything.
 - Each app checkout still carries its own `.env.playwright` (DB credentials,
   `TEST_API_KEY`) and `config.test.inc.php` — see `docs/process/harness.md`.
-- **Prerequisite** in the checkout (until merged upstream): pkp-lib's
-  `Config.php` must honour the `PKP_CONFIG_FILE` env var (branch `e2e_ng_2`
+- **Prerequisite** in the checkout: pkp-lib's `Config.php` must honour the
+  `PKP_CONFIG_FILE` env var (merged upstream 2026-08, so any current `main`
   carries it). `mount.js` verifies this and says so if it's missing.
 
 ## Layout

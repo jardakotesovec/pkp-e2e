@@ -70,11 +70,20 @@ all of it into the app checkout at its runtime paths (`lib/pkp/…`, app root)
 
 | App | Checkout | Base port | Test DB |
 |---|---|---|---|
-| OJS | `ojs-main` | 8000 | `ojs_test` |
-| OMP | `omp-main` | 8100 | `omp_test` |
-| OPS | `ops-main` | 8200 | `ops_test` |
+| OJS | `checkouts/ojs` | 8000 | `ojs_test` |
+| OMP | `checkouts/omp` | 8100 | `omp_test` |
+| OPS | `checkouts/ops` | 8200 | `ops_test` |
 
-Sibling checkouts under one parent dir, all on the campaign branch. Test DBs
+**Self-contained checkouts** inside this repo (gitignored), provisioned by
+`npm run fetch-apps` (`bin/fetch-apps.js`). The git rule is simple: the
+latest code comes FROM the pkp remotes (`pkp/ojs` `main` etc. — everything
+campaign-related is merged there); nothing is ever pushed or branched
+there. The script enforces it: the pkp remote is `upstream` with its push
+URL disabled (submodule push URLs too), the `jardakotesovec` fork is
+`origin` and the push default — a branch, rarely needed, would go to the
+fork. The checkouts exist only to run the suites — commits happen ONLY in
+this repo; `fetch-apps --update` moves an existing checkout to the current
+upstream `main`. Test DBs
 are **PostgreSQL** locally (harness code is DB-driver-agnostic —
 PRINCIPLES design-record D8); Postgres-specific defects reproduce in-env.
 Note for search-adjacent features: PDF full-text is NOT indexed on the test

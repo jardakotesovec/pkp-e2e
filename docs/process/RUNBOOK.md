@@ -468,10 +468,11 @@ brief ALSO opens with the **Frame** paragraph, verbatim, before the task.
     (pkp-e2e), one commit stream; never `.reports/` scratch (retention rule
     below). The app checkouts are read-only from the campaign's perspective:
     the mounted copies belong to `bin/mount.js` (edit here, re-run mount —
-    never commit them app-side), and the only main-repo changes are the
-    minimal reviewed ones on the reduced `e2e_ng_2` branches (the
-    `Config.php` `PKP_CONFIG_FILE` line; the OPS wordCount cast; the thin CI
-    hook workflows), which change only via maintainer-reviewed edits. The
+    never commit them app-side), and main-repo changes happen only via
+    maintainer-reviewed PRs to pkp `main`, never from a campaign session.
+    The local checkouts are the self-contained, gitignored `checkouts/<app>`
+    clones (`npm run fetch-apps`, harness.md "The fleets") — pkp push URLs
+    are disabled there by construction. The
     former submodule-sync flow (separate `lib/pkp` commits, push to fork,
     fetch in OMP/OPS, no-re-pin ruling 2026-07-28) is superseded by the
     extraction into this repo (2026-08-25).
@@ -565,9 +566,11 @@ rules that stay here:
   `clearAll()` Mailpit.
 - **DB hygiene cadence**: reset before any full-suite timing run and every
   ~8–10 features.
-- **Git**: the pkp-e2e repo is the ONLY push target for campaign work; the
-  reduced `e2e_ng_2` app branches change only via maintainer-reviewed edits,
-  never from a campaign session. Verify the remote URL before every push; a
+- **Git**: the pkp-e2e repo is the ONLY push target for campaign work. App
+  code is fetched from the pkp remotes; never push commits or branches
+  there — a branch, rarely needed, goes to the `jardakotesovec` fork (the
+  `checkouts/<app>` clones have pkp push URLs disabled and the fork as push
+  default). Verify the remote URL before every push; a
   bad pushed commit gets a follow-up commit, never a force-push.
 - **`.reports/` retention** (maintainer ruling 2026-07-31): per-feature
   reports — probe reports, `digest.md`, claim-check chunks and merge — are

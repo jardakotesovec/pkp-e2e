@@ -25,7 +25,10 @@ function resolveApp(name) {
         process.exit(1);
     }
     loadEnv(REPO_ROOT, '.env');
-    const root = process.env[`${name.toUpperCase()}_ROOT`];
+    // Relative <APP>_ROOT values (the self-contained checkouts/<app> default)
+    // are anchored to the repo root, not the caller's cwd.
+    const raw = process.env[`${name.toUpperCase()}_ROOT`];
+    const root = raw && path.resolve(REPO_ROOT, raw);
     if (!root || !fs.existsSync(path.join(root, 'config.TEMPLATE.inc.php'))) {
         console.error(
             `${name.toUpperCase()}_ROOT is not set (or is not an app checkout). ` +
@@ -35,7 +38,7 @@ function resolveApp(name) {
     }
     return {
         name,
-        root: path.resolve(root),
+        root,
         suiteDir: path.join(REPO_ROOT, 'apps', name, 'playwright'),
         basePort: APPS[name].basePort,
     };

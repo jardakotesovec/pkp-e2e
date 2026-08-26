@@ -6,3 +6,6 @@ apps/*/playwright/.server-logs/
 apps/*/playwright/.last-run.json
 docs/tracking/.reports/
 .reports/
+
+# Self-contained app checkouts + their files dirs (bin/fetch-apps.js) — never committed
+/checkouts/
