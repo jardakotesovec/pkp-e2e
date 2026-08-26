@@ -118,6 +118,26 @@ manager would name things today. Guardrails:
   it in the owning doc (RUNBOOK/TEMPLATE/PRINCIPLES/this file) with the date,
   as the docs already do.
 
+## Session hygiene (single-session deployment)
+
+The deployment runs ONE session at a time for now (maintainer, 2026-08-26 —
+parallelism may come later). Two rules follow from that:
+
+- **Start clean: reset the databases.** A previous session's investigation
+  may have left scratch contexts, half-seeded submissions, or drained jobs
+  behind. Before any probing or test run, `npm run reset:<app>` for every
+  fleet the session will touch — never trust inherited DB state, and never
+  attribute a finding to the app until it reproduces on a fresh reset.
+- **End pushed, not just committed.** The session's context is disposable
+  and the VM's working tree is not a durable home: work that reaches a
+  commit-worthy gate is committed AND pushed to pkp-e2e `main` before the
+  session ends — including doc/tracking updates (PROGRESS notes,
+  upstream-sync baselines). An unpushed commit is a stranded result; an
+  uncommitted tree at session end means the next session re-derives state
+  from files that aren't there. Push target rules unchanged (RUNBOOK
+  "Ops & campaign safeguards": pkp-e2e only, never the pkp remotes; keep
+  `main` green — a push that breaks CI breaks every app PR check).
+
 ## Standing duties (beyond the sync loop)
 
 - **Keep `main` green** — it backs every app repo's PR check (CLAUDE.md).
