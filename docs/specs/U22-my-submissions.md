@@ -485,9 +485,12 @@ fn-ops1); an empty view renders one full-width "No Items" row. ID sorting
 probed live 2026-08-26 (OJS): each header click toggles the direction, the
 address gains `sortColumn=id&sortDirection=…`, the rows reorder, and a URL
 carrying the sort parameters is honored on load. Table
-mechanics: `DashboardTable.vue`, owned by *Submissions dashboard*. The
-ui-library is pinned to the SAME commit (`1a89a4f2`) in all three app
-checkouts — positive shared-code evidence for every client-side claim; the
+mechanics: `DashboardTable.vue`, owned by *Submissions dashboard*. All
+three app checkouts pin the same ui-library source, and any pin drift is
+checked to be dashboard-irrelevant — positive shared-code evidence for every
+client-side claim (rechecked 2026-08-26: OJS pins `1a89a4f2`, OMP/OPS its
+3-commit-older ancestor `58a3dfbb`; none of the differing commits touch
+`src/pages/dashboard/` or `src/components/SideNav/`); the
 pkp-lib pins differ only by a campaign harness-cleanup commit touching no
 product code (checked 2026-08-26).
 

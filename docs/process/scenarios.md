@@ -41,8 +41,11 @@ themselves are the authoritative field list.
   set, author `canChangeMetadata` — it appears in the author's Incomplete
   list), `decisions[]` (real decision names, app-resolved — an unknown name
   400s listing the app's roster), `reviewRounds[].reviewers[]`
-  (`{username, status: invited|accepted|declined}` + per-reviewer
-  `status`/`method`/`responseDueDate`/`reviewDueDate`), `published`, and the
+  (`{username, status: invited|accepted|declined}` — the ONLY per-reviewer
+  keys; due dates and review method are NOT parameters: the builder stamps
+  them at Add Reviewer form parity from the context's
+  `numWeeksPerResponse/Review` and `defaultReviewMode`, and any other key
+  400s — corrected 2026-08-26), `published`, and the
   `author: {orcid, orcidIsVerified}` passthrough (pre-verified ORCID without
   the OAuth flow), and `participants[]` (`{username, role}` non-submitter
   stage assignments — the Assign Participant row without its notification or
@@ -71,7 +74,7 @@ Facts tests rely on (parity-verified — see the parity ledger):
 
 Implementation: shared base `shared/php/api/v1/_test/PKPTestController.php` +
 builders in `shared/php/classes/testing/` (`PKPBootstrapSeeder`,
-`scenario/PKPContextScenarioBuilder`, `scenario/PKPSubmissionScenarioBuilder`,
+`PKPContextScenarioBuilder`, `PKPSubmissionScenarioBuilder`,
 `Spec`, `UserSeeder`, `ContextFactory`); each app subclasses them under
 `apps/<app>/php/api/v1/_test/` and `apps/<app>/php/classes/testing/`.
 `bin/mount.js` copies it all into the app checkout at the runtime paths

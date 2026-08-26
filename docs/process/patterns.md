@@ -240,12 +240,15 @@ alternative.
   `edit_tasks`; `Repo::submission()->submit()` auto-creates editorial tasks.
   Any older doc or SQL referencing `queries`/`query_participants` is stale.
 - **Dashboard search commits on Enter only** (`Search.vue`
-  `@keydown.enter.prevent`); `fill()` alone never filters. A committed search
-  flips the dashboard to a cross-status "Search Results" view
-  (`currentViewId=search`) that removes the in-page search box (the side-nav
-  box owns the query there — scope by accessible name
-  `/Search submissions, ID/`). To assert on a specific status view, assert on
-  that view's own list response (`status[]=…`), not through search.
+  `@keydown.enter.prevent`); `fill()` alone never filters. The two search
+  boxes differ (verified live 2026-08-26, U23 suite): the IN-PAGE box
+  (accessible name `/Search submissions, ID/`) narrows the CURRENT view —
+  the heading keeps the view's name and count; only the SIDE-NAV global box
+  (name prefix `Search submissions`; its accessible name grows once a phrase
+  is typed — never match it `exact`) flips to the cross-status "Search
+  Results" view (`currentViewId=search`), which removes the in-page box.
+  A row outside the current view is invisible to the in-page search — switch
+  view first or search globally.
 - **Paginated lists accumulate state across runs** on a long-lived DB — never
   assert presence on an unscoped first page; search by the test's tag first.
   Seeded drafts carry no `dateSubmitted` so they sort LAST in date-ordered

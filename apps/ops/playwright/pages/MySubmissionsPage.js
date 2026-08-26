@@ -11,11 +11,19 @@
  * shared anchors key on. Re-anchor the three workflow-panel helpers on the
  * panel's own workflow navigation (the "Preprint" menu entry); everything
  * else is inherited unchanged.
+ *
+ * The re-anchoring is a mixin (`withOpsWorkflowPanel`) because the same
+ * panel serves the editorial dashboard too — the OPS EditorialDashboardPage
+ * applies it on top of the shared editorial POM.
  */
 const {expect} = require('@playwright/test');
 const {MySubmissionsPage: SharedMySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 
-exports.MySubmissionsPage = class MySubmissionsPage extends SharedMySubmissionsPage {
+/**
+ * Rebind the workflow-panel anchors on OPS's headingless panel. Applies to
+ * any DashboardPage-family base (author list, editorial dashboard).
+ */
+const withOpsWorkflowPanel = (Base) => class extends Base {
     /**
      * The workflow panel's own navigation entry — the stable inner anchor
      * (the side-modal wrapper reports visibility:hidden, so presence is
@@ -48,3 +56,9 @@ exports.MySubmissionsPage = class MySubmissionsPage extends SharedMySubmissionsP
         await expect(this.workflowNavEntry()).toHaveCount(0, {timeout: 30_000});
     }
 };
+
+exports.withOpsWorkflowPanel = withOpsWorkflowPanel;
+
+exports.MySubmissionsPage = class MySubmissionsPage extends withOpsWorkflowPanel(
+    SharedMySubmissionsPage
+) {};

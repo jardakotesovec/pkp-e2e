@@ -492,15 +492,15 @@ exports.selectReviewer = async function selectReviewer(page, modal, name) {
 };
 
 /**
- * Assign a stage participant through the Participants panel's legacy form.
+ * Complete an already-open "Assign Participant" legacy form (opened by the
+ * Participants panel's "Assign" or the dashboard row's "Assign Editor").
  *
  * @param {import('@playwright/test').Page} page
  * @param {{group: string, name: string, searchName: string, recommendOnly?: boolean}} options
  *   group: user-group option label (e.g. 'Journal manager'); name: display
  *   name shown in the results grid; searchName: name fragment to search by.
  */
-exports.assignParticipant = async function assignParticipant(page, {group, name, searchName, recommendOnly = false}) {
-    await page.getByRole('button', {name: 'Assign', exact: true}).click();
+exports.completeAssignParticipantForm = async function completeAssignParticipantForm(page, {group, name, searchName, recommendOnly = false}) {
     const modal = page
         .getByRole('dialog')
         .filter({has: page.locator('select[name="filterUserGroupId"]')});
@@ -524,6 +524,17 @@ exports.assignParticipant = async function assignParticipant(page, {group, name,
     await modal.getByRole('button', {name: 'OK', exact: true}).click();
     await expect(modal).toHaveCount(0, {timeout: 30_000});
     await waitForJQueryIdle(page);
+};
+
+/**
+ * Assign a stage participant through the Participants panel's legacy form.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {{group: string, name: string, searchName: string, recommendOnly?: boolean}} options
+ */
+exports.assignParticipant = async function assignParticipant(page, options) {
+    await page.getByRole('button', {name: 'Assign', exact: true}).click();
+    await exports.completeAssignParticipantForm(page, options);
 };
 
 module.exports.waitForJQueryIdle = waitForJQueryIdle;
