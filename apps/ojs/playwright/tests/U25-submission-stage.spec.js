@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/submission-stage.spec.js
+ * @file playwright/tests/U25-submission-stage.spec.js
  *
  * Submission stage — OJS suite, one test per canonical scenario the spec runs
  * on OJS (common scenarios 1–7; scenario 8 is OMP-only, 9 OPS-only).

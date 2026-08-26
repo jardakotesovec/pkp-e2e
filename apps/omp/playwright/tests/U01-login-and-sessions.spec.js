@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/login-and-sessions.spec.js
+ * @file playwright/tests/U01-login-and-sessions.spec.js
  *
  * U1 — Login & sessions, OMP suite (spec:
  * lib/pkp/docs/e2e/specs/U01-login-and-sessions.md). One test per canonical

@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/reviewer-assignment-absence.spec.js
+ * @file playwright/tests/U27-reviewer-assignment-absence.spec.js
  *
  * U27 — Reviewer assignment & management
  * (lib/pkp/docs/e2e/specs/U27-reviewer-assignment-and-management.md): the OPS

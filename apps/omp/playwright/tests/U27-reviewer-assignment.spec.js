@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/reviewer-assignment.spec.js
+ * @file playwright/tests/U27-reviewer-assignment.spec.js
  *
  * U27 — Reviewer assignment & management, OMP suite (spec:
  * lib/pkp/docs/e2e/specs/U27-reviewer-assignment-and-management.md). One test

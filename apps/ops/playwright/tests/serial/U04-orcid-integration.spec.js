@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/serial/orcid-integration.spec.js
+ * @file playwright/tests/serial/U04-orcid-integration.spec.js
  *
  * ORCID integration — the one OPS canonical scenario that asserts on ORCID
  * request EMAIL (spec scenario 4). Every ORCID mailable is queued-job mail
@@ -11,7 +11,7 @@
  * Spec: lib/pkp/docs/e2e/specs/U04-orcid-integration.md
  *
  * Coverage boundaries are declared in the parallel suite's header
- * (playwright/tests/orcid-integration.spec.js); this file adds only:
+ * (playwright/tests/U04-orcid-integration.spec.js); this file adds only:
  * - S4's emailed authorization link is recorded, never followed (OAuth
  *   cannot complete on the egress-firewalled fleets).
  * - OPS2 🐞 is about the Emails settings SCREEN's missing rows — this test's

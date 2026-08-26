@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/submission-wizard.spec.js
+ * @file playwright/tests/U21-submission-wizard.spec.js
  *
  * U21 — Submission wizard, OMP suite (spec:
  * docs/specs/U21-submission-wizard.md). One test per canonical scenario a

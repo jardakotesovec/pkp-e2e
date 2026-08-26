@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/review-stage-and-rounds.spec.js
+ * @file playwright/tests/U26-review-stage-and-rounds.spec.js
  *
  * Review stage & rounds — OJS suite, one test per canonical scenario the spec
  * runs on OJS (common scenarios 1–12; scenario 13 is OMP-only, 14 OPS-only).

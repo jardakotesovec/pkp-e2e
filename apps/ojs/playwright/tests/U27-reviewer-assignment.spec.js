@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/reviewer-assignment.spec.js
+ * @file playwright/tests/U27-reviewer-assignment.spec.js
  *
  * Reviewer assignment & management — OJS suite, one test per canonical
  * scenario the spec runs on OJS (common scenarios 1–12 + OJS-specific 14;

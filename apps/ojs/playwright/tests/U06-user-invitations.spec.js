@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/user-invitations.spec.js
+ * @file playwright/tests/U06-user-invitations.spec.js
  *
  * User invitations — OJS suite, one test per canonical scenario the spec runs
  * on OJS (scenarios 1–8; scenario 9 is OPS-only).

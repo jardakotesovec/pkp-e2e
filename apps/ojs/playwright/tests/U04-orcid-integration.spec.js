@@ -1,11 +1,11 @@
 // @ts-check
 /**
- * @file playwright/tests/orcid-integration.spec.js
+ * @file playwright/tests/U04-orcid-integration.spec.js
  *
  * ORCID integration — OJS suite, one test per canonical scenario the spec
  * runs on OJS. Parallel-safe scenarios live here (S1–S3, S5–S7, S9); the two
  * scenarios that assert on queued-job ORCID email (S4, S8) live in
- * tests/serial/orcid-integration.spec.js — ORCID mail only reaches Mailpit
+ * tests/serial/U04-orcid-integration.spec.js — ORCID mail only reaches Mailpit
  * after an explicit queue-worker run, which must never happen while parallel
  * agents seed (patterns.md parallel lesson 7).
  * Spec: lib/pkp/docs/e2e/specs/U04-orcid-integration.md

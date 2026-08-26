@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/user-invitations.spec.js
+ * @file playwright/tests/U06-user-invitations.spec.js
  *
  * U6 — User invitations, OMP suite (spec:
  * lib/pkp/docs/e2e/specs/U06-user-invitations.md). One test per canonical

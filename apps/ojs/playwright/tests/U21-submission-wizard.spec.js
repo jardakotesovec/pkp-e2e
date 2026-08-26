@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/submission-wizard.spec.js
+ * @file playwright/tests/U21-submission-wizard.spec.js
  *
  * Submission wizard — OJS suite, one test per canonical scenario the spec
  * runs on OJS (common scenarios 1–11 + the OJS-specific 12–13; scenario 14

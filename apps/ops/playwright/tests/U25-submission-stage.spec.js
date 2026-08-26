@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/submission-stage.spec.js
+ * @file playwright/tests/U25-submission-stage.spec.js
  *
  * U25 — Submission stage
  * (lib/pkp/docs/e2e/specs/U25-submission-stage.md): the OPS ABSENCE suite.

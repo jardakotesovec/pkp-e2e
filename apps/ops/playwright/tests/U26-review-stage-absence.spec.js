@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/review-stage-absence.spec.js
+ * @file playwright/tests/U26-review-stage-absence.spec.js
  *
  * U26 — Review stage & rounds
  * (lib/pkp/docs/e2e/specs/U26-review-stage-and-rounds.md): the OPS ABSENCE

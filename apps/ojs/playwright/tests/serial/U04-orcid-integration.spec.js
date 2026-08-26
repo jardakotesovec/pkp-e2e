@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/serial/orcid-integration.spec.js
+ * @file playwright/tests/serial/U04-orcid-integration.spec.js
  *
  * ORCID integration — the two OJS canonical scenarios that assert on ORCID
  * request EMAIL (spec scenarios 4 and 8). Every ORCID mailable is queued-job
@@ -11,7 +11,7 @@
  * Spec: lib/pkp/docs/e2e/specs/U04-orcid-integration.md
  *
  * Coverage boundaries are declared in the parallel suite's header
- * (playwright/tests/orcid-integration.spec.js); this file adds only:
+ * (playwright/tests/U04-orcid-integration.spec.js); this file adds only:
  * - S4's emailed authorization link is recorded, never followed (OAuth
  *   cannot complete on the egress-firewalled fleets).
  * - A6 ❓: S8 asserts the toggle's accept-time behavior, never its label

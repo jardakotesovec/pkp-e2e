@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/login-and-sessions.spec.js
+ * @file playwright/tests/U01-login-and-sessions.spec.js
  *
  * Login & sessions — OJS suite, one test per canonical scenario the spec runs
  * on OJS (scenarios 1–8; scenario 9 needs a config-gated install — see below).

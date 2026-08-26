@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/submission-stage.spec.js
+ * @file playwright/tests/U25-submission-stage.spec.js
  *
  * U25 — Submission stage, OMP suite (spec:
  * lib/pkp/docs/e2e/specs/U25-submission-stage.md). One test per canonical

@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @file playwright/tests/review-stage-and-rounds.spec.js
+ * @file playwright/tests/U26-review-stage-and-rounds.spec.js
  *
  * U26 — Review stage & rounds, OMP suite (spec:
  * lib/pkp/docs/e2e/specs/U26-review-stage-and-rounds.md). One test per
