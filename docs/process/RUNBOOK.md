@@ -24,7 +24,10 @@ around.
 
 **The current mode lives in `PROGRESS.md`'s banner** — read it before doing
 anything. Modes: **REVIEW/PILOT** (one feature per session, then STOP for
-maintainer review) and **AUTONOMOUS WAVES** (below).
+maintainer review), **AUTONOMOUS WAVES** (below), and **MAINTENANCE** (the
+resident QA agent's standing role and upstream-sync loop —
+`docs/process/MAINTENANCE.md`; this runbook's contracts stay binding
+underneath it).
 
 ## Mission, scope & invariants
 

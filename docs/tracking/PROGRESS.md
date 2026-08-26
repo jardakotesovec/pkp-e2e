@@ -28,7 +28,9 @@ writer's judgment. The critical goal: accurate QA/PO-readable specs plus
 strong-coverage per-app tests derived from them — every rule bends to that.
 
 **Mode: REVIEW/PILOT** — nothing runs autonomously; the maintainer launches
-each step and reviews its output.
+each step and reviews its output. (A third mode exists: **MAINTENANCE** —
+the resident QA agent per `docs/process/MAINTENANCE.md`, upstream baselines
+in `docs/tracking/upstream-sync.md`; it activates when this banner names it.)
 
 ## Features
 
