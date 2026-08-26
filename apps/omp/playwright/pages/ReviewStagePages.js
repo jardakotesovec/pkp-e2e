@@ -284,6 +284,38 @@ async function completeUploadWizard(page, fileName) {
 }
 
 /**
+ * Complete the same three-step upload wizard when it opens as a standalone
+ * dialog over the dashboard list (the author's "Submit revisions" action,
+ * U22). There it has no [data-cy="active-modal"] wrapper and no header text
+ * of its own (spec U22 fn-g), so the dialog is anchored by its step tabs.
+ */
+async function completeStandaloneUploadWizard(page, fileName) {
+    const wizard = page
+        .getByRole('dialog')
+        .filter({has: page.getByRole('tab', {name: '1. Upload File'})});
+    await expect(wizard.getByRole('tab', {name: '1. Upload File'})).toBeVisible({
+        timeout: 20_000,
+    });
+    await wizard.locator('select').first().selectOption({label: 'Book Manuscript'});
+    await page.locator('input[type="file"]').last().setInputFiles({
+        name: fileName,
+        mimeType: 'text/plain',
+        buffer: Buffer.from(`Revised file ${fileName}`),
+    });
+    await expect(wizard.getByRole('button', {name: /Change File/})).toBeVisible({
+        timeout: 20_000,
+    });
+    await wizard.getByRole('button', {name: 'Continue'}).click();
+    // Step 2 — Review Details (file name arrives prefilled).
+    await expect(wizard.getByText('Name the file')).toBeVisible({timeout: 10_000});
+    await wizard.getByRole('button', {name: 'Continue'}).click();
+    // Step 3 — Confirm.
+    await expect(wizard.getByText('File Added')).toBeVisible({timeout: 10_000});
+    await wizard.getByRole('button', {name: 'Complete'}).click();
+    await expect(page.getByText('File Added')).toBeHidden({timeout: 10_000});
+}
+
+/**
  * Assign a stage participant through the Participants panel's legacy
  * Assign dialog. `group` is the visible user-group option label.
  */
@@ -350,6 +382,7 @@ module.exports = {
     completeReviewAsReviewer,
     confirmReviewAsEditor,
     completeUploadWizard,
+    completeStandaloneUploadWizard,
     assignParticipant,
     openTasksPanel,
 };
