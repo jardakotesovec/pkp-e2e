@@ -7,8 +7,9 @@
  *
  *   node bin/fetch-apps.js [ojs] [omp] [ops] [--rebuild]   (default: all)
  *
- * Per app: shallow-clone pkp/<app> `main` (the campaign's minimal main-repo
- * changes are merged there; the jardakotesovec fork lags) with the remote
+ * Per app: clone pkp/<app> `main` with FULL history (the campaign's minimal
+ * main-repo changes are merged there; the jardakotesovec fork lags —
+ * history matters for archaeology when chasing a defect) with the remote
  * NAMED `upstream` and its push URL disabled immediately; add the
  * jardakotesovec fork as `origin` and make it the push default — so a bare
  * `git push` can only ever reach the fork, and pkp remotes reject every
@@ -62,7 +63,7 @@ function fetchApp(name) {
         // Clone from pkp (the fork lags), but NAME the remote `upstream` and
         // disable its push URL before anything else happens in the checkout.
         run(CHECKOUTS, 'git', [
-            'clone', '--depth', '1', '--branch', 'main', '--origin', 'upstream',
+            'clone', '--branch', 'main', '--origin', 'upstream',
             `https://github.com/${UPSTREAM_OWNER}/${name}.git`, name,
         ]);
     } else {
@@ -82,10 +83,10 @@ function fetchApp(name) {
     run(dir, 'git', ['config', 'remote.pushDefault', 'origin']);
 
     if (!fresh && update) {
-        run(dir, 'git', ['fetch', '--depth', '1', 'upstream', 'main']);
+        run(dir, 'git', ['fetch', 'upstream', 'main']);
         run(dir, 'git', ['checkout', '-B', 'main', 'FETCH_HEAD']);
     }
-    run(dir, 'git', ['submodule', 'update', '--init', '--recursive', '--depth', '1']);
+    run(dir, 'git', ['submodule', 'update', '--init', '--recursive']);
 
     // Submodule origins point at pkp remotes (.gitmodules) — disable pushes.
     run(dir, 'git', [
@@ -101,11 +102,11 @@ function fetchApp(name) {
         console.log('  lib/pkp pointer predates PKP_CONFIG_FILE — advancing to pkp-lib main');
         const libPkp = path.join(dir, 'lib', 'pkp');
         run(libPkp, 'git', [
-            'fetch', '--depth', '1',
+            'fetch',
             `https://github.com/${UPSTREAM_OWNER}/pkp-lib.git`, 'main',
         ]);
         run(libPkp, 'git', ['checkout', '--detach', 'FETCH_HEAD']);
-        run(libPkp, 'git', ['submodule', 'update', '--init', '--depth', '1']);
+        run(libPkp, 'git', ['submodule', 'update', '--init']);
         run(dir, 'git', [
             'submodule', 'foreach', '--recursive',
             `git remote set-url --push origin ${DISABLED_PUSH_URL}`,
