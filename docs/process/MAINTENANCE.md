@@ -123,6 +123,20 @@ manager would name things today. Guardrails:
 The deployment runs ONE session at a time for now (maintainer, 2026-08-26 —
 parallelism may come later). Two rules follow from that:
 
+- **Start on the right code: verify checkout state.** What each
+  `checkouts/<app>` should hold depends on the session's task — check
+  before assuming. Default: pkp upstream `main` (`npm run fetch-apps --
+  --update` puts it there, lib/pkp pointer included). Debugging or
+  reviewing a PR: checking out the PR's changes IS the right state — fetch
+  the ref from upstream (`git fetch upstream pull/<n>/head`) or add the
+  contributor's remote **fetch-only** and check out their branch. The git
+  rules survive any checkout: never push to a pkp remote, commits happen
+  only in pkp-e2e. Two corollaries: findings from a PR checkout are
+  reported against that PR, not filed as `main` behavior; and the
+  `upstream-sync.md` baselines only ever advance from a `main` review —
+  after a PR session, return the checkouts to upstream `main` (or state in
+  the session's report/Mattermost note that they were left elsewhere and
+  why, so the next session isn't surprised).
 - **Start clean: reset the databases.** A previous session's investigation
   may have left scratch contexts, half-seeded submissions, or drained jobs
   behind. Before any probing or test run, `npm run reset:<app>` for every
