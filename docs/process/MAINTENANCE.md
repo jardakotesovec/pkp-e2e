@@ -118,39 +118,78 @@ manager would name things today. Guardrails:
   it in the owning doc (RUNBOOK/TEMPLATE/PRINCIPLES/this file) with the date,
   as the docs already do.
 
-## Session hygiene (single-session deployment)
+## Session hygiene (parallel sessions)
 
-The deployment runs ONE session at a time for now (maintainer, 2026-08-26 —
-parallelism may come later). Two rules follow from that:
+The deployment runs PARALLEL sessions (maintainer, 2026-08-26): each
+claude-threads session works in its own git worktree of this repo, and app
+fleets come from a small pool of permanent environments — full independent
+checkout sets with disjoint ports/DBs (facts and table: harness.md
+"Environments"). Any environment can serve any task — PR debugging,
+upstream-sync review, probing; none is reserved. The rules:
 
-- **Start on the right code: verify checkout state.** What each
-  `checkouts/<app>` should hold depends on the session's task — check
-  before assuming. Default: pkp upstream `main` (`npm run fetch-apps --
-  --update` puts it there, lib/pkp pointer included). Debugging or
-  reviewing a PR: checking out the PR's changes IS the right state — fetch
-  the ref from upstream (`git fetch upstream pull/<n>/head`) or add the
-  contributor's remote **fetch-only** and check out their branch. The git
-  rules survive any checkout: never push to a pkp remote, commits happen
-  only in pkp-e2e. Two corollaries: findings from a PR checkout are
-  reported against that PR, not filed as `main` behavior; and the
-  `upstream-sync.md` baselines only ever advance from a `main` review —
-  after a PR session, return the checkouts to upstream `main` (or state in
-  the session's report/Mattermost note that they were left elsewhere and
-  why, so the next session isn't surprised).
-- **Start clean: reset the databases.** A previous session's investigation
-  may have left scratch contexts, half-seeded submissions, or drained jobs
-  behind. Before any probing or test run, `npm run reset:<app>` for every
-  fleet the session will touch — never trust inherited DB state, and never
+- **Claim before touching any app.** `npm run env -- claim [--app <app>]`
+  takes a free environment atomically and writes this worktree's `.env`
+  (a fresh worktree has none, and every harness script hard-errors without
+  it — a session literally cannot reach a fleet it hasn't claimed).
+  `npm run env -- release` when done; `npm run env -- status` shows
+  claims and flags stale ones (worktree gone or >24 h — recover with
+  `release <N> --force`, after checking the holder really is dead).
+  Spec/docs-only sessions claim nothing.
+- **Start on the right code: verify checkout state.** What the claimed
+  env's checkouts hold depends on the task — check before assuming, never
+  trust the previous holder. Default: pkp upstream `main`
+  (`npm run fetch-apps -- --update`; add `--slot <N>` for env N — it moves
+  the checkout there, lib/pkp pointer included). Debugging or reviewing a
+  PR: checking out the PR's changes IS the right state — fetch the ref
+  from upstream (`git fetch upstream pull/<n>/head`, inside `lib/pkp` for
+  pkp-lib PRs) or add the contributor's remote **fetch-only**. After
+  moving refs, make dependencies accurate: `composer install` always (a
+  cheap no-op when nothing changed); `npm ci && npm run build` only when
+  the diff touches `package-lock.json` or buildable sources (`js/`,
+  `lib/ui-library`); then `npm run mount`. **Check the PR's base first**:
+  `git merge-base <pr-head> origin/main` — a pkp-lib PR based on an old
+  `main` will fatal against the app's current tip (interface skew shows up
+  as an abstract-method fatal in the env's `.server-logs/`), and one
+  predating the harness's `PKP_CONFIG_FILE` support can't run under the
+  suite at all. A stale-based PR is reported as "needs a rebase before e2e
+  can verify" — a valid QA verdict, not a harness failure. The git rules
+  survive any checkout: never push to a pkp remote, commits happen only in
+  pkp-e2e. Findings from a PR checkout are reported against that PR, not
+  filed as `main` behavior.
+- **Start clean: reset the databases.** A previous holder may have left
+  scratch contexts, half-seeded submissions, or drained jobs behind.
+  Before any probing or test run, `npm run reset:<app>` for every fleet
+  the session will touch — never trust inherited DB state, and never
   attribute a finding to the app until it reproduces on a fresh reset.
+- **One suite at a time, never the same app twice.** The VM's cores can't
+  run parallel full suites, and Mailpit is one shared instance whose
+  recipient tags are app-scoped, not env-scoped: at most ONE full-suite
+  run machine-wide, and two runs of the SAME app must never overlap even
+  when targeted. Announce "running the <app> suite in env N" in the
+  session's thread before a full run; targeted `--grep` probes of
+  *different* apps are fine anytime. Leave `PLAYWRIGHT_WORKERS` alone (the
+  auto-detect sizes to the machine) unless a run must coexist with
+  another's probing — then pin it to 2.
+- **Tracking files merge through git, PR verdicts need one run.** With no
+  designated maintenance session, whichever session completes a `main`
+  review updates `upstream-sync.md` (and `PROGRESS.md`) on its worktree
+  branch and merges/pushes like any other change — the per-repo rows make
+  conflicts rare and trivial. Baselines still only advance from a `main`
+  review. For "did this PR cause the regression?": one run at the PR ref
+  + the PR diff + the latest green `main` CI run usually answers it; a
+  local `main` baseline rerun in the same env is for the genuinely
+  ambiguous case, not a default second run.
 - **End pushed, not just committed.** The session's context is disposable
   and the VM's working tree is not a durable home: work that reaches a
   commit-worthy gate is committed AND pushed to pkp-e2e `main` before the
   session ends — including doc/tracking updates (PROGRESS notes,
   upstream-sync baselines). An unpushed commit is a stranded result; an
   uncommitted tree at session end means the next session re-derives state
-  from files that aren't there. Push target rules unchanged (RUNBOOK
-  "Ops & campaign safeguards": pkp-e2e only, never the pkp remotes; keep
-  `main` green — a push that breaks CI breaks every app PR check).
+  from files that aren't there. Release the claim too — a held env with a
+  dead worktree is the stale-claim case above. Push target rules unchanged
+  (RUNBOOK "Ops & campaign safeguards": pkp-e2e only, never the pkp
+  remotes; keep `main` green — a push that breaks CI breaks every app PR
+  check).
 
 ## Standing duties (beyond the sync loop)
 

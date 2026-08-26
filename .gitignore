@@ -7,5 +7,7 @@ apps/*/playwright/.last-run.json
 docs/tracking/.reports/
 .reports/
 
-# Self-contained app checkouts + their files dirs (bin/fetch-apps.js) — never committed
+# Self-contained app checkouts + their files dirs (bin/fetch-apps.js) — never
+# committed. checkouts-s<N> are the extra permanent environments (--slot N).
 /checkouts/
+/checkouts-s*/

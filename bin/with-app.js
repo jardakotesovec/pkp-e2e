@@ -24,10 +24,12 @@ const app = resolveApp(appName);
 process.env.PKP_APP_NAME = app.name;
 process.env.PKP_APP_ROOT = app.root;
 process.env.PKP_SUITE_DIR = app.suiteDir;
+loadEnv(app.root); // the app checkout's .env.playwright (DB creds, API key)
+// Registry default LAST: the checkout's .env.playwright names its own port
+// (environments other than env 0 run on shifted ports — see harness.md).
 if (!process.env.PLAYWRIGHT_BASE_PORT) {
     process.env.PLAYWRIGHT_BASE_PORT = String(app.basePort);
 }
-loadEnv(app.root); // the app checkout's .env.playwright (DB creds, API key)
 
 const scriptPath = path.resolve(__dirname, '..', script);
 if (!fs.existsSync(scriptPath)) {

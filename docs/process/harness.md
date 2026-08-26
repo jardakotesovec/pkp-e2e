@@ -91,6 +91,36 @@ installs (probe finding, 2026-08) — galley-content search assertions need
 their own indexing arrangements.
 Same scenario endpoints and `publicknowledge` context path everywhere.
 
+### Environments (parallel sessions)
+
+The fleet table above describes **environment 0**. For parallel sessions
+(multiple worktree sessions on one machine — MAINTENANCE.md "Session
+hygiene") there are additional PERMANENT environments, full independent
+copies of the same thing provisioned once by
+`npm run fetch-apps -- --slot N`:
+
+| env | dir | ports (ojs/omp/ops) | DBs | TEST_API_KEY |
+|---|---|---|---|---|
+| 0 | `checkouts/` | 8000 / 8100 / 8200 | `<app>_test` | `playwright-test-key` |
+| 1 | `checkouts-s1/` | 9000 / 9100 / 9200 | `<app>_test_s1` | `playwright-test-key-s1` |
+| 2 | `checkouts-s2/` | 10000 / 10100 / 10200 | `<app>_test_s2` | `playwright-test-key-s2` |
+
+Everything is baked at provision time into each env's `.env.playwright` +
+`config.test.inc.php` (ports shifted by N×1000 leave room for one server
+per worker; the DB name carries the suffix, which also yields a distinct
+session cookie per env). The per-env `TEST_API_KEY` is a tripwire: if a run
+adopts a foreign env's leftover server (`reuseExistingServer`), seeding
+401s immediately instead of silently writing to the wrong DB. Envs are a
+symmetric pool — none is reserved for a task type. `bin/env.js`
+(`npm run env -- claim [N] | release | status`) claims one atomically
+(`<env-dir>/.claimed`) and writes the invoking worktree's `.env` with
+absolute `<APP>_ROOT` paths; environments always live in the MAIN worktree,
+sessions in their own worktrees (which also isolates `.auth/`,
+`test-results/`, `.server-logs/`, `.reports/` — all worktree-relative).
+Mailpit stays ONE shared instance across all envs — which is why two runs
+of the SAME app must never overlap (recipient tags are app-scoped, not
+env-scoped; see MAINTENANCE.md for the run discipline).
+
 **One shared roster, subset-enrolled per app** (see `users.md` for the
 roster): OMP splits the four reviewers (`julia`/`paul` → External,
 `amara`/`adam` → Internal) and seeds series `monographs`/`textbooks`
