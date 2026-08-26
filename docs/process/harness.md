@@ -191,7 +191,9 @@ re-running.
 ## Quick start: writing a new test
 
 1. **Folder**: feature test → the app's `apps/<app>/playwright/tests/`;
-   shared infrastructure only → `shared/playwright/`.
+   shared infrastructure only → `shared/playwright/`. Name feature suites
+   after their spec file — `U<nn>-<feature>.spec.js` (maintainer, 2026-08-26)
+   — so tests sort in FEATURE-MAP order alongside `docs/specs/`.
 2. **Import**: shared spec `require('../support/base-test.js')`; app spec
    `require('../support/fixtures.js')` (adds the app's api fixture).
 3. **User**: see `users.md`; `test.use({user: 'sectioneditor.ana'})` sets the
