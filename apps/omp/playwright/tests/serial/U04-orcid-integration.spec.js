@@ -42,9 +42,10 @@ function makeTag(scenario, testInfo) {
     return `u4${scenario}ompw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-// Suite disabled 2026-08-20 (maintainer): pending a decision on how ORCID's
-// external communication is handled in tests (mock server vs dead-port proxy).
-test.describe.skip('ORCID integration (queued email)', () => {
+// Re-enabled 2026-08-26 (maintainer): the dead-port proxy + sandbox-only dummy
+// credentials stand — no real ORCID traffic is possible from these tests
+// (see header); S2's popup asserts the sandbox URL only, without driving it.
+test.describe('ORCID integration (queued email)', () => {
     test('S4: "Request verification" emails the contributor an authorization link', async ({asUser, ompApi, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s4', testInfo);
