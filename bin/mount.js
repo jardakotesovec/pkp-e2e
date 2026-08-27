@@ -70,7 +70,7 @@ function mount(appName) {
         console.error(
             `${appName}: lib/pkp/classes/config/Config.php does not honour the ` +
                 `PKP_CONFIG_FILE env var — the checkout is missing the minimal ` +
-                `main-repo change (pkp-lib branch e2e_ng_2 until it is merged).`
+                `main-repo change (merged to pkp-lib main 2026-08 — update the checkout).`
         );
         process.exit(1);
     }

@@ -2,9 +2,9 @@
 # run-app.yml (also called by the thin hook workflows in the app repos);
 # this file is just the three-app matrix and its triggers.
 #
-# Until the minimal main-repo changes merge upstream, the apps are the
-# REDUCED e2e_ng_2 branches (Config.php PKP_CONFIG_FILE + OPS cast).
-# Flip app_ref to main afterwards (and app_repo to pkp/<app> if desired).
+# The apps are pkp upstream main (the once-needed reduced e2e_ng_2 branches
+# were retired 2026-08-27 — their two one-liners, Config.php PKP_CONFIG_FILE
+# and the OPS wordCount cast, are merged upstream).
 name: e2e
 
 on:
@@ -27,21 +27,21 @@ jobs:
     uses: ./.github/workflows/run-app.yml
     with:
       app: ojs
-      app_repo: jardakotesovec/ojs
-      app_ref: e2e_ng_2
+      app_repo: pkp/ojs
+      app_ref: main
   omp:
     # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
     if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: omp
-      app_repo: jardakotesovec/omp
-      app_ref: e2e_ng_2
+      app_repo: pkp/omp
+      app_ref: main
   ops:
     # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
     if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: ops
-      app_repo: jardakotesovec/ops
-      app_ref: e2e_ng_2
+      app_repo: pkp/ops
+      app_ref: main

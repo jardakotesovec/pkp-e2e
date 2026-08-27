@@ -27,8 +27,6 @@ jobs:
     env:
       APP_REPO: ${{ inputs.app_repo }}
       APP_REF: ${{ inputs.app_ref }}
-      PKPLIB_REPO: https://github.com/jardakotesovec/pkp-lib
-      PKPLIB_REF: e2e_ng_2
       PKP_CONFIG_FILE: ${{ github.workspace }}/app/config.test.inc.php
       TEST_API_KEY: ci-test-key
       MAILPIT_URL: http://127.0.0.1:8025
@@ -69,16 +67,6 @@ jobs:
           path: app
           submodules: recursive
           fetch-depth: 1
-
-      # TEMPORARY — remove once the pkp-lib PKP_CONFIG_FILE one-liner is
-      # merged (the recorded submodule pointer then satisfies the mount's
-      # prerequisite check by itself).
-      - name: "TEMPORARY: lib/pkp at the reduced e2e_ng_2 branch"
-        run: |
-          cd app/lib/pkp
-          git fetch --depth 1 "$PKPLIB_REPO" "$PKPLIB_REF"
-          git checkout --detach FETCH_HEAD
-          git submodule update --init --depth 1
 
       - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
