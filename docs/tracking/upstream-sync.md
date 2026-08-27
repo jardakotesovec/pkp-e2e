@@ -34,7 +34,12 @@ touched, findings filed, Mattermost notifications sent, or "clean")._
   author-response round template, vs 19 in OJS), so the i12903 companion was
   never applicable there and the window behind the would-be fatal is
   unreachable; the earlier framing measured OPS against the OJS/OMP
-  baseline instead of its own.
+  baseline instead of its own. CI at this tip (first un-pinned run,
+  33081733204): all three apps green — one flaky-passed test, OJS U26 S7
+  "cancel a round" (wizard completion link >30 s on attempt 1, retry green
+  in 42 s) — the third U26-under-load timing flake today (with the local
+  S5/S8 one-offs); none reproduce in isolation. Watch the decision-wizard
+  waits if the pattern recurs.
 - **2026-08-27** — ojs `20fc190b5956..014c084231`, omp `cdf5213ccb82..d0226ccac`,
   ops `12c625bd7efa..5b7157a984`, pkp-lib `00e6a1423a9e..774240665` (interactive
   session with the maintainer, prompted by the red e2e hook on pkp/omp `main`).
