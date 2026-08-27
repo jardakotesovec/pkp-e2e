@@ -21,6 +21,31 @@ range is fully triaged.**
 _Append-only, newest first: date · range per repo · outcome (specs/tests
 touched, findings filed, Mattermost notifications sent, or "clean")._
 
+- **2026-08-27 (third pass — CI plumbing + dead-worker evidence)** — no new
+  range (baselines unchanged). **CI**: `run-app.yml` gained an `e2e_ref` input
+  (pkp-e2e branch/PR runs now test their own tree — they silently tested
+  `main` before; app hooks unchanged, still float on main) and `e2e.yml`
+  gained dispatch app-repo/ref pins — the fix-verification combo is
+  `gh workflow run e2e.yml --ref <fix-branch> -f <app>_ref=<sha>` (both
+  validated on-branch before merge, `580ee4b`). Failure artifacts now really
+  contain `.server-logs/` (`5dde560` — upload-artifact@v4 skips hidden dirs
+  unless `include-hidden-files`, so the path had uploaded nothing since day
+  one). That fix immediately paid off on the standing "server process gone →
+  cascade" watch item — **two more dead-worker incidents today, both at the
+  reviewed tips, cause now evidenced**: OMP run 33095432326 (worker 0,
+  socket hang-up from the login smoke + U01 S7 onward; pre-fix, so no server
+  log; targeted rerun green) and OJS run 33106002377 (worker 2 —
+  `Segmentation fault (core dumped)` at the tail of
+  `.server-logs/server-8002.log`, seconds after
+  `/api/v1/invitations/userRoleAssignment` +
+  `/api/v1/users?…includePermissions=true` served for U01 S7's Users & Roles
+  screen; ~20-test cascade; rerun green). Pattern across all three incidents
+  (with the earlier U04 S7 DB-time-limit fatal): a worker's `php -S` dies,
+  Playwright never restarts it, every test on that worker fails in
+  milliseconds; none reproduce on rerun. Both of today's first failed at U01
+  S7 impersonation on different apps — if it recurs, chase the in-flight
+  request on that screen (PHP error log/core capture in CI) and consider
+  webServer crash resilience.
 - **2026-08-27 (second pass)** — ojs `014c084231..fcf2f00807`, omp
   `d0226ccac..244a04311`, ops `5b7157a984..94f6bbc59a`, pkp-lib
   `774240665..a9767b7f14` (the #13035 merge commit). The range is exactly the
