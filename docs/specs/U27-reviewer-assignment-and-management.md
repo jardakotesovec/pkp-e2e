@@ -32,7 +32,10 @@ OPS does not install a review stage or any reviewer role: a preprint server's
 workflow goes straight from submission to Production, no "Reviewers" panel
 exists on any screen, and its role settings offer no reviewer group. The
 absence of the stage itself is documented with
-[→ the review stage](U26-review-stage-and-rounds.md#rounds). <sup>p</sup>
+[→ the review stage](U26-review-stage-and-rounds.md#rounds). OPS also took
+only a fragment of the 2026-08 unassign/cancel rework, leaving the unassign
+window unable to load — a latent fault should reviewer flows ever be enabled
+there ⚠ [OPS1](#ops1). <sup>p</sup>
 
 On a press, everything in this file runs twice: the Internal Review stage and
 the External Review stage each carry their own Reviewers panel with the same
@@ -123,8 +126,10 @@ reacts to the checkboxes, appearing and disappearing as boxes are (un)ticked
 refused under the same date rule as at add time ⚠ [A8](#a8). <sup>g</sup>
 
 **Send Review Reminder window** (row action "Send Reminder"; window title
-"Review Reminder"): reviewer name and address (read-only), a template chooser
-when alternates exist, the editable message, and a read-only "Review
+"Review Reminder"): reviewer name and address (read-only), a template
+chooser ("Choose a predefined message to use, or fill out the form below.")
+preset to the reminder template and listing it with any alternates — picking
+one refills the message below — the editable message, and a read-only "Review
 Schedule" block of three dates — "Editor's Request", "Response Due Date" and
 "Review Due Date" while the reviewer has not responded; once they have,
 "Response Due Date" gives way to "Review Acceptance Date" (the review due
@@ -135,11 +140,16 @@ date shows in both variants). Submit button "Send Reminder". <sup>h</sup>
 checkbox; submit "Thank Reviewer". <sup>j</sup>
 
 **Unassign/Cancel window** (row action "Unassign Reviewer" before a response,
-"Cancel Reviewer" after one): prefilled notice message, "Do not send email to
-Reviewer." checkbox; the submit button reads "Unassign Reviewer" or "Cancel
-Reviewer" to match (Rule 17). **Reinstate Reviewer window**: same shape,
-submit "Reinstate Reviewer". **Resend Review Request window** (on a declined
-row): message, skip-email checkbox, plus fresh "Response Due Date" and
+"Cancel Reviewer" after one): the same template chooser as the reminder
+window — here preset to the unassign or cancel notice template — the
+prefilled notice message, "Do not send email to Reviewer." checkbox; the
+submit button reads "Unassign Reviewer" or "Cancel Reviewer" to match
+(Rule 17). **Reinstate Reviewer window**: same shape, chooser included,
+submit "Reinstate Reviewer". On a server running the shipped minified
+scripts (the production default) all of these windows — Send Reminder
+included — currently open without their message editor ⚠ [A20](#a20).
+**Resend Review Request window** (on a declined row; no template chooser):
+message, skip-email checkbox, plus fresh "Response Due Date" and
 "Review Due Date" pickers — each preset from its own configured interval,
 exactly as at add time ([A9](#a9), retired) (Rule 19).
 <sup>k</sup>
@@ -326,7 +336,8 @@ under the prompt "Record the response on behalf of the reviewer"; submit
     the invitation remains on the round. After any response (accept or
     decline), the entry reads "Cancel Reviewer": the row stays, as "Request
     Cancelled", and only review managers keep seeing it ⚠ [A6](#a6). Both
-    windows offer the notice email with a skip box. <sup>k</sup>
+    windows offer the notice email — each with its own template chooser and
+    a skip box (Fields). <sup>k</sup>
 18. **Reinstate.** "Reinstate Reviewer" on a cancelled row restores the
     assignment to the state its dates imply (accepted, overdue, submitted…),
     with an optional notice email; notice "Reviewer reinstated." <sup>k</sup>
@@ -410,9 +421,10 @@ under the prompt "Record the response on behalf of the reviewer"; submit
   the reviewer's behalf. <sup>i</sup>
 - **Thanking** → the acknowledgement email (unless skipped) and the
   acknowledged date in History. <sup>j</sup>
-- **Unassigning/cancelling** → the notice email (unless skipped; subject
-  "Request for Review Cancelled" — either way, unassign included) and the
-  reviewer's "Review pending." task is removed. Logged. Nothing else is
+- **Unassigning/cancelling** → the notice email (unless skipped) — unassign
+  notice subject "Your reviewer assignment for "{title}" has been removed",
+  cancel notice subject "Your review for "{title}" has been cancelled" — and
+  the reviewer's "Review pending." task is removed. Logged. Nothing else is
   cleaned up — the reviewer's other participations on the submission are
   untouched. <sup>k</sup>
 - **Reinstating / resending** → the respective email (unless skipped; the
@@ -550,10 +562,12 @@ mail is observed in the test install's mail catcher.
 11. **Unassign before, cancel after** — Editor: unassign an unanswered
     reviewer ("Unassign Reviewer" → submit) — notice "Reviewer removed.",
     the row is gone. On a second, accepted reviewer the same menu entry
-    reads "Cancel Reviewer"; cancelling leaves the row as "Request
-    Cancelled". Press "Reinstate Reviewer" on it — the row returns to its
-    dated state ("Request Accepted" or "Overdue"), and the reviewer's
-    mailbox holds the cancel and reinstate notices.
+    reads "Cancel Reviewer"; the window opens with its template chooser
+    above the notice; cancelling leaves the row as "Request Cancelled".
+    Press "Reinstate Reviewer" on it — the row returns to its dated state
+    ("Request Accepted" or "Overdue"), and the reviewer's mailbox holds the
+    cancel notice ("Your review for … has been cancelled") and the
+    reinstate notice.
 12. **Decline, then ask again** — with a declined row (reviewer declined, or
     scenario 8 run with the decline option), Editor: the row reads "Request
     Declined"; open "Resend Review Request", keep the fresh dates, send.
@@ -611,7 +625,9 @@ in an unusual situation or configuration.
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
 | [A18](#a18) | Emptying the request letter makes the add fail silently — yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
+| [A20](#a20) | With minified scripts on (the production default), the Send Reminder, Unassign, Cancel and Reinstate windows open without their message editor | 🐞 | user-visible | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
+| [OPS1](#ops1) | {OPS} The unassign window cannot load — OPS ships only a fragment of the unassign/cancel rework, its default notice template never installed | 🐞 | latent | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -858,6 +874,20 @@ Basis: live probe (both apps, baseline contexts checked to hold no
 alternates; two acting roles on OJS) + code reading.
 <sup>[f-a19](#fn-a19)</sup>
 
+<a id="a20"></a>
+**A20 — Four dialogs lose their editor under minified scripts** · 🐞 ·
+user-visible.
+With the server's minified-script bundling on — the production default, and
+the test installs' configuration — the Send Reminder, Unassign, Cancel and
+Reinstate windows open without their rich-text message: the editor never
+initializes, so the notice can be neither read nor edited. With bundling off
+the same flows work end to end. The cause is app-side in all three apps —
+the shipped script bundle was not recompiled after the 2026-08 dialog
+rework — so a recompile ships the fix; reported upstream 2026-08-27.
+Scenarios 7 and 11 cannot be run as written while this stands.
+Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
+<sup>[f-a20](#fn-a20)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -895,6 +925,21 @@ The server-rendered opening list omits the stage filter that its own request
 parameters carry.
 Basis: live probe (positive and negative controls on both stages).
 <sup>[f-omp2](#fn-omp2)</sup>
+
+### OPS
+
+<a id="ops1"></a>
+**OPS1 — The unassign window cannot load on a preprint server** · 🐞 ·
+latent.
+OPS took only a fragment of the 2026-08 unassign/cancel rework: the new
+default unassign notice template is never installed there — no template
+entry, no locale text, no upgrade step — so opening the Unassign Reviewer
+window fails outright instead of rendering. Latent because a default
+preprint server has no reviewer surface at all (see the absence paragraph);
+it bites only an install that enables reviewer flows, and needs a live
+probe if those ever ship.
+Basis: code reading (not live-probed — no screen reaches the window on a
+default install). <sup>[f-ops1](#fn-ops1)</sup>
 
 ---
 
@@ -1140,12 +1185,17 @@ settings nor on the unsubscribe page its footer links to (finding A12).
 <a id="fn-h"></a>
 **h** — Manual reminder: Vue guard statuses RESPONSE_OVERDUE/REVIEW_OVERDUE
 (AFFW-488); form `ReviewReminderForm` (template `reviewReminderForm.tpl`,
-AFFW-646..648; schedule readout branches on `getDateConfirmed()`), mailable
+AFFW-646..648; schedule readout branches on `getDateConfirmed()`; since
+pkp/pkp-lib#13035 — folded 2026-08-27 — the dialog renders the template
+chooser and attaches the shared `ReviewerActionFormHandler` in place of the
+retired `ReviewReminderFormHandler`, note k), mailable
 `ReviewRemind` (MAIL-042, key REVIEW_REMIND), editor sender; stamps
 `dateReminded`; success notice `notification.sentNotification`; event log
 `submission.event.reviewer.reviewerReminded`. The template-body preview op
 masks the one-click URL variable so editors never see a live reviewer link
-(`fetchReviewReminderTemplateBody`). Automatic reminders: scheduled task
+(`fetchReviewerActionTemplateBody`, the same op the chooser's re-fetch
+uses — note k; previously `fetchReviewReminderTemplateBody`). Automatic
+reminders: scheduled task
 `PKP\task\ReviewReminder` (JOB-054, owned by *Review setup & review forms* —
 clock thresholds `numDaysBefore/AfterReviewResponseReminderDue`,
 `numDaysBefore/AfterReviewSubmitReminderDue`) dispatches one queued job per
@@ -1240,14 +1290,30 @@ identical; the OMP thank mail "Thank you for your review" arrived under the
 acting editor's name.
 
 <a id="fn-k"></a>
-**k** — Unassign/cancel: `UnassignReviewerForm` over
-`ReviewerNotifyActionForm` (template `unassignReviewerForm.tpl`,
-AFFW-649/650; submit label switches on `dateConfirmed`). Execute: no
+**k** — Unassign/cancel (machinery reworked upstream by pkp/pkp-lib#13035,
+folded on the 2026-08-27 upstream-rebase check): abstract `ClearReviewForm`
+over `ReviewerNotifyActionForm`, concrete `UnassignReviewerForm` (before a
+response; template `unassignReviewerForm.tpl`, AFFW-649/650; op unchanged)
+and new `CancelReviewForm` (after one; op `updateCancelReview`, template
+`reviewCancelForm.tpl`) — replacing the old single form whose submit label
+switched on `dateConfirmed`. Execute unchanged: no
 response → assignment DELETED; responded → flagged cancelled with date;
-either way the reviewer's task row (NOTIF-019) is deleted, the mail
-`ReviewerUnassign` (MAIL-041, key REVIEW_CANCEL) goes unless skipped,
-notices `notification.removedReviewer`/`.cancelledReviewer`, log
-`log.review.reviewCleared`. The unassign path touches nothing else — no
+either way the reviewer's task row (NOTIF-019) is deleted, the notice mail
+goes unless skipped — unassign sends `ReviewerUnassign` (MAIL-041), since
+the rework on its own key REVIEWER_UNASSIGN (template installed by
+migration `I12903_ReviewerUnassignEmailTemplate`, registered in ojs+omp
+upgrade.xml) with a new email log event type REVIEWER_UNASSIGN
+(0x40000010); cancel sends the new mailable `ReviewCancel`, which took over
+key REVIEW_CANCEL with its subject changed to the one quoted in Side
+effects — notices `notification.removedReviewer`/`.cancelledReviewer`, log
+`log.review.reviewCleared`. Template chooser (the Unassign, Cancel,
+Reinstate and Send Reminder dialogs alike): `ReviewerNotifyActionForm`
+lists the action's default template plus its alternates (email-template
+Collector `alternateTo`); a pick re-fetches the body via AJAX op
+`fetchReviewerActionTemplateBody`, wired by the new JS handler
+`ReviewerActionFormHandler` (replacing `ReviewReminderFormHandler` — the
+stale committed `pkp.min.js` consequence is finding A20, note f-a20). The
+unassign path touches nothing else — no
 participant, task-assignment or discussion cleanup exists on this build
 (the clear-review hooks have zero listeners; the once-claimed drop from
 open editorial tasks and discussions was a stale carry-over from the
@@ -1270,13 +1336,17 @@ op (API-032 rider) → `ReviewerAction::confirmReview` — acts only while
 sends the editor-side response acknowledgement mails owned by the
 *Reviewer's review* feature, declines also void the one-click invitation.
 Vue action guard `!reviewAssignment.dateConfirmed` (AFFW-501). Live-probed
-2026-08-02 (OJS, OMP where noted): notices as quoted; cancel mail subject
-"Request for Review Cancelled" — its body ships the typo "reivew" ("…cancel
-the request for you to reivew the submission…", both apps) — and the
-unassign of an unanswered reviewer sent the same notice; reinstate subject
-"Can you still review something for {journal}?"; after a resend the row's
-menu again offered "Unassign Reviewer" and "Log Response"; the unassigned
-reviewer's own dashboard lost the assignment (before/after, both apps). Log
+2026-08-02 (OJS, OMP where noted): notices as quoted; after a resend the
+row's menu again offered "Unassign Reviewer" and "Log Response"; the
+unassigned reviewer's own dashboard lost the assignment (before/after, both
+apps). Mail split re-probed 2026-08-27 (OMP, full
+unassign→cancel→reinstate flow with the minified bundle off — note f-a20):
+cancel subject received verbatim `Your review for "{title}" has been
+cancelled` (previously "Request for Review Cancelled") and reinstate
+subject "Can you still review something for {journal}?"; the unassign
+subject `Your reviewer assignment for "{title}" has been removed` stands on
+the installed template, its wording verified identical in ojs and omp
+locale/en/emails.po. Log
 Response (both apps): accept → "Request Accepted", decline → "Request
 Declined", no mail to the reviewer, and the assigned editors received the
 same response mails a real reviewer click sends, From set to the reviewer's
@@ -1599,6 +1669,22 @@ drops out of the rendered select, leaving a single visible option. Adjacent
 to finding A5, retired 2026-08-25 — no alternate access check remains
 (note f-a5); the unconditional append this note describes is unchanged.
 
+<a id="fn-a20"></a>
+**f-a20** — Live-probed 2026-08-27 (OMP, fresh reset, `enable_minified =
+On` — the apps' production default and the test config): the Unassign and
+Send Reminder dialogs rendered without their TinyMCE message iframe — the
+editor never initializes. Cause verified in all three apps' checkouts
+(lib/pkp 774240665; ojs 014c084231, omp d0226ccac, ops 5b7157a984):
+`registry/minifiedScripts.txt` now lists `ReviewerActionFormHandler.js`,
+but the committed `js/pkp.min.js` was not recompiled — the compiled bundle
+contains zero occurrences of `ReviewerActionFormHandler` (control: the
+retired `ReviewReminderFormHandler` string still appears in it), so
+`$.pkp.controllers.grid.users.reviewer.form.ReviewerActionFormHandler` is
+undefined at attach time. With `enable_minified = Off` the full
+unassign→cancel→reinstate flow ran end to end (the mail capture in note k).
+App-side packaging defect (a `pkp.min.js` recompile ships the fix);
+reported upstream 2026-08-27.
+
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
 by `ojs-main DashboardHandler`; OMP `readReview.tpl` override comments "Not
@@ -1618,6 +1704,21 @@ Mechanism: the server-rendered panel builds its initial list without the
 review-stage filter that its own request parameters carry
 (`PKPSelectReviewerListPanel`); the search's refetch goes through the
 reviewers listing, which applies it.
+
+<a id="fn-ops1"></a>
+**f-ops1** — Code+registry inspection 2026-08-27 (pkp/ops main
+5b7157a984): of the pkp/pkp-lib#13035 companion changes, OPS took only the
+`registry/minifiedScripts.txt` swap — its `registry/emailTemplates.xml` has
+no `REVIEWER_UNASSIGN` entry, `locale/en/emails.po` carries no
+`emails.reviewerUnassign.*` / `emails.reviewCancel.*` keys, and
+`dbscripts/xml/upgrade.xml` lacks the `I12903_ReviewerUnassignEmailTemplate`
+migration (ojs and omp carry all three). `ReviewerNotifyActionForm::
+initData()` calls `Repo::emailTemplate()->getByKey($contextId,
+'REVIEWER_UNASSIGN')` and immediately calls `->getData('key')` and
+`->getLocalizedData('body')` on the result, so the missing template yields
+a null-method fatal before the unassign window renders. Not live-probed —
+no OPS screen reaches the window on a default install (absence note p);
+flagged for a live probe if OPS reviewer flows ship.
 
 ## Reference — entry points & surfaces
 
@@ -1654,7 +1755,7 @@ reviewers listing, which applies it.
 
 - `lib/pkp/classes/controllers/grid/users/reviewer/PKPReviewerGridHandler.php` — every modal op, role map, author denial
 - `ojs-main/controllers/grid/users/reviewer/ReviewerGridHandler.php` (recommendation by proxy) · `omp-main/…/ReviewerGridHandler.php` (empty)
-- `lib/pkp/controllers/grid/users/reviewer/form/` — `ReviewerForm`, `AdvancedSearchReviewerForm`, `CreateReviewerForm`, `EnrollExistingReviewerForm`, `EditReviewForm`, `ReviewReminderForm`, `ThankReviewerForm`, `UnassignReviewerForm`, `ReinstateReviewerForm`, `ResendRequestReviewerForm`, `EmailReviewerForm`, `ReviewerGossipForm`, `traits/HasReviewDueDate`
+- `lib/pkp/controllers/grid/users/reviewer/form/` — `ReviewerForm`, `AdvancedSearchReviewerForm`, `CreateReviewerForm`, `EnrollExistingReviewerForm`, `EditReviewForm`, `ReviewReminderForm`, `ThankReviewerForm`, `ClearReviewForm`, `UnassignReviewerForm`, `CancelReviewForm`, `ReinstateReviewerForm`, `ResendRequestReviewerForm`, `EmailReviewerForm`, `ReviewerGossipForm`, `traits/HasReviewDueDate`
 - `lib/pkp/classes/submission/action/EditorAction.php` — assignment creation + request mail
 - `lib/pkp/classes/submission/reviewAssignment/ReviewAssignment.php` — status machine; `lib/pkp/schemas/reviewAssignment.json`
 - `lib/pkp/classes/submission/maps/Schema.php::getPropertyReviewAssignments()` — row serialization and visibility
@@ -1662,5 +1763,5 @@ reviewers listing, which applies it.
 - lib/ui-library `src/components/ListPanel/users/SelectReviewerListPanel.vue` · `SelectReviewerListItem.vue` + `lib/pkp/classes/components/listPanels/PKPSelectReviewerListPanel.php` — reviewer search
 - `lib/pkp/classes/submission/reviewer/ReviewerAction.php` — response recording (log response)
 - `lib/pkp/jobs/email/ReviewReminder.php` (send) · `lib/pkp/classes/task/ReviewReminder.php` (clock, owned by review setup)
-- `lib/pkp/classes/mail/mailables/` — `ReviewRequest`, `ReviewRequestSubsequent`, `ReviewerRegister`, `EditReviewNotify`, `ReviewRemind`, `ReviewRemindAuto`, `ReviewResponseRemindAuto`, `ReviewAcknowledgement`, `ReviewerUnassign`, `ReviewerReinstate`, `ReviewerResendRequest`
+- `lib/pkp/classes/mail/mailables/` — `ReviewRequest`, `ReviewRequestSubsequent`, `ReviewerRegister`, `EditReviewNotify`, `ReviewRemind`, `ReviewRemindAuto`, `ReviewResponseRemindAuto`, `ReviewAcknowledgement`, `ReviewerUnassign`, `ReviewCancel`, `ReviewerReinstate`, `ReviewerResendRequest`
 - `lib/pkp/api/v1/vocabs/PKPInterestController.php` — interests lookup

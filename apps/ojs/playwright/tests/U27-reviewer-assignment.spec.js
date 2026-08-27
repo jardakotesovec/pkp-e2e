@@ -809,6 +809,9 @@ test.describe('reviewer-assignment', () => {
         // deletes the row outright.
         await clickRowAction(managerPage, unansweredRow, 'Unassign Reviewer');
         const unassignModal = legacyModal(managerPage, 'unassignReviewerForm');
+        await expect(
+            unassignModal.getByText('Choose a predefined message to use')
+        ).toBeVisible();
         await unassignModal
             .locator('form#unassignReviewerForm')
             .getByRole('button', {name: 'Unassign Reviewer', exact: true})
@@ -826,12 +829,12 @@ test.describe('reviewer-assignment', () => {
         // After a response the same entry reads "Cancel Reviewer"; the row
         // stays as "Request Cancelled".
         await clickRowAction(managerPage, acceptedRow, 'Cancel Reviewer');
-        const cancelModal = legacyModal(managerPage, 'unassignReviewerForm');
+        const cancelModal = legacyModal(managerPage, 'cancelReviewForm');
         await cancelModal
-            .locator('form#unassignReviewerForm')
+            .locator('form#cancelReviewForm')
             .getByRole('button', {name: 'Cancel Reviewer', exact: true})
             .click();
-        await expect(cancelModal.locator('form#unassignReviewerForm')).toBeHidden({
+        await expect(cancelModal.locator('form#cancelReviewForm')).toBeHidden({
             timeout: 30_000,
         });
         await waitForJQueryIdle(managerPage);
@@ -855,7 +858,7 @@ test.describe('reviewer-assignment', () => {
         await expect(acceptedRow).toContainText('Request Accepted');
 
         // The reviewer's mailbox holds the cancel and reinstate notices.
-        await pkpMail.find({to: `${accepted}@mail.test`, subject: 'Request for Review Cancelled'});
+        await pkpMail.find({to: `${accepted}@mail.test`, subject: 'has been cancelled'});
         await pkpMail.find({to: `${accepted}@mail.test`, subject: 'Can you still review something'});
     });
 

@@ -768,6 +768,9 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const unMenu = await openRowMenu(page, unRow);
         await unMenu.getByRole('menuitem', {name: 'Unassign Reviewer'}).click();
         const unassignModal = page.locator('[data-cy="active-modal"]').last();
+        await expect(
+            unassignModal.getByText('Choose a predefined message to use')
+        ).toBeVisible({timeout: 20_000});
         await awaitTinyMce(page, 'personalMessage');
         await unassignModal
             .getByRole('button', {name: 'Unassign Reviewer', exact: true})
@@ -811,7 +814,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // The reviewer's mailbox holds the cancel and reinstate notices.
         await pkpMail.find({
             to: acceptedEmail,
-            subject: 'Request for Review Cancelled',
+            subject: 'has been cancelled',
         });
         await pkpMail.find({
             to: acceptedEmail,

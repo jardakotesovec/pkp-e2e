@@ -831,7 +831,9 @@ the round row (round-file links go with it via cascade; notification rows for
 the round are deleted too); new stage = external review while >1 round, else
 Submission stage (OMP's internal variant: internal review / Submission).
 Author email mailable `DecisionCancelReviewRoundNotifyAuthor`; reviewer
-withdrawal mail `ReviewerUnassign` — both sent from the decision wizard
+withdrawal mail `ReviewCancel` (was `ReviewerUnassign` until the upstream
+unassign/cancel email split, pkp/pkp-lib#13035, folded on the 2026-08-27
+upstream-rebase check) — both sent from the decision wizard
 (decision-recording feature); the reviewer step renders only when the round
 has reviewers (live probe 2026-07-31: a reviewerless round's wizard has the
 author step only). Cancel flow live-probed
