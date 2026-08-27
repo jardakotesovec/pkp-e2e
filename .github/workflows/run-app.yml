@@ -167,4 +167,7 @@ jobs:
           path: |
             e2e/apps/${{ inputs.app }}/playwright/test-results/
             e2e/apps/${{ inputs.app }}/playwright/.server-logs/
+          # upload-artifact@v4 skips hidden dirs by default — without this the
+          # .server-logs/ half of the path silently uploads nothing.
+          include-hidden-files: true
           if-no-files-found: ignore
