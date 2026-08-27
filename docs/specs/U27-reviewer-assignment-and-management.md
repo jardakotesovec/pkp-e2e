@@ -145,9 +145,9 @@ window — here preset to the unassign or cancel notice template — the
 prefilled notice message, "Do not send email to Reviewer." checkbox; the
 submit button reads "Unassign Reviewer" or "Cancel Reviewer" to match
 (Rule 17). **Reinstate Reviewer window**: same shape, chooser included,
-submit "Reinstate Reviewer". On a server running the shipped minified
-scripts (the production default) all of these windows — Send Reminder
-included — currently open without their message editor ⚠ [A20](#a20).
+submit "Reinstate Reviewer" ([A20](#a20), retired — the shipped script
+bundle briefly opened these windows, Send Reminder included, without
+their message editor).
 **Resend Review Request window** (on a declined row; no template chooser):
 message, skip-email checkbox, plus fresh "Response Due Date" and
 "Review Due Date" pickers — each preset from its own configured interval,
@@ -625,13 +625,13 @@ in an unusual situation or configuration.
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
 | [A18](#a18) | Emptying the request letter makes the add fail silently — yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
-| [A20](#a20) | With minified scripts on (the production default), the Send Reminder, Unassign, Cancel and Reinstate windows open without their message editor | 🐞 | user-visible | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
 | [OPS1](#ops1) | {OPS} The unassign window cannot load — OPS ships only a fragment of the unassign/cancel rework, its default notice template never installed | 🐞 | latent | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
+| [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor — fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
 | [A11](#a11) | Retired: the change notice reported the pre-change deadlines — fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
 | [A5](#a5) | Retired: the alternate-template access check it questioned was reverted wholesale upstream (pkp/pkp-lib#10403 revert) — all alternates now listed unconditionally | ✅ | retired | rebase check (claude), 2026-08-25 — moot |
 | [A3](#a3) | Retired: a role-less Site Administrator is refused at the workflow screen — the earlier full-surface observation was of the seeded admin's silent Journal Manager enrollment | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
@@ -875,18 +875,23 @@ alternates; two acting roles on OJS) + code reading.
 <sup>[f-a19](#fn-a19)</sup>
 
 <a id="a20"></a>
-**A20 — Four dialogs lose their editor under minified scripts** · 🐞 ·
-user-visible.
+**A20 — Four dialogs lose their editor under minified scripts** · ✅ ·
+retired.
 With the server's minified-script bundling on — the production default, and
 the test installs' configuration — the Send Reminder, Unassign, Cancel and
-Reinstate windows open without their rich-text message: the editor never
-initializes, so the notice can be neither read nor edited. With bundling off
-the same flows work end to end. The cause is app-side in all three apps —
-the shipped script bundle was not recompiled after the 2026-08 dialog
-rework — so a recompile ships the fix; reported upstream 2026-08-27.
-Scenarios 7 and 11 cannot be run as written while this stands.
+Reinstate windows opened without their rich-text message: the editor never
+initialized, so the notice could be neither read nor edited. With bundling
+off the same flows worked end to end. The cause was app-side in all three
+apps — the shipped script bundle was not recompiled after the 2026-08
+dialog rework; reported upstream 2026-08-27.
 Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
 <sup>[f-a20](#fn-a20)</sup>
+
+> **Retired — re-probe (claude), 2026-08-27**: fixed upstream the same day
+> it was reported — each app recompiled its shipped script bundle, which
+> now carries the dialogs' handler. Re-verified live with minified scripts
+> on, on fresh installs: scenarios 7 and 11 ran green end to end on OJS and
+> OMP. OPS's unassign defect [OPS1](#ops1) is separate and stands.
 
 ### OMP
 
@@ -1312,7 +1317,8 @@ lists the action's default template plus its alternates (email-template
 Collector `alternateTo`); a pick re-fetches the body via AJAX op
 `fetchReviewerActionTemplateBody`, wired by the new JS handler
 `ReviewerActionFormHandler` (replacing `ReviewReminderFormHandler` — the
-stale committed `pkp.min.js` consequence is finding A20, note f-a20). The
+once-stale committed `pkp.min.js` consequence is retired finding A20, note
+f-a20). The
 unassign path touches nothing else — no
 participant, task-assignment or discussion cleanup exists on this build
 (the clear-review hooks have zero listeners; the once-claimed drop from
@@ -1683,7 +1689,16 @@ retired `ReviewReminderFormHandler` string still appears in it), so
 undefined at attach time. With `enable_minified = Off` the full
 unassign→cancel→reinstate flow ran end to end (the mail capture in note k).
 App-side packaging defect (a `pkp.min.js` recompile ships the fix);
-reported upstream 2026-08-27.
+reported upstream 2026-08-27. Update 2026-08-27 (same day): fixed
+upstream — each app recompiled its committed `pkp.min.js` (commits
+"pkp/pkp-lib#12903 Update pkp.min.js": ojs fcf2f00807, omp aba3ce08b, ops
+3829458df3; checkout HEADs ojs fcf2f00807, omp 244a04311, ops 94f6bbc59a,
+lib/pkp a9767b7f14 — the #13035 merge). The same grep now finds
+`ReviewerActionFormHandler` twice in each bundle, matching the control.
+Re-probed on fresh resets with `enable_minified = On`: scenarios 7 and 11
+green on OJS and OMP (template chooser present in the unassign/cancel/
+reinstate windows; the new cancel subject received). A20 retired. OPS's
+app-side gap is unchanged at ops 94f6bbc59a (note f-ops1) — OPS1 stands.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only

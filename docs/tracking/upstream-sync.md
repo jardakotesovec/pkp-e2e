@@ -11,16 +11,25 @@ range is fully triaged.**
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `014c084231` | 2026-08-27 | i12903 sync review (claude, interactive w/ maintainer) — see 2026-08-27 log entry |
-| omp | `d0226ccac` | 2026-08-27 | same review |
-| ops | `5b7157a984` | 2026-08-27 | same review |
-| pkp-lib | `774240665` | 2026-08-27 | same review; all three apps' submodule pointers sit here |
+| ojs | `fcf2f00807` | 2026-08-27 | i12903 sync review + A20 fix verification (claude, interactive w/ maintainer) — see the two 2026-08-27 log entries |
+| omp | `244a04311` | 2026-08-27 | same review |
+| ops | `94f6bbc59a` | 2026-08-27 | same review |
+| pkp-lib | `a9767b7f14` | 2026-08-27 | same review; the #13035 merge commit — all three apps' submodule pointers sit here |
 
 ## Sync log
 
 _Append-only, newest first: date · range per repo · outcome (specs/tests
 touched, findings filed, Mattermost notifications sent, or "clean")._
 
+- **2026-08-27 (second pass)** — ojs `014c084231..fcf2f00807`, omp
+  `d0226ccac..244a04311`, ops `5b7157a984..94f6bbc59a`, pkp-lib
+  `774240665..a9767b7f14` (the #13035 merge commit). The range is exactly the
+  maintainer's same-day fix for A20 — "pkp/pkp-lib#12903 Update pkp.min.js"
+  in each app (`ReviewerActionFormHandler` now in all three bundles).
+  Verified live minified-on, fresh resets: OJS + OMP U27 S7 and S11 green,
+  chooser present, new cancel subject received. **A20 retired** in the U27
+  register (dated). OPS1 unchanged — the OPS app-side companion is still
+  absent at this tip.
 - **2026-08-27** — ojs `20fc190b5956..014c084231`, omp `cdf5213ccb82..d0226ccac`,
   ops `12c625bd7efa..5b7157a984`, pkp-lib `00e6a1423a9e..774240665` (interactive
   session with the maintainer, prompted by the red e2e hook on pkp/omp `main`).
