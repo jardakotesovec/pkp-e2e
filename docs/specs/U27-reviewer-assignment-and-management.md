@@ -32,10 +32,10 @@ OPS does not install a review stage or any reviewer role: a preprint server's
 workflow goes straight from submission to Production, no "Reviewers" panel
 exists on any screen, and its role settings offer no reviewer group. The
 absence of the stage itself is documented with
-[→ the review stage](U26-review-stage-and-rounds.md#rounds). OPS also took
-only a fragment of the 2026-08 unassign/cancel rework, leaving the unassign
-window unable to load — a latent fault should reviewer flows ever be enabled
-there ⚠ [OPS1](#ops1). <sup>p</sup>
+[→ the review stage](U26-review-stage-and-rounds.md#rounds). The same
+deliberate absence covers the review emails — OPS ships no reviewer-flow
+email templates at all; an earlier reading of one missing template as a
+latent fault is retired [OPS1](#ops1). <sup>p</sup>
 
 On a press, everything in this file runs twice: the Internal Review stage and
 the External Review stage each carry their own Reviewers panel with the same
@@ -626,12 +626,12 @@ in an unusual situation or configuration.
 | [A18](#a18) | Emptying the request letter makes the add fail silently — yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
-| [OPS1](#ops1) | {OPS} The unassign window cannot load — OPS ships only a fragment of the unassign/cancel rework, its default notice template never installed | 🐞 | latent | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 | [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor — fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
+| [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates — no review process, the window unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
 | [A11](#a11) | Retired: the change notice reported the pre-change deadlines — fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
 | [A5](#a5) | Retired: the alternate-template access check it questioned was reverted wholesale upstream (pkp/pkp-lib#10403 revert) — all alternates now listed unconditionally | ✅ | retired | rebase check (claude), 2026-08-25 — moot |
 | [A3](#a3) | Retired: a role-less Site Administrator is refused at the workflow screen — the earlier full-surface observation was of the seeded admin's silent Journal Manager enrollment | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
@@ -891,7 +891,8 @@ Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
 > it was reported — each app recompiled its shipped script bundle, which
 > now carries the dialogs' handler. Re-verified live with minified scripts
 > on, on fresh installs: scenarios 7 and 11 ran green end to end on OJS and
-> OMP. OPS's unassign defect [OPS1](#ops1) is separate and stands.
+> OMP. OPS's unassign observation [OPS1](#ops1) was tracked separately and
+> was itself retired the same day.
 
 ### OMP
 
@@ -934,17 +935,27 @@ Basis: live probe (positive and negative controls on both stages).
 ### OPS
 
 <a id="ops1"></a>
-**OPS1 — The unassign window cannot load on a preprint server** · 🐞 ·
-latent.
-OPS took only a fragment of the 2026-08 unassign/cancel rework: the new
-default unassign notice template is never installed there — no template
-entry, no locale text, no upgrade step — so opening the Unassign Reviewer
-window fails outright instead of rendering. Latent because a default
-preprint server has no reviewer surface at all (see the absence paragraph);
-it bites only an install that enables reviewer flows, and needs a live
-probe if those ever ship.
-Basis: code reading (not live-probed — no screen reaches the window on a
-default install). <sup>[f-ops1](#fn-ops1)</sup>
+**OPS1 — Retired: the missing unassign template is deliberate** · ✅ ·
+retired.
+The code observation stands — OPS never installs the default unassign
+notice template, so the Unassign Reviewer window would fail outright
+rather than render — but it is not a finding. The window is unreachable:
+no Reviewers panel exists anywhere on a preprint server (the absence
+paragraph). And the "missing" pieces match OPS's baseline, which
+deliberately ships no review-flow email templates at all — no review
+request, reminder or cancel notice either (one review-round template in
+its registry against nineteen in OJS's) — so the 2026-08 rework's
+template-and-locale companion was never applicable there; the one piece
+OPS did need, the recompiled script bundle, it received ([A20](#a20)).
+The earlier "latent fault" framing measured OPS against the OJS/OMP
+baseline instead of its own.
+Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
+
+> **Retired — maintainer ruling + registry check (claude), 2026-08-27**:
+> overturned (was 🐞). Ruling: OPS has no review process, so a reviewer
+> unassign notice cannot be relevant there — the never-reachable window is
+> the deliberate absence's shadow, not a defect. Registry counts in the
+> footnote.
 
 ---
 
@@ -1698,7 +1709,8 @@ lib/pkp a9767b7f14 — the #13035 merge). The same grep now finds
 Re-probed on fresh resets with `enable_minified = On`: scenarios 7 and 11
 green on OJS and OMP (template chooser present in the unassign/cancel/
 reinstate windows; the new cancel subject received). A20 retired. OPS's
-app-side gap is unchanged at ops 94f6bbc59a (note f-ops1) — OPS1 stands.
+registry is unchanged at ops 94f6bbc59a (note f-ops1) — OPS1 was itself
+overturned the same day: the absence is OPS's deliberate baseline.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
@@ -1732,8 +1744,18 @@ initData()` calls `Repo::emailTemplate()->getByKey($contextId,
 'REVIEWER_UNASSIGN')` and immediately calls `->getData('key')` and
 `->getLocalizedData('body')` on the result, so the missing template yields
 a null-method fatal before the unassign window renders. Not live-probed —
-no OPS screen reaches the window on a default install (absence note p);
-flagged for a live probe if OPS reviewer flows ship.
+no OPS screen reaches the window on a default install (absence note p).
+Overturned 2026-08-27 (maintainer ruling, interactive session + registry
+check at ops 94f6bbc59a): OPS has never shipped reviewer-flow email
+templates — its `registry/emailTemplates.xml` contains no `REVIEW_REQUEST`,
+`REVIEW_REMIND` or `REVIEW_CANCEL` either (a single `REVIEW*` hit, the
+author-response round template, vs 19 `REVIEW*` registrations in OJS's) —
+so the #12903 app-side companion (template + locale + migration) was never
+applicable to OPS's baseline; the only piece OPS needed, the
+`minifiedScripts.txt` swap, it received. Ruling: OPS has no review
+process, so `REVIEWER_UNASSIGN` cannot be relevant there; the earlier
+"latent fault" framing measured OPS against the OJS/OMP baseline instead
+of its own.
 
 ## Reference — entry points & surfaces
 

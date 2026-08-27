@@ -28,8 +28,13 @@ touched, findings filed, Mattermost notifications sent, or "clean")._
   in each app (`ReviewerActionFormHandler` now in all three bundles).
   Verified live minified-on, fresh resets: OJS + OMP U27 S7 and S11 green,
   chooser present, new cancel subject received. **A20 retired** in the U27
-  register (dated). OPS1 unchanged — the OPS app-side companion is still
-  absent at this tip.
+  register (dated). **OPS1 also retired same day, overturned** — maintainer
+  ruling (OPS has no review process) + registry check: OPS has never
+  registered reviewer-flow email templates (one `REVIEW*` entry, the
+  author-response round template, vs 19 in OJS), so the i12903 companion was
+  never applicable there and the window behind the would-be fatal is
+  unreachable; the earlier framing measured OPS against the OJS/OMP
+  baseline instead of its own.
 - **2026-08-27** — ojs `20fc190b5956..014c084231`, omp `cdf5213ccb82..d0226ccac`,
   ops `12c625bd7efa..5b7157a984`, pkp-lib `00e6a1423a9e..774240665` (interactive
   session with the maintainer, prompted by the red e2e hook on pkp/omp `main`).
