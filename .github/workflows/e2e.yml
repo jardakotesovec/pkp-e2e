@@ -14,7 +14,35 @@ on:
     branches: ['main']
   schedule:
     - cron: '17 3 * * *' # nightly against the app branches below
+  # Dispatch can pin any app to an exact repo/ref (e.g. a PR's merge sha) and,
+  # via --ref, run the suite from any pkp-e2e branch — the fix-verification
+  # combo: `gh workflow run e2e.yml --ref <fix-branch> -f ojs_ref=<sha>`.
   workflow_dispatch:
+    inputs:
+      ojs_repo:
+        description: owner/name of the OJS repo to test
+        type: string
+        default: pkp/ojs
+      ojs_ref:
+        description: OJS git ref (branch or sha)
+        type: string
+        default: main
+      omp_repo:
+        description: owner/name of the OMP repo to test
+        type: string
+        default: pkp/omp
+      omp_ref:
+        description: OMP git ref (branch or sha)
+        type: string
+        default: main
+      ops_repo:
+        description: owner/name of the OPS repo to test
+        type: string
+        default: pkp/ops
+      ops_ref:
+        description: OPS git ref (branch or sha)
+        type: string
+        default: main
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -27,21 +55,24 @@ jobs:
     uses: ./.github/workflows/run-app.yml
     with:
       app: ojs
-      app_repo: pkp/ojs
-      app_ref: main
+      app_repo: ${{ inputs.ojs_repo || 'pkp/ojs' }}
+      app_ref: ${{ inputs.ojs_ref || 'main' }}
+      e2e_ref: ${{ github.sha }}
   omp:
     # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
     if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: omp
-      app_repo: pkp/omp
-      app_ref: main
+      app_repo: ${{ inputs.omp_repo || 'pkp/omp' }}
+      app_ref: ${{ inputs.omp_ref || 'main' }}
+      e2e_ref: ${{ github.sha }}
   ops:
     # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
     if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
     uses: ./.github/workflows/run-app.yml
     with:
       app: ops
-      app_repo: pkp/ops
-      app_ref: main
+      app_repo: ${{ inputs.ops_repo || 'pkp/ops' }}
+      app_ref: ${{ inputs.ops_ref || 'main' }}
+      e2e_ref: ${{ github.sha }}
