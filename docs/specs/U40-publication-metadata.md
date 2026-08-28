@@ -49,7 +49,7 @@ screen and its stages at all is the workflow screen's own rule (see
 | **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator — on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles — while assigned to the submission's current stage; an assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author — on their own submission, in the author view <sup>a</sup> |
 | **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always) — the page is absent from the author view in every app (Rule 1) <sup>a</sup> |
 | **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator — always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles — while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author — while their assignment carries the permission AND no version is published or scheduled (Rule 9); a journal or press does not grant it by default, a preprint server does [OPS1](#ops1) <sup>b</sup> |
-| **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13; a journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1)); an assistant without the metadata-edit permission never reaches a Publication page, so the question never arises for them; the Author is never offered it, in any app <sup>i</sup> |
+| **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13; a journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1)); an assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button — the button appears once their assignment carries the permission; the Author is never offered it, in any app <sup>i</sup> |
 | **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal) — Settings › Distribution › License; reaching Settings is the settings features' rule <sup>m</sup> || **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator — Tools › Permissions (Rule 14) <sup>k</sup> |
 | **Read the license, data availability and funding statement blocks** | • any reader — on a published item's landing page (Rule 15) <sup>l</sup> |
 
@@ -85,8 +85,8 @@ again." <sup>c</sup> <sup>d</sup>
 
 **Metadata page** — only the items the journal has enabled appear, in
 the settings screen's order; with none enabled the page reads "No
-metadata fields are currently enabled." Every item except Publisher ID
-and Article Number carries a hover tooltip with the item's help text.
+metadata fields are currently enabled." Every item carries a hover
+tooltip with the item's help text.
 <sup>e</sup>
 
 | Field (UI label) | Required? | Rules |
@@ -125,7 +125,7 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
    **"Permissions & Disclosure"**. Each opens a page headed "Publication:
    {entry}" ("Preprint: {entry}" on a preprint server) carrying one form
    with a **Save** button. The neighbouring entries (Contributors,
-   References, Funding, Identifiers, Galleys/Publication Formats, JATS,
+   References, Funding, Galleys/Publication Formats, JATS,
    Issue/Catalog Entry/Preprint Entry…) belong to their own features.
    The author view shows the same pages minus Permissions & Disclosure;
    on a preprint server the author view has no stage screens at all —
@@ -282,7 +282,9 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
       abstract in {language} is recommended. This helps ensure that the
       content is accessible" ⚠ [A14](#a14); a press asks for the title
       only. Each box is pre-filled with any text already stored in the
-      chosen language.
+      chosen language, and Confirm refuses an empty required box — both
+      dependable only once the freshly opened panel has finished its
+      background loading ⚠ [A15](#a15).
     - **13c — Confirm and Cancel.** **Confirm** stores the title (and
       abstract) in the new language, makes it the submission language,
       copies each file's name and each contributor's names and
@@ -301,12 +303,16 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
     server) with a caution paragraph and a button of the same name. The
     button opens the browser's own OK/Cancel box asking "Are you sure you
     wish to reset permissions data for all articles? This action can not
-    be undone." (the press's wording is older and milder
+    be undone." ("… for all preprints? …" on a preprint server; the
+    press's wording is older and milder
     ⚠ [OMP3](#omp3)). Cancel sends nothing — but leaves the button greyed
     until the page is reloaded ⚠ [A13](#a13). OK overwrites Copyright
     Year, Copyright Holder and License URL on every version of every
     submission in the journal with the defaults of Rule 12 as computed
     now, then shows "Article permissions were successfully reset."
+    ("Monograph permissions were successfully reset." on a press,
+    "Preprint permissions were successfully reset." on a preprint
+    server).
     Per-item overrides are lost; there is no undo. The tool reaches
     unpublished and declined submissions too ⚠ [A3](#a3): on a journal
     set to the article's publication date — and on a preprint server —
@@ -346,15 +352,15 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
 
 - Every successful save on any of these pages — and each version the
   reset tool touches — adds one activity-log line "Submission metadata
-  updated", attributed to the saving user (or to the impersonated user
-  when Login As is active). No email or notification is sent. <sup>c</sup>
+  updated", attributed to the saving user; when Login As is active the
+  line names the real user, with the impersonated one in an
+  "(acting as {user})" suffix. No email or notification is sent. <sup>c</sup>
 - Publishing a version fills its empty permission fields (Rule 12); the
   fill is part of the publish action and shows up on the Permissions &
   Disclosure page afterwards. <sup>h</sup>
 - Changing the submission language additionally rewrites the submission's
-  language, and writes the copied contributor names — and, by the same
-  mechanism, file names and affiliation names — into the new language
-  (Rule 13). <sup>i</sup>
+  language, and writes the copied contributor names, file names and
+  affiliation names into the new language (Rule 13). <sup>i</sup>
 - Reset permissions shows the success toast to the person who ran it and
   nothing to anyone else. <sup>k</sup>
 - Publication metadata travels outward with the item — DOI registration,
@@ -363,18 +369,20 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
 
 ## Settings that modify behavior
 
-- **Settings › Workflow › Metadata** — one section per item
-  (Keywords, Subjects, Disciplines, Supporting Agencies, Coverage, Rights,
-  Source, Type, Funding Statement, Data Availability Statement, Plain
-  Language Summary, plus References and Funders owned elsewhere): the
-  "Enable {item} metadata" box makes the field appear on the Metadata /
+- **Settings › Workflow › Metadata** — one section per item. This
+  feature's are Keywords, Subjects, Disciplines, Supporting Agencies,
+  Coverage, Rights, Source, Type, Funding Statement, Data Availability
+  Statement and Plain Language Summary; the screen also carries other
+  features' sections (Competing Interests, References and its metadata
+  lookup, Funders and grant-ID validation, Data Citations, Categories).
+  The "Enable {item} metadata" box makes the field appear on the Metadata /
   Data / Title & Abstract page (Rules 6, 16); the radio under it ("Do not
   request… / Ask the author… / Require the author…") governs the wizard
   only — except Plain Language Summary (listed first on the screen),
   whose "Require" is enforced on every publication save ⚠ [A1](#a1).
-  On a journal the same screen also
-  holds "Publisher ID" (enable for publications → Publisher ID field) and
-  "Article Number". <sup>m</sup>
+  The same screen also holds "Publisher ID" in every app (per-app
+  checkboxes enable it for publications and the app's other objects →
+  Publisher ID field) and, journal only, "Article Number". <sup>m</sup>
 - **Settings › Distribution › License** — "Copyright Holder" (Author /
   Journal / Custom copyright statement, with the "Copyright statement"
   text for the last — accepted even when left empty ⚠ [A12](#a12)),
@@ -428,14 +436,20 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
   journal the panel's "Assign To Future Issue and Schedule Only" choice
   can publish the article at once; the dependable way to a scheduled
   article is to save that choice on the Publication Settings page first
-  (scenario seeding notes).
+  (scenario seeding notes). A further finding for that feature, observed
+  while this feature's suites were built: the panel's issue-assignment
+  radios race their own preselection, and changing them early ends in a
+  server refusal whose raw technical message surfaces in a dialog.
 - *Issues* (no spec yet) — owns issues and their publication date, which
   Rule 12 reads on a journal set to the issue's date.
 - *[Funding](U43-funding.md)*, *Contributors & affiliations*, *Citations
-  & references*, *Identifiers*, *Galleys*, *Catalog management* (no
+  & references*, *Galleys*, *Catalog management* (no
   specs yet except Funding) — sibling Publication-area pages that reuse
   the edit gate of Rule 2 ([→ edit gate](#edit-gate)) and the
-  published-version banners of Rules 8–9.
+  published-version banners of Rules 8–9. *Identifiers* has no
+  Publication-area page at the pinned commits: DOI management lives on
+  the dashboard's "DOIs" page, and the publisher ID on this feature's
+  Metadata page.
 - *Import & export* (no spec yet) — owns the Tools page and its tab bar;
   the Permissions tab's content is Rule 14.
 - *Article landing page & reading* (no spec yet; press counterpart
@@ -545,7 +559,9 @@ Common to all three apps (OMP/OPS vocabulary per the
    submission: open Tools › Permissions; press "Reset Article
    Permissions"; the browser's own confirm box reads "Are you sure you
    wish to reset permissions data for all articles? This action can not
-   be undone." — Cancel: nothing changes, and the button stays greyed
+   be undone." ("… for all preprints? …" on a preprint server; the
+   press's sentence is structurally different ⚠ [OMP3](#omp3)) —
+   Cancel: nothing changes, and the button stays greyed
    ([A13](#a13)). Reload, press again, OK: the toast "Article permissions
    were successfully reset." appears. The published item's Permissions &
    Disclosure now shows the journal's default holder instead of "Example
@@ -604,6 +620,7 @@ the resolution — so IDs stay dense.
 | [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved — even after the summary is stored — and a journal's pre-scheduling panel is refused silently | 🐞 | user-visible | — |
 | [A2](#a2) | Reset permissions stamps Copyright Year 1970 on unpublished items (journal on article-date basis; preprint server) | 🐞 | user-visible | — |
 | [A4](#a4) | The Author's edit permission never returns after an unpublish; only a manual re-tick on the assignment restores it | 🐞 | user-visible | — |
+| [A15](#a15) | The freshly opened language panel acts before its loading settles: stale guidance and prefill kept (journal), an empty required Title accepted (press), the old language's text stored as the new title (preprint server) | 🐞 | user-visible | — |
 | [A13](#a13) | Cancelling the reset-permissions confirm box leaves the button greyed until a reload | 🐞 | minor | — |
 | [OJS1](#ojs1) | An article published into a not-yet-published issue keeps "Change", and every language change on it is refused | 🐞 | minor | — |
 | [OMP5](#omp5) | With License Terms but no license, the book page shows a "License" link that leads nowhere | 🐞 | minor | — |
@@ -806,6 +823,22 @@ shows no Abstract box.
 Question: which of the two is intended? Lean: required is right (it is
 the section's own policy); the description is the defect.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a14</sup>
+
+<a id="a15"></a>
+**A15 — The language panel acts before its own loading settles** · 🐞 · user-visible.
+Working the "Change Submission Language For" panel right after it opens
+— an ordinarily fast click — catches it still loading in the background,
+with a different face on each app: on a journal the revealed Title and
+Abstract boxes keep the OLD language's guidance and prefill for the rest
+of that opening; on a press, Confirm on a freshly (re)opened panel is
+accepted with the required Title empty — the submission language changes
+anyway and Title & Abstract afterwards counts "0/2 languages completed";
+on a preprint server the new language's boxes open nondeterministically
+empty or holding the CURRENT language's text, and confirming the
+pre-filled state stores the old language's text as the new language's
+title. Once the panel has settled, prefill and refusal behave exactly as
+Rule 13b says — the press's same Confirm is then refused.
+Since: live-observed 2026-08-28 · Basis: probe. <sup>f-a15</sup>
 
 ### OJS
 
@@ -1015,8 +1048,9 @@ submissions/{id}/publications/{pubId}` → `editPublication()`: policy
 errors), `Repo::publication()->edit()`, which writes the event-log entry
 `SUBMISSION_LOG_METADATA_UPDATE` with message
 `submission.event.general.metadataUpdated` ("Submission metadata
-updated"), `userId` = the impersonated user when `Validation::loggedInAs()`
-is set. No mailable, no notification in `edit()`; `event(new
+updated"), `userId` = the real signed-in user (`Validation::loggedInAs()`)
+when Login As is active — the rendered row then names them with the
+acted-as user in a suffix. No mailable, no notification in `edit()`; `event(new
 MetadataChanged($submission))` is fired but no listener exists in the
 pinned trees. Form strings: `common.saving`/`form.saved`,
 `form.errorOne`/`form.errorMany`, `validator.required`. Localized
@@ -1038,7 +1072,11 @@ showed both columns, French headings "Title in French (Canada)" etc.
 with no required marker, English headings "1/2 languages completed" /
 "0/2 languages completed"; a French title saved and the form reopened
 on English. Same bar on the Metadata page ("Keywords in French
-(Canada)").
+(Canada)"). Login As (live-probed 2026-08-28, OJS scratch journal,
+`admin` impersonating a scratch manager via Users & Roles › Login As):
+the save's Activity Log row read "2026-08-28 admin admin (acting as
+Mona Manager) Submission metadata updated" — the real user named, the
+impersonated one in the suffix.
 
 <a id="fn-d"></a>
 **d — Title & Abstract.** `PKP\components\forms\publication\TitleAbstractForm`:
@@ -1101,11 +1139,17 @@ with every item disabled the page showed "No metadata fields are
 currently enabled." with no form and no Save; with everything enabled
 the labels ran Keywords, Subjects, Disciplines, Supporting Agencies,
 Coverage, Rights, Source, Type, Funding Statement, Publisher ID (OJS
-adds Article Number); Keywords … Funding Statement each carry a hover
-tooltip (Coverage: "Coverage will typically indicate a work's spatial
-location (a place name or geographic coordinates), temporal period (a
-period label, date, or date range) or jurisdiction (such as a named
-administrative entity)."), Publisher ID and Article Number none;
+adds Article Number); every item — Keywords through Article Number —
+carries a hover tooltip with its help text (Coverage: "Coverage will
+typically indicate a work's spatial location (a place name or geographic
+coordinates), temporal period (a period label, date, or date range) or
+jurisdiction (such as a named administrative entity)."; re-probed
+2026-08-28, OJS journal manager, after a first pass missed the last two
+— Publisher ID: "The publisher ID may be used to record the ID from an
+external database. For example, items exported for deposit to PubMed
+may include the publisher ID. This should not be used for DOIs.";
+Article Number: "The article number can be used in citations and other
+metadata instead of page numbers.");
 Coverage disabled → hidden, re-enabled → "Pacific Ocean, 2020" back. A
 typed keyword became a chip with a "Remove ocean acidification" button;
 an unknown term was accepted; both persisted after Save and reload. The
@@ -1209,7 +1253,12 @@ Publication Settings first, then re-picked in the panel; confirmation
 is published. Are you sure you want to schedule this for publication?"
 with button "Schedule For Publication"): header "Status: Scheduled",
 all three fields still empty, disabled, with Override; the article page
-answered 404.
+answered 404. The OPS "Post" flow is two-tiered: the Production stage
+action reads "Post the preprint" and navigates to the publication
+screen, whose "Post" control opens the legacy modal (title "Post the
+preprint", confirmation "All requirements have been met. Are you sure
+you want to post this?", submit "Post"); after posting the control is
+"Unpost", asking "Are you sure you don't want this to be posted?".
 
 <a id="fn-i"></a>
 **i — Change Submission Language.** Readout component
@@ -1257,8 +1306,14 @@ Submission Language: English" with nothing after it (OJS four stages,
 OMP five plus "Marketing", OPS Production); every Publication entry
 (OJS 11, OMP 10, OPS 9) showed the readout plus "Change" — rendered as
 a `pkpButton`, not an anchor — for the manager and the section editor;
-the Copyeditor without the permission saw a bare "Publication" entry
-and no Publication pages (fn-a), so the button never rendered for them;
+the Copyeditor assigned to ANOTHER stage saw a bare "Publication" entry
+and no Publication pages (fn-a); an assistant assigned to the CURRENT
+stage with the permission off (OJS, 2026-08-28) reached the pages
+read-only — Save present but disabled (Rule 10) — and had the readout
+with "Change" in place once an editor ticked her assignment's
+permission (the permission-off readout state was not separately
+captured; the `canPublish || canEditPublication` guard hides the link,
+not the pages);
 the Author saw the readout on stage screens only (OJS/OMP) and, on OPS,
 no stage screen and no readout on any page. Panel: pre-title line with
 the submission id, h1 "Change Submission Language For", subtitle the
@@ -1281,11 +1336,13 @@ Title & Abstract open in French with the language bar offering
 "English" and "2/2 languages completed", the English title intact
 behind it; the contributor's Edit form showed `givenName`/`familyName`
 in `fr_CA` filled ("Ada" / "Author") where an untouched submission's
-were empty; the Submission Files list showed the file name under the
-new language (stored copy vs fallback display not separated — the
-per-locale name field was not opened; OPS's Production screen offered
-no Upload, so no file leg there); no contributor carried an
-affiliation, so the affiliation copy was not observed. Controls: the
+were empty; the file's name is genuinely copied, not merely displayed —
+the "Update File Details" form's per-locale name inputs held
+`name-fr_CA=""` at upload and the uploaded file's name in `fr_CA` with
+"2/2 languages completed" after the change (OJS, journal manager,
+2026-08-28); an affiliation saved in English only counted "1 of 2
+languages completed" before the change and "All translations
+available" after it (same drive). Controls: the
 published item (b) and the two-version item (c) showed no readout on
 any Publication page and the readout without button on every stage
 screen. Refusal: an item published from a second tab, then Confirm in
@@ -1448,7 +1505,14 @@ date", absent on OMP and OPS; "License Terms" rich text with "Enter
 public licensing terms you would like to display alongside published
 work."; Save. Settings › Workflow › Metadata: "Enable funding statement
 metadata" / "Enable data availability statement metadata" boxes as
-quoted.
+quoted; the full section-heading roster (2026-08-28, scratch manager,
+OJS, in order): "Plain Language Summary, Keywords, Subjects,
+Disciplines, Supporting Agencies, Coverage, Rights, Source, Type,
+Competing Interests, References, References Metadata Lookup, Funding
+Statement, Funders, Funder Grant ID validation, Data Availability
+Statement, Data Citations, Categories, Publisher ID, Article Number" —
+OMP identical minus Article Number, OPS the same shape: "Publisher ID"
+is present on all three apps, "Article Number" on OJS only.
 
 <a id="fn-s1"></a>
 **s1 — scenario 1 seeding.** One scratch submission past the wizard (any
@@ -1747,6 +1811,30 @@ requiring abstracts): "Abstract *" with "Required" and that description;
 Confirm with it empty was refused in the browser with "This field is
 required." and no request; "Do not require abstracts" sections (OJS,
 OPS) and OMP showed no Abstract box.
+
+<a id="fn-f-a15"></a>
+**f-a15 — A15 evidence.** Mechanism: the modal store
+(`workflowChangeSubmissionLanguageModalStore.js`) repopulates the
+metadata boxes (`setCustom`) only once its publication fetch fills
+`publicationProps`; until that, the `changeLanguageMetadata` form fetch
+and the TinyMCE editors' init settle, the panel renders and accepts input
+against stale or empty state. Observed live 2026-08-28 (pinned apps)
+while building the suites — Journal/Press/Preprint Server Manager, a
+Publication page › "Change": OJS — the boxes revealed by picking the new
+language kept the OLD language's guidance and prefill, permanently for
+that opening. OMP — Confirm pressed on a freshly (re)opened panel was
+accepted with the required Title EMPTY; the submission language changed
+and Title & Abstract afterwards showed "0/2 languages completed"
+(reproduced ~3 of 5 attempts under test timing). OPS — the new
+language's boxes opened nondeterministically empty or holding the
+CURRENT language's text, and confirming the pre-filled state stored the
+old language's text as the new language's title. Settled-state control:
+with the panel left to finish loading, the same OMP Confirm was refused
+with "This field is required." / "Please correct one error.", and
+prefill matched the stored values on all three apps (fn-i) — Rule 13b's
+settled-state claims stand and the suites assert them. The suites' timing
+workarounds are the campaign ledger's record
+(`docs/tracking/app-changes.md`, row 6; app code unchanged).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1 — OJS1 evidence.** An OJS submission whose publication is
