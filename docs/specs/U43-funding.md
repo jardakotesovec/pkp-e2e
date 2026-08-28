@@ -3,7 +3,7 @@ name: funding
 scope: Record who funded a submission — funders and their grants — and disclose that funding to readers
 apps: [ojs, omp, ops]
 shared: pkp-lib
-status: draft
+status: verified
 atlas-claims: [AFFW-401, AFFW-551, AFFW-552, AFFW-553, AFFW-554, AFFW-555, AFFW-556, AFFW-557, AFFR-063, VUE-039, VUE-061, API-020, SET-014]
 ---
 
@@ -15,14 +15,18 @@ atlas-claims: [AFFW-401, AFFW-551, AFFW-552, AFFW-553, AFFW-554, AFFW-555, AFFW-
 
 Funding lets a journal record, for each submission, the organizations that
 funded the work and the grants behind it, so funders are formally credited
-and the information travels with the publication's metadata. Authors can be
+and the information travels with the publication's metadata. It is one
+shared feature of the three applications the title names — OJS (journals),
+OMP (presses) and OPS (preprint servers) — and this spec is written in
+journal terms. Authors can be
 asked (or required) to declare funders while submitting; the editorial team
 maintains the same list on the workflow's Publication area; readers see the
 funders — with links to each funder's public registry record and to grant
 DOIs — on the published item's landing page. A funder is identified either
 by picking it from the ROR registry (the public Research Organization
-Registry of institutions) or by typing a name by hand; each funder can carry
-any number of grants (name, number, DOI). The free-text *Funding Statement*
+Registry of institutions; a registry-backed funder is shown with the
+**ROR mark**, the registry's logo) or by typing a name by hand; each funder
+can carry any number of grants (name, number, DOI). The free-text *Funding Statement*
 paragraph and the *Data Availability Statement* are separate publication
 metadata fields, owned by *Publication metadata* (no spec yet); this spec
 owns the structured funders list end to end.
@@ -44,7 +48,7 @@ should lock metadata is *Publication metadata*'s question (no spec yet).
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Funding list (workflow)** | • any role whose workflow view includes the Publication area — Journal Manager, Site Administrator, and assigned Section Editors, Assistants and the submission's Author — whenever the journal has funding switched on (Rule 2). An assigned Assistant whose group has no access to the submission's current stage gets no Publication entries at all, "Funding" included (stage access is the workflow screen's own rule) <sup>a</sup> |
+| **See the Funding list (workflow)** | • any role whose workflow view includes the Publication area — Journal Manager, Site Administrator, and assigned Section Editors, Assistants and the submission's Author — whenever the journal has funding switched on (Rule 2). Exception: an assigned Assistant whose role is not allowed onto the submission's current workflow stage sees no Publication entries at all, "Funding" included (which stages a role may enter is the workflow screen's own rule, not this feature's) <sup>a</sup> |
 | **Add / edit / delete / reorder funders (workflow)** | • whoever may currently edit the publication's metadata (see *Publication metadata*, no spec yet); everyone else sees the read-only list (Rule 8)<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint — on a journal or press the author's workflow list is read-only [OPS1](#ops1) <sup>a</sup> |
 | **Declare funders while submitting (wizard)** | • the submitting author — on the wizard's Details step, only while the journal *asks* or *requires* funder metadata (Rule 2) <sup>b</sup> |
 | **See funders on the landing page** | • any reader — on a published item that has funders recorded (Rule 9) <sup>f</sup> |
@@ -59,8 +63,8 @@ one error." and the Save button disables until the field is corrected.
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Funder** | Yes | "Search for a funder by name" queries the public ROR registry as you type (from four characters); the field's guidance reads 'Enter the full name of the institution below, avoiding any acronyms and select the name from the dropdown. (e.g. "Simon Fraser University")'. The first, pre-highlighted suggestion is always your typed text itself, styled like a registry match minus the country and registry mark ⚠ [A6](#a6); registry matches follow, each with name, country, the ROR mark and its own registry-record link (announced "Open link in a new tab."). If the registry does not answer, suggestions simply never appear and the field shows no error ⚠ [A9](#a9). Picking a registry match fixes the funder's identity: its registry link appears and its name — taken from the registry, in every registry language available — is not editable by hand. On an install whose server cannot itself reach the registry, the pick errors and the funder saves with no name at all ⚠ [A3](#a3); the registry-name storage on a normally connected install awaits observation ⚠ [A10](#a10). Or pick your typed text — the panel switches to one name box per submission language ("Type the funder name in {language}"), the primary-language box arriving pre-filled with your typed text. The primary language's box is marked required, but a save with any one language filled is accepted ⚠ [A12](#a12). Saving with neither a pick nor a name: "Search and select a Funder or enter a Funder name". A "Delete" button under the chosen funder clears it so you can search again. |
-| **Funder Grants** | No | A sub-table of grants ("Add any grants associated with this funder (optional).") — columns **Grant DOI**, **Grant Number**, **Grant Name** — with an "Add" button for new rows and a per-row "Delete". All three cells are optional; a row left entirely blank is silently dropped on save. Grant DOI must look like a DOI ("10.xxxx/…") — anything else is refused with "This is not formatted correctly." on the cell. Grant Number is checked against the funder's grant registry only when the journal's grant-validation setting is on and the funder is one of the supported major funders (Settings that modify behavior); a failed check is meant to refuse the save with "The given grant number could not be validated against the Funder's ROR ID." ⚠ [A11](#a11) |
+| **Funder** | Yes | "Search for a funder by name" queries the public ROR registry as you type (from four characters); the field's guidance reads 'Enter the full name of the institution below, avoiding any acronyms and select the name from the dropdown. (e.g. "Simon Fraser University")'. The first, pre-highlighted suggestion is always your typed text itself, styled like a registry match minus the country and ROR mark ⚠ [A6](#a6); registry matches follow, each with name, country, the ROR mark and its own registry-record link (read out by screen readers as "Open link in a new tab."). If the registry does not answer, suggestions simply never appear and the field shows no error ⚠ [A9](#a9). Picking a registry match fixes the funder's identity: its registry link appears and its name — taken from the registry, in every registry language available — is not editable by hand. If the pick instead pops up "An unexpected error has occurred. Please reload the page and try again.", the journal's own server cannot reach the registry: the funder still saves, but with no name at all ⚠ [A3](#a3). That the registry name then shows everywhere on a journal whose server does reach the registry is unconfirmed ⚠ [A10](#a10). Or pick your typed text — the panel switches to one name box per submission language ("Type the funder name in {language}"), the primary-language box arriving pre-filled with your typed text. The primary language's box is marked required, but a save with any one language filled is accepted ⚠ [A12](#a12). Saving with neither a pick nor a name: "Search and select a Funder or enter a Funder name". A "Delete" button under the chosen funder clears it so you can search again. |
+| **Funder Grants** | No | A sub-table of grants ("Add any grants associated with this funder (optional).") — columns **Grant DOI**, **Grant Number**, **Grant Name** — with an "Add" button for new rows and a per-row "Delete". All three cells are optional; a row left entirely blank is silently dropped on save. Grant DOI must look like a DOI ("10.xxxx/…") — anything else is refused with "This is not formatted correctly." on the cell. Grant Number is checked against the funder's grant registry only when the journal's grant-validation setting is on AND the funder was picked from the registry and is one of the supported major funders (Settings that modify behavior) — a hand-named funder's grants are never checked; a failed check is meant to refuse the save with "The given grant number could not be validated against the Funder's ROR ID." ⚠ [A11](#a11) |
 
 ## Rules & state
 
@@ -135,12 +139,16 @@ one error." and the Save button disables until the field is corrected.
     step: "Funders are required." The final submit stays enabled and the
     submission completes anyway ⚠ [A1](#a1). <sup>b</sup>
 12. **One list across versions.** The funders list belongs to the
-    submission as a whole: every publication version shows — and edits —
-    the same list ⚠ [A2](#a2). <sup>g</sup>
-13. **Hidden from anonymized review.** Wherever the application prepares a
-    publication for a reviewer who must not learn the authors' identity,
-    the funders list and the funding statement are withheld along with the
-    author names. <sup>h</sup>
+    submission as a whole: whichever publication version is selected in
+    the workflow, its "Funding" entry shows — and edits — the same list
+    ⚠ [A2](#a2). <sup>g</sup>
+13. **Reviewers never see funders.** A Reviewer's review screen shows no
+    funders list, whatever the review type. Where the review type keeps
+    the authors' identity from the reviewer, the funding information (the
+    funders list and the funding statement) is additionally withheld from
+    the data sent to the reviewer's browser, together with the author
+    names — a safeguard visible only by inspecting that data, never as a
+    difference on any screen. <sup>h</sup>
 
 ## Side effects
 
@@ -174,8 +182,10 @@ All on the workflow settings' **Metadata** screen, in its "Funders" section
 - The **"Funder Grant ID validation"** section ("Enable grant ID
   validation for supported funders (using the Zenodo API)."), checkbox
   **"Enable Grant ID validation."**: when on, a grant number entered for
-  one of the supported major funders (NIH, NSF, European Commission,
-  Wellcome Trust and some two dozen others) is checked against that
+  a registry-picked funder that is one of the supported major funders
+  (NIH, NSF, European Commission, Wellcome Trust and some two dozen
+  others — the roster is fixed in the software, not configurable) is
+  checked against that
   funder's public grant registry on save, rejecting numbers the registry
   does not know [A11](#a11). When the registry service is unreachable,
   the check is skipped silently and the save goes through. <sup>d</sup>
@@ -208,44 +218,65 @@ Common to all three apps (OMP/OPS vocabulary per the
 
 1. **Record and revise funding in the workflow** — Journal Manager: open a
    submission's workflow, Publication area, "Funding". The list reads "No
-   funders have been added." Press "Add Funder", type a funder name, pick
-   the typed text itself from the top of the suggestions, confirm the
-   primary-language name box (it arrives pre-filled with your typed
-   text), and add one grant row (name, number, DOI
-   "10.1234/example"); Save. The row shows the typed name. Add a second
-   funder by searching a well-known funder and picking its registry
-   match — the name and registry link appear in the panel; Save. The row
-   shows the funder with the ROR mark (on an install whose server cannot
-   reach the registry this leg errors and saves nameless instead —
-   [A3](#a3)). Press "Order", move the second funder up, press "Save
-   Order" — reload: the order holds. Open the first funder's "…" →
-   "Edit" — the panel is prefilled; change the grant number and Save.
-   Then "…" → "Delete" on the second funder, "Cancel" (still listed),
-   Delete again, "OK" — the row is gone. <sup>s1</sup>
+   funders have been added." Press "Add Funder", type a funder name of
+   your own (say "Test Foundation"), pick the typed text itself from the
+   top of the suggestions — the name box marked "* Required" arrives
+   pre-filled with it; leave it as it is — and add one grant row (name,
+   number, DOI "10.1234/example"); Save. The row shows the typed name:
+   this is the *typed-name funder*. Add a second funder: type "National
+   Institutes of Health" and pick the suggestion of that name that shows
+   a country and the ROR mark — the panel shows the name and its registry
+   link; Save. The row shows "National Institutes of Health" with the ROR
+   mark beside it: this is the *registry funder*. Known exception: if
+   picking the match instead pops up "An unexpected error has occurred.
+   Please reload the page and try again.", the journal's server cannot
+   reach the registry — that is the recorded defect ⚠ [A3](#a3), not a
+   failure of this scenario: dismiss the dialog ("OK") and Save; the row
+   then shows the ROR mark with no name, and it still serves as the
+   registry funder below. Press "Order", move the registry funder up
+   with its arrow, press "Save Order" — reload the page: the registry
+   funder is still listed first. Open the typed-name funder's "…" →
+   "Edit" — the panel is titled "Edit Funder" and prefilled with the name
+   and the grant row; change the grant number and Save — the panel
+   closes; reopen "…" → "Edit" and the new number is there; Cancel. Then
+   "…" → "Delete" on the registry funder, "Cancel" (still listed),
+   Delete again, "OK" — the row is gone, the typed-name funder alone
+   remains. <sup>s1</sup>
 2. **Declare funding while submitting** — Author, on a journal that asks
    for funder metadata: start a submission and walk to the Details step —
-   it ends with a "Funders" section. Add a funder there just as in the
-   workflow. On the Review step, the funder's name is listed under
-   "Details" (on a press or preprint server only after a reload — ⚠
-   [A4](#a4)). Complete the submission; sign in as Journal Manager and open
-   the new submission's "Funding" — the author's funder is there.
+   its last section (on a press, the section before Chapters) is
+   "Funders". Press "Add Funder" and record a hand-named funder the way
+   scenario 1 records its typed-name funder (type a name, pick the typed
+   text, Save). The section's table shows the row — on a press or
+   preprint server it still reads "No funders have been added." until you
+   reload the page, after which the row is there (⚠ [A4](#a4)). Go on to
+   the Review step: the funder's name is listed under "Details". Complete
+   the submission; sign in as Journal Manager and open the new
+   submission's "Funding" — the author's funder is there.
    <sup>s2</sup>
 3. **Read a published item's funding** — Reader: on a published article
-   whose funders list holds a registry-backed funder with a grant (name,
-   number and DOI), open its landing page. A "Funders" section lists the
-   funder's name with the ROR mark linking to its registry record, and the
-   grant's name, "Grant Number" and "Grant DOI" with the DOI as a link.
-   A published article with no funders shows no "Funders" section at all.
+   whose funders list holds a hand-named funder with a grant (name,
+   number and DOI) and a registry-backed funder (recorded through the
+   workflow as in scenario 1), open its landing page. A "Funders" section
+   lists the hand-named funder's name and its grant's name, "Grant Number"
+   with the number and "Grant DOI" with the DOI as a link; the
+   registry-backed funder's ROR mark links to its record on the registry
+   site (its name shows beside the mark on a journal whose server reaches
+   the registry; a mark with no name means it cannot — [A3](#a3)). A
+   published article with no funders shows no "Funders" section at all.
    <sup>s3</sup>
-4. **The journal opts out** — Journal Manager: on the workflow settings'
-   Metadata screen, untick "Enable funder metadata" and save. A
-   submission's workflow now shows no "Funding" entry in its Publication
-   area, and an author starting a submission gets no Funders section on
-   the Details step. Re-tick the setting and pick "Ask the author for
-   funder metadata during submission." again (the previously saved level
-   is not restored — the choice lands back on "Do not request funder
-   metadata from the author during submission." — ⚠ [A8](#a8)) — both
-   surfaces are back, the previously recorded funders intact. <sup>s4</sup>
+4. **The journal opts out** — Journal Manager, on a journal set to "Ask
+   the author for funder metadata during submission." with one submission
+   whose funders list already holds a funder (scenario 1 leaves one): on
+   the workflow settings' Metadata screen, untick "Enable funder
+   metadata" and save. That submission's workflow now shows no "Funding"
+   entry in its Publication area, and an author starting a submission
+   gets no Funders section on the Details step. Re-tick the setting: the
+   choice arrives on "Do not request funder metadata from the author
+   during submission." rather than the "Ask…" level saved before (⚠
+   [A8](#a8)); pick "Ask the author for funder metadata during
+   submission." again and save. Both surfaces are back, and the
+   submission's "Funding" list still holds its funder. <sup>s4</sup>
 
 ## Findings register
 
@@ -321,9 +352,9 @@ Basis: probe. <sup>f-a4</sup>
 <a id="a5"></a>
 **A5 — Two funder controls are broken for assistive technology** · 🐞 · minor.
 In ordering mode the row's up/down arrows are icon-only with no accessible
-name to announce. In the typed-name path the primary-language box is
-announced with both languages' labels run together, and the second box has
-no label at all.
+name for a screen reader to read out. In the typed-name path a screen
+reader reads the primary-language box out with both languages' labels run
+together, and the second box has no label at all.
 Basis: probe. <sup>f-a5</sup>
 
 <a id="a6"></a>
@@ -331,7 +362,7 @@ Basis: probe. <sup>f-a5</sup>
 user-visible.
 The first, pre-highlighted suggestion under the Funder search is always the
 typed text itself, styled like a registry match minus the country and
-registry mark. A user searching a real funder can pick it and save an
+ROR mark. A user searching a real funder can pick it and save an
 unlinked, hand-typed look-alike without noticing — two testers working from
 these very screens did exactly that.
 Question: should the manual option be visually set apart or listed last?
@@ -617,12 +648,14 @@ internet dependency if the registry is unreachable.
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** One scratch submission published with a
-registry-backed funder carrying one fully filled grant, and one published
-without funders as the absence control. On a press the landing page is
-the catalog book page; on a preprint server the posted preprint's page.
-Live-run 2026-08-28 on all three apps, absence controls clean. Where the
-server cannot reach the registry the registry funder renders nameless
-(A3): seed a manual funder alongside it for a name assertion.
+manual (typed-name) funder carrying one fully filled grant plus a
+registry-backed funder, and one published without funders as the absence
+control. On a press the landing page is the catalog book page; on a
+preprint server the posted preprint's page. Live-run 2026-08-28 on all
+three apps, absence controls clean. Where the server cannot reach the
+registry the registry funder renders nameless (A3) — its ROR-mark link
+still resolves (fn-f) — which is why the name and grant assertions ride
+on the manual funder; the suites cover the manual funder only.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** Scratch journal (the setting is mutated), one
