@@ -146,7 +146,7 @@
 
 | ID | apps | pointer | description |
 |----|------|---------|-------------|
-| AFFM-090 | ojs omp ops | `templates/management/distribution.tpl` tab `license` · `PKPLicenseForm::FORM_LICENSE` | Distribution · License form (+ Save). |
+| AFFM-090 | ojs omp ops | `templates/management/distribution.tpl` tab `license` · `PKPLicenseForm::FORM_LICENSE` | Distribution · License form (+ Save). Claimed by: publication-metadata. |
 | AFFM-091 | ojs omp ops | `distribution.tpl` tab `doisSetup` · `PKPDoiSetupSettingsForm::FORM_DOI_SETUP_SETTINGS` · `DoiSetupSettingsForm.vue` | Distribution · DOIs setup form (enable DOIs, objects, prefix, suffix pattern + Save). |
 | AFFM-092 | ojs omp ops | `distribution.tpl` tab `doisRegistration` · `PKPDoiRegistrationSettingsForm::FORM_DOI_REGISTRATION_SETTINGS` · `DoiRegistrationSettingsForm.vue` | Distribution · DOIs registration-agency form (+ Save). |
 | AFFM-093 | ojs omp ops | `distribution.tpl` tab `indexing` · `PKPSearchIndexingForm::FORM_SEARCH_INDEXING` | Distribution · Search engine indexing form (+ Save). |
@@ -259,7 +259,7 @@
 |----|------|---------|-------------|
 | AFFM-161 | ojs omp ops | `tools/index.tpl` tabs `importexport`/`permissions` | Tools · tab bar (Import/Export, Permissions). |
 | AFFM-162 | ojs omp ops | `tools/importexport.tpl` plugin link list (`op=importexport path=plugin/<name>`) | Tools · Import/Export · list of import/export plugin links opening each plugin's screen. |
-| AFFM-163 | ojs omp ops | `tools/permissions.tpl` `#resetPermissionsForm` (op `tools/resetPermissions`, `confirmText manager.setup.resetPermissions.confirm`) | Tools · Permissions · Reset article/monograph permissions submit (confirm). |
+| AFFM-163 | ojs omp ops | `tools/permissions.tpl` `#resetPermissionsForm` (op `tools/resetPermissions`, `confirmText manager.setup.resetPermissions.confirm`) | Tools · Permissions · Reset article/monograph permissions submit (confirm). Claimed by: publication-metadata. |
 | AFFM-164 | ojs omp ops | `plugins/importexport/native/templates/index.tpl` `#importXmlForm` (upload container + `importBounce`) | Tools · Native XML plugin · Import tab: upload XML file + Import button. |
 | AFFM-165 | ojs omp ops | `native/templates/index.tpl` `#exportSubmissions-tab` (`SubmissionsListPanel` select + `toggleSelectAll` + submit `exportSubmissionsBounce`; per-item workflow link) | Tools · Native XML plugin · Export submissions: select submissions (select all/none), per-item View-workflow link, Export button. |
 | AFFM-166 | ojs | `ojs-main/plugins/importexport/native/templates/index.tpl` `#exportIssues-tab` | Tools · Native XML plugin (OJS) · Export issues tab: select issues + Export button. |

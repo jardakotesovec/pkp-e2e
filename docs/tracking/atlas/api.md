@@ -35,7 +35,7 @@
 | API-017 | ojs omp ops | `PKP\API\v1\editTaskTemplates\PKPEditTaskTemplateController` | Editorial task templates (base `editTaskTemplates`): POST /, PUT {templateId}, DELETE {templateId}, GET variables, GET /. |
 | API-018 | ojs omp ops | `PKP\API\v1\emails\PKPEmailController` | Logged emails (base `emails`): GET /authorEmails, GET {emailId}. |
 | API-019 | ojs omp ops | `PKP\API\v1\emailTemplates\PKPEmailTemplateController` | Email templates CRUD (base `emailTemplates`): GET /, GET {key}, POST /, PUT {key}, DELETE restoreDefaults, DELETE {key}. |
-| API-020 | ojs omp ops | `PKP\API\v1\funders\PKPFunderController` | Publication funders (base `submissions/{submissionId}/publications/{publicationId}/funders`): GET /, GET {funderId}, POST /, PUT {funderId}, DELETE {funderId}, PUT order. |
+| API-020 | ojs omp ops | `PKP\API\v1\funders\PKPFunderController` | Publication funders (base `submissions/{submissionId}/publications/{publicationId}/funders`): GET /, GET {funderId}, POST /, PUT {funderId}, DELETE {funderId}, PUT order. Claimed by: funding. |
 | API-021 | ojs omp ops | `PKP\API\v1\genres\GenreController` | File genres (base `genres`): GET /, GET /{genreId}. OPS additionally mounts this at a legacy non-versioned entry point (API-066). |
 | API-022 | ojs omp ops | `PKP\API\v1\highlights\HighlightsController` | Highlights CRUD (base `highlights`): GET /, GET {highlightId}, POST /, PUT {highlightId}, PUT order, DELETE {highlightId}. |
 | API-023 | ojs omp ops | `PKP\API\v1\institutions\PKPInstitutionController` | Institutions CRUD (base `institutions`): GET /, GET {institutionId}, POST /, PUT {institutionId}, DELETE {institutionId}. |
@@ -64,7 +64,7 @@
 | API-046 | ojs omp ops | `PKP\API\v1\userGroups\UserGroupController` | User groups listing (base `userGroups`): GET /. |
 | API-047 | ojs omp ops | `PKP\API\v1\users\PKPUserController` | Users (base `users`): GET reviewers, GET report, GET {userId}, GET /, PUT {userId}/endRole/{userGroupId}, PUT {userId}/masthead/{userUserGroupId}. |
 | API-048 | ojs omp | `PKP\API\v1\vocabs\PKPInterestController` | Reviewer interests vocab (base `vocabs/interests`): GET /. OPS `vocabs` entry point mounts only PKPVocabController. Claimed by: reviewer-assignment-and-management. |
-| API-049 | ojs omp ops | `PKP\API\v1\vocabs\PKPVocabController` | Controlled vocabulary suggestions (base `vocabs`): GET /. |
+| API-049 | ojs omp ops | `PKP\API\v1\vocabs\PKPVocabController` | Controlled vocabulary suggestions (base `vocabs`): GET /. Claimed by: publication-metadata. |
 
 ## OJS overlay (ojs-main/api)
 
@@ -86,7 +86,7 @@
 | API-058 | omp | `APP\API\v1\_dois\BackendDoiController` (omp) | Extends API-001; adds PUT chapters/{chapterId}, PUT publicationFormats/{publicationFormatId}, PUT submissionFiles/{submissionFileId} under `_dois`. |
 | API-059 | omp | `APP\API\v1\_submissions\BackendSubmissionsController` (omp) | Extends API-006; adds POST saveDisplayFlags, POST saveFeaturedOrder, PUT addToCatalog under `_submissions`. |
 | API-060 | omp | `APP\API\v1\stats\sushi\StatsSushiController` (omp) | Extends API-039; adds GET reports/tr, GET reports/tr_b3 under `stats/sushi`. |
-| API-061 | omp | `APP\API\v1\submissions\SubmissionController` (omp) | Extends API-042; adds GET {submissionId}/publications/{publicationId}/_components/{audience|catalogEntry|publicationDates|permissionDisclosure} under `submissions`. |
+| API-061 | omp | `APP\API\v1\submissions\SubmissionController` (omp) | Extends API-042; adds GET {submissionId}/publications/{publicationId}/_components/{audience|catalogEntry|publicationDates|permissionDisclosure} under `submissions`. Claimed by: publication-metadata. |
 | API-062 | omp | `omp-main/api/v1/publicationPeerReviews/index.php` (entry point; no class pointer available) | `publicationPeerReviews` entry point instantiates `PKP\API\v1\publicationPeerReviews\PublicationPeerReviewController`, which does not exist in lib/pkp at `ad4606f93e` — dangling mount recorded mechanically; endpoints unknown. |
 
 ## OPS overlay (ops-main/api)

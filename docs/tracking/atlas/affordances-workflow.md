@@ -383,11 +383,11 @@
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
 | AFFW-280 | ojs,omp,ops | `workflowConfigEditorialOJS.js` / `workflowConfigAuthorOJS.js` → `WorkflowConfig.common.getPrimaryItems` → `WorkflowPrimaryBasicMetadata` `t('user.authorization.accessibleWorkflowStage')` | Any stage screen · no-access notice, suppresses all other items (guard: `!permissions.accessibleStages.includes(selectedStageId)` → `shouldContinue: false`) |
-| AFFW-281 | ojs,omp,ops | `WorkflowConfig.common.getPrimaryItems` → `WorkflowChangeSubmissionLanguage` with `canChangeSubmissionLanguage: false` | Any stage screen · current submission language readout (button suppressed on stage screens) |
+| AFFW-281 | ojs,omp,ops | `WorkflowConfig.common.getPrimaryItems` → `WorkflowChangeSubmissionLanguage` with `canChangeSubmissionLanguage: false` | Any stage screen · current submission language readout (button suppressed on stage screens) Claimed by: publication-metadata. |
 | AFFW-282 | ojs,omp,ops | `WorkflowConfig.common.getPrimaryItems` → `WorkflowSubmissionStatus` | Any stage screen · status panel (round status, min-reviews messaging, "stage not started", future-stage messaging) |
 | AFFW-283 | ojs,omp,ops | `src/pages/workflow/components/primary/WorkflowSubmissionStatus.vue` → `message` computed | Any stage screen · status text variants: `workflow.stageNotStarted`, `workflow.submissionInFutureStage`, `workflow.submissionNextReviewRoundInFutureStage`, `workflow.submissionInNextReviewRound`, `notification.type.roundStatusTitle`, `dashboard.minimumConfirmedReviewsRequired`, `dashboard.minimumReviewsConfirmedDecisionNeeded`, `editor.submission.workflowDecision.submission.published` |
 | AFFW-284 | ojs,omp,ops | `WorkflowConfig.common.getSecondaryItems` / `getActionItems` returning `shouldContinue: false` | Any stage screen · secondary + action columns hidden (guard: `!permissions.accessibleStages.includes(selectedStageId)`) |
-| AFFW-285 | ojs,omp,ops | `src/pages/workflow/components/publication/WorkflowChangeSubmissionLanguage.vue` → `t('submission.list.changeSubmissionLanguage.buttonLabel')` | Any workflow screen · Change-language link → `store.workflowChangeSubmissionLanguage()` (guard: `v-if="canChangeSubmissionLanguage"`) |
+| AFFW-285 | ojs,omp,ops | `src/pages/workflow/components/publication/WorkflowChangeSubmissionLanguage.vue` → `t('submission.list.changeSubmissionLanguage.buttonLabel')` | Any workflow screen · Change-language link → `store.workflowChangeSubmissionLanguage()` (guard: `v-if="canChangeSubmissionLanguage"`) Claimed by: publication-metadata. |
 
 ## Submission stage
 
@@ -511,10 +511,10 @@
 |---|---|---|---|
 | AFFW-377 | ojs,omp,ops | `WorkflowPage.vue` → `#publication-controls-left` (`data-cy="workflow-controls-left"`) | Publication tab · left controls region; supports nested arrays for horizontal rows (guard: `v-if="workflowStore.primaryControlsLeft?.length"`) |
 | AFFW-378 | ojs,omp,ops | `WorkflowPage.vue` → `#publication-controls-right` (`data-cy="workflow-controls-right"`) | Publication tab · right controls region (guard: `v-if="workflowStore.primaryControlsRight?.length"`) |
-| AFFW-379 | ojs,omp | `workflowConfigEditorialOJS.js` → `PublicationConfig.common.getPrimaryItems` → `WorkflowPublicationEditWarning` | Publication tab (editorial) · `publication.editorEditWarning` banner (guard: `selectedPublication.status === STATUS_PUBLISHED`) |
-| AFFW-380 | ojs,omp,ops | `workflowConfigAuthorOJS.js` → `PublicationConfig.common.getPrimaryItems` → `WorkflowPublicationEditDisabled` | Publication tab (author) · `publication.editDisabled` banner (guard: `selectedPublication.status === STATUS_PUBLISHED`) |
-| AFFW-381 | ojs,omp | `workflowConfigEditorialOJS.js` → `PublicationConfig.common.getPrimaryControlsLeft` → `WorkflowChangeSubmissionLanguage` `canChangeSubmissionLanguage: permissions.canChangeSubmissionLanguage` | Publication tab (editorial) · change-language control (guard: `submission.status !== STATUS_PUBLISHED && submission.publications.length < 2`) |
-| AFFW-382 | ops | `workflowConfigEditorialOPS.js` → `PublicationConfig.common.getPrimaryControlsLeft` → `WorkflowChangeSubmissionLanguage` | Publication tab (editorial, OPS) · same control, OPS override (guard: `submission.status !== STATUS_PUBLISHED && submission.publications.length < 2`) |
+| AFFW-379 | ojs,omp | `workflowConfigEditorialOJS.js` → `PublicationConfig.common.getPrimaryItems` → `WorkflowPublicationEditWarning` | Publication tab (editorial) · `publication.editorEditWarning` banner (guard: `selectedPublication.status === STATUS_PUBLISHED`) Claimed by: publication-metadata. |
+| AFFW-380 | ojs,omp,ops | `workflowConfigAuthorOJS.js` → `PublicationConfig.common.getPrimaryItems` → `WorkflowPublicationEditDisabled` | Publication tab (author) · `publication.editDisabled` banner (guard: `selectedPublication.status === STATUS_PUBLISHED`) Claimed by: publication-metadata. |
+| AFFW-381 | ojs,omp | `workflowConfigEditorialOJS.js` → `PublicationConfig.common.getPrimaryControlsLeft` → `WorkflowChangeSubmissionLanguage` `canChangeSubmissionLanguage: permissions.canChangeSubmissionLanguage` | Publication tab (editorial) · change-language control (guard: `submission.status !== STATUS_PUBLISHED && submission.publications.length < 2`) Claimed by: publication-metadata. |
+| AFFW-382 | ops | `workflowConfigEditorialOPS.js` → `PublicationConfig.common.getPrimaryControlsLeft` → `WorkflowChangeSubmissionLanguage` | Publication tab (editorial, OPS) · same control, OPS override (guard: `submission.status !== STATUS_PUBLISHED && submission.publications.length < 2`) Claimed by: publication-metadata. |
 | AFFW-383 | ojs,omp,ops | `workflowConfigEditorialOJS.js` / `workflowConfigEditorialOPS.js` / `workflowConfigAuthorOJS.js` / `workflowConfigAuthorOPS.js` → `WorkflowPublicationVersionControl` | Publication tab · version status indicator |
 | AFFW-384 | ojs,omp,ops | `src/pages/workflow/components/publication/WorkflowPublicationVersionControl.vue` → `statusProps` | Publication tab · status dot + label: `publication.status.unscheduled` / `.scheduled` / `.published` / `.unpublished` |
 | AFFW-385 | ops | `workflowConfigEditorialOPS.js` + `workflowConfigAuthorOPS.js` → `getPrimaryControlsLeft` → `WorkflowPublicationRelationDropdownOPS` | Publication tab (OPS) · Relation dropdown, paired horizontally with version control (component registered only in `WorkflowPageOPS.vue`) |
@@ -532,13 +532,13 @@
 
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
-| AFFW-395 | ojs,omp,ops | `workflowConfigEditorialOJS.js` / `workflowConfigAuthorOJS.js` → `PublicationConfig.titleAbstract` → `WorkflowPublicationForm formName:'titleAbstract'` | Title & Abstract · publication form (guard: `canEdit: permissions.canEditPublication`) |
+| AFFW-395 | ojs,omp,ops | `workflowConfigEditorialOJS.js` / `workflowConfigAuthorOJS.js` → `PublicationConfig.titleAbstract` → `WorkflowPublicationForm formName:'titleAbstract'` | Title & Abstract · publication form (guard: `canEdit: permissions.canEditPublication`) Claimed by: publication-metadata. |
 | AFFW-396 | ojs,omp,ops | `PublicationConfig.contributors` → `ContributorManager` | Contributors · contributor manager (editorial passes `canEdit: permissions.canEditPublication`; author config omits `canEdit`) |
-| AFFW-397 | ojs,omp,ops | `PublicationConfig.metadata` → `WorkflowPublicationForm formName:'metadata'`, `noFieldsMessage` | Metadata · metadata form; shows "No metadata fields are currently enabled." when form has no fields |
+| AFFW-397 | ojs,omp,ops | `PublicationConfig.metadata` → `WorkflowPublicationForm formName:'metadata'`, `noFieldsMessage` | Metadata · metadata form; shows "No metadata fields are currently enabled." when form has no fields Claimed by: publication-metadata. |
 | AFFW-398 | ojs,omp,ops | `PublicationConfig.citations` → `CitationManager` (`citationsMetadataLookup`) | Citations · citation manager (guard: `canEdit: permissions.canEditPublication`) |
 | AFFW-399 | ojs,omp,ops | `PublicationConfig.dataAvailabilityAndCitation` → `DataCitationManager` | Data availability & citation · data citation manager (guard: `pageInitConfig.publicationSettings.supportsDataCitations`) |
-| AFFW-400 | ojs,omp,ops | `PublicationConfig.dataAvailabilityAndCitation` → `WorkflowPublicationForm formName:'dataAvailability'` | Data availability & citation · data availability form (guard: `publicationSettings.supportsDataAvailability`) |
-| AFFW-401 | ojs,omp,ops | `PublicationConfig.funding` → `FunderManager` (`funderEditForm`) | Funding · funder manager (guard: `canEdit: permissions.canEditPublication`) |
+| AFFW-400 | ojs,omp,ops | `PublicationConfig.dataAvailabilityAndCitation` → `WorkflowPublicationForm formName:'dataAvailability'` | Data availability & citation · data availability form (guard: `publicationSettings.supportsDataAvailability`) Claimed by: publication-metadata. |
+| AFFW-401 | ojs,omp,ops | `PublicationConfig.funding` → `FunderManager` (`funderEditForm`) | Funding · funder manager (guard: `canEdit: permissions.canEditPublication`) Claimed by: funding. |
 | AFFW-402 | ojs,omp,ops | `workflowConfigEditorialOJS.js` → `PublicationConfig.identifiers` → `WorkflowPublicationForm formName:'identifier'` | Identifiers · identifier form (editorial config only) |
 | AFFW-403 | ojs | `workflowConfigEditorialOJS.js` → `PublicationConfig.jats` → `WorkflowPublicationJats` | JATS · JATS panel (component registered only in `WorkflowPageOJS.vue`) |
 | AFFW-404 | ojs | `src/pages/workflow/components/publication/WorkflowPublicationJats.vue` → `t('common.upload')` / `openFileBrowser` | JATS · Upload button (guard: `publication.status !== STATUS_PUBLISHED && canEdit`) |
@@ -558,7 +558,7 @@
 | AFFW-418 | ojs | same → `navigationGuard` → `window.confirm(t('form.dataHasChanged'))` | Body Text · unsaved-changes navigation confirm (guard: `isDirty`) |
 | AFFW-419 | ojs,ops | `workflowConfigEditorialOJS.js` / `workflowConfigAuthorOJS.js` → `PublicationConfig.galleys` → `GalleyManager` | Galleys · galley manager (editorial passes `canEdit: permissions.canEditPublication`; author omits it) |
 | AFFW-420 | ojs,omp,ops | `PublicationConfig.media` → `MediaFileManager` | Media · media file manager (editorial passes `canEdit`; author omits it) |
-| AFFW-421 | ojs,omp,ops | `workflowConfigEditorialOJS.js` → `PublicationConfig.license` → `WorkflowPublicationForm formName:'permissionDisclosure'` | License / Permissions · permission & disclosure form |
+| AFFW-421 | ojs,omp,ops | `workflowConfigEditorialOJS.js` → `PublicationConfig.license` → `WorkflowPublicationForm formName:'permissionDisclosure'` | License / Permissions · permission & disclosure form Claimed by: publication-metadata. |
 | AFFW-422 | ojs | `workflowConfigEditorialOJS.js` → `PublicationConfig.issue` → `WorkflowPublicationForm formName:'issue'` with `issueCount: publicationSettings.countIssues` | Issue assignment · issue entry form (OJS editorial config only) |
 | AFFW-423 | ojs | `src/pages/workflow/components/publication/WorkflowPublicationForm.vue` → `useWorkflowPublicationFormIssue(newForm, publication, {groupId:'placement'})` | Issue assignment · injected assignment radio + issue select (guard: `formName === 'issue' && issueCount > 0 && isOJS()`) |
 | AFFW-424 | ojs,omp | `WorkflowPublicationForm.vue` → `useInsertSummaryOfChangesContent(newForm,'summaryOfChanges',submission)` | Issue / Catalog Entry · "Insert Content" wiring on `summaryOfChanges` field (guard: `(formName === 'issue' && isOJS()) \|\| (formName === 'catalogEntry' && isOMP())`) |
@@ -567,7 +567,7 @@
 | AFFW-427 | omp | `workflowConfigEditorialOMP.js` → `PublicationConfig.catalogEntry` → `WorkflowPublicationForm formName:'catalogEntry'` | Catalog Entry · catalog entry form (OMP editorial config only) |
 | AFFW-428 | ops | `workflowConfigEditorialOPS.js` → `PublicationConfig.preprintEntry` → `WorkflowPublicationForm formName:'issue'` | Preprint Entry · preprint entry form reusing the `issue` component form (OPS editorial config only) |
 | AFFW-429 | ops | `workflowConfigAuthorOPS.js` → `PublicationConfig.discussions` → `DiscussionManager` `submissionStageId: WORKFLOW_STAGE_ID_PRODUCTION` | Discussions (OPS author publication tab) · discussions panel |
-| AFFW-430 | ojs,omp,ops | `src/pages/workflow/components/publication/WorkflowPublicationForm.vue` → `displayNoFieldsEnabled` / `noFieldsMessage` | Any publication form tab · empty-form message (guard: `publicationForm.fields.length === 0`); form submit disabled via `newPublicationForm.canSubmit = props.canEdit` |
+| AFFW-430 | ojs,omp,ops | `src/pages/workflow/components/publication/WorkflowPublicationForm.vue` → `displayNoFieldsEnabled` / `noFieldsMessage` | Any publication form tab · empty-form message (guard: `publicationForm.fields.length === 0`); form submit disabled via `newPublicationForm.canSubmit = props.canEdit` Claimed by: publication-metadata. |
 
 ## Marketing tabs (OMP)
 
@@ -604,9 +604,9 @@
 | AFFW-454 | ojs,omp,ops | `useWorkflowActions.js` → `workflowDeleteSubmission` | Delete submission dialog · `t('editor.submissionArchive.confirmDelete')`; `t('common.confirm')` (isPrimary) + `t('common.cancel')`; DELETE `_submissions/{id}` then `store.closeWorkflowModal()` |
 | AFFW-455 | ojs,omp,ops | `useWorkflowActions.js` → `workflowDecisionReturnToWorkflow` | Return-to-workflow dialog · `t('editor.submission.decision.returnToWorkflow.description')`; Confirm/Cancel; POST decision `DECISION_RETURN_TO_WORKFLOW` |
 | AFFW-456 | ojs,omp,ops | `useWorkflowActions.js` → `workflowDecisionReturnToDone` | Return-to-done dialog · `t('editor.submission.decision.returnToDone.description')`; Confirm/Cancel; POST `submissions/{id}/returnToDone` |
-| AFFW-457 | ojs,omp,ops | `useWorkflowActions.js` → `workflowChangeSubmissionLanguage` → `WorkflowChangeSubmissionLanguageModal` | Change submission language side modal |
-| AFFW-458 | ojs,omp,ops | `src/pages/workflow/modals/WorkflowChangeSubmissionLanguageModal.vue` → `t('submission.list.changeSubmissionLanguage.title')` | Change-language modal · title, publication title description, `changeLanguageMetadata` form with `@cancel="store.closeSideModal"` |
-| AFFW-459 | ojs,omp,ops | `src/pages/workflow/modals/workflowChangeSubmissionLanguageModalStore.js` → `setCustom` / `success` | Change-language modal · locale select re-populates title/abstract fields; on success `window.location.reload()`; action `.../changeLocale` |
+| AFFW-457 | ojs,omp,ops | `useWorkflowActions.js` → `workflowChangeSubmissionLanguage` → `WorkflowChangeSubmissionLanguageModal` | Change submission language side modal Claimed by: publication-metadata. |
+| AFFW-458 | ojs,omp,ops | `src/pages/workflow/modals/WorkflowChangeSubmissionLanguageModal.vue` → `t('submission.list.changeSubmissionLanguage.title')` | Change-language modal · title, publication title description, `changeLanguageMetadata` form with `@cancel="store.closeSideModal"` Claimed by: publication-metadata. |
+| AFFW-459 | ojs,omp,ops | `src/pages/workflow/modals/workflowChangeSubmissionLanguageModalStore.js` → `setCustom` / `success` | Change-language modal · locale select re-populates title/abstract fields; on success `window.location.reload()`; action `.../changeLocale` Claimed by: publication-metadata. |
 | AFFW-460 | ojs,omp,ops | `src/pages/workflow/modals/WorkflowSelectRevisionFormModal.vue` → `t('editor.submission.decision.requestRevisions')` | Select-revision-type side modal · form from `selectRevisionDecisionForm` / `selectRevisionRecommendationForm`; success closes modal and opens decision page |
 | AFFW-461 | ojs,omp,ops | `src/pages/workflow/composables/useWorkflowDecisions.js` → `showWarningDialogAboutMinimumReviewsIfEnabled` | Minimum-reviews warning dialog · `t('dashboard.proceedWithoutMinimumReviews')` / `t('dashboard.minimumConfirmedReviewsNotMet')`; `t('common.yesContinue')` (isWarnable) + `t('common.cancel')` (guard: `shouldMinimumReviewsBeConsidered && !hasMinimumReviewsCount`) |
 | AFFW-462 | ojs,omp,ops | `useWorkflowDecisions.js` → `openDecisionPage` | All decision buttons · redirect to `decision/record/{submissionId}` with `decision`, `ret`, `reviewRoundId`, `stageId` query params |
@@ -746,13 +746,13 @@
 
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
-| AFFW-551 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `getTopItems` / `FunderManagerSortButton` | Funders table · "Order"/"Save ordering" header button (icon `Sort`) · toggles and persists ordering |
-| AFFW-552 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `getTopItems` / `Actions.FUNDERS_ADD_FUNDER` | Funders table · "Add funder" header button · opens `FunderEditModal` (POST) (guard: none — always pushed) |
-| AFFW-553 | ojs,omp,ops | `src/managers/FunderManager/FunderManagerCellActions.vue` → `TableCellOrder` `@up`/`@down` | Funders table · per-row move up / move down · reorders funders (guard: `v-if="funderManagerStore.sortingEnabled"`) |
-| AFFW-554 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `getItemActions` / `Actions.FUNDERS_EDIT_FUNDER` | Funders table · row action "Edit" · opens `FunderEditModal` (PUT) prefilled with funder + grants (guard: none) |
-| AFFW-555 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `Actions.FUNDERS_DELETE_FUNDER` | Funders table · row action "Delete" (warnable) · confirm dialog → DELETE `.../funders/{id}` (guard: none) |
-| AFFW-556 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerActions.js` → `fundersDeleteFunder` dialog `actions` | Delete-funder dialog · "OK" / "Cancel" buttons · confirm or dismiss deletion |
-| AFFW-557 | ojs,omp,ops | `src/managers/FunderManager/modals/FunderEditModal.vue` → `PkpForm` `@success` | Funder add/edit modal · form save/cancel buttons · submits `funderEditForm` (funder ROR + grants) |
+| AFFW-551 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `getTopItems` / `FunderManagerSortButton` | Funders table · "Order"/"Save ordering" header button (icon `Sort`) · toggles and persists ordering Claimed by: funding. |
+| AFFW-552 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `getTopItems` / `Actions.FUNDERS_ADD_FUNDER` | Funders table · "Add funder" header button · opens `FunderEditModal` (POST) (guard: none — always pushed) Claimed by: funding. |
+| AFFW-553 | ojs,omp,ops | `src/managers/FunderManager/FunderManagerCellActions.vue` → `TableCellOrder` `@up`/`@down` | Funders table · per-row move up / move down · reorders funders (guard: `v-if="funderManagerStore.sortingEnabled"`) Claimed by: funding. |
+| AFFW-554 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `getItemActions` / `Actions.FUNDERS_EDIT_FUNDER` | Funders table · row action "Edit" · opens `FunderEditModal` (PUT) prefilled with funder + grants (guard: none) Claimed by: funding. |
+| AFFW-555 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerConfig.js` → `Actions.FUNDERS_DELETE_FUNDER` | Funders table · row action "Delete" (warnable) · confirm dialog → DELETE `.../funders/{id}` (guard: none) Claimed by: funding. |
+| AFFW-556 | ojs,omp,ops | `src/managers/FunderManager/useFunderManagerActions.js` → `fundersDeleteFunder` dialog `actions` | Delete-funder dialog · "OK" / "Cancel" buttons · confirm or dismiss deletion Claimed by: funding. |
+| AFFW-557 | ojs,omp,ops | `src/managers/FunderManager/modals/FunderEditModal.vue` → `PkpForm` `@success` | Funder add/edit modal · form save/cancel buttons · submits `funderEditForm` (funder ROR + grants) Claimed by: funding. |
 
 ## MediaFileManager
 
@@ -1009,7 +1009,7 @@
 | AFFW-708 | ojs,omp,ops | `lib/pkp/templates/workflow/reviewHistory.tpl` · `{foreach $dates}` rows | Review history popover · per-date rows (guard: `{if $date}`) Claimed by: reviewer-assignment-and-management. |
 | AFFW-709 | ojs,omp,ops | `lib/pkp/templates/controllers/modals/publish/publish.tpl` · `<pkp-form v-bind="components.PublishForm::FORM_PUBLISH">` mount `publish-{$uuid}` | Publish modal · publish confirmation form (submit rendered by PkpForm) |
 | AFFW-710 | ojs,omp,ops | `lib/pkp/templates/controllers/modals/publish/publish.tpl` · `div.pkpNotification--warning` list | Publish modal · pre-publication warnings block (guard: `{if $publishWarnings}`) |
-| AFFW-711 | ojs,omp,ops | `lib/pkp/templates/controllers/modals/submission/viewSubmissionMetadata.tpl` · `#viewSubmissionMetadata` | View submission metadata modal · read-only; blocks guarded by `{if $authors}`, `{if $additionalMetadata \|\| $dataAvailability \|\| $fundingStatement}`, `{if $dataAvailability}`, `{if $fundingStatement}` |
+| AFFW-711 | ojs,omp,ops | `lib/pkp/templates/controllers/modals/submission/viewSubmissionMetadata.tpl` · `#viewSubmissionMetadata` | View submission metadata modal · read-only; blocks guarded by `{if $authors}`, `{if $additionalMetadata \|\| $dataAvailability \|\| $fundingStatement}`, `{if $dataAvailability}`, `{if $fundingStatement}` Claimed by: publication-metadata. |
 
 ## Grid framework chrome (shared by all workflow grids)
 

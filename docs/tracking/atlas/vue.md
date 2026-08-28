@@ -61,7 +61,7 @@
 | VUE-036 | ojs,omp,ops | managers/DiscussionManager/DiscussionManager.vue | Workflow discussions & tasks manager (all three WorkflowPage variants) |
 | VUE-037 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerReviewer.vue | Reviewer-facing discussions surface (lib/pkp reviewer/review/step3.tpl, reviewCompleted.tpl) |
 | VUE-038 | ojs,omp,ops | managers/FileManager/FileManager.vue | Workflow-stage file manager (all WorkflowPage variants + FileAttacherWorkflowStage) |
-| VUE-039 | ojs,omp,ops | managers/FunderManager/FunderManager.vue | Funding sources management (SubmissionWizardPage + all WorkflowPage variants) |
+| VUE-039 | ojs,omp,ops | managers/FunderManager/FunderManager.vue | Funding sources management (SubmissionWizardPage + all WorkflowPage variants) Claimed by: funding. |
 | VUE-040 | ojs,omp,ops | managers/GalleyManager/GalleyManager.vue | Publication galleys management (imported by all three WorkflowPage variants) |
 | VUE-041 | ojs,omp,ops | managers/MediaFileManager/MediaFileManager.vue | Publication media files (image linking) manager (all WorkflowPage variants) |
 | VUE-042 | ? | managers/NavigationMenuManager/NavigationMenuManager.vue | Navigation menu manager component; no mount of the manager itself found (only its form modal is wired, VUE-065) |
@@ -88,7 +88,7 @@
 | VUE-058 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerFormModal.vue | Add/edit discussion or task side modal |
 | VUE-059 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerFormDisplayModal.vue | Discussion/task read-only display side modal |
 | VUE-060 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerHistoryModal.vue | Discussion/task activity history side modal |
-| VUE-061 | ojs,omp,ops | managers/FunderManager/modals/FunderEditModal.vue | Add/edit funder side modal |
+| VUE-061 | ojs,omp,ops | managers/FunderManager/modals/FunderEditModal.vue | Add/edit funder side modal Claimed by: funding. |
 | VUE-062 | ojs,omp,ops | managers/MediaFileManager/MediaFileManagerAddFileModal.vue | Media file upload side modal |
 | VUE-063 | ojs,omp,ops | managers/MediaFileManager/MediaFileManagerBatchLinkImagesModal.vue | Batch link images to galley text side modal |
 | VUE-064 | ojs,omp,ops | managers/MediaFileManager/MediaFileManagerManualLinkImageFormModal.vue | Manually link a single image side modal |
@@ -112,12 +112,12 @@
 | VUE-082 | ojs,omp,ops | pages/userComments/UserCommentDetailModal.vue | User comment detail/moderation side modal |
 | VUE-083 | ojs,omp,ops | pages/userComments/UserCommentReportDetailModal.vue | User comment report detail side modal |
 | VUE-084 | ojs,omp,ops | pages/workflow/components/publication/WorkflowVersionSideModal.vue | Create/edit publication version side modal (useWorkflowActions) |
-| VUE-085 | ojs,omp,ops | pages/workflow/modals/WorkflowChangeSubmissionLanguageModal.vue | Change submission language side modal (useWorkflowActions) |
+| VUE-085 | ojs,omp,ops | pages/workflow/modals/WorkflowChangeSubmissionLanguageModal.vue | Change submission language side modal (useWorkflowActions) Claimed by: publication-metadata. |
 | VUE-086 | ojs,omp,ops | pages/workflow/modals/WorkflowSelectRevisionFormModal.vue | Select revision target for decision side modal (useWorkflowDecisions) |
 | VUE-087 | ojs,omp,ops | components/Composer/FileAttacherModal.vue | Attach-files side modal opened from Composer (decision emails, discussions) |
 | VUE-088 | ojs,omp,ops | components/FileAttacher/AttacherModal.vue | File attacher source-picker side modal (FileAttacher; also used by Composer/discussions) |
 | VUE-089 | ojs,omp,ops | components/Form/fields/FieldPreparedContentInsertModal.vue | Insert prepared-content/variable side modal for rich text fields |
-| VUE-090 | ojs,omp,ops | components/Form/fields/VocabularyModal/VocabularyModal.vue | Controlled-vocabulary browser side modal (FieldBaseAutosuggest) |
+| VUE-090 | ojs,omp,ops | components/Form/fields/VocabularyModal/VocabularyModal.vue | Controlled-vocabulary browser side modal (FieldBaseAutosuggest) Claimed by: publication-metadata. |
 | VUE-091 | ojs,omp,ops | components/InsertSummaryOfChanges/InsertSummaryOfChangesModal.vue | Insert summary-of-changes side modal (workflow publication form / version form) |
 | VUE-092 | ojs,omp,ops | components/ListPanel/announcements/AnnouncementsEditModal.vue | Add/edit announcement side modal (AnnouncementsListPanel; site admin + context settings) |
 | VUE-093 | ojs,omp,ops | components/ListPanel/contributors/ContributorsEditModal.vue | Add/edit contributor side modal (ContributorsListPanel) |

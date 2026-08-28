@@ -157,3 +157,13 @@ until their specs exist. Do not force-claim the defects themselves.
    construction (`PKPNativeImportExportPlugin`); the button renders only when
    an add URL is set. Live-verified 2026-08-25 as manager on OJS, OMP and
    OPS. Resolves: maintainer confirmation as dead code (removal candidate).
+8. **AFFW-711 dead-code candidate** — attached to **U40** (claimed; the
+   publication-metadata spec's Reference table documents the waiver). The
+   "View submission metadata" modal's template
+   (`lib/pkp/templates/controllers/modals/submission/viewSubmissionMetadata.tpl`)
+   does not exist in any of the session's pinned checkouts (ojs ac67a6dd76,
+   omp 244a04311c, ops 94f6bbc59a, incl. lib/pkp submodules) — the atlas row
+   describes a file a later refactor removed; no screen offers the modal.
+   Code-verified 2026-08-28 (spec-author sweep of all three checkouts).
+   Resolves: maintainer confirmation as dead atlas row (atom retire
+   candidate).

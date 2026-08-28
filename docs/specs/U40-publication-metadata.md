@@ -3,7 +3,7 @@ name: publication-metadata
 scope: Maintain a publication's descriptive metadata — title & abstract, keywords and the other metadata items, data availability statement, submission language, copyright and license — and control who may still edit it once a version is published
 apps: [ojs, omp, ops]
 shared: pkp-lib
-status: draft
+status: verified
 atlas-claims: [AFFW-281, AFFW-285, AFFW-379, AFFW-380, AFFW-381, AFFW-382, AFFW-395, AFFW-397, AFFW-400, AFFW-421, AFFW-430, AFFW-457, AFFW-458, AFFW-459, AFFW-711, AFFM-090, AFFM-163, AFFR-065, VUE-085, VUE-090, API-049, API-061, SET-019, SET-032, SET-037, SET-043]
 ---
 
@@ -50,7 +50,8 @@ screen and its stages at all is the workflow screen's own rule (see
 | **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always) — the page is absent from the author view in every app (Rule 1) <sup>a</sup> |
 | **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator — always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles — while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author — while their assignment carries the permission AND no version is published or scheduled (Rule 9); a journal or press does not grant it by default, a preprint server does [OPS1](#ops1) <sup>b</sup> |
 | **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13; a journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1)); an assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button — the button appears once their assignment carries the permission; the Author is never offered it, in any app <sup>i</sup> |
-| **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal) — Settings › Distribution › License; reaching Settings is the settings features' rule <sup>m</sup> || **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator — Tools › Permissions (Rule 14) <sup>k</sup> |
+| **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal) — Settings › Distribution › License; reaching Settings is the settings features' rule <sup>m</sup> |
+| **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator — Tools › Permissions (Rule 14) <sup>k</sup> |
 | **Read the license, data availability and funding statement blocks** | • any reader — on a published item's landing page (Rule 15) <sup>l</sup> |
 
 ## Fields & validation
@@ -435,8 +436,9 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
   feature's findings shapes this spec's scheduled-state checks: on a
   journal the panel's "Assign To Future Issue and Schedule Only" choice
   can publish the article at once; the dependable way to a scheduled
-  article is to save that choice on the Publication Settings page first
-  (scenario seeding notes). A further finding for that feature, observed
+  article is to save that choice first on the Publication area's
+  "Publication Settings" entry page, then re-pick it in the "Schedule
+  For Publication" panel. A further finding for that feature, observed
   while this feature's suites were built: the panel's issue-assignment
   radios race their own preselection, and changing them early ends in a
   server refusal whose raw technical message surfaces in a dialog.
@@ -502,8 +504,10 @@ Common to all three apps (OMP/OPS vocabulary per the
    Author's "Edit Assignment", tick "Allow this person to make changes
    to the publication…", OK. Author: Save works again. Journal only:
    schedule a different submission of the same Author to a future issue
-   instead of publishing it — its Title & Abstract is read-only for the
-   Author with no banner at all. <sup>s3</sup>
+   instead of publishing it (save "Assign To Future Issue and Schedule
+   Only" on its Publication area's "Publication Settings" page first,
+   then re-pick it in the "Schedule For Publication" panel) — its Title
+   & Abstract is read-only for the Author with no banner at all. <sup>s3</sup>
 4. **Editing a published version** — Journal Manager, on a published
    item: every Publication page shows "Warning: This version has been
    published. Editing it may impact the published content." Change the

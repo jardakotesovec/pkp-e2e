@@ -39,12 +39,12 @@
 | SET-011 | ojs omp ops | lib/pkp/schemas/emailLog.json | Email Log — logged email regarding a submission (11 props). |
 | SET-012 | ojs omp ops | lib/pkp/schemas/emailTemplate.json | Email Template — saved email message sent by the application (10 props). |
 | SET-013 | ojs omp ops | lib/pkp/schemas/eventLog.json | Event Log — logged action taken regarding the submission (43 props). Overlaid by OMP (SET-036). |
-| SET-014 | ojs omp ops | lib/pkp/schemas/funder.json | Funder — a funder in a publication (7 props). |
+| SET-014 | ojs omp ops | lib/pkp/schemas/funder.json | Funder — a funder in a publication (7 props). Claimed by: funding. |
 | SET-015 | ojs omp ops | lib/pkp/schemas/highlight.json | Highlight — text+image+URL highlight at context or site level (9 props). |
 | SET-016 | ojs omp ops | lib/pkp/schemas/institution.json | Institution — used for usage stats, subscriptions, etc. (7 props). |
 | SET-017 | ojs omp ops | lib/pkp/schemas/navigationMenu.json | Navigation Menu — assignable to a theme navigation area (5 props). |
 | SET-018 | ojs omp ops | lib/pkp/schemas/navigationMenuItem.json | Navigation Menu Item — item assignable to navigation menus (12 props). |
-| SET-019 | ojs omp ops | lib/pkp/schemas/publication.json | Publication — published version of a submission (52 props). Overlaid by all three apps (SET-032, SET-037, SET-043). |
+| SET-019 | ojs omp ops | lib/pkp/schemas/publication.json | Publication — published version of a submission (52 props). Overlaid by all three apps (SET-032, SET-037, SET-043). Claimed by: publication-metadata. |
 | SET-020 | ojs omp ops | lib/pkp/schemas/reviewAssignment.json | Review Assignment — reviewer's assignment to review a submission (43 props). Claimed by: reviewer-assignment-and-management. |
 | SET-021 | ojs omp ops | lib/pkp/schemas/reviewRound.json | Review Round — round of review assignments in the review stage (7 props). Claimed by: review-stage-and-rounds. |
 | SET-022 | ojs omp ops | lib/pkp/schemas/ror.json | Ror — cached institution record from the ror.org data dump (7 props). |
@@ -62,18 +62,18 @@
 | SET-029 | ojs | ojs-main/schemas/context.json | Journal — OJS overlay of shared context.json (55 props: e.g. subscriptions, publishing, DOI/OAI journal settings). |
 | SET-030 | ojs | ojs-main/schemas/galley.json | Galley — OJS app-only schema, no shared counterpart in lib/pkp/schemas (14 props). |
 | SET-031 | ojs | ojs-main/schemas/issue.json | Issue — OJS app-only schema, no shared counterpart in lib/pkp/schemas (31 props). |
-| SET-032 | ojs | ojs-main/schemas/publication.json | OJS overlay of shared publication.json (8 props, no title key in file). |
+| SET-032 | ojs | ojs-main/schemas/publication.json | OJS overlay of shared publication.json (8 props, no title key in file). Claimed by: publication-metadata. |
 | SET-033 | ojs | ojs-main/schemas/section.json | OJS overlay of shared section.json (10 props). |
 | SET-034 | ojs | ojs-main/schemas/submission.json | OJS overlay of shared submission.json (4 props). Claimed by: submission-wizard. |
 | SET-035 | omp | omp-main/schemas/context.json | Press — OMP overlay of shared context.json (24 props). |
 | SET-036 | omp | omp-main/schemas/eventLog.json | OMP overlay of shared eventLog.json (1 prop). |
-| SET-037 | omp | omp-main/schemas/publication.json | OMP overlay of shared publication.json (6 props). |
+| SET-037 | omp | omp-main/schemas/publication.json | OMP overlay of shared publication.json (6 props). Claimed by: publication-metadata. |
 | SET-038 | omp | omp-main/schemas/section.json | Series — OMP overlay of shared section.json (11 props). |
 | SET-039 | omp | omp-main/schemas/submission.json | OMP overlay of shared submission.json (9 props). Claimed by: submission-wizard. |
 | SET-040 | omp | omp-main/schemas/submissionFile.json | OMP overlay of shared submissionFile.json (6 props). |
 | SET-041 | ops | ops-main/schemas/context.json | Server — OPS overlay of shared context.json (10 props). |
 | SET-042 | ops | ops-main/schemas/galley.json | Galley — OPS app-only schema, no shared counterpart in lib/pkp/schemas (14 props). |
-| SET-043 | ops | ops-main/schemas/publication.json | OPS overlay of shared publication.json (7 props, no title key in file). |
+| SET-043 | ops | ops-main/schemas/publication.json | OPS overlay of shared publication.json (7 props, no title key in file). Claimed by: publication-metadata. |
 | SET-044 | ops | ops-main/schemas/section.json | OPS overlay of shared section.json (12 props). |
 | SET-045 | ops | ops-main/schemas/submission.json | OPS overlay of shared submission.json (2 props). Claimed by: submission-wizard. |
 
