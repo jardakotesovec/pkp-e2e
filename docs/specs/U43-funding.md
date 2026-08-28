@@ -59,8 +59,8 @@ one error." and the Save button disables until the field is corrected.
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Funder** | Yes | "Search for a funder by name" queries the public ROR registry as you type (from four characters). The first, pre-highlighted suggestion is always your typed text itself, styled like a registry match minus the country and registry mark ⚠ [A6](#a6); registry matches follow, each with name, country and the ROR mark. If the registry does not answer, suggestions simply never appear and the field shows no error ⚠ [A9](#a9). Picking a registry match fixes the funder's identity: its registry link appears and its name — taken from the registry, in every registry language available — is not editable by hand. On an install whose server cannot itself reach the registry, the pick errors and the funder saves with no name at all ⚠ [A3](#a3); the registry-name storage on a normally connected install awaits observation ⚠ [A10](#a10). Or pick your typed text — the panel switches to one name box per submission language ("Type the funder name in {language}"), the journal's primary language required, the others optional. Saving with neither: "Search and select a Funder or enter a Funder name". A "Delete" button under the chosen funder clears it so you can search again. |
-| **Funder Grants** | No | A sub-table of grants ("Add any grants associated with this funder (optional).") — columns **Grant DOI**, **Grant Number**, **Grant Name** — with an "Add" button for new rows and a per-row "Delete". All three cells are optional; a row left entirely blank is silently dropped on save. Grant DOI must look like a DOI ("10.xxxx/…"). Grant Number is checked against the funder's grant registry only when the journal's grant-validation setting is on and the funder is one of the supported major funders (Settings that modify behavior); a failed check is meant to refuse the save with "The given grant number could not be validated against the Funder's ROR ID." ⚠ [A11](#a11) |
+| **Funder** | Yes | "Search for a funder by name" queries the public ROR registry as you type (from four characters); the field's guidance reads 'Enter the full name of the institution below, avoiding any acronyms and select the name from the dropdown. (e.g. "Simon Fraser University")'. The first, pre-highlighted suggestion is always your typed text itself, styled like a registry match minus the country and registry mark ⚠ [A6](#a6); registry matches follow, each with name, country, the ROR mark and its own registry-record link (announced "Open link in a new tab."). If the registry does not answer, suggestions simply never appear and the field shows no error ⚠ [A9](#a9). Picking a registry match fixes the funder's identity: its registry link appears and its name — taken from the registry, in every registry language available — is not editable by hand. On an install whose server cannot itself reach the registry, the pick errors and the funder saves with no name at all ⚠ [A3](#a3); the registry-name storage on a normally connected install awaits observation ⚠ [A10](#a10). Or pick your typed text — the panel switches to one name box per submission language ("Type the funder name in {language}"), the primary-language box arriving pre-filled with your typed text. The primary language's box is marked required, but a save with any one language filled is accepted ⚠ [A12](#a12). Saving with neither a pick nor a name: "Search and select a Funder or enter a Funder name". A "Delete" button under the chosen funder clears it so you can search again. |
+| **Funder Grants** | No | A sub-table of grants ("Add any grants associated with this funder (optional).") — columns **Grant DOI**, **Grant Number**, **Grant Name** — with an "Add" button for new rows and a per-row "Delete". All three cells are optional; a row left entirely blank is silently dropped on save. Grant DOI must look like a DOI ("10.xxxx/…") — anything else is refused with "This is not formatted correctly." on the cell. Grant Number is checked against the funder's grant registry only when the journal's grant-validation setting is on and the funder is one of the supported major funders (Settings that modify behavior); a failed check is meant to refuse the save with "The given grant number could not be validated against the Funder's ROR ID." ⚠ [A11](#a11) |
 
 ## Rules & state
 
@@ -69,16 +69,18 @@ one error." and the Save button disables until the field is corrected.
    its grants. The wizard, the workflow and the landing page all present
    this same list.
 2. **Availability follows one journal setting.** The Funders setting on the
-   workflow settings' Metadata screen has three levels: switched off —
-   funding appears nowhere (no "Funding" entry in the workflow, no wizard
-   section, nothing for readers to see because nothing can be recorded);
+   workflow settings' Metadata screen has three levels: switched off — no
+   "Funding" entry in the workflow and no wizard section, so nothing new
+   can be recorded; funders recorded before the switch-off stay visible to
+   readers on the published page (Rule 9);
    enabled — the workflow's "Funding" entry appears but authors are not
    asked during submission; ask or require — the wizard's Details step
    additionally shows the Funders section. A new journal starts at "ask".
    <sup>c</sup>
 3. **Where it lives in the workflow.** The workflow screen's Publication
    area — titled "Preprint" on a preprint server — gains a **"Funding"**
-   entry; it opens a screen headed "Publication: Funding" carrying the
+   entry; it opens a screen headed "Publication: Funding" ("Preprint:
+   Funding" on a preprint server) carrying the
    funders list: heading "Funders", the explanation "Add formal funding
    information, ensuring funders are properly credited and appear in the
    publication metadata.", and a table whose one visible column is
@@ -124,9 +126,10 @@ one error." and the Save button disables until the field is corrected.
     follow it — the same list and add/edit panel as the workflow, always
     editable by the submitting author. On a press or preprint server the
     section's table still reads "No funders have been added." after a
-    save; the funder IS saved — only this table fails to refresh ⚠
-    [A4](#a4). The wizard's Review step lists the funder names under
-    "Details", or "None provided". <sup>b</sup>
+    save — and the Review step "None provided" — until the page is
+    reloaded; the funder IS saved, only the wizard's display fails to
+    refresh ⚠ [A4](#a4). The wizard's Review step lists the funder names
+    under "Details", or "None provided". <sup>b</sup>
 11. **"Require" warns without blocking.** With the setting at require, an
     author who declared no funders sees a warning on the wizard's Review
     step: "Funders are required." The final submit stays enabled and the
@@ -165,9 +168,9 @@ All on the workflow settings' **Metadata** screen, in its "Funders" section
   submission." / "Ask the author for funder metadata during submission." /
   "Require the author to add funder metadata before accepting their
   submission." — the three levels of Rule 2 (off / enabled / ask /
-  require). Unticking and later re-ticking the box preselects no level:
-  the earlier choice is forgotten and the manager must pick a radio again
-  ⚠ [A8](#a8).
+  require). Unticking and later re-ticking the box does not restore the
+  saved level: the choice arrives reset to "Do not request…" and the
+  manager must pick their level again ⚠ [A8](#a8).
 - The **"Funder Grant ID validation"** section ("Enable grant ID
   validation for supported funders (using the Zenodo API)."), checkbox
   **"Enable Grant ID validation."**: when on, a grant number entered for
@@ -206,8 +209,9 @@ Common to all three apps (OMP/OPS vocabulary per the
 1. **Record and revise funding in the workflow** — Journal Manager: open a
    submission's workflow, Publication area, "Funding". The list reads "No
    funders have been added." Press "Add Funder", type a funder name, pick
-   the typed text itself from the top of the suggestions, fill the
-   primary-language name box, and add one grant row (name, number, DOI
+   the typed text itself from the top of the suggestions, confirm the
+   primary-language name box (it arrives pre-filled with your typed
+   text), and add one grant row (name, number, DOI
    "10.1234/example"); Save. The row shows the typed name. Add a second
    funder by searching a well-known funder and picking its registry
    match — the name and registry link appear in the panel; Save. The row
@@ -222,7 +226,8 @@ Common to all three apps (OMP/OPS vocabulary per the
    for funder metadata: start a submission and walk to the Details step —
    it ends with a "Funders" section. Add a funder there just as in the
    workflow. On the Review step, the funder's name is listed under
-   "Details". Complete the submission; sign in as Journal Manager and open
+   "Details" (on a press or preprint server only after a reload — ⚠
+   [A4](#a4)). Complete the submission; sign in as Journal Manager and open
    the new submission's "Funding" — the author's funder is there.
    <sup>s2</sup>
 3. **Read a published item's funding** — Reader: on a published article
@@ -237,9 +242,10 @@ Common to all three apps (OMP/OPS vocabulary per the
    submission's workflow now shows no "Funding" entry in its Publication
    area, and an author starting a submission gets no Funders section on
    the Details step. Re-tick the setting and pick "Ask the author for
-   funder metadata during submission." again (the earlier level is not
-   preselected — [A8](#a8)) — both surfaces are back, the previously
-   recorded funders intact. <sup>s4</sup>
+   funder metadata during submission." again (the previously saved level
+   is not restored — the choice lands back on "Do not request funder
+   metadata from the author during submission." — ⚠ [A8](#a8)) — both
+   surfaces are back, the previously recorded funders intact. <sup>s4</sup>
 
 ## Findings register
 
@@ -251,16 +257,17 @@ and evidence live in the entry's footnote.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A3](#a3) | A registry funder picked while the server cannot reach the registry errors and saves permanently nameless | 🐞 | user-visible | — |
-| [A4](#a4) | On a press or preprint server the wizard's funders table still reads empty after a successful save | 🐞 | minor | — |
+| [A4](#a4) | On a press or preprint server the wizard's funders table and Review step still read empty after a successful save | 🐞 | minor | — |
 | [A5](#a5) | Ordering arrows and the typed-name boxes are broken for assistive technology | 🐞 | minor | — |
 | [A1](#a1) | "Require the author to add funder metadata" warns on the Review step without blocking the submission | ❓ | user-visible | — |
 | [A2](#a2) | Every publication version shows and edits the same funders list, though the screen presents funding per version | ❓ | minor | — |
 | [A6](#a6) | The typed-text suggestion masquerades as a registry match; real funders get saved unlinked unnoticed | ❓ | user-visible | — |
 | [A7](#a7) | A funder added after ordering jumps to the top of the saved order | ❓ | minor | — |
-| [A8](#a8) | Re-enabling funder metadata forgets the previous submission-time level | ❓ | minor | — |
+| [A8](#a8) | Re-enabling funder metadata resets the submission-time level to "Do not request" | ❓ | minor | — |
 | [A9](#a9) | A failed funder search shows no error — suggestions silently never appear | ❓ | minor | — |
 | [A10](#a10) | Registry-name storage on a normally connected install remains unobserved | ❓ | latent | — |
 | [A11](#a11) | The grant-number rejection message has never been seen on screen | ❓ | latent | — |
+| [A12](#a12) | The primary-language funder name is marked required, yet a save with any one language filled is accepted | ❓ | minor | — |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's funders | ✅ | user-visible | — |
 
 ### All apps
@@ -302,11 +309,12 @@ funder and re-adding it once the server can reach the registry.
 Basis: probe. <sup>f-a3</sup>
 
 <a id="a4"></a>
-**A4 — Wizard funders table does not refresh on a press or preprint server** · 🐞 · minor.
+**A4 — The wizard does not refresh after a funder save on a press or preprint server** · 🐞 · minor.
 On OMP and OPS, saving a funder in the wizard's Funders section leaves the
-section's table reading "No funders have been added." The funder is saved —
-the Review step and the workflow list show it — only this table fails to
-refresh. On OJS the same table updates in place, so the stale display reads
+section's table reading "No funders have been added." and the Review step
+reading "None provided" until the page is reloaded. The funder is saved —
+the workflow list shows it, and a reload brings both wizard displays
+current. On OJS the same displays update in place, so the staleness reads
 as a defect, not a design.
 Basis: probe. <sup>f-a4</sup>
 
@@ -341,12 +349,15 @@ Lean: defect — appending is what a saved ordering implies.
 Basis: probe. <sup>f-a7</sup>
 
 <a id="a8"></a>
-**A8 — Re-enabling funder metadata forgets the submission-time level** · ❓ · minor.
-Unticking "Enable funder metadata", saving, and re-ticking it preselects no
-request level: the earlier choice is gone and the manager must pick a radio
-again. What is saved if none is picked was not observed.
+**A8 — Re-enabling funder metadata resets the submission-time level** · ❓ · minor.
+Unticking "Enable funder metadata", saving, and re-ticking it does not
+restore the saved request level: the radios arrive preselecting "Do not
+request funder metadata from the author during submission." — a manager
+who saves without noticing silently downgrades the journal from "Ask" or
+"Require" to never asking authors.
 Question: intended reset, or a lost setting? Lean: minor defect — a saved
-choice should survive a toggle.
+choice should survive a toggle, and the silent landing on "Do not
+request…" invites an unnoticed policy change.
 Basis: probe. <sup>f-a8</sup>
 
 <a id="a9"></a>
@@ -382,6 +393,19 @@ the refusal is wired to the row's Number cell. Settled by saving one
 invalid number for a supported funder, validation on, on an install with
 working server internet access.
 Basis: skip branch probed; message text from code. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — The primary-language name is marked required but not enforced** · ❓ · minor.
+In the typed-name path the journal's primary language's box is marked
+"* Required", yet a save with it empty and only another language's box
+filled is accepted: the panel closes and the row shows the other
+language's name. The save actually requires a name in any ONE language
+(or a registry pick) — the marker promises more than the save enforces.
+Question: should the save refuse without a primary-language name, or
+should the required marker come off? Lean: the marker is the defect —
+the any-one-language rule is what the save enforces and what the list
+renders from.
+Basis: probe. <sup>f-a12</sup>
 
 ### OPS
 
@@ -427,7 +451,10 @@ EMPTY Publication nav group (no "Funding" entry at all); a manager-level
 account added, edited and reordered funders on ALREADY-PUBLISHED items on
 all three apps, with only the "This version has been published" banner
 shown. Screen headings live-confirmed the same day: page title
-"Publication: Funding", OPS nav group "Preprint", sr-only column header
+"Publication: Funding" on OJS and OMP, "Preprint: Funding" on OPS — the
+OPS app locale recasts the publication term to "Preprint"
+(`locale/en/submission.po` override of `submission.publication`) and the
+page title follows it; OPS nav group "Preprint", sr-only column header
 "More Actions".
 
 <a id="fn-b"></a>
@@ -445,7 +472,8 @@ empty list, a warning notification with `submission.funders.required`
 the wizard's blocking `errors` set (A1; warn-only live-confirmed
 2026-08-28, see f-a1). Live-probed 2026-08-28: the section renders last on
 the OJS and OPS Details steps; OMP's Chapters section follows it; on OMP
-and OPS the section's table failed to refresh after save (A4, f-a4).
+and OPS the section's table and the Review step failed to refresh after
+save (A4, f-a4).
 
 <a id="fn-c"></a>
 **c — the setting.** Context schema `funders`
@@ -460,16 +488,20 @@ API).", checkbox label "Enable Grant ID validation." — three distinct
 strings, live-read 2026-08-28). Live-probed 2026-08-28: fresh scratch
 contexts start ticked at "Ask the author…" (`request` default) on all
 three apps; unticking removes the workflow entry and wizard section,
-re-ticking restores both with recorded funders intact — but preselects no
-level (A8, f-a8). All three apps' `MetadataSettingsForm` subclasses call the
+re-ticking restores both with recorded funders intact — but resets the
+request level to "Do not request…" (A8, f-a8). With the setting off,
+funders recorded earlier stayed on the published item's landing page
+(live-probed 2026-08-28, OJS scratch journal; the landing templates
+render funders without consulting the setting — fn-f's identical markup
+on all three apps). All three apps' `MetadataSettingsForm` subclasses call the
 parent constructor and only add publisher-id fields — the Funders section
 is inherited-shared. Screen access (workflow settings) is the settings
 features' rule, not re-verified here. Pin note: the OJS checkout's pkp-lib
-(`87999c45`) carries one commit OMP/OPS's pin (`a9767b7f`) lacks — a
-form-config empty-value fallback touching `FieldFunder.php` /
-`FieldFunderGrants.php` / `PKPMetadataSettingsForm.php` plumbing only
-(checked 2026-08-28); no product-visible funder logic differs between the
-pins.
+(`87999c45`) carries one commit OMP/OPS's pin (`a9767b7f`) lacks —
+"Restore type-aware empty value fallback for form field configs", 18
+files across the shared form-field config layer, the funders setting's
+own field classes included (checked 2026-08-28). Every funder behavior
+probed this day — the A8 reset included — was identical on both pins.
 
 <a id="fn-d"></a>
 **d — the add/edit panel and validation.** Form: `FunderEditForm`
@@ -484,7 +516,8 @@ funder by name") over `FieldAffiliationsRorAutoSuggest` (queries
 four typed characters, `allowCustom: true` — accepting the typed string is
 the manual path); a registry pick stores `ror` + `rorObject` and POSTs the
 registry record to the local `rors/` API (the Side-effects cache); manual
-path renders one `FieldText` per submission language, primary required.
+path renders one `FieldText` per submission language, the primary marked
+required (enforced as any-one-language — A12, f-a12).
 Server validation (`PKP\funder\Repository::validate()`): name-or-ror
 required (`submission.funders.funderNameOrRorRequired`), ROR id shape and
 grant DOI regex from `lib/pkp/schemas/funder.json`; the funders API
@@ -606,7 +639,12 @@ completed. Mechanism: the warning in `review-details.tpl` is a
 setting — it is not added to the wizard's `errors` object that disables
 submit; `PKP\publication\Repository::validate()` enforces
 `METADATA_REQUIRE` for the plain-language summary but contains no funders
-check at all (grepped 2026-08-28, pinned checkouts).
+check at all (grepped 2026-08-28, pinned checkouts). Warn-only is
+observable only in isolation: with any other blocking error present
+(e.g. the missing-file error), Submit is disabled and the funders warning
+is easy to mistake for blocking — the isolated re-run (2026-08-28, OJS: a
+draft with an uploaded, genre-assigned file, no funders, require on)
+reached "Submission complete".
 
 <a id="fn-f-a2"></a>
 **f-a2 — A2 evidence.** fn-g's storage facts. The workflow's version
@@ -628,11 +666,13 @@ deterministic on the campaign's test installs, whose servers have no
 outbound internet access.
 
 <a id="fn-f-a4"></a>
-**f-a4 — A4 evidence.** Live-probed 2026-08-28, two runs per app: the
-wizard section's table stayed at "No funders have been added." after a
-200 save on OMP and OPS; OJS refreshed in place. Same shared
-`FunderManager` component on all three (identical ui-library commit) —
-the per-app difference is unexplained at code level.
+**f-a4 — A4 evidence.** Live-probed 2026-08-28, two runs per app: after a
+200 save on OMP and OPS the wizard section's table stayed at "No funders
+have been added." and the wizard's Review step read "Funders — None
+provided"; a full page reload brought both current (the saved name then
+listed). OJS refreshed in place. Same shared `FunderManager` component on
+all three (identical ui-library commit) — the per-app difference is
+unexplained at code level.
 
 <a id="fn-f-a5"></a>
 **f-a5 — A5 evidence.** Live-probed 2026-08-28 (OJS; shared ui-library
@@ -653,9 +693,11 @@ sequence 0; ordering writes 1..n). Live-probed 2026-08-28 (OJS): the new
 funder listed first above the ordered rows and held that place on reload.
 
 <a id="fn-f-a8"></a>
-**f-a8 — A8 evidence.** Live-probed 2026-08-28 on OJS, OMP and OPS:
-untick "Enable funder metadata", save, re-tick — no request-level radio
-preselected. What persists if saved without picking one was not probed.
+**f-a8 — A8 evidence.** Live-probed 2026-08-28 on OJS (including after a
+fresh page load), OMP and OPS: from a journal saved at "Ask the
+author…", untick "Enable funder metadata", save, re-tick — the first
+radio, "Do not request funder metadata from the author during
+submission.", arrives checked; the saved "Ask" level is not restored.
 
 <a id="fn-f-a9"></a>
 **f-a9 — A9 evidence.** Observed 2026-08-28: `ror.org` intermittently
@@ -679,6 +721,19 @@ lean. Live-probed 2026-08-28 (OJS scratch journal, validation on): only
 the unreachable branch was reachable — nonsense NIH grant number
 `XXNONSENSE99ZZ` saved silently; message text read from the locale file,
 never seen rendered.
+
+<a id="fn-f-a12"></a>
+**f-a12 — A12 evidence.** Live-probed 2026-08-28 on OJS, on a scratch
+journal with English (primary) + French (Canada) submission languages:
+the English box carried the "* Required" marker and the `required`
+attribute; clearing it and saving with only the French box filled
+("Fonds bilingue FR") was accepted — the panel closed, the stored names
+were empty English + the French value, and the row rendered the French
+name. Server rule (`PKP\funder\Repository::validate()`,
+`submission.funders.funderNameOrRorRequired`): a name in any one language
+or a ROR id satisfies the save; no primary-locale check exists. The panel
+is the shared `FunderEditForm` on all three apps; the enforcement gap was
+probed on OJS only.
 
 <a id="fn-f-ops1"></a>
 **f-ops1 — OPS1 evidence.** Live-probed 2026-08-28: the OPS submitting
