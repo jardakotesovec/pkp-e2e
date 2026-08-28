@@ -82,7 +82,7 @@ maintainer adjusts on review. Statuses: pending / in_progress / done / parked.
 | U40 | Publication metadata | OJS OMP OPS | M | pending | |
 | U41 | Contributors & affiliations | OJS OMP OPS | M | pending | |
 | U42 | Citations & references | OJS OMP OPS | M | pending | |
-| U43 | Funding | OJS OMP OPS | L | pending | |
+| U43 | Funding | OJS OMP OPS | L | in_progress | 2026-08-28 on PINNED apps (local-only, no CI): ojs ac67a6dd76, omp 244a04311c, ops 94f6bbc59a. Steps 1–7 DONE: spec finalized+lint-clean (register 3🐞+8❓+1✅; headliner A3 registry pick saves a nameless funder, all apps); 5 tests+setup per app, full suites green ×2 fresh-reset (OMP had 3 load-flaked runs in between — PHP 30s-timeout fatals under load 13+, log-evidenced, different tests each time, clean under normal load). REMAINING: step 8 claim check (fold `.reports/U43-funding/pending-fold.md` first — 2 test-author spec corrections: OMP A4 Review-step staleness, OPS "Preprint: Funding" heading), step 9 readability, sign-off. Paused low-budget, RUNBOOK resume rules apply. |
 | U44 | Identifiers (publisher IDs & URN) | OJS OMP OPS | M | pending | |
 | U45 | DOIs | OJS OMP OPS | H | pending | |
 | U46 | Galleys | OJS OPS | M | pending | |
