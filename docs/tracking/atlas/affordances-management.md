@@ -97,9 +97,9 @@
 | AFFM-058 | ojs omp ops | `GenreGridRow` LinkAction `editGenre` | Workflow submission · Components grid · row Edit. |
 | AFFM-059 | ojs omp ops | `GenreGridRow` LinkAction `deleteGenre` | Workflow submission · Components grid · row Delete (confirmation). |
 | AFFM-060 | ojs omp ops | `GenreGridHandler::initFeatures` `OrderGridItemsFeature` | Workflow submission · Components grid · drag-to-reorder. |
-| AFFM-061 | ojs omp ops | `managers/ContributorRoleManager/ContributorRoleManager.vue` button `manager.contributorRoles.add` | Workflow submission · Contributor roles manager · Add role (opens `EditContributorRoleFormModal`). |
-| AFFM-062 | ojs omp ops | `contributorRoleManagerStore.js` item action `common.edit` | Workflow submission · Contributor roles manager · row Edit. |
-| AFFM-063 | ojs omp ops | `contributorRoleManagerStore.js` item action `manager.contributorRoles.delete.role` · `ContributorRoleDeleteDialogBody` | Workflow submission · Contributor roles manager · row Delete (confirm dialog). |
+| AFFM-061 | ojs omp ops | `managers/ContributorRoleManager/ContributorRoleManager.vue` button `manager.contributorRoles.add` | Workflow submission · Contributor roles manager · Add role (opens `EditContributorRoleFormModal`). Claimed by: contributors-and-affiliations. |
+| AFFM-062 | ojs omp ops | `contributorRoleManagerStore.js` item action `common.edit` | Workflow submission · Contributor roles manager · row Edit. Claimed by: contributors-and-affiliations. |
+| AFFM-063 | ojs omp ops | `contributorRoleManagerStore.js` item action `manager.contributorRoles.delete.role` · `ContributorRoleDeleteDialogBody` | Workflow submission · Contributor roles manager · row Delete (confirm dialog). Claimed by: contributors-and-affiliations. |
 | AFFM-064 | ops | `ops-main/pages/management/SettingsHandler.php` hook `Template::Settings::workflow::submission` tab `authorScreening` · guard `if (empty($rules)) return` | Workflow submission · Author screening tab listing screening-plugin rules (read-only table; only when screening plugins register rules). |
 
 ## Workflow settings — Review (`management/settings/workflow` tab `review`; tab guard `{if $hasReviewStage}` — OPS has no review stage)

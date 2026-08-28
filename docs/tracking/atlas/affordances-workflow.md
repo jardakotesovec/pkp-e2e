@@ -197,17 +197,17 @@
 
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
-| AFFW-146 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="toggleOrdering"` icon `Sort` | Contributors panel · Order button (guard: `v-if="canEditPublication"`, `:disabled="isLoading"`, `:is-active="isOrdering"`) |
-| AFFW-147 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="cancelOrdering"` `common.cancel` | Contributors panel · cancel ordering (guard: `v-if="isOrdering"`) |
-| AFFW-148 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openPreviewModal"` `contributor.listPanel.preview` | Contributors panel · Preview button (guard: `v-if="!isOrdering"`) |
-| AFFW-149 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openAddModal"` `grid.action.addContributor` | Contributors panel · Add contributor (guard: `v-if="!isOrdering && canEditPublication"`) |
-| AFFW-150 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `<Orderer @up="contributorItemOrderUp" @down="contributorItemOrderDown">` | Contributors item · up/down reorder controls (guard: `v-if="isOrdering"` inside `#item-actions`, itself `v-if="canEditPublication"`) |
-| AFFW-151 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="setPrimaryContact(item.id)"` `author.users.contributor.setPrincipalContact` | Contributors item · set principal contact (guard: `v-else` of `publication.primaryContactId == item.id`, which renders the principal-contact `Badge`) |
-| AFFW-152 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openEditModal(item.id)"` `common.edit` | Contributors item · Edit button |
-| AFFW-153 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openDeleteModal(item.id)"` `common.delete` | Contributors item · Delete button, warnable |
-| AFFW-154 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `contributorsApiUrl` / `publicationApiUrl` / `setItemOrderSequence` / `getAndUpdatePublication` / `formSuccess` / `updateForm` | Contributors panel · API plumbing for add/edit/delete/order/primary-contact |
-| AFFW-155 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsEditModal.vue` · `SideModalBody` + `PkpForm` | Contributors add/edit side modal · emits `updateForm` / `formSuccess` |
-| AFFW-156 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsPreviewModal.vue` · `PkpTable` rows | Contributors preview modal · abbreviated / publication-lists / full author strings (`authorsStringShort`, `authorsStringIncludeInBrowse`, `authorsString`) |
+| AFFW-146 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="toggleOrdering"` icon `Sort` | Contributors panel · Order button (guard: `v-if="canEditPublication"`, `:disabled="isLoading"`, `:is-active="isOrdering"`) Claimed by: contributors-and-affiliations. |
+| AFFW-147 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="cancelOrdering"` `common.cancel` | Contributors panel · cancel ordering (guard: `v-if="isOrdering"`) Claimed by: contributors-and-affiliations. |
+| AFFW-148 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openPreviewModal"` `contributor.listPanel.preview` | Contributors panel · Preview button (guard: `v-if="!isOrdering"`) Claimed by: contributors-and-affiliations. |
+| AFFW-149 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openAddModal"` `grid.action.addContributor` | Contributors panel · Add contributor (guard: `v-if="!isOrdering && canEditPublication"`) Claimed by: contributors-and-affiliations. |
+| AFFW-150 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `<Orderer @up="contributorItemOrderUp" @down="contributorItemOrderDown">` | Contributors item · up/down reorder controls (guard: `v-if="isOrdering"` inside `#item-actions`, itself `v-if="canEditPublication"`) Claimed by: contributors-and-affiliations. |
+| AFFW-151 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="setPrimaryContact(item.id)"` `author.users.contributor.setPrincipalContact` | Contributors item · set principal contact (guard: `v-else` of `publication.primaryContactId == item.id`, which renders the principal-contact `Badge`) Claimed by: contributors-and-affiliations. |
+| AFFW-152 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openEditModal(item.id)"` `common.edit` | Contributors item · Edit button Claimed by: contributors-and-affiliations. |
+| AFFW-153 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `@click="openDeleteModal(item.id)"` `common.delete` | Contributors item · Delete button, warnable Claimed by: contributors-and-affiliations. |
+| AFFW-154 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsListPanel.vue` · `contributorsApiUrl` / `publicationApiUrl` / `setItemOrderSequence` / `getAndUpdatePublication` / `formSuccess` / `updateForm` | Contributors panel · API plumbing for add/edit/delete/order/primary-contact Claimed by: contributors-and-affiliations. |
+| AFFW-155 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsEditModal.vue` · `SideModalBody` + `PkpForm` | Contributors add/edit side modal · emits `updateForm` / `formSuccess` Claimed by: contributors-and-affiliations. |
+| AFFW-156 | ojs,omp,ops | `components/ListPanel/contributors/ContributorsPreviewModal.vue` · `PkpTable` rows | Contributors preview modal · abbreviated / publication-lists / full author strings (`authorsStringShort`, `authorsStringIncludeInBrowse`, `authorsString`) Claimed by: contributors-and-affiliations. |
 
 ## Wizard list panel — Reviewer suggestions
 
@@ -533,7 +533,7 @@
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
 | AFFW-395 | ojs,omp,ops | `workflowConfigEditorialOJS.js` / `workflowConfigAuthorOJS.js` → `PublicationConfig.titleAbstract` → `WorkflowPublicationForm formName:'titleAbstract'` | Title & Abstract · publication form (guard: `canEdit: permissions.canEditPublication`) Claimed by: publication-metadata. |
-| AFFW-396 | ojs,omp,ops | `PublicationConfig.contributors` → `ContributorManager` | Contributors · contributor manager (editorial passes `canEdit: permissions.canEditPublication`; author config omits `canEdit`) |
+| AFFW-396 | ojs,omp,ops | `PublicationConfig.contributors` → `ContributorManager` | Contributors · contributor manager (both the editorial and author workflow configs pass `canEdit: permissions.canEditPublication` (note corrected 2026-08-28 at pinned ui-library — the earlier "author config omits canEdit" no longer holds)) Claimed by: contributors-and-affiliations. |
 | AFFW-397 | ojs,omp,ops | `PublicationConfig.metadata` → `WorkflowPublicationForm formName:'metadata'`, `noFieldsMessage` | Metadata · metadata form; shows "No metadata fields are currently enabled." when form has no fields Claimed by: publication-metadata. |
 | AFFW-398 | ojs,omp,ops | `PublicationConfig.citations` → `CitationManager` (`citationsMetadataLookup`) | Citations · citation manager (guard: `canEdit: permissions.canEditPublication`) |
 | AFFW-399 | ojs,omp,ops | `PublicationConfig.dataAvailabilityAndCitation` → `DataCitationManager` | Data availability & citation · data citation manager (guard: `pageInitConfig.publicationSettings.supportsDataCitations`) |
@@ -712,7 +712,7 @@
 
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
-| AFFW-532 | ojs,omp,ops | `src/managers/ContributorManager/ContributorManager.vue` → hosts `ContributorsListPanel` with `canEditPublication` from prop `canEdit` | Contributors tab · manager wrapper · all controls are the ContributorsListPanel atoms in Part 2 (Order/Cancel/Preview/Add/Orderer/set-primary/Edit/Delete/edit modal) |
+| AFFW-532 | ojs,omp,ops | `src/managers/ContributorManager/ContributorManager.vue` → hosts `ContributorsListPanel` with `canEditPublication` from prop `canEdit` | Contributors tab · manager wrapper · all controls are the ContributorsListPanel atoms in Part 2 (Order/Cancel/Preview/Add/Orderer/set-primary/Edit/Delete/edit modal) Claimed by: contributors-and-affiliations. |
 
 ## CitationManager
 
@@ -959,12 +959,12 @@
 
 | ID | apps | pointer | screen · control · description |
 |---|---|---|---|
-| AFFW-681 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · `<form id="editAuthor" action=updateAuthor>` + `{fbvFormButtons id="step2Buttons" submitText="common.save"}` | Contributor add/edit form (deprecated 3.4) · Save/Cancel |
-| AFFW-682 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · radios `userGroupId` in section `userGroupId` | Contributor form · contributor role radio group |
-| AFFW-683 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · checkboxes `primaryContact`, `includeInBrowse`, `{$additionalCheckboxes}` | Contributor form · principal-contact / include-in-browse toggles + app-injected extras |
-| AFFW-684 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · textarea `competingInterests` | Contributor form · competing interests (guard: `{if $requireAuthorCompetingInterests}`) |
-| AFFW-685 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/primaryContact.tpl` · `div#isChecked` | Contributors grid cell · principal-contact checkmark (guard: `{if $isPrincipalContact}`) |
-| AFFW-686 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/includeInBrowse.tpl` · `div#isChecked` | Contributors grid cell · include-in-browse checkmark (guard: `{if $includeInBrowse}`) |
+| AFFW-681 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · `<form id="editAuthor" action=updateAuthor>` + `{fbvFormButtons id="step2Buttons" submitText="common.save"}` | Contributor add/edit form (deprecated 3.4) · Save/Cancel Claimed by: contributors-and-affiliations. |
+| AFFW-682 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · radios `userGroupId` in section `userGroupId` | Contributor form · contributor role radio group Claimed by: contributors-and-affiliations. |
+| AFFW-683 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · checkboxes `primaryContact`, `includeInBrowse`, `{$additionalCheckboxes}` | Contributor form · principal-contact / include-in-browse toggles + app-injected extras Claimed by: contributors-and-affiliations. |
+| AFFW-684 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/form/authorForm.tpl` · textarea `competingInterests` | Contributor form · competing interests (guard: `{if $requireAuthorCompetingInterests}`) Claimed by: contributors-and-affiliations. |
+| AFFW-685 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/primaryContact.tpl` · `div#isChecked` | Contributors grid cell · principal-contact checkmark (guard: `{if $isPrincipalContact}`) Claimed by: contributors-and-affiliations. |
+| AFFW-686 | ojs,omp,ops | `lib/pkp/templates/controllers/grid/users/author/includeInBrowse.tpl` · `div#isChecked` | Contributors grid cell · include-in-browse checkmark (guard: `{if $includeInBrowse}`) Claimed by: contributors-and-affiliations. |
 
 ## Information Center (notes / history)
 

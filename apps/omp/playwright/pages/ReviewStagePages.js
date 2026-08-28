@@ -144,8 +144,32 @@ async function walkDecisionWizard(page, {maxSteps = 6} = {}) {
             name: /Record (Editorial )?(Decision|Recommendation)/,
         });
         if (await record.count()) {
-            await record.click();
-            await expect(completion).toBeVisible({timeout: 30_000});
+            // The wizard can re-render under the click (the same
+            // click-lost-to-re-render disease as the contributors panel;
+            // observed once in the full-suite gate: wizard still open, no
+            // decisions POST in any worker log). Outcome-keyed bounded
+            // re-click: success is the completion panel appearing; stop
+            // clicking once the decisions POST is on the wire (recording a
+            // decision twice is not idempotent); click errors (detached
+            // nodes mid-re-render) are swallowed and retried.
+            let posted = false;
+            page.waitForRequest(
+                (r) => r.url().includes('/decisions') && r.method() === 'POST',
+                {timeout: 60_000}
+            ).then(
+                () => (posted = true),
+                () => {}
+            );
+            await expect(async () => {
+                if (!(await completion.count()) && !posted) {
+                    try {
+                        await record.first().click({timeout: 2_000});
+                    } catch {
+                        // retried by toPass; success is the completion text
+                    }
+                }
+                expect(await completion.count()).toBeGreaterThan(0);
+            }).toPass({intervals: [500, 1_000, 2_000], timeout: 60_000});
             return;
         }
         await page.getByRole('button', {name: 'Continue', exact: true}).click();

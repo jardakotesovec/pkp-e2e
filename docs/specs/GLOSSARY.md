@@ -43,6 +43,12 @@ opportunistically (self-healing).
   Contributors list). Distinct from the **Author role** — the account that
   submitted and follows the submission; a contributor need not have an
   account at all.
+- **Primary contact (contributor)** — the one contributor on a publication's
+  Contributors list that editorial correspondence about the work is addressed
+  to (the list's "Primary Contact" badge; the submitting author's record
+  arrives holding it). Distinct from the journal's **principal contact**
+  ("Invitations, accounts, ORCID" below) — the configured identity system
+  emails are sent from.
 
 ## Roles and access
 
@@ -181,7 +187,8 @@ opportunistically (self-healing).
   cannot be invited to a role.
 - **Principal contact** — the journal's configured contact identity that
   system emails (password resets, ORCID requests, automatic reminders) are
-  sent from.
+  sent from. Distinct from a publication's **primary contact (contributor)** —
+  the badge on its Contributors list ("The world" above).
 - **ORCID iD: verified vs unauthenticated** — *verified* means the person
   completed ORCID's own sign-in for this install, so the iD carries an
   access token (solid icon); an iD merely typed or imported is

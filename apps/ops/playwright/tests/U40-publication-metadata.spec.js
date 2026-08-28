@@ -477,17 +477,32 @@ test.describe('Publication metadata (U40)', () => {
         await expect(warning).toBeVisible({timeout: 30_000});
 
         // The form stays editable: change the abstract and save (Rule 8).
+        // Content-verified edit: a late async component refresh can remount
+        // the form and revert the editor to the server value after the fill
+        // (payload-probed: the save then POSTs the OLD abstract — 200 +
+        // toast, stale DB, the mechanism behind today's gate reds). Each
+        // bounded attempt redoes fill+save and passes only when the save
+        // response's publication JSON holds the new abstract.
         await screen.openPage('Title & Abstract');
-        await screen.fillRichText(
-            'titleAbstract',
-            'abstract',
-            'en',
-            `Post-publication abstract ${tag}.`
-        );
-        await screen.save();
+        await expect(async () => {
+            await screen.fillRichText(
+                'titleAbstract',
+                'abstract',
+                'en',
+                `Post-publication abstract ${tag}.`
+            );
+            const response = await screen.save();
+            const publication = await response.json();
+            expect(publication.abstract?.en ?? '').toContain(
+                `Post-publication abstract ${tag}.`
+            );
+        }).toPass({intervals: [1_000, 2_000], timeout: 90_000});
 
         // The anonymous reader sees the new abstract at once on the
-        // preprint's landing page.
+        // preprint's landing page. (The two gate reds here were a harness
+        // bug — the editor content wasn't committed to the form model
+        // before Save, so the POST persisted the OLD abstract and the
+        // reader honestly rendered DB truth; fixed in fillRichText.)
         await page.goto(`/index.php/${PK}${PK_PREFIX}/preprint/view/${submissionId}`);
         await expect(
             page.getByRole('heading', {name: `Submission ${tag}`})

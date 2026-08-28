@@ -105,7 +105,7 @@
 | JOB-054 | ojs omp ops | `PKP\task\ReviewReminder` | Scheduled — dispatches automated reviewer-reminder jobs; registered daily (OJS + OMP Schedulers). |
 | JOB-055 | ojs omp ops | `PKP\task\StatisticsReport` | Scheduled — dispatches monthly editorial statistics report notify/mail jobs; registered monthlyOn(1) (PKPScheduler, all apps). |
 | JOB-056 | ojs omp ops | `PKP\task\UpdateIPGeoDB` | Scheduled — updates the DB-IP city lite database for Geo stats; registered monthlyOn(10) (PKPScheduler, all apps). |
-| JOB-057 | ojs omp ops | `PKP\task\UpdateRorRegistryDataset` | Scheduled — updates the ROR registry tables; registered monthly (PKPScheduler, all apps). |
+| JOB-057 | ojs omp ops | `PKP\task\UpdateRorRegistryDataset` | Scheduled — updates the ROR registry tables; registered monthly (PKPScheduler, all apps). Claimed by: contributors-and-affiliations. |
 
 ### App scheduled tasks — <app>/classes/tasks/
 

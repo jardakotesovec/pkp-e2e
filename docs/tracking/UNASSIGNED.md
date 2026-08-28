@@ -167,3 +167,15 @@ until their specs exist. Do not force-claim the defects themselves.
    Code-verified 2026-08-28 (spec-author sweep of all three checkouts).
    Resolves: maintainer confirmation as dead atlas row (atom retire
    candidate).
+9. **GRID-051 + AFFW-681..686 dead-surface candidates** — attached to
+   **U41** (claimed; the contributors-and-affiliations spec's Reference
+   table documents the waiver). The legacy pre-3.4 author grid
+   (`PKP\controllers\grid\users\author\AuthorGridHandler` and its six row
+   affordances) has no mount site in any of the session's pinned checkouts
+   (ojs ac67a6dd76, omp 244a04311c, ops 94f6bbc59a): no template, page or
+   plugin references the grid's component route — only the class files and
+   autoloader entries remain — and OPS lacks the app-side form class the
+   handler instantiates, so invoking it there would fatal. Code-verified
+   2026-08-28 (spec-author sweep of templates/pages/plugins in all three
+   checkouts). Resolves: maintainer confirmation as dead code (removal
+   candidate).

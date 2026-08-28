@@ -55,8 +55,8 @@
 | VUE-030 | ojs,omp,ops | managers/CategoryManager/CategoryManager.vue | Category tree management (mounted via each app's templates/management/context.tpl) |
 | VUE-031 | omp | managers/ChapterManager/ChapterManager.vue | Monograph chapters management (WorkflowPageOMP only) |
 | VUE-032 | ojs,omp,ops | managers/CitationManager/CitationManager.vue | Publication citations list management (all three WorkflowPage variants) |
-| VUE-033 | ojs,omp,ops | managers/ContributorManager/ContributorManager.vue | Publication contributors management (all three WorkflowPage variants) |
-| VUE-034 | ojs,omp,ops | managers/ContributorRoleManager/ContributorRoleManager.vue | Contributor-role (CRediT-style) settings manager (lib/pkp management/workflow.tpl) |
+| VUE-033 | ojs,omp,ops | managers/ContributorManager/ContributorManager.vue | Publication contributors management (all three WorkflowPage variants) Claimed by: contributors-and-affiliations. |
+| VUE-034 | ojs,omp,ops | managers/ContributorRoleManager/ContributorRoleManager.vue | Contributor-role (CRediT-style) settings manager (lib/pkp management/workflow.tpl) Claimed by: contributors-and-affiliations. |
 | VUE-035 | ojs,omp,ops | managers/DataCitationManager/DataCitationManager.vue | Data citations management (SubmissionWizardPage + all WorkflowPage variants) |
 | VUE-036 | ojs,omp,ops | managers/DiscussionManager/DiscussionManager.vue | Workflow discussions & tasks manager (all three WorkflowPage variants) |
 | VUE-037 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerReviewer.vue | Reviewer-facing discussions surface (lib/pkp reviewer/review/step3.tpl, reviewCompleted.tpl) |
@@ -83,7 +83,7 @@
 | VUE-053 | ojs,omp,ops | managers/FileManager/modals/FileMetadataForm.vue | File metadata edit modal (registered as controller in all three app load.js; also opened from legacy file grids) |
 | VUE-054 | ojs,omp,ops | managers/CategoryManager/EditCategoryFormModal.vue | Add/edit category side modal |
 | VUE-055 | ojs,omp,ops | managers/CitationManager/modals/CitationEditModal.vue | Edit citation side modal |
-| VUE-056 | ojs,omp,ops | managers/ContributorRoleManager/EditContributorRoleFormModal.vue | Add/edit contributor role side modal |
+| VUE-056 | ojs,omp,ops | managers/ContributorRoleManager/EditContributorRoleFormModal.vue | Add/edit contributor role side modal Claimed by: contributors-and-affiliations. |
 | VUE-057 | ojs,omp,ops | managers/DataCitationManager/modals/DataCitationEditModal.vue | Edit data citation side modal |
 | VUE-058 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerFormModal.vue | Add/edit discussion or task side modal |
 | VUE-059 | ojs,omp,ops | managers/DiscussionManager/DiscussionManagerFormDisplayModal.vue | Discussion/task read-only display side modal |
@@ -120,8 +120,8 @@
 | VUE-090 | ojs,omp,ops | components/Form/fields/VocabularyModal/VocabularyModal.vue | Controlled-vocabulary browser side modal (FieldBaseAutosuggest) Claimed by: publication-metadata. |
 | VUE-091 | ojs,omp,ops | components/InsertSummaryOfChanges/InsertSummaryOfChangesModal.vue | Insert summary-of-changes side modal (workflow publication form / version form) |
 | VUE-092 | ojs,omp,ops | components/ListPanel/announcements/AnnouncementsEditModal.vue | Add/edit announcement side modal (AnnouncementsListPanel; site admin + context settings) |
-| VUE-093 | ojs,omp,ops | components/ListPanel/contributors/ContributorsEditModal.vue | Add/edit contributor side modal (ContributorsListPanel) |
-| VUE-094 | ojs,omp,ops | components/ListPanel/contributors/ContributorsPreviewModal.vue | Contributor display-formats preview side modal (ContributorsListPanel) |
+| VUE-093 | ojs,omp,ops | components/ListPanel/contributors/ContributorsEditModal.vue | Add/edit contributor side modal (ContributorsListPanel) Claimed by: contributors-and-affiliations. |
+| VUE-094 | ojs,omp,ops | components/ListPanel/contributors/ContributorsPreviewModal.vue | Contributor display-formats preview side modal (ContributorsListPanel) Claimed by: contributors-and-affiliations. |
 | VUE-095 | ojs,omp,ops | components/ListPanel/doi/DoiItemVersionModal.vue | Per-version DOI display side modal (DoiListItem) |
 | VUE-096 | ojs,omp,ops | components/ListPanel/doi/DoiStatusInfoModal.vue | DOI registration status info side modal (DoiListPanel) |
 | VUE-097 | ojs,omp,ops | components/ListPanel/highlights/HighlightsEditModal.vue | Add/edit highlight side modal (HighlightsListPanel; site admin + context settings) |

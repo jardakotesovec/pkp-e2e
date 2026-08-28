@@ -556,6 +556,11 @@ test.describe('Publication metadata (U40)', () => {
         const abstractBody = richBody(managerPage, /^Abstract/);
         await abstractBody.click();
         await abstractBody.fill(newAbstract);
+        // Commit the editor content to the form model before Save (TinyMCE
+        // syncs v-model on change, reliably fired on blur) — without it a
+        // racing Save can persist the OLD abstract: 200 + toast, stale DB
+        // (the mechanism behind the OPS U40 S4 gate reds).
+        await abstractBody.blur();
         await savePublicationForm(managerPage);
 
         await page.goto(bookUrl(PK, submissionId));

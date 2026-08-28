@@ -202,8 +202,32 @@ exports.DecisionPage = class DecisionPage {
     /** Record the decision and return to the workflow via "View Submission". */
     async record() {
         await this.awaitComposerLoaded();
-        await this.recordButton.click();
-        await expect(this.viewSubmissionLink).toBeVisible({timeout: 30_000});
+        // The wizard can re-render under the click (click-lost-to-re-render,
+        // observed on the OMP twin in the full-suite gate). Outcome-keyed
+        // bounded re-click: success is the success dialog's "View
+        // Submission" link; stop clicking once the decisions POST is on the
+        // wire (recording a decision twice is not idempotent); click errors
+        // (detached nodes mid-re-render) are swallowed and retried.
+        let posted = false;
+        this.page
+            .waitForRequest(
+                (r) => r.url().includes('/decisions') && r.method() === 'POST',
+                {timeout: 60_000}
+            )
+            .then(
+                () => (posted = true),
+                () => {}
+            );
+        await expect(async () => {
+            if (!(await this.viewSubmissionLink.count()) && !posted) {
+                try {
+                    await this.recordButton.click({timeout: 2_000});
+                } catch {
+                    // retried by toPass; success is the completion link
+                }
+            }
+            expect(await this.viewSubmissionLink.count()).toBeGreaterThan(0);
+        }).toPass({intervals: [500, 1_000, 2_000], timeout: 60_000});
         await this.viewSubmissionLink.click();
         await expect(this.page.getByRole('heading', {name: /^Workflow:/})).toBeVisible({
             timeout: 30_000,

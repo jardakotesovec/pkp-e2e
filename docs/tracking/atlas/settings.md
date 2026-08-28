@@ -26,13 +26,13 @@
 
 | ID | apps | stable pointer | one line |
 |---|---|---|---|
-| SET-001 | ojs omp ops | lib/pkp/schemas/affiliation.json | Affiliation — institution an author is associated with (5 props). |
+| SET-001 | ojs omp ops | lib/pkp/schemas/affiliation.json | Affiliation — institution an author is associated with (5 props). Claimed by: contributors-and-affiliations. |
 | SET-002 | ojs omp ops | lib/pkp/schemas/announcement.json | Announcement — announcement/news item (12 props). |
-| SET-003 | ojs omp ops | lib/pkp/schemas/author.json | Author — an author of a publication (32 props). |
+| SET-003 | ojs omp ops | lib/pkp/schemas/author.json | Author — an author of a publication (32 props). Claimed by: contributors-and-affiliations. |
 | SET-004 | ojs omp ops | lib/pkp/schemas/category.json | Category — a category of content (12 props). |
 | SET-005 | ojs omp ops | lib/pkp/schemas/citation.json | Citation — reference in a publication to another publication (27 props). |
 | SET-006 | ojs omp ops | lib/pkp/schemas/context.json | Context — journal/press/server settings entity (133 props). Overlaid by all three apps (SET-029, SET-035, SET-041). |
-| SET-007 | ojs omp ops | lib/pkp/schemas/contributorRole.json | ContributorRole — contributor role for contributors (5 props). |
+| SET-007 | ojs omp ops | lib/pkp/schemas/contributorRole.json | ContributorRole — contributor role for contributors (5 props). Claimed by: contributors-and-affiliations. |
 | SET-008 | ojs omp ops | lib/pkp/schemas/dataCitation.json | DataCitation — a data citation in a publication (11 props). |
 | SET-009 | ojs omp ops | lib/pkp/schemas/decision.json | Editorial Decision — accept/decline/request-revisions etc. (12 props). |
 | SET-010 | ojs omp ops | lib/pkp/schemas/doi.json | DOI — persistent identifier assigned to published items (6 props). |
@@ -47,7 +47,7 @@
 | SET-019 | ojs omp ops | lib/pkp/schemas/publication.json | Publication — published version of a submission (52 props). Overlaid by all three apps (SET-032, SET-037, SET-043). Claimed by: publication-metadata. |
 | SET-020 | ojs omp ops | lib/pkp/schemas/reviewAssignment.json | Review Assignment — reviewer's assignment to review a submission (43 props). Claimed by: reviewer-assignment-and-management. |
 | SET-021 | ojs omp ops | lib/pkp/schemas/reviewRound.json | Review Round — round of review assignments in the review stage (7 props). Claimed by: review-stage-and-rounds. |
-| SET-022 | ojs omp ops | lib/pkp/schemas/ror.json | Ror — cached institution record from the ror.org data dump (7 props). |
+| SET-022 | ojs omp ops | lib/pkp/schemas/ror.json | Ror — cached institution record from the ror.org data dump (7 props). Claimed by: contributors-and-affiliations. |
 | SET-023 | ojs omp ops | lib/pkp/schemas/section.json | Section — journal/server section or press series (6 props). Overlaid by all three apps (SET-033, SET-038, SET-044). |
 | SET-024 | ojs omp ops | lib/pkp/schemas/site.json | Site — overall site hosting one or more contexts; site-level settings entity (37 props). |
 | SET-025 | ojs omp ops | lib/pkp/schemas/submission.json | Submission — a submission to the journal/press/server (32 props). Overlaid by all three apps (SET-034, SET-039, SET-045). Claimed by: submission-wizard. |

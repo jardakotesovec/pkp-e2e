@@ -125,6 +125,18 @@ exports.PublicationScreen = class PublicationScreen {
             await body.fill(text);
             await expect(body).toContainText(text);
         }
+        // Commit the editor content to the Vue form model (v-model syncs on
+        // TinyMCE change events): without an explicit change, a Save racing
+        // the input sync POSTs the field's stale value — 200 + "Saved"
+        // toast, old content persisted (observed twice in the full-suite
+        // gate on U40 S4: DB kept the seeded abstract). Same idiom as the
+        // OJS setRichText helper, which has never exhibited the race.
+        const id = this.controlId(formId, name, locale);
+        await this.page.evaluate(
+            // @ts-ignore tinymce is the page's global
+            (fieldId) => window.tinymce?.get(fieldId)?.fire('change'),
+            id
+        );
     }
 
     /** Read a rich-text field's stored HTML through the TinyMCE API
@@ -173,10 +185,15 @@ exports.PublicationScreen = class PublicationScreen {
             {timeout: 30_000}
         );
         await this.saveButton().click();
-        await saved;
+        const savedResponse = await saved;
         await expect(
             this.page.locator('[role="status"]', {hasText: 'Saved'}).first()
         ).toBeVisible({timeout: 30_000});
+        // The saved publication JSON — callers can verify what actually
+        // persisted (a late component refresh can remount the form and
+        // revert an uncommitted editor value before Save serializes it,
+        // making the save honestly persist the OLD content).
+        return savedResponse;
     }
 
     /** The "Current Submission Language: {language}" readout (Rule 13a).
