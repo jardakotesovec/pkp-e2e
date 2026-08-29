@@ -58,12 +58,36 @@ a real investigation when the class's watch condition trips.
   **Watch condition**: another incident first-failing at U01 S7 → chase the
   in-flight request on that screen and consider webServer crash resilience
   (upstream-sync 2026-08-27 entry has the evidence).
+  *2026-08-29 root-cause session*: the cascade half is FIXED — the
+  config-factory webServer command now wraps `php -S` in a bounded restart
+  loop (validated: SIGSEGV'd server respawns in ~1 s and serves again), and
+  runs it with `max_execution_time=120` so a merely slow request (the 30 s
+  DB-time-limit incident class) no longer turns fatal. The crash half stays
+  open: the 33106002377 segfault's in-flight request is (by the healthy-load
+  request sequence of that screen) `GET /api/v1/_submissions/viewsCount`;
+  unpinnable without a core dump — if it recurs, add core-dump capture to
+  CI before diagnosing further. A future incident now costs one test, not a
+  cascade.
 - **Decision-wizard timing under load** — U26 S5/S7/S8 (and U49 S11,
   2026-08-29) exceed waits during full-suite runs; green in isolation/on
   retry. Three U26 incidents 2026-08-27 alone. **Watch condition**: recurs
   in CI with retries exhausted → revisit the decision-wizard waits.
+  *2026-08-29 root-cause session*: this is the app-changes **row 9** race
+  wearing a timing costume — the post-save async publication refresh
+  remounts workflow components mid-interaction; under load the refresh
+  window widens, so clicks land in remounts and outcome waits blow. The
+  harness's outcome-keyed retries (Record Decision re-click, ordering
+  loops, rich-text commits) are mitigations; the fix is upstream (stop
+  remounting on refresh / let in-progress UI state survive it — row 9's
+  "app fix" column). Reported to the team with the 2026-08-29 flake report.
 - **Corrupted `.auth` storage-state JSON** — occasional local flake shape
   (2026-08-27); worth a harness look if it appears in CI.
+  *2026-08-29: FIXED* — root cause was `auth.js` writing the per-user state
+  file non-atomically (`context.storageState({path})`) while parallel
+  workers read the same path; a reader could see a truncated JSON. Now
+  written temp-file + rename (atomic) and the probe tolerates an unreadable
+  file by falling through to a fresh login. Recurrence would be a new bug,
+  not this class.
 
 ## Resolved
 

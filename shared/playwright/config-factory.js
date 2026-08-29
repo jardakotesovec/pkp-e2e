@@ -145,12 +145,26 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         // default — redirect it to per-server log files instead. A server kept
         // alive by reuseExistingServer holds its old log open, so the file is
         // only truncated when a server actually (re)starts.
+        //
+        // The restart loop is crash resilience: a `php -S` process death
+        // (observed in CI: segfault; locally: a 30 s execution-limit fatal
+        // inside a DB call) otherwise strands its worker — Playwright never
+        // restarts a webServer, so every remaining test on that port fails in
+        // milliseconds (20–33-test cascades; ci-triage.md "dead-worker
+        // cascade"). The loop respawns the server within a second, bounded so
+        // a port conflict can't spin forever; on teardown Playwright kills
+        // the whole process tree, shell included, so the loop can't respawn
+        // after a run. max_execution_time=120 keeps a merely slow request
+        // (seeding under load hits the default 30 s ceiling) from becoming a
+        // fatal at all; genuinely hung requests are already bounded by the
+        // dead-proxy config and the test timeout.
         webServer: Array.from({length: workers}, (_, i) => {
             const logDir = path.join(suiteDir, '.server-logs');
             fs.mkdirSync(logDir, {recursive: true});
             const logFile = path.join(logDir, `server-${basePort + i}.log`);
+            const serve = `php -d max_execution_time=120 -S 127.0.0.1:${basePort + i} -t "${appRoot}" >> "${logFile}" 2>&1`;
             return {
-                command: `php -S 127.0.0.1:${basePort + i} -t "${appRoot}" > "${logFile}" 2>&1`,
+                command: `: > "${logFile}"; n=0; until ${serve}; do s=$?; n=$((n+1)); [ "$n" -ge 20 ] && exit 1; echo "[harness] php -S died (exit $s); restart $n" >> "${logFile}"; sleep 1; done`,
                 url: `http://127.0.0.1:${basePort + i}/README.md`,
                 reuseExistingServer: true,
                 timeout: 30_000,

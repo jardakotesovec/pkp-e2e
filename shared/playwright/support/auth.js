@@ -16,7 +16,11 @@
  * redirects-disabled status probe would re-login everyone on every run.
  *
  * Under parallel workers two workers may race on a missing/stale file; both
- * log in (concurrent sessions are allowed), last write wins.
+ * log in (concurrent sessions are allowed), last write wins. The state file
+ * is written atomically (temp file + rename) so a concurrent reader can
+ * never observe a partially-written JSON; a file that still fails to load
+ * (corrupt from a pre-fix run, deleted mid-probe) falls through to a fresh
+ * login instead of failing the fixture.
  */
 const fs = require('fs');
 const path = require('path');
@@ -39,16 +43,18 @@ async function ensureAuthStateFor(browser, username, {baseURL}) {
     const statePath = path.join(authDir, `${username}.json`);
 
     if (fs.existsSync(statePath)) {
-        const probe = await request.newContext({baseURL, storageState: statePath});
+        let probe;
         try {
+            probe = await request.newContext({baseURL, storageState: statePath});
             const response = await probe.get('/index.php/index/user/profile');
             if (response.ok() && !response.url().includes('/login')) {
                 return statePath;
             }
         } catch {
-            // fall through to a fresh login
+            // unreadable state file or failed probe — fall through to a
+            // fresh login
         } finally {
-            await probe.dispose();
+            await probe?.dispose();
         }
     }
 
@@ -63,7 +69,11 @@ async function ensureAuthStateFor(browser, username, {baseURL}) {
         const loginPage = new LoginPage(page);
         await loginPage.goto();
         await loginPage.signIn(username, getPassword(username));
-        await context.storageState({path: statePath});
+        // Atomic publish: rename can't expose a half-written file to the
+        // parallel workers reading this path.
+        const tmpPath = `${statePath}.${process.pid}.tmp`;
+        fs.writeFileSync(tmpPath, JSON.stringify(await context.storageState()));
+        fs.renameSync(tmpPath, statePath);
     } finally {
         await context.close();
     }
