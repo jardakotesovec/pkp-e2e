@@ -15,7 +15,7 @@
 | ID | Apps | Pointer | Description |
 |---|---|---|---|
 | MAIL-001 | ojs omp ops | `PKP\mail\mailables\AnnouncementNotify` | Notify users about a new announcement. Key: `ANNOUNCEMENT` |
-| MAIL-002 | ojs omp | `PKP\mail\mailables\AuthorPublicationPublished` | Automatic email to authors when a publication is published. Key: `AUTHOR_PUBLICATION_PUBLISHED` |
+| MAIL-002 | ojs omp ops | `PKP\mail\mailables\AuthorPublicationPublished` | Automatic email to authors when a publication is published. Key: `AUTHOR_PUBLICATION_PUBLISHED` (Sends on OPS too — the shared listener runs there; OPS only omits the mailable from its configurable-emails list. Probe 2026-08-29.) Claimed by: publish-schedule-and-versions. |
 | MAIL-003 | ojs omp ops | `PKP\mail\mailables\ChangeProfileEmailInvitationNotify` | Sent when a user requests a profile email change (in no `Repository::map()` — dispatched directly). Key: `CHANGE_EMAIL` |
 | MAIL-004 | ojs omp ops | `PKP\mail\mailables\DecisionAcceptNotifyAuthor` | Author notification for the Accept decision. Key: `EDITOR_DECISION_ACCEPT` |
 | MAIL-005 | ojs omp | `PKP\mail\mailables\DecisionBackFromCopyeditingNotifyAuthor` | Author notification for the back-from-copyediting decision. Key: `EDITOR_DECISION_BACK_FROM_COPYEDITING` |
@@ -44,7 +44,7 @@
 | MAIL-028 | ojs omp | `PKP\mail\mailables\OrcidRequestAuthorAuthorization` | Automatic email asking authors for ORCID authorization/metadata push permission (OPS: template installed by `plugins/generic/orcidProfile` registry, class not in OPS `map()`). Key: `ORCID_REQUEST_AUTHOR_AUTHORIZATION` Claimed by: orcid-integration. |
 | MAIL-029 | ojs omp ops | `PKP\mail\mailables\OrcidRequestUpdateScope` | Automatic email requesting users update their ORCID OAuth scope for member API deposits (in no `Repository::map()` — dispatched directly). Key: `ORCID_REQUEST_UPDATE_SCOPE` Claimed by: orcid-integration. |
 | MAIL-030 | ojs omp ops | `PKP\mail\mailables\PasswordResetRequested` | Automatic email when a user requests a password reset. Key: `PASSWORD_RESET_CONFIRM` Claimed by: login-and-sessions. |
-| MAIL-031 | ojs omp ops | `PKP\mail\mailables\PublicationVersionNotify` | Automatic email to assigned editors when a new publication version is created. Key: `VERSION_CREATED` |
+| MAIL-031 | ojs omp ops | `PKP\mail\mailables\PublicationVersionNotify` | Automatic email to assigned editors when a new publication version is created. Key: `VERSION_CREATED` Claimed by: publish-schedule-and-versions. |
 | MAIL-032 | ojs omp | `PKP\mail\mailables\RecommendationNotifyEditors` | Message to deciding editors when a recommend-only decision is recorded. Key: `EDITOR_RECOMMENDATION` |
 | MAIL-033 | ojs omp | `PKP\mail\mailables\RequestReviewRoundAuthorResponse` | Email to author(s) requesting a response to reviewers' comments. Key: `REQUEST_REVIEW_ROUND_AUTHOR_RESPONSE` |
 | MAIL-034 | ojs omp | `PKP\mail\mailables\ReviewAcknowledgement` | Editor confirms receipt of a completed review and thanks the reviewer. Key: `REVIEW_ACK` Claimed by: reviewer-assignment-and-management. |
@@ -100,8 +100,8 @@
 
 | ID | Apps | Pointer | Description |
 |---|---|---|---|
-| MAIL-072 | ops | `APP\mail\mailables\PostedAcknowledgement` | Email to the submitting author when their preprint is posted (gated by context setting `postedAcknowledgement` via OPS `Repository::isMailableEnabled()`). Key: `POSTED_ACK` |
-| MAIL-073 | ops | `APP\mail\mailables\PostedNewVersionAcknowledgement` | Email to the submitting author when a new version of their preprint is posted. Key: `POSTED_NEW_VERSION_ACK` |
+| MAIL-072 | ops | `APP\mail\mailables\PostedAcknowledgement` | Email to the submitting author when their preprint is posted (gated by context setting `postedAcknowledgement` via OPS `Repository::isMailableEnabled()`). Key: `POSTED_ACK` Claimed by: publish-schedule-and-versions. |
+| MAIL-073 | ops | `APP\mail\mailables\PostedNewVersionAcknowledgement` | Email to the submitting author when a new version of their preprint is posted. Key: `POSTED_NEW_VERSION_ACK` Claimed by: publish-schedule-and-versions. |
 | MAIL-074 | ops | `APP\mail\mailables\SubmissionAcknowledgementCanPost` | Submission acknowledgement variant for authors who can post the preprint themselves. Key: `SUBMISSION_ACK_CAN_POST` Claimed by: submission-wizard. |
 
 ## Mailables — bundled plugin (found via registry `find`)

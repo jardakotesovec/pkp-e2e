@@ -98,7 +98,7 @@
 | JOB-047 | ojs omp ops | `PKP\task\FileLoader` | Scheduled — abstract base task for staged file processing (stage/processing/archive/reject dirs). |
 | JOB-048 | ojs omp ops | `PKP\task\PKPUsageStatsLoader` | Scheduled — abstract base ETL task for usage-stats log files (extends FileLoader). |
 | JOB-049 | ojs omp ops | `PKP\task\ProcessQueueJobs` | Scheduled — processes queued jobs from the scheduler; registered everyMinute (PKPScheduler, all apps). |
-| JOB-050 | ojs omp ops | `PKP\task\PublishSubmissions` | Scheduled — publishes submissions scheduled for publication; registered daily (OMP Scheduler only). |
+| JOB-050 | ojs omp ops | `PKP\task\PublishSubmissions` | Scheduled — publishes submissions scheduled for publication; registered daily (OMP Scheduler only). Claimed by: publish-schedule-and-versions. |
 | JOB-051 | ojs omp ops | `PKP\task\RemoveExpiredInvitations` | Scheduled — dispatches expired-invitation cleanup; registered daily (PKPScheduler, all apps). Claimed by: user-invitations. |
 | JOB-052 | ojs omp ops | `PKP\task\RemoveFailedJobs` | Scheduled — prunes old failed jobs from the failed-jobs list; registered daily (PKPScheduler, all apps). |
 | JOB-053 | ojs omp ops | `PKP\task\RemoveUnvalidatedExpiredUsers` | Scheduled — removes unvalidated users past validation timeout; registered monthlyOn(1) (PKPScheduler, all apps). |

@@ -73,7 +73,7 @@
 | GRID-059 | ojs omp ops | PKP\controllers\listbuilder\settings\reviewForms\ReviewFormElementResponseItemListbuilderHandler | Listbuilder for review-form element response items. Op method: fetch (plus inherited fetchRow, save from GRID-060) |
 | GRID-060 | ojs omp ops | PKP\controllers\listbuilder\settings\SetupListbuilderHandler | Base class for settings listbuilders. Ops: fetch, fetchRow, save |
 | GRID-061 | ojs omp ops | PKP\controllers\modals\documentLibrary\DocumentLibraryHandler | Submission document library modal. Op: documentLibrary |
-| GRID-062 | ojs omp ops | PKP\controllers\modals\publish\PublishHandler | Final publishing confirmation modal (base; OPS subclasses it, GRID-107). Op: publish |
+| GRID-062 | ojs omp ops | PKP\controllers\modals\publish\PublishHandler | Final publishing confirmation modal (base; OPS subclasses it, GRID-107). Op: publish Claimed by: publish-schedule-and-versions. |
 | GRID-063 | ojs omp ops | PKP\controllers\modals\submission\ViewSubmissionMetadataHandler | Read-only submission metadata modal (e.g. for reviewers). Op: display |
 | GRID-064 | ojs omp ops | PKP\controllers\page\PageHandler | Page-component AJAX handler (header widgets). No addRoleAssignment; op methods: tasks, css |
 | GRID-065 | ojs omp ops | PKP\controllers\tab\user\ProfileTabHandler | User profile tabs handler. No addRoleAssignment (session-user gated); op methods: identity, saveIdentity, contact, saveContact, roles, saveRoles, publicProfile, savePublicProfile, uploadProfileImage, deleteProfileImage, apiProfile, saveAPIProfile, changePassword, savePassword, notificationSettings, saveNotificationSettings |
@@ -118,4 +118,4 @@
 | GRID-104 | ops | APP\controllers\grid\settings\plugins\SettingsPluginGridHandler (ops-main) | Context-level plugins settings grid; subclass of PluginGridHandler (classes/) inheriting its ops. Own role-assigned op: manage |
 | GRID-105 | ops | APP\controllers\grid\submissions\ExportPublishedSubmissionsListGridHandler (ops-main) | Exportable published (posted) submissions grid (export plugins). Ops: fetchGrid, fetchRow |
 | GRID-106 | ops | APP\controllers\grid\settings\sections\SectionGridHandler (ops-main) | Server sections settings grid. Ops: fetchGrid, fetchRow, addSection, editSection, updateSection, deleteSection, activateSection, deactivateSection, saveSequence |
-| GRID-107 | ops | APP\controllers\modals\publish\OPSPublishHandler | OPS posting confirmation modal; subclass of GRID-062. Op: publish |
+| GRID-107 | ops | APP\controllers\modals\publish\OPSPublishHandler | OPS posting confirmation modal; subclass of GRID-062. Op: publish Claimed by: publish-schedule-and-versions. |

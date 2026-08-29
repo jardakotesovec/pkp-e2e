@@ -216,20 +216,38 @@ exports.PublicationScreen = class PublicationScreen {
     }
 
     /**
-     * The "Review Publishing Details" side panel, opened by "Schedule For
-     * Publication" from a Publication page.
+     * The top-right publish button in the Publication area's controls (its
+     * label is "Schedule For Publication" until the submission itself counts
+     * as published, then "Publish"). Scoped to the right-controls container
+     * so the stage views' same-labeled navigation shortcut never matches.
+     */
+    publishButton() {
+        return this.page
+            .locator('[data-cy="workflow-controls-right"]')
+            .getByRole('button', {name: /^(Schedule For Publication|Publish)$/});
+    }
+
+    /**
+     * The "Review Publishing Details" side panel, opened by the publish
+     * button from a Publication page. The FIRST press is occasionally
+     * swallowed (nothing opens, no request fires — U49 spec fn-k), so the
+     * press is retried once when the panel has not appeared.
      */
     async openPublishPanel() {
-        await this.page
-            .getByRole('button', {name: 'Schedule For Publication', exact: true})
-            .click();
+        const button = this.publishButton();
+        await expect(button).toBeVisible({timeout: 30_000});
+        await button.click();
         const panel = this.page
             .locator('[data-cy="active-modal"]')
             .filter({hasText: 'Review Publishing Details'})
             .last();
-        await expect(panel.locator('select[name="versionStage"]')).toBeVisible({
-            timeout: 30_000,
-        });
+        const settled = panel.locator('select[name="versionStage"]');
+        try {
+            await expect(settled).toBeVisible({timeout: 5_000});
+        } catch {
+            await button.click();
+        }
+        await expect(settled).toBeVisible({timeout: 30_000});
         return panel;
     }
 

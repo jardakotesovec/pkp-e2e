@@ -77,7 +77,7 @@
 | API-054 | ojs | `APP\API\v1\reviewers\recommendations\ReviewerRecommendationController` | Reviewer recommendation settings (base `reviewers/recommendations`): GET {reviewerRecommendationId}, GET /, POST /, PUT {reviewerRecommendationId}, PUT {reviewerRecommendationId}/status, DELETE {reviewerRecommendationId}. |
 | API-055 | ojs | `APP\API\v1\stats\sushi\StatsSushiController` (ojs) | Extends API-039; adds GET reports/tr, GET reports/tr_j3, GET reports/ir, GET reports/ir_a1 under `stats/sushi`. |
 | API-056 | ojs | `APP\API\v1\stats\issues\StatsIssueController` | Issue usage stats (base `stats/issues`): GET timeline, GET {issueId}, GET {issueId}/timeline, GET /. |
-| API-057 | ojs | `APP\API\v1\submissions\SubmissionController` (ojs) | Extends API-042; adds GET {submissionId}/publications/{publicationId}/issueAssignmentStatus, GET {submissionId}/publications/{publicationId}/_components/{issue|submissionPayment} under `submissions`. |
+| API-057 | ojs | `APP\API\v1\submissions\SubmissionController` (ojs) | Extends API-042; adds GET {submissionId}/publications/{publicationId}/issueAssignmentStatus, GET {submissionId}/publications/{publicationId}/_components/{issue|submissionPayment} under `submissions`. Claimed by: publish-schedule-and-versions. |
 
 ## OMP overlay (omp-main/api)
 
@@ -95,5 +95,5 @@
 |---|---|---|---|
 | API-063 | ops | `APP\API\v1\_dois\BackendDoiController` (ops) | Extends API-001; adds PUT galleys/{galleyId} under `_dois`. |
 | API-064 | ops | `APP\API\v1\stats\sushi\StatsSushiController` (ops) | Extends API-039; adds GET reports/ir under `stats/sushi`. |
-| API-065 | ops | `APP\API\v1\submissions\SubmissionController` (ops) | Extends API-042; adds PUT {submissionId}/publications/{publicationId}/relate and GET {submissionId}/publications/{publicationId}/_components/issue under `submissions`; also re-registers POST {submissionId}/publications, POST {submissionId}/publications/{publicationId}/version, PUT {submissionId}/publications/{publicationId}/publish, PUT {submissionId}/publications/{publicationId}/unpublish with an author-inclusive role set before delegating to parent. |
+| API-065 | ops | `APP\API\v1\submissions\SubmissionController` (ops) | Extends API-042; adds PUT {submissionId}/publications/{publicationId}/relate and GET {submissionId}/publications/{publicationId}/_components/issue under `submissions`; also re-registers POST {submissionId}/publications, POST {submissionId}/publications/{publicationId}/version, PUT {submissionId}/publications/{publicationId}/publish, PUT {submissionId}/publications/{publicationId}/unpublish with an author-inclusive role set before delegating to parent. Claimed by: publish-schedule-and-versions. |
 | API-066 | ops | `ops-main/api/genres/index.php` (entry point; mounts `PKP\API\v1\genres\GenreController`) | Legacy non-versioned entry point `api/genres/` (outside `v1/`) mounting the shared GenreController (API-021) — recorded mechanically. |

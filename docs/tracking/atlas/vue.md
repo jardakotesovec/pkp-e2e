@@ -111,14 +111,14 @@
 | VUE-081 | ojs,omp,ops | pages/submissionWizard/ReconfigureSubmissionModal.vue | Change section/language mid-wizard side modal (SubmissionWizardPage) Claimed by: submission-wizard. |
 | VUE-082 | ojs,omp,ops | pages/userComments/UserCommentDetailModal.vue | User comment detail/moderation side modal |
 | VUE-083 | ojs,omp,ops | pages/userComments/UserCommentReportDetailModal.vue | User comment report detail side modal |
-| VUE-084 | ojs,omp,ops | pages/workflow/components/publication/WorkflowVersionSideModal.vue | Create/edit publication version side modal (useWorkflowActions) |
+| VUE-084 | ojs,omp,ops | pages/workflow/components/publication/WorkflowVersionSideModal.vue | Create/edit publication version side modal (useWorkflowActions) Claimed by: publish-schedule-and-versions. |
 | VUE-085 | ojs,omp,ops | pages/workflow/modals/WorkflowChangeSubmissionLanguageModal.vue | Change submission language side modal (useWorkflowActions) Claimed by: publication-metadata. |
 | VUE-086 | ojs,omp,ops | pages/workflow/modals/WorkflowSelectRevisionFormModal.vue | Select revision target for decision side modal (useWorkflowDecisions) |
 | VUE-087 | ojs,omp,ops | components/Composer/FileAttacherModal.vue | Attach-files side modal opened from Composer (decision emails, discussions) |
 | VUE-088 | ojs,omp,ops | components/FileAttacher/AttacherModal.vue | File attacher source-picker side modal (FileAttacher; also used by Composer/discussions) |
 | VUE-089 | ojs,omp,ops | components/Form/fields/FieldPreparedContentInsertModal.vue | Insert prepared-content/variable side modal for rich text fields |
 | VUE-090 | ojs,omp,ops | components/Form/fields/VocabularyModal/VocabularyModal.vue | Controlled-vocabulary browser side modal (FieldBaseAutosuggest) Claimed by: publication-metadata. |
-| VUE-091 | ojs,omp,ops | components/InsertSummaryOfChanges/InsertSummaryOfChangesModal.vue | Insert summary-of-changes side modal (workflow publication form / version form) |
+| VUE-091 | ojs,omp,ops | components/InsertSummaryOfChanges/InsertSummaryOfChangesModal.vue | Insert summary-of-changes side modal (workflow publication form / version form) Claimed by: publish-schedule-and-versions. |
 | VUE-092 | ojs,omp,ops | components/ListPanel/announcements/AnnouncementsEditModal.vue | Add/edit announcement side modal (AnnouncementsListPanel; site admin + context settings) |
 | VUE-093 | ojs,omp,ops | components/ListPanel/contributors/ContributorsEditModal.vue | Add/edit contributor side modal (ContributorsListPanel) Claimed by: contributors-and-affiliations. |
 | VUE-094 | ojs,omp,ops | components/ListPanel/contributors/ContributorsPreviewModal.vue | Contributor display-formats preview side modal (ContributorsListPanel) Claimed by: contributors-and-affiliations. |
