@@ -1,6 +1,6 @@
 ---
 name: reviewer-assignment-and-management
-scope: An editor finds, invites, edits, reminds, thanks, unassigns, reinstates reviewers and reads their reviews on a review round's Reviewers panel
+scope: An editor finds, invites, edits, reminds, thanks, unassigns, reinstates reviewers and reads, rates and modifies their reviews on a review round's Reviewers panel
 apps: [ojs, omp]
 shared: pkp-lib
 status: verified
@@ -19,9 +19,10 @@ happens in the "Reviewers" panel on the review stage: an editor searches the
 journal's reviewer pool (or creates a brand-new reviewer account, or enrolls
 an existing user), sets the deadlines, the review type and the files the
 reviewer may see, then follows each invitation through its life — reminding an
-overdue reviewer, recording a response the reviewer gave by email, reading and
-confirming the finished review, thanking the reviewer, or unassigning and
-later reinstating them. This spec covers that panel and every window it opens.
+overdue reviewer, recording a response the reviewer gave by email, reading the
+finished review in its Review Details window — rating it, marking it
+complete, even modifying what the reviewer wrote — thanking the reviewer, or
+unassigning and later reinstating them. This spec covers that panel and every window it opens.
 The round machinery around it — round numbers, the status box, the decision
 buttons — is the neighboring feature
 [→ round machinery](U26-review-stage-and-rounds.md#rounds); what the reviewer
@@ -69,7 +70,7 @@ owned by
 | **See declined and cancelled rows** | • Review managers only — an assistant-level participant's table silently omits those rows ⚠ [A6](#a6) <sup>a</sup> |
 | **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants — any round, including past rounds (the past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds)) <sup>a</sup> |
 | **"Create New Reviewer" / "Enroll Existing User"** | • Journal Manager, Editor, assigned Section Editor and Guest Editor — the two links inside the Add Reviewer window (a Site Administrator's access runs through such a journal role — see the preamble)<br>• assistant-level participants — the two links never appear <sup>a</sup> |
-| **Manage an assignment** (row actions: "Review Details", "Email Reviewer", "Edit", "Send Reminder", "Thank Reviewer", "Revert Decision", "Read Review", "Resend Review Request", "Unassign Reviewer"/"Cancel Reviewer", "Reinstate Reviewer", "Log Response", "History") | • Review managers and assistant-level participants — per assignment state (Rule 3 for when each appears; the operations in Rules 12–21; the Email Reviewer window is described under Fields) <sup>a</sup> |
+| **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants — per assignment state (Rule 3 for when each appears and the menu's order; the operations in Rules 12–21; the Email Reviewer window is described under Fields) <sup>a</sup> |
 | **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor — about a user holding a Reviewer role, never about themselves<br>• assistant-level participants — the entry is absent <sup>l</sup> |
 | **"Login As" the reviewer** | • whoever may impersonate that reviewer — the row entry appears only then; the rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
 | **Author on the workflow screen** | • none of the above — an assigned Author gets none of these entries, even when they also hold an editorial role on the submission (the panel itself is absent, see the preamble); the server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
@@ -190,9 +191,9 @@ under the prompt "Record the response on behalf of the reviewer"; submit
    | "Overdue" (red) | Accepted (or not) and the review date passed | "Review due: {date}" |
    | "Request Declined" | Reviewer declined (hover: "The reviewer declined this review request.") | — |
    | "Request Resent" | Request re-sent after a decline, no response yet | "Response due: {date}" — but the date shown is the review deadline ⚠ [A2](#a2) |
-   | "Review Submitted" | Review in, not yet confirmed — merely opening it changes nothing ⚠ [A10](#a10); also after "Revert Decision" on a "Complete" row (Rule 16) | reviewer's recommendation {OJS} |
-   | "Review Viewed" | Only after "Revert Decision" on a "Reviewer Thanked" row (Rule 16) — never produced by viewing ⚠ [A10](#a10) | reviewer's recommendation {OJS} |
-   | "Complete" | An editor confirmed the review (Rule 14) | reviewer's recommendation {OJS} |
+   | "Review Submitted" | Review in, no editor has opened it yet ([A10](#a10), retired — opening now marks it viewed); also after "Revert Decision" on a "Complete" row (Rule 16) | reviewer's recommendation {OJS} |
+   | "Review Viewed" | An editor opened the review (Rule 14a); also after "Revert Decision" on a "Reviewer Thanked" row (Rule 16) | reviewer's recommendation {OJS} |
+   | "Complete" | An editor marked the review complete (Rule 14a) | reviewer's recommendation {OJS} |
    | "Reviewer Thanked" | Thank-you sent or recorded (Rule 16) | reviewer's recommendation {OJS} |
    | "Request Cancelled" | Assignment cancelled (hover: "The editor cancelled this review request.") | — |
 
@@ -206,13 +207,16 @@ under the prompt "Record the response on behalf of the reviewer"; submit
    "Read Review" in "Review Submitted"/"Review Viewed"; "Thank Reviewer" and
    "Revert Decision" in "Complete"; "Revert Decision" alone in "Reviewer
    Thanked"; the other states get no "Actions" button. The "More Actions"
-   menu always offers "Email Reviewer" and "History"; "Review Details", "Edit" and
-   the unassign entry on every non-cancelled row; "Resend Review Request"
-   only on "Request Declined"; "Reinstate Reviewer" only on "Request
-   Cancelled"; "Log Response" only while the reviewer has not responded;
-   "Editorial Notes" and "Login As" per the Actors table. Of these, only
-   the "Review Details" window is not separately specified in this file —
-   an explicit waiver, not an oversight. <sup>a</sup>
+   menu of a non-cancelled row offers, in order: "Review Details" — the
+   same window the "Read Review" button opens (Rule 14a) —, "Edit", the
+   unassign entry ("Unassign Reviewer" before a response, "Cancel Reviewer"
+   after one — Rule 17), "Email Reviewer", "History", then "Login As" and
+   "Editorial Notes" per the Actors table, "Resend Review Request"
+   only on "Request Declined", "Log Response" only while the reviewer has
+   not responded, and "Send Review To ORCID" when the reviewer has an
+   authenticated ORCID iD (Rule 23). On a cancelled row, "Reinstate
+   Reviewer" stands in place of the first three entries; the rest of the
+   menu is unchanged. <sup>a</sup>
 4. **The round's status line follows this table** — adding reviewers,
    receiving and confirming reviews move the round status box described in
    [→ the round status](U26-review-stage-and-rounds.md#round-status); this spec
@@ -301,22 +305,65 @@ under the prompt "Record the response on behalf of the reviewer"; submit
     the install sends automatic reminder emails around each deadline; their
     day-offsets are configured in *Review setup & review forms*, and each
     automatic send also lands in History. <sup>h</sup>
-14. <a id="read-review"></a> **Reading and confirming.** "Read Review" opens
-    the review: the reviewer's name and completion date, declared competing
-    interests, the review form answers or the reviewer's comments — "For
-    author and editor" and, separately, the editor-only comments, headed
-    "For editor" {OJS} / "For editor only" {OMP} —, the
-    "Reviewer Files" the reviewer attached, a "Reviewer rating" star row
-    (optional, 1–5 or "No rating"), and {OJS} the reviewer's recommendation
-    in a dropdown the editor may set or change on the reviewer's behalf (the
-    change is recorded in the submission's activity log). The window's
-    instruction reads "Once this review has been read, press \"Confirm\"…":
-    pressing "Confirm" marks the review confirmed — the row turns "Complete"
-    — and saves the rating; closing the window without confirming leaves
-    the row unchanged at "Review Submitted" ⚠ [A10](#a10). On a press the
-    window has no recommendation control [OMP1](#omp1). <sup>i</sup>
-15. **Downloading a review.** The same window's "Download Review Form" menu
-    offers four exports: "Author-Only Sections Displayed" and "Editor Form
+14a. <a id="read-review"></a> **The Review Details window.** "Read Review" —
+    or the menu's "Review Details" — opens a side window titled "Review
+    Details: {submission title}". It shows the reviewer's name; a guidance
+    paragraph that still tells the editor they "may upload the file below"
+    though the window offers no upload control ⚠ [A22](#a22); the
+    "Download Review Form" menu (Rule 15); a summary block with "Review
+    Submitted: {date and time}" and {OJS} "Recommendation: {label}"; the
+    "Reviewer Comments" — the review form answers, or "For author and
+    editor" and, separately, the editor-only comments, headed "For editor"
+    {OJS} / "For editor only" {OMP}; the "Reviewer Files" the reviewer
+    attached, read-only; {OJS} a display-only "Reviewer Recommendation"
+    group — so the recommendation appears twice, under two labels
+    ⚠ [A23](#a23); and a "Reviewer rating" star row ("No rating" or 1–5,
+    under "Rate the quality of the review provided. This rating is not
+    shared with the reviewer."). Footer buttons: "Cancel", "Modify Review"
+    (Rule 14b) and "Mark as Complete". Merely opening the window marks a
+    submitted review viewed — the row behind it updates to "Review
+    Viewed" at once and stays there ([A10](#a10), retired: the label now
+    means what it says). Clicking a rating star saves immediately — toast
+    "Reviewer rating saved" — and the rating persists across close and
+    reopen, though a click in the first moments after the window opens
+    can silently not take ⚠ [A21](#a21). {OJS} "Mark as Complete" sits
+    disabled, with a message beside it, while the review carries no
+    recommendation ("A recommendation is required before this review can
+    be marked as complete.") or leaves required review-form fields
+    unanswered ("This review is incomplete and cannot be marked as
+    complete yet."); on a press no such gate exists and the button is
+    enabled at once [OMP1](#omp1). Pressing it asks "Mark this review as
+    complete?" — "You can still modify this review after marking it as
+    complete. You will have the opportunity to thank the reviewer in the
+    next step." — and confirming shows "The review has been marked as
+    complete.": the row turns "Complete" (with the recommendation under
+    the status {OJS}) and offers "Thank Reviewer" and "Revert Decision"
+    (Rule 16), while in the still-open window "Mark as Complete" goes
+    disabled and "Modify Review" stays available. <sup>i</sup>
+14b. **Modifying a review.** "Modify Review" first asks "Modify this
+    review?" — "You are about to modify the review submitted by {reviewer
+    name}. All modifications will be recorded in the activity log." —
+    then opens a second side window, "Modify Review", stacked over the
+    first: it names the submission, repeats "You are modifying a
+    submitted review. All modifications will be recorded in the activity
+    log." and {OJS} shows a "Submitted recommendation:" line. Editable
+    there: the "For author and editor" comment — under the note "If this
+    is an open peer review, this comment will also appear publicly
+    alongside the article." — the "Reviewer Files" (the "Upload" control
+    lives here, not in the view window), and {OJS} a required
+    "Recommendation" select. The editor-only comment is editable
+    nowhere — it stays display-only in both windows, in both apps.
+    "Cancel" returns to the view window; "Save Changes" saves and closes
+    the edit window, and the view window refreshes showing "Last modified
+    by {user full name}" under its title along with the edited values —
+    with no further confirmation (only a review already marked complete
+    and publicly visible, on a journal running open review, gets a "Save
+    changes to this review?" dialog first). Each save lands attributed in
+    the submission's activity log (Side effects) — and would also mark a
+    not-yet-complete review complete, a side effect no screen can reach
+    today ⚠ [A24](#a24). <sup>i</sup>
+15. **Downloading a review.** The Review Details window's "Download Review
+    Form" menu offers the same four exports as ever: "Author-Only Sections Displayed" and "Editor Form
     Shows All Review Sections", each as PDF or XML. The author-only variants
     omit the editor-only comments and also hide the reviewer's identity —
     the reviewer is presented anonymized. The file downloads through the
@@ -413,12 +460,18 @@ under the prompt "Record the response on behalf of the reviewer"; submit
   send stamps the History "Reminder" date and the activity log. A reviewer
   response resets the reminder bookkeeping — the same reset that erases the
   History "Reminder" milestone ⚠ [A15](#a15). <sup>h</sup>
-- **Confirming a review** (Rule 14) → the reviewer's "Review pending." task
-  is cleared, the confirmation is logged, and a completed review is
-  deposited to the reviewer's ORCID record when one is authenticated (the
-  deposit consent flow is the *ORCID integration* feature). {OJS} A
-  recommendation set in the window is logged as recorded by the editor on
-  the reviewer's behalf. <sup>i</sup>
+- **Marking a review complete** (Rule 14a) → the reviewer's "Review
+  pending." task is cleared, the completion is logged in the submission's
+  activity log, and the review is deposited to the reviewer's ORCID record
+  when one is authenticated (the deposit consent flow is the *ORCID
+  integration* feature). <sup>i</sup>
+- **Modifying a review** (Rule 14b) → an attributed activity-log entry per
+  save — "The following was modified in this review: Comments." (or
+  "…Reviewer Recommendation." {OJS}) — each with a "View changes" action
+  showing what changed, and the "Last modified by {user full name}" line in
+  the view window (Rule 14b). {OJS} Changing the recommendation on the
+  reviewer's behalf now runs through this window and is logged as such a
+  modification. <sup>i</sup>
 - **Thanking** → the acknowledgement email (unless skipped) and the
   acknowledged date in History. <sup>j</sup>
 - **Unassigning/cancelling** → the notice email (unless skipped) — unassign
@@ -544,16 +597,21 @@ mail is observed in the test install's mail catcher.
    review", press "Log Response". The row reads "Request Accepted" with the
    review due date. Control: the "Log Response" entry is gone from that
    row's menu afterwards.
-9. **Read, rate, confirm, thank** — with a submitted review on the round
-   (seeded), Editor: the row reads "Review Submitted"; open "Read Review",
-   see the reviewer's comments split "For author and editor" / "For editor"
-   ({OMP}: "For editor only"), pick a star rating, press "Confirm" — the
-   row turns "Complete".
+9. **Read, rate, mark complete, thank** — with a submitted review on the
+   round (seeded), Editor: the row reads "Review Submitted"; open "Read
+   Review" — the "Review Details" window opens and the row behind it turns
+   "Review Viewed" at once (it stays after a reload). See the reviewer's
+   comments split "For author and editor" / "For editor" ({OMP}: "For
+   editor only"), then — once the window has settled ⚠ [A21](#a21) — click
+   a star under "Reviewer rating": the toast "Reviewer rating saved"
+   appears. Press "Mark as Complete", confirm "Mark this review as
+   complete?" — toast "The review has been marked as complete.", the row
+   turns "Complete".
    Press "Thank Reviewer", send — notice "Thank you email sent to
    reviewer.", row "Reviewer Thanked", thank-you in the reviewer's mailbox.
    Then "Revert Decision" → confirm "Unconsider this Review" — the row
    returns to "Review Viewed". <sup>s</sup>
-10. **Download the review** — Editor: in the "Read Review" window open
+10. **Download the review** — Editor: in the "Review Details" window open
     "Download Review Form" and fetch "Author-Only Sections Displayed (PDF)"
     and "Editor Form Shows All Review Sections (PDF)"; both download, and
     the author-only file omits the editor-only remarks and shows the
@@ -586,16 +644,32 @@ App-specific:
     ⚠ [OMP2](#omp2). Every scenario above runs the same on both stages.
     <sup>o</sup> <sup>s</sup>
 14. **{OJS} The recommendation runs through the table** — Editor: after
-    scenario 9's confirm, the "Complete" row's status cell shows the
-    reviewer's recommendation under the status; in "Read Review" the
-    recommendation dropdown can be changed by the editor. {OMP} Control: on
-    a press neither the status cell nor the window shows any recommendation
-    control [OMP1](#omp1).
+    scenario 9's "Mark as Complete", the "Complete" row's status cell shows
+    the reviewer's recommendation under the status; the "Review Details"
+    window displays it read-only — on its "Recommendation:" line and again
+    in the "Reviewer Recommendation" group ⚠ [A23](#a23) — and changing it
+    on the reviewer's behalf runs through "Modify Review" (scenario 16).
+    {OMP} Control: on a press neither the status cell nor the window shows
+    any recommendation [OMP1](#omp1).
 15. **{OPS} No reviewer surfaces on a preprint server** — Preprint Server
     Manager: open any preprint's workflow — no "Reviewers" panel exists on
     any screen, and Users & Roles offers no reviewer group to assign.
     Positive control: the same workflow screen offers the Production
     stage's own controls, so the screen itself is working. <sup>p</sup>
+16. **The editor modifies a submitted review** (common — runs on OJS and
+    OMP like scenarios 1–12) — with a submitted review on the round,
+    Editor: in the "Review Details" window press "Modify Review" and
+    confirm "Modify this review?". In the "Modify Review" window that
+    opens, edit the "For author and editor" comment ({OJS}: also pick a
+    different "Recommendation"), press "Save Changes". The edit window
+    closes and the view window now shows "Last modified by {name}" under
+    its title with the edited text ({OJS}: and the new recommendation; on
+    a press the window offers no recommendation field [OMP1](#omp1)). The
+    submission's activity log lists "The following was modified in this
+    review: Comments." ({OJS}: and "…Reviewer Recommendation.") attributed
+    to the editor, each with a "View changes" action. Control: the "For
+    editor" ({OMP}: "For editor only") comment offers no edit control in
+    either window. <sup>s</sup>
 
 ## Findings register
 
@@ -618,18 +692,22 @@ in an unusual situation or configuration.
 | [A2](#a2) | A "Request Resent" row's "Response due:" line shows the review deadline, not the response deadline | 🐞 | minor | — |
 | [A7](#a7) | A "Request Sent" row never shows its "Response due:" line, though the date is set | 🐞 | minor | — |
 | [A8](#a8) | Submitting inverted due dates is refused with no message — the form just stays open | 🐞 | user-visible | — |
-| [A10](#a10) | "Review Viewed" is never produced by viewing a review — only by reverting a thanked one | 🐞 | user-visible | — |
 | [A12](#a12) | The assignment-changed email's opt-out is offered nowhere — its own unsubscribe page omits the type | 🐞 | minor | — |
 | [A13](#a13) | Email Reviewer sends with an empty body despite the body being marked required | 🐞 | minor | — |
 | [A15](#a15) | The reviewer's response erases the dated "Reminder" milestone from the assignment's History | 🐞 | minor | claim check (claude), 2026-08-02 — settled |
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
 | [A18](#a18) | Emptying the request letter makes the add fail silently — yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
+| [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | — |
+| [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
+| [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
+| [A24](#a24) | Saving a modification would mark a not-yet-complete review complete — no current screen reaches it | ❓ | latent | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
+| [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed — the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
 | [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor — fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
 | [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates — no review process, the window unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
 | [A11](#a11) | Retired: the change notice reported the pre-change deadlines — fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
@@ -759,12 +837,20 @@ Reviewed: claim check (claude), 2026-08-02 — overturned (was a defect).
 <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a10"></a>
-**A10 — "Review Viewed" does not mean viewed** · 🐞 · user-visible.
-Opening "Read Review" and closing it without confirming leaves the row at
-"Review Submitted" — viewing never produces "Review Viewed". The only route
-to that status is "Revert Decision" on a "Reviewer Thanked" row, so the
-label misstates what happened in both directions.
+**A10 — "Review Viewed" does not mean viewed** · ✅ · retired.
+Opening the legacy "Read Review" window and closing it without confirming
+left the row at "Review Submitted" — viewing never produced "Review
+Viewed". The only route to that status was "Revert Decision" on a
+"Reviewer Thanked" row, so the label misstated what happened in both
+directions.
 Basis: live probe. <sup>[f-a10](#fn-a10)</sup>
+
+> **Retired — upstream rework (claude), 2026-08-29**: overturned by design.
+> The modify-reviews rework replaced the legacy read window with the Review
+> Details window, and merely opening that window now marks a submitted
+> review viewed — the row flips to "Review Viewed" live and survives a
+> reload (probed 2026-08-29, both apps). The label finally means what it
+> says; Rule 14a records the behavior.
 
 <a id="a11"></a>
 **A11 — The change notice tells the reviewer the old deadlines** · ✅ ·
@@ -894,6 +980,58 @@ Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
 > OMP. OPS's unassign observation [OPS1](#ops1) was tracked separately and
 > was itself retired the same day.
 
+<a id="a21"></a>
+**A21 — An early rating click can silently revert** · 🐞 · user-visible.
+The "Reviewer rating" stars are clickable the moment the Review Details
+window renders, but a click landing in the first moments — before the
+window has finished loading the assignment — is reverted when the load
+completes: the star flashes selected, then falls back, and no rating is
+saved, with no message. A click after the window settles saves normally,
+with its toast. The window offers no reliable "settled" signal: the revert
+was reproduced even after the footer's "Modify Review" button enabled,
+because the on-open mark-viewed round-trip re-renders the rating control
+after that point (test authoring, 2026-08-29 — the suite guards with an
+outcome-keyed re-click, never asserting the defect).
+Since: 2026-08-29 (the modify-reviews rework) · Basis: probe (observed in
+one open of four) + code reading. <sup>[f-a21](#fn-a21)</sup>
+
+<a id="a22"></a>
+**A22 — The window's guidance promises an upload control it lacks** · 🐞 ·
+minor.
+The Review Details window's guidance paragraph tells the editor they "may
+upload the file below and then press 'Mark as Complete'" — but the window
+offers no upload control anywhere; uploading a reviewer file lives only in
+the "Modify Review" window (Rule 14b). The text contradicts the screen it
+sits on; upstream has already flagged the sentence's translation entry for
+review.
+Since: 2026-08-29 (the rework kept the legacy window's text) · Basis:
+probe + code reading. <sup>[f-a22](#fn-a22)</sup>
+
+<a id="a23"></a>
+**A23 — The recommendation shows twice, under two labels** · ❓ · minor.
+On a journal, the Review Details window prints the reviewer's
+recommendation twice: once as the summary line "Recommendation: {label}"
+and again in the display-only "Reviewer Recommendation" group further
+down — the same value under two headings.
+Question: is the duplication intended? Lean: an artifact of composing the
+new window from stock blocks — one of the two would do. A press shows
+neither ([OMP1](#omp1)).
+Since: 2026-08-29 (the modify-reviews rework) · Basis: probe.
+<sup>[f-a23](#fn-a23)</sup>
+
+<a id="a24"></a>
+**A24 — A modification save completes an incomplete review** · ❓ · latent.
+The save behind "Save Changes" also stamps a review complete when it is
+not yet — an editor modifying an in-progress review would complete it as
+a side effect. No screen reaches that today: the Review Details window,
+and its "Modify Review", open only on submitted reviews, which already
+count as complete.
+Question: should a modification save ever set completion? Lean: harmless
+today, but a trap for any future surface that lets an editor touch an
+in-progress review.
+Since: 2026-08-29 (the modify-reviews rework) · Basis: code reading.
+<sup>[f-a24](#fn-a24)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -904,10 +1042,12 @@ reviewer pool: searching the Add Reviewer list on Internal Review finds the
 users holding the Internal Reviewer role, on External Review those with
 External Reviewer — the window's opening, unsearched list does not yet apply
 that split; that defect is OMP2. And a press's review collects no reviewer
-recommendation, so the status cell's recommendation line and the
-read-review window's recommendation dropdown simply do not exist there —
-the author-facing side of that same absence is recorded with the review
-stage (its finding "No reviewer recommendation on a press").
+recommendation, so the status cell's recommendation line and the Review
+Details windows' recommendation displays and select simply do not exist
+there — nor does the recommendation-based completeness gate: "Mark as
+Complete" is enabled at once (Rule 14a). The author-facing side of that
+same absence is recorded with the review stage (its finding "No reviewer
+recommendation on a press").
 Basis: live probe (the searched pool split, with positive and negative
 controls on both stages; the read-review window verified without a
 recommendation control) + code (the press disables reviewer recommendations
@@ -917,7 +1057,10 @@ and scopes reviewer groups per stage); the author-side
 counterpart was live-probed 2026-07-31 under the review-stage feature.
 Re-driven in the claim check (2026-08-02): the search split held with
 positive and negative controls in both directions on both stages, and the
-read-review window again rendered no recommendation control.
+read-review window again rendered no recommendation control. Re-probed
+2026-08-29 on the reworked Review Details windows: no recommendation
+group, line or select anywhere, and "Mark as Complete" enabled
+immediately, no gate.
 <sup>[f-omp1](#fn-omp1)</sup>
 
 <a id="omp2"></a>
@@ -978,12 +1121,22 @@ role map: manager, site admin, sub-editor = all ops; assistant = all minus
 `ReviewAssignmentRequiredPolicy`. Author denial:
 `authorize()` blocks `_getAuthorDeniedOps()` (all mutating ops) for any user
 with an author assignment on the submission — even one who also holds an
-editorial role — and `_getAuthorDeniedAnonymousOps()` (readReview,
-reviewHistory, reviewRead, sendEmail, gossip) when the review method is
-anonymous/double-anonymous. App chains: OJS
-`ReviewerGridHandler` overrides only `reviewRead` (recommendation-by-proxy,
-note i; GRID-086); OMP's subclass is EMPTY (GRID-098) — shared-behavior
-evidence. Declined/cancelled row visibility:
+editorial role — and `_getAuthorDeniedAnonymousOps()` (reviewHistory,
+reviewRead, sendEmail, gossip; the roster still lists `readReview`, an op
+the 2026-08-29 modify-reviews rework deleted along with `readReview.tpl`
+and `ReadReviewHandler.js`, so that entry is inert — code-read at lib/pkp
+pkp/pkp-lib#13156) when the review method is anonymous/double-anonymous.
+App chains: OJS `ReviewerGridHandler` still overrides `reviewRead`
+(recommendation-by-proxy on the legacy op — the Vue windows no longer post
+to it, note i; GRID-086); OMP's subclass is EMPTY (GRID-098) —
+shared-behavior evidence. Row-menu roster and order (Rule 3):
+`useReviewerManagerConfig.js::getItemActions`, code-read 2026-08-29 at the
+same rework and probed live the same day on both apps — the primary
+"Read Review" button on submitted/viewed rows and the menu's "Review
+Details" both open the Review Details window (note i); on a cancelled row
+the reinstate entry replaces the Review Details/Edit/unassign block while
+the unconditional entries (Email Reviewer, History, and the gated ones)
+still append. Declined/cancelled row visibility:
 `PKP\submission\maps\Schema::getPropertyReviewAssignments()` skips
 declined/cancelled rows unless `canSeeAllReviewAssignments()` — manager,
 sub-editor or site admin among the user's roles at that stage (finding A6).
@@ -1013,7 +1166,11 @@ Section Editor (code lean: the same visibility branch admits sub-editors).
 <a id="fn-b"></a>
 **b** — Status machine: `ReviewAssignment::getStatus()` (order: declined →
 cancelled → request-resent → due-date arithmetic → thanked/complete/viewed/
-received). Cell rendering:
+received). Since the 2026-08-29 modify-reviews rework the viewed state is
+set by opening the Review Details window — the PUT `…/consider` fired on
+open (note i); re-driven live 2026-08-29 on both apps: opening flipped a
+"Review Submitted" row to "Review Viewed" without a reload and the status
+survived one. Cell rendering:
 `useReviewerManagerConfig.js::getCellStatusItems` — titles quoted in Rule 2
 from `editor.review.requestSent` "Request Sent", `.requestAccepted`,
 `common.overdue`, `editor.review.requestDeclined`(+`.tooltip`),
@@ -1240,51 +1397,72 @@ to a fresh keyed URL of its own (new id and key); edit-change notices
 carried plain links even with one-click on.
 
 <a id="fn-i"></a>
-**i** — Read window: `PKPReviewerGridHandler::readReview` → `readReview.tpl`
-(AFFW-655..663; instruction `editor.review.readConfirmation`, comments split
-`submission.comments.canShareWithAuthor` "For author and editor" /
-`.cannotShareWithAuthor` "For editor only", competing-interests block,
-attachments grid `EditorReviewAttachmentsGridHandler` (GRID-012) headed
-`reviewer.submission.reviewerFiles` "Reviewer Files", rating radios
-`editor.review.rateReviewer` with `editor.review.reviewerRating.none` "No
-rating"). The viewed-marking step never fires — it compares strictly
-against a state a new assignment never holds, so opening a fresh review
-leaves it submitted (finding A10). Confirm posts `reviewRead`:
-saves/clears the rating, sets considered (or reconsidered), stamps the
-consideration date — and, for a not-yet-completed review, also stamps
-completion — clears the reviewer's "Review pending." task (NOTIF-019), logs
-`log.review.reviewConfirmed`, and triggers the ORCID deposit for the
-assignment (`SendReviewToOrcid`; consent/config is the ORCID feature —
-AFFW-506's deposit confirm rider). {OJS} recommendation dropdown: app
-template override captures `reviewerRecommendations.tpl`
-(`reviewer.article.recommendation`, description
-`…selectRecommendation.byEditor`; AFFW-664); OJS `ReviewerGridHandler::
-reviewRead` records a changed value with log
-`log.review.reviewRecommendationSetByProxy` (GRID-086). {OMP} override
-captures an empty block (AFFW-665); since the 2026-08-25 rebase the
-authoritative gate is the app flag
-`hasCustomizableReviewerRecommendation() === false` (the empty override
-remains). Vue modal head
-`ReviewerManagerReadReviewModal.vue` (VUE-068; AFFW-504/657): "Download"
-menu labels `editor.review.download`, `editor.review.authorOnly` (PDF/XML),
+**i** — Review Details windows (the 2026-08-29 modify-reviews rework,
+pkp/pkp-lib#13156 — it deleted the legacy grid `readReview` op,
+`readReview.tpl` and `ReadReviewHandler.js`): lib/ui-library
+`managers/ReviewerManager/` — `ReviewDetailsModal.vue` (view; title key
+`editor.review.reviewDetails`), `ReviewDetailsEditModal.vue` (modify),
+`ReviewDetailsRating.vue`, composables `useReviewDetails`,
+`useReviewDetailsForm`, `useReviewAssignment`, `useReviewContent`
+(comments split `submission.comments.canShareWithAuthor` "For author and
+editor" / `.cannotShareWithAuthor` "For editor only"). API
+(`submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}`,
+`ReviewAssignmentController`): GET/PUT on the assignment — a star click
+PUTs `{quality}` at once, toast "Reviewer rating saved" (the early-click
+race is finding A21, note f-a21); PUT `…/consider`, fired on window open
+(marks viewed) and by "Mark as Complete" (sets considered, stamps the
+consideration date, clears the reviewer's "Review pending." task
+(NOTIF-019), logs `log.review.reviewConfirmed`, and triggers the ORCID
+deposit `SendReviewToOrcid` — consent/config is the ORCID feature);
+GET/PUT `…/review` behind "Save Changes" (`editReview`; its
+`dateCompleted` stamp is finding A24, note f-a24). The UI sends each PUT
+as a POST carrying `X-Http-Method-Override: PUT`. Labels:
+`editor.review.markAsComplete` "Mark as Complete", `common.saveChanges`
+"Save Changes", `editor.review.reviewLastModifiedBy` "Last modified by
+{$username}"; guidance `editor.review.readConfirmation`, upstream-tagged
+fuzzy (finding A22, note f-a22). Mark-as-Complete gate: OJS-only
+(`isOJS()`-guarded in `useReviewDetails`); both gate messages are
+code-anchored, not probe-driven — the no-recommendation string
+(`editor.review.confirmReview.missingRecommendation`) guards a state
+unreachable with a UI-submitted review, whose wizard requires a
+recommendation {OJS}, and the unanswered-required-fields string was read
+from the same code. Private comment: the modify form's
+`canEditPrivateComment` parameter is passed true by no caller — the
+editor-only block is display-only cross-app (code-read 2026-08-29, not a
+press divergence). Save-confirm dialog: "Save changes to this review?"
+exists code-read only for a review already confirmed and publicly visible
+(open-review installs); the probes' installs never showed it. Activity
+log: attributed modification entries
+(`SUBMISSION_LOG_REVIEW_REVIEWER_COMMENTS_MODIFIED`,
+`…REVIEWER_RECOMMENDATION_MODIFIED`, `…REVIEWER_FORM_RESPONSE_MODIFIED`)
+each with a "View changes" action. {OJS} recommendation: shown on the
+info line and in the "Reviewer Recommendation" group (finding A23, note
+f-a23); editable only in the modify window's required select
+(`reviewerRecommendationId`). Legacy anchors the rework retired: the
+{OJS} `reviewerRecommendations.tpl` capture (AFFW-664) and {OMP} empty
+override (AFFW-665) no longer render in an editor window — the per-app
+gate is `hasCustomizableReviewerRecommendation()` (note f-omp1) — and
+the legacy `reviewRead` grid op (GRID-086) remains in code with no window
+posting to it (note a). Downloads (Rule 15): "Download Review Form" menu
+labels `editor.review.download`, `editor.review.authorOnly` (PDF/XML),
 `editor.review.allSections` (PDF/XML) → reviews API `export-pdf`/
-`export-xml` with `authorFriendly`, then the temporary-file download op (the
-`reviews` endpoints are owned by *Author response to reviews*; API-032
-rider); export rendering `reviewDownload.tpl` (AFFW-668) drops the
-private-comments block in author-friendly mode. Live-probed 2026-08-02: the
-menu button reads "Download Review Form"; the editor-only comments heading
-is "For editor" on OJS and "For editor only" on OMP (the exports mirror
-each app's heading); the author-friendly variants anonymize the reviewer —
-"Reviewer: C" in the PDF, `<anonymous/>` in the JATS XML (all four variants
-fetched on OJS, one on OMP); every variant saves under the same filename.
-Claim check 2026-08-02: the "Download Review Form" menu renders for
-free-form reviews too — it is not gated on a review form.
-Same probe: the window's contents appeared in the drafted order, "Confirm"
-turned the row "Complete" with the recommendation under the status {OJS},
-the OMP window rendered no recommendation control, and an editor-changed
-recommendation was logged verbatim ("…has been set by the editor, …, on
-behalf of the reviewer, …"). ORCID row action guard bug: finding A1 (note
-f-a1).
+`export-xml` with `authorFriendly`, then the temporary-file download op
+(the `reviews` endpoints are owned by *Author response to reviews*;
+API-032 rider); export rendering `reviewDownload.tpl` (AFFW-668) drops
+the private-comments block in author-friendly mode. Live-probed
+2026-08-02 from the legacy window: author-friendly variants anonymize the
+reviewer — "Reviewer: C" in the PDF, `<anonymous/>` in the JATS XML (all
+four variants fetched on OJS, one on OMP; every variant saves under the
+same filename; the menu renders for free-form reviews too — not gated on
+a review form). Re-checked 2026-08-29 from the new window: the same four
+exports offered under the same menu button. Live probe 2026-08-29 (OJS
+scratch journal + OMP publicknowledge press, manager role; apps ojs
+0471e029b9 / omp d34542e83, lib/pkp 13b621e42): window contents, dialog
+and toast texts, the live row flips (Viewed on open, Complete on
+mark-as-complete, surviving reload), rating persistence across
+close/reopen, "Last modified by {name}" after a save, the stacked Modify
+Review window, and the OMP absences — all as written in Rules 14a/14b.
+ORCID row action guard bug: finding A1 (note f-a1).
 
 <a id="fn-j"></a>
 **j** — `ThankReviewerForm` (template `thankReviewerForm.tpl`, AFFW-645):
@@ -1440,15 +1618,19 @@ through the config deep-merge. Stage split: reviewer groups are fetched per
 stage (`getUserGroupsByStage`), and the seeded press assigns the Internal
 Reviewer group to Internal Review and External Reviewer to External Review;
 file grants use the internal-review file stage on the internal stage. The
-recommendation absence: OMP's dashboard passes no recommendation roster and
-its read-review template blanks the recommendation control (AFFW-665);
-`hasCustomizableReviewerRecommendation()` returns true in both apps, so the
-divergence lives in the template/roster, not the capability flag.
+recommendation absence: OMP's dashboard passes no recommendation roster,
+and `Application::hasCustomizableReviewerRecommendation()` returns `false`
+in OMP against OJS's `true` — since the 2026-08-29 rework that flag (with
+the `isOJS()` completeness-gate guard) is what keeps every recommendation
+block and the Mark-as-Complete gate out of the Vue Review Details windows
+(note f-omp1; the legacy template overrides AFFW-664/665 are retired with
+the read window, note i).
 Live-probed 2026-08-02: the stage split held for the searched roster —
 positive and negative name searches on both stages, and the underlying
 reviewers listing filtered per stage — while the window's opening list
 showed both groups on either stage (finding OMP2, note f-omp2); the OMP
-read-review window rendered no recommendation control.
+read-review window rendered no recommendation control, re-verified
+2026-08-29 on the reworked windows.
 
 <a id="fn-p"></a>
 **p** — OPS absence, install facts: the preprint server's stage roster is
@@ -1479,7 +1661,10 @@ thresholds; scratch contexts are used for anything needing different review
 setup. Claim check 2026-08-02: scenario 1 driven end-to-end as a Section
 Editor (previously covered by other roles); scenarios 8–14 re-driven as a
 Section Editor on OJS with OMP twins for 9, 13 and 14; scenario 15 stands
-on the earlier OPS probe of the same date.
+on the earlier OPS probe of the same date. Upstream-sync probe 2026-08-29
+(modify-reviews rework; OJS scratch journal + OMP publicknowledge press,
+manager role): scenarios 9, 10 and 14 re-driven on the reworked Review
+Details windows, and scenario 16 driven end-to-end on both apps.
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js::getItemActions`: the guard reads
@@ -1588,9 +1773,13 @@ indistinguishable from correct behavior.
 check re-drove both apps, OJS as a Section Editor): open "Read
 Review", close without confirming → row still "Review Submitted" on both
 apps; "Review Viewed" only ever appeared after revert-from-Thanked, both
-apps. Mechanism: the viewed-marking branch
-compares strictly against a state new assignments never hold, so it never
-fires (note i).
+apps. Mechanism: the legacy window's viewed-marking branch compared
+strictly against a state new assignments never hold, so it never fired.
+Update 2026-08-29 (modify-reviews rework, pkp/pkp-lib#13156): the legacy
+window and its dead branch are deleted; the Review Details window PUTs
+`…/consider` on open, and the probe of the same date saw the row flip to
+"Review Viewed" live on both apps, surviving reload (note i). A10 retired
+— the recorded defect is now the implemented behavior.
 
 <a id="fn-a11"></a>
 **f-a11** — Live-probed 2026-08-02 (shared mailable): on OJS twice
@@ -1712,10 +1901,49 @@ reinstate windows; the new cancel subject received). A20 retired. OPS's
 registry is unchanged at ops 94f6bbc59a (note f-ops1) — OPS1 was itself
 overturned the same day: the absence is OPS's deliberate baseline.
 
+<a id="fn-a21"></a>
+**f-a21** — Live-probed 2026-08-29 (OJS): a star clicked immediately after
+the window opened flashed selected, then reverted with nothing saved, in
+one run of four; clicks after the window settled saved every time (toast
+"Reviewer rating saved", value persisted across close and reopen).
+Mechanism code-read the same day: `useReviewDetails` /
+`ReviewDetailsRating` render the rating radios (`name="quality"`) enabled
+before the assignment GET resolves; the load's completion re-initializes
+the rating widget from the fetched value, discarding a click that landed
+in the window.
+
+<a id="fn-a22"></a>
+**f-a22** — `editor.review.readConfirmation` still carries the legacy
+window's wording — "…you may upload the file below and then press 'Mark
+as Complete'…" as displayed — and the same rework's commit
+(pkp/pkp-lib#13156) tagged the key fuzzy, flagging the text for review.
+Live-probed 2026-08-29 (OJS + OMP): the view window renders no upload
+control anywhere; the "Upload" control exists only in
+`ReviewDetailsEditModal.vue` (Rule 14b).
+
+<a id="fn-a23"></a>
+**f-a23** — Live-probed 2026-08-29 (OJS): "Recommendation: {label}" in
+the window's info block and the same value again in the display-only
+"Reviewer Recommendation" group below the comments. OMP renders neither
+(note f-omp1).
+
+<a id="fn-a24"></a>
+**f-a24** — `ReviewAssignmentController::editReview` (lib/pkp
+`api/v1/submissions/reviewAssignments/`) sets `dateCompleted` to the
+current date when the assignment carries none, as part of a modification
+save. The Review Details window and its "Modify Review" open only from
+rows in the submitted/viewed states, whose assignments already carry
+`dateCompleted`, so no current screen reaches the branch. Code-read
+2026-08-29; not probeable through the UI.
+
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
-by `ojs-main DashboardHandler`; OMP `readReview.tpl` override comments "Not
-implemented in OMP"; reviewer groups resolved per stage via
+by `ojs-main DashboardHandler`; the authoritative per-app switch is
+`Application::hasCustomizableReviewerRecommendation()` — `true` in OJS,
+`false` in OMP (code-read 2026-08-29) — which the Review Details windows
+and the OJS-only Mark-as-Complete gate follow (`isOJS()`, note i; probed
+2026-08-29: OMP button enabled at once, no recommendation surface);
+reviewer groups resolved per stage via
 `getUserGroupsByStage($contextId, $stageId, ROLE_ID_REVIEWER)`. The
 author-side absence and the empty "Recommendation:" letter label are
 recorded in review-stage-and-rounds (its own register), probed live
@@ -1770,10 +1998,10 @@ of its own.
 | Edit Review window | row menu → "Edit" | AFFW-642..644 · GRID-026 · MAIL-026 · NOTIF-048 |
 | Send Reminder window | row button (overdue only) | AFFW-646..648 · MAIL-042 |
 | Automatic reminder emails | scheduled, per due assignment | JOB-012 · MAIL-043, 046 |
-| Read Review window | row button → "Read Review" | AFFW-655..663 · VUE-068 · AFFW-504, 657 · GRID-012 |
-| Review export (download) | Read Review → "Download Review Form" | AFFW-668 |
-| {OJS} recommendation control | Read Review window | AFFW-664 · GRID-086 |
-| {OMP} recommendation absence | Read Review window | AFFW-665 · GRID-098 |
+| Review Details window (view · modify) | row button "Read Review" / row menu → "Review Details"; "Modify Review" inside | AFFW-655..663 · VUE-068 · AFFW-504, 657 |
+| Review export (download) | Review Details → "Download Review Form" | AFFW-668 |
+| {OJS} recommendation control | Review Details window (display) · Modify Review (select) | AFFW-664 · GRID-086 |
+| {OMP} recommendation absence | Review Details windows | AFFW-665 · GRID-098 |
 | Thank Reviewer window | row button | AFFW-645 · MAIL-034 |
 | Revert / ORCID confirm dialogs | row actions | AFFW-490, 506 |
 | Unassign / Cancel window | row menu | AFFW-649..650 · MAIL-041 |
@@ -1790,13 +2018,14 @@ of its own.
 
 ## Reference — code anchors
 
-- `lib/pkp/classes/controllers/grid/users/reviewer/PKPReviewerGridHandler.php` — every modal op, role map, author denial
+- `lib/pkp/classes/controllers/grid/users/reviewer/PKPReviewerGridHandler.php` — the remaining legacy window ops (the `readReview` op is deleted), role map, author denial
+- `lib/pkp/api/v1/submissions/reviewAssignments/ReviewAssignmentController.php` — Review Details endpoints: assignment fetch/rating, consider (viewed / mark as complete), review fetch/modify
 - `ojs-main/controllers/grid/users/reviewer/ReviewerGridHandler.php` (recommendation by proxy) · `omp-main/…/ReviewerGridHandler.php` (empty)
 - `lib/pkp/controllers/grid/users/reviewer/form/` — `ReviewerForm`, `AdvancedSearchReviewerForm`, `CreateReviewerForm`, `EnrollExistingReviewerForm`, `EditReviewForm`, `ReviewReminderForm`, `ThankReviewerForm`, `ClearReviewForm`, `UnassignReviewerForm`, `CancelReviewForm`, `ReinstateReviewerForm`, `ResendRequestReviewerForm`, `EmailReviewerForm`, `ReviewerGossipForm`, `traits/HasReviewDueDate`
 - `lib/pkp/classes/submission/action/EditorAction.php` — assignment creation + request mail
 - `lib/pkp/classes/submission/reviewAssignment/ReviewAssignment.php` — status machine; `lib/pkp/schemas/reviewAssignment.json`
 - `lib/pkp/classes/submission/maps/Schema.php::getPropertyReviewAssignments()` — row serialization and visibility
-- lib/ui-library `src/managers/ReviewerManager/` — table, cells, actions, read-review and log-response modals
+- lib/ui-library `src/managers/ReviewerManager/` — table, cells, actions, log-response modal; `ReviewDetailsModal.vue` / `ReviewDetailsEditModal.vue` / `ReviewDetailsRating.vue` + `useReviewDetails` / `useReviewDetailsForm` / `useReviewAssignment` / `useReviewContent` — the Review Details view & modify windows
 - lib/ui-library `src/components/ListPanel/users/SelectReviewerListPanel.vue` · `SelectReviewerListItem.vue` + `lib/pkp/classes/components/listPanels/PKPSelectReviewerListPanel.php` — reviewer search
 - `lib/pkp/classes/submission/reviewer/ReviewerAction.php` — response recording (log response)
 - `lib/pkp/jobs/email/ReviewReminder.php` (send) · `lib/pkp/classes/task/ReviewReminder.php` (clock, owned by review setup)

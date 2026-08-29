@@ -16,9 +16,14 @@
  * - addReviewer / performReview / assignParticipant — the legacy grid flows
  *   around the review stage (Add Reviewer form, reviewer steps 1–4, the
  *   stage-participant form).
+ * - reviewDetailsModal / openReviewDetails / awaitReviewDetailsSettled /
+ *   markReviewComplete / closeReviewDetails — the Vue "Review Details" side
+ *   modal that replaced the legacy read-review window (form#readReviewForm
+ *   is gone; pkp/pkp-lib#13156).
  *
  * Labels are the live locale strings (lib/pkp/locale/en/*.po); the DOM shapes
- * were confirmed against a live install (aria snapshots, 2026-07-31).
+ * were confirmed against a live install (aria snapshots, 2026-07-31; the
+ * Review Details modal re-probed 2026-08-29).
  */
 const path = require('path');
 const {expect} = require('@playwright/test');
@@ -418,6 +423,104 @@ exports.performReview = async function performReview(page, contextPath, submissi
  */
 exports.legacyModal = function legacyModal(page, formId) {
     return page.getByRole('dialog').filter({has: page.locator(`form#${formId}`)});
+};
+
+/**
+ * The Vue "Review Details" side modal (replaced the legacy readReviewForm
+ * window, pkp/pkp-lib#13156). Anchored by the dialog's accessible name —
+ * the [data-cy="active-modal"] wrapper computes visibility:hidden, so the
+ * role+name anchor is the reliable one.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.reviewDetailsModal = function reviewDetailsModal(page) {
+    return page.getByRole('dialog', {name: /^Review Details:/});
+};
+
+/**
+ * Open a reviewer row's "Review Details" window through its "Read Review"
+ * button. Merely opening it marks a submitted review viewed — the row
+ * behind updates to "Review Viewed" at once.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openReviewDetails = async function openReviewDetails(page, row) {
+    await row.getByRole('button', {name: 'Read Review', exact: true}).click();
+    const modal = exports.reviewDetailsModal(page);
+    await expect(modal).toBeVisible({timeout: 30_000});
+    return modal;
+};
+
+/**
+ * The window's load-settled signal: "Modify Review" renders disabled until
+ * the assignment and review content finish loading, then enables. Waiting
+ * on it (never a timer) also walks around the early-rating-click race
+ * (register A21 of the reviewer-assignment spec — never asserted).
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ */
+exports.awaitReviewDetailsSettled = async function awaitReviewDetailsSettled(modal) {
+    await expect(modal.getByRole('button', {name: 'Modify Review', exact: true})).toBeEnabled({
+        timeout: 30_000,
+    });
+};
+
+/**
+ * Click a "Reviewer rating" star and wait for the save toast ("Reviewer
+ * rating saved"). Even after the settle signal, the window's mark-viewed
+ * round trip (the consider PUT fired on open) replaces the rating component
+ * and can revert a click landing just before the swap — the A21 race.
+ * Outcome-keyed bounded re-click (the DecisionPage.record pattern): retry
+ * until the radio holds, then wait for the toast; never a timer, and the
+ * race itself is asserted neither way.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ * @param {number} value 1–5 (0 = "No rating")
+ */
+exports.rateReview = async function rateReview(page, modal, value) {
+    await exports.awaitReviewDetailsSettled(modal);
+    const star = modal.locator(`input[name="quality"][value="${value}"]`);
+    await expect(async () => {
+        await star.check({timeout: 2_000});
+        await expect(star).toBeChecked({timeout: 2_000});
+    }).toPass({intervals: [250, 500, 1_000], timeout: 30_000});
+    await expect(page.getByText('Reviewer rating saved').first()).toBeVisible({
+        timeout: 30_000,
+    });
+};
+
+/**
+ * Press "Mark as Complete" and confirm the "Mark this review as complete?"
+ * dialog; returns after the success toast ("The review has been marked as
+ * complete."). Waits for the load-settled signal first.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ */
+exports.markReviewComplete = async function markReviewComplete(page, modal) {
+    await exports.awaitReviewDetailsSettled(modal);
+    await modal.getByRole('button', {name: 'Mark as Complete', exact: true}).click();
+    const dialog = page
+        .locator('[data-cy="dialog"]')
+        .filter({hasText: 'Mark this review as complete?'});
+    await expect(dialog).toBeVisible({timeout: 30_000});
+    await dialog.getByRole('button', {name: 'Mark as Complete', exact: true}).click();
+    await expect(
+        page.getByText('The review has been marked as complete.').first()
+    ).toBeVisible({timeout: 30_000});
+};
+
+/**
+ * Close the Review Details window through its footer "Cancel" button.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ */
+exports.closeReviewDetails = async function closeReviewDetails(page, modal) {
+    await modal.getByRole('button', {name: 'Cancel', exact: true}).click();
+    await expect(modal).toBeHidden({timeout: 30_000});
 };
 
 /**

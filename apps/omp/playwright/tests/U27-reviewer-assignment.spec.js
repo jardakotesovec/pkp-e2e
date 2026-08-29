@@ -6,10 +6,12 @@
  * lib/pkp/docs/e2e/specs/U27-reviewer-assignment-and-management.md). One test
  * per canonical scenario the spec runs on a press, in OMP vocabulary (press,
  * monograph, External Review per the glossary; the reviewer roster splits
- * julia/paul → External, amara/adam → Internal): common scenarios 1–12 run on
- * External Review, plus the OMP-specific stage-split scenario 13 and the
- * {OMP} control of scenario 14 (no recommendation surfaces on a press —
- * OMP1 ✅). Scenario 15 is OPS-only.
+ * julia/paul → External, amara/adam → Internal): common scenarios 1–12 and
+ * 16 run on External Review, plus the OMP-specific stage-split scenario 13
+ * and the {OMP} control of scenario 14 (no recommendation surfaces on a
+ * press — OMP1 ✅). Scenario 15 is OPS-only. The editor-side read window is
+ * the Vue "Review Details" modal with its "Modify Review" partner
+ * (pkp/pkp-lib#13156 — Rules 14a/14b).
  *
  * Deliberate omissions (register IDs from the spec's Findings register —
  * 🐞 findings are never asserted as contract):
@@ -22,9 +24,18 @@
  * - A8 (bug): S5 asserts the refusal itself (window stays open, no row) and
  *   the permanent guidance sentence — not the absence of an error message.
  * - A9 (bug): the Resend window's date presets are not asserted.
- * - A10 (bug): no assertion that viewing changes (or fails to change) a
- *   row's status; S9's "Review Viewed" arrives via Revert Decision, which
- *   Rule 16 owns as contract.
+ * - A21 (bug): a rating star clicked before the Review Details window has
+ *   settled can silently revert — never asserted; every rating click waits
+ *   for the load-settled signal first (the "Modify Review" footer button
+ *   enabling), never a timeout.
+ * - A22 (bug): nothing is asserted about the Review Details guidance
+ *   paragraph (it promises an upload control the window lacks).
+ * - A24 (open): the modification save's complete-an-incomplete-review side
+ *   effect is unreachable through the screens and not asserted either way.
+ * - A23 ({OJS}-only open question, the twice-shown recommendation): moot on
+ *   a press — S14 asserts no recommendation shows at all (OMP1 ✅).
+ *   (A10 is retired: opening the window now marks the review viewed by
+ *   design, and S9 asserts that flip as contract.)
  * - A11 (retired 2026-08-25, fixed upstream pkp/pkp-lib#13162) / A12 (bug):
  *   S6 asserts the change-notice email arrives — nothing about the
  *   deadlines it reports or its unsubscribe link.
@@ -46,7 +57,10 @@
  *   need the serial project), reviewer suggestions.
  * - Rule 8 (later-round hoisting/Reassign) has no canonical scenario and is
  *   not covered; toasts are only asserted for throwaway single-test users
- *   (shared-user toast queues race under parallel workers).
+ *   (shared-user SERVER-fed toast queues race under parallel workers) —
+ *   except the Review Details windows' Vue toasts ("Reviewer rating saved",
+ *   "The review has been marked as complete."), which are client-emitted by
+ *   the acting page itself and never leave it.
  *
  * Seeding: scenario endpoints only. Tests that assert mail or toasts run on
  * scratch presses with throwaway users (Mailpit is shared across fleets —
@@ -81,6 +95,9 @@ const {
     completeReview,
     awaitTinyMce,
     openReadReview,
+    rateReview,
+    markReviewComplete,
+    openModifyReview,
 } = require('../pages/ReviewerAssignmentPages.js');
 const {UsersAccessPage} = require('../pages/UserInvitationPages.js');
 const fs = require('fs');
@@ -622,7 +639,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await page.keyboard.press('Escape');
     });
 
-    test('S9: read, rate, confirm, thank', async ({ompApi, asUser, pkpMail}, testInfo) => {
+    test('S9: read, rate, mark complete, thank', async ({ompApi, asUser, pkpMail}, testInfo) => {
         const tag = makeTag(testInfo, 'u27s9');
         const shared = `Shared remarks ${tag} for author and editor.`;
         const priv = `Editoronly remarks ${tag}.`;
@@ -641,9 +658,11 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const row = reviewerRow(modal, 'Julia Reviewer');
         await expect(row).toContainText('Review Submitted');
 
-        // Read Review: the comments split into the two audiences ({OMP}:
-        // "For editor only"), plus a star rating the Confirm saves.
-        const readModal = await openReadReview(page, modal, 'Julia Reviewer');
+        // Read Review: the "Review Details" window opens with the comments
+        // split into the two audiences ({OMP}: "For editor only"). The
+        // workflow modal's DOM is unmounted while this window is open, so
+        // every row claim below waits for the window to close first.
+        let readModal = await openReadReview(page, modal, 'Julia Reviewer');
         await expect(
             readModal.getByText('For author and editor').first()
         ).toBeVisible();
@@ -652,11 +671,29 @@ test.describe('Reviewer assignment & management (U27)', () => {
             readModal.getByText('For editor only').first()
         ).toBeVisible();
         await expect(readModal.getByText(priv)).toBeVisible();
-        await readModal.locator('label.pkp_star_selection').nth(4).click();
-        await readModal.getByRole('button', {name: 'Confirm', exact: true}).click();
-        await expect(
-            readModal.getByRole('button', {name: 'Confirm', exact: true})
-        ).toBeHidden({timeout: 20_000});
+
+        // Once the window has settled (openReadReview waited for the
+        // "Modify Review" button to enable — A21), a star click saves
+        // inline with its toast.
+        await rateReview(page, readModal, 5);
+
+        // Merely opening the window marked the review viewed (Rule 14a —
+        // A10 retired: the label now means what it says): closed without
+        // confirming anything, the row reads "Review Viewed".
+        await readModal
+            .getByRole('button', {name: 'Cancel', exact: true})
+            .click();
+        await expect(readModal).toBeHidden({timeout: 20_000});
+        await expect(row).toContainText('Review Viewed', {timeout: 20_000});
+
+        // Reopen: "Mark as Complete" asks "Mark this review as complete?";
+        // confirming turns the row "Complete" once the window is closed.
+        readModal = await openReadReview(page, modal, 'Julia Reviewer');
+        await markReviewComplete(page, readModal);
+        await readModal
+            .getByRole('button', {name: 'Cancel', exact: true})
+            .click();
+        await expect(readModal).toBeHidden({timeout: 20_000});
         await expect(row).toContainText('Complete', {timeout: 20_000});
 
         // Thank Reviewer: the row turns "Reviewer Thanked" and the thank-you
@@ -949,27 +986,161 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const row = reviewerRow(modal, 'Julia Reviewer');
         await expect(row).toContainText('Review Submitted');
 
-        // The read-review window renders its comments and rating (positive
-        // controls) but no recommendation control anywhere (OMP1 ✅).
+        // The "Review Details" window renders its comments and its rating
+        // group (positive controls on the same surface the absences are
+        // scoped to; openReadReview's load-settle bounds the reads)…
         const readModal = await openReadReview(page, modal, 'Julia Reviewer');
         await expect(readModal.getByText(shared)).toBeVisible();
         await expect(
-            readModal.locator('label.pkp_star_selection').first()
+            readModal
+                .getByText('Rate the quality of the review provided.')
+                .first()
         ).toBeVisible();
-        await expect(readModal.getByText(/Recommendation/)).toHaveCount(0);
         await expect(
-            readModal.getByRole('combobox', {name: /Recommendation/})
+            readModal.getByRole('radio', {name: 'No rating'})
+        ).toBeVisible();
+
+        // …but no recommendation group, info line or select anywhere, and
+        // no completeness gate: "Mark as Complete" is enabled at once with
+        // no gate message beside it (OMP1 ✅ — the {OJS} gate does not
+        // exist on a press).
+        await expect(readModal.getByText(/recommendation/i)).toHaveCount(0);
+        await expect(readModal.getByRole('combobox')).toHaveCount(0);
+        await expect(
+            readModal.getByText(
+                'A recommendation is required before this review can be marked as complete.'
+            )
+        ).toHaveCount(0);
+        await expect(
+            readModal.getByRole('button', {name: 'Mark as Complete', exact: true})
+        ).toBeEnabled();
+
+        // The stacked "Modify Review" window: its comment editor and "Save
+        // Changes" render (positive controls), no recommendation select —
+        // or any select — anywhere ({OMP} marker of scenario 16 / OMP1 ✅).
+        const {editModal} = await openModifyReview(page, readModal, shared);
+        await expect(
+            editModal.getByRole('button', {name: 'Save Changes', exact: true})
+        ).toBeVisible();
+        await expect(editModal.getByText(/recommendation/i)).toHaveCount(0);
+        await expect(editModal.getByRole('combobox')).toHaveCount(0);
+        await editModal
+            .getByRole('button', {name: 'Cancel', exact: true})
+            .click();
+        await expect(editModal).toBeHidden({timeout: 20_000});
+
+        // Marked complete, the Complete row's status cell carries no
+        // recommendation line either (its status text and action button are
+        // the positive control; the row is only in the DOM again once the
+        // window is closed).
+        await markReviewComplete(page, readModal);
+        await readModal
+            .getByRole('button', {name: 'Cancel', exact: true})
+            .click();
+        await expect(readModal).toBeHidden({timeout: 20_000});
+        await expect(row).toContainText('Complete', {timeout: 20_000});
+        await expect(
+            row.getByRole('button', {name: 'Thank Reviewer'})
+        ).toBeVisible();
+        await expect(row.getByText(/recommendation/i)).toHaveCount(0);
+    });
+
+    test('S16: the editor modifies a submitted review', async ({ompApi, asUser}, testInfo) => {
+        const tag = makeTag(testInfo, 'u27s16');
+        const shared = `Shared remarks ${tag} for author and editor.`;
+        const priv = `Editoronly remarks ${tag}.`;
+        const edited = `Modified remarks ${tag} by the editor.`;
+        const seeded = await seedExternal(ompApi, tag, [
+            {username: 'reviewer.julia', status: 'accepted'},
+        ]);
+
+        const juliaPage = await (await asUser('reviewer.julia')).newPage();
+        await completeReview(juliaPage, PK, seeded.submissionId, {
+            comment: shared,
+            privateComment: priv,
+        });
+
+        const page = await (await asUser('manager.maya')).newPage();
+        const modal = await openEditorial(page, PK, seeded.submissionId);
+        const readModal = await openReadReview(page, modal, 'Julia Reviewer');
+
+        // Control, view-window half: the settled view window renders both
+        // comments (positive control) with no rich-text editor at all —
+        // read before the edit window stacks over it (the view window's
+        // DOM is unmounted underneath the stacked window).
+        await expect(readModal.getByText(shared)).toBeVisible();
+        await expect(readModal.getByText(priv)).toBeVisible();
+        await expect(
+            readModal.locator('iframe.tox-edit-area__iframe')
         ).toHaveCount(0);
 
-        // Confirmed, the Complete row's status cell carries no
-        // recommendation line either.
-        await readModal
-            .getByRole('button', {name: 'Confirm', exact: true})
-            .click();
+        // "Modify Review" asks "Modify this review?" and stacks the "Modify
+        // Review" window over the view window, its one editor prefilled
+        // with the shared comment (openModifyReview's own load-settle).
+        const {editModal, commentBody} = await openModifyReview(
+            page,
+            readModal,
+            shared
+        );
+
+        // Control, edit-window half: the "For editor only" comment renders
+        // display-only beside the single rich-text editor (the shared
+        // comment's — the positive control).
+        await expect(editModal.getByText(priv)).toBeVisible();
         await expect(
-            readModal.getByRole('button', {name: 'Confirm', exact: true})
-        ).toBeHidden({timeout: 20_000});
-        await expect(row).toContainText('Complete', {timeout: 20_000});
-        await expect(row.getByText(/Recommendation/)).toHaveCount(0);
+            editModal.locator('iframe.tox-edit-area__iframe')
+        ).toHaveCount(1);
+        // {OMP}: no recommendation field on a press (OMP1 ✅ — S14 owns the
+        // full absence sweep).
+        await expect(editModal.getByRole('combobox')).toHaveCount(0);
+
+        // Edit the shared comment and save — no further confirmation.
+        await commentBody.click();
+        await commentBody.fill(edited);
+        await expect(commentBody).toContainText(edited);
+        // Blur so TinyMCE syncs the field before submit (the group label
+        // renders as a plain element, not a heading).
+        await editModal
+            .getByText('Reviewer Comments', {exact: true})
+            .first()
+            .click();
+        await editModal
+            .getByRole('button', {name: 'Save Changes', exact: true})
+            .click();
+        await expect(editModal).toBeHidden({timeout: 20_000});
+
+        // The view window refreshes: "Last modified by {name}" under its
+        // title, with the edited text.
+        await expect(
+            readModal.getByText('Last modified by Maya Manager')
+        ).toBeVisible({timeout: 20_000});
+        await expect(readModal.getByText(edited)).toBeVisible();
+        await expect(readModal.getByText(shared)).toHaveCount(0);
+        await readModal
+            .getByRole('button', {name: 'Cancel', exact: true})
+            .click();
+        await expect(readModal).toBeHidden({timeout: 20_000});
+
+        // The activity log lists the modification attributed to the editor,
+        // with its "View changes" action.
+        await page
+            .getByRole('button', {name: 'Activity Log', exact: true})
+            .click();
+        const log = page.getByRole('dialog', {name: /Activity Log/});
+        const logRow = log
+            .getByRole('row')
+            .filter({
+                hasText: 'The following was modified in this review: Comments.',
+            })
+            .first();
+        await expect(logRow).toBeVisible({timeout: 30_000});
+        await expect(logRow).toContainText('Maya Manager');
+        // The action sits in the row's hidden controls row (legacy grid);
+        // the row's expander reveals the "View changes" link — the only
+        // such link in this one-modification log.
+        await logRow.locator('a.show_extras').click();
+        await expect(
+            log.getByRole('link', {name: 'View changes'}).first()
+        ).toBeVisible();
     });
 });

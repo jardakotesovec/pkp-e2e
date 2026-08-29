@@ -3,8 +3,9 @@
  * @file playwright/tests/U27-reviewer-assignment.spec.js
  *
  * Reviewer assignment & management — OJS suite, one test per canonical
- * scenario the spec runs on OJS (common scenarios 1–12 + OJS-specific 14;
- * scenario 13 is OMP-only, 15 OPS-only — they live in those repos).
+ * scenario the spec runs on OJS (common scenarios 1–12 and 16 +
+ * OJS-specific 14; scenario 13 is OMP-only, 15 OPS-only — they live in
+ * those repos).
  * Spec: lib/pkp/docs/e2e/specs/U27-reviewer-assignment-and-management.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
@@ -18,8 +19,6 @@
  *   scenario; the absence of an error message is not asserted as correct.
  * - A9 🐞: S12 submits the Resend window's preset dates without asserting
  *   their values.
- * - A10 🐞: S9 asserts the revert transitions the spec's Rule 16 names; that
- *   viewing never produces "Review Viewed" is not asserted either way.
  * - A11 (retired 2026-08-25, fixed upstream) / A12 🐞: S6 asserts the change
  *   notice arrives; its unsubscribe page is A12's record. The body now
  *   carries the just-saved deadlines (pkp/pkp-lib#13162), asserted neither
@@ -27,11 +26,25 @@
  * - A13/A14/A16 🐞: Email Reviewer body enforcement, the enroll form's false
  *   required message, and typed-date discarding are not exercised (all date
  *   input goes through the calendar, the screen's working path).
+ * - A21 🐞: the early-rating-click revert is never asserted — every Review
+ *   Details interaction waits for the window's load-settled signal (the
+ *   enabled "Modify Review" button), and S9's star click goes through
+ *   rateReview's outcome-keyed bounded re-click (radio held, then toast);
+ *   never a timer, the race asserted neither way.
+ * - A22 🐞: nothing asserts the Review Details guidance paragraph's promised
+ *   upload control either way.
+ * - A23 ❓: the recommendation's double display is not frozen — S14 and S16
+ *   anchor on the "Recommendation:" info line only (spec Rule 14a), never
+ *   on the "Reviewer Recommendation" group.
+ * - A24 ❓: the modification save's completion side effect is unreachable
+ *   through any screen and is not exercised.
  * - A15/A17 ❓ + A3/A4/A6 ❓ (A5 retired 2026-08-25 — its access check was
  *   reverted upstream): parked pending product rulings (no
  *   assistant-table, editorial-notes, site-admin-add or past-date-warning
  *   assertions; S7 uses the Edit window's past-date route as the spec's own
  *   overdue recipe, asserting nothing about warnings).
+ * - (A10 retired 2026-08-29 — opening the window now marks the row "Review
+ *   Viewed" by design; S9 asserts it as contract.)
  * - Automatic reminders (scheduled task; serial-scope, settings-owned
  *   clocks) and reviewer one-click access (settings modifier) have no
  *   canonical scenario here.
@@ -59,6 +72,11 @@ const {
     openAddReviewerModal,
     searchReviewerList,
     selectReviewer,
+    openReviewDetails,
+    awaitReviewDetailsSettled,
+    rateReview,
+    markReviewComplete,
+    closeReviewDetails,
     waitForJQueryIdle,
 } = require('../pages/ReviewStagePages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
@@ -654,21 +672,40 @@ test.describe('reviewer-assignment', () => {
         const row = workflow.panelRow('Reviewers', reviewer);
         await expect(row).toContainText('Review Submitted');
 
-        // Read Review: the comments split into their two headed blocks.
-        await row.getByRole('button', {name: 'Read Review', exact: true}).click();
-        const readModal = legacyModal(managerPage, 'readReviewForm');
+        // Read Review: the "Review Details" window opens (merely opening it
+        // marks the row "Review Viewed" — asserted below the moment the
+        // window closes, without a reload; the open window aria-hides the
+        // table behind it, so role locators cannot reach the row until then).
+        const readModal = await openReviewDetails(managerPage, row);
+
+        // The comments split into their two headed blocks.
         await expect(readModal.getByText('For author and editor')).toBeVisible({timeout: 30_000});
         await expect(readModal.getByText(`Shared comment ${tag}`)).toBeVisible();
         await expect(readModal.getByRole('heading', {name: 'For editor', exact: true})).toBeVisible();
         await expect(readModal.getByText(`Private remark ${tag}`)).toBeVisible();
 
-        // Pick a star rating and confirm — the row turns "Complete".
-        await readModal.locator('input[name="quality"][value="5"]').check();
-        await readModal.getByRole('button', {name: 'Confirm', exact: true}).click();
-        await expect(readModal.locator('form#readReviewForm')).toBeHidden({timeout: 30_000});
-        await waitForJQueryIdle(managerPage);
+        // Once the window has settled, a star click saves immediately with
+        // its toast (rateReview waits out A21's race on observable outcomes,
+        // never a timer).
+        await rateReview(managerPage, readModal, 5);
+
+        // Opening marked the row "Review Viewed" at once — it reads so as
+        // soon as the window closes, before any reload (A10 retired: the
+        // label now means what it says) — and it stays after one. The rating
+        // persists across close and reopen.
+        await closeReviewDetails(managerPage, readModal);
+        await expect(row).toContainText('Review Viewed');
         await managerPage.reload();
         await workflow.expectOpen();
+        await expect(row).toContainText('Review Viewed');
+        const reopenedModal = await openReviewDetails(managerPage, row);
+        await awaitReviewDetailsSettled(reopenedModal);
+        await expect(reopenedModal.locator('input[name="quality"][value="5"]')).toBeChecked();
+
+        // Mark as Complete (via its confirm dialog) — the row reads
+        // "Complete" once the window closes, no reload.
+        await markReviewComplete(managerPage, reopenedModal);
+        await closeReviewDetails(managerPage, reopenedModal);
         await expect(row).toContainText('Complete');
 
         // Thank the reviewer.
@@ -719,8 +756,7 @@ test.describe('reviewer-assignment', () => {
         const workflow = new WorkflowPage(editorPage, JOURNAL);
         await workflow.gotoEditorial(submissionId);
         const row = workflow.panelRow('Reviewers', 'Paul Reviewer');
-        await row.getByRole('button', {name: 'Read Review', exact: true}).click();
-        const readModal = legacyModal(editorPage, 'readReviewForm');
+        const readModal = await openReviewDetails(editorPage, row);
         await expect(readModal.getByText('For author and editor')).toBeVisible({timeout: 30_000});
 
         /** Open the "Download Review Form" menu and download one export. */
@@ -926,23 +962,139 @@ test.describe('reviewer-assignment', () => {
         const row = workflow.panelRow('Reviewers', 'Adam Reviewer');
         await expect(row).toContainText('Review Submitted');
 
-        // The read window's recommendation dropdown carries the reviewer's
-        // choice and can be changed by the editor.
-        await row.getByRole('button', {name: 'Read Review', exact: true}).click();
-        const readModal = legacyModal(editorPage, 'readReviewForm');
-        const recommendationSelect = readModal.locator('select[name="reviewerRecommendationId"]');
-        await expect(recommendationSelect).toBeVisible({timeout: 30_000});
-        await expect(recommendationSelect.locator('option:checked')).toHaveText(/Accept Submission/);
-        await recommendationSelect.selectOption({label: 'Revisions Required'});
-        await readModal.getByRole('button', {name: 'Confirm', exact: true}).click();
-        await expect(readModal.locator('form#readReviewForm')).toBeHidden({timeout: 30_000});
-        await waitForJQueryIdle(editorPage);
+        // The "Review Details" window displays the reviewer's recommendation
+        // read-only — anchored on its "Recommendation:" info line (one of
+        // A23's two displays; the duplication is not frozen). No editable
+        // select exists here: changing it on the reviewer's behalf runs
+        // through "Modify Review" (S16).
+        const readModal = await openReviewDetails(editorPage, row);
+        await awaitReviewDetailsSettled(readModal);
+        const recommendationLine = readModal
+            .getByText('Recommendation:', {exact: true})
+            .locator('xpath=..');
+        await expect(recommendationLine).toContainText('Accept Submission');
+        await expect(readModal.locator('select[name="reviewerRecommendationId"]')).toHaveCount(0);
 
-        // The "Complete" row's status cell shows the (editor-set)
-        // recommendation under the status.
-        await editorPage.reload();
-        await workflow.expectOpen();
+        // After "Mark as Complete", the "Complete" row's status cell shows
+        // the reviewer's recommendation under the status.
+        await markReviewComplete(editorPage, readModal);
+        await closeReviewDetails(editorPage, readModal);
         await expect(row).toContainText('Complete');
-        await expect(row).toContainText('Revisions Required');
+        await expect(row).toContainText('Accept Submission');
+    });
+
+    test('S16: the editor modifies a submitted review', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s16', testInfo);
+        const {submissionId} = await seedInReview(ojsApi, tag, {
+            reviewers: [{username: 'reviewer.adam', status: 'accepted'}],
+        });
+
+        // The reviewer submits a review with both comment blocks and a
+        // recommendation.
+        const reviewerPage = await (await asUser('reviewer.adam')).newPage();
+        await performReview(reviewerPage, JOURNAL, submissionId, {
+            recommendation: 'Accept Submission',
+            comments: `Original comment ${tag}`,
+            privateComments: `Private remark ${tag}`,
+        });
+
+        const editorPage = await (await asUser('sectioneditor.ana')).newPage();
+        const workflow = new WorkflowPage(editorPage, JOURNAL);
+        await workflow.gotoEditorial(submissionId);
+        const row = workflow.panelRow('Reviewers', 'Adam Reviewer');
+        const readModal = await openReviewDetails(editorPage, row);
+        await awaitReviewDetailsSettled(readModal);
+
+        // "Modify Review" first asks for confirmation, naming the reviewer
+        // and the activity log.
+        await readModal.getByRole('button', {name: 'Modify Review', exact: true}).click();
+        const confirmDialog = editorPage
+            .locator('[data-cy="dialog"]')
+            .filter({hasText: 'Modify this review?'});
+        await expect(confirmDialog).toBeVisible({timeout: 30_000});
+        await expect(confirmDialog).toContainText(
+            'You are about to modify the review submitted by Adam Reviewer. ' +
+                'All modifications will be recorded in the activity log.'
+        );
+        await confirmDialog.getByRole('button', {name: 'Modify Review', exact: true}).click();
+
+        // The "Modify Review" window stacks over the view window. Edit the
+        // "For author and editor" comment through its TinyMCE editor (the
+        // form model reads the editor, not the backing textarea) and pick a
+        // different recommendation (required select).
+        const editModal = editorPage.getByRole('dialog', {name: 'Modify Review'});
+        await expect(editModal).toBeVisible({timeout: 30_000});
+        const commentsEditorId = 'reviewDetailsForm-comments-control';
+        await editorPage.waitForFunction(
+            (id) => !!window.tinymce?.get(id)?.initialized,
+            commentsEditorId,
+            {timeout: 30_000}
+        );
+        await editorPage.evaluate(
+            ([id, value]) => {
+                const editor = window.tinymce.get(id);
+                editor.setContent(value);
+                editor.fire('change');
+            },
+            [commentsEditorId, `<p>Modified comment ${tag}</p>`]
+        );
+        await editModal
+            .locator('select[name="reviewerRecommendationId"]')
+            .selectOption({label: 'Revisions Required'});
+
+        // Control: the "For editor" comment offers no edit control in either
+        // window — the edit window's one TinyMCE instance is the shared
+        // comment's, while the private remark renders display-only.
+        await expect(editModal.getByText(`Private remark ${tag}`)).toBeVisible();
+        await expect(editModal.locator('.tox-tinymce')).toHaveCount(1);
+
+        // Save Changes: the edit window closes and the view window refreshes
+        // with the attribution line and the edited values (the review PUT
+        // rides POST via X-Http-Method-Override).
+        const saved = editorPage.waitForResponse(
+            (r) =>
+                /\/reviewAssignments\/\d+\/review$/.test(r.url().split('?')[0]) &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await editModal.getByRole('button', {name: 'Save Changes', exact: true}).click();
+        await saved;
+        await expect(editModal).toBeHidden({timeout: 30_000});
+        await expect(
+            readModal.getByText('Last modified by Ana Section Editor')
+        ).toBeVisible({timeout: 30_000});
+        await expect(readModal.getByText(`Modified comment ${tag}`)).toBeVisible();
+        const recommendationLine = readModal
+            .getByText('Recommendation:', {exact: true})
+            .locator('xpath=..');
+        await expect(recommendationLine).toContainText('Revisions Required');
+        await closeReviewDetails(editorPage, readModal);
+
+        // The activity log lists both modification entries attributed to the
+        // editor, each with a "View changes" action (behind the legacy grid
+        // row's expander).
+        await editorPage.getByRole('button', {name: 'Activity Log', exact: true}).click();
+        const log = editorPage.getByRole('dialog').filter({hasText: 'Activity Log & Notes'});
+        const commentsEntry = log
+            .getByRole('row')
+            .filter({hasText: 'The following was modified in this review: Comments.'})
+            .first();
+        await expect(commentsEntry).toBeVisible({timeout: 30_000});
+        await expect(commentsEntry).toContainText('Ana Section Editor');
+        await commentsEntry.locator('a.show_extras').click();
+        await expect(log.getByRole('link', {name: 'View changes'}).first()).toBeVisible({
+            timeout: 30_000,
+        });
+        const recommendationEntry = log
+            .getByRole('row')
+            .filter({
+                hasText: 'The following was modified in this review: Reviewer Recommendation.',
+            })
+            .first();
+        await expect(recommendationEntry).toBeVisible();
+        await expect(recommendationEntry).toContainText('Ana Section Editor');
     });
 });

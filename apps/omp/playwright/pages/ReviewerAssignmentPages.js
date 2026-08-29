@@ -5,7 +5,11 @@
  * App-local helpers for the OMP Reviewer assignment & management suite (U27).
  * The Reviewers panel is the Vue ReviewerManager ([data-cy="reviewer-manager"])
  * inside the workflow side modal; every window it opens is a legacy jQuery
- * modal stacked above it (topModal), except Log Response (a Vue side modal).
+ * modal stacked above it (topModal), except Log Response and — since the
+ * pkp/pkp-lib#13156 rework — the "Review Details" / "Modify Review" pair,
+ * which are Vue side modals anchored by their dialog role and title (their
+ * [data-cy="active-modal"] wrapper computes visibility:hidden, so topModal's
+ * visibility assertions would never pass against them).
  *
  * Date entry is CALENDAR PICKS ONLY by design of these tests: the pickers
  * discard typed dates (register finding A16), so pickDate() drives the
@@ -224,16 +228,112 @@ async function awaitTinyMce(page, idPrefix) {
     await expect(body).toContainText(/\w/, {timeout: 20_000});
 }
 
-/** Open the row's Read Review window; resolves the stacked legacy modal. */
+/**
+ * The Vue "Review Details" side window (Rule 14a). Anchored by its dialog
+ * title — never by [data-cy="active-modal"] (the wrapper computes
+ * visibility:hidden for this window).
+ */
+function reviewDetailsModal(page) {
+    return page.getByRole('dialog', {name: /^Review Details:/});
+}
+
+/**
+ * Open the row's Read Review window (the Vue "Review Details" side modal)
+ * and wait for it to settle: the footer's "Modify Review" button sits
+ * disabled until the assignment and review content finish loading — its
+ * enabled state is the load-settled signal. A rating star clicked before
+ * then can silently revert (register finding A21, never asserted), so every
+ * caller rates only after this resolves. NOTE: the workflow modal's DOM is
+ * unmounted while this window (or its stacked "Modify Review" partner) is
+ * open — reviewer ROWS can only be asserted after the window closes.
+ */
 async function openReadReview(page, modal, reviewerName) {
     await reviewerRow(modal, reviewerName)
         .getByRole('button', {name: 'Read Review'})
         .click();
-    const readModal = topModal(page);
+    const readModal = reviewDetailsModal(page);
+    await expect(readModal).toBeVisible({timeout: 20_000});
     await expect(
-        readModal.getByRole('button', {name: 'Confirm', exact: true})
-    ).toBeVisible({timeout: 20_000});
+        readModal.getByRole('button', {name: 'Modify Review', exact: true})
+    ).toBeEnabled({timeout: 20_000});
     return readModal;
+}
+
+/**
+ * Click a "Reviewer rating" star (1–5) in the settled Review Details window
+ * and wait for the inline save. The app sends the PUT as a POST with
+ * X-Http-Method-Override, so the bounding response is matched as POST; the
+ * "Reviewer rating saved" toast is client-emitted (no shared server queue).
+ */
+async function rateReview(page, readModal, stars) {
+    const saved = page.waitForResponse(
+        (r) =>
+            r.url().includes('/reviewAssignments/') &&
+            !r.url().includes('/consider') &&
+            r.request().method() === 'POST'
+    );
+    await readModal
+        .getByRole('radio', {name: `${stars} out of 5 stars`})
+        .check();
+    await saved;
+    await expect(page.getByText('Reviewer rating saved').first()).toBeVisible({
+        timeout: 20_000,
+    });
+}
+
+/**
+ * Press "Mark as Complete" in the Review Details window and confirm the
+ * "Mark this review as complete?" dialog (Rule 14a). The window stays open
+ * afterwards — callers close it with its "Cancel" button.
+ */
+async function markReviewComplete(page, readModal) {
+    await readModal
+        .getByRole('button', {name: 'Mark as Complete', exact: true})
+        .click();
+    const dialog = page
+        .locator('[data-cy="dialog"]')
+        .filter({hasText: 'Mark this review as complete?'});
+    await expect(
+        dialog.getByText(
+            'You can still modify this review after marking it as complete.'
+        )
+    ).toBeVisible({timeout: 10_000});
+    await dialog
+        .getByRole('button', {name: 'Mark as Complete', exact: true})
+        .click();
+    await expect(
+        page.getByText('The review has been marked as complete.').first()
+    ).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * Press "Modify Review" in the settled Review Details window, confirm the
+ * "Modify this review?" dialog, and resolve the stacked "Modify Review"
+ * window once its comment editor holds `settledText` (the window's own
+ * load-settle — its one TinyMCE arrives prefilled with the current shared
+ * comment). Returns {editModal, commentBody}.
+ */
+async function openModifyReview(page, readModal, settledText) {
+    await readModal
+        .getByRole('button', {name: 'Modify Review', exact: true})
+        .click();
+    const dialog = page
+        .locator('[data-cy="dialog"]')
+        .filter({hasText: 'Modify this review?'});
+    await expect(
+        dialog.getByText(/All modifications will be recorded in the activity log/)
+    ).toBeVisible({timeout: 10_000});
+    await dialog
+        .getByRole('button', {name: 'Modify Review', exact: true})
+        .click();
+    const editModal = page.getByRole('dialog', {name: /^Modify Review/});
+    await expect(editModal).toBeVisible({timeout: 20_000});
+    const commentBody = editModal
+        .frameLocator('iframe.tox-edit-area__iframe')
+        .first()
+        .locator('body');
+    await expect(commentBody).toContainText(settledText, {timeout: 20_000});
+    return {editModal, commentBody};
 }
 
 module.exports = {
@@ -252,5 +352,9 @@ module.exports = {
     dateAltField,
     completeReview,
     awaitTinyMce,
+    reviewDetailsModal,
     openReadReview,
+    rateReview,
+    markReviewComplete,
+    openModifyReview,
 };

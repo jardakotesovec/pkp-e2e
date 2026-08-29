@@ -259,8 +259,15 @@ async function completeReviewAsReviewer(page, contextPath, submissionId, comment
 
 /**
  * Editor confirms a submitted review from the Reviewers panel: the row's
- * "Read Review" opens the legacy read-review modal whose submit is
- * "Confirm".
+ * "Read Review" opens the Vue "Review Details" side window
+ * (pkp/pkp-lib#13156), whose "Mark as Complete" asks "Mark this review as
+ * complete?" in a confirmation dialog. The window is anchored by its dialog
+ * title — its [data-cy="active-modal"] wrapper computes visibility:hidden —
+ * and its load-settled signal is the "Modify Review" footer button
+ * enabling (no timeouts: PRINCIPLES A5). The window stays open after the
+ * confirm, so it is closed with its "Cancel" button — and the workflow
+ * modal's DOM is unmounted while the window is open, so the row can only
+ * be read back after the close.
  */
 async function confirmReviewAsEditor(page, modal, reviewerName) {
     const row = modal
@@ -268,14 +275,27 @@ async function confirmReviewAsEditor(page, modal, reviewerName) {
         .getByRole('row')
         .filter({hasText: reviewerName});
     await row.getByRole('button', {name: 'Read Review'}).click();
-    const readModal = topModal(page);
+    const readModal = page.getByRole('dialog', {name: /^Review Details:/});
     await expect(
-        readModal.getByRole('button', {name: 'Confirm', exact: true})
+        readModal.getByRole('button', {name: 'Modify Review', exact: true})
+    ).toBeEnabled({timeout: 20_000});
+    await readModal
+        .getByRole('button', {name: 'Mark as Complete', exact: true})
+        .click();
+    const dialog = page
+        .locator('[data-cy="dialog"]')
+        .filter({hasText: 'Mark this review as complete?'});
+    await dialog
+        .getByRole('button', {name: 'Mark as Complete', exact: true})
+        .click();
+    // The completion toast (client-emitted) bounds the save; the row is
+    // only in the DOM again once the window is closed.
+    await expect(
+        page.getByText('The review has been marked as complete.').first()
     ).toBeVisible({timeout: 20_000});
-    await readModal.getByRole('button', {name: 'Confirm', exact: true}).click();
-    await expect(
-        readModal.getByRole('button', {name: 'Confirm', exact: true})
-    ).toBeHidden({timeout: 20_000});
+    await readModal.getByRole('button', {name: 'Cancel', exact: true}).click();
+    await expect(readModal).toBeHidden({timeout: 20_000});
+    await expect(row).toContainText('Complete', {timeout: 20_000});
 }
 
 /**

@@ -298,8 +298,9 @@ reviewer forms to *Reviewer assignment & management*.
 ## Cross-feature interactions
 
 - **Reviewer assignment & management** — the Reviewers panel on this stage:
-  adding, reminding, thanking, unassigning reviewers and the editor's reading
-  of reviews. This spec owns only the author-side reading (Rule 15).
+  adding, reminding, thanking, unassigning reviewers and the editor's
+  reading, completing and modifying of reviews. This spec owns only the
+  author-side reading (Rule 15).
 - **Editorial decision recording** — every button of Rule 11 and the
   recommendation controls open that feature's wizard; this spec owns the
   buttons' presence and what each decision does to the round.
@@ -340,8 +341,9 @@ test install is observed in the install's mail catcher. <sup>s</sup>
    round (Reviewers panel); the status becomes "Awaiting responses from
    reviewers." After the reviewer submits their review, it reads "New reviews
    have been submitted."; after the editor opens the review through the
-   Reviewers panel's "Read Review" action and presses "Confirm" in the review
-   window, "All reviews are confirmed and a decision is needed."
+   Reviewers panel's "Read Review" action and confirms "Mark as Complete" in
+   the "Review Details" window, "All reviews are confirmed and a decision is
+   needed."
 3. **Request revisions within the round** — Editor: press "Request
    Revisions", keep "Revisions will not be subject to a new round of peer
    reviews.", complete the wizard. The status box reads "Revisions have been

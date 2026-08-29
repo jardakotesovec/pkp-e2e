@@ -33,6 +33,11 @@
  * - OMP2 (open): no assertion on reviewer-recommendation contents anywhere
  *   on the press — the read-review window is asserted without any
  *   recommendation-line claim.
+ * - U27's A21/A22 (the editor's Vue "Review Details" window, which S2's
+ *   confirm path now runs through — pkp/pkp-lib#13156): the rating-click
+ *   race is never asserted (the helper waits for the window's load-settled
+ *   signal, the "Modify Review" button enabling, before acting), and
+ *   nothing is asserted about the window's guidance paragraph.
  * - Round-status sentences quoted here are the editor wording of Rule 5;
  *   the "highlighted" styling of Accept Submission (Rule 11) is not
  *   asserted.

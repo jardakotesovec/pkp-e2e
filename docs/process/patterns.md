@@ -43,6 +43,12 @@ Each of these has bitten at least once.
 5. **The side-modal outer wrapper reports `visibility: hidden`** (during open,
    and permanently on some wrappers) — anchor `toBeVisible()` on inner
    content, never the wrapper.
+6. **The workflow modal's rows are gone while a Vue dialog is stacked over
+   them** (2026-08-29, i13156 Review Details rework): the underlying panel is
+   unmounted/aria-hidden beneath the open dialog, so a reviewer row's state
+   can only be asserted AFTER the dialog closes. Anchor these dialogs by
+   role+title (`getByRole('dialog', {name: /^Review Details:/})`), never
+   `[data-cy="active-modal"]` (pitfall 5's wrapper).
 6. **The workflow page itself is a reka-ui dialog** — when it opens another
    modal both are `[role="dialog"]`; disambiguate by accessible name:
    `getByRole('dialog', {name: /Add Reviewer/i})`.

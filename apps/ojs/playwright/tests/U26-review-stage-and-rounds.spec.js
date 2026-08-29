@@ -28,6 +28,11 @@
  *   round's status is asserted only through its reviewer-derived sentence.
  * - A7 ❓: the review-files dialog's checkbox/untick behavior is open; the
  *   suite asserts only additive panel listings (S1, S6).
+ * - U27-register A21 🐞 / A22 🐞 / A23 ❓ / A24 ❓ (the reworked Vue "Review
+ *   Details" window, reviewer-assignment spec): S2 drives only Read Review →
+ *   "Mark as Complete", waiting for the window's load-settled signal (the
+ *   enabled "Modify Review" button) instead of racing A21's rating click;
+ *   nothing else about that window is asserted here — the U27 suite owns it.
  * - Rule 17 (old authorDashboard addresses) is not a canonical scenario.
  * - Footnote r (Minimum Confirmed Reviews Required) is a settings modifier
  *   without a step-2 scenario-schema key; not covered here.
@@ -49,6 +54,9 @@ const {
     addReviewer,
     performReview,
     assignParticipant,
+    openReviewDetails,
+    markReviewComplete,
+    closeReviewDetails,
     waitForJQueryIdle,
     FIXTURE_PDF_NAME,
 } = require('../pages/ReviewStagePages.js');
@@ -163,18 +171,13 @@ test.describe('review stage & rounds', () => {
         await workflow.expectOpen();
         await workflow.expectStatus('Round 1 Status', 'New reviews have been submitted.');
 
-        // The editor confirms the review from the Reviewers panel.
-        await workflow
-            .panelRow('Reviewers', 'Julia Reviewer')
-            .getByRole('button', {name: 'Read Review', exact: true})
-            .click();
-        const readModal = editorPage
-            .getByRole('dialog')
-            .filter({has: editorPage.locator('form#readReviewForm')});
-        await expect(readModal).toBeVisible({timeout: 30_000});
-        await readModal.getByRole('button', {name: 'Confirm', exact: true}).click();
-        await expect(readModal).toHaveCount(0, {timeout: 30_000});
-        await waitForJQueryIdle(editorPage);
+        // The editor confirms the review from the Reviewers panel: "Read
+        // Review" opens the "Review Details" window; "Mark as Complete"
+        // confirms it through its dialog.
+        const reviewerRow = workflow.panelRow('Reviewers', 'Julia Reviewer');
+        const readModal = await openReviewDetails(editorPage, reviewerRow);
+        await markReviewComplete(editorPage, readModal);
+        await closeReviewDetails(editorPage, readModal);
 
         await editorPage.reload();
         await workflow.expectOpen();
