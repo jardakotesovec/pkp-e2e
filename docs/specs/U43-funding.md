@@ -99,7 +99,9 @@ one error." and the Save button disables until the field is corrected.
 5. **Add and edit.** "Add Funder" opens the "Add Funder" side panel
    (Fields & validation); "Edit" opens the same panel titled "Edit Funder",
    prefilled with the funder and its grants. Saving closes the panel and
-   the list updates in place. A registry-backed funder's identity is fixed:
+   the list updates in place — though at pkp main (2026-08-29) the saved
+   funder never appears in the list at all, not even after a reload
+   ⚠ [A13](#a13). A registry-backed funder's identity is fixed:
    to change which organization it is, clear the Funder field ("Delete"
    under the name) and search again — editing only its grants is the
    ordinary path. <sup>d</sup>
@@ -280,7 +282,8 @@ Common to all three apps (OMP/OPS vocabulary per the
 
 ## Findings register
 
-Verdicts are the author's judgment (claude, 2026-08-28), unreviewed unless
+Verdicts are the author's judgment (claude, 2026-08-28; additions
+2026-08-29), unreviewed unless
 an entry notes otherwise; the team settles them on spec review. Sorted
 🐞 → ❓ → ✅. Each entry opens with the user-observable symptom; mechanism
 and evidence live in the entry's footnote.
@@ -290,6 +293,7 @@ and evidence live in the entry's footnote.
 | [A3](#a3) | A registry funder picked while the server cannot reach the registry errors and saves permanently nameless | 🐞 | user-visible | — |
 | [A4](#a4) | On a press or preprint server the wizard's funders table and Review step still read empty after a successful save | 🐞 | minor | — |
 | [A5](#a5) | Ordering arrows and the typed-name boxes are broken for assistive technology | 🐞 | minor | — |
+| [A13](#a13) | A saved funder never appears in the Funders table — no row, so no edit, delete or reorder — though the published page shows the funding | 🐞 | user-visible | — |
 | [A1](#a1) | "Require the author to add funder metadata" warns on the Review step without blocking the submission | ❓ | user-visible | — |
 | [A2](#a2) | Every publication version shows and edits the same funders list, though the screen presents funding per version | ❓ | minor | — |
 | [A6](#a6) | The typed-text suggestion masquerades as a registry match; real funders get saved unlinked unnoticed | ❓ | user-visible | — |
@@ -348,6 +352,9 @@ the workflow list shows it, and a reload brings both wizard displays
 current. On OJS the same displays update in place, so the staleness reads
 as a defect, not a design.
 Basis: probe. <sup>f-a4</sup>
+Note (claude, 2026-08-29): at pkp main the pkp/pkp-lib#13003 schema move
+supersedes this refresh-miss — [A13](#a13)'s permanent blindness now
+affects every app; the text above describes the pinned pre-#13003 builds.
 
 <a id="a5"></a>
 **A5 — Two funder controls are broken for assistive technology** · 🐞 · minor.
@@ -437,6 +444,19 @@ should the required marker come off? Lean: the marker is the defect —
 the any-one-language rule is what the save enforces and what the list
 renders from.
 Basis: probe. <sup>f-a12</sup>
+
+<a id="a13"></a>
+**A13 — A saved funder never appears in the Funders table** · 🐞 · user-visible.
+At pkp main (2026-08-29) a funder added through the workflow or wizard
+Funding panel saves — the panel closes without error — but the Funders
+table keeps reading "No funders have been added.": not after the save,
+not after a full reload. Edit, delete and reorder are unreachable,
+since no row ever renders. The published page still shows the funding
+correctly, so nothing is lost — but editors and authors cannot see or
+manage what they saved. On every app; supersedes the refresh-miss of
+[A4](#a4) with permanent blindness.
+Since: 2026-08-29 (upstream regression, pkp/pkp-lib#13003) · Basis:
+probe + code (claude, 2026-08-29). <sup>f-a13</sup>
 
 ### OPS
 
@@ -767,6 +787,28 @@ name. Server rule (`PKP\funder\Repository::validate()`,
 or a ROR id satisfies the save; no primary-locale check exists. The panel
 is the shared `FunderEditForm` on all three apps; the enforcement gap was
 probed on OJS only.
+
+<a id="fn-f-a13"></a>
+**f-a13 — A13 evidence.** Upstream pkp/pkp-lib#13003 (commit 747af277a)
+moved `funders` from the publication schema (`publication.json`) to the
+submission schema (`submission.json:120`). The manager table is computed
+from `publication.funders` (ui-library
+`src/managers/FunderManager/funderManagerStore.js:25`,
+`items: computed(() => publication.value?.funders ?? [])`) and never
+fetches the funders collection — zero funders GETs in the network log.
+The save POST to `/api/v1/submissions/{n}/publications/{n}/funders`
+returns 200 and the funder persists on the submission: GET
+`submissions/{n}` contains it; GET `submissions/{n}/publications/{n}` no
+longer carries a `funders` property; GET `…/publications/{n}/funders`
+returns it with a `submissionId` and no `publicationId`. Live-probed
+2026-08-29 on OJS (submission 156 / publication 167, manager role,
+typed-name funder): row absent after the save and after a cold reload;
+the reader page's `#funding-data` block shows it. Suites: S1–S4 plus the
+per-app specific tests fail identically on OJS, OMP and OPS at the
+2026-08-29 tips (ojs 0471e029b9 / omp d34542e83 / ops 28d4cb1dff,
+lib/pkp 13b621e42) — the entire suite red at main is this one break;
+per convention the tests stay red until the upstream fix lands (the reds
+are the bug, not drift).
 
 <a id="fn-f-ops1"></a>
 **f-ops1 — OPS1 evidence.** Live-probed 2026-08-28: the OPS submitting
