@@ -698,8 +698,8 @@ in an unusual situation or configuration.
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
 | [A18](#a18) | Emptying the request letter makes the add fail silently — yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
-| [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | — |
-| [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | — |
+| [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | maintainer ruling, 2026-08-29 — risk accepted |
+| [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | maintainer ruling, 2026-08-29 — ticket to follow |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
@@ -993,7 +993,12 @@ because the on-open mark-viewed round-trip re-renders the rating control
 after that point (test authoring, 2026-08-29 — the suite guards with an
 outcome-keyed re-click, never asserting the defect).
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe (observed in
-one open of four) + code reading. <sup>[f-a21](#fn-a21)</sup>
+one open of four) + code reading.
+Reviewed: maintainer ruling, 2026-08-29 — stands as 🐞, risk accepted (low
+impact; a failed early click is recoverable by clicking again). The
+maintainer will attempt a manual repro under network throttling; the
+mechanism was re-confirmed in code at that day's main tip.
+<sup>[f-a21](#fn-a21)</sup>
 
 <a id="a22"></a>
 **A22 — The window's guidance promises an upload control it lacks** · 🐞 ·
@@ -1005,7 +1010,11 @@ the "Modify Review" window (Rule 14b). The text contradicts the screen it
 sits on; upstream has already flagged the sentence's translation entry for
 review.
 Since: 2026-08-29 (the rework kept the legacy window's text) · Basis:
-probe + code reading. <sup>[f-a22](#fn-a22)</sup>
+probe + code reading.
+Reviewed: maintainer ruling, 2026-08-29 — confirmed (the wording was
+called out before); the maintainer is opening an upstream ticket to
+investigate. The string was re-confirmed unchanged at that day's main tip.
+<sup>[f-a22](#fn-a22)</sup>
 
 <a id="a23"></a>
 **A23 — The recommendation shows twice, under two labels** · ❓ · minor.
