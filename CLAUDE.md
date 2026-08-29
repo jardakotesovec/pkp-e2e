@@ -8,7 +8,10 @@ suites for OJS/OMP/OPS. ALL process rules live in the docs, not here:
   (live state, mode banner). Never re-derive process from memory.
 - **Maintenance sessions** (resident QA agent — upstream syncs, suite
   stewardship, Mattermost): additionally `docs/process/MAINTENANCE.md` +
-  `docs/tracking/upstream-sync.md` (last-reviewed app commits).
+  `docs/tracking/upstream-sync.md` (last-reviewed app commits) +
+  `docs/tracking/ci-triage.md` (known problems & failing tests — check it
+  FIRST when a CI failure is reported; one root cause often reds
+  ojs+omp+ops as separate messages).
 - Test contract: `docs/process/PRINCIPLES.md`. Harness knowledge:
   `docs/process/{harness,patterns,scenarios,users}.md`. Spec contracts:
   `docs/process/TEMPLATE.md` + `docs/specs/GLOSSARY.md`.

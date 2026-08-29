@@ -27,10 +27,14 @@ where"). The lint gate checks reference integrity only; wording is the
 writer's judgment. The critical goal: accurate QA/PO-readable specs plus
 strong-coverage per-app tests derived from them — every rule bends to that.
 
-**Mode: REVIEW/PILOT** — nothing runs autonomously; the maintainer launches
-each step and reviews its output. (A third mode exists: **MAINTENANCE** —
-the resident QA agent per `docs/process/MAINTENANCE.md`, upstream baselines
-in `docs/tracking/upstream-sync.md`; it activates when this banner names it.)
+**Mode: MAINTENANCE** (maintainer ruling, 2026-08-29) — the resident QA
+agent per `docs/process/MAINTENANCE.md`, operated via claude-threads,
+**one session at a time** for now (single-session ruling, MAINTENANCE.md
+"Session hygiene"). Upstream baselines: `docs/tracking/upstream-sync.md`;
+CI-failure triage ledger: `docs/tracking/ci-triage.md` (check it FIRST on
+any reported failure). Feature work launched under this mode still follows
+the RUNBOOK loop. (Prior mode REVIEW/PILOT, 2026-07-31→2026-08-29: the
+maintainer launched and reviewed each step.)
 
 ## Features
 

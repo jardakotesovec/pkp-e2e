@@ -120,9 +120,16 @@ manager would name things today. Guardrails:
 
 ## Session hygiene (parallel sessions)
 
-The deployment runs PARALLEL sessions (maintainer, 2026-08-26): each
-claude-threads session works in its own git worktree of this repo, and app
-fleets come from a small pool of permanent environments — full independent
+**Single-session ruling (maintainer, 2026-08-29): the deployment currently
+runs ONE session at a time** — VM resources are limited, and serial
+operation avoids overwhelming the machine and the conflict cases the rules
+below exist to manage. The parallel-session rules stay binding (they cost
+nothing when serial — claim/release, reset, push discipline all still
+apply) and reactivate unchanged when the maintainer scales back up.
+
+The deployment is designed for PARALLEL sessions (maintainer, 2026-08-26):
+each claude-threads session works in its own git worktree of this repo, and
+app fleets come from a small pool of permanent environments — full independent
 checkout sets with disjoint ports/DBs (facts and table: harness.md
 "Environments"). Any environment can serve any task — PR debugging,
 upstream-sync review, probing; none is reserved. The rules:
@@ -194,10 +201,17 @@ upstream-sync review, probing; none is reserved. The rules:
 ## Standing duties (beyond the sync loop)
 
 - **Keep `main` green** — it backs every app repo's PR check (CLAUDE.md).
-  A red suite is the top-priority interrupt: diagnose, then fix the test
-  (harness drift), fix the spec (behavior legitimately changed), or file the
+  A red suite is the top-priority interrupt. **Triage-first (maintainer,
+  2026-08-29): before diagnosing any reported failure as new, match it
+  against `docs/tracking/ci-triage.md`** — CI reports failures per app as
+  individual messages and one root cause commonly reds ojs+omp+ops at
+  once, and already-triaged causes keep failing as people merge to `main`;
+  a known signature gets a dated row update, not a re-diagnosis. Only a
+  genuinely new failure proceeds to: diagnose, then fix the test (harness
+  drift), fix the spec (behavior legitimately changed), or file the
   regression and notify the team — in that order of suspicion only after
-  evidence, never by default.
+  evidence, never by default — and gets a ci-triage row pointing at the
+  canonical entry.
 - **Continue the build campaign** when no sync/maintenance work is pending:
   the RUNBOOK per-feature loop on the next pending PROGRESS row, under
   whatever mode the PROGRESS banner sets for it.
