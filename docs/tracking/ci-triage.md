@@ -36,11 +36,15 @@ note, don't silently rewrite history.
 
 State as of the 2026-08-29 baselines (`upstream-sync.md`): OJS 121✓/6✘,
 OMP 123✓/6✘, OPS 90✓/6✘ — **every current ✘ is A13 (×5) or A10 (×1)**.
+*2026-08-29 evening tips*: OJS 125✓/1✘ (A13 fixed upstream & verified;
+only A10 red + its 2 serial skips); OMP/OPS unchanged — their `main`
+still pins the pre-fix ui-library, so A13 (×5) + A10 (×1) remain the
+expected reds there.
 
 | ID | Signature (what CI shows) | Apps | Root cause (canonical entry) | Status | First seen / last confirmed |
 |----|---------------------------|------|------------------------------|--------|-----------------------------|
-| U43-A13 🐞 | Entire `U43-funding` suite red (5 tests/app): saved funders never render in the workflow/wizard funding table (reader pages fine, data intact) | ojs omp ops | #13003 moved funders publication→submission schema (`747af277a`) but FunderManager still reads `publication.funders` — U43 register A13; reported to team 2026-08-29 | open, upstream fix pending | 2026-08-29 / 2026-08-29 |
-| U04-A10 🐞 | `U04-orcid` contributor ORCID-delete test 500s; remaining serial U04 tests **skip** while their app project is red (skips are fallout, not separate failures) | ojs omp ops | RevokeOrcidToken serializes a lazy-hydrated Author — U04 register A10; reported to team 2026-08-29 | open, upstream fix pending | 2026-08-28 / 2026-08-29 |
+| U43-A13 🐞 | Entire `U43-funding` suite red (5 tests/app): saved funders never render in the workflow/wizard funding table (reader pages fine, data intact) | ~~ojs~~ omp ops | #13003 moved funders publication→submission schema (`747af277a`) but FunderManager still reads `publication.funders` — U43 register A13; reported to team 2026-08-29. *Fix landed*: ui-library `f88b7e6a` reads `submission.funders`; **verified green on OJS** (2026-08-29, ojs `979819ae45`, full U43 suite) — OMP/OPS `main` still pin the pre-fix ui-library, red there until their pointers bump | open — fixed on ojs, omp/ops await ui-library bump | 2026-08-29 / 2026-08-29 |
+| U04-A10 🐞 | `U04-orcid` contributor ORCID-delete test 500s; remaining serial U04 tests **skip** while their app project is red (skips are fallout, not separate failures) | ojs omp ops | RevokeOrcidToken serializes a lazy-hydrated Author — U04 register A10; reported to team 2026-08-29 | open, upstream fix pending (re-confirmed red on ojs `979819ae45`, 2026-08-29 — pkp-lib pointer unmoved) | 2026-08-28 / 2026-08-29 |
 
 ## Flake watch — known non-deterministic failure classes
 
@@ -69,8 +73,10 @@ a real investigation when the class's watch condition trips.
   CI before diagnosing further. A future incident now costs one test, not a
   cascade.
 - **Decision-wizard timing under load** — U26 S5/S7/S8 (and U49 S11,
-  2026-08-29) exceed waits during full-suite runs; green in isolation/on
-  retry. Three U26 incidents 2026-08-27 alone. **Watch condition**: recurs
+  2026-08-29; U40 S4 OJS, 2026-08-29 — first 4-worker run, post-publish
+  abstract wait blew 30 s, green in isolation in 3.7 s) exceed waits
+  during full-suite runs; green in isolation/on retry. Three U26
+  incidents 2026-08-27 alone. **Watch condition**: recurs
   in CI with retries exhausted → revisit the decision-wizard waits.
   *2026-08-29 root-cause session*: this is the app-changes **row 9** race
   wearing a timing costume — the post-save async publication refresh

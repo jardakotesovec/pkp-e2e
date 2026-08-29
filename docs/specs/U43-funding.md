@@ -457,6 +457,12 @@ manage what they saved. On every app; supersedes the refresh-miss of
 [A4](#a4) with permanent blindness.
 Since: 2026-08-29 (upstream regression, pkp/pkp-lib#13003) · Basis:
 probe + code (claude, 2026-08-29). <sup>f-a13</sup>
+*2026-08-29 (later the same day): upstream fix landed* — ui-library
+`f88b7e6a` points `funderManagerStore` at `submission.funders`. Verified
+on OJS (pointer bumped in `87e6c700c5`, UI rebuilt): full U43 suite green.
+OMP and OPS `main` still pin the pre-fix ui-library, so the defect stands
+there until their pointers advance; retire this entry when all three apps
+are verified.
 
 ### OPS
 

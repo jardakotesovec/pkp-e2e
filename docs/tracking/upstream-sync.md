@@ -11,17 +11,33 @@ range is fully triaged.**
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `0471e029b9` | 2026-08-29 | #13003 aftermath + i13156 maintenance cycle (claude, interactive w/ maintainer) — see the 2026-08-29 log entry |
-| omp | `d34542e83` | 2026-08-29 | same review |
-| ops | `28d4cb1dff` | 2026-08-29 | same review |
-| pkp-lib | `13b621e42` | 2026-08-29 | same review; all three apps' submodule pointers sit here |
+| ojs | `979819ae45` | 2026-08-29 | funder-fix verification cycle (claude, w/ maintainer) — see the second 2026-08-29 log entry |
+| omp | `d34542e83` | 2026-08-29 | #13003 aftermath + i13156 maintenance cycle — no new commits since |
+| ops | `3f619a3138` | 2026-08-29 | funder-fix verification cycle |
+| pkp-lib | `13b621e42` | 2026-08-29 | unmoved; all three apps' submodule pointers sit here |
 
 ## Sync log
 
 _Append-only, newest first: date · range per repo · outcome (specs/tests
 touched, findings filed, Mattermost notifications sent, or "clean")._
 
-- **2026-08-29 (maintenance cycle — #13003 aftermath + i13156 fold)** — ojs
+- **2026-08-29, second cycle (funder-fix verification)** — ojs
+  `0471e029b9..979819ae45` (3 commits), ops `28d4cb1dff..3f619a3138`
+  (1 commit), omp none, pkp-lib none. The range = the A13 fix and more
+  #13003 fix-ups: ui-library `f88b7e6a` points `funderManagerStore` at
+  `submission.funders` (pinned in ojs only — omp/ops still pre-fix);
+  galleys-as-JSON-array serialization fix (`->values()` on the publication
+  schema map; ojs `b08ae56ccd` + the identical ops `3f619a3138`); ojs
+  jatsTemplate bump (lazy-loading fix-ups, no suite-owned surface).
+  **A13 fix verified on OJS**: UI rebuilt, full suite at `979819ae45` =
+  125✓/2✘ — all five U43 funding tests green (register + ci-triage rows
+  annotated; entry retires when omp/ops bump their ui-library pointers);
+  the ✘s are the known A10 (pkp-lib unmoved) and a U40 S4 under-load
+  timing flake (green in isolation 3.7 s — tallied on the flake-watch
+  class). Galleys fix vouched by the green run (shared code path covers
+  ops). **First 4-worker run** (maintainer ruling, encoded in
+  MAINTENANCE.md): full OJS suite in 7m13s wall on the 4-core VM.
+  Baselines advanced (omp/pkp-lib naturally unmoved). — ojs
   `fcf2f00807..0471e029b9`, omp `244a04311..d34542e83`, ops
   `94f6bbc59a..28d4cb1dff`, pkp-lib `a9767b7f14..13b621e42` (50 commits;
   interactive with the maintainer). The range = the full #13003 batch-loading
