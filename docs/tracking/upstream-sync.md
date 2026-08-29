@@ -11,16 +11,51 @@ range is fully triaged.**
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `fcf2f00807` | 2026-08-27 | i12903 sync review + A20 fix verification (claude, interactive w/ maintainer) — see the two 2026-08-27 log entries |
-| omp | `244a04311` | 2026-08-27 | same review |
-| ops | `94f6bbc59a` | 2026-08-27 | same review |
-| pkp-lib | `a9767b7f14` | 2026-08-27 | same review; the #13035 merge commit — all three apps' submodule pointers sit here |
+| ojs | `0471e029b9` | 2026-08-29 | #13003 aftermath + i13156 maintenance cycle (claude, interactive w/ maintainer) — see the 2026-08-29 log entry |
+| omp | `d34542e83` | 2026-08-29 | same review |
+| ops | `28d4cb1dff` | 2026-08-29 | same review |
+| pkp-lib | `13b621e42` | 2026-08-29 | same review; all three apps' submodule pointers sit here |
 
 ## Sync log
 
 _Append-only, newest first: date · range per repo · outcome (specs/tests
 touched, findings filed, Mattermost notifications sent, or "clean")._
 
+- **2026-08-29 (maintenance cycle — #13003 aftermath + i13156 fold)** — ojs
+  `fcf2f00807..0471e029b9`, omp `244a04311..d34542e83`, ops
+  `94f6bbc59a..28d4cb1dff`, pkp-lib `a9767b7f14..13b621e42` (50 commits;
+  interactive with the maintainer). The range = the full #13003 batch-loading
+  chain plus its fix-up wave, the i13156 modify-reviews rework (4017a024f),
+  and app-side ports. **i13156 accommodated in place**: the editor read-review
+  window (readReview.tpl/ReadReviewHandler/grid op, deleted upstream) is now
+  the Vue Review Details + Modify Review windows — U27 Rules 3/14a/14b/15,
+  status table, side effects, S9/S10/S14 reworked, **S16 added**, fn-i
+  rewritten; U26 scenario 2 aligned; OJS+OMP suites reworked (new POM helpers;
+  row state assertable only after the dialog closes — patterns.md locator
+  pitfall 6) and green ×2. **U27 A10 retired** (overturned by design: opening
+  now marks Review Viewed). **New i13156 findings**: A21 🐞 rating-click race
+  (no reliable settled signal — suites guard, never assert), A22 🐞 stale
+  guidance (upload control moved to Modify Review; key fuzzy upstream),
+  A23 ❓ duplicate recommendation display {OJS}, A24 ❓ latent editReview
+  completion stamp (code-read). **Two #13003 regressions filed and reported
+  to the team** (maintainer posted 2026-08-29): U43 **A13** 🐞 — funders
+  moved publication→submission schema (747af277a) but FunderManager still
+  reads `publication.funders`: saved funders never render in the
+  workflow/wizard table on any app (reader pages fine, data intact; entire
+  U43 suite red = the bug); U04 **A10** 🐞 — contributor ORCID delete 500s
+  (RevokeOrcidToken serializes a lazy-hydrated Author; found 2026-08-28,
+  still present at these tips). **#13003 otherwise verified**: the wave
+  suites (U40/U41/U49) + all pre-wave suites pass at main — the fix-up chain
+  ("Collections are truthy", keying-by-ID restores, eager submissions, funder
+  moves) triaged against them; misc range commits (untranslated pageTitles
+  fix, base-URL/typo/PHPUnit cleanups) no-impact. Plugin submodule bumps
+  (crossref/jatsTemplate/pfl + routine) skimmed: no suite-owned surface.
+  Suite states at the tips: OJS 121✓/6✘, OMP 123✓/6✘, OPS 90✓/6✘ — every ✘
+  = A13 (×5) + A10 (×1); serial U04 tests skip while their app project is
+  red. U49 S11 full-run failure re-ran green in isolation (the known
+  under-load timing-flake class). Baselines advanced; work committed locally
+  only — **nothing pushed** (maintainer holds the push while the wave and
+  these reds sit ahead of origin).
 - **2026-08-27 (third pass — CI plumbing + dead-worker evidence)** — no new
   range (baselines unchanged). **CI**: `run-app.yml` gained an `e2e_ref` input
   (pkp-e2e branch/PR runs now test their own tree — they silently tested
