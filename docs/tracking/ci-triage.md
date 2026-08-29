@@ -72,11 +72,18 @@ a real investigation when the class's watch condition trips.
   unpinnable without a core dump — if it recurs, add core-dump capture to
   CI before diagnosing further. A future incident now costs one test, not a
   cascade.
-- **Decision-wizard timing under load** — U26 S5/S7/S8 (and U49 S11,
-  2026-08-29; U40 S4 OJS, 2026-08-29 — first 4-worker run, post-publish
-  abstract wait blew 30 s, green in isolation in 3.7 s) exceed waits
-  during full-suite runs; green in isolation/on retry. Three U26
-  incidents 2026-08-27 alone. **Watch condition**: recurs
+- **Decision-wizard timing under load** — U26 S5/S7/S8 (and U49 S11 +
+  U21 S10, 2026-08-29) exceed waits during full-suite runs; green in
+  isolation/on retry. Three U26 incidents 2026-08-27 alone.
+  *2026-08-29 worker-sweep tallies*: U40 S4 OJS red in 3 of 4 full runs
+  (2/3/4 workers; green at 5w and in isolation, 3.7 s) — but this one is
+  NOT a blown wait: the save returns 200 + "Saved" while the row-9
+  remount wiped the editor first, so the OLD abstract is committed
+  (reader page proved it). Mechanism already known on OPS (its U40 S4
+  carries a content-verified save loop); the OJS test now uses the same
+  idiom — save response JSON must hold the new abstract. U21 S10 OJS
+  red once at 5 workers (wizard step never reached Contributors; green
+  in isolation 9 s) — ordinary class member, tallied. **Watch condition**: recurs
   in CI with retries exhausted → revisit the decision-wizard waits.
   *2026-08-29 root-cause session*: this is the app-changes **row 9** race
   wearing a timing costume — the post-save async publication refresh

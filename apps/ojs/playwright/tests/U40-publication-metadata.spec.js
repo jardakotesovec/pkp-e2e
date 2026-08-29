@@ -519,12 +519,24 @@ test.describe('publication metadata', () => {
         await expect(managerPage.getByText(banner)).toBeVisible({timeout: 30_000});
 
         // The forms stay editable; a save changes what readers see at once.
+        // Content-verified edit (the OPS U40 S4 idiom): a late async
+        // component refresh can remount the form and revert the editor to
+        // the server value after the fill — the save then POSTs the OLD
+        // abstract (200 + toast, stale DB). Each bounded attempt redoes
+        // fill+save and passes only when the save response's publication
+        // JSON holds the new abstract.
         await pub.openEntry('Title & Abstract');
-        await pub.setRichText(
-            'titleAbstract-abstract-control-en',
-            `<p>Abstract ${tag} after publishing</p>`
-        );
-        await pub.save();
+        await expect(async () => {
+            await pub.setRichText(
+                'titleAbstract-abstract-control-en',
+                `<p>Abstract ${tag} after publishing</p>`
+            );
+            const response = await pub.save();
+            const publication = await response.json();
+            expect(publication.abstract?.en ?? '').toContain(
+                `Abstract ${tag} after publishing`
+            );
+        }).toPass({intervals: [1_000, 2_000], timeout: 90_000});
 
         // Anonymous reader (the bare page fixture holds no session).
         await page.goto(`/index.php/${JOURNAL}/article/view/${submissionId}`);

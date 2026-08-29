@@ -177,12 +177,14 @@ upstream-sync review, probing; none is reserved. The rules:
   *different* apps are fine anytime. Leave `PLAYWRIGHT_WORKERS` alone (the
   auto-detect sizes to the machine) unless a run must coexist with
   another's probing — then pin it to 2. **Single-session addendum
-  (maintainer, 2026-08-29): while the one-session ruling holds, run full
-  suites with `PLAYWRIGHT_WORKERS=4`** — the whole 4-core VM is the
-  session's; first timed run: full OJS suite in 7m13s. Watch the
-  under-load flake classes (ci-triage flake watch) — contention is
-  tighter at 4; drop back to the auto-detect if the flake rate climbs.
-  This addendum expires with the single-session ruling.
+  (maintainer ruling, 2026-08-29): while the one-session ruling holds,
+  run full suites with `PLAYWRIGHT_WORKERS=4`.** Decided by a timed
+  sweep on the 4-core VM (full OJS suite, clean resets): 2 workers
+  11m15s, 3 → 8m24s, 4 → 7m13s, 5 → 7m15s (plateau; 5 also
+  oversubscribes — one extra flake surfaced). Flake profile at 4 matched
+  2–3 (the known under-load classes, ci-triage flake watch); drop back
+  to the auto-detect if that changes. This addendum expires with the
+  single-session ruling.
 - **Tracking files merge through git, PR verdicts need one run.** With no
   designated maintenance session, whichever session completes a `main`
   review updates `upstream-sync.md` (and `PROGRESS.md`) on its worktree

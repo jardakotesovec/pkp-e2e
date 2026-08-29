@@ -120,10 +120,11 @@ exports.PublicationScreen = class PublicationScreen {
     async save() {
         const saved = waitForPublicationSave(this.page);
         await this.saveButton().click();
-        await saved;
+        const response = await saved;
         await expect(
             this.page.locator('[role="status"]:has-text("Saved")')
         ).toBeVisible({timeout: 30_000});
+        return response;
     }
 
     /**
