@@ -307,7 +307,14 @@ under the prompt "Record the response on behalf of the reviewer"; submit
     automatic send also lands in History. <sup>h</sup>
 14a. <a id="read-review"></a> **The Review Details window.** "Read Review" —
     or the menu's "Review Details" — opens a side window titled "Review
-    Details: {submission title}". It shows the reviewer's name; a guidance
+    Details: {submission title}". The same window also opens from the
+    submissions dashboard list's
+    [→ review activity indicators](U23-submissions-dashboard.md#review-indicators):
+    their popover's "View details" (review not yet submitted) or "View
+    unread recommendation" (review submitted) button leads here. {OJS}
+    Opened from that popover, a submitted review's window currently omits
+    the reviewer's recommendation — everything else renders as described
+    below ⚠ [A25](#a25). It shows the reviewer's name; a guidance
     paragraph that still tells the editor they "may upload the file below"
     though the window offers no upload control ⚠ [A22](#a22); the
     "Download Review Form" menu (Rule 15); a summary block with "Review
@@ -700,6 +707,7 @@ in an unusual situation or configuration.
 | [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
 | [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | maintainer ruling, 2026-08-29 — risk accepted |
 | [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | maintainer ruling, 2026-08-29 — ticket to follow |
+| [A25](#a25) | {OJS} Opened from the dashboard popover, a submitted review's Review Details window omits the recommendation | 🐞 | user-visible | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
@@ -1040,6 +1048,22 @@ today, but a trap for any future surface that lets an editor touch an
 in-progress review.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: code reading.
 <sup>[f-a24](#fn-a24)</sup>
+
+<a id="a25"></a>
+**A25 — The dashboard popover's window drops the recommendation** · 🐞 ·
+user-visible.
+{OJS} Opening a submitted review's Review Details window through the
+dashboard popover's "View unread recommendation" button loses exactly the
+recommendation the button promises: the "Recommendation: {label}" line is
+absent and the "Reviewer Recommendation" group's value reads "-", while
+everything else in the window matches the workflow path — so an editor
+reading the review from the dashboard never sees the recommendation in the
+window, though the popover states it one click earlier. For a
+not-yet-submitted review the two paths render identically. A press is
+unaffected by construction — its reviews carry no recommendation anywhere
+([OMP1](#omp1)).
+Since: 2026-08-31 (reported by the PKP team; reproduced live the same day)
+· Basis: probe. <sup>[f-a25](#fn-a25)</sup>
 
 ### OMP
 
@@ -1944,6 +1968,27 @@ save. The Review Details window and its "Modify Review" open only from
 rows in the submitted/viewed states, whose assignments already carry
 `dateCompleted`, so no current screen reaches the branch. Code-read
 2026-08-29; not probeable through the UI.
+
+<a id="fn-a25"></a>
+**f-a25** — Reported by the PKP team (2026-08-31); live-probed the same day
+(OJS), the same submitted review (recommendation "Accept Submission")
+opened on both paths. Dashboard-popover path ("View unread
+recommendation"): no "Recommendation:" heading or value between "Review
+Submitted:" and the Reviewer Comments, and the "Reviewer Recommendation"
+group's "Recommendation" value read "-" (the group and its guidance
+sentence render; only the value is empty). Workflow path, same assignment:
+"Recommendation: Accept Submission" on the info line and in the group.
+Every other item — reviewer name line, guidance paragraph, "Download
+Review Form", the "Review Submitted:" date, both Reviewer Comments blocks
+(seeded marker strings found once on each path), the empty Reviewer Files
+grid, the Reviewer rating row, footer "Cancel" / "Modify Review" / "Mark
+as Complete" — was identical across the paths. Parity control: a
+not-yet-submitted review ("View details" vs the row menu's "Review
+Details") rendered identically on both paths, item for item. The window's
+own API traffic is the same on both paths — the same
+`reviewAssignments/{id}` and `reviewAssignments/{id}/review` GETs, all
+200 — so the omission is in the window's rendering, not a failed or
+missing request.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
