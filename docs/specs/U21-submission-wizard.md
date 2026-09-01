@@ -581,6 +581,7 @@ minor = cosmetic · latent = only in an unusual situation.
 | [A7](#a7) | With acknowledgements off, the completion screen still claims a confirmation email was sent | 🐞 | minor | — |
 | [A8](#a8) | Section editors configured for auto-assignment are silently never assigned on any journal but the install's first | 🐞 | user-visible | — |
 | [A10](#a10) | A wizard loaded at phone width keeps its uncollapsed step rail and the page scrolls sideways (journal & press) | 🐞 | minor | — |
+| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all — "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | 🐞 | user-visible | — |
 | [OPS3](#ops3) | A preprint author's own "Cancel" is silently refused — the draft survives with no message | 🐞 | user-visible | — |
 | [OPS5](#ops5) | A can-post preprint submitter gets no acknowledgement email at all | 🐞 | user-visible | — |
 | [OPS7](#ops7) | The preprint "Not Allowed" page shows a raw locale code where its explanation should be | 🐞 | minor | — |
@@ -707,6 +708,25 @@ down after loading collapses correctly, as does a moderately narrow window
 from the start; a preprint server collapses correctly even on a phone-width
 load. Every step stays reachable by scrolling, hence minor. Basis: probe
 (repeatable both orders, three apps compared). <sup>[h](#fn-h)</sup>
+
+<a id="a11"></a>
+**A11 — No profile affiliation, no submission: the wizard's start 500s**
+· 🐞 · user-visible · regression (pkp-lib `9e2fbac214`, on OJS `main` as of
+`d44b186c22`, 2026-09-01).
+A user submitting as an Author whose profile has no affiliation gets a
+server error the moment the submission is created — the wizard never
+opens. `newAuthorFromUser()` has long stored a literal null for the
+affiliations of a user with none to migrate; the affiliation-fix branch
+merged 2026-09-01 rewrote `Author::getAffiliations()` so it no longer
+null-coalesces (`getData(...) ?? collect()` became a hasData guard that
+returns the stored null), and the typed `iterable` return then throws a
+TypeError when `Repo::author()->add()` iterates affiliations on insert.
+Every author-creating flow with an affiliation-less user is affected;
+on the e2e install it 500s the harness's seeding endpoint too, redding
+~100 of 129 OJS tests. Only OJS's `main` pins the broken range so far —
+OMP/OPS inherit it at their next pkp-lib bump. Basis: full-suite
+reproduction on a fully synced checkout + code inspection of the
+breaking diff. <sup>[fn-a11](#fn-a11)</sup>
 
 ### OMP
 
@@ -1398,6 +1418,29 @@ is site-level while the roster is context-scoped, so the same fallback
 should fire — not driven: the only site administrator on a test install is
 the seeded `admin` account every suite depends on, and the probe would
 permanently add an Author role to it.
+
+<a id="fn-a11"></a>
+**fn-a11** — A11. Reproduced 2026-09-01 on OJS `main` `d44b186c22` (env 0,
+checkout fully synced: submodules, composer install, npm ci, UI rebuilt,
+DB reset): POST `/api/v1/_test/scenarios/submission` → 500
+`TypeError: PKP\author\Author::getAffiliations(): Return value must be of
+type Traversable|array, null returned` (`Author.php:230`); full suite 21✓
+with everything seeding a submission red. Chain: `Repository::
+newAuthorFromUser()` (unchanged since pkp/pkp-lib#11030) runs
+`setAffiliations($migratedAffiliations ? [$migratedAffiliations] : null)`
+— the null is stored, so `hasData('affiliations')` is true;
+`9e2fbac214` ("Fix addAffiliation() for fresh and lazy-loaded authors",
+merged via `6f0a39733a` `i13003-author-order-fix`) replaced
+`getAffiliations()`'s `getData('affiliations') ?? collect()` with the
+hasData guard, which returns the stored null against the `iterable`
+return type; `DAO::insert()` (line 172) iterates `getAffiliations()` →
+throw. The production path is identical: `PKPSubmissionController::add()`
+(line 736) calls `newAuthorFromUser()` for every Author-role submitter,
+then `Repo::author()->add()`. Prior pkp-lib pointer `13b621e424` green
+(scheduled CI run 33466736951); first red at the `d44b186c22` pointer
+bump (pkp/ojs run 33536204412). Fix is either side of the mismatch:
+null-tolerant `getAffiliations()` or `collect()` instead of null in
+`newAuthorFromUser()`.
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds

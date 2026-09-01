@@ -21,7 +21,21 @@ range is fully triaged.**
 _Append-only, newest first: date · range per repo · outcome (specs/tests
 touched, findings filed, Mattermost notifications sent, or "clean")._
 
-- **2026-08-29, second cycle (funder-fix verification)** — ojs
+- **2026-09-01 (red-CI triage, NOT a sync — baselines unchanged)** —
+  reported failures triaged against the ledger: OMP/OPS reds = the known
+  A13+A10 rows (date-bumped); OJS's nightly 33466736951 showed U04-A10
+  **fixed** (pkp-lib `ecd12271ed`, 2026-08-31 — LazyCollection conversion
+  in RevokeOrcidToken; U04 fully green) and U49 S11 red retries-exhausted
+  (decision-wizard flake class, watch condition tripped → content-verified
+  save applied to the test, verification pending). Today's pkp/ojs hook run
+  33536204412 at `d44b186c22` then surfaced a **new regression**: pkp-lib
+  `9e2fbac214` makes `Author::getAffiliations()` throw on the null
+  `newAuthorFromUser()` stores for affiliation-less users → wizard start
+  500s and ~100/129 OJS tests red at seeding — filed as U21 register A11 +
+  ci-triage row U21-A11, reported to the team on Mattermost. The
+  `13b621e424..6f0a39733a` pkp-lib range (and ojs/ui-library companions)
+  is otherwise UNREVIEWED — next sync session owns it; baselines stay at
+  the 2026-08-29 tips.
   `0471e029b9..979819ae45` (3 commits), ops `28d4cb1dff..3f619a3138`
   (1 commit), omp none, pkp-lib none. The range = the A13 fix and more
   #13003 fix-ups: ui-library `f88b7e6a` points `funderManagerStore` at

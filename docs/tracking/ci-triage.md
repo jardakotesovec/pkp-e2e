@@ -8,6 +8,21 @@ cause commonly reds ojs+omp+ops at once — three messages are usually one
 problem. People also keep merging to `main`, so a new-looking red is often
 an already-triaged cause still unfixed.
 
+**Where to look (2026-09-01)**: besides this repo's `e2e` workflow, every
+app repo runs the suite via its thin hook on every push to its `main` —
+the latest run on `pkp/<app>` Actions (main branch) is the authoritative
+"is the app's tip red?" answer, and its head SHA is the exact commit to
+reproduce against. **Before reproducing, fully sync the environment**
+(maintainer, 2026-09-01) — checkout latest `main` with submodules
+(`npm run fetch-apps -- --update <app>` — app name is positional, not
+`--app`), `composer install`, `npm ci`, `npm run build`, then
+`npm run mount` + `npm run reset:<app>` — a stale dependency or UI bundle
+fakes or masks failures. Note: the bot's GitHub token is
+currently blocked from the pkp org (fine-grained token >366d lifetime
+policy) — `gh -R pkp/<app>` 403s; run/job metadata is reachable
+unauthenticated via the public REST API, but logs/artifacts are not, so
+per-test detail comes from local repro at the head SHA.
+
 ## Triage protocol (on every incoming failure report)
 
 1. **Match the signature** against the Open rows and Flake watch below —
@@ -43,8 +58,9 @@ expected reds there.
 
 | ID | Signature (what CI shows) | Apps | Root cause (canonical entry) | Status | First seen / last confirmed |
 |----|---------------------------|------|------------------------------|--------|-----------------------------|
-| U43-A13 🐞 | Entire `U43-funding` suite red (5 tests/app): saved funders never render in the workflow/wizard funding table (reader pages fine, data intact) | ~~ojs~~ omp ops | #13003 moved funders publication→submission schema (`747af277a`) but FunderManager still reads `publication.funders` — U43 register A13; reported to team 2026-08-29. *Fix landed*: ui-library `f88b7e6a` reads `submission.funders`; **verified green on OJS** (2026-08-29, ojs `979819ae45`, full U43 suite) — OMP/OPS `main` still pin the pre-fix ui-library, red there until their pointers bump | open — fixed on ojs, omp/ops await ui-library bump | 2026-08-29 / 2026-08-29 |
-| U04-A10 🐞 | `U04-orcid` contributor ORCID-delete test 500s; remaining serial U04 tests **skip** while their app project is red (skips are fallout, not separate failures) | ojs omp ops | RevokeOrcidToken serializes a lazy-hydrated Author — U04 register A10; reported to team 2026-08-29 | open, upstream fix pending (re-confirmed red on ojs `979819ae45`, 2026-08-29 — pkp-lib pointer unmoved) | 2026-08-28 / 2026-08-29 |
+| U21-A11 🐞 | **~100/129 OJS tests red at once**: every test that seeds a submission fails fast with `POST …/_test/scenarios/submission failed: 500` — `TypeError: Author::getAffiliations(): … null returned (Author.php:230)`; only U01/U04/U06-ish tests that never create a submission stay green | ojs (omp ops inherit at their next pkp-lib bump) | pkp-lib `9e2fbac214` made `getAffiliations()` throw on the null that `newAuthorFromUser()` stores for affiliation-less users — breaks the real wizard start too (`PKPSubmissionController::add()`), not just seeding — U21 register A11; reported to team 2026-09-01. First red: pkp/ojs run 33536204412 at `d44b186c22` ("Submodule updates") | open, upstream fix pending | 2026-09-01 / 2026-09-01 |
+| U43-A13 🐞 | Entire `U43-funding` suite red (5 tests/app): saved funders never render in the workflow/wizard funding table (reader pages fine, data intact) | ~~ojs~~ omp ops | #13003 moved funders publication→submission schema (`747af277a`) but FunderManager still reads `publication.funders` — U43 register A13; reported to team 2026-08-29. *Fix landed*: ui-library `f88b7e6a` reads `submission.funders`; **verified green on OJS** (2026-08-29, ojs `979819ae45`, full U43 suite) — OMP/OPS `main` still pin the pre-fix ui-library, red there until their pointers bump | open — fixed on ojs, omp/ops await ui-library bump | 2026-08-29 / 2026-09-01 (omp+ops, run 33466736951) |
+| U04-A10 🐞 | `U04-orcid` contributor ORCID-delete test 500s; remaining serial U04 tests **skip** while their app project is red (skips are fallout, not separate failures) | ~~ojs~~ omp ops | RevokeOrcidToken serializes a lazy-hydrated Author — U04 register A10; reported to team 2026-08-29. *Fix landed*: pkp-lib `ecd12271ed` (+`d9e9b3fc7c` for DepositOrcidSubmission, 2026-08-31) converts the LazyCollections in the job constructors; **U04 fully green on OJS** in scheduled run 33466736951 (2026-09-01) — OMP/OPS `main` still pin the pre-fix pkp-lib, red there until their pointers bump | open — fixed on ojs, omp/ops await pkp-lib bump | 2026-08-28 / 2026-09-01 (omp+ops) |
 
 ## Flake watch — known non-deterministic failure classes
 
@@ -93,6 +109,19 @@ a real investigation when the class's watch condition trips.
   loops, rich-text commits) are mitigations; the fix is upstream (stop
   remounting on refresh / let in-progress UI state survive it — row 9's
   "app fix" column). Reported to the team with the 2026-08-29 flake report.
+  *2026-09-01: watch condition TRIPPED* — U49 S11 OJS red with retries
+  exhausted in scheduled run 33466736951 (and red once 2026-08-30, run
+  33290463186), both times the same assertion: the saved "Assign To
+  Future Issue and Schedule Only" radio comes back unchecked in the
+  Schedule For Publication panel — i.e. the Publication Settings save
+  committed the OLD assignment (the U40 S4 save-vs-remount mechanism,
+  200 + "Saved" with wiped picks). Response: the U40 S4 content-verified
+  save idiom applied to U49 S11's Publication Settings save (response
+  JSON must hold status 7 READY_TO_SCHEDULE + an issueId, bounded retry).
+  **Verification pending** — the U21-A11 seeding blocker (Open row above)
+  reds U49 S11 before it reaches this code; re-run when A11 clears.
+  U21 S13 flaky (green on retry) in the same 09-01 run — ordinary class
+  member, tallied.
 - **Corrupted `.auth` storage-state JSON** — occasional local flake shape
   (2026-08-27); worth a harness look if it appears in CI.
   *2026-08-29: FIXED* — root cause was `auth.js` writing the per-user state

@@ -846,11 +846,24 @@ test.describe('publish, schedule & versions', () => {
             name: 'Assign To Future Issue and Schedule Only',
         });
         await expect(scheduleOnlyOnPage).toBeVisible({timeout: 30_000});
-        await scheduleOnlyOnPage.check();
-        await pub.selectIssueOption(managerPage, /Vol\. 9 No\. 9 \(2099\)/);
-        const saved = waitForPublicationSave(managerPage);
-        await pub.saveButton().click();
-        await saved;
+        // Content-verified save (the U40 S4 idiom): a late async publication
+        // refresh can remount the form after the picks, so the save POSTs
+        // the OLD assignment (200 + toast, stale DB) and the panel below
+        // then opens with the radio unchecked (CI 2026-08-30 and
+        // 2026-09-01, retries exhausted). Each bounded attempt redoes
+        // radio+issue and passes only when the save response's publication
+        // JSON holds the scheduled status and an issue.
+        await expect(async () => {
+            await scheduleOnlyOnPage.check();
+            await pub.selectIssueOption(managerPage, /Vol\. 9 No\. 9 \(2099\)/);
+            const saved = waitForPublicationSave(managerPage);
+            await pub.saveButton().click();
+            const publication = await (await saved).json();
+            // 7 = Publication::STATUS_READY_TO_SCHEDULE — what the
+            // "Schedule Only" choice commits (IssueAssignment enum).
+            expect(publication.status).toBe(7);
+            expect(publication.issueId).toBeTruthy();
+        }).toPass({intervals: [1_000, 2_000], timeout: 90_000});
 
         // "Schedule For Publication": the panel opens (no Publication
         // Stage saved yet) with the saved choice pre-checked and its
