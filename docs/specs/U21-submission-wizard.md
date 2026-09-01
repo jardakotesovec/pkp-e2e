@@ -1438,9 +1438,18 @@ throw. The production path is identical: `PKPSubmissionController::add()`
 (line 736) calls `newAuthorFromUser()` for every Author-role submitter,
 then `Repo::author()->add()`. Prior pkp-lib pointer `13b621e424` green
 (scheduled CI run 33466736951); first red at the `d44b186c22` pointer
-bump (pkp/ojs run 33536204412). Fix is either side of the mismatch:
-null-tolerant `getAffiliations()` or `collect()` instead of null in
-`newAuthorFromUser()`.
+bump (pkp/ojs run 33536204412). Direct probe 2026-09-01 clearing the
+harness of blame (the `_test` endpoints are NOT involved): a plain curl
+session as `author.alex` (no affiliation in `user_settings`) POSTing the
+production `api/v1/submissions` with a valid start payload → 500 with the
+identical TypeError; after inserting the same `user_settings.affiliation`
+row the profile form writes, the identical request → 200, submission
+created. The affiliation-less user shape is legitimate product state:
+`schemas/user.json` marks `affiliation` nullable and `RegistrationForm`
+attaches no required-validator to it. The suite's U21 S1 (pure UI, no
+scenario seeding) also failed at "Begin Submission" in the same run.
+Fix is either side of the mismatch: null-tolerant `getAffiliations()` or
+`collect()` instead of null in `newAuthorFromUser()`.
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
