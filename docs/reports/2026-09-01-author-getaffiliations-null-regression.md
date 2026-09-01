@@ -41,18 +41,40 @@ the freshly built author. The production path is
 (api/v1/submissions/PKPSubmissionController.php:736) → `Repo::author()->add()`
 — every Author-role submitter without a profile affiliation hits it.
 
-An affiliation-less user is legitimate state: `schemas/user.json` marks
-`affiliation` as `nullable` and `RegistrationForm` attaches no
-required-validator to it.
+An affiliation-less user is legitimate state, with a nuance (thanks to
+maintainer testing, 2026-09-01): the **registration page** enforces
+affiliation **client-side only** — the template hard-codes `required`
+on the input (`templates/frontend/components/registrationForm.tpl:52`)
+while `RegistrationForm` has no server-side affiliation validator and
+`schemas/user.json` marks it `nullable` — so browser registrations get
+one, but the **admin/invitation "add user" flow doesn't require it**,
+and API/import/scripted paths can skip it. Users created there (or
+pre-existing data) are the affected population.
 
 ## Steps to reproduce (app only, no test harness)
 
 1. OJS `main` @ `d44b186c22` (pkp-lib @ `6f0a39733a`), PHP 8.3,
    PostgreSQL 16. Any journal.
-2. A user enrolled as Author whose profile **Affiliation is empty**
-   (a fresh registration leaving the optional field blank is enough).
+2. A user enrolled as Author whose profile **Affiliation is empty** —
+   create one via the admin "add user" / invitation flow (which, unlike
+   the registration page's client-side `required`, doesn't ask for an
+   affiliation).
 3. Log in as that user → Dashboard → "Start A New Submission" → fill the
    start form (title, section, checkboxes) → **Begin Submission**.
+
+Reproduction gotchas (why a first attempt may not crash):
+
+- The author record is only created when the submission is made **as an
+  Author role** (`PKPSubmissionController::add()` gates on
+  `ROLE_ID_AUTHOR`). A manager/editor account that submits under one of
+  its other groups never calls `newAuthorFromUser()` — use an
+  author-only account or explicitly pick Author in the start form.
+- Clearing an existing affiliation via Profile → Contact must clear it
+  in **every locale**: `migrateUserAffiliation()` returns an Affiliation
+  if any locale still holds a non-blank value (`array_filter` over the
+  localized array), and blank strings in all locales fold into the same
+  null return as no value at all
+  (classes/affiliation/Repository.php:261-264).
 
 Observed: the underlying `POST /api/v1/submissions` returns
 **HTTP 500** `{"error":"TypeError: PKP\\author\\Author::getAffiliations():
