@@ -141,3 +141,9 @@ The missing affiliation is the discriminating variable.
   nothing from the e2e harness in the path.
 - Breaking diff: `git diff 13b621e424..6f0a39733a -- classes/author/`
   (the `getAffiliations()` hunk in `9e2fbac214`).
+- Maintainer bisect confirmation (2026-09-01, independent QA instance):
+  at `ecd12271ed` (the breaking commit's direct parent) an
+  affiliation-less author submits successfully; at `9e2fbac214` the same
+  flow 500s — first-bad/last-good verified on both sides. Also verified
+  not present in 3.3, 3.4 or 3.5 (admin-created affiliation-less authors
+  submit fine there).
