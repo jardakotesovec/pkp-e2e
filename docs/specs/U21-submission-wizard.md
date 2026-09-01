@@ -581,7 +581,7 @@ minor = cosmetic · latent = only in an unusual situation.
 | [A7](#a7) | With acknowledgements off, the completion screen still claims a confirmation email was sent | 🐞 | minor | — |
 | [A8](#a8) | Section editors configured for auto-assignment are silently never assigned on any journal but the install's first | 🐞 | user-visible | — |
 | [A10](#a10) | A wizard loaded at phone width keeps its uncollapsed step rail and the page scrolls sideways (journal & press) | 🐞 | minor | — |
-| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all — "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | 🐞 | user-visible | — |
+| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all — "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | 🐞 | user-visible | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
 | [OPS3](#ops3) | A preprint author's own "Cancel" is silently refused — the draft survives with no message | 🐞 | user-visible | — |
 | [OPS5](#ops5) | A can-post preprint submitter gets no acknowledgement email at all | 🐞 | user-visible | — |
 | [OPS7](#ops7) | The preprint "Not Allowed" page shows a raw locale code where its explanation should be | 🐞 | minor | — |

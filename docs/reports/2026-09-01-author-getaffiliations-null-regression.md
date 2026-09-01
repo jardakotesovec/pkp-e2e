@@ -62,19 +62,22 @@ pre-existing data) are the affected population.
 3. Log in as that user → Dashboard → "Start A New Submission" → fill the
    start form (title, section, checkboxes) → **Begin Submission**.
 
-Reproduction gotchas (why a first attempt may not crash):
+Confirmed by maintainer testing (2026-09-01, independent OJS QA
+instance): all of these crash at "Begin Submission" —
 
-- The author record is only created when the submission is made **as an
-  Author role** (`PKPSubmissionController::add()` gates on
-  `ROLE_ID_AUTHOR`). A manager/editor account that submits under one of
-  its other groups never calls `newAuthorFromUser()` — use an
-  author-only account or explicitly pick Author in the start form.
-- Clearing an existing affiliation via Profile → Contact must clear it
-  in **every locale**: `migrateUserAffiliation()` returns an Affiliation
-  if any locale still holds a non-blank value (`array_filter` over the
-  localized array), and blank strings in all locales fold into the same
-  null return as no value at all
-  (classes/affiliation/Repository.php:261-264).
+- a fresh user created via the admin "add user" flow with no affiliation;
+- an existing user whose affiliation was **removed via the edit-profile
+  section** (the blank-string save folds into the same null return —
+  `array_filter` guard, classes/affiliation/Repository.php:261-264);
+- a **multi-role** user (extra role added to an author-only account) —
+  role mix doesn't shield the path.
+
+One repro gotcha to rule out first: **a stale checkout** — the crash
+only exists at/after the `6f0a39733a` merge; an install a few days
+behind `main` passes and looks like a non-repro. Code note: the author
+record is only created when submitting under an **Author** group
+(`PKPSubmissionController::add()` gates on `ROLE_ID_AUTHOR`) — a
+manager/editor submitting under a non-author group won't hit it.
 
 Observed: the underlying `POST /api/v1/submissions` returns
 **HTTP 500** `{"error":"TypeError: PKP\\author\\Author::getAffiliations():
