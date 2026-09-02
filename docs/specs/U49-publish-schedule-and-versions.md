@@ -13,425 +13,418 @@ atlas-claims: [AFFW-256, AFFW-383, AFFW-384, AFFW-387, AFFW-388, AFFW-389, AFFW-
 
 ## Purpose
 
-Everything up to here prepared the submission; this feature is the last
-mile: an editor takes a publication version live. On a journal that means
-the **Schedule For Publication** flow — choosing whether the article joins
-an issue, goes live at once, or waits as *scheduled* until its issue is
-published; on a press the **Publish** button makes the catalog entry
-public; on a preprint server the **Post** button posts the preprint. The
-same feature owns the way back (**Unpublish** / **Unschedule**) and the
+Every step before this one prepared the submission. This feature is the
+last mile: an editor takes a publication version live. On a journal that is
+the **Schedule For Publication** flow, where the editor chooses whether the
+article joins an issue, goes live at once, or waits as *scheduled* until its
+issue is published. On a press the **Publish** button makes the catalog
+entry public. On a preprint server the **Post** button posts the preprint.
+The same feature owns the way back (**Unpublish** / **Unschedule**) and the
 version machinery: creating a new version of a published work, the version
 stages and numbering ("Author Original", "Version of Record 2.1"), the
 version list in the workflow's side menu, and the status readout
-("Status: Published") every role sees. Written in journal terms; a
-preprint server's screens say **Post**/**Unpost**/**Posted** where a
-journal's say Publish/Unpublish/Published, and its confirmation window is
-titled "Post the preprint" (other renames per the glossary's cross-app
-map). The press's per-submission "Catalog Entry" page and its catalog
-flags are *Catalog management*'s (no spec yet); this spec owns only the
-act of publishing. A journal's issues themselves — creating, ordering and
-publishing them — are *Issues*' (no spec yet); this spec owns the
+("Status: Published") that every role sees.
+
+This spec is written in journal terms. A preprint server's screens say
+**Post**/**Unpost**/**Posted** where a journal's say
+Publish/Unpublish/Published, and its confirmation window is titled "Post the
+preprint". Other renames follow the glossary's cross-app map. The press's
+per-submission "Catalog Entry" page and its catalog flags belong to
+*Catalog management* (no spec yet); this spec owns only the act of
+publishing. A journal's issues themselves, meaning creating, ordering and
+publishing them, belong to *Issues* (no spec yet); this spec owns the
 issue-assignment choices offered while publishing an article.
 
 ## Actors & permissions
 
-The Publication area is part of the per-submission workflow screen; who
-reaches that screen at all is *Workflow screen & stage access*'s rule (no
-spec yet). **May publish** below is one gate shared by every control in
+The Publication area is part of the per-submission workflow screen. Who
+reaches that screen at all is decided by *Workflow screen & stage access*
+(no spec yet). **May publish** below is one gate shared by every control in
 this feature: the user's role on the Production stage is Journal Manager,
 Editor or Site Administrator, and their participation is not limited to
-recommendations — a restriction set on the participant's stage
-assignment (the glossary's *recommending editor*). Section Editors, Guest Editors and assistant roles never
-get these controls, however assigned ⚠ [A2](#a2) — on a preprint server
-that includes the Moderator role, the role its own submission screens say
-will "review and post" preprints. <sup>a</sup>
+recommendations. That restriction is set on the participant's stage
+assignment (the glossary's *recommending editor*). Section Editors, Guest
+Editors and assistant roles never get these controls, however they are
+assigned ⚠ [A2](#a2). On a preprint server that includes the Moderator
+role, the role the server's own submission screens say will "review and
+post" preprints. <sup>a</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **Publish** (journal: "Schedule For Publication"; press: "Publish"; preprint server: "Post") | • may-publish roles — while the shown version is not yet published or scheduled ⚠ [A2](#a2)<br>• the submitting Author on a preprint server — never by default: the confirmation window lists "You can not post your own preprint. It must be approved and posted by a moderator." as an unmet requirement; a screening plugin can lift this, but even then the author's workflow view offers no Post control ⚠ [OPS3](#ops3) <sup>b</sup> |
-| **Unschedule** | • may-publish roles — while the shown version's status is "Scheduled" <sup>c</sup> |
-| **Unpublish** ("Unpost") | • may-publish roles — while the shown version's status is "Published" <sup>c</sup> |
-| **Preview** | • may-publish roles — on a not-yet-published version once the submission has moved past the Review stage (journal, press); and always on a scheduled version. This row is about the Preview among the publishing controls; the workflow window's own header shows a separate Preview/View button to every role <sup>d</sup> |
-| **Create New Version** | • may-publish roles — the side menu's "Create New Version" item, offered regardless of the current version's state <sup>e</sup> |
-| **Fill the publishing details** (Publication Settings page {OJS} / Preprint Entry page {OPS}; the "Review Publishing Details" panel {OJS}) | • may-publish roles; the entry pages additionally save for whoever may edit the publication (see [Publication metadata](U40-publication-metadata.md)) <sup>f</sup> |
-| **Switch versions / read the status** | • every role the Publication area admits, the Author included — the side menu lists each version by name and every version page heads with "Status: {state}" <sup>g</sup> |
+| **Publish** (journal: "Schedule For Publication"; press: "Publish"; preprint server: "Post") | • may-publish roles: while the shown version is not yet published or scheduled ⚠ [A2](#a2)<br>• the submitting Author on a preprint server: never by default. The confirmation window lists "You can not post your own preprint. It must be approved and posted by a moderator." as an unmet requirement. A screening plugin can lift this, but even then the author's workflow view offers no Post control ⚠ [OPS3](#ops3) <sup>b</sup> |
+| **Unschedule** | • may-publish roles: while the shown version's status is "Scheduled" <sup>c</sup> |
+| **Unpublish** ("Unpost") | • may-publish roles: while the shown version's status is "Published" <sup>c</sup> |
+| **Preview** | • may-publish roles: on a not-yet-published version once the submission has moved past the Review stage (journal, press), and always on a scheduled version. This row is about the Preview among the publishing controls. The workflow window's own header shows a separate Preview/View button to every role <sup>d</sup> |
+| **Create New Version** | • may-publish roles: the side menu's "Create New Version" item, offered whatever the current version's state <sup>e</sup> |
+| **Fill the publishing details** (Publication Settings page {OJS} / Preprint Entry page {OPS}; the "Review Publishing Details" panel {OJS}) | • may-publish roles. The entry pages additionally save for whoever may edit the publication (see [Publication metadata](U40-publication-metadata.md)) <sup>f</sup> |
+| **Switch versions / read the status** | • every role the Publication area admits, the Author included. The side menu lists each version by name, and every version page heads with "Status: {state}" <sup>g</sup> |
 
 ## Fields & validation
 
-Three surfaces carry fields; everything else in this feature is buttons
-and confirmation windows.
+Three surfaces carry fields. Everything else in this feature is buttons and
+confirmation windows.
 
-**"Review Publishing Details" panel {OJS}** — the side panel a journal
-opens on the way to publishing, when the version still needs its details
+**"Review Publishing Details" panel {OJS}**: the side panel a journal opens
+on the way to publishing, when the version still needs its details
 (Rule 3). <sup>h</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | Publication Stage | Yes | Select: Author Original · Published Manuscript Under Review · Version of Record. |
-| Revision Significance | Yes | Major Revision / Minor Revision; "Minor Revision" is selectable only when a version of the chosen stage already exists (Rule 12). |
-| Update Type | No | Select, "New Version" preselected; the other choices name the reason for the version (Correction, Erratum, Retraction, …). |
-| Summary of Changes (Amendment Notice) | No | Rich text, multilingual; described on screen as the public amendment notice, though no reader page shows it (Rule 13) ⚠ [A5](#a5). An "Insert Content" button on the submission-language box offers the change summaries authors saved with their review revisions (Rule 14). |
-| Issue Assignment | Yes | Radio; the choices offered depend on which issues the journal has (Rule 5): Don't Assign To An Issue · Assign To Future Issue and Publish Immediately · Assign To Future Issue and Schedule Only · Assign To Current/Back Issue. Opens preselecting the saved choice — or, with nothing saved, "Assign To Current/Back Issue" whenever the journal has a published or back issue; with only future issues nothing arrives preselected, and the first pick misfires ⚠ [OJS2](#ojs2). |
+| Revision Significance | Yes | Major Revision / Minor Revision. "Minor Revision" can be selected only when a version of the chosen stage already exists (Rule 12). |
+| Update Type | No | Select, "New Version" preselected. The other choices name the reason for the version (Correction, Erratum, Retraction, …). |
+| Summary of Changes (Amendment Notice) | No | Rich text, multilingual. The screen describes it as the public amendment notice, but no reader page shows it (Rule 13) ⚠ [A5](#a5). An "Insert Content" button on the submission-language box offers the change summaries authors saved with their review revisions (Rule 14). |
+| Issue Assignment | Yes | Radio. The choices offered depend on which issues the journal has (Rule 5): Don't Assign To An Issue · Assign To Future Issue and Publish Immediately · Assign To Future Issue and Schedule Only · Assign To Current/Back Issue. The panel opens with the saved choice preselected. With nothing saved, "Assign To Current/Back Issue" is preselected whenever the journal has a published or back issue. With only future issues nothing is preselected, and the first pick misfires ⚠ [OJS2](#ojs2). |
 | Issue | Yes, when the assignment names an issue | Select over the matching issues (future or published, per the chosen assignment). |
-| Associated review round | No | Select over the submission's review rounds; arrives pre-filled with the submission's round ("Round 1 — opened {date}"), so an untouched publish keeps the link. A "Published Manuscript Under Review" version is refused only once the round has been deliberately cleared (Rule 7). |
+| Associated review round | No | Select over the submission's review rounds. It arrives pre-filled with the submission's round ("Round 1 — opened {date}"), so an untouched publish keeps the link. A "Published Manuscript Under Review" version is refused only once the round has been deliberately cleared (Rule 7). |
 
-**Create New Version dialog** (all apps; Rule 11) — "Which version should
-metadata be copied from?" (select over the existing versions), Publication
-Stage (arrives preselected with the copied version's stage), Revision
+**Create New Version dialog** (all apps; Rule 11): "Which version should
+metadata be copied from?" (a select over the existing versions), Publication
+Stage (arrives preselected with the copied version's stage), and Revision
 Significance (same minor rule; "Minor Revision" preselected whenever the
-stage allows it), with Confirm/Cancel — so an untouched Confirm answers
-everything (Rule 11). <sup>i</sup>
+stage allows it), with Confirm/Cancel. An untouched Confirm therefore
+answers everything (Rule 11). <sup>i</sup>
 
-**Publication Settings page {OJS} / Preprint Entry page {OPS}** — the
-Publication area's entry page (a press's counterpart is the Catalog Entry
-page, described in *Catalog management*). Saves onto the shown version.
+**Publication Settings page {OJS} / Preprint Entry page {OPS}**: the
+Publication area's entry page. A press's counterpart is the Catalog Entry
+page, described in *Catalog management*. It saves onto the shown version.
 <sup>j</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| Issue Assignment + Issue {OJS} | Yes | The same radio + select as the panel above; a choice saved here is remembered and arrives pre-checked when the panel opens — except "Assign To Future Issue and Schedule Only" on a journal with no published issues, which comes back as the immediate-publish choice ⚠ [OJS2](#ojs2). |
-| Section {OJS OPS} | Always has a value | Defaults to the submission's section; the select offers no empty choice, so it cannot be blanked. Carries no on-screen required mark (only Issue Assignment and Issue are marked "Required"). |
-| Categories | No | Shown only when the journal has categories. |
-| Publication Date {OJS} / Date Posted {OPS} | No | Must be a date in the form YYYY-MM-DD ("The date must be in the format YYYY-MM-DD, such as 2019-01-01."). The description warns to leave it empty unless backdating — the date is normally set by publishing (Rule 8). On a press or preprint server a FUTURE date entered here is what schedules the item (Rule 6). |
-| Update Type · Summary of Changes | No | As on the panel above; on a preprint server the summary box has no "Insert Content" button. |
+| Issue Assignment + Issue {OJS} | Yes | The same radio and select as the panel above. A choice saved here is remembered and arrives pre-checked when the panel opens. The exception is "Assign To Future Issue and Schedule Only" on a journal with no published issues, which comes back as the immediate-publish choice ⚠ [OJS2](#ojs2). |
+| Section {OJS OPS} | Always has a value | Defaults to the submission's section. The select offers no empty choice, so it cannot be blanked. It carries no on-screen required mark; only Issue Assignment and Issue are marked "Required". |
+| Publication Date {OJS} / Date Posted {OPS} | No | Must be a date in the form YYYY-MM-DD ("The date must be in the format YYYY-MM-DD, such as 2019-01-01."). The description warns to leave it empty unless backdating, because the date is normally set by publishing (Rule 8). On a press or preprint server a FUTURE date entered here is what schedules the item (Rule 6). |
+| Update Type · Summary of Changes | No | As on the panel above. On a preprint server the summary box has no "Insert Content" button. |
 | Cover Image · Pages {OJS} · URL Path | No | Display extras of the published item. |
 
 ## Rules & state
 
-1. **A version's states.** Every version is exactly one of: not yet
-   published (readout **"Status: Unscheduled"** on the version readers
-   would get — with nothing published that is the highest version, by
-   stage then number; worded **"Unposted"** on a preprint server — and
-   **"Unpublished"** on any other version, in every app), **"Scheduled"**
-   (accepted for publication, waiting — Rule 5/6), or **"Published"**
-   ("Posted" on a preprint server). The readout heads every Publication page as
-   "Status: {state}" with a colored dot. A journal's in-between states
-   (an issue choice saved but not yet confirmed) also read "Unpublished".
-   <sup>g</sup>
+1. **A version's states.** Every version is in exactly one of three states.
+   Not yet published: the readout is **"Status: Unscheduled"** on the
+   version readers would get (with nothing published, that is the highest
+   version, by stage then number), worded **"Unposted"** on a preprint
+   server, and **"Unpublished"** on any other version, in every app.
+   **"Scheduled"**: accepted for publication and waiting (Rule 5/6).
+   **"Published"** ("Posted" on a preprint server). The readout heads every
+   Publication page as "Status: {state}" with a colored dot. A journal's
+   in-between states (an issue choice saved but not yet confirmed) also
+   read "Unpublished". <sup>g</sup>
 2. **One flow, staged differently per app.** The publish button sits at
-   the top right of the Publication area for may-publish roles — labeled
-   **"Schedule For Publication"** on a journal (it reads **"Publish"**
-   only once the submission itself counts as published, which takes a
-   published final-stage version — Rule 8 ⚠ [A3](#a3)),
-   **"Publish"** on a press, **"Post"** on a preprint server. A press or
-   preprint server goes straight to the confirmation window (Rule 4); a
+   the top right of the Publication area for may-publish roles. It is
+   labeled **"Schedule For Publication"** on a journal (it reads
+   **"Publish"** only once the submission itself counts as published,
+   which takes a published final-stage version, Rule 8 ⚠ [A3](#a3)),
+   **"Publish"** on a press, and **"Post"** on a preprint server. A press
+   or preprint server goes straight to the confirmation window (Rule 4). A
    journal first opens the "Review Publishing Details" panel when needed
-   (Rule 3). The Submission stage's own "Schedule For Publication"
-   shortcut button is that stage's (see
-   [Submission stage](U25-submission-stage.md#schedule)); it lands on
-   this area. The Production stage view shows a same-labeled action
-   button ("Post the preprint" on a preprint server) to every role who
-   can open the stage — publish-excluded roles included: for them it
-   merely lands on a Publication area with nothing to press ⚠ [A2](#a2).
-   Nothing stage-gates the real publish button either: a journal
-   submission still in External Review already offers "Schedule For
-   Publication"; only Preview waits for Review to pass (Actors).
-   <sup>k</sup>
+   (Rule 3). The Submission stage's own "Schedule For Publication" shortcut
+   button belongs to that stage (see
+   [Submission stage](U25-submission-stage.md#schedule)); it lands on this
+   area. The Production stage view shows a same-labeled action button
+   ("Post the preprint" on a preprint server) to every role who can open
+   the stage, publish-excluded roles included. For them it merely lands on
+   a Publication area with nothing to press ⚠ [A2](#a2). Nothing
+   stage-gates the real publish button either: a journal submission still
+   in External Review already offers "Schedule For Publication". Only
+   Preview waits for Review to pass (Actors). <sup>k</sup>
 3. **The details panel opens only while details are missing {OJS}.**
-   Pressing the journal's publish button opens "Review Publishing
-   Details" (Fields) if the version has no Publication Stage yet or no
-   confirmed issue choice; Confirm saves the choices and continues to the
-   confirmation window. When a saved issue choice and stage are already
-   in place — the issue choice, for instance, saved on the Publication
-   Settings page; the stage from an earlier act such as a panel save,
-   the version dialog or a prior publish (the settings page itself
-   carries no stage field) — the button skips the panel and opens the
-   confirmation window directly. The panel opens preselecting the saved issue choice — or,
-   with nothing saved, the same default as the Fields table above.
-   <sup>h</sup>
-4. **The confirmation window.** The final window (titled "Schedule For
-   Publication" on a journal and press, "Post the preprint" on a preprint
-   server) shows, in order: an optional warning list ("The following
-   issues were found, but will not prevent publishing" — none in a stock
-   install; plugins add them), then either the confirmation text with a
-   Publish/Post/Schedule For Publication button, or — when requirements
-   are unmet — "The following requirements must be met before this can be
-   published." ("…posted." on a preprint server) with the list and **no
-   confirm button at all**. The confirmation text opens "All publication
-   requirements have been met." ("All requirements have been met." on a
-   preprint server) and names the version — "The publication version is
-   "{version}"" — except that a press or preprint server publishing a
-   version with no stage yet shows "The publication must have a version
-   stage assigned before it can be published.": a sentence phrased as an
-   unmet requirement right under the all-met line, though it blocks
-   nothing ⚠ [A7](#a7). On a journal whose settings *require* a plain
-   language summary, a version without one gets neither text nor button —
-   the Confirm is refused with no message and publishing is never reached
-   ⚠ [OJS1](#ojs1). <sup>l</sup>
+   Pressing the journal's publish button opens "Review Publishing Details"
+   (Fields) if the version has no Publication Stage yet or no confirmed
+   issue choice. Confirm saves the choices and continues to the
+   confirmation window. When a saved issue choice and stage are already in
+   place, the button skips the panel and opens the confirmation window
+   directly. The issue choice may have been saved on the Publication
+   Settings page. The stage comes from an earlier act such as a panel
+   save, the version dialog or a prior publish (the settings page itself
+   carries no stage field). The panel opens with the saved issue choice
+   preselected. With nothing saved, it uses the same default as the Fields
+   table above. <sup>h</sup>
+4. **The confirmation window.** The final window is titled "Schedule For
+   Publication" on a journal and press, and "Post the preprint" on a
+   preprint server. It shows, in order: an optional warning list ("The
+   following issues were found, but will not prevent publishing"; none in
+   a stock install, plugins add them), then either the confirmation text
+   with a Publish/Post/Schedule For Publication button, or, when
+   requirements are unmet, "The following requirements must be met before
+   this can be published." ("…posted." on a preprint server) with the
+   list and **no confirm button at all**. The confirmation text opens "All
+   publication requirements have been met." ("All requirements have been
+   met." on a preprint server) and names the version: "The publication
+   version is "{version}"". The exception is a press or preprint server
+   publishing a version with no stage yet. It shows "The publication must
+   have a version stage assigned before it can be published." instead: a
+   sentence phrased as an unmet requirement right under the all-met line,
+   though it blocks nothing ⚠ [A7](#a7). On a journal whose settings
+   *require* a plain language summary, a version without one gets neither
+   text nor button. The Confirm is refused with no message and publishing
+   is never reached ⚠ [OJS1](#ojs1). <sup>l</sup>
 5. **What the issue choice decides {OJS}.** The four assignments map to
-   outcomes; only the choices the journal's issues allow are offered (no
-   future issue → no "Future Issue" options; no issues at all → Rule 15):
+   outcomes. Only the choices the journal's issues allow are offered: with
+   no future issue there are no "Future Issue" options, and with no issues
+   at all Rule 15 applies.
 
    | Choice | Outcome on confirm |
    |---|---|
    | Don't Assign To An Issue | Published at once, no issue ("…published immediately without any issue association…") |
    | Assign To Future Issue and Publish Immediately | Published at once as continuous publication, listed with its still-unpublished issue ("…published immediately as continuous publication even though it is assigned to {issue} which is not published yet…") |
-   | Assign To Future Issue and Schedule Only | **Scheduled** — the window's text promises "…published when {issue} is published…" and its button reads "Schedule For Publication" |
+   | Assign To Future Issue and Schedule Only | **Scheduled**. The window's text promises "…published when {issue} is published…" and its button reads "Schedule For Publication" |
    | Assign To Current/Back Issue | Published at once into the chosen issue ("…published immediately in {issue}…") |
 
    ⚠ On a journal with no published issues (a future issue only), the
    panel does not honor the FIRST pick of "Assign To Future Issue and
-   Schedule Only": the window offers immediate publication instead
-   ("…published immediately…", button "Publish") and confirming
-   publishes at once [OJS2](#ojs2). Saving the choice on the
-   Publication Settings page beforehand fares no better on that
-   journal — the saved "Schedule Only" comes back as the
-   immediate-publish choice. Only changing the radio to another choice
-   and picking "Schedule Only" again before Confirm yields the promised
-   scheduling window.
+   Schedule Only". The window offers immediate publication instead
+   ("…published immediately…", button "Publish"), and confirming
+   publishes at once [OJS2](#ojs2). Saving the choice on the Publication
+   Settings page beforehand fares no better on that journal: the saved
+   "Schedule Only" comes back as the immediate-publish choice. Only
+   changing the radio to another choice and picking "Schedule Only" again
+   before Confirm yields the promised scheduling window.
 
-   A scheduled article goes live when its issue is published — releasing
+   A scheduled article goes live when its issue is published. Releasing
    it is part of publishing the issue (see *Issues*, no spec yet), not a
    clock. <sup>m</sup>
 6. **Scheduling on a press or preprint server is by date.** There is no
-   issue step: Publish/Post with the entry page's date field empty
-   ("Date Published" on the press's Catalog Entry page, "Date Posted" on
-   Preprint Entry) publishes now and stamps today; with a FUTURE date
-   saved there it sets status "Scheduled" instead — though neither
-   window says so: the press's still promises to "make this catalog
-   entry public" ⚠ [OMP1](#omp1) and the preprint server's still asks
-   "…post this?" ⚠ [OPS1](#ops1). A
+   issue step. Publish/Post with the entry page's date field empty ("Date
+   Published" on the press's Catalog Entry page, "Date Posted" on Preprint
+   Entry) publishes now and stamps today. With a FUTURE date saved there,
+   it sets status "Scheduled" instead. Neither window says so: the press's
+   still promises to "make this catalog entry public" ⚠ [OMP1](#omp1),
+   and the preprint server's still asks "…post this?" ⚠ [OPS1](#ops1). A
    scheduled press item is published by a once-daily background check
-   when its date arrives. A preprint server has no such check: a
+   when its date arrives. A preprint server has no such check, so a
    scheduled preprint waits forever unless someone unschedules and
    re-posts it ⚠ [OPS1](#ops1). <sup>n</sup>
-7. **What blocks publishing.** The requirements list (Rule 4) refuses:
-   a declined submission ("A declined submission can not be published." /
-   "…posted."), in every app; a contributor's unauthenticated or
-   duplicated ORCID iD, when ORCID is enabled (see
-   [ORCID integration](U04-orcid-integration.md)); on a journal — an
-   assigned issue that no longer exists, an unpaid publication fee once
-   publication fees are fully in force — enabling payments and setting
-   the fee is not enough: the chosen payment method must itself be
-   completely set up (*Payments & APCs*'s territory) — and a
-   "Published Manuscript Under Review" version whose associated review
-   round has been cleared — the picker pre-fills the submission's round,
-   so an untouched publish passes (Fields); on a preprint server — the
-   author block (Actors). On a journal
-   the declined refusal comes one step late: the publish button first
-   opens "Review Publishing Details", which requires — and saves — a
-   Publication Stage and Revision Significance on the declined submission
-   before the no-button window appears; a press or preprint server opens
-   the refused window directly. <sup>o</sup>
+7. **What blocks publishing.** The requirements list (Rule 4) refuses the
+   following. In every app: a declined submission ("A declined submission
+   can not be published." / "…posted."), and a contributor's
+   unauthenticated or duplicated ORCID iD when ORCID is enabled (see
+   [ORCID integration](U04-orcid-integration.md)). On a journal: an
+   assigned issue that no longer exists; an unpaid publication fee once
+   publication fees are fully in force (enabling payments and setting the
+   fee is not enough, the chosen payment method must itself be completely
+   set up, which is *Payments & APCs*'s territory); and a "Published
+   Manuscript Under Review" version whose associated review round has
+   been cleared (the picker pre-fills the submission's round, so an
+   untouched publish passes; Fields). On a preprint server: the author
+   block (Actors). On a journal the declined refusal comes one step late.
+   The publish button first opens "Review Publishing Details", which
+   requires, and saves, a Publication Stage and Revision Significance on
+   the declined submission before the no-button window appears. A press
+   or preprint server opens the refused window directly. <sup>o</sup>
 8. **What publishing writes.** Going live stamps the publication date
-   (today, if the field was empty — a filled date is kept, even a past
-   one), fills the empty copyright/license fields from the journal's
-   defaults, and assigns a Publication Stage if none was chosen —
-   "Version of Record" on a journal or press, "Author Original" on a
-   preprint server, numbered as the next major version. It also switches
-   off the Author's edit permission on every assignment — permanently,
-   surviving unpublish (that lock's story is
-   [Publication metadata](U40-publication-metadata.md#a4)'s). On a
-   journal or preprint server the reader page goes live at once,
-   whatever the version's stage; the submission itself moves to the
-   dashboards' published lists (see
-   [My Submissions](U22-my-submissions.md) and
+   (today if the field was empty; a filled date is kept, even a past one),
+   fills the empty copyright/license fields from the journal's defaults,
+   and assigns a Publication Stage if none was chosen: "Version of Record"
+   on a journal or press, "Author Original" on a preprint server, numbered
+   as the next major version. It also switches off the Author's edit
+   permission on every assignment, permanently, surviving unpublish (that
+   lock's story belongs to
+   [Publication metadata](U40-publication-metadata.md#a4)). On a journal
+   or preprint server the reader page goes live at once, whatever the
+   version's stage. The submission itself moves to the dashboards'
+   published lists (see [My Submissions](U22-my-submissions.md) and
    [Submissions dashboard](U23-submissions-dashboard.md)) only when the
    published version's stage is the final one ⚠ [A3](#a3): "Version of
-   Record" on a journal or press, "Author Original" on a preprint
-   server. On a press the catalog page waits for that final stage too —
-   publishing a non-final version leaves it down ⚠ [A3](#a3).
-   Scheduling performs none of the fills — they run when the item
-   actually goes live. <sup>p</sup>
+   Record" on a journal or press, "Author Original" on a preprint server.
+   On a press the catalog page waits for that final stage too, so
+   publishing a non-final version leaves it down ⚠ [A3](#a3). Scheduling
+   performs none of the fills; they run when the item actually goes live.
+   <sup>p</sup>
 9. **Unpublish and Unschedule are one act with two names.** "Unschedule"
    appears on a scheduled version, "Unpublish" ("Unpost") on a published
-   one; each opens a red confirmation dialog whose confirm button
-   repeats the action name — on a journal or press "Are you sure you
-   don't want this scheduled for publication?" / "Are you sure you
-   don't want this to be published?"; on a preprint server "Are you
-   sure you don't want this to be scheduled to be posted?" / "…don't
-   want this to be posted?". Confirming sets the version back to
-   Rule 1's unpublished readout — "Unscheduled" ("Unposted") on the
-   version readers would get, "Unpublished" on any other. The reader
-   page goes down only when no published version remains: unpublishing
-   a later version while an earlier one is still published leaves the
-   page live serving that earlier version, its "Versions" list one
-   entry shorter. Everything else is KEPT: the publication date, the
-   issue choice {OJS}, the version number, the filled copyright fields.
-   <sup>q</sup>
+   one. Each opens a red confirmation dialog whose confirm button repeats
+   the action name. On a journal or press the dialog asks "Are you sure
+   you don't want this scheduled for publication?" / "Are you sure you
+   don't want this to be published?"; on a preprint server "Are you sure
+   you don't want this to be scheduled to be posted?" / "…don't want this
+   to be posted?". Confirming sets the version back to Rule 1's
+   unpublished readout: "Unscheduled" ("Unposted") on the version readers
+   would get, "Unpublished" on any other. The reader page goes down only
+   when no published version remains. Unpublishing a later version while
+   an earlier one is still published leaves the page live serving that
+   earlier version, with its "Versions" list one entry shorter. Everything
+   else is KEPT: the publication date, the issue choice {OJS}, the version
+   number, the filled copyright fields. <sup>q</sup>
 10. **Publishing again re-decides from what was kept.** Because the date
     and issue survive (Rule 9), a re-publish behaves like a first publish
-    with those values: a journal article's kept issue choice decides the
-    outcome again per Rule 5's table — an article kept as continuous
-    publication goes straight live again, its issue still unpublished; a
+    with those values. A journal article's kept issue choice decides the
+    outcome again per Rule 5's table: an article kept as continuous
+    publication goes straight live again, its issue still unpublished. A
     press or preprint item whose kept date has meanwhile passed goes
     straight live carrying the ORIGINAL date. <sup>q</sup>
 11. **Creating a new version.** "Create New Version" (side menu) opens a
-    dialog (Fields); Confirm creates a new version copying the chosen
+    dialog (Fields). Confirm creates a new version copying the chosen
     version's metadata, contributors, references and files-for-readers
     (galleys on a journal or preprint server, publication formats with
     their chapters on a press), with no publication date and not yet
     published. On a stage-assigned source the dialog arrives pre-answered
     (Fields), so an untouched Confirm yields a minor version of the same
-    stage — "Version of Record 1.1", not an unassigned one. The side menu
+    stage: "Version of Record 1.1", not an unassigned one. The side menu
     gains the version, named by its stage and number ("Version of Record
-    2.0") — "Unassigned version ({date})" only when no stage was chosen.
+    2.0"), or "Unassigned version ({date})" when no stage was chosen.
     Readers keep getting the published version until the new one is
-    published — yet the reader page's date line changes at once, the
-    unpublished draft's creation day appearing as the public "Published"
-    date ⚠ [A6](#a6). Nor can a reader reach the draft by address: on a
+    published. Yet the reader page's date line changes at once: the
+    unpublished draft's creation day appears as the public "Published"
+    date ⚠ [A6](#a6). Nor can a reader reach the draft by address. On a
     journal, a version address naming anything but an OLDER published
-    version of the same article — the draft's number, the current
-    version's own, a mistyped one — fails with a blank server error
-    rather than a "not found" page ⚠ [OJS3](#ojs3). <sup>r</sup>
+    version of the same article (the draft's number, the current version's
+    own, a mistyped one) fails with a blank server error rather than a
+    "not found" page ⚠ [OJS3](#ojs3). <sup>r</sup>
 12. **Version stages and numbering.** A journal and press know three
-    stages — Author Original, Published Manuscript Under Review, Version
-    of Record; a preprint server only Author Original. Numbering is per
+    stages: Author Original, Published Manuscript Under Review, Version of
+    Record. A preprint server knows only Author Original. Numbering is per
     stage: a major revision starts the stage's next whole number ("2.0"),
-    a minor one increments behind the dot ("1.1"); "Minor Revision" is
-    offered only when the chosen stage already has a version — and
-    switching the stage in the dialog silently re-selects "Minor
-    Revision" whenever it is allowed, discarding a "Major" pick
-    ⚠ [A4](#a4). Versions are never renumbered or deleted by this
-    feature. <sup>s</sup>
+    a minor one increments behind the dot ("1.1"). "Minor Revision" is
+    offered only when the chosen stage already has a version. Switching
+    the stage in the dialog silently re-selects "Minor Revision" whenever
+    it is allowed, discarding a "Major" pick ⚠ [A4](#a4). Versions are
+    never renumbered or deleted by this feature. <sup>s</sup>
 13. **Update type and the amendment notice.** The Update Type and Summary
     of Changes save onto the version, and every screen carrying them
     promises the summary "will appear publicly as the version amendment
-    notice" — but after publishing, no reader page shows it in any app:
-    readers are never told what the version changed ⚠ [A5](#a5).
+    notice". But after publishing, no reader page shows it in any app.
+    Readers are never told what the version changed ⚠ [A5](#a5).
     <sup>t</sup>
 14. **Insert Content {OJS OMP}.** The Summary of Changes box (panel and
     entry page) carries "Insert Content" on the submission-language text
-    only: a side panel listing the change summaries authors saved with
-    each review revision file, newest first, each labeled
+    only. It opens a side panel listing the change summaries authors saved
+    with each review revision file, newest first, each labeled
     "Review (Round {n}) • {date} • {file}" ("External Review (Round {n})
-    • …" on a press); choosing one appends its text after whatever the
-    box already holds. With none saved it reads "No
-    saved summaries found for this submission's review revisions." A
-    preprint server, having no review, has no such button. <sup>u</sup>
+    • …" on a press). Choosing one appends its text after whatever the box
+    already holds. With none saved it reads "No saved summaries found for
+    this submission's review revisions." A preprint server has no review,
+    so it has no such button. <sup>u</sup>
 15. **A journal with no issues {OJS}.** With not a single issue created,
     the publish flow shows no issue fields at all and publishes
-    immediately, issueless — scheduling is unreachable. <sup>m</sup>
+    immediately, without an issue. Scheduling is unreachable. <sup>m</sup>
 16. **Send to Text Editor {OJS OMP}.** The action lives on the workflow's
-    Production stage, in its "Production Ready Files" list: a file row's
-    "More Actions" menu offers "Send to Text Editor" only on files the
-    text editor can import (Word,
-    OpenDocument, RTF, LaTeX or Markdown files — a PDF row has no such
-    action). It opens the same version dialog, titled "Send File to
-    Text Editor", asking "To which version would you like to send this
-    file?" ("Create New Version" first, then each existing version);
-    what happens to the file afterwards is *JATS &
-    Body Text*'s (no spec yet). <sup>v</sup>
+    Production stage, in its "Production Ready Files" list. A file row's
+    "More Actions" menu offers "Send to Text Editor" only on files the text
+    editor can import (Word, OpenDocument, RTF, LaTeX or Markdown files; a
+    PDF row has no such action). It opens the same version dialog, titled
+    "Send File to Text Editor", asking "To which version would you like to
+    send this file?" ("Create New Version" first, then each existing
+    version). What happens to the file afterwards belongs to *JATS & Body
+    Text* (no spec yet). <sup>v</sup>
 17. **The awaiting-approval notice.** While no version is published, a
-    press's Production stage banners "Awaiting approval." with "The
-    monograph will not be listed in the catalog until it has been
-    published…"; publishing replaces it with two stacked notices —
-    "Status / Submission published." and the catalog notice
-    (*Catalog management*'s). A journal and preprint server record the
-    same approval state internally but their current workflow screens
-    show no such banner. <sup>w</sup>
+    press's Production stage shows the banner "Awaiting approval." with
+    "The monograph will not be listed in the catalog until it has been
+    published…". Publishing replaces it with two stacked notices: "Status
+    / Submission published." and the catalog notice (which belongs to
+    *Catalog management*). A journal and preprint server record the same
+    approval state internally, but their current workflow screens show no
+    such banner. <sup>w</sup>
 
 ## Side effects
 
-- **Email "Publication Published"** — when a version actually goes live
-  (not on scheduling), every user holding an Author-role assignment on
-  the submission gets it ("Your publication, {title}, … has been
-  published."); no journal, press or server setting turns it off, though
-  each recipient can switch the email — not the task notice — off in
-  their own profile's notification settings. A preprint server sends it
-  too, still worded "published" throughout ⚠ [OPS5](#ops5), alongside
-  its own acknowledgement below. <sup>x</sup>
-- **Task notice for the author** — the same publish files "A new version
-  of your submission, "{title}", was published." into each of those
-  users' Tasks; unpublishing removes the notice again. <sup>x</sup>
-- **Email "A new version was created for "{title}""** — creating a
-  version emails exactly the users with a stage assignment on the
-  submission, the submitting author included; the acting editor is among
-  them only when they hold such an assignment themselves (a manager
-  acting without one gets neither email nor notice), although the
-  template presents itself as a notice to assigned editors ⚠ [A1](#a1);
-  an assigned reviewer gets nothing. Each recipient also gets a matching
-  task notice ("A new version of a submission was created"). <sup>y</sup>
-- **Posted acknowledgements {OPS}** — posting emails the preprint's
-  contributors (every listed contributor with an email address, account
-  or not). Two templates exist — "Preprint Posted Acknowledgement" for
-  the first version, "New Version Posted Acknowledgement" for later
-  ones — but every post sends the new-version one; the first-post
-  acknowledgement never goes out ⚠ [OPS4](#ops4). The acknowledgement is
-  governed by one Workflow › Emails setting (Settings below) and is sent
-  even when the post only scheduled the preprint ⚠ [OPS2](#ops2).
-  <sup>z</sup>
-- **Activity log** — one line per act: "The submission was published." /
-  "…was scheduled for publication." (first version), "A new version was
-  published." / "…scheduled…" (later versions), "The submission was
-  unpublished." / "A version was removed from publication.", "A new
-  version was created." — an unschedule logs the unpublish line ("The
-  submission was unpublished."; no unschedule wording exists), and a
-  preprint server words them with posted/unposted throughout, the
-  scheduling lines included ("The submission was scheduled to be
-  posted." / "A new version was scheduled to be posted."). <sup>aa</sup>
-- **Workflow closes on the final version.** Publishing a Version of
-  Record (Author Original on a preprint server) also records the
-  submission's workflow as finished; unpublishing the last one reopens
-  it. The activity log shows the move: "{user} moved this submission to
-  the Done stage." / "{user} returned this submission to the workflow."
-  <sup>ab</sup>
-- **Passed along, other features' territory** — publishing marks DOIs for
-  deposit/update (*DOIs*), deposits the work to verified contributors'
-  ORCID records — scheduled counts as published for this
-  ([ORCID integration](U04-orcid-integration.md)) — refreshes the search
-  index, and on a press swaps the catalog availability records
-  (*Catalog management*). <sup>ac</sup>
+- **Email "Publication Published"**: sent when a version actually goes
+  live (not on scheduling) to every user holding an Author-role assignment
+  on the submission ("Your publication, {title}, … has been published.").
+  No journal, press or server setting turns it off. Each recipient can
+  switch the email off in their own profile's notification settings; that
+  does not switch off the task notice. A preprint server sends it too,
+  still worded "published" throughout ⚠ [OPS5](#ops5), alongside its own
+  acknowledgement below. <sup>x</sup>
+- **Task notice for the author**: the same publish files "A new version of
+  your submission, "{title}", was published." into each of those users'
+  Tasks. Unpublishing removes the notice again. <sup>x</sup>
+- **Email "A new version was created for "{title}""**: creating a version
+  emails exactly the users with a stage assignment on the submission, the
+  submitting author included. The acting editor is among them only when
+  they hold such an assignment themselves; a manager acting without one
+  gets neither email nor notice. The template nevertheless presents itself
+  as a notice to assigned editors ⚠ [A1](#a1). An assigned reviewer gets
+  nothing. Each recipient also gets a matching task notice ("A new version
+  of a submission was created"). <sup>y</sup>
+- **Posted acknowledgements {OPS}**: posting emails the preprint's
+  contributors (every listed contributor with an email address, account or
+  not). Two templates exist, "Preprint Posted Acknowledgement" for the
+  first version and "New Version Posted Acknowledgement" for later ones,
+  but every post sends the new-version one. The first-post acknowledgement
+  never goes out ⚠ [OPS4](#ops4). The acknowledgement is governed by one
+  Workflow › Emails setting (Settings below) and is sent even when the post
+  only scheduled the preprint ⚠ [OPS2](#ops2). <sup>z</sup>
+- **Activity log**: one line per act. "The submission was published." /
+  "…was scheduled for publication." for the first version; "A new version
+  was published." / "…scheduled…" for later versions; "The submission was
+  unpublished." / "A version was removed from publication."; "A new version
+  was created." An unschedule logs the unpublish line ("The submission was
+  unpublished."; no unschedule wording exists). A preprint server words
+  them with posted/unposted throughout, the scheduling lines included
+  ("The submission was scheduled to be posted." / "A new version was
+  scheduled to be posted."). <sup>aa</sup>
+- **Workflow closes on the final version.** Publishing a Version of Record
+  (Author Original on a preprint server) also records the submission's
+  workflow as finished. Unpublishing the last one reopens it. The activity
+  log shows the move: "{user} moved this submission to the Done stage." /
+  "{user} returned this submission to the workflow." <sup>ab</sup>
+- **Passed along to other features**: publishing marks DOIs for deposit or
+  update (*DOIs*), deposits the work to verified contributors' ORCID
+  records (scheduled counts as published for this;
+  [ORCID integration](U04-orcid-integration.md)), refreshes the search
+  index, and on a press swaps the catalog availability records (*Catalog
+  management*). <sup>ac</sup>
 
 ## Settings that modify behavior
 
-- **Preprint Posted {OPS}** — Settings › Workflow › Emails, "Preprint
+- **Preprint Posted {OPS}**: Settings › Workflow › Emails, "Preprint
   Posted": "Send an email to all authors." / "Do not send an email."
-  (sending is the default). Off, neither posted acknowledgement is
-  sent — the "Publication Published" email still arrives (this setting
-  does not touch it). <sup>z</sup>
-- **The journal's issues {OJS}** — which issues exist decides which
-  assignment choices the publish flow offers (Rule 5) and whether it
-  offers any (Rule 15). Publication fees add their requirement (Rule 7)
-  only once fully in force: payments on, a fee amount, and the chosen
-  payment method itself completely set up.
-- **No switch for the rest** — no journal, press or server setting turns
-  the "Publication Published" email off (each recipient can, in their
-  own profile — Side effects), nothing enables author self-posting on a
-  preprint server (a plugin hook only — Actors), and no setting turns
-  scheduling itself on or off in any app. <sup>b</sup>
+  Sending is the default. When off, neither posted acknowledgement is
+  sent. The "Publication Published" email still arrives; this setting does
+  not touch it. <sup>z</sup>
+- **The journal's issues {OJS}**: which issues exist decides which
+  assignment choices the publish flow offers (Rule 5) and whether it offers
+  any (Rule 15). Publication fees add their requirement (Rule 7) only once
+  fully in force: payments on, a fee amount, and the chosen payment method
+  itself completely set up.
+- **No switch for the rest.** No journal, press or server setting turns the
+  "Publication Published" email off (each recipient can, in their own
+  profile; Side effects). Nothing enables author self-posting on a preprint
+  server (a plugin hook only; Actors). No setting turns scheduling itself
+  on or off in any app. <sup>b</sup>
 
 ## Cross-feature interactions
 
-- [Publication metadata](U40-publication-metadata.md) — owns the
-  metadata pages, the edit locks that published/scheduled states impose,
-  and the copyright fill's field-level story (its Rule 12); this spec
-  owns the publishing acts that trigger them. Its plain-language-summary
-  finding surfaces here as the silent Confirm refusal ⚠ [OJS1](#ojs1).
-- [Submission stage](U25-submission-stage.md#schedule) — the journal's
+- [Publication metadata](U40-publication-metadata.md): owns the metadata
+  pages, the edit locks that published/scheduled states impose, and the
+  copyright fill's field-level story (its Rule 12). This spec owns the
+  publishing acts that trigger them. Its plain-language-summary finding
+  surfaces here as the silent Confirm refusal ⚠ [OJS1](#ojs1).
+- [Submission stage](U25-submission-stage.md#schedule): the journal's
   Submission-stage "Schedule For Publication" shortcut that lands here.
-- *Workflow screen & stage access* (no spec yet) — who opens the
-  workflow screen and sees the Publication area at all.
-- *Issues* (no spec yet) — issues themselves; publishing an issue is
-  what releases articles scheduled into it (Rule 5), and unpublishing an
-  issue sets its articles back to "Scheduled".
-- *Catalog management* (no spec yet) — the press's Catalog Entry page,
-  add-to-catalog and catalog flags; its catalog notice replaces the
+- *Workflow screen & stage access* (no spec yet): who opens the workflow
+  screen and sees the Publication area at all.
+- *Issues* (no spec yet): issues themselves. Publishing an issue is what
+  releases articles scheduled into it (Rule 5), and unpublishing an issue
+  sets its articles back to "Scheduled".
+- *Catalog management* (no spec yet): the press's Catalog Entry page,
+  add-to-catalog and catalog flags. Its catalog notice replaces the
   awaiting-approval banner (Rule 17).
-- *JATS & Body Text* (no spec yet) — the "Send to Text Editor" import
-  this feature's version dialog fronts (Rule 16).
+- *JATS & Body Text* (no spec yet): the "Send to Text Editor" import that
+  this feature's version dialog opens (Rule 16).
 - [My Submissions](U22-my-submissions.md) /
-  [Submissions dashboard](U23-submissions-dashboard.md) — the list views
-  a publish/schedule/unpublish moves a submission between.
-- [ORCID integration](U04-orcid-integration.md) — the ORCID publishing
+  [Submissions dashboard](U23-submissions-dashboard.md): the list views a
+  publish, schedule or unpublish moves a submission between.
+- [ORCID integration](U04-orcid-integration.md): the ORCID publishing
   requirements (Rule 7) and the on-publish deposit.
-- *Payments & APCs* (no spec yet) — the publication fee whose unpaid
-  state blocks a journal's publishing (Rule 7).
-- [Submission wizard](U21-submission-wizard.md) — the preprint server's
+- *Payments & APCs* (no spec yet): the publication fee whose unpaid state
+  blocks a journal's publishing (Rule 7).
+- [Submission wizard](U21-submission-wizard.md): the preprint server's
   post-submission texts that tell a submitter whether they can post.
 
 ## Canonical scenarios
 
-Common to all three apps (roles, labels and data per the glossary's
-cross-app map; the publish button and window read per Rule 2).
+Common to all three apps. Roles, labels and data follow the glossary's
+cross-app map; the publish button and window read per Rule 2.
 
 1. **Publish a submission and see it live** — Journal Manager: open an
-   unpublished submission's Publication area; the head reads "Status:
+   unpublished submission's Publication area. The head reads "Status:
    Unscheduled". Press the publish button and complete the flow (on a
    journal: pick "Assign To Current/Back Issue" and an issue in "Review
-   Publishing Details", then Confirm). The confirmation window states all
-   requirements are met and names the version to be assigned ("Version of
-   Record 1.0" / "Author Original 1.0"); confirm. The head now reads
+   Publishing Details", then Confirm). The confirmation window states that
+   all requirements are met and names the version to be assigned ("Version
+   of Record 1.0" / "Author Original 1.0"). Confirm. The head now reads
    "Status: Published", the reader page is live, the activity log shows
    "The submission was published.", and the submitting author finds the
    "Publication Published" email and a "was published" task notice.
@@ -439,100 +432,99 @@ cross-app map; the publish button and window read per Rule 2).
 2. **A declined submission cannot be published** — Journal Manager, on a
    declined submission: on a journal the publish button first opens
    "Review Publishing Details" and insists on a Publication Stage and
-   Revision Significance — Confirm saves them onto the declined
-   submission (Rule 7); a press or preprint server opens the window
-   directly. Either way the window lists "A declined submission can not
-   be published." ("…posted." on a preprint server) under "The following
-   requirements must be met…", and no confirm button is offered. Close;
-   the status is unchanged. <sup>s2</sup>
+   Revision Significance. Confirm saves them onto the declined submission
+   (Rule 7). A press or preprint server opens the window directly. Either
+   way the window lists "A declined submission can not be published."
+   ("…posted." on a preprint server) under "The following requirements
+   must be met…", and no confirm button is offered. Close; the status is
+   unchanged. <sup>s2</sup>
 3. **Unpublish** — Journal Manager, on the published submission of
-   scenario 1: the Publication area now offers "Unpublish"; pressing it
-   asks "Are you sure you don't want this to be published?". Confirm: the
-   status returns to "Unscheduled", the reader page is gone, the log adds
-   "The submission was unpublished." — and the author's task notice from
+   scenario 1: the Publication area now offers "Unpublish". Pressing it
+   asks "Are you sure you don't want this to be published?". Confirm. The
+   status returns to "Unscheduled", the reader page is gone, and the log
+   adds "The submission was unpublished." The author's task notice from
    scenario 1 is gone too: their Tasks list reads "No Items".
    <sup>s3</sup>
 4. **Create a new version** — Journal Manager, on a published
-   submission: side menu › "Create New Version"; the dialog asks which
+   submission: side menu › "Create New Version". The dialog asks which
    version to copy metadata from, the Publication Stage and the Revision
-   Significance — the published version's stage and "Minor Revision"
-   arrive preselected. Confirm unchanged: the menu gains "Version of
-   Record 1.1" ("Author Original 1.1" on a preprint server), its pages
-   open with "Status: Unpublished" and the copied content, and the
-   reader page still serves the OLD version — though its date line
-   already shifts ⚠ [A6](#a6). The submitting author and the
-   stage-assigned participants get the "A new version was created…"
-   email and task notice ⚠ [A1](#a1); an assigned reviewer — and a
-   manager acting without a stage assignment — get neither.
-   <sup>s4</sup>
+   Significance; the published version's stage and "Minor Revision" arrive
+   preselected. Confirm unchanged. The menu gains "Version of Record 1.1"
+   ("Author Original 1.1" on a preprint server), its pages open with
+   "Status: Unpublished" and the copied content, and the reader page still
+   serves the OLD version, though its date line already shifts
+   ⚠ [A6](#a6). The submitting author and the stage-assigned participants
+   get the "A new version was created…" email and task notice
+   ⚠ [A1](#a1). An assigned reviewer, and a manager acting without a stage
+   assignment, get neither. <sup>s4</sup>
 5. **Publish the new version** — continue scenario 4: fill an Update
-   Type ("Correction") and a Summary of Changes, publish the new version
-   (a journal offers the saved issue choice pre-filled). The reader page
-   now serves the new version and its "Versions" list gains the new
-   entry — but the saved summary appears nowhere on the page
-   ⚠ [A5](#a5); the log adds "A new version was published." <sup>s5</sup>
+   Type ("Correction") and a Summary of Changes, then publish the new
+   version (a journal offers the saved issue choice pre-filled). The
+   reader page now serves the new version and its "Versions" list gains
+   the new entry. The saved summary appears nowhere on the page
+   ⚠ [A5](#a5). The log adds "A new version was published." <sup>s5</sup>
 6. **Minor and major numbering** — Journal Manager: create a version in
-   the SAME stage as an existing one — "Minor Revision" is selectable
-   and yields "… 1.1"; create another choosing a stage with no versions —
-   "Minor Revision" is greyed and the result is that stage's "1.0".
-   While switching stages, watch the Revision Significance re-select
-   itself ⚠ [A4](#a4). <sup>s6</sup>
+   the SAME stage as an existing one. "Minor Revision" is selectable and
+   yields "… 1.1". Create another choosing a stage with no versions.
+   "Minor Revision" is greyed and the result is that stage's "1.0". While
+   switching stages, watch the Revision Significance re-select itself
+   ⚠ [A4](#a4). <sup>s6</sup>
 7. **The version list and the author's view** — the submitting Author
-   opens their submission's tracking view (My Submissions): the
-   Publication side menu lists every version by name; each page heads
-   with the status readout; no publish, unpublish or Create-New-Version
+   opens their submission's tracking view (My Submissions). The
+   Publication side menu lists every version by name, and each page heads
+   with the status readout. No publish, unpublish or Create-New-Version
    control appears anywhere. <sup>s7</sup>
 8. **Roles without the controls** — an assigned Section Editor (press:
    Series Editor; preprint server: Moderator) and an assigned Assistant
-   {OJS OMP} open the same Publication area: the version pages are there,
+   {OJS OMP} open the same Publication area. The version pages are there;
    the publish/unpublish buttons and "Create New Version" are not
    ⚠ [A2](#a2). The Production stage view still shows each of them a
-   "Schedule For Publication" ("Post the preprint") button — pressing it
-   only lands back on the Publication area, where nothing more is
-   offered. <sup>s8</sup>
+   "Schedule For Publication" ("Post the preprint") button. Pressing it
+   only lands back on the Publication area, where nothing more is offered.
+   <sup>s8</sup>
 9. **Unschedule** — Journal Manager, on a scheduled version (journal:
-   scenario 11's article; press/preprint server: scenario 14/15's future
-   date): the button offered is "Unschedule"; it asks "Are you sure you
-   don't want this scheduled for publication?" ("Are you sure you don't
-   want this to be scheduled to be posted?" on a preprint server).
-   Confirm: back to "Status: Unscheduled" ("Unposted"). <sup>s9</sup>
+   scenario 11's article; press or preprint server: scenario 14/15's
+   future date): the button offered is "Unschedule". It asks "Are you sure
+   you don't want this scheduled for publication?" ("Are you sure you
+   don't want this to be scheduled to be posted?" on a preprint server).
+   Confirm. The status is back to "Status: Unscheduled" ("Unposted").
+   <sup>s9</sup>
 10. **Republish with what was kept** — Journal Manager: unpublish a
     published item, then press the publish button again. The details
-    panel does not reopen {OJS} — the stage and issue choice survived
-    the unpublish (Rules 9, 3) — so check the kept issue choice {OJS}
-    and publication date on the entry page (Fields) beforehand; the
+    panel does not reopen {OJS}, because the stage and issue choice
+    survived the unpublish (Rules 9, 3). So check the kept issue choice
+    {OJS} and publication date on the entry page (Fields) beforehand. The
     button goes straight to the confirmation window, whose text on a
-    journal names the kept issue outcome; confirm. On a press or preprint
+    journal names the kept issue outcome. Confirm. On a press or preprint
     server the item returns to "Published"/"Posted" carrying its ORIGINAL
-    date (Rule 10); on a journal the kept issue choice decides again —
+    date (Rule 10). On a journal the kept issue choice decides again:
     scenario 12's continuous-publication article goes straight back to
     "Published", its issue still unpublished. <sup>s10</sup>
 
-Journal-only (a press and preprint server have no issues; their
-scheduling is scenario 14/15's date route).
+Journal-only. A press and preprint server have no issues; their
+scheduling is the date route of scenarios 14 and 15.
 
 11. **Schedule into a future issue** — Journal Manager, on a journal
-    with a future issue created AND at least one published issue: on
-    the Publication Settings page choose "Assign To Future Issue and
-    Schedule Only" plus the issue, and save. Press "Schedule For
-    Publication"; "Review Publishing Details" opens with the saved
-    choice pre-checked — fill the remaining required fields and
-    Confirm. The window promises "…published when {issue} is
-    published…" with a "Schedule For Publication" button; confirm.
-    "Status: Scheduled", the reader page stays down, and the dashboards
-    list the article under "Scheduled for publication". ⚠ On a journal
-    with NO published issues neither route holds: the panel's first
-    "Schedule Only" pick publishes immediately, and a choice saved on
-    Publication Settings comes back as the immediate-publish choice
-    [OJS2](#ojs2) — change the radio to another choice and pick
-    "Schedule Only" again in the panel before Confirm to reach the
-    scheduling window. <sup>s11</sup>
+    with a future issue created AND at least one published issue: on the
+    Publication Settings page choose "Assign To Future Issue and Schedule
+    Only" plus the issue, and save. Press "Schedule For Publication".
+    "Review Publishing Details" opens with the saved choice pre-checked;
+    fill the remaining required fields and Confirm. The window promises
+    "…published when {issue} is published…" with a "Schedule For
+    Publication" button. Confirm. The head reads "Status: Scheduled", the
+    reader page stays down, and the dashboards list the article under
+    "Scheduled for publication". ⚠ On a journal with NO published issues
+    neither route holds: the panel's first "Schedule Only" pick publishes
+    immediately, and a choice saved on Publication Settings comes back as
+    the immediate-publish choice [OJS2](#ojs2). Change the radio to
+    another choice and pick "Schedule Only" again in the panel before
+    Confirm to reach the scheduling window. <sup>s11</sup>
 12. **Continuous publication warns and publishes** — Journal Manager:
-    publish with "Assign To Future Issue and Publish Immediately"; the
-    window spells out that the article will be published immediately
-    even though its issue is not; confirm — live at once, listed with
-    the unpublished issue. Publishing that issue later (an *Issues* act)
-    releases any SCHEDULED articles it holds. <sup>s12</sup>
+    publish with "Assign To Future Issue and Publish Immediately". The
+    window spells out that the article will be published immediately even
+    though its issue is not. Confirm. The article is live at once, listed
+    with the unpublished issue. Publishing that issue later (an *Issues*
+    act) releases any SCHEDULED articles it holds. <sup>s12</sup>
 13. **No issues, no choices** — Journal Manager on a scratch journal
     with zero issues: the publish flow shows no Issue Assignment at all
     and publishes the article immediately without an issue (Rule 15).
@@ -543,31 +535,30 @@ Press-only.
 14. **A future date schedules the book** — Press Manager: on the Catalog
     Entry page set "Date Published" to a future date, save, then press
     Publish. The confirmation still reads "…make this catalog entry
-    public?" ⚠ [OMP1](#omp1), but confirming yields "Status: Scheduled" —
-    the catalog page stays down and the offered controls become
-    "Preview" and "Unschedule"; the daily background check publishes it
-    once the date arrives (Rule 6 — not watchable within a test
-    session). <sup>s14</sup>
+    public?" ⚠ [OMP1](#omp1), but confirming yields "Status: Scheduled".
+    The catalog page stays down and the offered controls become "Preview"
+    and "Unschedule". The daily background check publishes it once the
+    date arrives (Rule 6); that cannot be watched within a test session.
+    <sup>s14</sup>
 
 Preprint-server-only.
 
 15. **Post the preprint** — Preprint Server Manager, on a submitted
-    preprint: press "Post"; the "Post the preprint" window shows the
+    preprint: press "Post". The "Post the preprint" window shows the
     requirements met, the version to be assigned ("Author Original 1.0")
     and a "Related Publication" line (on a fresh preprint: "This
-    preprint's relations have not been entered."); confirm. "Status:
-    Posted", the preprint page is live, the contributors receive a
-    posting acknowledgement — mis-titled "New Version Posted
-    Acknowledgement" even on this first post ⚠ [OPS4](#ops4) — and a
-    future date saved on Preprint Entry beforehand yields "Status:
-    Scheduled" instead, a state nothing will ever post ⚠ [OPS1](#ops1),
-    while the acknowledgement is sent anyway ⚠ [OPS2](#ops2).
-    <sup>s15</sup>
+    preprint's relations have not been entered."). Confirm. The head reads
+    "Status: Posted", the preprint page is live, and the contributors
+    receive a posting acknowledgement, mis-titled "New Version Posted
+    Acknowledgement" even on this first post ⚠ [OPS4](#ops4). A future
+    date saved on Preprint Entry beforehand yields "Status: Scheduled"
+    instead, a state nothing will ever post ⚠ [OPS1](#ops1), while the
+    acknowledgement is sent anyway ⚠ [OPS2](#ops2). <sup>s15</sup>
 16. **The author cannot post** — the submitting Author on a default
     server: the wizard's closing screen says a moderator will review and
-    post the preprint (its texts are
-    [Submission wizard](U21-submission-wizard.md)'s); the author's
-    workflow view offers no Post control ⚠ [OPS3](#ops3). <sup>s16</sup>
+    post the preprint (its texts belong to
+    [Submission wizard](U21-submission-wizard.md)). The author's workflow
+    view offers no Post control ⚠ [OPS3](#ops3). <sup>s16</sup>
 
 ## Findings register
 
@@ -578,16 +569,16 @@ mechanism and evidence live in the entry's footnote.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A5](#a5) | The published Summary of Changes appears on no reader page — the promised amendment notice never renders | 🐞 | user-visible | — |
+| [A5](#a5) | The published Summary of Changes appears on no reader page; the promised amendment notice never renders | 🐞 | user-visible | — |
 | [A6](#a6) | Merely creating an unpublished version rewrites the live reader page's date line | 🐞 | user-visible | — |
 | [OJS1](#ojs1) | With a plain language summary required, the panel's Confirm is refused with no message and publishing is unreachable | 🐞 | user-visible | — |
-| [OJS2](#ojs2) | On a journal with no published issues, a "Schedule Only" choice — the panel's first pick, or one saved on Publication Settings — is not honored: the flow publishes immediately | 🐞 | user-visible | — |
+| [OJS2](#ojs2) | On a journal with no published issues, a "Schedule Only" choice (the panel's first pick, or one saved on Publication Settings) is not honored: the flow publishes immediately | 🐞 | user-visible | — |
 | [OJS3](#ojs3) | A version address naming anything but an older published version crashes the article page with a blank server error instead of "not found" | 🐞 | user-visible | — |
 | [OPS1](#ops1) | A preprint scheduled by a future date is never posted by anything | 🐞 | user-visible | — |
-| [OPS4](#ops4) | Every post — the first included — sends "New Version Posted Acknowledgement"; the first-post acknowledgement never goes out | 🐞 | user-visible | — |
+| [OPS4](#ops4) | Every post, the first included, sends "New Version Posted Acknowledgement"; the first-post acknowledgement never goes out | 🐞 | user-visible | — |
 | [A1](#a1) | The new-version email announces itself to editors but goes to every stage-assigned user, the submitting author included | ❓ | user-visible | — |
-| [A2](#a2) | Publishing is offered to managers only, although the app's deeper plumbing names Section Editors and Assistants — on a preprint server that leaves Moderators without a Post button | ❓ | user-visible | — |
-| [A3](#a3) | A published non-final version leaves the submission itself listed as unpublished — and a press's catalog page down | ❓ | user-visible | — |
+| [A2](#a2) | Publishing is offered to managers only, although the app's deeper plumbing names Section Editors and Assistants; on a preprint server that leaves Moderators without a Post button | ❓ | user-visible | — |
+| [A3](#a3) | A published non-final version leaves the submission itself listed as unpublished, and a press's catalog page down | ❓ | user-visible | — |
 | [A4](#a4) | Switching the Publication Stage silently re-selects "Minor Revision", discarding the user's choice | ❓ | minor | — |
 | [A7](#a7) | The press's and preprint server's confirmation shows a requirement-shaped stage sentence under "All … requirements have been met" | ❓ | minor | — |
 | [OMP1](#omp1) | The press's publish confirmation promises to make the entry public while a future date schedules it instead | ❓ | minor | — |
@@ -600,12 +591,12 @@ mechanism and evidence live in the entry's footnote.
 <a id="a1"></a>
 **A1 — Who the new-version email reaches** · ❓ · user-visible.
 Creating a version emails "A new version was created for "{title}"" to
-every user with a stage assignment on the submission — the submitting
-author included, the acting editor only via an assignment of their own
-(an unassigned acting manager gets nothing) — while the email's own
-description presents it as a notice to assigned editors. An assigned
+every user with a stage assignment on the submission. That includes the
+submitting author. The acting editor gets it only through an assignment
+of their own; an unassigned acting manager gets nothing. Yet the email's
+own description presents it as a notice to assigned editors. An assigned
 reviewer gets neither the email nor the task notice. Question: is the
-audience meant to be editors only? Lean: yes — the description and the
+audience meant to be editors only? Lean: yes. The description and the
 notice's editorial wording say so; the send filters by assignment, not
 role. Since: 2026-08-29 · Basis: probe. <sup>[f-a1](#fn-a1)</sup>
 
@@ -614,62 +605,62 @@ role. Since: 2026-08-29 · Basis: probe. <sup>[f-a1](#fn-a1)</sup>
 The publish/unpublish buttons and "Create New Version" appear only for
 Journal Managers, Editors and Site Administrators who are not limited to
 recommendations. Assigned Section Editors, Guest Editors and Assistants
-see none of them — although the application's deeper plumbing names those
-roles for the same acts, so screen and plumbing disagree about who may
-publish. Worse, the Production stage view offers the SAME excluded roles
-a button labeled "Schedule For Publication" / "Post the preprint" that
-is only a navigation shortcut: pressed, it lands on a Publication area
-where they have nothing to press. On a preprint server the excluded set
-includes the Moderator role — the role the submission screens tell
-authors will "review and post" their preprint, for whom that dead-end
-shortcut is the only Post-labeled control anywhere. Question: is
-manager-only the intended narrowing (and is the Moderator exclusion
-intended on a preprint server)? Lean: the narrowing looks deliberate in
-the new dashboard, but the Moderator case contradicts the server's own
-texts — needs a ruling. Since: 2026-08-29 · Basis: probe (the absent
-controls and the dead-end button, every app; the wider server roster is
-a code reading). <sup>[f-a2](#fn-a2)</sup>
+see none of them. The application's deeper plumbing names those roles for
+the same acts, so screen and plumbing disagree about who may publish.
+Worse, the Production stage view offers the SAME excluded roles a button
+labeled "Schedule For Publication" / "Post the preprint" that is only a
+navigation shortcut. Pressed, it lands on a Publication area where they
+have nothing to press. On a preprint server the excluded set includes the
+Moderator role, the role the submission screens tell authors will "review
+and post" their preprint. For a Moderator that dead-end shortcut is the
+only Post-labeled control anywhere. Question: is manager-only the intended
+narrowing, and is the Moderator exclusion intended on a preprint server?
+Lean: the narrowing looks deliberate in the new dashboard, but the
+Moderator case contradicts the server's own texts and needs a ruling.
+Since: 2026-08-29 · Basis: probe (the absent controls and the dead-end
+button, every app; the wider server roster is a code reading).
+<sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
 **A3 — Only a final-stage version counts for the submission** · ❓ ·
 user-visible.
-The submission's own standing follows its FINAL version stage only: with
+The submission's own standing follows its FINAL version stage only. With
 just an "Author Original" version published, a journal's article page is
-live while the dashboards still list the submission as active/queued —
-it joins the "Published" views only once a "Version of Record" is
+live while the dashboards still list the submission as active or queued.
+It joins the "Published" views only once a "Version of Record" is
 published. The publish button follows the same rollup: with the article
-live it still reads "Schedule For Publication", not "Publish". On a
-press BOTH halves wait: with only an "Author Original" version
-published the workflow reads "Status: Published" while the public
-catalog page stays down — yet the author is still emailed "Publication
-Published" with a link to a page the public cannot open. On a preprint
-server Author Original IS the final stage, so any post counts at once.
-Question: is a live article on a submission the lists
-call unpublished intended? Lean: intended as a versioning-model design
-(the lists track the version of record), but the disagreement between a
-live reader page and an "active" listing will surprise editors. Since:
-2026-08-29 · Basis: probe. <sup>[f-a3](#fn-a3)</sup>
+live it still reads "Schedule For Publication", not "Publish". On a press
+BOTH halves wait. With only an "Author Original" version published, the
+workflow reads "Status: Published" while the public catalog page stays
+down. The author is still emailed "Publication Published" with a link to
+a page the public cannot open. On a preprint server Author Original IS
+the final stage, so any post counts at once. Question: is a live article
+on a submission the lists call unpublished intended? Lean: intended as a
+versioning-model design (the lists track the version of record), but the
+disagreement between a live reader page and an "active" listing will
+surprise editors. Since: 2026-08-29 · Basis: probe.
+<sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
 **A4 — The Revision Significance re-decides itself** · ❓ · minor.
 In the version dialogs, changing the Publication Stage re-selects "Minor
-Revision" whenever a minor version is allowed for the new stage — a user
+Revision" whenever a minor version is allowed for the new stage. A user
 who chose "Major Revision" and then corrects the stage gets a minor
-version unless they notice. (The reverse switch — to a stage with no
-versions yet — correctly forces "Major Revision" and greys Minor; only
-the switch toward a stage with an existing version discards a choice. A
-preprint server, knowing one stage, offers no switch.) Question: should
-a stage switch preserve the user's significance choice? Lean: yes —
-silently overriding a made choice is a defect-shaped convenience.
-Since: 2026-08-29 · Basis: probe.
+version unless they notice. The reverse switch, to a stage with no
+versions yet, correctly forces "Major Revision" and greys Minor. Only the
+switch toward a stage with an existing version discards a choice. A
+preprint server knows one stage and offers no switch. Question: should a
+stage switch preserve the user's significance choice? Lean: yes. Silently
+overriding a made choice is a defect-shaped convenience. Since:
+2026-08-29 · Basis: probe.
 <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
 **A5 — The amendment notice never reaches readers** · 🐞 · user-visible.
 Every screen carrying the Summary of Changes promises "This will appear
-publicly as the version amendment notice…" — yet a version published
-with Update Type "Correction" and a saved summary shows that notice on
-no reader page in any app: not the article landing page, not the
+publicly as the version amendment notice…". Yet a version published with
+Update Type "Correction" and a saved summary shows that notice on no
+reader page in any app: not the article landing page, not the
 per-version pages, not the press's catalog page, not the preprint page.
 Readers see a new version appear with no word on what changed, while the
 editor believes they published a correction notice. Since: 2026-08-29 ·
@@ -679,28 +670,28 @@ Basis: probe (all three apps, default themes).
 <a id="a6"></a>
 **A6 — An unpublished draft rewrites the public dates** · 🐞 ·
 user-visible.
-Merely creating a new — still unpublished — version changes the live
-reader page's date line in every app: it becomes "Published {date} —
-Updated on {date}", with the draft's creation day presented as the
-published date and the real publication date demoted to "Updated on",
-while readers still get the old version and its "Versions" list shows
-nothing new. An editor who quietly starts preparing a revision thereby
-falsifies the published record's dates. Since: 2026-08-29 · Basis:
-probe. <sup>[f-a6](#fn-a6)</sup>
+Merely creating a new, still unpublished, version changes the live reader
+page's date line in every app. It becomes "Published {date} — Updated on
+{date}", with the draft's creation day presented as the published date
+and the real publication date demoted to "Updated on". Readers still get
+the old version, and its "Versions" list shows nothing new. An editor who
+quietly starts preparing a revision thereby falsifies the published
+record's dates. Since: 2026-08-29 · Basis: probe.
+<sup>[f-a6](#fn-a6)</sup>
 
 <a id="a7"></a>
 **A7 — A requirement-shaped sentence under "all met"** · ❓ · minor.
 On a press or preprint server, publishing a version that has no
 Publication Stage yet shows "The publication must have a version stage
 assigned before it can be published." directly under "All publication
-requirements have been met." — phrased as an unmet requirement, though
-it blocks nothing: the confirm button is present and the next line names
-the stage that will be assigned. On an already-staged version the pair
-collapses to "The publication version is "{version}"". (A journal's
+requirements have been met." It is phrased as an unmet requirement,
+though it blocks nothing: the confirm button is present and the next line
+names the stage that will be assigned. On an already-staged version the
+pair collapses to "The publication version is "{version}"". A journal's
 details panel assigns the stage first, so its window always shows the
-assigned form.) Question: should the notice say the stage WILL be
-assigned rather than "must be"? Lean: yes — a first-time publisher reads
-a contradiction. Since: 2026-08-29 · Basis: probe.
+assigned form. Question: should the notice say the stage WILL be assigned
+rather than "must be"? Lean: yes. A first-time publisher reads a
+contradiction. Since: 2026-08-29 · Basis: probe.
 <sup>[f-a7](#fn-a7)</sup>
 
 ### OJS
@@ -709,42 +700,42 @@ a contradiction. Since: 2026-08-29 · Basis: probe.
 **OJS1 — A required plain language summary blocks Confirm silently** · 🐞 · user-visible.
 On a journal that requires a plain language summary, the "Review
 Publishing Details" panel's Confirm is refused with no message for a
-version without one — publishing and scheduling are never reached, and
-nothing names the missing summary. (The requirement's save-blocking side
+version without one. Publishing and scheduling are never reached, and
+nothing names the missing summary. The requirement's save-blocking side
 is [Publication metadata](U40-publication-metadata.md#a1)'s finding; a
-press and preprint server publish without a summary.) Since: 2026-08-28 ·
+press and preprint server publish without a summary. Since: 2026-08-28 ·
 Basis: probe. <sup>[f-ojs1](#fn-ojs1)</sup>
 
 <a id="ojs2"></a>
 **OJS2 — A "Schedule Only" choice is not honored where no issue is published** · 🐞 ·
 user-visible.
-On a journal with no published issues — its only issue a future one —
-the "Review Publishing Details" panel opens with no choice preselected,
-and the editor's FIRST pick of "Assign To Future Issue and Schedule
-Only" is not honored: the confirmation window offers immediate
+On a journal with no published issues, where the only issue is a future
+one, the "Review Publishing Details" panel opens with no choice
+preselected, and the editor's FIRST pick of "Assign To Future Issue and
+Schedule Only" is not honored. The confirmation window offers immediate
 publication ("…published immediately… Are you sure you want to publish
-this?", button "Publish") and confirming yields "Status: Published" —
-the promised "…published when {issue} is published…" scheduling never
+this?", button "Publish") and confirming yields "Status: Published". The
+promised "…published when {issue} is published…" scheduling never
 happens. Saving the choice on the Publication Settings page beforehand
 fails the same way on that journal: the reloaded settings page and the
 panel both come back showing "Assign To Future Issue and Publish
 Immediately" checked, and an untouched Confirm offers immediate
-publication ("Publish" button). Only changing the radio to another
-choice and picking "Schedule Only" again before Confirm produces the
-correct scheduling window; with a published or back issue present, the
-first pick and a saved choice both behave correctly. The failure is
-deterministic, not a timing accident. Since: 2026-08-29 ·
-Basis: probe. <sup>[f-ojs2](#fn-ojs2)</sup>
+publication ("Publish" button). Only changing the radio to another choice
+and picking "Schedule Only" again before Confirm produces the correct
+scheduling window. With a published or back issue present, the first pick
+and a saved choice both behave correctly. The failure is deterministic,
+not a timing accident. Since: 2026-08-29 · Basis: probe.
+<sup>[f-ojs2](#fn-ojs2)</sup>
 
 <a id="ojs3"></a>
 **OJS3 — A mistyped version address crashes instead of "not found"** · 🐞 ·
 user-visible.
 An article's reader page links each OLDER published version at its own
-address (the "Versions" list). Typing any other version number into
-that address — a nonexistent one, the current version's own, an
-unpublished draft's, another article's — returns a blank server error
-instead of the "not found" page the reader should get. Because the list
-links only older versions, an ordinary mistype or a curious probe of
+address (the "Versions" list). Typing any other version number into that
+address returns a blank server error instead of the "not found" page the
+reader should get. That covers a nonexistent number, the current
+version's own, an unpublished draft's, and another article's. Because the
+list links only older versions, an ordinary mistype or a curious probe of
 the current number is enough to hit it. Since: 2026-08-29 · Basis:
 probe. <sup>[f-ojs3](#fn-ojs3)</sup>
 
@@ -755,72 +746,72 @@ probe. <sup>[f-ojs3](#fn-ojs3)</sup>
 minor.
 With a future Date Published saved, the press's publish confirmation
 still asks "All publication requirements have been met. Are you sure you
-want to make this catalog entry public?" — and confirming yields
-"Status: Scheduled", not a public entry: the catalog page stays down and
-the controls become "Preview" and "Unschedule". Question: should the
-window announce the scheduling, as a journal's does? Lean: yes — the
-journal flow shows the pattern. Since: 2026-08-29 · Basis: probe (the
-later daily release itself was not observed — the date lies in the
-future). <sup>[f-omp1](#fn-omp1)</sup>
+want to make this catalog entry public?". Confirming yields "Status:
+Scheduled", not a public entry: the catalog page stays down and the
+controls become "Preview" and "Unschedule". Question: should the window
+announce the scheduling, as a journal's does? Lean: yes. The journal flow
+shows the pattern. Since: 2026-08-29 · Basis: probe (the later daily
+release itself was not observed; the date lies in the future).
+<sup>[f-omp1](#fn-omp1)</sup>
 
 ### OPS
 
 <a id="ops1"></a>
 **OPS1 — A scheduled preprint is never posted** · 🐞 · user-visible.
 Posting a preprint that carries a future date on its Preprint Entry page
-sets "Status: Scheduled" — the "Post the preprint" window having given
-no hint, it still asks "…post this?" — and nothing ever posts it: the
-preprint server runs no scheduled-publications check (a press runs one
-daily), and no issue exists whose publication could release it. The
-preprint waits until someone unschedules it, clears or passes the date,
-and posts again. Since: 2026-08-29 · Basis: probe for the reachable
-scheduled state (twice); the never-posts half is a code reading — no
+sets "Status: Scheduled". The "Post the preprint" window gives no hint of
+this; it still asks "…post this?". Nothing ever posts it: the preprint
+server runs no scheduled-publications check (a press runs one daily), and
+no issue exists whose publication could release it. The preprint waits
+until someone unschedules it, clears or passes the date, and posts again.
+Since: 2026-08-29 · Basis: probe for the reachable scheduled state
+(twice); the never-posts half is a code reading, as no
 scheduled-publications task is registered.
 <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="ops2"></a>
 **OPS2 — Acknowledged as posted while merely scheduled** · ❓ · minor.
 The posted acknowledgement to contributors is sent whenever Post is
-confirmed — even when the future date meant the preprint was only
-scheduled (OPS1), so authors read that their preprint is posted while
-the public page does not exist. (The "Publication Published" email
-correctly waits for the actual posting.) Question: should the
+confirmed, even when the future date meant the preprint was only
+scheduled (OPS1). Authors then read that their preprint is posted while
+the public page does not exist. The "Publication Published" email
+correctly waits for the actual posting. Question: should the
 acknowledgement wait too? Lean: yes; today it announces intent, not
 fact. Since: 2026-08-29 · Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 
 <a id="ops3"></a>
 **OPS3 — Author self-posting has no surface** · ❓ · latent.
 A screening plugin can grant authors the right to post their own
-preprint, and the server's texts anticipate it (the wizard's closing
-screen invites can-post submitters to post). But the author's workflow
-view builds no Post button for any author, granted or not — so the
-grant, where it exists, has nothing to press. Unverifiable on a stock
-install (no such plugin ships); recorded as the code stands. Question:
-where is a granted author meant to post from? Lean: the invitation text
-and the plumbing expect a control the current author view lost. Basis:
-code. <sup>[f-ops3](#fn-ops3)</sup>
+preprint, and the server's texts anticipate it: the wizard's closing
+screen invites can-post submitters to post. But the author's workflow
+view builds no Post button for any author, granted or not, so the grant,
+where it exists, has nothing to press. This cannot be verified on a stock
+install, because no such plugin ships; it is recorded as the code stands.
+Question: where is a granted author meant to post from? Lean: the
+invitation text and the plumbing expect a control the current author view
+lost. Basis: code. <sup>[f-ops3](#fn-ops3)</sup>
 
 <a id="ops4"></a>
 **OPS4 — First-time authors are thanked for "a new version"** · 🐞 ·
 user-visible.
-Every post sends the contributors "New Version Posted Acknowledgement" —
-the very first post of a preprint included, so a first-time author reads
-"Thank you for posting a new version of your preprint… The new version
-is now available." The "Preprint Posted Acknowledgement" template meant
-for the first post is never sent at all. The acknowledgement body also
-ends with a raw "{$signature}" placeholder. Since: 2026-08-29 · Basis:
-probe. <sup>[f-ops4](#fn-ops4)</sup>
+Every post sends the contributors "New Version Posted Acknowledgement",
+the very first post of a preprint included. A first-time author therefore
+reads "Thank you for posting a new version of your preprint… The new
+version is now available." The "Preprint Posted Acknowledgement" template
+meant for the first post is never sent at all. The acknowledgement body
+also ends with a raw "{$signature}" placeholder. Since: 2026-08-29 ·
+Basis: probe. <sup>[f-ops4](#fn-ops4)</sup>
 
 <a id="ops5"></a>
 **OPS5 — "Posted" and "published" split the same screen** · ❓ · minor.
-A preprint server renames the act "Post" — yet several surfaces still
-say "published": after a post, the submission header's pill reads
-"Published" beside a status strip reading "Posted"; the author's
-"Publication Published" email says their preprint "has been published";
-and their task notice reads "A new version of your submission, "{title}",
-was published." Question: should the Post vocabulary reach these
-surfaces too? Lean: yes — the leftovers read as another application's
-words. Since: 2026-08-29 · Basis: probe.
+A preprint server renames the act "Post", yet several surfaces still say
+"published". After a post, the submission header's pill reads "Published"
+beside a status strip reading "Posted". The author's "Publication
+Published" email says their preprint "has been published". Their task
+notice reads "A new version of your submission, "{title}", was
+published." Question: should the Post vocabulary reach these surfaces
+too? Lean: yes. The leftovers read as another application's words. Since:
+2026-08-29 · Basis: probe.
 <sup>[f-ops5](#fn-ops5)</sup>
 
 ---

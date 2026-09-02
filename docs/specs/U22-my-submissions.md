@@ -13,60 +13,60 @@ atlas-claims: [AFFW-027, AFFW-040, AFFW-048, AFFW-049]
 
 ## Purpose
 
-My Submissions is the author's home in the editorial backend: one list, per
-journal, of every submission the signed-in account is an author on — drafts
-still being written, submissions under editorial consideration, and finished
-ones (published or declined). From here the author sees where each
-submission stands, answers what the journal asks of them (finish an
-incomplete draft, submit requested revisions), deletes drafts they have
-abandoned, and opens any submitted submission's workflow to follow it in
-detail. The list is the author's entry route into the workflow; everything
-behind the "View" action — the workflow screen itself, its stages and panels —
-belongs to *Workflow screen & stage access* and the stage features. The
-editorial team's own submission lists are a separate feature (*Submissions
-dashboard*), and a reviewer's assignment list is a third; this spec covers
-only the author-facing list.
+My Submissions is the author's home in the editorial backend. It is one
+list, per journal, of every submission the signed-in account is an author
+on: drafts still being written, submissions under editorial consideration,
+and finished ones, whether published or declined. From here the author sees
+where each submission stands and answers what the journal asks of them, such
+as finishing an incomplete draft or submitting requested revisions. The
+author can also delete drafts they have abandoned, and open any submitted
+submission's workflow to follow it in detail. The list is the author's way
+into the workflow. Everything behind the "View" action, meaning the workflow
+screen itself with its stages and panels, belongs to *Workflow screen &
+stage access* and the stage features. The editorial team's own submission
+lists are a separate feature (*Submissions dashboard*), and a reviewer's
+assignment list is a third. This spec covers only the author-facing list.
 
 ## Actors & permissions
 
 **The author** below means a signed-in account holding the journal's Author
 role. The list is personal and per-journal: it shows only submissions in
-this journal on which this account is assigned as an author (a **draft** —
-an *incomplete submission* — counts from the moment it is started; see
-*[Submission wizard](U21-submission-wizard.md)*). Holding other roles
-alongside Author changes nothing here — a Journal Manager who also authors
-sees their authored submissions on this list like any author — except the
-Filters panel, which follows the account's roles (Rule 5). What a row
-*offers* depends on the submission's state (Rules 6–8), not on the author's
-other roles.
+this journal on which this account is assigned as an author. A **draft**,
+also called an *incomplete submission*, counts from the moment it is started
+(see *[Submission wizard](U21-submission-wizard.md)*). Holding other roles
+alongside Author changes nothing here. A Journal Manager who also authors
+sees their authored submissions on this list like any author. The one
+exception is the Filters panel, which follows the account's roles (Rule 5).
+What a row *offers* depends on the submission's state (Rules 6–8), not on
+the author's other roles.
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **Open My Submissions** | • the author — from the sidebar menu group or by its direct address<br>• any signed-in user *without* the Author role typing the address — the access-denied page <sup>a</sup> |
-| **See a submission listed** | • the author — their own submissions only, in every state (draft, under consideration, scheduled, published, declined) <sup>b</sup> |
-| **Open a submission's workflow ("View")** | • the author — any of their submitted submissions; a draft has no "View" until submitted (Rule 6) <sup>e</sup> |
-| **Re-enter a draft ("Complete submission")** | • the author — their own drafts (Rule 6) <sup>f</sup> |
-| **Submit revisions from the list** | • the author — while the submission's current review round awaits their revisions (Rule 7) {OJS OMP} <sup>g</sup> |
-| **Delete incomplete submissions** | • the author — their own drafts only; a submitted submission is never deletable here (Rule 9); on a preprint server deletion is offered but confirming always fails ⚠ [OPS2](#ops2) <sup>i</sup> |
+| **Open My Submissions** | • the author: from the sidebar menu group or by its direct address<br>• any signed-in user *without* the Author role typing the address: the access-denied page <sup>a</sup> |
+| **See a submission listed** | • the author: their own submissions only, in every state (draft, under consideration, scheduled, published, declined) <sup>b</sup> |
+| **Open a submission's workflow ("View")** | • the author: any of their submitted submissions. A draft has no "View" until it is submitted (Rule 6) <sup>e</sup> |
+| **Re-enter a draft ("Complete submission")** | • the author: their own drafts (Rule 6) <sup>f</sup> |
+| **Submit revisions from the list** | • the author: while the submission's current review round awaits their revisions (Rule 7) {OJS OMP} <sup>g</sup> |
+| **Delete incomplete submissions** | • the author: their own drafts only. A submitted submission can never be deleted here (Rule 9). On a preprint server deletion is offered, but confirming always fails ⚠ [OPS2](#ops2) <sup>i</sup> |
 
 ## Fields & validation
 
-N/A — the list collects no data. Its search box and Filters panel are the
-submission lists' shared machinery, owned by *Submissions dashboard*; the
+N/A. The list collects no data. Its search box and Filters panel are shared
+by all submission lists and are owned by *Submissions dashboard*. The
 revision upload it can open is owned by *[Review stage & rounds](U26-review-stage-and-rounds.md#revisions)*.
 
 ## Rules & state
 
 1. **Where it lives.** The backend sidebar shows a **"My Submissions as
    Author"** menu group to every holder of the Author role. Its entries are
-   the list's *views* — named slices of the author's submissions — each with
-   a live count badge; choosing one opens the list filtered to that view.
-   The page heading names the current view with its total, e.g. "Active
+   the list's *views*: named slices of the author's submissions, each with a
+   live count badge. Choosing one opens the list filtered to that view. The
+   page heading names the current view with its total, for example "Active
    submissions (2)". Next to the group, "Start A New Submission" opens the
    submission wizard (owned by *[Submission wizard](U21-submission-wizard.md#ways-in)*).
    <sup>a</sup>
-2. **The views.** Which views exist depends on the app — a preprint server,
-   with no review stage, has fewer: <sup>b</sup>
+2. **The views.** Which views exist depends on the app. A preprint server
+   has no review stage, so it has fewer: <sup>b</sup>
 
    | View | OJS | OMP | OPS |
    |------|:---:|:---:|:---:|
@@ -78,201 +78,205 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    | Published | ✓ | ✓ | ✓ |
    | Declined | ✓ | ✓ | ✓ |
 
-   "Active submissions" is every submission still awaiting an outcome —
-   drafts included; the other views slice by what happened (revisions asked
-   for / delivered, not yet finished, scheduled into an issue {OJS},
-   published, declined). One submission can appear in several views. On a
+   "Active submissions" holds every submission still awaiting an outcome,
+   drafts included. The other views slice by what happened: revisions asked
+   for or delivered, not yet finished, scheduled into an issue {OJS},
+   published, or declined. One submission can appear in several views. On a
    press or preprint server, no route was found that places anything under
-   "Scheduled for publication" — the view was only ever seen empty
+   "Scheduled for publication". That view was only ever seen empty
    ⚠ [A3](#a3).
 3. **Landing.** An account whose only role in the journal is Author lands on
-   My Submissions after signing in on the journal's own login page (on a
+   My Submissions after signing in on the journal's own login page. On a
    multi-journal site, the site-wide login page leads to the site index
-   instead); the editorial roles (Journal Manager, Section Editor, Assistant,
-   Site Administrator) and the Reviewer role take precedence — an account
-   holding one of those lands on that role's list instead (the editorial
-   dashboard, or the reviewer's assignment list; an account holding both an
-   editorial role and Reviewer lands on the editorial dashboard), with the
-   author group still one click away in the sidebar. The retired submission-list address
-   from older versions forwards the same way. An old bookmarked
-   author-dashboard link for a specific submission lands on My Submissions
-   with that submission's workflow panel already open — for the submission's
-   own author; any other signed-in user following the same link gets an
-   access-denied page instead. The same forward works for a link to a
-   still-incomplete draft, opening a workflow panel the list itself never
-   offers for a draft ⚠ [A5](#a5). <sup>c</sup>
-4. **The row.** Columns are **ID** (sortable), **Submissions** (the
-   authors-and-title line), **Stage** (the submission's current stage — or
-   its outcome, e.g. "Declined" — in a colored bubble; a draft's bubble
-   reads "Incomplete", except on a preprint server where it reads
-   "Production" [OPS1](#ops1)), **Editorial Activity** (Rules 6–8), and
-   **Actions**. Sorting, paging and the empty view ("No Items") are the
-   shared table machinery of *Submissions dashboard*; this list uses them
-   unchanged. <sup>d</sup>
+   instead. The editorial roles (Journal Manager, Section Editor, Assistant,
+   Site Administrator) and the Reviewer role take precedence: an account
+   holding one of those lands on that role's list instead, meaning the
+   editorial dashboard or the reviewer's assignment list. An account holding
+   both an editorial role and Reviewer lands on the editorial dashboard. In
+   every case the author group stays one click away in the sidebar. The
+   retired submission-list address from older versions forwards the same
+   way. An old bookmarked author-dashboard link for a specific submission
+   lands the submission's own author on My Submissions with that
+   submission's workflow panel already open. Any other signed-in user
+   following the same link gets an access-denied page instead. The same
+   forward works for a link to a still-incomplete draft, and opens a
+   workflow panel the list itself never offers for a draft ⚠ [A5](#a5).
+   <sup>c</sup>
+4. **The row.** The columns are **ID** (sortable), **Submissions** (the
+   authors-and-title line), **Stage**, **Editorial Activity** (Rules 6–8),
+   and **Actions**. The Stage column shows the submission's current stage in
+   a colored bubble, or its outcome, for example "Declined". A draft's bubble
+   reads "Incomplete", except on a preprint server, where it reads
+   "Production" [OPS1](#ops1). Sorting, paging and the empty view
+   ("No Items") are the shared table behavior of *Submissions dashboard*.
+   This list uses them unchanged. <sup>d</sup>
 5. **Search and filters.** The search box above the list finds the author's
-   own submissions within the current view — the heading keeps the view's
+   own submissions within the current view. The heading keeps the view's
    name and count. The "Filters" button opens the journal's filter panel,
-   which offers up to: section {OJS OPS} (only when the journal has more
-   than one — a press offers no series filter here, however many series it
-   has ⚠ [OMP1](#omp1)), categories (only when any exist), issue {OJS}
-   (only when any exist), and days since last activity (always). The
-   editors' "Assigned To Editor" filter follows the account's roles, not
-   the page: an author-only account never sees it, but a Journal Manager or
-   Site Administrator who also authors finds it on their own list too
-   ⚠ [A4](#a4). Both controls are the shared machinery of *Submissions
-   dashboard*. <sup>j</sup>
+   which offers up to four filters: section {OJS OPS}, only when the journal
+   has more than one (a press offers no series filter here, however many
+   series it has ⚠ [OMP1](#omp1)); categories, only when any exist; issue
+   {OJS}, only when any exist; and days since last activity, always. The
+   editors' "Assigned To Editor" filter follows the account's roles, not the
+   page. An author-only account never sees it, but a Journal Manager or Site
+   Administrator who also authors finds it on their own list too
+   ⚠ [A4](#a4). Both controls are shared with *Submissions dashboard*.
+   <sup>j</sup>
 6. **Drafts vs submitted.** A submitted submission's Actions cell offers
    **"View"**, which opens the workflow (Rule 8). A draft's Actions cell is
-   empty — no "View", no button at all; its Editorial Activity cell instead
+   empty: no "View", no button at all. Its Editorial Activity cell instead
    carries **"Complete submission"**, which reopens the submission wizard at
-   the step the author last saved with "Save for Later" — a step merely
-   continued past is not remembered (*[Submission wizard](U21-submission-wizard.md)*).
-   <sup>e</sup> <sup>f</sup>
-7. **The Editorial Activity cell** tells the author what is happening — and
-   what is asked of them — without opening the workflow: <sup>f</sup>
+   the step the author last saved with "Save for Later". A step the author
+   merely continued past is not remembered
+   (*[Submission wizard](U21-submission-wizard.md)*). <sup>e</sup> <sup>f</sup>
+7. **The Editorial Activity cell** tells the author what is happening, and
+   what is asked of them, without opening the workflow: <sup>f</sup>
    - 7a. **Revision requested** {OJS OMP}: while the current review round
-     awaits the author's revisions (whether for this round or for a new
-     one), the cell shows "Revision requested" with a **"Submit revisions"**
-     button. Pressing it opens the upload dialog directly — three steps,
-     "Upload File", "Review Details", "Confirm", with no title of its own —
-     and the file lands in that round's revisions, exactly as if uploaded on
-     the workflow's review stage ([→ Revisions Uploaded](U26-review-stage-and-rounds.md#revisions)).
-     Once delivered, the submission lists under "Revisions submitted"; its
+     awaits the author's revisions, whether for this round or for a new one,
+     the cell shows "Revision requested" with a **"Submit revisions"**
+     button. Pressing it opens the upload dialog directly. The dialog has
+     three steps, "Upload File", "Review Details" and "Confirm", and no title
+     of its own. The file lands in that round's revisions, exactly as if it
+     had been uploaded on the workflow's review stage
+     ([→ Revisions Uploaded](U26-review-stage-and-rounds.md#revisions)).
+     Once delivered, the submission lists under "Revisions submitted". Its
      activity cell then shows the review progress counter (7b), not a
      "revisions submitted" message. <sup>g</sup>
    - 7b. **Under review, nothing asked** {OJS OMP}: the cell shows a review
-     progress counter — "Review update {completed}/{total}" over the current
-     round's reviewers — and, when completed reviews of the *open* kind
-     exist, a "Reviewers assigned:" row of those reviewers' avatars whose
-     popover names the reviewer and the review type. Reviews that are not
-     open never show a reviewer here — the author learns identities only
-     where the review type discloses them ([→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review)).
+     progress counter, "Review update {completed}/{total}", over the current
+     round's reviewers. When completed reviews of the *open* kind exist, it
+     also shows a "Reviewers assigned:" row of those reviewers' avatars. The
+     avatar's popover names the reviewer and the review type. Reviews that
+     are not open never show a reviewer here. The author learns identities
+     only where the review type discloses them
+     ([→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review)).
      ⚠ [A1](#a1) <sup>h</sup>
    - 7c. **Copyediting** {OJS OMP}: "Copyedited Files Uploaded: {count}".
    - 7d. **Scheduled into an issue** {OJS}: "To be published in issue
      {issue}".
-   - 7e. Otherwise the cell is empty — notably while a new submission awaits
-     the editorial team's first move. One exception: a submission declined
-     during review keeps showing the review counter in its row ⚠ [A2](#a2).
+   - 7e. Otherwise the cell is empty. In particular it is empty while a new
+     submission awaits the editorial team's first move. One exception: a
+     submission declined during review keeps showing the review counter in
+     its row ⚠ [A2](#a2).
 8. **"View" opens the workflow in place.** The workflow opens as a panel
-   over the list; the page address records which submission — and which of
-   its panels — is open, so the open state can be bookmarked or shared.
+   over the list. The page address records which submission is open, and
+   which of its panels, so the open state can be bookmarked or shared.
    Closing the panel returns to the list at the exact address it left. What
-   the panel contains — the author's view of the shared workflow screen — is
+   the panel contains, the author's view of the shared workflow screen, is
    *Workflow screen & stage access* and the stage features
    ([submission stage](U25-submission-stage.md#author-view),
    [review stage](U26-review-stage-and-rounds.md#author-view)). <sup>e</sup>
 9. **Deleting drafts.** "More Actions" (the "…" button above the list) offers
-   **"Delete Incomplete Submissions"** — grayed out while the current page
-   of the list has no draft rows. Choosing it puts the list in selection
-   mode: a checkbox appears on each draft row (only drafts — submitted rows
-   get none), with **"Delete Incomplete Submissions"** and **"Cancel"**
-   buttons above; the delete button stays disabled until something is
-   selected. Pressing it opens the "Confirm Delete of Incomplete
-   Submissions" dialog ("Are you sure you want to delete the selected items?
-   This action cannot be undone…") with **"Confirm"** and **"Cancel"**
-   buttons. Confirm deletes the selected drafts permanently; Cancel — in the
-   dialog or above the list — leaves selection mode entirely, ticks dropped,
-   nothing deleted. Changing view, search or filters also drops any
-   selection. On a preprint server the same flow is offered end to end, but
-   confirming always fails with an error dialog and the draft survives
-   ⚠ [OPS2](#ops2). The selection machinery is shared with the editorial
-   list (*Submissions dashboard*); what this list contributes is who gets
-   it: every author, over their own drafts. <sup>i</sup>
+   **"Delete Incomplete Submissions"**. It is grayed out while the current
+   page of the list has no draft rows. Choosing it puts the list in
+   selection mode: a checkbox appears on each draft row (only drafts;
+   submitted rows get none), with **"Delete Incomplete Submissions"** and
+   **"Cancel"** buttons above. The delete button stays disabled until
+   something is selected. Pressing it opens the
+   "Confirm Delete of Incomplete Submissions" dialog ("Are you sure you want
+   to delete the selected items? This action cannot be undone…") with
+   **"Confirm"** and **"Cancel"** buttons. Confirm deletes the selected drafts permanently.
+   Cancel, in the dialog or above the list, leaves selection mode entirely:
+   ticks are dropped and nothing is deleted. Changing the view, the search
+   or the filters also drops any selection. On a preprint server the same
+   flow is offered end to end, but confirming always fails with an error
+   dialog and the draft survives ⚠ [OPS2](#ops2). The selection behavior is
+   shared with the editorial list (*Submissions dashboard*). What this list
+   contributes is who gets it: every author, over their own drafts.
+   <sup>i</sup>
 10. **Counts stay current.** The sidebar view badges and the heading's total
-    update in place — no reload — after anything done from this screen that
-    changes them, e.g. deleting drafts or submitting revisions.
+    update in place, without a reload, after anything done from this screen
+    that changes them, for example deleting drafts or submitting revisions.
 
 ## Side effects
 
-- Deleting incomplete submissions removes them permanently — no email, no
-  undo; they vanish from every view, and a bookmarked link back into a
-  deleted draft's wizard no longer opens it.
+- Deleting incomplete submissions removes them permanently. There is no
+  email and no undo. They vanish from every view, and a bookmarked link back
+  into a deleted draft's wizard no longer opens it.
 - "Submit revisions" has the same side effects as uploading revisions on the
-  review stage — owned by *[Review stage & rounds](U26-review-stage-and-rounds.md#revisions)*.
-- The list itself sends nothing and logs nothing; it is a read-and-launch
-  surface.
+  review stage. Those belong to *[Review stage & rounds](U26-review-stage-and-rounds.md#revisions)*.
+- The list itself sends nothing and logs nothing. It only shows information
+  and opens other screens.
 
 ## Settings that modify behavior
 
 None found on the list itself. The neighboring "Start A New Submission"
 menu entry and the journal's intake gates belong to *[Submission wizard](U21-submission-wizard.md)*
-("Settings that modify behavior" there).
+(see "Settings that modify behavior" there).
 
 ## Cross-feature interactions
 
-- *[Submission wizard](U21-submission-wizard.md)* — creates the drafts and
-  submissions this list shows; "Complete submission" and draft deletion act
-  on its drafts; "Start A New Submission" sits beside this list's menu
+- *[Submission wizard](U21-submission-wizard.md)* creates the drafts and
+  submissions this list shows. "Complete submission" and draft deletion act
+  on its drafts. "Start A New Submission" sits beside this list's menu
   group.
-- *Submissions dashboard* (the editorial lists — no spec yet) — owns the
-  shared list machinery this feature rides: the table (sorting, paging,
-  empty state), search, the Filters panel, and the incomplete-submissions
-  selection mode. This spec owns only their author-facing configuration.
-- *Workflow screen & stage access* (no spec yet) — owns everything behind
-  "View"; this spec owns only the entry route.
+- *Submissions dashboard* (the editorial lists; no spec yet) owns the shared
+  list behavior this feature uses: the table (sorting, paging, empty state),
+  search, the Filters panel, and the incomplete-submissions selection mode.
+  This spec owns only their author-facing configuration.
+- *Workflow screen & stage access* (no spec yet) owns everything behind
+  "View". This spec owns only the entry route.
 - *[Submission stage](U25-submission-stage.md#author-view)* and
-  *[Review stage & rounds](U26-review-stage-and-rounds.md#author-view)* —
-  the stage states this list's Stage and Editorial Activity cells report;
-  review anonymity rules that gate Rule 7b.
+  *[Review stage & rounds](U26-review-stage-and-rounds.md#author-view)* own
+  the stage states this list's Stage and Editorial Activity cells report,
+  and the review anonymity rules that gate Rule 7b.
 
 ## Canonical scenarios
 
-Common to all three apps (OMP/OPS vocabulary per the
-[application glossary](GLOSSARY.md)):
+Common to all three apps. For OMP and OPS vocabulary, see the
+[application glossary](GLOSSARY.md).
 
 1. **Track and open a submission** — Author: on the journal's login page,
-   sign in as an account whose only role is Author, with one submitted
-   submission. You land on My
-   Submissions, "Active submissions" view; the row shows the submission's
-   ID, authors and title, and its current stage in a bubble. Press "View" —
-   the submission's workflow opens as a panel over the list. Close it — the
-   list is back. <sup>s1</sup>
-2. **Resume and clean up drafts** — Author with two drafts — one saved
-   partway with "Save for Later" — and one submitted submission: on the
-   "Incomplete submissions" view (on a preprint server
-   the drafts sit under "Active submissions" instead [OPS1](#ops1)), each
-   draft row shows the "Incomplete" stage bubble ("Production" on a preprint
-   server — the same [OPS1](#ops1) divergence), offers "Complete submission"
-   and no "View". Press
-   "Complete submission" on the saved draft — the submission wizard reopens
-   at the step it was saved; return to the list. Switch to "Active
-   submissions", where draft and submitted rows sit together, and open
-   "More Actions" → "Delete Incomplete Submissions"; tick the other draft's
-   checkbox — the submitted row gets none. Press "Delete Incomplete
-   Submissions" and press "Confirm" in the dialog — the draft is gone and
-   the sidebar counts drop. On a preprint server the confirm step fails
-   instead: an error dialog reports the deletion is not permitted and the
-   draft stays [OPS2](#ops2). <sup>s2</sup>
+   sign in as an account whose only role is Author and that has one
+   submitted submission. You land on My Submissions, in the "Active
+   submissions" view. The row shows the submission's ID, its authors and
+   title, and its current stage in a bubble. Press "View". The submission's
+   workflow opens as a panel over the list. Close it. The list is back.
+   <sup>s1</sup>
+2. **Resume and clean up drafts** — Author with two drafts, one of them
+   saved partway with "Save for Later", and one submitted submission: open
+   the "Incomplete submissions" view. On a preprint server the drafts sit
+   under "Active submissions" instead [OPS1](#ops1). Each draft row shows
+   the "Incomplete" stage bubble ("Production" on a preprint server, the
+   same [OPS1](#ops1) difference), offers "Complete submission", and has no
+   "View". Press "Complete submission" on the saved draft. The submission
+   wizard reopens at the step it was saved. Return to the list. Switch to
+   "Active submissions", where draft and submitted rows sit together, and
+   open "More Actions" → "Delete Incomplete Submissions". Tick the other
+   draft's checkbox. The submitted row has no checkbox. Press "Delete
+   Incomplete Submissions", then press "Confirm" in the dialog. The draft is
+   gone and the sidebar counts drop. On a preprint server the confirm step
+   fails instead: an error dialog reports that the deletion is not
+   permitted, and the draft stays [OPS2](#ops2). <sup>s2</sup>
 3. **Browse the views and search** — Author with two published submissions
-   and a declined one: walk the sidebar's view entries — each opens the list
-   under that view's heading with its count, the published submissions under
-   "Published", the declined one under "Declined" with its "Declined"
-   stage bubble; a view holding nothing shows "No Items". On the "Published"
-   view, type one published submission's title into the search box — the
-   list narrows to that submission alone and the heading count follows
-   ("Published (1)"). <sup>s3</sup>
+   and a declined one: walk the sidebar's view entries. Each opens the list
+   under that view's heading with its count. The published submissions
+   appear under "Published", and the declined one under "Declined" with its
+   "Declined" stage bubble. A view holding nothing shows "No Items". On the
+   "Published" view, type one published submission's title into the search
+   box. The list narrows to that submission alone, and the heading count
+   follows ("Published (1)"). <sup>s3</sup>
 
 App-specific:
 
 4. **Act on a revision request** {OJS OMP} — Author whose submission's
-   review round (on a press, either of its review stages) has revisions
-   requested and one assigned reviewer who has not yet completed a review:
-   the row's activity cell reads
-   "Revision requested" with "Submit revisions"; the submission also lists
-   under "Revisions requested". Press "Submit revisions" and upload a file
-   through the three-step dialog ("Upload File" → "Review Details" →
-   "Confirm") — back on the list the submission now sits under "Revisions
-   submitted", the sidebar badges have moved with it, and its activity cell
-   shows the review progress counter ("Review update 0/1"). On a preprint
-   server there is no review, so this scenario has no analogue. <sup>s4</sup>
+   review round has revisions requested and one assigned reviewer who has
+   not yet completed a review (on a press, either of its review stages
+   qualifies): the row's activity cell reads "Revision requested" with
+   "Submit revisions", and the submission also lists under
+   "Revisions requested". Press "Submit revisions" and upload a file through the
+   three-step dialog ("Upload File" → "Review Details" → "Confirm"). Back on
+   the list, the submission now sits under "Revisions submitted", the
+   sidebar badges have moved with it, and its activity cell shows the review
+   progress counter ("Review update 0/1"). On a preprint server there is no
+   review, so this scenario has no analogue. <sup>s4</sup>
 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-26), unreviewed unless
-an entry notes otherwise; the team settles them on spec review. Sorted
-🐞 → ❓ → ✅. Each entry opens with the user-observable symptom; mechanism
-and evidence live in the entry's footnote.
+an entry notes otherwise. The team settles them on spec review. Sorted
+🐞 → ❓ → ✅. Each entry opens with what the user sees. Mechanism and
+evidence live in the entry's footnote.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
@@ -282,7 +286,7 @@ and evidence live in the entry's footnote.
 | [A3](#a3) | On a press or preprint server, nothing was found that feeds the "Scheduled for publication" view | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server author gets no "Incomplete submissions" view; drafts hide inside "Active submissions" labeled "Production" | ❓ | minor | — |
 | [A4](#a4) | A Journal Manager who also authors gets the editors' "Assigned To Editor" filter on their personal list | ❓ | minor | — |
-| [A5](#a5) | An old author-dashboard link to a still-incomplete draft opens the draft's workflow panel — a surface the list never offers for a draft | ❓ | minor | — |
+| [A5](#a5) | An old author-dashboard link to a still-incomplete draft opens the draft's workflow panel, a screen the list never offers for a draft | ❓ | minor | — |
 | [OMP1](#omp1) | A press author cannot filter the list by series, even when the press has several | ❓ | minor | — |
 
 ### All apps
@@ -290,50 +294,50 @@ and evidence live in the entry's footnote.
 <a id="a1"></a>
 **A1 — Review progress disclosed to the author** · ❓ · user-visible.
 While their submission is under review with nothing asked of them, the
-author's row shows "Review update {completed}/{total}" — telling the author
-how many reviewers the round has and how many have finished. Reviewer
-*identities* stay protected (only open-type completed reviews show an
-avatar, Rule 7b), but the count itself is information journals have
-traditionally kept from authors.
+author's row shows "Review update {completed}/{total}". That tells the
+author how many reviewers the round has and how many have finished.
+Reviewer *identities* stay protected, because only open-type completed
+reviews show an avatar (Rule 7b). The count itself, however, is information
+journals have traditionally kept from authors.
 Question: is the completed/total review counter meant to be author-visible?
-Lean: intended — the counter was built specifically for this list's author
-view and leaks no identity; but a product ruling is worth having.
+Lean: intended. The counter was built specifically for this list's author
+view and leaks no identity. A product ruling is still worth having.
 Basis: probe + judgment. <sup>a1</sup>
 
 <a id="a2"></a>
 **A2 — A declined submission's row still shows the review counter** · ❓ ·
 minor.
 A submission declined during review keeps "Review update
-{completed}/{total}" in its Editorial Activity cell on the Declined view —
-the row reads as if review were still running on a submission whose outcome
+{completed}/{total}" in its Editorial Activity cell on the Declined view.
+The row reads as if review were still running on a submission whose outcome
 is settled.
 Question: should a declined submission's activity cell be cleared instead?
-Lean: oversight — the editorial list's equivalent cell has a declined state
+Lean: oversight. The editorial list's equivalent cell has a declined state,
 and this one does not.
 Basis: probe. <sup>a2</sup>
 
 <a id="a3"></a>
 **A3 — "Scheduled for publication" has no feeder on OMP/OPS** · ❓ · minor.
-The view exists for authors on all three apps, but on OMP and OPS the
-publish flows offer no date control, so nothing could be scheduled (rather
-than published outright) through the screens — the author's "Scheduled for
-publication" view was only ever seen empty. On OJS it fills normally via
-issue scheduling (Rule 7d).
+The view exists for authors on all three apps. On OMP and OPS, however, the
+publish flows offer no date control, so nothing could be scheduled rather
+than published outright through the screens. The author's "Scheduled for
+publication" view was only ever seen empty there. On OJS it fills normally
+through issue scheduling (Rule 7d).
 Question: is any screen route meant to produce a scheduled (future-dated)
 publication on these two apps, or is the view vestigial there?
-Lean: vestigial — the view rides in from shared machinery whose feeder
-these apps do not expose.
+Lean: vestigial. The view comes from shared code whose feeder these apps do
+not expose.
 Basis: probe. <sup>a3</sup>
 
 <a id="a4"></a>
 **A4 — Editors' filter on the manager-author's own list** · ❓ · minor.
 An account holding Journal Manager (or Site Administrator) alongside Author
 opens the Filters panel on their own My Submissions and finds the editors'
-"Assigned To Editor" filter there; an author-only account never does.
+"Assigned To Editor" filter there. An author-only account never does.
 Question: should the personal list suppress the editors' filter regardless
-of the account's other roles? Lean: intended and harmless — the filter
-follows the account's roles through shared machinery and discloses nothing
-a manager cannot already see on the editorial list.
+of the account's other roles? Lean: intended and harmless. The filter
+follows the account's roles through shared code, and it discloses nothing a
+manager cannot already see on the editorial list.
 Basis: probe. <sup>a4</sup>
 
 <a id="a5"></a>
@@ -341,12 +345,12 @@ Basis: probe. <sup>a4</sup>
 minor.
 Following an old author-dashboard link that points at a still-incomplete
 draft lands its author on My Submissions with the draft's workflow panel
-open — a surface the list never offers for a draft (a draft row has no
-"View", Rule 6). Any other signed-in account gets the access-denied page
+open. The list never offers that panel for a draft, because a draft row has
+no "View" (Rule 6). Any other signed-in account gets the access-denied page
 first.
-Question: should the forward refuse — or hand off to the wizard — for a
-submission that was never submitted? Lean: oversight, harmless — reachable
-by the draft's own author only.
+Question: should the forward refuse, or hand off to the wizard, for a
+submission that was never submitted? Lean: oversight, harmless. Only the
+draft's own author can reach it.
 Basis: probe. <sup>a5</sup>
 
 ### OMP
@@ -354,13 +358,13 @@ Basis: probe. <sup>a5</sup>
 <a id="omp1"></a>
 **OMP1 — No series filter on a press** · ❓ · minor.
 A press author's Filters panel never offers a series filter, even when the
-press has several series — only the other filters appear. On a journal or
+press has several series. Only the other filters appear. On a journal or
 preprint server with more than one section, the same panel lists the
 Section filter (Rule 5).
-Question: is the missing series filter a product choice? Lean: intended —
-the press omits the field across its whole dashboard, and a series, unlike
-a section, is an optional shelf not every submission has; worth a ruling
-since the shared machinery supports it.
+Question: is the missing series filter a product choice? Lean: intended.
+The press omits the field across its whole dashboard, and a series, unlike
+a section, is an optional shelf that not every submission has. A ruling is
+still worth having, since the shared code supports the filter.
 Basis: probe. <sup>omp1</sup>
 
 ### OPS
@@ -369,25 +373,26 @@ Basis: probe. <sup>omp1</sup>
 **OPS1 — No "Incomplete submissions" view on a preprint server** · ❓ ·
 minor.
 An OPS author's sidebar offers Active / Scheduled / Published / Declined
-only; their unfinished drafts appear solely inside "Active submissions",
-where a draft's Stage bubble reads "Production" rather than "Incomplete" —
-nothing marks a row as a draft except its "Complete submission" button.
+only. Their unfinished drafts appear solely inside "Active submissions",
+where a draft's Stage bubble reads "Production" rather than "Incomplete".
+Nothing marks a row as a draft except its "Complete submission" button.
 Question: is the missing view (and the unlabeled draft state) a deliberate
 simplification or an oversight?
-Lean: oversight — the reduction does not follow from any absent OPS concept
-(drafts exist there), and the draft-cleanup tool that pairs with the view
-was kept (itself broken — [OPS2](#ops2)).
+Lean: oversight. The reduction does not follow from any concept OPS lacks,
+since drafts exist there, and the draft-cleanup tool that pairs with the
+view was kept (itself broken, [OPS2](#ops2)).
 Basis: probe. <sup>ops1</sup>
 
 <a id="ops2"></a>
 **OPS2 — Draft deletion offered but always refused** · 🐞 · user-visible.
-The OPS author gets the whole cleanup flow — an enabled "Delete Incomplete
-Submissions" menu item, draft checkboxes, the confirm dialog — but pressing
+The OPS author gets the whole cleanup flow: an enabled "Delete Incomplete
+Submissions" menu item, draft checkboxes, and the confirm dialog. Pressing
 "Confirm" always ends in an error dialog ("You do not have permission to
 delete this submission.") and the draft stays. Expected: their own drafts
 delete, as they do on a journal. Rationale for 🐞: the permission check
-demands a stage assignment no preprint ever has — a gap opened by OPS's
-reduced stage set, not a choice, or the offer would have been removed too.
+demands a stage assignment no preprint ever has. That is a gap opened by
+OPS's reduced stage set, not a choice, or the offer would have been removed
+too.
 Basis: probe. <sup>ops2</sup>
 
 ---

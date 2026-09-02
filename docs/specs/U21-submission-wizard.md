@@ -13,285 +13,290 @@ atlas-claims: [AFFW-065, AFFW-068, AFFW-069, AFFW-070, AFFW-071, AFFW-072, AFFW-
 
 ## Purpose
 
-The submission wizard is how new work enters the journal — in each of the
+The submission wizard is how new work enters the journal. It exists in all
 three applications the title badges name: Open Journal Systems (OJS), Open
 Monograph Press (OMP) and Open Preprint Systems (OPS). A signed-in user
-starts on the **Make a Submission** screen, answers a few framing questions
-(title, language, section — what the journal asks depends on its setup), and
-lands in a guided multi-step wizard: upload files, enter details, list
-contributors, answer the editors' questions, then review everything and
-submit. The wizard saves the author's work automatically as they go, can be
-left and resumed at any time, can be reconfigured (language, section) midway, and can
-be cancelled outright. Submitting hands the work to the editorial team and
-triggers the acknowledgement emails and editor notifications. This spec owns
-the step flow and its gates — starting, filling, saving for later,
-reconfiguring, cancelling, submitting — plus the terminal screens (Saved for
-Later, Submission complete, Submission cancelled). The file panel's and
-contributor panel's own mechanics belong to *Submission files* and
-*Contributors & affiliations*; the other embedded panels likewise link out
-(see *Cross-feature interactions*).
+starts on the **Make a Submission** screen and answers a few framing
+questions: title, language, section. What the journal asks depends on its
+setup. They then land in a guided multi-step wizard: upload files, enter
+details, list contributors, answer the editors' questions, then review
+everything and submit. The wizard saves the author's work automatically as
+they go. It can be left and resumed at any time, its settings (language,
+section) can be changed midway, and it can be cancelled outright. Submitting
+hands the work to the editorial team and triggers the acknowledgement emails
+and editor notifications.
+
+This spec covers the step flow and its gates: starting, filling, saving for
+later, changing settings, cancelling and submitting. It also covers the
+closing screens (Saved for Later, Submission complete, Submission cancelled).
+The file panel and the contributor panel have their own mechanics, described
+in *Submission files* and *Contributors & affiliations*. The other embedded
+panels likewise belong to their own features (see *Cross-feature
+interactions*).
 
 ## Actors & permissions
 
-**The submitting author** means the account that started the draft (it holds
+**The submitting author** means the account that started the draft. It holds
 an author's assignment on the submission from the moment the draft is
-created). A **draft** (also called an *incomplete submission*) is a
-submission that has been started but not yet submitted. Site-wide baseline:
-every action below requires signing in; signed-out visitors reaching a
-wizard address get the Login page.
+created. A **draft** (also called an *incomplete submission*) is a submission
+that has been started but not yet submitted. Site-wide baseline: every action
+below requires signing in. A signed-out visitor who reaches a wizard address
+gets the Login page.
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **Open the Make a Submission start screen** | • any signed-in user, whatever their roles — the screen itself then decides whether they may proceed (Rule 3) <sup>c</sup> |
-| **Start a submission** (press "Begin Submission") | • Author; Journal Manager — with their existing role<br>• Section Editor — admitted, but silently enrolled as an Author, and their submission is made under that new role instead of their editorial one ⚠ [A9](#a9); a pure Site Administrator likely gets the same treatment (unverified — no scenario exercises it; recorded as an open question, [A9](#a9))<br>• any other signed-in user — automatically enrolled in the journal's Author role, provided an author-role group allows self-registration (Rule 3; on a preprint server the enrolment happens earlier, on merely opening the start screen ⚠ [OPS2](#ops2)); no self-registering author-role group → the "Not Allowed" page <sup>c</sup> |
-| **Open a draft's wizard** (fill, autosave, reconfigure, save for later, submit) | • the submitting author — their own draft<br>• Journal Manager; Site Administrator — any draft in the journal<br>• assigned Section Editor — drafts a Journal Manager has assigned them to as a participant, through the Participants panel on the draft's workflow screen (see *Stage participants*) <sup>f</sup> |
-| **Cancel a draft** (the footer "Cancel" control, Rule 16) | • the submitting author; Journal Manager; Site Administrator — only they are shown the control (and behind the scenes the deletion is refused for anyone else — a reassurance, not a testable step: no other role has a control to press); on a preprint server the author's own cancel is refused too ⚠ [OPS3](#ops3) <sup>o</sup> |
-| **See the Saved for Later / Submission complete / Submission cancelled screens** | • whoever may open the underlying submission (the cancelled screen names no submission and shows for anyone signed in) <sup>n</sup> |
-| **Reach the wizard from the reader site** ("Make a Submission" block, {OJS OMP}) | • any visitor — once a Journal Manager has enabled the block (Rule 1); it links to the journal's submissions information page, which in turn leads to the wizard <sup>a</sup> |
+| **Open the Make a Submission start screen** | • any signed-in user, whatever their roles. The screen itself then decides whether they may proceed (Rule 3) <sup>c</sup> |
+| **Start a submission** (press "Begin Submission") | • Author; Journal Manager: with their existing role<br>• Section Editor: admitted, but silently enrolled as an Author, and their submission is made under that new role instead of their editorial one ⚠ [A9](#a9). A pure Site Administrator likely gets the same treatment; this is unverified, because no scenario exercises it, and is recorded as an open question ([A9](#a9))<br>• any other signed-in user: automatically enrolled in the journal's Author role, provided an author-role group allows self-registration (Rule 3). On a preprint server the enrolment happens earlier, on merely opening the start screen ⚠ [OPS2](#ops2). With no self-registering author-role group they get the "Not Allowed" page <sup>c</sup> |
+| **Open a draft's wizard** (fill, autosave, change settings, save for later, submit) | • the submitting author: their own draft<br>• Journal Manager; Site Administrator: any draft in the journal<br>• assigned Section Editor: drafts a Journal Manager has assigned them to as a participant, through the Participants panel on the draft's workflow screen (see *Stage participants*) <sup>f</sup> |
+| **Cancel a draft** (the footer "Cancel" control, Rule 16) | • the submitting author; Journal Manager; Site Administrator. Only they are shown the control. Behind the scenes the deletion is refused for anyone else; that is a safeguard, not a testable step, because no other role has a control to press. On a preprint server the author's own cancel is refused too ⚠ [OPS3](#ops3) <sup>o</sup> |
+| **See the Saved for Later / Submission complete / Submission cancelled screens** | • whoever may open the underlying submission. The cancelled screen names no submission and shows for anyone signed in <sup>n</sup> |
+| **Reach the wizard from the reader site** ("Make a Submission" block, {OJS OMP}) | • any visitor, once a Journal Manager has enabled the block (Rule 1). It links to the journal's submissions information page, which in turn leads to the wizard <sup>a</sup> |
 
 ## Fields & validation
 
-The start form (Rule 4). Later steps embed forms owned by other features
-(see *Cross-feature interactions*); what the wizard itself enforces before
-submission is Rule 13.
+These are the fields of the start form (Rule 4). Later steps embed forms
+owned by other features (see *Cross-feature interactions*). What the wizard
+itself enforces before submission is Rule 13.
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| Before you begin | — | Informational text; shown only when the journal has configured start-of-submission guidance. |
-| Title | Yes | One-line rich text; becomes the submission's title. |
-| Submission Language | Yes | Radio list; shown only when the journal accepts submissions in more than one language. |
-| Section {OJS OPS} | Yes | Radio list; shown only when the author has more than one section open to them — with one open section it is chosen silently (Rule 4). Selecting a section with a policy shows that policy under the list. A press asks for Submission Type instead [OMP1](#omp1). |
+| Before you begin | — | Informational text. Shown only when the journal has configured start-of-submission guidance. |
+| Title | Yes | One-line rich text. It becomes the submission's title. |
+| Submission Language | Yes | Radio list. Shown only when the journal accepts submissions in more than one language. |
+| Section {OJS OPS} | Yes | Radio list. Shown only when the author has more than one section open to them; with one open section it is chosen silently (Rule 4). Selecting a section with a policy shows that policy under the list. A press asks for Submission Type instead [OMP1](#omp1). |
 | Submission Type {OMP} | Yes | "Monograph: Authors are associated with the book as a whole." or "Edited Volume: Authors are associated with their own chapter." [OMP1](#omp1) |
 | Submission Checklist {OJS OPS} · Submission Requirements {OMP} | Yes | The journal's checklist with one confirmation box: "Yes, my submission meets all of these requirements." Shown only when a checklist is configured. <sup>d</sup> |
-| Submit As | Yes | Radio list of the roles the user may submit under; shown only when the user holds two or more roles with submission access. The stock Journal Manager role has no submission access, so a Journal Manager who is also an Author gets no choice; when an editorial role is among the options, a hint recommends selecting it to edit and publish the submission oneself. <sup>d</sup> |
+| Submit As | Yes | Radio list of the roles the user may submit under. Shown only when the user holds two or more roles with submission access. The stock Journal Manager role has no submission access, so a Journal Manager who is also an Author gets no choice. When an editorial role is among the options, a hint recommends selecting it in order to edit and publish the submission oneself. <sup>d</sup> |
 | Privacy Consent | Yes | "Yes, I agree to have my data collected and stored according to the privacy statement." Shown only when a privacy statement is configured. |
-| Copyright (Review step) | No — but Submit stays disabled until ticked (Rule 14) | "Yes, I agree to the copyright statement." — shown on the Review step only when the journal has a copyright notice; the submission check never flags it, yet "Submit" does not enable while it is unticked (Rule 14). |
+| Copyright (Review step) | No, but Submit stays disabled until ticked (Rule 14) | "Yes, I agree to the copyright statement." Shown on the Review step only when the journal has a copyright notice. The submission check never flags it, yet "Submit" does not enable while it is unticked (Rule 14). |
 
 ## Rules & state
 
 1. <a id="ways-in"></a>**Ways in.** Signed in, the dashboard sidebar offers
    "Start A New Submission", which opens the **Make a Submission** start
    screen. On the reader site of a journal or press, the "Make a Submission"
-   sidebar block — installed with the app but switched off until a Journal
-   Manager enables the plugin and places the block in the sidebar — links to
-   the journal's submissions information page, whose own controls lead to
-   the same screen; a preprint server does not install this block. Old bookmarked wizard
-   addresses from earlier versions forward to the current wizard. <sup>a</sup>
+   sidebar block links to the journal's submissions information page, whose
+   own controls lead to the same screen. That block is installed with the
+   app but switched off until a Journal Manager enables the plugin and
+   places the block in the sidebar. A preprint server does not install this
+   block. Old bookmarked wizard addresses from earlier versions forward to
+   the current wizard. <sup>a</sup>
 2. **Open or closed.** When the journal has stopped accepting submissions,
-   the sidebar's "Start A New Submission" entry disappears and the start
-   screen — still reachable at its own address, say from a bookmark kept
-   from when submissions were open — shows only the notice "This journal is not
-   accepting submissions at this time. Visit the workflow settings to allow
-   submissions." ⚠ [A3](#a3). Starting a new submission is refused; an
-   already-started draft, however, can still be opened, filled and submitted
-   ⚠ [A1](#a1). <sup>b</sup>
+   the sidebar's "Start A New Submission" entry disappears. The start screen
+   is still reachable at its own address, for example from a bookmark kept
+   from when submissions were open, but it shows only the notice "This
+   journal is not accepting submissions at this time. Visit the workflow
+   settings to allow submissions." ⚠ [A3](#a3). Starting a new submission is
+   refused. An already-started draft, however, can still be opened, filled
+   and submitted ⚠ [A1](#a1). <sup>b</sup>
 3. **Start-screen gates.** The start screen turns a user away with a
-   "Not Allowed" page in two cases: they hold no role that may submit and
-   no author-role user group of the journal permits self-registration
+   "Not Allowed" page in two cases. First, they hold no role that may submit
+   and no author-role user group of the journal permits self-registration
    ("You are not allowed to submit to this journal because authors must be
-   registered by the editorial staff…"); or, on a journal or preprint
+   registered by the editorial staff…"). Second, on a journal or preprint
    server, every section is closed to them ("…submissions to all sections
-   of this journal have been deactivated or restricted…") — on a preprint
-   server either explanation renders as a raw locale code under the
-   heading ⚠ [OPS7](#ops7). The gate weighs the author-role groups as a
-   set: a press ships two such groups out of the box — "Author" and
-   "Chapter Author" — so switching off self-registration on the Author
-   group alone still leaves the way in open there; the page appears only
-   when no author-role group permits it {OMP} (a journal or preprint
-   server ships just one). A section is closed to an author
-   when it has been deactivated, or when it is restricted to editorial roles
-   and the user is not a Site Administrator, Journal Manager or Section
-   Editor. A user with no submitting role who passes the gates is enrolled
-   in the journal's self-registering Author role as part of starting the
-   submission ⚠ [OPS2](#ops2). <sup>c</sup>
+   of this journal have been deactivated or restricted…"). On a preprint
+   server either explanation renders as a raw locale code under the heading
+   ⚠ [OPS7](#ops7). The gate weighs the author-role groups as a set. A press
+   ships two such groups out of the box, "Author" and "Chapter Author", so
+   switching off self-registration on the Author group alone still leaves
+   the way in open there. The page appears only when no author-role group
+   permits it {OMP}. A journal or preprint server ships just one such group.
+   A section is closed to an author when it has been deactivated, or when it
+   is restricted to editorial roles and the user is not a Site
+   Administrator, Journal Manager or Section Editor. A user with no
+   submitting role who passes the gates is enrolled in the journal's
+   self-registering Author role as part of starting the submission
+   ⚠ [OPS2](#ops2). <sup>c</sup>
 4. **The start form.** The screen is headed "Make a Submission" and carries
    the start form (fields above), ending in the primary button
    "Begin Submission". Only sections open to the author (Rule 3) are
-   offered; when exactly one is open it is applied without being shown.
+   offered. When exactly one is open, it is applied without being shown.
    A press asks for the Submission Type instead of a section
    [OMP1](#omp1). <sup>d</sup>
 5. **Begin Submission creates the draft.** Pressing "Begin Submission"
-   creates the submission immediately — with the entered title, the chosen
-   language, section or type, and the chosen submitting role — and opens the
-   wizard at its first step. When submitting under an Author role, the
+   creates the submission immediately, with the entered title, the chosen
+   language, section or type, and the chosen submitting role. It then opens
+   the wizard at its first step. When submitting under an Author role, the
    author is also placed on the submission's Contributors list, as its
-   primary contact. The button shows a spinner while the wizard loads.
-   <sup>e</sup>
+   primary contact. An Author whose profile has no affiliation gets a server
+   error here instead, and the wizard never opens ⚠ [A11](#a11). The button
+   shows a spinner while the wizard loads. <sup>e</sup>
 6. **A draft persists until submitted or cancelled.** The draft appears on
    the author's My Submissions list as an incomplete submission (see *My
-   Submissions*), and its wizard address can be bookmarked and reopened:
-   an unfinished draft reopens the wizard **at the step recorded by "Save
-   for Later"** (Rule 10) — moving between steps alone records nothing, so a
-   draft never saved for later reopens at the first step; a submitted
+   Submissions*), and its wizard address can be bookmarked and reopened.
+   An unfinished draft reopens the wizard **at the step recorded by "Save
+   for Later"** (Rule 10). Moving between steps alone records nothing, so a
+   draft never saved for later reopens at the first step. A submitted
    submission's wizard address shows the "Submission complete" screen
    instead (Rule 15). <sup>f</sup>
 7. <a id="steps"></a>**The steps.** The wizard's step rail shows, in order:
    **Upload Files**, **Details**, **Contributors**, **For the Editors**
    (titled **For Readers** on a preprint server [OPS1](#ops1)), and
-   **Review** — plus **Reviewer Suggestions** (before Review) when the
-   journal asks authors to suggest reviewers {OJS OMP}. What each step
-   carries:
-   - *Upload Files* — the submission file panel (see *Submission files*);
-     each file is labeled with a file type. On a preprint server this step
-     manages the preprint's galleys — the files readers will get — through
+   **Review**. When the journal asks authors to suggest reviewers, a
+   **Reviewer Suggestions** step sits before Review {OJS OMP}. What each
+   step carries:
+   - *Upload Files*: the submission file panel (see *Submission files*).
+     Each file is labeled with a file type. On a preprint server this step
+     manages the preprint's galleys, the files readers will get, through
      its own "Files" panel: "Add File" first asks for the galley's label,
      then the upload asks for the file's Preprint Component before
      accepting the file [OPS1](#ops1).
-   - *Details* — title and abstract (title arrives pre-filled from the
-     start form); keywords, a references box, data citations, a data
+   - *Details*: title and abstract. The title arrives pre-filled from the
+     start form. Keywords, a references box, data citations, a data
      availability statement, and a Funders list appear only when the
      journal's setup asks for them. On a press this step also lists the
      book's Chapters [OMP1](#omp1).
-   - *Contributors* — the contributors panel (see *Contributors &
-     affiliations*); the submitting author is already listed (Rule 5).
-   - *For the Editors* — the descriptive metadata the journal asks for
+   - *Contributors*: the contributors panel (see *Contributors &
+     affiliations*). The submitting author is already listed (Rule 5).
+   - *For the Editors*: the descriptive metadata the journal asks for
      (subjects, disciplines, supporting agencies, coverage, rights, source,
-     type — each only when enabled), categories when the journal lets
-     authors pick them, and a "Comments for the Editor" box (always; a
-     preprint server's box is "Comments for the Moderator"). A
-     press adds an optional Series choice here [OMP1](#omp1); a preprint
-     server adds a License choice and a required "Relation status" question
-     [OPS1](#ops1).
-   - *Reviewer Suggestions* {OJS OMP} — the suggestions panel (see
-     *Reviewer suggestions*); present only when enabled.
-   - *Review* — Rule 12.
+     type, each only when enabled), categories when the journal lets
+     authors pick them, and a "Comments for the Editor" box, which is
+     always present. A preprint server's box is "Comments for the
+     Moderator". A press adds an optional Series choice here [OMP1](#omp1).
+     A preprint server adds a License choice and a required "Relation
+     status" question [OPS1](#ops1).
+   - *Reviewer Suggestions* {OJS OMP}: the suggestions panel (see
+     *Reviewer suggestions*). Present only when enabled.
+   - *Review*: Rule 12.
    Above the rail the wizard names the submission (number, contributors,
-   title as they fill in) and, on a journal or preprint server, states what
-   is being submitted — e.g. "Submitting to the Articles section in
-   English." — with a "Change" control (Rule 11); a press states the work
-   type instead ("Submitting a Monograph."). <sup>g</sup>
-8. **Moving between steps.** "Continue" advances one step; "Back" returns
-   one (absent on the first step). Completed and current steps can be
-   reopened directly from the step rail; steps not yet reached are not
-   clickable there. Each step change updates the browser tab title
+   title, as they are filled in). On a journal or preprint server it also
+   states what is being submitted, for example "Submitting to the Articles
+   section in English.", with a "Change" control (Rule 11). A press states
+   the work type instead ("Submitting a Monograph."). <sup>g</sup>
+8. **Moving between steps.** "Continue" advances one step. "Back" returns
+   one step and is absent on the first step. Completed and current steps
+   can be reopened directly from the step rail. Steps not yet reached are
+   not clickable there. Each step change updates the browser tab title
    ("Make a Submission: {step}") and the address bar, so the browser's own
    Back button also steps backwards through the wizard. Editing just the
-   "#…" part of the address on an open wizard, though, opens any step —
-   even ahead of progress; the submission check (Rule 12) runs only when
-   Review opens this way. Pasting a wizard address into a new tab, or
-   reloading, always ignores the "#…" part and reopens as Rule 6 describes.
+   "#…" part of the address on an open wizard, though, opens any step, even
+   ahead of progress. The submission check (Rule 12) runs only when Review
+   opens this way. Pasting a wizard address into a new tab, or reloading,
+   always ignores the "#…" part and reopens as Rule 6 describes.
    On narrow screens the rail collapses to "{n}/{total} steps" with a
-   "Show all steps" control — but a wizard *loaded* at phone width
-   (375 pixels, say) on a journal or press keeps the full uncollapsed rail
-   and the page scrolls sideways; a merely-narrow fresh load (600 pixels,
-   say) collapses correctly, as does resizing an already-open window down
-   to phone width — and a preprint server collapses correctly even on a
-   phone-width load ⚠ [A10](#a10). <sup>h</sup>
+   "Show all steps" control. But a wizard *loaded* at phone width (375
+   pixels, say) on a journal or press keeps the full uncollapsed rail and
+   the page scrolls sideways. A merely narrow fresh load (600 pixels, say)
+   collapses correctly, and so does resizing an already open window down to
+   phone width. A preprint server collapses correctly even on a phone-width
+   load ⚠ [A10](#a10). <sup>h</sup>
 9. <a id="autosave"></a>**Autosave.** The wizard saves form changes
-   automatically on a timer — roughly a minute after typing stops, not
-   keystroke by keystroke; the footer flashes "Saving" while a save runs
-   and then ticks "Last saved {n} seconds ago". The footer already shows a
+   automatically on a timer, roughly a minute after typing stops, not
+   keystroke by keystroke. The footer flashes "Saving" while a save runs and
+   then ticks "Last saved {n} seconds ago". The footer already shows a
    "Last saved" time on first arriving, before any save has actually run
    ⚠ [A4](#a4). The wizard notices a lost connection only when a save
-   fails: the footer then switches to "Reconnecting", unsent changes are
+   fails. The footer then switches to "Reconnecting", unsent changes are
    kept in the browser, and both "Save for Later" buttons and "Submit" are
-   disabled while the wizard retries on its own at growing intervals —
-   reconnection sends the kept text and re-enables the buttons. "Back",
+   disabled while the wizard retries on its own at growing intervals.
+   Reconnection sends the kept text and re-enables the buttons. "Back",
    "Cancel" and "Continue" never disable. With nothing unsaved the wizard
    never notices the outage: nothing changes on screen and "Submit" stays
    enabled while the network is down. Reopening a wizard for which the
-   browser still holds unsaved changes opens an "Unsaved Changes" dialog
-   offering to restore them ("Yes") or discard them ("No, discard unsaved
+   browser still holds unsaved changes opens an "Unsaved Changes" dialog.
+   It offers to restore them ("Yes") or discard them ("No, discard unsaved
    changes"). <sup>i</sup>
-10. **Save for Later.** "Save for Later" (offered in the header and the
-    footer) finishes any saves in flight, records the step reached, and
-    lands on the **Saved for Later** screen: a link back into the wizard
-    (labeled with the draft's contributors and title) and the note "We have
-    emailed a copy of this link to you at {email}." The email — with the
-    resume link — goes to the signed-in user who pressed the button
-    ⚠ [A2](#a2). If saving fails, a "Disconnected" dialog explains the
-    draft could not be saved. <sup>j</sup>
+10. **Save for Later.** "Save for Later" is offered in the header and the
+    footer. It finishes any saves in flight, records the step reached, and
+    lands on the **Saved for Later** screen. That screen shows a link back
+    into the wizard, labeled with the draft's contributors and title, and
+    the note "We have emailed a copy of this link to you at {email}." The
+    email with the resume link goes to the signed-in user who pressed the
+    button ⚠ [A2](#a2). If saving fails, a "Disconnected" dialog explains
+    that the draft could not be saved. <sup>j</sup>
 11. <a id="reconfigure"></a>**Change Submission Settings.** The "Change"
     control beside the "Submitting to…" line opens the **Change Submission
-    Settings** panel: the submission language (when more than one is
-    supported), plus the section on a journal or preprint server, or the
+    Settings** panel. It offers the submission language (when more than one
+    is supported), plus the section on a journal or preprint server, or the
     Submission Type on a press [OMP1](#omp1). Saving applies the change and
-    reloads the wizard so every step reflects it (a section change can
-    change what the Details step requires — Rule 13). With only one
-    language and one open section, no "Submitting to…" line or "Change"
-    control appears at all — except on a press, where the work-type line
-    and its "Change" control always remain, the type being ever
-    reconfigurable [OMP1](#omp1). <sup>k</sup>
+    reloads the wizard so every step reflects it. A section change can
+    change what the Details step requires (Rule 13). With only one language
+    and one open section, no "Submitting to…" line or "Change" control
+    appears at all. The exception is a press, where the work-type line and
+    its "Change" control always remain, because the type can always be
+    changed [OMP1](#omp1). <sup>k</sup>
 12. <a id="review-step"></a>**The Review step.** Entering Review checks the
-    whole submission ("Checking your submission" overlays the panels while
-    it runs). The step then shows one summary panel per earlier step —
+    whole submission. "Checking your submission" overlays the panels while
+    the check runs. The step then shows one summary panel per earlier step:
     Files (summarizing Upload Files; on a preprint server this same panel
     lists the galleys [OPS1](#ops1)), Details, Contributors, For the
-    Editors (when several submission languages are supported, the Details
-    and For the Editors panels each appear once per language), Reviewer
-    Suggestions when that step is present (Rule 7) {OJS OMP}, and the
-    app-specific panels (a License panel on a preprint server
-    [OPS1](#ops1); Chapters on a press [OMP1](#omp1)) —
-    each with an "Edit" button that jumps back to its step. Problems are announced in a banner ("There are one or more
-    problems that need to be fixed before you can submit…") and repeated on
-    the specific item, e.g. a missing abstract on the Details panel or "No
-    contributors have been added for this submission." on an empty
-    Contributors panel. When the journal has a copyright notice, a final
-    "Confirmation" section asks the author to tick the copyright agreement.
-    <sup>l</sup>
+    Editors, Reviewer Suggestions when that step is present (Rule 7)
+    {OJS OMP}, and the app-specific panels (a License panel on a preprint
+    server [OPS1](#ops1); Chapters on a press [OMP1](#omp1)). When several
+    submission languages are supported, the Details and For the Editors
+    panels each appear once per language. Each panel has an "Edit" button
+    that jumps back to its step. Problems are announced in a banner ("There
+    are one or more problems that need to be fixed before you can submit…")
+    and repeated on the specific item, for example a missing abstract on the
+    Details panel or "No contributors have been added for this submission."
+    on an empty Contributors panel. When the journal has a copyright notice,
+    a final "Confirmation" section asks the author to tick the copyright
+    agreement. <sup>l</sup>
 13. <a id="submit-gates"></a>**What must be complete to submit.** The check
-    behind Rule 12 requires, in every app: a title in the submission
-    language; every contributor's name (and any affiliation without a
-    registry identifier — how an affiliation gets one is the Contributors
-    panel's affair, see *Contributors & affiliations*) present in the
-    submission language; every metadata
-    item the journal's setup marks *required* (keywords, references, and so
-    on); and a file of every file type marked *required to submit* ("A file
-    of the {type} type must be uploaded…"). On a journal and a preprint
-    server the section adds its own demands: an abstract unless the section
-    waives abstracts, and the section's abstract word limit ("The abstract
-    is too long…") — a press requires an abstract only if its setup says so.
-    A submission whose section has since closed is blocked with the
-    section-closed message (Rule 17). Submitting the same draft twice
-    (say, from a second browser tab left on Review) is refused — but the
-    refusal ("This submission has already been submitted…") never reaches
-    the screen: the author sees only the generic problems banner with
-    nothing flagged below it ⚠ [A6](#a6). <sup>m</sup>
+    behind Rule 12 requires the following in every app: a title in the
+    submission language; every contributor's name present in the submission
+    language, and likewise any affiliation without a registry identifier
+    (how an affiliation gets one is the Contributors panel's affair, see
+    *Contributors & affiliations*); every metadata item the journal's setup
+    marks *required* (keywords, references, and so on); and a file of every
+    file type marked *required to submit* ("A file of the {type} type must
+    be uploaded…"). On a journal and a preprint server the section adds its
+    own demands: an abstract unless the section waives abstracts, and the
+    section's abstract word limit ("The abstract is too long…"). A press
+    requires an abstract only if its setup says so. A submission whose
+    section has since closed is blocked with the section-closed message
+    (Rule 17). Submitting the same draft twice, say from a second browser
+    tab left on Review, is refused. But the refusal ("This submission has
+    already been submitted…") never reaches the screen: the author sees
+    only the generic problems banner with nothing flagged below it
+    ⚠ [A6](#a6). <sup>m</sup>
 14. **Submitting.** On the Review step the primary button reads "Submit".
     It stays disabled until the check passes, every confirmation box is
     ticked, and no failed save has put the wizard into its "Reconnecting"
-    state (Rule 9). Pressing it asks for confirmation —
-    on a journal: "The submission, {title}, will be submitted to {journal}
+    state (Rule 9). Pressing it asks for confirmation. On a journal the
+    message reads: "The submission, {title}, will be submitted to {journal}
     for editorial review. Are you sure you want to complete this
-    submission?"; a preprint server's message says instead what happens
-    next: a moderator will review it, or — for submitters who may post
-    their own preprints — that they will be able to post it [OPS1](#ops1).
-    Confirming submits: the draft becomes a submitted submission on the
+    submission?" A preprint server's message says instead what happens
+    next: a moderator will review it, or, for submitters who may post their
+    own preprints, that they will be able to post it [OPS1](#ops1).
+    Confirming submits. The draft becomes a submitted submission on the
     editorial Submission stage (a preprint server's single production stage
     [OPS1](#ops1)), the side effects fire (see *Side effects*), and if the
     copyright box was ticked the agreement is recorded in the submission's
     activity log. <sup>m</sup>
 15. **Submission complete.** After submitting, the author lands on
-    "Submission complete": the journal has been notified, a confirmation
-    email sent — the screen says so even when the journal's
-    acknowledgement setting means no email went out ⚠ [A7](#a7) — and
-    three links are offered — "Review this submission"
-    (the submission's workflow, in the author's own view for authors),
-    "Create a new submission", and "Return to your dashboard". This same
-    screen answers the wizard address of any submitted submission — a stale
-    wizard bookmark shows it rather than an error. On a preprint server the
-    screen has two variants: viewers who cannot post read that a moderator
-    will review and post the preprint; those who can post are invited to
-    post it themselves [OPS1](#ops1). The variant follows whoever is
-    looking, not who submitted — a manager opening another author's
-    submitted wizard address is thanked for "your" preprint and invited to
-    post it ⚠ [OPS4](#ops4). <sup>n</sup>
+    "Submission complete". The screen says the journal has been notified
+    and a confirmation email sent. It says so even when the journal's
+    acknowledgement setting means no email went out ⚠ [A7](#a7). Three
+    links are offered: "Review this submission" (the submission's workflow,
+    in the author's own view for authors), "Create a new submission", and
+    "Return to your dashboard". This same screen answers the wizard address
+    of any submitted submission, so a stale wizard bookmark shows it rather
+    than an error. On a preprint server the screen has two variants.
+    Viewers who cannot post read that a moderator will review and post the
+    preprint. Those who can post are invited to post it themselves
+    [OPS1](#ops1). The variant follows whoever is looking, not who
+    submitted: a manager opening another author's submitted wizard address
+    is thanked for "your" preprint and invited to post it ⚠ [OPS4](#ops4).
+    <sup>n</sup>
 16. **Cancelling.** The wizard footer offers "Cancel" (as a link-style
     control) to the submitting author, a Journal Manager and a Site
-    Administrator only. It opens the dialog "Cancel submission" — "Are you
-    sure you wish to cancel this submission? This will delete the
-    submission and all associated data. This action cannot be undone." —
-    with "OK" / "Cancel". Confirming deletes the draft permanently and
-    lands on "Submission cancelled", which offers "Create a new submission"
-    and "Return to your dashboard". Nothing is emailed; the deleted draft's
-    wizard address afterwards answers only a bare page-not-found error,
-    without the journal's design. On a preprint server the submitting
-    author's own "Cancel" does not work: confirming closes the dialog and
-    nothing else happens — the draft survives, and no message explains why
-    ⚠ [OPS3](#ops3); a manager's cancel works there. Cancelling is only
-    for drafts; a submitted submission's wizard shows no such control
-    (its deletion is the editorial team's — see *Submission stage*).
-    <sup>o</sup>
+    Administrator only. It opens the dialog "Cancel submission", which
+    reads "Are you sure you wish to cancel this submission? This will
+    delete the submission and all associated data. This action cannot be
+    undone." with "OK" / "Cancel". Confirming deletes the draft permanently
+    and lands on "Submission cancelled", which offers "Create a new
+    submission" and "Return to your dashboard". Nothing is emailed. The
+    deleted draft's wizard address afterwards answers only a bare
+    page-not-found error, without the journal's design. On a preprint
+    server the submitting author's own "Cancel" does not work: confirming
+    closes the dialog and nothing else happens. The draft survives, and no
+    message explains why ⚠ [OPS3](#ops3). A manager's cancel works there.
+    Cancelling is only for drafts. A submitted submission's wizard shows no
+    such control; its deletion is the editorial team's (see *Submission
+    stage*). <sup>o</sup>
 17. <a id="section-closed"></a>**A section that closes mid-draft**
     {OJS OPS}. If the draft's section is deactivated, or restricted to
     editors, after the draft was started, a non-editor reopening the wizard
@@ -299,156 +304,157 @@ submission is Rule 13.
     submissions to the {section} section. If you need help recovering your
     submission, please contact {contact}." The same closure blocks the
     final submit (Rule 13). Site Administrators, Journal Managers and
-    Section Editors are not blocked by an editor-only restriction (they are
-    blocked by deactivation's submit check like anyone else). A press has
-    no section at intake, so this rule has no press analogue [OMP1](#omp1).
+    Section Editors are not blocked by an editor-only restriction. They are
+    blocked by deactivation's submit check like anyone else. A press has no
+    section at intake, so this rule has no press analogue [OMP1](#omp1).
     <sup>p</sup>
 
 ## Side effects
 
 All effects fire at the moment of submission (Rule 14) unless noted.
 
-- **Acknowledgement to the submitting author** — sent when the journal's
+- **Acknowledgement to the submitting author.** Sent when the journal's
   submission-acknowledgement setting is on (a fresh journal defaults to
-  emailing all authors); the journal's contact can be copied, and extra
-  copy addresses added, per setup — extra copies ride as blind copies on
-  the submitting author's message only. On a preprint server,
-  submitters who may post their own preprint are meant to get a variant
-  acknowledgement saying they can post it — in practice no acknowledgement
-  reaches them at all ⚠ [OPS5](#ops5). <sup>q</sup>
-- **Acknowledgement to the other contributors** — when the setting is "all
+  emailing all authors). Per setup, the journal's contact can be copied and
+  extra copy addresses added. Extra copies ride as blind copies on the
+  submitting author's message only. On a preprint server, submitters who
+  may post their own preprint are meant to get a variant acknowledgement
+  saying they can post it. In practice no acknowledgement reaches them at
+  all ⚠ [OPS5](#ops5). <sup>q</sup>
+- **Acknowledgement to the other contributors.** When the setting is "all
   authors", every contributor with an email who is not a submitting author
   gets a separate acknowledgement. <sup>q</sup>
-- **Section editors are assigned and notified** — the journal's setup can
-  pre-assign editorial users per section; those editors are assigned to
+- **Section editors are assigned and notified.** The journal's setup can
+  pre-assign editorial users per section. Those editors are assigned to
   the new submission and emailed, and it appears on their editorial
-  dashboard and in the submission's Participants list (the assignment
-  email itself belongs to *Stage participants*). On any journal created
-  after the install's first, the assignment silently fails — nobody is
+  dashboard and in the submission's Participants list. The assignment
+  email itself belongs to *Stage participants*. On any journal created
+  after the install's first, the assignment silently fails: nobody is
   assigned or emailed, and the needs-an-editor path below fires instead
   ⚠ [A8](#a8). <sup>q</sup>
-- **Managers are told when nobody is assigned** — if no editor was
+- **Managers are told when nobody is assigned.** If no editor was
   auto-assigned, every Journal Manager gets a task notification ("A new
   article has been submitted to which an editor needs to be assigned.",
-  worded per app) and the "needs an editor" email (unless they have
-  unsubscribed from that email) — the email keeps its journal wording
-  even on a preprint server ⚠ [OPS6](#ops6). <sup>q</sup>
-- **Activity log** — a "submission submitted" entry always; a "copyright
-  agreed" entry when the copyright box was ticked (Rule 14) — that entry's
+  worded per app) and the "needs an editor" email, unless they have
+  unsubscribed from that email. The email keeps its journal wording even
+  on a preprint server ⚠ [OPS6](#ops6). <sup>q</sup>
+- **Activity log.** A "submission submitted" entry always. A "copyright
+  agreed" entry when the copyright box was ticked (Rule 14); that entry's
   text currently opens with a raw "{$filename}" placeholder ⚠ [A5](#a5).
   <sup>q</sup>
-- **Comments for the Editor become a discussion** — text entered in the
+- **Comments for the Editor become a discussion.** Text entered in the
   For the Editors step's comments box opens as a discussion on the
   submission, and the discussion's participants are emailed the comment
-  regardless of the acknowledgement setting — who the participants are is
+  regardless of the acknowledgement setting. Who the participants are is
   the discussion's affair (see *Tasks & discussions*, which owns it and
-  the notification email); the one case verified here: with no editor yet
+  the notification email). The one case verified here: with no editor yet
   assigned, the submitting author is the only participant and so receives
   a copy of their own comment. <sup>q</sup>
-- **Editorial task templates run** — any task templates configured for the
+- **Editorial task templates run.** Any task templates configured for the
   first workflow stage are instantiated on the new submission (see *Tasks &
   discussions*). <sup>q</sup>
-- **{OPS} DOIs are assigned** — a preprint server configured to register
+- **{OPS} DOIs are assigned.** A preprint server configured to register
   DOIs mints them for the new preprint and its galleys at submission.
   <sup>q</sup>
-- **On Save for Later** (Rule 10) — the resume-link email to the user who
-  pressed the button ⚠ [A2](#a2). <sup>j</sup>
-- **On Cancel** (Rule 16) — the draft and everything attached to it are
-  deleted; no email, no log entry survives. <sup>o</sup>
+- **On Save for Later** (Rule 10): the resume-link email goes to the user
+  who pressed the button ⚠ [A2](#a2). <sup>j</sup>
+- **On Cancel** (Rule 16): the draft and everything attached to it are
+  deleted. No email is sent and no log entry survives. <sup>o</sup>
 
 ## Settings that modify behavior
 
-All journal-level settings; the intake screens where most live are the
-subject of *Submission intake configuration*.
+All of these are journal-level settings. The intake screens where most of
+them live are the subject of *Submission intake configuration*.
 
-- **Accepting / not accepting submissions** — closes the front door
+- **Accepting / not accepting submissions**: closes the front door
   (Rule 2).
-- **Start-of-submission guidance, checklist, privacy statement** — add the
+- **Start-of-submission guidance, checklist, privacy statement**: add the
   "Before you begin" text, the Submission Requirements confirmation, and
   the Privacy Consent confirmation to the start form (Rule 4). A site-wide
   configuration option can substitute the site's privacy statement for the
   journal's.
-- **Supported submission languages** — more than one adds the Submission
+- **Supported submission languages**: more than one adds the Submission
   Language choice (Rule 4) and the "Submitting to…" line with its "Change"
-  control (Rule 11), and makes the Review step show one Details panel and
-  one For the Editors panel per language (Rule 12).
-- **Sections** {OJS OPS} — each section's *deactivated* and *restricted to
-  editors* flags gate intake (Rules 3, 17); its *abstract not required* and
-  *abstract word limit* shape the Details step's demands (Rule 13). See
-  *Sections*.
-- **Metadata asked of authors** — each metadata item set to "ask" or
+  control (Rule 11). It also makes the Review step show one Details panel
+  and one For the Editors panel per language (Rule 12).
+- **Sections** {OJS OPS}: each section's *deactivated* and *restricted to
+  editors* flags gate intake (Rules 3, 17). Its *abstract not required* and
+  *abstract word limit* settings shape the Details step's demands (Rule
+  13). See *Sections*.
+- **Metadata asked of authors**: each metadata item set to "ask" or
   "require" during submission adds its field to the Details or For the
-  Editors step; "require" makes it a submit blocker (Rule 13).
-- **References, data citations, data availability, funders** — same
-  ask/require pattern; they add their sections to the Details step.
-- **Categories** — "let authors pick categories" plus at least one category
+  Editors step. Setting it to "require" makes it a submit blocker
+  (Rule 13).
+- **References, data citations, data availability, funders**: the same
+  ask/require pattern. They add their sections to the Details step.
+- **Categories**: "let authors pick categories" plus at least one category
   adds the category picker to For the Editors.
-- **Reviewer suggestions** {OJS OMP} — the review settings' "Reviewer
+- **Reviewer suggestions** {OJS OMP}: the review settings' "Reviewer
   Suggestion at Submission" toggle adds the Reviewer Suggestions step and
-  the Review step's suggestions panel (Rule 7); turning it off removes
+  the Review step's suggestions panel (Rule 7). Turning it off removes
   both. A preprint server has no review settings to offer it. <sup>g</sup>
-- **File types marked "required to submit"** — become submit blockers
-  (Rule 13); configured with the journal's file components (see *Submission
-  intake configuration*).
-- **Submission acknowledgement** — the "Submission Confirmation" choice on
+- **File types marked "required to submit"**: become submit blockers
+  (Rule 13). They are configured with the journal's file components (see
+  *Submission intake configuration*).
+- **Submission acknowledgement**: the "Submission Confirmation" choice on
   the workflow settings' Emails screen: off / submitting author only / all
   authors (the default), plus the copy-to-contact and extra-copy-address
-  options (Side effects).
-- **Copyright notice** — adds the copyright confirmation to the Review step
+  options (see *Side effects*).
+- **Copyright notice**: adds the copyright confirmation to the Review step
   (Rules 12, 14).
-- **{OPS} Author screening** — by default preprint authors cannot post
-  their own preprints; a screening plugin can grant it, which switches the
+- **{OPS} Author screening**: by default preprint authors cannot post
+  their own preprints. A screening plugin can grant it, which switches the
   confirmation message, the completion screen and the acknowledgement email
   to their can-post variants [OPS1](#ops1).
 
 ## Cross-feature interactions
 
-- **Submission files** — the Upload Files step's panel: upload, file type
+- **Submission files**: the Upload Files step's panel: upload, file type
   prompt, revise, remove. This spec owns only the step's presence and the
   required-file submit gate (Rule 13).
-- **Contributors & affiliations** — the Contributors step's panel; this
+- **Contributors & affiliations**: the Contributors step's panel. This
   spec owns the step, the submitter's auto-listing (Rule 5) and the
   name-language submit gate (Rule 13).
-- **Citations & references / Funding** — the references, data-citations and
+- **Citations & references / Funding**: the references, data-citations and
   funders sections embedded in the Details step.
-- **Publication metadata** — the meaning of the Details / For the Editors
-  metadata fields; the wizard owns only which appear and which block
+- **Publication metadata**: the meaning of the Details / For the Editors
+  metadata fields. The wizard owns only which appear and which block
   submission.
-- **Reviewer suggestions** — the suggestions panel and what editors later
-  do with them; the wizard owns the step's presence gate.
-- **Sections** — section configuration (deactivated, editor-restricted,
+- **Reviewer suggestions**: the suggestions panel and what editors later
+  do with them. The wizard owns the step's presence gate.
+- **Sections**: section configuration (deactivated, editor-restricted,
   abstract policy) whose effects gate this feature.
-- **Submission intake configuration** — the settings screens behind most of
+- **Submission intake configuration**: the settings screens behind most of
   "Settings that modify behavior".
-- **My Submissions** — where drafts are listed and resumed from; the entry
-  route into a submitted submission's workflow.
-- **Workflow screen & stage access** — where "Review this submission"
-  lands; also the home of the submissions interface this wizard drives
-  (its create, save-for-later and submit operations are part of that
+- **My Submissions**: where drafts are listed and resumed from, and the
+  entry route into a submitted submission's workflow.
+- **Workflow screen & stage access**: where "Review this submission"
+  lands. It is also the home of the submissions interface this wizard
+  drives (its create, save-for-later and submit operations are part of that
   feature's interface family). The submission record those operations read
   and write is defined once, in the shared submission definition homed
-  here. <sup>r</sup>
-- **Submission stage** — where the submitted submission arrives (a
-  journal/press); *Production stage* and *Publish, schedule & versions* for
-  a preprint server's post-submission path.
-- **Stage participants** — the editor-assigned email sent when section
+  there. <sup>r</sup>
+- **Submission stage**: where the submitted submission arrives on a
+  journal or press. *Production stage* and *Publish, schedule & versions*
+  cover a preprint server's post-submission path.
+- **Stage participants**: the editor-assigned email sent when section
   editors are auto-assigned.
-- **Tasks & discussions** — the comments-for-editor discussion and the
+- **Tasks & discussions**: the comments-for-editor discussion and the
   auto-created tasks.
 
 ## Canonical scenarios
 
-Common to all three apps unless badged; substitute press/preprint-server
+Common to all three apps unless badged. Substitute press or preprint-server
 vocabulary per the [application glossary](GLOSSARY.md). Actors are named by
 role; seeding recipes live in the footnote. <sup>s</sup>
 
 1. **Start a submission** — Author: signed in, choose "Start A New
    Submission" in the sidebar. The "Make a Submission" screen shows the
-   start form; fill in the Title, tick the Submission Checklist and
-   Privacy Consent boxes (and pick a Section on a journal or preprint
-   server / a Submission Type on a press, if offered), and press "Begin
-   Submission". The wizard opens on the "Upload Files" step, with the new
-   submission's number shown above the heading. <sup>s</sup>
+   start form. Fill in the Title, tick the Submission Checklist and Privacy
+   Consent boxes, and pick a Section on a journal or preprint server, or a
+   Submission Type on a press, if offered. Press "Begin Submission". The
+   wizard opens on the "Upload Files" step, with the new submission's
+   number shown above the heading. <sup>s</sup>
 2. **Fill every step and submit** — Author: continuing from a fresh draft,
    upload a file on "Upload Files", complete "Details" (the abstract, if
    demanded), confirm yourself on "Contributors", pass "For the Editors",
@@ -456,139 +462,136 @@ role; seeding recipes live in the footnote. <sup>s</sup>
    banner, tick any confirmation box, press "Submit", and confirm the
    dialog. The "Submission complete" screen appears with the links "Review
    this submission", "Create a new submission" and "Return to your
-   dashboard"; the acknowledgement email arrives in the mail catcher.
+   dashboard". The acknowledgement email arrives in the mail catcher.
    "Review this submission" opens the submission's workflow. <sup>s</sup>
 3. **Save for later and resume** — Author: on any wizard step, press "Save
    for Later". The "Saved for Later" screen shows a link naming your
-   submission and the note that the link was emailed to you; the email
-   arrives. Follow the emailed link (or reopen the draft from My
-   Submissions): the wizard reopens on the step you left. <sup>j</sup>
-4. **Cancel a draft** — Author: in a draft's wizard footer, press "Cancel";
-   the "Cancel submission" dialog warns the submission and all its data
-   will be deleted. Confirm with "OK" — the "Submission cancelled" screen
-   appears, and the draft is gone from My Submissions. Control — Journal
-   Manager, then Section Editor: the manager assigns a Section Editor to
-   another author's draft through the Participants panel's "Assign" on the
-   draft's workflow screen, opened by its typed address — an incomplete
-   submission's dashboard row offers only "Complete submission", no
-   workflow opener (the workflow screen and its address: *Workflow screen &
-   stage access*; the panel: *Stage participants*). That Section Editor,
-   opening the draft's wizard, gets "Save for Later" and "Continue" but no
-   "Cancel" control. On a preprint server this scenario passes only for a
-   manager — the author's own confirmation does nothing ⚠ [OPS3](#ops3).
-   <sup>o</sup> <sup>f</sup>
+   submission and the note that the link was emailed to you. The email
+   arrives. Follow the emailed link, or reopen the draft from My
+   Submissions: the wizard reopens on the step you left. <sup>j</sup>
+4. **Cancel a draft** — Author: in a draft's wizard footer, press "Cancel".
+   The "Cancel submission" dialog warns that the submission and all its
+   data will be deleted. Confirm with "OK". The "Submission cancelled"
+   screen appears, and the draft is gone from My Submissions. Control:
+   Journal Manager, then Section Editor. The manager assigns a Section
+   Editor to another author's draft through the Participants panel's
+   "Assign" on the draft's workflow screen, opened by its typed address (an
+   incomplete submission's dashboard row offers only "Complete submission",
+   no workflow opener; the workflow screen and its address are in *Workflow
+   screen & stage access*, the panel in *Stage participants*). That Section
+   Editor, opening the draft's wizard, gets "Save for Later" and "Continue"
+   but no "Cancel" control. On a preprint server this scenario passes only
+   for a manager; the author's own confirmation does nothing
+   ⚠ [OPS3](#ops3). <sup>o</sup> <sup>f</sup>
 5. **Change settings midway** — Author: in a draft on a journal with two
    open sections and two submission languages, press "Change" beside the
    "Submitting to…" line. In "Change Submission Settings", pick the other
    section and language and save. The wizard reloads and the line now names
-   the new section and language. (On a press the panel offers the
-   Submission Type and language instead [OMP1](#omp1).) <sup>k</sup>
+   the new section and language. On a press the panel offers the
+   Submission Type and language instead [OMP1](#omp1). <sup>k</sup>
 6. **Validation blocks an empty submission** — Author: start a draft and
-   go straight to "Review" pressing only "Continue". The banner "There are
+   go straight to "Review", pressing only "Continue". The banner "There are
    one or more problems that need to be fixed before you can submit."
-   appears, with the missing items called out on their panels (e.g. the
-   required file type on Files, the abstract on Details); "Submit" is
+   appears, with the missing items called out on their panels (for example
+   the required file type on Files, the abstract on Details). "Submit" is
    disabled. Use a panel's "Edit" button to jump back, fix the item, and
    return: the item's complaint is gone. <sup>l</sup>
 7. **The journal stops accepting submissions** — Journal Manager, then
    Author: the author first bookmarks the "Make a Submission" start screen
-   while submissions are open. With submissions then disabled in the
-   journal's workflow settings, the author's sidebar no longer offers
+   while submissions are open. Submissions are then disabled in the
+   journal's workflow settings. Now the author's sidebar no longer offers
    "Start A New Submission", and opening the bookmarked start screen shows
    the not-accepting notice ⚠ [A3](#a3).
    Positive control: re-enable submissions and the sidebar entry returns.
    <sup>b</sup>
 8. **A draft outlives the closing** — Author: start a draft while
-   submissions are open; a Journal Manager then disables submissions.
+   submissions are open. A Journal Manager then disables submissions.
    Reopen the draft: the wizard still opens, and completing it still
    submits ⚠ [A1](#a1). <sup>b</sup>
 9. **A user with no role submits** — a signed-in user with no role in the
-   journal (e.g. a Reviewer of another journal on the same site, or a
-   bare reader account): open "Make a Submission" and begin a submission.
-   The wizard opens normally; afterwards the account holds the journal's
-   Author role. Control: with self-registration turned off on every
-   author-role group — on a press that means both Author and Chapter
-   Author; turning off Author alone leaves the way in open {OMP}
-   (Rule 3) — the same user gets the "Not Allowed" page instead, its
-   explanation a raw locale code on a preprint server ⚠ [OPS7](#ops7);
-   ⚠ [OPS2](#ops2) for the preprint-server enrolment timing. <sup>c</sup>
+   journal (for example a Reviewer of another journal on the same site, or
+   a bare reader account): open "Make a Submission" and begin a submission.
+   The wizard opens normally. Afterwards the account holds the journal's
+   Author role. Control: turn off self-registration on every author-role
+   group (on a press that means both Author and Chapter Author; turning
+   off Author alone leaves the way in open {OMP}, Rule 3). The same user
+   now gets the "Not Allowed" page instead. On a preprint server its
+   explanation is a raw locale code ⚠ [OPS7](#ops7), and the enrolment
+   happens at a different moment ⚠ [OPS2](#ops2). <sup>c</sup>
 10. **All contributors are acknowledged** — Author: with the journal's
     submission acknowledgement set to all authors, add a second contributor
     with a distinct email on the Contributors step, then submit. Two
     acknowledgement emails arrive in the mail catcher: one to you, one to
     the other contributor. <sup>q</sup>
 11. **Editors learn of the new submission** — Journal Manager, then
-    Author: with one section that has an assigned section editor and a
-    second that has none (the manager configures the sections), the author
-    submits a fresh submission to each. For the first, the section editor
-    is assigned and notified; for the second, the Journal Manager receives
-    the "needs an editor" email in the mail catcher and a task
-    notification. (On any journal created after the install's first, the
-    first half fails — the editor is never assigned ⚠ [A8](#a8).)
-    <sup>q</sup>
+    Author: the manager configures one section that has an assigned
+    section editor and a second that has none. The author submits a fresh
+    submission to each. For the first, the section editor is assigned and
+    notified. For the second, the Journal Manager receives the "needs an
+    editor" email in the mail catcher and a task notification. On any
+    journal created after the install's first, the first half fails: the
+    editor is never assigned ⚠ [A8](#a8). <sup>q</sup>
 
 App-specific:
 
 12. **{OJS OPS} Closed and restricted sections** — Journal Manager, then
     Author: restrict one section to editors and deactivate another. On the
     start form the author is no longer offered either section, while a
-    Journal Manager still sees the restricted (not the deactivated) one.
-    Deactivate the section of an existing draft: the author reopening the
-    draft gets the "Section Closed" page naming the section and the
+    Journal Manager still sees the restricted one (not the deactivated
+    one). Deactivate the section of an existing draft: the author reopening
+    the draft gets the "Section Closed" page naming the section and the
     journal's contact. <sup>p</sup>
 13. **{OJS OMP} Suggest reviewers when asked** — Journal Manager, then
     Author: enable reviewer suggestions in the review settings. A new
     draft's wizard now shows the "Reviewer Suggestions" step before
     "Review", and the Review step gains a suggestions panel ("No reviewers
     have been suggested for this submission." while empty). Control: with
-    the setting off — and on a preprint server always — no such step
+    the setting off, and on a preprint server always, no such step
     appears. <sup>g</sup>
 14. **{OMP} Submit a monograph or an edited volume** — Author: the start
-    form asks for the Submission Type. Choose "Edited Volume…"; the wizard
+    form asks for the Submission Type. Choose "Edited Volume…". The wizard
     header reads "Submitting an Edited Volume." and "Change" offers the
-    type switch. The Details step lists Chapters whichever type is chosen —
-    switching back to "Monograph" changes only the header line, the
-    Chapters section stays. The For the Editors step
-    offers an optional Series choice ("None" preselected) when the press
-    has series [OMP1](#omp1). <sup>g</sup>
+    type switch. The Details step lists Chapters whichever type is chosen;
+    switching back to "Monograph" changes only the header line, and the
+    Chapters section stays. The For the Editors step offers an optional
+    Series choice ("None" preselected) when the press has series
+    [OMP1](#omp1). <sup>g</sup>
 15. **{OPS} Submit a preprint** — Author: on the Upload Files step, press
-    "Add File", enter a Galley Label (e.g. "PDF"), and upload the file,
-    picking its Preprint Component when asked; the fourth step, here
-    titled "For Readers",
-    asks for the License and the required "Relation status" answer; there
-    is no Reviewer Suggestions step. The
-    submit dialog says a moderator will review the preprint before posting;
-    "Submission complete" repeats it. Control — Preprint Server Manager
-    submitting their own preprint: the dialog and completion screen say
-    they can post it themselves [OPS1](#ops1), and no acknowledgement email
-    arrives for them ⚠ [OPS5](#ops5). <sup>m</sup> <sup>q</sup>
+    "Add File", enter a Galley Label (for example "PDF"), and upload the
+    file, picking its Preprint Component when asked. The fourth step, here
+    titled "For Readers", asks for the License and the required "Relation
+    status" answer. There is no Reviewer Suggestions step. The submit
+    dialog says a moderator will review the preprint before posting, and
+    "Submission complete" repeats it. Control: a Preprint Server Manager
+    submitting their own preprint. For them the dialog and completion
+    screen say they can post it themselves [OPS1](#ops1), and no
+    acknowledgement email arrives ⚠ [OPS5](#ops5). <sup>m</sup> <sup>q</sup>
 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-25; additions
-2026-08-26), unreviewed unless
-an entry notes otherwise; the team settles them on spec review. Sorted
-🐞 → ❓ → ✅ in the summary; the entries below are the source. Each entry
-opens with the user-observable symptom; mechanism and evidence live in the
-entry's footnote. Impact: user-visible = real effect in ordinary use ·
-minor = cosmetic · latent = only in an unusual situation.
+2026-08-26), unreviewed unless an entry notes otherwise. The team settles
+them on spec review. The summary is sorted 🐞 → ❓ → ✅; the entries below are
+the source. Each entry opens with the symptom a user sees. Mechanism and
+evidence live in the entry's footnote. Impact: user-visible = a real effect
+in ordinary use · minor = cosmetic · latent = only in an unusual situation.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A4](#a4) | The wizard footer shows a "Last saved" time counted from page load, not from a real save | 🐞 | minor | — |
 | [A5](#a5) | The copyright-agreed activity-log line opens with a raw "{$filename}" placeholder | 🐞 | minor | — |
-| [A6](#a6) | Submitting a draft twice shows a problems banner with nothing to fix — the real refusal never appears | 🐞 | latent | — |
+| [A6](#a6) | Submitting a draft twice shows a problems banner with nothing to fix; the real refusal never appears | 🐞 | latent | — |
 | [A7](#a7) | With acknowledgements off, the completion screen still claims a confirmation email was sent | 🐞 | minor | — |
 | [A8](#a8) | Section editors configured for auto-assignment are silently never assigned on any journal but the install's first | 🐞 | user-visible | — |
 | [A10](#a10) | A wizard loaded at phone width keeps its uncollapsed step rail and the page scrolls sideways (journal & press) | 🐞 | minor | — |
-| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all — "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | 🐞 | user-visible | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
-| [OPS3](#ops3) | A preprint author's own "Cancel" is silently refused — the draft survives with no message | 🐞 | user-visible | — |
+| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all; "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | 🐞 | user-visible | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
+| [OPS3](#ops3) | A preprint author's own "Cancel" is silently refused; the draft survives with no message | 🐞 | user-visible | — |
 | [OPS5](#ops5) | A can-post preprint submitter gets no acknowledgement email at all | 🐞 | user-visible | — |
 | [OPS7](#ops7) | The preprint "Not Allowed" page shows a raw locale code where its explanation should be | 🐞 | minor | — |
-| [A1](#a1) | Closing submissions does not stop drafts already started — they can still be filled and submitted | ❓ | latent | — |
+| [A1](#a1) | Closing submissions does not stop drafts already started; they can still be filled and submitted | ❓ | latent | — |
 | [A2](#a2) | The save-for-later confirmation email goes to whoever pressed the button, not to the submitting author | ❓ | latent | — |
 | [A3](#a3) | The submissions-closed notice shown to would-be authors ends with an instruction meant for managers | ❓ | minor | — |
-| [A9](#a9) | Pressing "Begin Submission" silently enrolls a pure Section Editor as Author — and probably a pure Site Administrator too | ❓ | latent | — |
+| [A9](#a9) | Pressing "Begin Submission" silently enrolls a pure Section Editor as Author, and probably a pure Site Administrator too | ❓ | latent | — |
 | [OPS2](#ops2) | A preprint server enrolls a roleless visitor as Author on merely opening the start screen | ❓ | latent | — |
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
@@ -600,8 +603,8 @@ minor = cosmetic · latent = only in an unusual situation.
 <a id="a1"></a>
 **A1 — Closed submissions do not stop an in-progress draft** · ❓ · latent.
 Turning off "accepting submissions" removes the sidebar entry and blocks the
-start screen (Rule 2), but an author with a draft already underway can still
-open it, keep filling it, and submit it — the closure is never checked once
+start screen (Rule 2). But an author with a draft already underway can still
+open it, keep filling it, and submit it. The closure is never checked once
 the draft exists.
 Question: is a closure meant to let started drafts finish, or should resume
 and submit be blocked too? Lean: letting drafts finish is defensible and
@@ -611,30 +614,30 @@ inspection + probe. <sup>[b](#fn-b)</sup>
 <a id="a2"></a>
 **A2 — Save-for-later email goes to the presser, not the owner** · ❓ · latent.
 "Save for Later" emails the resume link to the signed-in user who pressed
-the button. When that is the submitting author — the ordinary case — this is
-right; when a Journal Manager saves an author's draft for later, the manager
+the button. When that is the submitting author, the ordinary case, this is
+right. When a Journal Manager saves an author's draft for later, the manager
 gets the email and the author is never told. The Saved for Later screen even
 says so: its link names the author, while the note reads that the copy was
 emailed "to you at" the manager's own address.
 Question: should the resume-link email always go to the submitting author?
-Lean: yes — the link is the author's way back in; the current behavior reads
-as an oversight. Basis: probe. <sup>[j](#fn-j)</sup>
+Lean: yes. The link is the author's way back in, and the current behavior
+reads as an oversight. Basis: probe. <sup>[j](#fn-j)</sup>
 
 <a id="a3"></a>
 **A3 — The closed-journal notice speaks to the wrong audience** · ❓ · minor.
-With submissions disabled, anyone opening the start screen — including a
-plain author — reads "This journal is not accepting submissions at this
+With submissions disabled, anyone opening the start screen, including a
+plain author, reads "This journal is not accepting submissions at this
 time. Visit the workflow settings to allow submissions." The second sentence
-is an instruction only a manager can follow — and it is plain text, not a
-link, even for the manager.
+is an instruction only a manager can follow. It is plain text, not a link,
+even for the manager.
 Question: should authors get a message without the settings instruction?
-Lean: yes — one string serves two audiences; split it. Basis: probe.
+Lean: yes. One string serves two audiences; split it. Basis: probe.
 <sup>[b](#fn-b)</sup>
 
 <a id="a4"></a>
 **A4 — The footer claims a save that never happened** · 🐞 · minor.
 On opening any wizard step the footer already reads "Last saved a few
-seconds ago" and keeps counting — but the time is measured from the moment
+seconds ago" and keeps counting. But the time is measured from the moment
 the page loaded, not from any actual save, which may lie much further back.
 An author reading the footer is told their work was just saved when nothing
 has been sent.
@@ -643,27 +646,27 @@ Basis: probe. <sup>[i](#fn-i)</sup>
 <a id="a5"></a>
 **A5 — The copyright-agreed log line is garbled** · 🐞 · minor.
 When a submission is completed with the copyright box ticked, the activity
-log's agreement entry opens with a raw placeholder — "{$filename} (…)
-agreed to the copyright terms for submission.", the ticking user's username
-in the parentheses — on every copyright-confirmed submission. The
-neighboring "submission submitted" entry renders normally.
+log's agreement entry opens with a raw placeholder: "{$filename} (…)
+agreed to the copyright terms for submission.", with the ticking user's
+username in the parentheses. This happens on every copyright-confirmed
+submission. The neighboring "submission submitted" entry renders normally.
 Basis: probe. <sup>[m](#fn-m)</sup>
 
 <a id="a6"></a>
 **A6 — Double-submitting dead-ends on an empty problems banner** · 🐞 · latent.
-Pressing "Submit" on a draft that was already submitted — say, from a
-second browser tab left on the Review step — leaves the author on Review
-under the banner "There are one or more problems that need to be fixed
-before you can submit…" with nothing flagged on any panel. The server's
-actual refusal, "This submission has already been submitted…", never
-reaches the screen, so the author is told to fix problems that are not
-shown. Basis: probe. <sup>[m](#fn-m)</sup>
+Pressing "Submit" on a draft that was already submitted, say from a second
+browser tab left on the Review step, leaves the author on Review under the
+banner "There are one or more problems that need to be fixed before you can
+submit…" with nothing flagged on any panel. The server's actual refusal,
+"This submission has already been submitted…", never reaches the screen.
+So the author is told to fix problems that are not shown. Basis: probe.
+<sup>[m](#fn-m)</sup>
 
 <a id="a7"></a>
 **A7 — The completion screen claims an email that was never sent** · 🐞 · minor.
 With the journal's submission acknowledgement set to "Do not send an
 email.", the "Submission complete" screen still reads "…you've been
-emailed a confirmation for your records." — no email exists. An author
+emailed a confirmation for your records." No email exists. An author
 checking their inbox for the promised confirmation finds nothing.
 Basis: probe (a journal; the same sentence shows on a press).
 <sup>[q](#fn-q)</sup>
@@ -672,28 +675,27 @@ Basis: probe (a journal; the same sentence shows on a press).
 **A8 — Auto-assignment of section editors silently fails on all but the install's first journal** · 🐞 · user-visible.
 A section configured to assign editorial users automatically ("Editorial
 Assignments" on the section form) assigns nobody on any journal created
-after the install's first: the
-submission arrives with no editor, the configured editor is never emailed
-and never sees it, and the managers get the needs-an-editor alert instead.
-On the install's oldest journal the same setup works, which hides the
-defect from casual checks. Basis: probe (two failing journals plus a
-passing control, same day), with the code fault identified.
-<sup>[q](#fn-q)</sup>
+after the install's first. The submission arrives with no editor, the
+configured editor is never emailed and never sees it, and the managers get
+the needs-an-editor alert instead. On the install's oldest journal the same
+setup works, which hides the defect from casual checks. Basis: probe (two
+failing journals plus a passing control, same day), with the code fault
+identified. <sup>[q](#fn-q)</sup>
 
 <a id="a9"></a>
 **A9 — Starting a submission quietly turns a Section Editor into an Author** · ❓ · latent.
 The start screen admits a user whose only role is Section Editor on the
-strength of that editorial role, but pressing "Begin Submission" enrolls
-them in the journal's Author role — without asking, and without the
-self-registration check the ordinary sign-up path applies — and the
-submission is made under that new role, with the section editor
-auto-listed as its contributor and primary contact (Rule 5). A pure Site
-Administrator most likely gets the same treatment; that half is unverified
-— confirming it would permanently change the roles of the one seeded
-administrator account the whole test install depends on, so it awaits a
-check with a disposable administrator.
+strength of that editorial role. But pressing "Begin Submission" enrolls
+them in the journal's Author role, without asking, and without the
+self-registration check the ordinary sign-up path applies. The submission
+is made under that new role, with the section editor auto-listed as its
+contributor and primary contact (Rule 5). A pure Site Administrator most
+likely gets the same treatment. That half is unverified: confirming it
+would permanently change the roles of the one seeded administrator account
+the whole test install depends on, so it awaits a check with a disposable
+administrator.
 Question: should starting a submission change a section editor's (or
-administrator's) roles? Lean: unintended — the start screen offers the
+administrator's) roles? Lean: unintended. The start screen offers the
 editorial role, but the creation step recognizes only manager and author
 roles, and the developers already track the gap behind that mismatch.
 Basis: probe + code inspection (Section Editor); code inspection only
@@ -702,99 +704,93 @@ Basis: probe + code inspection (Section Editor); code inspection only
 <a id="a10"></a>
 **A10 — At phone width the step rail never collapses on a fresh load** · 🐞 · minor.
 Opening a wizard in a phone-sized window on a journal or press renders the
-full uncollapsed step rail and pushes the page into sideways scrolling —
-the "{n}/{total} steps" collapse never engages. The same window resized
-down after loading collapses correctly, as does a moderately narrow window
-from the start; a preprint server collapses correctly even on a phone-width
-load. Every step stays reachable by scrolling, hence minor. Basis: probe
+full uncollapsed step rail and pushes the page into sideways scrolling. The
+"{n}/{total} steps" collapse never engages. The same window resized down
+after loading collapses correctly, as does a moderately narrow window from
+the start. A preprint server collapses correctly even on a phone-width load.
+Every step stays reachable by scrolling, hence minor. Basis: probe
 (repeatable both orders, three apps compared). <sup>[h](#fn-h)</sup>
 
 <a id="a11"></a>
-**A11 — No profile affiliation, no submission: the wizard's start 500s**
-· 🐞 · user-visible · regression (pkp-lib `9e2fbac214`, on OJS `main` as of
-`d44b186c22`, 2026-09-01).
+**A11 — No profile affiliation, no submission: the wizard's start 500s** · 🐞 · user-visible.
+Regression (pkp-lib `9e2fbac214`, on OJS `main` as of `d44b186c22`,
+2026-09-01).
 A user submitting as an Author whose profile has no affiliation gets a
-server error the moment the submission is created — the wizard never
-opens. `newAuthorFromUser()` has long stored a literal null for the
-affiliations of a user with none to migrate; the affiliation-fix branch
-merged 2026-09-01 rewrote `Author::getAffiliations()` so it no longer
-null-coalesces (`getData(...) ?? collect()` became a hasData guard that
-returns the stored null), and the typed `iterable` return then throws a
-TypeError when `Repo::author()->add()` iterates affiliations on insert.
-Every author-creating flow with an affiliation-less user is affected;
-on the e2e install it 500s the harness's seeding endpoint too, redding
-~100 of 129 OJS tests. Only OJS's `main` pins the broken range so far —
-OMP/OPS inherit it at their next pkp-lib bump. Basis: full-suite
-reproduction on a fully synced checkout + code inspection of the
-breaking diff. <sup>[fn-a11](#fn-a11)</sup>
+server error the moment the submission is created. The wizard never opens.
+Every flow that creates an author record for an affiliation-less user is
+affected. On the e2e install it also breaks the harness's seeding endpoint,
+which reds about 100 of the 129 OJS tests. Only OJS's `main` pins the broken
+range so far; OMP and OPS inherit it at their next pkp-lib bump. The
+mechanism is in the footnote. Basis: full-suite reproduction on a fully
+synced checkout + code inspection of the breaking diff.
+<sup>[fn-a11](#fn-a11)</sup>
 
 ### OMP
 
 <a id="omp1"></a>
 **OMP1 — Intake by work type, series later** · ✅ · intended divergence.
-A press's start form asks for the Submission Type — "Monograph: Authors are
+A press's start form asks for the Submission Type, "Monograph: Authors are
 associated with the book as a whole." or "Edited Volume: Authors are
-associated with their own chapter." — instead of a section; nothing at
+associated with their own chapter.", instead of a section. Nothing at
 intake filters by series. The wizard header states the type ("Submitting a
 Monograph."), "Change Submission Settings" offers the type and language, and
 an optional Series choice (default "None") sits in the For the Editors step.
 The Details step additionally lists the book's Chapters, and the Review step
-summarizes them; chapter management itself is press tooling not detailed in
-this documentation set. Basis: code inspection — the press replaces the
+summarizes them. Chapter management itself is press tooling not detailed in
+this documentation set. Basis: code inspection; the press replaces the
 section machinery by design. <sup>[fn-omp1](#fn-omp1)</sup>
 
 ### OPS
 
 <a id="ops1"></a>
 **OPS1 — The preprint wizard is galley-based and moderation-aware** · ✅ · intended divergence.
-On a preprint server: the Upload Files step manages the preprint's galleys
-(what readers will download) rather than workflow files — its panel is
+On a preprint server the Upload Files step manages the preprint's galleys
+(what readers will download) rather than workflow files. Its panel is
 titled "Files", and "Add File" asks for a galley label and then the file's
-Preprint Component, with the Review step's matching panel also titled
-"Files"; the fourth step is
-titled "For Readers" — with "Comments for the Moderator" as its comments
-box — and adds a License choice and a required "Relation status" question;
-there is no Reviewer Suggestions step. Because posting is the only editorial
-act, the messaging branches on whether the user may post: the submit
-confirmation says a moderator will review the preprint (or that the
-submitter can post it), "Submission complete" carries the matching text
-(shown to whoever views it ⚠ [OPS4](#ops4)), and the acknowledgement email
-has a can-post variant — which in practice never arrives ⚠ [OPS5](#ops5).
-By default only moderators/managers may post; a screening plugin can extend
-it to authors. Basis: code inspection + probe — deliberate single-stage
-design. <sup>[fn-ops1](#fn-ops1)</sup>
+Preprint Component. The Review step's matching panel is also titled
+"Files". The fourth step is titled "For Readers", with "Comments for the
+Moderator" as its comments box, and adds a License choice and a required
+"Relation status" question. There is no Reviewer Suggestions step. Because
+posting is the only editorial act, the messaging branches on whether the
+user may post: the submit confirmation says a moderator will review the
+preprint (or that the submitter can post it), "Submission complete" carries
+the matching text (shown to whoever views it ⚠ [OPS4](#ops4)), and the
+acknowledgement email has a can-post variant, which in practice never
+arrives ⚠ [OPS5](#ops5). By default only moderators and managers may post;
+a screening plugin can extend it to authors. Basis: code inspection +
+probe; a deliberate single-stage design. <sup>[fn-ops1](#fn-ops1)</sup>
 
 <a id="ops2"></a>
 **OPS2 — Enrolment as Author happens on opening the start screen** · ❓ · latent.
 On a journal or press, a roleless signed-in user is enrolled in the Author
 role only when their submission is actually created. On a preprint server
-the enrolment happens as soon as they open the "Make a Submission" screen —
-before they have typed anything — so backing out still leaves the Author
+the enrolment happens as soon as they open the "Make a Submission" screen,
+before they have typed anything. So backing out still leaves the Author
 role on their account.
 Question: should merely viewing the start screen change a user's roles?
-Lean: no — enrol at creation, as the other apps do. Basis: probe.
+Lean: no. Enrol at creation, as the other apps do. Basis: probe.
 <sup>[c](#fn-c)</sup>
 
 <a id="ops3"></a>
 **OPS3 — An author's own Cancel silently does nothing** · 🐞 · user-visible.
 On a preprint server the wizard offers the submitting author the same
 "Cancel" control and "Cancel submission" dialog as everywhere else, but
-confirming does nothing: the dialog closes, no message appears, and the
-draft survives — the deletion is refused behind the scenes. A manager
+confirming does nothing. The dialog closes, no message appears, and the
+draft survives; the deletion is refused behind the scenes. A manager
 cancelling the same draft succeeds, and on a journal or press the author's
-own cancel works, so the control is offered to someone the server always
+own cancel works. So the control is offered to someone the server always
 refuses. Basis: probe (two independent runs, same day).
 <sup>[o](#fn-o)</sup>
 
 <a id="ops4"></a>
 **OPS4 — The completion screen thanks whoever is looking at it** · ❓ · latent.
 A preprint's "Submission complete" screen picks its message by the viewer's
-posting rights, not the submitter's: a manager opening another author's
+posting rights, not the submitter's. A manager opening another author's
 submitted wizard address reads "Thank you for submitting your preprint. You
-can now post your preprint publicly." — thanked and invited to post a
-preprint someone else submitted, with the author-facing links (Review this
-submission, Create a new submission, Return to your dashboard) absent from
-this variant.
+can now post your preprint publicly." They are thanked and invited to post
+a preprint someone else submitted, and the author-facing links (Review this
+submission, Create a new submission, Return to your dashboard) are absent
+from this variant.
 Question: should the completion screen address the submitter rather than
 the viewer? Lean: yes for the thank-you wording; offering a capable viewer
 the post-it-now link is defensible. Basis: probe. <sup>[n](#fn-n)</sup>
@@ -802,30 +798,30 @@ the post-it-now link is defensible. Basis: probe. <sup>[n](#fn-n)</sup>
 <a id="ops5"></a>
 **OPS5 — No acknowledgement email for a can-post submitter** · 🐞 · user-visible.
 A submitter who may post their own preprint (a manager, by default) gets no
-acknowledgement email after submitting — neither the can-post variant the
-app defines for exactly this case nor the ordinary one — while a plain
-author submitting under the same conditions receives theirs. The submitter
-is left with no emailed record of the submission. Basis: probe (with the
+acknowledgement email after submitting: neither the can-post variant the
+app defines for exactly this case nor the ordinary one. A plain author
+submitting under the same conditions receives theirs. The submitter is left
+with no emailed record of the submission. Basis: probe (with the
 plain-author control the same day). <sup>[q](#fn-q)</sup>
 
 <a id="ops6"></a>
 **OPS6 — The needs-an-editor email speaks journal language on a preprint server** · ❓ · minor.
 When a preprint arrives with no moderator assigned, the manager's task
 entry is preprint-worded ("A new preprint has been submitted to which a
-moderator needs to be assigned.") but the accompanying email is the
-journal template — "there is no editor assigned … assigning an editor
-under the Participants section".
+moderator needs to be assigned."), but the accompanying email is the
+journal template: "there is no editor assigned … assigning an editor under
+the Participants section".
 Question: should the email use preprint-server wording, as the matching
-task entry does? Lean: yes — the pair is inconsistent on the same event.
+task entry does? Lean: yes. The pair is inconsistent on the same event.
 Basis: probe. <sup>[q](#fn-q)</sup>
 
 <a id="ops7"></a>
 **OPS7 — The "Not Allowed" page explains itself in a raw locale code** · 🐞 · minor.
 A visitor turned away from a preprint server's start screen (Rule 3) gets
 the "Not Allowed" heading with, where the explanation should be, the
-literal text "##submission.wizard.notAllowed.description##" — the refused
+literal text "##submission.wizard.notAllowed.description##". The refused
 visitor is never told why. Both of the page's explanations are affected
-(the must-be-registered and the all-sections-closed variants); a journal
+(the must-be-registered and the all-sections-closed variants). A journal
 and a press show the proper text. Basis: probe + code inspection (the
 locale keys are missing on OPS alone). <sup>[c](#fn-c)</sup>
 

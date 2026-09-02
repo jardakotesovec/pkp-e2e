@@ -1,15 +1,16 @@
 # Glossary
 
-The vocabulary of the specs, in two parts. **Part I** defines what terms MEAN,
-so a QA or product person can read any spec without a developer — written in
-OJS voice; where OMP/OPS use a different NAME for the same thing, the entry
-says "cross-app names: Part II" rather than repeating the mapping. **Part II**
-is the cross-app term map and the shared-test capability names. Specs follow
-TEMPLATE rule 10 (`docs/process/TEMPLATE.md`): on-screen names win,
-first use of a coined term carries a gloss or pointer here, and authors add
-missing terms as part of writing. **Settled usage** entries record which of
-two competing words the specs use going forward; shipped specs are aligned
-opportunistically (self-healing).
+The vocabulary of the specs, in two parts. **Part I** says what the terms
+mean, so a QA or product person can read any spec without a developer. It is
+written in OJS words. Where OMP or OPS use a different name for the same
+thing, the entry says "cross-app names: Part II" instead of repeating the
+mapping. **Part II** is the cross-app term map and the capability names the
+shared tests use. Specs follow TEMPLATE rule 7 (`docs/process/TEMPLATE.md`):
+on-screen names win, the first use of a coined term carries a short
+explanation or a pointer here, and authors add missing terms as part of
+writing. **Settled usage** entries record which of two competing words the
+specs use from now on. Shipped specs are brought in line when they are next
+touched.
 
 ---
 
@@ -231,56 +232,56 @@ opportunistically (self-healing).
 <a id="reading-a-spec"></a>
 ## Reading a spec
 
-The one legend for every spec file — specs link here instead of repeating it.
+The one legend for every spec file. Specs link here instead of repeating it.
 
-- **The block of codes above the title** — a machine-readable index for the
-  documentation tooling; ignore it when reading.
-- **Unmarked claims.** A statement with no app marker asserts "verified
-  identical in every app that has the surface" — absence of a marker is
-  itself a claim, never "not yet checked".
-- **Badge** — `{OJS OMP}` on a title or scenario: which apps have the
+- **The block of codes above the title** is a machine-readable index for the
+  documentation tooling. Ignore it when reading.
+- **A claim with no app marker** holds in every app that has the surface, and
+  has been verified there. The absence of a marker is itself a claim, never
+  "not checked yet".
+- **Badge.** `{OJS OMP}` on a title or a scenario says which apps have the
   surface. A missing app gets a one-paragraph absence note near the top.
-- **Markers** — `⚠ [A1](#a1)` in the body means "as-built deviation here";
-  it links to the Findings-register entry. A plain `[OMP2](#omp2)` (no ⚠)
-  links to an intended divergence. Repeat mentions after the first carry the
-  bare marker.
-- **Finding / Findings register** — the spec's single home for as-built
-  deviations: 🐞 defect (author's call) · ❓ needs a product ruling · ✅
-  intended divergence. **Impact** is one plain word (user-visible / minor /
-  invisible / latent).
-- **Footnote marks** (`<sup>a</sup>`) — provenance: code anchors, probe
-  dates, seeded accounts. The body never depends on them; skip the footnote
-  tail and you lose no behavior.
-- **Everything is clickable** — markers, footnote marks, and cross-spec
-  pointers are real links, resolved both ways by the lint gate.
+- **Markers.** `⚠ [A1](#a1)` in the body means "the app deviates here from
+  what you would expect". It links to the Findings-register entry. A plain
+  `[OMP2](#omp2)` without ⚠ links to an intended difference between apps.
+  After the first mention, repeats carry the bare marker.
+- **Findings register.** The spec's single home for everything that deviates
+  or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
+  ruling · ✅ an intended difference. **Impact** is one plain word
+  (user-visible / minor / invisible / latent).
+- **Footnote marks** (`<sup>a</sup>`) point to evidence: code anchors, probe
+  dates, seeded accounts. The body never depends on them. Skip the footnotes
+  and you lose no behavior.
+- **Everything is clickable.** Markers, footnote marks and cross-spec pointers
+  are real links, checked both ways by the lint gate.
 ---
 
 # Part II — Cross-app term map & capability names
 
-**Contract.** This part is the single home for multi-app vocabulary. Specs are
-written in OJS terms, always; reading a spec for OMP or OPS, substitute via the
-tables below. No spec repeats these tables or inlines a translation ("journal
-(press in OMP)"). On-screen names win: every cell is the name
-the app's UI shows, and a probe that contradicts a cell fixes the cell. One
-definition per term. (Term meanings: Part I above.)
+**Contract.** This part is the single home for multi-app vocabulary. Specs
+are always written in OJS terms. When reading a spec for OMP or OPS,
+substitute using the tables below. No spec repeats these tables or inlines a
+translation such as "journal (press in OMP)". On-screen names win: every cell
+is the name the app's UI shows, and a probe that contradicts a cell fixes the
+cell. One definition per term. Term meanings are in Part I.
 
-**Two sections, two different questions.** §1 answers "what does this OJS
-word substitute to in OMP/OPS?" and governs SPEC scope — a renamed concept is
-the same feature, covered by the same spec. §2 answers "may a SHARED-layer
-test run on this app?" and governs test gating only. The two can legitimately
-disagree about the same noun: OMP series ARE sections for spec purposes
-(shared `PKPSection` machinery relabeled — one Sections spec covers them by
-substitution), while `hasSections` is ✗ for OMP so a shared-layer test
-written against OJS sections skips there and OMP's series coverage comes
-from its per-app suite (maintainer ruling 2026-07-27). Read each section for
-its own question and no cell conflicts.
+**Two sections, two different questions.** Section 1 answers "what does this
+OJS word become in OMP or OPS?" and governs the scope of a spec: a renamed
+concept is the same feature, covered by the same spec. Section 2 answers
+"may a shared-layer test run on this app?" and governs test gating only. The
+two can legitimately disagree about the same noun. OMP series ARE sections
+for spec purposes (the shared `PKPSection` machinery relabeled, so one
+Sections spec covers them by substitution), while `hasSections` is ✗ for OMP,
+so a shared-layer test written against OJS sections skips there and OMP's
+series coverage comes from its own suite. Read each section for its own
+question and no cell conflicts.
 
 **Absence is not a synonym.** A "—" cell means the concept does not exist in
-that app. Any rule or scenario built on a "—" term is implicitly absent there
-even without a badge (the spec still carries the badge — the dash is the
-reader's safety net, the badge is the contract). Where an app has a
-*counterpart feature* instead (issues → catalog), the dash says so, but the
-counterpart is a different feature with its own spec, never a substitution.
+that app. Any rule or scenario built on a "—" term is absent there even
+without a badge. The spec still carries the badge: the dash is the reader's
+safety net, the badge is the contract. Where an app has a *counterpart
+feature* instead (issues → catalog), the dash says so, but the counterpart
+is a different feature with its own spec, never a substitution.
 
 Terms not in this file mean the same thing in all three apps.
 
@@ -384,8 +385,7 @@ Vocabulary deltas (§1) never gate anything: labels and payload nouns come from
 `appContext.vocab` / `appContext.seed`, so a shared test runs unchanged wherever
 the capability holds.
 
-The §1-vs-§2 relationship (spec scope vs shared-test gating) is defined in
-the header — ruling evidence:
-`../tracking/.reports/phase0-feature-map/probe-omp-series.md` (2026-07-27;
-removed from the tip 2026-08-25, reachable in git history — RUNBOOK
-".reports/ retention").
+The relationship between section 1 (spec scope) and section 2 (shared-test
+gating) is defined in this part's header. The probe evidence behind it
+(`.reports/phase0-feature-map/probe-omp-series.md`) was removed from the tip
+and is reachable in git history.

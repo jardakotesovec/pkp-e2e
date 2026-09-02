@@ -15,85 +15,85 @@ atlas-claims: [AFFW-213, AFFW-214, AFFW-215, AFFW-217, AFFW-218, AFFW-219, AFFW-
 
 Once a submission is in a review round, someone has to find the reviewers,
 invite them, keep them on schedule, and read what they send back. That work
-happens in the "Reviewers" panel on the review stage: an editor searches the
-journal's reviewer pool (or creates a brand-new reviewer account, or enrolls
-an existing user), sets the deadlines, the review type and the files the
-reviewer may see, then follows each invitation through its life — reminding an
-overdue reviewer, recording a response the reviewer gave by email, reading the
-finished review in its Review Details window — rating it, marking it
-complete, even modifying what the reviewer wrote — thanking the reviewer, or
-unassigning and later reinstating them. This spec covers that panel and every window it opens.
-The round machinery around it — round numbers, the status box, the decision
-buttons — is the neighboring feature
-[→ round machinery](U26-review-stage-and-rounds.md#rounds); what the reviewer
-themself sees and does is the *Reviewer's review* feature; how review
+happens in the "Reviewers" panel on the review stage. An editor searches the
+journal's reviewer pool, or creates a brand-new reviewer account, or enrolls
+an existing user. They set the deadlines, the review type and the files the
+reviewer may see. Then they follow each invitation through its life: they
+remind an overdue reviewer, record a response the reviewer gave by email,
+read the finished review in its Review Details window, rate it, mark it
+complete, or even modify what the reviewer wrote. They thank the reviewer,
+or unassign and later reinstate them. This spec covers that panel and every
+window it opens. The round machinery around it (round numbers, the status
+box, the decision buttons) is the neighboring feature
+[→ round machinery](U26-review-stage-and-rounds.md#rounds). What the reviewer
+themself sees and does is the *Reviewer's review* feature. How review
 defaults and forms are configured is *Review setup & review forms*.
 
-OPS does not install a review stage or any reviewer role: a preprint server's
+OPS does not install a review stage or any reviewer role. A preprint server's
 workflow goes straight from submission to Production, no "Reviewers" panel
 exists on any screen, and its role settings offer no reviewer group. The
 absence of the stage itself is documented with
 [→ the review stage](U26-review-stage-and-rounds.md#rounds). The same
-deliberate absence covers the review emails — OPS ships no reviewer-flow
-email templates at all; an earlier reading of one missing template as a
+deliberate absence covers the review emails: OPS ships no reviewer-flow
+email templates at all. An earlier reading of one missing template as a
 latent fault is retired [OPS1](#ops1). <sup>p</sup>
 
-On a press, everything in this file runs twice: the Internal Review stage and
+On a press, everything in this file runs twice. The Internal Review stage and
 the External Review stage each carry their own Reviewers panel with the same
-controls. The reviewer pool differs by stage — searching the Add Reviewer
+controls. The reviewer pool differs by stage: searching the Add Reviewer
 window offers the press's Internal Reviewers on the internal stage and its
-External Reviewers on the external stage [OMP1](#omp1), though the window's
-opening, unsearched list does not yet apply that split ⚠ [OMP2](#omp2).
+External Reviewers on the external stage [OMP1](#omp1). The window's opening,
+unsearched list does not yet apply that split ⚠ [OMP2](#omp2).
 <sup>o</sup>
 
 ## Actors & permissions
 
-The Reviewers panel renders on the editorial view of the review stage; who
+The Reviewers panel renders on the editorial view of the review stage. Who
 can open that stage at all is
 [→ stage access](U26-review-stage-and-rounds.md#rounds) (the *Review stage &
 rounds* actors table). Within the panel, "review managers" below means:
 Journal Manager, Editor, and an assigned Section Editor or Guest Editor. A
 Site Administrator takes part through whatever journal role grants them
-stage access — holding no role in the journal, they are refused at the
-workflow screen itself ([A3](#a3), retired) <sup>a</sup>. An "assistant-level participant" is a member of an assistant
-group assigned to the stage (on the seeded installs the one such group the
-stage's assignment dialog offers is Funding Coordinator). The Author reaches
-the same workflow screen for their own submission but, while reviews are
-underway, gets no Reviewers panel at all — no table, no reviewer identities;
-whether and when a reduced read-only list of completed reviews appears is
-owned by
+stage access. Holding no role in the journal, they are refused at the
+workflow screen itself ([A3](#a3), retired) <sup>a</sup>. An "assistant-level
+participant" is a member of an assistant group assigned to the stage. On the
+seeded installs the one such group the stage's assignment dialog offers is
+Funding Coordinator. The Author reaches the same workflow screen for their
+own submission, but while reviews are underway they get no Reviewers panel at
+all: no table, no reviewer identities. Whether and when a reduced read-only
+list of completed reviews appears is owned by
 [→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review).
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Reviewers panel and its rows** | • Review managers and assistant-level participants — every round of the stage<br>• Author — no panel while reviews are underway; any reduced list of completed reviews is the neighboring feature's (see preamble) <sup>a</sup> |
-| **See declined and cancelled rows** | • Review managers only — an assistant-level participant's table silently omits those rows ⚠ [A6](#a6) <sup>a</sup> |
-| **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants — any round, including past rounds (the past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds)) <sup>a</sup> |
-| **"Create New Reviewer" / "Enroll Existing User"** | • Journal Manager, Editor, assigned Section Editor and Guest Editor — the two links inside the Add Reviewer window (a Site Administrator's access runs through such a journal role — see the preamble)<br>• assistant-level participants — the two links never appear <sup>a</sup> |
-| **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants — per assignment state (Rule 3 for when each appears and the menu's order; the operations in Rules 12–21; the Email Reviewer window is described under Fields) <sup>a</sup> |
-| **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor — about a user holding a Reviewer role, never about themselves<br>• assistant-level participants — the entry is absent <sup>l</sup> |
-| **"Login As" the reviewer** | • whoever may impersonate that reviewer — the row entry appears only then; the rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
-| **Author on the workflow screen** | • none of the above — an assigned Author gets none of these entries, even when they also hold an editorial role on the submission (the panel itself is absent, see the preamble); the server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
+| **See the Reviewers panel and its rows** | • Review managers and assistant-level participants: every round of the stage<br>• Author: no panel while reviews are underway. Any reduced list of completed reviews belongs to the neighboring feature (see the preamble) <sup>a</sup> |
+| **See declined and cancelled rows** | • Review managers only. An assistant-level participant's table silently omits those rows ⚠ [A6](#a6) <sup>a</sup> |
+| **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants: any round, including past rounds. The past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds) <sup>a</sup> |
+| **"Create New Reviewer" / "Enroll Existing User"** | • Journal Manager, Editor, assigned Section Editor and Guest Editor: the two links inside the Add Reviewer window. A Site Administrator's access runs through such a journal role (see the preamble)<br>• Assistant-level participants: the two links never appear <sup>a</sup> |
+| **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants, depending on the assignment's state. Rule 3 says when each action appears and in which order the menu lists them; the operations are Rules 12–21; the Email Reviewer window is described under Fields <sup>a</sup> |
+| **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor: about a user holding a Reviewer role, never about themselves<br>• Assistant-level participants: the entry is absent <sup>l</sup> |
+| **"Login As" the reviewer** | • Whoever may impersonate that reviewer. The row entry appears only then. The rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
+| **Author on the workflow screen** | • None of the above. An assigned Author gets none of these entries, even when they also hold an editorial role on the submission, because the panel itself is absent (see the preamble). The server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
 
 ## Fields & validation
 
 **Add Reviewer window** (title "Add Reviewer"; opened by the panel's "Add
-Reviewer" button). Its upper half is the reviewer search (Rules 5–8); once a
+Reviewer" button). Its upper half is the reviewer search (Rules 5–8). Once a
 reviewer is chosen, the name and email address are shown with a "Change" link
-back to the search,
-and the lower half holds the request form shared by all three add modes:
+back to the search. The lower half holds the request form shared by all three
+add modes:
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| Reviewer selection | yes | The request form below (and its submit button) stays hidden until a reviewer is chosen — the window offers no way to submit without one <sup>d</sup> |
-| "Choose a predefined message to use, or fill out the form below." | no | Email template chooser; renders on every add, even with no alternate request templates to offer — a one-option select ("Review Request") ⚠ [A19](#a19). When alternates do exist, all of them are listed ([A5](#a5), retired — the access check it questioned was reverted upstream) <sup>d</sup> |
-| "Email to be sent to reviewer" | no | Rich-text request letter, prefilled from the chosen template; placeholders for name, deadlines and the review link are filled at send time. Effectively required: submitting with the letter emptied fails with no on-screen feedback of any kind, yet still creates the assignment and never sends the request email ⚠ [A18](#a18) <sup>d</sup> |
-| "Do not send email to Reviewer." | no | Checkbox; skips the request email (the assignment is still created) <sup>d</sup> |
-| "Response Due Date" / "Review Due Date" (under "Important Dates") | yes | Date pickers, prefilled per the journal's review setup (Rule 9). The permanent guidance "Review due date must be greater or equal to response due date." states the rule (the Edit window shows it too); submitting with the dates inverted is refused with no visible feedback — the window stays open and nothing is added ⚠ [A8](#a8). The pickers (shared with the Edit and Resend windows) take calendar picks or a date typed in the YYYY-MM-DD format (e.g. 2026-08-02); input in any other format looks accepted on screen while the old value is silently submitted ⚠ [A16](#a16) — and they accept dates already past without any warning ⚠ [A17](#a17) <sup>f</sup> |
-| "Files To Be Reviewed" | no | Collapsed file list with one checkbox per file of the round; all ticked by default. The inline warning "No Files Selected" appears here only when the round has no files at all — unticking every box triggers no warning in this window (Rule 11) <sup>d</sup> |
-| "Review Type" | yes | Radio group "Anonymous Reviewer/Anonymous Author", "Anonymous Reviewer/Disclosed Author", "Open"; preselected per the journal's review setup <sup>d</sup> |
-| "Public Visibility" | no | Checkbox "Publicly Show Reviewer Comments"; preselected per the journal's public-visibility default <sup>d</sup> |
-| "Review Form" | no | Select, shown only when the journal has active review forms; default "None / Free Form Review"; a section may designate a default form (Rule 10) <sup>d</sup> |
+| Reviewer selection | yes | The request form below, and its submit button, stay hidden until a reviewer is chosen. The window offers no way to submit without one <sup>d</sup> |
+| "Choose a predefined message to use, or fill out the form below." | no | Email template chooser. It renders on every add, even with no alternate request templates to offer, as a one-option select ("Review Request") ⚠ [A19](#a19). When alternates do exist, all of them are listed ([A5](#a5), retired; the access check it questioned was reverted upstream) <sup>d</sup> |
+| "Email to be sent to reviewer" | no | Rich-text request letter, prefilled from the chosen template. Placeholders for name, deadlines and the review link are filled at send time. Effectively required: submitting with the letter emptied fails with no on-screen feedback of any kind, yet still creates the assignment and never sends the request email ⚠ [A18](#a18) <sup>d</sup> |
+| "Do not send email to Reviewer." | no | Checkbox. Skips the request email; the assignment is still created <sup>d</sup> |
+| "Response Due Date" / "Review Due Date" (under "Important Dates") | yes | Date pickers, prefilled per the journal's review setup (Rule 9). The permanent guidance "Review due date must be greater or equal to response due date." states the rule; the Edit window shows it too. Submitting with the dates inverted is refused with no visible feedback: the window stays open and nothing is added ⚠ [A8](#a8). The pickers, shared with the Edit and Resend windows, take calendar picks or a date typed in the YYYY-MM-DD format (e.g. 2026-08-02). Input in any other format looks accepted on screen while the old value is silently submitted ⚠ [A16](#a16). They also accept dates already past without any warning ⚠ [A17](#a17) <sup>f</sup> |
+| "Files To Be Reviewed" | no | Collapsed file list with one checkbox per file of the round, all ticked by default. The inline warning "No Files Selected" appears here only when the round has no files at all. Unticking every box triggers no warning in this window (Rule 11) <sup>d</sup> |
+| "Review Type" | yes | Radio group "Anonymous Reviewer/Anonymous Author", "Anonymous Reviewer/Disclosed Author", "Open". Preselected per the journal's review setup <sup>d</sup> |
+| "Public Visibility" | no | Checkbox "Publicly Show Reviewer Comments". Preselected per the journal's public-visibility default <sup>d</sup> |
+| "Review Form" | no | Select, shown only when the journal has active review forms. Default "None / Free Form Review". A section may designate a default form (Rule 10) <sup>d</sup> |
 
 **Create New Reviewer mode** (link "Create New Reviewer" inside the Add
 Reviewer window) adds account fields above the shared form:
@@ -103,61 +103,63 @@ Reviewer window) adds account fields above the shared form:
 | Given name | yes | Required in the site's primary language <sup>e</sup> |
 | Family name | no | A family name in a language requires a given name in that language <sup>e</sup> |
 | Affiliation | no | Free text <sup>e</sup> |
-| "Reviewing Interests" | no | Tag field over the site-wide interests vocabulary; suggestions appear while typing <sup>e</sup> |
-| Username | yes | Hint: "The username must contain only lowercase letters, numbers, and hyphens/underscores."; a duplicate is refused with the toast "The selected username is already in use by another user."; "Suggest" fills a lowercase proposal from the given name <sup>e</sup> |
-| Email | yes | Must be a valid address; a duplicate is refused with the toast "The selected email address is already in use by another user." <sup>e</sup> |
-| Reviewer role select | yes | Shown only when more than one reviewer group serves the stage; otherwise the single group is used silently <sup>e</sup> |
-| "Appear on the masthead" checkbox | — | Shown ticked and disabled — a new reviewer always appears on the masthead list of that group; informational only <sup>e</sup> |
+| "Reviewing Interests" | no | Tag field over the site-wide interests vocabulary. Suggestions appear while typing <sup>e</sup> |
+| Username | yes | Hint: "The username must contain only lowercase letters, numbers, and hyphens/underscores.". A duplicate is refused with the toast "The selected username is already in use by another user.". "Suggest" fills a lowercase proposal from the given name <sup>e</sup> |
+| Email | yes | Must be a valid address. A duplicate is refused with the toast "The selected email address is already in use by another user." <sup>e</sup> |
+| Reviewer role select | yes | Shown only when more than one reviewer group serves the stage. Otherwise the single group is used silently <sup>e</sup> |
+| "Appear on the masthead" checkbox | — | Shown ticked and disabled. A new reviewer always appears on the masthead list of that group; the box is informational only <sup>e</sup> |
 
 **Enroll Existing User mode** (link "Enroll Existing User"; the form is
 headed "Enroll an Existing User as Reviewer"):
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Search By Name" (user autocomplete) | yes | Searches users already enrolled in the journal who hold no reviewer role of any kind — on a press, membership in either stage's reviewer group excludes the user on both stages. Submitting with the field empty shows the generic "This field is required." above it; picking a user clears the message and the submit succeeds ([A14](#a14), retired) <sup>e</sup> |
-| Reviewer role select | yes | Always shown — even a single reviewer group renders as a one-option select (unlike Create New Reviewer, which then hides it) <sup>e</sup> |
+| "Search By Name" (user autocomplete) | yes | Searches users already enrolled in the journal who hold no reviewer role of any kind. On a press, membership in either stage's reviewer group excludes the user on both stages. Submitting with the field empty shows the generic "This field is required." above it. Picking a user clears the message and the submit succeeds ([A14](#a14), retired) <sup>e</sup> |
+| Reviewer role select | yes | Always shown. Even a single reviewer group renders as a one-option select, unlike Create New Reviewer, which then hides it <sup>e</sup> |
 | "Appear on the masthead" checkbox | — | Shown ticked and disabled, as in Create New Reviewer <sup>e</sup> |
 
 **Edit Review window** (row action "Edit"; title "Edit Review"): the two due
 dates, "Review Type" radios, "Public Visibility" checkbox, the "Files To Be
-Reviewed" file list, and — only while the review has not been submitted — the
-"Review Form" select. Here — and only here — the "No Files Selected" warning
-reacts to the checkboxes, appearing and disappearing as boxes are (un)ticked
-(Rule 11). Saving with review due date before response due date is
-refused under the same date rule as at add time ⚠ [A8](#a8). <sup>g</sup>
+Reviewed" file list, and the "Review Form" select. The select is offered only
+while the review has not been submitted. Here, and only here, the "No Files
+Selected" warning reacts to the checkboxes, appearing and disappearing as
+boxes are ticked and unticked (Rule 11). Saving with the review due date
+before the response due date is refused under the same date rule as at add
+time ⚠ [A8](#a8). <sup>g</sup>
 
 **Send Review Reminder window** (row action "Send Reminder"; window title
-"Review Reminder"): reviewer name and address (read-only), a template
+"Review Reminder"): the reviewer's name and address (read-only); a template
 chooser ("Choose a predefined message to use, or fill out the form below.")
-preset to the reminder template and listing it with any alternates — picking
-one refills the message below — the editable message, and a read-only "Review
-Schedule" block of three dates — "Editor's Request", "Response Due Date" and
-"Review Due Date" while the reviewer has not responded; once they have,
-"Response Due Date" gives way to "Review Acceptance Date" (the review due
-date shows in both variants). Submit button "Send Reminder". <sup>h</sup>
+preset to the reminder template and listing it with any alternates, where
+picking one refills the message below; the editable message; and a read-only
+"Review Schedule" block of three dates. While the reviewer has not responded
+the dates are "Editor's Request", "Response Due Date" and "Review Due Date".
+Once they have responded, "Response Due Date" gives way to "Review Acceptance
+Date". The review due date shows in both variants. Submit button "Send
+Reminder". <sup>h</sup>
 
-**Thank Reviewer window** (row action "Thank Reviewer"): reviewer name
-(read-only), prefilled thank-you message, "Do not send email to Reviewer."
-checkbox; submit "Thank Reviewer". <sup>j</sup>
+**Thank Reviewer window** (row action "Thank Reviewer"): the reviewer's name
+(read-only), a prefilled thank-you message, and the "Do not send email to
+Reviewer." checkbox. Submit "Thank Reviewer". <sup>j</sup>
 
 **Unassign/Cancel window** (row action "Unassign Reviewer" before a response,
 "Cancel Reviewer" after one): the same template chooser as the reminder
-window — here preset to the unassign or cancel notice template — the
-prefilled notice message, "Do not send email to Reviewer." checkbox; the
-submit button reads "Unassign Reviewer" or "Cancel Reviewer" to match
-(Rule 17). **Reinstate Reviewer window**: same shape, chooser included,
-submit "Reinstate Reviewer" ([A20](#a20), retired — the shipped script
-bundle briefly opened these windows, Send Reminder included, without
-their message editor).
+window, here preset to the unassign or cancel notice template; the prefilled
+notice message; and the "Do not send email to Reviewer." checkbox. The submit
+button reads "Unassign Reviewer" or "Cancel Reviewer" to match (Rule 17).
+**Reinstate Reviewer window**: the same shape, chooser included, with the
+submit "Reinstate Reviewer" ([A20](#a20), retired: the shipped script bundle
+briefly opened these windows, Send Reminder included, without their message
+editor).
 **Resend Review Request window** (on a declined row; no template chooser):
-message, skip-email checkbox, plus fresh "Response Due Date" and
-"Review Due Date" pickers — each preset from its own configured interval,
-exactly as at add time ([A9](#a9), retired) (Rule 19).
+the message, the skip-email checkbox, plus fresh "Response Due Date" and
+"Review Due Date" pickers. Each picker is preset from its own configured
+interval, exactly as at add time ([A9](#a9), retired) (Rule 19).
 <sup>k</sup>
 
 **Email Reviewer window** (row action "Email Reviewer"): "To" (read-only,
-showing the reviewer's name), Subject and Body — both marked required,
-but only the subject is enforced ⚠ [A13](#a13); with both empty the one
+showing the reviewer's name), Subject and Body. Both are marked required,
+but only the subject is enforced ⚠ [A13](#a13). With both empty, the one
 error shown is "This field is required." under Subject. Submit button
 "Send Email". <sup>l</sup>
 
@@ -166,130 +168,133 @@ field holding the notes kept about this reviewer, under the guidance "Record
 notes about this reviewer that you would like to make visible to other
 administrators, managers and all editors. Notes will be visible for future
 review assignments." ⚠ [A4](#a4). **Log Response window** (row
-action "Log Response"): one required radio — "Reviewer has accepted the
-invitation to review" / "Reviewer has declined the invitation to review" —
-under the prompt "Record the response on behalf of the reviewer"; submit
+action "Log Response"): one required radio, "Reviewer has accepted the
+invitation to review" / "Reviewer has declined the invitation to review",
+under the prompt "Record the response on behalf of the reviewer". Submit
 "Log Response". <sup>k</sup> <sup>l</sup>
 
 ## Rules & state
 
 1. **One table per round.** The "Reviewers" panel lists the selected round's
-   review assignments — each row one reviewer of that round. Five columns:
-   "Reviewer" (full name), "Reviewer status", "Type" (review-type icons),
-   "Actions" (the state's primary button or buttons, Rule 3) and "More
-   Actions" (the ellipsis menu holding the remaining row actions). The same
-   reviewer may sit on several rounds; each round shows only its own row.
-   <sup>a</sup>
+   review assignments. Each row is one reviewer of that round. There are five
+   columns: "Reviewer" (full name), "Reviewer status", "Type" (review-type
+   icons), "Actions" (the state's primary button or buttons, Rule 3) and
+   "More Actions" (the ellipsis menu holding the remaining row actions). The
+   same reviewer may sit on several rounds; each round shows only its own
+   row. <sup>a</sup>
 2. <a id="statuses"></a> **The status column.** Each row's status is
    recomputed from the assignment's real state every time the screen loads:
 
    | Status reads | When | Second line |
    |---|---|---|
-   | "Request Sent" | Invitation out, no response, response not yet due | none — the "Response due: {date}" line is missing here, though the date is set ⚠ [A7](#a7) |
+   | "Request Sent" | Invitation out, no response, response not yet due | none. The "Response due: {date}" line is missing here, though the date is set ⚠ [A7](#a7) |
    | "Request Accepted" | Reviewer accepted, review not yet due | "Review due: {date}" |
    | "Overdue" (red) | No response and the response date passed | "Response due: {date}" |
    | "Overdue" (red) | Accepted (or not) and the review date passed | "Review due: {date}" |
    | "Request Declined" | Reviewer declined (hover: "The reviewer declined this review request.") | — |
-   | "Request Resent" | Request re-sent after a decline, no response yet | "Response due: {date}" — but the date shown is the review deadline ⚠ [A2](#a2) |
-   | "Review Submitted" | Review in, no editor has opened it yet ([A10](#a10), retired — opening now marks it viewed); also after "Revert Decision" on a "Complete" row (Rule 16) | reviewer's recommendation {OJS} |
+   | "Request Resent" | Request re-sent after a decline, no response yet | "Response due: {date}", but the date shown is the review deadline ⚠ [A2](#a2) |
+   | "Review Submitted" | Review in, no editor has opened it yet ([A10](#a10), retired: opening now marks it viewed); also after "Revert Decision" on a "Complete" row (Rule 16) | reviewer's recommendation {OJS} |
    | "Review Viewed" | An editor opened the review (Rule 14a); also after "Revert Decision" on a "Reviewer Thanked" row (Rule 16) | reviewer's recommendation {OJS} |
    | "Complete" | An editor marked the review complete (Rule 14a) | reviewer's recommendation {OJS} |
    | "Reviewer Thanked" | Thank-you sent or recorded (Rule 16) | reviewer's recommendation {OJS} |
    | "Request Cancelled" | Assignment cancelled (hover: "The editor cancelled this review request.") | — |
 
-   A "Competing Interests" badge is appended when the reviewer declared any —
-   possible only on a journal with a competing-interests policy, without
-   which the reviewer wizard never asks and the badge cannot occur.
-   On a press, no recommendation line ever shows — a press's review collects
-   none [OMP1](#omp1). <sup>b</sup>
-3. **What each status admits.** The row's offered actions follow the status:
-   "Send Reminder" is the "Actions" button only in the two "Overdue" states;
-   "Read Review" in "Review Submitted"/"Review Viewed"; "Thank Reviewer" and
-   "Revert Decision" in "Complete"; "Revert Decision" alone in "Reviewer
-   Thanked"; the other states get no "Actions" button. The "More Actions"
-   menu of a non-cancelled row offers, in order: "Review Details" — the
-   same window the "Read Review" button opens (Rule 14a) —, "Edit", the
-   unassign entry ("Unassign Reviewer" before a response, "Cancel Reviewer"
-   after one — Rule 17), "Email Reviewer", "History", then "Login As" and
-   "Editorial Notes" per the Actors table, "Resend Review Request"
-   only on "Request Declined", "Log Response" only while the reviewer has
-   not responded, and "Send Review To ORCID" when the reviewer has an
-   authenticated ORCID iD (Rule 23). On a cancelled row, "Reinstate
-   Reviewer" stands in place of the first three entries; the rest of the
-   menu is unchanged. <sup>a</sup>
-4. **The round's status line follows this table** — adding reviewers,
-   receiving and confirming reviews move the round status box described in
-   [→ the round status](U26-review-stage-and-rounds.md#round-status); this spec
-   never restates those sentences.
+   A "Competing Interests" badge is appended when the reviewer declared any.
+   That is possible only on a journal with a competing-interests policy;
+   without one, the reviewer wizard never asks and the badge cannot occur.
+   On a press, no recommendation line ever shows, because a press's review
+   collects none [OMP1](#omp1). <sup>b</sup>
+3. **What each status admits.** The row's offered actions follow the status.
+   "Send Reminder" is the "Actions" button only in the two "Overdue" states.
+   "Read Review" is the button in "Review Submitted" and "Review Viewed".
+   "Thank Reviewer" and "Revert Decision" are the buttons in "Complete", and
+   "Revert Decision" alone in "Reviewer Thanked". The other states get no
+   "Actions" button. The "More Actions" menu of a non-cancelled row offers,
+   in order: "Review Details" (the same window the "Read Review" button
+   opens, Rule 14a), "Edit", the unassign entry ("Unassign Reviewer" before
+   a response, "Cancel Reviewer" after one, Rule 17), "Email Reviewer",
+   "History", then "Login As" and "Editorial Notes" per the Actors table,
+   "Resend Review Request" only on "Request Declined", "Log Response" only
+   while the reviewer has not responded, and "Send Review To ORCID" when the
+   reviewer has an authenticated ORCID iD (Rule 23). On a cancelled row,
+   "Reinstate Reviewer" stands in place of the first three entries; the rest
+   of the menu is unchanged. <sup>a</sup>
+4. **The round's status line follows this table.** Adding reviewers,
+   receiving reviews and confirming reviews move the round status box
+   described in
+   [→ the round status](U26-review-stage-and-rounds.md#round-status). This
+   spec never restates those sentences.
 5. <a id="search"></a> **Finding a reviewer.** The Add Reviewer window opens
    on "Locate a Reviewer": a searchable list of every user holding a
-   reviewer role for the stage (on a press the opening, unsearched list does
-   not yet honor the stage split ⚠ [OMP2](#omp2)), paged past 30 entries
-   behind a "View additional pages" bar. Each entry shows name, affiliation
-   and ORCID iD (a link showing the iD URL; an unauthenticated iD carries
-   the suffix "(unauthenticated)" and an outline ORCID logo, an
-   authenticated one the bare URL and the solid logo), headline counts ("{N}
-   active", "Reviewer rating: {N}" stars), days since last assignment ("{N}
-   days ago" / "Yesterday" / "Never assigned"), reviewing interests, and
-   expands to full statistics: active reviews, "Reviews completed", "Review
+   reviewer role for the stage. On a press the opening, unsearched list does
+   not yet honor the stage split ⚠ [OMP2](#omp2). Past 30 entries the list
+   is paged behind a "View additional pages" bar. Each entry shows the name,
+   affiliation and ORCID iD. The iD is a link showing the iD URL; an
+   unauthenticated iD carries the suffix "(unauthenticated)" and an outline
+   ORCID logo, an authenticated one the bare URL and the solid logo. The
+   entry also shows headline counts ("{N} active", "Reviewer rating: {N}"
+   stars), days since the last assignment ("{N} days ago" / "Yesterday" /
+   "Never assigned"), and reviewing interests. It expands to full
+   statistics, always shown: active reviews, "Reviews completed", "Review
    requests declined", "Review requests cancelled", "Days since last review
-   assigned", "Average days to complete review" — always — plus
-   "Reviewing Interests", "Editorial Notes" (when the viewer may read them)
-   and "Biography" only when there is data: an empty section is omitted, not
-   shown blank. <sup>c</sup>
-6. **Search aids.** A name search box; a "Filters" sidebar with five slider
-   controls — "Rated at least" (stars), "Reviews completed", "Days since
-   last review assigned" (range), "Active reviews currently assigned"
-   (range), "Average days to complete review" — each sitting disabled until
-   its per-filter enable button is pressed; and, above the list, the
-   submission's author names with affiliations (the first four bold, the
-   rest collapsed behind a "Show All {N} Authors" / "Show Less" toggle) so
-   the editor can spot conflicts. A reviewer whose affiliation matches an
-   author's (case-insensitively) is badged "Same institution as author".
+   assigned", "Average days to complete review". "Reviewing Interests",
+   "Editorial Notes" (when the viewer may read them) and "Biography" appear
+   only when there is data; an empty section is omitted, not shown blank.
    <sup>c</sup>
+6. **Search aids.** There is a name search box and a "Filters" sidebar with
+   five slider controls: "Rated at least" (stars), "Reviews completed",
+   "Days since last review assigned" (range), "Active reviews currently
+   assigned" (range), "Average days to complete review". Each slider sits
+   disabled until its per-filter enable button is pressed. Above the list,
+   the submission's author names with affiliations are shown so the editor
+   can spot conflicts: the first four in bold, the rest collapsed behind a
+   "Show All {N} Authors" / "Show Less" toggle. A reviewer whose affiliation
+   matches an author's (case-insensitively) is badged "Same institution as
+   author". <sup>c</sup>
 7. **Locks and notices in the list.**
    - A reviewer already on this round is dimmed with "This reviewer has
      already been assigned to this review round." and cannot be selected
      again.
-   - A user who can see the author's identity — anyone with any assignment on
-     the submission, and every Journal Manager and Site Administrator — is
-     locked with "This reviewer is locked because they have been assigned a
-     role which allows them to view the author's identity. Anonymous peer
-     review can not be guaranteed. Would you like to unlock this reviewer
-     anyway?" plus an "Unlock" link; unlocking frees the Select button for
-     that entry. <sup>c</sup>
+   - A user who can see the author's identity is locked. That means anyone
+     with any assignment on the submission, and every Journal Manager and
+     Site Administrator. The lock reads "This reviewer is locked because they
+     have been assigned a role which allows them to view the author's
+     identity. Anonymous peer review can not be guaranteed. Would you like to
+     unlock this reviewer anyway?" with an "Unlock" link. Unlocking frees the
+     Select button for that entry. <sup>c</sup>
 8. **Later rounds.** From Round 2 on, reviewers who completed a review in the
-   previous round are hoisted to the top of the list, flagged "This reviewer
-   completed a review in the last round.", and their button reads "Reassign"
-   instead of "Select Reviewer". The request email for any assignment on a
-   later round defaults to the subsequent-round request template, sent as
-   "Request to review a revised submission" (Side effects). <sup>c</sup>
-   <sup>d</sup>
+   previous round are hoisted to the top of the list and flagged "This
+   reviewer completed a review in the last round.". Their button reads
+   "Reassign" instead of "Select Reviewer". The request email for any
+   assignment on a later round defaults to the subsequent-round request
+   template, sent as "Request to review a revised submission" (Side
+   effects). <sup>c</sup> <sup>d</sup>
 9. <a id="due-dates"></a> **Deadlines.** Every request carries a response due
-   date (the date to accept or decline by) and a review due date. Defaults
-   come from the journal's review setup (weeks from today for each; the
-   install falls back to 3 weeks for the response and 4 for the review when
-   unset — the numbers are *Review setup & review forms*'). The review due
-   date may not precede the response due date ⚠ [A8](#a8), and nothing warns
-   against a date already past ⚠ [A17](#a17) (Fields). <sup>f</sup>
+   date (the date to accept or decline by) and a review due date. The
+   defaults come from the journal's review setup, as weeks from today for
+   each. When unset, the install falls back to 3 weeks for the response and
+   4 for the review; the numbers belong to *Review setup & review forms*.
+   The review due date may not precede the response due date ⚠ [A8](#a8),
+   and nothing warns against a date already past ⚠ [A17](#a17) (Fields).
+   <sup>f</sup>
 10. **Review type, visibility, form.** Each assignment carries its own review
     type (the three-way anonymity choice), a public-visibility flag, and
-    optionally one of the journal's review forms; defaults per the review
-    setup and — for the form — per the submission's section. The type gates
-    the author's access to the finished review
-    ([→ reading as the author](U26-review-stage-and-rounds.md#author-read-review))
-    and what the reviewer wizard shows is the *Reviewer's review* feature.
-    The form can be changed (Edit window) only until the review is
-    submitted; afterwards the selector disappears. <sup>d</sup> <sup>g</sup>
-11. **File access.** The reviewer will see exactly the round files ticked in
-    the "Files To Be Reviewed" list — at add time and at any later "Edit";
-    editing replaces the whole selection with the current checkboxes. Which
+    optionally one of the journal's review forms. The defaults come from the
+    review setup and, for the form, from the submission's section. The type
+    gates the author's access to the finished review
+    ([→ reading as the author](U26-review-stage-and-rounds.md#author-read-review)).
+    What the reviewer wizard shows is the *Reviewer's review* feature. The
+    form can be changed (Edit window) only until the review is submitted;
+    afterwards the selector disappears. <sup>d</sup> <sup>g</sup>
+11. **File access.** The reviewer sees exactly the round files ticked in the
+    "Files To Be Reviewed" list, at add time and at any later "Edit".
+    Editing replaces the whole selection with the current checkboxes. Which
     files populate that list is the round's Files for Review set
     ([→ Files for Review](U26-review-stage-and-rounds.md#review-files)). The
     "No Files Selected" warning appears in the Add window only when the
-    round's list is empty; only the Edit window shows and hides it reactively
-    as boxes are (un)ticked. Either way nothing blocks saving — an assignment
-    can be created or saved with no files granted at all.
+    round's list is empty. Only the Edit window shows and hides it reactively
+    as boxes are ticked and unticked. Either way nothing blocks saving: an
+    assignment can be created or saved with no files granted at all.
     <sup>d</sup> <sup>g</sup>
 12. **Editing notifies the reviewer.** Saving the Edit window with a changed
     due date or review type puts a "Review assignment updated." task in the
@@ -297,201 +302,202 @@ under the prompt "Record the response on behalf of the reviewer"; submit
     (Side effects). An edit that changes only files or visibility sends
     nothing. <sup>g</sup>
 13. <a id="reminders"></a> **Reminders.** "Send Reminder" exists only while a
-    row shows "Overdue" — an editor cannot send the reminder form to an
-    on-schedule reviewer (the free-form "Email Reviewer" window has no such
-    gate). Sending stamps a dated "Reminder" milestone into the row's
-    History — a line the reviewer's subsequent response erases
-    ⚠ [A15](#a15). Separately,
-    the install sends automatic reminder emails around each deadline; their
-    day-offsets are configured in *Review setup & review forms*, and each
-    automatic send also lands in History. <sup>h</sup>
-14a. <a id="read-review"></a> **The Review Details window.** "Read Review" —
-    or the menu's "Review Details" — opens a side window titled "Review
+    row shows "Overdue". An editor cannot send the reminder form to an
+    on-schedule reviewer; the free-form "Email Reviewer" window has no such
+    gate. Sending stamps a dated "Reminder" milestone into the row's History.
+    The reviewer's subsequent response erases that line ⚠ [A15](#a15).
+    Separately, the install sends automatic reminder emails around each
+    deadline. Their day-offsets are configured in *Review setup & review
+    forms*, and each automatic send also lands in History. <sup>h</sup>
+14a. <a id="read-review"></a> **The Review Details window.** "Read Review",
+    or the menu's "Review Details", opens a side window titled "Review
     Details: {submission title}". The same window also opens from the
     submissions dashboard list's
     [→ review activity indicators](U23-submissions-dashboard.md#review-indicators):
-    their popover's "View details" (review not yet submitted) or "View
-    unread recommendation" (review submitted) button leads here. {OJS}
+    their popover's "View details" button (review not yet submitted) or
+    "View unread recommendation" button (review submitted) leads here. {OJS}
     Opened from that popover, a submitted review's window currently omits
-    the reviewer's recommendation — everything else renders as described
-    below ⚠ [A25](#a25). It shows the reviewer's name; a guidance
-    paragraph that still tells the editor they "may upload the file below"
-    though the window offers no upload control ⚠ [A22](#a22); the
-    "Download Review Form" menu (Rule 15); a summary block with "Review
-    Submitted: {date and time}" and {OJS} "Recommendation: {label}"; the
-    "Reviewer Comments" — the review form answers, or "For author and
-    editor" and, separately, the editor-only comments, headed "For editor"
-    {OJS} / "For editor only" {OMP}; the "Reviewer Files" the reviewer
-    attached, read-only; {OJS} a display-only "Reviewer Recommendation"
-    group — so the recommendation appears twice, under two labels
-    ⚠ [A23](#a23); and a "Reviewer rating" star row ("No rating" or 1–5,
-    under "Rate the quality of the review provided. This rating is not
-    shared with the reviewer."). Footer buttons: "Cancel", "Modify Review"
-    (Rule 14b) and "Mark as Complete". Merely opening the window marks a
-    submitted review viewed — the row behind it updates to "Review
-    Viewed" at once and stays there ([A10](#a10), retired: the label now
-    means what it says). Clicking a rating star saves immediately — toast
-    "Reviewer rating saved" — and the rating persists across close and
-    reopen, though a click in the first moments after the window opens
-    can silently not take ⚠ [A21](#a21). {OJS} "Mark as Complete" sits
-    disabled, with a message beside it, while the review carries no
-    recommendation ("A recommendation is required before this review can
-    be marked as complete.") or leaves required review-form fields
-    unanswered ("This review is incomplete and cannot be marked as
-    complete yet."); on a press no such gate exists and the button is
-    enabled at once [OMP1](#omp1). Pressing it asks "Mark this review as
-    complete?" — "You can still modify this review after marking it as
-    complete. You will have the opportunity to thank the reviewer in the
-    next step." — and confirming shows "The review has been marked as
-    complete.": the row turns "Complete" (with the recommendation under
-    the status {OJS}) and offers "Thank Reviewer" and "Revert Decision"
-    (Rule 16), while in the still-open window "Mark as Complete" goes
+    the reviewer's recommendation; everything else renders as described
+    below ⚠ [A25](#a25). The window shows the reviewer's name. It shows a
+    guidance paragraph that still tells the editor they "may upload the file
+    below", though the window offers no upload control ⚠ [A22](#a22). It
+    shows the "Download Review Form" menu (Rule 15), and a summary block
+    with "Review Submitted: {date and time}" and {OJS} "Recommendation:
+    {label}". It shows the "Reviewer Comments": the review form answers, or
+    "For author and editor" and, separately, the editor-only comments,
+    headed "For editor" {OJS} / "For editor only" {OMP}. It shows the
+    "Reviewer Files" the reviewer attached, read-only. {OJS} It also shows a
+    display-only "Reviewer Recommendation" group, so the recommendation
+    appears twice, under two labels ⚠ [A23](#a23). Last comes a "Reviewer
+    rating" star row ("No rating" or 1–5, under "Rate the quality of the
+    review provided. This rating is not shared with the reviewer."). The
+    footer buttons are "Cancel", "Modify Review" (Rule 14b) and "Mark as
+    Complete". Merely opening the window marks a submitted review viewed:
+    the row behind it updates to "Review Viewed" at once and stays there
+    ([A10](#a10), retired: the label now means what it says). Clicking a
+    rating star saves immediately, with the toast "Reviewer rating saved",
+    and the rating persists across close and reopen. A click in the first
+    moments after the window opens can silently not take ⚠ [A21](#a21).
+    {OJS} "Mark as Complete" sits disabled, with a message beside it, while
+    the review carries no recommendation ("A recommendation is required
+    before this review can be marked as complete.") or leaves required
+    review-form fields unanswered ("This review is incomplete and cannot be
+    marked as complete yet."). On a press no such gate exists and the button
+    is enabled at once [OMP1](#omp1). Pressing it asks "Mark this review as
+    complete?" with the text "You can still modify this review after
+    marking it as complete. You will have the opportunity to thank the
+    reviewer in the next step.". Confirming shows "The review has been
+    marked as complete.". The row turns "Complete" (with the recommendation
+    under the status {OJS}) and offers "Thank Reviewer" and "Revert
+    Decision" (Rule 16). In the still-open window "Mark as Complete" goes
     disabled and "Modify Review" stays available. <sup>i</sup>
 14b. **Modifying a review.** "Modify Review" first asks "Modify this
-    review?" — "You are about to modify the review submitted by {reviewer
-    name}. All modifications will be recorded in the activity log." —
-    then opens a second side window, "Modify Review", stacked over the
-    first: it names the submission, repeats "You are modifying a
-    submitted review. All modifications will be recorded in the activity
-    log." and {OJS} shows a "Submitted recommendation:" line. Editable
-    there: the "For author and editor" comment — under the note "If this
-    is an open peer review, this comment will also appear publicly
-    alongside the article." — the "Reviewer Files" (the "Upload" control
-    lives here, not in the view window), and {OJS} a required
-    "Recommendation" select. The editor-only comment is editable
-    nowhere — it stays display-only in both windows, in both apps.
-    "Cancel" returns to the view window; "Save Changes" saves and closes
-    the edit window, and the view window refreshes showing "Last modified
-    by {user full name}" under its title along with the edited values —
-    with no further confirmation (only a review already marked complete
-    and publicly visible, on a journal running open review, gets a "Save
-    changes to this review?" dialog first). Each save lands attributed in
-    the submission's activity log (Side effects) — and would also mark a
+    review?" with the text "You are about to modify the review submitted by
+    {reviewer name}. All modifications will be recorded in the activity
+    log.". It then opens a second side window, "Modify Review", stacked over
+    the first. That window names the submission, repeats "You are modifying
+    a submitted review. All modifications will be recorded in the activity
+    log." and {OJS} shows a "Submitted recommendation:" line. Three things
+    are editable there: the "For author and editor" comment, under the note
+    "If this is an open peer review, this comment will also appear publicly
+    alongside the article."; the "Reviewer Files" (the "Upload" control
+    lives here, not in the view window); and {OJS} a required
+    "Recommendation" select. The editor-only comment is editable nowhere. It
+    stays display-only in both windows, in both apps. "Cancel" returns to
+    the view window. "Save Changes" saves and closes the edit window, and
+    the view window refreshes showing "Last modified by {user full name}"
+    under its title along with the edited values. There is no further
+    confirmation, with one exception: a review already marked complete and
+    publicly visible, on a journal running open review, gets a "Save changes
+    to this review?" dialog first. Each save lands attributed in the
+    submission's activity log (Side effects). A save would also mark a
     not-yet-complete review complete, a side effect no screen can reach
     today ⚠ [A24](#a24). <sup>i</sup>
 15. **Downloading a review.** The Review Details window's "Download Review
-    Form" menu offers the same four exports as ever: "Author-Only Sections Displayed" and "Editor Form
-    Shows All Review Sections", each as PDF or XML. The author-only variants
-    omit the editor-only comments and also hide the reviewer's identity —
-    the reviewer is presented anonymized. The file downloads through the
-    browser. <sup>i</sup>
-16. **Thanking, and taking it back.** "Thank Reviewer" sends (or, with the
-    skip box, only records) the acknowledgement — the row turns "Reviewer
-    Thanked" and the on-screen notice reads "Thank you email sent to
-    reviewer." or "Review marked as acknowledged. Email not sent.". "Revert
-    Decision" asks "Unconsider this Review" — confirming returns a
+    Form" menu offers the same four exports as ever: "Author-Only Sections
+    Displayed" and "Editor Form Shows All Review Sections", each as PDF or
+    XML. The author-only variants omit the editor-only comments and also
+    hide the reviewer's identity; the reviewer is presented anonymized. The
+    file downloads through the browser. <sup>i</sup>
+16. **Thanking, and taking it back.** "Thank Reviewer" sends the
+    acknowledgement, or only records it when the skip box is ticked. The row
+    turns "Reviewer Thanked" and the on-screen notice reads "Thank you email
+    sent to reviewer." or "Review marked as acknowledged. Email not sent.".
+    "Revert Decision" asks "Unconsider this Review". Confirming returns a
     "Complete" row to "Review Submitted" and a "Reviewer Thanked" row to
     "Review Viewed", with no notice shown either way, so the review can be
-    re-examined; the review content is untouched and the revert is logged.
+    re-examined. The review content is untouched and the revert is logged.
     <sup>j</sup>
 17. <a id="unassign"></a> **Unassign vs Cancel.** Before the reviewer has
-    responded, the entry reads "Unassign Reviewer" and removing them deletes
-    the row outright — the notice reads "Reviewer removed." and nothing of
-    the invitation remains on the round. After any response (accept or
-    decline), the entry reads "Cancel Reviewer": the row stays, as "Request
-    Cancelled", and only review managers keep seeing it ⚠ [A6](#a6). Both
-    windows offer the notice email — each with its own template chooser and
-    a skip box (Fields). <sup>k</sup>
+    responded, the entry reads "Unassign Reviewer", and removing them
+    deletes the row outright. The notice reads "Reviewer removed." and
+    nothing of the invitation remains on the round. After any response,
+    accept or decline, the entry reads "Cancel Reviewer". The row then
+    stays, as "Request Cancelled", and only review managers keep seeing it
+    ⚠ [A6](#a6). Both windows offer the notice email, each with its own
+    template chooser and a skip box (Fields). <sup>k</sup>
 18. **Reinstate.** "Reinstate Reviewer" on a cancelled row restores the
     assignment to the state its dates imply (accepted, overdue, submitted…),
-    with an optional notice email; notice "Reviewer reinstated." <sup>k</sup>
+    with an optional notice email. The notice reads "Reviewer reinstated."
+    <sup>k</sup>
 19. **Resend after a decline.** "Resend Review Request" on a declined row
-    asks the reviewer to reconsider: fresh response and review due dates
-    (Fields), optional email, notice "Request to
-    reconsider the review assignment was sent." The row becomes "Request
-    Resent" until the reviewer responds again ⚠ [A2](#a2), and its menu
-    again offers "Unassign Reviewer" and "Log Response" — the request counts
-    as unanswered once more. <sup>k</sup>
+    asks the reviewer to reconsider, with fresh response and review due dates
+    (Fields) and an optional email. The notice reads "Request to reconsider
+    the review assignment was sent." The row becomes "Request Resent" until
+    the reviewer responds again ⚠ [A2](#a2). Its menu again offers "Unassign
+    Reviewer" and "Log Response", because the request counts as unanswered
+    once more. <sup>k</sup>
 20. **Logging a response.** When a reviewer answers by email instead of
     clicking, "Log Response" records the acceptance or decline on their
-    behalf; the row moves to "Request Accepted" or "Request Declined"
-    exactly as if the reviewer had clicked: the reviewer receives no email,
+    behalf. The row moves to "Request Accepted" or "Request Declined"
+    exactly as if the reviewer had clicked. The reviewer receives no email,
     and the assigned editors get the same response notification a real
-    reviewer click sends — its From header set to the reviewer's own
+    reviewer click sends, with its From header set to the reviewer's own
     address. The entry exists only while the invitation is unanswered.
     <sup>k</sup>
 21. **History.** "History" opens a side modal titled "History" listing the
-    assignment's dated milestones — "Assigned", "Notified", "Reminder",
-    "Confirm" or "Declined", "Completed", "Acknowledged" — each with its
-    date and time; blank milestones are omitted, and the "Reminder"
-    milestone is erased by the reviewer's response ⚠ [A15](#a15).
-    <sup>l</sup>
+    assignment's dated milestones: "Assigned", "Notified", "Reminder",
+    "Confirm" or "Declined", "Completed", "Acknowledged", each with its date
+    and time. Blank milestones are omitted, and the "Reminder" milestone is
+    erased by the reviewer's response ⚠ [A15](#a15). <sup>l</sup>
 22. **Editorial Notes.** "Editorial Notes" opens the notes editors keep
-    about a reviewer, naming its audience — "administrators, managers and
-    all editors" — in its guidance text (Fields). The notes belong to the
-    person, not the assignment: the same
-    text appears (and is overwritten) wherever that reviewer is opened, on
-    any submission ⚠ [A4](#a4). The reviewer never sees them; they also
-    surface read-only in the reviewer search (Rule 5) for those allowed.
-    <sup>l</sup>
+    about a reviewer. Its guidance text names the audience: "administrators,
+    managers and all editors" (Fields). The notes belong to the person, not
+    the assignment: the same text appears, and is overwritten, wherever that
+    reviewer is opened, on any submission ⚠ [A4](#a4). The reviewer never
+    sees them. They also surface read-only in the reviewer search (Rule 5)
+    for those allowed. <sup>l</sup>
 23. **ORCID deposit.** A row whose reviewer has an authenticated ORCID iD
-    offers "Send Review To ORCID" with the confirm "Send this review to the
-    reviewer's ORCID?" — intended for completed reviews, but offered in
-    every state ⚠ [A1](#a1). Confirming a completed review's deposit sends
-    the review to the reviewer's ORCID record; the ORCID plumbing is the
-    *ORCID integration* feature. <sup>i</sup>
+    offers "Send Review To ORCID", with the confirm "Send this review to the
+    reviewer's ORCID?". The action is intended for completed reviews but is
+    offered in every state ⚠ [A1](#a1). Confirming a completed review's
+    deposit sends the review to the reviewer's ORCID record. The ORCID
+    plumbing is the *ORCID integration* feature. <sup>i</sup>
 
 ## Side effects
 
-- **Adding a reviewer** → the row appears ("{name} was assigned to review
-  this submission and sent an email notification." — or "…was not sent an
-  email notification." with the skip box); the reviewer gets a "Review
-  pending." task in their own task list and — unless skipped — the request
-  email (subject "Invitation to review" {OJS} / "Manuscript Review Request"
-  {OMP}, or "Request to review a revised submission" on later rounds), sent
-  under the acting editor's name. When the journal has
-  reviewer one-click access enabled, the email carries a sign-in-free review
-  link (the landing is the *Reviewer's review* feature; the invitation
-  record is [→ user invitations](U06-user-invitations.md#invitation-states)).
-  The assignment is logged in the submission's activity log. <sup>m</sup>
+- **Adding a reviewer** → the row appears with the notice "{name} was
+  assigned to review this submission and sent an email notification.", or
+  "…was not sent an email notification." with the skip box. The reviewer
+  gets a "Review pending." task in their own task list. Unless skipped, they
+  also get the request email (subject "Invitation to review" {OJS} /
+  "Manuscript Review Request" {OMP}, or "Request to review a revised
+  submission" on later rounds), sent under the acting editor's name. When
+  the journal has reviewer one-click access enabled, the email carries a
+  sign-in-free review link. The landing is the *Reviewer's review* feature;
+  the invitation record is
+  [→ user invitations](U06-user-invitations.md#invitation-states). The
+  assignment is logged in the submission's activity log. <sup>m</sup>
 - **Creating a new reviewer** → a user account is created with a generated
-  password and — unless the skip box is ticked — a welcome email
-  ("Registration as Reviewer…") carrying the username and that password;
-  the account must change its password at first sign-in
+  password. Unless the skip box is ticked, a welcome email ("Registration as
+  Reviewer…") carries the username and that password. The account must
+  change its password at first sign-in
   ([→ forced password change](U01-login-and-sessions.md)). The new account
   joins the chosen reviewer group and its masthead list. <sup>e</sup>
 - **Enrolling an existing user** → the user gains the chosen reviewer role
-  permanently; no separate email beyond the request itself. <sup>e</sup>
-- **Editing an assignment** (date or type changed) → reviewer task "Review
-  assignment updated." plus the change-notice email — reporting the
-  just-saved deadlines (it long reported the pre-edit ones — [A11](#a11),
-  retired: fixed upstream), and whose unsubscribe link opens a page that
-  does not offer this email type ⚠ [A12](#a12). <sup>g</sup>
+  permanently. No separate email is sent beyond the request itself.
+  <sup>e</sup>
+- **Editing an assignment** (date or type changed) → the reviewer task
+  "Review assignment updated." plus the change-notice email. The email
+  reports the just-saved deadlines (it long reported the pre-edit ones;
+  [A11](#a11), retired: fixed upstream). Its unsubscribe link opens a page
+  that does not offer this email type ⚠ [A12](#a12). <sup>g</sup>
 - **Manual reminder** → the reminder email (subject "A reminder to please
   complete your review"), a "Notification sent." notice to the editor, a
   "Reminder" date in History (erased once the reviewer responds
   ⚠ [A15](#a15)), and an activity-log entry. <sup>h</sup>
 - **Automatic reminders** → the overdue-response and overdue-review reminder
   emails go out from the journal's principal contact when the configured
-  day-offsets are reached (clocks in *Review setup & review forms*); each
-  send stamps the History "Reminder" date and the activity log. A reviewer
-  response resets the reminder bookkeeping — the same reset that erases the
-  History "Reminder" milestone ⚠ [A15](#a15). <sup>h</sup>
+  day-offsets are reached (the clocks are in *Review setup & review forms*).
+  Each send stamps the History "Reminder" date and the activity log. A
+  reviewer response resets the reminder bookkeeping. That is the same reset
+  that erases the History "Reminder" milestone ⚠ [A15](#a15). <sup>h</sup>
 - **Marking a review complete** (Rule 14a) → the reviewer's "Review
   pending." task is cleared, the completion is logged in the submission's
   activity log, and the review is deposited to the reviewer's ORCID record
   when one is authenticated (the deposit consent flow is the *ORCID
   integration* feature). <sup>i</sup>
 - **Modifying a review** (Rule 14b) → an attributed activity-log entry per
-  save — "The following was modified in this review: Comments." (or
-  "…Reviewer Recommendation." {OJS}) — each with a "View changes" action
+  save: "The following was modified in this review: Comments." (or
+  "…Reviewer Recommendation." {OJS}), each with a "View changes" action
   showing what changed, and the "Last modified by {user full name}" line in
   the view window (Rule 14b). {OJS} Changing the recommendation on the
   reviewer's behalf now runs through this window and is logged as such a
   modification. <sup>i</sup>
 - **Thanking** → the acknowledgement email (unless skipped) and the
   acknowledged date in History. <sup>j</sup>
-- **Unassigning/cancelling** → the notice email (unless skipped) — unassign
-  notice subject "Your reviewer assignment for "{title}" has been removed",
-  cancel notice subject "Your review for "{title}" has been cancelled" — and
-  the reviewer's "Review pending." task is removed. Logged. Nothing else is
-  cleaned up — the reviewer's other participations on the submission are
-  untouched. <sup>k</sup>
+- **Unassigning/cancelling** → the notice email (unless skipped). The
+  unassign notice subject is "Your reviewer assignment for "{title}" has
+  been removed"; the cancel notice subject is "Your review for "{title}" has
+  been cancelled". The reviewer's "Review pending." task is removed. The
+  action is logged. Nothing else is cleaned up: the reviewer's other
+  participations on the submission are untouched. <sup>k</sup>
 - **Reinstating / resending** → the respective email (unless skipped; the
   reinstate notice asks "Can you still review something for {journal}?")
   and a log entry. <sup>k</sup>
 - **Logging a response** → the same emails and bookkeeping as the reviewer's
-  own accept/decline (owned by the *Reviewer's review* feature). <sup>k</sup>
+  own accept or decline (owned by the *Reviewer's review* feature).
+  <sup>k</sup>
 - **Adding a suggested reviewer** → when the added or enrolled reviewer
   matches one of the author's reviewer suggestions, the suggestion is marked
   approved and disappears from the suggestions panel (the panel is the
@@ -499,177 +505,178 @@ under the prompt "Record the response on behalf of the reviewer"; submit
 
 ## Settings that modify behavior
 
-All of these live on other features' screens; listed here for their effect on
-this panel. The configuration surfaces belong to *Review setup & review
-forms* unless said otherwise. <sup>n</sup>
+All of these live on other features' screens. They are listed here for their
+effect on this panel. The configuration surfaces belong to *Review setup &
+review forms* unless said otherwise. <sup>n</sup>
 
-- **Default review type** — preselects the "Review Type" radios.
-- **Weeks to respond / weeks to complete** — the due-date defaults (Rule 9).
-- **Automatic reminder day-offsets** — arm the automatic reminder emails
+- **Default review type**: preselects the "Review Type" radios.
+- **Weeks to respond / weeks to complete**: the due-date defaults (Rule 9).
+- **Automatic reminder day-offsets**: arm the automatic reminder emails
   (Rule 13).
-- **Reviewer one-click access** — adds the sign-in-free keyed link to
-  request and reminder emails; with it on, the editor-facing preview shows
-  the link as a placeholder rather than the live address, and each sent
-  reminder mints a fresh keyed link of its own. <sup>h</sup>
-- **Public visibility default** — preselects the "Public Visibility" box.
-- **Review forms** — populate the "Review Form" selects; a section's default
+- **Reviewer one-click access**: adds the sign-in-free keyed link to request
+  and reminder emails. With it on, the editor-facing preview shows the link
+  as a placeholder rather than the live address, and each sent reminder
+  mints a fresh keyed link of its own. <sup>h</sup>
+- **Public visibility default**: preselects the "Public Visibility" box.
+- **Review forms**: populate the "Review Form" selects. A section's default
   form preselects it (section configuration is *Sections* territory).
-- **Reviewer suggestions enabled** (workflow settings) — the Add Reviewer
+- **Reviewer suggestions enabled** (workflow settings): the Add Reviewer
   window can be opened from a suggestion, arriving with that person
-  preselected or prefilled; the suggestions panel itself is the *Reviewer
+  preselected or prefilled. The suggestions panel itself is the *Reviewer
   suggestions* feature. <sup>d</sup>
 
 ## Cross-feature interactions
 
-- **Review stage & rounds** — the stage screen, round machinery, round
-  status box, Files for Review, and the author's read-only reviewers list;
-  this spec owns everything inside the Reviewers panel and its windows.
-- **Reviewer's review** — the reviewer's own experience: the request landing,
-  accept/decline, the wizard, one-click access. Log Response (Rule 20)
-  drives that feature's accept/decline path from the editor's side.
-- **Review setup & review forms** — every default named in Settings, the
+- **Review stage & rounds**: the stage screen, round machinery, round
+  status box, Files for Review, and the author's read-only reviewers list.
+  This spec owns everything inside the Reviewers panel and its windows.
+- **Reviewer's review**: the reviewer's own experience, meaning the request
+  landing, accept/decline, the wizard, and one-click access. Log Response
+  (Rule 20) drives that feature's accept/decline path from the editor's
+  side.
+- **Review setup & review forms**: every default named in Settings, the
   reminder clocks, and review-form authoring.
-- **Reviewer suggestions** — the suggestions panel and its "add" entry into
+- **Reviewer suggestions**: the suggestions panel and its "add" entry into
   this feature's window.
-- **User invitations** — the invitation record behind one-click review
+- **User invitations**: the invitation record behind one-click review
   links.
-- **Sign-in & sessions** — "Login As" on a reviewer row, and the forced
+- **Sign-in & sessions**: "Login As" on a reviewer row, and the forced
   password change a created reviewer account goes through.
-- **Users management** — the reviewer role memberships this feature creates
+- **Users management**: the reviewer role memberships this feature creates
   (Create/Enroll) are otherwise managed there.
-- **Editorial decision recording** — decisions close rounds; nothing in this
+- **Editorial decision recording**: decisions close rounds. Nothing in this
   panel records a decision.
-- **ORCID integration** — the review deposit behind Rule 23.
-- **Tasks & discussions** — the reviewer's "Review pending." task cleanup on
-  unassignment; no discussion cleanup happens (Side effects).
+- **ORCID integration**: the review deposit behind Rule 23.
+- **Tasks & discussions**: the reviewer's "Review pending." task cleanup on
+  unassignment. No discussion cleanup happens (Side effects).
 
 ## Canonical scenarios
 
-Common to OJS and OMP; substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md) (on a press, run on External
-Review; scenario 13 covers the internal twin). Actors are named by role;
+Common to OJS and OMP. Substitute roles and vocabulary per the
+[application glossary](GLOSSARY.md). On a press, run them on External
+Review; scenario 13 covers the internal twin. Actors are named by role;
 seeded accounts and recipes live in the footnotes. <sup>s</sup> Outgoing
 mail is observed in the test install's mail catcher.
 
 1. **Invite a reviewer** — Editor: on a round with review files, press "Add
-   Reviewer", search the list for a seeded reviewer by name, press "Select
-   Reviewer", check the prefilled request letter and the two due dates
-   (defaults per the journal's review setup), press "Add Reviewer". The
-   panel lists the reviewer as "Request Sent" (the row's response-deadline
-   line is missing ⚠ [A7](#a7)), and the reviewer's mailbox holds the
-   request email. Verify it arrived; a silent failure mode exists
-   (⚠ [A18](#a18)): submitting the form with the letter emptied gives no
-   feedback at all while still creating the row, and no request email goes
-   out. <sup>s</sup>
+   Reviewer", search the list for a seeded reviewer by name, and press
+   "Select Reviewer". Check the prefilled request letter and the two due
+   dates (the defaults come from the journal's review setup), then press
+   "Add Reviewer". The panel lists the reviewer as "Request Sent" (the row's
+   response-deadline line is missing ⚠ [A7](#a7)), and the reviewer's
+   mailbox holds the request email. Verify it arrived, because a silent
+   failure mode exists (⚠ [A18](#a18)): submitting the form with the letter
+   emptied gives no feedback at all while still creating the row, and no
+   request email goes out. <sup>s</sup>
 2. **The list warns before anonymity breaks** — Editor: in "Locate a
-   Reviewer", find a reviewer who is also a Journal Manager: the entry is
-   locked with the author-identity warning and no Select button; press
-   "Unlock" — the "Select Reviewer" button appears. Also verify a reviewer
-   already on the round shows "This reviewer has already been assigned to
-   this review round." with no way to select them again.
+   Reviewer", find a reviewer who is also a Journal Manager. The entry is
+   locked with the author-identity warning and no Select button. Press
+   "Unlock": the "Select Reviewer" button appears. Also verify that a
+   reviewer already on the round shows "This reviewer has already been
+   assigned to this review round." with no way to select them again.
 3. **Create a brand-new reviewer** — Journal Manager: in the Add Reviewer
-   window choose "Create New Reviewer", fill given name and email, press
-   "Suggest" beside Username (a username appears), press "Add Reviewer".
-   The row appears as "Request Sent"; the new address's mailbox holds the
-   registration email with a password and the review request; signing in
-   with that password lands on the "Change Password" form
+   window choose "Create New Reviewer", fill in a given name and an email,
+   press "Suggest" beside Username (a username appears), and press "Add
+   Reviewer". The row appears as "Request Sent". The new address's mailbox
+   holds the registration email with a password and the review request.
+   Signing in with that password lands on the "Change Password" form
    ([→ sign-in flows](U01-login-and-sessions.md)). <sup>s</sup>
 4. **Enroll an existing user** — Journal Manager: choose "Enroll Existing
-   User", type a seeded author's name into the autocomplete, pick them,
-   press "Add Reviewer". The row appears; opening the journal's users list
+   User", type a seeded author's name into the autocomplete, pick them, and
+   press "Add Reviewer". The row appears. Opening the journal's users list
    shows the user now also holds the Reviewer role. Control: typing the name
    of an existing reviewer into the same autocomplete finds nothing.
 5. **Deadlines are validated** — Editor: in the Add Reviewer form set the
-   review due date before the response due date and submit; no assignment
-   is created — the window stays open, and the only statement of the rule
-   is the guidance sentence "Review due date must be greater or equal to
-   response due date." (no error message appears ⚠ [A8](#a8)). Correct the
+   review due date before the response due date and submit. No assignment
+   is created and the window stays open. The only statement of the rule is
+   the guidance sentence "Review due date must be greater or equal to
+   response due date."; no error message appears ⚠ [A8](#a8). Correct the
    dates; the submission succeeds and the row appears.
 6. **Edit an assignment, reviewer is told** — Editor: on a "Request Sent"
-   row open "Edit", move the review due date a week later, save. The
-   reviewer's account (sign in as them) shows the "Review assignment
-   updated." task, and their mailbox holds the change notice. Control: an
-   edit changing only the file ticks sends nothing new.
-7. **Remind an overdue reviewer** — Editor: on a row showing "Overdue"
-   (e.g. via "Edit", set the response due date to yesterday — the pickers
-   accept past dates), the row's button reads "Send
-   Reminder"; open it, verify the schedule readout, press "Send Reminder".
-   The notice "Notification sent." appears, the reviewer's mailbox holds
-   the reminder, and the row's "History" now lists a "Reminder" date —
-   check it before the reviewer responds: their response erases the line
-   ⚠ [A15](#a15). Control: a row that is not overdue
-   offers no "Send Reminder" button. <sup>s</sup>
+   row open "Edit", move the review due date a week later, and save. Sign in
+   as the reviewer: their account shows the "Review assignment updated."
+   task, and their mailbox holds the change notice. Control: an edit that
+   changes only the file ticks sends nothing new.
+7. **Remind an overdue reviewer** — Editor: on a row showing "Overdue" (for
+   example, via "Edit" set the response due date to yesterday; the pickers
+   accept past dates), the row's button reads "Send Reminder". Open it,
+   verify the schedule readout, and press "Send Reminder". The notice
+   "Notification sent." appears, the reviewer's mailbox holds the reminder,
+   and the row's "History" now lists a "Reminder" date. Check it before the
+   reviewer responds, because their response erases the line
+   ⚠ [A15](#a15). Control: a row that is not overdue offers no "Send
+   Reminder" button. <sup>s</sup>
 8. **Log a response on the reviewer's behalf** — Editor: on an unanswered
    row open "Log Response", choose "Reviewer has accepted the invitation to
-   review", press "Log Response". The row reads "Request Accepted" with the
-   review due date. Control: the "Log Response" entry is gone from that
+   review", and press "Log Response". The row reads "Request Accepted" with
+   the review due date. Control: the "Log Response" entry is gone from that
    row's menu afterwards.
 9. **Read, rate, mark complete, thank** — with a submitted review on the
-   round (seeded), Editor: the row reads "Review Submitted"; open "Read
-   Review" — the "Review Details" window opens and the row behind it turns
+   round (seeded), Editor: the row reads "Review Submitted". Open "Read
+   Review": the "Review Details" window opens and the row behind it turns
    "Review Viewed" at once (it stays after a reload). See the reviewer's
-   comments split "For author and editor" / "For editor" ({OMP}: "For
-   editor only"), then — once the window has settled ⚠ [A21](#a21) — click
-   a star under "Reviewer rating": the toast "Reviewer rating saved"
-   appears. Press "Mark as Complete", confirm "Mark this review as
-   complete?" — toast "The review has been marked as complete.", the row
-   turns "Complete".
-   Press "Thank Reviewer", send — notice "Thank you email sent to
-   reviewer.", row "Reviewer Thanked", thank-you in the reviewer's mailbox.
-   Then "Revert Decision" → confirm "Unconsider this Review" — the row
-   returns to "Review Viewed". <sup>s</sup>
+   comments split into "For author and editor" / "For editor" ({OMP}: "For
+   editor only"). Then, once the window has settled ⚠ [A21](#a21), click a
+   star under "Reviewer rating": the toast "Reviewer rating saved" appears.
+   Press "Mark as Complete" and confirm "Mark this review as complete?". The
+   toast "The review has been marked as complete." appears and the row turns
+   "Complete". Press "Thank Reviewer" and send: the notice reads "Thank you
+   email sent to reviewer.", the row reads "Reviewer Thanked", and the
+   thank-you is in the reviewer's mailbox. Then press "Revert Decision" and
+   confirm "Unconsider this Review": the row returns to "Review Viewed".
+   <sup>s</sup>
 10. **Download the review** — Editor: in the "Review Details" window open
     "Download Review Form" and fetch "Author-Only Sections Displayed (PDF)"
-    and "Editor Form Shows All Review Sections (PDF)"; both download, and
-    the author-only file omits the editor-only remarks and shows the
-    reviewer anonymized, while the full one carries both comment blocks and
-    the reviewer's name.
+    and "Editor Form Shows All Review Sections (PDF)". Both download. The
+    author-only file omits the editor-only remarks and shows the reviewer
+    anonymized, while the full one carries both comment blocks and the
+    reviewer's name.
 11. **Unassign before, cancel after** — Editor: unassign an unanswered
-    reviewer ("Unassign Reviewer" → submit) — notice "Reviewer removed.",
-    the row is gone. On a second, accepted reviewer the same menu entry
-    reads "Cancel Reviewer"; the window opens with its template chooser
-    above the notice; cancelling leaves the row as "Request Cancelled".
-    Press "Reinstate Reviewer" on it — the row returns to its dated state
-    ("Request Accepted" or "Overdue"), and the reviewer's mailbox holds the
-    cancel notice ("Your review for … has been cancelled") and the
-    reinstate notice.
-12. **Decline, then ask again** — with a declined row (reviewer declined, or
-    scenario 8 run with the decline option), Editor: the row reads "Request
-    Declined"; open "Resend Review Request", keep the fresh dates, send.
-    The row reads "Request Resent" ⚠ [A2](#a2) and the reviewer's mailbox
-    holds the reconsider request.
+    reviewer ("Unassign Reviewer", then submit). The notice reads "Reviewer
+    removed." and the row is gone. On a second, accepted reviewer the same
+    menu entry reads "Cancel Reviewer". The window opens with its template
+    chooser above the notice, and cancelling leaves the row as "Request
+    Cancelled". Press "Reinstate Reviewer" on it: the row returns to its
+    dated state ("Request Accepted" or "Overdue"), and the reviewer's
+    mailbox holds the cancel notice ("Your review for … has been cancelled")
+    and the reinstate notice.
+12. **Decline, then ask again** — with a declined row (the reviewer
+    declined, or scenario 8 run with the decline option), Editor: the row
+    reads "Request Declined". Open "Resend Review Request", keep the fresh
+    dates, and send. The row reads "Request Resent" ⚠ [A2](#a2) and the
+    reviewer's mailbox holds the reconsider request.
 
 App-specific:
 
 13. **{OMP} Two review stages, two reviewer pools** — Press Editor: on a
     monograph in Internal Review, press "Add Reviewer" and search an
-    Internal Reviewer by name — found; search an External Reviewer by name —
-    "No items found."; send the monograph to External Review, press "Add
-    Reviewer" there and repeat — now the External Reviewer is found and the
-    Internal one is not [OMP1](#omp1). Assert through the search: the
-    window's opening, unsearched list does not apply the split
+    Internal Reviewer by name: found. Search an External Reviewer by name:
+    "No items found.". Send the monograph to External Review, press "Add
+    Reviewer" there and repeat: now the External Reviewer is found and the
+    Internal one is not [OMP1](#omp1). Assert through the search, because
+    the window's opening, unsearched list does not apply the split
     ⚠ [OMP2](#omp2). Every scenario above runs the same on both stages.
     <sup>o</sup> <sup>s</sup>
 14. **{OJS} The recommendation runs through the table** — Editor: after
     scenario 9's "Mark as Complete", the "Complete" row's status cell shows
-    the reviewer's recommendation under the status; the "Review Details"
-    window displays it read-only — on its "Recommendation:" line and again
-    in the "Reviewer Recommendation" group ⚠ [A23](#a23) — and changing it
-    on the reviewer's behalf runs through "Modify Review" (scenario 16).
+    the reviewer's recommendation under the status. The "Review Details"
+    window displays it read-only, on its "Recommendation:" line and again
+    in the "Reviewer Recommendation" group ⚠ [A23](#a23). Changing it on
+    the reviewer's behalf runs through "Modify Review" (scenario 16).
     {OMP} Control: on a press neither the status cell nor the window shows
     any recommendation [OMP1](#omp1).
 15. **{OPS} No reviewer surfaces on a preprint server** — Preprint Server
-    Manager: open any preprint's workflow — no "Reviewers" panel exists on
+    Manager: open any preprint's workflow. No "Reviewers" panel exists on
     any screen, and Users & Roles offers no reviewer group to assign.
     Positive control: the same workflow screen offers the Production
     stage's own controls, so the screen itself is working. <sup>p</sup>
-16. **The editor modifies a submitted review** (common — runs on OJS and
+16. **The editor modifies a submitted review** (common: runs on OJS and
     OMP like scenarios 1–12) — with a submitted review on the round,
     Editor: in the "Review Details" window press "Modify Review" and
     confirm "Modify this review?". In the "Modify Review" window that
     opens, edit the "For author and editor" comment ({OJS}: also pick a
-    different "Recommendation"), press "Save Changes". The edit window
-    closes and the view window now shows "Last modified by {name}" under
+    different "Recommendation"), and press "Save Changes". The edit window
+    closes, and the view window now shows "Last modified by {name}" under
     its title with the edited text ({OJS}: and the new recommendation; on
     a press the window offers no recommendation field [OMP1](#omp1)). The
     submission's activity log lists "The following was modified in this
@@ -683,61 +690,61 @@ App-specific:
 Verdicts are the author's judgment (claude, 2026-08-02), unreviewed unless an
 entry notes otherwise; the team settles them on spec review. A claim-check
 pass (claude, 2026-08-02, both apps live) re-drove every entry and the spec's
-claims; where it overturned an entry, the entry is retired in place — badge
-✅, wording states the resolution — so IDs stay dense, and the ruling sits in
-the entry's Reviewed line and the summary's Review column. Sorted 🐞 → ❓ →
-✅ in the summary (🐞 defect, author's call · ❓ needs a product ruling · ✅
-intended divergence — or a retired finding); the entries below are the
-source. Each entry opens with the user-observable symptom; mechanism and
-evidence live in the entry's footnote. Impact key: user-visible = real effect
-in ordinary use · minor = cosmetic only, however often seen · latent = only
-in an unusual situation or configuration.
+claims. Where it overturned an entry, the entry is retired in place: the
+badge becomes ✅, the wording states the resolution, so IDs stay dense, and
+the ruling sits in the entry's Reviewed line and the summary's Review column.
+Sorted 🐞 → ❓ → ✅ in the summary (🐞 defect, author's call · ❓ needs a
+product ruling · ✅ intended divergence, or a retired finding); the entries
+below are the source. Each entry opens with the user-observable symptom;
+mechanism and evidence live in the entry's footnote. Impact key: user-visible
+= real effect in ordinary use · minor = cosmetic only, however often seen ·
+latent = only in an unusual situation or configuration.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | "Send Review To ORCID" is offered on rows in every state, not only completed reviews | 🐞 | latent | — |
 | [A2](#a2) | A "Request Resent" row's "Response due:" line shows the review deadline, not the response deadline | 🐞 | minor | — |
 | [A7](#a7) | A "Request Sent" row never shows its "Response due:" line, though the date is set | 🐞 | minor | — |
-| [A8](#a8) | Submitting inverted due dates is refused with no message — the form just stays open | 🐞 | user-visible | — |
-| [A12](#a12) | The assignment-changed email's opt-out is offered nowhere — its own unsubscribe page omits the type | 🐞 | minor | — |
+| [A8](#a8) | Submitting inverted due dates is refused with no message; the form just stays open | 🐞 | user-visible | — |
+| [A12](#a12) | The assignment-changed email's opt-out is offered nowhere; its own unsubscribe page omits the type | 🐞 | minor | — |
 | [A13](#a13) | Email Reviewer sends with an empty body despite the body being marked required | 🐞 | minor | — |
 | [A15](#a15) | The reviewer's response erases the dated "Reminder" milestone from the assignment's History | 🐞 | minor | claim check (claude), 2026-08-02 — settled |
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
-| [A18](#a18) | Emptying the request letter makes the add fail silently — yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
-| [A19](#a19) | The template chooser renders on every add — a one-option select even with zero alternate templates | 🐞 | minor | — |
+| [A18](#a18) | Emptying the request letter makes the add fail silently, yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
+| [A19](#a19) | The template chooser renders on every add, as a one-option select even with zero alternate templates | 🐞 | minor | — |
 | [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | maintainer ruling, 2026-08-29 — risk accepted |
 | [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | maintainer ruling, 2026-08-29 — ticket to follow |
 | [A25](#a25) | {OJS} Opened from the dashboard popover, a submitted review's Review Details window omits the recommendation | 🐞 | user-visible | — |
-| [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split — only searching filters by stage | 🐞 | user-visible | — |
-| [A4](#a4) | Editorial Notes are one shared note per reviewer — editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
-| [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants — the same table shows different reviewers per role | ❓ | minor | — |
+| [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split; only searching filters by stage | 🐞 | user-visible | — |
+| [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
+| [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
 | [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
-| [A24](#a24) | Saving a modification would mark a not-yet-complete review complete — no current screen reaches it | ❓ | latent | — |
+| [A24](#a24) | Saving a modification would mark a not-yet-complete review complete; no current screen reaches it | ❓ | latent | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
-| [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed — the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
-| [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor — fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
-| [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates — no review process, the window unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
-| [A11](#a11) | Retired: the change notice reported the pre-change deadlines — fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
-| [A5](#a5) | Retired: the alternate-template access check it questioned was reverted wholesale upstream (pkp/pkp-lib#10403 revert) — all alternates now listed unconditionally | ✅ | retired | rebase check (claude), 2026-08-25 — moot |
-| [A3](#a3) | Retired: a role-less Site Administrator is refused at the workflow screen — the earlier full-surface observation was of the seeded admin's silent Journal Manager enrollment | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
-| [A9](#a9) | Retired: the Resend window presets each date from its own interval — the earlier collapse was a same-interval coincidence | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
-| [A14](#a14) | Retired: the enroll "required" message appears only on an empty submit and clears on pick — ordinary validation | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
+| [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
+| [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor; fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
+| [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates; no review process, and the window is unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
+| [A11](#a11) | Retired: the change notice reported the pre-change deadlines; fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
+| [A5](#a5) | Retired: the alternate-template access check it questioned was reverted wholesale upstream (pkp/pkp-lib#10403 revert); all alternates are now listed unconditionally | ✅ | retired | rebase check (claude), 2026-08-25 — moot |
+| [A3](#a3) | Retired: a role-less Site Administrator is refused at the workflow screen; the earlier full-surface observation was of the seeded admin's silent Journal Manager enrollment | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
+| [A9](#a9) | Retired: the Resend window presets each date from its own interval; the earlier collapse was a same-interval coincidence | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
+| [A14](#a14) | Retired: the enroll "required" message appears only on an empty submit and clears on pick, which is ordinary validation | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
 
 ### All apps
 
 <a id="a1"></a>
 **A1 — ORCID deposit offered regardless of review state** · 🐞 · latent.
 A reviewer row whose reviewer has an authenticated ORCID iD shows "Send
-Review To ORCID" in its menu in every state — including before the reviewer
-has even responded — although the action only makes sense for a completed
-review. Latent because it needs ORCID configured and an authenticated
-reviewer iD, which default test installs lack.
+Review To ORCID" in its menu in every state, including before the reviewer
+has even responded. The action only makes sense for a completed review. It
+is latent because it needs ORCID configured and an authenticated reviewer
+iD, which default test installs lack.
 Basis: code reading. A live probe (2026-08-02) could only confirm the flip
-side — without an ORCID on the reviewer, the entry is absent in every state
-checked — because attaching an iD needs the external OAuth flow no screen
-here provides. Settled by: a reviewer with a verified iD, any non-complete
-row, open the menu. <sup>[f-a1](#fn-a1)</sup>
+side: without an ORCID on the reviewer, the entry is absent in every state
+checked. Attaching an iD needs the external OAuth flow no screen here
+provides. Settled by: a reviewer with a verified iD, any non-complete row,
+open the menu. <sup>[f-a1](#fn-a1)</sup>
 
 <a id="a2"></a>
 **A2 — "Request Resent" shows the wrong deadline** · 🐞 · minor.
@@ -751,15 +758,15 @@ date under the response-due label). <sup>[f-a2](#fn-a2)</sup>
 <a id="a3"></a>
 **A3 — Retired: the "role-less site admin" was a Journal Manager** · ✅ ·
 retired.
-Does not reproduce: a Site Administrator holding no journal role cannot
-reach the workflow screen at all — the attempt is refused with the Error
-dialog "The current role does not have access to this operation." (positive
-control: the same account renders the full Administration area). The
+Does not reproduce. A Site Administrator holding no journal role cannot
+reach the workflow screen at all: the attempt is refused with the Error
+dialog "The current role does not have access to this operation.". Positive
+control: the same account renders the full Administration area. The
 complete add surface observed earlier belonged to the seeded `admin`
 account, which silently holds a Journal Manager role in every journal of
-the install — a manager was observed, not a role-less site admin. The
-Actors section now records the corrected fact; the live behavior is more
-restrictive than was documented and no open question remains.
+the install. A manager was observed, not a role-less site admin. The
+Actors section now records the corrected fact. The live behavior is more
+restrictive than was documented, and no open question remains.
 Reviewed: claim check (claude), 2026-08-02 — overturned (was an open
 question). <sup>[f-a3](#fn-a3)</sup>
 
@@ -767,12 +774,12 @@ question). <sup>[f-a3](#fn-a3)</sup>
 **A4 — Editorial Notes are one note per reviewer, everywhere** · ❓ ·
 user-visible.
 The "Editorial Notes" window is opened from one submission's reviewer row,
-but the note it edits belongs to the reviewer as a person: the same text
+but the note it edits belongs to the reviewer as a person. The same text
 shows for that reviewer on every other submission, and saving here
 overwrites what a colleague wrote there. The window does name its audience
-and future use — "Record notes about this reviewer that you would like to
+and future use: "Record notes about this reviewer that you would like to
 make visible to other administrators, managers and all editors. Notes will
-be visible for future review assignments." — but never says the note is one
+be visible for future review assignments.". It never says the note is one
 shared text across submissions.
 Question: is a single cross-submission note the intended design? Lean: the
 storage is clearly deliberate (the search list shows the same note, and the
@@ -787,10 +794,10 @@ assignment). <sup>[f-a4](#fn-a4)</sup>
 retired.
 The Add Reviewer window's template chooser builds its list of alternates to
 the subsequent-round request template by checking, for each alternate,
-whether the *subsequent-round template itself* is accessible to the editor —
+whether the *subsequent-round template itself* is accessible to the editor,
 not the alternate. A journal restricting individual alternate templates to
 certain roles would find them offered (or hidden) wholesale.
-Question: is per-alternate access meant to be enforced here? Lean: yes — the
+Question: is per-alternate access meant to be enforced here? Lean: yes. The
 sibling code path for the first-round template checks each alternate
 individually; the mechanism is in the footnote.
 Basis: code reading. <sup>[f-a5](#fn-a5)</sup>
@@ -804,14 +811,14 @@ Basis: code reading. <sup>[f-a5](#fn-a5)</sup>
 <a id="a6"></a>
 **A6 — Assistant-level participants see a shorter reviewers table** · ❓ ·
 minor.
-For a review manager the table keeps declined and cancelled rows visible
-(with their tooltips and the resend/reinstate entries). An assistant-level
+For a review manager the table keeps declined and cancelled rows visible,
+with their tooltips and the resend and reinstate entries. An assistant-level
 participant assigned to the stage gets the same table with those rows
-silently omitted — nothing indicates rows are missing, so two people looking
+silently omitted. Nothing indicates rows are missing, so two people looking
 at "the same" round see different reviewer counts.
-Question: is hiding declined/cancelled history from assistants intended?
-Lean: intended as written — the visibility rule names exactly the manager
-roles — but the silence is worth a product look.
+Question: is hiding declined and cancelled history from assistants intended?
+Lean: intended as written, because the visibility rule names exactly the
+manager roles, but the silence is worth a product look.
 Basis: live probe (a manager control saw all three row kinds where the
 assistant's table showed one; the assistant's row menu also lacked "Login
 As" and "Editorial Notes") + code reading.
@@ -819,8 +826,8 @@ As" and "Editorial Notes") + code reading.
 
 <a id="a7"></a>
 **A7 — "Request Sent" rows hide their response deadline** · 🐞 · minor.
-A freshly invited reviewer's row reads "Request Sent" with no second line:
-the "Response due: {date}" line every comparable state shows never renders
+A freshly invited reviewer's row reads "Request Sent" with no second line.
+The "Response due: {date}" line every comparable state shows never renders
 here, though the date is set and the Edit window shows it. The editor loses
 the at-a-glance deadline until the row turns "Overdue".
 Basis: live probe. <sup>[f-a7](#fn-a7)</sup>
@@ -828,29 +835,29 @@ Basis: live probe. <sup>[f-a7](#fn-a7)</sup>
 <a id="a8"></a>
 **A8 — Inverted due dates are refused without a word** · 🐞 · user-visible.
 Submitting the Add Reviewer form with the review due date set before the
-response due date does nothing visible: no error, no notice — the window
-simply stays open and no assignment is created. Only the permanent guidance
-sentence states the rule; the server's own error message never reaches the
-screen.
+response due date does nothing visible. There is no error and no notice; the
+window simply stays open and no assignment is created. Only the permanent
+guidance sentence states the rule. The server's own error message never
+reaches the screen.
 Basis: live probe. <sup>[f-a8](#fn-a8)</sup>
 
 <a id="a9"></a>
 **A9 — Retired: the Resend window presets dates correctly** · ✅ · retired.
-Does not reproduce: on a journal whose response and review intervals differ,
-the Resend window's fresh pickers arrive preset exactly as a new request's —
-each date today plus its own configured interval. The earlier "both preset
-to the response interval" observation was made where the two intervals
-coincide, so the apparent collapse was a coincidence, not a behavior.
+Does not reproduce. On a journal whose response and review intervals differ,
+the Resend window's fresh pickers arrive preset exactly as a new request's:
+each date is today plus its own configured interval. The earlier "both
+preset to the response interval" observation was made where the two
+intervals coincide, so the apparent collapse was a coincidence, not a
+behavior.
 Reviewed: claim check (claude), 2026-08-02 — overturned (was a defect).
 <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a10"></a>
 **A10 — "Review Viewed" does not mean viewed** · ✅ · retired.
 Opening the legacy "Read Review" window and closing it without confirming
-left the row at "Review Submitted" — viewing never produced "Review
-Viewed". The only route to that status was "Revert Decision" on a
-"Reviewer Thanked" row, so the label misstated what happened in both
-directions.
+left the row at "Review Submitted". Viewing never produced "Review Viewed".
+The only route to that status was "Revert Decision" on a "Reviewer Thanked"
+row, so the label misstated what happened in both directions.
 Basis: live probe. <sup>[f-a10](#fn-a10)</sup>
 
 > **Retired — upstream rework (claude), 2026-08-29**: overturned by design.
@@ -879,7 +886,7 @@ date fields). <sup>[f-a11](#fn-a11)</sup>
 <a id="a12"></a>
 **A12 — The change notice's opt-out is unreachable** · 🐞 · minor.
 The assignment-changed email is suppressed for reviewers who opted out of
-it — but no screen offers that opt-out: the email type is missing from the
+it, but no screen offers that opt-out. The email type is missing from the
 profile's notification settings, and the unsubscribe page the email's own
 footer links to does not list it either. The link dead-ends for its own
 email type.
@@ -889,17 +896,16 @@ Basis: live probe. <sup>[f-a12](#fn-a12)</sup>
 **A13 — Email Reviewer enforces only the subject** · 🐞 · minor.
 The window marks both Subject and Body required, but filling only the
 Subject sends the email with an empty body. With both empty, the only error
-shown is "This field is required." under Subject — the body never shows
-one.
+shown is "This field is required." under Subject. The body never shows one.
 Basis: live probe (both apps). <sup>[f-a13](#fn-a13)</sup>
 
 <a id="a14"></a>
 **A14 — Retired: the enroll "required" error is ordinary validation** · ✅ ·
 retired.
-Does not reproduce as stated: driving the sequence cleanly (open the enroll
+Does not reproduce as stated. Driving the sequence cleanly (open the enroll
 form, type, pick a user) shows no "This field is required." message at any
 point. The message appears only after submitting with the field empty, and
-picking a user then clears it — submitting afterwards succeeds. The earlier
+picking a user then clears it; submitting afterwards succeeds. The earlier
 observation most likely read that post-submit state as the post-pick state.
 The empty-submit error is also the generic "This field is required.", not
 an "existing user must be selected" wording.
@@ -910,12 +916,12 @@ Reviewed: claim check (claude), 2026-08-02 — overturned (was a defect).
 **A15 — The reviewer's response erases the History "Reminder" line** · 🐞 ·
 minor.
 Sending a reminder stamps a dated "Reminder" milestone into the assignment's
-History — but once the reviewer responds, the line is gone. The response
-resets the reminder bookkeeping — the same reset that re-arms the automatic
-reminders (Side effects) — and erases the dated History milestone with it.
+History. Once the reviewer responds, the line is gone. The response resets
+the reminder bookkeeping, the same reset that re-arms the automatic
+reminders (Side effects), and erases the dated History milestone with it.
 The mechanism is deliberate; the user-facing cost is the lost History line.
-Basis: live probe (the settling recipe run exactly: reminder → History shows
-"Reminder"; an acceptance logged → the milestone is gone).
+Basis: live probe (the settling recipe run exactly: reminder, then History
+shows "Reminder"; an acceptance logged, then the milestone is gone).
 Reviewed: claim check (claude), 2026-08-02 — settled from an open question
 to a defect; both prior conflicting observations are explained (one read
 History before the response, one after). <sup>[f-a15](#fn-a15)</sup>
@@ -924,10 +930,10 @@ History before the response, one after). <sup>[f-a15](#fn-a15)</sup>
 **A16 — A wrong-format typed due date is silently thrown away** · 🐞 ·
 user-visible.
 The due-date pickers (the Add, Edit and Resend windows share the widget)
-accept a date typed in the YYYY-MM-DD format (e.g. 2026-08-02) — it saves
-and flows downstream. But input in any other format only looks accepted: the visible
-field keeps the keystrokes while the old value is silently submitted — the
-editor's correction doesn't happen and nothing says so.
+accept a date typed in the YYYY-MM-DD format (e.g. 2026-08-02): it saves
+and flows downstream. Input in any other format only looks accepted. The
+visible field keeps the keystrokes while the old value is silently
+submitted, so the editor's correction does not happen and nothing says so.
 Basis: live probe.
 Reviewed: claim check (claude), 2026-08-02 — rescoped (a correctly
 formatted typed date is accepted end-to-end; only wrong-format input is
@@ -936,9 +942,9 @@ discarded). <sup>[f-a16](#fn-a16)</sup>
 <a id="a17"></a>
 **A17 — Past due dates pass without a warning** · ❓ · minor.
 The same pickers accept dates already in the past with no warning or
-confirmation; a saved past date immediately renders the row "Overdue".
-Question: should the screen warn? Lean: arguably intentional — this is the
-only screen route to backdating a deadline — but a warning would cost
+confirmation. A saved past date immediately renders the row "Overdue".
+Question: should the screen warn? Lean: arguably intentional, since this is
+the only screen route to backdating a deadline, but a warning would cost
 nothing.
 Basis: live probe. <sup>[f-a17](#fn-a17)</sup>
 
@@ -946,13 +952,14 @@ Basis: live probe. <sup>[f-a17](#fn-a17)</sup>
 **A18 — Emptying the request letter half-completes the add, silently** · 🐞
 · user-visible.
 Submitting the Add Reviewer form with the request letter emptied shows
-nothing at all — no error, no toast, no error page; the window simply stays
-open. But the assignment IS created: after a reload the reviewer sits at
+nothing at all: no error, no toast, no error page. The window simply stays
+open. But the assignment IS created. After a reload the reviewer sits at
 "Request Sent" with a full row menu, while the request email never goes out
 and reopening Add Reviewer shows the reviewer dimmed as already assigned.
 The editor is told nothing and the reviewer is never actually invited. In
 ordinary use the field can be empty at submit without the editor ever
-clearing it — the prefill can still be loading when the editor submits.
+clearing it, because the prefill can still be loading when the editor
+submits.
 Basis: live probe (both apps, driven once per app; positive control: a
 normal add delivers the request mail). <sup>[f-a18](#fn-a18)</sup>
 
@@ -960,10 +967,10 @@ normal add delivers the request mail). <sup>[f-a18](#fn-a18)</sup>
 **A19 — The template chooser renders with nothing to choose** · 🐞 · minor.
 The Add Reviewer window's template chooser ("Choose a predefined message to
 use, or fill out the form below.") is meant to appear only when alternate
-request templates exist, but it renders on every add: on a baseline journal
+request templates exist, but it renders on every add. On a baseline journal
 with zero alternates it shows a select with exactly one option, "Review
-Request" — a chooser with nothing to choose. Which alternates the chooser
-lists is a separate question — see [A5](#a5).
+Request": a chooser with nothing to choose. Which alternates the chooser
+lists is a separate question; see [A5](#a5).
 Basis: live probe (both apps, baseline contexts checked to hold no
 alternates; two acting roles on OJS) + code reading.
 <sup>[f-a19](#fn-a19)</sup>
@@ -971,13 +978,13 @@ alternates; two acting roles on OJS) + code reading.
 <a id="a20"></a>
 **A20 — Four dialogs lose their editor under minified scripts** · ✅ ·
 retired.
-With the server's minified-script bundling on — the production default, and
-the test installs' configuration — the Send Reminder, Unassign, Cancel and
-Reinstate windows opened without their rich-text message: the editor never
+With the server's minified-script bundling on (the production default, and
+the test installs' configuration), the Send Reminder, Unassign, Cancel and
+Reinstate windows opened without their rich-text message. The editor never
 initialized, so the notice could be neither read nor edited. With bundling
 off the same flows worked end to end. The cause was app-side in all three
-apps — the shipped script bundle was not recompiled after the 2026-08
-dialog rework; reported upstream 2026-08-27.
+apps: the shipped script bundle was not recompiled after the 2026-08
+dialog rework. Reported upstream 2026-08-27.
 Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
 <sup>[f-a20](#fn-a20)</sup>
 
@@ -991,15 +998,15 @@ Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
 <a id="a21"></a>
 **A21 — An early rating click can silently revert** · 🐞 · user-visible.
 The "Reviewer rating" stars are clickable the moment the Review Details
-window renders, but a click landing in the first moments — before the
-window has finished loading the assignment — is reverted when the load
-completes: the star flashes selected, then falls back, and no rating is
-saved, with no message. A click after the window settles saves normally,
-with its toast. The window offers no reliable "settled" signal: the revert
-was reproduced even after the footer's "Modify Review" button enabled,
-because the on-open mark-viewed round-trip re-renders the rating control
-after that point (test authoring, 2026-08-29 — the suite guards with an
-outcome-keyed re-click, never asserting the defect).
+window renders. A click landing in the first moments, before the window has
+finished loading the assignment, is reverted when the load completes: the
+star flashes selected, then falls back, and no rating is saved, with no
+message. A click after the window settles saves normally, with its toast.
+The window offers no reliable "settled" signal. The revert was reproduced
+even after the footer's "Modify Review" button enabled, because the on-open
+mark-viewed round-trip re-renders the rating control after that point (test
+authoring, 2026-08-29: the suite guards with an outcome-keyed re-click,
+never asserting the defect).
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe (observed in
 one open of four) + code reading.
 Reviewed: maintainer ruling, 2026-08-29 — stands as 🐞, risk accepted (low
@@ -1012,10 +1019,10 @@ mechanism was re-confirmed in code at that day's main tip.
 **A22 — The window's guidance promises an upload control it lacks** · 🐞 ·
 minor.
 The Review Details window's guidance paragraph tells the editor they "may
-upload the file below and then press 'Mark as Complete'" — but the window
-offers no upload control anywhere; uploading a reviewer file lives only in
-the "Modify Review" window (Rule 14b). The text contradicts the screen it
-sits on; upstream has already flagged the sentence's translation entry for
+upload the file below and then press 'Mark as Complete'". The window offers
+no upload control anywhere; uploading a reviewer file lives only in the
+"Modify Review" window (Rule 14b). The text contradicts the screen it sits
+on. Upstream has already flagged the sentence's translation entry for
 review.
 Since: 2026-08-29 (the rework kept the legacy window's text) · Basis:
 probe + code reading.
@@ -1029,9 +1036,9 @@ investigate. The string was re-confirmed unchanged at that day's main tip.
 On a journal, the Review Details window prints the reviewer's
 recommendation twice: once as the summary line "Recommendation: {label}"
 and again in the display-only "Reviewer Recommendation" group further
-down — the same value under two headings.
+down. It is the same value under two headings.
 Question: is the duplication intended? Lean: an artifact of composing the
-new window from stock blocks — one of the two would do. A press shows
+new window from stock blocks; one of the two would do. A press shows
 neither ([OMP1](#omp1)).
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe.
 <sup>[f-a23](#fn-a23)</sup>
@@ -1039,10 +1046,10 @@ Since: 2026-08-29 (the modify-reviews rework) · Basis: probe.
 <a id="a24"></a>
 **A24 — A modification save completes an incomplete review** · ❓ · latent.
 The save behind "Save Changes" also stamps a review complete when it is
-not yet — an editor modifying an in-progress review would complete it as
-a side effect. No screen reaches that today: the Review Details window,
-and its "Modify Review", open only on submitted reviews, which already
-count as complete.
+not yet complete. An editor modifying an in-progress review would complete
+it as a side effect. No screen reaches that today: the Review Details
+window, and its "Modify Review", open only on submitted reviews, which
+already count as complete.
 Question: should a modification save ever set completion? Lean: harmless
 today, but a trap for any future surface that lets an editor touch an
 in-progress review.
@@ -1054,14 +1061,14 @@ Since: 2026-08-29 (the modify-reviews rework) · Basis: code reading.
 user-visible.
 {OJS} Opening a submitted review's Review Details window through the
 dashboard popover's "View unread recommendation" button loses exactly the
-recommendation the button promises: the "Recommendation: {label}" line is
+recommendation the button promises. The "Recommendation: {label}" line is
 absent and the "Reviewer Recommendation" group's value reads "-", while
-everything else in the window matches the workflow path — so an editor
+everything else in the window matches the workflow path. So an editor
 reading the review from the dashboard never sees the recommendation in the
 window, though the popover states it one click earlier. For a
 not-yet-submitted review the two paths render identically. A press is
-unaffected by construction — its reviews carry no recommendation anywhere
-([OMP1](#omp1)).
+unaffected by construction, because its reviews carry no recommendation
+anywhere ([OMP1](#omp1)).
 Since: 2026-08-31 (reported by the PKP team; reproduced live the same day)
 · Basis: probe. <sup>[f-a25](#fn-a25)</sup>
 
@@ -1071,37 +1078,36 @@ Since: 2026-08-31 (reported by the PKP team; reproduced live the same day)
 **OMP1 — Per-stage reviewer pools, no recommendations** · ✅ · intended
 divergence.
 A press runs this feature on both of its review stages, each with its own
-reviewer pool: searching the Add Reviewer list on Internal Review finds the
-users holding the Internal Reviewer role, on External Review those with
-External Reviewer — the window's opening, unsearched list does not yet apply
-that split; that defect is OMP2. And a press's review collects no reviewer
+reviewer pool. Searching the Add Reviewer list on Internal Review finds the
+users holding the Internal Reviewer role, and on External Review those with
+External Reviewer. The window's opening, unsearched list does not yet apply
+that split; that defect is OMP2. A press's review also collects no reviewer
 recommendation, so the status cell's recommendation line and the Review
 Details windows' recommendation displays and select simply do not exist
-there — nor does the recommendation-based completeness gate: "Mark as
+there. Nor does the recommendation-based completeness gate: "Mark as
 Complete" is enabled at once (Rule 14a). The author-facing side of that
 same absence is recorded with the review stage (its finding "No reviewer
 recommendation on a press").
 Basis: live probe (the searched pool split, with positive and negative
 controls on both stages; the read-review window verified without a
 recommendation control) + code (the press disables reviewer recommendations
-by design — since the 2026-08-25 rebase explicitly, via
-`Application::hasCustomizableReviewerRecommendation()` returning `false` —
-and scopes reviewer groups per stage); the author-side
-counterpart was live-probed 2026-07-31 under the review-stage feature.
-Re-driven in the claim check (2026-08-02): the search split held with
-positive and negative controls in both directions on both stages, and the
-read-review window again rendered no recommendation control. Re-probed
-2026-08-29 on the reworked Review Details windows: no recommendation
-group, line or select anywhere, and "Mark as Complete" enabled
-immediately, no gate.
+by design, since the 2026-08-25 rebase explicitly, via
+`Application::hasCustomizableReviewerRecommendation()` returning `false`,
+and scopes reviewer groups per stage). The author-side counterpart was
+live-probed 2026-07-31 under the review-stage feature. Re-driven in the
+claim check (2026-08-02): the search split held with positive and negative
+controls in both directions on both stages, and the read-review window
+again rendered no recommendation control. Re-probed 2026-08-29 on the
+reworked Review Details windows: no recommendation group, line or select
+anywhere, and "Mark as Complete" enabled immediately, no gate.
 <sup>[f-omp1](#fn-omp1)</sup>
 
 <a id="omp2"></a>
 **OMP2 — The Add Reviewer window opens with both stages' pools** · 🐞 ·
 user-visible.
 On a press, the Add Reviewer window's opening list shows the reviewers of
-both stages — Internal and External Reviewers alike, on either stage. Only
-searching applies OMP1's per-stage split: a name from the other stage's
+both stages: Internal and External Reviewers alike, on either stage. Only
+searching applies OMP1's per-stage split. A name from the other stage's
 group returns "No items found." while the stage's own reviewers are found.
 The server-rendered opening list omits the stage filter that its own request
 parameters carry.
@@ -1113,15 +1119,15 @@ Basis: live probe (positive and negative controls on both stages).
 <a id="ops1"></a>
 **OPS1 — Retired: the missing unassign template is deliberate** · ✅ ·
 retired.
-The code observation stands — OPS never installs the default unassign
+The code observation stands: OPS never installs the default unassign
 notice template, so the Unassign Reviewer window would fail outright
-rather than render — but it is not a finding. The window is unreachable:
-no Reviewers panel exists anywhere on a preprint server (the absence
-paragraph). And the "missing" pieces match OPS's baseline, which
-deliberately ships no review-flow email templates at all — no review
+rather than render. But it is not a finding. The window is unreachable,
+because no Reviewers panel exists anywhere on a preprint server (the
+absence paragraph). And the "missing" pieces match OPS's baseline, which
+deliberately ships no review-flow email templates at all: no review
 request, reminder or cancel notice either (one review-round template in
-its registry against nineteen in OJS's) — so the 2026-08 rework's
-template-and-locale companion was never applicable there; the one piece
+its registry against nineteen in OJS's). So the 2026-08 rework's
+template-and-locale companion was never applicable there. The one piece
 OPS did need, the recompiled script bundle, it received ([A20](#a20)).
 The earlier "latent fault" framing measured OPS against the OJS/OMP
 baseline instead of its own.

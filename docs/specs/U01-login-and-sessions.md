@@ -13,36 +13,36 @@ atlas-claims: [AFFW-467, AFFW-470, AFFW-473, AFFW-499, AFFM-105, AFFM-191, AFFM-
 
 ## Purpose
 
-Everything here is about being someone on the site. A visitor signs in with a
-username (or email address) and password and is taken where their roles point;
-signing out hands the browser back to the public site. A forgotten password is
-recovered through an emailed link; an account can be flagged so its next
-sign-in forces a password change. Two supervised doors exist on top of the
-ordinary one: administrators and journal managers can **log in as** another
-user to see the site exactly as that user does and act on their behalf, and
-the site can be configured so that the Administration area asks the Site
-Administrator to **confirm their password** again before opening. This spec
-owns those flows, the session behavior behind them (staying signed in,
-expiry), and the screens they run on.
+This spec is about being someone on the site. A visitor signs in with a
+username (or email address) and a password, and is taken where their roles
+point. Signing out hands the browser back to the public site. A forgotten
+password is recovered through an emailed link. An account can be flagged so
+that its next sign-in forces a password change. Two supervised doors exist on
+top of the ordinary one. Administrators and journal managers can **log in
+as** another user, to see the site exactly as that user does and act on their
+behalf. And the site can be configured so that the Administration area asks
+the Site Administrator to **confirm their password** again before it opens.
+This spec covers those flows, the session behavior behind them (staying
+signed in, expiry), and the screens they run on.
 
 ## Actors & permissions
 
 "Impersonate" below means using **Login As** to continue the browser session
 as another user. A user is "wholly within a manager's journals" when every
 role they hold anywhere on the site sits in journals that manager manages.
-The Users & Roles screen's own reachability belongs to the users-management
+Who can reach the Users & Roles screen itself belongs to the users-management
 feature (see *Cross-feature interactions*).
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **Sign in / sign out** | • Anyone with an enabled account — any journal's Login page or the site-level one; a disabled account is refused with a message (Rule 2) <sup>a</sup> |
-| **Request a password reset** | • Anyone, signed out — the "Forgot your password?" link on the Login page (Rules 7–8) <sup>e</sup> |
-| **Set a new password from the emailed link** | • The holder of the emailed link — while the link is valid (Rules 8–10) <sup>f</sup> |
-| **Complete a forced password change** | • The account holder — when their account is flagged to require it, at their next sign-in (Rule 11) <sup>g</sup> |
-| **Impersonate a user (Login As)** | • Site Administrator — any account except their own or another Site Administrator's (Rule 14)<br>• Journal Manager — accounts wholly within the journals they manage (Rule 14)<br>• Nobody else — no other role is offered the action anywhere, and even its address, captured by hand in a session that does offer the action (Rule 14), answers them with the access-denied page: "The current role does not have access to this operation." (Rule 17) <sup>h</sup> |
-| **Return to their own account** | • The impersonator — "Logout as {username}" in the user menu, or the same entry on the workflow Participants panel (Rule 15) <sup>j</sup> |
-| **Pass the Confirm Access gate** | • Site Administrator — the gate exists only when the site's configuration requires re-authentication, and only the Administration area asks (Rule 16); every other role is turned away from Administration by its ordinary role gate, never by this one <sup>k</sup> |
-| **See the access-denied page** | • Any signed-in user reaching a screen their role does not allow (Rule 17); a signed-out visitor gets the Login page instead (Rule 4) <sup>l</sup> |
+| **Sign in / sign out** | • Anyone with an enabled account, on any journal's Login page or the site-level one. A disabled account is refused with a message (Rule 2) <sup>a</sup> |
+| **Request a password reset** | • Anyone, signed out, through the "Forgot your password?" link on the Login page (Rules 7–8) <sup>e</sup> |
+| **Set a new password from the emailed link** | • The holder of the emailed link, while the link is valid (Rules 8–10) <sup>f</sup> |
+| **Complete a forced password change** | • The account holder, at their next sign-in, when their account is flagged to require it (Rule 11) <sup>g</sup> |
+| **Impersonate a user (Login As)** | • Site Administrator: any account except their own or another Site Administrator's (Rule 14)<br>• Journal Manager: accounts wholly within the journals they manage (Rule 14)<br>• Nobody else. No other role is offered the action anywhere. Even the action's address, captured by hand in a session that does offer it (Rule 14), answers them with the access-denied page: "The current role does not have access to this operation." (Rule 17) <sup>h</sup> |
+| **Return to their own account** | • The impersonator, through "Logout as {username}" in the user menu, or the same entry on the workflow Participants panel (Rule 15) <sup>j</sup> |
+| **Pass the Confirm Access gate** | • Site Administrator. The gate exists only when the site's configuration requires re-authentication, and only the Administration area asks (Rule 16). Every other role is turned away from Administration by its ordinary role gate, never by this one <sup>k</sup> |
+| **See the access-denied page** | • Any signed-in user who reaches a screen their role does not allow (Rule 17). A signed-out visitor gets the Login page instead (Rule 4) <sup>l</sup> |
 
 ## Fields & validation
 
@@ -51,27 +51,27 @@ feature (see *Cross-feature interactions*).
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Username or Email" | yes | Either the account's username or its email address |
-| "Password" | yes | The typing box stops accepting input at 32 characters, though passwords may be longer ⚠ [A1](#a1); a "Forgot your password?" link sits under it <sup>a</sup> |
-| "Keep me logged in" | no | Keeps the sign-in alive for a fixed window from login, beyond the idle lifetime that otherwise ends it (Rule 5); the box arrives pre-ticked ⚠ [A2](#a2) |
-| Spam check | when configured | Only when the installation's configuration turns a check on for the login form: reCAPTCHA shows its widget; the ALTCHA check is invisible — nothing extra appears and signing in works as usual, though a browser without JavaScript is refused with "You must complete the validation check used to prevent spam submissions." (see *Settings*) <sup>a</sup> |
-| "Register" link | — | Shown beside the "Login" button while the journal accepts registrations; disabling registration removes it (see *Settings*) <sup>a</sup> |
+| "Password" | yes | The typing box stops accepting input at 32 characters, even though passwords may be longer ⚠ [A1](#a1). A "Forgot your password?" link sits under it <sup>a</sup> |
+| "Keep me logged in" | no | Keeps the sign-in alive for a fixed window from login, beyond the idle lifetime that otherwise ends it (Rule 5). The box arrives pre-ticked ⚠ [A2](#a2) |
+| Spam check | when configured | Appears only when the installation's configuration turns a check on for the login form. reCAPTCHA shows its widget. The ALTCHA check is invisible: nothing extra appears and signing in works as usual, but a browser without JavaScript is refused with "You must complete the validation check used to prevent spam submissions." (see *Settings*) <sup>a</sup> |
+| "Register" link | — | Shown beside the "Login" button while the journal accepts registrations. Disabling registration removes it (see *Settings*) <sup>a</sup> |
 
 **Lost-password page** (title "Reset Password"; reached via "Forgot your
 password?"):
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Registered user's email" | yes | Must be an email address; the page instructs "Enter your account email address below and an email will be sent with instructions on how to reset your password." <sup>e</sup> |
+| "Registered user's email" | yes | Must be an email address. The page instructs "Enter your account email address below and an email will be sent with instructions on how to reset your password." <sup>e</sup> |
 | Spam check | when configured | The Login page's invisible ALTCHA check, per configuration <sup>e</sup> |
-| "Register" link | — | Same as the Login page's — gone when registration is disabled |
+| "Register" link | — | Same as the Login page's. Gone when registration is disabled |
 
-**Set-a-new-password form** (opened by the emailed link; the page is headed
-"Reset Password", though the browser tab shows a raw internal code in place
-of a title ⚠ [A3](#a3)):
+**Set-a-new-password form** (opened by the emailed link). The page is headed
+"Reset Password", but the browser tab shows a raw internal code in place of a
+title ⚠ [A3](#a3):
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "New password" | yes | At least the site minimum length (stated under the field: "The password must be at least {N} characters."); when the site's compromised-password check is on, a known-breached password is refused (see *Settings*) <sup>f</sup> |
+| "New password" | yes | At least the site minimum length, stated under the field: "The password must be at least {N} characters." When the site's compromised-password check is on, a known-breached password is refused (see *Settings*) <sup>f</sup> |
 | "Repeat new password" | yes | Must match |
 
 **Change Password form** (forced at sign-in; title "Change Password"):
@@ -79,75 +79,74 @@ of a title ⚠ [A3](#a3)):
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Login" (username) | yes | Prefilled with the username that just signed in <sup>g</sup> |
-| "Current password" | yes | Wrong value errors "The current password you entered was incorrect." <sup>g</sup> |
+| "Current password" | yes | A wrong value errors "The current password you entered was incorrect." <sup>g</sup> |
 | "New password" / "Repeat new password" | yes | Site minimum length; both must match <sup>g</sup> |
 
 **Confirm Access form** (title "Confirm Access"):
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Password" | yes | The signed-in Site Administrator's own password; the page says "Signed in as **{name}**. Please enter your password to continue."; a wrong password re-shows the form with the generic sign-in error (Rule 16) <sup>k</sup> |
-| "Cancel" | — | Leaves for the page the administrator came from — never back into Administration (Rule 16) <sup>k</sup> |
+| "Password" | yes | The signed-in Site Administrator's own password. The page says "Signed in as **{name}**. Please enter your password to continue." A wrong password re-shows the form with the generic sign-in error (Rule 16) <sup>k</sup> |
+| "Cancel" | — | Leaves for the page the administrator came from, never back into Administration (Rule 16) <sup>k</sup> |
 
 ## Rules & state
 
 1. **One Login page.** Every journal has a Login page, and the site has one
-   outside any journal — reached from the "Login" link at the top right of
-   the site's own homepage, the page listing the journals; both carry the
-   same form. A visitor who is already
-   signed in and opens the Login, lost-password, or emailed reset-link
-   address is sent to their home (Rule 3) instead of the form. <sup>a</sup>
+   outside any journal. The site-level page is reached from the "Login" link
+   at the top right of the site's own homepage, the page that lists the
+   journals. Both carry the same form. A visitor who is already signed in
+   and opens the Login, lost-password, or emailed reset-link address is sent
+   to their home (Rule 3) instead of the form. <sup>a</sup>
 2. **One generic failure.** A wrong password and a wrong or unknown username
-   or email answer the same sentence on the same page: "Invalid
-   username/email or password. Please try again." An empty required box
-   never reaches the site: the browser itself refuses the submission and
-   prompts to fill the field in. A disabled
-   account with correct credentials answers differently: "Your account has
-   been disabled. Please contact the administrator for more information." —
-   or, when staff recorded a reason, "Your account has been disabled for the
-   following reason: {reason}". <sup>a</sup>
+   or email get the same sentence on the same page: "Invalid username/email
+   or password. Please try again." An empty required box never reaches the
+   site: the browser itself refuses the submission and prompts to fill the
+   field in. A disabled account with correct credentials gets a different
+   answer: "Your account has been disabled. Please contact the administrator
+   for more information." When staff recorded a reason, it reads "Your
+   account has been disabled for the following reason: {reason}". <sup>a</sup>
 3. **Landing after sign-in.** An interrupted destination wins (Rule 4).
-   Otherwise a user holding a role beyond Reader **in the journal signed
-   into** lands on that journal's Dashboard; a user with no such role there
-   — Reader-only, role-less, or holding roles only in other journals —
-   lands on the journal home page. Signing in at the site-level Login of a
-   multi-journal site lands on the site home page whatever the user's
-   roles: the Dashboard landing needs a journal to aim at. <sup>b</sup>
-4. **An interrupted visit resumes.** A signed-out visitor opening a private
-   screen's address — a bookmark, an emailed link — gets the plain Login
-   page; nothing on it names the destination being held, though a few
-   screens add an explanatory sentence above the form (a download that
-   requires signing in, for example). Signing in continues to the address
-   they originally asked for. One address misbehaves: the address that ends
-   at the word "dashboard", with nothing after it, answers a blank
-   server-error page instead of the Login page ⚠ [A7](#a7). <sup>b</sup>
-5. **Staying signed in.** Closing the browser does not sign a user out:
-   ticked or not, the sign-in survives browser restarts — unless the
+   Otherwise, a user holding a role beyond Reader **in the journal signed
+   into** lands on that journal's Dashboard. A user with no such role there
+   (Reader-only, role-less, or holding roles only in other journals) lands
+   on the journal home page. Signing in at the site-level Login of a
+   multi-journal site lands on the site home page whatever the user's roles,
+   because the Dashboard landing needs a journal to aim at. <sup>b</sup>
+4. **An interrupted visit resumes.** A signed-out visitor who opens a private
+   screen's address (a bookmark, an emailed link) gets the plain Login page.
+   Nothing on it names the destination being held, though a few screens add
+   an explanatory sentence above the form (a download that requires signing
+   in, for example). Signing in continues to the address they originally
+   asked for. One address misbehaves: the address that ends at the word
+   "dashboard", with nothing after it, answers a blank server-error page
+   instead of the Login page ⚠ [A7](#a7). <sup>b</sup>
+5. **Staying signed in.** Closing the browser does not sign a user out.
+   Ticked or not, the sign-in survives browser restarts, unless the
    installation is configured to end sessions at browser close. Unticked,
    the session ends when its idle lifetime runs out (a config default of
    7 days without a visit). Ticking "Keep me logged in" extends the sign-in
    past that idle limit, for a fixed window from login (config default
    30 days). <sup>c</sup>
-6. **Signing out.** The user menu (top-right initials) offers "Logout";
-   signing out returns the browser to the Login page and ends only this
-   browser's session — the same account signed in elsewhere stays signed in.
+6. **Signing out.** The user menu (top-right initials) offers "Logout".
+   Signing out returns the browser to the Login page and ends only this
+   browser's session. The same account signed in elsewhere stays signed in.
    The login form then arrives with the just-departed user's email address
-   prefilled in "Username or Email" — the email even when the sign-in had
-   used the username. While impersonating, the menu offers no
-   plain Logout — its only exit is "Logout as {username}" (Rule 15). <sup>d</sup>
+   prefilled in "Username or Email". It is the email even when the sign-in
+   had used the username. While impersonating, the menu offers no plain
+   Logout. Its only exit is "Logout as {username}" (Rule 15). <sup>d</sup>
 7. **Requesting a reset.** Submitting the lost-password form answers "A
    confirmation has been sent to your email address if a matching account was
    found. Please follow the instructions in the email to reset your
-   password." with a "Login" link back; an email actually goes out when the
+   password." with a "Login" link back. An email actually goes out when the
    address belongs to an account. <sup>e</sup>
 8. **The reset email** carries one link. The link expires on a clock (2 hours
-   on a default install — see *Settings*) and dies early if the account's
-   password changes or the account signs in, so it is single-use in effect.
+   on a default install; see *Settings*). It also dies early if the account's
+   password changes or the account signs in, so in effect it is single-use.
    <sup>e</sup> <sup>f</sup>
 9. **Setting the new password.** A valid link opens the set-a-new-password
    form (Fields above). Saving answers "Password has been updated
-   successfully. Please login with updated password." with a "Login" link —
-   the user is **not** signed in by resetting, and every other signed-in
+   successfully. Please login with updated password." with a "Login" link.
+   The user is **not** signed in by resetting, and every other signed-in
    session of that account ends at that moment. <sup>f</sup>
 10. **A dead link explains itself.** An expired or altered link shows "Sorry,
     the link you clicked on has expired or is not valid. Please try resetting
@@ -155,173 +154,173 @@ of a title ⚠ [A3](#a3)):
     lost-password page. A link whose username no longer exists lands on the
     lost-password page directly. <sup>f</sup>
 11. **Forced password change.** An account flagged to require a password
-    change signs in only through the "Change Password" form: correct
+    change signs in only through the "Change Password" form. Correct
     credentials at the Login page divert there instead of landing anywhere.
     The page explains "You must choose a new password before you can log in
     to this site…". Completing the form signs the user in and lands them
-    where an ordinary sign-in would (Rule 3 — a reviewer, for instance,
-    lands on the Dashboard); their other sessions end. No users screen offers the
-    flag itself ⚠ [A5](#a5): the one screen-driven path that sets it is the
+    where an ordinary sign-in would (Rule 3; a reviewer, for instance, lands
+    on the Dashboard). Their other sessions end. No users screen offers the
+    flag itself ⚠ [A5](#a5). The one screen-driven path that sets it is the
     review stage's "Create New Reviewer" {OJS OMP}, which flags the new
-    account automatically and emails it a generated password (the form
-    belongs to the reviewer-assignment feature). <sup>g</sup>
+    account automatically and emails it a generated password. That form
+    belongs to the reviewer-assignment feature. <sup>g</sup>
 12. **Impersonation is total while it lasts.** After Login As, the browser
-    session **is** the target user: their dashboard, their submissions,
-    their name on everything done. The action is offered behind a
-    confirmation dialog reading "Log in as this user? All actions you
-    perform will be attributed to this user." (OK / Cancel). <sup>h</sup> <sup>i</sup>
+    session **is** the target user: their dashboard, their submissions, their
+    name on everything done. The action sits behind a confirmation dialog
+    reading "Log in as this user? All actions you perform will be attributed
+    to this user." (OK / Cancel). <sup>h</sup> <sup>i</sup>
 13. **While impersonating, the screen says so.** The top bar shows the
     impersonator's own initials, muted, with the target's initials overlaid
-    in a warning color; the user menu adds "You are currently logged in as
-    {username}" with a "Logout as {username}" link; on a submission's
+    in a warning color. The user menu adds "You are currently logged in as
+    {username}" with a "Logout as {username}" link. On a submission's
     workflow screen, the Participants panel shows its own "Logout as
     {username}" entry at the top of the list. In every one of these,
-    {username} is the **impersonated** account — the labels name the user
+    {username} is the **impersonated** account. The labels name the user
     being worn, not the one who will be restored. <sup>j</sup>
 14. <a id="who-may-impersonate"></a> **Who may impersonate whom.** A Site
     Administrator may impersonate anyone except themselves and other Site
     Administrators. A Journal Manager may impersonate a user wholly within
-    the journals they manage; a user who also holds roles in a journal the
+    the journals they manage. A user who also holds roles in a journal the
     manager does not manage is out of reach. Rows never offer the action on
     the current user's own account. No screen offers a path to an
     out-of-reach user, but the action's address can be built by hand: use
     Login As on a row that does offer it, copy the address the browser
-    visited from its history — it ends in a number identifying that user —
+    visited from its history (it ends in a number identifying that user),
     return to your own account ("Logout as", Rule 15), then open that
     address with the number changed. Opened for an out-of-reach user, it
-    shows an error page — "Sorry, you do not have administrative rights
-    over this user…" — listing the possible causes, with a link back to the
-    users list. In a session the site can no longer fully resolve — one
-    that outlived a server-side reset, say — the same address answers a
-    blank server error instead of impersonating or turning the visitor
-    away ⚠ [A8](#a8). <sup>h</sup>
+    shows an error page, "Sorry, you do not have administrative rights over
+    this user…", listing the possible causes, with a link back to the users
+    list. In a session the site can no longer fully resolve (one that
+    outlived a server-side reset, say), the same address answers a blank
+    server error instead of impersonating or turning the visitor away
+    ⚠ [A8](#a8). <sup>h</sup>
 15. **Returning.** "Logout as {username}" (user menu or Participants panel)
     restores the original account without asking for credentials and lands
-    home — or back on the same submission when used from a workflow screen.
-    Typing the plain sign-out address instead — it must be captured before
+    home, or back on the same submission when used from a workflow screen.
+    Typing the plain sign-out address instead ends everything: the browser is
+    signed out of both identities and lands on the Login page, not back in
+    the original account. That address must be captured before
     impersonating, by copying the link behind the user menu's "Logout"
-    entry, since the menu no longer offers it after — ends everything: the
-    browser is signed out of both identities and lands on the Login page,
-    not back in the original account. No deeper nesting is supported, yet the
-    Users & Roles list and the workflow Participants panel still offer
-    Login As while an impersonation is already active (to see this,
-    impersonate a user who can themselves open one of those screens — a
-    Journal Manager, say), and using it starts a second one that replaces
-    the first ⚠ [A4](#a4). <sup>i</sup> <sup>j</sup>
+    entry, because the menu no longer offers it afterwards. No deeper
+    nesting is supported, yet the Users & Roles list and the workflow
+    Participants panel still offer Login As while an impersonation is
+    already active. To see this, impersonate a user who can themselves open
+    one of those screens, a Journal Manager, say. Using it starts a second
+    impersonation that replaces the first ⚠ [A4](#a4). <sup>i</sup> <sup>j</sup>
 16. **The Confirm Access gate.** When the installation's configuration sets a
-    re-authentication window (minutes), every Administration screen first
+    re-authentication window (in minutes), every Administration screen first
     shows the "Confirm Access" form (Fields above). The correct password
-    opens Administration for the window's duration; working inside
+    opens Administration for the window's duration. Working inside
     Administration keeps refreshing the window, so the prompt returns only
     after the administrator has been away from it longer than the window. A
-    button press that needs Administration rights after the window lapsed —
-    pressing Administration's "Delete Template Cache" button after idling
-    past the window, for example — also lands on Confirm Access, and the
-    pressed action is **not** replayed: after confirming, a notice says
-    "Your last action was not completed. Please try again." Opening the
-    Confirm Access address directly with nothing to continue to — the
-    address trimmed of the interrupted page it carries in the address bar
-    whenever the gate fires — never shows the form: the browser is sent
-    straight home without being asked for a password (while a confirmed
-    window is still active, it lands on Administration instead). Starting an
-    impersonation ends the confirmed window. <sup>k</sup>
-17. **Access denied, signed in.** A signed-in user reaching a screen their
-    role does not allow is shown a message page stating the denial (the
-    exact sentence varies with the screen; most commonly "The current role
-    does not have access to this operation."); nothing of the refused screen
+    button press that needs Administration rights after the window lapsed
+    also lands on Confirm Access. Pressing Administration's "Delete Template
+    Cache" button after idling past the window is one example. The pressed
+    action is **not** replayed: after confirming, a notice says "Your last
+    action was not completed. Please try again." Opening the Confirm Access
+    address directly, with nothing to continue to, never shows the form.
+    That is the address trimmed of the interrupted page it carries in the
+    address bar whenever the gate fires. The browser is sent straight home
+    without being asked for a password. While a confirmed window is still
+    active, it lands on Administration instead. Starting an impersonation
+    ends the confirmed window. <sup>k</sup>
+17. **Access denied, signed in.** A signed-in user who reaches a screen their
+    role does not allow is shown a message page stating the denial. The exact
+    sentence varies with the screen; most commonly it is "The current role
+    does not have access to this operation." Nothing of the refused screen
     renders. Signed out, the same address shows the Login page instead
     (Rule 4). <sup>l</sup>
 18. **Sessions end from the outside too.** The installation can be
     configured to end a session whose network address changes mid-visit (on
-    by default), and the Site Administrator can expire every session at once
-    with the "Expire User Sessions" tool (see *System administration*); the
-    user's next click then lands on the Login page. <sup>m</sup>
+    by default). The Site Administrator can also expire every session at
+    once with the "Expire User Sessions" tool (see *System administration*).
+    The user's next click then lands on the Login page. <sup>m</sup>
 
 ## Side effects
 
-- **On a reset request** — one email, "Password Reset Confirmation", to the
-  matching account, sent from the site's principal contact, containing the
-  single reset link (Rule 8). No other flow in this spec sends mail. <sup>e</sup>
-- **On every sign-in** — the account's last-login date is updated (it shows
-  on users-management screens). Completing a forced change or an emailed
-  reset also ends the account's other sessions (Rules 9, 11). <sup>b</sup> <sup>f</sup>
-- **On impersonation** — everything done while impersonating is recorded as
-  the impersonated user: submissions, decisions and emails all carry the
-  target's name, per the confirmation dialog's warning (Rule 12). Submission
+- **On a reset request**: one email, "Password Reset Confirmation", goes to
+  the matching account, sent from the site's principal contact, containing
+  the single reset link (Rule 8). No other flow in this spec sends mail.
+  <sup>e</sup>
+- **On every sign-in**: the account's last-login date is updated (it shows on
+  users-management screens). Completing a forced change or an emailed reset
+  also ends the account's other sessions (Rules 9, 11). <sup>b</sup> <sup>f</sup>
+- **On impersonation**: everything done while impersonating is recorded as
+  the impersonated user. Submissions, decisions and emails all carry the
+  target's name, as the confirmation dialog warns (Rule 12). Submission
   activity-log entries additionally remember who was really acting: they
-  display "{impersonator} (acting as {target})" — except to readers from
-  whom a review's anonymity already hides the entry's reviewer, who see the
-  target's name alone (the log screen itself belongs to the *Submission
-  activity log & notes* feature).
+  display "{impersonator} (acting as {target})". The exception is a reader
+  from whom a review's anonymity already hides the entry's reviewer; they
+  see the target's name alone. The log screen itself belongs to the
+  *Submission activity log & notes* feature.
 
 ## Settings that modify behavior
 
-- **Site password policy** — the minimum password length and the
+- **Site password policy.** The minimum password length and the
   compromised-password check ("uncompromised" validation on new passwords)
-  are set on the Administration site settings screen (owned by the *Site
-  settings* feature). <sup>n</sup>
-- **Sign-in rate limiting** — the same screen can enable rate limiting with
-  a maximum attempt count (default 5) and cool-down (default 300 seconds).
+  are set on the Administration site settings screen, which the *Site
+  settings* feature owns. <sup>n</sup>
+- **Sign-in rate limiting.** The same screen can enable rate limiting with a
+  maximum attempt count (default 5) and a cool-down (default 300 seconds).
   When enabled, repeated failed sign-ins or reset requests are refused for
-  the cool-down — deliberately showing the same generic answer as an
+  the cool-down. On purpose, the refusal shows the same generic answer as an
   ordinary failure, plus a delay, so the limiting itself is invisible.
   During the cool-down even the correct password answers "Invalid
-  username/email or password. Please try again." — intended concealment
-  [A6](#a6). Disabled by default. <sup>n</sup>
-- **Configuration file, security section** — for the system administrator,
-  no screen: the reset-link lifetime (`reset_seconds`, default 2 hours); the
-  "Keep me logged in" window (`remember_me_lifetime`, default 30 days);
+  username/email or password. Please try again." This concealment is
+  intended [A6](#a6). Disabled by default. <sup>n</sup>
+- **Configuration file, security section.** For the system administrator,
+  with no screen: the reset-link lifetime (`reset_seconds`, default 2 hours);
+  the "Keep me logged in" window (`remember_me_lifetime`, default 30 days);
   end-session-on-browser-close (`session_expire_on_close`);
   end-session-on-address-change (`session_check_ip`, default on); forcing
   https for login or the whole site (`force_login_ssl`, `force_ssl`); the
-  Confirm Access window (`password_timeout` minutes, default off); the salt
-  behind reset links — a secret value that makes the links unforgeable. The
-  same section's plugin-installation and allowed-HTML
-  keys serve other features (see *Cross-feature interactions*). <sup>m</sup>
-- **Idle session lifetime** — `session_lifetime` (default 7 days) in the
+  Confirm Access window (`password_timeout` minutes, default off); and the
+  salt behind reset links, a secret value that makes the links unforgeable.
+  The same section's plugin-installation and allowed-HTML keys serve other
+  features (see *Cross-feature interactions*). <sup>m</sup>
+- **Idle session lifetime.** `session_lifetime` (default 7 days) in the
   configuration file's general section. <sup>m</sup>
-- **Spam checks on login and lost-password** — the configuration file's
+- **Spam checks on login and lost-password.** The configuration file's
   captcha section decides whether the login form carries reCAPTCHA or the
-  invisible ALTCHA check (`captcha_on_login` / `altcha_on_login`) and
+  invisible ALTCHA check (`captcha_on_login` / `altcha_on_login`), and
   whether the lost-password form carries the ALTCHA check
-  (`altcha_on_lost_password`); the captcha configuration's home is the
+  (`altcha_on_lost_password`). The captcha configuration's home is the
   *Registration & account validation* feature. <sup>a</sup>
-- **User registration disabled** — the journal setting that closes
+- **User registration disabled.** The journal setting that closes
   registration also removes the Register links from the Login and
-  lost-password pages; a directly-typed register address then answers "This
-  journal is currently not accepting user registrations." The setting
-  itself belongs to the *Roles configuration* feature. <sup>a</sup>
+  lost-password pages. A directly-typed register address then answers "This
+  journal is currently not accepting user registrations." The setting itself
+  belongs to the *Roles configuration* feature. <sup>a</sup>
 
 ## Cross-feature interactions
 
-- **Registration** — the Login page's "Register" link enters the
-  registration flow, and the captcha configuration is homed there (see
-  *Registration & account validation*).
-- **User profile** — a signed-in user changes their own password on the
-  profile's Password tab (see *User profile*); this spec owns only the
-  sign-in-blocking flows (forced change, emailed reset).
-- **Users management** — disabling accounts (with the reason Rule 2 shows)
-  and the Users & Roles screen where Login As is most prominently offered
-  belong to *Users management*; this spec owns the Login As action itself
-  on every surface that offers it. No users screen currently exposes the
-  flag behind the forced password change ⚠ [A5](#a5) (Rule 11).
-- **Stage participants / Reviewer assignment** — the Participants panel and
-  the Reviewers table belong to their own features; this spec owns only
-  their "Login As" / "Logout as" entries. The "Create New Reviewer" form
-  that flags its new account for a password change (Rule 11) is the
-  reviewer-assignment feature's.
-- **System administration** — the Administration area the Confirm Access
-  gate protects, and the "Expire User Sessions" tool, are *System
-  administration & jobs*'; the gate itself is this spec's.
-- **Site settings** — the password-policy and rate-limiting form is *Site
-  settings*'; this spec owns their effect on these screens.
-- **Invitations & one-click links** — emailed invitation and reviewer
+- **Registration.** The Login page's "Register" link enters the registration
+  flow, and the captcha configuration lives there (see *Registration &
+  account validation*).
+- **User profile.** A signed-in user changes their own password on the
+  profile's Password tab (see *User profile*). This spec covers only the
+  flows that block sign-in: the forced change and the emailed reset.
+- **Users management.** Disabling accounts (with the reason Rule 2 shows)
+  and the Users & Roles screen, where Login As is most prominently offered,
+  belong to *Users management*. This spec covers the Login As action itself
+  on every screen that offers it. No users screen currently exposes the flag
+  behind the forced password change ⚠ [A5](#a5) (Rule 11).
+- **Stage participants / Reviewer assignment.** The Participants panel and
+  the Reviewers table belong to their own features. This spec covers only
+  their "Login As" / "Logout as" entries. The "Create New Reviewer" form that
+  flags its new account for a password change (Rule 11) belongs to the
+  reviewer-assignment feature.
+- **System administration.** The Administration area the Confirm Access gate
+  protects, and the "Expire User Sessions" tool, belong to *System
+  administration & jobs*. The gate itself is this spec's.
+- **Site settings.** The password-policy and rate-limiting form belongs to
+  *Site settings*. This spec covers their effect on these screens.
+- **Invitations & one-click links.** Emailed invitation and reviewer
   one-click links open their flows signed out without touching these
-  screens; they belong to [user invitations](U06-user-invitations.md) and the
+  screens. They belong to [user invitations](U06-user-invitations.md) and the
   future *Reviewer's review* spec.
-- **Plugins management** — the configuration file's security section also
-  carries the plugin-installation policy keys consumed by *Plugins
-  management*.
+- **Plugins management.** The configuration file's security section also
+  carries the plugin-installation policy keys used by *Plugins management*.
 
 ## Canonical scenarios
 
@@ -330,71 +329,72 @@ Common to all three apps; substitute roles and vocabulary per the
 accounts and recipes live in the footnotes. <sup>s</sup>
 
 1. **Sign in and land on the Dashboard** — Editor: open the journal's Login
-   page; enter the right username with a wrong password — the page answers
+   page. Enter the right username with a wrong password. The page answers
    "Invalid username/email or password. Please try again." and keeps the
-   username filled in. Enter the correct password and press "Login" — the
+   username filled in. Enter the correct password and press "Login". The
    browser lands on the Dashboard. <sup>s</sup>
 2. **Sign out** — any signed-in user: open the top-right user menu (the
    initials button) and press "Logout". The browser returns to the Login
-   page, signed out; the "Username or Email" box already holds the
-   departed account's email address. Opening any dashboard address now
-   shows the Login page, not the dashboard — except the address that ends
+   page, signed out, and the "Username or Email" box already holds the
+   departed account's email address. Opening any dashboard address now shows
+   the Login page, not the dashboard. The exception is the address that ends
    at the word "dashboard", which answers a blank error page ⚠ [A7](#a7).
 3. **A bookmarked private page waits for sign-in** — Editor, signed out:
    paste a submission workflow address into the browser. The Login page
-   appears instead of the submission. Sign in — the browser continues
+   appears instead of the submission. Sign in. The browser continues
    straight to the submission that was asked for, not to the Dashboard.
 4. **Recover a forgotten password** — Author, signed out: press "Forgot your
-   password?" on the Login page, enter the account's email address, submit —
-   the page answers that a confirmation has been sent if the address
-   matched. Open the emailed "Password Reset Confirmation" message and follow its
-   link; on "Reset Password", enter a new password twice and save. The page
-   answers "Password has been updated successfully. Please login with
-   updated password." — still signed out. Sign in with the new password
-   (works); the old password now fails with the generic error. <sup>s</sup>
+   password?" on the Login page, enter the account's email address, and
+   submit. The page answers that a confirmation has been sent if the address
+   matched. Open the emailed "Password Reset Confirmation" message and follow
+   its link. On "Reset Password", enter a new password twice and save. The
+   page answers "Password has been updated successfully. Please login with
+   updated password." and you are still signed out. Sign in with the new
+   password: it works. The old password now fails with the generic error.
+   <sup>s</sup>
 5. **A stale or altered reset link is refused** — the same Author, signed
-   out again (signed in, the link just bounces home — Rule 1): open the
+   out again (signed in, the link just bounces home, Rule 1): open the
    emailed link again after the password was changed and the account signed
-   in — the page answers "Sorry, the link you clicked on has expired or is
+   in. The page answers "Sorry, the link you clicked on has expired or is
    not valid. Please try resetting your password again." with a link back
    to the lost-password form. A link with a mangled code answers the same.
 6. **Forced password change at first sign-in** — Editor, on a submission in
    review: in the "Add Reviewer" window, choose "Create New Reviewer" and
    create a reviewer with a throwaway email address. The registration email
-   delivers a username and a generated password. Sign in with them — instead
+   delivers a username and a generated password. Sign in with them. Instead
    of landing anywhere, the "Change Password" form appears. Enter the
-   emailed password as the current one and a new password twice; pressing
-   "OK" signs the reviewer in and lands them on the Dashboard — the landing
-   their reviewer role earns (Rule 3). Signing in again with
-   the new password is normal. {OJS OMP; a preprint server has no review
-   stage, so no screen there sets the flag — no OPS analogue.} <sup>s</sup>
+   emailed password as the current one and a new password twice. Pressing
+   "OK" signs the reviewer in and lands them on the Dashboard, the landing
+   their reviewer role earns (Rule 3). Signing in again with the new password
+   is normal. {OJS OMP; a preprint server has no review stage, so no screen
+   there sets the flag — no OPS analogue.} <sup>s</sup>
 7. **Administrator impersonates a user and returns** — Site Administrator:
-   on Users & Roles, open an Author's row menu and choose "Login As"; a
-   dialog warns all actions will be attributed to that user; press OK. The
-   browser is now that Author's session — their name, their My Submissions —
-   and the top bar shows the administrator's initials with the Author's
-   overlaid in a warning color; the user menu reads "You are currently
-   logged in as {author}".
-   Choose "Logout as {author}" — the administrator is back in their own
-   session, no password asked. <sup>s</sup>
+   on Users & Roles, open an Author's row menu and choose "Login As". A
+   dialog warns that all actions will be attributed to that user. Press OK.
+   The browser is now that Author's session: their name, their My
+   Submissions. The top bar shows the administrator's initials with the
+   Author's overlaid in a warning color, and the user menu reads "You are
+   currently logged in as {author}". Choose "Logout as {author}". The
+   administrator is back in their own session, with no password asked.
+   <sup>s</sup>
 8. **Editor impersonates a participant from the Participants panel** —
    Editor, on a submission's workflow: on the Participants panel, open a
-   Section Editor participant's row menu and choose "Login As"; confirm.
+   Section Editor participant's row menu, choose "Login As", and confirm.
    The browser lands on the same submission as that participant, and the
-   top of the Participants panel now offers "Logout as {that participant}"
-   — press it to return to the editor's view of the same submission.
+   top of the Participants panel now offers "Logout as {that participant}".
+   Press it to return to the editor's view of the same submission.
    Impersonating the submission's Author instead lands on the author's own
-   My Submissions view, which shows no Participants panel — the way back is
-   the user menu's "Logout as {author}" entry. On a journal or press the
-   Reviewers table offers the same row action for reviewers {OJS OMP; a
+   My Submissions view, which shows no Participants panel. The way back is
+   then the user menu's "Logout as {author}" entry. On a journal or press
+   the Reviewers table offers the same row action for reviewers {OJS OMP; a
    preprint server has no Reviewers table}. <sup>i</sup>
 9. **Administration asks for the password again** — Site Administrator, on
    an install configured with a re-authentication window (see *Settings*):
-   open Administration — the "Confirm Access" page appears, naming the
+   open Administration. The "Confirm Access" page appears, naming the
    administrator and asking for their password. A wrong password re-shows
-   the form with the generic sign-in error; the right one opens
-   Administration. Leaving Administration alone past the window and coming
-   back shows the gate again; pressing Cancel on it leads back out, not
+   the form with the generic sign-in error. The right one opens
+   Administration. Leave Administration alone past the window and come
+   back: the gate shows again. Pressing Cancel on it leads back out, not
    into Administration. <sup>s</sup>
 
 ## Findings register
@@ -412,22 +412,22 @@ or configuration.
 | [A1](#a1) | The password boxes stop accepting input at 32 characters, so longer passwords cannot be typed | 🐞 | user-visible | Jarda 2026-08-25 |
 | [A2](#a2) | "Keep me logged in" arrives pre-ticked on every visit | 🐞 | minor | Jarda 2026-08-25 |
 | [A3](#a3) | The set-a-new-password page's browser tab shows a raw internal code instead of a title | 🐞 | minor | Jarda 2026-08-25 |
-| [A4](#a4) | "Login As" is still offered mid-impersonation (Users & Roles and the Participants panel); a second use strands the operator — "Logout as" restores the intermediate user, not their own account | 🐞 | latent | Jarda 2026-08-25 |
+| [A4](#a4) | "Login As" is still offered mid-impersonation (Users & Roles and the Participants panel); a second use strands the operator, because "Logout as" restores the intermediate user, not their own account | 🐞 | latent | Jarda 2026-08-25 |
 | [A7](#a7) | Signed out, the address ending at the word "dashboard" answers a blank server error instead of the Login page | 🐞 | user-visible | Jarda 2026-08-25 |
 | [A8](#a8) | Login As answers a blank server error when the browser's session can no longer be fully resolved (e.g. it outlived a server-side reset) | 🐞 | minor | Jarda 2026-08-25 |
 | [A5](#a5) | No users screen offers the "must change password" flag, so a forced change cannot be required on an existing account | ❓ | user-visible | Jarda 2026-08-25 · to triage |
-| [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down — intended concealment | ✅ | latent | Jarda 2026-08-25 |
+| [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down; the concealment is intended | ✅ | latent | Jarda 2026-08-25 |
 
 ### All apps
 
 <a id="a1"></a>
 **A1 — Password boxes cut off at 32 characters** · 🐞 · user-visible.
 The password fields on the Login, Confirm Access, forced-change and reset
-forms refuse to accept more than 32 typed characters, while nothing stops an
-account from having a longer password (passwords are stored hashed, and other
-entry paths allow longer ones). A user whose password runs past 32 characters
+forms refuse to accept more than 32 typed characters. Nothing stops an
+account from having a longer password: passwords are stored hashed, and other
+entry paths allow longer ones. A user whose password runs past 32 characters
 types it, the box silently keeps only the first 32, and sign-in fails with
-the generic error — with no hint why.
+the generic error and no hint why.
 Basis: code inspection + observed on a running site. <sup>[f-a1](#fn-a1)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: raise the
@@ -437,9 +437,9 @@ Basis: code inspection + observed on a running site. <sup>[f-a1](#fn-a1)</sup>
 
 <a id="a2"></a>
 **A2 — "Keep me logged in" pre-ticked** · 🐞 · minor.
-The checkbox arrives already ticked on a fresh Login page, so every user gets
-a persistent multi-week session unless they notice and untick it — the
-opposite of the opt-in the label suggests.
+The checkbox arrives already ticked on a fresh Login page. Every user
+therefore gets a persistent multi-week session unless they notice and untick
+it, the opposite of the opt-in the label suggests.
 Basis: code inspection (a malformed template attribute renders the box
 ticked unconditionally) + observed on a running site. <sup>[f-a2](#fn-a2)</sup>
 
@@ -451,7 +451,7 @@ ticked unconditionally) + observed on a running site. <sup>[f-a2](#fn-a2)</sup>
 <a id="a3"></a>
 **A3 — Raw code in the reset page's browser tab** · 🐞 · minor.
 The set-a-new-password page (the emailed reset link's destination) is headed
-"Reset Password", but the browser tab reads "user.login.resetPassword" — an
+"Reset Password", but the browser tab reads "user.login.resetPassword", an
 internal code shown where the page title belongs.
 Basis: observed on a running site. <sup>[f-a3](#fn-a3)</sup>
 Tracked as
@@ -464,21 +464,21 @@ Tracked as
 
 <a id="a4"></a>
 **A4 — Second Login As offered mid-impersonation** · 🐞 · latent.
-While an impersonation is already active — seeing this requires
+While an impersonation is already active, both the Users & Roles list and
+the workflow Participants panel still offer "Login As" on other users' rows,
+and choosing it starts a second impersonation. Seeing this requires
 impersonating a user who can themselves open Users & Roles or a workflow
-screen, a Journal Manager or Editor, say — both the Users & Roles list and
-the workflow Participants panel still offer "Login As" on other users'
-rows, and choosing it starts a second impersonation. The chain does not
-nest: one "Logout as" then restores the *intermediate* user — plainly
-signed in, with no impersonation banner and no further "Logout as" offered
-— so the operator's own account is unreachable from the screen; the only
-way out is the plain sign-out address (copied from the user menu's "Logout"
-entry before impersonating — Rule 15), which signs everything out. The end
-state holds fewer rights than the operator started with, so nothing is
-gained — the cost is a stranded, confusing session. The application's own
-earlier screens establish the intended behavior: the previous generation of
-these lists explicitly withheld "Login As" while an impersonation was
-active, and the current screens lost that rule in their rebuild.
+screen, a Journal Manager or Editor, say. The chain does not nest. One
+"Logout as" then restores the *intermediate* user, plainly signed in, with
+no impersonation banner and no further "Logout as" offered. The operator's
+own account is unreachable from the screen. The only way out is the plain
+sign-out address, copied from the user menu's "Logout" entry before
+impersonating (Rule 15), which signs everything out. The end state holds
+fewer rights than the operator started with, so nothing is gained; the cost
+is a stranded, confusing session. The application's own earlier screens
+establish the intended behavior: the previous generation of these lists
+explicitly withheld "Login As" while an impersonation was active, and the
+current screens lost that rule in their rebuild.
 Basis: observed on a running site + code inspection. <sup>[f-a4](#fn-a4)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 (upgraded from an
@@ -490,16 +490,15 @@ Basis: observed on a running site + code inspection. <sup>[f-a4](#fn-a4)</sup>
 <a id="a5"></a>
 **A5 — No screen sets the "must change password" flag** · ❓ · user-visible.
 The forced-change flow (Rule 11) is fully functional, but no current users
-screen offers the flag that triggers it: a user row's "Edit" opens an
+screen offers the flag that triggers it. A user row's "Edit" opens an
 invite-style wizard with no such option. The only screen-driven path that
 flags an account is the review stage's "Create New Reviewer" {OJS OMP},
-which flags its newly created account automatically — so staff cannot
-require a password change on an existing account. In OJS 3.4 the users
-list's Edit User form offered exactly this checkbox on existing accounts;
-the capability was dropped when that form was replaced by the invitation
-wizard.
+which flags its newly created account automatically. So staff cannot require
+a password change on an existing account. In OJS 3.4 the users list's Edit
+User form offered exactly this checkbox on existing accounts. The capability
+was dropped when that form was replaced by the invitation wizard.
 Question: bring the capability back (and on which screen), or retire it
-deliberately? Lean: none recorded — the loss is verified fact, the
+deliberately? Lean: none recorded. The loss is verified fact; the
 restoration is a product call.
 Basis: observed on a running site + 3.4 code comparison.
 <sup>[f-a5](#fn-a5)</sup>
@@ -513,13 +512,13 @@ Basis: observed on a running site + 3.4 code comparison.
 <a id="a6"></a>
 **A6 — Lockout tells a correctly-authenticating user their password is wrong** · ✅ · latent.
 With sign-in rate limiting enabled, exceeding the attempt limit changes
-nothing on screen but a short delay, and inside the cool-down even the
-correct password answers "Invalid username/email or password. Please try
-again." This is deliberate design, not an oversight: the limiting stays
-invisible so an attacker can never tell throttling from a wrong guess —
-accepting that the account's real owner, mid-cool-down, briefly gets a
-message that is untrue for them (the window self-clears within the
-cool-down, 5 minutes by default).
+nothing on screen but a short delay. Inside the cool-down even the correct
+password answers "Invalid username/email or password. Please try again."
+This is deliberate design, not an oversight. The limiting stays invisible so
+an attacker can never tell throttling from a wrong guess. The accepted cost
+is that the account's real owner, mid-cool-down, briefly gets a message that
+is untrue for them. The window clears itself within the cool-down, 5 minutes
+by default.
 Basis: observed on a running site + upstream design record.
 <sup>[f-a6](#fn-a6)</sup>
 
@@ -530,13 +529,13 @@ Basis: observed on a running site + upstream design record.
 
 <a id="a7"></a>
 **A7 — The address ending at the word "dashboard" answers a blank error page when signed out** · 🐞 · user-visible.
-A signed-out visitor opening a dashboard address cut short at the word
-"dashboard", with nothing after it —
-a truncated bookmark, a hand-typed URL — gets an entirely blank page: a
-server error with no content, where every other private address shows the
-Login page and continues to the destination after sign-in (Rule 4). Every
-deeper dashboard address behaves correctly. Nothing private is exposed —
-the page is simply empty — but the visitor is left with no way forward.
+A signed-out visitor who opens a dashboard address cut short at the word
+"dashboard", with nothing after it (a truncated bookmark, a hand-typed URL),
+gets an entirely blank page: a server error with no content. Every other
+private address shows the Login page and continues to the destination after
+sign-in (Rule 4). Every deeper dashboard address behaves correctly. Nothing
+private is exposed, the page is simply empty, but the visitor is left with
+no way forward.
 Basis: observed on a running site. <sup>[f-a7](#fn-a7)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: signed
@@ -547,13 +546,13 @@ Basis: observed on a running site. <sup>[f-a7](#fn-a7)</sup>
 
 <a id="a8"></a>
 **A8 — Login As answers a blank server error in a half-resolved session** · 🐞 · minor.
-When the browser carries a session the site can no longer fully resolve —
-observed with a session that outlived a server-side database reset; the
-pages themselves still render as signed-in — opening the Login As address
-(from a row action or directly) answers an entirely blank server error: no
-impersonation, no refusal, no way forward. A fresh sign-in makes the same
-action work normally, and a signed-out visitor is properly redirected to
-Login — only the half-resolved state crashes. Nothing private is exposed.
+When the browser carries a session the site can no longer fully resolve,
+opening the Login As address (from a row action or directly) answers an
+entirely blank server error: no impersonation, no refusal, no way forward.
+This was observed with a session that outlived a server-side database reset;
+the pages themselves still rendered as signed in. A fresh sign-in makes the
+same action work normally, and a signed-out visitor is properly redirected
+to Login. Only the half-resolved state crashes. Nothing private is exposed.
 Since: 2026-08-25 · Basis: observed on a running site + code inspection.
 <sup>[f-a8](#fn-a8)</sup>
 

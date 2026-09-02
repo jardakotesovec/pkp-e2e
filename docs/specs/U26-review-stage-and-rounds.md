@@ -14,85 +14,87 @@ atlas-claims: [AFFW-323, AFFW-324, AFFW-325, AFFW-327, AFFW-328, AFFW-329, AFFW-
 ## Purpose
 
 Peer review happens in numbered rounds. When an editor sends a submission to
-review, Round 1 opens: the editor chooses which files reviewers will see,
-invites reviewers, watches a status line that tracks where the round stands,
-and closes the round with a decision — accept, decline, ask for revisions, or
-open another round. The author follows the same submission on the same workflow
-screen in a reduced view: the letters the editor sent them, the reviews they
-are allowed to read, and a place to upload revised files when revisions were
-asked for. This spec covers the review stage screen and the round machinery —
-what each role sees on it per round and state. Inviting and managing the
-reviewers themselves, the decision-recording wizard, and the author's formal
-response to reviews are neighboring features (see *Cross-feature
-interactions*).
+review, Round 1 opens. The editor chooses which files reviewers will see,
+invites reviewers, and watches a status line that tracks where the round
+stands. The editor then closes the round with a decision: accept, decline,
+ask for revisions, or open another round. The author follows the same
+submission on the same workflow screen, in a reduced view. There they find
+the letters the editor sent them, the reviews they are allowed to read, and
+a place to upload revised files when revisions were asked for. This spec
+covers the review stage screen and how rounds work: what each role sees on
+it, per round and per state. Three neighbouring features are described
+elsewhere: inviting and managing the reviewers themselves, the
+decision-recording wizard, and the author's formal response to reviews (see
+*Cross-feature interactions*).
 
-OPS does not install a review stage: a preprint server's workflow goes straight
-from submission to Production, so no Review entry ever appears in a preprint's
-workflow menu and none of the screens in this file exist there. <sup>p</sup>
+OPS does not install a review stage. A preprint server's workflow goes
+straight from submission to Production, so no Review entry ever appears in a
+preprint's workflow menu, and none of the screens in this file exist there.
+<sup>p</sup>
 
 On a press, everything in this file describes the External Review stage. A
-press also offers a separate, earlier Internal Review stage [OMP1](#omp1); its
-screens are documented separately. <sup>q</sup>
+press also offers a separate, earlier Internal Review stage [OMP1](#omp1).
+Its screens are documented separately. <sup>q</sup>
 
 ## Actors & permissions
 
 "Assigned to the stage" means listed on the Participants panel for the review
 stage. A **deciding editor** is a Journal Manager or Editor, or an assigned
-Section Editor whose participation is not limited to recommendations; a
-**recommending editor** is one whose participation is limited to
-recommendations (the limitation is set when participants are managed — see
-*Stage participants*). The Author reaches this screen only for their own
-submission, through My Submissions. Typing the workflow address of a
-submission outside these grants gets only an access error, with nothing of
-that submission shown. <sup>a</sup>
+Section Editor whose participation is not limited to recommendations. A
+**recommending editor** is an assigned editor whose participation is limited
+to recommendations. That limitation is set when participants are managed
+(see *Stage participants*). The Author reaches this screen only for their
+own submission, through My Submissions. Anyone who types the workflow
+address of a submission they have no right to gets only an access error, and
+nothing of that submission is shown. <sup>a</sup>
 
-| Action | Who may — and when |
+| Action | Who may, and when |
 |--------|--------------------|
-| **Open the review stage** (rounds, status, panels) | • Site Administrator; Journal Manager; Editor — every submission in the journal<br>• Section Editor, Guest Editor — when assigned to the stage<br>• Funding Coordinator — the one assistant-level group the stage's assignment dialog offers for assignment here<br>• Production assistant roles (Copyeditor, Layout Editor, Proofreader) — no path in: the assignment dialog does not offer them, and one assigned on another stage is told they do not have access to this stage ⚠ [A5](#a5)<br>• Author — their own submission, in the author view (Rule 14) <sup>a</sup> |
-| **See the round status line** | • Everyone who opens the stage — the same status box for every role (Rules 4–5) ⚠ [A2](#a2) |
-| **Choose the files under review** | • Site Administrator; Journal Manager; Editor; assigned Section Editor and Guest Editor — the Files for Review panel's file selection (Rule 8) <sup>h</sup> |
-| **Upload revised files** | • Author — the "Upload revisions" button, only while the round asks for or already holds revisions (Rule 9) ⚠ [A1](#a1)<br>• Editorial roles — through the Revisions Uploaded panel's own controls (to file revisions on the author's behalf) <sup>i</sup> |
-| **Record a decision on the round** (buttons at the top of the screen) | • Deciding editors — on the current round only (Rules 10–11)<br>• Recommending editors — never the decision buttons; they get recommendation controls instead, and only while a deciding editor is also assigned to the stage (Rule 13; the recording flow is *Editorial decision recording*'s) <sup>e</sup> |
-| **See the "Recommendation" box** | • Deciding editors — once a recommending editor has recorded a recommendation for the round (Rule 13) <sup>e</sup> |
-| **Read a completed review** (author view) | • Author — only reviews conducted openly, and only once completed (Rule 15) <sup>j</sup> |
-| **Open the editor's letters** ("Notifications" list) | • Author — the emails editors sent them about this submission (Rule 16) <sup>k</sup> |
-| **Delete the submission** | • Journal Manager; Site Administrator — only while the submission stands declined (Rule 11) <sup>e</sup> |
+| **Open the review stage** (rounds, status, panels) | • Site Administrator; Journal Manager; Editor: every submission in the journal<br>• Section Editor, Guest Editor: when assigned to the stage<br>• Funding Coordinator: the one assistant-level group the stage's assignment dialog offers for assignment here<br>• Production assistant roles (Copyeditor, Layout Editor, Proofreader): no way in. The assignment dialog does not offer them, and one assigned on another stage is told they do not have access to this stage ⚠ [A5](#a5)<br>• Author: their own submission, in the author view (Rule 14) <sup>a</sup> |
+| **See the round status line** | • Everyone who opens the stage. It is the same status box for every role (Rules 4–5) ⚠ [A2](#a2) |
+| **Choose the files under review** | • Site Administrator; Journal Manager; Editor; assigned Section Editor and Guest Editor: the Files for Review panel's file selection (Rule 8) <sup>h</sup> |
+| **Upload revised files** | • Author: the "Upload revisions" button, only while the round asks for or already holds revisions (Rule 9) ⚠ [A1](#a1)<br>• Editorial roles: through the Revisions Uploaded panel's own controls, to file revisions on the author's behalf <sup>i</sup> |
+| **Record a decision on the round** (buttons at the top of the screen) | • Deciding editors: on the current round only (Rules 10–11)<br>• Recommending editors: never the decision buttons. They get recommendation controls instead, and only while a deciding editor is also assigned to the stage (Rule 13). The recording flow belongs to *Editorial decision recording* <sup>e</sup> |
+| **See the "Recommendation" box** | • Deciding editors: once a recommending editor has recorded a recommendation for the round (Rule 13) <sup>e</sup> |
+| **Read a completed review** (author view) | • Author: only reviews conducted openly, and only once completed (Rule 15) <sup>j</sup> |
+| **Open the editor's letters** ("Notifications" list) | • Author: the emails editors sent them about this submission (Rule 16) <sup>k</sup> |
+| **Delete the submission** | • Journal Manager; Site Administrator: only while the submission stands declined (Rule 11) <sup>e</sup> |
 
 ## Fields & validation
 
-N/A — the stage's own surfaces are panels, buttons and a status line. The
+N/A. The stage's own surfaces are panels, buttons and a status line. The
 forms they open belong to their own features: the decision wizard to
 *Editorial decision recording*, the file-upload wizard to *Submission files*,
-reviewer forms to *Reviewer assignment & management*.
+and the reviewer forms to *Reviewer assignment & management*.
 
 ## Rules & state
 
 <a id="rounds"></a>
 1. Review happens in **rounds numbered from 1**. Every round the submission
-   has been through stays visible; the highest-numbered round is the
+   has been through stays visible. The highest-numbered round is the
    **current** round. Only the current round's status and decisions still
-   move — but a past round's panels remain editable (Rule 10
+   move, but a past round's panels remain editable (Rule 10
    ⚠ [A8](#a8)). <sup>b</sup>
-2. Round 1 is created the moment a submission enters the review stage (the
-   "Send for Review" decision on the Submission stage — see *Submission
-   stage*). Every later round is created only by the "Create New Review Round"
-   button (Rule 12). Rounds are never renumbered. <sup>b</sup>
+2. Round 1 is created the moment a submission enters the review stage, that
+   is, on the "Send for Review" decision on the Submission stage (see
+   *Submission stage*). Every later round is created only by the "Create New
+   Review Round" button (Rule 12). Rounds are never renumbered. <sup>b</sup>
 3. In the workflow menu, the stage entry "Review" expands into one entry per
-   round, "Review Round 1", "Review Round 2", …. Opening a submission that is
-   in review lands on the current round; the page title reads "Review (Round
-   {N})". <sup>a</sup>
+   round: "Review Round 1", "Review Round 2", and so on. Opening a submission
+   that is in review lands on the current round. The page title reads
+   "Review (Round {N})". <sup>a</sup>
 4. <a id="round-status"></a> **The round status box.** At the top of the
    stage, a box headed "Round {N} Status" carries one sentence describing
-   where the current round stands (Rule 5). Selecting a **past** round — or
-   viewing the stage after the submission has moved past it — the box is
-   headed plain "Status" instead. A past round reads "The submission has been
-   advanced to the next round of review". Once the submission has moved past
-   review, the box reads "The submission is currently in the {stage} stage."
-   (or, on a past round, "The submission advanced to the next review round,
-   was accepted, and is currently in the {stage} stage."). Before the stage
-   has started it reads "The {stage} stage has not yet been initiated." Both
-   the editorial and the author view show this same box ⚠ [A2](#a2).
-   <sup>c</sup> <sup>d</sup>
+   where the current round stands (Rule 5). When a **past** round is
+   selected, or when the stage is viewed after the submission has moved past
+   it, the box is headed plain "Status" instead. A past round reads "The
+   submission has been advanced to the next round of review". Once the
+   submission has moved past review, the box reads "The submission is
+   currently in the {stage} stage." On a past round it then reads "The
+   submission advanced to the next review round, was accepted, and is
+   currently in the {stage} stage." Before the stage has started it reads
+   "The {stage} stage has not yet been initiated." The editorial view and
+   the author view show this same box ⚠ [A2](#a2). <sup>c</sup> <sup>d</sup>
 5. **The status sentences.** The status is recomputed from the round's actual
    state every time the screen loads:
 
@@ -112,57 +114,57 @@ reviewer forms to *Reviewer assignment & management*.
    | "All recommendations are in and a decision is needed." | Every recommending editor has recorded one |
    | "Submission accepted." | After an Accept Submission decision on the round |
    | "Submission declined." | After a Decline Submission decision on the round |
-   | "Returned back to review." | The submission was sent back from the Copyediting stage **and** every review of the round is completed and confirmed — until then the reviewer-derived sentences show instead (Rule 6) |
+   | "Returned back to review." | The submission was sent back from the Copyediting stage **and** every review of the round is completed and confirmed. Until then the reviewer-derived sentences show instead (Rule 6) |
 
    <sup>c</sup> <sup>d</sup>
 6. **Precedence.** When several sentences could apply, the round reports the
-   most urgent reviewer fact first: an overdue review wins over an unread one,
-   an unread one over still-running ones; reviewers who declined or were
-   removed are not counted. The revision sentences (requested/submitted) and
-   the closing sentences (accepted/declined) override the reviewer-derived
-   ones outright. "Returned back to review." sits **below** the
-   reviewer-derived sentences: after a submission is moved back from
-   Copyediting, a round with no reviewers reads "Waiting for reviewers to be
-   assigned." and one with reviews underway "Awaiting responses from
-   reviewers."; the returned-back sentence can surface only once every review
-   is completed and confirmed. "Awaiting recommendations from editors." appears only once
-   the round has at least one reviewer record — a round with none reads
-   "Waiting for reviewers to be assigned." even while recommendations are
-   awaited (a declined reviewer is record enough). On a round whose only
-   reviewer records are declines, the recommendation sentences take over from
-   the confirmed-reviews fallback of ⚠ [A4](#a4): with a recommendation still
-   pending such a round reads "Awaiting recommendations from editors."
-   <sup>c</sup> <sup>e</sup>
+   most urgent reviewer fact first. An overdue review wins over an unread
+   one, and an unread one wins over reviews still underway. Reviewers who
+   declined or were removed are not counted. The revision sentences
+   (requested and submitted) and the closing sentences (accepted and
+   declined) override the reviewer-derived ones outright. "Returned back to
+   review." sits **below** the reviewer-derived sentences. After a submission
+   is moved back from Copyediting, a round with no reviewers reads "Waiting
+   for reviewers to be assigned." and one with reviews underway reads
+   "Awaiting responses from reviewers." The returned-back sentence can appear
+   only once every review is completed and confirmed. "Awaiting
+   recommendations from editors." appears only once the round has at least
+   one reviewer record. A round with none reads "Waiting for reviewers to be
+   assigned." even while recommendations are awaited. A declined reviewer
+   counts as a record. On a round whose only reviewer records are declines,
+   the recommendation sentences take over from the confirmed-reviews fallback
+   of ⚠ [A4](#a4): with a recommendation still pending, such a round reads
+   "Awaiting recommendations from editors." <sup>c</sup> <sup>e</sup>
 7. The two "requested" sentences flip to their "submitted" partner as soon as
-   a revised file newer than the decision exists, and flip back if that file
-   is deleted — though the author's revisions task does not come back
+   a revised file newer than the decision exists. They flip back if that file
+   is deleted. The author's revisions task, however, does not come back
    ⚠ [A9](#a9) (see *Side effects*). <sup>c</sup> <sup>m</sup>
 8. <a id="review-files"></a> **Files for Review.** Each round carries its own
-   set of files under review — what reviewers of that round are given — in
-   the panel headed "Files for Review". The
-   panel's selection dialog ("Current Review Files For Round {N}") lists the
-   submission's workflow files with checkboxes: ticking a file adds it to the
-   round, new files can be uploaded from the same dialog, and no file is ever
-   deleted here. Confirming reports "Review files updated." Unticking a file,
-   though, changes nothing the editor can see — the panel lists it exactly as
-   before — and the dialog's checkboxes do not reliably mirror the panel
+   set of files under review, the files the reviewers of that round are
+   given, in the panel headed "Files for Review". The panel's selection
+   dialog ("Current Review Files For Round {N}") lists the submission's
+   workflow files with checkboxes. Ticking a file adds it to the round, new
+   files can be uploaded from the same dialog, and no file is ever deleted
+   here. Confirming reports "Review files updated." Unticking a file, though,
+   changes nothing the editor can see: the panel lists it exactly as before,
+   and the dialog's checkboxes do not reliably mirror the panel
    ⚠ [A7](#a7). <sup>h</sup>
 9. <a id="revisions"></a> **Revisions Uploaded.** Each round also carries the
-   revised files uploaded in answer to a revision request, in the panel headed
-   "Revisions Uploaded". The panel is present from the moment the round
-   opens, and its description — "These files have been submitted by the
-   author after revisions were requested" — shows even on a round where no
-   revisions were ever requested ⚠ [A10](#a10). The author's bottom-of-screen "Upload
-   revisions" button appears only while the round's status is "Revisions have
-   been requested.", "Revisions requested from the author to be taken to a new
-   review round.", or "Revisions have been submitted and a decision is
-   needed." ⚠ [A1](#a1) — after the author's first upload in the
-   new-round variant the round leaves this list and that button disappears,
-   though the Revisions Uploaded panel's own "Upload" control still opens the
-   same wizard. <sup>i</sup>
-10. **Past rounds lose the decision buttons.** The decision buttons render
-    only when the current round is selected; a past round shows the panels of
-    that round (its reviewers, its files), and the panels keep their own
+   revised files uploaded in answer to a revision request, in the panel
+   headed "Revisions Uploaded". The panel is present from the moment the
+   round opens. Its description, "These files have been submitted by the
+   author after revisions were requested", shows even on a round where no
+   revisions were ever requested ⚠ [A10](#a10). The author's
+   bottom-of-screen "Upload revisions" button appears only while the round's
+   status is "Revisions have been requested.", "Revisions requested from the
+   author to be taken to a new review round.", or "Revisions have been
+   submitted and a decision is needed." ⚠ [A1](#a1). In the new-round
+   variant, the round leaves this list after the author's first upload and
+   that button disappears. The Revisions Uploaded panel's own "Upload"
+   control still opens the same wizard. <sup>i</sup>
+10. **Past rounds lose the decision buttons.** The decision buttons appear
+    only when the current round is selected. A past round shows the panels
+    of that round (its reviewers, its files), and the panels keep their own
     controls (upload, add a reviewer, assign a participant). Those controls
     still act: a reviewer added or a file uploaded on a past round lands in
     that past round ⚠ [A8](#a8). <sup>a</sup>
@@ -171,289 +173,291 @@ reviewer forms to *Reviewer assignment & management*.
     round): "Request Revisions", "Accept Submission" (the highlighted one),
     "Create New Review Round", "Cancel Review Round", "Decline Submission".
     Three qualifications:
-    - "Request Revisions" opens with the choice "Require New Review Round" —
-      "Revisions will not be subject to a new round of peer reviews."
-      (preselected) or "Revisions will be subject to a new round of peer
-      reviews." — which selects between the two revision paths of Rule 5.
-      The new-round choice continues under the wizard name "Resubmit for
-      Review"; the wizard itself is *Editorial decision
-      recording*'s. <sup>e</sup>
+    - "Request Revisions" opens with the choice "Require New Review Round".
+      The options are "Revisions will not be subject to a new round of peer
+      reviews." (preselected) and "Revisions will be subject to a new round
+      of peer reviews." This choice selects between the two revision paths of
+      Rule 5. The new-round choice continues under the wizard name "Resubmit
+      for Review". The wizard itself belongs to *Editorial decision
+      recording*. <sup>e</sup>
     - "Cancel Review Round" is offered only while no reviewer of the round
-      has responded to the invitation — a decline forecloses cancelling just
-      as an acceptance does — or completed a review; past that point the
-      button is simply absent, with no explanation in its
-      place. <sup>f</sup>
+      has responded to the invitation or completed a review. A decline
+      rules out cancelling just as an acceptance does. Past that point the
+      button is simply absent, with no explanation in its place. <sup>f</sup>
     - While the submission stands **declined**, all of the above are replaced
-      by "Revert Decline", and a Journal Manager or Site Administrator
-      additionally gets "Delete". <sup>e</sup>
+      by "Revert Decline". A Journal Manager or Site Administrator also gets
+      "Delete". <sup>e</sup>
 12. **Creating and cancelling rounds.**
-    - "Create New Review Round" opens round N+1: the wizard offers the
-      previous round's revised files — already ticked — to carry over as the
-      new round's review files; reviewers are *not* carried over, so the new
-      round starts as "Waiting for reviewers to be assigned." and the
-      previous round becomes a past round (Rule 10). <sup>g</sup>
-    - "Cancel Review Round" removes the current round entirely — the round,
+    - "Create New Review Round" opens round N+1. The wizard offers the
+      previous round's revised files, already ticked, to carry over as the
+      new round's review files. Reviewers are *not* carried over, so the new
+      round starts as "Waiting for reviewers to be assigned." The previous
+      round becomes a past round (Rule 10). <sup>g</sup>
+    - "Cancel Review Round" removes the current round entirely. The round,
       its reviewer invitations and its file links disappear, and a withdrawn
       invitation vanishes from the reviewer's own assignment lists without a
-      trace. The submission lands on the previous round — whose status box no
-      longer recalls a revision request recorded on it ⚠ [A6](#a6) — or back
-      on the Submission stage if Round 1 was cancelled. The files themselves
-      stay in the submission's records. <sup>f</sup>
+      trace. The submission lands on the previous round, whose status box no
+      longer recalls a revision request recorded on it ⚠ [A6](#a6). If
+      Round 1 was cancelled, the submission goes back to the Submission
+      stage. The files themselves stay in the submission's records.
+      <sup>f</sup>
 13. <a id="recommendations"></a> **Recommendations.** A recommending editor
-    sees three recommendation buttons in place of the decision buttons —
-    "Recommend Revisions", "Recommend Accept", "Recommend Decline" (the flow is
-    *Editorial decision recording*'s; the limitation itself is set in *Stage
-    participants*). The buttons require a deciding editor to also be assigned
-    to the stage: a recommending editor who is the only editorial participant
-    gets no buttons at all — the "Recommendation" box instead reads "You can
-    not make a recommendation until an editor is assigned with permission to
-    record a decision." On the deciding editor's screen, once a recommendation for
-    the selected round exists, a box headed "Recommendation" lists the
-    recommendation(s) recorded — e.g. "Accept Submission" — with no further
-    detail. The round status walks the three recommendation sentences of
-    Rule 5. <sup>e</sup>
+    sees three recommendation buttons in place of the decision buttons:
+    "Recommend Revisions", "Recommend Accept", "Recommend Decline". The flow
+    belongs to *Editorial decision recording*; the limitation itself is set
+    in *Stage participants*. The buttons require a deciding editor to also
+    be assigned to the stage. A recommending editor who is the only
+    editorial participant gets no buttons at all. Instead, the
+    "Recommendation" box reads "You can not make a recommendation until an
+    editor is assigned with permission to record a decision." On the
+    deciding editor's screen, once a recommendation for the selected round
+    exists, a box headed "Recommendation" lists the recommendation or
+    recommendations recorded, for example "Accept Submission", with no
+    further detail. The round status walks the three recommendation
+    sentences of Rule 5. <sup>e</sup>
 14. <a id="author-view"></a> **The author's view** of the same screen, per
-    round: the Revisions Uploaded panel with the upload button (Rule 9) and
-    the stage's discussions, always; a "Notifications" list once an editor
-    has sent the author a letter (Rule 16); and the list of reviews they may
-    read, once such a review exists (Rule 15). A submission fresh in
-    review therefore shows only the two ever-present panels — the other two
-    appear with their preconditions. When the editor has asked for a formal response to
-    the reviews, a response panel appears as well — that flow is *Author
-    response to reviews*', and on a press the panel currently never appears
-    even when a response was invited; the finding is recorded with that
-    feature. <sup>a</sup>
+    round, always shows the Revisions Uploaded panel with the upload button
+    (Rule 9) and the stage's discussions. A "Notifications" list appears
+    once an editor has sent the author a letter (Rule 16). A list of the
+    reviews they may read appears once such a review exists (Rule 15). A
+    submission fresh in review therefore shows only the two ever-present
+    panels; the other two appear once their preconditions are met. When the
+    editor has asked for a formal response to the reviews, a response panel
+    appears as well. That flow belongs to *Author response to reviews*. On a
+    press that panel currently never appears, even when a response was
+    invited; the finding is recorded with that feature. <sup>a</sup>
 15. <a id="author-read-review"></a> **Reading reviews as the author.** Only
-    reviews conducted **openly** are ever listed for the author, and only once
-    completed; until such a review exists the author's screen shows no
-    reviewers list at all — not an empty one — and anonymous reviews never
+    reviews conducted **openly** are ever listed for the author, and only
+    once completed. Until such a review exists, the author's screen shows no
+    reviewers list at all, not even an empty one. Anonymous reviews never
     appear, whatever their state. Each listed review offers "Read Review",
-    which opens a window with the reviewer's name, completion date and
-    recommendation — on a press no recommendation exists to show
-    ⚠ [OMP2](#omp2) —, the review text the author is meant to see (for form-based
-    reviews, only the parts marked for authors; for free-text reviews, only
-    remarks shared with the author) — though on a journal the window currently
-    renders no review text at all ⚠ [OJS1](#ojs1) — and a section for files
-    the reviewer attached ⚠ [A3](#a3). <sup>j</sup>
+    which opens a window with three parts. First, the reviewer's name,
+    completion date and recommendation; on a press no recommendation exists
+    to show ⚠ [OMP2](#omp2). Second, the review text the author is meant to
+    see: for form-based reviews, only the parts marked for authors; for
+    free-text reviews, only remarks shared with the author. On a journal the
+    window currently shows no review text at all ⚠ [OJS1](#ojs1). Third, a
+    section for files the reviewer attached ⚠ [A3](#a3). <sup>j</sup>
 16. <a id="author-emails"></a> **The "Notifications" list** on the author's
     review stage holds the emails editors sent the author about this
-    submission — each row a subject line and date; clicking one opens the
-    full letter read-only in a side panel. This is where the author re-reads a
-    decision letter. Until the first such letter the list is absent
-    entirely — not shown empty. <sup>k</sup>
+    submission. Each row is a subject line and a date. Clicking one opens
+    the full letter read-only in a side panel. This is where the author
+    re-reads a decision letter. Until the first such letter, the list is
+    absent entirely, not shown empty. <sup>k</sup>
 17. **Old addresses.** A bookmarked author link of the form used by earlier
     versions (`{journal}/authorDashboard/submission/{id}`) lands on My
-    Submissions with the submission's workflow open; the old per-round tab
+    Submissions with the submission's workflow open. The old per-round tab
     address from those versions
     (`{journal}/authorDashboard/reviewRoundInfo/{id}`) answers with a bare
     "404 Not Found" page, with or without an id. <sup>o</sup>
 
 ## Side effects
 
-- **Author uploads a revised file** → the round status flips per Rule 7, and
-  an automatic email (subject "Revised Version Uploaded"), sent under the
-  author's own name and address, goes to the Journal Managers, Editors and
-  Section Editors assigned to the stage. All of this takes effect the moment
-  the file is attached in the upload window's first step — closing the wizard
-  without finishing does not undo the upload or recall the email. To avoid a
-  flood, the same editor is not emailed again for further uploads within a
-  day unless they have signed in since the last notice. <sup>l</sup>
-- **Request Revisions decision** → each author assigned to the stage gets a
-  task in their task list — the "Tasks" panel opened from the site header —
-  naming the submission — on a journal it reads
-  "Revision required.", on a press "Revisions to consider in External
-  Review." ⚠ [OMP3](#omp3) — and their row on My Submissions reads "Revision
-  requested" with a "Submit revisions" button in both apps (the list itself
-  belongs to *My Submissions*). The task disappears when a revised file is
-  uploaded, but does not return if the only revised file is deleted — the
-  status and the My Submissions row revert to their requested state (Rule 7)
-  while the task list stays silent ⚠ [A9](#a9). The new-round variant's task
-  reads "Resubmit for review." in both apps and stays in the author's list
-  even after they upload ⚠ [A1](#a1). The decision's own notifications and
-  emails are *Editorial decision recording*'s. <sup>m</sup>
-- **Round created** → an internal round-status notice record is created; it
+- **Author uploads a revised file.** The round status flips per Rule 7, and
+  an automatic email with the subject "Revised Version Uploaded" goes to the
+  Journal Managers, Editors and Section Editors assigned to the stage. It is
+  sent under the author's own name and address. All of this takes effect the
+  moment the file is attached in the upload window's first step. Closing the
+  wizard without finishing does not undo the upload or recall the email. To
+  avoid a flood, the same editor is not emailed again for further uploads
+  within a day unless they have signed in since the last notice. <sup>l</sup>
+- **Request Revisions decision.** Each author assigned to the stage gets a
+  task naming the submission in their task list, the "Tasks" panel opened
+  from the site header. On a journal it reads "Revision required.", on a
+  press "Revisions to consider in External Review." ⚠ [OMP3](#omp3). Their
+  row on My Submissions reads "Revision requested" with a "Submit revisions"
+  button in both apps (the list itself belongs to *My Submissions*). The
+  task disappears when a revised file is uploaded. It does not return if the
+  only revised file is deleted: the status and the My Submissions row revert
+  to their requested state (Rule 7) while the task list stays silent
+  ⚠ [A9](#a9). The new-round variant's task reads "Resubmit for review." in
+  both apps and stays in the author's list even after they upload
+  ⚠ [A1](#a1). The decision's own notifications and emails belong to
+  *Editorial decision recording*. <sup>m</sup>
+- **Round created.** An internal round-status notice record is created. It
   currently surfaces nowhere (footnote only). <sup>n</sup>
-- **Round cancelled** → the round's reviewer invitations are withdrawn, and
-  the authors — and the reviewers, when the round has any (the wizard offers
-  the reviewer-notice step only then) — can be notified by email as part of
-  the decision (the email steps are *Editorial decision
-  recording*'s). <sup>f</sup>
+- **Round cancelled.** The round's reviewer invitations are withdrawn. The
+  authors can be notified by email as part of the decision, and so can the
+  reviewers when the round has any (the wizard offers the reviewer-notice
+  step only then). The email steps belong to *Editorial decision
+  recording*. <sup>f</sup>
 
 ## Settings that modify behavior
 
-- **Minimum Confirmed Reviews Required** (the journal's review setup — see
-  *Review setup & review forms*): when set, the round status box shows
-  "Minimum number of confirmed reviews required: {N}." while reviews are being
-  gathered. While confirmed reviews remain below that minimum, the line
-  replaces the submitted- and confirmed-review sentences ("New reviews have
-  been submitted.", "All reviews are confirmed and a decision is needed.") —
-  but "Awaiting responses from reviewers." still appears beneath it while
-  reviews are underway. <sup>r</sup>
-- **Reviewer suggestions enabled** (publication settings): adds a reviewer
-  suggestions panel to the stage — the panel is *Reviewer suggestions*'. <sup>a</sup>
-- **Review type per assignment** (open / anonymous, chosen when the reviewer
-  is assigned — *Reviewer assignment & management*): gates the author's
-  access to each review (Rule 15).
+- **Minimum Confirmed Reviews Required** (the journal's review setup; see
+  *Review setup & review forms*). When set, the round status box shows
+  "Minimum number of confirmed reviews required: {N}." while reviews are
+  being gathered. While confirmed reviews remain below that minimum, this
+  line replaces the submitted- and confirmed-review sentences ("New reviews
+  have been submitted.", "All reviews are confirmed and a decision is
+  needed."). "Awaiting responses from reviewers." still appears beneath it
+  while reviews are underway. <sup>r</sup>
+- **Reviewer suggestions enabled** (publication settings). Adds a reviewer
+  suggestions panel to the stage. The panel belongs to *Reviewer
+  suggestions*. <sup>a</sup>
+- **Review type per assignment** (open or anonymous, chosen when the
+  reviewer is assigned; see *Reviewer assignment & management*). Gates the
+  author's access to each review (Rule 15).
 
 ## Cross-feature interactions
 
-- **Reviewer assignment & management** — the Reviewers panel on this stage:
-  adding, reminding, thanking, unassigning reviewers and the editor's
-  reading, completing and modifying of reviews. This spec owns only the
+- **Reviewer assignment & management**: the Reviewers panel on this stage.
+  Adding, reminding, thanking and unassigning reviewers, and the editor's
+  reading, completing and modifying of reviews. This spec covers only the
   author-side reading (Rule 15).
-- **Editorial decision recording** — every button of Rule 11 and the
-  recommendation controls open that feature's wizard; this spec owns the
+- **Editorial decision recording**: every button of Rule 11 and the
+  recommendation controls open that feature's wizard. This spec covers the
   buttons' presence and what each decision does to the round.
-- **Stage participants** — who is assigned to the stage, and the
+- **Stage participants**: who is assigned to the stage, and the
   limited-to-recommendations setting behind Rule 13.
-- **Author response to reviews** — the response request and the author's
-  response panel that mount on this stage.
-- **Reviewer suggestions** — the suggestions panel (mounted here when
-  enabled).
-- **Submission files** — the file manager and upload wizard mechanics behind
+- **Author response to reviews**: the response request and the author's
+  response panel that appear on this stage.
+- **Reviewer suggestions**: the suggestions panel, shown here when enabled.
+- **Submission files**: the file manager and upload wizard mechanics behind
   the Files for Review and Revisions Uploaded panels.
-- **Tasks & discussions** — the Discussions panel present on this stage in
+- **Tasks & discussions**: the Discussions panel present on this stage in
   both views.
-- **Submission stage** — the "Send for Review" decision that opens Round 1.
-- **Copyediting stage** — sending a submission back from copyediting returns
-  it to its review round, whose status box usually resumes the
+- **Submission stage**: the "Send for Review" decision that opens Round 1.
+- **Copyediting stage**: sending a submission back from copyediting returns
+  it to its review round. That round's status box usually resumes the
   reviewer-derived sentences; "Returned back to review." shows only in the
   all-confirmed state (Rules 5–6).
-- **Reviewer's review** — a reviewer revisits their own past rounds on their
-  reviewer page, including a round-history window; none of that renders on
+- **Reviewer's review**: a reviewer revisits their own past rounds on their
+  reviewer page, including a round-history window. None of that appears on
   this screen.
 
 ## Canonical scenarios
 
-Common to OJS and OMP; substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md) (on a press, the stage is External
-Review). Actors are named by role; seeded accounts and recipes live in the
-footnotes. Where a scenario checks a recipient's mailbox, outgoing mail on the
-test install is observed in the install's mail catcher. <sup>s</sup>
+Common to OJS and OMP. Substitute roles and vocabulary per the
+[application glossary](GLOSSARY.md); on a press, the stage is External
+Review. Actors are named by role. Seeded accounts and recipes live in the
+footnotes. Where a scenario checks a recipient's mailbox, outgoing mail on
+the test install is observed in the install's mail catcher. <sup>s</sup>
 
-1. **Round 1 opens with the submission** — Editor: on a new submission's
+1. **Round 1 opens with the submission**: Editor: on a new submission's
    workflow, record the decision that sends it to review ("Send for Review").
    The workflow menu now shows "Review" with the entry "Review Round 1"
-   selected, the page title reads "Review (Round 1)", and the status box says
-   "Round 1 Status — Waiting for reviewers to be assigned." The Files for
-   Review panel lists the files chosen when sending to review.
-2. **The status line follows the reviewers** — Editor: add a reviewer to the
-   round (Reviewers panel); the status becomes "Awaiting responses from
-   reviewers." After the reviewer submits their review, it reads "New reviews
-   have been submitted."; after the editor opens the review through the
-   Reviewers panel's "Read Review" action and confirms "Mark as Complete" in
-   the "Review Details" window, "All reviews are confirmed and a decision is
-   needed."
-3. **Request revisions within the round** — Editor: press "Request
+   selected. The page title reads "Review (Round 1)", and the status box
+   says "Round 1 Status — Waiting for reviewers to be assigned." The Files
+   for Review panel lists the files chosen when sending to review.
+2. **The status line follows the reviewers**: Editor: add a reviewer to the
+   round (Reviewers panel). The status becomes "Awaiting responses from
+   reviewers." After the reviewer submits their review, it reads "New
+   reviews have been submitted." Then open the review through the Reviewers
+   panel's "Read Review" action and confirm "Mark as Complete" in the
+   "Review Details" window. The status now reads "All reviews are confirmed
+   and a decision is needed."
+3. **Request revisions within the round**: Editor: press "Request
    Revisions", keep "Revisions will not be subject to a new round of peer
-   reviews.", complete the wizard. The status box reads "Revisions have been
-   requested." The Author signs in: their task list holds a revisions task
-   for this submission, and the submission's review stage shows the "Upload
-   revisions" button.
-4. **Author uploads a revision** — Author: on the review stage, press "Upload
-   revisions" and complete the upload. The Revisions Uploaded panel lists the file,
-   the status box (editor view) now reads "Revisions have been submitted and
-   a decision is needed.", the author's task is gone, and the assigned
-   editors' mailboxes hold the revised-version notice.
-5. **Request revisions toward a new round** — Editor: press "Request
+   reviews.", and complete the wizard. The status box reads "Revisions have
+   been requested." The Author signs in. Their task list holds a revisions
+   task for this submission, and the submission's review stage shows the
+   "Upload revisions" button.
+4. **Author uploads a revision**: Author: on the review stage, press "Upload
+   revisions" and complete the upload. The Revisions Uploaded panel lists
+   the file. The status box (editor view) now reads "Revisions have been
+   submitted and a decision is needed." The author's task is gone, and the
+   assigned editors' mailboxes hold the revised-version notice.
+5. **Request revisions toward a new round**: Editor: press "Request
    Revisions", choose "Revisions will be subject to a new round of peer
-   reviews.", complete the wizard — status "Revisions requested from the
-   author to be taken to a new review round." Author: upload one revised
-   file — status "Revisions submitted. A new review round needs to be
-   created." ⚠ [A1](#a1) after this upload the bottom "Upload revisions"
-   button is gone and the task list still reads "Resubmit for review."; a
-   further file can be added only through the Revisions Uploaded panel's own
-   "Upload" control.
-6. **A new round** — Editor: press "Create New Review Round"; in the
-   wizard's file step the revised file is already ticked — keep it and record
-   the decision. The menu gains "Review Round 2"
-   (selected), status "Waiting for reviewers to be assigned.", and the Files
-   for Review panel of Round 2 lists the carried file. Selecting "Review Round 1"
-   shows its reviewers and files, no decision buttons, and the note "The
-   submission has been advanced to the next round of review".
-7. **Cancel a round** — Editor: on a Round 2 whose only reviewer has not yet
-   responded to the invitation, press "Cancel Review Round" and confirm through
-   the wizard. "Review Round 2" disappears from the menu, the submission
-   stands on Round 1, and the invited reviewer no longer finds the assignment
-   in any of their assignment lists.
+   reviews.", and complete the wizard. The status reads "Revisions requested
+   from the author to be taken to a new review round." Author: upload one
+   revised file. The status reads "Revisions submitted. A new review round
+   needs to be created." ⚠ [A1](#a1) After this upload the bottom "Upload
+   revisions" button is gone and the task list still reads "Resubmit for
+   review." A further file can be added only through the Revisions Uploaded
+   panel's own "Upload" control.
+6. **A new round**: Editor: press "Create New Review Round". In the wizard's
+   file step the revised file is already ticked. Keep it and record the
+   decision. The menu gains "Review Round 2" (selected), the status reads
+   "Waiting for reviewers to be assigned.", and the Files for Review panel
+   of Round 2 lists the carried file. Selecting "Review Round 1" shows its
+   reviewers and files, no decision buttons, and the note "The submission
+   has been advanced to the next round of review".
+7. **Cancel a round**: Editor: on a Round 2 whose only reviewer has not yet
+   responded to the invitation, press "Cancel Review Round" and confirm
+   through the wizard. "Review Round 2" disappears from the menu, the
+   submission stands on Round 1, and the invited reviewer no longer finds
+   the assignment in any of their assignment lists.
    Additionally verify: on a submission whose Round 1 is cancelled, the
    submission returns to the Submission stage.
-8. **Cancelling is blocked once a review is in** — Editor: on a round with a
-   completed review, verify "Cancel Review Round" is not offered among the
-   buttons.
-9. **Accept out of review** — Editor: press "Accept Submission" and complete
-   the wizard. The submission moves to Copyediting; selecting the review
-   stage still shows the rounds, with the status box reporting the submission
-   is now in the Copyediting stage.
-10. **Decline, revert, delete** — Editor: press "Decline Submission" and
-    complete the wizard — the buttons are replaced by "Revert Decline", and a
-    Journal Manager additionally sees "Delete" while a Section Editor does
-    not. Press "Revert Decline" and complete it: the submission is back in
-    review and the status line again reflects the round's reviewer state.
-11. **Recommend-only round** — on a round with at least one reviewer added
-    (one who declined is enough — Rule 6), a Section Editor limited to
-    recommendations — assigned alongside a deciding Editor (Rule 13) — opens
-    the current round: no decision buttons — the buttons
-    read "Recommend Revisions", "Recommend Accept", "Recommend Decline"
-    instead; the status box reads "Awaiting recommendations from editors."
-    After they record "Accept Submission" as a recommendation (wizard per
-    *Editorial decision recording*), the deciding Editor's screen shows the
+8. **Cancelling is blocked once a review is in**: Editor: on a round with a
+   completed review, verify that "Cancel Review Round" is not offered among
+   the buttons.
+9. **Accept out of review**: Editor: press "Accept Submission" and complete
+   the wizard. The submission moves to Copyediting. Selecting the review
+   stage still shows the rounds, and the status box reports that the
+   submission is now in the Copyediting stage.
+10. **Decline, revert, delete**: Editor: press "Decline Submission" and
+    complete the wizard. The buttons are replaced by "Revert Decline". A
+    Journal Manager additionally sees "Delete"; a Section Editor does not.
+    Press "Revert Decline" and complete it. The submission is back in review
+    and the status line again reflects the round's reviewer state.
+11. **Recommend-only round**: on a round with at least one reviewer added
+    (one who declined is enough, Rule 6), a Section Editor limited to
+    recommendations, assigned alongside a deciding Editor (Rule 13), opens
+    the current round. There are no decision buttons. The buttons read
+    "Recommend Revisions", "Recommend Accept", "Recommend Decline" instead,
+    and the status box reads "Awaiting recommendations from editors." They
+    record "Accept Submission" as a recommendation (wizard per *Editorial
+    decision recording*). The deciding Editor's screen then shows the
     "Recommendation" box listing "Accept Submission", and the status box
-    reads "All recommendations are in and a decision is needed." (with a
-    second recommending editor still pending it would read "New editorial
-    recommendations have been submitted.").
-12. **Author reads an open review** — with a completed **open** review on the
-    round, the Author opens the review stage: the reviewers list names the
-    reviewer and offers "Read Review", which opens the review with the
-    reviewer's name, date and recommendation (no recommendation line on a
-    press ⚠ [OMP2](#omp2)). On a press the remarks the
-    reviewer shared with the author follow; on a journal expect no review
-    text in the window, even when the reviewer shared remarks ⚠
-    [OJS1](#ojs1). The window's attachments section is not part of this
-    scenario's pass/fail and must not be asserted by tests ⚠ [A3](#a3). With
-    an **anonymous** completed review on another submission as control, the
-    author's review stage shows no reviewers list at all — not an empty one.
-    The author also finds the decision letters under "Notifications" and can
+    reads "All recommendations are in and a decision is needed." With a
+    second recommending editor still pending, it would read "New editorial
+    recommendations have been submitted." instead.
+12. **Author reads an open review**: with a completed **open** review on the
+    round, the Author opens the review stage. The reviewers list names the
+    reviewer and offers "Read Review". That opens the review with the
+    reviewer's name, date and recommendation (there is no recommendation
+    line on a press ⚠ [OMP2](#omp2)). On a press the remarks the reviewer
+    shared with the author follow. On a journal, expect no review text in
+    the window, even when the reviewer shared remarks ⚠ [OJS1](#ojs1). The
+    window's attachments section is not part of this scenario's pass/fail
+    and must not be asserted by tests ⚠ [A3](#a3). As a control, use an
+    **anonymous** completed review on another submission: the author's
+    review stage shows no reviewers list at all, not even an empty one. The
+    author also finds the decision letters under "Notifications" and can
     open each read-only (Rule 16).
 
 App-specific:
 
-13. **{OMP} Straight to External Review** — Press Editor: on a new
-    monograph's Submission stage, choose "Send to External Review" (skipping
-    Internal Review). External Review "Review Round 1" opens exactly as in
-    scenario 1, and scenarios 2–12 run identically on the press [OMP1](#omp1).
-    The workflow menu also carries the separate "Internal Review" stage entry
-    (documented separately).
-14. **{OPS} No review stage on a preprint server** — Preprint Server
-    Manager: open any preprint's workflow. The menu offers no Review entry —
-    the stages go straight to Production — and no round, reviewer or review
+13. **{OMP} Straight to External Review**: Press Editor: on a new
+    monograph's Submission stage, choose "Send to External Review", which
+    skips Internal Review. External Review "Review Round 1" opens exactly as
+    in scenario 1, and scenarios 2–12 run identically on the press
+    [OMP1](#omp1). The workflow menu also carries the separate "Internal
+    Review" stage entry, which is documented separately.
+14. **{OPS} No review stage on a preprint server**: Preprint Server
+    Manager: open any preprint's workflow. The menu offers no Review entry.
+    The stages go straight to Production, and no round, reviewer or review
     file surface exists anywhere on the screen. Positive control: the same
-    screen offers the Production stage's own controls (e.g. posting or
-    declining the preprint), so the workflow itself is working. <sup>p</sup>
+    screen offers the Production stage's own controls (for example posting
+    or declining the preprint), so the workflow itself is working.
+    <sup>p</sup>
 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-07-31), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted 🐞 → ❓ →
-✅ in the summary (🐞 defect, author's call · ❓ needs a product ruling · ✅
-intended divergence); the entries below are the source. Each entry opens with
-the user-observable symptom; mechanism and evidence live in the entry's
+entry notes otherwise. The team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ (🐞 defect, author's call · ❓ needs a product ruling · ✅
+intended divergence). The entries below are the source. Each entry opens
+with the symptom a user observes; mechanism and evidence live in the entry's
 footnote.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
-| [A1](#a1) | After the first upload on the new-round revision path, the author's "Upload revisions" button vanishes and nothing says they are done — though the panel's own "Upload" still works | 🐞 | user-visible | — |
-| [OJS1](#ojs1) | On a journal, the author's "Read Review" window shows no review text — remarks shared with the author are missing (a press shows them) | 🐞 | user-visible | — |
+| [A1](#a1) | After the first upload on the new-round revision path, the author's "Upload revisions" button vanishes and nothing says they are done, though the panel's own "Upload" still works | 🐞 | user-visible | — |
+| [OJS1](#ojs1) | On a journal, the author's "Read Review" window shows no review text; remarks shared with the author are missing (a press shows them) | 🐞 | user-visible | — |
 | [A9](#a9) | Deleting the only revised file flips the status back but never returns the author's revisions task | 🐞 | minor | — |
 | [A10](#a10) | The Revisions Uploaded panel says files were "submitted by the author after revisions were requested" on rounds where no revisions were requested | 🐞 | minor | — |
-| [A2](#a2) | Author sees the editor's status wording; the author-tailored wording exists but is never shown | ❓ | user-visible | — |
-| [A3](#a3) | What the read-review window's attachments section lists — observation recorded privately with the maintainer pending a fix | ❓ | latent | — |
+| [A2](#a2) | The author sees the editor's status wording; the author-tailored wording exists but is never shown | ❓ | user-visible | — |
+| [A3](#a3) | What the read-review window's attachments section lists: observation recorded privately with the maintainer pending a fix | ❓ | latent | — |
 | [A4](#a4) | A round whose only reviewers declined reports "All reviews are confirmed and a decision is needed." | ❓ | user-visible | — |
 | [A5](#a5) | No screen path assigns a production assistant to the review stage; one assigned elsewhere is refused entry | ❓ | minor | — |
 | [A6](#a6) | After a round is cancelled, the restored round's status box no longer mentions its unresolved revision request | ❓ | user-visible | — |
 | [A7](#a7) | Unticking a file in the review-files dialog changes nothing the editor can see, and the checkboxes do not mirror the panel | ❓ | minor | — |
-| [A8](#a8) | A past round's panels still act — a reviewer added or a file uploaded there lands in the closed round | ❓ | user-visible | — |
-| [OMP2](#omp2) | A press collects no reviewer recommendation (intended — confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | rebase check (claude), 2026-08-25 — form-field half intended |
+| [A8](#a8) | A past round's panels still act: a reviewer added or a file uploaded there lands in the closed round | ❓ | user-visible | — |
+| [OMP2](#omp2) | A press collects no reviewer recommendation (intended, confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | rebase check (claude), 2026-08-25 — form-field half intended |
 | [OMP3](#omp3) | On a press the fresh revisions task reads "Revisions to consider in External Review.", not the journal's "Revision required." | ❓ | minor | — |
 | [OMP1](#omp1) | Presses run an additional Internal Review stage before External Review | ✅ | — | — |
 
@@ -461,139 +465,139 @@ footnote.
 
 <a id="a1"></a>
 **A1 — Inconsistent upload affordances after the first resubmit upload** · 🐞 · user-visible.
-When revisions were requested to be taken to a new review round, the author's
-bottom-of-screen "Upload revisions" button is offered while the request
-stands — but as soon as the author uploads one file, the button vanishes,
+When revisions were requested to be taken to a new review round, the
+author's bottom-of-screen "Upload revisions" button is offered while the
+request stands. As soon as the author uploads one file, the button vanishes,
 while the Revisions Uploaded panel's own "Upload" control still opens the
 same wizard. In the same situation without a new round required, the bottom
-button correctly stays and the revisions task clears on upload. The author is
-therefore not locked out; the defect is the contradiction — one upload path
-withdrawn, the other still offered — and that nothing tells the author they
-are done: the "Resubmit for review." task stays in their list after the
+button correctly stays and the revisions task clears on upload. The author
+is therefore not locked out. The defect is the contradiction (one upload
+path withdrawn, the other still offered), and that nothing tells the author
+they are done: the "Resubmit for review." task stays in their list after the
 upload, and the status sentence still awaits the editor's new round.
 Basis: probe (2026-07-31); the state missing from the bottom button's list is
 code-confirmed. <sup>[f-a1](#fn-a1)</sup>
 
 <a id="a2"></a>
 **A2 — Author-tailored status wording never shown** · ❓ · user-visible.
-The product carries author-specific wordings for two round statuses — e.g.
-"New reviews have been submitted and are being considered by the editor." and
-a reassuring no-action-needed text for an overdue review — but the status box
-the author sees uses the editor wording ("A review is overdue."), which
-invites the author to worry or chase. The tailored texts were shown by earlier
-versions.
+The product carries author-specific wordings for two round statuses, for
+example "New reviews have been submitted and are being considered by the
+editor." and a reassuring no-action-needed text for an overdue review. The
+status box the author sees uses the editor wording instead ("A review is
+overdue."), which invites the author to worry or chase. Earlier versions
+showed the tailored texts.
 Question: should the author's status box use the author wordings again?
-Lean: yes — the texts exist, are maintained, and read as deliberate design.
-Basis: probe (2026-07-31 — the author's box is character-identical to the
+Lean: yes. The texts exist, are maintained, and read as deliberate design.
+Basis: probe (2026-07-31; the author's box is character-identical to the
 editor's at every state checked); the tailored texts themselves are code
 reading. <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
 **A3 — Read-review attachment listing recorded privately** · ❓ · latent.
 What the author's "Read Review" window lists in its attachments section was
-observed live on both the journal and the press; the observation is recorded
+observed live on both the journal and the press. The observation is recorded
 privately with the maintainer, pending a fix. Until that resolves, this spec
 makes no claim about the window's attachment listing, and tests must not
 assert anything about what that section lists (scenario 12 excludes it
 explicitly).
-Basis: probe (2026-07-31, both apps — routed to the maintainer's private
+Basis: probe (2026-07-31, both apps; routed to the maintainer's private
 file). <sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
 **A4 — All-declined round claims confirmed reviews** · ❓ · user-visible.
 A round where reviewers were invited but every one of them declined reports
-"All reviews are confirmed and a decision is needed." — no review exists, none
-was confirmed. The sentence "Waiting for reviewers to be assigned." appears
-only while the round has no reviewer records at all.
+"All reviews are confirmed and a decision is needed." No review exists, and
+none was confirmed. The sentence "Waiting for reviewers to be assigned."
+appears only while the round has no reviewer records at all.
 Question: what should a round with only declined reviewers report? Lean: the
 "decision is needed" half is right, the "all reviews are confirmed" half is
-wrong — misleading wording rather than misbehavior.
-Basis: probe (2026-07-31 — a round whose only invited reviewer declined shows
+wrong. This is misleading wording rather than misbehavior.
+Basis: probe (2026-07-31; a round whose only invited reviewer declined shows
 the confirmed-reviews sentence); reproduces identically on a press
 (2026-07-31). <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
 **A5 — No path assigns a production assistant to the review stage** · ❓ · minor.
 The review stage's participant-assignment dialog offers no production
-assistant groups (Copyeditor, Layout Editor, Proofreader), and one assigned
-on another stage who selects the review stage sees only "You don't currently
-have access to that stage of the workflow." — so no screen path gives those
+assistant groups (Copyeditor, Layout Editor, Proofreader). One assigned on
+another stage who selects the review stage sees only "You don't currently
+have access to that stage of the workflow." So no screen path gives those
 roles any part in review, although the file panels' underlying permissions
-would admit an assistant. The Funding Coordinator — also an assistant-level
-group — is offered by the same dialog on both apps, by design.
+would admit an assistant. The Funding Coordinator, also an assistant-level
+group, is offered by the same dialog on both apps, by design.
 Question: are the production assistant roles meant to be assignable to the
 review stage? Lean: the dialog's roster is the intended gate, and the
-file-panel permissions naming assistants are leftovers — but whether an
-assistant placed on the stage by other means would gain access was not
-observed.
+file-panel permissions naming assistants are leftovers. Whether an assistant
+placed on the stage by other means would gain access was not observed.
 Basis: probe (OJS, 2026-07-31); the dialog's role roster read on both apps
 (2026-07-31). <sup>[f-a5](#fn-a5)</sup>
 
 <a id="a6"></a>
 **A6 — Cancelling a round forgets the previous round's revision request** · ❓ · user-visible.
 After "Cancel Review Round" removes Round 2, the restored Round 1 reports
-"Awaiting responses from reviewers." — even though a request for revisions
-toward a new round had been recorded on it and the author's revised file
-still sits in its Revisions Uploaded panel. The status box no longer says
-revisions were requested or submitted, so nothing on the screen recalls the
-round's open business.
+"Awaiting responses from reviewers." This happens even though a request for
+revisions toward a new round had been recorded on it and the author's
+revised file still sits in its Revisions Uploaded panel. The status box no
+longer says revisions were requested or submitted, so nothing on the screen
+recalls the round's open business.
 Question: should the restored round's status still reflect its unresolved
-revision request? Lean: yes — the box falls back to reviewer bookkeeping and
+revision request? Lean: yes. The box falls back to reviewer bookkeeping and
 hides what the round was actually waiting on.
 Basis: probe (2026-07-31). <sup>[f-a6](#fn-a6)</sup>
 
 <a id="a7"></a>
 **A7 — Unticking a review file changes nothing the editor can see** · ❓ · minor.
 In the "Current Review Files For Round {N}" dialog, unticking a listed file
-and confirming reports "Review files updated." — but the Files for Review
-panel still lists the file exactly as before; only reopening the dialog shows
-the cleared checkbox. A file the round received through a decision arrives in
-the dialog unticked even while the panel lists it — as does a file uploaded
-from the dialog itself — so the checkboxes do not mirror the panel to begin
-with.
-Question: what is the checkbox meant to control — and does a reviewer of the
-round still get an unticked file? Lean: the checkbox drives a visibility flag
-the editor's own panel ignores; whether the reviewer's file list honors it is
-the observation that would settle intent.
+and confirming reports "Review files updated." The Files for Review panel
+still lists the file exactly as before; only reopening the dialog shows the
+cleared checkbox. A file the round received through a decision arrives in
+the dialog unticked even while the panel lists it. So does a file uploaded
+from the dialog itself. The checkboxes therefore do not mirror the panel to
+begin with.
+Question: what is the checkbox meant to control, and does a reviewer of the
+round still get an unticked file? Lean: the checkbox drives a visibility
+flag the editor's own panel ignores. Whether the reviewer's file list honors
+it is the observation that would settle intent.
 Basis: probe (OJS, 2026-07-31); reproduces on OMP (2026-07-31), including for
 a file uploaded from the dialog itself. <sup>[f-a7](#fn-a7)</sup>
 
 <a id="a8"></a>
 **A8 — Past rounds still accept reviewers and files** · ❓ · user-visible.
-A past round is presented as closed — its decision buttons are gone and its
-status reads "The submission has been advanced to the next round of review" —
-yet its panels still work: adding a reviewer there sends a live invitation
+A past round is presented as closed: its decision buttons are gone and its
+status reads "The submission has been advanced to the next round of review".
+Yet its panels still work. Adding a reviewer there sends a live invitation
 recorded on the past round, and completing an upload lands the file in the
 past round's panel. A round's record can therefore change after review has
 moved on, with nothing marking the panels read-only.
 Question: are a past round's reviewer and file panels meant to stay editable?
 Lean: the withdrawn decision buttons say the round is closed, and a reviewer
-invited into a superseded round reads as an accident waiting to happen — but
-the acting roles are entitled to manage those panels, so it may be deliberate
-flexibility.
-Basis: probe (2026-07-31 — both mutations driven on OJS; the retained
+invited into a superseded round reads as an accident waiting to happen. But
+the acting roles are entitled to manage those panels, so it may be
+deliberate flexibility.
+Basis: probe (2026-07-31; both mutations driven on OJS, and the retained
 controls render identically on OMP). <sup>[f-a8](#fn-a8)</sup>
 
 <a id="a9"></a>
 **A9 — Deleting the only revised file leaves no revisions task behind** · 🐞 · minor.
-When the only revised file on a round is deleted — by the editor or by the
-author — the round's status and the author's My Submissions row correctly
-return to their revisions-requested state, but the revisions task never
-returns to the author's task list: the list stays silent where the decision
-had put "Revision required." The author still has the My Submissions cue and
-the upload button, so the miss is the prompt, not the path. A file later
-added on the review stage does bring a task back, under different wording.
+When the only revised file on a round is deleted, by the editor or by the
+author, the round's status and the author's My Submissions row correctly
+return to their revisions-requested state. The revisions task, however,
+never returns to the author's task list: the list stays silent where the
+decision had put "Revision required." The author still has the My
+Submissions cue and the upload button, so what is missing is the prompt, not
+the path. A file later added on the review stage does bring a task back,
+under different wording.
 Basis: probe (2026-07-31, OJS and OMP, both deleter
 roles). <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a10"></a>
 **A10 — Revisions panel claims revisions were requested when none were** · 🐞 · minor.
 The "Revisions Uploaded" panel opens with the description "These files have
-been submitted by the author after revisions were requested" on every round —
-including a round on which no revision request was ever recorded, where the
-sentence describes an event that never happened. The panel is empty at that
-point, so the miss is the explanation, not the files — but a reader is told
-revisions were requested when they were not.
+been submitted by the author after revisions were requested" on every round.
+That includes a round on which no revision request was ever recorded, where
+the sentence describes an event that never happened. The panel is empty at
+that point, so what is wrong is the explanation, not the files. Still, a
+reader is told revisions were requested when they were not.
 Since: 2026-08-02 · Basis: probe. <sup>[f-a10](#fn-a10)</sup>
 
 ### OJS
@@ -601,13 +605,13 @@ Since: 2026-08-02 · Basis: probe. <sup>[f-a10](#fn-a10)</sup>
 <a id="ojs1"></a>
 **OJS1 — Author's read-review window shows no review text** · 🐞 · user-visible.
 On a journal, the "Read Review" window an author opens on a completed open
-review gives the reviewer's name, completion date and recommendation — and
-then no review text at all: even a remark the reviewer explicitly shared with
-the author is missing. The decision letter's reviewer appendix stops at the
-recommendation the same way (that letter is *Editorial decision recording*'s
-surface). On a press the same window shows the shared remarks; editor-only
-remarks are correctly absent in both apps. The author is the reader this
-window exists for, and on a journal they get none of the text.
+review gives the reviewer's name, completion date and recommendation, and
+then no review text at all. Even a remark the reviewer explicitly shared
+with the author is missing. The decision letter's reviewer appendix stops at
+the recommendation the same way (that letter belongs to *Editorial decision
+recording*). On a press the same window shows the shared remarks.
+Editor-only remarks are correctly absent in both apps. The author is the
+reader this window exists for, and on a journal they get none of the text.
 Basis: probe (2026-07-31, OJS with OMP contrast). <sup>[f-ojs1](#fn-ojs1)</sup>
 
 ### OMP
@@ -615,22 +619,22 @@ Basis: probe (2026-07-31, OJS with OMP contrast). <sup>[f-ojs1](#fn-ojs1)</sup>
 <a id="omp1"></a>
 **OMP1 — Internal Review stage** · ✅ · intended divergence.
 A press runs an additional Internal Review stage between Submission and
-External Review, with the same round machinery, its own decision labels
+External Review. It has the same round machinery, its own decision labels
 ("Send to External Review" closes an internal round), and its own revision
-file spaces. A monograph may also skip it entirely (scenario 13). The External
-Review stage this file documents is unchanged by its presence. The Internal
-Review stage's own screens are documented separately.
+file spaces. A monograph may also skip it entirely (scenario 13). The
+External Review stage this file documents is unchanged by its presence. The
+Internal Review stage's own screens are documented separately.
 Basis: code (the stage roster and decision list are press-specific by
 design); parity and the Internal Review menu entry observed live
 (2026-07-31). <sup>[f-omp1](#fn-omp1)</sup>
 
 <a id="omp2"></a>
 **OMP2 — No reviewer recommendation on a press** · ❓ · user-visible.
-On a press, the reviewer's review form offers no recommendation field, so the
-author's "Read Review" window shows no recommendation line — and the decision
+On a press, the reviewer's review form offers no recommendation field, so
+the author's "Read Review" window shows no recommendation line. The decision
 letter's per-reviewer section still prints the label "Recommendation:" with
-nothing after it (the letter itself is *Editorial decision recording*'s
-surface). On a journal the recommendation runs through all three places.
+nothing after it (the letter itself belongs to *Editorial decision
+recording*). On a journal the recommendation runs through all three places.
 Question: is a recommendation-free review the press's intended design? Lean:
 the missing form field reads as deliberate, but a letter printing an empty
 "Recommendation:" label is a defect either way.
@@ -647,13 +651,13 @@ Basis: probe (2026-07-31, OMP with OJS contrast). <sup>[f-omp2](#fn-omp2)</sup>
 **OMP3 — The press's fresh revisions task is worded differently** · ❓ · minor.
 After a Request Revisions decision on a press, the author's task-list entry
 reads "Revisions to consider in External Review." where a journal's reads
-"Revision required." Everything around it is identical in both apps — the
+"Revision required." Everything around it is identical in both apps: the
 "Revision requested" row on My Submissions, the "Submit revisions" button,
 the task clearing on upload, and the new-round variant's "Resubmit for
 review." task.
-Question: is the press's different task wording intended? Lean: unintended —
-the press's internal-review bookkeeping deletes the task the decision just
-created and a second mechanism refiles it under its own wording; the effect
+Question: is the press's different task wording intended? Lean: unintended.
+The press's internal-review bookkeeping deletes the task the decision just
+created, and a second mechanism refiles it under its own wording. The effect
 is wording-level only.
 Basis: probe (2026-07-31, the same flow driven on both
 apps). <sup>[f-omp3](#fn-omp3)</sup>

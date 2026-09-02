@@ -13,188 +13,190 @@ atlas-claims: [AFFW-146, AFFW-147, AFFW-148, AFFW-149, AFFW-150, AFFW-151, AFFW-
 
 ## Purpose
 
-Every publication carries a list of **contributors** — the people (or
-organizations) credited as its authors — and this feature is how that list
-is maintained and shown. The submitting author builds the list while
-submitting; the editorial team maintains it on the workflow's Publication
-area; readers see it on the published item's pages. Each contributor has a
-name, contact details, one or more **contributor roles** (labels such as
-"Author" or "Translator", defined per journal on a settings screen this
-feature owns), and any number of **affiliations** — institutions either
-picked from the ROR registry (the public Research Organization Registry;
-a registry-backed entry carries the **ROR mark**, the registry's logo) or
-typed by hand. One contributor per publication is its **primary contact**
-(the badge's on-screen words; distinct from the journal's *principal
-contact*, the configured identity system emails are sent from). The
-feature is one shared implementation across OJS (journals), OMP (presses)
-and OPS (preprint servers), and this spec is written in journal terms.
-<sup>a</sup>
+Every publication carries a list of **contributors**: the people or
+organizations credited as its authors. This feature is how that list is
+maintained and shown. The submitting author builds the list while
+submitting. The editorial team maintains it in the workflow's Publication
+area. Readers see it on the published item's pages. Each contributor has a
+name, contact details, one or more **contributor roles**, and any number of
+**affiliations**. Contributor roles are labels such as "Author" or
+"Translator", defined per journal on a settings screen that belongs to this
+feature. An affiliation is an institution, either picked from the ROR
+registry (the public Research Organization Registry) or typed by hand. An
+entry picked from the registry carries the **ROR mark**, the registry's
+logo. One contributor per publication is its **primary contact**. That is
+the badge's on-screen wording, and it is distinct from the journal's
+*principal contact*, the configured identity that system emails are sent
+from. The feature is one shared implementation across OJS (journals), OMP
+(presses) and OPS (preprint servers). This spec is written in journal
+terms. <sup>a</sup>
 
 ## Actors & permissions
 
-**Editing follows the publication, not this screen**: the contributors
-list is editable by exactly the people who may edit the submission's
-publication metadata at that moment — the gate and its published-state
-locks are owned by *Publication metadata*
-([→ edit gate](U40-publication-metadata.md#edit-gate)). That gate's
+**Editing rights follow the publication, not this screen.** The
+contributors list is editable by exactly the people who may edit the
+submission's publication metadata at that moment. That gate, and the locks
+it applies once a version is published, belong to *Publication metadata*
+([→ edit gate](U40-publication-metadata.md#edit-gate)). The gate's
 published-state behavior holds here unchanged: a published version's
 Contributors page shows the same warning banner as the other publication
-pages and stays fully editable for the same people. When the viewer
-may not edit, the list is read-only: the rows and the "Preview" button
-remain, and every other control — "Order", "Add Contributor" and all
-row actions — is absent entirely (Rule 9; unlike the Funding list, whose
-disabled buttons stay visible grayed out). During submission, the
-wizard's Contributors step is the submitting author's own draft and is
+pages, and it stays fully editable for the same people. When the viewer
+may not edit, the list is read-only. The rows and the "Preview" button
+remain. Every other control is absent entirely: "Order", "Add Contributor"
+and all row actions (Rule 9). This differs from the Funding list, whose
+disabled buttons stay visible but grayed out. During submission, the
+wizard's Contributors step is the submitting author's own draft, and it is
 always editable there. <sup>a</sup> <sup>b</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Contributors list (workflow)** | • any role whose workflow view includes the Publication area — Journal Manager, Editor, Site Administrator, and assigned Section Editors, Guest Editors, Assistants and the submission's Author; the "Contributors" entry is always present, with no setting to remove it (which roles reach the workflow screen at all is the workflow screen's own rule) <sup>a</sup> |
-| **Add / edit / delete / reorder contributors, set the primary contact** | • whoever may currently edit the publication's metadata ([→ edit gate](U40-publication-metadata.md#edit-gate)); everyone else sees the read-only list (Rule 9)<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint — on a journal or press the author's workflow list is read-only [OPS1](#ops1) <sup>b</sup> |
-| **Edit contributors while submitting (wizard)** | • the submitting author — the wizard's Contributors step is always present and always editable (the step's place in the flow and its submit gates belong to the *[Submission wizard](U21-submission-wizard.md)*) <sup>i</sup> |
-| **Manage the journal's contributor roles** | • Journal Manager (and a Site Administrator working in the journal) — on the "Contributor Roles" settings screen (Rule 12) <sup>e</sup> |
-| **See contributors on reader pages** | • any reader — on a published item's landing page and in the listing pages' author lines (Rules 14–15) <sup>h</sup> |
-| **Require competing-interest statements** | • Journal Manager (and a Site Administrator working in the journal) — on the workflow settings' Metadata screen (Settings that modify behavior) <sup>j</sup> |
+| **See the Contributors list (workflow)** | • any role whose workflow view includes the Publication area: Journal Manager, Editor, Site Administrator, and assigned Section Editors, Guest Editors, Assistants and the submission's Author. The "Contributors" entry is always present, and no setting removes it. Which roles reach the workflow screen at all is the workflow screen's own rule. <sup>a</sup> |
+| **Add / edit / delete / reorder contributors, set the primary contact** | • whoever may currently edit the publication's metadata ([→ edit gate](U40-publication-metadata.md#edit-gate)). Everyone else sees the read-only list (Rule 9).<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint. On a journal or press the author's workflow list is read-only [OPS1](#ops1). <sup>b</sup> |
+| **Edit contributors while submitting (wizard)** | • the submitting author. The wizard's Contributors step is always present and always editable. The step's place in the flow and its submit gates belong to the *[Submission wizard](U21-submission-wizard.md)*. <sup>i</sup> |
+| **Manage the journal's contributor roles** | • Journal Manager, and a Site Administrator working in the journal, on the "Contributor Roles" settings screen (Rule 12). <sup>e</sup> |
+| **See contributors on reader pages** | • any reader, on a published item's landing page and in the listing pages' author lines (Rules 14–15). <sup>h</sup> |
+| **Require competing-interest statements** | • Journal Manager, and a Site Administrator working in the journal, on the workflow settings' Metadata screen (Settings that modify behavior). <sup>j</sup> |
 
 ## Fields & validation
 
 The add/edit panel ("Add Contributor" / "Edit") opens with a
-**"Contributor Type"** choice that decides which of the fields below
-appear; its guidance warns "Selecting a contributor type will determine
-which fields you need to complete in this form. Please note that if you
-change the contributor type after you've started filling out the form,
-any information you've already entered will not be saved." Fields marked
-*multilingual* follow the language-bar behavior of the other publication
-forms (see *[Publication metadata](U40-publication-metadata.md)*): only
-the submission language's copy is ever required. A save missing a
-required field never leaves the form: **"This field is required."**
-appears in red under the field, and the form's foot shows **"Please
-correct one error."** — **"Please correct {n} errors."** when several —
-with a **"Jump to next error"** link until every error is fixed; after a
-refused save the Save button stays disabled until an errored field is
+**"Contributor Type"** choice. That choice decides which of the fields
+below appear. Its guidance warns: "Selecting a contributor type will
+determine which fields you need to complete in this form. Please note that
+if you change the contributor type after you've started filling out the
+form, any information you've already entered will not be saved." Fields
+marked *multilingual* follow the language-bar behavior of the other
+publication forms (see *[Publication metadata](U40-publication-metadata.md)*).
+Only the submission language's copy is ever required. A save with a
+required field missing never leaves the form. **"This field is required."**
+appears in red under the field. The form's foot shows **"Please correct one
+error."**, or **"Please correct {n} errors."** when there are several, with
+a **"Jump to next error"** link until every error is fixed. After a refused
+save, the Save button stays disabled until a field with an error is
 edited. <sup>c</sup> <sup>n</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Contributor Type** | Yes | Radio choice: **"Person"** (preselected), **"Organization or group"** or **"Anonymous"** — an entry with no name of its own, shown everywhere as "Anonymous" (Rule 3): for it only Email, Country, Contributor Roles, CRediT roles and Publication Lists remain (no name fields, ROR ID, Homepage URL, Bio Statement or Affiliations) — and of these only Contributor Roles is actually enforced: Email and Country keep their required markers, yet an Anonymous save with both empty is accepted ⚠ [A18](#a18). Switching types leaves what you typed on screen; on save the other type's entries are discarded as the guidance warns — except a typed ROR ID, which silently stays in the saved record ⚠ [A4](#a4). |
+| **Contributor Type** | Yes | Radio choice: **"Person"** (preselected), **"Organization or group"** or **"Anonymous"**. An Anonymous contributor has no name of its own and is shown everywhere as "Anonymous" (Rule 3). For it, only Email, Country, Contributor Roles, CRediT roles and Publication Lists remain; there are no name fields, ROR ID, Homepage URL, Bio Statement or Affiliations. Of those, only Contributor Roles is actually enforced. Email and Country keep their required markers, yet an Anonymous save with both empty is accepted ⚠ [A18](#a18). Switching types leaves what you typed on screen. On save, the other type's entries are discarded, as the guidance warns. The exception is a typed ROR ID, which silently stays in the saved record ⚠ [A4](#a4). |
 | **Given Name** | Yes (Person) | Text, multilingual. Person only. |
 | **Family Name** | No | Text, multilingual. Person only. |
 | **Preferred Public Name** | No | Text, multilingual. Person only. Guidance: "Please provide the full name as the author should be identified on the published work. Example: Dr. Alan P. Mwandenga" |
 | **Organization Name** | Yes (Organization) | Text, multilingual. Organization only. |
 | **Email** | Yes | Text; must be an email address. Not enforced for an Anonymous contributor, despite the marker ([A18](#a18)). |
-| **Country** | Yes | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country — every later edit of them is then refused until one is chosen ⚠ [A16](#a16). Not enforced for an Anonymous contributor ([A18](#a18)). |
-| **ROR ID** | No | Organization only: a plain text box ("Enter organization's ROR ID."), separate from the Affiliations field below; anything typed is accepted without a shape check ⚠ [A4](#a4). |
+| **Country** | Yes | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country. Every later edit of that contributor is then refused until one is chosen ⚠ [A16](#a16). Not enforced for an Anonymous contributor ([A18](#a18)). |
+| **ROR ID** | No | Organization only. A plain text box ("Enter organization's ROR ID."), separate from the Affiliations field below. Anything typed is accepted without a shape check ⚠ [A4](#a4). |
 | **Homepage URL** | No | Must be a web address. |
-| **ORCID iD** | No | Person only; present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
-| **Competing Interests** | Yes, when shown | Rich text, multilingual; present only when the journal requires competing-interest statements (Settings that modify behavior). Guidance: "Please disclose any competing interests this author may have with the research subject." Saving it empty is stopped as a missing required field (the section's refusal above). On a preprint server the field's label renders as raw code-like text instead of the plain "Competing Interests" ⚠ [OPS2](#ops2). <sup>j</sup> |
+| **ORCID iD** | No | Person only. Present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
+| **Competing Interests** | Yes, when shown | Rich text, multilingual. Present only when the journal requires competing-interest statements (Settings that modify behavior). Guidance: "Please disclose any competing interests this author may have with the research subject." Saving it empty is stopped as a missing required field (the refusal described above this table). On a preprint server the field's label renders as raw code-like text instead of the plain "Competing Interests" ⚠ [OPS2](#ops2). <sup>j</sup> |
 | **Bio Statement (e.g., department and rank)** | No | Rich text, multilingual. |
-| **Affiliations** | No | The contributor's institution list (any number). Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type (from four characters, straight from your own browser); each suggestion shows the institution's name, country, the ROR mark and a link to its registry record — or pick your typed text itself (offered first, as a bare label) to record a hand-typed institution. "Add" appears only once a suggestion is picked — there is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution on the list. While a picked entry sits under "Selected", the search box is disabled — add or remove the entry before typing a new query. A registry-backed entry's identity is fixed: its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}" — boxes a screen reader announces wrongly ⚠ [A10](#a10)), a completeness status ("{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled — a total that may follow the publication's own language set rather than the journal's ⚠ [A17](#a17)), and both "Edit institution name" and "Remove institution" — the two actions sit behind the row's expander button, named "Click to edit or delete"; a save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." — misprinted in the form foot's error summary as "Go to Affiliations: [object Object]" ⚠ [A7](#a7). Removing asks "Are you sure?" — "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why (rate-limited, unavailable or deprecated — three distinct messages, each dismissed with "OK"), and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog: they stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11); hand-typed entry keeps working throughout. <sup>d</sup> |
-| **Contributor Roles** | Yes | One checkbox per role the journal defines (Rule 11); at least one must be ticked — a save with none is stopped as a missing required field (the section's refusal above). When the journal has exactly one role the field disappears — and, as built, every contributor save from the form then fails, leaving role-less contributors behind ⚠ [A14](#a14). <sup>c</sup> |
-| **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." — the standard CRediT taxonomy list with a degree per picked role; shown to readers on the landing page (Rule 14). |
-| **Publication Lists** | No | One checkbox, ticked by default: "Include this contributor when identifying authors in lists of publications." (Rule 8 — and its as-built limits, ⚠ [A3](#a3)). |
+| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution on the list. While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}"). A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. That total may follow the publication's own language set rather than the journal's ⚠ [A17](#a17). A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." The form foot's error summary misprints that message as "Go to Affiliations: [object Object]" ⚠ [A7](#a7). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why. There are three distinct messages (rate-limited, unavailable or deprecated), each dismissed with "OK", and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
+| **Contributor Roles** | Yes | One checkbox per role the journal defines (Rule 11). At least one must be ticked; a save with none is stopped as a missing required field (the refusal described above this table). When the journal has exactly one role, the field disappears. Every contributor save from the form then fails, leaving role-less contributors behind ⚠ [A14](#a14). <sup>c</sup> |
+| **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." The standard CRediT taxonomy list, with a degree per picked role. Shown to readers on the landing page (Rule 14). |
+| **Publication Lists** | No | One checkbox, ticked by default: "Include this contributor when identifying authors in lists of publications." (Rule 8, and its limits in practice, ⚠ [A3](#a3)). |
 
 **The "Add Role" / "Edit Role" panel** (the Contributor Roles settings
 screen, Rule 12): <sup>e</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Role Identifier** | Yes | Drop-down of the built-in identifier codes (AUTHOR, EDITOR, CHAIR, REVIEWER, REVIEW_ASSISTANT, STATS_REVIEWER, REVIEWER_EXTERNAL, READER, TRANSLATOR, OTHER) — what the role means to the system, e.g. for exports. Fixed after creation: on "Edit Role" the drop-down offers only the role's own identifier. |
-| **Role Name** | Yes (enforced for the primary language only) | Text, one box per journal language ("Fill name in all of the languages.") — the words shown on contributor rows, forms and reader pages. Despite the guidance, a save with another language's box left empty is accepted without a word ⚠ [A13](#a13). |
+| **Role Identifier** | Yes | Drop-down of the built-in identifier codes (AUTHOR, EDITOR, CHAIR, REVIEWER, REVIEW_ASSISTANT, STATS_REVIEWER, REVIEWER_EXTERNAL, READER, TRANSLATOR, OTHER). The identifier is what the role means to the system, for example in exports. It is fixed after creation: on "Edit Role" the drop-down offers only the role's own identifier. |
+| **Role Name** | Yes (enforced for the primary language only) | Text, one box per journal language ("Fill name in all of the languages."). These are the words shown on contributor rows, forms and reader pages. Despite the guidance, a save with another language's box left empty is accepted without a word ⚠ [A13](#a13). |
 
 ## Rules & state
 
 1. **One list per publication version.** Each version carries its own
    copy of the contributors list. Creating a new version copies every
-   contributor — order, roles, affiliations and the primary-contact
-   choice included — onto the new version, where it can then be edited
-   independently (creating versions is *Publish, schedule & versions*'s,
-   no spec yet). <sup>g</sup>
-2. **Where it lives.** The workflow screen's Publication area — titled
-   "Preprint" on a preprint server — carries a **"Contributors"** entry,
-   second in the list right after "Title & Abstract", for every role and
-   with no setting that removes it. It opens the contributors list:
-   heading "Contributors", with **"Order"**, **"Preview"** and
+   contributor onto the new version, including order, roles, affiliations
+   and the primary-contact choice. The copy can then be edited
+   independently. Creating versions belongs to *Publish, schedule &
+   versions* (no spec yet). <sup>g</sup>
+2. **Where it lives.** The workflow screen's Publication area is titled
+   "Preprint" on a preprint server. It carries a **"Contributors"** entry,
+   second in the list right after "Title & Abstract". The entry is there
+   for every role, and no setting removes it. It opens the contributors
+   list: the heading "Contributors", with **"Order"**, **"Preview"** and
    **"Add Contributor"** above the rows. <sup>a</sup>
 3. **The row.** Each contributor's row shows their full name and one
-   badge per contributor role ("Author", "Translator", …); the primary
-   contact's row adds a **"Primary Contact"** badge where other rows
-   offer **"Set Primary Contact"**, and each row ends with **"Edit"**
-   and **"Delete"**. An Anonymous contributor's row is titled with the
-   literal word **"Anonymous"** — and that word serves as the name in
-   every slot the list feeds: the Delete confirmation's "{name}", the
-   three Preview formats (Rule 7) and the reader pages' credits and
-   author lines (Rules 14–15), where nothing distinguishes the entry
-   from a person actually named Anonymous. The row never shows the contributor's affiliations,
-   although the list reserves a line under the name for exactly that
-   ⚠ [A1](#a1). <sup>a</sup>
-4. **Add and edit.** "Add Contributor" opens the side panel of Fields &
-   validation; "Edit" opens the same panel prefilled. Saving closes the
-   panel, updates the row in place, and refreshes the preview formats
-   (Rule 7). <sup>c</sup>
+   badge per contributor role ("Author", "Translator", …). The primary
+   contact's row adds a **"Primary Contact"** badge; other rows offer
+   **"Set Primary Contact"** instead. Each row ends with **"Edit"** and
+   **"Delete"**. An Anonymous contributor's row is titled with the literal
+   word **"Anonymous"**. That word serves as the name in every place the
+   list feeds: the Delete confirmation's "{name}", the three Preview
+   formats (Rule 7), and the reader pages' credits and author lines
+   (Rules 14–15). Nothing there distinguishes the entry from a person
+   actually named Anonymous. The row never shows the contributor's
+   affiliations, although the list reserves a line under the name for
+   exactly that ⚠ [A1](#a1). <sup>a</sup>
+4. **Add and edit.** "Add Contributor" opens the side panel described in
+   Fields & validation. "Edit" opens the same panel prefilled. Saving
+   closes the panel, updates the row in place, and refreshes the preview
+   formats (Rule 7). <sup>c</sup>
 5. **Delete.** "Delete" opens a confirmation titled "Delete Contributor":
    "Are you sure you want to remove {name} as a contributor? This action
-   can not be undone." — "Delete Contributor" removes the contributor
-   with their affiliations permanently; "Cancel" leaves everything
-   untouched. The last contributor deletes the same way, with no extra
-   warning: the emptied list shows "No items found." beneath the
-   unchanged "Order", "Preview" and "Add Contributor" buttons, and
+   can not be undone." Its "Delete Contributor" button removes the
+   contributor, with their affiliations, permanently. "Cancel" leaves
+   everything untouched. The last contributor deletes the same way, with
+   no extra warning. The emptied list then shows "No items found." beneath
+   the unchanged "Order", "Preview" and "Add Contributor" buttons, and
    Preview's three formats simply show nothing. Deleting the primary
-   contact leaves the publication with no primary contact at all,
-   without any warning or replacement ⚠ [A2](#a2). <sup>f</sup>
-6. **Ordering.** "Order" puts the list in ordering mode: "Preview" and
-   "Add Contributor" give way to a **"Cancel"** button, "Order" itself
-   relabels **"Save Order"**, and each row shows up/down arrows (named
-   "Increase position of {name}" / "Decrease position of {name}" for
-   assistive technology). "Save Order" persists the sequence everywhere
-   the list appears; "Cancel" restores the order from before. Until
-   "Save Order" has been used once, a newly added contributor ties the
-   auto-created submitting author for first position: the panel, the
-   three Preview formats and the reader pages each resolve the tie on
-   their own and can disagree, varying between loads ⚠ [A15](#a15).
-   Once an order has been saved, every list and author string follows
-   it, and later additions join at the end. <sup>f</sup>
-7. **Preview — the three display formats.** "Preview" opens "List of
-   Contributors" ("Contributors to this publication will be identified
-   in the following formats."), a two-column table (Format / Display)
+   contact leaves the publication with no primary contact at all, without
+   any warning or replacement ⚠ [A2](#a2). <sup>f</sup>
+6. **Ordering.** "Order" puts the list in ordering mode. "Preview" and
+   "Add Contributor" give way to a **"Cancel"** button, "Order" itself is
+   relabeled **"Save Order"**, and each row shows up/down arrows. For
+   assistive technology the arrows are named "Increase position of
+   {name}" and "Decrease position of {name}". "Save Order" saves the
+   sequence everywhere the list appears. "Cancel" restores the order from
+   before. Until "Save Order" has been used once, a newly added
+   contributor ties the auto-created submitting author for first position.
+   The panel, the three Preview formats and the reader pages each resolve
+   that tie on their own, so they can disagree, and the order can vary
+   between loads ⚠ [A15](#a15). Once an order has been saved, every list
+   and author string follows it, and later additions join at the end.
+   <sup>f</sup>
+7. **Preview: the three display formats.** "Preview" opens "List of
+   Contributors" ("Contributors to this publication will be identified in
+   the following formats."). It is a two-column table (Format / Display)
    of the strings the rest of the system uses:
-   - **"Abbreviated"** — a short author line built from the first
-     contributor alone: their family name — or their given name when
-     they have no family name; an organization's Organization Name;
-     the word "Anonymous" for an Anonymous contributor — plus "et al."
-     when there are several, so the string is never empty while any
-     contributor exists (which contributor is "first" is unstable
-     until an order has been saved, [A15](#a15));
-   - **"Publication Lists"** — the full format below, restricted to
-     contributors ticked for publication lists (Rule 8);
-   - **"Full"** — every contributor's name followed by their own roles
-     in parentheses, the entries joined by semicolons — e.g. "Daniel
-     Barnes (Author); Carlo Corino (Author); Alan Mwandenga
-     (Translator)"; contributors sharing a role are never grouped under
+   - **"Abbreviated"**: a short author line built from the first
+     contributor alone, plus "et al." when there are several. For a
+     person it uses the family name, or the given name when there is no
+     family name. For an organization it uses the Organization Name. For
+     an Anonymous contributor it uses the word "Anonymous". The string is
+     therefore never empty while any contributor exists. Which
+     contributor counts as "first" is unstable until an order has been
+     saved ([A15](#a15)).
+   - **"Publication Lists"**: the Full format below, restricted to
+     contributors ticked for publication lists (Rule 8).
+   - **"Full"**: every contributor's name followed by their own roles in
+     parentheses, with the entries joined by semicolons. For example
+     "Daniel Barnes (Author); Carlo Corino (Author); Alan Mwandenga
+     (Translator)". Contributors sharing a role are never grouped under
      one parenthesis. <sup>a</sup>
 8. **The publication-lists tick.** Unticking "Publication Lists" on a
    contributor is meant to keep them out of the author lines on listing
-   pages while the landing page still credits them. As built, the tick
-   governs the Preview's "Publication Lists" format everywhere, but of
-   the reader-facing listings only a press's catalog lists honor it — a
+   pages, while the landing page still credits them. In practice the tick
+   governs the Preview's "Publication Lists" format everywhere, but among
+   the reader-facing listings only a press's catalog lists honor it. A
    journal's and a preprint server's listings show the unticked
-   contributor anyway ⚠ [A3](#a3). "Abbreviated" ignores the tick
-   either way: it is built from the first contributor of the full list,
-   even one unticked from publication lists — so the two formats can
-   disagree about who leads the author line. <sup>a</sup> <sup>h</sup>
-9. **Read-only presentation.** For a viewer who may not edit the
-   publication (Actors & permissions — on a journal or press the
-   submission's own Author is such a viewer), the same list shows only
-   the rows — names and role badges — and the "Preview" button; "Order",
-   "Add Contributor" and every row action are absent. The "Primary
-   Contact" badge disappears with them, so a read-only viewer cannot
-   tell which contributor is the primary contact ⚠ [A6](#a6).
-   <sup>b</sup>
-10. **The primary contact.** Exactly one contributor at a time can be
-    the version's primary contact — the address editorial
-    correspondence about the work is directed to. "Set Primary Contact"
-    moves the badge immediately, with no confirmation. The submitting
-    author's own contributor record arrives as the primary contact
-    (created on submission — see *[Submission wizard](U21-submission-wizard.md)*).
+   contributor anyway ⚠ [A3](#a3). "Abbreviated" ignores the tick either
+   way. It is built from the first contributor of the full list, even one
+   unticked from publication lists, so the two formats can disagree about
+   who leads the author line. <sup>a</sup> <sup>h</sup>
+9. **Read-only presentation.** Some viewers may not edit the publication
+   (Actors & permissions). On a journal or press the submission's own
+   Author is such a viewer. For them the same list shows only the rows,
+   with names and role badges, and the "Preview" button. "Order", "Add
+   Contributor" and every row action are absent. The "Primary Contact"
+   badge disappears with them, so a read-only viewer cannot tell which
+   contributor is the primary contact ⚠ [A6](#a6). <sup>b</sup>
+10. **The primary contact.** Exactly one contributor at a time can be the
+    version's primary contact: the address editorial correspondence about
+    the work is directed to. "Set Primary Contact" moves the badge
+    immediately, with no confirmation. The submitting author's own
+    contributor record arrives as the primary contact. It is created on
+    submission; see *[Submission wizard](U21-submission-wizard.md)*.
     Readers never see the choice: no reader page marks any author as a
     contact. A publication can be left with no primary contact
     ([A2](#a2)). <sup>b</sup> <sup>g</sup>
@@ -202,288 +204,285 @@ screen, Rule 12): <sup>e</sup>
     contributor form are the journal's own list, maintained on the
     "Contributor Roles" settings screen (Rule 12). A new journal or
     preprint server starts with two: "Author" (identifier AUTHOR) and
-    "Translator" (identifier TRANSLATOR); a new press starts with four —
-    those two plus "Chapter Author" (also identifier AUTHOR) and
-    "Volume editor" (identifier EDITOR). The submitting author's
-    auto-created contributor gets the journal's first AUTHOR-identifier
-    role. <sup>e</sup>
-12. **The Contributor Roles screen.** Settings → Workflow → Submission →
-    **"Contributor Roles"**: a table of **"Role Name"** and **"Role
-    Identifier"** with **"Add Role"** above it and "Edit" / "Delete
-    Role" behind each row's "…" menu. Add and edit use the panel of
-    Fields & validation; a successful save reports "Contributor role
-    saved". <sup>e</sup>
-13. **Deleting a role.** "Delete Role" opens a type-to-confirm dialog —
-    'Are you absolutely sure you want to delete "{identifier}" role?' —
-    whose warning lists the two preconditions (at least one AUTHOR role
-    must remain; no contributor may still hold the role) and whose
-    confirm button stays disabled until the identifier is typed back
-    exactly. A role any contributor of any submission still holds is
-    refused: "One or more contributors are using this role. Change the
-    role to another before delete." The journal's last AUTHOR-identifier
-    role can never be deleted ("Last AUTHOR role cannot be deleted.").
-    Either refusal appears as a modal "Error" dialog dismissed with
-    "OK"; when both would apply, the in-use refusal is the one shown.
-    The type-to-confirm dialog's confirm button is mislabeled with a
-    whole warning sentence — "Are you sure you wish to delete this
-    item? This action cannot be undone." — where a short "Delete" label
-    belongs ⚠ [A12](#a12). A deleted role's confirmation reads "Role
-    Deleted" — '"{identifier}" has been successfully deleted.'
+    "Translator" (identifier TRANSLATOR). A new press starts with four:
+    those two plus "Chapter Author" (also identifier AUTHOR) and "Volume
+    editor" (identifier EDITOR). The submitting author's auto-created
+    contributor gets the journal's first AUTHOR-identifier role.
     <sup>e</sup>
+12. **The Contributor Roles screen.** Settings → Workflow → Submission →
+    **"Contributor Roles"**. It is a table of **"Role Name"** and **"Role
+    Identifier"**, with **"Add Role"** above it and "Edit" / "Delete Role"
+    behind each row's "…" menu. Add and edit use the panel described in
+    Fields & validation. A successful save reports "Contributor role
+    saved". <sup>e</sup>
+13. **Deleting a role.** "Delete Role" opens a type-to-confirm dialog:
+    'Are you absolutely sure you want to delete "{identifier}" role?' Its
+    warning lists the two preconditions: at least one AUTHOR role must
+    remain, and no contributor may still hold the role. Its confirm button
+    stays disabled until the identifier is typed back exactly. A role that
+    any contributor of any submission still holds is refused: "One or more
+    contributors are using this role. Change the role to another before
+    delete." The journal's last AUTHOR-identifier role can never be
+    deleted ("Last AUTHOR role cannot be deleted."). Either refusal
+    appears as a modal "Error" dialog dismissed with "OK". When both would
+    apply, the in-use refusal is the one shown. The type-to-confirm
+    dialog's confirm button is mislabeled with a whole warning sentence,
+    "Are you sure you wish to delete this item? This action cannot be
+    undone.", where a short "Delete" label belongs ⚠ [A12](#a12). A
+    deleted role's confirmation reads "Role Deleted": '"{identifier}" has
+    been successfully deleted.' <sup>e</sup>
 14. **What readers see on the landing page.** A published item's landing
-    page — the article page; the catalog's book page on a press; the
-    preprint's page on a preprint server — credits every contributor in
-    list order: name, affiliation names (a registry-backed affiliation's
-    ROR mark links to its registry record — a link assistive technology
-    cannot name ⚠ [A9](#a9)), contributor role names,
-    ORCID iD (verified or unauthenticated icon — see
-    *[ORCID integration](U04-orcid-integration.md)*), and any CRediT
-    roles. Contributors with a Bio Statement additionally get an
-    **"Author Biographies"** ("Author Biography" for one) section:
-    "{name}, {affiliations}" above each statement — just the name, no
-    comma, for a contributor without an affiliation. On a press, a book
+    page is the article page on a journal, the catalog's book page on a
+    press, and the preprint's page on a preprint server. It credits every
+    contributor in list order: name, affiliation names, contributor role
+    names, ORCID iD, and any CRediT roles. A registry-backed affiliation's
+    ROR mark links to its registry record, but assistive technology
+    cannot name that link ⚠ [A9](#a9). The ORCID iD shows a verified or
+    unauthenticated icon; see *[ORCID integration](U04-orcid-integration.md)*.
+    Contributors with a Bio Statement additionally get an **"Author
+    Biographies"** section ("Author Biography" for one). Above each
+    statement it shows "{name}, {affiliations}", or just the name with no
+    comma for a contributor without an affiliation. On a press, a book
     with five or more contributors compacts the credits to a single
-    flowed line of names joined by semicolons, without affiliations,
-    ROR marks, ORCID icons or role names [OMP1](#omp1); an Edited
-    Volume's book page credits its volume editors — each name suffixed
-    "(ed)", with the role name — in place of the contributor list
-    [OMP2](#omp2). <sup>h</sup>
+    flowed line of names joined by semicolons, without affiliations, ROR
+    marks, ORCID icons or role names [OMP1](#omp1). An Edited Volume's
+    book page credits its volume editors in place of the contributor
+    list, each name suffixed "(ed)", with the role name [OMP2](#omp2).
+    <sup>h</sup>
 15. **What readers see in listings.** Issue tables of contents, search
-    results, the archive and other listing pages show each item's
-    author line in the "Full" format of Rule 7 — names with roles in
-    parentheses. Whether a listing omits unticked contributors is
-    Rule 8's as-built exception ([A3](#a3)); whether a section hides
-    author lines entirely is the section configuration's rule, not this
-    feature's. <sup>h</sup>
+    results, the archive and other listing pages show each item's author
+    line in the "Full" format of Rule 7: names with roles in parentheses.
+    Whether a listing omits unticked contributors is Rule 8's exception
+    ([A3](#a3)). Whether a section hides author lines entirely is the
+    section configuration's rule, not this feature's. <sup>h</sup>
 16. **Affiliation identities and the registry cache.** An affiliation is
-    either registry-backed — identified by its ROR record, name shown
-    from the registry in every registry language — or typed by hand with
-    per-language names (Fields & validation). Registry search runs from
-    the user's own browser against the public registry; the first time
-    an institution is picked anywhere in the journal, the install also
-    stores its registry record through the journal's server, and a
-    monthly self-update keeps all stored records current with the public
-    registry data set (also run once at install). When the journal's
-    server cannot reach the registry for that first pick, the stored
-    record never arrives: the pick itself still lands normally, the
-    "Add" press raises an error dialog, and the entry is added anyway —
-    the affiliation saves, and publishes, with no name at all
-    ⚠ [A5](#a5). <sup>d</sup> <sup>k</sup>
-17. **Reviewers and anonymity.** Where the review type keeps the
-    authors' identity from the reviewer, the contributor list is
-    withheld from the data sent to the reviewer's browser — a safeguard
-    visible only by inspecting that data; what a reviewer's screens
-    show of authorship is the review features' territory
+    either registry-backed or typed by hand. A registry-backed one is
+    identified by its ROR record, and its name is shown from the registry
+    in every registry language. A typed one has per-language names
+    (Fields & validation). Registry search runs from the user's own
+    browser against the public registry. The first time an institution is
+    picked anywhere in the journal, the install also stores its registry
+    record through the journal's server. A monthly self-update keeps all
+    stored records current with the public registry data set; it also
+    runs once at install. When the journal's server cannot reach the
+    registry for that first pick, the stored record never arrives. The
+    pick itself still lands normally, pressing "Add" raises an error
+    dialog, and the entry is added anyway. The affiliation then saves, and
+    publishes, with no name at all ⚠ [A5](#a5). <sup>d</sup> <sup>k</sup>
+17. **Reviewers and anonymity.** Where the review type keeps the authors'
+    identity from the reviewer, the contributor list is withheld from the
+    data sent to the reviewer's browser. That safeguard is visible only by
+    inspecting that data. What a reviewer's screens show of authorship
+    belongs to the review features
     (*[Review stage & rounds](U26-review-stage-and-rounds.md)*).
     <sup>l</sup>
 
 ## Side effects
 
 - Adding, editing, deleting or reordering contributors sends no email,
-  raises no notification, and writes no activity-log entry — the list
-  simply changes. Changing the primary contact is the one exception: it
+  raises no notification, and writes no activity-log entry. The list
+  simply changes. Changing the primary contact is the one exception. It
   writes a single activity-log entry, "Submission metadata updated"
   (Activity Log & Notes → History), because the choice is saved on the
-  publication itself — it too sends no email and raises no
-  notification. <sup>f</sup>
+  publication itself. It too sends no email and raises no notification.
+  <sup>f</sup>
 - The one email in the flow: requesting a contributor's ORCID
   verification from the form sends that contributor the verification
-  email — owned by *[ORCID integration](U04-orcid-integration.md)*.
+  email. That email is owned by *[ORCID integration](U04-orcid-integration.md)*.
 - Picking a registry-backed affiliation can store a local copy of the
-  institution's registry record (names in all registry languages);
-  invisible to users (Rule 16).
-- Contributor data travels outward with the publication's metadata: DOI
+  institution's registry record, with names in all registry languages.
+  This is invisible to users (Rule 16).
+- Contributor data travels outward with the publication's metadata. DOI
   registration, metadata export and citation displays carry the names,
-  roles, affiliations and ORCID iDs — those surfaces belong to their own
+  roles, affiliations and ORCID iDs. Those surfaces belong to their own
   features.
-- Changing the submission language copies contributor names (and typed
-  affiliation names) into the new language — the change-language flow
-  is *[Publication metadata](U40-publication-metadata.md)*'s.
+- Changing the submission language copies contributor names, and typed
+  affiliation names, into the new language. The change-language flow
+  belongs to *[Publication metadata](U40-publication-metadata.md)*.
 
 ## Settings that modify behavior
 
-- **Competing interests** — workflow settings' Metadata screen, section
-  "Competing Interests", checkbox "Require submitting Authors to file a
-  Competing Interest (CI) statement with their submission.": when on,
-  the contributor form gains the required "Competing Interests" field
-  (Fields & validation) on every add and edit. Turning the setting off
-  removes the field but keeps any saved statements — they reappear
-  intact when it is turned back on. <sup>j</sup>
+- **Competing interests.** On the workflow settings' Metadata screen,
+  section "Competing Interests", the checkbox "Require submitting Authors
+  to file a Competing Interest (CI) statement with their submission."
+  When it is on, the contributor form gains the required "Competing
+  Interests" field (Fields & validation) on every add and edit. Turning
+  the setting off removes the field but keeps any saved statements. They
+  reappear intact when it is turned back on. <sup>j</sup>
 - **The journal's contributor roles** (Rules 11–13) shape the form's
-  Contributor Roles choices — the one-role journal shows no choice at
-  all, and cannot save a contributor from the form (⚠ [A14](#a14)).
+  Contributor Roles choices. A one-role journal shows no choice at all,
+  and cannot save a contributor from the form (⚠ [A14](#a14)).
 - **ORCID enablement** decides whether the form carries the ORCID iD
-  field — *[ORCID integration](U04-orcid-integration.md)*'s setting.
-- Nothing gates the rest: the Contributors entry, the affiliations
-  field and the registry lookup are always on, with no journal or site
-  setting to disable them. <sup>a</sup>
+  field. The setting belongs to *[ORCID integration](U04-orcid-integration.md)*.
+- Nothing gates the rest. The Contributors entry, the affiliations field
+  and the registry lookup are always on, with no journal or site setting
+  to disable them. <sup>a</sup>
 
 ## Cross-feature interactions
 
-- *[Publication metadata](U40-publication-metadata.md)* — owns the
-  "may edit the publication" gate ([→ edit gate](U40-publication-metadata.md#edit-gate))
-  and the published-state banners this feature's editing rides on; owns
-  the Publication area's shared page furniture around each publication
-  page (header, status line, banners) and the change-language flow
-  whose name-copying is noted in Side effects.
-- *[Submission wizard](U21-submission-wizard.md)* — owns the wizard
-  shell: the Contributors step's place, its Review-step presentation
-  and submit gates, and the auto-creation of the submitting author's
-  contributor record; this spec owns the panel the step mounts — the
-  same list, form and rules as the workflow (always editable there).
-- *[ORCID integration](U04-orcid-integration.md)* — owns the
-  contributor form's ORCID iD field states, the verification request
-  and iD removal, and the publish-time checks on contributor iDs.
-- *Workflow screen & stage access* (no spec yet) — owns which roles
-  reach the workflow screen and its Publication area; this spec's
-  Actors rows start from that access.
-- *[Funding](U43-funding.md)* — its Funder field reuses this feature's
+- *[Publication metadata](U40-publication-metadata.md)* owns the "may
+  edit the publication" gate ([→ edit gate](U40-publication-metadata.md#edit-gate))
+  and the published-state banners this feature's editing depends on. It
+  also owns the Publication area's shared page furniture around each
+  publication page (header, status line, banners), and the
+  change-language flow whose name-copying is noted in Side effects.
+- *[Submission wizard](U21-submission-wizard.md)* owns the wizard shell:
+  the Contributors step's place, its Review-step presentation and submit
+  gates, and the auto-creation of the submitting author's contributor
+  record. This spec owns the panel the step shows: the same list, form
+  and rules as the workflow, always editable there.
+- *[ORCID integration](U04-orcid-integration.md)* owns the contributor
+  form's ORCID iD field states, the verification request and iD removal,
+  and the publish-time checks on contributor iDs.
+- *Workflow screen & stage access* (no spec yet) owns which roles reach
+  the workflow screen and its Publication area. This spec's Actors rows
+  start from that access.
+- *[Funding](U43-funding.md)*: its Funder field reuses this feature's
   registry lookup (<a id="ror-lookup"></a>the search-as-you-type against
   the public ROR registry, the suggestion rows and the install's record
-  cache — Rule 16).
-- *Institutions* (no spec yet) — the manager-maintained institution
-  list for subscriptions and statistics is a separate record set; only
-  the registry lookup above is shared.
-- *Article landing page & reading* (no spec yet; the press counterpart
-  is the OMP catalog's book page) — owns the landing screen; the
-  contributor block on it is described here (Rule 14) as this feature's
-  reader surface. A press's chapter-level author lists belong to the
-  catalog features.
+  cache; Rule 16).
+- *Institutions* (no spec yet): the manager-maintained institution list
+  for subscriptions and statistics is a separate record set. Only the
+  registry lookup above is shared.
+- *Article landing page & reading* (no spec yet; the press counterpart is
+  the OMP catalog's book page) owns the landing screen. The contributor
+  block on it is described here (Rule 14) as this feature's reader
+  surface. A press's chapter-level author lists belong to the catalog
+  features.
 - **User profiles and the masthead** use a separate, plain-text
-  affiliation field — not this feature's institution records; the two
-  meet only when a new submission copies the submitting author's
-  profile affiliation into their contributor record (matching it
-  against stored registry records by exact name). <sup>d</sup>
+  affiliation field, not this feature's institution records. The two meet
+  only when a new submission copies the submitting author's profile
+  affiliation into their contributor record, matching it against stored
+  registry records by exact name. <sup>d</sup>
 
 ## Canonical scenarios
 
-Common to all three apps (OMP/OPS vocabulary per the
-[application glossary](GLOSSARY.md)):
+Common to all three apps. For OMP and OPS vocabulary, see the
+[application glossary](GLOSSARY.md).
 
 1. **Maintain the contributor list** — Journal Manager: open a
-   submission's workflow, Publication area, "Contributors". The
-   submitting author is already listed with an "Author" badge and the
-   "Primary Contact" badge. Press "Add Contributor": the panel opens on
-   "Contributor Type" = "Person"; fill Given Name, Email and
-   Country, tick the "Author" role, Save — the panel closes and the new
-   row shows the name with an "Author" badge. Add a second contributor
-   as "Organization or group": the name fields swap to "Organization
-   Name"; fill it, Email and Country, tick "Author", Save.
-   Open the person's "Edit", add a Family Name, Save — the row updates.
-   Press "Delete" on the organization: the dialog "Delete Contributor"
-   asks "Are you sure you want to remove {name} as a contributor? This
-   action can not be undone." — Cancel keeps the row; Delete again and
-   confirm removes it. <sup>s1</sup>
+   submission's workflow, then the Publication area, then "Contributors".
+   The submitting author is already listed with an "Author" badge and the
+   "Primary Contact" badge. Press "Add Contributor". The panel opens with
+   "Contributor Type" set to "Person". Fill Given Name, Email and Country,
+   tick the "Author" role, and Save. The panel closes and the new row
+   shows the name with an "Author" badge. Add a second contributor as
+   "Organization or group". The name fields swap to "Organization Name".
+   Fill it, Email and Country, tick "Author", and Save. Open the person's
+   "Edit", add a Family Name, and Save. The row updates. Press "Delete"
+   on the organization. The dialog "Delete Contributor" asks "Are you
+   sure you want to remove {name} as a contributor? This action can not
+   be undone." Cancel keeps the row. Press Delete again and confirm: the
+   row is removed. <sup>s1</sup>
 2. **Reorder and preview the display formats** — Journal Manager, on a
-   submission with two Person contributors with distinct family names
-   (scenario 1 leaves exactly that: its organization was deleted) whose
-   order has been pinned once with "Order" → "Save Order" (until then a
-   newly added contributor ties the first row for position and the list
-   can come back in either order, [A15](#a15)): press
-   "Preview" — "List of Contributors" shows "Abbreviated" as the first
-   contributor's family name plus "et al.", and "Full" as both names
-   each followed by "(Author)" and separated by a semicolon. Close,
-   press "Order": up/down arrows replace the row buttons; move the
-   second contributor up and press "Save Order" — reload the page: the
-   order holds, and "Abbreviated" in Preview now names the other family
-   name. Press "Order" again, move a row, press "Cancel" — the saved
-   order is back. <sup>s2</sup>
+   submission with two Person contributors with distinct family names.
+   Scenario 1 leaves exactly that, since its organization was deleted.
+   Pin the order once first, with "Order" then "Save Order". Until then a
+   newly added contributor ties the first row for position, and the list
+   can come back in either order ([A15](#a15)). Press "Preview". "List
+   of Contributors" shows "Abbreviated" as the first contributor's family
+   name plus "et al.", and "Full" as both names, each followed by
+   "(Author)" and separated by a semicolon. Close it and press "Order".
+   Up/down arrows replace the row buttons. Move the second contributor up
+   and press "Save Order". Reload the page: the order holds, and
+   "Abbreviated" in Preview now names the other family name. Press
+   "Order" again, move a row, and press "Cancel". The saved order is
+   back. <sup>s2</sup>
 3. **Move the primary contact** — Journal Manager, on a submission with
-   two contributors: the submitting author's row carries "Primary
-   Contact" while the other row offers "Set Primary Contact". Press
-   "Set Primary Contact" on the other row — the badge moves at once,
-   with no confirmation. Delete that new primary contact: the remaining
-   row still shows only "Set Primary Contact" — the submission now has
-   no primary contact at all, and nothing warned about it. Press
-   "Schedule For Publication" — the button in the Publication area's
-   header above the pages, beside "Status: Unscheduled" — and continue
-   past "Review Publishing Details" (its "Confirm" button) to the final
-   confirmation: "All publication requirements have been met." — the
-   missing contact is never mentioned (⚠ [A2](#a2)). Back out with
-   "Close" — the dialog's only other button is "Publish"; there is no
-   Cancel. Nothing is published, yet the header's status may no longer
-   read "Unscheduled": the earlier "Confirm" already recorded the
-   version choice, so a changed status label with nothing published is
-   the expected outcome here, not a failure (the publish dialog's own
-   mechanics belong to *Publish, schedule & versions*, no spec yet).
-   <sup>s3</sup>
+   two contributors. The submitting author's row carries "Primary
+   Contact", and the other row offers "Set Primary Contact". Press "Set
+   Primary Contact" on the other row. The badge moves at once, with no
+   confirmation. Delete that new primary contact. The remaining row still
+   shows only "Set Primary Contact": the submission now has no primary
+   contact at all, and nothing warned about it. Press "Schedule For
+   Publication", the button in the Publication area's header above the
+   pages, beside "Status: Unscheduled". Continue past "Review Publishing
+   Details" (its "Confirm" button) to the final confirmation: "All
+   publication requirements have been met." The missing contact is never
+   mentioned (⚠ [A2](#a2)). Back out with "Close". The dialog's only
+   other button is "Publish"; there is no Cancel. Nothing is published,
+   yet the header's status may no longer read "Unscheduled". The earlier
+   "Confirm" already recorded the version choice, so a changed status
+   label with nothing published is the expected outcome here, not a
+   failure. The publish dialog's own mechanics belong to *Publish,
+   schedule & versions* (no spec yet). <sup>s3</sup>
 4. **Record affiliations, typed and registry-backed** — Journal Manager,
-   editing a contributor: under "Affiliations", type a made-up
+   editing a contributor. Under "Affiliations", type a made-up
    institution name of four or more characters, pick the typed text
-   itself from the suggestions, press "Add" — the institution joins the
-   list with "Edit institution name" and "Remove institution" behind
-   its row-expander button ("Click to edit or delete"). On a journal
-   with a second submission language (enabled on Settings → Website →
-   Languages — see *[Publication metadata](U40-publication-metadata.md)*'s
-   language settings), "Edit institution name" opens one name box per
-   language with a "{count} of {total} languages completed" status. Then type a real university's
-   name and pick the suggestion that shows its country and the ROR
-   mark — the entry's row links to the registry record and offers only
-   "Remove institution". Known exception: on an install whose server
-   cannot reach the registry, the picked suggestion still shows
-   normally but pressing "Add" raises an "Error" dialog — the entry is
-   added anyway and saves without a display name ([A5](#a5)). Save the
-   contributor;
-   reopen Edit — both institutions are there. Remove one: "Are you
-   sure?" — "The affiliation {name} will be deleted."; "Yes" removes
-   it. <sup>s4</sup>
+   itself from the suggestions, and press "Add". The institution joins
+   the list, with "Edit institution name" and "Remove institution" behind
+   its row-expander button ("Click to edit or delete"). On a journal with
+   a second submission language (enabled on Settings → Website →
+   Languages; see the language settings in
+   *[Publication metadata](U40-publication-metadata.md)*), "Edit
+   institution name" opens one name box per language with a "{count} of
+   {total} languages completed" status. Then type a real university's
+   name and pick the suggestion that shows its country and the ROR mark.
+   The entry's row links to the registry record and offers only "Remove
+   institution". Known exception: on an install whose server cannot reach
+   the registry, the picked suggestion still shows normally, but pressing
+   "Add" raises an "Error" dialog. The entry is added anyway and saves
+   without a display name ([A5](#a5)). Save the contributor and reopen
+   Edit: both institutions are there. Remove one. "Are you sure?" asks
+   "The affiliation {name} will be deleted."; "Yes" removes it.
+   <sup>s4</sup>
 5. **Manage the journal's contributor roles** — Journal Manager:
    Settings → Workflow → Submission → "Contributor Roles". The table
-   lists "Author" (AUTHOR) and "Translator" (TRANSLATOR) — on a press
-   also "Chapter Author" and "Volume editor" (Rule 11). Press "Add
-   Role", pick identifier EDITOR, name it in every language ("Fill
-   name in all of the languages."), Save — "Contributor role saved"
-   and the row appears. On a submission, edit a contributor and tick
-   the new role — its badge joins the row. Back on the settings screen,
-   "Delete Role" on the new role now refuses after the type-to-confirm
-   with a modal "Error" dialog: "One or more contributors are using
-   this role. Change the role to another before delete." — "OK" returns
-   to the list with the role still there. Untick the role on the
-   contributor, then delete the role again: type the identifier into
-   the confirm box — the confirm button, labeled with a whole warning
-   sentence (⚠ [A12](#a12)), enables only on an exact match — and the
-   dialog "Role Deleted" confirms. Now try "Delete Role" on "Author":
-   while the submission's contributor still holds the "Author" role,
-   the same in-use "Error" dialog refuses again (with both refusals
-   applicable, the in-use one is shown — Rule 13). Move the contributor
-   off the role (tick "Translator", untick "Author", Save — on a press
-   also delete "Chapter Author" the same way, so "Author" is the last
-   AUTHOR-identifier role; "Chapter Author" shares the identifier
-   AUTHOR, so its dialog also asks for "AUTHOR" — the role deleted is
-   the one whose row's "…" menu was opened) and try once more: the
-   "Error" dialog now reads "Last AUTHOR role cannot be deleted." <sup>s5</sup>
+   lists "Author" (AUTHOR) and "Translator" (TRANSLATOR); on a press it
+   also lists "Chapter Author" and "Volume editor" (Rule 11). Press "Add
+   Role", pick identifier EDITOR, name it in every language ("Fill name
+   in all of the languages."), and Save. "Contributor role saved" appears
+   and the row appears. On a submission, edit a contributor and tick the
+   new role. Its badge joins the row. Back on the settings screen, "Delete
+   Role" on the new role now refuses after the type-to-confirm, with a
+   modal "Error" dialog: "One or more contributors are using this role.
+   Change the role to another before delete." "OK" returns to the list
+   with the role still there. Untick the role on the contributor, then
+   delete the role again. Type the identifier into the confirm box. The
+   confirm button, labeled with a whole warning sentence (⚠ [A12](#a12)),
+   enables only on an exact match. The dialog "Role Deleted" confirms.
+   Now try "Delete Role" on "Author". While the submission's contributor
+   still holds the "Author" role, the same in-use "Error" dialog refuses
+   again. With both refusals applicable, the in-use one is shown
+   (Rule 13). Move the contributor off the role: tick "Translator", untick
+   "Author", Save. On a press also delete "Chapter Author" the same way,
+   so that "Author" is the last AUTHOR-identifier role. "Chapter Author"
+   shares the identifier AUTHOR, so its dialog also asks for "AUTHOR"; the
+   role deleted is the one whose row's "…" menu was opened. Try once
+   more: the "Error" dialog now reads "Last AUTHOR role cannot be
+   deleted." <sup>s5</sup>
 6. **Readers see the contributors** — Reader: on a published item with
-   two contributors — one with a typed affiliation, a Bio Statement and
-   two roles, listed first, the order pinned with "Save Order" before
-   publishing ([A15](#a15)) — open the landing page. The authors block
-   credits both in list order: names, the affiliation name, and each
-   contributor's role names; an "Author Biography" section — headed in
-   the singular, since only one contributor has a Bio Statement
-   (Rule 14) — shows "{name}, {affiliation}" above the statement. A listing page naming
-   the item (an issue's table of contents; a press's catalog list; the
-   preprint server's archive) shows the author line as names with roles
-   in parentheses. On a press, a book with five or more contributors
-   compacts the credits to a single flowed line of names joined by
-   semicolons — no affiliations, ROR marks, ORCID icons or role names
-   ([OMP1](#omp1)); where one of the five has an affiliation, its only
-   trace is a dangling comma after the name (⚠ [A1](#a1)).
+   two contributors. One of them has a typed affiliation, a Bio Statement
+   and two roles, and is listed first, with the order pinned with "Save
+   Order" before publishing ([A15](#a15)). Open the landing page. The
+   authors block credits both in list order: names, the affiliation name,
+   and each contributor's role names. An "Author Biography" section shows
+   "{name}, {affiliation}" above the statement. It is headed in the
+   singular because only one contributor has a Bio Statement (Rule 14). A
+   listing page naming the item (an issue's table of contents, a press's
+   catalog list, the preprint server's archive) shows the author line as
+   names with roles in parentheses. On a press, a book with five or more
+   contributors compacts the credits to a single flowed line of names
+   joined by semicolons, with no affiliations, ROR marks, ORCID icons or
+   role names ([OMP1](#omp1)). Where one of the five has an affiliation,
+   its only trace is a dangling comma after the name (⚠ [A1](#a1)).
    <sup>s6</sup>
 7. **Keep a contributor out of publication lists** — Journal Manager,
-   then Reader: edit the second of two contributors and untick "Include
-   this contributor when identifying authors in lists of publications.";
-   Save. "Preview" now omits them from the "Publication Lists" row
-   while "Full" keeps them. On the published item: the landing page
-   still credits both; a press's catalog list drops the unticked
-   contributor, while a journal's and a preprint server's listings
-   still show them (⚠ [A3](#a3)). <sup>s7</sup>
+   then Reader. Edit the second of two contributors and untick "Include
+   this contributor when identifying authors in lists of publications."
+   Save. "Preview" now omits them from the "Publication Lists" row, while
+   "Full" keeps them. On the published item, the landing page still
+   credits both. A press's catalog list drops the unticked contributor,
+   while a journal's and a preprint server's listings still show them
+   (⚠ [A3](#a3)). <sup>s7</sup>
 8. **Require competing interests** — Journal Manager: on the workflow
-   settings' Metadata screen, tick "Require submitting Authors to file
-   a Competing Interest (CI) statement with their submission." and
-   save. Editing any contributor now shows a required "Competing
-   Interests" field; saving it empty is refused on the form — "This
-   field is required." in red under the field, "Please correct one
-   error." at the foot; filling it saves. Untick the setting: the field
-   is gone from the form. <sup>s8</sup>
+   settings' Metadata screen, tick "Require submitting Authors to file a
+   Competing Interest (CI) statement with their submission." and save.
+   Editing any contributor now shows a required "Competing Interests"
+   field. Saving it empty is refused on the form: "This field is
+   required." in red under the field, and "Please correct one error." at
+   the foot. Filling it saves. Untick the setting: the field is gone from
+   the form. <sup>s8</sup>
 
 ## Findings register
 
@@ -495,10 +494,10 @@ mechanism and evidence live in the entry's footnote.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | Contributor rows never show affiliations, though the list reserves a line for them | 🐞 | user-visible | — |
-| [A3](#a3) | The publication-lists tick is honored only by a press's catalog listings — journal and preprint-server listings ignore it | 🐞 | user-visible | — |
-| [A5](#a5) | A registry pick the server cannot cache raises an error dialog, then saves — and publishes — nameless | 🐞 | user-visible | — |
-| [A14](#a14) | On a one-role journal no contributor can be saved from the form — every attempt errors, yet creates a role-less contributor | 🐞 | user-visible | — |
-| [A15](#a15) | A newly added contributor can land at the top of the list — and of the reader-facing author line — varying between loads | 🐞 | user-visible | — |
+| [A3](#a3) | The publication-lists tick is honored only by a press's catalog listings; journal and preprint-server listings ignore it | 🐞 | user-visible | — |
+| [A5](#a5) | A registry pick the server cannot cache raises an error dialog, then saves and publishes with no name | 🐞 | user-visible | — |
+| [A14](#a14) | On a one-role journal no contributor can be saved from the form; every attempt errors, yet creates a role-less contributor | 🐞 | user-visible | — |
+| [A15](#a15) | A newly added contributor can land at the top of the list, and of the reader-facing author line, varying between loads | 🐞 | user-visible | — |
 | [A7](#a7) | The contributor form's error summary prints "Go to Affiliations: [object Object]" | 🐞 | minor | — |
 | [A9](#a9) | The landing page's affiliation ROR link has no accessible name | 🐞 | minor | — |
 | [A10](#a10) | The typed affiliation's per-language name boxes are announced wrongly by a screen reader | 🐞 | minor | — |
@@ -507,7 +506,7 @@ mechanism and evidence live in the entry's footnote.
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
 | [A16](#a16) | The auto-created contributor can arrive without a Country — every later edit is then refused until one is supplied | ❓ | user-visible | — |
 | [A4](#a4) | The organization contributor's "ROR ID" box accepts any text without a shape check | ❓ | minor | — |
-| [A6](#a6) | The read-only list hides the "Primary Contact" badge — viewers without edit rights cannot see who it is | ❓ | minor | — |
+| [A6](#a6) | The read-only list hides the "Primary Contact" badge, so viewers without edit rights cannot see who it is | ❓ | minor | — |
 | [A8](#a8) | Institution text typed but never picked is silently dropped on save | ❓ | minor | — |
 | [A11](#a11) | After a registry-error dialog the institution search stays dead until the Edit panel is reopened | ❓ | minor | — |
 | [A13](#a13) | A contributor role's name saves with a language left empty, despite the required marker | ❓ | minor | — |
@@ -521,30 +520,29 @@ mechanism and evidence live in the entry's footnote.
 
 <a id="a1"></a>
 **A1 — Contributor rows never show affiliations** · 🐞 · user-visible.
-The workflow's contributor rows (and the wizard's Review list) are built
-to show each contributor's affiliation under the name, but the line is
-always empty — even for a contributor whose Edit panel holds a saved
-affiliation, such as one carried over from the submitter's profile: an
-editor scanning the list cannot see any contributor's institution
-without opening each Edit panel. The display reads from a field the
-contributor data no longer carries. The same dead read reaches a
-press's readers: on a book page compacted for five or more contributors
-([OMP1](#omp1)), a contributor with an affiliation renders as
-"{name}, ;" — the comma that should introduce the affiliation prints
-with nothing after it.
+The workflow's contributor rows, and the wizard's Review list, are built
+to show each contributor's affiliation under the name. The line is always
+empty, even for a contributor whose Edit panel holds a saved affiliation,
+such as one carried over from the submitter's profile. An editor scanning
+the list cannot see any contributor's institution without opening each
+Edit panel. The display reads from a field the contributor data no longer
+carries. The same dead read reaches a press's readers. On a book page
+compacted for five or more contributors ([OMP1](#omp1)), a contributor
+with an affiliation renders as "{name}, ;". The comma that should
+introduce the affiliation prints with nothing after it.
 Basis: code reading + probe. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — Deleting the primary contact leaves none** · ❓ · user-visible.
 Deleting the contributor who is the primary contact removes the badge
-from the list entirely: no other contributor inherits it, and no warning
-or prompt appears — the publication simply has no primary contact until
-someone notices and sets one. The publish flow does not catch it
-either: "Review Publishing Details" and the final "Schedule For
-Publication" check ("All publication requirements have been met.") pass
-with no mention of the missing contact.
+from the list entirely. No other contributor inherits it, and no warning
+or prompt appears. The publication simply has no primary contact until
+someone notices and sets one. The publish flow does not catch it either.
+"Review Publishing Details" and the final "Schedule For Publication"
+check ("All publication requirements have been met.") pass with no
+mention of the missing contact.
 Question: should deletion be blocked, warn, or hand the badge to another
-contributor? Lean: at least a warning — the deletion is offered without
+contributor? Lean: at least a warning. The deletion is offered without
 any hint that the contact point is being lost.
 Basis: code reading + probe. <sup>f-a2</sup>
 
@@ -552,142 +550,142 @@ Basis: code reading + probe. <sup>f-a2</sup>
 **A3 — The publication-lists tick works only on a press** · 🐞 ·
 user-visible.
 Unticking "Include this contributor when identifying authors in lists of
-publications." promises to keep the contributor out of listing pages,
-and the Preview's "Publication Lists" row honors it — but on a journal
-and a preprint server every reader-facing listing (issue tables of
-contents, search results, the archive) shows the contributor anyway.
-Only a press's catalog lists apply the tick. The checkbox thus does
+publications." promises to keep the contributor out of listing pages, and
+the Preview's "Publication Lists" row honors it. On a journal and a
+preprint server, though, every reader-facing listing (issue tables of
+contents, search results, the archive) shows the contributor anyway. Only
+a press's catalog lists apply the tick. The checkbox therefore does
 nothing reader-visible on two of the three applications.
 Basis: code reading + probe. <sup>f-a3</sup>
 
 <a id="a4"></a>
 **A4 — The organization "ROR ID" box takes anything** · ❓ · minor.
 An organization contributor's form offers a free-text "ROR ID" box that
-accepts any string without checking the registry-identifier shape —
-unlike the Affiliations field, whose registry entries are always picked
-from the registry. A wrong value saves silently and then shows nowhere
-but this same box — not on the contributor's row, not on the published
-page — while still traveling into metadata exports. The value even
-survives a change of contributor type: a contributor saved as a Person
-after a type switch silently keeps a ROR ID typed while "Organization
-or group" was selected, though the save discards the Organization Name
-as the guidance warns — so a Person's stored record can carry an
+accepts any string without checking the registry-identifier shape. The
+Affiliations field is different: its registry entries are always picked
+from the registry. A wrong value saves silently. It then shows nowhere but
+this same box, not on the contributor's row and not on the published
+page, while still traveling into metadata exports. The value even
+survives a change of contributor type. A contributor saved as a Person
+after a type switch silently keeps a ROR ID typed while "Organization or
+group" was selected, even though the save discards the Organization Name
+as the guidance warns. So a Person's stored record can carry an
 organization-only ROR ID, with the same export risk.
-Question: should the box validate the identifier shape (or be a registry
-pick)? Lean: validate — the sibling affiliation machinery already
-enforces the shape.
+Question: should the box validate the identifier shape, or be a registry
+pick? Lean: validate. The sibling affiliation machinery already enforces
+the shape.
 Basis: code reading + probe. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — A registry pick the server cannot cache errors, then saves — and publishes — nameless** · 🐞 · user-visible.
-When the journal's server cannot reach the registry (the user's own
-browser search still works), the picked suggestion still becomes the
-selected entry with its registry link and ROR mark; pressing "Add" then
-raises a generic "Error" dialog — "An unexpected error has occurred.
-Please reload the page and try again." — yet the entry is added anyway
-and saves with no name. Reopening the form shows the entry flagged in red "The primary
-language English is required", which misleads twice: the missing name
-never blocks any later save, and a registry-backed row offers no name
-box — only "Remove institution". On the published page the reader sees
-a bare, unlabeled ROR-logo link where the institution name should be.
-Same failure family as the Funding list's registry picks
-(*[Funding](U43-funding.md)*).
+When the journal's server cannot reach the registry, the user's own
+browser search still works. The picked suggestion still becomes the
+selected entry, with its registry link and ROR mark. Pressing "Add" then
+raises a generic "Error" dialog: "An unexpected error has occurred.
+Please reload the page and try again." Yet the entry is added anyway and
+saves with no name. Reopening the form shows the entry flagged in red
+"The primary language English is required". That message misleads twice:
+the missing name never blocks any later save, and a registry-backed row
+offers no name box, only "Remove institution". On the published page the
+reader sees a bare, unlabeled ROR-logo link where the institution name
+should be. This is the same failure family as the Funding list's
+registry picks (*[Funding](U43-funding.md)*).
 Basis: probe. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — Read-only viewers cannot see who the primary contact is** · ❓ · minor.
 For a viewer without edit rights, the contributor rows show names and
-role badges only: the "Primary Contact" badge disappears along with the
-editing controls, so an assigned participant who may not edit the
-metadata has no way to see which contributor editorial correspondence
+role badges only. The "Primary Contact" badge disappears along with the
+editing controls. An assigned participant who may not edit the metadata
+therefore has no way to see which contributor editorial correspondence
 goes to.
-Question: should the badge — information, not an action — stay in the
-read-only view? Lean: yes — it states a fact about the publication, and
-hiding it reads as a side effect of stripping the action buttons rather
-than a choice.
+Question: should the badge stay in the read-only view, since it is
+information rather than an action? Lean: yes. It states a fact about the
+publication, and hiding it reads as a side effect of stripping the action
+buttons rather than a choice.
 Basis: probe. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — The form's error summary prints "[object Object]" for affiliation errors** · 🐞 · minor.
 When an affiliation fails validation on the contributor form, the error
-summary at the form's foot reads "Go to Affiliations: [object Object]"
-where sibling fields print their message (compare "Go to Country: This
+summary at the form's foot reads "Go to Affiliations: [object Object]".
+Sibling fields print their message there (compare "Go to Country: This
 field is required."). The inline message under the field itself is
-correct; only the summary line is garbled.
+correct. Only the summary line is garbled.
 Basis: probe. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — Institution text typed but never picked is dropped without a word** · ❓ · minor.
 Typing an institution into the Affiliations search box and saving the
 form without picking a suggestion saves the contributor with no
-affiliation: the typed text vanishes with no message. A user who missed
+affiliation. The typed text vanishes with no message. A user who missed
 that "Add" only appears after a pick can believe they recorded an
 affiliation they did not.
-Question: should the save warn about (or keep) text left in the search
-box? Lean: warn — the pick-then-Add flow is easy to miss.
+Question: should the save warn about text left in the search box, or
+keep it? Lean: warn. The pick-then-Add flow is easy to miss.
 Basis: probe. <sup>f-a8</sup>
 
 <a id="a9"></a>
 **A9 — The landing page's affiliation ROR link has no accessible name** · 🐞 · minor.
 On a journal's article page and a preprint server's preprint page, a
-registry-backed affiliation's ROR mark is an icon-only link with no
-text and no accessible name: a screen-reader user hears an unnamed link
-and cannot tell it leads to the institution's registry record.
+registry-backed affiliation's ROR mark is an icon-only link with no text
+and no accessible name. A screen-reader user hears an unnamed link and
+cannot tell that it leads to the institution's registry record.
 Basis: probe. <sup>f-a9</sup>
 
 <a id="a10"></a>
 **A10 — The typed affiliation's name boxes are announced wrongly** · 🐞 · minor.
-In the Affiliations field's typed-entry editor, a screen reader reads
-the primary language's box out with both languages' labels run together,
-and the second language's box has no label at all — the same defect the
-Funding list's typed-name boxes carry
+In the Affiliations field's typed-entry editor, a screen reader reads the
+primary language's box out with both languages' labels run together, and
+the second language's box has no label at all. The Funding list's
+typed-name boxes carry the same defect
 (*[Funding](U43-funding.md#a5)*).
 Basis: probe. <sup>f-a10</sup>
 
 <a id="a11"></a>
 **A11 — A registry error kills the institution search for the rest of the panel** · ❓ · minor.
-After any "ROR API Error" dialog, dismissing it does not bring the
-search back: new queries fire no registry lookup and offer only the
-typed text itself, until the Edit panel is closed and reopened. The
-rate-limited dialog's own advice — "Please wait a moment before
-continuing to search." — cannot work in place; only the unavailable
-dialog's page-refresh advice does. The text just searched is left
-pre-picked as a typed entry, so hand-typed entry keeps working.
-Question: should dismissing the dialog (or a short wait) re-enable the
-registry search, as the dialogs' wording implies? Lean: yes — two of
-the three messages advise retrying, and no retry is possible without
+After any "ROR API Error" dialog, dismissing it does not bring the search
+back. New queries fire no registry lookup and offer only the typed text
+itself, until the Edit panel is closed and reopened. The rate-limited
+dialog's own advice, "Please wait a moment before continuing to search.",
+cannot work in place. Only the unavailable dialog's page-refresh advice
+does. The text just searched is left pre-picked as a typed entry, so
+hand-typed entry keeps working.
+Question: should dismissing the dialog, or a short wait, re-enable the
+registry search, as the dialogs' wording implies? Lean: yes. Two of the
+three messages advise retrying, and no retry is possible without
 reopening the panel.
 Basis: probe. <sup>f-a11</sup>
 
 <a id="a12"></a>
 **A12 — The delete-role confirm button is labeled with a whole sentence** · 🐞 · minor.
-In the type-to-confirm delete-role dialog (Rule 13), the confirm
-button's label is the message "Are you sure you wish to delete this
-item? This action cannot be undone." — a warning sentence where a short
-"Delete" belongs; no concise confirm label exists in the dialog.
+In the type-to-confirm delete-role dialog (Rule 13), the confirm button's
+label is the message "Are you sure you wish to delete this item? This
+action cannot be undone." That is a warning sentence where a short
+"Delete" belongs. No concise confirm label exists in the dialog.
 Basis: probe. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — A role name saves with a language left empty** · ❓ · minor.
-"Add Role" marks Role Name required in every journal language and its
-guidance says "Fill name in all of the languages." — yet a save with a
+"Add Role" marks Role Name required in every journal language, and its
+guidance says "Fill name in all of the languages." Yet a save with a
 non-primary language's box empty succeeds, reports "Contributor role
 saved", and simply leaves that language's name blank.
 Question: should the all-languages requirement be enforced, or the
-marker and guidance softened to the primary language? Lean: enforce —
-the form promises it twice.
+marker and guidance softened to the primary language? Lean: enforce. The
+form promises it twice.
 Basis: probe. <sup>f-a13</sup>
 
 <a id="a14"></a>
 **A14 — On a one-role journal no contributor can be saved** · 🐞 · user-visible.
 When a journal has exactly one contributor role, the form hides the
-Contributor Roles field as designed — but saving any contributor from
-it then fails with the generic "An unexpected error has occurred.
-Please reload the page and try again." toast, every time: the screen
-cannot create a contributor at all on such a journal. Worse, each
-failed attempt still creates the contributor behind the scenes with no
-role — after a reload the list shows the new row with no role badge —
-and the intended automatic assignment of the one role never happens.
+Contributor Roles field as designed. Saving any contributor from it then
+fails every time, with the generic "An unexpected error has occurred.
+Please reload the page and try again." toast. The screen cannot create a
+contributor at all on such a journal. Worse, each failed attempt still
+creates the contributor behind the scenes with no role. After a reload
+the list shows the new row with no role badge, and the intended automatic
+assignment of the one role never happens.
 Basis: probe. <sup>f-a14</sup>
 
 <a id="a15"></a>
@@ -696,54 +694,54 @@ On a list whose rows were never explicitly reordered, a newly added
 contributor receives the same list position as the auto-created
 submitting author instead of joining at the end. The panel, the three
 Preview formats and the reader pages each resolve the tie on their own,
-so they can disagree — the workflow list showing one order while the
-landing page and table of contents show the other — and the order can
+so they can disagree. The workflow list can show one order while the
+landing page and table of contents show the other, and the order can
 change between loads. Ordering mode opens in whatever order last
-rendered; "Save Order" stamps explicit positions and ends the
-instability, after which every ordering claim in this spec holds.
+rendered. "Save Order" stamps explicit positions and ends the
+instability. After that, every ordering claim in this spec holds.
 Basis: probe + code reading. <sup>f-a15</sup>
 
 <a id="a16"></a>
 **A16 — The auto-created contributor can lack a Country, then every edit demands one** · ❓ · user-visible.
-The submitting author's auto-created contributor copies the country
-from their user profile — but an account created by an administrator
-("Add User") never asks for a country, so the contributor can arrive
-without one. Country being required on the contributor form, any later
-edit of that contributor — ticking a role, adding an affiliation — is
-refused until the editor supplies a Country the author never entered.
-Question: should the form accept an edit that leaves an
-already-missing Country empty, or should the administrator's account
-form require a country as self-registration does? Lean: real friction,
-bug-leaning — the form's assumption is broken only by the
-administrator-created account path.
+The submitting author's auto-created contributor copies the country from
+their user profile. An account created by an administrator ("Add User")
+never asks for a country, so the contributor can arrive without one.
+Country is required on the contributor form, so any later edit of that
+contributor, such as ticking a role or adding an affiliation, is refused
+until the editor supplies a Country the author never entered.
+Question: should the form accept an edit that leaves an already-missing
+Country empty, or should the administrator's account form require a
+country as self-registration does? Lean: real friction, leaning bug. The
+form's assumption is broken only by the administrator-created account
+path.
 Basis: probe + code reading. <sup>f-a16</sup>
 
 <a id="a17"></a>
 **A17 — The affiliation completeness total may follow the publication's languages** · ❓ · minor.
 On one journal, a fresh typed affiliation reported "All translations
 available" on one submission but "1 of 2 languages completed" on
-another — suggesting the typed entry's per-language name boxes and
-their "{count} of {total} languages completed" total follow the
+another. This suggests that the typed entry's per-language name boxes,
+and their "{count} of {total} languages completed" total, follow the
 publication's own language set rather than the journal's.
 Question: does the box count follow the publication's languages or the
-journal's? Lean: the publication's — the two submissions differed in
-nothing else observed; settling it needs two publications on one
-journal with differing language sets, comparing each typed entry's box
-count and total.
+journal's? Lean: the publication's. The two submissions differed in
+nothing else observed. Settling it needs two publications on one journal
+with differing language sets, comparing each typed entry's box count and
+total.
 Basis: probe (single observation). <sup>f-a17</sup>
 
 <a id="a18"></a>
 **A18 — Anonymous's required markers on Email and Country do not bind** · ❓ · minor.
 With "Anonymous" picked as the contributor type, the form marks Email,
-Country and Contributor Roles "* Required" — but a save with only a
-contributor role ticked is accepted without a word, and the stored
-contributor has no email or country. Only Contributor Roles is
-enforced: an all-empty save is refused for that field alone, with
-Email and Country never flagged.
+Country and Contributor Roles "* Required". A save with only a
+contributor role ticked is nonetheless accepted without a word, and the
+stored contributor has no email or country. Only Contributor Roles is
+enforced: an all-empty save is refused for that field alone, and Email
+and Country are never flagged.
 Question: should Email and Country be enforced for an Anonymous
-contributor, or their required markers dropped? Lean: drop the
-markers — an entry with no identity of its own plausibly has no
-contact details, and nothing downstream is observed to need them.
+contributor, or their required markers dropped? Lean: drop the markers.
+An entry with no identity of its own plausibly has no contact details,
+and nothing downstream is observed to need them.
 Basis: probe. <sup>f-a18</sup>
 
 ### OMP
@@ -752,20 +750,21 @@ Basis: probe. <sup>f-a18</sup>
 **OMP1 — Five or more contributors compact the book page's credits** · ✅ · user-visible.
 On a press, a catalog book page with five or more contributors switches
 from the full per-contributor blocks to a single flowed line of names
-joined by semicolons — no ROR marks, no ORCID icons, no role names, no
-CRediT roles. A deliberate layout for long author lists — though as
-built the line is names-only: where a contributor has an affiliation,
-it renders as a dangling comma with nothing after it (⚠ [A1](#a1)).
+joined by semicolons, with no ROR marks, no ORCID icons, no role names
+and no CRediT roles. This is a deliberate layout for long author lists.
+In practice the line is names-only: where a contributor has an
+affiliation, it renders as a dangling comma with nothing after it
+(⚠ [A1](#a1)).
 Basis: code reading + probe. <sup>f-omp1</sup>
 
 <a id="omp2"></a>
 **OMP2 — An Edited Volume credits volume editors** · ✅ · user-visible.
-On a press, an Edited Volume's book page shows the volume's editors —
-each name suffixed "(ed)", with the role name — where a monograph shows
-its contributor list; the catalog's listing line keeps the full
-contributor list, and chapter pages carry their own author lines. The
-contributors list remains the source the catalog draws from; the swap
-is the catalog's presentation choice.
+On a press, an Edited Volume's book page shows the volume's editors where
+a monograph shows its contributor list. Each name is suffixed "(ed)",
+with the role name. The catalog's listing line keeps the full contributor
+list, and chapter pages carry their own author lines. The contributors
+list remains the source the catalog draws from. The swap is the catalog's
+presentation choice.
 Basis: code reading + probe. <sup>f-omp2</sup>
 
 ### OPS
@@ -773,19 +772,20 @@ Basis: code reading + probe. <sup>f-omp2</sup>
 <a id="ops1"></a>
 **OPS1 — The submitting author edits their own preprint's contributors** · ✅ · user-visible.
 On a preprint server the author's workflow Contributors list is fully
-editable on their not-yet-posted preprint, while on a journal or press
-the author's workflow list is read-only. Matches the preprint model —
-authors prepare their own preprint for posting; the same divergence
+editable on their not-yet-posted preprint. On a journal or press the
+author's workflow list is read-only. This matches the preprint model, in
+which authors prepare their own preprint for posting. The same difference
 holds for the neighboring Funding list.
 Basis: probe. <sup>f-ops1</sup>
 
 <a id="ops2"></a>
 **OPS2 — The Competing Interests label renders raw markup** · 🐞 · minor.
-On a preprint server the contributor form's Competing Interests field
-is labeled with raw code-like text — visible link markup around "CI
-Policy" plus an unresolved placeholder token — instead of the plain
-"Competing Interests" label the other applications show. The guidance
-sentence, the required behavior and saving all work as specified.
+On a preprint server the contributor form's Competing Interests field is
+labeled with raw code-like text instead of the plain "Competing
+Interests" label the other applications show. The text is visible link
+markup around "CI Policy" plus an unresolved placeholder token. The
+guidance sentence, the required behavior and saving all work as
+specified.
 Basis: probe + code reading. <sup>f-ops2</sup>
 
 ---

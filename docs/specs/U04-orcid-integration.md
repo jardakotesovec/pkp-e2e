@@ -13,37 +13,37 @@ atlas-claims: [AFFW-502, AFFM-117, AFFM-222, AFFU-065, AFFU-066, AFFU-099, AFFU-
 
 ## Purpose
 
-An ORCID iD is a researcher's persistent public identifier. This feature lets a
-journal collect iDs that are **verified** — connected by their owners through
-ORCID's own sign-in — rather than typed in on trust. Users connect an iD to
-their account from their profile or while registering; editors ask a
-submission's contributors by email to verify theirs; and a journal that holds
-ORCID **member** credentials writes back: when an article is published, its
-record is added to each verified contributor's ORCID profile, and on a journal a
-completed peer review can be added to the reviewer's profile as a review
-contribution. Everything is switched on per journal (or once for the whole
-site) with API credentials issued by ORCID.
+An ORCID iD is a researcher's persistent public identifier. This feature lets
+a journal collect iDs that are **verified**, meaning their owners connected
+them through ORCID's own sign-in, rather than typed in on trust. Users connect
+an iD to their account from their profile or while registering. Editors ask a
+submission's contributors by email to verify theirs. A journal that holds
+ORCID **member** credentials also writes back: when an article is published,
+its record is added to each verified contributor's ORCID profile, and on a
+journal a completed peer review can be added to the reviewer's profile as a
+review contribution. Everything is switched on per journal, or once for the
+whole site, with API credentials issued by ORCID.
 
 ## Actors & permissions
 
-"Verified" below means the person completed ORCID's sign-in for this install, so
-the iD carries an access token; an iD merely typed or imported is
-**unauthenticated** and displays as such. Screens that host an ORCID control
-(the profile, the workflow's Contributors list, the Reviewers table) keep their
-own reachability rules in their own features — this table covers only the ORCID
-capability on each.
+"Verified" below means the person completed ORCID's sign-in for this install,
+so the iD carries an access token. An iD that was merely typed or imported is
+**unauthenticated** and is displayed as such. The screens that host an ORCID
+control (the profile, the workflow's Contributors list, the Reviewers table)
+keep their own access rules in their own features. This table covers only the
+ORCID capability on each of them.
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **Enable & configure ORCID for one journal** | • Site Administrator; Journal Manager — the "ORCID" tab on Settings → Users & Roles (Rule 1); locked read-only while the site-wide configuration is active (Rule 3) <sup>a</sup> |
-| **Enable & configure ORCID site-wide** | • Site Administrator — the "ORCID" tab on Site Settings; the tab exists only while the install hosts more than one journal (Rule 2) <sup>b</sup> |
-| **Connect / authorize own iD** | • Any signed-in user — profile, Identity tab (Rules 5–6)<br>• Any visitor — a journal's registration page (Rule 7); not offered on the site-level registration page <sup>c</sup> |
-| **Remove own iD** | • The user themselves — "Delete" beside the connected iD on the Identity tab (Rule 6c) <sup>d</sup> |
-| **Request a contributor's verification by email** | • Site Administrator; Journal Manager; Section Editor assigned to the submission — "Request verification" on the contributor's ORCID iD field (Rule 8)<br>• Author of the submission — the same button, from the submission wizard's Contributors step (the contributor list on the author's own dashboard is read-only)<br>• ⚠ [A5](#a5) an Assistant who can edit the contributor is offered the same button; the request is refused, yet the field reports it as sent <sup>e</sup> |
-| **Remove a contributor's iD** | • The same roles as the row above — "Delete" on the contributor's ORCID iD field (Rule 8a) ⚠ [A5](#a5) <sup>e</sup> |
-| **Verify via the emailed link** | • Whoever holds the emailed authorization link — works signed out; the link is single-use (Rule 9) <sup>f</sup> |
-| **Send a review to ORCID** {OJS} | • Site Administrator; Journal Manager; Section Editor — "Send Review To ORCID" on the reviewer's row (Rule 12)<br>• ⚠ [A1](#a1) a Press Manager is offered the same action, though a press deposits nothing <sup>g</sup> |
-| **Read the public ORCID pages** | • Anyone, signed in or out — the "What is ORCID?" page and the verification landing page, reached from links or by URL (Rules 9–10) <sup>f</sup> |
+| **Enable & configure ORCID for one journal** | • Site Administrator; Journal Manager: the "ORCID" tab on Settings → Users & Roles (Rule 1). The tab is locked read-only while the site-wide configuration is active (Rule 3) <sup>a</sup> |
+| **Enable & configure ORCID site-wide** | • Site Administrator: the "ORCID" tab on Site Settings. The tab exists only while the install hosts more than one journal (Rule 2) <sup>b</sup> |
+| **Connect / authorize own iD** | • Any signed-in user: profile, Identity tab (Rules 5–6)<br>• Any visitor: a journal's registration page (Rule 7). Not offered on the site-level registration page <sup>c</sup> |
+| **Remove own iD** | • The user themselves: "Delete" beside the connected iD on the Identity tab (Rule 6c) <sup>d</sup> |
+| **Request a contributor's verification by email** | • Site Administrator; Journal Manager; Section Editor assigned to the submission: "Request verification" on the contributor's ORCID iD field (Rule 8)<br>• Author of the submission: the same button, from the submission wizard's Contributors step. The contributor list on the author's own dashboard is read-only<br>• ⚠ [A5](#a5) an Assistant who can edit the contributor is offered the same button. The request is refused, yet the field reports it as sent <sup>e</sup> |
+| **Remove a contributor's iD** | • The same roles as the row above: "Delete" on the contributor's ORCID iD field (Rule 8a) ⚠ [A5](#a5) <sup>e</sup> |
+| **Verify via the emailed link** | • Whoever holds the emailed authorization link. It works signed out, and the link is single-use (Rule 9) <sup>f</sup> |
+| **Send a review to ORCID** {OJS} | • Site Administrator; Journal Manager; Section Editor: "Send Review To ORCID" on the reviewer's row (Rule 12)<br>• ⚠ [A1](#a1) a Press Manager is offered the same action, though a press deposits nothing <sup>g</sup> |
+| **Read the public ORCID pages** | • Anyone, signed in or out: the "What is ORCID?" page and the verification landing page, reached from links or by URL (Rules 9–10) <sup>f</sup> |
 
 ## Fields & validation
 
@@ -52,33 +52,33 @@ Journal ORCID settings ("ORCID" tab, Settings → Users & Roles):
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Enable ORCID functionality" | no | Unchecking hides every ORCID surface for this journal (Rule 4). Checked and locked while the site-wide configuration is active (Rule 3) <sup>a</sup> |
-| "ORCID API" | yes (when enabled) | Four choices: Public / Public Sandbox / Member / Member Sandbox. Member unlocks deposits (Rule 11); Sandbox points every ORCID link at ORCID's test service <sup>a</sup> |
-| "Client ID" / "Client Secret" | yes (when enabled) | Credentials issued by ORCID; the secret is entered masked. Shown read-only (secret fully masked) while configured site-wide <sup>a</sup> |
-| "City" | no | Sent as the review venue on review deposits; a review deposit silently requires both this and the journal's country to be set (Rule 12) <sup>g</sup> |
+| "ORCID API" | yes (when enabled) | Four choices: Public / Public Sandbox / Member / Member Sandbox. Member unlocks deposits (Rule 11). Sandbox points every ORCID link at ORCID's test service <sup>a</sup> |
+| "Client ID" / "Client Secret" | yes (when enabled) | Credentials issued by ORCID. The secret is entered masked. Both are shown read-only, the secret fully masked, while configured site-wide <sup>a</sup> |
+| "City" | no | Sent as the review venue on review deposits. A review deposit silently requires both this and the journal's country to be set (Rule 12) <sup>g</sup> |
 | "Send e-mail to request ORCID authorization from authors when an article is accepted ie. sent to copy editing" | no | Turns on the automatic author emails of Rule 13 ⚠ [A6](#a6) |
 | "ORCID request log" | no | Error (default) or full logging of ORCID traffic, for the journal's technical staff <sup>a</sup> |
 
 Site-wide ORCID settings carry only the first three rows (enable, API, Client
-ID/Secret) — city, the email toggle and the log level remain per-journal. <sup>b</sup>
+ID/Secret). City, the email toggle and the log level remain per-journal. <sup>b</sup>
 
 Contributor's ORCID iD field (add/edit contributor, Contributors list):
 
 | State | What the field shows |
 |-------|----------------------|
-| No iD | "Request verification" button → confirmation "Would you like to send an email to this author requesting they verify their ORCID?" (for a contributor being added, the dialog adds "The email will be sent once the author has been created."); after sending, the button is disabled and reads "ORCID Verification has been requested!", with a "Resend Verification Email" link beside it (Rule 8) <sup>e</sup> |
+| No iD | A "Request verification" button. Pressing it asks "Would you like to send an email to this author requesting they verify their ORCID?" For a contributor being added, the dialog adds "The email will be sent once the author has been created." After sending, the button is disabled and reads "ORCID Verification has been requested!", with a "Resend Verification Email" link beside it (Rule 8) <sup>e</sup> |
 | Unauthenticated iD | The iD as a link, the hollow ORCID icon, and the note "This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly." plus "Delete" <sup>e</sup> |
 | Verified iD | The iD as a link with the solid ORCID icon, plus "Delete" (confirmation before removal) <sup>e</sup> |
 
 ## Rules & state
 
 1. **Per-journal switch.** ORCID is off until a Journal Manager enables it on
-   the "ORCID" tab and saves credentials; every rule below assumes it is on for
-   the journal at hand. The tab is always present, enabled or not. <sup>a</sup>
+   the "ORCID" tab and saves credentials. Every rule below assumes it is on
+   for the journal at hand. The tab is always present, enabled or not. <sup>a</sup>
 2. **Site-wide switch (multi-journal installs).** On an install hosting more
    than one journal, the Site Administrator's Site Settings carry an "ORCID"
    tab that enables ORCID **for every journal at once** with one set of
    credentials. On a single-journal install the tab is absent ⚠ [A9](#a9). <sup>b</sup>
-3. Site-wide configuration overrides the journals: each journal's tab then
+3. Site-wide configuration overrides the journals. Each journal's tab then
    shows "Enable ORCID functionality" checked and locked, the API type and
    Client ID read-only, the secret masked, and a note ending "Contact your
    site administrator to disable ORCID functionality or change these
@@ -88,28 +88,29 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
    Identity tab shows no ORCID field at all, the registration page shows no
    ORCID block, and the contributor form has no ORCID iD field. <sup>c</sup>
 5. **Connecting from the profile.** On the Identity tab of an ORCID-enabled
-   journal an ORCID block appears: with no iD, a "Create or Connect
-   your ORCID iD" button; with an unauthenticated iD, the iD as a hollow-icon
-   link suffixed "(unauthenticated)" and an "Authorize and Connect your ORCID
-   iD" button; with a verified iD, only the iD as a solid-icon link and its
-   "Delete" button — the connect button and the "What is ORCID?" link beside
-   it are gone. The connect/authorize button opens ORCID's sign-in in a popup
-   window; completing it stores the verified iD and reloads the
+   journal an ORCID block appears. What it holds depends on the account's iD.
+   With no iD: a "Create or Connect your ORCID iD" button. With an
+   unauthenticated iD: the iD as a hollow-icon link suffixed
+   "(unauthenticated)" and an "Authorize and Connect your ORCID iD" button.
+   With a verified iD: only the iD as a solid-icon link and its "Delete"
+   button; the connect button and the "What is ORCID?" link beside it are
+   gone. The connect/authorize button opens ORCID's sign-in in a popup
+   window. Completing it stores the verified iD and reloads the
    tab. <sup>c</sup> <sup>h</sup>
 6. Companions of the profile flow:
    6a. ⚠ [A4](#a4) the "What is ORCID?" link beside the button opens the same
    sign-in popup instead of the What-is-ORCID page it names. <sup>c</sup>
-   6b. Denying access on ORCID's consent screen records the refusal; the
+   6b. Denying access on ORCID's consent screen records the refusal. The
    stored iD and token, if any, are cleared. <sup>f</sup>
    6c. "Delete" beside a verified iD asks "Are you sure you want to remove this
-   ORCID?"; confirming removes the iD at once — no separate save — and tells
-   ORCID to cancel this install's access token. <sup>d</sup>
+   ORCID?" Confirming removes the iD at once, with no separate save, and
+   tells ORCID to cancel this install's access token. <sup>d</sup>
 7. **Connecting while registering.** A journal's registration page offers the
-   same "Create or Connect your ORCID iD" button at the top of the form;
-   completing ORCID's sign-in fills the name, email, country and affiliation
+   same "Create or Connect your ORCID iD" button at the top of the form.
+   Completing ORCID's sign-in fills the name, email, country and affiliation
    fields from the ORCID record and pins the iD to the form. Connecting is
    never required to register. ⚠ [A3](#a3) the account created afterwards
-   holds the iD as unauthenticated — the new user is expected to press
+   holds the iD as unauthenticated, so the new user is expected to press
    "Authorize and Connect" once more from their profile. <sup>i</sup>
 8. **Contributor verification requests.** On the contributor form, "Request
    verification" emails that contributor an authorization link (Rule 14
@@ -118,218 +119,217 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
    being added, the request is remembered and the email goes out when the
    contributor is saved.
    8a. "Delete" beside a contributor's iD (verified or not) removes it after
-   confirmation and cancels its token at ORCID — though at pkp main
-   (2026-08-29) the delete fails outright and the iD stays
+   confirmation and cancels its token at ORCID. At pkp main (2026-08-29),
+   however, the delete fails outright and the iD stays
    ⚠ [A10](#a10). <sup>e</sup>
 9. **The emailed link and the verification landing.** The emailed
-   authorization link leads to ORCID's sign-in; ORCID then returns the
-   browser to the journal's "ORCID Authorization" page. Success shows the
-   verified iD and "Your ORCID iD has been verified and successfully
+   authorization link leads to ORCID's sign-in. ORCID then returns the
+   browser to the journal's "ORCID Authorization" page. On success the page
+   shows the verified iD and "Your ORCID iD has been verified and successfully
    associated with the submission.", then returns the visitor to the journal
    front page after ten seconds. A used, stale or tampered link shows "Your
-   ORCID iD could not be verified. The link is no longer valid."; an iD
+   ORCID iD could not be verified. The link is no longer valid." An iD
    already attached to the submission answers "An ORCID iD was already stored
-   for this submission."; ⚠ [A2](#a2) a
-   visitor who pressed Deny at ORCID gets a raw placeholder where the
-   explanation should be. Every failure closes with "Please contact the
-   journal manager with your name, ORCID iD, and details of your
-   submission." — ⚠ [A8](#a8) "journal manager" verbatim on presses and
-   preprint servers too. <sup>f</sup>
+   for this submission." ⚠ [A2](#a2) a visitor who pressed Deny at ORCID gets
+   a raw placeholder where the explanation should be. Every failure closes
+   with "Please contact the journal manager with your name, ORCID iD, and
+   details of your submission." ⚠ [A8](#a8) that line says "journal manager"
+   verbatim on presses and preprint servers too. <sup>f</sup>
 10. **The What-is-ORCID page.** Every journal exposes a public "What is
-    ORCID?" page (linked from the ORCID emails; also reachable by URL)
-    explaining the iD and how the journal uses it; its "How and why" section
+    ORCID?" page, linked from the ORCID emails and also reachable by URL. It
+    explains the iD and how the journal uses it. Its "How and why" section
     differs between public-API and member-API journals. <sup>f</sup>
 11. **Member API = deposits.** With a Member (or Member Sandbox) API
     configured, publishing an article adds it as a "work" to the ORCID record
-    of every contributor holding a verified iD with a live deposit permission
-    — "live" meaning not expired and not revoked; no screen shows liveness,
-    the deposit simply skips the others — publication is the trigger; nothing
-    is deposited before it. A
-    contributor verified under the public API holds no deposit permission:
-    the deposit pauses and the journal emails them a request to re-authorize
-    with the wider permission (Rule 14); completing that link finishes the
-    deposit. Works deposited once are updated in place on later publishes.
+    of every contributor holding a verified iD with a live deposit
+    permission. "Live" means not expired and not revoked. No screen shows
+    liveness; the deposit simply skips the others. Publication is the
+    trigger, and nothing is deposited before it. A contributor verified under
+    the public API holds no deposit permission. For them the deposit pauses
+    and the journal emails a request to re-authorize with the wider
+    permission (Rule 14); completing that link finishes the deposit. Works
+    deposited once are updated in place on later publishes.
     [OMP1](#omp1) presses request and verify iDs identically but deposit
     nothing. <sup>j</sup>
 12. **Review deposits {OJS}.** On a journal with the member API, a completed
     review can be added to the reviewer's ORCID record as a review
-    contribution: the Reviewers table offers "Send Review To ORCID" on the
+    contribution. The Reviewers table offers "Send Review To ORCID" on the
     row of a reviewer with a verified iD, behind a confirmation ("Send this
     review to the reviewer's ORCID?"). Confirming closes the dialog with no
-    on-screen message either way — the deposit runs in the background.
-    Publishing the article also deposits its completed reviews. A review deposit
-    additionally requires the ORCID settings' City and the journal's country
-    to be set — otherwise it is skipped without message. The row action's
-    presence depends on the reviewer's verified iD alone — the member API gates
-    only the deposit, so a public-API journal offers the action too, and its
-    confirm deposits nothing. ⚠ [A1](#a1) the row action is offered before
-    the review is complete, though nothing is deposited for an incomplete
-    review. <sup>g</sup>
+    on-screen message either way; the deposit runs in the background.
+    Publishing the article also deposits its completed reviews. A review
+    deposit additionally requires the ORCID settings' City and the journal's
+    country to be set. Otherwise it is skipped without a message. The row
+    action's presence depends on the reviewer's verified iD alone. The member
+    API gates only the deposit, so a public-API journal offers the action
+    too, and its confirm deposits nothing. ⚠ [A1](#a1) the row action is
+    offered before the review is complete, though nothing is deposited for an
+    incomplete review. <sup>g</sup>
 13. **Automatic author emails {OJS OMP}.** With the settings tab's email
     toggle on, recording the editorial decision Accept (or Skip Review) emails
     every contributor who does not yet hold a live verified iD the
     verification request of Rule 8 ⚠ [A6](#a6). ⚠ [OPS1](#ops1) a preprint
     server shows the toggle but has no accepting decision to trigger it. <sup>k</sup>
-14. **Which email goes out.** Under a public API the request email is "Submission
-    ORCID" (asking the contributor to connect their iD); under a member API it
-    is "Requesting ORCID record access" (asking for deposit permission); the
-    re-authorization mail of Rule 11 is "Requesting updated ORCID record
-    access". All
-    three carry the personal authorization link and the What-is-ORCID link,
-    and are sent from the journal's principal contact. ⚠ [OPS2](#ops2) on a
-    preprint server none of the three appears on the Emails settings screen;
-    the re-authorization mail, once listed nowhere, gained its journal and
-    press rows upstream ([A7](#a7), resolved 2026-08-25). <sup>l</sup>
-15. Other screens that surface ORCID follow the rules above: the invitation
+14. **Which email goes out.** Under a public API the request email is
+    "Submission ORCID", which asks the contributor to connect their iD. Under
+    a member API it is "Requesting ORCID record access", which asks for
+    deposit permission. The re-authorization mail of Rule 11 is "Requesting
+    updated ORCID record access". All three carry the personal authorization
+    link and the What-is-ORCID link, and are sent from the journal's
+    principal contact. ⚠ [OPS2](#ops2) on a preprint server none of the three
+    appears on the Emails settings screen. The re-authorization mail was once
+    listed nowhere; it gained its journal and press rows upstream
+    ([A7](#a7), resolved 2026-08-25). <sup>l</sup>
+15. Other screens that surface ORCID follow the rules above. The invitation
     wizard's "Verify ORCID iD" step (described in
     [User invitations](U06-user-invitations.md)) appears only while ORCID is
-    enabled; the reviewer-suggestion form collects a plain, unverified
-    "ORCID iD" text field; and reviewer lists distinguish a verified iD
-    (solid icon) from an unauthenticated one (hollow icon,
-    "(unauthenticated)" suffix — described with the Reviewers table in
-    [Reviewer assignment & management](U27-reviewer-assignment-and-management.md)). <sup>m</sup>
+    enabled. The reviewer-suggestion form collects a plain, unverified
+    "ORCID iD" text field. Reviewer lists distinguish a verified iD (solid
+    icon) from an unauthenticated one (hollow icon, "(unauthenticated)"
+    suffix); that is described with the Reviewers table in
+    [Reviewer assignment & management](U27-reviewer-assignment-and-management.md). <sup>m</sup>
 16. A preprint server's install additionally ships the retired ORCID Profile
-    plugin from the pre-built-in era [OPS3](#ops3); the built-in integration
-    this spec describes is what runs everywhere.
+    plugin from the time before the built-in integration [OPS3](#ops3). The
+    built-in integration this spec describes is what runs everywhere.
 
 ## Side effects
 
-- **On "Request verification" / the Rule 13 decision** — one email to the
+- **On "Request verification" / the Rule 13 decision**: one email to the
   contributor (Rule 14 chooses which), carrying their single-use
   authorization link. <sup>l</sup>
-- **On completing an emailed authorization for a published article** — the
+- **On completing an emailed authorization for a published article**: the
   work is deposited at once and the landing page adds "The submission has
-  been added to your ORCID record."; for an article not yet published it
-  says the record will be added on publication. <sup>f</sup>
-- **On publication** — work deposits to every eligible contributor (Rule 11)
+  been added to your ORCID record." For an article not yet published it says
+  the record will be added on publication. <sup>f</sup>
+- **On publication**: work deposits to every eligible contributor (Rule 11)
   and, on a journal, review deposits for the article's completed reviews
-  (Rule 12); all in the background, with no notice on the publishing
-  screen. <sup>j</sup>
-- **On removing an iD** (own profile or a contributor's) — the install asks
+  (Rule 12). All of this runs in the background, with no notice on the
+  publishing screen. <sup>j</sup>
+- **On removing an iD** (own profile or a contributor's): the install asks
   ORCID to cancel the matching access token in the background. <sup>d</sup>
-- **ORCID request log** — traffic with ORCID is written to the application
+- **ORCID request log**: traffic with ORCID is written to the application
   log at the level the settings tab chooses. <sup>a</sup>
 
 ## Settings that modify behavior
 
 - **Enable ORCID functionality** (per journal, or site-wide on multi-journal
-  installs) — the master switch; Rules 1–4.
-- **ORCID API** — Public collects verified iDs only; Member also deposits
-  (Rules 11–12); the two Sandbox variants aim every link and deposit at
+  installs): the master switch; Rules 1–4.
+- **ORCID API**: Public collects verified iDs only; Member also deposits
+  (Rules 11–12). The two Sandbox variants aim every link and deposit at
   ORCID's test service instead of the real one.
-- **Send e-mail to request ORCID authorization…** — the Rule 13 automatic
+- **Send e-mail to request ORCID authorization…**: the Rule 13 automatic
   emails; off by default.
-- **City** + the journal's country (from the journal's masthead settings) —
+- **City** plus the journal's country (from the journal's masthead settings):
   both required for review deposits (Rule 12).
-- **ORCID request log** — logging verbosity only; no user-facing change.
+- **ORCID request log**: logging verbosity only; no user-facing change.
 
 ## Cross-feature interactions
 
-- **Profile — Identity tab** hosts the connect/authorize/delete controls
-  (Rules 5–6); the tab itself and its other fields belong to the *User
+- **Profile — Identity tab** hosts the connect, authorize and delete controls
+  (Rules 5–6). The tab itself and its other fields belong to the *User
   profile* feature.
 - **Contributors list** (workflow and submission wizard) hosts the
-  contributor ORCID field (Rule 8); the list's own mechanics belong to
+  contributor ORCID field (Rule 8). The list's own mechanics belong to
   *Contributors & affiliations*.
-- **Reviewers table** {OJS} hosts "Send Review To ORCID" (Rule 12); the
+- **Reviewers table** {OJS} hosts "Send Review To ORCID" (Rule 12). The
   table, its other row actions and its confirm-dialog chrome belong to
   [Reviewer assignment & management](U27-reviewer-assignment-and-management.md).
-- **User invitations** — the accept wizard's "Verify ORCID iD" step and the
+- **User invitations**: the accept wizard's "Verify ORCID iD" step and the
   send wizard's ORCID note are described in
-  [User invitations](U06-user-invitations.md); they obey this spec's enablement
-  rules.
-- **Emails management** — the stored ORCID email templates are edited on the
-  Emails settings screen (feature spec to come — *Emails management*); this
+  [User invitations](U06-user-invitations.md). They obey this spec's
+  enablement rules.
+- **Emails management**: the stored ORCID email templates are edited on the
+  Emails settings screen (feature spec to come: *Emails management*). This
   spec owns the ORCID-specific gaps ⚠ [OPS2](#ops2) ⚠ [A7](#a7).
-- **Publishing** — publication is the deposit trigger (Rule 11); the publish
+- **Publishing**: publication is the deposit trigger (Rule 11). The publish
   action itself belongs to the publishing feature of each app.
 
 ## Canonical scenarios
 
 Common to all three apps; substitute vocabulary per the
 [application glossary](GLOSSARY.md). Actors are named by role. No
-scenario step completes ORCID's own sign-in; where a step opens the sign-in
+scenario step completes ORCID's own sign-in. Where a step opens the sign-in
 popup, the scenario says inline what an offline install shows. Preconditions
-marked "(seeded)" cannot be staged from any screen on an offline install —
-their seeding recipes and accounts live in the scenarios' footnote, the one
+marked "(seeded)" cannot be staged from any screen on an offline install.
+Their seeding recipes and accounts live in the scenarios' footnote, the one
 part of the Footnotes tail a scenario runner needs. <sup>s</sup>
 
-1. **Turn ORCID on for a journal** — Journal Manager: open Settings → Users &
-   Roles, tab "ORCID". Tick "Enable ORCID functionality" — the API fields
-   appear; pick "Public Sandbox", enter any placeholder Client ID and Client
-   Secret — both must be filled in, but the save does not check them against
-   ORCID — and save.
+1. **Turn ORCID on for a journal**: Journal Manager: open Settings → Users &
+   Roles, tab "ORCID". Tick "Enable ORCID functionality"; the API fields
+   appear. Pick "Public Sandbox" and enter any placeholder Client ID and
+   Client Secret. Both must be filled in, but the save does not check them
+   against ORCID. Save.
    Open your profile's Identity tab in another tab: an ORCID block with a
    "Create or Connect your ORCID iD" button has appeared. Untick and save
-   again (control): the ORCID block is gone — the tab shows no ORCID field
+   again (control): the ORCID block is gone, and the tab shows no ORCID field
    at all. <sup>s</sup>
-2. **The connect offer, and the About link that doesn't go there** — any
+2. **The connect offer, and the About link that doesn't go there**: any
    signed-in user on an ORCID-enabled journal: on the Identity tab, press
-   "Create or Connect your ORCID iD" — a small popup window opens on an
-   ORCID sign-in address while the profile tab stays put (on an offline
-   install the popup shows a connection error — that is expected). Close it.
-   Press the "What is ORCID?" link beside the button: ⚠ [A4](#a4) the same
-   popup opens instead of the What-is-ORCID page. <sup>s</sup>
-3. **Remove a connected iD from the profile** — a user whose account holds a
+   "Create or Connect your ORCID iD". A small popup window opens on an ORCID
+   sign-in address while the profile tab stays put. On an offline install
+   the popup shows a connection error; that is expected. Close it. Press the
+   "What is ORCID?" link beside the button: ⚠ [A4](#a4) the same popup opens
+   instead of the What-is-ORCID page. <sup>s</sup>
+3. **Remove a connected iD from the profile**: a user whose account holds a
    verified iD (seeded): the Identity tab shows the iD as a link with the
-   solid ORCID icon and a "Delete" button. Press Delete — "Are you sure you
-   want to remove this ORCID?"; confirm. The iD is gone and the
+   solid ORCID icon and a "Delete" button. Press Delete. The dialog asks "Are
+   you sure you want to remove this ORCID?"; confirm. The iD is gone and the
    "Create or Connect your ORCID iD" button is back. <sup>s</sup>
-4. **Ask a contributor to verify** — Journal Manager: on a submission's
+4. **Ask a contributor to verify**: Journal Manager: on a submission's
    Contributors list, edit a contributor who has no iD. The ORCID iD field
-   shows "Request verification"; press it — "Would you like to send an email
-   to this author requesting they verify their ORCID?"; confirm — for an
-   already-saved contributor the email leaves at once; only a contributor
-   still being added waits for the save (Rule 8) — then save. The
+   shows "Request verification". Press it. The dialog asks "Would you like to
+   send an email to this author requesting they verify their ORCID?";
+   confirm. For an already-saved contributor the email leaves at once; only a
+   contributor still being added waits for the save (Rule 8). Then save. The
    field now reads "ORCID Verification has been requested!". The
    contributor's mailbox holds the request email with a personal
    authorization link (leading to ORCID's site) and the What-is-ORCID link. <sup>s</sup>
-5. **Remove a contributor's iD** — Journal Manager: edit a contributor whose
+5. **Remove a contributor's iD**: Journal Manager: edit a contributor whose
    iD is unauthenticated (seeded). The field shows the hollow-icon iD link,
    the not-verified warning, and "Delete". Press Delete and confirm: the iD
-   is gone; the field offers "Request verification" again — ⚠ [A10](#a10)
+   is gone, and the field offers "Request verification" again. ⚠ [A10](#a10)
    at pkp main the confirm never completes and the iD stays. <sup>s</sup>
-6. **The public ORCID pages by URL** — signed-out visitor: type the journal's
-   `/orcid/about` address — the "What is ORCID?" page renders with the
-   journal's chrome. Type `/orcid/verify` — the "ORCID Authorization" page
+6. **The public ORCID pages by URL**: signed-out visitor: type the journal's
+   `/orcid/about` address. The "What is ORCID?" page renders with the
+   journal's chrome. Type `/orcid/verify`. The "ORCID Authorization" page
    answers "Your ORCID iD could not be verified. The link is no longer
    valid." and "Please contact the journal manager with your name, ORCID iD,
-   and details of your submission." ⚠ [A8](#a8) — a stale or truncated
+   and details of your submission." ⚠ [A8](#a8). A stale or truncated
    emailed link gets an explanation, never an error page. <sup>s</sup>
-7. **A journal with ORCID off shows none of it** — visitor and Journal
+7. **A journal with ORCID off shows none of it**: visitor and Journal
    Manager on a scratch journal with ORCID disabled: the registration page
-   has no ORCID block; a contributor form has no ORCID iD field; the
-   profile's Identity tab shows no ORCID field at all (positive
-   control: the same screens on the enabled journal show the Rule 5 and
-   Rule 8 controls). <sup>s</sup>
+   has no ORCID block, a contributor form has no ORCID iD field, and the
+   profile's Identity tab shows no ORCID field at all. Positive control: the
+   same screens on the enabled journal show the Rule 5 and Rule 8
+   controls. <sup>s</sup>
 
 App-specific:
 
-8. **{OJS OMP} Accepting a submission asks the authors** — Journal Manager:
+8. **{OJS OMP} Accepting a submission asks the authors**: Journal Manager:
    with the ORCID email toggle on, record Accept on a submission in review.
    Each contributor without a verified iD receives the Rule 14 request email
-   (observe the mailbox); with the toggle off (control), accepting a second
+   (observe the mailbox). With the toggle off (control), accepting a second
    submission sends nothing. <sup>s</sup>
-9. **{OJS} Send a review to ORCID** — Journal Manager, on a journal
-   configured with the Member Sandbox API — the API type gates only the
-   background deposit, never the row action's presence (Rule 12): on a
+9. **{OJS} Send a review to ORCID**: Journal Manager, on a journal
+   configured with the Member Sandbox API. The API type gates only the
+   background deposit, never the row action's presence (Rule 12). On a
    submission whose reviewer holds a verified iD (seeded), open the Reviewers
    table row menu: "Send Review To ORCID" is offered ⚠ [A1](#a1) even before
-   the review is complete. After the review is complete, press it — "Send
-   this review to the reviewer's ORCID?" — and confirm: the dialog closes
-   with no message of any kind; the deposit itself happens in the background
-   (Rule 12). <sup>s</sup>
+   the review is complete. After the review is complete, press it. The dialog
+   asks "Send this review to the reviewer's ORCID?"; confirm. The dialog
+   closes with no message of any kind. The deposit itself happens in the
+   background (Rule 12). <sup>s</sup>
 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-07; additions
-2026-08-29), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted 🐞 → ❓ → ✅
-in the summary; the entries below are the source. Each entry opens with the
-user-observable symptom; mechanism and evidence live in the entry's footnote.
-An entry whose ID starts with OMP or OPS concerns only the app it names; and
-because a claim tagged {OJS} (or {OJS OMP}) exists only in the app(s) the tag
-names, a marker inside it may still report what the *other* apps wrongly show.
+2026-08-29), unreviewed unless an entry notes otherwise; the team settles
+them on spec review. Sorted 🐞 → ❓ → ✅ in the summary; the entries below are
+the source. Each entry opens with the user-observable symptom; mechanism and
+evidence live in the entry's footnote. An entry whose ID starts with OMP or
+OPS concerns only the app it names. A claim tagged {OJS} (or {OJS OMP})
+exists only in the app(s) the tag names, so a marker inside it may still
+report what the *other* apps wrongly show.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
@@ -339,10 +339,10 @@ names, a marker inside it may still report what the *other* apps wrongly show.
 | [A5](#a5) | An Assistant's contributor-ORCID controls are refused by the server yet report success | 🐞 | user-visible | — |
 | [A8](#a8) | The verification-failure page says "journal manager" on presses and preprint servers | 🐞 | minor | — |
 | [OPS2](#ops2) | The ORCID request emails have no rows on the preprint server's Emails screen | 🐞 | user-visible | — |
-| [A10](#a10) | Deleting a contributor's unauthenticated iD fails — the confirm never completes and the iD stays | 🐞 | user-visible | — |
+| [A10](#a10) | Deleting a contributor's unauthenticated iD fails: the confirm never completes and the iD stays | 🐞 | user-visible | — |
 | [A3](#a3) | An iD connected while registering lands on the account unverified | ❓ | minor | — |
 | [A6](#a6) | The author-email toggle's label misdescribes when it fires | ❓ | minor | — |
-| [A7](#a7) | The re-authorization email template is not editable in any app — resolved upstream for journals and presses (pkp/pkp-lib#13050); the preprint-server gap is [OPS2](#ops2)'s | ❓ | latent | rebase check (claude) 2026-08-25 |
+| [A7](#a7) | The re-authorization email template is not editable in any app. Resolved upstream for journals and presses (pkp/pkp-lib#13050); the preprint-server gap is [OPS2](#ops2)'s | ❓ | latent | rebase check (claude) 2026-08-25 |
 | [A9](#a9) | The site tab's absence on single-journal installs rests on its switch-on condition, not observation | ❓ | minor | — |
 | [OPS1](#ops1) | The author-email toggle exists on a preprint server that can never trigger it | ❓ | latent | — |
 | [OMP1](#omp1) | A press requests and verifies iDs but deposits no works | ✅ | user-visible | — |
@@ -353,21 +353,21 @@ names, a marker inside it may still report what the *other* apps wrongly show.
 <a id="a1"></a>
 **A1 — Send Review To ORCID ignores review completion, and answers with silence** · 🐞 · user-visible.
 The Reviewers table offers "Send Review To ORCID" on any row whose reviewer
-holds a verified iD, whatever the state of the review — the completion
-condition the action was given never evaluates to false. Nothing is deposited
-for an incomplete review (the background deposit re-checks completion), and
-confirming shows no message either way (Rule 12), so an editor who uses it
-early gets no sign the deposit never happened. A Press Manager is offered the
-same action, dialog and silent close, though a press deposits nothing
-([OMP1](#omp1)); a public-API journal offers it the same way, though its
-deposit runs only under the member API (Rule 12).
+holds a verified iD, whatever the state of the review. The completion
+condition the action was given never evaluates to false. Nothing is
+deposited for an incomplete review, because the background deposit re-checks
+completion, and confirming shows no message either way (Rule 12). So an
+editor who uses it early gets no sign that the deposit never happened. A
+Press Manager is offered the same action, dialog and silent close, though a
+press deposits nothing ([OMP1](#omp1)). A public-API journal offers it the
+same way, though its deposit runs only under the member API (Rule 12).
 Basis: probe + code. <sup>[f-a1](#fn-a1)</sup>
 
 <a id="a2"></a>
 **A2 — Denied-access landing renders a raw placeholder** · 🐞 · user-visible.
 A contributor who follows their emailed authorization link and presses "Deny"
-on ORCID's consent screen lands on the "ORCID Authorization" page, where the
-explanation line renders as a raw `##orcid.authDenied##` token — the
+on ORCID's consent screen lands on the "ORCID Authorization" page. There the
+explanation line renders as a raw `##orcid.authDenied##` token, because the
 translation key the page asks for does not exist in any locale. The refusal
 itself is recorded correctly.
 Basis: code (the denial leg needs ORCID's live consent screen, unreachable
@@ -375,42 +375,42 @@ from the test install). <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
 **A3 — Registration-connected iD arrives unverified** · ❓ · minor.
-A visitor who connects their ORCID iD while registering — signing in at ORCID
-from the registration page's popup — gets an account that holds the iD as
-**unauthenticated**: the profile then shows the hollow icon, the
+A visitor who connects their ORCID iD while registering, by signing in at
+ORCID from the registration page's popup, gets an account that holds the iD
+as **unauthenticated**. The profile then shows the hollow icon, the
 "(unauthenticated)" suffix and an "Authorize and Connect your ORCID iD"
 button asking them to do it again. The sign-in they already completed
 granted this install a token that is simply not kept.
 Question: should the registration connect count as verification?
-Lean: yes — asking the same person to authorize twice reads as a gap, not a
+Lean: yes. Asking the same person to authorize twice reads as a gap, not a
 choice.
 Basis: code (the OAuth leg is unreachable from the test install). <sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
 **A4 — The About link opens the sign-in popup** · 🐞 · user-visible.
 On the profile Identity tab and the registration page, the "What is ORCID?"
-link beside the connect button opens the ORCID sign-in popup — the same as
-the button — instead of the What-is-ORCID page it is labeled with. The page
+link beside the connect button opens the ORCID sign-in popup, the same as
+the button, instead of the What-is-ORCID page it is labeled with. The page
 itself works when reached by URL (Rule 10).
 Basis: code; live confirmation pending. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
 **A5 — Assistant's refused ORCID controls report success** · 🐞 · user-visible.
-An Assistant editing a contributor sees the same ORCID iD field as an editor
-— "Request verification", "Delete" — but the server refuses both: no email
-goes out, the iD stays. The screen still reports success — the field switches
-to "ORCID Verification has been requested!" or shows the iD gone — with no
-error anywhere. The roles allowed to use these controls omit the Assistant,
-though Assistants may edit every other contributor field.
+An Assistant editing a contributor sees the same ORCID iD field as an editor,
+with "Request verification" and "Delete". The server refuses both: no email
+goes out, and the iD stays. The screen still reports success. The field
+switches to "ORCID Verification has been requested!" or shows the iD gone,
+with no error anywhere. The roles allowed to use these controls omit the
+Assistant, though Assistants may edit every other contributor field.
 Basis: probe + code. <sup>[f-a5](#fn-a5)</sup>
 
 <a id="a6"></a>
 **A6 — The email toggle's label misdescribes its trigger** · ❓ · minor.
 The setting reads "Send e-mail to request ORCID authorization from authors
-when an article is accepted ie. sent to copy editing", but the emails fire
-when the decision Accept **or Skip Review** is recorded — Skip Review is not
-mentioned — and the grammar ("ie.") is off. Elsewhere the same setting is
-described as acting "on publication", which it does not.
+when an article is accepted ie. sent to copy editing". The emails actually
+fire when the decision Accept **or Skip Review** is recorded, and Skip Review
+is not mentioned. The grammar ("ie.") is also off. Elsewhere the same setting
+is described as acting "on publication", which it does not.
 Question: which wording is the intended contract?
 Lean: keep the accept-time behavior, fix the label.
 Basis: probe + code. <sup>[f-a6](#fn-a6)</sup>
@@ -422,7 +422,7 @@ a wider permission, Rule 11) is delivered from a stored template that no app
 lists on its Emails settings screen, so no manager can review or customize
 it. Its two sibling ORCID emails are listed (on journals and presses).
 Question: intended, or an omission from the emails roster?
-Lean: omission — it shares its purpose and audience with the two listed ones.
+Lean: omission. It shares its purpose and audience with the two listed ones.
 Basis: probe + code. <sup>[f-a7](#fn-a7)</sup>
 
 > **Resolved upstream — rebase check (claude), 2026-08-25**: the lean was
@@ -435,31 +435,31 @@ Basis: probe + code. <sup>[f-a7](#fn-a7)</sup>
 **A8 — Failure page says "journal manager" on presses and preprint servers** · 🐞 · minor.
 Every failure on the "ORCID Authorization" page closes with "Please contact
 the journal manager with your name, ORCID iD, and details of your
-submission." — on a press or a preprint server too, where the reader's
-contact is a Press Manager or Preprint Server Manager, not a "journal
-manager".
+submission." It says so on a press or a preprint server too, where the
+reader's contact is a Press Manager or Preprint Server Manager, not a
+"journal manager".
 Basis: probe. <sup>[f-a8](#fn-a8)</sup>
 
 <a id="a9"></a>
 **A9 — Site ORCID tab on a single-journal install** · ❓ · minor.
 Rule 2 says a single-journal install carries no "ORCID" tab in Site
-Settings. The tab's presence on multi-journal installs is confirmed; its
+Settings. The tab's presence on multi-journal installs is confirmed. Its
 absence rests on the condition that switches the tab on, since every
 install at hand hosts several journals.
 Question: is the tab really absent when the install hosts a single journal?
-Lean: yes — the tab renders only when the install counts more than one
+Lean: yes. The tab renders only when the install counts more than one
 journal.
 Basis: code. <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a10"></a>
 **A10 — Deleting a contributor's iD fails outright** · 🐞 · user-visible.
 At pkp main (2026-08-29), pressing "Delete" on a contributor's
-unauthenticated ORCID iD and confirming does nothing: the confirm
-dialog's action never completes and the iD stays. The server refuses the
-removal with an internal error — the token-revocation job cannot even be
-queued — so the removal Rule 8a promises is unreachable from the screen.
-The profile flavor of the same removal (a user deleting their own iD,
-Rule 6c) still works.
+unauthenticated ORCID iD and confirming does nothing. The confirm dialog's
+action never completes and the iD stays. The server refuses the removal with
+an internal error, because the token-revocation job cannot even be queued.
+So the removal Rule 8a promises is unreachable from the screen. The profile
+flavor of the same removal (a user deleting their own iD, Rule 6c) still
+works.
 Since: 2026-08-28 (upstream regression, reported to the team that day) ·
 Basis: probe + code (claude, 2026-08-29). <sup>[f-a10](#fn-a10)</sup>
 
@@ -467,11 +467,11 @@ Basis: probe + code (claude, 2026-08-29). <sup>[f-a10](#fn-a10)</sup>
 
 <a id="omp1"></a>
 **OMP1 — A press verifies iDs but deposits nothing** · ✅ · user-visible.
-A press collects and verifies contributor iDs exactly like a journal — same
-settings, same emails, same landing pages — but publishing a monograph adds
-nothing to anyone's ORCID record, member API or not. The deposit machinery
-declares monograph deposits unsupported for now.
-Rationale: an acknowledged not-yet-built capability, not decay — the code
+A press collects and verifies contributor iDs exactly like a journal, with
+the same settings, the same emails and the same landing pages. Publishing a
+monograph, however, adds nothing to anyone's ORCID record, member API or
+not. The deposit machinery declares monograph deposits unsupported for now.
+Rationale: an acknowledged not-yet-built capability, not decay. The code
 marks it as pending future work.
 Basis: code. <sup>[f-omp1](#fn-omp1)</sup>
 
@@ -480,22 +480,22 @@ Basis: code. <sup>[f-omp1](#fn-omp1)</sup>
 <a id="ops1"></a>
 **OPS1 — A dead email toggle on preprint servers** · ❓ · latent.
 A preprint server's ORCID settings show the same "Send e-mail to request
-ORCID authorization from authors…" toggle as a journal, but the decision
-that triggers those emails (Accept) does not exist on a preprint server, so
-the toggle changes nothing. Editors can still request verification per
+ORCID authorization from authors…" toggle as a journal. The decision that
+triggers those emails (Accept) does not exist on a preprint server, so the
+toggle changes nothing. Editors can still request verification per
 contributor by hand.
 Question: hide the toggle on preprint servers, or give posting the same
 trigger?
-Lean: hide it — a control that can never act misleads.
+Lean: hide it. A control that can never act misleads.
 Basis: probe + code. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="ops2"></a>
 **OPS2 — ORCID request emails hidden from the OPS Emails screen** · 🐞 ·
 user-visible.
 On a preprint server the Emails settings screen lists no row for the ORCID
-request emails, so a manager cannot review or customize them, though the
-"Request verification" button still sends them using the seeded texts. On
-journals and presses the two request emails are listed.
+request emails, so a manager cannot review or customize them. The "Request
+verification" button still sends them using the seeded texts. On journals
+and presses the two request emails are listed.
 Basis: probe + code (the preprint server keeps its own email roster and
 omits them). <sup>[f-ops2](#fn-ops2)</sup>
 
@@ -503,10 +503,9 @@ omits them). <sup>[f-ops2](#fn-ops2)</sup>
 **OPS3 — Legacy ORCID Profile plugin ships alongside the built-in feature** · ✅ · invisible.
 A preprint server's install additionally bundles the old "ORCID Profile"
 generic plugin (the pre-3.5 implementation), which journals and presses no
-longer carry. The built-in integration described in this spec is what runs;
-the plugins screen lists the plugin as "ORCID Profile Plugin", disabled,
-with its enable box offered — journals and presses list no ORCID plugin
-row.
+longer carry. The built-in integration described in this spec is what runs.
+The plugins screen lists the plugin as "ORCID Profile Plugin", disabled,
+with its enable box offered. Journals and presses list no ORCID plugin row.
 Basis: probe + code (bundled files + migration helper).
 <sup>[f-ops3](#fn-ops3)</sup>
 

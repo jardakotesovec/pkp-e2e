@@ -13,197 +13,195 @@ atlas-claims: [AFFW-281, AFFW-285, AFFW-379, AFFW-380, AFFW-381, AFFW-382, AFFW-
 
 ## Purpose
 
-Every submission carries a *publication* — the face readers eventually
-see — and this feature is where its descriptive metadata is kept: the
-title and abstract, the journal's chosen metadata items (keywords,
-subjects, disciplines, supporting agencies, coverage, rights, source,
-type, funding statement, publisher ID), the data availability statement,
-the submission's language, and the copyright and license that will travel
-with it. Authors give a first version of most of this while submitting;
-from then on the editorial team maintains it on the workflow screen's
-Publication area, per version, until publication — and the feature decides
-who may still touch it afterwards (editors are warned, authors are locked
-out). It also owns the journal's default license settings, the tool that
-re-stamps every submission with those defaults, and what readers see of
-the license and statements on the published item's page. It is one shared
-feature of OJS (journals), OMP (presses) and OPS (preprint servers),
-written here in journal terms; a press's readers see the same blocks on
-the catalog's book page, a preprint server's on the preprint's page.
+Every submission carries a *publication*, the face readers eventually see.
+This feature is where its descriptive metadata is kept: the title and
+abstract, the journal's chosen metadata items (keywords, subjects,
+disciplines, supporting agencies, coverage, rights, source, type, funding
+statement, publisher ID), the data availability statement, the submission's
+language, and the copyright and license that will travel with it. Authors
+give a first version of most of this while submitting. From then on the
+editorial team maintains it on the workflow screen's Publication area, per
+version, until publication. The feature also decides who may still touch it
+afterwards: editors are warned, authors are locked out. It owns the journal's
+default license settings, the tool that re-stamps every submission with those
+defaults, and what readers see of the license and statements on the
+published item's page. It is one shared feature of OJS (journals), OMP
+(presses) and OPS (preprint servers), written here in journal terms. A
+press's readers see the same blocks on the catalog's book page, and a
+preprint server's readers on the preprint's page.
 
 ## Actors & permissions
 
 Two terms recur below. **Editorial roles** are Journal Manager, Editor,
 Section Editor, Guest Editor and the assistant roles (Copyeditor, Layout
-Editor, Proofreader) — the Site Administrator counts as one when working
-in a journal. **May edit the publication** is one gate (Rule 2) shared by
-every page in this feature and by the neighbouring publication features
-(contributors, citations, funding, galleys): Journal Managers and Editors
-always may; other participants may while their assignment carries the
-metadata-edit permission; an Author may only while no version of the
-submission is published or scheduled. Which roles reach the workflow
-screen and its stages at all is the workflow screen's own rule (see
-*Workflow screen & stage access*), not restated here. <sup>a</sup> <sup>b</sup>
+Editor, Proofreader). The Site Administrator counts as one when working in a
+journal. **May edit the publication** is one gate (Rule 2) shared by every
+page in this feature and by the neighbouring publication features
+(contributors, citations, funding, galleys). Journal Managers and Editors
+always may. Other participants may while their assignment carries the
+metadata-edit permission. An Author may only while no version of the
+submission is published or scheduled. Which roles reach the workflow screen
+and its stages at all is the workflow screen's own rule (see *Workflow screen
+& stage access*) and is not restated here. <sup>a</sup> <sup>b</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator — on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles — while assigned to the submission's current stage; an assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author — on their own submission, in the author view <sup>a</sup> |
-| **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always) — the page is absent from the author view in every app (Rule 1) <sup>a</sup> |
-| **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator — always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles — while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author — while their assignment carries the permission AND no version is published or scheduled (Rule 9); a journal or press does not grant it by default, a preprint server does [OPS1](#ops1) <sup>b</sup> |
-| **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13; a journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1)); an assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button — the button appears once their assignment carries the permission; the Author is never offered it, in any app <sup>i</sup> |
-| **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal) — Settings › Distribution › License; reaching Settings is the settings features' rule <sup>m</sup> |
-| **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator — Tools › Permissions (Rule 14) <sup>k</sup> |
-| **Read the license, data availability and funding statement blocks** | • any reader — on a published item's landing page (Rule 15) <sup>l</sup> |
+| **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator: on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles: while assigned to the submission's current stage. An assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author: on their own submission, in the author view <sup>a</sup> |
+| **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1) <sup>a</sup> |
+| **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator: always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND no version is published or scheduled (Rule 9). A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
+| **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission. The Author is never offered it, in any app <sup>i</sup> |
+| **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License. Reaching Settings is the settings features' rule <sup>m</sup> |
+| **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator: Tools › Permissions (Rule 14) <sup>k</sup> |
+| **Read the license, data availability and funding statement blocks** | • any reader: on a published item's landing page (Rule 15) <sup>l</sup> |
 
 ## Fields & validation
 
-All fields are per version and, where marked *multilingual*, kept
-separately per submission language: a form opens in the submission's
-language; a language bar at the top of the form offers each other
-language as a button, and pressing one shows that language's column
-("{Field} in {language}") beside the submission language's on every
-multilingual field; only the submission language's copy is ever required
-(Rule 3). The one-line editors (Title, Subtitle) keep Bold, Italic,
-Underline, Superscript and Subscript behind a "Formatting" menu that
-appears once the field has focus; the Abstract, Plain Language Summary
-and statement editors show a toolbar of Bold, Italic, Superscript,
-Subscript and a link button — no underline, no lists. A save that fails
-shows "Please correct one error." (or "… {n} errors.") under the form
-with a "Go to {Field}: {message}" button for each failing field and a
-"Jump to next error" button, and marks the failing field; a save the
-server refuses additionally shows the toast "The form was not saved
-because 1 error(s) were encountered. Please correct these errors and try
-again." <sup>c</sup> <sup>d</sup>
+All fields are per version. Where a field is marked *multilingual*, it is
+kept separately per submission language. A form opens in the submission's
+language. A language bar at the top of the form offers each other language
+as a button. Pressing one shows that language's column ("{Field} in
+{language}") beside the submission language's column on every multilingual
+field. Only the submission language's copy is ever required (Rule 3). The
+one-line editors (Title, Subtitle) keep Bold, Italic, Underline, Superscript
+and Subscript behind a "Formatting" menu that appears once the field has
+focus. The Abstract, Plain Language Summary and statement editors show a
+toolbar of Bold, Italic, Superscript, Subscript and a link button, with no
+underline and no lists. A save that fails shows "Please correct one error."
+(or "… {n} errors.") under the form, with a "Go to {Field}: {message}" button
+for each failing field and a "Jump to next error" button, and marks the
+failing field. A save the server refuses additionally shows the toast "The
+form was not saved because 1 error(s) were encountered. Please correct these
+errors and try again." <sup>c</sup> <sup>d</sup>
 
 **Title & Abstract page** <sup>d</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Prefix** | No | Short text, multilingual; guidance "Examples: A, The". Shown before the title wherever the full title is displayed. |
-| **Title** | Yes | One-line rich text, multilingual. Required in the submission language once the submission has been submitted: saving it empty is refused with "This field is required." |
+| **Prefix** | No | Short text, multilingual. Guidance reads "Examples: A, The". Shown before the title wherever the full title is displayed. |
+| **Title** | Yes | One-line rich text, multilingual. Required in the submission language once the submission has been submitted. Saving it empty is refused with "This field is required." |
 | **Subtitle** | No | One-line rich text, multilingual. |
-| **Abstract** | Journal/preprint server: yes unless the submission's section is set to "Do not require abstracts" [OMP2](#omp2) | Rich text, multilingual. When the section sets an abstract word count the field shows "Word Count: {n}/{limit}"; over the limit the counter gains a red error mark and Save is refused with "The abstract is too long. It should be {limit} words or less. It is currently {n} words long." An empty required abstract is refused with "This field is required." [A7](#a7). A press has no per-section abstract policy: optional, no limit [OMP2](#omp2). |
-| **Plain Language Summary** | Only when the journal *requires* it | Rich text, multilingual, shown after Abstract; present only when the journal has enabled plain language summaries (Settings that modify behavior). Shares the abstract's word limit. When the journal requires it, every OTHER Publication page's Save is refused for this field — storing the summary here does not lift the refusal ⚠ [A1](#a1). |
+| **Abstract** | Journal/preprint server: yes unless the submission's section is set to "Do not require abstracts" [OMP2](#omp2) | Rich text, multilingual. When the section sets an abstract word count, the field shows "Word Count: {n}/{limit}". Over the limit, the counter gains a red error mark and Save is refused with "The abstract is too long. It should be {limit} words or less. It is currently {n} words long." An empty required abstract is refused with "This field is required." [A7](#a7). A press has no per-section abstract policy: the field is optional with no limit [OMP2](#omp2). |
+| **Plain Language Summary** | Only when the journal *requires* it | Rich text, multilingual, shown after Abstract. Present only when the journal has enabled plain language summaries (Settings that modify behavior). Shares the abstract's word limit. When the journal requires it, every OTHER Publication page's Save is refused for this field, and storing the summary here does not lift the refusal ⚠ [A1](#a1). |
 
-**Metadata page** — only the items the journal has enabled appear, in
-the settings screen's order; with none enabled the page reads "No
-metadata fields are currently enabled." Every item carries a hover
-tooltip with the item's help text.
+**Metadata page**. Only the items the journal has enabled appear, in the
+settings screen's order. With none enabled the page reads "No metadata
+fields are currently enabled." Every item carries a hover tooltip with the
+item's help text.
 <sup>e</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Keywords**, **Subjects**, **Disciplines**, **Supporting Agencies** | No | Term lists, multilingual: type a term and press Enter (or pick a suggestion) to add it as a chip with its own "Remove {term}" button; suggestions are terms already recorded in this journal for that item and language (Rule 7). Any typed term is accepted. |
+| **Keywords**, **Subjects**, **Disciplines**, **Supporting Agencies** | No | Term lists, multilingual. Type a term and press Enter (or pick a suggestion) to add it as a chip with its own "Remove {term}" button. Suggestions are terms already recorded in this journal for that item and language (Rule 7). Any typed term is accepted. |
 | **Coverage**, **Rights**, **Source**, **Type** | No | Plain text, multilingual. |
-| **Funding Statement** | No | Rich text, multilingual. Shown to readers under "Funding Statement" (Rule 15). The structured funders list is a separate page — see *[Funding](U43-funding.md)*. |
-| **Publisher ID** | No | Plain text, single value; present when the journal enables publisher IDs for publications (see *Identifiers*). |
-| **Article Number** {OJS} | No | Plain text; present when the journal enables article numbers. |
+| **Funding Statement** | No | Rich text, multilingual. Shown to readers under "Funding Statement" (Rule 15). The structured funders list is a separate page; see *[Funding](U43-funding.md)*. |
+| **Publisher ID** | No | Plain text, single value. Present when the journal enables publisher IDs for publications (see *Identifiers*). |
+| **Article Number** {OJS} | No | Plain text. Present when the journal enables article numbers. |
 
 **Data page** <sup>f</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Data Availability Statement** | No | Rich text, multilingual; present when the journal has enabled the statement. The page itself ("Data") exists when either the statement or data citations are enabled; its data-citations part belongs to *Citations & references*. |
+| **Data Availability Statement** | No | Rich text, multilingual. Present when the journal has enabled the statement. The page itself ("Data") exists when either the statement or data citations are enabled. Its data-citations part belongs to *Citations & references*. |
 
-**Permissions & Disclosure page** — each field arrives locked with the
-value the journal will apply automatically and an **"Override"** link
-that unlocks it for a per-item value (Rule 11). <sup>g</sup>
+**Permissions & Disclosure page**. Each field arrives locked with the value
+the journal will apply automatically, and an **"Override"** link that unlocks
+it for a per-item value (Rule 11). <sup>g</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | **Copyright Holder** | No | Text, multilingual. Description: "Copyright will be assigned automatically to {holder} when this is published." ("… posted." on a preprint server), naming the journal's default holder (Rule 12). |
-| **Copyright Year** | No | A year (whole number). Description names the basis: the article's publication date, or — on a journal set to issue-based copyright — the issue's publication date. |
-| **License URL** | No | Must be a web address: anything else is refused with "This is not a valid URL." Description: "The license will be set automatically to {license name} when this is published." ("… posted." on a preprint server) — the license's name for a Creative Commons choice, the raw address for an "Other license URL"; present, with the Override lock, only when the journal has a default license; otherwise the field is plain-editable with no description. On a preprint whose author chose a license while submitting, the field arrives filled and unlocked while the description still names the server's default ⚠ [OPS2](#ops2). |
+| **Copyright Year** | No | A year (whole number). The description names the basis: the article's publication date, or, on a journal set to issue-based copyright, the issue's publication date. |
+| **License URL** | No | Must be a web address. Anything else is refused with "This is not a valid URL." Description: "The license will be set automatically to {license name} when this is published." ("… posted." on a preprint server). The name is the license's name for a Creative Commons choice, or the raw address for an "Other license URL". The description and the Override lock are present only when the journal has a default license. Otherwise the field is plain-editable with no description. On a preprint whose author chose a license while submitting, the field arrives filled and unlocked while the description still names the server's default ⚠ [OPS2](#ops2). |
 | **Default Chapter License URL** {OMP} | No | On an Edited Volume only: the license chapters inherit unless a chapter sets its own [OMP4](#omp4). |
 
 ## Rules & state
 
 1. **Where the pages live.** The workflow screen's Publication area
-   (titled "Publication"; "Preprint" on a preprint server) lists, in this
-   order, the entries this feature owns: **"Title & Abstract"** (first),
-   **"Metadata"**, **"Data"** (after References, and only when the
+   (titled "Publication"; "Preprint" on a preprint server) lists the
+   entries this feature owns, in this order: **"Title & Abstract"**
+   (first), **"Metadata"**, **"Data"** (after References, and only when the
    journal enables the data availability statement or data citations),
-   and — for editorial roles with Production-stage access only —
-   **"Permissions & Disclosure"**. Each opens a page headed "Publication:
-   {entry}" ("Preprint: {entry}" on a preprint server) carrying one form
-   with a **Save** button. The neighbouring entries (Contributors,
-   References, Funding, Galleys/Publication Formats, JATS,
+   and **"Permissions & Disclosure"**, which appears for editorial roles
+   with Production-stage access only. Each opens a page headed
+   "Publication: {entry}" ("Preprint: {entry}" on a preprint server)
+   carrying one form with a **Save** button. The neighbouring entries
+   (Contributors, References, Funding, Galleys/Publication Formats, JATS,
    Issue/Catalog Entry/Preprint Entry…) belong to their own features.
-   The author view shows the same pages minus Permissions & Disclosure;
-   on a preprint server the author view has no stage screens at all —
-   only the Preprint pages and "Production Tasks & Discussions".
+   The author view shows the same pages minus Permissions & Disclosure.
+   On a preprint server the author view has no stage screens at all, only
+   the Preprint pages and "Production Tasks & Discussions".
    An assistant assigned to a stage other than the submission's current
-   one sees the "Publication" entry with no pages beneath it (and "You
+   one sees the "Publication" entry with no pages beneath it, and "You
    don't currently have access to that stage of the workflow." on the
-   other stages). <sup>a</sup>
+   other stages. <sup>a</sup>
    <a id="edit-gate"></a>
-2. **May edit the publication — the one gate.** A person may save
-   changes to a version's metadata when any of these holds:
-   - they hold the Journal Manager or Editor role (or are the Site
-     Administrator) — no participant assignment needed;
+2. **May edit the publication: the one gate.** A person may save changes
+   to a version's metadata when any of these holds:
+   - they hold the Journal Manager or Editor role, or are the Site
+     Administrator. No participant assignment is needed;
    - they are a participant on the submission whose assignment carries
      the metadata-edit permission. A new assignment starts from the
      role's setting "Permit submission metadata edit." (Settings ›
-     Users & Roles › Roles) — on by default for Editor and Section
-     Editor, off for the assistant roles and, on a journal or press, for
-     Author — and the person adding a participant can tick or untick
+     Users & Roles › Roles). That setting is on by default for Editor and
+     Section Editor, and off for the assistant roles and, on a journal or
+     press, for Author. The person adding a participant can tick or untick
      "Allow this person to make changes to the publication, such as the
      title, abstract, metadata and other publication details…" for that
      assignment (see *Stage participants*);
    - for an Author, additionally: no version of the submission is
      published or scheduled (Rule 9).
-   The gate is evaluated per submission, not per version: whoever may
+   The gate is evaluated per submission, not per version. Whoever may
    edit one version may edit them all. <sup>b</sup>
 3. **Per version, per language.** Each publication version carries its
-   own copy of every field on these pages; the version switch on the
-   Publication area chooses which one the pages show and save (creating
-   and switching versions is *Publish, schedule & versions*'s). Forms
+   own copy of every field on these pages. The version switch on the
+   Publication area chooses which one the pages show and save. Creating
+   and switching versions belongs to *Publish, schedule & versions*. Forms
    open in the submission language, which is the only language ever
-   required. On a journal with several submission-metadata languages
+   required. On a journal with several submission-metadata languages,
    each form carries one language bar: the submission language as a
-   label, every other language as a button. Pressing a button shows
-   that language's column ("{Field} in {language}", never marked
-   required) beside the submission language's on every multilingual
-   field, and each submission-language heading counts "{n}/{m}
-   languages completed". A value typed in the other language saves with
-   the form; the form reopens on the submission language alone.
-   <sup>c</sup>
-4. **Saving.** Pressing **Save** writes the whole form: "Saving" then
-   "Saved" appears beside the button, and the values are the ones a
-   reload shows. A failing save keeps the page open with the error
-   summary (Fields & validation) and the offending fields marked, the
-   "Saving" note clears without "Saved", and nothing is written. Every
-   successful save adds the activity-log line "Submission metadata
-   updated" (Side effects). <sup>c</sup>
-5. **Title & Abstract.** The title is required in the submission
-   language for any submitted submission; the abstract's requirement and
-   word limit follow the submission's section ("Do not require
-   abstracts", "Word Count") on a journal or preprint server, and a press
-   applies neither [OMP2](#omp2). The counter "Word Count: {n}/{limit}"
-   appears only when the section sets a limit; an over-limit abstract
-   is refused on Save, an empty required one before the save is even
-   sent (Fields & validation) [A7](#a7). The Plain Language Summary
-   field follows Rule 6's enablement; when the journal requires it, the
-   Title & Abstract page refuses an empty summary like any required
-   field, and every other Publication page refuses to save at all
-   ⚠ [A1](#a1). <sup>d</sup>
+   label, every other language as a button. Pressing a button shows that
+   language's column ("{Field} in {language}", never marked required)
+   beside the submission language's column on every multilingual field.
+   Each submission-language heading then counts "{n}/{m} languages
+   completed". A value typed in the other language saves with the form.
+   The form reopens on the submission language alone. <sup>c</sup>
+4. **Saving.** Pressing **Save** writes the whole form. "Saving" and then
+   "Saved" appear beside the button, and the values are the ones a reload
+   shows. A failing save keeps the page open with the error summary
+   (Fields & validation) and the offending fields marked. The "Saving"
+   note clears without "Saved", and nothing is written. Every successful
+   save adds the activity-log line "Submission metadata updated" (Side
+   effects). <sup>c</sup>
+5. **Title & Abstract.** The title is required in the submission language
+   for any submitted submission. On a journal or preprint server, the
+   abstract's requirement and word limit follow the submission's section
+   ("Do not require abstracts", "Word Count"). A press applies neither
+   [OMP2](#omp2). The counter "Word Count: {n}/{limit}" appears only when
+   the section sets a limit. An over-limit abstract is refused on Save.
+   An empty required one is refused before the save is even sent (Fields
+   & validation) [A7](#a7). The Plain Language Summary field follows Rule
+   6's enablement. When the journal requires the summary, the Title &
+   Abstract page refuses an empty summary like any required field, and
+   every other Publication page refuses to save at all ⚠ [A1](#a1).
+   <sup>d</sup>
 6. **The Metadata page mirrors the journal's metadata setup.** Each item
    on Settings › Workflow › Metadata has an "Enable {item} metadata"
-   switch; the Metadata page shows exactly the enabled items (Fields &
-   validation), in the settings screen's order, and the ask/require
-   choice under each switch concerns the submission wizard only (see
+   switch. The Metadata page shows exactly the enabled items (Fields &
+   validation), in the settings screen's order. The ask/require choice
+   under each switch concerns the submission wizard only (see
    *[Submission wizard](U21-submission-wizard.md)*). Switching an item
-   off hides its field but keeps the stored values; switching it back
-   on shows them again. With nothing enabled the page reads "No metadata
+   off hides its field but keeps the stored values. Switching it back on
+   shows them again. With nothing enabled the page reads "No metadata
    fields are currently enabled." and has no Save button. <sup>e</sup>
-7. **Term lists (keywords, subjects, disciplines, supporting
-   agencies).** Typing in the field shows suggestions drawn from terms
-   already recorded in this journal for the same item and language, on
-   any submission; Enter or a click adds the term as a chip, the chip's
-   × removes it, and a term nobody has used before is accepted as typed.
+7. **Term lists (keywords, subjects, disciplines, supporting agencies).**
+   Typing in the field shows suggestions drawn from terms already
+   recorded in this journal for the same item and language, on any
+   submission. Enter or a click adds the term as a chip. The chip's ×
+   removes it. A term nobody has used before is accepted as typed.
    Suggestions are refreshed after each save, so a term added on one
    submission is offered on the next ⚠ [A10](#a10). <sup>e</sup>
 8. **A published version warns editors, and stays editable.** On every
-   Publication page of a published version an editorial role sees the
+   Publication page of a published version, an editorial role sees the
    banner "Warning: This version has been published. Editing it may
    impact the published content." The forms stay editable for whoever
    may edit the publication (Rule 2), and a save changes what readers
@@ -213,91 +211,92 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
    pages become read-only (Rule 10) on every version. The published
    version additionally shows the banner "This version has been
    published and can not be edited." ("This version has been posted and
-   can not be edited." on a preprint server); a version that is only
-   scheduled shows no banner — Save is simply unavailable. Publishing
-   also switches the Author's assignment permission off for good: after
-   an unpublish the pages stay read-only until an editor re-ticks "Allow
+   can not be edited." on a preprint server). A version that is only
+   scheduled shows no banner; Save is simply unavailable. Publishing
+   also switches the Author's assignment permission off for good. After
+   an unpublish, the pages stay read-only until an editor re-ticks "Allow
    this person to make changes to the publication…" on the Author's
    assignment, which restores saving at once ⚠ [A4](#a4). <sup>j</sup>
 10. **Read-only presentation.** A viewer who may not edit the publication
-    gets the same pages with the Save button unavailable; the fields
+    gets the same pages with the Save button unavailable. The fields
     still look editable ⚠ [A8](#a8). Nothing they type is saved.
     <sup>c</sup>
 11. **Permissions & Disclosure: defaults and overrides.** Copyright
     Holder and Copyright Year arrive locked, each with a description
-    naming the value the journal will apply and an **"Override"** link;
+    naming the value the journal will apply and an **"Override"** link.
     License URL is locked the same way only when the journal has a
     default license. "Override" unlocks the field for a per-item value,
-    which Save keeps. Once a field holds a value it opens unlocked on
-    later visits; clearing it and saving returns it to "automatic"
+    which Save keeps. Once a field holds a value, it opens unlocked on
+    later visits. Clearing it and saving returns it to "automatic"
     (Rule 12). <sup>g</sup>
 12. **Publishing fills the empty permission fields from the defaults.**
     When a version is published (not merely scheduled), any of the three
-    fields still empty is filled once: Copyright Holder from Settings ›
-    Distribution › License ("Author" → the contributors' names as one
-    string, each followed by their contributor role in parentheses —
-    "Alice Probe (Author)" ⚠ [A11](#a11); "Journal", or no choice saved
-    yet → the journal's name; "Custom copyright statement" → the custom
-    text, even when it is empty ⚠ [A12](#a12)); Copyright Year from the
-    item's publication date — on a journal set to "Use the issue's
-    publication date", from its issue's date instead (the year of
-    publishing when the issue has no date yet); License URL from the
-    journal's default license (left empty when the journal has none). The
-    same holder string is what the locked Copyright Holder's description
-    announces before publishing (Fields & validation). A field already
-    holding a value is never overwritten, so an override entered before
-    publishing is what readers see (Rule 15). The publish step itself
-    belongs to *Publish, schedule & versions*. <sup>h</sup>
+    fields still empty is filled once. Copyright Holder comes from
+    Settings › Distribution › License: with "Author", the contributors'
+    names as one string, each followed by their contributor role in
+    parentheses, "Alice Probe (Author)" ⚠ [A11](#a11); with "Journal", or
+    no choice saved yet, the journal's name; with "Custom copyright
+    statement", the custom text, even when it is empty ⚠ [A12](#a12).
+    Copyright Year comes from the item's publication date. On a journal
+    set to "Use the issue's publication date" it comes from its issue's
+    date instead (the year of publishing when the issue has no date yet).
+    License URL comes from the journal's default license, and is left
+    empty when the journal has none. The same holder string is what the
+    locked Copyright Holder's description announces before publishing
+    (Fields & validation). A field already holding a value is never
+    overwritten, so an override entered before publishing is what readers
+    see (Rule 15). The publish step itself belongs to *Publish, schedule &
+    versions*. <sup>h</sup>
 13. **Change Submission Language.**
     - **13a — the readout and the button.** Every stage screen shows
       "Current Submission Language: {language}" and nothing after it.
-      For editorial roles every Publication page shows the same readout
-      followed — while the submission has exactly one version and is not
-      published — by a **"Change"** button, offered to roles who may edit
-      or publish (Actors). Once a second version exists or the item is
+      For editorial roles, every Publication page shows the same readout.
+      While the submission has exactly one version and is not published,
+      a **"Change"** button follows it, offered to roles who may edit or
+      publish (Actors). Once a second version exists or the item is
       published, the button AND the readout leave the Publication pages
       together, while the stage screens keep the readout ⚠ [A6](#a6). A
       journal article published into an issue that is not yet published
       keeps the readout and the button beside "Status: Published", and
-      every Confirm on it is refused (13c) ⚠ [OJS1](#ojs1); whether a
+      every Confirm on it is refused (13c) ⚠ [OJS1](#ojs1). Whether a
       merely scheduled article offers the button is open ⚠ [A5](#a5).
-      The Author's pages never show the button and their Publication
-      pages show no readout (their stage screens do); on a preprint
+      The Author's pages never show the button, and their Publication
+      pages show no readout (their stage screens do). On a preprint
       server the Author has no stage screen and sees no readout anywhere.
     - **13b — the panel.** Change opens the side panel "Change Submission
-      Language For", subtitled with the item's title, holding the
-      required radio list **Submission Language** — the journal's
+      Language For", subtitled with the item's title. It holds the
+      required radio list **Submission Language** (the journal's
       submission languages plus the current one, described "This is the
       primary submission language. Changing this will have effects on
-      the submission and the metadata entered" — and the buttons
+      the submission and the metadata entered") and the buttons
       **Cancel** / **Confirm**. With the current language selected there
       is nothing else. Picking a different language reveals, in bold,
       "Before changing the submission language, ensure you have filled
       out the following metadata fields to maintain system integrity.
       Also, note that contributor information and file names will be
-      copied from previously entered information.", followed by **Title**
-      (required; "Enter submission title here in {language}. You can
-      format your title as needed") and — where the section requires
-      abstracts — **Abstract**, marked required and enforced ("This field
-      is required.") although its description reads "Including the
-      abstract in {language} is recommended. This helps ensure that the
-      content is accessible" ⚠ [A14](#a14); a press asks for the title
-      only. Each box is pre-filled with any text already stored in the
-      chosen language, and Confirm refuses an empty required box — both
-      dependable only once the freshly opened panel has finished its
-      background loading ⚠ [A15](#a15).
+      copied from previously entered information." This is followed by
+      **Title** (required; "Enter submission title here in {language}. You
+      can format your title as needed") and, where the section requires
+      abstracts, **Abstract**. The Abstract is marked required and
+      enforced ("This field is required.") although its description reads
+      "Including the abstract in {language} is recommended. This helps
+      ensure that the content is accessible" ⚠ [A14](#a14). A press asks
+      for the title only. Each box is pre-filled with any text already
+      stored in the chosen language, and Confirm refuses an empty
+      required box. Both are dependable only once the freshly opened
+      panel has finished its background loading ⚠ [A15](#a15).
     - **13c — Confirm and Cancel.** **Confirm** stores the title (and
-      abstract) in the new language, makes it the submission language,
-      copies each file's name and each contributor's names and
-      affiliation names into the new language where it had none, and
-      reloads the workflow screen on Title & Abstract — now open in the
+      abstract) in the new language and makes it the submission language.
+      It copies each file's name and each contributor's names and
+      affiliation names into the new language where it had none. It then
+      reloads the workflow screen on Title & Abstract, now open in the
       new language, with the old language's copy behind the language bar
       (Rule 3). **Cancel** closes the panel and changes nothing. A change
-      the journal refuses — the item gained a second version or was
-      published meanwhile, or is the [OJS1](#ojs1) case — shows the toast "You can
-      not change language of this submission because it already has more
-      than one publication version or a published publication." and
-      leaves the panel open with its values. <sup>i</sup>
+      the journal refuses (the item gained a second version or was
+      published meanwhile, or is the [OJS1](#ojs1) case) shows the toast
+      "You can not change language of this submission because it already
+      has more than one publication version or a published publication."
+      and leaves the panel open with its values. <sup>i</sup>
 14. **Reset permissions (Tools › Permissions).** The Tools page's
     "Permissions" tab shows "Reset Article Permissions" ("Reset Monograph
     Permissions" on a press, "Reset Preprint Permissions" on a preprint
@@ -305,58 +304,57 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
     button opens the browser's own OK/Cancel box asking "Are you sure you
     wish to reset permissions data for all articles? This action can not
     be undone." ("… for all preprints? …" on a preprint server; the
-    press's wording is older and milder
-    ⚠ [OMP3](#omp3)). Cancel sends nothing — but leaves the button greyed
-    until the page is reloaded ⚠ [A13](#a13). OK overwrites Copyright
-    Year, Copyright Holder and License URL on every version of every
-    submission in the journal with the defaults of Rule 12 as computed
-    now, then shows "Article permissions were successfully reset."
-    ("Monograph permissions were successfully reset." on a press,
-    "Preprint permissions were successfully reset." on a preprint
-    server).
-    Per-item overrides are lost; there is no undo. The tool reaches
-    unpublished and declined submissions too ⚠ [A3](#a3): on a journal
-    set to the article's publication date — and on a preprint server —
-    such an item receives the year 1970 ⚠ [A2](#a2); on a journal set to
+    press's wording is older and milder ⚠ [OMP3](#omp3)). Cancel sends
+    nothing, but leaves the button greyed until the page is reloaded
+    ⚠ [A13](#a13). OK overwrites Copyright Year, Copyright Holder and
+    License URL on every version of every submission in the journal with
+    the defaults of Rule 12 as computed now. It then shows "Article
+    permissions were successfully reset." ("Monograph permissions were
+    successfully reset." on a press, "Preprint permissions were
+    successfully reset." on a preprint server).
+    Per-item overrides are lost, and there is no undo. The tool reaches
+    unpublished and declined submissions too ⚠ [A3](#a3). On a journal
+    set to the article's publication date, and on a preprint server,
+    such an item receives the year 1970 ⚠ [A2](#a2). On a journal set to
     the issue's publication date it receives the current year (a
-    published item its issue's year); a press gives the current year.
+    published item its issue's year). A press gives the current year.
     <sup>k</sup>
 15. **What readers see.** On a published item's landing page:
     - a **"License"** block appears when the item has a License URL or
       the journal has License Terms. With a Creative Commons license it
       shows "Copyright (c) {year} {holder}" (when a holder is set) and
       the Creative Commons badge with its sentence "This work is licensed
-      under a Creative Commons … License."; with any other License URL it
+      under a Creative Commons … License." With any other License URL it
       shows a link to that address labelled with the copyright statement
-      (or "License" when no holder is set); the journal's License Terms
-      text follows in either case — with terms but no License URL the
+      (or "License" when no holder is set). The journal's License Terms
+      text follows in either case. With terms but no License URL, the
       block is the heading and the terms alone. On a press the copyright
       statement is a separate line above the block, shown whenever year
       and holder are set even with no license, and the block itself
       carries only the badge or link (always labelled "License") and the
-      terms [OMP1](#omp1); with terms but no License URL the press's
+      terms [OMP1](#omp1). With terms but no License URL, the press's
       block shows a "License" link that leads nowhere ⚠ [OMP5](#omp5);
     - a **"Data Availability Statement"** block and a **"Funding
       Statement"** block appear when the respective field is filled, and
-      not otherwise — in that order, above the License block.
-    The keywords, abstract and plain language summary display on the same
-    page belongs to *Article landing page & reading* (press: *Catalog
-    book page*). <sup>l</sup>
+      not otherwise, in that order, above the License block.
+    The display of keywords, abstract and plain language summary on the
+    same page belongs to *Article landing page & reading* (press:
+    *Catalog book page*). <sup>l</sup>
 16. **The Data page.** With the data availability statement enabled, the
-    "Data" page carries the **Data Availability Statement** field (and,
-    when data citations are enabled, the data-citations list owned by
-    *Citations & references*). Disabling the statement removes the field
-    but keeps the stored text, which readers continue to see (Rule 15).
-    <sup>f</sup>
+    "Data" page carries the **Data Availability Statement** field. When
+    data citations are enabled, it also carries the data-citations list
+    owned by *Citations & references*. Disabling the statement removes
+    the field but keeps the stored text, which readers continue to see
+    (Rule 15). <sup>f</sup>
 
 ## Side effects
 
-- Every successful save on any of these pages — and each version the
-  reset tool touches — adds one activity-log line "Submission metadata
-  updated", attributed to the saving user; when Login As is active the
-  line names the real user, with the impersonated one in an
-  "(acting as {user})" suffix. No email or notification is sent. <sup>c</sup>
-- Publishing a version fills its empty permission fields (Rule 12); the
+- Every successful save on any of these pages, and each version the reset
+  tool touches, adds one activity-log line "Submission metadata updated",
+  attributed to the saving user. When Login As is active, the line names
+  the real user, with the impersonated one in an "(acting as {user})"
+  suffix. No email or notification is sent. <sup>c</sup>
+- Publishing a version fills its empty permission fields (Rule 12). The
   fill is part of the publish action and shows up on the Permissions &
   Disclosure page afterwards. <sup>h</sup>
 - Changing the submission language additionally rewrites the submission's
@@ -364,98 +362,97 @@ that unlocks it for a per-item value (Rule 11). <sup>g</sup>
   affiliation names into the new language (Rule 13). <sup>i</sup>
 - Reset permissions shows the success toast to the person who ran it and
   nothing to anyone else. <sup>k</sup>
-- Publication metadata travels outward with the item — DOI registration,
-  export, the published page — through the features that own those
-  surfaces; this feature only edits it.
+- Publication metadata travels outward with the item (DOI registration,
+  export, the published page) through the features that own those
+  surfaces. This feature only edits it.
 
 ## Settings that modify behavior
 
-- **Settings › Workflow › Metadata** — one section per item. This
-  feature's are Keywords, Subjects, Disciplines, Supporting Agencies,
+- **Settings › Workflow › Metadata**: one section per item. This feature's
+  items are Keywords, Subjects, Disciplines, Supporting Agencies,
   Coverage, Rights, Source, Type, Funding Statement, Data Availability
-  Statement and Plain Language Summary; the screen also carries other
+  Statement and Plain Language Summary. The screen also carries other
   features' sections (Competing Interests, References and its metadata
   lookup, Funders and grant-ID validation, Data Citations, Categories).
-  The "Enable {item} metadata" box makes the field appear on the Metadata /
-  Data / Title & Abstract page (Rules 6, 16); the radio under it ("Do not
+  The "Enable {item} metadata" box makes the field appear on the Metadata,
+  Data or Title & Abstract page (Rules 6, 16). The radio under it ("Do not
   request… / Ask the author… / Require the author…") governs the wizard
-  only — except Plain Language Summary (listed first on the screen),
-  whose "Require" is enforced on every publication save ⚠ [A1](#a1).
-  The same screen also holds "Publisher ID" in every app (per-app
-  checkboxes enable it for publications and the app's other objects →
-  Publisher ID field) and, journal only, "Article Number". <sup>m</sup>
-- **Settings › Distribution › License** — "Copyright Holder" (Author /
+  only, with one exception: Plain Language Summary (listed first on the
+  screen), whose "Require" is enforced on every publication save
+  ⚠ [A1](#a1). The same screen also holds "Publisher ID" in every app
+  (per-app checkboxes enable it for publications and the app's other
+  objects, which produces the Publisher ID field) and, journal only,
+  "Article Number". <sup>m</sup>
+- **Settings › Distribution › License**: "Copyright Holder" (Author /
   Journal / Custom copyright statement, with the "Copyright statement"
-  text for the last — accepted even when left empty ⚠ [A12](#a12)),
-  "License" (the six Creative Commons 4.0 licenses or "Other license
-  URL" with an address), "License Terms" (rich text shown to readers,
-  Rule 15), and — journal only — "Copyright Year" basis ("Use the issue's
-  publication date", the default / "Use the article's publication
-  date"). A fresh journal has no holder chosen (Rule 12 then names the
-  journal) and shows "Other license URL" selected with an empty address,
-  which is "no default license". These feed Rules 11, 12 and 14.
-  <sup>m</sup>
+  text for the last, accepted even when left empty ⚠ [A12](#a12)),
+  "License" (the six Creative Commons 4.0 licenses or "Other license URL"
+  with an address), "License Terms" (rich text shown to readers, Rule 15),
+  and, journal only, the "Copyright Year" basis ("Use the issue's
+  publication date", the default / "Use the article's publication date").
+  A fresh journal has no holder chosen (Rule 12 then names the journal)
+  and shows "Other license URL" selected with an empty address, which
+  means "no default license". These feed Rules 11, 12 and 14. <sup>m</sup>
 - **Sections › Word Count / "Do not require abstracts"** (journal,
-  preprint server) — the abstract policy of Rule 5; owned by the sections
+  preprint server): the abstract policy of Rule 5. Owned by the sections
   feature.
 - **Roles › "Permit submission metadata edit."** per role, and the
   per-participant "Allow this person to make changes to the
-  publication…" checkbox — the assignment side of Rule 2; owned by the
+  publication…" checkbox: the assignment side of Rule 2. Owned by the
   roles and stage-participants features.
-- **Submission languages** (Settings › Website › Languages) — more than
+- **Submission languages** (Settings › Website › Languages): more than
   one submission-metadata language adds the per-field language switch
   (Rule 3) and the choices in Change Submission Language (Rule 13).
 
 ## Cross-feature interactions
 
-- *[Submission wizard](U21-submission-wizard.md)* — the seam: the wizard
-  owns its steps, which fields it asks for and which block submitting;
-  this spec owns the fields' meaning, the journal settings that enable
-  them, and every edit after the wizard. The wizard's Details step is a
-  slice of the Title & Abstract page (no prefix or subtitle; the plain
-  language summary appears there when the journal's setting asks for or
-  requires it [A9](#a9)) plus keywords; its "For the Editors" step is the
-  Metadata page's asked/required items; on a preprint server its License
+- *[Submission wizard](U21-submission-wizard.md)*: the wizard owns its
+  steps, which fields it asks for and which block submitting. This spec
+  owns the fields' meaning, the journal settings that enable them, and
+  every edit after the wizard. The wizard's Details step is a slice of the
+  Title & Abstract page (no prefix or subtitle; the plain language summary
+  appears there when the journal's setting asks for or requires it
+  [A9](#a9)) plus keywords. Its "For the Editors" step is the Metadata
+  page's asked and required items. On a preprint server its License
   section sets the License URL of Rule 11 before posting. With the
   summary required, the wizard's own saves are hit by the same refusal
-  as this feature's pages (A1); what the author then sees is the
-  wizard's to describe.
-- *Workflow screen & stage access* (no spec yet) — owns which roles reach
-  the workflow screen, its stages and the Publication area; this spec's
+  as this feature's pages (A1). What the author then sees is the wizard's
+  to describe.
+- *Workflow screen & stage access* (no spec yet): owns which roles reach
+  the workflow screen, its stages and the Publication area. This spec's
   Actors rows start from that access.
-- *Stage participants* (no spec yet) — owns the participant assignment
-  and its "Allow this person to make changes to the publication…"
-  checkbox that Rule 2 reads.
-- *Publish, schedule & versions* (no spec yet) — owns publishing,
-  scheduling, unpublishing and versions, including the "Review
-  Publishing Details" panel a journal shows before scheduling; this spec
-  owns the edit locks those states impose (Rules 8–9), the
-  permission-field fill that publishing performs (Rule 12), the
-  language-change restriction (Rule 13), and the record of how a
-  required plain language summary reaches that panel (A1). One of that
-  feature's findings shapes this spec's scheduled-state checks: on a
-  journal the panel's "Assign To Future Issue and Schedule Only" choice
-  can publish the article at once; the dependable way to a scheduled
-  article is to save that choice first on the Publication area's
-  "Publication Settings" entry page, then re-pick it in the "Schedule
-  For Publication" panel. A further finding for that feature, observed
-  while this feature's suites were built: the panel's issue-assignment
-  radios race their own preselection, and changing them early ends in a
-  server refusal whose raw technical message surfaces in a dialog.
-- *Issues* (no spec yet) — owns issues and their publication date, which
+- *Stage participants* (no spec yet): owns the participant assignment and
+  its "Allow this person to make changes to the publication…" checkbox
+  that Rule 2 reads.
+- *Publish, schedule & versions* (no spec yet): owns publishing,
+  scheduling, unpublishing and versions, including the "Review Publishing
+  Details" panel a journal shows before scheduling. This spec owns the
+  edit locks those states impose (Rules 8–9), the permission-field fill
+  that publishing performs (Rule 12), the language-change restriction
+  (Rule 13), and the record of how a required plain language summary
+  reaches that panel (A1). One of that feature's findings shapes this
+  spec's scheduled-state checks: on a journal, the panel's "Assign To
+  Future Issue and Schedule Only" choice can publish the article at once.
+  The dependable way to a scheduled article is to save that choice first
+  on the Publication area's "Publication Settings" entry page, then
+  re-pick it in the "Schedule For Publication" panel. A further finding
+  for that feature was observed while this feature's suites were built:
+  the panel's issue-assignment radios race their own preselection, and
+  changing them early ends in a server refusal whose raw technical
+  message surfaces in a dialog.
+- *Issues* (no spec yet): owns issues and their publication date, which
   Rule 12 reads on a journal set to the issue's date.
 - *[Funding](U43-funding.md)*, *Contributors & affiliations*, *Citations
-  & references*, *Galleys*, *Catalog management* (no
-  specs yet except Funding) — sibling Publication-area pages that reuse
-  the edit gate of Rule 2 ([→ edit gate](#edit-gate)) and the
-  published-version banners of Rules 8–9. *Identifiers* has no
-  Publication-area page at the pinned commits: DOI management lives on
-  the dashboard's "DOIs" page, and the publisher ID on this feature's
-  Metadata page.
-- *Import & export* (no spec yet) — owns the Tools page and its tab bar;
-  the Permissions tab's content is Rule 14.
+  & references*, *Galleys*, *Catalog management* (no specs yet except
+  Funding): sibling Publication-area pages that reuse the edit gate of
+  Rule 2 ([→ edit gate](#edit-gate)) and the published-version banners of
+  Rules 8–9. *Identifiers* has no Publication-area page at the pinned
+  commits: DOI management lives on the dashboard's "DOIs" page, and the
+  publisher ID on this feature's Metadata page.
+- *Import & export* (no spec yet): owns the Tools page and its tab bar.
+  The Permissions tab's content is Rule 14.
 - *Article landing page & reading* (no spec yet; press counterpart
-  *Catalog book page*) — owns the landing page; the License, Data
+  *Catalog book page*): owns the landing page. The License, Data
   Availability Statement and Funding Statement blocks on it are described
   here (Rule 15) as this feature's reader surface.
 
@@ -465,40 +462,40 @@ Common to all three apps (OMP/OPS vocabulary per the
 [application glossary](GLOSSARY.md)):
 
 1. **Edit the title and abstract** — Journal Manager: open a submitted,
-   unpublished submission's workflow, Publication area, "Title &
-   Abstract". The page is headed "Publication: Title & Abstract" and
-   shows Prefix (with "Examples: A, The"), Title, Subtitle and Abstract,
-   filled with what the author entered. Type "The" as Prefix, add a
-   Subtitle, make one word of the Title italic (click into the Title,
-   open "Formatting", pick Italic), change the Abstract; press Save —
-   "Saved" appears beside the button. Clear the Title and Save again:
-   the summary "Please correct one error. Go to Title: This field is
-   required. Jump to next error" appears with "This field is required."
-   under Title, and nothing is saved (restore the title, Save). Reload
-   the page: prefix, subtitle, italic title and
-   abstract are as saved; the submission's title in the dashboard list
-   reads with the new prefix; the Activity Log shows a new "Submission
-   metadata updated" line. <sup>s1</sup>
+   unpublished submission's workflow, then the Publication area, then
+   "Title & Abstract". The page is headed "Publication: Title & Abstract"
+   and shows Prefix (with "Examples: A, The"), Title, Subtitle and
+   Abstract, filled with what the author entered. Type "The" as Prefix,
+   add a Subtitle, make one word of the Title italic (click into the
+   Title, open "Formatting", pick Italic), and change the Abstract. Press
+   Save: "Saved" appears beside the button. Clear the Title and Save
+   again: the summary "Please correct one error. Go to Title: This field
+   is required. Jump to next error" appears with "This field is required."
+   under Title, and nothing is saved. Restore the title and Save. Reload
+   the page: prefix, subtitle, italic title and abstract are as saved. The
+   submission's title in the dashboard list reads with the new prefix.
+   The Activity Log shows a new "Submission metadata updated" line.
+   <sup>s1</sup>
 2. **The Metadata page follows the journal's setup** — Journal Manager,
    on a scratch journal: on Settings › Workflow › Metadata untick every
-   "Enable … metadata" box and save; the submission's "Metadata" page now
+   "Enable … metadata" box and save. The submission's "Metadata" page now
    reads "No metadata fields are currently enabled." with no Save button.
-   Enable Keywords and Coverage; the page shows exactly Keywords and
-   Coverage. Type "ocean acidification" in Keywords, press Enter — a chip
-   appears with a "Remove ocean acidification" button; press it, the
-   chip goes; add it again, then a term nobody has used before — both
-   become chips; Save, reload: both chips are there. Disable Coverage
+   Enable Keywords and Coverage. The page shows exactly Keywords and
+   Coverage. Type "ocean acidification" in Keywords and press Enter: a
+   chip appears with a "Remove ocean acidification" button. Press it and
+   the chip goes. Add it again, then a term nobody has used before. Both
+   become chips. Save and reload: both chips are there. Disable Coverage
    after filling it, then re-enable it: the value is back. <sup>s2</sup>
 3. **The Author before and after publication** — Author, then Journal
-   Manager: as the Author open your own submitted submission's "Title &
+   Manager: as the Author, open your own submitted submission's "Title &
    Abstract" (My Submissions › the item › workflow). On a journal or
-   press the fields are shown but Save is unavailable and nothing typed
-   persists on reload; on a preprint server the page saves like scenario
-   1 [OPS1](#ops1). As the Journal Manager publish the submission. Back
+   press the fields are shown but Save is unavailable, and nothing typed
+   persists on reload. On a preprint server the page saves like scenario
+   1 [OPS1](#ops1). As the Journal Manager, publish the submission. Back
    as the Author: the published version's Title & Abstract shows "This
    version has been published and can not be edited." ("… has been
    posted and can not be edited." on the preprint server) and Save is
-   unavailable — on the preprint server too. Journal Manager: unpublish.
+   unavailable, on the preprint server too. Journal Manager: unpublish.
    Author: the page is still read-only, with no banner (⚠ [A4](#a4)).
    Journal Manager: on a stage screen's Participants panel open the
    Author's "Edit Assignment", tick "Allow this person to make changes
@@ -506,12 +503,12 @@ Common to all three apps (OMP/OPS vocabulary per the
    schedule a different submission of the same Author to a future issue
    instead of publishing it (save "Assign To Future Issue and Schedule
    Only" on its Publication area's "Publication Settings" page first,
-   then re-pick it in the "Schedule For Publication" panel) — its Title
-   & Abstract is read-only for the Author with no banner at all. <sup>s3</sup>
+   then re-pick it in the "Schedule For Publication" panel). Its Title &
+   Abstract is read-only for the Author with no banner at all. <sup>s3</sup>
 4. **Editing a published version** — Journal Manager, on a published
    item: every Publication page shows "Warning: This version has been
    published. Editing it may impact the published content." Change the
-   Abstract on Title & Abstract and Save — "Saved". Open the item's
+   Abstract on Title & Abstract and Save: "Saved". Open the item's
    landing page as a reader: the new abstract is shown. <sup>s4</sup>
 5. **Copyright and license: defaults, override, publish** — Journal
    Manager, on a scratch journal whose Settings › Distribution › License
@@ -519,14 +516,14 @@ Common to all three apps (OMP/OPS vocabulary per the
    a License Terms paragraph: open an unpublished submission's
    "Permissions & Disclosure". Copyright Holder is locked with "Copyright
    will be assigned automatically to {contributor name} (Author) when
-   this is published." — the role label is part of the string
-   ([A11](#a11)) — and an "Override" link; Copyright Year is locked with
-   its basis sentence; License URL is locked with "The license will be
-   set automatically to CC Attribution 4.0 when this is published." Press
+   this is published." (the role label is part of the string,
+   [A11](#a11)) and an "Override" link. Copyright Year is locked with its
+   basis sentence. License URL is locked with "The license will be set
+   automatically to CC Attribution 4.0 when this is published." Press
    Override under Copyright Holder, type "Example Society", Save. Publish
    the item. Reopen the page: Copyright Holder "Example Society"
    (unlocked), Copyright Year the current year, License URL the CC
-   Attribution 4.0 address — all editable. Open the landing page: the
+   Attribution 4.0 address, all editable. Open the landing page: the
    "License" block shows "Copyright (c) {year} Example Society", the
    Creative Commons badge with "This work is licensed under a Creative
    Commons Attribution 4.0 International License." and the License Terms
@@ -537,54 +534,54 @@ Common to all three apps (OMP/OPS vocabulary per the
    journal with two submission languages and one unpublished,
    single-version submission in the first language: any Publication page
    reads "Current Submission Language: {first language}" with a "Change"
-   button; every stage screen shows the readout without it. Press
+   button. Every stage screen shows the readout without it. Press
    Change: the panel "Change Submission Language For" names the item and
-   offers both languages under Submission Language; Cancel closes it
-   with nothing changed. Press again, pick the second language: the
+   offers both languages under Submission Language. Cancel closes it
+   with nothing changed. Press again and pick the second language: the
    warning about metadata and copied names appears with a Title box
-   (required) in the second language and — in a section that requires
-   abstracts — an Abstract box; type a title, leave the abstract empty,
-   Confirm: "This field is required." under Abstract, nothing sent
-   ([A14](#a14)); fill it, Confirm. The screen reloads on Title &
-   Abstract, open in the second language with the new title; the readout
-   names the second language; the first language's title is still there
-   in the column the form's language bar reveals; the contributor's
+   (required) in the second language and, in a section that requires
+   abstracts, an Abstract box. Type a title, leave the abstract empty,
+   Confirm: "This field is required." appears under Abstract and nothing
+   is sent ([A14](#a14)). Fill it, Confirm. The screen reloads on Title &
+   Abstract, open in the second language with the new title. The readout
+   names the second language. The first language's title is still there
+   in the column the form's language bar reveals. The contributor's
    "Edit" form shows the given and family names in the second language,
    copied from the first. Controls: on a published item, and on an item
-   with two versions, neither readout nor "Change" on any Publication
-   page (the stage screens keep the readout); the Author's pages never
-   show the button. Journal only: an article published into a future
-   issue that is not yet published still shows "Change", and confirming
-   a change there ends in the toast "You can not change language of this
-   submission…" with the panel still open ([OJS1](#ojs1)). <sup>s6</sup>
+   with two versions, there is neither readout nor "Change" on any
+   Publication page (the stage screens keep the readout). The Author's
+   pages never show the button. Journal only: an article published into a
+   future issue that is not yet published still shows "Change", and
+   confirming a change there ends in the toast "You can not change
+   language of this submission…" with the panel still open
+   ([OJS1](#ojs1)). <sup>s6</sup>
 7. **Reset every item's permissions** — Journal Manager, on a scratch
    journal with one published item carrying an overridden Copyright
    Holder (scenario 5), one unpublished submission and one declined
-   submission: open Tools › Permissions; press "Reset Article
-   Permissions"; the browser's own confirm box reads "Are you sure you
+   submission: open Tools › Permissions and press "Reset Article
+   Permissions". The browser's own confirm box reads "Are you sure you
    wish to reset permissions data for all articles? This action can not
    be undone." ("… for all preprints? …" on a preprint server; the
-   press's sentence is structurally different ⚠ [OMP3](#omp3)) —
-   Cancel: nothing changes, and the button stays greyed
-   ([A13](#a13)). Reload, press again, OK: the toast "Article permissions
-   were successfully reset." appears. The published item's Permissions &
-   Disclosure now shows the journal's default holder instead of "Example
-   Society", and the landing page's copyright line follows. The
-   unpublished and the declined submission's pages also carry filled-in
-   values, unlocked, and each item's Activity Log gains one "Submission
-   metadata updated" line attributed to you ([A3](#a3)); on a journal
-   set to the article's publication date, and on a preprint server,
-   their Copyright Year reads 1970 ([A2](#a2)); on a press, the current
-   year. <sup>s7</sup>
+   press's sentence is structurally different ⚠ [OMP3](#omp3)). Cancel:
+   nothing changes, and the button stays greyed ([A13](#a13)). Reload,
+   press again, OK: the toast "Article permissions were successfully
+   reset." appears. The published item's Permissions & Disclosure now
+   shows the journal's default holder instead of "Example Society", and
+   the landing page's copyright line follows. The unpublished and the
+   declined submission's pages also carry filled-in values, unlocked, and
+   each item's Activity Log gains one "Submission metadata updated" line
+   attributed to you ([A3](#a3)). On a journal set to the article's
+   publication date, and on a preprint server, their Copyright Year reads
+   1970 ([A2](#a2)). On a press it reads the current year. <sup>s7</sup>
 8. **Statements reach the reader** — Journal Manager: on Settings ›
    Workflow › Metadata enable "Data Availability Statement" and "Funding
-   Statement". The submission's Publication area gains a "Data" entry;
-   enter a statement there and Save; on "Metadata" fill Funding
-   Statement and Save. Publish; the landing page shows a "Data
-   Availability Statement" block and a "Funding Statement" block with the
-   texts. Disable the data availability statement in Settings: the "Data"
-   entry disappears from the workflow (data citations off), and the
-   published page still shows the statement. <sup>s8</sup>
+   Statement". The submission's Publication area gains a "Data" entry.
+   Enter a statement there and Save. On "Metadata" fill Funding Statement
+   and Save. Publish. The landing page shows a "Data Availability
+   Statement" block and a "Funding Statement" block with the texts.
+   Disable the data availability statement in Settings: the "Data" entry
+   disappears from the workflow (data citations off), and the published
+   page still shows the statement. <sup>s8</sup>
 
 App-specific:
 
@@ -592,21 +589,21 @@ App-specific:
    scratch journal with Copyright Year set to "Use the issue's
    publication date" and a back issue published last year: assign an
    unpublished submission to that issue and publish it. Permissions &
-   Disclosure shows Copyright Year = the issue's year, not this year; the
+   Disclosure shows Copyright Year = the issue's year, not this year. The
    landing page's copyright line agrees. <sup>s9</sup>
-10. **{OMP} A chapter license for an edited volume** — Press Manager:
-    on an Edited Volume's "Permissions & Disclosure" a fourth field,
+10. **{OMP} A chapter license for an edited volume** — Press Manager: on
+    an Edited Volume's "Permissions & Disclosure" a fourth field,
     "Default Chapter License URL", appears locked with an Override link
-    describing the license it inherits; on a Monograph the field is
-    absent [OMP4](#omp4). Override it with another license address,
-    Save, reload: the address is kept. <sup>s10</sup>
+    describing the license it inherits. On a Monograph the field is
+    absent [OMP4](#omp4). Override it with another license address, Save,
+    reload: the address is kept. <sup>s10</sup>
 11. **{OPS} The license the author chose is already there** — Author,
     then Preprint Server Manager: submit a preprint choosing a license in
     the wizard's License section. As the manager, open its "Permissions &
     Disclosure": License URL holds the chosen address, unlocked (no
     Override link), while the sentence beneath still names the server's
-    default license ([OPS2](#ops2)). Post the preprint: the landing
-    page's "License" block shows the chosen license's badge and sentence.
+    default license ([OPS2](#ops2)). Post the preprint: the landing page's
+    "License" block shows the chosen license's badge and sentence.
     <sup>s11</sup>
 
 ## Findings register
@@ -616,24 +613,24 @@ an entry notes otherwise; the team settles them on spec review. Sorted
 🐞 → ❓ → ✅. Each entry opens with the user-observable symptom; mechanism
 and evidence live in the entry's footnote. Entries marked *basis: code*
 were read from the pinned checkouts and await their live drive. An entry
-the live drive disproved is retired in place — badge ✅, wording states
-the resolution — so IDs stay dense.
+the live drive disproved is retired in place: its badge becomes ✅ and its
+wording states the resolution, so IDs stay dense.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved — even after the summary is stored — and a journal's pre-scheduling panel is refused silently | 🐞 | user-visible | — |
+| [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved, even after the summary is stored, and a journal's pre-scheduling panel is refused silently | 🐞 | user-visible | — |
 | [A2](#a2) | Reset permissions stamps Copyright Year 1970 on unpublished items (journal on article-date basis; preprint server) | 🐞 | user-visible | — |
 | [A4](#a4) | The Author's edit permission never returns after an unpublish; only a manual re-tick on the assignment restores it | 🐞 | user-visible | — |
 | [A15](#a15) | The freshly opened language panel acts before its loading settles: stale guidance and prefill kept (journal), an empty required Title accepted (press), the old language's text stored as the new title (preprint server) | 🐞 | user-visible | — |
 | [A13](#a13) | Cancelling the reset-permissions confirm box leaves the button greyed until a reload | 🐞 | minor | — |
 | [OJS1](#ojs1) | An article published into a not-yet-published issue keeps "Change", and every language change on it is refused | 🐞 | minor | — |
 | [OMP5](#omp5) | With License Terms but no license, the book page shows a "License" link that leads nowhere | 🐞 | minor | — |
-| [A3](#a3) | Reset permissions rewrites every submission — unpublished and declined included — and logs one "metadata updated" line per version | ❓ | user-visible | — |
+| [A3](#a3) | Reset permissions rewrites every submission, unpublished and declined included, and logs one "metadata updated" line per version | ❓ | user-visible | — |
 | [A5](#a5) | A scheduled article may still offer and allow Change Submission Language (code reading; the state was not reached live) | ❓ | minor | — |
 | [A6](#a6) | The "Current Submission Language" readout leaves the Publication pages once a second version exists or the item is published | ❓ | minor | — |
 | [A8](#a8) | Read-only pages keep their fields typeable with Save unavailable | ❓ | minor | — |
 | [A10](#a10) | No term suggestion appeared on the Metadata page, even for a term already recorded in the journal | ❓ | minor | — |
-| [A11](#a11) | The automatic copyright holder carries the contributor's role — "Copyright (c) 2026 Alice Probe (Author)" on the reader's page | ❓ | minor | — |
+| [A11](#a11) | The automatic copyright holder carries the contributor's role: "Copyright (c) 2026 Alice Probe (Author)" on the reader's page | ❓ | minor | — |
 | [A12](#a12) | "Custom copyright statement" saves with an empty statement; items then publish with no holder | ❓ | minor | — |
 | [A14](#a14) | The language panel's Abstract is required but described as "recommended" | ❓ | minor | — |
 | [OMP3](#omp3) | The press's reset-permissions wording is the older text | ❓ | minor | — |
@@ -651,48 +648,49 @@ the resolution — so IDs stay dense.
 **A1 — Requiring a plain language summary blocks every other save** · 🐞 · user-visible.
 With Settings › Workflow › Metadata set to "Require the author to provide
 a plain language summary…", pressing Save on the Metadata, Data or
-Permissions & Disclosure page — none of which carries the summary field
-— is refused with "Please correct one error. Go to plainLanguageSummary:
-This field is required. Jump to next error": a raw field name, and no
-field on the page is marked. Storing the summary on Title & Abstract
-changes nothing — those pages can never be saved from the screen while
-the setting is on, and the entry page next to them (Publication
-Settings / Catalog Entry / Preprint entry) is refused the same way. The
-requirement is checked against what each save sends rather than against
-what the version holds. Publishing does not enforce it: a press
+Permissions & Disclosure page is refused with "Please correct one error.
+Go to plainLanguageSummary: This field is required. Jump to next error".
+None of those pages carries the summary field. The message shows a raw
+field name, and no field on the page is marked. Storing the summary on
+Title & Abstract changes nothing: those pages can never be saved from the
+screen while the setting is on, and the entry page next to them
+(Publication Settings / Catalog Entry / Preprint entry) is refused the same
+way. The requirement is checked against what each save sends rather than
+against what the version holds. Publishing does not enforce it: a press
 publishes and a preprint server posts without a summary, while on a
 journal the "Review Publishing Details" panel's Confirm is refused with
 no message and scheduling is never reached (see *Publish, schedule &
-versions*). The submission wizard is hit too: at "Require" the start
-form's title is dropped without a message and an empty summary on
+versions*). The submission wizard is hit too. At "Require", the start
+form's title is dropped without a message, and an empty summary on
 Details produces "Error An unexpected error has occurred. Please reload
-the page and try again." while the wizard moves on — recorded in
-*[Submission wizard](U21-submission-wizard.md)*.
+the page and try again." while the wizard moves on. That leg is recorded
+in *[Submission wizard](U21-submission-wizard.md)*.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — Reset permissions writes the year 1970 on unpublished items** · 🐞 · user-visible.
 On a journal set to "Use the article's publication date", and on a
 preprint server, the reset tool gives every unpublished or declined
-version a Copyright Year of 1970 — the year an absent publication date
-resolves to; the field then shows "1970", unlocked, on Permissions &
+version a Copyright Year of 1970, the year an absent publication date
+resolves to. The field then shows "1970", unlocked, on Permissions &
 Disclosure. A press writes the current year for items without a date,
 and a journal on the issue basis does the same. The value publishes
-as-is unless someone notices (Rule 12 never overwrites a filled year).
+as-is unless someone notices, because Rule 12 never overwrites a filled
+year.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — Reset permissions reaches every submission** · ❓ · user-visible.
 The tool's caution speaks of "every published article", but it rewrites
 Copyright Year, Copyright Holder and License URL on every version of
-every submission in the journal — unpublished and declined included —
-leaving those fields filled and unlocked where they were empty and
-locked, and adds one "Submission metadata updated" activity-log line
-per version, attributed to the manager who pressed the button.
+every submission in the journal, unpublished and declined included. It
+leaves those fields filled and unlocked where they were empty and locked,
+and adds one "Submission metadata updated" activity-log line per version,
+attributed to the manager who pressed the button.
 Question: is the intended scope published items only? Lean: the text
-describes the intent and the tool overshoots — but the stamped defaults
-on unpublished items are what publishing would have applied anyway
-(A2 aside), so the visible harm is the log noise and the lost "automatic"
+describes the intent and the tool overshoots. But the stamped defaults
+on unpublished items are what publishing would have applied anyway (A2
+aside), so the visible harm is the log noise and the lost "automatic"
 state.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a3</sup>
 
@@ -701,27 +699,27 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a3</sup>
 Publishing switches off the Author's "Allow this person to make
 changes…" permission on every one of their assignments. Unpublishing the
 version lifts the published-state lock but not that switch, so the
-Author's pages stay read-only — no banner, no notice — until an editor
-opens the Author's "Edit Assignment" on the Participants panel and
-re-ticks the permission, which restores saving at once. On a preprint
+Author's pages stay read-only, with no banner and no notice, until an
+editor opens the Author's "Edit Assignment" on the Participants panel and
+re-ticks the permission. That restores saving at once. On a preprint
 server, where authors edit their own preprint by default, the author
-loses editing after a post/unpost cycle. Rationale: the lock is meant
-to follow the published state; the permanent switch-off duplicates it
-with a side effect nothing on screen explains.
+loses editing after a post/unpost cycle. Rationale: the lock is meant to
+follow the published state. The permanent switch-off duplicates it with a
+side effect nothing on screen explains.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — A scheduled article can still change language** · ❓ · minor.
 By the code, an article scheduled to a future issue keeps its "Change"
 button beside "Current Submission Language", and confirming the change
-is accepted — although elsewhere "scheduled" is treated like "published"
-(the Author's lock, Rule 9) and the refusal text speaks of published
-items. The live drive did not reach that state from this side (the
+is accepted. Elsewhere, "scheduled" is treated like "published" (the
+Author's lock, Rule 9) and the refusal text speaks of published items.
+The live drive did not reach that state from this side: the
 pre-publishing panel's "Schedule Only" choice published the article at
-once — *Publish, schedule & versions*'s finding); the closest reachable
+once (a *Publish, schedule & versions* finding). The closest reachable
 state is OJS1, where the button is offered but the change refused.
 Question: should scheduling close the language change as publishing
-does? Lean: yes — a scheduled item is already frozen for its issue.
+does? Lean: yes. A scheduled item is already frozen for its issue.
 Settled by: the "Change" button on a Publication page whose header reads
 "Status: Scheduled", reached through the Publication Settings route
 (scenario 6 seeding), and what Confirm does there.
@@ -730,21 +728,21 @@ Basis: code. <sup>f-a5</sup>
 <a id="a6"></a>
 **A6 — The language readout vanishes with the second version** · ❓ · minor.
 The "Current Submission Language: {language}" line on the Publication
-pages is shown together with its "Change" button; once a second version
-exists (or the item is published) both go from every Publication page,
+pages is shown together with its "Change" button. Once a second version
+exists (or the item is published), both go from every Publication page,
 while the stage screens keep the readout.
-Question: should the readout stay without the button? Lean: yes — the
-information is still true and the stage screens show it.
+Question: should the readout stay without the button? Lean: yes. The
+information is still true, and the stage screens show it.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — Retired: the abstract limit and requirement are enforced** · ✅ · retired.
 The concern was that the page might only mark an over-limit or empty
-abstract without refusing the save. It refuses both: an over-limit
+abstract without refusing the save. It refuses both. An over-limit
 abstract is rejected on Save with "The abstract is too long. It should
-be {limit} words or less. It is currently {n} words long.", and an empty
-required abstract with "This field is required." before anything is
-sent (Fields & validation). No open question remains.
+be {limit} words or less. It is currently {n} words long." An empty
+required abstract is rejected with "This field is required." before
+anything is sent (Fields & validation). No open question remains.
 Reviewed: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a7</sup>
 
@@ -752,32 +750,32 @@ question). <sup>f-a7</sup>
 **A8 — Read-only pages look editable** · ❓ · minor.
 A viewer who may not edit (an Author on a journal, an assistant without
 the permission) gets fields they can type into and a Save button that
-does nothing; nothing tells them the page is read-only until a reload
+does nothing. Nothing tells them the page is read-only until a reload
 shows their edits gone.
-Question: should the fields be disabled, or a notice shown? Lean: minor
-UX defect; the banner of Rule 9 covers only the published case.
+Question: should the fields be disabled, or a notice shown? Lean: a minor
+UX defect. The banner of Rule 9 covers only the published case.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a8</sup>
 
 <a id="a9"></a>
 **A9 — Retired: the wizard does ask for the plain language summary** · ✅ · retired.
-The draft read the wizard as never showing the field. On the screen the
+The draft read the wizard as never showing the field. On the screen, the
 Details step shows "Plain Language Summary" at "Ask the author…" and
-marks it required at "Require the author…"; the Review step lists
-"Plain Language Summary None provided" when it was left empty. The
-setting's options work as promised; what goes wrong at "Require" is
-A1's wizard leg.
+marks it required at "Require the author…". The Review step lists "Plain
+Language Summary None provided" when it was left empty. The setting's
+options work as promised. What goes wrong at "Require" is A1's wizard
+leg.
 Reviewed: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a9</sup>
 
 <a id="a10"></a>
 **A10 — Term suggestions did not appear** · ❓ · minor.
 Typing a term in Keywords that is already recorded on another submission
-of the same journal offered nothing but the typed text itself; no
-suggestion appeared on any of the three apps' test installs, on the
-same or another submission.
+of the same journal offered nothing but the typed text itself. No
+suggestion appeared on any of the three apps' test installs, on the same
+or another submission.
 Question: are suggestions expected here, or does the lookup need
-something this install lacks? Lean: the field is built to suggest and
-the rule stands as written; settled by one suggestion appearing while
+something this install lacks? Lean: the field is built to suggest, and
+the rule stands as written. Settled by one suggestion appearing while
 typing a term already recorded on another submission of the same
 journal.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a10</sup>
@@ -786,13 +784,12 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a10</sup>
 **A11 — The automatic copyright holder names the contributor's role** · ❓ · minor.
 With Copyright Holder set to "Author", the holder the journal fills in
 at publishing is each contributor's name followed by their contributor
-role in parentheses — "Alice Probe (Author)" — and that is the line
-readers get: "Copyright (c) 2026 Alice Probe (Author)". The locked
-field's description announces the same string beforehand, and the reset
-tool writes it too. Identical on a journal, a press and a preprint
-server.
+role in parentheses, "Alice Probe (Author)". That is the line readers
+get: "Copyright (c) 2026 Alice Probe (Author)". The locked field's
+description announces the same string beforehand, and the reset tool
+writes it too. Identical on a journal, a press and a preprint server.
 Question: is the role label meant to be part of the copyright line?
-Lean: no — a copyright line names people, not their roles; the string
+Lean: no. A copyright line names people, not their roles. The string
 used here is the byline string that carries roles.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a11</sup>
 
@@ -801,47 +798,48 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a11</sup>
 Settings › Distribution › License saves "Custom copyright statement"
 with the "Copyright statement" box empty. Permissions & Disclosure then
 reads "Copyright will be assigned automatically to  when this is
-published." — nothing named — and publishing leaves Copyright Holder
-empty, so the reader's page shows no copyright line and labels a
+published.", naming nothing. Publishing leaves Copyright Holder empty,
+so the reader's page shows no copyright line and labels a
 non-Creative-Commons license link just "License".
 Question: should the statement be required once that option is chosen?
-Lean: yes — the option has no meaning without a text.
+Lean: yes. The option has no meaning without a text.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — The reset button stays greyed after Cancel** · 🐞 · minor.
 Pressing "Reset Article Permissions" and answering Cancel in the
-browser's confirm box sends nothing and changes nothing — but the button
-stays disabled, so a second attempt needs a page reload. Same on a
-press and a preprint server.
+browser's confirm box sends nothing and changes nothing. But the button
+stays disabled, so a second attempt needs a page reload. Same on a press
+and a preprint server.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a13</sup>
 
 <a id="a14"></a>
 **A14 — The language panel's Abstract is required but described as recommended** · ❓ · minor.
 In "Change Submission Language For", on a section that requires
 abstracts, the Abstract box is marked required and Confirm is refused
-without it ("This field is required.") — while its description reads
+without it ("This field is required."). Yet its description reads
 "Including the abstract in {language} is recommended. This helps ensure
 that the content is accessible". Journal and preprint server; a press
 shows no Abstract box.
-Question: which of the two is intended? Lean: required is right (it is
-the section's own policy); the description is the defect.
+Question: which of the two is intended? Lean: required is right, because
+it is the section's own policy. The description is the defect.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a14</sup>
 
 <a id="a15"></a>
 **A15 — The language panel acts before its own loading settles** · 🐞 · user-visible.
-Working the "Change Submission Language For" panel right after it opens
-— an ordinarily fast click — catches it still loading in the background,
-with a different face on each app: on a journal the revealed Title and
+Working the "Change Submission Language For" panel right after it opens,
+an ordinarily fast click, catches it still loading in the background.
+Each app shows a different face. On a journal, the revealed Title and
 Abstract boxes keep the OLD language's guidance and prefill for the rest
-of that opening; on a press, Confirm on a freshly (re)opened panel is
-accepted with the required Title empty — the submission language changes
-anyway and Title & Abstract afterwards counts "0/2 languages completed";
-on a preprint server the new language's boxes open nondeterministically
-empty or holding the CURRENT language's text, and confirming the
-pre-filled state stores the old language's text as the new language's
-title. Once the panel has settled, prefill and refusal behave exactly as
-Rule 13b says — the press's same Confirm is then refused.
+of that opening. On a press, Confirm on a freshly (re)opened panel is
+accepted with the required Title empty: the submission language changes
+anyway, and Title & Abstract afterwards counts "0/2 languages
+completed". On a preprint server, the new language's boxes open
+nondeterministically empty or holding the CURRENT language's text, and
+confirming the pre-filled state stores the old language's text as the
+new language's title. Once the panel has settled, prefill and refusal
+behave exactly as Rule 13b says, and the press's same Confirm is then
+refused.
 Since: live-observed 2026-08-28 · Basis: probe. <sup>f-a15</sup>
 
 ### OJS
@@ -850,12 +848,12 @@ Since: live-observed 2026-08-28 · Basis: probe. <sup>f-a15</sup>
 **OJS1 — "Change" stays on an article published into an unpublished issue** · 🐞 · minor.
 An article published into a future issue that is not yet published
 keeps "Current Submission Language: {language}" with its "Change"
-button on every Publication page, beside "Status: Published"; picking a
+button on every Publication page, beside "Status: Published". Picking a
 language and confirming is refused with the toast "You can not change
 language of this submission because it already has more than one
 publication version or a published publication." A published article
 assigned to no issue hides readout and button as Rule 13a says. The
-button is offered for a change that always fails — the screen and the
+button is offered for a change that always fails: the screen and the
 refusal disagree about whether the item counts as published.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ojs1</sup>
 
@@ -864,37 +862,37 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ojs1</sup>
 <a id="omp1"></a>
 **OMP1 — Copyright line outside the License block** · ✅ · minor.
 The catalog's book page prints "Copyright (c) {year} {holder}" as its
-own line whenever both are set, and the "License" block below carries
-only the badge (or link) and the press's License Terms; a journal and a
+own line whenever both are set. The "License" block below carries only
+the badge (or link) and the press's License Terms. A journal and a
 preprint server put the copyright line inside the block and show it
-only with a license. Different page, same data — a presentation choice
+only with a license. Different page, same data: a presentation choice
 of the press templates.
 Basis: code. <sup>f-omp1</sup>
 
 <a id="omp2"></a>
 **OMP2 — No abstract policy on a press** · ✅ · minor.
 The press's Title & Abstract page never requires the abstract and shows
-no word counter: a press has no per-section abstract settings to apply.
+no word counter. A press has no per-section abstract settings to apply.
 Basis: code. <sup>f-omp2</sup>
 
 <a id="omp3"></a>
 **OMP3 — Older reset-permissions wording** · ❓ · minor.
 The press's Permissions tab describes the tool as attaching permissions
 "permanently" to published content and confirms with "Are you sure you
-wish to reset permissions data already attached to monographs?" —
-without the journal's and preprint server's warning that the action
-cannot be undone and may re-license work. The tool does the same thing
-on all three.
-Question: align the press text with the others? Lean: yes — the caution
+wish to reset permissions data already attached to monographs?". It
+lacks the journal's and preprint server's warning that the action cannot
+be undone and may re-license work. The tool does the same thing on all
+three.
+Question: align the press text with the others? Lean: yes. The caution
 is the point of the paragraph.
 Basis: code. <sup>f-omp3</sup>
 
 <a id="omp4"></a>
 **OMP4 — Default Chapter License URL for edited volumes** · ✅ · user-visible.
-On an Edited Volume the Permissions & Disclosure page adds "Default
+On an Edited Volume, the Permissions & Disclosure page adds "Default
 Chapter License URL", locked with an Override link describing the
 license it inherits (the volume's own License URL, else the press
-default); a Monograph has no such field. Chapters are a press-only
+default). A Monograph has no such field. Chapters are a press-only
 object.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-omp4</sup>
 
@@ -902,8 +900,8 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-omp4</sup>
 **OMP5 — A "License" link that leads nowhere** · 🐞 · minor.
 On a press with License Terms and no license address, the book page's
 "License" block shows a link labelled "License" above the terms that
-points at no address — clicking it goes nowhere. A journal and a
-preprint server show the heading and the terms alone in that case.
+points at no address. Clicking it goes nowhere. A journal and a preprint
+server show the heading and the terms alone in that case.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-omp5</sup>
 
 ### OPS
@@ -912,23 +910,23 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-omp5</sup>
 **OPS1 — The submitting author edits their own preprint** · ✅ · user-visible.
 On a preprint server the Author role grants the metadata-edit permission
 by default, so the author's Title & Abstract, Metadata and Data pages
-save like an editor's until the preprint is posted; on a journal or
-press the Author role does not grant it and the author's pages are
-read-only from submission onward. Matches the preprint model — authors
-prepare their own preprint for posting.
+save like an editor's until the preprint is posted. On a journal or
+press the Author role does not grant it, and the author's pages are
+read-only from submission onward. This matches the preprint model:
+authors prepare their own preprint for posting.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ops1</sup>
 
 <a id="ops2"></a>
 **OPS2 — The license sentence names the server default beside the author's choice** · ❓ · minor.
 On a preprint whose author picked a license in the submission wizard,
 Permissions & Disclosure shows License URL filled with that choice and
-unlocked (no Override), yet the sentence beneath still reads "The
+unlocked (no Override). Yet the sentence beneath still reads "The
 license will be set automatically to {server default} when this is
-posted." Posting keeps the author's choice — the sentence is wrong, not
+posted." Posting keeps the author's choice. The sentence is wrong, not
 the value.
 Question: should the sentence follow the stored value, or disappear once
-the field is filled? Lean: disappear — it describes the automatic
-fill, which will not happen.
+the field is filled? Lean: disappear. It describes the automatic fill,
+which will not happen.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ops2</sup>
 
 ---

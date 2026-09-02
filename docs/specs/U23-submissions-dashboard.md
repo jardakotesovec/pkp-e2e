@@ -13,84 +13,88 @@ atlas-claims: [AFFW-001, AFFW-002, AFFW-003, AFFW-004, AFFW-005, AFFW-006, AFFW-
 
 ## Purpose
 
-The editorial dashboard is the editorial team's home in the backend: one
-page, per journal, listing the journal's submissions sliced into named
-*views* — "Active submissions", "Reviews overdue", "Published" and so on —
-with a search box, a filter panel, and one row per submission showing where
-it stands and what needs doing next. From here a Journal Manager, Section
-Editor or assistant finds a submission, reads its state at a glance (stage,
-days since anything happened, review progress), acts on the most common next
-step right from the row (assign an editor, assign reviewers), opens the full
-workflow in place, and cleans up abandoned incomplete submissions in bulk.
+The editorial dashboard is the editorial team's home in the backend. It is
+one page per journal that lists the journal's submissions in named *views*,
+such as "Active submissions", "Reviews overdue" and "Published". It has a
+search box, a filter panel, and one row per submission showing where the
+submission stands and what needs doing next. From here a Journal Manager,
+Section Editor or assistant can find a submission, read its state at a
+glance (stage, days since anything happened, review progress), take the most
+common next step right from the row (assign an editor, assign reviewers),
+open the full workflow in place, and delete abandoned incomplete submissions
+in bulk.
 
-This spec also owns the list machinery every backend submission list shares —
-the table, search, the filter panel, the selection mode for deleting
+This spec also owns the list machinery every backend submission list shares:
+the table, the search, the filter panel, the selection mode for deleting
 incomplete submissions, and the open-in-place workflow panel. The author's
 own list (*[My Submissions](U22-my-submissions.md)*) and the reviewer's
-assignment list (*Reviewer's review* — no spec yet) are separate features
-that ride this machinery; their rows, views and permissions are specified
+assignment list (*Reviewer's review*, no spec yet) are separate features
+that use this machinery. Their rows, views and permissions are specified
 there, not here.
 
 ## Actors & permissions
 
 **The editorial roles** on this page are **Site Administrator**, **Journal
 Manager**, **Section Editor**, and the assistant-level roles (**Copyeditor**,
-**Layout Editor**, **Proofreader**, **Funding Coordinator** — "an assistant"
-below). Two scopes run through everything (Rule 3): Journal Managers and
-Site Administrators work **journal-wide** — every submission in the journal;
-Section Editors and assistants work **assigned-only** — they see and search
-only submissions they are assigned to through one of these roles (listed on
-a stage's Participants panel). Holding Author or Reviewer alongside an
-editorial role changes nothing here except the conflict rows of Rule 9a.
+**Layout Editor**, **Proofreader**, **Funding Coordinator**, called "an
+assistant" below). Two scopes run through everything (Rule 3). Journal
+Managers and Site Administrators work **journal-wide**: they see every
+submission in the journal. Section Editors and assistants work
+**assigned-only**: they see and search only the submissions they are
+assigned to through one of these roles, which means they are listed on a
+stage's Participants panel. Holding Author or Reviewer alongside an
+editorial role changes nothing here, except for the conflict rows of
+Rule 9a.
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **Open the editorial dashboard** | • the editorial roles — from the sidebar's "Editor Dashboard" group or by its direct address<br>• any signed-in user with none of these roles typing the address — the access-denied page <sup>a</sup> |
-| **See a submission listed** | • Journal Manager, Site Administrator — every submission in the journal, in whichever views match its state<br>• Section Editor, assistants — only submissions they are assigned to (Rule 3) <sup>c</sup> |
+| **Open the editorial dashboard** | • the editorial roles: from the sidebar's "Editor Dashboard" group or by its direct address<br>• any signed-in user with none of these roles who types the address: the access-denied page <sup>a</sup> |
+| **See a submission listed** | • Journal Manager, Site Administrator: every submission in the journal, in whichever views match its state<br>• Section Editor, assistants: only submissions they are assigned to (Rule 3) <sup>c</sup> |
 | **See the "Needs editor" view** | • Journal Manager, Site Administrator only {OJS OMP} <sup>b</sup> |
-| **See the "Declined" view** | • Journal Manager, Site Administrator only — Section Editors and assistants have no view that lists declined submissions ⚠ [A1](#a1) <sup>b</sup> |
-| **Open a submission's workflow ("View")** | • every editorial role — on any row listed for them, except a conflict row (Rule 9a) or an incomplete submission's row (Rule 9c) <sup>l</sup> |
-| **Filter by "Assigned To Editor"** | • Journal Manager, Site Administrator — the field appears in their Filters panel only (Rule 8) <sup>i</sup> |
-| **Delete incomplete submissions in bulk** | • Journal Manager, Site Administrator — over any incomplete submission in the journal (Rule 12); Section Editors and assistants get no "More Actions" control at all here (authors get it on their own list — [→ deleting drafts](U22-my-submissions.md)) <sup>m</sup> |
-| **Receive the monthly outstanding-tasks email** | • Journal Manager, Section Editor — active accounts with at least one outstanding item, unless they opted out {OJS OMP} (Side effects) <sup>n</sup> |
+| **See the "Declined" view** | • Journal Manager, Site Administrator only. Section Editors and assistants have no view that lists declined submissions ⚠ [A1](#a1) <sup>b</sup> |
+| **Open a submission's workflow ("View")** | • every editorial role, on any row listed for them, except a conflict row (Rule 9a) or an incomplete submission's row (Rule 9c) <sup>l</sup> |
+| **Filter by "Assigned To Editor"** | • Journal Manager, Site Administrator: the field appears in their Filters panel only (Rule 8) <sup>i</sup> |
+| **Delete incomplete submissions in bulk** | • Journal Manager, Site Administrator: over any incomplete submission in the journal (Rule 12). Section Editors and assistants get no "More Actions" control here at all. Authors get it on their own list ([→ deleting drafts](U22-my-submissions.md)) <sup>m</sup> |
+| **Receive the monthly outstanding-tasks email** | • Journal Manager, Section Editor: active accounts with at least one outstanding item, unless they opted out {OJS OMP} (Side effects) <sup>n</sup> |
 
 ## Fields & validation
 
-The page collects no data of its own; its one form is the **Filters** panel
+The page collects no data of its own. Its one form is the **Filters** panel
 (Rule 8). Which fields the panel offers depends on the journal's setup and
-the account's roles — never on which dashboard page it opens from:
+the account's roles, never on which dashboard page it opens from:
 
 | Field (UI label) | Appears when | Rules |
 |------------------|--------------|-------|
-| Section {OJS OPS} | the journal has more than one section | tick one or more sections; a press never offers a series filter ⚠ [OMP1](#omp1) <sup>i</sup> |
-| Assigned To Editor — labelled "Assigned to Moderator" on a preprint server {OPS} | the account holds Journal Manager or Site Administrator | pick one or more people from a suggest list of the journal's Journal Managers and Section Editors; the list offers nothing until a name is typed <sup>i</sup> |
+| Section {OJS OPS} | the journal has more than one section | tick one or more sections. A press never offers a series filter ⚠ [OMP1](#omp1) <sup>i</sup> |
+| Assigned To Editor (labelled "Assigned to Moderator" on a preprint server {OPS}) | the account holds Journal Manager or Site Administrator | pick one or more people from a suggest list of the journal's Journal Managers and Section Editors. The list offers nothing until a name is typed <sup>i</sup> |
 | Categories | the journal has at least one category | pick one or more categories <sup>i</sup> |
 | Issues {OJS} | the journal has at least one issue | pick one or more issues <sup>i</sup> |
-| Days since last activity | always | a slider from 0 to 180 days — keeps only submissions idle for at least that many days; 0 means no restriction <sup>i</sup> |
+| Days since last activity | always | a slider from 0 to 180 days. It keeps only submissions idle for at least that many days; 0 means no restriction <sup>i</sup> |
 
 ## Rules & state
 
 <a id="views-sidebar"></a>
 1. **Where it lives.** The backend sidebar shows an **"Editor Dashboard"**
    menu group to every holder of an editorial role. Its entries are the
-   dashboard's views, each with a live count badge; choosing one opens the
+   dashboard's views, each with a live count badge. Choosing one opens the
    list filtered to that view. At the top of the group sits a search box
    labelled "Search submissions" (Rule 7). The count badge of "Reviews
-   overdue" is colored to draw attention — whatever it counts, zero
-   included; the other badges are plain {OJS OMP}. Accounts also holding Reviewer or Author see that role's own
-   sidebar group beside this one (owned by *Reviewer's review* — no spec
-   yet — and *[My Submissions](U22-my-submissions.md)*), and "Start A New
+   overdue" is colored to draw attention, whatever it counts, zero
+   included; the other badges are plain {OJS OMP}. Accounts that also hold
+   Reviewer or Author see that role's own sidebar group beside this one
+   (owned by *Reviewer's review*, no spec yet, and
+   *[My Submissions](U22-my-submissions.md)*), and "Start A New
    Submission" (owned by *[Submission wizard](U21-submission-wizard.md#ways-in)*).
    <sup>a</sup> <sup>d</sup>
-2. **The views.** A view is a named slice of the journal's submissions; one
-   submission can sit in several views at once. Which views exist depends on
-   the app — a preprint server, with no review or copyediting, has far
-   fewer: <sup>b</sup>
+2. **The views.** A view is a named slice of the journal's submissions. One
+   submission can sit in several views at once. Which views exist depends
+   on the app. A preprint server has no review or copyediting, so it has
+   far fewer: <sup>b</sup>
 
    | View | Lists | OJS | OMP | OPS |
    |------|-------|:---:|:---:|:---:|
    | Assigned to me | submissions still in progress that the signed-in account is assigned to | ✓ | ✓ | ✓ |
-   | Active submissions | every submission still awaiting an outcome — incomplete ones included | ✓ | ✓ | ✓ |
+   | Active submissions | every submission still awaiting an outcome, incomplete ones included | ✓ | ✓ | ✓ |
    | Needs editor | active submissions with no editor assigned yet (Journal Manager / Site Administrator only) | ✓ | ✓ | — |
    | All in submission stage | active submissions sitting on the Submission stage | ✓ | ✓ | — |
    | Needs reviews | submissions in review with fewer confirmed reviews than the journal requires | ✓ | ✓ | — |
@@ -98,7 +102,7 @@ the account's roles — never on which dashboard page it opens from:
    | Reviews submitted | submissions in review with at least one review submitted | ✓ | ✓ | — |
    | Reviews overdue | submissions in review with an overdue review request or review | ✓ | ✓ | — |
    | Author revisions submitted | submissions whose authors have delivered requested revisions | ✓ | ✓ | — |
-   | All in review stage | active submissions on the Review stage — on a press, both of its review stages under the one entry | ✓ | ✓ | — |
+   | All in review stage | active submissions on the Review stage; on a press, both of its review stages under the one entry | ✓ | ✓ | — |
    | All in copyediting stage | active submissions on the Copyediting stage | ✓ | ✓ | — |
    | All in production stage | active submissions on the Production stage | ✓ | ✓ | ✓ |
    | Scheduled for publication | submissions scheduled but not yet published | ✓ | ✓ | ✓ |
@@ -107,196 +111,204 @@ the account's roles — never on which dashboard page it opens from:
 
    Every view honors the account's scope (Rule 3): "All in submission
    stage" for a Section Editor means *their* submissions on that stage.
-   "Assigned to me" is the landing view and differs from "Active
-   submissions" even for a Journal Manager — it lists only submissions the
-   account is itself assigned to. <sup>b</sup> <sup>c</sup>
+   "Assigned to me" is the landing view. It differs from "Active
+   submissions" even for a Journal Manager, because it lists only
+   submissions the account is itself assigned to. <sup>b</sup> <sup>c</sup>
 <a id="scope"></a>
 3. **Scope.** Journal Managers and Site Administrators see the whole
    journal. Section Editors and assistants see only submissions where they
-   are listed as a participant through that editorial role — an assignment
-   as Author or Reviewer does not surface a submission on *this* dashboard
-   (it surfaces on My Submissions or the reviewer's list instead). The
-   scope applies uniformly to views, search and counts. <sup>c</sup>
-4. **Addresses.** The page's address records the current state — the
-   view, the search phrase, any filters, the sort, and an open workflow
-   panel — so it can be bookmarked, shared or reloaded as-is. Two
+   are listed as a participant through that editorial role. An assignment
+   as Author or Reviewer does not surface a submission on *this* dashboard;
+   it surfaces on My Submissions or the reviewer's list instead. The scope
+   applies uniformly to views, search and counts. <sup>c</sup>
+4. **Addresses.** The page's address records the current state: the view,
+   the search phrase, any filters, the sort, and an open workflow panel. So
+   the page can be bookmarked, shared or reloaded as it was. Two
    exceptions: the pager's current page is never recorded (page 2 cannot
-   be bookmarked), and a switched-off sort is mis-recorded ⚠ [A5](#a5). The retired submission-list address from older versions —
-   `{journal path}/submissions` — forwards to the signed-in account's
-   home list (precedence owned by
-   *[My Submissions](U22-my-submissions.md)*, "Landing"). <sup>e</sup>
+   be bookmarked), and a switched-off sort is mis-recorded ⚠ [A5](#a5).
+   The retired submission-list address from older versions,
+   `{journal path}/submissions`, forwards to the signed-in account's home
+   list. The precedence is owned by
+   *[My Submissions](U22-my-submissions.md)*, "Landing". <sup>e</sup>
 <a id="table"></a>
 5. **The heading and the table.** The heading names the current view with
-   its total, e.g. "Active submissions (10)", and shows a spinner while the
-   list loads. Columns are **ID** (sortable), **Submissions** (the
-   authors-and-title line), **Stage** (the current stage — or the outcome,
-   e.g. "Declined" — named in plain text with a small colored dot beside
-   it), **Days** (days since the
-   submission's last activity; sortable), **Editorial Activity** (Rule 9)
-   and **Actions** ("View", Rule 11). An incomplete submission's Stage
-   cell reads "Incomplete" — except on a preprint server, which has no
-   "Incomplete" label: there it reads "Production" {OPS}. A sortable header cycles through
-   three states as it is clicked — descending, ascending, then unsorted —
-   and the address follows for the first two; switching the sort off
-   leaves the old sort in the address ⚠ [A5](#a5). The list pages at 30
-   rows, with pager controls underneath on any view holding more; which
-   page is showing is never part of the address (Rule 4). An empty view
-   shows a single "No Items" row.
+   its total, for example "Active submissions (10)", and shows a spinner
+   while the list loads. The columns are **ID** (sortable), **Submissions**
+   (the authors-and-title line), **Stage** (the current stage, or the
+   outcome such as "Declined", named in plain text with a small colored dot
+   beside it), **Days** (days since the submission's last activity;
+   sortable), **Editorial Activity** (Rule 9) and **Actions** ("View",
+   Rule 11). An incomplete submission's Stage cell reads "Incomplete". The
+   exception is a preprint server, which has no "Incomplete" label: there
+   it reads "Production" {OPS}. A sortable header cycles through three
+   states as it is clicked: descending, ascending, then unsorted. The
+   address follows for the first two; switching the sort off leaves the
+   old sort in the address ⚠ [A5](#a5). The list pages at 30 rows, with
+   pager controls underneath on any view holding more. Which page is
+   showing is never part of the address (Rule 4). An empty view shows a
+   single "No Items" row.
    The author's and reviewer's lists reuse this table with their own
    columns (theirs have no "Days"). <sup>f</sup>
 <a id="search"></a>
 6. **Search within a view.** The search box above the list ("Search
-   submissions, ID, authors, keywords, etc.") narrows the *current view* —
-   the heading keeps the view's name and the count follows. An active
-   search shows as a chip above the table with an X to clear it; "Clear
+   submissions, ID, authors, keywords, etc.") narrows the *current view*.
+   The heading keeps the view's name and the count follows. An active
+   search shows as a chip above the table with an X to clear it. "Clear
    Filters" appears beside the chips whenever panel filters are active.
    Switching views clears the search. <sup>g</sup>
 <a id="search-view"></a>
 7. **Global search.** The sidebar's "Search submissions" box searches
-   *everything the account can reach* — the whole journal for a Journal
-   Manager or Site Administrator, their assigned submissions for a Section
-   Editor or assistant (the Rule 3 scope: a submission they merely authored
-   stays out of these results too — My Submissions finds it) — regardless
-   of state: it is the one place a Section
-   Editor can still find a declined or published submission of theirs
-   ⚠ [A1](#a1). Submitting it opens the **"Search Results"** view with the
-   phrase as a chip; the in-page search box disappears there (the sidebar
-   box owns the phrase). Filters still work on top of the results. Only
-   when the phrase and every filter are cleared does the page leave the
-   view, returning to the one the search started from — clearing the
-   phrase alone, with a filter chip still active, stays on "Search
-   Results". <sup>h</sup>
+   *everything the account can reach*, regardless of state: the whole
+   journal for a Journal Manager or Site Administrator, and their assigned
+   submissions for a Section Editor or assistant (the Rule 3 scope, so a
+   submission they merely authored stays out of these results too; My
+   Submissions finds it). It is the one place a Section Editor can still
+   find a declined or published submission of theirs ⚠ [A1](#a1).
+   Submitting it opens the **"Search Results"** view with the phrase as a
+   chip. The in-page search box disappears there, because the sidebar box
+   owns the phrase. Filters still work on top of the results. The page
+   leaves the view only when the phrase and every filter are cleared; it
+   then returns to the view the search started from. Clearing the phrase
+   alone, with a filter chip still active, stays on "Search Results".
+   <sup>h</sup>
 <a id="filters"></a>
 8. **Filters.** The "Filters" button opens a side panel (title "Filters")
    with the fields of the Fields table, "Clear Filters" and "Apply
    Filters". Applying closes the panel, narrows the current view, and puts
-   one chip per active filter above the table — each with an X to drop just
+   one chip per active filter above the table, each with an X to drop just
    that filter. Filters combine with the search phrase. Switching views
    clears them. <sup>i</sup>
 <a id="activity"></a>
 9. **The Editorial Activity cell** tells the team what state the submission
-   is in — and offers the next step where there is an obvious one. Exactly
+   is in, and offers the next step where there is an obvious one. Exactly
    one of the following renders, checked in this order: <sup>j</sup>
    - 9a. **Conflict rows.** When the signed-in user is on the submission as
      an author (and not through any editorial role), the cell reads "You
      cannot access this submission as a Journal Manager since you are the
-     author. To view it, go to \"My Submissions\"" — the wording says
-     "Journal Manager" whoever is looking, on every app ⚠ [A3](#a3) — and
-     the row offers no buttons at all: no "View", and no activity-cell
-     action such as "Assign Editor". The same applies when they are on it as a
-     reviewer, pointing to "Review Assignments" instead {OJS OMP}. Only
-     journal-wide accounts ever see these rows (Rule 3). <sup>j</sup>
-   - 9b. **Declined**: "Declined during the {stage} stage." — the stage by
-     its plain name: a review-stage decline reads "Review", not "External
-     Review" (on the "Declined" view; the row keeps its "View"). <sup>j</sup>
-   - 9c. **Incomplete submission**: a **"Complete submission"** button —
-     which takes the editor into the *author's* submission wizard for that
-     draft ⚠ [A2](#a2); the row has no "View"
-     (*[Submission wizard](U21-submission-wizard.md)* owns what follows).
+     author. To view it, go to \"My Submissions\"". The wording says
+     "Journal Manager" whoever is looking, on every app ⚠ [A3](#a3). The
+     row offers no buttons at all: no "View", and no activity-cell action
+     such as "Assign Editor". The same applies when they are on it as a
+     reviewer; the notice then points to "Review Assignments" instead
+     {OJS OMP}. Only journal-wide accounts ever see these rows (Rule 3).
+     <sup>j</sup>
+   - 9b. **Declined**: "Declined during the {stage} stage." The stage is
+     named plainly: a review-stage decline reads "Review", not "External
+     Review". This shows on the "Declined" view, and the row keeps its
+     "View". <sup>j</sup>
+   - 9c. **Incomplete submission**: a **"Complete submission"** button. It
+     takes the editor into the *author's* submission wizard for that draft
+     ⚠ [A2](#a2). The row has no "View". What follows is owned by
+     *[Submission wizard](U21-submission-wizard.md)*.
    - 9d. **Submission stage, no editor assigned** {OJS OMP}: an **"Assign
-     Editor"** button opening the "Assign Participant" window (the form
-     is owned by *Stage participants* — no spec yet). Once an editor is
+     Editor"** button that opens the "Assign Participant" window (the form
+     is owned by *Stage participants*, no spec yet). Once an editor is
      assigned, the cell goes quiet. <sup>j</sup>
    - 9e. **In review** {OJS OMP}: the review-round states, in the round's
-     own vocabulary — see Rule 10 for the per-reviewer indicators that
+     own vocabulary. See Rule 10 for the per-reviewer indicators that
      accompany most of them:
      - no reviewers on the current round yet: an **"Assign Reviewers"**
-       button opening the Add Reviewer window
+       button that opens the Add Reviewer window
        ([→ finding a reviewer](U27-reviewer-assignment-and-management.md#search));
      - revisions asked of the author: "Revisions requested from author"
        (this round) or "Revisions requested from the author to be taken to
-       a new review round" (resubmit) — the "Request Revisions" decision's
+       a new review round" (resubmit). The "Request Revisions" decision's
        "Require New Review Round" choice picks between the two
        ([→ decisions](U26-review-stage-and-rounds.md#decisions));
-     - revisions delivered: "Revisions submitted" — plus "New review round
+     - revisions delivered: "Revisions submitted", plus "New review round
        to be created" when they answer a resubmit decision;
      - all reviews confirmed: "All reviews are confirmed and a decision is
-       needed." — or, where the journal counts a minimum, "Minimum required
-       number of reviews have been confirmed. A decision is needed.";
+       needed." Where the journal counts a minimum, it reads "Minimum
+       required number of reviews have been confirmed. A decision is
+       needed." instead;
      - otherwise: the per-reviewer indicators alone.
    - 9f. **In review, with recommending editors on board** {OJS OMP}: the
-     messaging shifts to the recommendation workflow — whether an editor
-     is recommending or deciding is chosen when they are added to the
+     messaging shifts to the recommendation workflow. Whether an editor is
+     recommending or deciding is chosen when they are added to the
      submission's participants (a recommend-only option against full
-     decision powers). A deciding editor
-     reads "Recommending Editors are tasked to advise the next steps for
-     this submission", then "An editorial recommendation has been received"
-     / "All editorial recommendations have been received, and a decision is
-     required." as recommendations land. A recommending editor who has
-     recorded theirs reads "Recommendation has been made by you."
-     (recording one is owned by the decision features — [→ recommendations](U26-review-stage-and-rounds.md#recommendations)). <sup>j</sup>
+     decision powers). A deciding editor reads "Recommending Editors are
+     tasked to advise the next steps for this submission", then "An
+     editorial recommendation has been received" / "All editorial
+     recommendations have been received, and a decision is required." as
+     recommendations land. A recommending editor who has recorded theirs
+     reads "Recommendation has been made by you." Recording one is owned
+     by the decision features
+     ([→ recommendations](U26-review-stage-and-rounds.md#recommendations)). <sup>j</sup>
    - 9g. **In copyediting** {OJS OMP}: "Copyedited Files Uploaded: {count}".
    - 9h. **Scheduled into an issue** {OJS}: "To be published in issue
      {issue}".
-   - 9i. Otherwise the cell is empty — notably a Submission-stage row with
-     its editor assigned, and most rows on a preprint server.
+   - 9i. Otherwise the cell is empty. That is the case for a
+     Submission-stage row with its editor assigned, and for most rows on a
+     preprint server.
 <a id="review-indicators"></a>
 10. **Per-reviewer activity indicators** {OJS OMP}. Wherever Rule 9e shows
     them, the cell carries one small round indicator per reviewer on the
-    current round — declined and cancelled ones included: a countdown ring with the days left (or overdue) for
-    requests and ongoing reviews — colored to flag overdue ones — and an
-    icon once there is an outcome (submitted, confirmed, declined,
-    cancelled). Clicking one opens a popover with the reviewer's name, the
-    review type, a status sentence, and up to three buttons: <sup>k</sup>
+    current round, declined and cancelled ones included. For requests and
+    ongoing reviews it is a countdown ring with the days left (or overdue),
+    colored to flag overdue ones. Once there is an outcome (submitted,
+    confirmed, declined, cancelled) it is an icon. Clicking one opens a
+    popover with the reviewer's name, the review type, a status sentence,
+    and up to three buttons: <sup>k</sup>
 
     | Reviewer status (popover headline) | Buttons offered |
     |------------------------------------|-----------------|
     | "Awaiting Response from the reviewer" (first request or resent) | "Edit Due Date" · "View details" · "Unassign" |
     | "Review Request overdue by {days} days" | "Edit Due Date" · "View details" · "Unassign" |
     | "Ongoing review - request accepted" | "Edit Due Date" · "View details" · "Cancel Reviewer" |
-    | "Review overdue by {days} days" — described as a missed *response*, dated with the review deadline ⚠ [A6](#a6) | "Edit Due Date" · "View details" · "Cancel Reviewer" |
+    | "Review overdue by {days} days" (described as a missed *response* and dated with the review deadline ⚠ [A6](#a6)) | "Edit Due Date" · "View details" · "Cancel Reviewer" |
     | "Review completed on {date}" | "View unread recommendation" (then "View recommendation" once read) |
     | "Review was confirmed by editor" | "View recommendation" |
     | "Review Request declined on {date}" | "Resend Review Request" · "View details" · "Cancel Reviewer" |
-    | "Reviewer cancelled review request" — shown when the *editor* cancelled ⚠ [A4](#a4) | "Resend Review Request" · "View details" |
+    | "Reviewer cancelled review request" (shown when the *editor* cancelled ⚠ [A4](#a4)) | "Resend Review Request" · "View details" |
 
     On a journal the completed-review popover also names the reviewer's
-    recommendation; a press shows the completed sentence without one.
+    recommendation. A press shows the completed sentence without one.
     An assigned Section Editor or assistant gets the same popovers with the
-    same working buttons — but declined and cancelled reviewers show no
+    same working buttons, but declined and cancelled reviewers show no
     indicator at all for them ⚠ [A7](#a7).
     Every button opens the same window it would open from the workflow's
-    Reviewers panel, and the list refreshes afterwards — the flows
+    Reviewers panel, and the list refreshes afterwards. The flows
     themselves are owned by *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*
     ([deadlines](U27-reviewer-assignment-and-management.md#due-dates),
     [reading and confirming](U27-reviewer-assignment-and-management.md#read-review),
     [unassign vs cancel](U27-reviewer-assignment-and-management.md#unassign)). <sup>k</sup>
 <a id="open-in-place"></a>
 11. **"View" opens the workflow in place.** The submission's workflow opens
-    as a panel over the list; the address records which submission — and
-    which of its panels — is open, so the state can be bookmarked or
-    shared, and reloading such an address reopens the panel. Closing it
-    returns to the list exactly as it was left, refreshed. What the panel
-    contains is *Workflow screen & stage access* (no spec yet) and the
-    stage features. <sup>l</sup>
+    as a panel over the list. The address records which submission, and
+    which of its panels, is open, so the state can be bookmarked or shared,
+    and reloading such an address reopens the panel. Closing it returns to
+    the list exactly as it was left, refreshed. What the panel contains
+    belongs to *Workflow screen & stage access* (no spec yet) and the stage
+    features. <sup>l</sup>
 <a id="bulk-delete"></a>
 12. **Bulk cleanup of incomplete submissions.** "More Actions" (the "…"
-    button above the list) offers **"Delete Incomplete Submissions"** — on
-    this dashboard only to Journal Managers and Site Administrators, and
-    grayed out while the current page of the list has no incomplete rows.
-    Choosing it puts the list in selection mode: a checkbox appears on each
-    incomplete row (only those), with **"Delete Incomplete Submissions"**
-    and **"Cancel"** buttons above; the delete button stays disabled until
-    something is ticked. Pressing it opens the "Confirm Delete of
-    Incomplete Submissions" dialog ("Are you sure you want to delete the
-    selected items? This action cannot be undone. Please confirm to
-    proceed.") with **"Confirm"** and **"Cancel"**. Confirm deletes the
-    ticked submissions permanently; Cancel — in the dialog or above the
-    list — leaves selection mode with nothing deleted. Changing view,
-    search or filters also drops the selection. The same machinery serves
-    the author's own list with its own who-may
+    button above the list) offers **"Delete Incomplete Submissions"**. On
+    this dashboard only Journal Managers and Site Administrators get it,
+    and it is grayed out while the current page of the list has no
+    incomplete rows. Choosing it puts the list in selection mode: a
+    checkbox appears on each incomplete row (only those), with
+    **"Delete Incomplete Submissions"** and **"Cancel"** buttons above. The delete
+    button stays disabled until something is ticked. Pressing it opens the
+    "Confirm Delete of Incomplete Submissions" dialog ("Are you sure you
+    want to delete the selected items? This action cannot be undone. Please
+    confirm to proceed.") with **"Confirm"** and **"Cancel"**. Confirm
+    deletes the ticked submissions permanently. Cancel, in the dialog or
+    above the list, leaves selection mode with nothing deleted. Changing
+    the view, search or filters also drops the selection. The same
+    machinery serves the author's own list with its own permissions
     ([→ deleting drafts](U22-my-submissions.md)). <sup>m</sup>
 13. **Counts stay current.** The sidebar badges and the heading's total
-    update in place — no reload — after anything done from this screen that
-    changes them (a deletion, an assignment made from a row, a decision
-    taken in the workflow panel before closing it). <sup>d</sup>
+    update in place, without a reload, after anything done from this screen
+    that changes them: a deletion, an assignment made from a row, a
+    decision taken in the workflow panel before closing it. <sup>d</sup>
 
 ## Side effects
 
-- The dashboard itself is a read-and-launch surface: listing, searching and
+- The dashboard itself is a read-and-launch surface. Listing, searching and
   filtering send nothing and log nothing. <sup>o</sup>
-- Deleting incomplete submissions removes them permanently — no email, no
-  undo; they vanish from every list including the authors' own.
+- Deleting incomplete submissions removes them permanently. There is no
+  email and no undo; they vanish from every list, including the authors'
+  own.
 - Actions launched from rows and popovers (assign editor, assign reviewers,
   edit due date, cancel…) carry the side effects of their owning features
   (*Stage participants*, *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*).
@@ -304,153 +316,151 @@ the account's roles — never on which dashboard page it opens from:
   month, every active Journal Manager and Section Editor with outstanding
   work gets one email, "Outstanding editorial tasks for {journal}", sent
   from the journal's principal contact. It lists up to 20 of their assigned
-  submissions that are waiting on them — a new submission awaiting first
-  review, review rounds needing reviewers / awaiting reviews / with reviews
-  ready or overdue / with revisions submitted, and submissions idle for 30+
-  days in copyediting or production — each linking into this dashboard, and
-  closes with a link to "your submission dashboard". An in-app notification
-  is recorded alongside. Nothing is sent to editors with nothing
-  outstanding, to accounts that opted out of this notification ⚠ [A8](#a8)
-  (the email carries an unsubscribe link), or to accounts whose role was removed in
-  the meantime. Assistants and Site Administrators (as such) never receive
-  it. A preprint server sends no such email — the monthly task is not
-  scheduled there. <sup>n</sup>
+  submissions that are waiting on them: a new submission awaiting first
+  review; review rounds needing reviewers, awaiting reviews, with reviews
+  ready or overdue, or with revisions submitted; and submissions idle for
+  30 or more days in copyediting or production. Each links into this
+  dashboard, and the email closes with a link to "your submission
+  dashboard". An in-app notification is recorded alongside. Nothing is sent
+  to editors with nothing outstanding, to accounts that opted out of this
+  notification ⚠ [A8](#a8) (the email carries an unsubscribe link), or to
+  accounts whose role was removed in the meantime. Assistants and Site
+  Administrators (as such) never receive it. A preprint server sends no
+  such email, because the monthly task is not scheduled there. <sup>n</sup>
 
 ## Settings that modify behavior
 
 - **Reviews required** {OJS OMP}: the journal's required number of reviews
-  (configured in review setup — *Review setup & review forms*, no spec
-  yet) drives the "Needs reviews" view and the "Minimum required number of
+  (configured in review setup; *Review setup & review forms*, no spec yet)
+  drives the "Needs reviews" view and the "Minimum required number of
   reviews…" message (Rule 9e).
 - **Notification opt-out**: each editor can block the monthly
-  outstanding-tasks email in their profile's notification settings — the
-  control there is labelled "Weekly email of outstanding tasks", though
-  the email is monthly ⚠ [A8](#a8); the email's unsubscribe link does the
-  same.
-- **Journal setup**: sections, categories and issues existing (or not)
-  decides which filter fields appear (Fields table); disabling submissions
-  hides the neighboring "Start A New Submission" entry (owned by
+  outstanding-tasks email in their profile's notification settings. The
+  control there is labelled "Weekly email of outstanding tasks", though the
+  email is monthly ⚠ [A8](#a8). The email's unsubscribe link does the same.
+- **Journal setup**: whether sections, categories and issues exist decides
+  which filter fields appear (Fields table). Disabling submissions hides
+  the neighboring "Start A New Submission" entry (owned by
   *[Submission wizard](U21-submission-wizard.md)*).
 
 ## Cross-feature interactions
 
-- *[My Submissions](U22-my-submissions.md)* — the author's list rides this
-  feature's table, search, filters and selection machinery; it owns its own
-  views, columns and who-may. Landing precedence and the legacy-address
-  forward are specified there ("Landing").
-- *Reviewer's review* (no spec yet) — the reviewer's assignment list is the
-  page's third face, riding the same machinery with its own views and
+- *[My Submissions](U22-my-submissions.md)*: the author's list uses this
+  feature's table, search, filters and selection machinery. It owns its own
+  views, columns and permissions. Landing precedence and the forward from
+  the old address are specified there ("Landing").
+- *Reviewer's review* (no spec yet): the reviewer's assignment list is the
+  page's third face. It uses the same machinery with its own views and
   columns.
-- *Workflow screen & stage access* (no spec yet) — owns everything behind
-  "View"; this spec owns only the open-in-place mechanism (Rule 11).
+- *Workflow screen & stage access* (no spec yet): owns everything behind
+  "View". This spec owns only the open-in-place mechanism (Rule 11).
 - *[Submission stage](U25-submission-stage.md)*, *[Review stage & rounds](U26-review-stage-and-rounds.md)*,
-  *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)* —
+  *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*:
   the states the Stage and Editorial Activity cells report, and the windows
   the row and popover buttons open.
-- *[Submission wizard](U21-submission-wizard.md)* — creates the incomplete
-  submissions this dashboard lists and cleans up; "Complete submission"
+- *[Submission wizard](U21-submission-wizard.md)*: creates the incomplete
+  submissions this dashboard lists and cleans up. "Complete submission"
   re-enters it.
-- *Stage participants* (no spec yet) — the "Assign Editor" window.
+- *Stage participants* (no spec yet): the "Assign Editor" window.
 
 ## Canonical scenarios
 
-Common to all three apps (OMP/OPS vocabulary per the
-[application glossary](GLOSSARY.md); scenarios naming review or copyediting
-views are {OJS OMP} where badged):
+Common to all three apps. OMP and OPS vocabulary follows the
+[application glossary](GLOSSARY.md). Scenarios that name review or
+copyediting views are {OJS OMP} where badged:
 
 1. **Land and walk the views** — Journal Manager: sign in on the journal's
-   login page. You land on the editorial dashboard, "Assigned to me" view,
-   under the sidebar's "Editor Dashboard" group, one entry per view with a
-   count badge. Walk the entries — each opens the list under its own
-   heading with its count ("Published (2)"); a view holding nothing shows
-   "No Items". <sup>s1</sup>
+   login page. You land on the editorial dashboard in the "Assigned to me"
+   view, under the sidebar's "Editor Dashboard" group, which has one entry
+   per view with a count badge. Walk the entries. Each opens the list under
+   its own heading with its count ("Published (2)"). A view holding nothing
+   shows "No Items". <sup>s1</sup>
 2. **Assigned-only scope** — Section Editor assigned to one submission, in
    a journal holding a second, unassigned one: every view shows only the
-   assigned submission; the unassigned one appears nowhere — not in
-   "Active submissions", not in global search. A Journal Manager checking
-   the same views sees both, and their "Assigned to me" view lists only
-   their own assignments. <sup>s2</sup>
+   assigned submission. The unassigned one appears nowhere, not in "Active
+   submissions" and not in global search. A Journal Manager checking the
+   same views sees both, and their "Assigned to me" view lists only their
+   own assignments. <sup>s2</sup>
 3. **Search within a view** — Journal Manager with several active
    submissions: on "Active submissions", type part of one title into the
-   search box — the list narrows to matching rows, the heading count
-   follows, and the phrase shows as a chip. Press the chip's X — the full
+   search box. The list narrows to matching rows, the heading count
+   follows, and the phrase shows as a chip. Press the chip's X. The full
    view is back. Switching to another view also drops the phrase.
    <sup>s3</sup>
 4. **Global search** — Journal Manager, with one declined submission in
    the journal: type its title into the sidebar's "Search submissions" box
-   and submit. The "Search Results" view opens listing it — declined
-   submissions included — with the phrase as a chip and no in-page search
-   box. Clear the chip: you return to the view you searched from.
+   and submit. The "Search Results" view opens and lists it, declined
+   submissions included, with the phrase as a chip and no in-page search
+   box. Clear the chip. You return to the view you searched from.
    <sup>s4</sup>
 5. **Filter the list** — Journal Manager: press "Filters", set "Days since
    last activity" to a value at or below one stale submission's idle time
-   (and above the other rows'), press
-   "Apply Filters" — the list narrows and a filter chip appears. "Clear
-   Filters" restores the view. The "Assigned To Editor" field is in the
-   manager's panel; sign in as a Section Editor and open the same panel —
-   the field is absent. <sup>s5</sup>
+   (and above the other rows'), and press "Apply Filters". The list narrows
+   and a filter chip appears. "Clear Filters" restores the view. The
+   "Assigned To Editor" field is in the manager's panel. Sign in as a
+   Section Editor and open the same panel: the field is absent. <sup>s5</sup>
 6. **Open a submission in place** — any editorial role with a listed
    submission: press "View". The workflow opens as a panel over the list
-   and the address records it; reload the address — the panel reopens.
-   Close it — the list is back at the exact address it left. <sup>s6</sup>
+   and the address records it. Reload the address: the panel reopens.
+   Close it: the list is back at the exact address it left. <sup>s6</sup>
 7. **Sort and page** — Journal Manager on a view with several rows: click
-   the "ID" header — rows reorder and the address records the sort; click
-   again to flip it. The "Days" header sorts by idle time the same way. A
-   view with more than 30 rows shows pager controls; page 2 shows the rest.
-   <sup>s7</sup>
+   the "ID" header. The rows reorder and the address records the sort.
+   Click again to flip it. The "Days" header sorts by idle time the same
+   way. A view with more than 30 rows shows pager controls, and page 2
+   shows the rest. <sup>s7</sup>
 8. **Triage a new submission** {OJS OMP} — Journal Manager, with a fresh
-   submission nobody is assigned to: it lists under "Needs editor", its
-   activity cell offering "Assign Editor". Press it, assign a Section
-   Editor through the window that opens, and confirm — back on the list the
-   button is gone, the row drops off "Needs editor", and the counts move.
+   submission nobody is assigned to: it lists under "Needs editor", and its
+   activity cell offers "Assign Editor". Press it, assign a Section Editor
+   through the window that opens, and confirm. Back on the list the button
+   is gone, the row drops off "Needs editor", and the counts move.
    <sup>s8</sup>
 9. **Review activity at a glance** {OJS OMP} — Journal Manager, one
    submission in review: while the round has no reviewers, the cell offers
    "Assign Reviewers", which opens the Add Reviewer window. With two
-   requests out, the cell shows two countdown indicators; click one — the
+   requests out, the cell shows two countdown indicators. Click one: the
    popover names the reviewer, the review type and "Awaiting Response from
    the reviewer", with "Edit Due Date", "View details" and "Unassign".
-   After one reviewer submits, their indicator turns to a done mark whose
+   After one reviewer submits, their indicator turns into a done mark whose
    popover reads "Review completed on {date}" with "View unread
    recommendation". <sup>s9</sup>
-10. **The conflict row** — Journal Manager who is also an author: their own
-    authored submission's row on the editorial dashboard shows the "You
-    cannot access this submission… go to \"My Submissions\"" notice and no
-    "View" button, while ordinary rows around it keep theirs. The same
-    submission sits normally under their "My Submissions as Author" group.
-    <sup>s10</sup>
+10. **The conflict row** — Journal Manager who is also an author: the row
+    of their own authored submission on the editorial dashboard shows the
+    "You cannot access this submission… go to \"My Submissions\"" notice
+    and no "View" button, while the ordinary rows around it keep theirs.
+    The same submission sits normally under their "My Submissions as
+    Author" group. <sup>s10</sup>
 11. **Declined out of editors' sight** — Journal Manager declines a
-    Section Editor's assigned submission: the manager finds it under
-    "Declined" ("Declined during the … stage."); the Section Editor's
+    Section Editor's assigned submission. The manager finds it under
+    "Declined" ("Declined during the … stage."). The Section Editor's
     sidebar has no "Declined" entry and the submission is gone from all
-    their views — only their global search still finds it ⚠ [A1](#a1).
+    their views. Only their global search still finds it ⚠ [A1](#a1).
     <sup>s11</sup>
-12. **Bulk-delete incomplete submissions** — Journal Manager, journal
+12. **Bulk-delete incomplete submissions** — Journal Manager, in a journal
     holding two incomplete submissions (one theirs, one another author's)
     and a submitted one: "More Actions" → "Delete Incomplete Submissions"
-    puts the list in selection mode — checkboxes on the two incomplete rows
-    only. Tick both, press "Delete Incomplete Submissions", press
-    "Confirm" in the dialog — both are gone and the counts drop. A Section
+    puts the list in selection mode, with checkboxes on the two incomplete
+    rows only. Tick both, press "Delete Incomplete Submissions", and press
+    "Confirm" in the dialog. Both are gone and the counts drop. A Section
     Editor's dashboard shows no "More Actions" button at all. <sup>s12</sup>
 
 App-specific:
 
 13. **Issue filter and scheduled rows** {OJS} — Journal Manager with a
     submission scheduled into an unpublished issue: its activity cell reads
-    "To be published in issue {issue}", its Stage cell "Scheduled", and it
-    lists under "Scheduled for publication" — no longer under "Active
-    submissions"; the Filters panel's "Issues" field narrows any view to
-    that issue's submissions. <sup>s13</sup>
+    "To be published in issue {issue}", its Stage cell reads "Scheduled",
+    and it lists under "Scheduled for publication" and no longer under
+    "Active submissions". The Filters panel's "Issues" field narrows any
+    view to that issue's submissions. <sup>s13</sup>
 14. **One review view, two review stages** {OMP} — Press Manager with one
     monograph in Internal Review and another in External Review: "All in
-    review stage" lists both; the internal one's activity cell shows its
+    review stage" lists both. The internal one's activity cell shows its
     round state just as the external one does. <sup>s14</sup>
 15. **The reduced dashboard** {OPS} — Preprint Server Manager: the sidebar
     group offers exactly Assigned to me / Active submissions / All in
-    production stage / Scheduled for publication / Published / Declined —
-    no review, copyediting or "Needs editor" views. A fresh preprint's
-    activity cell is empty; the bulk-cleanup flow of scenario 12 works the
-    same. <sup>s15</sup>
+    production stage / Scheduled for publication / Published / Declined.
+    There are no review, copyediting or "Needs editor" views. A fresh
+    preprint's activity cell is empty. The bulk-cleanup flow of scenario 12
+    works the same. <sup>s15</sup>
 
 ## Findings register
 
@@ -462,11 +472,11 @@ and evidence live in the entry's footnote.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A4](#a4) | The popover over an editor-cancelled review request blames the reviewer: "Reviewer cancelled review request" | 🐞 | minor | — |
-| [A5](#a5) | Switching a sort off leaves the old sort in the address — display and address disagree until reload | 🐞 | minor | — |
+| [A5](#a5) | Switching a sort off leaves the old sort in the address, so display and address disagree until reload | 🐞 | minor | — |
 | [A6](#a6) | The overdue-review popover describes the missed review as a "response" and dates it with the review deadline | 🐞 | minor | — |
-| [A1](#a1) | Section Editors and assistants have no view listing declined (or published-and-gone) submissions — global search is their only way back | ❓ | user-visible | — |
+| [A1](#a1) | Section Editors and assistants have no view listing declined (or published-and-gone) submissions; global search is their only way back | ❓ | user-visible | — |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
-| [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager" — whoever is looking, on presses and preprint servers too | ❓ | minor | — |
+| [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
 | [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned Section Editors and assistants | ❓ | minor | — |
 | [A8](#a8) | The profile's opt-out for the monthly outstanding-tasks email is labelled "Weekly email of outstanding tasks" | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
@@ -478,82 +488,81 @@ and evidence live in the entry's footnote.
 user-visible.
 The "Declined" view exists only for Journal Managers and Site
 Administrators. A Section Editor or assistant whose assigned submission is
-declined loses it from every view on their dashboard; the same goes for
-nothing-left-to-do outcomes their view roster does not cover. Their global
-search still finds it (Rule 7), but nothing tells them so.
+declined loses it from every view on their dashboard. The same happens with
+other finished outcomes their views do not cover. Their global search still
+finds it (Rule 7), but nothing tells them so.
 Question: should assigned editors keep a view (or their "Declined" /
-"Published" entries) scoped to their own submissions? Lean: intended
-reduction — the roster assigns each view a deliberate role list — but the
-silent disappearance is worth a product ruling.
+"Published" entries) scoped to their own submissions? Lean: an intended
+reduction, since each view has a deliberate role list, but the silent
+disappearance is worth a product ruling.
 Basis: probe + code. <sup>a1</sup>
 
 <a id="a2"></a>
 **A2 — "Complete submission" hands an editor the author's wizard** · ❓ ·
 minor.
 An incomplete submission's row on the editorial dashboard offers "Complete
-submission" — the same button the author gets — and pressing it opens the
+submission", the same button the author gets. Pressing it opens the
 author's submission wizard on someone else's draft, where the editor can
-edit and even submit it. Expected: a manager-appropriate affordance (or
-none).
-Question: is editors completing an author's draft intended? Lean: intended
-but rough — managers may legitimately finish a stuck draft, and the page
-offers no other way in; the row otherwise has no "View" at all.
+edit and even submit it. Expected: a control suited to a manager, or none.
+Question: is it intended that editors complete an author's draft? Lean:
+intended but rough. Managers may legitimately finish a stuck draft, and the
+page offers no other way in; the row otherwise has no "View" at all.
 Basis: probe + code. <sup>a2</sup>
 
 <a id="a3"></a>
 **A3 — The conflict notice always says "Journal Manager"** · ❓ · minor.
 The notice on a conflict row (Rule 9a) is a fixed sentence: "You cannot
-access this submission as a Journal Manager since you are the author…" —
-shown unchanged to a Site Administrator, and on presses and preprint
-servers where the role is called Press Manager / Preprint Server Manager.
+access this submission as a Journal Manager since you are the author…". It
+is shown unchanged to a Site Administrator, and on presses and preprint
+servers where the role is called Press Manager or Preprint Server Manager.
 The reviewer variant has the same fixed wording.
-Question: should the notice name the viewer's actual role (or drop the role
-mention)? Lean: wording oversight — a single shared sentence with no
-app-level rewording; harmless but reads wrong outside OJS.
+Question: should the notice name the viewer's actual role, or drop the role
+mention? Lean: a wording oversight. It is a single shared sentence with no
+app-level rewording; harmless, but it reads wrong outside OJS.
 Basis: probe + code. <sup>a3</sup>
 
 <a id="a4"></a>
 **A4 — Cancelled-by-editor popover blames the reviewer** · 🐞 · minor.
 When an editor cancels a review request ("Cancel Reviewer"), the reviewer's
-indicator popover is headlined "Reviewer cancelled review request" — the
-reviewer did nothing — and its description repeats the misattribution:
-"Reviewer has cancelled the review request on {date}." Expected: wording
-that attributes the cancellation to the editorial side, as the Reviewers
-panel's own status ("Request Cancelled") does. Rationale for 🐞: the
-neighboring declined status has its own, correct headline, so the two
-states were meant to read differently.
+indicator popover is headlined "Reviewer cancelled review request",
+although the reviewer did nothing. Its description repeats the
+misattribution: "Reviewer has cancelled the review request on {date}."
+Expected: wording that attributes the cancellation to the editorial side,
+as the Reviewers panel's own status ("Request Cancelled") does. Rationale
+for 🐞: the neighboring declined status has its own, correct headline, so
+the two states were meant to read differently.
 Basis: probe + code. <sup>a4</sup>
 
 <a id="a5"></a>
 **A5 — Un-sorting leaves a stale sort in the address** · 🐞 · minor.
-Clicking a sorted column's header a third time switches sorting off — the
-rows return to their default order — but the address keeps the sort it
-just left. Until the page is reloaded, the address and the displayed
-order disagree; reloading or sharing that address re-applies the sort the
-person switched off. Expected: the address follows the third state as it
-does the first two (Rule 4).
+Clicking a sorted column's header a third time switches sorting off and the
+rows return to their default order, but the address keeps the sort it just
+left. Until the page is reloaded, the address and the displayed order
+disagree. Reloading or sharing that address re-applies the sort the person
+switched off. Expected: the address follows the third state as it does the
+first two (Rule 4).
 Basis: probe. <sup>a5</sup>
 
 <a id="a6"></a>
 **A6 — The overdue-review popover talks about a response** · 🐞 · minor.
 Once an accepted review runs overdue, the indicator popover's headline says
-"Review overdue by {days} days" but its description reads "This reviewer
-has not completed their review. A response was due on {date}." — calling
-the missed review a "response", and the date it shows is the review due
-date under that wrong name. Expected: the description to speak of the
-review and its deadline, as the headline does; the response-overdue state
-has this same sentence where it is correct.
+"Review overdue by {days} days", but its description reads "This reviewer
+has not completed their review. A response was due on {date}." It calls the
+missed review a "response", and the date it shows is the review due date
+under that wrong name. Expected: the description speaks of the review and
+its deadline, as the headline does. The response-overdue state has this
+same sentence, where it is correct.
 Basis: probe. <sup>a6</sup>
 
 <a id="a7"></a>
 **A7 — Declined and cancelled reviewers vanish for assistants** · ❓ · minor.
-On the same submission at the same moment, a Journal Manager's row shows
-an indicator for every reviewer on the round — declined and cancelled ones
-included — while an assigned Section Editor or assistant sees indicators
-only for the others; nothing marks the omission. The popovers they do get
-carry the editor's full working buttons.
+On the same submission at the same moment, a Journal Manager's row shows an
+indicator for every reviewer on the round, declined and cancelled ones
+included. An assigned Section Editor or assistant sees indicators only for
+the others, and nothing marks the omission. The popovers they do get carry
+the editor's full working buttons.
 Question: is the reduced indicator set for assigned (non-manager) users
-intended? Lean: omission — the list assigned users receive simply leaves
+intended? Lean: an omission. The list assigned users receive simply leaves
 declined and cancelled reviewers out, while every other part of the cell
 matches the manager's.
 Basis: probe. <sup>a7</sup>
@@ -561,12 +570,12 @@ Basis: probe. <sup>a7</sup>
 <a id="a8"></a>
 **A8 — The outstanding-tasks opt-out says "Weekly"** {OJS OMP} · ❓ · minor.
 The profile's notification settings name the opt-out for the
-outstanding-tasks email "Weekly email of outstanding tasks" — but the
-email goes out monthly (Side effects), and nothing else on screen calls it
+outstanding-tasks email "Weekly email of outstanding tasks", but the email
+goes out monthly (Side effects), and nothing else on screen calls it
 weekly.
-Question: which is wrong — the label or the schedule? Lean: the label —
-the task is deliberately registered to run monthly on the 1st, so the
-label reads like a leftover from an earlier cadence.
+Question: which is wrong, the label or the schedule? Lean: the label. The
+task is deliberately registered to run monthly on the 1st, so the label
+reads like a leftover from an earlier cadence.
 Basis: probe + code. <sup>a8</sup>
 
 ### OMP
@@ -574,13 +583,13 @@ Basis: probe + code. <sup>a8</sup>
 <a id="omp1"></a>
 **OMP1 — No series filter on a press** · ❓ · minor.
 A press's Filters panel never offers a series filter, even when the press
-has several series — on a journal or preprint server with more than one
+has several series. On a journal or preprint server with more than one
 section, the same panel lists the Section field. The omission is
 dashboard-wide; the author's list records the same fact
 ([→ My Submissions](U22-my-submissions.md)).
-Question: is the missing series filter a product choice? Lean: intended —
-a series, unlike a section, is an optional shelf not every submission has;
-worth a ruling since the shared machinery supports it.
+Question: is the missing series filter a product choice? Lean: intended. A
+series, unlike a section, is an optional shelf not every submission has.
+Worth a ruling since the shared machinery supports it.
 Basis: probe + code. <sup>omp1</sup>
 
 ---
