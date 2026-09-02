@@ -27,8 +27,9 @@ just the provisioner for the default, isolated layout (see
   `lib/pkp/…`), hides the copies via `.git/info/exclude`, and refuses to
   overwrite copies that were edited app-side — **edits belong here**. Re-run
   after changing any PHP overlay; `npm run unmount` removes everything.
-- Each app checkout still carries its own `.env.playwright` (DB credentials,
-  `TEST_API_KEY`) and `config.test.inc.php` — see `docs/process/harness.md`.
+- Each app checkout still carries its own `.env.playwright` (`TEST_API_KEY`,
+  ports, `PKP_CONFIG_FILE`) and `config.test.inc.php` (DB credentials). See
+  `docs/process/harness.md`.
 - **Prerequisite** in the checkout: pkp-lib's `Config.php` must honour the
   `PKP_CONFIG_FILE` env var (merged upstream 2026-08, so any current `main`
   carries it). `mount.js` verifies this and says so if it's missing.

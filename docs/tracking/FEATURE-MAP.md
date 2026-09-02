@@ -140,7 +140,7 @@ Atoms: AFFW-065, 068..075, 077..110, 112..122, 125..127, 129..132 · AFFR-092 ·
 Notes: panel mechanics live in U36/U41; the wizard owns step flow + gates. Rider: API-042's submit/saveForLater endpoint clusters (owned by U24) serve this feature.
 
 ### U22 — My Submissions (author dashboard) {OJS OMP OPS} · L
-An author tracks their submissions, acts on requests, re-enters incomplete ones; owns the author's entry route into the workflow (TEMPLATE rule 9).
+An author tracks their submissions, acts on requests, re-enters incomplete ones; owns the author's entry route into the workflow (TEMPLATE rule 6).
 Atoms: AFFW-027, 040, 048..049
 Notes: riders — the list's route/page component ride ROUTE-007..008 and VUE-003 (owned by U23); this feature cites its views there.
 
@@ -393,7 +393,7 @@ Notes: AFFM-263..271 and API-059's saveDisplayFlags/saveFeaturedOrder/addToCatal
 
 Every `?`-flagged line from the six crosswalks, with the final call. Resolution
 rule applied: accept the crosswalk's primary assignment unless RULINGS or
-TEMPLATE rules 8–10 clearly say otherwise. **101 of the 104 flagged lines
+TEMPLATE rules 5–7 clearly say otherwise. **101 of the 104 flagged lines
 resolve to the crosswalk's primary; three were overturned on critic review
 2026-07-27 (AFFR-057 → U13, AFFW-712..734 → OOS, ROUTE-037 → U18).** Four are
 additionally confirmed by explicit RULINGS text (AFFW-427, NOTIF-038,
@@ -467,7 +467,7 @@ adjudicated in that critic pass.
 | AFFR-051 | U69 | RULINGS htmlMonographFile clarification: a catalog READER surface, in scope under U69 (confirmed by RULINGS). |
 | AFFR-052 | U13 | Shared details atom; OMP exposure is covered by U69 (D2 superseded), not by U13. |
 | AFFR-056 | U13 | Chart *display* owned by the screen (rule 6); pipeline and stats semantics stay U64's. |
-| AFFR-057 | U13 | ⚑ TEMPLATE rule 6 screen ownership, consistent with AFFR-056 and D11's lean; U42 cites; OMP exposure via U69 rider. |
+| AFFR-057 | U13 | ⚑ TEMPLATE rule 5 screen ownership, consistent with AFFR-056 and D11's lean; U42 cites; OMP exposure via U69 rider. |
 | AFFR-063 | U43 | Funders display is primary; the availability-statement portion sits on the U40/U13 seam per D11. |
 | AFFR-065 | U40 | License display owned by U40 per D10; U13 cites it as landing content. |
 | AFFR-069 | U45 | Crossmark is registration-agency plugin behavior (plugin-owner rule); renders on U13's screen (rider). |

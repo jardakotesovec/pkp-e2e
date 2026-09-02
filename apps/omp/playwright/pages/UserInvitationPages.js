@@ -2,7 +2,7 @@
  * @file playwright/pages/UserInvitationPages.js
  *
  * OMP page objects for the user-invitations feature (spec:
- * lib/pkp/docs/e2e/specs/U06-user-invitations.md, RUNBOOK step 6).
+ * lib/pkp/docs/e2e/specs/U06-user-invitations.md, RUNBOOK step 7).
  *
  * Three surfaces:
  * - UsersAccessPage — Settings → Users & Roles (Users tab): the Invitations

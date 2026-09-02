@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// lint-spec.mjs — the campaign's mechanical spec gate (RUNBOOK step 5, TEMPLATE "The lint gate").
+// lint-spec.mjs — the campaign's mechanical spec gate (RUNBOOK step 6, TEMPLATE "The lint gate").
 // run:      node lint/lint-spec.mjs [specs/foo.md ...]     default: every specs/*.md
 // self-test: node lint/lint-spec.mjs --self-test           embedded good/bad fixtures, no deps
 // REFERENCE INTEGRITY ONLY (maintainer, 2026-07-31 — wording, vocabulary and the leak rule
 // are the writer's judgment, never linted): campaign identifiers a reader cannot resolve
-// (TEMPLATE rules 6–7) · register anatomy · link/anchor/footnote resolution.
+// (TEMPLATE rule 5) · register anatomy · link/anchor/footnote resolution.
 // Checks: campaign · register · links. Findings print "file:line — check — excerpt"; exit 1.
 
 import fs from 'node:fs';
@@ -52,9 +52,9 @@ function parseDoc(file) {
 const excerpt = (s, n = 110) => { const t = String(s).trim().replace(/\s+/g, ' '); return t.length > n ? t.slice(0, n) + '…' : t; };
 
 // (The leak rule and the glossary/vocabulary checks were removed 2026-07-31 — TEMPLATE rule 1
-// and rule 10 bind by the writer's judgment; the gate keeps only reference integrity.)
+// and rule 7 bind by the writer's judgment; the gate keeps only reference integrity.)
 
-// ------------------------------------------------- 1. campaign identifiers (TEMPLATE rules 6–7)
+// ------------------------------------------------- 1. campaign identifiers (TEMPLATE rule 5)
 // FEATURE-MAP row codes (U26) and atlas atom IDs (AFFW-323) are the campaign's own bookkeeping.
 // A PO or QA reader cannot resolve them, so they never appear in the readable body: a
 // cross-feature pointer NAMES the feature ("see *Stage participants*") and links once that

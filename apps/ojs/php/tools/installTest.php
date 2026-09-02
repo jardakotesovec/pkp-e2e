@@ -24,7 +24,7 @@ if (PHP_SAPI !== 'cli') {
  *   install fresh;
  * - installed DB (current version row present) → no-op, exit 0.
  * Refuses any database whose name does not contain "test"
- * (`npm run test:e2e:reset` is the tool that empties it).
+ * (`npm run reset:<app>` is the tool that empties it).
  */
 
 // The installer requires installed = Off, and bootstrapping with

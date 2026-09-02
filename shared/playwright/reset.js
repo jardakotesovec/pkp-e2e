@@ -2,7 +2,7 @@
 /**
  * @file lib/pkp/playwright/reset.js
  *
- * test:e2e:reset — nuke the test install so the next run performs a cold
+ * reset:<app> — nuke the test install so the next run performs a cold
  * bootstrap: drop + recreate the test database, wipe the test files dir and
  * the storage-state cache (playwright/.auth/).
  *
