@@ -41,8 +41,9 @@ page in this feature and by the neighbouring publication features
 always may. Other participants may while their assignment carries the
 metadata-edit permission. An Author may only while no version of the
 submission is published or scheduled. Which roles reach the workflow screen
-and its stages at all is the workflow screen's own rule (see *Workflow screen
-& stage access*) and is not restated here. <sup>a</sup> <sup>b</sup>
+and its stages at all is the workflow screen's own rule
+([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)) and
+is not restated here. <sup>a</sup> <sup>b</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
@@ -122,7 +123,9 @@ it for a per-item value (Rule 11). <sup>g</sup>
    (first), **"Metadata"**, **"Data"** (after References, and only when the
    journal enables the data availability statement or data citations),
    and **"Permissions & Disclosure"**, which appears for editorial roles
-   with Production-stage access only. Each opens a page headed
+   with Production-stage access only
+   ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)).
+   Each opens a page headed
    "Publication: {entry}" ("Preprint: {entry}" on a preprint server)
    carrying one form with a **Save** button. The neighbouring entries
    (Contributors, References, Funding, Galleys/Publication Formats, JATS,
@@ -418,13 +421,15 @@ it for a per-item value (Rule 11). <sup>g</sup>
   summary required, the wizard's own saves are hit by the same refusal
   as this feature's pages (A1). What the author then sees is the wizard's
   to describe.
-- *Workflow screen & stage access* (no spec yet): owns which roles reach
-  the workflow screen, its stages and the Publication area. This spec's
-  Actors rows start from that access.
+- *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)*:
+  owns which roles reach the workflow screen, its stages and the Publication
+  area ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)).
+  This spec's Actors rows start from that access.
 - *Stage participants* (no spec yet): owns the participant assignment and
   its "Allow this person to make changes to the publication…" checkbox
   that Rule 2 reads.
-- *Publish, schedule & versions* (no spec yet): owns publishing,
+- *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*:
+  owns publishing,
   scheduling, unpublishing and versions, including the "Review Publishing
   Details" panel a journal shows before scheduling. This spec owns the
   edit locks those states impose (Rules 8–9), the permission-field fill
@@ -1940,7 +1945,7 @@ sentence on the preprint page).
 | Tools › Permissions › Reset permissions | Tools → Permissions → "Reset Article Permissions" | AFFM-163 (tab bar AFFM-161 and page ops ROUTE-018 belong to *Import & export*) |
 | License block on the landing page | published item's page | AFFR-065 (the data-availability / funding-statement blocks ride AFFR-063, owned by *Funding*) |
 | Term suggestions API | `vocabs?vocab=…&locale=…&submissionId=…` | API-049 |
-| Publication forms API | `submissions/{id}/publications/{id}/_components/{titleAbstract,metadata,dataAvailability,permissionDisclosure,changeLanguageMetadata}` + `PUT …/publications/{id}` + `PUT …/changeLocale` (the omnibus controller is *Workflow screen & stage access*'s) | API-061 (OMP's `permissionDisclosure` re-registration; its `catalogEntry` component is *Catalog management*'s) |
+| Publication forms API | `submissions/{id}/publications/{id}/_components/{titleAbstract,metadata,dataAvailability,permissionDisclosure,changeLanguageMetadata}` + `PUT …/publications/{id}` + `PUT …/changeLocale` (the omnibus controller is *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*'s) | API-061 (OMP's `permissionDisclosure` re-registration; its `catalogEntry` component is *Catalog management*'s) |
 | Publication record shape | — | SET-019 (shared), SET-032 (OJS), SET-037 (OMP), SET-043 (OPS) |
 | Vocabulary browser modal | not reachable from this feature's pages at the pinned commits — serves the Categories picker in the wizard's "For the Editors" step (*Submission wizard*) and the dashboard filters (*Submissions dashboard*) | VUE-090 (waived here, delegated to those specs) |
 | "View submission metadata" modal | its template does not exist in any pinned checkout — dead candidate | AFFW-711 (waived; proposed for the unassigned list) |

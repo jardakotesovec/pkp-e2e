@@ -163,7 +163,8 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    which of its panels, so the open state can be bookmarked or shared.
    Closing the panel returns to the list at the exact address it left. What
    the panel contains, the author's view of the shared workflow screen, is
-   *Workflow screen & stage access* and the stage features
+   [→ the workflow screen](U24-workflow-screen-and-stage-access.md#workflow-entry)
+   and the stage features
    ([submission stage](U25-submission-stage.md#author-view),
    [review stage](U26-review-stage-and-rounds.md#author-view)). <sup>e</sup>
 9. **Deleting drafts.** "More Actions" (the "…" button above the list) offers
@@ -210,12 +211,13 @@ menu entry and the journal's intake gates belong to *[Submission wizard](U21-sub
   submissions this list shows. "Complete submission" and draft deletion act
   on its drafts. "Start A New Submission" sits beside this list's menu
   group.
-- *Submissions dashboard* (the editorial lists; no spec yet) owns the shared
+- *[Submissions dashboard](U23-submissions-dashboard.md)* (the editorial
+  lists) owns the shared
   list behavior this feature uses: the table (sorting, paging, empty state),
   search, the Filters panel, and the incomplete-submissions selection mode.
   This spec owns only their author-facing configuration.
-- *Workflow screen & stage access* (no spec yet) owns everything behind
-  "View". This spec owns only the entry route.
+- *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#workflow-entry)*
+  owns everything behind "View". This spec owns only the entry route.
 - *[Submission stage](U25-submission-stage.md#author-view)* and
   *[Review stage & rounds](U26-review-stage-and-rounds.md#author-view)* own
   the stage states this list's Stage and Editorial Activity cells report,
@@ -752,7 +754,7 @@ its drafts (positive control).
 | Review progress counter | row activity cell | AFFW-049 |
 | Draft selection & deletion | "More Actions" above the list | riders on AFFW-020, 021, 023, 026 (owned by *Submissions dashboard*) |
 | Legacy submissions address | `{journal}/submissions` → forwards home | rider on ROUTE-007 (owned by *Submissions dashboard*) |
-| Old author-dashboard link | `{journal}/authorDashboard/submission/{id}` → forwards here with the workflow panel open | ROUTE-005 (owned by *Workflow screen & stage access*) |
+| Old author-dashboard link | `{journal}/authorDashboard/submission/{id}` → forwards here with the workflow panel open | ROUTE-005 (owned by [→ workflow addresses](U24-workflow-screen-and-stage-access.md#workflow-addresses)) |
 
 ## Reference — code anchors
 

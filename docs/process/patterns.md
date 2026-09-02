@@ -195,7 +195,12 @@ quarantine tag on purpose: a known regression stays red, and its
 Inherit from `BasePage` (`shared/playwright/pages/BasePage.js`). A POM holds
 `page` and its locators as instance properties. Placement: shared mechanics go
 in `shared/playwright/pages/` (today `BasePage`, `LoginPage`, `DashboardPage`,
-`EditorialDashboardPage`, `MySubmissionsPage`); app-specific POMs go in
+`EditorialDashboardPage`, `MySubmissionsPage` and `WorkflowPage`, the
+workflow panel's frame: opening by address or from a row, header readouts,
+the side menu with its stages, rounds, version nodes and pages, the status
+and no-access boxes, the Delete / Return-to-Workflow / Return-to-Done
+dialogs; app vocabulary comes from `appContext` capabilities or a `labels`
+option); app-specific POMs go in
 `apps/<app>/playwright/pages/`. The OJS tree has `ContributorPages.js`,
 `FundingPages.js`, `OrcidPages.js`, `PublicationMetadataPages.js`,
 `PublishSchedulePages.js`, `ReviewStagePages.js`, `UserInvitationPages.js` and
@@ -204,12 +209,14 @@ in `shared/playwright/pages/` (today `BasePage`, `LoginPage`, `DashboardPage`,
 cancel dialogs). OMP and OPS keep their own counterparts under their trees;
 duplication between app suites is deliberate (PRINCIPLES M1).
 
-**Not built yet**: an `EditorialWorkflowPage.js` (decisions, the Publication
-side-nav, publish, galleys, with helpers along the lines of `clickDecision`,
-`clickRequestRevisions({newRound})`, `awaitEmailTemplateLoaded`,
-`recordDecision`, `publishCurrentPanel`, `addGalley`, `deleteGalley`) and an
-`IssuePage.js`. These are the shapes to build when a suite needs them; no code
-exists.
+The workflow panel is split on purpose: the shared `WorkflowPage` owns the
+frame (what U24 describes), while what a stage or page shows once open —
+decisions, files, reviewers, publish, galleys — stays app-side in the
+feature's own page object (`ReviewStagePages.js`, `PublishSchedulePages.js`,
+…), because those surfaces differ per app.
+
+**Not built yet**: an `IssuePage.js`. Build it at the shape a suite needs; no
+code exists.
 
 ## Decision flow
 

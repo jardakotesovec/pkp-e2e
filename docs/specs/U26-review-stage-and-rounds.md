@@ -46,7 +46,9 @@ to recommendations. That limitation is set when participants are managed
 (see *Stage participants*). The Author reaches this screen only for their
 own submission, through My Submissions. Anyone who types the workflow
 address of a submission they have no right to gets only an access error, and
-nothing of that submission is shown. <sup>a</sup>
+nothing of that submission is shown
+([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)).
+<sup>a</sup>
 
 | Action | Who may, and when |
 |--------|--------------------|

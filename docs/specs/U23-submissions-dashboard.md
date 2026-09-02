@@ -278,8 +278,9 @@ the account's roles, never on which dashboard page it opens from:
     which of its panels, is open, so the state can be bookmarked or shared,
     and reloading such an address reopens the panel. Closing it returns to
     the list exactly as it was left, refreshed. What the panel contains
-    belongs to *Workflow screen & stage access* (no spec yet) and the stage
-    features. <sup>l</sup>
+    belongs to
+    [→ the workflow screen](U24-workflow-screen-and-stage-access.md#workflow-entry)
+    and the stage features. <sup>l</sup>
 <a id="bulk-delete"></a>
 12. **Bulk cleanup of incomplete submissions.** "More Actions" (the "…"
     button above the list) offers **"Delete Incomplete Submissions"**. On
@@ -299,8 +300,11 @@ the account's roles, never on which dashboard page it opens from:
     ([→ deleting drafts](U22-my-submissions.md)). <sup>m</sup>
 13. **Counts stay current.** The sidebar badges and the heading's total
     update in place, without a reload, after anything done from this screen
-    that changes them: a deletion, an assignment made from a row, a
-    decision taken in the workflow panel before closing it. <sup>d</sup>
+    that changes them: a bulk deletion of incomplete submissions from the
+    list (Rule 12), an assignment made from a row, a decision taken in the
+    workflow panel before closing it, and a submission deleted from inside
+    its workflow panel, after which the badges and the total follow within
+    a few seconds. <sup>d</sup>
 
 ## Side effects
 
@@ -352,8 +356,8 @@ the account's roles, never on which dashboard page it opens from:
 - *Reviewer's review* (no spec yet): the reviewer's assignment list is the
   page's third face. It uses the same machinery with its own views and
   columns.
-- *Workflow screen & stage access* (no spec yet): owns everything behind
-  "View". This spec owns only the open-in-place mechanism (Rule 11).
+- *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#workflow-entry)*:
+  owns everything behind "View". This spec owns only the open-in-place mechanism (Rule 11).
 - *[Submission stage](U25-submission-stage.md)*, *[Review stage & rounds](U26-review-stage-and-rounds.md)*,
   *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*:
   the states the Stage and Editorial Activity cells report, and the windows
@@ -699,7 +703,16 @@ overdue by {n} days" in its activity cell (OJS + OMP). Count refresh
 live-probed 2026-08-26: within one session, no reload, the sidebar badges
 and the heading total moved after a bulk delete and after an editor
 assignment made from a row (OJS; the OMP badge movement rechecked and
-confirmed the same day).
+confirmed the same day). Delete from inside the workflow panel, live-probed
+2026-09-02 (OJS, OMP, OPS, `manager.maya`, a declined scratch submission):
+`openWorkflowModal()`'s `onClose` calls `fetchSubmissions()`, which triggers
+the count reload through a five-second trailing throttle (`appStore.js`);
+the browser sent `_submissions/viewsCount` right after the delete and the
+sidebar read "6 Declined" → "5 Declined" (OPS "8 Declined" → "7 Declined",
+heading "Declined (8)" → "Declined (7)") before any reload. A badge read
+inside the throttle window shows the old number for up to five seconds,
+which an earlier same-day observation ("4 Declined" beside "Declined (3)")
+had taken for a lag until reload.
 
 <a id="fn-e"></a>
 **e — addresses.** URL query params: `currentViewId`, `searchPhrase`,

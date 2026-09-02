@@ -28,8 +28,8 @@ buttons each role is offered in each state, and what each decision does to the
 submission. The guided wizard behind every decision button, with its email step
 and its file-promotion step, belongs to *Editorial decision recording*. The
 panels' own mechanics belong to their features (see *Cross-feature
-interactions*). Who may open a submission's workflow at all belongs to
-*Workflow screen & stage access*.
+interactions*). Who may open a submission's workflow at all is
+[→ stage access](U24-workflow-screen-and-stage-access.md#stage-access).
 
 A preprint server runs a **single-stage workflow**. A posted preprint's only
 stage is Production, and no Submission stage ever appears in a preprint's
@@ -47,20 +47,22 @@ recommendations. A **recommending editor** is an assigned editor whose
 participation is limited to recommendations. That limitation is set when
 participants are managed (see *Stage participants*). Who may **open** the
 Submission-stage screen at all is a gate shared by every workflow stage, and
-it is defined once in *Workflow screen & stage access*. The rows below record
+it is defined once, as
+[→ stage access](U24-workflow-screen-and-stage-access.md#stage-access). The
+rows below record
 only what each role is offered **on** the screen once it is open. The Author
 reaches this screen only for their own submission, through My Submissions, in
 a reduced author view (Rule 10). <sup>a</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Submission-stage panels** (files, discussions, participants) | • Site Administrator; Journal Manager; Editor: every submission in the journal<br>• Assigned Section Editor, Guest Editor, and the assistant groups the stage admits (Copyeditor, Layout Editor, Proofreader, Funding Coordinator, the four named in the decision row below): their assigned submissions<br>• Author: their own submission, in the author view (Rule 10; the author sees files and discussions only) <sup>a</sup> |
+| **See the Submission-stage panels** (files, discussions, participants) | • Site Administrator; Journal Manager; Editor: every submission in the journal<br>• Assigned Section Editor, Guest Editor, and the assistant groups whose stage set includes the Submission stage (by default only the Funding Coordinator; a Copyeditor, Layout Editor or Proofreader assigned here gets the no-access box instead, unless the Roles settings screen has added this stage to their group; [→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)): their assigned submissions<br>• Author: their own submission, in the author view (Rule 10; the author sees files and discussions only) <sup>a</sup> |
 | **Record a decision** (the buttons at the top of the screen) | • Deciding editors: while the submission is queued at this stage (queued means still awaiting a decision at this stage) they get the onward decisions (Rules 2–4); while it stands declined they get "Revert Decline" (Rule 5)<br>• Recommending editors: they are offered a reduced subset of the same decision buttons ("Send for Review" on a journal; "Send to Internal Review" on a press), not the dedicated recommendation controls the Review stage gives them ⚠ [A2](#a2)<br>• Assistants (Copyeditor, Layout Editor, Proofreader, Funding Coordinator): no decision buttons, whatever stage access they hold <sup>c</sup> <sup>d</sup> |
 | **Send the submission to review** | • Deciding editors: "Send for Review" on a journal; "Send to External Review" (which skips internal review) or "Send to Internal Review" on a press (Rule 2)<br>• Recommending editors: one of these buttons appears for them too ⚠ [A2](#a2) <sup>e</sup> |
 | **Accept and skip review** | • Deciding editors: "Accept and Skip Review" (Rule 3) <sup>e</sup> |
 | **Decline the submission** | • Deciding editors: "Decline Submission", while the submission is queued (Rule 4) <sup>e</sup> |
 | **Revert a decline** | • Deciding editors: "Revert Decline", only while the submission stands declined (Rule 5) <sup>e</sup> |
-| **Delete the submission** | • Journal Manager; Site Administrator: the "Delete" button, only while the submission stands declined (Rule 6). No other role is offered the button. Behind that, the system also refuses the delete operation itself for anyone who is not a Manager or Administrator <sup>f</sup> |
+| **Delete the submission** | • Journal Manager; Editor; Site Administrator (who holds a journal role on this install): the "Delete" button, only while the submission stands declined (Rule 6). No other role is offered the button; an assigned Section Editor is not. Behind that, the system also refuses the delete operation itself for anyone who is not a Manager, Editor or Administrator <sup>f</sup> |
 | **Jump to the publication (Schedule For Publication)** | • Every role the editorial view admits, on a journal. The author's own view never shows it (Rule 10). The "Schedule For Publication" shortcut at the top of the screen is not tied to decision rights, so assigned assistants and recommend-only editors see it too. It opens the publication's Title & Abstract. A press does not show it (Rule 7) <sup>g</sup> |
 
 ## Fields & validation
@@ -107,17 +109,18 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
    decision button offered is "Revert Decline". It returns the submission to
    the queued state and restores the onward buttons of Rules 2–3. <sup>e</sup>
 6. <a id="delete"></a> **Delete.** While the submission stands declined, a
-   Journal Manager or Site Administrator also sees a "Delete" button. Pressing
-   it opens a confirm dialog titled "Delete" that reads "Are you sure you want
-   to permanently delete this submission?" with "Confirm" / "Cancel".
-   Confirming removes the submission permanently and closes the workflow. The
-   button is offered only in the declined state and only to those two roles.
-   No other role is offered the button, and behind that the system also
-   refuses the delete operation itself. That refusal is a safeguard, not
-   something a screen shows. After the delete, the submission's old workflow
-   address (a stale bookmark, say) opens the dashboard with an explicit error
-   dialog: "Error" / "Invalid submission." / "OK". So the reader is told the
-   submission is gone. An empty leftover dialog lingers behind the error
+   Journal Manager, Editor or Site Administrator (who holds a journal role
+   on this install) also sees a "Delete" button. The button is offered only
+   in the declined state and only to those roles (Actors).
+   The dialog and what confirming does are
+   [→ the Delete dialog](U24-workflow-screen-and-stage-access.md#delete-dialog).
+   After the delete, the submission's dashboard address (a stale bookmark
+   to the open panel, say) opens the dashboard with an explicit error
+   dialog: "Error" / "Invalid submission." / "OK"; the older typed
+   workflow addresses answer with a bare page instead
+   ([→ that finding](U24-workflow-screen-and-stage-access.md#a9)). So the reader is told the
+   submission is gone. Behind the error, the workflow panel itself stays
+   open, empty but for the submission's number in its header
    ⚠ [A3](#a3). <sup>f</sup>
 7. <a id="schedule"></a> **The Schedule For Publication shortcut** {OJS}.
    At the top of the Submission stage a journal also shows a "Schedule For
@@ -128,12 +131,15 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
    never shows it (Rule 10). Its appearance does not depend on the submission's
    status, so it is shown even while the submission stands declined
    ⚠ [A1](#a1). A press does not show it. <sup>g</sup>
-8. **The status box is quiet at this stage.** On the review and later stages,
-   a status box at the top of the stage's panel column, above the Submission
-   Files panel, describes the submission's standing. While the submission is
-   still active at the Submission stage, that box shows nothing. It appears
-   only once the submission has moved on to a later stage, when it reads, for
-   example, "The submission is currently in the Copyediting stage." <sup>h</sup>
+8. **The status box is quiet at this stage.** While the submission has not
+   yet left the Submission stage, no status box is shown on this screen.
+   Once the submission has moved on to Review or a later stage,
+   a status box appears at the top of this stage's panel column, above the
+   Submission Files panel, and says where the submission now stands, for
+   example "The submission is currently in the Copyediting stage." The box
+   and its full message roster are
+   [→ the status box](U24-workflow-screen-and-stage-access.md#status-box).
+   <sup>h</sup>
 9. **No decision applies off the active stage.** A decision button appears only
    when the Submission stage is the submission's active stage. Once the
    submission has moved onward, opening the Submission-stage entry shows its
@@ -147,20 +153,15 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
     Submission stage. The author's entry route (View on My Submissions) belongs
     to *My Submissions*; everything on the screen after it is covered here.
     <sup>i</sup>
-11. **The old author-dashboard address forwards, for the author only.** Older
-    versions reached the submission's files through a separate author-dashboard
-    page. That page's address was `…/authorDashboard/submission/<number>` under
-    the journal's own address, where the number is the same submission number
-    the current workflow address carries. When the submission's own author
-    types it into the address bar today, it forwards to the current workflow
-    screen. On a journal or press the author lands on My Submissions with the
-    submission's workflow open. On a preprint server they land on the
-    submission's publication tabs. The forward is not a general redirect. Any
-    other signed-in role, whether an Editor, a Journal Manager, or an author
-    who is not this submission's, gets an authorization-denied page ("You do
-    not currently have sufficient privileges to view the submission.") instead
-    of the workflow. The old page and its file lists appear nowhere on a
-    current install. The Submission Files panel is their replacement. <sup>j</sup>
+11. **The old author-dashboard address forwards, for the author only.** An
+    old author-dashboard bookmark (`…/authorDashboard/submission/<number>`)
+    forwards the submission's own Author to the submission's workflow panel
+    on My Submissions, which opens at its usual landing entry (this screen
+    while the submission is still at the Submission stage; the current
+    review round, for one in review); the forward, the landing and the
+    refusals are
+    [→ workflow addresses](U24-workflow-screen-and-stage-access.md#workflow-addresses).
+    <sup>j</sup>
 
 ## Side effects
 
@@ -188,9 +189,9 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
 
 ## Cross-feature interactions
 
-- **Workflow screen & stage access**: who may open a submission's workflow and
-  reach this stage. This spec owns only what the Submission stage offers once
-  opened.
+- **[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)**:
+  who may open a submission's workflow and reach this stage. This spec owns
+  only what the Submission stage offers once opened.
 - **Editorial decision recording**: every decision button (Rules 2–5) opens
   that feature's guided wizard. This spec owns the buttons' presence and the
   stage or status change each decision makes.
@@ -208,8 +209,9 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
 - **Publish, schedule & versions**: the destination of the Schedule For
   Publication shortcut (Rule 7).
 - **Production stage / Publish, schedule & versions**: on a preprint server,
-  where the editorial moves this stage would carry (decline, revert, post)
-  live instead [OPS1](#ops1).
+  which has no Submission stage, the decision buttons this stage would carry
+  ("Decline Submission", "Revert Decline", "Post the preprint") sit on the
+  Production stage instead [OPS1](#ops1).
 
 ## Canonical scenarios
 
@@ -408,7 +410,18 @@ listed; the discussions panel is headed "Desk Review Tasks & Discussions" (not
 (shared panel config): with "Reviewer Suggestion at Submission" enabled but no
 suggestions entered, no panel renders; with one suggestion entered through the
 submission wizard, the panel "Reviewers Suggested by Author" renders under
-Participants with the suggested reviewer and the author's reason.
+Participants with the suggested reviewer and the author's reason. Which
+assistants see the panels, live-probed 2026-09-02 (OJS and OMP, all four
+assigned as participants to a submission at the Submission stage, each
+opening it by the dashboard address): `copyeditor.carla`, `layouteditor.leo`
+and `proofreader.pia` got "Workflow: Submission" over one line, "You don't
+currently have access to that stage of the workflow.", and nothing else;
+`assistant.rita` (Funding coordinator) got "Current Submission Language:
+English", "Submission Files" (with "Upload"), "Desk Review Tasks &
+Discussions" (with "Add"), "Participants", on OJS also "Schedule For
+Publication", and no decision buttons. The gate is the group's stage set on
+the Roles settings screen (Copyeditor: Copyediting; Layout Editor and
+Proofreader: Production; Funding coordinator: Submission and Review).
 
 <a id="fn-c"></a>
 **c** — The decision the buttons expose is built server-side by
@@ -513,7 +526,16 @@ Declined-view before/after check walked as scenario 6 prescribes — the
 declined submission listed only in the Declined view, never the default view,
 gone from it after the delete; the Section Editor's missing Delete control
 re-confirmed. The server-side refusal for other roles rests on the code above;
-only the button's absence was verified live.
+only the button's absence was verified live. Live-probed 2026-09-02 (OJS and
+OMP, a submission declined at Submission): `editor.diana` (Journal editor /
+Press editor, a `ROLE_ID_MANAGER` group, so it passes the
+`hasCurrentUserAtLeastOneAssignedRoleInAnyStage` check) was offered
+"Schedule For Publication" (OJS), "Revert Decline", "Delete"; pressing
+"Delete" opened the same "Delete" / "Are you sure you want to permanently
+delete this submission?" dialog, and "Cancel" kept the panel and the button;
+`sectioneditor.ana` (assigned Section editor) was offered "Revert Decline"
+only. The browser sends the delete as `POST …/api/v1/_submissions/{id}` (the
+DELETE route by method override), answered 200.
 
 <a id="fn-a3"></a>
 **f-a3** — Live-observed 2026-08-02 (OJS and OMP, identical terminal state;

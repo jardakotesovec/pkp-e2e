@@ -88,10 +88,17 @@ touched.
 ## Workflow
 
 - **Stage** — one of the workflow's fixed stops: Submission → Review →
-  Copyediting → Production (OJS). Fixed per app, not configurable.
-  Cross-app: Part II (OMP adds Internal Review; OPS has Production
-  only). The **active stage** is where the submission currently sits;
-  decision buttons render only there.
+  Copyediting → Production (OJS), plus Done once a version of record is
+  published. Fixed per app, not configurable. Cross-app: Part II (OMP adds
+  Internal Review; OPS has Production only). The **active stage** is where
+  the submission currently sits; decision buttons render only there.
+- **Done** — the resting place a submission enters by itself when a version
+  of record is published: the stage bubble reads "Published", no stage
+  entry is striped, and the log records the move. It is left by hand with
+  the header's "Return to Workflow" (back to the stage it was published
+  from; "Return to Done" reverses that) or automatically when the last
+  published version is unpublished. The workflow-screen spec owns the
+  rules.
 - **Workflow screen** — the per-submission editorial screen with its stage
   navigation; ONE shared surface for every role including the Author (role
   determines what is offered, never a separate screen). The author's reduced
@@ -245,6 +252,10 @@ The one legend for every spec file. Specs link here instead of repeating it.
   what you would expect". It links to the Findings-register entry. A plain
   `[OMP2](#omp2)` without ⚠ links to an intended difference between apps.
   After the first mention, repeats carry the bare marker.
+- **Basis** (the last line of a register entry) names the kind of evidence
+  behind the finding: *probe* = seen on a running install; *commit* =
+  traced in the app's change history; *judgment* = the author's reading of
+  the app, not yet seen running.
 - **Findings register.** The spec's single home for everything that deviates
   or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
   ruling · ✅ an intended difference. **Impact** is one plain word

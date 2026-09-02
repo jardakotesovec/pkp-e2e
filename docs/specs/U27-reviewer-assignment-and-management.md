@@ -50,8 +50,8 @@ unsearched list does not yet apply that split ⚠ [OMP2](#omp2).
 
 The Reviewers panel renders on the editorial view of the review stage. Who
 can open that stage at all is
-[→ stage access](U26-review-stage-and-rounds.md#rounds) (the *Review stage &
-rounds* actors table). Within the panel, "review managers" below means:
+[→ stage access](U24-workflow-screen-and-stage-access.md#stage-access).
+Within the panel, "review managers" below means:
 Journal Manager, Editor, and an assigned Section Editor or Guest Editor. A
 Site Administrator takes part through whatever journal role grants them
 stage access. Holding no role in the journal, they are refused at the

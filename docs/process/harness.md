@@ -54,7 +54,7 @@ shared/playwright/
 │   ├── legacy.js            # waitForJQueryIdle — legacy jQuery surfaces (grids, AjaxModals)
 │   ├── motion.js            # disableMotion — animations forced to 0.01ms in every context
 │   └── env.js               # loadEnv(appRoot) — .env.playwright parser (shell exports win)
-├── pages/                   # BasePage, LoginPage, DashboardPage, EditorialDashboardPage, MySubmissionsPage
+├── pages/                   # BasePage, LoginPage, DashboardPage, EditorialDashboardPage, MySubmissionsPage, WorkflowPage
 ├── data/users.js            # The 18 baseline identities + getPassword()/getEmail()
 ├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir + .auth/
 ├── serve.js                 # serve:<app> — manual PHP server on the fleet's base port

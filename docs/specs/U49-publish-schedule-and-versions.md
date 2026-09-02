@@ -38,8 +38,9 @@ issue-assignment choices offered while publishing an article.
 ## Actors & permissions
 
 The Publication area is part of the per-submission workflow screen. Who
-reaches that screen at all is decided by *Workflow screen & stage access*
-(no spec yet). **May publish** below is one gate shared by every control in
+reaches that screen at all is
+[→ stage access](U24-workflow-screen-and-stage-access.md#stage-access).
+**May publish** below is one gate shared by every control in
 this feature: the user's role on the Production stage is Journal Manager,
 Editor or Site Administrator, and their participation is not limited to
 recommendations. That restriction is set on the participant's stage
@@ -393,8 +394,8 @@ page, described in *Catalog management*. It saves onto the shown version.
   surfaces here as the silent Confirm refusal ⚠ [OJS1](#ojs1).
 - [Submission stage](U25-submission-stage.md#schedule): the journal's
   Submission-stage "Schedule For Publication" shortcut that lands here.
-- *Workflow screen & stage access* (no spec yet): who opens the workflow
-  screen and sees the Publication area at all.
+- *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)*:
+  who opens the workflow screen and sees the Publication area at all.
 - *Issues* (no spec yet): issues themselves. Publishing an issue is what
   releases articles scheduled into it (Rule 5), and unpublishing an issue
   sets its articles back to "Scheduled".
@@ -1639,7 +1640,9 @@ API-057's `submissionPayment` component is cited by *Payments & APCs*
 (rider). AFFW-424's `catalogEntry` half and NOTIF-037's OMP
 format-approval surface belong to *Catalog management* (riders); the
 publish/versions endpoint cluster of the omnibus submissions controller
-is homed at *Workflow screen & stage access* (rider both ways).
+is homed at
+*[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*
+(rider both ways).
 
 ## Reference — code anchors
 

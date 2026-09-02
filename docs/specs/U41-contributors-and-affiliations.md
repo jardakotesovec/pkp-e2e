@@ -50,7 +50,7 @@ always editable there. <sup>a</sup> <sup>b</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Contributors list (workflow)** | • any role whose workflow view includes the Publication area: Journal Manager, Editor, Site Administrator, and assigned Section Editors, Guest Editors, Assistants and the submission's Author. The "Contributors" entry is always present, and no setting removes it. Which roles reach the workflow screen at all is the workflow screen's own rule. <sup>a</sup> |
+| **See the Contributors list (workflow)** | • any role whose workflow view includes the Publication area: Journal Manager, Editor, Site Administrator, and assigned Section Editors, Guest Editors, Assistants and the submission's Author. The "Contributors" entry is always present, and no setting removes it. Which roles reach the workflow screen at all is the workflow screen's own rule ([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)); whether the Publication area shows is [→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs). <sup>a</sup> |
 | **Add / edit / delete / reorder contributors, set the primary contact** | • whoever may currently edit the publication's metadata ([→ edit gate](U40-publication-metadata.md#edit-gate)). Everyone else sees the read-only list (Rule 9).<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint. On a journal or press the author's workflow list is read-only [OPS1](#ops1). <sup>b</sup> |
 | **Edit contributors while submitting (wizard)** | • the submitting author. The wizard's Contributors step is always present and always editable. The step's place in the flow and its submit gates belong to the *[Submission wizard](U21-submission-wizard.md)*. <sup>i</sup> |
 | **Manage the journal's contributor roles** | • Journal Manager, and a Site Administrator working in the journal, on the "Contributor Roles" settings screen (Rule 12). <sup>e</sup> |
@@ -108,8 +108,8 @@ screen, Rule 12): <sup>e</sup>
    copy of the contributors list. Creating a new version copies every
    contributor onto the new version, including order, roles, affiliations
    and the primary-contact choice. The copy can then be edited
-   independently. Creating versions belongs to *Publish, schedule &
-   versions* (no spec yet). <sup>g</sup>
+   independently. Creating versions belongs to
+   *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*. <sup>g</sup>
 2. **Where it lives.** The workflow screen's Publication area is titled
    "Preprint" on a preprint server. It carries a **"Contributors"** entry,
    second in the list right after "Title & Abstract". The entry is there
@@ -334,9 +334,10 @@ screen, Rule 12): <sup>e</sup>
 - *[ORCID integration](U04-orcid-integration.md)* owns the contributor
   form's ORCID iD field states, the verification request and iD removal,
   and the publish-time checks on contributor iDs.
-- *Workflow screen & stage access* (no spec yet) owns which roles reach
-  the workflow screen and its Publication area. This spec's Actors rows
-  start from that access.
+- *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)*
+  owns which roles reach the workflow screen and its Publication area
+  ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)).
+  This spec's Actors rows start from that access.
 - *[Funding](U43-funding.md)*: its Funder field reuses this feature's
   registry lookup (<a id="ror-lookup"></a>the search-as-you-type against
   the public ROR registry, the suggestion rows and the install's record
@@ -404,8 +405,8 @@ Common to all three apps. For OMP and OPS vocabulary, see the
    yet the header's status may no longer read "Unscheduled". The earlier
    "Confirm" already recorded the version choice, so a changed status
    label with nothing published is the expected outcome here, not a
-   failure. The publish dialog's own mechanics belong to *Publish,
-   schedule & versions* (no spec yet). <sup>s3</sup>
+   failure. The publish dialog's own mechanics belong to
+   *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*. <sup>s3</sup>
 4. **Record affiliations, typed and registry-backed** — Journal Manager,
    editing a contributor. Under "Affiliations", type a made-up
    institution name of four or more characters, pick the typed text
@@ -849,8 +850,9 @@ comes from the same permission as the sibling publication features
 HIDES "Order" (`v-if`), "Add Contributor" (`v-if`) and the whole
 `#item-actions` slot (Set Primary Contact, badge, Edit, Delete); nothing
 is rendered disabled — contrast `FunderManager`, whose buttons gray out.
-"Preview" is not gated. API cluster (owned by *Workflow screen & stage
-access*'s controller): GET contributors allows Manager, Sub-editor,
+"Preview" is not gated. API cluster (owned by
+*[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*'s
+controller): GET contributors allows Manager, Sub-editor,
 Assistant, Reviewer, Author; the four writes (add/edit/delete/saveOrder)
 allow Manager, Sub-editor, Assistant, Author behind
 `PublicationWritePolicy`; `addContributor`/`editContributor` re-run
@@ -1493,7 +1495,7 @@ Interests" (live-probed 2026-08-28, fn j).
 | Contributors step panel (wizard) | submission wizard, Contributors step | rider on the wizard shell (owned by *[Submission wizard](U21-submission-wizard.md)*) |
 | Contributor Roles screen | Settings → Workflow → Submission → "Contributor Roles" | AFFM-061 (Add Role) · AFFM-062 (row Edit) · AFFM-063 (row Delete) · VUE-034 · VUE-056 |
 | Contributor roles API | `contributorRoles` (list, get, identifiers, add, edit, delete) | API-014 |
-| Contributors API cluster | `submissions/{id}/publications/{id}/contributors` (list, get, add, edit, delete, saveOrder) | rider on the submissions API (owned by *Workflow screen & stage access*, no spec yet) |
+| Contributors API cluster | `submissions/{id}/publications/{id}/contributors` (list, get, add, edit, delete, saveOrder) | rider on the submissions API (owned by *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*) |
 | ROR registry lookup API | `rors` (get, list, add-or-edit cache) — the two read routes have no UI caller | API-033 |
 | ROR registry cache refresh | scheduled task, monthly + at install | JOB-057 |
 | Author record shape | — | SET-003 |

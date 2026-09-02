@@ -428,8 +428,8 @@ them live are the subject of *Submission intake configuration*.
   "Settings that modify behavior".
 - **My Submissions**: where drafts are listed and resumed from, and the
   entry route into a submitted submission's workflow.
-- **Workflow screen & stage access**: where "Review this submission"
-  lands. It is also the home of the submissions interface this wizard
+- **[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#workflow-entry)**:
+  where "Review this submission" lands. It is also the home of the submissions interface this wizard
   drives (its create, save-for-later and submit operations are part of that
   feature's interface family). The submission record those operations read
   and write is defined once, in the shared submission definition homed
@@ -477,8 +477,9 @@ role; seeding recipes live in the footnote. <sup>s</sup>
    Editor to another author's draft through the Participants panel's
    "Assign" on the draft's workflow screen, opened by its typed address (an
    incomplete submission's dashboard row offers only "Complete submission",
-   no workflow opener; the workflow screen and its address are in *Workflow
-   screen & stage access*, the panel in *Stage participants*). That Section
+   no workflow opener; the workflow screen and its address are
+   [→ workflow addresses](U24-workflow-screen-and-stage-access.md#workflow-addresses),
+   the panel in *Stage participants*). That Section
    Editor, opening the draft's wizard, gets "Save for Later" and "Continue"
    but no "Cancel" control. On a preprint server this scenario passes only
    for a manager; the author's own confirmation does nothing
@@ -1392,7 +1393,8 @@ notably `submissionProgress`, note f), overlaid per app:
 (SET-045: `sectionId`, `stageId` tweaks). The wizard and its endpoints read
 and write through this schema; the endpoint family itself (create,
 save-for-later, submit, delete) belongs to the submissions interface homed
-in *Workflow screen & stage access* (rider both ways).
+in *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*
+(rider both ways).
 
 <a id="fn-a9"></a>
 **fn-a9** — A9. Live-probed 2026-08-26 (OJS scratch journal): a user whose
@@ -1536,7 +1538,7 @@ sections — scratch sections/users for every closure test.
 - `lib/pkp/classes/components/forms/publication/Details.php` — wizard Details form
 - `lib/ui-library/src/components/Container/{StartSubmissionPage,SubmissionWizardPage,SubmissionWizardPageOMP,SubmissionWizardPageOPS}.vue` (VUE-023/029) · `pages/submissionWizard/ReconfigureSubmissionModal.vue` (VUE-081) · `mixins/autosave.js`
 - `lib/pkp/templates/submission/{start,wizard,complete,saved,cancelled}.tpl` + `review-*.tpl`; `omp…/templates/submission/{chapters,review-chapters}.tpl`; `ops…/templates/submission/{galleys,review-galleys,review-license,complete}.tpl`
-- `lib/pkp/api/v1/submissions/PKPSubmissionController.php` — add / saveForLater / submit / delete (API family owned by *Workflow screen & stage access*)
+- `lib/pkp/api/v1/submissions/PKPSubmissionController.php` — add / saveForLater / submit / delete (API family owned by *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*)
 - `lib/pkp/classes/submission/Repository.php` — `validateSubmit()`, `submit()`, `canCurrentUserDelete()`; OJS/OPS `validateSubmit()` overlays (forked)
 - `lib/pkp/classes/observers/listeners/{SendSubmissionAcknowledgement,AssignEditors,LogSubmissionSubmitted,UpdateAuthorStageAssignments,RestrictAuthorAssignment}.php` + per-app subscribers; `ops…/classes/observers/listeners/AssignDOIsOnSubmission.php`
 - `lib/pkp/classes/context/SubEditorsDAO.php::assignEditors()` — auto-assignment + NOTIF-012

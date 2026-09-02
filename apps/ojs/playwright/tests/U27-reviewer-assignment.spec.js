@@ -6,7 +6,7 @@
  * scenario the spec runs on OJS (common scenarios 1–12 and 16 +
  * OJS-specific 14; scenario 13 is OMP-only, 15 OPS-only — they live in
  * those repos).
- * Spec: lib/pkp/docs/e2e/specs/U27-reviewer-assignment-and-management.md
+ * Spec: docs/specs/U27-reviewer-assignment-and-management.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):

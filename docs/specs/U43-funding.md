@@ -27,29 +27,31 @@ public Research Organization Registry of institutions), or by typing a name
 by hand. A registry-backed funder is shown with the **ROR mark**, the
 registry's logo. Each funder can carry any number of grants (name, number,
 DOI). The free-text *Funding Statement* paragraph and the *Data Availability
-Statement* are separate publication metadata fields owned by *Publication
-metadata* (no spec yet). This spec owns the structured funders list end to
-end.
+Statement* are separate publication metadata fields owned by
+*[Publication metadata](U40-publication-metadata.md)*. This spec owns the
+structured funders list end to end.
 
 ## Actors & permissions
 
 **Editing follows the publication, not this screen.** The funders list is
 editable by exactly the people who may edit the submission's publication
 metadata at that moment. That gate, and its locks for published items, are
-owned by *Publication metadata* (no spec yet). When the viewer may not edit,
+owned by *[Publication metadata](U40-publication-metadata.md#edit-gate)*.
+When the viewer may not edit,
 the list is read-only: "Add Funder" and "Order" are grayed out and the row
 action menus are absent (Rule 8). During submission, the wizard's Funders
 section is the submitting author's own draft and is always editable there.
 Publishing does not itself lock the list. A Journal Manager can still add,
 edit and reorder funders on a published item, with only the general "This
 version has been published" banner as a caution. Whether publication should
-lock metadata is *Publication metadata*'s question (no spec yet).
+lock metadata is *[Publication metadata](U40-publication-metadata.md#edit-gate)*'s
+question.
 <sup>a</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
-| **See the Funding list (workflow)** | • any role whose workflow view includes the Publication area: Journal Manager, Site Administrator, and assigned Section Editors, Assistants and the submission's Author. Only while the journal has funding switched on (Rule 2). Exception: an assigned Assistant whose role is not allowed onto the submission's current workflow stage sees no Publication entries at all, "Funding" included. Which stages a role may enter is the workflow screen's own rule, not this feature's <sup>a</sup> |
-| **Add / edit / delete / reorder funders (workflow)** | • whoever may currently edit the publication's metadata (see *Publication metadata*, no spec yet). Everyone else sees the read-only list (Rule 8)<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint. On a journal or press the author's workflow list is read-only [OPS1](#ops1) <sup>a</sup> |
+| **See the Funding list (workflow)** | • any role whose workflow view includes the Publication area: Journal Manager, Site Administrator, and assigned Section Editors, Assistants and the submission's Author. Only while the journal has funding switched on (Rule 2). Exception: an assigned Assistant whose role is not allowed onto the submission's current workflow stage sees no Publication entries at all, "Funding" included ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)). Which stages a role may enter is the workflow screen's own rule ([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)), not this feature's <sup>a</sup> |
+| **Add / edit / delete / reorder funders (workflow)** | • whoever may currently edit the publication's metadata (see *[Publication metadata](U40-publication-metadata.md#edit-gate)*). Everyone else sees the read-only list (Rule 8)<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint. On a journal or press the author's workflow list is read-only [OPS1](#ops1) <sup>a</sup> |
 | **Declare funders while submitting (wizard)** | • the submitting author, on the wizard's Details step, only while the journal *asks* for or *requires* funder metadata (Rule 2) <sup>b</sup> |
 | **See funders on the landing page** | • any reader, on a published item that has funders recorded (Rule 9) <sup>f</sup> |
 | **Configure funding for the journal** | • Journal Manager, and a Site Administrator working in the journal, on the workflow settings' Metadata screen (Settings that modify behavior) <sup>c</sup> |
@@ -195,7 +197,8 @@ the submission."): <sup>c</sup>
 
 ## Cross-feature interactions
 
-- *Publication metadata* (no spec yet) owns who may edit a publication and
+- *[Publication metadata](U40-publication-metadata.md#edit-gate)* owns who
+  may edit a publication and
   the published-state policy this feature's editing rides on, including
   that publishing warns rather than locks (Actors & permissions). It also
   owns the Funding Statement and Data Availability Statement fields and
@@ -206,8 +209,8 @@ the submission."): <sup>c</sup>
 - *Article landing page & reading* (no spec yet; the press counterpart is
   the OMP catalog's book page) owns the landing screen. The Funders block on
   it is described here (Rule 9) as this feature's reader surface.
-- *Contributors & affiliations* (no spec yet) is the home of the ROR
-  registry lookup machinery the Funder field reuses.
+- *[Contributors & affiliations](U41-contributors-and-affiliations.md#ror-lookup)*
+  is the home of the ROR registry lookup machinery the Funder field reuses.
 - The search machinery can filter submissions by funder. Any reader-facing
   exposure of that belongs to the search feature.
 
