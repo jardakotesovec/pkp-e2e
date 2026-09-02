@@ -183,6 +183,13 @@ journal manager would name things today. Guardrails:
   and how.
 - A team reply that changes campaign rules is a maintainer ruling. Encode it
   in the owning doc (RUNBOOK, TEMPLATE, PRINCIPLES or this file).
+- A team reply that settles a register entry (confirmed, overturned, risk
+  accepted, ticket to follow) is a maintainer verdict on that entry. Record
+  it in the spec exactly as TEMPLATE "Findings register" prescribes: the
+  `> **Reviewed — <name>, <date>**: … Ruling: …` blockquote under the entry
+  (the person's name or handle, never "maintainer ruling"), mirrored in the
+  summary table's Review cell as `<name> <date> · <disposition>`. U01 is the
+  reference rendering.
 
 ## A developer's PR fails the suite
 

@@ -301,9 +301,14 @@ atlas-claims: [<atom IDs this spec owns>]
 
      Badges: 🐞 defect (author's call) · ❓ needs a product ruling · ✅ intended
      divergence. Impact: one plain value (user-visible / invisible / latent /
-     minor). Review: "—" until someone reviews, then their name and date
-     (`npm run questions` lists the ❓ rows whose Review cell is still "—",
-     so the dash is load-bearing).
+     minor). Review: "—" until someone reviews, then `<name> <date>` with an
+     optional ` · <disposition>` (`Jarda 2026-08-25`, `Jarda 2026-08-25 ·
+     to triage`, `@beaug 2026-08-29 · risk accepted`); the cell is a mirror
+     of the entry's Reviewed blockquote, never the only record. An author
+     re-check (claim check, re-probe, rebase check) may also fill the cell,
+     as `<check> (claude), <date> — <outcome>`. `npm run questions` lists
+     the ❓ rows whose Review cell is still "—", so the dash is
+     load-bearing.
 
      Entries under `### All apps` / `### OMP` / `### OPS`. IDs are LOCAL and
      DENSE (A1, A2… / OMP1… / OPS1…), no gaps, no foreign keys. Anchor each:
@@ -318,12 +323,25 @@ atlas-claims: [<atom IDs this spec owns>]
      <For ❓ only> Question: <the one sentence the team answers>. Lean: <the
      author's lean and why, one sentence>.
      Since: <date (age)> · Basis: probe | commit | judgment. <sup>f-a1</sup>
-     <A maintainer verdict is a BLOCKQUOTE after the entry, so it stands out
-     when scanning:
-     > **Reviewed — name, date**: confirmed | overturned (was 🐞). Ruling: <the
-     > decision, and any adjustment it sets>.
-     Only when it happens; never pre-printed. Mirror the reviewer and date
-     in the summary table's Review column.>
+
+     > **Reviewed — <name>, <date>**: confirmed 🐞 | overturned (was 🐞) |
+     > ❓ stands | ✅ intended (was ❓). Ruling: <the decision, and any
+     > adjustment it sets>.
+
+     MAINTAINER VERDICTS. A human's verdict on an entry (spec review, a
+     Mattermost reply, a PR comment) is ALWAYS the blockquote above: a blank
+     line after the Basis line (the footnote mark stays on the Basis line),
+     then `> **Reviewed — <name>, <date>**:` in bold, the verdict first,
+     then `Ruling:` with the decision and anything it sets (fix, disposition,
+     ticket, risk accepted). Name the person (the name they sign with, or
+     their Mattermost handle), never "maintainer ruling". Never an inline
+     `Reviewed:` line in the entry body. Only when it happens; never
+     pre-printed. Mirror the name and date in the summary table's Review
+     column. U01's register is the reference rendering.
+     The word "Reviewed" is reserved for a human. An author re-check that
+     changes a verdict (claim check, re-probe, rebase check) is a plain
+     `Re-checked: <check> (claude), <date> — <outcome>` line in the body,
+     not a blockquote.
 
      `Since:` only when dated (omit the line otherwise). One sentence of
      rationale for a 🐞-versus-✅ call is welcome ("worked for OPS's whole

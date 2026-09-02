@@ -712,8 +712,8 @@ latent = only in an unusual situation or configuration.
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
 | [A18](#a18) | Emptying the request letter makes the add fail silently, yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add, as a one-option select even with zero alternate templates | 🐞 | minor | — |
-| [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | maintainer ruling, 2026-08-29 — risk accepted |
-| [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | maintainer ruling, 2026-08-29 — ticket to follow |
+| [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | @beaug 2026-08-29 · risk accepted |
+| [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | @beaug 2026-08-29 · ticket to follow |
 | [A25](#a25) | {OJS} Opened from the dashboard popover, a submitted review's Review Details window omits the recommendation | 🐞 | user-visible | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split; only searching filters by stage | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
@@ -767,7 +767,7 @@ account, which silently holds a Journal Manager role in every journal of
 the install. A manager was observed, not a role-less site admin. The
 Actors section now records the corrected fact. The live behavior is more
 restrictive than was documented, and no open question remains.
-Reviewed: claim check (claude), 2026-08-02 — overturned (was an open
+Re-checked: claim check (claude), 2026-08-02 — overturned (was an open
 question). <sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
@@ -849,7 +849,7 @@ each date is today plus its own configured interval. The earlier "both
 preset to the response interval" observation was made where the two
 intervals coincide, so the apparent collapse was a coincidence, not a
 behavior.
-Reviewed: claim check (claude), 2026-08-02 — overturned (was a defect).
+Re-checked: claim check (claude), 2026-08-02 — overturned (was a defect).
 <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a10"></a>
@@ -909,7 +909,7 @@ picking a user then clears it; submitting afterwards succeeds. The earlier
 observation most likely read that post-submit state as the post-pick state.
 The empty-submit error is also the generic "This field is required.", not
 an "existing user must be selected" wording.
-Reviewed: claim check (claude), 2026-08-02 — overturned (was a defect).
+Re-checked: claim check (claude), 2026-08-02 — overturned (was a defect).
 <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
@@ -922,7 +922,7 @@ reminders (Side effects), and erases the dated History milestone with it.
 The mechanism is deliberate; the user-facing cost is the lost History line.
 Basis: live probe (the settling recipe run exactly: reminder, then History
 shows "Reminder"; an acceptance logged, then the milestone is gone).
-Reviewed: claim check (claude), 2026-08-02 — settled from an open question
+Re-checked: claim check (claude), 2026-08-02 — settled from an open question
 to a defect; both prior conflicting observations are explained (one read
 History before the response, one after). <sup>[f-a15](#fn-a15)</sup>
 
@@ -935,7 +935,7 @@ and flows downstream. Input in any other format only looks accepted. The
 visible field keeps the keystrokes while the old value is silently
 submitted, so the editor's correction does not happen and nothing says so.
 Basis: live probe.
-Reviewed: claim check (claude), 2026-08-02 — rescoped (a correctly
+Re-checked: claim check (claude), 2026-08-02 — rescoped (a correctly
 formatted typed date is accepted end-to-end; only wrong-format input is
 discarded). <sup>[f-a16](#fn-a16)</sup>
 
@@ -1008,12 +1008,13 @@ mark-viewed round-trip re-renders the rating control after that point (test
 authoring, 2026-08-29: the suite guards with an outcome-keyed re-click,
 never asserting the defect).
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe (observed in
-one open of four) + code reading.
-Reviewed: maintainer ruling, 2026-08-29 — stands as 🐞, risk accepted (low
-impact; a failed early click is recoverable by clicking again). The
-maintainer will attempt a manual repro under network throttling; the
-mechanism was re-confirmed in code at that day's main tip.
-<sup>[f-a21](#fn-a21)</sup>
+one open of four) + code reading. <sup>[f-a21](#fn-a21)</sup>
+
+> **Reviewed — @beaug, 2026-08-29**: confirmed 🐞, risk accepted. Ruling: the
+> entry stands and no fix is planned; the impact is low, since a failed
+> early click is recoverable by clicking again. The maintainer will attempt
+> a manual repro under network throttling. The mechanism was re-confirmed
+> in code at that day's main tip (claude).
 
 <a id="a22"></a>
 **A22 — The window's guidance promises an upload control it lacks** · 🐞 ·
@@ -1025,11 +1026,11 @@ no upload control anywhere; uploading a reviewer file lives only in the
 on. Upstream has already flagged the sentence's translation entry for
 review.
 Since: 2026-08-29 (the rework kept the legacy window's text) · Basis:
-probe + code reading.
-Reviewed: maintainer ruling, 2026-08-29 — confirmed (the wording was
-called out before); the maintainer is opening an upstream ticket to
-investigate. The string was re-confirmed unchanged at that day's main tip.
-<sup>[f-a22](#fn-a22)</sup>
+probe + code reading. <sup>[f-a22](#fn-a22)</sup>
+
+> **Reviewed — @beaug, 2026-08-29**: confirmed 🐞 (the wording was called
+> out before). Ruling: an upstream ticket to investigate is to follow. The
+> string was re-confirmed unchanged at that day's main tip (claude).
 
 <a id="a23"></a>
 **A23 — The recommendation shows twice, under two labels** · ❓ · minor.

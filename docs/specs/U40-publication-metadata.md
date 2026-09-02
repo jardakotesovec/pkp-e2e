@@ -748,7 +748,7 @@ abstract is rejected on Save with "The abstract is too long. It should
 be {limit} words or less. It is currently {n} words long." An empty
 required abstract is rejected with "This field is required." before
 anything is sent (Fields & validation). No open question remains.
-Reviewed: re-probe (claude), 2026-08-28 — overturned (was an open
+Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a7</sup>
 
 <a id="a8"></a>
@@ -769,7 +769,7 @@ marks it required at "Require the author…". The Review step lists "Plain
 Language Summary None provided" when it was left empty. The setting's
 options work as promised. What goes wrong at "Require" is A1's wizard
 leg.
-Reviewed: re-probe (claude), 2026-08-28 — overturned (was an open
+Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a9</sup>
 
 <a id="a10"></a>
