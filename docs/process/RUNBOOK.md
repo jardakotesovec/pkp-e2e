@@ -159,8 +159,9 @@ rule is the security one.
 > claim can only be settled that way, return it as an open question instead
 > of probing it. A finding that could plausibly be a security weakness goes
 > ONLY into the maintainer's private security file
-> (`../e2e_ng/security.md`; on the VM, a direct Mattermost message to
-> @jarda.kotesovec and @beaug), never into a spec, test, report file or commit,
+> (`../e2e_ng/security.md`; on the VM, additionally a direct Mattermost
+> message to @jarda.kotesovec and @beaug), never into a spec, test, report
+> file or commit,
 > because these repos are public. Before writing there, read the whole file.
 > If the problem is already recorded (Open or Handled), update that entry
 > instead of adding a new one. New entries use the file's fixed entry shape
@@ -197,12 +198,12 @@ short and outcome-shaped. That is context budgeting, not a wording rule.
   security file, verified" (or "dismissed") so the maintainer knows to look.
   Ordinary UX defects are not security concerns. They go to the register.
 
-  **On the VM** the private file does not exist. A session running there
-  reports a security-shaped observation to the maintainers directly on
-  Mattermost, tagging @jarda.kotesovec and @beaug, with the content in a
-  direct message to them and never in a channel post, spec, test or
-  commit. They carry it into the private file. The verification probe and
-  the "fact of routing" rule apply unchanged.
+  **On the VM** the same file is written, at the same path relative to
+  the repo, created with its two headings if absent. In addition, a session
+  running there sends a direct Mattermost message to @jarda.kotesovec and
+  @beaug with the observation, so they see it without opening the VM. The
+  content never appears in a channel post, spec, test or commit. The
+  verification probe and the "fact of routing" rule apply unchanged.
   **Writing the file.** Any agent may write it. The quarantine is about where
   content goes, not who writes it. Every write is read-first: read the whole
   file, and if an observation matches an existing entry (same guard, same
@@ -297,10 +298,10 @@ never moves content that was routed to the private security file.
 
 - **Per app: at most 700 tests and 25 minutes** for the full suite on a fresh
   database. The three fleets run in parallel, so wall time does not add up
-  across apps. The 25 minutes apply to one CI job: when a suite outgrows
-  it, shard the job (Playwright `--shard`) rather than lowering coverage.
-  At today's pace (about 130 tests in 7 minutes at 4 workers) that point
-  arrives around the 45th feature.
+  across apps. The 25 minutes apply to one CI job: as a suite grows past
+  it, the job is sharded (Playwright `--shard`), never the coverage
+  reduced. At today's pace (about 130 tests in 7 minutes at 4 workers)
+  the first shard split arrives around the 45th feature.
 - **Tiers** live in each PROGRESS row: H is 10–13 common scenarios, M is 6–8,
   L is 3–4, give or take one or two by the author's judgment. Each app's
   suite implements the common scenarios plus that app's own, so its count per
