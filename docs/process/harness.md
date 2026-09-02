@@ -277,6 +277,30 @@ Rules that live elsewhere: findings and security routing are in RUNBOOK
 "What goes where"; git and push rules are in RUNBOOK "Ops & campaign
 safeguards".
 
+## CI
+
+- `.github/workflows/e2e.yml` runs the three-app matrix on every push and
+  PR of this repo, and nightly against the apps' `main`. Its
+  `workflow_dispatch` form takes `ojs_ref`, `omp_ref` and `ops_ref`, so a
+  branch of this repo can be run against a pinned app commit:
+  `gh workflow run e2e.yml --ref <branch> -f ojs_ref=<sha>`. `gh` works on
+  this repo (it lives under `jardakotesovec`, outside the pkp org the bot
+  token is blocked from).
+- `.github/workflows/run-app.yml` is the reusable job. Each app repo's
+  `e2e-tests.yml` calls it on every push and PR with `app_ref` set to the
+  commit under test; it runs this repo's `main` unless `e2e_ref` is given.
+  Its optional `companion_branch` input names the app PR's branch: when a
+  pkp-e2e branch of the same name exists, the suite runs from it instead
+  (MAINTENANCE "A developer's PR fails the suite"). The app hooks do not
+  pass it yet (PROGRESS "Open harness work").
+- CI runs with `PLAYWRIGHT_WORKERS=4` and `--retries=1`. Failure artifacts
+  include `.server-logs/`.
+- The latest run of `e2e-tests.yml` on an app repo's `main` is the
+  authoritative "is the app's tip red?" answer. Without a token:
+  `https://api.github.com/repos/pkp/<app>/actions/workflows/e2e-tests.yml/runs?branch=main&per_page=5`
+  lists the runs with their head SHAs; logs and artifacts need a token, so
+  per-test detail comes from a local reproduction at that SHA.
+
 ## Verify before trusting
 
 File paths, selectors and schema fields cited across these docs are

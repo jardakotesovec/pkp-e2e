@@ -8,6 +8,11 @@ contract, the test contract, security routing, model discipline, budgets,
 git rules) stays binding. The mode is active when the `PROGRESS.md` banner
 names it.
 
+**Cadence.** The VM runs one session a day, scheduled through
+claude-threads: sync to the apps' `main` (the loop below), triage any red
+CI, then continue the build campaign with what is left of the session. A
+daily sync also catches a red nobody has reported yet.
+
 Four kinds of work arrive in this mode. Building a new spec and its tests
 is the RUNBOOK loop, unchanged. Keeping specs and tests in step with the
 apps is the upstream-sync loop below, which is the same loop applied to
@@ -48,7 +53,14 @@ The apps move; the suite follows. The baselines live in
    then only each app's pointer position. Read the commits and PRs, not just
    their titles, for anything touching shipped territory. Read the GitHub
    issue each PR links to as well: the issue states the intention, and that
-   intention is the yardstick for "intended change" versus "bug".
+   intention is the yardstick for "intended change" versus "bug". The bot's
+   token is blocked from the pkp org, so read PRs and issues through the
+   public REST API without a token
+   (`https://api.github.com/repos/pkp/<repo>/pulls/<n>`, `.../issues/<n>`)
+   or fetch the web page. To find which spec a commit touches, grep
+   `docs/specs/` for the class and file names in the diff: every spec's
+   footnotes and its "Reference — code anchors" section name the code it
+   rests on.
 3. **Triage every change** (next section). Each lands as one of: no impact,
    accommodate in an existing spec and its tests, new-feature territory, or
    re-budget.
@@ -63,7 +75,13 @@ The apps move; the suite follows. The baselines live in
    spec maintenance, not a test hack. Never edit a test to pass a claim the
    app now disproves without correcting the spec. Behavior that contradicts
    the linked issue's stated intention is a finding: register entry, with
-   the commit and the issue in its footnote.
+   the commit and the issue in its footnote. A slice needs the same
+   separation of roles as a full feature, not the same headcount: one
+   probe agent, one writing agent, one persona read; skip the digest when
+   the probe list is under about five items. When a register entry is
+   retired by the change, move it to the register's Retired block
+   (TEMPLATE) and grep the suites' file headers for its ID, because a
+   header that declares "not covered, see A7" outlives A7 otherwise.
 5. **Be critical.** Reviewing the diff IS a QA review of the team's recent
    work. Anything that raises an eyebrow gets checked against the running
    fleets where that is cheap, then reported to the team on Mattermost with
@@ -76,7 +94,10 @@ The apps move; the suite follows. The baselines live in
    THAT a security-shaped observation was routed, then ping the maintainer.
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
    a dated log entry: one line per change reviewed (commit, verdict, what
-   was touched or filed), never a narrative. Commit.
+   was touched or filed), never a narrative. Then re-check the open
+   ci-triage rows and companion rows against the new tips and delete the
+   ones that are resolved, and drop sync-log entries older than the oldest
+   open item. Commit.
    The baseline only advances when the range is actually triaged. A partial
    review leaves the baseline where it was and says so in the log.
 
@@ -130,9 +151,10 @@ journal manager would name things today. Guardrails:
   commit or spec anchor, and what the suite now does about it. Link the
   register entry; do not restate it.
 - **Notify, don't spam.** Routine green syncs get at most a one-line summary.
-  Eyebrow findings and breaking changes get their own message. Questions the
-  RUNBOOK would mark ❓ for the maintainer go to the channel too; in this
-  mode the team is the reviewer.
+  Findings that raised an eyebrow and breaking changes get their own
+  message. Questions the RUNBOOK would mark ❓ go to the channel too. The
+  team reviews what it has time for: a verdict is welcome and is never
+  required for anything to proceed.
 - **Never post** security-file content (only the fact of routing),
   credentials, or speculation presented as a finding. Say what was verified
   and how.
@@ -142,13 +164,18 @@ journal manager would name things today. Guardrails:
 ## A developer's PR fails the suite
 
 A developer whose OJS, OMP or OPS pull request fails the e2e check reaches
-out (on Mattermost for now; CI will eventually notify the channel itself)
-to ask whether they hit a bug or changed behavior the tests encode. The
-answer is the same critical triage as the sync loop, on one PR:
+out on Mattermost (CI will eventually notify the channel itself) to ask
+whether they hit a bug or changed behavior the tests encode. The thread
+where they asked is the conversation: the answer goes there. If a
+maintainer relays the question from the PR, they carry the answer back.
+The work is the same critical triage as the sync loop, on one PR:
 
 1. **Reproduce at the PR ref.** Claim an environment, fetch the PR ref (the
    "Start on the right code" rules below, merge-base check included), reset
-   the databases, run the failing suites.
+   the databases, run the failing suites. A pkp-lib PR is fetched inside
+   `lib/pkp` and its merge base is checked against the app's `lib/pkp`
+   pointer; a PR pair (pkp-lib plus app) is handled as one, on the app
+   PR's ref.
 2. **Diagnose against the intention.** Read the PR and its linked issue.
    The failure is one of: test drift (the harness assumed something the
    PR legitimately changed), an intended behavior change the spec must
@@ -158,14 +185,22 @@ answer is the same critical triage as the sync loop, on one PR:
    register, because the spec describes `main` and this behavior is not on
    `main`. If the PR later merges with the bug in it, the sync loop files
    the register entry then.
-4. **Intended change.** Create a companion branch in pkp-e2e named exactly
-   like the developer's branch, and run the sync loop's "Accommodate" step
-   on it: spec, persona, lint, tests, green at the PR ref. Push the branch
-   to pkp-e2e. `main` stays untouched. Tell the developer the companion is
-   ready, and add a row to `docs/tracking/companion-branches.md`.
+4. **Intended change.** Create a companion branch in pkp-e2e, from `main`
+   as it stands, named exactly like the developer's branch (for a PR pair,
+   the app PR's branch; for a pkp-lib-only PR, that PR's branch). Run the
+   sync loop's "Accommodate" step on it: spec, persona, lint, tests, green
+   at the PR ref locally, then on CI with
+   `gh workflow run e2e.yml --ref <companion> -f <app>_ref=<pr-sha>` (the
+   pkp-e2e repo is outside the pkp org, so `gh` works there). Push the
+   branch to pkp-e2e; `main` stays untouched. Tell the developer the
+   companion is ready, and add a row to
+   `docs/tracking/companion-branches.md`. Once the app hooks pass the PR's
+   branch name (harness.md "CI"), the PR's own check picks the companion
+   up by name and turns green without anyone merging first.
 5. **When the developer says their PR is merged.** Fetch `main`, confirm
-   the commit is there, merge the companion branch into pkp-e2e `main`,
-   run the touched suites once, push. Advance that repo's baseline in
+   the commit is there, rebase the companion onto pkp-e2e `main` (resolve
+   conflicts if `main` moved), run the touched suites once, fast-forward
+   `main` to it, push. Advance that repo's baseline in
    `upstream-sync.md` past the merged commit with a one-line log entry, so
    the next sync does not re-triage it. Delete the row from the companion
    table; git history keeps it.
@@ -182,7 +217,8 @@ is defined. To add or change a test, change or add its scenario first
 (through a writing agent, with the persona on the new text), then write
 the test from it, run it green, and update the PROGRESS test count. A test
 with no scenario, or a scenario with no test in an app that runs it, is a
-defect either way.
+defect either way. Nothing records the request or the answer; the spec and
+the test are the record.
 
 ## Session hygiene
 
@@ -211,7 +247,8 @@ back up.
   which moves that checkout, lib/pkp pointer included). When debugging or
   reviewing a PR, checking out the PR's changes IS the right state: fetch
   the ref from upstream (`git fetch upstream pull/<n>/head`, inside `lib/pkp`
-  for pkp-lib PRs) or add the contributor's remote fetch-only. After moving
+  for pkp-lib PRs) or add the contributor's remote fetch-only
+  (`git remote add <name> <url> && git remote set-url --push <name> no-push`). After moving
   refs, make the dependencies match: `composer install` always (a cheap
   no-op when nothing changed); `npm ci && npm run build` only when the diff
   touches `package-lock.json` or buildable sources (`js/`, `lib/ui-library`);
@@ -266,8 +303,10 @@ back up.
   reported failure as new, match it against `docs/tracking/ci-triage.md`. CI
   reports failures per app as separate messages, one root cause commonly
   reds ojs, omp and ops at once, and already-triaged causes keep failing as
-  people merge to `main`. A known signature gets a dated row update, not a
-  re-diagnosis. A genuinely new failure gets the same critical triage as
+  people merge to `main`; answer the three messages with one reply. For
+  now a person pings the channel; the daily session also checks each app's
+  latest `main` run itself (harness.md "CI" says where). A known signature
+  gets a dated row update, not a re-diagnosis. A genuinely new failure gets the same critical triage as
   the sync loop: read the commits since the last green run and the issues
   they link to, then decide on evidence whether the test drifted, the spec
   must follow an intended change, or the app regressed. A regression stays
@@ -285,4 +324,5 @@ back up.
 - **Post the open questions monthly.** `npm run questions` lists every ❓
   register entry still waiting for a product ruling, grouped by spec. Post
   it to Mattermost about once a month so the team can settle them in small
-  batches.
+  batches, and note the date in the PROGRESS banner so the next session
+  knows when the month is up.

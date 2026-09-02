@@ -25,6 +25,19 @@ underneath it.
 Paths in every campaign document are relative to the pkp-e2e repo root.
 `../e2e_ng/` is the maintainer's private directory outside every repo.
 
+**Words used in these docs.** The *orchestrator* is the session's main
+agent; it briefs *subagents* (a *probe agent* drives the screens and
+reports facts, a *writing agent* edits a spec, the *reader persona* reads
+a spec as a QA person who has never seen the project). A *brief* is the
+instruction a subagent gets. The *digest* is the one-page list of
+spec-affecting facts distilled from probe reports. The *claim check* tests
+a finished spec's own sentences against the running app. A *fleet* is one
+app's running test install (server, database, checkout). A *tier* is a
+feature's scenario budget (H, M or L). A *scratch* journal, user or
+submission is one a test creates for itself. The *atlas* is the frozen
+inventory of every screen and action, one *atom* per item, made before
+any spec was written.
+
 ## Mission, scope & invariants
 
 **Mission.** Document every OJS feature at the business level: actors,
@@ -59,10 +72,12 @@ feature?" must be answerable with a grep.
 
 **Invariants.** Every iteration keeps these true:
 
-- **Every atom is claimed.** Each atom of the frozen atlas ends up claimed
-  by exactly one spec, parked in `UNASSIGNED.md`, or marked out of scope in
-  its sweep file with a reason. The unclaimed count is the completeness
-  metric for the features not yet built. Never force an atom into a
+- **Every atom has one owner.** Each atom of the frozen atlas belongs to
+  exactly one FEATURE-MAP row, is parked in `UNASSIGNED.md`, or is marked
+  out of scope with a reason. The FEATURE-MAP row is the claim: a built
+  spec copies its row's atom list into its `atlas-claims` frontmatter, and
+  the atlas files themselves are not edited. The count of atoms in rows
+  not yet built is the completeness metric. Never force an atom into a
   feature. A wrong grouping is worse than a deferred one. Group by what a
   journal manager would call the thing, never by code module.
 - **As built, and intended.** Specs document what the code actually does.
@@ -144,7 +159,8 @@ rule is the security one.
 > claim can only be settled that way, return it as an open question instead
 > of probing it. A finding that could plausibly be a security weakness goes
 > ONLY into the maintainer's private security file
-> (`../e2e_ng/security.md`), never into a spec, test, report file or commit,
+> (`../e2e_ng/security.md`; on the VM, a direct Mattermost message to
+> @jarda.kotesovec and @beaug), never into a spec, test, report file or commit,
 > because these repos are public. Before writing there, read the whole file.
 > If the problem is already recorded (Open or Handled), update that entry
 > instead of adding a new one. New entries use the file's fixed entry shape
@@ -181,6 +197,12 @@ short and outcome-shaped. That is context budgeting, not a wording rule.
   security file, verified" (or "dismissed") so the maintainer knows to look.
   Ordinary UX defects are not security concerns. They go to the register.
 
+  **On the VM** the private file does not exist. A session running there
+  reports a security-shaped observation to the maintainers directly on
+  Mattermost, tagging @jarda.kotesovec and @beaug, with the content in a
+  direct message to them and never in a channel post, spec, test or
+  commit. They carry it into the private file. The verification probe and
+  the "fact of routing" rule apply unchanged.
   **Writing the file.** Any agent may write it. The quarantine is about where
   content goes, not who writes it. Every write is read-first: read the whole
   file, and if an observation matches an existing entry (same guard, same
@@ -221,6 +243,8 @@ short and outcome-shaped. That is context budgeting, not a wording rule.
   keeps everything, so nothing needs a Resolved section and nothing grows
   without bound. The parity ledger and `app-changes.md` record changes
   that are still in effect; a row leaves those when the change is reverted.
+  The sync log keeps entries back to the oldest open item and nothing
+  older. A flake class keeps its last three incidents.
 - **Everything outside the canonical home is one sentence plus a link.** A
   ci-triage row, a sync-log line, a PROGRESS note, a Mattermost post: each
   says what and where in one sentence and links the register entry. The
@@ -273,7 +297,10 @@ never moves content that was routed to the private security file.
 
 - **Per app: at most 700 tests and 25 minutes** for the full suite on a fresh
   database. The three fleets run in parallel, so wall time does not add up
-  across apps.
+  across apps. The 25 minutes apply to one CI job: when a suite outgrows
+  it, shard the job (Playwright `--shard`) rather than lowering coverage.
+  At today's pace (about 130 tests in 7 minutes at 4 workers) that point
+  arrives around the 45th feature.
 - **Tiers** live in each PROGRESS row: H is 10–13 common scenarios, M is 6–8,
   L is 3–4, give or take one or two by the author's judgment. Each app's
   suite implements the common scenarios plus that app's own, so its count per
@@ -356,11 +383,10 @@ cite these rules by number, so the numbers are stable.
 **How the work is split.** Heavy work is delegated. The spec author, the
 probe agents, the digest agent, the test authors and the claim checkers are
 separate subagents. The orchestrator briefs them, judges results, and is the
-only writer of PROGRESS rows, atlas `Claimed by:` markers and
-`app-changes.md` entries. Every brief points at TEMPLATE or PRINCIPLES rather
+only writer of PROGRESS rows and `app-changes.md` entries. Every brief points at TEMPLATE or PRINCIPLES rather
 than paraphrasing their rules, and carries this sentence verbatim: "Do NOT
-write to PROGRESS.md, atlas files, or docs/tracking/app-changes.md; return
-proposed content in your report instead." Every probe, claim-check and test
+write to PROGRESS.md or docs/tracking/app-changes.md; return proposed
+content in your report instead." Every probe, claim-check and test
 brief also opens with the Frame paragraph, verbatim, before the task.
 
 1. **Claim it.** Set the feature's PROGRESS row to `in_progress`.
@@ -462,7 +488,10 @@ brief also opens with the Frame paragraph, verbatim, before the task.
    still reachable at all. The target is our own text: catch an inaccurate
    rule before a QA reader trusts it. The same screen-only scope applies. The
    merge agent returns a change list in the digest format, and a fold agent
-   folds the accepted findings under step 4's rules. Items that cannot be
+   folds the accepted findings under step 4's rules. The brief lists the
+   rules the canonical scenarios already exercise, so checkers spend their
+   time on the permission rows and rules no test touches; that is where
+   the wrong claims have been found. Items that cannot be
    resolved become ❓ entries with a stated lean. After the fold, re-run lint
    and give the reader persona (step 5) the folded spans only; new wording
    is never verified by its writer.
@@ -484,8 +513,8 @@ brief also opens with the Frame paragraph, verbatim, before the task.
     low-confidence. If anything was routed to the security file, the
     verification pass has already run and the report gives the outcome as
     counts only (verified / dismissed). Open questions stay recorded, not
-    resolved; the team settles them on spec review. Then stop: in REVIEW mode,
-    one feature per fresh session.
+    resolved; the team settles what it has time for. Then stop; the next
+    feature starts in a fresh session.
 
 ### Resuming a feature mid-flight
 
@@ -568,6 +597,7 @@ live in `docs/process/harness.md`. The campaign-side rules are here:
 - **Per feature**: the spec is `verified` and lint-clean; all three apps are
   covered per the multi-app rules; every affordance atom is covered,
   delegated or waived; each app's suite is green twice; the PROGRESS row is
-  updated with a short note; everything is committed; and in REVIEW mode the
-  maintainer has signed off.
+  updated with a short note; everything is committed. Team review of the
+  register's verdicts is welcome whenever the team has time, and is never
+  a gate.
 - **Campaign**: the bar in "Mission, scope & invariants".

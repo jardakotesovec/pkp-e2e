@@ -21,8 +21,10 @@ to their OMP and OPS names.
 - `docs/tracking/FEATURE-MAP.md`: the full list of 70 features and which
   screens and behaviors each one covers.
 - `docs/tracking/ci-triage.md`: known CI failures and their causes. Check it
-  before diagnosing a red build as new. Every tracking file holds only what
-  is open; resolved items are deleted and live on in git history.
+  before diagnosing a red build as new. Tracking files hold only what is
+  open; resolved items are deleted and live on in git history. The two
+  exceptions are the parity ledger and app-changes, which record changes
+  still in effect.
 - `docs/tracking/upstream-sync.md`: the last app commits the suite was
   reviewed against.
 - `docs/tracking/companion-branches.md`: pkp-e2e branches prepared for

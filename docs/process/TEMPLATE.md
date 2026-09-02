@@ -175,7 +175,7 @@ name: <feature-slug>
 scope: <one line: the user job this feature serves>
 apps: [ojs, omp, ops]       # apps that have the feature (all three unless absent)
 shared: pkp-lib | no        # implemented in lib/pkp or app-only
-status: draft | verified    # verified = the full RUNBOOK loop passed (claim check resolved, lint zero, readability, tests green ×2)
+status: draft | verified    # verified = the full RUNBOOK loop passed (readability, lint zero, tests green ×2, claim check resolved)
 atlas-claims: [<atom IDs this spec owns>]
 ---
 
@@ -301,7 +301,9 @@ atlas-claims: [<atom IDs this spec owns>]
 
      Badges: 🐞 defect (author's call) · ❓ needs a product ruling · ✅ intended
      divergence. Impact: one plain value (user-visible / invisible / latent /
-     minor). Review: "—" until someone reviews, then their name and date.
+     minor). Review: "—" until someone reviews, then their name and date
+     (`npm run questions` lists the ❓ rows whose Review cell is still "—",
+     so the dash is load-bearing).
 
      Entries under `### All apps` / `### OMP` / `### OPS`. IDs are LOCAL and
      DENSE (A1, A2… / OMP1… / OPS1…), no gaps, no foreign keys. Anchor each:
@@ -327,7 +329,18 @@ atlas-claims: [<atom IDs this spec owns>]
      rationale for a 🐞-versus-✅ call is welcome ("worked for OPS's whole
      life; broke in the 2025 stage removal — regression, not choice"); the
      commit archaeology goes in the footnote. A finding another feature owns
-     gets one line plus a link to that spec, with the full entry there. -->
+     gets one line plus a link to that spec, with the full entry there.
+
+     RETIRED ENTRIES. When a defect is fixed upstream or a verdict is
+     overturned, the entry moves to a `### Retired` block at the end of
+     the register as ONE line, anchor and ID kept (IDs stay dense), badge
+     ✅, impact "retired", one clause saying why and when, the footnote
+     mark kept:
+     <a id="a5"></a>
+     **A5 — <short title>** · ✅ · retired. Fixed upstream (pkp/pkp-lib#NNNN),
+     2026-08-25. <sup>f-a5</sup>
+     Its summary row stays (sorted with the ✅ rows); its body markers are
+     removed, and lint does not require one for a Retired entry. -->
 
 ---
 

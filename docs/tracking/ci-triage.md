@@ -26,11 +26,13 @@ per-test detail comes from a local reproduction at the head SHA.
 1. **Match the signature** against the Open rows and the Flake watch:
    failing spec files and tests, error shape, apps. A match means already
    triaged: update the row's *last confirmed* date, note any spread to
-   another app, acknowledge briefly if the report came from the team, and
-   stop. No re-diagnosis, no duplicate finding.
+   another app, acknowledge briefly if the report came from the team (one
+   reply for the three per-app messages), and stop. No re-diagnosis, no
+   duplicate finding.
 2. **Suspect a flake second.** The flake classes below mimic regressions.
    The tell: does it reproduce on a targeted rerun or in isolation? A
-   flake-class match gets a dated tally on its line, not a new row.
+   flake-class match gets a dated tally on its line, not a new row; a line
+   keeps its last three incidents.
 3. **Only then diagnose as new**, with the same critical triage as the sync
    loop: the commits since the last green run and the issues they link to,
    then a decision on evidence between test drift, an intended change the
@@ -40,8 +42,9 @@ per-test detail comes from a local reproduction at the head SHA.
 4. **Delete rows** once the fix is verified green on `main` in every
    affected app; git history keeps the row. A fix that has landed in one
    app but not the others is a dated note in the row's Status cell. The
-   same goes for a flake class whose cause is fixed. Rows are cheap; open
-   one for anything that could red CI twice.
+   same goes for a flake class whose cause is fixed. The daily sync
+   re-checks every row against the new tips. Rows are cheap; open one for
+   anything that could red CI twice.
 5. **Rows are one sentence plus a link.** The signature, the apps, the
    canonical entry. The story of the fix lives in the register entry and in
    git; it does not accumulate here. Status cells are updated by dated
@@ -71,11 +74,10 @@ when the class's watch condition trips.
   window widens. The harness mitigates with outcome-keyed retries and
   content-verified saves (U40 S4 on OJS and OPS, U49 S11 on OJS since
   2026-09-01); the fix is upstream. Reported to the team 2026-08-29.
-  Tallies: three U26 incidents 2026-08-27; U40 S4 OJS in 3 of 4 full runs
-  2026-08-29; U21 S10 once 2026-08-29; U49 S11 red with retries exhausted
-  2026-08-30 and 2026-09-01 (watch condition tripped, hardening applied and
-  verified green 2026-09-01); U21 S13 flaky-passed 2026-09-01. **Watch
-  condition**: a hardened test reds again with retries exhausted.
+  Last incidents: U49 S11 red with retries exhausted 2026-08-30 and
+  2026-09-01 (watch condition tripped, hardening applied and verified green
+  2026-09-01); U21 S13 flaky-passed 2026-09-01. **Watch condition**: a
+  hardened test reds again with retries exhausted.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

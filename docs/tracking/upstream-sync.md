@@ -4,17 +4,19 @@ Baselines for the MAINTENANCE upstream-sync loop
 (`docs/process/MAINTENANCE.md`): the tip of pkp `main` each app was last
 reviewed at. After `npm run fetch-apps -- --update`, diff
 `<baseline>..HEAD` per app (and lib/pkp once — it is shared), triage, then
-advance the row and append a log line. **The baseline advances only when its
-range is fully triaged.**
+advance the row and add a log entry in the shape below. **The baseline
+advances only when its range is fully triaged.** The log keeps entries
+back to the oldest open item in `ci-triage.md` or `companion-branches.md`
+and nothing older.
 
 ## Baselines
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `979819ae45` | 2026-08-29 | funder-fix verification cycle (claude, w/ maintainer) — see the second 2026-08-29 log entry |
-| omp | `d34542e83` | 2026-08-29 | #13003 aftermath + i13156 maintenance cycle — no new commits since |
-| ops | `3f619a3138` | 2026-08-29 | funder-fix verification cycle |
-| pkp-lib | `13b621e42` | 2026-08-29 | unmoved; all three apps' submodule pointers sit here |
+| ojs | `979819ae45` | 2026-08-29 | claude with the maintainer (second 2026-08-29 entry) |
+| omp | `d34542e83` | 2026-08-29 | claude with the maintainer |
+| ops | `3f619a3138` | 2026-08-29 | claude with the maintainer |
+| pkp-lib | `13b621e42` | 2026-08-29 | claude with the maintainer; all three apps' pointers sit here |
 
 ## Sync log
 

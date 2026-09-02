@@ -27,6 +27,16 @@ on:
         required: false
         type: string
         default: main
+      companion_branch:
+        description: >-
+          branch name of the app PR under test. If a pkp-e2e branch of the
+          same name exists, the suite runs from it instead of e2e_ref: that
+          branch is the PR's companion, carrying the spec and test updates
+          the PR needs (docs/process/MAINTENANCE.md "A developer's PR fails
+          the suite"). App hooks pass `github.head_ref || github.ref_name`.
+        required: false
+        type: string
+        default: ''
 
 jobs:
   e2e:
@@ -60,12 +70,28 @@ jobs:
           - 1025:1025
 
     steps:
+      # A pkp-e2e branch named like the app PR's branch is that PR's
+      # companion (spec + test updates it needs). Run from it when it exists.
+      - name: Resolve the pkp-e2e ref (companion branch or e2e_ref)
+        id: e2e
+        env:
+          COMPANION: ${{ inputs.companion_branch }}
+          FALLBACK: ${{ inputs.e2e_ref }}
+        run: |
+          ref="$FALLBACK"
+          if [ -n "$COMPANION" ] && [ "$COMPANION" != "main" ] \
+             && git ls-remote --exit-code --heads https://github.com/jardakotesovec/pkp-e2e.git "refs/heads/$COMPANION" >/dev/null 2>&1; then
+            ref="$COMPANION"
+            echo "companion branch found in pkp-e2e: $COMPANION"
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
       # Explicit repository: when called from an app repo's hook workflow,
       # the default checkout target would be the CALLER's repo.
       - uses: actions/checkout@v4
         with:
           repository: jardakotesovec/pkp-e2e
-          ref: ${{ inputs.e2e_ref }}
+          ref: ${{ steps.e2e.outputs.ref }}
           path: e2e
 
       - uses: actions/checkout@v4

@@ -42,9 +42,10 @@ just the provisioner for the default, isolated layout (see
 - `apps/{ojs,omp,ops}/` — per-app Playwright suites (`playwright/`) and the
   `APP\testing` PHP overlays (`php/`, mounted into the app root).
 - `docs/` — the campaign's single documentation home: `process/` (RUNBOOK,
-  PRINCIPLES, harness, patterns, scenarios, users), `specs/` (the product
-  specs), `tracking/` (PROGRESS, FEATURE-MAP, ledgers).
+  TEMPLATE, PRINCIPLES, MAINTENANCE, harness, patterns, scenarios, users),
+  `specs/` (the product specs), `tracking/` (PROGRESS, FEATURE-MAP,
+  ledgers). `docs/README.md` is the map.
 - `configs/` — one Playwright config per app; `bin/` — mount/unmount and the
   `with-app` runner; `.github/workflows/e2e.yml` — the three-app CI matrix.
 
-Start reading at `docs/process/harness.md`.
+Start reading at `docs/README.md`.

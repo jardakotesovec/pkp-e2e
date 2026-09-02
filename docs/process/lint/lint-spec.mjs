@@ -144,6 +144,7 @@ function checkRegister(doc, out) {
         }
     }
     for (const e of entries) {
+        if (/^retired/i.test(e.group)) continue; // TEMPLATE: a retired entry is one line, no body marker needed
         if (!marked.has(e.id)) out.push({ line: e.line, check: 'register', msg: `entry ${e.id} is never marked in the body` });
         else if (e.badge && e.badge !== '✅' && !warned.has(e.id))
             out.push({ line: e.line, check: 'register', msg: `entry ${e.id} (${e.badge}) has no ⚠ marker in the body — the home mention carries ⚠` });
@@ -328,6 +329,12 @@ function selfTest() {
         console.log(`${hit ? 'pass ' : 'FAIL'} ${check} — ${excerpt(to, 60)}`);
         if (!hit) { fails++; findings.forEach((f) => console.log(`      (got ${f.check}: ${f.msg})`)); }
     }
+    // a one-line entry under "### Retired" needs no body marker (TEMPLATE "Findings register")
+    const retired = GOOD.replace('---\n\n<a id="footnotes"></a>', '### Retired\n\n<a id="a2"></a>\n**A2 — Old finding** · ✅ · retired. Fixed upstream. <sup>[f-a1](#fn-a1)</sup>\n\n---\n\n<a id="footnotes"></a>')
+        .replace('| [OMP1](#omp1) | The press flow lands on the catalog step | ✅ | minor | — |', '| [OMP1](#omp1) | The press flow lands on the catalog step | ✅ | minor | — |\n| [A2](#a2) | Retired: old finding | ✅ | retired | — |');
+    const rf = lintFile(write(retired));
+    if (rf.length) { fails++; console.log('FAIL retired-block fixture produced findings:'); rf.forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
+    else console.log('pass  retired-block entry without a body marker — 0 findings');
     fs.rmSync(dir, { recursive: true, force: true });
     console.log(fails ? `\n${fails} self-test failure(s)` : '\nself-test OK');
     return fails ? 1 : 0;
