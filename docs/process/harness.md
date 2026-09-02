@@ -180,6 +180,36 @@ subset in its own way:
   Isolation comes from data namespacing with unique tags, not from separate
   databases. See `patterns.md` tag conventions.
 
+### The validation-variant server
+
+Some behaviors are config keys with no per-entity switch: email validation
+(`[email] require_validation`) and the ALTCHA spam check on registration
+(`[captcha] altcha`, `altcha_on_register`). PRINCIPLES.md D9 forbids editing
+the running config, so each fleet also starts **one fixed extra server at
+`basePort + 90`** (8090 for OJS, 8190 for OMP, 8290 for OPS; workers never
+reach that offset) that serves the same install through a second config
+file. It shares the fleet's DB, files dir and Mailpit; only the config
+differs, so users, journals and mail created there are the ordinary seeded
+ones.
+
+- The file is `config.test.validation.inc.php` next to the default config.
+  `config-factory.js` regenerates it on every Playwright config load from
+  the default file, flipping `require_validation = On`, `altcha = on`,
+  `altcha_hmackey` (a fixed test key) and `altcha_on_register = on`, and
+  re-pointing `base_url` to the variant port. `base_url` matters: the app
+  builds the activation link in the validation email from it, and a link to
+  worker 0's server would land on a config that says validation is off.
+  Never edit the file by hand; it follows the default config, which CI
+  generates fresh each run.
+- Tests reach it through the `variants` fixture:
+  `await page.goto(`${variants.validation}/index.php/publicknowledge/user/register`)`.
+  Only explicit navigation goes there. `baseURL`, `storageState`, `asUser`
+  and `pkpApi` stay on the worker's own server, so a test on the variant
+  logs in through the UI itself.
+- Its log is `.server-logs/server-<port>-validation.log`. For poking around
+  by hand: `PKP_CONFIG_FILE=<variant file> PLAYWRIGHT_BASE_PORT=<port> npm
+  run serve:<app>`.
+
 ## config.test.inc.php — the local test config
 
 Each app has a local, gitignored `config.test.inc.php`. The app reads it

@@ -193,6 +193,17 @@ touched.
 - **Disabled account** — refused at sign-in ("Your account has been
   disabled…", optionally with a recorded reason); a disabled user also
   cannot be invited to a role.
+- **Register page: journal-level vs site-level** — a journal's own
+  "Register" page (its address carries the journal's path) registers with
+  that journal and hands out its Reader role; the site-level page, reached
+  from the site homepage that lists the journals, offers a choice of
+  journals and roles instead. The registration spec owns both.
+- **Account validation (email validation)** — the optional, install-wide
+  requirement that a new account prove its email address before it works:
+  the account starts disabled, a "Validate Your Account" email carries an
+  activation link, and pressing "Activate Account" on the linked page opens
+  the account. **Settled usage**: "activation link" for the emailed link,
+  "validation" for the requirement.
 - **Principal contact** — the journal's configured contact identity that
   system emails (password resets, ORCID requests, automatic reminders) are
   sent from. Distinct from a publication's **primary contact (contributor)** —

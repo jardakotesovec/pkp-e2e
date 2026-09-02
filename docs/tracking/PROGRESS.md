@@ -46,7 +46,7 @@ markers and evidence footnotes are unchanged.
 | Row | Feature | Apps | Budget | Status | Note |
 |---|---|---|---|---|---|
 | U01 | Login & sessions | OJS OMP OPS | M | done | Spec verified. 8 tests per app (+setup); scenario 9 declared not covered in the suite headers. Register 6🐞+1❓+1✅. Maintainer review done 2026-08-25: A1–A4 and A7–A8 confirmed with fix rulings, A5 for team triage, A6 intended (pkp/pkp-lib#12162). |
-| U02 | Registration & account validation | OJS OMP OPS | M | pending | |
+| U02 | Registration & account validation | OJS OMP OPS | M | done | Spec verified. 8 tests per app (+setup; OPS scenario 3 is an absence test). Register 8🐞+2❓; headliners A6 (registering on a journal with no technical support contact while email validation is required ends in a server error and strands a disabled account, all apps) and A7 ❓ (Reader granted regardless of its self-registration flag). 1 observation in the private file, verified. Scenario 7 runs on the new validation-variant server (harness.md). App-side RegistrationPages POMs. 9 minor readability frictions open. |
 | U03 | User profile | OJS OMP OPS | M | pending | |
 | U04 | ORCID integration | OJS OMP OPS | M | done | Spec verified. 9 tests OJS, 8 OMP, 9 OPS (+setup; 2 absence tests). Register 7🐞+5❓+2✅; headliner A5 (Assistant false-success). Open red on OMP/OPS: A10, fixed on OJS, waiting for their pkp-lib bump (ci-triage U04-A10). ORCID legs run against the dead-port proxy with sandbox dummy credentials. |
 | U05 | Notifications center & email preferences | OJS OMP OPS | M | pending | |

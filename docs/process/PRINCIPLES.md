@@ -172,6 +172,10 @@ everything else is scratched.
   may write the stored value directly, but the window stays the
   application's: read back what the app wrote and shift from there, so the
   seed still means "expired" when the configured window changes.
+  A config-dependent behavior with no per-entity switch at all (email
+  validation, the spam checks) is tested against the fixed
+  validation-variant server described in `harness.md`, never by editing
+  config.
 
 Per-feature scenario keys are documented as they land in `scenarios.md`, with
 their parity rationale in `docs/tracking/parity-ledger.md`.

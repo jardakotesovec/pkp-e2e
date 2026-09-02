@@ -285,7 +285,7 @@ title ⚠ [A3](#a3):
   invisible ALTCHA check (`captcha_on_login` / `altcha_on_login`), and
   whether the lost-password form carries the ALTCHA check
   (`altcha_on_lost_password`). The captcha configuration's home is the
-  *Registration & account validation* feature. <sup>a</sup>
+  [Registration & account validation](U02-registration-and-account-validation.md#spam-checks) feature. <sup>a</sup>
 - **User registration disabled.** The journal setting that closes
   registration also removes the Register links from the Login and
   lost-password pages. A directly-typed register address then answers "This
@@ -295,8 +295,8 @@ title ⚠ [A3](#a3):
 ## Cross-feature interactions
 
 - **Registration.** The Login page's "Register" link enters the registration
-  flow, and the captcha configuration lives there (see *Registration &
-  account validation*).
+  flow, and the captcha configuration lives there (see
+  [Registration & account validation](U02-registration-and-account-validation.md)).
 - **User profile.** A signed-in user changes their own password on the
   profile's Password tab (see *User profile*). This spec covers only the
   flows that block sign-in: the forced change and the emailed reset.

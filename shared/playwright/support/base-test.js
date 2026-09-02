@@ -16,9 +16,15 @@
  *   (appContext.capabilities.hasReviewStage), never app names, and resolves
  *   personas through appContext.seed.actors (archetype → username-or-null).
  * - baseURL: per-worker — basePort + parallelIndex, one PHP server each.
+ * - variants: base URLs of the fleet's fixed alternate servers — same DB,
+ *   files dir and Mailpit, a different config file. `variants.validation`
+ *   has email validation and the ALTCHA spam check on (harness.md "The
+ *   validation-variant server"). Navigate to it explicitly; nothing else
+ *   (storageState, pkpApi) is redirected there.
  */
 const path = require('path');
 const base = require('@playwright/test');
+const {VALIDATION_PORT_OFFSET} = require('../config-factory.js');
 const {ensureAuthStateFor} = require('./auth.js');
 const {disableMotion} = require('./motion.js');
 const {PkpApi} = require('./api.js');
@@ -45,6 +51,13 @@ const test = base.test.extend({
     baseURL: async ({}, use, testInfo) => {
         const basePort = parseInt(process.env.PLAYWRIGHT_BASE_PORT || '8000', 10);
         await use(`http://127.0.0.1:${basePort + testInfo.parallelIndex}`);
+    },
+
+    variants: async ({}, use) => {
+        const basePort = parseInt(process.env.PLAYWRIGHT_BASE_PORT || '8000', 10);
+        await use({
+            validation: `http://127.0.0.1:${basePort + VALIDATION_PORT_OFFSET}`,
+        });
     },
 
     // Kill animations in the default context (and thus `page`) — see motion.js.
