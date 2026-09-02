@@ -8,10 +8,33 @@ contract, the test contract, security routing, model discipline, budgets,
 git rules) stays binding. The mode is active when the `PROGRESS.md` banner
 names it.
 
-**Cadence.** The VM runs one session a day, scheduled through
-claude-threads: sync to the apps' `main` (the loop below), triage any red
-CI, then continue the build campaign with what is left of the session. A
-daily sync also catches a red nobody has reported yet.
+## The daily session
+
+The VM runs one session a day, scheduled through claude-threads. The
+scheduled prompt only points here; this section is the day's order.
+
+1. Read CLAUDE.md, the PROGRESS banner, this file, `ci-triage.md`,
+   `upstream-sync.md` and `companion-branches.md`. Work from files, never
+   from memory of earlier sessions. Check `/model` is Fable.
+2. Claim an environment and start on the right code ("Session hygiene").
+3. Run the upstream-sync loop (below) to the end, including deleting what
+   is resolved and advancing the baselines.
+4. Check the latest `e2e-tests.yml` run on each app's `main` (harness.md
+   "CI") and triage anything red against `ci-triage.md` before calling it
+   new. A daily check also catches a red nobody has reported yet.
+5. Merge any companion whose app PR has merged ("A developer's PR fails
+   the suite", step 5).
+6. If about a month has passed since the last open-questions post noted in
+   the PROGRESS banner, post `npm run questions` to the channel.
+7. With the time that remains, continue the build campaign: the next
+   pending PROGRESS row through the RUNBOOK loop, one feature at most; if
+   the session runs short, stop cleanly at the current gate.
+8. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
+   release the environment, and post a one-paragraph summary to the
+   channel: what was synced, what was red and why, what was built.
+
+A ping about a developer's failing PR during the day takes priority over
+step 7 and follows "A developer's PR fails the suite".
 
 Four kinds of work arrive in this mode. Building a new spec and its tests
 is the RUNBOOK loop, unchanged. Keeping specs and tests in step with the
