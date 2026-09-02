@@ -1,26 +1,27 @@
 {
-    "name": "pkp-e2e",
-    "private": true,
-    "description": "Playwright e2e suites, seeding harness, specs and process docs for OJS/OMP/OPS. Runs against app checkouts named in .env; `npm run mount` copies the PHP overlays into them.",
-    "scripts": {
-        "fetch-apps": "node bin/fetch-apps.js",
-        "env": "node bin/env.js",
-        "mount": "node bin/mount.js",
-        "unmount": "node bin/unmount.js",
-        "test:ojs": "playwright test -c configs/ojs.config.js",
-        "test:omp": "playwright test -c configs/omp.config.js",
-        "test:ops": "playwright test -c configs/ops.config.js",
-        "reset:ojs": "node bin/with-app.js ojs shared/playwright/reset.js",
-        "reset:omp": "node bin/with-app.js omp shared/playwright/reset.js",
-        "reset:ops": "node bin/with-app.js ops shared/playwright/reset.js",
-        "serve:ojs": "node bin/with-app.js ojs shared/playwright/serve.js",
-        "serve:omp": "node bin/with-app.js omp shared/playwright/serve.js",
-        "serve:ops": "node bin/with-app.js ops shared/playwright/serve.js",
-        "config:ojs": "node bin/with-app.js ojs shared/playwright/make-test-config.js",
-        "config:omp": "node bin/with-app.js omp shared/playwright/make-test-config.js",
-        "config:ops": "node bin/with-app.js ops shared/playwright/make-test-config.js"
-    },
-    "devDependencies": {
-        "@playwright/test": "^1.54.0"
-    }
+  "name": "pkp-e2e",
+  "private": true,
+  "description": "Playwright e2e suites, seeding harness, specs and process docs for OJS/OMP/OPS. Runs against app checkouts named in .env; `npm run mount` copies the PHP overlays into them.",
+  "scripts": {
+    "fetch-apps": "node bin/fetch-apps.js",
+    "env": "node bin/env.js",
+    "mount": "node bin/mount.js",
+    "unmount": "node bin/unmount.js",
+    "test:ojs": "playwright test -c configs/ojs.config.js",
+    "test:omp": "playwright test -c configs/omp.config.js",
+    "test:ops": "playwright test -c configs/ops.config.js",
+    "reset:ojs": "node bin/with-app.js ojs shared/playwright/reset.js",
+    "reset:omp": "node bin/with-app.js omp shared/playwright/reset.js",
+    "reset:ops": "node bin/with-app.js ops shared/playwright/reset.js",
+    "serve:ojs": "node bin/with-app.js ojs shared/playwright/serve.js",
+    "serve:omp": "node bin/with-app.js omp shared/playwright/serve.js",
+    "serve:ops": "node bin/with-app.js ops shared/playwright/serve.js",
+    "config:ojs": "node bin/with-app.js ojs shared/playwright/make-test-config.js",
+    "config:omp": "node bin/with-app.js omp shared/playwright/make-test-config.js",
+    "config:ops": "node bin/with-app.js ops shared/playwright/make-test-config.js",
+    "questions": "node bin/open-questions.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.0"
+  }
 }

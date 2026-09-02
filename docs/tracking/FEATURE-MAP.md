@@ -4,6 +4,7 @@ This file is the single home for the campaign's feature taxonomy: **70 features
 (U01–U70)** with every atlas atom assigned. Every spec session starts here: pick a
 feature row, claim its listed atoms, write the spec per `TEMPLATE.md`.
 
+- **The atlas is the frozen Phase-0 inventory** (2026-07-28). It split the apps into these features and is not extended: a surface added upstream since then is noted in its feature's row here, or gets a new row (MAINTENANCE "Triage").
 - **Invariant (atom claim — RUNBOOK "Mission, scope & invariants")**: every atlas atom lands in **exactly one**
   of: a feature section below, the **Out of scope** section at the tail of this
   file, or `UNASSIGNED.md`. The unclaimed count is the campaign's completeness

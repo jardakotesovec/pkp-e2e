@@ -184,9 +184,11 @@ tests stay isolated:
 
 ## Test tags
 
-Filter with `--grep @tagname`: `@smoke` (must pass on every PR), `@regression`
-(scheduled or nightly), `@slow` (opt out locally), `@flaky` (quarantined).
-Apply them like this: `test('name', {tag: ['@smoke']}, async ({page}) => {...})`.
+One tag is in use: `@smoke`, for the tests that must pass on every PR.
+Filter with `--grep @smoke`. Apply it like this:
+`test('name', {tag: ['@smoke']}, async ({page}) => {...})`. There is no
+quarantine tag on purpose: a known regression stays red, and its
+`docs/tracking/ci-triage.md` row is the record.
 
 ## Page Object Model
 

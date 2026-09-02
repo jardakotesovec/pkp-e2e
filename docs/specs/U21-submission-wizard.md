@@ -1445,8 +1445,7 @@ created. The affiliation-less user shape is legitimate product state:
 attaches no required-validator to it. The suite's U21 S1 (pure UI, no
 scenario seeding) also failed at "Begin Submission" in the same run.
 Fix is either side of the mismatch: null-tolerant `getAffiliations()` or
-`collect()` instead of null in `newAuthorFromUser()`.
-
+`collect()` instead of null in `newAuthorFromUser()`. Fix PR pkp/pkp-lib#13265 verified at the PR ref 2026-09-01 (full OJS suite 129/129 green); its first revision broke the with-affiliation branch (`collect($obj)` cast the object's properties to items) and was corrected by the author the same day (`eb4cef9203`, `collect([$migratedAffiliation])`). Upstream-ready report handed to the team 2026-09-01 (`docs/reports/`, deleted once addressed; git history keeps it).
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
 `workType`; `SubmissionHandler::getSubmittingTo()` returns the work-type

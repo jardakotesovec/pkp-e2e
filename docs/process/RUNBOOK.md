@@ -47,9 +47,11 @@ diffs, with inline HTML only where the structure needs it.
 **Method.** First enumerate, then document, then map coverage. "Did we miss a
 feature?" must be answerable with a grep.
 
-- Phase 0, the surface atlas (`docs/tracking/atlas/`), is complete: 2,163
-  atoms, each assigned to a feature in `FEATURE-MAP.md` or parked in
-  `UNASSIGNED.md`.
+- Phase 0, the surface atlas (`docs/tracking/atlas/`), is complete and
+  frozen: 2,163 atoms, each assigned to a feature in `FEATURE-MAP.md` or
+  parked in `UNASSIGNED.md`. It did its job, which was to split the apps
+  into features. Surfaces added since go into their FEATURE-MAP row, or a
+  new row, never into the atlas (MAINTENANCE "Triage").
 - Phase 1, the feature specs, is the current phase. This file describes its
   loop.
 - Phase 2, the coverage crosswalk, maps every spec scenario against the
@@ -57,11 +59,12 @@ feature?" must be answerable with a grep.
 
 **Invariants.** Every iteration keeps these true:
 
-- **Every atom is claimed.** Each atlas atom ends up claimed by exactly one
-  spec, parked in `UNASSIGNED.md`, or marked out of scope in its sweep file
-  with a reason. The unclaimed count is the completeness metric. Never force
-  an atom into a feature. A wrong grouping is worse than a deferred one.
-  Group by what a journal manager would call the thing, never by code module.
+- **Every atom is claimed.** Each atom of the frozen atlas ends up claimed
+  by exactly one spec, parked in `UNASSIGNED.md`, or marked out of scope in
+  its sweep file with a reason. The unclaimed count is the completeness
+  metric for the features not yet built. Never force an atom into a
+  feature. A wrong grouping is worse than a deferred one. Group by what a
+  journal manager would call the thing, never by code module.
 - **As built, and intended.** Specs document what the code actually does.
   Behavior that is inconsistent, loses data, contradicts what the screen
   offers, or would surprise a product owner gets a ⚠ marker and a Findings
@@ -204,6 +207,24 @@ short and outcome-shaped. That is context budgeting, not a wording rule.
   after the verification pass, leave the file tidy: dismissed entries
   deleted, duplicates merged, every remaining Open entry distinct and
   `verified`.
+- **A finding against an unmerged PR** goes to the developer, not to a
+  register: the spec describes `main` (MAINTENANCE "A developer's PR fails
+  the suite").
+- **Reports for the team** (`docs/reports/`) are temporary. A report exists
+  to hand the team something they need in one piece, usually an
+  upstream-ready write-up of a regression. Once the problem it reports is
+  addressed, delete the file; the register entry's footnote keeps the
+  pointer ("reported 2026-09-01; report in git history").
+- **Tracking files hold what is open.** When an item is resolved, delete
+  it: a fixed regression's ci-triage row, a merged companion branch's row,
+  a report the team has acted on, a PROGRESS note's history. Git history
+  keeps everything, so nothing needs a Resolved section and nothing grows
+  without bound. The parity ledger and `app-changes.md` record changes
+  that are still in effect; a row leaves those when the change is reverted.
+- **Everything outside the canonical home is one sentence plus a link.** A
+  ci-triage row, a sync-log line, a PROGRESS note, a Mattermost post: each
+  says what and where in one sentence and links the register entry. The
+  long form lives in exactly one place.
 - **Build blockers** go to `docs/tracking/app-changes.md`: an app defect that
   had to be worked around or fixed to get tests green (races,
   nondeterministic UI, behavior hostile to a test harness), plus the record

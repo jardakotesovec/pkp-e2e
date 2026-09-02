@@ -8,6 +8,13 @@ contract, the test contract, security routing, model discipline, budgets,
 git rules) stays binding. The mode is active when the `PROGRESS.md` banner
 names it.
 
+Four kinds of work arrive in this mode. Building a new spec and its tests
+is the RUNBOOK loop, unchanged. Keeping specs and tests in step with the
+apps is the upstream-sync loop below, which is the same loop applied to
+the changed slice. A developer's PR that fails the suite gets its own
+section below. A request to add or change coverage is the shortest: the
+scenario changes first, then the test, and the two never drift apart.
+
 ## Role & goals
 
 1. **You are QA**, specialised in maintaining the Playwright e2e suite for
@@ -39,18 +46,24 @@ The apps move; the suite follows. The baselines live in
 2. **Diff since the baseline.** Per app, `git log <baseline>..HEAD` in the
    checkout and in its `lib/pkp`. lib/pkp is shared: review its range once,
    then only each app's pointer position. Read the commits and PRs, not just
-   their titles, for anything touching shipped territory.
+   their titles, for anything touching shipped territory. Read the GitHub
+   issue each PR links to as well: the issue states the intention, and that
+   intention is the yardstick for "intended change" versus "bug".
 3. **Triage every change** (next section). Each lands as one of: no impact,
    accommodate in an existing spec and its tests, new-feature territory, or
    re-budget.
-4. **Accommodate.** Fold spec corrections and test updates through the
-   RUNBOOK's own gates: spec edits by writing agents plus lint, touched
-   suites re-run green, PROGRESS row notes updated to the new state. Every
-   new or rewritten register entry gets the reader persona (RUNBOOK step 5)
-   on that entry alone before commit; lint checks references, not wording.
-   A behavior change that contradicts a shipped spec claim is spec
-   maintenance, not a test hack. Never edit a test to pass a claim the app
-   now disproves without correcting the spec.
+4. **Accommodate.** Run the RUNBOOK loop on the changed slice, with the
+   same gates: probe the changed screens live, fold the change into the
+   spec (rules, scenarios, register) through a writing agent, run the
+   reader persona on the changed spans, lint, update the tests, run the
+   touched suites green, update the PROGRESS row note to the new state.
+   Every new or rewritten register entry gets the reader persona (RUNBOOK
+   step 5) on that entry alone before commit; lint checks references, not
+   wording. A behavior change that contradicts a shipped spec claim is
+   spec maintenance, not a test hack. Never edit a test to pass a claim the
+   app now disproves without correcting the spec. Behavior that contradicts
+   the linked issue's stated intention is a finding: register entry, with
+   the commit and the issue in its footnote.
 5. **Be critical.** Reviewing the diff IS a QA review of the team's recent
    work. Anything that raises an eyebrow gets checked against the running
    fleets where that is cheap, then reported to the team on Mattermost with
@@ -62,7 +75,8 @@ The apps move; the suite follows. The baselines live in
    keep the content in the private file only, and on Mattermost say only
    THAT a security-shaped observation was routed, then ping the maintainer.
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
-   a dated log line (range reviewed, outcomes, notifications sent). Commit.
+   a dated log entry: one line per change reviewed (commit, verdict, what
+   was touched or filed), never a narrative. Commit.
    The baseline only advances when the range is actually triaged. A partial
    review leaves the baseline where it was and says so in the log.
 
@@ -75,10 +89,14 @@ decide deliberately. This decision is how the suite stays organised.
   existing spec already owns with different parameters. Fold it into that
   spec and its suites. This mirrors RUNBOOK multi-app rule 7: a difference
   that reuses existing machinery stays where the machinery is specified.
-- **New feature.** The change needs rules of its own: screens whose atoms no
-  spec claims, or replacement scenarios rather than modified ones. Add a
-  FEATURE-MAP row (the next free U-number) and a PROGRESS row with a
-  provisional tier, then run the RUNBOOK per-feature loop.
+- **New feature.** The change deserves a scope of its own: new screens with
+  rules of their own, or replacement scenarios rather than modified ones.
+  Add a FEATURE-MAP row (the next free U-number) and a PROGRESS row with a
+  provisional tier, then run the RUNBOOK per-feature loop. An improvement
+  or extension of an existing feature is the previous case, not this one.
+  The atlas is not extended for either: it is the frozen Phase-0 inventory
+  that split the apps into features, and new surfaces are described in the
+  FEATURE-MAP row they belong to.
 - **Re-budget.** A feature grew enough that its tier under-covers it, or
   shrank so its tier overspends. Change the tier in its PROGRESS row with a
   one-line dated rationale, and grow or prune scenarios and tests to match.
@@ -95,8 +113,8 @@ a feature that grew two identities, merge features the product merged,
 retire rows for removed surfaces. The aim is a map that matches how a
 journal manager would name things today. Guardrails:
 
-- The atom-claim invariant holds through every reorganisation: each atom
-  still lands in exactly one feature, out of scope, or `UNASSIGNED.md`.
+- Atoms from the frozen Phase-0 atlas keep exactly one owner through every
+  reorganisation: a feature, out of scope, or `UNASSIGNED.md`.
 - U-numbers are never reused or renumbered. A retired or merged-away row
   stays in the map as a one-line tombstone pointing at its successor. Its
   spec file, if shipped, is folded or superseded under the RUNBOOK's "Fix
@@ -120,6 +138,51 @@ journal manager would name things today. Guardrails:
   and how.
 - A team reply that changes campaign rules is a maintainer ruling. Encode it
   in the owning doc (RUNBOOK, TEMPLATE, PRINCIPLES or this file).
+
+## A developer's PR fails the suite
+
+A developer whose OJS, OMP or OPS pull request fails the e2e check reaches
+out (on Mattermost for now; CI will eventually notify the channel itself)
+to ask whether they hit a bug or changed behavior the tests encode. The
+answer is the same critical triage as the sync loop, on one PR:
+
+1. **Reproduce at the PR ref.** Claim an environment, fetch the PR ref (the
+   "Start on the right code" rules below, merge-base check included), reset
+   the databases, run the failing suites.
+2. **Diagnose against the intention.** Read the PR and its linked issue.
+   The failure is one of: test drift (the harness assumed something the
+   PR legitimately changed), an intended behavior change the spec must
+   follow, or a bug the PR introduces. Decide on evidence, never by default.
+3. **Bug.** Report it to the developer with the evidence: what the screen
+   offers, what happens, at which commit. Nothing enters the spec's
+   register, because the spec describes `main` and this behavior is not on
+   `main`. If the PR later merges with the bug in it, the sync loop files
+   the register entry then.
+4. **Intended change.** Create a companion branch in pkp-e2e named exactly
+   like the developer's branch, and run the sync loop's "Accommodate" step
+   on it: spec, persona, lint, tests, green at the PR ref. Push the branch
+   to pkp-e2e. `main` stays untouched. Tell the developer the companion is
+   ready, and add a row to `docs/tracking/companion-branches.md`.
+5. **When the developer says their PR is merged.** Fetch `main`, confirm
+   the commit is there, merge the companion branch into pkp-e2e `main`,
+   run the touched suites once, push. Advance that repo's baseline in
+   `upstream-sync.md` past the merged commit with a one-line log entry, so
+   the next sync does not re-triage it. Delete the row from the companion
+   table; git history keeps it.
+
+There is no automation for the merge yet. Assume the developer asks for
+it. A companion that waits more than a few weeks is worth a nudge in the
+PR's thread, because its base drifts.
+
+## Coverage requests
+
+Someone asks whether a behavior is covered, or for a test to be added or
+changed. Check the spec's canonical scenarios first; that is where coverage
+is defined. To add or change a test, change or add its scenario first
+(through a writing agent, with the persona on the new text), then write
+the test from it, run it green, and update the PROGRESS test count. A test
+with no scenario, or a scenario with no test in an app that runs it, is a
+defect either way.
 
 ## Session hygiene
 
@@ -204,13 +267,22 @@ back up.
   reports failures per app as separate messages, one root cause commonly
   reds ojs, omp and ops at once, and already-triaged causes keep failing as
   people merge to `main`. A known signature gets a dated row update, not a
-  re-diagnosis. Only a genuinely new failure proceeds to diagnosis, and then
-  to one of: fix the test (harness drift), fix the spec (behavior
-  legitimately changed), or file the regression and notify the team. That is
-  the order of suspicion, each step only on evidence, never by default. The
-  new failure also gets a ci-triage row pointing at its canonical entry.
+  re-diagnosis. A genuinely new failure gets the same critical triage as
+  the sync loop: read the commits since the last green run and the issues
+  they link to, then decide on evidence whether the test drifted, the spec
+  must follow an intended change, or the app regressed. A regression stays
+  red until the fix lands: no skip, no quarantine tag, no test edit. Its
+  ci-triage row (one line plus a link to the register entry) is the only
+  record, and the team hears about it on Mattermost.
 - **Continue the build campaign** when no sync or maintenance work is
   pending: the RUNBOOK per-feature loop on the next pending PROGRESS row,
   under whatever mode the PROGRESS banner sets.
 - **Fix stale artifacts as you go** (RUNBOOK "Fix stale campaign artifacts
   when you meet them").
+- **Delete what is resolved.** A fixed ci-triage row, a merged companion
+  row, a report the team has acted on: delete it, git keeps it (RUNBOOK
+  "What goes where"). Tracking files hold only what is open.
+- **Post the open questions monthly.** `npm run questions` lists every ❓
+  register entry still waiting for a product ruling, grouped by spec. Post
+  it to Mattermost about once a month so the team can settle them in small
+  batches.

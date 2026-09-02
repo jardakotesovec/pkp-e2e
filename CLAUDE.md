@@ -12,7 +12,10 @@ not here. `docs/README.md` is the map of the documentation.
   `docs/tracking/upstream-sync.md` (last-reviewed app commits) and
   `docs/tracking/ci-triage.md` (known problems and failing tests). Check
   ci-triage FIRST when a CI failure is reported: one root cause often reds
-  ojs, omp and ops as three separate messages.
+  ojs, omp and ops as three separate messages. A developer's failing PR
+  follows MAINTENANCE "A developer's PR fails the suite" (companion branch
+  with the same name, merged on request; open ones are listed in
+  `docs/tracking/companion-branches.md`).
 - Test contract: `docs/process/PRINCIPLES.md`. Harness knowledge:
   `docs/process/{harness,patterns,scenarios,users}.md`. Spec contract:
   `docs/process/TEMPLATE.md` plus `docs/specs/GLOSSARY.md`.

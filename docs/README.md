@@ -21,9 +21,12 @@ to their OMP and OPS names.
 - `docs/tracking/FEATURE-MAP.md`: the full list of 70 features and which
   screens and behaviors each one covers.
 - `docs/tracking/ci-triage.md`: known CI failures and their causes. Check it
-  before diagnosing a red build as new.
+  before diagnosing a red build as new. Every tracking file holds only what
+  is open; resolved items are deleted and live on in git history.
 - `docs/tracking/upstream-sync.md`: the last app commits the suite was
   reviewed against.
+- `docs/tracking/companion-branches.md`: pkp-e2e branches prepared for
+  developers' open app PRs, waiting to be merged after theirs.
 - `docs/tracking/app-changes.md`: app defects the tests had to work around,
   and any app code the campaign changed.
 - `docs/tracking/parity-ledger.md`: evidence that the test-data builders
@@ -31,7 +34,8 @@ to their OMP and OPS names.
 - `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the mechanical
   inventory of every screen and action in the apps, and the leftovers no
   spec claims yet.
-- `docs/reports/`: occasional stand-alone reports for the team.
+- `docs/reports/`: temporary write-ups handed to the team, deleted once the
+  problem they report is addressed.
 
 ## If you are building specs and tests
 
@@ -46,5 +50,6 @@ Read in this order:
    Then `patterns.md` (conventions and pitfalls), `scenarios.md` (seeding
    test data and asserting on email) and `users.md` (the seeded accounts).
 
-`docs/process/MAINTENANCE.md` is for the resident QA agent that keeps the
-suite in step with the moving apps and talks to the team on Mattermost.
+`docs/process/MAINTENANCE.md` is for the resident QA agent: keeping the
+suite in step with the moving apps, helping a developer whose PR fails the
+suite, answering coverage requests, and talking to the team on Mattermost.
