@@ -128,11 +128,6 @@ each; delete when done._
   double-anonymous review with deadlines) through a settings passthrough in
   the bootstrap seeder, with parity rows; then re-check every shipped spec
   and suite against the new defaults (PRINCIPLES "Bootstrap data policy").
-- **App hooks pass the PR branch name** (maintainer, 2026-09-02): each app
-  repo's `e2e-tests.yml` adds `companion_branch: ${{ github.head_ref ||
-  github.ref_name }}` to its call of `run-app.yml`, so a PR's check runs
-  from its same-named companion branch when one exists (harness.md "CI").
-  Needs a maintainer-reviewed PR per app repo.
 
 ## Model-fallback log
 

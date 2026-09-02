@@ -194,9 +194,9 @@ The work is the same critical triage as the sync loop, on one PR:
    pkp-e2e repo is outside the pkp org, so `gh` works there). Push the
    branch to pkp-e2e; `main` stays untouched. Tell the developer the
    companion is ready, and add a row to
-   `docs/tracking/companion-branches.md`. Once the app hooks pass the PR's
-   branch name (harness.md "CI"), the PR's own check picks the companion
-   up by name and turns green without anyone merging first.
+   `docs/tracking/companion-branches.md`. The PR's own check picks the
+   companion up by name (harness.md "CI") and turns green without anyone
+   merging first.
 5. **When the developer says their PR is merged.** Fetch `main`, confirm
    the commit is there, rebase the companion onto pkp-e2e `main` (resolve
    conflicts if `main` moved), run the touched suites once, fast-forward

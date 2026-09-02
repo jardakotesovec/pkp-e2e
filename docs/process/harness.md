@@ -289,10 +289,9 @@ safeguards".
 - `.github/workflows/run-app.yml` is the reusable job. Each app repo's
   `e2e-tests.yml` calls it on every push and PR with `app_ref` set to the
   commit under test; it runs this repo's `main` unless `e2e_ref` is given.
-  Its optional `companion_branch` input names the app PR's branch: when a
+  The hooks also pass `companion_branch`, the PR's branch name: when a
   pkp-e2e branch of the same name exists, the suite runs from it instead
-  (MAINTENANCE "A developer's PR fails the suite"). The app hooks do not
-  pass it yet (PROGRESS "Open harness work").
+  (MAINTENANCE "A developer's PR fails the suite").
 - CI runs with `PLAYWRIGHT_WORKERS=4` and `--retries=1`. Failure artifacts
   include `.server-logs/`.
 - The latest run of `e2e-tests.yml` on an app repo's `main` is the
