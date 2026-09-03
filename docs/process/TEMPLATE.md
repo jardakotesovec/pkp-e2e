@@ -37,7 +37,7 @@ defect, however true it is.
 ## The lint gate
 
 Every spec must pass `node docs/process/lint/lint-spec.mjs <spec>` with zero
-findings before tests are written (RUNBOOK step 6). The gate checks only what
+findings before the claim check (RUNBOOK step 6). The gate checks only what
 is mechanically decidable and is a broken reference for the reader:
 
 - Findings-register integrity: markers and entries match both ways, every
@@ -49,6 +49,11 @@ is mechanically decidable and is a broken reference for the reader:
 Everything else, including wording, glossary vocabulary, app badges and the
 code-in-footnotes rule, is the writer's judgment, checked by the readability
 pass and never by the gate.
+
+`node docs/process/lint/lint-spec.mjs --claims <spec>` prints a report of the
+spec's claims marked by kind (no footnote, undated, no screen, role-gated,
+exclusive wording, quoted string) for the claim check; it is a report, not a
+gate.
 
 ## The rules
 
@@ -65,7 +70,9 @@ pass and never by the gate.
    A footnote is self-contained: cite a probe by its date and what was seen
    ("live-probed 2026-07-31: both links present, single-use"), never by a
    report file or item number, because `.reports/` is session scratch and a
-   committed spec must stand on its own.
+   committed spec must stand on its own. A probe citation may name what it
+   covers, so a reader can tell which claims the probe settled:
+   "Live-probed 2026-09-02 (Rules 4, 9; Actors rows 1–2): …".
    - Bad: "`/authorDashboard/submission/{id}` redirects to My Submissions …
      (live-probed 302, both author kinds)"
    - Good: "An old bookmarked author-dashboard link lands on My Submissions
@@ -119,7 +126,9 @@ pass and never by the gate.
    (`[→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)`).
    Before describing any cross-feature behavior, grep `specs/` for its
    user-facing string: if another spec owns it, link; if this spec is the
-   natural owner, take the passage over and leave links behind.
+   natural owner, take the passage over and leave links behind. A
+   Cross-feature bullet states no behavior of the other feature's screen
+   beyond the pointer.
    Which spec owns what:
    - *Behavior that does not vary with context* is specified once, in the
      mechanism's home feature. Context features own the deltas (presence,

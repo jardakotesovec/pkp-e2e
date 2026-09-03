@@ -174,6 +174,7 @@ categories, issues, users) on top of the app's own install defaults. There
 is no settings passthrough that enriches it. A test that needs a setting
 changed drives the settings UI on a scratch context, never on
 `publicknowledge`.
+What those defaults are, screen by screen and dated: `seed-facts.md`.
 
 ## Field shapes not built yet
 

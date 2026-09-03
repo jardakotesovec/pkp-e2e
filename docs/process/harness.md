@@ -88,6 +88,15 @@ branch, rarely needed, can only go to the fork. The checkouts exist only to
 run the suites. Commits happen only in this repo. `fetch-apps --update` moves
 an existing checkout to the current upstream `main`.
 
+Every fleet uses fixed port bands above its base port; nothing else may
+listen there:
+
+| offset | who | started by |
+|---|---|---|
+| +0 … +19 | the runner's workers, one `php -S` each | Playwright `webServer` |
+| +50 | the probe server (`patterns.md` "Probe kit") | `npm run probe-servers -- --start` |
+| +90 | the validation variant (below) | Playwright, or `probe-servers --start` when nothing answers |
+
 Test DBs are **PostgreSQL** locally. The harness code itself is
 DB-driver-agnostic (PRINCIPLES D8), so Postgres is a local choice, not a
 dependency. Postgres-specific defects reproduce in this environment.
@@ -275,7 +284,15 @@ npm run test:ojs -- --ui             # Playwright UI mode — best for iterating
 PWDEBUG=1 npm run test:ojs           # step-through
 npm run reset:ojs                    # nuke the test DB (forces cold bootstrap next run)
 npm run serve:ojs                    # manual PHP server on the fleet's base port
+npm run probe-servers -- --start|--status|--stop [--app ojs]   # detached probe servers at base+50 (and +90)
+npm run fleet-prep -- --feature U03 [--reset] [--apps ojs,omp]  # per app: reset?, setup project, probe server; .reports/U03/fleet.json
+npm run test:final -- --feature U03 [--apps ojs] [--grep @smoke] # the suites one after another; logs in .reports/U03/final-run-<app>.log
 ```
+
+`fleet-prep` and `test:final` run the apps one after another and leave
+`PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a
+run; a manual `serve:<app>` may not (its port is a worker's, and the run
+adopts it).
 
 Reset the DB before any full-suite timing run and every 8 to 10 features.
 Long-lived DBs accumulate state that pollutes COUNT assertions and tag

@@ -2,6 +2,8 @@
 // lint-spec.mjs — the campaign's mechanical spec gate (RUNBOOK step 6, TEMPLATE "The lint gate").
 // run:      node lint/lint-spec.mjs [specs/foo.md ...]     default: every specs/*.md
 // self-test: node lint/lint-spec.mjs --self-test           embedded good/bad fixtures, no deps
+// claims:   node lint/lint-spec.mjs --claims specs/foo.md [--date YYYY-MM-DD]
+//           a report for the claim check (every claim line, risky kinds marked), never a gate
 // REFERENCE INTEGRITY ONLY (maintainer, 2026-07-31 — wording, vocabulary and the leak rule
 // are the writer's judgment, never linted): campaign identifiers a reader cannot resolve
 // (TEMPLATE rule 5) · register anatomy · link/anchor/footnote resolution.
@@ -50,6 +52,12 @@ function parseDoc(file) {
 }
 
 const excerpt = (s, n = 110) => { const t = String(s).trim().replace(/\s+/g, ' '); return t.length > n ? t.slice(0, n) + '…' : t; };
+
+// <sup> marks: linked form <sup>[a](#fn-a)</sup> or bare <sup>a</sup> → block #fn-a
+const supMarks = (line) => [...line.matchAll(/<sup>(.*?)<\/sup>/g)].map((m) => {
+    const link = m[1].match(/\]\(#([\w-]+)\)/);
+    return { raw: m[1], id: link ? link[1] : 'fn-' + m[1].trim() };
+});
 
 // (The leak rule and the glossary/vocabulary checks were removed 2026-07-31 — TEMPLATE rule 1
 // and rule 7 bind by the writer's judgment; the gate keeps only reference integrity.)
@@ -201,11 +209,8 @@ function checkLinks(doc, out) {
             if (exists && anchorPart && !anchorsOf(resolved).has(anchorPart))
                 out.push({ line: i + 1, check: 'links', msg: `anchor does not resolve: ${target}` });
         }
-        // <sup> marks: linked form <sup>[a](#fn-a)</sup> or bare <sup>a</sup> → block #fn-a
-        for (const m of doc.lines[i].matchAll(/<sup>(.*?)<\/sup>/g)) {
-            const link = m[1].match(/\]\(#([\w-]+)\)/);
-            const id = link ? link[1] : 'fn-' + m[1].trim();
-            if (!localAnchors.has(id)) out.push({ line: i + 1, check: 'links', msg: `footnote mark <sup>${excerpt(m[1], 20)}</sup> has no block #${id}` });
+        for (const { raw, id } of supMarks(doc.lines[i])) {
+            if (!localAnchors.has(id)) out.push({ line: i + 1, check: 'links', msg: `footnote mark <sup>${excerpt(raw, 20)}</sup> has no block #${id}` });
             else usedFootnotes.add(id);
         }
     }
@@ -215,6 +220,137 @@ function checkLinks(doc, out) {
         for (const m of doc.lines[i].matchAll(/<a id="(fn-[^"]+)"><\/a>/g))
             if (!usedFootnotes.has(m[1])) out.push({ line: i + 1, check: 'links', msg: `footnote block #${m[1]} has no mark in the body` });
     }
+}
+
+// ---------------------------------------------------------------- 4. claims report (--claims)
+// A report for the claim check (RUNBOOK step 7), never a gate: every claim-bearing line of the
+// body is listed, the risky kinds first (no-mark · undated · no-screen · role-gated · exclusive ·
+// string), then the rest with their footnote's probe date, so the checklist is the whole spec.
+
+const CLAIM_SECTIONS = /^(Actors & permissions|Fields & validation|Rules & state|Side effects|Settings|Cross-feature interactions|Canonical scenarios|Findings register)/;
+const ROLE_NAMES = ['Site Administrator', 'Journal Manager', 'Press Manager', 'Server Manager', 'Journal Editor', 'Press Editor',
+    'Editor', 'Section Editor', 'Series Editor', 'Moderator', 'Guest Editor', 'Reviewer', 'Internal Reviewer', 'Author', 'Reader',
+    'Copyeditor', 'Layout Editor', 'Proofreader', 'Funding [Cc]oordinator', 'Assistant', 'Editorial Board Member', 'Subscription Manager'];
+const ROLE_RE = new RegExp(`\\b(?:${ROLE_NAMES.join('|')})\\b|\\bpermission level\\b`); // role names as capitalised on screen
+const EXCLUSIVE_RE = /\b(?:only|never|no one|nothing else|not offered|absent|whoever|whatever|alike|cannot|no screen|all|every|each|any|always)\b/i;
+const NO_SCREEN_RE = /no screen|read from the code|not observable|code reading|cannot be seen/i;
+const PROBE_DATE_RE = /live-probed\s+(\d{4}-\d{2}-\d{2})/gi;
+const KIND_ORDER = ['no-mark', 'undated', 'no-screen', 'role-gated', 'exclusive', 'string'];
+const kindLabel = (x) => `${x.kind}${x.detail ? ' ' + x.detail : ''}`;
+const normWs = (s) => s.replace(/\s+/g, ' ').trim();
+
+// footnote blocks of the tail: #fn-x → its joined text and newest "live-probed YYYY-MM-DD" date
+function footnoteBlocks(doc) {
+    const blocks = new Map();
+    let cur = null;
+    for (let i = doc.tailStart; i < doc.lines.length; i++) {
+        const l = doc.lines[i];
+        const a = l.match(/<a id="(fn-[^"]+)"><\/a>/);
+        if (a) { cur = { id: a[1], line: i + 1, lines: [] }; blocks.set(a[1], cur); continue; }
+        if (/^##\s+/.test(l)) { cur = null; continue; }
+        if (cur) cur.lines.push(l);
+    }
+    for (const b of blocks.values()) {
+        b.text = normWs(b.lines.join(' '));
+        b.date = [...b.text.matchAll(PROBE_DATE_RE)].map((m) => m[1]).sort().pop() || null;
+    }
+    return blocks;
+}
+
+// Claim-bearing lines, grouped into items (a bullet, a numbered rule, a table row, a paragraph or
+// a register entry) so a wrapped item's closing mark covers its earlier lines and a sub-bullet
+// inherits its parent's. Skipped: headings, blank lines, anchors, table header/separator rows, the
+// register's preamble and summary table, and lines that carry marks only.
+function claimItems(doc) {
+    const items = [];
+    let cur = null, inEntry = false, sectionItems = [];
+    const isSep = (l) => /^\|[\s:|-]+\|?\s*$/.test(l);
+    for (let i = 0; i < doc.tailStart; i++) {
+        const l = doc.lines[i];
+        if (doc.skip[i] || !CLAIM_SECTIONS.test(doc.h2[i])) { cur = null; continue; }
+        if (/^#{1,6}\s/.test(l)) { cur = null; inEntry = false; sectionItems = []; continue; }
+        if (!l.trim() || /^---\s*$/.test(l) || /^\*[^*]+:\*\s*$/.test(l)) { cur = null; inEntry = false; continue; } // blank, rule, *"Profile" section:*
+        if (/^<a id="[^"]+"><\/a>\s*$/.test(l)) { cur = null; inEntry = true; continue; }
+        if (/^Findings register/.test(doc.h2[i]) && !inEntry) continue;
+        if (/^\|/.test(l)) {
+            if (isSep(l) || isSep(doc.lines[i + 1] || '')) { cur = null; continue; }
+            cur = { indent: 0, parent: null, lines: [] }; items.push(cur); sectionItems.push(cur);
+        } else {
+            const b = l.match(/^(\s*)(?:[-*•]|\d+\.)\s+/);
+            if (b || !cur) {
+                const indent = b ? b[1].length : 0;
+                const parent = b ? [...sectionItems].reverse().find((it) => it.indent < indent) || null : null;
+                cur = { indent, parent, lines: [] }; items.push(cur); sectionItems.push(cur);
+            }
+        }
+        cur.lines.push(i);
+    }
+    for (const it of items) {
+        it.own = new Set(it.lines.flatMap((i) => supMarks(doc.lines[i]).map((m) => m.id)));
+        it.text = normWs(it.lines.map((i) => doc.lines[i]).join(' '));
+    }
+    return items;
+}
+
+const marksOf = (line, item) => {
+    const own = supMarks(line).map((m) => m.id);
+    if (own.length) return own;
+    for (let it = item; it; it = it.parent) if (it.own.size) return [...it.own];
+    return [];
+};
+
+// → { date, lines: [{ line, text, kinds: [{kind, detail}], marks, dates }] }, date = --date or the newest probe date
+function claimsOf(file, dateArg = null) {
+    const doc = parseDoc(file);
+    const blocks = footnoteBlocks(doc);
+    const date = dateArg || [...blocks.values()].map((b) => b.date).filter(Boolean).sort().pop() || null;
+    const tail = normWs(doc.lines.slice(doc.tailStart).join(' '));
+    const result = [];
+    for (const item of claimItems(doc)) {
+        // quoted runs of ≥3 words, taken from the whole item so a string wrapped over two lines still counts
+        const strings = [];
+        const joined = item.lines.map((i) => doc.lines[i]).join('\n');
+        for (const m of joined.matchAll(/"([^"]+)"/g)) {
+            const s = normWs(m[1]);
+            if (s.split(' ').length >= 3 && !tail.includes(s)) strings.push({ s, line: item.lines[joined.slice(0, m.index).split('\n').length - 1] });
+        }
+        for (const i of item.lines) {
+            const line = doc.lines[i];
+            const prose = line.replace(/<sup>.*?<\/sup>/g, '').replace(MARKER_RE, '').replace(/[\s⚠.,;:()—-]+/g, '');
+            if (!prose) continue;
+            const marks = marksOf(line, item);
+            const kinds = [];
+            if (!marks.length) kinds.push({ kind: 'no-mark', detail: '' });
+            const undated = marks.filter((id) => { const b = blocks.get(id); return !b || !b.date || (date && b.date < date); });
+            if (undated.length) kinds.push({ kind: 'undated', detail: undated.join(' ') });
+            if (NO_SCREEN_RE.test(line)) kinds.push({ kind: 'no-screen', detail: '' });
+            else { const via = marks.find((id) => NO_SCREEN_RE.test(blocks.get(id)?.text || '')); if (via) kinds.push({ kind: 'no-screen', detail: `(${via})` }); }
+            if (ROLE_RE.test(line)) kinds.push({ kind: 'role-gated', detail: '' });
+            if (EXCLUSIVE_RE.test(line)) kinds.push({ kind: 'exclusive', detail: '' });
+            for (const st of strings) if (st.line === i) kinds.push({ kind: 'string', detail: `"${excerpt(st.s, 40)}"` });
+            result.push({ line: i + 1, text: line, kinds, marks, dates: marks.map((id) => `${id.replace(/^fn-/, '')} ${blocks.get(id)?.date || '—'}`) });
+        }
+    }
+    return { date, lines: result };
+}
+
+function printClaims(file, dateArg) {
+    const { date, lines } = claimsOf(file, dateArg);
+    const r = path.relative(process.cwd(), file);
+    const rel = !r || r.startsWith('..') ? file : r;
+    console.log(`claims — ${rel} — reference date ${date || 'none'}${dateArg ? ' (--date)' : ' (newest live-probed date in the footnotes)'}`);
+    const counts = Object.fromEntries(KIND_ORDER.map((k) => [k, 0]));
+    let viaFootnote = 0;
+    const marked = lines.filter((l) => l.kinds.length);
+    for (const l of marked) {
+        const kinds = KIND_ORDER.flatMap((k) => l.kinds.filter((x) => x.kind === k));
+        for (const x of kinds) if (x.kind === 'no-screen' && x.detail) viaFootnote++; else counts[x.kind]++;
+        console.log(`${rel}:${l.line} — ${kinds.map(kindLabel).join(', ')} — ${excerpt(l.text, 80)}`);
+    }
+    console.log(`\ndated — the remaining ${lines.length - marked.length} claim line(s), with their footnote's probe date`);
+    for (const l of lines) if (!l.kinds.length) console.log(`${rel}:${l.line} — dated ${l.dates.join(', ')} — ${excerpt(l.text, 80)}`);
+    const tally = KIND_ORDER.map((k) => `${k} ${counts[k]}${k === 'no-screen' && viaFootnote ? ` (+${viaFootnote} via a footnote that says so)` : ''}`);
+    console.log(`\n${lines.length} claim line(s): ${tally.join(' · ')} · dated ${lines.length - marked.length} (a line counts once per kind; not a gate)`);
 }
 
 // ---------------------------------------------------------------- driver
@@ -320,6 +456,90 @@ const CASES = [
     ['links', '<a id="fn-omp1"></a>', '<a id="fn-a1"></a>'],
 ];
 
+// claims fixture: GOOD with claim sections and footnotes that exercise every kind of the report
+const CLAIMS = GOOD.replace(/## Rules & state[\s\S]*?(?=## Findings register)/, `## Actors & permissions
+
+| Action | Who may, and when |
+|--------|--------------------|
+| **Record a decision** | • Journal Manager, on an open round <sup>a</sup> |
+
+## Rules & state
+
+1. The editor sees only the "Record decision" button while the round is
+   open ⚠ [A1](#a1). <sup>a</sup>
+2. The round closes when the last review comes in.
+3. A closed round keeps its files. <sup>b</sup>
+4. The author sees the outcome on the same screen. <sup>c</sup>
+5. The decision date is read from the code; no screen shows it. <sup>a</sup>
+6. The reminder runs nightly. <sup>d</sup>
+7. The page reads "Thanks for recording your decision" at the top. <sup>a</sup>
+8. The page reads "Thanks for coming
+   back today" below. <sup>a</sup>
+9. The page lists the files in upload order. <sup>a</sup>
+10. On a press the same button opens the catalog step instead [OMP1](#omp1). <sup>a</sup>
+
+## Side effects
+
+- **On decision**: the decision is stored and the author is told. <sup>a</sup>
+  - the notice names the round.
+
+`).replace(/<a id="fn-a"><\/a>[\s\S]*?(?=<a id="fn-a1">)/, `<a id="fn-a"></a>
+**a** — Stage access: \`WorkflowStageAccessPolicy::authorize()\`. Live-probed
+2026-08-01 (Rules 1, 7–10): the page reads "Thanks for coming back today"
+below the form.
+
+<a id="fn-b"></a>
+**b** — File retention: \`SubmissionFileDAO::retain()\`.
+
+<a id="fn-c"></a>
+**c** — Live-probed 2026-07-01: the outcome row is present.
+
+<a id="fn-d"></a>
+**d** — \`ReminderTask\`; live-probed 2026-08-01: no screen runs it.
+
+`);
+
+// [substring of the claim line, expected kind labels in report order]; a line absent from the report fails
+const CLAIM_EXPECT = [
+    ['• Journal Manager, on an open round', ['role-gated']],
+    ['The editor sees only', ['exclusive']],
+    ['open ⚠ [A1](#a1). <sup>a</sup>', []],
+    ['The round closes when the last review', ['no-mark']],
+    ['A closed round keeps its files', ['undated fn-b']],
+    ['The author sees the outcome on the same screen', ['undated fn-c']],
+    ['The decision date is read from the code', ['no-screen', 'exclusive']],
+    ['The reminder runs nightly', ['no-screen (fn-d)']],
+    ['Thanks for recording your decision', ['string "Thanks for recording your decision"']],
+    ['The page reads "Thanks for coming', []],
+    ['The page lists the files in upload order', []],
+    ['the notice names the round', []],
+];
+
+function selfTestClaims(write) {
+    let fails = 0;
+    const file = write(CLAIMS);
+    const gate = lintFile(file);
+    if (gate.length) { fails++; console.log('FAIL claims fixture is not gate-clean:'); gate.forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
+    const { date, lines } = claimsOf(file);
+    if (date !== '2026-08-01') { fails++; console.log(`FAIL claims default date: expected the newest probe date 2026-08-01, got ${date}`); }
+    else console.log('pass  claims — default date is the newest live-probed date, read across a wrapped line');
+    for (const [needle, want] of CLAIM_EXPECT) {
+        const l = lines.find((x) => x.text.includes(needle));
+        const got = l ? KIND_ORDER.flatMap((k) => l.kinds.filter((x) => x.kind === k)).map(kindLabel) : null;
+        const ok = got && got.join(', ') === want.join(', ');
+        console.log(`${ok ? 'pass ' : 'FAIL'} claims — ${want.length ? want.join(', ') : 'dated'} — ${excerpt(needle, 50)}`);
+        if (!ok) { fails++; console.log(`      (got ${got ? got.join(', ') || 'dated' : 'line not in the report'})`); }
+    }
+    const skipped = ['| Action | Who may, and when |', '|--------|', 'Verdicts are the', '| [A1](#a1) |'];
+    for (const s of skipped) if (lines.some((l) => l.text.includes(s))) { fails++; console.log(`FAIL claims — listed a non-claim line: ${excerpt(s, 40)}`); }
+    if (!fails) console.log('pass  claims — table header rows, the register preamble and summary table are not listed');
+    const later = claimsOf(file, '2026-08-02').lines.find((x) => x.text.includes('The page lists the files in upload order'));
+    const ok = later && later.kinds.map(kindLabel).join(', ') === 'undated fn-a';
+    console.log(`${ok ? 'pass ' : 'FAIL'} claims — --date 2026-08-02 makes a 2026-08-01 footnote undated`);
+    if (!ok) fails++;
+    return fails;
+}
+
 function selfTest() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lint-spec-'));
     fs.mkdirSync(path.join(dir, 'specs'));
@@ -343,6 +563,7 @@ function selfTest() {
     const rf = lintFile(write(retired));
     if (rf.length) { fails++; console.log('FAIL retired-block fixture produced findings:'); rf.forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
     else console.log('pass  retired-block entry without a body marker — 0 findings');
+    fails += selfTestClaims(write);
     fs.rmSync(dir, { recursive: true, force: true });
     console.log(fails ? `\n${fails} self-test failure(s)` : '\nself-test OK');
     return fails ? 1 : 0;
@@ -352,9 +573,19 @@ function selfTest() {
 
 const args = process.argv.slice(2);
 if (args.includes('--self-test')) process.exit(selfTest());
+const resolveTarget = (t) => (fs.existsSync(path.resolve(t)) ? path.resolve(t) : path.join(SPECS_DIR, t));
+const ci = args.indexOf('--claims');
+if (ci !== -1) { // the report, not the gate: always exit 0 once the spec is found
+    const spec = args[ci + 1], di = args.indexOf('--date'), date = di === -1 ? null : args[di + 1];
+    if (!spec || spec.startsWith('-') || (di !== -1 && !/^\d{4}-\d{2}-\d{2}$/.test(date || ''))) { console.error('usage: lint-spec.mjs --claims <spec> [--date YYYY-MM-DD]'); process.exit(2); }
+    const file = resolveTarget(spec);
+    if (!fs.existsSync(file)) { console.error(`lint-spec: no such file: ${file}`); process.exit(2); }
+    printClaims(file, date);
+    process.exit(0);
+}
 const targets = args.filter((a) => !a.startsWith('-'));
 const files = targets.length
-    ? targets.map((t) => (fs.existsSync(path.resolve(t)) ? path.resolve(t) : path.join(SPECS_DIR, t)))
+    ? targets.map(resolveTarget)
     : fs.readdirSync(SPECS_DIR).filter((f) => /^U\d{2}-.*\.md$/.test(f)).sort().map((f) => path.join(SPECS_DIR, f));
 for (const f of files) if (!fs.existsSync(f)) { console.error(`lint-spec: no such file: ${f}`); process.exit(2); }
 process.exit(run(files));

@@ -344,3 +344,76 @@ exploration.
   the global author role does not trip author checks. A second `participants`
   entry for the same user rides on `build()`'s firstOr semantics (see
   `scenarios.md`).
+
+## Probe kit
+
+`shared/playwright/probe/index.js` is what a live-probe script imports
+instead of rebuilding a `lib.js`. It is a thin wrapper over the modules the
+suites already use (`LoginPage`, `users.js`, `PkpApi`, `PkpMail`,
+`waitForJQueryIdle`, `disableMotion`, `bin/apps.js`), so ports and keys are
+environment-correct and nothing is hard-coded. Two environment variables
+name the output folder, `.reports/<PROBE_FEATURE>/<PROBE_AGENT>/`:
+`PROBE_FEATURE` is the spec id, `PROBE_AGENT` a short id for the agent.
+Scripts run through `bin/probe.js`:
+
+```bash
+npm run probe-servers -- --start                    # once per session: php -S per app at base+50, and +90
+PROBE_FEATURE=U03 PROBE_AGENT=g1 node bin/probe.js all my-probe.js   # or ojs|omp|ops; ONLY=ojs,omp narrows
+```
+
+A script calls `forEachApp(fn)`; `fn` receives one app's bag: `{app,
+name, root, baseURL, port, api, mail, users, contextPath, url(path),
+variant('validation')}`. `api` is the `_test` client with that app's own
+key, `mail` the shared Mailpit, `baseURL` the probe server (base port + 50),
+`variant('validation')` the +90 server with email validation and ALTCHA on.
+Everything per app travels in the bag, never in `process.env`, so one
+process holds all three apps.
+
+```js
+const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, idle, tag} =
+    require('../../shared/playwright/probe');
+
+forEachApp(async (app) => {
+    const scratch = tag('u03reg');
+    await app.api.createContext({tag: scratch, users: [{username: `${scratch}mgr`, roles: ['manager']}]});
+    const {page, close} = await launch(app);
+    try {
+        await signIn(page, 'manager.maya');
+        await page.goto(app.url(`/index.php/${app.contextPath}/management/settings/website`));
+        await idle(page);
+        record(`website-${app.name}`, await screen(page));   // {url, title, aria, text}
+        await shot(page, `website-${app.name}`);            // full-page PNG
+        await loc(page, 'the Save button', page.getByRole('button', {name: 'Save', exact: true}));
+        await signOut(page);
+    } finally {
+        await close();
+    }
+});
+```
+
+What each helper gives you: `launch(app)` is a 1280×900 Chromium with
+animations off and a response listener that records URL, method, status and
+size (never a body) of every `/api/` call and every status ≥ 400 into
+`run-<app>.json`. `screen(page)` is the screen as data: the aria snapshot of
+the main region (the body when the page has no `main`) and of every open
+dialog, plus the verbatim `innerText` of header and main, because aria
+snapshots normalise punctuation. `record(name, data)` writes JSON,
+`shot(page, name)` a PNG, `loc(page, description, locator)` a row in
+`locators.md` (selector, match count, visibility) for the test author.
+`idle(page)` is `waitForJQueryIdle`; `tag(prefix)` makes a scratch tag that
+follows the tag conventions above. `signIn` uses the roster password rule,
+so it works for scratch users too.
+
+Must not, in a probe script: assertions or `expect`; the test runner or its
+fixtures; a generic request caller (drive the UI, or the `_test` API through
+`api`); page objects (a probe reads the screen, it does not model it);
+`clearAll` on Mailpit; edits to any config; `networkidle`; `waitForTimeout`;
+starting a server (the probe servers are started once, outside scripts).
+Tests never import the kit: `npm run lint:probe-imports` fails when
+`playwright/probe` appears under `apps/` or `shared/playwright/{tests,pages,support}`.
+
+Two premises that cost a smoke run: a scratch context has no technical
+support contact, and the validation email's sender is that contact, so a
+registration on the +90 server 500s until a manager sets it (Settings ›
+Contact); and the frontend has no `main` landmark, so `screen()` gives you
+the body there.

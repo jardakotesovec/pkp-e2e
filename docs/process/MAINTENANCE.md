@@ -88,17 +88,24 @@ The apps move; the suite follows. The baselines live in
    accommodate in an existing spec and its tests, new-feature territory, or
    re-budget.
 4. **Accommodate.** Run the RUNBOOK loop on the changed slice, with the
-   same gates: probe the changed screens live, fold the change into the
-   spec (rules, scenarios, register) through a writing agent, run the
-   reader persona on the changed spans, lint, update the tests, run the
-   touched suites green, update the PROGRESS row note to the new state.
-   Every new or rewritten register entry gets the reader persona (RUNBOOK
-   step 5) on that entry alone before commit; lint checks references, not
-   wording. A behavior change that contradicts a shipped spec claim is
-   spec maintenance, not a test hack. Never edit a test to pass a claim the
-   app now disproves without correcting the spec. Behavior that contradicts
-   the linked issue's stated intention is a finding: register entry, with
-   the commit and the issue in its footnote. A slice needs the same
+   same gates and the same rules: probe the changed screens live (step 3:
+   the probe kit, the three probe rules, "What each role reads", agents one
+   or two at a time), fold the change into the spec (rules, scenarios,
+   register) through a writing agent (step 4), run the reader persona on
+   the changed spans (step 5), lint (step 6), update the tests and run the
+   touched suites green once (steps 8–9), update the PROGRESS row note to
+   the new state (step 10). When the slice changes a rule, an Actors row or
+   a scenario, one fresh checker drives the changed spans after the persona
+   re-read (`lint-spec.mjs --claims` over the diff, RUNBOOK step 7); a
+   footnote-only or register-only change needs none. The slice writes the
+   same `.reports/<feature>/phase-status.md`. Every new or rewritten
+   register entry gets the reader persona (RUNBOOK step 5) on that entry
+   alone before commit; lint checks references, not wording. A behavior
+   change that contradicts a shipped spec claim is spec maintenance, not a
+   test hack. Never edit a test to pass a claim the app now disproves
+   without correcting the spec. Behavior that contradicts the linked
+   issue's stated intention is a finding: register entry, with the commit
+   and the issue in its footnote. A slice needs the same
    separation of roles as a full feature, not the same headcount: one
    probe agent, one writing agent, one persona read; skip the digest when
    the probe list is under about five items. When a register entry is
@@ -302,12 +309,14 @@ back up.
   recipient scoping is per app, not per environment. So: at most one
   full-suite run machine-wide, and two runs of the same app must never
   overlap, even targeted ones. Announce "running the <app> suite in env N"
-  in the session's thread before a full run. Targeted `--grep` probes of
-  different apps are fine at any time. Run full suites with
-  `PLAYWRIGHT_WORKERS=4` while the one-session ruling holds (a timed sweep
-  on the 4-core VM showed 4 workers as the plateau, with the same flake
-  profile as 2 or 3). Otherwise leave `PLAYWRIGHT_WORKERS` alone, unless a
-  run must coexist with another session's probing, then pin it to 2.
+  in the session's thread before a full run. `npm run test:final` runs the three
+  suites one after another and follows the same announce and workers
+  rules. Targeted `--grep` probes of different apps are fine at any time.
+  Run full suites with `PLAYWRIGHT_WORKERS=4` while the one-session ruling
+  holds (a timed sweep on the 4-core VM showed 4 workers as the plateau,
+  with the same flake profile as 2 or 3). Otherwise leave
+  `PLAYWRIGHT_WORKERS` alone, unless a run must coexist with another
+  session's probing, then pin it to 2.
 - **Tracking files merge through git; a PR verdict needs one run.** Whichever
   session completes a `main` review updates `upstream-sync.md` (and
   `PROGRESS.md`) on its worktree branch and merges and pushes like any other

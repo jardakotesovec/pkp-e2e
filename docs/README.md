@@ -33,6 +33,9 @@ to their OMP and OPS names.
   and any app code the campaign changed.
 - `docs/tracking/parity-ledger.md`: evidence that the test-data builders
   produce the same state a real user would.
+- `docs/tracking/cost-ledger.md`: what each feature session cost in
+  weighted tokens, by role, with the U02 baseline and the command that
+  fills a row.
 - `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the mechanical
   inventory of every screen and action in the apps, and the leftovers no
   spec claims yet.
@@ -51,6 +54,10 @@ Read in this order:
 4. `docs/process/harness.md`: how the Playwright harness is laid out and run.
    Then `patterns.md` (conventions and pitfalls), `scenarios.md` (seeding
    test data and asserting on email) and `users.md` (the seeded accounts).
+
+- `docs/process/seed-facts.md`: what a fresh test install contains and how
+  it is configured; check a probe premise against it before writing the
+  question. Its generated part is kept true by `npm run seed-facts -- --check`.
 
 `docs/process/MAINTENANCE.md` is for the resident QA agent: keeping the
 suite in step with the moving apps, helping a developer whose PR fails the

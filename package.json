@@ -19,7 +19,12 @@
     "config:ojs": "node bin/with-app.js ojs shared/playwright/make-test-config.js",
     "config:omp": "node bin/with-app.js omp shared/playwright/make-test-config.js",
     "config:ops": "node bin/with-app.js ops shared/playwright/make-test-config.js",
-    "questions": "node bin/open-questions.mjs"
+    "questions": "node bin/open-questions.mjs",
+    "seed-facts": "node bin/seed-facts.js",
+    "probe-servers": "node bin/probe-servers.js",
+    "fleet-prep": "node bin/fleet-prep.js",
+    "test:final": "node bin/test-final.js",
+    "lint:probe-imports": "! git grep -l \"playwright/probe\" -- apps shared/playwright/tests shared/playwright/pages shared/playwright/support"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.0"

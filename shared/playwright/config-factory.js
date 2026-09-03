@@ -27,6 +27,7 @@ const os = require('os');
 const path = require('path');
 const {defineConfig, devices} = require('@playwright/test');
 const {loadEnv} = require('./support/env.js');
+const {phpServerCommand, phpServerEnv, phpServerReadyUrl} = require('./php-server.js');
 
 /**
  * Worker auto-detect. The workload is wait-bound (single-threaded php -S +
@@ -192,10 +193,10 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
     const sharedTestDir = path.join(__dirname, 'tests');
     const appTestDir = path.join(suiteDir, 'tests');
 
-    const serverEnv = {
-        PKP_CONFIG_FILE: process.env.PKP_CONFIG_FILE,
-        TEST_API_KEY: process.env.TEST_API_KEY || '',
-    };
+    const serverEnv = phpServerEnv({
+        configFile: process.env.PKP_CONFIG_FILE,
+        testApiKey: process.env.TEST_API_KEY,
+    });
     const validationPort = basePort + VALIDATION_PORT_OFFSET;
     const validationConfigFile = ensureValidationConfig(
         process.env.PKP_CONFIG_FILE,
@@ -203,17 +204,15 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
     );
     const logDir = path.join(suiteDir, '.server-logs');
     fs.mkdirSync(logDir, {recursive: true});
-    const phpServer = (port, {logName = `server-${port}.log`, env = serverEnv} = {}) => {
-        const logFile = path.join(logDir, logName);
-        const serve = `php -d max_execution_time=120 -S 127.0.0.1:${port} -t "${appRoot}" >> "${logFile}" 2>&1`;
-        return {
-            command: `: > "${logFile}"; n=0; until ${serve}; do s=$?; n=$((n+1)); [ "$n" -ge 20 ] && exit 1; echo "[harness] php -S died (exit $s); restart $n" >> "${logFile}"; sleep 1; done`,
-            url: `http://127.0.0.1:${port}/README.md`,
-            reuseExistingServer: true,
-            timeout: 30_000,
-            env,
-        };
-    };
+    // The command and env come from php-server.js, shared with the probe
+    // servers (bin/probe-servers.js) so both kinds of server are identical.
+    const phpServer = (port, {logName = `server-${port}.log`, env = serverEnv} = {}) => ({
+        command: phpServerCommand({appRoot, port, logFile: path.join(logDir, logName)}),
+        url: phpServerReadyUrl(port),
+        reuseExistingServer: true,
+        timeout: 30_000,
+        env,
+    });
 
     return defineConfig({
         outputDir: path.join(suiteDir, 'test-results'),
@@ -261,24 +260,10 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         ],
         // One PHP server per worker; `php -S` is single-threaded. The ready
         // probe is a static file so it answers even before the DB is installed
-        // (the setup project handles cold installs itself). `php -S` logs every
-        // request to stderr, which Playwright pipes into the reporter output by
-        // default — redirect it to per-server log files instead. A server kept
-        // alive by reuseExistingServer holds its old log open, so the file is
-        // only truncated when a server actually (re)starts.
-        //
-        // The restart loop is crash resilience: a `php -S` process death
-        // (observed in CI: segfault; locally: a 30 s execution-limit fatal
-        // inside a DB call) otherwise strands its worker — Playwright never
-        // restarts a webServer, so every remaining test on that port fails in
-        // milliseconds (20–33-test cascades; ci-triage.md "dead-worker
-        // cascade"). The loop respawns the server within a second, bounded so
-        // a port conflict can't spin forever; on teardown Playwright kills
-        // the whole process tree, shell included, so the loop can't respawn
-        // after a run. max_execution_time=120 keeps a merely slow request
-        // (seeding under load hits the default 30 s ceiling) from becoming a
-        // fatal at all; genuinely hung requests are already bounded by the
-        // dead-proxy config and the test timeout.
+        // (the setup project handles cold installs itself). The command's
+        // logging and restart loop are explained in php-server.js; on
+        // teardown Playwright kills the whole process tree, shell included,
+        // so the loop can't respawn after a run.
         //
         // The last entry is the validation variant: same install, second
         // config file, fixed port (workers never reach the offset). Tests

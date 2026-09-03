@@ -60,6 +60,9 @@ Traps:
 
 ## 3. The seeded roster
 
+Per-app roles and permission levels for every account, generated from the
+seed fixtures, plus the install defaults: `seed-facts.md`.
+
 Home: `shared/playwright/data/users.js`. All 18 users are enrolled in
 `publicknowledge`. `admin` is site-level and created by the installer. The
 other 17 are created by the bootstrap seed. Usernames follow the pattern
