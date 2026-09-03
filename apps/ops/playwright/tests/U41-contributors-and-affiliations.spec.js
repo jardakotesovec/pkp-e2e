@@ -138,9 +138,10 @@ async function openContributors(page, contextPath, submissionId, options = {}) {
 
 /**
  * Pin a two-row contributor list's order so {firstName} leads, through the
- * screen's ordering mode: a panel-added second contributor TIES the
- * auto-created author at sequence 0, so the untouched display order is
- * nondeterministic until "Save Order" renumbers it.
+ * screen's ordering mode. For determinism: "Save Order" persists an
+ * explicit sequence for every row, so the callers' ordering assertions
+ * hold by construction instead of depending on insertion order (Rule 6's
+ * append-at-end itself is not asserted here).
  */
 async function pinOrder(page, screen, firstName) {
     // Content-verified pin (campaign workaround; see the app-changes note):
@@ -310,9 +311,8 @@ test.describe('Contributors & affiliations (U41)', () => {
         });
         await expect(screen.row('Greta Zeta')).toBeVisible({timeout: 30_000});
 
-        // Pin the starting order (Alex first): the panel-added second
-        // contributor ties the auto-created author at sequence 0, so the
-        // untouched order is nondeterministic (see pinOrder).
+        // Pin the starting order (Alex first) so the ordering assertions
+        // below do not depend on insertion order (see pinOrder).
         await pinOrder(page, screen, 'Alex Author');
 
         // Preview (Rule 7): "Abbreviated" is the first contributor's
@@ -848,9 +848,9 @@ test.describe('Contributors & affiliations (U41)', () => {
         const listsRow = screen.previewRow('Publication Lists');
         await expect(listsRow).toContainText('Alex Author');
         await expect(listsRow).not.toContainText('Greta Zeta');
-        // Order-agnostic: the untouched two-row list ties at sequence 0
-        // (see pinOrder), so which name leads is nondeterministic — S7's
-        // rule is presence in the formats, not order.
+        // Order-agnostic: this test never pins an order (see pinOrder) and
+        // S7's rule is presence in the formats, not order — so which name
+        // leads is not asserted.
         const fullRow = screen.previewRow('Full');
         await expect(fullRow).toContainText('Alex Author (Author)');
         await expect(fullRow).toContainText('Greta Zeta (Author)');

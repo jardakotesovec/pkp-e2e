@@ -48,16 +48,13 @@
  * - The wizard's Contributors step (shell, gates, the auto-created
  *   contributor) is U21's; versioning's contributor copy belongs to
  *   Publish, schedule & versions; the ORCID field states are U04's.
- * - NEW FINDING (proposed for the spec's register, not yet filed): a
- *   contributor added through the panel to a publication whose only
- *   contributor is the auto-created author gets sequence 0 — the SAME
- *   sequence as the existing author (`AuthorDAO::getNextSeq()` treats a
- *   max seq of 0 as "no contributors": `if ($seq)`), so "the first
- *   contributor" (rows, author strings, reader pages) is nondeterministic
- *   until an order is saved. This contradicts Rule 6's "joins at the end
- *   of the list". S2 and S6 avoid the tied path by pinning an explicit
- *   order (Save Order persists seq 0..n) before any order-dependent
- *   assertion.
+ * - Rule 6's "a newly added contributor joins at the end of the list" and
+ *   "a never-reordered list is stable" are not asserted as such: S2 and
+ *   S6 pin an explicit order (Save Order persists seq 0..n, submitter
+ *   first) before any order-dependent assertion, so those assertions
+ *   hold by construction and do not depend on insertion order. The pin
+ *   is for determinism only — the insertion-order rule itself has no
+ *   dedicated test here (A15, the former sequence-0 tie, is retired).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (S5's role mutations and S8's setting mutation run on
@@ -265,10 +262,9 @@ test.describe('contributors and affiliations', () => {
         await panel.savePanel(dialog);
         await expect(panel.row('Zoe Zephyr')).toBeVisible({timeout: 30_000});
 
-        // Pin the starting order (Alex first) with an explicit Save Order:
-        // the panel-added contributor ties the auto-created author at
-        // sequence 0, so the untouched order is nondeterministic (see the
-        // file header).
+        // Pin the starting order (Alex first) with an explicit Save Order
+        // so the ordering assertions below do not depend on insertion
+        // order (determinism only; see the file header).
         await panel.makeFirst('Alex Author');
         await expect(panel.rows().nth(1)).toContainText('Zoe Zephyr');
 
@@ -649,8 +645,8 @@ test.describe('contributors and affiliations', () => {
         await panel.savePanel(dialog);
         await expect(panel.row('Noa Secondi')).toBeVisible({timeout: 30_000});
 
-        // Pin the list order (Alex first) — the panel-added contributor
-        // ties the auto-created author at sequence 0 (see the file header).
+        // Pin the list order (Alex first) so the list-order assertions
+        // below do not depend on insertion order (see the file header).
         await panel.makeFirst('Alex Author');
 
         // The anonymous reader's landing page credits both in list order:

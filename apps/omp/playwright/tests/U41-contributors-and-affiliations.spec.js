@@ -60,13 +60,12 @@
  *   same component asserted here), versioning's contributor copy (Rule 1 —
  *   *Publish, schedule & versions*), the ORCID field's states (U04), and
  *   the change-language name copy (U40's flow, touched by its OMP S6).
- * - Rule 6's "a contributor added later joins at the end": observed
- *   UNSTABLE while building this suite — the second contributor added to
- *   a one-contributor list ties the stored sequence and the list (and
- *   every author string) can lead with either row until "Save Order"
- *   renumbers them (reported to the spec's register; not asserted either
- *   way). Tests that depend on who is first pin the order through the
- *   screen's own ordering mode before asserting.
+ * - Rule 6's "a contributor added later joins at the end" (and the
+ *   stability of a never-reordered list) is not asserted as such: tests
+ *   that depend on who is first pin the order through the screen's own
+ *   ordering mode before asserting, so the ordering assertions hold by
+ *   construction and do not depend on insertion order. The pin is for
+ *   determinism only (A15, the former sequence tie, is retired).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (role and settings mutations run on scratch presses with
@@ -152,10 +151,10 @@ function scratchPressSpec(tag, {locales} = {}) {
 
 /**
  * Pin a two-row contributor list's order so {firstName} leads, through the
- * screen's own ordering mode. Needed because a second contributor added to
- * a one-contributor list ties the stored sequence, leaving the display and
- * author strings unstable until "Save Order" renumbers them (the register
- * finding of the file header — never asserted, only worked around).
+ * screen's own ordering mode. For determinism: "Save Order" persists an
+ * explicit sequence for every row, so the callers' ordering assertions
+ * hold by construction instead of depending on insertion order (see the
+ * file header).
  */
 async function pinOrder(page, screen, firstName) {
     // Content-verified pin (campaign workaround; see the app-changes note):
@@ -966,8 +965,8 @@ test.describe('Contributors & affiliations (U41)', () => {
 
         // The book page compacts the credits to a single flowed line of
         // semicolon-joined names: no per-contributor blocks, no role names.
-        // (Name order is not asserted — the stored sequence of panel-added
-        // contributors ties; see the file header's register note.)
+        // (Name order is not asserted — this test never pins an order and
+        // S6's rule is presence, not order; see the file header.)
         await page.goto(bookUrl(PK, submissionId));
         const authorsBlock = page.locator('.item.authors');
         await expect(authorsBlock).toContainText('Alex Author', {timeout: 30_000});

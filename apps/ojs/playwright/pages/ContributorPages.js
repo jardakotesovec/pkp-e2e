@@ -109,10 +109,9 @@ exports.ContributorsPanel = class ContributorsPanel {
      * Pin a deterministic order with the named contributor first: enter
      * ordering mode, press the row's up arrow (a no-op when already
      * first) and Save Order — which persists explicit sequence numbers
-     * 0..n for every row. Needed because a panel-added second contributor
-     * TIES the auto-created author at sequence 0 (`AuthorDAO::getNextSeq`
-     * treats a max seq of 0 as "no contributors"), leaving the untouched
-     * order nondeterministic; see the suite header.
+     * 0..n for every row. Used for determinism: the suites' ordering
+     * assertions then hold by construction instead of depending on the
+     * insertion order; see the suite header.
      */
     async makeFirst(name) {
         // Content-verified pin (campaign workaround; see the app-changes
