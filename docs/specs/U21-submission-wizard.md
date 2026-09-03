@@ -119,9 +119,9 @@ itself enforces before submission is Rule 13.
    language, section or type, and the chosen submitting role. It then opens
    the wizard at its first step. When submitting under an Author role, the
    author is also placed on the submission's Contributors list, as its
-   primary contact. An Author whose profile has no affiliation gets a server
-   error here instead, and the wizard never opens ⚠ [A11](#a11). The button
-   shows a spinner while the wizard loads. <sup>e</sup>
+   primary contact, whether or not the author's profile carries an
+   affiliation (an empty affiliation is a legitimate profile state). The
+   button shows a spinner while the wizard loads. <sup>e</sup>
 6. **A draft persists until submitted or cancelled.** The draft appears on
    the author's My Submissions list as an incomplete submission (see *My
    Submissions*), and its wizard address can be bookmarked and reopened.
@@ -585,7 +585,6 @@ in ordinary use · minor = cosmetic · latent = only in an unusual situation.
 | [A7](#a7) | With acknowledgements off, the completion screen still claims a confirmation email was sent | 🐞 | minor | — |
 | [A8](#a8) | Section editors configured for auto-assignment are silently never assigned on any journal but the install's first | 🐞 | user-visible | — |
 | [A10](#a10) | A wizard loaded at phone width keeps its uncollapsed step rail and the page scrolls sideways (journal & press) | 🐞 | minor | — |
-| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all; "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | 🐞 | user-visible | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
 | [OPS3](#ops3) | A preprint author's own "Cancel" is silently refused; the draft survives with no message | 🐞 | user-visible | — |
 | [OPS5](#ops5) | A can-post preprint submitter gets no acknowledgement email at all | 🐞 | user-visible | — |
 | [OPS7](#ops7) | The preprint "Not Allowed" page shows a raw locale code where its explanation should be | 🐞 | minor | — |
@@ -596,6 +595,7 @@ in ordinary use · minor = cosmetic · latent = only in an unusual situation.
 | [OPS2](#ops2) | A preprint server enrolls a roleless visitor as Author on merely opening the start screen | ❓ | latent | — |
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
+| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all; "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | ✅ | retired | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
 | [OMP1](#omp1) | A press submits by work type (Monograph / Edited Volume), with no section at intake and an optional Series later | ✅ | — | — |
 | [OPS1](#ops1) | A preprint server's wizard is galley-based and single-stage: license & relation questions, moderation-aware messaging, can-post variants | ✅ | — | — |
 
@@ -712,20 +712,6 @@ the start. A preprint server collapses correctly even on a phone-width load.
 Every step stays reachable by scrolling, hence minor. Basis: probe
 (repeatable both orders, three apps compared). <sup>[h](#fn-h)</sup>
 
-<a id="a11"></a>
-**A11 — No profile affiliation, no submission: the wizard's start 500s** · 🐞 · user-visible.
-Regression (pkp-lib `9e2fbac214`, on OJS `main` as of `d44b186c22`,
-2026-09-01).
-A user submitting as an Author whose profile has no affiliation gets a
-server error the moment the submission is created. The wizard never opens.
-Every flow that creates an author record for an affiliation-less user is
-affected. On the e2e install it also breaks the harness's seeding endpoint,
-which reds about 100 of the 129 OJS tests. Only OJS's `main` pins the broken
-range so far; OMP and OPS inherit it at their next pkp-lib bump. The
-mechanism is in the footnote. Basis: full-suite reproduction on a fully
-synced checkout + code inspection of the breaking diff.
-<sup>[fn-a11](#fn-a11)</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -825,6 +811,11 @@ visitor is never told why. Both of the page's explanations are affected
 (the must-be-registered and the all-sections-closed variants). A journal
 and a press show the proper text. Basis: probe + code inspection (the
 locale keys are missing on OPS alone). <sup>[c](#fn-c)</sup>
+
+### Retired
+
+<a id="a11"></a>
+**A11 — No profile affiliation, no submission: the wizard's start 500s** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13265), 2026-09-03. <sup>[fn-a11](#fn-a11)</sup>
 
 ---
 
@@ -1447,7 +1438,7 @@ created. The affiliation-less user shape is legitimate product state:
 attaches no required-validator to it. The suite's U21 S1 (pure UI, no
 scenario seeding) also failed at "Begin Submission" in the same run.
 Fix is either side of the mismatch: null-tolerant `getAffiliations()` or
-`collect()` instead of null in `newAuthorFromUser()`. Fix PR pkp/pkp-lib#13265 verified at the PR ref 2026-09-01 (full OJS suite 129/129 green); its first revision broke the with-affiliation branch (`collect($obj)` cast the object's properties to items) and was corrected by the author the same day (`eb4cef9203`, `collect([$migratedAffiliation])`). Upstream-ready report handed to the team 2026-09-01 (`docs/reports/`, deleted once addressed; git history keeps it).
+`collect()` instead of null in `newAuthorFromUser()`. Fix PR pkp/pkp-lib#13265 verified at the PR ref 2026-09-01 (full OJS suite 129/129 green); its first revision broke the with-affiliation branch (`collect($obj)` cast the object's properties to items) and was corrected by the author the same day (`eb4cef9203`, `collect([$migratedAffiliation])`). Upstream-ready report handed to the team 2026-09-01 (`docs/reports/`, deleted once addressed; git history keeps it). Retired 2026-09-03: the fix merged as pkp-lib `eb4cef92` (pkp/pkp-lib#13265) and reached all three apps' `main` (OJS `c499837187`, OMP `a1aefa3fe`, OPS `6bda92fb03`), where the full suites ran green that day (OJS 154, OMP 156, OPS 119 tests).
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
 `workType`; `SubmissionHandler::getSubmittingTo()` returns the work-type

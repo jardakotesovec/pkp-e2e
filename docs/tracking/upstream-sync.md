@@ -27,6 +27,9 @@ lives in the register entry and in git. A companion-branch merge
 (MAINTENANCE "A developer's PR fails the suite") also gets a one-line
 entry when it advances a baseline._
 
+- **2026-09-03 — U15 build session, not a sync; baselines unchanged.**
+  - Checkouts moved to ojs `c499837187` (lib/pkp `8d5ddf8192`), omp `a1aefa3fe` and ops `6bda92fb03` (lib/pkp `7ab247a737`); ui-library bumped in all three → rebuilt. The range is UNTRIAGED; the next sync owns it.
+  - pkp-lib `eb4cef92` (#13265) present in every app's lib/pkp → U21 A11 retired, ci-triage row U21-A11 deleted; full suites green at the tips: OJS 154, OMP 156, OPS 119 (with the new U15 serial suites).
 - **2026-09-01 — red-CI triage, not a sync; baselines unchanged.**
   - OMP/OPS reds → the known U43-A13 and U04-A10 rows (dates bumped).
   - pkp-lib `ecd12271ed` → U04 A10 fixed on OJS (U04 fully green, run 33466736951); omp/ops pending their pointer bump.
