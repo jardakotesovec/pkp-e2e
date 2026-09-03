@@ -38,7 +38,7 @@ entry when it advances a baseline._
   - pkp-lib `6a902ad50a` (#13184, bulk-email user count) → no impact (U55 pending); OJS only.
   - pkp-lib `84e049ebd9` + profile/login/register template hooks, FBV readonly/hidden field flags → no impact (plugin hook points, no visible behavior; U01/U02/U03 territory).
   - pkp-lib NavigationMenuDAO cache invalidation, `384693429b` + ojs `a7a3c6c8da` (#13261 export-grid link to the version), pkp-lib #13003 affiliation/serialization fixes, ojs `fed8315e6b`/`7819a42e98` (pubId export grids) → no impact (U08/U63 pending; U21/U41 suites green).
-  - ojs `e470617a65`/`094218bde4` (#12752 HTML galley sanitizer, Off by default) → no suite impact; config-key mismatch (`allowed_hosts` documented, `allowed_media_hosts` read) reported: `docs/reports/2026-09-03-galley-html-filter-config-key-mismatch.md`.
+  - ojs `e470617a65`/`094218bde4` (#12752 HTML galley sanitizer, Off by default) → no impact (galleys are U46, pending; the filter is Off by default). A config-key report filed the same day was withdrawn: the template's `allowed_hosts` line is a copy-paste remnant, not part of the feature (maintainer, 2026-09-03).
   - ui-library `7611b0b8` (FieldControlledVocab watcher rebuilt from the value) and `e414522e` (vocabulary modal button row) → no impact (U40 suites green on CI at `762415103f`; OJS bundle rebuilt locally).
   - crossref plugin bumps (ojs `a03c4b7`, ops `417a43a`) → no impact (U45 pending).
   - App e2e hooks now pass the PR branch name (ojs `79b0a1ca34`, omp `efe0b7800`, ops `2eabaf670c`) → harness fact already in harness.md "CI".
