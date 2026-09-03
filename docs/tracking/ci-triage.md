@@ -73,7 +73,7 @@ when the class's watch condition trips.
   2026-09-01); the fix is upstream. Reported to the team 2026-08-29.
   Last incidents: U49 S11 red with retries exhausted 2026-08-30 and
   2026-09-01 (watch condition tripped, hardening applied and verified green
-  2026-09-01); U21 S13 flaky-passed 2026-09-01. **Watch condition**: a
+  2026-09-01); U21 S13 flaky-passed 2026-09-01; U21 S11 red on OMP with its retry exhausted 2026-09-03 (run 33745718330), green on the targeted rerun. **Watch condition**: a
   hardened test reds again with retries exhausted.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
