@@ -26,22 +26,25 @@ scheduled prompt only points here; this section is the day's order.
    the suite", step 5).
 6. If about a month has passed since the last open-questions post noted in
    the PROGRESS banner, post `npm run questions` to the channel.
-7. With the time that remains, continue the build campaign: the next
-   pending PROGRESS row through the RUNBOOK loop, one feature at most; if
-   the session runs short, stop cleanly at the current gate.
-8. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
+7. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
    release the environment, and post a one-paragraph summary to the
-   channel: what was synced, what was red and why, what was built.
+   channel: what was synced, what was red and why, what was changed.
 
-A ping about a developer's failing PR during the day takes priority over
-step 7 and follows "A developer's PR fails the suite".
+A ping about a developer's failing PR during the day follows "A
+developer's PR fails the suite".
 
-Four kinds of work arrive in this mode. Building a new spec and its tests
-is the RUNBOOK loop, unchanged. Keeping specs and tests in step with the
-apps is the upstream-sync loop below, which is the same loop applied to
-the changed slice. A developer's PR that fails the suite gets its own
-section below. A request to add or change coverage is the shortest: the
-scenario changes first, then the test, and the two never drift apart.
+**The maintenance session never builds a new spec or suite.** Pending
+PROGRESS rows are built in feature sessions the maintainer launches, one
+feature per session, under the RUNBOOK loop. Time left over after the
+steps above is left over; the session ends. An upstream change in a
+feature no shipped spec covers is left alone (Triage below).
+
+Three kinds of work arrive in this mode. Keeping specs and tests in step
+with the apps is the upstream-sync loop below, which is the RUNBOOK loop
+applied to a changed slice of a shipped spec. A developer's PR that fails
+the suite gets its own section below. A request to add or change coverage
+is the shortest: the scenario changes first, then the test, and the two
+never drift apart.
 
 ## Role & goals
 
@@ -85,7 +88,7 @@ The apps move; the suite follows. The baselines live in
    footnotes and its "Reference — code anchors" section name the code it
    rests on.
 3. **Triage every change** (next section). Each lands as one of: no impact,
-   accommodate in an existing spec and its tests, new-feature territory, or
+   accommodate in an existing spec and its tests, not covered yet, or
    re-budget.
 4. **Accommodate.** Run the RUNBOOK loop on the changed slice, with the
    same gates and the same rules: probe the changed screens live (step 3:
@@ -133,21 +136,22 @@ The apps move; the suite follows. The baselines live in
 
 ## Triage: where does a change land?
 
-For every upstream change, and every new-feature request from the team,
+For every upstream change, and every coverage request from the team,
 decide deliberately. This decision is how the suite stays organised.
 
-- **Accommodate in place** (the default). The change reuses behavior an
-  existing spec already owns with different parameters. Fold it into that
+- **Accommodate in place** (the default). The change reuses behavior a
+  shipped spec already owns with different parameters. Fold it into that
   spec and its suites. This mirrors RUNBOOK multi-app rule 7: a difference
   that reuses existing machinery stays where the machinery is specified.
-- **New feature.** The change deserves a scope of its own: new screens with
-  rules of their own, or replacement scenarios rather than modified ones.
-  Add a FEATURE-MAP row (the next free U-number) and a PROGRESS row with a
-  provisional tier, then run the RUNBOOK per-feature loop. An improvement
-  or extension of an existing feature is the previous case, not this one.
-  The atlas is not extended for either: it is the frozen Phase-0 inventory
-  that split the apps into features, and new surfaces are described in the
-  FEATURE-MAP row they belong to.
+- **Not covered yet.** The change lands in territory no shipped spec
+  covers: a pending FEATURE-MAP row, or screens with rules of their own
+  that no row claims. Leave it alone and note nothing. The feature session
+  that builds that row reads the app as it is then. A change to a pending
+  feature's surface that a shipped spec points at (a cross-feature bullet)
+  is the previous case, limited to the pointer. The atlas is never
+  extended: it is the frozen Phase-0 inventory that split the apps into
+  features, and new surfaces are described in the FEATURE-MAP row they
+  belong to when that row is built.
 - **Re-budget.** A feature grew enough that its tier under-covers it, or
   shrank so its tier overspends. Change the tier in its PROGRESS row with a
   one-line dated rationale, and grow or prune scenarios and tests to match.
@@ -352,9 +356,6 @@ back up.
   red until the fix lands: no skip, no quarantine tag, no test edit. Its
   ci-triage row (one line plus a link to the register entry) is the only
   record, and the team hears about it on Mattermost.
-- **Continue the build campaign** when no sync or maintenance work is
-  pending: the RUNBOOK per-feature loop on the next pending PROGRESS row,
-  under whatever mode the PROGRESS banner sets.
 - **Fix stale artifacts as you go** (RUNBOOK "Fix stale campaign artifacts
   when you meet them").
 - **Delete what is resolved.** A fixed ci-triage row, a merged companion

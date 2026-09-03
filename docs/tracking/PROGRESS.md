@@ -25,13 +25,14 @@ is the writer's judgment.
 
 **Mode: MAINTENANCE** (since 2026-08-29). The resident QA agent runs per
 `docs/process/MAINTENANCE.md`, through claude-threads, one session a day
-(sync, CI triage, then build), one session at a time (MAINTENANCE.md
+(sync, CI triage, companions), one session at a time (MAINTENANCE.md
 "Session hygiene"). Open questions last posted to the team: never yet. Upstream baselines are in
 `docs/tracking/upstream-sync.md`. The CI-failure triage ledger is
 `docs/tracking/ci-triage.md`; check it first on any reported failure.
-Feature work launched in this mode still follows the RUNBOOK loop. Before
-2026-08-29 the mode was REVIEW: the maintainer launched and reviewed each
-step.
+The maintenance session never builds a pending row; new specs and suites
+are built in feature sessions the maintainer launches, under the RUNBOOK
+loop. Before 2026-08-29 the mode was REVIEW: the maintainer launched and
+reviewed each step.
 
 ## Features
 
