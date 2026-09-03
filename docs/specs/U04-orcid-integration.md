@@ -119,9 +119,7 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
    being added, the request is remembered and the email goes out when the
    contributor is saved.
    8a. "Delete" beside a contributor's iD (verified or not) removes it after
-   confirmation and cancels its token at ORCID. At pkp main (2026-08-29),
-   however, the delete fails outright and the iD stays
-   ⚠ [A10](#a10). <sup>e</sup>
+   confirmation and cancels its token at ORCID. <sup>e</sup>
 9. **The emailed link and the verification landing.** The emailed
    authorization link leads to ORCID's sign-in. ORCID then returns the
    browser to the journal's "ORCID Authorization" page. On success the page
@@ -287,8 +285,7 @@ part of the Footnotes tail a scenario runner needs. <sup>s</sup>
 5. **Remove a contributor's iD**: Journal Manager: edit a contributor whose
    iD is unauthenticated (seeded). The field shows the hollow-icon iD link,
    the not-verified warning, and "Delete". Press Delete and confirm: the iD
-   is gone, and the field offers "Request verification" again. ⚠ [A10](#a10)
-   at pkp main the confirm never completes and the iD stays. <sup>s</sup>
+   is gone, and the field offers "Request verification" again. <sup>s</sup>
 6. **The public ORCID pages by URL**: signed-out visitor: type the journal's
    `/orcid/about` address. The "What is ORCID?" page renders with the
    journal's chrome. Type `/orcid/verify`. The "ORCID Authorization" page
@@ -339,12 +336,12 @@ report what the *other* apps wrongly show.
 | [A5](#a5) | An Assistant's contributor-ORCID controls are refused by the server yet report success | 🐞 | user-visible | — |
 | [A8](#a8) | The verification-failure page says "journal manager" on presses and preprint servers | 🐞 | minor | — |
 | [OPS2](#ops2) | The ORCID request emails have no rows on the preprint server's Emails screen | 🐞 | user-visible | — |
-| [A10](#a10) | Deleting a contributor's unauthenticated iD fails: the confirm never completes and the iD stays | 🐞 | user-visible | — |
 | [A3](#a3) | An iD connected while registering lands on the account unverified | ❓ | minor | — |
 | [A6](#a6) | The author-email toggle's label misdescribes when it fires | ❓ | minor | — |
 | [A7](#a7) | The re-authorization email template is not editable in any app. Resolved upstream for journals and presses (pkp/pkp-lib#13050); the preprint-server gap is [OPS2](#ops2)'s | ❓ | latent | rebase check (claude) 2026-08-25 |
 | [A9](#a9) | The site tab's absence on single-journal installs rests on its switch-on condition, not observation | ❓ | minor | — |
 | [OPS1](#ops1) | The author-email toggle exists on a preprint server that can never trigger it | ❓ | latent | — |
+| [A10](#a10) | Deleting a contributor's unauthenticated iD fails: the confirm never completes and the iD stays (regression, pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (pkp-lib `ecd12271ed` + `d9e9b3fc7c`), suites green on all three apps |
 | [OMP1](#omp1) | A press requests and verifies iDs but deposits no works | ✅ | user-visible | — |
 | [OPS3](#ops3) | A preprint server additionally bundles the legacy ORCID Profile plugin | ✅ | invisible | — |
 
@@ -451,18 +448,6 @@ Lean: yes. The tab renders only when the install counts more than one
 journal.
 Basis: code. <sup>[f-a9](#fn-a9)</sup>
 
-<a id="a10"></a>
-**A10 — Deleting a contributor's iD fails outright** · 🐞 · user-visible.
-At pkp main (2026-08-29), pressing "Delete" on a contributor's
-unauthenticated ORCID iD and confirming does nothing. The confirm dialog's
-action never completes and the iD stays. The server refuses the removal with
-an internal error, because the token-revocation job cannot even be queued.
-So the removal Rule 8a promises is unreachable from the screen. The profile
-flavor of the same removal (a user deleting their own iD, Rule 6c) still
-works.
-Since: 2026-08-28 (upstream regression, reported to the team that day) ·
-Basis: probe + code (claude, 2026-08-29). <sup>[f-a10](#fn-a10)</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -508,6 +493,11 @@ The plugins screen lists the plugin as "ORCID Profile Plugin", disabled,
 with its enable box offered. Journals and presses list no ORCID plugin row.
 Basis: probe + code (bundled files + migration helper).
 <sup>[f-ops3](#fn-ops3)</sup>
+
+### Retired
+
+<a id="a10"></a>
+**A10 — Deleting a contributor's iD fails outright** · ✅ · retired. Fixed upstream (pkp-lib `ecd12271ed` + `d9e9b3fc7c`, pkp/pkp-lib#13003 follow-ups), 2026-09-03. <sup>[f-a10](#fn-a10)</sup>
 
 ---
 
@@ -867,6 +857,13 @@ omp d34542e83 / ops 28d4cb1dff, lib/pkp 13b621e42); still present at
 main 2026-08-29 — per convention the test stays red until the upstream
 fix lands (the reds are the bug, not drift). The profile disconnect
 (note d) acts on a User, which carries no LazyCollections — unaffected.
+Retired 2026-09-03: fixed upstream by pkp-lib `ecd12271ed` ("pkp/pkp-lib#13003
+Fix audit report issues") plus `d9e9b3fc7c` ("Do not attempt to serialize
+LazyCollections"). Verified fully green on OJS in pkp/ojs Actions run
+33466736951 (2026-09-01); on 2026-09-03 both commits sit in OMP's and OPS's
+`lib/pkp` (OMP `a1aefa3fe`, OPS `6bda92fb03`) and the apps' own e2e runs at
+those tips are green (pkp/omp run 33629780688, pkp/ops run 33629815586, both
+2026-09-02). Scenario 5 (suite S5) passes on all three apps again.
 
 <a id="fn-omp1"></a>
 **f-omp1** — `omp-main/classes/orcid/actions/SendSubmissionToOrcid`:

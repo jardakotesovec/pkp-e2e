@@ -118,14 +118,22 @@ function checkRegister(doc, out) {
         if (a.badge && b.badge && BADGE_ORDER[b.badge] < BADGE_ORDER[a.badge])
             out.push({ line: b.line, check: 'register', msg: `summary out of order: ${b.badge} ${b.id} after ${a.badge} ${a.id} (sort 🐞 → ❓ → ✅)` });
     }
-    // IDs dense per section: A1..An / OMP1.. / OPS1.., no gaps
+    // IDs dense per section: A1..An / OMP1.. / OPS1.., no gaps. A "### Retired" entry keeps its
+    // number but sits at the end of the register (TEMPLATE), so density is checked on the sorted
+    // numbers and document order only among the live entries.
     const groups = {};
     for (const e of entries) (groups[e.id.replace(/\d+$/, '')] ||= []).push(e);
-    for (const [prefix, list] of Object.entries(groups))
-        list.forEach((e, n) => {
-            if (Number(e.id.slice(prefix.length)) !== n + 1)
-                out.push({ line: e.line, check: 'register', msg: `${prefix} IDs must be dense and in order — expected ${prefix}${n + 1}, found ${e.id}` });
+    const num = (e, prefix) => Number(e.id.slice(prefix.length));
+    for (const [prefix, list] of Object.entries(groups)) {
+        [...list].sort((a, b) => num(a, prefix) - num(b, prefix)).forEach((e, n) => {
+            if (num(e, prefix) !== n + 1)
+                out.push({ line: e.line, check: 'register', msg: `${prefix} IDs must be dense — expected ${prefix}${n + 1}, found ${e.id}` });
         });
+        const live = list.filter((e) => !/^retired/i.test(e.group));
+        for (let i = 1; i < live.length; i++)
+            if (num(live[i], prefix) < num(live[i - 1], prefix))
+                out.push({ line: live[i].line, check: 'register', msg: `${prefix} IDs must be in order — ${live[i].id} after ${live[i - 1].id}` });
+    }
     // markers ↔ entries, both ways. A 🐞/❓ entry is ⚠-marked at its home; repeat mentions are bare
     // markers (TEMPLATE "Rules & state"), so ⚠ is required once per entry, not on every occurrence.
     const marked = new Set(), warned = new Set();

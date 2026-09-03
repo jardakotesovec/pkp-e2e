@@ -99,9 +99,7 @@ one error." and the Save button stays disabled until the field is corrected.
 5. **Add and edit.** "Add Funder" opens the "Add Funder" side panel (Fields
    & validation). "Edit" opens the same panel titled "Edit Funder",
    prefilled with the funder and its grants. Saving closes the panel and the
-   list updates in place. At pkp main (2026-08-29), however, the saved
-   funder never appears in the list at all, not even after a reload
-   ⚠ [A13](#a13). A registry-backed funder's identity is fixed. To change
+   list updates in place. A registry-backed funder's identity is fixed. To change
    which organization it is, clear the Funder field ("Delete" under the
    name) and search again. Editing only its grants is the ordinary path.
    <sup>d</sup>
@@ -290,7 +288,6 @@ user can observe; mechanism and evidence live in the entry's footnote.
 | [A3](#a3) | A registry funder picked while the server cannot reach the registry errors and saves permanently nameless | 🐞 | user-visible | — |
 | [A4](#a4) | On a press or preprint server the wizard's funders table and Review step still read empty after a successful save | 🐞 | minor | — |
 | [A5](#a5) | Ordering arrows and the typed-name boxes are broken for assistive technology | 🐞 | minor | — |
-| [A13](#a13) | A saved funder never appears in the Funders table, so it cannot be edited, deleted or reordered, though the published page shows the funding | 🐞 | user-visible | — |
 | [A1](#a1) | "Require the author to add funder metadata" warns on the Review step without blocking the submission | ❓ | user-visible | — |
 | [A2](#a2) | Every publication version shows and edits the same funders list, though the screen presents funding per version | ❓ | minor | — |
 | [A6](#a6) | The typed-text suggestion looks like a registry match, so real funders get saved unlinked without anyone noticing | ❓ | user-visible | — |
@@ -300,6 +297,7 @@ user can observe; mechanism and evidence live in the entry's footnote.
 | [A10](#a10) | Whether a registry pick stores and shows the registry name on a normally connected install has not been observed | ❓ | latent | — |
 | [A11](#a11) | The grant-number rejection message has never been seen on screen | ❓ | latent | — |
 | [A12](#a12) | The primary-language funder name is marked required, yet a save with any one language filled is accepted | ❓ | minor | — |
+| [A13](#a13) | A saved funder never appears in the Funders table, so it cannot be edited, deleted or reordered, though the published page shows the funding (regression, pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (ui-library `f88b7e6a`), suites green on all three apps |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's funders | ✅ | user-visible | — |
 
 ### All apps
@@ -348,9 +346,12 @@ workflow list shows it, and a reload brings both wizard displays current. On
 OJS the same displays update in place, so the staleness reads as a defect,
 not a design.
 Basis: probe. <sup>f-a4</sup>
-Note (claude, 2026-08-29): at pkp main the pkp/pkp-lib#13003 schema move
-supersedes this refresh-miss. [A13](#a13)'s permanent blindness now affects
-every app; the text above describes the pinned pre-#13003 builds.
+Note (claude, 2026-08-29; updated 2026-09-03): between the pkp/pkp-lib#13003
+schema move and its ui-library fix, [A13](#a13) (now retired) hid the saved
+funder on every app and masked this refresh-miss. With the fix in all three
+apps the text above is the standing description again; the OMP and OPS suites
+still save the wizard funder without asserting the table either way, so the
+refresh-miss has not been re-probed at the fixed tips.
 
 <a id="a5"></a>
 **A5 — Two funder controls are broken for assistive technology** · 🐞 · minor.
@@ -441,25 +442,6 @@ any-one-language rule is what the save enforces and what the list renders
 from.
 Basis: probe. <sup>f-a12</sup>
 
-<a id="a13"></a>
-**A13 — A saved funder never appears in the Funders table** · 🐞 · user-visible.
-At pkp main (2026-08-29) a funder added through the workflow or wizard
-Funding panel saves, and the panel closes without error, but the Funders
-table keeps reading "No funders have been added.", not after the save and
-not after a full reload. Edit, delete and reorder are unreachable, since no
-row ever renders. The published page still shows the funding correctly, so
-nothing is lost, but editors and authors cannot see or manage what they
-saved. On every app. It supersedes the refresh-miss of [A4](#a4) with
-permanent blindness.
-Since: 2026-08-29 (upstream regression, pkp/pkp-lib#13003) · Basis:
-probe + code (claude, 2026-08-29). <sup>f-a13</sup>
-*2026-08-29 (later the same day): upstream fix landed* — ui-library
-`f88b7e6a` points `funderManagerStore` at `submission.funders`. Verified
-on OJS (pointer bumped in `87e6c700c5`, UI rebuilt): the full Funding suite green.
-OMP and OPS `main` still pin the pre-fix ui-library, so the defect stands
-there until their pointers advance; retire this entry when all three apps
-are verified.
-
 ### OPS
 
 <a id="ops1"></a>
@@ -469,6 +451,11 @@ their not-yet-posted preprint. On a journal or press the author's workflow
 list is read-only. This matches the preprint model: authors prepare their
 own preprint for posting.
 Basis: probe. <sup>f-ops1</sup>
+
+### Retired
+
+<a id="a13"></a>
+**A13 — A saved funder never appears in the Funders table** · ✅ · retired. Fixed upstream (ui-library `f88b7e6a`, pkp/pkp-lib#13003 follow-up), 2026-09-03. <sup>f-a13</sup>
 
 ---
 
@@ -811,6 +798,13 @@ per-app specific tests fail identically on OJS, OMP and OPS at the
 lib/pkp 13b621e42) — the entire suite red at main is this one break;
 per convention the tests stay red until the upstream fix lands (the reds
 are the bug, not drift).
+Retired 2026-09-03: fixed upstream by ui-library `f88b7e6a` ("pkp/pkp-lib#13003
+Move funders to submission"), which points `funderManagerStore` at
+`submission.funders`. Verified green on OJS at `979819ae45` on 2026-08-29
+(full Funding suite; ui-library pointer bumped in `87e6c700c5`, UI rebuilt);
+on 2026-09-03 `f88b7e6a` sits in OMP's and OPS's `lib/ui-library` (OMP
+`a1aefa3fe`, OPS `6bda92fb03`) and the apps' own e2e runs at those tips are
+green (pkp/omp run 33629780688, pkp/ops run 33629815586, both 2026-09-02).
 
 <a id="fn-f-ops1"></a>
 **f-ops1 — OPS1 evidence.** Live-probed 2026-08-28: the OPS submitting

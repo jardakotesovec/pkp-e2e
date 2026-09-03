@@ -13,10 +13,10 @@ and nothing older.
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `979819ae45` | 2026-08-29 | claude with the maintainer (second 2026-08-29 entry) |
-| omp | `d34542e83` | 2026-08-29 | claude with the maintainer |
-| ops | `3f619a3138` | 2026-08-29 | claude with the maintainer |
-| pkp-lib | `13b621e42` | 2026-08-29 | claude with the maintainer; all three apps' pointers sit here |
+| ojs | `762415103f` | 2026-09-03 | claude (daily maintenance session) |
+| omp | `a1aefa3fe` | 2026-09-03 | claude (daily maintenance session) |
+| ops | `6bda92fb03` | 2026-09-03 | claude (daily maintenance session) |
+| pkp-lib | `6a902ad50a` | 2026-09-03 | claude (daily maintenance session); OJS's pointer sits here, OMP and OPS sit at `7ab247a737` (the three commits between are reviewed, so their next bump to `6a902ad50a` needs no re-triage) |
 
 ## Sync log
 
@@ -27,6 +27,22 @@ lives in the register entry and in git. A companion-branch merge
 (MAINTENANCE "A developer's PR fails the suite") also gets a one-line
 entry when it advances a baseline._
 
+- **2026-09-03 (sync) — ojs `979819ae45..762415103f` (22), omp `d34542e83..a1aefa3fe` (6), ops `3f619a3138..6bda92fb03` (6), pkp-lib `13b621e42..6a902ad50a` (16; omp/ops at `7ab247a737`), ui-library `f88b7e6a..7611b0b8` (ojs) / `30beb5e3..ba2d082b` (omp, ops).**
+  - CI at the tips: ojs run 33734101572, omp 33629780688, ops 33629815586 → all green; nothing red to triage.
+  - ui-library `f88b7e6a` and pkp-lib `ecd12271ed`+`d9e9b3fc7c` now in omp/ops → U43 A13 and U04 A10 retired (verified by the green omp/ops runs above); ci-triage rows U43-A13 and U04-A10 deleted.
+  - ui-library `d3e19fc4` (#971, recommendations passed to the dashboard-opened Review Details window) → U27 A25 retired, verified live on OJS (both entry paths identical); the parity scenario/test stays parked per the 2026-09-01 maintainer ruling.
+  - pkp-lib `922f895988` (author seq `!== null` + Collector tie-break) → U41 A15 retired: re-probed live on OJS and OMP (new contributor joins at the end, seq 0/1, stable over reloads, previews, landing page and TOC); OPS by the shared mechanism.
+  - pkp-lib #13232 / ojs #5769 / omp #2441 / ops #1381 / lensGalley `025f53c` (i12311 JATS usage tracking; `UsageEvent` gains `publication`, `LogUsageEvent` gates on the publication's status, JATS column only when the plugin is enabled) → no impact (usage statistics is U64, pending; every in-tree caller passes the publication; suites green on CI).
+  - pkp-lib `44ef66eb90` (#13191, assistants may fetch reviewer suggestions; the API 401 that logged assistants out of a submission with suggestions) → intended fix in U25 Rule 1 territory, OJS only until omp/ops bump their pointer; not probed (no seed key for suggestions); no spec change.
+  - pkp-lib `56d3caac55` (vocab suggestions capped at 200 entries) → no impact (U40 fn-e).
+  - pkp-lib `6a902ad50a` (#13184, bulk-email user count) → no impact (U55 pending); OJS only.
+  - pkp-lib `84e049ebd9` + profile/login/register template hooks, FBV readonly/hidden field flags → no impact (plugin hook points, no visible behavior; U01/U02/U03 territory).
+  - pkp-lib NavigationMenuDAO cache invalidation, `384693429b` + ojs `a7a3c6c8da` (#13261 export-grid link to the version), pkp-lib #13003 affiliation/serialization fixes, ojs `fed8315e6b`/`7819a42e98` (pubId export grids) → no impact (U08/U63 pending; U21/U41 suites green).
+  - ojs `e470617a65`/`094218bde4` (#12752 HTML galley sanitizer, Off by default) → no suite impact; config-key mismatch (`allowed_hosts` documented, `allowed_media_hosts` read) reported: `docs/reports/2026-09-03-galley-html-filter-config-key-mismatch.md`.
+  - ui-library `7611b0b8` (FieldControlledVocab watcher rebuilt from the value) and `e414522e` (vocabulary modal button row) → no impact (U40 suites green on CI at `762415103f`; OJS bundle rebuilt locally).
+  - crossref plugin bumps (ojs `a03c4b7`, ops `417a43a`) → no impact (U45 pending).
+  - App e2e hooks now pass the PR branch name (ojs `79b0a1ca34`, omp `efe0b7800`, ops `2eabaf670c`) → harness fact already in harness.md "CI".
+  - Baselines advanced.
 - **2026-09-03 — U15 build session, not a sync; baselines unchanged.**
   - Checkouts moved to ojs `c499837187` (lib/pkp `8d5ddf8192`), omp `a1aefa3fe` and ops `6bda92fb03` (lib/pkp `7ab247a737`); ui-library bumped in all three → rebuilt. The range is UNTRIAGED; the next sync owns it.
   - pkp-lib `eb4cef92` (#13265) present in every app's lib/pkp → U21 A11 retired, ci-triage row U21-A11 deleted; full suites green at the tips: OJS 154, OMP 156, OPS 119 (with the new U15 serial suites).
@@ -36,31 +52,3 @@ entry when it advances a baseline._
   - U49 S11 red with retries exhausted → decision-wizard flake class; content-verified save applied to the test, verified green the same day.
   - pkp-lib `9e2fbac214` (via ojs `d44b186c22`) → new regression, U21 register A11 + ci-triage row U21-A11; reported to the team.
   - pkp-lib `13b621e424..6f0a39733a` and the ojs/ui-library companions → UNREVIEWED apart from A11; the next sync owns the range.
-- **2026-08-29 (second) — ojs `0471e029b9..979819ae45` (3), ops `28d4cb1dff..3f619a3138` (1), omp none, pkp-lib none.**
-  - ui-library `f88b7e6a` (funders read from `submission.funders`) → U43 A13 fixed on OJS, verified: full suite at `979819ae45` 125✓/2✘, the ✘ being the known A10 and one U40 S4 flake; omp/ops still pin the pre-fix ui-library.
-  - ojs `b08ae56ccd` / ops `3f619a3138` (galleys serialized as a JSON array) → no impact, vouched by the green run.
-  - ojs jatsTemplate bump → no impact.
-  - First 4-worker full run, 7m13s on the 4-core VM → ruling encoded in MAINTENANCE.md.
-  - Baselines advanced.
-- **2026-08-29 — ojs `fcf2f00807..0471e029b9`, omp `244a04311..d34542e83`, ops `94f6bbc59a..28d4cb1dff`, pkp-lib `a9767b7f14..13b621e42` (50 commits, with the maintainer).**
-  - pkp-lib `4017a024f` (i13156 modify-reviews rework) → accommodated in place: U27 Rules 3/14a/14b/15, status table, side effects, S9/S10/S14 reworked, S16 added, fn-i rewritten; U26 scenario 2; OJS+OMP suites green ×2; U27 A10 retired; new U27 A21 🐞, A22 🐞, A23 ❓, A24 ❓.
-  - pkp-lib `747af277a` and the #13003 batch-loading chain → U43 A13 🐞 filed and reported (funders never render); U04 A10 🐞 filed and reported (ORCID delete 500s); otherwise no impact (U40/U41/U49 and all earlier suites pass).
-  - Misc range commits (pageTitles, base-URL, PHPUnit cleanups) and plugin submodule bumps → no impact.
-  - Suite state at the tips: OJS 121✓/6✘, OMP 123✓/6✘, OPS 90✓/6✘, every ✘ = A13 or A10. Baselines advanced; committed locally, push held by the maintainer.
-- **2026-08-27 (third pass) — no new range.**
-  - CI: `run-app.yml` gained an `e2e_ref` input and `e2e.yml` dispatch pins (`580ee4b`); failure artifacts now include `.server-logs/` (`5dde560`).
-  - Two dead-worker incidents (OMP run 33095432326, OJS run 33106002377) → ci-triage flake class, since resolved.
-- **2026-08-27 (second pass) — ojs `014c084231..fcf2f00807`, omp `d0226ccac..244a04311`, ops `5b7157a984..94f6bbc59a`, pkp-lib `774240665..a9767b7f14`.**
-  - `pkp.min.js` recompiled in all three apps (#12903) → U27 A20 retired, verified live with minification on.
-  - U27 OPS1 retired the same day (overturned by maintainer ruling: OPS ships no reviewer email templates, the window is unreachable).
-  - CI run 33081733204 green on all three apps; one U26 S7 flaky pass → decision-wizard flake class.
-- **2026-08-27 — ojs `20fc190b5956..014c084231`, omp `cdf5213ccb82..d0226ccac`, ops `12c625bd7efa..5b7157a984`, pkp-lib `00e6a1423a9e..774240665` (with the maintainer, prompted by the red hook on pkp/omp).**
-  - pkp/pkp-lib#13035 (issue #12903, unassign/cancel rework) → accommodated in place: U27 spec (template chooser, mail split, fn-k/h) and OJS/OMP S11 tests; U26 fn-f (round-cancel mail is `ReviewCancel`).
-  - Same rework → U27 A20 🐞 filed (apps did not recompile `pkp.min.js`) and OPS1 (latent); reported to the team.
-  - CI: `e2e_ng_2` pin retired, CI now tests `pkp/<app>@main` (app-changes rows 1–2); the OMP-hook red was the pinned old lib/pkp against new app code.
-  - #13117, #13128, #13141, #13218, #13235 → no impact.
-  - Drive-by: the top-nav help button's screen-reader label renders `##common.help##` (no owning spec yet; told the team).
-  - Suites at the new baselines: OMP 90/92 and OJS 84/88 (the A20 reds plus flakes), OPS 62/62.
-- **2026-08-26** — baselines seeded from the self-contained checkouts at
-  charter time; the 2026-08-25 upstream-rebase check of the shipped specs
-  covered the history up to these tips. No unreviewed range outstanding.

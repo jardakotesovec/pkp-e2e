@@ -57,8 +57,6 @@ per-test detail comes from a local reproduction at the head SHA.
 
 | ID | Signature (what CI shows) | Apps | Canonical entry | Status | First seen / last confirmed |
 |----|---------------------------|------|-----------------|--------|-----------------------------|
-| U43-A13 🐞 | Entire `U43-funding` suite red, 5 tests per app: saved funders never render in the workflow and wizard funding table | omp, ops | U43 register A13 (regression, #13003) | open on omp and ops. 2026-08-29: fixed on ojs (ui-library `f88b7e6a`, verified green at ojs `979819ae45`); omp and ops still pin the pre-fix ui-library | 2026-08-29 / 2026-09-01 (omp, ops; run 33466736951) |
-| U04-A10 🐞 | `U04-orcid` contributor ORCID-delete test 500s; the remaining serial U04 tests skip while their app project is red (fallout, not separate failures) | omp, ops | U04 register A10 (regression, RevokeOrcidToken) | open on omp and ops. 2026-09-01: fixed on ojs (pkp-lib `ecd12271ed` + `d9e9b3fc7c`, U04 fully green in run 33466736951); omp and ops still pin the pre-fix pkp-lib | 2026-08-28 / 2026-09-01 (omp, ops) |
 
 ## Flake watch — known non-deterministic failure classes
 

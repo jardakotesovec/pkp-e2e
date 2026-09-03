@@ -148,13 +148,12 @@ screen, Rule 12): <sup>e</sup>
    assistive technology the arrows are named "Increase position of
    {name}" and "Decrease position of {name}". "Save Order" saves the
    sequence everywhere the list appears. "Cancel" restores the order from
-   before. Until "Save Order" has been used once, a newly added
-   contributor ties the auto-created submitting author for first position.
-   The panel, the three Preview formats and the reader pages each resolve
-   that tie on their own, so they can disagree, and the order can vary
-   between loads ⚠ [A15](#a15). Once an order has been saved, every list
-   and author string follows it, and later additions join at the end.
-   <sup>f</sup>
+   before. A newly added contributor joins at the end of the list, after
+   the auto-created submitting author, and that order is the same in the
+   panel, the three Preview formats and the reader pages, and stable
+   across loads, whether or not "Save Order" has ever been used. Once an
+   order has been saved, every list and author string follows it, and
+   later additions still join at the end. <sup>f</sup>
 7. **Preview: the three display formats.** "Preview" opens "List of
    Contributors" ("Contributors to this publication will be identified in
    the following formats."). It is a two-column table (Format / Display)
@@ -164,9 +163,9 @@ screen, Rule 12): <sup>e</sup>
      person it uses the family name, or the given name when there is no
      family name. For an organization it uses the Organization Name. For
      an Anonymous contributor it uses the word "Anonymous". The string is
-     therefore never empty while any contributor exists. Which
-     contributor counts as "first" is unstable until an order has been
-     saved ([A15](#a15)).
+     therefore never empty while any contributor exists. "First" is the
+     first row of the list: the auto-created submitting author until an
+     order is saved, then whoever the saved order puts first.
    - **"Publication Lists"**: the Full format below, restricted to
      contributors ticked for publication lists (Rule 8).
    - **"Full"**: every contributor's name followed by their own roles in
@@ -378,9 +377,8 @@ Common to all three apps. For OMP and OPS vocabulary, see the
 2. **Reorder and preview the display formats** — Journal Manager, on a
    submission with two Person contributors with distinct family names.
    Scenario 1 leaves exactly that, since its organization was deleted.
-   Pin the order once first, with "Order" then "Save Order". Until then a
-   newly added contributor ties the first row for position, and the list
-   can come back in either order ([A15](#a15)). Press "Preview". "List
+   The list shows the submitting author first and the added contributor
+   second, on every reload (Rule 6). Press "Preview". "List
    of Contributors" shows "Abbreviated" as the first contributor's family
    name plus "et al.", and "Full" as both names, each followed by
    "(Author)" and separated by a semicolon. Close it and press "Order".
@@ -454,8 +452,7 @@ Common to all three apps. For OMP and OPS vocabulary, see the
    deleted." <sup>s5</sup>
 6. **Readers see the contributors** — Reader: on a published item with
    two contributors. One of them has a typed affiliation, a Bio Statement
-   and two roles, and is listed first, with the order pinned with "Save
-   Order" before publishing ([A15](#a15)). Open the landing page. The
+   and two roles, and is listed first. Open the landing page. The
    authors block credits both in list order: names, the affiliation name,
    and each contributor's role names. An "Author Biography" section shows
    "{name}, {affiliation}" above the statement. It is headed in the
@@ -498,7 +495,6 @@ mechanism and evidence live in the entry's footnote.
 | [A3](#a3) | The publication-lists tick is honored only by a press's catalog listings; journal and preprint-server listings ignore it | 🐞 | user-visible | — |
 | [A5](#a5) | A registry pick the server cannot cache raises an error dialog, then saves and publishes with no name | 🐞 | user-visible | — |
 | [A14](#a14) | On a one-role journal no contributor can be saved from the form; every attempt errors, yet creates a role-less contributor | 🐞 | user-visible | — |
-| [A15](#a15) | A newly added contributor can land at the top of the list, and of the reader-facing author line, varying between loads | 🐞 | user-visible | — |
 | [A7](#a7) | The contributor form's error summary prints "Go to Affiliations: [object Object]" | 🐞 | minor | — |
 | [A9](#a9) | The landing page's affiliation ROR link has no accessible name | 🐞 | minor | — |
 | [A10](#a10) | The typed affiliation's per-language name boxes are announced wrongly by a screen reader | 🐞 | minor | — |
@@ -516,6 +512,7 @@ mechanism and evidence live in the entry's footnote.
 | [OMP1](#omp1) | A book with five or more contributors compacts to bare name-and-affiliation lines | ✅ | user-visible | — |
 | [OMP2](#omp2) | An Edited Volume's book page credits volume editors instead of the contributor list | ✅ | user-visible | — |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's contributors | ✅ | user-visible | — |
+| [A15](#a15) | A newly added contributor can land at the top of the list, and of the reader-facing author line, varying between loads (pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (pkp-lib `922f895988`), verified live on OJS and OMP |
 
 ### All apps
 
@@ -689,19 +686,6 @@ the list shows the new row with no role badge, and the intended automatic
 assignment of the one role never happens.
 Basis: probe. <sup>f-a14</sup>
 
-<a id="a15"></a>
-**A15 — A new contributor can land at the top of the list, varying between loads** · 🐞 · user-visible.
-On a list whose rows were never explicitly reordered, a newly added
-contributor receives the same list position as the auto-created
-submitting author instead of joining at the end. The panel, the three
-Preview formats and the reader pages each resolve the tie on their own,
-so they can disagree. The workflow list can show one order while the
-landing page and table of contents show the other, and the order can
-change between loads. Ordering mode opens in whatever order last
-rendered. "Save Order" stamps explicit positions and ends the
-instability. After that, every ordering claim in this spec holds.
-Basis: probe + code reading. <sup>f-a15</sup>
-
 <a id="a16"></a>
 **A16 — The auto-created contributor can lack a Country, then every edit demands one** · ❓ · user-visible.
 The submitting author's auto-created contributor copies the country from
@@ -788,6 +772,11 @@ markup around "CI Policy" plus an unresolved placeholder token. The
 guidance sentence, the required behavior and saving all work as
 specified.
 Basis: probe + code reading. <sup>f-ops2</sup>
+
+### Retired
+
+<a id="a15"></a>
+**A15 — A new contributor can land at the top of the list, varying between loads** · ✅ · retired. Fixed upstream (pkp-lib `922f895988`, pkp/pkp-lib#13003), 2026-09-03. <sup>f-a15</sup>
 
 ---
 
@@ -1041,9 +1030,11 @@ but the method treats a max sequence of 0 as "no contributors" (`if
 ($seq)` — falsy zero), `Repository::newAuthorFromUser()` leaves the
 auto-created author's sequence at 0, and the authors collector orders
 by sequence with no tiebreak — so on a never-reordered list the new
-contributor ties at 0 (A15); an earlier append-at-end live-confirmation
-(2026-08-28, OJS) was a coincidental draw on that tie, the probed list
-evidently rendering the tied rows in insertion order. Delete dialog,
+contributor tied at 0 (A15, retired 2026-09-03: `getNextSeq()` now tests
+`$seq !== null` and the collector breaks sequence ties by `author_id`,
+so a new contributor takes `seq` 1 after the auto-created author's 0);
+an earlier append-at-end live-confirmation (2026-08-28, OJS) was a
+coincidental draw on the then-tied rows. Delete dialog,
 ordering mode with the verbatim arrow names,
 cancel-restore and the immediate primary-contact move
 live-confirmed 2026-08-28 (OJS); same date, the last delete emptied the
@@ -1197,9 +1188,10 @@ if desired.
 **s2 — scenario 2 seeding.** The scenario-1 submission with two PERSON
 contributors with distinct family names. "et al." from
 `submission.shortAuthor`; the format strings refresh because Preview
-re-fetches the publication. The opening Save-Order pin is load-bearing:
-without it the tied sequences make "Abbreviated" and the row order
-nondeterministic (A15).
+re-fetches the publication. The suites still open with a Save-Order pin
+(submitter first), a workaround from when A15 made "Abbreviated" and the
+row order nondeterministic; since A15's retirement (2026-09-03) it is
+belt-and-braces, not load-bearing.
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** Same submission; the submitting author's
@@ -1221,8 +1213,9 @@ in-use refusal.
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** One published scratch submission per app
 with the contributor set described; on OMP the listing is the catalog
-list, on OPS the archive. Run "Order" → "Save Order" once before
-publishing so the reader-order assertions are deterministic (A15). The
+list, on OPS the archive. The suites still run "Order" → "Save Order"
+once before publishing, an A15-era workaround that is no longer needed
+since its retirement (2026-09-03). The
 ≥5-contributor OMP leg needs a second
 scratch monograph with five contributors.
 
@@ -1401,6 +1394,23 @@ listed "Alex, Beta" while the landing page and issue table of contents
 printed "Beta; Alex", and ordering mode opened in the reader pages'
 order. "Save Order" stamped 0..n and every surface agreed from then on.
 Shared `lib/pkp` DAO with no app override — OPS runs the same code.
+Retired 2026-09-03: fixed upstream by pkp-lib `922f895988` ("pkp/pkp-lib#13003
+Fix author insertion order glitch"): `classes/author/DAO.php`
+`getNextSeq()` now tests `if ($seq !== null)`, so a new author after the
+seq-0 auto-created author gets seq 1 instead of tying at 0, and
+`classes/author/Collector.php` ORDERBY_SEQUENCE breaks ties by
+`author_id`. The commit sits in all three apps' `lib/pkp` as of
+2026-09-03 (OJS `762415103f`, OMP `a1aefa3fe`, OPS `6bda92fb03`).
+Verified live 2026-09-03 on OJS and OMP (env 0, fresh reset,
+`editor.diana` on `publicknowledge`, one unpublished and one published
+submission per app): after adding a contributor through the panel's
+"Add Contributor" form, the panel showed the auto-created author first
+and the new contributor second immediately after the save and on three
+reloads; all three Preview formats, ordering mode, the landing/book page
+(two loads) and the issue table of contents / catalog line agreed; the
+panel's own API responses carried `seq=0` for the auto-created author
+and `seq=1` for the new one on every publication. Not re-probed on OPS
+(shared pkp-lib mechanism) nor with three or more contributors.
 
 <a id="fn-f-a16"></a>
 **f-a16 — A16 evidence.** `Repository::newAuthorFromUser()` copies the

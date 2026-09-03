@@ -315,10 +315,10 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     submissions dashboard list's
     [→ review activity indicators](U23-submissions-dashboard.md#review-indicators):
     their popover's "View details" button (review not yet submitted) or
-    "View unread recommendation" button (review submitted) leads here. {OJS}
-    Opened from that popover, a submitted review's window currently omits
-    the reviewer's recommendation; everything else renders as described
-    below ⚠ [A25](#a25). The window shows the reviewer's name. It shows a
+    "View unread recommendation" button (review submitted) leads here, and
+    both entry paths show the same window, {OJS} recommendation included
+    ([A25](#a25), retired: the popover path once dropped it). The window
+    shows the reviewer's name. It shows a
     guidance paragraph that still tells the editor they "may upload the file
     below", though the window offers no upload control ⚠ [A22](#a22). It
     shows the "Download Review Form" menu (Rule 15), and a summary block
@@ -693,6 +693,8 @@ pass (claude, 2026-08-02, both apps live) re-drove every entry and the spec's
 claims. Where it overturned an entry, the entry is retired in place: the
 badge becomes ✅, the wording states the resolution, so IDs stay dense, and
 the ruling sits in the entry's Reviewed line and the summary's Review column.
+A finding fixed upstream after that pass moves to the `### Retired` block at
+the register's end as one line (TEMPLATE), its footnote keeping the record.
 Sorted 🐞 → ❓ → ✅ in the summary (🐞 defect, author's call · ❓ needs a
 product ruling · ✅ intended divergence, or a retired finding); the entries
 below are the source. Each entry opens with the user-observable symptom;
@@ -714,7 +716,6 @@ latent = only in an unusual situation or configuration.
 | [A19](#a19) | The template chooser renders on every add, as a one-option select even with zero alternate templates | 🐞 | minor | — |
 | [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | @beaug 2026-08-29 · risk accepted |
 | [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | @beaug 2026-08-29 · ticket to follow |
-| [A25](#a25) | {OJS} Opened from the dashboard popover, a submitted review's Review Details window omits the recommendation | 🐞 | user-visible | — |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split; only searching filters by stage | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
@@ -722,6 +723,7 @@ latent = only in an unusual situation or configuration.
 | [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
 | [A24](#a24) | Saving a modification would mark a not-yet-complete review complete; no current screen reaches it | ❓ | latent | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
+| [A25](#a25) | Retired: {OJS} opened from the dashboard popover, a submitted review's Review Details window omitted the recommendation; fixed upstream (pkp/ui-library#971) | ✅ | retired | re-verified live (claude), 2026-09-03 — fixed upstream |
 | [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
 | [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor; fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
 | [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates; no review process, and the window is unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
@@ -1057,22 +1059,6 @@ in-progress review.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: code reading.
 <sup>[f-a24](#fn-a24)</sup>
 
-<a id="a25"></a>
-**A25 — The dashboard popover's window drops the recommendation** · 🐞 ·
-user-visible.
-{OJS} Opening a submitted review's Review Details window through the
-dashboard popover's "View unread recommendation" button loses exactly the
-recommendation the button promises. The "Recommendation: {label}" line is
-absent and the "Reviewer Recommendation" group's value reads "-", while
-everything else in the window matches the workflow path. So an editor
-reading the review from the dashboard never sees the recommendation in the
-window, though the popover states it one click earlier. For a
-not-yet-submitted review the two paths render identically. A press is
-unaffected by construction, because its reviews carry no recommendation
-anywhere ([OMP1](#omp1)).
-Since: 2026-08-31 (reported by the PKP team; reproduced live the same day)
-· Basis: probe. <sup>[f-a25](#fn-a25)</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -1139,6 +1125,11 @@ Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
 > unassign notice cannot be relevant there — the never-reachable window is
 > the deliberate absence's shadow, not a defect. Registry counts in the
 > footnote.
+
+### Retired
+
+<a id="a25"></a>
+**A25 — The dashboard popover's window drops the recommendation** · ✅ · retired. Fixed upstream (pkp/ui-library#971, `d3e19fc4`), in all three apps' lib/ui-library and re-verified live on OJS, 2026-09-03. <sup>[f-a25](#fn-a25)</sup>
 
 ---
 
@@ -1995,7 +1986,27 @@ Details") rendered identically on both paths, item for item. The window's
 own API traffic is the same on both paths — the same
 `reviewAssignments/{id}` and `reviewAssignments/{id}/review` GETs, all
 200 — so the omission is in the window's rendering, not a failed or
-missing request.
+missing request. Retired 2026-09-03: fixed by lib/ui-library `d3e19fc4`
+("Set recommendation options when opened from submissions listing",
+pkp/ui-library#971, merged 2026-09-01) — `dashboardPageStore.js` now passes
+`recommendations` into the workflow modal props, and `ReviewDetailsModal.vue`
+/ `ReviewDetailsEditModal.vue` declare the prop required; the commit sits in
+all three apps' `lib/ui-library` as of 2026-09-03 (OJS `762415103f`, OMP
+`a1aefa3fe`, OPS `6bda92fb03`). Verified live 2026-09-03 on OJS
+`762415103f` (env 0, fresh reset): a submitted review with recommendation
+"Accept Submission", opened through the dashboard's Editorial Activity
+popover button "View unread recommendation", showed "Recommendation: Accept
+Submission" on the info line and "Accept Submission" as the "Reviewer
+Recommendation" group's value; the window's full text was
+character-for-character identical to the one opened from the workflow's
+Reviewers panel ("Read Review") — reviewer name line, "Review Submitted:"
+date, both Reviewer Comments blocks, the empty Reviewer Files grid, the
+rating row and the footer buttons. Incidental: opening the window from the
+popover marks the review viewed (the Reviewers row then reads "Review
+Viewed"), which is the existing behavior of Rule 14a, not a discrepancy. A
+parity scenario and tests for the two entry paths remain PARKED by
+maintainer ruling (2026-09-01) pending a separate discussion; none were
+added here.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
