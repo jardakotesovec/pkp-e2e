@@ -27,7 +27,8 @@ Deliverables:
 1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES.
 2. Page objects: {{page_objects}}.
 3. Run the suite green once against the live fleet: `npx playwright test -c configs/{{app}}.config.js {{suite_path}} --output {{output_dir}} --reporter=list` (harness.md says how the config starts its worker servers). Save the green run's log as `{{green_log}}`.
-4. A test that contradicts the spec is returned as step 9 says: a digest-format block (`### T-{{app}}-<n>` / Affects / Status / Apps / Proposed / Evidence: run-log pointer) in `{{findings_path}}`. Mark that test `test.fixme` with the block ID unless the spec's footnote or register already records what the app does. An app defect that blocks green is returned as a proposed `app-changes.md` row.
+4. A test that contradicts the spec is returned as step 9 says: a digest-format block (`### T-{{app}}-<n>` / Affects / Status / Apps / Proposed / Evidence: run-log pointer) in `{{findings_path}}`. An app defect that blocks green is returned as a proposed `app-changes.md` row.
+5. A scenario whose setting has no passthrough key on `POST scenarios/context` is returned as a harness need (scenarios.md "Configuring a scratch context"), never driven through a settings screen in the test.
 
 Read `.reports/{{feature}}/screen-notes.md` first and append what you learn by hand (a test never imports the kit). Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
@@ -35,4 +36,4 @@ Any throwaway check you drive by hand uses the probe kit with `PROBE_FEATURE={{f
 
 Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec, PRINCIPLES or the harness docs. Never edit anything under `checkouts/`. Commit nothing. Kill only browser or PHP processes you started yourself.
 
-Return (short): the suite path and test count; the page-object path(s) and public method names; the green-run log path and its summary line; the findings file (block count, or none); anything that blocked you; the security routing count.
+Return (short): the suite path and test count; the page-object path(s) and public method names; the green-run log path and its summary line; the findings file (block count, or none); harness needs (missing passthrough key families, or none); anything that blocked you; the security routing count.

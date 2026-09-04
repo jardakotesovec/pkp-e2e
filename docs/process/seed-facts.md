@@ -9,9 +9,9 @@ seed fixtures, and `npm run seed-facts -- --check` in the lint step fails
 when it drifts (`npm run seed-facts -- --write` regenerates it). The
 hand-written lines each carry the screen that shows the fact and the date
 it was seen; the sync loop re-checks a line whose screen or seeder the
-upstream range touches. When the "Enrich the bootstrap seed" work in
-PROGRESS lands, the generated part regenerates and every install-default
-line below is re-probed.
+upstream range touches. A bootstrap change, should one ever be needed, regenerates the generated
+part and re-probes every install-default line below (PRINCIPLES "Bootstrap
+data policy").
 
 ## Generated from the seed
 
@@ -241,7 +241,7 @@ so; it is not a guess.
 ## Where to change it
 
 - `publicknowledge` and the seeded users are read-only for every test and
-  probe (PRINCIPLES principle 1). Never change a setting, section, issue or
+  probe (PRINCIPLES A1). Never change a setting, section, issue or
   role there; a suite that needs a different configuration would leave it
   behind for every other suite.
 - A different context-level configuration is a scratch context from

@@ -586,9 +586,13 @@ paragraph, verbatim, before the task.
      seeds its own scratch context, signs in from the roster, and records
      every screen with `screen()`, so a maintenance session can run the
      chunk again on a later build instead of re-authoring the drive.
-     Outputs still go to `.reports/<feature>/<agent>/` through
+          Outputs still go to `.reports/<feature>/<agent>/` through
      `PROBE_FEATURE` and `PROBE_AGENT`. The scripts are committed with the
      spec and run on demand, never in CI.
+   - **Settings coverage.** The chunk that owns "Settings that modify
+     behavior" reports every entry with neither a scenario at the end real
+     journals run nor a why-not line (TEMPLATE's coverage rule), so the
+     gap is a stated decision before the tests are written.
    - **Merge and fold.** With three or more chunks a merge agent returns one
      change list in the digest format (`claimcheck-merge.md`). With two or
      fewer, the fold agent reads the chunks directly and still writes
@@ -711,7 +715,8 @@ PROGRESS note names the last gate reached.
   smaller than what a fresh agent would read. One or two agents at a time.
 - **The orchestrator never probes, verifies or edits a spec inline.** Doing
   the work inline is how the controlling agent gets lost, and spec edits
-  belong to the writing agents. If context runs low mid-feature: finish the
+  belong to the writing agents. The one exception is the frontmatter
+  `status:` flip at step 10. If context runs low mid-feature: finish the
   current gate, commit what is commit-worthy, and end. A fresh session
   resumes.
 - **No status prose, no side plans.** Between gates the files under
@@ -735,9 +740,10 @@ PROGRESS note names the last gate reached.
 | Reader persona | the spec body only; the product-owner read, the Findings register only |
 | Writing agents (author, finalizer, rewrite, fold) | TEMPLATE (including "Write for a reader who has only this page"), the digest or change list, the spec; the author also reads the feature's rows in `incidentals.md` and the templates and locale files for labels |
 
-An agent that reads the spec without folding it (persona, digest, checker,
-test author) reads the body and only the footnotes its lines cite, never
-the whole file; footnotes are half the file by size.
+An agent that reads the spec without folding it (digest, checker, test
+author) reads the body and only the footnotes its lines cite, never the
+whole file; footnotes are half the file by size. The persona reads no
+footnotes at all.
 
 ### Rejected consolidations
 

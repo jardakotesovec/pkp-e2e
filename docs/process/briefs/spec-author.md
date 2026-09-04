@@ -24,6 +24,8 @@ Deliverables:
 2. Lint to zero: `node docs/process/lint/lint-spec.mjs {{spec_path}}` (TEMPLATE "The lint gate"). Run it once with `--claims` too; the checklist marks the risky kinds of claim and helps build the probe list.
 3. The probe list at `{{probe_list_path}}`, every item phrased as step 2 says. Number the items P1, P2, …; give each a one-line title, the apps, the accounts, the screen, the actions, the observations wanted, and the draft location it settles. Group items by screen cluster with an estimated call count per cluster, so one cluster fits one probe agent (step 7's ~40 calls). The list's header states the premises every item relies on and what is deliberately not probed.
 
+After you return, a reader persona reads the draft's body (RUNBOOK step 2 "Draft read") and you get its report path in a follow-up message: fix its wording stumbles in the draft, add each fact stumble to the probe list as an item, run the lint again, and return once more with the counts.
+
 You never probe or drive a browser. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing.
 
 Return (short, pointers not findings): the probe-list path and item count per cluster; the lint result; the sections written or changed (names only); anything that blocked you; whether a security-shaped item exists (count only, content never).

@@ -17,7 +17,7 @@ Preserve the verified meaning — reword the phrasing, never the claim — excep
 Inputs:
 - The spec: `{{spec_path}}`.
 - The change list: {{change_list}}. You may open the report behind a block when you need the detail: {{evidence_dirs}}.
-- Claim-check date for the evidence footnotes: {{check_date}}. With two or fewer chunks, write `.reports/{{feature}}/claimcheck-merge.md` yourself first, in the digest format with the sections step 7 names, before editing.
+- Claim-check date for the evidence footnotes: {{check_date}}. With two or fewer chunks, write `.reports/{{feature}}/claimcheck-merge.md` yourself first, in the digest format with the sections step 7 names, and the fold log's "Suite-asserted claims touched" section with it, before editing; the rest of the log is appended at the end.
 
 Task, saving the spec after each section:
 1. Fold every `corrects` and `new` block into the rule, row, scenario, footnote or register entry it names, at the weight its user impact earns, by pasting the block's Proposed line in the reader's words. A correction replaces a sentence; it does not append a clause to it.
