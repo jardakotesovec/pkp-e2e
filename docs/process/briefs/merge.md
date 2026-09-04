@@ -22,6 +22,6 @@ Add three sections: "Suite-asserted claims touched", listing every changed claim
 
 Size: at most 150 lines. Nothing is quoted from the reports beyond on-screen strings that belong in the spec.
 
-Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. Never edit anything under `checkouts/`.
+Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. Never edit anything under `checkouts/`. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short): the merge path and line count; block counts by status; the number of duplicates merged; the count of suite-asserted claims touched; the security routing count carried through.

@@ -23,6 +23,6 @@ Budget: about 40 browser calls (RUNBOOK step 7). When you reach it, write the re
 
 Report: `.reports/{{feature}}/{{agent}}/report.md`, written for the digest agent and the maintainer as step 3 says: one section per item in the list's order, the claim answered first, the incidental observations separately, the locator used, every on-screen string that differs between apps quoted verbatim per app, and the snapshot file names. Facts only, no spec prose, no severity judgments.
 
-Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit anything under `checkouts/`. Commit nothing.
+Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit anything under `checkouts/`. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short, pointers not findings): the report path; the items covered and the items left; whether anything blocked you; the security routing count.

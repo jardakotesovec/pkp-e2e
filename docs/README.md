@@ -39,6 +39,9 @@ to their OMP and OPS names.
 - `docs/tracking/incidentals.md`: things a session saw in passing on
   another feature's screens, one line each, kept until that feature's spec
   absorbs them.
+- `docs/tracking/friction.md`: what made an agent's task harder than it
+  needed to be, one line each, appended by the agents themselves; read on
+  review, rows deleted once acted on.
 - `docs/tracking/backfill.md`: shipped specs waiting to be brought up to a
   rule adopted after they shipped, in priority order; the maintenance
   session takes the top slice on a quiet day.

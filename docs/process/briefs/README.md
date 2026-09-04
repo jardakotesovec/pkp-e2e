@@ -25,8 +25,9 @@ from scratch, and it never writes rules into one.
 4. Keep the verbatim blocks as they are: the Frame paragraph (copied from
    RUNBOOK "The screen is the instrument"; when its wording changes there,
    update the four templates that carry it), the PROGRESS and app-changes
-   sentence, "Commit nothing.", the `checkouts/` sentence, and "Preserve the verified
-   meaning" in the rewrite and fold templates.
+   sentence, "Commit nothing.", the friction sentence (`docs/tracking/friction.md`), the
+   `checkouts/` sentence, and "Preserve the verified meaning" in the rewrite
+   and fold templates.
 5. The "Return (short)" block is what the agent sends back: pointers and
    counts, never findings. Do not widen it.
 

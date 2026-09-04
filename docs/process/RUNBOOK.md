@@ -240,6 +240,12 @@ short and outcome-shaped. That is context budgeting, not a wording rule.
   spec author reads their feature's rows at step 2. A row is deleted when
   the owning spec absorbs it, or when a later probe of that screen finds
   it gone.
+- **Process friction** (what cost an agent calls, time or retries and what
+  would have helped) goes to `docs/tracking/friction.md`, one line per
+  entry, appended by the agent itself at the end of its task. Nobody reads
+  it mid-feature; the maintenance session or the maintainer reads it on
+  review and folds the real patterns into the process docs. It never holds
+  a finding about the product.
 - **Reports for the team** (`docs/reports/`) are temporary. A report exists
   to hand the team something they need in one piece, usually an
   upstream-ready write-up of a regression. Once the problem it reports is

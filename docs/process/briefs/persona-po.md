@@ -13,6 +13,6 @@ You are deciding what to send to the developers. For each entry, from the entry 
 
 Write your report to `{{report_path}}`: the fails first (entry ID, quoted phrase, what you needed), then one line per passing entry with your one-sentence reading.
 
-Do not edit the document. Do not write anywhere else. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing.
+Do not edit the document. Do not write anywhere else. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short): the report path; the number of entries read; the IDs that fail.

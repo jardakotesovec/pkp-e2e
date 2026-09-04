@@ -75,6 +75,14 @@ when the class's watch condition trips.
   2026-09-01 (watch condition tripped, hardening applied and verified green
   2026-09-01); U21 S13 flaky-passed 2026-09-01; U21 S11 red on OMP with its retry exhausted 2026-09-03 (run 33745718330), green on the targeted rerun. **Watch condition**: a
   hardened test reds again with retries exhausted.
+- **Reviewer-indicator popover under load** (U23 S9, OJS). The row with
+  two reviewers opens the wrong reviewer's popover (Paul instead of Julia)
+  during a full-suite run and passes in isolation; the hover target is
+  settled before both indicators have rendered. Seen once, 2026-09-04
+  (U05 final run, `.reports/U05/final-run-ojs.log`), green alone and on
+  the OJS re-run the same day. **Watch condition**: a second full-suite
+  incident; then anchor the hover on the indicator's own accessible name
+  and wait for both indicators before hovering.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

@@ -73,3 +73,34 @@ resumed five times) and a red first final run caused by a stale front-end
 bundle after the upstream sync (the fetch script now rebuilds it). The
 session was paused three times at the maintainer's request and resumed in
 place; each resume re-created the orchestrator's whole context.
+
+## U05
+
+| role | agents | calls | pure text | input | cache creation | cache read | output | weighted | share |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| orchestrator | — | 188 | 51 | 4,490 | 875,491 | 41,334,672 | 138,861 | 5,926,626 | 24.4% |
+| claim check | 4 | 217 | 9 | 6,384 | 2,256,353 | 33,458,192 | 8,562 | 6,215,454 | 25.6% |
+| probe | 6 | 200 | 6 | 6,070 | 1,247,664 | 24,493,346 | 21,768 | 4,123,825 | 17.0% |
+| rewrite | 7 | 120 | 9 | 3,574 | 828,052 | 10,273,260 | 4,302 | 2,087,475 | 8.6% |
+| spec author | 1 | 36 | 2 | 1,094 | 637,075 | 6,537,762 | 2,116 | 1,461,794 | 6.0% |
+| other: U05 OJS test suite | 1 | 38 | 1 | 1,186 | 317,266 | 7,954,599 | 965 | 1,198,053 | 4.9% |
+| readability/persona | 9 | 54 | 9 | 1,458 | 491,939 | 1,864,151 | 23,276 | 919,177 | 3.8% |
+| finalize/fold | 2 | 38 | 2 | 1,156 | 323,243 | 4,325,335 | 2,224 | 848,863 | 3.5% |
+| other: U05 OMP test suite | 1 | 32 | 1 | 994 | 182,382 | 3,709,686 | 2,188 | 610,880 | 2.5% |
+| other: U05 OPS test suite | 1 | 28 | 1 | 866 | 194,874 | 3,341,307 | 2,352 | 590,349 | 2.4% |
+| merge | 1 | 12 | 1 | 354 | 89,791 | 813,591 | 367 | 195,787 | 0.8% |
+| other: U05 product-owner re-read (4 entries) | 1 | 3 | 1 | 66 | 17,625 | 78,025 | 190 | 30,850 | 0.1% |
+| other: U05 product-owner register read | 1 | 3 | 1 | 66 | 15,502 | 82,106 | 300 | 29,154 | 0.1% |
+| other: U05 product-owner read of A11 | 1 | 3 | 1 | 66 | 16,141 | 78,733 | 6 | 28,146 | 0.1% |
+| **total** | 36 | 972 | 95 | 27,824 | 7,493,398 | 138,344,765 | 207,477 | 24,266,433 | 100% |
+
+U05 · 36 agents · 784 subagent calls · 188 orchestrator calls · weighted 24,266,433
+
+Against U03: +16% weighted for a spec of    16785 words, 9 rules, 9 scenarios and
+14 register entries, and 9/8/8 tests. The orchestrator share (24%) stays
+above a fifth for the second feature running, which trips the "per-phase
+runners" condition in PROGRESS "Open harness work". Eight persona passes
+and seven rewrites (12% together) circled one roster row whose event
+cannot fire on a test install until it became register entry A11; a
+blocker that is a declared fact should end the loop sooner. Four claim-check
+chunks at 26% is the largest role, as in U03.

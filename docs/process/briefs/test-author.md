@@ -34,6 +34,6 @@ Read `.reports/{{feature}}/screen-notes.md` first and append what you learn by h
 
 Any throwaway check you drive by hand uses the probe kit with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}}`, within about 40 browser calls (RUNBOOK step 7); tests never import the kit.
 
-Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec, PRINCIPLES or the harness docs. Never edit anything under `checkouts/`. Commit nothing. Kill only browser or PHP processes you started yourself.
+Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec, PRINCIPLES or the harness docs. Never edit anything under `checkouts/`. Commit nothing. Kill only browser or PHP processes you started yourself. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short): the suite path and test count; the page-object path(s) and public method names; the green-run log path and its summary line; the findings file (block count, or none); harness needs (missing passthrough key families, or none); anything that blocked you; the security routing count.

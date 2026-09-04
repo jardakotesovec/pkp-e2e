@@ -26,6 +26,6 @@ Deliverables:
 
 After you return, a reader persona reads the draft's body (RUNBOOK step 2 "Draft read") and you get its report path in a follow-up message: fix its wording stumbles in the draft, add each fact stumble to the probe list as an item, run the lint again, and return once more with the counts.
 
-You never probe or drive a browser. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing.
+You never probe or drive a browser. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short, pointers not findings): the probe-list path and item count per cluster; the lint result; the sections written or changed (names only); anything that blocked you; whether a security-shaped item exists (count only, content never).

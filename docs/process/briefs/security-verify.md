@@ -23,6 +23,6 @@ Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`no
 
 Budget: about 15 browser calls, within step 7's ~40.
 
-Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit anything under `checkouts/`. Commit nothing.
+Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit anything under `checkouts/`. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short, counts and status words only, never the content): "verified" or "dismissed" for the entry and its SEC id; the number of Open entries left in the file; whether anything blocked you.

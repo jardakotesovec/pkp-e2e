@@ -28,6 +28,6 @@ Budget: about 40 browser calls (step 7). When you reach it, write the report on 
 
 Report: `{{report_path}}`, in spec-section order (the fold needs that). Header: chunk, apps driven, the declared no-screen lines by spec line number, budget used. Then one entry per checklist line or tight group: spec line number(s), verdict (holds / wrong / imprecise / undetermined), the screen evidence (snapshot file name, locator), and for anything not "holds" a block in the digest format of step 3b (`### {{chunk}}-<n> — one line, product voice` / Affects / Status: corrects | new | undetermined / Apps / Proposed / Evidence pointer). Facts only, no spec prose beyond the proposed line.
 
-Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec. Never edit anything under `checkouts/`. Commit nothing.
+Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec. Never edit anything under `checkouts/`. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
 Return (short, pointers not findings): the report path; lines driven / declared / left (counts); verdict counts (holds / wrong / imprecise / undetermined); whether anything blocked you; the security routing count.

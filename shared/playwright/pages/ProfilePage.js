@@ -58,7 +58,10 @@
  *   `open()` answers it OK;
  * - the Notifications tab pairs `#{settingName}` (allow) with
  *   `#email{SettingName}` (email) and disables the second while the first is
- *   unticked; groups are `h4` elements inside the form.
+ *   unticked; groups are `h4` elements inside the form, each row a
+ *   `.section` whose sentence is the `label` at the top of its
+ *   `ul.checkbox_and_radiobutton` (`notificationTable()` reads both in DOM
+ *   order).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
@@ -537,9 +540,46 @@ exports.ProfilePage = class ProfilePage extends BasePage {
     // Notifications (Rule 11)
     // ---------------------------------------------------------------------
 
+    /** The tab's opening sentence (`notification.settingsDescription`). */
+    notificationsIntro() {
+        return this.form('notifications').locator('p').first();
+    }
+
     /** The tab's group headings, in order. */
     notificationGroups() {
         return this.form('notifications').locator('h4');
+    }
+
+    /**
+     * One event row: the `.section` holding the row's sentence (a `label`
+     * at the top of its `ul.checkbox_and_radiobutton`) and its two boxes.
+     */
+    notificationRow(sentence) {
+        return this.form('notifications')
+            .locator('.section')
+            .filter({has: this.page.locator('ul.checkbox_and_radiobutton > label', {hasText: sentence})});
+    }
+
+    /**
+     * The tab as data: `[{group, rows: [sentence, …]}, …]` in screen order
+     * (the `h4` headings and the `.section` rows are siblings inside
+     * `#notificationSettings`, so the grouping is read from the DOM order).
+     */
+    async notificationTable() {
+        return this.form('notifications').evaluate((form) => {
+            const groups = [];
+            for (const node of form.querySelectorAll('#notificationSettings > h4, #notificationSettings > .section')) {
+                if (node.tagName === 'H4') {
+                    groups.push({group: node.textContent.trim(), rows: []});
+                    continue;
+                }
+                const label = node.querySelector('ul.checkbox_and_radiobutton > label');
+                if (label && groups.length) {
+                    groups[groups.length - 1].rows.push(label.textContent.trim());
+                }
+            }
+            return groups;
+        });
     }
 
     /** All "Enable these types of notifications." boxes. */

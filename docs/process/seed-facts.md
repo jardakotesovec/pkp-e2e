@@ -237,6 +237,54 @@ so; it is not a guess.
   loads (404); a suite asserts the "Delete" control and the stored file,
   never the rendered picture. Profile › Public. Live-probed 2026-09-03/04,
   all three apps (`.reports/U03/pF` P27; `.reports/U03/cc-K5.md`).
+- `POST scenarios/submission` with `submitted: true` raises the "needs an
+  editor" task for every Manager of the context (the auto-enrolled `admin`
+  included) but sends no email (the scenario request runs under
+  `Mail::fake()`); the submission wizard raises both, with the email sent
+  inside the submit request itself. A probe or test that needs the email
+  drives the wizard. Tasks window; Mailpit. Live-probed 2026-09-04, all
+  three apps (`.reports/U05/pT` P2, `pN` P32).
+- A second `POST scenarios/context` naming an existing username enrols that
+  user in the new context; `roles: []` is refused (400), and a
+  context-level registration always adds Reader, so the only way to an
+  account with no role anywhere is the site-level Register page with no
+  journal ticked. A registration on the worker or probe ports signs the
+  visitor in at once ("Registration complete") and sends no email; its
+  "Yes, I would like to be notified…" box is unticked on arrival. Register
+  page. Live-probed 2026-09-04, all three apps (`.reports/U05/pR` P11,
+  P28, P34).
+- Emails sent by a queued job (`jobs.php run`) carry links on the config
+  `base_url` (the worker port); emails sent inside a request carry the
+  request's host. A probe on a probe server rewrites the host before
+  opening a footer link from a job-sent email. Mailpit. Live-probed
+  2026-09-04, all three apps (`.reports/U05/pA` P24, P26).
+- Announcements are off on a scratch context and on the site ("Enable
+  announcements" unticked); the announcement form's "Send an email about
+  this to all registered users." box is unticked by default, and the OJS
+  "Publish Issue" dialog's box is ticked by default. Settings › Website ›
+  Setup › Announcements; Announcements › Add; Issues › Future Issues ›
+  Publish Issue. Live-probed 2026-09-04, all three apps (`.reports/U05/pA`
+  P24–P26).
+- `participants: [{role: 'manager'}]` on a submitted `POST
+  scenarios/submission` surfaced in the Participants panel and the
+  discussion form on OPS only, not on OJS or OMP (seen once, cause not
+  investigated); the Participants "Assign" form offers no Manager group on
+  OJS or OMP. Workflow › Participants. Seen 2026-09-04 (`.reports/U05/pU`
+  P36).
+- A wizard submission started from a scratch context's start page needs a
+  title, the checklist and privacy boxes, one file with a genre, and (on OJS
+  and OPS, not OMP) an abstract before its final "Submit"; the wizard asks
+  for "Submit" twice, the second time in a confirm dialog. Submission
+  wizard. Live-driven 2026-09-04, all three apps (`.reports/U05/cc-K1.md`).
+- `POST scenarios/submission` with `participants: [{role: 'sectionEditor'}]`
+  is what makes the workflow's discussion form offer the Section Editor as
+  a participant. Workflow › Discussions › Add. Live-driven 2026-09-04
+  (`.reports/U05/cc-K1.md`).
+- The Login and Register pages' password boxes carry `maxlength=32`, so a
+  scratch tag longer than 14 characters yields a password the Register
+  page cuts (the probe kit strips it on Login only); keep scratch tags
+  short. Login; Register. Live-driven 2026-09-04, all three apps
+  (`.reports/U05/cc-K3.md` K3-3, `cc-K4.md`).
 
 ## Where to change it
 
