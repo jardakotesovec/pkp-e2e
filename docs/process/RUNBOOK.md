@@ -580,6 +580,15 @@ paragraph, verbatim, before the task.
      fresh checker takes the remainder. The brief names the chunk's probe
      cluster, its scripts and the screen notes; the checker starts from
      them and still drives every line.
+   - **Checks are kept.** A checker's scripts live in
+     `shared/playwright/checks/<feature>/<chunk>/` from the start (kit
+     import `require('../../../probe')`): one entry script per chunk that
+     seeds its own scratch context, signs in from the roster, and records
+     every screen with `screen()`, so a maintenance session can run the
+     chunk again on a later build instead of re-authoring the drive.
+     Outputs still go to `.reports/<feature>/<agent>/` through
+     `PROBE_FEATURE` and `PROBE_AGENT`. The scripts are committed with the
+     spec and run on demand, never in CI.
    - **Merge and fold.** With three or more chunks a merge agent returns one
      change list in the digest format (`claimcheck-merge.md`). With two or
      fewer, the fold agent reads the chunks directly and still writes
@@ -618,8 +627,10 @@ paragraph, verbatim, before the task.
    runs `npm run test:final -- --feature U<nn>` (the three suites in turn,
    logs under `.reports/<feature>/`). That is the second green. A fix after
    a failed final run re-runs it.
-10. **Update PROGRESS.** Status, number of tests per app, and a short note of
-    one to three lines. Register highlights are welcome: 🐞 and ❓ counts, the
+10. **Update PROGRESS.** First set the spec's frontmatter to
+    `status: verified` (TEMPLATE's definition: the whole loop passed); the
+    orchestrator does this, no writing agent. Then the row: status, number
+    of tests per app, and a short note of one to three lines. Register highlights are welcome: 🐞 and ❓ counts, the
     finding a reviewer should read first, anything low-confidence. Finding
     detail stays in the register.
 11. **Commit.** Everything the campaign produces (specs, docs, shared and
@@ -665,7 +676,12 @@ PROGRESS note names the last gate reached.
   completion. Record the point reached in the feature's PROGRESS note, log
   the event in the Model-fallback log, and stop for maintainer review. An
   ordinary technical stall (context overflow, tool error, environment
-  breakage) is not a flag; the narrower-slice retry applies.
+  breakage) is not a flag; the narrower-slice retry applies. During an API
+  incident (launches failing one after another) the orchestrator stops
+  after two failed launches, records the gate reached in `phase-status.md`,
+  and ends the turn: polling and back-off sleeps cost the orchestrator's
+  whole context per call. The maintainer restarts when the incident is
+  over.
 - **Model check at session start.** `/model` must be Fable. A handoff session
   starts on the saved default, not the predecessor's model.
 - **Model-fallback log** in PROGRESS holds anomalies only: refusals, flags,
@@ -678,11 +694,13 @@ PROGRESS note names the last gate reached.
   agent returns where its report is, how many items it covered, and whether
   anything blocked it. The digest agent reads reports; the orchestrator never
   carries their contents.
-- **Briefs are the Frame paragraph plus pointers**: the feature, the spec
-  path, the report path, `fleet.json` for the ports, `screen-notes.md`,
-  the row of "What each role reads", and "follow RUNBOOK step N". Point at
-  the rule files; never paraphrase them, and never retype into a brief a
-  fact that belongs in the screen notes. A brief for an agent that drives screens names the
+- **Briefs are rendered from `docs/process/briefs/<role>.md`**: fill the
+  slots (the feature, the spec path, the report path, `fleet.json`, the
+  chunk or cluster, the agent id) and add only the feature-specific facts
+  the step names. The templates carry the Frame, the reading-list row,
+  `screen-notes.md` and the return format. Never paraphrase a rule into a
+  brief, and never retype into one a fact that belongs in the screen
+  notes. A brief for an agent that drives screens names the
   ~40-call budget (step 7).
 - **Fresh agents, short transcripts.** An agent that drives screens is
   always fresh. Message an existing agent only when its transcript is
@@ -713,6 +731,10 @@ PROGRESS note names the last gate reached.
 | Reader persona | the spec body only; the product-owner read, the Findings register only |
 | Writing agents (author, finalizer, rewrite, fold) | TEMPLATE (including "Write for a reader who has only this page"), the digest or change list, the spec; the author also reads the feature's rows in `incidentals.md` and the templates and locale files for labels |
 
+An agent that reads the spec without folding it (persona, digest, checker,
+test author) reads the body and only the footnotes its lines cite, never
+the whole file; footnotes are half the file by size.
+
 ### Rejected consolidations
 
 Turned down; do not re-propose one without new evidence. Skipping claims
@@ -742,7 +764,9 @@ live in `docs/process/harness.md`. The campaign-side rules are here:
   fork as push default. Verify the remote URL before every push. A bad pushed
   commit gets a follow-up commit, never a force-push.
 - **.reports/ retention.** Per-feature reports (probe reports, `digest.md`,
-  claim-check chunks and merge) are session-local scratch: required during
+  claim-check chunks and merge) are session-local scratch (the checker
+  scripts are the exception: they live under `shared/playwright/checks/`
+  and are committed, step 7): required during
   the loop, never committed (the directory is gitignored), and deletable
   after review sign-off. The spec must stand on its own: probe dates and
   verbatim on-screen strings live in its footnotes (TEMPLATE rule 1), never

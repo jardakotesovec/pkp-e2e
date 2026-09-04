@@ -91,9 +91,12 @@ The apps move; the suite follows. The baselines live in
    accommodate in an existing spec and its tests, not covered yet, or
    re-budget.
 4. **Accommodate.** Run the RUNBOOK loop on the changed slice, with the
-   same gates and the same rules: probe the changed screens live (step 3:
-   the probe kit, the three probe rules, "What each role reads", agents one
-   or two at a time), fold the change into the spec (rules, scenarios,
+   same gates and the same rules: run the feature's kept checks for the
+   chunks whose screens changed (`shared/playwright/checks/<feature>/`,
+   RUNBOOK step 7) and have a fresh agent judge the snapshots against the
+   spec lines each chunk owns, then probe live only what the checks did not
+   cover (step 3: the probe kit, the three probe rules, "What each role
+   reads", agents one or two at a time), fold the change into the spec (rules, scenarios,
    register) through a writing agent (step 4), run the reader persona on
    the changed spans (step 5), lint (step 6), update the tests and run the
    touched suites green once (steps 8–9), update the PROGRESS row note to

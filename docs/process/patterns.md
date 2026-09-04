@@ -193,7 +193,9 @@ quarantine tag on purpose: a known regression stays red, and its
 ## Page Object Model
 
 Inherit from `BasePage` (`shared/playwright/pages/BasePage.js`). A POM holds
-`page` and its locators as instance properties. Placement: shared mechanics go
+`page` and its locators as instance properties. A page object shared by the
+three app suites stays app-neutral: role names, fold labels and other
+per-app strings are passed in by the suite, never hard-coded from one app. Placement: shared mechanics go
 in `shared/playwright/pages/` (today `BasePage`, `LoginPage`, `DashboardPage`,
 `EditorialDashboardPage`, `MySubmissionsPage`, `ProfilePage` and `WorkflowPage`, the
 workflow panel's frame: opening by address or from a row, header readouts,
@@ -405,6 +407,10 @@ under the agent's id when the process exits. `note(text)` appends one line
 there at once, for what a locator row cannot carry: a dialog that appears on
 the way out of a screen, a premise that proved wrong, a wait that hangs.
 Every agent that drives screens reads that file first (RUNBOOK step 3).
+Claim-check scripts are not scratch:
+they live in `shared/playwright/checks/<feature>/<chunk>/`, import the kit
+as `require('../../../probe')`, and are kept so a maintenance session can
+run a chunk again (RUNBOOK step 7 "Checks are kept").
 `idle(page)` is `waitForJQueryIdle`; `tag(prefix)` makes a scratch tag that
 follows the tag conventions above. `signIn` uses the roster password rule,
 so it works for scratch users too.
@@ -417,6 +423,12 @@ starting a server (the probe servers are started once, outside scripts).
 Tests never import the kit: `npm run lint:probe-imports` fails when
 `playwright/probe` appears under `apps/` or `shared/playwright/{tests,pages,support}`.
 
+Two kit gotchas every screen-driving agent meets: `idle(page)` hangs in a
+session the server has just ended (after a password change or a sign-out
+elsewhere), so use a bounded wait there; and Playwright dismisses a browser
+`confirm()` or `alert()` by default, so a screen that may ask (a tab switch
+with unsaved changes, a refused upload) needs `page.on('dialog', …)` before
+the action, or the script silently takes the Cancel branch.
 Two premises that cost a smoke run: a scratch context has no technical
 support contact, and the validation email's sender is that contact, so a
 registration on the +90 server 500s until a manager sets it (Settings ›

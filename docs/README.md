@@ -51,7 +51,8 @@ Read in this order:
 
 1. `docs/process/RUNBOOK.md`: what the project is trying to achieve, how a
    feature moves from nothing to a verified spec with green tests, and where
-   each kind of finding goes.
+   each kind of finding goes. `docs/process/briefs/` holds the brief
+   template for each subagent role; the orchestrator fills the slots.
 2. `docs/process/TEMPLATE.md`: how a spec is written, section by section.
 3. `docs/process/PRINCIPLES.md`: the rules every test follows.
 4. `docs/process/harness.md`: how the Playwright harness is laid out and run.
