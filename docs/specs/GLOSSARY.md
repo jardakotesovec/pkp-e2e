@@ -244,6 +244,8 @@ touched.
   like `editor.diana`); shared and never mutated by tests.
 - **Scratch** — a throwaway journal/submission/user created for one test and
   owned by it.
+- **Ready account / throwaway account** — a roster account a scenario signs
+  in with, versus a scratch user created for that scenario.
 - **Mail catcher** — the test install's outgoing-mail trap; "the email
   arrives" in a scenario means it lands there.
 

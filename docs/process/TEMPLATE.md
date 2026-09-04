@@ -37,9 +37,13 @@ defect, however true it is.
 ## Write for a reader who has only this page
 
 The readability pass (RUNBOOK step 5) hands the body to a QA person who
-has never seen a campaign document, has no code, and reads nothing below
-the footnotes. Every writer, whether drafting, folding or rewriting,
-writes to that reader from the start. Three kinds of sentence fail:
+knows the applications and has read `docs/specs/GLOSSARY.md`, has no
+code, has read no other spec, and reads nothing below the footnotes.
+Every writer, whether drafting, folding or rewriting, writes to that
+reader from the start: lean, in the GLOSSARY's words, with nothing the
+reader already knows explained again (what a test install, a seeded or
+scratch journal, a ready account or the mail catcher is; how to reach
+the Dashboard; what a role does). Three kinds of sentence fail:
 
 - **A verb or noun that maps to nothing on screen.** "Re-rendered",
   "is built to show", "the fold", "the editorial layout": say what the
@@ -56,12 +60,12 @@ writes to that reader from the start. Three kinds of sentence fail:
 Four conventions the shipped specs share, so a new spec does not invent
 its own:
 
-- The scenario preamble defines *seeded journal* and *scratch journal*,
-  says which scenarios use a ready account and which a throwaway one, and
-  that the ready accounts and their passwords are in the footnote.
-- Mail is read "in the mailbox of the address it was sent to"; the
-  preamble explains the shared mail catcher once, and the footnote names
-  the tool and its address.
+- The scenario preamble is one or two sentences: which scenarios run on
+  the seeded journal with ready accounts and which on a scratch journal
+  with throwaway ones, in the GLOSSARY's words, with the accounts, the
+  passwords and the tooling recipe in the footnote. It defines nothing.
+- Mail is read "in the mailbox of the address it was sent to" (GLOSSARY
+  "Mail catcher"); the footnote names the tool and its address.
 - A note under the title maps journal, Journal Manager, Section Editor and
   Reviewer to the press and preprint-server names (GLOSSARY Part II), and
   the body then uses the journal words.
@@ -329,7 +333,13 @@ atlas-claims: [<atom IDs this spec owns>]
      reader executes it without a trip back into Rules. Mark a per-app
      divergence inline ([OMP2](#omp2)); a scenario an app cannot run gets its
      analogue or absence noted at the end. Seeding recipes and usernames go
-     in the scenario's footnote.
+     in the scenario's footnote. PRECONDITIONS ARE GIVENS, NOT STEPS: a
+     scratch journal, throwaway accounts, a seeded submission or an email
+     in a mailbox are stated as the state the scenario starts from; how the
+     test tooling builds that state is the footnote's business, and a
+     by-hand recipe for building it (create a journal, invite accounts)
+     never enters the body. The flow starts where the feature's screens
+     start.
      Acceptance test: a QA person who has NEVER opened the screen can execute
      the scenario and judge pass or fail. -->
 

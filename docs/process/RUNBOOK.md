@@ -535,18 +535,27 @@ paragraph, verbatim, before the task.
    superscript evidence marks, the front-matter block) are explained on the
    page and are not stumbles. The persona marks each stumble as *wording*
    or *fact* (a stumble no rewrite can settle without new evidence, such as
-   whether a limit cuts or refuses). Rewrite the wording stumbles, then run the persona once more
-   over the rewritten passages only, because a rewrite is not verified by
-   its own writer. A second pass is skipped when the first found zero
-   blockers and every friction was fixed. The gate is zero blockers.
+   whether a limit cuts or refuses). Rewrite the wording blockers, then run
+   the persona once more, because a rewrite is not verified by its own
+   writer. **The loop is two reads and one rewrite.** The first read covers
+   the whole body. The rewrite fixes wording blockers only, and never
+   lengthens a passage: a stumble that a rule, row or register entry
+   already answers gets a pointer to it, not a new sentence. The second
+   read covers the whole rule or scenario that holds each rewritten span
+   and reports only stumbles inside the span; it is skipped when nothing
+   was rewritten. **The gate is met when every remaining blocker is a fact
+   the page already declares** (a ❓ entry, a marked row, a declared
+   no-screen line): no rewrite settles a fact, so the loop ends there. A
+   blocker a persona raises on a declared fact is counted, not re-passed.
    **Every persona report has a consumer.** Fact stumbles go to the next
    agent that drives screens, the claim-check chunk file (step 7) or the
    test authors' briefs (step 8), and the orchestrator's brief names them.
-   Wording frictions are rewritten when they change how a reader would
-   execute a rule or scenario; the rest are counted in the PROGRESS note
-   ("n minor readability frictions open"), so no report is left to a lean.
-   Writers avoid most stumbles by writing to TEMPLATE "Write for a reader
-   who has only this page".
+   Wording frictions are counted in the PROGRESS note ("n minor
+   readability frictions open"), never rewritten unless the maintainer
+   asks, so no report is left to a lean and no pass grows the body (U05,
+   2026-09-04: seven friction rewrites made the body longer and the next
+   read found stumbles in the new sentences). Writers avoid most stumbles
+   by writing to TEMPLATE "Write for a reader who has only this page".
    **Product-owner read.** After the last fold (step 9), a second persona
    reads the Findings register only, as a product owner deciding what to
    fix: from each entry alone, what a user experiences, and whether it is a
@@ -613,7 +622,8 @@ paragraph, verbatim, before the task.
      sentence; it does not append a clause to it.
      Items that cannot be resolved become ❓ entries with a stated lean.
      After the fold, re-run lint and give the reader persona (step 5) the
-     folded spans only; new wording is never verified by its writer.
+     rules and scenarios that hold the folded spans, reporting on the spans
+     only; new wording is never verified by its writer.
 8. **Write the Playwright tests** from the checked spec, following
    PRINCIPLES and the harness docs. One suite per app, derived from the spec
    (rules 2 and 3), one test per canonical scenario in each app that runs
@@ -634,7 +644,7 @@ paragraph, verbatim, before the task.
    wording, one fresh checker drives those spans first; a footnote-only or
    register-only change needs no checker. Then one writing agent folds
    everything the run's findings change, register entries included, and
-   one persona pass reads the changed spans. The fold happens once, on
+   one persona pass reads the rules that hold the changed spans, as step 5 says. The fold happens once, on
    verified facts. Never edit a test to pass a claim the
    app disproves. An app defect that blocks green is worked around and
    recorded in `app-changes.md`. After the last spec change the orchestrator

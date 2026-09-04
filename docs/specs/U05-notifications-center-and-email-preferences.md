@@ -32,8 +32,8 @@ every signed-in user meets, whatever their role:
   unread tasks, opening a window headed "Tasks" that lists the tasks the
   application has raised for this account across every journal;
 - the **message at the top right** of an editorial page after an action
-  ("Your changes have been saved." and its warning and error cousins),
-  called a *toast* in this spec because the screen gives it no name;
+  ("Your changes have been saved." and its warning and error cousins), a
+  *toast*;
 - the **choices on the Profile page's "Notifications" tab**: for every
   event type, whether the event reaches this account at all in this
   journal, and whether it also arrives by email;
@@ -41,20 +41,17 @@ every signed-in user meets, whatever their role:
   opens, where the addressee switches off notification emails without
   signing in.
 
-Two phrases recur. The *editorial pages* are the application's working
-side: the pages with the dark header bar that carries the bell, and under
-the signed-in user's name at the top right the entry "Edit Profile", which
-opens the Profile page. The *reader-facing pages* are the journal's public
-site, whose header shows the signed-in user's name with "Dashboard" and
-"View Profile" under it; "Dashboard" leads to the editorial pages.
+*Editorial pages* here are the pages under the Dashboard, whose header
+carries the bell and, under the signed-in name at the top right, "Edit
+Profile" (the Profile page); *reader-facing pages* are the journal's
+public site, with "Dashboard" and "View Profile" under the signed-in
+name.
 
-The tab itself, as a screen with a "Save" button, is described in
-[User profile](U03-user-profile.md) (its Rule 11 and scenario 10). This spec
-owns what its boxes mean, which event types are listed, and the Unsubscribe
-page. Each event type is raised by another feature: what triggers it, who
-is chosen as a recipient and what the email says belong to that feature,
-and Rule 6 points to each. This spec owns the delivery: the task, the
-toast, the email footer and the person's choices.
+The tab as a screen, "Save" included, is described in
+[User profile](U03-user-profile.md) (its Rule 11 and scenario 10), and each
+event type belongs to the feature that raises it (Rule 6 names each). This
+spec owns the delivery: the task, the toast, the email footer, the person's
+choices and the Unsubscribe page.
 
 ## Actors & permissions
 
@@ -66,11 +63,11 @@ one row in the Tasks panel.
 
 | Action | Who may, and when |
 |--------|--------------------|
-| **Open the Tasks panel** | • Any signed-in user on an editorial page, whatever their roles, including a user with no role in that journal, a user with no role in any journal, and the Site Administrator (Rule 2). The panel lists the account holder's own tasks and nobody else's: another Journal Manager's rows are untouched by what this one deletes <sup>a</sup> |
+| **Open the Tasks panel** | • Any signed-in user on an editorial page, whatever their roles, including a user with no role in that journal, a user with no role in any journal, and the Site Administrator (Rule 2). The panel lists the account holder's own tasks only; what one Journal Manager deletes leaves another's rows untouched <sup>a</sup> |
 | **Mark tasks read or new, delete tasks** | • The account holder, on their own list only (Rule 3) <sup>a</sup> |
-| **See the unread count on the reader-side header** | • A signed-in user holding Journal Manager, Author, Reviewer or an assistant-level role in the journal (Copyeditor, Layout Editor, Proofreader, Funding Coordinator and the other roles under the "Assistant" permission level on Settings › Users & Roles › Roles), or the Site Administrator (Rule 4); the count shows even when it is "0"<br>• On the site's own home page (the page listing the journals) only the Site Administrator sees a number, and there it sits in the drop-down list under the name, after that list's "Dashboard" entry, not on the name itself (Rule 4)<br>• A Section Editor sees their name without a count, with or without unread tasks ⚠ [A3](#a3); a Reader sees the bare name too <sup>c</sup> |
-| **Choose which events reach them, and which by email** | • The account holder, per journal, on the Profile page's "Notifications" tab (Rule 5; the tab as a screen is *[User profile](U03-user-profile.md)*'s) <sup>d</sup> |
-| **Open the Unsubscribe page and unsubscribe** | • Whoever holds the emailed link, signed in or not. The link names the account it acts on: a Journal Manager who opens the Author's link sees the Author's address on the page, and "Unsubscribe" changes the Author's choices, not the Manager's (Rule 8) <sup>f</sup> |
+| **See the unread count on the reader-side header** | • A signed-in user holding Journal Manager, Author, Reviewer or an assistant-level role in the journal, or the Site Administrator (Rule 4); the count shows even when it is "0"<br>• On the site's own home page only the Site Administrator, and there in the drop-down list under the name, after "Dashboard", not on the name itself (Rule 4)<br>• A Section Editor sees their name without a count, with or without unread tasks ⚠ [A3](#a3); a Reader sees the bare name too <sup>c</sup> |
+| **Choose which events reach them, and which by email** | • The account holder, per journal, on the Profile page's "Notifications" tab (Rule 5) <sup>d</sup> |
+| **Open the Unsubscribe page and unsubscribe** | • Whoever holds the emailed link, signed in or not; the page names and acts on the addressee, not on whoever is signed in (Rule 8, scenario 6) <sup>f</sup> |
 | **Receive a task or a notification email** | • Decided per event type by the feature that raises it; the roster in Rule 6 says who is told, where it shows and whether an email goes out <sup>e</sup> |
 
 ## Fields & validation
@@ -85,10 +82,9 @@ are listed in four groups, headed "Public Announcements", "Submission
 Events", "Reviewing Events" and "Editors", in this order. Each row is the
 event's sentence, followed by the two boxes named below. Where the row's
 sentence would name a submission, the tab shows the word "Title" in its
-place. In the table below, a row whose wording differs by application is
-one line, with each application's version separated by "·"; separate rows
-are on separate lines. The same groups and rows are offered to every role:
-an Author or a Reader sees the "Editors" group too. <sup>d</sup>
+place. Where a row's wording differs by application, the versions share one line,
+separated by "·". Every role is offered the same groups and rows: an Author
+or a Reader sees the "Editors" group too. <sup>d</sup>
 
 | Group | Rows, in order |
 |-------|----------------|
@@ -99,22 +95,18 @@ an Author or a Reader sees the "Editors" group too. <sup>d</sup>
 
 | Box (UI label, under every row) | Required? | Rules |
 |------------------|-----------|-------|
-| "Enable these types of notifications." | — | Ticked by default. Unticked, the event no longer raises a task for this account in this journal, and the announcement and issue emails stop; the "needs an editor" email keeps coming ⚠ [A10](#a10) (Rule 5a). Unticking it greys out the email box below it at once; the tick that box had is dropped when the tab is saved (Rule 5c) |
+| "Enable these types of notifications." | — | Ticked by default. Unticked, the event is not raised for this account in this journal (Rule 5a; one email ignores the box ⚠ [A10](#a10)). Unticking it greys out the email box below it, whose tick is dropped on save (Rule 5c) |
 | "Do not send me an email for these types of notifications." | — | Unticked by default. Ticked, the event still reaches the account in the application but sends no email (Rule 5b). Greyed out while "Enable these types of notifications." is unticked |
 
 **The Unsubscribe page** (Rule 8): under the heading "Unsubscribe" and the
 sentence "Select the emails that you no longer wish to receive at {email}
-from {journal name}.", one box for every row the tab ever shows, the
-"Statistics report summary." row included whether or not the journal sends
-that email, each labelled with
-the row's sentence (the word "Title" itself where the tab has it, never a
-submission's title), listed without group headings and in the page's own
-order, not the tab's (that order is given below and is part of what to
-check); then the sentence "You
-can resubscribe to email notifications at any time from your user profile."
-with "user profile" as a link, and a button "Unsubscribe". Every box is
-ticked when the page opens, whatever the person's tab holds ⚠ [A2](#a2).
-The boxes, in order:
+from {journal name}.", one box for every row the tab ever shows, each
+labelled with the row's sentence (the word "Title" itself where the tab has
+it), without group headings and in the page's own order, given below; then
+the sentence "You can resubscribe to email notifications at any time from
+your user profile." with "user profile" as a link, and a button
+"Unsubscribe". Every box is ticked when the page opens, whatever the
+person's tab holds ⚠ [A2](#a2). The boxes, in order:
 
 - {OJS} "An issue has been published." · "An issue has been made open
   access." · "A new article, "Title," has been submitted." · "A new version
@@ -127,9 +119,9 @@ The boxes, in order:
   box comes first (worded per application as on the tab) and the
   announcement box seventh ("New announcement." on a press).
 
-The list is the same on every journal of the application: the statistics
-box is listed even where the journal's statistics email is off
-⚠ [A9](#a9). <sup>f</sup>
+The list is the same on every journal: the "Statistics report summary." box
+is listed even where the journal's statistics email is off ⚠ [A9](#a9).
+<sup>f</sup>
 
 **The Tasks panel** (Rule 2): a full-height panel over the page with a
 back-arrow button "Close" and the heading "Tasks"; inside it a table with
@@ -174,8 +166,7 @@ items" on an empty list). No text can be typed anywhere in the panel.
      one journal, each row also shows the journal's initials (the "Journal
      initials" typed on the Create Journal form; "Press Initials" on a
      press, "Server initials" on a preprint server) between the sentence
-     and the title, because the list pools the tasks of every journal on
-     the site. With no task at all the list reads "No Items".
+     and the title (Rule 2d). With no task at all the list reads "No Items".
      Beyond 25 rows the list is paged: the line under the table then reads
      "1 - 25 of 26 items" with page numbers and ">" and ">>" after it, and
      offers "Items per page:" with the choices "10", "25", "50", "75" and
@@ -189,22 +180,10 @@ items" on an empty list). No text can be typed anywhere in the panel.
      lands instead on a reader-facing page whose whole text is "A workflow
      stage was not specified.", and the submission is not reached
      ⚠ [OPS3](#ops3). The task is marked read either way.
-   - 2d. **The list is per account, not per journal.** The same window with
-     the same rows opens from any journal's editorial pages and from the
-     site-level Profile page, which carries the same bell. The site-level
-     Profile page is the Profile page reached without a journal: "View
-     Profile" under the signed-in name on the site's own home page leads
-     there. The site's own home page is the page listing the site's
-     journals; its address is the journal's public-site address with
-     "index" in place of the segment that names the journal, which is
-     "publicknowledge" for the seeded journal, so "…/publicknowledge/…"
-     becomes "…/index/…" (the same swap Rule 5d makes for the profile
-     address). Not every account is shown the site-level Profile page: an
-     account with roles in several journals or in none sees it, and so
-     does the Site Administrator of a site with several journals (a site
-     with one journal was not tried); an account with a role in exactly
-     one journal is sent on to that journal's profile the moment it opens
-     the site-level Profile address (Rule 5d has the detail).
+   - 2d. **The list is per account, not per journal.** It pools every
+     journal's tasks, and the same window with the same rows opens from
+     any journal's editorial pages and from the site-level Profile page
+     (Rule 5d), which carries the same bell.
 3. **Mark Read, Mark New, Delete.** Each acts on the rows whose box is
    ticked and on nothing else; with no box ticked, pressing any of the three
    changes nothing. "Mark Read" turns the ticked rows into read rows and
@@ -212,24 +191,16 @@ items" on an empty list). No text can be typed anywhere in the panel.
    rows at once, with no confirmation and no way back. After each action
    every box is unticked again, and once the window is closed the badge on
    the bell shows the new number of unread rows. <sup>a</sup>
-4. **The reader-side count.** On the reader-facing pages (the journal's
-   public site), a signed-in user's name in the header is followed by a
-   number, as "{name} 1" with one unread task: the same number of unread
-   tasks the bell shows. It shows for a Journal Manager, an Author, a
-   Reviewer, the assistant-level roles (Copyeditor, Layout Editor,
-   Proofreader, Funding Coordinator and the other roles under the
-   "Assistant" permission level) and the Site Administrator; a Section
-   Editor and a Reader see the bare name, with or without unread tasks
-   [A3](#a3) (Actors has the row). It reads "0" when nothing is unread, and
-   it counts every journal's tasks, like the bell. On the site's own home
-   page (the page listing the journals) a number shows for the Site
-   Administrator only, and there it is not on the name itself but in the
-   drop-down list under the name, after that list's "Dashboard" entry (as
-   "Dashboard 1" with one unread task);
-   a Journal Manager, even one with roles in two journals, sees the bare
-   name there. It is a count only: the
-   reader-side header offers no list, and "Dashboard" under the name leads to the
-   editorial pages where the bell is. <sup>c</sup>
+4. **The reader-side count.** On the reader-facing pages, a signed-in
+   user's name in the header is followed by the
+   number of unread tasks the bell shows, as "{name} 1" with one and "0"
+   with none, every journal's tasks counted. Actors says who sees it; a
+   Section Editor and a Reader see the bare name, with or without unread
+   tasks [A3](#a3). On the site's own home page the Site Administrator
+   alone sees a number, in the drop-down list under the name after its
+   "Dashboard" entry ("Dashboard 1" with one unread task); a Journal
+   Manager, even one with roles in two journals, sees the bare name there.
+   It is a count only: the reader-side header offers no list. <sup>c</sup>
 5. **What the Notifications tab's boxes do.** <sup>d</sup>
    - 5a. **"Enable these types of notifications." unticked** means the
      event is not raised for this account in this journal: no task, and
@@ -242,27 +213,26 @@ items" on an empty list). No text can be typed anywhere in the panel.
      but the email that would accompany it is not sent to this account. For events
      whose email is optional for the sender (an announcement posted without
      its email box), the choice only matters when the sender chose to email.
-   - 5c. **Unticking "Enable…" clears the email choice.** The moment
-     "Enable…" is unticked its email box greys out, keeping whatever tick
-     it had; "Save" then records the email choice as unticked, and the tab
-     shows the box unticked on its next load. A person who later re-ticks
-     "Enable…" finds the email box unticked and gets the event's emails
-     again until they tick it once more.
+   - 5c. **Unticking "Enable…" clears the email choice.** The email box
+     greys out at once, keeping whatever tick it had; "Save" records it as
+     unticked, and it shows unticked on the tab's next load. Re-ticking
+     "Enable…" later leaves the email box unticked, so the event's emails
+     come again until it is ticked once more.
    - 5d. **The choices are kept per journal.** The tab saves for the journal
      it was opened in, and each journal on a site keeps its own set. The
-     site-level profile keeps yet another set: it is the journal's profile
-     address with the word "index" in place of the journal's own path, for
+     site-level profile keeps yet another set. Its address is the journal's
+     profile address with "index" in place of the journal's path, for
      example "…/index/user/profile" (*[User profile](U03-user-profile.md)*
-     Rule 3); "View Profile", listed under the signed-in name on the
-     site's home page (the page listing the journals), leads to the same
-     address. A user with a role
-     in exactly one journal who opens that address is sent to that journal's
-     profile with the "Identity" tab open, whatever tab the address named;
-     the site-level tab is seen by a user with roles in several journals or
-     in none, and by the Site Administrator of a site with several
-     journals (a Site Administrator on a site with one journal was not
-     tried). No event listed on the tab is raised at site level, so the
-     site-level set currently governs nothing ⚠ [A4](#a4).
+     Rule 3); the site's home page has the same "index", and its "View
+     Profile" under the signed-in name leads to the site-level profile. A
+     user with a
+     role in exactly one journal who opens that address is sent to that
+     journal's profile with the "Identity" tab open, whatever tab the
+     address named; the site-level tab is seen by a user with roles in
+     several journals or in none, and by the Site Administrator of a site
+     with several journals (a site with one journal was not tried). No
+     event listed on the tab is raised at site level, so the site-level set
+     currently governs nothing ⚠ [A4](#a4).
    - 5e. **Registration presets the email choice.** A person who registers
      with the box "Yes, I would like to be notified of new publications and
      announcements." unticked (*[Registration & account validation](U02-registration-and-account-validation.md)*)
@@ -274,31 +244,29 @@ items" on an empty list). No text can be typed anywhere in the panel.
    type. The feature named in the second column raises it and says exactly
    when; this table says who is told, how, and whether an email carries
    the Unsubscribe link (Rule 7). "No task" means the event shows nothing
-   in the application (the Tasks panel does not list it and no screen
-   announces it): for those rows the "Enable…" box only matters for the
-   email. Three rows ("An issue has been made open access.", "Weekly email
-   of outstanding tasks" and "Statistics report summary.") are raised by
-   a *scheduled task*: a job the site runs on its own timer. No screen and
-   no action of a person starts it; that sets it apart from scenario 9's
-   issue email, which a person's "Publish Issue" hands to the site's
-   background jobs ("When emails arrive", Canonical scenarios). On the
-   test installs that timer does not run, so no scenario in this spec
-   produces those three emails, and no screen in the application offers
-   a button or link that sends one. <sup>e</sup>
+   in the application (no row in the Tasks panel, no screen announcing
+   it), so the "Enable…" box only matters for the email. Three rows ("An
+   issue has been made open access.", "Weekly email of outstanding tasks"
+   and "Statistics report summary.") are raised by a *scheduled task*: a
+   job the site runs on its own timer, which no screen and no action of a
+   person starts (unlike scenario 9's issue email, which "Publish Issue"
+   queues; "When emails arrive", Canonical scenarios). On the test
+   installs that timer does not run, so no scenario produces those three
+   emails. <sup>e</sup>
 
    | Row (as on the tab) | Raised by (owner) | Who is told | In the application | Email (footer link?) |
    |---|---|---|---|---|
    | "A new announcement has been created." / "New announcement." | A Journal Manager posts an announcement (*Announcements*, spec not yet written) | every user with a role in the journal | no task | only when the announcement was posted with "Send an email about this to all registered users." ticked; link: yes |
    | "An issue has been published." {OJS} | A Journal Manager publishes an issue with "Send an email about this to all registered users." ticked in the "Publish Issue" dialog (*Issues*, spec not yet written) | every user with a role in the journal | no task | yes; link: yes |
-   | "An issue has been made open access." {OJS} | the day an issue of a subscription journal becomes open access, if the journal's open-access notification is switched on. Which screens make a journal a subscription journal, switch that notification on and give an issue its open-access day is not described in this spec; *Subscriptions & open access control* (spec not yet written) will. A scheduled task raises it (the paragraph above this table); no screen starts it | every user with a role in the journal | no task | yes; link: yes |
-   | "A new article, "Title," has been submitted." | a new submission into a section whose form has an editor ticked under "Editorial Assignments" (Settings › Journal › "Sections", a section's "Edit"; the assignment itself is *[Submission wizard](U21-submission-wizard.md)*'s). On every journal but the install's first (its oldest; the seeded journal, on a test install) the tick is ignored and this event never happens: the submission raises the "needs an editor" row's event instead, as if nobody were ticked, so on a scratch journal this row's event is never seen ⚠ [A11](#a11) <sup>e</sup> | nobody, by this row, on any journal but the install's first: the ticked editor gets neither task nor email, and every Journal Manager gets the "needs an editor" row's task and email exactly as for that row below (what the ticked editor gets on the install's first journal was never seen, [A11](#a11)) | none of this row's own. The task the Managers get is the "needs an editor" row's, worded with that row's sentence, and it answers to that row's "Enable…" box, not to this row's (Rule 5a, scenario 3); what this row's own boxes change could not be seen, because the row's event never happened on a test install | none of this row's own; link: no. The email the Managers get is the "needs an editor" row's, subject "A new submission needs an editor to be assigned: "{title}"", and only that row's "Do not send me an email…" box stops it ⚠ [A10](#a10) (scenario 4); nothing to the ticked editor |
+   | "An issue has been made open access." {OJS} | the day an issue of a subscription journal becomes open access, if the journal's open-access notification is on (those screens are *Subscriptions & open access control*'s, spec not yet written). A scheduled task raises it (above); no screen starts it | every user with a role in the journal | no task | yes; link: yes |
+   | "A new article, "Title," has been submitted." | a new submission into a section whose form has an editor ticked under "Editorial Assignments" (Settings › Journal › "Sections", a section's "Edit"; the assignment itself is *[Submission wizard](U21-submission-wizard.md)*'s). On every journal but the install's first (its oldest; the seeded journal, on a test install) the tick is ignored and this event never happens: the submission raises the "needs an editor" row's event instead, as if nobody were ticked ⚠ [A11](#a11) <sup>e</sup> | nobody, by this row, on any journal but the install's first: the ticked editor gets neither task nor email, and every Journal Manager gets the "needs an editor" row's task and email exactly as for that row below (what the ticked editor gets on the install's first journal was never seen, [A11](#a11)) | none of this row's own. The Managers' task is the "needs an editor" row's and answers to that row's "Enable…" box, not this one's (Rule 5a, scenario 3); what this row's own boxes change was never seen, the event never having happened on a test install | none of this row's own; link: no. The Managers' email is the "needs an editor" row's, stopped only by that row's "Do not send me an email…" box ⚠ [A10](#a10) (scenario 4); nothing to the ticked editor |
    | "A new version of your submission, "Title", was published." | a version goes live (*[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*) | every user holding an Author assignment on the submission | a task | the "Publication Published" email; link: no ⚠ [A8](#a8) |
    | "A new article has been submitted to which an editor needs to be assigned." | a new submission with nobody assigned automatically (*[Submission wizard](U21-submission-wizard.md)*) | every Journal Manager | a task | the "needs an editor" email, subject "A new submission needs an editor to be assigned: "{title}""; link: no ⚠ [A8](#a8); sent even with "Enable…" unticked ⚠ [A10](#a10) |
    | "Discussion added." | a discussion is opened with the person as a participant, and every reply to it (*Tasks & discussions*, spec not yet written) | the discussion's participants, the person who wrote the message included | a task reading "{who opened it} started a discussion: {name}: {opening message}", for a reply the same sentence again ⚠ [A1](#a1) | the message, subject the discussion's name, sent by the person who wrote it; link: yes, in Rule 7a's "Reply to this comment…" sentence |
    | "Discussion activity." | nothing: no event raises it ⚠ [A1](#a1) | — | — | — |
-   | "A reviewer has commented on "Title"." | a reviewer submits a review (*[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*) | only the Journal Managers and Section Editors assigned to that submission, in either role (the people listed under "Participants" on its workflow page); a Journal Manager who is not assigned gets nothing | no task | the review-complete email, subject "Review complete: {reviewer} recommends {recommendation} for #{submission number} {authors} — "{title}"" ({submission number} is the number the submission's workflow page shows at its top, {authors} the family names of its authors; {OMP} "recommends None", the press's review form offering no recommendation); link: yes, in Rule 7a's "This is an automated message…" sentence |
-   | "Weekly email of outstanding tasks" | the monthly reminder of outstanding tasks that *[Submissions dashboard (editorial)](U23-submissions-dashboard.md)* describes: the row says "Weekly" but the email goes out monthly, a mislabel recorded in *[Submissions dashboard (editorial)](U23-submissions-dashboard.md#a8)*'s findings; the row is listed on a preprint server too, but the email is never sent there ⚠ [OPS1](#ops1). A scheduled task raises it (the paragraph above this table); no screen starts it | Journal Managers and Section Editors with submissions waiting on them (which submissions count is *[Submissions dashboard (editorial)](U23-submissions-dashboard.md)*'s to say) | no task | yes; link: yes, in Rule 7a's "This is an automated message…" sentence |
-   | "Statistics report summary." | the monthly statistics email, sent while the journal's "Editorial statistics" choice under Settings › Workflow › "Emails", group "For Editors", is "Send a monthly email to editors." (Settings that modify behavior, below). A scheduled task raises it (the paragraph above this table); no screen starts it | Journal Managers and Section Editors | no task | yes, with a spreadsheet attached; link: yes |
+   | "A reviewer has commented on "Title"." | a reviewer submits a review (*[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*) | only the Journal Managers and Section Editors assigned to that submission, in either role; a Journal Manager who is not assigned gets nothing | no task | the review-complete email, subject "Review complete: {reviewer} recommends {recommendation} for #{submission number} {authors} — "{title}"" ({submission number} and {authors} as in Rule 7a; {OMP} "recommends None", the press's review form offering no recommendation); link: yes, in Rule 7a's "This is an automated message…" sentence |
+   | "Weekly email of outstanding tasks" | the monthly reminder of outstanding tasks that *[Submissions dashboard (editorial)](U23-submissions-dashboard.md)* describes (the "Weekly" mislabel is noted in Fields); listed on a preprint server too, where the email is never sent ⚠ [OPS1](#ops1). A scheduled task raises it (above); no screen starts it | Journal Managers and Section Editors with submissions waiting on them (which submissions count is *[Submissions dashboard (editorial)](U23-submissions-dashboard.md)*'s to say) | no task | yes; link: yes, in Rule 7a's "This is an automated message…" sentence |
+   | "Statistics report summary." | the monthly statistics email, sent while the journal's "Editorial statistics" choice is "Send a monthly email to editors." (Settings that modify behavior). A scheduled task raises it (above); no screen starts it | Journal Managers and Section Editors | no task | yes, with a spreadsheet attached; link: yes |
 
    One email that a box on this tab does *not* govern is the reviewer's
    "Review assignment updated." notice; *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md#a12)*
@@ -306,7 +274,7 @@ items" on an empty list). No text can be typed anywhere in the panel.
 7. **Notification emails and their footer.** <sup>f</sup>
    - 7a. An email marked "link: yes" in Rule 6 ends with a footer: a dash
      ("—") on a line of its own, then one of three sentences: "Unsubscribe from emails sent by
-     {journal name}." (announcements, issues and the statistics report; the last comes from a scheduled task that no screen starts, so its footer was not seen) <sup>e</sup>, "This
+     {journal name}." (announcements, issues and the statistics report, whose footer was not seen: a scheduled task, Rule 6) <sup>e</sup>, "This
      is an automated message from {journal name}. You can unsubscribe from
      this email at any time." (the reminder, the review-complete email) and
      "Reply to this comment at #{submission number} {authors} or
@@ -320,8 +288,7 @@ items" on an empty list). No text can be typed anywhere in the panel.
    - 7b. The link is personal and permanent: it names the addressee and the
      notification it came with, needs no sign-in, and keeps working every
      time it is opened. It stops working only if the notification it came
-     with is deleted, which a person can do themselves from the Tasks panel
-     for a task ⚠ [A7](#a7).
+     with is deleted, as a task can be from the Tasks panel ⚠ [A7](#a7).
    - 7c. The same emails also carry the hidden headers that let a mail
      program show its own "Unsubscribe" button. Whether that button works is
      an open question ⚠ [A5](#a5); the link in the footer is the supported
@@ -333,23 +300,19 @@ items" on an empty list). No text can be typed anywhere in the panel.
    - 8a. **Reaching it.** The footer link opens the page in the journal's
      reader-facing layout, signed in or not. The link's address ends
      "…/notification/unsubscribe?validate={code}&id={notification number}":
-     {code} is a long code and {notification number} the number the
-     application gave the notification the email came with (not the
-     submission's number). No screen in this spec shows either value, and
-     the three checks below only cut one of the two out or replace it, so
-     neither ever has to be matched. Three broken links
-     open the bare "404 Not Found" page instead (the plain page with that
-     text alone, without the journal's header): "…?id={notification
-     number}" (the code and its name cut out); "…?validate={code}"
-     (everything from the "&" on deleted); and the whole address with a
-     number no notification has in place of {notification number}
-     (999999999, for one). That bare page is also
-     what an email's own, intact link opens once the addressee has deleted,
-     from their own Tasks panel, the task that came with that email (Rule
-     7b; each participant's email is tied to that participant's own row,
-     so another participant deleting theirs changes nothing); the discussion emails
-     (Rule 6) are the ones whose event raises a task and carries the link,
-     so they are the emails to try that on.
+     a long code, and the number the application gave the notification the
+     email came with (not the submission's number); no screen shows either,
+     and nothing below needs them matched. Three broken links open the bare
+     "404 Not Found" page instead (that text alone, without the journal's
+     header): "…?id={notification number}" (the code and its name cut
+     out); "…?validate={code}" (everything from the "&" on deleted); and
+     the intact address with a number no notification has in place of
+     {notification number} (999999999, for one). The same bare page is
+     what an intact link opens once the addressee has deleted, from their
+     own Tasks panel, the task that came with that email (Rule 7b; another
+     participant deleting their own row changes nothing). The discussion
+     emails (Rule 6) are the ones whose event both raises a task and
+     carries the link, so they are the emails to try that on.
    - 8b. **What it shows.** The heading, sentence, boxes, "user profile"
      link and "Unsubscribe" button described in Fields. The sentence names
      the addressee's email address and the journal, whoever is signed in.
@@ -396,14 +359,11 @@ items" on an empty list). No text can be typed anywhere in the panel.
 
 ## Side effects
 
-- **Marking, deleting** (Rule 3) changes the number on the bell's badge,
-  which counts unread rows only (up for "Mark New", down for "Mark Read",
-  and down for "Delete" when the deleted row was unread; deleting a read
-  row leaves the number as it was); the bell shows no
-  number while the window is open, so read it after "Close" (Rule 3). It
-  also changes the number after the signed-in user's name in the header of
-  the journal's public site, shown on the next reader-facing page opened
-  (Rule 4); there is nothing to save or confirm.
+- **Marking, deleting** (Rule 3) changes the bell's badge, read after
+  "Close": it counts unread rows only (up for "Mark New", down for "Mark
+  Read" and for deleting an unread row; deleting a read row leaves it). The
+  reader-side count follows on the next reader-facing page opened (Rule 4).
+  There is nothing to save or confirm.
 - **Deleting a task** also ends the Unsubscribe link of the email that
   announced it (Rule 7b) ⚠ [A7](#a7).
 - **Saving the Notifications tab** (Rule 5) changes only future events;
@@ -427,22 +387,19 @@ items" on an empty list). No text can be typed anywhere in the panel.
   no scripted scenario, because the test tooling cannot yet create a
   journal with the email off; a tester flips it there on a throwaway
   journal and expects the row to vanish. <sup>i</sup>
-- **The API secret (configuration file, no screen).** A secret key the
-  system administrator writes into the application's configuration file;
-  no screen shows or sets it. Set on the test installs. Without it the Unsubscribe links and headers are dead
-  (Rule 7d) ⚠ [A6](#a6); no scenario, because the configuration file is
-  shared by every test. <sup>i</sup>
+- **The API secret (configuration file, no screen).** A key the system
+  administrator writes into the configuration file; no screen shows or sets
+  it. Set on the test installs; without it the Unsubscribe links and
+  headers are dead (Rule 7d) ⚠ [A6](#a6). No scenario: the configuration
+  file is shared by every test. <sup>i</sup>
 - **Rows per page (configuration file, no screen).** The Tasks panel's page
   size, 25 on a default install; the panel's own "Items per page:" choice
   changes it for the moment only (Rule 2b). No scenario. <sup>i</sup>
-- **The announcement's email box, the issue's email box, the open-access
-  notification and the journal's announcements switch** decide whether the
-  events in Rule 6 send email at all. The two boxes are on the forms that
-  post an announcement and publish an issue ("Send an email about this to
-  all registered users.", Rule 6); the other two are journal settings
-  whose screens this spec does not describe. All four belong to
-  *Announcements*, *Issues* and *Subscriptions & open access control*
-  (specs not yet written).
+- **The announcement's and the issue's email box** ("Send an email about
+  this to all registered users.", Rule 6), **the open-access notification
+  and the journal's announcements switch** decide whether the events in
+  Rule 6 send email at all; all four belong to *Announcements*, *Issues*
+  and *Subscriptions & open access control* (specs not yet written).
 
 ## Cross-feature interactions
 
@@ -462,7 +419,7 @@ items" on an empty list). No text can be typed anywhere in the panel.
   *Tasks & discussions* each raise the events in Rule 6 and own their
   triggers, recipients and email texts; the discussion form ("Add" in the
   workflow page's discussions panel) and its reply are *Tasks &
-  discussions*', and this spec quotes only the labels scenario 5 presses.
+  discussions*'.
   **Review stage & rounds** owns the
   decision tasks that an editorial decision raises and that also land in
   the Tasks panel (for one, "Revision required." on a journal and
@@ -473,57 +430,18 @@ items" on an empty list). No text can be typed anywhere in the panel.
 
 ## Canonical scenarios
 
-Common to all three apps. The scenarios use journal words; the note under
-the title says how to read them on a press or a preprint server. Actors are
-named by role, and every scenario runs on a test install, a copy of the
-application set up for testing. Two words recur: the *seeded journal* is
-the journal a test install ships with, "Journal of Public Knowledge" (on
-a press "Public Knowledge Press", on a preprint server "Public Knowledge
-Preprint Server";
-registration open, every default role, and a *ready account* for each
-role: an account that already exists there, which the tester signs in
-with); a *scratch journal* is a throwaway journal created
-for the test, with registration open and the default roles, holding the
-throwaway accounts the scenario names. Scenarios 1–6, 8 and 9 run on a
-scratch journal with throwaway accounts, because they change notification
-choices and raise tasks that would linger; scenario 7, which only looks,
-uses a ready account on the seeded journal, and its site-level step needs
-a second journal on the site: run it after any of scenarios 1–6, whose
-scratch journal stays, or set up a scratch journal first ("Setting up a
-scratch journal" below). Where a scenario opens an email
-or judges what a mailbox holds, read it in the mailbox of the address it
-was sent to: on a test install every message the site sends lands in one
-shared *mail catcher*, a web page listing the mail, and the messages for an
-account are the ones addressed to that account's email address. The ready
-accounts and their passwords, the mail catcher's address and the set-up
-recipes live in the footnotes. Profile › "Notifications" is reached by
-"Edit Profile" under the signed-in name at the top right of the editorial
-pages, then the "Notifications" tab; an account with no editorial role, a
-Reader included, gets to the editorial pages through "Dashboard" under its
-name on the journal's public site. Where a scenario says the Author
-submits, the Author goes through the submission wizard ("Begin
-Submission"; the title, the checklist box and the privacy box; a file
-with its kind chosen; on a journal or a preprint server the abstract; on
-a preprint server the "For Readers" choice) to the footer's "Submit" and
-confirms "Submit" in the dialog that follows. <sup>s0</sup>
+Common to all three apps. Scenarios 1–6, 8 and 9 run on a scratch
+journal with throwaway accounts, because they change notification choices
+and raise tasks that would linger; scenario 7, which only looks, uses a
+ready account on the seeded journal, and its site-level step needs a
+second journal on the site. Read the scenarios on a press or a preprint
+server with the note under the title; the ready accounts and their
+passwords, the mail catcher's address and the tooling recipe are in the
+footnote. <sup>s0</sup>
 
-**Setting up a scratch journal.** The tests create it through the test
-tooling (the recipe is in the footnote); by hand, the Site Administrator
-creates it under Administration › Hosted Journals › "Create Journal", then
-invites the throwaway accounts, with their roles, under the new journal's
-Settings › Users & Roles ("Invite to a role"; each person accepts the
-invitation from the email it sends them — *Users management*, spec not
-yet written). Do not register the throwaway accounts on the
-journal's public site instead: a registration with the "Yes, I would like
-to be notified…" box unticked presets a choice (Rule 5e) that scenario 9
-needs at its default. A new journal's sections have nobody ticked under
-"Editorial Assignments" on the section form (Settings › Journal ›
-"Sections", a section's "Edit"; "Series" on a press, where a new press has
-none yet), so no editor is assigned automatically and every new submission raises the "needs an editor" task
-for every Journal Manager of that journal; the Site Administrator who
-created it is one of them. Ticking editors there would change nothing on
-any journal but the install's first, its oldest (the seeded journal, on a
-test install; *[Submission wizard](U21-submission-wizard.md#a8)*).
+**The scratch journal.** Its accounts' Notifications tabs start at their
+defaults, and the Site Administrator is a Journal Manager of it, so every
+new submission's "needs an editor" task reaches them too (Rule 6).
 
 **When emails arrive.** Every email in scenarios 1–6 leaves at the moment
 of the action and is in its mailbox within a second. Where a scenario says
@@ -533,37 +451,30 @@ about that title or that discussion's name alone: the mailbox's earlier
 emails stay and do not count. Scenario 9's issue email is different:
 "Publish Issue" only queues it for the site's background jobs, and on the
 test installs the jobs do not run by themselves. After "Publish Issue",
-run the site's background jobs (how, on a test install, is in the footnote
-with the set-up recipes) and judge both mailboxes only once they have run.
+run the site's background jobs (the footnote says how) and judge both mailboxes only once they have run.
 
 1. **A submission raises a task, and the bell counts it**: Author, Journal
-   Manager, both throwaway accounts on a scratch journal (set up as above);
-   the Manager has no task yet and is not the Site Administrator, whose
+   Manager, both throwaway accounts on a scratch journal; the Manager has no task yet and is not the Site Administrator, whose
    list pools every journal's tasks (Rule 2d). The Author submits a new
-   submission. The Journal Manager opens any editorial page after the
+   submission (the wizard to its "Submit" dialog; on a preprint server with
+   the "For Readers" choice). The Journal Manager opens any editorial page after the
    submission (or reloads the one that is open) and sees a red "1" on the
    bell; a page that was already open before the submission still shows
-   no number.
-   Pressing the bell opens the "Tasks" window: one row, its sentence in
-   bold, "A new article has been submitted to which an editor needs to be
-   assigned." (on a press "A new monograph has been submitted to which an
-   editor needs to be assigned.", on a preprint server "A new preprint has
-   been submitted to which a moderator needs to be assigned."), with the
-   submission's title under
-   it; while the window is open the bell in the header is greyed out with
-   no number. Press the row's sentence: {OJS OMP} the submissions
-   dashboard opens with the submission's workflow in a panel over the
-   list, headed with the Author's name and the title under it; {OPS} a
-   reader-facing page reading "A workflow stage was not specified." opens
-   instead ⚠ [OPS3](#ops3). Back on any editorial page the bell shows no
+   no number. Pressing the bell opens the "Tasks" window: one row, its
+   sentence in bold, "A new article has been submitted to which an editor
+   needs to be assigned." (worded per application as in Fields), with the
+   submission's title under it; while the window is open the bell in the
+   header is greyed out with no number. Press the row's sentence:
+   {OJS OMP} the submission's workflow opens over the submissions dashboard
+   (Rule 2c); {OPS} a reader-facing page reading "A workflow stage was not
+   specified." opens instead ⚠ [OPS3](#ops3). Back on any editorial page the bell shows no
    number, and opening the window again shows the row's sentence in
    regular type. <sup>s1</sup>
 2. **Mark New, Mark Read, Delete**: Journal Manager, Author. The Manager
-   is a fresh throwaway account on the scratch journal, not scenario 1's
-   Manager (whose window already holds that scenario's row), so it has had
-   no task yet; the Author submits twice, and the Manager does not open the Tasks window
-   in between, so the window holds exactly two rows, both unread, and the
-   bell shows "2". Open the window and press "Mark Read" with no box
+   is a fresh throwaway account on the scratch journal with no task yet
+   (not scenario 1's Manager); the Author submits twice, and the Manager
+   does not open the Tasks window in between, so the window holds exactly
+   two rows, both unread, and the bell shows "2". Open the window and press "Mark Read" with no box
    ticked: both rows stay bold and no message appears. Tick the first row
    and press "Mark Read": the row's sentence turns to regular type and its box is unticked again.
    Press "Close": the bell shows "1". Open the window again, tick the same
@@ -576,9 +487,8 @@ with the set-up recipes) and judge both mailboxes only once they have run.
    Managers, Author. Manager A opens Profile › "Notifications", unticks
    "Enable these types of notifications." under "A new article has been
    submitted to which an editor needs to be assigned." (its email box greys
-   out) and presses "Save": "Your changes have been saved." appears at the
-   top right with a green left edge and disappears by itself within a few
-   seconds. Manager B changes nothing. The Author submits a new
+   out) and presses "Save": the toast "Your changes have been saved." appears
+   (Rule 9). Manager B changes nothing. The Author submits a new
    submission. Manager A's Tasks window gains no row for this submission
    and the number on the bell does not grow (the rows from earlier
    submissions stay); Manager B's window gains the row. Both mailboxes hold an email whose
@@ -593,16 +503,14 @@ with the set-up recipes) and judge both mailboxes only once they have run.
    their Tasks window; Manager B's mailbox holds the email whose subject is "A
    new submission needs an editor to be assigned: "{title}"" with this
    submission's title, and once it has arrived Manager A's mailbox holds
-   no email with that subject (the emails from scenario 3 are still there
-   and do not count). <sup>s4</sup>
+   no email with that subject ("When emails arrive"). <sup>s4</sup>
 5. **Unsubscribing from an email's footer link**: Journal Manager, Author,
    throwaway accounts on the scratch journal, then a signed-out visitor.
    The whole scenario runs on the scratch journal, on a submission of the
-   Author's there (scenario 4's serves, or the Author submits a new one).
+   Author's there.
    On that submission's workflow page, on its
    Submission stage, in the panel headed "Desk Review Tasks & Discussions"
-   (a preprint server's workflow has only the Production stage, and the
-   panel there is headed "Production Tasks & Discussions"), the Journal
+   (on a preprint server "Production Tasks & Discussions"), the Journal
    Manager presses
    "Add", types a "Name", ticks the Author's box under "Participants" (the
    Manager's own box arrives ticked; the form offers no email choice),
@@ -610,19 +518,14 @@ with the set-up recipes) and judge both mailboxes only once they have run.
    mailbox holds an email whose subject is the discussion's name, sent by
    the Manager, ending "Reply to this comment at #{submission number}
    {authors} or unsubscribe from emails sent by {journal name}."
-   ({submission number} is the number the submission's workflow page shows
-   at its top, and {authors} its authors' family names: this submission has
-   one author, so the Author's own family name; Rule 7a);
-   the Manager's own mailbox holds a copy. Signed out, open the "unsubscribe" link: the
+   (Rule 7a; {authors} here is the Author's own family name, the one
+   author); the Manager's own mailbox holds a copy. Signed out, open the "unsubscribe" link: the
    "Unsubscribe" page shows "Select the emails that you no longer wish to
    receive at {the Author's address} from {journal name}.", every box
    ticked, and the button "Unsubscribe". Press it: "You have been
    unsubscribed" with the sentence naming the Author's address. Open the
    link again: the page shows again, boxes ticked. Sign in as the Author
-   on the scratch journal's public site and open its Profile ›
-   "Notifications" ("Dashboard" under the Author's name, then "Edit
-   Profile" under the name at the top right of the editorial page, then
-   the "Notifications" tab; the preamble's route): under every row of the tab, in
+   and open the scratch journal's Profile › "Notifications": under every row of the tab, in
    every group, the second box, "Do not send me an email for these types
    of notifications.", is ticked, and the first box, "Enable these types
    of notifications.", is still ticked; the tab has no row that the
@@ -646,20 +549,14 @@ with the set-up recipes) and judge both mailboxes only once they have run.
    with exactly the rows in Fields for this application, "Editors" holding
    "Weekly email of outstanding tasks" and "Statistics report summary.",
    every "Enable…" box ticked and every email box unticked. Then, as the
-   Site Administrator, on a site that holds more than one journal (a
-   scratch journal left by scenarios 1–6 serves; the seeded journal alone
-   is not enough, and a site with one journal was not tried, Rule 5d),
-   open the
-   site-level profile at its address, "…/index/user/profile" (the
-   journal's profile address with "index" in place of the journal's path;
-   "View Profile" under the signed-in name on the site's home page leads
-   there too, Rule 5d), and its "Notifications" tab: the same groups,
-   without "Statistics report summary.". <sup>s7</sup>
+   Site Administrator, on a site that holds more than one journal (Rule
+   5d), open the
+   site-level profile at "…/index/user/profile" (Rule 5d) and its
+   "Notifications" tab: the same groups, without "Statistics report
+   summary.". <sup>s7</sup>
 8. **Registration presets the email choice**: a visitor registers on a
    scratch journal with "Yes, I would like to be notified of new
-   publications and announcements." unticked, then signs in (on an install
-   that requires email validation, activating the account from the emailed
-   link first; the test installs do not) and opens Profile ›
+   publications and announcements." unticked, then signs in and opens Profile ›
    "Notifications": under every row of "Public Announcements",
    "Enable…" is ticked and "Do not send me an email…" is ticked. A second
    visitor registers with the box ticked: both boxes are at their defaults.
@@ -669,21 +566,11 @@ with the set-up recipes) and judge both mailboxes only once they have run.
 
 9. **An issue's email and its Unsubscribe link** {OJS}: Journal Manager,
    Reader, Author, throwaway accounts on a scratch journal set up fresh
-   for this scenario, its own and not the one scenarios 1–6 used, so the
-   Author's Notifications tab has never been saved and scenario 5's
-   Unsubscribe does not reach it. The journal holds one
-   unpublished issue; a new journal has none, so the Manager creates it
-   first under Issues › Future Issues › "Create Issue": under
-   "Identification", type "1" under "Volume", "1" under "Number", "2026"
-   under "Year" and a title under "Title", then press "Save". The title
-   is required: the "Title" box among the four show-boxes under the
-   fields arrives ticked, and a save without a title is refused with no
-   error shown (the form stays open and the list stays empty). *Issues*,
-   spec not yet written, owns the rest of that form. The issue is then
-   listed as "Vol. 1 No. 1 (2026): {title}". The Reader opens Profile › "Notifications"
-   ("Dashboard" under the Reader's name on the journal's public site, then
-   "Edit Profile" under the name at the top right of the editorial page,
-   then the "Notifications" tab), unticks "Enable…" under
+   for this scenario, not the one scenarios 1–6 used, so the Author's
+   Notifications tab is untouched by scenario 5. The journal holds one
+   unpublished issue, listed under Issues › Future Issues as
+   "Vol. 1 No. 1 (2026): {title}". The Reader opens Profile ›
+   "Notifications", unticks "Enable…" under
    "An issue has been published." and saves; the Author never opens
    Profile › "Notifications", so every box on the Author's tab is still at
    its default.
@@ -695,12 +582,9 @@ with the set-up recipes) and judge both mailboxes only once they have run.
    articles publishes without a warning). Run the site's background jobs
    ("When emails arrive" above). Then the Author's mailbox holds the issue
    email: its subject is "Just published: Vol. 1 No. 1 (2026): {title} of
-   {journal name}", and its footer (Rule 7a: a
-   dash on a line of its own, then the sentence) reads "Unsubscribe from
-   emails sent by {journal name}.", the scratch journal's name in place of
-   {journal name} and "Unsubscribe" as the link; the Reader's mailbox
-   holds no email with that subject. On a press or a preprint server
-   there are no issues and no such row. <sup>s9</sup>
+   {journal name}", and its footer (Rule 7a) reads "Unsubscribe from emails sent by
+   {journal name}." with "Unsubscribe" as the link; the Reader's mailbox
+   holds no email with that subject. <sup>s9</sup>
 
 ## Findings register
 

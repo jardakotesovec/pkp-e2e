@@ -14,14 +14,11 @@ Sizes are a rough share of one feature's cost.
 
 | # | Spec | Slice | Size | Waits on |
 |---|---|---|---|---|
-| 1 | U03 | Rewrite the open readability frictions that change how a reader would execute a rule or scenario (47 at shipping; use `.reports/U03/persona-3.md` and `persona-5.md` where present, else a fresh persona read of the body); persona on the rewritten spans. | 1/10 | — |
-| 2 | U02, U24 | The same (9 open each; session reports under `.reports/` where present, else a fresh read). | 1/10 | — |
-| 3 | U15, U22, U23 | Fresh persona read of the body (their reports are gone), rewrite the execution-changing frictions. | 1/10 | — |
-| 4 | all 16 | Product-owner read of the Findings register (RUNBOOK step 5), rewrite of entries a product owner cannot triage from alone; two specs a day. | 1/4 | — |
-| 5 | all 16 | One agent checks the four shipped conventions of TEMPLATE "Write for a reader who has only this page" across the preambles and title notes; fix the misses. | 1/20 | — |
-| 6 | U01 | Fold the incidental: a password-reset link opened while signed in lands silently on the dashboard (`docs/tracking/incidentals.md`). | 1/50 | — |
-| 7 | U06 | Fold the incidental: the Decline template body already ends "Kind regards," before the signature. | 1/50 | — |
-| 8 | U01, U02, U03, U06 | Scenarios at the non-default end for the site-level settings they list (password policy, self-registration flags, registration closed). Site settings are a shared singleton: the scenarios run in the serial project and restore the setting (PRINCIPLES A7 and A9). | 1/4 | U60 Site settings or U54 Roles configuration building the site-settings keys |
-| 9 | U27, U26, U25 | Scenarios for the review-setup settings (default review type, deadlines, reminders, review forms, reviewer suggestions, one-click access, minimum reviews). | 1/4 | U28 or U29 building the review-setup keys |
-| 10 | U21 | Scenarios for the intake settings (categories for authors, metadata items set to require, references and funders asked, extra required file types). | 1/4 | U58 building the intake keys |
-| 11 | U40, U41, U43, U49, U15 | Single settings still documented only (funding statement, ORCID enablement, section word count, fees, items per page). | 1/10 | the key each needs, or a probe-established scenario without one |
+| 1 | all 16 | Product-owner read of the Findings register (RUNBOOK step 5), rewrite of entries a product owner cannot triage from alone; two specs a day. | 1/4 | — |
+| 2 | all 16 | Trim the scenario preambles and any body sentence that explains what the GLOSSARY defines (test install, seeded and scratch journal, ready account, mail catcher, reaching the Dashboard) to the GLOSSARY's words, and cut by-hand set-up recipes to stated givens (TEMPLATE "Write for a reader who has only this page" and "PRECONDITIONS ARE GIVENS", 2026-09-04; U05 is the model). One persona read per spec, blockers only. | 1/5 | — |
+| 3 | U01 | Fold the incidental: a password-reset link opened while signed in lands silently on the dashboard (`docs/tracking/incidentals.md`). | 1/50 | — |
+| 4 | U06 | Fold the incidental: the Decline template body already ends "Kind regards," before the signature. | 1/50 | — |
+| 5 | U01, U02, U03, U06 | Scenarios at the non-default end for the site-level settings they list (password policy, self-registration flags, registration closed). Site settings are a shared singleton: the scenarios run in the serial project and restore the setting (PRINCIPLES A7 and A9). | 1/4 | U60 Site settings or U54 Roles configuration building the site-settings keys |
+| 6 | U27, U26, U25 | Scenarios for the review-setup settings (default review type, deadlines, reminders, review forms, reviewer suggestions, one-click access, minimum reviews). | 1/4 | U28 or U29 building the review-setup keys |
+| 7 | U21 | Scenarios for the intake settings (categories for authors, metadata items set to require, references and funders asked, extra required file types). | 1/4 | U58 building the intake keys |
+| 8 | U40, U41, U43, U49, U15 | Single settings still documented only (funding statement, ORCID enablement, section word count, fees, items per page). | 1/10 | the key each needs, or a probe-established scenario without one |

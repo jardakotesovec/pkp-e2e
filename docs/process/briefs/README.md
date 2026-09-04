@@ -40,7 +40,7 @@ from scratch, and it never writes rules into one.
 | 3, probe one cluster | `probe.md` |
 | 3b, digest | `digest.md` |
 | 4, finalize (one agent, or one slice of an H feature) | `finalizer.md` |
-| 5, readability check (first pass, or rewritten spans only) | `persona.md` |
+| 5, readability check (first pass over the body; second pass over the rules that hold the rewritten spans) | `persona.md` |
 | 5, rewrite wording stumbles | `rewrite.md` |
 | 5, product-owner read of the register (after the last fold) | `persona-po.md` |
 | 7, one claim-check chunk (also step 9's span checker) | `claim-check.md` |

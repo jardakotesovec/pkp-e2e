@@ -20,10 +20,10 @@ Inputs:
 
 Task:
 1. Fix every blocker: {{blockers}}. Where a blocker is something the shipped specs already handle (accounts, the mail catcher, an address), follow the convention TEMPLATE names instead of inventing one.
-2. Fix the wording frictions as step 5 says: the ones that change how a reader would execute a rule or scenario are rewritten; the rest are your call, and the ones left are counted. Fact stumbles stay untouched: {{fact_stumbles}}.
+2. Leave the frictions alone; they are counted, not rewritten (step 5). Fact stumbles stay untouched: {{fact_stumbles}}. A rewrite never lengthens a passage: where a stumble is answered by a rule, row or register entry elsewhere on the page, point to it in the spec's own link style instead of restating it, and where the fix needs more words, they replace words rather than add to them.
 3. Keep every register ID, footnote letter, marker and anchor intact. Save section by section. Run `node docs/process/lint/lint-spec.mjs {{spec_path}}` at the end and fix to zero.
 4. Write `{{rewrite_log}}`: one line per persona item saying fixed / left (with the reason), and a final section "Rewritten spans" listing every passage you changed by section and rule or scenario number, so the second persona pass reads only those spans.
 
 You never probe or drive a browser. Never edit `docs/process/seed-facts.md`. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 
-Return (short): the rewrite-log path; blockers fixed / frictions fixed / frictions left (counts); the lint result; whether any claim's substance had to change (IDs only; expected none).
+Return (short): the rewrite-log path; blockers fixed / left (counts) and the body's word count before and after (it must not grow); the lint result; whether any claim's substance had to change (IDs only; expected none).
