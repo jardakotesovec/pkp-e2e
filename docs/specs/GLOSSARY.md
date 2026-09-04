@@ -273,6 +273,8 @@ The long form of the legend. Each spec's Conventions line carries the three symb
   or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
   ruling · ✅ an intended difference. **Impact** is one plain word
   (user-visible / minor / invisible / latent).
+- **Placeholders.** A lowercase phrase in braces, {email} for one, stands for
+  the value the screen fills in.
 - **Footnote marks** (`<sup>a</sup>`) point to evidence: code anchors, probe
   dates, seeded accounts. The body never depends on them. Skip the footnotes
   and you lose no behavior.

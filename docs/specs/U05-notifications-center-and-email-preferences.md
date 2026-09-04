@@ -9,18 +9,7 @@ atlas-claims: [AFFW-698, AFFW-699, AFFW-700, AFFU-093, AFFU-094, AFFU-095, AFFU-
 
 # Notifications center & email preferences
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for, and a lowercase phrase in braces, {email} for one, stands for the value the screen fills in; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
-
-> **One spec, three applications.** The page is written in the words of a
-> journal (OJS): "journal", "Journal Manager", "Section Editor", "Reviewer".
-> Read it on a press (OMP) with "press" for "journal", Press Manager for
-> Journal Manager, Series Editor for Section Editor and External Reviewer
-> for the reviewer role; on a preprint server (OPS) with "server" for
-> "journal", Preprint Server Manager for Journal Manager, Moderator for
-> Section Editor, and no reviewer role at all. Where an on-screen sentence
-> differs by more than that one word, the spec quotes each application's
-> version. The full map is Part II of the
-> [application glossary](GLOSSARY.md).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -430,14 +419,12 @@ items" on an empty list). No text can be typed anywhere in the panel.
 
 ## Canonical scenarios
 
-Common to all three apps. Scenarios 1–6, 8 and 9 run on a scratch
-journal with throwaway accounts, because they change notification choices
+Scenarios 1–6, 8 and 9 run on a scratch journal with throwaway accounts, because they change notification choices
 and raise tasks that would linger; scenario 7, which only looks, uses a
 ready account on the seeded journal, and its site-level step needs a
-second journal on the site. Read the scenarios on a press or a preprint
-server with the note under the title; the ready accounts and their
-passwords, the mail catcher's address and the tooling recipe are in the
-footnote. <sup>s0</sup>
+second journal on the site. The ready accounts and their passwords, the
+mail catcher's address and the tooling recipe are in the footnote.
+<sup>s0</sup>
 
 **The scratch journal.** Its accounts' Notifications tabs start at their
 defaults, and the Site Administrator is a Journal Manager of it, so every
@@ -589,15 +576,9 @@ run the site's background jobs (the footnote says how) and judge both mailboxes 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-04), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted 🐞 → ❓ →
-✅ in the summary; the entries below are the source. Each entry opens with the
-user-observable symptom; mechanism and evidence live in the entry's footnote.
-Impact values: user-visible = real effect in ordinary use · minor = cosmetic
-only, however often seen · latent = only in an unusual situation or
-configuration · invisible = an intended difference between the applications
-that misleads nobody, recorded so the difference is on file. Entries whose
-Basis line says "judgment" come from reading the application and await the
-live check.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

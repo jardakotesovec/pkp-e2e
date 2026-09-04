@@ -63,12 +63,13 @@ its own:
 - The scenario preamble is one or two sentences: which scenarios run on
   the seeded journal with ready accounts and which on a scratch journal
   with throwaway ones, in the GLOSSARY's words, with the accounts, the
-  passwords and the tooling recipe in the footnote. It defines nothing.
+  passwords and the tooling recipe in the footnote. It defines nothing and
+  says nothing about how to read the page (no "common to all three apps",
+  no pointer to a note under the title).
 - Mail is read "in the mailbox of the address it was sent to" (GLOSSARY
   "Mail catcher"); the footnote names the tool and its address.
-- A note under the title maps journal, Journal Manager, Section Editor and
-  Reviewer to the press and preprint-server names (GLOSSARY Part II), and
-  the body then uses the journal words.
+- The body uses the journal words; the press and preprint-server names
+  are GLOSSARY Part II's, and no note under the title repeats them.
 - A finding's expected and observed behaviour are stated in the same
   screen words as the rule it marks, so a tester can tell a documented
   defect from a pass.
@@ -232,13 +233,15 @@ atlas-claims: [<atom IDs this spec owns>]
 <!-- Title badge only when an app LACKS the feature; omit when all three have it.
      If badged, follow the Purpose section with a one-paragraph absence note. -->
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
-<!-- That one line is the whole on-page legend, verbatim: the three symbols a
-     tester needs to judge pass or fail, and a link for everything else. The
-     glossary's "Reading a spec" section is the long form; specs never grow a
-     local legend beyond this line. A spec that needs a construct the legend
-     does not cover should simplify the construct. -->
+<!-- That one line, verbatim, is the whole on-page legend. The reader has read
+     the glossary: its "Reading a spec" section is the legend and its Part II
+     is the cross-app word map, so a spec never carries a local legend, a
+     "how to read this on a press" note, or any sentence about its own
+     conventions. The body is the feature's substance and nothing else. A
+     spec that needs a construct the legend does not cover should simplify
+     the construct. -->
 
 ## Purpose
 
@@ -352,11 +355,11 @@ atlas-claims: [<atom IDs this spec owns>]
      needs a product ruling. There is no separate Known-deviations or
      Open-questions section, and no external bug list. Structure:
 
-     Preamble (3–5 lines): "Verdicts are the author's judgment (claude,
+     Preamble, one sentence: "Verdicts are the author's judgment (claude,
      <date>), unreviewed unless an entry notes otherwise; the team settles
-     them on spec review." + the sort rule + "each entry opens with the
-     user-observable symptom; mechanism and evidence live in the entry's
-     footnote."
+     them on spec review." The sort rule, the verdict and impact words and
+     the entry shape are the glossary's ("Reading a spec"); the preamble
+     repeats none of them.
 
      Summary table, the triage view, sorted 🐞 → ❓ → ✅, mirroring the
      entries (the entries are the source):
