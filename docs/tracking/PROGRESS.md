@@ -122,14 +122,19 @@ markers and evidence footnotes are unchanged.
 _Harness changes agreed with the maintainer and not yet built. One line
 each; delete when done._
 
-- **Enrich the bootstrap seed** (maintainer, 2026-09-02): give
-  `publicknowledge` the settings most real journals enable (announcements,
-  public comments, categories in the wizard, keywords and citations on
-  request, reviewer suggestions, DOIs auto-assigned on publish, CSL,
-  double-anonymous review with deadlines) through a settings passthrough in
-  the bootstrap seeder, with parity rows; then re-check every shipped spec
-  and suite against the new defaults (PRINCIPLES "Bootstrap data policy").
-  `docs/process/seed-facts.md` regenerates when it lands.
+- **Scratch-context passthrough keys, built as features need them**
+  (maintainer, 2026-09-04, replacing the 2026-09-02 "enrich the bootstrap
+  seed" item): `publicknowledge` stays at the install defaults, so nothing
+  shipped is re-checked. Each feature that needs a setting at its
+  non-default end seeds it through `POST scenarios/context`; the first
+  feature to need a key family builds it with its parity row (scenarios.md
+  "Configuring a scratch context"; TEMPLATE settings coverage rule). Two
+  backlogs wait on families pending features will build: U27, U26 and U25's
+  review setup (U28 or U29), and U21's intake settings (U58); they sit in
+  `docs/tracking/backfill.md`. When the first reader-facing feature comes
+  up (article landing page, issues, catalog browse), seed an enriched
+  second journal in the bootstrap fixture rather than touching
+  `publicknowledge`.
 - **Per-phase runners, conditional**: after two features on the current
   loop, if the cost ledger still shows the orchestrator above about a fifth
   of spend, script the phases as separate `bin/workflows/` units (probe +

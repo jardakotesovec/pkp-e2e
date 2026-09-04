@@ -245,10 +245,12 @@ so; it is not a guess.
   role there; a suite that needs a different configuration would leave it
   behind for every other suite.
 - A different context-level configuration is a scratch context from
-  `POST scenarios/context` (scenarios.md): it arrives with the install
-  defaults above, and the test drives the settings screen it needs as the
-  scratch context's manager (or seeds the `orcid` state through the
-  scenario's passthrough). Throwaway users come from the same call.
+  `POST scenarios/context` (scenarios.md "Configuring a scratch context"):
+  it arrives with the install defaults above, and the test seeds the
+  setting it needs through a passthrough key (`orcid` today; a missing
+  family is built when a feature needs it). A test never drives a settings
+  screen to configure its context. Throwaway users come from the same
+  call.
 - Email validation or the ALTCHA check: use the validation variant through
   the `variants` fixture (`variants.validation` is the base URL); it shares
   the DB, files and Mailpit with the worker servers (harness.md).

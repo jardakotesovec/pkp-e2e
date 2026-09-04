@@ -184,11 +184,13 @@ their parity rationale in `docs/tracking/parity-ledger.md`.
 
 The base seed is `apps/<app>/playwright/fixtures/bootstrap.js`: the journal
 `publicknowledge`, 18 users, sections, categories and issues, documented in
-`users.md`. Richer defaults are the policy: enable what most real journals
-use, so tests exercise representative configuration, while scratch
-contexts keep the install defaults, so both configurations get covered.
-Today the base context still has plain install defaults; enriching it is
-open harness work (PROGRESS "Open harness work"). A bootstrap change
+`users.md`. The base context keeps the install defaults, and every shipped
+spec was verified against them. The configured half of a feature is
+covered on scratch contexts: each setting a spec lists is probed at both
+ends and the end real journals run gets a scenario (TEMPLATE "Settings
+that modify behavior"), seeded through the scenario API's passthrough keys
+(scenarios.md "Configuring a scratch context"), never by driving a
+settings screen in a test. A bootstrap change, should one ever be needed,
 requires checking every implemented spec against the new defaults,
 deliberately, not casually.
 

@@ -296,7 +296,16 @@ atlas-claims: [<atom IDs this spec owns>]
 ## Settings that modify behavior
 
 <!-- Site or context settings, config variables, plugin toggles that change
-     the rules above, and HOW they change them. -->
+     the rules above, and HOW they change them.
+     COVERAGE RULE: every setting listed here is probed at both ends
+     (RUNBOOK step 3), and the end real journals run gets a canonical
+     scenario below, or the entry says in one line why not ("configuration
+     file, no screen on the test installs", "owned by the ORCID spec").
+     An entry with neither is a gap the claim check reports. Those
+     scenarios are part of the feature's tier, not extra scope. The base
+     journal keeps the install defaults; a scenario at the other end runs
+     on a scratch context configured through the scenario API
+     (scenarios.md "Configuring a scratch context"). -->
 
 ## Cross-feature interactions
 

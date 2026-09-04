@@ -35,8 +35,10 @@ developer's PR fails the suite".
 
 **The maintenance session never builds a new spec or suite.** Pending
 PROGRESS rows are built in feature sessions the maintainer launches, one
-feature per session, under the RUNBOOK loop. Time left over after the
-steps above is left over; the session ends. An upstream change in a
+feature per session, under the RUNBOOK loop. When the sync loop produced nothing to accommodate, the session takes
+the top slice of `docs/tracking/backfill.md` (a shipped spec brought up to
+a rule adopted after it shipped), one slice a day at most, under the same
+rules as an accommodate slice; otherwise the session ends. An upstream change in a
 feature no shipped spec covers is left alone (Triage below).
 
 Three kinds of work arrive in this mode. Keeping specs and tests in step

@@ -173,11 +173,24 @@ JavaScript client is `pkpApi` in `shared/playwright/support/api.js`
 ## The base context has plain defaults
 
 `publicknowledge` is seeded with the fixture data above (sections,
-categories, issues, users) on top of the app's own install defaults. There
-is no settings passthrough that enriches it. A test that needs a setting
-changed drives the settings UI on a scratch context, never on
-`publicknowledge`.
-What those defaults are, screen by screen and dated: `seed-facts.md`.
+categories, issues, users) on top of the app's own install defaults, and
+stays that way: no settings passthrough enriches it, and no test changes a
+setting there. What those defaults are, screen by screen and dated:
+`seed-facts.md`.
+
+## Configuring a scratch context
+
+A scenario that runs with a setting at its non-default end (TEMPLATE
+"Settings that modify behavior", coverage rule) gets a scratch context
+from `POST scenarios/context` created with that setting through a
+passthrough key, the way `orcid` works today. A test never drives a
+settings screen to configure its context; a probe may, because what the
+screen offers is part of what it records. When a feature needs a key
+family the API does not have yet, the test author returns it as a harness
+need, the orchestrator has it built in the same session with its parity
+row (`docs/tracking/parity-ledger.md`), and the family leaves the list
+below. The shape is recorded there so it is built once, the same way,
+for every feature that needs it.
 
 ## Field shapes not built yet
 

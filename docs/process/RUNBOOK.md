@@ -607,7 +607,11 @@ paragraph, verbatim, before the task.
 8. **Write the Playwright tests** from the checked spec, following
    PRINCIPLES and the harness docs. One suite per app, derived from the spec
    (rules 2 and 3), one test per canonical scenario in each app that runs
-   it. Seed through the scenario endpoints, reuse or extend page objects,
+   it. Seed through the scenario endpoints (a configured scratch context
+   comes from a passthrough key, never from driving a settings screen in a
+   test; a missing key family is built in the session with its parity row,
+   scenarios.md "Configuring a scratch context"), reuse or extend page
+   objects,
    scope Mailpit by a unique throwaway recipient (PRINCIPLES A8), and pair
    every "nothing happens" claim with a positive control. Locators,
    dialogs and waiting idioms come from `screen-notes.md`, never from
