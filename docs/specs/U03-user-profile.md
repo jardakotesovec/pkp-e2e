@@ -9,18 +9,7 @@ atlas-claims: [AFFU-053, AFFU-054, AFFU-055, AFFU-056, AFFU-057, AFFU-058, AFFU-
 
 # User profile
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
-
-> **One spec, three applications.** The page is written in the words of a
-> journal (OJS): "journal", "Journal Manager", "Section Editor", "Reviewer".
-> Read it on a press (OMP) with "press" for "journal", Press Manager for
-> Journal Manager, Series Editor for Section Editor and External Reviewer
-> for the reviewer role; on a preprint server (OPS) with "server" for
-> "journal", Preprint Server Manager for Journal Manager, Moderator for
-> Section Editor, and no reviewer role at all. Where an on-screen sentence
-> differs by more than that one word, the spec quotes each application's
-> version. The full map is Part II of the
-> [application glossary](GLOSSARY.md).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -34,7 +23,8 @@ seven tabs: **Identity** (names, display name, avatar initials), **Contact**
 Key** (a token for external applications). The page is the same on a journal,
 a press and a preprint server; what differs is which self-service roles a
 context offers. The Notifications tab is described here only as a screen; what
-each toggle does belongs to *Notifications center & email preferences*. The
+each toggle does belongs to
+[Notifications center & email preferences](U05-notifications-center-and-email-preferences.md). The
 ORCID controls on the Identity tab belong to
 [ORCID integration](U04-orcid-integration.md).
 
@@ -130,7 +120,7 @@ with, for every event type, the two checkboxes "Enable these types of
 notifications." and "Do not send me an email for these types of
 notifications." Unticking the first greys out the second, unticked, and
 both survive a Save (Rule 11). The types and what the boxes do belong to
-*Notifications center & email preferences*. <sup>i</sup>
+[Notifications center & email preferences](U05-notifications-center-and-email-preferences.md). <sup>i</sup>
 
 **API Key tab:**
 
@@ -376,7 +366,8 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
     choices are kept per journal: the tab saves for the journal it was
     opened in, and the site-level profile keeps a separate set (Rule 3).
     Which types are listed, what each box does, and the one-click
-    unsubscribe page belong to *Notifications center & email preferences*.
+    unsubscribe page belong to
+    [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md).
     <sup>i</sup>
 12. **The API key.** <sup>h</sup>
     - 12a. **States.** With no key, the tab shows "None" and a "Create API
@@ -401,10 +392,9 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
       that switches it and is described from the code alone. <sup>k</sup>
 13. **A role not yet started.** When the page is opened in a journal where
     the user holds no active role, but a dated role assignment is waiting to
-    start (a Journal Manager creates one with "Invite to a role" on Users &
-    Roles, giving a start date in the future, and the invited person accepts
-    the emailed invitation; the *User invitations* feature describes it), a
-    banner above the heading reads "Your role is scheduled to begin on {date}" and "Until
+    start (a role invitation with a start date in the future that the
+    invited person has accepted; the *User invitations* feature describes
+    it), a banner above the heading reads "Your role is scheduled to begin on {date}" and "Until
     then, you can review and update your profile. If you believe this is an
     error, please contact the administrator." The waiting role may sit in
     any journal, not only the one being viewed ⚠ [A5](#a5). <sup>j</sup>
@@ -495,7 +485,8 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
   tab's "Editors" group carries a "Statistics report summary." row; switched
   off ("Do not send the email to editors." under Settings › Workflow ›
   Emails), the row disappears. The site-level profile never shows it. The
-  setting and the row belong to *Notifications center & email preferences*.
+  setting and the row belong to
+  [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md).
   <sup>i</sup>
 
 ## Cross-feature interactions
@@ -513,7 +504,7 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
   [Login-link finding](U02-registration-and-account-validation.md#a5) is a
   cousin of [A1](#a1): both aim at the Roles tab and miss.
 - **ORCID integration** owns everything ORCID on the Identity tab.
-- **Notifications center & email preferences** (spec not yet written) owns the meaning of
+- **[Notifications center & email preferences](U05-notifications-center-and-email-preferences.md)** owns the meaning of
   the Notifications tab's boxes, the list of event types, and the one-click
   unsubscribe page.
 - **User invitations.** The email-change confirmation reuses the invitation
@@ -553,20 +544,12 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
 
 ## Canonical scenarios
 
-Common to all three apps. The scenarios use journal words; the note under
-the title says how to read them on a press or a preprint server. Actors are
-named by role. Two words recur: the *seeded journal* is the journal a test
-install ships with (registration open, every default role, and a ready
-account for each role); a *scratch journal* is a throwaway journal created
-for the test, which arrives the same way. A scenario that changes an account
-runs on a fresh throwaway account in a scratch journal, never on a ready
-account; scenarios 1 and 10, which only look, use a ready account on the
-seeded journal. Where a scenario opens an email, read it in the mailbox of
-the address it was sent to: on a test install every message the site sends
-lands in one shared *mail catcher*, a web page listing the mail, and the
-message for your account is the one addressed to that account's email
-address. The ready accounts and their passwords, the mail catcher's address
-and the set-up recipes live in the footnotes. <sup>s</sup>
+Scenarios 2–9 change an account, so each runs as a throwaway account on a
+scratch journal, never as a ready account; scenarios 1 and 10, which only
+look, use a ready account on the seeded journal. Read an email in the
+mailbox of the address it was sent to. The ready accounts and their
+passwords, the mail catcher's address and the tooling recipe are in the
+footnote. <sup>s</sup>
 
 1. **Reach the profile and its tabs** — Author, signed in on the journal:
    open the top-right user menu and press "Edit Profile". A page headed
@@ -627,9 +610,8 @@ and the set-up recipes live in the footnotes. <sup>s</sup>
    tab with the old address in force and "Your changes have been saved." at
    the top right, and the "confirm" link of that second message now also
    shows "Invitation Unavailable".
-6. **Take a role and give it up** — a Reader who holds no other role (a
-   fresh account that registered with the journal and took nothing else;
-   the footnote gives the recipe): on "Roles", under the heading "Roles",
+6. **Take a role and give it up** — a Reader who holds no other role: on
+   "Roles", under the heading "Roles",
    the boxes offered on a journal are "Reader" (ticked), "Author" and
    "Reviewer"; on a press they are "Reader", "Author", "Chapter Author" and
    "External Reviewer" [OMP1](#omp1); on a preprint server "Reader" and
@@ -691,21 +673,17 @@ and the set-up recipes live in the footnotes. <sup>s</sup>
     for these types of notifications.", and a "Save" button. Untick one "Enable…" box: its
     email box greys out. Press "Save": "Your changes have been saved.".
     Reopen the tab: the box is still unticked. Tick it again and save to
-    restore. (What each box changes is tested in *Notifications center &
-    email preferences*.)
+    restore. (What each box changes is tested in
+    [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md).)
 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-03), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted 🐞 → ❓ →
-✅ in the summary; the entries below are the source. Each entry opens with the
-user-observable symptom; mechanism and evidence live in the entry's footnote.
-Impact values: user-visible = real effect in ordinary use · minor = cosmetic
-only, however often seen · latent = only in an unusual situation or
-configuration · invisible = an intended difference between the applications
-that misleads nobody, recorded so the difference is on file. Every entry was
-seen on a running install of all three apps on 2026-09-03 and again on
-2026-09-04 unless its Basis line says otherwise.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec). Every entry was seen on
+a running install of all three apps on 2026-09-03 and again on 2026-09-04
+unless its Basis line says otherwise.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
@@ -1489,8 +1467,8 @@ check**: OJS's subclass appends two public-category types (published issue,
 open access); OMP's and OPS's subclasses are empty. Storage:
 `NotificationSubscriptionSettingsDAO` keyed by user **and** `contextId`
 (null at site level), read and written in `fetch()` / `execute()`. Types,
-semantics and the unsubscribe page: *Notifications center & email
-preferences*. Live-probed 2026-09-03, all three apps (Rule 11; Settings):
+semantics and the unsubscribe page:
+[Notifications center & email preferences](U05-notifications-center-and-email-preferences.md). Live-probed 2026-09-03, all three apps (Rule 11; Settings):
 unticking `notificationNewAnnouncement` leaves `emailNotificationNewAnnouncement`
 unticked and `disabled`; Save answers the toast, and a full reload shows
 both as saved with the pairing reapplied; the "Editors" group holds "Weekly
@@ -1866,7 +1844,7 @@ user's request delivered the same mail. Live-probed 2026-09-04 (claim check): ho
 | Roles tab | Profile → "Roles" | AFFU-078..083 |
 | Public tab | Profile → "Public" | AFFU-084..088 |
 | Password tab | Profile → "Password" | AFFU-089..092 |
-| Notifications tab (shell only) | Profile → "Notifications" | AFFU-058 (boxes AFFU-093..095: *Notifications center & email preferences*) |
+| Notifications tab (shell only) | Profile → "Notifications" | AFFU-058 (boxes AFFU-093..095: [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md)) |
 | API Key tab | Profile → "API Key" | AFFU-096..098 |
 | Email-change confirmation mail + links | `CHANGE_EMAIL` → `{journal}/invitation/accept?id=…&key=…` · `invitation/decline?…` → POST `confirmDecline` | MAIL-003 |
 | User record | `lib/pkp/schemas/user.json` (the fields these tabs edit) | SET-027 |

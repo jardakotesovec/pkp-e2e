@@ -9,7 +9,7 @@ atlas-claims: [AFFW-213, AFFW-214, AFFW-215, AFFW-217, AFFW-218, AFFW-219, AFFW-
 
 # Reviewer assignment & management {OJS OMP}
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -55,10 +55,9 @@ Within the panel, "review managers" below means:
 Journal Manager, Editor, and an assigned Section Editor or Guest Editor. A
 Site Administrator takes part through whatever journal role grants them
 stage access. Holding no role in the journal, they are refused at the
-workflow screen itself ([A3](#a3), retired) <sup>a</sup>. An "assistant-level
-participant" is a member of an assistant group assigned to the stage. On the
-seeded installs the one such group the stage's assignment dialog offers is
-Funding Coordinator. The Author reaches the same workflow screen for their
+workflow screen itself ([A3](#a3), retired) <sup>a</sup>. On the seeded
+installs the one assistant-level group the stage's assignment dialog offers
+for this stage is Funding Coordinator. The Author reaches the same workflow screen for their
 own submission, but while reviews are underway they get no Reviewers panel at
 all: no table, no reviewer identities. Whether and when a reduced read-only
 list of completed reviews appears is owned by
@@ -552,11 +551,10 @@ review forms* unless said otherwise. <sup>n</sup>
 
 ## Canonical scenarios
 
-Common to OJS and OMP. Substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md). On a press, run them on External
-Review; scenario 13 covers the internal twin. Actors are named by role;
-seeded accounts and recipes live in the footnotes. <sup>s</sup> Outgoing
-mail is observed in the test install's mail catcher.
+Every scenario runs on the seeded journal with ready accounts and scratch
+submissions; scenario 3's new reviewer is a throwaway address, and each
+email is read in the mailbox of the address it was sent to. The accounts and
+the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Invite a reviewer** — Editor: on a round with review files, press "Add
    Reviewer", search the list for a seeded reviewer by name, and press
@@ -597,9 +595,8 @@ mail is observed in the test install's mail catcher.
    as the reviewer: their account shows the "Review assignment updated."
    task, and their mailbox holds the change notice. Control: an edit that
    changes only the file ticks sends nothing new.
-7. **Remind an overdue reviewer** — Editor: on a row showing "Overdue" (for
-   example, via "Edit" set the response due date to yesterday; the pickers
-   accept past dates), the row's button reads "Send Reminder". Open it,
+7. **Remind an overdue reviewer** — Editor: on a row showing "Overdue", the
+   row's button reads "Send Reminder". Open it,
    verify the schedule readout, and press "Send Reminder". The notice
    "Notification sent." appears, the reviewer's mailbox holds the reminder,
    and the row's "History" now lists a "Reminder" date. Check it before the
@@ -612,7 +609,7 @@ mail is observed in the test install's mail catcher.
    the review due date. Control: the "Log Response" entry is gone from that
    row's menu afterwards.
 9. **Read, rate, mark complete, thank** — with a submitted review on the
-   round (seeded), Editor: the row reads "Review Submitted". Open "Read
+   round, Editor: the row reads "Review Submitted". Open "Read
    Review": the "Review Details" window opens and the row behind it turns
    "Review Viewed" at once (it stays after a reload). See the reviewer's
    comments split into "For author and editor" / "For editor" ({OMP}: "For
@@ -640,9 +637,8 @@ mail is observed in the test install's mail catcher.
     dated state ("Request Accepted" or "Overdue"), and the reviewer's
     mailbox holds the cancel notice ("Your review for … has been cancelled")
     and the reinstate notice.
-12. **Decline, then ask again** — with a declined row (the reviewer
-    declined, or scenario 8 run with the decline option), Editor: the row
-    reads "Request Declined". Open "Resend Review Request", keep the fresh
+12. **Decline, then ask again** — with a declined row, Editor: the row reads
+    "Request Declined". Open "Resend Review Request", keep the fresh
     dates, and send. The row reads "Request Resent" ⚠ [A2](#a2) and the
     reviewer's mailbox holds the reconsider request.
 
@@ -688,19 +684,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-02), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. A claim-check
-pass (claude, 2026-08-02, both apps live) re-drove every entry and the spec's
-claims. Where it overturned an entry, the entry is retired in place: the
-badge becomes ✅, the wording states the resolution, so IDs stay dense, and
-the ruling sits in the entry's Reviewed line and the summary's Review column.
-A finding fixed upstream after that pass moves to the `### Retired` block at
-the register's end as one line (TEMPLATE), its footnote keeping the record.
-Sorted 🐞 → ❓ → ✅ in the summary (🐞 defect, author's call · ❓ needs a
-product ruling · ✅ intended divergence, or a retired finding); the entries
-below are the source. Each entry opens with the user-observable symptom;
-mechanism and evidence live in the entry's footnote. Impact key: user-visible
-= real effect in ordinary use · minor = cosmetic only, however often seen ·
-latent = only in an unusual situation or configuration.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

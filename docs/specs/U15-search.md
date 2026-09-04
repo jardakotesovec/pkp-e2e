@@ -9,20 +9,7 @@ atlas-claims: [AFFR-083, AFFR-084, AFFR-085, ROUTE-024, ROUTE-048, ROUTE-067, RO
 
 # Search
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
-
-> **One spec, three applications.** The page is written in the words of a
-> journal (OJS): "journal", "article", "Journal Manager", "Section Editor".
-> Read it on a press (OMP) with "press" for "journal", "book" or "monograph"
-> for "article" and Press Manager for Journal Manager; on a preprint server
-> (OPS) with "server" for "journal", "preprint" for "article", Preprint
-> Server Manager for Journal Manager and Moderator for Section Editor. Two
-> on-screen strings follow the map: the search box's hidden label "Search
-> articles for" reads "Search preprints for" on a server, and a result's
-> date line reads "Downloads: {n} - Submitted {date} - Posted {date}"
-> there. The press's Search page is a different page with its own wording,
-> described where it differs ([OMP2](#omp2)). The full map is Part II of
-> the [application glossary](GLOSSARY.md).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -36,7 +23,8 @@ narrow by publication date and to page through long lists. Behind the page
 sits the **search index**: the site's own copy of the searchable text of
 every published article, refreshed in the background when an article is
 published or unpublished and rebuildable from the command line. This spec
-owns the Search page and its forms in the three applications, the results
+owns the Search page and its forms in the three applications (a press's
+is a different page with its own wording, [OMP2](#omp2)), the results
 list, the refinements, the paging, the site-wide search across journals,
 the index and what keeps it current, and the search box on a preprint
 server's home and archive pages. It does not cover the editorial
@@ -77,7 +65,7 @@ shared. <sup>b</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Search box** (hidden label "Search articles for", heard through a screen reader or seen in the browser's accessibility inspector, not on screen; the box shows the placeholder "Search") | No | The words to look for. Left empty, or holding only spaces, the page behaves as Rule 5 says. Reloaded with results, the box still holds the words searched. |
+| **Search box** (hidden label "Search articles for", "Search preprints for" on a server, heard through a screen reader or seen in the browser's accessibility inspector, not on screen; the box shows the placeholder "Search") | No | The words to look for. Left empty, or holding only spaces, the page behaves as Rule 5 says. Reloaded with results, the box still holds the words searched. |
 | **Advanced filters › Published After** (three selects labelled "Year", "Month", "Day", each starting blank) | No | Keeps only articles published on or after the chosen day (Rule 9). The Year list runs from the earliest to the latest publication date entered on any of the journal's articles, published or not ⚠ [A15](#a15). All three parts must be chosen: a Year with one or no other part is ignored, and the selects then show a date the reader did not choose ⚠ [A1](#a1); a Month or Day without a Year is ignored and the selects go blank. The Day list offers 1 to 31 for every month; a day the month does not have is applied as the following month's date ⚠ [A14](#a14). {OJS OPS} |
 | **Advanced filters › Published Before** (the same three selects) | No | Keeps only articles published before the chosen day; the chosen day itself is left out ⚠ [A2](#a2). Same Year list ⚠ [A15](#a15), same all-three-parts rule ⚠ [A1](#a1) and same handling of an impossible day ⚠ [A14](#a14). {OJS OPS} |
 | **Advanced filters › By Journal** (a select, first entry blank) | No | On the site-wide Search page of a journal site only (Rule 10): limits the results to one journal, but only on the first page of results, and the select shows blank again after every search [OJS2](#ojs2). Inside a journal the select is absent, and a press or preprint server site never shows one ⚠ [A10](#a10). {OJS} |
@@ -92,8 +80,8 @@ shared. <sup>b</sup>
    an article's landing page, Contact, Submissions) carries a "Search" link
    in its header, beside the navigation menu. The link is absent on the
    Search page itself and on the site's own pages outside any journal, and
-   the editorial dashboard, My Submissions and the reviewer's assignments
-   page, where a signed-in role lands, have their own header without it.
+   the Dashboard, My Submissions and the reviewer dashboard have their own
+   header without it.
    The link opens the Search page: breadcrumb and heading "Search",
    the search box, the Advanced filters (on a journal or server) and the
    "Search" button, with the results below. The header link belongs to the
@@ -233,7 +221,7 @@ shared. <sup>b</sup>
     version of it) queues a background refresh of its entry; the article
     becomes findable once that refresh has run: on a live site within
     moments, on a test install only after the site's background jobs have
-    been run (the set-up note under Canonical scenarios). Unpublishing an article removes it from the results at
+    been run (the scenarios' footnote says how). Unpublishing an article removes it from the results at
     once; so does unpublishing the issue that holds it {OJS}, and so does
     deleting it (a published article is deleted only after being returned
     to the workflow and declined, [Submission stage](U25-submission-stage.md#delete)).
@@ -401,15 +389,12 @@ configuration file (config.inc.php), search section; no screen shows them.
 
 ## Canonical scenarios
 
-Common to all three apps, in journal words; the note under the title says
-how to read them on a press or a preprint server. Actors are named by
-role. Every scenario starts from a *scratch journal*: a throwaway journal
-the Site Administrator creates for the test, holding the published
-articles the scenario names, each carrying a made-up word that appears
-nowhere else on the site. After the articles are published, run the site's
-background jobs so that the index holds them (Rule 12): a search that
-expects a hit is judged only once the jobs have run. The seeding recipe
-the suites use, and how the jobs are run on a test install, are in the
+Every scenario runs on a scratch journal holding the published articles it
+names, each carrying a made-up word that appears nowhere else on the site;
+scenarios 4, 5 and 9 sign in with throwaway accounts on it. The site's
+background jobs have run since the articles were published, so the index
+holds them (Rule 12): a search that expects a hit is judged only once the
+jobs have run. The tooling recipe, and how the jobs are run, are in the
 footnote. <sup>s</sup>
 
 1. **Find an article by a word in its title** — a visitor, on a scratch
@@ -517,16 +502,9 @@ Press-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-02), unreviewed unless
-an entry notes otherwise; the team settles them on spec review. Sorted
-🐞 → ❓ → ✅ in the summary; the entries below are the source. Each entry
-opens with the user-observable symptom; mechanism and evidence live in the
-entry's footnote. Basis: *probe* = seen on a running install on
-2026-09-02; *judgment* = the author's reading of the application, not seen
-running. Impact values: user-visible = real effect in ordinary use · minor
-= cosmetic only, however often seen · latent = only in an unusual situation
-or configuration · invisible = no reader ever sees it. The Review column
-reads "—" until someone has reviewed the entry, then that reviewer's name
-and date.
+an entry notes otherwise; the team settles them on spec review. The summary
+is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
+and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

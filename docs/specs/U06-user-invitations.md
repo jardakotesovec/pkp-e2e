@@ -9,7 +9,7 @@ atlas-claims: [AFFM-099, AFFM-100, AFFM-101, AFFM-118, AFFM-119, AFFM-120, AFFU-
 
 # User invitations
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -43,11 +43,10 @@ reach that screen at all belongs to the user-management feature (see
 
 ## Fields & validation
 
-On-screen labels follow the app. On a press the "Journal Masthead" column
-reads "Press Masthead", and on a preprint server "Server Masthead". Quoted
-button labels containing "OJS" likewise use the app's own acronym: a press
-shows "Create OMP account" and "Accept And Continue to OMP", a preprint
-server "Accept And Continue to OPS".
+On a press the "Journal Masthead" column reads "Press Masthead", and on a
+preprint server "Server Masthead". Button labels containing "OJS" carry the
+app's own acronym: a press shows "Create OMP account" and "Accept And
+Continue to OMP", a preprint server "Accept And Continue to OPS".
 
 Send wizard. The fields below are for a **new** invitee. For an existing
 user the personal fields show read-only.
@@ -224,9 +223,10 @@ Accept wizard (new invitee):
 
 ## Canonical scenarios
 
-Common to all three apps. Substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md). Actors are named by role; seeded
-accounts and recipes live in the footnotes. <sup>s</sup>
+Every scenario runs on the seeded journal: the Journal Manager is a ready
+account, each invitee is a throwaway address, and scenario 3's existing user
+is a ready account not yet holding the offered role. The accounts and the
+tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Invite a newcomer to a role**: Journal Manager: on Users & Roles, press
    "Invite to a role". On "Search User", enter an email address no account
@@ -301,10 +301,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-07-31), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted 🐞 → ❓ → ✅
-in the summary; the entries below are the source. Each entry opens with the
-user-observable symptom; mechanism and evidence live in the entry's footnote.
-An entry whose ID starts with OMP or OPS concerns only the app(s) it names.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

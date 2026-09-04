@@ -9,7 +9,7 @@ atlas-claims: [AFFW-323, AFFW-324, AFFW-325, AFFW-327, AFFW-328, AFFW-329, AFFW-
 
 # Review stage & rounds {OJS OMP}
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -38,13 +38,8 @@ Its screens are documented separately. <sup>q</sup>
 
 ## Actors & permissions
 
-"Assigned to the stage" means listed on the Participants panel for the review
-stage. A **deciding editor** is a Journal Manager or Editor, or an assigned
-Section Editor whose participation is not limited to recommendations. A
-**recommending editor** is an assigned editor whose participation is limited
-to recommendations. That limitation is set when participants are managed
-(see *Stage participants*). The Author reaches this screen only for their
-own submission, through My Submissions. Anyone who types the workflow
+The Author reaches this screen only for their own submission, through My
+Submissions. Anyone who types the workflow
 address of a submission they have no right to gets only an access error, and
 nothing of that submission is shown
 ([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)).
@@ -264,8 +259,7 @@ and the reviewer forms to *Reviewer assignment & management*.
   avoid a flood, the same editor is not emailed again for further uploads
   within a day unless they have signed in since the last notice. <sup>l</sup>
 - **Request Revisions decision.** Each author assigned to the stage gets a
-  task naming the submission in their task list, the "Tasks" panel opened
-  from the site header. On a journal it reads "Revision required.", on a
+  task naming the submission in the header's Tasks panel. On a journal it reads "Revision required.", on a
   press "Revisions to consider in External Review." ⚠ [OMP3](#omp3). Their
   row on My Submissions reads "Revision requested" with a "Submit revisions"
   button in both apps (the list itself belongs to *My Submissions*). The
@@ -330,11 +324,9 @@ and the reviewer forms to *Reviewer assignment & management*.
 
 ## Canonical scenarios
 
-Common to OJS and OMP. Substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md); on a press, the stage is External
-Review. Actors are named by role. Seeded accounts and recipes live in the
-footnotes. Where a scenario checks a recipient's mailbox, outgoing mail on
-the test install is observed in the install's mail catcher. <sup>s</sup>
+Every scenario runs on the seeded journal with ready accounts and scratch
+submissions; scenario 4's notice is read in the mailbox of the editor it was
+sent to. The accounts and the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Round 1 opens with the submission**: Editor: on a new submission's
    workflow, record the decision that sends it to review ("Send for Review").
@@ -440,11 +432,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-07-31), unreviewed unless an
-entry notes otherwise. The team settles them on spec review. The summary is
-sorted 🐞 → ❓ → ✅ (🐞 defect, author's call · ❓ needs a product ruling · ✅
-intended divergence). The entries below are the source. Each entry opens
-with the symptom a user observes; mechanism and evidence live in the entry's
-footnote.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

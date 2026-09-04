@@ -9,7 +9,7 @@ atlas-claims: [AFFW-027, AFFW-040, AFFW-048, AFFW-049]
 
 # My Submissions (author dashboard)
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -91,8 +91,8 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    instead. The editorial roles (Journal Manager, Section Editor, Assistant,
    Site Administrator) and the Reviewer role take precedence: an account
    holding one of those lands on that role's list instead, meaning the
-   editorial dashboard or the reviewer's assignment list. An account holding
-   both an editorial role and Reviewer lands on the editorial dashboard. In
+   Dashboard or the reviewer dashboard. An account holding both an
+   editorial role and Reviewer lands on the Dashboard. In
    every case the author group stays one click away in the sidebar. The
    retired submission-list address from older versions forwards the same
    way. An old bookmarked author-dashboard link for a specific submission
@@ -225,8 +225,10 @@ menu entry and the journal's intake gates belong to *[Submission wizard](U21-sub
 
 ## Canonical scenarios
 
-Common to all three apps. For OMP and OPS vocabulary, see the
-[application glossary](GLOSSARY.md).
+Every scenario runs on the seeded journal, signed in as a ready account
+holding only the Author role, with scratch submissions in the states the
+scenario names. The account and the tooling recipe are in each scenario's
+footnote.
 
 1. **Track and open a submission** — Author: on the journal's login page,
    sign in as an account whose only role is Author and that has one
@@ -276,9 +278,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-26), unreviewed unless
-an entry notes otherwise. The team settles them on spec review. Sorted
-🐞 → ❓ → ✅. Each entry opens with what the user sees. Mechanism and
-evidence live in the entry's footnote.
+an entry notes otherwise; the team settles them on spec review. The summary
+is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
+and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|

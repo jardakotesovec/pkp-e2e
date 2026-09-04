@@ -9,7 +9,7 @@ atlas-claims: [AFFW-226, AFFW-227, AFFW-228, AFFW-229, AFFW-230, AFFW-233, AFFW-
 
 # Workflow screen & stage access
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -28,8 +28,7 @@ menu with its stage entries and publication pages, where the screen lands
 when it opens, what a stage shows before its own panels, and the three
 confirmation dialogs the frame itself carries (delete a submission, return a
 finished submission to the workflow, return it to
-[Done](GLOSSARY.md#workflow), the resting place a submission enters once its
-version of record is published). Above all it is the one home of the
+[Done](GLOSSARY.md#workflow)). Above all it is the one home of the
 **stage-access rule**: which role, with which assignment, may open which
 stage and which publication page. The stage features, the publication
 features and the header tools' own features describe what sits inside each
@@ -46,9 +45,7 @@ them is described in this campaign [OMP1](#omp1).
 <a id="stage-access"></a>
 ## Actors & permissions
 
-**Terms used below.** A person is **assigned** to a submission when they
-appear on one of its Participants panels in some role (see *Stage
-participants*). Each role group has a fixed **stage set**, the stages the
+**Terms used below.** Each role group has a fixed **stage set**, the stages the
 group is allowed to work in; the Roles settings screen lists them. The
 defaults for the roles this spec names: Section Editor, Guest Editor and
 Author cover every stage; Copyeditor covers Copyediting; Layout Editor and
@@ -65,10 +62,9 @@ names a Site Administrator it means one who holds a journal role on this
 install; a role-less administrator is unverified ⚠ [A8](#a8) (Rule 3).
 **Editorial roles** are the manager-level roles plus Section Editor, Guest
 Editor and the assistant roles (Copyeditor, Layout Editor, Proofreader,
-Funding Coordinator). The **active stage** is the stage the submission
-currently sits in. The **author's view** is what the same screen shows when
-it is opened from My Submissions: fewer header tools and fewer publication
-pages, but the same stages and the same rules. <sup>a</sup> <sup>j</sup>
+Funding Coordinator). The **author's view** has fewer header tools and
+fewer publication pages, but the same stages and the same rules.
+<sup>a</sup> <sup>j</sup>
 
 The rule in one sentence: a manager-level role reaches every stage of every
 submission without being assigned; every other role reaches only the
@@ -85,7 +81,7 @@ role's stage set. The rows spell that out per capability.
 | **"View" / "Preview"** (header) | • Everyone who opened the screen from the editorial dashboard, the assistant roles included: "View" while the submission rests in Done; "Preview" while it is not published and sits in Copyediting or Production (Rule 6)<br>• Author: neither; the author's header carries "Library" only <sup>f</sup> |
 | **"Activity Log"** (header) | • Journal Manager; Editor, unless assigned to the submission in another role, in which case as that role (as in the row "Open a stage's panels"); assigned Section Editor and Guest Editor, while their stage set includes the active stage. The log itself is *Submission activity log & notes*<br>• Assistant roles; Author: never <sup>f</sup> |
 | **"Library"** (header) | • Everyone who can open the screen, the Author included. The library is *Submission & Publisher Libraries* <sup>f</sup> |
-| **"Return to Workflow"** (header, Rule 18) | • [Deciding editors](GLOSSARY.md#roles-and-access), while the submission rests in Done: a Journal Manager or Editor (no assignment needed), or an assigned Section Editor or Guest Editor whose assignment is not limited to recommendations<br>• Assistant roles; Author: never <sup>m</sup> |
+| **"Return to Workflow"** (header, Rule 18) | • [Deciding editors](GLOSSARY.md#roles-and-access), while the submission rests in Done<br>• Assistant roles; Author: never <sup>m</sup> |
 | **"Return to Done"** (header, Rule 18) | • The same deciding editors, on the active stage, once the submission has been returned from Done and still has a published version<br>• Assistant roles; Author: never <sup>m</sup> |
 | **Confirm the "Delete" dialog** (Rule 19) | • Journal Manager; Editor; Site Administrator (who holds a journal role on this install; a role-less administrator is unverified, see [A8](#a8)). An assigned Section Editor (a Moderator on a preprint server) is not offered the button. Which stage offers it, and when, is the stage feature's rule (*[Submission stage](U25-submission-stage.md#delete)*, *Review stage & rounds*, *Production stage*). Behind the dialog the system refuses the deletion for any other role <sup>n</sup> |
 | **Change the submission language / choose a version / create a version** (publication controls, Rules 9 and 17) | • Owned elsewhere: [→ change language](U40-publication-metadata.md), *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*. A version is chosen by selecting its node in the side menu; the page itself offers no version switcher (Rule 17) |
@@ -202,8 +198,7 @@ from the menu belongs to its own feature.
    modify behavior; *Payments & APCs*); **"View"** while the submission
    rests in Done, or **"Preview"** while it is not published and sits in
    Copyediting or Production (on a preprint server, every preprint that is
-   [queued](GLOSSARY.md#workflow) or declined; queued means still awaiting
-   a decision at its stage); both open the
+   [queued](GLOSSARY.md#workflow) or declined); both open the
    submission's public page, the one a site visitor reads, in the same tab,
    and "Preview"'s page carries the notice "This is a preview and has not
    been published."; neither appears while the
@@ -575,11 +570,9 @@ from the menu belongs to its own feature.
 
 ## Canonical scenarios
 
-Common scenarios first, then app-specific ones. Actors are named by role;
-substitute the press and preprint-server names per the glossary's
-[role name map](GLOSSARY.md#roles-default-user-group-names). Any install that offers the roles
-named serves; the footnotes record the accounts and test data the test
-install uses. <sup>s</sup>
+Every scenario runs on the seeded journal with ready accounts; the
+submissions, and the assignments on them, are scratch. The accounts, their
+passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Open a submission's workflow from the editorial dashboard**. Editor:
    on the dashboard, press "View" on a freshly submitted article. A panel
@@ -708,13 +701,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-02), unreviewed unless an
-entry notes otherwise. The team settles them on spec review. The summary is
-sorted 🐞 → ❓ → ✅ (🐞 defect, author's call · ❓ needs a product ruling · ✅
-intended divergence). The entries below are the source. Each entry opens
-with the symptom a user sees; mechanism and evidence live in the entry's
-footnote. Impact values: user-visible = a real effect in ordinary use ·
-minor = cosmetic only, however often seen · latent = only in an unusual
-situation or configuration.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

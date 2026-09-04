@@ -85,6 +85,11 @@ is mechanically decidable and is a broken reference for the reader:
 - Link resolution: every link, anchor and footnote resolves.
 - Campaign identifiers in the body: a FEATURE-MAP row code or an atlas atom
   ID is a reference no QA or product reader can resolve (rule 5).
+- Shape: the Conventions line is the one-line GLOSSARY pointer verbatim,
+  there is no "One spec, three applications" note under the title, the
+  register preamble does not re-explain the impact words or the entry
+  shape, and the scenario preamble does not open with "Common to all three
+  apps." The reader has read the GLOSSARY; the body carries the feature.
 
 Everything else, including wording, glossary vocabulary, app badges and the
 code-in-footnotes rule, is the writer's judgment, checked by the readability

@@ -42,7 +42,11 @@ One row per feature, in FEATURE-MAP order. Budget is the provisional tier
 per app, register counts, review status, open blockers). History lives in
 git and in `upstream-sync.md`; do not append to a note, replace it. All
 shipped specs had a plain-English body rewrite on 2026-09-02; claims,
-markers and evidence footnotes are unchanged.
+markers and evidence footnotes are unchanged. On 2026-09-04 every
+shipped spec was trimmed to the GLOSSARY reader: the per-spec reading
+instructions, the scenario preamble definitions and the by-hand set-up
+recipes are gone (TEMPLATE, lint `shape` check); logs in
+`.reports/backfill-trim/`.
 
 | Row | Feature | Apps | Budget | Status | Note |
 |---|---|---|---|---|---|

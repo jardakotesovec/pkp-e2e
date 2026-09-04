@@ -58,8 +58,9 @@ touched.
   source of names; specs always use the concrete on-screen name, never
   umbrellas like "editorial staff". Role LEVELS (manager / editor /
   assistant / reader) group roles by capability; "assistant-level" covers
-  Copyeditor, Layout Editor, Proofreader, Funding Coordinator — panels but
-  never decision buttons.
+  the default assistant groups (OJS: Copyeditor, Designer, Funding
+  Coordinator, Indexer, Layout Editor, Marketing and Sales Coordinator,
+  Proofreader, Editorial Board Member) — panels but never decision buttons.
 - **Site Administrator** — the install-wide admin: Administration area, site
   settings, impersonation. Takes part in a journal's workflow only through a
   journal role.
@@ -87,6 +88,8 @@ touched.
 
 ## Workflow
 
+- **Draft (incomplete submission)** — a submission started in the wizard
+  and not yet submitted; it is the author's alone until the final "Submit".
 - **Stage** — one of the workflow's fixed stops: Submission → Review →
   Copyediting → Production (OJS), plus Done once a version of record is
   published. Fixed per app, not configurable. Cross-app: Part II (OMP adds
@@ -260,15 +263,19 @@ The long form of the legend. Each spec's Conventions line carries the three symb
   has been verified there. The absence of a marker is itself a claim, never
   "not checked yet".
 - **Badge.** `{OJS OMP}` on a title or a scenario says which apps have the
-  surface. A missing app gets a one-paragraph absence note near the top.
+  surface. A missing app gets a one-paragraph absence note near the top. A
+  register entry whose ID starts with OMP or OPS concerns only the app it
+  names, and a marker inside a badged claim may report what the apps
+  outside the badge wrongly show.
 - **Markers.** `⚠ [A1](#a1)` in the body means "the app deviates here from
   what you would expect". It links to the Findings-register entry. A plain
   `[OMP2](#omp2)` without ⚠ links to an intended difference between apps.
   After the first mention, repeats carry the bare marker.
 - **Basis** (the last line of a register entry) names the kind of evidence
   behind the finding: *probe* = seen on a running install; *commit* =
-  traced in the app's change history; *judgment* = the author's reading of
-  the app, not yet seen running.
+  traced in the app's change history; *code* = read from the app's code
+  and not seen running; *judgment* = the author's reading of the app, not
+  yet seen running.
 - **Findings register.** The spec's single home for everything that deviates
   or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
   ruling · ✅ an intended difference. **Impact** is one plain word

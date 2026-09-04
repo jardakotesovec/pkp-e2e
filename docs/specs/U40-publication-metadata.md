@@ -9,7 +9,7 @@ atlas-claims: [AFFW-281, AFFW-285, AFFW-379, AFFW-380, AFFW-381, AFFW-382, AFFW-
 
 # Publication metadata {OJS OMP OPS}
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -25,10 +25,9 @@ version, until publication. The feature also decides who may still touch it
 afterwards: editors are warned, authors are locked out. It owns the journal's
 default license settings, the tool that re-stamps every submission with those
 defaults, and what readers see of the license and statements on the
-published item's page. It is one shared feature of OJS (journals), OMP
-(presses) and OPS (preprint servers), written here in journal terms. A
-press's readers see the same blocks on the catalog's book page, and a
-preprint server's readers on the preprint's page.
+published item's page. A press's readers see the same blocks on the
+catalog's book page, and a preprint server's readers on the preprint's
+page.
 
 ## Actors & permissions
 
@@ -51,7 +50,7 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 | **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1) <sup>a</sup> |
 | **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator: always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND no version is published or scheduled (Rule 9). A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
 | **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission. The Author is never offered it, in any app <sup>i</sup> |
-| **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License. Reaching Settings is the settings features' rule <sup>m</sup> |
+| **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License <sup>m</sup> |
 | **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator: Tools › Permissions (Rule 14) <sup>k</sup> |
 | **Read the license, data availability and funding statement blocks** | • any reader: on a published item's landing page (Rule 15) <sup>l</sup> |
 
@@ -463,8 +462,11 @@ it for a per-item value (Rule 11). <sup>g</sup>
 
 ## Canonical scenarios
 
-Common to all three apps (OMP/OPS vocabulary per the
-[application glossary](GLOSSARY.md)):
+Scenarios 1, 3, 4 and 11 run on the seeded journal with ready accounts
+and scratch submissions; scenarios 2 and 5–10 run on a scratch journal
+with throwaway accounts, because each changes journal settings or
+rewrites every submission in the journal. Each scenario's accounts and
+seeding are in its footnote.
 
 1. **Edit the title and abstract** — Journal Manager: open a submitted,
    unpublished submission's workflow, then the Publication area, then
@@ -493,8 +495,7 @@ Common to all three apps (OMP/OPS vocabulary per the
    after filling it, then re-enable it: the value is back. <sup>s2</sup>
 3. **The Author before and after publication** — Author, then Journal
    Manager: as the Author, open your own submitted submission's "Title &
-   Abstract" (My Submissions › the item › workflow). On a journal or
-   press the fields are shown but Save is unavailable, and nothing typed
+   Abstract". On a journal or press the fields are shown but Save is unavailable, and nothing typed
    persists on reload. On a preprint server the page saves like scenario
    1 [OPS1](#ops1). As the Journal Manager, publish the submission. Back
    as the Author: the published version's Title & Abstract shows "This
@@ -506,10 +507,7 @@ Common to all three apps (OMP/OPS vocabulary per the
    Author's "Edit Assignment", tick "Allow this person to make changes
    to the publication…", OK. Author: Save works again. Journal only:
    schedule a different submission of the same Author to a future issue
-   instead of publishing it (save "Assign To Future Issue and Schedule
-   Only" on its Publication area's "Publication Settings" page first,
-   then re-pick it in the "Schedule For Publication" panel). Its Title &
-   Abstract is read-only for the Author with no banner at all. <sup>s3</sup>
+   instead of publishing it. Its Title & Abstract is read-only for the Author with no banner at all. <sup>s3</sup>
 4. **Editing a published version** — Journal Manager, on a published
    item: every Publication page shows "Warning: This version has been
    published. Editing it may impact the published content." Change the
@@ -614,12 +612,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-28), unreviewed unless
-an entry notes otherwise; the team settles them on spec review. Sorted
-🐞 → ❓ → ✅. Each entry opens with the user-observable symptom; mechanism
-and evidence live in the entry's footnote. Entries marked *basis: code*
-were read from the pinned checkouts and await their live drive. An entry
-the live drive disproved is retired in place: its badge becomes ✅ and its
-wording states the resolution, so IDs stay dense.
+an entry notes otherwise; the team settles them on spec review. The summary
+is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
+and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|

@@ -9,7 +9,7 @@ atlas-claims: [AFFW-256, AFFW-383, AFFW-384, AFFW-387, AFFW-388, AFFW-389, AFFW-
 
 # Publish, schedule & versions {OJS OMP OPS}
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -25,11 +25,10 @@ stages and numbering ("Author Original", "Version of Record 2.1"), the
 version list in the workflow's side menu, and the status readout
 ("Status: Published") that every role sees.
 
-This spec is written in journal terms. A preprint server's screens say
-**Post**/**Unpost**/**Posted** where a journal's say
-Publish/Unpublish/Published, and its confirmation window is titled "Post the
-preprint". Other renames follow the glossary's cross-app map. The press's
-per-submission "Catalog Entry" page and its catalog flags belong to
+A preprint server's screens say **Post**/**Unpost**/**Posted** where a
+journal's say Publish/Unpublish/Published, and its confirmation window is
+titled "Post the preprint". The press's per-submission "Catalog Entry"
+page and its catalog flags belong to
 *Catalog management* (no spec yet); this spec owns only the act of
 publishing. A journal's issues themselves, meaning creating, ordering and
 publishing them, belong to *Issues* (no spec yet); this spec owns the
@@ -37,14 +36,12 @@ issue-assignment choices offered while publishing an article.
 
 ## Actors & permissions
 
-The Publication area is part of the per-submission workflow screen. Who
-reaches that screen at all is
+Who reaches the workflow screen at all is
 [→ stage access](U24-workflow-screen-and-stage-access.md#stage-access).
 **May publish** below is one gate shared by every control in
 this feature: the user's role on the Production stage is Journal Manager,
-Editor or Site Administrator, and their participation is not limited to
-recommendations. That restriction is set on the participant's stage
-assignment (the glossary's *recommending editor*). Section Editors, Guest
+Editor or Site Administrator, and they are not a recommending editor.
+Section Editors, Guest
 Editors and assistant roles never get these controls, however they are
 assigned ⚠ [A2](#a2). On a preprint server that includes the Moderator
 role, the role the server's own submission screens say will "review and
@@ -416,8 +413,11 @@ page, described in *Catalog management*. It saves onto the shown version.
 
 ## Canonical scenarios
 
-Common to all three apps. Roles, labels and data follow the glossary's
-cross-app map; the publish button and window read per Rule 2.
+Scenarios 1–10 and 16 run on the seeded journal with ready accounts and
+scratch submissions; scenarios 11–15 run on a scratch journal with
+throwaway accounts, because each needs its own issues or a future-dated
+item. The publish button and window are labelled per Rule 2; the mail
+catcher and each scenario's seeding are in its footnote.
 
 1. **Publish a submission and see it live** — Journal Manager: open an
    unpublished submission's Publication area. The head reads "Status:
@@ -565,8 +565,8 @@ Preprint-server-only.
 
 Verdicts are the author's judgment (claude, 2026-08-29), unreviewed
 unless an entry notes otherwise; the team settles them on spec review.
-Sorted 🐞 → ❓ → ✅. Each entry opens with the user-observable symptom;
-mechanism and evidence live in the entry's footnote.
+The summary is sorted 🐞 → ❓ → ✅ and the entries below are the source;
+badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|

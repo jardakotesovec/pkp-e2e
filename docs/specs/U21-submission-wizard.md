@@ -9,13 +9,11 @@ atlas-claims: [AFFW-065, AFFW-068, AFFW-069, AFFW-070, AFFW-071, AFFW-072, AFFW-
 
 # Submission wizard {OJS OMP OPS}
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
-The submission wizard is how new work enters the journal. It exists in all
-three applications the title badges name: Open Journal Systems (OJS), Open
-Monograph Press (OMP) and Open Preprint Systems (OPS). A signed-in user
+The submission wizard is how new work enters the journal. A signed-in user
 starts on the **Make a Submission** screen and answers a few framing
 questions: title, language, section. What the journal asks depends on its
 setup. They then land in a guided multi-step wizard: upload files, enter
@@ -326,8 +324,8 @@ All effects fire at the moment of submission (Rule 14) unless noted.
   gets a separate acknowledgement. <sup>q</sup>
 - **Section editors are assigned and notified.** The journal's setup can
   pre-assign editorial users per section. Those editors are assigned to
-  the new submission and emailed, and it appears on their editorial
-  dashboard and in the submission's Participants list. The assignment
+  the new submission and emailed, and it appears on their Dashboard and
+  in the submission's Participants list. The assignment
   email itself belongs to *Stage participants*. On any journal created
   after the install's first, the assignment silently fails: nobody is
   assigned or emailed, and the needs-an-editor path below fires instead
@@ -444,9 +442,11 @@ them live are the subject of *Submission intake configuration*.
 
 ## Canonical scenarios
 
-Common to all three apps unless badged. Substitute press or preprint-server
-vocabulary per the [application glossary](GLOSSARY.md). Actors are named by
-role; seeding recipes live in the footnote. <sup>s</sup>
+Every scenario runs on the seeded journal with ready accounts; the drafts
+and submissions are scratch, scenario 9 signs in with a throwaway account
+holding no role in the journal, and scenario 10's second contributor is a
+throwaway address. The accounts, their passwords and the tooling recipe are
+in the footnote. <sup>s</sup>
 
 1. **Start a submission** — Author: signed in, choose "Start A New
    Submission" in the sidebar. The "Make a Submission" screen shows the
@@ -462,8 +462,8 @@ role; seeding recipes live in the footnote. <sup>s</sup>
    banner, tick any confirmation box, press "Submit", and confirm the
    dialog. The "Submission complete" screen appears with the links "Review
    this submission", "Create a new submission" and "Return to your
-   dashboard". The acknowledgement email arrives in the mail catcher.
-   "Review this submission" opens the submission's workflow. <sup>s</sup>
+   dashboard". The acknowledgement email arrives in your mailbox. "Review
+   this submission" opens the submission's workflow. <sup>s</sup>
 3. **Save for later and resume** — Author: on any wizard step, press "Save
    for Later". The "Saved for Later" screen shows a link naming your
    submission and the note that the link was emailed to you. The email
@@ -472,16 +472,10 @@ role; seeding recipes live in the footnote. <sup>s</sup>
 4. **Cancel a draft** — Author: in a draft's wizard footer, press "Cancel".
    The "Cancel submission" dialog warns that the submission and all its
    data will be deleted. Confirm with "OK". The "Submission cancelled"
-   screen appears, and the draft is gone from My Submissions. Control:
-   Journal Manager, then Section Editor. The manager assigns a Section
-   Editor to another author's draft through the Participants panel's
-   "Assign" on the draft's workflow screen, opened by its typed address (an
-   incomplete submission's dashboard row offers only "Complete submission",
-   no workflow opener; the workflow screen and its address are
-   [→ workflow addresses](U24-workflow-screen-and-stage-access.md#workflow-addresses),
-   the panel in *Stage participants*). That Section
-   Editor, opening the draft's wizard, gets "Save for Later" and "Continue"
-   but no "Cancel" control. On a preprint server this scenario passes only
+   screen appears, and the draft is gone from My Submissions. Control: a
+   Section Editor assigned as a participant to another author's draft,
+   opening the draft's wizard, gets "Save for Later" and "Continue" but no
+   "Cancel" control. On a preprint server this scenario passes only
    for a manager; the author's own confirmation does nothing
    ⚠ [OPS3](#ops3). <sup>o</sup> <sup>f</sup>
 5. **Change settings midway** — Author: in a draft on a journal with two
@@ -522,14 +516,14 @@ role; seeding recipes live in the footnote. <sup>s</sup>
 10. **All contributors are acknowledged** — Author: with the journal's
     submission acknowledgement set to all authors, add a second contributor
     with a distinct email on the Contributors step, then submit. Two
-    acknowledgement emails arrive in the mail catcher: one to you, one to
-    the other contributor. <sup>q</sup>
-11. **Editors learn of the new submission** — Journal Manager, then
-    Author: the manager configures one section that has an assigned
-    section editor and a second that has none. The author submits a fresh
+    acknowledgement emails arrive: one in your mailbox, one in the other
+    contributor's. <sup>q</sup>
+11. **Editors learn of the new submission** — Author, then Journal
+    Manager: on a journal with one section that has an assigned section
+    editor and a second that has none, the author submits a fresh
     submission to each. For the first, the section editor is assigned and
     notified. For the second, the Journal Manager receives the "needs an
-    editor" email in the mail catcher and a task notification. On any
+    editor" email and a task notification. On any
     journal created after the install's first, the first half fails: the
     editor is never assigned ⚠ [A8](#a8). <sup>q</sup>
 
@@ -571,11 +565,10 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-25; additions
-2026-08-26), unreviewed unless an entry notes otherwise. The team settles
-them on spec review. The summary is sorted 🐞 → ❓ → ✅; the entries below are
-the source. Each entry opens with the symptom a user sees. Mechanism and
-evidence live in the entry's footnote. Impact: user-visible = a real effect
-in ordinary use · minor = cosmetic · latent = only in an unusual situation.
+2026-08-26), unreviewed unless an entry notes otherwise; the team settles
+them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
+are the source; badges, Impact and Basis:
+[Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

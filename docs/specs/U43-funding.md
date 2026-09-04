@@ -9,16 +9,14 @@ atlas-claims: [AFFW-401, AFFW-551, AFFW-552, AFFW-553, AFFW-554, AFFW-555, AFFW-
 
 # Funding {OJS OMP OPS}
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
 Funding lets a journal record, for each submission, the organizations that
 funded the work and the grants behind it. Funders are formally credited, and
-the information travels with the publication's metadata. The feature is
-shared by the three applications the title names: OJS (journals), OMP
-(presses) and OPS (preprint servers). This spec is written in journal terms.
-Authors can be asked, or required, to declare funders while submitting. The
+the information travels with the publication's metadata. Authors can be
+asked, or required, to declare funders while submitting. The
 editorial team maintains the same list on the workflow's Publication area.
 Readers see the funders on the published item's landing page, with links to
 each funder's public registry record and to grant DOIs. A funder is
@@ -214,8 +212,10 @@ the submission."): <sup>c</sup>
 
 ## Canonical scenarios
 
-Common to all three apps (OMP/OPS vocabulary per the
-[application glossary](GLOSSARY.md)):
+Scenarios 1–3 run on the seeded journal with ready accounts and scratch
+submissions; scenario 4 runs on a scratch journal with throwaway
+accounts, because it changes the journal's funders setting. Each
+scenario's accounts and seeding are in its footnote.
 
 1. **Record and revise funding in the workflow** — Journal Manager: open a
    submission's workflow, then its Publication area, then "Funding". The
@@ -279,9 +279,10 @@ Common to all three apps (OMP/OPS vocabulary per the
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-28; additions
-2026-08-29), unreviewed unless an entry notes otherwise. The team settles
-them on spec review. Sorted 🐞 → ❓ → ✅. Each entry opens with the symptom a
-user can observe; mechanism and evidence live in the entry's footnote.
+2026-08-29), unreviewed unless an entry notes otherwise; the team settles
+them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
+are the source; badges, Impact and Basis:
+[Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|

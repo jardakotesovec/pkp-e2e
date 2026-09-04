@@ -9,13 +9,12 @@ atlas-claims: [AFFW-502, AFFM-117, AFFM-222, AFFU-065, AFFU-066, AFFU-099, AFFU-
 
 # ORCID integration
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
 An ORCID iD is a researcher's persistent public identifier. This feature lets
-a journal collect iDs that are **verified**, meaning their owners connected
-them through ORCID's own sign-in, rather than typed in on trust. Users connect
+a journal collect **verified** iDs rather than ones typed in on trust. Users connect
 an iD to their account from their profile or while registering. Editors ask a
 submission's contributors by email to verify theirs. A journal that holds
 ORCID **member** credentials also writes back: when an article is published,
@@ -26,12 +25,9 @@ whole site, with API credentials issued by ORCID.
 
 ## Actors & permissions
 
-"Verified" below means the person completed ORCID's sign-in for this install,
-so the iD carries an access token. An iD that was merely typed or imported is
-**unauthenticated** and is displayed as such. The screens that host an ORCID
-control (the profile, the workflow's Contributors list, the Reviewers table)
-keep their own access rules in their own features. This table covers only the
-ORCID capability on each of them.
+The screens that host an ORCID control (the profile, the workflow's
+Contributors list, the Reviewers table) keep their own access rules in their
+own features. This table covers only the ORCID capability on each of them.
 
 | Action | Who may — and when |
 |--------|--------------------|
@@ -244,13 +240,11 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
 
 ## Canonical scenarios
 
-Common to all three apps; substitute vocabulary per the
-[application glossary](GLOSSARY.md). Actors are named by role. No
-scenario step completes ORCID's own sign-in. Where a step opens the sign-in
-popup, the scenario says inline what an offline install shows. Preconditions
-marked "(seeded)" cannot be staged from any screen on an offline install.
-Their seeding recipes and accounts live in the scenarios' footnote, the one
-part of the Footnotes tail a scenario runner needs. <sup>s</sup>
+Every scenario runs on a scratch journal with throwaway accounts, ORCID
+enabled with sandbox credentials (scenario 7's journal has it disabled); no
+step completes ORCID's own sign-in, and the iDs a scenario starts from are
+seeded. The mail catcher and the tooling recipe are in the footnote.
+<sup>s</sup>
 
 1. **Turn ORCID on for a journal**: Journal Manager: open Settings → Users &
    Roles, tab "ORCID". Tick "Enable ORCID functionality"; the API fields
@@ -321,12 +315,8 @@ App-specific:
 
 Verdicts are the author's judgment (claude, 2026-08-07; additions
 2026-08-29), unreviewed unless an entry notes otherwise; the team settles
-them on spec review. Sorted 🐞 → ❓ → ✅ in the summary; the entries below are
-the source. Each entry opens with the user-observable symptom; mechanism and
-evidence live in the entry's footnote. An entry whose ID starts with OMP or
-OPS concerns only the app it names. A claim tagged {OJS} (or {OJS OMP})
-exists only in the app(s) the tag names, so a marker inside it may still
-report what the *other* apps wrongly show.
+them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
+are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

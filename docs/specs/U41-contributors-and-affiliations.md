@@ -9,7 +9,7 @@ atlas-claims: [AFFW-146, AFFW-147, AFFW-148, AFFW-149, AFFW-150, AFFW-151, AFFW-
 
 # Contributors & affiliations
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -24,12 +24,8 @@ name, contact details, one or more **contributor roles**, and any number of
 feature. An affiliation is an institution, either picked from the ROR
 registry (the public Research Organization Registry) or typed by hand. An
 entry picked from the registry carries the **ROR mark**, the registry's
-logo. One contributor per publication is its **primary contact**. That is
-the badge's on-screen wording, and it is distinct from the journal's
-*principal contact*, the configured identity that system emails are sent
-from. The feature is one shared implementation across OJS (journals), OMP
-(presses) and OPS (preprint servers). This spec is written in journal
-terms. <sup>a</sup>
+logo. One contributor per publication is its **primary contact**.
+<sup>a</sup>
 
 ## Actors & permissions
 
@@ -191,8 +187,7 @@ screen, Rule 12): <sup>e</sup>
    badge disappears with them, so a read-only viewer cannot tell which
    contributor is the primary contact ⚠ [A6](#a6). <sup>b</sup>
 10. **The primary contact.** Exactly one contributor at a time can be the
-    version's primary contact: the address editorial correspondence about
-    the work is directed to. "Set Primary Contact" moves the badge
+    version's primary contact. "Set Primary Contact" moves the badge
     immediately, with no confirmation. The submitting author's own
     contributor record arrives as the primary contact. It is created on
     submission; see *[Submission wizard](U21-submission-wizard.md)*.
@@ -357,8 +352,12 @@ screen, Rule 12): <sup>e</sup>
 
 ## Canonical scenarios
 
-Common to all three apps. For OMP and OPS vocabulary, see the
-[application glossary](GLOSSARY.md).
+Scenarios 1–3, 6 and 7 run on the seeded journal with ready accounts and
+scratch submissions; scenarios 4, 5 and 8 run on a scratch journal with
+throwaway accounts, because each needs the journal set up differently (a
+second submission language, added contributor roles, the
+competing-interests requirement). Each scenario's accounts and seeding
+are in its footnote.
 
 1. **Maintain the contributor list** — Journal Manager: open a
    submission's workflow, then the Publication area, then "Contributors".
@@ -411,11 +410,9 @@ Common to all three apps. For OMP and OPS vocabulary, see the
    itself from the suggestions, and press "Add". The institution joins
    the list, with "Edit institution name" and "Remove institution" behind
    its row-expander button ("Click to edit or delete"). On a journal with
-   a second submission language (enabled on Settings → Website →
-   Languages; see the language settings in
-   *[Publication metadata](U40-publication-metadata.md)*), "Edit
-   institution name" opens one name box per language with a "{count} of
-   {total} languages completed" status. Then type a real university's
+   a second submission language, "Edit institution name" opens one name
+   box per language with a "{count} of {total} languages completed"
+   status. Then type a real university's
    name and pick the suggestion that shows its country and the ROR mark.
    The entry's row links to the registry record and offers only "Remove
    institution". Known exception: on an install whose server cannot reach
@@ -486,8 +483,8 @@ Common to all three apps. For OMP and OPS vocabulary, see the
 
 Verdicts are the author's judgment (claude, 2026-08-28), unreviewed
 unless an entry notes otherwise; the team settles them on spec review.
-Sorted 🐞 → ❓ → ✅. Each entry opens with the user-observable symptom;
-mechanism and evidence live in the entry's footnote.
+The summary is sorted 🐞 → ❓ → ✅ and the entries below are the source;
+badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|

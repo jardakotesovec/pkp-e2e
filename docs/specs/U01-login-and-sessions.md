@@ -9,7 +9,7 @@ atlas-claims: [AFFW-467, AFFW-470, AFFW-473, AFFW-499, AFFM-105, AFFM-191, AFFM-
 
 # Login & sessions
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -27,9 +27,8 @@ signed in, expiry), and the screens they run on.
 
 ## Actors & permissions
 
-"Impersonate" below means using **Login As** to continue the browser session
-as another user. A user is "wholly within a manager's journals" when every
-role they hold anywhere on the site sits in journals that manager manages.
+A user is "wholly within a manager's journals" when every role they hold
+anywhere on the site sits in journals that manager manages.
 Who can reach the Users & Roles screen itself belongs to the users-management
 feature (see *Cross-feature interactions*).
 
@@ -93,8 +92,7 @@ title ⚠ [A3](#a3):
 
 1. **One Login page.** Every journal has a Login page, and the site has one
    outside any journal. The site-level page is reached from the "Login" link
-   at the top right of the site's own homepage, the page that lists the
-   journals. Both carry the same form. A visitor who is already signed in
+   at the top right of the site's own homepage. Both carry the same form. A visitor who is already signed in
    and opens the Login, lost-password, or emailed reset-link address is sent
    to their home (Rule 3) instead of the form. <sup>a</sup>
 2. **One generic failure.** A wrong password and a wrong or unknown username
@@ -324,9 +322,10 @@ title ⚠ [A3](#a3):
 
 ## Canonical scenarios
 
-Common to all three apps; substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md). Actors are named by role; seeded
-accounts and recipes live in the footnotes. <sup>s</sup>
+Scenarios 1–3, 7 and 8 use ready accounts on the seeded journal (8 on a
+scratch submission); scenarios 4–6 act on a throwaway account, because
+each changes its password. The ready accounts and their passwords and the
+tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Sign in and land on the Dashboard** — Editor: open the journal's Login
    page. Enter the right username with a wrong password. The page answers
@@ -400,12 +399,9 @@ accounts and recipes live in the footnotes. <sup>s</sup>
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-01), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted 🐞 → ❓ in
-the summary; the entries below are the source. Each entry opens with the
-user-observable symptom; mechanism and evidence live in the entry's footnote.
-Impact values: user-visible = real effect in ordinary use · minor =
-cosmetic only, however often seen · latent = only in an unusual situation
-or configuration.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

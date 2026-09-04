@@ -9,7 +9,7 @@ atlas-claims: [AFFW-001, AFFW-002, AFFW-003, AFFW-004, AFFW-005, AFFW-006, AFFW-
 
 # Submissions dashboard (editorial)
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -41,8 +41,7 @@ assistant" below). Two scopes run through everything (Rule 3). Journal
 Managers and Site Administrators work **journal-wide**: they see every
 submission in the journal. Section Editors and assistants work
 **assigned-only**: they see and search only the submissions they are
-assigned to through one of these roles, which means they are listed on a
-stage's Participants panel. Holding Author or Reviewer alongside an
+assigned to through one of these roles. Holding Author or Reviewer alongside an
 editorial role changes nothing here, except for the conflict rows of
 Rule 9a.
 
@@ -223,10 +222,7 @@ the account's roles, never on which dashboard page it opens from:
        needed." instead;
      - otherwise: the per-reviewer indicators alone.
    - 9f. **In review, with recommending editors on board** {OJS OMP}: the
-     messaging shifts to the recommendation workflow. Whether an editor is
-     recommending or deciding is chosen when they are added to the
-     submission's participants (a recommend-only option against full
-     decision powers). A deciding editor reads "Recommending Editors are
+     messaging shifts to the recommendation workflow. A deciding editor reads "Recommending Editors are
      tasked to advise the next steps for this submission", then "An
      editorial recommendation has been received" / "All editorial
      recommendations have been received, and a decision is required." as
@@ -369,9 +365,10 @@ the account's roles, never on which dashboard page it opens from:
 
 ## Canonical scenarios
 
-Common to all three apps. OMP and OPS vocabulary follows the
-[application glossary](GLOSSARY.md). Scenarios that name review or
-copyediting views are {OJS OMP} where badged:
+Scenarios 1 and 15 sign in with a ready account; the rest use throwaway
+accounts and scratch submissions, mostly on a scratch journal, so the view
+counts hold only what the scenario built. Each scenario's accounts and
+starting state are in its footnote.
 
 1. **Land and walk the views** — Journal Manager: sign in on the journal's
    login page. You land on the editorial dashboard in the "Assigned to me"
@@ -469,9 +466,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-26), unreviewed unless
-an entry notes otherwise; the team settles them on spec review. Sorted
-🐞 → ❓ → ✅. Each entry opens with the user-observable symptom; mechanism
-and evidence live in the entry's footnote.
+an entry notes otherwise; the team settles them on spec review. The summary
+is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
+and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|

@@ -9,29 +9,7 @@ atlas-claims: [AFFU-009, AFFU-010, AFFU-011, AFFU-012, AFFU-013, AFFU-014, AFFU-
 
 # Registration & account validation
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
-
-> **One spec, three applications.** The page is written in the words of a
-> journal (OJS): "journal", "Journal Manager", "Section Editor", "Reviewer".
-> Read it on a press (OMP) with "press" for "journal", Press Manager for
-> Journal Manager, Series Editor for Section Editor and External Reviewer
-> for the reviewer role; on a preprint server (OPS) with "server" for
-> "journal", Preprint Server Manager for Journal Manager, Moderator for
-> Section Editor, and no reviewer role at all. Quoted on-screen sentences
-> swap that one word and nothing else: "This journal is currently not
-> accepting user registrations." reads "This press…" / "This server…";
-> "Which journals on this site would you like to register with?" reads
-> "presses" / "servers"; the reviewer box "…to review submissions to this
-> journal." reads "…to this press."; "…for any journal with which you are
-> registering." reads "…any server…" (on a press site that line is a raw
-> code, finding [OMP1](#omp1)); and "…this journal's privacy statement."
-> reads "…this press's…". One sentence does not follow the map: the option
-> that closes registration on Site Access Options, quoted in full for each
-> application under *Settings* below. Settings paths swap the word too
-> (Hosted Journals is Hosted Presses / Hosted Servers). The full map is
-> Part II of the [application glossary](GLOSSARY.md). A badge such as
-> {OJS OMP} on a row or a scenario means it applies to journals and presses
-> only.
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -39,9 +17,8 @@ This spec is about becoming someone on the site. A visitor fills in the
 "Register" form, choosing a username and password and giving a name,
 affiliation, country and email address, and walks away with an account. On a
 journal's own Register page the new account is a Reader of that journal, and
-the visitor may ask to be a Reviewer too. On the site's Register page, the
-one reached from the site's own homepage outside any journal, the visitor
-picks the journals to join and the roles to ask for in each. Where a privacy
+the visitor may ask to be a Reviewer too. On the site's Register page the
+visitor picks the journals to join and the roles to ask for in each. Where a privacy
 statement is configured, registering means agreeing to it. An installation
 can demand that the email address be proven before the account works: the
 account then starts disabled, an email carries an activation link, and the
@@ -53,11 +30,9 @@ belong to [Login & sessions](U01-login-and-sessions.md).
 
 ## Actors & permissions
 
-"Journal-level" means the Register page inside a journal (the address carries
-the journal's path); "site-level" means the Register page of the site itself,
-reached from the site homepage that lists the journals. "Registration is
-open" on a journal when its Users & Roles settings say visitors can register
-(see *Settings* below). A "self-registering role" is a role whose Roles settings
+"Registration is open" on a journal when its Users & Roles settings say
+visitors can register (see *Settings* below). A "self-registering role" is a
+role whose Roles settings
 allow user self-registration; out of the box those are Reader, Author and
 Reviewer on a journal, Reader, Author, Chapter Author and External Reviewer
 on a press, and Reader and Author on a preprint server. The Author role is
@@ -146,8 +121,8 @@ except the two password boxes, which come back empty and must be retyped.
    pressing the header's "Register" (a language code such as "/en" may sit
    between the two, as it does in the journal's other addresses); the
    site-level page's is the same with "index" in place of the journal's
-   path, and the site homepage, the page listing the journals, is the site's
-   own address with no journal in it. Typing the address is how a page is
+   path, and the site homepage is the site's own address with no journal in
+   it. Typing the address is how a page is
    reached while its links are hidden (Rules 2 and 4). The journal-level
    page registers with that journal; the site-level page registers with the
    site and offers a choice of journals (Rule 8). <sup>a</sup> <sup>g</sup>
@@ -241,9 +216,8 @@ except the two password boxes, which come back empty and must be retyped.
     an account holding, in the journal, a role whose permission level on
     the Roles settings screen is Journal Manager, Section Editor, Assistant
     or Reviewer (on a default install: Journal Manager, Journal Editor,
-    Section Editor, Reviewer, and the assistant roles such as Copyeditor,
-    Layout Editor, Proofreader and Funding Coordinator; a preprint server's
-    one assistant role is Editorial Board Member), never for an Author or
+    Section Editor, Reviewer and the assistant-level roles; a preprint
+    server's one assistant-level role is Editorial Board Member), never for an Author or
     Reader alone, so a fresh registrant sees it only after ticking the
     reviewer offer; it leads to that role's submissions list (a manager's,
     editor's or assistant's opens on the list headed "Assigned to me", a
@@ -447,14 +421,11 @@ except the two password boxes, which come back empty and must be retyped.
 
 ## Canonical scenarios
 
-Common to all three apps. The scenarios use journal words; the note under
-the title says how to read them on a press or a preprint server. Actors are
-named by role. Two words recur: the *seeded journal* is the journal a test
-install ships with (registration open, every default role, the default
-Privacy Statement); a *scratch journal* is a throwaway journal created for
-the test, which arrives the same way, open for registration and with the
-default statement. Ready accounts and set-up recipes live in the footnotes.
-<sup>s</sup>
+Scenarios 1–3 register throwaway accounts on the seeded journal; scenarios
+4–6 run on a scratch journal (6 on the seeded journal as well); scenario 7
+runs on an install that requires email validation; scenario 8 uses ready
+accounts. The ready accounts and their passwords and the tooling recipe are
+in the footnote. <sup>s</sup>
 
 1. **Register with a journal and land on the completion page** — a
    visitor, signed out: open the journal's homepage and press "Register" in
@@ -516,8 +487,7 @@ default statement. Ready accounts and set-up recipes live in the footnotes.
    open. <sup>s</sup>
 6. **Register from the site homepage with roles in two journals** — a
    visitor, signed out, on a site with the seeded journal and a scratch
-   journal: open the site homepage (the journal list, at the site's own
-   address outside any journal; Rule 1) and press "Register".
+   journal: open the site homepage (Rule 1) and press "Register".
    Under "Which journals on this site would you like to register with?"
    both journals are listed with "Request the following roles.". Tick
    "Reader" under one and, on a journal or press, the reviewer role under
@@ -533,11 +503,9 @@ default statement. Ready accounts and set-up recipes live in the footnotes.
    Submissions". "Edit My Profile" › Roles shows exactly the ticked roles
    in their journals. <sup>s</sup>
 7. **Email validation** — on an install configured to require email
-   validation (a configuration-file setting, see *Settings* below; ask
-   whoever runs the install to turn it on and to say where its outgoing
-   mail can be read), a visitor, signed out: register with a journal that
-   has a technical support contact (Settings › Journal › Contact), ticking
-   its privacy consent. The page "Registration awaiting verification" appears with
+   validation (a configuration-file setting, see *Settings* below), a
+   visitor, signed out: register with a journal that has a technical
+   support contact, ticking its privacy consent. The page "Registration awaiting verification" appears with
    "We've sent a confirmation email to you at {email}…", its only link the
    breadcrumb's "Home", and the header still shows a signed-out site. Try
    to sign in: "Your account has been disabled for the following reason:
@@ -550,25 +518,20 @@ default statement. Ready accounts and set-up recipes live in the footnotes.
    homepage. Open the emailed link once more: the "Invitation Unavailable"
    page with "Login" and "Register" buttons. <sup>s</sup>
 8. **A signed-in user opening Register sees the completion page** — any
-   signed-in user, for example one who has just registered as in scenario
-   1: type the journal's Register address (Rule 1) into the address bar.
+   signed-in user: type the journal's Register address (Rule 1) into the
+   address bar.
    The "Registration complete" page appears, not the form, offering "Make a
    New Submission", "Edit My Profile" and "Continue Browsing". A user who
    holds one of the roles Rule 10 lists, a Section Editor say, sees "View
-   Submissions" as well (a tester without such an account can use the
-   Reviewer registered in scenario 3, a role Rule 10 also lists). The
-   site-level address (Rule 1) answers with "Edit My Profile" and "Continue
-   Browsing" only. <sup>s</sup>
+   Submissions" as well. The site-level address (Rule 1) answers with "Edit
+   My Profile" and "Continue Browsing" only. <sup>s</sup>
 
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-02), unreviewed unless an
-entry notes otherwise; the team settles them on spec review. Sorted
-🐞 → ❓ → ✅ in the summary; the entries below are the source.
-Each entry opens with the user-observable symptom; mechanism and evidence
-live in the entry's footnote. Impact values: user-visible = real effect in
-ordinary use · minor = cosmetic only, however often seen · latent = only in
-an unusual situation or configuration.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|

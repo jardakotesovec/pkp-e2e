@@ -11,7 +11,7 @@ atlas-claims: [AFFW-286, AFFW-287, AFFW-288, AFFW-289, AFFW-290, AFFW-291, AFFW-
 
 <!-- OPS lacks the Submission stage as a reachable screen; see the absence note under Purpose. -->
 
-> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 
@@ -40,13 +40,7 @@ post the preprint) happen on the Production stage instead and belong to
 
 ## Actors & permissions
 
-"Assigned to the stage" means listed on the Participants panel for the
-Submission stage. A **deciding editor** is a Journal Manager or Editor, or an
-assigned Section Editor or Guest Editor whose participation is not limited to
-recommendations. A **recommending editor** is an assigned editor whose
-participation is limited to recommendations. That limitation is set when
-participants are managed (see *Stage participants*). Who may **open** the
-Submission-stage screen at all is a gate shared by every workflow stage, and
+Who may **open** the Submission-stage screen at all is a gate shared by every workflow stage, and
 it is defined once, as
 [→ stage access](U24-workflow-screen-and-stage-access.md#stage-access). The
 rows below record
@@ -57,7 +51,7 @@ a reduced author view (Rule 10). <sup>a</sup>
 | Action | Who may — and when |
 |--------|--------------------|
 | **See the Submission-stage panels** (files, discussions, participants) | • Site Administrator; Journal Manager; Editor: every submission in the journal<br>• Assigned Section Editor, Guest Editor, and the assistant groups whose stage set includes the Submission stage (by default only the Funding Coordinator; a Copyeditor, Layout Editor or Proofreader assigned here gets the no-access box instead, unless the Roles settings screen has added this stage to their group; [→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)): their assigned submissions<br>• Author: their own submission, in the author view (Rule 10; the author sees files and discussions only) <sup>a</sup> |
-| **Record a decision** (the buttons at the top of the screen) | • Deciding editors: while the submission is queued at this stage (queued means still awaiting a decision at this stage) they get the onward decisions (Rules 2–4); while it stands declined they get "Revert Decline" (Rule 5)<br>• Recommending editors: they are offered a reduced subset of the same decision buttons ("Send for Review" on a journal; "Send to Internal Review" on a press), not the dedicated recommendation controls the Review stage gives them ⚠ [A2](#a2)<br>• Assistants (Copyeditor, Layout Editor, Proofreader, Funding Coordinator): no decision buttons, whatever stage access they hold <sup>c</sup> <sup>d</sup> |
+| **Record a decision** (the buttons at the top of the screen) | • Deciding editors: while the submission is queued at this stage they get the onward decisions (Rules 2–4); while it stands declined they get "Revert Decline" (Rule 5)<br>• Recommending editors: they are offered a reduced subset of the same decision buttons ("Send for Review" on a journal; "Send to Internal Review" on a press), not the dedicated recommendation controls the Review stage gives them ⚠ [A2](#a2)<br>• Assistants (Copyeditor, Layout Editor, Proofreader, Funding Coordinator): no decision buttons, whatever stage access they hold <sup>c</sup> <sup>d</sup> |
 | **Send the submission to review** | • Deciding editors: "Send for Review" on a journal; "Send to External Review" (which skips internal review) or "Send to Internal Review" on a press (Rule 2)<br>• Recommending editors: one of these buttons appears for them too ⚠ [A2](#a2) <sup>e</sup> |
 | **Accept and skip review** | • Deciding editors: "Accept and Skip Review" (Rule 3) <sup>e</sup> |
 | **Decline the submission** | • Deciding editors: "Decline Submission", while the submission is queued (Rule 4) <sup>e</sup> |
@@ -215,10 +209,10 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
 
 ## Canonical scenarios
 
-Common to OJS and OMP. A preprint server has no Submission stage, and
-scenario 9 covers its absence. Substitute roles and vocabulary per the
-[application glossary](GLOSSARY.md). Actors are named by role. Seeded accounts
-and recipes live in the footnotes. <sup>s</sup>
+Every scenario runs on the seeded journal with ready accounts and scratch
+submissions; scenarios 2 to 6 reach their states by recording the decisions
+on screen. The accounts, their passwords and the tooling recipe are in the
+footnote. <sup>s</sup>
 
 1. **Open a new submission at the Submission stage**. Editor: open a freshly
    submitted article's workflow and land on the Submission stage. The screen
@@ -242,13 +236,11 @@ and recipes live in the footnotes. <sup>s</sup>
    press "Revert Decline" and complete the wizard. The submission returns to the
    queued state, and the onward buttons "Send for Review", "Accept and Skip
    Review" and "Decline Submission" are offered again.
-6. **Delete a declined submission**. Journal Manager: on a declined submission
-   (re-decline the submission from scenario 5, or decline a fresh one), press
-   "Delete". A dialog asks "Are you sure you want to permanently delete this
-   submission?" Confirm. The submission is removed and the workflow closes. To
-   verify it is gone, open the submissions dashboard's **Declined** view, in the
-   view list beside the submissions table. Declined submissions are listed only
-   there, not in the default view. The submission no longer appears. Control: on
+6. **Delete a declined submission**. Journal Manager: on a declined submission,
+   press "Delete". A dialog asks "Are you sure you want to permanently delete
+   this submission?" Confirm. The submission is removed and the workflow
+   closes. Open the Dashboard's "Declined" view: the submission no longer
+   appears. Control: on
    the same declined submission a Section Editor sees no "Delete" button.
 7. **The author's view**. Author: from My Submissions, open your own new
    submission's workflow. The Submission stage shows the "Submission Files"
@@ -277,13 +269,9 @@ App-specific:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-02), unreviewed unless an
-entry notes otherwise. The team settles them on spec review. The summary is
-sorted 🐞 → ❓ → ✅ (🐞 defect, author's call · ❓ needs a product ruling · ✅
-intended divergence). The entries below are the source. Each entry opens with
-the symptom a user sees; mechanism and evidence live in the entry's footnote.
-Impact values: user-visible = a real effect in ordinary use · minor = cosmetic
-only, however often seen · latent = only in an unusual situation or
-configuration.
+entry notes otherwise; the team settles them on spec review. The summary is
+sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
