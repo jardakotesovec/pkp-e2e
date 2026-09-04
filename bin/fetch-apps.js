@@ -108,11 +108,23 @@ function fetchApp(name) {
     }
     run(dir, 'git', ['config', 'remote.pushDefault', 'origin']);
 
+    // The UI bundle (js/build.js) is built from lib/ui-library; an --update
+    // that moves the tree or that submodule must rebuild it, or the checkout
+    // runs new PHP against a stale bundle (U43 A13 reappeared that way,
+    // 2026-09-04).
+    const uiRev = () => {
+        try {
+            return execFileSync('git', ['rev-parse', 'HEAD:lib/ui-library'], {cwd: dir, stdio: ['ignore', 'pipe', 'ignore']}).toString().trim();
+        } catch { return ''; }
+    };
+    const uiBefore = fresh ? '' : uiRev();
     if (!fresh && update) {
         run(dir, 'git', ['fetch', 'upstream', 'main']);
         run(dir, 'git', ['checkout', '-B', 'main', 'FETCH_HEAD']);
     }
     run(dir, 'git', ['submodule', 'update', '--init', '--recursive']);
+    const uiMoved = !fresh && update && uiRev() !== uiBefore;
+    if (uiMoved) console.log('  lib/ui-library moved: the UI bundle will be rebuilt');
 
     // Submodule origins point at pkp remotes (.gitmodules) — disable pushes.
     run(dir, 'git', [
@@ -163,15 +175,15 @@ function fetchApp(name) {
     }
 
     // UI build.
-    if (rebuild || !fs.existsSync(path.join(dir, 'node_modules'))) {
+    if (rebuild || uiMoved || !fs.existsSync(path.join(dir, 'node_modules'))) {
         run(dir, 'npm', ['ci']);
     } else {
         console.log('  npm ci: node_modules present, skipping (--rebuild forces)');
     }
-    if (rebuild || !fs.existsSync(path.join(dir, 'js', 'build.js'))) {
+    if (rebuild || uiMoved || !fs.existsSync(path.join(dir, 'js', 'build.js'))) {
         run(dir, 'npm', ['run', 'build']);
     } else {
-        console.log('  UI build: js/build.js present, skipping (--rebuild forces)');
+        console.log('  UI build: js/build.js present, skipping (--rebuild forces; --update rebuilds when lib/ui-library moved)');
     }
 
     // Runtime wiring: env file, files dir, test DB, test config.

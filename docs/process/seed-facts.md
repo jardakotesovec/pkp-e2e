@@ -177,6 +177,12 @@ so; it is not a guess.
   update checks); Mailpit and other `127.0.0.1` traffic are unaffected. No
   screen shows it. Maintainer ruling 2026-08-20 (`parity-ledger.md`
   "Correction"), harness.md "config.test.inc.php".
+- The compromised-password check is a site setting, off on every fleet
+  (Administration › Site Settings › Security, "Check passwords against
+  compromised password databases" unticked), so Profile › Password accepts
+  `password1234`; ticked, the tab refused `qwerty123456` on all three apps
+  even with outbound HTTP dead. Live-probed 2026-09-03/04, all three apps
+  (`.reports/U03/pG` P32; `.reports/U03/cc-K6.md` K6-1).
 - PDF full text is not indexed, so a search on galley content finds nothing.
   The Search page. harness.md states it; U15 finding A11 says no galley
   text of any type reaches the index on any install (a product defect, not
@@ -192,6 +198,45 @@ so; it is not a guess.
   group, so the Register page offers no reviewer box and the scenario API
   rejects `externalReviewer`. Settings › Users & Roles › Roles; the Register
   page. Live-probed 2026-09-02 (U02 note c; `.reports/U02/probe-G1.md`).
+- `fr_CA` is a UI language but not a form language on `publicknowledge`
+  and on scratch contexts (the seeders never set the form locales), so
+  multilingual boxes on the Profile tabs show one language until a manager
+  ticks "Forms" for French. Settings › Website › Setup › Languages; Profile ›
+  Identity. Live-probed 2026-09-03, all three apps (`.reports/U03/pB`, `pC`,
+  `pJ`; U03 note j).
+- A scenario-seeded user has no Country, so its Profile › Contact tab
+  cannot be saved until one is chosen ("This field is required."), at
+  journal and site level; a test that saves Contact picks a Country first.
+  Live-probed 2026-09-03, all three apps (`.reports/U03/pA` P7, `pC` P13,
+  `pJ` P42).
+- A scratch context has no discussion templates, so the Participants
+  "Notify" form offers an empty template list and composes nothing.
+  Workflow › Participants › Notify. Live-probed 2026-09-03, all three apps
+  (`.reports/U03/pC` P15).
+- The editorial statistics email is on by default on `publicknowledge` and
+  on every scratch context, so the Profile › Notifications tab shows the
+  "Statistics report summary." row. Settings › Workflow › Emails › "For
+  Editors" ("Send a monthly email to editors."). Live-probed 2026-09-03,
+  all three apps (`.reports/U03/pH` P36, `pJ` P46).
+- `publicknowledge` has no published item on any app (OJS Vol 1 No 2 is
+  empty; OMP "No titles have been published yet."; OPS lists categories
+  only), so a reader-facing item page needs a scenario-published scratch
+  submission. The public home page. Live-probed 2026-09-03 (`.reports/U03/pF`
+  P30).
+- "The site has one registration-open journal" stops holding as soon as any
+  scratch context exists; a probe that needs the one-journal state runs
+  first on a fresh fleet. Profile › Roles "Register with other journals"
+  fold. Seen 2026-09-03 (`.reports/U03/pE` P22, `pJ` setup).
+- A scratch context created without an `orcid` key has "Enable ORCID
+  functionality" unticked and no ORCID block on Profile › Identity; one
+  created with `orcid: {enabled: true}` has both (`scenarios.md`
+  `POST scenarios/context`). Settings › Website › Setup; Profile › Identity.
+  Live-probed 2026-09-04, all three apps (`.reports/U03/cc-K6.md` K6-2).
+- On the test installs the profile image's address is the public files
+  directory's filesystem path appended to the origin, so the picture never
+  loads (404); a suite asserts the "Delete" control and the stored file,
+  never the rendered picture. Profile › Public. Live-probed 2026-09-03/04,
+  all three apps (`.reports/U03/pF` P27; `.reports/U03/cc-K5.md`).
 
 ## Where to change it
 

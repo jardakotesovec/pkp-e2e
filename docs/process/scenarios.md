@@ -91,7 +91,10 @@ Keys:
   with a 400 that lists the app's whole set. See `users.md` for the keys and
   their traps.
 - `orcid`: the state of the ORCID settings tab, saved through the same
-  service the tab's form uses. Keys `enabled` (default true), `apiType`
+  service the tab's form uses. The defaults below apply only when the
+  `orcid` key is given at all; a context created without it arrives with
+  ORCID off (seed-facts.md "Install defaults", 2026-09-04). Keys `enabled`
+  (default true), `apiType`
   (default Public Sandbox), `clientId` and `clientSecret` (dummy defaults),
   `city`, `sendMailToAuthorsOnPublication`. The OAuth exchange can never
   complete on a test install, because outbound HTTP fails fast at the

@@ -195,7 +195,7 @@ quarantine tag on purpose: a known regression stays red, and its
 Inherit from `BasePage` (`shared/playwright/pages/BasePage.js`). A POM holds
 `page` and its locators as instance properties. Placement: shared mechanics go
 in `shared/playwright/pages/` (today `BasePage`, `LoginPage`, `DashboardPage`,
-`EditorialDashboardPage`, `MySubmissionsPage` and `WorkflowPage`, the
+`EditorialDashboardPage`, `MySubmissionsPage`, `ProfilePage` and `WorkflowPage`, the
 workflow panel's frame: opening by address or from a row, header readouts,
 the side menu with its stages, rounds, version nodes and pages, the status
 and no-access boxes, the Delete / Return-to-Workflow / Return-to-Done

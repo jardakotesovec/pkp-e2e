@@ -86,7 +86,9 @@ The pkp remote is named `upstream` with its push URL disabled, submodule push
 URLs included. The `jardakotesovec` fork is `origin` and the push default, so a
 branch, rarely needed, can only go to the fork. The checkouts exist only to
 run the suites. Commits happen only in this repo. `fetch-apps --update` moves
-an existing checkout to the current upstream `main`.
+an existing checkout to the current upstream `main` and rebuilds the UI
+bundle (`js/build.js`) when `lib/ui-library` moved; a bundle older than the
+submodule makes retired UI defects reappear (U43 A13, 2026-09-04).
 
 Every fleet uses fixed port bands above its base port; nothing else may
 listen there:
