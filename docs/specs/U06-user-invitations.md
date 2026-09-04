@@ -9,7 +9,7 @@ atlas-claims: [AFFM-099, AFFM-100, AFFM-101, AFFM-118, AFFM-119, AFFM-120, AFFU-
 
 # User invitations
 
-> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 

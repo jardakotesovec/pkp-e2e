@@ -9,7 +9,7 @@ atlas-claims: [AFFU-053, AFFU-054, AFFU-055, AFFU-056, AFFU-057, AFFU-058, AFFU-
 
 # User profile
 
-> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 > **One spec, three applications.** The page is written in the words of a
 > journal (OJS): "journal", "Journal Manager", "Section Editor", "Reviewer".

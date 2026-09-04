@@ -9,7 +9,7 @@ atlas-claims: [AFFW-467, AFFW-470, AFFW-473, AFFW-499, AFFM-105, AFFM-191, AFFM-
 
 # Login & sessions
 
-> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 

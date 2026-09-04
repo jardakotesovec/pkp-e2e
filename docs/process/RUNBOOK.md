@@ -233,6 +233,13 @@ short and outcome-shaped. That is context budgeting, not a wording rule.
 - **A finding against an unmerged PR** goes to the developer, not to a
   register: the spec describes `main` (MAINTENANCE "A developer's PR fails
   the suite").
+- **What a probe saw on another feature's screen** goes to
+  `docs/tracking/incidentals.md`: one line naming the owning feature, the
+  screen, what was seen and the date, written by the orchestrator from the
+  fold logs' "left in `.reports/`" lists and the merge's incidentals. A
+  spec author reads their feature's rows at step 2. A row is deleted when
+  the owning spec absorbs it, or when a later probe of that screen finds
+  it gone.
 - **Reports for the team** (`docs/reports/`) are temporary. A report exists
   to hand the team something they need in one piece, usually an
   upstream-ready write-up of a regression. Once the problem it reports is
@@ -401,6 +408,10 @@ paragraph, verbatim, before the task.
    FEATURE-MAP row number first, so files sort in map order), following
    TEMPLATE and covering all three apps from the start. Draw on the feature's
    atlas atoms and the code, including its `atlas/affordances-*.md` rows.
+   Name every screen, control and message by its on-screen label, taken
+   from the templates and locale files the author is reading anyway; the
+   probe confirms the label, and the reader never meets a code concept
+   where the screen has a word.
    Every affordance on the feature's screens ends up covered by a rule or
    scenario, delegated to another spec with a checkable pointer, or
    explicitly waived. Where the code is ambiguous, do not guess. Put the
@@ -411,9 +422,23 @@ paragraph, verbatim, before the task.
    be quoted exactly, but it never lists the only strings to capture; the
    probe records the whole screen (step 3). When the claim depends on a
    quantity or shape (how many errors, versions or issues; which of two
-   actions; a journal with or without X), the item says so and asks for the
-   default and the other end. The author checks each item's premise
-   against `docs/process/seed-facts.md` (what the seeded installs contain).
+   actions; a journal with or without X), the item says so and asks for
+   the default and the other end. A screen with tabs or steps gets one
+   item that changes something and then leaves without saving, because the
+   dialogs and losses on the way out are never seen by an item that stays
+   on one screen. The author checks each item's premise against
+   `docs/process/seed-facts.md` (what the seeded installs contain) and
+   reads the feature's rows in `docs/tracking/incidentals.md` (what earlier
+   sessions saw on its screens in passing): each row goes on the probe
+   list or into the draft.
+
+   **Draft read.** Before the probes run, the reader persona (step 5's
+   brief) reads the draft's body once. The author fixes the wording
+   stumbles itself; this read is not the gate, step 5's is. Every fact
+   stumble (an address the reader cannot reach, a limit that may cut or
+   refuse, a step with two ways, a tick that may not survive Save) becomes
+   a probe-list item, so the questions a reader will ask are driven before
+   the spec is written for them.
    An item that cannot be phrased as screen actions is not probed. The
    claim it would have supported gets a ❓ register entry with a stated lean
    (generic if security-shaped), a marker, or leaves the draft. The list
@@ -438,6 +463,16 @@ paragraph, verbatim, before the task.
    Reports are written for the digest agent and for the maintainer, who may
    audit them before sign-off.
 
+   **Screen notes.** `.reports/<feature>/screen-notes.md` is the one file
+   every agent that drives screens reads first and appends to: per screen,
+   the locators that worked, kit gotchas, premise corrections, dialogs that
+   appear on the way out, waiting idioms. The kit appends each agent's
+   locator table there when its process exits (`patterns.md` "Probe kit");
+   the agent adds the rest with `note()` or by hand, in a short section
+   under its own id. Later probes, the claim checkers and the test authors
+   read it instead of each other's scripts. A brief points at it; nothing
+   in it travels by memory or by being retyped into a brief.
+
    **3b. Digest.** One digest agent reads every probe report and writes
    `.reports/<feature>/digest.md`: the spec-affecting facts and nothing else.
    It is the only evidence artifact step 4 reads. Every correction, new
@@ -457,8 +492,10 @@ paragraph, verbatim, before the task.
    one of them verbatim. Each line reads as product behavior in the spec's
    own voice. Reproduction narrative and quoted report prose stay in
    `.reports/`. An `undetermined` block says only that, plus the one
-   observation that would settle it. `Proposed:` is a suggestion; step 4
-   decides. When a probe premise proved wrong, the digest ends with the
+   observation that would settle it. A fact a report saw in one run, or
+   filed as incidental, is `undetermined` with its settling observation or
+   a footnote candidate, never `corrects`. `Proposed:` is a suggestion;
+   step 4 decides. When a probe premise proved wrong, the digest ends with the
    `seed-facts.md` correction it proposes. Size is the check: at most 120
    lines for an M-tier feature, 200 for H. A digest that will not fit means
    the probes overshot.
@@ -488,9 +525,27 @@ paragraph, verbatim, before the task.
    ID, a cross-reference that names no feature; the persona has read no
    other spec and must not "recognise" campaign notation); and a step they
    could execute two ways, or an outcome they could not judge pass or fail.
-   Rewrite the stumbles, then run the persona once more over the rewritten
-   passages only, because a rewrite is not verified by its own writer. The
-   gate is zero blockers; frictions are the writer's call.
+   The brief says the Conventions line's symbols (⚠, the app badges, the
+   superscript evidence marks, the front-matter block) are explained on the
+   page and are not stumbles. The persona marks each stumble as *wording*
+   or *fact* (a stumble no rewrite can settle without new evidence, such as
+   whether a limit cuts or refuses). Rewrite the wording stumbles, then run the persona once more
+   over the rewritten passages only, because a rewrite is not verified by
+   its own writer. A second pass is skipped when the first found zero
+   blockers and every friction was fixed. The gate is zero blockers.
+   **Every persona report has a consumer.** Fact stumbles go to the next
+   agent that drives screens, the claim-check chunk file (step 7) or the
+   test authors' briefs (step 8), and the orchestrator's brief names them.
+   Wording frictions are rewritten when they change how a reader would
+   execute a rule or scenario; the rest are counted in the PROGRESS note
+   ("n minor readability frictions open"), so no report is left to a lean.
+   Writers avoid most stumbles by writing to TEMPLATE "Write for a reader
+   who has only this page".
+   **Product-owner read.** After the last fold (step 9), a second persona
+   reads the Findings register only, as a product owner deciding what to
+   fix: from each entry alone, what a user experiences, and whether it is a
+   defect or intended. Entries that fail are reworded by a writing agent.
+   One short agent; the register is what the team triages from.
    **Rewrites preserve verified meaning.** The rewrite brief names the digest
    and footnotes behind every claim being reworded and carries verbatim:
    "Preserve the verified meaning — reword the phrasing, never the claim."
@@ -522,12 +577,21 @@ paragraph, verbatim, before the task.
      order, because the fold needs it that way.
    - **About 40 calls per checker.** A checker that reaches its budget
      writes its report on what it has, lists the remainder, and exits. A
-     fresh checker takes the remainder.
+     fresh checker takes the remainder. The brief names the chunk's probe
+     cluster, its scripts and the screen notes; the checker starts from
+     them and still drives every line.
    - **Merge and fold.** With three or more chunks a merge agent returns one
      change list in the digest format (`claimcheck-merge.md`). With two or
      fewer, the fold agent reads the chunks directly and still writes
      `claimcheck-merge.md` and the fold log, with its "suite-asserted claims
-     touched" section, before editing. The fold follows step 4's rules.
+     touched" section, before editing. Every block's Proposed line is
+     written in the reader's words (TEMPLATE "Write for a reader who has
+     only this page"), on-screen strings quoted, so the fold pastes reader
+     language instead of translating checker prose under its budget. The
+     fold follows step 4's rules, and before returning reads its own
+     folded spans against that TEMPLATE section and fixes what fails; the
+     self-read is not the gate, the persona is. A correction replaces a
+     sentence; it does not append a clause to it.
      Items that cannot be resolved become ❓ entries with a stated lean.
      After the fold, re-run lint and give the reader persona (step 5) the
      folded spans only; new wording is never verified by its writer.
@@ -536,15 +600,19 @@ paragraph, verbatim, before the task.
    (rules 2 and 3), one test per canonical scenario in each app that runs
    it. Seed through the scenario endpoints, reuse or extend page objects,
    scope Mailpit by a unique throwaway recipient (PRINCIPLES A8), and pair
-   every "nothing happens" claim with a positive control. Run with
-   `--output` to a private directory and `--reporter=list`.
+   every "nothing happens" claim with a positive control. Locators,
+   dialogs and waiting idioms come from `screen-notes.md`, never from
+   re-reading the probe scripts. Run with `--output` to a private directory
+   and `--reporter=list`.
 9. **Run them green.** Each new suite runs green once by its author against
    the live fleets. A test that contradicts the spec means the spec is
    wrong: the test author returns the finding as a digest-format block with
-   a pointer to the run log, a writing agent folds it, and the persona
-   reads the changed spans. When the change alters a claim rather than its
-   wording, one fresh checker drives those spans; a footnote-only or
-   register-only change needs none. Never edit a test to pass a claim the
+   a pointer to the run log. When the block alters a claim rather than its
+   wording, one fresh checker drives those spans first; a footnote-only or
+   register-only change needs no checker. Then one writing agent folds
+   everything the run's findings change, register entries included, and
+   one persona pass reads the changed spans. The fold happens once, on
+   verified facts. Never edit a test to pass a claim the
    app disproves. An app defect that blocks green is worked around and
    recorded in `app-changes.md`. After the last spec change the orchestrator
    runs `npm run test:final -- --feature U<nn>` (the three suites in turn,
@@ -611,9 +679,10 @@ PROGRESS note names the last gate reached.
   anything blocked it. The digest agent reads reports; the orchestrator never
   carries their contents.
 - **Briefs are the Frame paragraph plus pointers**: the feature, the spec
-  path, the report path, `fleet.json` for the ports, the row of "What each
-  role reads", and "follow RUNBOOK step N". Point at the rule files; never
-  paraphrase them. A brief for an agent that drives screens names the
+  path, the report path, `fleet.json` for the ports, `screen-notes.md`,
+  the row of "What each role reads", and "follow RUNBOOK step N". Point at
+  the rule files; never paraphrase them, and never retype into a brief a
+  fact that belongs in the screen notes. A brief for an agent that drives screens names the
   ~40-call budget (step 7).
 - **Fresh agents, short transcripts.** An agent that drives screens is
   always fresh. Message an existing agent only when its transcript is
@@ -638,11 +707,11 @@ PROGRESS note names the last gate reached.
 
 | Role | Reads |
 |---|---|
-| Probe agent | the Frame, step 3, "Live-probe etiquette", patterns.md "Probe kit", `seed-facts.md`, `users.md` |
-| Claim checker | the same, plus the spec and step 7 |
-| Test author | PRINCIPLES, harness.md, patterns.md, scenarios.md, the spec |
-| Reader persona | the spec body only |
-| Writing agents (author, finalizer, rewrite, fold) | TEMPLATE, the digest or change list, the spec |
+| Probe agent | the Frame, step 3, "Live-probe etiquette", patterns.md "Probe kit", `seed-facts.md`, `users.md`, the feature's `screen-notes.md` |
+| Claim checker | the same, plus the spec, step 7 and its chunk's probe scripts |
+| Test author | PRINCIPLES, harness.md, patterns.md, scenarios.md, the spec, `screen-notes.md` |
+| Reader persona | the spec body only; the product-owner read, the Findings register only |
+| Writing agents (author, finalizer, rewrite, fold) | TEMPLATE (including "Write for a reader who has only this page"), the digest or change list, the spec; the author also reads the feature's rows in `incidentals.md` and the templates and locale files for labels |
 
 ### Rejected consolidations
 

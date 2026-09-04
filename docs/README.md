@@ -36,6 +36,9 @@ to their OMP and OPS names.
 - `docs/tracking/cost-ledger.md`: what each feature session cost in
   weighted tokens, by role, with the U02 baseline and the command that
   fills a row.
+- `docs/tracking/incidentals.md`: things a session saw in passing on
+  another feature's screens, one line each, kept until that feature's spec
+  absorbs them.
 - `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the mechanical
   inventory of every screen and action in the apps, and the leftovers no
   spec claims yet.

@@ -221,6 +221,7 @@ function flush() {
         }
         if (locatorRows.length) {
             fs.writeFileSync(path.join(dir, 'locators.md'), locatorTable());
+            appendScreenNotes(`Locators (${path.basename(dir)}, ${new Date().toISOString().slice(0, 10)})`, locatorTable());
         }
     } catch (error) {
         // Never mask the script's own failure with a bookkeeping error.
@@ -496,6 +497,43 @@ function locatorTable() {
     return `${lines.join('\n')}\n`;
 }
 
+/**
+ * The feature-level screen notes, `.reports/<feature>/screen-notes.md`: the
+ * one file every agent that drives the feature's screens reads first and
+ * appends to (RUNBOOK step 3). Created on first write.
+ */
+function screenNotesPath() {
+    const feature = requireEnv('PROBE_FEATURE', 'the spec id, e.g. PROBE_FEATURE=U03');
+    const dir = path.join(REPO_ROOT, '.reports', feature);
+    fs.mkdirSync(dir, {recursive: true});
+    return path.join(dir, 'screen-notes.md');
+}
+
+function appendScreenNotes(heading, body) {
+    const file = screenNotesPath();
+    const header = fs.existsSync(file)
+        ? ''
+        : `# ${process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (RUNBOOK step 3 "Screen notes").\n`;
+    fs.appendFileSync(file, `${header}\n## ${heading}\n\n${body.endsWith('\n') ? body : `${body}\n`}`);
+}
+
+/**
+ * Append one line to the feature's screen notes at once, under this agent's
+ * id: a dialog that appears on the way out of a screen, a premise that
+ * proved wrong, a wait that hangs, anything a locator row cannot carry.
+ *
+ * @param {string} text one line, product words plus the selector if any
+ */
+function note(text) {
+    const agent = process.env.PROBE_AGENT || 'unknown';
+    const app = process.env.PKP_APP_NAME ? ` [${process.env.PKP_APP_NAME}]` : '';
+    const file = screenNotesPath();
+    const header = fs.existsSync(file)
+        ? ''
+        : `# ${process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (RUNBOOK step 3 "Screen notes").\n`;
+    fs.appendFileSync(file, `${header}- ${agent}${app}: ${String(text).replace(/\s+/g, ' ').trim()}\n`);
+}
+
 /** Wait until jQuery has no in-flight requests (legacy grids, AjaxModals). */
 async function idle(page) {
     await waitForJQueryIdle(page);
@@ -535,6 +573,8 @@ module.exports = {
     record,
     loc,
     locatorTable,
+    note,
+    screenNotesPath,
     idle,
     tag,
     outDir,

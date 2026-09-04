@@ -34,6 +34,41 @@ its home section and link to it from anywhere else. Length is whatever those
 two produce. Write plain sentences. A rule the reader has to read twice is a
 defect, however true it is.
 
+## Write for a reader who has only this page
+
+The readability pass (RUNBOOK step 5) hands the body to a QA person who
+has never seen a campaign document, has no code, and reads nothing below
+the footnotes. Every writer, whether drafting, folding or rewriting,
+writes to that reader from the start. Three kinds of sentence fail:
+
+- **A verb or noun that maps to nothing on screen.** "Re-rendered",
+  "is built to show", "the fold", "the editorial layout": say what the
+  tester sees ("the tab shows again with the message at the top right",
+  "a link that opens a list under it").
+- **A token the page does not explain.** Every screen a rule or scenario
+  starts on is reachable from the text: a menu path or an address. Every
+  term the screen itself does not use is glossed at first use.
+- **A step with two readings, or an outcome nobody can judge.** "Up to 255
+  characters" says whether longer input is cut or refused. "The change is
+  lost" says where the tester looks to see that. A scenario step that
+  leaves a choice ("press another tab") names one.
+
+Four conventions the shipped specs share, so a new spec does not invent
+its own:
+
+- The scenario preamble defines *seeded journal* and *scratch journal*,
+  says which scenarios use a ready account and which a throwaway one, and
+  that the ready accounts and their passwords are in the footnote.
+- Mail is read "in the mailbox of the address it was sent to"; the
+  preamble explains the shared mail catcher once, and the footnote names
+  the tool and its address.
+- A note under the title maps journal, Journal Manager, Section Editor and
+  Reviewer to the press and preprint-server names (GLOSSARY Part II), and
+  the body then uses the journal words.
+- A finding's expected and observed behaviour are stated in the same
+  screen words as the rule it marks, so a tester can tell a documented
+  defect from a pass.
+
 ## The lint gate
 
 Every spec must pass `node docs/process/lint/lint-spec.mjs <spec>` with zero
@@ -193,12 +228,13 @@ atlas-claims: [<atom IDs this spec owns>]
 <!-- Title badge only when an app LACKS the feature; omit when all three have it.
      If badged, follow the Purpose section with a one-paragraph absence note. -->
 
-> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
-<!-- That one line is the whole legend. The glossary's "Reading a spec" section
-     is its only home; specs link to it and never restate it. A spec that needs
-     a construct the legend does not cover should simplify the construct, not
-     grow a local legend. -->
+<!-- That one line is the whole on-page legend, verbatim: the three symbols a
+     tester needs to judge pass or fail, and a link for everything else. The
+     glossary's "Reading a spec" section is the long form; specs never grow a
+     local legend beyond this line. A spec that needs a construct the legend
+     does not cover should simplify the construct. -->
 
 ## Purpose
 

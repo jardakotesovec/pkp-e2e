@@ -250,7 +250,7 @@ touched.
 <a id="reading-a-spec"></a>
 ## Reading a spec
 
-The one legend for every spec file. Specs link here instead of repeating it.
+The long form of the legend. Each spec's Conventions line carries the three symbols a tester needs to judge pass or fail (⚠, app badges, superscript evidence marks) and links here for the rest.
 
 - **The block of codes above the title** is a machine-readable index for the
   documentation tooling. Ignore it when reading.

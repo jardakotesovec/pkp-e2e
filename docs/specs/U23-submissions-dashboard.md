@@ -9,7 +9,7 @@ atlas-claims: [AFFW-001, AFFW-002, AFFW-003, AFFW-004, AFFW-005, AFFW-006, AFFW-
 
 # Submissions dashboard (editorial)
 
-> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+> Conventions: ⚠ marks behaviour that is documented as it is today and questioned in the Findings register; `{OJS OMP}` names the apps a sentence holds for; superscript letters point to evidence and can be skipped. The rest: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 ## Purpose
 

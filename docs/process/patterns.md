@@ -370,7 +370,7 @@ Everything per app travels in the bag, never in `process.env`, so one
 process holds all three apps.
 
 ```js
-const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, idle, tag} =
+const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag} =
     require('../../shared/playwright/probe');
 
 forEachApp(async (app) => {
@@ -399,7 +399,12 @@ the main region (the body when the page has no `main`) and of every open
 dialog, plus the verbatim `innerText` of header and main, because aria
 snapshots normalise punctuation. `record(name, data)` writes JSON,
 `shot(page, name)` a PNG, `loc(page, description, locator)` a row in
-`locators.md` (selector, match count, visibility) for the test author.
+`locators.md` (selector, match count, visibility) for the test author; the
+same rows are appended to the feature-level `.reports/<feature>/screen-notes.md`
+under the agent's id when the process exits. `note(text)` appends one line
+there at once, for what a locator row cannot carry: a dialog that appears on
+the way out of a screen, a premise that proved wrong, a wait that hangs.
+Every agent that drives screens reads that file first (RUNBOOK step 3).
 `idle(page)` is `waitForJQueryIdle`; `tag(prefix)` makes a scratch tag that
 follows the tag conventions above. `signIn` uses the roster password rule,
 so it works for scratch users too.
