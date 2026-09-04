@@ -221,7 +221,7 @@ function flush() {
         }
         if (locatorRows.length) {
             fs.writeFileSync(path.join(dir, 'locators.md'), locatorTable());
-            appendScreenNotes(`Locators (${path.basename(dir)}, ${new Date().toISOString().slice(0, 10)})`, locatorTable());
+            appendScreenLocators(`Locators (${path.basename(dir)}, ${new Date().toISOString().slice(0, 10)})`, locatorTable());
         }
     } catch (error) {
         // Never mask the script's own failure with a bookkeeping error.
@@ -509,11 +509,16 @@ function screenNotesPath() {
     return path.join(dir, 'screen-notes.md');
 }
 
-function appendScreenNotes(heading, body) {
-    const file = screenNotesPath();
+/**
+ * The locator tables the kit appends when a process exits go to the sibling
+ * `.reports/<feature>/screen-locators.md`, so screen-notes.md stays the
+ * hand-written file agents read whole (RUNBOOK step 3 "Screen notes").
+ */
+function appendScreenLocators(heading, body) {
+    const file = path.join(path.dirname(screenNotesPath()), 'screen-locators.md');
     const header = fs.existsSync(file)
         ? ''
-        : `# ${process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (RUNBOOK step 3 "Screen notes").\n`;
+        : `# ${process.env.PROBE_FEATURE} screen locators\n\nEvery \`loc()\` row from every agent, appended when its process exits; grep it by screen or element. The notes are in screen-notes.md.\n`;
     fs.appendFileSync(file, `${header}\n## ${heading}\n\n${body.endsWith('\n') ? body : `${body}\n`}`);
 }
 
@@ -547,6 +552,18 @@ async function idle(page) {
  *
  * @param {string} prefix e.g. "u03reg"
  */
+/**
+ * A scratch password built from a tag: policy-safe (letters, a digit, a
+ * symbol) and at most 32 characters, because the Register page's password
+ * box carries maxlength="32" (the Login page object lifts it, Register
+ * does not) and a longer value is silently cut, so the later sign-in fails.
+ *
+ * @param {string} seed usually the account's tag
+ */
+function password(seed) {
+    return `${String(seed).replace(/[^A-Za-z0-9]/g, '').slice(0, 27)}Aa1!!`;
+}
+
 function tag(prefix) {
     const agent = (process.env.PROBE_AGENT || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const value = `${String(prefix).toLowerCase().replace(/[^a-z0-9]/g, '')}${agent}${Math.random()
@@ -577,6 +594,7 @@ module.exports = {
     screenNotesPath,
     idle,
     tag,
+    password,
     outDir,
     users,
 };

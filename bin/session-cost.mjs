@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 // session-cost.mjs — price-weighted token spend of one Claude Code session, split
 // orchestrator vs subagent roles. Rows paste into docs/tracking/cost-ledger.md.
-// run: node bin/session-cost.mjs <session.jsonl> [--label U02]
+// run: node bin/session-cost.mjs <session.jsonl> [--label U02] [--append]
+// --append writes the table and summary line under "## <label>" at the end of docs/tracking/cost-ledger.md.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith('--'));
-if (!file) { console.error('usage: node bin/session-cost.mjs <session.jsonl> [--label U02]'); process.exit(1); }
+if (!file) { console.error('usage: node bin/session-cost.mjs <session.jsonl> [--label U02] [--append]'); process.exit(1); }
 const label = args.includes('--label') ? args[args.indexOf('--label') + 1] : path.basename(file, '.jsonl').slice(0, 8);
 
 const WEIGHTS = { output: 5, input: 1, cacheCreate: 1.25, cacheRead: 0.1 };
@@ -69,11 +70,19 @@ const fmt = (n) => Math.round(n).toLocaleString('en-US');
 const pct = (t) => `${((100 * weighted(t)) / wTotal).toFixed(1)}%`;
 const row = (...cells) => `| ${cells.join(' | ')} |`;
 
-console.log(row('role', 'agents', 'calls', 'pure text', 'input', 'cache creation', 'cache read', 'output', 'weighted', 'share'));
-console.log(row('---', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:'));
-console.log(row('orchestrator', '—', orch.calls, orch.pureText, fmt(orch.input), fmt(orch.cacheCreate), fmt(orch.cacheRead), fmt(orch.output), fmt(weighted(orch)), pct(orch)));
+const lines = [];
+lines.push(row('role', 'agents', 'calls', 'pure text', 'input', 'cache creation', 'cache read', 'output', 'weighted', 'share'));
+lines.push(row('---', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:', '---:'));
+lines.push(row('orchestrator', '—', orch.calls, orch.pureText, fmt(orch.input), fmt(orch.cacheCreate), fmt(orch.cacheRead), fmt(orch.output), fmt(weighted(orch)), pct(orch)));
 for (const [role, t] of [...roles].sort((a, b) => weighted(b[1]) - weighted(a[1]))) {
-    console.log(row(role, t.agents, t.calls, t.pureText, fmt(t.input), fmt(t.cacheCreate), fmt(t.cacheRead), fmt(t.output), fmt(weighted(t)), pct(t)));
+    lines.push(row(role, t.agents, t.calls, t.pureText, fmt(t.input), fmt(t.cacheCreate), fmt(t.cacheRead), fmt(t.output), fmt(weighted(t)), pct(t)));
 }
-console.log(row('**total**', agentCount, total.calls, total.pureText, fmt(total.input), fmt(total.cacheCreate), fmt(total.cacheRead), fmt(total.output), fmt(wTotal), '100%'));
-console.log(`\n${label} · ${agentCount} agents · ${total.calls - orch.calls} subagent calls · ${orch.calls} orchestrator calls · weighted ${fmt(wTotal)}`);
+lines.push(row('**total**', agentCount, total.calls, total.pureText, fmt(total.input), fmt(total.cacheCreate), fmt(total.cacheRead), fmt(total.output), fmt(wTotal), '100%'));
+const summary = `${label} · ${agentCount} agents · ${total.calls - orch.calls} subagent calls · ${orch.calls} orchestrator calls · weighted ${fmt(wTotal)}`;
+console.log(lines.join('\n'));
+console.log(`\n${summary}`);
+if (args.includes('--append')) {
+    const ledger = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'docs', 'tracking', 'cost-ledger.md');
+    fs.appendFileSync(ledger, `\n## ${label}\n\n${lines.join('\n')}\n\n${summary}\n`);
+    console.log(`\nappended to ${path.relative(process.cwd(), ledger)}`);
+}

@@ -15,14 +15,16 @@ limit notices are not API calls and are not counted.
 
 The command, run where the session transcript is at hand:
 
-    node bin/session-cost.mjs ~/.claude/projects/<project>/<session-uuid>.jsonl --label U03
+    node bin/session-cost.mjs ~/.claude/projects/<project>/<session-uuid>.jsonl --label U03 --append
 
 Subagents are read from `<session-uuid>/subagents/agent-*.jsonl` next to the
 transcript and grouped by role from their `meta.json` description; a
 description the keyword map does not know is printed as `other: <text>`.
-Paste the table and the summary line under a heading for the feature. On
-the VM the transcript is not available to the session itself; a row filled
-from completion notifications only is marked `partial`.
+`--append` writes the table and the summary line under a heading for the
+feature at the end of this file; nothing else is written here, and what
+the numbers mean is the maintainer's judgment at review. On the VM the
+transcript is not available to the session itself; a row filled from
+completion notifications only is marked `partial`.
 
 ## U02 baseline
 

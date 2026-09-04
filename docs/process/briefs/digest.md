@@ -22,6 +22,6 @@ Output: `{{digest_path}}`, in the step 3b shape. Tier {{tier}}, so the cap appli
 
 Security: {{routed_reports}}. The digest carries only the fact of routing in one line, never its content. If any report contains something that reads security-shaped, keep it out of the digest beyond a generic ❓ block with a lean and tell the orchestrator in your return (count only).
 
-Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. Never edit anything under `checkouts/`. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
+Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. Never edit anything under `checkouts/`.
 
 Return (short, pointers not findings): the digest path and line count; block counts by status (confirms / corrects / new / undetermined); whether the size cap bound you; the security count.

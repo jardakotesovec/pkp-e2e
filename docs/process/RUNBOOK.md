@@ -294,14 +294,13 @@ through the spec's own quality bar scaled to the size of the correction. A
 writing agent folds the change; the orchestrator never edits a spec inline.
 Evidence gets a footnote with the probe date and the verbatim on-screen
 strings. A new defect becomes a proper register entry with the next free ID,
-and every new or rewritten register entry gets the reader persona (step 5)
-on that entry alone before commit, because lint checks references, not
-wording. Lint runs to zero on the touched spec, and the session report names every
+and the rewritten spans get step 5's reader before commit, because lint
+checks references, not wording. Lint runs to zero on the touched spec, and the session report names every
 spec touched and why. The limits: only what this session's evidence
 established, no speculative rewrites. A correction too large or too
 uncertain to fold confidently becomes that spec's ❓ entry with a stated
 lean. A rewrite that changes how a reader would execute a rule or scenario
-gets the persona re-read of the rewritten passages (step 5).
+gets step 5's reader on the rewritten passages.
 
 Two things maintenance never does: it never changes app code beyond what the
 "Build blockers" rule allows (a row in `app-changes.md`, and only when
@@ -407,7 +406,10 @@ Every brief points at TEMPLATE or PRINCIPLES rather than paraphrasing their
 rules, and carries this sentence verbatim: "Do NOT write to PROGRESS.md or
 docs/tracking/app-changes.md; return proposed content in your report
 instead." Every probe, claim-check and test brief also opens with the Frame
-paragraph, verbatim, before the task.
+paragraph, verbatim, before the task. A feature session does the feature
+and nothing else: process changes, backfill slices and doc work run in
+their own session, because every call the orchestrator makes re-reads its
+whole context and that context only grows.
 
 1. **Claim it.** Set the feature's PROGRESS row to `in_progress`.
 2. **Author the spec** at `docs/specs/U<nn>-<feature>.md` (the zero-padded
@@ -437,14 +439,6 @@ paragraph, verbatim, before the task.
    reads the feature's rows in `docs/tracking/incidentals.md` (what earlier
    sessions saw on its screens in passing): each row goes on the probe
    list or into the draft.
-
-   **Draft read.** Before the probes run, the reader persona (step 5's
-   brief) reads the draft's body once. The author fixes the wording
-   stumbles itself; this read is not the gate, step 5's is. Every fact
-   stumble (an address the reader cannot reach, a limit that may cut or
-   refuse, a step with two ways, a tick that may not survive Save) becomes
-   a probe-list item, so the questions a reader will ask are driven before
-   the spec is written for them.
    An item that cannot be phrased as screen actions is not probed. The
    claim it would have supported gets a ❓ register entry with a stated lean
    (generic if security-shaped), a marker, or leaves the draft. The list
@@ -469,14 +463,24 @@ paragraph, verbatim, before the task.
    Reports are written for the digest agent and for the maintainer, who may
    audit them before sign-off.
 
+   **About 40 browser calls per agent**, for every agent that drives
+   screens: probes, checkers, span checkers and a test author's throwaway
+   checks. The cost of a call grows with everything the agent has read
+   before it, so the same work costs about half in two agents of 30 calls
+   as in one of 60. Clusters and chunks are cut to fit. An agent that
+   reaches the ceiling writes its report on what it has, lists the
+   remainder, and exits; a fresh agent takes the remainder, starting from
+   the report and the screen notes.
+
    **Screen notes.** `.reports/<feature>/screen-notes.md` is the one file
    every agent that drives screens reads first and appends to: per screen,
    the locators that worked, kit gotchas, premise corrections, dialogs that
-   appear on the way out, waiting idioms. The kit appends each agent's
-   locator table there when its process exits (`patterns.md` "Probe kit");
-   the agent adds the rest with `note()` or by hand, in a short section
-   under its own id. Later probes, the claim checkers and the test authors
-   read it instead of each other's scripts. A brief points at it; nothing
+   appear on the way out, waiting idioms, written with `note()` or by
+   hand in a short section under the agent's id. The kit's locator tables
+   go to the sibling `screen-locators.md` when a process exits
+   (`patterns.md` "Probe kit"), a file to grep, never to read whole. Later
+   probes, the claim checkers and the test authors read the notes instead
+   of each other's scripts. A brief points at it; nothing
    in it travels by memory or by being retyped into a brief.
 
    **3b. Digest.** One digest agent reads every probe report and writes
@@ -522,52 +526,31 @@ paragraph, verbatim, before the task.
    is left half-folded. A refusal or safeguard flag is not a stall: pause
    per "Model discipline", and never re-press the brief or water down the
    item to get around it.
-5. **Readability check.** A separate subagent reads in strict persona: a QA or
-   product person who has never seen a campaign document, has no code access,
-   and reads only the body above the footnotes. They restate every rule in
-   their own words and walk each scenario as a manual test. The brief names
-   three kinds of stumble: a verb or noun they cannot map to something on
-   screen; any token they cannot resolve from the page itself (a code, an
-   ID, a cross-reference that names no feature; the persona has read no
-   other spec and must not "recognise" campaign notation); and a step they
-   could execute two ways, or an outcome they could not judge pass or fail.
-   The brief says the Conventions line's symbols (⚠, the app badges, the
-   superscript evidence marks, the front-matter block) are explained on the
-   page and are not stumbles. The persona marks each stumble as *wording*
-   or *fact* (a stumble no rewrite can settle without new evidence, such as
-   whether a limit cuts or refuses). Rewrite the wording blockers, then run
-   the persona once more, because a rewrite is not verified by its own
-   writer. **The loop is two reads and one rewrite.** The first read covers
-   the whole body. The rewrite fixes wording blockers only, and never
-   lengthens a passage: a stumble that a rule, row or register entry
-   already answers gets a pointer to it, not a new sentence. The second
-   read covers the whole rule or scenario that holds each rewritten span
-   and reports only stumbles inside the span; it is skipped when nothing
-   was rewritten. **The gate is met when every remaining blocker is a fact
-   the page already declares** (a ❓ entry, a marked row, a declared
-   no-screen line): no rewrite settles a fact, so the loop ends there. A
-   blocker a persona raises on a declared fact is counted, not re-passed.
-   **Every persona report has a consumer.** Fact stumbles go to the next
-   agent that drives screens, the claim-check chunk file (step 7) or the
-   test authors' briefs (step 8), and the orchestrator's brief names them.
-   Wording frictions are counted in the PROGRESS note ("n minor
-   readability frictions open"), never rewritten unless the maintainer
-   asks, so no report is left to a lean and no pass grows the body (U05,
-   2026-09-04: seven friction rewrites made the body longer and the next
-   read found stumbles in the new sentences). Writers avoid most stumbles
-   by writing to TEMPLATE "Write for a reader who has only this page".
-   **Product-owner read.** After the last fold (step 9), a second persona
-   reads the Findings register only, as a product owner deciding what to
-   fix: from each entry alone, what a user experiences, and whether it is a
-   defect or intended. Entries that fail are reworded by a writing agent.
-   One short agent; the register is what the team triages from.
-   **Rewrites preserve verified meaning.** The rewrite brief names the digest
-   and footnotes behind every claim being reworded and carries verbatim:
-   "Preserve the verified meaning — reword the phrasing, never the claim."
-   This step runs before the claim check and the tests on purpose: the
-   claim check verifies the rewritten wording, so a rewrite that changed a
-   claim's substance is caught there, and the tests derive from a checked
-   spec.
+5. **Readability check.** One pass, after the claim-check fold (step 7),
+   which is the last change to the wording before the tests derive from
+   it. A separate subagent reads the whole body in strict persona: a QA
+   person who knows the applications and has read the GLOSSARY, has no
+   code access, has read no other spec, and reads only the body above the
+   footnotes. They restate every rule in their own words, walk each
+   scenario as a manual test, and report three kinds of stumble: a verb or
+   noun they cannot map to something on screen; a token they cannot
+   resolve from the page or the GLOSSARY; a step they could execute two
+   ways, or an outcome they could not judge pass or fail. Each stumble is
+   graded blocker or friction, and wording or fact (one only the
+   application can settle). Then one rewrite agent fixes the wording
+   blockers, never lengthening a passage: a stumble that a rule, row or
+   register entry already answers gets a pointer, not a sentence. Its
+   brief names the digest and footnotes behind every claim it rewords and
+   carries verbatim: "Preserve the verified meaning — reword the phrasing,
+   never the claim." A fact blocker is settled from the footnotes and
+   evidence where they hold the answer; otherwise it becomes a ❓ entry
+   with a stated lean. A span whose substance the rewrite had to change is
+   listed in its log and driven by one fresh span checker (step 9's) before
+   the tests are written. Frictions are counted in the PROGRESS note ("n
+   minor readability frictions open"), never rewritten unless the
+   maintainer asks. That is the whole step: no second read, no loop, no
+   other persona anywhere in the feature. Writers avoid most stumbles by
+   writing to TEMPLATE "Write for a reader who has only this page".
 6. **Lint gate.** Run the lint described in TEMPLATE, and
    `npm run seed-facts -- --check`. The lint checks reference integrity
    only: register and marker integrity, link, anchor and footnote
@@ -590,11 +573,10 @@ paragraph, verbatim, before the task.
      points & surfaces" table. A claim naming two screens sits in one chunk
      and its owner drives both. The chunk report stays in spec-section
      order, because the fold needs it that way.
-   - **About 40 calls per checker.** A checker that reaches its budget
-     writes its report on what it has, lists the remainder, and exits. A
-     fresh checker takes the remainder. The brief names the chunk's probe
-     cluster, its scripts and the screen notes; the checker starts from
-     them and still drives every line.
+   - **About 40 calls per checker** (step 3's ceiling), and the chunks are
+     cut to fit it. The brief names the chunk's probe cluster, its scripts
+     and the screen notes; the checker starts from them and still drives
+     every line.
    - **Checks are kept.** A checker's scripts live in
      `shared/playwright/checks/<feature>/<chunk>/` from the start (kit
      import `require('../../../probe')`): one entry script per chunk that
@@ -618,12 +600,10 @@ paragraph, verbatim, before the task.
      language instead of translating checker prose under its budget. The
      fold follows step 4's rules, and before returning reads its own
      folded spans against that TEMPLATE section and fixes what fails; the
-     self-read is not the gate, the persona is. A correction replaces a
+     self-read is not the gate, step 5 is. A correction replaces a
      sentence; it does not append a clause to it.
      Items that cannot be resolved become ❓ entries with a stated lean.
-     After the fold, re-run lint and give the reader persona (step 5) the
-     rules and scenarios that hold the folded spans, reporting on the spans
-     only; new wording is never verified by its writer.
+     After the fold, re-run lint; then step 5 runs.
 8. **Write the Playwright tests** from the checked spec, following
    PRINCIPLES and the harness docs. One suite per app, derived from the spec
    (rules 2 and 3), one test per canonical scenario in each app that runs
@@ -643,9 +623,8 @@ paragraph, verbatim, before the task.
    a pointer to the run log. When the block alters a claim rather than its
    wording, one fresh checker drives those spans first; a footnote-only or
    register-only change needs no checker. Then one writing agent folds
-   everything the run's findings change, register entries included, and
-   one persona pass reads the rules that hold the changed spans, as step 5 says. The fold happens once, on
-   verified facts. Never edit a test to pass a claim the
+   everything the run's findings change, register entries included. The
+   fold happens once, on verified facts. Never edit a test to pass a claim the
    app disproves. An app defect that blocks green is worked around and
    recorded in `app-changes.md`. After the last spec change the orchestrator
    runs `npm run test:final -- --feature U<nn>` (the three suites in turn,
@@ -656,7 +635,9 @@ paragraph, verbatim, before the task.
     orchestrator does this, no writing agent. Then the row: status, number
     of tests per app, and a short note of one to three lines. Register highlights are welcome: 🐞 and ❓ counts, the
     finding a reviewer should read first, anything low-confidence. Finding
-    detail stays in the register.
+    detail stays in the register. The cost ledger gets its rows in one call,
+    `node bin/session-cost.mjs <transcript> --label U<nn> --append`, with
+    no commentary: what the numbers mean is the maintainer's call at review.
 11. **Commit.** Everything the campaign produces (specs, docs, shared and
     app-side tests, page objects, builders, PHP overlays) is committed in this
     repo, in one commit stream. `.reports/` scratch is never committed. The
@@ -725,7 +706,7 @@ PROGRESS note names the last gate reached.
   `screen-notes.md` and the return format. Never paraphrase a rule into a
   brief, and never retype into one a fact that belongs in the screen
   notes. A brief for an agent that drives screens names the
-  ~40-call budget (step 7).
+  ~40-call budget (step 3).
 - **Fresh agents, short transcripts.** An agent that drives screens is
   always fresh. Message an existing agent only when its transcript is
   smaller than what a fresh agent would read. One or two agents at a time.
@@ -753,25 +734,13 @@ PROGRESS note names the last gate reached.
 | Probe agent | the Frame, step 3, "Live-probe etiquette", patterns.md "Probe kit", `seed-facts.md`, `users.md`, the feature's `screen-notes.md` |
 | Claim checker | the same, plus the spec, step 7 and its chunk's probe scripts |
 | Test author | PRINCIPLES, harness.md, patterns.md, scenarios.md, the spec, `screen-notes.md` |
-| Reader persona | the spec body only; the product-owner read, the Findings register only |
+| Reader persona | GLOSSARY, then the spec body only |
 | Writing agents (author, finalizer, rewrite, fold) | TEMPLATE (including "Write for a reader who has only this page"), the digest or change list, the spec; the author also reads the feature's rows in `incidentals.md` and the templates and locale files for labels |
 
 An agent that reads the spec without folding it (digest, checker, test
 author) reads the body and only the footnotes its lines cite, never the
 whole file; footnotes are half the file by size. The persona reads no
 footnotes at all.
-
-### Rejected consolidations
-
-Turned down; do not re-propose one without new evidence. Skipping claims
-with a dated footnote (a third of the substantive claim-check catches sat
-under dated footnotes). Readability after the claim check behind a
-word-list grep (rewrites change claims a grep cannot see). Porting one
-app's tests to the others (three independent derivations surface
-ambiguities, PRINCIPLES M1; revisit if tests dominate the ledger). One
-probe agent per app; digest merged into the finalizer; rewrite merged into
-the persona; the spec author writing tests, or the test author as checker;
-long-lived driving agents.
 
 ## Ops & campaign safeguards
 

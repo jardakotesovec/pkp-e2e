@@ -106,9 +106,9 @@ The apps move; the suite follows. The baselines live in
    a scenario, one fresh checker drives the changed spans after the persona
    re-read (`lint-spec.mjs --claims` over the diff, RUNBOOK step 7); a
    footnote-only or register-only change needs none. The slice writes the
-   same `.reports/<feature>/phase-status.md`. Every new or rewritten
-   register entry gets the reader persona (RUNBOOK step 5) on that entry
-   alone before commit; lint checks references, not wording. A behavior
+   same `.reports/<feature>/phase-status.md`. Every changed span, register
+   entries included, gets step 5's reader before commit; lint checks
+   references, not wording. A behavior
    change that contradicts a shipped spec claim is spec maintenance, not a
    test hack. Never edit a test to pass a claim the app now disproves
    without correcting the spec. Behavior that contradicts the linked

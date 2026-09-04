@@ -294,7 +294,17 @@ npm run serve:ojs                    # manual PHP server on the fleet's base por
 npm run probe-servers -- --start|--status|--stop [--app ojs]   # detached probe servers at base+50 (and +90)
 npm run fleet-prep -- --feature U03 [--reset] [--apps ojs,omp]  # per app: reset?, setup project, probe server; .reports/U03/fleet.json
 npm run test:final -- --feature U03 [--apps ojs] [--grep @smoke] # the suites one after another; logs in .reports/U03/final-run-<app>.log
+npx playwright test -c configs/ojs.config.js apps/ojs/playwright/tests/U03-user-profile.spec.js   # one spec by path (an agent's green run)
+npx playwright test -c configs/ojs.config.js --project=ojs-serial --no-deps apps/ojs/playwright/tests/serial/U05-notifications-center-and-email-preferences.spec.js   # one serial spec alone, on a warm install
 ```
+
+**Keep every run an agent waits on under about four minutes.** An agent's
+cached context expires after five minutes without a call, and the next
+call pays to rebuild all of it. So an agent runs one spec by path, one app
+per call, and a serial spec with `--project=<app>-serial --no-deps` on a
+warm install: selecting a serial spec by path alone runs its dependency
+projects (`setup`, `shared`, the app project) in full first. Whole-project
+runs belong to the orchestrator's final run.
 
 `fleet-prep` and `test:final` run the apps one after another and leave
 `PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a

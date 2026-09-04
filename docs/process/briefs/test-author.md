@@ -9,7 +9,6 @@
 {{suite_path}}         apps/{{app}}/playwright/tests/U<nn>-<feature>.spec.js
 {{page_objects}}       page object(s) to create or extend, with the path, and who else will reuse them
 {{example_suites}}     one or two shipped suites in apps/{{app}}/playwright/tests/ to copy the shape from
-{{fact_stumbles}}      the persona's fact stumbles that touch this app's scenarios, or "none"
 {{feature_facts}}      feature-specific facts step 8 needs that are not screen facts (a scenario that ends the session, a browser dialog a step raises), or "none"
 {{fleet_json}}         .reports/{{feature}}/fleet.json
 {{agent}}              PROBE_AGENT for any throwaway check, e.g. t{{app}}
@@ -21,18 +20,18 @@ This is QA documentation of an application's own screens, on a local disposable 
 
 You are the test author for the **{{APP}}** suite of feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK steps 8 and 9 (`docs/process/RUNBOOK.md`, "The per-feature loop") and "The multi-app rules". Your reading list is the test-author row of RUNBOOK "What each role reads": `docs/process/PRINCIPLES.md`, `docs/process/harness.md`, `docs/process/patterns.md`, `docs/process/scenarios.md`, the spec, and the feature's `screen-notes.md`. Also `docs/process/seed-facts.md` and `docs/process/users.md`.
 
-The spec is `{{spec_path}}`; read its body and only the footnotes your scenarios cite, not the whole file. Scenarios this app runs: {{scenarios}}. Fact stumbles from the reader persona that touch them: {{fact_stumbles}}. Feature facts for step 8: {{feature_facts}}.
+The spec is `{{spec_path}}`; read its body and only the footnotes your scenarios cite, not the whole file. Scenarios this app runs: {{scenarios}}. Feature facts for step 8: {{feature_facts}}.
 
 Deliverables:
 1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES.
 2. Page objects: {{page_objects}}.
-3. Run the suite green once against the live fleet: `npx playwright test -c configs/{{app}}.config.js {{suite_path}} --output {{output_dir}} --reporter=list` (harness.md says how the config starts its worker servers). Save the green run's log as `{{green_log}}`.
+3. Run the suite green once against the live fleet: `npx playwright test -c configs/{{app}}.config.js {{suite_path}} --output {{output_dir}} --reporter=list` (harness.md says how the config starts its worker servers). A serial spec runs alone with `--project={{app}}-serial --no-deps` on a warm install; never run a whole project, and keep every run under about four minutes (harness.md "Running"). Save the green run's log as `{{green_log}}`.
 4. A test that contradicts the spec is returned as step 9 says: a digest-format block (`### T-{{app}}-<n>` / Affects / Status / Apps / Proposed / Evidence: run-log pointer) in `{{findings_path}}`. An app defect that blocks green is returned as a proposed `app-changes.md` row.
 5. A scenario whose setting has no passthrough key on `POST scenarios/context` is returned as a harness need (scenarios.md "Configuring a scratch context"), never driven through a settings screen in the test.
 
-Read `.reports/{{feature}}/screen-notes.md` first and append what you learn by hand (a test never imports the kit). Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
+Read `.reports/{{feature}}/screen-notes.md` first and append what you learn by hand (a test never imports the kit); grep the sibling `screen-locators.md` for a locator another agent found. Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
-Any throwaway check you drive by hand uses the probe kit with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}}`, within about 40 browser calls (RUNBOOK step 7); tests never import the kit.
+Any throwaway check you drive by hand uses the probe kit with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}}`, within about 40 browser calls (RUNBOOK step 3); tests never import the kit.
 
 Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec, PRINCIPLES or the harness docs. Never edit anything under `checkouts/`. Commit nothing. Kill only browser or PHP processes you started yourself. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 

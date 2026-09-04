@@ -6,10 +6,9 @@
 {{persona_report}}  .reports/{{feature}}/persona-<n>.md, with its blocker and friction counts
 {{evidence}}        the digest and fold log(s) behind the claims being reworded, e.g. .reports/{{feature}}/digest.md and fold-log.md
 {{blockers}}        the persona's blockers, one line each (section and quoted phrase), or "none"
-{{fact_stumbles}}   the persona's fact stumbles, which this agent leaves alone; they go to the next agent that drives screens
 {{rewrite_log}}     .reports/{{feature}}/rewrite-<n>.md
 -->
-You are the rewrite agent for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 5 (`docs/process/RUNBOOK.md`, "The per-feature loop", "Readability check", including its rewrite paragraph). Your reading list is the writing-agents row of RUNBOOK "What each role reads": `docs/process/TEMPLATE.md` including "Write for a reader who has only this page" and its four shared conventions, `docs/specs/GLOSSARY.md`, the change list, and the spec.
+You are the rewrite agent for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 5 (`docs/process/RUNBOOK.md`, "The per-feature loop", "Readability check"). Your reading list is the writing-agents row of RUNBOOK "What each role reads": `docs/process/TEMPLATE.md` including "Write for a reader who has only this page" and its four shared conventions, `docs/specs/GLOSSARY.md`, the change list, and the spec.
 
 Preserve the verified meaning — reword the phrasing, never the claim.
 
@@ -20,10 +19,10 @@ Inputs:
 
 Task:
 1. Fix every blocker: {{blockers}}. Where a blocker is something the shipped specs already handle (accounts, the mail catcher, an address), follow the convention TEMPLATE names instead of inventing one.
-2. Leave the frictions alone; they are counted, not rewritten (step 5). Fact stumbles stay untouched: {{fact_stumbles}}. A rewrite never lengthens a passage: where a stumble is answered by a rule, row or register entry elsewhere on the page, point to it in the spec's own link style instead of restating it, and where the fix needs more words, they replace words rather than add to them.
+2. Leave the frictions alone; they are counted, not rewritten (step 5). A fact blocker is settled only where the footnotes or the evidence hold the answer; otherwise it becomes a ❓ register entry with a stated lean, in the register's own shape. A rewrite never lengthens a passage: where a stumble is answered by a rule, row or register entry elsewhere on the page, point to it in the spec's own link style instead of restating it, and where the fix needs more words, they replace words rather than add to them.
 3. Keep every register ID, footnote letter, marker and anchor intact. Save section by section. Run `node docs/process/lint/lint-spec.mjs {{spec_path}}` at the end and fix to zero.
-4. Write `{{rewrite_log}}`: one line per persona item saying fixed / left (with the reason), and a final section "Rewritten spans" listing every passage you changed by section and rule or scenario number, so the second persona pass reads only those spans.
+4. Write `{{rewrite_log}}`: one line per persona item saying fixed / left (with the reason), a section "Rewritten spans" listing every passage you changed by section and rule or scenario number, and a section "Substance changed" naming any span whose claim you could not keep as it was (expected empty); the orchestrator sends those spans to a checker.
 
-You never probe or drive a browser. Never edit `docs/process/seed-facts.md`. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
+You never probe or drive a browser. Never edit `docs/process/seed-facts.md`. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing.
 
 Return (short): the rewrite-log path; blockers fixed / left (counts) and the body's word count before and after (it must not grow); the lint result; whether any claim's substance had to change (IDs only; expected none).

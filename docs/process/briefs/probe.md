@@ -17,9 +17,9 @@ You are a probe agent for feature {{feature}} "{{feature_name}}" in the pkp-e2e 
 
 Your slice: **{{cluster}}** of `{{probe_list_path}}`, items {{items}}. Read the list's header first (it carries the premises that bind every item), then only your cluster. The draft the items settle is `{{spec_path}}`; open only the rules or entries an item names. Run scripts with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}} node bin/probe.js all <script>` (or one app), keep them under `.reports/{{feature}}/{{agent}}/`, tag prefix `{{tag_prefix}}`. On the fleets at the same time: {{concurrent_agents}}; use your own scratch contexts and users.
 
-Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`note()` in the kit). Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
+Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`note()` in the kit); grep the sibling `screen-locators.md` for a locator another agent found. Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
-Budget: about 40 browser calls (RUNBOOK step 7). When you reach it, write the report on what you have, list the remaining items, and exit.
+Budget: about 40 browser calls (RUNBOOK step 3). When you reach it, write the report on what you have, list the remaining items, and exit.
 
 Report: `.reports/{{feature}}/{{agent}}/report.md`, written for the digest agent and the maintainer as step 3 says: one section per item in the list's order, the claim answered first, the incidental observations separately, the locator used, every on-screen string that differs between apps quoted verbatim per app, and the snapshot file names. Facts only, no spec prose, no severity judgments.
 

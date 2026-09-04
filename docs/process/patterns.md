@@ -402,11 +402,15 @@ dialog, plus the verbatim `innerText` of header and main, because aria
 snapshots normalise punctuation. `record(name, data)` writes JSON,
 `shot(page, name)` a PNG, `loc(page, description, locator)` a row in
 `locators.md` (selector, match count, visibility) for the test author; the
-same rows are appended to the feature-level `.reports/<feature>/screen-notes.md`
-under the agent's id when the process exits. `note(text)` appends one line
-there at once, for what a locator row cannot carry: a dialog that appears on
-the way out of a screen, a premise that proved wrong, a wait that hangs.
-Every agent that drives screens reads that file first (RUNBOOK step 3).
+same rows are appended to the feature-level `.reports/<feature>/screen-locators.md`
+under the agent's id when the process exits, a file to grep by screen or
+element, never to read whole. `note(text)` appends one line to
+`.reports/<feature>/screen-notes.md` at once, for what a locator row cannot
+carry: a dialog that appears on the way out of a screen, a premise that
+proved wrong, a wait that hangs. Every agent that drives screens reads the
+notes file first (RUNBOOK step 3). `password(tag)` builds a scratch
+password of at most 32 characters, the Register page's silent limit (the
+Login page object lifts it, the Register page does not).
 Claim-check scripts are not scratch:
 they live in `shared/playwright/checks/<feature>/<chunk>/`, import the kit
 as `require('../../../probe')`, and are kept so a maintenance session can

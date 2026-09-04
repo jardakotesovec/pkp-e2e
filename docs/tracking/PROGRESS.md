@@ -139,13 +139,6 @@ each; delete when done._
   up (article landing page, issues, catalog browse), seed an enriched
   second journal in the bootstrap fixture rather than touching
   `publicknowledge`.
-- **Per-phase runners, conditional**: after two features on the current
-  loop, if the cost ledger still shows the orchestrator above about a fifth
-  of spend, script the phases as separate `bin/workflows/` units (probe +
-  digest; claim check → fold → lint → persona; readability; tests → green),
-  each invocable alone so a maintenance slice can use one, none setting
-  `model`, each returning on a refusal or safeguard flag and writing
-  `phase-status.md`. Otherwise leave it.
 
 ## Model-fallback log
 

@@ -20,6 +20,6 @@ Task: fold your slice into the draft as step 4 says, so the spec describes what 
 
 Write `{{fold_log_path}}` (append if another slice wrote it first): one line per digest block saying what it became (rule text / register ID / footnote / marker / dropped, with the reason for any drop or downgrade); a "left in `.reports/`" list of what did not clear the bar and what belongs to another feature, one line each naming the owning feature and screen; and a "seed-facts lines proposed" section copied from the digest for the orchestrator.
 
-You never probe or drive a browser. Never edit `docs/process/seed-facts.md` or `docs/process/scenarios.md`; the orchestrator handles those. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
+You never probe or drive a browser. Never edit `docs/process/seed-facts.md` or `docs/process/scenarios.md`; the orchestrator handles those. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing.
 
 Return (short, pointers not findings): the fold-log path; the register's counts (🐞 / ❓ / ✅) and the IDs added or changed; the lint result; anything dropped or downgraded (block IDs only); the security count carried through.
