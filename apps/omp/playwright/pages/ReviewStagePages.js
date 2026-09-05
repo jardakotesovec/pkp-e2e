@@ -308,7 +308,11 @@ async function completeUploadWizard(page, fileName) {
     await expect(wizard.getByText(/^Upload .* File$/).first()).toBeVisible({
         timeout: 20_000,
     });
-    await wizard.locator('select').first().selectOption({label: 'Book Manuscript'});
+    // The wizard's first select can be the (disabled) "revise a file"
+    // chooser; the component select is the genre one.
+    const genre = wizard.locator('select[id^="genreId"]');
+    await expect(genre).toBeVisible({timeout: 20_000});
+    await genre.selectOption({label: 'Book Manuscript'});
     await page.locator('input[type="file"]').last().setInputFiles({
         name: fileName,
         mimeType: 'text/plain',
@@ -387,7 +391,11 @@ async function completeStandaloneUploadWizard(page, fileName) {
     await expect(wizard.getByRole('tab', {name: '1. Upload File'})).toBeVisible({
         timeout: 20_000,
     });
-    await wizard.locator('select').first().selectOption({label: 'Book Manuscript'});
+    // The wizard's first select can be the (disabled) "revise a file"
+    // chooser; the component select is the genre one.
+    const genre = wizard.locator('select[id^="genreId"]');
+    await expect(genre).toBeVisible({timeout: 20_000});
+    await genre.selectOption({label: 'Book Manuscript'});
     await page.locator('input[type="file"]').last().setInputFiles({
         name: fileName,
         mimeType: 'text/plain',

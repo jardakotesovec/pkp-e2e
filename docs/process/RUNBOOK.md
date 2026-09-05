@@ -461,7 +461,11 @@ whole context and that context only grows.
    Reports record the locator used and separate the claim from incidental
    observations, because an incidental DOM detail is not promotable.
    Reports are written for the digest agent and for the maintainer, who may
-   audit them before sign-off.
+   audit them before sign-off. When the probe list's premises name a
+   scenario key listed under scenarios.md "Field shapes not built yet", the
+   harness agent that builds it runs first and the probes after; a probe
+   that meets the missing key builds the fixture by hand through the
+   screens, at several runs per cluster.
 
    **About 40 browser calls per agent**, for every agent that drives
    screens: probes, checkers, span checkers and a test author's throwaway

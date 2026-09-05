@@ -65,6 +65,17 @@ function safeName(name) {
     return String(name).replace(/[^A-Za-z0-9_.-]+/g, '_');
 }
 
+/**
+ * `<name>-<app>` inside withApp, so a script that runs on two apps never
+ * overwrites one app's snapshot with the other's. Outside withApp (no app
+ * in play) the name is returned unchanged.
+ */
+function appSuffixed(name) {
+    const app = process.env.PKP_APP_NAME;
+    const base = safeName(name);
+    return app && !base.endsWith(`-${app}`) ? `${base}-${app}` : base;
+}
+
 // ---------------------------------------------------------------------------
 // Apps and their environment
 
@@ -358,17 +369,27 @@ async function launch(app, {storageState, headless = true} = {}) {
 /**
  * Sign in through the real login form on the page's own server (the probe
  * server unless `origin` names another, e.g. app.variant('validation')).
+ * `contextPath` uses that journal's own login page instead of the site's,
+ * which is what decides where the user lands afterwards. An open session is
+ * signed out first (the login page would otherwise send it home silently).
  *
  * @param {import('@playwright/test').Page} page
  * @param {string} username a roster username (users.md) or a scratch user
- * @param {{password?: string, origin?: string}} [options]
+ * @param {{password?: string, origin?: string, contextPath?: string}} [options]
  */
-async function signIn(page, username, {password, origin} = {}) {
+async function signIn(page, username, {password, origin = '', contextPath} = {}) {
     const loginPage = new LoginPage(page);
-    if (origin) {
-        await page.goto(`${origin}/index.php/index/en/login`);
-    } else {
-        await loginPage.goto();
+    const open = async () => {
+        if (origin || contextPath) {
+            await page.goto(`${origin}/index.php/${contextPath || 'index'}/en/login`);
+        } else {
+            await loginPage.goto();
+        }
+    };
+    await open();
+    if ((await loginPage.usernameInput.count()) === 0) {
+        await signOut(page, {origin});
+        await open();
     }
     await loginPage.signIn(username, password || users.getPassword(username));
 }
@@ -436,19 +457,19 @@ async function screen(page) {
  * @param {string} name
  */
 async function shot(page, name) {
-    const file = path.join(outDir(), `${safeName(name)}.png`);
+    const file = path.join(outDir(), `${appSuffixed(name)}.png`);
     await page.screenshot({path: file, fullPage: true});
     return file;
 }
 
 /**
- * Write <name>.json in the output dir. Returns the path.
+ * Write <name>-<app>.json in the output dir. Returns the path.
  *
  * @param {string} name
  * @param {any} data
  */
 function record(name, data) {
-    const file = path.join(outDir(), `${safeName(name)}.json`);
+    const file = path.join(outDir(), `${appSuffixed(name)}.json`);
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
     return file;
 }
@@ -539,9 +560,17 @@ function note(text) {
     fs.appendFileSync(file, `${header}- ${agent}${app}: ${String(text).replace(/\s+/g, ' ').trim()}\n`);
 }
 
-/** Wait until jQuery has no in-flight requests (legacy grids, AjaxModals). */
+/**
+ * Wait until jQuery has no in-flight requests (legacy grids, AjaxModals)
+ * and the network has been quiet for half a second, which is when a Vue
+ * panel that fetches its own data on landing (a dashboard tab, a workflow
+ * step's discussions panel) is actually on screen. The quiet wait gives up
+ * silently after five seconds, so a page that keeps polling cannot hang a
+ * script.
+ */
 async function idle(page) {
     await waitForJQueryIdle(page);
+    await page.waitForLoadState('networkidle', {timeout: 5_000}).catch(() => {});
 }
 
 /**

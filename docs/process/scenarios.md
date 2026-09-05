@@ -190,6 +190,14 @@ Facts tests rely on, all parity-checked against the UI path:
   on a submitted seed is additive. Seeding `participants: []` together with
   `submitted: false` is what produces a genuine needs-editor state.
 
+The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
+`status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`)
+and `reviewAssignments[]`. It does not echo the title: a test that matches
+the submission by title keeps the value it sent. On a scratch context the
+seeded submission sits in no editor's `assigned-to-me` view (the default
+Editor Dashboard view) until someone is assigned; list it under the "active"
+view or assign a participant.
+
 Implementation: `shared/php/api/v1/_test/PKPTestController.php` and the
 builders in `shared/php/classes/testing/` (`PKPBootstrapSeeder`,
 `PKPContextScenarioBuilder`, `PKPSubmissionScenarioBuilder`, `Spec`,
@@ -281,7 +289,10 @@ write into the same inbox. The rules below follow from that.
   `X-Tags`. `pkpMail` refuses any read without a recipient.
 - **`contains` is a content marker, not a scope.** It searches a substring
   in subject and body. Use it when the test controls some text in the
-  message. It supplements the recipient scope and never replaces it.
+  message. It supplements the recipient scope and never replaces it. On a
+  scratch context whose path is the seed tag, every mail carries the tag
+  (the context name, the throwaway addresses), so `contains: tag` matches
+  everything; use a phrase the test controls, such as the seeded title.
 - **Pair every absence claim with a positive control.** Wait for a message
   you expect to arrive the same way, then assert that the target message did
   not. The control also bounds the wait, so the test never waits on

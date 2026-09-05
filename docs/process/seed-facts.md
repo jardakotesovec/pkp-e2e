@@ -121,6 +121,11 @@ One line per fact: the fact, the screen that shows it, and the date it was
 seen (with the pointer). A line without a dated observation in the repo says
 so; it is not a guess.
 
+- The seed creates no submissions on any app. Every Editor Dashboard view
+  counts 0 until a test seeds one through `POST scenarios/submission`, so a
+  probe premise like "any existing submission" needs a seed first. Editor
+  Dashboard on OPS, 2026-09-04 (U28 pE); OJS and OMP by the seed fixtures,
+  which hold no submission.
 - The installer's default Privacy Statement is present on the seeded context
   and on every scratch context, so their Register pages show the consent
   box. Settings › Website › Setup › Privacy Statement; the Register page.

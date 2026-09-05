@@ -76,6 +76,10 @@ Each of these has bitten at least once.
 15. **`getByRole` name strings are substring matches.** `{name: 'View'}`
     matches "Assign Re**view**ers". Use `exact: true` or an anchored regex for
     short common words.
+16. **Legacy grid control links carry padding in their text.** A row's
+    "Edit" link reads " Edit " to `hasText`, so an anchored regex
+    (`filter({hasText: /^Edit$/})`) never matches. Read them by role and
+    exact accessible name: `getByRole('link', {name: 'Edit', exact: true})`.
 
 ## Fixture selection
 
@@ -399,8 +403,10 @@ size (never a body) of every `/api/` call and every status ≥ 400 into
 `run-<app>.json`. `screen(page)` is the screen as data: the aria snapshot of
 the main region (the body when the page has no `main`) and of every open
 dialog, plus the verbatim `innerText` of header and main, because aria
-snapshots normalise punctuation. `record(name, data)` writes JSON,
-`shot(page, name)` a PNG, `loc(page, description, locator)` a row in
+snapshots normalise punctuation. `record(name, data)` writes JSON and
+`shot(page, name)` a PNG, both as `<name>-<app>` inside `withApp`, so a
+script on two apps never overwrites one app's snapshot with the other's;
+`loc(page, description, locator)` a row in
 `locators.md` (selector, match count, visibility) for the test author; the
 same rows are appended to the feature-level `.reports/<feature>/screen-locators.md`
 under the agent's id when the process exits, a file to grep by screen or
@@ -415,9 +421,13 @@ Claim-check scripts are not scratch:
 they live in `shared/playwright/checks/<feature>/<chunk>/`, import the kit
 as `require('../../../probe')`, and are kept so a maintenance session can
 run a chunk again (RUNBOOK step 7 "Checks are kept").
-`idle(page)` is `waitForJQueryIdle`; `tag(prefix)` makes a scratch tag that
-follows the tag conventions above. `signIn` uses the roster password rule,
-so it works for scratch users too.
+`idle(page)` is `waitForJQueryIdle` plus a bounded network-quiet wait, so a
+Vue panel that fetches its own data on landing (a dashboard tab, a workflow
+step's discussions panel) is on screen before `screen()` reads; `tag(prefix)`
+makes a scratch tag that follows the tag conventions above. `signIn` uses
+the roster password rule, so it works for scratch users too; `signIn(page,
+user, {contextPath})` goes through that journal's own login page (which
+decides where the user lands), and any open session is signed out first.
 
 Must not, in a probe script: assertions or `expect`; the test runner or its
 fixtures; a generic request caller (drive the UI, or the `_test` API through

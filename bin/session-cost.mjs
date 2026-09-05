@@ -25,8 +25,9 @@ const roleOf = (meta) => {
 };
 
 // One API response is written as several lines with the same message.id (one
-// per content block) and identical usage; naive summing inflates ~2.5×. Usage
-// is taken once per id; tool_use blocks are collected across all its lines.
+// per content block); naive summing inflates ~2.5×. Usage is taken once per
+// id: the input-side counts are identical on every line, but output_tokens is a
+// placeholder (2–20) on all but the last line, so the largest value wins.
 // "<synthetic>" messages (session-limit notices) are not API calls and are skipped.
 function tally(jsonl) {
     const usage = new Map();
@@ -36,7 +37,7 @@ function tally(jsonl) {
         let row; try { row = JSON.parse(line); } catch { continue; }
         const m = row.message;
         if (row.type !== 'assistant' || !m?.usage || !m.id || m.model === '<synthetic>') continue;
-        if (!usage.has(m.id)) usage.set(m.id, m.usage);
+        if (!usage.has(m.id) || (m.usage.output_tokens || 0) > (usage.get(m.id).output_tokens || 0)) usage.set(m.id, m.usage);
         if ((Array.isArray(m.content) ? m.content : []).some((b) => b.type === 'tool_use')) withTool.add(m.id);
     }
     const t = { calls: usage.size, pureText: usage.size - withTool.size, input: 0, cacheCreate: 0, cacheRead: 0, output: 0 };

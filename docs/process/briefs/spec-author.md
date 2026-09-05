@@ -20,7 +20,7 @@ Inputs:
 - Tier: {{tier}}.
 
 Deliverables:
-1. The spec at `{{spec_path}}`, following TEMPLATE, all three apps from the start.
+1. The spec at `{{spec_path}}`, following TEMPLATE, all three apps from the start. Write it as two Writes (the body, then the footnotes and references): a single call that generates for more than five minutes outlives the prompt cache, and the next call rebuilds the whole context.
 2. Lint to zero: `node docs/process/lint/lint-spec.mjs {{spec_path}}` (TEMPLATE "The lint gate"). Run it once with `--claims` too; the checklist marks the risky kinds of claim and helps build the probe list.
 3. The probe list at `{{probe_list_path}}`, every item phrased as step 2 says. Number the items P1, P2, …; give each a one-line title, the apps, the accounts, the screen, the actions, the observations wanted, and the draft location it settles. Group items by screen cluster with an estimated call count per cluster, so one cluster fits one probe agent (step 3's ~40 calls). The list's header states the premises every item relies on and what is deliberately not probed.
 
