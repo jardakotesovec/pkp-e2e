@@ -1,0 +1,1899 @@
+---
+name: reviewers-review
+scope: A reviewer finds their review requests, accepts or declines, works through the review wizard, submits the review, and reads what they wrote in earlier rounds
+apps: [ojs, omp]
+shared: pkp-lib
+status: verified
+atlas-claims: [AFFW-029, AFFW-050, AFFW-057, AFFU-138, AFFU-139, AFFU-140, AFFU-141, AFFU-142, AFFU-143, AFFU-144, AFFU-145, AFFU-146, AFFU-147, AFFU-148, AFFU-149, AFFU-150, AFFU-151, AFFU-152, AFFU-153, AFFU-154, AFFU-155, AFFU-156, AFFU-157, AFFU-158, AFFU-159, AFFU-160, AFFU-161, AFFU-162, AFFU-163, AFFU-164, AFFU-165, AFFU-166, AFFU-167, AFFU-168, AFFU-169, AFFU-170, AFFU-171, AFFU-172, AFFU-173, AFFU-174, AFFU-175, AFFU-176, AFFU-177, AFFU-178, AFFU-179, AFFU-180, AFFU-181, AFFU-182, AFFU-183, AFFU-184, AFFU-185, AFFU-186, AFFU-187, AFFU-188, AFFU-189, AFFU-190, AFFU-191, AFFU-192, AFFU-193, AFFU-194, AFFU-195, AFFU-196, AFFU-197, AFFU-198, AFFU-199, AFFU-200, AFFU-201, AFFU-202, AFFU-203, AFFU-204, AFFU-205, AFFU-207, AFFU-208, AFFU-209, ROUTE-022, ROUTE-047, ROUTE-066, GRID-013, GRID-028, GRID-063, VUE-009, VUE-076, MAIL-035, MAIL-036, MAIL-037, NOTIF-013]
+---
+
+# Reviewer's review {OJS OMP}
+
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+
+## Purpose
+
+A reviewer is asked by email to review a submission. This feature is
+everything that happens on the reviewer's side of that request: the list of
+their assignments under "My Assignments as Reviewer", the four-step review
+wizard where they accept or decline, read the guidelines, download the files,
+write or fill in the review and submit it, and the "Previous Reviews" box
+where they re-read what they wrote in an earlier round. It also covers the
+sign-in-free link a journal can put into its request emails. The editor's
+side of the same assignment (inviting, reminding, reading the review) is
+[→ reviewer assignment & management](U27-reviewer-assignment-and-management.md#statuses);
+the review round the assignment belongs to is
+[→ review stage & rounds](U26-review-stage-and-rounds.md#rounds). The
+settings that shape the wizard (review type, forms, guidelines, one-click
+access, deadlines) are configured in *Review setup & review forms* and take
+effect here.
+
+OPS does not install a reviewer role or a review stage: its Roles settings
+list no reviewer group, the sidebar of every installed role has no "My
+Assignments as Reviewer" group, and the review wizard has no page on a
+preprint server. The list's address typed by any installed role shows the
+access-denied page; the wizard's address shows a bare "404 Not Found" page
+for every account (scenario 17). A Preprint Server Manager can still create
+a role at the "Reviewer" permission level (with no stage to give it) and
+invite a user to it; that user then sees a "My Assignments as Reviewer"
+group whose page stays on "Loading" under the heading "undefined (0)"
+⚠ [OPS1](#ops1). <sup>p</sup>
+
+On a press the wizard runs on both review stages. An Internal Reviewer's
+wizard shows the press's "Internal Review Guidelines" and an External
+Reviewer's the "External Review Guidelines"; everything else is the same.
+A press collects no reviewer recommendation, so its step 3 has no
+"Recommendation" list [OMP1](#omp1). <sup>q</sup>
+
+## Actors & permissions
+
+**Terms used below.** A **reviewer** is an account holding a reviewer role
+in the journal (on a press: Internal Reviewer or External Reviewer). The
+**assigned reviewer** of a submission is the reviewer with a review
+assignment on it (a row in the editor's Reviewers panel). An assignment is
+**answered** once the reviewer accepted or declined, and **closed** once the
+review is submitted or the editor cancelled it. A Site Administrator or an
+editor takes part only through a reviewer role of their own; editorial roles
+give no access to any screen in this spec. <sup>l</sup>
+
+| Action | Who may, and when |
+|--------|--------------------|
+| **See "My Assignments as Reviewer"** (the sidebar group and its list) | • Reviewer: always, listing only their own assignments in this journal (Rule 2)<br>• Any other account: no sidebar group; the typed address shows the access-denied page <sup>a</sup> <sup>l</sup> |
+| **Open the review wizard** | • The assigned reviewer: while the assignment is neither declined nor cancelled, in any round; also after the review is submitted (to read it; nothing can be saved then, Rule 13), and after the submission moved on without the review (the review can still be written and submitted, Rule 17)<br>• The assigned reviewer of a declined or cancelled assignment, and everyone else: refused, with the message Rule 15 gives for each case <sup>l</sup> |
+| **Accept or decline** the request (step 1) | • The assigned reviewer: while the request is unanswered (the editor's side of the answer is [→ Log Response](U27-reviewer-assignment-and-management.md#unassign)) <sup>f</sup> |
+| **Download the files for review** | • The assigned reviewer: on steps 1 and 3, the files the editor ticked for them; with "Restrict File Access" on, on step 3 only, after accepting (Settings)<br>• The submission's editors: a file link from the wizard downloads for them too (Rule 15)<br>• An account with no access to the submission's files (a reviewer with no assignment on it): opening a file link is refused (Rule 15) <sup>e</sup> <sup>l</sup> |
+| **Write, save and submit the review** (step 3) | • The assigned reviewer: after accepting, until the review is submitted <sup>h</sup> <sup>i</sup> |
+| **Upload reviewer files** (step 3) | • The assigned reviewer: until the review is submitted; afterwards "Upload File" and each row's "Delete" are gone and only the row's "Edit" is offered <sup>h</sup> <sup>j</sup> |
+| **Use the "Review Tasks & Discussions" panel** on steps 3 and 4 | • The assigned reviewer: add a discussion, reply, edit or delete their own. The mechanics are *Tasks & discussions*; this spec owns only the fact that the panel is offered here <sup>h</sup> |
+| **Read an earlier round's review** ("Previous Reviews") | • The assigned reviewer: for their own assignments on rounds the submission has moved past, their current one included once a later round opened without them (Rule 14, ⚠ [A12](#a12)) <sup>k</sup> |
+| **Open a one-click review link** | • The addressed reviewer, signed out or signed in as themselves. A browser signed in as somebody else gets a blank page (Rule 16, [A10](#a10)) <sup>m</sup> |
+
+## Fields & validation
+
+**Step 1 ("1. Request")** <sup>e</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "I do not have any competing interests" / "I may have competing interests (Specify below)" | no | Radio pair, shown only on a journal with a competing-interests policy (Settings). The first is preselected. Choosing the second reveals a rich-text box for the statement. What is saved is Rule 8 |
+| Competing-interests statement (the box under the radios, no label of its own) | no | Rich text. Saved only with "I may have competing interests"; otherwise discarded |
+| "Yes, I agree to have my data collected and stored according to the privacy statement." | yes, until accepted | Checkbox, shown while the request is unanswered on a journal with a privacy statement (Settings); its words "privacy statement" link to the journal's privacy page. "Accept Review, Continue to Step #2" with the box unticked is refused with "This field is required." under the box, and the step stays. The box is gone once the request is accepted |
+
+**Decline Review Request window** <sup>f</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| The message (one rich-text box under "You may provide the editor with any reasons why you are declining this review in the field below.") | no | Prefilled with the journal's "Unable to Review" email: "Editors:" {OJS} / "Editor(s):" {OMP}, then "I am afraid that at this time I am unable to review the submission, "{title}," for {journal}. Thank you for thinking of me, and another time feel free to call on me." and the reviewer's name. The reviewer may edit or empty it; it becomes the body of the decline email (Side effects) |
+
+**Step 3 ("3. Download & Review")** <sup>h</sup> <sup>i</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "For author and editor" | no | Rich text under "Review", shown when the assignment carries no review form. Nothing requires it: "Submit Review" with both boxes empty and no file under "Reviewer Files" ({OJS}: with a recommendation chosen) submits the review ⚠ [A7](#a7) |
+| "For editor" {OJS} / "For editor only" {OMP} | no | Rich text, same condition. Never required |
+| The review form's questions | per question, marked "*" | Shown instead of the two text boxes when the assignment carries a review form: the form's title and description, then each question as the form defines it (a text box, a checkbox group, a radio group or a drop-down). A required question left unanswered stops "Submit Review" only after its confirmation: the step stays, no question is marked, and the box "Please fill in required fields." / "Some required fields are not filled in. Please complete them before submitting your review." appears under the buttons ({OMP}: the first sentence prints as a raw key ⚠ [OMP3](#omp3)). "Save for Later" saves whether or not a required question is answered, with "Your changes have been saved." as on a free-form review |
+| "Reviewer Files" (the list under "Upload") | no | The reviewer's own attachments: "Upload File" opens the shared upload wizard (*Submission files*; here three steps, "1. Upload File", "2. Review Details" and "3. Confirm", with no file-type question), and each row offers "Edit" and "Delete". Once the review is submitted, "Upload File" and "Delete" are gone and "Edit" stays |
+| "Recommendation" {OJS} | yes, on submit | Drop-down preset to "Choose One" listing the journal's active recommendations (the defaults, in order: "Accept Submission", "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline Submission", "See Comments"). "Submit Review" with "Choose One" is asked for confirmation first; after "OK" the step stays and "This field is required." appears under the list. It is the only check a free-form submit meets (row 1). "Save for Later" keeps whatever is chosen. A press has no such field [OMP1](#omp1) |
+
+## Rules & state
+
+<a id="reviewer-dashboard"></a>
+1. **Where the list lives.** The backend sidebar shows a "My Assignments as
+   Reviewer" group to every reviewer. Its entries are the views of Rule 2,
+   each written as its count and then its name ("3 Action Required by me");
+   choosing one opens the list under a heading that reads the view's name
+   with the count in brackets, "Action Required by me (3)". The browser
+   tab reads "Submissions". For a reviewer with no other role the sidebar
+   holds nothing else but "Start A New Submission". A reviewer who holds
+   no editorial role lands here after signing in on the journal's Login
+   page; the precedence between this list, the editorial Dashboard and My
+   Submissions is [→ landing](U22-my-submissions.md#landing). The sidebar
+   group next to it for editorial roles is
+   [→ the editorial dashboard](U23-submissions-dashboard.md#views-sidebar).
+   <sup>a</sup>
+2. **The views.** One assignment sits in exactly the views whose condition
+   it meets. A cancelled assignment sits in none of them: the list never
+   shows it. The six views, in the sidebar's order: <sup>b</sup>
+
+   | View | Lists |
+   |------|-------|
+   | "Action Required by me" | unanswered or accepted assignments whose review is not yet submitted, while the submission is still on that review stage |
+   | "All assignments" | every assignment that is neither declined nor cancelled, as long as the submission is still on the stage or, once the review is submitted, not yet published |
+   | "Completed" | submitted reviews on submissions that are not yet published |
+   | "Declined" | assignments the reviewer declined, until the editor re-sends the request; a re-sent one is back under "Action Required by me" with "Respond to request" |
+   | "Published" | submitted reviews on published submissions |
+   | "Archived" | reviews never submitted on submissions that moved on to Copyediting or Production |
+
+   "Action Required by me" is the landing view.
+3. **The table.** Four columns: "ID" (the submission's number, with a
+   "Sort" control that does not reorder the rows ⚠ [A1](#a1)), "Submissions" (the title, plain text), "Editorial
+   Activity" (one sentence about the assignment's state) and "Actions" (one
+   button, or none). Dates in the sentences are written year-month-day
+   (2026-10-02). The sentence and the button follow the assignment's
+   state: <sup>c</sup>
+
+   | State | "Editorial Activity" reads | "Actions" button |
+   |-------|----------------------------|----------------|
+   | request unanswered, response not yet due (also after an editor re-sent a declined request) | "Please accept or decline this request by {date}" | "Respond to request" |
+   | request unanswered, response overdue | "Deadline for responding to this request has passed. Please accept or decline this request at the earliest." | "Respond to request" |
+   | accepted, review not yet due | "Please complete this review by {date} 00:00:00." (the date carries a midnight clock time ⚠ [A5](#a5)) | "Finish review" |
+   | accepted, review overdue | "Deadline for completing this review has passed. Please complete the review at the earliest." | "Finish review" |
+   | review submitted (whether or not the editor has confirmed it) | "Review submitted on {date}" | "View" |
+   | declined | "Request declined on {date}" | none |
+   | not submitted, and the submission moved on to Copyediting or Production | "Incomplete" | none |
+
+   "Respond to request", "Finish review" and "View" all open the review
+   wizard (Rule 6). A submitted review's wizard opens on "4. Completion"
+   (Rule 13). The list offers no bulk controls and no row menu.
+4. **Search and filters.** The list carries the search box "Search
+   submissions, ID, authors, keywords, etc." and a "Filters" button opening
+   the "Filters" window. A typed phrase shows above the table as "Search:
+   {phrase}" with a "Clear search phrase" control, but the rows stay as
+   they were ⚠ [A1](#a1). Past 30 rows a pager appears, but every page
+   lists every row ⚠ [A1](#a1). The window offers the groups the journal
+   has: on the seeded journal "Section" ("Articles", "Reviews"), "Issues",
+   "Categories" and "Days since last activity" {OJS}, "Categories" and
+   "Days since last activity" {OMP}; a journal with one section, no issues
+   and no categories offers "Days since last activity" alone. Every window
+   has "Clear Filters" and "Apply Filters"; with nothing applied, nothing
+   about filters shows above the table. <sup>a</sup>
+5. **The header's "Dashboard" link.** For a reviewer without an editorial
+   role, the reader-side header's "Dashboard" item lands on this list. The
+   item itself belongs to *Navigation menus & site chrome*. <sup>a</sup>
+<a id="wizard"></a>
+6. **The review wizard.** Every action link on the list opens the wizard,
+   a page headed "Review: {submission title}", at the address
+   `{journal path}/reviewer/submission/{submission id}`. The address names
+   the submission, not the assignment: it opens the reviewer's assignment on
+   the latest round they are assigned to. Under the heading sit the
+   "Previous Reviews" box (Rule 14, only when earlier rounds exist) and four
+   tabs: "1. Request", "2. Guidelines", "3. Download & Review",
+   "4. Completion". The wizard remembers the furthest step reached: the tabs
+   beyond it are disabled, the tabs up to it can be revisited, and the page
+   opens on the furthest step. A step number typed into the address beyond
+   the reached step falls back to the reached step. <sup>d</sup>
+<a id="step-1"></a>
+7. **Step 1, the request.** The step shows, in order: the "Request for
+   Review" text ("You have been selected as a potential reviewer of the
+   following submission. Below is an overview of the submission, as well as
+   the timeline for this review. We hope that you are able to participate.");
+   "Article Title" {OJS} / "Book Title" {OMP}; "Abstract" {OJS} /
+   "Description" {OMP}; "Review Type" with the assignment's type
+   ("Anonymous Reviewer/Anonymous Author", "Anonymous Reviewer/Disclosed
+   Author" or "Open"); the "Review Files" list of the files the editor ticked
+   for this reviewer, one row per file with its name (a download link),
+   date and component (the whole list absent, before and after accepting,
+   when "Restrict File Access" is on: the files are then on step 3 only,
+   Settings); the link "View All Submission Details", which opens a
+   read-only window with the title, the abstract, and the authors only
+   when the review type discloses them (an "Open" review names them, "Anonymous
+   Reviewer/Anonymous Author" does not); the "Review Schedule" block
+   with three read-only dates, "Editor's Request", "Response Due Date" and
+   "Review Due Date"; the link "About Due Dates", which opens a dialog
+   reading "The editor asks that you either accept or decline the review
+   before the Response Due Date and complete the review by the Review Due
+   Date."; on a journal with a competing-interests policy, the "Competing
+   Interests" section (Rule 8); and, while unanswered, the privacy consent
+   box (Fields). While the request is unanswered the step ends with the
+   link "Decline Review Request" and the button "Accept Review, Continue to
+   Step #2"; once accepted, with a single "Save and continue" button.
+   <sup>e</sup>
+8. **Competing interests.** On a journal with a competing-interests policy
+   the step shows "Competing Interests" with the guidance "This publisher
+   has a policy for disclosure of potential competing interests from its
+   reviewers. Please take a moment to review this policy.", a "Competing
+   Interests" link opening the policy text in a dialog, and the radio pair
+   of Fields. Accepting, "Save and continue" and declining all record the
+   choice: the statement is kept with "I may have competing interests" and
+   discarded with "I do not have any competing interests". A recorded
+   statement shows to the editor as the row's "Competing Interests" badge
+   ([→ the status column](U27-reviewer-assignment-and-management.md#statuses)).
+   On a journal without a policy the section is absent and nothing is
+   recorded. <sup>e</sup>
+<a id="accept"></a>
+9. **Accepting.** "Accept Review, Continue to Step #2" records the
+   acceptance and moves to step 2. The editor's row turns "Request
+   Accepted", the assigned editors receive the acceptance email, and the
+   reviewer's list row moves to the accepted wording of Rule 3 with
+   "Finish review" (Side effects). From then on step 1 shows "Save and
+   continue" instead of the two response buttons. <sup>f</sup>
+<a id="decline"></a>
+10. **Declining.** "Decline Review Request" opens the "Decline Review
+    Request" window (Fields). Its "Decline Review Request" button records
+    the refusal, emails the editors the message, and sends the reviewer to
+    the journal's public home page, where nothing mentions the decline,
+    rather than back to their assignments ⚠ [A3](#a3). The list then shows "Request declined on {date}" with no
+    action, and the assignment appears under "Declined". The wizard is
+    closed to the reviewer from then on (Rule 15). An editor may ask again
+    with "Resend Review Request", which reopens the request as unanswered
+    ([→ resend](U27-reviewer-assignment-and-management.md#unassign)).
+    <sup>f</sup>
+11. **Step 2, the guidelines.** The step shows the journal's "Reviewer
+    Guidelines" text ("Review Guidelines" from the review setup; on a press
+    the stage's own guidelines) or, when none is configured, "This publisher
+    has not set any reviewer guidelines.". "Continue to Step #3" moves on;
+    "Go Back" returns to step 1. <sup>g</sup>
+<a id="step-3"></a>
+12. **Step 3, download and review.** The step shows, in order: the "Review
+    Files" list again (always, whatever the file-access setting, because
+    the reviewer has accepted by now); when guidelines are configured, a
+    "Reviewer Guidelines" line with the link "Review Guidelines", which
+    opens them in a dialog of that name; the review itself; the "Upload"
+    section ("Upload files you would like the editor and/or author to
+    consult, including revised versions of the original review file(s).")
+    with the "Reviewer Files" list, "No Files" while empty; the "Review
+    Tasks & Discussions" panel with its "Add" button (Actors; a second
+    copy sits on step 4, Rule 13); {OJS} the
+    "Recommendation" list under "Select a recommendation and submit the
+    review to complete the process. You must enter a review or upload a
+    file before selecting a recommendation." (a sentence nothing enforces,
+    Rule 13); and, last, the link "Go Back" (to step 2) and the buttons
+    "Save for Later" and "Submit Review". The review is either the two
+    free-text boxes under "Review" ("Enter (or paste) your review of this
+    submission into the form below."): "For author and editor" ("These
+    comments will be shared with the author and editor. If this is an open
+    peer review, they will also appear publicly alongside the article.")
+    and "For editor" {OJS} / "For editor only" {OMP} ("These comments are
+    private between you and the editor."); or, when the assignment carries
+    a review form, the form's title, description and questions in the two
+    boxes' place. Which one applies is the editor's choice per assignment
+    ([→ review type, visibility, form](U27-reviewer-assignment-and-management.md#read-review));
+    the forms themselves are built in *Review setup & review forms*.
+    <sup>h</sup>
+<a id="save-submit"></a>
+13. **Saving and submitting.** "Save for Later" keeps everything typed,
+    answered and chosen, shows "Your changes have been saved." and stays on
+    step 3; nothing reaches the editor. Text that is saved and later emptied
+    is not emptied by a further save: the field shows blank, but the earlier
+    text is what stays on record and what the editor reads ⚠ [A4](#a4).
+    "Submit Review" asks "Are you sure you
+    want to submit this review?" at once, whatever the step holds;
+    "Cancel" leaves step 3 as it was. Only after "OK" are the checks of
+    Fields run: a review form's unanswered required question, and {OJS} a
+    "Recommendation" left at "Choose One", keep the step with their
+    messages; nothing else stops the submit, so a review with nothing typed
+    and no file goes through ⚠ [A7](#a7). A submit that passes moves to
+    step 4. Step 4 ("4. Completion") reads "Review Submitted" and "Thank
+    you for completing the review of this submission. Your review has been
+    submitted successfully. We appreciate your contribution to the quality
+    of the work that we publish; the editor may contact you again for more
+    information if needed.", with the "Review Tasks & Discussions" panel
+    under them (a second copy of step 3's panel, with its own "Add"). From
+    then on nothing can be
+    saved or submitted: all four tabs open; step 1's "Save and continue",
+    step 2's "Continue to Step #3", "Save for Later" and "Submit Review"
+    are disabled; the review boxes ({OJS}: and the "Recommendation" list)
+    still take typing, which goes nowhere; and "Reviewer Files" offers no
+    "Upload File" and no "Delete", only each row's "Edit". The list's
+    "View" opens this wizard on "4. Completion". <sup>i</sup> <sup>j</sup>
+<a id="round-history"></a>
+14. **Previous Reviews.** The wizard opens with a "Previous Reviews" box
+    above the tabs whenever the reviewer's round is no longer the
+    submission's latest round: one line per such round, their current one
+    included when a later round opened without them (on a press, as soon
+    as the monograph has an External Review round, the Internal Reviewer's
+    own review is listed this way) ⚠ [A12](#a12). Each line reads "Round
+    {N} Review Submitted on {date}" with a "Read Round {N} Review" button.
+    For a round the reviewer declined, the date is the decline date; for a
+    round they accepted but never finished, and for their current round
+    before they submit, the line ends after "Submitted on" with no date at
+    all ⚠ [A2](#a2). The button opens a side window titled "Round {N}
+    Review submitted by you for" with the submission title under it. Its
+    left column shows, for a submitted review: {OJS} "Recommendation";
+    "Reviewer Comments" split into "For editors and authors" and "For
+    editors only", each entry numbered ("Comment 1: "); and "Attachments"
+    ("These are files that you attached along with your review"), a
+    download list shown only when the reviewer attached files; the files
+    the editor sent for review are not listed ⚠ [A13](#a13). For a
+    declined round it shows "Declined Date" and "Decline reason sent by
+    email" with the email's subject "Unable to Review" on one line and the
+    message sent under it; a decline sent with an empty message shows the
+    "Decline Review Request" window's prefilled text there instead
+    (Fields). For an unfinished round it shows only "The review was not
+    completed.". The right column shows "Article Metadata" (the same
+    heading on a press) with "Type" (the section) and "Abstract", each
+    only when set, and "General Information" ("Editor's Request", "Response Due Date", and for a
+    non-declined round "Review Accepted On", "Review Due Date", "Review
+    Submitted On", each only when it has a date). <sup>k</sup>
+<a id="access"></a>
+15. **Who is refused.** The wizard address opens only for the assigned
+    reviewer of a live assignment. Anyone else who types it gets a page in
+    the journal's public layout with one of two messages: an editor, the
+    author, or any account without a reviewer role reads "The current role
+    does not have access to this operation." (the access-denied page); a
+    reviewer with no assignment on that submission, or whose assignment
+    was declined or cancelled, reads "The current user is not assigned as
+    a reviewer for the requested document.". A signed-out visitor gets the
+    journal's Login page, and signing in there as the assigned reviewer
+    continues to the wizard. A file link from the wizard downloads for the
+    reviewer it was ticked for and for the submission's editors (an
+    assigned Section Editor, a Journal Manager); an account with no access
+    to the submission's files, such as a reviewer with no assignment on
+    it, gets a bare line of text, "The current role does not have access
+    to this operation.", and no file, instead of the access-denied page
+    ⚠ [A6](#a6). With "Restrict File Access" on, step 1 lists no files at
+    all; the reviewer reaches them on step 3 after accepting (Settings).
+    "My Assignments as Reviewer" typed by an account without a
+    reviewer role shows the access-denied page. <sup>l</sup>
+<a id="one-click"></a>
+16. **One-click access.** With "One-click Reviewer Access" on (Settings),
+    the request email and the reminders the editor sends carry a personal
+    link that needs no sign-in: opening it in a signed-out browser signs
+    the reviewer in and lands on the wizard. Opening the link does not use it up: a second
+    open lands on the wizard again. A link stops working once the review
+    is submitted or the request declined; such a link shows the
+    "Invitation Unavailable" page
+    ([→ the invitation-link landing](U06-user-invitations.md#invitation-landing)).
+    Each reminder mints a link of its own, and the earlier link dies the
+    moment the reminder is sent: it shows a bare "404 Not Found" page, not
+    "Invitation Unavailable" ⚠ [A9](#a9); a request on another submission
+    of the same journal does the same to the reviewer's earlier request
+    link. A browser already signed in as somebody else gets a blank page
+    with no message at all ⚠ [A10](#a10). With the setting off, the
+    emails carry the plain wizard address, which asks for sign-in on the
+    journal's Login page and then opens the wizard. <sup>m</sup>
+17. **After the submission moves on.** When the editor decides the round
+    without this review and the submission reaches Copyediting or
+    Production, an unfinished assignment reads "Incomplete" with no action
+    under "Archived" (Rule 3). The wizard address still opens the wizard at
+    the step reached, and it still works: nothing on it says the round is
+    over, and the review can be written and submitted as if the round were
+    open ⚠ [A11](#a11); once submitted, the row leaves "Archived" for
+    "Completed". A finished review on a submission that moves on keeps
+    its "View" button, under "Completed" and later "Published". <sup>b</sup>
+    <sup>c</sup>
+
+## Side effects
+
+- **Accepting** → the assigned editors of the stage (Journal Manager or
+  Section Editor assigned to the submission; the journal's principal contact
+  when nobody is assigned) receive the email "Review accepted: {reviewer}
+  accepted review assignment for #{id} {authors} — "{title}"", sent under
+  the reviewer's name with their address as reply-to. The submission's
+  activity log records the acceptance, the editor's row turns "Request
+  Accepted" and its History gains the "Confirm" date
+  ([→ history](U27-reviewer-assignment-and-management.md#unassign)). What
+  the acceptance does to an earlier reminder on the editor's row is
+  [→ reminders](U27-reviewer-assignment-and-management.md#reminders).
+  <sup>n</sup>
+- **Declining** → the same editors receive the email "Unable to Review",
+  its body the window's message, sent the same way. The activity log
+  records the decline, the editor's row turns "Request Declined", and a
+  one-click link for the assignment stops working. <sup>n</sup>
+- **Submitting** → every Journal Manager and Section Editor assigned to the
+  stage receives the email "Review complete: {reviewer} recommends
+  {recommendation} for #{id} {authors} — "{title}"", sent from the
+  journal's principal contact, its body naming the recommendation and the
+  review type with a link to the submission, unless they opted out of it in
+  their notification preferences (*Notifications center & email
+  preferences*). On a press the subject reads "recommends None" and the
+  body "Recommendation: None" ⚠ [OMP2](#omp2). The editors' header "Tasks"
+  panel gains no entry; any other notice of the review on their screens is
+  *Notifications center & email preferences*'s. The reviewer's own "Review
+  pending." task is cleared, the activity log records "The round {N} review
+  assigned to {reviewer} for submission {id} has been completed.", the
+  editor's row turns "Review Submitted" ({OJS}: with the recommendation
+  under it), the round status box moves on
+  ([→ round status](U26-review-stage-and-rounds.md#round-status)), and a
+  one-click link for the assignment stops working. <sup>n</sup>
+- **Saving for later** → nothing leaves the reviewer's screen beyond the
+  saved values; no email, no task, no log entry. <sup>i</sup>
+- **Uploading a reviewer file** → the file joins "Reviewer Files" on step 3
+  and, once the review is submitted, the editor's "Reviewer Files" in the
+  Review Details window
+  ([→ Review Details](U27-reviewer-assignment-and-management.md#read-review)).
+  <sup>h</sup>
+
+## Settings that modify behavior
+
+All of these are configured on other features' screens; they are listed for
+their effect on the reviewer's screens. Unless said otherwise the screen is
+Settings › Workflow › Review (its sub-tab "Setup" for the first two, "Reviewer
+Guidance" for the guidelines and the policy), owned by *Review setup & review
+forms*. <sup>o</sup>
+
+- **"Restrict File Access"** (the box reads "Reviewers will not be given
+  access to the submission file until they have agreed to review it." {OJS}
+  / "Reviewers will have access to the submission file only after agreeing
+  to review it." {OMP}): on, step 1 shows no "Review Files" list and the
+  files appear on step 3 once the reviewer accepts; off (the install
+  default), the files are on step 1 already. Scenario 9 runs the "on" end
+  on a scratch journal.
+- **"One-click Reviewer Access"** ("Include a secure link in the email
+  invitation to reviewers."): on, Rule 16; off (the default), the emails
+  carry the plain wizard address. Scenario 10 runs the "on" end.
+- **"Review Guidelines"** (on a press "Internal Review Guidelines" and
+  "External Review Guidelines"): the text of step 2 and of step 3's
+  "Review Guidelines" dialog. Empty by default, which is the end scenario 2
+  meets ("This publisher has not set any reviewer guidelines."); a
+  configured text has no scenario of its own because step 2 changes only
+  its paragraph.
+- **"Competing Interests"** (the policy text): set, step 1 asks the
+  competing-interests question (Rule 8); empty (the default), it does not.
+  Scenario 13 runs the "set" end.
+- **Privacy Statement** (Settings › Website › Setup › Privacy Statement,
+  *Journal identity & about pages*): present (the default on the seeded
+  journal and on scratch journals), step 1 asks for consent before
+  acceptance (Fields); empty, no box is shown. The empty end has no
+  scenario: the box's absence is one fewer tick and nothing else changes.
+- **Review forms** and the per-assignment **"Review Form"** choice: a form
+  replaces the two free-text boxes on step 3 (Rule 12). Scenario 8 runs a
+  form; the others run free-form reviews.
+- **The assignment's "Review Type"**: shown on step 1, and it decides
+  whether "View All Submission Details" names the authors (Rule 7). The
+  default type comes from "Default Review Mode". Scenario 2 reads the
+  label and opens the window on the default type; the "Open" end has no
+  scenario of its own, because it only adds the authors' names to that
+  window.
+- **The assignment's due dates** ("Response Due Date", "Review Due Date",
+  set by the editor from the journal's weeks-to-respond and weeks-to-review
+  defaults): shown on step 1 and in the history window, and they decide the
+  overdue wording of Rule 3. No scenario of its own: scenario 2 reads the
+  dates on step 1, the overdue wording is Rule 3's, and the defaults are
+  *Review setup & review forms*'.
+- **{OJS} Reviewer recommendations** (the journal's configurable set):
+  the options of step 3's "Recommendation" list. No scenario of its own: a
+  journal's own entries only lengthen the list (an added entry appears as
+  its last option).
+- **Automatic reminders**: sent to the reviewer by *reviewer assignment &
+  management*, clocked in *Review setup & review forms*; on this side they
+  are only more emails. No scenario: they run on the server's clock, which
+  no screen on the test installs advances.
+
+## Cross-feature interactions
+
+- **Reviewer assignment & management**: the editor's Reviewers panel, where
+  every state this spec produces is read (the row statuses, History, Read
+  Review, Log Response, Resend Review Request, Cancel Reviewer).
+- **Review stage & rounds**: the round the assignment belongs to and its
+  status box; what the author sees of a completed review is described
+  there.
+- **Review setup & review forms**: every setting above, and the review forms
+  rendered on step 3.
+- **User invitations**: the invitation record behind a one-click link and
+  the "Invitation Unavailable" landing.
+- **Submissions dashboard** and **My Submissions**: the neighbouring sidebar
+  groups and the landing precedence.
+- **Submission files**: the upload wizard behind "Upload File" on step 3.
+- **Tasks & discussions**: the discussions panel on step 3, and the
+  reviewer's "Review pending." task.
+- **Notifications center & email preferences**: any notice the editors get
+  of a submitted review, and the review-complete email's opt-out.
+- **Submission activity log & notes**: the log rows written on accept,
+  decline and submit.
+- **ORCID integration**: the deposit of a completed review is triggered
+  from the editor's side, never from the wizard.
+
+## Canonical scenarios
+
+Scenarios 1 to 7 and 11, 12 and 14 run on the seeded journal with ready
+accounts and scratch submissions; scenarios 8, 9, 10 and 13 run on a scratch
+journal configured for them, with throwaway accounts. Each email is read in
+the mailbox of the address it was sent to. Accounts, passwords and the
+tooling recipe are in the footnote. <sup>s</sup>
+
+1. **The request appears in the reviewer's list** — Reviewer, with a fresh
+   review request on a submission in review: sign in on the journal's Login
+   page. The landing page is the view "Action Required by me" under "My
+   Assignments as Reviewer", headed "Action Required by me ({count})", and
+   the sidebar entry's count includes the request. The row shows the
+   submission's ID and title, "Please accept or decline this request by
+   {date}" and the button "Respond to request". The same row is under "All
+   assignments"; "Completed", "Declined", "Published" and "Archived" do not
+   list it. Control: the same account's sidebar holds no "Editor Dashboard"
+   group.
+2. **Accept a review request** — Reviewer: press "Respond to request". The
+   page "Review: {title}" opens on "1. Request" with tabs 2 to 4 disabled.
+   Read "Review Type" ("Anonymous Reviewer/Anonymous Author") and the
+   "Review Schedule" dates. Press "View All Submission Details": the window
+   shows the title and the abstract and no authors; close it. Press "About
+   Due Dates" (the dialog text appears; close it). Press "Accept Review,
+   Continue to Step #2" without ticking the privacy box: "This field is required." appears under
+   the box and the step stays. Tick the box and press again: "2.
+   Guidelines" opens, reading "This publisher has not set any reviewer
+   guidelines.". Reload the page: it opens on step 2, step 1 now offers
+   "Save and continue". The list row reads "Please complete this review by
+   {date} 00:00:00." with "Finish review", and the assigned editor's
+   mailbox holds "Review accepted: …".
+3. **Decline a review request** — Reviewer, with an unanswered request:
+   on step 1 press "Decline Review Request". The window opens with the
+   prefilled message; add a line to it and press its "Decline Review
+   Request". The browser lands on the journal's home page, which says
+   nothing about the decline ⚠ [A3](#a3). Open "My Assignments as
+   Reviewer": the row reads "Request declined on {date}" with no button,
+   and it sits under "Declined" only. Type the wizard address: the page
+   reads "The current user is not assigned as a reviewer for the requested
+   document.". The assigned editor's mailbox holds "Unable to Review" with
+   the edited message as its body.
+4. **Download the files for review** — Reviewer, with an accepted request
+   on a round where the editor ticked one file for them: on step 1 the
+   "Review Files" list shows that file; press its name and the file
+   downloads. Press "Continue to Step #3" on step 2: the same list heads
+   step 3. Control: a second file of the round the editor did not tick is
+   in neither list.
+5. **Save a review for later** — Reviewer, on step 3 of an accepted
+   request: type into "For author and editor" and into "For editor" {OJS}
+   / "For editor only" {OMP}, {OJS} pick a "Recommendation", and press
+   "Save for Later". "Your changes have been saved." appears and the step
+   stays. Sign out and in again: the list row still reads "Finish review";
+   the wizard opens on step 3 with both texts and the choice restored.
+   Control: the editors' mailbox has no review-complete email and the
+   editor's row still reads "Request Accepted".
+6. **Submit a free-form review** — Reviewer, on step 3: with the text in
+   place ({OJS}: and a recommendation chosen), press "Submit Review" and
+   "OK" on "Are you sure you want to submit this review?". "4. Completion"
+   opens reading "Review Submitted" and the thank-you text, with the
+   "Review Tasks & Discussions" panel under it. All four tabs are now
+   open; on step 3 "Submit Review" and
+   "Save for Later" are disabled. The list row reads "Review submitted on
+   {date}" with "View", under "Completed". The mailbox of each editor
+   assigned to the stage holds "Review complete: …" with the recommendation
+   in its subject ({OMP}: "recommends None" ⚠ [OMP2](#omp2)); the editor's
+   header "Tasks" panel gains no entry. Control: "View" opens the wizard
+   on "4. Completion".
+7. **Nothing stops an empty review** — Reviewer, on step 3 with nothing
+   typed and no file: press "Submit Review". "Are you sure you want to
+   submit this review?" appears at once, with no field marked. Press "OK":
+   {OJS} the step stays and "This field is required." shows under
+   "Recommendation"; choose one, reload the step, then press "Submit
+   Review" and "OK" again. {OMP} nothing intervenes. Either way
+   "4. Completion" opens and the
+   editors' mailbox holds "Review complete: …" for a review with nothing
+   in it ⚠ [A7](#a7). Control: on another open assignment, press "Upload
+   File" under "Upload" and attach a file; it lists under "Reviewer Files"
+   with "Edit" and "Delete", and submitting with the boxes still empty goes
+   through the same way.
+8. **A review form instead of free text** — Reviewer, on a scratch journal
+   with an active review form holding one required question, assigned with
+   that form: step 3 shows the form's title, its description and the
+   question marked "*" in place of the two text boxes. Press "Submit
+   Review" with the question unanswered and "OK" on the confirmation: the
+   step stays, the question is not marked, and the box "Please fill in
+   required fields." / "Some required fields are not filled in. Please
+   complete them before submitting your review." appears under the buttons
+   ({OMP}: the first line is the raw key ⚠ [OMP3](#omp3)); nothing is
+   submitted. Press "Save for Later" with the question still unanswered:
+   "Your changes have been saved." appears, and after a reload the
+   question is still unanswered. Answer it ({OJS}: and choose a
+   recommendation), press "Submit Review" and "OK": step 4 opens.
+9. **Restricted file access** — Reviewer, on a scratch journal with
+   "Restrict File Access" on and a request with one ticked file: step 1
+   shows no "Review Files" list. Accept the request: step 3 lists the file
+   and it downloads. Control: on the seeded journal (the setting off) the
+   list is on step 1 before acceptance (scenario 4).
+10. **One-click access** — Reviewer, on a scratch journal with "One-click
+    Reviewer Access" on, holding the request email ("Invitation to review"
+    {OJS} / "Manuscript Review Request" {OMP}) with its review link. Open
+    the link in a signed-out browser: the wizard opens on "1. Request" with
+    the reviewer signed in. Open the same link in a second signed-out
+    browser: the wizard again. Accept and submit the review. Open the link
+    once more: the "Invitation Unavailable" page. Control: with the setting
+    off, the request email's link shows the journal's Login page first,
+    and signing in there opens the wizard.
+11. **Read an earlier round's review** — Reviewer, assigned on round 2
+    after submitting a round-1 review on the same submission: the wizard
+    opens with "Previous Reviews" reading "Round 1 Review Submitted on
+    {date}". Press "Read Round 1 Review": the window "Round 1 Review
+    submitted by you for" shows the title, "Reviewer Comments" with the
+    round-1 text under "For editors and authors" ({OJS}: and the
+    "Recommendation"), and "General Information" with the round-1 dates.
+    Control: a round-2 assignment whose round-1 request the reviewer
+    declined with a typed reason reads "Declined Date" and "Decline reason
+    sent by email" in the window instead, with "Unable to Review" and the
+    typed reason under it.
+12. **Nothing can be saved after submission** — Reviewer, with a
+    submitted review that carries one reviewer file: open the wizard from
+    "View". Every tab opens. Step 1's "Save and continue" and step 2's
+    "Continue to Step #3" are disabled; on step 3 "Submit Review" and
+    "Save for Later" are disabled, "Reviewer Files" offers no "Upload
+    File", and the file's row offers "Edit" but no "Delete". Control: the
+    same reviewer's other, still-open assignment offers all of them.
+13. **Declare competing interests** — Reviewer, on a scratch journal with a
+    competing-interests policy: step 1 shows "Competing Interests" with its
+    link (press it: the policy dialog opens) and the radio pair, "I do not
+    have any competing interests" preselected. Choose "I may have competing
+    interests (Specify below)", type a statement, tick the privacy box and
+    accept. The editor's Reviewers panel shows the row with a "Competing
+    Interests" badge. Control: on the seeded journal (no policy) step 1
+    has no "Competing Interests" section.
+14. **Left behind when the submission moves on** — Reviewer, with a seeded
+    acceptance (no wizard step reached, Rule 6), the review unsubmitted, on
+    a submission the editor has since sent to Copyediting: the row reads
+    "Incomplete" with no button, under "Archived" only. Type the wizard
+    address: it opens on "1. Request" with "Save and continue" enabled and
+    nothing saying the round is over ⚠ [A11](#a11). Press "Save and
+    continue", then "Continue to Step #3", type a review ({OJS}: and choose
+    a recommendation), press "Submit Review" and "OK": "4. Completion"
+    opens, and the row sits under "Completed" as "Review submitted on
+    {date}" with "View", no longer under "Archived". Control: the same
+    reviewer's submitted review on another submission in Copyediting reads
+    "Review submitted on {date}" with "View", under "Completed".
+
+App-specific:
+
+15. **{OMP} Two stages, no recommendation** — Internal Reviewer, with a
+    request on a monograph in Internal Review: step 2 shows the press's
+    "Internal Review Guidelines" text (a scratch press with both guideline
+    texts set), and step 3 has no "Recommendation" list [OMP1](#omp1).
+    Submit the review: the "Review complete" email's subject reads
+    "recommends None" ⚠ [OMP2](#omp2). External Reviewer, on a monograph in
+    External Review: step 2 shows the "External Review Guidelines" text.
+16. **{OJS} The recommendation reaches the editor** — Reviewer: submit a
+    review with "Revisions Required" chosen. Editor: the Reviewers panel
+    row shows "Review Submitted" with "Revisions Required" under it, and
+    the "Previous Reviews" window of a later round shows the same under
+    "Recommendation" (scenario 11).
+17. **{OPS} No reviewer surfaces on a preprint server** — Preprint Server
+    Manager (a Moderator and an Author see the same): the sidebar has no
+    "My Assignments as Reviewer" group. Type the list's address
+    (`{server path}/dashboard/reviewAssignments`) and the wizard's address
+    for any preprint (Rule 6): the first shows the access-denied page, the
+    second a bare "404 Not Found" page with no server header around it. Positive control: the "Editor Dashboard" group and its list
+    open normally. Settings › Users & Roles › Roles lists no reviewer
+    group among the installed roles (a journal lists "Reviewer", a press
+    "Internal Reviewer" and "External Reviewer"); its "Create New Role"
+    window still offers the "Reviewer" permission level, and choosing it
+    greys out the only stage, "Production", while the role still saves.
+    Variant: a user holding such a home-made role signs in: the sidebar
+    shows "My Assignments as Reviewer", the list's address opens a page
+    headed "undefined (0)" whose table stays on "Loading" over "Showing 0
+    to 0 of 0", and the wizard's address still shows the bare "404 Not
+    Found" page ⚠ [OPS1](#ops1). <sup>p</sup>
+
+## Findings register
+
+Verdicts are the author's judgment (claude, 2026-09-04), unreviewed unless
+an entry notes otherwise; the team settles them on spec review. The summary
+is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
+and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
+
+| ID | Finding (one line, symptom) | Bug? | Impact | Review |
+|----|-----------------------------|------|--------|--------|
+| [A1](#a1) | The reviewer list's search box, "Sort" control and pager do nothing: every phrase, every sort and every page shows the same rows | 🐞 | user-visible | — |
+| [A2](#a2) | "Previous Reviews" prints "Round {N} Review Submitted on" with no date for a round the reviewer never finished | 🐞 | minor | — |
+| [A4](#a4) | A saved review text that is emptied and saved again keeps its old content on record | 🐞 | user-visible | — |
+| [A5](#a5) | The accepted row's "Please complete this review by" date prints with a 00:00:00 clock time | 🐞 | minor | — |
+| [A6](#a6) | A file link opened by an account without file access answers a bare line of text, not the access-denied page | 🐞 | minor | — |
+| [A7](#a7) | A review with nothing typed and no file attached can be submitted | 🐞 | user-visible | — |
+| [A9](#a9) | A reminder, or a request on another submission, kills the reviewer's earlier one-click link, which then shows a bare "404 Not Found" | 🐞 | user-visible | — |
+| [A10](#a10) | A one-click link opened in a browser signed in as somebody else shows a blank page, never the intended message | 🐞 | user-visible | — |
+| [A12](#a12) | A reviewer's own round is listed under "Previous Reviews" once the submission moves past it | 🐞 | minor | — |
+| [OMP2](#omp2) | {OMP} The review-complete email tells editors the reviewer "recommends None" | 🐞 | minor | — |
+| [OMP3](#omp3) | {OMP} A review form's "required fields" refusal opens with a raw locale key | 🐞 | minor | — |
+| [OPS1](#ops1) | {OPS} A home-made reviewer role opens a "My Assignments as Reviewer" list that never loads | 🐞 | minor | — |
+| [A3](#a3) | Declining a request sends the reviewer to the journal's public home page instead of their assignments | ❓ | minor | — |
+| [A11](#a11) | An assignment left behind under "Archived" still opens a wizard that takes and submits a full review | ❓ | minor | — |
+| [A13](#a13) | The "Read Round {N} Review" window never lists the files that were sent for review | ❓ | minor | — |
+| [OMP1](#omp1) | A press's wizard collects no recommendation, and each review stage shows its own guidelines | ✅ | — | — |
+| [A8](#a8) | Retired: "Save for Later" with a required question open did save and confirm after all | ✅ | retired | — |
+| [OMP4](#omp4) | Retired: the press's "Previous Reviews" oddity is every app's (A12) | ✅ | retired | — |
+
+### All apps
+
+<a id="a1"></a>
+**A1 — Search, sorting and paging on the reviewer list are inert** · 🐞 ·
+user-visible.
+The list under "My Assignments as Reviewer" offers the search box "Search
+submissions, ID, authors, keywords, etc.", a "Sort" control on the "ID"
+column and a pager once a view holds more than 30 rows. Typing a phrase
+puts "Search: {phrase}" above the table and leaves the rows exactly as they
+were, a phrase matching nothing included. Pressing "Sort" changes the
+address and leaves the rows in the same order, pressed once or twice. Past
+30 rows a pager appears, but every page lists every row: "Showing 1 to 30
+of 34" stands under a table of 34 rows, and page 2 shows the same 34 rows
+under "Showing 31 to 34 of 34". The editorial dashboard's identical
+controls work as expected. A reviewer with many assignments cannot find
+one by title.
+Basis: probe (the search, 2026-09-04; sort and pager, 2026-09-05; both
+apps). <sup>[f-a1](#fn-a1)</sup>
+
+<a id="a2"></a>
+**A2 — "Previous Reviews" shows a dateless line for an unfinished round** · 🐞 · minor.
+When a reviewer accepted an earlier round's request but never submitted,
+and is assigned again on a later round, the "Previous Reviews" box prints
+"Round {N} Review Submitted on" followed by nothing, next to a "Read Round
+{N} Review" button whose window then says "The review was not completed.".
+The line reads as a submitted review with a missing date. The same
+dateless line shows for the reviewer's own unsubmitted round once a later
+round opened without them (A12).
+Basis: probe (2026-09-04 and 2026-09-05, both apps). <sup>[f-a2](#fn-a2)</sup>
+
+<a id="a3"></a>
+**A3 — Declining lands on the journal's home page** · ❓ · minor.
+After "Decline Review Request" the reviewer is sent to the journal's public
+home page, not to "My Assignments as Reviewer" where the declined row now
+sits. Nothing on the home page confirms the decline; the reviewer has to
+find their way back to the list to see "Request declined on {date}".
+Question: is the home page the intended destination? Lean: an old default
+nobody revisited; the assignments list, or the wizard's own confirmation
+step, would tell the reviewer what happened.
+Basis: probe (2026-09-04, both apps). <sup>[f-a3](#fn-a3)</sup>
+
+<a id="a4"></a>
+**A4 — An emptied review text survives "Save for Later"** · 🐞 ·
+user-visible.
+A reviewer types into "For author and editor" (or "For editor" {OJS} /
+"For editor only" {OMP}),
+presses "Save for Later", then clears the box and presses "Save for Later"
+again. "Your changes have been saved." appears both times, but the earlier
+text stays on record: reloading the step shows it again, and it is what the
+editor reads after submission. Only a non-empty box overwrites the saved
+text; an empty one is skipped. The same holds for "Submit Review" with a
+box emptied after a save.
+Basis: probe (2026-09-04, both apps: the reload shows the old text); code
+(what the editor reads, and the submit path). <sup>[f-a4](#fn-a4)</sup>
+
+<a id="a5"></a>
+**A5 — The accepted row's due date carries a clock time** · 🐞 · minor.
+Once the request is accepted, the list row reads "Please complete this
+review by 2026-10-02 00:00:00." — the due date followed by a midnight time
+and a period — where the unanswered row reads "Please accept or decline this
+request by 2026-10-02" and step 1's "Review Due Date" shows the date alone.
+The reviewer reads a deadline of midnight that nobody set.
+Basis: probe (2026-09-04, both apps). <sup>[f-a5](#fn-a5)</sup>
+
+<a id="a6"></a>
+**A6 — A file link opened by an account without file access answers a bare line of text** · 🐞 · minor.
+A file link copied from the wizard and opened by an account with no access
+to the submission's files (a reviewer without an assignment on that
+submission; the submission's editors download the file) shows a page
+holding nothing but one line of machine text with the message "The current
+role does not have access to this operation." inside it, and no file,
+instead of the access-denied page every other refused address shows. The
+refusal itself holds.
+Basis: probe (2026-09-04 and 2026-09-05, both apps). <sup>[f-a6](#fn-a6)</sup>
+
+<a id="a7"></a>
+**A7 — An empty review can be submitted** · 🐞 · user-visible.
+Step 3 presents the two review boxes as the point of the step and, on a
+journal, says "You must enter a review or upload a file before selecting
+a recommendation.", yet "Submit Review" with nothing typed and no file
+under "Reviewer Files" goes through: on a press at once, on a journal as
+soon as a "Recommendation" is chosen. The editors receive "Review complete:
+…" and the row turns "Review Submitted" for a review that holds nothing.
+Basis: probe (2026-09-04, both apps). <sup>[f-a7](#fn-a7)</sup>
+
+<a id="a9"></a>
+**A9 — A later one-click email kills the earlier link** · 🐞 · user-visible.
+A reviewer holds a request email with its one-click link. When the journal
+sends them a second one-click email, a reminder for the same review or a
+request on another submission, the first email's link stops working:
+opening it shows a bare "404 Not Found" page, not the wizard and not
+"Invitation Unavailable". A reviewer who goes back to the original request
+email is locked out without a word of explanation; only the newest email's
+link works.
+Basis: probe (2026-09-04, both apps); the reason is a code reading.
+<sup>[f-a9](#fn-a9)</sup>
+
+<a id="a10"></a>
+**A10 — A one-click link opened as somebody else shows a blank page** · 🐞 · user-visible.
+When a browser signed in as another user (an author was tried) opens a
+reviewer's one-click link, the screen is entirely blank: no page, no
+message, no way on. The sentence written for this case, "You are logged in
+as a different user. Please log out and try the invitation link again.",
+never shows.
+Basis: probe (2026-09-04, both apps). <sup>[f-a10](#fn-a10)</sup>
+
+<a id="a11"></a>
+**A11 — An archived assignment still opens a wizard that takes a full review** · ❓ · minor.
+When the submission has moved on to Copyediting or Production without the
+review, the list marks the assignment "Incomplete" with no button, yet the
+wizard address opens the wizard exactly as it was: nothing says the round
+is over, and the review can be written and submitted in full. The row
+then reads "Review submitted on {date}" under "Completed", and the editor,
+who has moved on to Copyediting, gets a review nobody asked for.
+Question: should the wizard close (as it does for a cancelled assignment)
+or open read-only once the submission has moved on? Lean: read-only with a
+line saying the review is no longer needed.
+Basis: probe (2026-09-04, step 1 to step 2; 2026-09-05, through "Submit
+Review"; both apps). <sup>[f-a11](#fn-a11)</sup>
+
+<a id="a12"></a>
+**A12 — A reviewer's own round is listed as a previous review once the submission moves past it** · 🐞 · minor.
+A reviewer whose round is no longer the submission's latest sees their own
+review under "Previous Reviews": "Round {N} Review Submitted on {date}"
+with "Read Round {N} Review", whose window shows their own comments;
+before they submit, and on the page they submitted from, the line has no
+date (A2). The box announces an earlier round the reviewer never had. Seen
+on a journal when round 2 opened without them, and on a press as soon as
+the monograph has an External Review round.
+Basis: probe (2026-09-04, the press; 2026-09-05, both apps).
+<sup>[f-a12](#fn-a12)</sup>
+
+<a id="a13"></a>
+**A13 — The "Read Round {N} Review" window never lists the files sent for review** · ❓ · minor.
+The window has a "Files For Review" block ("These files were sent to you
+for review") that never appeared: with a file sent to the reviewer for
+round 1 and another for round 2, the round-1 window listed only the
+reviewer's own "Attachments".
+Question: which reviewer is the block meant for? Lean: it does not show
+for a reviewer assigned again on the next round; one whose later-round
+request was declined, or who has none, may see it.
+Basis: probe (2026-09-05, both apps). <sup>[f-a13](#fn-a13)</sup>
+
+### OMP
+
+<a id="omp1"></a>
+**OMP1 — No recommendation on a press; guidelines per stage** · ✅ ·
+intended divergence.
+A press's step 3 has no "Recommendation" list, its "Previous Reviews"
+window shows no "Recommendation" block, and nothing gates "Submit Review"
+on a recommendation. The press's two review stages each show their own
+guidelines text ("Internal Review Guidelines" on Internal Review,
+"External Review Guidelines" on External Review) on step 2 and in step 3's
+dialog. The editor-facing half of the same absence is recorded with
+[→ reviewer assignment & management](U27-reviewer-assignment-and-management.md#read-review).
+Basis: probe (2026-09-04, both press stages), and code for the design
+intent (the press disables reviewer recommendations, and the OJS-only step-3
+template carries the list). <sup>[f-omp1](#fn-omp1)</sup>
+
+<a id="omp2"></a>
+**OMP2 — The review-complete email says "recommends None"** · 🐞 · minor.
+On a press the email that tells the editors a review is in has the subject
+"Review complete: {reviewer} recommends None for #{id} …" and a
+"Recommendation: None" line in its body, because the subject template
+prints a recommendation the press never collects. The editor reads a
+recommendation of "None" where there was no question.
+Basis: probe (2026-09-04, on both press stages). <sup>[f-omp2](#fn-omp2)</sup>
+
+<a id="omp3"></a>
+**OMP3 — The review form's refusal opens with a raw key** · 🐞 · minor.
+When "Submit Review" is refused for an unanswered required question, the
+box under the buttons opens with
+"##reviewer.submission.reviewFormResponse.form.responseRequired##" where
+a journal reads "Please fill in required fields."; the second sentence,
+"Some required fields are not filled in. Please complete them before
+submitting your review.", is the same on both. The reviewer reads a code
+where a sentence belongs.
+Basis: probe (2026-09-04). <sup>[f-omp3](#fn-omp3)</sup>
+
+### OPS
+
+<a id="ops1"></a>
+**OPS1 — A home-made reviewer role on a preprint server opens a list that never loads** · 🐞 · minor.
+A Preprint Server Manager can create a role at the "Reviewer" permission
+level and invite a user to it. That user's sidebar then shows "My
+Assignments as Reviewer", and the list's address opens a page headed
+"undefined (0)" whose table stays on "Loading" over "Showing 0 to 0 of 0";
+nothing ever lists, and the wizard's address is still a bare "404 Not
+Found" page. Reached only through a role the install never creates.
+Basis: probe (2026-09-05). <sup>[f-ops1](#fn-ops1)</sup>
+
+### Retired
+
+<a id="a8"></a>
+**A8 — "Save for Later" says nothing while a required question is open** · ✅ · retired. Withdrawn 2026-09-05: four later saves on both apps went through with "Your changes have been saved." (Fields step 3). <sup>[f-a8](#fn-a8)</sup>
+
+<a id="omp4"></a>
+**OMP4 — A press lists the reviewer's own review as a previous one** · ✅ · retired. Folded into A12 on 2026-09-05: a journal shows the same box once a later round opens without the reviewer. <sup>[f-omp4](#fn-omp4)</sup>
+
+---
+
+<a id="footnotes"></a>
+## Footnotes — mechanism & evidence
+
+<a id="fn-a"></a>
+**a** — The list is the shared dashboard page in its reviewer flavour:
+`PKPDashboardHandler` (lib/pkp `pages/dashboard/`) op `reviewAssignments`,
+constructed with `DashboardPage::MyReviewAssignments`, role assignment
+`ROLE_ID_REVIEWER` only; the app dispatchers (`ojs pages/dashboard/index.php`,
+`omp …`, `ops …`) all route the op to the same base with no override
+(ROUTE-008; the OPS dispatcher routes it too, but no OPS account can hold
+the role). The Vue page is `DashboardPage.vue` (VUE-003, owned by the
+editorial dashboard); the reviewer view differs only in its columns, cells
+and controls (`useDashboardConfig.js` `MY_REVIEW_ASSIGNMENTS` branch,
+AFFW-029, AFFU-197..204). Sidebar group and its entries:
+`PKPTemplateManager` builds `$menu['reviewAssignments']` (label key
+`navigation.reviewAssignments` = "My Assignments as Reviewer", icon
+`ReviewAssignments`) from `Repo::submission()->getDashboardViews(…,
+[ROLE_ID_REVIEWER])` for any user holding the role; page heading key
+`navigation.submissions` = "Submissions". Bulk controls:
+`useDashboardBulkDelete.js` `bulkDeleteIsAvailableForUser` returns true only
+for the editorial dashboard and My Submissions (AFFU-204). The filters
+window is `getSubmissionFiltersForm`, the app's `SubmissionFilters` form,
+the same one the editorial dashboard uses. Live-probed 2026-09-04 on OJS
+and OMP (Rules 1, 4, 5; Actors row 1 control): the page heading is the view
+name with its count ("Action Required by me (13)"), the window title
+"Submissions | {journal}"; the sidebar entries read "{count} {name}" in the
+order of Rule 2, with "Start A New Submission" the only item under the
+group; signing in on the journal's login page lands on the "Action Required
+by me" view, signing in on the site's login page on the journal's home
+page; the reader-side header's "Dashboard" item lands on the same view;
+the filters window offers on OJS "Section" ("Articles", "Reviews"),
+"Issues", "Categories" (with "Select Categories"), "Days since last
+activity" (a slider, 0–180), "Clear Filters" / "Apply Filters", on OMP the
+last two groups only; no pager under 30 rows; nothing about filters above
+the table with none applied; an editor without a reviewer role has no "My
+Assignments as Reviewer" group on either app. Live-probed 2026-09-05 on
+OJS and OMP (Rule 4): a scratch journal with one section, no issues and no
+categories offered "Days since last activity" alone, with "Clear Filters"
+and "Apply Filters".
+
+<a id="fn-b"></a>
+**b** — Views: `Repo::submission()->getDashboardViews()` cases
+`TYPE_REVIEWER_ASSIGNMENTS_ACTION_REQUIRED` ("Action Required by me"),
+`_ALL` ("All assignments"), `_COMPLETED`, `_PUBLISHED`, `_ARCHIVED`,
+`_DECLINED` (locale keys `submission.dashboard.view.reviewAssignments.*`),
+each a `ReviewAssignment` collector filter: `filterByActionRequiredByReviewer`
+(not declined, not cancelled, `submissions.stage_id = ra.stage_id`,
+`date_completed` null); `filterByActive` (not declined/cancelled, and stage
+matches OR (not published AND completed)); `filterByCompleted` (completed,
+submission not published, `stage_id <> SUBMISSION`); `filterByPublished`
+(completed, submission published); `filterByIsArchived` (not completed,
+submission in EDITING or PRODUCTION); `filterByDeclined`. Cancelled rows
+match no view (`Collector.php`). The landing view is the first entry.
+Live-probed 2026-09-04 on OJS and OMP (Rule 2): unanswered and accepted →
+"Action Required by me" + "All assignments"; submitted → "All assignments"
++ "Completed"; declined → "Declined" only; moved to Copyediting unsubmitted
+→ "Archived" only; cancelled by the editor → none of the six.
+Live-probed 2026-09-05 on OJS and OMP (Rule 2): every seed sat in exactly
+the views above; an unanswered request the editor removed with "Unassign
+Reviewer" sits in no view; "Completed" was verified for submitted,
+unpublished reviews only, and the collector's further exclusion (a
+submission back on the Submission stage, `stage_id <> SUBMISSION`) has no
+editor screen that reaches it, so the body does not claim it; an accepted,
+unsubmitted review on a submission published through the scenario tooling
+appeared in no view ("Archived" counted the Copyediting and Production
+rows only) — not settled for a submission published from the editor's
+Production screens.
+
+<a id="fn-c"></a>
+**c** — Columns: `useDashboardConfig.js::getColumns` for
+`MY_REVIEW_ASSIGNMENTS`: `id` ("ID", `common.id`, sortable), `title`
+("Submissions", `navigation.submissions`), `activity` ("Editorial Activity",
+`stats.editorialActivity`), `actions` ("Actions", `admin.jobs.list.actions`)
+(AFFU-201). Activity sentence:
+`useDashboardConfigEditorialActivity.js::getEditorialActivityForMyReviewAssignments`
+— `REVIEW_ASSIGNMENT_STATUS_DECLINED` → `dashboard.reviewAssignment.declined`
+(date = `dateConfirmed`); submission stage EDITING/PRODUCTION and status not
+in `CompletedReviewAssignmentStatuses` → `submissions.incomplete`;
+`AWAITING_RESPONSE` / `REQUEST_RESEND` → `.acceptOrDeclineRequestDate`
+(`dateResponseDue`); `RESPONSE_OVERDUE` →
+`.deadlineForRespondingAcceptOrDecline`; `ACCEPTED` → `.completeReviewByDate`
+(`dateDue`, passed unformatted — the probe records the date's shape);
+`REVIEW_OVERDUE` → `.deadlineForCompletingReviewHasPassed`; completed
+statuses (received, viewed, complete, thanked) → `.reviewSubmitted`
+(`dateCompleted`) (AFFU-202). Action label:
+`DashboardCellReviewAssignmentActions.vue` — EDITING/PRODUCTION and not
+completed → none; `AWAITING_RESPONSE`/`RESPONSE_OVERDUE`/`REQUEST_RESEND` →
+`dashboard.actions.respondToRequest`; `ACCEPTED`/`REVIEW_OVERDUE` →
+`dashboard.actions.finishReview`; `DECLINED` → none; else `common.view`
+(AFFU-203). Every label calls `dashboardPageStore.openReviewerForm`, a full
+redirect to `reviewer/submission/{submissionId}` (AFFW-057). Live-probed
+2026-09-04 on OJS and OMP (Rule 3): every row wording verbatim; the
+"Actions" cell is a button and the title cell plain text; the accepted
+sentence prints the raw `dateDue` as "2026-10-02 00:00:00." (finding A5),
+the unanswered one "2026-10-02" with no period, the declined one
+"2026-09-04"; the two overdue sentences carry no date; "View" opens the
+wizard on "4. Completion".
+
+<a id="fn-d"></a>
+**d** — Wizard page: `PKPReviewerHandler::submission()` (lib/pkp
+`pages/reviewer/`), reached only through the app subclasses
+`APP\pages\reviewer\ReviewerHandler` of OJS (ROUTE-047; adds an override of
+`getReviewForm()` for step 3) and OMP (ROUTE-066; no override beyond the
+constructor and `authorize()`); both register ops `submission`, `step`,
+`saveStep`, `showDeclineReview`, `saveDeclineReview`, `downloadFile` for
+`ROLE_ID_REVIEWER` (the `downloadFile` op has no method anywhere in the
+chain — inert). OPS has no `pages/reviewer/` directory (ROUTE-022 apps
+column). Page title: `__('semicolon', ['label' => __('submission.review')])
+. title` = "Review: {title}". Which assignment: `SubmissionAccessPolicy` →
+`ReviewAssignmentAccessPolicy` fetches
+`filterByReviewerIds([$user], true)` (`isLastReviewRoundByReviewer`)
+`->first()`, i.e. the reviewer's assignment on their latest round. Step
+gating: `$step = min(requested, max(assignment step, 1))`, then a `1..4`
+range check that throws "Invalid step!"; because the clamp runs first, a
+high number never reaches the check (live-probed 2026-09-04 on OJS and
+OMP: `?step=3`, `?step=4` and `?step=9` on an unanswered assignment all
+rendered step 1 with HTTP 200 and the address unchanged), while `?step=-1`
+answered HTTP 500 with an empty body on both apps — an address no screen
+offers, kept here and not in the body; `ReviewerTabHandler.js::getDisabledSteps` disables
+tab indexes beyond the reached step; a `setStep` event after each successful
+save enables the next. Tabs: `reviewStepHeader.tpl` (`#reviewTabs`,
+AFFU-138..141), keys `reviewer.reviewSteps.*` = "1. Request",
+"2. Guidelines", "3. Download & Review", "4. Completion". The
+`<reviewer-submission-page>` mount above the tabs is footnote k.
+Live-probed 2026-09-04 on OJS and OMP (Rule 6): heading, address, the four
+tab labels, tabs beyond the reached step `aria-disabled`, the page opening
+on the furthest step; an assignment seeded as accepted through the
+scenario API opens on step 1 with "Save and continue" (the reached step
+advances only on a screen acceptance or that press).
+
+<a id="fn-e"></a>
+**e** — Step 1: `PKPReviewerReviewStep1Form` + lib/pkp
+`templates/reviewer/review/step1.tpl` (AFFU-143..154), included by
+`ojs templates/reviewer/review/step1.tpl` with `descriptionFieldKey =
+article.abstract` ("Abstract") and by OMP's with `submission.description`
+("Description") (AFFU-155, 156); "Article Title"/"Book Title" are the apps'
+`submission.title` strings. Request text key `reviewer.step1.requestBoilerplate`;
+review type `__($reviewAssignment->getReviewMethodKey())` →
+`editor.submissionReview.open` / `.anonymous` / `.doubleAnonymous`. Review
+files grid: `ReviewerReviewFilesGridHandler` (GRID-028; title
+`reviewer.submission.reviewFiles` = "Review Files"; rows filtered by
+`ReviewFilesDAO::check` per assignment; the grid's own policy passes
+`permitDeclined = !restrictReviewerFileAccess`), rendered only when
+`!$restrictReviewerFileAccess` (AFFU-144); per-file download authorisation
+is `SubmissionFileAssignedReviewerAccessPolicy` (skips unconfirmed
+assignments when the setting is on). "View All Submission Details":
+`ReviewerViewMetadataLinkAction` → Vue modal `ReviewerSubmissionDetailsModal`
+(`useReviewerSubmissionDetailsForm.js`: title, authors only when
+`publication.authorsString` is non-empty — the API blanks it for anonymous
+review types —, abstract, data citations when enabled, data availability,
+funding statement, keywords, subjects, disciplines) (AFFU-145; GRID-063 is
+the legacy modal handler the atlas recorded, now superseded by the Vue
+modal — the probe confirms which one renders). Schedule fields
+`dateNotified`/`responseDue`/`dateDue` read-only (AFFU-146; labels
+`reviewer.submission.reviewRequestDate` "Editor's Request",
+`.responseDueDate`, `.reviewDueDate`); "About Due Dates" = `ConfirmationModal`
+with `reviewer.aboutDueDates.text` (AFFU-147). Competing interests: link
+action only when `$context->getLocalizedData('competingInterests') != ''`
+(AFFU-148), radios/textarea only when `$currentContext->getData('competingInterests')`
+(AFFU-149..151), `disabled=$reviewIsClosed`. Privacy consent: rendered when
+`!getDateConfirmed() && privacyStatement` (AFFU-152), validated by
+`FormValidator … 'privacyConsent' 'required'
+'user.profile.form.privacyConsentRequired'` ("You must agree to the terms of
+the privacy statement."); the label is `user.register.form.privacyConsent`
+with the journal's privacy page as the link. Buttons: `getDateConfirmed()`
+→ "Save and continue" (`common.saveAndContinue`), else
+`reviewer.submission.acceptReview` + `reviewer.submission.declineReview`
+(AFFU-153, 154). Live-probed 2026-09-04 on OJS and OMP (Rules 7, 8; Fields
+step 1; scenarios 4, 13): the sections in Rule 7's order with the per-app
+labels; the request text and the "About Due Dates" text verbatim; the file
+row is name (a download link; the file arrives as
+`jpk-review-assignment-{id}-…` on OJS, `pkp-review-assignment-{id}-…` on
+OMP), date, component; "View All Submission Details" showed "Title" and
+"Abstract" alone for "Anonymous Reviewer/Anonymous Author" and "Title",
+"Authors", "Abstract" for "Open" ("Anonymous Reviewer/Disclosed Author" not
+driven; the seeded submissions carry no keywords, so the window's other
+metadata rows listed above were never seen and the body names only the
+title, the abstract and the authors); dates `YYYY-MM-DD`; the
+consent box is `required` and the unticked press is stopped by the
+browser-side validator with a `label.error` "This field is required."
+under the box (the server's "You must agree to the terms of the privacy
+statement." is the fallback behind it); "Decline Review Request" is an
+`<a>` and "Accept Review, Continue to Step #2" a `<button>`, in that
+order; on a scratch journal with a policy, the "Competing Interests"
+section, its dialog, the radio pair with the first preselected, and the
+typed statement kept across toggles and shown to the editor; whether the
+statement box hides again when "I do not have any competing interests" is
+chosen back was not captured, so the body does not say. On the seeded
+journal the privacy statement is present and the policy and guidelines
+are empty.
+
+<a id="fn-f"></a>
+**f** — Accept: `PKPReviewerReviewStep1Form::execute()` records the CI
+declaration (only when the context has `competingInterests`), bumps the
+step, and, when `getDateConfirmed()` is null, calls
+`ReviewerAction::confirmReview($request, $ra, $submission, false)`. Decline:
+`PKPReviewerHandler::showDeclineReview()` renders
+`reviewer/review/modal/regretMessage.tpl` (AFFU-176..178; prompt key
+`reviewer.submission.declineReviewMessage`; body prefilled from the
+`REVIEW_DECLINE` template compiled via `ReviewerAction::getResponseEmail()`);
+`saveDeclineReview()` refuses a completed review ("Review already
+completed!" exception), records CI as above, calls `confirmReview(…, true,
+$declineReviewMessage)` and answers `redirectUrlJson(url(ROUTE_PAGE, null,
+'index'))` — the journal's index page (finding A3). The modal copies the
+step-1 CI radio and textarea into hidden inputs so the declaration is
+recorded with the decline. `confirmReview()` is idempotent: it acts only
+while `dateConfirmed` is null, then sets `declined`, `dateConfirmed`, clears
+`dateReminded`/`reminderWasAutomatic`, marks the access invitation DECLINED
+on decline, and logs `SUBMISSION_LOG_REVIEW_ACCEPT`/`_DECLINE`. The API's
+`PUT reviews/{submissionId}/{reviewAssignmentId}/confirmReview` (API-032,
+owned by *Author response to reviews*) drives the same method for the
+editor's Log Response; a rider, not a screen of this spec.
+Live-probed 2026-09-04 on OJS and OMP (Rules 9, 10; scenarios 2, 3):
+acceptance moves to step 2 in-page, a reload opens step 2, step 1 then
+offers "Save and continue" alone; the decline window's prefilled text opens
+"Editors:" (OJS) / "Editor(s):" (OMP) and an added line arrived in the
+"Unable to Review" body; after the decline the browser was on the
+journal's home page with nothing about the decline (finding A3), the
+"Declined" view held the row with an empty "Actions" cell, and "All
+assignments" did not; the editor's row read "Request Declined" with
+"Resend Review Request" added to its menu; the accepted row's History
+gained "Confirm". Live-probed 2026-09-05 on OJS and OMP (Rules 2, 10):
+after the editor's "Resend Review Request" the row left "Declined" ("0
+Declined") and read "Please accept or decline this request by {date}"
+under "Action Required by me" with "Respond to request", and step 1
+offered "Decline Review Request" and "Accept Review, Continue to Step #2"
+again.
+
+<a id="fn-g"></a>
+**g** — Step 2: `PKPReviewerReviewStep2Form::fetch()` picks
+`internalReviewGuidelines` for `WORKFLOW_STAGE_ID_INTERNAL_REVIEW`, else
+`reviewGuidelines`; empty → `reviewer.submission.noGuidelines`.
+`step2.tpl` (AFFU-157, 158): label `reviewer.submission.reviewerGuidelines`
+("Reviewer Guidelines"), buttons `reviewer.submission.continueToStepThree`
+and `navigation.goBack` (a link to `submission?step=1`). Live-probed
+2026-09-04 on OJS and OMP (Rule 11): heading "Reviewer Guidelines", the
+seeded journal's "This publisher has not set any reviewer guidelines."
+(OJS says "publisher" too), the link "Go Back" back to step 1 and the
+button "Continue to Step #3" switching to step 3 in-page; a scratch
+journal's configured text shown in its place, and on the press each
+stage's own text (the internal reviewer's step 2 "Internal Review
+Guidelines", the external reviewer's "External Review Guidelines").
+
+<a id="fn-h"></a>
+**h** — Step 3: `PKPReviewerReviewStep3Form` + `step3.tpl` (AFFU-159..168);
+OJS wraps it in `ojs templates/reviewer/review/step3.tpl`, which captures
+`reviewerRecommendations.tpl` into `$additionalFormFields` (AFFU-166, 169:
+select `#reviewerRecommendationId`, options from
+`Repo::reviewerRecommendation()->getRecommendationOptions()`, label
+`reviewer.article.recommendation`, description
+`reviewer.article.selectRecommendation`, default `common.chooseOne`); OMP
+has no step-3 override, so the slot renders empty. Files grid as step 1
+without the restrict guard (AFFU-160). Guidelines link:
+`ViewReviewGuidelinesLinkAction` (label and dialog title
+`reviewer.submission.guidelines` = "Review Guidelines") assigned only when
+`getGuidelines()` is non-empty (AFFU-161); the surrounding section title is
+`reviewer.submission.reviewerGuidelines`. Free-form boxes `#comments` /
+`#commentsPrivate` (labels `submission.comments.canShareWithAuthor` /
+`.cannotShareWithAuthor` with their `.description` strings) under
+`submission.review` + `reviewer.submission.reviewDescription`, only in the
+`{else}` of `{if $reviewForm}` (AFFU-162, 163); review form:
+`reviewFormResponse.tpl` iterates `reviewFormElements`, element types
+SMALL_TEXT_FIELD / TEXT_FIELD / TEXTAREA / CHECKBOXES / RADIO_BUTTONS /
+DROP_DOWN_BOX (AFFU-170..175), `readonly`/`disabled=$disabled` where
+`disabled = dateCompleted != null`. Attachments:
+`ReviewerReviewAttachmentsGridHandler` (GRID-013; title
+`reviewer.submission.reviewerFiles` = "Reviewer Files"; capabilities ADD |
+DELETE | EDIT, add and delete dropped when the template passes
+`reviewIsClosed`) under `common.upload` + `reviewer.submission.uploadDescription`
+(AFFU-164). Discussions: `<discussion-manager-reviewer>` (AFFU-165, 181)
+fetches the submission and mounts the shared `DiscussionManager`;
+`useDiscussionManagerConfig.js::getManagerConfig` grants every action to a
+user for whom `isCurrentUserAssignedAsReviewer(submission)` holds
+(AFFU-182..191 are that manager's controls; mechanics owned by *Tasks &
+discussions*). Buttons: `fbvFormButtons submitText=reviewer.submission.submitReview
+confirmSubmit=reviewer.confirmSubmit saveText=reviewer.submission.saveReviewForLater
+cancelText=navigation.goBack` (AFFU-167); message box
+`#reviewStep3MessageBox` with `…form.responseRequired` ("Please fill in
+required fields.") and `…form.notFilledIn` (AFFU-168). Live-probed
+2026-09-04 on OJS and OMP (Rule 12, Fields step 3, Actors rows 6–7): the
+sections in the rule's order; the private box is labelled "For editor" on
+OJS and "For editor only" on OMP (`submission.comments.cannotShareWithAuthor`
+differs per app; the editor's "Review Details" window uses the same label);
+"Reviewer Guidelines" is a form-section label, not a heading element,
+followed by the link "Review Guidelines" whose dialog is headed "Review
+Guidelines"; the panel is "Review Tasks & Discussions" with "Add"; "Upload
+File" opens the "Upload File" dialog with tabs "1. Upload File",
+"2. Review Details", "3. Confirm" and no genre select, and the new row's
+expander offers "Edit" and "Delete"; the footer is the link "Go Back",
+then "Save for Later", then "Submit Review". The editor's "Review Details"
+window listed the uploaded file on some openings and "No Items" on others
+while its data request answered the same each time; that window belongs to
+*Reviewer assignment & management*.
+
+<a id="fn-i"></a>
+**i** — Save vs submit: `ReviewerReviewStep3FormHandler.js` sets the hidden
+`isSave` from the button pressed, and before validation makes `#comments`
+required only when `#reviewAttachmentsGridContainer tbody.empty` is visible
+(`updateCommentsRequired_`), and `#reviewerRecommendationId` required only
+for the submit button (`updateRecommendationRequired_`). Those `required`
+flags sit on textareas the rich-text editors hide, so the browser never
+shows a required-field message and the "Confirm" dialog opens first
+(finding A7).
+`reviewStep3Required.js` (loaded only when the assignment has a review form)
+adds one `required` rule per `fieldset[aria-required=true]`, shows
+`#reviewStep3MessageBox` on `invalid-form.validate`, hides it once valid,
+and sets `validator.cancelSubmit` for "Save for Later". Server:
+`PKPReviewerHandler::saveStep()` — `isSave` → `saveForLater()` (saves form
+responses or comments, stores the recommendation, `null` when 0) + trivial
+notification `common.changesSaved` ("Your changes have been saved.");
+else `validate()` (required review-form elements via
+`getRequiredReviewFormElementIds`, `…form.responseRequired`; OJS
+`ReviewerReviewStep3Form` adds `reviewerRecommendationId` required with
+`…form.recommendationRequired` = "Must select a recommendation associated
+with journal") then `execute()`. `saveReviewForm()` writes a comment only
+when `strlen(...) > 0` (finding A4), through
+`Repo::reviewAssignment()->saveReviewComment()`, which updates the existing
+viewable / non-viewable comment row in place (no duplicates). Submitting a
+completed review is refused server-side ("Review already completed!").
+Live-probed 2026-09-04 on OJS and OMP (Rule 13, Fields step 3, scenarios
+7 and 8): "Submit Review" opened "Confirm" ("Are you sure you want to
+submit this review?", "OK" / "Cancel") at once with every field empty;
+"Cancel" left the step unchanged; after "OK" OMP submitted the empty
+review, OJS kept the step with "This field is required." under
+"Recommendation" and submitted once one was chosen; a text-only and a
+file-only review submitted on both. With a one-question form: after "OK"
+the step stayed with the message box under the buttons and no field
+marked (OMP's first line the raw key, finding OMP3). "Save for Later" with
+the question open showed nothing once per app on 2026-09-04 (the retired
+A8); live-probed 2026-09-05 on OJS and OMP, four saves on two assignments
+per app (a fresh `?step=3` load and the landing after "Continue to Step
+#3"): `POST reviewer/saveStep/{id}?step=3` answered 200 and "Your changes
+have been saved." showed each time, the question still unanswered after a
+reload. Not driven, so the body does not claim them: a "Save for Later"
+with "Choose One" selected after an earlier choice (only a chosen value
+was seen restored), and a second "Submit Review" on the page showing
+"This field is required." without a reload (the review went through after
+one, which is why scenario 7 reloads). Seen once per app and not settled:
+after "Cancel" on the confirmation, a second "Submit Review" press on the
+same page did nothing until the page was reloaded.
+
+<a id="fn-j"></a>
+**j** — After submission: `ReviewerReviewForm::fetch()` sets `reviewIsClosed
+= dateCompleted || cancelled`, which disables the step-1 and step-2 submit
+buttons and CI controls, makes the step-3 textareas `readonly`, disables
+"Submit Review"/"Save for Later" (`submitDisabled`), and strips add/delete
+from the attachments grid; review-form elements get `disabled` from
+`dateCompleted`. Step 4: `reviewCompleted.tpl` (AFFU-179, 180; keys
+`reviewer.complete` = "Review Submitted", `reviewer.complete.whatNext`) with
+a second `<discussion-manager-reviewer>`. `submission()` opens on
+`max(step, 1)` = 4 for a submitted review, which is what "View" shows.
+Step 4 holds the heading, the paragraph and a second "Review Tasks &
+Discussions" panel (the template's second `<discussion-manager-reviewer>`,
+container `discussionManagerComplete-*`, while step 3's stays in the DOM
+hidden), which renders only after the panel's own
+`GET /api/v1/submissions/{id}` returns: a snapshot taken the instant the
+tab lands shows the heading and the paragraph over an empty container,
+which is what the 2026-09-04 probe recorded as "no panel". Live-probed
+2026-09-05 on OJS and OMP (Rule 13, Actors row 7, scenario 6): the panel
+there, with the same text as step 3's, on the in-page landing after "OK",
+on a fresh load, on a typed `?step=4` and after the list's "View"; its
+"Add" opens the same "Review Tasks & Discussions" window as step 3's
+(cancelled; saving from step 4 was not driven).
+Live-probed 2026-09-04 on OJS and OMP (Rule 13, Actors rows 2 and 6,
+scenario 12): typed `?step=3` and the tabs then showed both boxes still
+editable (toolbar shown) with the submitted text, OJS's "Recommendation"
+enabled at its value, "Save for Later" and "Submit Review" disabled,
+"Upload File" gone, the file row's expander offering "Edit" only, the
+discussions "Add" still there; step 1's "Save and continue" and step 2's
+"Continue to Step #3" disabled. Whether the row's "Edit" still saves after
+submission was not driven.
+
+<a id="fn-k"></a>
+**k** — Previous rounds: `PKPReviewerHandler::submission()` collects the
+reviewer's assignments on the submission and stage, and for every round
+other than the last round of the submission
+(`getLastReviewRoundBySubmissionId`) pushes `{reviewRoundNumber,
+submittedOn = declined ? dateConfirmed : dateCompleted}` into
+`pageInitConfig.reviewRoundHistories`; `ReviewerSubmissionPage.vue`
+(VUE-009, AFFU-142, 192, 193) renders the box only when the array is
+non-empty, with `reviewer.submission.reviewRound.info` ("Previous Reviews"),
+`.info.submittedOn` ("Round {round} Review Submitted on {submittedOn}",
+`formatShortDate(null)` → empty, finding A2) and `.info.read` ("Read Round
+{round} Review"). `RoundHistoryModal.vue` (VUE-076, AFFU-194..196) via
+`roundHistoryModalStore.js` fetches `GET reviews/history/{submissionId}/{reviewRoundId}`
+(`PKPReviewController::getHistory()`, part of API-032): declined →
+`reviewRound.reviewDeclineDate` ("Declined Date") + `.emailLog` ("Decline
+reason sent by email") with the `REVIEW_DECLINE` log entry whose sent date
+equals the confirm date, else `.emailLog.defaultMessage` ("No reason given
+to the decline of the review invitation.", a fallback an on-screen
+decline never produces: an emptied window still sends the template's
+default body, see below); `dateCompleted`
+null → `.reviewNotCompleted`; else recommendation
+(`getLocalizedRecommendation()`, empty on a press), comments split by
+`viewable` under `.comments.authorAndEditor` ("For editors and authors") /
+`.comments.editorOnly` ("For editors only") prefixed `.comments.prefix`
+("Comment {index}: "), `.attachments` (reviewer's REVIEW_ATTACHMENT files of
+the round) and `.files` (the round's REVIEW_FILE files, only when the
+reviewer's latest assignment on the stage is not declined). Right column:
+`articleMetadata` (Type = section title, Abstract, Keywords) and
+`generalInformation` (Editor's Request, Response Due Date; non-declined
+only: Review Accepted On, Review Due Date, Review Submitted On). Window
+title `.info.modal.title` ("Round {round} Review submitted by you for"),
+pre-title the submission id, description the localized title. Live-probed
+2026-09-04 on OJS and OMP (Rule 14, scenario 11; a reviewer re-added on
+round 2 after a submitted, a declined and an unfinished round 1): the box
+sits above the tabs with a heading "Previous Reviews" and one line per
+round made of the text and a button (no link in the box); the submitted
+round read "Round 1 Review Submitted on 2026-09-04", the unfinished one
+"Round 1 Review Submitted on " (finding A2); the window's title,
+pre-title and description as above with "Close" its only control; the
+submitted review showed {OJS} "Recommendation" / "Revisions Required",
+then "Reviewer Comments" with "For editors and authors" and "For editors
+only", each "Comment 1:" plus the text (no "Attachments" or "Files For
+Review" block: the round carried no files); the declined round showed
+"Declined Date", then "Decline reason sent by email" with the subject
+"Unable to Review" as its own paragraph above the message (the typed
+reason for a screen decline; for an API-seeded decline the raw template
+with its `{$submissionTitle}`-style placeholders, a seed artefact); the
+unfinished round "The review was not completed." alone; the right column
+"Article Metadata" on both apps ({OJS} "Type:" "Articles" and "Abstract:";
+{OMP} "Abstract:" only, the monograph having no series) and "General
+Information" with the rows per state as written. Live-probed 2026-09-05 on
+OJS and OMP (Rule 14, Actors row 8): a reviewer accepted on round 1 whose
+round 2 opened with another reviewer only saw "Previous Reviews" / "Round
+1 Review Submitted on " / "Read Round 1 Review" on her own round-1 wizard
+(finding A12; the window "The review was not completed."); a decline sent
+from the window with its message emptied showed "Unable to Review" and
+then the template's default body with the placeholders resolved
+("Editors:" / "Editor(s):", the sentence, the reviewer's name), never the
+fallback sentence; with a file sent for round 1 (listed on the reviewer's
+step 3) and another for round 2, the round-1 window showed "Attachments"
+with the reviewer's own upload and no "Files For Review" heading on
+either app (finding A13); the "Keywords" row and a "Comment 2:" line
+were never seen (no seeded keywords; a second comment in one group needs
+the editor's "Modify Review"), so the body does not name them. Not
+driven: whether the declined line's date is the decline date rather than
+the request date (both fell on the same day).
+
+<a id="fn-l"></a>
+**l** — Access: the app `ReviewerHandler::authorize()` adds
+`SubmissionAccessPolicy` with `permitDeclined = false`; for the reviewer role
+that is `RoleBasedHandlerOperationPolicy` + `ReviewAssignmentAccessPolicy`,
+which denies when no assignment exists for the user on the submission, when
+`getCancelled()`, or when `getDeclined()` (message key
+`user.authorization.submissionReviewer`, "The current user is not assigned
+as a reviewer for the requested document."). Only `ROLE_ID_REVIEWER` is in
+the handler's role assignments, so a manager, editor, assistant or author
+hits the role check first. The dashboard op `reviewAssignments` is
+assigned to `ROLE_ID_REVIEWER` alone (`PKPDashboardHandler` constructor) under
+`PKPSiteAccessPolicy`. Site Administrator: no admin branch on the reviewer
+handler — same as any other non-reviewer. Live-probed 2026-09-04 on OJS
+and OMP (Rule 15; Actors rows 1, 2, 4): the role refusal lands on
+`user/authorizationDenied?message=user.authorization.roleBasedAccessDenied`
+(the assigned Section Editor and the Author at the wizard address; the
+Author at the list address too), the assignment refusal on
+`…?message=user.authorization.submissionReviewer` (a reviewer with no
+assignment, and the declined and the cancelled reviewer), both HTTP 200 in
+the reader-side layout; signed out → `login?source=…`, and signing in
+there continued to the wizard. The file link
+(`$$$call$$$/api/file/file-api/download-file?submissionFileId=…`) opened
+by a reviewer without an assignment answered HTTP 200 with
+`Content-Type: application/json` and the body
+`{"status":false,"content":"The current role does not have access to this
+operation.","elementId":"0","events":[]}` (finding A6): the JSON handler
+answers in place and never redirects to the denied page. Live-probed
+2026-09-05 on OJS and OMP (Rule 15, Actors row 4): the same file link
+opened by the Section Editor assigned to the submission and by the Journal
+Manager downloaded the file (`article.pdf`, 243 bytes); a reviewer with no
+assignment on the submission got the JSON refusal above. A file address
+before acceptance with "Restrict File Access" on was not driven (step 1
+offers no link to copy); `SubmissionFileAssignedReviewerAccessPolicy`
+skips unconfirmed assignments when the setting is on.
+
+<a id="fn-m"></a>
+**m** — One-click: `EditorAction::createReviewRequestMailable()` (OJS/OMP
+`lib/pkp/classes/submission/action/EditorAction.php`) creates a
+`ReviewerAccessInvite` (payload `reviewAssignmentId`, expiry
+`(numWeeksPerReview + 4) * 7` days from `getExpiryDays()`) and replaces the
+`{$reviewAssignmentUrl}` variable with the invitation's accept URL when
+`reviewerAccessKeysEnabled`; the `OneClickReviewerAccess` trait does the
+same for `ReviewRemind`, `ReviewRemindAuto`, `ReviewResponseRemindAuto`
+(AFFU-205; each send mints a new invitation). The link is the invitation
+page (`InvitationHandler::accept`, AFFU-206, owned by *User invitations*),
+which calls `ReviewerAccessInviteRedirectController::acceptHandle()`
+(AFFU-207): 404 unless the invitation is PENDING, then `handleAccess()`
+(refuses when the setting is off; throws
+`"You are logged in as a different user. Please log out and try the
+invitation link again."` for a browser signed in as a different user,
+`ReviewerAccessInvite.php`; otherwise
+`Validation::registerUserSession($reviewer)`) and redirects to
+`reviewer/submission?submissionId=…&reviewId=…`. The invitation is marked
+ACCEPTED by `finalize()` on review submission and DECLINED by
+`confirmReview(decline)`; a non-pending link that still exists falls into
+the invitation feature's "Invitation Unavailable" handling. The app
+`ReviewerHandler::authorize()` also honours a `key` query parameter
+directly (a legacy link shape) by running the same accept path.
+`confirmDecline()` (AFFU-208) redirects to the login page after a decline
+through the invitation page; no reviewer email carries a decline link
+today, so nothing in this feature reaches that path. Without the setting
+`ReviewAssignmentEmailVariable::getReviewUrl()` is the plain
+`reviewer/submission?submissionId=` address.
+Live-probed 2026-09-04 on OJS and OMP (Rule 16, Actors row 9, scenario
+10; a scratch context with the setting on, the reviewer added through the
+editor's "Add Reviewer" window because an API-seeded assignment sends no
+request email): the request email is "Invitation to review" (OJS) /
+"Manuscript Review Request" (OMP), from the editor's own address, its two
+links the same `{context path}/invitation/accept?id=N&key=…` (the body
+says "logging into the journal site" / "logging into the press"); a fresh
+signed-out browser was redirected once to
+`reviewer/submission?submissionId=…&reviewId=…` and showed the wizard on
+"1. Request" with the reviewer's name in the header; the same link in a
+second signed-out browser landed there again; after accepting and
+submitting through the link, it answered HTTP 200 with the reader-side
+page "Invitation Unavailable" / "This invitation is no longer available.
+It may have already been accepted, declined, or expired. Please contact
+the journal manager for further assistance." (the words "journal manager"
+on the press too), "Login" / "Register" — whether accepting alone already
+spends the link was not separated; after a decline through the wizard's
+window the same link rendered "Invitation Unavailable" too (live-probed
+2026-09-05, both apps). The expiry end (`getExpiryDays()`, the review
+period plus four weeks) cannot be driven on the test installs, whose
+clock nothing advances, so the body does not claim it; automatic reminders (`ReviewRemindAuto`,
+`ReviewResponseRemindAuto`) carry the link by the same trait but were not
+driven either. The
+row's "Send Reminder" (an overdue row's control; dialog "Review Reminder",
+email "A reminder to please complete your review", body "login to the
+journal" / "login to the press") minted a new invitation (new `id` and
+`key`) that landed on the wizard the same way. The older link answered a
+bare HTTP 404 "404 Not Found" (no app page) on every open after a later
+one-click email to the same reviewer on the same context, whether that
+was a reminder or a request on another submission; a request link opened
+with no later email in between worked (finding A9). Opened while signed
+in as the scratch author, both a request and a reminder link answered
+HTTP 500 with an empty body; the server log holds the exception above
+(finding A10). With the setting off (the seeded journal), the request
+email's links were `reviewer/submission?submissionId=N` with no key, a
+signed-out open was redirected to `login?source=…`, and signing in there
+as the reviewer continued to the wizard on "1. Request" (scenario 10's
+control). Incidental, another feature's: the "Edit" window's date-change
+email carries keyless wizard links even with the setting on (*Reviewer
+assignment & management*).
+
+<a id="fn-n"></a>
+**n** — Emails and bookkeeping. Accept/decline:
+`ReviewerAction::getResponseEmail()` builds `ReviewConfirm` (MAIL-036, key
+`REVIEW_CONFIRM`, subject `emails.reviewConfirm.subject`) or `ReviewDecline`
+(MAIL-037, `REVIEW_DECLINE`, subject "Unable to Review", body the window's
+text or the template), sender and reply-to the reviewer, recipients the
+stage assignments whose group is MANAGER or SUB_EDITOR, falling back to the
+context contact; logged as `SubmissionEmailLogEventType::REVIEW_CONFIRM`/`_DECLINE`.
+Both mailables are `canDisable` (Settings › Workflow › Emails). Live-probed
+2026-09-04 (Side effects "Accepting", "Declining"): both emails From and
+Reply-To the reviewer; on the seeded OJS journal they reached three
+editors (the section's auto-assigned Editor and Section Editors plus the
+participant), on the press the participant alone — the recipient set
+differs with the seed, not the rule. Live-probed 2026-09-05 on a scratch
+journal, both apps: with a Section Editor as the only stage participant
+the "Review accepted" email went to them alone, not to the unassigned
+Journal Manager; with nobody assigned, to the principal contact alone.
+Submit:
+`PKPReviewerReviewStep3Form::execute()` — for each MANAGER/SUB_EDITOR stage
+assignment, `NOTIFICATION_TYPE_REVIEWER_COMMENT` (NOTIF-013,
+`notification.type.reviewerComment` = "A reviewer has commented on
+"{$title}"."), then `ReviewCompleteNotifyEditors` (MAIL-035, key
+`REVIEW_COMPLETE`, subject `emails.reviewComplete.subject` — on a press
+`{$reviewRecommendation}` resolves to "None", finding OMP2 — from the
+context contact, with the `emails.footer.unsubscribe.automated` footer)
+unless the type is in the user's blocked email list; deletes the reviewer's
+`NOTIFICATION_TYPE_REVIEW_ASSIGNMENT` task ("Review pending."); logs
+`SUBMISSION_LOG_REVIEW_READY` (`log.review.reviewReady`); finalizes the
+access invitation. The editor-side consequences (row status, History,
+round status) are the neighbouring specs'. Live-probed 2026-09-04 on OJS
+and OMP (Side effects "Submitting", scenario 6): the email reached every
+editor assigned to the stage — three on the seeded OJS journal (the
+section's auto-assigned Editor and Section Editors plus the participant),
+the participant alone on the press — From "Site Admin" <admin@mail.test>
+(the context contact); subject "Review complete: {reviewer} recommends
+{recommendation} for #{id} Author — "{title}"", body "Dear {name}," /
+"{reviewer} completed the following review:" / the submission line with
+its workflow link / "*Recommendation:* {recommendation}" ("None" on the
+press) / "*Type:* {review type}" / "Login to view all files and comments
+({link}) provided by this reviewer." / the "This is an automated message
+from {journal} … You can unsubscribe …" footer. The editor's header
+"Tasks" panel (the header has no other notifications button) read "No
+Items" after the submit on both apps, so the `REVIEWER_COMMENT`
+notification was not seen anywhere; the editor's workflow page right
+after the submit was not opened and is where to look. The reviewer's
+"Review pending." line left their Tasks panel; the editor's row read
+"Review Submitted", with "Revisions Required" under it on OJS.
+
+<a id="fn-o"></a>
+**o** — Settings: `restrictReviewerFileAccess` (label
+`manager.setup.reviewOptions.restrictReviewerFileAccess` "Restrict File
+Access"), `reviewerAccessKeysEnabled` ("One-click Reviewer Access"),
+`reviewGuidelines` / OMP `internalReviewGuidelines` (labels
+`manager.setup.reviewGuidelines` — "Review Guidelines" on OJS, "External
+Review Guidelines" on OMP — and `manager.setup.internalReviewGuidelines`),
+`competingInterests` (`manager.setup.competingInterests`), all on
+`PKPReviewSetupForm`; `privacyStatement` on the website setup form;
+`defaultReviewMode`, `numWeeksPerResponse`, `numWeeksPerReview`, review
+forms and OJS reviewer recommendations per the review-setup feature. Scratch
+configuration through the scenario API: `POST scenarios/context` takes
+`review {defaultReviewMode, restrictReviewerFileAccess,
+reviewerAccessKeysEnabled, reviewGuidelines, competingInterests, OMP
+internalReviewGuidelines, numWeeksPerResponse, numWeeksPerReview, …}` and
+`reviewForms[]`, and a reviewer entry takes `reviewForm: "<title>"`
+(scenarios.md "Configuring a scratch context", built 2026-09-05; OPS
+answers 400 on the review keys).
+Live-probed 2026-09-04 on OJS and OMP: Settings › Workflow › Review has the
+sub-tabs "Setup" and "Reviewer Guidance"; on the seeded journal "Restrict
+File Access" and "One-click Reviewer Access" are unticked, "Review
+Guidelines" (OMP: both guideline boxes) and "Competing Interests" empty,
+"Default Review Mode" "Anonymous Reviewer/Anonymous Author"; the "Restrict
+File Access" box label differs per app (OJS "Reviewers will not be given
+access to the submission file until they have agreed to review it.", OMP
+"Reviewers will have access to the submission file only after agreeing to
+review it."), the "One-click Reviewer Access" label and group text are the
+same on both. With "Restrict File Access" on (a scratch journal, both
+apps): step 1 has no "Review Files" section at all, before and after
+accepting (2026-09-05), and step 3 lists the granted file as a download
+link. Live-probed 2026-09-05: after "Default Review Mode" was set to
+"Open", a newly seeded assignment's step 1 read "Review Type" / "Open";
+on OJS the "Reviewer Recommendations" sub-tab's "Add Recommendation"
+(textbox "Review Recommendations *", list "Recommendation type *") put
+the new entry last in step 3's "Recommendation" list.
+
+<a id="fn-p"></a>
+**p** — OPS: no `pages/reviewer/` directory in `ops-main` (ROUTE-022 lists
+OJS and OMP only), no reviewer user group in its `registry/userGroups.xml`
+(seed-facts "OPS has no reviewer role", live-probed 2026-09-02), the
+`reviewAssignments` dashboard op present but assigned to a permission
+level no installed OPS role carries (a manager can create one and a user
+can accept it, below), and no review-flow email templates
+([→ the OPS absence](U27-reviewer-assignment-and-management.md#ops1)). The
+absence is probed as install facts (scenario 17), never asserted from code.
+Live-probed 2026-09-04 on OPS as `manager.maya`, `sectioneditor.ana`
+(Moderator) and `author.alex`: the sidebar holds "Editor Dashboard" and
+its views, "Start A New Submission", "DOIs", "Settings", "Statistics",
+"Tools" (fewer for the Moderator) and no reviewer group; typed
+`dashboard/reviewAssignments` was redirected for all three to
+`user/authorizationDenied?message=user.authorization.roleBasedAccessDenied`
+(HTTP 200, the reader-side layout, "The current role does not have access
+to this operation."); typed `reviewer/submission/1`, with and without a
+preprint of that id and with `?step=1`, answered HTTP 404 with no
+redirect and a 23-byte body holding only the heading "404 Not Found";
+Settings › Users & Roles › Roles listed five roles ("Preprint Server
+manager", "Moderator", "Author", "Reader", "Editorial Board Member") with
+one stage column, "Production", and no "Reviewer" permission level. The
+same screen on the seeded journal lists "Reviewer" (permission level
+"Reviewer") and on the press "Internal Reviewer" and "External Reviewer"
+(both "Reviewer"). The seeded OPS server holds no submissions; the probe
+seeded one for the wizard-address check. Live-probed 2026-09-05 on a
+scratch OPS server (scenario 17, finding OPS1): the same two pages for the
+installer's `admin`, an Editorial Board Member and a Reader; "Create New
+Role" lists the permission levels "Manager", "Moderator", "Assistant",
+"Author", "Reviewer", "Reader" (OJS and OMP offer "Reviewer" there too,
+the level of their installed reviewer groups), choosing "Reviewer"
+disables the one "Production" checkbox with the hint "You need to define a
+stage to assign to." and "OK" saved "Scratch Reviewer" · "Reviewer" as a
+sixth row; Users › More Actions › "Edit" opened "Invite user to take a
+role" offering it, and the invitation's "Accept And Continue to OPS"
+showed no confirmation yet the role was held on the next sign-in (the
+revisited link reads "Invitation Unavailable"). That account's sidebar
+held "My Assignments as Reviewer" (href `#`, no views under it) and "My
+Submissions as Author"; `dashboard/reviewAssignments` answered HTTP 200
+with the heading "undefined (0)", the columns "ID Sort", "Submissions",
+"Editorial Activity", "Actions", one "Loading" row and "Showing 0 to 0 of
+0", its data request `GET api/v1/_submissions?…` answering 401 (OJS and
+OMP fetch `_submissions/reviewerAssignments` for this list); `dashboard/
+editorial` sent it to the access-denied page and `reviewer/submission/2`
+stayed the bare 404.
+
+<a id="fn-q"></a>
+**q** — OMP: `Application::hasCustomizableReviewerRecommendation()` returns
+false on the press and its `templates/reviewer/review/` holds only
+`step1.tpl` (the description label), so `$additionalFormFields` is empty
+and no recommendation is collected or validated; `getLocalizedRecommendation()`
+is empty in the history payload; the stage-specific guidelines come from
+footnote g. OMP's `ReviewerHandler` adds nothing beyond OJS's minus the
+step-3 form override, and both apps' step-3 forms share
+`PKPReviewerReviewStep3Form` — shared-behaviour evidence for every unmarked
+claim on the wizard, with the recommendation-related lines the only
+divergence.
+
+<a id="fn-s"></a>
+**s** — Scenario tooling. Ready accounts: `reviewer.julia` (OJS/OMP
+External Reviewer), `reviewer.amara` (OMP Internal Reviewer),
+`editor.diana` / `sectioneditor.ana` as the assigned editor, `author.alex`
+as submitter; passwords per `docs/process/users.md`. A submission in
+review with a request: `POST scenarios/submission` with `submitted: true`,
+`decisions: ['sendExternalReview']` (OMP internal: `sendInternalReview`),
+`reviewRounds: [{reviewers: [{username, status: 'invited' | 'accepted' |
+'declined'}]}]`, `participants: [{username: 'sectioneditor.ana', role:
+'sectionEditor'}]` so the response and review-complete emails have a
+recipient (seed-facts: without a participant they fall back to the
+principal contact). A round-2 assignment: the `submission-in-round-2`
+fixture or `decisions` through `newExternalReviewRound` with two
+`reviewRounds` entries. Review files are grant-based (patterns.md): the
+test ticks the file in the editor's Add Reviewer or Edit window, or the
+builder grants it; seeded submissions carry no files, so the test uploads
+one first. Scratch journals for scenarios 8, 9, 10 and 13 come from `POST
+scenarios/context` with the `review` keys and `reviewForms[]` of footnote
+o; scenario 8's form is attached with the reviewer entry's `reviewForm:
+"<title>"`; the reviewer of scenario 10 is a throwaway account so its
+mailbox is scoped (PRINCIPLES A8), and it is added through the editor's
+"Add Reviewer" window, because an assignment seeded through the API sends
+no request email and so carries no one-click link (the setting itself
+comes from the `review` key's `reviewerAccessKeysEnabled`, footnote o).
+Scenario 14 moves the submission on
+with `decisions: ['accept']` after the reviewer accepted (the API's
+promote-from-review decision is `accept`; `acceptFromReview` is refused).
+An assignment seeded `status: 'accepted'` opens its wizard on "1. Request"
+with "Save and continue"; a test reaches step 2 by pressing it. Mail is
+read in Mailpit at the fleet's port (`.reports/U28/fleet.json`). Scenario
+17's variant: the role is made on a scratch server in Settings › Users &
+Roles › Roles › "Create New Role" ("Reviewer" level, no stage) and the
+throwaway user is invited from Users › More Actions › "Edit" › "Invite
+user to take a role"; the "Accept And Continue to OPS" press on the
+emailed link shows no confirmation, and the role is held on the next
+sign-in.
+
+<a id="fn-a1"></a>
+**f-a1** — patterns.md ("The reviewer dashboard endpoint
+`_submissions/reviewerAssignments` ignores `searchPhrase` AND pagination",
+recorded 2026-08 while writing the review-stage suites);
+`PKPDashboardHandler` passes the same search control to every page type
+(`DashboardControlSearch`, AFFU-198), and the reviewer endpoint's collector
+applies neither. On screen the search box and pager render as on the
+editorial dashboard. Live-probed 2026-09-04 on OJS and OMP: with 13 / 10
+rows in "All assignments", a phrase matching one title and a phrase
+matching nothing both put `&searchPhrase=…` in the address, showed
+"Search: {phrase}" with "Clear search phrase", sent
+`GET _submissions/reviewerAssignments?searchPhrase=…` and listed the same
+rows, with no empty-state message. Live-probed 2026-09-05 on OJS and OMP
+with 34 rows in "All assignments": the pager showed "Showing 1 to 30 of
+34" under all 34 rows, and page 2 sent `offset=30&page=2` and listed the
+same 34 rows under "Showing 31 to 34 of 34"; "Sort" on "ID" put
+`sortColumn=id&sortDirection=…` in the address and sent
+`orderBy=id&orderDirection=DESC` then `ASC`, the rows unchanged both
+times; the editorial dashboard's pager showed 30 of 38 and its search cut
+30 rows to 1. Cosmetic, both apps: "Clear search phrase" leaves an empty
+`searchPhrase=` in the address.
+
+<a id="fn-a2"></a>
+**f-a2** — `PKPReviewerHandler::submission()` sets `submittedOn` to
+`dateCompleted` for a non-declined assignment, null when never submitted;
+`ReviewerSubmissionPage.vue` interpolates `formatShortDate(review.submittedOn)`
+into "Round {round} Review Submitted on {submittedOn}" with no branch for
+the unfinished case, while the window's store has one
+(`isIncomplete`). Live-probed 2026-09-04 on OJS and OMP: a reviewer who
+accepted round 1 and never submitted, re-assigned on round 2, saw "Round 1
+Review Submitted on " with nothing after "on"; the window read "The review
+was not completed." and its "General Information" stopped at "Review Due
+Date". Live-probed 2026-09-05 on OJS and OMP: the same dateless line on
+the reviewer's own round-1 wizard once round 2 opened without them
+(finding A12), and on a press before the internal reviewer submitted.
+
+<a id="fn-a3"></a>
+**f-a3** — `PKPReviewerHandler::saveDeclineReview()` ends with
+`$request->redirectUrlJson($dispatcher->url($request, ROUTE_PAGE, null,
+'index'))`; `null` page with op `index` is the context's index page, i.e.
+the journal's public home. Unchanged since the wizard's first version.
+Live-probed 2026-09-04 on OJS and OMP: after the window's button the
+browser was on `{journal path}/index` (OJS: the "Current Issue" home; OMP:
+the press home), with nothing on the page about the decline.
+
+<a id="fn-a4"></a>
+**f-a4** — `PKPReviewerReviewStep3Form::saveReviewForm()`: `if
+(strlen($comments = $this->getData('comments')) > 0) saveReviewComment(…)`
+and the same for `commentsPrivate`; `saveReviewComment()` updates the
+existing row in place, so a non-empty save overwrites but an empty one is
+never written. `initData()` reloads the newest row per visibility, which
+is how the old text reappears. Review-form answers take a different path
+(`saveReviewFormResponse` per element) and are not affected by this
+reading. Live-probed 2026-09-04 on OJS and OMP: text in both boxes saved,
+both boxes cleared and saved again ("Your changes have been saved." both
+times, the save request answering `status: true`), reload → both boxes
+showed the first-save texts; new text in one box only → that box updated,
+the other still the first-save text; no email left, the editor's row still
+"Request Accepted".
+
+<a id="fn-a5"></a>
+**f-a5** — `useDashboardConfigEditorialActivity.js::getEditorialActivityForMyReviewAssignments`
+passes `reviewAssignment.dateDue` unformatted into
+`dashboard.reviewAssignment.completeReviewByDate` ("Please complete this
+review by {$date}."), while the unanswered branch formats `dateResponseDue`
+and the declined branch `dateConfirmed`. Live-probed 2026-09-04 on OJS and
+OMP: "Please complete this review by 2026-10-02 00:00:00." on every
+accepted row, step 1's "Review Due Date" "2026-10-02".
+
+<a id="fn-a6"></a>
+**f-a6** — The file link is the legacy JSON endpoint
+`$$$call$$$/api/file/file-api/download-file?submissionFileId=…&submissionId=…&stageId=3`;
+a refused `$$$call$$$` request is answered by the JSON handler with
+`{"status":false,"content":"<message>"}` and HTTP 200, never with the
+`user/authorizationDenied` redirect the page handlers use. Live-probed
+2026-09-04 on OJS and OMP with a reviewer holding no assignment on the
+submission: `Content-Type: application/json`, the body quoted in the
+entry, no file. The assigned reviewer's own click downloaded the fixture
+(243 bytes) and stayed on the wizard. Live-probed 2026-09-05 on OJS and
+OMP: the assigned Section Editor and the Journal Manager downloaded the
+same link (`SubmissionFileAssignedReviewerAccessPolicy` is one of several
+policies the file endpoint accepts; the editors pass on their stage
+assignment); a reviewer with no assignment got the JSON refusal.
+
+<a id="fn-a7"></a>
+**f-a7** — The hidden textareas behind the two editors carry the browser's
+`required` (and the OJS select its own), but the rich-text editors hide
+them, so no browser message ever shows and `confirmSubmit` opens the
+dialog first. Server-side `PKPReviewerReviewStep3Form::validate()` checks
+only the required review-form elements, and OJS's subclass adds
+`reviewerRecommendationId`; nothing checks for empty comments with no
+attachment, so `execute()` completes the review. Live-probed 2026-09-04
+on OJS and OMP: both boxes empty and no file — OMP reached step 4 "Review
+Submitted"; OJS stopped at "Choose One" ("This field is required." under
+the list) and reached step 4 once "Decline Submission" was chosen; a
+text-only review and a file-only review reached step 4 on both, and the
+"Review complete" email arrived each time.
+
+<a id="fn-a8"></a>
+**f-a8** — Retired. Seen once per app on 2026-09-04 (a one-question form,
+"Save for Later" with the question unanswered: no toast, no message box,
+the page unchanged) and read then as `reviewStep3Required.js` setting
+`validator.cancelSubmit` for the save. Live-probed 2026-09-05 on OJS and
+OMP, four saves on two assignments per app (a fresh `?step=3` load and the
+landing after "Continue to Step #3"): `POST reviewer/saveStep/{id}?step=3`
+answered 200 and "Your changes have been saved." showed every time, the
+question still unanswered after a reload. The first sighting did not
+reproduce; the body now says the save goes through (Fields step 3,
+scenario 8).
+
+<a id="fn-a9"></a>
+**f-a9** — `Invitation::invite()` (`lib/pkp/classes/invitation/core/Invitation.php`)
+ends by deleting every other PENDING invitation of the same type for the
+same user and context, so each `ReviewerAccessInvite` sent (a request, a
+`ReviewRemind`, an automatic reminder) removes the reviewer's earlier
+ones; a deleted id no longer resolves in `InvitationHandler` and falls to
+a `NotFoundHttpException`, which is why the bare 404 renders instead of
+the "Invitation Unavailable" page that a still-existing, non-pending
+invitation gets. Live-probed 2026-09-04 on OJS and OMP (a scratch context
+with "One-click Reviewer Access" on): a request link opened after a
+reminder had gone to the same reviewer, and a request link opened after
+a request on another submission had gone to them, both answered HTTP 404
+with the plain body "404 Not Found" on every open (three opens on OMP);
+a request link opened with no later email in between landed on the
+wizard. The code reading is the explanation, not a driven fact.
+
+<a id="fn-a10"></a>
+**f-a10** — `ReviewerAccessInvite::handleAccess()` (or its redirect
+controller) throws a plain `Exception` with the message quoted in the
+entry when the session's user is not the invited reviewer; nothing
+catches it on the page route, so the response is HTTP 500 with an empty
+body. Live-probed 2026-09-04 on OJS and OMP: a browser signed in as the
+scratch author opened a request link and a reminder link; each answered
+HTTP 500 with a zero-length body, and the app's server log recorded
+`Uncaught Exception: You are logged in as a different user. Please log
+out and try the invitation link again. in
+…/lib/pkp/classes/invitation/invitations/reviewerAccess/ReviewerAccessInvite.php`.
+Not security-shaped: the link denies the wrong user, only without a page.
+
+<a id="fn-a11"></a>
+**f-a11** — `ReviewerReviewForm::fetch()` sets `reviewIsClosed` from
+`dateCompleted` and `getCancelled()` only; a submission that left the
+review stage changes neither, and `ReviewAssignmentAccessPolicy` still
+finds the live assignment, so the wizard renders and `saveStep` accepts.
+Live-probed 2026-09-04 on OJS and OMP: with the reviewer accepted and the
+submission moved to Copyediting through the `accept` decision, the row
+sat under "Archived" alone as "Incomplete" with an empty "Actions" cell;
+the typed wizard address answered HTTP 200 with the full step 1 and an
+enabled "Save and continue", which posted `reviewer/saveStep/{id}?step=1`
+(200) and moved to "2. Guidelines" with no dialog or error. Live-probed
+2026-09-05 on OJS and OMP: "Continue to Step #3", both boxes typed ({OJS}
+"Accept Submission" chosen), "Submit Review" and "OK" reached
+"4. Completion" ("Review Submitted" and the thank-you text); the list then
+read "Archived (0)" and the row sat under "All assignments" and
+"Completed" as "Review submitted on 2026-09-04" with "View". A published
+submission's wizard behaved the same. Whether the editor receives the
+"Review complete" email for such a submit was not driven (their mailbox
+after one is where to look).
+
+<a id="fn-a12"></a>
+**f-a12** — `PKPReviewerHandler::submission()` lists every round the
+reviewer is assigned to on the submission and stage except the
+submission's last review round (`getLastReviewRoundBySubmissionId`, which
+is not stage-aware), so any round that is no longer the last, the
+reviewer's own current one included, lands in `reviewRoundHistories` and
+renders as a "Previous Reviews" line. Live-probed 2026-09-05 on OJS and
+OMP: a reviewer accepted on round 1, with round 2 opened for another
+reviewer only, saw "Previous Reviews" / "Round 1 Review Submitted on " /
+"Read Round 1 Review" on her own round-1 wizard, the window reading "The
+review was not completed."; on a scratch press the Internal Reviewer's
+wizard showed the dateless line before she submitted and on the in-page
+step 4 after "Submit Review", and "Round 1 Review Submitted on
+2026-09-04" after a reload. The press half was first seen 2026-09-04
+(footnote f-omp4).
+
+<a id="fn-a13"></a>
+**f-a13** — `PKPReviewController::getHistory()` fills `.files` (the round's
+REVIEW_FILE files, "Files For Review") only when the reviewer's latest
+assignment on the stage is not declined — a condition the round-2
+reviewer met, so the reading does not explain the absence; the lean
+(the block is meant for a reviewer without a live later assignment) is
+untested. Live-probed 2026-09-05 on OJS and OMP: the editor uploaded a
+review file on round 1 and added the reviewer with it ticked (her step 3
+"Review Files" listed `article.pdf`); she uploaded a reviewer file and
+submitted; re-added on round 2, her round-1 window showed "Attachments"
+with her upload and no "Files For Review" heading; after the editor put
+a file on round 2 and granted it to her, the round-1 window still showed
+none. Settling observation: the window for a reviewer whose later-round
+assignment is declined or absent.
+
+<a id="fn-omp1"></a>
+**f-omp1** — OMP `classes/core/Application.php::hasCustomizableReviewerRecommendation()`
+→ false; no `templates/reviewer/review/step3.tpl` in omp-main;
+`PKPReviewerReviewStep2Form::fetch()` and `ViewReviewGuidelinesLinkAction::getGuidelines()`
+select `internalReviewGuidelines` for the internal stage. The editor-side
+half was live-probed 2026-08-29 under the reviewer-assignment feature.
+Live-probed 2026-09-04 on a scratch press with both guideline texts set:
+the Internal Reviewer's step 2 and step 3 dialog showed the internal text,
+the External Reviewer's the external text; `select#reviewerRecommendationId`
+matched nothing and the word "Recommendation" was absent on both stages'
+step 3.
+
+<a id="fn-omp2"></a>
+**f-omp2** — `emails.reviewComplete.subject` = "Review complete:
+{$reviewerName} recommends {$reviewRecommendation} for #{$submissionId}
+…"; `ReviewAssignmentEmailVariable::getRecommendation()` has no
+recommendation to resolve on a press and the placeholder prints "None".
+Live-probed 2026-09-04 on the press, External Review (seeded journal) and
+Internal Review (scratch press): subject "Review complete: {reviewer}
+recommends None for #{id} …" and the body line "*Recommendation:* None";
+first seen the same day in the notifications feature's claim check.
+
+<a id="fn-omp3"></a>
+**f-omp3** — The key `reviewer.submission.reviewFormResponse.form.responseRequired`
+is defined in OJS's own `locale/en/locale.po` and not in lib/pkp's, while
+`step3.tpl`'s `#reviewStep3MessageBox` uses it on every app; OMP has no
+definition, so the key prints wrapped in `##`. Live-probed 2026-09-04 on
+OMP with a one-question form: the box read
+"##reviewer.submission.reviewFormResponse.form.responseRequired##" over
+"Some required fields are not filled in. Please complete them before
+submitting your review."; on OJS the same box read "Please fill in
+required fields." over the same second line.
+
+<a id="fn-omp4"></a>
+**f-omp4** — `PKPReviewerHandler::submission()` lists every round the
+reviewer is assigned to on the submission and stage except the
+submission's last review round (`getLastReviewRoundBySubmissionId`,
+which is not stage-aware): once an External Review round exists, the
+Internal Review round is no longer the last one, so the internal
+reviewer's own round lands in `reviewRoundHistories`. Live-probed
+2026-09-04 on a scratch press: the Internal Reviewer's wizard had no box
+on steps 2 and 3 while only the internal round existed; after the
+section editor recorded "Send to External Review" and added an External
+Reviewer, her reloaded wizard showed "Previous Reviews" / "Round 1 Review
+Submitted on 2026-09-04" / "Read Round 1 Review", whose window held her
+own comments and "Review Submitted On: 2026-09-04"; on the in-page step 4
+right after "Submit Review", before any reload, the same line read "Round
+1 Review Submitted on " with no date. The External Reviewer, with no
+other round, had no box. Live-probed 2026-09-05 on OJS and OMP: a journal
+shows the same box to a round-1 reviewer once round 2 opens without them,
+so the entry retired into A12 (footnote f-a12).
+
+<a id="fn-ops1"></a>
+**f-ops1** — The `reviewAssignments` op and the sidebar's
+`$menu['reviewAssignments']` branch key on `ROLE_ID_REVIEWER`, the
+permission level, not on an installed group, and OPS's "Create New Role"
+form still offers that level; OPS has no `pages/reviewer/` directory and
+its dashboard page requests `api/v1/_submissions` for the reviewer view,
+which refuses the role. Live-probed 2026-09-05 on a scratch OPS server:
+"Scratch Reviewer" · "Reviewer" saved with no stage; the invited user,
+after accepting, had the sidebar group, the list page at HTTP 200 with
+the heading "undefined (0)", one "Loading" row and "Showing 0 to 0 of 0",
+its data request answering 401, and the wizard address a bare 404. Not
+security-shaped: the page shows nothing and the request is refused.
+
+## Reference — entry points & surfaces
+
+| Entry | Path | Atom |
+|-------|------|------|
+| "My Assignments as Reviewer" sidebar group and list | backend sidebar → view; `{journal}/dashboard/reviewAssignments?currentViewId=…` | ROUTE-008 (owned by the editorial dashboard) · AFFW-029, 050, 057 · AFFU-197..204 |
+| Review wizard | list row action → `{journal}/reviewer/submission/{id}` (`?step=N`) | ROUTE-022, 047, 066 · AFFU-138..142, 209 · VUE-009 |
+| Step 1 "1. Request" | wizard tab | AFFU-143..156 · GRID-028 · GRID-063 (superseded legacy modal) |
+| Decline Review Request window | step 1 → "Decline Review Request" | AFFU-176..178 · MAIL-037 |
+| Step 2 "2. Guidelines" | wizard tab | AFFU-157, 158 |
+| Step 3 "3. Download & Review" | wizard tab | AFFU-159..169 · GRID-013, 028 · AFFU-170..175 (review-form elements) |
+| Discussions panel (step 3) | wizard | AFFU-165, 180..191 |
+| Step 4 "4. Completion" | wizard tab | AFFU-179, 180 |
+| Previous Reviews box and Round history window | wizard header → "Read Round {N} Review" | AFFU-192..196 · VUE-076 · API-032 (`history` op; owned by *Author response to reviews*) |
+| One-click review link | request/reminder email → invitation page → wizard | AFFU-205, 207, 208 · AFFU-206 (owned by *User invitations*) |
+| Response emails to editors | on accept / decline | MAIL-036, 037 |
+| Review-complete notification and email | on submit | NOTIF-013 · MAIL-035 |
+| Log Response (editor's side) | Reviewers panel row menu | API-032 `confirmReview` op (rider) |
+
+## Reference — code anchors
+
+- `lib/pkp/pages/reviewer/PKPReviewerHandler.php` — the wizard's page, step, save, decline ops and the past-round history payload
+- `ojs pages/reviewer/ReviewerHandler.php` (adds the OJS step-3 form) · `omp pages/reviewer/ReviewerHandler.php` (constructor and authorize only)
+- `lib/pkp/classes/submission/reviewer/form/` — `ReviewerReviewForm`, `PKPReviewerReviewStep1Form`, `PKPReviewerReviewStep2Form`, `PKPReviewerReviewStep3Form`; `ojs classes/submission/reviewer/form/ReviewerReviewStep3Form.php` (recommendation required)
+- `lib/pkp/classes/submission/reviewer/ReviewerAction.php` — accept/decline bookkeeping and the response emails
+- `lib/pkp/templates/reviewer/review/` — `reviewStepHeader.tpl`, `step1.tpl`, `step2.tpl`, `step3.tpl`, `reviewFormResponse.tpl`, `reviewCompleted.tpl`, `modal/regretMessage.tpl`; `ojs templates/reviewer/review/step3.tpl`, `reviewerRecommendations.tpl`
+- `lib/pkp/js/controllers/form/reviewer/ReviewerReviewStep3FormHandler.js`, `lib/pkp/js/pages/reviewer/reviewStep3Required.js`, `ReviewerTabHandler.js` — client-side required rules and tab locking
+- `lib/pkp/classes/security/authorization/internal/ReviewAssignmentAccessPolicy.php`, `SubmissionFileAssignedReviewerAccessPolicy.php` — who reaches the wizard and its files
+- `lib/pkp/pages/dashboard/PKPDashboardHandler.php` (`reviewAssignments`), `lib/pkp/classes/submission/Repository.php::getDashboardViews()`, `lib/pkp/classes/submission/reviewAssignment/Collector.php` — the list and its views
+- lib/ui-library `pages/dashboard/components/DashboardTable/DashboardCellReviewAssignment*.vue`, `composables/useDashboardConfigEditorialActivity.js` — the list's cells
+- lib/ui-library `pages/reviewerSubmission/` — `ReviewerSubmissionPage.vue`, `RoundHistoryModal.vue`, `roundHistoryModalStore.js`, `ReviewerSubmissionDetailsModal.vue`; `lib/pkp/api/v1/reviews/PKPReviewController.php::getHistory()`
+- `lib/pkp/classes/invitation/invitations/reviewerAccess/` — `ReviewerAccessInvite.php`, `handlers/ReviewerAccessInviteRedirectController.php`; `lib/pkp/classes/mail/traits/OneClickReviewerAccess.php`; `lib/pkp/classes/submission/action/EditorAction.php::createReviewRequestMailable()`
+- `lib/pkp/classes/mail/mailables/ReviewConfirm.php`, `ReviewDecline.php`, `ReviewCompleteNotifyEditors.php`

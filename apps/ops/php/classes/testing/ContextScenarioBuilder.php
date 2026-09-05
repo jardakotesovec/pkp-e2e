@@ -11,7 +11,9 @@
  *
  * @brief OPS scratch-server scenario (a fresh server gets its default section
  * from the Context::add hook; user section assignments resolve by
- * abbrev/path).
+ * abbrev/path). OPS has no review stage and no Settings › Workflow › Review
+ * tab, so the `review` and `reviewForms` keys are REJECTED outright — never
+ * silently ignored.
  */
 
 namespace APP\testing;
@@ -19,6 +21,7 @@ namespace APP\testing;
 use PKP\context\Context;
 use PKP\testing\PKPContextScenarioBuilder;
 use PKP\testing\Spec;
+use PKP\testing\SpecException;
 
 class ContextScenarioBuilder extends PKPContextScenarioBuilder
 {
@@ -46,5 +49,10 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
     protected function addStructure(Context $context, array $plan, int $sequence): int
     {
         return BootstrapSeeder::addSection($context, $plan, $sequence);
+    }
+
+    protected function assertReviewSupported(string $key): void
+    {
+        throw new SpecException($key, "OPS has no review stage — {$key} cannot be seeded on this app");
     }
 }

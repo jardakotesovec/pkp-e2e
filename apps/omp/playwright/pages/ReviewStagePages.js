@@ -328,6 +328,53 @@ async function completeUploadWizard(page, fileName) {
 }
 
 /**
+ * Upload one review file into the round's "Files for Review" list through
+ * the editor's "Upload/Select Files" window ("Current Review Files For
+ * Round N": link "Upload Review File" opens the legacy three-step wizard;
+ * the new file's box arrives ticked, "OK" saves the selection). The round
+ * list then carries the file; a reviewer still needs a grant (their Add
+ * Reviewer or Edit window) before it shows on their wizard (patterns.md
+ * "Review files are grant-based").
+ */
+async function uploadRoundReviewFile(page, modal, fileName) {
+    await modal.getByRole('button', {name: 'Upload/Select Files'}).click();
+    const selectWindow = topModal(page);
+    await expect(
+        selectWindow.getByRole('link', {name: 'Upload Review File'})
+    ).toBeVisible({timeout: 20_000});
+    await selectWindow.getByRole('link', {name: 'Upload Review File'}).click();
+    // The wizard's first select is the (disabled) "revise a file" chooser;
+    // the component select is the genre one.
+    const wizard = topModal(page);
+    const genre = wizard.locator('select[id^="genreId"]');
+    await expect(genre).toBeVisible({timeout: 20_000});
+    await genre.selectOption({label: 'Book Manuscript'});
+    await page.locator('input[type="file"]').last().setInputFiles({
+        name: fileName,
+        mimeType: 'text/plain',
+        buffer: Buffer.from(`Review file ${fileName}`),
+    });
+    await expect(wizard.getByRole('button', {name: /Change File/})).toBeVisible({timeout: 20_000});
+    await wizard.getByRole('button', {name: 'Continue', exact: true}).click();
+    await expect(wizard.getByRole('tab', {name: '2. Review Details'})).toHaveAttribute('aria-selected', 'true', {timeout: 20_000});
+    await wizard.getByRole('button', {name: 'Continue', exact: true}).click();
+    await expect(wizard.getByRole('tab', {name: '3. Confirm'})).toHaveAttribute('aria-selected', 'true', {timeout: 20_000});
+    await wizard.getByRole('button', {name: 'Complete', exact: true}).click();
+    await expect(wizard.getByRole('tab', {name: '3. Confirm'})).toBeHidden({timeout: 20_000});
+    const box = selectWindow
+        .getByRole('row')
+        .filter({hasText: fileName})
+        .locator('input[type="checkbox"]')
+        .first();
+    await expect(box).toBeVisible({timeout: 20_000});
+    await box.check();
+    await selectWindow.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(
+        modal.getByRole('row').filter({hasText: fileName}).first()
+    ).toBeVisible({timeout: 20_000});
+}
+
+/**
  * Complete the same three-step upload wizard when it opens as a standalone
  * dialog over the dashboard list (the author's "Submit revisions" action,
  * U22). There it has no [data-cy="active-modal"] wrapper and no header text
@@ -426,6 +473,7 @@ module.exports = {
     completeReviewAsReviewer,
     confirmReviewAsEditor,
     completeUploadWizard,
+    uploadRoundReviewFile,
     completeStandaloneUploadWizard,
     assignParticipant,
     openTasksPanel,

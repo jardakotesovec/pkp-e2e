@@ -77,7 +77,7 @@ recipes are gone (TEMPLATE, lint `shape` check); logs in
 | U25 | Submission stage | OJS OMP OPS | M | done | Spec verified. 7 tests OJS, 8 OMP, 2 OPS absence (+setup). Register 3❓+2✅ (the A2 area has private-file items). |
 | U26 | Review stage & rounds | OJS OMP | H | done | Spec verified. 12 tests OJS, 13 OMP, 1 OPS absence (+setup). Register 4🐞+9❓+1✅ (A3 observation in the private file). In step with upstream at the 2026-08-29 baselines (i13156 Review Details rework folded). |
 | U27 | Reviewer assignment & management | OJS OMP | H | done | Spec verified. 14 tests OJS, 15 OMP, 1 OPS absence (+setup). Register 28 entries: 13🐞+5❓+10✅ (9 retired; A25 retired 2026-09-03, fixed upstream and re-verified live); headliner A18 (silent half-add); 3 observations in the private file. Team triage 2026-08-29: A21 risk accepted, A22 ticket to follow. The Review Details entry-path parity scenario and tests stay PARKED (maintainer ruling 2026-09-01). |
-| U28 | Reviewer's review | OJS OMP | H | pending | |
+| U28 | Reviewer's review | OJS OMP | H | done | Spec verified. 15 tests OJS, 15 OMP, 1 OPS absence (+setup). Register 12🐞+3❓+1✅ (A8, OMP4 retired); headliners A7 (a review with nothing typed and no file submits: OMP at once, OJS once a recommendation is chosen), A9 (a later one-click email, reminder or another request, turns the earlier link into a bare 404), A10 (a one-click link opened while signed in as somebody else is a blank page), A11 ❓ (an "Archived" assignment still takes and submits a full review). Harness: review-setup passthrough family built (`review {…}`, `reviewForms[]`, reviewer `reviewForm`; 4 parity rows), unblocking backfill row 4. Shared ReviewerPages POM; OMP ReviewStagePages/ReviewerAssignmentPages extended. Low-confidence: A13 ❓ (files never shown in the round window), three fact frictions (F1, F2, F14). 17 minor readability frictions open. |
 | U29 | Review setup & review forms | OJS OMP | M | pending | |
 | U30 | Author response to reviews | OJS | M | pending | |
 | U31 | Reviewer suggestions | OJS OMP | L | pending | |
@@ -132,10 +132,10 @@ each; delete when done._
   shipped is re-checked. Each feature that needs a setting at its
   non-default end seeds it through `POST scenarios/context`; the first
   feature to need a key family builds it with its parity row (scenarios.md
-  "Configuring a scratch context"; TEMPLATE settings coverage rule). Two
-  backlogs wait on families pending features will build: U27, U26 and U25's
-  review setup (U28 or U29), and U21's intake settings (U58); they sit in
-  `docs/tracking/backfill.md`. When the first reader-facing feature comes
+  "Configuring a scratch context"; TEMPLATE settings coverage rule). The
+  review-setup family was built with U28 (2026-09-05), so backfill row 4
+  (U27, U26, U25) is unblocked; U21's intake settings still wait on U58;
+  both sit in `docs/tracking/backfill.md`. When the first reader-facing feature comes
   up (article landing page, issues, catalog browse), seed an enriched
   second journal in the bootstrap fixture rather than touching
   `publicknowledge`.

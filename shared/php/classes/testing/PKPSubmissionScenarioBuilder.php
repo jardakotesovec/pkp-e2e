@@ -40,6 +40,12 @@
  *   config.test.inc.php, and the sandbox ORCID credentials are dummies), so
  *   the unauthenticated/verified field states are seeded directly
  *   (the same author_settings rows the OAuth landing stores, minus tokens).
+ * - reviewRounds[].reviewers[].reviewForm "<title>" — attaches the context's
+ *   ACTIVE review form of that exact title to the assignment (U28), the
+ *   same Repo::reviewAssignment()->edit(['reviewFormId']) the reviewer
+ *   row's "Edit" window runs (EditReviewForm::execute; the window offers
+ *   active forms only). A missing or inactive title is a 400 naming the
+ *   active titles.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -166,7 +172,10 @@ abstract class PKPSubmissionScenarioBuilder
                 if (!$reviewer) {
                     throw new SpecException("{$reviewerSpec->path}.username", "Unknown reviewer username \"{$username}\"");
                 }
-                $reviewers[] = ['user' => $reviewer, 'status' => $status];
+                $reviewFormId = $reviewerSpec->has('reviewForm')
+                    ? $this->resolveActiveReviewFormId($context, (string) $reviewerSpec->get('reviewForm'), "{$reviewerSpec->path}.reviewForm")
+                    : null;
+                $reviewers[] = ['user' => $reviewer, 'status' => $status, 'reviewFormId' => $reviewFormId];
             }
             $roundPlans[] = [
                 'stageId' => $this->reviewStageIdForRound($roundSpec),
@@ -616,6 +625,16 @@ abstract class PKPSubmissionScenarioBuilder
                 'considered' => ReviewAssignment::REVIEW_ASSIGNMENT_NEW,
             ]);
 
+            if ($plan['reviewFormId'] !== null) {
+                // The reviewer row's "Edit" window (EditReviewForm::execute
+                // ~207-215): the assignment's review-form id, valid while
+                // the review is not completed. Dates and method are the
+                // form's own values here, so the window would send no
+                // "assignment changed" notification or email either.
+                $assignment = Repo::reviewAssignment()->get($assignment->getId());
+                Repo::reviewAssignment()->edit($assignment, ['reviewFormId' => $plan['reviewFormId']]);
+            }
+
             if ($plan['status'] !== 'invited') {
                 $assignment = Repo::reviewAssignment()->get($assignment->getId());
                 $previousActingUser = Registry::get('user');
@@ -642,6 +661,27 @@ abstract class PKPSubmissionScenarioBuilder
             ];
         }
         return $seeded;
+    }
+
+    /**
+     * Resolve a review form title against the context's ACTIVE forms — the
+     * ones the reviewer row's "Edit" window lists (EditReviewForm::fetch,
+     * ReviewFormDAO::getActiveByAssocId). Matches any locale's title.
+     */
+    protected function resolveActiveReviewFormId(Context $context, string $title, string $specKey): int
+    {
+        $reviewFormDao = DAORegistry::getDAO('ReviewFormDAO'); /** @var \PKP\reviewForm\ReviewFormDAO $reviewFormDao */
+        $forms = $reviewFormDao->getActiveByAssocId(Application::getContextAssocType(), $context->getId())->toArray();
+        $titles = [];
+        foreach ($forms as $form) {
+            $formTitles = (array) $form->getTitle(null);
+            if (in_array($title, $formTitles, true)) {
+                return (int) $form->getId();
+            }
+            $titles[] = $form->getLocalizedTitle();
+        }
+        $available = $titles ? implode(', ', array_map(fn ($t) => "\"{$t}\"", $titles)) : '(none)';
+        throw new SpecException($specKey, "No active review form titled \"{$title}\" in context \"{$context->getPath()}\". Active forms: {$available}");
     }
 
     /** Resolve a decision name against the app's own decision types. */

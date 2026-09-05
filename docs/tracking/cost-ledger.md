@@ -106,3 +106,23 @@ and seven rewrites (12% together) circled one roster row whose event
 cannot fire on a test install until it became register entry A11; a
 blocker that is a declared fact should end the loop sooner. Four claim-check
 chunks at 26% is the largest role, as in U03.
+
+## U28
+
+| role | agents | calls | pure text | input | cache creation | cache read | output | weighted | share |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| orchestrator | — | 134 | 36 | 3,248 | 515,384 | 25,490,021 | 99,160 | 3,692,280 | 18.1% |
+| claim check | 7 | 247 | 9 | 7,398 | 1,406,944 | 29,342,042 | 25,403 | 4,827,297 | 23.7% |
+| probe | 7 | 245 | 7 | 7,600 | 1,104,162 | 26,014,757 | 10,698 | 4,042,768 | 19.8% |
+| test author | 3 | 98 | 3 | 2,986 | 928,253 | 14,539,079 | 6,181 | 2,648,115 | 13.0% |
+| finalize/fold | 5 | 116 | 5 | 3,562 | 763,093 | 12,902,348 | 12,945 | 2,312,388 | 11.3% |
+| spec author | 1 | 21 | 1 | 642 | 647,407 | 4,133,399 | 1,686 | 1,231,671 | 6.0% |
+| other: U28 harness: review-setup keys | 1 | 27 | 1 | 774 | 154,973 | 3,281,842 | 5,198 | 548,664 | 2.7% |
+| digest | 1 | 15 | 1 | 450 | 132,164 | 1,409,316 | 1,030 | 311,737 | 1.5% |
+| other: U28 span check K9 step 4 panel | 1 | 12 | 1 | 354 | 118,079 | 982,280 | 873 | 250,546 | 1.2% |
+| readability/persona | 1 | 8 | 1 | 226 | 68,275 | 406,083 | 12,132 | 186,838 | 0.9% |
+| merge | 1 | 9 | 1 | 258 | 92,032 | 574,967 | 1,249 | 179,040 | 0.9% |
+| rewrite | 1 | 16 | 1 | 482 | 59,410 | 836,555 | 907 | 162,935 | 0.8% |
+| **total** | 29 | 948 | 67 | 27,980 | 5,990,176 | 119,912,689 | 177,462 | 20,394,279 | 100% |
+
+U28 · 29 agents · 814 subagent calls · 134 orchestrator calls · weighted 20,394,279

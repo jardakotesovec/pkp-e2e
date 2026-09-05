@@ -85,7 +85,7 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    press or preprint server, no route was found that places anything under
    "Scheduled for publication". That view was only ever seen empty
    ⚠ [A3](#a3).
-3. **Landing.** An account whose only role in the journal is Author lands on
+3. <a id="landing"></a> **Landing.** An account whose only role in the journal is Author lands on
    My Submissions after signing in on the journal's own login page. On a
    multi-journal site, the site-wide login page leads to the site index
    instead. The editorial roles (Journal Manager, Section Editor, Assistant,

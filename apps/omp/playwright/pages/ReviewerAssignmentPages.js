@@ -110,6 +110,56 @@ async function awaitRequestFormReady(page, addModal) {
     ).toBeAttached({timeout: 10_000});
 }
 
+/**
+ * Add a reviewer to the open round through the "Add Reviewer" window:
+ * search the list by name, select the entry, wait for the request letter to
+ * settle (app-changes row 4: OMP answers 500 when the letter editor has not
+ * initialised), press the footer's "Add Reviewer" and wait for the row. The
+ * window's "Files To Be Reviewed" boxes arrive ticked, so every file already
+ * in the round's "Files for Review" list is granted to the reviewer.
+ */
+async function addReviewerFromList(page, modal, {search, name}) {
+    const addModal = await openAddReviewer(page, modal);
+    await searchReviewerList(page, addModal, search);
+    await selectReviewerAndAwaitForm(page, addModal, name);
+    await addModal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+    const row = reviewerRow(modal, name);
+    await expect(row).toBeVisible({timeout: 20_000});
+    await expect(row).toContainText('Request Sent');
+    return row;
+}
+
+/**
+ * Open the reviewer row's "Edit" window (More Actions › Edit,
+ * form#editReviewForm) and return it, settled on its "Review Type" group.
+ */
+async function openEditReview(page, row) {
+    const menu = await openRowMenu(page, row);
+    await menu.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+    const editModal = topModal(page);
+    await expect(editModal.getByText('Review Type')).toBeVisible({timeout: 20_000});
+    return editModal;
+}
+
+/**
+ * Grant one of the round's review files to a reviewer: the Edit window's
+ * "Files To Be Reviewed" box for `fileName` is ticked (a file added after
+ * the assignment arrives unticked) and "OK" saves. The window closes on
+ * success; the reviewer's wizard then lists the file.
+ */
+async function grantFileToReviewer(page, row, fileName) {
+    const editModal = await openEditReview(page, row);
+    const box = editModal
+        .getByRole('row')
+        .filter({hasText: fileName})
+        .locator('input[type="checkbox"]')
+        .first();
+    await expect(box).toBeVisible({timeout: 20_000});
+    await box.check();
+    await editModal.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(editModal.getByText('Review Type')).toBeHidden({timeout: 20_000});
+}
+
 /** Local-time ISO date (yyyy-mm-dd) — toISOString() would shift timezones. */
 function isoDate(date) {
     const y = date.getFullYear();
@@ -346,6 +396,9 @@ module.exports = {
     selectButton,
     selectReviewerAndAwaitForm,
     awaitRequestFormReady,
+    addReviewerFromList,
+    openEditReview,
+    grantFileToReviewer,
     isoDate,
     daysFromNow,
     pickDate,

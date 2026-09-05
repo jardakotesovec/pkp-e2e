@@ -100,6 +100,29 @@ Keys:
   complete on a test install, because outbound HTTP fails fast at the
   dead-port proxy in `config.test.inc.php`, so dummy credentials are as good
   as real ones for every screen this state gates.
+- `review` (OJS, OMP): the fields of Settings › Workflow › Review › "Setup"
+  and "Reviewer Guidance", validated and saved the way those forms' save
+  is. Keys, named as the forms name them: `defaultReviewMode`
+  (`anonymous`, `doubleAnonymous`, `open`, or the form's 1/2/3),
+  `defaultReviewPublicVisibility`, `restrictReviewerFileAccess`,
+  `reviewerAccessKeysEnabled`, `reviewerSuggestionEnabled`,
+  `numWeeksPerResponse`, `numWeeksPerReview`, `numReviewsPerSubmission`, the
+  four reminder thresholds (`numDaysBeforeReviewResponseReminderDue`,
+  `numDaysAfterReviewResponseReminderDue`,
+  `numDaysBeforeReviewSubmitReminderDue`,
+  `numDaysAfterReviewSubmitReminderDue`, whole days 0–14), `showEnsuringLink`,
+  and the localized `reviewGuidelines`, `competingInterests` and, on OMP
+  only, `internalReviewGuidelines`. A key the app's forms lack is a 400.
+  OPS has no Review tab and answers 400 on the whole key, like
+  `reviewRounds[]`.
+- `reviewForms[]` (OJS, OMP): review forms created and activated the way
+  the "Review Forms" grid does. Each entry: `title` (required, localized),
+  `description` (localized), `active` (default true), and `elements[]` of
+  `question` (required, localized), `description`, `type`, `required`
+  (default false) and `options`. `type` is one of the grid's item types,
+  `smalltextfield`, `textfield`, `textarea`, `checkboxes`, `radiobuttons`,
+  `dropdownbox` (or its number 1–6); the last three need `options`, a list
+  of response labels (or a locale map of lists). OPS answers 400.
 
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
@@ -123,13 +146,18 @@ Keys:
   the author keeps metadata editing rights. It appears in the author's
   Incomplete list.
 - `decisions[]`: real decision names, resolved per app (`sendExternalReview`,
-  `acceptFromReview`, …). An unknown name fails with a 400 that lists the
-  app's roster.
-- `reviewRounds[]`, each with `reviewers[]` of `{username, status}` where
-  `status` is `invited` (default), `accepted` or `declined`. These are the
-  only per-reviewer keys. Due dates and the review method are not
-  parameters: the builder stamps them exactly as the Add Reviewer form does,
-  from the context's `numWeeksPerResponse` and `numWeeksPerReview` and its
+  `accept`, `requestRevisions`, …: the lowercased class name of the app's
+  decision type). An unknown name fails with a 400 that lists the app's
+  roster.
+- `reviewRounds[]`, each with `reviewers[]` of `{username, status,
+  reviewForm}` where `status` is `invited` (default), `accepted` or
+  `declined`, and `reviewForm` is the exact title of one of the context's
+  active review forms (seeded through `reviewForms[]`), attached the way
+  the reviewer row's "Edit" window attaches it; a missing or inactive title
+  fails with a 400 that names the active titles. These are the only
+  per-reviewer keys. Due dates and the review method are not parameters:
+  the builder stamps them exactly as the Add Reviewer form does, from the
+  context's `numWeeksPerResponse` and `numWeeksPerReview` and its
   `defaultReviewMode` (double-anonymous when unset). Any other key fails
   with a 400.
 - `participants[]` of `{username, role}`: extra stage assignments for people
@@ -207,17 +235,13 @@ row.
   `metadata.datePublished` (without it, publish stamps today);
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
   `name?`, `genre?`, `group?`).
-- Reviewer: `reviewForm: "<title>"` attaching an existing active review form
-  by exact title, seeded first through a context `reviewForms[]` list.
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - Context passthroughs: `copyrightNotice`, `enablePublicComments`,
   `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), metadata modes (`keywords`,
-  `citations`), review setup (`defaultReviewMode`,
-  `reviewerSuggestionEnabled`, `numWeeksPerResponse`, `numWeeksPerReview`,
-  reminder thresholds), ISSNs, `plugins: {pluginName: {enabled, settings}}`
-  keyed by the plugin's lowercased class name, `reviewForms[]`, OJS
+  `citations`), ISSNs, `plugins: {pluginName: {enabled, settings}}`
+  keyed by the plugin's lowercased class name, OJS
   `issues[]` with `accessStatus`, and OJS `subscriptions[]` where
   `'expired'` seeds an active row with a past end date.
 - Named scenario fixtures (`submission-draft`, `submission-in-review`,

@@ -285,6 +285,51 @@ so; it is not a guess.
   page cuts (the probe kit strips it on Login only); keep scratch tags
   short. Login; Register. Live-driven 2026-09-04, all three apps
   (`.reports/U05/cc-K3.md` K3-3, `cc-K4.md`).
+- Settings › Workflow › Review on the seeded journal is at the install
+  defaults: "Restrict File Access" off, "One-click Reviewer Access" off,
+  "Review Guidelines" (OMP: "Internal Review Guidelines" and "External
+  Review Guidelines") empty, "Competing Interests" empty, "Default Review
+  Mode" "Anonymous Reviewer/Anonymous Author", both deadlines 4 weeks.
+  Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pA` P1).
+- A reviewer seeded through `POST scenarios/submission` gets no request
+  email on either app; the request email (and the one-click link) comes
+  only from the editor's "Add Reviewer" window. Mailpit. Live-probed
+  2026-09-04, OJS and OMP (`.reports/U28/pD1` premise 2; `pD1b`).
+- An assignment seeded `status: accepted` opens its wizard on "1. Request"
+  with "Save and continue"; step 2 is reached only after that press (an
+  acceptance made on the screen lands on step 2). Reviewer wizard.
+  Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pA`; `pC` header).
+- An assignment seeded `status: declined` stores the decline email's raw
+  template, placeholders unresolved ("{$submissionTitle}", "{$contextName}",
+  "{$senderName}"), as its message; the reviewer's "Read Round N Review"
+  window prints it as is. A decline made on the screen stores the typed
+  text. Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pD2` P28).
+- OPS `publicknowledge` is seeded with no submissions; every Editor
+  Dashboard view counts 0. Live-probed 2026-09-04 (`.reports/U28/pE` P32).
+- A later one-click email to the same reviewer on the same context (a
+  reminder, or another submission's request) deletes the earlier request
+  link, which then answers a bare "404 Not Found"; a test opens a one-click
+  link before any further email goes to that reviewer. Mailpit; the
+  invitation page. Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pD1b`
+  P26).
+- A decline made on the screen with an empty message stores and sends the
+  decline email's default body with its placeholders resolved ("Unable to
+  Review"; "Editors:" on a journal, "Editor(s):" on a press), followed by
+  the reviewer's name. Reviewer wizard, "Decline Review Request"; the
+  reviewer's "Read Round N Review" window. Live-driven 2026-09-05, OJS and
+  OMP (`.reports/U28/cc-K5.md` K5-3).
+- A submission seeded after a scratch context's "Default Review Mode" was
+  changed carries the new mode as its assignments' review type. Reviewer
+  wizard step 1 "Review Type". Live-driven 2026-09-05, OJS and OMP
+  (`.reports/U28/cc-K4.md`).
+- OPS's Roles › "Create New Role" offers the permission levels Manager,
+  Moderator, Assistant, Author, Reviewer and Reader, with "Production" as
+  the only stage; a Reviewer-level role saves with no stage, and a user who
+  accepts an invitation to it (Users › Edit is the invitation wizard on
+  this build; the email "You are invited to new roles"; "Accept And
+  Continue to OPS", which shows no confirmation) holds it. Settings › Users
+  & Roles. Live-driven 2026-09-05 (`.reports/U28/cc-K6.md` K6-1,
+  `cc-K6b.md`).
 
 ## Where to change it
 
