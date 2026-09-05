@@ -180,7 +180,7 @@ Notes: the reviewer dashboard list is folded here per D4 — it cites ROUTE-008/
 ### U29 — Review setup & review forms {OJS OMP} · M
 A manager configures how review runs: mode, deadlines, reminders, guidance, review forms, recommendation options.
 Atoms: AFFW-669..670 · AFFM-065..081 · GRID-046..047, 059..060 · VUE-047, 069 · API-054 · JOB-054
-Notes: owns the reminder clocks (JOB-054); the reminder sends live with U27 (MAIL-043, 046). Review-form elements' rendering in the wizard is U28's (AFFU-170..175).
+Notes: owns the reminder clocks (JOB-054); the reminder sends live with U27 (MAIL-043, 046). Review-form elements' rendering in the wizard is U28's (AFFU-170..175). AFFW-669 (OMP's own preview template) is a dead file no handler loads; the preview renders lib/pkp's (U29 footnote f, 2026-09-05).
 
 ### U30 — Author response to reviews {OJS} · M
 An editor requests, and an author submits, a formal response to a review round.

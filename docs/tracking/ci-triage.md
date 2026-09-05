@@ -73,8 +73,20 @@ when the class's watch condition trips.
   2026-09-01); the fix is upstream. Reported to the team 2026-08-29.
   Last incidents: U49 S11 red with retries exhausted 2026-08-30 and
   2026-09-01 (watch condition tripped, hardening applied and verified green
-  2026-09-01); U21 S13 flaky-passed 2026-09-01; U21 S11 red on OMP with its retry exhausted 2026-09-03 (run 33745718330), green on the targeted rerun. **Watch condition**: a
+  2026-09-01); U21 S13 flaky-passed 2026-09-01; U21 S11 red on OMP with its retry exhausted 2026-09-03 (run 33745718330), green on the targeted rerun; U40 S6 then U40 S4 red on OMP in two
+  consecutive local final runs 2026-09-05 (U29 session, load average ~15 on
+  10 cores), green on the third. **Watch condition**: a
   hardened test reds again with retries exhausted.
+- **U01 S8 hangs on a used database** (OJS, local only so far). After a
+  day's probes, checks and suite runs on one database, "S8: editor
+  impersonates a participant from the Participants panel" hit its 4-minute
+  timeout twice in a row (the editor's dashboard showed 129 assigned
+  submissions); it passed in 8 s right after `reset:ojs` and the final
+  run was green. Seen 2026-09-05 (U29 session, `.reports/U29/pw-out-u01s8`
+  in git-ignored scratch). CI runs on a fresh database, so no CI incident
+  yet. **Watch condition**: S8 reds in CI, or a local run on a fresh
+  database reds; then bisect the participant panel against submission
+  volume.
 - **Reviewer-indicator popover under load** (U23 S9, OJS). The row with
   two reviewers opens the wrong reviewer's popover (Paul instead of Julia)
   during a full-suite run and passes in isolation; the hover target is
