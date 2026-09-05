@@ -11,7 +11,10 @@ prices of the four token kinds, so the weighted number ranks the levers
 correctly (cold agent contexts and long transcripts re-read every turn cost
 more than long reports do). The script deduplicates by API message id;
 summing transcript lines naively inflates every figure about 2.5×. Session
-limit notices are not API calls and are not counted. Rows before U28 count
+limit notices are not API calls and are not counted. Rows before 2026-09-05
+were refilled with the corrected script (output tokens had been read from
+a placeholder line and undercounted about five times), so every row is
+comparable. Rows before U28 count
 output at about a fifth of its true value (the script read the placeholder
 count on streamed lines); add about 3.5M to each of those totals when
 comparing with U28 onward.
@@ -33,43 +36,43 @@ completion notifications only is marked `partial`.
 
 | role | agents | calls | pure text | input | cache creation | cache read | output | weighted | share |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| orchestrator | — | 126 | 41 | 7,106 | 955,537 | 24,444,551 | 129,025 | 4,291,107 | 26.1% |
-| claim check | 2 | 123 | 5 | 18,123 | 1,223,403 | 16,736,928 | 8,542 | 3,263,780 | 19.9% |
-| probe | 9 | 194 | 9 | 53,523 | 1,154,797 | 14,187,134 | 5,501 | 2,943,238 | 17.9% |
-| test author | 3 | 64 | 3 | 20,376 | 755,700 | 9,150,567 | 2,265 | 1,891,383 | 11.5% |
-| finalize/fold | 5 | 61 | 5 | 16,815 | 489,873 | 5,420,021 | 1,512 | 1,178,718 | 7.2% |
-| explore/plan | 6 | 82 | 6 | 4,602 | 543,058 | 3,790,732 | 628 | 1,065,638 | 6.5% |
-| spec author | 1 | 24 | 1 | 8,690 | 254,432 | 3,260,612 | 360 | 654,591 | 4.0% |
-| digest | 1 | 13 | 2 | 4,254 | 227,501 | 957,956 | 543 | 387,141 | 2.4% |
-| rewrite | 1 | 14 | 1 | 6,309 | 116,132 | 1,317,807 | 430 | 285,405 | 1.7% |
-| readability/persona | 2 | 12 | 2 | 3,971 | 98,924 | 445,255 | 8,840 | 216,352 | 1.3% |
-| merge | 1 | 8 | 1 | 2,570 | 71,028 | 429,941 | 522 | 136,959 | 0.8% |
-| other: Harness: validation-variant server | 1 | 10 | 1 | 6,156 | 46,494 | 477,718 | 40 | 112,245 | 0.7% |
-| **total** | 32 | 731 | 77 | 152,495 | 5,936,879 | 80,619,222 | 158,208 | 16,426,556 | 100% |
+| orchestrator | — | 126 | 41 | 7,106 | 955,537 | 24,444,551 | 129,025 | 4,291,107 | 22.6% |
+| probe | 9 | 194 | 9 | 53,523 | 1,154,797 | 14,187,134 | 148,078 | 3,656,123 | 19.3% |
+| claim check | 2 | 123 | 5 | 18,123 | 1,223,403 | 16,736,928 | 75,087 | 3,596,505 | 18.9% |
+| test author | 3 | 64 | 3 | 20,376 | 755,700 | 9,150,567 | 34,603 | 2,053,073 | 10.8% |
+| finalize/fold | 5 | 61 | 5 | 16,815 | 489,873 | 5,420,021 | 59,046 | 1,466,388 | 7.7% |
+| explore/plan | 6 | 82 | 6 | 4,602 | 543,058 | 3,790,732 | 70,108 | 1,413,038 | 7.4% |
+| spec author | 1 | 24 | 1 | 8,690 | 254,432 | 3,260,612 | 73,826 | 1,021,921 | 5.4% |
+| digest | 1 | 13 | 2 | 4,254 | 227,501 | 957,956 | 19,907 | 483,961 | 2.5% |
+| rewrite | 1 | 14 | 1 | 6,309 | 116,132 | 1,317,807 | 23,432 | 400,415 | 2.1% |
+| readability/persona | 2 | 12 | 2 | 3,971 | 98,924 | 445,255 | 21,908 | 281,692 | 1.5% |
+| merge | 1 | 8 | 1 | 2,570 | 71,028 | 429,941 | 5,755 | 163,124 | 0.9% |
+| other: Harness: validation-variant server | 1 | 10 | 1 | 6,156 | 46,494 | 477,718 | 9,323 | 158,660 | 0.8% |
+| **total** | 32 | 731 | 77 | 152,495 | 5,936,879 | 80,619,222 | 670,098 | 18,986,006 | 100% |
 
-U02 · 32 agents · 605 subagent calls · 126 orchestrator calls · weighted 16,426,556
+U02 · 32 agents · 605 subagent calls · 126 orchestrator calls · weighted 18,986,006
 
 ## U03
 
 | role | agents | calls | pure text | input | cache creation | cache read | output | weighted | share |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| orchestrator | — | 195 | 62 | 9,799 | 1,134,278 | 37,307,683 | 133,054 | 5,823,685 | 27.9% |
-| probe | 11 | 311 | 12 | 53,426 | 1,780,409 | 25,527,261 | 22,548 | 4,944,403 | 23.7% |
-| claim check | 6 | 216 | 6 | 43,222 | 1,265,283 | 23,116,494 | 14,392 | 4,008,435 | 19.2% |
-| test author | 3 | 53 | 4 | 1,518 | 797,808 | 9,333,711 | 1,794 | 1,941,119 | 9.3% |
-| finalize/fold | 5 | 94 | 5 | 13,126 | 581,250 | 10,375,639 | 3,565 | 1,795,077 | 8.6% |
-| spec author | 2 | 21 | 1 | 7,064 | 259,633 | 2,015,752 | 226 | 534,310 | 2.6% |
-| readability/persona | 4 | 18 | 4 | 5,473 | 259,848 | 633,989 | 10,471 | 446,037 | 2.1% |
-| digest | 1 | 24 | 1 | 7,070 | 138,790 | 2,166,374 | 1,733 | 405,860 | 1.9% |
-| other: U03 checker: Rule 2 tab-switch span | 1 | 21 | 1 | 642 | 169,269 | 1,282,448 | 5,154 | 366,243 | 1.8% |
-| rewrite | 1 | 19 | 1 | 3,280 | 144,690 | 1,776,969 | 371 | 363,694 | 1.7% |
-| merge | 1 | 9 | 1 | 6,054 | 87,123 | 652,996 | 41 | 180,462 | 0.9% |
-| other: U03 add register entry for silent loss | 1 | 7 | 1 | 194 | 45,754 | 323,309 | 384 | 91,637 | 0.4% |
-| **total** | 36 | 988 | 99 | 150,868 | 6,664,135 | 114,512,625 | 193,733 | 20,900,964 | 100% |
+| orchestrator | — | 195 | 62 | 9,799 | 1,134,278 | 37,307,683 | 133,054 | 5,823,685 | 23.8% |
+| probe | 11 | 311 | 12 | 53,426 | 1,780,409 | 25,527,261 | 204,996 | 5,856,643 | 23.9% |
+| claim check | 6 | 216 | 6 | 43,222 | 1,265,283 | 23,116,494 | 221,966 | 5,046,305 | 20.6% |
+| test author | 3 | 53 | 4 | 1,518 | 797,808 | 9,333,711 | 68,627 | 2,275,284 | 9.3% |
+| finalize/fold | 5 | 94 | 5 | 13,126 | 581,250 | 10,375,639 | 90,475 | 2,229,627 | 9.1% |
+| readability/persona | 4 | 18 | 4 | 5,473 | 259,848 | 633,989 | 72,780 | 757,582 | 3.1% |
+| spec author | 2 | 21 | 1 | 7,064 | 259,633 | 2,015,752 | 33,170 | 699,030 | 2.9% |
+| digest | 1 | 24 | 1 | 7,070 | 138,790 | 2,166,374 | 24,192 | 518,155 | 2.1% |
+| rewrite | 1 | 19 | 1 | 3,280 | 144,690 | 1,776,969 | 24,757 | 485,624 | 2.0% |
+| other: U03 checker: Rule 2 tab-switch span | 1 | 21 | 1 | 642 | 169,269 | 1,282,448 | 10,577 | 393,358 | 1.6% |
+| merge | 1 | 9 | 1 | 6,054 | 87,123 | 652,996 | 22,208 | 291,297 | 1.2% |
+| other: U03 add register entry for silent loss | 1 | 7 | 1 | 194 | 45,754 | 323,309 | 4,327 | 111,352 | 0.5% |
+| **total** | 36 | 988 | 99 | 150,868 | 6,664,135 | 114,512,625 | 911,129 | 24,487,944 | 100% |
 
-U03 · 36 agents · 793 subagent calls · 195 orchestrator calls · weighted 20,900,964
+U03 · 36 agents · 793 subagent calls · 195 orchestrator calls · weighted 24,487,944
 
-Against U02: +27% weighted for a spec 32% longer (19.2k words, 14 rules,
+Against U02: +29% weighted for a spec 32% longer (19.2k words, 14 rules,
 10 scenarios, 20 register entries; U02 14.5k words, 10 entries) and 10
 tests per app instead of 8. No explore/plan agents (U02 spent 6.5% there).
 Test authoring stayed flat in absolute terms. Two incidents sit inside the
@@ -83,25 +86,30 @@ place; each resume re-created the orchestrator's whole context.
 
 | role | agents | calls | pure text | input | cache creation | cache read | output | weighted | share |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| orchestrator | — | 188 | 51 | 4,490 | 875,491 | 41,334,672 | 138,861 | 5,926,626 | 24.4% |
-| claim check | 4 | 217 | 9 | 6,384 | 2,256,353 | 33,458,192 | 8,562 | 6,215,454 | 25.6% |
-| probe | 6 | 200 | 6 | 6,070 | 1,247,664 | 24,493,346 | 21,768 | 4,123,825 | 17.0% |
-| rewrite | 7 | 120 | 9 | 3,574 | 828,052 | 10,273,260 | 4,302 | 2,087,475 | 8.6% |
-| spec author | 1 | 36 | 2 | 1,094 | 637,075 | 6,537,762 | 2,116 | 1,461,794 | 6.0% |
-| other: U05 OJS test suite | 1 | 38 | 1 | 1,186 | 317,266 | 7,954,599 | 965 | 1,198,053 | 4.9% |
-| readability/persona | 9 | 54 | 9 | 1,458 | 491,939 | 1,864,151 | 23,276 | 919,177 | 3.8% |
-| finalize/fold | 2 | 38 | 2 | 1,156 | 323,243 | 4,325,335 | 2,224 | 848,863 | 3.5% |
-| other: U05 OMP test suite | 1 | 32 | 1 | 994 | 182,382 | 3,709,686 | 2,188 | 610,880 | 2.5% |
-| other: U05 OPS test suite | 1 | 28 | 1 | 866 | 194,874 | 3,341,307 | 2,352 | 590,349 | 2.4% |
-| merge | 1 | 12 | 1 | 354 | 89,791 | 813,591 | 367 | 195,787 | 0.8% |
-| other: U05 product-owner re-read (4 entries) | 1 | 3 | 1 | 66 | 17,625 | 78,025 | 190 | 30,850 | 0.1% |
+| orchestrator | — | 323 | 85 | 7,782 | 1,709,538 | 78,667,765 | 319,294 | 11,607,951 | 30.4% |
+| claim check | 4 | 217 | 9 | 6,384 | 2,256,353 | 33,458,192 | 218,463 | 7,264,959 | 19.0% |
+| probe | 6 | 200 | 6 | 6,070 | 1,247,664 | 24,493,346 | 211,639 | 5,073,180 | 13.3% |
+| rewrite | 7 | 120 | 9 | 3,574 | 828,052 | 10,273,260 | 149,619 | 2,814,060 | 7.4% |
+| readability/persona | 11 | 62 | 11 | 1,654 | 567,768 | 2,169,756 | 176,594 | 1,811,310 | 4.7% |
+| spec author | 1 | 36 | 2 | 1,094 | 637,075 | 6,537,762 | 64,071 | 1,771,569 | 4.6% |
+| other: U05 OJS test suite | 1 | 38 | 1 | 1,186 | 317,266 | 7,954,599 | 26,337 | 1,324,913 | 3.5% |
+| finalize/fold | 2 | 38 | 2 | 1,156 | 323,243 | 4,325,335 | 69,566 | 1,185,573 | 3.1% |
+| other: U05 trim pass | 1 | 36 | 3 | 1,036 | 175,718 | 3,768,726 | 68,184 | 938,476 | 2.5% |
+| other: Trim shipped specs batch 1 | 1 | 26 | 2 | 774 | 336,271 | 3,000,149 | 25,769 | 849,973 | 2.2% |
+| other: U05 OMP test suite | 1 | 32 | 1 | 994 | 182,382 | 3,709,686 | 25,047 | 725,175 | 1.9% |
+| other: U05 OPS test suite | 1 | 28 | 1 | 866 | 194,874 | 3,341,307 | 28,736 | 722,269 | 1.9% |
+| other: Trim shipped specs batch 4 | 1 | 28 | 2 | 838 | 174,108 | 2,551,158 | 28,610 | 616,639 | 1.6% |
+| other: Trim shipped specs batch 3 | 1 | 21 | 1 | 642 | 171,285 | 2,185,030 | 20,871 | 537,606 | 1.4% |
+| other: Trim shipped specs batch 2 | 1 | 24 | 1 | 738 | 139,453 | 2,253,343 | 25,405 | 527,414 | 1.4% |
+| merge | 1 | 12 | 1 | 354 | 89,791 | 813,591 | 24,066 | 314,282 | 0.8% |
+| other: U05 product-owner re-read (4 entries) | 1 | 3 | 1 | 66 | 17,625 | 78,025 | 3,879 | 49,295 | 0.1% |
 | other: U05 product-owner register read | 1 | 3 | 1 | 66 | 15,502 | 82,106 | 300 | 29,154 | 0.1% |
-| other: U05 product-owner read of A11 | 1 | 3 | 1 | 66 | 16,141 | 78,733 | 6 | 28,146 | 0.1% |
-| **total** | 36 | 972 | 95 | 27,824 | 7,493,398 | 138,344,765 | 207,477 | 24,266,433 | 100% |
+| other: U05 product-owner read of A11 | 1 | 3 | 1 | 66 | 16,141 | 78,733 | 192 | 29,076 | 0.1% |
+| **total** | 43 | 1250 | 140 | 35,340 | 9,400,109 | 189,741,869 | 1,486,642 | 38,192,873 | 100% |
 
-U05 · 36 agents · 784 subagent calls · 188 orchestrator calls · weighted 24,266,433
+U05 · 43 agents · 927 subagent calls · 323 orchestrator calls · weighted 38,192,873
 
-Against U03: +16% weighted for a spec of    16785 words, 9 rules, 9 scenarios and
+Five of the 43 agents (the U05 trim pass and the four shipped-spec trim batches, about 3.5M weighted) trimmed the shipped specs in the same session (maintainer's request, 2026-09-04); the feature alone is about 34.7M. Against U03: +42% weighted for a spec of 16,785 words, 9 rules, 9 scenarios and
 14 register entries, and 9/8/8 tests. The orchestrator share (24%) stays
 above a fifth for the second feature running, which trips the "per-phase
 runners" condition in PROGRESS "Open harness work". Eight persona passes
