@@ -284,7 +284,9 @@ row.
   `name?`, `genre?`, `group?`).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - Context passthroughs: `notifyAllAuthors` (Settings › Workflow › Emails
-  "Notify All Authors", U30), `supportedFormLocales` (Website › Setup ›
+  "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
+  Workflow › Review "Reviewer Recommendations", U29), the submission-intake
+  settings U21's scenarios would run against (built with U58), `supportedFormLocales` (Website › Setup ›
   Languages "Forms" column; the settings forms stay single-language until
   it is set, U29), `copyrightNotice`, `enablePublicComments`,
   `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
@@ -298,6 +300,9 @@ row.
   `submission-in-round-2`, `submission-published`) and a typed scenario
   client. Until a suite shows the need, tests call
   `pkpApi.createContext()` and `createSubmission()` directly.
+- An enriched second journal in the bootstrap fixture for the first
+  reader-facing feature (article landing page, issues, catalog browse),
+  rather than touching `publicknowledge` (maintainer, 2026-09-04).
 
 ## Decision behaviour worth knowing
 

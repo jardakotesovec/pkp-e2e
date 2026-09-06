@@ -1,61 +1,31 @@
 # Progress — live state
 
-This file is pure state. Row notes are short (one to three lines) and may
-carry register highlights: 🐞 and ❓ counts, the headline finding, anything
-low-confidence. Finding detail lives in each spec's Findings register, never
-here. Read this file together with `docs/process/RUNBOOK.md` (the loop). Spec
-style is in `TEMPLATE.md`, test rules in `PRINCIPLES.md`.
-
-**Where the build stands.** The harness was rebuilt clean-room on 2026-07-31
-(the earlier build survives in git history on branch `e2e_ng`; nothing from
-it is read back). Since then features are built one per session under the
-RUNBOOK loop, picked by the maintainer. Since 2026-08-26 the fleets are the
-self-contained `checkouts/<app>` clones of pkp `main` (`npm run fetch-apps`,
-harness.md "The fleets"). Everything campaign-related is merged upstream, so
-the latest app code is fetched from the pkp remotes and never pushed or
-branched there.
-
-**The standing rules.** Fable runs every role, with no per-role model split
-and no fallback. A safeguard flag, refusal or downgrade pauses the feature
-for maintainer review (RUNBOOK "Model discipline"). Potential security
-concerns go to the private `../e2e_ng/security.md` and never into a public
-artifact; the fact of routing is always stated, the content never (RUNBOOK
-"What goes where"). The lint gate checks reference integrity only; wording
-is the writer's judgment.
+One row per feature; the banner names the mode. Read it with
+`docs/process/RUNBOOK.md`. Finding detail lives in each spec's Findings
+register, never here.
 
 **Mode: MAINTENANCE** (since 2026-08-29). The resident QA agent runs per
-`docs/process/MAINTENANCE.md`, through claude-threads, one session a day
-(sync, CI triage, companions), one session at a time (MAINTENANCE.md
-"Session hygiene"). Open questions last posted to the team: never yet. Upstream baselines are in
-`docs/tracking/upstream-sync.md`. The CI-failure triage ledger is
-`docs/tracking/ci-triage.md`; check it first on any reported failure.
-The maintenance session never builds a pending row; new specs and suites
-are built in feature sessions the maintainer launches, under the RUNBOOK
-loop. Before 2026-08-29 the mode was REVIEW: the maintainer launched and
-reviewed each step.
+`docs/process/MAINTENANCE.md`, one session a day, and never builds a
+pending row; feature sessions are launched by the maintainer under the
+RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
+baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
+companion branches: `docs/tracking/ci-triage.md`, checked first on any
+reported failure. A row note is replaced, never appended to, and keeps the
+shape `tests per app · register counts · one headliner ID · open blocker ·
+low-confidence IDs`.
 
 ## Features
 
-One row per feature, in FEATURE-MAP order. Budget is the provisional tier
-(H/M/L per RUNBOOK); the maintainer adjusts it on review. Statuses: pending
-/ in_progress / done / parked. A note describes the row's state today (tests
-per app, register counts, the one finding to read first, open blockers).
-History lives in
-git and in `upstream-sync.md`; do not append to a note, replace it. All
-shipped specs had a plain-English body rewrite on 2026-09-02; claims,
-markers and evidence footnotes are unchanged. On 2026-09-04 every
-shipped spec was trimmed to the GLOSSARY reader: the per-spec reading
-instructions, the scenario preamble definitions and the by-hand set-up
-recipes are gone (TEMPLATE, lint `shape` check); logs in
-`.reports/backfill-trim/`.
+Rows in FEATURE-MAP order. Budget is the tier (H/M/L, RUNBOOK "Budget");
+status is pending / in_progress / done / parked.
 
 | Row | Feature | Apps | Budget | Status | Note |
 |---|---|---|---|---|---|
 | U01 | Login & sessions | OJS OMP OPS | M | done | Spec verified. 8 tests per app (+setup); scenario 9 declared not covered in the suite headers. Register 6🐞+1❓+1✅. Maintainer review done 2026-08-25: A1–A4 and A7–A8 confirmed with fix rulings, A5 for team triage, A6 intended (pkp/pkp-lib#12162). |
-| U02 | Registration & account validation | OJS OMP OPS | M | done | Spec verified. 8 tests per app (+setup; OPS scenario 3 is an absence test). Register 8🐞+2❓; headliners A6 (registering on a journal with no technical support contact while email validation is required ends in a server error and strands a disabled account, all apps) and A7 ❓ (Reader granted regardless of its self-registration flag). 1 observation in the private file, verified. Scenario 7 runs on the new validation-variant server (harness.md). App-side RegistrationPages POMs. 9 minor readability frictions open. |
-| U03 | User profile | OJS OMP OPS | M | done | Spec verified. 10 tests per app (+setup; OPS scenario 6 is the absence form). Register 12🐞+6❓+2✅; headliners A3 (the site-level email-change "reject" link answers a blank server error), A10 (the site-level change-email mail signs off "Kind regards, Array"), OPS2 (the change-email template is missing from OPS Manage Emails while the mail is still sent), A17 (a Contact save the server refused loses the typed values on the next tab, unasked). 2 observations in the private file, verified. Shared ProfilePage POM. Low-confidence: Rule 3's Site Administrator wording on a one-journal site (not drivable on the fleets). 47 minor readability frictions open (38 on the claim-check fold's spans, 9 on the final Rule 2 / scenario 3 / A17 spans; none rewritten). |
+| U02 | Registration & account validation | OJS OMP OPS | M | done | 8 tests per app (+setup; OPS S3 absence). 8🐞+2❓. Headliner A6. 1 in the private file, verified. |
+| U03 | User profile | OJS OMP OPS | M | done | 10 tests per app (+setup; OPS S6 absence). 12🐞+6❓+2✅. Headliner A3. 2 in the private file, verified. Low-confidence: Rule 3 (one-journal site, not drivable on the fleets). |
 | U04 | ORCID integration | OJS OMP OPS | M | done | Spec verified. 9 tests OJS, 8 OMP, 9 OPS (+setup; 2 absence tests). Register 6🐞+5❓+3✅ (A10 retired 2026-09-03, fixed upstream in all three apps); headliner A5 (Assistant false-success). ORCID legs run against the dead-port proxy with sandbox dummy credentials. |
-| U05 | Notifications center & email preferences | OJS OMP OPS | M | done | Spec verified. 9 tests OJS (S9 in the serial project), 8 OMP, 8 OPS (+setup). Register 6🐞+8❓; headliners A10 ("Enable…" unticked stops the needs-editor task but not its email, all apps), OPS3 (a task row on a preprint server lands on "A workflow stage was not specified."), A6 (every Unsubscribe link is a 404 on an install whose config sets no API secret, the shipped default), A11 ❓ (automatic editor assignment on a scratch journal). Build blocker app-changes row 12 (OMP/OPS discussion save dies on a missing app-level Notification class; overlay mounted; report in docs/reports). Shared NotificationsPages POM; ProfilePage extended (U03 re-run green ×3). Low-confidence: Rule 2d/5d one-journal-site wording (F26, not drivable on the fleets). Body trimmed 16% after review (per-spec boilerplate, preamble and set-up recipes cut to GLOSSARY pointers); 26 minor readability frictions open, counted. |
+| U05 | Notifications center & email preferences | OJS OMP OPS | M | done | 9 OJS (S9 serial) · 8 OMP · 8 OPS (+setup). 6🐞+8❓. Headliner A10. Blocker: app-changes row 12 (overlay mounted). Low-confidence: Rules 2d/5d (F26, not drivable on the fleets). |
 | U06 | User invitations | OJS OMP OPS | M | done | Spec verified. 8 tests OJS, 8 OMP, 9 OPS (+setup). Register 8🐞+2❓ (A1 outcome in the private file). |
 | U07 | Journal identity & about pages | OJS OMP OPS | M | pending | |
 | U08 | Navigation menus & site chrome | OJS OMP OPS | M | pending | |
@@ -65,22 +35,22 @@ recipes are gone (TEMPLATE, lint `shape` check); logs in
 | U12 | Announcements | OJS OMP OPS | M | pending | |
 | U13 | Article landing page & reading | OJS OPS | H | pending | |
 | U14 | Reader comments & moderation | OJS | M | pending | |
-| U15 | Search | OJS OMP OPS | M | done | Spec verified. 9 tests OJS, 8 OMP, 8 OPS (+setup; serial project, because the index refresh is a queued job). Register 11🐞+12❓+1✅; headliners A11 (the text of galleys is never searched, all apps), A1 (a partial date filter is ignored and the selects then show a date never chosen), A12/A13 (typed-address error pages). 2 observations in the private file, verified. App-side SearchPages POMs. 5 minor readability frictions open. |
+| U15 | Search | OJS OMP OPS | M | done | 9 OJS · 8 OMP · 8 OPS (+setup; serial project). 11🐞+12❓+1✅. Headliner A11. 2 in the private file, verified. |
 | U16 | Categories | OJS OMP OPS | M | pending | |
 | U17 | Sections | OJS OMP OPS | M | pending | |
 | U18 | Web feeds | OJS OMP OPS | L | pending | |
 | U19 | OAI-PMH | OJS OMP OPS | M | pending | |
 | U20 | Search-engine metadata & analytics | OJS OMP OPS | L | pending | |
-| U21 | Submission wizard | OJS OMP OPS | H | done | Spec verified. 13 tests OJS, 14 OMP, 14 OPS (+setup). Register 10🐞+7❓+2✅; headliner A8 (silent editor auto-assignment failure on every journal but the install's first). A11 (the `9e2fbac214` regression) retired 2026-09-03: fix pkp/pkp-lib#13265 is in every app's lib/pkp and the full suites are green at the tips. |
-| U22 | My Submissions (author dashboard) | OJS OMP OPS | L | done | Spec verified. 4 tests OJS, 5 OMP, 4 OPS (+setup). Register 1🐞+7❓; headliner OPS2 (OPS authors are offered draft deletion whose confirm always fails); A3 is low-confidence. 1 observation in the private file, verified. 5 minor readability frictions open. |
-| U23 | Submissions dashboard (editorial) | OJS OMP OPS | H | done | Spec verified. 13 tests OJS, 13 OMP, 11 OPS (+setup). Register 3🐞+6❓; headliners A5 (sort's "off" state leaves stale sort params in the address), A8 ❓ (opt-out labelled "Weekly" for a monthly email), A7 ❓ (assistants and Section Editors never see declined/cancelled reviewer indicators). Shared EditorialDashboardPage POM. 6 minor readability frictions open. |
-| U24 | Workflow screen & stage access | OJS OMP OPS | M | done | Spec verified. 8 tests OJS, 9 OMP, 6 OPS (+setup; OPS runs scenarios 1, 5–8, 10, the rest have no preprint analogue). Register 4🐞+10❓+2✅; headliners A9 (an old-shape workflow bookmark to a deleted submission is a bare "404 Not Found" on every app) and the corrected Delete rights (the Editor is offered "Delete" on OJS and OMP; U25 corrected to match). 1 observation in the private file, verified. Low-confidence: Rule 15b's per-round wording on a left review stage; the two "no email" claims (Rules 18–19) have no positive control. Shared WorkflowPage POM; ten shipped specs now link U24's anchors; U23's A9 (added and withdrawn this session) is gone. 9 minor readability frictions open. |
+| U21 | Submission wizard | OJS OMP OPS | H | done | 13 OJS · 14 OMP · 14 OPS (+setup). 10🐞+7❓+2✅ (A11 retired 2026-09-03). Headliner A8. |
+| U22 | My Submissions (author dashboard) | OJS OMP OPS | L | done | 4 OJS · 5 OMP · 4 OPS (+setup). 1🐞+7❓. Headliner OPS2. 1 in the private file, verified. Low-confidence: A3. |
+| U23 | Submissions dashboard (editorial) | OJS OMP OPS | H | done | 13 OJS · 13 OMP · 11 OPS (+setup). 3🐞+6❓. Headliner A5. |
+| U24 | Workflow screen & stage access | OJS OMP OPS | M | done | 8 OJS · 9 OMP · 6 OPS (+setup; OPS runs S1, S5–S8, S10). 4🐞+10❓+2✅. Headliner A9. 1 in the private file, verified. Low-confidence: Rule 15b; Rules 18–19 (no positive control). |
 | U25 | Submission stage | OJS OMP OPS | M | done | Spec verified. 7 tests OJS, 8 OMP, 2 OPS absence (+setup). Register 3❓+2✅ (the A2 area has private-file items). |
 | U26 | Review stage & rounds | OJS OMP | H | done | Spec verified. 12 tests OJS, 13 OMP, 1 OPS absence (+setup). Register 4🐞+9❓+1✅ (A3 observation in the private file). In step with upstream at the 2026-08-29 baselines (i13156 Review Details rework folded). |
-| U27 | Reviewer assignment & management | OJS OMP | H | done | Spec verified. 14 tests OJS, 15 OMP, 1 OPS absence (+setup). Register 28 entries: 13🐞+5❓+10✅ (9 retired; A25 retired 2026-09-03, fixed upstream and re-verified live); headliner A18 (silent half-add); 3 observations in the private file. Team triage 2026-08-29: A21 risk accepted, A22 ticket to follow. The Review Details entry-path parity scenario and tests stay PARKED (maintainer ruling 2026-09-01). |
-| U28 | Reviewer's review | OJS OMP | H | done | Spec verified. 15 tests OJS, 15 OMP, 1 OPS absence (+setup). Register 12🐞+3❓+1✅ (A8, OMP4 retired); headliners A7 (a review with nothing typed and no file submits: OMP at once, OJS once a recommendation is chosen), A9 (a later one-click email, reminder or another request, turns the earlier link into a bare 404), A10 (a one-click link opened while signed in as somebody else is a blank page), A11 ❓ (an "Archived" assignment still takes and submits a full review). Harness: review-setup passthrough family built (`review {…}`, `reviewForms[]`, reviewer `reviewForm`; 4 parity rows). Shared ReviewerPages POM; OMP ReviewStagePages/ReviewerAssignmentPages extended. Low-confidence: A13 ❓ (files never shown in the round window), three fact frictions (F1, F2, F14). 17 minor readability frictions open. |
-| U29 | Review setup & review forms | OJS OMP | M | done | Spec verified (high-effort build, 2026-09-06; the medium build of 2026-09-05 is in git at 7cb4ee5 and in `.reports/U29-medium`; comparison in `.reports/U29-compare/`). 10 tests OJS, 9 OMP (8 common + the OMP1 absence check), 1 OPS absence (+setup). Register 4🐞+6❓+2✅; headliners A9 (the reviewer row's "Edit" window drops a deactivated form on "OK"), A5 (changing an item's type drops its answer options with the app's own warning never shown), A1 (the after-due reminder never fires unless a before-due reminder is set; read from the code), OMP3 (the press's "Internal Review Guidelines" toolbar lacks the quote and list buttons), A7 ❓ (the "Reviewer Recommendations" table has no fixed order), A6 ❓ (a deactivated recommendation prints "-" in the editor's "Read Review" section). A8 and A9 come from the medium build, re-driven 2026-09-06. 1 observation routed to the private file by the author from the code, merged into an existing verified entry. Harness: `reviewForms[].elements[].included` passthrough (parity row 2026-09-06). Open harness need, non-blocking: a `reviewerRecommendations[]` context passthrough. 16 minor readability frictions open. Coverage section: settings rows only. |
-| U30 | Author response to reviews | OJS | M | done | Spec verified. 6 tests OJS, 1 OMP absence, 1 OPS absence (+setup). Register 6🐞+3❓; headliners A7 (the Request Revisions email's "Submit Author Response" lands on a stage with no card once revisions are uploaded), A1 (a sent request leaves no trace on the editor's table), A3 (the Funding Coordinator is offered "View" and "Delete" the app refuses), OMP1 (the press's decision email offers a response with nowhere to go), A2 ❓ (nobody is told when the response arrives), A8 ❓ (a cancelled reviewer's effect on readiness, not seedable). Harness: `reviewRounds[].reviewers[].status: 'completed'` (+ `recommendation`, `comments`) built with parity rows; the seeded mail fake now builds the mailable (harness-wide fix, full suites green ×3). First feature built with scenarios composed after the fold (process commits eb20de3, f2c9829; two one-off reduction passes mid-feature). Open harness needs, non-blocking: `contributors[]`, `notifyAllAuthors`, reviewer `files[]`, `cancelled` status (scenarios.md). 16 Coverage rows out of tier. 13 minor readability frictions open. |
+| U27 | Reviewer assignment & management | OJS OMP | H | done | 14 OJS · 15 OMP · 1 OPS absence (+setup). 13🐞+5❓+10✅ (9 retired). Headliner A18. 3 in the private file. PARKED: the Review Details entry-path parity scenario and its tests (maintainer, 2026-09-01). |
+| U28 | Reviewer's review | OJS OMP | H | done | 15 OJS · 15 OMP · 1 OPS absence (+setup). 12🐞+3❓+1✅ (A8, OMP4 retired). Headliner A7. Low-confidence: A13. |
+| U29 | Review setup & review forms | OJS OMP | M | done | 10 OJS · 9 OMP · 1 OPS absence (+setup). 4🐞+6❓+2✅. Headliner A9. 1 in the private file. Coverage: settings rows only. Low-confidence: A6, A7. |
+| U30 | Author response to reviews | OJS | M | done | 6 OJS · 1 OMP absence · 1 OPS absence (+setup). 6🐞+3❓. Headliner A7. 16 Coverage rows out of tier. Low-confidence: A8 (not seedable). |
 | U31 | Reviewer suggestions | OJS OMP | L | pending | |
 | U32 | Copyediting stage | OJS OMP | M | pending | |
 | U33 | Production stage | OJS OMP OPS | M | pending | |
@@ -91,15 +61,15 @@ recipes are gone (TEMPLATE, lint `shape` check); logs in
 | U38 | Submission activity log & notes | OJS OMP OPS | L | pending | |
 | U39 | Submission & Publisher Libraries | OJS OMP OPS | L | pending | |
 | U40 | Publication metadata | OJS OMP OPS | M | done | Spec verified. 11 tests OJS, 9 OMP, 9 OPS (+setup). Register 7🐞+10❓+6✅; headliner A1 (Plain Language Summary at "Require" permanently blocks saves on all apps). 1 observation in the private file, verified. |
-| U41 | Contributors & affiliations | OJS OMP OPS | M | done | Spec verified. 9 tests OJS, 11 OMP, 9 OPS (+setup). Register 9🐞+9❓+4✅ (A15 retired 2026-09-03, fixed upstream by pkp-lib `922f895988`, verified live on OJS and OMP); headliner A14 (one-role journals cannot save any contributor). 1 observation in the private file, verified. The suites' order-pinning (`makeFirst`/`pinOrder`) is now plain determinism, no longer an A15 workaround. |
+| U41 | Contributors & affiliations | OJS OMP OPS | M | done | 9 OJS · 11 OMP · 9 OPS (+setup). 9🐞+9❓+4✅ (A15 retired 2026-09-03). Headliner A14. 1 in the private file, verified. |
 | U42 | Citations & references | OJS OMP OPS | M | pending | |
-| U43 | Funding | OJS OMP OPS | L | done | Spec verified. 5 tests per app (+setup). Register 3🐞+9❓+2✅ (A13 retired 2026-09-03, fixed upstream in all three apps); headliner A3 (a registry-picked funder saves nameless when the server cannot reach ROR); A10/A11 low-confidence, need a server with egress. A4 stands, not re-probed at the fixed tips (the OMP/OPS suites save without asserting the table). |
+| U43 | Funding | OJS OMP OPS | L | done | 5 tests per app (+setup). 3🐞+9❓+2✅ (A13 retired 2026-09-03). Headliner A3. Low-confidence: A4 (not re-probed at the fixed tips), A10, A11 (need a server with egress). |
 | U44 | Identifiers (publisher IDs & URN) | OJS OMP OPS | M | pending | |
 | U45 | DOIs | OJS OMP OPS | H | pending | |
 | U46 | Galleys | OJS OPS | M | pending | |
 | U47 | Media files | OJS OMP OPS | L | pending | |
 | U48 | JATS & Body Text | OJS | M | pending | |
-| U49 | Publish, schedule & versions | OJS OMP OPS | H | done | Spec verified. 13 tests OJS, 11 OMP, 12 OPS (+setup). Register 7🐞+9❓; headliner OJS2 ("Schedule Only" is not honored on a journal with no published issues; app-changes row 10). S11 OJS uses the content-verified save idiom (ci-triage flake watch). |
+| U49 | Publish, schedule & versions | OJS OMP OPS | H | done | 13 OJS · 11 OMP · 12 OPS (+setup). 7🐞+9❓. Headliner OJS2. Blocker: app-changes row 10; S11 OJS is on the ci-triage flake watch. |
 | U50 | Issues | OJS | H | pending | |
 | U51 | Subscriptions & open access control | OJS | H | pending | |
 | U52 | Payments & APCs | OJS | M | pending | |
@@ -121,31 +91,3 @@ recipes are gone (TEMPLATE, lint `shape` check); logs in
 | U68 | Catalog browse | OMP | L | pending | |
 | U69 | Monograph landing page | OMP | M | pending | |
 | U70 | Catalog management | OMP | M | pending | |
-
-## Open harness work
-
-_Harness changes agreed with the maintainer and not yet built. One line
-each; delete when done._
-
-- **Scratch-context passthrough keys, built as features need them**
-  (maintainer, 2026-09-04, replacing the 2026-09-02 "enrich the bootstrap
-  seed" item): `publicknowledge` stays at the install defaults, so nothing
-  shipped is re-checked. Each feature that needs a setting at its
-  non-default end seeds it through `POST scenarios/context`; the first
-  feature to need a key family builds it with its parity row (scenarios.md
-  "Configuring a scratch context"; TEMPLATE "Coverage"). The review-setup
-  family was built with U28 (2026-09-05); U21's intake settings wait on
-  U58. Shipped specs are not brought up to later rules one by one: the
-  maintainer schedules one revision pass over the existing specs and
-  suites when the process has settled (2026-09-06). When the first reader-facing feature comes
-  up (article landing page, issues, catalog browse), seed an enriched
-  second journal in the bootstrap fixture rather than touching
-  `publicknowledge`.
-
-## Model-fallback log
-
-_Anomalies only — refusals, safeguard flags, downgrades, pauses (date ·
-feature · role · what happened); appended by hand.
-Routine agents are not logged._
-
-(none)
