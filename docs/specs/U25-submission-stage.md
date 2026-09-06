@@ -1,10 +1,6 @@
 ---
 name: submission-stage
-scope: The editorial team screens a new submission on the workflow's Submission stage and moves it onward — sends it to review, accepts and skips review, declines, reverts a decline — or deletes it
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-286, AFFW-287, AFFW-288, AFFW-289, AFFW-290, AFFW-291, AFFW-292, AFFW-293, AFFW-294, AFFW-295, AFFW-296, AFFW-297, AFFW-298, AFFW-299, AFFW-300, AFFW-302, AFFW-303, AFFW-706, GRID-032, GRID-033]
 ---
 
 # Submission stage {OJS OMP OPS}

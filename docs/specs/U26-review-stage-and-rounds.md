@@ -1,10 +1,6 @@
 ---
 name: review-stage-and-rounds
-scope: Editors run numbered review rounds on a submission (round status, review files, revisions, round decisions); the author follows and responds on the same screen
-apps: [ojs, omp]
-shared: pkp-lib
 status: draft
-atlas-claims: [AFFW-323, AFFW-324, AFFW-325, AFFW-327, AFFW-328, AFFW-329, AFFW-330, AFFW-332, AFFW-333, AFFW-334, AFFW-335, AFFW-336, AFFW-337, AFFW-338, AFFW-339, AFFW-349, AFFW-350, AFFW-351, AFFW-352, AFFW-353, AFFW-355, AFFW-487, AFFW-666, AFFW-667, AFFW-701, AFFW-702, AFFW-703, AFFW-704, GRID-010, GRID-011, GRID-024, GRID-025, GRID-027, GRID-029, GRID-053, MAIL-047, NOTIF-029, NOTIF-031, SET-021]
 ---
 
 # Review stage & rounds {OJS OMP}

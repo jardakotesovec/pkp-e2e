@@ -1,10 +1,6 @@
 ---
 name: funding
-scope: Record who funded a submission — funders and their grants — and disclose that funding to readers
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-401, AFFW-551, AFFW-552, AFFW-553, AFFW-554, AFFW-555, AFFW-556, AFFW-557, AFFR-063, VUE-039, VUE-061, API-020, SET-014]
 ---
 
 # Funding {OJS OMP OPS}

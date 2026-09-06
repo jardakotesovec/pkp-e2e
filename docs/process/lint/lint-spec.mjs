@@ -425,11 +425,7 @@ function run(files) {
 
 const GOOD = `---
 name: sample-feature
-scope: A tester records a decision on the sample surface
-apps: [ojs, omp]
-shared: pkp-lib
 status: draft
-atlas-claims: [AFFW-001]
 ---
 
 # Sample feature {OJS OMP}

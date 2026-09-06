@@ -1,10 +1,6 @@
 ---
 name: review-setup-and-review-forms
-scope: A manager configures how peer review runs: the default review mode, deadlines and reminders, reviewer access, guidance texts, review forms, and (OJS) the recommendation options a reviewer can pick
-apps: [ojs, omp]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-669, AFFW-670, AFFM-065, AFFM-066, AFFM-067, AFFM-068, AFFM-069, AFFM-070, AFFM-071, AFFM-072, AFFM-073, AFFM-074, AFFM-075, AFFM-076, AFFM-077, AFFM-078, AFFM-079, AFFM-080, AFFM-081, GRID-046, GRID-047, GRID-059, GRID-060, VUE-047, VUE-069, API-054, JOB-054]
 ---
 
 # Review setup & review forms {OJS OMP}

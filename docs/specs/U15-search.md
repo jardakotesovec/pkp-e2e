@@ -1,10 +1,6 @@
 ---
 name: search
-scope: Readers find published articles by the words in them, narrow the results by publication date, and page through what was found
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFR-083, AFFR-084, AFFR-085, ROUTE-024, ROUTE-048, ROUTE-067, ROUTE-083, SET-054, JOB-027]
 ---
 
 # Search

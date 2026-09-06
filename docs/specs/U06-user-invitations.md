@@ -1,10 +1,6 @@
 ---
 name: user-invitations
-scope: A manager invites someone into journal roles; the recipient accepts (creating or linking an account) or declines
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFM-099, AFFM-100, AFFM-101, AFFM-118, AFFM-119, AFFM-120, AFFU-122, AFFU-123, AFFU-124, AFFU-125, AFFU-126, AFFU-127, AFFU-128, AFFU-129, AFFU-130, AFFU-131, AFFU-132, AFFU-133, AFFU-134, AFFU-135, AFFU-136, AFFU-137, AFFU-206, ROUTE-013, ROUTE-014, VUE-001, VUE-011, VUE-052, API-024, MAIL-055, SET-064, JOB-013, JOB-051]
 ---
 
 # User invitations

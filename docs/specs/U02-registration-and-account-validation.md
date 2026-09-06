@@ -1,10 +1,6 @@
 ---
 name: registration-and-account-validation
-scope: A visitor creates an account on a journal or on the site, agrees to the privacy statement, asks for the Reader or Reviewer role, and, when the installation requires it, activates the account through an emailed link
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFU-009, AFFU-010, AFFU-011, AFFU-012, AFFU-013, AFFU-014, AFFU-015, AFFU-016, AFFU-017, AFFU-018, AFFU-019, AFFU-020, AFFU-021, AFFU-022, AFFU-023, AFFU-024, AFFU-025, AFFU-026, AFFU-027, AFFU-028, AFFU-029, AFFU-030, AFFU-031, AFFU-032, AFFU-033, AFFU-034, AFFU-035, ROUTE-030, MAIL-058, MAIL-059, SET-057, JOB-053]
 ---
 
 # Registration & account validation

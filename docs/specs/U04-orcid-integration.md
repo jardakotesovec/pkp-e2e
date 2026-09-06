@@ -1,10 +1,6 @@
 ---
 name: orcid-integration
-scope: Users and contributors connect verified ORCID iDs; the journal requests verification by email and deposits published works (and reviews) to ORCID records
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-502, AFFM-117, AFFM-222, AFFU-065, AFFU-066, AFFU-099, AFFU-100, AFFU-101, AFFU-102, AFFU-103, AFFU-104, AFFU-105, AFFU-106, AFFU-107, AFFU-108, AFFU-109, AFFU-110, ROUTE-021, API-029, MAIL-027, MAIL-028, MAIL-029, JOB-017, JOB-018, JOB-019, JOB-020, JOB-033, JOB-034, PLUG-021]
 ---
 
 # ORCID integration

@@ -1,10 +1,6 @@
 ---
 name: user-profile
-scope: A signed-in user maintains their own account on the Profile page: identity, contact details and email address, self-service roles, public profile, password, notification choices and API key
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFU-053, AFFU-054, AFFU-055, AFFU-056, AFFU-057, AFFU-058, AFFU-059, AFFU-060, AFFU-061, AFFU-062, AFFU-063, AFFU-064, AFFU-067, AFFU-068, AFFU-069, AFFU-070, AFFU-071, AFFU-072, AFFU-073, AFFU-074, AFFU-075, AFFU-076, AFFU-077, AFFU-078, AFFU-079, AFFU-080, AFFU-081, AFFU-082, AFFU-083, AFFU-084, AFFU-085, AFFU-086, AFFU-087, AFFU-088, AFFU-089, AFFU-090, AFFU-091, AFFU-092, AFFU-096, AFFU-097, AFFU-098, ROUTE-028, ROUTE-029, ROUTE-071, ROUTE-087, GRID-065, MAIL-003, SET-027]
 ---
 
 # User profile

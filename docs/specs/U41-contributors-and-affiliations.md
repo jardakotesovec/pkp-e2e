@@ -1,10 +1,6 @@
 ---
 name: contributors-and-affiliations
-scope: Maintain who authored the work — the contributors, their order, roles, ROR-backed affiliations and the primary contact — everywhere the list appears
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-146, AFFW-147, AFFW-148, AFFW-149, AFFW-150, AFFW-151, AFFW-152, AFFW-153, AFFW-154, AFFW-155, AFFW-156, AFFW-396, AFFW-532, AFFW-681, AFFW-682, AFFW-683, AFFW-684, AFFW-685, AFFW-686, AFFM-061, AFFM-062, AFFM-063, GRID-051, VUE-033, VUE-034, VUE-056, VUE-093, VUE-094, API-014, API-033, SET-001, SET-003, SET-007, SET-022, JOB-057]
 ---
 
 # Contributors & affiliations

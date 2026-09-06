@@ -1,10 +1,6 @@
 ---
 name: login-and-sessions
-scope: A user signs in and out, stays signed in, recovers or is forced to change a password, re-confirms their password for the Administration area, and an administrator or manager logs in as another user
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-467, AFFW-470, AFFW-473, AFFW-499, AFFM-105, AFFM-191, AFFM-209, AFFU-001, AFFU-002, AFFU-003, AFFU-004, AFFU-005, AFFU-006, AFFU-007, AFFU-008, AFFU-036, AFFU-037, AFFU-038, AFFU-039, AFFU-040, AFFU-041, AFFU-042, AFFU-043, AFFU-044, AFFU-045, AFFU-046, AFFU-047, AFFU-048, AFFU-049, AFFU-050, AFFU-051, AFFU-052, ROUTE-016, MAIL-030, SET-052]
 ---
 
 # Login & sessions

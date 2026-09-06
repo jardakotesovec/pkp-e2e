@@ -1,10 +1,6 @@
 ---
 name: publish-schedule-and-versions
-scope: Take a submission's publication version live — publish, schedule, unschedule, unpublish — and create and manage its successive versions
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: draft
-atlas-claims: [AFFW-256, AFFW-383, AFFW-384, AFFW-387, AFFW-388, AFFW-389, AFFW-390, AFFW-391, AFFW-392, AFFW-393, AFFW-394, AFFW-422, AFFW-423, AFFW-424, AFFW-428, AFFW-435, AFFW-436, AFFW-437, AFFW-438, AFFW-439, AFFW-440, AFFW-441, AFFW-442, AFFW-443, AFFW-444, AFFW-445, AFFW-446, AFFW-447, AFFW-448, AFFW-449, AFFW-450, AFFW-451, AFFW-452, AFFW-453, AFFW-709, AFFW-710, GRID-062, GRID-107, VUE-084, VUE-091, API-057, API-065, MAIL-002, MAIL-031, MAIL-072, MAIL-073, NOTIF-035, NOTIF-037, NOTIF-050, NOTIF-054, JOB-050]
 ---
 
 # Publish, schedule & versions {OJS OMP OPS}

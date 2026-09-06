@@ -1,10 +1,6 @@
 ---
 name: author-response-to-reviews
-scope: An editor asks the author for a written response to a review round's completed reviews; the author submits one that editors read, edit or delete
-apps: [ojs]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-326, AFFW-354, AFFW-577, AFFW-578, AFFW-579, AFFW-580, AFFW-581, AFFW-582, AFFW-583, AFFW-584, AFFW-585, ROUTE-023, VUE-008, VUE-049, VUE-070, API-032, MAIL-033]
 ---
 
 # Author response to reviews {OJS}

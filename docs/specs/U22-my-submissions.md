@@ -1,10 +1,6 @@
 ---
 name: my-submissions
-scope: An author tracks their own submissions, acts on requests (complete a draft, submit revisions), cleans up incomplete ones, and opens each submission's workflow
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: draft
-atlas-claims: [AFFW-027, AFFW-040, AFFW-048, AFFW-049]
 ---
 
 # My Submissions (author dashboard)

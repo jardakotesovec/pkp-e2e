@@ -1,10 +1,6 @@
 ---
 name: notifications-center-and-email-preferences
-scope: A signed-in user receives in-app tasks and notification emails, reviews them in the header's Tasks panel, chooses per journal which events reach them and which by email, and unsubscribes from an email's footer link
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-698, AFFW-699, AFFW-700, AFFU-093, AFFU-094, AFFU-095, AFFU-111, AFFU-112, AFFU-113, AFFU-114, AFFU-115, AFFU-116, AFFU-117, AFFU-118, AFFU-119, AFFU-120, AFFU-121, AFFR-009, ROUTE-020, GRID-039, GRID-040, NOTIF-001, NOTIF-002, NOTIF-003, NOTIF-004, NOTIF-005, NOTIF-006, NOTIF-007]
 ---
 
 # Notifications center & email preferences

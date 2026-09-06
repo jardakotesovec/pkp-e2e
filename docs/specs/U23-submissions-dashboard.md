@@ -1,10 +1,6 @@
 ---
 name: submissions-dashboard
-scope: Editors, managers and assistants find, filter, triage and open submissions — the editorial views, search, activity cells and bulk cleanup, plus the shared list machinery the other backend submission lists ride
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: draft
-atlas-claims: [AFFW-001, AFFW-002, AFFW-003, AFFW-004, AFFW-005, AFFW-006, AFFW-007, AFFW-008, AFFW-009, AFFW-010, AFFW-011, AFFW-012, AFFW-013, AFFW-014, AFFW-015, AFFW-016, AFFW-017, AFFW-018, AFFW-019, AFFW-020, AFFW-021, AFFW-022, AFFW-023, AFFW-024, AFFW-025, AFFW-026, AFFW-028, AFFW-030, AFFW-031, AFFW-032, AFFW-033, AFFW-034, AFFW-035, AFFW-036, AFFW-037, AFFW-038, AFFW-039, AFFW-041, AFFW-042, AFFW-043, AFFW-044, AFFW-045, AFFW-046, AFFW-047, AFFW-051, AFFW-052, AFFW-053, AFFW-054, AFFW-055, AFFW-056, AFFW-058, AFFW-059, AFFW-060, AFFW-061, AFFW-062, AFFW-063, AFFW-064, AFFW-066, AFFW-067, ROUTE-007, ROUTE-008, ROUTE-035, ROUTE-057, ROUTE-074, VUE-003, VUE-075, API-006, MAIL-025, JOB-011, JOB-046]
 ---
 
 # Submissions dashboard (editorial)

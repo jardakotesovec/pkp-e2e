@@ -1,10 +1,6 @@
 ---
 name: publication-metadata
-scope: Maintain a publication's descriptive metadata — title & abstract, keywords and the other metadata items, data availability statement, submission language, copyright and license — and control who may still edit it once a version is published
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-281, AFFW-285, AFFW-379, AFFW-380, AFFW-381, AFFW-382, AFFW-395, AFFW-397, AFFW-400, AFFW-421, AFFW-430, AFFW-457, AFFW-458, AFFW-459, AFFW-711, AFFM-090, AFFM-163, AFFR-065, VUE-085, VUE-090, API-049, API-061, SET-019, SET-032, SET-037, SET-043]
 ---
 
 # Publication metadata {OJS OMP OPS}

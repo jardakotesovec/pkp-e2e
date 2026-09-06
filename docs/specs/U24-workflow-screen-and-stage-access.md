@@ -1,10 +1,6 @@
 ---
 name: workflow-screen-and-stage-access
-scope: Any participant, the Author included, opens a submission's workflow and reaches the stages, publication tabs and header tools their role and assignment allow
-apps: [ojs, omp, ops]
-shared: pkp-lib
 status: verified
-atlas-claims: [AFFW-226, AFFW-227, AFFW-228, AFFW-229, AFFW-230, AFFW-233, AFFW-234, AFFW-240, AFFW-241, AFFW-242, AFFW-244, AFFW-245, AFFW-246, AFFW-247, AFFW-249, AFFW-250, AFFW-251, AFFW-252, AFFW-253, AFFW-254, AFFW-255, AFFW-259, AFFW-260, AFFW-261, AFFW-262, AFFW-263, AFFW-264, AFFW-265, AFFW-266, AFFW-267, AFFW-268, AFFW-269, AFFW-270, AFFW-271, AFFW-272, AFFW-273, AFFW-274, AFFW-277, AFFW-278, AFFW-279, AFFW-280, AFFW-282, AFFW-283, AFFW-284, AFFW-377, AFFW-378, AFFW-454, AFFW-455, AFFW-456, AFFW-707, ROUTE-005, ROUTE-031, ROUTE-034, ROUTE-053, ROUTE-054, ROUTE-072, ROUTE-073, ROUTE-088, VUE-012, API-042]
 ---
 
 # Workflow screen & stage access
