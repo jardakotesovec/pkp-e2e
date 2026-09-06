@@ -24,8 +24,7 @@ Pick the first that works:
 5. **CSS** — last resort. Wrap it in a role or data attribute when you can.
 
 Avoid: `nth-child` and `:first-child` (they break when rows reorder); long
-class-name chains; `page.waitForTimeout(n)` (auto-wait exists, and a fixed
-timeout hides a real race — PRINCIPLES A5); `waitForLoadState('networkidle')`
+class-name chains; `waitForLoadState('networkidle')`
 on Vue pages (they poll, so it may never resolve — wait on a visible landmark
 instead).
 
@@ -211,9 +210,7 @@ tests stay isolated:
 
 One tag is in use: `@smoke`, for the tests that must pass on every PR.
 Filter with `--grep @smoke`. Apply it like this:
-`test('name', {tag: ['@smoke']}, async ({page}) => {...})`. There is no
-quarantine tag on purpose: a known regression stays red, and its
-`docs/tracking/ci-triage.md` row is the record.
+`test('name', {tag: ['@smoke']}, async ({page}) => {...})`.
 
 ## Page Object Model
 
@@ -233,8 +230,7 @@ option); app-specific POMs go in
 `PublishSchedulePages.js`, `ReviewStagePages.js`, `UserInvitationPages.js` and
 `SubmissionWizardPage.js` (the start form plus the wizard: collapse-aware
 `gotoStep`/`expectStep`, dropzone `uploadFile`, TinyMCE fill, the submit and
-cancel dialogs). OMP and OPS keep their own counterparts under their trees;
-duplication between app suites is deliberate (PRINCIPLES M1).
+cancel dialogs). OMP and OPS keep their own counterparts under their trees.
 
 The workflow panel is split on purpose: the shared `WorkflowPage` owns the
 frame (what U24 describes), while what a stage or page shows once open —
@@ -266,26 +262,18 @@ navigate. Decision-constant and round-status gotchas: `scenarios.md`.
 
 ## Data seeding
 
-Prefer the API over the UI for setup, and drive the UI only for what the test
-actually exercises. The setup project runs the bootstrap once per DB
+The setup project runs the bootstrap once per DB
 lifetime. Composite state comes from the scenario endpoints via
 `pkpApi.createContext()`/`createSubmission()`; one-off mutations use the
 app's api fixture. The full surface and its quirks: `scenarios.md`. There is
-no cleanup fixture. When you hit a TODO stub, flag it instead of inventing an
-alternative.
+no cleanup fixture.
 
 ## Things to avoid
 
-- **Absolute database IDs.** Use the ID the seeding call returned.
-- **Mutating shared seed data** (`publicknowledge` and the 18 users: renames,
-  role changes, flag changes). Need special attributes? Create a throwaway
-  user in a scratch journal. No baseline account carries the
-  `mustChangePassword` flag; `manager.maya` logs straight in.
-- **A stray server on a worker port.** A Playwright run adopts whatever
-  answers there (`reuseExistingServer`) instead of starting its own, so
-  nothing else may listen on the worker band (`harness.md` "The fleets").
-- **Committing `.auth/` files.** They hold session cookies and are gitignored.
-  Un-stage one if you see it staged.
+- **A stray server on a worker port** is adopted by a Playwright run
+  (`reuseExistingServer`) instead of it starting its own, so nothing else
+  may listen on the worker band (`harness.md` "The fleets").
+- **`.auth/` files** hold session cookies and are gitignored.
 
 ## UI realities learned the hard way
 
@@ -336,43 +324,6 @@ alternative.
   `ReviewSettingsPages.typeRichText` and `ReviewerPages.typeInto` do it, and
   the legacy multilingual box's French twin opens only while the English box
   is focused (the globe icon is decorative).
-
-## Live-probe cookbook (spec verification)
-
-Throwaway probes that check spec claims against the running app. These idioms
-cost half a session to rediscover. One caveat first: the Frame
-(`briefs/frame.md`) forbids exploring a feature through hand-built requests, so the
-request-context idioms below are for verifying a specific claim, never for
-exploration.
-
-- **Authenticate with Playwright request contexts, never bare curl.** Log in
-  through the real UI form, then fire probes through `context.request` so the
-  cookies ride along. `page.evaluate(() => window.pkp?.currentUser?.csrfToken)`
-  supplies the CSRF header for mutating calls. curl login is a trap:
-  multilingual journals 302 `/login` → `/en/login`, so a naive scrape reads an
-  empty page and every later request runs anonymous.
-- **An anonymous XHR to a legacy grid op returns a plausible JSON denial**
-  ("You don't currently have access to that stage…"), indistinguishable from
-  a real role denial. NEVER trust a DENIED verdict without (a) proof the
-  session is live (an API GET returning 200) and (b) a positive control: a
-  plainly entitled actor running the SAME op and getting ALLOWED.
-- **Legacy grid-op URLs**: `.../$$$call$$$/grid/<path>/<op-name>` with the op
-  HYPHENATED (`read-review`, not `readReview`) and the header
-  `X-Requested-With: XMLHttpRequest`. A camelCase name or a missing header
-  gives an opaque 500.
-- **REST verbs vary per route** (`confirmReview` is PUT). A wrong verb can
-  surface as a 500, not a 405. Check the `Route::` registration before
-  concluding anything from an error status.
-- **Scenario seeding in probes**: users are minted ONLY by the context
-  scenario's `users[]` (an explicit `password` is honored, otherwise it is
-  `username+username`). The submission scenario resolves usernames but never
-  creates them. Multilingual fields accept a locale map (`{"en": …}`); a bare
-  string is wrapped under the context's primary locale (`scenarios.md`).
-- **Dual-role traps**: an author-editor probe needs a user genuinely enrolled
-  in BOTH groups who is also the submitter. A bare stage assignment without
-  the global author role does not trip author checks. A second `participants`
-  entry for the same user rides on `build()`'s firstOr semantics (see
-  `scenarios.md`).
 
 ## Probe kit
 
@@ -448,12 +399,9 @@ under the agent's id when the process exits, a file to grep by screen or
 element, never to read whole. `note(text)` appends one line to
 `.reports/<feature>/screen-notes.md` at once, for what a locator row cannot
 carry: a dialog that appears on the way out of a screen, a premise that
-proved wrong, a wait that hangs. Every agent that drives screens reads the
-notes file first (`briefs/claim-check.md`).
-Claim-check scripts are not scratch:
-they live in `shared/playwright/checks/<feature>/<chunk>/`, import the kit
-as `require('../../../probe')`, and are kept so a maintenance session can
-run a chunk again (`briefs/claim-check.md`).
+proved wrong, a wait that hangs. Kept claim-check scripts live in
+`shared/playwright/checks/<feature>/<chunk>/` and import the kit as
+`require('../../../probe')`.
 `idle(page)` is `waitForJQueryIdle` plus a bounded network-quiet wait, so a
 Vue panel that fetches its own data on landing (a dashboard tab, a workflow
 step's discussions panel) is on screen before `screen()` reads; `tag(prefix)`
@@ -462,22 +410,10 @@ the roster password rule, so it works for scratch users too; `signIn(page,
 user, {contextPath})` goes through that journal's own login page (which
 decides where the user lands), and any open session is signed out first.
 
-Must not, in a probe script: assertions or `expect`; the test runner or its
-fixtures; a generic request caller (drive the UI, or the `_test` API through
-`api`); page objects (a probe reads the screen, it does not model it);
-edits to any config; `networkidle`; `waitForTimeout`;
-starting a server (the probe servers are started once, outside scripts).
-Tests never import the kit: `npm run lint:probe-imports` fails when
-`playwright/probe` appears under `apps/` or `shared/playwright/{tests,pages,support}`.
+`npm run lint:probe-imports` fails when `playwright/probe` appears under
+`apps/` or `shared/playwright/{tests,pages,support}`.
 
-Two artefacts of automation that have shipped as spec claims: a snapshot
-taken the instant a tab or window lands misses a panel or grid that
-renders after its own request (`screen()` now waits for the page's
-outstanding requests before it records, and a read that still looks empty
-is taken again after the wait); and a click issued before the page's own
-scripts attach runs the browser's native check instead of the app's
-validator, so the message a person sees at human pace is the claim, not the
-tooltip a too-early click gets.
+`screen()` waits for the page's outstanding requests before it records.
 Two kit gotchas every screen-driving agent meets: `idle(page)` hangs in a
 session the server has just ended (after a password change or a sign-out
 elsewhere), so use a bounded wait there; and Playwright dismisses a browser

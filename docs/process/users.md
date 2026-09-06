@@ -1,8 +1,7 @@
 # Users & Roles Reference
 
 Everything about signing in: which user to log in as, what the passwords
-are, how login caching works, and what the seeded journal contains. The
-harness files named here exist and match this text.
+are, how login caching works, and what the seeded journal contains.
 
 Display names read "Firstname Role" (`admin` is "Site Admin"). Emails are
 `<username>@mail.test`.
@@ -53,8 +52,7 @@ Traps:
   such as canPublish and settings access. For a non-manager editorial role,
   use `sectionEditor`.
 - **The site administrator has no scenario key.** The installer's `admin` is
-  the only administrator. Keep it enabled and never merge it: every suite
-  depends on it.
+  the only administrator; every suite depends on it.
 - **Screens show the app's own label.** `sectionEditor` appears as "Section
   editor" in OJS, "Series editor" in OMP and "Moderator" in OPS.
 
@@ -66,8 +64,8 @@ seed fixtures, plus the install defaults: `seed-facts.md`.
 Home: `shared/playwright/data/users.js`. All 18 users are enrolled in
 `publicknowledge`. `admin` is site-level and created by the installer. The
 other 17 are created by the bootstrap seed. Usernames follow the pattern
-`role.firstname`, with one account per permission archetype. **Use the first
-listed account for a role** unless the test needs a specific property.
+`role.firstname`, with one account per permission archetype. The first
+listed account for a role is the one the suites use.
 
 OMP and OPS enrol only a subset of the roster; `seed-facts.md` "Users" has
 the per-app enrolment.
@@ -111,8 +109,7 @@ else has their username repeated twice (`editor.diana` becomes
 **Maxlength trap.** The login form's password input carries
 `maxlength="32"`, and the `sectioneditor.*` passwords are longer than that.
 `LoginPage.fillPassword()` removes the attribute before filling, so tests
-never hit the limit. The limit itself is a product finding, not something to
-work around in tests.
+never hit the limit.
 
 ## Login flow internals
 
@@ -159,5 +156,5 @@ full cold bootstrap.
 ## The `publicknowledge` context
 
 Its locales, sections, categories and issues per app are in
-`seed-facts.md`. When a test publishes, use the unpublished issue unless it
-targets a back issue.
+`seed-facts.md`. On OJS, Vol 2 No 1 (2015) is the unpublished issue; Vol 1
+No 2 (2014) is the published back issue.

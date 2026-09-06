@@ -1,15 +1,9 @@
 # Scenario API & Mailpit
 
 The `/api/v1/_test/*` endpoints build realistic application state in one
-POST. Use them instead of driving the UI for setup. This file documents what
+POST. This file documents what
 the endpoints accept today, the facts tests rely on, and how to assert on
-email through Mailpit.
-
-Two rules from `PRINCIPLES.md` govern the builders behind these endpoints.
-A seeded state must match what a real user would have produced through the
-UI (A2). A builder grows only when several tests need the same state (A3).
-Every builder change gets a row in `docs/tracking/parity-ledger.md` before it
-merges.
+email through Mailpit. Builders follow PRINCIPLES A2 and A3.
 
 ## How the endpoints work
 
@@ -66,9 +60,7 @@ Payload keys:
 
 ## `POST scenarios/context`
 
-Creates a scratch journal, press or preprint server. Use it whenever a test
-needs to change anything at journal level. The base context
-`publicknowledge` is read-only for tests.
+Creates a scratch journal, press or preprint server.
 
 Keys:
 
@@ -140,8 +132,7 @@ usernames but never creates them. The response returns `tag`, `contextId`,
 ## `POST scenarios/submission`
 
 Walks a submission to a declared end state through the same services the
-wizard and the workflow screens use. Tests never script the journey to their
-starting point.
+wizard and the workflow screens use.
 
 Keys:
 
@@ -221,6 +212,11 @@ Facts tests rely on, all parity-checked against the UI path:
 - A real wizard submit auto-assigns the section's editors, so `participants`
   on a submitted seed is additive. Seeding `participants: []` together with
   `submitted: false` is what produces a genuine needs-editor state.
+- An author-editor state needs a user enrolled in both groups who is also
+  the submitter; a bare stage assignment without the global author role
+  does not trip author checks. A second `participants` entry for the same
+  user rides on `build()`'s firstOr semantics ("Decision behaviour worth
+  knowing" below).
 
 The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`)
@@ -251,21 +247,14 @@ setting there. What those defaults are, screen by screen and dated:
 A scenario that runs with a setting at its non-default end (TEMPLATE
 "Coverage", its decision rule) gets a scratch context
 from `POST scenarios/context` created with that setting through a
-passthrough key, the way `orcid` works today. A test never drives a
-settings screen to configure its context; a probe may, because what the
-screen offers is part of what it records. When a feature needs a key
-family the API does not have yet, the spec author names it with the draft
-and a harness agent builds it with its parity row before the claim check
-(RUNBOOK step 4, `docs/tracking/parity-ledger.md`); a test author who
-still meets a missing key returns it as a harness need. The family then
-leaves the list below. The shape is recorded there so it is built once, the same way,
-for every feature that needs it.
+passthrough key, the way `orcid` works today. A key family the API does
+not have yet is recorded in the list below with its shape, so it is built
+once, the same way, for every feature that needs it; a built family leaves
+the list.
 
 ## Field shapes not built yet
 
-These keys do not exist. They are ideas recorded from an earlier harness, to
-be built at the recorded shape when a feature needs them, each with a parity
-row.
+These keys do not exist. They are ideas recorded from an earlier harness.
 
 - Submission: `contributors[]` (`givenName`, `familyName`, `email`, no
   account: the second "Authors" box of the author-response request, U30);

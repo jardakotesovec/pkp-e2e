@@ -12,13 +12,10 @@ in `scenarios.md`, and the seeded identities in `users.md`.
 
 ## The two playwright layers
 
-Every app has two Playwright layers. Picking the wrong one puts a test in the
-wrong folder.
+Every app has two Playwright layers.
 
 **`apps/<app>/playwright/` holds the app's feature suites.** Every feature
-test lives here, even when the scenario is common to all three apps. Per-app
-suites are derived from the spec, and duplication between apps is fine. The
-spec is the artifact we maintain, not shared test code.
+test lives here, even when the scenario is common to all three apps.
 
 ```
 apps/<app>/playwright/
@@ -35,12 +32,8 @@ apps/<app>/playwright/
 └── .auth/             # Storage-state cache per user (gitignored)
 ```
 
-Both test folders stay **flat**. Add subfolders only once 25 to 30 specs make
-natural clusters obvious.
-
 **`shared/playwright/` holds shared infrastructure only.** Base fixtures,
-shared POMs, and the bootstrap and login smoke specs. Feature suites never live
-here. When in doubt, a file belongs in the app's tree. Two directories are
+shared POMs, and the bootstrap and login smoke specs. Two directories are
 not infrastructure but live here because they span all three apps: `probe/`
 (the probe kit) and `checks/` (the kept claim-check scripts, one directory
 per feature, run on demand and never by CI; `briefs/claim-check.md`).
@@ -219,8 +212,7 @@ to spot: seeding succeeds and the browser step dies.
   worker count (unset = auto-detect, see above)
 - `TEST_API_KEY`: enables and gates `/api/v1/_test/*`. The namespace answers
   404 unless the var is in the server's environment, and 403 unless the
-  request's `X-Test-Key` header matches. Never set it on a production
-  install.
+  request's `X-Test-Key` header matches.
 - `MAILPIT_URL`: the Mailpit HTTP API (default `http://127.0.0.1:8025`).
   Mailpit is one shared instance across every worker and all three fleets
   (`brew services start mailpit`); its recipient addresses are scoped per
@@ -247,45 +239,21 @@ npx playwright test -c configs/ojs.config.js apps/ojs/playwright/tests/U03-user-
 npx playwright test -c configs/ojs.config.js --project=ojs-serial --no-deps apps/ojs/playwright/tests/serial/U05-notifications-center-and-email-preferences.spec.js   # one serial spec alone, on a warm install
 ```
 
-**Keep every run an agent waits on under about four minutes.** An agent's
-cached context expires after five minutes without a call, and the next
-call pays to rebuild all of it. So an agent runs one spec by path, one app
-per call, and a serial spec with `--project=<app>-serial --no-deps` on a
-warm install: selecting a serial spec by path alone runs its dependency
-projects (`setup`, `shared`, the app project) in full first. Whole-project
-runs belong to the orchestrator's final run.
+A run longer than about four minutes outlives the prompt cache of the agent
+waiting on it, and whole-project runs are what `npm run test:final` is for.
+Selecting a serial spec by path alone runs its dependency projects
+(`setup`, `shared`, the app project) in full first; `--project=<app>-serial
+--no-deps` on a warm install runs the spec alone.
 
 `fleet-prep` and `test:final` run the apps one after another and leave
 `PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a
 run; nothing else may listen on a worker port, because the run adopts a
 server it finds there (`reuseExistingServer`).
 
-Reset the DB before any full-suite timing run. Long-lived DBs accumulate state that pollutes COUNT assertions and tag
+Long-lived DBs accumulate state that pollutes COUNT assertions and tag
 searches. After a reset, the first run can die on a webServer start race, so
 relaunch it. After a killed run, kill orphan chromium and php
 processes before re-running.
-
-## Quick start: writing a new test
-
-1. **Folder**: a feature test goes in the app's `apps/<app>/playwright/tests/`;
-   only shared infrastructure goes in `shared/playwright/`. Name feature
-   suites after their spec file, `U<nn>-<feature>.spec.js`, so tests sort in
-   FEATURE-MAP order alongside `docs/specs/`.
-2. **Import**: a shared spec uses `require('../support/base-test.js')`; an
-   app spec uses `require('../support/fixtures.js')`, which adds the app's api
-   fixture.
-3. **User**: see `users.md`. `test.use({user: 'sectioneditor.ana'})` sets the
-   file's default logged-in user; `asUser('reviewer.julia')` opens extra
-   authenticated contexts for multi-actor flows.
-4. **Screen**: there is no screen map. Read the Vue/PHP sources directly and
-   confirm selectors against the running app (`patterns.md`).
-5. **Conventions**: `patterns.md` covers locators, waits, parallel lessons
-   and tags.
-6. **Seed through the API, drive the UI only for what the test exercises**:
-   `scenarios.md`.
-
-Rules that live elsewhere: findings and security routing are in RUNBOOK
-"What goes where"; git and push rules are in RUNBOOK step 10.
 
 ## CI
 
@@ -313,7 +281,5 @@ Rules that live elsewhere: findings and security routing are in RUNBOOK
 ## Verify before trusting
 
 File paths, selectors and schema fields cited across these docs are
-snapshots, and UIs drift faster than docs. Before finalizing a test, open the
-named component or class and confirm it, re-grep anything that moved, and run
-the test (`npm run test:<app> -- --ui`) before claiming it works. Treat every
-doc here as a map, not a GPS.
+snapshots, verified on the date a line names, and UIs drift faster than
+docs.

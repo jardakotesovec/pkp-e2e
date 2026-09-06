@@ -1,17 +1,10 @@
 # Seed facts
 
 What a fresh test install contains and how it is configured, on one sheet.
-A spec author checks a claim's premise against it before writing the
-claim ("the seeded journal has no consent box" was wrong; the sheet says
-so). A claim checker proposes a correction here when a premise proved
-wrong (`briefs/claim-check.md`). It stays true two ways. The first part is generated from the
-seed fixtures, and `npm run seed-facts -- --check` in the lint step fails
-when it drifts (`npm run seed-facts -- --write` regenerates it). The
-hand-written lines each carry the screen that shows the fact and the date
-it was seen; the sync loop re-checks a line whose screen or seeder the
-upstream range touches. A bootstrap change, should one ever be needed, regenerates the generated
-part and re-probes every install-default line below (PRINCIPLES "Bootstrap
-data policy").
+The first part is generated from the seed fixtures, and `npm run seed-facts
+-- --check` in the lint step fails when it drifts (`npm run seed-facts --
+--write` regenerates it). The hand-written lines each carry the screen that
+shows the fact and the date it was seen.
 
 ## Generated from the seed
 
@@ -120,8 +113,7 @@ The archetype a shared test asks for and the seeded username it resolves to; `nu
 One line per fact: the fact, the screen that shows it, and the date it was
 seen (with the pointer). A line without a dated observation in the repo says
 so; it is not a guess. A `.reports/…` pointer names the session evidence
-behind a line; that scratch is deleted after review, so a disputed line is
-settled by a fresh probe on the current build.
+behind a line; that scratch is deleted after review.
 
 - The seed creates no submissions on any app. Every Editor Dashboard view
   counts 0 until a test seeds one through `POST scenarios/submission`, so a
@@ -409,28 +401,7 @@ settled by a fresh probe on the current build.
   journal; there is no passthrough key, so a probe flips it on the screen
   and a test cannot. Live-probed 2026-09-06, OJS (`.reports/U30/pC` P20).
 
-## Where to change it
-
-- `publicknowledge` and the seeded users are read-only for every test and
-  probe (PRINCIPLES A1). Never change a setting, section, issue or
-  role there; a suite that needs a different configuration would leave it
-  behind for every other suite.
-- A different context-level configuration is a scratch context from
-  `POST scenarios/context` (scenarios.md "Configuring a scratch context"):
-  it arrives with the install defaults above, and the test seeds the
-  setting it needs through a passthrough key (`orcid` today; a missing
-  family is built when a feature needs it). A test never drives a settings
-  screen to configure its context. Throwaway users come from the same
-  call.
-- Email validation or the ALTCHA check: use the validation variant through
-  the `variants` fixture (`variants.validation` is the base URL); it shares
-  the DB, files and Mailpit with the worker servers (harness.md).
-- Anything that lives in `config.test.inc.php` (runners, proxy, locales,
-  search driver) is fixed for the whole fleet. PRINCIPLES D9 forbids editing
-  it from a test; a third configuration would need its own variant server,
-  which is a harness change to raise with the maintainer.
-- A change to the seed itself (`apps/<app>/playwright/fixtures/bootstrap.js`,
-  `support/app.context.js`) is a campaign decision: PRINCIPLES "Bootstrap
-  data policy" requires re-checking every implemented spec against the new
-  defaults. Regenerate this sheet with `npm run seed-facts -- --write` and
-  re-probe the hand-written lines the change touches.
+A scratch context at the other end of a setting is seeded through the
+scenario API's passthrough keys (scenarios.md "Configuring a scratch
+context"); the validation-variant server (harness.md) covers the
+config-file settings.
