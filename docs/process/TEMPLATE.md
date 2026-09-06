@@ -90,6 +90,9 @@ is mechanically decidable and is a broken reference for the reader:
   register preamble does not re-explain the impact words or the entry
   shape, and the scenario preamble does not open with "Common to all three
   apps." The reader has read the GLOSSARY; the body carries the feature.
+- Coverage (specs that carry the "Coverage" section): every table row has
+  a "Runs in" or a "Why not", and no scenario leaves a typed value to the
+  tester ("type a sentence", "type a title").
 
 Everything else, including wording, glossary vocabulary, app badges and the
 code-in-footnotes rule, is the writer's judgment, checked by the readability
@@ -293,7 +296,10 @@ atlas-claims: [<atom IDs this spec owns>]
      Numbered rules. If a rule is really two rules, split it (10a/10b) so
      other sections can cite the half they mean. One sentence, one rule:
      three short sentences beat one 90-word chain. Put the condition first,
-     then the consequence. Name states and fields as the UI shows them. Lists
+     then the consequence. ONE IDEA PER RULE, and a rule past about eight
+     lines is split. Inventory (what a screen lists, top to bottom) belongs
+     in the Fields tables; a rule says what changes and when, and points at
+     the table for the list. Name states and fields as the UI shows them. Lists
      of three or more parallel items get bullets or a compact table, never a
      prose run. Mark as-built oddities with ⚠ and a register link; the
      symptom is stated once here (its home) and repeated mentions elsewhere
@@ -305,19 +311,48 @@ atlas-claims: [<atom IDs this spec owns>]
      surfaced), log entries, jobs, changes to other entities. One bullet per
      effect. Do not stack five findings in one bullet. -->
 
-## Settings that modify behavior
+## Coverage
 
-<!-- Site or context settings, config variables, plugin toggles that change
-     the rules above, and HOW they change them.
-     COVERAGE RULE: every setting listed here is probed at both ends
-     (RUNBOOK step 3), and the end real journals run gets a canonical
-     scenario below, or the entry says in one line why not ("configuration
-     file, no screen on the test installs", "owned by the ORCID spec").
-     An entry with neither is a gap the claim check reports. Those
-     scenarios are part of the feature's tier, not extra scope. The base
-     journal keeps the install defaults; a scenario at the other end runs
-     on a scratch context configured through the scenario API
-     (scenarios.md "Configuring a scratch context"). -->
+<!-- The map of what the scenarios cover and what they leave out, so a
+     reviewer can see every decision and ask for a row to be covered. Three
+     short tables, each row "| what | Runs in | Why not |": the ACTORS
+     (one row per Actors row or group of rows), the STATES the Rules name
+     (each state of the feature's main object: unanswered, accepted,
+     declined, cancelled, moved on…), and the SETTINGS that change the
+     rules above (site or context settings, config variables, plugin
+     toggles, and HOW they change them). For a feature that is itself a
+     settings screen, the settings table lists the screen's own fields,
+     each mapped to where it takes effect.
+     DECISION RULE: every row ends one of three ways: "scenario N", "inside
+     scenario N" (a control or a step of that scenario), or a one-line why
+     not ("out of tier", "configuration file, no screen on the test
+     installs", "owned by the ORCID spec", "register A4 carries it; not a
+     user path"). A row blank in both columns is a gap the lint reports.
+     "Out of tier" is a legitimate answer: it records a cut the reviewer can
+     reverse, and the PROGRESS note counts these rows so backfill can pick
+     them up. Every setting listed is probed at both ends (RUNBOOK step 3),
+     and the scenarios the table names are part of the feature's tier, not
+     extra scope. The base journal keeps the install defaults; a scenario at
+     the other end runs on a scratch context configured through the
+     scenario API (scenarios.md "Configuring a scratch context").
+     Specs shipped before 2026-09-06 carry the settings table only, under
+     the heading "Settings that modify behavior"; they gain the other two
+     when backfilled. -->
+
+Actors
+
+| Who | Runs in | Why not |
+|-----|---------|---------|
+
+States
+
+| State | Runs in | Why not |
+|-------|---------|---------|
+
+Settings
+
+| Setting | Runs in | Why not |
+|---------|---------|---------|
 
 ## Cross-feature interactions
 
@@ -348,6 +383,20 @@ atlas-claims: [<atom IDs this spec owns>]
      by-hand recipe for building it (create a journal, invite accounts)
      never enters the body. The flow starts where the feature's screens
      start.
+     SPENDING THE TIER (breadth before depth): a scenario earns its slot by
+     opening an actor or state no other scenario opens (the Coverage
+     section is the ledger). Depth goes INSIDE a scenario, as controls,
+     variants and quoted outcomes, never as a second scenario on the same
+     state. A bug path gets a scenario only when it is the main path a user
+     takes; otherwise the register entry carries it and the scenario that
+     passes by carries the ⚠ marker. Every scenario reads the other side's
+     effect after the action it performs: the editor's screen after a
+     reviewer's action, the affected screen after a settings change.
+     SHAPE: the title names the state; the given is one clause; the steps
+     run in execution order, each typed value named ("type 2 in "Default
+     Response Deadline"", never "type a number"), each outcome quoted; one
+     "Control:" sentence closes it. An action by another actor mid-scenario
+     says who and on which screen.
      Acceptance test: a QA person who has NEVER opened the screen can execute
      the scenario and judge pass or fail. -->
 

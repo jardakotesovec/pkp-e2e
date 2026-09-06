@@ -315,8 +315,10 @@ never moves content that was routed to the private security file.
   it, the job is sharded (Playwright `--shard`), never the coverage
   reduced. At today's pace (about 130 tests in 7 minutes at 4 workers)
   the first shard split arrives around the 45th feature.
-- **Tiers** live in each PROGRESS row: H is 10–13 common scenarios, M is 6–8,
-  L is 3–4, give or take one or two by the author's judgment. Each app's
+- **Tiers** live in each PROGRESS row: H is 10–16 common scenarios, M is 6–8,
+  L is 3–4, give or take one or two by the author's judgment; the spec's
+  Coverage section decides the count within the tier, and a row it cannot
+  fit is written "out of tier", never dropped silently. Each app's
   suite implements the common scenarios plus that app's own, so its count per
   feature is the tier plus the app-specific ones.
 
@@ -422,7 +424,12 @@ whole context and that context only grows.
    where the screen has a word.
    Every affordance on the feature's screens ends up covered by a rule or
    scenario, delegated to another spec with a checkable pointer, or
-   explicitly waived. Where the code is ambiguous, do not guess. Put the
+   explicitly waived. The draft's Coverage section (TEMPLATE) is written
+   with the scenarios: one row per actor, per state the Rules name and per
+   setting, each ending in the scenario that runs it or a one-line why not.
+   The scenarios are spent breadth first (TEMPLATE "Canonical scenarios",
+   "Spending the tier"): each opens a state or actor no other opens, and
+   depth goes inside it. Where the code is ambiguous, do not guess. Put the
    question on the probe list the author returns with the draft. The author
    never probes. Every probe item is phrased as screen actions and
    observations: "as role R, on screen S, do X; record what appears". An
@@ -450,7 +457,12 @@ whole context and that context only grows.
    kit"; the brief carries `PROBE_FEATURE` and `PROBE_AGENT`). Any statement
    about what a UI control does (appears, is enabled, says X, is absent, in
    state Z for role R) is exactly the kind of claim code-reading gets wrong,
-   so no such claim ships without being driven live. Three rules bind every
+   so no such claim ships without being driven live. A read is taken
+   settled: the kit's `screen()` waits for the page's outstanding requests
+   before it records, and a claim about what shows the instant a tab or
+   window lands, or about a click issued before the page's own scripts
+   attach, is an artefact of automation, not behavior (patterns.md "Probe
+   kit"). Three rules bind every
    probe. **Record the screen, not only the answer:** on every screen
    visited, save the kit's `screen()` snapshot first, then answer the item.
    **Name the axis and drive both ends:** when the item names a quantity or
@@ -521,7 +533,9 @@ whole context and that context only grows.
    includes a finding only at the weight its user impact earns, in product
    voice, and may downgrade or drop anything. What does not clear the bar
    stays in `.reports/`. Findings that belong to another feature go to that
-   spec via a link. Where the digest quotes several apps' strings, all of
+   spec via a link. The finalizer re-reads the Coverage section last: a
+   state or setting the evidence introduced gets a row, and no row is left
+   without a scenario or a why not. Where the digest quotes several apps' strings, all of
    them reach the spec; one is never kept as the universal one. One
    finalizer for an M or L feature; an H feature is folded in slices, one
    digest section or one spec section per agent. Small chunks are the
@@ -607,7 +621,8 @@ whole context and that context only grows.
      self-read is not the gate, step 5 is. A correction replaces a
      sentence; it does not append a clause to it.
      Items that cannot be resolved become ❓ entries with a stated lean.
-     After the fold, re-run lint; then step 5 runs.
+     The fold re-reads the Coverage section as step 4 does. After the fold,
+     re-run lint; then step 5 runs.
 8. **Write the Playwright tests** from the checked spec, following
    PRINCIPLES and the harness docs. One suite per app, derived from the spec
    (rules 2 and 3), one test per canonical scenario in each app that runs
@@ -617,7 +632,10 @@ whole context and that context only grows.
    scenarios.md "Configuring a scratch context"), reuse or extend page
    objects,
    scope Mailpit by a unique throwaway recipient (PRINCIPLES A8), and pair
-   every "nothing happens" claim with a positive control. Locators,
+   every "nothing happens" claim with a positive control. Every absence
+   the scenario states ("nothing else", "no list", "stays") is asserted
+   with a settled, auto-waited read, never left unasserted (PRINCIPLES M6):
+   that assertion is the last net for a spec claim read too early. Locators,
    dialogs and waiting idioms come from `screen-notes.md`, never from
    re-reading the probe scripts. Run with `--output` to a private directory
    and `--reporter=list`.
@@ -638,7 +656,9 @@ whole context and that context only grows.
     `status: verified` (TEMPLATE's definition: the whole loop passed); the
     orchestrator does this, no writing agent. Then the row: status, number
     of tests per app, and a short note of one to three lines. Register highlights are welcome: 🐞 and ❓ counts, the
-    finding a reviewer should read first, anything low-confidence. Finding
+    finding a reviewer should read first, anything low-confidence, and the
+    count of Coverage rows written "out of tier" (the backfill queue reads
+    it). Finding
     detail stays in the register. The cost ledger gets its rows in one call,
     `node bin/session-cost.mjs <transcript> --label U<nn> --append`, with
     no commentary: what the numbers mean is the maintainer's call at review.

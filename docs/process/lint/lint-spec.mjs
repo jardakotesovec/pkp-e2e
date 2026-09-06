@@ -113,6 +113,29 @@ function checkShape(doc, out) {
     }
 }
 
+// ---------------------------------------------------------------- 1b. coverage (TEMPLATE "Coverage")
+// Only specs that carry the section are checked (shipped specs before 2026-09-06 have the settings
+// table alone under "Settings that modify behavior"). Every table row needs a "Runs in" or a "Why
+// not"; and no scenario leaves a typed value to the tester.
+const PLACEHOLDER_RE = /\btype (?:a|an|some|any) (?:sentence|title|line|word|text|name|description|number|value)\b/i;
+
+function checkCoverage(doc, out) {
+    const has = doc.lines.some((l, i) => !doc.skip[i] && /^##\s+Coverage\s*$/.test(l));
+    if (!has) return;
+    for (let i = 0; i < doc.tailStart; i++) {
+        if (doc.skip[i]) continue;
+        const line = doc.lines[i];
+        if (/^Coverage$/.test(doc.h2[i]) && /^\|/.test(line)) {
+            const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+            if (cells.length < 3 || /^-+$/.test(cells[0]) || /^(Who|State|Setting)$/.test(cells[0])) continue;
+            if (!cells[1] && !cells[2]) out.push({ line: i + 1, check: 'coverage', msg: `row "${excerpt(cells[0], 50)}" has neither a "Runs in" nor a "Why not"` });
+        }
+        if (/^Canonical scenarios/.test(doc.h2[i]) && PLACEHOLDER_RE.test(line)) {
+            out.push({ line: i + 1, check: 'coverage', msg: `the tester is left to choose a value: ${excerpt(line.match(PLACEHOLDER_RE)[0], 40)} — name it` });
+        }
+    }
+}
+
 // ---------------------------------------------------------------- 2. findings-register integrity
 
 const MARKER_RE = /(⚠\s*)?\[([A-Z]{1,3}\d+)\]\(#([a-z]{1,3}\d+)\)/g;
@@ -384,6 +407,7 @@ function lintFile(file) {
     const doc = parseDoc(file);
     checkCampaign(doc, out);
     checkShape(doc, out);
+    checkCoverage(doc, out);
     checkRegister(doc, out);
     checkLinks(doc, out);
     return out.sort((a, b) => a.line - b.line);
@@ -398,7 +422,7 @@ function run(files) {
         const rel = !r || r.startsWith('..') ? file : r;
         for (const f of findings) console.log(`${rel}:${f.line} — ${f.check} — ${excerpt(f.msg)}`);
     }
-    if (total === 0) console.log(`OK — ${files.length} spec(s) clean (campaign · shape · register · links)`);
+    if (total === 0) console.log(`OK — ${files.length} spec(s) clean (campaign · shape · coverage · register · links)`);
     else console.log(`\n${total} finding(s) in ${files.length} spec(s)`);
     return total === 0 ? 0 : 1;
 }

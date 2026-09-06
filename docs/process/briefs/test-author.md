@@ -23,7 +23,7 @@ You are the test author for the **{{APP}}** suite of feature {{feature}} "{{feat
 The spec is `{{spec_path}}`; read its body and only the footnotes your scenarios cite, not the whole file. Scenarios this app runs: {{scenarios}}. Feature facts for step 8: {{feature_facts}}.
 
 Deliverables:
-1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES.
+1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES. Every absence a scenario states ("nothing else", "no list", "stays") is asserted with a settled, auto-waited read and a positive control, never left unasserted (PRINCIPLES M6); a contradiction is a finding under deliverable 4, not a dropped assertion.
 2. Page objects: {{page_objects}}.
 3. Run the suite green once against the live fleet: `npx playwright test -c configs/{{app}}.config.js {{suite_path}} --output {{output_dir}} --reporter=list` (harness.md says how the config starts its worker servers). A serial spec runs alone with `--project={{app}}-serial --no-deps` on a warm install; never run a whole project, and keep every run under about four minutes (harness.md "Running"). Save the green run's log as `{{green_log}}`.
 4. A test that contradicts the spec is returned as step 9 says: a digest-format block (`### T-{{app}}-<n>` / Affects / Status / Apps / Proposed / Evidence: run-log pointer) in `{{findings_path}}`. An app defect that blocks green is returned as a proposed `app-changes.md` row.

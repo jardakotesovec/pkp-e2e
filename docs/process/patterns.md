@@ -437,6 +437,14 @@ starting a server (the probe servers are started once, outside scripts).
 Tests never import the kit: `npm run lint:probe-imports` fails when
 `playwright/probe` appears under `apps/` or `shared/playwright/{tests,pages,support}`.
 
+Two artefacts of automation that have shipped as spec claims: a snapshot
+taken the instant a tab or window lands misses a panel or grid that
+renders after its own request (`screen()` now waits for the page's
+outstanding requests before it records, and a read that still looks empty
+is taken again after the wait); and a click issued before the page's own
+scripts attach runs the browser's native check instead of the app's
+validator, so the message a person sees at human pace is the claim, not the
+tooltip a too-early click gets.
 Two kit gotchas every screen-driving agent meets: `idle(page)` hangs in a
 session the server has just ended (after a password change or a sign-out
 elsewhere), so use a bounded wait there; and Playwright dismisses a browser

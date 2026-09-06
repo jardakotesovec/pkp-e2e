@@ -88,7 +88,7 @@ app-agnostic infrastructure goes in `shared/playwright/`; every feature suite
 goes in its own app's `apps/<app>/playwright/tests/`. Folders stay flat until
 25 to 30 spec files make natural clusters obvious.
 
-## Multi-app conventions (M1–M5)
+## Multi-app conventions (M1–M6)
 
 What gets tested per app is decided by the RUNBOOK's multi-app rules. These
 are the authoring conventions:
@@ -118,6 +118,15 @@ are the authoring conventions:
   filter's own response.
 - **M5 — Attribute failures by the seed tag** carried in the test's own data,
   never by row id. Parallel writers make ids unstable.
+- **M6 — Breadth is the spec's decision, depth is the test's.** A suite
+  implements the spec's scenarios and invents none; a state without a
+  scenario is recorded in the spec's Coverage section, not covered by a
+  test on the author's initiative. Inside a scenario the test goes deep:
+  every absence claim is asserted with a settled, auto-waited read and a
+  positive control; every "nothing happens" is bounded by the response or
+  mail that would have carried the effect; the other side's effect is
+  read. A contradiction with the spec is a finding (RUNBOOK step 9), never
+  a skipped assertion.
 
 ## Scenario-endpoint design record (D1–D9)
 

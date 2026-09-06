@@ -16,7 +16,7 @@ Inputs:
 - The digest: `{{digest_path}}`, your slice: {{slice}}. It is the only evidence artifact you read by default; you may open the one probe report behind a block when you need the detail (its Evidence line names the file).
 - Probe date for the evidence footnotes: {{probe_date}}. Notes from the orchestrator: {{orchestrator_notes}}.
 
-Task: fold your slice into the draft as step 4 says, so the spec describes what the running apps do, written to TEMPLATE "Write for a reader who has only this page". Leave the frontmatter `status:` as it is (TEMPLATE's frontmatter says when it changes). Fold section by section and save as you go. Then run `node docs/process/lint/lint-spec.mjs {{spec_path}}` and fix what it reports until it is zero.
+Task: fold your slice into the draft as step 4 says, so the spec describes what the running apps do, written to TEMPLATE "Write for a reader who has only this page". Leave the frontmatter `status:` as it is (TEMPLATE's frontmatter says when it changes). Fold section by section and save as you go. Re-read the Coverage section last: add a row for every state or setting the evidence introduced, and leave no row without a scenario or a why not. Then run `node docs/process/lint/lint-spec.mjs {{spec_path}}` and fix what it reports until it is zero.
 
 Write `{{fold_log_path}}` (append if another slice wrote it first): one line per digest block saying what it became (rule text / register ID / footnote / marker / dropped, with the reason for any drop or downgrade); a "left in `.reports/`" list of what did not clear the bar and what belongs to another feature, one line each naming the owning feature and screen; and a "seed-facts lines proposed" section copied from the digest for the orchestrator.
 

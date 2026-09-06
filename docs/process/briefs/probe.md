@@ -21,6 +21,8 @@ Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`no
 
 Size: the cluster is cut for about 40 browser calls (RUNBOOK step 3). Finish every item even if it takes more; do not stop at a count.
 
+Read settled: `screen()` waits for the page's outstanding requests before it records. What shows the instant a tab or window lands, or what a click does before the page's own scripts attach, is an automation artefact, not behavior; when a read looks empty or odd, take it again after the wait and report the settled one.
+
 Report: `.reports/{{feature}}/{{agent}}/report.md`, written for the digest agent and the maintainer as step 3 says: one section per item in the list's order, the claim answered first, the incidental observations separately, the locator used, every on-screen string that differs between apps quoted verbatim per app, and the snapshot file names. Facts only, no spec prose, no severity judgments.
 
 Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit anything under `checkouts/`. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.

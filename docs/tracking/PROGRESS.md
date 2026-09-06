@@ -39,7 +39,8 @@ reviewed each step.
 One row per feature, in FEATURE-MAP order. Budget is the provisional tier
 (H/M/L per RUNBOOK); the maintainer adjusts it on review. Statuses: pending
 / in_progress / done / parked. A note describes the row's state today (tests
-per app, register counts, review status, open blockers). History lives in
+per app, register counts, review status, open blockers, Coverage rows
+written "out of tier"). History lives in
 git and in `upstream-sync.md`; do not append to a note, replace it. All
 shipped specs had a plain-English body rewrite on 2026-09-02; claims,
 markers and evidence footnotes are unchanged. On 2026-09-04 every

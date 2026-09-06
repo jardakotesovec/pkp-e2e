@@ -428,10 +428,14 @@ async function innerTextOf(locator) {
  * aria snapshot of the main region (body when the page has no `main`) plus
  * every open dialog; `text` is the verbatim innerText of the header and the
  * main region — aria snapshots normalise punctuation, innerText does not.
+ * The read is taken settled: it waits for jQuery and the network to go
+ * quiet first (`idle`), so a panel or grid that renders after its own
+ * request is on screen before it is recorded.
  *
  * @param {import('@playwright/test').Page} page
  */
 async function screen(page) {
+    await idle(page);
     const main = page.locator('main');
     const hasMain = (await main.count()) > 0;
     const region = hasMain ? main.first() : page.locator('body');
