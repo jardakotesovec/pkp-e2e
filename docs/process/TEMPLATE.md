@@ -325,7 +325,8 @@ atlas-claims: [<atom IDs this spec owns>]
      each mapped to where it takes effect.
      DECISION RULE: every row ends one of three ways: "scenario N", "inside
      scenario N" (a control or a step of that scenario), or a one-line why
-     not ("out of tier", "configuration file, no screen on the test
+     not; in the draft, before the scenarios exist, "Runs in" reads
+     `planned` for a row the scenarios should cover ("out of tier", "configuration file, no screen on the test
      installs", "owned by the ORCID spec", "register A4 carries it; not a
      user path"). A row blank in both columns is a gap the lint reports.
      "Out of tier" is a legitimate answer: it records a cut the reviewer can
@@ -363,10 +364,11 @@ Settings
 
 <!-- Named journeys a QA person can act out on any install. These are the
      units tests map onto: each app's suite implements them (RUNBOOK
-     multi-app rules). WHEN: the draft carries each scenario's title and
-     given only (the plan); the full text is composed after the claim-check
-     fold from the verified body (RUNBOOK step 7 "Scenarios"), every
-     sentence a fact the Rules, Fields or Side effects already state. ORDER: first the scenarios COMMON to every app that
+     multi-app rules). WHEN: the draft carries this section's preamble and
+     no scenarios; they are composed after the claim-check fold from the
+     verified body and the Coverage rows (RUNBOOK step 7 "Scenarios"),
+     every sentence a fact the Rules, Fields or Side effects already
+     state. ORDER: first the scenarios COMMON to every app that
      has the feature, then the app-specific ones (title the block or badge
      the scenario). A common scenario is written once, app-neutral, and each
      app implements it in its own context (roles, data and vocabulary per

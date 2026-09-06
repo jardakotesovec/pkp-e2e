@@ -426,12 +426,13 @@ whole context and that context only grows.
    scenario, delegated to another spec with a checkable pointer, or
    explicitly waived. The draft's Coverage section (TEMPLATE) is written
    with the draft: one row per actor, per state the Rules name and per
-   setting, each ending in the scenario planned for it or a one-line why
-   not. The draft's scenarios are the plan only: a numbered title and its
-   given per scenario, spent breadth first (TEMPLATE "Canonical scenarios",
-   "Spending the tier"), no steps. The full scenario text is composed
-   after the claim-check fold (step 7, "Scenarios"), from the verified
-   body, so the folds never patch scenarios written from the code. Where the code is ambiguous, do not guess. Put the
+   setting, "Runs in" reading `planned` or a one-line why not. The draft
+   has no scenarios: the "Canonical scenarios" section holds its preamble
+   only, and the scenarios are composed after the claim-check fold (step
+   7, "Scenarios") from the verified body and the Coverage rows, so
+   nothing written from the code is ever patched into a scenario. The
+   settings rows marked `planned` tell the step 3 harness agent which
+   passthrough keys the scenarios will need. Where the code is ambiguous, do not guess. Put the
    question on the probe list the author returns with the draft. The author
    never probes. Every probe item is phrased as screen actions and
    observations: "as role R, on screen S, do X; record what appears". An
@@ -626,16 +627,17 @@ whole context and that context only grows.
      The fold re-reads the Coverage section as step 4 does. After the fold,
      re-run lint.
    - **Scenarios.** One fresh writer then composes the canonical scenarios
-     from the verified body: the draft's titles and givens, the Rules,
-     Fields, Side effects and the Coverage section, in TEMPLATE's shape
+     from the verified body: the Coverage rows marked `planned`, the
+     Rules, Fields and Side effects, in TEMPLATE's shape
      (steps in execution order, typed values named, outcomes quoted, one
      Control each, the other side's effect read). Every sentence is a fact
      the body already states, on-screen strings quoted from it; the writer
      adds no claim of its own and, where a step would need one, leaves a
      one-line why not in the Coverage row instead. It fills the Coverage
-     rows' "Runs in" column and the scenario footnote, and may add or drop
-     a planned scenario when the evidence changed the picture, saying so in
-     its log. The scenarios are verified by the suites: step 8 drives every
+     rows' "Runs in" column (each `planned` becomes "scenario N", "inside
+     scenario N" or a why not) and the scenario footnote, deciding the
+     scenario set itself, breadth first within the tier, and saying in its
+     log which rows it left out of tier. The scenarios are verified by the suites: step 8 drives every
      step of every scenario on every app, and a contradiction returns as a
      step 9 finding. Lint to zero, the gate file is
      `.reports/<feature>/scenarios-log.md`; then step 5 runs.
