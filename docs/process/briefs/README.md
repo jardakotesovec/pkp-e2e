@@ -1,8 +1,9 @@
 # Brief templates
 
-One file per role of the RUNBOOK loop. The orchestrator renders a brief by
-copying the role's template and filling its slots. It never writes a brief
-from scratch, and it never writes rules into one.
+One file per role of the RUNBOOK loop, plus two shared blocks the templates
+point at or take as a slot (`frame.md`, `digest-block.md`). The orchestrator
+renders a brief by copying the role's template and filling its slots. It
+never writes a brief from scratch, and it never writes rules into one.
 
 ## How to render a brief
 
@@ -16,19 +17,15 @@ from scratch, and it never writes rules into one.
    on the way out, a wait that hangs) belongs in
    `.reports/<feature>/screen-notes.md`, never in a brief; the template
    already points the agent there.
-3. Never add a rule, a paraphrase of a rule, or a checklist of your own.
-   Every rule the agent needs is reached through the pointers the template
-   carries (RUNBOOK step and section names, TEMPLATE, PRINCIPLES, the row
-   of "What each role reads"). A rule missing from the docs is fixed in
-   the docs through maintainer review; a brief never patches it.
-4. Keep the verbatim blocks as they are: the Frame paragraph (copied from
-   RUNBOOK "The screen is the instrument"; when its wording changes there,
-   update the four templates that carry it: claim-check, harness,
-   test-author, security-verify), the PROGRESS and app-changes sentence,
-   "Commit nothing.", the friction sentence (`docs/tracking/friction.md`;
-   only the templates for agents that drive screens carry it),
-   the `checkouts/` sentence, and "Preserve the verified meaning" in the
-   rewrite and fold templates.
+3. The orchestrator adds no rule when rendering. The templates themselves
+   carry each role's operating rules, under maintainer review; a missing
+   rule is fixed in the template, never patched into a brief.
+4. Keep the verbatim blocks as they are: the Frame (`frame.md`, filled into
+   the frame slot of claim-check, harness, test-author and security-verify),
+   the PROGRESS and app-changes sentence, "Commit nothing.", the friction
+   sentence (`docs/tracking/friction.md`; only the templates for agents
+   that drive screens carry it), the `checkouts/` sentence, and "Preserve
+   the verified meaning" in the rewrite and fold templates.
 5. The "Return (short)" block is what the agent sends back: pointers and
    counts, never findings. Do not widen it.
 
@@ -45,4 +42,6 @@ from scratch, and it never writes rules into one.
 | 8, readability check (one read of the whole body) | `persona.md` |
 | 8, rewrite the wording blockers | `rewrite.md` |
 | 9, one app's suite | `test-author.md` |
-| "What goes where", the security verification probe | `security-verify.md` |
+| 12, the security verification probe | `security-verify.md` |
+| not a role: the Frame, filled into the frame slot | `frame.md` |
+| not a role: the digest block, the shape every evidence hand-over uses | `digest-block.md` |

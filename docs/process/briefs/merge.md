@@ -16,7 +16,7 @@ Inputs:
 - The chunk plan: `{{chunk_plan}}`.
 - The spec: `{{spec_path}}`, read only to map line numbers to rules and IDs. Do not edit it.
 
-Output: `{{merge_path}}`, one change list of digest blocks, in spec-section order: one block per change (`### M<n> — one line, product voice` / Affects / Status: corrects | new | undetermined / Apps / Proposed / Evidence: chunk report and block id, never a quotation), then a closing table of confirmations by section (rule or row · apps · chunk). Merge duplicates across chunks into one block. Every Proposed line is written in the reader's words, with the on-screen strings quoted, so the fold pastes it; where the apps' strings differ, every one of them reaches the block verbatim. An undetermined block says only that plus the one settling observation.
+Output: `{{merge_path}}`, one change list of digest blocks in the shape of `docs/process/briefs/digest-block.md` (ID `M<n>`; Evidence: chunk report and block id), in spec-section order, one block per change, then a closing table of confirmations by section (rule or row · apps · chunk). Merge duplicates across chunks into one block.
 
 Add three sections: "Suite-asserted claims touched", listing every changed claim a test could assert (the fold log needs it); "Declared lines", carrying the orchestrator's diff for the fold: {{declared_lines}}; and "For the orchestrator", collecting the chunks' proposed seed-facts and scenarios.md notes and their incidentals on other features' screens, as pointers.
 
