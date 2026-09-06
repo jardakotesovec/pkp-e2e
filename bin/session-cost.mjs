@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // session-cost.mjs — price-weighted token spend of one Claude Code session, split
-// orchestrator vs subagent roles. Rows paste into docs/tracking/cost-ledger.md.
-// run: node bin/session-cost.mjs <session.jsonl> [--label U02] [--append]
-// --append writes the table and summary line under "## <label>" at the end of docs/tracking/cost-ledger.md.
+// orchestrator vs subagent roles. An ad-hoc tool: it prints a markdown table and a
+// summary line to stdout; nothing in the process reads or records the numbers.
+// run: node bin/session-cost.mjs <session.jsonl> [--label U02]
 import fs from 'node:fs';
 import path from 'node:path';
 
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith('--'));
-if (!file) { console.error('usage: node bin/session-cost.mjs <session.jsonl> [--label U02] [--append]'); process.exit(1); }
+if (!file) { console.error('usage: node bin/session-cost.mjs <session.jsonl> [--label U02]'); process.exit(1); }
 const label = args.includes('--label') ? args[args.indexOf('--label') + 1] : path.basename(file, '.jsonl').slice(0, 8);
 
 const WEIGHTS = { output: 5, input: 1, cacheCreate: 1.25, cacheRead: 0.1 };
@@ -84,8 +84,3 @@ lines.push(row('**total**', agentCount, total.calls, total.pureText, fmt(total.i
 const summary = `${label} · ${agentCount} agents · ${total.calls - orch.calls} subagent calls · ${orch.calls} orchestrator calls · weighted ${fmt(wTotal)}`;
 console.log(lines.join('\n'));
 console.log(`\n${summary}`);
-if (args.includes('--append')) {
-    const ledger = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'docs', 'tracking', 'cost-ledger.md');
-    fs.appendFileSync(ledger, `\n## ${label}\n\n${lines.join('\n')}\n\n${summary}\n`);
-    console.log(`\nappended to ${path.relative(process.cwd(), ledger)}`);
-}

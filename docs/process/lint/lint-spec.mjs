@@ -89,10 +89,9 @@ function checkCampaign(doc, out) {
     }
 }
 
-// ------------------------------------------------- 1b. shape: the body carries the feature only
-// The reader has read GLOSSARY.md ("Reading a spec", Part II), so a spec never carries its own
-// legend, a "how to read this on a press" note, or a register preamble that re-explains the
-// verdict and impact words (TEMPLATE title block and Findings register comment, 2026-09-04).
+// ------------------------------------------------- 1b. shape: the Conventions line is a pointer
+// The reader has read GLOSSARY.md ("Reading a spec"), so the title block's Conventions line is the
+// one-line pointer there, never a legend of its own (TEMPLATE title block).
 const CONVENTIONS_LINE = '> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).';
 
 function checkShape(doc, out) {
@@ -100,15 +99,6 @@ function checkShape(doc, out) {
         const line = doc.lines[i];
         if (/^>\s*Conventions/.test(line) && line.trim() !== CONVENTIONS_LINE) {
             out.push({ line: i + 1, check: 'shape', msg: 'the Conventions line is the one-line GLOSSARY pointer, verbatim (TEMPLATE title block)' });
-        }
-        if (/One spec, three applications/.test(line)) {
-            out.push({ line: i + 1, check: 'shape', msg: 'no note under the title on how to read the page — GLOSSARY Part II is the word map' });
-        }
-        if (/^Findings register/.test(doc.h2[i]) && /Impact values:|each entry opens with the/.test(line)) {
-            out.push({ line: i + 1, check: 'shape', msg: 'the register preamble is one sentence plus a pointer — the impact words and entry shape are GLOSSARY "Reading a spec"' });
-        }
-        if (/^Canonical scenarios/.test(doc.h2[i]) && /Common to all three apps\./.test(line)) {
-            out.push({ line: i + 1, check: 'shape', msg: 'the scenario preamble says where the scenarios run, not how to read the page' });
         }
     }
 }
@@ -498,7 +488,6 @@ Basis: judgment. <sup>[f-omp1](#fn-omp1)</sup>
 // each case: [expected check, substring of the clean fixture, the bad replacement]
 const CASES = [
     ['shape', '> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).', '> Conventions: ⚠ marks questioned behaviour; the rest is in [Reading a spec](GLOSSARY.md#reading-a-spec).'],
-    ['shape', '## Purpose', '> **One spec, three applications.** Read it on a press with "press" for "journal".\n\n## Purpose'],
     ['campaign', 'the author see the outcome', 'the author see the outcome (participants: U35)'],
     ['campaign', 'the author see the outcome', 'the author see the outcome, per atom AFFW-042'],
     ['register', '| [OMP1](#omp1) | The press flow lands on the catalog step | ✅ | minor | — |', '| [OMP1](#omp1) | The press flow lands on the catalog step | 🐞 | minor | — |'],
