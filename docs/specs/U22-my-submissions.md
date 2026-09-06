@@ -1,6 +1,6 @@
 ---
 name: my-submissions
-status: draft
+status: verified
 ---
 
 # My Submissions (author dashboard)

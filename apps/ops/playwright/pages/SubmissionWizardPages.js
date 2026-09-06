@@ -175,7 +175,7 @@ async function addGalleyFile(page, {label = 'PDF', genre = 'Preprint Text', file
             }
         }
     }
-    // fbv ids are runtime-suffixed — select by name (patterns.md pitfall 8).
+    // fbv ids are runtime-suffixed — select by name (patterns.md locator pitfall "fbvElement ids are runtime-suffixed").
     await labelDialog.locator('input[name="label"]').fill(label);
     await labelDialog.getByRole('button', {name: 'Save', exact: true}).click();
 

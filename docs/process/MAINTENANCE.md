@@ -78,8 +78,8 @@ The apps move; the suite follows. The baselines live in
    chunk owns and drives only what the checks did not cover
    (`briefs/claim-check.md`), one fold agent (`briefs/fold.md`), one
    persona read of the changed spans, register entries included, then the
-   rewrite (step 8), lint (step 5), the touched suites green once (step
-   9), the PROGRESS note replaced (step 10); no merge agent. A change that
+   rewrite (step 7), lint, the touched suites green once (step 8), the
+   PROGRESS note replaced (step 9); no merge agent. A change that
    contradicts a shipped claim is spec maintenance, never a test edit.
    Behavior that contradicts the linked issue's stated intention is a
    finding: a register entry with the commit and the issue in its footnote.
@@ -137,7 +137,7 @@ would name things today. Atoms from the frozen Phase-0 atlas keep exactly
 one owner through every reorganisation: a feature, out of scope, or
 `UNASSIGNED.md`. U-numbers are never reused or renumbered; a retired or
 merged-away row stays as a one-line tombstone pointing at its successor,
-its shipped spec is folded or superseded under "Standing duties", and moved
+its shipped spec is folded into or superseded by the successor's, and moved
 claims keep their evidence footnotes. Every reorganisation is a dated note
 in the affected FEATURE-MAP rows plus a PROGRESS note, mentioned in the
 next Mattermost summary.
@@ -236,7 +236,7 @@ the test are the record.
 - **End pushed, not just committed.** The VM's working tree is not a durable
   home: work that reaches a commit-worthy gate is committed AND pushed to
   pkp-e2e `main` before the session ends, tracking updates included, under
-  the push rules of RUNBOOK step 11. A push that breaks CI breaks every app
+  the push rules of RUNBOOK step 10. A push that breaks CI breaks every app
   PR check.
 
 ## Standing duties

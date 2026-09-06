@@ -13,7 +13,7 @@
  *   each headed "Preprint: {entry}". Carries the form-field addressing
  *   (FieldBase compileId: `{formId}-{name}-control[-{locale}]`, TinyMCE
  *   iframes at `{controlId}_ifr`), the Save flow bounded by the
- *   publications API + the "Saved" status (patterns.md pitfall 13), the
+ *   publications API + the "Saved" status (patterns.md locator pitfall on the "Saved" status), the
  *   locked-field "Override" affordance (Rule 11), and the "Current
  *   Submission Language" readout with its "Change" panel (Rule 13).
  * - postPreprint / unpostPreprint — the Production stage screen's "Post"

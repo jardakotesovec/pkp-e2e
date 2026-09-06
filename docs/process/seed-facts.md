@@ -182,8 +182,8 @@ settled by a fresh probe on the current build.
 - Outbound HTTP is dead: `[proxy]` points at `127.0.0.1:9`, so every
   server-side external call fails fast (ORCID, reCAPTCHA, DOI registration,
   update checks); Mailpit and other `127.0.0.1` traffic are unaffected. No
-  screen shows it. Maintainer ruling 2026-08-20 (`parity-ledger.md`
-  "Correction"), harness.md "config.test.inc.php".
+  screen shows it. Maintainer ruling 2026-08-20; harness.md
+  "config.test.inc.php".
 - The compromised-password check is a site setting, off on every fleet
   (Administration › Site Settings › Security, "Check passwords against
   compromised password databases" unticked), so Profile › Password accepts

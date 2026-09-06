@@ -1,6 +1,6 @@
 ---
 name: submissions-dashboard
-status: draft
+status: verified
 ---
 
 # Submissions dashboard (editorial)

@@ -87,7 +87,7 @@ provisioned by `npm run fetch-apps` (`bin/fetch-apps.js`) from the pkp
 remotes' `main`. The pkp remote is named `upstream` with its push URL
 disabled, submodule push URLs included; the `jardakotesovec` fork is
 `origin` and the push default, so a branch, rarely needed, can only go to
-the fork (RUNBOOK step 11). `fetch-apps --update` moves
+the fork (RUNBOOK step 10). `fetch-apps --update` moves
 an existing checkout to the current upstream `main` and rebuilds the UI
 bundle (`js/build.js`) when `lib/ui-library` moved; a bundle older than the
 submodule makes retired UI defects reappear (U43 A13, 2026-09-04).
@@ -285,7 +285,7 @@ processes before re-running.
    `scenarios.md`.
 
 Rules that live elsewhere: findings and security routing are in RUNBOOK
-"What goes where"; git and push rules are in RUNBOOK step 11.
+"What goes where"; git and push rules are in RUNBOOK step 10.
 
 ## CI
 

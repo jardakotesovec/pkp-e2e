@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lint-spec.mjs — the campaign's mechanical spec gate (RUNBOOK step 5, TEMPLATE "The lint gate").
+// lint-spec.mjs — the campaign's mechanical spec gate (TEMPLATE "The lint gate").
 // run:      node lint/lint-spec.mjs [specs/foo.md ...]     default: every specs/*.md
 // self-test: node lint/lint-spec.mjs --self-test           embedded good/bad fixtures, no deps
 // claims:   node lint/lint-spec.mjs --claims specs/foo.md [--date YYYY-MM-DD]
@@ -106,7 +106,8 @@ function checkShape(doc, out) {
 // ---------------------------------------------------------------- 1b. coverage (TEMPLATE "Coverage")
 // Only specs that carry the section are checked (shipped specs before 2026-09-06 have the settings
 // table alone under "Settings that modify behavior"). Every table row needs a "Runs in" or a "Why
-// not"; and no scenario leaves a typed value to the tester.
+// not", a `planned` row is a finding once the spec is `verified` (RUNBOOK step 9), and no scenario
+// leaves a typed value to the tester.
 const PLACEHOLDER_RE = /\btype (?:a|an|some|any) (?:sentence|title|line|word|text|name|description|number|value)\b/i;
 
 function checkCoverage(doc, out) {
@@ -119,6 +120,7 @@ function checkCoverage(doc, out) {
             const cells = line.split('|').slice(1, -1).map((c) => c.trim());
             if (cells.length < 3 || /^-+$/.test(cells[0]) || /^(Who|State|Setting)$/.test(cells[0])) continue;
             if (!cells[1] && !cells[2]) out.push({ line: i + 1, check: 'coverage', msg: `row "${excerpt(cells[0], 50)}" has neither a "Runs in" nor a "Why not"` });
+            if (doc.front.status === 'verified' && /^planned$/i.test(cells[1])) out.push({ line: i + 1, check: 'coverage', msg: `row "${excerpt(cells[0], 50)}" still reads planned in a verified spec` });
         }
         if (/^Canonical scenarios/.test(doc.h2[i]) && PLACEHOLDER_RE.test(line)) {
             out.push({ line: i + 1, check: 'coverage', msg: `the tester is left to choose a value: ${excerpt(line.match(PLACEHOLDER_RE)[0], 40)} — name it` });
@@ -260,7 +262,7 @@ function checkLinks(doc, out) {
 }
 
 // ---------------------------------------------------------------- 4. claims report (--claims)
-// A report for the claim check (RUNBOOK step 6), never a gate: every claim-bearing line of the
+// A report for the claim check (RUNBOOK step 5), never a gate: every claim-bearing line of the
 // body is listed, the risky kinds first (to-drive · no-mark · undated · no-screen · role-gated ·
 // exclusive · string), then the rest with their footnote's probe date, so the checklist is the
 // whole spec. A to-drive line is one whose footnote opens "to drive:" — the author's open question
@@ -610,6 +612,11 @@ function selfTest() {
     const rf = lintFile(write(retired));
     if (rf.length) { fails++; console.log('FAIL retired-block fixture produced findings:'); rf.forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
     else console.log('pass  retired-block entry without a body marker — 0 findings');
+    // a Coverage row still reading `planned` is a finding only once the spec is verified (RUNBOOK step 9)
+    const covered = GOOD.replace('## Findings register', '## Coverage\n\n| Who, state or setting | Runs in | Why not |\n|---|---|---|\n| Editor | planned | |\n\n## Findings register');
+    const draftCov = lintFile(write(covered)), verifiedCov = lintFile(write(covered.replace('status: draft', 'status: verified')));
+    if (draftCov.length || !verifiedCov.some((f) => f.check === 'coverage')) { fails++; console.log('FAIL coverage — a planned row must pass as draft and fail as verified'); [...draftCov, ...verifiedCov].forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
+    else console.log('pass  coverage — a planned row passes as draft and fails as verified');
     fails += selfTestClaims(write);
     fs.rmSync(dir, { recursive: true, force: true });
     console.log(fails ? `\n${fails} self-test failure(s)` : '\nself-test OK');
@@ -630,6 +637,8 @@ if (ci !== -1) { // the report, not the gate: always exit 0 once the spec is fou
     printClaims(file, date);
     process.exit(0);
 }
+const unknown = args.filter((a) => a.startsWith('-'));
+if (unknown.length) { console.error(`lint-spec: unknown option ${unknown[0]}; usage: lint-spec.mjs [spec ...] | --claims <spec> [--date YYYY-MM-DD] | --self-test`); process.exit(2); }
 const targets = args.filter((a) => !a.startsWith('-'));
 const files = targets.length
     ? targets.map(resolveTarget)

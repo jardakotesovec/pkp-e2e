@@ -113,7 +113,7 @@ are the authoring conventions:
   every absence claim is asserted with a settled, auto-waited read and a
   positive control; every "nothing happens" is bounded by the response or
   mail that would have carried the effect; the other side's effect is
-  read. A contradiction with the spec is a finding (RUNBOOK step 9), never
+  read. A contradiction with the spec is a finding (RUNBOOK step 8), never
   a skipped assertion.
 
 ## Scenario-endpoint design record (D1–D9)

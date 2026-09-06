@@ -8,7 +8,7 @@ REST API. Any change to a scenario builder needs a parity row here before
 it merges; a deliberate deviation is recorded as such, with its rationale.
 One row per audited builder path per app. The evidence detail stays in
 `.reports/`, and those pointers dangle once the scratch is deleted
-(RUNBOOK step 11), so a disputed row is settled by a fresh probe on the
+(RUNBOOK step 10), so a disputed row is settled by a fresh probe on the
 current build, not by the old report.
 
 | Date | App | Builder path | Parity check | Verdict | Notes |

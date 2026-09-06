@@ -37,41 +37,42 @@ orchestrator.
 4. **Harness.** Only when the author's return names a scenario key
    `scenarios.md` lacks: a harness agent builds it with its parity row and
    re-runs the shipped suites that seed through it (`briefs/harness.md`); a
-   test author who meets a missing key at step 9 sends the loop back here.
+   test author who meets a missing key at step 8 sends the loop back here.
    Gate: `.reports/<feature>/harness/report.md`.
-5. **Lint.** `node docs/process/lint/lint-spec.mjs <spec>` and
-   `npm run seed-facts -- --check` to zero, then `--claims <spec>` into
-   `.reports/<feature>/claims.txt`. Gate: `claims.txt`.
-6. **Claim check.** The orchestrator cuts `claims.txt` into screen clusters
-   seeded from the spec's surfaces table (`claimcheck-chunks.md`); fresh
-   checkers drive every line (`briefs/claim-check.md`); with three or more
-   chunks a merge agent writes `claimcheck-merge.md` (`briefs/merge.md`), with
-   two or fewer the fold reads the chunk reports directly; a fold agent folds
-   the change list into the spec (`briefs/fold.md`).
-   Gate: `fold-log.md`, lint zero, `claims.txt` regenerated.
-7. **Scenarios.** A fresh writer composes the canonical scenarios from the
+5. **Claim check.** `npm run seed-facts -- --check` to zero, then
+   `node docs/process/lint/lint-spec.mjs --claims <spec>` into
+   `.reports/<feature>/claims.txt`. The orchestrator cuts `claims.txt` into
+   screen clusters seeded from the spec's surfaces table
+   (`claimcheck-chunks.md`); fresh checkers drive every line
+   (`briefs/claim-check.md`); with three or more chunks a merge agent writes
+   `claimcheck-merge.md` (`briefs/merge.md`), with two or fewer the fold reads
+   the chunk reports directly; a fold agent folds the change list into the
+   spec (`briefs/fold.md`). Gate: `claims.txt`, `fold-log.md`, lint zero,
+   `claims.txt` regenerated.
+6. **Scenarios.** A fresh writer composes the canonical scenarios from the
    verified body and fills the Coverage "Runs in" column
    (`briefs/scenario-writer.md`). Gate: scenarios in the spec, no Coverage
    row blank, lint zero.
-8. **Readability.** One persona read of the body (`briefs/persona.md`), then
+7. **Readability.** One persona read of the body (`briefs/persona.md`), then
    one rewrite of the wording blockers (`briefs/rewrite.md`); no second read,
    no other persona anywhere in the feature. Gate: `persona.md`, lint zero.
-9. **Tests.** One test author per app writes the suite and runs it green once
+8. **Tests.** One test author per app writes the suite and runs it green once
    (`briefs/test-author.md`); one fold agent folds the runs' findings, with
    `Basis: test run` on new entries (`briefs/fold.md`); then
    `npm run test:final -- --feature U<nn>` is the second green, re-run after
    any fix. Gate: `test-<app>-green.log`, `final-run-<app>.log`.
-10. **Progress.** The orchestrator sets the frontmatter to `status: verified`
-    (its one inline spec edit) and replaces the PROGRESS row: status, tests
-    per app, and a note in the fixed shape (tests per app · register counts ·
-    one headliner ID · open blocker · low-confidence IDs). Gate: the row.
-11. **Commit.** One commit in this repo, everything the campaign produced;
+9. **Progress.** The orchestrator sets the frontmatter to `status: verified`
+   (its one inline spec edit) and replaces the PROGRESS row: status, tests
+   per app, and a note in the fixed shape (tests per app · register counts ·
+   one headliner ID · open blocker · low-confidence IDs). Gate: the row, lint
+   zero after the flip.
+10. **Commit.** One commit in this repo, everything the campaign produced;
     `.reports/` never (session scratch, gitignored, deletable after review;
     the kept checks under `shared/playwright/checks/` are the exception).
     App checkouts are read-only: pkp push URLs are disabled by construction,
     app changes go through maintainer-reviewed PRs, a bad push gets a
     follow-up commit, never a force-push. Gate: the commit.
-12. **Report.** What was built, the register highlights, anything
+11. **Report.** What was built, the register highlights, anything
     low-confidence; if anything was routed to the private file, the
     verification probe (`briefs/security-verify.md`) has run and the report
     gives counts only. Then stop; the next feature starts in a fresh session.

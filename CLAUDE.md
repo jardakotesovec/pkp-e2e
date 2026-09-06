@@ -5,7 +5,7 @@ Playwright suites for OJS, OMP and OPS. The process rules live in the docs,
 not here. `docs/README.md` is the map of the documentation.
 
 - **Start every feature session with `docs/process/RUNBOOK.md`** (the loop,
-  model discipline, security routing) **and `docs/tracking/PROGRESS.md`**
+  what goes where, model discipline) **and `docs/tracking/PROGRESS.md`**
   (live state and the mode banner). Never re-derive the process from memory.
 - **Maintenance sessions** (the resident QA agent) also read
   `docs/process/MAINTENANCE.md`, `docs/tracking/upstream-sync.md` and
@@ -22,7 +22,7 @@ Operational facts:
   `npm run fetch-apps` (pkp upstream `main`, with push URLs to pkp
   disabled). `npm run mount` copies the PHP overlays into them, with a guard
   against app-side edits; the checkouts are read-only and commits happen
-  only in this repo (RUNBOOK step 11). Suites run from here:
+  only in this repo (RUNBOOK step 10). Suites run from here:
   `npm run test:ojs|omp|ops`, `reset:<app>`.
 - CI: `.github/workflows/e2e.yml` (the matrix) and `run-app.yml` (reusable,
   also called by the app repos' thin hooks at run time). A broken `main`

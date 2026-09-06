@@ -1,6 +1,6 @@
 ---
 name: publish-schedule-and-versions
-status: draft
+status: verified
 ---
 
 # Publish, schedule & versions {OJS OMP OPS}

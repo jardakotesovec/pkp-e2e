@@ -86,7 +86,7 @@ function selectButton(entry) {
  * Select a reviewer from the (already searched) list and wait for the
  * request form below — its prefilled letter included — to be ready to
  * submit (an AJAX-loading TinyMCE letter fails server-side if submitted
- * too early: locator pitfall 11).
+ * too early: locator pitfall "AJAX-loaded email templates").
  */
 async function selectReviewerAndAwaitForm(page, addModal, name) {
     await selectButton(reviewerListEntry(addModal, name)).click();
@@ -268,7 +268,7 @@ async function completeReview(
 
 /**
  * Wait for a legacy modal's TinyMCE message body to be non-empty before
- * submitting (locator pitfall 11 — AJAX-prefilled letters). idPrefix is
+ * submitting (locator pitfall "AJAX-loaded email templates"). idPrefix is
  * 'personalMessage' (add/unassign/reinstate/resend) or 'message'
  * (thank/reminder/email).
  */

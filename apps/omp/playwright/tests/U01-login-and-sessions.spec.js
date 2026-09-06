@@ -389,7 +389,7 @@ test.describe('Login & sessions (U1)', () => {
         await form.locator('input[name="username"]').fill(reviewerUsername);
         await form.locator('input[name="email"]').fill(reviewerEmail);
         // The message body loads by AJAX — submitting before it arrives fails
-        // server-side (locator pitfall 11).
+        // server-side (locator pitfall "AJAX-loaded email templates").
         await expect(
             addModal
                 .frameLocator('iframe[id^="personalMessage"]')

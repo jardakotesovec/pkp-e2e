@@ -1,6 +1,6 @@
 ---
 name: submission-wizard
-status: draft
+status: verified
 ---
 
 # Submission wizard {OJS OMP OPS}

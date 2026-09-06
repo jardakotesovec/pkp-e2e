@@ -8,7 +8,7 @@
 {{declared_lines}} the orchestrator's subset check: the chunk headers' declared no-screen lines minus the checklist's `no-screen` lines, which must be empty or explained; "none" when empty
 {{merge_path}}     .reports/{{feature}}/claimcheck-merge.md
 -->
-You are the merge agent for the claim check of feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it), dispatched only with three or more chunks. Follow RUNBOOK step 6. Read `docs/process/TEMPLATE.md`, including "Write for a reader who has only this page", so every `Affects:` names a real rule, row, scenario, footnote or register ID and every `Proposed:` line is already in the reader's words.
+You are the merge agent for the claim check of feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it), dispatched only with three or more chunks. Follow RUNBOOK step 5. Read `docs/process/TEMPLATE.md`, including "Write for a reader who has only this page", so every `Affects:` names a real rule, row, scenario, footnote or register ID and every `Proposed:` line is already in the reader's words.
 
 Inputs:
 - The chunk reports, each in spec-section order:

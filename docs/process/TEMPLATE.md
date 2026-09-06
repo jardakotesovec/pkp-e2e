@@ -36,7 +36,7 @@ defect, however true it is.
 
 ## Write for a reader who has only this page
 
-The readability pass (RUNBOOK step 8) hands the body to a QA person who
+The readability pass (RUNBOOK step 5) hands the body to a QA person who
 knows the applications and has read `docs/specs/GLOSSARY.md`, has no
 code, has read no other spec, and reads nothing below the footnotes.
 Every writer, whether drafting, folding or rewriting, writes to that
@@ -76,33 +76,34 @@ its own:
 
 ## The lint gate
 
-Every spec must pass `node docs/process/lint/lint-spec.mjs <spec>` with zero
-findings before the claim check (RUNBOOK step 5). The gate checks only what
-is mechanically decidable and is a broken reference for the reader:
+Every spec passes `node docs/process/lint/lint-spec.mjs <spec>` with zero
+findings before the claim check (RUNBOOK step 5) and after every later edit.
+The gate checks only what is mechanically decidable and would be a broken
+reference for the reader:
 
-- Findings-register integrity: markers and entries match both ways, every
-  entry has a badge, the summary table agrees with the entries, IDs are dense.
-- Link resolution: every link, anchor and footnote resolves.
+- Findings register: every entry opens `**ID — title** · badge · impact`
+  under its own anchor; IDs are dense per prefix and in document order; the
+  summary table mirrors the entries (same badge, sorted 🐞 → ❓ → ✅); every
+  🐞 or ❓ entry is marked in the body with exactly one `⚠ [A1](#a1)`, a ✅
+  entry with a plain link and never ⚠; a `### Retired` entry needs no marker.
+- Links: every link, anchor and `<sup>` mark resolves both ways, anchors are
+  unique, and no footnote block is orphaned.
 - Campaign identifiers in the body: a FEATURE-MAP row code or an atlas atom
   ID is a reference no QA or product reader can resolve (rule 5).
-- Shape: the Conventions line is the one-line GLOSSARY pointer verbatim,
-  there is no "One spec, three applications" note under the title, the
-  register preamble does not re-explain the impact words or the entry
-  shape, and the scenario preamble does not open with "Common to all three
-  apps." The reader has read the GLOSSARY; the body carries the feature.
-- Coverage (specs that carry the "Coverage" section): every table row has
-  a "Runs in" or a "Why not", and no scenario leaves a typed value to the
-  tester ("type a sentence", "type a title").
+- The Conventions line is the one-line GLOSSARY pointer verbatim.
+- Coverage: every table row has a "Runs in" or a "Why not", no row still
+  reads `planned` once the spec is `verified`, and no scenario leaves a typed
+  value to the tester ("type a sentence", "type a title").
 
 `node docs/process/lint/lint-spec.mjs --claims <spec>` prints the spec's
-claims marked by kind (to-drive, no footnote, undated, no screen,
-role-gated, exclusive wording, quoted string) for the claim check; it is a
-report, not a gate. A `to-drive` line is one whose footnote opens
-`to drive:` with the author's open question (RUNBOOK step 3).
+claims marked by kind (`to-drive`, `no-mark`, `undated`, `no-screen`,
+`role-gated`, `exclusive`, `string`; the rest print as dated) for the claim
+check; it is a report, not a gate. A `to-drive` line is one whose footnote
+opens `to drive:` with the author's open question (RUNBOOK step 3).
 
-Everything else, including wording, glossary vocabulary, app badges and the
-code-in-footnotes rule, is the writer's judgment, checked by the readability
-pass and never by the gate.
+Everything else, including wording, glossary vocabulary, app badges, the
+code-in-footnotes rule and the shape of the preambles, is the writer's
+judgment, checked by the readability pass and never by the gate.
 
 ## The rules
 
@@ -148,7 +149,7 @@ pass and never by the gate.
    reproduction stays in the session's `.reports/` scratch, because a product
    reader needs the outcome, not the trail.
    Each finding enters at the weight its impact earns. The change list
-   (RUNBOOK step 6) is raw material, not spec content. The writer judges
+   (RUNBOOK step 5) is raw material, not spec content. The writer judges
    every candidate: does it belong to this feature, is it relevant to a user, does
    the proposed weight match what a user would notice. Then write it
    symptom-first, in product language, at proportionate length. Severity is
@@ -326,7 +327,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      installs", "owned by the ORCID spec", "register A4 carries it; not a
      user path"). In the draft, before the scenarios exist, "Runs in"
      reads `planned` for a row the scenarios should cover, and the
-     scenario writer replaces it (RUNBOOK step 7). A row blank in both
+     scenario writer replaces it (RUNBOOK step 5). A row blank in both
      columns is a gap the lint reports. A Why-not cell says why the row
      has no scenario ("out of tier", "no screen on the test installs",
      "owned by the ORCID spec"); never evidence such as "read once
@@ -334,7 +335,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      "Out of tier" is a legitimate answer: it records a cut the reviewer
      can reverse; a later revision finds these rows by grepping the
      Coverage sections. Every setting listed is driven at both ends
-     (RUNBOOK step 6), and the scenarios the table names are part of the
+     (RUNBOOK step 5), and the scenarios the table names are part of the
      feature's tier, not extra scope. The base journal keeps the install
      defaults; a scenario at the other end runs on a scratch context
      configured through the scenario API (scenarios.md "Configuring a
@@ -354,7 +355,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      units tests map onto: each app's suite implements them (RUNBOOK
      multi-app rules). WHEN: the draft carries this section's preamble and
      no scenarios; they are composed after the claim check from the
-     verified body and the Coverage rows (RUNBOOK step 7),
+     verified body and the Coverage rows (RUNBOOK step 5),
      every sentence a fact the Rules, Fields or Side effects already
      state. ORDER: first the scenarios COMMON to every app that
      has the feature, then the app-specific ones (title the block or badge
@@ -488,4 +489,10 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
 
 | Entry | Path | Atom |
 |-------|------|------|
+
+## Reference — code anchors
+
+<!-- The files the feature lives in (handlers, services, forms, templates,
+     ui-library components), one bullet per layer. The sync loop greps the
+     specs for the class and file names an upstream diff touches. -->
 ```

@@ -116,7 +116,7 @@ async function expectPlainStatus(modal, sentence) {
 /**
  * Wait for any email composer on the current wizard step to finish loading
  * its template (submitting against a still-loading composer fails
- * server-side — locator pitfall 11).
+ * server-side — locator pitfall "AJAX-loaded email templates").
  */
 async function awaitComposerReady(page) {
     if (await page.getByText('Email Templates').count()) {
