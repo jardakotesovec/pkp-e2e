@@ -1,13 +1,13 @@
 # Incidentals
 
 Things a session saw in passing on screens that belong to another feature.
-A probe, claim check or test run notices them while working its own
+A claim check or test run notices them while working its own
 feature; the owning spec is the only place they can become a finding. One
 line per item: the owning feature, the screen, what was seen, the date, and
 where the evidence sat. The orchestrator writes rows from the fold logs'
 "left in `.reports/`" lists and the claim-check merge's incidentals (RUNBOOK
-"What goes where"). A spec author reads their feature's rows at step 2 and
-puts each on the probe list or into the draft. A row is deleted when the
+"What goes where"). A spec author reads their feature's rows at step 3 and
+puts each into the draft, as a claim or a `to drive` question. A row is deleted when the
 owning spec absorbs it, or when a later probe of that screen finds it gone.
 Nothing security-shaped goes here (it goes to the private file).
 

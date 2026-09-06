@@ -196,8 +196,8 @@ The base seed is `apps/<app>/playwright/fixtures/bootstrap.js`: the journal
 `users.md`. The base context keeps the install defaults, and every shipped
 spec was verified against them. The configured half of a feature is
 covered on scratch contexts: each setting a spec lists is probed at both
-ends and the end real journals run gets a scenario (TEMPLATE "Settings
-that modify behavior"), seeded through the scenario API's passthrough keys
+ends and the end real journals run gets a scenario (TEMPLATE "Coverage"),
+seeded through the scenario API's passthrough keys
 (scenarios.md "Configuring a scratch context"), never by driving a
 settings screen in a test. A bootstrap change, should one ever be needed,
 requires checking every implemented spec against the new defaults,

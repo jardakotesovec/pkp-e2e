@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lint-spec.mjs — the campaign's mechanical spec gate (RUNBOOK step 6, TEMPLATE "The lint gate").
+// lint-spec.mjs — the campaign's mechanical spec gate (RUNBOOK step 5, TEMPLATE "The lint gate").
 // run:      node lint/lint-spec.mjs [specs/foo.md ...]     default: every specs/*.md
 // self-test: node lint/lint-spec.mjs --self-test           embedded good/bad fixtures, no deps
 // claims:   node lint/lint-spec.mjs --claims specs/foo.md [--date YYYY-MM-DD]
@@ -270,11 +270,13 @@ function checkLinks(doc, out) {
 }
 
 // ---------------------------------------------------------------- 4. claims report (--claims)
-// A report for the claim check (RUNBOOK step 7), never a gate: every claim-bearing line of the
-// body is listed, the risky kinds first (no-mark · undated · no-screen · role-gated · exclusive ·
-// string), then the rest with their footnote's probe date, so the checklist is the whole spec.
+// A report for the claim check (RUNBOOK step 6), never a gate: every claim-bearing line of the
+// body is listed, the risky kinds first (to-drive · no-mark · undated · no-screen · role-gated ·
+// exclusive · string), then the rest with their footnote's probe date, so the checklist is the
+// whole spec. A to-drive line is one whose footnote opens "to drive:" — the author's open question
+// (RUNBOOK step 3); the Purpose section is listed because its absence paragraph states screen facts.
 
-const CLAIM_SECTIONS = /^(Actors & permissions|Fields & validation|Rules & state|Side effects|Settings|Cross-feature interactions|Canonical scenarios|Findings register)/;
+const CLAIM_SECTIONS = /^(Purpose|Actors & permissions|Fields & validation|Rules & state|Side effects|Settings|Cross-feature interactions|Canonical scenarios|Findings register)/;
 const ROLE_NAMES = ['Site Administrator', 'Journal Manager', 'Press Manager', 'Server Manager', 'Journal Editor', 'Press Editor',
     'Editor', 'Section Editor', 'Series Editor', 'Moderator', 'Guest Editor', 'Reviewer', 'Internal Reviewer', 'Author', 'Reader',
     'Copyeditor', 'Layout Editor', 'Proofreader', 'Funding [Cc]oordinator', 'Assistant', 'Editorial Board Member', 'Subscription Manager'];
@@ -282,7 +284,8 @@ const ROLE_RE = new RegExp(`\\b(?:${ROLE_NAMES.join('|')})\\b|\\bpermission leve
 const EXCLUSIVE_RE = /\b(?:only|never|no one|nothing else|not offered|absent|whoever|whatever|alike|cannot|no screen|all|every|each|any|always)\b/i;
 const NO_SCREEN_RE = /no screen|read from the code|not observable|code reading|cannot be seen/i;
 const PROBE_DATE_RE = /live-probed\s+(\d{4}-\d{2}-\d{2})/gi;
-const KIND_ORDER = ['no-mark', 'undated', 'no-screen', 'role-gated', 'exclusive', 'string'];
+const TO_DRIVE_RE = /\bto drive:\s*(.*)/i;
+const KIND_ORDER = ['to-drive', 'no-mark', 'undated', 'no-screen', 'role-gated', 'exclusive', 'string'];
 const kindLabel = (x) => `${x.kind}${x.detail ? ' ' + x.detail : ''}`;
 const normWs = (s) => s.replace(/\s+/g, ' ').trim();
 
@@ -367,6 +370,7 @@ function claimsOf(file, dateArg = null) {
             if (!prose) continue;
             const marks = marksOf(line, item);
             const kinds = [];
+            for (const id of marks) { const q = (blocks.get(id)?.text || '').match(TO_DRIVE_RE); if (q) { kinds.push({ kind: 'to-drive', detail: `"${excerpt(q[1], 60)}"` }); break; } }
             if (!marks.length) kinds.push({ kind: 'no-mark', detail: '' });
             const undated = marks.filter((id) => { const b = blocks.get(id); return !b || !b.date || (date && b.date < date); });
             if (undated.length) kinds.push({ kind: 'undated', detail: undated.join(' ') });
@@ -528,6 +532,7 @@ const CLAIMS = GOOD.replace(/## Rules & state[\s\S]*?(?=## Findings register)/, 
    back today" below. <sup>a</sup>
 9. The page lists the files in upload order. <sup>a</sup>
 10. On a press the same button opens the catalog step instead [OMP1](#omp1). <sup>a</sup>
+11. A second upload replaces the first. <sup>e</sup>
 
 ## Side effects
 
@@ -548,11 +553,17 @@ below the form.
 <a id="fn-d"></a>
 **d** — \`ReminderTask\`; live-probed 2026-08-01: no screen runs it.
 
+<a id="fn-e"></a>
+**e** — To drive: as Author, upload twice on the same round; does the list
+show one file or two? \`SubmissionFileDAO::insert()\` reads either way.
+
 `);
 
 // [substring of the claim line, expected kind labels in report order]; a line absent from the report fails
 const CLAIM_EXPECT = [
+    ['lets an editor record a decision', []],
     ['• Journal Manager, on an open round', ['role-gated']],
+    ['A second upload replaces the first', ['to-drive "as Author, upload twice on the same round; does the list sho…"', 'undated fn-e']],
     ['The editor sees only', ['exclusive']],
     ['open ⚠ [A1](#a1). <sup>a</sup>', []],
     ['The round closes when the last review', ['no-mark']],

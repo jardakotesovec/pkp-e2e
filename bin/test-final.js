@@ -17,6 +17,11 @@
  * run (reuseExistingServer) and keep logging elsewhere, so it is reported
  * before the run starts; the probe servers at basePort + 50 are unaffected
  * and can stay up.
+ *
+ * After each app's run, one line compares the spec's canonical scenarios
+ * with the suite's test titles (`S<n>: …`, RUNBOOK step 9) and names the
+ * scenarios without a test; a suite's header declares the ones it skips
+ * on purpose, so the line is information, never a failure.
  */
 const fs = require('fs');
 const path = require('path');
@@ -71,6 +76,44 @@ function answers(port) {
     });
 }
 
+/** Scenario numbers of the feature's spec (the numbered items under "## Canonical scenarios"). */
+function specScenarios(feature) {
+    const dir = path.join(REPO_ROOT, 'docs', 'specs');
+    const file = fs.readdirSync(dir).find((f) => f.startsWith(`${feature}-`) && f.endsWith('.md'));
+    if (!file) return null;
+    const lines = fs.readFileSync(path.join(dir, file), 'utf8').split('\n');
+    const start = lines.findIndex((l) => /^##\s+Canonical scenarios/.test(l));
+    if (start === -1) return null;
+    const numbers = [];
+    for (let i = start + 1; i < lines.length && !/^##\s/.test(lines[i]); i++) {
+        const m = lines[i].match(/^(\d+)\.\s+\*\*/);
+        if (m) numbers.push(parseInt(m[1], 10));
+    }
+    return numbers;
+}
+
+/** Scenario numbers the app's suite files for the feature carry in their test titles. */
+function suiteScenarios(feature, app) {
+    const dir = path.join(REPO_ROOT, 'apps', app, 'playwright', 'tests');
+    if (!fs.existsSync(dir)) return [];
+    const found = new Set();
+    for (const f of fs.readdirSync(dir)) {
+        if (!f.startsWith(`${feature}-`) || !f.endsWith('.spec.js')) continue;
+        const text = fs.readFileSync(path.join(dir, f), 'utf8');
+        for (const m of text.matchAll(/test\s*\(\s*['"\`]S(\d+)\b/g)) found.add(parseInt(m[1], 10));
+    }
+    return [...found].sort((a, b) => a - b);
+}
+
+function scenarioLine(feature, app) {
+    const spec = specScenarios(feature);
+    if (!spec) return `test-final: ${app}: no spec scenarios found for ${feature}`;
+    const have = new Set(suiteScenarios(feature, app));
+    const missing = spec.filter((n) => !have.has(n));
+    return `test-final: ${app}: ${have.size} of ${spec.length} scenarios have a test` +
+        (missing.length ? ` — without one: ${missing.map((n) => `S${n}`).join(', ')} (the suite header says why)` : '');
+}
+
 /** The list reporter's closing tally: "12 passed", "1 failed", "3 skipped", "2 flaky". */
 function tally(text) {
     const pick = (word) => {
@@ -123,6 +166,7 @@ function tally(text) {
             `${counts.flaky} flaky, ${counts.skipped} skipped in ${seconds} s (exit ${code}, log ${path.relative(REPO_ROOT, logFile)})`;
         console.log(line);
         summary.push(line);
+        console.log(scenarioLine(feature, name));
         if (code !== 0) {
             ok = false;
         }

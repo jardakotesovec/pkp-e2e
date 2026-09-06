@@ -11,9 +11,9 @@ from scratch, and it never writes rules into one.
    with an unfilled slot is not sent. Delete the comment from the rendered
    brief.
 2. Add only the feature-specific facts the RUNBOOK step names for that
-   role: which cluster or chunk, which lines, which digest blocks, which
-   other agent runs on the fleets at the same time. A fact about a screen (a locator, a dialog on
-   the way out, a wait that hangs) belongs in
+   role: which chunk, which lines, which blocks, which other agent runs on
+   the fleets at the same time. A fact about a screen (a locator, a dialog
+   on the way out, a wait that hangs) belongs in
    `.reports/<feature>/screen-notes.md`, never in a brief; the template
    already points the agent there.
 3. Never add a rule, a paraphrase of a rule, or a checklist of your own.
@@ -23,11 +23,12 @@ from scratch, and it never writes rules into one.
    the docs through maintainer review; a brief never patches it.
 4. Keep the verbatim blocks as they are: the Frame paragraph (copied from
    RUNBOOK "The screen is the instrument"; when its wording changes there,
-   update the four templates that carry it), the PROGRESS and app-changes
-   sentence, "Commit nothing.", the friction sentence
-   (`docs/tracking/friction.md`; only the templates for agents that drive
-   screens carry it), the `checkouts/` sentence, and "Preserve the verified meaning" in the rewrite
-   and fold templates.
+   update the four templates that carry it: claim-check, harness,
+   test-author, security-verify), the PROGRESS and app-changes sentence,
+   "Commit nothing.", the friction sentence (`docs/tracking/friction.md`;
+   only the templates for agents that drive screens carry it),
+   the `checkouts/` sentence, and "Preserve the verified meaning" in the
+   rewrite and fold templates.
 5. The "Return (short)" block is what the agent sends back: pointers and
    counts, never findings. Do not widen it.
 
@@ -35,15 +36,13 @@ from scratch, and it never writes rules into one.
 
 | RUNBOOK step | Template |
 |---|---|
-| 2, author the spec | `spec-author.md` |
-| 3, probe one cluster | `probe.md` |
-| 3b, digest | `digest.md` |
-| 4, finalize (one agent, or one slice of an H feature) | `finalizer.md` |
-| 5, readability check (one read of the whole body, after the step 7 fold) | `persona.md` |
-| 5, rewrite wording blockers | `rewrite.md` |
-| 7, one claim-check chunk (also step 9's span checker) | `claim-check.md` |
-| 7, merge three or more chunks | `merge.md` |
-| 7 and 9, fold a change list into the spec | `fold.md` |
-| 7, compose the scenarios after the fold | `scenario-writer.md` |
-| 8 and 9, one app's suite | `test-author.md` |
+| 3, author the spec | `spec-author.md` |
+| 4, build a missing harness key | `harness.md` |
+| 6, one claim-check chunk | `claim-check.md` |
+| 6, merge three or more chunks | `merge.md` |
+| 6 and 9, fold a change list into the spec | `fold.md` |
+| 7, compose the scenarios | `scenario-writer.md` |
+| 8, readability check (one read of the whole body) | `persona.md` |
+| 8, rewrite the wording blockers | `rewrite.md` |
+| 9, one app's suite | `test-author.md` |
 | "What goes where", the security verification probe | `security-verify.md` |

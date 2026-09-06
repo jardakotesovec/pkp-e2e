@@ -35,10 +35,13 @@ developer's PR fails the suite".
 
 **The maintenance session never builds a new spec or suite.** Pending
 PROGRESS rows are built in feature sessions the maintainer launches, one
-feature per session, under the RUNBOOK loop. When the sync loop produced nothing to accommodate, the session takes
-the top slice of `docs/tracking/backfill.md` (a shipped spec brought up to
-a rule adopted after it shipped), one slice a day at most, under the same
-rules as an accommodate slice; otherwise the session ends. An upstream change in a
+feature per session, under the RUNBOOK loop. When the sync loop produced nothing to accommodate, the session folds
+`docs/tracking/friction.md` under the filter its header states (a third
+feature would meet it, the docs do not already say it, not one screen's
+fact), deletes every row, and ends. Shipped
+specs are not brought up to later rules one by one; the maintainer
+schedules a revision pass over the existing specs and suites when the
+process has settled. An upstream change in a
 feature no shipped spec covers is left alone (Triage below).
 
 Three kinds of work arrive in this mode. Keeping specs and tests in step
@@ -95,28 +98,25 @@ The apps move; the suite follows. The baselines live in
 4. **Accommodate.** Run the RUNBOOK loop on the changed slice, with the
    same gates and the same rules: run the feature's kept checks for the
    chunks whose screens changed (`shared/playwright/checks/<feature>/`,
-   RUNBOOK step 7) and have a fresh agent judge the snapshots against the
-   spec lines each chunk owns, then probe live only what the checks did not
-   cover (step 3: the probe kit, the three probe rules, "What each role
-   reads", agents one or two at a time), fold the change into the spec (rules, scenarios,
-   register) through a writing agent (step 4), run the reader persona on
-   the changed spans (step 5), lint (step 6), update the tests and run the
-   touched suites green once (steps 8–9), update the PROGRESS row note to
-   the new state (step 10). When the slice changes a rule, an Actors row or
-   a scenario, one fresh checker drives the changed spans after the persona
-   re-read (`lint-spec.mjs --claims` over the diff, RUNBOOK step 7); a
-   footnote-only or register-only change needs none. The slice writes the
-   same `.reports/<feature>/phase-status.md`. Every changed span, register
-   entries included, gets step 5's reader before commit; lint checks
-   references, not wording. A behavior
+   RUNBOOK step 6) and have a fresh checker judge the snapshots against
+   the spec lines each chunk owns and drive only what the checks did not
+   cover (step 6: the probe kit, the four checker rules, "What each role
+   reads", agents one or two at a time), fold the change into the spec
+   (rules, scenarios, register) through a writing agent (step 6 "Merge and
+   fold"), run the reader persona on the changed spans (step 8), lint
+   (step 5), update the tests and run the touched suites green once (step
+   9), update the PROGRESS row note to the new state (step 10). The slice
+   writes the same `.reports/<feature>/phase-status.md`. Every changed
+   span, register entries included, gets step 8's reader before commit;
+   lint checks references, not wording. A behavior
    change that contradicts a shipped spec claim is spec maintenance, not a
    test hack. Never edit a test to pass a claim the app now disproves
    without correcting the spec. Behavior that contradicts the linked
    issue's stated intention is a finding: register entry, with the commit
    and the issue in its footnote. A slice needs the same
    separation of roles as a full feature, not the same headcount: one
-   probe agent, one writing agent, one persona read; skip the digest when
-   the probe list is under about five items. When a register entry is
+   checker, one writing agent, one persona read; no merge agent when there
+   is one chunk. When a register entry is
    retired by the change, move it to the register's Retired block
    (TEMPLATE) and grep the suites' file headers for its ID, because a
    header that declares "not covered, see A7" outlives A7 otherwise.

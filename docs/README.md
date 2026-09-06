@@ -42,9 +42,6 @@ to their OMP and OPS names.
 - `docs/tracking/friction.md`: what made an agent's task harder than it
   needed to be, one line each, appended by the agents themselves; read on
   review, rows deleted once acted on.
-- `docs/tracking/backfill.md`: shipped specs waiting to be brought up to a
-  rule adopted after they shipped, in priority order; the maintenance
-  session takes the top slice on a quiet day.
 - `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the mechanical
   inventory of every screen and action in the apps, and the leftovers no
   spec claims yet.

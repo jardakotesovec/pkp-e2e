@@ -234,15 +234,16 @@ setting there. What those defaults are, screen by screen and dated:
 ## Configuring a scratch context
 
 A scenario that runs with a setting at its non-default end (TEMPLATE
-"Settings that modify behavior", coverage rule) gets a scratch context
+"Coverage", its decision rule) gets a scratch context
 from `POST scenarios/context` created with that setting through a
 passthrough key, the way `orcid` works today. A test never drives a
 settings screen to configure its context; a probe may, because what the
 screen offers is part of what it records. When a feature needs a key
-family the API does not have yet, the test author returns it as a harness
-need, the orchestrator has it built in the same session with its parity
-row (`docs/tracking/parity-ledger.md`), and the family leaves the list
-below. The shape is recorded there so it is built once, the same way,
+family the API does not have yet, the spec author names it with the draft
+and a harness agent builds it with its parity row before the claim check
+(RUNBOOK step 4, `docs/tracking/parity-ledger.md`); a test author who
+still meets a missing key returns it as a harness need. The family then
+leaves the list below. The shape is recorded there so it is built once, the same way,
 for every feature that needs it.
 
 ## Field shapes not built yet

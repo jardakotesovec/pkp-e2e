@@ -36,7 +36,7 @@ defect, however true it is.
 
 ## Write for a reader who has only this page
 
-The readability pass (RUNBOOK step 5) hands the body to a QA person who
+The readability pass (RUNBOOK step 8) hands the body to a QA person who
 knows the applications and has read `docs/specs/GLOSSARY.md`, has no
 code, has read no other spec, and reads nothing below the footnotes.
 Every writer, whether drafting, folding or rewriting, writes to that
@@ -77,7 +77,7 @@ its own:
 ## The lint gate
 
 Every spec must pass `node docs/process/lint/lint-spec.mjs <spec>` with zero
-findings before the claim check (RUNBOOK step 6). The gate checks only what
+findings before the claim check (RUNBOOK step 5). The gate checks only what
 is mechanically decidable and is a broken reference for the reader:
 
 - Findings-register integrity: markers and entries match both ways, every
@@ -94,14 +94,15 @@ is mechanically decidable and is a broken reference for the reader:
   a "Runs in" or a "Why not", and no scenario leaves a typed value to the
   tester ("type a sentence", "type a title").
 
+`node docs/process/lint/lint-spec.mjs --claims <spec>` prints the spec's
+claims marked by kind (to-drive, no footnote, undated, no screen,
+role-gated, exclusive wording, quoted string) for the claim check; it is a
+report, not a gate. A `to-drive` line is one whose footnote opens
+`to drive:` with the author's open question (RUNBOOK step 3).
+
 Everything else, including wording, glossary vocabulary, app badges and the
 code-in-footnotes rule, is the writer's judgment, checked by the readability
 pass and never by the gate.
-
-`node docs/process/lint/lint-spec.mjs --claims <spec>` prints a report of the
-spec's claims marked by kind (no footnote, undated, no screen, role-gated,
-exclusive wording, quoted string) for the claim check; it is a report, not a
-gate.
 
 ## The rules
 
@@ -146,16 +147,16 @@ gate.
    not a walkthrough: the spec states the outcome, and step-by-step
    reproduction stays in the session's `.reports/` scratch, because a product
    reader needs the outcome, not the trail.
-   Each finding enters at the weight its impact earns. The digest (RUNBOOK
-   step 3b) is raw material, not spec content. The writer judges every
-   candidate: does it belong to this feature, is it relevant to a user, does
+   Each finding enters at the weight its impact earns. The change list
+   (RUNBOOK step 6) is raw material, not spec content. The writer judges
+   every candidate: does it belong to this feature, is it relevant to a user, does
    the proposed weight match what a user would notice. Then write it
    symptom-first, in product language, at proportionate length. Severity is
-   proposed by the digest and settled by the reviewer, not argued in the
+   proposed by the change list and settled by the reviewer, not argued in the
    spec: badge it, state the symptom, state the impact in one plain word, and
    stop. Trivia, fixture accidents and other features' findings stay in
    `.reports/` or move to their owning spec. Campaign-internal words
-   ("probe", "digest", "claim check", "orchestrator") do not belong in a
+   ("claim check", "change list", "orchestrator") do not belong in a
    spec; evidence citations live in footnotes.
    Every finding belongs in a register, with one exception: a potential
    security concern goes to the maintainer's private security file and never
@@ -314,46 +315,37 @@ atlas-claims: [<atom IDs this spec owns>]
 ## Coverage
 
 <!-- The map of what the scenarios cover and what they leave out, so a
-     reviewer can see every decision and ask for a row to be covered. Three
-     short tables, each row "| what | Runs in | Why not |": the ACTORS
-     (one row per Actors row or group of rows), the STATES the Rules name
-     (each state of the feature's main object: unanswered, accepted,
-     declined, cancelled, moved on…), and the SETTINGS that change the
-     rules above (site or context settings, config variables, plugin
-     toggles, and HOW they change them). For a feature that is itself a
-     settings screen, the settings table lists the screen's own fields,
-     each mapped to where it takes effect.
+     reviewer can see every decision and ask for a row to be covered. One
+     table, "| Who, state or setting | Runs in | Why not |", in three
+     runs of rows: the ACTORS (one row per Actors row or group of rows),
+     the STATES the Rules name (each state of the feature's main object:
+     unanswered, accepted, declined, cancelled, moved on…), and the
+     SETTINGS that change the rules above (site or context settings,
+     config variables, plugin toggles, and HOW they change them). For a
+     feature that is itself a settings screen, the settings rows list the
+     screen's own fields, each mapped to where it takes effect.
      DECISION RULE: every row ends one of three ways: "scenario N", "inside
      scenario N" (a control or a step of that scenario), or a one-line why
-     not; in the draft, before the scenarios exist, "Runs in" reads
-     `planned` for a row the scenarios should cover ("out of tier", "configuration file, no screen on the test
+     not ("out of tier", "configuration file, no screen on the test
      installs", "owned by the ORCID spec", "register A4 carries it; not a
-     user path"). A row blank in both columns is a gap the lint reports.
-     "Out of tier" is a legitimate answer: it records a cut the reviewer can
-     reverse, and the PROGRESS note counts these rows so backfill can pick
-     them up. Every setting listed is probed at both ends (RUNBOOK step 3),
-     and the scenarios the table names are part of the feature's tier, not
-     extra scope. The base journal keeps the install defaults; a scenario at
-     the other end runs on a scratch context configured through the
-     scenario API (scenarios.md "Configuring a scratch context").
-     Specs shipped before 2026-09-06 carry the settings table only, under
-     the heading "Settings that modify behavior"; they gain the other two
-     when backfilled. -->
+     user path"). In the draft, before the scenarios exist, "Runs in"
+     reads `planned` for a row the scenarios should cover, and the
+     scenario writer replaces it (RUNBOOK step 7). A row blank in both
+     columns is a gap the lint reports.
+     "Out of tier" is a legitimate answer: it records a cut the reviewer
+     can reverse; a later revision finds these rows by grepping the
+     Coverage sections. Every setting listed is driven at both ends
+     (RUNBOOK step 6), and the scenarios the table names are part of the
+     feature's tier, not extra scope. The base journal keeps the install
+     defaults; a scenario at the other end runs on a scratch context
+     configured through the scenario API (scenarios.md "Configuring a
+     scratch context").
+     Specs shipped before 2026-09-06 carry the settings rows only, under
+     the heading "Settings that modify behavior"; they gain the actor and
+     state rows when they are next revised. -->
 
-Actors
-
-| Who | Runs in | Why not |
-|-----|---------|---------|
-
-States
-
-| State | Runs in | Why not |
-|-------|---------|---------|
-
-Settings
-
-| Setting | Runs in | Why not |
-|---------|---------|---------|
+| Who, state or setting | Runs in | Why not |
+|-----------------------|---------|---------|
 
 ## Cross-feature interactions
 
@@ -365,8 +357,8 @@ Settings
 <!-- Named journeys a QA person can act out on any install. These are the
      units tests map onto: each app's suite implements them (RUNBOOK
      multi-app rules). WHEN: the draft carries this section's preamble and
-     no scenarios; they are composed after the claim-check fold from the
-     verified body and the Coverage rows (RUNBOOK step 7 "Scenarios"),
+     no scenarios; they are composed after the claim check from the
+     verified body and the Coverage rows (RUNBOOK step 7),
      every sentence a fact the Rules, Fields or Side effects already
      state. ORDER: first the scenarios COMMON to every app that
      has the feature, then the app-specific ones (title the block or badge
