@@ -37,11 +37,18 @@ Each of these has bitten at least once.
    hook: `#{name}-button` (`#review-button`, `#setup-button`).
 2. **Nested tab groups.** The top-level *Setup* tab and Appearance → Setup are
    different tabs. Reach the outer one via `#setup-button` and the inner one
-   via the visible-tab role.
+   via the visible-tab role. The sidebar's "Settings" group is collapsed, and
+   its entries are not in the DOM until the group is opened.
 3. **Headlessui menus (More Actions).** Items are `role="menuitem"`, and the
    menu portals to the document root. Scope to `page`, not to the row.
 4. **Side modals.** Scope via `[data-cy="active-modal"]`. When modals stack,
    filter by a distinctive inner element, never `.first()` or `.last()`.
+   A legacy side window's content loads by AJAX after the dialog opens and
+   `idle()` returns before it: use the kit's `settled()` on a field of its
+   form. A closed Vue side modal leaves a hidden shell in the DOM until the
+   next navigation, so `getByRole` on the table behind it returns nothing
+   until then; and a Vue form's "Save" is disabled after a refused save
+   until the flagged boxes change (a click on it hangs).
 5. **The side-modal outer wrapper reports `visibility: hidden`** while it
    opens, and permanently on some wrappers. Anchor `toBeVisible()` on inner
    content, never on the wrapper.
@@ -53,7 +60,10 @@ Each of these has bitten at least once.
    `[data-cy="active-modal"]` (that is pitfall 5's wrapper).
 7. **The workflow page itself is a reka-ui dialog.** When it opens another
    modal, both are `[role="dialog"]`. Disambiguate by accessible name:
-   `getByRole('dialog', {name: /Add Reviewer/i})`.
+   `getByRole('dialog', {name: /Add Reviewer/i})`. Read its text from the
+   dialog (the kit's `screen().text.dialog`; `text.main` is the dashboard
+   list behind it), and close an inner window with its own "Close" or
+   "Cancel", never Escape, which closes the workflow dialog too.
 8. **Confirmation dialogs.** Use `[role="dialog"]:has-text(...)` or the legacy
    `[data-cy="dialog"]`. Button labels vary (OK/Yes/No) between reka-ui and
    jQuery UI.
@@ -61,7 +71,11 @@ Each of these has bitten at least once.
    not `#id`.
 10. **Legacy pkp jQuery grids.** Row controls stay hidden until `a.show_extras`
     is clicked (its class flips to `hide_extras`). Rows are
-    `tr.gridRow#component-grid-...`.
+    `tr.gridRow#component-grid-...`, and a row's action links live in the
+    NEXT `tr` after it, not inside it; the arrow clicked a second time to
+    close the controls hangs the click. A listbuilder's "Add Item" renders
+    its new row after the click returns, so `.last()` on the visible boxes
+    fills the previous row, and a grid redraw swallows the next click on it.
 11. **PkpButton accessible names include row context.** The Edit button in a
     mailables list is named `Edit Discussion (Production)`. Use a row-scoped
     regex.
@@ -73,6 +87,12 @@ Each of these has bitten at least once.
     clicking the button opens a real OS dialog.
 14. **`[role="status"]:has-text("Saved")`** is the canonical form-save
     confirmation. Wait on it before reloading or asserting persistence.
+    "Saving" and "Saved" coexist for a beat as two `.pkpFormPage__status`
+    spans, so filter by text, never a bare `toHaveText`. A successful Vue
+    settings save shows only that inline status for about five seconds and
+    no page notice; a refusal shows the page bar "The form was not saved
+    because…", and its field errors carry class `pkpFieldError` (a
+    `[class*=error]` sweep misses them).
 15. **`getByRole` name strings are substring matches.** `{name: 'View'}`
     matches "Assign Re**view**ers". Use `exact: true` or an anchored regex for
     short common words.
@@ -80,6 +100,11 @@ Each of these has bitten at least once.
     "Edit" link reads " Edit " to `hasText`, so an anchored regex
     (`filter({hasText: /^Edit$/})`) never matches. Read them by role and
     exact accessible name: `getByRole('link', {name: 'Edit', exact: true})`.
+17. **A `page.goto()` that changes only the hash** of the page already open
+    (`…/workflow#review/reviewForms` from `…/workflow`) is a same-document
+    navigation: it returns null, nothing reloads, an open window stays open.
+    Leave the page first (goto another address) or assert on the tab strip,
+    not the response.
 
 ## Fixture selection
 
@@ -313,6 +338,11 @@ alternative.
   uninitialized editor loses the body, and the save 500s on a null message.
   Wait for the editor's `initialized` before selecting. `ReviewStagePages`'s
   `addReviewer` does this; the 450ms modal slide used to mask the problem.
+  Any TinyMCE box in a Vue form must be `initialized` before typing (text
+  typed earlier is wiped, or the save posts nothing for it); the shared
+  `ReviewSettingsPages.typeRichText` and `ReviewerPages.typeInto` do it, and
+  the legacy multilingual box's French twin opens only while the English box
+  is focused (the globe icon is decorative).
 
 ## Live-probe cookbook (spec verification)
 
@@ -400,14 +430,30 @@ forEachApp(async (app) => {
 What each helper gives you: `launch(app)` is a 1280×900 Chromium with
 animations off and a response listener that records URL, method, status and
 size (never a body) of every `/api/` call and every status ≥ 400 into
-`run-<app>.json`. `screen(page)` is the screen as data: the aria snapshot of
+`run-<app>-<HHMMSS>.json`, one record per process (HHMMSS from its start),
+which also carries the browser's console errors and warnings and uncaught
+page errors (`console`, capped at 200). `screen(page)` is the screen as data: the aria snapshot of
 the main region (the body when the page has no `main`) and of every open
 dialog, plus the verbatim `innerText` of header and main, because aria
-snapshots normalise punctuation. `record(name, data)` writes JSON and
+snapshots normalise punctuation, and `text.dialog`, the innerText of the
+last visible dialog (null when none is open), because the workflow page is
+itself a dialog over the dashboard and `text.main` reads the list behind
+it. `settled(page, locator)` waits, after `idle()`, until the locator's
+text (an input's value) is non-empty and the same across two reads and
+returns it, for a Composer page, a legacy side window loaded by AJAX or a
+Vue side window built from a fetched publication, which fill after
+`idle()` returns; on timeout it returns what is there and adds `{settled:
+false}` to the run record's `warnings`, never a throw. `record(name, data)` writes JSON and
 `shot(page, name)` a PNG, both as `<name>-<app>` inside `withApp`, so a
 script on two apps never overwrites one app's snapshot with the other's;
+`merge(name, patch)` reads `<name>-<app>.json` back, shallow-merges the
+patch into it (`steps` objects merge by key) and writes it, for a facts
+file a script writes per phase, so a partial rerun keeps the earlier
+phases' facts;
 `loc(page, description, locator)` a row in
-`locators.md` (selector, match count, visibility) for the test author; the
+`locators.md` (selector, match count, visibility) for the test author,
+appended under a dated heading when the process exits, so several
+processes of one agent keep every row; the
 same rows are appended to the feature-level `.reports/<feature>/screen-locators.md`
 under the agent's id when the process exits, a file to grep by screen or
 element, never to read whole. `note(text)` appends one line to
@@ -450,10 +496,10 @@ session the server has just ended (after a password change or a sign-out
 elsewhere), so use a bounded wait there; and Playwright dismisses a browser
 `confirm()` or `alert()` by default, so a screen that may ask (a tab switch
 with unsaved changes, a refused upload) needs `page.on('dialog', …)` before
-the action, or the script silently takes the Cancel branch. `screen()`
-records the page, not the browser console: a claim about console errors
-needs the script's own `page.on('console')` and `page.on('pageerror')`
-listeners, attached before the navigation.
+the action, or the script silently takes the Cancel branch. The run record
+carries the browser's console errors and warnings and uncaught page errors
+from `launch()` on; a script that needs every level (info, log) attaches
+its own `page.on('console')` listener.
 Two premises that cost a smoke run: a scratch context has no technical
 support contact, and the validation email's sender is that contact, so a
 registration on the +90 server 500s until a manager sets it (Settings ›

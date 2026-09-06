@@ -203,6 +203,8 @@ function probeApps() {
 
 const runs = new Map(); // app name → record
 const locatorRows = [];
+let locatorsFlushed = 0; // how many of locatorRows are already in locators.md
+const CONSOLE_CAP = 200;
 
 function runRecord(app) {
     if (!runs.has(app.name)) {
@@ -212,11 +214,24 @@ function runRecord(app) {
             keySource: app.keySource,
             startedAt: new Date().toISOString(),
             responses: [],
+            console: [],
+            warnings: [],
         });
     }
     return runs.get(app.name);
 }
 
+/** The record of the app in play (withApp sets PKP_APP_NAME), or null. */
+function currentRecord() {
+    return runs.get(process.env.PKP_APP_NAME) || null;
+}
+
+/**
+ * Every process of an agent keeps its own files: the run record is
+ * `run-<app>-<HHMMSS>.json` (HHMMSS from startedAt) and the locator rows
+ * are appended to locators.md under a dated heading, so a script run in
+ * phases, one process each, loses nothing from the earlier phases.
+ */
 function flush() {
     if (runs.size === 0 && locatorRows.length === 0) {
         return; // nothing ran (a tool merely required the kit)
@@ -225,14 +240,22 @@ function flush() {
         const dir = outDir();
         for (const record of runs.values()) {
             record.endedAt = new Date().toISOString();
+            const stamp = record.startedAt.slice(11, 19).replace(/:/g, '');
             fs.writeFileSync(
-                path.join(dir, `run-${record.app}.json`),
+                path.join(dir, `run-${record.app}-${stamp}.json`),
                 JSON.stringify(record, null, 2),
             );
         }
-        if (locatorRows.length) {
-            fs.writeFileSync(path.join(dir, 'locators.md'), locatorTable());
-            appendScreenLocators(`Locators (${path.basename(dir)}, ${new Date().toISOString().slice(0, 10)})`, locatorTable());
+        // flush() runs at the end of withApp and again on exit: append only
+        // the rows not written yet.
+        if (locatorRows.length > locatorsFlushed) {
+            const now = new Date().toISOString();
+            const heading = `Locators (${path.basename(dir)}, ${now.slice(0, 10)} ${now.slice(11, 19)})`;
+            const table = locatorTable(locatorRows.slice(locatorsFlushed));
+            locatorsFlushed = locatorRows.length;
+            const file = path.join(dir, 'locators.md');
+            fs.appendFileSync(file, `${fs.existsSync(file) ? '\n' : ''}## ${heading}\n\n${table}`);
+            appendScreenLocators(heading, table);
         }
     } catch (error) {
         // Never mask the script's own failure with a bookkeeping error.
@@ -354,6 +377,23 @@ async function launch(app, {storageState, headless = true} = {}) {
         }
     });
     const page = await context.newPage();
+    // Console errors and warnings and uncaught page errors go into the run
+    // record (capped); a script that needs every level attaches its own.
+    const logConsole = (type, text, url) => {
+        if (record.console.length >= CONSOLE_CAP) {
+            return;
+        }
+        record.console.push({at: new Date().toISOString(), type, text: String(text).slice(0, 300), url});
+    };
+    page.on('console', (message) => {
+        const type = message.type();
+        if (type === 'error' || type === 'warning') {
+            logConsole(type, message.text(), (message.location() || {}).url || page.url());
+        }
+    });
+    page.on('pageerror', (error) => {
+        logConsole('pageerror', error.message || String(error), page.url());
+    });
     console.log(`[probe] ${app.name}: ${app.baseURL} (key from ${app.keySource})`);
     return {
         browser,
@@ -426,8 +466,11 @@ async function innerTextOf(locator) {
 /**
  * What the screen shows, as data: {url, title, aria, text}. `aria` is the
  * aria snapshot of the main region (body when the page has no `main`) plus
- * every open dialog; `text` is the verbatim innerText of the header and the
- * main region — aria snapshots normalise punctuation, innerText does not.
+ * every open dialog; `text` is the verbatim innerText of the header, the
+ * main region and the last visible dialog (`text.dialog`, null when none
+ * is open) — aria snapshots normalise punctuation, innerText does not. The
+ * dialog text matters because the workflow page is itself a dialog over
+ * the dashboard, so `text.main` reads the list behind it.
  * The read is taken settled: it waits for jQuery and the network to go
  * quiet first (`idle`), so a panel or grid that renders after its own
  * request is on screen before it is recorded.
@@ -440,7 +483,8 @@ async function screen(page) {
     const hasMain = (await main.count()) > 0;
     const region = hasMain ? main.first() : page.locator('body');
     const aria = {main: await region.ariaSnapshot(), dialogs: []};
-    for (const dialog of await page.locator('[role="dialog"]:visible').all()) {
+    const dialogs = page.locator('[role="dialog"]:visible');
+    for (const dialog of await dialogs.all()) {
         aria.dialogs.push(await dialog.ariaSnapshot());
     }
     return {
@@ -450,6 +494,7 @@ async function screen(page) {
         text: {
             header: await innerTextOf(page.locator('header')),
             main: await innerTextOf(hasMain ? main : page.locator('body')),
+            dialog: aria.dialogs.length ? await innerTextOf(dialogs.last()) : null,
         },
     };
 }
@@ -475,6 +520,40 @@ async function shot(page, name) {
 function record(name, data) {
     const file = path.join(outDir(), `${appSuffixed(name)}.json`);
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
+    return file;
+}
+
+function isPlainObject(value) {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/**
+ * Merge `patch` into <name>-<app>.json (created when missing) and write it
+ * back: one level deep, except `steps`, whose object merges by key. For a
+ * facts file a script writes per phase, so a partial rerun keeps the
+ * earlier phases' facts instead of replacing them. Returns the path.
+ *
+ * @param {string} name
+ * @param {object} patch
+ */
+function merge(name, patch) {
+    const file = path.join(outDir(), `${appSuffixed(name)}.json`);
+    let current = {};
+    if (fs.existsSync(file)) {
+        try {
+            current = JSON.parse(fs.readFileSync(file, 'utf8'));
+        } catch {
+            current = {};
+        }
+    }
+    if (!isPlainObject(current)) {
+        current = {};
+    }
+    const merged = {...current, ...patch};
+    if (isPlainObject(current.steps) && isPlainObject(patch.steps)) {
+        merged.steps = {...current.steps, ...patch.steps};
+    }
+    fs.writeFileSync(file, JSON.stringify(merged, null, 2));
     return file;
 }
 
@@ -507,14 +586,14 @@ async function loc(page, description, locator) {
     return locator;
 }
 
-/** The rows collected by loc() as a Markdown table. */
-function locatorTable() {
+/** The rows collected by loc() (or the rows given) as a Markdown table. */
+function locatorTable(rows = locatorRows) {
     const cell = (value) => String(value ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
     const lines = [
         '| app | screen | element | locator | matches | visible |',
         '|---|---|---|---|---|---|',
     ];
-    for (const row of locatorRows) {
+    for (const row of rows) {
         lines.push(
             `| ${cell(row.app)} | ${cell(row.url)} | ${cell(row.description)} | \`${cell(row.locator)}\` | ${cell(row.count)} | ${cell(row.visible)} |`,
         );
@@ -577,6 +656,62 @@ async function idle(page) {
     await page.waitForLoadState('networkidle', {timeout: 5_000}).catch(() => {});
 }
 
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Wait until a control has filled: `idle(page)`, then the locator visible
+ * with a non-empty innerText (input value for a form control) that stays
+ * the same across two reads 150 ms apart. Returns the text. For pages and
+ * windows that fill after their own request (a Composer page, a legacy
+ * side window loaded by AJAX, a Vue side window built from a fetched
+ * publication), which `idle()` and `screen()` read before they fill. On
+ * timeout it returns whatever text is there and records `{settled: false}`
+ * in the run record's `warnings`; it never throws for the timeout.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} locator
+ * @param {{timeout?: number}} [options] milliseconds, default 15000
+ */
+async function settled(page, locator, {timeout = 15_000} = {}) {
+    await idle(page);
+    const deadline = Date.now() + timeout;
+    const read = async () => {
+        const element = locator.first();
+        if ((await element.count()) === 0 || !(await element.isVisible())) {
+            return null;
+        }
+        const tagName = await element.evaluate((node) => node.tagName.toLowerCase());
+        return ['input', 'textarea', 'select'].includes(tagName)
+            ? element.inputValue()
+            : element.innerText();
+    };
+    let last = null;
+    while (Date.now() < deadline) {
+        const first = await read().catch(() => null);
+        await pause(150);
+        if (first === null || first.trim() === '') {
+            continue;
+        }
+        const second = await read().catch(() => null);
+        if (second === first) {
+            return first;
+        }
+        last = second ?? first;
+    }
+    const record = currentRecord();
+    if (record) {
+        record.warnings.push({
+            at: new Date().toISOString(),
+            settled: false,
+            locator: String(locator),
+            url: page.url(),
+            timeout,
+            text: String(last ?? '').slice(0, 300),
+        });
+    }
+    return last ?? '';
+}
+
 /**
  * A unique scratch tag: `<prefix><agent><random>`, a single lowercase
  * alphanumeric token of at most 32 characters (patterns.md "Tag
@@ -621,11 +756,13 @@ module.exports = {
     screen,
     shot,
     record,
+    merge,
     loc,
     locatorTable,
     note,
     screenNotesPath,
     idle,
+    settled,
     tag,
     password,
     outDir,

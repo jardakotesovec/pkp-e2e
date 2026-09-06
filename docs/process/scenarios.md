@@ -81,7 +81,10 @@ Keys:
   `supportedLocales`, `supportedSubmissionLocales`, `contactName`,
   `contactEmail`, `enabled`. `supportedSubmissionLocales` mirrors the
   Languages settings grid's submission toggles and keeps the metadata
-  locales in step, exactly as the grid does.
+  locales in step, exactly as the grid does. A scratch context needs
+  `supportedLocales` to include a locale before that locale's URL segment
+  (`/fr_CA/`) works there; the seeded journals already carry it as a UI
+  language.
 - `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
   entry renames the default section. OMP's context scenario does not accept
   a `series[]` list yet and answers 400 on the key.
@@ -92,7 +95,9 @@ Keys:
   or series path), and `orcid` plus `orcidIsVerified` for a pre-set ORCID
   iD. Role keys are the app's default user-group keys. An unknown key fails
   with a 400 that lists the app's whole set. See `users.md` for the keys and
-  their traps.
+  their traps. A scratch context's reviewer is created here too: the seeded
+  reviewers are not enrolled on a scratch context, so they are absent from
+  its Add Reviewer search and refused the wizard.
 - `orcid`: the state of the ORCID settings tab, saved through the same
   service the tab's form uses. The defaults below apply only when the
   `orcid` key is given at all; a context created without it arrives with
@@ -152,14 +157,24 @@ Keys:
 - `decisions[]`: real decision names, resolved per app (`sendExternalReview`,
   `accept`, `requestRevisions`, …: the lowercased class name of the app's
   decision type). An unknown name fails with a 400 that lists the app's
-  roster.
+  roster. A decision that moves the submission into a review stage
+  (`sendExternalReview`, OMP's `sendInternalReview`) creates that round and
+  seeds the next `reviewRounds[]` entry into it; `newExternalReviewRound`
+  (and OMP's `newInternalReviewRound`) creates its round but consumes no
+  entry, so that round gets no reviewers, and every entry left after the
+  decisions builds a further round of its own.
 - `reviewRounds[]`, each with `reviewers[]` of `{username, status,
   reviewForm, recommendation, comments}` where `status` is `invited`
   (default), `accepted`, `declined` or `completed`, and `reviewForm` is the
   exact title of one of the context's active review forms (seeded through
   `reviewForms[]`), attached the way the reviewer row's "Edit" window
   attaches it; a missing or inactive title fails with a 400 that names the
-  active titles. `completed` is a review accepted and submitted through the
+  active titles. A form becomes uneditable on screen the moment a request
+  carries it, so text to type on the form (a second language, a renamed
+  item) is typed before the reviewer is seeded. A reviewer named here
+  leaves the Add Reviewer search, so a script that both seeds a request and
+  opens Add Reviewer seeds a spare `externalReviewer` in the context's
+  `users[]`. `completed` is a review accepted and submitted through the
   reviewer wizard's own step forms: the editor's row reads "Review
   Submitted" with "Read Review", and the reviewer's list shows it under
   "Completed". Its two optional inputs are step 3's: `recommendation` (OJS
@@ -256,7 +271,9 @@ row.
   account: the second "Authors" box of the author-response request, U30);
   `reviewRounds[].reviewers[].files[]` (a reviewer's uploaded file, the
   "Attach Review Files" source, U30); `reviewRounds[].reviewers[].status:
-  'cancelled'` (U30, the readiness question); `commentsForEditor`; `reviewerSuggestions[]` (`givenName`,
+  'cancelled'` (U30, the readiness question); `reviewRounds[].revisionsUploaded`
+  (the author's "Upload" is refused on a round where revisions were not
+  requested, U30); `commentsForEditor`; `reviewerSuggestions[]` (`givenName`,
   `familyName`, `email`, `affiliation?`, `suggestionReason?`);
   `userComments[]` (`user`, `text`, `approved?`, needs a published
   publication); `metrics` (OJS only: `views?`, `downloads?`, `months?`).
@@ -267,7 +284,9 @@ row.
   `name?`, `genre?`, `group?`).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - Context passthroughs: `notifyAllAuthors` (Settings › Workflow › Emails
-  "Notify All Authors", U30), `copyrightNotice`, `enablePublicComments`,
+  "Notify All Authors", U30), `supportedFormLocales` (Website › Setup ›
+  Languages "Forms" column; the settings forms stay single-language until
+  it is set, U29), `copyrightNotice`, `enablePublicComments`,
   `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), metadata modes (`keywords`,

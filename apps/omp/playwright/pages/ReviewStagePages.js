@@ -181,7 +181,8 @@ async function walkDecisionWizard(page, {maxSteps = 6} = {}) {
 /**
  * Press "Request Revisions", pick the round path in the entry dialog
  * (asserting the no-new-round choice arrives preselected — Rule 11), and
- * complete the wizard.
+ * complete the wizard. The wizard's "Notify Reviewers" email is sent, so
+ * the reviewer's row reads "Reviewer Thanked" afterwards.
  */
 async function requestRevisions(page, modal, {newRound = false} = {}) {
     await decisionButton(modal, DECISIONS.requestRevisions).click();

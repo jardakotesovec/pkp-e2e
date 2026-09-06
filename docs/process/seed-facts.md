@@ -309,9 +309,12 @@ so; it is not a guess.
   the review-assignments dashboard ("Action required"), authors on "My
   Submissions" ("Active") and readers on the journal's reader-facing home.
   Login. Live-probed 2026-09-06, all three apps (`.reports/U29/pF` P33).
-- An invited reviewer's "Accept Review, Continue to Step #2" needs the
-  privacy box ticked first; a typed `?step=2` before acceptance shows
-  step 1. Reviewer wizard. Live-probed 2026-09-05, OJS and OMP
+- The seeded journals carry a privacy statement, so an invited reviewer's
+  step 1 shows the consent box "Yes, I agree to have my data collected and
+  stored according to the privacy statement." and "Accept Review, Continue
+  to Step #2" stays on step 1 until it is ticked (the page shows "This field
+  is required." only after the press); a typed `?step=2` before acceptance
+  shows step 1. Reviewer wizard. Live-probed 2026-09-05, OJS and OMP
   (`.reports/U29/pB` P10).
 - A "Request Sent" row in the Reviewers panel shows no "Review due:" line;
   the dates are in the row's "Edit" window and on the reviewer's step 1.

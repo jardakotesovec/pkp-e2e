@@ -443,8 +443,9 @@ say what each one does.
    TEMPLATE and covering all three apps from the start. Draw on the feature's
    atlas atoms and the code, including its `atlas/affordances-*.md` rows.
    Name every screen, control and message by its on-screen label, taken
-   from the templates and locale files the author is reading anyway; the
-   claim check confirms the label, and the reader never meets a code
+   from the templates and locale files the author is reading anyway (the
+   app's own locale file overrides lib/pkp's key, so grep the app first);
+   the claim check confirms the label, and the reader never meets a code
    concept where the screen has a word.
    Every affordance on the feature's screens ends up covered by a rule or
    scenario, delegated to another spec with a checkable pointer, or
@@ -798,12 +799,12 @@ mid-feature commit's PROGRESS note names the last gate reached.
 
 | Role | Reads |
 |---|---|
-| Claim checker | the Frame, step 6, "Live-probe etiquette", patterns.md "Probe kit", `seed-facts.md`, `users.md`, `scenarios.md`, the feature's `screen-notes.md`, its chunk of the spec |
+| Claim checker | the Frame, step 6, "Live-probe etiquette", patterns.md ("Locator pitfalls", "UI realities learned the hard way", "Probe kit"), `seed-facts.md`, `users.md`, `scenarios.md`, the feature's `screen-notes.md`, its chunk of the spec |
 | Harness agent | the Frame, PRINCIPLES (A2, A3, D1–D9), scenarios.md, the parity ledger, the spec's Coverage rows |
 | Merge agent | TEMPLATE "Write for a reader who has only this page", the chunk reports, the chunk plan |
 | Test author | the Frame, PRINCIPLES, harness.md, patterns.md, scenarios.md, `seed-facts.md`, `users.md`, the spec, `screen-notes.md` |
 | Reader persona | GLOSSARY, then the spec body only |
-| Security verification probe | the Frame, "What goes where", patterns.md "Probe kit", `users.md`, `screen-notes.md` |
+| Security verification probe | the Frame, "What goes where", patterns.md ("Locator pitfalls", "Probe kit"), `users.md`, `screen-notes.md` |
 | Writing agents (author, fold, rewrite, scenario writer) | TEMPLATE (including "Write for a reader who has only this page"), GLOSSARY, the spec, and the evidence for the step (the fold: the change list; the rewrite: the persona report and the change list; the scenario writer: the fold log); the author also reads `seed-facts.md`, `users.md`, the feature's rows in `incidentals.md`, and the templates and locale files for labels |
 
 An agent that reads the spec without folding it (checker, merge, test
