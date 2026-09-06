@@ -15,38 +15,31 @@ to their OMP and OPS names.
 
 ## If you want to know what is built and what is next
 
-- `docs/tracking/PROGRESS.md`: one row per feature, its status, its test
-  counts and a short note. The banner at the top says which mode the project
-  is in.
-- `docs/tracking/FEATURE-MAP.md`: the full list of 70 features and which
-  screens and behaviors each one covers.
-- `docs/tracking/ci-triage.md`: known CI failures and their causes. Check it
-  before diagnosing a red build as new. Tracking files hold only what is
-  open; resolved items are deleted and live on in git history. The two
-  exceptions are the parity ledger and app-changes, which record changes
-  still in effect.
+Tracking files hold what is open; resolved items are deleted and live on
+in git history. The parity ledger and app-changes are the exception: they
+record changes still in effect.
+
+- `docs/tracking/PROGRESS.md`: one row per feature with its status, test
+  counts and a short note; the banner names the mode.
+- `docs/tracking/FEATURE-MAP.md`: the 70 features and the screens and
+  behaviors each one covers.
+- `docs/tracking/ci-triage.md`: known CI failures, flake classes and the
+  companion branches waiting on developers' app PRs; check it before
+  calling a red build new.
 - `docs/tracking/upstream-sync.md`: the last app commits the suite was
   reviewed against.
-- `docs/tracking/companion-branches.md`: pkp-e2e branches prepared for
-  developers' open app PRs, waiting to be merged after theirs.
-- `docs/tracking/app-changes.md`: app defects the tests had to work around,
-  and any app code the campaign changed.
+- `docs/tracking/app-changes.md`: app defects the tests work around, and
+  any app code the campaign changed.
 - `docs/tracking/parity-ledger.md`: evidence that the test-data builders
-  produce the same state a real user would.
-- `docs/tracking/cost-ledger.md`: what each feature session cost in
-  weighted tokens, by role, with the U02 baseline and the command that
-  fills a row.
-- `docs/tracking/incidentals.md`: things a session saw in passing on
-  another feature's screens, one line each, kept until that feature's spec
-  absorbs them.
+  produce the state a real user would.
+- `docs/tracking/incidentals.md`: what a session saw in passing on another
+  feature's screens, kept until that spec absorbs it.
 - `docs/tracking/friction.md`: what made an agent's task harder than it
-  needed to be, one line each, appended by the agents themselves; read on
-  review, rows deleted once acted on.
-- `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the mechanical
-  inventory of every screen and action in the apps, and the leftovers no
-  spec claims yet.
-- `docs/reports/`: temporary write-ups handed to the team, deleted once the
-  problem they report is addressed.
+  needed to be, appended by the agents that drive screens; rows are
+  deleted once acted on.
+- `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the inventory
+  of every screen and action in the apps, and the leftovers no spec claims.
+- `docs/reports/`: write-ups handed to the team, deleted once acted on.
 
 ## If you are building specs and tests
 
@@ -55,7 +48,8 @@ Read in this order:
 1. `docs/process/RUNBOOK.md`: what the project is trying to achieve, how a
    feature moves from nothing to a verified spec with green tests, and where
    each kind of finding goes. `docs/process/briefs/` holds the brief
-   template for each subagent role; the orchestrator fills the slots.
+   template for each subagent role plus the shared Frame (`frame.md`) and
+   digest block (`digest-block.md`); the orchestrator fills the slots.
 2. `docs/process/TEMPLATE.md`: how a spec is written, section by section.
 3. `docs/process/PRINCIPLES.md`: the rules every test follows.
 4. `docs/process/harness.md`: how the Playwright harness is laid out and run.

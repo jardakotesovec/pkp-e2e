@@ -15,7 +15,7 @@ not here. `docs/README.md` is the map of the documentation.
   ojs, omp and ops as three separate messages. A developer's failing PR
   follows MAINTENANCE "A developer's PR fails the suite" (companion branch
   with the same name, merged on request; open ones are listed in
-  `docs/tracking/companion-branches.md`).
+  `docs/tracking/ci-triage.md`).
 - Test contract: `docs/process/PRINCIPLES.md`. Harness knowledge:
   `docs/process/{harness,patterns,scenarios,users}.md`. Spec contract:
   `docs/process/TEMPLATE.md` plus `docs/specs/GLOSSARY.md`.

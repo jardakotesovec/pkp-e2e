@@ -13,8 +13,8 @@ names it.
 The VM runs one session a day, scheduled through claude-threads. The
 scheduled prompt only points here; this section is the day's order.
 
-1. Read CLAUDE.md, the PROGRESS banner, this file, `ci-triage.md`,
-   `upstream-sync.md` and `companion-branches.md`. Work from files, never
+1. Read CLAUDE.md, the PROGRESS banner, this file, `ci-triage.md` (its
+   companion table included) and `upstream-sync.md`. Work from files, never
    from memory of earlier sessions. Check `/model` is Fable.
 2. Claim an environment and start on the right code ("Session hygiene").
 3. Run the upstream-sync loop (below) to the end, including deleting what
@@ -237,8 +237,8 @@ The work is the same critical triage as the sync loop, on one PR:
    `gh workflow run e2e.yml --ref <companion> -f <app>_ref=<pr-sha>` (the
    pkp-e2e repo is outside the pkp org, so `gh` works there). Push the
    branch to pkp-e2e; `main` stays untouched. Tell the developer the
-   companion is ready, and add a row to
-   `docs/tracking/companion-branches.md`. The PR's own check picks the
+   companion is ready, and add a row to the companion table in
+   `docs/tracking/ci-triage.md`. The PR's own check picks the
    companion up by name (harness.md "CI") and turns green without anyone
    merging first.
 5. **When the developer says their PR is merged.** Fetch `main`, confirm

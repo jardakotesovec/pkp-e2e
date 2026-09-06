@@ -101,3 +101,14 @@ when the class's watch condition trips.
   (harness.md "Runtime model"), so a recurrence now costs one test. It was
   never pinned; if it recurs, add core-dump capture to CI before
   diagnosing.
+
+## Companion branches — pkp-e2e branches waiting on app PRs
+
+One row per branch prepared for a developer's open OJS, OMP or OPS pull
+request (MAINTENANCE "A developer's PR fails the suite"), named exactly
+like the developer's branch. State: `investigating` (reproducing, no
+verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
+`merged` (only while the sync line is written; then the row is deleted).
+
+| App PR | Branch | State | Since | Note (one line) |
+|--------|--------|-------|-------|-----------------|

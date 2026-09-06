@@ -6,8 +6,8 @@ reviewed at. After `npm run fetch-apps -- --update`, diff
 `<baseline>..HEAD` per app (and lib/pkp once — it is shared), triage, then
 advance the row and add a log entry in the shape below. **The baseline
 advances only when its range is fully triaged.** The log keeps entries
-back to the oldest open item in `ci-triage.md` or `companion-branches.md`
-and nothing older.
+back to the oldest open item in `ci-triage.md` (its companion table
+included) and nothing older.
 
 ## Baselines
 
