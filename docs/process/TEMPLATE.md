@@ -230,11 +230,7 @@ their own line. Lint checks that every reference resolves both ways.
 ```markdown
 ---
 name: <feature-slug>
-scope: <one line: the user job this feature serves>
-apps: [ojs, omp, ops]       # apps that have the feature (all three unless absent)
-shared: pkp-lib | no        # implemented in lib/pkp or app-only
-status: draft | verified    # verified = the full RUNBOOK loop passed (readability, lint zero, tests green ×2, claim check resolved)
-atlas-claims: [<atom IDs this spec owns>]
+status: draft | verified    # verified = the full RUNBOOK loop passed
 ---
 
 # <Feature name> {OJS OMP OPS}
@@ -331,7 +327,10 @@ atlas-claims: [<atom IDs this spec owns>]
      user path"). In the draft, before the scenarios exist, "Runs in"
      reads `planned` for a row the scenarios should cover, and the
      scenario writer replaces it (RUNBOOK step 7). A row blank in both
-     columns is a gap the lint reports.
+     columns is a gap the lint reports. A Why-not cell says why the row
+     has no scenario ("out of tier", "no screen on the test installs",
+     "owned by the ORCID spec"); never evidence such as "read once
+     <date>", which is a footnote.
      "Out of tier" is a legitimate answer: it records a cut the reviewer
      can reverse; a later revision finds these rows by grepping the
      Coverage sections. Every setting listed is driven at both ends
@@ -339,10 +338,7 @@ atlas-claims: [<atom IDs this spec owns>]
      feature's tier, not extra scope. The base journal keeps the install
      defaults; a scenario at the other end runs on a scratch context
      configured through the scenario API (scenarios.md "Configuring a
-     scratch context").
-     Specs shipped before 2026-09-06 carry the settings rows only, under
-     the heading "Settings that modify behavior"; they gain the actor and
-     state rows when they are next revised. -->
+     scratch context"). -->
 
 | Who, state or setting | Runs in | Why not |
 |-----------------------|---------|---------|
@@ -424,9 +420,7 @@ atlas-claims: [<atom IDs this spec owns>]
      to triage`, `@beaug 2026-08-29 · risk accepted`); the cell is a mirror
      of the entry's Reviewed blockquote, never the only record. An author
      re-check (claim check, re-probe, rebase check) may also fill the cell,
-     as `<check> (claude), <date> — <outcome>`. `npm run questions` lists
-     the ❓ rows whose Review cell is still "—", so the dash is
-     load-bearing.
+     as `<check> (claude), <date> — <outcome>`.
 
      Entries under `### All apps` / `### OMP` / `### OPS`. IDs are LOCAL and
      DENSE (A1, A2… / OMP1… / OPS1…), no gaps, no foreign keys. Anchor each:
@@ -456,10 +450,9 @@ atlas-claims: [<atom IDs this spec owns>]
      `Reviewed:` line in the entry body. Only when it happens; never
      pre-printed. Mirror the name and date in the summary table's Review
      column. U01's register is the reference rendering.
-     The word "Reviewed" is reserved for a human. An author re-check that
-     changes a verdict (claim check, re-probe, rebase check) is a plain
-     `Re-checked: <check> (claude), <date> — <outcome>` line in the body,
-     not a blockquote.
+     An author re-check that changes a verdict is a plain `Re-checked:
+     <check> (claude), <date> — <outcome>` line; "Reviewed" is reserved
+     for a human.
 
      `Since:` only when dated (omit the line otherwise). One sentence of
      rationale for a 🐞-versus-✅ call is welcome ("worked for OPS's whole
@@ -495,9 +488,4 @@ atlas-claims: [<atom IDs this spec owns>]
 
 | Entry | Path | Atom |
 |-------|------|------|
-
-## Reference — code anchors
-
-<!-- The load-bearing files (handler, controller, manager, schema). Not
-     exhaustive. -->
 ```

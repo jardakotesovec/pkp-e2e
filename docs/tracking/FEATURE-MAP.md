@@ -20,7 +20,7 @@ feature row, claim its listed atoms, write the spec per `TEMPLATE.md`.
   section F: they get their own **section G — OMP catalog**, since they are
   OMP-specific features created by a scope extension, not part of the
   three-lens consensus taxonomy.
-- **Tiers** (RUNBOOK scenario budgets): **14 H · 42 M · 14 L**. Apps badge is
+- **Tiers** (RUNBOOK "Budget"): **14 H · 42 M · 14 L**. Apps badge is
   `{OJS OMP OPS}` unless shown.
 - **`Notes:` lines** carry cross-feature *riders*: where a mixed-payload atom is
   claimed by one feature but serves another, both features carry a one-line

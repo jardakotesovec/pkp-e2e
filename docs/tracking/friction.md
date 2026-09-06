@@ -1,6 +1,6 @@
 # Friction — what made an agent's task harder than it needed to be
 
-Any agent may append here, at the end of its task, when something cost it
+Any agent that drives screens appends here, at the end of its task, when something cost it
 calls, time or retries that a better brief, doc, kit, seed or fixture would
 have saved. Nobody reads this file mid-feature. The maintenance session
 folds it on a quiet day (MAINTENANCE "The daily session"), and the fold is

@@ -119,7 +119,9 @@ The archetype a shared test asks for and the seeded username it resolves to; `nu
 
 One line per fact: the fact, the screen that shows it, and the date it was
 seen (with the pointer). A line without a dated observation in the repo says
-so; it is not a guess.
+so; it is not a guess. A `.reports/…` pointer names the session evidence
+behind a line; that scratch is deleted after review, so a disputed line is
+settled by a fresh probe on the current build.
 
 - The seed creates no submissions on any app. Every Editor Dashboard view
   counts 0 until a test seeds one through `POST scenarios/submission`, so a

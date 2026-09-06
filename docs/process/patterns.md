@@ -151,20 +151,16 @@ over.
    queue. Assert on the save endpoint via `waitForResponse`, not on toasts.
 3. **`searchPhrase=` OR-joins on whitespace.** Search by the tag alone, a
    single whitespace-free token. Never `'Published article {tag}'`.
-4. **Mailpit is shared across workers AND fleets.** Never `clearAll()` outside
-   the serial infrastructure spec. Scope every assertion by a unique throwaway
-   recipient, and pair every absence claim with a positive control. The full
-   rules and the `pkpMail` API live in `scenarios.md` "Mailpit".
+4. **Mailpit is shared across workers AND fleets.** The rules and the
+   `pkpMail` API are in `scenarios.md` "Mailpit" (PRINCIPLES A8).
 5. **`.auth/{user}.json` can go stale after impersonation flows.**
    `signInAs`/`signOutAs` migrate the session. `ensureAuthStateFor` probes the
    file before reuse and logs in again when needed. Specs do nothing special.
-6. **Server-side outbound HTTP fails fast at the dead-port `[proxy]`** (the
-   config contract in `harness.md`). A test must never depend on the app
-   reaching an external service. Flows that fire outbound calls as a side
-   effect (for example ORCID jobs popped by a queue drain) fail fast and
-   harmlessly.
-7. **Nothing queued or scheduled runs on its own** (`task_runner` and
-   `job_runner` are Off). A spec that needs a scheduled task invokes
+6. **Server-side outbound HTTP fails fast at the dead-port `[proxy]`**
+   (the config contract in `harness.md`); a test never depends on the app
+   reaching an external service.
+7. **Runners are invoked explicitly, in the serial project only.** A spec
+   that needs a scheduled task invokes
    `php lib/pkp/tools/scheduler.php run`. One that needs a queued job's side
    effect (job-dispatched mail: ORCID mailables, deposits) invokes `runJobs()`
    from `shared/playwright/support/jobs.js`. Both belong in the serial project
@@ -331,10 +327,6 @@ alternative.
   review-round files. The Add Reviewer modal's file selection writes the
   `review_files` grant. Mirror that flow; do not expect seeded files to be
   visible to the reviewer.
-- **A real wizard submit fires `AssignEditors`**, which auto-assigns the
-  section's editors. So `participants` on submitted scenarios is additive.
-  Seeding `participants: []` WITHOUT `submitted` is what produces a genuine
-  needs-editor state.
 - **Reviewer-select copies the email template into TinyMCE client-side.** An
   uninitialized editor loses the body, and the save 500s on a null message.
   Wait for the editor's `initialized` before selecting. `ReviewStagePages`'s
@@ -445,12 +437,8 @@ returns it, for a Composer page, a legacy side window loaded by AJAX or a
 Vue side window built from a fetched publication, which fill after
 `idle()` returns; on timeout it returns what is there and adds `{settled:
 false}` to the run record's `warnings`, never a throw. `record(name, data)` writes JSON and
-`shot(page, name)` a PNG, both as `<name>-<app>` inside `withApp`, so a
+`shot(page, name)` a PNG, both as `<name>-<app>` inside `forEachApp`, so a
 script on two apps never overwrites one app's snapshot with the other's;
-`merge(name, patch)` reads `<name>-<app>.json` back, shallow-merges the
-patch into it (`steps` objects merge by key) and writes it, for a facts
-file a script writes per phase, so a partial rerun keeps the earlier
-phases' facts;
 `loc(page, description, locator)` a row in
 `locators.md` (selector, match count, visibility) for the test author,
 appended under a dated heading when the process exits, so several
@@ -461,9 +449,7 @@ element, never to read whole. `note(text)` appends one line to
 `.reports/<feature>/screen-notes.md` at once, for what a locator row cannot
 carry: a dialog that appears on the way out of a screen, a premise that
 proved wrong, a wait that hangs. Every agent that drives screens reads the
-notes file first (`briefs/claim-check.md`). `password(tag)` builds a scratch
-password of at most 32 characters, the Register page's silent limit (the
-Login page object lifts it, the Register page does not).
+notes file first (`briefs/claim-check.md`).
 Claim-check scripts are not scratch:
 they live in `shared/playwright/checks/<feature>/<chunk>/`, import the kit
 as `require('../../../probe')`, and are kept so a maintenance session can
@@ -479,7 +465,7 @@ decides where the user lands), and any open session is signed out first.
 Must not, in a probe script: assertions or `expect`; the test runner or its
 fixtures; a generic request caller (drive the UI, or the `_test` API through
 `api`); page objects (a probe reads the screen, it does not model it);
-`clearAll` on Mailpit; edits to any config; `networkidle`; `waitForTimeout`;
+edits to any config; `networkidle`; `waitForTimeout`;
 starting a server (the probe servers are started once, outside scripts).
 Tests never import the kit: `npm run lint:probe-imports` fails when
 `playwright/probe` appears under `apps/` or `shared/playwright/{tests,pages,support}`.

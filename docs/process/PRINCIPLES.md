@@ -22,17 +22,6 @@ request the application's own screens would not send. The `/api/v1/_test/*`
 endpoints are harness plumbing for reaching a starting state (A4), never the
 behavior under test.
 
-The **legacy Cypress suite** still ships in the app repositories. It is out of
-scope: never maintained, never run by this project, and deleted only when the
-maintainer decides the Playwright suite has replaced it.
-
-## Why this suite exists
-
-The Cypress suite was a chain of fixtures: tests depended on state left by
-earlier specs, could not run in parallel, and one failure mid-chain forced a
-re-run of everything. This suite is parallel-first. Each test seeds its own
-state through the test-only scenario endpoints.
-
 ## Architecture principles (A1–A9)
 
 - **A1 — The isolation unit is the submission.** Tests create their own
@@ -71,9 +60,8 @@ state through the test-only scenario endpoints.
   no Mailpit tags. The only real scoping is a unique throwaway recipient
   address that names the app and the test (`u53top-omp@mail.test`). The
   `contains` filter is a content marker, a supplement, never a substitute.
-  Never `clearAll()` outside a serial infrastructure spec. Pair every
-  negative assertion with a positive control taken the same way, which also
-  bounds the wait. The full rules and the API are in `scenarios.md`.
+  Pair every negative assertion with a positive control taken the same
+  way, which also bounds the wait. The full rules and the API are in `scenarios.md`.
 - **A9 — Operations that scan globally run serially.** Scheduled tasks,
   site-level plugin toggles, site-settings changes, cache clears, queue
   drains: serial project only (`apps/<app>/playwright/tests/serial/`), which
@@ -205,10 +193,5 @@ deliberately, not casually.
 
 ## Findings and changes: where they go
 
-The full routing is RUNBOOK "What goes where". The authoring-side summary:
-app-code changes and build blockers go to `docs/tracking/app-changes.md`;
-builder parity notes go to `docs/tracking/parity-ledger.md`; product
-findings go to the feature spec's Findings register. A test result that
-contradicts the spec, permissions included, means the spec is wrong: report
-it to the register, never park it as a skipped or `fixme` test or a "not
-covered" note. Commit discipline and budgets: RUNBOOK.
+Where findings go: RUNBOOK "What goes where". A result contradicting the
+spec means the spec is wrong (M6), never a skipped or `fixme` test.

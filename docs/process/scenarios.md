@@ -346,9 +346,6 @@ write into the same inbox. The rules below follow from that.
   you expect to arrive the same way, then assert that the target message did
   not. The control also bounds the wait, so the test never waits on
   silence. `expectNone` does this for you.
-- **Never call `clearAll()` from a parallel spec.** It empties the shared
-  inbox for everyone. Only a dedicated serial infrastructure spec may call
-  it, and none exists today.
 
 Note on the word "tag": everywhere else in these docs it means the seed tag
 from `patterns.md`. Mailpit tags are a different thing and are not used.
@@ -365,12 +362,10 @@ The API:
 - `count({to, contains, subject})`: number of matches for a recipient-scoped
   search. Use it for exactly-N claims after a bounding `find()`. An
   unbounded count proves nothing about silence.
-- `inboxFor(email)` and `latestTo(email)`: polling reads for one recipient.
-  `latestTo` can still race two mails to the same recipient, so prefer
-  `find`.
+- `inboxFor(email)`: a polling read of one recipient's inbox; prefer
+  `find` for an assertion.
 - `messageCount()`: total messages in the inbox, any recipient. Useful to
   assert that seeding produced no mail.
 - `fullMessage(id)` and `extractLink(html, linkText)`: body access and
   click-the-link flows. `extractLink` handles single- and double-quoted
   hrefs.
-- `clearAll()`: deletes the whole inbox. See the rule above.
