@@ -541,7 +541,7 @@ function locatorTable(rows = locatorRows) {
 /**
  * The feature-level screen notes, `.reports/<feature>/screen-notes.md`: the
  * one file every agent that drives the feature's screens reads first and
- * appends to (RUNBOOK step 3). Created on first write.
+ * appends to (docs/process/briefs/claim-check.md). Created on first write.
  */
 function screenNotesPath() {
     const feature = requireEnv('PROBE_FEATURE', 'the spec id, e.g. PROBE_FEATURE=U03');
@@ -553,7 +553,7 @@ function screenNotesPath() {
 /**
  * The locator tables the kit appends when a process exits go to the sibling
  * `.reports/<feature>/screen-locators.md`, so screen-notes.md stays the
- * hand-written file agents read whole (RUNBOOK step 3 "Screen notes").
+ * hand-written file agents read whole (docs/process/briefs/claim-check.md).
  */
 function appendScreenLocators(heading, body) {
     const file = path.join(path.dirname(screenNotesPath()), 'screen-locators.md');
@@ -576,7 +576,7 @@ function note(text) {
     const file = screenNotesPath();
     const header = fs.existsSync(file)
         ? ''
-        : `# ${process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (RUNBOOK step 3 "Screen notes").\n`;
+        : `# ${process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (docs/process/briefs/claim-check.md).\n`;
     fs.appendFileSync(file, `${header}- ${agent}${app}: ${String(text).replace(/\s+/g, ' ').trim()}\n`);
 }
 

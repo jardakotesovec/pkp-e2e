@@ -1,5 +1,5 @@
 // U28 claim check, chunk K6 — the OPS absence and the cross-app role
-// controls (RUNBOOK step 7 "Checks are kept").
+// controls (docs/process/briefs/claim-check.md).
 //
 // OPS, on its own scratch preprint server (a manager, a moderator, an
 // author, an Editorial Board Member, a reader, and a second author "rev"

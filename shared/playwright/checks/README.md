@@ -2,8 +2,7 @@
 
 One directory per feature, one per claim-check chunk inside it
 (`U05/K1/`, …). These are the scripts the claim checkers wrote while
-driving the spec's sentences against the running apps (RUNBOOK step 7
-"Checks are kept"). They are not tests: no assertions, no runner, no
+driving the spec's sentences against the running apps (`docs/process/briefs/claim-check.md`). They are not tests: no assertions, no runner, no
 fixtures. Each chunk has one entry script that seeds its own scratch
 context, signs in from the roster and records every screen with the probe
 kit's `screen()`, so a maintenance session can run the chunk again on a

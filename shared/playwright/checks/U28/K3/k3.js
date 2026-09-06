@@ -1,7 +1,7 @@
 // U28 claim check, chunk K3 — wizard steps 2 to 4 on OJS and OMP: the
 // guidelines step, the review boxes, "Reviewer Files", "Save for Later",
 // "Submit Review" and its confirmation, the submitted wizard, and what the
-// editor gets (RUNBOOK step 7 "Checks are kept").
+// editor gets (docs/process/briefs/claim-check.md).
 //
 // Drives, per app, on its own scratch context (a manager, a section editor
 // as stage participant, an author, one external reviewer "Rita Reviewer";

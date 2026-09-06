@@ -1,14 +1,13 @@
 # UNASSIGNED — parked atoms & dead-code candidates
 
-A campaign deliverable per the campaign's atom-claim invariant and liveness rule (RUNBOOK "Mission, scope & invariants"):
+A campaign deliverable per the campaign's atom-claim invariant and liveness rule:
 atoms no spec claims land here **with a reason**, alongside dead-code
 candidates surfaced by probes. Every entry names what would resolve it (a
 Phase-1 probe or a maintainer ruling). The claim check counts these as
 accounted for; the campaign is done only when each entry is either claimed by a
 spec, confirmed dead (stays here with evidence), or ruled out of scope.
 
-Sources (removed from the tip 2026-08-25, reachable in git history — RUNBOOK
-".reports/ retention"): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
+Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
 dead-code additions. **18 parked atoms** + **7 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's

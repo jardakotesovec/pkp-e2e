@@ -145,7 +145,7 @@ each; delete when done._
 ## Model-fallback log
 
 _Anomalies only — refusals, safeguard flags, downgrades, pauses (date ·
-feature · role · what happened); appended by hand (RUNBOOK Model discipline).
+feature · role · what happened); appended by hand.
 Routine agents are not logged._
 
 (none)

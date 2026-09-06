@@ -1,5 +1,5 @@
 // U05 claim check, chunk K3: the Notifications tab's rows per app, the
-// site-level tab, registration, the settings entries (RUNBOOK step 7).
+// site-level tab, registration, the settings entries (docs/process/briefs/claim-check.md).
 // Seeds its own scratch contexts, signs in from the roster rule, records
 // every screen with screen(). Run:
 //   PROBE_FEATURE=U05 PROBE_AGENT=ccK3 node bin/probe.js all shared/playwright/checks/U05/K3/k3.js

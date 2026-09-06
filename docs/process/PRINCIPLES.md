@@ -15,8 +15,8 @@ Related files: the build loop, budgets and definition of done are in
 `ContextFactory` and their app subclasses). A *seed tag* is the unique
 per-test token described in `patterns.md`.
 
-**Scope.** Tests assert behavior through the screens, as the RUNBOOK's "The
-screen is the instrument" describes: a test drives the UI as a signed-in
+**Scope.** Tests assert behavior through the screens, as the Frame
+(`briefs/frame.md`) says: a test drives the UI as a signed-in
 role, including navigating straight to a URL, and never asserts against a
 request the application's own screens would not send. The `/api/v1/_test/*`
 endpoints are harness plumbing for reaching a starting state (A4), never the

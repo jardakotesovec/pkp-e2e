@@ -1,6 +1,6 @@
 // U28 claim check, chunk K2 — wizard step 1 on OJS and OMP: the request,
 // the details window, accepting, declining, file links and who is refused
-// (RUNBOOK step 7 "Checks are kept").
+// (docs/process/briefs/claim-check.md).
 //
 // Drives, per app, on its own scratch context (a manager, a section editor
 // as participant, an author, two external reviewers and on OMP an internal

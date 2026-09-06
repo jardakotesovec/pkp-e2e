@@ -1,5 +1,5 @@
 // U28 claim check, chunk K9 — what the "4. Completion" step holds under the
-// thank-you text, on OJS and OMP (RUNBOOK step 7 "Checks are kept").
+// thank-you text, on OJS and OMP (docs/process/briefs/claim-check.md).
 //
 // Behind test finding T-ojs-1: Rule 13 says step 4 reads "Review Submitted"
 // and the thank-you paragraph "and nothing else"; scenario 6 says "with

@@ -4,7 +4,7 @@ What a fresh test install contains and how it is configured, on one sheet.
 A spec author checks a claim's premise against it before writing the
 claim ("the seeded journal has no consent box" was wrong; the sheet says
 so). A claim checker proposes a correction here when a premise proved
-wrong (RUNBOOK step 6). It stays true two ways. The first part is generated from the
+wrong (`briefs/claim-check.md`). It stays true two ways. The first part is generated from the
 seed fixtures, and `npm run seed-facts -- --check` in the lint step fails
 when it drifts (`npm run seed-facts -- --write` regenerates it). The
 hand-written lines each carry the screen that shows the fact and the date

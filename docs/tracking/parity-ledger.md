@@ -11,7 +11,7 @@ notifications as a user performing the equivalent steps through the UI/REST
 API. **Any change to a scenario builder requires a parity entry here before it
 merges**; deliberate deviations are recorded as such, with rationale.
 Evidence pointers into per-feature `.reports/` scratch may dangle after that
-scratch is deleted (RUNBOOK ".reports/ retention") — a disputed row is
+scratch is deleted (RUNBOOK step 11) — a disputed row is
 settled by a fresh probe on the current build, not by the old report.
 
 Format: one row per audited builder path per app. Evidence detail stays in

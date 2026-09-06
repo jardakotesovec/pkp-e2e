@@ -32,7 +32,7 @@ Deliverables:
 
 Read `.reports/{{feature}}/screen-notes.md` first and append what you learn by hand, in the kit's one-line shape prefixed with your agent id (a test never imports the kit); grep the sibling `screen-locators.md` for a locator another agent found, and the kept check scripts under `shared/playwright/checks/{{feature}}/` for the screen you are on (grep them, never read one whole). Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
-Any throwaway check you drive by hand uses the probe kit with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}}`, sized for about 40 browser calls (RUNBOOK step 6); tests never import the kit.
+Any throwaway check you drive by hand uses the probe kit with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}}`; tests never import the kit.
 
 Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit the spec, PRINCIPLES or the harness docs. Never edit anything under `checkouts/`. Commit nothing. Kill only browser or PHP processes you started yourself. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 

@@ -1,6 +1,6 @@
 // U29 claim check, chunk K2 — the "Setup" values in effect (Rules 5–8, register A3)
 // on OJS and OMP. OPS has no Review tab and no reviewer role (pF P34–35), so it
-// is skipped. RUNBOOK step 7 "Checks are kept".
+// is skipped. docs/process/briefs/claim-check.md.
 //
 // Per app, one scratch context: manager "Mira Manager", section editor "Sid
 // Editor" (stage participant), author "Ava Author", external reviewers "Rowan

@@ -36,7 +36,7 @@ never writes a brief from scratch, and it never writes rules into one.
 | 3, author the spec | `spec-author.md` |
 | 4, build a missing harness key | `harness.md` |
 | 6, one claim-check chunk | `claim-check.md` |
-| 6, merge three or more chunks | `merge.md` |
+| 6, three or more chunks (with two or fewer, no merge agent and no merge file) | `merge.md` |
 | 6 and 9, fold a change list into the spec | `fold.md` |
 | 7, compose the scenarios | `scenario-writer.md` |
 | 8, readability check (one read of the whole body) | `persona.md` |

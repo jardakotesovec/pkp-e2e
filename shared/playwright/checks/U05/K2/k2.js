@@ -1,5 +1,5 @@
 // U05 claim check, chunk K2 — what the Notifications tab's boxes do and the
-// roster of events (RUNBOOK step 7 "Checks are kept").
+// roster of events (docs/process/briefs/claim-check.md).
 //
 // Drives, per app, on its own scratch context: the box round trip on the
 // "…needs to be assigned." row (Rule 5c), three wizard submissions as the

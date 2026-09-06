@@ -1,6 +1,6 @@
 # Atlas — Phase 0 surface sweeps (OJS · OMP · OPS)
 
-Mechanical enumeration of the apps' surface per the campaign Method (RUNBOOK "Mission, scope & invariants"). Atoms only:
+Mechanical enumeration of the apps' surface per the campaign method (first enumerate, then document, then map coverage). Atoms only:
 no analysis, no liveness judgment — dead/unreachable surfaces are expected
 here and get resolved in Phase 1 (→ `UNASSIGNED.md`). Overlap between
 modalities is deliberate and harmless.

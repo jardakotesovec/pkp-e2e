@@ -5,15 +5,14 @@ This file is the single home for the campaign's feature taxonomy: **70 features
 feature row, claim its listed atoms, write the spec per `TEMPLATE.md`.
 
 - **The atlas is the frozen Phase-0 inventory** (2026-07-28). It split the apps into these features and is not extended: a surface added upstream since then is noted in its feature's row here, or gets a new row (MAINTENANCE "Triage").
-- **Invariant (atom claim — RUNBOOK "Mission, scope & invariants")**: every atlas atom lands in **exactly one**
+- **Invariant (atom claim)**: every atlas atom lands in **exactly one**
   of: a feature section below, the **Out of scope** section at the tail of this
   file, or `UNASSIGNED.md`. The unclaimed count is the campaign's completeness
   metric. This map accounts for all **2,163** atoms:
   **1,972 feature-assigned · 173 out of scope · 18 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later).
 - **Atom IDs and modality conventions**: see `atlas/README.md`. IDs are dense per
   modality and never renumbered; ranges here (`AFFW-068..075`) are inclusive.
-- **Sources** (removed from the tip 2026-08-25, reachable in git history —
-  RUNBOOK ".reports/ retention"): `.reports/phase0-feature-map/synthesis.md` §1 (feature list and
+- **Sources** (removed from the tip 2026-08-25, reachable in git history): `.reports/phase0-feature-map/synthesis.md` §1 (feature list and
   order) as amended by `.reports/phase0-feature-map/RULINGS.md` (all D-leans
   accepted; Q1–Q5 as ruled; D2 superseded; U68–U70 added), atomized by the six
   crosswalk files in `.reports/phase0-feature-map/`.

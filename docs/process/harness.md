@@ -43,7 +43,7 @@ shared POMs, and the bootstrap and login smoke specs. Feature suites never live
 here. When in doubt, a file belongs in the app's tree. Two directories are
 not infrastructure but live here because they span all three apps: `probe/`
 (the probe kit) and `checks/` (the kept claim-check scripts, one directory
-per feature, run on demand and never by CI; RUNBOOK step 6).
+per feature, run on demand and never by CI; `briefs/claim-check.md`).
 
 ```
 shared/playwright/
@@ -59,7 +59,7 @@ shared/playwright/
 │   └── env.js               # loadEnv(appRoot) — .env.playwright parser (shell exports win)
 ├── pages/                   # BasePage, LoginPage, DashboardPage, EditorialDashboardPage, MySubmissionsPage, WorkflowPage
 ├── probe/                   # The probe kit (patterns.md "Probe kit"); scripts import it, tests never do
-├── checks/<feature>/<chunk>/ # Kept claim-check scripts, re-runnable by a maintenance session (RUNBOOK step 6)
+├── checks/<feature>/<chunk>/ # Kept claim-check scripts, re-runnable by a maintenance session (briefs/claim-check.md)
 ├── data/users.js            # The 18 baseline identities + getPassword()/getEmail()
 ├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir + .auth/
 ├── serve.js                 # serve:<app> — manual PHP server on the fleet's base port
@@ -338,8 +338,7 @@ processes before re-running.
    `scenarios.md`.
 
 Rules that live elsewhere: findings and security routing are in RUNBOOK
-"What goes where"; git and push rules are in RUNBOOK "Ops & campaign
-safeguards".
+"What goes where"; git and push rules are in RUNBOOK step 11.
 
 ## CI
 

@@ -1,6 +1,6 @@
 // U28 claim check, chunk K5 — "Previous Reviews" and the round history
 // window, archived and cancelled assignments, OMP's two review stages, the
-// OJS recommendation reaching the editor (RUNBOOK step 7 "Checks are kept").
+// OJS recommendation reaching the editor (docs/process/briefs/claim-check.md).
 //
 // Drives, per app, on its own scratch context (a manager, a section editor
 // as stage participant, an author, two external reviewers "Rita Reviewer"

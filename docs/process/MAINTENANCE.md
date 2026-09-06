@@ -100,10 +100,9 @@ The apps move; the suite follows. The baselines live in
    chunks whose screens changed (`shared/playwright/checks/<feature>/`,
    RUNBOOK step 6) and have a fresh checker judge the snapshots against
    the spec lines each chunk owns and drive only what the checks did not
-   cover (step 6: the probe kit, the four checker rules, "What each role
-   reads", agents one or two at a time), fold the change into the spec
-   (rules, scenarios, register) through a writing agent (step 6 "Merge and
-   fold"), run the reader persona on the changed spans (step 8), lint
+   cover (step 6, `briefs/claim-check.md`, agents one or two at a time),
+   fold the change into the spec (rules, scenarios, register) through a
+   writing agent (step 6, `briefs/fold.md`), run the reader persona on the changed spans (step 8), lint
    (step 5), update the tests and run the touched suites green once (step
    9), update the PROGRESS row note to the new state (step 10). The slice
    writes the same `.reports/<feature>/phase-status.md`. Every changed
@@ -127,7 +126,7 @@ The apps move; the suite follows. The baselines live in
    change that looks unintended, a regression risk, a migration that could
    lose data, a permission surface that widened, a UX regression, a change
    that contradicts its own PR description. Exception: anything
-   security-shaped follows the RUNBOOK security routing. Verify privately,
+   security-shaped follows RUNBOOK "What goes where". Verify privately,
    keep the content in the private file only, and on Mattermost say only
    THAT a security-shaped observation was routed, then ping the maintainer.
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
@@ -160,7 +159,7 @@ decide deliberately. This decision is how the suite stays organised.
 - **Re-budget.** A feature grew enough that its tier under-covers it, or
   shrank so its tier overspends. Change the tier in its PROGRESS row with a
   one-line dated rationale, and grow or prune scenarios and tests to match.
-  The global ceilings in RUNBOOK "Budget & ceilings" still hold. If a tier
+  The global ceilings in RUNBOOK "Budget" still hold. If a tier
   bump would breach a ceiling, take the trade-off to Mattermost first.
 - **No impact.** An internal refactor with no spec-visible behavior change.
   The subclass-chain reasoning (RUNBOOK multi-app rule 8) plus a green suite
@@ -177,9 +176,8 @@ journal manager would name things today. Guardrails:
   reorganisation: a feature, out of scope, or `UNASSIGNED.md`.
 - U-numbers are never reused or renumbered. A retired or merged-away row
   stays in the map as a one-line tombstone pointing at its successor. Its
-  spec file, if shipped, is folded or superseded under the RUNBOOK's "Fix
-  stale campaign artifacts" rules, and moved claims keep their evidence
-  footnotes.
+  spec file, if shipped, is folded or superseded under "Standing duties"
+  below, and moved claims keep their evidence footnotes.
 - Every reorganisation is a dated note in the affected FEATURE-MAP rows plus
   a PROGRESS note, and is mentioned in the next Mattermost summary. Cheap to
   audit, easy to revert.
@@ -340,7 +338,7 @@ back up.
   session ends, including doc and tracking updates. An unpushed commit is a
   stranded result; an uncommitted tree at session end means the next session
   re-derives state from files that are not there. Release the claim too. The
-  push rules are unchanged (RUNBOOK "Ops & campaign safeguards"): pkp-e2e
+  push rules are unchanged (RUNBOOK step 11): pkp-e2e
   only, never the pkp remotes, and keep `main` green, because a push that
   breaks CI breaks every app PR check.
 
@@ -361,8 +359,18 @@ back up.
   red until the fix lands: no skip, no quarantine tag, no test edit. Its
   ci-triage row (one line plus a link to the register entry) is the only
   record, and the team hears about it on Mattermost.
-- **Fix stale artifacts as you go** (RUNBOOK "Fix stale campaign artifacts
-  when you meet them").
+- **Fix stale artifacts as you go.** Everything the campaign created is a
+  living artifact (process docs, page objects, fixtures, helpers, earlier
+  suites, the lint gate, the `_test` scenario API with its parity entry);
+  a session that finds one stale fixes it in that session, runs every
+  suite the fix touches green once, and names the fix in its report. A
+  shipped spec is corrected the same way when the session's own evidence
+  shows a claim wrong: through a writing agent, with a dated footnote
+  holding the verbatim on-screen strings, the reader on the rewritten
+  spans, lint zero, and the spec named in the report; a correction too
+  large or uncertain to fold becomes that spec's ❓ entry with a lean.
+  Maintenance never changes app code beyond what the app-changes rule
+  allows, and never moves content routed to the private security file.
 - **Delete what is resolved.** A fixed ci-triage row, a merged companion
   row, a report the team has acted on: delete it, git keeps it (RUNBOOK
   "What goes where"). Tracking files hold only what is open.

@@ -1,5 +1,4 @@
-// U28 claim check, chunk K6b — the remainder of K6 (RUNBOOK step 7 "Checks
-// are kept"): what an OPS account holding a home-made "Reviewer"-level role
+// U28 claim check, chunk K6b — the remainder of K6 (docs/process/briefs/claim-check.md): what an OPS account holding a home-made "Reviewer"-level role
 // gets (K6-2 of .reports/U28/cc-K6.md).
 //
 // Starts from K6's scratch server (scratch.json in ../ccK6/, copied into this

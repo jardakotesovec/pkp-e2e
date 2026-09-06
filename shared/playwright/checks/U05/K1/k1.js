@@ -1,5 +1,5 @@
 // U05 claim check, chunk K1: the Tasks panel, the bell and badge, the
-// reader-side count, toasts (RUNBOOK step 7). Seeds its own scratch
+// reader-side count, toasts (docs/process/briefs/claim-check.md). Seeds its own scratch
 // contexts, signs in from the roster rule, records every screen with
 // screen(). Run: PROBE_FEATURE=U05 PROBE_AGENT=ccK1 node bin/probe.js all shared/playwright/checks/U05/K1/k1.js
 //

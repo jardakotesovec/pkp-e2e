@@ -27,7 +27,7 @@ Write your scripts under `shared/playwright/checks/{{feature}}/{{chunk}}/`, impo
 
 Read `.reports/{{feature}}/screen-notes.md` first and append what you learn with the kit's `note()`: per screen, the locators that worked, kit gotchas, premise corrections, dialogs that appear on the way out, waiting idioms. Grep the sibling `screen-locators.md` (the kit's locator tables, a file to grep, never to read whole) for a locator another agent found, and `shared/playwright/checks/` for an earlier feature's script on the same screen, grepped for the screen you are on rather than read whole. Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
-Size: the chunk is cut for about 40 browser calls (RUNBOOK step 6). Drive every checklist line even if it takes more; do not stop at a count.
+Size: drive every checklist line even if it takes more calls than the chunk was cut for; do not stop at a count.
 
 Report: `{{report_path}}`, in spec-section order (the fold needs that). Header: chunk, apps driven, the declared no-screen lines by spec line number, calls used. Then one entry per checklist line or tight group: spec line number(s), verdict (holds / wrong / imprecise / undetermined), the screen evidence (snapshot file name, locator), with the claim separated from incidental observations (an incidental DOM detail is not promotable), and for anything not "holds", and for everything the sweep found, a digest block in the shape of `docs/process/briefs/digest-block.md` (ID `{{chunk}}-<n>`). Facts only, no spec prose beyond the proposed line. End with the `seed-facts.md` correction for any premise that proved wrong.
 

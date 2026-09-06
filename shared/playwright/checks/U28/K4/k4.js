@@ -1,8 +1,7 @@
 // U28 claim check, chunk K4 — the settings-driven variants on OJS and OMP:
 // competing interests, restricted file access, a review form, guidelines and
 // one-click links (Rule 8, Rule 16, "Settings that modify behavior",
-// scenarios 8, 9, 10, 13, register A8, A9, A10, OMP3). RUNBOOK step 7
-// "Checks are kept".
+// scenarios 8, 9, 10, 13, register A8, A9, A10, OMP3). docs/process/briefs/claim-check.md.
 //
 // Drives, per app, on its own scratch context (a manager, a section editor as
 // stage participant, an author, one external reviewer "Dora Reviewer").

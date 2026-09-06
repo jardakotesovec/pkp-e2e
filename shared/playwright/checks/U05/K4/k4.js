@@ -1,5 +1,5 @@
 // U05 claim check, chunk K4 — notification emails, the footer, the
-// Unsubscribe page, queued emails (RUNBOOK step 7 "Checks are kept").
+// Unsubscribe page, queued emails (docs/process/briefs/claim-check.md).
 //
 // Drives, per app, on its own scratch context: a discussion email and its
 // footer (Rule 7a/7c, scenario 5, Mailpit's own view of the plain-text

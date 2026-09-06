@@ -347,8 +347,8 @@ alternative.
 ## Live-probe cookbook (spec verification)
 
 Throwaway probes that check spec claims against the running app. These idioms
-cost half a session to rediscover. One caveat first: the campaign's method
-(RUNBOOK) forbids exploring a feature through hand-built requests, so the
+cost half a session to rediscover. One caveat first: the Frame
+(`briefs/frame.md`) forbids exploring a feature through hand-built requests, so the
 request-context idioms below are for verifying a specific claim, never for
 exploration.
 
@@ -460,13 +460,13 @@ element, never to read whole. `note(text)` appends one line to
 `.reports/<feature>/screen-notes.md` at once, for what a locator row cannot
 carry: a dialog that appears on the way out of a screen, a premise that
 proved wrong, a wait that hangs. Every agent that drives screens reads the
-notes file first (RUNBOOK step 6). `password(tag)` builds a scratch
+notes file first (`briefs/claim-check.md`). `password(tag)` builds a scratch
 password of at most 32 characters, the Register page's silent limit (the
 Login page object lifts it, the Register page does not).
 Claim-check scripts are not scratch:
 they live in `shared/playwright/checks/<feature>/<chunk>/`, import the kit
 as `require('../../../probe')`, and are kept so a maintenance session can
-run a chunk again (RUNBOOK step 6 "Checks are kept").
+run a chunk again (`briefs/claim-check.md`).
 `idle(page)` is `waitForJQueryIdle` plus a bounded network-quiet wait, so a
 Vue panel that fetches its own data on landing (a dashboard tab, a workflow
 step's discussions panel) is on screen before `screen()` reads; `tag(prefix)`
