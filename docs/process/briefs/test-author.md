@@ -9,7 +9,7 @@
 {{suite_path}}         apps/{{app}}/playwright/tests/U<nn>-<feature>.spec.js
 {{page_objects}}       page object(s) to create or extend, with the path, and who else will reuse them
 {{example_suites}}     one or two shipped suites in apps/{{app}}/playwright/tests/ to copy the shape from
-{{feature_facts}}      feature-specific facts step 9 needs that are not screen facts (a scenario that ends the session, a browser dialog a step raises), or "none"
+{{feature_facts}}      feature-specific facts step 8 needs that are not screen facts (a scenario that ends the session, a browser dialog a step raises), or "none"
 {{fleet_json}}         .reports/{{feature}}/fleet.json
 {{agent}}              PROBE_AGENT for any throwaway check, e.g. t{{app}}
 {{output_dir}}         .reports/{{feature}}/test-{{app}}-output
@@ -21,7 +21,7 @@
 
 You are the test author for the **{{APP}}** suite of feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 8 and "The multi-app rules". Read `docs/process/PRINCIPLES.md`, `docs/process/harness.md`, `docs/process/patterns.md`, `docs/process/scenarios.md`, `docs/process/seed-facts.md`, `docs/process/users.md`, the spec, and the feature's `screen-notes.md`.
 
-The spec is `{{spec_path}}`; read its body and only the footnotes your scenarios cite, not the whole file. Scenarios this app runs: {{scenarios}}. Feature facts for step 9: {{feature_facts}}.
+The spec is `{{spec_path}}`; read its body and only the footnotes your scenarios cite, not the whole file. Scenarios this app runs: {{scenarios}}. Feature facts for step 8: {{feature_facts}}.
 
 Deliverables:
 1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES: one test per scenario, its title opening with the scenario number (`S3: …`). Every absence a scenario states ("nothing else", "no list", "stays") is asserted with a settled, auto-waited read and a positive control, never left unasserted (PRINCIPLES M6); a contradiction is a finding under deliverable 4, not a dropped assertion.
