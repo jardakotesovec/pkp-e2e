@@ -4,12 +4,6 @@ The contract every test-writing session follows, and the design record a
 harness rebuild would start from. Paths are relative to the pkp-e2e repo
 root. Test files cite these rules by ID (A8, D9, M1…), so the IDs are stable.
 
-Related files: the build loop, budgets and definition of done are in
-`RUNBOOK.md`; spec style in `TEMPLATE.md`; live state in
-`docs/tracking/PROGRESS.md`; harness layout and environment facts in
-`harness.md`; seeding and Mailpit in `scenarios.md`; identities in
-`users.md`; parity verdicts in `docs/tracking/parity-ledger.md`.
-
 **Two terms.** A *scenario builder* is one of the PHP classes behind
 `/api/v1/_test/*` (`PKPBootstrapSeeder`, `PKP*ScenarioBuilder`,
 `ContextFactory` and their app subclasses). A *seed tag* is the unique
@@ -190,8 +184,3 @@ seeded through the scenario API's passthrough keys
 settings screen in a test. A bootstrap change, should one ever be needed,
 requires checking every implemented spec against the new defaults,
 deliberately, not casually.
-
-## Findings and changes: where they go
-
-Where findings go: RUNBOOK "What goes where". A result contradicting the
-spec means the spec is wrong (M6), never a skipped or `fixme` test.

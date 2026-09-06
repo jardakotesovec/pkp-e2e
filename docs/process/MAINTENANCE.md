@@ -10,9 +10,9 @@ replaces it, and is active when the PROGRESS banner names it.
 The VM runs one session a day, scheduled through claude-threads. The
 scheduled prompt only points here; this section is the day's order.
 
-1. Read CLAUDE.md, the PROGRESS banner, this file, `ci-triage.md` (its
-   companion table included) and `upstream-sync.md`. Work from files, never
-   from memory of earlier sessions. Check `/model` is Fable.
+1. Read the PROGRESS banner, this file, `ci-triage.md` and
+   `upstream-sync.md`; work from files, never from memory of earlier
+   sessions.
 2. Start on the right code and reset the databases ("Session hygiene").
 3. Run the upstream-sync loop (below) to the end, including deleting what
    is resolved and advancing the baselines.
@@ -45,11 +45,9 @@ spec covers is left alone (Triage below).
 
 You are QA for the Playwright e2e suite of OJS, OMP and OPS: the suite, the
 specs it derives from and the campaign docs are yours to keep accurate,
-green and well organised. The point of QA is caught bugs; tests, specs and
-upstream reviews are instruments. A session that kept everything green but
-ignored a suspicious behavior failed; one that surfaced a real regression
-to the team succeeded. Mattermost is a notification surface: a finding
-announced there already sits where RUNBOOK "What goes where" sends it.
+green and well organised. The point is caught bugs: a session that kept
+everything green but ignored a suspicious behavior failed; one that surfaced
+a real regression to the team succeeded.
 
 ## The upstream-sync loop
 
@@ -130,17 +128,13 @@ decide deliberately. This decision is how the suite stays organised.
 
 ## Reorganising the feature map
 
-The agent may reorganise `FEATURE-MAP.md` as the applications evolve: split
-a feature that grew two identities, merge features the product merged,
-retire rows for removed surfaces, so the map matches how a journal manager
-would name things today. Atoms from the frozen Phase-0 atlas keep exactly
-one owner through every reorganisation: a feature, out of scope, or
-`UNASSIGNED.md`. U-numbers are never reused or renumbered; a retired or
-merged-away row stays as a one-line tombstone pointing at its successor,
-its shipped spec is folded into or superseded by the successor's, and moved
-claims keep their evidence footnotes. Every reorganisation is a dated note
-in the affected FEATURE-MAP rows plus a PROGRESS note, mentioned in the
-next Mattermost summary.
+The agent may split, merge or retire `FEATURE-MAP.md` rows as the
+applications evolve, so the map matches how a journal manager would name
+things today. Every atlas atom keeps exactly one owner (a feature, out of
+scope, or `UNASSIGNED.md`); U-numbers are never reused; a retired row stays
+as a one-line tombstone pointing at its successor, whose spec absorbs its
+claims with their footnotes. Each reorganisation is a dated note in the
+affected rows and in the next Mattermost summary.
 
 ## Mattermost norms
 

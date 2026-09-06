@@ -5,16 +5,18 @@ FEATURE-MAP row number) and fill in every section, or mark a section
 `N/A — <reason>`. The HTML comments are guidance. Delete them in the real
 spec.
 
-## Who a spec is for
+## Write for a reader who has only this page
 
 A QA person or product owner who wants to **learn** the feature, **check**
-whether it behaves as intended, or **add** to it. Concise, but covering every
-detail that matters for the area. The spec is the source of truth: everything
-the project knows about the feature lives here (its behavior in all three
-apps, where the apps differ, what is broken, what still needs a product
-decision), and everything else (tests, bug lists, coverage views) is derived
-from it. If a reader needs a developer or an internal report to understand a
-sentence, the sentence is wrong.
+whether it behaves as intended, or **add** to it: someone who knows the
+applications and has read `docs/specs/GLOSSARY.md`, has no code, has read no
+other spec, and reads nothing below the footnotes. The readability pass
+(RUNBOOK step 7) hands the body to exactly that reader. The spec is the
+source of truth: everything the project knows about the feature lives here
+(its behavior in all three apps, where the apps differ, what is broken, what
+still needs a product decision), and everything else (tests, bug lists,
+coverage views) is derived from it. If a reader needs a developer or an
+internal report to understand a sentence, the sentence is wrong.
 
 **One spec covers OJS, OMP and OPS.** The body describes shared behavior. A
 claim with no app marker asserts "verified identical in every app that has
@@ -34,11 +36,6 @@ its home section and link to it from anywhere else. Length is whatever those
 two produce. Write plain sentences. A rule the reader has to read twice is a
 defect, however true it is.
 
-## Write for a reader who has only this page
-
-The readability pass (RUNBOOK step 5) hands the body to a QA person who
-knows the applications and has read `docs/specs/GLOSSARY.md`, has no
-code, has read no other spec, and reads nothing below the footnotes.
 Every writer, whether drafting, folding or rewriting, writes to that
 reader from the start: lean, in the GLOSSARY's words, with nothing the
 reader already knows explained again (what a test install, a seeded or
@@ -57,7 +54,7 @@ the Dashboard; what a role does). Three kinds of sentence fail:
   lost" says where the tester looks to see that. A scenario step that
   leaves a choice ("press another tab") names one.
 
-Four conventions the shipped specs share, so a new spec does not invent
+Two conventions the shipped specs share, so a new spec does not invent
 its own:
 
 - The scenario preamble is one or two sentences: which scenarios run on
@@ -66,10 +63,6 @@ its own:
   passwords and the tooling recipe in the footnote. It defines nothing and
   says nothing about how to read the page (no "common to all three apps",
   no pointer to a note under the title).
-- Mail is read "in the mailbox of the address it was sent to" (GLOSSARY
-  "Mail catcher"); the footnote names the tool and its address.
-- The body uses the journal words; the press and preprint-server names
-  are GLOSSARY Part II's, and no note under the title repeats them.
 - A finding's expected and observed behaviour are stated in the same
   screen words as the rule it marks, so a tester can tell a documented
   defect from a pass.
@@ -148,15 +141,10 @@ judgment, checked by the readability pass and never by the gate.
    not a walkthrough: the spec states the outcome, and step-by-step
    reproduction stays in the session's `.reports/` scratch, because a product
    reader needs the outcome, not the trail.
-   Each finding enters at the weight its impact earns. The change list
-   (RUNBOOK step 5) is raw material, not spec content. The writer judges
-   every candidate: does it belong to this feature, is it relevant to a user, does
-   the proposed weight match what a user would notice. Then write it
-   symptom-first, in product language, at proportionate length. Severity is
-   proposed by the change list and settled by the reviewer, not argued in the
-   spec: badge it, state the symptom, state the impact in one plain word, and
-   stop. Trivia, fixture accidents and other features' findings stay in
-   `.reports/` or move to their owning spec. Campaign-internal words
+   Each finding enters at the weight its impact earns, symptom-first, at
+   proportionate length. Severity is proposed by the change list and settled
+   by the reviewer, not argued in the spec: badge it, state the symptom,
+   state the impact in one plain word, and stop. Campaign-internal words
    ("claim check", "change list", "orchestrator") do not belong in a
    spec; evidence citations live in footnotes.
    Every finding belongs in a register, with one exception: a potential
@@ -327,7 +315,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      installs", "owned by the ORCID spec", "register A4 carries it; not a
      user path"). In the draft, before the scenarios exist, "Runs in"
      reads `planned` for a row the scenarios should cover, and the
-     scenario writer replaces it (RUNBOOK step 5). A row blank in both
+     scenario writer replaces it (RUNBOOK step 6). A row blank in both
      columns is a gap the lint reports. A Why-not cell says why the row
      has no scenario ("out of tier", "no screen on the test installs",
      "owned by the ORCID spec"); never evidence such as "read once
@@ -355,7 +343,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      units tests map onto: each app's suite implements them (RUNBOOK
      multi-app rules). WHEN: the draft carries this section's preamble and
      no scenarios; they are composed after the claim check from the
-     verified body and the Coverage rows (RUNBOOK step 5),
+     verified body and the Coverage rows (RUNBOOK step 6),
      every sentence a fact the Rules, Fields or Side effects already
      state. ORDER: first the scenarios COMMON to every app that
      has the feature, then the app-specific ones (title the block or badge
@@ -414,9 +402,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
 
      | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 
-     Badges: 🐞 defect (author's call) · ❓ needs a product ruling · ✅ intended
-     divergence. Impact: one plain value (user-visible / invisible / latent /
-     minor). Review: "—" until someone reviews, then `<name> <date>` with an
+     Badges and Impact words: the glossary's. Review: "—" until someone reviews, then `<name> <date>` with an
      optional ` · <disposition>` (`Jarda 2026-08-25`, `Jarda 2026-08-25 ·
      to triage`, `@beaug 2026-08-29 · risk accepted`); the cell is a mirror
      of the entry's Reviewed blockquote, never the only record. An author
@@ -425,9 +411,8 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
 
      Entries under `### All apps` / `### OMP` / `### OPS`. IDs are LOCAL and
      DENSE (A1, A2… / OMP1… / OPS1…), no gaps, no foreign keys. Anchor each:
-     `<a id="a1"></a>`. Body markers: `⚠ [A1](#a1)` when the entry is 🐞 or ❓
-     (⚠ means "as-built deviation here", any scope); plain `[OMP2](#omp2)`
-     for ✅ intended divergences.
+     `<a id="a1"></a>`. Body markers: `⚠ [A1](#a1)` when the entry is 🐞 or ❓,
+     plain `[OMP2](#omp2)` for ✅ intended divergences.
 
      Entry anatomy (5–8 lines):
      **A1 — <short title>** · 🐞 · user-visible.
