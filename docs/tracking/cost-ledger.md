@@ -19,6 +19,12 @@ output at about a fifth of its true value (the script read the placeholder
 count on streamed lines); add about 3.5M to each of those totals when
 comparing with U28 onward.
 
+The rows `U28-medium` and `U29-high` are the two effort trials (blind
+rebuilds, 2026-09-05 and 2026-09-06): each feature was built once at each
+effort, and the comparison settled on high for every role (commit 120b795
+carries what the medium builds did better). The comparisons are in
+`.reports/U28-compare/` and `.reports/U29-compare/`.
+
 The command, run where the session transcript is at hand:
 
     node bin/session-cost.mjs ~/.claude/projects/<project>/<session-uuid>.jsonl --label U03 --append
