@@ -26,11 +26,10 @@
  */
 const fs = require('fs');
 const path = require('path');
-const http = require('http');
 const {spawn} = require('child_process');
 const {APPS, REPO_ROOT} = require('./apps.js');
 const {resolveProbeApp, PROBE_PORT_OFFSET} = require('../shared/playwright/probe/index.js');
-const {phpServerCommand, phpServerEnv, phpServerReadyUrl} = require('../shared/playwright/php-server.js');
+const {phpServerCommand, phpServerEnv, phpServerStatus} = require('../shared/playwright/php-server.js');
 
 const PID_DIR = path.join(REPO_ROOT, '.reports', 'servers');
 const USAGE = 'usage: node bin/probe-servers.js --start|--stop|--status [--app ojs|omp|ops]';
@@ -80,21 +79,6 @@ function alive(pid) {
     }
 }
 
-/** HTTP status of the static ready probe, or null when nothing answers. */
-function httpStatus(port) {
-    return new Promise((resolve) => {
-        const req = http.get(phpServerReadyUrl(port), (res) => {
-            res.resume();
-            resolve(res.statusCode);
-        });
-        req.setTimeout(2000, () => {
-            req.destroy();
-            resolve(null);
-        });
-        req.on('error', () => resolve(null));
-    });
-}
-
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function waitFor(check, timeoutMs, poll = 250) {
@@ -138,7 +122,7 @@ async function startOne(app, server) {
         console.log(`probe-servers: ${app.name} ${kind}: already running (pid ${existing}, port ${port})`);
         return true;
     }
-    if ((await httpStatus(port)) !== null) {
+    if ((await phpServerStatus(port)) !== null) {
         if (kind === 'validation') {
             console.log(`probe-servers: ${app.name} ${kind}: something already serves ${port} — using it as is`);
             return true;
@@ -169,7 +153,7 @@ async function startOne(app, server) {
     });
     child.unref();
     fs.writeFileSync(pidFile(app.name, kind), `${child.pid}\n`);
-    const up = await waitFor(async () => (await httpStatus(port)) !== null, 30_000);
+    const up = await waitFor(async () => (await phpServerStatus(port)) !== null, 30_000);
     if (!up) {
         console.error(`probe-servers: ${app.name} ${kind}: no answer on ${port} after 30 s — see ${logFile}`);
         return false;
@@ -202,7 +186,7 @@ async function stopOne(app, {kind, port}) {
         } catch {
             process.kill(pid, 'SIGTERM');
         }
-        const gone = await waitFor(async () => !alive(pid) && (await httpStatus(port)) === null, 10_000);
+        const gone = await waitFor(async () => !alive(pid) && (await phpServerStatus(port)) === null, 10_000);
         if (!gone) {
             try {
                 process.kill(-pid, 'SIGKILL');
@@ -212,7 +196,7 @@ async function stopOne(app, {kind, port}) {
         }
     }
     fs.rmSync(pidFile(app.name, kind), {force: true});
-    if ((await httpStatus(port)) !== null) {
+    if ((await phpServerStatus(port)) !== null) {
         console.error(
             `probe-servers: ${app.name} ${kind}: pid ${pid} stopped but port ${port} still answers — a server this script did not start; left alone`,
         );
@@ -242,7 +226,7 @@ async function status(name) {
     for (const {kind, port} of servers(app)) {
         const pid = readPid(app.name, kind);
         const running = pid ? alive(pid) : false;
-        const code = await httpStatus(port);
+        const code = await phpServerStatus(port);
         const http = code === null ? 'no answer' : `HTTP ${code} on /README.md`;
         const state = running
             ? `running (pid ${pid})`

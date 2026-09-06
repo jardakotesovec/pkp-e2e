@@ -10,7 +10,7 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const {APPS, REPO_ROOT, resolveApp} = require('./apps.js');
+const {REPO_ROOT, resolveApp, configuredApps} = require('./apps.js');
 
 const sha = (file) =>
     crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -64,10 +64,5 @@ function unmount(appName) {
 }
 
 const requested = process.argv.slice(2);
-const names = requested.length
-    ? requested
-    : Object.keys(APPS).filter((name) => {
-          require('../shared/playwright/support/env.js').loadEnv(REPO_ROOT, '.env');
-          return !!process.env[`${name.toUpperCase()}_ROOT`];
-      });
+const names = requested.length ? requested : configuredApps();
 names.forEach(unmount);

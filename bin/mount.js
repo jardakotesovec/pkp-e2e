@@ -18,7 +18,7 @@
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const {APPS, REPO_ROOT, resolveApp} = require('./apps.js');
+const {REPO_ROOT, resolveApp, configuredApps} = require('./apps.js');
 
 const EXCLUDE_BEGIN = '# >>> pkp-e2e mount (managed block — do not edit)';
 const EXCLUDE_END = '# <<< pkp-e2e mount';
@@ -115,12 +115,7 @@ function mount(appName) {
 }
 
 const requested = process.argv.slice(2);
-const names = requested.length
-    ? requested
-    : Object.keys(APPS).filter((name) => {
-          require('../shared/playwright/support/env.js').loadEnv(REPO_ROOT, '.env');
-          return !!process.env[`${name.toUpperCase()}_ROOT`];
-      });
+const names = requested.length ? requested : configuredApps();
 if (!names.length) {
     console.error('mount: no apps requested and no <APP>_ROOT set in .env');
     process.exit(1);

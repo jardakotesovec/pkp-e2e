@@ -24,6 +24,7 @@
  * runs (reuseExistingServer, or a probe server) keeps its old log open and
  * the file is only reset when a server actually (re)starts.
  */
+const http = require('http');
 
 const RESTART_LIMIT = 20;
 
@@ -59,4 +60,26 @@ function phpServerReadyUrl(port) {
     return `http://127.0.0.1:${port}/README.md`;
 }
 
-module.exports = {phpServerCommand, phpServerEnv, phpServerReadyUrl, RESTART_LIMIT};
+/**
+ * HTTP status of the ready probe on `port`, or null when nothing answers
+ * within `timeoutMs`.
+ *
+ * @param {number} port
+ * @param {{timeoutMs?: number}} [options]
+ * @returns {Promise<number|null>}
+ */
+function phpServerStatus(port, {timeoutMs = 2000} = {}) {
+    return new Promise((resolve) => {
+        const req = http.get(phpServerReadyUrl(port), (res) => {
+            res.resume();
+            resolve(res.statusCode);
+        });
+        req.setTimeout(timeoutMs, () => {
+            req.destroy();
+            resolve(null);
+        });
+        req.on('error', () => resolve(null));
+    });
+}
+
+module.exports = {phpServerCommand, phpServerEnv, phpServerReadyUrl, phpServerStatus, RESTART_LIMIT};

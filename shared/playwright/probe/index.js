@@ -28,6 +28,7 @@ const {PkpMail} = require('../support/mail.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
 const {disableMotion} = require('../support/motion.js');
 const {LoginPage} = require('../pages/LoginPage.js');
+const {readEnvFile} = require('../support/env.js');
 const users = require('../data/users.js');
 const {VALIDATION_PORT_OFFSET} = require('../config-factory.js');
 
@@ -80,44 +81,14 @@ function appSuffixed(name) {
 // Apps and their environment
 
 /**
- * The checkout's .env.playwright as a map (the same syntax support/env.js
- * loads into process.env). Read into a map, not process.env, so one process
- * can hold three apps with three keys and three ports. Shell exports win
- * for TEST_API_KEY and MAILPIT_URL only (the runner's rule); the port always
- * comes from the file, else the registry, so `PLAYWRIGHT_BASE_PORT` in the
- * shell cannot shift every app onto one fleet.
- */
-function readEnvFile(dir, fileName = '.env.playwright') {
-    const map = {};
-    const envFile = path.join(dir, fileName);
-    if (!fs.existsSync(envFile)) {
-        return map;
-    }
-    for (const line of fs.readFileSync(envFile, 'utf8').split('\n')) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) {
-            continue;
-        }
-        const eq = trimmed.indexOf('=');
-        if (eq === -1) {
-            continue;
-        }
-        const key = trimmed.slice(0, eq).trim();
-        let value = trimmed.slice(eq + 1).trim();
-        if (
-            (value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))
-        ) {
-            value = value.slice(1, -1);
-        }
-        map[key] = value;
-    }
-    return map;
-}
-
-/**
  * The static part of an app's bag: identity, ports, config, key. No browser,
  * no request context, so bin/probe-servers.js can use it too.
+ *
+ * The checkout's .env.playwright is read into a map, not process.env, so one
+ * process can hold three apps with three keys and three ports. Shell exports
+ * win for TEST_API_KEY and MAILPIT_URL only (the runner's rule); the port
+ * always comes from the file, else the registry, so `PLAYWRIGHT_BASE_PORT`
+ * in the shell cannot shift every app onto one fleet.
  *
  * @param {string} name ojs | omp | ops
  */

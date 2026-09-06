@@ -25,9 +25,9 @@
  */
 const fs = require('fs');
 const path = require('path');
-const http = require('http');
 const {spawnSync} = require('child_process');
 const {APPS, REPO_ROOT, resolveApp} = require('./apps.js');
+const {phpServerStatus} = require('../shared/playwright/php-server.js');
 
 const USAGE = 'usage: node bin/test-final.js --feature <id> [--apps ojs,omp,ops] [--grep <pattern>]';
 
@@ -60,20 +60,6 @@ function parseArgs(argv) {
         }
     }
     return options;
-}
-
-function answers(port) {
-    return new Promise((resolve) => {
-        const req = http.get(`http://127.0.0.1:${port}/README.md`, (res) => {
-            res.resume();
-            resolve(true);
-        });
-        req.setTimeout(1500, () => {
-            req.destroy();
-            resolve(false);
-        });
-        req.on('error', () => resolve(false));
-    });
 }
 
 /** Scenario numbers of the feature's spec (the numbered items under "## Canonical scenarios"). */
@@ -132,7 +118,7 @@ function tally(text) {
 
     for (const name of apps) {
         const app = resolveApp(name);
-        if (await answers(app.basePort)) {
+        if ((await phpServerStatus(app.basePort, {timeoutMs: 1500})) !== null) {
             console.log(
                 `test-final: WARNING ${name}: a server already answers on ${app.basePort}; the run will adopt it ` +
                     `(kill any manual server first — lsof -nP -iTCP:${app.basePort})`,

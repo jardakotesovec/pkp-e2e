@@ -44,4 +44,10 @@ function resolveApp(name) {
     };
 }
 
-module.exports = {APPS, REPO_ROOT, resolveApp};
+/** The apps whose <APP>_ROOT the repo .env names, in registry order. */
+function configuredApps() {
+    loadEnv(REPO_ROOT, '.env');
+    return Object.keys(APPS).filter((name) => !!process.env[`${name.toUpperCase()}_ROOT`]);
+}
+
+module.exports = {APPS, REPO_ROOT, resolveApp, configuredApps};

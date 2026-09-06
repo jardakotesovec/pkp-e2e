@@ -27,6 +27,7 @@ const os = require('os');
 const path = require('path');
 const {defineConfig, devices} = require('@playwright/test');
 const {loadEnv} = require('./support/env.js');
+const {patchIni} = require('./ini.js');
 const {phpServerCommand, phpServerEnv, phpServerReadyUrl} = require('./php-server.js');
 
 /**
@@ -90,48 +91,6 @@ const validationPatches = (port) => ({
         altcha_on_register: 'on',
     },
 });
-
-/**
- * Rewrite config keys in place inside their section (an active or commented
- * assignment at line start), appending under the section header when the
- * section lacks the key — the same rules make-test-config.js applies to the
- * template. Returns the patched text.
- */
-function patchIni(text, patches) {
-    const out = [];
-    let pending = {};
-    let done = new Set();
-    const flushPending = () => {
-        for (const [key, value] of Object.entries(pending)) {
-            out.push(`${key} = ${value}`);
-        }
-        pending = {};
-        done = new Set();
-    };
-    for (const line of text.split('\n')) {
-        const sectionMatch = line.match(/^\[(\w+)\]/);
-        if (sectionMatch) {
-            flushPending();
-            pending = {...(patches[sectionMatch[1]] || {})};
-            out.push(line);
-            continue;
-        }
-        const keyMatch = line.match(/^(;?)\s*([a-z_]+)\s*=/);
-        if (keyMatch && pending[keyMatch[2]] !== undefined) {
-            out.push(`${keyMatch[2]} = ${pending[keyMatch[2]]}`);
-            done.add(keyMatch[2]);
-            delete pending[keyMatch[2]];
-            continue;
-        }
-        // A later active assignment would win in ini — drop it.
-        if (keyMatch && keyMatch[1] === '' && done.has(keyMatch[2])) {
-            continue;
-        }
-        out.push(line);
-    }
-    flushPending();
-    return out.join('\n');
-}
 
 /**
  * Derive the validation-variant config from the default test config and
