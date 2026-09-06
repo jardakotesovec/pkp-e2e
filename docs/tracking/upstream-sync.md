@@ -1,13 +1,7 @@
 # Upstream sync — last-reviewed app commits
 
-Baselines for the MAINTENANCE upstream-sync loop
-(`docs/process/MAINTENANCE.md`): the tip of pkp `main` each app was last
-reviewed at. After `npm run fetch-apps -- --update`, diff
-`<baseline>..HEAD` per app (and lib/pkp once — it is shared), triage, then
-advance the row and add a log entry in the shape below. **The baseline
-advances only when its range is fully triaged.** The log keeps entries
-back to the oldest open item in `ci-triage.md` (its companion table
-included) and nothing older.
+The last-reviewed commit of each app and of `lib/pkp`, advanced by the
+MAINTENANCE upstream-sync loop (`docs/process/MAINTENANCE.md`).
 
 ## Baselines
 
@@ -20,12 +14,9 @@ included) and nothing older.
 
 ## Sync log
 
-_Append-only, newest first. One entry per sync: the date and the range per
-repo, then ONE LINE per change reviewed (commit → no impact / spec and
-tests touched / finding filed, with a link). Never a narrative; the story
-lives in the register entry and in git. A companion-branch merge
-(MAINTENANCE "A developer's PR fails the suite") also gets a one-line
-entry when it advances a baseline._
+_Newest first; one entry per sync: the date and the range per repo, then
+one line per change reviewed (commit → no impact / spec and tests touched /
+finding filed, with a link)._
 
 - **2026-09-04 (sync) — ojs `762415103f..97663b2850` (4), omp and ops unchanged, pkp-lib `6a902ad50a..4ddab4b9cf` (1, ojs only), ui-library `7611b0b8..5c3da336` (ojs only), lensGalley `025f53c..43c8195` (ojs only).**
   - CI at the tips: ojs run 33771247334, omp 33629780688, ops 33629815586 → all green; nothing red to triage; no open ci-triage rows, no companions.

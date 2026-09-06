@@ -1,15 +1,10 @@
 # Scenario-endpoint parity ledger
 
-Rows are dated verdicts, corrected by dated notes in their Notes cell,
-never rewritten. Contract: PRINCIPLES A2 — a seeded scenario must leave
-the same database state, fire the same hooks, and produce the same
-notifications as a user performing the equivalent steps through the UI or
-REST API. Any change to a scenario builder needs a parity row here before
-it merges; a deliberate deviation is recorded as such, with its rationale.
-One row per audited builder path per app. The evidence detail stays in
-`.reports/`, and those pointers dangle once the scratch is deleted
-(RUNBOOK step 10), so a disputed row is settled by a fresh probe on the
-current build, not by the old report.
+One row per audited builder path per app: a dated verdict that the
+scenario builder produces the state a real user would (PRINCIPLES A2),
+corrected by dated notes in the Notes cell, never rewritten. The evidence
+detail lives in `.reports/`, and a disputed row is settled by a fresh probe
+on the current build.
 
 | Date | App | Builder path | Parity check | Verdict | Notes |
 |---|---|---|---|---|---|

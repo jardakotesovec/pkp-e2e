@@ -10,9 +10,7 @@ pending row; feature sessions are launched by the maintainer under the
 RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
 baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
-reported failure. A row note is replaced, never appended to, and keeps the
-shape `tests per app · register counts · one headliner ID · open blocker ·
-low-confidence IDs`.
+reported failure.
 
 ## Features
 
@@ -21,12 +19,12 @@ status is pending / in_progress / done / parked.
 
 | Row | Feature | Apps | Budget | Status | Note |
 |---|---|---|---|---|---|
-| U01 | Login & sessions | OJS OMP OPS | M | done | Spec verified. 8 tests per app (+setup); scenario 9 declared not covered in the suite headers. Register 6🐞+1❓+1✅. Maintainer review done 2026-08-25: A1–A4 and A7–A8 confirmed with fix rulings, A5 for team triage, A6 intended (pkp/pkp-lib#12162). |
+| U01 | Login & sessions | OJS OMP OPS | M | done | 8 OJS · 8 OMP · 8 OPS (+setup; scenario 9 declared not covered in the suite headers). 6🐞+1❓+1✅. |
 | U02 | Registration & account validation | OJS OMP OPS | M | done | 8 tests per app (+setup; OPS S3 absence). 8🐞+2❓. Headliner A6. 1 in the private file, verified. |
 | U03 | User profile | OJS OMP OPS | M | done | 10 tests per app (+setup; OPS S6 absence). 12🐞+6❓+2✅. Headliner A3. 2 in the private file, verified. Low-confidence: Rule 3 (one-journal site, not drivable on the fleets). |
-| U04 | ORCID integration | OJS OMP OPS | M | done | Spec verified. 9 tests OJS, 8 OMP, 9 OPS (+setup; 2 absence tests). Register 6🐞+5❓+3✅ (A10 retired 2026-09-03, fixed upstream in all three apps); headliner A5 (Assistant false-success). ORCID legs run against the dead-port proxy with sandbox dummy credentials. |
+| U04 | ORCID integration | OJS OMP OPS | M | done | 9 OJS · 8 OMP · 9 OPS (+setup; 2 absence tests). 6🐞+5❓+3✅ (A10 retired 2026-09-03, fixed upstream in all three apps). Headliner A5. ORCID legs run against the dead-port proxy with sandbox dummy credentials. |
 | U05 | Notifications center & email preferences | OJS OMP OPS | M | done | 9 OJS (S9 serial) · 8 OMP · 8 OPS (+setup). 6🐞+8❓. Headliner A10. Blocker: app-changes row 12 (overlay mounted). Low-confidence: Rules 2d/5d (F26, not drivable on the fleets). |
-| U06 | User invitations | OJS OMP OPS | M | done | Spec verified. 8 tests OJS, 8 OMP, 9 OPS (+setup). Register 8🐞+2❓ (A1 outcome in the private file). |
+| U06 | User invitations | OJS OMP OPS | M | done | 8 OJS · 8 OMP · 9 OPS (+setup). 8🐞+2❓. 1 in the private file. |
 | U07 | Journal identity & about pages | OJS OMP OPS | M | pending | |
 | U08 | Navigation menus & site chrome | OJS OMP OPS | M | pending | |
 | U09 | Custom pages & blocks | OJS OMP OPS | L | pending | |
@@ -45,8 +43,8 @@ status is pending / in_progress / done / parked.
 | U22 | My Submissions (author dashboard) | OJS OMP OPS | L | done | 4 OJS · 5 OMP · 4 OPS (+setup). 1🐞+7❓. Headliner OPS2. 1 in the private file, verified. Low-confidence: A3. |
 | U23 | Submissions dashboard (editorial) | OJS OMP OPS | H | done | 13 OJS · 13 OMP · 11 OPS (+setup). 3🐞+6❓. Headliner A5. |
 | U24 | Workflow screen & stage access | OJS OMP OPS | M | done | 8 OJS · 9 OMP · 6 OPS (+setup; OPS runs S1, S5–S8, S10). 4🐞+10❓+2✅. Headliner A9. 1 in the private file, verified. Low-confidence: Rule 15b; Rules 18–19 (no positive control). |
-| U25 | Submission stage | OJS OMP OPS | M | done | Spec verified. 7 tests OJS, 8 OMP, 2 OPS absence (+setup). Register 3❓+2✅ (the A2 area has private-file items). |
-| U26 | Review stage & rounds | OJS OMP | H | done | Spec verified. 12 tests OJS, 13 OMP, 1 OPS absence (+setup). Register 4🐞+9❓+1✅ (A3 observation in the private file). In step with upstream at the 2026-08-29 baselines (i13156 Review Details rework folded). |
+| U25 | Submission stage | OJS OMP OPS | M | done | 7 OJS · 8 OMP · 2 OPS absence (+setup). 3❓+2✅. The A2 area has items in the private file. |
+| U26 | Review stage & rounds | OJS OMP | H | done | 12 OJS · 13 OMP · 1 OPS absence (+setup). 4🐞+9❓+1✅. 1 in the private file. In step with upstream at the 2026-08-29 baselines. |
 | U27 | Reviewer assignment & management | OJS OMP | H | done | 14 OJS · 15 OMP · 1 OPS absence (+setup). 13🐞+5❓+10✅ (9 retired). Headliner A18. 3 in the private file. PARKED: the Review Details entry-path parity scenario and its tests (maintainer, 2026-09-01). |
 | U28 | Reviewer's review | OJS OMP | H | done | 15 OJS · 15 OMP · 1 OPS absence (+setup). 12🐞+3❓+1✅ (A8, OMP4 retired). Headliner A7. Low-confidence: A13. |
 | U29 | Review setup & review forms | OJS OMP | M | done | 10 OJS · 9 OMP · 1 OPS absence (+setup). 4🐞+6❓+2✅. Headliner A9. 1 in the private file. Coverage: settings rows only. Low-confidence: A6, A7. |
@@ -60,7 +58,7 @@ status is pending / in_progress / done / parked.
 | U37 | Tasks & discussions | OJS OMP OPS | H | pending | |
 | U38 | Submission activity log & notes | OJS OMP OPS | L | pending | |
 | U39 | Submission & Publisher Libraries | OJS OMP OPS | L | pending | |
-| U40 | Publication metadata | OJS OMP OPS | M | done | Spec verified. 11 tests OJS, 9 OMP, 9 OPS (+setup). Register 7🐞+10❓+6✅; headliner A1 (Plain Language Summary at "Require" permanently blocks saves on all apps). 1 observation in the private file, verified. |
+| U40 | Publication metadata | OJS OMP OPS | M | done | 11 OJS · 9 OMP · 9 OPS (+setup). 7🐞+10❓+6✅. Headliner A1. 1 in the private file, verified. |
 | U41 | Contributors & affiliations | OJS OMP OPS | M | done | 9 OJS · 11 OMP · 9 OPS (+setup). 9🐞+9❓+4✅ (A15 retired 2026-09-03). Headliner A14. 1 in the private file, verified. |
 | U42 | Citations & references | OJS OMP OPS | M | pending | |
 | U43 | Funding | OJS OMP OPS | L | done | 5 tests per app (+setup). 3🐞+9❓+2✅ (A13 retired 2026-09-03). Headliner A3. Low-confidence: A4 (not re-probed at the fixed tips), A10, A11 (need a server with egress). |

@@ -34,9 +34,12 @@ developer's PR fails the suite".
 PROGRESS rows are built in feature sessions the maintainer launches, one
 feature per session, under the RUNBOOK loop. When the sync loop produced
 nothing to accommodate, the session folds `docs/tracking/friction.md`
-under the filter its header states (a third feature would meet it, the
-docs do not already say it, not one screen's fact), deletes every row, and
-ends. Shipped specs are not brought up to later rules one by one; the
+and deletes every row. A row earns a change only when a third feature
+would meet the same thing, the docs do not already say it (grep first) and
+it is not one screen's fact or general Playwright knowledge; what passes is
+a kit change or a clause on an existing entry, never a new section, and a
+harness key a row asks for is listed under scenarios.md "Field shapes not
+built yet", not built. Then the session ends. Shipped specs are not brought up to later rules one by one; the
 maintainer schedules a revision pass over the existing specs and suites
 when the process has settled. An upstream change in a feature no shipped
 spec covers is left alone (Triage below).
