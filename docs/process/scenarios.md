@@ -19,9 +19,12 @@ variable of the PHP server. Without the variable the whole namespace answers
 404. With a wrong header it answers 403. See `harness.md` for the variable
 and for `bin/mount.js`, which copies the PHP code into the app checkouts.
 
-Every mutating request runs inside one database transaction and under
-`Mail::fake()`. A failed build rolls back, so it never leaves half-created
-state. Mail sent while seeding is dropped. Only mail sent by the test's own
+Every mutating request runs inside one database transaction and under a
+mail fake. A failed build rolls back, so it never leaves half-created
+state. Mail sent while seeding is dropped, but each mailable is still built
+the way the app's mailer builds it before sending, so the `email_log` rows
+the app writes next to a send carry the compiled subject and body, as they
+do after a real send. Only mail sent by the test's own
 actions reaches Mailpit. The acting user during a build is the installer's
 `admin` account.
 
@@ -151,12 +154,25 @@ Keys:
   decision type). An unknown name fails with a 400 that lists the app's
   roster.
 - `reviewRounds[]`, each with `reviewers[]` of `{username, status,
-  reviewForm}` where `status` is `invited` (default), `accepted` or
-  `declined`, and `reviewForm` is the exact title of one of the context's
-  active review forms (seeded through `reviewForms[]`), attached the way
-  the reviewer row's "Edit" window attaches it; a missing or inactive title
-  fails with a 400 that names the active titles. These are the only
-  per-reviewer keys. Due dates and the review method are not parameters:
+  reviewForm, recommendation, comments}` where `status` is `invited`
+  (default), `accepted`, `declined` or `completed`, and `reviewForm` is the
+  exact title of one of the context's active review forms (seeded through
+  `reviewForms[]`), attached the way the reviewer row's "Edit" window
+  attaches it; a missing or inactive title fails with a 400 that names the
+  active titles. `completed` is a review accepted and submitted through the
+  reviewer wizard's own step forms: the editor's row reads "Review
+  Submitted" with "Read Review", and the reviewer's list shows it under
+  "Completed". Its two optional inputs are step 3's: `recommendation` (OJS
+  only: `accept`, the default, `pendingRevisions`, `resubmitHere`,
+  `resubmitElsewhere`, `decline` or `seeComments`, resolved against the
+  journal's active recommendations; a 400 on OMP, whose step 3 has no such
+  list) and `comments` (the "For author and editor" text, default "Seeded
+  review comments for {tag}.", stored as the paragraph TinyMCE posts). Both
+  are a 400 on any other status, and `completed` refuses a review form with
+  required questions, as the wizard does. A seeded `accepted` assignment
+  opens the wizard on step 1 (the on-screen accept lands on step 2). These
+  are the only per-reviewer keys. Due dates and the review method are not
+  parameters:
   the builder stamps them exactly as the Add Reviewer form does, from the
   context's `numWeeksPerResponse` and `numWeeksPerReview` and its
   `defaultReviewMode` (double-anonymous when unset). Any other key fails
@@ -235,7 +251,11 @@ These keys do not exist. They are ideas recorded from an earlier harness, to
 be built at the recorded shape when a feature needs them, each with a parity
 row.
 
-- Submission: `commentsForEditor`; `reviewerSuggestions[]` (`givenName`,
+- Submission: `contributors[]` (`givenName`, `familyName`, `email`, no
+  account: the second "Authors" box of the author-response request, U30);
+  `reviewRounds[].reviewers[].files[]` (a reviewer's uploaded file, the
+  "Attach Review Files" source, U30); `reviewRounds[].reviewers[].status:
+  'cancelled'` (U30, the readiness question); `commentsForEditor`; `reviewerSuggestions[]` (`givenName`,
   `familyName`, `email`, `affiliation?`, `suggestionReason?`);
   `userComments[]` (`user`, `text`, `approved?`, needs a published
   publication); `metrics` (OJS only: `views?`, `downloads?`, `months?`).
@@ -245,7 +265,8 @@ row.
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
   `name?`, `genre?`, `group?`).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
-- Context passthroughs: `copyrightNotice`, `enablePublicComments`,
+- Context passthroughs: `notifyAllAuthors` (Settings › Workflow › Emails
+  "Notify All Authors", U30), `copyrightNotice`, `enablePublicComments`,
   `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), metadata modes (`keywords`,
@@ -287,7 +308,9 @@ write into the same inbox. The rules below follow from that.
 - **Scope every read by a unique throwaway recipient** that names the app
   and the test, for example `u53top-omp@mail.test`. This is the only scoping
   the install supports: Mailpit tags do not exist here, because nothing sets
-  `X-Tags`. `pkpMail` refuses any read without a recipient.
+  `X-Tags`. `pkpMail` refuses any read without a recipient. Mailpit's
+  `to:` search matches the To header only: a Cc or Bcc recipient is not
+  found by it (U30 claim check K2).
 - **`contains` is a content marker, not a scope.** It searches a substring
   in subject and body. Use it when the test controls some text in the
   message. It supplements the recipient scope and never replaces it. On a

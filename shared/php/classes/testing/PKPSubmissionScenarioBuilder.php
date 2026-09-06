@@ -21,12 +21,21 @@
  * Step-2 core schema: tag*, context* (urlPath), submitter* (username), title,
  * abstract, locale, submitted (explicit false = wizard-resumable draft),
  * decisions[] (real decision names, app-resolved), reviewRounds[] with
- * reviewers[] {username, status: invited|accepted|declined}, published.
+ * reviewers[] {username, status: invited|accepted|declined|completed,
+ * reviewForm, recommendation, comments}, published.
  * Overlays: OJS section/issue; OMP series/seriesPosition + per-round stage
  * internal|external; OPS section (reviewRounds REJECTED — no review stage).
  * Richer keys return per feature, each with a parity entry.
  *
  * Feature passthroughs so far (each with a parity-ledger entry):
+ * - reviewers[].status 'completed' (+ 'recommendation', 'comments') — U30:
+ *   the reviewer wizard's own step forms run under the reviewer's identity
+ *   (PKPReviewerReviewStep1Form → Step2Form → Step3Form::execute), so the
+ *   assignment, the submission comment, the editors' REVIEWER_COMMENT
+ *   notifications + REVIEW_COMPLETE email-log rows, the task deletion and
+ *   the reviewReady event-log row are the app's own. 'accepted' keeps the
+ *   bare confirmReview (step stays 1 — a documented deviation the U28
+ *   suites walk from).
  * - participants[] {username*, role*} — non-submitter stage assignments
  *   (U21: an assigned Section Editor opening another author's draft), the
  *   same Repo::stageAssignment()->build() row the workflow's Assign
@@ -79,7 +88,10 @@ abstract class PKPSubmissionScenarioBuilder
 {
     use HasReviewDueDate;
 
-    public const REVIEWER_STATUSES = ['invited', 'accepted', 'declined'];
+    public const REVIEWER_STATUSES = ['invited', 'accepted', 'declined', 'completed'];
+
+    /** Default "For author and editor" text of a completed seeded review. */
+    public const DEFAULT_REVIEW_COMMENTS = 'Seeded review comments for {tag}.';
 
     /**
      * Read the app's section/series overlay keys off the root spec and return
@@ -175,7 +187,38 @@ abstract class PKPSubmissionScenarioBuilder
                 $reviewFormId = $reviewerSpec->has('reviewForm')
                     ? $this->resolveActiveReviewFormId($context, (string) $reviewerSpec->get('reviewForm'), "{$reviewerSpec->path}.reviewForm")
                     : null;
-                $reviewers[] = ['user' => $reviewer, 'status' => $status, 'reviewFormId' => $reviewFormId];
+                // Step-3 inputs of a completed review: the "Recommendation"
+                // list (OJS only — a press's step 3 has no such field) and
+                // the "For author and editor" box. Meaningless on any other
+                // status, so a 400 rather than a silently dropped key.
+                foreach (['recommendation', 'comments'] as $step3Key) {
+                    if ($reviewerSpec->has($step3Key) && $status !== 'completed') {
+                        throw new SpecException("{$reviewerSpec->path}.{$step3Key}", "\"{$step3Key}\" applies to status \"completed\" only");
+                    }
+                }
+                $recommendationId = null;
+                if ($status === 'completed' && Application::get()->hasCustomizableReviewerRecommendation()) {
+                    $recommendationId = $this->resolveRecommendationId($context, (string) $reviewerSpec->get('recommendation', 'accept'), "{$reviewerSpec->path}.recommendation");
+                } elseif ($reviewerSpec->has('recommendation')) {
+                    throw new SpecException("{$reviewerSpec->path}.recommendation", 'This app\'s reviewer wizard has no "Recommendation" field');
+                }
+                // Step 3's box is a TinyMCE editor, which posts a paragraph
+                // ("<p>…</p>") for plain typed text: wrap a bare string the
+                // same way; a string that already carries markup is kept.
+                $comments = null;
+                if ($status === 'completed') {
+                    $comments = (string) $reviewerSpec->get('comments', str_replace('{tag}', $tag, self::DEFAULT_REVIEW_COMMENTS));
+                    if ($comments !== '' && !str_starts_with(ltrim($comments), '<')) {
+                        $comments = "<p>{$comments}</p>";
+                    }
+                }
+                $reviewers[] = [
+                    'user' => $reviewer,
+                    'status' => $status,
+                    'reviewFormId' => $reviewFormId,
+                    'recommendationId' => $recommendationId,
+                    'comments' => $comments,
+                ];
             }
             $roundPlans[] = [
                 'stageId' => $this->reviewStageIdForRound($roundSpec),
@@ -640,12 +683,24 @@ abstract class PKPSubmissionScenarioBuilder
                 $previousActingUser = Registry::get('user');
                 Registry::set('user', $reviewer);
                 try {
-                    $reviewerAction->confirmReview(
-                        $request,
-                        $assignment,
-                        $submission,
-                        $plan['status'] === 'declined'
-                    );
+                    if ($plan['status'] === 'completed') {
+                        // "Accept Review, Continue to Step #2" IS the step-1
+                        // form (PKPReviewerHandler::saveStep → Step1Form::
+                        // execute: competing-interests declaration when the
+                        // context asks, step → 2, confirmReview(false)), then
+                        // step 2 and step 3's "Submit Review".
+                        $this->runReviewerStep($request, $submission, $assignment, 1);
+                        $this->completeReview($request, $submission, $assignment, $plan['comments'], $plan['recommendationId']);
+                    } else {
+                        // accepted / declined: the bare ReviewerAction call,
+                        // as before. A seeded acceptance therefore leaves
+                        // step = 1 (the UI's accept moves it to 2 and, when
+                        // the context asks, declares competing interests);
+                        // the U28 suites walk the wizard from step 1 on it,
+                        // so this stays a documented deviation
+                        // (parity-ledger 2026-09-06).
+                        $reviewerAction->confirmReview($request, $assignment, $submission, $plan['status'] === 'declined');
+                    }
                 } finally {
                     Registry::set('user', $previousActingUser);
                 }
@@ -661,6 +716,77 @@ abstract class PKPSubmissionScenarioBuilder
             ];
         }
         return $seeded;
+    }
+
+    /**
+     * Run one reviewer-wizard step form's execute() on the assignment, the
+     * way PKPReviewerHandler::saveStep does after validate(). The form reads
+     * the CURRENT assignment row, so callers re-fetch after each step.
+     *
+     * @param array<string, mixed> $data the step's posted fields (setData)
+     */
+    protected function runReviewerStep(\PKP\core\PKPRequest $request, \APP\submission\Submission $submission, ReviewAssignment $assignment, int $step, array $data = []): void
+    {
+        $formClass = "\\PKP\\submission\\reviewer\\form\\PKPReviewerReviewStep{$step}Form";
+        $form = new $formClass($request, $submission, $assignment);
+        foreach ($data as $key => $value) {
+            $form->setData($key, $value);
+        }
+        $form->execute();
+    }
+
+    /**
+     * "Continue to Step #3" then "Submit Review" + "OK": the step-2 and
+     * step-3 forms (PKPReviewerReviewStep3Form::execute — review comment,
+     * dateCompleted + recommendation, editors' REVIEWER_COMMENT notifications
+     * and REVIEW_COMPLETE mail log, task removal, reviewReady event log).
+     * The step-3 validator refuses a submit that leaves a required
+     * review-form question unanswered; the seed refuses the same.
+     */
+    protected function completeReview(\PKP\core\PKPRequest $request, \APP\submission\Submission $submission, ReviewAssignment $assignment, string $comments, ?int $recommendationId): void
+    {
+        $assignment = Repo::reviewAssignment()->get($assignment->getId());
+        if ($assignment->getReviewFormId()) {
+            $reviewFormElementDao = DAORegistry::getDAO('ReviewFormElementDAO'); /** @var \PKP\reviewForm\ReviewFormElementDAO $reviewFormElementDao */
+            if ($reviewFormElementDao->getRequiredReviewFormElementIds($assignment->getReviewFormId())) {
+                throw new SpecException('reviewRounds', "A completed review cannot be seeded on a review form with required questions (the wizard refuses the submit); use a form without required items or complete the review on screen");
+            }
+        }
+        $this->runReviewerStep($request, $submission, $assignment, 2);
+        $assignment = Repo::reviewAssignment()->get($assignment->getId());
+        $this->runReviewerStep($request, $submission, $assignment, 3, [
+            'reviewFormResponses' => null,
+            'comments' => $comments,
+            'commentsPrivate' => '',
+            'reviewerRecommendationId' => $recommendationId,
+        ]);
+    }
+
+    /**
+     * Resolve a recommendation name (the tail of the app's default
+     * recommendation translation key: accept, pendingRevisions, resubmitHere,
+     * resubmitElsewhere, decline, seeComments) against the context's ACTIVE
+     * recommendations — the ones step 3's "Recommendation" list offers.
+     */
+    protected function resolveRecommendationId(Context $context, string $name, string $specKey): int
+    {
+        $prefix = 'reviewer.article.decision.';
+        $recommendations = \PKP\submission\reviewer\recommendation\ReviewerRecommendation::query()
+            ->withContextId($context->getId())
+            ->withActive()
+            ->get();
+        $names = [];
+        foreach ($recommendations as $recommendation) {
+            $key = (string) $recommendation->getAttribute(\PKP\submission\reviewer\recommendation\ReviewerRecommendation::DEFAULT_RECOMMENDATION_TRANSLATION_KEY);
+            if ($key === $prefix . $name) {
+                return (int) $recommendation->getAttribute('reviewerRecommendationId');
+            }
+            if (str_starts_with($key, $prefix)) {
+                $names[] = substr($key, strlen($prefix));
+            }
+        }
+        $available = $names ? implode(', ', $names) : '(none)';
+        throw new SpecException($specKey, "Unknown recommendation \"{$name}\". Active recommendations in context \"{$context->getPath()}\": {$available}");
     }
 
     /**

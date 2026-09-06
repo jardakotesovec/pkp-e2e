@@ -36,6 +36,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Testing\Fakes\MailFake;
 use PKP\core\PKPBaseController;
 use PKP\core\PKPRequest;
 use PKP\core\Registry;
@@ -131,13 +132,38 @@ abstract class PKPTestController extends PKPBaseController
     }
 
     /**
+     * Drop seeding-side mail, but let each mailable go through the two steps
+     * the app's own PKP\mail\Mailer::send runs before the transport:
+     * setData() (the template variables into viewData) and build() (the
+     * Mailable::build hook). Repo::emailLogEntry()->logMailable, which the
+     * app calls right after Mail::send, compiles the logged subject and body
+     * from that viewData — under a bare Mail::fake() every seeded email_log
+     * row carried the raw "{$reviewerName} recommends …" template instead
+     * (U30 parity diff, 2026-09-06).
+     */
+    protected function fakeMail(): void
+    {
+        $manager = Mail::isFake() ? Mail::getFacadeRoot()->manager : Mail::getFacadeRoot();
+        Mail::swap(new class ($manager) extends MailFake {
+            public function send($view, array $data = [], $callback = null)
+            {
+                if ($view instanceof \PKP\mail\Mailable) {
+                    $view->setData($view->getLocale());
+                    $view->build();
+                }
+                return parent::send($view, $data, $callback);
+            }
+        });
+    }
+
+    /**
      * Shared builder harness: Mail::fake, admin as acting user, one DB
      * transaction. SpecException → 400 with the dotted specKey; anything
      * else → 500 with the exception summary.
      */
     protected function runBuilder(callable $build): JsonResponse
     {
-        Mail::fake();
+        $this->fakeMail();
         $admin = Repo::user()->getByUsername('admin', true);
         if ($admin) {
             Registry::set('user', $admin);

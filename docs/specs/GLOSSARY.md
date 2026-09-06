@@ -159,7 +159,8 @@ touched.
   shown in the row and Read Review) and an **editor's recommendation** (what
   a recommending editor records instead of a decision; shown to deciding
   editors in the Recommendation box).
-- **Confirming a review** — the editor's Confirm press in Read Review: row →
+- **Confirming a review** — the editor's "Mark as Complete" press in Read
+  Review (the dialog asks "Mark this review as complete?"): row →
   Complete, reviewer's task cleared. **Thank Reviewer** acknowledges it
   (row → Reviewer Thanked); **Revert Decision** ("Unconsider this Review")
   steps a Complete/Thanked row back.

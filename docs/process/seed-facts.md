@@ -385,6 +385,24 @@ so; it is not a guess.
   row is toggled or edited; a reviewer's "Save for Later" gives the review
   a recommendation without submitting it. Live-driven 2026-09-05
   (`.reports/U29-medium/cc-K6.md`).
+- `reviewRounds[].reviewers[].status: 'completed'` seeds a submitted review
+  on OJS and OMP (optional `recommendation`, OJS only, and `comments`): the
+  editor's Reviewers row reads "Review Submitted" with "Read Review", and
+  the reviewer's "Completed" view lists it. Live-driven 2026-09-06, OJS and
+  OMP (`.reports/U30/harness/report.md`).
+- `decisions: [..., 'newExternalReviewRound']` together with N
+  `reviewRounds[]` entries yields N+1 rounds (the decision's round gets no
+  reviewers); two reviewed rounds are seeded with `decisions:
+  ['sendExternalReview']` and two entries. Live-driven 2026-09-06, OJS
+  (`.reports/U30/pD` seeds).
+- {OMP} A monograph seeded with `reviewRounds[].stage: 'internal'` and
+  `decisions: ['sendInternalReview']` lands its editor on Internal Review;
+  `status: 'completed'` works on a press round (no recommendation cell).
+  Live-probed 2026-09-06 (`.reports/U30/pE` P26).
+- "Notify All Authors" (Settings › Workflow › Emails) arrives at "Send an
+  email notification to all authors of the submission." on a scratch
+  journal; there is no passthrough key, so a probe flips it on the screen
+  and a test cannot. Live-probed 2026-09-06, OJS (`.reports/U30/pC` P20).
 
 ## Where to change it
 

@@ -450,7 +450,10 @@ session the server has just ended (after a password change or a sign-out
 elsewhere), so use a bounded wait there; and Playwright dismisses a browser
 `confirm()` or `alert()` by default, so a screen that may ask (a tab switch
 with unsaved changes, a refused upload) needs `page.on('dialog', …)` before
-the action, or the script silently takes the Cancel branch.
+the action, or the script silently takes the Cancel branch. `screen()`
+records the page, not the browser console: a claim about console errors
+needs the script's own `page.on('console')` and `page.on('pageerror')`
+listeners, attached before the navigation.
 Two premises that cost a smoke run: a scratch context has no technical
 support contact, and the validation email's sender is that contact, so a
 registration on the +90 server 500s until a manager sets it (Settings ›
