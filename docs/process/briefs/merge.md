@@ -5,10 +5,10 @@
 {{spec_path}}      docs/specs/U<nn>-<feature>.md
 {{chunk_reports}}  every chunk report, one per line: chunk id and .reports/{{feature}}/cc-<chunk>.md
 {{chunk_plan}}     .reports/{{feature}}/claimcheck-chunks.md
-{{declared_lines}} the declared no-screen lines from the chunk headers that the checklist does not tag no-screen (the orchestrator's diff), or "none"
+{{declared_lines}} the orchestrator's subset check: the chunk headers' declared no-screen lines minus the checklist's `no-screen` lines, which must be empty or explained; "none" when empty
 {{merge_path}}     .reports/{{feature}}/claimcheck-merge.md
 -->
-You are the merge agent for the claim check of feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 6's "Merge and fold" bullet and its digest block (`docs/process/RUNBOOK.md`, "The per-feature loop"). Read `docs/process/TEMPLATE.md`, including "Write for a reader who has only this page", so every `Affects:` names a real rule, row, scenario, footnote or register ID and every `Proposed:` line is already in the reader's words.
+You are the merge agent for the claim check of feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it), dispatched only with three or more chunks. Follow RUNBOOK step 6. Read `docs/process/TEMPLATE.md`, including "Write for a reader who has only this page", so every `Affects:` names a real rule, row, scenario, footnote or register ID and every `Proposed:` line is already in the reader's words.
 
 Inputs:
 - The chunk reports, each in spec-section order:

@@ -8,7 +8,7 @@
 {{blockers}}        the persona's blockers, one line each (section and quoted phrase), or "none"
 {{rewrite_log}}     .reports/{{feature}}/rewrite.md
 -->
-You are the rewrite agent for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 8 (`docs/process/RUNBOOK.md`, "The per-feature loop", "Readability check"). Your reading list is the writing-agents row of RUNBOOK "What each role reads": `docs/process/TEMPLATE.md` including "Write for a reader who has only this page" and its four shared conventions, `docs/specs/GLOSSARY.md`, the persona report, the change list, and the spec.
+You are the rewrite agent for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 8. Read `docs/process/TEMPLATE.md` including "Write for a reader who has only this page" and its four shared conventions, `docs/specs/GLOSSARY.md`, the persona report, the change list, and the spec.
 
 Preserve the verified meaning — reword the phrasing, never the claim.
 

@@ -7,7 +7,7 @@
 {{fold_logs}}        the fold log of step 6 (.reports/{{feature}}/fold-log.md), for what the evidence changed
 {{log_path}}         .reports/{{feature}}/scenarios-log.md
 -->
-You are the scenario writer for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 7 (`docs/process/RUNBOOK.md`, "The per-feature loop"), "The multi-app rules" and "What goes where". Your reading list is the writing-agents row of RUNBOOK "What each role reads": `docs/process/TEMPLATE.md` (its "Canonical scenarios" comment, "Spending the tier" and "Shape", and "Write for a reader who has only this page"), `docs/specs/GLOSSARY.md`, the fold log, then the spec's body.
+You are the scenario writer for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 7, "The multi-app rules" and "What goes where". Read `docs/process/TEMPLATE.md` (its "Canonical scenarios" comment, "Spending the tier" and "Shape", and "Write for a reader who has only this page"), `docs/specs/GLOSSARY.md`, the fold log, then the spec's body.
 
 Inputs:
 - The spec: `{{spec_path}}`, claim-checked and folded. Its "Canonical scenarios" section holds the preamble only. Its Coverage section marks the rows the scenarios should cover (`planned`) and carries the why-nots already decided.
