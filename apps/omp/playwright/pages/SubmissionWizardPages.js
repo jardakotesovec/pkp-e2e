@@ -57,6 +57,33 @@ async function expectStep(page, label) {
     await expect(currentRailStep(page)).toContainText(label, {timeout: 20_000});
 }
 
+/**
+ * Open a started step from the rail by its exact label (end-anchored:
+ * "Review" must not land on "Reviewer Suggestions"). Handles the collapsed
+ * rail («n/total steps» + "Show all steps") and a click swallowed by a
+ * re-render (patterns.md "The wizard Steps rail collapses").
+ */
+async function gotoStep(page, label) {
+    const exact = new RegExp(`${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
+    for (let attempt = 0; attempt < 3; attempt++) {
+        if (await page.locator('.pkpSteps--collapsed').count()) {
+            const controls = page.locator('.pkpSteps__controls button');
+            if (await controls.count()) {
+                await controls.click();
+            }
+        }
+        await railEntry(page, exact).click();
+        try {
+            await expect(currentRailStep(page)).toHaveText(exact, {timeout: 5_000});
+            return;
+        } catch (error) {
+            if (attempt === 2) {
+                throw error;
+            }
+        }
+    }
+}
+
 /** Wait for the wizard screen itself (heading + rail). */
 async function expectWizardOpen(page) {
     await expect(
@@ -234,6 +261,7 @@ module.exports = {
     railEntry,
     currentRailStep,
     expectStep,
+    gotoStep,
     expectWizardOpen,
     fillStartTitle,
     beginSubmission,

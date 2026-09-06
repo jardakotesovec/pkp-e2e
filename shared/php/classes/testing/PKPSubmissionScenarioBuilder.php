@@ -55,6 +55,17 @@
  *   row's "Edit" window runs (EditReviewForm::execute; the window offers
  *   active forms only). A missing or inactive title is a 400 naming the
  *   active titles.
+ * - reviewerSuggestions[] {givenName*, familyName?, email*, affiliation?,
+ *   suggestionReason?} — the wizard's "Reviewer Suggestions" step entries
+ *   (U31): the same ReviewerSuggestion::create() the step's "Add Reviewer
+ *   Suggestion" window runs through POST submissions/{id}/reviewers/
+ *   suggestions (ReviewerSuggestionController::add), validated with that
+ *   request's own rules (AddReviewerSuggestion::rules + the multilingual
+ *   rule) and created before submit(), as the wizard adds them (the API
+ *   refuses add/edit/delete on a complete submission). The step exists
+ *   only while the context's reviewerSuggestionEnabled is on, so a seed on
+ *   a context with it off is a 400; OPS (no API mount, no step) refuses
+ *   the key.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -79,6 +90,9 @@ use PKP\submission\action\EditorAction;
 use PKP\submission\reviewAssignment\ReviewAssignment;
 use PKP\submission\reviewer\ReviewerAction;
 use PKP\submission\reviewRound\ReviewRound;
+use PKP\submission\reviewer\suggestion\ReviewerSuggestion;
+use PKP\validation\MultilingualInput;
+use PKP\validation\ValidatorFactory;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
 use PKP\user\User;
@@ -92,6 +106,10 @@ abstract class PKPSubmissionScenarioBuilder
 
     /** Default "For author and editor" text of a completed seeded review. */
     public const DEFAULT_REVIEW_COMMENTS = 'Seeded review comments for {tag}.';
+
+    /** Defaults of the two required boxes a reviewer suggestion may leave to the seed. */
+    public const DEFAULT_SUGGESTION_AFFILIATION = 'Seeded affiliation for {tag}';
+    public const DEFAULT_SUGGESTION_REASON = 'Seeded suggestion reason for {tag}.';
 
     /**
      * Read the app's section/series overlay keys off the root spec and return
@@ -119,6 +137,11 @@ abstract class PKPSubmissionScenarioBuilder
 
     /** OPS overrides to reject review seeding outright. */
     protected function assertReviewRoundsSupported(Spec $root): void
+    {
+    }
+
+    /** OPS overrides to reject reviewer suggestions (no API mount, no wizard step). */
+    protected function assertReviewerSuggestionsSupported(Spec $root): void
     {
     }
 
@@ -251,6 +274,12 @@ abstract class PKPSubmissionScenarioBuilder
             ];
         }
 
+        $suggestionPlans = [];
+        if ($root->has('reviewerSuggestions')) {
+            $this->assertReviewerSuggestionsSupported($root);
+            $suggestionPlans = $this->parseReviewerSuggestions($context, $root, $tag);
+        }
+
         $publishOverlayPlan = $this->parsePublishOverlay($context, $root);
         $root->assertConsumed();
 
@@ -267,7 +296,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = $this->forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -305,9 +334,11 @@ abstract class PKPSubmissionScenarioBuilder
         array $roundPlans,
         array $publishOverlayPlan,
         ?array $authorPlan = null,
-        array $participantPlans = []
+        array $participantPlans = [],
+        array $suggestionPlans = []
     ): array {
         $request = Application::get()->getRequest();
+        $seededSuggestions = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -374,6 +405,23 @@ abstract class PKPSubmissionScenarioBuilder
             // spot-check defect 1).
             $publication = Repo::publication()->get($publication->getId());
             Repo::publication()->edit($publication, $publicationEdits);
+
+            // The wizard's "Reviewer Suggestions" step, while the submission
+            // is still incomplete: the same ReviewerSuggestion::create() the
+            // step's window runs (ReviewerSuggestionController::add), with
+            // the request's own suggestingUserId (the acting author) and
+            // submissionId merged in as prepareForValidation does.
+            foreach ($suggestionPlans as $plan) {
+                $suggestion = ReviewerSuggestion::create(array_merge($plan, [
+                    'submissionId' => $submissionId,
+                    'suggestingUserId' => $submitter->getId(),
+                ]));
+                $suggestion->refresh();
+                $seededSuggestions[] = [
+                    'id' => (int) $suggestion->getKey(),
+                    'email' => $suggestion->email,
+                ];
+            }
 
             if ($submitted) {
                 $submission = Repo::submission()->get($submissionId);
@@ -553,7 +601,90 @@ abstract class PKPSubmissionScenarioBuilder
             'submissionProgress' => $submission->getData('submissionProgress'),
             'reviewRounds' => $rounds,
             'reviewAssignments' => $seededAssignments,
+            'reviewerSuggestions' => $seededSuggestions,
         ];
+    }
+
+    /**
+     * Read reviewerSuggestions[] and validate each entry with the rules the
+     * wizard's "Add Reviewer Suggestion" window is validated with
+     * (AddReviewerSuggestion::rules, minus the two DB-exists rules that hold
+     * by construction here): givenName required, familyName optional, email
+     * required and valid, affiliation and the reason required (defaulted by
+     * the seed the way the abstract is), every multilingual box a locale
+     * map over the context's form locales with the primary locale present.
+     * The API's per-submission unique email is checked within the list —
+     * the submission does not exist yet, so nothing else can clash.
+     * Parse-phase: no writes.
+     *
+     * @return array<int, array<string, mixed>> the create() payloads, minus submissionId / suggestingUserId
+     */
+    protected function parseReviewerSuggestions(Context $context, Spec $root, string $tag): array
+    {
+        if (!$context->getData('reviewerSuggestionEnabled')) {
+            throw new SpecException('reviewerSuggestions', 'The wizard offers the "Reviewer Suggestions" step only while the context\'s "Reviewer Suggestion at Submission" setting is on: seed the context with review.reviewerSuggestionEnabled: true');
+        }
+        $primaryLocale = $context->getPrimaryLocale();
+        // AddReviewerSuggestion::allowedLocales: the form locales plus the site's primary locale.
+        $allowedLocales = (array) $context->getSupportedFormLocales();
+        $sitePrimaryLocale = Application::get()->getRequest()->getSite()->getPrimaryLocale();
+        if (!in_array($sitePrimaryLocale, $allowedLocales)) {
+            $allowedLocales[] = $sitePrimaryLocale;
+        }
+        $rules = [
+            'givenName' => ['required', 'array', new MultilingualInput($primaryLocale, $allowedLocales, true)],
+            'familyName' => ['sometimes', 'array', new MultilingualInput($primaryLocale, $allowedLocales, false)],
+            'email' => ['required', 'email'],
+            'affiliation' => ['required', 'array', new MultilingualInput($primaryLocale, $allowedLocales, true)],
+            'suggestionReason' => ['required', 'array', new MultilingualInput($primaryLocale, $allowedLocales, true)],
+        ];
+
+        $plans = [];
+        $emails = [];
+        foreach ($root->childList('reviewerSuggestions') as $spec) {
+            $plan = [
+                'givenName' => $spec->localized('givenName', $primaryLocale),
+                'email' => (string) $spec->require('email'),
+                'affiliation' => $spec->localized('affiliation', $primaryLocale, str_replace('{tag}', $tag, self::DEFAULT_SUGGESTION_AFFILIATION)),
+                'suggestionReason' => $spec->localized('suggestionReason', $primaryLocale, str_replace('{tag}', $tag, self::DEFAULT_SUGGESTION_REASON)),
+            ];
+            if ($plan['givenName'] === null) {
+                throw new SpecException("{$spec->path}.givenName", "Missing required spec key \"{$spec->path}.givenName\"");
+            }
+            if ($spec->has('familyName')) {
+                $plan['familyName'] = $spec->localized('familyName', $primaryLocale);
+            }
+            // The reason box is a rich-text editor, which posts a paragraph
+            // ("<p>…</p>") for plain typed text: wrap a bare string the same
+            // way; a string that already carries markup is kept.
+            foreach ($plan['suggestionReason'] as $reasonLocale => $reason) {
+                $reason = (string) $reason;
+                if ($reason !== '' && !str_starts_with(ltrim($reason), '<')) {
+                    $plan['suggestionReason'][$reasonLocale] = "<p>{$reason}</p>";
+                }
+            }
+            // The window's "Save" is refused with the same messages.
+            $validator = ValidatorFactory::make($plan, $rules);
+            if ($validator->fails()) {
+                $messages = [];
+                foreach ($validator->errors()->toArray() as $field => $fieldMessages) {
+                    $messages[] = "{$field}: " . implode(' ', $fieldMessages);
+                }
+                throw new SpecException($spec->path, 'The "Add Reviewer Suggestion" window would refuse this entry: ' . implode('; ', $messages));
+            }
+            if (in_array($plan['email'], $emails, true)) {
+                throw new SpecException("{$spec->path}.email", "Two suggestions on one submission cannot share the email address \"{$plan['email']}\" (the window refuses the second)");
+            }
+            $emails[] = $plan['email'];
+            // The multilingual validated() drops empty locale values.
+            foreach (['givenName', 'familyName', 'affiliation', 'suggestionReason'] as $multilingualKey) {
+                if (isset($plan[$multilingualKey])) {
+                    $plan[$multilingualKey] = array_filter($plan[$multilingualKey]);
+                }
+            }
+            $plans[] = $plan;
+        }
+        return $plans;
     }
 
     /**

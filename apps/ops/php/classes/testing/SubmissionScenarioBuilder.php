@@ -47,4 +47,9 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
     {
         throw new SpecException('reviewRounds', 'OPS has no review stage — reviewRounds cannot be seeded on this app');
     }
+
+    protected function assertReviewerSuggestionsSupported(Spec $root): void
+    {
+        throw new SpecException('reviewerSuggestions', 'OPS mounts no reviewer-suggestions API and its wizard has no "Reviewer Suggestions" step — reviewerSuggestions cannot be seeded on this app');
+    }
 }

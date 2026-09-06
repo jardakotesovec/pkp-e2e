@@ -231,6 +231,11 @@ behind a line; that scratch is deleted after review.
   created with `orcid: {enabled: true}` has both (`scenarios.md`
   `POST scenarios/context`). Settings › Website › Setup; Profile › Identity.
   Live-probed 2026-09-04, all three apps (`.reports/U03/cc-K6.md` K6-2).
+- With `orcid: {enabled: true}` the "Add Reviewer Suggestion" window of the
+  wizard's "Reviewer Suggestions" step gains an "ORCID iD" box that accepts
+  only the full `https://orcid.org/…` form; a bare iD or a number is refused
+  with "The ORCID iD you specified is invalid. Please include the full URI".
+  Live-driven 2026-09-06, OJS and OMP (`.reports/U31/cc-K2.md` K2-3).
 - On the test installs the profile image's address is the public files
   directory's filesystem path appended to the origin, so the picture never
   loads (404); a suite asserts the "Delete" control and the stored file,
@@ -317,7 +322,8 @@ behind a line; that scratch is deleted after review.
   `invitation/accept?id=N&key=…`, which answers a redirect to
   `reviewer/submission?submissionId=…&reviewId=…`. Mailpit; the reviewer
   wizard. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K2.md`).
-- A scratch context seeded `supportedLocales: ['en','fr_CA']` has French
+- A scratch context seeded `context.supportedLocales: ['en','fr_CA']` (the key
+  sits under `context`; top-level it is a 400 "Unsupported spec key") has French
   under the "UI" column only; the settings forms get their language switch
   once the "Forms" box is ticked in Settings › Website › Setup ›
   Languages. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K3.md`).

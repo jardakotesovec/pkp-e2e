@@ -49,7 +49,7 @@ status is pending / in_progress / done / parked.
 | U28 | Reviewer's review | OJS OMP | H | done | 15 OJS · 15 OMP · 1 OPS absence (+setup). 12🐞+3❓+1✅ (A8, OMP4 retired). Headliner A7. Low-confidence: A13. |
 | U29 | Review setup & review forms | OJS OMP | M | done | 10 OJS · 9 OMP · 1 OPS absence (+setup). 4🐞+6❓+2✅. Headliner A9. 1 in the private file. Coverage: settings rows only. Low-confidence: A6, A7. |
 | U30 | Author response to reviews | OJS | M | done | 6 OJS · 1 OMP absence · 1 OPS absence (+setup). 6🐞+3❓. Headliner A7. 16 Coverage rows out of tier. Low-confidence: A8 (not seedable). |
-| U31 | Reviewer suggestions | OJS OMP | L | pending | |
+| U31 | Reviewer suggestions | OJS OMP | L | done | 4 OJS · 5 OMP · 1 OPS absence (+setup). 8🐞+4❓. Headliner A5. 1 in the private file, verified. 12 Coverage rows out of tier. Low-confidence: A5 (the Enroll path not driven). |
 | U32 | Copyediting stage | OJS OMP | M | pending | |
 | U33 | Production stage | OJS OMP OPS | M | pending | |
 | U34 | Editorial decision recording | OJS OMP OPS | H | pending | |

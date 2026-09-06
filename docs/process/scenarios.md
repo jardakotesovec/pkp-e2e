@@ -189,6 +189,29 @@ Keys:
 - `published` (default false). Requires `submitted: true`.
 - `author`: `{orcid, orcidIsVerified}` on the submitter's contributor record,
   a pre-verified ORCID iD without the OAuth flow.
+- `reviewerSuggestions[]` (OJS, OMP): the entries of the wizard's "Reviewer
+  Suggestions" step, each `{givenName, familyName, email, affiliation,
+  suggestionReason}`, created the way the step's "Add Reviewer Suggestion"
+  window creates them, before the submit. `givenName` and `email` are
+  required and `familyName` is optional; `affiliation` (default "Seeded
+  affiliation for {tag}") and `suggestionReason` (default "Seeded suggestion
+  reason for {tag}.", stored as the paragraph the rich-text box posts) are
+  required on the window, so the seed fills them. The name, affiliation and
+  reason boxes are multilingual: a bare string lands under the context's
+  primary locale; a locale map must carry that locale and may name only the
+  context's form locales. The window's refusals are the seed's: an invalid
+  address or a second entry with the same address is a 400. The context's
+  `review.reviewerSuggestionEnabled` must be on, because the step exists
+  only then (a 400 otherwise); OPS answers 400. The address is what the
+  editor's panel matches against accounts, so an entry carrying a seeded
+  user's address (`<username>@mail.test`) is "a person with an account".
+  No entry is ever marked approved or turned into a reviewer: that is the
+  panel's "Add Reviewer", driven on screen.
+  An address once turned into a reviewer through "Create New Reviewer" or
+  "Enroll Existing User" is an account with the Reviewer role for every
+  other submission of the context, so a scenario that needs the Create or
+  Enroll path seeds a fresh address per submission. Live-driven 2026-09-06,
+  OJS and OMP (`.reports/U31/cc-K3.md`).
 
 App-specific keys:
 
@@ -199,7 +222,9 @@ App-specific keys:
   (`monograph`, the default, or `editedVolume`); and per review round
   `stage: internal | external` (default external).
 - OPS: `section` (abbrev or path; defaults to the server's first section).
-  `reviewRounds` is rejected with a 400, because OPS has no review stage.
+  `reviewRounds` is rejected with a 400, because OPS has no review stage,
+  and so is `reviewerSuggestions`, because OPS mounts no reviewer
+  suggestions and its wizard has no such step.
 
 Facts tests rely on, all parity-checked against the UI path:
 
@@ -217,10 +242,16 @@ Facts tests rely on, all parity-checked against the UI path:
   does not trip author checks. A second `participants` entry for the same
   user rides on `build()`'s firstOr semantics ("Decision behaviour worth
   knowing" below).
+- Seeded reviewer suggestions sit where the wizard's do: the editor's
+  workflow lists them under "Reviewers Suggested by Author" on the
+  Submission stage with no row action, and on a review round with a
+  "<name> More Actions" menu on each row. On a seeded draft the wizard
+  still opens on "Upload Files"; its "Reviewer Suggestions" step is the
+  fifth, four "Continue"s on.
 
 The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
-`status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`)
-and `reviewAssignments[]`. It does not echo the title: a test that matches
+`status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`),
+`reviewAssignments[]` and `reviewerSuggestions[]` (`id`, `email`). It does not echo the title: a test that matches
 the submission by title keeps the value it sent. On a scratch context the
 seeded submission sits in no editor's `assigned-to-me` view (the default
 Editor Dashboard view) until someone is assigned; list it under the "active"
@@ -262,9 +293,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Attach Review Files" source, U30); `reviewRounds[].reviewers[].status:
   'cancelled'` (U30, the readiness question); `reviewRounds[].revisionsUploaded`
   (the author's "Upload" is refused on a round where revisions were not
-  requested, U30); `commentsForEditor`; `reviewerSuggestions[]` (`givenName`,
-  `familyName`, `email`, `affiliation?`, `suggestionReason?`);
-  `userComments[]` (`user`, `text`, `approved?`, needs a published
+  requested, U30); `commentsForEditor`; `userComments[]` (`user`, `text`, `approved?`, needs a published
   publication); `metrics` (OJS only: `views?`, `downloads?`, `months?`).
 - Publication: `galleys[]` (`label`, `locale?`, and either `file`, a basename
   under `apps/<app>/playwright/fixtures/files/`, or `urlRemote`);

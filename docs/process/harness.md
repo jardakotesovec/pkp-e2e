@@ -217,7 +217,10 @@ to spot: seeding succeeds and the browser step dies.
   Mailpit is one shared instance across every worker and all three fleets
   (`brew services start mailpit`); its recipient addresses are scoped per
   app, so two runs of the same app must never overlap (MAINTENANCE
-  "Session hygiene").
+  "Session hygiene"). The instance keeps at most 500 messages, and on a
+  busy day it sits at that cap, so a "no email was sent" reading counts the
+  messages to a fresh recipient, never the total (seen 2026-09-06,
+  `.reports/U31/cc-K3.md`).
 
 ## Running
 
