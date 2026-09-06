@@ -69,8 +69,8 @@ other 17 are created by the bootstrap seed. Usernames follow the pattern
 `role.firstname`, with one account per permission archetype. **Use the first
 listed account for a role** unless the test needs a specific property.
 
-OMP and OPS enrol only a subset of the roster. See `harness.md` for the
-per-app differences.
+OMP and OPS enrol only a subset of the roster; `seed-facts.md` "Users" has
+the per-app enrolment.
 
 | Username | Roster label | Use when you need… |
 |---|---|---|
@@ -79,7 +79,7 @@ per-app differences.
 | `editor.diana` | editor | A senior editor (also a section editor of both sections) |
 | `sectioneditor.ana` | sectionEditor | Section editor for Articles (`ART`). The default pick |
 | `sectioneditor.ravi` | sectionEditor | Section editor for Reviews (`REV`) |
-| `sectioneditor.omar` | sectionEditor | Another Articles section editor. The designated account for recommend-only assignments (the flag itself is set per assignment) |
+| `sectioneditor.omar` | sectionEditor | Another Articles section editor. The designated account for recommend-only assignments (the flag itself is set per assignment). On OPS, deliberately assigned to no section, as a visibility control |
 | `reviewer.julia` | reviewer | The default reviewer |
 | `reviewer.paul` | reviewer | A second reviewer |
 | `reviewer.amara` | reviewer | A third reviewer (Internal on OMP) |
@@ -158,17 +158,6 @@ full cold bootstrap.
 
 ## The `publicknowledge` context
 
-Path `publicknowledge`, base URL `/index.php/publicknowledge/`, primary
-locale `en` (supported: `en`, `fr_CA`), acronym `JPK`.
-
-| Section | Abbrev | Section editors | Notes |
-|---|---|---|---|
-| Articles | `ART` | editor.diana, sectioneditor.ana, sectioneditor.omar | Word count limit 500 |
-| Reviews | `REV` | editor.diana, sectioneditor.ravi | Abstracts not required |
-
-Categories: `applied-science` (children `comp-sci/computer-vision` and
-`eng`) and `social-sciences` (children `sociology` and `anthropology`).
-
-Issues: Vol 1 No 2 (2014) is **published**. Vol 2 No 1 (2015) is
-unpublished. Use the unpublished one when a test publishes, unless it
+Its locales, sections, categories and issues per app are in
+`seed-facts.md`. When a test publishes, use the unpublished issue unless it
 targets a back issue.

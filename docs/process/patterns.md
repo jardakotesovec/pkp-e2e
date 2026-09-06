@@ -285,8 +285,9 @@ alternative.
   role changes, flag changes). Need special attributes? Create a throwaway
   user in a scratch journal. No baseline account carries the
   `mustChangePassword` flag; `manager.maya` logs straight in.
-- **Running `serve:<app>` alongside a Playwright run.** They fight over the
-  base port (see `harness.md`).
+- **A stray server on a worker port.** A Playwright run adopts whatever
+  answers there (`reuseExistingServer`) instead of starting its own, so
+  nothing else may listen on the worker band (`harness.md` "The fleets").
 - **Committing `.auth/` files.** They hold session cookies and are gitignored.
   Un-stage one if you see it staged.
 

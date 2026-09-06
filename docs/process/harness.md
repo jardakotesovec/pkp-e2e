@@ -62,8 +62,7 @@ shared/playwright/
 ├── checks/<feature>/<chunk>/ # Kept claim-check scripts, re-runnable by a maintenance session (briefs/claim-check.md)
 ├── data/users.js            # The 18 baseline identities + getPassword()/getEmail()
 ├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir + .auth/
-├── serve.js                 # serve:<app> — manual PHP server on the fleet's base port
-├── make-test-config.js      # config:<app> — generate config.test.inc.php from the app template
+├── make-test-config.js      # generate config.test.inc.php from the app template (run through bin/with-app.js)
 └── config-factory.js        # definePkpConfig({appName, appRoot, basePort}) — all three apps
 ```
 
@@ -84,13 +83,11 @@ root). Edit here, then re-run mount.
 | OPS | `checkouts/ops` | 8200 | `ops_test` |
 
 The checkouts are **self-contained clones inside this repo** (gitignored),
-provisioned by `npm run fetch-apps` (`bin/fetch-apps.js`). The git rule is
-simple: the latest code comes from the pkp remotes (`pkp/ojs` `main` and so
-on), and nothing is ever pushed or branched there. The script enforces this.
-The pkp remote is named `upstream` with its push URL disabled, submodule push
-URLs included. The `jardakotesovec` fork is `origin` and the push default, so a
-branch, rarely needed, can only go to the fork. The checkouts exist only to
-run the suites. Commits happen only in this repo. `fetch-apps --update` moves
+provisioned by `npm run fetch-apps` (`bin/fetch-apps.js`) from the pkp
+remotes' `main`. The pkp remote is named `upstream` with its push URL
+disabled, submodule push URLs included; the `jardakotesovec` fork is
+`origin` and the push default, so a branch, rarely needed, can only go to
+the fork (RUNBOOK step 11). `fetch-apps --update` moves
 an existing checkout to the current upstream `main` and rebuilds the UI
 bundle (`js/build.js`) when `lib/ui-library` moved; a bundle older than the
 submodule makes retired UI defects reappear (U43 A13, 2026-09-04).
@@ -115,56 +112,6 @@ Two facts worth knowing before you write a test:
 - All three apps use the same scenario endpoints and the same
   `publicknowledge` context path.
 
-### Environments
-
-The fleet table above describes **environment 0**. For parallel sessions
-(several worktree sessions on one machine, see MAINTENANCE.md "Session
-hygiene") there are additional permanent environments. Each is a full
-independent copy of the same thing, provisioned once by
-`npm run fetch-apps -- --slot N`:
-
-| env | dir | ports (ojs/omp/ops) | DBs | TEST_API_KEY |
-|---|---|---|---|---|
-| 0 | `checkouts/` | 8000 / 8100 / 8200 | `<app>_test` | `playwright-test-key` |
-| 1 | `checkouts-s1/` | 9000 / 9100 / 9200 | `<app>_test_s1` | `playwright-test-key-s1` |
-| 2 | `checkouts-s2/` | 10000 / 10100 / 10200 | `<app>_test_s2` | `playwright-test-key-s2` |
-
-Everything is baked into each environment's `.env.playwright` and
-`config.test.inc.php` at provision time. Ports shift by N×1000, which leaves
-room for one server per worker. The DB name carries the suffix, which also
-gives each environment its own session cookie name.
-
-The per-environment `TEST_API_KEY` is a tripwire. If a run adopts a leftover
-server from another environment (through `reuseExistingServer`), seeding
-fails with a 401 right away instead of silently writing to the wrong DB.
-
-Environments are a symmetric pool. None is reserved for a task type.
-`bin/env.js` (`npm run env -- claim [N] | release | status`) claims one
-atomically by creating `<env-dir>/.claimed`, and writes the invoking
-worktree's `.env` with absolute `<APP>_ROOT` paths. Environments always live
-in the main worktree. Sessions live in their own worktrees, which also keeps
-`.auth/`, `test-results/`, `.server-logs/` and `.reports/` apart, since all of
-them are worktree-relative.
-
-Mailpit stays one shared instance across all environments. That is why two
-runs of the same app must never overlap: recipient addresses are scoped per
-app, not per environment. The run discipline is in MAINTENANCE.md; the Mailpit
-rules and API are in `scenarios.md`.
-
-## One roster, enrolled differently per app
-
-All apps share one roster of seeded users (`users.md`), but each app enrols a
-subset in its own way:
-
-- **OMP** splits the four reviewers: `julia`/`paul` become External
-  reviewers, `amara`/`adam` Internal reviewers. It seeds the series
-  `monographs`/`textbooks`, identified by `path` with no abbrev.
-- **OPS** enrols `sectioneditor.*` as Moderators. `ana`/`ravi` are assigned
-  to section `PRE`; `omar` is deliberately left unassigned as a visibility
-  control. `assistant.rita` is an Editorial Board Member with no stage
-  access. OPS has no editor, reviewer, copyeditor, layout or proofreader
-  accounts, so `seed.actors` maps those archetypes to null.
-
 ## Runtime model
 
 - **One `php -S` server per Playwright worker**, at `basePort +
@@ -182,8 +129,8 @@ subset in its own way:
 - **Server output** goes to
   `apps/<app>/playwright/.server-logs/server-<port>.log` (request log plus
   PHP warnings). Look there when debugging server-side errors. A server
-  adopted through `reuseExistingServer`, for example one left over from
-  `serve:<app>`, keeps logging wherever it was started.
+  adopted through `reuseExistingServer` (a stray one on a worker port)
+  keeps logging wherever it was started.
 - **Project chain**: `setup → {shared, <app>} → <app>-serial`. The setup
   project probes `GET /api/v1/_test/bootstrap`. Warm, it is a no-op in under
   a second. Cold, it installs the schema through `tools/installTest.php` and
@@ -223,15 +170,16 @@ ones.
   and `pkpApi` stay on the worker's own server, so a test on the variant
   logs in through the UI itself.
 - Its log is `.server-logs/server-<port>-validation.log`. For poking around
-  by hand: `PKP_CONFIG_FILE=<variant file> PLAYWRIGHT_BASE_PORT=<port> npm
-  run serve:<app>`.
+  by hand, `npm run probe-servers -- --start` brings it up when nothing
+  answers on its port.
 
 ## config.test.inc.php — the local test config
 
 Each app has a local, gitignored `config.test.inc.php`. The app reads it
 through the `PKP_CONFIG_FILE` env var, which is the whole switch between the
 dev install and the test install. Generate it from the app's own template with
-`npm run config:<app> > "$APP_ROOT/config.test.inc.php"` (the env inputs are
+`node bin/with-app.js <app> shared/playwright/make-test-config.js >
+"$APP_ROOT/config.test.inc.php"` (the env inputs are
 documented in `shared/playwright/make-test-config.js`; CI uses the same
 generator), or write it by hand. Besides its own Postgres `<app>_test` DB and
 files dir it must carry:
@@ -275,7 +223,9 @@ to spot: seeding succeeds and the browser step dies.
   install.
 - `MAILPIT_URL`: the Mailpit HTTP API (default `http://127.0.0.1:8025`).
   Mailpit is one shared instance across every worker and all three fleets
-  (`brew services start mailpit`).
+  (`brew services start mailpit`); its recipient addresses are scoped per
+  app, so two runs of the same app must never overlap (MAINTENANCE
+  "Session hygiene").
 
 ## Running
 
@@ -290,7 +240,6 @@ npm run test:ojs -- --project=ojs    # only the app project (name varies per app
 npm run test:ojs -- --ui             # Playwright UI mode — best for iterating
 PWDEBUG=1 npm run test:ojs           # step-through
 npm run reset:ojs                    # nuke the test DB (forces cold bootstrap next run)
-npm run serve:ojs                    # manual PHP server on the fleet's base port
 npm run probe-servers -- --start|--status|--stop [--app ojs]   # detached probe servers at base+50 (and +90)
 npm run fleet-prep -- --feature U03 [--reset] [--apps ojs,omp]  # per app: reset?, setup project, probe server; .reports/U03/fleet.json
 npm run test:final -- --feature U03 [--apps ojs] [--grep @smoke] # the suites one after another; logs in .reports/U03/final-run-<app>.log
@@ -308,14 +257,12 @@ runs belong to the orchestrator's final run.
 
 `fleet-prep` and `test:final` run the apps one after another and leave
 `PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a
-run; a manual `serve:<app>` may not (its port is a worker's, and the run
-adopts it).
+run; nothing else may listen on a worker port, because the run adopts a
+server it finds there (`reuseExistingServer`).
 
-Reset the DB before any full-suite timing run and every 8 to 10 features.
-Long-lived DBs accumulate state that pollutes COUNT assertions and tag
+Reset the DB before any full-suite timing run. Long-lived DBs accumulate state that pollutes COUNT assertions and tag
 searches. After a reset, the first run can die on a webServer start race, so
-relaunch it. Don't run `serve:<app>` while a Playwright run is live, because
-both want the same port. After a killed run, kill orphan chromium and php
+relaunch it. After a killed run, kill orphan chromium and php
 processes before re-running.
 
 ## Quick start: writing a new test
