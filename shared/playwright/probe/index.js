@@ -523,40 +523,6 @@ function record(name, data) {
     return file;
 }
 
-function isPlainObject(value) {
-    return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-/**
- * Merge `patch` into <name>-<app>.json (created when missing) and write it
- * back: one level deep, except `steps`, whose object merges by key. For a
- * facts file a script writes per phase, so a partial rerun keeps the
- * earlier phases' facts instead of replacing them. Returns the path.
- *
- * @param {string} name
- * @param {object} patch
- */
-function merge(name, patch) {
-    const file = path.join(outDir(), `${appSuffixed(name)}.json`);
-    let current = {};
-    if (fs.existsSync(file)) {
-        try {
-            current = JSON.parse(fs.readFileSync(file, 'utf8'));
-        } catch {
-            current = {};
-        }
-    }
-    if (!isPlainObject(current)) {
-        current = {};
-    }
-    const merged = {...current, ...patch};
-    if (isPlainObject(current.steps) && isPlainObject(patch.steps)) {
-        merged.steps = {...current.steps, ...patch.steps};
-    }
-    fs.writeFileSync(file, JSON.stringify(merged, null, 2));
-    return file;
-}
-
 /**
  * Note a locator for the test author: how the script found an element,
  * described in words, with the selector and what it matched. The rows
@@ -720,18 +686,6 @@ async function settled(page, locator, {timeout = 15_000} = {}) {
  *
  * @param {string} prefix e.g. "u03reg"
  */
-/**
- * A scratch password built from a tag: policy-safe (letters, a digit, a
- * symbol) and at most 32 characters, because the Register page's password
- * box carries maxlength="32" (the Login page object lifts it, Register
- * does not) and a longer value is silently cut, so the later sign-in fails.
- *
- * @param {string} seed usually the account's tag
- */
-function password(seed) {
-    return `${String(seed).replace(/[^A-Za-z0-9]/g, '').slice(0, 27)}Aa1!!`;
-}
-
 function tag(prefix) {
     const agent = (process.env.PROBE_AGENT || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const value = `${String(prefix).toLowerCase().replace(/[^a-z0-9]/g, '')}${agent}${Math.random()
@@ -745,10 +699,8 @@ function tag(prefix) {
 
 module.exports = {
     PROBE_PORT_OFFSET,
-    VALIDATION_PORT_OFFSET,
+    requireEnv,
     resolveProbeApp,
-    probeApps,
-    withApp,
     forEachApp,
     launch,
     signIn,
@@ -756,15 +708,11 @@ module.exports = {
     screen,
     shot,
     record,
-    merge,
     loc,
-    locatorTable,
     note,
-    screenNotesPath,
     idle,
     settled,
     tag,
-    password,
     outDir,
     users,
 };

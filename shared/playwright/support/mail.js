@@ -12,8 +12,6 @@
  * CONTENT MARKER — a substring searched in subject/body — a supplement to the
  * recipient scope, never a substitute. Pair every silence claim with a
  * positive control (expectNone does this for you).
- *
- * Never clearAll() outside the dedicated serial infrastructure spec.
  */
 
 class PkpMail {
@@ -125,11 +123,6 @@ class PkpMail {
         return result.messages || [];
     }
 
-    /** Convenience for inboxFor(email)[0]. */
-    async latestTo(email) {
-        return (await this.inboxFor(email))[0];
-    }
-
     /** Total messages, any recipient (e.g. to assert Mail::fake() suppression). */
     async messageCount() {
         const result = await this._get('/api/v1/messages', {limit: '1'});
@@ -161,17 +154,6 @@ class PkpMail {
             }
         }
         return null;
-    }
-
-    /**
-     * DELETE the whole shared inbox. Permitted ONLY in the dedicated serial
-     * test-infrastructure spec — every other caller scopes with find/expectNone.
-     */
-    async clearAll() {
-        const response = await fetch(`${this.url}/api/v1/messages`, {method: 'DELETE'});
-        if (!response.ok) {
-            throw new Error(`Mailpit clearAll failed: ${response.status}`);
-        }
     }
 }
 

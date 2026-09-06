@@ -135,7 +135,7 @@ function tally(text) {
         if (await answers(app.basePort)) {
             console.log(
                 `test-final: WARNING ${name}: a server already answers on ${app.basePort}; the run will adopt it ` +
-                    `(kill any manual serve:${name} first — lsof -nP -iTCP:${app.basePort})`,
+                    `(kill any manual server first — lsof -nP -iTCP:${app.basePort})`,
             );
         }
         const logFile = path.join(reportDir, `final-run-${name}.log`);

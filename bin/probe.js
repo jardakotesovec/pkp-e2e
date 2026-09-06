@@ -11,8 +11,6 @@
  * runs `fn` for every app named here (`all` = ojs, omp, ops; narrow further
  * with ONLY=ojs,omp). Per-app identity, ports and keys travel in the bag
  * `fn` receives, never in process.env, so one process holds all three apps.
- * A script that calls `withApp('ojs', fn)` directly runs for that app only,
- * whatever was named here.
  *
  * Output lands under .reports/<PROBE_FEATURE>/<PROBE_AGENT>/; both variables
  * are required and checked here so the error is one line, not a stack.
@@ -20,6 +18,7 @@
 const path = require('path');
 const fs = require('fs');
 const {APPS, REPO_ROOT} = require('./apps.js');
+const {requireEnv} = require('../shared/playwright/probe/index.js');
 
 const USAGE =
     'usage: PROBE_FEATURE=<spec id> PROBE_AGENT=<agent id> node bin/probe.js <ojs|omp|ops|all> <script> [args…]';
@@ -30,19 +29,12 @@ if (!target || !script) {
     process.exit(1);
 }
 
-for (const [name, hint] of [
-    ['PROBE_FEATURE', 'the spec id the probe serves, e.g. U03'],
-    ['PROBE_AGENT', 'a short id for this agent, e.g. g1 — it names the output folder'],
-]) {
-    const value = (process.env[name] || '').trim();
-    if (!value) {
-        console.error(`probe: ${name} is not set (${hint}).\n${USAGE}`);
-        process.exit(1);
-    }
-    if (!/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(value)) {
-        console.error(`probe: ${name}="${value}" must be a plain token (letters, digits, _ . -)`);
-        process.exit(1);
-    }
+try {
+    requireEnv('PROBE_FEATURE', 'the spec id the probe serves, e.g. U03');
+    requireEnv('PROBE_AGENT', 'a short id for this agent, e.g. g1 — it names the output folder');
+} catch (error) {
+    console.error(`${error.message}\n${USAGE}`);
+    process.exit(1);
 }
 
 const apps = target === 'all' ? Object.keys(APPS) : [target];
