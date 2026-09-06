@@ -1,679 +1,871 @@
-// U29 claim check, chunk K4: Settings › Workflow › Review › "Review Forms" —
-// the list and authoring: create, the form window's three tabs, Form Items,
-// response options, preview, languages; what each item type gives the
-// reviewer on step 3. Spec: docs/specs/U29-review-setup-and-review-forms.md —
-// Fields "Review Form" and "Form Item" tables (93–114), Rules 10, 13, 15, 16
-// (211–221, 244–250, 258–280), scenario 6 (467–481), footnotes f and g.
+// U29 claim check, chunk K4: the "Review Forms" list and the form window,
+// on OJS and OMP (OPS has no "Review" tab; nothing to drive there).
+// Spec: docs/specs/U29-review-setup-and-review-forms.md — Fields "Review
+// Forms" (lines 89–107), Rules 12–13 (253–308), Side effects "Review form
+// actions" (381–386), scenarios 6 and 8 (506–521, 531–539).
 //
-// Seeds its own scratch context per app (en + fr_CA; throwaway manager,
-// author, two external reviewers; two active review forms, one carrying all
-// six item types; one submission in external review with the first reviewer
-// accepted on that form). Records every screen. Nothing on the seeded
-// context is touched. OPS has no Review tab: skipped with a record.
+// Seeds two scratch contexts per app:
+//   A — forms "Gamma" (active, in use: sub1 carries it with an accepted
+//       reviewer, sub2 with a declined one) and "Delta" (inactive, with a
+//       description and two items); sub3 in review with no reviewer.
+//   B — no forms, one submission in review, for scenarios 6 and 8 and the
+//       "Create Review Form" / "Create New Item" windows.
 //
 //   PROBE_FEATURE=U29 PROBE_AGENT=ccK4 node bin/probe.js all shared/playwright/checks/U29/K4/k4.js
-//   PHASES=seed,list,items,preview,addrev,reviewer,lang   (default: all; later phases reuse k4-scratch-<app>.json)
+//   PHASES=seed,a1,a1b,a2,a3,b,c,d,e   (default: all; later phases reuse k4-scratch-<app>.json)
+//
+// Order matters in A: a1 ends with "Gamma" (in use) deactivated, a2 has its
+// reviewer submit on the wizard's step 3, a3 reads the counts and reactivates.
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir} =
     require('../../../probe');
 
-const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ['seed', 'list', 'items', 'preview', 'addrev', 'reviewer', 'lang'];
+const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ['seed', 'a1', 'a1b', 'a2', 'a3', 'b', 'c', 'd', 'e'];
 const on = (p) => PHASES.includes(p);
+const log = (...a) => console.log(...a);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const scratchFile = (app) => path.join(outDir(), `k4-scratch-${app.name}.json`);
-const log = (...a) => console.log(`[${process.env.PKP_APP_NAME}]`, ...a);
-const flat = (s, n = 500) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n);
-const G = '#reviewFormGridContainer';
-const IG = '#reviewFormElementsGridContainer';
-
-async function full(page, name, extra = {}) {
-    const data = await screen(page);
-    data.notifications = await page.evaluate(() => [...document.querySelectorAll('.pkp_notification, [role=status], [role=alert], .pkpNotification')]
-        .filter((e) => e.innerText && e.innerText.trim()).map((e) => ({cls: e.className.slice(0, 80), text: e.innerText.trim().replace(/\s+/g, ' ').slice(0, 300), visible: e.getClientRects().length > 0})));
-    Object.assign(data, extra);
-    record(name, data);
-    await shot(page, name);
-    return data;
-}
-
-const dlgWith = (page, sel) => page.locator('[role=dialog]').filter({has: page.locator(sel)}).last();
-const vis = (el) => el.getClientRects().length > 0;
-
-async function dialogInfo(dlg) {
-    return dlg.evaluate((d) => {
-        const vis = (el) => el.getClientRects().length > 0;
-        const t = (el) => (el ? el.innerText.trim().replace(/\s+/g, ' ') : null);
-        return {
-            title: t(d.querySelector('h1, h2, h3, .modal__header, [class*="title"]')),
-            text: d.innerText.trim(),
-            buttons: [...d.querySelectorAll('button, a.pkp_button, input[type=submit]')].filter(vis).map((b) => ({text: t(b) || b.value, id: b.id, disabled: b.disabled})),
-            links: [...d.querySelectorAll('a')].filter(vis).map((a) => t(a)).filter(Boolean),
-            tabs: [...d.querySelectorAll('[role=tab]')].map((a) => ({text: t(a), selected: a.getAttribute('aria-selected') || (a.parentElement.classList.contains('ui-tabs-active') ? 'true' : 'false'), disabled: a.closest('li') ? a.closest('li').classList.contains('ui-state-disabled') || a.closest('li').getAttribute('aria-disabled') === 'true' : null})),
-            inputs: [...d.querySelectorAll('input, select, textarea, iframe')].filter((i) => i.type !== 'hidden').map((i) => ({tag: i.tagName, type: i.type, id: i.id, name: i.name, value: i.tagName === 'SELECT' ? i.value : (i.value || '').slice(0, 80), checked: i.checked, visible: vis(i), options: i.tagName === 'SELECT' ? [...i.options].map((o) => `${o.value}=${o.text}${o.selected ? '*' : ''}`) : undefined})),
-            labels: [...d.querySelectorAll('label, legend')].filter(vis).map((l) => t(l)).filter(Boolean),
-            errors: [...d.querySelectorAll('.error, label.error, .pkp_form_error, .formError, [class*="error"]')].filter(vis).map((e) => ({cls: e.className.slice(0, 60), text: t(e)})),
-            flags: [...d.querySelectorAll('.flag, .localization_popover, .localization_popover_container, .multilingual_extra, .multilingual_primary')].map((e) => ({cls: e.className.slice(0, 80), title: e.title, text: t(e).slice(0, 120), visible: vis(e)})),
-        };
-    });
-}
-
-async function openForms(page, app, ctx) {
-    await page.goto(app.url(`/index.php/${ctx}/en/management/settings/workflow#review/reviewForms`));
-    await idle(page);
-    const reviewTab = page.getByRole('tab', {name: 'Review', exact: true});
-    if ((await reviewTab.getAttribute('aria-selected').catch(() => null)) !== 'true') await reviewTab.click();
-    const side = page.getByRole('tab', {name: 'Review Forms', exact: true});
-    if ((await side.getAttribute('aria-selected').catch(() => null)) !== 'true') await side.click();
-    await page.locator(`${G} .pkp_controllers_grid`).waitFor({timeout: 20000});
-    await idle(page);
-}
-
-async function gridRows(page, sel) {
-    return page.evaluate((sel) => {
-        const c = document.querySelector(sel);
-        if (!c) return null;
-        const vis = (el) => el.getClientRects().length > 0;
-        const t = (el) => el.innerText.trim().replace(/\s+/g, ' ');
-        return {
-            heading: t(c.querySelector('h4') || c).slice(0, 120),
-            actionsAbove: [...c.querySelectorAll('.pkp_linkaction, .actions a')].filter(vis).map((a) => ({text: t(a), cls: a.className.slice(0, 60)})),
-            columns: [...c.querySelectorAll('thead th')].map(t),
-            rows: [...c.querySelectorAll('tbody tr.gridRow')].map((r) => ({id: r.id, cells: [...r.querySelectorAll('td')].map(t), checkboxes: [...r.querySelectorAll('input[type=checkbox]')].map((b) => ({name: b.name, checked: b.checked})), sortable: r.classList.contains('ui-sortable-handle')})),
-            controlRows: [...c.querySelectorAll('tr.row_controls')].map((r) => ({visible: vis(r), links: [...r.querySelectorAll('a')].map((a) => t(a) || a.title || a.className)})),
-            emptyText: [...c.querySelectorAll('tbody tr:not(.gridRow):not(.row_controls) td')].map(t).filter(Boolean),
-            belowLinks: [...c.querySelectorAll('a')].filter(vis).map(t).filter((x) => /Done|Cancel ordering/.test(x)),
-            text: t(c).slice(0, 1500),
-        };
-    }, sel);
-}
-
-async function openRowControls(page, sel, rowIndex) {
-    const row = page.locator(`${sel} tbody tr.gridRow`).nth(rowIndex);
-    const ctrl = page.locator(`${sel} tr.row_controls`).nth(rowIndex);
-    if (!(await ctrl.isVisible().catch(() => false))) await row.locator('a.show_extras').first().click();
-    await ctrl.waitFor({state: 'visible', timeout: 10000}).catch(() => {});
-    return ctrl;
-}
-async function rowAction(page, sel, rowIndex, actionName) {
-    const ctrl = await openRowControls(page, sel, rowIndex);
-    await ctrl.getByRole('link', {name: actionName, exact: true}).first().click();
-}
-const rowIndexByTitle = async (page, sel, re) => (await gridRows(page, sel)).rows.findIndex((r) => re.test(r.cells[0]));
-
-async function typeRich(page, dlg, idPrefix, text) {
-    await dlg.locator(`iframe[id^="${idPrefix}-"]`).first().waitFor({timeout: 15000});
-    const body = page.frameLocator(`iframe[id^="${idPrefix}-"]`).first().locator('body');
-    await body.click();
-    await body.fill(text);
-}
-
-async function waitDialogGone(page, sel, ms = 15000) {
-    await page.locator('[role=dialog]').filter({has: page.locator(sel)}).waitFor({state: 'hidden', timeout: ms}).catch(() => {});
-}
-
-async function confirmDialog(page) {
-    await page.waitForFunction(() => { const ds = [...document.querySelectorAll('[role=dialog]')].filter((d) => d.getClientRects().length > 0); const d = ds[ds.length - 1]; return d && /Confirm/.test(d.innerText); }, null, {timeout: 10000}).catch(() => {});
-    return page.locator('[role=dialog]:visible').last();
-}
-
-async function openEditWindow(page, titleRe) {
-    const idx = await rowIndexByTitle(page, G, titleRe);
-    await rowAction(page, G, idx, 'Edit');
-    const dlg = dlgWith(page, '#editReviewFormTabs');
-    await dlg.locator('#editReviewFormTabs').waitFor({timeout: 15000});
-    await dlg.locator('form#reviewFormForm').waitFor({timeout: 15000}).catch(() => {});
-    await page.locator('.ui-tabs-loading').waitFor({state: 'detached', timeout: 15000}).catch(() => {});
-    await idle(page);
-    return dlg;
-}
-async function openItemsTab(page, dlg) {
-    await dlg.getByRole('tab', {name: 'Form Items'}).click();
-    await dlg.locator(`${IG} .pkp_controllers_grid`).waitFor({timeout: 15000});
-    await idle(page);
-}
-async function openItemWindow(page, dlg, action = 'new', rowIndex = 0) {
-    if (action === 'new') await dlg.locator(IG).getByRole('link', {name: 'Create New Item'}).click();
-    else await rowAction(page, IG, rowIndex, 'Edit');
-    const d = dlgWith(page, 'form#reviewFormElementForm');
-    await d.locator('select#elementType').waitFor({timeout: 15000});
-    await idle(page);
-    return d;
-}
-async function optionsArea(d) {
-    return d.locator('#elementOptions').evaluate((e) => {
-        const vis = (el) => el.getClientRects().length > 0;
-        return {text: e.innerText.trim().replace(/\s+/g, ' ').slice(0, 400), visible: vis(e), columns: [...e.querySelectorAll('th')].map((h) => h.innerText.trim()), links: [...e.querySelectorAll('a, button')].filter(vis).map((a) => a.innerText.trim() || a.className.slice(0, 40)), rows: [...e.querySelectorAll('tbody tr')].filter(vis).map((r) => ({text: r.innerText.trim().replace(/\s+/g, ' ').slice(0, 120), inputs: [...r.querySelectorAll('input, textarea')].filter((i) => i.type !== 'hidden').map((i) => ({name: i.name, value: i.value, visible: vis(i)}))}))};
-    });
-}
-async function addOptions(d, choices) {
-    // "Add Item" appends a row; wait for the new row's box before filling, or the fill lands in the previous row
-    for (const c of choices) {
-        const before = await d.locator('#elementOptions tbody tr').evaluateAll((rs) => rs.filter((r) => r.getClientRects().length > 0 && r.querySelector('input')).length);
-        await d.locator('#elementOptions').getByRole('link', {name: 'Add Item'}).first().click();
-        await d.locator('#elementOptions tbody tr').evaluateAll((rs) => rs.filter((r) => r.getClientRects().length > 0 && r.querySelector('input')).length).then(async (n) => { if (n <= before) await d.page().waitForFunction((b) => [...document.querySelectorAll('[role=dialog] #elementOptions tbody tr')].filter((r) => r.getClientRects().length > 0 && r.querySelector('input')).length > b, before, {timeout: 10000}).catch(() => {}); });
-        const inputs = d.locator('#elementOptions input[type=text]:visible');
-        await inputs.last().waitFor({timeout: 10000});
-        await inputs.last().fill(c);
-        await inputs.last().press('Tab').catch(() => {});
-    }
-}
-async function clearOptions(d) {
-    // each row carries a remove icon (a link with no text, class pkp_linkaction_delete)
-    for (let i = 0; i < 6; i++) {
-        const del = d.locator('#elementOptions tbody tr a.pkp_linkaction_delete').first();
-        if (!(await del.count()) || !(await del.isVisible().catch(() => false))) break;
-        await del.click();
-        await d.page().waitForFunction(() => true, null, {timeout: 200}).catch(() => {});
-    }
-}
-async function saveItem(page, d) {
-    const w = page.waitForResponse((r) => /update-review-form-element/.test(r.url()), {timeout: 15000}).catch(() => null);
-    await d.getByRole('button', {name: 'Save', exact: true}).click();
-    const r = await w;
-    return r ? r.status() : null;
-}
-async function waitRows(page, sel, n) {
-    await page.waitForFunction(([s, n]) => document.querySelectorAll(`${s} tbody tr.gridRow`).length === n, [sel, n], {timeout: 15000}).catch(() => {});
-    await idle(page);
-}
-
-async function readPreview(dlg) {
-    return dlg.locator('form#previewReviewForm').evaluate((f) => {
-        const t = (el) => el.innerText.trim().replace(/\s+/g, ' ');
-        return {
-            title: f.querySelector('h3') && t(f.querySelector('h3')),
-            text: f.innerText.trim(),
-            controls: [...f.querySelectorAll('input, select, textarea')].filter((i) => i.type !== 'hidden').map((i) => ({type: i.type, tag: i.tagName, name: i.name, value: i.value, checked: i.checked, label: ((i.id && f.querySelector(`label[for="${i.id}"]`)) || i.closest('label') || i.parentElement).innerText.trim().replace(/\s+/g, ' ').slice(0, 80), options: i.tagName === 'SELECT' ? [...i.options].map((o) => JSON.stringify(o.text)) : undefined})),
-            buttons: [...f.querySelectorAll('button, input[type=submit], a.pkp_button')].map((b) => t(b) || b.value),
-            reqMarks: [...f.querySelectorAll('.req')].map((e) => ({text: t(e), section: t(e.closest('.section') || e.parentElement).slice(0, 80)})),
-        };
-    });
-}
-
-async function readReviewerStep3(page) {
-    return page.evaluate(() => {
-        const t = (el) => el.innerText.trim().replace(/\s+/g, ' ');
-        const form = document.querySelector('form#reviewForm') || document.querySelector('[name^="reviewFormResponses"]')?.closest('form') || document.querySelector('main') || document.body;
-        return {
-            url: location.href, lang: document.documentElement.lang,
-            text: (document.querySelector('main') || document.body).innerText.trim().slice(0, 4000),
-            headings: [...form.querySelectorAll('h1,h2,h3,h4,h5')].map(t),
-            controls: [...form.querySelectorAll('[name^="reviewFormResponses"]')].map((i) => ({type: i.type, tag: i.tagName, name: i.name, value: i.value, label: ((i.id && form.querySelector(`label[for="${i.id}"]`)) || i.closest('label') || i.parentElement).innerText.trim().replace(/\s+/g, ' ').slice(0, 80), options: i.tagName === 'SELECT' ? [...i.options].map((o) => JSON.stringify(o.text)) : undefined, sectionText: (i.closest('.section') || i.parentElement.parentElement).innerText.trim().replace(/\s+/g, ' ').slice(0, 200)})),
-            reqMarks: [...form.querySelectorAll('.req')].map((e) => ({text: t(e), section: t(e.closest('.section') || e.parentElement).slice(0, 100)})),
-            buttons: [...form.querySelectorAll('button, input[type=submit], a.pkp_button')].filter((b) => b.getClientRects().length > 0).map((b) => t(b) || b.value),
-            errors: [...document.querySelectorAll('.pkp_form_error, .error, .pkp_notification, .formError, [class*="error"]')].filter((e) => e.getClientRects().length > 0 && e.innerText.trim()).map((e) => ({cls: e.className.slice(0, 60), text: t(e).slice(0, 300)})),
-        };
-    });
-}
-
-async function walkToStep3(page, app, ctx, subId, locale = 'en') {
-    await page.goto(app.url(`/index.php/${ctx}/${locale}/reviewer/submission/${subId}?step=3`));
-    await idle(page);
-    for (let i = 0; i < 3; i++) {
-        if (await page.locator('[name^="reviewFormResponses"]').count()) break;
-        const btn = page.getByRole('button', {name: /Save and continue|Continue to Step|Sauvegarder et continuer|Enregistrer et continuer|Poursuivre/i}).first();
-        if (!(await btn.count())) break;
-        const noCI = page.locator('input[name="competingInterestOption"]').first();
-        if (await noCI.count()) await noCI.check().catch(() => {});
-        const label = await btn.innerText();
-        await btn.click();
-        await idle(page);
-        log('[wizard] pressed', flat(label), '→', page.url());
-    }
-    await page.locator('[name^="reviewFormResponses"]').first().waitFor({timeout: 15000}).catch(() => {});
-    await idle(page);
-}
+const texts = async (l) => (await l.allInnerTexts()).map((s) => s.trim()).filter(Boolean);
 
 forEachApp(async (app) => {
-    const out = {app: app.name};
-    if (app.name === 'ops') { record('k4-results', {app: 'ops', skipped: 'OPS has no Review tab and no review forms; the spec covers OJS and OMP'}); return; }
-    let scratch = fs.existsSync(scratchFile(app)) ? JSON.parse(fs.readFileSync(scratchFile(app), 'utf8')) : null;
+    if (app.name === 'ops') return;
+    let sc = fs.existsSync(scratchFile(app)) ? JSON.parse(fs.readFileSync(scratchFile(app), 'utf8')) : {};
+    const saveScratch = () => fs.writeFileSync(scratchFile(app), JSON.stringify(sc, null, 2));
+    const facts = {app: app.name, steps: {}, browserDialogs: [], errors: {}};
+    const done = (label, data) => { facts.steps[label] = data; log(`[${label}]`, app.name, JSON.stringify(data).slice(0, 1800)); };
 
-    if (on('seed')) {
-        const t = tag('u29k4');
-        scratch = {tag: t, mgr: `${t}mgr`, rev: `${t}rev`, rev2: `${t}rev2`, au: `${t}au`, formA: `Types form ${t}`, formB: `Order form ${t}`, formC: `Scenario form ${t}`, formD: `Inactive form ${t}`};
-        const ctx = await app.api.createContext({
-            tag: t,
-            context: {name: `U29 K4 ${t}`, acronym: 'U29K4', supportedLocales: ['en', 'fr_CA'], supportedSubmissionLocales: ['en', 'fr_CA']},
+    // ---- seed ---------------------------------------------------------------
+    if (on('seed') && !sc.A) {
+        const tA = tag('u29k4a');
+        const A = {mgr: `${tA}mgr`, au: `${tA}au`, rev1: `${tA}rev1`, rev2: `${tA}rev2`, rev3: `${tA}rev3`};
+        const ctxA = await app.api.createContext({
+            tag: tA,
             users: [
-                {username: scratch.mgr, roles: ['manager'], givenName: 'Kfour', familyName: 'Manager'},
-                {username: scratch.au, roles: ['author'], givenName: 'Kfour', familyName: 'Author'},
-                {username: scratch.rev, roles: ['externalReviewer'], givenName: 'Kfour', familyName: 'Reviewer'},
-                {username: scratch.rev2, roles: ['externalReviewer'], givenName: 'Kfour', familyName: 'Spare'},
+                {username: A.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+                {username: A.au, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+                {username: A.rev1, roles: ['externalReviewer'], givenName: 'Rowan', familyName: 'Reviewer'},
+                {username: A.rev2, roles: ['externalReviewer'], givenName: 'Sparrow', familyName: 'Declined'},
+                {username: A.rev3, roles: ['externalReviewer'], givenName: 'Robin', familyName: 'Spare'},
             ],
             reviewForms: [
-                {title: {en: scratch.formA}, description: {en: 'Types form description under the title.'}, elements: [
-                    {question: {en: 'Q1 one word'}, description: {en: 'Q1 description under the question'}, type: 'smalltextfield'},
-                    {question: {en: 'Q2 one line'}, type: 'textfield'},
-                    {question: {en: 'Q3 many lines'}, type: 'textarea', required: true},
-                    {question: {en: 'Q4 tick several'}, type: 'checkboxes', options: ['Alpha', 'Beta', 'Gamma']},
-                    {question: {en: 'Q5 choose one'}, type: 'radiobuttons', required: true, options: ['Yes', 'No']},
-                    {question: {en: 'Q6 pick from list'}, type: 'dropdownbox', options: ['First', 'Second', 'Third']},
+                {title: 'Gamma', description: 'Gamma instructions for the reviewer.', elements: [
+                    {question: 'Is the sample adequate?', description: 'Consider the sampling frame.', type: 'radiobuttons', required: true, options: ['Yes', 'No']},
+                    {question: 'Further remarks', type: 'textarea'},
                 ]},
-                {title: {en: scratch.formB}, elements: [{question: {en: 'B1 one line'}, type: 'textfield'}]},
+                {title: 'Delta', description: 'Delta description.', active: false, elements: [
+                    {question: 'D one', type: 'textfield'},
+                    {question: 'D two', type: 'checkboxes', required: true, options: ['Alpha', 'Beta']},
+                ]},
             ],
         });
-        scratch.contextId = ctx.contextId; scratch.path = ctx.path;
-        const sub = await app.api.createSubmission({tag: `${t}s`, context: ctx.path, submitter: scratch.au, title: `U29K4 in review ${t}`, decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: scratch.rev, status: 'accepted', reviewForm: scratch.formA}]}]});
-        scratch.submissionId = sub.submissionId || sub.id;
-        fs.writeFileSync(scratchFile(app), JSON.stringify(scratch, null, 2));
-        log('seeded', JSON.stringify(scratch));
+        const pA = ctxA.path || tA;
+        const s1 = await app.api.createSubmission({tag: `${tA}s1`, context: pA, submitter: A.au, title: `K4 sub1 ${tA}`,
+            decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: A.rev1, status: 'accepted', reviewForm: 'Gamma'}]}]});
+        const s2 = await app.api.createSubmission({tag: `${tA}s2`, context: pA, submitter: A.au, title: `K4 sub2 ${tA}`,
+            decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: A.rev2, status: 'declined', reviewForm: 'Gamma'}]}]});
+        const s3 = await app.api.createSubmission({tag: `${tA}s3`, context: pA, submitter: A.au, title: `K4 sub3 ${tA}`,
+            decisions: ['sendExternalReview']});
+        const tB = tag('u29k4b');
+        const B = {mgr: `${tB}mgr`, au: `${tB}au`, rev: `${tB}rev`};
+        const ctxB = await app.api.createContext({
+            tag: tB,
+            users: [
+                {username: B.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+                {username: B.au, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+                {username: B.rev, roles: ['externalReviewer'], givenName: 'Casey', familyName: 'Reviewer'},
+            ],
+        });
+        const pB = ctxB.path || tB;
+        const sB = await app.api.createSubmission({tag: `${tB}s1`, context: pB, submitter: B.au, title: `K4 B sub ${tB}`, decisions: ['sendExternalReview']});
+        sc = {A: {tag: tA, path: pA, users: A, sub1: s1.submissionId, sub2: s2.submissionId, sub3: s3.submissionId},
+            B: {tag: tB, path: pB, users: B, sub: sB.submissionId}};
+        saveScratch();
+        log('[seed]', app.name, JSON.stringify({A: [pA, s1.submissionId, s2.submissionId, s3.submissionId], B: [pB, sB.submissionId]}));
     }
 
-    const {page, close} = await launch(app);
-    const browserDialogs = [];
-    const toasts = [];
-    page.on('response', async (r) => { if (/fetchNotification/.test(r.url())) { try { const j = await r.json(); const texts = []; const walk = (o) => { if (!o) return; if (typeof o === 'string') texts.push(o.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()); else if (typeof o === 'object') Object.values(o).forEach(walk); }; walk(j && j.content); if (texts.length) { toasts.push({at: new Date().toISOString(), texts}); log('[toast]', JSON.stringify(texts)); } } catch (e) {} } });
-    page.on('dialog', (d) => { browserDialogs.push({type: d.type(), message: d.message()}); log('[browser dialog]', d.type(), d.message()); d.accept().catch(() => {}); });
-    const toastsSince = (n) => toasts.slice(n).map((x) => x.texts);
-    try {
-        if (on('list')) {
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await openForms(page, app, scratch.path);
-            out.listSeeded = await gridRows(page, G);
-            await full(page, 'list-seeded', {grid: out.listSeeded});
-            log('[list seeded]', JSON.stringify(out.listSeeded.columns), JSON.stringify(out.listSeeded.actionsAbove), JSON.stringify(out.listSeeded.rows));
-            await loc(page, 'Review Forms grid', page.locator(G));
-            await loc(page, 'Review Forms › Order link', page.locator(`${G} a.pkp_linkaction_orderItems`));
-            // 93–95, 99: the create window; empty title refused
-            await page.locator(G).getByRole('link', {name: 'Create Review Form'}).click();
-            const cd = dlgWith(page, 'form#reviewFormForm');
-            await cd.locator('input[id^="title-"]').first().waitFor({timeout: 15000});
+    const mailOf = (u) => `${u}@mail.test`;
+    const mailCounts = async (users) => {
+        const out = {};
+        for (const u of Object.values(users)) out[u] = await app.mail.count({to: mailOf(u)}).catch((e) => `err ${e.message}`);
+        return out;
+    };
+
+    // ---- per-context helpers (bound to a page) ----------------------------------
+    function bind(page, ctx) {
+        const url = (p) => app.url(`/index.php/${ctx.path}${p}`);
+        const H = {};
+        H.full = async (name) => {
+            let data;
+            try { data = await screen(page); } catch (e) { data = {url: page.url(), error: String(e.message).slice(0, 200)}; }
+            record(`${name}-${app.name}`, data);
+            await shot(page, `${name}-${app.name}`).catch(() => {});
+            return data;
+        };
+        H.panel = () => page.getByRole('tabpanel', {name: 'Review Forms', exact: true});
+        H.grid = () => H.panel().locator('.pkp_controllers_grid').first();
+        H.dlg = () => page.locator('[role="dialog"]:visible').last();
+        H.openForms = async () => {
+            await page.goto(url('/management/settings/workflow#review/reviewForms')); await idle(page);
+            if (!(await H.panel().isVisible().catch(() => false))) {
+                await page.getByRole('tab', {name: 'Review', exact: true}).click();
+                await page.getByRole('tabpanel', {name: 'Review', exact: true}).getByRole('tab', {name: 'Review Forms', exact: true}).click();
+                await idle(page);
+            }
+            await H.grid().locator('tbody tr').first().waitFor({timeout: 20000});
             await idle(page);
-            out.createWindow = await dialogInfo(cd);
-            await full(page, 'create-window', {dialog: out.createWindow});
-            log('[create window]', out.createWindow.title, JSON.stringify(out.createWindow.labels), JSON.stringify(out.createWindow.buttons.map((b) => b.text)), JSON.stringify(out.createWindow.links));
-            const w0 = page.waitForResponse((r) => /update-review-form/.test(r.url()), {timeout: 6000}).catch(() => null);
-            await cd.getByRole('button', {name: 'Save', exact: true}).click();
-            const r0 = await w0;
-            await page.waitForFunction(() => [...document.querySelectorAll('[role=dialog] .error, [role=dialog] label.error')].some((e) => e.getClientRects().length > 0), null, {timeout: 6000}).catch(() => {});
-            out.createEmpty = {request: r0 ? r0.status() : 'no request (client-side)', errors: (await dialogInfo(cd)).errors};
-            await full(page, 'create-empty-refused', out.createEmpty);
-            log('[create empty]', JSON.stringify(out.createEmpty));
-            // scenario 6: title + description → row at the bottom, 0 / 0, Active unticked
-            await cd.locator('input[id^="title-"]').first().fill(scratch.formC);
-            await typeRich(page, cd, 'description', 'Scenario form description.');
-            let tn = toasts.length;
-            const w1 = page.waitForResponse((r) => /update-review-form/.test(r.url()), {timeout: 15000}).catch(() => null);
-            await cd.getByRole('button', {name: 'Save', exact: true}).click();
-            const r1 = await w1;
-            await waitDialogGone(page, 'form#reviewFormForm');
-            await waitRows(page, G, 3);
-            out.listAfterC = {status: r1 && r1.status(), toasts: toastsSince(tn), grid: await gridRows(page, G)};
-            await full(page, 'list-after-c', out.listAfterC);
-            log('[list after C]', JSON.stringify(out.listAfterC.toasts), JSON.stringify(out.listAfterC.grid.rows));
-            // control form D, left inactive
-            await page.locator(G).getByRole('link', {name: 'Create Review Form'}).click();
-            const cd2 = dlgWith(page, 'form#reviewFormForm');
-            await cd2.locator('input[id^="title-"]').first().waitFor({timeout: 15000});
-            await cd2.locator('input[id^="title-"]').first().fill(scratch.formD);
-            await cd2.getByRole('button', {name: 'Save', exact: true}).click();
-            await waitDialogGone(page, 'form#reviewFormForm');
-            await waitRows(page, G, 4);
-            out.listAfterD = await gridRows(page, G);
-            await full(page, 'list-after-d', {grid: out.listAfterD});
-            log('[list after D]', JSON.stringify(out.listAfterD.rows.map((r) => r.cells)));
-            // 219–220: the row's arrow → actions
-            const ctrl = await openRowControls(page, G, 2);
-            out.rowActions = await ctrl.locator('a').evaluateAll((as) => as.filter((a) => a.getClientRects().length > 0).map((a) => a.innerText.trim()));
-            await full(page, 'row-actions', {rowActions: out.rowActions});
-            log('[row actions]', JSON.stringify(out.rowActions));
-            // (the arrow is not clicked again: a second click never closes the controls row — pC1 note)
-            // 216–217: Order → drag B above A → Done (no notice)
-            await page.locator(`${G} a.pkp_linkaction_orderItems`).first().click();
-            await page.waitForFunction((s) => document.querySelector(`${s} tbody tr.gridRow.ui-sortable-handle`), G, {timeout: 10000}).catch(() => {});
-            out.orderMode = await gridRows(page, G);
-            await full(page, 'list-order-mode', {grid: out.orderMode});
-            log('[order mode]', JSON.stringify(out.orderMode.belowLinks), JSON.stringify(out.orderMode.rows.map((r) => [r.cells[0], r.sortable])));
-            const rows = page.locator(`${G} tbody tr.gridRow`);
-            const src = await rows.nth(1).boundingBox();
-            const dst = await rows.nth(0).boundingBox();
-            await page.mouse.move(src.x + 40, src.y + src.height / 2);
+        };
+        H.readGrid = (g) => g.evaluate((root) => {
+            const vis = (e) => e.getClientRects().length > 0;
+            const rows = [...root.querySelectorAll('tbody tr.gridRow')].map((tr) => ({
+                title: (tr.querySelector('td') || {}).innerText?.trim().split('\n').pop(),
+                cells: [...tr.querySelectorAll('td')].map((td) => td.innerText.trim().replace(/\n/g, ' / ')),
+                active: [...tr.querySelectorAll('input[type=checkbox]')].map((c) => ({checked: c.checked, disabled: c.disabled})),
+                moveIcon: !!tr.querySelector('.pkp_helpers_moveicon, .ordering'),
+                actions: [...(tr.nextElementSibling?.classList.contains('row_controls') ? tr.nextElementSibling.querySelectorAll('a') : [])].map((a) => a.innerText.trim()).filter(Boolean),
+            }));
+            return {
+                heading: (root.querySelector('.pkp_controllers_grid_header h4, h4, .grid_header h4, .pkp_grid_title') || {}).innerText?.trim(),
+                rows,
+                gridActions: [...root.querySelectorAll('.actions a, .pkp_linkactions a')].filter(vis).map((a) => a.innerText.trim()),
+                finishControls: [...root.querySelectorAll('.order_finish_controls a')].filter(vis).map((a) => a.innerText.trim()),
+                columns: [...root.querySelectorAll('thead th')].map((th) => th.innerText.trim()),
+                empty: [...root.querySelectorAll('tbody .no_items, tbody tr.empty')].filter(vis).map((e) => e.innerText.trim()),
+            };
+        });
+        H.notices = async (ms = 5000) => {
+            const seen = new Set(); const end = Date.now() + ms;
+            while (Date.now() < end) {
+                for (const s of await page.locator('.pkpNotification, .pkp_notification, [role="alert"], [role="status"]').allInnerTexts().catch(() => [])) {
+                    if (s.trim()) seen.add(s.trim().replace(/\n×\nClose$/, '').replace(/\s+/g, ' '));
+                }
+                await sleep(400);
+            }
+            return [...seen];
+        };
+        H.rowOf = (g, title, nth = 0) => g.locator('tbody tr.gridRow').filter({hasText: new RegExp(`^\\s*(Settings\\s*)?${title}\\s*$`, 'm')}).nth(nth);
+        H.expandRow = async (row) => {
+            const controls = row.locator('xpath=following-sibling::tr[1][contains(@class,"row_controls")]');
+            if (!(await controls.isVisible().catch(() => false))) { await row.locator('.show_extras').first().click(); await idle(page); }
+            return controls;
+        };
+        H.rowActions = async (g, title, nth = 0) => texts((await H.expandRow(H.rowOf(g, title, nth))).locator('a'));
+        H.readDialog = async () => {
+            const d = H.dlg();
+            await d.waitFor({timeout: 15000});
+            await sleep(300);
+            return d.evaluate((el) => ({
+                title: (el.querySelector('h1, h2, h3, .modal__title, .pkp_modal_title, [class*="title"]') || {}).innerText?.trim(),
+                text: el.innerText.trim().slice(0, 1200),
+                buttons: [...el.querySelectorAll('button, a.pkp_button, .pkp_button')].filter((b) => b.getClientRects().length).map((b) => b.innerText.trim()).filter(Boolean),
+            }));
+        };
+        H.pressDialog = async (name) => {
+            const n = H.notices(4000);
+            await H.dlg().getByRole('button', {name, exact: true}).first().click();
+            const seen = await n; await idle(page); await sleep(500);
+            return seen;
+        };
+        H.toggleActive = async (title, press, label, nth = 0) => {
+            const row = H.rowOf(H.grid(), title, nth);
+            const box = row.locator('input[type=checkbox]').first();
+            const before = await box.isChecked();
+            await loc(page, `Review Forms row "${title}": the Active box`, box);
+            await box.click();
+            const confirm = await H.readDialog();
+            await H.full(`${label}-confirm`);
+            const seen = await H.pressDialog(press);
+            await H.grid().locator('tbody tr.gridRow').first().waitFor({timeout: 20000});
+            const after = await H.readGrid(H.grid());
+            await H.full(`${label}-after`);
+            return {before, confirm, pressed: press, notices: seen, rows: after.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active}))};
+        };
+        H.dragRowAbove = async (g, movingTitle, targetTitle) => {
+            const mb = await H.rowOf(g, movingTitle).boundingBox(); const tb = await H.rowOf(g, targetTitle).boundingBox();
+            await page.mouse.move(mb.x + 40, mb.y + mb.height / 2);
             await page.mouse.down();
-            await page.mouse.move(src.x + 40, src.y + src.height / 2 - 5, {steps: 3});
-            await page.mouse.move(dst.x + 40, dst.y + 4, {steps: 25});
+            await page.mouse.move(mb.x + 40, mb.y + mb.height / 2 - 6, {steps: 4});
+            await page.mouse.move(tb.x + 40, tb.y + 4, {steps: 20});
+            await page.mouse.move(tb.x + 40, tb.y - 8, {steps: 6});
+            await sleep(200);
             await page.mouse.up();
-            await idle(page);
-            tn = toasts.length;
-            const ws = page.waitForResponse((r) => /save-sequence/.test(r.url()), {timeout: 10000}).catch(() => null);
-            await page.locator(G).getByRole('link', {name: 'Done', exact: true}).click();
-            const rs = await ws;
-            await idle(page);
-            out.listAfterOrder = {saveSequence: rs && rs.status(), toasts: toastsSince(tn), notifications: [], grid: await gridRows(page, G)};
-            await full(page, 'list-after-order', out.listAfterOrder);
-            log('[after order]', out.listAfterOrder.saveSequence, JSON.stringify(out.listAfterOrder.toasts), JSON.stringify(out.listAfterOrder.grid.rows.map((r) => r.cells[0])));
-            // the order after leaving the page
-            await openForms(page, app, scratch.path);
-            out.listReloaded = await gridRows(page, G);
-            await full(page, 'list-reloaded', {grid: out.listReloaded});
-            log('[reloaded]', JSON.stringify(out.listReloaded.rows.map((r) => r.cells[0])));
-        }
-
-        if (on('items')) {
-            if (!on('list')) { await signIn(page, scratch.mgr, {contextPath: scratch.path}); await openForms(page, app, scratch.path); }
-            // 244–246: the Edit window
-            const dlg = await openEditWindow(page, /^Settings Scenario form|Scenario form/);
-            out.editWindow = await dialogInfo(dlg);
-            await full(page, 'edit-window', {dialog: out.editWindow});
-            log('[edit window]', out.editWindow.title, JSON.stringify(out.editWindow.tabs), JSON.stringify(out.editWindow.labels), JSON.stringify(out.editWindow.inputs.filter((i) => i.visible || i.tag === 'IFRAME').map((i) => [i.tag, i.id, i.value])));
-            await loc(page, 'Edit review form window', dlg);
-            // 258–261: Form Items, empty
-            await openItemsTab(page, dlg);
-            out.itemsEmpty = await gridRows(page, IG);
-            await full(page, 'items-empty', {grid: out.itemsEmpty});
-            log('[items empty]', JSON.stringify(out.itemsEmpty.columns), JSON.stringify(out.itemsEmpty.actionsAbove), JSON.stringify(out.itemsEmpty.emptyText));
-            // 102–112: the item window
-            let d = await openItemWindow(page, dlg, 'new');
-            out.itemWindow = await dialogInfo(d);
-            out.itemWindow.options = await optionsArea(d);
-            await full(page, 'item-window', {dialog: out.itemWindow});
-            log('[item window]', out.itemWindow.title, JSON.stringify(out.itemWindow.labels), JSON.stringify(out.itemWindow.inputs.filter((i) => i.type === 'checkbox' || i.tag === 'SELECT')), JSON.stringify(out.itemWindow.options));
-            await loc(page, 'Item window', d);
-            await loc(page, 'Item type select', d.locator('select#elementType'));
-            // everything empty → client-side refusal at Item type
-            const w0 = page.waitForResponse((r) => /update-review-form-element/.test(r.url()), {timeout: 6000}).catch(() => null);
-            await d.getByRole('button', {name: 'Save', exact: true}).click();
-            const r0 = await w0;
-            await page.waitForFunction(() => [...document.querySelectorAll('[role=dialog] .error, [role=dialog] label.error')].some((e) => e.getClientRects().length > 0), null, {timeout: 6000}).catch(() => {});
-            out.itemEmpty = {request: r0 ? r0.status() : 'no request (client-side)', errors: (await dialogInfo(d)).errors};
-            await full(page, 'item-empty-refused', out.itemEmpty);
-            log('[item empty]', JSON.stringify(out.itemEmpty));
-            // a type, no question → server-side toast
-            await d.locator('select#elementType').selectOption({label: 'Single word text box'});
-            let tn = toasts.length;
-            const st = await saveItem(page, d);
-            await page.waitForFunction((n) => document.querySelectorAll('.pkp_notification').length > 0 || n, tn, {timeout: 4000}).catch(() => {});
-            out.itemNoQuestion = {status: st, toasts: toastsSince(tn), stillOpen: await d.isVisible().catch(() => false), errors: (await dialogInfo(d)).errors};
-            await full(page, 'item-noquestion-refused', out.itemNoQuestion);
-            log('[item no question]', JSON.stringify(out.itemNoQuestion));
-            // scenario 6 item 1: radio Yes/No, required
-            await typeRich(page, d, 'question', 'S1 radio yes/no');
-            await d.locator('select#elementType').selectOption({label: 'Radio buttons (you can only choose one)'});
-            await addOptions(d, ['Yes', 'No']);
-            await d.locator('input#required').check();
-            out.item1Filled = {options: await optionsArea(d), required: await d.locator('input#required').isChecked(), included: await d.locator('input#included').isChecked()};
-            await full(page, 'item1-filled', out.item1Filled);
-            await saveItem(page, d);
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            await waitRows(page, IG, 1);
-            out.itemsAfter1 = await gridRows(page, IG);
-            await full(page, 'items-after-1', {grid: out.itemsAfter1});
-            log('[items after 1]', JSON.stringify(out.itemsAfter1.rows.map((r) => r.cells[0])), JSON.stringify(out.itemsAfter1.controlRows));
-            // item 2: Extended text box
-            d = await openItemWindow(page, dlg, 'new');
-            await typeRich(page, d, 'question', 'S2 extended text');
-            await d.locator('select#elementType').selectOption({label: 'Extended text box'});
-            await saveItem(page, d);
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            await waitRows(page, IG, 2);
-            // item 3: radio with rows, saved; then switched to a text type and saved again (112, footnote g's open question)
-            d = await openItemWindow(page, dlg, 'new');
-            await typeRich(page, d, 'question', 'S3 rows then text');
-            await d.locator('select#elementType').selectOption({label: 'Radio buttons (you can only choose one)'});
-            await addOptions(d, ['Orphan A', 'Orphan B']);
-            await saveItem(page, d);
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            await waitRows(page, IG, 3);
-            d = await openItemWindow(page, dlg, 'edit', 2);
-            out.item3Before = {title: (await dialogInfo(d)).title, type: await d.locator('select#elementType').inputValue(), options: await optionsArea(d)};
-            const bd = browserDialogs.length;
-            await d.locator('select#elementType').selectOption({label: 'Single line text box'});
-            await page.waitForFunction(() => true, null, {timeout: 300}).catch(() => {});
-            out.item3Switched = {browserDialogs: browserDialogs.slice(bd), options: await optionsArea(d), errors: (await dialogInfo(d)).errors};
-            await full(page, 'item3-type-switched', {before: out.item3Before, after: out.item3Switched});
-            log('[item3 switched]', JSON.stringify(out.item3Switched));
-            await saveItem(page, d);
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            await idle(page);
-            d = await openItemWindow(page, dlg, 'edit', 2);
-            out.item3Reopened = {title: (await dialogInfo(d)).title, type: await d.locator('select#elementType').evaluate((s) => s.options[s.selectedIndex].text), options: await optionsArea(d)};
-            await full(page, 'item3-reopened', out.item3Reopened);
-            log('[item3 reopened]', JSON.stringify(out.item3Reopened));
-            await d.getByRole('link', {name: 'Cancel'}).first().click();
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            // item 4, then delete it (260)
-            d = await openItemWindow(page, dlg, 'new');
-            await typeRich(page, d, 'question', 'S4 throwaway');
-            await d.locator('select#elementType').selectOption({label: 'Single word text box'});
-            await saveItem(page, d);
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            await waitRows(page, IG, 4);
-            out.itemsBeforeDelete = await gridRows(page, IG);
-            log('[items 4]', JSON.stringify(out.itemsBeforeDelete.rows.map((r) => r.cells[0])), JSON.stringify(out.itemsBeforeDelete.actionsAbove));
-            await rowAction(page, IG, 3, 'Delete');
-            const cdlg = await confirmDialog(page);
-            out.itemDeleteConfirm = await dialogInfo(cdlg);
-            await full(page, 'item-delete-confirm', {dialog: out.itemDeleteConfirm});
-            log('[item delete confirm]', flat(out.itemDeleteConfirm.text, 300), JSON.stringify(out.itemDeleteConfirm.buttons.map((b) => b.text)));
-            tn = toasts.length;
-            const wd = page.waitForResponse((r) => /delete-review-form-element/.test(r.url()), {timeout: 10000}).catch(() => null);
-            await cdlg.getByRole('button', {name: 'OK', exact: true}).click();
-            const rd = await wd;
-            await waitRows(page, IG, 3);
-            out.itemsAfterDelete = {status: rd && rd.status(), toasts: toastsSince(tn), grid: await gridRows(page, IG)};
-            await full(page, 'items-after-delete', out.itemsAfterDelete);
-            log('[items after delete]', out.itemsAfterDelete.status, JSON.stringify(out.itemsAfterDelete.toasts), JSON.stringify(out.itemsAfterDelete.grid.rows.map((r) => r.cells[0])));
-            // 262: Order on the items list, S3 above S1 → Done; preview follows
-            await dlg.locator(IG).getByRole('link', {name: 'Order', exact: true}).click();
-            await page.waitForFunction((s) => document.querySelector(`${s} tbody tr.gridRow.ui-sortable-handle`), IG, {timeout: 10000}).catch(() => {});
-            out.itemsOrderMode = await gridRows(page, IG);
-            await full(page, 'items-order-mode', {grid: out.itemsOrderMode});
-            const irows = dlg.locator(`${IG} tbody tr.gridRow`);
-            const s = await irows.nth(2).boundingBox(); const t0 = await irows.nth(0).boundingBox();
-            await page.mouse.move(s.x + 40, s.y + s.height / 2); await page.mouse.down();
-            await page.mouse.move(s.x + 40, s.y + s.height / 2 - 5, {steps: 3});
-            await page.mouse.move(t0.x + 40, t0.y + 4, {steps: 25}); await page.mouse.up();
-            await idle(page);
-            tn = toasts.length;
-            const wo = page.waitForResponse((r) => /save-sequence/.test(r.url()), {timeout: 10000}).catch(() => null);
-            await dlg.locator(IG).getByRole('link', {name: 'Done', exact: true}).click();
-            const ro = await wo;
-            await idle(page);
-            out.itemsAfterOrder = {saveSequence: ro && ro.status(), toasts: toastsSince(tn), grid: await gridRows(page, IG)};
-            await full(page, 'items-after-order', out.itemsAfterOrder);
-            log('[items after order]', out.itemsAfterOrder.saveSequence, JSON.stringify(out.itemsAfterOrder.toasts), JSON.stringify(out.itemsAfterOrder.grid.rows.map((r) => r.cells[0])));
-            await dlg.getByRole('button', {name: 'Close'}).first().click();
-            await waitDialogGone(page, '#editReviewFormTabs');
-            await idle(page);
-        }
-
-        if (on('preview')) {
-            if (!on('items')) { await signIn(page, scratch.mgr, {contextPath: scratch.path}); await openForms(page, app, scratch.path); }
-            // repair S1's rows (a filler race on the first run left a blank row): Edit S1 → clear → "Yes", "No" → Save
-            let dlg = await openEditWindow(page, /Scenario form/);
-            await openItemsTab(page, dlg);
-            {
-                const i1 = (await gridRows(page, IG)).rows.findIndex((r) => /S1 radio/.test(r.cells[0]));
-                const d = await openItemWindow(page, dlg, 'edit', i1);
-                const rowsNow = (await optionsArea(d)).rows.map((r) => r.text);
-                if (JSON.stringify(rowsNow) !== JSON.stringify(['Yes', 'No'])) {
-                    await clearOptions(d);
-                    await addOptions(d, ['Yes', 'No']);
-                    out.s1Repaired = await optionsArea(d);
-                    await saveItem(page, d);
-                    await waitDialogGone(page, 'form#reviewFormElementForm');
-                    await idle(page);
-                } else { await d.getByRole('link', {name: 'Cancel'}).first().click(); await waitDialogGone(page, 'form#reviewFormElementForm'); }
-                // the item window's title, from the aria snapshot (the nested dialogs share the DOM)
+            await sleep(400);
+        };
+        // the form window
+        H.openFormWindow = async (title, action = 'Edit', nth = 0) => {
+            const controls = await H.expandRow(H.rowOf(H.grid(), title, nth));
+            await controls.getByRole('link', {name: action, exact: true}).first().click();
+            await H.dlg().locator('#editReviewFormTabs li').first().waitFor({timeout: 15000});
+            await idle(page); await sleep(300);
+            return H.dlg();
+        };
+        H.windowInfo = async () => H.dlg().evaluate((el) => ({
+            heading: (el.querySelector('h1, h2, h3, .modal__title, [class*="title"]') || {}).innerText?.trim(),
+            tabs: [...el.querySelectorAll('#editReviewFormTabs li')].map((li) => ({text: li.innerText.trim(), selected: li.getAttribute('aria-selected') || li.classList.contains('ui-tabs-active'), disabled: li.classList.contains('ui-state-disabled') || li.getAttribute('aria-disabled') === 'true'})),
+            panelHead: (el.querySelector('.ui-tabs-panel:not([style*="display: none"])') || {}).innerText?.trim().slice(0, 300),
+        }));
+        H.clickFormTab = async (label) => {
+            await H.dlg().locator('#editReviewFormTabs a').filter({hasText: label}).first().click();
+            await H.dlg().locator('.ui-tabs-panel:visible .pkp_controllers_grid tbody tr, .ui-tabs-panel:visible form, .ui-tabs-panel:visible input, .ui-tabs-panel:visible textarea').first().waitFor({timeout: 15000}).catch(() => {});
+            await idle(page); await sleep(400);
+        };
+        H.itemsGrid = () => H.dlg().locator('.ui-tabs-panel:visible .pkp_controllers_grid').first();
+        H.closeWindow = async () => {
+            const d = H.dlg();
+            const close = d.getByRole('button', {name: /Close/}).first();
+            if (await close.count()) await close.click(); else await d.locator('.pkpModalCloseButton, .close').first().click();
+            await sleep(400); await idle(page);
+        };
+        // Preview Form panel as data: the order of questions, marks, descriptions and controls
+        H.readPreview = async () => H.dlg().locator('.ui-tabs-panel:visible').first().evaluate((p) => {
+            const walk = [];
+            const it = document.createTreeWalker(p, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+            let n;
+            while ((n = it.nextNode())) {
+                if (n.nodeType === 3) { const t = n.textContent.trim(); if (t) walk.push(`T:${t.slice(0, 80)}`); }
+                else if (/^(INPUT|TEXTAREA|SELECT)$/.test(n.tagName)) walk.push(`C:${n.tagName.toLowerCase()}[${n.type || ''}]${n.name ? ' ' + n.name : ''}`);
+                else if (n.tagName === 'IFRAME') walk.push('C:iframe');
+                else if (n.classList.contains('req')) walk.push(`M:${n.textContent.trim()}`);
             }
-            // 247–248, 476–477: Preview Form inside Edit
-            await dlg.getByRole('tab', {name: 'Preview Form'}).click();
-            await dlg.locator('form#previewReviewForm').waitFor({timeout: 15000});
-            await idle(page);
-            out.preview = await readPreview(dlg);
-            out.preview.tabs = (await dialogInfo(dlg)).tabs;
-            out.preview.windowButtons = (await dialogInfo(dlg)).buttons.map((b) => b.text);
-            await full(page, 'preview-in-edit', {preview: out.preview});
-            log('[preview]', out.preview.title, JSON.stringify(out.preview.controls.map((c) => [c.type, c.label])), JSON.stringify(out.preview.reqMarks), JSON.stringify(out.preview.buttons), JSON.stringify(out.preview.windowButtons));
-            await loc(page, 'Preview Form form', dlg.locator('form#previewReviewForm'));
-            await dlg.getByRole('button', {name: 'Close'}).first().click();
-            await waitDialogGone(page, '#editReviewFormTabs');
-            await idle(page);
-            // 249–250: the row's "Preview"
-            const idx = await rowIndexByTitle(page, G, /Scenario form/);
-            await rowAction(page, G, idx, 'Preview');
-            dlg = dlgWith(page, '#editReviewFormTabs');
-            await dlg.locator('form#previewReviewForm').waitFor({timeout: 20000});
-            await page.locator('.ui-tabs-loading').waitFor({state: 'detached', timeout: 15000}).catch(() => {});
-            await idle(page);
-            out.previewWindow = await dialogInfo(dlg);
-            out.previewWindow.preview = await readPreview(dlg);
-            await full(page, 'preview-window', {dialog: out.previewWindow});
-            log('[preview window]', out.previewWindow.title, JSON.stringify(out.previewWindow.tabs), out.previewWindow.preview.title);
-            await dlg.getByRole('button', {name: 'Close'}).first().click();
-            await waitDialogGone(page, '#editReviewFormTabs');
-            await idle(page);
-            // the seeded six-type form's preview (265–268): it is in use, so its row offers "Preview", not "Edit" (Rule 12)
-            await rowAction(page, G, await rowIndexByTitle(page, G, /Types form/), 'Preview');
-            dlg = dlgWith(page, '#editReviewFormTabs');
-            await dlg.locator('form#previewReviewForm').waitFor({timeout: 20000});
-            await page.locator('.ui-tabs-loading').waitFor({state: 'detached', timeout: 15000}).catch(() => {});
-            await idle(page);
-            out.previewTypes = await readPreview(dlg);
-            await full(page, 'preview-types', {preview: out.previewTypes});
-            log('[preview types]', JSON.stringify(out.previewTypes.controls.map((c) => [c.type, c.name, c.label, c.options])), JSON.stringify(out.previewTypes.reqMarks));
-            await dlg.getByRole('button', {name: 'Close'}).first().click();
-            await waitDialogGone(page, '#editReviewFormTabs');
-            await idle(page);
-            // 478–479: tick Active on the scenario form → Confirm → OK → stays ticked
-            const row = page.locator(`${G} tbody tr.gridRow`).nth(await rowIndexByTitle(page, G, /Scenario form/));
-            await row.locator('input[type=checkbox]').click();
-            const cdlg = await confirmDialog(page);
-            out.activateConfirm = await dialogInfo(cdlg);
-            await full(page, 'activate-confirm', {dialog: out.activateConfirm});
-            log('[activate confirm]', flat(out.activateConfirm.text, 300), JSON.stringify(out.activateConfirm.buttons.map((b) => b.text)));
-            const tn = toasts.length;
-            const wa = page.waitForResponse((r) => /activate-review-form|activateReviewForm/.test(r.url()), {timeout: 10000}).catch(() => null);
-            await cdlg.getByRole('button', {name: 'OK', exact: true}).click();
-            const ra = await wa;
-            await idle(page);
-            await page.waitForFunction(() => true, null, {timeout: 500}).catch(() => {});
-            out.afterActivate = {status: ra && ra.status(), url: ra && ra.url(), toasts: toastsSince(tn), grid: await gridRows(page, G)};
-            await full(page, 'list-after-activate', out.afterActivate);
-            await openForms(page, app, scratch.path);
-            out.afterActivateReloaded = await gridRows(page, G);
-            await full(page, 'list-after-activate-reloaded', {grid: out.afterActivateReloaded});
-            log('[after activate]', out.afterActivate.status, JSON.stringify(out.afterActivate.toasts), JSON.stringify(out.afterActivateReloaded.rows.map((r) => [r.cells[0], r.cells[1], r.cells[2], r.checkboxes[0] && r.checkboxes[0].checked])));
-        }
-
-        if (on('addrev')) {
-            if (!(on('items') || on('preview'))) await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            // 218, 479–481: the Add Reviewer window's "Review Form" list
-            await page.goto(app.url(`/index.php/${scratch.path}/en/dashboard/editorial?workflowSubmissionId=${scratch.submissionId}`));
-            await idle(page);
-            const addBtn = page.getByRole('button', {name: 'Add Reviewer', exact: true}).first();
-            await addBtn.waitFor({timeout: 30000});
-            await addBtn.click();
-            const dlg = page.getByRole('dialog').last();
-            const entry = dlg.locator('.listPanel__item').filter({hasText: /Spare/}).first();
-            await entry.waitFor({timeout: 30000});
-            await entry.getByRole('button', {name: /^Select /}).first().click();
-            await dlg.locator('input.datepicker').first().waitFor({timeout: 30000});
-            await idle(page);
-            out.addReviewer = await dlg.evaluate((d) => ({selects: [...d.querySelectorAll('select')].map((s) => ({id: s.id, name: s.name, value: s.value, label: (d.querySelector(`label[for="${s.id}"]`) || {}).innerText, options: [...s.options].map((o) => o.text), visible: s.getClientRects().length > 0}))}));
-            await full(page, 'add-reviewer-form-list', out.addReviewer);
-            log('[add reviewer]', JSON.stringify(out.addReviewer));
-            await loc(page, 'Add Reviewer › Review Form list', dlg.locator('select#reviewFormId'));
-            await dlg.getByRole('button', {name: 'Cancel', exact: true}).last().click().catch(() => {});
-            await idle(page);
-            await signOut(page);
-        }
-
-        if (on('reviewer')) {
-            // 100, 108, 263, 265–269: the reviewer's step 3 on the six-type form
-            await signIn(page, scratch.rev, {contextPath: scratch.path});
-            await walkToStep3(page, app, scratch.path, scratch.submissionId, 'en');
-            out.rev3 = await readReviewerStep3(page);
-            await full(page, 'rev-step3', {read: out.rev3});
-            log('[rev step3]', JSON.stringify(out.rev3.headings), JSON.stringify(out.rev3.controls.map((c) => [c.type, c.name, c.label, c.options])), JSON.stringify(out.rev3.reqMarks), JSON.stringify(out.rev3.buttons));
-            await loc(page, 'Reviewer step 3 form controls', page.locator('[name^="reviewFormResponses"]'));
-            // 269: Submit Review with the required questions unanswered
-            const submit = page.getByRole('button', {name: 'Submit Review', exact: true}).first();
-            if (await submit.count()) {
-                await submit.click();
-                await idle(page);
-                const c = page.locator('[role=dialog]:visible').last();
-                out.rev3SubmitAsk = (await c.count()) ? await dialogInfo(c) : {browserDialogs: [...browserDialogs]};
-                await full(page, 'rev-step3-submit-ask', {dialog: out.rev3SubmitAsk});
-                log('[rev submit ask]', flat(out.rev3SubmitAsk.text, 300), JSON.stringify((out.rev3SubmitAsk.buttons || []).map((b) => b.text)));
-                const ok = c.getByRole('button', {name: 'OK', exact: true}).first();
-                if (await ok.count()) { await ok.click(); await idle(page); }
-                await page.waitForFunction(() => [...document.querySelectorAll('.pkp_form_error, .error, .formError, [class*="error"]')].some((e) => e.getClientRects().length > 0 && e.innerText.trim()), null, {timeout: 8000}).catch(() => {});
-                out.rev3Refused = await readReviewerStep3(page);
-                await full(page, 'rev-step3-refused', {read: out.rev3Refused});
-                log('[rev refused]', page.url(), JSON.stringify(out.rev3Refused.errors), JSON.stringify(out.rev3Refused.reqMarks.length));
-            }
-            await signOut(page);
-        }
-
-        if (on('lang')) {
-            // 274–280: tick "Forms" for French, then the windows and the reviewer's French step 3
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await page.goto(app.url(`/index.php/${scratch.path}/en/management/settings/website#setup/languages`));
-            await idle(page);
-            const setupTab = page.getByRole('tab', {name: 'Setup', exact: true});
-            if ((await setupTab.getAttribute('aria-selected').catch(() => null)) !== 'true') await setupTab.click();
-            const langTab = page.getByRole('tab', {name: 'Languages', exact: true});
-            if ((await langTab.getAttribute('aria-selected').catch(() => null)) !== 'true') await langTab.click();
-            await page.locator('#languageGridContainer .pkp_controllers_grid').waitFor({timeout: 20000});
-            await idle(page);
-            const readLang = () => page.locator('#languageGridContainer').evaluate((c) => ({columns: [...c.querySelectorAll('thead th')].map((h) => h.innerText.trim()), rows: [...c.querySelectorAll('tbody tr.gridRow')].map((r) => ({text: r.innerText.trim().replace(/\s+/g, ' '), boxes: [...r.querySelectorAll('input[type=checkbox]')].map((b) => ({id: b.id, checked: b.checked}))}))}));
-            out.langBefore = await readLang();
-            await full(page, 'lang-grid-before', {grid: out.langBefore});
-            const frRow = page.locator('#languageGridContainer tbody tr.gridRow').filter({hasText: /Fran|French/});
-            const formsBox = frRow.locator('input[type=checkbox][id*="formLocale"]').first();
-            if (!(await formsBox.isChecked())) {
-                const w = page.waitForResponse((r) => r.request().method() === 'POST' && !/fetchNotification/.test(r.url()), {timeout: 10000}).catch(() => null);
-                await formsBox.click();
-                await w;
-                await page.waitForFunction(() => { const b = [...document.querySelectorAll('#languageGridContainer input[id*="fr_CA-formLocale"]')].pop(); return b && b.checked; }, null, {timeout: 10000}).catch(() => {});
-                await idle(page);
-            }
-            out.langAfter = await readLang();
-            await full(page, 'lang-grid-after', {grid: out.langAfter});
-            log('[lang grid]', JSON.stringify(out.langAfter));
-            await openForms(page, app, scratch.path);
-            await page.locator(G).getByRole('link', {name: 'Create Review Form'}).click();
-            const cd = dlgWith(page, 'form#reviewFormForm');
-            await cd.locator('input[id^="title-"]').first().waitFor({timeout: 15000});
-            await idle(page);
-            out.langCreate = await dialogInfo(cd);
-            await full(page, 'lang-create-window', {dialog: out.langCreate});
-            await cd.locator('input[id^="title-en"]').first().click().catch(() => {});
-            await page.waitForFunction(() => { const i = document.querySelector('[role=dialog] input[id^="title-fr_CA"]'); return i && i.getClientRects().length > 0; }, null, {timeout: 4000}).catch(() => {});
-            out.langCreateRevealed = await cd.evaluate((d) => ({titleInputs: [...d.querySelectorAll('input[id^="title-"]')].map((e) => ({id: e.id, visible: e.getClientRects().length > 0, label: (d.querySelector(`label[for="${e.id}"]`) || {}).innerText})), iframes: [...d.querySelectorAll('iframe')].map((f) => ({id: f.id, visible: f.getClientRects().length > 0})), popover: [...d.querySelectorAll('.localization_popover')].map((e) => ({text: e.innerText.trim().replace(/\s+/g, ' ').slice(0, 120), visible: e.getClientRects().length > 0})), flags: [...d.querySelectorAll('.flag')].map((e) => ({cls: e.className, title: e.title, visible: e.getClientRects().length > 0}))}));
-            await full(page, 'lang-create-window-revealed', out.langCreateRevealed);
-            log('[lang create]', JSON.stringify(out.langCreateRevealed));
-            await loc(page, 'Create Review Form › French title box', cd.locator('input[id^="title-fr_CA"]').first());
-            await cd.getByRole('button', {name: 'Close'}).first().click();
-            await waitDialogGone(page, 'form#reviewFormForm');
-            await idle(page);
-            const dlg = await openEditWindow(page, /Inactive form/);
-            await openItemsTab(page, dlg);
-            const d = await openItemWindow(page, dlg, 'new');
-            await d.locator('select#elementType').selectOption({label: 'Radio buttons (you can only choose one)'});
-            await addOptions(d, ['Un']);
-            out.langItem = {iframes: await d.locator('iframe').evaluateAll((fs) => fs.map((f) => ({id: f.id, visible: f.getClientRects().length > 0}))), options: await optionsArea(d), flags: (await dialogInfo(d)).flags};
-            await full(page, 'lang-item-window', out.langItem);
-            log('[lang item]', JSON.stringify(out.langItem));
+            return {text: p.innerText.trim().slice(0, 1500), walk: walk.slice(0, 80)};
+        });
+        // review stage / Add Reviewer
+        H.revTable = () => page.getByRole('table', {name: 'Reviewers', exact: true});
+        H.openRound = async (id, label) => {
+            await page.goto(url(`/dashboard/editorial?workflowSubmissionId=${id}`)); await idle(page);
+            await page.getByRole('link', {name: /Review Round 1|Round 1/}).first().click({timeout: 8000}).catch(() => {});
+            await H.revTable().waitFor({timeout: 30000}).catch(() => {}); await idle(page);
+            await H.full(`${label}-review-stage`);
+        };
+        H.addReviewerList = async (label, who) => {
+            await page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+            const d = page.getByRole('dialog').filter({hasText: 'Add Reviewer'}).last(); await d.waitFor({timeout: 30000});
+            const entry = d.locator('.listPanel__item').filter({hasText: who}).first(); await entry.waitFor({timeout: 30000});
+            await page.waitForFunction(() => { const ta = document.querySelector('textarea[name="personalMessage"]'); const mce = window.tinyMCE || window.tinymce; return !!(ta && mce?.get(ta.id)?.initialized); }, null, {timeout: 30000}).catch(() => {});
+            await entry.getByRole('button', {name: /Select/}).first().click(); await idle(page);
+            await d.locator('#regularReviewerForm').waitFor({state: 'visible', timeout: 30000});
+            const form = await d.locator('#regularReviewerForm').evaluate((f) => {
+                const sel = f.querySelector('select[name="reviewFormId"]');
+                return {reviewFormListPresent: !!sel, labelText: /Review Form/.test(f.innerText), options: sel ? [...sel.options].map((o) => ({value: o.value, text: o.text, selected: o.selected})) : null};
+            });
+            record(`${label}-add-reviewer-${app.name}`, {form, aria: await d.ariaSnapshot(), text: await d.innerText()});
+            await shot(page, `${label}-add-reviewer-${app.name}`).catch(() => {});
+            await loc(page, 'Add Reviewer window: "Review Form" list', d.locator('#regularReviewerForm select[name="reviewFormId"]'));
             await d.getByRole('button', {name: 'Close'}).first().click();
-            await waitDialogGone(page, 'form#reviewFormElementForm');
-            await dlg.getByRole('button', {name: 'Close'}).first().click().catch(() => {});
-            await waitDialogGone(page, '#editReviewFormTabs');
+            await page.locator('#regularReviewerForm').waitFor({state: 'hidden', timeout: 15000}).catch(() => {});
             await idle(page);
-            await signOut(page);
-            // the reviewer reading in French: the English texts where the French is empty
-            await signIn(page, scratch.rev, {contextPath: scratch.path});
-            await walkToStep3(page, app, scratch.path, scratch.submissionId, 'fr_CA');
-            out.rev3fr = await readReviewerStep3(page);
-            await full(page, 'rev-step3-fr', {read: out.rev3fr});
-            log('[rev step3 fr]', out.rev3fr.lang, JSON.stringify(out.rev3fr.headings), JSON.stringify(out.rev3fr.controls.map((c) => [c.type, c.label, c.options])));
-            await signOut(page);
-        }
-    } finally {
-        out.browserDialogs = browserDialogs; out.toasts = toasts;
-        record('k4-results', out);
-        await signOut(page).catch(() => {});
-        await close();
+            return form;
+        };
+        H.editAssignmentWindow = async (who, label) => {
+            const row = H.revTable().getByRole('row').filter({hasText: who}).first();
+            await row.getByRole('button', {name: 'More Actions'}).click();
+            await page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+            const edit = page.getByRole('dialog').filter({has: page.locator('form#editReviewForm')});
+            await edit.locator('form#editReviewForm input[name="isReviewPubliclyVisible"]').waitFor({timeout: 30000}); await idle(page); await sleep(400);
+            const info = await edit.locator('form#editReviewForm').evaluate((f) => {
+                const sel = f.querySelector('select[name="reviewFormId"]');
+                return {reviewFormListPresent: !!sel, labelText: /Review Form/.test(f.innerText), options: sel ? [...sel.options].map((o) => ({value: o.value, text: o.text, selected: o.selected})) : null};
+            });
+            record(`${label}-edit-assignment-${app.name}`, {info, heading: await edit.locator('h1, h2, h3').first().innerText().catch(() => null), text: await edit.innerText()});
+            await shot(page, `${label}-edit-assignment-${app.name}`).catch(() => {});
+            await loc(page, 'Edit Review window: "Review Form" list', edit.locator('select[name="reviewFormId"]'));
+            const cancel = edit.getByRole('link', {name: 'Cancel', exact: true});
+            if (await cancel.count()) await cancel.first().click(); else await page.getByRole('dialog').last().getByRole('button', {name: 'Close'}).first().click();
+            await page.locator('form#editReviewForm').waitFor({state: 'hidden', timeout: 15000}).catch(() => {});
+            await idle(page);
+            return info;
+        };
+        // the item window
+        H.itemForm = () => page.locator('form#reviewFormElementForm');
+        H.lbState = async () => ({
+            addLink: await H.itemForm().locator('.pkp_linkaction_addItem').evaluateAll((els) => els.map((e) => ({tag: e.tagName, text: e.innerText.trim(), disabled: e.disabled, aria: e.getAttribute('aria-disabled')}))),
+            columns: await texts(H.itemForm().locator('#elementOptions thead th')),
+            headerRows: await H.itemForm().locator('#elementOptions thead tr').count(),
+            rows: await H.itemForm().locator('#elementOptions tbody tr').evaluateAll((trs) => trs.filter((tr) => tr.offsetParent !== null).map((tr) => ({
+                text: tr.innerText.trim(), inputs: [...tr.querySelectorAll('input:not([type=hidden])')].map((i) => ({type: i.type, value: i.value, visible: i.offsetParent !== null})),
+            }))),
+        });
+        H.addOption = async (text) => {
+            await H.itemForm().locator('.pkp_linkaction_addItem').first().dispatchEvent('mousedown');
+            await H.itemForm().locator('#elementOptions tbody tr input[type=text]:visible').last().waitFor({timeout: 8000});
+            const afterAdd = await H.lbState();
+            await H.itemForm().locator('#elementOptions tbody tr input[type=text]:visible').last().fill(text);
+            return afterAdd;
+        };
+        H.typeSel = () => H.itemForm().locator('select#elementType, select[name=elementType]').first();
+        H.selectType = async (label) => { await H.typeSel().selectOption({label}); await sleep(400); };
+        H.fillFrame = async (nth, text) => {
+            const frame = H.itemForm().frameLocator('iframe').nth(nth);
+            await frame.locator('body').click();
+            await frame.locator('body').fill(text);
+        };
+        H.openCreateItem = async () => {
+            await H.dlg().getByText('Create New Item', {exact: true}).first().click();
+            await H.itemForm().waitFor({timeout: 10000});
+            await H.itemForm().locator('#elementOptions table').first().waitFor({timeout: 10000}).catch(() => {});
+            await H.itemForm().locator('.tox-toolbar__primary').first().waitFor({timeout: 10000}).catch(() => {});
+            await idle(page); await sleep(300);
+        };
+        H.itemWindowInfo = async () => {
+            const d = H.dlg();
+            return {
+                heading: await d.locator('h1, h2, h3, [class*="title"]').first().innerText().catch(() => null),
+                labels: await d.locator('label').evaluateAll((els) => els.filter((l) => l.getClientRects().length).map((l) => l.innerText.trim()).filter(Boolean)),
+                checkboxes: await H.itemForm().locator('input[type=checkbox]').evaluateAll((els) => els.map((e) => ({name: e.name, checked: e.checked}))),
+                typeOptions: await H.typeSel().locator('option').evaluateAll((els) => els.map((e) => ({value: e.value, text: e.innerText.trim(), selected: e.selected}))),
+                listbuilder: await H.lbState(),
+                buttons: await texts(d.locator('button:visible, a.pkp_button:visible, .pkp_button:visible')),
+                errors: await texts(d.locator('.error, label.error, .pkp_form_error, .formError')),
+            };
+        };
+        H.saveItem = async (ms = 6000) => {
+            const p = H.notices(ms);
+            await H.itemForm().getByRole('button', {name: 'Save', exact: true}).first().click();
+            const n = await p; await idle(page); await sleep(400);
+            return n;
+        };
+        H.openItemEdit = async (question) => {
+            const g = H.itemsGrid();
+            const controls = await H.expandRow(H.rowOf(g, question));
+            const actions = await texts(controls.locator('a'));
+            await controls.getByRole('link', {name: 'Edit', exact: true}).first().click();
+            await H.itemForm().waitFor({timeout: 10000});
+            await H.itemForm().locator('.tox-toolbar__primary').first().waitFor({timeout: 10000}).catch(() => {});
+            await idle(page); await sleep(300);
+            return actions;
+        };
+        H.url = url;
+        return H;
     }
+
+    const sect = async (label, fn) => { try { await fn(); } catch (e) { facts.errors[label] = String(e.stack || e).slice(0, 900); log(`[ERROR ${label}]`, app.name, facts.errors[label].slice(0, 400)); } };
+
+    // =========================== A1: manager on context A ===========================
+    if (on('a1')) {
+        const ctx = sc.A;
+        facts.steps.a_mail_before = await mailCounts(ctx.users);
+        const {page, close} = await launch(app);
+        page.on('dialog', async (d) => { facts.browserDialogs.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); });
+        const H = bind(page, ctx);
+        try {
+            await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+            await sect('a1_list', async () => {
+                await H.openForms();
+                await H.full('a1-list');
+                const g = await H.readGrid(H.grid());
+                done('a1_list', {url: page.url(), heading: g.heading, columns: g.columns, gridActions: g.gridActions, rows: g.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active}))});
+                done('a1_gamma_actions', await H.rowActions(H.grid(), 'Gamma'));
+                done('a1_delta_actions', await H.rowActions(H.grid(), 'Delta'));
+                await H.full('a1-row-actions');
+            });
+            // Rule 12/13: the in-use form's Preview window
+            await sect('a1_gamma_preview', async () => {
+                await H.openFormWindow('Gamma', 'Preview');
+                const info = await H.windowInfo();
+                await H.full('a1-gamma-preview-window');
+                const preview = await H.readPreview();
+                const greyed = H.dlg().locator('#editReviewFormTabs li').filter({hasText: 'Form Items'}).first();
+                await loc(page, 'Preview window (form in use): greyed "Form Items" tab', greyed);
+                await greyed.locator('a').first().click({force: true, timeout: 5000}).catch(() => {});
+                await sleep(500);
+                const afterPress = await H.windowInfo();
+                const greyed2 = H.dlg().locator('#editReviewFormTabs li').filter({hasText: 'Review Form'}).first();
+                await greyed2.locator('a').first().click({force: true, timeout: 5000}).catch(() => {});
+                await sleep(500);
+                const afterPress2 = await H.windowInfo();
+                await H.full('a1-gamma-preview-after-grey-press');
+                done('a1_gamma_preview', {window: info, preview, afterPressFormItems: afterPress, afterPressReviewForm: afterPress2});
+                await H.closeWindow();
+            });
+            // Rule 13: Delta's Edit window, tabs, Preview Form, save on "Review Form"
+            await sect('a1_delta_edit', async () => {
+                await H.openFormWindow('Delta', 'Edit');
+                const info = await H.windowInfo();
+                const labels = await H.dlg().locator('label').evaluateAll((els) => els.filter((l) => l.getClientRects().length).map((l) => l.innerText.trim()).filter(Boolean));
+                await H.full('a1-delta-edit-window');
+                await H.clickFormTab('Form Items');
+                const items = await H.readGrid(H.itemsGrid());
+                await H.full('a1-delta-items');
+                await H.clickFormTab('Preview Form');
+                const preview = await H.readPreview();
+                // the controls can be typed into
+                const box = H.dlg().locator('.ui-tabs-panel:visible input[type=text]').first();
+                let typed = null;
+                if (await box.count()) { await box.fill('typed in preview'); typed = await box.inputValue(); }
+                const reqCount = await page.locator('main').evaluate(() => 0).catch(() => 0);
+                await H.full('a1-delta-preview-typed');
+                done('a1_delta_window', {window: info, labels, items: {columns: items.columns, gridActions: items.gridActions, rows: items.rows.map((r) => r.cells)}, preview, typed, reqCount});
+                await H.clickFormTab('Review Form');
+                const title = H.dlg().locator('input[name^="title"]').first();
+                await title.fill('Delta v2');
+                const n = H.notices(6000);
+                await H.dlg().locator('form').getByRole('button', {name: 'Save', exact: true}).first().click();
+                const saved = await n; await idle(page); await sleep(500);
+                const g = await H.readGrid(H.grid());
+                await H.full('a1-delta-saved');
+                done('a1_delta_save', {notices: saved, dialogsOpen: await page.locator('[role="dialog"]:visible').count(), rows: g.rows.map((r) => ({title: r.title, cells: r.cells}))});
+            });
+            // Rule 12d: order
+            await sect('a1_order', async () => {
+                await H.grid().locator('.pkp_linkaction_orderItems').first().click(); await sleep(500);
+                const ordering = await H.readGrid(H.grid());
+                await H.full('a1-ordering-mode');
+                await H.dragRowAbove(H.grid(), 'Delta v2', 'Gamma');
+                const dragged = await H.readGrid(H.grid());
+                const n = H.notices(4000);
+                await H.grid().locator('.order_finish_controls .saveButton').click();
+                const doneNotices = await n; await idle(page); await sleep(500);
+                await page.reload(); await idle(page); await H.openForms();
+                const reloaded = await H.readGrid(H.grid());
+                await H.full('a1-order-after-done-reload');
+                await H.grid().locator('.pkp_linkaction_orderItems').first().click(); await sleep(500);
+                await H.dragRowAbove(H.grid(), 'Gamma', 'Delta v2');
+                const dragged2 = await H.readGrid(H.grid());
+                await H.grid().locator('.order_finish_controls .cancelFormButton').click(); await idle(page); await sleep(500);
+                const afterCancel = await H.readGrid(H.grid());
+                await page.reload(); await idle(page); await H.openForms();
+                const reloaded2 = await H.readGrid(H.grid());
+                await H.full('a1-order-after-cancel-reload');
+                done('a1_order', {orderingMode: {gridActions: ordering.gridActions, finishControls: ordering.finishControls, moveIcons: ordering.rows.map((r) => r.moveIcon)},
+                    afterDrag: dragged.rows.map((r) => r.title), doneNotices, afterDoneReload: reloaded.rows.map((r) => r.title),
+                    cancel: {afterDrag: dragged2.rows.map((r) => r.title), afterCancel: afterCancel.rows.map((r) => r.title), afterReload: reloaded2.rows.map((r) => r.title)}});
+                // put Gamma back first for the editors' list order check
+                await H.grid().locator('.pkp_linkaction_orderItems').first().click(); await sleep(500);
+                await H.dragRowAbove(H.grid(), 'Gamma', 'Delta v2');
+                await H.grid().locator('.order_finish_controls .saveButton').click(); await idle(page); await sleep(500);
+            });
+            // Rule 12b/12c: copy Delta v2, read the copy, delete it
+            await sect('a1_copy_delete', async () => {
+                await page.reload(); await idle(page); await H.openForms();
+                const controls = await H.expandRow(H.rowOf(H.grid(), 'Delta v2'));
+                await controls.getByRole('link', {name: 'Copy', exact: true}).first().click();
+                const confirm = await H.readDialog();
+                await H.full('a1-copy-confirm');
+                const copyNotices = await H.pressDialog('OK');
+                const after = await H.readGrid(H.grid());
+                await H.full('a1-after-copy');
+                const copyActions = await H.rowActions(H.grid(), 'Delta v2', 1);
+                await H.openFormWindow('Delta v2', 'Edit', 1);
+                const winTitle = await H.dlg().locator('input[name^="title"]').first().inputValue().catch(() => null);
+                const winDesc = await H.dlg().frameLocator('iframe').first().locator('body').innerText().catch(() => null);
+                await H.clickFormTab('Form Items');
+                const items = await H.readGrid(H.itemsGrid());
+                await H.full('a1-copy-items');
+                await H.closeWindow();
+                done('a1_copy', {confirm, notices: copyNotices, rows: after.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active})), copyActions, copyWindow: {title: winTitle, description: winDesc, items: items.rows.map((r) => r.title)}});
+                await page.reload(); await idle(page); await H.openForms();
+                const c2 = await H.expandRow(H.rowOf(H.grid(), 'Delta v2', 1));
+                await c2.getByRole('link', {name: 'Delete', exact: true}).first().click();
+                const delConfirm = await H.readDialog();
+                await H.full('a1-delete-confirm');
+                const delNotices = await H.pressDialog('OK');
+                const afterDel = await H.readGrid(H.grid());
+                await H.full('a1-after-delete');
+                done('a1_delete', {confirm: delConfirm, notices: delNotices, rows: afterDel.rows.map((r) => ({title: r.title, cells: r.cells}))});
+            });
+            // Rule 12: editors' lists with Gamma active, Delta inactive
+            await sect('a1_lists_active', async () => {
+                await H.openRound(ctx.sub3, 'a1-gamma-on');
+                done('a1_add_reviewer_gamma_on', await H.addReviewerList('a1-gamma-on', 'Robin'));
+                await H.openRound(ctx.sub1, 'a1-sub1');
+                done('a1_edit_assignment_gamma_on', await H.editAssignmentWindow('Rowan', 'a1-gamma-on'));
+            });
+            if (app.name === 'ojs') await sect('a1_section', async () => {
+                await page.goto(H.url('/management/settings/context#sections')); await idle(page);
+                let sPanel = page.getByRole('tabpanel', {name: 'Sections', exact: true});
+                if (!(await sPanel.isVisible().catch(() => false))) { await page.getByRole('tab', {name: 'Sections', exact: true}).click(); await idle(page); }
+                const sGrid = sPanel.locator('.pkp_controllers_grid').first();
+                await sGrid.locator('tbody tr.gridRow').first().waitFor({timeout: 20000}); await idle(page);
+                const row = sGrid.locator('tbody tr.gridRow').first();
+                await row.locator('.show_extras').first().click(); await idle(page);
+                await row.locator('xpath=following-sibling::tr[1][contains(@class,"row_controls")]').getByRole('link', {name: 'Edit', exact: true}).first().click();
+                const d = H.dlg();
+                await d.locator('select[name="reviewFormId"]').first().waitFor({timeout: 20000}); await idle(page); await sleep(400);
+                await H.full('a1-section-edit');
+                const opts = await d.locator('select[name="reviewFormId"]').first().evaluate((s) => [...s.options].map((o) => ({value: o.value, text: o.text, selected: o.selected})));
+                done('a1_section_review_form_list', {options: opts, labelText: /Review Form/.test(await d.innerText())});
+                await H.closeWindow();
+            });
+            // Rule 12/12a/A2: deactivate the form in use
+            await sect('a1_deactivate_in_use', async () => {
+                await H.openForms();
+                done('a1_deactivate_gamma', await H.toggleActive('Gamma', 'OK', 'a1-deactivate-gamma'));
+                done('a1_gamma_actions_after_deactivate', await H.rowActions(H.grid(), 'Gamma'));
+                await H.openRound(ctx.sub3, 'a1-none-active');
+                done('a1_add_reviewer_none_active', await H.addReviewerList('a1-none-active', 'Robin'));
+                await H.openRound(ctx.sub1, 'a1-sub1-none-active');
+                done('a1_edit_assignment_none_active', await H.editAssignmentWindow('Rowan', 'a1-none-active'));
+            });
+            await signOut(page);
+            // OMP control: the seeded press's series window has no "Review Form" list (read-only, nothing saved)
+            if (app.name === 'omp') await sect('a1_series_control', async () => {
+                await signIn(page, 'manager.maya'); await idle(page);
+                await page.goto(app.url(`/index.php/${app.contextPath}/management/settings/context#series`)); await idle(page);
+                let sPanel = page.getByRole('tabpanel', {name: 'Series', exact: true});
+                if (!(await sPanel.isVisible().catch(() => false))) { await page.getByRole('tab', {name: 'Series', exact: true}).click(); await idle(page); }
+                const sGrid = sPanel.locator('.pkp_controllers_grid').first();
+                await sGrid.locator('tbody tr.gridRow').first().waitFor({timeout: 20000}); await idle(page);
+                const row = sGrid.locator('tbody tr.gridRow').first();
+                await row.locator('.show_extras').first().click(); await idle(page);
+                await row.locator('xpath=following-sibling::tr[1][contains(@class,"row_controls")]').getByRole('link', {name: 'Edit', exact: true}).first().click();
+                const d = H.dlg();
+                await d.locator('form input[name^="title"]').first().waitFor({timeout: 20000}); await idle(page); await sleep(600);
+                await H.full('a1-series-edit-control');
+                done('a1_series_control', {reviewFormListPresent: await d.locator('select[name="reviewFormId"]').count(), textHasReviewForm: /Review Form/.test(await d.innerText()), selects: await d.locator('select').evaluateAll((els) => els.map((e) => e.name))});
+                await H.closeWindow();
+                await signOut(page);
+            });
+        } finally { record(`a1-facts-${app.name}`, {steps: facts.steps, errors: facts.errors, browserDialogs: facts.browserDialogs}); await close(); }
+    }
+
+    // =========================== A1b: the assignment's Edit window with no active form ===========================
+    if (on('a1b')) {
+        const ctx = sc.A;
+        const {page, close} = await launch(app);
+        const H = bind(page, ctx);
+        try {
+            await sect('a1b_edit_assignment_none_active', async () => {
+                await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+                await H.openRound(ctx.sub1, 'a1b-sub1-none-active');
+                done('a1b_edit_assignment_none_active', await H.editAssignmentWindow('Rowan', 'a1b-none-active'));
+                await signOut(page);
+            });
+        } finally { record(`a1b-facts-${app.name}`, {steps: facts.steps, errors: facts.errors}); await close(); }
+    }
+
+    // =========================== A2: the reviewer on the deactivated form ===========================
+    if (on('a2')) {
+        const ctx = sc.A;
+        const {page, close} = await launch(app);
+        page.on('dialog', async (d) => { facts.browserDialogs.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); });
+        const H = bind(page, ctx);
+        try {
+            await sect('a2_wizard', async () => {
+                await signIn(page, ctx.users.rev1, {contextPath: ctx.path}); await idle(page);
+                await page.goto(H.url(`/reviewer/submission/${ctx.sub1}`)); await idle(page);
+                await page.waitForFunction(() => !/Loading/.test(document.querySelector('main')?.innerText || ''), null, {timeout: 20000}).catch(() => {});
+                const onStep = async () => (await page.locator('[role=tab][aria-selected=true]').first().innerText().catch(() => '')).trim();
+                await H.full('a2-landing');
+                const landing = await onStep();
+                if (!/^3\./.test(landing)) {
+                    for (const name of ['Save and continue', /Continue to Step #3/]) {
+                        const b = page.getByRole('button', {name}); if (await b.count()) { await b.first().click(); await idle(page); }
+                    }
+                }
+                await page.waitForFunction(() => document.querySelector('[role=tab][aria-selected=true]')?.textContent.trim().startsWith('3.'), null, {timeout: 30000}).catch(() => {});
+                await idle(page);
+                const s3 = await H.full('a2-step3');
+                const main = page.locator('main');
+                const mainText = s3.text?.main || '';
+                const order = ['Gamma instructions for the reviewer.', 'Is the sample adequate?', 'Consider the sampling frame.', 'Further remarks'].map((s) => ({s, at: mainText.indexOf(s)}));
+                done('a2_step3', {landing, step: await onStep(), order, hasTitle: /Gamma/.test(mainText),
+                    radios: await main.locator('input[type=radio]:visible').evaluateAll((els) => els.map((e) => ({name: e.name, value: e.value, label: (e.closest('label') || document.querySelector(`label[for="${e.id}"]`) || {}).innerText?.trim()})))});
+                const yes = main.getByRole('radio', {name: 'Yes', exact: true}).first();
+                await yes.check();
+                const ta = main.locator('textarea:visible').first();
+                if (await ta.count()) await ta.fill('Remarks from K4.');
+                else { const body = page.frameLocator('main iframe').first().locator('body'); await body.click(); await page.keyboard.type('Remarks from K4.'); }
+                const rec = main.locator('select').filter({has: page.locator('option', {hasText: /Accept/})}).first();
+                let recChosen = null;
+                if (await rec.count()) { await rec.selectOption({index: 1}); recChosen = await rec.evaluate((s) => ({name: s.name, chosen: s.options[s.selectedIndex]?.text})); }
+                await H.full('a2-step3-filled');
+                done('a2_filled', {recChosen});
+                await page.getByRole('button', {name: 'Submit Review'}).first().click();
+                await page.waitForFunction(() => [...document.querySelectorAll('[role="dialog"]')].some((e) => e.offsetParent !== null && /sure|submit/i.test(e.innerText)), null, {timeout: 8000}).catch(() => {});
+                await H.full('a2-submit-confirm');
+                const confirm = await H.readDialog().catch(() => null);
+                if (confirm) await H.dlg().getByRole('button', {name: /^(OK|Submit Review|Yes)$/}).first().click();
+                await page.waitForFunction(() => document.querySelector('[role=tab][aria-selected=true]')?.textContent.trim().startsWith('4.'), null, {timeout: 30000}).catch(() => {});
+                await idle(page);
+                await H.full('a2-after-submit');
+                done('a2_submitted', {confirm, step: await onStep(), url: page.url()});
+                await signOut(page);
+            });
+        } finally { record(`a2-facts-${app.name}`, {steps: facts.steps, errors: facts.errors, browserDialogs: facts.browserDialogs}); await close(); }
+    }
+
+    // =========================== A3: counts after submission, reactivate ===========================
+    if (on('a3')) {
+        const ctx = sc.A;
+        const {page, close} = await launch(app);
+        const H = bind(page, ctx);
+        try {
+            await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+            await sect('a3_counts', async () => {
+                await H.openForms();
+                const g = await H.readGrid(H.grid());
+                await H.full('a3-list-after-submit');
+                done('a3_counts', {rows: g.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active}))});
+                done('a3_gamma_actions', await H.rowActions(H.grid(), 'Gamma'));
+                done('a3_reactivate_gamma', await H.toggleActive('Gamma', 'OK', 'a3-reactivate-gamma'));
+                done('a3_cancel_on_deactivate', await H.toggleActive('Gamma', 'Cancel', 'a3-cancel-deactivate'));
+            });
+            await sect('a3_edit_assignment_active', async () => {
+                await H.openRound(ctx.sub1, 'a3-sub1-gamma-on');
+                done('a3_edit_assignment_gamma_on', await H.editAssignmentWindow('Rowan', 'a3-gamma-on'));
+            });
+            await signOut(page);
+            facts.steps.a_mail_after = await mailCounts(ctx.users);
+            done('a_mail', {before: facts.steps.a_mail_before, after: facts.steps.a_mail_after});
+        } finally { record(`a3-facts-${app.name}`, {steps: facts.steps, errors: facts.errors}); await close(); }
+    }
+
+    // =========================== B: scenarios 6 and 8 on an empty context ===========================
+    if (on('b')) {
+        const ctx = sc.B;
+        const mailBefore = await mailCounts(ctx.users);
+        const {page, close} = await launch(app);
+        page.on('dialog', async (d) => { facts.browserDialogs.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); });
+        const H = bind(page, ctx);
+        try {
+            await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+            await sect('b_empty_list', async () => {
+                await page.goto(H.url('/management/settings/workflow#review/reviewForms')); await idle(page);
+                if (!(await H.panel().isVisible().catch(() => false))) {
+                    await page.getByRole('tab', {name: 'Review', exact: true}).click();
+                    await page.getByRole('tabpanel', {name: 'Review', exact: true}).getByRole('tab', {name: 'Review Forms', exact: true}).click();
+                    await idle(page);
+                }
+                await H.grid().waitFor({timeout: 20000}); await idle(page); await sleep(500);
+                await H.full('b-list-empty');
+                const g = await H.readGrid(H.grid());
+                done('b_list_empty', {heading: g.heading, columns: g.columns, gridActions: g.gridActions, empty: g.empty, rows: g.rows.length, panelText: (await H.panel().innerText()).trim().slice(0, 400)});
+            });
+            // Scenario 6: create the form, refused save first
+            await sect('b_create', async () => {
+                await H.panel().getByText('Create Review Form', {exact: true}).first().click();
+                const d = H.dlg();
+                await d.locator('input[name^="title"]').first().waitFor({timeout: 15000}); await idle(page); await sleep(400);
+                await H.full('b-create-window');
+                const heading = await d.locator('h1, h2, h3, [class*="title"]').first().innerText().catch(() => null);
+                const labels = await d.locator('label').evaluateAll((els) => els.filter((l) => l.getClientRects().length).map((l) => l.innerText.trim()).filter(Boolean));
+                const n0 = H.notices(3000);
+                await d.getByRole('button', {name: 'Save', exact: true}).last().click();
+                const refusedNotices = await n0; await idle(page);
+                await H.full('b-create-empty-save');
+                const refused = {dialogsOpen: await page.locator('[role="dialog"]:visible').count(), errors: await texts(d.locator('.error, label.error, .pkp_form_error, .formError')), titleName: await d.locator('input[name^="title"]').first().evaluate((e) => e.getAttribute('aria-label') || e.labels?.[0]?.innerText || '').catch(() => null), notices: refusedNotices};
+                await d.locator('input[name^="title"]').first().fill('Method check');
+                const n = H.notices(6000);
+                await d.getByRole('button', {name: 'Save', exact: true}).last().click();
+                const saved = await n; await idle(page); await sleep(500);
+                await H.grid().locator('tbody tr.gridRow').first().waitFor({timeout: 15000});
+                const g = await H.readGrid(H.grid());
+                await H.full('b-after-create');
+                done('b_create', {heading, labels, refused, saved: {notices: saved, dialogsOpen: await page.locator('[role="dialog"]:visible').count(), rows: g.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active})), gridActions: g.gridActions}});
+            });
+            // Scenario 6: the items
+            await sect('b_items', async () => {
+                await H.openFormWindow('Method check', 'Edit');
+                const editHeading = (await H.windowInfo()).heading;
+                await H.clickFormTab('Form Items');
+                const itemsEmpty = await H.readGrid(H.itemsGrid());
+                await H.full('b-items-empty');
+                await H.openCreateItem();
+                const opened = await H.itemWindowInfo();
+                await H.full('b-item-window');
+                // refused: everything empty
+                const refusedEmpty = {notices: await H.saveItem(3000), errors: await texts(H.dlg().locator('.error, label.error, .pkp_form_error, .formError')), open: await H.itemForm().isVisible()};
+                await H.full('b-item-empty-save');
+                // refused: question typed, type still "Choose item type"
+                await H.fillFrame(0, 'Is the method sound?');
+                const refusedNoType = {notices: await H.saveItem(3000), errors: await texts(H.dlg().locator('.error, label.error, .pkp_form_error, .formError')), open: await H.itemForm().isVisible(), typeSelected: await H.typeSel().evaluate((s) => s.options[s.selectedIndex]?.text)};
+                await H.full('b-item-no-type-save');
+                // Add Item before a type is chosen, then a second row
+                const addBeforeType = await H.addOption('Yes');
+                const afterFirst = await H.lbState();
+                const addSecond = await H.addOption('No');
+                const afterSecond = await H.lbState();
+                await H.full('b-item-two-options');
+                await H.itemForm().locator('input[name="required"]').check();
+                await H.selectType('Radio buttons (you can only choose one)');
+                const afterType = await H.lbState();
+                const saved1 = await H.saveItem();
+                const rows1 = await H.readGrid(H.itemsGrid());
+                await H.full('b-item1-saved');
+                done('b_item1', {editHeading, itemsEmpty: {gridActions: itemsEmpty.gridActions, columns: itemsEmpty.columns, empty: itemsEmpty.empty}, opened, refusedEmpty, refusedNoType, addBeforeType, afterFirst, addSecond, afterSecond, afterType, saved1: {notices: saved1, windowOpen: await H.itemForm().isVisible().catch(() => false), rows: rows1.rows.map((r) => r.cells)}, browserDialogs: facts.browserDialogs.slice()});
+                // second item
+                await H.openCreateItem();
+                await H.fillFrame(0, 'Other remarks');
+                await H.selectType('Extended text box');
+                const saved2 = await H.saveItem();
+                // third item: required, with a description, one option; later switched to a text type
+                await H.openCreateItem();
+                await H.fillFrame(0, 'Temp choice');
+                await H.fillFrame(1, 'Pick one.');
+                await H.itemForm().locator('input[name="required"]').check();
+                await H.selectType('Drop-down box');
+                await H.addOption('A');
+                const saved3 = await H.saveItem();
+                const rows3 = await H.readGrid(H.itemsGrid());
+                await H.full('b-items-three');
+                done('b_items_2_3', {saved2, saved3, rows: rows3.rows.map((r) => r.cells)});
+                // Preview Form
+                await H.clickFormTab('Preview Form');
+                const preview = await H.readPreview();
+                const radios = await H.dlg().locator('.ui-tabs-panel:visible input[type=radio]').evaluateAll((els) => els.map((e) => ({value: e.value, label: (e.closest('label') || document.querySelector(`label[for="${e.id}"]`) || {}).innerText?.trim()})));
+                const textareaCount = await H.dlg().locator('.ui-tabs-panel:visible textarea, .ui-tabs-panel:visible iframe').count();
+                await H.full('b-preview');
+                done('b_preview', {preview, radios, textareaCount});
+                // the item's Edit window: heading, then switch Temp choice to a text type
+                await H.clickFormTab('Form Items');
+                const itemActions = await H.openItemEdit('Temp choice');
+                const editInfo = await H.itemWindowInfo();
+                await H.full('b-item-edit-window');
+                const dlgsBefore = facts.browserDialogs.length;
+                await H.selectType('Extended text box');
+                const afterSwitch = {listbuilder: await H.lbState(), browserDialogs: facts.browserDialogs.slice(dlgsBefore), windowText: (await H.dlg().innerText()).slice(0, 600)};
+                await H.full('b-item-switched');
+                const savedSwitch = await H.saveItem();
+                await H.openItemEdit('Temp choice');
+                const reopened = {type: await H.typeSel().evaluate((s) => s.options[s.selectedIndex]?.text), listbuilder: await H.lbState()};
+                await H.full('b-item-reopened');
+                done('b_item_edit', {itemActions, editHeading: editInfo.heading, checkboxes: editInfo.checkboxes, afterSwitch, savedSwitch, reopened});
+                // close the item window and the form window
+                const closeItem = H.dlg().getByRole('button', {name: /Close/}).first();
+                if (await closeItem.count()) await closeItem.click(); await sleep(400); await idle(page);
+                await H.closeWindow();
+            });
+            // Scenario 6: Add Reviewer without and with an active form
+            await sect('b_activate', async () => {
+                await H.openRound(ctx.sub, 'b-before');
+                done('b_add_reviewer_before', await H.addReviewerList('b-before', 'Casey'));
+                await H.openForms();
+                done('b_activate', await H.toggleActive('Method check', 'OK', 'b-activate'));
+                await H.openRound(ctx.sub, 'b-active');
+                done('b_add_reviewer_active', await H.addReviewerList('b-active', 'Casey'));
+            });
+            // Scenario 8: deactivate, then delete
+            await sect('b_s8', async () => {
+                await H.openForms();
+                done('b_deactivate', await H.toggleActive('Method check', 'OK', 'b-deactivate'));
+                await H.openRound(ctx.sub, 'b-deactivated');
+                done('b_add_reviewer_deactivated', await H.addReviewerList('b-deactivated', 'Casey'));
+                await H.openForms();
+                const controls = await H.expandRow(H.rowOf(H.grid(), 'Method check'));
+                done('b_actions_before_delete', await texts(controls.locator('a')));
+                await controls.getByRole('link', {name: 'Delete', exact: true}).first().click();
+                const confirm = await H.readDialog();
+                await H.full('b-delete-confirm');
+                const notices = await H.pressDialog('OK');
+                await sleep(500);
+                const g = await H.readGrid(H.grid());
+                await H.full('b-after-delete');
+                done('b_delete', {confirm, notices, rows: g.rows.map((r) => r.title), empty: g.empty, gridActions: g.gridActions});
+            });
+            await signOut(page);
+            const mailAfter = await mailCounts(ctx.users);
+            done('b_mail', {before: mailBefore, after: mailAfter});
+        } finally { record(`b-facts-${app.name}`, {steps: facts.steps, errors: facts.errors, browserDialogs: facts.browserDialogs}); await close(); }
+    }
+    // =========================== C: follow-ups ===========================
+    // (1) the assignment's Edit window on an in-progress review with an active form (sub4, seeded here);
+    // (2) "Cancel" on a confirmation with a clean notice window; (3) when "Order" appears: 0, 1, 2 rows.
+    if (on('c')) {
+        if (!sc.A.sub4) {
+            const A = sc.A;
+            const s4 = await app.api.createSubmission({tag: `${A.tag}s4`, context: A.path, submitter: A.users.au, title: `K4 sub4 ${A.tag}`,
+                decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: A.users.rev3, status: 'accepted', reviewForm: 'Gamma'}]}]});
+            sc.A.sub4 = s4.submissionId; saveScratch();
+        }
+        const {page, close} = await launch(app);
+        page.on('dialog', async (d) => { facts.browserDialogs.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); });
+        try {
+            const HA = bind(page, sc.A);
+            await sect('c_edit_assignment_in_progress', async () => {
+                await signIn(page, sc.A.users.mgr, {contextPath: sc.A.path}); await idle(page);
+                await HA.openRound(sc.A.sub4, 'c-sub4');
+                done('c_edit_assignment_in_progress_gamma_on', await HA.editAssignmentWindow('Robin', 'c-in-progress-gamma-on'));
+            });
+            await sect('c_cancel_clean', async () => {
+                await HA.openForms();
+                const residual = await HA.notices(1500);
+                done('c_cancel_on_deactivate', {residualNoticesBefore: residual, ...(await HA.toggleActive('Gamma', 'Cancel', 'c-cancel-deactivate'))});
+                await signOut(page);
+            });
+            const HB = bind(page, sc.B);
+            const orderState = async () => HB.grid().evaluate((root) => {
+                const a = [...root.querySelectorAll('.pkp_linkaction_orderItems')];
+                return {rows: root.querySelectorAll('tbody tr.gridRow').length, orderLinks: a.map((e) => ({text: e.innerText.trim(), visible: e.getClientRects().length > 0, display: getComputedStyle(e).display})),
+                    visibleActions: [...root.querySelectorAll('.actions a, .pkp_linkactions a')].filter((e) => e.getClientRects().length > 0).map((e) => e.innerText.trim())};
+            });
+            await sect('c_order_visibility', async () => {
+                await signIn(page, sc.B.users.mgr, {contextPath: sc.B.path}); await idle(page);
+                await page.goto(HB.url('/management/settings/workflow#review/reviewForms')); await idle(page);
+                if (!(await HB.panel().isVisible().catch(() => false))) {
+                    await page.getByRole('tab', {name: 'Review', exact: true}).click();
+                    await page.getByRole('tabpanel', {name: 'Review', exact: true}).getByRole('tab', {name: 'Review Forms', exact: true}).click();
+                    await idle(page);
+                }
+                await HB.grid().waitFor({timeout: 20000}); await idle(page); await sleep(500);
+                const zero = await orderState();
+                await HB.full('c-order-0-rows');
+                await HB.panel().getByText('Create Review Form', {exact: true}).first().click();
+                await HB.dlg().locator('input[name^="title"]').first().waitFor({timeout: 15000}); await idle(page); await sleep(300);
+                await HB.dlg().locator('input[name^="title"]').first().fill('Solo');
+                await HB.dlg().getByRole('button', {name: 'Save', exact: true}).last().click(); await idle(page); await sleep(800);
+                await HB.grid().locator('tbody tr.gridRow').first().waitFor({timeout: 15000});
+                const one = await orderState();
+                await HB.full('c-order-1-row');
+                const controls = await HB.expandRow(HB.rowOf(HB.grid(), 'Solo'));
+                await controls.getByRole('link', {name: 'Copy', exact: true}).first().click();
+                await HB.readDialog();
+                await HB.pressDialog('OK');
+                await HB.grid().locator('tbody tr.gridRow').nth(1).waitFor({timeout: 15000});
+                const two = await orderState();
+                await HB.full('c-order-2-rows');
+                done('c_order_visibility', {zero, one, two});
+                await signOut(page);
+            });
+        } finally { record(`c-facts-${app.name}`, {steps: facts.steps, errors: facts.errors, browserDialogs: facts.browserDialogs}); await close(); }
+    }
+    // =========================== D: Rule 12d's last sentence — the editors' list follows the grid order ===========================
+    if (on('d')) {
+        const {page, close} = await launch(app);
+        const H = bind(page, sc.A);
+        try {
+            await sect('d_list_order', async () => {
+                await signIn(page, sc.A.users.mgr, {contextPath: sc.A.path}); await idle(page);
+                await H.openForms();
+                const g0 = await H.readGrid(H.grid());
+                if (!g0.rows.find((r) => r.title === 'Delta v2').active[0].checked) await H.toggleActive('Delta v2', 'OK', 'd-activate-delta');
+                const gridOrder1 = (await H.readGrid(H.grid())).rows.map((r) => r.title);
+                await H.openRound(sc.A.sub3, 'd-order1');
+                const list1 = await H.addReviewerList('d-order1', 'Robin');
+                await H.openForms();
+                await H.grid().locator('.pkp_linkaction_orderItems').first().click(); await sleep(500);
+                await H.dragRowAbove(H.grid(), 'Delta v2', 'Gamma');
+                await H.grid().locator('.order_finish_controls .saveButton').click(); await idle(page); await sleep(500);
+                await page.reload(); await idle(page); await H.openForms();
+                const gridOrder2 = (await H.readGrid(H.grid())).rows.map((r) => r.title);
+                await H.full('d-grid-reordered');
+                await H.openRound(sc.A.sub3, 'd-order2');
+                const list2 = await H.addReviewerList('d-order2', 'Robin');
+                done('d_list_order', {gridOrder1, list1: list1.options?.map((o) => o.text), gridOrder2, list2: list2.options?.map((o) => o.text)});
+                await signOut(page);
+            });
+        } finally { record(`d-facts-${app.name}`, {steps: facts.steps, errors: facts.errors}); await close(); }
+    }
+    // =========================== E: the "Item" box empty with a type chosen ===========================
+    if (on('e')) {
+        const {page, close} = await launch(app);
+        const H = bind(page, sc.B);
+        try {
+            await sect('e_item_empty_with_type', async () => {
+                await signIn(page, sc.B.users.mgr, {contextPath: sc.B.path}); await idle(page);
+                await H.openForms();
+                await H.openFormWindow('Solo', 'Edit');
+                await H.clickFormTab('Form Items');
+                await H.openCreateItem();
+                await H.selectType('Extended text box');
+                const notices = await H.saveItem(3000);
+                await H.full('e-item-empty-with-type-save');
+                const d = H.dlg();
+                const aria = await d.ariaSnapshot();
+                done('e_item_empty_with_type', {notices, windowOpen: await H.itemForm().isVisible(), requiredMessages: (aria.match(/This field is required\./g) || []).length,
+                    errors: await texts(d.locator('.error, label.error, .pkp_form_error, .formError')), itemsRows: (await H.readGrid(H.itemsGrid()).catch(() => ({rows: []}))).rows.map((r) => r.title)});
+                await signOut(page);
+            });
+        } finally { record(`e-facts-${app.name}`, {steps: facts.steps, errors: facts.errors}); await close(); }
+    }
+    if (Object.keys(facts.errors).length) log('[errors]', app.name, JSON.stringify(facts.errors).slice(0, 3000));
 });

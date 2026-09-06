@@ -554,7 +554,7 @@ tooling recipe are in the footnote. <sup>s</sup>
    typed and no file: press "Submit Review". "Are you sure you want to
    submit this review?" appears at once, with no field marked. Press "OK":
    {OJS} the step stays and "This field is required." shows under
-   "Recommendation"; choose one, reload the step, then press "Submit
+   "Recommendation"; reload the step, choose one, then press "Submit
    Review" and "OK" again. {OMP} nothing intervenes. Either way
    "4. Completion" opens and the
    editors' mailbox holds "Review complete: …" for a review with nothing

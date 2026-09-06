@@ -98,12 +98,14 @@ async function awaitRequestFormReady(page, addModal) {
     await expect(
         addModal.getByRole('button', {name: 'Add Reviewer', exact: true})
     ).toBeVisible({timeout: 20_000});
-    // The letter is AJAX-fetched into TinyMCE; wait for a non-empty body.
+    // The letter is AJAX-fetched into TinyMCE; wait for a non-empty body
+    // (30 s, as the OJS helper does: under full-suite load the fetch can
+    // take longer than 20 s).
     const letter = page
         .frameLocator('iframe[id^="personalMessage"]')
         .last()
         .locator('body');
-    await expect(letter).toContainText(/\w/, {timeout: 20_000});
+    await expect(letter).toContainText(/\w/, {timeout: 30_000});
     // The FormHandler renamed the visible date inputs (init complete).
     await expect(
         addModal.locator('input[name="responseDueDate-removed"]')

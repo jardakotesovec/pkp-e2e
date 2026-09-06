@@ -2,695 +2,521 @@
 /**
  * @file playwright/tests/U29-review-setup-and-review-forms.spec.js
  *
- * Review setup & review forms — OMP suite, one test per canonical scenario
- * the spec runs on a press (common scenarios 1–9 and OMP-specific 11; 10 is
- * OJS's and 12 OPS's, in those trees), in press vocabulary: a Press
- * Manager, a Series Editor as the control, External Review as "the review
- * stage" of the common scenarios, Internal Review only in scenario 11.
- * Spec: docs/specs/U29-review-setup-and-review-forms.md
+ * U29 — Review setup & review forms, OMP suite (spec:
+ * docs/specs/U29-review-setup-and-review-forms.md). One test per canonical
+ * scenario a press runs, in OMP vocabulary (press, Press Manager, monograph,
+ * External Review, the two guideline boxes): the common scenarios 1–8, plus
+ * the press's absence check for the "Reviewer Recommendations" tab (OMP1)
+ * with the three tabs it does have as the positive control. Scenarios 9 and
+ * 10 are OJS's (the tab is journal-only), scenario 11 is OPS's.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
- * - A1 ❓: no reminder clock is ever observed firing (the daily task does
- *   not run on the test installs); S4 asserts only the readings, the save
- *   and, bounded by the request email, the silence.
- * - A2 ❓: S7 unticks "Active" on a form in use because the spec's scenario
- *   is the recipe for Rule 11's contract (gone from "Add Reviewer", kept by
- *   the request, still met on step 3); whether the box should lock is the
- *   open question and no assertion says the untick is right.
- * - A3 ❓: no declined request carries a form anywhere here.
- * - A4 🐞: S3 saves 0 and re-reads it; the "Add Reviewer" date a 0 gives
- *   (today plus 21 days) is the bug's record, asserted neither way. S3's
- *   control is the minimum's effect on the round status box instead.
- * - A5 🐞: every navigation walks the tab chain (Settings › Workflow ›
- *   "Review" › side tab); no test bookmarks or reloads a side-tab address
- *   and asserts where it lands.
- * - A6 🐞: S7 never opens the reviewer row's "Edit" window on a request
- *   carrying a deactivated form.
- * - A8 ❓: no second forms language anywhere here.
- * - OMP1 ✅: the press has no "Reviewer Recommendations" tab; S1 reads the
- *   three side tabs as the whole list, and no test looks for the fourth.
- * - OMP3 🐞: nothing is asserted about the toolbars of the guidance boxes.
- * - Settings with no scenario of their own ("Restrict File Access",
- *   "One-click Reviewer Access", "Reviewer Suggestion at Submission", a
- *   second forms language): none here. A press has no section's default
- *   form.
+ * - A1 🐞: the automatic reminder clock is off on the test installs; S1
+ *   saves a slider and reads it back, and no test expects a reminder email.
+ * - A5 🐞: no test changes an item's type after adding response options.
+ * - OMP3 🐞: nothing is asserted about the internal box's toolbar; S4 types
+ *   plain sentences into both boxes.
+ * - A2 ❓: S8 deactivates a form nobody carries; a form in use is never
+ *   deactivated, and the activation warning's promise is asserted neither
+ *   way.
+ * - A3 ❓: no deadline is saved as 0 or emptied.
+ * - A4 ❓: after a reload every test runs the tab chain again ("Review" ›
+ *   the side tab) without asserting where the reload landed.
+ * - A6 ❓: journal-only (the recommendations window).
+ * - Settings with no scenario of their own (a second form language, a
+ *   role's settings access, the daily clock): none here. A press has no
+ *   sections, so the section default has no press counterpart.
+ * - S4 reads the External Reviewer's wizard only: the internal text is
+ *   typed as the negative control of the box split (OMP2), and no Internal
+ *   Reviewer signs in (the internal stage is the reviewer's-review spec's).
  *
- * Seeding: scenario endpoints only. publicknowledge and the 18 seeded users
- * are read-only (S1 only reads them). Every other scenario seeds a scratch
- * press through `POST scenarios/context` with throwaway users (a
- * `manager`, an `author`, `externalReviewer`s and, in S11, an
- * `internalReviewer`: a roster reviewer named on a scratch press is not
- * enrolled there) and, where a setting is a precondition, the `review` /
- * `reviewForms[]` passthrough keys; what a test drives on the settings
- * screen is the behavior under test. Mail is read by throwaway recipient
- * (PRINCIPLES A8) with a positive control. No hard-coded waits.
+ * Seeding: scenario endpoints only. Every test runs on its own scratch
+ * press (`POST scenarios/context`, install defaults unless a `review` /
+ * `reviewForms[]` passthrough key names the configured end) with throwaway
+ * users whose addresses carry app + test (u29s4ompw0…@mail.test) and one
+ * seeded monograph in External Review round 1 (`skipInternalReview`);
+ * publicknowledge and the 18 seeded users are never touched. The reviewer
+ * side runs in its own authenticated context (`asUser`), never a sign-out.
+ * Absence claims are paired with a positive control read the same way (the
+ * same window's other control, the same tab strip's other tabs). No
+ * hard-coded waits.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {ReviewSettingsPage, SETUP_BOX_LABELS} = require('../pages/ReviewSettingsPages.js');
 const {openEditorial} = require('../pages/ReviewStagePages.js');
 const {
-    reviewerRow,
     openAddReviewer,
-    searchReviewerList,
-    selectReviewerAndAwaitForm,
-    addReviewerFromList,
-    openEditReview,
+    reviewerListEntry,
+    selectButton,
     dateAltField,
     isoDate,
     daysFromNow,
 } = require('../pages/ReviewerAssignmentPages.js');
+const {
+    PressReviewSettingsPage,
+    PRESS_SIDE_TABS,
+    LIBRARY_TAB,
+    GUIDELINE_BOXES,
+} = require('../pages/ReviewSettingsPages.js');
 const {ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
-const {WorkflowPage: WorkflowFrame} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
-const PRESS = 'publicknowledge';
-const ANON_ANON = 'Anonymous Reviewer/Anonymous Author';
-const NO_REMINDER = 'No reminder set';
-const PRIVATE_BOX = 'For editor only';
-const SLIDERS = [
-    'Review Request Response - Before Due Date',
-    'Review Request Response - After Due Date',
-    'Review Submission - Before Due Date',
-    'Review Submission - After Due Date',
-];
+const REFUSED_NOTICE =
+    'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.';
+const DEACTIVATE_FORM = 'Are you sure you wish to deactivate this review form? It will no longer be available for new review assignments.';
+const ACTIVATE_FORM = "Are you sure you wish to activate this review form? Once it's assigned to a review you will no longer be able to deactivate it.";
+const COPY_FORM = 'Are you sure you wish to create a copy of this review form?';
+const DELETE_FORM = 'Are you sure you wish to delete this review form?';
+const RADIO_TYPE = 'Radio buttons (you can only choose one)';
+const TEXTAREA_TYPE = 'Extended text box';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
     return `u29${scenario}ompw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** The throwaway accounts of a scratch press. */
-function scratchUsers(tag) {
-    return {
-        manager: `mgr${tag}`,
-        author: `au${tag}`,
-        reviewer: `rev${tag}`,
-        reviewerName: `Scratch Reviewer${tag}`,
-        reviewerFamily: `Reviewer${tag}`,
-        second: `two${tag}`,
-        secondName: `Second Reviewer${tag}`,
-        internal: `int${tag}`,
-        internalName: `Internal Reviewer${tag}`,
-    };
-}
-
-/** A scratch press with a manager, an author, two External Reviewers and one Internal Reviewer. */
-async function seedPress(ompApi, tag, extra = {}) {
-    const users = scratchUsers(tag);
-    await ompApi.createContext({
+/**
+ * A scratch press with a manager, an author and an External Reviewer, plus
+ * one monograph in External Review round 1 (the reviewer on it when
+ * `reviewer` names a status). Returns the names the screens show.
+ */
+async function seedPress(ompApi, tag, {review, reviewForms, reviewer = null, reviewForm} = {}) {
+    const manager = `mgr${tag}`;
+    const author = `au${tag}`;
+    const reviewerUser = `rev${tag}`;
+    const reviewerName = `Probe Reviewer${tag}`;
+    const spec = {
         tag,
         users: [
-            {username: users.manager, roles: ['manager']},
-            {username: users.author, roles: ['author']},
-            {username: users.reviewer, roles: ['externalReviewer'], givenName: 'Scratch', familyName: users.reviewerFamily},
-            {username: users.second, roles: ['externalReviewer'], givenName: 'Second', familyName: users.reviewerFamily},
-            {username: users.internal, roles: ['internalReviewer'], givenName: 'Internal', familyName: users.reviewerFamily},
+            {username: manager, roles: ['manager']},
+            {username: author, roles: ['author']},
+            {username: reviewerUser, roles: ['externalReviewer'], givenName: 'Probe', familyName: `Reviewer${tag}`},
         ],
-        ...extra,
-    });
-    return users;
-}
-
-/** A scratch monograph standing in a review round 1 (External Review unless told otherwise). */
-async function seedInReview(ompApi, tag, submitter, reviewers = [], {suffix = '', stage = 'external'} = {}) {
-    const title = `Monograph ${tag}${suffix}`;
-    const result = await ompApi.createSubmission({
-        tag: `${tag}${suffix}`,
+    };
+    if (review) spec.review = review;
+    if (reviewForms) spec.reviewForms = reviewForms;
+    await ompApi.createContext(spec);
+    const reviewers = reviewer ? [{username: reviewerUser, status: reviewer, ...(reviewForm ? {reviewForm} : {})}] : [];
+    const {submissionId} = await ompApi.createSubmission({
+        tag,
         context: tag,
-        submitter,
-        title,
-        decisions: [stage === 'internal' ? 'sendInternalReview' : 'skipInternalReview'],
-        reviewRounds: [{stage, reviewers}],
+        submitter: author,
+        title: `Monograph ${tag}`,
+        decisions: ['skipInternalReview'],
+        reviewRounds: [{stage: 'external', reviewers}],
     });
-    return {submissionId: result.submissionId, title};
-}
-
-/** The Add Reviewer window's "Review Form" list (present only with an active form). */
-function reviewFormSelect(addModal) {
-    return addModal.locator('select[name="reviewFormId"]');
-}
-
-/** Open the workflow, press "Add Reviewer" and select a scratch reviewer; returns the window. */
-async function openAddReviewerFor(page, contextPath, submissionId, users, name) {
-    const modal = await openEditorial(page, contextPath, submissionId);
-    const addModal = await openAddReviewer(page, modal);
-    await searchReviewerList(page, addModal, users.reviewerFamily);
-    await selectReviewerAndAwaitForm(page, addModal, name);
-    return addModal;
-}
-
-/** The reviewer's wizard on a scratch press. */
-function wizardFor(page, contextPath) {
-    return new ReviewWizardPage(page, contextPath, {privateBoxLabel: PRIVATE_BOX});
-}
-
-/** Walk a seeded acceptance to step 3 ("Save and continue", "Continue to Step #3"). */
-async function walkToStep3(wizard) {
-    await wizard.expectStep(1);
-    await wizard.saveAndContinueButton.click();
-    await wizard.expectStep(2);
-    await wizard.continueToStep3();
+    return {manager, author, reviewer: reviewerUser, reviewerName, submissionId};
 }
 
 /**
- * Open a monograph's Submission stage and its "Submission Files" › "Upload"
- * window; returns the anonymity link locator inside the wizard (asserted by
- * the caller either way).
+ * Open the monograph's "Add Reviewer" window and select the reviewer, so
+ * the request form (review type, dates, the "Review Form" list) is on
+ * screen. Returns the window.
  */
-async function openSubmissionUpload(page, contextPath, submissionId) {
-    const frame = new WorkflowFrame(page, contextPath);
-    await frame.gotoEditorial(submissionId);
-    await frame.selectStage('Submission');
-    await page.getByRole('button', {name: 'Upload', exact: true}).first().click();
-    const wizard = uploadWizardDialog(page);
-    await expect(wizard.locator('input[type="file"]')).toBeAttached({timeout: 30_000});
-    return wizard.getByRole('link', {name: 'How to ensure all files are anonymized'});
+async function openRequestForm(page, tag, submissionId, reviewerName) {
+    const workflow = await openEditorial(page, tag, submissionId);
+    const addModal = await openAddReviewer(page, workflow);
+    await selectButton(reviewerListEntry(addModal, reviewerName)).click();
+    // These tests read the request form and close it; none submits it, so
+    // readiness is the form's own init signal (the FormHandler renamed the
+    // visible date inputs), not the prefilled letter. On a press whose
+    // active review form was seeded, the letter's client-side fill loses
+    // its race with the editor's init and stays empty (incidentals.md, U27).
+    await expect(addModal.getByRole('button', {name: 'Add Reviewer', exact: true})).toBeVisible({timeout: 30_000});
+    await expect(addModal.locator('input[name="responseDueDate-removed"]')).toBeAttached({timeout: 30_000});
+    return addModal;
 }
 
-/** The legacy "Upload Submission File" wizard (a dialog carrying the wizard div). */
-function uploadWizardDialog(page) {
-    return page.getByRole('dialog').filter({has: page.locator('div[id^="fileUploadWizard"]')});
+/** The request form's "Review Form" list (absent while no form is active). */
+function reviewFormList(modal) {
+    return modal.locator('#regularReviewerForm select[name="reviewFormId"]');
+}
+
+/** Close the "Add Reviewer" window (it has no "Cancel"; never Escape). */
+async function closeRequestForm(modal) {
+    await modal.getByRole('button', {name: /^Close/}).first().click();
+    await expect(modal.locator('#regularReviewerForm')).toBeHidden({timeout: 30_000});
+}
+
+/** The reviewer's wizard on a press (its editor-only box reads "For editor only"). */
+function pressWizard(page, tag) {
+    return new ReviewWizardPage(page, tag, {privateBoxLabel: 'For editor only'});
 }
 
 test.describe('review setup & review forms', () => {
-    test('S1: the Review settings and who reaches them', {tag: '@smoke'}, async ({asUser}) => {
-        const page = await (await asUser('manager.maya')).newPage();
-        const settings = new ReviewSettingsPage(page, PRESS);
-        await settings.gotoSideTab('Setup');
-        expect(await settings.sideTabNames()).toEqual(['Setup', 'Reviewer Guidance', 'Review Forms']);
-
-        // "Setup" at the install defaults.
+    test('S1: save the review setup', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s1', testInfo);
+        const {manager, reviewerName, submissionId} = await seedPress(ompApi, tag);
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const setup = settings.setup;
-        await expect(setup.reviewModeRadio(ANON_ANON)).toBeChecked();
-        for (const label of Object.values(SETUP_BOX_LABELS)) {
-            await expect(setup.box(label)).not.toBeChecked();
-        }
-        await expect(setup.responseDeadline).toHaveValue('4');
-        await expect(setup.completionDeadline).toHaveValue('4');
-        await expect(setup.minReviews).toHaveValue('0');
-        for (const label of SLIDERS) {
-            await expect(setup.sliderReading(label)).toHaveText(NO_REMINDER);
-        }
+        await settings.goto('Setup');
 
-        // "Reviewer Guidance" empty (both guideline boxes), "Review Forms" empty.
-        await settings.openSideTab('Reviewer Guidance');
-        await expect(settings.guidance.internalGuidelinesBody).toHaveText('');
-        await expect(settings.guidance.externalGuidelinesBody).toHaveText('');
-        await expect(settings.guidance.competingInterestsBody).toHaveText('');
-        await expect(settings.guidance.anonymityBox).not.toBeChecked();
-        await settings.openSideTab('Review Forms');
-        await expect(settings.forms.noItems).toBeVisible();
-        await expect(settings.forms.rows).toHaveCount(0);
+        // The install defaults are on screen, then the edits.
+        await expect(setup.modeRadio('Anonymous Reviewer/Anonymous Author')).toBeChecked();
+        await expect(setup.sliderReadout('Review Request Response - Before Due Date')).toHaveText('No reminder set');
+        await setup.modeRadio('Open').check();
+        await setup.field('Default Response Deadline').fill('2');
+        await setup.field('Minimum Confirmed Reviews Required').fill('1');
+        await setup.setSliderByKeyboard('Review Request Response - Before Due Date', 3);
+        await expect(setup.sliderReadout('Review Request Response - Before Due Date')).toHaveText('3 days before due date');
+        await setup.save();
 
-        // Control: a Series Editor has no "Settings" and the address is refused.
-        const anaPage = await (await asUser('sectioneditor.ana')).newPage();
-        const anaSettings = new ReviewSettingsPage(anaPage, PRESS);
-        await anaPage.goto(anaSettings.contextUrl(PRESS, '/dashboard/editorial'));
-        await expect(anaSettings.sidebar.getByRole('link', {name: 'Editor Dashboard'}).first()).toBeVisible({timeout: 30_000});
-        await expect(anaSettings.sidebar.getByRole('link', {name: 'Settings', exact: true})).toHaveCount(0);
-        await expect(anaSettings.sidebar.getByRole('button', {name: 'Settings', exact: true})).toHaveCount(0);
-        await anaPage.goto(anaSettings.url());
-        await expect(anaSettings.accessDenied).toBeVisible({timeout: 30_000});
-        await expect(anaSettings.reviewTab).toHaveCount(0);
+        // Reload and open "Review" › "Setup" again: every value shows as saved.
+        await settings.reloadAndOpen('Setup');
+        await expect(setup.modeRadio('Open')).toBeChecked();
+        await expect(setup.field('Default Response Deadline')).toHaveValue('2');
+        await expect(setup.field('Minimum Confirmed Reviews Required')).toHaveValue('1');
+        await expect(setup.slider('Review Request Response - Before Due Date')).toHaveAttribute('aria-valuetext', '3 days before due date');
+        await expect(setup.sliderReadout('Review Request Response - Before Due Date')).toHaveText('3 days before due date');
+
+        // Add Reviewer: "Open" preselected, the response due date two weeks out.
+        const modal = await openRequestForm(page, tag, submissionId, reviewerName);
+        await expect(modal.getByRole('radio', {name: 'Open', exact: true})).toBeChecked();
+        await expect(dateAltField(modal, 'responseDueDate')).toHaveValue(isoDate(daysFromNow(14)));
+        // Control: the completion deadline was left at its default of four weeks.
+        await expect(dateAltField(modal, 'reviewDueDate')).toHaveValue(isoDate(daysFromNow(28)));
     });
 
-    test('S2: change the defaults and see them on the next request', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
+    test('S2: a refused deadline saves nothing', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s2', testInfo);
-        const users = await seedPress(ompApi, tag);
-        // The earlier reviewer is assigned before the settings change.
-        const {submissionId} = await seedInReview(ompApi, tag, users.author, [{username: users.reviewer, status: 'invited'}]);
-
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Setup');
+        const {manager} = await seedPress(ompApi, tag);
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const setup = settings.setup;
-        await setup.reviewModeRadio('Open').check();
-        await setup.box(SETUP_BOX_LABELS.publicComments).check();
-        await setup.responseDeadline.fill('2');
-        await setup.completionDeadline.fill('6');
-        const response = await setup.save();
-        expect(response.status()).toBe(200);
-        await setup.expectSaved();
+        await settings.goto('Setup');
 
-        // Reload: the tab shows the same values (walking the tab chain, A5).
-        await page.reload();
-        await settings.openReviewTab();
-        await settings.openSideTab('Setup');
-        await expect(setup.reviewModeRadio('Open')).toBeChecked();
-        await expect(setup.box(SETUP_BOX_LABELS.publicComments)).toBeChecked();
-        await expect(setup.responseDeadline).toHaveValue('2');
-        await expect(setup.completionDeadline).toHaveValue('6');
+        // Letters in the deadline plus a mode change in the same edit.
+        await setup.field('Default Completion Deadline').fill('abc');
+        await setup.modeRadio('Anonymous Reviewer/Disclosed Author').check();
+        await setup.saveButton.click();
+        await expect(setup.fieldError('Default Completion Deadline')).toContainText('This is not a valid integer.', {timeout: 30_000});
+        await expect(setup.errorSummary).toContainText('Please correct one error.');
+        await expect(setup.jumpToErrorButton).toBeVisible();
+        await expect(settings.notice(REFUSED_NOTICE)).toBeVisible({timeout: 30_000});
+        await expect(setup.saveButton).toBeDisabled();
+        // Control: no "Saved" appeared beside the button.
+        await expect(setup.savedStatus).toHaveCount(0);
 
-        // The next request starts from the new defaults.
-        const addModal = await openAddReviewerFor(page, tag, submissionId, users, users.secondName);
-        await expect(addModal.getByRole('radio', {name: 'Open', exact: true})).toBeChecked();
-        await expect(addModal.locator('input[name="isReviewPubliclyVisible"]')).toBeChecked();
-        await expect(dateAltField(addModal, 'responseDueDate')).toHaveValue(isoDate(daysFromNow(14)));
-        await expect(dateAltField(addModal, 'reviewDueDate')).toHaveValue(isoDate(daysFromNow(42)));
+        // Nothing was saved, not even the mode that passed.
+        await settings.reloadAndOpen('Setup');
+        await expect(setup.field('Default Completion Deadline')).toHaveValue('4');
+        await expect(setup.modeRadio('Anonymous Reviewer/Anonymous Author')).toBeChecked();
+        await expect(setup.modeRadio('Anonymous Reviewer/Disclosed Author')).not.toBeChecked();
 
-        // Control: the earlier request keeps its type and dates.
-        const modal = await openEditorial(page, tag, submissionId);
-        const editModal = await openEditReview(page, reviewerRow(modal, 'Scratch'));
-        await expect(editModal.getByRole('radio', {name: ANON_ANON, exact: true})).toBeChecked();
-        await expect(editModal.locator('input[name="isReviewPubliclyVisible"]')).not.toBeChecked();
-        await expect(dateAltField(editModal, 'responseDueDate')).toHaveValue(isoDate(daysFromNow(28)));
-        await expect(dateAltField(editModal, 'reviewDueDate')).toHaveValue(isoDate(daysFromNow(28)));
+        // A negative number is refused with the other message.
+        await setup.field('Default Completion Deadline').fill('-1');
+        await setup.saveButton.click();
+        await expect(setup.fieldError('Default Completion Deadline')).toContainText('This must be at least 0.', {timeout: 30_000});
+        await expect(setup.errorSummary).toContainText('Please correct one error.');
     });
 
-    test('S3: whole weeks only', async ({asUser, ompApi}, testInfo) => {
+    test('S3: unsaved edits survive a tab switch, not a reload', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s3', testInfo);
-        const users = await seedPress(ompApi, tag);
-        const {submissionId} = await seedInReview(ompApi, tag, users.author, [{username: users.reviewer, status: 'accepted'}]);
-
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Setup');
+        const {manager} = await seedPress(ompApi, tag);
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const setup = settings.setup;
+        // Any browser prompt (a beforeunload on the reload) would be recorded here.
+        const prompts = [];
+        page.on('dialog', (dialog) => {
+            prompts.push(dialog.type());
+            dialog.dismiss().catch(() => {});
+        });
+        await settings.goto('Setup');
+        await expect(setup.field('Default Response Deadline')).toHaveValue('4');
 
-        // Refused: the message under the box, the value kept, no "Saved".
-        await setup.responseDeadline.fill('abc');
-        const refused = await setup.save();
-        expect(refused.status()).toBe(400);
-        await expect(setup.fieldError(setup.responseDeadline)).toHaveText('This is not a valid integer.');
-        await expect(setup.responseDeadline).toHaveValue('abc');
-        await expect(setup.formErrors).toContainText('Please correct one error.');
-        await expect(setup.status.filter({hasText: 'Saved'})).toHaveCount(0);
-
-        // Accepted: 0 and 2.
-        await setup.responseDeadline.fill('0');
-        await setup.minReviews.fill('2');
-        const saved = await setup.save();
-        expect(saved.status()).toBe(200);
-        await setup.expectSaved();
-        await page.reload();
-        await settings.openReviewTab();
+        // Edit, switch side tabs and come back: no warning, the edit is still there.
+        await setup.field('Default Response Deadline').fill('6');
+        await settings.openSideTab('Reviewer Guidance');
+        await expect(settings.guidance.saveButton).toBeVisible();
+        await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
         await settings.openSideTab('Setup');
-        await expect(setup.responseDeadline).toHaveValue('0');
-        await expect(setup.minReviews).toHaveValue('2');
-        await expect(setup.fieldError(setup.responseDeadline)).toHaveCount(0);
+        await expect(setup.field('Default Response Deadline')).toHaveValue('6');
+        await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
 
-        // Control: the saved minimum reaches the round status box (Rule 4).
-        const modal = await openEditorial(page, tag, submissionId);
-        await expect(modal).toContainText('Minimum number of confirmed reviews required: 2.', {timeout: 30_000});
+        // A reload drops the edit with no prompt: the saved value is back.
+        await settings.reloadAndOpen('Setup');
+        await expect(setup.field('Default Response Deadline')).toHaveValue('4');
+        expect(prompts).toEqual([]);
     });
 
-    test('S4: set the reminder clocks', async ({asUser, ompApi, pkpMail}, testInfo) => {
+    test('S4: guidance reaches the reviewer', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s4', testInfo);
-        const users = await seedPress(ompApi, tag);
-        const reviewerMail = `${users.reviewer}@mail.test`;
-        const {submissionId, title} = await seedInReview(ompApi, tag, users.author);
+        const external = 'Judge the method first.';
+        const internal = 'Judge the market first.';
+        const policy = 'Declare any funding link.';
+        const {manager, reviewer, submissionId} = await seedPress(ompApi, tag, {reviewer: 'invited'});
 
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Setup');
-        const setup = settings.setup;
-        const days = [3, 5, 7, 0];
-        const readings = ['3 days before due date', '5 days after due date', '7 days before due date', NO_REMINDER];
-        for (const [i, label] of SLIDERS.entries()) {
-            await setup.setSlider(label, days[i]);
-            await expect(setup.sliderReading(label)).toHaveText(readings[i]);
-        }
-        const saved = await setup.save();
-        expect(saved.status()).toBe(200);
-        await setup.expectSaved();
-        await page.reload();
-        await settings.openReviewTab();
-        await settings.openSideTab('Setup');
-        for (const [i, label] of SLIDERS.entries()) {
-            await expect(setup.sliderReading(label)).toHaveText(readings[i]);
-            await expect(setup.slider(label)).toHaveAttribute('aria-valuenow', String(days[i]));
-        }
+        // Manager: the external guidelines, the internal ones (the control
+        // of the box split, OMP2) and the policy saved on "Reviewer Guidance".
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
+        await settings.goto('Reviewer Guidance');
+        await settings.guidance.typeExternal(external);
+        await settings.guidance.typeInternal(internal);
+        await settings.guidance.typeInto('competingInterests', policy);
+        await settings.guidance.save();
 
-        // Control: a request sent now brings the reviewer the request email
-        // (positive control, bounds the wait) and no reminder.
-        const modal = await openEditorial(page, tag, submissionId);
-        await addReviewerFromList(page, modal, {search: users.reviewerFamily, name: users.reviewerName});
-        await pkpMail.expectNone({
-            to: reviewerMail,
-            contains: 'Will you be able to review this for us?',
-            afterControl: {to: reviewerMail, contains: title},
-        });
-        expect(await pkpMail.count({to: reviewerMail, contains: 'A reminder to please complete your review'})).toBe(0);
+        // External Reviewer: step 1's "Competing Interests" block, its
+        // window, then step 2's guidelines — the external text, not the internal.
+        const reviewerPage = await (await asUser(reviewer)).newPage();
+        const wizard = pressWizard(reviewerPage, tag);
+        await wizard.goto(submissionId);
+        const step1 = reviewerPage.locator('#reviewStep1Form');
+        await expect(step1).toContainText('Competing Interests');
+        await expect(step1.getByText('I do not have any competing interests')).toBeVisible();
+        await expect(step1.getByText('I may have competing interests (Specify below)')).toBeVisible();
+        await expect(wizard.noCompetingInterestsRadio).toBeChecked();
+        await expect(step1).not.toContainText(policy);
+        await wizard.competingInterestsLink.click();
+        const policyWindow = reviewerPage.getByRole('dialog').filter({hasText: policy});
+        await expect(policyWindow).toBeVisible({timeout: 30_000});
+        await policyWindow.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(policyWindow).toBeHidden({timeout: 30_000});
+        await wizard.accept();
+        const step2 = reviewerPage.locator('#reviewStep2Form');
+        await expect(step2).toContainText('Reviewer Guidelines');
+        await expect(step2).toContainText(external);
+        const text = await step2.innerText();
+        expect(text.indexOf('Reviewer Guidelines')).toBeLessThan(text.indexOf(external));
+        await expect(step2).not.toContainText(internal);
+        await expect(step2).not.toContainText('This publisher has not set any reviewer guidelines.');
     });
 
-    test('S5: guidance and the anonymity link', async ({asUser, ompApi}, testInfo) => {
+    test('S5: the guidelines box per app', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
-        const users = await seedPress(ompApi, tag);
-        const {submissionId} = await seedInReview(ompApi, tag, users.author);
-        const guidelines = `Guidelines for ${tag}.`;
-        const policy = `Policy for ${tag}.`;
-
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Reviewer Guidance');
+        const {manager} = await seedPress(ompApi, tag);
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const guidance = settings.guidance;
-        await guidance.typeInto('reviewGuidelines', guidelines);
-        await guidance.typeInto('competingInterests', policy);
-        await expect(guidance.externalGuidelinesBody).toHaveText(guidelines);
-        await expect(guidance.competingInterestsBody).toHaveText(policy);
+        await settings.goto('Reviewer Guidance');
 
-        // The words open the dialog without changing the box.
-        await guidance.anonymityWordsButton.click();
-        await expect(guidance.anonymityDialog).toBeVisible({timeout: 30_000});
-        await expect(guidance.anonymityDialog.getByRole('button', {name: 'Close', exact: true})).toBeVisible();
-        await guidance.anonymityDialog.getByRole('button', {name: 'Close', exact: true}).click();
-        await expect(guidance.anonymityDialog).toBeHidden();
-        await expect(guidance.anonymityBox).not.toBeChecked();
+        // A press has two guideline boxes, internal above external, and no
+        // bare "Review Guidelines" box (OMP2); both are rich-text boxes.
+        const headings = await guidance.headings();
+        expect(headings).toContain(GUIDELINE_BOXES.internal.heading);
+        expect(headings).toContain(GUIDELINE_BOXES.external.heading);
+        expect(headings).toContain('Competing Interests');
+        expect(headings).not.toContain('Review Guidelines');
+        expect(headings.indexOf(GUIDELINE_BOXES.internal.heading)).toBeLessThan(headings.indexOf(GUIDELINE_BOXES.external.heading));
+        await expect(guidance.internalBody).toBeVisible();
+        await expect(guidance.externalBody).toBeVisible();
 
-        await guidance.anonymityBox.check();
-        const saved = await guidance.save();
-        expect(saved.status()).toBe(200);
-        await guidance.expectSaved();
-        await page.reload();
-        await settings.openReviewTab();
-        await settings.openSideTab('Reviewer Guidance');
-        await expect(guidance.externalGuidelinesBody).toHaveText(guidelines);
-        await expect(guidance.competingInterestsBody).toHaveText(policy);
-        await expect(guidance.anonymityBox).toBeChecked();
+        // Tick the anonymizing box, save, reload: it stays ticked.
+        await expect(guidance.anonymizeBox).not.toBeChecked();
+        await guidance.anonymizeBox.check();
+        await guidance.save();
+        await settings.reloadAndOpen('Reviewer Guidance');
+        await expect(guidance.anonymizeBox).toBeChecked();
 
-        // The upload window shows the link, and the link opens the dialog.
-        const link = await openSubmissionUpload(page, tag, submissionId);
-        await expect(link).toBeVisible({timeout: 30_000});
-        await link.click();
-        const dialog = page
-            .getByRole('dialog')
-            .filter({has: page.getByRole('heading', {name: 'How to ensure all files are anonymized'})})
-            .last();
-        await expect(dialog.getByRole('button', {name: 'OK', exact: true})).toBeVisible({timeout: 30_000});
-        await expect(dialog.getByRole('button', {name: 'Cancel', exact: true})).toBeVisible();
-        await dialog.getByRole('button', {name: 'Cancel', exact: true}).click();
-        await expect(dialog).toBeHidden();
-
-        // Control: a press with the box unticked shows no link.
-        const controlTag = `${tag}b`;
-        const controlUsers = await seedPress(ompApi, controlTag);
-        const {submissionId: controlId} = await seedInReview(ompApi, controlTag, controlUsers.author);
-        const controlPage = await (await asUser(controlUsers.manager)).newPage();
-        const controlLink = await openSubmissionUpload(controlPage, controlTag, controlId);
-        await expect(uploadWizardDialog(controlPage).locator('select[id^="genreId"]')).toBeVisible({timeout: 30_000});
-        await expect(controlLink).toHaveCount(0);
+        // The words in the sentence open the instructions; "Close" closes them,
+        // and there is no "OK" (control: "Close" is there). The box stays as it was.
+        await guidance.anonymizeWords.click();
+        const window = guidance.instructionsWindow();
+        await expect(window).toBeVisible({timeout: 30_000});
+        await expect(window.getByRole('heading', {name: 'How to ensure all files are anonymized'})).toBeVisible();
+        await expect(window.getByRole('button', {name: 'Close', exact: true})).toBeVisible();
+        await expect(window.getByRole('button', {name: 'OK', exact: true})).toHaveCount(0);
+        await window.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(window).toBeHidden({timeout: 30_000});
+        await expect(guidance.anonymizeBox).toBeChecked();
     });
 
-    test('S6: create a review form and offer it', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
+    test('S6: build a review form and offer it', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
         test.slow();
+        test.setTimeout(240_000);
         const tag = makeTag('s6', testInfo);
-        const inactiveTitle = `Unused ${tag}`;
-        const users = await seedPress(ompApi, tag, {
-            // Control: a second form left inactive.
-            reviewForms: [{title: inactiveTitle, active: false, elements: [{question: 'Unused?', type: 'textarea'}]}],
-        });
-        const {submissionId} = await seedInReview(ompApi, tag, users.author);
-        const formTitle = `Form ${tag}`;
-        const description = `Answer both questions for ${tag}.`;
-        const question1 = `Is the method sound for ${tag}?`;
-        const question2 = `Comments for ${tag}`;
-
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Review Forms');
+        const title = 'Method check';
+        const question = 'Is the method sound?';
+        const {manager, reviewerName, submissionId} = await seedPress(ompApi, tag);
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const forms = settings.forms;
+        await settings.goto('Review Forms');
+        await expect(forms.noItems).toBeVisible();
 
-        // Create: a row at the bottom, 0 / 0, inactive.
-        const createWindow = await forms.openCreateWindow();
-        await createWindow.fillForm({title: formTitle, description});
-        await createWindow.save();
-        const row = forms.row(formTitle);
-        await expect(row).toBeVisible({timeout: 30_000});
-        expect(await forms.counts(row)).toEqual({inReview: '0', completed: '0'});
+        // "Create Review Form": the notice, the row with 0 / 0 and no tick.
+        await forms.createForm(title);
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        const row = forms.row(title).first();
+        expect(await forms.rowCounts(row)).toEqual({inReview: 0, completed: 0});
         await expect(forms.activeBox(row)).not.toBeChecked();
 
-        // Two items.
-        const editWindow = await forms.openEditWindow(row);
-        await editWindow.openTab('Form Items');
-        await expect(editWindow.itemsGrid.getByText('No Items')).toBeVisible({timeout: 30_000});
-        const item1 = await editWindow.openCreateItemWindow();
-        await item1.questionBody.click();
-        await page.keyboard.type(question1);
-        await item1.chooseType('radiobuttons');
-        await item1.addOption('Yes');
-        await item1.addOption('No');
-        await item1.requiredBox.check();
-        await item1.save();
-        await expect(editWindow.itemRow(question1)).toBeVisible({timeout: 30_000});
-        const item2 = await editWindow.openCreateItemWindow();
-        await item2.questionBody.click();
-        await page.keyboard.type(question2);
-        await item2.chooseType('textarea');
-        await item2.save();
-        await expect(editWindow.itemRow(question2)).toBeVisible({timeout: 30_000});
-        await expect(editWindow.itemRows).toHaveCount(2);
+        // "Edit" › "Form Items": a required radio item with two options, then a text item.
+        const controls = await forms.rowControls(row);
+        await forms.control(controls, 'Edit').click();
+        await expect(forms.windowHeading()).toHaveText('Edit', {timeout: 30_000});
+        await forms.openWindowTab('Form Items');
+        await expect(forms.itemsGrid().getByText('No Items')).toBeVisible({timeout: 30_000});
+        await forms.openCreateItem();
+        await forms.saveItem({question, required: true, type: RADIO_TYPE, options: ['Yes', 'No']});
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        await forms.openCreateItem();
+        await forms.saveItem({question: 'Other remarks', type: TEXTAREA_TYPE});
+        await expect(forms.itemRows()).toHaveCount(2);
 
-        // Preview: title, description, the starred radio question, the text box.
-        await editWindow.openTab('Preview Form');
-        const preview = editWindow.preview;
-        await expect(preview).toBeVisible({timeout: 30_000});
-        await expect(preview).toContainText(formTitle);
-        await expect(preview).toContainText(description);
-        await expect(preview).toContainText(`${question1}*`);
-        await expect(preview.getByRole('radio', {name: 'Yes', exact: true})).toBeVisible();
-        await expect(preview.getByRole('radio', {name: 'No', exact: true})).toBeVisible();
-        await expect(preview).toContainText(question2);
-        await expect(preview.locator('textarea')).toHaveCount(1);
-        await editWindow.close();
+        // "Preview Form": the title, the starred question with two radios, the text box.
+        await forms.openWindowTab('Preview Form');
+        await expect(forms.previewForm).toBeVisible({timeout: 30_000});
+        await expect(forms.previewForm.getByRole('heading', {name: title})).toBeVisible();
+        await expect(forms.previewForm).toContainText(`${question}*`);
+        await expect(forms.previewRadio('Yes')).toBeVisible();
+        await expect(forms.previewRadio('No')).toBeVisible();
+        await expect(forms.previewForm).toContainText('Other remarks');
+        await expect(forms.previewForm.locator('textarea')).toHaveCount(1);
+        await forms.closeWindow();
 
-        // Activate.
-        await forms.setActive(forms.row(formTitle), true);
+        // Inactive: "Add Reviewer" has no "Review Form" list (control: the
+        // same form's review type radios are there).
+        let modal = await openRequestForm(page, tag, submissionId, reviewerName);
+        await expect(modal.locator('#regularReviewerForm input[name="reviewMethod"]').first()).toBeVisible();
+        await expect(reviewFormList(modal)).toHaveCount(0);
+        await closeRequestForm(modal);
 
-        // The Add Reviewer window offers the active form and not the inactive one.
-        const addModal = await openAddReviewerFor(page, tag, submissionId, users, users.reviewerName);
-        const select = reviewFormSelect(addModal);
-        await expect(select).toBeVisible({timeout: 30_000});
-        const options = await select.locator('option').allInnerTexts();
-        expect(options[0]).toBe('None / Free Form Review');
-        expect(options).toContain(formTitle);
-        expect(options).not.toContain(inactiveTitle);
+        // Tick "Active" › "OK": the notice, and the list now offers the form.
+        await settings.goto('Review Forms');
+        await forms.activeBox(forms.row(title).first()).click();
+        await forms.answerConfirm(ACTIVATE_FORM, 'OK');
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        await expect(forms.activeBox(forms.row(title).first())).toBeChecked();
+        modal = await openRequestForm(page, tag, submissionId, reviewerName);
+        await expect(reviewFormList(modal)).toBeVisible({timeout: 30_000});
+        await expect(reviewFormList(modal).locator('option')).toHaveText(['None / Free Form Review', title]);
+        await expect(reviewFormList(modal).locator('option:checked')).toHaveText('None / Free Form Review');
     });
 
-    test('S7: a form in use is locked', async ({asUser, ompApi}, testInfo) => {
+    test('S7: a form in use is frozen', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s7', testInfo);
-        const formA = `Form A ${tag}`;
-        const formB = `Form B ${tag}`;
-        const question = `Question A for ${tag}?`;
-        const users = await seedPress(ompApi, tag, {
-            reviewForms: [
-                {title: formA, elements: [{question, type: 'radiobuttons', options: ['Yes', 'No']}]},
-                {title: formB, elements: [{question: `Question B for ${tag}?`, type: 'textarea'}]},
-            ],
+        const title = 'Method check';
+        const items = ['Is the method sound?', 'Other remarks'];
+        const {manager} = await seedPress(ompApi, tag, {
+            reviewForms: [{
+                title,
+                elements: [
+                    {question: items[0], type: 'radiobuttons', required: true, options: ['Yes', 'No']},
+                    {question: items[1], type: 'textarea'},
+                ],
+            }],
+            reviewer: 'accepted',
+            reviewForm: title,
         });
-        const {submissionId} = await seedInReview(ompApi, tag, users.author, [
-            {username: users.reviewer, status: 'accepted', reviewForm: formA},
-        ]);
-
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Review Forms');
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const forms = settings.forms;
-        const rowA = forms.row(formA);
-        expect(await forms.counts(rowA)).toEqual({inReview: '1', completed: '0'});
-        const actions = await forms.openActions(rowA);
-        expect(actions).toContain('Copy');
-        expect(actions).toContain('Preview');
-        expect(actions).not.toContain('Edit');
-        expect(actions).not.toContain('Delete');
-        // Control: the unused form offers all four.
-        const actionsB = await forms.openActions(forms.row(formB));
-        expect(actionsB).toEqual(expect.arrayContaining(['Edit', 'Copy', 'Preview', 'Delete']));
+        await settings.goto('Review Forms');
 
-        // "Preview" opens on "Preview Form" with the other two tabs dead.
-        const preview = await forms.openPreviewWindow(rowA);
-        await expect(preview.heading()).toHaveText('Preview');
-        await expect(preview.tab('Preview Form')).toHaveAttribute('aria-selected', 'true');
-        await expect(preview.tab('Review Form')).toHaveAttribute('aria-disabled', 'true');
-        await expect(preview.tab('Form Items')).toHaveAttribute('aria-disabled', 'true');
-        await expect(preview.preview).toContainText(question);
-        await preview.close();
+        // In Review 1; "Copy" and "Preview" only.
+        const row = forms.row(title).first();
+        expect(await forms.rowCounts(row)).toEqual({inReview: 1, completed: 0});
+        await expect(forms.activeBox(row)).toBeChecked();
+        let controls = await forms.rowControls(row);
+        await expect(forms.control(controls, 'Copy')).toBeVisible();
+        await expect(forms.control(controls, 'Preview')).toBeVisible();
+        await expect(forms.control(controls, 'Edit')).toHaveCount(0);
+        await expect(forms.control(controls, 'Delete')).toHaveCount(0);
 
-        // Deactivate: the box unticks, the count stays, the list drops it.
-        await forms.setActive(forms.row(formA), false);
-        expect(await forms.counts(forms.row(formA))).toEqual({inReview: '1', completed: '0'});
-        const addModal = await openAddReviewerFor(page, tag, submissionId, users, users.secondName);
-        const select = reviewFormSelect(addModal);
-        await expect(select).toBeVisible({timeout: 30_000});
-        const options = await select.locator('option').allInnerTexts();
-        expect(options).toContain(formB);
-        expect(options).not.toContain(formA);
+        // "Preview": the window headed "Preview" on "Preview Form", the other two greyed.
+        await forms.control(controls, 'Preview').click();
+        await expect(forms.windowHeading()).toHaveText('Preview', {timeout: 30_000});
+        await expect(forms.windowTab('Preview Form')).toHaveAttribute('aria-selected', 'true', {timeout: 30_000});
+        await expect(forms.windowTab('Review Form')).toHaveAttribute('aria-disabled', 'true');
+        await expect(forms.windowTab('Form Items')).toHaveAttribute('aria-disabled', 'true');
+        await expect(forms.previewForm).toContainText(`${items[0]}*`);
+        await forms.closeWindow();
 
-        // Control: the reviewer still meets the form on step 3.
-        const reviewerPage = await (await asUser(users.reviewer)).newPage();
-        const wizard = wizardFor(reviewerPage, tag);
-        await wizard.goto(submissionId);
-        await walkToStep3(wizard);
-        const step3 = reviewerPage.locator('#reviewStep3Form');
-        await expect(step3.getByRole('heading', {name: formA})).toBeVisible({timeout: 30_000});
-        await expect(step3).toContainText(question);
-        await expect(wizard.formRadio('Yes')).toBeVisible();
+        // "Copy" › "OK": a second, unticked row at the bottom with "Edit" and
+        // "Delete", carrying the same items.
+        controls = await forms.rowControls(forms.row(title).first());
+        await forms.control(controls, 'Copy').click();
+        await forms.answerConfirm(COPY_FORM, 'OK');
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        await expect(forms.row(title)).toHaveCount(2, {timeout: 30_000});
+        const copy = forms.rows().last();
+        await expect(copy).toContainText(title);
+        expect(await forms.rowCounts(copy)).toEqual({inReview: 0, completed: 0});
+        await expect(forms.activeBox(copy)).not.toBeChecked();
+        const copyControls = await forms.rowControls(copy);
+        await expect(forms.control(copyControls, 'Edit')).toBeVisible();
+        await expect(forms.control(copyControls, 'Delete')).toBeVisible();
+        await forms.control(copyControls, 'Edit').click();
+        await expect(forms.windowHeading()).toHaveText('Edit', {timeout: 30_000});
+        await forms.openWindowTab('Form Items');
+        await expect(forms.itemRows()).toHaveCount(2, {timeout: 30_000});
+        await expect(forms.itemRows().nth(0)).toContainText(items[0]);
+        await expect(forms.itemRows().nth(1)).toContainText(items[1]);
     });
 
-    test('S8: copy, reorder and delete', async ({asUser, ompApi}, testInfo) => {
+    test('S8: deactivate and delete an unused form', async ({asUser, ompApi}, testInfo) => {
         test.slow();
+        test.setTimeout(240_000);
         const tag = makeTag('s8', testInfo);
-        const formA = `Form A ${tag}`;
-        const formB = `Form B ${tag}`;
-        const questionA = `Question A for ${tag}?`;
-        const users = await seedPress(ompApi, tag, {
-            reviewForms: [
-                {title: formA, active: false, elements: [{question: questionA, type: 'radiobuttons', options: ['Yes', 'No']}]},
-                {title: formB, elements: [{question: `Question B for ${tag}?`, type: 'textarea'}]},
-            ],
+        const title = 'Method check';
+        const {manager, reviewerName, submissionId} = await seedPress(ompApi, tag, {
+            reviewForms: [{title, active: true, elements: [{question: 'Is the method sound?', type: 'textarea'}]}],
         });
-        const {submissionId} = await seedInReview(ompApi, tag, users.author);
-
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Review Forms');
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
         const forms = settings.forms;
-        await expect(forms.rows).toHaveCount(2);
-        const idA = await forms.rowId(forms.row(formA));
-        const idB = await forms.rowId(forms.row(formB));
 
-        // Copy: a third row at the bottom, same title, inactive, same items.
-        await forms.pressAction(forms.row(formA), 'Copy');
-        await forms.confirm('create a copy of this review form');
-        await expect(forms.rows).toHaveCount(3, {timeout: 30_000});
-        const copyRow = forms.rows.last();
-        await expect(copyRow).toContainText(formA);
-        const idCopy = await forms.rowId(copyRow);
-        expect(idCopy).not.toBe(idA);
-        await expect(forms.activeBox(copyRow)).not.toBeChecked();
-        const copyWindow = await forms.openEditWindow(copyRow);
-        await copyWindow.openTab('Form Items');
-        await expect(copyWindow.itemRow(questionA)).toBeVisible({timeout: 30_000});
-        await expect(copyWindow.itemRows).toHaveCount(1);
-        await copyWindow.close();
+        // Control for the absence below: while the form is active the list is offered.
+        let modal = await openRequestForm(page, tag, submissionId, reviewerName);
+        await expect(reviewFormList(modal)).toBeVisible({timeout: 30_000});
+        await closeRequestForm(modal);
 
-        // Reorder: the copy to the top, "Done", and it stays first after a reload.
-        await forms.moveRowToTop(forms.rows.last());
-        await page.reload();
-        await settings.openReviewTab();
-        await settings.openSideTab('Review Forms');
-        expect(await forms.rowId(forms.rows.first())).toBe(idCopy);
-        expect(await forms.rowId(forms.rows.nth(1))).toBe(idA);
-        expect(await forms.rowId(forms.rows.nth(2))).toBe(idB);
+        // Untick "Active": the deactivation question, "OK", the notice, the tick gone.
+        await settings.goto('Review Forms');
+        const row = forms.row(title).first();
+        await expect(forms.activeBox(row)).toBeChecked();
+        await forms.activeBox(row).click();
+        await expect(forms.confirmWindow(DEACTIVATE_FORM)).toBeVisible({timeout: 30_000});
+        await forms.answerConfirm(DEACTIVATE_FORM, 'OK');
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        await expect(forms.activeBox(forms.row(title).first())).not.toBeChecked();
 
-        // Once activated, the "Review Form" list names the copy first.
-        await forms.setActive(forms.rows.first(), true);
-        const addModal = await openAddReviewerFor(page, tag, submissionId, users, users.reviewerName);
-        const select = reviewFormSelect(addModal);
-        await expect(select).toBeVisible({timeout: 30_000});
-        const values = await select.locator('option').evaluateAll((options) => options.map((o) => [o.value, o.textContent.trim()]));
-        expect(values[0][1]).toBe('None / Free Form Review');
-        expect(values[1]).toEqual([String(idCopy), formA]);
-        expect(values[2]).toEqual([String(idB), formB]);
+        // With no other active form, "Add Reviewer" has no "Review Form" list.
+        modal = await openRequestForm(page, tag, submissionId, reviewerName);
+        await expect(modal.locator('#regularReviewerForm input[name="reviewMethod"]').first()).toBeVisible();
+        await expect(reviewFormList(modal)).toHaveCount(0);
+        await closeRequestForm(modal);
 
-        // Delete the copy; the originals stay.
-        await settings.gotoSideTab('Review Forms');
-        await forms.pressAction(forms.rows.first(), 'Delete');
-        await forms.confirm('delete this review form');
-        await page.reload();
-        await settings.openReviewTab();
-        await settings.openSideTab('Review Forms');
-        await expect(forms.rows).toHaveCount(2);
-        expect(await forms.rowId(forms.rows.nth(0))).toBe(idA);
-        expect(await forms.rowId(forms.rows.nth(1))).toBe(idB);
-        await expect(forms.row(formB)).toBeVisible();
+        // "Delete" › "OK": the row is gone.
+        await settings.goto('Review Forms');
+        const controls = await forms.rowControls(forms.row(title).first());
+        await forms.control(controls, 'Delete').click();
+        await forms.answerConfirm(DELETE_FORM, 'OK');
+        await expect(forms.row(title)).toHaveCount(0, {timeout: 30_000});
+        await expect(forms.noItems).toBeVisible({timeout: 30_000});
     });
 
-    test('S9: leave with unsaved changes', async ({asUser, ompApi}, testInfo) => {
+    test('OMP1: no "Reviewer Recommendations" tab on a press', async ({asUser, ompApi}, testInfo) => {
         test.slow();
-        const tag = makeTag('s9', testInfo);
-        const users = await seedPress(ompApi, tag);
-        const page = await (await asUser(users.manager)).newPage();
-        // No dialog is expected on the way out (Rule 1); any that appears is
-        // accepted so the trip completes, and counted.
-        const dialogs = [];
-        page.on('dialog', (dialog) => {
-            dialogs.push(dialog.type());
-            dialog.accept();
-        });
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Setup');
-        const setup = settings.setup;
-        await expect(setup.reviewModeRadio(ANON_ANON)).toBeChecked();
+        const tag = makeTag('omp1', testInfo);
+        const {manager} = await seedPress(ompApi, tag);
+        const page = await (await asUser(manager)).newPage();
+        const settings = new PressReviewSettingsPage(page, tag);
+        await settings.goto();
 
-        // A side-tab trip keeps the change.
-        await setup.reviewModeRadio('Open').check();
-        await settings.openSideTab('Reviewer Guidance');
-        await settings.openSideTab('Setup');
-        await expect(setup.reviewModeRadio('Open')).toBeChecked();
+        // The press's top tabs: "Review" between "Submission" and "Press Library" (OMP2).
+        const topTabs = await settings.topTabNames();
+        expect(topTabs.slice(0, 3)).toEqual(['Submission', 'Review', LIBRARY_TAB]);
 
-        // Leaving the page drops it, with no dialog on the way out.
-        await settings.leaveThroughSidebar('Website');
-        await settings.returnThroughSidebar();
-        await settings.openSideTab('Setup');
-        await expect(setup.reviewModeRadio(ANON_ANON)).toBeChecked();
-        await expect(setup.reviewModeRadio('Open')).not.toBeChecked();
-        expect(dialogs).toEqual([]);
-
-        // Control: saved, the same trip keeps it.
-        await setup.reviewModeRadio('Open').check();
-        const saved = await setup.save();
-        expect(saved.status()).toBe(200);
-        await setup.expectSaved();
-        await settings.leaveThroughSidebar('Website');
-        await settings.returnThroughSidebar();
-        await settings.openSideTab('Setup');
-        await expect(setup.reviewModeRadio('Open')).toBeChecked();
-    });
-
-    test('S11: two sets of guidelines ({OMP})', async ({asUser, ompApi}, testInfo) => {
-        test.slow();
-        const tag = makeTag('s11', testInfo);
-        const users = await seedPress(ompApi, tag);
-        const internal = await seedInReview(ompApi, tag, users.author, [{username: users.internal, status: 'accepted'}], {
-            suffix: 'i',
-            stage: 'internal',
-        });
-        const external = await seedInReview(ompApi, tag, users.author, [{username: users.reviewer, status: 'accepted'}], {
-            suffix: 'x',
-            stage: 'external',
-        });
-        const internalText = `Internal guidance for ${tag}.`;
-        const externalText = `External guidance for ${tag}.`;
-
-        // The Press Manager types a different sentence into each box.
-        const page = await (await asUser(users.manager)).newPage();
-        const settings = new ReviewSettingsPage(page, tag);
-        await settings.gotoSideTab('Reviewer Guidance');
-        const guidance = settings.guidance;
-        await guidance.typeInto('internalReviewGuidelines', internalText);
-        await guidance.typeInto('reviewGuidelines', externalText);
-        const saved = await guidance.save();
-        expect(saved.status()).toBe(200);
-        await guidance.expectSaved();
-        await page.reload();
+        // "Review" has exactly the three side tabs; the fourth has no tab and
+        // no panel (control: the three panels the tabs open exist, and
+        // "Setup" opens).
         await settings.openReviewTab();
-        await settings.openSideTab('Reviewer Guidance');
-        await expect(guidance.internalGuidelinesBody).toHaveText(internalText);
-        await expect(guidance.externalGuidelinesBody).toHaveText(externalText);
-
-        // The Internal Reviewer's step 2 shows the internal sentence only.
-        const internalPage = await (await asUser(users.internal)).newPage();
-        const internalWizard = wizardFor(internalPage, tag);
-        await internalWizard.goto(internal.submissionId);
-        await internalWizard.expectStep(1);
-        await internalWizard.saveAndContinueButton.click();
-        await internalWizard.expectStep(2);
-        await expect(internalPage.getByText(internalText)).toBeVisible();
-        await expect(internalPage.getByText(externalText)).toHaveCount(0);
-
-        // The External Reviewer's step 2 shows the external sentence only.
-        const externalPage = await (await asUser(users.reviewer)).newPage();
-        const externalWizard = wizardFor(externalPage, tag);
-        await externalWizard.goto(external.submissionId);
-        await externalWizard.expectStep(1);
-        await externalWizard.saveAndContinueButton.click();
-        await externalWizard.expectStep(2);
-        await expect(externalPage.getByText(externalText)).toBeVisible();
-        await expect(externalPage.getByText(internalText)).toHaveCount(0);
+        expect(await settings.sideTabNames()).toEqual(PRESS_SIDE_TABS);
+        await expect(settings.sideTab('Reviewer Recommendations')).toHaveCount(0);
+        await expect(settings.sidePanel('Reviewer Recommendations')).toHaveCount(0);
+        await expect(settings.reviewPanel).not.toContainText('Reviewer Recommendations');
+        await expect(settings.reviewPanel).toContainText('Review Forms');
+        await settings.openSideTab('Setup');
+        await expect(settings.setup.saveButton).toBeVisible();
+        await expect(page.locator('[data-cy="reviewer-recommendation-manager"]')).toHaveCount(0);
     });
 });

@@ -119,7 +119,8 @@ Keys:
   the "Review Forms" grid does. Each entry: `title` (required, localized),
   `description` (localized), `active` (default true), and `elements[]` of
   `question` (required, localized), `description`, `type`, `required`
-  (default false) and `options`. `type` is one of the grid's item types,
+  (default false), `included` (the item's "Included in message to author"
+  box, default true) and `options`. `type` is one of the grid's item types,
   `smalltextfield`, `textfield`, `textarea`, `checkboxes`, `radiobuttons`,
   `dropdownbox` (or its number 1–6); the last three need `options`, a list
   of response labels (or a locale map of lists). OPS answers 400.

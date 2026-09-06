@@ -1,6 +1,6 @@
 ---
 name: review-setup-and-review-forms
-scope: A manager configures how peer review runs in the journal — the default review type, deadlines, automatic reminders, reviewer guidance, review forms and (on a journal) the recommendation options a reviewer picks from
+scope: A manager configures how peer review runs: the default review mode, deadlines and reminders, reviewer access, guidance texts, review forms, and (OJS) the recommendation options a reviewer can pick
 apps: [ojs, omp]
 shared: pkp-lib
 status: verified
@@ -14,696 +14,738 @@ atlas-claims: [AFFW-669, AFFW-670, AFFM-065, AFFM-066, AFFM-067, AFFM-068, AFFM-
 ## Purpose
 
 A Journal Manager decides how peer review runs before any reviewer is
-asked: which review type a new request starts with, how many weeks a
-reviewer gets to answer and to finish, when the journal reminds a reviewer
-by itself, what guidance and competing-interests policy a reviewer reads,
-which structured review forms an editor can attach to a request, and, on a
-journal, which recommendation options a reviewer can pick from. All of it
-sits on one screen, Settings › Workflow › "Review", in four side tabs. This
-spec owns that screen, the automatic reminder clocks it sets, and the
-review-form editor. The places where the settings take effect belong to
-their own screens and are only pointed at here: the editor's Add Reviewer
-window ([→ reviewer assignment](U27-reviewer-assignment-and-management.md#due-dates)),
-the reviewer's wizard ([→ reviewer's review](U28-reviewers-review.md#wizard))
-and the round status box ([→ review stage](U26-review-stage-and-rounds.md#round-status)).
+invited. Everything for that sits on one screen, Settings › Workflow › Review,
+in four side tabs: "Setup" (the default review mode, what reviewers may
+access, the default deadlines, the minimum number of reviews, and the clocks
+of the automatic reminder emails), "Reviewer Guidance" (the guidelines and
+the competing-interests policy reviewers read), "Review Forms" (structured
+questionnaires a reviewer fills in instead of two free-text boxes) and, on a
+journal, "Reviewer Recommendations" (the list a reviewer picks a
+recommendation from). None of it is visible to a reviewer directly: each
+setting takes effect on the editor's Reviewers panel
+([→ reviewer assignment & management](U27-reviewer-assignment-and-management.md#search))
+or in the reviewer's wizard
+([→ reviewer's review](U28-reviewers-review.md#wizard)), and this spec says
+which setting lands where. The wizard itself, the request emails and the
+editor's windows stay with their own specs. <sup>a</sup>
 
-OPS installs no review stage, so a preprint server's Settings › Workflow
-has no "Review" tab: its tabs read "Submission", "Preprint Server
-Library", "Emails" and "Tasks and Discussions". None of the screens in
-this spec exists there, and the test tooling refuses to configure review
-settings on a preprint server (scenario 12). <sup>p</sup>
+OPS does not install a review stage, so its Workflow Settings screen has no
+"Review" tab: a Preprint Server Manager sees "Submission", "Preprint Server
+Library", "Emails" and "Tasks and Discussions" only, and nothing in this
+spec has a screen on a preprint server (scenario 11). <sup>b</sup>
 
-A press has two review stages, so its "Reviewer Guidance" tab carries two
-guideline boxes, "Internal Review Guidelines" and "External Review
-Guidelines", where a journal has one "Review Guidelines" box
-[OMP2](#omp2). A press collects no reviewer recommendation, so it has no
-"Reviewer Recommendations" tab [OMP1](#omp1). Everything else on the
-screen is the same. <sup>q</sup>
+On a press the "Review" tab has three side tabs: "Setup", "Reviewer
+Guidance" and "Review Forms". A press collects no reviewer recommendation,
+so it has no "Reviewer Recommendations" tab [OMP1](#omp1); its "Reviewer
+Guidance" tab carries two guideline boxes, one per review stage, and a few
+labels are worded differently [OMP2](#omp2). <sup>b</sup>
 
 ## Actors & permissions
 
-**Terms used below.** A **settings role** is a role whose configuration
-grants access to the journal's Settings: by default Journal Manager,
-Editor and Production Editor (the roles at the manager level; which roles
-carry that access is *Roles configuration* territory). A review form is
-**in use** once at least one review request that was not declined carries
-it (Rule 12). A recommendation option is **in use** once any reviewer has
-chosen it (Rule 18). <sup>a</sup>
+**Terms used below.** The **manager roles** are the roles at the Journal
+Manager permission level whose role settings allow access to the journal's
+settings: on the seeded journals the Journal Manager and the Editor (a
+Journal Editor group at the manager level). A **form in use** is a review
+form that at least one review assignment carries (an assignment the
+reviewer has not declined; Rule 12). A **recommendation in use** is one
+some reviewer has chosen on a submitted review (Rule 18). <sup>c</sup>
 
 | Action | Who may, and when |
 |--------|--------------------|
-| **Open Settings › Workflow › "Review"** and its side tabs | • Site Administrator, and every settings role in this journal: always<br>• Section Editor, Guest Editor, assistant-level roles, Reviewer, Author, Reader: the sidebar offers no "Settings"; the typed address shows the access-denied page, "The current role does not have access to this operation." <sup>a</sup> |
-| **Save the "Setup" and "Reviewer Guidance" forms** | • The same accounts as the row above <sup>a</sup> |
-| **Create, edit, copy, preview, reorder, activate, deactivate and delete review forms**, and edit their items | • The same accounts as the row above. "Edit" and "Delete" are offered only while the form is not in use (Rule 12); "Copy", "Preview" and the "Active" box are offered always <sup>b</sup> |
-| **Add, edit, activate, deactivate and delete recommendation options** {OJS} | • The same accounts as the row above. A row's "Edit" and "Delete" are offered only while the option is not in use; the "Activate" box is offered always (Rule 18) <sup>c</sup> |
+| **Open Settings › Workflow › Review** (all its side tabs) | • Manager roles and the Site Administrator: the sidebar's "Settings" is a collapsed group; opened, it lists "Workflow", which leads there<br>• Section Editor, Assistant, Reviewer, Author: the sidebar has no "Settings" group, and the typed address lands on a page reading "The current role does not have access to this operation."<br>• Reader: no sidebar at all (the journal's sign-in lands on the reader site); the typed address lands on the same page <sup>c</sup> |
+| **Save "Setup" and "Reviewer Guidance"** | • Manager roles and the Site Administrator: the tab's "Save" <sup>c</sup> |
+| **Create, edit, copy, preview, order, activate and deactivate review forms** | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a form not in use (Rule 12); "Copy", "Preview" and the "Active" tick are offered on every form <sup>c</sup> |
+| **Add, edit, delete and order a form's items** | • Manager roles and the Site Administrator, only while the form is not in use (Rule 12): the "Form Items" tab is greyed out for a form in use <sup>c</sup> |
+| **Add, edit, delete, activate and deactivate a reviewer recommendation** {OJS} | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a recommendation not in use (Rule 18); the "Activate" tick is offered on every row <sup>c</sup> |
 
 ## Fields & validation
 
-**"Setup" side tab** (one form, one "Save" at the bottom). The three
-number boxes are checked on save. A refused form keeps the typed value in
-its box, shows the message under it ("This is not a valid integer." for
-letters or a decimal, "This must be at least 0." for a negative number)
-and a line above "Save" ("Please correct one error. Go to {field}: {the
-message} Jump to next error"; with several boxes wrong it reads "Please
-correct {n} errors." and repeats "Go to {field}: {message}" for each), and
-no "Saved". <sup>d</sup>
+**"Setup" tab.** One form with "Save" at the bottom. The boxes below are
+the form's, in screen order. <sup>d</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Default Review Mode" | yes (one is always selected) | Radios "Anonymous Reviewer/Anonymous Author" (the install default), "Anonymous Reviewer/Disclosed Author", "Open". Preselects "Review Type" in the Add Reviewer window (Rule 2) |
-| "Publicly Show Reviewer Comments" | no | One box, "Make reviewer comments publicly visible with published content", under the explanation "Enable this setting if you'd like the review process to be made publicly visible alongside published submissions. …". Off by default. Preselects "Public Visibility" in the Add Reviewer window (Rule 2) |
-| "Restrict File Access" | no | One box: "Reviewers will not be given access to the submission file until they have agreed to review it." {OJS} / "Reviewers will have access to the submission file only after agreeing to review it." {OMP}. Off by default. Effect: Rule 5 |
-| "One-click Reviewer Access" | no | Under "Reviewers can be sent a secure link in the email invitation, which will log them in automatically when they click the link.", one box "Include a secure link in the email invitation to reviewers.". Off by default. Effect: Rule 5 |
-| "Reviewer Suggestion at Submission" | no | Under "Author can suggest several potential reviewers before completing the submission …", one box "Allow authors to suggest potential reviewers at submission process". Off by default. Effect: Rule 6 |
-| "Default Response Deadline" | no | Small text box, "Number of weeks to accept or decline a review request." Whole number of weeks, 0 or more; 4 on a fresh journal. Effect: Rule 3; 0 and an empty box both give 3 weeks ⚠ [A4](#a4) |
-| "Default Completion Deadline" | no | Small text box, "Weeks allowed to complete the review" {OJS} / "Weeks allowed for review completion" {OMP}. Whole number of weeks, 0 or more; 4 on a fresh journal. Effect: Rule 3; 0 and an empty box both give 4 weeks ⚠ [A4](#a4) |
-| "Minimum Confirmed Reviews Required" | no | Small text box, "Minimum number of confirmed reviews required for a submission". Whole number, 0 or more; 0 on a fresh journal. Effect: Rule 4 |
-| "Set Reminders for Review" | — | A heading with the explanation "Send an email reminder before or after for review request response (if reviewer has not responded to review request yet) or review submission (if reviewer has not submitted review yet)", followed by the four sliders below |
-| "Review Request Response - Before Due Date", "Review Request Response - After Due Date", "Review Submission - Before Due Date", "Review Submission - After Due Date" | no | Four sliders from "None" to 14, whole days, moved with the mouse or the arrow keys (End jumps to 14). The box beside each reads "No reminder set" at 0, otherwise "{n} days before due date" or "{n} days after due date" (at 1 it still reads "1 days"). All four at 0 on a fresh journal. Effect: Rule 8 |
+| "Default Review Mode" | yes (one is always selected) | Radio: "Anonymous Reviewer/Anonymous Author" (the install default), "Anonymous Reviewer/Disclosed Author", "Open". Effect: Rule 3 |
+| "Publicly Show Reviewer Comments" (help "Enable this setting if you'd like the review process to be made publicly visible alongside published submissions. This supports transparent peer review practices and can help foster greater trust and accountability.") — box "Make reviewer comments publicly visible with published content" | no | Off by default. Effect: Rule 4 |
+| "Restrict File Access" (no help text) — box "Reviewers will not be given access to the submission file until they have agreed to review it." (on a press "Reviewers will have access to the submission file only after agreeing to review it." [OMP2](#omp2)) | no | Off by default. Effect: Rule 5 |
+| "One-click Reviewer Access" (help "Reviewers can be sent a secure link in the email invitation, which will log them in automatically when they click the link.") — box "Include a secure link in the email invitation to reviewers." | no | Off by default. Effect: Rule 5 |
+| "Reviewer Suggestion at Submission" (help "Author can suggest several potential reviewers before completing the submission which can streamline the review process and provide valuable input for editorial team.") — box "Allow authors to suggest potential reviewers at submission process" | no | Off by default. Effect: Rule 6 |
+| "Default Response Deadline" (help "Number of weeks to accept or decline a review request.") | no | A whole number of weeks, 0 or more; the install default is 4. Letters or a decimal are refused with "This is not a valid integer."; a negative number with "This must be at least 0.". An emptied box is accepted, comes back blank after a reload and behaves like 0 (Rule 7). Effect: Rule 7 |
+| "Default Completion Deadline" (help "Weeks allowed to complete the review"; on a press "Weeks allowed for review completion" [OMP2](#omp2)) | no | As above; install default 4. Effect: Rule 7 |
+| "Minimum Confirmed Reviews Required" (help "Minimum number of confirmed reviews required for a submission") | no | A whole number, 0 or more; install default 0. The same refusals as the deadlines; an emptied box comes back as "0". Effect: Rule 8 |
+| "Set Reminders for Review" (help "Send an email reminder before or after for review request response (if reviewer has not responded to review request yet) or review submission (if reviewer has not submitted review yet)") — four sliders: "Review Request Response - Before Due Date", "Review Request Response - After Due Date", "Review Submission - Before Due Date", "Review Submission - After Due Date" | no | Each slider runs between its end labels "None" and "14", set by dragging, by a click on the track or by the keyboard arrows (one day per press); a box beside it reads the value back: "No reminder set" at the left end, otherwise "{n} days before due date" / "{n} days after due date" ("1 days" at 1; there is no singular). The install default is "No reminder set" on all four. Effect: Rule 9 |
 
-**"Reviewer Guidance" side tab** (one form, one "Save"). Every text box
-here is typed per language of the journal's forms (Rule 16); the reviewer
-sees the text in the language they are reading in. <sup>e</sup>
-
-| Field (UI label) | Required? | Rules |
-|------------------|-----------|-------|
-| "Internal Review Guidelines" {OMP} | no | Rich text with a shorter toolbar (no quote or list buttons) ⚠ [OMP3](#omp3); shown to Internal Reviewers on their wizard's step 2 [OMP2](#omp2) |
-| "Review Guidelines" {OJS} / "External Review Guidelines" {OMP} | no | Rich text (bold, italic, superscript, subscript, link, quote, lists). Empty on a fresh journal. Effect: Rule 5 |
-| "Competing Interests" | no | Rich text, same toolbar. Empty on a fresh journal. Effect: Rule 5 |
-| The anonymity box (no heading of its own) | no | One box, "Present a link to how to ensure all files are anonymized during upload". Its words "how to ensure all files are anonymized" are a button: pressing them opens the dialog "How to ensure all files are anonymized" with the journal's anonymity checklist and a "Close" button, without changing the box. Off by default. Effect: Rule 7 |
-
-**"Create Review Form" / "Review Form" window** (the review-forms list's
-"Create Review Form" link, and the first tab of a form's "Edit"
-window). <sup>f</sup>
+**"Reviewer Guidance" tab.** One form with "Save". Every text box here is a
+rich-text box. With more than one form language the form shows a language
+switch at its top ("French" beside "English"), each box reads "{n}/2
+languages completed", and pressing "French" shows a second box "… in French"
+under each; one "Save" saves both languages (the seeded journals have
+English only). No box carries help text. <sup>e</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Title" | yes | Plain text, per language (Rule 16). Left empty, "Save" is refused in the window with "This field is required." under "Title" |
-| "Description and Instructions" | no | Rich text, per language. Shown to the reviewer under the title on their step 3 |
+| {OMP} "Internal Review Guidelines" | no | Empty by default. Shown to Internal Reviewers on their wizard's step 2 and 3 (Rule 10). Its toolbar has no quote or list buttons, unlike the two boxes under it ⚠ [OMP3](#omp3) |
+| "Review Guidelines" (on a press "External Review Guidelines") | no | Empty by default. Shown to reviewers on the wizard's step 2 and 3 (Rule 10) |
+| "Competing Interests" | no | Empty by default. Set, the wizard's step 1 asks the reviewer to declare competing interests (Rule 10) |
+| Box "Present a link to how to ensure all files are anonymized during upload" | no | Off by default. The words "how to ensure all files are anonymized" inside the sentence are a button that opens a window "How to ensure all files are anonymized" with the instructions, closed with "Close" (there is no "OK"); pressing the words does not tick the box. Effect: Rule 11 |
 
-**"Create New Item" / "Edit" window** (the "Form Items" tab of a form's
-"Edit" window). <sup>g</sup>
-
-| Field (UI label) | Required? | Rules |
-|------------------|-----------|-------|
-| "Item" | yes | Rich text, per language: the question the reviewer answers. Left empty (with a type chosen), "Save" is refused with a red notice at the top right, "Errors occurred processing this form" and "A question is required for the form item. (English)" |
-| "Description" | no | Rich text, per language; shown under the question |
-| "Reviewers required to complete item" | no | Box, off for a new item. On, the reviewer cannot submit the review with it unanswered ([→ the wizard's form questions](U28-reviewers-review.md#step-3)) |
-| "Included in message to author" | no | Box, **on** for a new item. Off marks the question as not for the author; the author's own review screen is described at [→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review) |
-| "Item type" | yes | Drop-down opening on "Choose item type"; left there, "Save" is refused in the window with "This field is required." under "Item type". The types, in order: "Single word text box", "Single line text box", "Extended text box", "Checkboxes (you can choose one or more)", "Radio buttons (you can only choose one)", "Drop-down box" |
-| "Response Options" (the list under the type, link "Add Item") | for the last three types | Each row is one answer the reviewer can pick, per language. The list accepts rows whatever the type shows, with no notice on a type change; saving with a text type chosen drops the rows for good (the reopened item's list reads "No Items"). Only "Checkboxes …", "Radio buttons …" and "Drop-down box" show the rows to the reviewer; a text type shows a box and no rows (Rule 15) |
-
-**"Add Recommendation" / "Edit Recommendation" window** {OJS} (the
-"Reviewer Recommendations" tab). <sup>c</sup>
+**"Review Forms" tab.** A list titled "Review Forms" with "Create Review
+Form" above it ("Order" joins it once the list has two forms) and the
+columns "Title", "In Review", "Completed" and "Active"; "No Items" while
+the journal has none. The windows opened from it are headed "Create Review
+Form", "Edit" (a form's and an item's edit window alike), "Preview" and
+"Create New Item". A refused save leaves the window open: an empty "Title"
+or an unchosen "Item type" shows "This field is required." under the box,
+while an empty "Item" with a type chosen shows the notice "A question is
+required for the form item. (English)" and nothing under the box:
+<sup>f</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Review Recommendations" | yes | Plain text, per language, hint "e.g. accept, reject": the words the reviewer sees in the "Recommendation" list. Left empty, "Save" is refused with "This field is required." under the box and a line above "Save" ("Please correct 2 errors. Go to Review Recommendations: This field is required. Go to Recommendation type: This field is required. Jump to next error"; "Please correct one error. …" for a single box), and "Save" stays disabled until every flagged box is corrected |
-| "Recommendation type" | yes | Drop-down that opens blank: "Approved", "Not Approved", "Revisions Requested", "With Comments". Left blank, refused with "This field is required." under it. A classification of the option (Rule 18); it changes nothing on this screen |
-| The status drop-down (no label) | yes | "Active Upon Saving" (preselected) or "Deactivate" |
+| "Create Review Form" window (and the "Review Form" tab of a form's "Edit" window): "Title" | yes | Text, one box per form language. Refused empty |
+| Same window: "Description and Instructions" | no | Rich text, one box per form language. Shown to the reviewer above the questions and in the preview |
+| "Create New Item" window (and an item's "Edit" window): "Item" | yes | Rich text, per form language: the question the reviewer answers. Refused empty, by the notice quoted above the table |
+| Same window: "Description" | no | Rich text, per form language: help shown under the question |
+| Same window: box "Reviewers required to complete item" | no | Off by default. On, the reviewer cannot submit the review with the item unanswered (Rule 15) |
+| Same window: box "Included in message to author" | no | On by default. Off, the item and its answer are left out of what the author gets to read (Rule 15) |
+| Same window: "Item type" | yes | A list: "Choose item type" (preselected, the empty choice), "Single word text box", "Single line text box", "Extended text box", "Checkboxes (you can choose one or more)", "Radio buttons (you can only choose one)", "Drop-down box". Saved with "Choose item type" still selected, the window is refused |
+| Same window: "Response Options" list with an "Add Item" link (no column heading) | for the three choice types | Each row is one answer the reviewer can pick, per form language. "Add Item" is offered whatever the type, even before one is chosen: it adds an editable row at the bottom, one text box at a time, and fixes the previous row. Changing "Item type" shows no warning and the rows stay listed; they are kept when the item is saved with a choice type and dropped when it is saved with a text type ⚠ [A5](#a5) (Rule 14) |
+
+**"Reviewer Recommendations" tab {OJS}.** A table titled "Reviewer
+Recommendations" with the button "Add Recommendation", the columns
+"Recommendations" and "Activate" (a tick per row), and an unnamed third
+column holding the "More Actions" menu of a row not in use. Its window
+("Add Recommendation" / "Edit Recommendation") has one button, "Save"; a
+refused save shows "This field is required." under each empty required
+box and, at the foot, "Please correct 2 errors." (or "Please correct one
+error." for one) with "Jump to next error"; it sends nothing, stays open,
+and "Save" is greyed out until the boxes are filled: <sup>g</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Review Recommendations" (help "e.g. accept, reject") | yes | Text, one box per form language: the words the reviewer picks. Refused empty |
+| "Recommendation type" | yes | A list: "Approved", "Not Approved", "Revisions Requested", "With Comments"; nothing is preselected, and the entry is refused without a choice. The type is shown nowhere else: not to the reviewer, not in the editor's review windows, not in the table |
+| The unlabelled list under it | yes | A list: "Active Upon Saving" (preselected) or "Deactivate": whether the entry is offered to reviewers as soon as it is saved (Rule 17) |
 
 ## Rules & state
 
-<a id="review-settings"></a>
-1. **Where the settings live.** Settings › Workflow shows a "Review" tab
-   after "Submission". Inside it, side tabs "Setup", "Reviewer Guidance",
-   "Review Forms" and, on a journal, "Reviewer Recommendations"
-   [OMP1](#omp1). "Setup" and "Reviewer Guidance" are forms with their own
-   "Save"; a successful save shows "Saved" to the left of the button and
-   nothing else on the page changes. The address bar follows the side
-   tab, but reloading or bookmarking that address opens "Submission" ›
-   "Disable Submissions", not the Review tab ⚠ [A5](#a5). Switching side
-   tabs keeps an unsaved change (the box still shows it on return);
-   leaving the page from the sidebar drops it without a warning, and the
-   tab shows the saved values again when reopened. <sup>d</sup>
-2. **Defaults feed new requests only.** "Default Review Mode",
-   "Publicly Show Reviewer Comments", the two deadlines and the active
-   review forms are what the editor's Add Reviewer window starts from
-   ([→ the window's defaults](U27-reviewer-assignment-and-management.md#due-dates)).
-   Saving a change here alters no existing review request: a reviewer
-   already assigned keeps their review type, dates, visibility and form.
-   The change is visible the next time an Add Reviewer window opens.
-   <sup>d</sup>
-3. **Deadlines.** The two deadline boxes are whole numbers of weeks. Each
-   new request's "Response Due Date" is today plus the response weeks and
-   its "Review Due Date" today plus the completion weeks. A response box
-   at 0 or empty gives 3 weeks, and a completion box at 0 or empty 4
-   weeks; the tab never shows either number ⚠ [A4](#a4). Anything that is not a whole
-   number of 0 or more is refused on save with the message under the box
-   (Fields). <sup>d</sup>
-4. **Minimum confirmed reviews.** "Minimum Confirmed Reviews Required" is
-   read by the review stage's round status box, which then names the
-   minimum and holds back its "all reviews confirmed" sentence until that
-   many reviews are confirmed
-   ([→ the round status box](U26-review-stage-and-rounds.md#round-status)).
-   0, the default, means no minimum. <sup>d</sup>
-5. **What the reviewer meets.** "Restrict File Access", "One-click
-   Reviewer Access", the guidelines and the competing-interests policy
-   change the reviewer's own screens and emails and nothing on the
-   editor's: the files' step, the sign-in-free link, the text of step 2
-   and the competing-interests question of step 1
-   ([→ the reviewer's wizard](U28-reviewers-review.md#wizard)). A policy
-   text that is empty asks no question; a guidelines box that is empty
-   shows the wizard's "no guidelines" sentence. <sup>e</sup>
-6. **Reviewer suggestions.** "Reviewer Suggestion at Submission" adds the
-   author's "Reviewer Suggestions" step (5 of 6) to the submission wizard
-   and, once an author has suggested someone, a "Reviewers Suggested by
-   Author" panel to that submission's workflow (the Submission stage and
-   the review stage). A submission without suggestions shows no panel.
-   Off, the wizard has five steps and the panel is hidden even where
-   suggestions were stored; both belong to *Reviewer suggestions*.
-   <sup>d</sup>
-7. **The anonymity link.** With the "Reviewer Guidance" box ticked, the
-   file-upload window opened on the Submission stage ("Submission Files"
-   › "Upload") and on the review stages ("Upload/Select Files" › "Upload
-   Review File") shows, on its step "1. Upload File", the link "How to
-   ensure all files are anonymized" under the component list at the top
-   of the step (under the drop zone once a component is chosen). It opens
-   the same
-   dialog the box's own words open, here with "OK" and "Cancel" buttons.
-   Unticked, the upload window has no such link. The upload window itself
-   is *Submission files* territory. <sup>e</sup>
-<a id="reminder-clocks"></a>
-8. **The reminder clocks.** The four sliders arm automatic reminder emails
-   to reviewers, checked once a day by the install's scheduled task,
-   which no screen on the test installs runs. <sup>h</sup> A slider at 0
-   ("No reminder set") arms nothing. Which clock applies depends on where the request
-   stands:
-   - while the request is unanswered, the two "Review Request Response"
-     clocks count from the "Response Due Date";
-   - once accepted and until the review is submitted, the two "Review
-     Submission" clocks count from the "Review Due Date".
+<a id="screen"></a>
+1. **The screen.** Settings › Workflow (page heading "Workflow Settings")
+   has a "Review" tab between "Submission" and "Publisher Library" (on a
+   press "Press Library" [OMP2](#omp2)). Its side tabs are "Setup",
+   "Reviewer Guidance", "Review Forms" and, on a journal, "Reviewer
+   Recommendations". Pressing a tab changes the page address, but a reload
+   lands on "Submission" › "Disable Submissions" whatever tab was open
+   ⚠ [A4](#a4). <sup>a</sup>
 
-   A "Before Due Date" reminder goes out on the first daily check that
-   falls within that many days before the due date, and only if no
-   reminder (automatic or the editor's "Send Reminder") has been sent in
-   that phase yet. An "After Due Date" reminder goes out on the first
-   daily check that many or more days after the due date, and only if a
-   reminder was already sent in that phase before the due date
-   ⚠ [A1](#a1). Each clock fires at most once per request; the reviewer's
-   answer clears the request's reminder history, so the "Review
-   Submission" clocks start fresh. No reminder goes to a declined or
-   cancelled request, to a submitted review, or to a request on a
-   submission that has been declined or published. <sup>h</sup>
-9. **What the reminder sends.** The response reminder is the journal's
-   "Review Response Overdue (Automated)" email, subject "Will you be able
-   to review this for us?"; the submission reminder is "Review Reminder
-   (Automated)", subject "A reminder to please complete your review". Both
-   are sent from the journal's principal contact in the journal's main
-   language, carry a fresh sign-in-free link when "One-click Reviewer
-   Access" is on, and are logged on the submission ("An automatic reminder
-   email was sent to {name} regarding their review assignment") and in the
-   reviewer row's History
-   ([→ reminders on the Reviewers panel](U27-reviewer-assignment-and-management.md#reminders)).
-   The wording is edited under *Emails management*. <sup>h</sup>
-<a id="review-forms"></a>
-10. **The review-forms list.** The "Review Forms" side tab lists the
-    journal's forms in their display order, with columns "Title", "In
-    Review", "Completed" and "Active", and the link "Create Review Form"
-    above it ("Order" joins it once there is a row). While there is none
-    the list reads "No Items". A new form is saved inactive, at the
-    bottom of the list.
-    "Order" lets the rows be dragged, with "Done" and "Cancel ordering"
-    under the list; "Done" saves the order with no notice, and that order
-    is the order of the "Review Form" list in the Add Reviewer window.
-    Each row's arrow opens its actions: "Edit", "Copy", "Preview",
-    "Delete" (Rule 12 says when the first and last are missing).
+2. **Saving "Setup" and "Reviewer Guidance".** "Save" writes the whole form
+   at once. A successful save shows no page notice: "Saving" then "Saved"
+   appear beside the button, and "Saved" is gone after about five seconds.
+   A refused box shows its reason in a red badge under the box; beside
+   "Save" at the foot of the form, "Please correct one error." (or "Please
+   correct {n} errors.") and a button "Jump to next error" appear; a page
+   notice reads "The form was not saved because 1 error(s) were
+   encountered. Please correct these errors and try again."; "Save" is
+   greyed out; and nothing on the form is saved, not even the boxes that
+   passed. Switching side tabs with unsaved edits keeps
+   them, with no warning: back on the tab, the edited values are still
+   there. A reload drops them, with no warning either: the tab shows the
+   saved values again. Nothing here sends an email. <sup>d</sup>
+
+<a id="review-mode"></a>
+3. **"Default Review Mode"** is what the editor's Add Reviewer window
+   preselects as "Review Type" on every new request ([→ finding a
+   reviewer](U27-reviewer-assignment-and-management.md#search)). Changing
+   it later changes the preselection only: requests already made keep the
+   type they were made with. The type is what the reviewer reads on the
+   wizard's step 1 ([→ step 1](U28-reviewers-review.md#step-1)). <sup>d</sup>
+
+4. **"Publicly Show Reviewer Comments"** sets the default of the "Publicly
+   Show Reviewer Comments" box in the editor's Add Reviewer window and the
+   assignment's "Edit" window: on, that box arrives ticked on every new
+   request; off, unticked. A request made before the change keeps its box
+   as it was. What a ticked box does to the published article belongs to
+   *Article landing page & reading*. <sup>d</sup>
+
+<a id="access"></a>
+5. **Reviewer access.** "Restrict File Access" on: a reviewer sees the
+   files for review only after accepting the request (the wizard's step 3
+   instead of step 1). "One-click Reviewer Access" on: every request and
+   reminder email to a reviewer carries a personal sign-in-free link. Both
+   effects are the reviewer's-review spec's
+   ([→ one-click access](U28-reviewers-review.md#one-click)); the automatic
+   reminders of Rule 9 mint such a link too when the box is on (no screen
+   shows those emails on the test installs, Rule 9e). <sup>d</sup>
+
+6. **"Reviewer Suggestion at Submission"** on: the submission wizard gains
+   the step "Reviewer Suggestions", between "For the Editors" and "Review",
+   where the author names potential reviewers (*Submission wizard*); how
+   the editors then see the suggestions belongs to *Reviewer suggestions*.
+   Off (the default), the step is absent. <sup>d</sup>
+
+<a id="deadlines"></a>
+7. **The default deadlines.** When an editor opens Add Reviewer, "Response
+   Due Date" is preset to today plus "Default Response Deadline" weeks and
+   "Review Due Date" to today plus "Default Completion Deadline" weeks; the
+   editor can change both before sending
+   ([→ deadlines](U27-reviewer-assignment-and-management.md#due-dates)).
+   A deadline saved as 0 or left empty is not "no deadline": Add Reviewer
+   then presets three weeks for the response and four for the review
+   ⚠ [A3](#a3). Requests already sent keep their dates. <sup>h</sup>
+
+8. **"Minimum Confirmed Reviews Required"** above 0 adds a first line to
+   the round status on the review stage: "Minimum number of confirmed
+   reviews required: {N}." A review counts as confirmed once the editor has
+   marked it complete (Read Review › "Mark as Complete") or thanked the
+   reviewer; an accepted, submitted or viewed review does not count. When
+   that many are confirmed the line stays and the round's own line under it
+   becomes "Minimum required number of reviews have been confirmed. A
+   decision is needed."
+   ([→ the round status box](U26-review-stage-and-rounds.md#round-status)).
+   At 0 nothing is required and no such line appears. <sup>d</sup>
+
+<a id="reminders"></a>
+9. **The automatic reminder clocks.** Once a day the install looks at every
+   review request that is still open (sent, not declined, not cancelled, not
+   yet submitted) on a submission still awaiting a decision, and sends the
+   reviewer a reminder email when one of the four sliders says so. A slider
+   at "No reminder set" never sends. <sup>i</sup>
+   - 9a. **Before the reviewer has answered**, the two "Review Request
+     Response" sliders count against the request's response due date:
+     "Before Due Date" sends once when today is within that many days
+     before the due date and the reviewer has not been reminded yet;
+     "After Due Date" sends once when the due date is at least that many
+     days past. The email is "Review Response Overdue (Automated)"
+     (subject "Will you be able to review this for us?"; on a press
+     "Manuscript Review Request" [OMP2](#omp2)).
+   - 9b. **After the reviewer has accepted**, the two "Review Submission"
+     sliders count the same way against the review due date, and the email
+     is "Review Reminder (Automated)" (subject "A reminder to please
+     complete your review").
+   - 9c. Each reminder, automatic or the editor's own "Send Reminder",
+     stamps the assignment's "Reminder" date
+     ([→ reminders](U27-reviewer-assignment-and-management.md#reminders))
+     and writes "An automatic reminder email was sent to {reviewer}
+     regarding their review assignment" to the activity log. The
+     reviewer's acceptance clears that date, which is what lets the
+     submission-side clock start afresh.
+   - 9d. An "After Due Date" reminder is sent only to a reviewer who has
+     already been reminded once (by the "Before" clock or by an editor).
+     With "Before Due Date" at "No reminder set" and nobody pressing "Send
+     Reminder", the "After Due Date" slider never sends ⚠ [A1](#a1).
+   - 9e. Both emails are templates the manager can edit on the "Manage
+     Emails" page, reached from the "Add and edit templates" link on
+     Settings › Workflow › "Emails" (*Emails management*); they are sent
+     from the journal's principal contact. On the test installs the daily
+     clock is switched off, so no scenario drives it (Settings).
+
+<a id="guidance"></a>
+10. **Guidance texts.** "Review Guidelines" set: the reviewer wizard's
+    step 2 shows "Reviewer Guidelines" and then the text, and step 3 gains
+    a "Reviewer Guidelines" block whose link "Review Guidelines" opens the
+    text in a window closed with "OK". Left empty, step 2 reads "This
+    publisher has not set any reviewer guidelines." and step 3 has no such
+    block. On a press an Internal Reviewer reads the "Internal Review
+    Guidelines" text and an External Reviewer the "External Review
+    Guidelines" text, both under the wizard's "Reviewer Guidelines" heading
+    and its "Review Guidelines" window [OMP2](#omp2). "Competing Interests"
+    set: step 1 shows a "Competing
+    Interests" block reading "This publisher has a policy for disclosure
+    of potential competing interests from its reviewers. Please take a
+    moment to review this policy.", a link "Competing Interests" that opens
+    the typed text in a window closed with "OK", and the choices "I do not
+    have any competing interests" (preselected) and "I may have competing
+    interests (Specify below)"; the text itself is not printed on the step.
+    Empty: the block is absent. On a press the one "Competing Interests"
+    text reaches Internal and External Reviewers alike. The wizard's
+    rendering is [→ step 1](U28-reviewers-review.md#step-1). <sup>e</sup>
+
+11. **The anonymizing link.** With "Present a link to how to ensure all
+    files are anonymized during upload" on, the file upload window on the
+    Submission and Review stages shows a link "How to ensure all files are
+    anonymized" that opens the same instructions the settings box links
+    to, here with "OK" and "Cancel" (*Submission files*). Off, the upload
+    window has no such link. <sup>e</sup>
+
+<a id="forms"></a>
+12. **A review form's life.** "Create Review Form" saves a new form as
+    inactive, at the bottom of the list, with no items. Only an **active**
+    form (the "Active" tick) is offered to editors. While the journal has
+    at least one active form, Add Reviewer and the "Edit" window of a
+    review still in progress show a "Review Form" list whose first entry is
+    "None / Free Form Review" (the assignment's own form selected); with no
+    active form those windows have no "Review Form" list at all, and a
+    completed review's "Edit" window never has one. A journal section's
+    "Review Form" list (*Sections*) offers the active forms the same way. The list's "In Review" column counts the
+    assignments carrying the form whose review is not yet submitted,
+    "Completed" those submitted; a declined request counts in neither ⚠
+    [A8](#a8). A form with both at 0 is **not in use**: its row offers "Edit", "Copy",
+    "Preview" and "Delete". A **form in use** offers "Copy" and "Preview"
+    only; its window opens on "Preview Form" with the "Review Form" and
+    "Form Items" tabs greyed out, so a form in use never changes under the
+    reviewers who have it. The "Active" tick still toggles on a form in
+    use, and the confirmation says the opposite ⚠ [A2](#a2). <sup>f</sup>
+    - 12a. **Activate / deactivate.** Ticking "Active" opens a window
+      "Confirm" asking "Are you sure you wish to activate this review form?
+      Once it's assigned to a review you will no longer be able to
+      deactivate it." (asked even on a form assignments already carry);
+      unticking asks "Are you sure you wish to deactivate this review form?
+      It will no longer be available for new review assignments.". "OK"
+      applies it with the notice "Your changes have been saved.", "Cancel"
+      leaves the tick as it was. A deactivated form leaves the editors'
+      lists at once; assignments already carrying it keep it, and their
+      reviewers still see the form on the wizard's step 3, but the
+      reviewer row's "Edit" window no longer shows the form it carries and
+      its "OK" detaches it ⚠ [A9](#a9).
+    - 12b. **Copy** asks, in the same "Confirm" window, "Are you sure you
+      wish to create a copy of this review form?" and adds an inactive
+      form at the bottom of the list with the same title (no suffix), the
+      same description and the items in their current order, with "Edit"
+      and "Delete" offered again. It is the only way to change a form in
+      use: copy it, edit the copy, activate the copy.
+    - 12c. **Delete** asks, in the same window, "Are you sure you wish to
+      delete this review form?" and removes the form with its items. It is
+      offered on a form not in use only.
+    - 12d. **Order.** "Order" above the list switches to ordering mode:
+      rows are dragged, then "Done" (under the rows) keeps the new order
+      with no notice and "Cancel ordering" restores the old. "Order" and
+      "Create Review Form" stay above the list meanwhile. The order is the
+      order of the editors' "Review Form" lists.
+
+<a id="edit-window"></a>
+13. **The form's window** (row "Edit"; headed "Edit") has three tabs:
+    "Review Form" (the title and description form with "Save"), "Form
+    Items" (the items list) and "Preview Form" (the form as a reviewer will
+    see it: title, description, then every item in order; a required item
+    carries "*" right after its question, an item's description sits
+    between that mark and the answer control, and the controls can be
+    typed into, though nothing is sent). Saving on "Review Form" closes
+    the window and shows the page notice "Your changes have been saved.",
+    with the list behind updated. Row "Preview" opens the same window
+    headed "Preview" on "Preview Form"; on a form in use the two other
+    tabs are greyed out and pressing them does nothing (Rule 12).
     <sup>f</sup>
-11. **Active and inactive.** Only forms whose "Active" box is ticked are
-    offered when a reviewer is added or a request is edited. Ticking the
-    box asks, in a dialog titled "Confirm" with "OK" and "Cancel", "Are
-    you sure you wish to activate this review form? Once it's assigned to
-    a review you will no longer be able to deactivate it."; unticking
-    asks "Are you sure you wish to deactivate this review form? It will
-    no longer be available for new review assignments.". Deactivating
-    hides the form from new requests; the requests that carry it keep it
-    and its counts stay, and the reviewer still meets the form on step 3.
-    The activation message's promise of a lock is not kept, the box can
-    be unticked at any time ⚠ [A2](#a2). A request carrying a deactivated
-    form loses it when an editor presses "OK" in its "Edit" window
-    ⚠ [A6](#a6). <sup>f</sup>
-12. **A form in use is locked.** "In Review" counts the requests carrying
-    the form whose review is not yet submitted, "Completed" those whose
-    review is submitted; a declined request counts in neither. While both
-    are 0 the row offers "Edit" and "Delete". Once either is above 0,
-    both actions disappear; the form can still be copied, previewed and
-    switched active or inactive. "Preview" then opens the form's window
-    on "Preview Form" with the "Review Form" and "Form Items" tabs greyed
-    out and dead. A form carried only by declined requests counts as
-    unused and can be edited or deleted ⚠ [A3](#a3). <sup>f</sup>
-13. **The form's window.** "Edit" opens a window titled "Edit" with three
-    tabs: "Review Form" (the title and description, Fields), "Form Items"
-    (the questions, Rule 15) and "Preview Form" (the form as the reviewer
-    will see it: title, description, then each question with its control,
-    a required one marked with "*"; nothing on it can be saved).
-    "Preview" from the row opens the same window, titled "Preview", on
-    "Preview Form". <sup>f</sup>
-14. **Copy and delete.** Both ask in a "Confirm" dialog with "OK" and
-    "Cancel". "Copy" asks "Are you sure you wish to create a copy of this
-    review form?" and adds an inactive row at the bottom with the same
-    title, description and items; nothing in the title marks it as a
-    copy. "Delete" asks "Are you sure you wish to delete this review
-    form?" and removes the form; the declined requests that carried it
-    lose it silently. <sup>f</sup>
-15. **Form items.** The "Form Items" tab lists the questions in order under
-    the column "Item", with the link "Create New Item" above ("Order"
-    joins it once there is a row) and, per row, "Edit" and "Delete"
-    ("Confirm delete of a published form
-    item..."). While there is none the list reads "No Items". "Order"
-    works as on the forms list (Rule 10); that order is the order on the
-    reviewer's step 3 and in the preview. The item window is titled
-    "Create New Item" or, for an existing item, "Edit". What each type gives the
-    reviewer: a one-word box, a one-line box, a multi-line box, a group
-    of boxes where several can be ticked, a group where one can be
-    chosen, or a drop-down that opens blank. The "Response Options" rows
-    are the choices of the last three, in the order listed. A question
-    marked required must be answered before the review can be submitted;
-    a question not marked "Included in message to author" is marked as
-    not for the author; the author's own review screen is described at
-    [→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review).
-    <sup>g</sup>
-16. **Languages.** Titles, descriptions, questions and response options are
-    typed per language of the journal's forms, the languages ticked under
-    "Forms" on Settings › Website › Setup › Languages. The seeded journal
-    has one, so every box here is a single box. A second forms language
-    adds a box per language in the review-form windows: a globe icon sits
-    at the right end of each box, and the second language's box (its
-    placeholder names the language, "French") opens under the first one
-    when that is focused; the rich-text boxes and the response-option
-    rows get theirs the same way. "Reviewer Guidance" and {OJS} "Add
-    Recommendation" show instead a language switcher at the top ("English"
-    and "French" buttons) with one box per field, each box reading "1/2
-    languages completed" until both are filled. A reviewer reading in a
-    language whose text is empty sees the journal's main-language text.
-    <sup>g</sup>
-17. **Where the form lands.** A form is attached to a request in the Add
-    Reviewer window's "Review Form" list (a section's default form
-    preselects it {OJS}; that default is set under *Sections*) and can be
-    swapped in the request's "Edit" window until the review is submitted
-    ([→ review type, visibility, form](U27-reviewer-assignment-and-management.md#due-dates)).
-    Both lists exist only while the journal has an active form; they open
-    on "None / Free Form Review" and offer the active forms in display
-    order, never an inactive one, even the one the request carries
-    ⚠ [A6](#a6). On the reviewer's step 3 the form replaces the two
-    free-text boxes ([→ step 3](U28-reviewers-review.md#step-3)).
-    <sup>f</sup>
+
+<a id="items"></a>
+14. **Items.** "Form Items" lists the items in order under the column
+    "Item" with "Create New Item" above ("Order" joins it once items are
+    listed) and "No Items" while empty. Each row offers "Edit" (the item
+    window again, headed "Edit") and "Delete" (which asks "Confirm delete of a published form item..."
+    before removing). The item window is Fields; a saved item closes the
+    window with the notice "Your changes have been saved." and lands at
+    the bottom, and "Order" reorders items as Rule 12d does forms. The
+    three choice types keep the "Response Options" rows as the choices the
+    reviewer sees. Of the text types, "Single word text box" and "Single
+    line text box" both show the same one-line box and "Extended text box"
+    a several-line box. Saving an item that has "Response Options" with a
+    text type drops the options without the warning the app carries for
+    it ⚠ [A5](#a5). <sup>f</sup>
+
+15. **What an item does for the reviewer.** The wizard's step 3 shows the
+    form's title, description and items instead of its two free-text boxes
+    ([→ step 3](U28-reviewers-review.md#step-3)). "Reviewers required to
+    complete item" makes the item one the reviewer must answer: "Submit
+    Review" and its "Are you sure you want to submit this review?"
+    confirmation still run, then step 3 stays with "This field is
+    required." under the item. "Included in message to author" unticked
+    keeps the item and its answer out of everything the author is given: the reviews
+    an editor copies into a decision email (*Editorial decision recording*)
+    and the author's own reading of an open review
+    ([→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review));
+    the editor still reads it in full. <sup>f</sup>
+
+16. **Languages.** A journal with more than one form language gives every
+    multilingual box in this spec a version per language, shown in two
+    ways: the "Reviewer Guidance" form and, on a journal, the "Add
+    Recommendation" window carry a language switch at the top ("French"
+    beside "English") that reveals a second box under each; in the "Review
+    Forms" windows the twin, labelled "(French)" on a text box and "French"
+    on a rich-text box, opens under the main-language box only while that
+    box is focused. The reviewer reads the version of their interface
+    language and falls back to the journal's main language. The seeded
+    journals have one form language, so every box appears once (Settings).
+    <sup>e</sup>
+
 <a id="recommendations"></a>
-18. **Recommendation options** {OJS}. The "Reviewer Recommendations" tab
-    lists the journal's options in a table headed "Recommendations",
-    "Activate" and an unlabelled third column holding each row's "More
-    Actions" button, with "Add Recommendation" above. A fresh journal
-    holds six active options, in this order: "Accept Submission" (type
-    "Approved"), "Revisions Required", "Resubmit for Review", "Resubmit
-    Elsewhere" (all "Revisions Requested"), "Decline Submission" ("Not
-    Approved") and "See Comments" ("With Comments"). A new option lands
-    last. The table keeps no fixed order: a row that was edited, ticked
-    or unticked can change its place (seen at the top after the table
-    refreshed in place, at the end after a reload), and the reviewer's
-    list follows the table's order ⚠ [A7](#a7). The reviewer's step 3
-    "Recommendation" list opens on "Choose One" and offers the active
-    options in the table's order, plus, on a review that already chose an
-    option since deactivated, that option
-    ([→ the reviewer's recommendation](U28-reviewers-review.md#step-3)).
-    Ticking or unticking "Activate" asks "Are you sure you want to
-    activate the recommendation {title}" / "… deactivate …" under the
-    heading "Activate Reviewer Recommendation" / "Deactivate Reviewer
-    Recommendation", with "Yes" and "No". A row's "More Actions" menu
-    holds "Edit" and "Delete" ("Delete Recommendation": "Are you sure you
-    want to delete the recommendation {title}", "Yes"/"No"); the menu is
-    absent altogether once any reviewer has chosen the option (a choice
-    saved with "Save for Later" counts), and the defaults are no
-    exception. No change on this tab shows a notice: the
-    table simply shows the new state. The "Recommendation type" is a
-    classification carried into the public review display of a published
-    article and into reports; nothing on the editorial screens shows it.
-    <sup>c</sup>
-19. **A new language** ticked under "Forms" on Settings › Website › Setup ›
-    Languages gives the six default options their translated titles
-    automatically (a language that is only a UI language does not); a
-    default renamed before the tick gets the stock translation too
-    ⚠ [A8](#a8). An option the journal added keeps only the languages
-    typed into it, and the reviewer sees the main-language title where
-    theirs is empty. <sup>c</sup>
+17. **Reviewer recommendations {OJS}.** A journal starts with six entries,
+    all active and in this order: "Accept Submission", "Revisions
+    Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline
+    Submission", "See Comments". The active entries, in the table's order,
+    are the "Recommendation" list a reviewer picks from on the wizard's
+    step 3; an inactive entry is hidden there, except on a review that
+    already carries it. "Add Recommendation" opens the window of Fields;
+    saving closes it and the new entry appears in the table, active or not
+    as the last list said. The "Activate" tick asks "Are you sure you want
+    to activate the recommendation {title}" (window "Activate Reviewer
+    Recommendation") or "Are you sure you want to deactivate the
+    recommendation {title}" ("Deactivate Reviewer Recommendation"), with
+    "Yes" / "No". The table has no fixed order ⚠ [A7](#a7): on the test
+    installs a new entry has always appeared last, but an edited or ticked
+    entry sometimes stays where it is and sometimes drops to the bottom,
+    and the same steps give either on different runs; the reviewer's list
+    is the ticked rows in whatever order the table shows. Adding, editing
+    and the tick redraw the table with no notice. <sup>g</sup>
+
+18. **A recommendation in use** (chosen on at least one submitted review)
+    has no "More Actions" menu: it can be neither edited nor deleted, only
+    deactivated and reactivated. While it is deactivated, the Reviewers
+    table still prints it under the reviewer's status ("Review Submitted",
+    or "Review Viewed" once an editor has opened the review), and the
+    editor's "Read Review" window still lists "Recommendation: {title}" at
+    the top but prints "-" in its "Reviewer Recommendation" section;
+    reactivated, the section prints the title again ⚠ [A6](#a6). An entry
+    not in use offers "Edit" (the
+    same window, prefilled, "Edit Recommendation") and "Delete", which asks
+    "Are you sure you want to delete the recommendation {title}" (window
+    "Delete Recommendation"), "Yes" / "No". The six starting entries can be
+    edited and deleted like any other while not in use. <sup>g</sup>
 
 ## Side effects
 
-- **"Saved"** beside the button after a successful save of "Setup" or
-  "Reviewer Guidance"; nothing is emailed or logged. <sup>d</sup>
-- **A short notice "Your changes have been saved."** at the top right,
-  fading by itself, after every review-form action that changes the list
-  (create, edit, copy, activate, deactivate, delete, item edits); "Order"
-  › "Done" shows none. <sup>f</sup>
-- **Automatic reminder emails** to reviewers (Rule 9), with their activity
-  log row and History line. They run on the install's daily task, which
-  no screen triggers. <sup>h</sup>
-- **The anonymity link** on the file-upload window (Rule 7).
-- **Requests that carried a deleted form** lose it silently (Rule 14).
-- **Recommendation changes** show no notice, email and log nothing.
-  <sup>c</sup>
+- **Saving "Setup" or "Reviewer Guidance"**: the journal's settings change;
+  the form's own "Saved" is the only notice (Rule 2); no email.
+  <sup>d</sup>
+- **The automatic reminder** (Rule 9): one email to the reviewer per
+  trigger, from the principal contact, with a one-click link when Rule 5's
+  box is on; the assignment's "Reminder" date; an activity-log row "An
+  automatic reminder email was sent to {reviewer} regarding their review
+  assignment"; the email is also logged on the submission. <sup>i</sup>
+- **Review form actions** (create, save, copy, activate, deactivate, delete,
+  and every item action): the page notice "Your changes have been saved."
+  and the list redrawn; ordering's "Done" redraws with no notice; nothing
+  is emailed. Deleting a form is silent towards assignments: it is offered
+  only when none carries it. <sup>f</sup>
+- **Recommendation actions** {OJS}: the table redraws with no notice;
+  nothing is emailed. Deactivating an entry hides it from reviewers who
+  have not yet chosen; a review already submitted with it keeps it in the
+  Reviewers table and in the "Recommendation:" line of the editor's "Read
+  Review" window but loses it in that window's "Reviewer Recommendation"
+  section ⚠ [A6](#a6) (Rule 18). <sup>g</sup>
 
 ## Settings that modify behavior
 
-This feature is a settings screen; every field above is a setting whose
-effect lands on another feature's screen. The list below says where each
-takes effect and which scenario runs it at its non-default end. The
-seeded journal keeps the install defaults (every box off, both deadlines 4
-weeks, the minimum 0, every clock at 0, every text empty, no review form,
-{OJS} the six default recommendations); scratch journals are configured
-through the test tooling.
+The tabs of this spec are themselves the settings other review features
+read; the list below is what changes *these* screens.
 
-- **"Default Review Mode"**: the Add Reviewer window's "Review Type"
-  (scenario 2 runs "Open").
-- **"Publicly Show Reviewer Comments"**: the Add Reviewer window's "Public
-  Visibility" box (scenario 2 runs it on).
-- **"Restrict File Access"**: the reviewer's files step; the on end is
-  *Reviewer's review*'s scenario 9. No scenario here: this screen only
-  stores the box (scenario 1 reads its default).
-- **"One-click Reviewer Access"**: the sign-in-free link in request and
-  reminder emails; the on end is *Reviewer's review*'s scenario 10. No
-  scenario here, for the same reason.
-- **"Reviewer Suggestion at Submission"**: the author's "Reviewer
-  Suggestions" wizard step and the "Reviewers Suggested by Author" panel,
-  both owned by *Reviewer suggestions*. No scenario here: the on end is
-  that feature's scenario, and this screen only stores the box (scenario
-  1 reads its default).
-- **The two deadlines**: the Add Reviewer window's dates (scenario 2 runs 2
-  and 6 weeks; scenario 3 runs the refused and the 0 ends).
-- **"Minimum Confirmed Reviews Required"**: the round status box, *Review
-  stage & rounds*. No scenario here: the box's effect is that spec's
-  sentence, and this screen only stores the number (scenario 3 saves it).
-- **The four reminder clocks**: scenario 4 sets and reads them back. No
-  email is observed by any scenario: the daily task does not run on the
-  test installs, and a clock cannot be advanced from a screen.
-- **"Review Guidelines"** and **"Competing Interests"**: the reviewer's
-  steps 2 and 1, *Reviewer's review* (its scenarios 2 and 13). Scenario 5
-  types and saves them here; scenario 11 runs the press's two guideline
-  boxes to the reviewer's step.
-- **The anonymity box**: the upload window's link (scenario 5 runs both
-  ends).
-- **Review forms**: the "Review Form" list and the reviewer's step 3
-  (scenarios 6 to 8; the reviewer's step is *Reviewer's review*'s
-  scenario 8).
-- **{OJS} Recommendation options**: the reviewer's "Recommendation" list
-  (scenario 10).
-- **Roles configuration**: which roles reach Settings at all (Actors). The
-  seeded roles are used as they are; no scenario changes a role.
-- **Languages & locales**: a second forms language (Settings › Website ›
-  Setup › Languages, "Forms") adds a hidden second-language box behind a
-  globe icon to each text of the review-form windows; "Reviewer Guidance"
-  and "Add Recommendation" show a language switcher at the top instead
-  (Rule 16). No scenario: the seeded journal has one forms language, and
-  every scenario types in it.
-- **The scheduled-task runner** (a configuration file setting, no screen
-  on the test installs): off, no automatic reminder ever goes out.
+- **The app's review stages.** OPS has none, so the "Review" tab is absent
+  (the absence paragraph; scenario 11). A press has two, which is why
+  "Reviewer Guidance" carries two guideline boxes [OMP2](#omp2); scenario 5
+  runs on both apps and reads the press's second box.
+- **Reviewer recommendations are a journal feature.** The "Reviewer
+  Recommendations" tab exists on a journal only [OMP1](#omp1); scenarios 9
+  and 10 are OJS scenarios, and OMP's suite carries one absence check.
+- **Form languages** (Settings › Website › Setup › Languages, the "Forms"
+  column; *Languages & locales*): a second form language adds a language
+  switch at the top of the "Reviewer Guidance" form and a twin under each
+  "Review Forms" box (Rule 16). No scenario of its own: the seeded and
+  scratch journals have one form language, and multilingual box mechanics
+  belong to the languages spec.
+- **A role's settings access** (Settings › Users & Roles › Roles; *Roles
+  configuration*): a manager-level role whose settings access is switched
+  off loses the "Settings" group and this screen with it (Actors). No
+  scenario: the switch is the roles spec's; Actors' access rows are probed
+  with the seeded roles.
+- **A section's default "Review Form"** (Settings › Journal › Sections, on a
+  journal; *Sections*): set, Add Reviewer preselects that form for
+  submissions in the section instead of "None / Free Form Review" (Rule
+  12). No scenario: the field is the sections spec's and a test cannot seed
+  it; the preselect is read once by hand.
+- **The test installs' clock.** The daily reminder task and the mail queue
+  are off on the test installs, so Rule 9 is described from the code and
+  the reminder emails have no scenario; the sliders' saving does (scenario
+  1).
 
 ## Cross-feature interactions
 
-- **Reviewer assignment & management**: the Add Reviewer and Edit windows
-  that consume the defaults and the forms, the History line an automatic
-  reminder writes, and the editor's own "Send Reminder".
-- **Reviewer's review**: the wizard where guidelines, the policy, file
-  restriction, one-click links, review forms and recommendation options
-  take effect.
-- **Review stage & rounds**: the round status box that reads the minimum
-  confirmed reviews, and what the author is shown of a review, where
-  "Included in message to author" takes effect.
-- **Reviewer suggestions**: the author's "Reviewer Suggestions" wizard
-  step and the "Reviewers Suggested by Author" panel that the "Reviewer
-  Suggestion at Submission" box switches on.
-- **Sections** {OJS}: a section's "Review Form" list, offered only while
-  the journal has an active form.
-- **Submission files**: the upload window that shows the anonymity link.
-- **Emails management**: the two automatic reminder templates.
-- **Roles configuration**: which roles hold settings access.
-- **Languages & locales**: the second-language boxes, the language
-  switcher and the automatic translation of the default recommendation
-  options.
-- **System administration & jobs**: the daily scheduled task behind the
-  reminder clocks.
+- **Reviewer assignment & management**: the Add Reviewer and "Edit"
+  windows where the review mode, the deadlines, the public-visibility box
+  and the "Review Form" list take effect; "Send Reminder" and the
+  assignment's "Reminder" date; the editor's "Read Review" window with its
+  "Download Review Form" button and "Recommendation" line.
+- **Reviewer's review**: the wizard where the guidelines, the
+  competing-interests declaration, the restricted files, the one-click link,
+  the review form's questions and the recommendation list appear.
+- **Review stage & rounds**: the round status sentence driven by "Minimum
+  Confirmed Reviews Required", and the author's reading of a review.
+- **Editorial decision recording**: the decision email's copied reviews,
+  where "Included in message to author" filters the items.
+- **Submission wizard** and **Reviewer suggestions**: the author's
+  suggestion step switched on by "Reviewer Suggestion at Submission", and
+  what the editors see of the suggestions.
+- **Submission files**: the upload window's "How to ensure all files are
+  anonymized" link.
+- **Sections**: a journal section's default "Review Form".
+- **Emails management**: the two automated reminder templates, on the
+  "Manage Emails" page.
+- **Submission activity log & notes**: the automatic-reminder row (no screen
+  shows it on the test installs, whose clock is off; Rule 9c).
+- **Roles configuration** and **Languages & locales**: the settings access
+  and the form languages listed under Settings.
+- **Article landing page & reading**: what "Publicly Show Reviewer Comments"
+  eventually shows on a published article.
 
 ## Canonical scenarios
 
-Scenarios 1 and 12 run on the seeded journal with ready accounts and
-change nothing; the others run on a scratch journal configured for them,
-with throwaway accounts and scratch submissions. Each email is read in the
-mailbox of the address it was sent to. Accounts, passwords and the tooling
-recipe are in the footnote. <sup>s</sup>
+Scenarios 1 to 8 each start on their own scratch journal at install
+defaults, with throwaway accounts (Journal Manager, Reviewer, Author and a
+seeded submission in review); scenarios 9 and 10 are journal-only; scenario
+11 runs on the seeded preprint server with a ready account. Access checks
+use the seeded journal's ready accounts. <sup>s0</sup>
 
-1. **The Review settings and who reaches them** — Journal Manager: open
-   Settings › Workflow and press "Review". The side tabs read "Setup",
-   "Reviewer Guidance", "Review Forms" and {OJS} "Reviewer
-   Recommendations". "Setup" shows "Anonymous Reviewer/Anonymous Author"
-   selected, the four boxes unticked, "Default Response Deadline" 4,
-   "Default Completion Deadline" 4, "Minimum Confirmed Reviews Required"
-   0 and all four sliders reading "No reminder set". "Reviewer Guidance"
-   shows empty boxes and the anonymity box unticked; "Review Forms" reads
-   "No Items". Control: signed in as a Section Editor, the sidebar has no
-   "Settings" and the same address shows "The current role does not have
-   access to this operation.".
-2. **Change the defaults and see them on the next request** — Journal
-   Manager, on a scratch journal with a submission in review that already
-   has one reviewer: on "Setup" choose "Open", tick "Make reviewer
-   comments publicly visible with published content", set the deadlines
-   to 2 and 6, press "Save": "Saved" appears. Reload the page: the tab
-   shows the same values. Open the submission's review stage and press
-   "Add Reviewer", then select a reviewer: "Review Type" preselects
-   "Open", "Public Visibility" is ticked, "Response Due Date" is today
-   plus 14 days and "Review Due Date" today plus 42 days. Control: the
-   earlier reviewer's row "Edit" window still shows "Anonymous
-   Reviewer/Anonymous Author" and its original dates.
-3. **Whole weeks only** — Journal Manager, on a scratch journal: type
-   "abc" into "Default Response Deadline" and press "Save": "This is not
-   a valid integer." appears under the box, "abc" stays in it and no
-   "Saved" shows. Type "0" instead, set "Minimum Confirmed Reviews
-   Required" to 2, press "Save": "Saved". Reload: 0 and 2 are shown.
-   Control: "Add Reviewer" on a scratch submission in review now proposes
-   today plus 21 days as the "Response Due Date" ⚠ [A4](#a4).
-4. **Set the reminder clocks** — Journal Manager, on a scratch journal:
-   move the four sliders to 3, 5, 7 and 0. The boxes beside them read "3
-   days before due date", "5 days after due date", "7 days before due
-   date" and "No reminder set". Press "Save": "Saved". Reload: the same
-   four readings. Control: no email arrives in any reviewer's mailbox
-   (the clocks run on the server's daily task, which the screen never
-   triggers; Settings).
-5. **Guidance and the anonymity link** — Journal Manager, on a scratch
-   journal with a scratch submission: on "Reviewer Guidance" type a
-   sentence into "Review Guidelines" and one into "Competing Interests",
-   press the words "how to ensure all files are anonymized": the dialog
-   "How to ensure all files are anonymized" opens; press "Close". Tick
-   the box and press "Save": "Saved". Open the submission's Submission
-   stage and press "Upload" on the "Submission Files" panel: the upload
-   window shows the link "How to ensure all files are anonymized" under
-   the component list, and pressing it opens the same dialog with "OK" and
-   "Cancel". Control: on a scratch journal with the box unticked, the
-   same window shows no such link.
-6. **Create a review form and offer it** — Journal Manager, on a scratch
-   journal with a submission in review: on "Review Forms" press "Create
-   Review Form", type a title and a description, press "Save": a row with
-   that title appears with "In Review" 0, "Completed" 0 and "Active"
-   unticked. Open the row's "Edit", then "Form Items", press "Create New
-   Item": type the question, choose "Radio buttons (you can only choose
-   one)", add the rows "Yes" and "No" under "Response Options" with "Add
-   Item", tick "Reviewers required to complete item", press "Save": the
-   item lists. Add a second item of type "Extended text box". Open
-   "Preview Form": the title, the description, the first question with
-   two radio buttons and "*", the second with a text box. Close the
-   window. Tick "Active" and press "OK" in the "Confirm" dialog: the box
-   stays ticked. On the submission's "Add Reviewer" window the "Review
-   Form" list offers the title. Control: a second form created and left
-   inactive is not in that list.
-7. **A form in use is locked** — Journal Manager, on a scratch journal
-   with two active review forms, the first carried by an accepted review
-   request: its row reads "In Review" 1 and its arrow offers "Copy" and
-   "Preview" but neither "Edit" nor "Delete". "Preview" opens the window
-   on "Preview Form" with "Review Form" and "Form Items" greyed out.
-   Untick "Active", press "OK" under "Are you sure you wish to deactivate
-   this review form? …": the box is unticked, "In Review" still reads 1
-   ⚠ [A2](#a2), and the "Add Reviewer" window's "Review Form" list no
-   longer offers the title. The reviewer row's "More Actions" › "Edit"
-   window shows "None / Free Form Review" selected ⚠ [A6](#a6); press
-   "Cancel". Control: as that reviewer, step 3 of the wizard still shows
-   the form.
-8. **Copy, reorder and delete** — Journal Manager, on a scratch journal
-   with two review forms: on the first row press "Copy" and "OK": a
-   third row with the first form's title appears at the bottom, "Active"
-   unticked, and its "Edit" › "Form Items" lists the same items. Press
-   "Order", drag the third row to the top, press "Done" and reload: it
-   stays first, and the "Add Reviewer" window's "Review Form" list, once
-   the copy is activated, names it first. Press its "Delete" and "OK":
-   the row is gone. Control: the two original rows are untouched.
-9. **Leave with unsaved changes** — Journal Manager, on a scratch journal:
-   on "Setup" choose "Open", then press the side tab "Reviewer Guidance"
-   and press "Setup" again: "Open" is still selected. Now open Settings ›
-   Website from the sidebar and come back to Settings › Workflow ›
-   "Review" › "Setup": no dialog appeared on the way out and "Anonymous
-   Reviewer/Anonymous Author" is selected again. Control: the same change
-   followed by "Save" survives the same trip.
-10. **{OJS} Recommendation options** — Journal Manager, on a scratch
-    journal with a submission in review whose one reviewer has accepted:
-    "Reviewer Recommendations" lists the six defaults, all ticked. Press
-    "Add Recommendation", type "Major revisions", choose "Revisions
-    Requested", keep "Active Upon Saving", press "Save": a seventh row,
-    ticked, last, with no notice. Signed in as the reviewer, step 3's
-    "Recommendation" list opens on "Choose One" and ends with "Major
-    revisions". Back as the manager, untick "Accept Submission": the
-    dialog "Deactivate Reviewer Recommendation" asks "Are you sure you
-    want to deactivate the recommendation Accept Submission"; press
-    "Yes": the box is unticked, and the reviewer's list no longer offers
-    it. On the "Major revisions" row open "More Actions" › "Delete",
-    press "Yes": the row is gone. Control: after the reviewer submits a
-    review with "See Comments", that row has no "More Actions" button;
-    "Activate" still toggles it.
-11. **{OMP} Two sets of guidelines** — Press Manager, on a scratch press
-    with a submission in internal review with an Internal Reviewer and
-    one in external review with an External Reviewer, both accepted: on
-    "Reviewer Guidance" type different sentences into "Internal Review
-    Guidelines" and "External Review Guidelines", press "Save": "Saved".
-    Signed in as the Internal Reviewer, step 2 of the wizard shows the
-    internal sentence; as the External Reviewer, the external one.
-    Control: neither wizard shows the other sentence.
-12. **{OPS} No Review tab** — Preprint Server Manager: open Settings ›
-    Workflow. The tabs read "Submission", "Preprint Server Library",
-    "Emails" and "Tasks and Discussions", with no "Review" among them;
-    typing the journal's Review-tab address on the server lands on the
-    same page with "Submission" › "Disable Submissions" open and the
-    typed address unchanged. Control: "Disable Submissions" shows its
-    form. The tooling side of the absence is in the footnote. <sup>p</sup>
+1. **Save the review setup**: Journal Manager: open Settings › Workflow ›
+   "Review" › "Setup". Choose "Open" under "Default Review Mode", type 2 in
+   "Default Response Deadline" and 1 in "Minimum Confirmed Reviews
+   Required", drag "Review Request Response - Before Due Date" to 3 (the
+   box beside it reads "3 days before due date"), press "Save": "Saved"
+   appears beside the button. Reload the page and open "Review" › "Setup"
+   again: every value shows as saved. Open the submission's review stage and
+   press "Add Reviewer": "Review Type" has "Open" preselected and "Response
+   Due Date" is two weeks from today. <sup>s1</sup>
+
+2. **A refused deadline saves nothing**: Journal Manager: on "Setup", type
+   `abc` in "Default Completion Deadline" and change "Default Review Mode"
+   to "Anonymous Reviewer/Disclosed Author", press "Save". "This is not a
+   valid integer." appears under the deadline, "Please correct one error."
+   beside "Save" at the foot of the form and the page notice "The form was
+   not saved because 1 error(s) were encountered. Please correct these errors and try
+   again."; "Save" is greyed out. Reload and open "Setup" again: the
+   deadline reads 4 and the review mode reads "Anonymous
+   Reviewer/Anonymous Author". Repeat with `-1`: the refusal under the box
+   reads "This must be at least 0.". <sup>s2</sup>
+
+3. **Unsaved edits survive a tab switch, not a reload**: Journal Manager:
+   on "Setup", change "Default Response Deadline" to 6, press the "Reviewer
+   Guidance" side tab without saving and come back to "Setup": no warning
+   appeared and the box still reads 6. Reload the page and open "Setup"
+   again: no prompt appeared and the box reads 4. <sup>s3</sup>
+
+4. **Guidance reaches the reviewer**: Journal Manager: on "Reviewer
+   Guidance", type "Judge the method first." into "Review Guidelines" and
+   "Declare any funding link." into "Competing Interests", press "Save".
+   Reviewer (with an open request on the submission): open the request;
+   step 1 shows a "Competing Interests" block with the choices "I do not
+   have any competing interests" and "I may have competing interests
+   (Specify below)", and its link "Competing Interests" opens a window
+   reading "Declare any funding link."; press "OK", accept, and step 2
+   shows "Reviewer Guidelines" then "Judge the method first.". <sup>s4</sup>
+
+5. **The guidelines box per app**: Journal Manager: on "Reviewer Guidance",
+   the guideline box reads "Review Guidelines" on a journal; on a press two
+   boxes read "Internal Review Guidelines" and "External Review Guidelines",
+   in that order [OMP2](#omp2). Tick "Present a link to how to ensure all
+   files are anonymized during upload", press "Save", reload and open
+   "Reviewer Guidance" again: the box stays ticked. Press the words "how to
+   ensure all files are anonymized": a window "How to ensure all files are
+   anonymized" opens; "Close" closes it. <sup>s5</sup>
+
+6. **Build a review form and offer it**: Journal Manager: on "Review
+   Forms", press "Create Review Form", type "Method check" as "Title" and
+   press "Save": the window closes, the page shows "Your changes have been
+   saved." and the list has a row "Method check" with "In Review" 0,
+   "Completed" 0 and "Active" unticked. Open the row's "Edit" › "Form
+   Items" › "Create New Item": type "Is the method sound?" as "Item", tick
+   "Reviewers required to complete item", choose "Radio buttons (you can
+   only choose one)", add "Yes" and "No" under "Response Options", "Save".
+   Add a second item "Other remarks" of type "Extended text box". "Preview
+   Form" shows the title, "Is the method sound?" followed by "*" with two
+   radio buttons and "Other remarks" with a text box. Close the window.
+   Open the submission's "Add Reviewer": it has no "Review Form" list. Tick
+   "Active" on the row and press "OK" in the "Confirm" window; "Add
+   Reviewer" now has a "Review Form" list with "None / Free Form Review"
+   and "Method check". <sup>s6</sup>
+
+7. **A form in use is frozen**: Journal Manager, on a journal whose active
+   form "Method check" is carried by one open request: the row reads "In
+   Review" 1 and offers "Copy" and "Preview" but no "Edit" and no "Delete".
+   "Preview" opens a window headed "Preview" on "Preview Form" with
+   "Review Form" and "Form Items" greyed out. Press "Copy" and "OK": "Your
+   changes have been saved." shows, a second, unticked "Method check" row
+   appears at the bottom with "Edit" and "Delete" offered, and its "Edit"
+   › "Form Items" lists the same items. <sup>s7</sup>
+
+8. **Deactivate and delete an unused form**: Journal Manager: on an active
+   form nobody carries, untick "Active", read "Are you sure you wish to
+   deactivate this review form? It will no longer be available for new
+   review assignments." and press "OK": "Your changes have been saved."
+   shows, the tick is gone and, with no other active form, the submission's
+   "Add Reviewer" has no "Review Form" list. Open the row's "Delete", press
+   "OK" on "Are you sure you wish to delete this review form?": the row is
+   gone. <sup>s8</sup>
+
+9. **Add and retire a recommendation** {OJS}: Journal Manager: on
+   "Reviewer Recommendations" the table lists "Accept Submission",
+   "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere",
+   "Decline Submission" and "See Comments", all ticked. Press "Add
+   Recommendation", type "Accept with minor changes", choose "Approved",
+   leave "Active Upon Saving", press "Save": the window closes and the row
+   appears last, ticked. Untick "See Comments" and press "Yes" on "Are you
+   sure you want to deactivate the recommendation See Comments": the row
+   is unticked (whether it stays put or drops to the bottom is not fixed
+   ⚠ [A7](#a7)). Reviewer (accepted request on the submission): step 3's
+   "Recommendation" list ends with "Accept with minor changes" and has no
+   "See Comments". <sup>s9</sup>
+
+10. **A recommendation in use loses its menu** {OJS}: Journal Manager, after
+    a reviewer submitted a review recommending "Accept with minor changes":
+    that row has no "More Actions" menu, while an unused custom row still
+    offers "Edit" and "Delete"; "Delete" › "Yes" on the unused row removes
+    it. <sup>s10</sup>
+
+11. **No review settings on a preprint server** {OPS}: Preprint Server
+    Manager: Settings › Workflow shows the tabs "Submission", "Preprint
+    Server Library", "Emails" and "Tasks and Discussions" and no "Review"
+    tab; the same screen on the seeded journal and press shows "Review"
+    between "Submission" and the library tab (the positive control).
+    <sup>s11</sup>
 
 ## Findings register
 
-Verdicts are the author's judgment (claude, 2026-09-05), unreviewed unless
-an entry notes otherwise; the team settles them on spec review.
+Verdicts are the author's judgment (claude, 2026-09-06), unreviewed unless
+an entry notes otherwise; the team settles them on spec review. The summary
+is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
+and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
-|----|------------------------------|------|--------|--------|
-| [A4](#a4) | "Default Response Deadline" at 0 or empty gives the Add Reviewer window 3 weeks, and "Default Completion Deadline" at 0 or empty 4, numbers the Setup tab never shows | 🐞 | minor | — |
-| [A5](#a5) | Reloading or bookmarking the address the Review side tabs write opens "Submission" › "Disable Submissions" | 🐞 | minor | — |
-| [A6](#a6) | A request carrying a deactivated review form shows "None / Free Form Review" in its "Edit" window, and "OK" there drops the form and lowers its "In Review" count | 🐞 | minor | — |
-| [OMP3](#omp3) | A press's "Internal Review Guidelines" box has no quote or list buttons, unlike the two boxes under it | 🐞 | minor | — |
-| [A1](#a1) | An "After Due Date" reminder is sent only if a reminder already went out before the due date; alone, the slider arms nothing | ❓ | latent | — |
-| [A2](#a2) | Activating a review form warns it cannot be deactivated once assigned, but the box unticks at any time | ❓ | minor | — |
-| [A3](#a3) | A review form carried only by declined requests counts as unused and can be edited or deleted under them | ❓ | minor | — |
-| [A7](#a7) | {OJS} Ticking, unticking or editing a recommendation row can move it in the table, and the reviewer's list moves with it | ❓ | minor | — |
-| [A8](#a8) | {OJS} A default recommendation renamed before a forms language was added gets that language's stock title | ❓ | minor | — |
-| [OMP1](#omp1) | A press has no "Reviewer Recommendations" tab | ✅ | invisible | — |
-| [OMP2](#omp2) | A press's "Reviewer Guidance" carries "Internal Review Guidelines" and "External Review Guidelines" | ✅ | user-visible | — |
+|----|-----------------------------|------|--------|--------|
+| [A1](#a1) | An "After Due Date" reminder is sent only to reviewers who were already reminded once, so with "Before Due Date" at "No reminder set" the after-due slider never sends (read from the code) | 🐞 | latent | — |
+| [A5](#a5) | Saving a form item with a text type drops its "Response Options" without the warning the app carries for it | 🐞 | minor | — |
+| [OMP3](#omp3) | On a press, a list or quote can be typed into "External Review Guidelines" but not into "Internal Review Guidelines" | 🐞 | minor | — |
+| [A9](#a9) | Once a form carried by an open request is deactivated, the reviewer row's "Edit" window shows "None / Free Form Review", and "OK" there detaches the form and lowers its "In Review" count | 🐞 | minor | — |
+| [A2](#a2) | A form in use can still be deactivated, although the activation confirmation promises it cannot | ❓ | minor | — |
+| [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
+| [A4](#a4) | The address changes with the open tab, but a reload of Workflow Settings always lands on "Submission" › "Disable Submissions" | ❓ | minor | — |
+| [A6](#a6) | A recommendation deactivated after a reviewer chose it reads "-" in the "Reviewer Recommendation" section of the editor's "Read Review" window while the window's own "Recommendation:" line still names it | ❓ | user-visible | — |
+| [A7](#a7) | The "Reviewer Recommendations" table and the reviewer's list have no fixed order: an edited or ticked row sometimes stays put and sometimes drops to the bottom | ❓ | minor | — |
+| [A8](#a8) | A form whose only requests were declined reads 0 / 0 and offers "Edit" and "Delete" like a fresh one; deleting it drops it from the declined request | ❓ | minor | — |
+| [OMP1](#omp1) | A press has no "Reviewer Recommendations" tab | ✅ | — | — |
+| [OMP2](#omp2) | A press words five strings differently and has a guideline box per review stage | ✅ | — | — |
 
 ### All apps
 
 <a id="a1"></a>
-**A1 — After-due reminders need a prior reminder** · ❓ · latent.
-The Setup tab offers "Review Request Response - After Due Date" and
-"Review Submission - After Due Date" as clocks of their own. As built, an
-after-due reminder is sent only to a reviewer who already received a
-reminder before the due date (an automatic "Before Due Date" one, or the
-editor's "Send Reminder"); a journal that sets only the after-due clocks
-sends no automatic reminder at all. Question: is the after-due clock
-meant to depend on a prior reminder? Lean: defect; the screen presents
-the four clocks as independent and nothing on it says otherwise. Basis:
-code (the daily task does not run on the test installs). <sup>[f-a1](#fn-a1)</sup>
+**A1 — The after-due reminder needs an earlier reminder** · 🐞 · latent.
+The "Review Request Response - After Due Date" and "Review Submission -
+After Due Date" sliders read as independent clocks. They are not: the
+install sends an after-due reminder only when the assignment already
+carries a "Reminder" date, which the "Before Due Date" clock or an editor's
+"Send Reminder" stamps. A journal that sets only the after-due sliders gets
+no automatic reminder at all. Latent on the test installs, where the daily
+clock is off, so no screen shows it. Basis: code. <sup>f-a1</sup>
 
 <a id="a2"></a>
-**A2 — Activation warning promises a lock that does not exist** · ❓ ·
-minor.
-Ticking "Active" asks "Are you sure you wish to activate this review
-form? Once it's assigned to a review you will no longer be able to
-deactivate it.". A form carried by review requests can still be
-deactivated: the box unticks after the deactivation confirmation and the
-form leaves the "Review Form" list, while the existing requests keep it
-and the reviewer still meets the form. Question: should assignment lock
-the box, or should the message go? Lean: the message is wrong; the
-requests that carry the form keep it, and the one harm (A6) is the Edit
-window's, not this box's. Basis: probe. <sup>[f-a2](#fn-a2)</sup>
+**A2 — Deactivating a form in use** · ❓ · minor.
+Ticking "Active" warns "Once it's assigned to a review you will no longer
+be able to deactivate it.", yet the tick on a form in use still toggles and
+the deactivation goes through with "Your changes have been saved."; the
+reviewers who carry the form keep it on their wizard's step 3, and only new
+requests lose the option (with no other active form, Add Reviewer loses
+its "Review Form" list). Question: is the deactivation of a form in use
+intended (the warning is wrong) or should the tick be locked (the code is
+wrong)? Lean: intended, since nothing breaks for the assignments that
+carry it, and the warning text should change. Basis: probe. <sup>f-a2</sup>
 
 <a id="a3"></a>
-**A3 — Declined requests do not count as use** · ❓ · minor.
-"In Review" and "Completed" skip declined requests, so a form whose only
-requests were declined offers "Edit" and "Delete" like a fresh one.
-Editing then changes the questions those declined requests still refer
-to (their "Edit" window keeps showing the form), and deleting drops the
-form from them silently. Question: intended? Lean: intended; a declined
-request holds no answers, so nothing is lost. Basis: probe.
-<sup>[f-a3](#fn-a3)</sup>
+**A3 — Zero weeks means three for one deadline and four for the other** · ❓ · minor.
+"Default Response Deadline" and "Default Completion Deadline" both accept 0
+and both accept an emptied box (saved blank). Add Reviewer then presets the
+response due date three weeks out and the review due date four weeks out,
+while the settings screen shows 0 or nothing and says nothing about a
+fallback. Question: should 0 and empty be refused, or should the fallbacks
+be shown? Lean: refuse them with a message that the box must be at least
+1, since no reviewer can answer in zero weeks. Basis: probe. <sup>f-a3</sup>
 
 <a id="a4"></a>
-**A4 — 0 or empty in a deadline box is a hidden default** · 🐞 · minor.
-"Default Response Deadline" and "Default Completion Deadline" accept 0
-and an empty box; either way the Add Reviewer window then proposes today
-plus 3 weeks for the response and today plus 4 weeks for the review,
-where 0 should give today. Neither number appears on the Setup tab, whose
-fresh-journal values are 4 and 4.
-Defect: a saved 0 is a value the screen accepts and then ignores. Basis:
-probe. <sup>[f-a4](#fn-a4)</sup>
+**A4 — A reload forgets the open tab** · ❓ · minor.
+Pressing "Review" and then a side tab changes the page address as if the
+tab were remembered, but a reload of that address lands on "Submission" ›
+"Disable Submissions": a manager who reloads after a save has to find the
+side tab again. Question: is the side tab meant to survive a reload? Lean:
+yes, and this is a defect, since the screen writes the address and then
+ignores it. Basis: probe. <sup>f-a4</sup>
 
 <a id="a5"></a>
-**A5 — The Review tab's address does not survive a reload** · 🐞 · minor.
-Opening a Review side tab changes the address bar, so a manager expects
-a reload or a bookmark of it to return to that tab. Instead the page
-opens on "Submission" › "Disable Submissions"; only a hand-typed address
-of another shape reaches the Review tab. Basis: probe.
-<sup>[f-a5](#fn-a5)</sup>
+**A5 — A type change drops the answer options silently** · 🐞 · minor.
+An item's "Response Options" rows stay listed when "Item type" is changed
+to a text type, and "Save" then discards them with no warning; the app
+carries the warning "Changing the form item type..." for exactly this
+change, and it never shows. A manager who switches a choice item to a text
+box and back has to retype every option. Basis: probe. <sup>f-a5</sup>
 
 <a id="a6"></a>
-**A6 — The Edit window drops a deactivated form** · 🐞 · minor.
-A request carrying a review form that has since been deactivated opens
-its "Edit" window (the reviewer row's "More Actions" › "Edit", *Reviewer
-assignment & management*) with "None / Free Form Review" selected and no
-sign of the form it carries. Pressing "OK" with nothing changed detaches
-the form: the reviewer's step 3 shows the free-text boxes instead of the
-questions, and the form's "In Review" count on the "Review Forms" list
-drops by one, so a form whose every carrier was touched this way reads
-0 / 0 and offers "Edit" and "Delete" again (Rule 12). Expected: the
-window shows the carried form and "OK" leaves it alone. Basis: probe.
-<sup>[f-a6](#fn-a6)</sup>
+**A6 — A deactivated recommendation reads "-" in the editor's window** · ❓ · user-visible.
+When a recommendation is deactivated after a reviewer submitted a review
+with it, the Reviewers table still prints it under the reviewer's status
+and the editor's "Read Review" window still lists "Recommendation:
+{title}" among its lines at the top, but the window's "Reviewer
+Recommendation" section prints "-"; reactivating the entry makes the
+section print the title again. The window contradicts itself: the editor
+reads the recommendation at the top and none in the section meant for it.
+Question: should the window show a recommendation whose entry is inactive?
+Lean: yes, and this is a defect, since the review carries it and the table
+and the window's own line show it. Basis: probe.
+<sup>f-a6</sup>
 
 <a id="a7"></a>
-**A7 — {OJS} A change to a row can move it** · ❓ · minor.
-Ticking, unticking or editing a row on "Reviewer Recommendations" can
-move it, to the top when the table refreshes in place, to the end after
-a reload, and the reviewer's "Recommendation" list moves with it.
-Question: what order is the list meant to keep? Lean: the list is
-fetched with no sort, so the database's own row order shows through;
-harmless but unsettling for a manager who arranged the options. Basis:
-probe. <sup>[f-a7](#fn-a7)</sup>
+**A7 — Recommendation order is not fixed** · ❓ · minor.
+The "Reviewer Recommendations" table and the reviewer's "Recommendation"
+list have no fixed order. A new entry has always appeared last, but after
+an edit or a tick the changed row sometimes stays where it is and
+sometimes drops to the bottom, and the same steps give either on different
+runs; there is no control to order the list. Question: should the table
+and the reviewer's list have a fixed order (creation order, or one the
+manager sets)? Lean: yes, and this is a defect, since a manager cannot
+rely on where a row will be after a tick. Basis: probe. <sup>f-a7</sup>
 
 <a id="a8"></a>
-**A8 — {OJS} A renamed default gets the stock translation** · ❓ · minor.
-A default option renamed in English before French was ticked under
-"Forms" ("Decline (renamed)") receives the stock French title "Refuser la
-soumission" with the tick, so a reviewer reading in French sees the
-stock wording where one reading in English sees the rename. Question:
-should a default that was renamed still receive the automatic
-translation? Lean: the automatic translation is meant for untouched
-defaults; whether a renamed one should get it is the team's call.
-Basis: probe. <sup>[f-a8](#fn-a8)</sup>
+**A8 — Declined requests do not count as use** · ❓ · minor.
+"In Review" and "Completed" skip declined requests, so a form whose only
+requests were declined reads 0 / 0 and offers "Edit", "Copy", "Preview"
+and "Delete" like a fresh one. Deleting it drops the form from the
+declined request: its "Edit" window then shows "None / Free Form Review".
+Question: intended? Lean: intended; a declined request holds no answers,
+so nothing is lost. Basis: probe. <sup>f-a8</sup>
+
+<a id="a9"></a>
+**A9 — The "Edit" window drops a deactivated form** · 🐞 · minor.
+When a form carried by an open request is deactivated, the reviewer
+row's "More Actions" › "Edit" window opens with "None / Free Form Review"
+selected and lists only the still-active forms, with no sign of the form
+the request carries. "OK" with nothing changed detaches it: the
+reviewer's step 3 shows the free-text boxes instead of the questions and
+the form's "In Review" count drops by one. Expected: the window shows the
+carried form and "OK" leaves it alone. Basis: probe. <sup>f-a9</sup>
 
 ### OMP
 
 <a id="omp1"></a>
-**OMP1 — No "Reviewer Recommendations" tab on a press** · ✅ · invisible.
-A press collects no reviewer recommendation, so the side tab and its
-options do not exist there; the reviewer's step 3 has no "Recommendation"
-list ([→ the press reviewer's step 3](U28-reviewers-review.md#omp1)).
-Intended: OMP has never had reviewer recommendations. Basis: probe.
-<sup>[f-omp1](#fn-omp1)</sup>
+**OMP1 — No "Reviewer Recommendations" tab on a press** · ✅ · —.
+A press's "Review" tab has "Setup", "Reviewer Guidance" and "Review Forms"
+only. A press collects no reviewer recommendation (the reviewer's wizard on
+a press has no "Recommendation" list), so there is nothing to configure.
+Basis: probe. <sup>f-omp1</sup>
 
 <a id="omp2"></a>
-**OMP2 — Two guideline boxes on a press** · ✅ · user-visible.
-"Reviewer Guidance" opens with "Internal Review Guidelines", then
-"External Review Guidelines" where a journal shows "Review Guidelines",
-then "Competing Interests" and the anonymity box. Each guideline reaches
-the reviewers of its own stage; the "Competing Interests" text is shared.
-Intended: the press has two review stages. Basis: probe.
-<sup>[f-omp2](#fn-omp2)</sup>
+**OMP2 — Press wording and the second guideline box** · ✅ · —.
+On a press, the library tab reads "Press Library" (journal: "Publisher
+Library"), "Restrict File Access" reads "Reviewers will have access to the
+submission file only after agreeing to review it.", the completion
+deadline's help reads "Weeks allowed for review completion", the "Review
+Response Overdue (Automated)" email's subject reads "Manuscript Review
+Request" (journal: "Will you be able to review this for us?"), and
+"Reviewer Guidance" shows "Internal Review Guidelines" above "External
+Review Guidelines" instead of a single "Review Guidelines"; the internal
+text goes to Internal Reviewers, the external one to External Reviewers,
+and the one "Competing Interests" text to both. Basis: probe.
+<sup>f-omp2</sup>
 
 <a id="omp3"></a>
-**OMP3 — A shorter toolbar on "Internal Review Guidelines"** · 🐞 · minor.
-On a press, "Internal Review Guidelines" offers Bold, Italic,
-Superscript, Subscript and a link button, while "External Review
-Guidelines" and "Competing Interests" under it add Blockquote, Bullet
-list and Numbered list. A list typed in the external box cannot be typed
-in the internal one. Expected: the same toolbar on all three boxes.
-Basis: probe. <sup>[f-omp3](#fn-omp3)</sup>
+**OMP3 — The internal guidelines box has a smaller toolbar** · 🐞 · minor.
+On a press, "Internal Review Guidelines" offers Bold, Italic, Superscript,
+Subscript and Insert/edit link only, while "External Review Guidelines"
+and "Competing Interests" on the same form also offer Blockquote, Bullet
+list and Numbered list: a manager can type a list or a quote into the
+external guidelines and not into the internal ones. Basis: probe.
+<sup>f-omp3</sup>
 
 ---
 
@@ -711,547 +753,725 @@ Basis: probe. <sup>[f-omp3](#fn-omp3)</sup>
 ## Footnotes — mechanism & evidence
 
 <a id="fn-a"></a>
-**a** — Page and access: `ManagementHandler::workflow()` renders
-`lib/pkp/templates/management/workflow.tpl`; the Review tab is guarded by
-`{if $hasReviewStage}` (`ManagementHandler::hasReviewStage()`, true when
-the app's stages include internal or external review). Handler roles:
-`SettingsHandler` (OJS/OMP `pages/management/`) assigns `settings` to
-`ROLE_ID_MANAGER` and `ROLE_ID_SITE_ADMIN`; `CanAccessSettingsPolicy`
-additionally requires the manager-level group's `permitSettings` flag,
-which `registry/userGroups.xml` sets on the default manager, editor and
-productionEditor groups (OJS and OMP). Roster: `manager.maya` (Journal
-Manager), `editor.diana` (Editor, manager level), `sectioneditor.ana`
-(Section Editor, no settings). Access-denied page: the shared
-`PKPHandler` refusal, `user/authorizationDenied?message=user.authorization.roleBasedAccessDenied`,
-a frontend page with no heading. Live-probed 2026-09-05 (Actors row 1;
-scenario 1's control), OJS and OMP: `sectioneditor.ana`, an assistant
-and `reviewer.julia` typing Settings › Workflow all land on that page
-with "The current role does not have access to this operation."; their
-sidebar has no "Settings"; `editor.diana` (Editor) has "Settings" and
-opens "Review" › "Setup" with its form. Claim check 2026-09-05, OJS and
-OMP: `admin`, a throwaway Editor and Production Editor open and save the
-forms; a Guest Editor {OJS}, Author and Reader are refused like the
-Section Editor.
+**a** — The screen is `lib/pkp/templates/management/workflow.tpl`, rendered
+by `ManagementHandler::workflow()` (lib/pkp `pages/management/`) and the
+app's `SettingsHandler::workflow()`; the "Review" tab is wrapped in
+`{if $hasReviewStage}`, computed by `ManagementHandler::hasReviewStage()`
+from `Application::getApplicationStages()` (OJS: submission, external
+review, editing, production; OMP adds internal review; OPS: production
+only). Side tabs: `reviewSetup` (`PKPReviewSetupForm::FORM_REVIEW_SETUP`),
+`reviewerGuidance` (`PKPReviewGuidanceForm::FORM_REVIEW_GUIDANCE`),
+`reviewForms` (`ReviewFormGridHandler` fetched into
+`reviewFormGridContainer`) and, under `{if $hasCustomizableRecommendation}`,
+`reviewerRecommendations` (`<reviewer-recommendation-manager>`). Both Vue
+forms PUT to the context API (`contexts/{id}`, the app's
+`ContextController`) and are validated by the context schema
+(`lib/pkp/schemas/context.json`, the app's `schemas/context.json` on top).
+Labels: `manager.workflow.title` "Workflow Settings",
+`manager.publication.reviewStage` "Review", `navigation.setup` "Setup",
+`manager.publication.reviewerGuidance` "Reviewer Guidance",
+`manager.reviewForms` "Review Forms", `manager.reviewerRecommendations`
+"Reviewer Recommendations" (OJS `locale/en/manager.po`); the library tab is
+`manager.publication.library` as each app's locale renders it ("Publisher
+Library", "Press Library", "Preprint Server Library"), the last tab
+`manager.template.tasksAndDiscussions` "Tasks and Discussions". Live-probed
+2026-09-05 (Rule 1; OJS and OMP, `manager.maya` and a scratch manager):
+heading, tab and side-tab names as quoted. The address: pressing "Review"
+writes `#review`, a side tab writes a one-part hash (`#reviewSetup`,
+`#reviewerGuidance`, …) that replaces it; a reload on `#reviewSetup` lands
+on "Submission" › "Disable Submissions" on both apps (finding A4), while a
+typed `#review/reviewSetup` opens "Review" › "Setup" directly. The tabs are
+`<tabs :track-history="true">` wrappers.
 
 <a id="fn-b"></a>
-**b** — Review forms grid: `ReviewFormGridHandler` (GRID-047; ops
-fetchGrid, createReviewForm, editReviewForm, updateReviewForm,
-copyReviewForm, activateReviewForm, deactivateReviewForm,
-deleteReviewForm, reviewFormBasics, reviewFormElements,
-reviewFormPreview, saveSequence) with roles `ROLE_ID_MANAGER`,
-`ROLE_ID_SITE_ADMIN` plus `CanAccessSettingsPolicy`. Row actions in
-`ReviewFormGridRow::initialize()`: `edit` and `delete` only when
-`$canEdit = getIncompleteCount() == 0 && getCompleteCount() == 0`; `copy`
-and `preview` always. Items grid: `ReviewFormElementsGridHandler`
-(GRID-046), same roles.
+**b** — OPS: `ops classes/core/Application.php::getApplicationStages()`
+returns production only, so `$hasReviewStage` is false and the template
+skips the whole tab; `ops pages/management/SettingsHandler.php::workflow()`
+adds nothing review-related. OMP: `omp classes/core/Application.php::
+hasCustomizableReviewerRecommendation()` returns false (OJS true, OPS
+false), which hides the recommendations tab; `omp
+classes/components/forms/context/ReviewGuidanceForm.php` adds the
+`internalReviewGuidelines` box before `reviewGuidelines`, whose label the
+OMP locale overrides to "External Review Guidelines"
+(`manager.setup.reviewGuidelines` in `omp locale/en/manager.po`; OJS
+"Review Guidelines"). The OPS tab names quoted in the absence paragraph are
+the template's remaining tabs (`manager.publication.submissionStage`,
+`manager.publication.library`, `manager.publication.emails`,
+`manager.template.tasksAndDiscussions`). Live-probed 2026-09-06 (absence
+paragraph, OMP1, OMP2, scenario 11): OPS `manager.maya` sees "Submission",
+"Preprint Server Library", "Emails", "Tasks and Discussions" and no
+"Review"; the seeded journal and press show "Review" second; the press's
+"Review" has three side tabs and the word "Recommendation" appears nowhere
+on it.
 
 <a id="fn-c"></a>
-**c** — Recommendation options (OJS only:
-`Application::hasCustomizableReviewerRecommendation()` returns true on
-OJS, false on OMP and OPS; `workflow.tpl` guards the tab with
-`{if $hasCustomizableRecommendation}`). Manager
-`ReviewerRecommendationManager.vue` (VUE-047) with
-`ReviewerRecommendationsEditModal.vue` (VUE-069) and its Pinia store;
-form `APP\components\forms\context\ReviewerRecommendationForm`
-(fields `title` multilingual required, `type` select from
-`Repository::getRecommendationTypeLabels()`, `status` select 1/0). API
-`ReviewerRecommendationController` (API-054, base
-`reviewers/recommendations`: GET, GET {id}, POST, PUT {id}, PUT
-{id}/status, DELETE {id}); `edit` and `delete` answer 406 when the model's
-`removable` attribute is false (`ReviewerRecommendation::removable()`:
-no review assignment in the context references the option), and the Vue
-row renders its `DropdownActions` only `v-if="item.removable"`. Defaults:
-`Repository::getDefaultRecommendations()` (six `reviewer.article.decision.*`
-keys, all `status` 1) with the machine-readable types in
-`getDefaultRecommendationsMappedToMachineReadableType()`; added per
-context by `addDefaultRecommendations()`. New-locale translation:
-`Repository::setLocalizedDataOnNewLocaleAdd()`. The reviewer's list:
-`Repository::getRecommendationOptions()` (active ones, plus the
-assignment's own `reviewerRecommendationId` when set). The type is
-consumed by `OpenReviewComponent` (the public peer-review display of a
-published article) and reported through the API resource. Dialog and
-label strings: `manager.reviewerRecommendations.*`,
-`grid.action.addReviewerRecommendation` "Add Recommendation",
-`grid.action.editReviewerRecommendation` "Edit Recommendation",
-`grid.action.deleteReviewerRecommendation` "Delete Recommendation",
-`common.moreActions` "More Actions". Live-probed 2026-09-05 (Actors row
-4; Fields "Add Recommendation"; Rule 18; scenario 10), OJS `manager.maya`
-and a scratch manager: six defaults and their types as listed, every
-unused row with "Edit" and "Delete"; the table's third column header is
-empty; the "Recommendation type" select has no placeholder entry (value
-"" until chosen); the status select is unlabelled; an empty save leaves
-the browser with no request and shows the two "This field is required."
-messages plus the "Please correct 2 errors …" footer; add, edit, delete
-and both toggles show no notice (the table re-fetches through `GET
-api/v1/reviewers/recommendations`); the reviewer's "Recommendation"
-list opens on "Choose One"; an option chosen by a reviewer loses its
-"More Actions" button while "Activate" still toggles both ways. Claim
-check 2026-09-05, OJS: an option a reviewer picked and saved with "Save
-for Later" (review not submitted) loses its menu the same way, and stays
-in that reviewer's list after deactivation; the translation of the
-defaults arrives when French is ticked under "Forms" on Website › Setup ›
-Languages (`save-language-setting … supportedFormLocales`), not while
-French is only a UI language; a default renamed before the tick got the
-stock French title too (A8).
+**c** — Access: the settings page is `ManagementHandler` with
+`CanAccessSettingsPolicy` (permit for `ROLE_ID_SITE_ADMIN`, and for
+`ROLE_ID_MANAGER` groups whose `permitSettings` flag is set; both seeded
+manager-level groups, "Journal manager" and "Journal editor", carry
+`permitSettings="true"` in `registry/userGroups.xml`, OJS and OMP alike).
+The grids (`ReviewFormGridHandler`, `ReviewFormElementsGridHandler`,
+`ReviewFormElementResponseItemListbuilderHandler` through
+`SetupListbuilderHandler`) assign their ops to `ROLE_ID_MANAGER` and
+`ROLE_ID_SITE_ADMIN` and add the same policy. The forms' PUT goes through
+the context API's own manager gate. "Edit" and "Delete" on a form: `
+ReviewFormGridRow::initialize()` adds them only when
+`getIncompleteCount() == 0 && getCompleteCount() == 0`; the elements grid's
+`updateReviewFormElement`/`deleteReviewFormElement` refuse a form that
+`ReviewFormDAO::unusedReviewFormExists()` does not report as unused. The
+recommendation manager (`ReviewerRecommendationManager.vue`) renders the
+row menu only for `item.removable`, and the OJS API
+(`api/v1/reviewers/recommendations/ReviewerRecommendationController.php`)
+refuses `edit` and `delete` on a non-removable entry with 406. Live-probed
+2026-09-06 (Actors rows 1–5; OJS, OMP and OPS, one account per level:
+`manager.maya`, `editor.diana`, `admin`, `sectioneditor.ana`,
+`assistant.rita`, `reviewer.julia`, `author.alex`, `reader.rosa`): the three
+manager-level accounts have the collapsed "Settings" group (expanded: OJS
+"Journal", "Website", "Workflow", "Distribution", "Users & Roles"; "Press"
+on OMP, "Server" on OPS) and reach the page by the typed address
+`{journal}/management/settings/workflow`; the others have no "Settings" in
+their sidebar and the typed address redirects to
+`{journal}/en/user/authorizationDenied?message=user.authorization.roleBasedAccessDenied`
+(final status 200) reading "The current role does not have access to this
+operation."; `reader.rosa` lands on `{journal}/en/index` after the
+journal's login. On OPS `sectioneditor.ana` (Moderator) is denied the same
+way. `editor.diana` and `admin` are offered "Create Review Form" and, on a
+scratch context's inactive form, "Edit", "Copy", "Preview", "Delete".
 
 <a id="fn-d"></a>
-**d** — Setup form: `PKPReviewSetupForm` (`FORM_REVIEW_SETUP`, method
-PUT to `contexts/{id}`; AFFM-065). Fields in order: `defaultReviewMode`
-radios (values `SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS` 2 default,
-`_ANONYMOUS` 1, `_OPEN` 3; schema default 2),
-`defaultReviewPublicVisibility` checkbox (option value `false`, label
-`manager.setup.reviewOptions.publicReviewerComments.label`; read by
-`Context::getDefaultReviewPublicVisibility()`),
-`restrictReviewerFileAccess`, `reviewerAccessKeysEnabled`,
-`reviewerSuggestionEnabled` (inserted after the one-click box when the
-app's context schema carries the property: OJS and OMP do),
-`numWeeksPerResponse` (schema default 4, `min:0`), `numWeeksPerReview`
-(default 4, `min:0`), `numReviewsPerSubmission` (default 0; read by
-`Context::getNumReviewsPerSubmission()`); then a `FieldHTML`
-`reminderForReview` heading and four `FieldSlider`s
-`numDaysBeforeReviewResponseReminderDue`,
-`numDaysAfterReviewResponseReminderDue`,
-`numDaysBeforeReviewSubmitReminderDue`,
-`numDaysAfterReviewSubmitReminderDue` (`min` 0, `max` 14, labels
-`manager.setup.reviewOptions.reminders.*`: "None", "{$value} days
-before/after due date", "No reminder set"). Save: `PKPContextController::edit`
-→ `PKPContextService::validate()` (schema integer/min rules) + `edit()`;
-the Vue `FormPage` shows `form.saved` "Saved" in a `role=status` span
-immediately left of the button. Labels quoted from
-`lib/pkp/locale/en/manager.po` (`manager.setup.reviewOptions.*`); the
-OJS `locale/en/manager.po` overrides the completion-deadline description
-("Weeks allowed to complete the review"; OMP keeps lib/pkp's "Weeks
-allowed for review completion"). Fallback deadlines 3/4 when unset:
-`ReviewerForm` in the Add Reviewer window (U27 footnote f). The
-passthrough that seeds these values for tests: `review {…}` on `POST
-scenarios/context` (`PKPContextScenarioBuilder::parseReviewSettings`,
-parity ledger 2026-09-05). Live-probed 2026-09-05 (Fields "Setup";
-Rules 1–3; scenarios 1–4, 9), OJS and OMP: every heading, description
-and box line as quoted, install defaults on both seeded contexts; the
-save travels as `POST api/v1/contexts/{id}` (not PUT); every value reads
-back after a reload; "abc" and "2.5" refused with "This is not a valid
-integer.", "-1" with "This must be at least 0." (`.pkpFieldError` under
-the box, footer `.pkpFormErrors`), the value kept in the box; an empty
-response box and a 0 both save and give "Add Reviewer" today + 21 days,
-and the completion box at 0 or empty today + 28 (A4; claim check
-2026-09-05, OJS and OMP); the sliders
-drive by keyboard (ArrowRight one day, End 14) and read "1 days
-before/after due date" at 1 (the string is not pluralised); the side
-tabs write a flat hash (`#reviewSetup`, `#reviewerGuidance`,
-`#reviewForms`, `#reviewerRecommendations`) that a reload does not
-honour (A5); an unsaved radio survives a side-tab switch and is lost on
-leaving the page from the sidebar with no dialog. The legacy item window
-(Rule 15), by contrast, warns on close: "The data on this form has
-changed. Do you wish to continue without saving?" (seen once).
+**d** — `PKPReviewSetupForm` (lib/pkp `classes/components/forms/context/`):
+`defaultReviewMode` radio (`manager.setup.reviewOptions.reviewMode`;
+options `editor.submissionReview.doubleAnonymous` = 2 "Anonymous
+Reviewer/Anonymous Author", `.anonymous` = 1 "Anonymous Reviewer/Disclosed
+Author", `.open` = 3 "Open"; schema default 2);
+`defaultReviewPublicVisibility` checkbox (`publicReviewerComments.show`,
+`.label`, `.description`) whose single option carries `'value' => false`
+(finding A3); `restrictReviewerFileAccess` (`.restrictReviewerFileAccess`,
+`.description`; the OMP locale overrides the description);
+`reviewerAccessKeysEnabled` (`.reviewerAccessKeysEnabled`, `.label`,
+`.description`); `reviewerSuggestionEnabled`, added by
+`addReviewSuggestionControl()` after the one-click box when the app's
+context schema has the property (OJS and OMP do);
+`numWeeksPerResponse` (`defaultReviewResponseTime` "Default Response
+Deadline", help `numWeeksPerResponse`), `numWeeksPerReview`
+(`defaultReviewCompletionTime` "Default Completion Deadline", help
+`numWeeksPerReview`, which OJS overrides to "Weeks allowed to complete the
+review"; lib/pkp and OMP "Weeks allowed for review completion"),
+`numReviewsPerSubmission` ("Minimum Confirmed Reviews Required"), all
+`FieldText` size small; schema: integer, `nullable`, `min:0`, defaults 4,
+4, 0, so the API's validator answers `validator.integer` "This is not a
+valid integer." and `validator.min.numeric` "This must be at least 0.".
+The four `FieldSlider`s: min 0, max 14, `minLabel` "None", `valueLabel`
+"{$value} days before due date" / "{$value} days after due date",
+`valueLabelMin` "No reminder set"; schema integer `min:0` with no default.
+Effects: `ReviewerForm::initData()` (lib/pkp
+`controllers/grid/users/reviewer/form/`) presets `reviewMethod` from
+`defaultReviewMode` (double-anonymous when unset) and
+`isReviewPubliclyVisible` from `Context::getDefaultReviewPublicVisibility()`;
+`EditorAction::addReviewer()` stores the visibility flag on the assignment;
+`reviewerFormFooter.tpl` and the assignment's `editReviewForm.tpl` carry
+the box under `manager.setup.reviewOptions.publicReviewerComments.show`.
+`reviewerSuggestionEnabled` is read by `PKPSubmissionHandler` (the wizard
+step) and `PKPSelectReviewerListPanel` / `PKPDashboardHandler` (the
+suggestions panel). Rule 2's refusal shape (`form.errorOne` "Please
+correct one error.", `form.errorMany`, `form.errorGoTo` "Go to {label}:
+{message}", `form.errorNext` "Jump to next error") is the shared Vue
+form's; the page notice is `form.errors` "The form was not saved because
+{count} error(s) were encountered. Please correct these errors and try
+again." raised on the `400`; the "Saving"/"Saved" text is the form's
+`role="status"` footer; live-probed 2026-09-06 (Rule 2, scenario 2; OJS and
+OMP): the `form.errorGoTo` buttons sit in a screen-reader-only list
+(`ul.-screenReader`) and are never visible, the summary and "Jump to next
+error" render at the foot beside "Save" (`.pkpFormErrors`), and the badge
+sits directly under the box (label, help, box, badge). The email "Your
+review assignment has been changed for {journal}", sent when the editor
+changes an assignment's dates, links the plain
+`reviewer/submission?submissionId=…` address with no key; only requests and
+reminders carry the one-click `invitation/accept?id=N&key=…` link
+(live-probed 2026-09-06, Rule 5; OJS and OMP). Live-probed 2026-09-05
+(Rules 2, 3, 4, 6, 8; Fields "Setup"; OJS and OMP, `manager.maya` read-only on the seeded contexts and a
+scratch manager on scratch contexts): every label, help text, option and
+default as quoted; `abc`, `-1` and `2.5` refused in both number boxes with
+the strings quoted and a `400`, the "Open" radio chosen in the same edit
+not saved; an emptied deadline saved blank, an emptied minimum saved as
+"0"; a successful save answered `200` with no page notice and "Saved" gone
+after 5 s; a side-tab switch with edits kept them (no dialog recorded), a
+reload showed the saved values (no `beforeunload` prompt). Finding A3 of
+the draft (the public-visibility tick) did not hold: the tick survived
+"Save" and a reload on both apps, Add Reviewer's box arrived ticked, and
+the earlier request's "Edit Review" window kept its unticked box. "Minimum
+Confirmed Reviews Required" 1 printed "Minimum number of confirmed reviews
+required: 1." above "Awaiting responses from reviewers." (the accepted
+state) and 0 removed the line; live-probed 2026-09-06 (Rule 8; OJS and
+OMP): the first line stayed after the review was submitted ("New reviews
+have been submitted." under it) and after "Read Review", and after Read
+Review › "Mark as Complete" › "Mark this review as complete?" › "Mark as
+Complete" the second line read "Minimum required number of reviews have
+been confirmed. A decision is needed." with the row at "Complete". The
+suggestion box added the wizard step "5 Reviewer Suggestions" before "6
+Review" on both apps; with the box on and no suggestion entered, nothing
+on the review stage or in Add Reviewer mentions suggestions (2026-09-06),
+and the editors' side with a suggestion entered was not driven here. When
+"Save" is re-enabled after a refusal was not driven.
 
 <a id="fn-e"></a>
-**e** — Guidance form: `PKPReviewGuidanceForm` (`FORM_REVIEW_GUIDANCE`,
-AFFM-066): `reviewGuidelines` and `competingInterests` (`FieldRichTextarea`,
-multilingual, toolbar `bold italic superscript subscript | link |
-blockquote bullist numlist`) and `showEnsuringLink`
-(`FieldShowEnsuringLink`, label
-`manager.setup.reviewOptions.showAnonymousReviewLink`, dialog title
-`review.anonymousPeerReview.title` "How to ensure all files are
-anonymized", body `review.anonymousPeerReview`). OMP's
-`APP\components\forms\context\ReviewGuidanceForm` inserts
-`internalReviewGuidelines` before `reviewGuidelines`, and OMP's locale
-renames `manager.setup.reviewGuidelines` to "External Review
-Guidelines". Where the box takes effect:
-`PKPSubmissionFilesUploadBaseForm::initData()` adds the `ensuringLink`
-`LinkAction` (a `ConfirmationModal` with the same strings) when
-`showEnsuringLink` is set and the stage is Submission, Internal Review or
-External Review. Reviewer-side effects: U28 Rules 8 and 12 (its footnote
-o). Live-probed 2026-09-05 (Fields "Reviewer Guidance"; Rules 5, 7;
-scenarios 5, 11), OJS and OMP: field order as listed; "Review
-Guidelines" / "External Review Guidelines" and "Competing Interests"
-carry the eight toolbar buttons, OMP's "Internal Review Guidelines" five
-(no Blockquote, Bullet list or Numbered list; OMP3); one forms language
-shows no language control, and with French ticked under "Forms" the form
-gains a "French" button beside "English" at its top and each box reads
-"1/2 languages completed", the French text reaching a reviewer reading
-in French (live-driven 2026-09-05, OJS and OMP); the box's dialog has one
-button, "Close", while the upload window's link opens the same dialog
-with "OK" and "Cancel"; the link sits under the component list of step
-"1. Upload File" (under the drop zone once a component is chosen),
-reached from the Submission stage's "Submission Files" ›
-"Upload" and the review stage's "Upload/Select Files" › "Upload Review
-File", and is absent from both with the box unticked; the guidelines
-reach the reviewer's step 2, the policy step 1 with its "review this
-policy" dialog, an empty policy asks no question, empty guidelines read
-"This publisher has not set any reviewer guidelines."; on OMP the
-internal and external sentences reach only their own stage's reviewer
-and the policy is shared.
+**e** — `PKPReviewGuidanceForm`: `reviewGuidelines` and
+`competingInterests` are multilingual `FieldRichTextarea`s (toolbar bold,
+italic, super/subscript, link, blockquote, lists); `showEnsuringLink` is a
+`FieldShowEnsuringLink` (extends `FieldOptions`; option label
+`manager.setup.reviewOptions.showAnonymousReviewLink`, whose `<button>` the
+Vue field turns into the dialog `review.anonymousPeerReview.title` "How to
+ensure all files are anonymized" with the body `review.anonymousPeerReview`
+and "OK"). Effects: the reviewer wizard's step 2 and step 3 link
+(`PKPReviewerReviewStep2Form`, `step3.tpl`) and the step-1 competing
+interests section (`PKPReviewerReviewStep1Form`), owned by the
+reviewer's-review spec; the upload window's link:
+`PKPSubmissionFilesUploadBaseForm::fetch()` adds the `ensuringLink`
+`LinkAction` (a `ConfirmationModal` with the same title and text) when
+`showEnsuringLink` is on and the stage is submission, internal review or
+external review. Form languages: `ManagementHandler::getSupportedFormLocales()`
+feeds the forms' `locales`; the seeded and scratch contexts have `en` as
+their only form locale (seed-facts.md). Live-probed 2026-09-06 (Rule 16,
+Fields "Reviewer Guidance"; OJS and OMP, a scratch context with French
+ticked under "Forms" in Settings › Website › Setup › Languages): the form
+gained the "French"/"English" switch at its top and no box gained a tab,
+each box read "0/2 languages completed" while empty, "French" revealed
+"Review Guidelines in French" (OMP "Internal Review Guidelines in French",
+…) under the English box, "Setup" gained no language control, and the
+French guidance reached a reviewer reading the wizard in French; the
+French "Forms" box was unticked on the fresh scratch context, so the
+one-language premise holds. Live-probed 2026-09-05 (Rules 10,
+11; Fields "Reviewer Guidance"; OJS and OMP, scratch contexts with a
+throwaway manager, an external reviewer and, on OMP, an internal reviewer;
+a second untouched context as the control): box labels and order as
+quoted, no help text; the words are a `<button>` inside the label and the
+window's only control is the header "Close"; the typed guidance and policy
+reached the reviewer's steps 1, 2 and 3 with the strings quoted in Rule
+10, the control context showed none of them; the upload windows of the
+Submission and Review stages ("Upload Submission File", "Upload Review
+File") carried the link only with the box on, opening the same text with
+"OK" and "Cancel"; on OMP the internal box reached the internal round's
+reviewer and the external box the external round's.
 
 <a id="fn-f"></a>
-**f** — Form lifecycle. Create/edit: `ReviewFormForm` (template
-`manager/reviewForms/reviewFormForm.tpl`; `FormValidatorLocale` on
-`title`, message `manager.reviewForms.form.titleRequired`); a new form
-gets `setActive(0)` and `REALLY_BIG_NUMBER` sequence, then
-`resequenceReviewForms()`. Window tabs: `editReviewForm.tpl` (AFFW-670)
-with anchors `reviewFormBasics` / `reviewFormElements` /
-`reviewFormPreview`, `disabled: [0, 1]` when `!$canEdit` and
-`selected: 2` when opened with `preview=1` (the row's Preview action).
-Counts: `ReviewFormDAO::getByAssocId()` sub-selects `complete_count`
-(`date_completed IS NOT NULL AND declined <> 1`) and `incomplete_count`
-(`date_completed IS NULL AND declined <> 1`). Active column:
-`ReviewFormGridCellProvider::getCellActions()` returns
-`activateReviewForm` / `deactivateReviewForm` confirmations
-(`manager.reviewForms.confirmActivate` / `confirmDeactivate`); the
-handler ops flip `is_active` with no check on the counts (A2). Copy:
-`copyReviewForm` (`manager.reviewForms.confirmCopy`; inserts the form
-inactive at the end and re-inserts each element). Delete:
-`deleteReviewForm` (`manager.reviewForms.confirmDelete`; guarded by the
-two counts; clears `reviewFormId` on any assignment still referencing the
-form, which can only be declined ones, then `deleteById`). Order: the
-grid's `OrderGridItemsFeature` → `saveSequence`; the Add Reviewer
-window's select lists `ReviewFormDAO::getActiveByAssocId()` in `seq`
-order (U27 footnote d; parity ledger 2026-09-05 `reviewForms[]` row).
-Each mutating op ends in `NotificationManager::createTrivialNotification`
-(the top-right notice). OMP ships a second preview template,
-`omp/templates/controllers/grid/settings/reviewForm/previewReviewForm.tpl`
-(AFFW-669); no handler loads it (the form's template is
-`manager/reviewForms/previewReviewForm.tpl` in lib/pkp), so the preview
-renders the same on both apps. Live-probed 2026-09-05 (Actors row 3;
-Fields "Create Review Form"; Rules 10–14, 17; scenarios 6–8), OJS and
-OMP, byte-identical: the empty list reads "No Items" (the grid's generic
-empty text, not `manager.reviewForms.noneCreated`); "Create Review Form"
-and "Order" are grid links; an empty title is refused client-side with
-"This field is required." under "Title*" (the server message never
-shows); the windows are titled "Create Review Form", "Edit", "Preview";
-every confirmation is a dialog titled "Confirm" with "OK"/"Cancel" and
-the texts as quoted; list changes end in the toast "Your changes have
-been saved." (`fetchNotification`; fades by itself, untimed), "Order" ›
-"Done" (`saveSequence`) in none; the order holds after leaving the page
-and the Add Reviewer list follows it; counts 1 / 0 with one accepted and
-one declined request lock "Edit" and "Delete"; a declined-only form
-keeps all four actions and its declined row's "Edit" window still shows
-the form, and after the deletion that window opens on "None / Free Form
-Review" with the remaining active forms listed (driven with another form
-active, 2026-09-05); with no active form left it has no "Review Form"
-list at all; a deactivated form keeps its
-counts, leaves the Add Reviewer list and still reaches the reviewer's
-step 3 (A2), while the reviewer row's "Edit" window (`form#editReviewForm`,
-`select#reviewFormId` listing `getActiveByAssocId()` only) shows "None
-/ Free Form Review" and its "OK" (`update-review`) detaches the form
-(A6); the Add Reviewer window has no "Review Form" list at all while the
-context has no active form, otherwise "None / Free Form Review" first
-and the active forms in `seq` order.
+**f** — Grid: `ReviewFormGridHandler` (lib/pkp
+`controllers/grid/settings/reviewForms/`): title `manager.reviewForms`,
+action `createReviewForm` ("Create Review Form", `AjaxModal`), columns
+`name` ("Title"), `inReview` ("In Review", `getIncompleteCount()`),
+`completed` ("Completed", `getCompleteCount()`), `active`
+(`selectStatusCell.tpl`, a checkbox whose click runs the
+`activateReviewForm`/`deactivateReviewForm` `RemoteActionConfirmationModal`
+with `manager.reviewForms.confirmActivate` / `confirmDeactivate`);
+`initFeatures()` adds `OrderGridItemsFeature` ("Order",
+`grid.action.order`; finish controls `common.done` "Done" and
+`grid.action.cancelOrdering` "Cancel ordering"); rows ordered by `seq`
+(`ReviewFormDAO::getByAssocId()`, `getActiveByAssocId()` `ORDER BY rf.seq`).
+The counts: `ReviewFormDAO` sub-selects on `review_assignments` with
+`declined <> 1`, split on `date_completed`. Row actions
+(`ReviewFormGridRow`): `edit` and `delete` under `$canEdit` (both counts
+0), `copy` (`manager.reviewForms.confirmCopy`), `preview` (the edit op with
+`preview=1`). `editReviewForm()` renders
+`controllers/grid/settings/reviewForms/editReviewForm.tpl`: tabs
+`manager.reviewForms.edit` "Review Form", `manager.reviewFormElements` "Form
+Items", `manager.reviewForms.preview` "Preview Form"; `{if !$canEdit}
+disabled: [0, 1]{/if}` and `selected: {if $preview}2{else}0{/if}`.
+`ReviewFormForm` (`manager/reviewForms/reviewFormForm.tpl`): `title`
+required (`FormValidatorLocale`, `manager.reviewForms.form.titleRequired`),
+`description` rich, both multilingual; a new form gets `active = 0` and
+`REALLY_BIG_NUMBER` then resequenced. `copyReviewForm()` inserts the form
+inactive at the end and copies every element; `deleteReviewForm()` requires
+both counts 0 (and clears `reviewFormId` on any assignment, moot by then);
+`deactivateReviewForm()` checks only `getActive()` (finding A2). Every
+mutating op ends in `NotificationManager::createTrivialNotification()`
+("Your changes have been saved.") and a `DataChangedEvent` that redraws
+the grid; the ordering feature's `saveSequence` raises no notification. Items: `ReviewFormElementsGridHandler`
+(title "Form Items", action `createReviewFormElement` "Create New Item",
+column `question` "Item" capped at 220 characters of text, ordering
+feature); `ReviewFormElementGridRow` adds `edit` and `delete`
+(`manager.reviewFormElements.confirmDelete`); `ReviewFormElementForm`
+(`manager/reviewForms/reviewFormElementForm.tpl`): `question` required
+(`questionRequired`), `description`, `required`, `included` (default 1 on a
+new item), `elementType` required (`elementTypeRequired`; options
+`ReviewFormElement::getReviewFormElementTypeOptions()`: 1 "Single word text
+box", 2 "Single line text box", 3 "Extended text box", 4 "Checkboxes (you
+can choose one or more)", 5 "Radio buttons (you can only choose one)", 6
+"Drop-down box"), the listbuilder
+`ReviewFormElementResponseItemListbuilderHandler` (title
+`grid.reviewFormElement.responseItems` "Response Options", column
+`manager.reviewFormElements.possibleResponse` "Selection", "Add Item")
+enabled by `togglePossibleResponses()` for the three multiple-response
+types, with the `alert()` `manager.reviewFormElement.changeType`; on save a
+non-choice type stores `possibleResponses = null`. Preview:
+`PreviewReviewForm` renders `manager/reviewForms/previewReviewForm.tpl`
+(title, description, then `reviewer/review/reviewFormResponse.tpl`, the
+same template the wizard's step 3 uses; a required item gets the section's
+required mark). OMP still ships an unused legacy
+`templates/controllers/grid/settings/reviewForm/previewReviewForm.tpl`
+(mock inputs per type) that nothing renders. Effects of `included`:
+`PKPReviewController::getReviewFormResponses()` `authorFriendly`,
+`reviewDownload.tpl` `authorFriendly`, and the decision email's
+`ReviewerComments` mail trait skip elements with `getIncluded()` false;
+`required` is enforced by `ReviewFormElementDAO::getRequiredReviewFormElementIds()`
+in the wizard's step 3. Live-probed 2026-09-05 (Rules 12–15; Fields "Review
+Forms"; OJS and OMP, scratch contexts with a throwaway manager, and
+submissions in review with an accepted and a declined reviewer where the
+counts were read): the empty list and the empty items list both read the
+generic "No Items" (`grid.noItems`), never the locale's own empty strings;
+the windows are headed "Create Review Form", "Edit" (form and item alike),
+"Preview", "Create New Item"; every save and every confirmed action showed the page notice "Your
+changes have been saved." (`common.changesSaved`) and the form window
+closed on its own save; the confirmations are page windows headed
+"Confirm" with "OK" / "Cancel"; a copy kept the title verbatim and the
+items in the source's current order; ordering's "Done" showed no notice;
+the counts read 1 / 0 with one accepted and one declined assignment and
+0 / 1 after the review was submitted; the in-use row offered "Copy",
+"Preview" only, its "Preview" window opened on "Preview Form" with the two
+other tabs `ui-state-disabled` and inert; the item with `included` off was
+absent from the author's "Review: {title}" window and present in the
+editor's "Review Details: {title}" window with its "Download Review Form"
+button; a journal section's "Edit" window listed the active form only and
+its choice preselected the form in Add Reviewer, while a press series
+window has no "Review Form" list. Add Reviewer showed no "Review Form"
+`select` at all while no form was active (`ReviewerForm::fetch()` renders
+the list only with active forms). The listbuilder's "Add Item" is a plain
+link never disabled, the `select` carries no `onchange`, so
+`togglePossibleResponses()` and its `alert()` never run (finding A5); no
+column header row is rendered. In the preview, "Single word text box" and
+"Single line text box" are both `<input type="text">`; the required mark
+is `<span class="req">*</span>` after the question and the description a
+paragraph before the control. Live-probed 2026-09-06 (Fields "Review
+Forms", Rules 12, 14, 15, 16; OJS and OMP): "Order" is present but hidden
+on the empty and the one-row forms list and on the empty items list, and
+appears with the second form (an items list with exactly one item was not
+observed); the empty "Title" and the unchosen "Item type" are refused in
+the browser with "This field is required." (`form.required`), so
+`titleRequired` and `elementTypeRequired` are never reached through the
+screen, while an empty "Item" with a type chosen reaches the server's
+`questionRequired` notice "A question is required for the form item.
+(English)" with nothing under the box (whether that notice is the page bar
+or sits inside the window was not settled: it was gone four seconds
+later); a completed review's "Edit" window had no "Review Form" list with
+an active form present, while a review in progress had the list with its
+own form selected; the required item let "Submit Review" and its "Are you
+sure you want to submit this review?" confirmation run, then step 3 stayed
+with "This field is required." under the item; with French ticked under
+"Forms", "Title" and a "Response Options" row gained a "(French)" twin
+(`title[fr_CA]`, `newRowId[possibleResponse][fr_CA]`) and each rich-text box a
+"French" editor, hidden until the English box was focused, the toolbar's
+globe icon revealing nothing, and a reviewer reading the wizard in French
+saw the French item text with the untranslated title, description, items
+and options in English.
 
 <a id="fn-g"></a>
-**g** — Items: `ReviewFormElementForm` (template
-`manager/reviewForms/reviewFormElementForm.tpl`; validators on `question`
-(`manager.reviewFormElements.form.questionRequired`) and `elementType`
-(`…elementTypeRequired`); `initData()` sets `included => 1` for a new
-item). Types: `ReviewFormElement::REVIEW_FORM_ELEMENT_TYPE_*` 1–6
-(`getReviewFormElementTypeOptions()`, labels
-`manager.reviewFormElements.{smalltextfield,textfield,textarea,checkboxes,radiobuttons,dropdownbox}`);
-`getMultipleResponsesElementTypes()` = checkboxes, radio buttons,
-drop-down. Options: `ReviewFormElementResponseItemListbuilderHandler`
-(GRID-059, base `SetupListbuilderHandler` GRID-060; title
-`grid.reviewFormElement.responseItems` "Response Options", column
-`manager.reviewFormElements.possibleResponse` "Selection", add label
-`manager.reviewFormElements.addResponseItem` "Add selection"); the
-template's `togglePossibleResponses()` disables the add control for text
-types and alerts `manager.reviewFormElement.changeType`; `execute()`
-stores `possibleResponses` only for the three list types and `null`
-otherwise. Row actions: `ReviewFormElementGridRow` (edit, delete with
-`manager.reviewFormElements.confirmDelete`); order via
-`OrderGridItemsFeature`. Preview and reviewer rendering share
-`lib/pkp/templates/reviewer/review/reviewFormResponse.tpl` (required
-marked via `fbvFormSection required`; the drop-down renders with
-`defaultLabel=""`). Included flag: `reviewDownload.tpl` skips elements
-`{if $authorFriendly && !$reviewFormElement->getIncluded()}` (U26
-footnote j). Localisation fallback: `getLocalizedQuestion()` and friends
-(`DataObject::getLocalizedData`, primary locale fallback). Live-probed
-2026-09-05 (Fields "Create New Item"; Rules 15–16; scenario 6), OJS and
-OMP: the empty items list reads "No Items"; "Create New Item" and
-"Order" are grid links ("Order" rendered only once the list has a row,
-as on the forms grid); the windows are titled "Create New Item" / "Edit";
-a missing type is refused client-side with "This field is
-required." at "Item type*"; a typed type with an empty question is
-refused server-side with the red toast "Errors occurred processing this
-form" / "A question is required for the form item. (English)"; the
-options listbuilder is headed "Response Options" with the link "Add
-Item" (no "Selection" column, no "Add selection"), is live before a type
-is chosen, and switching a radio item to "Single line text box" shows no
-notice and keeps the rows (`togglePossibleResponses()` is never called);
-a saved switch to a text type drops the rows (`execute()` stores `null`;
-the reopened item lists "No Items"; live-driven 2026-09-05, OJS and OMP).
-Languages:
-the seeded journals have `fr_CA` as a UI language but not a forms
-language (Website › Setup › Languages, "Forms" unticked), and a scratch
-context inherits that, so no box on this screen has tabs; with "Forms"
-ticked for French the legacy windows show the multilingual popover (a
-globe icon at the end of the box, DOM class `flag flag_fr_CA`, revealing
-a "French" box beneath it; the rich-text editors carry the icon at the
-end of their toolbar and a hidden `…-fr_CA_ifr` editor; a response-option
-row a hidden `[possibleResponse][fr_CA]` box), the Vue forms a language
-switcher at the top (footnote e). Fallback driven on OJS only: a reviewer reading in French
-sees the English title, description, question and options where the
-French is empty.
+**g** — OJS only. `ojs pages/management/SettingsHandler::
+addReviewFormWorkflowSupport()` builds `ReviewerRecommendationsListPanel`
+(`ojs classes/components/listPanels/`) with the entries of
+`ReviewerRecommendation::query()->withContextId()`, and assigns
+`hasCustomizableRecommendation`. The Vue manager
+`lib/ui-library/src/managers/ReviewerRecommendationManager/
+ReviewerRecommendationManager.vue` with `reviewerRecommendationManagerStore.js`
+and `ReviewerRecommendationsEditModal.vue`: button
+`grid.action.addReviewerRecommendation` "Add Recommendation"; columns
+`manager.reviewerRecommendations.list.name.title` "Recommendations" and
+`.list.status.title` "Activate"; the row checkbox is `:checked="item.status"`
+with a `click.prevent` that opens the dialog
+(`manager.reviewerRecommendations.activate.title` / `deactivate.title`,
+messages `confirmActivate` / `confirmDeactivate`, `common.yes` /
+`common.no`) and then `PUT reviewers/recommendations/{id}/status`;
+`DropdownActions` (label `common.moreActions` "More Actions") only
+`v-if="item.removable"`, with `common.edit` and `common.delete` (the delete
+dialog: `grid.action.deleteReviewerRecommendation` "Delete Recommendation",
+`manager.reviewerRecommendations.confirmDelete`); add/edit open the side
+modal titled "Add Recommendation" / `grid.action.editReviewerRecommendation`
+"Edit Recommendation" over `ReviewerRecommendationForm`
+(`ojs classes/components/forms/context/`): `title` required multilingual
+(`manager.reviewerRecommendations.title.label`, help `.title.description`),
+`type` required `FieldSelect` over
+`Repo::reviewerRecommendation()->getRecommendationTypeLabels()` (1
+"Approved", 2 "Not Approved", 3 "Revisions Requested", 4 "With Comments"),
+`status` `FieldSelect` with no label (1 "Active Upon Saving", 0
+"Deactivate", value 1). API (`ReviewerRecommendationController`, base
+`reviewers/recommendations`): GET, GET {id}, POST, PUT {id}, PUT
+{id}/status, DELETE {id}; `removable` is
+`!Repo::reviewAssignment()->…->filterByReviewerRecommendationIds([$id])->exists()`.
+Defaults: `ContextService::afterAddContext` calls
+`Repo::reviewerRecommendation()->addDefaultRecommendations()`, six rows
+from `reviewer.article.decision.accept` ("Accept Submission"),
+`.pendingRevisions` ("Revisions Required"), `.resubmitHere` ("Resubmit for
+Review"), `.resubmitElsewhere` ("Resubmit Elsewhere"), `.decline` ("Decline
+Submission"), `.seeComments` ("See Comments"), `status` 1, titled in every
+supported locale. The reviewer's list:
+`Repository::getRecommendationOptions()` returns the active entries plus
+the one the assignment already carries, consumed by
+`PKPReviewerReviewStep3Form`. Live-probed 2026-09-06 (Rules 17, 18; Fields
+"Reviewer Recommendations"; OJS scratch context with a throwaway manager
+and an accepted external reviewer): the table, the six defaults, the
+dialogs and the reviewer's list as quoted; "Recommendation type" is a
+`select` with no selected option and the status list a `select`; an empty
+save is refused in the browser with "This field is required." under both
+required boxes and "Please correct 2 errors." at the foot (no request
+sent), "Save" then `[disabled]` until every error is cleared, and with one
+box empty the foot reads "Please correct one error." (live-probed
+2026-09-06); with French ticked under "Forms" the window gains the
+"French"/"English" switch and a second box "Review Recommendations in
+French" (`title-fr_CA`) behind "French"; add is `POST reviewers/recommendations`, edit a `POST …/{id}`, both
+redrawing the table with no notice; the rows are listed by
+`ReviewerRecommendation::query()->withContextId()->get()` with no
+ordering, so the table shows whatever order the database returns: in this
+probe an edited or toggled row dropped to the bottom, on later drives the
+same day it stayed in place (finding A7, footnote f-a7), and the
+reviewer's `select` followed the table either way; the type appears in no
+window the editor or the reviewer opens.
+The in-use entry lost its "More Actions" cell after the submit; deactivated,
+the Reviewers table's status cell still printed it ("Review Submitted",
+and "Review Viewed" once the review had been opened) while "Read Review" /
+"Review Details" kept its "Recommendation:" summary line and printed "-"
+in its "Reviewer Recommendation" section; reactivated, the section printed
+the title again (finding A6; re-read 2026-09-06).
 
 <a id="fn-h"></a>
-**h** — Reminder clocks: scheduled task `PKP\task\ReviewReminder`
-(JOB-054), registered `->daily()` in OJS's and OMP's
-`classes/scheduler/Scheduler.php` (OPS registers none). Logic in
-`executeActions()`: iterates
-`Repo::reviewAssignment()->getCollector()->filterByIsIncomplete(true)`,
-skips submissions whose status is not `STATUS_QUEUED`, then branches on
-`getDateConfirmed()` (null → the response clocks against
-`dateResponseDue`, else the submit clocks against `dateDue`). Before-due:
-`getDateReminded() === null` and today within N days before the due
-date. After-due: `getDateReminded() !== null`, `dateReminded < dateDue`,
-and today ≥ N days past the due date (A1: the after branch sits in the
-`else` of the "no reminder yet" test, so it never fires without a prior
-reminder). `dateReminded` is reset by
-`ReviewerAction::confirmReview` on the reviewer's answer. Send: job
-`PKP\jobs\email\ReviewReminder` — mailables `ReviewResponseRemindAuto`
-(template key `REVIEW_RESPONSE_OVERDUE_AUTO`, name
+**h** — `HasReviewDueDate` trait (lib/pkp
+`controllers/grid/users/reviewer/form/traits/`):
+`getReviewResponseDueDate()` is `Carbon::today()->endOfDay()->addWeeks(n)`
+with `n = numWeeksPerResponse`, falling back to
+`REVIEW_RESPONSE_DEFAULT_DUE_WEEKS = 3` when the setting is 0 or empty;
+`getReviewSubmitDueDate()` the same with `numWeeksPerReview` and
+`REVIEW_SUBMIT_DEFAULT_DUE_WEEKS = 4` (finding A4). `ReviewerForm::
+initData()` calls `getDueDates($context)` for the Add Reviewer window;
+the one-click invitation's lifetime is `(numWeeksPerReview + 4) * 7` days
+(`ReviewerAccessInvite::getExpiryDays()`). The scenario API's
+`reviewRounds[]` builder stamps dates the same way (scenarios.md).
+Live-probed 2026-09-05 (Rule 7, finding A3; OJS and OMP, scratch contexts):
+with 4 / 4 both dates were today + 28 days; with 2 / 5, today + 14 and + 35;
+with 0 / 0 and with both boxes emptied, today + 21 and + 28; the accepted
+request's row kept "Review due: {date}" throughout.
+
+<a id="fn-i"></a>
+**i** — The clock is `PKP\task\ReviewReminder` (lib/pkp `classes/task/`),
+registered `->daily()` in `ojs classes/scheduler/Scheduler.php` and `omp
+classes/scheduler/Scheduler.php` (OPS registers none). It iterates
+`Repo::reviewAssignment()->getCollector()->filterByIsIncomplete(true)`
+(notified, not completed, not declined, not cancelled), skips submissions
+whose status is not `STATUS_QUEUED`, and reads the four `numDays…` settings
+per context. With `dateConfirmed` null and `dateReminded` null it sends
+`ReviewResponseRemindAuto` when `numDaysBeforeReviewResponseReminderDue > 0`
+and the response due date is ahead by at most that many days; with
+`dateReminded` set, when `numDaysAfterReviewResponseReminderDue > 0`, today
+is past the due date by at least that many days and the last reminder
+predates the due date. After confirmation the same two branches run on the
+review due date with the submit thresholds and `ReviewRemindAuto`. The
+"after" branch sits inside `else` of `dateReminded === null` (finding A1).
+The job `PKP\jobs\email\ReviewReminder` builds the mailable from the
+template (`REVIEW_RESPONSE_OVERDUE_AUTO`, name
 `mailable.reviewResponseOverdueAuto.name` "Review Response Overdue
-(Automated)", subject `emails.reviewResponseOverdueAuto.subject` "Will
-you be able to review this for us?") and `ReviewRemindAuto`
-(`REVIEW_REMIND_AUTO`, "Review Reminder (Automated)", subject "A
-reminder to please complete your review"), sent from the context's
-`contactEmail`/`contactName` in the primary locale; a `ReviewerAccessInvite`
-is minted when `reviewerAccessKeysEnabled`; then
-`Repo::reviewAssignment()->edit(['dateReminded', 'reminderWasAutomatic' => 1])`,
-`Repo::emailLogEntry()->logMailable(REVIEW_REMIND_AUTO)` and an event log
-row `SUBMISSION_LOG_REVIEW_REMIND_AUTO` with message
-`submission.event.reviewer.reviewerRemindedAuto`. The send side and the
-History line are U27's (its footnote h; MAIL-043/046). No screen on the
-test installs runs the task (`[schedule] task_runner = Off`, seed-facts),
-so Rules 8 and 9 are code-read and not driven.
+(Automated)", subject `emails.reviewResponseOverdueAuto.subject` "Will you
+be able to review this for us?", which the OMP locale overrides to
+"Manuscript Review Request"; `REVIEW_REMIND_AUTO`, name "Review
+Reminder (Automated)", subject "A reminder to please complete your
+review" on both apps; names and subjects read on the "Manage Emails" page,
+reached from the "Add and edit templates" link of Settings › Workflow ›
+"Emails", live-probed 2026-09-06 on OJS and OMP), from
+`contactEmail`/`contactName`, mints a `ReviewerAccessInvite`
+when `reviewerAccessKeysEnabled`, sends, sets `dateReminded` and
+`reminderWasAutomatic`, logs the email
+(`SubmissionEmailLogEventType::REVIEW_REMIND_AUTO`) and the event
+(`SUBMISSION_LOG_REVIEW_REMIND_AUTO`,
+`submission.event.reviewer.reviewerRemindedAuto` "An automatic reminder
+email was sent to {$recipientName} regarding their review assignment").
+`ReviewerAction::confirmReview()` resets `dateReminded` and
+`reminderWasAutomatic` on accept or decline. The test installs run with
+`[schedule] task_runner = Off` and `[queues] job_runner = Off`
+(seed-facts.md), so the clock, its emails and its log row are not
+observable through any screen there: Rule 9 and the reminder side effect
+are read from the code, and no screen settles them.
 
-<a id="fn-p"></a>
-**p** — OPS absence: `Application::getApplicationStages()` on OPS holds
-Production only, so `ManagementHandler::hasReviewStage()` is false and
-`workflow.tpl` omits the `review` tab; OPS's `Scheduler` registers no
-`ReviewReminder`; `hasCustomizableReviewerRecommendation()` returns
-false. Tooling: OPS's `ContextScenarioBuilder::assertReviewSupported()`
-answers 400 to the `review` and `reviewForms` keys (parity ledger
-2026-09-05). Live-probed 2026-09-05 (Purpose; scenario 12), OPS
-`manager.maya`: tabs "Submission", "Preprint Server Library", "Emails",
-"Tasks and Discussions"; no "Review" tab; the typed
-`…/management/settings/workflow#review/reviewSetup` reloads to the same
-page with "Submission" › "Disable Submissions" selected, the hash left
-as typed, no redirect. On OMP the same shape with `reviewerRecommendations`
-opens "Review" › "Setup" and rewrites the hash to `#review`. The library
-tab per app: "Publisher Library" / "Press Library" / "Preprint Server
-Library".
+<a id="fn-s0"></a>
+**s0** — Scratch journal: `POST scenarios/context` with a throwaway
+`manager`, an `externalReviewer` and an `author` in `users[]` (a seeded
+reviewer is not enrolled on a scratch context, so the reviewer must be
+created there), then `POST scenarios/submission` with
+`decisions: ['sendExternalReview']` and `reviewRounds: [{reviewers:
+[{username, status: 'accepted'}]}]` where a request is needed; `review:`
+and `reviewForms[]` passthrough keys (scenarios.md "Configuring a scratch
+context") seed the configured ends where a scenario starts from them
+(scenario 7 seeds an active form and a reviewer carrying it through
+`reviewForm:`). Access checks: the seeded journal `publicknowledge` with
+`manager.maya`, `editor.diana`, `sectioneditor.ana`, `assistant.rita`,
+`reviewer.julia`, `author.alex`, `reader.rosa` (passwords: the username
+twice; `admin` / `admin`). Scenario 11: the seeded OPS server with
+`manager.maya`; the journal and press controls with the same account.
+Mail is read in the mail catcher (Mailpit, `http://127.0.0.1:8025`) though
+no scenario here expects mail.
 
-<a id="fn-q"></a>
-**q** — OMP: `ReviewGuidanceForm` adds `internalReviewGuidelines`
-(footnote e); `omp/locale/en/manager.po` sets
-`manager.setup.reviewGuidelines` "External Review Guidelines" and
-`manager.setup.reviewOptions.restrictReviewerFileAccess.description`
-"Reviewers will have access to the submission file only after agreeing
-to review it."; `hasCustomizableReviewerRecommendation()` false (footnote
-c). U28's OMP1 and footnote q record the reviewer-side absence of the
-recommendation list. Live-probed 2026-09-05 (Purpose; OMP1, OMP2;
-scenario 11), OMP `manager.maya` and a scratch press: side tabs "Setup",
-"Reviewer Guidance", "Review Forms"; the three guidance boxes in that
-order; the sentences reach their own stage's reviewer only.
+<a id="fn-s1"></a>
+**s1** — Scenario 1 exercises Rules 2, 3, 7 and the sliders' saving; the
+Add Reviewer read is the effect end of Rules 3 and 7 (`ReviewerForm::
+initData()`). The scratch journal starts at the install defaults (seed-facts
+"Settings › Workflow › Review on the seeded journal", 2026-09-04).
+Live-probed 2026-09-05 in parts (footnotes d, h): the sliders set by
+keyboard saved and read back after a reload; "Open" and a 2-week response
+deadline reached Add Reviewer. For the test author (2026-09-06): a mouse
+drag lands where the pointer is released and is not pixel-exact (a drag
+from the left end read 2), so the suite sets the slider by keyboard (focus
+it, Home, then ArrowRight three times) and reads "3 days before due date"
+in the box beside it.
 
-<a id="fn-s"></a>
-**s** — Accounts and tooling for the scenarios. Seeded journal
-`publicknowledge`: `manager.maya` (Journal Manager), `sectioneditor.ana`
-(Section Editor, the control of scenario 1), OPS `manager.maya`
-(Preprint Server Manager, scenario 12); passwords per
-`docs/process/users.md`. Scratch journals from `POST scenarios/context`
-with a throwaway `manager`, `externalReviewer` (OMP: also
-`internalReviewer`) and `author` in `users[]`: every reviewer a scratch
-scenario signs in as is a throwaway from `users[]`, never a roster
-reviewer, because a roster reviewer named in `reviewRounds[].reviewers[]`
-is assigned but not enrolled in the scratch context (absent from its Add
-Reviewer search and refused the wizard with the access-denied page;
-probed 2026-09-05). Scenario 5's second journal and scenario 7's forms
-come from the `review {showEnsuringLink}` and `reviewForms[]`
-passthroughs (scenarios.md "Configuring a scratch context"); scenario
-7's forms are seeded active, because a reviewer's `reviewForm: '<title>'`
-attaches only an active form; its accepted request from `POST
-scenarios/submission` with `decisions: ['sendExternalReview']` and
-`reviewRounds: [{reviewers: [{username, status: 'accepted', reviewForm:
-'<title>'}]}]` (OMP scenario 11: `sendInternalReview` for the internal
-one). A seeded `accepted` request opens the wizard on step 1 ("Save and
-continue") and ignores a typed `?step=3` until steps 1–2 are passed.
-Scenario 2's earlier reviewer is seeded before the settings change;
-scenario 10's submitted review is made through the reviewer's wizard.
-The slider is driven by keyboard (arrow keys on the handle). Mail is
-read in Mailpit (`http://127.0.0.1:8025`), scoped by the throwaway
-recipient. Scenario recipes are to be confirmed by the test author.
+<a id="fn-s2"></a>
+**s2** — Scenario 2: the context schema's `integer` and `min:0` rules and
+the Vue form's per-field error rendering (footnote d). Live-probed
+2026-09-05 with `abc`, `-1` and `2.5` (the decimal is refused like the
+letters) in "Default Completion Deadline", the mode change in the same
+edit unsaved after the refusal, both apps.
 
-<a id="fn-a1"></a>
-**f-a1** — `PKP\task\ReviewReminder::executeActions()`: in both phases
-the after-due test lives in the `else` branch of
-`if ($reviewAssignment->getDateReminded() === null)`, and additionally
-requires `$dateReminded->lt($dateDue)`. With the before-due slider at 0
-and no manual "Send Reminder", `dateReminded` stays null and the
-after-due branch is never reached. Read 2026-09-05 on the `main`
-checkouts (OJS and OMP, shared lib/pkp). Not driven: the task runner is
-off on the test installs.
+<a id="fn-s3"></a>
+**s3** — Scenario 3: the Vue tab switch keeps the page and the form's
+state; only a reload re-reads the saved values. Live-probed 2026-09-05 on
+"Setup" (a deadline and a slider) and "Reviewer Guidance" (a guideline
+text) on both apps: no dialog on the switch, values still present on
+return, saved values after the reload, no `beforeunload` prompt.
 
-<a id="fn-a2"></a>
-**f-a2** — `ReviewFormGridHandler::deactivateReviewForm()` checks CSRF,
-existence and `getActive()` only; `ReviewFormGridCellProvider` offers
-the deactivate action whenever `getActive()` is true. The confirmation
-string `manager.reviewForms.confirmActivate` carries the promise. Read
-2026-09-05. Live-probed 2026-09-05, OJS and OMP: a form at 1 / 0
-(accepted request) deactivates after the confirmation
-(`deactivate-review-form` 200, "Your changes have been saved."), counts
-unchanged, gone from "Add Reviewer"; the untouched request's reviewer
-still gets the form on step 3.
+<a id="fn-s4"></a>
+**s4** — Scenario 4: `reviewGuidelines` and `competingInterests` saved
+through the guidance form; the wizard's step 1 and 2 rendering is the
+reviewer's-review spec's (`PKPReviewerReviewStep1Form`,
+`PKPReviewerReviewStep2Form`). Live-probed 2026-09-05 on both apps
+(footnote e). The reviewer's "Accept Review, Continue to Step #2" does
+nothing until the privacy box is ticked ("This field is required." under
+it otherwise).
 
-<a id="fn-a3"></a>
-**f-a3** — `ReviewFormDAO::getByAssocId()` counts with `declined <> 1`;
-`ReviewFormGridRow` derives `$canEdit` from the two counts;
-`deleteReviewForm()` nulls `reviewFormId` on assignments returned by
-`filterByReviewFormIds`, which after the count guard can only be declined
-ones. Read 2026-09-05. Live-probed 2026-09-05, OJS and OMP: a form
-carried by one declined request reads 0 / 0 and offers "Edit", "Copy",
-"Preview", "Delete"; the declined row's "Edit" window shows the form
-selected; after "Delete" that window opens on "None / Free Form Review"
-with the remaining active forms listed (claim check 2026-09-05, OJS and
-OMP, another form active), and with no active form left it has no
-"Review Form" list.
+<a id="fn-s5"></a>
+**s5** — Scenario 5: `omp ReviewGuidanceForm` adds `internalReviewGuidelines`
+before `reviewGuidelines`; `FieldShowEnsuringLink` (footnote e).
+Live-probed 2026-09-05 on both apps: box order, the button in the sentence,
+the window's "Close", the tick after "Save" and a fresh navigation.
 
-<a id="fn-a4"></a>
-**f-a4** — Schema `numWeeksPerResponse` / `numWeeksPerReview`: `nullable`,
-`integer`, `min:0`, default 4 (`lib/pkp/schemas/context.json`), so an
-empty box passes validation and stores null; `ReviewerForm::initData()`
-(U27 footnote f) substitutes 3 and 4 when the context value is empty
-(PHP's empty(), so 0 counts as unset). Live-probed 2026-09-05, OJS and
-OMP: "Default Response Deadline" 0 saves ("Saved", reads back 0) and
-"Add Reviewer" then proposes today + 21 days; an empty box likewise;
-both boxes empty give today + 21 and today + 28, and both boxes at 0 the
-same (claim check 2026-09-05, OJS and OMP).
+<a id="fn-s6"></a>
+**s6** — Scenario 6: `createReviewForm` → `updateReviewForm`;
+`createReviewFormElement` → `updateReviewFormElement` with the listbuilder's
+`possibleResponses`; `reviewFormPreview`; `activateReviewForm`; the Add
+Reviewer list is `ReviewerForm::fetch()` over
+`ReviewFormDAO::getActiveByAssocId()` with `manager.reviewForms.noneChosen`
+"None / Free Form Review" as the empty choice, rendered only when at least
+one form is active. Live-probed 2026-09-05 on both apps (footnote f): the
+create, item and preview steps on one context, the activation and the Add
+Reviewer list on another seeded with two inactive forms.
 
-<a id="fn-a5"></a>
-**f-a5** — `workflow.tpl`'s `<tabs :track-history="true">` writes the
-side tab's own id as the hash (`#reviewSetup`, `#reviewerGuidance`,
-`#reviewForms`, `#reviewerRecommendations`); on load the page reads the
-hash against the main tab row, which has no tab of that name, so the
-first main tab opens. Only the nested `#review/reviewSetup` shape (which
-the app never writes) opens the Review tab. Live-probed 2026-09-05, OJS
-and OMP: after opening "Review" › "Setup" the address ends in
-`#reviewSetup`; reload lands on "Submission" › "Disable Submissions"
-with the Review side tab still marked selected but hidden.
+<a id="fn-s7"></a>
+**s7** — Scenario 7: `reviewForms: [{title: 'Method check', elements: […]}]`
+and a `reviewRounds[].reviewers[]` entry with `reviewForm: 'Method check'`
+(scenarios.md); `getIncompleteCount()` 1 → `$canEdit` false →
+`ReviewFormGridRow` without `edit`/`delete`, `editReviewForm.tpl` with tabs
+0 and 1 disabled; `copyReviewForm()`. Live-probed 2026-09-05 on both apps
+(footnote f): row 1 / 0, "Copy" and "Preview" only, the "Preview" window's
+greyed tabs inert under a forced click, the copy at the bottom with
+"Edit" / "Delete" and the same items.
 
-<a id="fn-a6"></a>
-**f-a6** — `PKPReviewerGridHandler::editReview()` / `updateReview()` with
-`EditReviewForm` (U27's Edit Review window): `initData()` fills the
-"Review Form" select from `ReviewFormDAO::getActiveByAssocId()` only, so
-a deactivated `reviewFormId` matches no option and the select posts ""
-on "OK" (`update-review`); `execute()` looks the id up and stores `null`
-when it finds no form. Live-probed
-2026-09-05, OJS and OMP: after deactivating the carried form the window
-shows "None / Free Form Review" selected and the other active forms;
-"OK" with nothing changed → 200, no notice; reopened, still "None /
-Free Form Review"; the reviewer's step 3 then shows the free-form boxes;
-the form's row on "Review Forms" reads one less under "In Review"
-(1 / 1 → 0 / 1; claim check 2026-09-05, OJS and OMP). Control: with the
-carried form active, the select preselects it.
+<a id="fn-s8"></a>
+**s8** — Scenario 8: `deactivateReviewForm` (confirmation
+`manager.reviewForms.confirmDeactivate`) and `deleteReviewForm`
+(`manager.reviewForms.confirmDelete`) on a form with both counts 0.
+Live-probed 2026-09-05 on both apps (footnote f) with a second active form
+present, so the Add Reviewer list shrank rather than vanished; the
+zero-active end was read on the in-use form's deactivation (footnote
+f-a2).
 
-<a id="fn-a7"></a>
-**f-a7** — `Repository::getRecommendationOptions()` and the manager's
-`GET api/v1/reviewers/recommendations` query with no `orderBy`, so the
-rows come in the database's own order, which changes as rows are
-updated. Live-probed 2026-09-05, OJS, one scratch journal: a deactivated
-default at the end after a reload; two toggled rows at the top after
-in-page refreshes; an edited default moved up one place; an edited last
-row stayed last; the reviewer's list matched the table each time. A read
-taken right after "Yes", before the table re-fetched, still shows the
-old order, which is what an earlier "left in place" observation was.
+<a id="fn-s9"></a>
+**s9** — Scenario 9 (OJS): `POST reviewers/recommendations` from the side
+modal, `PUT …/status` from the tick dialog; the reviewer's list is
+`Repository::getRecommendationOptions()` on step 3 (`ojs
+templates/reviewer/review/reviewerRecommendations.tpl`). Live-probed
+2026-09-06 (footnote g): the new entry last and ticked, "See Comments"
+unticked (moved to the bottom in that run and in a second the same day;
+left in place, above the new entry, on the suite's first run and on a
+later 15-change drive, also 2026-09-06: finding A7), the reviewer's list
+ending with the new entry and without "See Comments" either way.
 
-<a id="fn-a8"></a>
-**f-a8** — `Repository::setLocalizedDataOnNewLocaleAdd()` writes the
-stock `reviewer.article.decision.*` title for every default option in the
-new forms locale, without checking whether the primary-locale title was
-changed. Live-probed 2026-09-05, OJS scratch journal: "Decline
-Submission" renamed to "Decline (renamed)", then French ticked under
-"Forms": its "Edit Recommendation" window shows "Refuser la soumission"
-in the French box; the reviewer's `/fr_CA/` step 3 lists "Refuser la
-soumission", the English step 3 "Decline (renamed)"; "Only English", an
-added option, kept an empty French box.
+<a id="fn-s10"></a>
+**s10** — Scenario 10 (OJS): the submitted review stores
+`reviewerRecommendationId` (`PKPReviewerReviewStep3Form::execute()`), which
+makes `removable` false and hides the `DropdownActions`; the API refuses
+`edit`/`delete` with 406 behind it. The submit itself follows the
+reviewer's-review spec's scenario. Live-probed 2026-09-06 (footnote g): the
+chosen entry's row without "More Actions", an unused custom entry deleted
+through "Delete" › "Yes".
 
-<a id="fn-omp1"></a>
-**f-omp1** — `omp/classes/core/Application.php::hasCustomizableReviewerRecommendation()`
-returns false; `workflow.tpl` `{if $hasCustomizableRecommendation}`;
-the recommendation model and API are only wired in OJS
-(`ojs/api/v1/reviewers/recommendations/`). U28 OMP1 for the reviewer
-side. Live-probed 2026-09-05, OMP `manager.maya`: no such side tab and
-no recommendation manager on the page; "Review Forms" opens as the
-control.
+<a id="fn-s11"></a>
+**s11** — Scenario 11: footnote b, live-probed 2026-09-06 on all three
+apps.
 
-<a id="fn-omp2"></a>
-**f-omp2** — `omp/classes/components/forms/context/ReviewGuidanceForm.php`
-(`FIELD_POSITION_BEFORE, 'reviewGuidelines'`); labels
-`manager.setup.internalReviewGuidelines` "Internal Review Guidelines"
-and OMP's `manager.setup.reviewGuidelines` "External Review Guidelines".
-Per-stage delivery: U28 footnote q. Live-probed 2026-09-05, OMP scratch
-press: different sentences in the two boxes reach the internal and the
-external reviewer's step 2 respectively, neither sees the other's; one
-"Competing Interests" text reaches both.
+<a id="fn-f-a1"></a>
+**f-a1** — `PKP\task\ReviewReminder::executeActions()`: the
+`numDaysAfterReviewResponseReminderDue` and
+`numDaysAfterReviewSubmitReminderDue` checks live in the `else` branch of
+`if ($reviewAssignment->getDateReminded() === null)`, so an assignment
+never reminded is only ever considered for the "before" thresholds. The
+scenario API cannot advance the clock and the task runner is off on the
+fleets, so the finding is read from the code and no screen shows it; a
+re-check needs a server whose scheduler runs. Since: the reminder rewrite that introduced the four
+sliders (pkp-lib 3.5).
 
-<a id="fn-omp3"></a>
-**f-omp3** — `omp/classes/components/forms/context/ReviewGuidanceForm.php`
-adds `internalReviewGuidelines` as a `FieldRichTextarea` without the
-`toolbar` option that `PKPReviewGuidanceForm` gives `reviewGuidelines`
-and `competingInterests` (`bold italic superscript subscript | link |
-blockquote bullist numlist`), so the field falls back to the component's
-default toolbar. Live-probed 2026-09-05, OMP `manager.maya` and a scratch
-press: the internal box's toolbar reads Bold, Italic, Superscript,
-Subscript, link; the two boxes under it add Blockquote, Bullet list,
-Numbered list.
+<a id="fn-f-a2"></a>
+**f-a2** — `ReviewFormGridHandler::deactivateReviewForm()` tests
+`$request->checkCSRF() && isset($reviewForm) && $reviewForm->getActive()`
+only; `ReviewFormGridCellProvider::getCellActions()` offers the toggle on
+every row; the warning is `manager.reviewForms.confirmActivate`.
+Live-probed 2026-09-05 on both apps on a form carried by an accepted and a
+declined assignment: the untick asked the deactivation question, "OK"
+showed "Your changes have been saved.", the row read unticked and 1 / 0
+after a reload, Add Reviewer on the same submission had no "Review Form"
+list (it was the only form), the accepted reviewer's step 3 still showed
+the form's items, and re-ticking asked the activation question again.
+
+<a id="fn-f-a3"></a>
+**f-a3** — Footnote h: `REVIEW_RESPONSE_DEFAULT_DUE_WEEKS = 3` versus
+`REVIEW_SUBMIT_DEFAULT_DUE_WEEKS = 4`, against schema defaults of 4 and 4;
+the schema's `nullable` lets the emptied box through. Live-probed
+2026-09-05 on both apps: 0 / 0 and empty / empty both gave today + 21 and
+today + 28 in Add Reviewer.
+
+<a id="fn-f-a4"></a>
+**f-a4** — Footnote a: the side tabs' `<tabs :track-history="true">` writes
+a one-part hash that the page never reads back on load (only the
+`#review/reviewSetup` shape it does not write is honoured). Live-probed
+2026-09-05 on OJS and OMP, scratch contexts: reload on
+`…/workflow#reviewSetup` selected "Submission" and "Disable Submissions"
+with the hash still in the address. Candidate for `app-changes.md` if a
+suite needs the tab after a reload.
+
+<a id="fn-f-a5"></a>
+**f-a5** — Footnote f: `reviewFormElementForm.tpl` defines
+`togglePossibleResponses()` with the
+`alert(manager.reviewFormElement.changeType)` for the type list's change
+(its own comment says "onchange"), but the `{fbvElement type="select"}`
+it renders carries no `onchange`, so the listbuilder is never disabled and
+no warning fires; `ReviewFormElementForm::
+execute()` stores `possibleResponses = null` for a text type. Live-probed
+2026-09-05 on both apps: "Add Item" pressed with "Choose item type" still
+selected added a row; a saved radio item with "Yes" / "No" switched to
+"Extended text box" and saved showed "Your changes have been saved." and,
+reopened, "No Items" under "Response Options"; `page.on('dialog')` recorded
+nothing. Since: the elided warning was wired when the listbuilder was
+written; the age of the missing binding was not traced.
+
+<a id="fn-f-a6"></a>
+**f-a6** — Footnote g: `Repository::getRecommendationOptions()` returns the
+active entries plus the one the assignment carries, which is what the
+reviewer's list shows. The editor's window is the Vue
+`ReviewerManager/ReviewDetailsModal.vue` (the "Read Review" row button and
+the "Review Details" menu entry open the same one); it prints the title it
+finds for the assignment's `reviewerRecommendationId` in the
+`recommendations` list it is handed (`useReviewerManagerConfig.js
+getRecommendationString()`, null when the id is not in the list). Which
+list each surface is handed was not traced. Live-probed 2026-09-06 on OJS,
+twice in separate runs and read once the comments block had filled in:
+with the entry deactivated the window still carried "Review Submitted:
+{date}" and "Recommendation: Accept with minor changes" among its summary
+lines and printed "-" in its "Reviewer Recommendation" section (help "The
+reviewer's suggested outcome for this submission."); reactivated, the
+section printed the title too, and the "Review Details" menu entry opened
+the same window. An earlier read that saw the summary lines missing was
+taken before the window had filled in. The Reviewers row's label was
+"Review Submitted" until the editor opened the review and "Review Viewed"
+after, the title under either. The window itself is the reviewer
+assignment & management spec's surface.
+
+<a id="fn-f-a7"></a>
+**f-a7** — Footnote g: `ReviewerRecommendationController::getMany()`
+(`ReviewerRecommendation::query()->withContextId()->get()`) feeds the
+table and `Repository::getRecommendationOptions()` (`withActive()->get()`)
+the reviewer's list; neither orders, so both show the rows as the database
+returns them. Live-probed 2026-09-06 on OJS, two fresh scratch journals
+with a throwaway manager and an accepted external reviewer each, 15 changes
+(4 adds, 3 edits, 8 ticks), the table read after every change at once and
+again after the settings page was reopened, the reviewer's step 3 list
+after 11 of them: every new row last; no edited or ticked row ever moved
+(creation order throughout, the same after the reopen); the reviewer's
+`select` was the ticked rows in the table's order on all 11 reads. Earlier
+the same day on the same install, three separate drives saw every edited
+or toggled row drop to the bottom, and the OJS suite's first run saw
+scenario 9's toggled row stay above the new entry. The browser's traffic
+is the same each time (footnote g's add, edit and status calls, then `GET
+reviewers/recommendations`, all 200) and the table is redrawn from that
+GET, so the difference sits in the database's answer to an unordered query
+(a lean, not an observation: a rewritten row's physical place); which of
+the two a run gets is not something the tester can steer, so a test
+asserts the tick and the reviewer's list, never the row's position.
+
+
+<a id="fn-f-a8"></a>
+**f-a8** — Live-driven 2026-09-06 on OJS from the register entry alone, on
+a fresh scratch journal: a form carried by one declined request read 0 / 0
+with "Edit", "Copy", "Preview" and "Delete"; after "Delete" › "OK" the
+declined request's "Edit" window listed "None / Free Form Review" selected.
+Editing the questions under a declined request was not driven. First seen
+2026-09-05 by the earlier build of this spec.
+
+<a id="fn-f-a9"></a>
+**f-a9** — Live-driven 2026-09-06 on OJS and OMP from the register entry
+alone, on a fresh scratch context each: an accepted request carrying an
+active form; the form deactivated on "Review Forms" ("OK" on the
+confirmation); the reviewer row's "Edit" window then listed only the
+still-active forms with "None / Free Form Review" selected; "OK" unchanged
+answered 200, the form's "In Review" went 1 → 0, and the reviewer's step 3
+showed "For author and editor" and "For editor" instead of the questions.
+The count still read 1 before the "OK", so the window's save does the
+detaching. First seen 2026-09-05 by the earlier build of this spec.
+<a id="fn-f-omp1"></a>
+**f-omp1** — Footnote b (`hasCustomizableReviewerRecommendation()`); the
+press wizard's missing "Recommendation" list is the reviewer's-review
+spec's OMP1. Live-probed 2026-09-06 on the seeded press: three side tabs,
+no "Recommendation" anywhere on the "Review" tab; the press reviewer's step
+3 had no "Recommendation" list (2026-09-05).
+
+<a id="fn-f-omp2"></a>
+**f-omp2** — `omp locale/en/manager.po` overrides
+`manager.setup.reviewOptions.restrictReviewerFileAccess.description` and
+`manager.setup.reviewGuidelines`, and does not override
+`manager.setup.reviewOptions.numWeeksPerReview` (lib/pkp wording), while
+`ojs locale/en/manager.po` overrides the last one; `omp
+ReviewGuidanceForm` adds `internalReviewGuidelines`
+(`manager.setup.internalReviewGuidelines`); `manager.publication.library`
+is "Publisher Library" in OJS and "Press Library" in OMP; the OMP locale
+also overrides `emails.reviewResponseOverdueAuto.subject` to "Manuscript
+Review Request" (footnote i). Live-probed 2026-09-05 on both apps
+(footnotes d, e): every string as quoted; the subject read on the "Manage
+Emails" page of the seeded journal and press 2026-09-06. The internal
+box's toolbar is OMP3.
+
+<a id="fn-f-omp3"></a>
+**f-omp3** — Footnote e: `omp ReviewGuidanceForm` adds
+`internalReviewGuidelines` as a `FieldRichTextarea` with its own toolbar
+list, shorter than the one `PKPReviewGuidanceForm` gives `reviewGuidelines`
+and `competingInterests`. Live-probed 2026-09-05 on one scratch press and
+again on a second 2026-09-06: "Internal Review Guidelines" shows five
+toolbar buttons (Bold, Italic, Superscript, Subscript, Insert/edit link);
+"External Review Guidelines" and "Competing Interests" show eight (plus
+Blockquote, Bullet list, Numbered list).
 
 ## Reference — entry points & surfaces
 
 | Entry | Path | Atom |
 |-------|------|------|
-| Settings › Workflow › Review › Setup | `management/settings/workflow#review/reviewSetup` typed (the screen writes `#reviewSetup`, which a reload does not honour, A5) (Vue form `reviewSetup`) | AFFM-065 |
-| Settings › Workflow › Review › Reviewer Guidance | `…#review/reviewerGuidance` typed (written: `#reviewerGuidance`) (Vue form `reviewerGuidance`) | AFFM-066 |
-| Settings › Workflow › Review › Review Forms (grid) | `…#review/reviewForms` typed (written: `#reviewForms`); component `grid.settings.reviewForms.ReviewFormGridHandler` | GRID-047, AFFM-067..073 |
-| Review form window: Review Form / Form Items / Preview Form tabs | `editReviewForm.tpl` tabset; ops `reviewFormBasics`, `reviewFormElements`, `reviewFormPreview` | AFFW-670, AFFW-669 (OMP dead template) |
-| Form Items grid and item window | component `grid.settings.reviewForms.ReviewFormElementsGridHandler` | GRID-046, AFFM-074..077 |
-| Response Options listbuilder | component `listbuilder.settings.reviewForms.ReviewFormElementResponseItemListbuilderHandler` | GRID-059, GRID-060 |
-| Settings › Workflow › Review › Reviewer Recommendations {OJS} | `…#review/reviewerRecommendations` typed (written: `#reviewerRecommendations`); Vue `ReviewerRecommendationManager` | VUE-047, VUE-069, AFFM-078..081 |
-| Reviewer recommendations API {OJS} | `api/v1/contexts/{path}/reviewers/recommendations` | API-054 |
-| Automatic reviewer reminders | scheduled task `PKP\task\ReviewReminder` (daily) → job `PKP\jobs\email\ReviewReminder` | JOB-054 |
-| Settings save | `POST api/v1/contexts/{id}` as sent by the browser (`PKPContextController::edit`, method override to PUT) | (dispatcher owned by *Journal identity & about pages*) |
+| Settings › Workflow › "Review" › "Setup" | sidebar Settings › Workflow → `{journal}/management/settings/workflow`, tab "Review" › "Setup"; saves `PUT api/v1/contexts/{id}` | AFFM-065 |
+| "Review" › "Reviewer Guidance" | same page, side tab | AFFM-066 |
+| "Review" › "Review Forms" list | same page, side tab (legacy grid) | GRID-047 · AFFM-067 (Create Review Form), AFFM-068 (Edit), AFFM-069 (Copy), AFFM-070 (Preview), AFFM-071 (Active tick), AFFM-072 (Delete), AFFM-073 (Order) |
+| Review form window (tabs "Review Form", "Form Items", "Preview Form") | row "Edit" / "Preview" | AFFW-670 · GRID-046 · AFFM-074 (Create New Item), AFFM-075 (Edit item), AFFM-076 (Delete item), AFFM-077 (Order items) |
+| "Response Options" list in the item window | item window | GRID-059 · GRID-060 |
+| OMP legacy preview template (not rendered) | — | AFFW-669 |
+| "Review" › "Reviewer Recommendations" {OJS} | same page, side tab; `api/v1/reviewers/recommendations` | VUE-047 · VUE-069 · API-054 · AFFM-078 (Add), AFFM-079 (Activate tick), AFFM-080 (Edit), AFFM-081 (Delete) |
+| Automatic reminder clock | daily scheduled task, no screen | JOB-054 |
 
 ## Reference — code anchors
 
-- `lib/pkp/templates/management/workflow.tpl` — the Review tab and its
-  side tabs.
-- `lib/pkp/pages/management/ManagementHandler.php`,
-  `ojs/pages/management/SettingsHandler.php`,
-  `omp/pages/management/SettingsHandler.php` — page handlers.
-- `lib/pkp/classes/components/forms/context/PKPReviewSetupForm.php`,
-  `PKPReviewGuidanceForm.php`, `omp/classes/components/forms/context/ReviewGuidanceForm.php`.
-- `lib/pkp/classes/components/forms/FieldSlider.php`,
-  `FieldShowEnsuringLink.php`; `lib/ui-library/src/components/Form/fields/FieldSlider.vue`,
-  `FieldShowEnsuringLink.vue`.
-- `lib/pkp/controllers/grid/settings/reviewForms/` — `ReviewFormGridHandler`,
-  `ReviewFormGridRow`, `ReviewFormGridCellProvider`,
-  `ReviewFormElementsGridHandler`, `ReviewFormElementGridRow`,
-  `form/ReviewFormForm`, `form/ReviewFormElementForm`, `form/PreviewReviewForm`.
-- `lib/pkp/controllers/listbuilder/settings/reviewForms/ReviewFormElementResponseItemListbuilderHandler.php`.
-- `lib/pkp/classes/reviewForm/` — `ReviewForm`, `ReviewFormDAO`,
-  `ReviewFormElement`, `ReviewFormElementDAO`.
-- `lib/pkp/templates/manager/reviewForms/` and
-  `lib/pkp/templates/controllers/grid/settings/reviewForms/editReviewForm.tpl`;
-  `lib/pkp/templates/reviewer/review/reviewFormResponse.tpl`.
-- `ojs/classes/components/forms/context/ReviewerRecommendationForm.php`,
-  `ojs/classes/components/listPanels/ReviewerRecommendationsListPanel.php`,
-  `ojs/api/v1/reviewers/recommendations/ReviewerRecommendationController.php`,
-  `lib/pkp/classes/submission/reviewer/recommendation/` (`ReviewerRecommendation`,
-  `Repository`, `enums/ReviewerRecommendationType`),
-  `lib/ui-library/src/managers/ReviewerRecommendationManager/`.
-- `lib/pkp/classes/task/ReviewReminder.php`,
-  `lib/pkp/jobs/email/ReviewReminder.php`,
-  `lib/pkp/classes/mail/mailables/ReviewRemindAuto.php`,
-  `ReviewResponseRemindAuto.php`; `ojs/classes/scheduler/Scheduler.php`,
-  `omp/classes/scheduler/Scheduler.php`.
-- `lib/pkp/schemas/context.json`, `ojs/schemas/context.json`,
-  `omp/schemas/context.json` — the settings and their defaults.
-- `lib/pkp/classes/testing/PKPContextScenarioBuilder.php` — the `review`
-  and `reviewForms[]` passthroughs used by the scenarios.
+- `lib/pkp/templates/management/workflow.tpl` — the Workflow Settings page and its tabs
+- `lib/pkp/pages/management/ManagementHandler.php` (`workflow()`, `hasReviewStage()`, `addReviewFormWorkflowSupport()`) · `ojs pages/management/SettingsHandler.php` (adds the recommendations panel) · `omp pages/management/SettingsHandler.php` · `ops pages/management/SettingsHandler.php`
+- `lib/pkp/classes/components/forms/context/PKPReviewSetupForm.php`, `PKPReviewGuidanceForm.php` · `omp classes/components/forms/context/ReviewGuidanceForm.php` · `lib/pkp/classes/components/forms/FieldShowEnsuringLink.php` · lib/ui-library `components/Form/fields/FieldSlider.vue`, `FieldShowEnsuringLink.vue`, `FieldOptions.vue`
+- `lib/pkp/schemas/context.json`, `ojs schemas/context.json`, `omp schemas/context.json` — the settings' types, defaults and rules; `lib/pkp/api/v1/contexts/PKPContextController.php::edit()`
+- `lib/pkp/controllers/grid/settings/reviewForms/` — `ReviewFormGridHandler.php`, `ReviewFormGridRow.php`, `ReviewFormGridCellProvider.php`, `ReviewFormElementsGridHandler.php`, `ReviewFormElementGridRow.php`, `form/ReviewFormForm.php`, `form/ReviewFormElementForm.php`, `form/PreviewReviewForm.php`
+- `lib/pkp/controllers/listbuilder/settings/reviewForms/ReviewFormElementResponseItemListbuilderHandler.php`, `lib/pkp/controllers/listbuilder/settings/SetupListbuilderHandler.php`
+- `lib/pkp/templates/manager/reviewForms/` (`reviewFormForm.tpl`, `reviewFormElementForm.tpl`, `previewReviewForm.tpl`), `lib/pkp/templates/controllers/grid/settings/reviewForms/editReviewForm.tpl`, `lib/pkp/templates/reviewer/review/reviewFormResponse.tpl`, `lib/pkp/templates/controllers/grid/common/cell/selectStatusCell.tpl`
+- `lib/pkp/classes/reviewForm/` — `ReviewForm.php`, `ReviewFormDAO.php`, `ReviewFormElement.php`, `ReviewFormElementDAO.php`
+- `lib/pkp/controllers/grid/users/reviewer/form/ReviewerForm.php`, `EditReviewForm.php`, `traits/HasReviewDueDate.php` — where the defaults land
+- `lib/pkp/classes/submission/reviewer/recommendation/` — `ReviewerRecommendation.php`, `Repository.php`, `enums/ReviewerRecommendationType.php`; `ojs api/v1/reviewers/recommendations/ReviewerRecommendationController.php` and its `formRequests/`; `ojs classes/components/forms/context/ReviewerRecommendationForm.php`, `ojs classes/components/listPanels/ReviewerRecommendationsListPanel.php`; `ojs classes/services/ContextService.php` (default entries); lib/ui-library `managers/ReviewerRecommendationManager/`
+- `lib/pkp/classes/task/ReviewReminder.php`, `lib/pkp/jobs/email/ReviewReminder.php`, `lib/pkp/classes/mail/mailables/ReviewRemindAuto.php`, `ReviewResponseRemindAuto.php`, `ojs classes/scheduler/Scheduler.php`, `omp classes/scheduler/Scheduler.php`
+- `lib/pkp/classes/security/authorization/CanAccessSettingsPolicy.php`, `ojs registry/userGroups.xml`, `omp registry/userGroups.xml`

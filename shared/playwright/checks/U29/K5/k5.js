@@ -1,520 +1,809 @@
-// U29 claim check, chunk K5: review forms in use — activate/deactivate, the
-// in-use lock, copy, reorder, delete, and where a form lands (the Add
-// Reviewer window, the reviewer row's "Edit" window, the reviewer's step 3).
-// Spec: docs/specs/U29-review-setup-and-review-forms.md — Rules 11, 12, 14,
-// 17 (222–243, 251–257, 281–292), register A2, A3, A6, scenarios 7 and 8
-// (482–501), footnotes f, f-a2, f-a3, f-a6.
+// U29 claim check, chunk K5: items, what an item does for the reviewer, and
+// languages, on OJS and OMP (OPS has no "Review" tab; nothing to drive there).
+// Spec: docs/specs/U29-review-setup-and-review-forms.md — Rules 14–16 (lines
+// 309–340), scenario 7 (522–530), register A2 (596–607) and A5 (627–634).
 //
-// Seeds its own scratch context per app: a throwaway manager and two
-// throwaway external reviewers; forms "Form A" (active), "Form B" (inactive),
-// "Form C" (active), each with a required text box and a Yes/No radio;
-// submissions in external review: s1 rev1 accepted + Form A, s2 reviewer.paul
-// declined + Form A, s3 no reviewer (the Add Reviewer target), s4
-// reviewer.paul declined + Form C, s5 rev2 accepted + Form A (rev2 submits
-// the review through the wizard, so "Completed" gets a count). Records every
-// screen. Nothing on the seeded context is touched. OPS has no Review tab:
-// skipped with a record.
+// Seeds two scratch contexts per app:
+//   A — open review; form "Method check" (active, in use: sub1 carries it with an
+//       accepted reviewer) with one item of each of the six types, the textarea
+//       item seeded with "Included in message to author" off; a spare reviewer.
+//   B — forms "Blank form" (no items) and "Lang form" (English-only items), sub
+//       carried by an accepted reviewer, for the "No Items" list and Rule 16
+//       (French ticked under "Forms" through Settings › Website › Languages).
 //
 //   PROBE_FEATURE=U29 PROBE_AGENT=ccK5 node bin/probe.js all shared/playwright/checks/U29/K5/k5.js
-//   PHASES=seed,a,b,c,d,e   (default: all; later phases reuse k5-scratch-<app>.json)
-//   a: list, lock, preview, Add Reviewer list, activate Form B, s1 Edit window (Rules 11, 12, 17)
-//   b: rev2 submits the review on s5 → "Completed" 1; the submitted row's Edit window (Rules 12, 17)
-//   c: deactivate Form A in use: counts, Add Reviewer, s1 Edit window, rev1's step 3, "OK" detaches (A2, A6, scenario 7)
-//   d: copy, order, delete the copy; declined-only Form C: s4 Edit window before/after its deletion (Rule 14, A3, scenario 8)
-//   e: {OJS} the section's default form preselects in Add Reviewer (Rule 17)
+//   PHASES=seed,a1,a2,a3,b1,c1,c2   (default: all; later phases reuse k5-scratch-<app>.json; b2 is kept
+//   as a record of the one-locale attempt: a context without fr_CA as a UI locale drops the /fr_CA/ segment)
+//
+// Order matters in A: a1 ends with "Method check" (in use) deactivated, a2 has its
+// reviewer submit on the wizard's step 3, a3 reactivates and reads the review as
+// the editor (Read Review, the "Request Revisions" email) and as the author.
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir} =
     require('../../../probe');
 
-const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ['seed', 'a', 'b', 'c', 'd', 'e'];
+const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ['seed', 'a1', 'a2', 'a3', 'b1', 'c1', 'c2'];
 const on = (p) => PHASES.includes(p);
+const log = (...a) => console.log(...a);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const scratchFile = (app) => path.join(outDir(), `k5-scratch-${app.name}.json`);
-const resultsFile = (app) => path.join(outDir(), `k5-results-${app.name}.json`);
-const log = (...a) => console.log(`[${process.env.PKP_APP_NAME}]`, ...a);
-const flat = (s, n = 400) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n);
-const FORMS_PATH = (ctx) => `/index.php/${ctx}/en/management/settings/workflow#review/reviewForms`;
-const WORKFLOW = (ctx, id) => `/index.php/${ctx}/en/dashboard/editorial?workflowSubmissionId=${id}`;
-const REV1 = 'Kay Fiveone', REV2 = 'Kay Fivetwo';
-const ELEMENTS = [
-    {question: 'Overall assessment', type: 'textarea', required: true},
-    {question: 'Recommend?', type: 'radiobuttons', options: ['Yes', 'No']},
-];
-
-async function full(page, name, extra = {}) {
-    const data = await screen(page);
-    Object.assign(data, extra);
-    record(name, data);
-    await shot(page, name);
-    return data;
-}
-
-/** The review-forms grid as data: rows (title, counts, Active box) and the grid links. */
-async function readGrid(page) {
-    return page.evaluate(() => {
-        const t = (el) => (el ? el.innerText.trim().replace(/\s+/g, ' ') : null);
-        const grid = [...document.querySelectorAll('.pkp_controllers_grid')].find((g) => g.getClientRects().length > 0 && /Active/.test(g.innerText));
-        if (!grid) return {missing: true};
-        const rows = [...grid.querySelectorAll('tbody tr.gridRow')].filter((r) => r.querySelector('td')).map((r) => {
-            const box = r.querySelector('input[type=checkbox]');
-            const ctl = r.nextElementSibling;
-            return {
-                id: r.id, cells: [...r.querySelectorAll('td')].map(t), title: t(r.querySelector('td:first-child')).replace(/^Settings\s*/, ''),
-                checked: box ? box.checked : null, disabled: box ? box.disabled : null,
-                actions: ctl ? [...ctl.querySelectorAll('a')].map(t).filter(Boolean) : [], actionsVisible: ctl ? ctl.getClientRects().length > 0 : false,
-            };
-        });
-        return {headers: [...grid.querySelectorAll('thead th')].map(t), rows, links: [...grid.querySelectorAll('a')].filter((a) => a.getClientRects().length && t(a) && !a.closest('tbody')).map(t), empty: t(grid.querySelector('.empty, tr.empty, .gridRowEmpty'))};
-    });
-}
-
-async function openForms(page, app, ctx) {
-    await page.goto(app.url(FORMS_PATH(ctx)));
-    await idle(page);
-    const reviewTab = page.getByRole('tab', {name: 'Review', exact: true});
-    if ((await reviewTab.getAttribute('aria-selected').catch(() => null)) !== 'true') await reviewTab.click();
-    const formsTab = page.getByRole('tab', {name: 'Review Forms', exact: true});
-    if ((await formsTab.getAttribute('aria-selected').catch(() => null)) !== 'true') await formsTab.click();
-    await page.locator('.pkp_controllers_grid:visible').first().waitFor({timeout: 20000});
-    await idle(page);
-}
-
-const gridLoc = (page) => page.locator('.pkp_controllers_grid:visible').first();
-const rowLoc = (page, title, nth = 0) => gridLoc(page).locator('tbody tr.gridRow').filter({has: page.locator('td:first-child', {hasText: new RegExp(`^\\s*(Settings\\s*)?${title}\\s*$`)})}).nth(nth);
-
-/** Open the row's arrow only when its controls row is hidden; return the controls row locator. */
-async function rowActions(page, row) {
-    const ctl = row.locator('xpath=following-sibling::tr[1]');
-    if (!(await ctl.isVisible().catch(() => false))) { await row.locator('a.show_extras').click(); await ctl.waitFor({state: 'visible', timeout: 10000}).catch(() => {}); }
-    return ctl;
-}
-
-/** Read every open dialog after the side window has filled. */
-async function readDialog(page) {
-    await page.getByRole('dialog').last().waitFor({timeout: 10000}).catch(() => {});
-    await Promise.race([
-        page.locator('[role=dialog] .ui-tabs-nav li, [role=dialog] form, [role=dialog] .pkp_controllers_grid').first().waitFor({timeout: 60000}),
-        page.locator('[role=dialog]').getByText(/Are you sure/).first().waitFor({timeout: 60000}),
-    ]).catch(() => {});
-    await page.locator('[role=dialog] .ui-tabs-loading').first().waitFor({state: 'detached', timeout: 60000}).catch(() => {});
-    return page.evaluate(() => {
-        const t = (el) => (el ? el.innerText.trim().replace(/\s+/g, ' ') : null);
-        return [...document.querySelectorAll('[role=dialog]')].filter((d) => d.getClientRects().length > 0).map((d) => ({
-            title: t(d.querySelector('h1, h2, h3, .modal__header, [id$="title"]')),
-            text: t(d).slice(0, 1500),
-            buttons: [...d.querySelectorAll('button, a.pkp_button, input[type=submit]')].filter((b) => b.getClientRects().length > 0).map((b) => t(b) || b.value),
-            tabs: [...d.querySelectorAll('.ui-tabs-nav li, [role=tab]')].filter((x) => x.getClientRects().length > 0).map((tb) => ({text: t(tb), selected: tb.getAttribute('aria-selected') || tb.classList.contains('ui-tabs-active'), disabled: tb.classList.contains('ui-state-disabled') || tb.getAttribute('aria-disabled') === 'true'})),
-        }));
-    });
-}
-
-async function notices$(page) {
-    await page.waitForFunction(() => [...document.querySelectorAll('.pkpNotification, [role=status], [role=alert], .pkp_notification')].some((e) => e.getClientRects().length > 0 && e.innerText.trim()), null, {timeout: 4000}).catch(() => {});
-    return page.evaluate(() => [...document.querySelectorAll('.pkpNotification, [role=status], [role=alert], .pkp_notification')].filter((e) => e.getClientRects().length > 0 && e.innerText.trim()).map((e) => ({cls: e.className.slice(0, 60), text: e.innerText.trim().replace(/\s+/g, ' ')})));
-}
-
-/** Press a "Confirm" dialog button; collect the review-form traffic and the notice. */
-async function confirmDialog(page, name = 'OK') {
-    const dlg = page.getByRole('dialog').last();
-    const before = await page.evaluate(() => document.querySelectorAll('[role=dialog]').length);
-    const responses = [];
-    const l = (r) => { if (/review-form|reviewer-grid|sequence/i.test(r.url())) responses.push({method: r.request().method(), url: r.url().replace(/^https?:\/\/[^/]+/, '').slice(0, 200), status: r.status()}); };
-    page.on('response', l);
-    await dlg.getByRole('button', {name, exact: true}).click();
-    await page.waitForFunction((n) => document.querySelectorAll('[role=dialog]').length < n, before, {timeout: 10000}).catch(() => {});
-    const notices = await notices$(page);
-    await idle(page);
-    page.off('response', l);
-    return {responses, notices};
-}
-
-/** Tick or untick a form's "Active" box: returns the dialog and the result. */
-async function toggleActive(page, row, snapName) {
-    await row.locator('input[type=checkbox]').click();
-    const dialog = await readDialog(page);
-    await full(page, snapName, {dialog});
-    const result = await confirmDialog(page, 'OK');
-    return {dialog, result};
-}
-
-/** Workflow page › "Add Reviewer" › "Select <name>"; read the Review Form list; Cancel. */
-async function addReviewerList(page, app, ctx, subId, reviewerName, snapName) {
-    await page.goto(app.url(WORKFLOW(ctx, subId)));
-    await idle(page);
-    await page.getByRole('button', {name: 'Add Reviewer', exact: true}).first().click();
-    const select = page.getByRole('dialog').last().getByRole('button', {name: `Select ${reviewerName}`}).first();
-    await select.waitFor({timeout: 20000});
-    await select.click();
-    await page.locator('input.datepicker').first().waitFor({timeout: 20000});
-    await page.locator('#regularReviewerForm iframe, .tox-tinymce').first().waitFor({timeout: 15000}).catch(() => {});
-    const list = await readSelect(page, '#regularReviewerForm');
-    await full(page, snapName, {reviewFormList: list});
-    await page.getByRole('dialog').last().locator('a, button').filter({hasText: /^Cancel$/}).first().click().catch(() => {});
-    await page.waitForFunction(() => !document.querySelector('input.datepicker'), null, {timeout: 5000}).catch(() => {});
-    return list;
-}
-
-async function readSelect(page, scope) {
-    return page.evaluate((scope) => {
-        const root = document.querySelector(scope) || document;
-        const s = root.querySelector('select#reviewFormId, select[name="reviewFormId"]');
-        const t = (el) => (el ? el.innerText.trim().replace(/\s+/g, ' ') : null);
-        return s ? {present: true, label: t(root.querySelector(`label[for="${s.id}"]`)), options: [...s.options].map((o) => ({value: o.value, text: o.text, selected: o.selected}))}
-            : {present: false, selects: [...root.querySelectorAll('select')].map((x) => x.name), hasReviewFormWords: /Review Form/.test(root.innerText || '')};
-    }, scope);
-}
-
-/** Workflow page › reviewer row › "More Actions" › "Edit": the window's Review Form list; then Cancel or OK. */
-async function editReviewerRow(page, app, ctx, subId, reviewerName, snapName, press = 'Cancel') {
-    await page.goto(app.url(WORKFLOW(ctx, subId)));
-    await idle(page);
-    const row = page.getByRole('row', {name: new RegExp(reviewerName)}).first();
-    await row.waitFor({timeout: 20000});
-    const rowText = flat(await row.innerText());
-    await row.getByRole('button', {name: 'More Actions'}).click();
-    const menu = await page.locator('[role=menuitem]').allInnerTexts();
-    const edit = page.getByRole('menuitem', {name: 'Edit', exact: true});
-    if (!(await edit.count())) { await page.keyboard.press('Escape'); await full(page, snapName, {menu, rowText, noEdit: true}); return {menu, rowText, noEdit: true}; }
-    await edit.click();
-    await page.locator('form#editReviewForm').waitFor({timeout: 20000});
-    await page.locator('form#editReviewForm select, form#editReviewForm input.datepicker').first().waitFor({timeout: 15000}).catch(() => {});
-    const list = await readSelect(page, 'form#editReviewForm');
-    const formText = flat(await page.locator('form#editReviewForm').innerText(), 1200);
-    await full(page, snapName, {menu, rowText, reviewFormSelect: list, formText});
-    let result = null;
-    if (press === 'OK') {
-        result = await confirmDialog(page, 'OK');
-        await page.waitForFunction(() => !document.querySelector('form#editReviewForm'), null, {timeout: 10000}).catch(() => {});
-        await full(page, `${snapName}-after-ok`, {result});
-    } else {
-        await page.getByRole('dialog').last().locator('a, button').filter({hasText: /^Cancel$/}).first().click().catch(() => {});
-    }
-    return {menu, rowText, list, formText, result};
-}
-
-/** The reviewer's wizard: walk from step 1 to step 3 with the buttons; read step 3. */
-async function walkToStep3(page, app, ctx, subId, prefix) {
-    await page.goto(app.url(`/index.php/${ctx}/en/reviewer/submission/${subId}`));
-    await idle(page);
-    const o = {landing: page.url()};
-    for (let i = 0; i < 3; i++) {
-        if (await page.locator('[name^="reviewFormResponses"], textarea[name="comments"]').count()) break;
-        const btn = page.getByRole('button', {name: /Save and continue|Continue to Step/i}).first();
-        if (!(await btn.count())) break;
-        const noCI = page.locator('input[name="competingInterestOption"]').first();
-        if (await noCI.count()) await noCI.check().catch(() => {});
-        const label = await btn.innerText();
-        const beforeText = await page.locator('main').first().innerText().catch(() => '');
-        await btn.click();
-        await page.waitForFunction((t) => (document.querySelector('main') || document.body).innerText !== t, beforeText, {timeout: 15000}).catch(() => {});
-        await idle(page);
-        o[`press${i + 1}`] = {label: flat(label), url: page.url()};
-    }
-    await page.locator('[name^="reviewFormResponses"], textarea[name="comments"]').first().waitFor({timeout: 15000}).catch(() => {});
-    o.url = page.url();
-    o.step3 = await page.evaluate(() => {
-        const t = (el) => (el ? el.innerText.trim().replace(/\s+/g, ' ') : null);
-        const m = document.querySelector('main') || document.body;
-        return {
-            headings: [...m.querySelectorAll('h1, h2, h3, h4, legend')].map(t).filter(Boolean).slice(0, 30),
-            labels: [...m.querySelectorAll('label')].map(t).filter(Boolean).slice(0, 30),
-            formControls: [...m.querySelectorAll('[name^="reviewFormResponses"]')].map((e) => ({tag: e.tagName, type: e.type, name: e.name})),
-            textareas: [...m.querySelectorAll('textarea')].map((x) => x.name),
-            buttons: [...m.querySelectorAll('button')].filter((b) => b.getClientRects().length).map(t),
-        };
-    });
-    await full(page, prefix, {walk: o});
-    return o;
-}
+const factsFile = (app) => path.join(outDir(), `k5-facts-${app.name}.json`);
+const texts = async (l) => (await l.allInnerTexts()).map((s) => s.trim()).filter(Boolean);
 
 forEachApp(async (app) => {
-    const out = fs.existsSync(resultsFile(app)) ? JSON.parse(fs.readFileSync(resultsFile(app), 'utf8')) : {};
-    const save = () => fs.writeFileSync(resultsFile(app), JSON.stringify(out, null, 2));
-    if (app.name === 'ops') { record('k5-results', {app: 'ops', skipped: 'OPS has no Review tab and no review forms (spec Purpose, K6); nothing in K5 has a screen there'}); return; }
-    let scratch = fs.existsSync(scratchFile(app)) ? JSON.parse(fs.readFileSync(scratchFile(app), 'utf8')) : null;
-    const omp = app.name === 'omp';
+    if (app.name === 'ops') return;
+    let sc = fs.existsSync(scratchFile(app)) ? JSON.parse(fs.readFileSync(scratchFile(app), 'utf8')) : {};
+    const saveScratch = () => fs.writeFileSync(scratchFile(app), JSON.stringify(sc, null, 2));
+    // facts merge on a partial rerun (PHASES=…), as ccK3's note asks
+    const facts = fs.existsSync(factsFile(app)) ? JSON.parse(fs.readFileSync(factsFile(app), 'utf8')) : {app: app.name, steps: {}, browserDialogs: [], errors: {}};
+    facts.browserDialogs = facts.browserDialogs || [];
+    const done = (label, data) => { facts.steps[label] = data; log(`[${label}]`, app.name, JSON.stringify(data).slice(0, 1600)); };
+    const saveFacts = () => fs.writeFileSync(factsFile(app), JSON.stringify(facts, null, 2));
 
-    if (on('seed') || !scratch) {
-        const t = tag('u29k5');
-        scratch = {tag: t, mgr: `${t}mgr`, rev1: `${t}rev1`, rev2: `${t}rev2`};
-        const ctx = await app.api.createContext({
-            tag: t,
+    // ---- seed ---------------------------------------------------------------
+    if (on('seed') && !sc.A) {
+        const tA = tag('u29k5a');
+        const A = {mgr: `${tA}mgr`, au: `${tA}au`, rev1: `${tA}rev1`, rev3: `${tA}rev3`};
+        const ctxA = await app.api.createContext({
+            tag: tA,
             users: [
-                {username: scratch.mgr, roles: ['manager'], givenName: 'Kay', familyName: 'Manager'},
-                {username: scratch.rev1, roles: ['externalReviewer'], givenName: 'Kay', familyName: 'Fiveone'},
-                {username: scratch.rev2, roles: ['externalReviewer'], givenName: 'Kay', familyName: 'Fivetwo'},
+                {username: A.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+                {username: A.au, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+                {username: A.rev1, roles: ['externalReviewer'], givenName: 'Rowan', familyName: 'Reviewer'},
+                {username: A.rev3, roles: ['externalReviewer'], givenName: 'Robin', familyName: 'Spare'},
             ],
+            review: {defaultReviewMode: 'open'},
             reviewForms: [
-                {title: 'Form A', description: 'Form A description', active: true, elements: ELEMENTS},
-                {title: 'Form B', description: 'Form B description', active: false, elements: ELEMENTS},
-                {title: 'Form C', description: 'Form C description', active: true, elements: ELEMENTS},
+                {title: 'Method check', description: 'Checks the method section.', elements: [
+                    {question: 'Is the method sound?', description: 'Judge the design.', type: 'radiobuttons', required: true, options: ['Yes', 'No']},
+                    {question: 'Other remarks', type: 'textarea', included: false},
+                    {question: 'One word, please', type: 'smalltextfield'},
+                    {question: 'One line summary', type: 'textfield'},
+                    {question: 'Which sections need work?', type: 'checkboxes', options: ['Intro', 'Methods', 'Results']},
+                    {question: 'Overall rating', type: 'dropdownbox', options: ['Good', 'Poor']},
+                ]},
             ],
         });
-        scratch.contextId = ctx.contextId; scratch.path = ctx.path;
-        const stage = omp ? {stage: 'external'} : {};
-        const mk = async (suffix, title, reviewers) => (await app.api.createSubmission({
-            tag: `${t}${suffix}`, context: scratch.path, submitter: 'author.alex', title, submitted: true,
-            decisions: ['sendExternalReview'], reviewRounds: [{...stage, reviewers}],
-            participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}],
-        })).submissionId;
-        scratch.s1 = await mk('s1', `U29K5 s1 rev1 accepted Form A ${t}`, [{username: scratch.rev1, status: 'accepted', reviewForm: 'Form A'}]);
-        scratch.s2 = await mk('s2', `U29K5 s2 paul declined Form A ${t}`, [{username: 'reviewer.paul', status: 'declined', reviewForm: 'Form A'}]);
-        scratch.s3 = await mk('s3', `U29K5 s3 no reviewer ${t}`, []);
-        scratch.s4 = await mk('s4', `U29K5 s4 paul declined Form C ${t}`, [{username: 'reviewer.paul', status: 'declined', reviewForm: 'Form C'}]);
-        scratch.s5 = await mk('s5', `U29K5 s5 rev2 accepted Form A ${t}`, [{username: scratch.rev2, status: 'accepted', reviewForm: 'Form A'}]);
-        fs.writeFileSync(scratchFile(app), JSON.stringify(scratch, null, 2));
-        out.seed = scratch; save();
-        log('[seed]', JSON.stringify(scratch));
+        const pA = ctxA.path || tA;
+        const s1 = await app.api.createSubmission({tag: `${tA}s1`, context: pA, submitter: A.au, title: `K5 sub1 ${tA}`,
+            decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: A.rev1, status: 'accepted', reviewForm: 'Method check'}]}]});
+        const tB = tag('u29k5b');
+        const B = {mgr: `${tB}mgr`, au: `${tB}au`, rev: `${tB}rev`};
+        const formsB = [
+            {title: 'Lang form', description: 'Lang form description.', elements: [
+                {question: 'Q one', type: 'textfield'},
+                {question: 'Q two', type: 'textarea'},
+                {question: 'Q three', type: 'radiobuttons', options: ['Oui', 'Non']},
+            ]},
+        ];
+        let blankSeeded = true;
+        let ctxB;
+        try {
+            ctxB = await app.api.createContext({tag: tB, users: [
+                {username: B.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+                {username: B.au, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+                {username: B.rev, roles: ['externalReviewer'], givenName: 'Casey', familyName: 'Reviewer'},
+            ], reviewForms: [{title: 'Blank form', elements: []}, ...formsB]});
+        } catch (e) {
+            blankSeeded = false;
+            facts.errors.seed_blank = String(e.message || e).slice(0, 400);
+            ctxB = await app.api.createContext({tag: tB, users: [
+                {username: B.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+                {username: B.au, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+                {username: B.rev, roles: ['externalReviewer'], givenName: 'Casey', familyName: 'Reviewer'},
+            ], reviewForms: formsB});
+        }
+        const pB = ctxB.path || tB;
+        const sB = await app.api.createSubmission({tag: `${tB}s1`, context: pB, submitter: B.au, title: `K5 B sub ${tB}`,
+            decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: B.rev, status: 'accepted', reviewForm: 'Lang form'}]}]});
+        sc = {A: {tag: tA, path: pA, users: A, sub1: s1.submissionId}, B: {tag: tB, path: pB, users: B, sub: sB.submissionId, blankSeeded}};
+        saveScratch();
+        log('[seed]', app.name, JSON.stringify(sc));
     }
 
-    const {page, close} = await launch(app);
-    const browserDialogs = [];
-    page.on('dialog', async (d) => { browserDialogs.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); });
-    try {
-        // ---------------- a: list, lock, preview, Add Reviewer, activate, Edit window with an active form
-        if (on('a')) {
-            const r = {};
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await openForms(page, app, scratch.path);
-            r.grid = await readGrid(page);
-            await full(page, 'a-forms-list', {grid: r.grid});
-            log('[a list]', JSON.stringify(r.grid.headers), JSON.stringify(r.grid.rows.map((x) => [x.title, x.cells.slice(1, 3), x.checked])), JSON.stringify(r.grid.links));
-            await loc(page, 'Review Forms grid', gridLoc(page));
-            await loc(page, 'Form A row', rowLoc(page, 'Form A'));
-            // Form A (1 / 0): its actions, then Preview
-            const ctlA = await rowActions(page, rowLoc(page, 'Form A'));
-            r.formAActions = await ctlA.locator('a:visible').allInnerTexts();
-            await full(page, 'a-form-a-actions', {actions: r.formAActions});
-            log('[a Form A actions]', JSON.stringify(r.formAActions));
-            await ctlA.getByRole('link', {name: 'Preview', exact: true}).click();
-            r.preview = await readDialog(page);
-            await full(page, 'a-form-a-preview', {dialog: r.preview});
-            log('[a preview]', JSON.stringify(r.preview.map((d) => [d.title, d.tabs, d.buttons])), flat(r.preview.at(-1)?.text, 300));
-            const rfTab = page.getByRole('dialog').last().locator('.ui-tabs-nav li').filter({hasText: /^Review Form$/}).first();
-            await rfTab.locator('a').first().click({force: true, timeout: 5000}).catch((e) => { r.reviewFormTabClickError = flat(e.message, 120); });
-            await idle(page);
-            r.previewAfterClick = await readDialog(page);
-            await full(page, 'a-form-a-preview-after-tab-click', {dialog: r.previewAfterClick});
-            log('[a preview after click]', JSON.stringify(r.previewAfterClick.map((d) => d.tabs)));
-            await page.getByRole('dialog').last().getByRole('button', {name: 'Close', exact: true}).first().click().catch(() => page.keyboard.press('Escape'));
-            await idle(page);
-            // Form C (declined-only, 0 / 0) and Form B (inactive, unused): their actions
-            for (const title of ['Form C', 'Form B']) {
-                const ctl = await rowActions(page, rowLoc(page, title));
-                r[`${title}Actions`] = await ctl.locator('a:visible').allInnerTexts();
-                log(`[a ${title} actions]`, JSON.stringify(r[`${title}Actions`]));
+    // ---- per-context helpers (bound to a page) ----------------------------------
+    function bind(page, ctx) {
+        const url = (p) => app.url(`/index.php/${ctx.path}${p}`);
+        const H = {url};
+        H.full = async (name) => {
+            let data;
+            try { data = await screen(page); } catch (e) { data = {url: page.url(), error: String(e.message).slice(0, 200)}; }
+            record(`${name}-${app.name}`, data);
+            await shot(page, `${name}-${app.name}`).catch(() => {});
+            return data;
+        };
+        H.panel = () => page.getByRole('tabpanel', {name: 'Review Forms', exact: true});
+        H.grid = () => H.panel().locator('.pkp_controllers_grid').first();
+        H.dlg = () => page.locator('[role="dialog"]:visible').last();
+        H.openForms = async () => {
+            // a hash-only goto does not reload: leave to the journal index first (ccK3's note), so open windows are gone
+            await page.goto(url('/index')); await idle(page);
+            await page.goto(url('/management/settings/workflow#review/reviewForms')); await idle(page);
+            if (!(await H.panel().isVisible().catch(() => false))) {
+                await page.getByRole('tab', {name: 'Review', exact: true}).click();
+                await page.getByRole('tabpanel', {name: 'Review', exact: true}).getByRole('tab', {name: 'Review Forms', exact: true}).click();
+                await idle(page);
             }
-            await full(page, 'a-form-c-b-actions', {formC: r['Form CActions'], formB: r['Form BActions']});
-            // Add Reviewer on s3: the list with A and C active
-            r.addReviewerBefore = await addReviewerList(page, app, scratch.path, scratch.s3, REV2, 'a-add-reviewer-before');
-            log('[a add reviewer before]', JSON.stringify(r.addReviewerBefore));
-            await loc(page, 'Review Form select in Add Reviewer', page.locator('select#reviewFormId'));
-            // tick Form B
-            await openForms(page, app, scratch.path);
-            r.activateB = await toggleActive(page, rowLoc(page, 'Form B'), 'a-activate-dialog');
-            r.gridAfterActivate = await readGrid(page);
-            await full(page, 'a-forms-list-after-activate', {grid: r.gridAfterActivate, result: r.activateB.result});
-            log('[a activate]', flat(r.activateB.dialog.at(-1)?.text, 300), JSON.stringify(r.activateB.dialog.at(-1)?.buttons), JSON.stringify(r.activateB.result), JSON.stringify(r.gridAfterActivate.rows.map((x) => [x.title, x.cells.slice(1, 3), x.checked])));
-            r.addReviewerAfter = await addReviewerList(page, app, scratch.path, scratch.s3, REV2, 'a-add-reviewer-after');
-            log('[a add reviewer after]', JSON.stringify(r.addReviewerAfter.options));
-            // s1's row "Edit" with its carried Form A active
-            r.editS1 = await editReviewerRow(page, app, scratch.path, scratch.s1, REV1, 'a-edit-s1-active');
-            log('[a edit s1]', JSON.stringify(r.editS1.menu), JSON.stringify(r.editS1.list));
-            await loc(page, 'Review Form select in Edit Review', page.locator('form#editReviewForm select#reviewFormId'));
-            await signOut(page);
-            out.a = r; save();
-        }
-        // ---------------- b: rev2 submits the review on s5 (Form A) → "Completed"; the submitted row's Edit window
-        if (on('b')) {
-            const r = {};
-            await signIn(page, scratch.rev2, {contextPath: scratch.path});
-            r.walk = await walkToStep3(page, app, scratch.path, scratch.s5, 'b-rev2-step3');
-            log('[b step3]', JSON.stringify(r.walk.step3.headings), JSON.stringify(r.walk.step3.formControls), JSON.stringify(r.walk.step3.textareas), JSON.stringify(r.walk.step3.buttons));
-            await page.locator('textarea[name^="reviewFormResponses"]').first().fill('Assessed by K5.');
-            await page.locator('input[type=radio][name^="reviewFormResponses"]').first().check();
-            const rec = page.locator('select#reviewerRecommendationId');
-            if (await rec.count()) await rec.selectOption({index: 1});
-            await page.getByRole('button', {name: 'Submit Review', exact: true}).click();
-            r.submitAsk = await readDialog(page);
-            await full(page, 'b-submit-ask', {dialog: r.submitAsk});
-            await page.getByRole('dialog').last().getByRole('button', {name: 'OK', exact: true}).click();
-            await page.waitForFunction(() => /Review Submitted/.test((document.querySelector('main') || document.body).innerText), null, {timeout: 20000}).catch(() => {});
+            await H.grid().locator('tbody tr').first().waitFor({timeout: 20000});
             await idle(page);
-            r.afterSubmit = {url: page.url(), text: flat(await page.locator('main').first().innerText().catch(() => ''), 400)};
-            await full(page, 'b-after-submit', {after: r.afterSubmit});
-            log('[b submitted]', flat(r.submitAsk.at(-1)?.text, 200), r.afterSubmit.url, r.afterSubmit.text.slice(0, 120));
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await openForms(page, app, scratch.path);
-            r.grid = await readGrid(page);
-            await full(page, 'b-forms-list-after-submit', {grid: r.grid});
-            log('[b list]', JSON.stringify(r.grid.rows.map((x) => [x.title, x.cells.slice(1, 3), x.checked])));
-            r.editS5 = await editReviewerRow(page, app, scratch.path, scratch.s5, REV2, 'b-edit-s5-submitted');
-            log('[b edit s5]', JSON.stringify(r.editS5.menu), JSON.stringify(r.editS5.list), flat(r.editS5.formText, 300));
-            await signOut(page);
-            out.b = r; save();
-        }
-        // ---------------- c: deactivate Form A while in use (A2), the lists, rev1's step 3 before and after the Edit window's "OK" (A6)
-        if (on('c')) {
-            const r = {};
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await openForms(page, app, scratch.path);
-            r.deactivateA = await toggleActive(page, rowLoc(page, 'Form A'), 'c-deactivate-dialog');
-            r.gridAfter = await readGrid(page);
-            await full(page, 'c-forms-list-after-deactivate', {grid: r.gridAfter, result: r.deactivateA.result});
-            log('[c deactivate]', flat(r.deactivateA.dialog.at(-1)?.text, 300), JSON.stringify(r.deactivateA.result), JSON.stringify(r.gridAfter.rows.map((x) => [x.title, x.cells.slice(1, 3), x.checked])));
-            const ctlA = await rowActions(page, rowLoc(page, 'Form A'));
-            r.formAActionsAfter = await ctlA.locator('a:visible').allInnerTexts();
-            log('[c Form A actions]', JSON.stringify(r.formAActionsAfter));
-            r.addReviewer = await addReviewerList(page, app, scratch.path, scratch.s3, REV2, 'c-add-reviewer-after-deactivate');
-            log('[c add reviewer]', JSON.stringify(r.addReviewer.options));
-            r.editS1 = await editReviewerRow(page, app, scratch.path, scratch.s1, REV1, 'c-edit-s1-deactivated', 'Cancel');
-            log('[c edit s1]', JSON.stringify(r.editS1.list));
-            // rev1's step 3: the deactivated form is still there
-            await signIn(page, scratch.rev1, {contextPath: scratch.path});
-            r.step3Before = await walkToStep3(page, app, scratch.path, scratch.s1, 'c-rev1-step3-before-ok');
-            log('[c step3 before OK]', JSON.stringify(r.step3Before.step3.headings), JSON.stringify(r.step3Before.step3.formControls), JSON.stringify(r.step3Before.step3.textareas));
-            // the editor presses "OK" in the Edit window without changing anything
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            r.editS1Ok = await editReviewerRow(page, app, scratch.path, scratch.s1, REV1, 'c-edit-s1-press-ok', 'OK');
-            log('[c edit s1 OK]', JSON.stringify(r.editS1Ok.result));
-            r.editS1After = await editReviewerRow(page, app, scratch.path, scratch.s1, REV1, 'c-edit-s1-after-ok', 'Cancel');
-            log('[c edit s1 after OK]', JSON.stringify(r.editS1After.list));
-            await signIn(page, scratch.rev1, {contextPath: scratch.path});
-            r.step3After = await walkToStep3(page, app, scratch.path, scratch.s1, 'c-rev1-step3-after-ok');
-            log('[c step3 after OK]', JSON.stringify(r.step3After.step3.headings), JSON.stringify(r.step3After.step3.formControls), JSON.stringify(r.step3After.step3.textareas));
-            await signOut(page);
-            out.c = r; save();
-        }
-        // ---------------- d: copy Form A (first row), order, activate, delete the copy; declined-only Form C's deletion and s4's Edit window
-        if (on('d')) {
-            const r = {};
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await openForms(page, app, scratch.path);
-            r.gridBefore = await readGrid(page);
-            const firstTitle = r.gridBefore.rows[0].title;
-            const ctl = await rowActions(page, rowLoc(page, firstTitle));
-            await ctl.getByRole('link', {name: 'Copy', exact: true}).click();
-            r.copyDialog = await readDialog(page);
-            await full(page, 'd-copy-dialog', {dialog: r.copyDialog});
-            r.copyResult = await confirmDialog(page, 'OK');
-            r.gridAfterCopy = await readGrid(page);
-            await full(page, 'd-forms-list-after-copy', {grid: r.gridAfterCopy, result: r.copyResult});
-            log('[d copy]', firstTitle, flat(r.copyDialog.at(-1)?.text, 200), JSON.stringify(r.copyResult), JSON.stringify(r.gridAfterCopy.rows.map((x) => [x.id, x.title, x.cells.slice(1, 3), x.checked])));
-            const copyRow = gridLoc(page).locator('tbody tr.gridRow').last();
-            r.copyRowId = await copyRow.getAttribute('id');
-            const ctlCopy = await rowActions(page, copyRow);
-            r.copyActions = await ctlCopy.locator('a:visible').allInnerTexts();
-            await ctlCopy.getByRole('link', {name: 'Edit', exact: true}).click();
-            r.copyEdit = await readDialog(page);
-            await full(page, 'd-copy-edit-review-form-tab', {dialog: r.copyEdit});
-            const dlg = page.getByRole('dialog').last();
-            r.copyTitleValue = await dlg.locator('input[name^="title"]').first().inputValue().catch(() => null);
-            await dlg.locator('.ui-tabs-nav li').filter({hasText: /^Form Items$/}).locator('a').first().click();
-            await dlg.locator('#reviewFormElementsGridContainer table').waitFor({timeout: 30000}).catch(() => {});
+        };
+        H.readGrid = (g) => g.evaluate((root) => {
+            const vis = (e) => e.getClientRects().length > 0;
+            const rows = [...root.querySelectorAll('tbody tr.gridRow')].filter(vis).map((tr) => ({
+                title: (tr.querySelector('td') || {}).innerText?.trim().split('\n').pop(),
+                cells: [...tr.querySelectorAll('td')].map((td) => td.innerText.trim().replace(/\n/g, ' / ')),
+                active: [...tr.querySelectorAll('input[type=checkbox]')].map((c) => ({checked: c.checked, disabled: c.disabled})),
+                moveIcon: !!tr.querySelector('.pkp_helpers_moveicon, .ordering'),
+                actions: [...(tr.nextElementSibling?.classList.contains('row_controls') ? tr.nextElementSibling.querySelectorAll('a') : [])].map((a) => a.innerText.trim()).filter(Boolean),
+            }));
+            return {
+                heading: (root.querySelector('.pkp_controllers_grid_header h4, h4, .grid_header h4, .pkp_grid_title') || {}).innerText?.trim(),
+                rows,
+                gridActions: [...root.querySelectorAll('.actions a, .pkp_linkactions a')].filter(vis).map((a) => a.innerText.trim()),
+                finishControls: [...root.querySelectorAll('.order_finish_controls a')].filter(vis).map((a) => a.innerText.trim()),
+                columns: [...root.querySelectorAll('thead th')].map((th) => th.innerText.trim()),
+                empty: [...root.querySelectorAll('tbody .no_items, tbody tr.empty')].filter(vis).map((e) => e.innerText.trim()),
+            };
+        });
+        H.notices = async (ms = 5000) => {
+            const seen = new Set(); const end = Date.now() + ms;
+            while (Date.now() < end) {
+                for (const s of await page.locator('.pkpNotification, .pkp_notification, [role="alert"], [role="status"]').allInnerTexts().catch(() => [])) {
+                    if (s.trim()) seen.add(s.trim().replace(/\n×\nClose$/, '').replace(/\s+/g, ' '));
+                }
+                await sleep(400);
+            }
+            return [...seen];
+        };
+        H.rowOf = (g, title, nth = 0) => g.locator('tbody tr.gridRow').filter({hasText: title}).nth(nth);
+        H.expandRow = async (row) => {
+            const controls = row.locator('xpath=following-sibling::tr[1][contains(@class,"row_controls")]');
+            if (!(await controls.isVisible().catch(() => false))) { await row.locator('.show_extras').first().click(); await idle(page); }
+            return controls;
+        };
+        H.rowActions = async (g, title, nth = 0) => texts((await H.expandRow(H.rowOf(g, title, nth))).locator('a'));
+        H.readDialog = async () => {
+            const d = H.dlg();
+            await d.waitFor({timeout: 15000});
+            await sleep(300);
+            return d.evaluate((el) => ({
+                title: (el.querySelector('h1, h2, h3, .modal__title, .pkp_modal_title, [class*="title"]') || {}).innerText?.trim(),
+                text: el.innerText.trim().slice(0, 1200),
+                buttons: [...el.querySelectorAll('button, a.pkp_button, .pkp_button')].filter((b) => b.getClientRects().length).map((b) => b.innerText.trim()).filter(Boolean),
+            }));
+        };
+        H.pressDialog = async (name) => {
+            const n = H.notices(4000);
+            await H.dlg().getByRole('button', {name, exact: true}).first().click();
+            const seen = await n; await idle(page); await sleep(500);
+            return seen;
+        };
+        H.toggleActive = async (title, press, label, nth = 0) => {
+            const row = H.rowOf(H.grid(), title, nth);
+            const box = row.locator('input[type=checkbox]').first();
+            const before = await box.isChecked();
+            await loc(page, `Review Forms row "${title}": the Active box`, box);
+            await box.click();
+            const confirm = await H.readDialog();
+            await H.full(`${label}-confirm`);
+            const seen = await H.pressDialog(press);
+            await H.grid().locator('tbody tr.gridRow').first().waitFor({timeout: 20000});
+            const after = await H.readGrid(H.grid());
+            await H.full(`${label}-after`);
+            return {before, confirm, pressed: press, notices: seen, rows: after.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active}))};
+        };
+        H.dragRowAbove = async (g, movingRow, targetRow) => {
+            const mb = await movingRow.boundingBox(); const tb = await targetRow.boundingBox();
+            await page.mouse.move(mb.x + 40, mb.y + mb.height / 2);
+            await page.mouse.down();
+            await page.mouse.move(mb.x + 40, mb.y + mb.height / 2 - 6, {steps: 4});
+            await page.mouse.move(tb.x + 40, tb.y + 4, {steps: 20});
+            await page.mouse.move(tb.x + 40, tb.y - 8, {steps: 6});
+            await sleep(200);
+            await page.mouse.up();
+            await sleep(400);
+        };
+        // the form window
+        H.openFormWindow = async (title, action = 'Edit', nth = 0) => {
+            const controls = await H.expandRow(H.rowOf(H.grid(), title, nth));
+            await controls.getByRole('link', {name: action, exact: true}).first().click();
+            await H.dlg().locator('#editReviewFormTabs li').first().waitFor({timeout: 15000});
+            await idle(page); await sleep(300);
+            return H.dlg();
+        };
+        H.windowInfo = async () => H.dlg().evaluate((el) => ({
+            heading: (el.querySelector('h1, h2, h3, .modal__title, [class*="title"]') || {}).innerText?.trim(),
+            tabs: [...el.querySelectorAll('#editReviewFormTabs li')].map((li) => ({text: li.innerText.trim(), selected: li.getAttribute('aria-selected') || li.classList.contains('ui-tabs-active'), disabled: li.classList.contains('ui-state-disabled') || li.getAttribute('aria-disabled') === 'true'})),
+            panelHead: (el.querySelector('.ui-tabs-panel:not([style*="display: none"])') || {}).innerText?.trim().slice(0, 300),
+        }));
+        H.clickFormTab = async (label) => {
+            await H.dlg().locator('#editReviewFormTabs a').filter({hasText: label}).first().click();
+            await H.dlg().locator('.ui-tabs-panel:visible .pkp_controllers_grid tbody tr, .ui-tabs-panel:visible form, .ui-tabs-panel:visible input, .ui-tabs-panel:visible textarea').first().waitFor({timeout: 15000}).catch(() => {});
+            await idle(page); await sleep(400);
+        };
+        H.itemsGrid = () => H.dlg().locator('.ui-tabs-panel:visible .pkp_controllers_grid').first();
+        H.ensureItemsTab = async (title, nth) => {
+            if (await H.itemsGrid().isVisible().catch(() => false) && /Form Items/.test(await H.itemsGrid().innerText().catch(() => ''))) return;
+            await H.openForms();
+            await H.openFormWindow(title, 'Edit', nth);
+            await H.clickFormTab('Form Items');
+        };
+        H.closeWindow = async () => {
+            const d = H.dlg();
+            const close = d.getByRole('button', {name: /Close/}).first();
+            if (await close.count()) await close.click(); else await d.locator('.pkpModalCloseButton, .close').first().click();
+            await sleep(400); await idle(page);
+        };
+        // the item window
+        H.itemForm = () => page.locator('form#reviewFormElementForm');
+        H.lbState = async () => ({
+            addLink: await H.itemForm().locator('.pkp_linkaction_addItem').evaluateAll((els) => els.map((e) => ({tag: e.tagName, text: e.innerText.trim(), disabled: e.disabled, aria: e.getAttribute('aria-disabled')}))),
+            columns: await texts(H.itemForm().locator('#elementOptions thead th')),
+            rows: await H.itemForm().locator('#elementOptions tbody tr').evaluateAll((trs) => trs.filter((tr) => tr.offsetParent !== null).map((tr) => ({
+                text: tr.innerText.trim(), inputs: [...tr.querySelectorAll('input:not([type=hidden])')].map((i) => ({type: i.type, name: i.name, value: i.value, visible: i.offsetParent !== null})),
+            }))),
+        });
+        H.typeSel = () => H.itemForm().locator('select#elementType, select[name=elementType]').first();
+        H.selectType = async (label) => { await H.typeSel().selectOption({label}); await sleep(400); };
+        H.openCreateItem = async () => {
+            await H.dlg().getByText('Create New Item', {exact: true}).first().click();
+            await H.itemForm().waitFor({timeout: 10000});
+            await H.itemForm().locator('#elementOptions table').first().waitFor({timeout: 10000}).catch(() => {});
+            await H.itemForm().locator('.tox-toolbar__primary').first().waitFor({timeout: 10000}).catch(() => {});
+            await idle(page); await sleep(300);
+        };
+        H.itemWindowInfo = async () => {
+            const d = H.dlg();
+            return {
+                heading: await d.locator('h1, h2, h3, [class*="title"]').first().innerText().catch(() => null),
+                labels: await d.locator('label').evaluateAll((els) => els.filter((l) => l.getClientRects().length).map((l) => l.innerText.trim()).filter(Boolean)),
+                checkboxes: await H.itemForm().locator('input[type=checkbox]').evaluateAll((els) => els.map((e) => ({name: e.name, checked: e.checked}))),
+                type: await H.typeSel().evaluate((s) => s.options[s.selectedIndex]?.text).catch(() => null),
+                iframes: await H.itemForm().locator('iframe').evaluateAll((els) => els.map((e) => e.id)),
+                localeLabels: await H.itemForm().locator('.localizable, .pkp_form_localeToggle, label[for*="fr_CA"], [id*="fr_CA"]').evaluateAll((els) => els.map((e) => `${e.tagName}#${e.id}.${e.className}`).slice(0, 20)),
+                listbuilder: await H.lbState(),
+                buttons: await texts(d.locator('button:visible, a.pkp_button:visible, .pkp_button:visible')),
+                errors: await texts(d.locator('.error, label.error, .pkp_form_error, .formError')),
+            };
+        };
+        H.saveItem = async (ms = 6000) => {
+            const p = H.notices(ms);
+            await H.itemForm().getByRole('button', {name: 'Save', exact: true}).first().click();
+            const n = await p; await idle(page); await sleep(400);
+            return {notices: n, itemWindowOpen: await H.itemForm().isVisible().catch(() => false)};
+        };
+        H.openItemEdit = async (question) => {
+            const g = H.itemsGrid();
+            const controls = await H.expandRow(H.rowOf(g, question));
+            const actions = await texts(controls.locator('a'));
+            await controls.getByRole('link', {name: 'Edit', exact: true}).first().click();
+            await H.itemForm().waitFor({timeout: 10000});
+            await H.itemForm().locator('.tox-toolbar__primary').first().waitFor({timeout: 10000}).catch(() => {});
+            await idle(page); await sleep(300);
+            return actions;
+        };
+        H.fillFrame = async (frameLoc, text) => {
+            await frameLoc.locator('body').click();
+            await frameLoc.locator('body').fill(text);
+        };
+        H.itemQuestionFrame = async (locale) => {
+            const sel = locale ? `iframe[id*="question"][id*="${locale}"]` : 'iframe[id*="question"]';
+            return H.itemForm().frameLocator((await H.itemForm().locator(sel).count()) ? sel : 'iframe').first();
+        };
+        // walk of a panel: text nodes, controls and required marks in order
+        H.walk = (root) => root.evaluate((p) => {
+            const out = [];
+            const it = document.createTreeWalker(p, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+            let n;
+            while ((n = it.nextNode())) {
+                if (n.nodeType === 3) { const t = n.textContent.trim(); if (t && n.parentElement.closest('select, script, style') === null) out.push(`T:${t.slice(0, 70)}`); }
+                else if (/^(INPUT|TEXTAREA)$/.test(n.tagName)) { if (n.type !== 'hidden' && n.getClientRects().length) out.push(`C:${n.tagName.toLowerCase()}[${n.type || ''}]${n.name ? ' ' + n.name : ''}${n.tagName === 'TEXTAREA' ? ` rows=${n.rows}` : ''}`); }
+                else if (n.tagName === 'SELECT') out.push(`C:select ${n.name} [${[...n.options].map((o) => o.text.trim()).join('|')}]`);
+                else if (n.tagName === 'IFRAME') out.push(`C:iframe#${n.id}`);
+                else if (n.classList.contains('req')) out.push(`M:${n.textContent.trim()}`);
+            }
+            return out.slice(0, 140);
+        });
+        // review stage
+        H.revTable = () => page.getByRole('table', {name: 'Reviewers', exact: true});
+        H.openRound = async (id, label, view = 'editorial') => {
+            await page.goto(url(`/dashboard/${view}?workflowSubmissionId=${id}`)); await idle(page);
+            await page.getByRole('link', {name: /Review Round 1|Round 1/}).first().click({timeout: 8000}).catch(() => {});
+            await page.getByRole('table', {name: /Reviewers|Reviews/}).first().waitFor({timeout: 30000}).catch(() => {}); await idle(page);
+            return H.full(label);
+        };
+        H.addReviewerList = async (label, who) => {
+            await page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+            const d = page.getByRole('dialog').filter({hasText: 'Add Reviewer'}).last(); await d.waitFor({timeout: 30000});
+            const entry = d.locator('.listPanel__item').filter({hasText: who}).first(); await entry.waitFor({timeout: 30000});
+            await page.waitForFunction(() => { const ta = document.querySelector('textarea[name="personalMessage"]'); const mce = window.tinyMCE || window.tinymce; return !!(ta && mce?.get(ta.id)?.initialized); }, null, {timeout: 30000}).catch(() => {});
+            await entry.getByRole('button', {name: /Select/}).first().click(); await idle(page);
+            await d.locator('#regularReviewerForm').waitFor({state: 'visible', timeout: 30000});
+            const form = await d.locator('#regularReviewerForm').evaluate((f) => {
+                const sel = f.querySelector('select[name="reviewFormId"]');
+                return {reviewFormListPresent: !!sel, labelText: /Review Form/.test(f.innerText), options: sel ? [...sel.options].map((o) => ({value: o.value, text: o.text, selected: o.selected})) : null};
+            });
+            record(`${label}-add-reviewer-${app.name}`, {form, aria: await d.ariaSnapshot(), text: await d.innerText()});
+            await shot(page, `${label}-add-reviewer-${app.name}`).catch(() => {});
+            await loc(page, 'Add Reviewer window: "Review Form" list', d.locator('#regularReviewerForm select[name="reviewFormId"]'));
+            await d.getByRole('button', {name: 'Close'}).first().click();
+            await page.locator('#regularReviewerForm').waitFor({state: 'hidden', timeout: 15000}).catch(() => {});
             await idle(page);
-            r.copyItems = await dlg.locator('#reviewFormElementsGridContainer').innerText().then(flat).catch(() => null);
-            await full(page, 'd-copy-form-items', {items: r.copyItems});
-            await dlg.locator('.ui-tabs-nav li').filter({hasText: /^Preview Form$/}).locator('a').first().click();
-            await dlg.locator('form#previewReviewForm').waitFor({timeout: 30000}).catch(() => {});
+            return form;
+        };
+        // the reviewer's wizard
+        H.wizardTo3 = async (id, label, locale = '') => {
+            await page.goto(url(`${locale ? '/' + locale : ''}/reviewer/submission/${id}`)); await idle(page);
+            await page.waitForFunction(() => !/Loading/.test(document.querySelector('main')?.innerText || ''), null, {timeout: 20000}).catch(() => {});
+            const onStep = async () => (await page.locator('[role=tab][aria-selected=true]').first().innerText().catch(() => '')).trim();
+            const landing = await onStep();
+            if (!/^3\./.test(landing)) {
+                const priv = page.getByRole('checkbox', {name: /privacy statement|confidentialit/i}); if (await priv.count()) await priv.first().check().catch(() => {});
+                for (let i = 0; i < 2; i++) {
+                    const b = page.locator('main').getByRole('button', {name: /continue|continu|étape|step/i}).first();
+                    if (await b.count()) { await b.click(); await idle(page); await sleep(400); }
+                }
+            }
+            await page.waitForFunction(() => /^3/.test(document.querySelector('[role=tab][aria-selected=true]')?.textContent.trim() || ''), null, {timeout: 30000}).catch(() => {});
             await idle(page);
-            r.copyPreview = await dlg.locator('form#previewReviewForm').innerText().then(flat).catch(() => null);
-            await full(page, 'd-copy-preview-tab', {preview: r.copyPreview});
-            log('[d copy window]', JSON.stringify(r.copyActions), r.copyTitleValue, '| items:', r.copyItems, '| preview:', r.copyPreview);
-            await dlg.getByRole('button', {name: 'Close', exact: true}).first().click().catch(() => page.keyboard.press('Escape'));
-            await idle(page);
-            // Order: drag the copy to the top, Done, reload
-            await gridLoc(page).locator('a.pkp_linkaction_orderItems').first().click();
-            await idle(page);
-            r.orderingMode = await page.evaluate(() => { const g = [...document.querySelectorAll('.pkp_controllers_grid')].find((x) => x.getClientRects().length); const t = (el) => el.innerText.trim().replace(/\s+/g, ' '); return {links: [...g.querySelectorAll('a')].filter((a) => a.getClientRects().length && t(a) && !a.closest('tbody')).map((a) => t(a)), cursor: getComputedStyle(g.querySelector('tbody tr.gridRow')).cursor}; });
-            await full(page, 'd-ordering-mode', {mode: r.orderingMode});
-            const moving = page.locator(`tr#${r.copyRowId}`).first();
-            const mb = await moving.locator('td').first().boundingBox();
-            const fb = await gridLoc(page).locator('tbody tr.gridRow').first().boundingBox();
-            const x = mb.x + 60, y0 = mb.y + mb.height / 2, y1 = fb.y + 4;
-            await page.mouse.move(x, y0); await page.mouse.down();
-            for (let i = 1; i <= 25; i++) await page.mouse.move(x, y0 + ((y1 - y0) * i) / 25);
-            await page.mouse.move(x, y1 - 2); await page.mouse.up();
-            r.afterDrag = (await readGrid(page)).rows.map((x) => x.id);
-            const responses = []; const l = (rr) => { if (/sequence|review-form/i.test(rr.url())) responses.push({method: rr.request().method(), url: rr.url().replace(/^https?:\/\/[^/]+/, '').slice(0, 200), status: rr.status()}); }; page.on('response', l);
-            await gridLoc(page).locator('a.saveButton').first().click();
-            await idle(page); page.off('response', l);
-            r.doneResponses = responses; r.doneNotices = await notices$(page);
-            await full(page, 'd-after-done', {order: r.afterDrag, responses, notices: r.doneNotices});
-            await page.goto(app.url(`/index.php/${scratch.path}/en/management/settings/website`)); await idle(page);
-            await openForms(page, app, scratch.path);
-            r.afterReload = await readGrid(page);
-            await full(page, 'd-after-reload', {grid: r.afterReload});
-            log('[d order]', JSON.stringify(r.orderingMode), 'copy', r.copyRowId, 'afterDrag', JSON.stringify(r.afterDrag), JSON.stringify(r.doneResponses), JSON.stringify(r.doneNotices), 'afterReload', JSON.stringify(r.afterReload.rows.map((x) => [x.id, x.title, x.checked])));
-            // activate the copy; Add Reviewer names it first
-            r.activateCopy = await toggleActive(page, page.locator(`tr#${r.copyRowId}`).first(), 'd-activate-copy-dialog');
-            r.gridActivated = await readGrid(page);
-            r.addReviewer = await addReviewerList(page, app, scratch.path, scratch.s3, REV2, 'd-add-reviewer-copy-first');
-            log('[d add reviewer]', JSON.stringify(r.gridActivated.rows.map((x) => [x.id, x.title, x.checked])), JSON.stringify(r.addReviewer.options));
-            // delete the copy
-            await openForms(page, app, scratch.path);
-            const ctlDel = await rowActions(page, page.locator(`tr#${r.copyRowId}`).first());
-            await ctlDel.getByRole('link', {name: 'Delete', exact: true}).click();
-            r.deleteDialog = await readDialog(page);
-            await full(page, 'd-delete-dialog', {dialog: r.deleteDialog});
-            r.deleteResult = await confirmDialog(page, 'OK');
-            await page.goto(app.url(`/index.php/${scratch.path}/en/management/settings/website`)); await idle(page);
-            await openForms(page, app, scratch.path);
-            r.gridAfterDelete = await readGrid(page);
-            await full(page, 'd-forms-list-after-delete-copy', {grid: r.gridAfterDelete, result: r.deleteResult});
-            log('[d delete copy]', flat(r.deleteDialog.at(-1)?.text, 200), JSON.stringify(r.deleteResult), JSON.stringify(r.gridAfterDelete.rows.map((x) => [x.id, x.title, x.cells.slice(1, 3), x.checked])));
-            // declined-only Form C: s4's Edit window before, delete, after (Form B still active)
-            r.editS4Before = await editReviewerRow(page, app, scratch.path, scratch.s4, 'Paul', 'd-edit-s4-before-delete');
-            log('[d edit s4 before]', JSON.stringify(r.editS4Before.list), flat(r.editS4Before.rowText, 120));
-            await openForms(page, app, scratch.path);
-            const ctlC = await rowActions(page, rowLoc(page, 'Form C'));
-            r.formCActions = await ctlC.locator('a:visible').allInnerTexts();
-            await ctlC.getByRole('link', {name: 'Delete', exact: true}).click();
-            r.deleteCDialog = await readDialog(page);
-            r.deleteCResult = await confirmDialog(page, 'OK');
-            await page.goto(app.url(`/index.php/${scratch.path}/en/management/settings/website`)); await idle(page);
-            await openForms(page, app, scratch.path);
-            r.gridAfterDeleteC = await readGrid(page);
-            await full(page, 'd-forms-list-after-delete-c', {grid: r.gridAfterDeleteC, result: r.deleteCResult});
-            r.editS4After = await editReviewerRow(page, app, scratch.path, scratch.s4, 'Paul', 'd-edit-s4-after-delete');
-            log('[d delete C]', JSON.stringify(r.formCActions), JSON.stringify(r.deleteCResult), JSON.stringify(r.gridAfterDeleteC.rows.map((x) => [x.title, x.cells.slice(1, 3), x.checked])), 'edit s4 after', JSON.stringify(r.editS4After.list), flat(r.editS4After.rowText, 120));
-            await signOut(page);
-            out.d = r; save();
-        }
-        // ---------------- e: {OJS} the section's default review form preselects in Add Reviewer
-        if (on('e') && !omp) {
-            const r = {};
-            await signIn(page, scratch.mgr, {contextPath: scratch.path});
-            await page.goto(app.url(`/index.php/${scratch.path}/en/management/settings/context#sections`)); await idle(page);
-            await page.getByRole('tab', {name: 'Sections', exact: true}).click().catch(() => {}); await idle(page);
-            const sgrid = page.locator('[role="tabpanel"]:visible .pkp_controllers_grid').last();
-            await sgrid.locator('table').waitFor({timeout: 30000});
-            const first = sgrid.locator('tr.gridRow').first();
-            r.sectionTitle = flat(await first.innerText(), 80);
-            const sctl = await rowActions(page, first);
-            await sctl.getByRole('link', {name: 'Edit', exact: true}).click();
-            const dlg = page.locator('[role=dialog]').filter({has: page.locator('form[id*="ection"]')}).last();
-            await dlg.locator('select[name="reviewFormId"]').waitFor({timeout: 30000});
-            await idle(page);
-            r.sectionSelect = await dlg.locator('select[name="reviewFormId"]').evaluate((s) => [...s.options].map((o) => ({value: o.value, text: o.text, selected: o.selected})));
-            await full(page, 'e-section-edit', {select: r.sectionSelect});
-            await dlg.locator('select[name="reviewFormId"]').selectOption({label: 'Form B'});
-            await dlg.getByRole('button', {name: 'Save', exact: true}).click();
-            await page.waitForFunction(() => !document.querySelector('form[id*="ection"]'), null, {timeout: 20000}).catch(() => {});
-            r.saveNotices = await notices$(page);
-            await idle(page);
-            await full(page, 'e-section-saved', {notices: r.saveNotices});
-            r.addReviewer = await addReviewerList(page, app, scratch.path, scratch.s3, REV2, 'e-add-reviewer-section-default');
-            log('[e section]', r.sectionTitle, JSON.stringify(r.sectionSelect), JSON.stringify(r.saveNotices), JSON.stringify(r.addReviewer.options));
-            await signOut(page);
-            out.e = r; save();
-        }
-    } catch (e) {
-        out.error = {message: flat(e.message, 600), stack: flat(e.stack, 1200), url: page.url()};
-        save();
-        await full(page, 'error').catch(() => {});
-        log('[error]', out.error.message, page.url());
-    } finally {
-        out.browserDialogs = browserDialogs; save();
-        await close();
+            const s3 = await H.full(`${label}-step3`);
+            return {landing, step: await onStep(), text: (s3.text?.main || '').slice(0, 3000), walk: await H.walk(page.locator('main'))};
+        };
+        H.submitReview = async (label) => {
+            const out = {};
+            await page.getByRole('button', {name: 'Submit Review'}).first().click();
+            await page.waitForFunction(() => [...document.querySelectorAll('[role="dialog"]')].some((e) => e.offsetParent !== null && /sure/i.test(e.innerText)), null, {timeout: 8000}).catch(() => {});
+            out.confirm = await H.readDialog().catch(() => null);
+            if (out.confirm) await H.dlg().getByRole('button', {name: 'OK', exact: true}).last().click();
+            await page.waitForFunction(() => /^4/.test(document.querySelector('[role=tab][aria-selected=true]')?.textContent.trim() || '') || /required|obligatoire/i.test(document.querySelector('main')?.innerText || ''), null, {timeout: 30000}).catch(() => {});
+            await idle(page); await sleep(500);
+            const s = await H.full(`${label}-after-submit`);
+            out.step = (await page.locator('[role=tab][aria-selected=true]').first().innerText().catch(() => '')).trim();
+            out.errors = await texts(page.locator('main .error, main label.error, main .pkp_form_error, main .formError, main [class*="error"]:visible'));
+            out.head = (s.text?.main || '').slice(0, 600);
+            return out;
+        };
+        return H;
     }
+
+    const REDO = (process.env.REDO || '').split(',').filter(Boolean);
+    const sect = async (label, fn) => {
+        if (process.env.SKIP_DONE === '1' && facts.steps[label] !== undefined && !facts.errors[label] && !REDO.includes(label)) { log(`[skip ${label}]`, app.name); return; }
+        delete facts.errors[label];
+        try { await fn(); } catch (e) { facts.errors[label] = String(e.stack || e).slice(0, 900); log(`[ERROR ${label}]`, app.name, facts.errors[label].slice(0, 400)); } };
+    const withPage = async (ctx, fn) => {
+        const {page, close} = await launch(app);
+        page.on('dialog', async (d) => { facts.browserDialogs.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); });
+        const H = bind(page, ctx);
+        try { await fn(page, H); } finally { await signOut(page).catch(() => {}); await close(); saveFacts(); }
+    };
+
+    // =========================== A1: manager on context A ===========================
+    if (on('a1')) await withPage(sc.A, async (page, H) => {
+        const ctx = sc.A;
+        await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+        // scenario 7: the row of a form in use, and its Preview window
+        await sect('a1_list', async () => {
+            await H.openForms();
+            await H.full('a1-list');
+            const g = await H.readGrid(H.grid());
+            done('a1_list', {columns: g.columns, gridActions: g.gridActions, rows: g.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active}))});
+            done('a1_row_actions', await H.rowActions(H.grid(), 'Method check'));
+            await H.full('a1-row-actions');
+        });
+        await sect('a1_preview', async () => {
+            await H.openFormWindow('Method check', 'Preview');
+            const info = await H.windowInfo();
+            await H.full('a1-preview-window');
+            const walk = await H.walk(H.dlg().locator('.ui-tabs-panel:visible').first());
+            done('a1_preview', {window: info, walk});
+            await H.closeWindow();
+        });
+        // scenario 7: Copy › OK; the copy's row, its Edit › Form Items
+        await sect('a1_copy', async () => {
+            const controls = await H.expandRow(H.rowOf(H.grid(), 'Method check', 0));
+            await controls.getByRole('link', {name: 'Copy', exact: true}).first().click();
+            const confirm = await H.readDialog();
+            await H.full('a1-copy-confirm');
+            const notices = await H.pressDialog('OK');
+            await H.grid().locator('tbody tr.gridRow').nth(1).waitFor({timeout: 20000});
+            const g = await H.readGrid(H.grid());
+            await H.full('a1-after-copy');
+            const copyActions = await H.rowActions(H.grid(), 'Method check', 1);
+            await H.full('a1-copy-row-actions');
+            done('a1_copy', {confirm, notices, rows: g.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active})), copyActions});
+        });
+        // Rule 14 on the copy: the items list, row actions, the "Edit" item window (seeded included=false item)
+        await sect('a1_items', async () => {
+            await H.openFormWindow('Method check', 'Edit', 1);
+            const win = await H.windowInfo();
+            await H.clickFormTab('Form Items');
+            const items = await H.readGrid(H.itemsGrid());
+            await H.full('a1-copy-items');
+            const actions = await H.openItemEdit('Other remarks');
+            const info = await H.itemWindowInfo();
+            await H.full('a1-item-edit-other-remarks');
+            await loc(page, 'Item window: "Included in message to author" box', H.itemForm().locator('input[type=checkbox][name="included"]'));
+            await loc(page, 'Item window: "Reviewers required to complete item" box', H.itemForm().locator('input[type=checkbox][name="required"]'));
+            await H.itemForm().getByRole('link', {name: 'Cancel', exact: true}).first().click().catch(() => {});
+            await H.itemForm().waitFor({state: 'hidden', timeout: 10000}).catch(() => {});
+            done('a1_items', {window: win, items: {heading: items.heading, columns: items.columns, gridActions: items.gridActions, empty: items.empty, rows: items.rows.map((r) => r.cells)}, otherRemarksActions: actions, otherRemarksWindow: {heading: info.heading, labels: info.labels, checkboxes: info.checkboxes, type: info.type, listbuilder: info.listbuilder, buttons: info.buttons}});
+        });
+        // Rule 14: Delete an item of the copy
+        await sect('a1_delete_item', async () => {
+            const g = H.itemsGrid();
+            const controls = await H.expandRow(H.rowOf(g, 'One word, please'));
+            await loc(page, 'Form Items row: "Delete"', controls.getByRole('link', {name: 'Delete', exact: true}));
+            await controls.getByRole('link', {name: 'Delete', exact: true}).first().click();
+            const confirm = await H.readDialog();
+            await H.full('a1-item-delete-confirm');
+            const notices = await H.pressDialog('OK');
+            await sleep(800); await idle(page);
+            const after = await H.readGrid(H.itemsGrid());
+            await H.full('a1-items-after-delete');
+            done('a1_delete_item', {confirm, notices, rows: after.rows.map((r) => r.cells)});
+        });
+        // Rule 14: Create New Item lands at the bottom; the window closes with the notice
+        await sect('a1_create_item', async () => {
+            await H.openCreateItem();
+            const before = await H.itemWindowInfo();
+            await H.fillFrame(await H.itemQuestionFrame(), 'Extra word');
+            await H.selectType('Single word text box');
+            const saved = await H.saveItem();
+            const after = await H.readGrid(H.itemsGrid());
+            await H.full('a1-items-after-create');
+            done('a1_create_item', {heading: before.heading, saved, dialogsOpen: await page.locator('[role="dialog"]:visible').count(), rows: after.rows.map((r) => r.cells)});
+        });
+        // Rule 14: Order inside the window
+        await sect('a1_order_items', async () => {
+            await H.ensureItemsTab('Method check', 1);
+            const g = H.itemsGrid();
+            await loc(page, 'Form Items: "Order"', g.locator('.pkp_linkaction_orderItems'));
+            await g.locator('.pkp_linkaction_orderItems').first().click(); await sleep(500);
+            const ordering = await H.readGrid(g);
+            await H.full('a1-items-ordering');
+            await H.dragRowAbove(g, H.rowOf(g, 'Extra word'), H.rowOf(g, 'Is the method sound'));
+            const dragged = await H.readGrid(g);
+            const n = H.notices(3000);
+            await g.locator('.order_finish_controls .saveButton').click();
+            const notices = await n; await idle(page); await sleep(500);
+            await H.closeWindow();
+            await H.openFormWindow('Method check', 'Edit', 1);
+            await H.clickFormTab('Form Items');
+            const reopened = await H.readGrid(H.itemsGrid());
+            await H.full('a1-items-after-order');
+            done('a1_order_items', {orderingControls: ordering.finishControls, moveIcons: ordering.rows.map((r) => r.moveIcon), dragged: dragged.rows.map((r) => r.cells[0]), notices, reopened: reopened.rows.map((r) => r.cells[0])});
+        });
+        // A5: a saved radio item switched to a text type, saved, reopened
+        await sect('a1_a5', async () => {
+            await H.ensureItemsTab('Method check', 1);
+            await H.openItemEdit('Is the method sound');
+            const before = await H.itemWindowInfo();
+            const dialogsBefore = facts.browserDialogs.length;
+            await H.selectType('Extended text box');
+            const afterSwitch = await H.lbState();
+            await H.full('a1-a5-after-switch');
+            const saved = await H.saveItem();
+            await H.openItemEdit('Is the method sound');
+            const reopened = await H.itemWindowInfo();
+            await H.full('a1-a5-reopened');
+            await H.itemForm().getByRole('link', {name: 'Cancel', exact: true}).first().click().catch(() => {});
+            await H.itemForm().waitFor({state: 'hidden', timeout: 10000}).catch(() => {});
+            done('a1_a5', {before: {type: before.type, rows: before.listbuilder.rows.map((r) => r.text)}, browserDialogsDuringSwitch: facts.browserDialogs.slice(dialogsBefore), afterSwitchRows: afterSwitch.rows.map((r) => r.text), saved, reopened: {type: reopened.type, rows: reopened.listbuilder.rows.map((r) => r.text), errors: reopened.errors}});
+            await H.closeWindow();
+        });
+        // A2: deactivate the form in use; Add Reviewer afterwards
+        await sect('a1_a2_deactivate', async () => {
+            await H.openForms();
+            done('a1_a2_deactivate', await H.toggleActive('Method check', 'OK', 'a1-a2-deactivate', 0));
+            await page.reload(); await idle(page); await H.openForms();
+            const g = await H.readGrid(H.grid());
+            await H.full('a1-a2-after-reload');
+            done('a1_a2_after_reload', g.rows.map((r) => ({title: r.title, cells: r.cells, active: r.active})));
+        });
+        await sect('a1_a2_add_reviewer', async () => {
+            await H.openRound(ctx.sub1, 'a1-a2-review-stage');
+            done('a1_a2_add_reviewer', await H.addReviewerList('a1-a2', 'Robin'));
+        });
+    });
+
+    // =========================== A2: the reviewer on context A ===========================
+    if (on('a2')) await withPage(sc.A, async (page, H) => {
+        const ctx = sc.A;
+        await signIn(page, ctx.users.rev1, {contextPath: ctx.path}); await idle(page);
+        await sect('a2_step3', async () => {
+            const s3 = await H.wizardTo3(ctx.sub1, 'a2');
+            done('a2_step3', {landing: s3.landing, step: s3.step, walk: s3.walk, freeTextBoxes: (s3.text.match(/For author and editor|For editor only|Review Text|Comments for the editor/gi) || [])});
+        });
+        // Rule 15: "Submit Review" with the required item unanswered
+        await sect('a2_required', async () => {
+            done('a2_required', await H.submitReview('a2-required'));
+        });
+        // then answer everything and submit
+        await sect('a2_submit', async () => {
+            const main = page.locator('main');
+            await main.getByRole('radio', {name: 'Yes', exact: true}).first().check();
+            for (const ta of await main.locator('textarea[name^="reviewFormResponses"]:visible').all()) await ta.fill('Remarks from ccK5 (excluded from the author).');
+            for (const tb of await main.locator('input[type=text][name^="reviewFormResponses"]:visible').all()) await tb.fill('word');
+            const cb = main.locator('input[type=checkbox][name^="reviewFormResponses"]').first(); if (await cb.count()) await cb.check();
+            const sel = main.locator('select[name^="reviewFormResponses"]').first(); if (await sel.count()) await sel.selectOption({index: 1});
+            const rec = main.locator('select[name="reviewerRecommendationId"]'); if (await rec.count()) await rec.selectOption({label: 'Accept Submission'});
+            await H.full('a2-step3-filled');
+            done('a2_submit', await H.submitReview('a2-submit'));
+        });
+    });
+
+    // =========================== A3: manager and author on context A ===========================
+    if (on('a3')) await withPage(sc.A, async (page, H) => {
+        const ctx = sc.A;
+        await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+        // A2: re-tick Active (the activation warning)
+        await sect('a3_reactivate', async () => {
+            await H.openForms();
+            done('a3_reactivate', await H.toggleActive('Method check', 'OK', 'a3-reactivate', 0));
+        });
+        // Rule 15: the editor reads the review in full
+        await sect('a3_read_review', async () => {
+            await H.openRound(ctx.sub1, 'a3-review-stage');
+            const row = H.revTable().getByRole('row').filter({hasText: /Rowan/}).first();
+            const rowText = (await row.innerText()).replace(/\s+/g, ' ');
+            const btn = row.getByRole('button', {name: 'Read Review'});
+            if (await btn.count()) { await btn.first().click(); } else {
+                await row.getByRole('button', {name: 'More Actions'}).click();
+                await page.getByRole('menuitem', {name: /Review Details|Read Review/}).first().click();
+            }
+            await page.waitForFunction(() => [...document.querySelectorAll('[role="dialog"]')].some((e) => e.offsetParent !== null && /Method check/.test(e.innerText)), null, {timeout: 20000}).catch(() => {});
+            await idle(page);
+            await H.full('a3-read-review-manager');
+            const d = await H.readDialog();
+            done('a3_read_review', {rowText, dialog: d.title, hasItem1: /Is the method sound/.test(d.text), hasOtherRemarks: /Other remarks/.test(d.text), hasRemarkAnswer: /Remarks from ccK5/.test(d.text), buttons: d.buttons, text: d.text.slice(0, 1200)});
+            await H.dlg().getByRole('button', {name: /^Cancel$|^Close$/}).last().click().catch(() => {});
+            await idle(page);
+        });
+        // Rule 15: the decision email's reviews ("Request Revisions", left unsent)
+        await sect('a3_decision_email', async () => {
+            await H.openRound(ctx.sub1, 'a3-review-stage-decision');
+            const btn = page.getByRole('button', {name: /Request Revisions/}).first();
+            await loc(page, 'Review stage: "Request Revisions"', btn);
+            await btn.click(); await idle(page); await sleep(800);
+            const readFrames = async () => {
+                const bodies = [];
+                for (const f of page.frames()) { if (f === page.mainFrame()) continue; const t = await f.locator('body').innerText().catch(() => ''); if (t.trim()) bodies.push(t.trim().slice(0, 3000)); }
+                return bodies;
+            };
+            const steps = [];
+            let bodies = [];
+            for (let i = 0; i < 4; i++) {
+                const d = H.dlg();
+                const info = await d.evaluate((el) => ({heading: (el.querySelector('h1, h2, h3') || {}).innerText?.trim(), stepsText: el.innerText.trim().slice(0, 500), buttons: [...el.querySelectorAll('button')].filter((b) => b.getClientRects().length).map((b) => b.innerText.trim()).filter(Boolean)})).catch(() => null);
+                await H.full(`a3-request-revisions-step${i + 1}`);
+                bodies = await readFrames();
+                steps.push({info, frames: bodies.length});
+                if (bodies.some((b) => /Method check|Is the method sound/.test(b))) break;
+                const next = d.getByRole('button', {name: /^Next$|^Continue$/}).first();
+                if (!(await next.count())) break;
+                await next.click(); await idle(page);
+                await page.waitForFunction(() => !!(window.tinyMCE || window.tinymce)?.activeEditor?.initialized, null, {timeout: 15000}).catch(() => {});
+                await sleep(1200);
+            }
+            const all = bodies.join('\n');
+            done('a3_decision_email', {steps, hasItem1: /Is the method sound/.test(all), hasYes: /\bYes\b/.test(all), hasOtherRemarks: /Other remarks/.test(all), hasRemarkAnswer: /Remarks from ccK5/.test(all), hasOneWord: /One word, please/.test(all), bodies: bodies.map((b) => b.slice(0, 1500))});
+            // leave without recording the decision
+            const cancel = H.dlg().getByRole('button', {name: /^Cancel$/}).first();
+            if (await cancel.count()) await cancel.click().catch(() => {});
+            await sleep(600);
+            const confirm = page.locator('[role="dialog"]:visible').last();
+            const yes = confirm.getByRole('button', {name: /^Yes$|^OK$|^Leave$/}).first();
+            if (await yes.count()) await yes.click().catch(() => {});
+            await idle(page);
+            await H.full('a3-after-cancel-decision');
+        });
+        // Rule 15: the author's own reading
+        await sect('a3_author_read', async () => {
+            await signIn(page, ctx.users.au, {contextPath: ctx.path}); await idle(page);
+            await H.openRound(ctx.sub1, 'a3-author-stage', 'mySubmissions');
+            const readBtns = page.locator('[role="dialog"]:visible, main').getByRole('button', {name: /Read Review/});
+            const count = await readBtns.count();
+            let dialog = null;
+            if (count) {
+                await readBtns.first().click();
+                await page.waitForFunction(() => [...document.querySelectorAll('[role="dialog"]')].filter((e) => e.offsetParent !== null).length > 1, null, {timeout: 20000}).catch(() => {});
+                await idle(page);
+                await H.full('a3-read-review-author');
+                dialog = await H.readDialog();
+            }
+            done('a3_author_read', {readButtons: count, dialog: dialog && {title: dialog.title, buttons: dialog.buttons, hasItem1: /Is the method sound/.test(dialog.text), hasOtherRemarks: /Other remarks/.test(dialog.text), hasRemarkAnswer: /Remarks from ccK5/.test(dialog.text), hasOneWord: /One word, please/.test(dialog.text), text: dialog.text.slice(0, 1200)}});
+        });
+    });
+
+    // =========================== B1: manager on context B ===========================
+    if (on('b1')) await withPage(sc.B, async (page, H) => {
+        const ctx = sc.B;
+        await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+        // Rule 14: the empty items list
+        await sect('b1_empty_items', async () => {
+            await H.openForms();
+            const g = await H.readGrid(H.grid());
+            done('b1_list', g.rows.map((r) => ({title: r.title, cells: r.cells})));
+            if (!ctx.blankSeeded) {
+                await H.grid().getByText('Create Review Form', {exact: true}).first().click();
+                await H.dlg().locator('input[name^="title"]').first().waitFor({timeout: 15000});
+                await H.dlg().locator('input[name^="title"]').first().fill('Blank form');
+                await H.dlg().locator('form').getByRole('button', {name: 'Save', exact: true}).first().click();
+                await idle(page); await sleep(800);
+            }
+            await H.openFormWindow('Blank form', 'Edit');
+            await H.clickFormTab('Form Items');
+            const items = await H.readGrid(H.itemsGrid());
+            await H.full('b1-blank-items');
+            done('b1_empty_items', {heading: items.heading, columns: items.columns, gridActions: items.gridActions, empty: items.empty, rows: items.rows.length, panelText: (await H.dlg().locator('.ui-tabs-panel:visible').first().innerText()).trim().slice(0, 400)});
+            await H.closeWindow();
+        });
+        // Rule 16: one form language — the Create Review Form and item windows before French
+        await sect('b1_before_french', async () => {
+            await H.grid().getByText('Create Review Form', {exact: true}).first().click();
+            await H.dlg().locator('input[name^="title"]').first().waitFor({timeout: 15000}); await sleep(500);
+            const titleInputs = await H.dlg().locator('input[name^="title"]').evaluateAll((els) => els.map((e) => ({name: e.name, visible: e.offsetParent !== null})));
+            const descFrames = await H.dlg().locator('iframe').evaluateAll((els) => els.map((e) => e.id));
+            await H.full('b1-create-form-one-language');
+            await H.closeWindow();
+            done('b1_before_french', {titleInputs, descFrames});
+        });
+        // tick French under "Forms" (Settings › Website › Setup › Languages), ccK3's locators
+        await sect('b1_tick_french', async () => {
+            await page.goto(H.url('/management/settings/website')); await idle(page);
+            await page.locator('#setup-button').click(); await idle(page);
+            await page.getByRole('tab', {name: 'Languages', exact: true}).click();
+            await page.locator('#languageGridContainer .pkp_controllers_grid').waitFor({timeout: 20000}); await idle(page);
+            const box = page.locator('input[id*="fr_CA-formLocale"]').first();
+            await loc(page, 'Languages: French row "Forms" box', box);
+            const before = await box.isChecked();
+            if (!before) { await box.click(); await idle(page); await sleep(1000); }
+            await H.full('b1-languages');
+            done('b1_tick_french', {before, after: await box.isChecked()});
+        });
+        // Rule 16 with two form languages: the Create Review Form window (the item window and the reviewer are phase c1/c2 on context C)
+        await sect('b1_two_languages_form', async () => {
+            await H.openForms();
+            await H.grid().getByText('Create Review Form', {exact: true}).first().click();
+            await H.dlg().locator('input[name^="title"]').first().waitFor({timeout: 15000}); await sleep(500);
+            const titleInputs = await H.dlg().locator('input[name^="title"]').evaluateAll((els) => els.map((e) => ({name: e.name, visible: e.offsetParent !== null})));
+            const descFrames = await H.dlg().locator('iframe').evaluateAll((els) => els.map((e) => e.id));
+            const labels = await H.dlg().locator('label').evaluateAll((els) => els.filter((l) => l.getClientRects().length).map((l) => l.innerText.trim()).filter(Boolean));
+            await H.full('b1-create-form-two-languages');
+            await H.closeWindow();
+            done('b1_two_languages_form', {titleInputs, descFrames, labels});
+        });
+    });
+
+    // =========================== B2: the reviewer on context B, French and English ===========================
+    if (on('b2')) await withPage(sc.B, async (page, H) => {
+        const ctx = sc.B;
+        await signIn(page, ctx.users.rev, {contextPath: ctx.path}); await idle(page);
+        await sect('b2_fr', async () => {
+            const s = await H.wizardTo3(ctx.sub, 'b2-fr', 'fr_CA');
+            done('b2_fr', {url: page.url(), step: s.step, hasQun: /Q un \(fr\)/.test(s.text), hasQone: /Q one/.test(s.text), hasQtwo: /Q two/.test(s.text), hasQthree: /Q three/.test(s.text), title: /Lang form/.test(s.text), walk: s.walk.filter((w) => /^T:/.test(w)).slice(0, 40)});
+        });
+        await sect('b2_en', async () => {
+            const s = await H.wizardTo3(ctx.sub, 'b2-en', 'en');
+            done('b2_en', {url: page.url(), step: s.step, hasQun: /Q un \(fr\)/.test(s.text), hasQone: /Q one/.test(s.text), hasQtwo: /Q two/.test(s.text), walk: s.walk.filter((w) => /^T:/.test(w)).slice(0, 40)});
+        });
+    });
+
+    // =========================== C1: manager on context C (en + fr_CA UI locales) ===========================
+    if (on('c1') && !sc.C) {
+        const tC = tag('u29k5c');
+        const C = {mgr: `${tC}mgr`, au: `${tC}au`, rev: `${tC}rev`};
+        const ctxC = await app.api.createContext({tag: tC, context: {supportedLocales: ['en', 'fr_CA']}, users: [
+            {username: C.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+            {username: C.au, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+            {username: C.rev, roles: ['externalReviewer'], givenName: 'Casey', familyName: 'Reviewer'},
+        ], reviewForms: [{title: 'Lang form', description: 'Lang form description.', elements: [
+            {question: 'Q one', type: 'textfield'},
+            {question: 'Q two', type: 'textarea'},
+            {question: 'Q three', type: 'radiobuttons', options: ['Oui', 'Non']},
+        ]}]});
+        sc.C = {tag: tC, path: ctxC.path || tC, users: C};
+        saveScratch();
+        log('[seed C]', app.name, JSON.stringify(sc.C));
+    }
+    if (on('c1')) await withPage(sc.C, async (page, H) => {
+        const ctx = sc.C;
+        await signIn(page, ctx.users.mgr, {contextPath: ctx.path}); await idle(page);
+        await sect('c1_tick_french', async () => {
+            await page.goto(H.url('/management/settings/website')); await idle(page);
+            await page.locator('#setup-button').click(); await idle(page);
+            await page.getByRole('tab', {name: 'Languages', exact: true}).click();
+            await page.locator('#languageGridContainer .pkp_controllers_grid').waitFor({timeout: 20000}); await idle(page);
+            const box = page.locator('input[id*="fr_CA-formLocale"]').first();
+            const before = await box.isChecked();
+            if (!before) { await box.click(); await idle(page); await sleep(1000); }
+            await H.full('c1-languages');
+            done('c1_tick_french', {before, after: await box.isChecked()});
+        });
+        // Rule 16: the item window with two form languages ("Q three": Item, Description, Response Options)
+        await sect('c1_item_q3', async () => {
+            await H.openForms();
+            await H.openFormWindow('Lang form', 'Edit');
+            await H.clickFormTab('Form Items');
+            await H.openItemEdit('Q three');
+            const info = await H.itemWindowInfo();
+            const frameVis = await H.itemForm().locator('iframe').evaluateAll((els) => els.map((e) => ({id: e.id, visible: e.getClientRects().length > 0})));
+            const localeUi = await H.itemForm().evaluate((f) => [...f.querySelectorAll('.localizable, .pkp_form_localeToggle, .pkp_helpers_dropdown, .locale, [class*="locale"], [class*="Locale"]')].map((e) => `${e.tagName}.${e.className}:${(e.innerText || '').trim().slice(0, 40)}`).slice(0, 20));
+            await H.full('c1-item-q3-two-languages');
+            done('c1_item_q3', {labels: info.labels, iframes: frameVis, localeUi, listbuilder: info.listbuilder});
+            await H.itemForm().getByRole('link', {name: 'Cancel', exact: true}).first().click().catch(() => {});
+            await H.itemForm().waitFor({state: 'hidden', timeout: 10000}).catch(() => {});
+        });
+        // Rule 16: type a French question on "Q one" and save
+        await sect('c1_french_q1', async () => {
+            await H.ensureItemsTab('Lang form', 0);
+            await H.openItemEdit('Q one');
+            const frFrame = H.itemForm().locator('iframe[id*="question"][id*="fr_CA"]');
+            const frIds = await frFrame.evaluateAll((els) => els.map((e) => ({id: e.id, visible: e.getClientRects().length > 0})));
+            // a hidden French box sits behind a locale switch: try the toggles the legacy form uses
+            // the French editor sits in the box's localization popover, shown while the English editor has focus
+            // (MultilingualInputHandler focus/blur); the globe icon beside the toolbar is decorative
+            let toggled = null;
+            if (frIds.length && !frIds[0].visible) {
+                await H.itemForm().frameLocator('iframe[id*="question"][id*="en"]').first().locator('body').click();
+                await frFrame.first().waitFor({state: 'visible', timeout: 8000}).catch(() => {});
+                await sleep(400);
+                toggled = {
+                    frVisibleAfterEnFocus: await frFrame.first().isVisible().catch(() => false),
+                    frLabel: await H.itemForm().locator('label.locale_textarea').first().innerText().catch(() => null),
+                    popover: await H.itemForm().locator('.localization_popover_container').evaluateAll((els) => els.map((e) => ({cls: e.className, visible: e.getClientRects().length > 0}))),
+                };
+                await loc(page, 'Item window: the French "Item" editor (popover under the English one)', frFrame.first());
+                await H.full('c1-item-q1-french-shown');
+            }
+            const frVisible = await frFrame.first().isVisible().catch(() => false);
+            if (frIds.length) await H.fillFrame(H.itemForm().frameLocator('iframe[id*="question"][id*="fr_CA"]').first(), 'Q un (fr)');
+            await H.full('c1-item-q1-french-typed');
+            const saved = await H.saveItem();
+            await H.openItemEdit('Q one');
+            const frText = await H.itemForm().frameLocator('iframe[id*="question"][id*="fr_CA"]').first().locator('body').innerText().catch(() => null);
+            const enText = await H.itemForm().frameLocator('iframe[id*="question"]').first().locator('body').innerText().catch(() => null);
+            await H.full('c1-item-q1-reopened');
+            await H.itemForm().getByRole('link', {name: 'Cancel', exact: true}).first().click().catch(() => {});
+            await H.itemForm().waitFor({state: 'hidden', timeout: 10000}).catch(() => {});
+            await H.closeWindow();
+            done('c1_french_q1', {frIds, toggled, frVisible, saved, reopened: {en: enText, fr: frText}});
+        });
+        await sect('c1_title_popover', async () => {
+            await H.openForms();
+            await H.grid().getByText('Create Review Form', {exact: true}).first().click();
+            const en = H.dlg().locator('input[name="title[en]"]').first();
+            await en.waitFor({timeout: 15000}); await sleep(400);
+            const fr = H.dlg().locator('input[name="title[fr_CA]"]').first();
+            const before = await fr.isVisible().catch(() => false);
+            await en.click(); await sleep(600);
+            const after = await fr.isVisible().catch(() => false);
+            const frLabel = await H.dlg().locator('label.locale').first().innerText().catch(() => null);
+            const popover = await H.dlg().locator('.localization_popover_container, .localizationPopover, [class*="popover"]').evaluateAll((els) => els.map((e) => ({cls: e.className, visible: e.getClientRects().length > 0, text: e.innerText.trim().slice(0, 80)})));
+            await H.full('c1-create-form-title-focused');
+            await H.closeWindow();
+            done('c1_title_popover', {frVisibleBeforeFocus: before, frVisibleAfterFocus: after, frLabel, popover});
+        });
+        // the submission is seeded only once the French text is saved: a form in use has no "Edit"
+        if (!ctx.sub && !facts.errors.c1_french_q1) {
+            const sC = await app.api.createSubmission({tag: `${ctx.tag}s1`, context: ctx.path, submitter: ctx.users.au, title: `K5 C sub ${ctx.tag}`,
+                decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: ctx.users.rev, status: 'accepted', reviewForm: 'Lang form'}]}]});
+            sc.C.sub = sC.submissionId; saveScratch();
+            log('[seed C sub]', app.name, sc.C.sub);
+        }
+    });
+
+    // =========================== C2: the reviewer on context C, French and English ===========================
+    if (on('c2')) await withPage(sc.C, async (page, H) => {
+        const ctx = sc.C;
+        await signIn(page, ctx.users.rev, {contextPath: ctx.path}); await idle(page);
+        const pick = (s) => ({url: page.url(), step: s.step, hasQun: /Q un \(fr\)/.test(s.text), hasQone: /Q one/.test(s.text), hasQtwo: /Q two/.test(s.text), hasQthree: /Q three/.test(s.text), hasOui: /Oui/.test(s.text), title: /Lang form/.test(s.text), formText: (s.text.match(/Lang form[\s\S]{0,400}/) || [''])[0]});
+        await sect('c2_fr', async () => done('c2_fr', pick(await H.wizardTo3(ctx.sub, 'c2-fr', 'fr_CA'))));
+        await sect('c2_en', async () => done('c2_en', pick(await H.wizardTo3(ctx.sub, 'c2-en', 'en'))));
+    });
+
+    saveFacts();
+    log(`[k5 ${app.name}] done; errors: ${Object.keys(facts.errors).join(', ') || 'none'}`);
 });

@@ -355,6 +355,7 @@ abstract class PKPContextScenarioBuilder
                     'question' => $question,
                     'description' => $elementSpec->localized('description', $primaryLocale, ''),
                     'required' => (bool) $elementSpec->get('required', false),
+                    'included' => (bool) $elementSpec->get('included', true),
                     'type' => $type,
                     'options' => $options,
                 ];
@@ -372,7 +373,8 @@ abstract class PKPContextScenarioBuilder
     /**
      * Create one review form the way the Review Forms grid does:
      * ReviewFormForm::execute (inactive, sequence REALLY_BIG_NUMBER, then
-     * resequence), ReviewFormElementForm::execute per item (included,
+     * resequence), ReviewFormElementForm::execute per item (`included` as
+     * the item window's "Included in message to author" box, on by default;
      * sequence REALLY_BIG_NUMBER, then resequence; possibleResponses only on
      * the multiple-response types), and the grid's "Active" checkbox
      * (ReviewFormGridHandler::activateReviewForm: setActive(1) + update).
@@ -402,7 +404,7 @@ abstract class PKPContextScenarioBuilder
             $reviewFormElement->setQuestion($element['question'], null);
             $reviewFormElement->setDescription($element['description'], null);
             $reviewFormElement->setRequired($element['required'] ? 1 : 0);
-            $reviewFormElement->setIncluded(1);
+            $reviewFormElement->setIncluded($element['included'] ? 1 : 0);
             $reviewFormElement->setElementType($element['type']);
             $reviewFormElement->setPossibleResponses($element['options'], null);
             $reviewFormElementDao->insertObject($reviewFormElement);

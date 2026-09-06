@@ -290,22 +290,40 @@ so; it is not a guess.
   page cuts (the probe kit strips it on Login only); keep scratch tags
   short. Login; Register. Live-driven 2026-09-04, all three apps
   (`.reports/U05/cc-K3.md` K3-3, `cc-K4.md`).
-- Settings › Workflow › Review on the seeded journal and press is at the
-  install defaults. "Setup": "Default Review Mode" "Anonymous
-  Reviewer/Anonymous Author"; "Publicly Show Reviewer Comments", "Restrict
-  File Access", "One-click Reviewer Access" and "Reviewer Suggestion at
-  Submission" unticked; both deadlines 4 weeks; "Minimum Confirmed Reviews
-  Required" 0; the four reminder sliders 0 ("No reminder set"). "Reviewer
-  Guidance": every text empty (OMP: "Internal Review Guidelines" and
-  "External Review Guidelines"), the anonymity box unticked. "Review
-  Forms": none ("No Items"). {OJS} "Reviewer Recommendations": six active
-  options in order "Accept Submission" (Approved), "Revisions Required",
-  "Resubmit for Review", "Resubmit Elsewhere" (Revisions Requested),
-  "Decline Submission" (Not Approved), "See Comments" (With Comments), each
-  with "Edit" and "Delete". Side tabs: OJS four, OMP three; OPS has no
-  "Review" tab (its tabs are "Submission", "Preprint Server Library",
-  "Emails", "Tasks and Discussions"). Live-probed 2026-09-05
-  (`.reports/U29/pA` P1, `pB` P8, `pC1` P12, `pD` P21, P24, P25).
+- Settings › Workflow › Review on the seeded journal, and on every scratch
+  context, is at the install defaults: "Restrict File Access" off,
+  "One-click Reviewer Access" off, "Review Guidelines" (OMP: "Internal
+  Review Guidelines" and "External Review Guidelines") empty, "Competing
+  Interests" empty, "Default Review Mode" "Anonymous Reviewer/Anonymous
+  Author", both deadlines 4 weeks, "Minimum Confirmed Reviews Required" 0,
+  all four reminder sliders "No reminder set", "Publicly Show Reviewer
+  Comments" off, "Reviewer Suggestion at Submission" off. Live-probed
+  2026-09-04 (`.reports/U28/pA` P1) and 2026-09-05, OJS and OMP
+  (`.reports/U29/pA1` P1, `pA2` P5).
+- A scratch press has no series: the context scenario accepts no
+  `series[]`, and Settings › Press › Series reads "No Items". Live-probed
+  2026-09-05, OMP (`.reports/U29/pC2` P21).
+- Where a login lands: the site-level Login page lands every account on
+  the site index; a journal's own Login page lands managers, editors and
+  assistants on the editorial dashboard ("Assigned to me"), reviewers on
+  the review-assignments dashboard ("Action required"), authors on "My
+  Submissions" ("Active") and readers on the journal's reader-facing home.
+  Login. Live-probed 2026-09-06, all three apps (`.reports/U29/pF` P33).
+- An invited reviewer's "Accept Review, Continue to Step #2" needs the
+  privacy box ticked first; a typed `?step=2` before acceptance shows
+  step 1. Reviewer wizard. Live-probed 2026-09-05, OJS and OMP
+  (`.reports/U29/pB` P10).
+- A "Request Sent" row in the Reviewers panel shows no "Review due:" line;
+  the dates are in the row's "Edit" window and on the reviewer's step 1.
+  Reviewers panel. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K2.md`).
+- The one-click link in a request or reminder email is
+  `invitation/accept?id=N&key=…`, which answers a redirect to
+  `reviewer/submission?submissionId=…&reviewId=…`. Mailpit; the reviewer
+  wizard. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K2.md`).
+- A scratch context seeded `supportedLocales: ['en','fr_CA']` has French
+  under the "UI" column only; the settings forms get their language switch
+  once the "Forms" box is ticked in Settings › Website › Setup ›
+  Languages. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K3.md`).
 - A reviewer seeded through `POST scenarios/submission` gets no request
   email on either app; the request email (and the one-click link) comes
   only from the editor's "Add Reviewer" window. Mailpit. Live-probed
@@ -345,33 +363,28 @@ so; it is not a guess.
   Continue to OPS", which shows no confirmation) holds it. Settings › Users
   & Roles. Live-driven 2026-09-05 (`.reports/U28/cc-K6.md` K6-1,
   `cc-K6b.md`).
-- The seeded journals support `en` and `fr_CA` for the UI but only `en`
-  for forms (Website › Setup › Languages, "Forms" column), so settings and
-  review-form windows show one language; a scratch context from `POST
-  scenarios/context` inherits this (`supportedLocales` does not set form
-  locales). Live-probed 2026-09-05 (`.reports/U29/pC1` P15).
 - A roster reviewer named in `reviewRounds[].reviewers[]` on a scratch
   context is assigned but not enrolled there: absent from that context's
   Add Reviewer search and refused the wizard ("The current role does not
   have access to this operation."); use a throwaway `externalReviewer` in
   `users[]`. A reviewer's `reviewForm:` attaches only an active form.
-  Live-probed 2026-09-05, OJS and OMP (`.reports/U29/pA` header, `pC2`
+  Live-probed 2026-09-05, OJS and OMP (`.reports/U29-medium/pA` header, `pC2`
   header, `pD` P22).
 - A reviewer named in `reviewRounds[].reviewers[]` is no longer offered by
   that submission's Add Reviewer search, so a script that adds a second
   reviewer through the screen needs a second `externalReviewer` in
   `users[]`. `review: {numReviewsPerSubmission: N}` on the context reaches
   the round status box. Live-driven 2026-09-05, OJS and OMP
-  (`.reports/U29/cc-K1.md`).
+  (`.reports/U29-medium/cc-K1.md`).
 - A submission seeded `submitted: false` opens the author's wizard at
   `submission?id=<id>`; every uploaded file needs its type chosen before
   "Submit"; a Section Editor not assigned to a submission gets "Error" on
   its workflow page. Live-driven 2026-09-05, OJS and OMP
-  (`.reports/U29/cc-K2.md`).
+  (`.reports/U29-medium/cc-K2.md`).
 - {OJS} The "Reviewer Recommendations" table keeps no fixed order once a
   row is toggled or edited; a reviewer's "Save for Later" gives the review
   a recommendation without submitting it. Live-driven 2026-09-05
-  (`.reports/U29/cc-K6.md`).
+  (`.reports/U29-medium/cc-K6.md`).
 
 ## Where to change it
 
