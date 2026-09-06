@@ -467,14 +467,14 @@ whole context and that context only grows.
    that meets the missing key builds the fixture by hand through the
    screens, at several runs per cluster.
 
-   **About 40 browser calls per agent**, for every agent that drives
-   screens: probes, checkers, span checkers and a test author's throwaway
-   checks. The cost of a call grows with everything the agent has read
-   before it, so the same work costs about half in two agents of 30 calls
-   as in one of 60. Clusters and chunks are cut to fit. An agent that
-   reaches the ceiling writes its report on what it has, lists the
-   remainder, and exits; a fresh agent takes the remainder, starting from
-   the report and the screen notes.
+   **About 40 browser calls per agent is the planning size**, for every
+   agent that drives screens: probes, checkers, span checkers and a test
+   author's throwaway checks. The cost of a call grows with everything the
+   agent has read before it, so the same work costs about half in two
+   agents of 30 calls as in one of 60. Clusters and chunks are cut to fit.
+   The size is for planning, not a stop: an agent finishes its cluster or
+   chunk even when it runs past 40, because a hand-over to a fresh agent
+   loses more context than the extra calls cost.
 
    **Screen notes.** `.reports/<feature>/screen-notes.md` is the one file
    every agent that drives screens reads first and appends to: per screen,
@@ -577,8 +577,8 @@ whole context and that context only grows.
      points & surfaces" table. A claim naming two screens sits in one chunk
      and its owner drives both. The chunk report stays in spec-section
      order, because the fold needs it that way.
-   - **About 40 calls per checker** (step 3's ceiling), and the chunks are
-     cut to fit it. The brief names the chunk's probe cluster, its scripts
+   - **About 40 calls per checker** (step 3's planning size), and the
+     chunks are cut to fit it; a checker finishes its chunk regardless. The brief names the chunk's probe cluster, its scripts
      and the screen notes; the checker starts from them and still drives
      every line.
    - **Checks are kept.** A checker's scripts live in
@@ -710,7 +710,7 @@ PROGRESS note names the last gate reached.
   `screen-notes.md` and the return format. Never paraphrase a rule into a
   brief, and never retype into one a fact that belongs in the screen
   notes. A brief for an agent that drives screens names the
-  ~40-call budget (step 3).
+  ~40-call planning size (step 3).
 - **Fresh agents, short transcripts.** An agent that drives screens is
   always fresh. Message an existing agent only when its transcript is
   smaller than what a fresh agent would read. One or two agents at a time.

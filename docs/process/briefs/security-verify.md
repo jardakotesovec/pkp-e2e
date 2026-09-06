@@ -21,7 +21,7 @@ Task:
 
 Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`note()` in the kit). Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
-Budget: about 15 browser calls, within step 7's ~40.
+Size: about 15 browser calls; finish the item even if it takes more.
 
 Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Never edit anything under `checkouts/`. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape before you return.
 

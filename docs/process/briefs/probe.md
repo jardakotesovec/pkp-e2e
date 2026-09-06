@@ -19,7 +19,7 @@ Your slice: **{{cluster}}** of `{{probe_list_path}}`, items {{items}}. Read the 
 
 Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`note()` in the kit); grep the sibling `screen-locators.md` for a locator another agent found. Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
-Budget: about 40 browser calls (RUNBOOK step 3). When you reach it, write the report on what you have, list the remaining items, and exit.
+Size: the cluster is cut for about 40 browser calls (RUNBOOK step 3). Finish every item even if it takes more; do not stop at a count.
 
 Report: `.reports/{{feature}}/{{agent}}/report.md`, written for the digest agent and the maintainer as step 3 says: one section per item in the list's order, the claim answered first, the incidental observations separately, the locator used, every on-screen string that differs between apps quoted verbatim per app, and the snapshot file names. Facts only, no spec prose, no severity judgments.
 
