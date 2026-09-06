@@ -363,7 +363,10 @@ Settings
 
 <!-- Named journeys a QA person can act out on any install. These are the
      units tests map onto: each app's suite implements them (RUNBOOK
-     multi-app rules). ORDER: first the scenarios COMMON to every app that
+     multi-app rules). WHEN: the draft carries each scenario's title and
+     given only (the plan); the full text is composed after the claim-check
+     fold from the verified body (RUNBOOK step 7 "Scenarios"), every
+     sentence a fact the Rules, Fields or Side effects already state. ORDER: first the scenarios COMMON to every app that
      has the feature, then the app-specific ones (title the block or badge
      the scenario). A common scenario is written once, app-neutral, and each
      app implements it in its own context (roles, data and vocabulary per

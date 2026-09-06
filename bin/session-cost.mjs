@@ -17,6 +17,7 @@ const ROLES = [
     ['finalize/fold', /finaliz|\bfold\b/i], ['merge', /\bmerge\b/i], ['claim check', /claim[ -]check/i],
     ['spec author', /spec author/i], ['test author', /test author/i], ['probe', /\bprobe\b/i],
     ['digest', /\bdigest\b/i], ['readability/persona', /persona/i], ['rewrite', /rewrite/i],
+    ['scenarios', /scenario writer/i],
 ];
 const roleOf = (meta) => {
     if (/^(Plan|Explore)$/.test(meta.agentType || '')) return 'explore/plan';

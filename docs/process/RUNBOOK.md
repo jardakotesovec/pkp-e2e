@@ -425,11 +425,13 @@ whole context and that context only grows.
    Every affordance on the feature's screens ends up covered by a rule or
    scenario, delegated to another spec with a checkable pointer, or
    explicitly waived. The draft's Coverage section (TEMPLATE) is written
-   with the scenarios: one row per actor, per state the Rules name and per
-   setting, each ending in the scenario that runs it or a one-line why not.
-   The scenarios are spent breadth first (TEMPLATE "Canonical scenarios",
-   "Spending the tier"): each opens a state or actor no other opens, and
-   depth goes inside it. Where the code is ambiguous, do not guess. Put the
+   with the draft: one row per actor, per state the Rules name and per
+   setting, each ending in the scenario planned for it or a one-line why
+   not. The draft's scenarios are the plan only: a numbered title and its
+   given per scenario, spent breadth first (TEMPLATE "Canonical scenarios",
+   "Spending the tier"), no steps. The full scenario text is composed
+   after the claim-check fold (step 7, "Scenarios"), from the verified
+   body, so the folds never patch scenarios written from the code. Where the code is ambiguous, do not guess. Put the
    question on the probe list the author returns with the draft. The author
    never probes. Every probe item is phrased as screen actions and
    observations: "as role R, on screen S, do X; record what appears". An
@@ -544,8 +546,8 @@ whole context and that context only grows.
    is left half-folded. A refusal or safeguard flag is not a stall: pause
    per "Model discipline", and never re-press the brief or water down the
    item to get around it.
-5. **Readability check.** One pass, after the claim-check fold (step 7),
-   which is the last change to the wording before the tests derive from
+5. **Readability check.** One pass, after step 7's fold and scenarios,
+   which are the last change to the wording before the tests derive from
    it. A separate subagent reads the whole body in strict persona: a QA
    person who knows the applications and has read the GLOSSARY, has no
    code access, has read no other spec, and reads only the body above the
@@ -622,7 +624,21 @@ whole context and that context only grows.
      sentence; it does not append a clause to it.
      Items that cannot be resolved become ❓ entries with a stated lean.
      The fold re-reads the Coverage section as step 4 does. After the fold,
-     re-run lint; then step 5 runs.
+     re-run lint.
+   - **Scenarios.** One fresh writer then composes the canonical scenarios
+     from the verified body: the draft's titles and givens, the Rules,
+     Fields, Side effects and the Coverage section, in TEMPLATE's shape
+     (steps in execution order, typed values named, outcomes quoted, one
+     Control each, the other side's effect read). Every sentence is a fact
+     the body already states, on-screen strings quoted from it; the writer
+     adds no claim of its own and, where a step would need one, leaves a
+     one-line why not in the Coverage row instead. It fills the Coverage
+     rows' "Runs in" column and the scenario footnote, and may add or drop
+     a planned scenario when the evidence changed the picture, saying so in
+     its log. The scenarios are verified by the suites: step 8 drives every
+     step of every scenario on every app, and a contradiction returns as a
+     step 9 finding. Lint to zero, the gate file is
+     `.reports/<feature>/scenarios-log.md`; then step 5 runs.
 8. **Write the Playwright tests** from the checked spec, following
    PRINCIPLES and the harness docs. One suite per app, derived from the spec
    (rules 2 and 3), one test per canonical scenario in each app that runs
@@ -635,7 +651,11 @@ whole context and that context only grows.
    every "nothing happens" claim with a positive control. Every absence
    the scenario states ("nothing else", "no list", "stays") is asserted
    with a settled, auto-waited read, never left unasserted (PRINCIPLES M6):
-   that assertion is the last net for a spec claim read too early. Locators,
+   that assertion is the last net for a spec claim read too early. The
+   suites are also the scenarios' verification (step 7, "Scenarios"): the
+   scenario text was composed from verified rules and never driven as a
+   walk, so a step that does not run as written is a finding, never a
+   test rewritten around it. Locators,
    dialogs and waiting idioms come from `screen-notes.md`, never from
    re-reading the probe scripts. Run with `--output` to a private directory
    and `--reporter=list`.
@@ -759,7 +779,7 @@ PROGRESS note names the last gate reached.
 | Claim checker | the same, plus the spec, step 7 and its chunk's probe scripts |
 | Test author | PRINCIPLES, harness.md, patterns.md, scenarios.md, the spec, `screen-notes.md` |
 | Reader persona | GLOSSARY, then the spec body only |
-| Writing agents (author, finalizer, rewrite, fold) | TEMPLATE (including "Write for a reader who has only this page"), the digest or change list, the spec; the author also reads the feature's rows in `incidentals.md` and the templates and locale files for labels |
+| Writing agents (author, finalizer, rewrite, fold, scenario writer) | TEMPLATE (including "Write for a reader who has only this page"), the digest or change list, the spec; the author also reads the feature's rows in `incidentals.md` and the templates and locale files for labels |
 
 An agent that reads the spec without folding it (digest, checker, test
 author) reads the body and only the footnotes its lines cite, never the

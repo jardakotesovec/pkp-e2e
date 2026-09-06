@@ -44,5 +44,6 @@ from scratch, and it never writes rules into one.
 | 7, one claim-check chunk (also step 9's span checker) | `claim-check.md` |
 | 7, merge three or more chunks | `merge.md` |
 | 7 and 9, fold a change list into the spec | `fold.md` |
+| 7, compose the scenarios after the fold | `scenario-writer.md` |
 | 8 and 9, one app's suite | `test-author.md` |
 | "What goes where", the security verification probe | `security-verify.md` |

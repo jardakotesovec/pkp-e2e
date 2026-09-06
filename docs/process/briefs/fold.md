@@ -23,7 +23,7 @@ Task, saving the spec after each section:
 1. Fold every `corrects` and `new` block into the rule, row, scenario, footnote or register entry it names, at the weight its user impact earns, by pasting the block's Proposed line in the reader's words. A correction replaces a sentence; it does not append a clause to it.
 2. Every `undetermined` block becomes a ❓ entry with the stated lean, a marker on the claim, or the claim leaves the spec; never a plain claim.
 3. Declared lines: {{declared_lines}}. Run `node docs/process/lint/lint-spec.mjs --claims {{spec_path}}` and check that each of them tags `no-screen`.
-4. Re-read the Coverage section: a state or setting the change list introduced gets a row, and no row is left without a scenario or a why not. Run `node docs/process/lint/lint-spec.mjs {{spec_path}}` and fix to zero.
+4. Re-read the Coverage section: a state or setting the change list introduced gets a row, planned for a scenario or given a one-line why not (at step 7 the scenario writer fills "Runs in" after you; at step 9 no row is left blank). Run `node docs/process/lint/lint-spec.mjs {{spec_path}}` and fix to zero.
 5. Before returning, read every span you changed against TEMPLATE "Write for a reader who has only this page" and fix what fails; step 5's reader is the gate, not this self-read.
 6. Write `{{fold_log_path}}`: one line per block saying what it became (rule text / register ID / footnote / marker / dropped, with the reason for any drop or downgrade); a "Suite-asserted claims touched" section (the change list's, each marked folded, softened or unchanged); a "left in `.reports/`" list; and a "Folded spans" section listing every passage you changed by section and rule, scenario or entry.
 
