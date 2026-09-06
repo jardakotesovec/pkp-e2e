@@ -8,6 +8,5 @@ docs/tracking/.reports/
 .reports/
 
 # Self-contained app checkouts + their files dirs (bin/fetch-apps.js) — never
-# committed. checkouts-s<N> are the extra permanent environments (--slot N).
+# committed.
 /checkouts/
-/checkouts-s*/
