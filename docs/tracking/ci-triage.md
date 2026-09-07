@@ -1,7 +1,8 @@
 # CI triage — known problems & failing tests
 
-Known-red tests on `main`, the flake classes that mimic regressions, and
-the companion branches waiting on app PRs. MAINTENANCE "Standing duties"
+Known-red tests on `main`, confirmed upstream regressions awaiting a fix,
+the flake classes that mimic regressions, and the companion branches
+waiting on app PRs. MAINTENANCE "Standing duties"
 and "A developer's PR fails the suite" say what to do with them.
 
 **Where to look.** Besides this repo's `e2e` workflow, every app repo runs
@@ -17,6 +18,18 @@ are not, so per-test detail comes from a local reproduction at the head SHA.
 
 | ID | Signature (what CI shows) | Apps | Canonical entry | Status | First seen / last confirmed |
 |----|---------------------------|------|-----------------|--------|-----------------------------|
+
+## Open regressions — confirmed upstream regressions awaiting a fix
+
+One row per regression the sync loop confirmed on reset databases and
+reported to the team (MAINTENANCE step 5), in territory no shipped suite
+reds on. Re-checked against the new tips every sync (step 6) by re-running
+its kept reproduction under `shared/playwright/checks/sync/`; deleted when
+the fix lands.
+
+| Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
+|-------------|---------|------|--------------|----------|-----------------|
+| pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). |
 
 ## Flake watch — known non-deterministic failure classes
 

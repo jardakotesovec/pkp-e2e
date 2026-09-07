@@ -106,8 +106,12 @@ The apps move; the suite follows. The baselines live in
    databases before it is a finding. A confirmed regression is reported
    on Mattermost with the evidence (commit, surface, steps, what was
    observed) AND sent as a direct message to @beaug and @jarda.kotesovec
-   the same day; nothing unconfirmed reaches either, because a false
-   regression report costs more than a missed one. If a shipped suite
+   the same day, and it gets a row in `ci-triage.md` "Open regressions"
+   with its reproduction script kept under
+   `shared/playwright/checks/sync/<pr>/` (the checks layout, importing
+   the kit as `require('../../../probe')`), so the next sync re-runs it
+   instead of re-deriving it; nothing unconfirmed reaches either, because
+   a false regression report costs more than a missed one. If a shipped suite
    should have caught it, that is a `friction.md` row or a pending-row
    note. Anything security-shaped follows RUNBOOK "What goes where":
    verify privately, on Mattermost say only THAT an observation was
@@ -116,8 +120,9 @@ The apps move; the suite follows. The baselines live in
    a dated log entry: one line per change reviewed (commit, coverage
    verdict, regression verdict when an agent read it, what was touched or
    filed), never a narrative. Then re-check the open
-   ci-triage rows and companion rows against the new tips and delete the
-   ones that are resolved. Commit. The baseline only advances when the
+   ci-triage rows (known-red tests, open regressions by re-running their
+   kept reproduction) and companion rows against the new tips and delete
+   the ones that are resolved. Commit. The baseline only advances when the
    range is actually triaged; a partial review leaves it where it was and
    says so in the log.
 
