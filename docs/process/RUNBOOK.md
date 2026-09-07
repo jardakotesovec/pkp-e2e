@@ -205,7 +205,10 @@ revise; the spec's classed Coverage table, in TEMPLATE's draft shape, is
 `docs/tracking/coverage-revision/U<nn>.md`: `S<n>` in "Runs in" where a
 scenario already covers the row, `planned` where none does, and under the
 table the plan for each gap (rides in `S<n>`, a scenario of its own, or
-no seed) and the suite mismatches `lint-spec.mjs --tests` reports.
+no seed) and the suite mismatches `lint-spec.mjs --tests` reports. The
+table is the spend: the extra counts the states the existing scenarios
+already cover, so a spec past its extra gains guards only and its other
+states stay under "Budget", where the maintainer can pull one back.
 
 1. **Claim and fleet prep** as steps 1 and 2.
 2. **Scenarios.** A scenario writer (`briefs/scenario-writer.md`, situation
