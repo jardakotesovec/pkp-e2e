@@ -439,18 +439,24 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      themselves: their bold leads name what each opens, their badges say
      which apps run them, so the section never restates them.
      "Left out": one bullet per reason, only the reasons that apply, in
-     this order, each opening with its reason word in bold:
-       - **Budget** — states: <the cut state rows, most valuable first>.
-         Variants: <the cut variant rows>. Never a main or guard row.
-       - **Nothing new to test**: <a role or state with the same screen as
-         a covered row, each naming the row it repeats; a role no screen
-         offers anything>.
-       - **Register carries it**: <a path a 🐞 or ❓ entry records; never a
-         test (PRINCIPLES M3)>.
-       - **No seed**: <a state the harness cannot build yet; this is the
-         harness backlog>.
-       - **Owned by another feature**: <the item, then the feature in
-         italics>.
+     this order, each opening with its reason word in bold and ending at
+     the colon; the items are indented bullets under it, one per line, so
+     a reviewer can point at one:
+       - **Budget** — states:
+         - <a cut state row, the most valuable first>
+       - **Budget** — variants:
+         - <a cut variant row>
+         (never a main or guard row)
+       - **Nothing new to test**:
+         - <a role or state with the same screen as a covered row, naming
+           the row it repeats; a role no screen offers anything>
+       - **Register carries it**:
+         - <a path a 🐞 or ❓ entry records; never a test (PRINCIPLES M3)>
+       - **No seed**:
+         - <a state the harness cannot build yet; this is the harness
+           backlog>
+       - **Owned by another feature**:
+         - <the item, then the feature in italics>
      Each item cites the body (a Rule, an Actors row, a register ID). No
      evidence in this section: a probe date is a footnote. Budget is the
      one bullet a reviewer argues with: an item there is reversed on

@@ -815,11 +815,57 @@ App-specific:
 
 Left out of the scenarios above, by reason:
 
-- **Budget** — states: a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9); Submit As offered to a user with two submitting roles, with the editorial-role hint (Fields); the Details and For the Editors panels once per language on Review (Rule 12); one language and one open section, with no "Submitting to…" line or "Change" control (Rule 11); a section that waives abstracts, and a press requiring one only when its setup says so (Rule 13); metadata, references, data citations, the data availability statement and funders at their "ask" end (Settings, "Metadata asked of authors" and "References, data citations, data availability, funders"); the category picker (Settings, "Categories"); the "Before you begin" guidance (Settings, "Start-of-submission guidance, checklist, privacy statement"); one open section applied without being shown (Rule 4); the reader-site "Make a Submission" block once enabled {OJS OMP} (Actors row 6, Rule 1). Variants: old bookmarked wizard addresses forwarding to the current wizard (Rule 1); a section's policy shown under the list (Fields); the start form with no checklist or privacy statement configured (Settings, "Start-of-submission guidance, checklist, privacy statement"); "Back", absent on the first step, the rail reopening reached steps only, the tab title and address per step (Rule 8); editing the "#…" part of the address, and a reload ignoring it (Rule 8); the "Disconnected" dialog when a save fails (Rule 10); the deleted draft's wizard address answering a bare page-not-found (Rule 16); a Journal Manager unsubscribed from the "needs an editor" email (Side effects).
-- **Nothing new to test**: Site Administrator opening any draft and offered "Cancel" (Actors rows 3–4; the Journal Manager's offer, scenario 4); every other role, with no "Cancel" control to press (Actors row 4; the Section Editor's screen, scenario 4); the closing screens shown to whoever may open the submission, the cancelled screen naming nothing (Actors row 5); a screening plugin granting can-post {OPS} (Settings, "Author screening"; the manager's variants, scenario 15's control).
-- **Register carries it**: A2 (the resume-link email going to a Journal Manager who pressed "Save for Later"); A6 (submitting the same draft twice); A9 (a Section Editor or Site Administrator pressing "Begin Submission"); A10 (the step rail at phone width); A12 (the Emails screen showing no acknowledgement option after off is saved); OMP2 (a second copy address on a press); OPS4 (a manager reading another author's completion screen).
-- **No seed**: a journal with a task template for the first workflow stage (Side effects, "Editorial task templates run"); a preprint server configured to register DOIs {OPS} (Side effects, "DOIs are assigned"); the site-wide substitution of the site's privacy statement (Settings, "Start-of-submission guidance, checklist, privacy statement").
-- **Owned by another feature**: the Upload Files panel and its file types (*Submission files*); the contributors panel (*Contributors & affiliations*); the references and data-citations sections (*Citations & references*); the Funders list (*Funding*); the meaning of the Details and For the Editors metadata fields (*Publication metadata*); the suggestions panel (*Reviewer suggestions*); section configuration (*Sections*); the intake screens (*Submission intake configuration*); the drafts list and the way into a submitted submission (*My Submissions*); where "Review this submission" lands (*Workflow screen & stage access*); the submission's arrival on its stage (*Submission stage*); the assignment email (*Stage participants*); the discussion's participants and the tasks (*Tasks & discussions*).
+- **Budget** — states:
+  - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9)
+  - Submit As offered to a user with two submitting roles, with the editorial-role hint (Fields)
+  - the Details and For the Editors panels once per language on Review (Rule 12)
+  - one language and one open section, with no "Submitting to…" line or "Change" control (Rule 11)
+  - a section that waives abstracts, and a press requiring one only when its setup says so (Rule 13)
+  - metadata, references, data citations, the data availability statement and funders at their "ask" end (Settings, "Metadata asked of authors" and "References, data citations, data availability, funders")
+  - the category picker (Settings, "Categories")
+  - the "Before you begin" guidance (Settings, "Start-of-submission guidance, checklist, privacy statement")
+  - one open section applied without being shown (Rule 4)
+  - the reader-site "Make a Submission" block once enabled {OJS OMP} (Actors row 6, Rule 1)
+- **Budget** — variants:
+  - old bookmarked wizard addresses forwarding to the current wizard (Rule 1)
+  - a section's policy shown under the list (Fields)
+  - the start form with no checklist or privacy statement configured (Settings, "Start-of-submission guidance, checklist, privacy statement")
+  - "Back", absent on the first step, the rail reopening reached steps only, the tab title and address per step (Rule 8)
+  - editing the "#…" part of the address, and a reload ignoring it (Rule 8)
+  - the "Disconnected" dialog when a save fails (Rule 10)
+  - the deleted draft's wizard address answering a bare page-not-found (Rule 16)
+  - a Journal Manager unsubscribed from the "needs an editor" email (Side effects)
+- **Nothing new to test**:
+  - Site Administrator opening any draft and offered "Cancel" (Actors rows 3–4; the Journal Manager's offer, scenario 4)
+  - every other role, with no "Cancel" control to press (Actors row 4; the Section Editor's screen, scenario 4)
+  - the closing screens shown to whoever may open the submission, the cancelled screen naming nothing (Actors row 5)
+  - a screening plugin granting can-post {OPS} (Settings, "Author screening"; the manager's variants, scenario 15's control)
+- **Register carries it**:
+  - A2 (the resume-link email going to a Journal Manager who pressed "Save for Later")
+  - A6 (submitting the same draft twice)
+  - A9 (a Section Editor or Site Administrator pressing "Begin Submission")
+  - A10 (the step rail at phone width)
+  - A12 (the Emails screen showing no acknowledgement option after off is saved)
+  - OMP2 (a second copy address on a press)
+  - OPS4 (a manager reading another author's completion screen)
+- **No seed**:
+  - a journal with a task template for the first workflow stage (Side effects, "Editorial task templates run")
+  - a preprint server configured to register DOIs {OPS} (Side effects, "DOIs are assigned")
+  - the site-wide substitution of the site's privacy statement (Settings, "Start-of-submission guidance, checklist, privacy statement")
+- **Owned by another feature**:
+  - the Upload Files panel and its file types (*Submission files*)
+  - the contributors panel (*Contributors & affiliations*)
+  - the references and data-citations sections (*Citations & references*)
+  - the Funders list (*Funding*)
+  - the meaning of the Details and For the Editors metadata fields (*Publication metadata*)
+  - the suggestions panel (*Reviewer suggestions*)
+  - section configuration (*Sections*)
+  - the intake screens (*Submission intake configuration*)
+  - the drafts list and the way into a submitted submission (*My Submissions*)
+  - where "Review this submission" lands (*Workflow screen & stage access*)
+  - the submission's arrival on its stage (*Submission stage*)
+  - the assignment email (*Stage participants*)
+  - the discussion's participants and the tasks (*Tasks & discussions*)
 
 ## Findings register
 

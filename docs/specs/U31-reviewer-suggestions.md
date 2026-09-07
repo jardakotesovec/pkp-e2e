@@ -489,10 +489,28 @@ in the footnote. <sup>s</sup>
 
 Left out of the scenarios above, by reason:
 
-- **Budget** — states: "Reviewer Suggestion at Submission" switched off after suggestions exist, then on again (Rule 8d); a submission moved on to Copyediting, its rows without the "…" menu. Variants: the panel and the list with the setting off (scenario 1's control reads the wizard step only); "Submit" with no suggestion (the warning is advisory); "Create New Reviewer" with "Email" changed (the suggestion stays pending); a window closed with unsaved text (the suggestion window, the Add Reviewer window, the inner window); the Journal Manager in an author's draft wizard (the Author's step, one route more).
-- **Nothing new to test**: assigned Section Editor, Guest Editor and Site Administrator (the Journal Manager's offer, scenarios 2 and 3); Reviewer and Reader (no screen offers them anything).
-- **Register carries it**: A2 (the "ORCID iD" box with "Enable ORCID functionality" on); A3 (a matched suggestion after the reviewer is unassigned or cancelled); A6 (the same address accepted in another case); A9 (the emptied entry's blank row); A10 (the inner window's "Back to Search"); A5's "Enroll an Existing User as Reviewer" path for the Funding Coordinator, not driven.
-- **Owned by another feature**: the "For Reviewer Suggestion" guidance text (*Submission intake configuration*); a second form language's boxes in the suggestion window (*Languages & locales*).
+- **Budget** — states:
+  - "Reviewer Suggestion at Submission" switched off after suggestions exist, then on again (Rule 8d)
+  - a submission moved on to Copyediting, its rows without the "…" menu
+- **Budget** — variants:
+  - the panel and the list with the setting off (scenario 1's control reads the wizard step only)
+  - "Submit" with no suggestion (the warning is advisory)
+  - "Create New Reviewer" with "Email" changed (the suggestion stays pending)
+  - a window closed with unsaved text (the suggestion window, the Add Reviewer window, the inner window)
+  - the Journal Manager in an author's draft wizard (the Author's step, one route more)
+- **Nothing new to test**:
+  - assigned Section Editor, Guest Editor and Site Administrator (the Journal Manager's offer, scenarios 2 and 3)
+  - Reviewer and Reader (no screen offers them anything)
+- **Register carries it**:
+  - A2 (the "ORCID iD" box with "Enable ORCID functionality" on)
+  - A3 (a matched suggestion after the reviewer is unassigned or cancelled)
+  - A6 (the same address accepted in another case)
+  - A9 (the emptied entry's blank row)
+  - A10 (the inner window's "Back to Search")
+  - A5's "Enroll an Existing User as Reviewer" path for the Funding Coordinator, not driven
+- **Owned by another feature**:
+  - the "For Reviewer Suggestion" guidance text (*Submission intake configuration*)
+  - a second form language's boxes in the suggestion window (*Languages & locales*)
 
 ## Findings register
 

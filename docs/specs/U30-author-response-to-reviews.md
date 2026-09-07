@@ -627,11 +627,35 @@ the footnote. <sup>s</sup>
 
 Left out of the scenarios above, by reason:
 
-- **Budget** — states: a request on a round with two assigned authors (one email, "To" naming both; Rule 13); a past round keeping its response while the new round starts empty (Rule 12); a declined request beside a completed review, the round still ready (Rule 3). Variants: the revisions email's "Submit Author Response" pressed on a journal (pressed on the press in scenario 7; on the journal the author opens the round from My Submissions); an open review's name in the email instead of "Reviewer 1:" (Rule 5).
-- **Nothing new to test**: Site Administrator (the Journal Manager's offer, scenarios 1 and 3); Guest Editor (the Section Editor's gate, scenario 6); Reviewer, Reader, and a Section Editor or Guest Editor not assigned to the submission, by the request page's typed address (the Author's access-denied page, scenario 6); the typed address on a preprint server with the preprint's own stage (scenario 7's page); Press Editor on Internal Review (External Review's absence, scenario 7); no reviewer on the round (the "Awaiting reviews" cell of scenario 1); the accepted round's card without a request (scenario 4's card under another status sentence); a review form on the assignment (the email's form block is the one *Reviewer's review* documents).
-- **Register carries it**: A3 (the Funding Coordinator's "View" window and refused "Delete"); A4 (the request page by typed address on a round that is not ready or holds a response); A5 (an emptied "Subject" or "Message" at "Submit Request"); A7 (revisions uploaded before responding); A8 (a cancelled request beside a completed review).
-- **No seed**: "Notify All Authors" at its default, the copy to other contributors (needs a contributor with an email and no account); "Notify All Authors" off (no scenario key).
-- **Owned by another feature**: the "Request Author Review Response" template (*Emails management*); "Publicly Show Reviewer Comments" (*Article landing page & reading*); a second form language's two "Author Response" boxes (*Languages & locales*).
+- **Budget** — states:
+  - a request on a round with two assigned authors (one email, "To" naming both; Rule 13)
+  - a past round keeping its response while the new round starts empty (Rule 12)
+  - a declined request beside a completed review, the round still ready (Rule 3)
+- **Budget** — variants:
+  - the revisions email's "Submit Author Response" pressed on a journal (pressed on the press in scenario 7; on the journal the author opens the round from My Submissions)
+  - an open review's name in the email instead of "Reviewer 1:" (Rule 5)
+- **Nothing new to test**:
+  - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
+  - Guest Editor (the Section Editor's gate, scenario 6)
+  - Reviewer, Reader, and a Section Editor or Guest Editor not assigned to the submission, by the request page's typed address (the Author's access-denied page, scenario 6)
+  - the typed address on a preprint server with the preprint's own stage (scenario 7's page)
+  - Press Editor on Internal Review (External Review's absence, scenario 7)
+  - no reviewer on the round (the "Awaiting reviews" cell of scenario 1)
+  - the accepted round's card without a request (scenario 4's card under another status sentence)
+  - a review form on the assignment (the email's form block is the one *Reviewer's review* documents)
+- **Register carries it**:
+  - A3 (the Funding Coordinator's "View" window and refused "Delete")
+  - A4 (the request page by typed address on a round that is not ready or holds a response)
+  - A5 (an emptied "Subject" or "Message" at "Submit Request")
+  - A7 (revisions uploaded before responding)
+  - A8 (a cancelled request beside a completed review)
+- **No seed**:
+  - "Notify All Authors" at its default, the copy to other contributors (needs a contributor with an email and no account)
+  - "Notify All Authors" off (no scenario key)
+- **Owned by another feature**:
+  - the "Request Author Review Response" template (*Emails management*)
+  - "Publicly Show Reviewer Comments" (*Article landing page & reading*)
+  - a second form language's two "Author Response" boxes (*Languages & locales*)
 
 ## Findings register
 
