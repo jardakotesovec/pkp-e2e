@@ -281,6 +281,12 @@ The long form of the legend. Each spec's Conventions line carries the three symb
   or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
   ruling · ✅ an intended difference. **Impact** is one plain word
   (user-visible / minor / invisible / latent).
+- **Coverage.** The canonical scenarios are what the automated suites
+  check: a scenario's bold leads name what it opens, its badge which apps
+  run it. The Coverage section lists what they leave out and why: a
+  **Budget** item is a cut the team can ask to reverse; the other reasons
+  (nothing new to test, a register entry records it, no way to seed the
+  state yet, another feature owns it) are not cuts.
 - **Placeholders.** A lowercase phrase in braces, {email} for one, stands for
   the value the screen fills in.
 - **Footnote marks** (`<sup>a</sup>`) point to evidence: code anchors, probe

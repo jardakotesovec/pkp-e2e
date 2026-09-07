@@ -226,56 +226,6 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
   Add Reviewer window's own (*Reviewer assignment & management*).
   <sup>k</sup> <sup>t14</sup>
 
-## Coverage
-
-Actors
-
-| Who | Runs in | Why not |
-|-----|---------|---------|
-| Author, on their own draft (add, edit, delete, Review step, submit) | scenario 1 | |
-| Author, after submitting (no panel on the author view) | inside scenario 1 | |
-| Journal Manager / Editor (panel on both stages, "Add Reviewer" from the panel, the list inside Add Reviewer) | scenarios 2 and 3 | |
-| Journal Manager on an author's draft (the wizard with the step) | | out of tier: the same step as the Author's, one route more |
-| Assigned Section Editor | | out of tier: the same offer as the Editor |
-| Guest Editor (OJS) | | out of tier: the same gate as the Section Editor |
-| Site Administrator, with or without a journal role | | out of tier: the same offer as the Journal Manager |
-| Funding Coordinator (error dialog, no panel: register A1; the unresponsive "Create New Reviewer" from the list: register A5) | scenario 4 | the "Enroll an Existing User as Reviewer" path for this role: not driven |
-| Reviewer, Reader | | no screen offers them anything |
-| Press Editor on Internal Review (no panel; the list inside Add Reviewer) | scenario 5 | |
-| Preprint Server Manager, Author on a preprint server (absence) | scenario 6 | |
-
-States
-
-| State | Runs in | Why not |
-|-------|---------|---------|
-| Draft with no suggestion (empty panel, the Review step's warning, "Submit" passes) | inside scenario 1 (the empty panel and the warning) | "Submit" with no suggestion: out of tier, a second draft for one advisory warning |
-| Draft with suggestions (add, edit, delete; "Save for Later" keeps them) | scenario 1 | |
-| A second suggestion with the same email address (refused; accepted in another case, register A6) | inside scenario 1 (the refusal) | the other-case entry: register A6 carries it |
-| Submitted, Submission stage (panel listed, no row action) | inside scenarios 1 and 2 | |
-| In review, current round (panel with "Add Reviewer" on each row) | scenario 2 | |
-| Suggestion turned into a reviewer: an account with a Reviewer role | inside scenario 2 (the row) and scenario 3 (the list) | |
-| Suggestion turned into a reviewer: an account without a Reviewer role | inside scenario 2 | |
-| Suggestion turned into a reviewer: no account | inside scenarios 2, 3 and 5 | |
-| Every suggestion turned into a reviewer (panel gone) | inside scenario 2 | |
-| Suggested person already a reviewer on the round (notice, no button) | inside scenario 3 | |
-| Matched suggestion after the reviewer is unassigned or cancelled (gone from the Review stage and the list, still on the Submission stage) | | register A3 carries it; out of tier |
-| Submission moved on to Copyediting (rows without the "…" menu) | | out of tier: one panel state more than the current-round state |
-| "Create New Reviewer" with "Email" changed (suggestion stays pending) | | out of tier: one form edit more than the no-account path |
-| A window closed with unsaved text: the suggestion window, the Add Reviewer window, the inner window (dropped, no warning) | | out of tier: one close control more than the main paths |
-| The inner window's "Back to Search" (a further window nested) | | register A10 carries it; not a user path |
-| The emptied entry's blank row after an inner "Add Reviewer" | | register A9 carries it; passed on the no-account path |
-
-Settings
-
-| Setting | Runs in | Why not |
-|---------|---------|---------|
-| "Reviewer Suggestion at Submission" off (default: no step, no panel, no list) | inside scenario 1 (the control: no step) | no panel and no list with the setting off: out of tier, with the flip row below |
-| "Reviewer Suggestion at Submission" on | scenarios 1 to 5 (the given) | |
-| Switched off after suggestions exist, then on again | | out of tier: the setting is flipped on its screen mid-scenario; Rule 8d carries the reading |
-| "Enable ORCID functionality" on ("ORCID iD" box after "Email"; only a full address saves; the iD shows in the "Edit" window only) | | register A2 carries it; out of tier |
-| "For Reviewer Suggestion" guidance text (Author Guidance; the default's misspelling is register A7) | | owned by *Submission intake configuration*; the step shows whatever the box holds |
-| A second form language (the window opens with one box; the other language's boxes behind its language button) | | owned by *Languages & locales*; the seeded and scratch journals have one form language |
-
 ## Cross-feature interactions
 
 - **Submission wizard** owns the step rail, the gate that adds the
@@ -310,165 +260,219 @@ scenario 1's control and scenario 6 run on the seeded journal and preprint
 server with ready accounts. Accounts, passwords and the tooling recipe are
 in the footnote. <sup>s</sup>
 
-1. **The author suggests reviewers on a draft**: Author, on their own
-   draft: open the draft's wizard; the step "Reviewer Suggestions" sits
-   between "For the Editors" and "Review". On it, the guidance text above
-   the panel begins "When submitting, you have the option to suggest
-   several potential reviewers." (the default text misspells "valuable"
-   [A7](#a7)), and the panel, headed "Reviewer Suggestions" with an "Add
-   Reviewer Suggestion" button, reads "No items found.". Press "Continue":
-   the "Review" step shows, under the heading "Reviewer Suggestions", the
-   warning "No reviewers have been suggested for this submission."; press
-   that block's "Edit" to return to the step. Press "Add Reviewer
-   Suggestion" and then "Save" with every box empty: "This field is
-   required." shows under "Given Name", "Email", "Affiliation" and "Reasons
-   for suggesting reviewer", the top of the window reads "Please correct 4
-   errors." with "Jump to next error", and "Save" cannot be pressed. Type
-   Kay in "Given Name": its message clears, the top reads "Please correct 3
-   errors." and "Save" still cannot be pressed. Type Suggested in "Family
-   Name", kay.suggested@mail.test in "Email" and Public Knowledge University
-   in "Affiliation": "Save" still cannot be pressed. Type "Expert in open
-   access publishing; no conflict of interest." in "Reasons for suggesting
-   reviewer": "Save" can be pressed again. Press "Save": the window closes
-   and the panel lists "Kay Suggested" with the
-   badge "Public Knowledge University", the address on the line below, and
-   "Edit" and "Delete" on the right. Add a second entry the same way (Lee
-   in "Given Name", Second in "Family Name", lee.second@mail.test in
-   "Email", Second University in "Affiliation", "Knows the corpus." in
-   "Reasons for suggesting reviewer"), then start a third with
-   kay.suggested@mail.test in "Email" and the other required boxes filled
-   as for Lee: "Save" is refused with "The email has already been taken."
-   under "Email" and the panel keeps two entries (the same address typed
-   in capitals would be accepted as a third [A6](#a6)); close the window.
-   Press "Edit" on Kay's entry: the window is titled "Edit" with her values
-   filled in; change "Affiliation" to Open University and press "Save": the
-   entry's badge reads "Open University". Press "Delete" on Lee's entry: a
-   dialog titled "Delete Reviewer Suggestion" asks "Are you sure you want
-   to remove this suggestion? This action can not be undone."; press
-   "Cancel": the entry stays; press "Delete" again and then "Delete
-   Reviewer Suggestion": the entry is gone. Press "Save for Later" and
-   reopen the draft from My Submissions: the step lists "Kay Suggested"
-   again. Press "Continue": the "Review" step's "Reviewer Suggestions"
-   block, with its "Edit" button, shows the full name, the email address
-   and the affiliation, and no reason. Press "Submit" and confirm in the
-   dialog that follows: the submission is in. Open it from My Submissions:
-   no stage of the author's view shows a suggestions panel [A4](#a4).
-   Journal Manager, on the same submission's Submission stage: under the
-   Participants panel, "Reviewers Suggested by Author" lists Kay's initials,
-   "Kay Suggested", "Open University" and the reason, with no action on the
-   row. Control: on the seeded journal, where "Reviewer Suggestion at
-   Submission" is off, a new draft's wizard has no "Reviewer Suggestions"
-   step. <sup>s1</sup>
+1. **The author suggests reviewers on a draft**
 
-2. **The editor turns suggestions into reviewers from the panel**: Journal
-   Manager, on a submission in review round 1 whose three suggestions are
-   Kay Suggested (her address belongs to an account holding the Reviewer
-   role), Lee Second (an account without a Reviewer role) and Nova Newcomer
-   (no account carries the address): open the Submission stage: under the
-   Participants panel, "Reviewers Suggested by Author" lists all three with
-   initials, full name, affiliation and reason, and no action on any row.
-   Open the Review stage: the same panel lists the three, and each row ends
-   in a "…" menu labelled "{name} More Actions" holding one action, "Add
-   Reviewer". Press "Add Reviewer" on Kay's row: the Add Reviewer window
-   opens on "Selected Reviewer" showing her name and email, with no "Locate
-   a Reviewer", the "Review Request" message and both due dates already
-   filled; press "Cancel": the window closes without asking and Kay stays
-   in the panel. Open it again and press "Add Reviewer": the Reviewers
-   panel lists Kay, and her row leaves "Reviewers Suggested by Author" at
-   once, with no reload. Press "Add Reviewer" on Lee's row: the window
-   opens on "Enroll an Existing User as Reviewer" with "Search By Name"
-   holding "Lee Second (lee.second@mail.test)" and "Enroll the user with
-   this reviewer user group" set to "Reviewer" (on a press "External
-   Reviewer"); press "Add Reviewer": the Reviewers panel lists Lee and his
-   row is gone from the panel. Press "Add Reviewer" on Nova's row: the
-   window opens on "Create New Reviewer" with "Given Name", "Family Name",
-   "Email" and "Affiliation" filled from the suggestion; press "Add
-   Reviewer" with "Username" empty: "This field is required." shows under
-   the box and Nova stays in the panel. Type nova in "Username" and press
-   "Add Reviewer": the Reviewers panel lists Nova, and "Reviewers Suggested
-   by Author" disappears from the Review stage. Kay's mailbox holds the
-   review request and Nova's the new reviewer's welcome email and the
-   request. Open the Submission stage
-   again: "Reviewers Suggested by Author" still lists all three, with no
-   action on any row. Control: a submission of the same journal with no
-   suggestion shows the panel on neither stage. <sup>s2</sup>
+   Given: Author, on their own draft.
 
-3. **The suggestions list inside Add Reviewer**: Journal Manager, on a
-   submission in review round 1 whose three suggestions are Kay Suggested
-   (on the round from the start, not through "Add Reviewer", so her
-   suggestion is still pending: Rule 11), Pat Peer (an account holding the
-   Reviewer role, not on the round) and Nova Newcomer (no account): press
-   the Reviewers panel's own "Add Reviewer": the window opens with a list
-   "Select a Reviewer from Reviewer Suggestions" above "Locate a Reviewer".
-   Pat's and Nova's entries show the full name, affiliation and reason with
-   a "Select Reviewer" button (named "Select undefined" to screen readers
-   [A8](#a8)); Kay's shows the notice "This reviewer has already been
-   assigned to this review round." and no button. Press "Select Reviewer"
-   on Pat's entry: this same window changes to "Selected Reviewer" with
-   his name and email; press "Add Reviewer": the Reviewers panel lists Pat. Press
-   the Reviewers panel's "Add Reviewer" again: the list no longer has
-   Pat's entry. Press "Select Reviewer" on Nova's entry: a
-   second "Add Reviewer" window opens on top, on "Create New Reviewer" with
-   "Given Name", "Family Name", "Email" and "Affiliation" filled from the
-   suggestion; type nova in "Username" and press "Add Reviewer": the inner
-   window closes, Nova's entry leaves the list (its emptied row stays as a
-   gap [A9](#a9)), Nova appears in "Locate a Reviewer" marked as already
-   assigned, and the outer window stays open. Press the "Close" arrow at
-   its top: the Reviewers panel lists Kay, Pat and Nova, and the Review
-   stage's "Reviewers Suggested by Author" lists Kay alone, with her "…"
-   menu. Control: on a submission of the same journal with no suggestion, "Add
-   Reviewer" opens with no "Select a Reviewer from Reviewer Suggestions"
-   list. <sup>s3</sup>
+   - **The step**: open the draft's wizard; the step "Reviewer Suggestions"
+     sits between "For the Editors" and "Review". On it, the guidance text
+     above the panel begins "When submitting, you have the option to
+     suggest several potential reviewers." (the default text misspells
+     "valuable" [A7](#a7)), and the panel, headed "Reviewer Suggestions"
+     with an "Add Reviewer Suggestion" button, reads "No items found.".
+   - **The Review step with no suggestion**: press "Continue": the "Review"
+     step shows, under the heading "Reviewer Suggestions", the warning "No
+     reviewers have been suggested for this submission."; press that
+     block's "Edit" to return to the step.
+   - **The required boxes**: press "Add Reviewer Suggestion" and then
+     "Save" with every box empty: "This field is required." shows under
+     "Given Name", "Email", "Affiliation" and "Reasons for suggesting
+     reviewer", the top of the window reads "Please correct 4 errors."
+     with "Jump to next error", and "Save" cannot be pressed. Type Kay in
+     "Given Name": its message clears, the top reads "Please correct 3
+     errors." and "Save" still cannot be pressed. Type Suggested in
+     "Family Name", kay.suggested@mail.test in "Email" and Public Knowledge
+     University in "Affiliation": "Save" still cannot be pressed. Type
+     "Expert in open access publishing; no conflict of interest." in
+     "Reasons for suggesting reviewer": "Save" can be pressed again.
+   - **Adding**: press "Save": the window closes and the panel lists "Kay
+     Suggested" with the badge "Public Knowledge University", the address
+     on the line below, and "Edit" and "Delete" on the right. Add a second
+     entry the same way (Lee in "Given Name", Second in "Family Name",
+     lee.second@mail.test in "Email", Second University in "Affiliation",
+     "Knows the corpus." in "Reasons for suggesting reviewer").
+   - **The same address twice**: start a third with kay.suggested@mail.test
+     in "Email" and the other required boxes filled as for Lee: "Save" is
+     refused with "The email has already been taken." under "Email" and
+     the panel keeps two entries (the same address typed in capitals would
+     be accepted as a third [A6](#a6)); close the window.
+   - **Editing**: press "Edit" on Kay's entry: the window is titled "Edit"
+     with her values filled in; change "Affiliation" to Open University
+     and press "Save": the entry's badge reads "Open University".
+   - **Deleting**: press "Delete" on Lee's entry: a dialog titled "Delete
+     Reviewer Suggestion" asks "Are you sure you want to remove this
+     suggestion? This action can not be undone."; press "Cancel": the
+     entry stays; press "Delete" again and then "Delete Reviewer
+     Suggestion": the entry is gone.
+   - **"Save for Later"**: press "Save for Later" and reopen the draft from
+     My Submissions: the step lists "Kay Suggested" again.
+   - **The Review step and "Submit"**: press "Continue": the "Review"
+     step's "Reviewer Suggestions" block, with its "Edit" button, shows
+     the full name, the email address and the affiliation, and no reason.
+     Press "Submit" and confirm in the dialog that follows: the submission
+     is in.
+   - **The author's view after submitting**: open it from My Submissions:
+     no stage of the author's view shows a suggestions panel [A4](#a4).
+   - **The Journal Manager's read**: Journal Manager, on the same
+     submission's Submission stage: under the Participants panel,
+     "Reviewers Suggested by Author" lists Kay's initials, "Kay Suggested",
+     "Open University" and the reason, with no action on the row.
+   - **Control**: on the seeded journal, where "Reviewer Suggestion at
+     Submission" is off, a new draft's wizard has no "Reviewer
+     Suggestions" step. <sup>s1</sup>
 
-4. **The Funding Coordinator meets the error dialog**: Funding Coordinator
-   assigned to a submission in review round 1 whose two suggestions are Kay
-   Suggested (an account holding the Reviewer role) and Nova Newcomer (no
-   account): open the Review stage: no "Reviewers Suggested by Author"
-   panel shows; instead a dialog titled "Error" opens, reading "The current
-   role does not have access to this operation.", with one button, "OK"
-   [A1](#a1); press "OK". Open the Submission stage: the same dialog; press
-   "OK". Back on the Review stage, press the Reviewers panel's "Add
-   Reviewer": the window opens with "Select a Reviewer from Reviewer
-   Suggestions" listing both, each with "Select Reviewer". Press "Select
-   Reviewer" on Kay's entry: this same window changes to "Selected
-   Reviewer" with her name and email; press "Add Reviewer": the Reviewers
-   panel lists Kay. Press the Reviewers panel's "Add Reviewer" again and
-   "Select Reviewer" on Nova's entry: a second window opens on "Create New
-   Reviewer", filled in; type nova in "Username" and press its "Add
-   Reviewer": the form stays open, no message shows and the Reviewers
-   panel does not gain Nova [A5](#a5); press the "Close" arrow of each
-   window. Control: Journal Manager, on the same submission's Review
-   stage: no dialog opens, and "Reviewers Suggested by Author" lists Nova
-   and not Kay. <sup>s4</sup>
+2. **The editor turns suggestions into reviewers from the panel**
 
-5. **Internal Review offers the list without the panel** {OMP}: Press
-   Editor, on a monograph in Internal Review round 1 whose two suggestions
-   are Nova Newcomer (no account) and Kay Suggested: open the Internal
-   Review stage: no "Reviewers Suggested by Author" panel shows
-   [OMP1](#omp1). Press the Reviewers panel's "Add Reviewer": the window
-   opens with "Select a Reviewer from Reviewer Suggestions" above "Locate a
-   Reviewer", listing both. Press "Select Reviewer" on Nova's entry: a
-   second "Add Reviewer" window opens on "Create New Reviewer", filled from
-   the suggestion; type nova in "Username" and press "Add Reviewer": the
-   inner window closes and Nova's entry leaves the list; press the "Close"
-   arrow: the internal round's Reviewers panel lists Nova. Record the
-   decision "Send to External Review" and open the External Review stage:
-   "Reviewers Suggested
-   by Author" lists Kay only, her row ending in the "…" menu with "Add
-   Reviewer"; the Reviewers panel's "Add Reviewer" window has Kay's entry
-   alone under "Select a Reviewer from Reviewer Suggestions"; the round's
-   Reviewers panel starts empty. Control: the Submission stage's "Reviewers
-   Suggested by Author" lists both, with no action, so the missing panel is
-   Internal Review's alone. <sup>s5</sup>
+   Given: Journal Manager, on a submission in review round 1 whose three
+   suggestions are Kay Suggested (her address belongs to an account holding
+   the Reviewer role), Lee Second (an account without a Reviewer role) and
+   Nova Newcomer (no account carries the address).
 
-6. **No suggestions on a preprint server** {OPS}: Author, on the seeded
-   preprint server: start a new submission; the wizard has no "Reviewer
-   Suggestions" step. Preprint Server Manager: Settings › Workflow has no
-   "Review" tab, so "Reviewer Suggestion at Submission" cannot be switched
-   on; the workflow screen of a posted preprint shows no "Reviewers
-   Suggested by Author" panel. Control: on a journal with the setting on,
-   the same wizard carries the step (scenario 1) and the same screen the
-   panel (scenario 2). <sup>s6</sup>
+   - **Submission stage**: under the Participants panel, "Reviewers
+     Suggested by Author" lists all three with initials, full name,
+     affiliation and reason, and no action on any row.
+   - **Review stage**: the same panel lists the three, and each row ends in
+     a "…" menu labelled "{name} More Actions" holding one action, "Add
+     Reviewer".
+   - **Kay's row, an account with the Reviewer role**: press "Add
+     Reviewer": the Add Reviewer window opens on "Selected Reviewer"
+     showing her name and email, with no "Locate a Reviewer", the "Review
+     Request" message and both due dates already filled. Press "Cancel":
+     the window closes without asking and Kay stays in the panel. Open it
+     again and press "Add Reviewer": the Reviewers panel lists Kay, and
+     her row leaves "Reviewers Suggested by Author" at once, with no
+     reload.
+   - **Lee's row, an account without the role**: press "Add Reviewer": the
+     window opens on "Enroll an Existing User as Reviewer" with "Search By
+     Name" holding "Lee Second (lee.second@mail.test)" and "Enroll the
+     user with this reviewer user group" set to "Reviewer" (on a press
+     "External Reviewer"). Press "Add Reviewer": the Reviewers panel lists
+     Lee and his row is gone from the panel.
+   - **Nova's row, no account**: press "Add Reviewer": the window opens on
+     "Create New Reviewer" with "Given Name", "Family Name", "Email" and
+     "Affiliation" filled from the suggestion. Press "Add Reviewer" with
+     "Username" empty: "This field is required." shows under the box and
+     Nova stays in the panel. Type nova in "Username" and press "Add
+     Reviewer": the Reviewers panel lists Nova, and "Reviewers Suggested
+     by Author" disappears from the Review stage.
+   - **Mailboxes**: Kay's holds the review request; Nova's the new
+     reviewer's welcome email and the request.
+   - **Submission stage again**: "Reviewers Suggested by Author" still
+     lists all three, with no action on any row.
+   - **Control**: a submission of the same journal with no suggestion shows
+     the panel on neither stage. <sup>s2</sup>
+
+3. **The suggestions list inside Add Reviewer**
+
+   Given: Journal Manager, on a submission in review round 1 whose three
+   suggestions are Kay Suggested (on the round from the start, not through
+   "Add Reviewer", so her suggestion is still pending: Rule 11), Pat Peer
+   (an account holding the Reviewer role, not on the round) and Nova
+   Newcomer (no account).
+
+   - **The list**: press the Reviewers panel's own "Add Reviewer": the
+     window opens with a list "Select a Reviewer from Reviewer
+     Suggestions" above "Locate a Reviewer". Pat's and Nova's entries show
+     the full name, affiliation and reason with a "Select Reviewer" button
+     (named "Select undefined" to screen readers [A8](#a8)); Kay's shows
+     the notice "This reviewer has already been assigned to this review
+     round." and no button.
+   - **Pat's entry, an account with the Reviewer role**: press "Select
+     Reviewer" on Pat's entry: this same window changes to "Selected
+     Reviewer" with his name and email; press "Add Reviewer": the
+     Reviewers panel lists Pat. Press the Reviewers panel's "Add Reviewer"
+     again: the list no longer has Pat's entry.
+   - **Nova's entry, no account**: press "Select Reviewer" on Nova's entry:
+     a second "Add Reviewer" window opens on top, on "Create New Reviewer"
+     with "Given Name", "Family Name", "Email" and "Affiliation" filled
+     from the suggestion; type nova in "Username" and press "Add
+     Reviewer": the inner window closes, Nova's entry leaves the list (its
+     emptied row stays as a gap [A9](#a9)), Nova appears in "Locate a
+     Reviewer" marked as already assigned, and the outer window stays
+     open.
+   - **After closing**: press the "Close" arrow at its top: the Reviewers
+     panel lists Kay, Pat and Nova, and the Review stage's "Reviewers
+     Suggested by Author" lists Kay alone, with her "…" menu.
+   - **Control**: on a submission of the same journal with no suggestion,
+     "Add Reviewer" opens with no "Select a Reviewer from Reviewer
+     Suggestions" list. <sup>s3</sup>
+
+4. **The Funding Coordinator meets the error dialog**
+
+   Given: Funding Coordinator assigned to a submission in review round 1
+   whose two suggestions are Kay Suggested (an account holding the Reviewer
+   role) and Nova Newcomer (no account).
+
+   - **Review stage**: open it: no "Reviewers Suggested by Author" panel
+     shows; instead a dialog titled "Error" opens, reading "The current
+     role does not have access to this operation.", with one button, "OK"
+     [A1](#a1); press "OK".
+   - **Submission stage**: open it: the same dialog; press "OK".
+   - **The list inside Add Reviewer**: back on the Review stage, press the
+     Reviewers panel's "Add Reviewer": the window opens with "Select a
+     Reviewer from Reviewer Suggestions" listing both, each with "Select
+     Reviewer". Press "Select Reviewer" on Kay's entry: this same window
+     changes to "Selected Reviewer" with her name and email; press "Add
+     Reviewer": the Reviewers panel lists Kay.
+   - **"Create New Reviewer" as this role**: press the Reviewers panel's
+     "Add Reviewer" again and "Select Reviewer" on Nova's entry: a second
+     window opens on "Create New Reviewer", filled in; type nova in
+     "Username" and press its "Add Reviewer": the form stays open, no
+     message shows and the Reviewers panel does not gain Nova [A5](#a5);
+     press the "Close" arrow of each window.
+   - **Control**: Journal Manager, on the same submission's Review stage:
+     no dialog opens, and "Reviewers Suggested by Author" lists Nova and
+     not Kay. <sup>s4</sup>
+
+5. **Internal Review offers the list without the panel** {OMP}
+
+   Given: Press Editor, on a monograph in Internal Review round 1 whose two
+   suggestions are Nova Newcomer (no account) and Kay Suggested.
+
+   - **Internal Review stage**: open it: no "Reviewers Suggested by Author"
+     panel shows [OMP1](#omp1).
+   - **The list inside Add Reviewer**: press the Reviewers panel's "Add
+     Reviewer": the window opens with "Select a Reviewer from Reviewer
+     Suggestions" above "Locate a Reviewer", listing both. Press "Select
+     Reviewer" on Nova's entry: a second "Add Reviewer" window opens on
+     "Create New Reviewer", filled from the suggestion; type nova in
+     "Username" and press "Add Reviewer": the inner window closes and
+     Nova's entry leaves the list; press the "Close" arrow: the internal
+     round's Reviewers panel lists Nova.
+   - **External Review stage**: record the decision "Send to External
+     Review" and open the External Review stage: "Reviewers Suggested by
+     Author" lists Kay only, her row ending in the "…" menu with "Add
+     Reviewer"; the Reviewers panel's "Add Reviewer" window has Kay's
+     entry alone under "Select a Reviewer from Reviewer Suggestions"; the
+     round's Reviewers panel starts empty.
+   - **Control**: the Submission stage's "Reviewers Suggested by Author"
+     lists both, with no action, so the missing panel is Internal
+     Review's alone. <sup>s5</sup>
+
+6. **No suggestions on a preprint server** {OPS}
+
+   Given: Author and Preprint Server Manager, on the seeded preprint
+   server.
+
+   - **The wizard**: Author: start a new submission; the wizard has no
+     "Reviewer Suggestions" step.
+   - **The setting**: Preprint Server Manager: Settings › Workflow has no
+     "Review" tab, so "Reviewer Suggestion at Submission" cannot be
+     switched on.
+   - **The workflow screen**: the workflow screen of a posted preprint
+     shows no "Reviewers Suggested by Author" panel.
+   - **Control**: on a journal with the setting on, the same wizard carries
+     the step (scenario 1) and the same screen the panel (scenario 2).
+     <sup>s6</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states: "Reviewer Suggestion at Submission" switched off after suggestions exist, then on again (Rule 8d); a submission moved on to Copyediting, its rows without the "…" menu. Variants: the panel and the list with the setting off (scenario 1's control reads the wizard step only); "Submit" with no suggestion (the warning is advisory); "Create New Reviewer" with "Email" changed (the suggestion stays pending); a window closed with unsaved text (the suggestion window, the Add Reviewer window, the inner window); the Journal Manager in an author's draft wizard (the Author's step, one route more).
+- **Nothing new to test**: assigned Section Editor, Guest Editor and Site Administrator (the Journal Manager's offer, scenarios 2 and 3); Reviewer and Reader (no screen offers them anything).
+- **Register carries it**: A2 (the "ORCID iD" box with "Enable ORCID functionality" on); A3 (a matched suggestion after the reviewer is unassigned or cancelled); A6 (the same address accepted in another case); A9 (the emptied entry's blank row); A10 (the inner window's "Back to Search"); A5's "Enroll an Existing User as Reviewer" path for the Funding Coordinator, not driven.
+- **Owned by another feature**: the "For Reviewer Suggestion" guidance text (*Submission intake configuration*); a second form language's boxes in the suggestion window (*Languages & locales*).
 
 ## Findings register
 

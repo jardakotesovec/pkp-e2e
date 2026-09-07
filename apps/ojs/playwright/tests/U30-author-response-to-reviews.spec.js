@@ -21,7 +21,7 @@
  *   asserts only the access-denied page it leads to (Rule 14); that she is
  *   OFFERED the enabled button, "View" and "Delete" is the bug's record and
  *   is not asserted as contract. The "View" window and the refused "Delete"
- *   are out of tier (Coverage), not driven.
+ *   are under Budget in the spec's Coverage section, not driven.
  * - A4 🐞: S6's Journal-Manager control opens the typed request page and
  *   asserts only that it renders; the typed page's "return to nowhere"
  *   ("Cancel" → 404, the dead "View Submission" control) is the bug's
@@ -35,7 +35,7 @@
  *   reviewer request is cancelled (A8 — no scenario-API 'cancelled' status).
  * - OMP1 🐞 and the press / preprint absence: scenario 7, in the OMP and OPS
  *   trees.
- * - Out-of-tier states and settings (open review type, review forms, "Notify
+ * - Budget states and settings (open review type, review forms, "Notify
  *   All Authors" off, the public flag, a second form language, past-round
  *   reads): none here — breadth is the spec's (Coverage), depth the test's
  *   (PRINCIPLES M6).

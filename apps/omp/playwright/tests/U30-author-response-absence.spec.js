@@ -18,7 +18,7 @@
  *   and deleting, the minimum, who may request): OJS-only screens; the OJS
  *   suite covers them.
  * - The preprint-server part of scenario 7: the OPS suite's.
- * - The Internal Review stage: the same absence, out of tier (spec Coverage,
+ * - The Internal Review stage: the same absence, under "Nothing new to test" (spec Coverage,
  *   read once 2026-09-06).
  * - Sending the request from the typed page (its A4 dead end) and the
  *   request email's own button: the scenario's control only reads the page.

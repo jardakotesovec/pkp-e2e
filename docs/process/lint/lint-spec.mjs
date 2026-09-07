@@ -105,27 +105,56 @@ function checkShape(doc, out) {
 
 // ---------------------------------------------------------------- 1b. coverage (TEMPLATE "Coverage")
 // Only specs that carry the section are checked (shipped specs before 2026-09-06 have the settings
-// table alone under "Settings that modify behavior"). Every table row needs a "Runs in" or a "Why
-// not", a `planned` row is a finding once the spec is `verified` (RUNBOOK step 9), and no scenario
+// table alone under "Settings that modify behavior"). Two shapes, told apart by the table header.
+// DRAFT table (| Who, state or setting | Class | Runs in | Why not |): every row carries a class and a
+// "Runs in" or a "Why not". FINAL shape (the "Left out" bullets alone; the scenarios carry what is
+// checked): every bullet opens with a reason word, the Budget bullet cuts states or variants only. A
+// verified spec carries the final shape and no `planned`; no date sits in the section; no scenario
 // leaves a typed value to the tester.
 const PLACEHOLDER_RE = /\btype (?:a|an|some|any) (?:sentence|title|line|word|text|name|description|number|value)\b/i;
+const CLASSES = ['main', 'guard', 'state', 'variant'];
+const REASONS = ['Budget', 'Nothing new to test', 'Register carries it', 'No seed', 'Owned by another feature'];
 
 function checkCoverage(doc, out) {
-    const has = doc.lines.some((l, i) => !doc.skip[i] && /^##\s+Coverage\s*$/.test(l));
-    if (!has) return;
+    const covLine = doc.lines.findIndex((l, i) => !doc.skip[i] && /^##\s+Coverage\s*$/.test(l));
+    if (covLine === -1) return;
+    const cov = (line, msg) => out.push({ line, check: 'coverage', msg });
+    let shape = null;
     for (let i = 0; i < doc.tailStart; i++) {
         if (doc.skip[i]) continue;
         const line = doc.lines[i];
-        if (/^Coverage$/.test(doc.h2[i]) && /^\|/.test(line)) {
-            const cells = line.split('|').slice(1, -1).map((c) => c.trim());
-            if (cells.length < 3 || /^-+$/.test(cells[0]) || /^(Who|State|Setting)$/.test(cells[0])) continue;
-            if (!cells[1] && !cells[2]) out.push({ line: i + 1, check: 'coverage', msg: `row "${excerpt(cells[0], 50)}" has neither a "Runs in" nor a "Why not"` });
-            if (doc.front.status === 'verified' && /^planned$/i.test(cells[1])) out.push({ line: i + 1, check: 'coverage', msg: `row "${excerpt(cells[0], 50)}" still reads planned in a verified spec` });
+        if (/^Coverage$/.test(doc.h2[i])) {
+            if (/^\|/.test(line)) {
+                const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+                if (cells.every((c) => /^-*$/.test(c))) continue;
+                if (/^(Who, state or setting|Who|State|Setting)$/.test(cells[0])) {
+                    shape = 'draft';
+                    if (cells[1] !== 'Class') cov(i + 1, 'the draft table is "| Who, state or setting | Class | Runs in | Why not |" (TEMPLATE "Coverage")');
+                    continue;
+                }
+                if (shape !== 'draft') { cov(i + 1, 'the final Coverage section holds the "Left out" bullets only; the scenarios carry what is checked (TEMPLATE "Coverage")'); continue; }
+                const [what, cls, runs, why] = cells;
+                if (cells.length < 4) { cov(i + 1, `row "${excerpt(what, 50)}" has no Class column`); continue; }
+                if (!CLASSES.includes(cls)) cov(i + 1, `row "${excerpt(what, 50)}" has no class (${CLASSES.join(' / ')})`);
+                if (!runs && !why) cov(i + 1, `row "${excerpt(what, 50)}" has neither a "Runs in" nor a "Why not"`);
+                if (doc.front.status === 'verified' && /^planned$/i.test(runs)) cov(i + 1, `row "${excerpt(what, 50)}" still reads planned in a verified spec`);
+            } else if (/^-\s+\*\*/.test(line)) {
+                shape = shape || 'final';
+                const word = ((line.match(/^-\s+\*\*([^*]+)\*\*/) || [])[1] || '').trim();
+                if (!REASONS.includes(word)) cov(i + 1, `a "Left out" bullet opens with "${excerpt(word, 30)}"; the reason words are ${REASONS.join(' · ')}`);
+                else if (word === 'Budget') {
+                    if (!/^-\s+\*\*Budget\*\*\s+—\s+(states|variants):/i.test(line)) cov(i + 1, 'the Budget bullet opens "**Budget** — states:" or "**Budget** — variants:"');
+                    if (/\b(main|guards?)\s*:/i.test(line)) cov(i + 1, 'a main or guard row is never cut for budget (TEMPLATE "Coverage")');
+                }
+            } else if (shape === 'final' && doc.front.status === 'verified' && /\bplanned\b/.test(line)) cov(i + 1, 'still reads planned in a verified spec');
+            if (/\b20\d\d-\d\d-\d\d\b/.test(line)) cov(i + 1, 'a date in the Coverage section is evidence; it belongs in a footnote');
+            if (/\bout of tier\b/i.test(line)) cov(i + 1, '"out of tier" is campaign vocabulary; the reason word is Budget');
         }
         if (/^Canonical scenarios/.test(doc.h2[i]) && PLACEHOLDER_RE.test(line)) {
-            out.push({ line: i + 1, check: 'coverage', msg: `the tester is left to choose a value: ${excerpt(line.match(PLACEHOLDER_RE)[0], 40)} — name it` });
+            cov(i + 1, `the tester is left to choose a value: ${excerpt(line.match(PLACEHOLDER_RE)[0], 40)} — name it`);
         }
     }
+    if (shape === 'draft' && doc.front.status === 'verified') cov(covLine + 1, 'a verified spec carries the draft Coverage table; the scenario writer turns it into the "Left out" list (TEMPLATE "Coverage")');
 }
 
 // ---------------------------------------------------------------- 2. findings-register integrity
@@ -612,11 +641,26 @@ function selfTest() {
     const rf = lintFile(write(retired));
     if (rf.length) { fails++; console.log('FAIL retired-block fixture produced findings:'); rf.forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
     else console.log('pass  retired-block entry without a body marker — 0 findings');
-    // a Coverage row still reading `planned` is a finding only once the spec is verified (RUNBOOK step 9)
-    const covered = GOOD.replace('## Findings register', '## Coverage\n\n| Who, state or setting | Runs in | Why not |\n|---|---|---|\n| Editor | planned | |\n\n## Findings register');
-    const draftCov = lintFile(write(covered)), verifiedCov = lintFile(write(covered.replace('status: draft', 'status: verified')));
-    if (draftCov.length || !verifiedCov.some((f) => f.check === 'coverage')) { fails++; console.log('FAIL coverage — a planned row must pass as draft and fail as verified'); [...draftCov, ...verifiedCov].forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
-    else console.log('pass  coverage — a planned row passes as draft and fails as verified');
+    // Coverage (TEMPLATE "Coverage"): the draft table passes as draft and fails as verified; the final
+    // shape is the "Left out" bullets alone, with reason words, no guard cut, no date, no table
+    const draftCov = GOOD.replace('## Findings register', '## Coverage\n\n| Who, state or setting | Class | Runs in | Why not |\n|---|---|---|---|\n| Editor (Actors row 1) | main | planned | |\n\n## Findings register');
+    const finalCov = GOOD.replace('## Findings register', '## Canonical scenarios\n\n1. **Record a decision**\n\n   Given: Editor, on an open round.\n\n   - **Control**: press "Record decision"; the decision is recorded.\n\n## Coverage\n\nLeft out of the scenarios above, by reason:\n\n- **Budget** — states: the closed round (Rule 2).\n- **Owned by another feature**: the catalog step (*Catalog management*).\n\n## Findings register');
+    const covCases = [
+        ['the draft table passes as draft', draftCov, false],
+        ['the draft table fails as verified', draftCov.replace('status: draft', 'status: verified'), true],
+        ['a draft row without a class', draftCov.replace('| main |', '| |'), true],
+        ['the final shape passes as verified', finalCov.replace('status: draft', 'status: verified'), false],
+        ['a table in the final shape', finalCov.replace('Left out of the scenarios above, by reason:', '| # | Scenario | Apps |\n|---|---|---|\n| 1 | Record a decision | OJS |'), true],
+        ['a bullet without a reason word', finalCov.replace('**Owned by another feature**', '**Skipped**'), true],
+        ['the Budget bullet cutting a guard', finalCov.replace('— states:', '— guards:'), true],
+        ['a date in the section', finalCov.replace('(Rule 2).', '(Rule 2), read once 2026-09-06.'), true],
+    ];
+    for (const [name, text, wantHit] of covCases) {
+        const findings = lintFile(write(text));
+        const ok = wantHit ? findings.some((f) => f.check === 'coverage') : findings.length === 0;
+        console.log(`${ok ? 'pass ' : 'FAIL'} coverage — ${name}`);
+        if (!ok) { fails++; findings.forEach((f) => console.log(`      (got ${f.check}: ${f.msg})`)); }
+    }
     fails += selfTestClaims(write);
     fs.rmSync(dir, { recursive: true, force: true });
     console.log(fails ? `\n${fails} self-test failure(s)` : '\nself-test OK');

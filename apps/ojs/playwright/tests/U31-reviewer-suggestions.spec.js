@@ -35,7 +35,7 @@
  *   leaves behind is asserted neither way.
  * - A10 🐞: no test presses the inner window's "Back to Search".
  * - A2 ❓, A3 ❓ (ORCID box; a matched suggestion after unassign) and the
- *   out-of-tier states and settings in Coverage: none here — breadth is the
+ *   Budget states and settings in the spec's Coverage section: none here — breadth is the
  *   spec's, depth the test's (PRINCIPLES M6).
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch journal

@@ -31,9 +31,11 @@ orchestrator.
 2. **Fleet prep.** `npm run fleet-prep -- --feature U<nn> [--reset]`.
    Gate: `.reports/<feature>/fleet.json`.
 3. **Draft.** A spec author writes `docs/specs/U<nn>-<feature>.md` per
-   TEMPLATE, all three apps from the start, Coverage rows `planned`, no
-   scenarios, open questions as `to drive:` footnotes (`briefs/spec-author.md`).
-   Gate: the spec, lint zero.
+   TEMPLATE, all three apps from the start, Coverage rows classed and
+   `planned`, no scenarios, open questions as `to drive:` footnotes
+   (`briefs/spec-author.md`). The orchestrator writes the scenario count
+   next to the tier in the PROGRESS row from the author's class counts
+   ("Budget"). Gate: the spec, lint zero, the PROGRESS row.
 4. **Harness.** Only when the author's return names a scenario key
    `scenarios.md` lacks: a harness agent builds it with its parity row and
    re-runs the shipped suites that seed through it (`briefs/harness.md`); a
@@ -49,10 +51,11 @@ orchestrator.
    the chunk reports directly; a fold agent folds the change list into the
    spec (`briefs/fold.md`). Gate: `claims.txt`, `fold-log.md`, lint zero,
    `claims.txt` regenerated.
-6. **Scenarios.** A fresh writer composes the canonical scenarios from the
-   verified body and fills the Coverage "Runs in" column
-   (`briefs/scenario-writer.md`). Gate: scenarios in the spec, no Coverage
-   row blank, lint zero.
+6. **Scenarios.** A fresh writer spends the tier by the Coverage classes,
+   composes the canonical scenarios from the verified body, and turns the
+   Coverage table into the "Left out" list after them
+   (`briefs/scenario-writer.md`). Gate: scenarios in the spec, the
+   Coverage table gone, lint zero.
 7. **Readability.** One persona read of the body (`briefs/persona.md`), then
    one rewrite of the wording blockers (`briefs/rewrite.md`); no second read,
    no other persona anywhere in the feature. Gate: `persona.md`, lint zero.
@@ -64,8 +67,8 @@ orchestrator.
 9. **Progress.** The orchestrator sets the frontmatter to `status: verified`
    (its one inline spec edit) and replaces the PROGRESS row: status, tests
    per app, and a note in the fixed shape (tests per app · register counts ·
-   one headliner ID · open blocker · low-confidence IDs). Gate: the row, lint
-   zero after the flip.
+   one headliner ID · budget cuts as states / variants · open blocker ·
+   low-confidence IDs). Gate: the row, lint zero after the flip.
 10. **Commit.** One commit in this repo, everything the campaign produced;
     `.reports/` never (session scratch, gitignored, deletable after review;
     the kept checks under `shared/playwright/checks/` are the exception).
@@ -95,11 +98,22 @@ orchestrator.
 
 ## Budget
 
-Per app at most 700 tests and 25 minutes for the full suite on a fresh
-database; a suite that grows past that is sharded, never cut. Tiers (the
-PROGRESS row): H is 10–16 common scenarios, M 6–8, L 3–4; the spec's Coverage
-section decides within the tier, and what does not fit is written "out of
-tier", never dropped silently.
+Per app about 700 tests and 25 minutes for the full suite on a fresh
+database; the measured sizes and times are in the PROGRESS banner, kept
+current by the maintenance session. CI runs one job per app with four
+workers and no sharding yet: a suite that grows past the cap gets a shard
+matrix in `run-app.yml`, never a cut. A feature's scenario count is
+everything important plus a fixed extra. The important half, the main
+and guard rows of the spec's classed Coverage table (TEMPLATE
+"Coverage"), is always covered, however many there are, so a complex
+feature grows by itself and stays one spec. The extra is the tier, set
+by the feature's importance in FEATURE-MAP: H buys about 6–8 further
+scenarios for state rows, M 3–4, L 1–2. At step 3 the orchestrator
+writes the resulting count next to the tier in the PROGRESS row (`H ·
+15`) from the spec author's class counts. The scenario writer spends the
+extra on the most used states first, and what it does not reach is
+written under the section's "Budget" bullet, never dropped silently,
+where the maintainer can pull any item back in.
 
 ## The multi-app rules
 
@@ -135,7 +149,9 @@ Test files cite these by number, so the numbers are stable.
    (screens no spec claims, replacement scenarios) earns its own FEATURE-MAP
    row. Forked-copy code with identical logic is one feature, but every
    shared claim there needs probe evidence. OMP/OPS-only surfaces stay out of
-   scope until the maintainer extends it.
+   scope until the maintainer extends it. Size alone never splits a
+   feature: a complex feature stays one spec and its tier grows
+   ("Budget").
 8. **Look in the class hierarchy first.** For a load-bearing lib/pkp class
    read each app's subclass chain: an empty subclass is positive evidence of
    shared behavior, an override is intended divergence, a missing override

@@ -102,8 +102,8 @@ are the authoring conventions:
   never by row id. Parallel writers make ids unstable.
 - **M6 — Breadth is the spec's decision, depth is the test's.** A suite
   implements the spec's scenarios and invents none; a state without a
-  scenario is recorded in the spec's Coverage section, not covered by a
-  test on the author's initiative. Inside a scenario the test goes deep:
+  scenario is recorded under the spec's Coverage "Left out" list, not
+  covered by a test on the author's initiative. Inside a scenario the test goes deep:
   every absence claim is asserted with a settled, auto-waited read and a
   positive control; every "nothing happens" is bounded by the response or
   mail that would have carried the effect; the other side's effect is
@@ -178,9 +178,9 @@ The base seed is `apps/<app>/playwright/fixtures/bootstrap.js`: the journal
 `users.md`. The base context keeps the install defaults, and every shipped
 spec was verified against them. The configured half of a feature is
 covered on scratch contexts: each setting a spec lists is probed at both
-ends and the end real journals run gets a scenario (TEMPLATE "Coverage"),
-seeded through the scenario API's passthrough keys
-(scenarios.md "Configuring a scratch context"), never by driving a
-settings screen in a test. A bootstrap change, should one ever be needed,
+ends, and its non-default end is a classed Coverage row that gets a
+scenario when the tier reaches it (TEMPLATE "Coverage"), seeded through
+the scenario API's passthrough keys (scenarios.md "Configuring a scratch
+context"), never by driving a settings screen in a test. A bootstrap change, should one ever be needed,
 requires checking every implemented spec against the new defaults,
 deliberately, not casually.

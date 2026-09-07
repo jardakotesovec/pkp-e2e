@@ -84,9 +84,12 @@ reference for the reader:
 - Campaign identifiers in the body: a FEATURE-MAP row code or an atlas atom
   ID is a reference no QA or product reader can resolve (rule 5).
 - The Conventions line is the one-line GLOSSARY pointer verbatim.
-- Coverage: every table row has a "Runs in" or a "Why not", no row still
-  reads `planned` once the spec is `verified`, and no scenario leaves a typed
-  value to the tester ("type a sentence", "type a title").
+- Coverage: in the draft table every row carries a class and a "Runs in"
+  or a "Why not"; in the final shape (the "Left out" bullets alone) every
+  bullet opens with one of the five reason words and the Budget bullet
+  cuts states or variants only; a `verified` spec carries the final shape
+  and no `planned`; no date sits in the section; and no scenario leaves a
+  typed value to the tester ("type a sentence", "type a title").
 
 `node docs/process/lint/lint-spec.mjs --claims <spec>` prints the spec's
 claims marked by kind (`to-drive`, `no-mark`, `undated`, `no-screen`,
@@ -297,41 +300,6 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      surfaced), log entries, jobs, changes to other entities. One bullet per
      effect. Do not stack five findings in one bullet. -->
 
-## Coverage
-
-<!-- The map of what the scenarios cover and what they leave out, so a
-     reviewer can see every decision and ask for a row to be covered. One
-     table, "| Who, state or setting | Runs in | Why not |", in three
-     runs of rows: the ACTORS (one row per Actors row or group of rows),
-     the STATES the Rules name (each state of the feature's main object:
-     unanswered, accepted, declined, cancelled, moved on…), and the
-     SETTINGS that change the rules above (site or context settings,
-     config variables, plugin toggles, and HOW they change them). For a
-     feature that is itself a settings screen, the settings rows list the
-     screen's own fields, each mapped to where it takes effect.
-     DECISION RULE: every row ends one of three ways: "scenario N", "inside
-     scenario N" (a control or a step of that scenario), or a one-line why
-     not ("out of tier", "configuration file, no screen on the test
-     installs", "owned by the ORCID spec", "register A4 carries it; not a
-     user path"). In the draft, before the scenarios exist, "Runs in"
-     reads `planned` for a row the scenarios should cover, and the
-     scenario writer replaces it (RUNBOOK step 6). A row blank in both
-     columns is a gap the lint reports. A Why-not cell says why the row
-     has no scenario ("out of tier", "no screen on the test installs",
-     "owned by the ORCID spec"); never evidence such as "read once
-     <date>", which is a footnote.
-     "Out of tier" is a legitimate answer: it records a cut the reviewer
-     can reverse; a later revision finds these rows by grepping the
-     Coverage sections. Every setting listed is driven at both ends
-     (RUNBOOK step 5), and the scenarios the table names are part of the
-     feature's tier, not extra scope. The base journal keeps the install
-     defaults; a scenario at the other end runs on a scratch context
-     configured through the scenario API (scenarios.md "Configuring a
-     scratch context"). -->
-
-| Who, state or setting | Runs in | Why not |
-|-----------------------|---------|---------|
-
 ## Cross-feature interactions
 
 <!-- Other specs this one touches, and who owns each shared rule (rule 5
@@ -365,25 +333,120 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      by-hand recipe for building it (create a journal, invite accounts)
      never enters the body. The flow starts where the feature's screens
      start.
-     SPENDING THE TIER (breadth before depth): a scenario earns its slot by
-     opening an actor or state no other scenario opens (the Coverage
-     section is the ledger). Depth goes INSIDE a scenario, as controls,
-     variants and quoted outcomes, never as a second scenario on the same
-     state. A bug path gets a scenario only when it is the main path a user
-     takes; otherwise the register entry carries it and the scenario that
-     passes by carries the ⚠ marker. Every scenario reads the other side's
-     effect after the action it performs: the editor's screen after a
-     reviewer's action, the affected screen after a settings change.
-     SHAPE: the title names the state; the given is one clause; the steps
-     run in execution order, each typed value named ("type 2 in "Default
-     Response Deadline"", never "type a number"), each outcome quoted; one
-     "Control:" sentence closes it. An action by another actor mid-scenario
-     says who and on which screen.
+     SPENDING THE TIER: by the Coverage classes (the Coverage comment,
+     "Spending the tier"): main and guard rows always, states as far as
+     the tier's extra reaches, variants only inside a scenario already
+     there. Depth
+     goes INSIDE a scenario, as controls, variants and quoted outcomes,
+     never as a second scenario on the same state. A bug path gets a
+     scenario only when it is the main path a user takes; otherwise the
+     register entry carries it and the scenario that passes by carries
+     the ⚠ marker. Every scenario reads the other side's effect after the
+     action it performs: the editor's screen after a reviewer's action,
+     the affected screen after a settings change.
+     SHAPE: the title names the state, on its own line with its badge;
+     then a "Given:" line, one clause; then one bullet per screen or case,
+     opening with a bold lead that names what the bullet opens (the
+     screen, the role, the row's case: "**Nova's row, no account**"), its
+     steps in execution order, each typed value named ("type 2 in "Default
+     Response Deadline"", never "type a number"), each outcome quoted; the
+     last bullet is "**Control**". Read only the bold leads and you know
+     what the scenario checks: that is the coverage index, and the
+     Coverage section below lists only what the scenarios leave out. An
+     action by another actor mid-scenario opens its own bullet naming the
+     role.
      Acceptance test: a QA person who has NEVER opened the screen can execute
      the scenario and judge pass or fail. -->
 
-1. **<Scenario name>**: <actor(s)>: <flow in 2–4 sentences, including the
-   observable outcome>. <sup>s1</sup>
+1. **<Scenario name>** {OJS OMP}
+
+   Given: <actor(s)>, <the state the scenario starts from>.
+
+   - **<Screen or case>**: <steps, each typed value named, each outcome
+     quoted>.
+   - **Control**: <the negative control>. <sup>s1</sup>
+
+## Coverage
+
+<!-- What the suites check and what they leave out, so a reviewer sees
+     every decision in one place and can ask for a cut to be reversed.
+     The section has two shapes: the DRAFT table below (steps 3 to 5),
+     and the FINAL shape the scenario writer turns it into at step 6.
+     Only the final shape ships.
+
+     DRAFT TABLE, three runs of rows: the ACTORS (one row per Actors row
+     or group of rows), the STATES the Rules name (each state of the
+     feature's main object: unanswered, accepted, declined, cancelled,
+     moved on…), and the SETTINGS that change the rules above (site or
+     context settings, config variables, plugin toggles). A feature that
+     is itself a settings screen lists the screen's own fields, each
+     mapped to where it takes effect. A row CITES the body instead of
+     restating it: "moved on to Copyediting (Rule 8e)", "assigned Section
+     Editor (Actors row 5)". "Runs in" reads `planned` for a row the
+     scenarios should cover, or stays empty with a reason word in "Why
+     not" (the five words are under FINAL SHAPE). A row blank in both is
+     a gap the lint reports. Every setting listed is driven at both ends
+     (RUNBOOK step 5): the base journal keeps the install defaults and the
+     other end runs on a scratch context configured through the scenario
+     API (scenarios.md "Configuring a scratch context").
+
+     CLASS, one word per row, the author's judgment from the body just
+     written; the fold may reclass on evidence:
+       main     the job the Purpose paragraph names, once per actor it
+                names: the path a user takes on an ordinary day. Test:
+                would a user notice the same day if this broke?
+       guard    a rule that stops something ("only X can", "is refused",
+                "cannot be pressed", "never shows"); a side effect that
+                leaves the app or changes another entity (an email and
+                who gets it, a notification, a role granted, data kept or
+                lost, anything published or paid); an app's absence of the
+                feature. Test: if this broke silently, who is hurt, and
+                how soon would anyone know?
+       state    a further state of the main object with its own screen
+                wording; a setting's non-default end when it changes what
+                a screen offers. Test: does the screen say or offer
+                something different here?
+       variant  a second role with the same offer as a covered one; a
+                close, cancel or back control; a wording variant; a
+                setting end that only re-words a line; a bug path (the
+                register carries it). Test: would a test here assert
+                anything a covered row does not?
+
+     SPENDING THE TIER (the scenario writer, step 6): every main and guard
+     row first. A guard rides inside the main scenario that triggers it
+     (the email is read after the accept, the refusal is pressed on the
+     way past) and gets a scenario of its own only when no main scenario
+     opens its actor or state. Then state rows, the most used first, as
+     many as the tier's extra buys (H about 6–8, M 3–4, L 1–2; RUNBOOK
+     "Budget"). A variant is covered only when it rides inside a scenario
+     already there. A main or guard row is never cut for budget, whatever
+     the count.
+
+     FINAL SHAPE: the "Left out" list alone, under this heading, placed
+     after the canonical scenarios. What IS checked is the scenarios
+     themselves: their bold leads name what each opens, their badges say
+     which apps run them, so the section never restates them.
+     "Left out": one bullet per reason, only the reasons that apply, in
+     this order, each opening with its reason word in bold:
+       - **Budget** — states: <the cut state rows, most valuable first>.
+         Variants: <the cut variant rows>. Never a main or guard row.
+       - **Nothing new to test**: <a role or state with the same screen as
+         a covered row, each naming the row it repeats; a role no screen
+         offers anything>.
+       - **Register carries it**: <a path a 🐞 or ❓ entry records; never a
+         test (PRINCIPLES M3)>.
+       - **No seed**: <a state the harness cannot build yet; this is the
+         harness backlog>.
+       - **Owned by another feature**: <the item, then the feature in
+         italics>.
+     Each item cites the body (a Rule, an Actors row, a register ID). No
+     evidence in this section: a probe date is a footnote. Budget is the
+     one bullet a reviewer argues with: an item there is reversed on
+     request (MAINTENANCE "Coverage requests"), and a regression on one
+     reverses it unasked. -->
+
+| Who, state or setting | Class | Runs in | Why not |
+|-----------------------|-------|---------|---------|
 
 ## Findings register
 

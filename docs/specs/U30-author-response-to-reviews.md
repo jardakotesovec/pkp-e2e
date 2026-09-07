@@ -353,65 +353,6 @@ form. Both are listed here.
   landing page & reading*); nothing on the workflow screen shows the flag.
   <sup>q</sup>
 
-## Coverage
-
-Actors
-
-| Who | Runs in | Why not |
-|-----|---------|---------|
-| Journal Manager / Editor (request, read, edit, delete) | scenarios 1, 3 | |
-| Site Administrator | | out of tier: same offer as the Journal Manager; read once 2026-09-06 |
-| Assigned Section Editor (request) | scenario 6 | |
-| Guest Editor | | out of tier: same gate as the Section Editor; not driven |
-| Funding Coordinator (table shown, request refused) | scenario 6 | the "View" window and the refused "Delete" are out of tier; A3 carries them, read once 2026-09-06 |
-| Assigned author, the submitter (submit, re-read) | scenario 2 | |
-| Second assigned author (co-author with an account) | scenario 4 | |
-| Author by the request page's address | inside scenario 6 | |
-| Reviewer, Reader by the request page's address | | out of tier: the same access-denied page as the Author's, read once 2026-09-06; no screen offers them anything |
-| Section Editor or Guest Editor not assigned to the submission, by the request page's address | | out of tier: the same access-denied page as the Author's, read once 2026-09-06 |
-| Press Editor / press Author on External Review (absence) | scenario 7 | |
-| Press Editor on Internal Review (absence) | | out of tier: same absence as External Review; read once 2026-09-06 |
-| Preprint Server Manager, Moderator, Author on a preprint server (absence) | scenario 7 | |
-
-States
-
-| State | Runs in | Why not |
-|-------|---------|---------|
-| Not ready ("Awaiting reviews", button greyed) | inside scenario 1 | |
-| No reviewer on the round ("Awaiting reviews") | | out of tier: the same cell as one outstanding review; read once 2026-09-06 |
-| A declined request beside a completed review (ready) | | out of tier: one panel row more than the ready state; read once 2026-09-06 |
-| A cancelled request beside a completed review | | register A8 carries it; not driven, no seed for a cancelled request |
-| Ready ("Ready to invite author", button enabled) | scenario 1 | |
-| Requested (email sent; the editor's table unchanged) | scenario 1 | |
-| Requested with two assigned authors (one email, "To" naming both) | | out of tier: the second assigned author's state without a request; read once 2026-09-06 |
-| Emptied "Subject" or "Message" at "Submit Request" | | register A5 carries it; not a user path |
-| Card without a request: "Revisions have been requested." (the response submitted before any upload) | scenario 4 | the decision email's "Submit Author Response" is pressed on the press only (scenario 7); on the journal the author opens the round from My Submissions |
-| Revisions uploaded before responding (card gone; the decision email's button opens the round with no window) | | register A7 carries it; read once 2026-09-06 |
-| Card without a request: the accepted round ("The submission is currently in the Copyediting stage.") | | out of tier: same card as the revisions case; read once 2026-09-06 |
-| Response submitted (card flipped, every row with "…") | scenario 2 | |
-| The email's button while signed out (Login first) | inside scenario 2 | |
-| Response edited by an editor | scenario 3 | |
-| Response deleted (the table catches up; card back to "Respond to Reviews") | scenario 3 | |
-| Second response after a deletion, without a new request | scenario 3 | |
-| Past round keeping its response; new round empty | | out of tier: needs a second round on top of the submitted-response state; read once 2026-09-06 |
-| Request page by typed address: a round that is not ready, or holding a response (refused whether or not every review is in) | | register A4 carries the typed-address path; not a user path; read once 2026-09-06 |
-| Request page by typed address: a wrong round ("Invalid review round.") | inside scenario 6 | |
-| Request page by typed address on a preprint server, with the preprint's own stage ("Invalid review round.") | | out of tier: still the access-denied page; read once 2026-09-06 |
-
-Settings
-
-| Setting | Runs in | Why not |
-|---------|---------|---------|
-| "Minimum Confirmed Reviews Required" 0 (default: every review must be in) | inside scenario 1 | |
-| "Minimum Confirmed Reviews Required" 1 (one "Complete" review is enough; the email still says all are in) | scenario 5 | |
-| "Notify All Authors" default (copy to other contributors) | | out of tier: needs a contributor with an email and no account, added on the Contributors list by hand; read once 2026-09-06 |
-| "Notify All Authors" off | | out of tier: no scenario-API key for it yet; read once 2026-09-06 with the setting flipped on its screen |
-| Review type open vs anonymous (name vs "Reviewer 1:" in the email) | inside scenario 1 (anonymous) | the open variant is out of tier: one template line; read once 2026-09-06 |
-| A review form on the assignment (included questions in the email) | | out of tier: the email's form block is the same one *Reviewer's review* documents; read once 2026-09-06 |
-| "Request Author Review Response" template edited (Settings › Workflow › Emails) | | owned by *Emails management*; the page loads whatever the template holds |
-| "Publicly Show Reviewer Comments" (the public flag) | | owned by *Article landing page & reading*; no screen here shows it |
-| A second form language (two "Author Response" boxes) | | owned by *Languages & locales*; the seeded and scratch journals have one form language |
-
 ## Cross-feature interactions
 
 - **Review stage & rounds** owns the round, its status sentences (Rule 6
@@ -455,167 +396,228 @@ review the scenario starts from. Each email is read in the mailbox of the
 address it was sent to. Accounts, passwords and the tooling recipe are in
 the footnote. <sup>s</sup>
 
-1. **From "Awaiting reviews" to a sent request**: Editor, with two
-   submissions in review, the first with one Reviewer who accepted the
-   request and has not reviewed, the second with its one review in,
-   recommending "Revisions Required" with the comment "The method needs a
-   control group.": open the first submission's review stage. After the
-   Reviewers panel the table "Author Response" lists one row, the Author,
-   whose "Response Status" reads "Awaiting reviews", and "Request Response"
-   is greyed. Open the second submission's review stage: the row reads
-   "Ready to invite author" over "Editor can now request the author's
-   response." and "Request Response" is enabled. Press it: the page
-   "Request Author Response" opens with the Author as the one chip in
-   "To" and no box to add anyone, "Subject" reading "Request For Author
-   Response To Reviewer Feedback", and "Message" holding the "Submit
-   Author Response" button, "The following comments were received from
-   reviewers.", "Reviewer 1:", "Recommendation: Revisions Required" and
-   "The method needs a control group.". Press "Cancel": the workflow
-   screen shows the round again and no request reaches the Author's
-   mailbox. Press "Request Response" again, then "Submit Request": the
-   dialog "Request for review response sent" opens, and its link "View
-   Submission Summary" returns to the round, where the row still reads
-   "Ready to invite author" and "Request Response" is still enabled
-   ⚠ [A1](#a1). In the Author's mailbox the email "Request For Author
-   Response To Reviewer Feedback" opens "Hello {author name},",
-   says "All peer reviews for your submission titled "{submission title}"
-   have now been completed.", shows the "Submit Author Response" button,
-   then the same reviewer block, and closes with "Kind regards," over the
-   Editor's name. Author: open the second submission's review stage from
-   My Submissions: the "Notifications" list holds one row for that email,
-   and the stage ends with the card "Author Response" reading "Respond to
-   Reviews" with "Submit Response". Control: the first submission's review
-   stage shows the Author no "Author Response" card.
+1. **From "Awaiting reviews" to a sent request**
 
-2. **The author responds from the email**: Author, signed out, with
-   scenario 1's request sent and its email in their mailbox: press
-   "Submit Author Response" in the email. The Login page shows; sign in:
-   My Submissions opens with the submission's workflow on the review
-   stage, the round selected, and the window "Submit Your Response to
-   Reviewer Feedback" already open, its intro opening "All reviews for
-   your submission have been completed.". Press "Cancel": the window
-   closes and the screen stays on the round; reload the page: no window
-   opens, and the card "Author Response" reads "Respond to Reviews" with
-   "Submit Response". Press "Submit Response": the window opens again with
-   "Submit Response" greyed. Type "We added a control group." in "Author
-   Response": still greyed. Under "Authors" ("Author contributors who this
-   response is being submitted on behalf of.") tick the one box, the
-   Author's own name: "Submit Response" is enabled. Press it: the window
-   closes with no message and the card reads "A response was submitted by
-   {name}", {name} being the Author, with "View Submitted Response". Press
-   "View Submitted Response": the window opens with the intro "A review
-   response has been submitted and is displayed below. This response
-   cannot be edited by authors. If you would like any changes, please
-   contact the assigned editor.", the text and the tick shown; type
-   "More." after the text and untick the box: "Submit Response" stays
-   greyed; press "Cancel". Editor: open the round: the Author's row reads
-   "A response was submitted by {name}" and ends in a "More Actions"
-   button ("…"), and the header's "Tasks" panel reads "No Items". Control:
-   the Editor's mailbox holds no email about the response and the
-   submission's dashboard row is unchanged ⚠ [A2](#a2).
+   Given: Editor, with two submissions in review, the first with one
+   Reviewer who accepted the request and has not reviewed, the second with
+   its one review in, recommending "Revisions Required" with the comment
+   "The method needs a control group.".
 
-3. **The editor edits, deletes, and the author answers again**: Journal
-   Manager, with scenario 2's response on the round: open the round and
-   press "…" › "View" on the Author's row. The window "Author Response to
-   Reviews" opens with the note "The following response was submitted by
-   the author, {name}. Editors may review the response and make edits if
-   necessary.", the text and the ticked box, and the buttons "Save" and
-   "Cancel". Untick the box: "Save" greys; tick it again, replace the text
-   with "We added a control group and a power analysis." and press
-   "Save": the window closes with no message. Author: on the round press
-   "View Submitted Response": the window shows "We added a control group
-   and a power analysis." and the card still reads "A response was
-   submitted by {name}", the Author's own name. Journal Manager: press "…"
-   › "Delete" (in red): the dialog "Delete" / "Are you sure you wish to
-   delete this item? This action cannot be undone." opens with "OK" (in
-   red) and "Cancel". Press "Cancel", then "…" › "Delete" › "OK": within a
-   few seconds the row reads "Ready to invite author", its "…" is gone and
-   "Request Response" is enabled. Author: the card reads "Respond to
-   Reviews" with "Submit Response", with no new request in the mailbox or
-   the "Notifications" list; press it, type "We have reworked the
-   analysis." in "Author Response", tick the box and press "Submit
-   Response": the card reads "A response was submitted by {name}" again.
-   Journal Manager: the row reads "A response was submitted by {name}"
-   with its "…" back, and the submission's activity log holds one row "An
-   email has been sent: Request For Author Response To Reviewer Feedback"
-   and no row for the response, its edit, its deletion or the second
-   response. Control: "Cancel" in the "Delete" dialog left the row reading
-   "A response was submitted by {name}" with its "…" in place.
+   - **"Awaiting reviews"**: open the first submission's review stage.
+     After the Reviewers panel the table "Author Response" lists one row,
+     the Author, whose "Response Status" reads "Awaiting reviews", and
+     "Request Response" is greyed.
+   - **"Ready to invite author"**: open the second submission's review
+     stage: the row reads "Ready to invite author" over "Editor can now
+     request the author's response." and "Request Response" is enabled.
+   - **The request page**: press it: the page "Request Author Response"
+     opens with the Author as the one chip in "To" and no box to add
+     anyone, "Subject" reading "Request For Author Response To Reviewer
+     Feedback", and "Message" holding the "Submit Author Response" button,
+     "The following comments were received from reviewers.", "Reviewer
+     1:", "Recommendation: Revisions Required" and "The method needs a
+     control group.".
+   - **"Cancel"**: press "Cancel": the workflow screen shows the round
+     again and no request reaches the Author's mailbox.
+   - **"Submit Request"**: press "Request Response" again, then "Submit
+     Request": the dialog "Request for review response sent" opens, and
+     its link "View Submission Summary" returns to the round, where the
+     row still reads "Ready to invite author" and "Request Response" is
+     still enabled ⚠ [A1](#a1).
+   - **The email**: in the Author's mailbox the email "Request For Author
+     Response To Reviewer Feedback" opens "Hello {author name},", says
+     "All peer reviews for your submission titled "{submission title}"
+     have now been completed.", shows the "Submit Author Response" button,
+     then the same reviewer block, and closes with "Kind regards," over
+     the Editor's name.
+   - **The author's view**: Author: open the second submission's review
+     stage from My Submissions: the "Notifications" list holds one row for
+     that email, and the stage ends with the card "Author Response"
+     reading "Respond to Reviews" with "Submit Response".
+   - **Control**: the first submission's review stage shows the Author no
+     "Author Response" card.
+
+2. **The author responds from the email**
+
+   Given: Author, signed out, with scenario 1's request sent and its email
+   in their mailbox.
+
+   - **The email's button while signed out**: press "Submit Author
+     Response" in the email. The Login page shows; sign in: My Submissions
+     opens with the submission's workflow on the review stage, the round
+     selected, and the window "Submit Your Response to Reviewer Feedback"
+     already open, its intro opening "All reviews for your submission have
+     been completed.".
+   - **"Cancel" and a reload**: press "Cancel": the window closes and the
+     screen stays on the round; reload the page: no window opens, and the
+     card "Author Response" reads "Respond to Reviews" with "Submit
+     Response".
+   - **Writing the response**: press "Submit Response": the window opens
+     again with "Submit Response" greyed. Type "We added a control group."
+     in "Author Response": still greyed. Under "Authors" ("Author
+     contributors who this response is being submitted on behalf of.")
+     tick the one box, the Author's own name: "Submit Response" is
+     enabled. Press it: the window closes with no message and the card
+     reads "A response was submitted by {name}", {name} being the Author,
+     with "View Submitted Response".
+   - **Re-reading**: press "View Submitted Response": the window opens with
+     the intro "A review response has been submitted and is displayed
+     below. This response cannot be edited by authors. If you would like
+     any changes, please contact the assigned editor.", the text and the
+     tick shown; type "More." after the text and untick the box: "Submit
+     Response" stays greyed; press "Cancel".
+   - **The editor's side**: Editor: open the round: the Author's row reads
+     "A response was submitted by {name}" and ends in a "More Actions"
+     button ("…"), and the header's "Tasks" panel reads "No Items".
+   - **Control**: the Editor's mailbox holds no email about the response
+     and the submission's dashboard row is unchanged ⚠ [A2](#a2).
+
+3. **The editor edits, deletes, and the author answers again**
+
+   Given: Journal Manager, with scenario 2's response on the round.
+
+   - **"View" and "Save"**: open the round and press "…" › "View" on the
+     Author's row. The window "Author Response to Reviews" opens with the
+     note "The following response was submitted by the author, {name}.
+     Editors may review the response and make edits if necessary.", the
+     text and the ticked box, and the buttons "Save" and "Cancel". Untick
+     the box: "Save" greys; tick it again, replace the text with "We added
+     a control group and a power analysis." and press "Save": the window
+     closes with no message.
+   - **The author's re-read**: Author: on the round press "View Submitted
+     Response": the window shows "We added a control group and a power
+     analysis." and the card still reads "A response was submitted by
+     {name}", the Author's own name.
+   - **"Delete"**: Journal Manager: press "…" › "Delete" (in red): the
+     dialog "Delete" / "Are you sure you wish to delete this item? This
+     action cannot be undone." opens with "OK" (in red) and "Cancel".
+     Press "Cancel", then "…" › "Delete" › "OK": within a few seconds the
+     row reads "Ready to invite author", its "…" is gone and "Request
+     Response" is enabled.
+   - **A second response without a new request**: Author: the card reads
+     "Respond to Reviews" with "Submit Response", with no new request in
+     the mailbox or the "Notifications" list; press it, type "We have
+     reworked the analysis." in "Author Response", tick the box and press
+     "Submit Response": the card reads "A response was submitted by
+     {name}" again.
+   - **The editor's table and the activity log**: Journal Manager: the row
+     reads "A response was submitted by {name}" with its "…" back, and the
+     submission's activity log holds one row "An email has been sent:
+     Request For Author Response To Reviewer Feedback" and no row for the
+     response, its edit, its deletion or the second response.
+   - **Control**: "Cancel" in the "Delete" dialog left the row reading "A
+     response was submitted by {name}" with its "…" in place.
 
 4. **Revisions requested: the card without a request, and the co-author's
-   response**: Author and a second assigned author (a co-author with an
-   account who is not on the Contributors list), with a submission whose
-   round has its one review in and a Request Revisions decision recorded,
-   and no request sent: the co-author opens the review stage from My
-   Submissions. The status box reads "Revisions have been requested." and
-   the stage ends with the card "Author Response" reading "Respond to
-   Reviews" with "Submit Response". Press it: under "Authors" the only box
-   is the Author's name, the co-author having none; type "We will add the
-   control group." in "Author Response", tick the box and press "Submit
-   Response": the card reads "A response was submitted by {name}", {name}
-   being the co-author. Author: open the same round: the card reads "A
-   response was submitted by {name}" with "View Submitted Response" only
-   and no "Submit Response". Journal Manager: open the round: the "Author
-   Response" table has two rows, the Author and the co-author, both
-   reading "A response was submitted by {name}" and each ending in "…";
-   "View" on the co-author's row opens "Author Response to Reviews" with
-   the note naming the co-author. Control: on the Author's row "View" and
-   "Delete" are greyed, on the co-author's row both are enabled.
+   response**
 
-5. **One confirmed review is enough when the minimum says so**: Journal
-   Manager, on a scratch journal with "Minimum Confirmed Reviews Required"
-   set to 1 and a submission in review with two Reviewers, the first's
-   review in recommending "Revisions Required" with the comment "Shorten
-   the introduction." and the second's request accepted: open the round.
-   The "Author Response" row reads "Awaiting reviews" and "Request
-   Response" is greyed. In the Reviewers panel open the first reviewer's
-   "Read Review", press "Mark as Complete" and confirm with "Mark as
-   Complete" in the dialog "Mark this review as complete?": the row now
-   reads "Ready to invite author" and "Request Response" is enabled while
-   the second review is still due. Press "Request Response", then "Submit
-   Request", and read the email in the Author's mailbox: it opens "All
-   peer reviews for your submission titled "{submission title}" have now
-   been completed." ⚠ [A6](#a6) and holds one reviewer block, "Reviewer
-   1:", "Recommendation: Revisions Required" and "Shorten the
-   introduction.". Control: the email holds no second reviewer block; the
-   review still due contributes nothing.
+   Given: Author and a second assigned author (a co-author with an account
+   who is not on the Contributors list), with a submission whose round has
+   its one review in and a Request Revisions decision recorded, and no
+   request sent.
 
-6. **Who may request**: Section Editor and Funding Coordinator assigned to
-   the review stage, Author and Journal Manager, with a ready round (its
-   one review in) on a submission in the Section Editor's section: Section
-   Editor: open the round: the "Author Response" table reads "Ready to
-   invite author" and "Request Response" is enabled; press it: the page
-   "Request Author Response" opens; press "Cancel": the round shows again.
-   Funding Coordinator: open the round: the same table with "Request
-   Response" enabled; press it: the access-denied page "The current role
-   does not have access to this operation." shows instead of the request
-   page ⚠ [A3](#a3). Author: type this round's request-page address (Rule
-   14): the access-denied page "The current role does not have access to
-   this operation." shows and the review stage does not. Journal Manager: type the
-   address with a round number that does not exist: the access-denied page
-   reads "Invalid review round.". Control: the Journal Manager typing the
-   address with the round's real number gets the "Request Author Response"
-   page (reached this way it has nowhere to return to ⚠ [A4](#a4)).
+   - **The card without a request**: the co-author opens the review stage
+     from My Submissions. The status box reads "Revisions have been
+     requested." and the stage ends with the card "Author Response"
+     reading "Respond to Reviews" with "Submit Response".
+   - **The co-author's response**: press it: under "Authors" the only box
+     is the Author's name, the co-author having none; type "We will add
+     the control group." in "Author Response", tick the box and press
+     "Submit Response": the card reads "A response was submitted by
+     {name}", {name} being the co-author.
+   - **The Author's view**: Author: open the same round: the card reads "A
+     response was submitted by {name}" with "View Submitted Response" only
+     and no "Submit Response".
+   - **The editor's two rows**: Journal Manager: open the round: the
+     "Author Response" table has two rows, the Author and the co-author,
+     both reading "A response was submitted by {name}" and each ending in
+     "…"; "View" on the co-author's row opens "Author Response to Reviews"
+     with the note naming the co-author.
+   - **Control**: on the Author's row "View" and "Delete" are greyed, on
+     the co-author's row both are enabled.
 
-7. **A press and a preprint server** {OMP OPS}: Press Editor and press
-   Author, with a monograph in External Review whose one review is in,
-   revisions requested and the decision email in the press Author's
-   mailbox; Preprint Server Manager, Moderator and preprint Author, with a
-   submitted preprint: Press Editor: open the monograph's External Review
-   stage: no "Author Response" table follows the Reviewers panel. Press
-   Author: in the mailbox the email "Your submission has been reviewed and
-   we encourage you to submit revisions" carries "Submit Author Response";
-   press it: the monograph's External Review stage opens reading
-   "Revisions have been requested." with no "Author Response" card and no
-   window ⚠ [OMP1](#omp1). Preprint Server Manager: open the preprint's
-   Production stage: no "Author Response" table; type the preprint's
-   Rule 14 address (stage 3, round 1): the access-denied page "A workflow
-   stage was not specified.". Moderator: the same address
-   shows the same page. Preprint Author: the same address shows "The
-   current role does not have access to this operation.". Control: the
-   Press Editor typing the monograph round's address (Rule 14) gets the
-   "Request Author Response" page with the press Author in "To"; the
-   absence is the workflow screen's alone.
+5. **One confirmed review is enough when the minimum says so**
+
+   Given: Journal Manager, on a scratch journal with "Minimum Confirmed
+   Reviews Required" set to 1 and a submission in review with two
+   Reviewers, the first's review in recommending "Revisions Required" with
+   the comment "Shorten the introduction." and the second's request
+   accepted.
+
+   - **Before "Mark as Complete"**: open the round. The "Author Response"
+     row reads "Awaiting reviews" and "Request Response" is greyed.
+   - **"Mark as Complete"**: in the Reviewers panel open the first
+     reviewer's "Read Review", press "Mark as Complete" and confirm with
+     "Mark as Complete" in the dialog "Mark this review as complete?": the
+     row now reads "Ready to invite author" and "Request Response" is
+     enabled while the second review is still due.
+   - **The email**: press "Request Response", then "Submit Request", and
+     read the email in the Author's mailbox: it opens "All peer reviews
+     for your submission titled "{submission title}" have now been
+     completed." ⚠ [A6](#a6) and holds one reviewer block, "Reviewer 1:",
+     "Recommendation: Revisions Required" and "Shorten the introduction.".
+   - **Control**: the email holds no second reviewer block; the review
+     still due contributes nothing.
+
+6. **Who may request**
+
+   Given: Section Editor and Funding Coordinator assigned to the review
+   stage, Author and Journal Manager, with a ready round (its one review
+   in) on a submission in the Section Editor's section.
+
+   - **Section Editor**: open the round: the "Author Response" table reads
+     "Ready to invite author" and "Request Response" is enabled; press it:
+     the page "Request Author Response" opens; press "Cancel": the round
+     shows again.
+   - **Funding Coordinator**: open the round: the same table with "Request
+     Response" enabled; press it: the access-denied page "The current role
+     does not have access to this operation." shows instead of the request
+     page ⚠ [A3](#a3).
+   - **Author, by the typed address**: type this round's request-page
+     address (Rule 14): the access-denied page "The current role does not
+     have access to this operation." shows and the review stage does not.
+   - **A wrong round number**: Journal Manager: type the address with a
+     round number that does not exist: the access-denied page reads
+     "Invalid review round.".
+   - **Control**: the Journal Manager typing the address with the round's
+     real number gets the "Request Author Response" page (reached this way
+     it has nowhere to return to ⚠ [A4](#a4)).
+
+7. **A press and a preprint server** {OMP OPS}
+
+   Given: Press Editor and press Author, with a monograph in External
+   Review whose one review is in, revisions requested and the decision
+   email in the press Author's mailbox; Preprint Server Manager, Moderator
+   and preprint Author, with a submitted preprint.
+
+   - **Press Editor**: open the monograph's External Review stage: no
+     "Author Response" table follows the Reviewers panel.
+   - **Press Author, from the decision email**: in the mailbox the email
+     "Your submission has been reviewed and we encourage you to submit
+     revisions" carries "Submit Author Response"; press it: the
+     monograph's External Review stage opens reading "Revisions have been
+     requested." with no "Author Response" card and no window
+     ⚠ [OMP1](#omp1).
+   - **Preprint Server Manager**: open the preprint's Production stage: no
+     "Author Response" table; type the preprint's Rule 14 address (stage
+     3, round 1): the access-denied page "A workflow stage was not
+     specified.".
+   - **Moderator**: the same address shows the same page.
+   - **Preprint Author**: the same address shows "The current role does
+     not have access to this operation.".
+   - **Control**: the Press Editor typing the monograph round's address
+     (Rule 14) gets the "Request Author Response" page with the press
+     Author in "To"; the absence is the workflow screen's alone.
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states: a request on a round with two assigned authors (one email, "To" naming both; Rule 13); a past round keeping its response while the new round starts empty (Rule 12); a declined request beside a completed review, the round still ready (Rule 3). Variants: the revisions email's "Submit Author Response" pressed on a journal (pressed on the press in scenario 7; on the journal the author opens the round from My Submissions); an open review's name in the email instead of "Reviewer 1:" (Rule 5).
+- **Nothing new to test**: Site Administrator (the Journal Manager's offer, scenarios 1 and 3); Guest Editor (the Section Editor's gate, scenario 6); Reviewer, Reader, and a Section Editor or Guest Editor not assigned to the submission, by the request page's typed address (the Author's access-denied page, scenario 6); the typed address on a preprint server with the preprint's own stage (scenario 7's page); Press Editor on Internal Review (External Review's absence, scenario 7); no reviewer on the round (the "Awaiting reviews" cell of scenario 1); the accepted round's card without a request (scenario 4's card under another status sentence); a review form on the assignment (the email's form block is the one *Reviewer's review* documents).
+- **Register carries it**: A3 (the Funding Coordinator's "View" window and refused "Delete"); A4 (the request page by typed address on a round that is not ready or holds a response); A5 (an emptied "Subject" or "Message" at "Submit Request"); A7 (revisions uploaded before responding); A8 (a cancelled request beside a completed review).
+- **No seed**: "Notify All Authors" at its default, the copy to other contributors (needs a contributor with an email and no account); "Notify All Authors" off (no scenario key).
+- **Owned by another feature**: the "Request Author Review Response" template (*Emails management*); "Publicly Show Reviewer Comments" (*Article landing page & reading*); a second form language's two "Author Response" boxes (*Languages & locales*).
 
 ## Findings register
 

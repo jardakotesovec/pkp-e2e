@@ -212,13 +212,18 @@ loop's critical triage, on one PR:
 ## Coverage requests
 
 Someone asks whether a behavior is covered, or for a test to be added or
-changed. Check the spec's canonical scenarios first; that is where coverage
-is defined. To add or change a test, change or add its scenario first
-(through a writing agent, with the persona on the new text), then write
-the test from it, run it green, and update the PROGRESS test count. A test
-with no scenario, or a scenario with no test in an app that runs it, is a
-defect either way. Nothing records the request or the answer; the spec and
-the test are the record.
+changed. The spec answers first: the canonical scenarios' bold leads say
+which scenario checks it and their badges in which apps, and the Coverage
+section says why it has none. A request for an item under "Budget" is the
+expected path; a regression (a PR read, a CI failure, a user report) on a
+Budget item reverses the cut unasked, and one on a "Nothing new to test"
+item reclasses it. To add or change a test, change or add its scenario
+first (through a writing agent, with the persona on the new text), then
+write the test from it, run it green, and update the PROGRESS test count.
+A test with no scenario, or a scenario with no test in an app its badge
+names, is a defect either way; no script checks this yet (the scenarios'
+badges against the suites' `S<n>:` test titles is the check to build). Nothing records the request or the answer; the spec and the
+test are the record.
 
 ## Session hygiene
 
@@ -272,6 +277,11 @@ the test are the record.
   large or uncertain to fold becomes that spec's ❓ entry with a lean.
   Maintenance never changes app code beyond what the app-changes rule
   allows, and never moves content routed to the private security file.
+- **Keep the budget measured.** After every full `test:final`, replace the
+  PROGRESS banner's suite line with each app's test count and run time
+  from the `final-run-<app>.log` summary lines, dated, so RUNBOOK
+  "Budget" rests on a number; when an app approaches 25 minutes, the
+  shard matrix in `run-app.yml` is the next task, never a cut.
 - **Delete what is resolved.** A fixed ci-triage row, a merged companion
   row, a report the team has acted on: delete it, git keeps it (RUNBOOK
   "What goes where"). Tracking files hold only what is open.
