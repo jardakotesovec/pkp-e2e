@@ -108,7 +108,9 @@ and guard rows of the spec's classed Coverage table (TEMPLATE
 "Coverage"), is always covered, however many there are, so a complex
 feature grows by itself and stays one spec. The extra is the tier, set
 by the feature's importance in FEATURE-MAP: H buys about 6–8 further
-scenarios for state rows, M 3–4, L 1–2. At step 3 the orchestrator
+scenarios for state rows, M 3–4, L 1–2. A state whose given a scenario
+already holds rides in it as a bullet and is not counted; the extra
+counts the states that need a given of their own. At step 3 the orchestrator
 writes the resulting count next to the tier in the PROGRESS row (`H ·
 15`) from the spec author's class counts. The scenario writer spends the
 extra on the most used states first, and what it does not reach is
@@ -207,8 +209,10 @@ scenario already covers the row, `planned` where none does, and under the
 table the plan for each gap (rides in `S<n>`, a scenario of its own, or
 no seed) and the suite mismatches `lint-spec.mjs --tests` reports. The
 table is the spend: the extra counts the states the existing scenarios
-already cover, so a spec past its extra gains guards only and its other
-states stay under "Budget", where the maintainer can pull one back.
+already cover, so a spec past its extra gains guards, plus the states an
+existing scenario's given already holds, ridden as bullets at no cost;
+its other states stay under "Budget", where the maintainer can pull one
+back.
 
 1. **Claim and fleet prep** as steps 1 and 2.
 2. **Scenarios.** A scenario writer (`briefs/scenario-writer.md`, situation

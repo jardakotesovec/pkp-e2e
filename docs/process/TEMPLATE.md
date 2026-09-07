@@ -428,7 +428,12 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      row first. A guard rides inside the main scenario that triggers it
      (the email is read after the accept, the refusal is pressed on the
      way past) and gets a scenario of its own only when no main scenario
-     opens its actor or state. Then state rows, the most used first, as
+     opens its actor or state. Then state rows, the most used first. A
+     state whose given a scenario already holds rides in it as a bullet
+     (the dashboard's views on the seeded journal, walked in one
+     scenario, one bullet each) and costs nothing; a state that needs a
+     given of its own (a setting's non-default end, a submission in a
+     stage the seed lacks, another signed-in role) gets a scenario, as
      many as the tier's extra buys (H about 6–8, M 3–4, L 1–2; RUNBOOK
      "Budget"). A variant is covered only when it rides inside a scenario
      already there. A main or guard row is never cut for budget, whatever
