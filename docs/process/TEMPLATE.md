@@ -300,6 +300,18 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      surfaced), log entries, jobs, changes to other entities. One bullet per
      effect. Do not stack five findings in one bullet. -->
 
+## Settings that modify behavior
+
+<!-- The catalogue of what can be configured that changes the rules above:
+     site or context settings, config variables, plugin toggles. One bullet
+     per setting: its on-screen label in quotes, where it is set (the
+     screen path, or the owning feature in italics), the install default,
+     and what each end changes, citing the Rule. Facts only, verified like
+     any rule: which scenario runs which end is read from the scenarios'
+     bold leads, and an end left untested is a Coverage "Left out" item,
+     never a sentence here. "None" is a valid section, with a pointer to
+     where the feature's gates live. -->
+
 ## Cross-feature interactions
 
 <!-- Other specs this one touches, and who owns each shared rule (rule 5
@@ -377,12 +389,12 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      DRAFT TABLE, three runs of rows: the ACTORS (one row per Actors row
      or group of rows), the STATES the Rules name (each state of the
      feature's main object: unanswered, accepted, declined, cancelled,
-     moved on…), and the SETTINGS that change the rules above (site or
-     context settings, config variables, plugin toggles). A feature that
-     is itself a settings screen lists the screen's own fields, each
-     mapped to where it takes effect. A row CITES the body instead of
-     restating it: "moved on to Copyediting (Rule 8e)", "assigned Section
-     Editor (Actors row 5)". "Runs in" reads `planned` for a row the
+     moved on…), and the SETTINGS of the section above, one row per
+     setting's non-default end. A feature that is itself a settings
+     screen lists the screen's own fields, each mapped to where it takes
+     effect. A row CITES the body instead of restating it: "moved on to
+     Copyediting (Rule 8e)", "assigned Section Editor (Actors row 5)",
+     ""Restrict File Access" on (Settings bullet 1)". "Runs in" reads `planned` for a row the
      scenarios should cover, or stays empty with a reason word in "Why
      not" (the five words are under FINAL SHAPE). A row blank in both is
      a gap the lint reports. Every setting listed is driven at both ends

@@ -216,8 +216,9 @@ states stay under "Budget", where the maintainer can pull one back.
    scenarios into TEMPLATE's shape sentence for sentence, adds a bullet to
    the scenario a gap rides in, appends a scenario for each gap that needs
    one (numbers never move: the suites' `S<n>` titles and the PROGRESS
-   notes cite them), folds each "Settings that modify behavior" bullet
-   into a Rule or a Cross-feature line and deletes that section, settles
+   notes cite them), strips the coverage sentences ("scenario 9 runs the
+   on end", "no scenario because…") from the "Settings that modify
+   behavior" bullets so the section holds facts only, settles
    every test without a scenario and every scenario without a test the
    queue file lists (the scenario becomes a "Left out" item with its
    reason, or the test's behavior gets a scenario when the body states

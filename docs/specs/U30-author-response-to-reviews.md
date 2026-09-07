@@ -353,6 +353,20 @@ form. Both are listed here.
   landing page & reading*); nothing on the workflow screen shows the flag.
   <sup>q</sup>
 
+## Settings that modify behavior
+
+- **"Minimum Confirmed Reviews Required"** (Settings › Workflow › Review,
+  "Setup"; *Review setup & review forms*): 0 on a fresh install and on the
+  seeded journal, so a round is ready only when every reviewer has
+  submitted; above 0, the round is also ready as soon as that many reviews
+  stand "Complete", whatever the other reviewers have done (Rule 3).
+- **"Notify All Authors"** (Settings › Workflow › Emails, under "Editorial
+  Decisions"; *Emails management*): the default, "Send an email
+  notification to all authors of the submission.", copies the request to
+  every other contributor who has an email address (Rule 13, Side
+  effects); the other choice sends the request to the assigned authors
+  only.
+
 ## Cross-feature interactions
 
 - **Review stage & rounds** owns the round, its status sentences (Rule 6

@@ -226,6 +226,26 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
   Add Reviewer window's own (*Reviewer assignment & management*).
   <sup>k</sup> <sup>t14</sup>
 
+## Settings that modify behavior
+
+- **"Reviewer Suggestion at Submission"** (Settings › Workflow › Review;
+  *Review setup & review forms*): off on a fresh install and on the seeded
+  journal. On, the wizard gains the "Reviewer Suggestions" step (Rule 1)
+  and the editors' panel shows on the Submission and Review stages
+  (Rule 8); switched off again, the panel hides on every stage and the
+  suggestions are kept (Rule 8d). A preprint server has no such checkbox.
+- **"For Reviewer Suggestion"** (Settings › Workflow › Submission, "Author
+  Guidance"; *Submission intake configuration*): the guidance text above
+  the step's panel, with a default text (Rule 1); a custom text shows on
+  the next wizard visit.
+- **"Enable ORCID functionality"** (Settings › Users & Roles › ORCID;
+  *ORCID integration*): off by default; on, the suggestion window gains
+  the "ORCID iD" box (Fields).
+- **Form languages** (Settings › Website › Setup › Languages, "Forms";
+  *Languages & locales*): one on the seeded and scratch journals; each
+  further language adds its own name, affiliation and reason boxes to the
+  window (Rule 13).
+
 ## Cross-feature interactions
 
 - **Submission wizard** owns the step rail, the gate that adds the
