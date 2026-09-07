@@ -406,6 +406,11 @@ behind a line; that scratch is deleted after review.
   email notification to all authors of the submission." on a scratch
   journal; there is no passthrough key, so a probe flips it on the screen
   and a test cannot. Live-probed 2026-09-06, OJS (`.reports/U30/pC` P20).
+- A fresh context asks for keywords and references at "request" by install
+  default, so the seeded context's Details step shows an optional "Keywords"
+  field and a references box on OJS, OMP and OPS; a scratch context seeded
+  `metadata: {keywords: 'off'}` shows no "Keywords" field (U21 runs,
+  2026-09-07).
 
 A scratch context at the other end of a setting is seeded through the
 scenario API's passthrough keys (scenarios.md "Configuring a scratch

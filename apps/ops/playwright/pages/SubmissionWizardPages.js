@@ -320,13 +320,123 @@ async function openChangeSettings(page) {
     return modal;
 }
 
+/** The footer's primary "Submit" button (Review step). */
+function submitButton(page) {
+    return footer(page).getByRole('button', {name: 'Submit', exact: true});
+}
+
+/**
+ * The Review step's closing "Confirmation" section heading — present only
+ * when the server has a copyright notice (Rule 12).
+ */
+function confirmationHeading(page) {
+    return page.getByRole('heading', {name: 'Confirmation', exact: true});
+}
+
+/** The Confirmation section's copyright box (Rule 14). */
+function copyrightCheckbox(page) {
+    return page.getByRole('checkbox', {name: /agree to the copyright statement/});
+}
+
+/**
+ * Wizard form control ids (TinyMCE renders `{id}_ifr`). The For Readers
+ * step's "Comments for the Moderator" box is not multilingual, so it
+ * carries no locale suffix (probe `.reports/U21/tops/readers-iframes-ops.json`).
+ */
+const CONTROLS = {
+    title: 'titleAbstract-title-control-en',
+    abstract: 'titleAbstract-abstract-control-en',
+    keywords: 'titleAbstract-keywords-control-en',
+    moderatorNote: 'commentsForTheEditors-commentsForTheEditors-control',
+};
+
+/** Fill a wizard TinyMCE box by its control id (replaces its content). */
+async function fillRichText(page, controlId, text) {
+    const body = page.frameLocator(`#${controlId}_ifr`).locator('body');
+    await body.click();
+    await body.fill(text);
+    await expect(body).toContainText(text);
+}
+
+/** The rendered text of a wizard TinyMCE box. */
+function richTextBody(page, controlId) {
+    return page.frameLocator(`#${controlId}_ifr`).locator('body');
+}
+
+/** A Details / For Readers form field by its label. */
+function wizardField(page, labelRe) {
+    return page
+        .locator('.pkpFormField')
+        .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: labelRe})});
+}
+
+/** Add a keyword chip on the Details step (Enter commits the term). */
+async function addKeyword(page, term) {
+    const input = page.locator(`#${CONTROLS.keywords}`);
+    await input.click();
+    await input.fill(term);
+    await input.press('Enter');
+    await expect(page.getByRole('button', {name: `Remove ${term}`})).toBeVisible();
+}
+
+/** The Contributors step's list rows. */
+function contributorRows(page) {
+    return page.locator('.listPanel--contributor li.listPanel__item');
+}
+
+/**
+ * On the Contributors step, add a person contributor with the Author role
+ * (the panel's own mechanics belong to Contributors & affiliations). The
+ * server offers more than one contributor role, so the required
+ * "Contributor Roles" choice renders. Waits for the save and for the row.
+ */
+async function addContributor(page, {givenName, email, country = 'Iceland'}) {
+    await page.getByRole('button', {name: 'Add Contributor'}).click();
+    const modal = page.locator('[data-cy="active-modal"]').last();
+    // Required fields' accessible names carry the "* Required" suffix.
+    await modal.getByRole('textbox', {name: /^Given Name/}).first().fill(givenName);
+    await modal.getByRole('textbox', {name: /^Email/}).fill(email);
+    await modal.getByRole('combobox', {name: /^Country/}).selectOption({label: country});
+    await modal
+        .getByRole('group', {name: /Contributor Roles/})
+        .getByRole('checkbox', {name: 'Author', exact: true})
+        .check();
+    const saved = page.waitForResponse(
+        (r) => r.url().includes('/contributors') && r.request().method() === 'POST' && r.ok()
+    );
+    await modal.getByRole('button', {name: 'Save', exact: true}).click();
+    await saved;
+    await expect(contributorRows(page).filter({hasText: givenName})).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * Press the footer's "Cancel", confirm the "Cancel submission" dialog with
+ * "OK", and wait for the "Submission cancelled" screen (Rule 16; on a
+ * preprint server this completes for a manager only — register OPS3).
+ */
+async function cancelDraft(page) {
+    await page.locator('#cancelSubmission').click();
+    const dialog = page.getByRole('dialog').filter({hasText: 'Cancel submission'});
+    await expect(
+        dialog.getByText(
+            'Are you sure you wish to cancel this submission? This will delete the submission and all associated data. This action cannot be undone.'
+        )
+    ).toBeVisible({timeout: 10_000});
+    await dialog.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(page.getByRole('heading', {name: 'Submission cancelled'})).toBeVisible({
+        timeout: 30_000,
+    });
+}
+
 module.exports = {
     FIXTURE_PDF,
     STEPS,
     SUBMIT_DIALOGS,
+    CONTROLS,
     startUrl,
     wizardUrl,
     footer,
+    submitButton,
     submittingToLine,
     railEntry,
     currentRailStep,
@@ -340,8 +450,17 @@ module.exports = {
     openReview,
     problemsBanner,
     reviewPanel,
+    confirmationHeading,
+    copyrightCheckbox,
+    fillRichText,
+    richTextBody,
+    wizardField,
+    addKeyword,
+    contributorRows,
+    addContributor,
     confirmSubmit,
     completeAndSubmitDraft,
     saveForLater,
+    cancelDraft,
     openChangeSettings,
 };

@@ -57,6 +57,22 @@
  *   paths (U28): the same DAO writes ReviewFormForm::execute,
  *   ReviewFormElementForm::execute and
  *   ReviewFormGridHandler::activateReviewForm run. OPS refuses the key.
+ * - copyrightNotice (localized) — Settings › Workflow › Submission › "Author
+ *   Guidelines" form's Copyright Notice (U21); with it set, the wizard's
+ *   Review step gains the "Confirmation" section (ConfirmSubmission).
+ * - metadata {keywords?, subjects?, disciplines?, agencies?, coverage?,
+ *   rights?, source?, type?, citations?, fundingStatement?, funders?,
+ *   dataAvailability?, dataCitations?, plainLanguageSummary?} — the
+ *   Settings › Workflow › Submission › "Metadata" screen's items (U21), each
+ *   one of the words off / enable / request / require (Context::METADATA_*);
+ *   an item the app's context schema lacks is a 400.
+ * - submissionAcknowledgement (off / submittingAuthor / allAuthors),
+ *   copySubmissionAckPrimaryContact (bool), copySubmissionAckAddress
+ *   (string, comma-separated) — Settings › Workflow › Emails "Submission
+ *   Confirmation" (U21; PKPEmailSetupForm).
+ * All settings passthroughs (review included) are validated and written in
+ * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
+ * PUT contexts/{id} save is (PKPContextController::edit).
  */
 
 namespace PKP\testing;
@@ -145,6 +161,7 @@ abstract class PKPContextScenarioBuilder
         $orcidSettings = $this->parseOrcidSettings($root);
         $primaryLocale = (string) $contextParams['primaryLocale'];
         $reviewSettings = $this->parseReviewSettings($root, $primaryLocale);
+        $intakeSettings = $this->parseIntakeSettings($root, $primaryLocale);
         $reviewFormPlans = $this->parseReviewForms($root, $primaryLocale);
         $root->assertConsumed();
 
@@ -163,22 +180,18 @@ abstract class PKPContextScenarioBuilder
             $context = $contextService->edit($context, $orcidSettings, Application::get()->getRequest());
         }
 
-        if ($reviewSettings !== null) {
-            // The Review "Setup" / "Reviewer Guidance" forms' save: PUT
-            // contexts/{id} → PKPContextController::edit validates against
-            // the context schema with the context's form locales, then
-            // PKPContextService::edit writes.
-            $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
-            $errors = $contextService->validate(
-                EntityWriteInterface::VALIDATE_ACTION_EDIT,
-                $reviewSettings + ['id' => $context->getId()],
-                (array) $context->getSupportedFormLocales(),
-                $context->getPrimaryLocale()
+        // The settings forms' save (Review "Setup" / "Reviewer Guidance",
+        // Submission "Author Guidelines" / "Metadata", Emails): PUT
+        // contexts/{id} → PKPContextController::edit validates against the
+        // context schema with the context's form locales, then
+        // PKPContextService::edit writes.
+        $formSettings = ($reviewSettings ?? []) + $intakeSettings['settings'];
+        if ($formSettings !== []) {
+            $specKeys = $intakeSettings['specKeys'] + array_combine(
+                array_keys($reviewSettings ?? []),
+                array_map(fn ($key) => "review.{$key}", array_keys($reviewSettings ?? []))
             );
-            if (!empty($errors)) {
-                throw new SpecException('review', 'The Review settings form would refuse this: ' . json_encode($errors));
-            }
-            $context = $contextService->edit($context, $reviewSettings, Application::get()->getRequest());
+            $context = $this->saveFormSettings($context, $formSettings, $specKeys);
         }
 
         foreach ($reviewFormPlans as $plan) {
@@ -206,6 +219,119 @@ abstract class PKPContextScenarioBuilder
             'path' => $context->getPath(),
             'users' => $users,
         ];
+    }
+
+    /**
+     * Validate and write settings the way the settings forms' PUT
+     * contexts/{id} save does (PKPContextController::edit). A validation
+     * error is a 400 naming the spec key of the first refused field.
+     *
+     * @param array $specKeys context-schema field → dotted spec key
+     */
+    protected function saveFormSettings(Context $context, array $settings, array $specKeys): Context
+    {
+        $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
+        $errors = $contextService->validate(
+            EntityWriteInterface::VALIDATE_ACTION_EDIT,
+            $settings + ['id' => $context->getId()],
+            (array) $context->getSupportedFormLocales(),
+            $context->getPrimaryLocale()
+        );
+        if (!empty($errors)) {
+            // A multilingual error is keyed "field.locale".
+            $field = explode('.', (string) array_key_first($errors))[0];
+            throw new SpecException($specKeys[$field] ?? $field, 'The settings form would refuse this: ' . json_encode($errors));
+        }
+        return $contextService->edit($context, $settings, Application::get()->getRequest());
+    }
+
+    /**
+     * The optional submission-intake passthroughs → the context-settings
+     * rows their Settings › Workflow forms save (U21): `copyrightNotice`
+     * (Submission › Author Guidelines), `metadata` (Submission › Metadata)
+     * and the Emails tab's `submissionAcknowledgement`,
+     * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress`. Only
+     * keys the app's context schema carries are accepted.
+     *
+     * @return array{settings: array, specKeys: array}
+     */
+    protected function parseIntakeSettings(Spec $root, string $primaryLocale): array
+    {
+        $schema = app()->get('schema')->get('context'); /** @var \stdClass $schema */
+        $hasProperty = fn (string $key) => isset($schema->properties->{$key});
+        $settings = [];
+        $specKeys = [];
+
+        if ($root->has('copyrightNotice')) {
+            $value = $root->get('copyrightNotice');
+            if (!is_string($value) && !is_array($value)) {
+                throw new SpecException('copyrightNotice', 'copyrightNotice must be a string or a locale map');
+            }
+            $settings['copyrightNotice'] = $root->localized('copyrightNotice', $primaryLocale);
+            $specKeys['copyrightNotice'] = 'copyrightNotice';
+        }
+
+        if ($root->has('metadata')) {
+            $spec = $root->child('metadata');
+            // The Metadata form posts form-encoded strings, so its "off"
+            // arrives as the string "0" (the context schema types these
+            // items as strings, and its validator refuses the bare integer
+            // METADATA_DISABLE); the stored row is "0" either way.
+            $modes = [
+                'off' => (string) Context::METADATA_DISABLE,
+                'enable' => Context::METADATA_ENABLE,
+                'request' => Context::METADATA_REQUEST,
+                'require' => Context::METADATA_REQUIRE,
+            ];
+            // The items of PKPMetadataSettingsForm, in its order.
+            foreach ([
+                'plainLanguageSummary', 'keywords', 'subjects', 'disciplines', 'agencies', 'coverage', 'rights',
+                'source', 'type', 'citations', 'fundingStatement', 'funders', 'dataAvailability', 'dataCitations',
+            ] as $item) {
+                if (!$spec->has($item)) {
+                    continue;
+                }
+                $hasProperty($item) || throw new SpecException("metadata.{$item}", "metadata.{$item} is not a metadata item of this app's Metadata screen");
+                $mode = $spec->get($item);
+                if (!is_string($mode) || !array_key_exists($mode, $modes)) {
+                    throw new SpecException("metadata.{$item}", "metadata.{$item} must be one of: " . implode(', ', array_keys($modes)));
+                }
+                $settings[$item] = $modes[$mode];
+                $specKeys[$item] = "metadata.{$item}";
+            }
+            $spec->assertConsumed();
+        }
+
+        if ($root->has('submissionAcknowledgement')) {
+            $options = [
+                'off' => Context::SUBMISSION_ACKNOWLEDGEMENT_OFF,
+                'submittingAuthor' => Context::SUBMISSION_ACKNOWLEDGEMENT_SUBMITTING_AUTHOR,
+                'allAuthors' => Context::SUBMISSION_ACKNOWLEDGEMENT_ALL_AUTHORS,
+            ];
+            $value = $root->get('submissionAcknowledgement');
+            if (!is_string($value) || !array_key_exists($value, $options)) {
+                throw new SpecException('submissionAcknowledgement', 'submissionAcknowledgement must be one of: ' . implode(', ', array_keys($options)));
+            }
+            $settings['submissionAcknowledgement'] = $options[$value];
+            $specKeys['submissionAcknowledgement'] = 'submissionAcknowledgement';
+        }
+        if ($root->has('copySubmissionAckPrimaryContact')) {
+            $settings['copySubmissionAckPrimaryContact'] = (bool) $root->get('copySubmissionAckPrimaryContact');
+            $specKeys['copySubmissionAckPrimaryContact'] = 'copySubmissionAckPrimaryContact';
+        }
+        if ($root->has('copySubmissionAckAddress')) {
+            // An empty box arrives as null on both the form's PUT and this
+            // POST (ConvertEmptyStringsToNull middleware), so null is the
+            // cleared state the form itself saves.
+            $value = $root->get('copySubmissionAckAddress');
+            if (!is_string($value) && $value !== null) {
+                throw new SpecException('copySubmissionAckAddress', 'copySubmissionAckAddress must be a string (comma-separated addresses, as the field is typed)');
+            }
+            $settings['copySubmissionAckAddress'] = $value;
+            $specKeys['copySubmissionAckAddress'] = 'copySubmissionAckAddress';
+        }
+
+        return ['settings' => $settings, 'specKeys' => $specKeys];
     }
 
     /**

@@ -4,19 +4,24 @@
  *
  * U21 — Submission wizard, OMP suite (spec:
  * docs/specs/U21-submission-wizard.md). One test per canonical scenario a
- * press runs, in OMP vocabulary (press, monograph, Submission Type — glossary
- * substitution): common scenarios 1–11, then the OMP-specific scenarios 13
- * and 14 plus the press absence of scenario 12's section machinery (OMP1).
- * Scenario 15 is OPS-only (galley intake) and has no press analogue.
+ * press runs, in OMP vocabulary (press, monograph, Submission Type, "Cover
+ * Note to Editor" — glossary substitution): common scenarios 1–11, 16 and
+ * 17, then the OMP-specific scenarios 13 and 14 plus the press absence of
+ * scenario 12's section machinery (OMP1). Scenario 15 is OPS-only (galley
+ * intake) and has no press analogue. What the scenarios leave out is the
+ * spec's Coverage section.
  *
  * Deliberate non-coverage (register IDs from the spec's Findings register —
  * 🐞 findings are never asserted as contract; ❓-parked claims are not
  * coverage gaps):
- * - A4 (🐞): nothing is asserted about the footer's "Last saved" ticker.
- * - A5 (🐞): the activity log's copyright entry is not read.
+ * - A4 (🐞): S3 waits for the autosave itself; nothing is asserted about the
+ *   footer's "Last saved" reading before a save has run.
+ * - A5 (🐞): S16 reads the activity log's copyright entry by its tail
+ *   ("agreed to the copyright terms"); its leading placeholder is not
+ *   asserted either way.
  * - A6 (🐞): no double-submit is attempted.
- * - A7 (🐞): acknowledgements stay ON in every scenario here; nothing is
- *   asserted about the completion screen's email sentence with them off.
+ * - A7 (🐞): S10's "Off" leg asserts the silence only; nothing is asserted
+ *   about the completion screen's email sentence with acknowledgements off.
  * - A2 (❓): S3 asserts the ordinary case (the submitting author presses
  *   "Save for Later"); who gets the email when a manager presses it is not
  *   asserted either way.
@@ -25,32 +30,27 @@
  * - A8 (🐞): S11's auto-assignment half runs on the seeded press — the
  *   install's oldest context, where assignment works; nothing is asserted
  *   about auto-assignment on scratch presses.
- * - Rule 9's autosave/offline mechanics (Reconnecting, unsaved-changes
- *   restore) are not canonical scenarios and are not covered.
- * - Rule 14's copyright confirmation box is not covered: no press on this
- *   install carries a copyright notice, so scenario 2's "tick any
- *   confirmation box" step is empty here.
- * - Scenario 5's language half is not covered: the install's presses carry a
- *   single submission language, so no Submission Language choice renders
- *   anywhere; the press-specific half (the ever-reconfigurable work type,
- *   OMP1) is covered by S5.
- * - Scenario 1's reader-site "Make a Submission" block (Rule 1) belongs to
- *   the sidebar-block plugin surface and is not driven here; entry is
- *   asserted via the dashboard sidebar.
  *
  * Seeding: scenario endpoints only. Drafts (`submitted: false`) on the
  * read-only `publicknowledge` press for author-only flows; scratch presses
  * (with throwaway users carrying unique mail.test addresses) wherever a
- * setting is flipped or Mailpit is read (PRINCIPLES A8 — every mail
- * assertion is scoped by a unique throwaway recipient). All tests run in the
- * parallel `omp` project; nothing global is touched.
+ * setting differs from the install default (seeded through the context
+ * passthrough keys: `copyrightNotice`, `metadata`,
+ * `submissionAcknowledgement` and its copies, `supportedSubmissionLocales`)
+ * or Mailpit is read (PRINCIPLES A8 — every mail assertion is scoped by a
+ * unique throwaway recipient). The settings scenarios 7, 8, 9 and 13 switch
+ * their setting through the manager's own screen, as the spec's bullets
+ * say. All tests run in the parallel `omp` project; nothing global is
+ * touched.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
     STEPS,
+    CONTROLS,
     startUrl,
     wizardUrl,
     footer,
+    submitButton,
     submittingToLine,
     railEntry,
     expectStep,
@@ -60,17 +60,30 @@ const {
     uploadWizardFile,
     openReview,
     problemsBanner,
+    reviewPanel,
+    confirmationHeading,
+    copyrightCheckbox,
+    fillRichText,
+    richTextBody,
+    wizardField,
+    addKeyword,
+    contributorRows,
+    addContributor,
     confirmSubmit,
     completeAndSubmitDraft,
     saveForLater,
+    cancelDraft,
     openChangeSettings,
 } = require('../pages/SubmissionWizardPages.js');
 const {
     openEditorial,
+    openAuthorView,
     secondaryRegion,
-    assignParticipant,
     openTasksPanel,
 } = require('../pages/ReviewStagePages.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {getPassword} = require('../../../../shared/playwright/data/users.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -79,6 +92,13 @@ const WORK_TYPES = {
     monograph: 'Monograph: Authors are associated with the book as a whole.',
     editedVolume: 'Edited Volume: Authors are associated with their own chapter.',
 };
+
+const ACK_SUBJECT = 'Thank you for your submission';
+const COAUTHOR_ACK_SUBJECT = 'Submission confirmation';
+const NEEDS_EDITOR_SUBJECT = 'needs an editor to be assigned';
+/** The press's "Comments for the Editor" box, discussion and email title. */
+const EDITOR_NOTE = 'Cover Note to Editor';
+const SUBMITTED_LOG_LINE = 'Initial submission completed.';
 
 /** Parallel-safe unique tag: single alphanumeric token, ≤32 chars. */
 function makeTag(testInfo, scenarioKey) {
@@ -89,22 +109,25 @@ function makeTag(testInfo, scenarioKey) {
 /**
  * Seed a scratch press whose path is the tag, with throwaway users
  * (usernames prefixed by the tag so their mail.test addresses are unique
- * per run). Returns {path, users: {key: {username, email}}}.
+ * per run) and any context passthrough keys (`settings`) the scenario's
+ * given names. Returns {path, users: {key: {username, email, name}}}.
  */
-async function seedPress(ompApi, tag, userKeys) {
+async function seedPress(ompApi, tag, userKeys, {settings = {}, context = {}} = {}) {
     const roleByKey = {
         manager: ['manager'],
         author: ['author'],
+        seriesEditor: ['sectionEditor'],
         reader: ['reader'],
         reader2: ['reader'],
     };
     const users = {};
     const specs = userKeys.map((key) => {
         const username = `${tag}${key}`;
-        users[key] = {username, email: `${username}@mail.test`};
+        const givenName = `U21${key}`;
+        users[key] = {username, email: `${username}@mail.test`, name: `${givenName} Tester`};
         return {
             username,
-            givenName: `U21${key}`,
+            givenName,
             familyName: 'Tester',
             email: `${username}@mail.test`,
             roles: roleByKey[key],
@@ -112,8 +135,9 @@ async function seedPress(ompApi, tag, userKeys) {
     });
     await ompApi.createContext({
         tag,
-        context: {name: {en: `U21 Press ${tag}`}},
+        context: {name: {en: `U21 Press ${tag}`}, ...context},
         users: specs,
+        ...settings,
     });
     return {path: tag, users};
 }
@@ -149,10 +173,39 @@ async function setDisableSubmissions(page, contextPath, disabled) {
     await saved;
 }
 
+/**
+ * On the open workflow screen, open "Activity Log" and return the History
+ * table's rows (the dialog loads them after it opens; the table bounds the
+ * read).
+ */
+async function activityLogRows(page) {
+    await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
+    const log = page.getByRole('dialog', {name: /Activity Log/});
+    await expect(log.getByRole('table').first()).toBeVisible({timeout: 30_000});
+    return log.getByRole('row');
+}
+
+/**
+ * Walk a draft to Review with one uploaded file and a second contributor
+ * added on the Contributors step, then submit (scenario 10's drafts).
+ */
+async function submitWithCoauthor(page, contextPath, seeded, tag, contributorEmail) {
+    await page.goto(wizardUrl(contextPath, seeded.submissionId));
+    await expectWizardOpen(page);
+    await uploadWizardFile(page, `ms-${tag}.txt`);
+    await continueTo(page, STEPS.details);
+    await continueTo(page, STEPS.contributors);
+    await addContributor(page, {givenName: `Coauthor${tag}`, email: contributorEmail});
+    await continueTo(page, STEPS.editors);
+    await openReview(page);
+    await expect(problemsBanner(page)).toHaveCount(0);
+    await confirmSubmit(page);
+}
+
 test.describe('Submission wizard (U21)', () => {
     test.beforeEach(async ({}, testInfo) => testInfo.setTimeout(300_000));
 
-    test('S1: start a submission from the dashboard sidebar', async ({asUser}, testInfo) => {
+    test('S1: start a submission from the dashboard sidebar', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s1');
         const page = await (await asUser('author.alex')).newPage();
 
@@ -173,13 +226,33 @@ test.describe('Submission wizard (U21)', () => {
             page.locator('.submissionWizard__submissionDetails')
         ).toContainText(String(id));
         await expect(page).toHaveTitle(/Make a Submission/);
+
+        // No affiliation: a throwaway Author (the seeder creates the account
+        // with no affiliation) starts a draft the same way — the wizard
+        // opens on Upload Files and Contributors already lists them as the
+        // primary contact (Rule 5).
+        const press = await seedPress(ompApi, tag, ['author']);
+        const author = press.users.author;
+        const bare = await (await asUser(author.username)).newPage();
+        await bare.goto(startUrl(press.path));
+        await beginSubmission(bare, {title: `Submission ${tag}b`});
+        await continueTo(bare, STEPS.details);
+        await continueTo(bare, STEPS.contributors);
+        const row = contributorRows(bare).filter({hasText: author.name});
+        await expect(row).toBeVisible({timeout: 20_000});
+        await expect(row.locator('.pkpBadge').filter({hasText: 'Primary Contact'})).toBeVisible();
+        await expect(contributorRows(bare)).toHaveCount(1);
     });
 
     test('S2: fill every step and submit; the acknowledgement arrives', async ({ompApi, pkpMail, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s2');
-        const press = await seedPress(ompApi, tag, ['author']);
+        const press = await seedPress(ompApi, tag, ['author', 'manager']);
         const author = press.users.author;
         const seeded = await seedDraft(ompApi, tag, {
+            context: press.path,
+            submitter: author.username,
+        });
+        const second = await seedDraft(ompApi, `${tag}b`, {
             context: press.path,
             submitter: author.username,
         });
@@ -188,9 +261,21 @@ test.describe('Submission wizard (U21)', () => {
         await page.goto(wizardUrl(press.path, seeded.submissionId));
         await expectWizardOpen(page);
 
-        // Upload a manuscript, pass every step, submit from Review
-        // (scenario 2; the press asks no abstract — OMP1).
-        await completeAndSubmitDraft(page, `ms-${tag}.txt`);
+        // Upload a manuscript, pass every step, reach Review (scenario 2;
+        // the press asks no abstract — OMP1): the check clears with no
+        // banner, and with no copyright notice on this press Review has no
+        // "Confirmation" section (scenario 16's control; positive control:
+        // the Files panel read the same way).
+        await uploadWizardFile(page, `ms-${tag}.txt`);
+        await continueTo(page, STEPS.details);
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await openReview(page);
+        await expect(problemsBanner(page)).toHaveCount(0);
+        await expect(reviewPanel(page, 'Files').getByRole('heading', {name: 'Files'})).toBeVisible();
+        await expect(confirmationHeading(page)).toHaveCount(0);
+        await expect(copyrightCheckbox(page)).toHaveCount(0);
+        await confirmSubmit(page);
 
         // The completion screen offers the three links (Rule 15).
         await expect(page.getByRole('link', {name: 'Review this submission'})).toBeVisible();
@@ -201,7 +286,7 @@ test.describe('Submission wizard (U21)', () => {
         // effects; unique throwaway recipient).
         await pkpMail.find({
             to: author.email,
-            subject: 'Thank you for your submission',
+            subject: ACK_SUBJECT,
             timeoutMs: 30_000,
         });
 
@@ -214,6 +299,59 @@ test.describe('Submission wizard (U21)', () => {
                 .getByRole('heading', {name: /^Workflow:/})
                 .first()
         ).toBeVisible({timeout: 30_000});
+
+        // The submission's activity log holds the "submission submitted"
+        // entry (Side effects; the log is read on the workflow screen by
+        // the press manager, who has the "Activity Log" control).
+        const managerPage = await (await asUser(press.users.manager.username)).newPage();
+        await openEditorial(managerPage, press.path, seeded.submissionId);
+        await expect(
+            (await activityLogRows(managerPage)).filter({hasText: SUBMITTED_LOG_LINE})
+        ).toHaveCount(1);
+
+        // The wizard address after submitting answers "Submission complete"
+        // with no "Cancel" control (Rules 6, 15, 16); control: the second,
+        // unsubmitted draft answers its address with the wizard itself and
+        // "Cancel" in its footer.
+        await page.goto(wizardUrl(press.path, seeded.submissionId));
+        await expect(page.getByRole('heading', {name: 'Submission complete'})).toBeVisible({
+            timeout: 20_000,
+        });
+        await expect(page.locator('#cancelSubmission')).toHaveCount(0);
+        await page.goto(wizardUrl(press.path, second.submissionId));
+        await expectWizardOpen(page);
+        await expect(footer(page).locator('#cancelSubmission')).toBeVisible();
+
+        // Comments for the Editor: on the second draft (the scratch press
+        // has no editor assigned), type the note in the For the Editors
+        // step's box — a press labels it "Cover Note to Editor" — and
+        // submit: the workflow shows the note as a discussion, and a copy
+        // of it arrives in your mailbox, you being its only participant.
+        const note = 'Please note the data set is under embargo.';
+        await uploadWizardFile(page, `ms-${tag}b.txt`);
+        await continueTo(page, STEPS.details);
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await expect(wizardField(page, new RegExp(`^${EDITOR_NOTE}`))).toBeVisible();
+        await fillRichText(page, CONTROLS.editorNote, note);
+        await openReview(page);
+        await expect(problemsBanner(page)).toHaveCount(0);
+        await confirmSubmit(page);
+        await page.getByRole('link', {name: 'Review this submission'}).click();
+        const discussions = page.locator('[data-cy="discussion-manager"]').first();
+        await expect(
+            discussions.getByRole('heading', {name: 'Desk Review Tasks & Discussions'})
+        ).toBeVisible({timeout: 30_000});
+        const discussionRow = discussions.getByRole('row').filter({hasText: EDITOR_NOTE});
+        await expect(discussionRow).toBeVisible({timeout: 30_000});
+        await expect(discussionRow).toContainText(`Created by: ${author.username}`);
+        const copy = await pkpMail.find({
+            to: author.email,
+            subject: EDITOR_NOTE,
+            contains: 'under embargo',
+            timeoutMs: 30_000,
+        });
+        expect(copy.To.map((r) => r.Address)).toEqual([author.email]);
     });
 
     test('S3: save for later and resume from the emailed link', async ({ompApi, pkpMail, asUser}, testInfo) => {
@@ -224,24 +362,53 @@ test.describe('Submission wizard (U21)', () => {
             context: press.path,
             submitter: author.username,
         });
+        const second = await seedDraft(ompApi, `${tag}b`, {
+            context: press.path,
+            submitter: author.username,
+        });
 
         const page = await (await asUser(author.username)).newPage();
         await page.goto(wizardUrl(press.path, seeded.submissionId));
         await expectWizardOpen(page);
         await continueTo(page, STEPS.details);
 
+        // Autosave: type the title and stop. The wizard saves on its own
+        // timer, roughly a minute on (Rule 9): the footer flashes "Saving"
+        // and then ticks "Last saved {n} seconds ago". Both waits are bound
+        // by the save the wizard itself sends; nothing is pressed.
+        const saved = page.waitForResponse(
+            (r) =>
+                /\/publications\/\d+/.test(r.url()) &&
+                ['POST', 'PUT'].includes(r.request().method()) &&
+                r.ok(),
+            {timeout: 100_000}
+        );
+        const flashed = page.waitForFunction(
+            () =>
+                /Saving/.test(
+                    document.querySelector('.submissionWizard__footer')?.textContent || ''
+                ),
+            null,
+            {timeout: 100_000, polling: 50}
+        );
+        await fillRichText(page, CONTROLS.title, 'Autosave check');
+        await saved;
+        await flashed;
+        await expect(footer(page)).toContainText(/Last saved \d+ seconds? ago/);
+
         // "Save for Later" lands on the Saved for Later screen: a resume
-        // link naming the submission and the emailed-copy note (Rule 10).
+        // link naming the draft's contributors and title, and the
+        // emailed-copy note (Rule 10).
         await saveForLater(page);
         const resumeLink = page.locator(`a[href*="/submission?id=${seeded.submissionId}"]`);
         await expect(resumeLink).toBeVisible();
-        await expect(resumeLink).toContainText(`Submission ${tag}`);
+        await expect(resumeLink).toContainText(author.name.split(' ')[1]);
+        await expect(resumeLink).toContainText('Autosave check');
         await expect(
             page.getByText(`We have emailed a copy of this link to you at ${author.email}.`)
         ).toBeVisible();
 
-        // The email arrives, and its link reopens the wizard on the step
-        // recorded (scenario 3).
+        // The email arrives with the resume link (scenario 3).
         const message = await pkpMail.find({
             to: author.email,
             subject: 'Resume your submission',
@@ -250,63 +417,121 @@ test.describe('Submission wizard (U21)', () => {
         const full = await pkpMail.fullMessage(message.ID);
         const match = /href="([^"]*\/submission\?id=\d+[^"]*)"/.exec(full.HTML || '');
         expect(match, 'the saved-for-later email carries the wizard link').toBeTruthy();
-        await page.goto(match[1].replace(/&amp;/g, '&'));
+        const link = match[1].replace(/&amp;/g, '&');
+
+        // Signed out, the emailed link shows the Login page (Actors).
+        await page.goto(`/index.php/${press.path}/login/signOut`);
+        await page.waitForURL((url) => !url.pathname.endsWith('/signOut'), {
+            waitUntil: 'commit',
+            timeout: 15_000,
+        });
+        await page.goto(link);
+        await expect(page.locator('form#login')).toBeVisible({timeout: 20_000});
+        await expect(page.locator('.pkpSteps__buttons')).toHaveCount(0);
+
+        // Resume: sign in and follow the link: the wizard reopens on
+        // "Details", the step you left, with "Autosave check" in "Title".
+        await new LoginPage(page).signIn(author.username, getPassword(author.username));
+        await page.goto(link);
         await expectWizardOpen(page);
         await expectStep(page, STEPS.details);
+        await expect(richTextBody(page, CONTROLS.title)).toContainText('Autosave check');
+
+        // Control: the second draft, moved to "Details" by "Continue" and
+        // never saved for later, reopens from My Submissions at "Upload
+        // Files" (Rule 6).
+        await page.goto(wizardUrl(press.path, second.submissionId));
+        await expectWizardOpen(page);
+        await continueTo(page, STEPS.details);
+        const mySub = new MySubmissionsPage(page, press.path);
+        await mySub.goto();
+        const row = await mySub.findRowByTag(`${tag}b`);
+        await mySub.completeSubmissionButton(row).click();
+        await expectWizardOpen(page);
+        expect(page.url()).toContain(`id=${second.submissionId}`);
+        await expectStep(page, STEPS.files);
     });
 
-    test('S4: cancel a draft; an assigned series editor gets no Cancel', async ({ompApi, asUser}, testInfo) => {
+    test('S4: cancel a draft; a manager cancels another author\'s; an assigned series editor gets no Cancel', async ({ompApi, pkpMail, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s4');
-        const seeded = await seedDraft(ompApi, tag);
-        const draftUrl = wizardUrl(PK, seeded.submissionId, {localePrefix: PK_PREFIX});
-
-        // A Press Manager assigns a Series Editor to the draft (control
-        // seeding — the wizard is the surface under test below).
-        const mayaPage = await (await asUser('manager.maya')).newPage();
-        const modal = await openEditorial(mayaPage, PK, seeded.submissionId);
-        await assignParticipant(mayaPage, modal, {
-            group: 'Series editor',
-            query: 'Ana',
-            resultName: 'Ana Section Editor',
+        const press = await seedPress(ompApi, tag, ['author', 'manager', 'seriesEditor']);
+        const author = press.users.author;
+        const manager = press.users.manager;
+        const own = await seedDraft(ompApi, tag, {
+            context: press.path,
+            submitter: author.username,
         });
+        // The manager's and the Series Editor's draft: the editor is
+        // assigned as a participant (the given the tooling builds: the
+        // same row the Participants panel's "Assign Participant" writes).
+        const other = await seedDraft(ompApi, `${tag}b`, {
+            context: press.path,
+            submitter: author.username,
+            participants: [{username: press.users.seriesEditor.username, role: 'sectionEditor'}],
+        });
+        const spare = await seedDraft(ompApi, `${tag}c`, {
+            context: press.path,
+            submitter: author.username,
+        });
+        const ownUrl = wizardUrl(press.path, own.submissionId);
+        const otherUrl = wizardUrl(press.path, other.submissionId);
 
         // Control: the assigned Series Editor gets the wizard — Save for
         // Later and Continue offered — but no "Cancel" (Rule 16).
-        const anaPage = await (await asUser('sectioneditor.ana')).newPage();
-        await anaPage.goto(draftUrl);
-        await expectWizardOpen(anaPage);
+        const editorPage = await (await asUser(press.users.seriesEditor.username)).newPage();
+        await editorPage.goto(otherUrl);
+        await expectWizardOpen(editorPage);
         await expect(
-            footer(anaPage).getByRole('button', {name: 'Continue', exact: true})
+            footer(editorPage).getByRole('button', {name: 'Continue', exact: true})
         ).toBeVisible();
         await expect(
-            footer(anaPage).getByRole('button', {name: 'Save for Later', exact: true})
+            footer(editorPage).getByRole('button', {name: 'Save for Later', exact: true})
         ).toBeVisible();
-        await expect(anaPage.locator('#cancelSubmission')).toHaveCount(0);
+        await expect(editorPage.locator('#cancelSubmission')).toHaveCount(0);
 
-        // The submitting author cancels: warning dialog, then the
-        // "Submission cancelled" screen (Rule 16, scenario 4).
-        const page = await (await asUser('author.alex')).newPage();
-        await page.goto(draftUrl);
+        // The submitting author cancels their own draft: warning dialog,
+        // then the "Submission cancelled" screen with its two links
+        // (Rule 16, scenario 4).
+        const page = await (await asUser(author.username)).newPage();
+        await page.goto(ownUrl);
         await expectWizardOpen(page);
-        await page.locator('#cancelSubmission').click();
-        const dialog = page
-            .getByRole('dialog')
-            .filter({hasText: 'Cancel submission'});
-        await expect(
-            dialog.getByText(
-                'Are you sure you wish to cancel this submission? This will delete the submission and all associated data. This action cannot be undone.'
-            )
-        ).toBeVisible({timeout: 10_000});
-        await dialog.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(
-            page.getByRole('heading', {name: 'Submission cancelled'})
-        ).toBeVisible({timeout: 30_000});
+        await cancelDraft(page);
         await expect(page.getByRole('link', {name: 'Create a new submission'})).toBeVisible();
         await expect(page.getByRole('link', {name: 'Return to your dashboard'})).toBeVisible();
 
+        // The draft is gone from My Submissions: the author's "Active
+        // submissions" view counts the two drafts left and lists them
+        // (positive control, read the same way), and no row carries the
+        // cancelled draft's title.
+        const mySub = new MySubmissionsPage(page, press.path);
+        await mySub.goto();
+        await mySub.expectViewHeading('Active submissions', 2);
+        await expect(mySub.row(`Submission ${tag}b`)).toBeVisible();
+        await expect(mySub.row(`Submission ${tag}c`)).toBeVisible();
+        await expect(mySub.row(new RegExp(`Submission ${tag}(?![a-z0-9])`))).toHaveCount(0);
+
         // The deleted draft's wizard address now answers a bare 404.
-        const response = await page.goto(draftUrl);
+        const response = await page.goto(ownUrl);
         expect(response.status()).toBe(404);
+
+        // The Press Manager on another author's draft: the footer offers
+        // "Cancel"; confirming lands on "Submission cancelled".
+        const managerPage = await (await asUser(manager.username)).newPage();
+        await managerPage.goto(otherUrl);
+        await expectWizardOpen(managerPage);
+        await expect(footer(managerPage).locator('#cancelSubmission')).toBeVisible();
+        await cancelDraft(managerPage);
+
+        // Mailboxes: no email arrives on either cancel, in the author's
+        // mailbox or the manager's. Positive control taken the same way:
+        // the author's "Save for Later" on the spare draft, whose email is
+        // sent after both cancels, so it bounds the silence.
+        await page.goto(wizardUrl(press.path, spare.submissionId));
+        await expectWizardOpen(page);
+        await saveForLater(page);
+        await pkpMail.find({to: author.email, subject: 'Resume your submission', timeoutMs: 30_000});
+        expect(await pkpMail.count({to: author.email})).toBe(1);
+        expect(await pkpMail.count({to: manager.email})).toBe(0);
     });
 
     test('S5: change the submission settings midway (work type — OMP1)', async ({ompApi, asUser}, testInfo) => {
@@ -337,6 +562,15 @@ test.describe('Submission wizard (U21)', () => {
             'Submitting an Edited Volume.',
             {timeout: 30_000}
         );
+
+        // Control: the draft reopened from My Submissions still names the
+        // new type.
+        const mySub = new MySubmissionsPage(page, PK);
+        await mySub.goto();
+        const row = await mySub.findRowByTag(tag);
+        await mySub.completeSubmissionButton(row).click();
+        await expectWizardOpen(page);
+        await expect(submittingToLine(page)).toContainText('Submitting an Edited Volume.');
     });
 
     test('S6: validation blocks an empty submission until the file is fixed', async ({ompApi, asUser}, testInfo) => {
@@ -359,15 +593,11 @@ test.describe('Submission wizard (U21)', () => {
         await expect(problemsBanner(page)).toContainText(
             'There are one or more problems that need to be fixed before you can submit.'
         );
-        const filesPanel = page
-            .locator('.submissionWizard__reviewPanel')
-            .filter({has: page.getByRole('heading', {name: 'Files', exact: true})});
+        const filesPanel = reviewPanel(page, 'Files');
         await expect(filesPanel).toContainText(
             /upload at least one Book Manuscript file/
         );
-        await expect(
-            footer(page).getByRole('button', {name: 'Submit', exact: true})
-        ).toBeDisabled();
+        await expect(submitButton(page)).toBeDisabled();
 
         // The panel's "Edit" jumps back to Upload Files; fix the item and
         // return: the complaint is gone and Submit enables.
@@ -379,9 +609,46 @@ test.describe('Submission wizard (U21)', () => {
         await expect(filesPanel).not.toContainText(
             /upload at least one Book Manuscript file/
         );
-        await expect(
-            footer(page).getByRole('button', {name: 'Submit', exact: true})
-        ).toBeEnabled();
+        await expect(submitButton(page)).toBeEnabled();
+
+        // A contributor named in another language only: on a bilingual
+        // scratch press, a second draft's co-author is named in English,
+        // then the submission language is switched to French (Canada)
+        // through "Change Submission Settings" (Rule 11), so the co-author
+        // has a name in another of the press's languages and none in the
+        // submission language. Review: the banner, the Contributors panel's
+        // complaint, and a disabled Submit (Rule 13).
+        const press = await seedPress(ompApi, tag, ['author'], {
+            context: {supportedLocales: ['en', 'fr_CA'], supportedSubmissionLocales: ['en', 'fr_CA']},
+        });
+        const author = press.users.author;
+        const bilingual = await seedDraft(ompApi, `${tag}b`, {
+            context: press.path,
+            submitter: author.username,
+        });
+        const second = await (await asUser(author.username)).newPage();
+        await second.goto(wizardUrl(press.path, bilingual.submissionId));
+        await expectWizardOpen(second);
+        await expect(submittingToLine(second)).toContainText('Submitting a Monograph in English.');
+        await uploadWizardFile(second, `ms-${tag}b.txt`);
+        await continueTo(second, STEPS.details);
+        await continueTo(second, STEPS.contributors);
+        await addContributor(second, {givenName: `Coauthor${tag}`, email: `${tag}co@mail.test`});
+        const settings = await openChangeSettings(second);
+        await settings.getByRole('radio', {name: 'French (Canada)'}).check();
+        await settings.getByRole('button', {name: 'Save', exact: true}).click();
+        await expect(submittingToLine(second)).toContainText('French (Canada)', {timeout: 30_000});
+        await continueTo(second, STEPS.details);
+        await continueTo(second, STEPS.contributors);
+        await continueTo(second, STEPS.editors);
+        await openReview(second);
+        await expect(problemsBanner(second)).toContainText(
+            'There are one or more problems that need to be fixed before you can submit.'
+        );
+        await expect(reviewPanel(second, 'Contributors')).toContainText(
+            'The given name is missing in French (Canada) for one or more of the contributors.'
+        );
+        await expect(submitButton(second)).toBeDisabled();
     });
 
     test('S7: the press stops accepting submissions', async ({ompApi, asUser}, testInfo) => {
@@ -449,6 +716,12 @@ test.describe('Submission wizard (U21)', () => {
             })
         ).toHaveCount(0);
         await completeAndSubmitDraft(page, `ms-${tag}.txt`);
+
+        // Control: on the same closed press the author's sidebar offers no
+        // "Start A New Submission" (scenario 7).
+        await page.goto(`/index.php/${press.path}/dashboard/mySubmissions`);
+        await expect(page.getByRole('heading', {level: 1})).toBeVisible({timeout: 20_000});
+        await expect(page.getByRole('link', {name: 'Start A New Submission'})).toHaveCount(0);
     });
 
     test('S9: a user with no submitting role is enrolled as Author; without self-registration the start screen refuses', async ({ompApi, asUser}, testInfo) => {
@@ -516,6 +789,12 @@ test.describe('Submission wizard (U21)', () => {
 
     test('S10: all contributors are acknowledged', async ({ompApi, pkpMail, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s10');
+
+        // All authors (the default): a second contributor with a distinct
+        // throwaway address; two acknowledgements — the submitting
+        // author's and the co-author variant to the other contributor
+        // (Side effects; the panel's own mechanics belong to Contributors
+        // & affiliations).
         const press = await seedPress(ompApi, tag, ['author']);
         const author = press.users.author;
         const contributorEmail = `${tag}contrib@mail.test`;
@@ -523,50 +802,87 @@ test.describe('Submission wizard (U21)', () => {
             context: press.path,
             submitter: author.username,
         });
-
         const page = await (await asUser(author.username)).newPage();
-        await page.goto(wizardUrl(press.path, seeded.submissionId));
+        await submitWithCoauthor(page, press.path, seeded, tag, contributorEmail);
+        await pkpMail.find({to: author.email, subject: ACK_SUBJECT, timeoutMs: 30_000});
+        await pkpMail.find({to: contributorEmail, subject: COAUTHOR_ACK_SUBJECT, timeoutMs: 30_000});
+
+        // Copies: a press whose Emails screen copies the press contact and
+        // an extra address (seeded through the acknowledgement copy keys).
+        // Your acknowledgement carries both as blind copies; the other
+        // contributor's message goes to them alone.
+        const copiesTag = `${tag}c`;
+        const contactEmail = `${copiesTag}contact@mail.test`;
+        const extraEmail = `${copiesTag}extra@mail.test`;
+        const copies = await seedPress(ompApi, copiesTag, ['author'], {
+            context: {contactName: 'U21 Contact', contactEmail},
+            settings: {copySubmissionAckPrimaryContact: true, copySubmissionAckAddress: extraEmail},
+        });
+        const copiesDraft = await seedDraft(ompApi, copiesTag, {
+            context: copies.path,
+            submitter: copies.users.author.username,
+        });
+        const copiesContributor = `${copiesTag}contrib@mail.test`;
+        const copiesPage = await (await asUser(copies.users.author.username)).newPage();
+        await submitWithCoauthor(copiesPage, copies.path, copiesDraft, copiesTag, copiesContributor);
+        const ack = await pkpMail.find({to: copies.users.author.email, subject: ACK_SUBJECT, timeoutMs: 30_000});
+        const ackFull = await pkpMail.fullMessage(ack.ID);
+        expect((ackFull.Bcc || []).map((r) => r.Address).sort()).toEqual([contactEmail, extraEmail].sort());
+        const coauthorAck = await pkpMail.find({to: copiesContributor, subject: COAUTHOR_ACK_SUBJECT, timeoutMs: 30_000});
+        const coauthorFull = await pkpMail.fullMessage(coauthorAck.ID);
+        expect(coauthorFull.To.map((r) => r.Address)).toEqual([copiesContributor]);
+        expect(coauthorFull.Cc || []).toEqual([]);
+        expect(coauthorFull.Bcc || []).toEqual([]);
+
+        // Submitting author only: one email, in your mailbox; none reaches
+        // the other contributor (the author's own bounds the wait).
+        const onlyTag = `${tag}o`;
+        const only = await seedPress(ompApi, onlyTag, ['author'], {
+            settings: {submissionAcknowledgement: 'submittingAuthor'},
+        });
+        const onlyDraft = await seedDraft(ompApi, onlyTag, {
+            context: only.path,
+            submitter: only.users.author.username,
+        });
+        const onlyContributor = `${onlyTag}contrib@mail.test`;
+        const onlyPage = await (await asUser(only.users.author.username)).newPage();
+        await submitWithCoauthor(onlyPage, only.path, onlyDraft, onlyTag, onlyContributor);
+        await pkpMail.expectNone({
+            to: onlyContributor,
+            afterControl: {to: only.users.author.email, subject: ACK_SUBJECT, timeoutMs: 30_000},
+        });
+        expect(await pkpMail.count({to: only.users.author.email, subject: ACK_SUBJECT})).toBe(1);
+
+        // Off: no acknowledgement arrives, to you or the other contributor
+        // (the needs-an-editor email to the press manager, sent by the same
+        // submit, bounds the wait).
+        const offTag = `${tag}f`;
+        const off = await seedPress(ompApi, offTag, ['author', 'manager'], {
+            settings: {submissionAcknowledgement: 'off'},
+        });
+        const offDraft = await seedDraft(ompApi, offTag, {
+            context: off.path,
+            submitter: off.users.author.username,
+        });
+        const offContributor = `${offTag}contrib@mail.test`;
+        const offPage = await (await asUser(off.users.author.username)).newPage();
+        await submitWithCoauthor(offPage, off.path, offDraft, offTag, offContributor);
+        const control = {to: off.users.manager.email, subject: NEEDS_EDITOR_SUBJECT, contains: offTag, timeoutMs: 30_000};
+        await pkpMail.expectNone({to: off.users.author.email, subject: ACK_SUBJECT, afterControl: control});
+        await pkpMail.expectNone({to: offContributor, afterControl: control});
+
+        // Control: under all authors, a submission whose only contributor
+        // is you produces one acknowledgement.
+        const soloTag = `${tag}s`;
+        const solo = await seedDraft(ompApi, soloTag, {
+            context: press.path,
+            submitter: author.username,
+        });
+        await page.goto(wizardUrl(press.path, solo.submissionId));
         await expectWizardOpen(page);
-        await uploadWizardFile(page, `ms-${tag}.txt`);
-        await continueTo(page, STEPS.details);
-        await continueTo(page, STEPS.contributors);
-
-        // Add a second contributor with a distinct throwaway address
-        // (scenario 10; the panel's own mechanics belong to Contributors &
-        // affiliations).
-        await page.getByRole('button', {name: 'Add Contributor'}).click();
-        const modal = page.locator('[data-cy="active-modal"]').last();
-        await modal.getByRole('textbox', {name: /^Given Name/}).fill(`Coauthor${tag}`);
-        await modal.getByRole('textbox', {name: /^Email/}).fill(contributorEmail);
-        await modal.getByRole('combobox', {name: /^Country/}).selectOption({label: 'Iceland'});
-        await modal.getByRole('checkbox', {name: 'Author', exact: true}).check();
-        const saved = page.waitForResponse(
-            (r) => r.url().includes('/contributors') && r.ok()
-        );
-        await modal.getByRole('button', {name: 'Save', exact: true}).click();
-        await saved;
-        await expect(page.getByText(`Coauthor${tag}`).first()).toBeVisible({
-            timeout: 20_000,
-        });
-
-        await continueTo(page, STEPS.editors);
-        await openReview(page);
-        await expect(problemsBanner(page)).toHaveCount(0);
-        await confirmSubmit(page);
-
-        // Two acknowledgements: the submitting author's, and the co-author
-        // variant to the other contributor (Side effects; the press default
-        // is "all authors").
-        await pkpMail.find({
-            to: author.email,
-            subject: 'Thank you for your submission',
-            timeoutMs: 30_000,
-        });
-        await pkpMail.find({
-            to: contributorEmail,
-            subject: 'Submission confirmation',
-            timeoutMs: 30_000,
-        });
+        await completeAndSubmitDraft(page, `ms-${soloTag}.txt`);
+        await pkpMail.find({to: author.email, subject: ACK_SUBJECT, contains: `Submission ${soloTag}`, timeoutMs: 30_000});
+        expect(await pkpMail.count({to: author.email, subject: ACK_SUBJECT, contains: `Submission ${soloTag}`})).toBe(1);
     });
 
     test('S11: editors learn of the new submission', async ({ompApi, pkpMail, asUser}, testInfo) => {
@@ -605,7 +921,7 @@ test.describe('Submission wizard (U21)', () => {
 
         await pkpMail.find({
             to: press.users.manager.email,
-            subject: 'needs an editor to be assigned',
+            subject: NEEDS_EDITOR_SUBJECT,
             contains: tag,
             timeoutMs: 30_000,
         });
@@ -749,5 +1065,141 @@ test.describe('Submission wizard (U21)', () => {
         await expect(noneRadio).toBeChecked();
         await expect(page.getByRole('radio', {name: 'Monographs', exact: true})).toBeVisible();
         await expect(page.getByRole('radio', {name: 'Textbooks', exact: true})).toBeVisible();
+    });
+
+    test('S16: the copyright confirmation gates Submit and is logged', async ({ompApi, asUser}, testInfo) => {
+        const tag = makeTag(testInfo, 'u21s16');
+
+        // A press with a copyright notice (seeded through `copyrightNotice`),
+        // a complete draft at Review (scenario 16).
+        const press = await seedPress(ompApi, tag, ['author', 'manager'], {
+            settings: {copyrightNotice: `<p>Copyright notice ${tag}.</p>`},
+        });
+        const author = press.users.author;
+        const seeded = await seedDraft(ompApi, tag, {
+            context: press.path,
+            submitter: author.username,
+        });
+        const page = await (await asUser(author.username)).newPage();
+        await page.goto(wizardUrl(press.path, seeded.submissionId));
+        await expectWizardOpen(page);
+        await uploadWizardFile(page, `ms-${tag}.txt`);
+        await continueTo(page, STEPS.details);
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await openReview(page);
+
+        // The check passes with no banner; a final "Confirmation" section
+        // asks for the copyright agreement, and "Submit" stays disabled
+        // while the box is unticked (Rules 12, 14).
+        await expect(problemsBanner(page)).toHaveCount(0);
+        await expect(confirmationHeading(page)).toBeVisible();
+        await expect(page.getByText(`Copyright notice ${tag}.`)).toBeVisible();
+        const box = copyrightCheckbox(page);
+        await expect(box).toBeVisible();
+        await expect(box).not.toBeChecked();
+        await expect(submitButton(page)).toBeDisabled();
+
+        // Tick it, submit, confirm: "Submission complete".
+        await box.check();
+        await expect(submitButton(page)).toBeEnabled();
+        await confirmSubmit(page);
+
+        // "Review this submission" opens the workflow; its activity log
+        // holds the "submission submitted" entry and a "copyright agreed"
+        // entry (Side effects; the log is read by the press manager, who
+        // has the "Activity Log" control; the entry's leading placeholder is
+        // A5's and is not asserted).
+        await page.getByRole('link', {name: 'Review this submission'}).click();
+        await expect(
+            page
+                .locator('[data-cy="active-modal"]')
+                .getByRole('heading', {name: /^Workflow:/})
+                .first()
+        ).toBeVisible({timeout: 30_000});
+        const managerPage = await (await asUser(press.users.manager.username)).newPage();
+        await openEditorial(managerPage, press.path, seeded.submissionId);
+        const rows = await activityLogRows(managerPage);
+        await expect(rows.filter({hasText: SUBMITTED_LOG_LINE})).toHaveCount(1);
+        await expect(
+            rows.filter({hasText: `(${author.username}) agreed to the copyright terms for submission.`})
+        ).toHaveCount(1);
+    });
+
+    test('S17: required metadata blocks the submit', async ({ompApi, asUser}, testInfo) => {
+        const tag = makeTag(testInfo, 'u21s17');
+
+        // A press whose setup requires keywords during submission (seeded
+        // through `metadata: {keywords: 'require'}`), a complete draft
+        // (scenario 17).
+        const press = await seedPress(ompApi, tag, ['author'], {
+            settings: {metadata: {keywords: 'require'}},
+        });
+        const author = press.users.author;
+        const seeded = await seedDraft(ompApi, tag, {
+            context: press.path,
+            submitter: author.username,
+        });
+        const page = await (await asUser(author.username)).newPage();
+        await page.goto(wizardUrl(press.path, seeded.submissionId));
+        await expectWizardOpen(page);
+        await uploadWizardFile(page, `ms-${tag}.txt`);
+
+        // "Details" shows a "Keywords" field; leave it empty and reach
+        // Review: the problems banner, the keywords complaint on the
+        // Details panel, and a disabled Submit (Rule 13).
+        await continueTo(page, STEPS.details);
+        await expect(wizardField(page, /^Keywords/)).toBeVisible();
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await openReview(page);
+        await expect(problemsBanner(page)).toContainText(
+            'There are one or more problems that need to be fixed before you can submit.'
+        );
+        const detailsPanel = reviewPanel(page, 'Details');
+        const keywordsItem = detailsPanel
+            .locator('.submissionWizard__reviewPanel__item')
+            .filter({hasText: 'Keywords'});
+        await expect(keywordsItem).toContainText('This field is required.');
+        await expect(submitButton(page)).toBeDisabled();
+
+        // "Edit" on the Details panel, type the keyword, return: the
+        // complaint is gone and Submit is enabled.
+        await detailsPanel.getByRole('button', {name: 'Edit', exact: true}).click();
+        await expectStep(page, STEPS.details);
+        await addKeyword(page, 'wizard');
+        await openReview(page, {viaRail: true});
+        await expect(problemsBanner(page)).toHaveCount(0);
+        await expect(keywordsItem).toContainText('wizard');
+        await expect(keywordsItem).not.toContainText('This field is required.');
+        await expect(submitButton(page)).toBeEnabled();
+
+        // Control: on a press whose setup does not ask for keywords,
+        // "Details" shows no "Keywords" field (positive control: the Title
+        // field, read the same way) and Review passes without one. The
+        // spec places this control on the seeded press, but the seeded
+        // press asks for keywords (optional, the install default) — finding
+        // T-omp-2 in .reports/U21/test-omp-findings.md — so the control
+        // runs on a scratch press seeded with `metadata: {keywords: 'off'}`.
+        const offTag = `${tag}c`;
+        const off = await seedPress(ompApi, offTag, ['author'], {
+            settings: {metadata: {keywords: 'off'}},
+        });
+        const control = await seedDraft(ompApi, offTag, {
+            context: off.path,
+            submitter: off.users.author.username,
+        });
+        const offPage = await (await asUser(off.users.author.username)).newPage();
+        await offPage.goto(wizardUrl(off.path, control.submissionId));
+        await expectWizardOpen(offPage);
+        await uploadWizardFile(offPage, `ms-${offTag}.txt`);
+        await continueTo(offPage, STEPS.details);
+        await expect(wizardField(offPage, /^Title/)).toBeVisible();
+        await expect(wizardField(offPage, /^Keywords/)).toHaveCount(0);
+        await continueTo(offPage, STEPS.contributors);
+        await continueTo(offPage, STEPS.editors);
+        await openReview(offPage);
+        await expect(problemsBanner(offPage)).toHaveCount(0);
+        await expect(submitButton(offPage)).toBeEnabled();
     });
 });

@@ -50,8 +50,8 @@ Payload keys:
   "Articles", OPS "Preprints") instead of adding a second one. OMP creates no
   default series. Section fields, OJS: `abbrev` (required), `title`,
   `policy`, `wordCount`, `abstractsNotRequired`, `identifyType`. OPS: `abbrev`
-  (required), `path`, `title`, `policy`. OMP series: `path` (required),
-  `title`, `description`.
+  (required), `path`, `title`, `policy`, `wordCount`, `abstractsNotRequired`.
+  OMP series: `path` (required), `title`, `description`.
 - `categories[]` with `path` (required), `title`, and nested `children[]`.
 - `issues[]` (OJS only) with `volume`, `number`, `year` (all required) and
   `published`.
@@ -124,6 +124,33 @@ Keys:
   `smalltextfield`, `textfield`, `textarea`, `checkboxes`, `radiobuttons`,
   `dropdownbox` (or its number 1–6); the last three need `options`, a list
   of response labels (or a locale map of lists). OPS answers 400.
+- `copyrightNotice` (localized): the Copyright Notice of Settings ›
+  Workflow › Submission › "Author Guidance", saved the way that form's
+  save is. A scratch context has none until it is set. With one set, the
+  wizard's "Review" step ends in a "Confirmation" section whose "Yes, I
+  agree to the copyright statement." box must be ticked before "Submit"
+  enables.
+- `metadata`: the items of Settings › Workflow › Submission › "Metadata",
+  each set to one of the words `off` (the item's box unticked), `enable`
+  ("Do not request … during submission"), `request` ("Ask the author …")
+  or `require`, exactly as that screen saves them. Items: `keywords`,
+  `subjects`, `disciplines`, `agencies`, `coverage`, `rights`, `source`,
+  `type`, `citations`, `fundingStatement`, `funders`, `dataAvailability`,
+  `dataCitations`, `plainLanguageSummary`; an item the app's context
+  schema lacks is a 400, and so is any other word. A fresh context has
+  `keywords` and `citations` at `request` and the rest off. An item at
+  `require` is a submit blocker: the wizard's "Details" step shows its
+  field and "Review" reports it until it is filled.
+- `submissionAcknowledgement`: who gets the "Submission Confirmation"
+  email of Settings › Workflow › Emails, `allAuthors` (the default),
+  `submittingAuthor` or `off`; with it `copySubmissionAckPrimaryContact`
+  (boolean, "Notify Primary Contact") and `copySubmissionAckAddress` (a
+  string, "Notify Anyone", comma-separated as the box is typed; on OMP
+  the press schema allows a single address, so a list is a 400 there as
+  on the screen). Saved as that form saves: `off` and an empty address
+  store no row, and a context saved at `off` reopens the Emails screen
+  with no "Submission Confirmation" option selected, as it does after a
+  by-hand save (U21's register).
 
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
@@ -307,14 +334,15 @@ These keys do not exist. They are ideas recorded from an earlier harness.
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - Context passthroughs: `notifyAllAuthors` (Settings › Workflow › Emails
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
-  Workflow › Review "Reviewer Recommendations", U29), the submission-intake
-  settings U21's scenarios would run against (built with U58), `supportedFormLocales` (Website › Setup ›
+  Workflow › Review "Reviewer Recommendations", U29), the remaining
+  submission-intake settings (the checklist and the privacy statement,
+  U58), `supportedFormLocales` (Website › Setup ›
   Languages "Forms" column; the settings forms stay single-language until
-  it is set, U29), `copyrightNotice`, `enablePublicComments`,
+  it is set, U29), `enablePublicComments`,
   `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
-  `registrationAgency`, `doiCreationTime`), metadata modes (`keywords`,
-  `citations`), ISSNs, `plugins: {pluginName: {enabled, settings}}`
+  `registrationAgency`, `doiCreationTime`), ISSNs,
+  `plugins: {pluginName: {enabled, settings}}`
   keyed by the plugin's lowercased class name, OJS
   `issues[]` with `accessStatus`, and OJS `subscriptions[]` where
   `'expired'` seeds an active row with a past end date.

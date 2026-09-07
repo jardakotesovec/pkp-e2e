@@ -9,7 +9,8 @@
  *
  * @class BootstrapSeeder
  *
- * @brief OPS base seed: sections (abbrev + path — OPS sections carry both).
+ * @brief OPS base seed: sections (abbrev + path — OPS sections carry both;
+ * wordCount and abstractsNotRequired as the OPS section form reads them).
  */
 
 namespace APP\testing;
@@ -33,6 +34,8 @@ class BootstrapSeeder extends PKPBootstrapSeeder
             'path' => $spec->get('path'),
             'title' => $spec->get('title'),
             'policy' => $spec->get('policy'),
+            'wordCount' => $spec->get('wordCount'),
+            'abstractsNotRequired' => (bool) $spec->get('abstractsNotRequired', false),
         ];
     }
 
@@ -63,9 +66,13 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                     'title' => $localize($plan['title'], $plan['abbrev']),
                     'abbrev' => $localize($plan['abbrev']),
                     'path' => $plan['path'] ?? strtolower($plan['abbrev']),
+                    'abstractsNotRequired' => $plan['abstractsNotRequired'] ?? false,
                 ];
                 if (($plan['policy'] ?? null) !== null) {
                     $params['policy'] = $localize($plan['policy']);
+                }
+                if (($plan['wordCount'] ?? null) !== null) {
+                    $params['wordCount'] = (int) $plan['wordCount'];
                 }
                 $defaultSection = $existing->first();
                 Repo::section()->edit($defaultSection, $params);
@@ -78,6 +85,7 @@ class BootstrapSeeder extends PKPBootstrapSeeder
         $section->setData('sequence', $sequence);
         $section->setData('editorRestricted', false);
         $section->setData('metaIndexed', true);
+        $section->setData('abstractsNotRequired', $plan['abstractsNotRequired'] ?? false);
         $section->setData('path', $plan['path'] ?? strtolower($plan['abbrev']));
         foreach ($localize($plan['title'], $plan['abbrev']) as $l => $value) {
             $section->setData('title', $value, $l);
@@ -89,6 +97,9 @@ class BootstrapSeeder extends PKPBootstrapSeeder
             foreach ($localize($plan['policy']) as $l => $value) {
                 $section->setData('policy', $value, $l);
             }
+        }
+        if (($plan['wordCount'] ?? null) !== null) {
+            $section->setData('wordCount', (int) $plan['wordCount']);
         }
         return Repo::section()->add($section);
     }

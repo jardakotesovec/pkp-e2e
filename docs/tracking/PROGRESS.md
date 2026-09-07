@@ -42,7 +42,7 @@ status is pending / in_progress / done / parked.
 | U18 | Web feeds | OJS OMP OPS | L | pending | |
 | U19 | OAI-PMH | OJS OMP OPS | M | pending | |
 | U20 | Search-engine metadata & analytics | OJS OMP OPS | L | pending | |
-| U21 | Submission wizard | OJS OMP OPS | H | done | 13 OJS · 14 OMP · 14 OPS (+setup). 10🐞+7❓+2✅ (A11 retired 2026-09-03). Headliner A8. |
+| U21 | Submission wizard | OJS OMP OPS | H · 17 | done | 15 OJS · 16 OMP · 17 OPS (+setup). 11🐞+7❓+3✅ (A12, OMP2 added 2026-09-07). Headliner A8. Budget cuts: 10 states, 8 variants; No seed: task templates, OPS DOIs. Revised 2026-09-07 (coverage rule): 2 scenarios added, 7 grew. Four OMP final runs each red on one other feature's flake (U28 S1, U40 S4, U31 S4; ci-triage flake watch), every U21 test green in all four. |
 | U22 | My Submissions (author dashboard) | OJS OMP OPS | L | done | 4 OJS · 5 OMP · 4 OPS (+setup). 1🐞+7❓. Headliner OPS2. 1 in the private file, verified. Low-confidence: A3. |
 | U23 | Submissions dashboard (editorial) | OJS OMP OPS | H | done | 13 OJS · 13 OMP · 11 OPS (+setup). 3🐞+6❓. Headliner A5. |
 | U24 | Workflow screen & stage access | OJS OMP OPS | M | done | 8 OJS · 9 OMP · 6 OPS (+setup; OPS runs S1, S5–S8, S10). 4🐞+10❓+2✅. Headliner A9. 1 in the private file, verified. Low-confidence: Rule 15b; Rules 18–19 (no positive control). |

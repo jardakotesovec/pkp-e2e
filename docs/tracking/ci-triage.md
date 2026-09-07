@@ -44,12 +44,24 @@ trips.
   window widens. The harness mitigates with outcome-keyed retries and
   content-verified saves (U40 S4 on OJS and OPS, U49 S11 on OJS since
   2026-09-01); the fix is upstream. Reported to the team 2026-08-29.
-  Last incidents: U49 S11 red with retries exhausted 2026-08-30 and
-  2026-09-01 (watch condition tripped, hardening applied and verified green
-  2026-09-01); U21 S13 flaky-passed 2026-09-01; U21 S11 red on OMP with its retry exhausted 2026-09-03 (run 33745718330), green on the targeted rerun; U40 S6 then U40 S4 red on OMP in two
-  consecutive local final runs 2026-09-05 (U29 session, load average ~15 on
-  10 cores), green on the third. **Watch condition**: a
+  Last incidents: U21 S11 red on OMP with its retry exhausted 2026-09-03 (run
+  33745718330), green on the targeted rerun; U40 S6 then U40 S4 red on OMP in
+  two consecutive local final runs 2026-09-05 (U29 session, load average ~15
+  on 10 cores), green on the third; U40 S4 red on OMP in two of four local final
+  runs 2026-09-07 (U21 revision; the first at load ~15 on 10 cores), green
+  on the others. **Watch condition**: a
   hardened test reds again with retries exhausted.
+- **Reviewer dashboard list under load** (U28 S1, OMP). The "Action Required
+  by me" count read exceeds its 10 s wait in full-suite runs and passes
+  alone. Last incidents: red in two consecutive local final runs 2026-09-07
+  (U21 revision, load ~15 on 10 cores), green alone and in the third full
+  run. **Watch condition**: reds at CI's four workers.
+- **Error dialog stacking over the Add Reviewer windows on a press** (U31 S4,
+  OMP). The "Error" dialog's overlay intercepts the window's "Close" and the
+  test runs to its five-minute timeout; the mechanism is the U31 test
+  author's friction line of 2026-09-06. Last incidents: red in a local final
+  run and again alone 2026-09-07, green in two full runs earlier that day.
+  **Watch condition**: reds on CI.
 - **U01 S8 hangs on a used database** (OJS, local only so far). After a
   day's probes, checks and suite runs on one database, "S8: editor
   impersonates a participant from the Participants panel" hit its 4-minute

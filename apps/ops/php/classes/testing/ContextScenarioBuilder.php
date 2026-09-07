@@ -43,6 +43,8 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
             'path' => $spec->get('path'),
             'title' => $spec->get('title'),
             'policy' => $spec->get('policy'),
+            'wordCount' => $spec->get('wordCount'),
+            'abstractsNotRequired' => (bool) $spec->get('abstractsNotRequired', false),
         ];
     }
 
