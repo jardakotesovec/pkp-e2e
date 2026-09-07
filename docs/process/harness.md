@@ -236,7 +236,7 @@ npm run test:ojs -- --ui             # Playwright UI mode — best for iterating
 PWDEBUG=1 npm run test:ojs           # step-through
 npm run reset:ojs                    # nuke the test DB (forces cold bootstrap next run)
 npm run probe-servers -- --start|--status|--stop [--app ojs]   # detached probe servers at base+50 (and +90)
-npm run fleet-prep -- --feature U03 [--reset] [--apps ojs,omp]  # per app: reset?, setup project, probe server; .reports/U03/fleet.json
+npm run fleet-prep -- --feature U03 [--reset] [--apps ojs,omp]  # per app: reset?, setup project, probe server; .reports/U03/fleet.json (a subset run keeps the other apps' entries)
 npm run test:final -- --feature U03 [--apps ojs] [--grep @smoke] # the suites one after another; logs in .reports/U03/final-run-<app>.log
 npx playwright test -c configs/ojs.config.js apps/ojs/playwright/tests/U03-user-profile.spec.js   # one spec by path (an agent's green run)
 npx playwright test -c configs/ojs.config.js --project=ojs-serial --no-deps apps/ojs/playwright/tests/serial/U05-notifications-center-and-email-preferences.spec.js   # one serial spec alone, on a warm install

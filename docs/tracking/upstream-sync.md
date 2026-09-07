@@ -7,10 +7,10 @@ MAINTENANCE upstream-sync loop (`docs/process/MAINTENANCE.md`).
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `97663b2850` | 2026-09-04 | claude (daily maintenance session) |
-| omp | `a1aefa3fe` | 2026-09-04 | claude (daily maintenance session); tip unchanged |
-| ops | `6bda92fb03` | 2026-09-04 | claude (daily maintenance session); tip unchanged |
-| pkp-lib | `4ddab4b9cf` | 2026-09-04 | claude (daily maintenance session); OJS's pointer sits here, OMP and OPS sit at `7ab247a737` (everything between is reviewed, so their next bump needs no re-triage) |
+| ojs | `ed3705cdae` | 2026-09-07 | claude (daily maintenance session) |
+| omp | `5365ebd73` | 2026-09-07 | claude (daily maintenance session) |
+| ops | `b0b24a3127` | 2026-09-07 | claude (daily maintenance session) |
+| pkp-lib | `74a8d58571` | 2026-09-07 | claude (daily maintenance session); all three apps' pointers sit here |
 
 ## Sync log
 
@@ -18,6 +18,13 @@ _Newest first; one entry per sync: the date and the range per repo, then
 one line per change reviewed (commit → no impact / spec and tests touched /
 finding filed, with a link)._
 
+- **2026-09-07 (sync) — ojs `97663b2850..ed3705cdae` (3), omp `a1aefa3fe..5365ebd73` (3), ops `6bda92fb03..b0b24a3127` (3), pkp-lib `4ddab4b9cf..74a8d58571` (6; every app now at the same pointer), ui-library unchanged.**
+  - CI at the tips: ojs run 33877061458, omp 33877082296, ops 33877070198 → all green; nothing red to triage; no open ci-triage rows, no companions.
+  - pkp-lib #12352 (issue #12347; `386635ebde`, `1ae5ee47ae`, `6dac76becb`, `c830e1b4f0`, `74a8d58571`: `Repository::edit()` logs the new revision and now persists the submission-level entry it used to drop; migration `I12347_FixRevisionUploadLogData`, registered in each app's `upgrade.xml`) → not covered yet (submission files U36 and activity log U38 pending; U36 row noted). Regression read rr1 (`.reports/sync/rr1/suspicions.md`): 2 suspicions, 1 reproduced, 3 unverified hunches. REGRESSION: the upload wizard's step-1 Cancel after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`; `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry carrying the original uploader's username with the pre-revision name and fileId). Re-verified on fresh resets: `74a8d58571` keeps fileId 2 / `article-rev.pdf`, `4ddab4b9cf` restores fileId 1 / "Renamed by B.pdf" (`.reports/sync/verifyA`, `verifyB`). Reported on Mattermost and DM'd to @beaug and @jarda.kotesovec the same day. The issue's intended fix holds and the new Activity Log rows render complete with working Download links (S2 not reproduced). The migration never runs on the harness's fresh installs; read only. One observation routed to the private file and dismissed the same day after verification on OJS and OMP.
+  - pkp-lib `093be2c7e2` (#12179, ContributorsListPanel registered globally in `js/load.js`) → no impact (QuickSubmit only, not in the checkouts); the UI bundles were rebuilt in all three apps because `js/load.js` is a buildable source.
+  - Friction folded (nothing to accommodate): one clause each on patterns.md pitfalls 6, 7 and 15, on the scenarios.md response shape (`stageId`) and on briefs/harness.md step 2; the other asks were already in the docs or one screen's fact; all rows deleted.
+  - Stale artifact fixed: `bin/fleet-prep.js` now keeps the other apps' entries in `fleet.json` on a subset run (a single-app re-prep had dropped OMP and OPS from it; harness.md line updated).
+  - Baselines advanced.
 - **2026-09-04 (sync) — ojs `762415103f..97663b2850` (4), omp and ops unchanged, pkp-lib `6a902ad50a..4ddab4b9cf` (1, ojs only), ui-library `7611b0b8..5c3da336` (ojs only), lensGalley `025f53c..43c8195` (ojs only).**
   - CI at the tips: ojs run 33771247334, omp 33629780688, ops 33629815586 → all green; nothing red to triage; no open ci-triage rows, no companions.
   - ojs `95b03c34ec` (#13271, `getExportable()` groups by `s.submission_id` too; the pubId export grids errored on PostgreSQL) → not covered yet (the method serves only the export plugins: U45/U63 pending).

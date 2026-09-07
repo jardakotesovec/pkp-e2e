@@ -54,7 +54,9 @@ Each of these has bitten at least once.
 6. **The workflow modal's rows disappear while a Vue dialog is stacked over
    them.** The underlying panel is unmounted or aria-hidden beneath the open
    dialog, so a reviewer row's state can only be asserted AFTER the dialog
-   closes. Anchor these dialogs by role and title
+   closes. Role-based reads of anything behind an open window return
+   nothing for the same reason; read the page behind through text or CSS
+   locators (U31, 2026-09-06). Anchor these dialogs by role and title
    (`getByRole('dialog', {name: /^Review Details:/})`), never by
    `[data-cy="active-modal"]` (that is pitfall 5's wrapper).
 7. **The workflow page itself is a reka-ui dialog.** When it opens another
@@ -62,7 +64,10 @@ Each of these has bitten at least once.
    `getByRole('dialog', {name: /Add Reviewer/i})`. Read its text from the
    dialog (the kit's `screen().text.dialog`; `text.main` is the dashboard
    list behind it), and close an inner window with its own "Close" or
-   "Cancel", never Escape, which closes the workflow dialog too.
+   "Cancel", never Escape, which closes the workflow dialog too. On a
+   legacy (FBV) form the bottom "Cancel" is an `<a>` link, not a button, so
+   a `getByRole('button')` Cancel never matches; use `getByRole('link')`
+   or `a:visible` (U31, 2026-09-06).
 8. **Confirmation dialogs.** Use `[role="dialog"]:has-text(...)` or the legacy
    `[data-cy="dialog"]`. Button labels vary (OK/Yes/No) between reka-ui and
    jQuery UI.
@@ -94,7 +99,10 @@ Each of these has bitten at least once.
     `[class*=error]` sweep misses them).
 15. **`getByRole` name strings are substring matches.** `{name: 'View'}`
     matches "Assign Re**view**ers". Use `exact: true` or an anchored regex for
-    short common words.
+    short common words. The wizard rail is the standing trap: a "wait until
+    step X is current" idiom on `'Review'` also matches "Reviewer
+    Suggestions" and silently stays there; anchor the end
+    (`SubmissionWizardPage`'s `endAnchored`) (U31, 2026-09-06).
 16. **Legacy grid control links carry padding in their text.** A row's
     "Edit" link reads " Edit " to `hasText`, so an anchored regex
     (`filter({hasText: /^Edit$/})`) never matches. Read them by role and

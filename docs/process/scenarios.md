@@ -251,7 +251,11 @@ Facts tests rely on, all parity-checked against the UI path:
 
 The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`),
-`reviewAssignments[]` and `reviewerSuggestions[]` (`id`, `email`). It does not echo the title: a test that matches
+`reviewAssignments[]` and `reviewerSuggestions[]` (`id`, `email`). `stageId`
+is the submission's stored stage after the build, not the stage the screen
+names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
+the posted state), while an unposted preprint reads the Production stage's
+5 (U31, 2026-09-06). It does not echo the title: a test that matches
 the submission by title keeps the value it sent. On a scratch context the
 seeded submission sits in no editor's `assigned-to-me` view (the default
 Editor Dashboard view) until someone is assigned; list it under the "active"

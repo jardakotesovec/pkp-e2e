@@ -94,6 +94,19 @@ const fleet = {
     workers: process.env.PLAYWRIGHT_WORKERS || 'auto',
     apps: {},
 };
+// A run for a subset of the apps keeps the other apps' entries from the
+// previous fleet.json, so a single-app re-prep never drops fleets that are
+// still up (a probe agent reads this file for every app's ports).
+if (fs.existsSync(fleetFile)) {
+    try {
+        const previous = JSON.parse(fs.readFileSync(fleetFile, 'utf8'));
+        for (const [name, entry] of Object.entries(previous.apps || {})) {
+            if (!apps.includes(name)) fleet.apps[name] = entry;
+        }
+    } catch (e) {
+        // unreadable or malformed: start fresh
+    }
+}
 
 let ok = true;
 for (const name of apps) {

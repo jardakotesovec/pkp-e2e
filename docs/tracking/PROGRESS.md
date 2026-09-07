@@ -57,7 +57,7 @@ status is pending / in_progress / done / parked.
 | U33 | Production stage | OJS OMP OPS | M | pending | |
 | U34 | Editorial decision recording | OJS OMP OPS | H | pending | |
 | U35 | Stage participants | OJS OMP OPS | M | pending | |
-| U36 | Submission files | OJS OMP OPS | H | pending | |
+| U36 | Submission files | OJS OMP OPS | H | pending | pkp-lib#12352 (2026-09-04) broke the upload wizard's step-1 Cancel restore when another user had renamed the file; reported to the team 2026-09-07 (upstream-sync log). |
 | U37 | Tasks & discussions | OJS OMP OPS | H | pending | |
 | U38 | Submission activity log & notes | OJS OMP OPS | L | pending | |
 | U39 | Submission & Publisher Libraries | OJS OMP OPS | L | pending | |
