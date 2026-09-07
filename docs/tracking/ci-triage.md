@@ -58,8 +58,8 @@ trips.
   run. **Watch condition**: reds at CI's four workers.
 - **Error dialog stacking over the Add Reviewer windows on a press** (U31 S4,
   OMP). The "Error" dialog's overlay intercepts the window's "Close" and the
-  test runs to its five-minute timeout; the mechanism is the U31 test
-  author's friction line of 2026-09-06. Last incidents: red in a local final
+  test runs to its five-minute timeout (seen first by the U31 test author
+  on 2026-09-06, one re-run). Last incidents: red in a local final
   run and again alone 2026-09-07, green in two full runs earlier that day.
   **Watch condition**: reds on CI.
 - **U01 S8 hangs on a used database** (OJS, local only so far). After a
