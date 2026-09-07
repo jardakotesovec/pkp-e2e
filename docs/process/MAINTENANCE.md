@@ -221,9 +221,12 @@ item reclasses it. To add or change a test, change or add its scenario
 first (through a writing agent, with the persona on the new text), then
 write the test from it, run it green, and update the PROGRESS test count.
 A test with no scenario, or a scenario with no test in an app its badge
-names, is a defect either way; no script checks this yet (the scenarios'
-badges against the suites' `S<n>:` test titles is the check to build). Nothing records the request or the answer; the spec and the
-test are the record.
+names, is a defect either way: `node docs/process/lint/lint-spec.mjs
+--tests <spec>` reports both (the scenarios' badges against the suites'
+`S<n>` test titles); a spec still on the revision queue
+(`docs/tracking/coverage-revision.md`) fails it until its own session
+(RUNBOOK "Revising a shipped feature"). Nothing records the request or
+the answer; the spec and the test are the record.
 
 ## Session hygiene
 
@@ -282,6 +285,11 @@ test are the record.
   from the `final-run-<app>.log` summary lines, dated, so RUNBOOK
   "Budget" rests on a number; when an app approaches 25 minutes, the
   shard matrix in `run-app.yml` is the next task, never a cut.
+- **Leave the revision queue to the maintainer.**
+  `docs/tracking/coverage-revision.md` lists the shipped specs awaiting
+  RUNBOOK "Revising a shipped feature"; each is a session the maintainer
+  launches, never a daily task. A spec off the queue stays clean under
+  `lint-spec.mjs --tests`, run with the lint whenever its suites change.
 - **Delete what is resolved.** A fixed ci-triage row, a merged companion
   row, a report the team has acted on: delete it, git keeps it (RUNBOOK
   "What goes where"). Tracking files hold only what is open.

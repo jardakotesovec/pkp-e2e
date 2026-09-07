@@ -128,7 +128,9 @@ Test files cite these by number, so the numbers are stable.
    as `{OJS OMP}` and one absence paragraph written as an install fact.
 2. **Scenarios live in the spec, common ones first,** then the app-specific
    ones; a per-app difference inside a common scenario is marked inline, and
-   a scenario an app cannot run names its analogue or absence.
+   a scenario an app cannot run names its analogue or absence. A scenario
+   added to a shipped spec goes last; the earlier numbers never move
+   ("Revising a shipped feature").
 3. **Tests are written per app, derived from the spec.** Each suite covers
    the common scenarios in its app's own context plus its app-specific ones;
    duplication between suites is fine. Never assert a 🐞 finding as the
@@ -191,3 +193,41 @@ When PROGRESS shows `in_progress` and the tree holds uncommitted work, read
 `phase-status.md`, check the files it names exist, and re-run the first gate
 whose file is missing. Only files count; a mid-feature commit's PROGRESS
 note names the last gate reached.
+
+## Revising a shipped feature
+
+A spec shipped before a rule changed is brought up to it in a session of
+its own, launched by the maintainer like a feature session (the
+maintenance session never builds), one feature at a time, H tiers first.
+The body stays verified, so there is no draft and no claim check. The
+queue is `docs/tracking/coverage-revision.md`, one row per spec still to
+revise; the spec's classed Coverage table, in TEMPLATE's draft shape, is
+`docs/tracking/coverage-revision/U<nn>.md`: `S<n>` in "Runs in" where a
+scenario already covers the row, `planned` where none does, and under the
+table the plan for each gap (rides in `S<n>`, a scenario of its own, or
+no seed) and the suite mismatches `lint-spec.mjs --tests` reports.
+
+1. **Claim and fleet prep** as steps 1 and 2.
+2. **Scenarios.** A scenario writer (`briefs/scenario-writer.md`, situation
+   "revision") spends the classed table by class: reshapes the existing
+   scenarios into TEMPLATE's shape sentence for sentence, adds a bullet to
+   the scenario a gap rides in, appends a scenario for each gap that needs
+   one (numbers never move: the suites' `S<n>` titles and the PROGRESS
+   notes cite them), folds each "Settings that modify behavior" bullet
+   into a Rule or a Cross-feature line and deletes that section, settles
+   every test without a scenario and every scenario without a test the
+   queue file lists (the scenario becomes a "Left out" item with its
+   reason, or the test's behavior gets a scenario when the body states
+   it), and writes the "Left out" list. A state with no scenario key goes
+   to step 4 or under "No seed". Gate: lint zero.
+3. **Readability** as step 7, the persona reading the changed and new
+   scenarios only.
+4. **Tests.** One test author per app (`briefs/test-author.md`, situation
+   "revision") extends the suite: a test per new scenario, an assertion
+   per bullet added to a scenario already tested, every title opening
+   `S<n>`, the header's "not covered" block cut to register IDs; then the
+   fold and `test:final` as step 8. Gate: the green logs,
+   `node docs/process/lint/lint-spec.mjs --tests <spec>` zero.
+5. **Progress, commit, report** as steps 9 to 11: the PROGRESS row in the
+   fixed shape with the scenario count beside the tier; the feature's
+   file under `coverage-revision/` and its queue row deleted.

@@ -4,10 +4,12 @@
 // self-test: node lint/lint-spec.mjs --self-test           embedded good/bad fixtures, no deps
 // claims:   node lint/lint-spec.mjs --claims specs/foo.md [--date YYYY-MM-DD]
 //           a report for the claim check (every claim line, risky kinds marked), never a gate
+// tests:    node lint/lint-spec.mjs --tests [specs/foo.md ...]   default: every spec
+//           every canonical scenario against the three suites' S<n> test titles (RUNBOOK rule 3)
 // REFERENCE INTEGRITY ONLY (maintainer, 2026-07-31 — wording, vocabulary and the leak rule
 // are the writer's judgment, never linted): campaign identifiers a reader cannot resolve
 // (TEMPLATE rule 5) · register anatomy · link/anchor/footnote resolution.
-// Checks: campaign · shape · register · links. Findings print "file:line — check — excerpt"; exit 1.
+// Checks: campaign · shape · coverage · register · links; --tests: scenarios vs suites. Findings print "file:line — check — excerpt"; exit 1.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -452,6 +454,167 @@ function run(files) {
     return total === 0 ? 0 : 1;
 }
 
+// ---------------------------------------------------------------- 5. scenarios vs suites (--tests)
+
+// Every canonical scenario has one test per app its badge names, titled `S<n>: …` (RUNBOOK rule 3,
+// MAINTENANCE "Coverage requests"); an unbadged scenario runs where the spec's title badge says.
+// An absence test may carry a number its badge excludes when its title says "absence".
+const APPS = ['ojs', 'omp', 'ops'];
+const APPS_ROOT = path.resolve(SCRIPT_DIR, '../../../apps');
+const APP_BADGE_RE = /\{((?:OJS|OMP|OPS)(?:\s+(?:OJS|OMP|OPS))*)\}/;
+const TITLE_RE = /^S(\d+)((?:\+S\d+)*)([a-z]?)\b/; // S3 · S13+S14 (one absence test for two) · S3b (a split, reported)
+const LEGACY_RE = /^scenario\s+(\d+)\b/i;
+const badgeApps = (s) => { const m = s.match(APP_BADGE_RE); return m ? m[1].split(/\s+/).map((a) => a.toLowerCase()) : null; };
+const APP = (a) => a.toUpperCase();
+
+function scenariosOf(doc) {
+    const specApps = badgeApps(doc.title) || APPS;
+    const out = [];
+    for (let i = 0; i < doc.tailStart; i++) {
+        if (doc.skip[i] || !/^Canonical scenarios/.test(doc.h2[i])) continue;
+        const m = doc.lines[i].match(/^(\d+)\.\s+\*\*(.*)$/);
+        if (!m) continue;
+        // the badge sits inside the bold title or right after it, before the first sentence; a title may wrap
+        const close = m[2].indexOf('**');
+        const title = close === -1 ? m[2] : m[2].slice(0, close), rest = close === -1 ? '' : m[2].slice(close + 2);
+        const head = title + ' ' + (rest.split(/[.:—]/)[0] || '');
+        out.push({ n: Number(m[1]), line: i + 1, title: title.replace(APP_BADGE_RE, '').trim(), apps: badgeApps(head) || specApps });
+    }
+    return out;
+}
+
+function suiteTests(feature, app, root) {
+    const tests = [];
+    for (const dir of [path.join(root, app, 'playwright', 'tests'), path.join(root, app, 'playwright', 'tests', 'serial')]) {
+        if (!fs.existsSync(dir)) continue;
+        for (const f of fs.readdirSync(dir).filter((x) => x.startsWith(feature + '-') && x.endsWith('.spec.js')).sort()) {
+            const file = path.join(dir, f);
+            fs.readFileSync(file, 'utf8').split('\n').forEach((l, i) => {
+                const m = l.match(/^\s*test\(\s*(['"`])((?:\\.|(?!\1).)*)\1/);
+                if (m) tests.push({ file, line: i + 1, title: m[2] });
+            });
+        }
+    }
+    return tests;
+}
+
+function checkTests(file, root = APPS_ROOT) {
+    const out = [];
+    const feature = (path.basename(file).match(/^(U\d{2})-/) || [])[1];
+    if (!feature) { out.push({ file, line: 1, msg: 'the spec file name does not open U<nn>-, so no suite can be matched' }); return out; }
+    const doc = parseDoc(file);
+    const scenarios = scenariosOf(doc);
+    const byN = new Map(scenarios.map((s) => [s.n, s]));
+    for (const app of APPS) {
+        const expected = scenarios.filter((s) => s.apps.includes(app));
+        const tests = suiteTests(feature, app, root);
+        if (!tests.length) {
+            if (expected.length) out.push({ file, line: expected[0].line, msg: `no ${app} suite, and scenario${expected.length > 1 ? 's' : ''} ${expected.map((s) => s.n).join(', ')} name${expected.length > 1 ? '' : 's'} ${APP(app)}` });
+            continue;
+        }
+        const covered = new Set(), count = new Map();
+        for (const t of tests) {
+            const m = t.title.match(TITLE_RE), lg = m ? null : t.title.match(LEGACY_RE);
+            const at = { file: t.file, line: t.line };
+            if (!m && !lg) { out.push({ ...at, msg: `"${excerpt(t.title, 50)}" names no scenario; a test title opens S<n>` }); continue; }
+            if (lg) out.push({ ...at, msg: `"${excerpt(t.title, 40)}": the title opens S${lg[1]}, not "scenario ${lg[1]}"` });
+            const split = !!(m && m[3]);
+            if (split) out.push({ ...at, msg: `"${excerpt(t.title, 40)}": S${m[1]}${m[3]} splits scenario ${m[1]}; one test per scenario` });
+            const nums = m ? [Number(m[1]), ...m[2].split('+').filter(Boolean).map((x) => Number(x.slice(1)))] : [Number(lg[1])];
+            const absence = /absen/i.test(t.title);
+            for (const n of nums) {
+                const sc = byN.get(n);
+                if (!sc) { out.push({ ...at, msg: `S${n}: the spec has no scenario ${n}` }); continue; }
+                if (!sc.apps.includes(app) && !absence) out.push({ ...at, msg: `S${n}: scenario ${n} is badged {${sc.apps.map(APP).join(' ')}}, not ${APP(app)}; an absence test says "absence" in its title` });
+                covered.add(n);
+                if (!split) { count.set(n, (count.get(n) || 0) + 1); if (count.get(n) > 1) out.push({ ...at, msg: `two tests on S${n} in ${app}; one test per scenario` }); }
+            }
+        }
+        for (const s of expected) if (!covered.has(s.n)) out.push({ file, line: s.line, msg: `scenario ${s.n} "${excerpt(s.title, 40)}" has no S${s.n} test in ${app}` });
+    }
+    return out.sort((a, b) => (a.file === b.file ? a.line - b.line : a.file === file ? -1 : b.file === file ? 1 : a.file.localeCompare(b.file)));
+}
+
+function runTests(files, root = APPS_ROOT) {
+    let total = 0;
+    const rel = (f) => { const r = path.relative(process.cwd(), f); return !r || r.startsWith('..') ? f : r; };
+    for (const file of files) {
+        const findings = checkTests(file, root);
+        total += findings.length;
+        for (const f of findings) console.log(`${rel(f.file)}:${f.line} — tests — ${excerpt(f.msg, 160)}`);
+    }
+    if (total === 0) console.log(`OK — ${files.length} spec(s): every scenario has its S<n> test in every app its badge names`);
+    else console.log(`\n${total} finding(s) in ${files.length} spec(s)`);
+    return total === 0 ? 0 : 1;
+}
+
+// self-test fixture for --tests: a two-app spec with one press-only and one preprint-absence scenario
+const TESTS_SPEC = `---
+name: sample
+status: verified
+---
+
+# Sample feature {OJS OMP}
+
+## Canonical scenarios
+
+1. **Do the thing**
+
+   Given: Editor.
+
+   - **Control**: nothing else changes.
+
+2. **Only on a press** {OMP}
+
+   - **Control**: nothing on a journal.
+
+3. **Nothing on a preprint server** {OPS}
+
+   - **Control**: the address is refused.
+
+## Footnotes — mechanism & evidence
+`;
+const suite = (...titles) => `const { test } = require('@playwright/test');\ntest.describe('sample', () => {\n${titles.map((t) => `    test('${t}', async () => {});\n`).join('')}});\n`;
+const TESTS_SUITES = { ojs: suite('S1: do the thing'), omp: suite('S1: do the thing', 'S2: only on a press'), ops: suite('S3: nothing on a preprint server') };
+
+function selfTestTests(dir) {
+    let fails = 0;
+    const specsDir = path.join(dir, 'tspecs'), apps = path.join(dir, 'apps');
+    fs.mkdirSync(specsDir, { recursive: true });
+    const spec = path.join(specsDir, 'U99-sample.md');
+    fs.writeFileSync(spec, TESTS_SPEC);
+    const write = (suites) => {
+        fs.rmSync(apps, { recursive: true, force: true });
+        for (const [app, text] of Object.entries(suites)) {
+            if (text === null) continue;
+            const d = path.join(apps, app, 'playwright', 'tests');
+            fs.mkdirSync(d, { recursive: true });
+            fs.writeFileSync(path.join(d, 'U99-sample.spec.js'), text);
+        }
+        return checkTests(spec, apps);
+    };
+    const cases = [
+        ['every scenario has its test per app', TESTS_SUITES, 0],
+        ['a scenario with no test in an app its badge names', { ...TESTS_SUITES, ojs: suite() }, 1],
+        ['a test with no scenario behind it', { ...TESTS_SUITES, omp: suite('S1: do the thing', 'S2: only on a press', 'S4: extra') }, 1],
+        ['a test on a scenario the badge excludes', { ...TESTS_SUITES, ojs: suite('S1: do the thing', 'S2: only on a press') }, 1],
+        ['an absence test on a scenario the badge excludes', { ...TESTS_SUITES, ojs: suite('S1: do the thing', 'S2 (absence): no press step on a journal') }, 0],
+        ['two tests on one scenario', { ...TESTS_SUITES, ojs: suite('S1: do the thing', 'S1: do it again') }, 1],
+        ['a split test (S1b)', { ...TESTS_SUITES, ojs: suite('S1: do the thing', 'S1b: the second half') }, 1],
+        ['the legacy "scenario 1:" title', { ...TESTS_SUITES, ojs: suite('scenario 1: do the thing') }, 1],
+        ['a title with no number', { ...TESTS_SUITES, ojs: suite('S1: do the thing', 'OJS1: something else') }, 1],
+        ['no suite for an app a scenario names', { ...TESTS_SUITES, ops: null }, 1],
+        ['one absence test for two scenarios (S2+S3)', { ...TESTS_SUITES, ojs: suite('S1: do the thing', 'S2+S3 (absence): neither on a journal') }, 0],
+    ];
+    for (const [name, suites, want] of cases) {
+        const findings = write(suites);
+        const ok = findings.length === want;
+        console.log(`${ok ? 'pass ' : 'FAIL'} tests — ${name}`);
+        if (!ok) { fails++; findings.forEach((f) => console.log(`      (got ${path.basename(f.file)}:${f.line} ${f.msg})`)); }
+    }
+    return fails;
+}
+
 // ---------------------------------------------------------------- self-test
 
 const GOOD = `---
@@ -662,6 +825,7 @@ function selfTest() {
         if (!ok) { fails++; findings.forEach((f) => console.log(`      (got ${f.check}: ${f.msg})`)); }
     }
     fails += selfTestClaims(write);
+    fails += selfTestTests(dir);
     fs.rmSync(dir, { recursive: true, force: true });
     console.log(fails ? `\n${fails} self-test failure(s)` : '\nself-test OK');
     return fails ? 1 : 0;
@@ -681,11 +845,12 @@ if (ci !== -1) { // the report, not the gate: always exit 0 once the spec is fou
     printClaims(file, date);
     process.exit(0);
 }
-const unknown = args.filter((a) => a.startsWith('-'));
-if (unknown.length) { console.error(`lint-spec: unknown option ${unknown[0]}; usage: lint-spec.mjs [spec ...] | --claims <spec> [--date YYYY-MM-DD] | --self-test`); process.exit(2); }
+const testsMode = args.includes('--tests');
+const unknown = args.filter((a) => a.startsWith('-') && a !== '--tests');
+if (unknown.length) { console.error(`lint-spec: unknown option ${unknown[0]}; usage: lint-spec.mjs [spec ...] | --tests [spec ...] | --claims <spec> [--date YYYY-MM-DD] | --self-test`); process.exit(2); }
 const targets = args.filter((a) => !a.startsWith('-'));
 const files = targets.length
     ? targets.map(resolveTarget)
     : fs.readdirSync(SPECS_DIR).filter((f) => /^U\d{2}-.*\.md$/.test(f)).sort().map((f) => path.join(SPECS_DIR, f));
 for (const f of files) if (!fs.existsSync(f)) { console.error(`lint-spec: no such file: ${f}`); process.exit(2); }
-process.exit(run(files));
+process.exit(testsMode ? runTests(files) : run(files));

@@ -83,7 +83,7 @@ async function expectNoAuthorResponse(modal) {
 test.describe('Author response to reviews (U30) — OMP absence', () => {
     test.beforeEach(async ({}, testInfo) => testInfo.setTimeout(300_000));
 
-    test('scenario 7 {OMP}: no "Author Response" on a press, the request page still opens by address', async ({ompApi, asUser, pkpMail}, testInfo) => {
+    test('S7 {OMP}: no "Author Response" on a press, the request page still opens by address', async ({ompApi, asUser, pkpMail}, testInfo) => {
         const tag = makeTag(testInfo, 'u30s7');
         const title = titleFor(tag);
 

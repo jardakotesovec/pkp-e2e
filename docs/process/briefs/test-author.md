@@ -10,6 +10,7 @@
 {{page_objects}}       page object(s) to create or extend, with the path, and who else will reuse them
 {{example_suites}}     one or two shipped suites in apps/{{app}}/playwright/tests/ to copy the shape from
 {{feature_facts}}      feature-specific facts step 8 needs that are not screen facts (a scenario that ends the session, a browser dialog a step raises), or "none"
+{{situation}}          fresh: a new suite (RUNBOOK step 8); or revision: the suite exists (RUNBOOK "Revising a shipped feature"), naming the scenario numbers added and the scenarios whose bullets grew
 {{fleet_json}}         .reports/{{feature}}/fleet.json
 {{agent}}              PROBE_AGENT for any throwaway check, e.g. t{{app}}
 {{output_dir}}         .reports/{{feature}}/test-{{app}}-output
@@ -23,8 +24,10 @@ You are the test author for the **{{APP}}** suite of feature {{feature}} "{{feat
 
 The spec is `{{spec_path}}`; read its body and only the footnotes your scenarios cite, not the whole file. Scenarios this app runs: {{scenarios}}. Feature facts for step 8: {{feature_facts}}.
 
+Situation: {{situation}}
+
 Deliverables:
-1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES: one test per scenario, its title opening with the scenario number (`S3: …`). Every absence a scenario states ("nothing else", "no list", "stays") is asserted with a settled, auto-waited read and a positive control, never left unasserted (PRINCIPLES M6); a contradiction is a finding under deliverable 4, not a dropped assertion.
+1. `{{suite_path}}`, in the shape of {{example_suites}}, following PRINCIPLES: one test per scenario, its title opening with the scenario number (`S3: …`). Every absence a scenario states ("nothing else", "no list", "stays") is asserted with a settled, auto-waited read and a positive control, never left unasserted (PRINCIPLES M6); a contradiction is a finding under deliverable 4, not a dropped assertion. In a revision, extend the existing suite: a test per scenario added, an assertion per bullet added to a scenario already tested, every title opening `S<n>` (the legacy `scenario <n>` titles renamed, existing numbers kept), the header's "not covered" block cut to the register IDs (the spec's Coverage section is the record of the rest); `node docs/process/lint/lint-spec.mjs --tests {{spec_path}}` reports zero for this app before you return.
 2. Page objects: {{page_objects}}.
 3. Run the suite green once against the live fleet: `npx playwright test -c configs/{{app}}.config.js {{suite_path}} --output {{output_dir}} --reporter=list` (harness.md says how the config starts its worker servers). A serial spec runs alone with `--project={{app}}-serial --no-deps` on a warm install; never run a whole project, and keep every run under about four minutes (harness.md "Running"). Save the green run's log as `{{green_log}}`.
 4. A test that contradicts the spec is returned as step 8 says: a digest block in the shape of `docs/process/briefs/digest-block.md` (ID `T-{{app}}-<n>`; Evidence: the run-log pointer and the screenshot) in `{{findings_path}}`. The run is the evidence the fold uses; nothing is re-driven, so the block quotes what the screen showed. Never edit a test to pass a claim the app disproves. An app defect that blocks green is worked around and returned as a proposed `app-changes.md` row.

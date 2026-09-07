@@ -98,7 +98,7 @@ async function expectDeniedRequestPage(page, submissionId, {url, text}) {
 test.describe('Author response to reviews (U30) — OPS absence', () => {
     test.beforeEach(async ({}, testInfo) => testInfo.setTimeout(180_000));
 
-    test('scenario 7 {OPS}: no "Author Response" on a preprint, the request page address is denied', async ({opsApi, asUser, appContext}, testInfo) => {
+    test('S7 {OPS}: no "Author Response" on a preprint, the request page address is denied', async ({opsApi, asUser, appContext}, testInfo) => {
         const tag = makeTag(testInfo, 'u30s7');
 
         // A submitted preprint: it lands on Production (stage 5) with no
