@@ -446,7 +446,9 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
          - <a cut state row, the most valuable first>
        - **Budget** — variants:
          - <a cut variant row>
-         (never a main or guard row)
+         (never a main or guard row; never a row another feature's
+         scenario drives, which is Owned: Budget tells the reader that no
+         spec tests this)
        - **Nothing new to test**:
          - <a role or state with the same screen as a covered row, naming
            the row it repeats; a role no screen offers anything>
@@ -456,7 +458,8 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
          - <a state the harness cannot build yet; this is the harness
            backlog>
        - **Owned by another feature**:
-         - <the item, then the feature in italics>
+         - <the item, then the feature in italics, and the scenario number
+           once that feature is shipped>
      Each item cites the body (a Rule, an Actors row, a register ID). No
      evidence in this section: a probe date is a footnote. Budget is the
      one bullet a reviewer argues with: an item there is reversed on
