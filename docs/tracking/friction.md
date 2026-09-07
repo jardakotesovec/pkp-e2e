@@ -7,7 +7,7 @@ them under MAINTENANCE "The daily session".
 
 One line per entry, appended at the end, in this shape:
 
-`YYYY-MM-DD · U<nn> · <role and agent id> · <what cost you calls, time or retries> · <what would have helped>`
+`YYYY-MM-DD · U<nn> or sync · <role and agent id> · <what cost you calls, time or retries> · <what would have helped>`
 
 Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).

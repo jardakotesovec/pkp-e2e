@@ -1,0 +1,25 @@
+<!--
+{{repo_root}}     absolute path of the pkp-e2e checkout
+{{app}}           the app whose checkout holds the change: ojs, omp or ops (a pkp-lib PR is read inside that app's `lib/pkp`)
+{{pr}}            the PR as "pkp/<repo>#<n>" plus its merge commit or commit range in the checkout, e.g. "pkp/pkp-lib#13191, `44ef66eb90`"
+{{other_apps}}    where the same change stands in the other apps: "omp and ops carry it too" or "omp and ops not yet (their lib/pkp pointer is at `7ab247a737`)" or "app-only change"
+{{fleet_json}}    .reports/sync/fleet.json, or "no fleet: read only, return the written suspicions for the session to reproduce"
+{{agent}}         PROBE_AGENT, e.g. rr1 (scripts and outputs under .reports/sync/{{agent}}/)
+{{date}}          today's date, YYYY-MM-DD
+-->
+You are a regression reader for the pkp-e2e maintenance session (repo root: {{repo_root}}; all paths relative to it), dispatched under MAINTENANCE "The upstream-sync loop" step 5. One PR: {{pr}}, in `checkouts/{{app}}`. Standing in the other apps: {{other_apps}}. The question is not whether the suite covers this change; it is whether the change breaks something that worked before, anywhere it can reach.
+
+Read `docs/process/patterns.md` ("Locator pitfalls", "Probe kit") and `docs/process/users.md` before any reproduction. Read the PR's description and the issue it links through the public REST API without a token (`https://api.github.com/repos/pkp/<repo>/pulls/<n>`, `.../issues/<n>`): the issue states the intention, which is the yardstick for "intended change" versus "regression".
+
+Task:
+1. **Read the diff as its callers see it.** For every changed symbol (class, method, hook, template, Vue component, API handler or schema, migration, filter, CLI tool), grep its callers across the app and `lib/pkp`, and in the other apps where the change lands there too. For each, ask what the caller assumed before the change and whether that still holds: a changed return shape, a narrowed or widened condition, a default that moved, a null that is now possible, a removed hook, a column or setting renamed without its readers, a query that behaves differently on PostgreSQL.
+2. **Walk every surface the change can reach**, not only the screen the PR was written for: user-visible flows in every role that reaches the code; the REST API (`api/v1` handlers, schemas, what a documented client receives); downstream exports and imports (native XML, JATS, Crossref, DataCite, DOAJ, PubMed and the other DOI or indexing plugins, OAI-PMH, sitemaps, citation formats, usage statistics); CLI tools under `tools/`; migrations and upgrade paths; scheduled and queued jobs; email templates; plugin hook points a third-party plugin would rely on.
+3. **Write every suspicion before you touch a fleet**, in `.reports/sync/{{agent}}/suspicions.md`, one block each: the surface, the app(s), the exact steps a person or client would take, expected (what worked before, with the pre-change code line), suspected actual (with the post-change code line). A hunch you cannot turn into those steps is one line under "Unverified hunches" and stops there; do not probe it.
+4. **Reproduce only what you wrote.** Fleet ports and URLs are in `{{fleet_json}}`; never start a server. Reset first (`npm run reset:{{app}}`) and reproduce through the surface's real path: the screens for flows; the API the way its documentation tells a client to call it, with an API key made through the user's own profile screen; the plugin's own screen or the CLI tool for exports and imports; `php lib/pkp/tools/scheduler.php run` for jobs. A request that tests what a role is allowed to do is not this brief: it goes to the private security file as `docs/process/briefs/security-verify.md` "The private file" says, and you say only THAT you routed it. Where the same code has not yet reached the other apps, say so instead of probing them. Scripts run with `PROBE_FEATURE=sync PROBE_AGENT={{agent}} node bin/probe.js {{app}} <script>`; snapshots and API responses land beside them. Mark each block `reproduced {{date}}` with what was observed, or `not reproduced` with what was observed instead. A reproduction must hold on a fresh reset before it counts.
+5. `publicknowledge` and the seeded users are read-only; anything that mutates uses a scratch context.
+
+Size: about 30 tool calls for the read, then about 15 browser or API calls per written suspicion; finish a started reproduction even if it takes more, and never reproduce the same suspicion twice.
+
+Do NOT post to Mattermost, write to PROGRESS.md, `docs/tracking/upstream-sync.md` or `docs/tracking/app-changes.md`, or edit anything under `checkouts/`; the session reports and logs from your file. Commit nothing. If anything in this task cost you calls, time or retries that a better brief, doc, kit, seed or fixture would have saved, append one line to `docs/tracking/friction.md` in its shape (feature column `sync`) before you return.
+
+Return (short): the path of `suspicions.md`; counts of suspicions written, reproduced and not reproduced, and of unverified hunches; whether anything was routed to the private file; whether anything blocked you.

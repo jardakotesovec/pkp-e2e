@@ -87,18 +87,35 @@ The apps move; the suite follows. The baselines live in
    A register entry the change retires moves to the register's Retired
    block (TEMPLATE), and the suites' file headers are grepped for its ID,
    because a header that says "not covered, see A7" outlives A7 otherwise.
-5. **Be critical.** Reviewing the diff IS a QA review of the team's recent
-   work. Anything that raises an eyebrow (a change that looks unintended, a
-   regression risk, a migration that could lose data, a widened permission
-   surface, a UX regression, a PR that contradicts its own description) is
-   checked against the running fleets where that is cheap, then reported
-   on Mattermost with the evidence: commit, screen, what was observed.
-   Anything security-shaped follows RUNBOOK "What goes where": verify
-   privately, and on Mattermost say only THAT an observation was routed,
-   then ping the maintainer.
+5. **Hunt regressions.** Reviewing the diff IS a QA review of the team's
+   recent work, and step 3's question ("does the suite care?") is not the
+   same as "does this break something?". Ask the second question of every
+   PR in the range, on every surface the change can reach: screens and
+   flows, the REST API and what a client receives, downstream exports and
+   imports (native XML, JATS, DOI and indexing plugins, OAI-PMH, sitemaps,
+   citations, usage statistics), CLI tools, migrations, jobs and emails,
+   and the other two apps once their `lib/pkp` pointer catches up. A
+   trivial PR (docs, CI, locale, version bump, a one-line fix whose
+   callers are in the diff) gets the answer in the log line. A substantive
+   PR gets one agent rendered from `briefs/regression-read.md`, one or two
+   agents at a time. The agent reads the diff and the callers of what it
+   changed, writes every suspicion as steps with expected and suspected
+   actual BEFORE touching a fleet, and reproduces only what it could
+   write; a hunch it cannot turn into steps is one "unverified" line in
+   the log and nothing more. The reproduction must hold on reset
+   databases before it is a finding. A confirmed regression is reported
+   on Mattermost with the evidence (commit, surface, steps, what was
+   observed) AND sent as a direct message to @beaug and @jarda.kotesovec
+   the same day; nothing unconfirmed reaches either, because a false
+   regression report costs more than a missed one. If a shipped suite
+   should have caught it, that is a `friction.md` row or a pending-row
+   note. Anything security-shaped follows RUNBOOK "What goes where":
+   verify privately, on Mattermost say only THAT an observation was
+   routed, then ping the maintainer.
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
-   a dated log entry: one line per change reviewed (commit, verdict, what
-   was touched or filed), never a narrative. Then re-check the open
+   a dated log entry: one line per change reviewed (commit, coverage
+   verdict, regression verdict when an agent read it, what was touched or
+   filed), never a narrative. Then re-check the open
    ci-triage rows and companion rows against the new tips and delete the
    ones that are resolved. Commit. The baseline only advances when the
    range is actually triaged; a partial review leaves it where it was and
