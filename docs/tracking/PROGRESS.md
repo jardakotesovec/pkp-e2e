@@ -61,7 +61,7 @@ status is pending / in_progress / done / parked.
 | U37 | Tasks & discussions | OJS OMP OPS | H | pending | |
 | U38 | Submission activity log & notes | OJS OMP OPS | L | pending | |
 | U39 | Submission & Publisher Libraries | OJS OMP OPS | L | pending | |
-| U40 | Publication metadata | OJS OMP OPS | M | done | 11 OJS · 9 OMP · 9 OPS (+setup). 7🐞+10❓+6✅. Headliner A1. 1 in the private file, verified. |
+| U40 | Publication metadata | OJS OMP OPS | M | done | 11 OJS · 9 OMP · 9 OPS (+setup). 7🐞+10❓+6✅. Headliner A1. 1 in the private file, verified. Accommodating pkp-lib#13109 (per-version Author lock, A4 expected retired): claim check K1 reached 2026-09-08, `.reports/U40/phase-status.md`; fold, persona, rewrite and the S3 test updates follow. |
 | U41 | Contributors & affiliations | OJS OMP OPS | M | done | 9 OJS · 11 OMP · 9 OPS (+setup). 9🐞+9❓+4✅ (A15 retired 2026-09-03). Headliner A14. 1 in the private file, verified. |
 | U42 | Citations & references | OJS OMP OPS | M | pending | |
 | U43 | Funding | OJS OMP OPS | L | done | 5 tests per app (+setup). 3🐞+9❓+2✅ (A13 retired 2026-09-03). Headliner A3. Low-confidence: A4 (not re-probed at the fixed tips), A10, A11 (need a server with egress). |
@@ -70,7 +70,7 @@ status is pending / in_progress / done / parked.
 | U46 | Galleys | OJS OPS | M | pending | |
 | U47 | Media files | OJS OMP OPS | L | pending | |
 | U48 | JATS & Body Text | OJS | M | pending | |
-| U49 | Publish, schedule & versions | OJS OMP OPS | H | done | 13 OJS · 11 OMP · 12 OPS (+setup). 7🐞+9❓. Headliner OJS2. Blocker: app-changes row 10; S11 OJS is on the ci-triage flake watch. |
+| U49 | Publish, schedule & versions | OJS OMP OPS | H | done | 13 OJS · 11 OMP · 12 OPS (+setup). 7🐞+9❓. Headliner OJS2. 2026-09-08 sync (pkp-lib#13109): Rule 8 and fn-p reworded, publishing no longer switches the Author's permission off; the lock story stays with U40. Blocker: app-changes row 10; S11 OJS is on the ci-triage flake watch. |
 | U50 | Issues | OJS | H | pending | |
 | U51 | Subscriptions & open access control | OJS | H | pending | |
 | U52 | Payments & APCs | OJS | M | pending | |

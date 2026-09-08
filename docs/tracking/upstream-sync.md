@@ -7,10 +7,10 @@ MAINTENANCE upstream-sync loop (`docs/process/MAINTENANCE.md`).
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `ed3705cdae` | 2026-09-07 | claude (daily maintenance session) |
-| omp | `5365ebd73` | 2026-09-07 | claude (daily maintenance session) |
-| ops | `b0b24a3127` | 2026-09-07 | claude (daily maintenance session) |
-| pkp-lib | `74a8d58571` | 2026-09-07 | claude (daily maintenance session); all three apps' pointers sit here |
+| ojs | `05684c7f9d` | 2026-09-08 | claude (daily maintenance session, second run) |
+| omp | `14be789b5` | 2026-09-08 | claude (daily maintenance session, second run) |
+| ops | `9db7bd3d7e` | 2026-09-08 | claude (daily maintenance session, second run) |
+| pkp-lib | `f4db6d22c4` | 2026-09-08 | claude (daily maintenance session, second run); all three apps' pointers sit here; ui-library `445b8b90` in all three |
 
 ## Sync log
 
@@ -18,6 +18,12 @@ _Newest first; one entry per sync: the date and the range per repo, then
 one line per change reviewed (commit → no impact / spec and tests touched /
 finding filed, with a link)._
 
+- **2026-09-08 (second sync) — ojs `ed3705cdae..05684c7f9d` (3), omp `5365ebd73..14be789b5` (4), ops `b0b24a3127..9db7bd3d7e` (4), pkp-lib `74a8d58571..f4db6d22c4` (5; every app's pointer), ui-library `5c3da336..445b8b90` (all three; bundles rebuilt).**
+  - CI at the tips: ojs run 34224652722, omp 34224699474, ops 34224738339 → all green. pkp-e2e `main` push run 34215183797 (the morning sync commit, docs only) red on OJS U21 S12 twice, same app tips as the green nightly 34183869175; a Continue press swallowed the instant the Details step became current (no save fired; CI trace) → flake class, `continueTo()` now re-presses (ci-triage flake watch; U21 S1/S3/S12 green locally after the change).
+  - pkp-lib #13273 / ojs #5793 / omp #2453 / ops #1392 / ui-library `445b8b90` (issue #13109: an Author with the metadata-edit permission edits any version that is not published or scheduled, judged per version; publishing no longer switches the permission off; `canCurrentUserChangeMetadata` moves from the submission to the publication schema; `WORKFLOW_STAGE_ID_DONE` joins `getApplicationStages()` and the registry's group stages, migration `I13109_PermitPublishedMetadataEdit` for upgrades) → accommodate in U40 (Actors row "Save changes", Rule 2's Author clause, Rule 9, scenario 3, A4 expected retired; claim check K1 dispatched 2026-09-08, `.reports/U40/`), U49 fn-p folded (the publish-time sweep sentence), U41 fn-b unchanged (it points at U40's gate); the Done-stage surfaces are not covered yet (U24/U35/U54 pending). Regression read rr2 (`.reports/sync/rr2/suspicions.md`): 4 suspicions written, 4 reproduced on a reset OJS, 5 unverified hunches. REGRESSION (ci-triage row, kept script `checks/sync/pkp-lib-13109/regressions.js`): the Done stage in `getApplicationStages()` reaches callers written for its absence: Statistics › Editorial Activity gains a permanent "0 Done" row, the Roles grid a "Done" column with live toggles on the manager, reviewer and reader rows, the discussion attacher's stage picker a disabled "Done" for every submission. Intention gap reported with it: a fresh install grants stage 6 to no role (`installSettings()` caps registry stages at Production), so the PR's grant lands only on upgrades. API: `canCurrentUserChangeMetadata` absent from `GET submissions/{id}`, `null` on `_submissions` items (`getSubmissionsListProps()` still lists it), present per publication. One observation routed to the private file (verification probe dispatched). Harness: the `published: true` seed's mirror of the removed author-permission sweep is dropped in the working tree (`shared/php/classes/testing/PKPSubmissionScenarioBuilder.php`, parity ledger note), uncommitted until the touched suites run green in the next session (the session hit its limit mid-run).
+  - Open regression pkp-lib#12352: fix PR #13288 still open; row kept.
+  - Friction: one rr2 row left for the next fold (`reset:<app>` leaves a cold DB for the probe kit until the setup project runs).
+  - Baselines advanced; the U40 accommodation's remaining gates (fold, persona, rewrite, tests) continue in the next session from `.reports/U40/phase-status.md`.
 - **2026-09-08 (sync) — ojs, omp, ops and every `lib/pkp` pointer unchanged at the 2026-09-07 baselines; ui-library unchanged. Nothing to triage; baselines stay.**
   - CI at the tips: ojs run 33877061458, omp 33877082296, ops 33877070198 (unchanged, all green); pkp-e2e `main` green after the U21 revision pushes (run 34159007742) and on the nightly (34183869175); no known-red rows, no companions.
   - pkp-lib `main` sits one commit past the pointers at `3ec74f0eb9`, the #12352 merge commit, tree identical to `74a8d58571` → no impact when the pointers catch up.

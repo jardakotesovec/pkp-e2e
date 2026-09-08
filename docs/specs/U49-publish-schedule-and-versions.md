@@ -211,12 +211,14 @@ page, described in *Catalog management*. It saves onto the shown version.
    fills the empty copyright/license fields from the journal's defaults,
    and assigns a Publication Stage if none was chosen: "Version of Record"
    on a journal or press, "Author Original" on a preprint server, numbered
-   as the next major version. It also switches off the Author's edit
-   permission on every assignment, permanently, surviving unpublish (that
-   lock's story belongs to
-   [Publication metadata](U40-publication-metadata.md#a4)). On a journal
-   or preprint server the reader page goes live at once, whatever the
-   version's stage. The submission itself moves to the dashboards'
+   as the next major version. It does not touch the Author's "Allow this
+   person to make changes to the publication…" permission: the Author's
+   pages on a published or scheduled version are read-only by that status
+   alone, and the moment the version is unpublished the Author can save
+   again (the gate is
+   [Publication metadata](U40-publication-metadata.md#edit-gate)'s). On a
+   journal or preprint server the reader page goes live at once, whatever
+   the version's stage. The submission itself moves to the dashboards'
    published lists (see [My Submissions](U22-my-submissions.md) and
    [Submissions dashboard](U23-submissions-dashboard.md)) only when the
    published version's stage is the final one ⚠ [A3](#a3): "Version of
@@ -1086,16 +1088,22 @@ left untouched the PMUR publish went through.
 copyright/license back-fill only when the result is PUBLISHED; version
 auto-assignment via `getNextAvailableVersion(…,
 Publication::DEFAULT_VERSION_STAGE, false)` (OJS/OMP `VERSION_OF_RECORD`,
-OPS `AUTHOR_ORIGINAL`). Author lock: the API controller
-(`publishPublication`) sets `canChangeMetadata = 0` on every author
-stage assignment after publishing — not restored on unpublish, and not
-applied when the daily task publishes. Submission rollup:
+OPS `AUTHOR_ORIGINAL`). Author lock: the Author's pages on a published
+or scheduled version are read-only by the publication's status alone
+(`Repo::submission()->canEditPublication()`; *Publication metadata*,
+Rule 9). Since pkp/pkp-lib#13109 (lib/pkp `18f402e585`, in every app's
+lib/pkp pointer `f4db6d22c4`, 2026-09-08) `publishPublication()` no
+longer sets `canChangeMetadata = 0` on the Author's stage assignments,
+so an unpublish returns saving at once. Submission rollup:
 `getStatusByPublications()` counts only versions whose stage equals
 `VersionStage::finalVersionStage()` (A3). Live 2026-08-29 (OPS
 controls): posting filled the empty copyright holder/year from the
 server's defaults; the author's Save stayed disabled after unpost (the
-lock survives); a future-date post that only scheduled left the
-copyright fields empty (scheduling performs no fills). The stage
+assignment switch-off of that date, since removed by pkp/pkp-lib#13109;
+the post-change unpost leg is driven on screen by *Publication
+metadata*'s scenarios, not here); a future-date post that only
+scheduled left the copyright fields empty (scheduling performs no
+fills). The stage
 auto-assign is never exercised through the OJS screens — the journal's
 details panel demands a stage before any UI publish — while a press or
 preprint server exercises it live on every first stage-less publish

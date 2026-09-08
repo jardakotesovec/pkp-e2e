@@ -225,10 +225,27 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         }
     }
 
-    /** Press Continue and wait for the named step to become current. */
+    /**
+     * Press Continue and wait for the named step to become current. A press
+     * the step's own re-render swallows (the Details step mounts its editors
+     * right after it becomes current; U21 S12 on OJS, CI run 34215183797,
+     * 2026-09-08: the press fired no save and the rail stayed on "2 Details")
+     * is pressed again, as gotoStep() does.
+     */
     async continueTo(name) {
-        await this.continueButton().click();
-        await this.expectStep(name);
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await this.continueButton().click();
+            try {
+                await expect(this.currentStepLabel()).toContainText(name, {
+                    timeout: attempt < 2 ? 8_000 : 30_000,
+                });
+                return;
+            } catch (error) {
+                if (attempt === 2) {
+                    throw error;
+                }
+            }
+        }
     }
 
     /**

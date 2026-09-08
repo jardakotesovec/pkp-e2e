@@ -29,6 +29,7 @@ the fix lands.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
+| pkp-lib `f4db6d22c4` + ojs `3bfe1f9f68` / omp `5d2b2fea7` / ops `16bbd9b90e` (pkp/pkp-lib#13273, issue #13109) | The "Done" stage now sits in `Application::getApplicationStages()` while its lib/pkp callers assume it absent: Statistics › Editorial Activity shows a permanent "0 Done" row under Active Submissions (and the monthly editorial report shares the loop); Settings › Users & Roles › Roles gains a "Done" column whose toggle is live on the Journal manager, Reviewer and Reader rows while their other stages are locked; a discussion's "Attach Workflow Files" stage picker lists a disabled "Done" for every submission | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-13109/regressions.js` (S2–S4 records `s2-stats-editorial`, `s3-roles-grid`, `s4-stage-options`); fixed when the stats table has four rows, the Roles grid no "Done" column (or locked like the other stages), the picker four stages | 2026-09-08 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `WorkflowStageDAO::getWorkflowStageTranslationKeys()` and the eleven `getApplicationStages()` callers were written with Done "intentionally absent" (the DAO's own comment); the apps' `getApplicationStages()` gained `WORKFLOW_STAGE_ID_DONE` at the PR. Same PR, same day, not a regression but an intention gap reported with it: on a fresh install no role receives stage 6 at all (`Repo::userGroup()->installSettings()` caps registry stages at Production), so the grant `registry/userGroups.xml` and the upgrade migration make never lands on a fresh 3.6 install. Delete the row when the upstream fix lands. |
 | pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Delete the row when #13288 lands. |
 
 ## Flake watch — known non-deterministic failure classes
@@ -80,6 +81,13 @@ trips.
   the OJS re-run the same day. **Watch condition**: a second full-suite
   incident; then anchor the hover on the indicator's own accessible name
   and wait for both indicators before hovering.
+- **A wizard Continue press swallowed the instant a step becomes current**
+  (U21 S12, OJS). The press issued right after the rail showed "2 Details"
+  fired no save and the rail stayed put for the 30 s wait, on both attempts
+  of CI run 34215183797 (2026-09-08, the same app tips the nightly
+  34183869175 and a local run passed on). `continueTo()` now re-presses when
+  the rail has not moved within 8 s (patterns.md recorded design). **Watch
+  condition**: a `continueTo` red with the retries exhausted.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop
