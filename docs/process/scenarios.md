@@ -309,7 +309,11 @@ setting there. What those defaults are, screen by screen and dated:
 A scenario that runs with a setting at its non-default end (TEMPLATE
 "Coverage", its decision rule) gets a scratch context
 from `POST scenarios/context` created with that setting through a
-passthrough key, the way `orcid` works today. A key family the API does
+passthrough key, the way `orcid` works today. A passthrough saves what the
+settings form's form-encoded PUT would (values as strings, an emptied text
+box as null: the app's schema refuses the PHP constants the form config
+carries), and `psql <app>_test` is the parity ground truth (U21 harness
+run, 2026-09-07). A key family the API does
 not have yet is recorded in the list below with its shape, so it is built
 once, the same way, for every feature that needs it; a built family leaves
 the list.

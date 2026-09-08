@@ -355,7 +355,10 @@ variant('validation')}`. `api` is the `_test` client with that app's own
 key, `mail` the shared Mailpit, `baseURL` the probe server (base port + 50),
 `variant('validation')` the +90 server with email validation and ALTCHA on.
 Everything per app travels in the bag, never in `process.env`, so one
-process holds all three apps.
+process holds all three apps. The exception is `PKP_APP_ROOT` and
+`PKP_SUITE_DIR`, which `withApp` exports for the app while `fn` runs
+because `base-test.js` reads them: a suite page object is required inside
+`fn`, never at the top of the script (U21 tops, 2026-09-07).
 
 ```js
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag} =

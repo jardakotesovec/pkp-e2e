@@ -4,13 +4,19 @@
 //   A. editor 1 uploads article.pdf through the wizard (Submission stage)
 //   B. editor 2 renames the file through its "Update File Details" window
 //      (MODE=control: editor 1 renames it instead)
-//   C. editor 1 uploads article-rev.pdf as a revision of it and presses
+//   C. editor 1 (MODE=other: editor 2, issue #13286 "Variant 2", which the
+//      issue says fails on 3.4, 3.5 and main) uploads article-rev.pdf as a
+//      revision of it and presses
 //      "Cancel" on the wizard's step 1 once the upload completed; the file
 //      list is read back through GET api/v1/submissions/<id>/files
 //   D. the Activity Log & Notes history is read, and its Download fetched
 //   E. the file's "More Information" history is read
 //
-//   PROBE_FEATURE=sync PROBE_AGENT=<agent> node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-12352/cancel-restore.js
+//   PROBE_FEATURE=sync PROBE_AGENT=<agent> [MODE=main|control|other] node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-12352/cancel-restore.js
+//
+// Follow-up upstream: issue pkp/pkp-lib#13286 and its fix PR #13288 (the
+// restore state moves from the event log into the session; verified fixed at
+// the PR head e07727add6 on 2026-09-08, MODE=main and MODE=other).
 //
 // Verdict from `result-main-ojs.json` in the agent's output folder:
 //   fixed  → afterCancel.items[0] carries the ORIGINAL fileId and the name
@@ -162,7 +168,7 @@ forEachApp(async (app) => {
     const ed1 = `${T}ed1`, ed2 = `${T}ed2`, au = `${T}au`;
     const revFile = path.join(outDir(), 'article-rev.pdf');
     fs.copyFileSync(FIXTURE, revFile);
-    const MODE = process.env.MODE || 'main';   // control: the uploader renames the file
+    const MODE = process.env.MODE || 'main';   // control: the uploader renames the file; other: the renamer also revises
     const RENAMED = 'Renamed by B.pdf';
 
     const ctx = await app.api.createContext({tag: T, users: [
@@ -215,8 +221,8 @@ forEachApp(async (app) => {
         await snap(page, 'b2-after-rename');
         result.afterRename = await filesViaApi(app, T, sid, 'b2', page);
 
-        // C. editor 1 revises and cancels
-        await signIn(page, ed1, {contextPath: T});
+        // C. editor 1 revises and cancels (other: editor 2 does)
+        await signIn(page, MODE === 'other' ? ed2 : ed1, {contextPath: T});
         await page.goto(wf); await idle(page);
         await openUploadWizard(page);
         result.reviseInfo = await driveWizard(page, {file: revFile, reviseMatch: 'Renamed', cancel: true, label: 'c1'});
