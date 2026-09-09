@@ -25,7 +25,8 @@ scheduled prompt only points here; this section is the day's order.
    the PROGRESS banner, post `npm run questions` to the channel.
 7. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
    and post a one-paragraph summary to the channel: what was synced, what
-   was red and why, what was changed.
+   was red and why, what was changed, with the day's regression report
+   (step 5) attached as a file when there is one.
 
 A ping about a developer's failing PR during the day follows "A
 developer's PR fails the suite".
@@ -103,15 +104,25 @@ The apps move; the suite follows. The baselines live in
    actual BEFORE touching a fleet, and reproduces only what it could
    write; a hunch it cannot turn into steps is one "unverified" line in
    the log and nothing more. The reproduction must hold on reset
-   databases before it is a finding. A confirmed regression is reported
-   on Mattermost with the evidence (commit, surface, steps, what was
-   observed) AND sent as a direct message to @beaug and @jarda.kotesovec
-   the same day, and it gets a row in `ci-triage.md` "Open regressions"
-   with its reproduction script kept under
-   `shared/playwright/checks/sync/<pr>/` (the checks layout, importing
-   the kit as `require('../../../probe')`), so the next sync re-runs it
-   instead of re-deriving it; nothing unconfirmed reaches either, because
-   a false regression report costs more than a missed one. If a shipped suite
+   databases before it is a finding. A confirmed regression, and a
+   finding that contradicts the linked issue's stated intention, gets a
+   detailed report under `docs/reports/<date>-<repo>-<pr>.md` (maintainer
+   ruling, 2026-09-09): the change and its intention; one section per
+   finding with the exact numbered steps a person follows on a fresh
+   install, the expected and observed outcome with the on-screen strings
+   verbatim, the request and response where the browser showed one, the
+   cause in the developer layer, the kept script and snapshot pointers,
+   and what stays unverified. The report is posted into the session's
+   thread as a file with the day's summary AND sent as a direct message
+   to @beaug and @jarda.kotesovec the same day; the regression gets a row
+   in `ci-triage.md` "Open regressions" linking the report, with its
+   reproduction script kept under `shared/playwright/checks/sync/<pr>/`
+   (the checks layout, importing the kit as `require('../../../probe')`),
+   so the next sync re-runs it instead of re-deriving it. The report is
+   deleted once the team has acted on it (RUNBOOK "What goes where"); the
+   row and the register entry keep the pointer. Nothing unconfirmed
+   reaches the report or the DMs, because a false regression report costs
+   more than a missed one. If a shipped suite
    should have caught it, that is a `friction.md` row or a pending-row
    note. Anything security-shaped follows RUNBOOK "What goes where":
    verify privately, on Mattermost say only THAT an observation was
