@@ -50,19 +50,23 @@ trips.
   two consecutive local final runs 2026-09-05 (U29 session, load average ~15
   on 10 cores), green on the third; U40 S4 red on OMP in two of four local final
   runs 2026-09-07 (U21 revision; the first at load ~15 on 10 cores), green
-  on the others. **Watch condition**: a
+  on the others, and in the second of the U23 revision's local final runs
+  2026-09-08. **Watch condition**: a
   hardened test reds again with retries exhausted.
-- **Reviewer dashboard list under load** (U28 S1, OMP). The "Action Required
-  by me" count read exceeds its 10 s wait in full-suite runs and passes
-  alone. Last incidents: red in two consecutive local final runs 2026-09-07
-  (U21 revision, load ~15 on 10 cores), green alone and in the third full
-  run. **Watch condition**: reds at CI's four workers.
-- **Error dialog stacking over the Add Reviewer windows on a press** (U31 S4,
-  OMP). The "Error" dialog's overlay intercepts the window's "Close" and the
-  test runs to its five-minute timeout (seen first by the U31 test author
-  on 2026-09-06, one re-run). Last incidents: red in a local final
-  run and again alone 2026-09-07, green in two full runs earlier that day.
-  **Watch condition**: reds on CI.
+- **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
+  Required by me" row or count read exceeds its 10 s wait in full-suite
+  runs and passes alone. Last incidents: S1 red in two consecutive local
+  final runs 2026-09-07 (U21 revision, load ~15 on 10 cores), green alone
+  and in the third full run; 2026-09-08 (U23 revision) S1 red in the first
+  local final run and S2 in the second, the same row read.
+  **Watch condition**: reds at CI's four workers.
+- **Error dialog stacking over the Add Reviewer windows** (U31 S4, OMP and
+  once OJS). The "Error" dialog's overlay intercepts the window's "Close"
+  and the test runs to its five-minute timeout (seen first by the U31 test
+  author on 2026-09-06, one re-run). Last incidents: OMP red in a local
+  final run and again alone 2026-09-07, green in two full runs earlier that
+  day; OJS red in a local final run 2026-09-08 (U23 revision), the first
+  time on a journal. **Watch condition**: reds on CI.
 - **U01 S8 hangs on a used database** (OJS, local only so far). After a
   day's probes, checks and suite runs on one database, "S8: editor
   impersonates a participant from the Participants panel" hit its 4-minute

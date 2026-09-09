@@ -23,7 +23,10 @@
  * - the sortable ID / Days column headers and the pager (U23 Rules 4–5);
  * - activity-cell action buttons ("Assign Editor", "Assign Reviewers") and
  *   the per-reviewer activity indicators with their popovers (U23 Rules
- *   9–10).
+ *   9–10);
+ * - the column headers and a row's Stage / Editorial Activity cells (U23
+ *   Rule 5), the Filters panel's suggest-list fields, and the "More
+ *   Actions" menu's grayed state (U23 Rule 12).
  */
 const {expect} = require('@playwright/test');
 const {MySubmissionsPage} = require('./MySubmissionsPage.js');
@@ -178,6 +181,73 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         await expect(this.filtersModal()).toHaveCount(0, {timeout: 30_000});
     }
 
+    /**
+     * A column header by its label ('ID', 'Submissions', 'Stage', 'Days',
+     * 'Editorial Activity', 'Actions'). The sortable ones carry a
+     * screen-reader "Sort" after the label and CSS upper-cases every
+     * header, so the match is a case-insensitive word-anchored prefix.
+     */
+    columnHeader(name) {
+        return this.page.getByRole('columnheader', {
+            name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'),
+        });
+    }
+
+    /** A row's Stage cell (the third column: the stage or outcome named in
+     * plain text beside a small colored dot, U23 Rule 5). The ID column is
+     * the row's header (`th`), so among the row's `cell`s Stage is the
+     * second. */
+    stageCell(row) {
+        return row.getByRole('cell').nth(1);
+    }
+
+    /** The small colored dot beside the Stage cell's text (`bg-stage-*`). */
+    stageDot(row) {
+        return row.locator('[class*="bg-stage-"]');
+    }
+
+    /**
+     * A suggest-list field of the open Filters panel by its label
+     * ("Assigned To Editor"; "Assigned to Moderator" on a preprint server —
+     * the suite passes its app's label). Its options render only after a
+     * name is typed; read them with `suggestOptions()`.
+     */
+    filterSuggestField(label) {
+        return this.filtersModal().getByRole('combobox', {name: label});
+    }
+
+    /** The options a suggest-list field currently offers (page-wide: the
+     * list portals out of the field). */
+    suggestOptions() {
+        return this.page.getByRole('option');
+    }
+
+    /**
+     * Open the "More Actions" menu and return its "Delete Incomplete
+     * Submissions" entry, which is grayed (`aria-disabled`) while the
+     * current page of the list has no incomplete row (U23 Rule 12). Close
+     * the menu again with `closeMoreActions()`.
+     */
+    async openMoreActions() {
+        await this.moreActionsButton().click();
+        const item = this.bulkDeleteMenuItem();
+        await expect(item).toBeVisible({timeout: 30_000});
+        return item;
+    }
+
+    /** Close an open "More Actions" menu without choosing an entry: a second
+     * press on the button toggles the menu shut (Escape leaves a menu whose
+     * only entry is grayed open, since nothing in it can take focus). */
+    async closeMoreActions() {
+        await this.moreActionsButton().click();
+        await expect(this.bulkDeleteMenuItem()).toBeHidden({timeout: 30_000});
+    }
+
+    /** The popover a reviewer activity indicator opens inside its row. */
+    activityPopover(row) {
+        return row.locator('[id^="headlessui-popover-panel"]');
+    }
+
     /** A sortable column header's sort button ('ID' or 'Days') — the button
      * inside the columnheader carries the label plus a screen-reader "Sort"
      * text (TableColumn.vue). */
@@ -219,5 +289,36 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
      */
     activityIndicator(row, statusPattern) {
         return row.getByRole('button', {name: statusPattern});
+    }
+
+    /** A row's Editorial Activity cell (fifth column, U23 Rule 9); empty
+     * once a Submission-stage row has its editor (Rule 9i). The ID column
+     * is the row's header (`th`), so among the row's `cell`s it is the
+     * fourth (the fifth is "Actions", whose text reads "View"). */
+    activityCell(row) {
+        return row.getByRole('cell').nth(3);
+    }
+
+    /** Close the open Filters panel without applying (Escape). */
+    async closeFilters() {
+        await this.page.keyboard.press('Escape');
+        await expect(this.filtersModal()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** The "Review Details: {title}" window a popover's "View details"
+     * opens — the same window the workflow's Reviewers panel opens (U23
+     * Rule 10). Close it with its own "Close" button. */
+    reviewDetailsDialog() {
+        return this.page.getByRole('dialog', {name: /^Review Details:/});
+    }
+
+    /** Arm a wait for the list's next reload (its submissions fetch); call
+     * before the action that should reload the list and await the promise
+     * after it. */
+    listReload() {
+        return this.page.waitForResponse(
+            (r) => r.request().method() === 'GET' && /\/_submissions\?/.test(r.url()),
+            {timeout: 30_000}
+        );
     }
 };
