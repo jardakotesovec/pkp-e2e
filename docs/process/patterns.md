@@ -306,11 +306,9 @@ no cleanup fixture.
   `page.evaluate((id) => window.tinymce?.get(id)?.getContent(), fieldId)`.
 - **The wizard Steps rail collapses when it overflows.** Non-current pills are
   clipped to 1px, and `force: true` clicks are silent no-ops. Use
-  `SubmissionWizardPage.gotoStep()`/`continueTo()`/`expectStep()`
+  `SubmissionWizardPage.gotoStep()`/`expectStep()`
   (`apps/ojs/playwright/pages/SubmissionWizardPage.js`). The pattern handles
-  expansion, end-anchored name matching and clicks swallowed by a re-render
-  (Continue included: a press issued the instant a step becomes current can
-  fire nothing, so it is re-pressed when the rail has not moved).
+  expansion, end-anchored name matching and clicks swallowed by a re-render.
 - **`useFetch` tunnels DELETE and PUT via POST + `X-Http-Method-Override`, and
   unauthorized API calls return 401**, not 403. Match `waitForResponse` method
   predicates and status assertions accordingly.

@@ -13,4 +13,3 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
-2026-09-08 · sync · regression reader rr2 · `npm run reset:ojs` leaves a cold database on which the probe kit's `bootstrapProbe()` and every `_test/scenarios/*` call answer 500 (`sessions` table absent), so the first probe run failed and the fix (run the suites' setup project, `npx playwright test -c configs/ojs.config.js --project=setup`) had to be dug out of `bootstrap.setup.js` and the fleet setup log; 4 calls · the regression-read brief's "Reset first (`npm run reset:<app>`)" should name the setup command that follows it, or `reset:<app>` should run it
