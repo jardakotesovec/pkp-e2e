@@ -11,8 +11,9 @@ RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
 baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
 reported failure. Suite size (RUNBOOK "Budget"; last full `test:final`,
-2026-09-06, on the maintainer's 10-core machine; CI runs 4 workers): OJS
-208 tests · 7.3 min · OMP 204 · 6.3 min · OPS 141 · 3.0 min.
+2026-09-09, on the 4-core VM at `PLAYWRIGHT_WORKERS=4`, CI's setting): OJS
+208 tests · 10.9 min · OMP 206 · 10.8 min · OPS 143 · 5.3 min (the OJS and
+OPS serial projects ran separately after a flake in the main project).
 
 ## Features
 
@@ -61,7 +62,7 @@ status is pending / in_progress / done / parked.
 | U37 | Tasks & discussions | OJS OMP OPS | H | pending | |
 | U38 | Submission activity log & notes | OJS OMP OPS | L | pending | |
 | U39 | Submission & Publisher Libraries | OJS OMP OPS | L | pending | |
-| U40 | Publication metadata | OJS OMP OPS | M | done | 11 OJS · 9 OMP · 9 OPS (+setup). 7🐞+10❓+6✅. Headliner A1. 1 in the private file, verified. |
+| U40 | Publication metadata | OJS OMP OPS | M | done | 9 OJS · 9 OMP · 9 OPS (+setup; OJS S3b/S6b folded into S3/S6 2026-09-09). 7🐞+11❓+7✅. Headliner A1. 1 in the private file, verified. Sync 2026-09-09 (pkp-lib#13109): Rules 2/9 per version, A4 retired, A16 🐞 (the issue's own case refused on a fresh install: no role holds the Done stage), A17 ❓. |
 | U41 | Contributors & affiliations | OJS OMP OPS | M | done | 9 OJS · 11 OMP · 9 OPS (+setup). 9🐞+9❓+4✅ (A15 retired 2026-09-03). Headliner A14. 1 in the private file, verified. |
 | U42 | Citations & references | OJS OMP OPS | M | pending | |
 | U43 | Funding | OJS OMP OPS | L | done | 5 tests per app (+setup). 3🐞+9❓+2✅ (A13 retired 2026-09-03). Headliner A3. Low-confidence: A4 (not re-probed at the fixed tips), A10, A11 (need a server with egress). |

@@ -34,8 +34,8 @@ journal. **May edit the publication** is one gate (Rule 2) shared by every
 page in this feature and by the neighbouring publication features
 (contributors, citations, funding, galleys). Journal Managers and Editors
 always may. Other participants may while their assignment carries the
-metadata-edit permission. An Author may only while no version of the
-submission is published or scheduled. Which roles reach the workflow screen
+metadata-edit permission. An Author may only on a version that is neither
+published nor scheduled (Rule 9). Which roles reach the workflow screen
 and its stages at all is the workflow screen's own rule
 ([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)) and
 is not restated here. <sup>a</sup> <sup>b</sup>
@@ -44,7 +44,7 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 |--------|--------------------|
 | **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator: on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles: while assigned to the submission's current stage. An assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author: on their own submission, in the author view <sup>a</sup> |
 | **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1) <sup>a</sup> |
-| **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator: always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND no version is published or scheduled (Rule 9). A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
+| **Save changes on any of these pages** | • Journal Manager, Editor, Site Administrator: always, published versions included (Rule 8)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND the version they are on is neither published nor scheduled (Rule 9). While another version is published, Save is offered on the unpublished one but refused ([A16](#a16)). A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
 | **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article published into a not-yet-published issue is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission. The Author is never offered it, in any app <sup>i</sup> |
 | **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License <sup>m</sup> |
 | **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator: Tools › Permissions (Rule 14) <sup>k</sup> |
@@ -146,10 +146,13 @@ it for a per-item value (Rule 11). <sup>g</sup>
      "Allow this person to make changes to the publication, such as the
      title, abstract, metadata and other publication details…" for that
      assignment (see *Stage participants*);
-   - for an Author, additionally: no version of the submission is
-     published or scheduled (Rule 9).
-   The gate is evaluated per submission, not per version. Whoever may
-   edit one version may edit them all. <sup>b</sup>
+   - for an Author, additionally: the version they are on is neither
+     published nor scheduled (Rule 9).
+   The gate is judged per version. An editorial role who may edit one
+   version may edit them all, published ones included (Rule 8). An
+   Author may edit only the versions that are neither published nor
+   scheduled, and while another version is published even that save is
+   refused ([A16](#a16)). <sup>b</sup>
 3. **Per version, per language.** Each publication version carries its
    own copy of every field on these pages. The version switch on the
    Publication area chooses which one the pages show and save. Creating
@@ -204,20 +207,29 @@ it for a per-item value (Rule 11). <sup>g</sup>
    impact the published content." The forms stay editable for whoever
    may edit the publication (Rule 2), and a save changes what readers
    see at once. <sup>j</sup>
-9. **A published or scheduled version locks the Author out.** Once any
-   version of the submission is published or scheduled, the Author's
-   pages become read-only (Rule 10) on every version. The published
-   version additionally shows the banner "This version has been
-   published and can not be edited." ("This version has been posted and
-   can not be edited." on a preprint server). A version that is only
-   scheduled shows no banner; Save is simply unavailable. Publishing
-   also switches the Author's assignment permission off for good. After
-   an unpublish, the pages stay read-only until an editor re-ticks "Allow
-   this person to make changes to the publication…" on the Author's
-   assignment, which restores saving at once ⚠ [A4](#a4). <sup>j</sup>
+9. **A published or scheduled version locks the Author out.** A
+   published or scheduled version is read-only for the Author (Rule 10);
+   the submission's other versions are not. The published version
+   additionally shows the banner "This version has been published and
+   can not be edited." ("This version has been posted and can not be
+   edited." on a preprint server). A version that is only scheduled
+   shows no banner, just the disabled Save. An editor may still
+   create a new version, and on it an Author whose assignment carries
+   the permission finds Save offered and no banner. On a journal, when
+   the other version is only scheduled, that save is kept. While another
+   version is published, it is refused: "Saving" shows, then the
+   toast "An unexpected error has occurred. Please reload the page and
+   try again.", nothing in the form footer, and the edit is gone on
+   reload ⚠ [A16](#a16). The Author's Contributors page makes the same
+   offer on the new version; whether its saves go through is open
+   ⚠ [A17](#a17). Publishing leaves the Author's assignment permission
+   (Rule 2) as it was, and after an unpublish the Author saves at once.
+   <sup>j</sup>
 10. **Read-only presentation.** A viewer who may not edit the publication
-    gets the same pages with the Save button unavailable. The fields
-    still look editable ⚠ [A8](#a8). Nothing they type is saved.
+    gets the same pages with the Save button present but disabled. The
+    fields still look editable ⚠ [A8](#a8). Nothing they type is saved.
+    Opening another Publication page or address drops an unsaved edit
+    without any prompt, on an editable page too.
     <sup>c</sup>
 11. **Permissions & Disclosure: defaults and overrides.** Copyright
     Holder and Copyright Year arrive locked, each with a description
@@ -491,19 +503,33 @@ seeding are in its footnote.
    after filling it, then re-enable it: the value is back. <sup>s2</sup>
 3. **The Author before and after publication** — Author, then Journal
    Manager: as the Author, open your own submitted submission's "Title &
-   Abstract". On a journal or press the fields are shown but Save is unavailable, and nothing typed
-   persists on reload. On a preprint server the page saves like scenario
-   1 [OPS1](#ops1). As the Journal Manager, publish the submission. Back
-   as the Author: the published version's Title & Abstract shows "This
-   version has been published and can not be edited." ("… has been
-   posted and can not be edited." on the preprint server) and Save is
-   unavailable, on the preprint server too. Journal Manager: unpublish.
-   Author: the page is still read-only, with no banner (⚠ [A4](#a4)).
-   Journal Manager: on a stage screen's Participants panel open the
-   Author's "Edit Assignment", tick "Allow this person to make changes
-   to the publication…", OK. Author: Save works again. Journal only:
-   schedule a different submission of the same Author to a future issue
-   instead of publishing it. Its Title & Abstract is read-only for the Author with no banner at all. <sup>s3</sup>
+   Abstract". On a journal or press the fields are shown but Save is
+   disabled, and nothing typed persists on reload. On a preprint
+   server the page saves like scenario 1 [OPS1](#ops1). As the Journal
+   Manager, publish the submission, on a journal without an issue; its
+   header reads "Status: Published". Back as the Author: the
+   published version's Title & Abstract shows "This version has been
+   published and can not be edited." ("… has been posted and can not be
+   edited." on the preprint server) and Save is disabled, on the
+   preprint server too. Journal Manager: on a stage screen's
+   Participants panel open the Author's "Edit Assignment"; on a journal
+   or press tick "Allow this person to make changes to the publication…"
+   and OK (on a preprint server it is already ticked). Author: the
+   published version is still read-only, with its banner. Journal
+   Manager: on the Publication area press "Create New Version" and
+   confirm. Author: the new version's Title & Abstract shows no banner
+   and Save is offered; type "The" as Prefix and press Save: "Saving"
+   shows, then the toast "An unexpected error has occurred. Please
+   reload the page and try again.", and after a reload Prefix is empty
+   ([A16](#a16)). Journal Manager: unpublish. Author: "The" typed as
+   Prefix on either version now saves and is there after a reload.
+   Journal only: on a different submission of the same Author, tick the
+   permission the same way, then schedule it to a future issue
+   by the dependable route under Cross-feature interactions; its header
+   reads "Status: Scheduled". Its Title & Abstract is read-only for the
+   Author with no banner at all; after the Journal Manager's "Create New
+   Version", the Author saves on the new version while the scheduled
+   one stays read-only. <sup>s3</sup>
 4. **Editing a published version** — Journal Manager, on a published
    item: every Publication page shows "Warning: This version has been
    published. Editing it may impact the published content." Change the
@@ -607,8 +633,9 @@ App-specific:
 
 ## Findings register
 
-Verdicts are the author's judgment (claude, 2026-08-28), unreviewed unless
-an entry notes otherwise; the team settles them on spec review. The summary
+Verdicts are the author's judgment (claude, 2026-08-28; A16, A17 and the
+retirement of A4 2026-09-09), unreviewed unless an entry notes otherwise;
+the team settles them on spec review. The summary
 is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
 and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
@@ -616,12 +643,13 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved, even after the summary is stored, and a journal's pre-scheduling panel is refused silently | 🐞 | user-visible | — |
 | [A2](#a2) | Reset permissions stamps Copyright Year 1970 on unpublished items (journal on article-date basis; preprint server) | 🐞 | user-visible | — |
-| [A4](#a4) | The Author's edit permission never returns after an unpublish; only a manual re-tick on the assignment restores it | 🐞 | user-visible | — |
+| [A16](#a16) | On a new version of a published item the Author's Save is offered and refused: "An unexpected error has occurred…", the edit gone on reload | 🐞 | user-visible | — |
 | [A15](#a15) | The freshly opened language panel acts before its loading settles: stale guidance and prefill kept (journal), an empty required Title accepted (press), the old language's text stored as the new title (preprint server) | 🐞 | user-visible | — |
 | [A13](#a13) | Cancelling the reset-permissions confirm box leaves the button greyed until a reload | 🐞 | minor | — |
 | [OJS1](#ojs1) | An article published into a not-yet-published issue keeps "Change", and every language change on it is refused | 🐞 | minor | — |
 | [OMP5](#omp5) | With License Terms but no license, the book page shows a "License" link that leads nowhere | 🐞 | minor | — |
 | [A3](#a3) | Reset permissions rewrites every submission, unpublished and declined included, and logs one "metadata updated" line per version | ❓ | user-visible | — |
+| [A17](#a17) | The Author's Contributors page offers "Add Contributor", "Edit", "Delete" and "Order" on a new version of a published item; whether a save there is kept is untried | ❓ | user-visible | — |
 | [A5](#a5) | A scheduled article may still offer and allow Change Submission Language (code reading; the state was not reached live) | ❓ | minor | — |
 | [A6](#a6) | The "Current Submission Language" readout leaves the Publication pages once a second version exists or the item is published | ❓ | minor | — |
 | [A8](#a8) | Read-only pages keep their fields typeable with Save unavailable | ❓ | minor | — |
@@ -631,6 +659,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | The language panel's Abstract is required but described as "recommended" | ❓ | minor | — |
 | [OMP3](#omp3) | The press's reset-permissions wording is the older text | ❓ | minor | — |
 | [OPS2](#ops2) | A wizard-chosen license shows beside a sentence promising the server's default | ❓ | minor | — |
+| [A4](#a4) | Retired: publishing leaves the Author's edit permission as it was, and the Author saves at once after an unpublish | ✅ | retired | re-probe (claude), 2026-09-09 — fixed upstream |
 | [A7](#a7) | Retired: an over-limit abstract is refused on Save with its own message, an empty required one before the save is sent | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [A9](#a9) | Retired: the wizard's Details step does show Plain Language Summary at "Ask" and at "Require" | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [OMP1](#omp1) | The book page prints the copyright line outside the License block | ✅ | minor | — |
@@ -689,20 +718,6 @@ on unpublished items are what publishing would have applied anyway (A2
 aside), so the visible harm is the log noise and the lost "automatic"
 state.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a3</sup>
-
-<a id="a4"></a>
-**A4 — The Author's edit permission is gone for good after publishing** · 🐞 · user-visible.
-Publishing switches off the Author's "Allow this person to make
-changes…" permission on every one of their assignments. Unpublishing the
-version lifts the published-state lock but not that switch, so the
-Author's pages stay read-only, with no banner and no notice, until an
-editor opens the Author's "Edit Assignment" on the Participants panel and
-re-ticks the permission. That restores saving at once. On a preprint
-server, where authors edit their own preprint by default, the author
-loses editing after a post/unpost cycle. Rationale: the lock is meant to
-follow the published state. The permanent switch-off duplicates it with a
-side effect nothing on screen explains.
-Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — A scheduled article can still change language** · ❓ · minor.
@@ -838,6 +853,35 @@ behave exactly as Rule 13b says, and the press's same Confirm is then
 refused.
 Since: live-observed 2026-08-28 · Basis: probe. <sup>f-a15</sup>
 
+<a id="a16"></a>
+**A16 — The Author's Save on a new version of a published item is offered and refused** · 🐞 · user-visible.
+After an editor creates a new version of a published item, the Author
+whose assignment carries the metadata-edit permission opens the new
+version's Title & Abstract and finds no banner and Save enabled. Pressing
+it shows "Saving", then the toast "An unexpected error has occurred.
+Please reload the page and try again."; the form footer stays empty, no
+field is marked, and the edit is gone on reload. The same Save is
+accepted once the published version is unpublished, and on a journal
+whose other version is only scheduled. Identical on all three apps.
+Rationale: the page offers what the save then refuses, the message
+names nothing the Author can act on, and editing the unpublished
+version while another is published is what the app's 2026-09-08 change
+to this gate set out to allow.
+Since: live-probed 2026-09-09 · Basis: probe. <sup>f-a16</sup>
+
+<a id="a17"></a>
+**A17 — The Author's Contributors page offers editing on a new version of a published item** · ❓ · user-visible.
+On the new version of a published item, the permitted Author's
+"Contributors" page offers "Add Contributor", "Edit", "Delete" and
+"Order"; on the published version it offers "Preview" alone. A save
+there was not tried.
+Question: does a contributor save go through where the Title & Abstract
+save is refused? Lean: no, the same refusal as A16, because every
+Publication page saves through the one gate of Rule 2. Settled by: as
+the permitted Author on the new version while another is published,
+press "Add Contributor", fill the required boxes, Save, then reload.
+Since: live-probed 2026-09-09 · Basis: probe. <sup>f-a17</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -925,6 +969,11 @@ the field is filled? Lean: disappear. It describes the automatic fill,
 which will not happen.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ops2</sup>
 
+### Retired
+
+<a id="a4"></a>
+**A4 — The Author's edit permission is gone for good after publishing** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13109), verified 2026-09-09 on all three apps: the permission survives publishing, and Save works at once after an unpublish (Rule 9). <sup>f-a4</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -938,6 +987,10 @@ OMP/OPS — one commit apart, in the form-field config layer). Every
 "code" basis below is a reading of those trees; every "live-probed
 2026-08-28" note is a drive of the running fleets at those commits
 through the screens, on scratch contexts (the seeded journal untouched).
+Every "live-probed 2026-09-09" note is a drive of the fleets at that day's
+tips: OJS `05684c7f9d`, OMP `14be789b5`, OPS `9db7bd3d7e`, lib/pkp
+`f4db6d22c4`, ui-library `445b8b90` (the first tips carrying
+pkp/pkp-lib#13109, in every app since 2026-09-08).
 
 <a id="fn-a"></a>
 **a — the pages and their navigation.** Publication-area entries are
@@ -981,22 +1034,34 @@ Copyediting-stage item the same role reached the pages.
 
 <a id="fn-b"></a>
 **b — the edit gate.** Client: `useWorkflowPermissions.js` —
-`canEditPublication = submission.canCurrentUserChangeMetadata`, forced
-false for an assigned Author when any publication is
-`STATUS_PUBLISHED`/`STATUS_SCHEDULED`. `canCurrentUserChangeMetadata`
-is mapped by `PKP\submission\maps\Schema::canChangeMetadata()`: true
-when one of the current user's stage assignments has `canChangeMetadata`,
-else true for an UNASSIGNED user holding `ROLE_ID_SITE_ADMIN` or
-`ROLE_ID_MANAGER`. Server (`PKPSubmissionController::editPublication()`,
+`canEditPublication = selectedPublication.canCurrentUserChangeMetadata ?? false`.
+Since pkp/pkp-lib#13109 (lib/pkp `74a8d58571..f4db6d22c4`, ui-library
+`445b8b90`, in every app 2026-09-08) the composable carries no rule of
+its own about published versions; until then it read the SUBMISSION's
+`canCurrentUserChangeMetadata` and forced false for an assigned Author
+when any publication was `STATUS_PUBLISHED`/`STATUS_SCHEDULED`. API:
+`canCurrentUserChangeMetadata` is a publication property
+(`schemas/publication.json`, apiSummary) mapped by
+`publication/maps/Schema.php` through
+`Repo::submission()->canEditPublication($publication, $user)` for the
+request user; the submission schema no longer defines it and
+`submission/maps/Schema::canChangeMetadata()` is gone (live 2026-09-09,
+OJS, through a manager's API key: `GET submissions/{id}` has no such key,
+each `_submissions` list item carries it as `null`, and each publication
+answers a boolean). Server (`PKPSubmissionController::editPublication()`,
 also `PublicationWritePolicy` → `PublicationCanBeEditedPolicy`): site
-admin passes outright; otherwise `Repo::submission()->canEditPublication()`
-— true for any user holding a manager-level role in the context
+admin passes outright; otherwise `canEditPublication(Publication, User)`
+(was `(submissionId, userId)`) — true for any user holding a
+manager-level role in the context
 (`_canUserAccessUnassignedSubmissions`, roles in
 `UserGroup\Repository::NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES` =
 `[ROLE_ID_MANAGER]`; OJS "Editor" and "Production Editor" are
-manager-level groups), else false when a published/scheduled version
-exists and the user's assignments are all Author-role, else true iff some
-assignment has `canChangeMetadata`. Assignment default:
+manager-level groups), else false when the GIVEN publication is
+`STATUS_PUBLISHED`/`STATUS_SCHEDULED` and the user's assignments are all
+Author-role, else true iff some assignment has `canChangeMetadata`. The
+same write is also behind the stage-access policy
+(`user.authorization.accessibleWorkflowStage`), which is what refuses
+A16 (fn-f-a16). Assignment default:
 `stageAssignment\Repository::build()` copies the group's
 `permitMetadataEdit`; `registry/userGroups.xml` sets it true for
 manager, editor, productionEditor and sectionEditor on OJS/OMP, for
@@ -1006,7 +1071,10 @@ checkbox `canChangeMetadata`, label `stageParticipants.canChangeMetadata`)
 sets it per assignment and forces true for `ROLE_ID_MANAGER` groups.
 Role setting label `settings.roles.permitMetadataEdit` ("Permit
 submission metadata edit."). Site Administrator: server bypass explicit
-in `editPublication()`; client via the unassigned-admin branch.
+in `editPublication()`; on the client the mapped publication property,
+whose `canEditPublication()` has no site-admin clause (the old
+submission-level map had one), so an administrator with no journal role
+now reads false on screen — a code reading, see the limitation below.
 Live-probed 2026-08-28 on all three apps: the Assign Participant /
 "Edit Assignment" dialogs show the "Permissions" box labelled "Allow
 this person to make changes to the publication, such as the title,
@@ -1028,7 +1096,19 @@ occurred…" dialog). That administrator opened the workflow by URL, saw
 the full editorial nav including Permissions & Disclosure, and saved
 on all three apps. The pure no-role case rests on the server bypass in
 the code; settling observation: the same drive in a context where the
-administrator holds no role.
+administrator holds no role. Live-probed 2026-09-09 (Actors row "Save
+changes", Rule 2; OJS, OMP and OPS, scratch contexts): the "Edit
+Assignment" string identical on all three; Roles › Author › "Permit
+submission metadata edit." unticked on the journal and press, ticked on
+the preprint server; the unassigned scratch manager and `admin` saved on
+all three; the Section Editor on the default assignment saved; the
+Author with the box ticked saved on an unpublished single version
+(journal, press) and by default on the preprint server; with the box
+unticked the Author was read-only on every version. The assistant
+clause of the Actors rows "Save changes" and "Change the submission
+language" was not re-driven that day: that the change leaves it
+untouched is a code reading of the diff, which alters only the Author
+branch.
 
 <a id="fn-c"></a>
 **c — loading, saving, logging.** `WorkflowPublicationForm.vue` fetches
@@ -1074,7 +1154,16 @@ on English. Same bar on the Metadata page ("Keywords in French
 `admin` impersonating a scratch manager via Users & Roles › Login As):
 the save's Activity Log row read "2026-08-28 admin admin (acting as
 Mona Manager) Submission metadata updated" — the real user named, the
-impersonated one in the suffix.
+impersonated one in the suffix. Live-probed 2026-09-09 (Rule 10, A16;
+all three apps): a save the server refuses for stage access (401,
+fn-f-a16) shows no footer summary, no field mark and no "Saved"; about
+1.5 s after the press the notification "An unexpected error has
+occurred. Please reload the page and try again." appears with a "×"
+close (a read 15 s later had missed it). Leaving a Publication page with
+an unsaved edit, by opening "Metadata" or by another address, opened no
+browser dialog and no app prompt, in the editable and the read-only
+state alike (a dialog listener armed before each switch; the typed text
+gone on return).
 
 <a id="fn-d"></a>
 **d — Title & Abstract.** `PKP\components\forms\publication\TitleAbstractForm`:
@@ -1348,6 +1437,16 @@ the first — `PUT …/changeLocale` 403 `{"error":"You can not change
 language of this submission because it already has more than one
 publication version or a published publication."}`, shown as a top-right
 toast with "Close", panel open, no reload — identical on OJS, OMP, OPS.
+Live-probed 2026-09-09 (Actors row "Change the submission language"; all
+three apps): the manager's fresh single-version item showed "Current
+Submission Language: English" with an enabled "Change"; the two-version
+item showed no "Change" for the manager, `admin` or the Section Editor;
+the Author's Publication pages carried neither readout nor button; the
+OJS scheduled single-version item still showed the readout and the
+button for the manager (A5's state, the button's press not driven). The
+assistant clause (no "Change" without the permission, the button once
+it is ticked) was not re-driven: that the change leaves it untouched is
+a code reading of the diff, which alters only the Author branch.
 
 <a id="fn-j"></a>
 **j — the published-state banners.** `PublicationConfig.common.getPrimaryItems`:
@@ -1369,13 +1468,35 @@ can not be edited." (OJS, OMP) / "This version has been posted and can
 not be edited." (OPS). OJS scheduled item (reached via Publication
 Settings › "Assign To Future Issue and Schedule Only", then the header
 action; header "Status: Scheduled"): the Author's page had Save
-disabled and no banner line at all. The author lock on ALL versions is
-the client rule in fn-b plus the server rule; the permanent switch-off:
-`PKPSubmissionController::publishPublication()` sets `canChangeMetadata
-= 0` on every Author-role stage assignment after `publish()`;
-`unpublishPublication()` does not restore it, and `RestrictAuthorAssignment`
-/ `UpdateAuthorStageAssignments` re-derive it from the role only on
-`SubmissionSubmitted` (A4).
+disabled and no banner line at all. The Author lock is per version:
+`canEditPublication(Publication, User)` reads the given publication's
+status (fn-b), so a sibling version that is neither published nor
+scheduled maps `canCurrentUserChangeMetadata: true` for a permitted
+Author and its form gets Save. Until pkp/pkp-lib#13109 (lib/pkp
+`18f402e585`, in every app 2026-09-08)
+`PKPSubmissionController::publishPublication()` also set
+`canChangeMetadata = 0` on every Author-role stage assignment after
+`publish()`, which `unpublishPublication()` never restored
+(`RestrictAuthorAssignment` / `UpdateAuthorStageAssignments` re-derive
+it from the role only on `SubmissionSubmitted`); the change deletes
+that loop (the retired A4). Live-probed 2026-09-09 (Rule 9, scenario
+3; OJS, OMP and OPS, scratch contexts): the two banners verbatim as
+above, the manager's warning identical on all three; the Author's "Edit
+Assignment" box still ticked after the publish, after the unpublish
+and, on OJS, after scheduling; right after "Unpublish" ("Unpost" on
+OPS; confirm "Are you sure you don't want this to be published?" / "…to
+be posted?") the Author's Save was enabled on both versions, answered
+200 and persisted, with no re-tick; with the box unticked both versions
+were read-only with no banner (control). New version of a published
+item ("Create New Version"; "Version of Record 1.1" on OJS and OMP,
+"Author Original 1.1" on OPS): the Author's page read "Status:
+Unpublished", no banner, Save enabled, the save refused 401 (fn-f-a16).
+OJS scheduled item (Publication Settings › "Assign To Future Issue and
+Schedule Only", then the panel; header "Status: Scheduled", "Preview" /
+"Unschedule"): the permitted Author's page had Save disabled and no
+banner line; "Create New Version" was offered to the manager on it, and
+the Author's save on "Version of Record 1.1" answered 200 and persisted
+while 1.0 stayed read-only.
 
 <a id="fn-k"></a>
 **k — reset permissions.** `PKPToolsHandler` (roles MANAGER, SITE_ADMIN;
@@ -1526,17 +1647,24 @@ first, or every Metadata save is refused (A1).
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** A roster Author's own submitted submission
 (the Author must be the submitter — the stage assignment is theirs);
-Journal Manager to publish/unpublish. On OJS, publishing needs an issue
-(a scratch future issue; "Assign To Future Issue and Publish
-Immediately" publishes at once as continuous publication). The
-scheduled leg needs a second submission of the same Author: reach the
-scheduled state by saving "Assign To Future Issue and Schedule Only" on
-Publication Settings FIRST, then re-picking it in the "Schedule For
+Journal Manager to publish/unpublish. On OJS a journal with no issues
+publishes without one: the "Schedule For Publication" › Review
+Publishing Details panel then carries no Issue Assignment group and the
+confirm window reads "…This will be published immediately without any
+issue association…" (live-probed 2026-09-09, scratch journal); with a
+scratch future issue, "Assign To Future Issue and Publish Immediately"
+publishes at once as continuous publication. The scheduled leg needs a
+second submission of the same Author and a scratch future issue: reach
+the scheduled state by saving "Assign To Future Issue and Schedule Only"
+on Publication Settings FIRST, then re-picking it in the "Schedule For
 Publication" panel (opened without that saved choice the panel can
-publish instead — *Publish, schedule & versions*). The re-tick leg
+publish instead — *Publish, schedule & versions*). The permission tick
 is the Author's "Edit Assignment" on any stage screen's Participants
-panel (live-probed 2026-08-28, all three apps: unticked after the
-unpublish, Save restored the moment it was ticked).
+panel, Rule 2's plain tick (live-probed 2026-09-09, all three apps: the
+box's state survives the publish and the unpublish; on the preprint
+server it is ticked from the start). Until 2026-09-08 the same tick was
+the repair after an unpublish (the retired A4; live-probed 2026-08-28:
+unticked after the unpublish, Save restored the moment it was ticked).
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** One published scratch submission; the
@@ -1684,17 +1812,24 @@ one line) above the author's own earlier "Submission metadata updated"
 rows.
 
 <a id="fn-f-a4"></a>
-**f-a4 — A4 evidence.** fn-j: `publishPublication()` zeroes
-`canChangeMetadata` on Author-role assignments; `unpublishPublication()`
-contains no assignment code; `canEditPublication()` then denies the
-author (no published version, but no `canChangeMetadata` assignment
-either) and `Schema::canChangeMetadata()` returns false for an assigned
-user without the flag. Code-read 2026-08-28. Live-probed 2026-08-28 on
-all three apps: after "Unpublish" ("Unpost" on OPS) the Author's Title &
+**f-a4 — A4 evidence.** Until pkp/pkp-lib#13109: `publishPublication()`
+zeroed `canChangeMetadata` on Author-role assignments;
+`unpublishPublication()` contained no assignment code;
+`canEditPublication()` then denied the author (no published version,
+but no `canChangeMetadata` assignment either) and
+`Schema::canChangeMetadata()` returned false for an assigned user
+without the flag. Code-read 2026-08-28. Live-probed 2026-08-28 on all
+three apps: after "Unpublish" ("Unpost" on OPS) the Author's Title &
 Abstract had Save disabled and no banner (the OPS author had saved
-before the post); the manager's "Edit Assignment" for that Author
-showed the "Permissions" box unticked; ticking it and pressing OK made
-the Author's Save enabled and a title edit persisted.
+before the post); the manager's "Edit Assignment" for that Author showed
+the "Permissions" box unticked; ticking it and pressing OK made the
+Author's Save enabled and a title edit persisted. Retired 2026-09-09:
+lib/pkp `18f402e585` (pkp/pkp-lib#13109, in every app 2026-09-08)
+deletes the `StageAssignment` loop from `publishPublication()`;
+live-probed 2026-09-09 on OJS, OMP and OPS (fn-j): the box stays ticked
+through the publish and the unpublish, and right after the unpublish the
+Author's Save on both versions is enabled, answers 200 and persists with
+no re-tick.
 
 <a id="fn-f-a5"></a>
 **f-a5 — A5 evidence.** Client guard `submission.status !==
@@ -1834,6 +1969,54 @@ settled-state claims stand and the suites assert them. The suites' timing
 workarounds are the campaign ledger's record
 (`docs/tracking/app-changes.md`, row 6; app code unchanged).
 
+<a id="fn-f-a16"></a>
+**f-a16 — A16 evidence.** The change: pkp/pkp-lib#13109 "Author should
+be able to edit metadata if the publication is not published" (lib/pkp
+`74a8d58571..f4db6d22c4`, ojs `05684c7f9d`, omp `14be789b5`, ops
+`9db7bd3d7e`, ui-library `445b8b90`), whose stated intention is the
+issue's own steps: an Author holding the permission edits a new version
+while another is published. Live-probed 2026-09-09 (Rule 9, scenario 3;
+OJS, OMP and OPS, scratch contexts; the Author the submitter with the
+"Edit Assignment" box ticked, version 1.0 published and 1.1 created by
+the manager): the Author's Title & Abstract on "Version of Record 1.1"
+("Author Original 1.1" on OPS) read "Status: Unpublished", no banner,
+Save enabled; the tunnelled `PUT submissions/{id}/publications/{newId}`
+(`X-Http-Method-Override: PUT`) answered 401 Unauthorized,
+`application/json`, body verbatim
+`{"error":"user.authorization.accessibleWorkflowStage","errorMessage":"You don't currently have access to that stage of the workflow."}`
+(OJS; OMP and OPS answered 401 to the same request, twice each, the
+second after a reload); the browser console logged `Failed to load
+resource: the server responded with a status of 401 (Unauthorized)`;
+on screen, about 1.5 s after the press, the notification "An unexpected
+error has occurred. Please reload the page and try again." with a "×"
+close, the form footer empty, no field marked, the title unchanged on
+reload. Controls: the same save answered 200 and persisted after
+"Unpublish" (all three apps) and on the OJS item whose other version was
+only scheduled. Cause: the per-version gate passes (the page offers
+Save, the publication maps `canCurrentUserChangeMetadata: true`), but
+the write is also behind stage access, and a published submission rests
+in the Done stage (*Workflow screen & stage access*); on a fresh install
+no role holds that stage — `Repo::userGroup()->installSettings()` caps
+the registry's stage lists at Production, so the stage-6 grant
+pkp/pkp-lib#13109 adds to `registry/userGroups.xml` lands only through
+its upgrade migration `I13109_PermitPublishedMetadataEdit` (the Roles
+grid's "Done" box unticked for every role on the scratch contexts; the
+Author's "Edit Assignment" window lists no stages, its hidden field
+`stageId=1`). The manager's header for the same submission shows the
+badge "Published"; version 1.1 reads "Status: Unpublished" and 1.0
+"Status: Published" with the editor warning.
+
+<a id="fn-f-a17"></a>
+**f-a17 — A17 evidence.** Live-probed 2026-09-09 (OJS, OMP and OPS, the
+same scratch items as fn-f-a16): the Author's "Contributors" page on the
+new version ("Status: Unpublished") offered "Order", "Preview", "Add
+Contributor" and, on its one row, "Edit" and "Delete"; on the published
+version ("Status: Published", the read-only banner) "Preview" alone. No
+contributor save was attempted. The page belongs to
+*[Contributors & affiliations](U41-contributors-and-affiliations.md)*;
+the lean rests on its saves sharing the publication write gate of fn-b
+(a code reading), not on a drive.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1 — OJS1 evidence.** An OJS submission whose publication is
 published into an unpublished issue carries the SUBMISSION status
@@ -1904,7 +2087,10 @@ attribute. Consistent with the live observation recorded for the Funding
 page (see *Funding*, OPS1). Code-read 2026-08-28. Live-probed
 2026-08-28 (fn-b, fn-j): the preprint author's Title & Abstract saved
 before the post and was locked after it; the journal and press authors
-were read-only from the start.
+were read-only from the start. Live-probed 2026-09-09 (fn-j): the
+preprint author saved by default before the post, was locked on the
+posted version with the "posted" banner, and saved on it again at once
+after the unpost.
 
 <a id="fn-f-ops2"></a>
 **f-ops2 — OPS2 evidence.** `PKPPublicationLicenseForm` sets the
@@ -1946,8 +2132,9 @@ sentence on the preprint page).
 - `lib/pkp/api/v1/submissions/PKPSubmissionController.php` —
   `editPublication()`, `changeLocale()`, `copyMultilingualData()`,
   `getPublication{TitleAbstract,Metadata,DataAvailability,License}Form()`,
-  `getChangeLanguageMetadata()`, `publishPublication()` (author flag
-  reset); OJS/OPS `api/v1/submissions/SubmissionController.php`
+  `getChangeLanguageMetadata()`, `publishPublication()` (its Author
+  flag reset removed by pkp/pkp-lib#13109); OJS/OPS
+  `api/v1/submissions/SubmissionController.php`
   (title/abstract section policy), OMP's (`permissionDisclosure`).
 - `lib/pkp/classes/components/forms/publication/{TitleAbstractForm,PKPMetadataForm,PKPDataAvailabilityForm,PKPPublicationLicenseForm}.php`,
   OMP `classes/components/forms/publication/PublicationLicenseForm.php`,
@@ -1956,7 +2143,9 @@ sentence on the preprint page).
   `publish()`), `lib/pkp/classes/submission/Repository.php`
   (`canEditPublication()`, `resetPermissions()`), each app's
   `classes/submission/Submission.php` (`_getContextLicenseFieldValue()`),
-  `lib/pkp/classes/submission/maps/Schema.php` (`canChangeMetadata()`).
+  `lib/pkp/classes/publication/maps/Schema.php`
+  (`canCurrentUserChangeMetadata`, per publication since
+  pkp/pkp-lib#13109; the submission map's `canChangeMetadata()` is gone).
 - `lib/pkp/schemas/publication.json` + app overlays; `lib/pkp/schemas/context.json`
   (metadata and license settings).
 - `lib/ui-library/src/pages/workflow/composables/useWorkflowPermissions.js`,

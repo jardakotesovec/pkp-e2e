@@ -333,6 +333,14 @@ no cleanup fixture.
   the legacy multilingual box's French twin opens only while the English box
   is focused (the globe icon is decorative).
 
+- **Settings › Users & Roles › Users is a Vue table** (`<user-access-manager>`),
+  not a legacy grid: each row has an ellipsis menu ("Edit", "Email", "Remove
+  User", "Disable User"); "Edit" leaves the modal for
+  `management/settings/user/{id}`, whose role rows carry "Remove Role". A
+  journal manager may not administer `admin`, a user's last role cannot be
+  removed there, and ending your own current role answers 401 until a
+  fresh sign-in (sync rr3, 2026-09-09).
+
 ## Probe kit
 
 `shared/playwright/probe/index.js` is what a live-probe script imports
@@ -398,7 +406,14 @@ text (an input's value) is non-empty and the same across two reads and
 returns it, for a Composer page, a legacy side window loaded by AJAX or a
 Vue side window built from a fetched publication, which fill after
 `idle()` returns; on timeout it returns what is there and adds `{settled:
-false}` to the run record's `warnings`, never a throw. `record(name, data)` writes JSON and
+false}` to the run record's `warnings`, never a throw. The workflow's
+Publication forms (Title & Abstract and its siblings) are such Vue windows:
+the form and its footer's "Save" render after `screen()` and `idle()`
+return, so read them through `settled()` on the form's footer or an editor
+field, never straight after the click; and a preprint server heads these
+pages "Preprint: …" where a journal or press reads "Publication: …", so a
+heading wait keyed on "Publication" burns its timeout on OPS (U40 K1,
+2026-09-09). `record(name, data)` writes JSON and
 `shot(page, name)` a PNG, both as `<name>-<app>` inside `forEachApp`, so a
 script on two apps never overwrites one app's snapshot with the other's;
 `loc(page, description, locator)` a row in

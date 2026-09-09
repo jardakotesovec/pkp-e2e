@@ -5,14 +5,17 @@
  * OJS-local Page Object for the Publish, schedule & versions feature
  * (spec: docs/specs/U49-publish-schedule-and-versions.md). Extends the
  * U40 PublicationScreen (workflow Publication area, "Review Publishing
- * Details" panel, publish/unpublish flows, issue helpers) with the
- * version machinery and status surfaces this feature owns:
+ * Details" panel, publish/unpublish flows, issue helpers, and — since the
+ * U40 revision of 2026-09-09 — the "Status: {state}" readout, the left and
+ * right controls, the version side menu's treeitems and version-scoped
+ * entries) with the surfaces this feature owns:
  *
- * - the "Status: {state}" readout in the workflow's left controls;
- * - the top-right publish/unpublish/unschedule buttons (right controls);
- * - the version side menu (one treeitem per version, entries nested) and
- *   the "Create New Version" dialog;
+ * - the "Create New Version" dialog opened and confirmed as two steps (the
+ *   suite asserts the dialog's own state between them);
+ * - the publish panel on a journal that has issues, bounded by its
+ *   issue-assignment status fetch;
  * - the publish confirmation window (legacy modal) and its refusal form;
+ * - the Unschedule dialog;
  * - the user's Tasks modal (legacy notifications grid).
  *
  * DOM shapes confirmed against the running app while this suite was built
@@ -28,47 +31,6 @@ const {expect} = require('@playwright/test');
 const {PublicationScreen} = require('./PublicationMetadataPages.js');
 
 exports.PublishScreen = class PublishScreen extends PublicationScreen {
-    /** The workflow's left controls (carry the "Status: {state}" readout). */
-    leftControls() {
-        return this.page.locator('[data-cy="workflow-controls-left"]');
-    }
-
-    /** The workflow's top-right controls (publish/unpublish/unschedule). */
-    rightControls() {
-        return this.page.locator('[data-cy="workflow-controls-right"]');
-    }
-
-    /** Assert the shown version's status readout ("Unscheduled", …). */
-    async expectStatus(state) {
-        await expect(this.leftControls()).toContainText(`Status: ${state}`, {
-            timeout: 30_000,
-        });
-    }
-
-    /** A version's side-menu treeitem (accessible name = version name). */
-    versionMenuItem(versionLabel) {
-        return this.page.getByRole('treeitem', {name: versionLabel, exact: true});
-    }
-
-    /**
-     * Open a Publication entry under a specific version's submenu (the
-     * side menu nests each version's entries inside its treeitem; clicking
-     * the version's own link expands the group).
-     */
-    async openVersionEntry(versionLabel, entryName) {
-        const item = this.versionMenuItem(versionLabel);
-        await expect(item).toBeVisible({timeout: 30_000});
-        const entry = item.getByRole('link', {name: entryName, exact: true});
-        if (!(await entry.isVisible())) {
-            await item.getByRole('link', {name: versionLabel, exact: true}).click();
-        }
-        await expect(entry).toBeVisible({timeout: 30_000});
-        await entry.click();
-        await expect(
-            this.page.getByRole('heading', {name: `Publication: ${entryName}`})
-        ).toBeVisible({timeout: 30_000});
-    }
-
     /**
      * Open the "Create New Version" dialog from the side menu and wait for
      * its selects to arrive.

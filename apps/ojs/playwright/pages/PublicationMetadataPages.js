@@ -8,11 +8,14 @@
  * Surfaces:
  * - PublicationScreen — the workflow's Publication area pages ("Title &
  *   Abstract", "Metadata", "Data", "Permissions & Disclosure", "Publication
- *   Settings"): opening an entry, the Vue form's TinyMCE fields, the
- *   bounded Save, the "Current Submission Language" readout with its
- *   "Change" panel, the "Schedule For Publication" panel (Review Publishing
- *   Details), Unpublish, and the participant "Edit Assignment" permission
- *   tick.
+ *   Settings"): opening an entry (under a named version when the item has
+ *   several), the stage screens, the "Status: {state}" readout, the Vue
+ *   form's TinyMCE fields, the bounded Save, the "Current Submission
+ *   Language" readout with its "Change" panel, the "Schedule For
+ *   Publication" panel (Review Publishing Details), Unpublish, "Create New
+ *   Version", and the participant "Edit Assignment" permission (tick, and
+ *   a read of the box that leaves it as it was). The U49 PublishScreen
+ *   extends this class with the publish-flow specifics.
  * - Issue helpers (legacy jQuery grid at /manageIssues) — create a future
  *   issue, publish it without notifying users, and set its published date
  *   through the date-picker calendar (the visible input's altField only
@@ -89,9 +92,110 @@ exports.PublicationScreen = class PublicationScreen {
         ).toBeVisible({timeout: 30_000});
     }
 
+    /**
+     * Open a stage screen ("Submission", "Production", …) from the side
+     * menu and wait for its "Workflow: {name}" heading. A published item's
+     * workflow opens on a Publication page, so the Participants panel needs
+     * this first. The menu's link is the last of that name (the header's
+     * navigation carries the same word).
+     */
+    async openStage(name) {
+        await this.page.getByRole('link', {name, exact: true}).last().click();
+        await expect(
+            this.page.getByRole('heading', {name: `Workflow: ${name}`})
+        ).toBeVisible({timeout: 30_000});
+    }
+
+    /** The workflow's left controls (carry the "Status: {state}" readout). */
+    leftControls() {
+        return this.page.locator('[data-cy="workflow-controls-left"]');
+    }
+
+    /** The workflow's top-right controls (publish/unpublish/unschedule). */
+    rightControls() {
+        return this.page.locator('[data-cy="workflow-controls-right"]');
+    }
+
+    /** Assert the shown version's status readout ("Unscheduled", …). */
+    async expectStatus(state) {
+        await expect(this.leftControls()).toContainText(`Status: ${state}`, {
+            timeout: 30_000,
+        });
+    }
+
     /** The Publication-area menu entry for a page ("Title & Abstract", …). */
     entryLink(name) {
         return this.page.getByRole('link', {name, exact: true});
+    }
+
+    /** A version's side-menu treeitem (accessible name = version name). */
+    versionMenuItem(versionLabel) {
+        return this.page.getByRole('treeitem', {name: versionLabel, exact: true});
+    }
+
+    /**
+     * Open a Publication entry under a specific version's submenu (the
+     * side menu nests each version's entries inside its treeitem; clicking
+     * the version's own link expands the group). With two versions the
+     * plain entryLink is ambiguous, so a two-version item always opens its
+     * pages this way.
+     */
+    async openVersionEntry(versionLabel, entryName) {
+        const item = this.versionMenuItem(versionLabel);
+        await expect(item).toBeVisible({timeout: 30_000});
+        const entry = item.getByRole('link', {name: entryName, exact: true});
+        if (!(await entry.isVisible())) {
+            await item.getByRole('link', {name: versionLabel, exact: true}).click();
+        }
+        await expect(entry).toBeVisible({timeout: 30_000});
+        await entry.click();
+        await expect(
+            this.page.getByRole('heading', {name: `Publication: ${entryName}`})
+        ).toBeVisible({timeout: 30_000});
+    }
+
+    /** The side menu's "Create New Version" link. */
+    createNewVersionLink() {
+        return this.page.getByRole('link', {name: 'Create New Version', exact: true});
+    }
+
+    /**
+     * Press "Create New Version", optionally pick the Publication Stage
+     * and Revision Significance (left untouched, a published Version of
+     * Record 1.0 yields "Version of Record 1.1"), Confirm, and wait for the
+     * version POST, the dialog closing and the new version's treeitem.
+     *
+     * @param {{versionStage?: string, versionIsMinor?: string, expectLabel: string}} options
+     */
+    async createNewVersion({versionStage, versionIsMinor, expectLabel}) {
+        const link = this.createNewVersionLink();
+        if (!(await link.isVisible())) {
+            await this.page.getByRole('link', {name: 'Publication', exact: true}).click();
+        }
+        await link.click();
+        const dialog = this.page
+            .getByRole('dialog')
+            .filter({hasText: 'Which version should metadata be copied from?'});
+        await expect(dialog.locator('select[name="versionStage"]')).toBeVisible({
+            timeout: 30_000,
+        });
+        if (versionStage) {
+            await dialog.locator('select[name="versionStage"]').selectOption(versionStage);
+        }
+        if (versionIsMinor) {
+            await dialog.locator('select[name="versionIsMinor"]').selectOption(versionIsMinor);
+        }
+        const created = this.page.waitForResponse(
+            (r) =>
+                r.url().includes('/version') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
+        await created;
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        await expect(this.versionMenuItem(expectLabel)).toBeVisible({timeout: 30_000});
     }
 
     /**
@@ -429,6 +533,33 @@ exports.PublicationScreen = class PublicationScreen {
         await dialog.getByRole('button', {name: 'OK', exact: true}).click();
         await expect(checkbox).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(this.page);
+    }
+
+    /**
+     * Open a participant's "Edit Assignment" form, read whether "Allow this
+     * person to make changes to the publication…" is ticked, and leave the
+     * form through its Cancel (a link on this legacy form) so nothing is
+     * saved. Returns the box's state.
+     *
+     * @param {string} displayName e.g. 'Ada Author'
+     * @returns {Promise<boolean>}
+     */
+    async participantMetadataEditAllowed(displayName) {
+        await this.page
+            .getByRole('button', {name: `${displayName} More Actions`})
+            .first()
+            .click();
+        await this.page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+        const dialog = this.page
+            .getByRole('dialog')
+            .filter({hasText: 'Edit Assignment'});
+        const checkbox = dialog.locator('input[name="canChangeMetadata"]');
+        await expect(checkbox).toBeVisible({timeout: 30_000});
+        const allowed = await checkbox.isChecked();
+        await dialog.getByRole('link', {name: 'Cancel', exact: true}).click();
+        await expect(checkbox).toHaveCount(0, {timeout: 30_000});
+        await waitForJQueryIdle(this.page);
+        return allowed;
     }
 
     /** Open the workflow's "Activity Log" modal ("Activity Log & Notes"). */

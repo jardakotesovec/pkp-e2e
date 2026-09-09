@@ -20,6 +20,12 @@
  *   (legacy "Post the preprint" modal wrapping the OPS PublishForm) and
  *   "Unpost" (confirm dialog "Are you sure you don't want this to be
  *   posted?").
+ * - openPublicationPage / statusReadout / createNewVersion /
+ *   openEditAssignment — one version's page by address (workflowMenuKey),
+ *   the header's "Status:" readout, the Preprint group's "Create New
+ *   Version" dialog and a participant's "Edit Assignment" window (Rule 2's
+ *   "Allow this person to make changes to the publication…" box); added
+ *   2026-09-09 for scenario 3's new-version and after-unpost legs.
  *
  * Labels are the live locale strings (ops + lib/pkp locale/en/*.po at the
  * pinned commits); DOM shapes from lib/ui-library WorkflowPublicationForm /
@@ -27,6 +33,7 @@
  * OPS fleet while this suite was built (2026-08-28).
  */
 const {expect} = require('@playwright/test');
+const {waitForJQueryIdle} = require('../support/legacy.js');
 
 /**
  * Open a submission's workflow panel straight by URL (editorial or author
@@ -263,7 +270,10 @@ exports.postPreprint = postPreprint;
  * Unpost the open workflow's posted preprint: a posted preprint's workflow
  * opens on its publication screen, whose header carries the "Unpost"
  * control; it opens a confirm dialog ("Are you sure you don't want this to
- * be posted?") whose confirming button also reads "Unpost".
+ * be posted?") whose confirming button also reads "Unpost". Once a second
+ * version exists the workflow opens on the NEWEST version, whose header
+ * offers no "Unpost": open the posted version by address first
+ * (`openPublicationPage`), as U40 S3 does.
  *
  * @param {import('@playwright/test').Page} page
  */
@@ -304,3 +314,101 @@ async function saveSettingsPanel(page, panel) {
 }
 
 exports.saveSettingsPanel = saveSettingsPanel;
+
+/** The workflow header's status readout ("Status: Posted" / "Status:
+ * Unpublished" …); `toContainText` is case-sensitive, so "Posted" never
+ * false-matches "Unposted". */
+function statusReadout(page) {
+    return page.locator('[data-cy="workflow-controls-left"]');
+}
+
+exports.statusReadout = statusReadout;
+
+/**
+ * Open the workflow straight onto ONE version's Publication page: the side
+ * menu mirrors its selection into the `workflowMenuKey` query param
+ * (useWorkflowMenu), so a specific version is reached by address without
+ * walking the nested version tree. Arrival is judged on the page heading.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} contextPath
+ * @param {number} submissionId
+ * @param {number} publicationId the version's publication id
+ * @param {{author?: boolean, entry?: string, heading?: string}} [options]
+ *   `entry` is the menu key suffix (default `titleAbstract`), `heading`
+ *   the page heading it opens on (default "Preprint: Title & Abstract")
+ */
+async function openPublicationPage(
+    page,
+    contextPath,
+    submissionId,
+    publicationId,
+    {author = false, entry = 'titleAbstract', heading = 'Preprint: Title & Abstract'} = {}
+) {
+    const dashboard = author ? 'mySubmissions' : 'editorial';
+    await page.goto(
+        `/index.php/${contextPath}/dashboard/${dashboard}?workflowSubmissionId=${submissionId}&workflowMenuKey=publication_${publicationId}_${entry}`
+    );
+    await expect(page.getByRole('heading', {name: heading})).toBeVisible({
+        timeout: 30_000,
+    });
+}
+
+exports.openPublicationPage = openPublicationPage;
+
+/**
+ * "Create New Version" from the open workflow's Preprint group (the item
+ * sits last in the group, offered to editorial roles only): its dialog is
+ * anchored on its own version-source control and confirmed untouched
+ * (source = the current version, "Minor Revision" — *Publish, schedule &
+ * versions*). Bounded by the version POST answering OK; returns the new
+ * publication JSON (its `id` addresses the new version's pages).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function createNewVersion(page) {
+    await page.getByRole('link', {name: 'Create New Version', exact: true}).click();
+    const dialog = page
+        .getByRole('dialog')
+        .filter({has: page.locator('#version-versionSource-control')});
+    await expect(dialog.locator('#version-versionSource-control')).toBeVisible({
+        timeout: 30_000,
+    });
+    const created = page.waitForResponse(
+        (r) =>
+            /\/publications\/\d+\/version/.test(r.url()) &&
+            r.request().method() === 'POST' &&
+            r.ok(),
+        {timeout: 30_000}
+    );
+    await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
+    const publication = await (await created).json();
+    await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    return publication;
+}
+
+exports.createNewVersion = createNewVersion;
+
+/**
+ * Open a participant's "Edit Assignment" window from the open stage
+ * screen's Participants panel ("{name} More Actions" › Edit). The workflow
+ * panel is itself an active-modal, so the legacy window is scoped by its
+ * own title text. Returns the window; its permission box is
+ * `input[name="canChangeMetadata"]` ("Allow this person to make changes to
+ * the publication…"), its Cancel is a link and its confirm reads "OK".
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} displayName the participant as the panel names them
+ */
+async function openEditAssignment(page, displayName) {
+    await page.getByRole('button', {name: `${displayName} More Actions`}).click();
+    await page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+    const modal = page
+        .locator('[data-cy="active-modal"]')
+        .filter({hasText: 'Edit Assignment'});
+    await expect(modal.getByText('Edit Assignment')).toBeVisible({timeout: 30_000});
+    await waitForJQueryIdle(page);
+    return modal;
+}
+
+exports.openEditAssignment = openEditAssignment;

@@ -19,10 +19,13 @@
  *   reach into unposted/declined submissions): S7 runs the reset on a server
  *   whose only submission is posted and asserts only that item; nothing is
  *   asserted about unposted or declined items.
- * - A4 🐞 (the author's edit permission never returns after an unpost): S3
- *   does not assert the intermediate locked state after the unpost — it goes
- *   straight to the assignment re-tick (Rule 2's contract side) and asserts
- *   that saving works from there.
+ * - A16 🐞 (the permitted Author's Save on a new version of a posted item
+ *   is offered and refused): S3 asserts only the contract side — no banner
+ *   and Save offered on the new version — and never presses that Save
+ *   while the other version is posted; the refusal is asserted neither
+ *   way. The saves S3 drives on both versions come after the unpost.
+ * - A17 ❓ (the Author's Contributors page on a new version of a posted
+ *   item): never opened; nothing about contributor saves is asserted.
  * - A13 🐞 (the reset button stays greyed after Cancel): S7 reloads the
  *   Tools page after the Cancel leg instead of pressing again in place; the
  *   greyed state is not asserted either way.
@@ -69,8 +72,12 @@ const {test, expect} = require('../support/fixtures.js');
 const {
     PublicationScreen,
     openWorkflow,
+    openPublicationPage,
+    statusReadout,
     postPreprint,
     unpostPreprint,
+    createNewVersion,
+    openEditAssignment,
     saveSettingsPanel,
 } = require('../pages/PublicationPages.js');
 const {EditorialDashboardPage} = require('../pages/EditorialDashboardPage.js');
@@ -356,12 +363,13 @@ test.describe('Publication metadata (U40)', () => {
     test('S3: the author before and after posting', async ({asUser, opsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s3', testInfo);
-        const {submissionId} = await opsApi.createSubmission({
+        const {submissionId, publicationId} = await opsApi.createSubmission({
             tag,
             context: PK,
             submitter: 'author.alex',
             title: `Submission ${tag}`,
         });
+        const bannerText = 'This version has been posted and can not be edited.';
 
         // Before posting, the submitting author's own page saves like an
         // editor's (OPS1 ✅ — the preprint-server divergence the spec marks
@@ -378,6 +386,41 @@ test.describe('Publication metadata (U40)', () => {
             `Author abstract ${tag}.`
         );
         await authorScreen.save();
+
+        // Leaving a Publication page with an unsaved edit — by opening
+        // another entry or by another address — prompts nothing, on an
+        // editable page too (Rule 10's last sentence). A dialog listener is
+        // armed before each move so a browser prompt would be recorded
+        // rather than auto-dismissed (patterns.md "Probe kit"); each move
+        // is bounded by the next page's heading, and the only dialog open
+        // after it is the workflow panel itself. Positive control, the same
+        // Prefix read: the typed text is there before the move and the
+        // abstract saved above is still there after, while the unsaved
+        // Prefix is gone.
+        const prefix = authorScreen.input('titleAbstract', 'prefix', 'en');
+        const browserPrompts = [];
+        const onDialog = (dialog) => {
+            browserPrompts.push(`${dialog.type()}: ${dialog.message()}`);
+            dialog.dismiss().catch(() => {});
+        };
+        authorPage.on('dialog', onDialog);
+        await prefix.fill(`Draft ${tag}`);
+        await expect(prefix).toHaveValue(`Draft ${tag}`);
+        await authorScreen.openPage('Metadata');
+        await expect(authorPage.getByRole('dialog')).toHaveCount(1);
+        await authorScreen.openPage('Title & Abstract');
+        await expect(prefix).toHaveValue('', {timeout: 30_000});
+        await expect(
+            authorScreen.richTextBody('titleAbstract', 'abstract', 'en')
+        ).toContainText(`Author abstract ${tag}.`);
+        await prefix.fill(`Draft ${tag}`);
+        await expect(prefix).toHaveValue(`Draft ${tag}`);
+        await openWorkflow(authorPage, PK, submissionId, {author: true});
+        await authorScreen.openPage('Title & Abstract');
+        await expect(authorPage.getByRole('dialog')).toHaveCount(1);
+        await expect(prefix).toHaveValue('', {timeout: 30_000});
+        authorPage.off('dialog', onDialog);
+        expect(browserPrompts).toEqual([]);
 
         // The OPS author view has no stage screen and no language readout
         // anywhere (Rule 1 / Rule 13a, OPS markers) — bounded by the page
@@ -399,55 +442,75 @@ test.describe('Publication metadata (U40)', () => {
         // unavailable (Rule 9, OPS wording).
         await openWorkflow(authorPage, PK, submissionId, {author: true});
         await authorScreen.openPage('Title & Abstract');
-        await expect(
-            authorPage.getByText('This version has been posted and can not be edited.')
-        ).toBeVisible({timeout: 30_000});
+        await expect(authorPage.getByText(bannerText)).toBeVisible({timeout: 30_000});
         await expect(authorScreen.saveButton()).toBeDisabled();
 
-        // Unpost, then re-tick "Allow this person to make changes to the
-        // publication…" on the author's assignment (Rule 2's assignment
-        // leg; that the re-tick is NEEDED after an unpost is A4 🐞 — the
-        // intermediate locked state is deliberately not asserted). A posted
-        // preprint's workflow opens on its publication screen, where the
-        // "Unpost" control lives.
-        await openWorkflow(managerPage, PK, submissionId);
-        await unpostPreprint(managerPage);
-
+        // Posting leaves the Author's assignment permission as it was
+        // (Rule 9; the retired A4): on the Production stage's Participants
+        // panel the Author's "Edit Assignment" box "Allow this person to
+        // make changes to the publication…" still reads ticked — on a
+        // preprint server it is ticked from the start (OPS1), so nothing
+        // is ticked here; Cancel leaves the window.
         await openWorkflow(managerPage, PK, submissionId);
         await managerScreen.openProductionStage();
-        await managerPage
-            .getByRole('button', {name: 'Alex Author More Actions'})
-            .click();
-        await managerPage.getByRole('menuitem', {name: 'Edit', exact: true}).click();
-        // The workflow panel is itself an active-modal — scope the legacy
-        // "Edit Assignment" modal by its own title text.
-        const editModal = managerPage
-            .locator('[data-cy="active-modal"]')
-            .filter({hasText: 'Edit Assignment'});
-        await expect(editModal.getByText('Edit Assignment')).toBeVisible({
-            timeout: 30_000,
-        });
-        await waitForJQueryIdle(managerPage);
-        await editModal.locator('input[name="canChangeMetadata"]').check();
-        await editModal.getByRole('button', {name: 'OK', exact: true}).click();
+        const editModal = await openEditAssignment(managerPage, 'Alex Author');
+        await expect(editModal.locator('input[name="canChangeMetadata"]')).toBeChecked();
+        await editModal.getByRole('link', {name: 'Cancel', exact: true}).click();
         await expect(editModal).toHaveCount(0, {timeout: 30_000});
 
-        // The author's Save works again at once, and the edit persists.
-        await openWorkflow(authorPage, PK, submissionId, {author: true});
-        await authorScreen.openPage('Title & Abstract');
-        await expect(authorScreen.saveButton()).toBeEnabled({timeout: 30_000});
-        await authorScreen.fillRichText(
-            'titleAbstract',
-            'abstract',
-            'en',
-            `Restored abstract ${tag}.`
-        );
-        await authorScreen.save();
-        await openWorkflow(authorPage, PK, submissionId, {author: true});
-        await authorScreen.openPage('Title & Abstract');
+        // The manager creates a new version ("Create New Version", confirm):
+        // the menu gains "Author Original 1.1". On the new version the
+        // Author's Title & Abstract carries no banner and Save is offered
+        // (Rule 9); the posted version, read the same way by address, keeps
+        // its banner and disabled Save — the positive control. Pressing that
+        // offered Save while the other version is posted is A16 🐞 and is
+        // not driven (header).
+        await openWorkflow(managerPage, PK, submissionId);
+        const newPublication = await createNewVersion(managerPage);
         await expect(
-            authorScreen.richTextBody('titleAbstract', 'abstract', 'en')
-        ).toContainText(`Restored abstract ${tag}.`);
+            managerPage.getByRole('link', {name: 'Author Original 1.1', exact: true})
+        ).toBeVisible({timeout: 30_000});
+
+        await openPublicationPage(authorPage, PK, submissionId, publicationId, {author: true});
+        await expect(statusReadout(authorPage)).toContainText('Posted', {timeout: 30_000});
+        await expect(authorPage.getByText(bannerText)).toBeVisible({timeout: 30_000});
+        await expect(authorScreen.saveButton()).toBeDisabled();
+
+        await openPublicationPage(authorPage, PK, submissionId, newPublication.id, {
+            author: true,
+        });
+        await expect(statusReadout(authorPage)).toContainText('Unpublished', {
+            timeout: 30_000,
+        });
+        await expect(authorScreen.saveButton()).toBeEnabled({timeout: 30_000});
+        await expect(authorPage.getByText(bannerText)).toHaveCount(0);
+
+        // The manager unposts. With two versions the workflow opens on the
+        // newest one, so the posted version is opened by address; its
+        // header carries the "Unpost" control.
+        await openPublicationPage(managerPage, PK, submissionId, publicationId);
+        await unpostPreprint(managerPage);
+
+        // The Author saves AT ONCE, with no re-tick of the permission
+        // (Rule 9; A4 retired 2026-09-09): "The" typed as Prefix on either
+        // version is kept after a reload, and neither page carries the
+        // banner any more.
+        for (const versionId of [publicationId, newPublication.id]) {
+            await openPublicationPage(authorPage, PK, submissionId, versionId, {
+                author: true,
+            });
+            await expect(authorScreen.saveButton()).toBeEnabled({timeout: 30_000});
+            await expect(authorPage.getByText(bannerText)).toHaveCount(0);
+            await authorScreen.input('titleAbstract', 'prefix', 'en').fill('The');
+            await authorScreen.save();
+            await openPublicationPage(authorPage, PK, submissionId, versionId, {
+                author: true,
+            });
+            await expect(authorScreen.input('titleAbstract', 'prefix', 'en')).toHaveValue(
+                'The',
+                {timeout: 30_000}
+            );
+        }
     });
 
     test('S4: editing a posted version reaches readers at once', async ({asUser, opsApi, page}, testInfo) => {

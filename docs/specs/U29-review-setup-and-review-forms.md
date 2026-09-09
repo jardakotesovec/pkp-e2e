@@ -755,7 +755,10 @@ app's `SettingsHandler::workflow()`; the "Review" tab is wrapped in
 `{if $hasReviewStage}`, computed by `ManagementHandler::hasReviewStage()`
 from `Application::getApplicationStages()` (OJS: submission, external
 review, editing, production; OMP adds internal review; OPS: production
-only). Side tabs: `reviewSetup` (`PKPReviewSetupForm::FORM_REVIEW_SETUP`),
+only; since pkp/pkp-lib#13109 (ojs `3bfe1f9f68` / omp `5d2b2fea7` / ops
+`16bbd9b90e`, 2026-09-08) each list ends with done,
+`WORKFLOW_STAGE_ID_DONE`, which is no review stage, so the test's outcome
+is unchanged in every app). Side tabs: `reviewSetup` (`PKPReviewSetupForm::FORM_REVIEW_SETUP`),
 `reviewerGuidance` (`PKPReviewGuidanceForm::FORM_REVIEW_GUIDANCE`),
 `reviewForms` (`ReviewFormGridHandler` fetched into
 `reviewFormGridContainer`) and, under `{if $hasCustomizableRecommendation}`,
@@ -781,8 +784,9 @@ typed `#review/reviewSetup` opens "Review" › "Setup" directly. The tabs are
 
 <a id="fn-b"></a>
 **b** — OPS: `ops classes/core/Application.php::getApplicationStages()`
-returns production only, so `$hasReviewStage` is false and the template
-skips the whole tab; `ops pages/management/SettingsHandler.php::workflow()`
+returns production only (production and done since pkp/pkp-lib#13109, ops
+`16bbd9b90e`, 2026-09-08), neither a review stage, so `$hasReviewStage` is
+false and the template skips the whole tab; `ops pages/management/SettingsHandler.php::workflow()`
 adds nothing review-related. OMP: `omp classes/core/Application.php::
 hasCustomizableReviewerRecommendation()` returns false (OJS true, OPS
 false), which hides the recommendations tab; `omp

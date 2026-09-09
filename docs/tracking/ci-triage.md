@@ -29,6 +29,7 @@ the fix lands.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
+| pkp-lib `f4db6d22c4` + ojs `3bfe1f9f68` / omp `5d2b2fea7` / ops `16bbd9b90e` (pkp/pkp-lib#13273, issue #13109) | The "Done" stage now sits in each app's `Application::getApplicationStages()` while its lib/pkp callers assume it absent: Statistics › Editorial Activity shows a permanent "0 Done" row under Active Submissions (the monthly editorial report mail shares the loop); Settings › Users & Roles › Roles gains a "Done" column whose toggle is live on the Journal manager, Reviewer and Reader rows while their other stages are locked, and the role form a "Done" box; every submission's `stages` carries a Done entry and a discussion's "Attach Workflow Files" stage picker lists a disabled "Done" for every submission | OJS OMP OPS (each app's stage list; shared lib/pkp callers; reproduced on OJS) | `checks/sync/pkp-lib-13109/regressions.js` (records `s3-stats-editorial`, `s4-roles-grid`, `s4b-author-role-form`, `s5-stage-options`, `s2-api`); fixed when the stats table has four rows, the Roles grid no "Done" column (or locked like the other stages), the picker and `stages` four stages | 2026-09-08 (thread + DMs to @beaug, @jarda.kotesovec); re-read and re-confirmed from scratch 2026-09-09 (rr3) | Cause: `WorkflowStageDAO::getWorkflowStageTranslationKeys()`, `UserGroupGridCellProvider`, `PKPStatsHandler`, `submission/maps/Schema::getPropertyStages()` and the other `getApplicationStages()` callers were written with Done absent (the Schema's own comment says so); the apps' `getApplicationStages()` gained `WORKFLOW_STAGE_ID_DONE` at the PR. Reported with it, not a regression: on a fresh install no role receives stage 6 (`Repo::userGroup()->installSettings()` caps registry stages at Production), so the grant `registry/userGroups.xml` and the upgrade migration make never lands on a fresh 3.6 install — with the visible consequence U40 K1 drove on all three apps (2026-09-09): the issue's own case, an Author with the permission editing a new version while another is published, still fails, because the published submission rests in Done and the Author's group holds no stage 6, so the screen offers Save and the write answers 401 `user.authorization.accessibleWorkflowStage` (U40 register, the entry folded from K1-1); and `canCurrentUserChangeMetadata` left the submission object (`GET submissions/{id}` omits it, `_submissions` items emit it as `null` because `getSubmissionsListProps()` still names it) and lives on each publication. Delete the row when the upstream fix lands. |
 | pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Delete the row when #13288 lands. |
 
 ## Flake watch — known non-deterministic failure classes
@@ -80,6 +81,30 @@ trips.
   the OJS re-run the same day. **Watch condition**: a second full-suite
   incident; then anchor the hover on the indicator's own accessible name
   and wait for both indicators before hovering.
+- **A wizard Continue press swallowed the instant a step becomes current**
+  (U21 S12, OJS). CI run 34215183797 (2026-09-08, pkp-e2e `main` at
+  `aa12a61`, a docs-only push) red on both attempts: the press issued right
+  after the rail showed "2 Details" fired no save and the rail stayed put
+  for the 30 s wait. The same tree (`9bd62a9`, the revert of 2026-09-09)
+  and the same app tips were green on run 34354844582, on the nightly
+  34183869175 and locally, so the class is timing, not a regression.
+  **Watch condition**: a second red; then `continueTo()` re-presses when
+  the rail has not moved within a few seconds.
+- **Contributor reorder under load** (U41 S2, OPS). After "Order", the
+  "Increase position" press on the second contributor left the list
+  unchanged for the 10 s wait during a local full run at four workers
+  (2026-09-09, sync session, `.reports/sync/final-run-ops.log`, the
+  U41 describe's remaining tests did not run); green alone in 7 s and on
+  CI at the same tips (run 34354844582). **Watch condition**: a second
+  full-run incident; then wait for the order mode's own list re-render
+  before pressing.
+- **Review wizard step not advancing on "Accept" under load** (U28 S10,
+  OJS). The one-click-access leg's accept press left step "2." disabled for
+  its 30 s wait during a local full run at four workers (2026-09-09, sync
+  session, `.reports/sync/final-run-ojs.log`); green in 17 s with the whole
+  U28 suite re-run alone, and on CI at the same tips (run 34354844582).
+  **Watch condition**: a second full-run incident; then read the accept's
+  own response before expecting the step.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

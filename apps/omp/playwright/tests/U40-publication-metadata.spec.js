@@ -18,11 +18,12 @@
  *   save): never asserted, and no test runs with the summary at "Require" —
  *   scratch presses stay at the fresh-context default (off), per the spec's
  *   own scenario seeding notes.
- * - A4 🐞 (the author's edit permission never returns after an unpublish):
- *   S3 follows the spec scenario's route — after the unpublish the manager
- *   re-ticks "Allow this person to make changes to the publication…" and
- *   the author's saving is asserted AFTER the re-tick; the intermediate
- *   still-locked state is not asserted either way.
+ * - A16 🐞 (the permitted Author's Save on a new version of a published
+ *   item is offered and refused): S3 creates the new version and asserts
+ *   the contract on it (no banner, Save offered) but never presses that
+ *   Save while the other version is published; the refusal is not driven.
+ * - A17 ❓ (the Author's Contributors page on that new version): never
+ *   opened.
  * - A13 🐞 (Cancel leaves the reset button greyed): S7's Cancel leg asserts
  *   only that nothing was reset, then reloads the page before pressing
  *   again — the button's (broken) state is never asserted.
@@ -43,15 +44,7 @@
  *   A12 ❓ (empty custom copyright statement — the option is never chosen),
  *   A14 ❓ (journal/preprint-only: a press's language panel has no Abstract
  *   box) are open questions, not coverage gaps.
- * - The two-version control of scenario 6 ("Create New Version" then no
- *   readout): version creation is *Publish, schedule & versions*' surface;
- *   S6 exercises the published-item control, which trips the same guard.
- * - Side-effect silence ("no email or notification is sent"): a
- *   mail-silence claim with no natural in-test positive control; not
- *   asserted (no Mailpit use in this suite).
- * - Keywords/abstract/summary display on the book page belongs to *Catalog
- *   book page*; S4 asserts the edited abstract there only because the
- *   scenario's point is that an editor's save reaches readers at once.
+ * Everything else the spec leaves out is recorded in its Coverage section.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (settings mutations run on scratch presses with throwaway
@@ -92,10 +85,14 @@ async function openWorkflow(page, contextPath, submissionId, {author = false} = 
  * From an open workflow view, open one of the Publication group's pages and
  * wait for its "Publication: {entry}" heading. The group is expanded by
  * default — clicking "Publication" would collapse it, so it is only clicked
- * when the entry is hidden.
+ * when the entry is hidden. With two versions both expanded the entry link
+ * exists once per version: pass the version's label to scope the click.
  */
-async function openPublicationPage(page, entry) {
-    const link = page.getByRole('link', {name: entry, exact: true});
+async function openPublicationPage(page, entry, {version = null} = {}) {
+    const scope = version
+        ? page.getByRole('treeitem', {name: version, exact: true})
+        : page;
+    const link = scope.getByRole('link', {name: entry, exact: true});
     if (!(await link.isVisible())) {
         await page.getByRole('link', {name: 'Publication', exact: true}).click();
     }
@@ -230,6 +227,76 @@ async function unpublishFromWorkflow(page) {
     await expect(
         page.getByRole('button', {name: 'Publish', exact: true})
     ).toBeVisible({timeout: 30_000});
+}
+
+/**
+ * Open one version's Publication page straight by address, through the
+ * app's own workflowMenuKey parameter (`publication_{publicationId}_{page}`),
+ * so a submission with two versions lands on the intended one; resolved on
+ * the page heading AND the form's Save button, which renders after its own
+ * fetch (a Save read straight after the heading is still absent).
+ */
+async function openVersionPage(page, contextPath, submissionId, publicationId, {author = false} = {}) {
+    const dashboard = author ? 'mySubmissions' : 'editorial';
+    await page.goto(
+        `/index.php/${contextPath}/dashboard/${dashboard}?workflowSubmissionId=${submissionId}&workflowMenuKey=publication_${publicationId}_titleAbstract`
+    );
+    await expect(
+        page.getByRole('heading', {name: 'Publication: Title & Abstract'})
+    ).toBeVisible({timeout: 30_000});
+    await expect(saveButton(page)).toBeVisible({timeout: 30_000});
+}
+
+/** The Publication head's status readout ("Status:" + state label). */
+function statusReadout(page) {
+    return page.locator('div:has(> span:text-is("Status:"))');
+}
+
+/**
+ * "Create New Version" from the open workflow's Publication group, confirmed
+ * untouched (Rule 9's editor step; the dialog's answers belong to *Publish,
+ * schedule & versions*). Returns the new publication's id from the app's
+ * own POST …/version response.
+ */
+async function createNewVersionFromWorkflow(page) {
+    const item = page.getByRole('link', {name: 'Create New Version', exact: true});
+    if (!(await item.isVisible())) {
+        await page.getByRole('link', {name: 'Publication', exact: true}).click();
+    }
+    await item.click();
+    const dialog = page.getByRole('dialog', {name: 'Create New Version'});
+    await expect(dialog).toBeVisible({timeout: 30_000});
+    await expect(dialog.getByLabel('Publication Stage')).toBeVisible({timeout: 30_000});
+    const created = page.waitForResponse(
+        (r) =>
+            /\/publications\/\d+\/version/.test(r.url()) &&
+            r.request().method() === 'POST' &&
+            r.ok(),
+        {timeout: 30_000}
+    );
+    await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
+    const body = await (await created).json();
+    await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    return body.id;
+}
+
+/**
+ * From an open workflow view, open the Production stage's Participants
+ * panel and the named participant's "Edit Assignment" window. Returns the
+ * window and its "Allow this person to make changes to the publication…"
+ * box; the caller ticks + OK, or reads + Cancel (a link, pitfall 7).
+ */
+async function openEditAssignment(page, displayName) {
+    await page.getByRole('link', {name: 'Production', exact: true}).click();
+    await page.getByRole('button', {name: new RegExp(`${displayName} More Actions`)}).click();
+    await page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+    const dialog = page.getByRole('dialog', {name: 'Edit Assignment'});
+    await expect(dialog).toBeVisible({timeout: 30_000});
+    const permissionBox = dialog.getByRole('checkbox', {
+        name: /Allow this person to make changes to the publication/,
+    });
+    await expect(permissionBox).toBeVisible({timeout: 30_000});
+    return {dialog, permissionBox};
 }
 
 /** The catalog book page URL (publicknowledge is bilingual → /en prefix). */
@@ -461,7 +528,7 @@ test.describe('Publication metadata (U40)', () => {
     test('S3: the press author before and after publication', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s3', testInfo);
-        const {submissionId} = await ompApi.createSubmission({
+        const {submissionId, publicationId: v1} = await ompApi.createSubmission({
             tag,
             context: PK,
             submitter: 'author.alex',
@@ -478,53 +545,103 @@ test.describe('Publication metadata (U40)', () => {
         await expect(saveButton(authorPage)).toBeDisabled();
 
         // The press manager publishes the monograph (the Publish control
-        // sits on the Publication pages).
+        // sits on the Publication pages); the head reads "Status: Published".
         const managerPage = await (await asUser('manager.maya')).newPage();
         await openWorkflow(managerPage, PK, submissionId);
         await openPublicationPage(managerPage, 'Title & Abstract');
         await publishFromWorkflow(managerPage);
+        await expect(statusReadout(managerPage)).toContainText('Published', {timeout: 30_000});
 
         // The author now sees the published-version banner, Save still
         // unavailable.
+        const banner = 'This version has been published and can not be edited.';
         await openWorkflow(authorPage, PK, submissionId, {author: true});
         await openPublicationPage(authorPage, 'Title & Abstract');
-        await expect(
-            authorPage.getByText('This version has been published and can not be edited.')
-        ).toBeVisible();
+        await expect(authorPage.getByText(banner)).toBeVisible();
         await expect(saveButton(authorPage)).toBeDisabled();
 
-        // The manager unpublishes, then re-ticks "Allow this person to
-        // make changes to the publication…" on the author's assignment
-        // (the spec scenario's route back to an editable page — the
-        // intermediate locked state of A4 is not asserted either way).
-        await unpublishFromWorkflow(managerPage);
-        await managerPage.getByRole('link', {name: 'Production', exact: true}).click();
-        await managerPage
-            .getByRole('button', {name: /Alex Author More Actions/})
-            .click();
-        await managerPage.getByRole('menuitem', {name: 'Edit', exact: true}).click();
-        const editAssignment = managerPage.getByRole('dialog', {name: 'Edit Assignment'});
-        await expect(editAssignment).toBeVisible({timeout: 30_000});
-        const permissionBox = editAssignment.getByRole('checkbox', {
-            name: /Allow this person to make changes to the publication/,
-        });
-        if (!(await permissionBox.isChecked())) {
-            await permissionBox.check();
-        }
-        await editAssignment.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(editAssignment).toHaveCount(0, {timeout: 30_000});
+        // The manager ticks "Allow this person to make changes to the
+        // publication…" on the author's assignment (Rule 2's plain tick;
+        // a press leaves it unticked by default, which the read before the
+        // tick asserts and which is the control for the later "still
+        // ticked" read).
+        let assignment = await openEditAssignment(managerPage, 'Alex Author');
+        await expect(assignment.permissionBox).not.toBeChecked();
+        await assignment.permissionBox.check();
+        await assignment.dialog.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(assignment.dialog).toHaveCount(0, {timeout: 30_000});
 
-        // The author's Save works again and the edit persists.
-        await openWorkflow(authorPage, PK, submissionId, {author: true});
-        await openPublicationPage(authorPage, 'Title & Abstract');
+        // The published version is still read-only for the author, with
+        // its banner.
+        await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
+        await expect(authorPage.getByText(banner)).toBeVisible();
+        await expect(saveButton(authorPage)).toBeDisabled();
+
+        // The manager creates a new version; on it the author finds no
+        // banner and Save offered (Rule 9). That Save is NOT pressed while
+        // the other version is published: its refusal is A16 🐞.
+        await openVersionPage(managerPage, PK, submissionId, v1);
+        const v2 = await createNewVersionFromWorkflow(managerPage);
+        await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
         await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
+        await expect(authorPage.getByText(banner)).toHaveCount(0);
+
+        // The manager unpublishes the published version. Nothing is
+        // re-ticked: the assignment's box is read as still ticked (the
+        // positive control that the permission survived the publish and
+        // the unpublish) and closed with Cancel.
+        await openVersionPage(managerPage, PK, submissionId, v1);
+        await unpublishFromWorkflow(managerPage);
+        assignment = await openEditAssignment(managerPage, 'Alex Author');
+        await expect(assignment.permissionBox).toBeChecked();
+        await assignment.dialog.getByRole('link', {name: 'Cancel', exact: true}).click();
+        await expect(assignment.dialog).toHaveCount(0, {timeout: 30_000});
+
+        // The author saves at once on the formerly published version: no
+        // banner, "The" as Prefix, Saved, and there after a reload.
+        await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
+        await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
+        await expect(authorPage.getByText(banner)).toHaveCount(0);
+        const prefixInput = field(authorPage, /^Prefix/).locator('input').first();
+        await prefixInput.fill('The');
+        await savePublicationForm(authorPage);
+        await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
+        await expect(prefixInput).toHaveValue('The');
+
+        // Rule 10: leaving the page with an unsaved edit prompts nothing
+        // and drops the edit. The typed subtitle is read back from the
+        // editor first (so the drop is of a real edit); the switch to
+        // Metadata is bounded by its heading; no browser dialog and no
+        // in-app dialog other than the workflow window itself appears
+        // (the Unpublish and Create New Version windows above are read
+        // through the same dialog role, the positive control); reopened,
+        // Title & Abstract shows the saved prefix (positive control) and
+        // not the subtitle.
+        const draftSubtitle = `Draft ${tag}`;
         const subtitleBody = richBody(authorPage, /^Subtitle/);
         await subtitleBody.click();
-        await subtitleBody.fill(`AuthorSub ${tag}`);
+        await subtitleBody.fill(draftSubtitle);
+        await expect(subtitleBody).toContainText(draftSubtitle);
+        const nativeDialogs = [];
+        authorPage.on('dialog', (dialog) => {
+            nativeDialogs.push(dialog.type());
+            dialog.accept().catch(() => {});
+        });
+        await openPublicationPage(authorPage, 'Metadata', {version: 'Version of Record 1.0'});
+        await expect(authorPage.getByRole('dialog')).toHaveCount(1);
+        expect(nativeDialogs).toEqual([]);
+        await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
+        await expect(prefixInput).toHaveValue('The');
+        await expect(richBody(authorPage, /^Subtitle/)).not.toContainText(draftSubtitle);
+
+        // The new version saves for the author as well, and keeps it.
+        await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
+        await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
+        const prefixInput2 = field(authorPage, /^Prefix/).locator('input').first();
+        await prefixInput2.fill('The');
         await savePublicationForm(authorPage);
-        await openWorkflow(authorPage, PK, submissionId, {author: true});
-        await openPublicationPage(authorPage, 'Title & Abstract');
-        await expect(richBody(authorPage, /^Subtitle/)).toContainText(`AuthorSub ${tag}`);
+        await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
+        await expect(prefixInput2).toHaveValue('The');
     });
 
     test('S4: editing a published version warns and reaches readers', async ({asUser, ompApi, page}, testInfo) => {

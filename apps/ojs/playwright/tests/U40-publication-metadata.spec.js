@@ -3,27 +3,26 @@
  * @file playwright/tests/U40-publication-metadata.spec.js
  *
  * Publication metadata — OJS suite, one test per canonical COMMON scenario
- * (spec scenarios 1–8) plus the OJS-specific scenario 9. Two scenarios are
- * split: scenario 3's journal-only scheduled leg runs as its own test
- * (S3b), and scenario 6's visibility controls run as S6b.
+ * (spec scenarios 1–8) plus the OJS-specific scenario 9. Scenario 3's
+ * journal-only scheduled leg and scenario 6's visibility controls run as
+ * the tail of S3 and S6 (one test per scenario; the scheduled leg's second
+ * submission is seeded in S3 itself).
  * Spec: docs/specs/U40-publication-metadata.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register):
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a claim parked on an open ❓ is not a coverage gap):
  * - A1 🐞: no test runs with Plain Language Summary at "Require" — in that
  *   state every other Publication save fails, so the suite never enters it,
  *   and the summary field itself is left unexercised.
  * - A2 🐞 / A3 ❓: the reset-permissions test (S7) asserts only the
  *   published item's rewrite; what the tool writes on unpublished and
  *   declined submissions (the 1970 year included) rides those findings.
- * - A4 🐞: S3 re-ticks the Author's assignment permission after the
- *   unpublish without asserting the pre-state (whether the permission
- *   should have returned by itself is A4's question).
  * - A5 ❓: whether a scheduled article can still change language is not
- *   asserted; S3b reaches the scheduled state through the spec's
- *   "Publication Settings first" seeding route and only checks the edit
- *   lock.
+ *   asserted; S3 reaches the scheduled state through the spec's
+ *   "Publication Settings first" seeding route and checks only the edit
+ *   lock and the new version.
  * - A6 ❓: once an item is published or has two versions, only the
- *   "Change" BUTTON's absence is asserted (S6b) — whether the readout
+ *   "Change" BUTTON's absence is asserted (S6) — whether the readout
  *   should also leave the Publication pages is A6's open question.
  * - A8 ❓: read-only pages' fields staying typeable is not asserted; S3
  *   asserts only that nothing typed persists (Rule 10's contract).
@@ -42,6 +41,16 @@
  * - A14 ❓: scenario 6's empty-abstract Confirm refusal is asserted as the
  *   scenario writes it; the field description's "recommended" wording (the
  *   finding itself) is not.
+ * - A15 🐞: S6 gates the language panel on its own loading (the French
+ *   description) before picking a language, so the stale-panel behavior
+ *   is never entered.
+ * - A16 🐞: on the new version of a published item S3 asserts what the
+ *   page offers the permitted Author (no banner, Save enabled — Rule 9's
+ *   contract) and never presses Save there; the refused save is the
+ *   finding. The Author saves on the new version only once the item is
+ *   unpublished, and on the scheduled item (where the save is kept).
+ * - A17 ❓: the Author's Contributors page on the new version is not
+ *   opened.
  * - OJS1 🐞: scenario 6's leg on an article published into a not-yet-
  *   published issue (button offered, change always refused) is skipped.
  * - Rule 13's Author-stage-screen readout is asserted only on OJS's own
@@ -53,8 +62,10 @@
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only for settings (S1/S3/S4 touch only their own seeded
- * submissions there; every settings mutation runs on a scratch journal
- * with throwaway users). Waits are event-based (API responses, web-first
+ * submissions there — S3's scheduled leg schedules its own submission
+ * into the seeded, never-published future issue Vol. 2 No. 1 (2015), as
+ * U49 S9 does; every settings mutation runs on a scratch journal with
+ * throwaway users). Waits are event-based (API responses, web-first
  * assertions, jQuery idle for legacy grids) — no hard sleeps. Everything
  * runs in the parallel `ojs` project.
  */
@@ -379,116 +390,197 @@ test.describe('publication metadata', () => {
 
     test('S3: the Author before and after publication', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
-        test.setTimeout(240_000);
+        test.setTimeout(420_000);
         const tag = makeTag('s3', testInfo);
-        const {submissionId} = await ojsApi.createSubmission({
-            tag,
-            context: JOURNAL,
-            submitter: 'author.alex',
-            title: `Submission ${tag}`,
-        });
+        const [{submissionId}, scheduledSeed] = await Promise.all([
+            ojsApi.createSubmission({
+                tag,
+                context: JOURNAL,
+                submitter: 'author.alex',
+                title: `Submission ${tag}`,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}q`,
+                context: JOURNAL,
+                submitter: 'author.alex',
+                title: `Submission ${tag}q`,
+            }),
+        ]);
+        const scheduledId = scheduledSeed.submissionId;
 
         const authorPage = await (await asUser('author.alex')).newPage();
         const authorPub = new PublicationScreen(authorPage, JOURNAL);
         const managerPage = await (await asUser('manager.maya')).newPage();
         const managerPub = new PublicationScreen(managerPage, JOURNAL);
+        const prefix = authorPage.locator('input[name="prefix-en"]');
+        const publishedBanner = authorPage.getByText(
+            'This version has been published and can not be edited.'
+        );
+        const editorWarning = authorPage.getByText('Warning: This version has been published');
+        const V1 = 'Version of Record 1.0';
+        const V2 = 'Version of Record 1.1';
 
         // On a journal the submitting Author's Title & Abstract shows the
         // fields with Save unavailable, and nothing typed persists.
         await authorPub.gotoWorkflow(submissionId, {author: true});
         await authorPub.openEntry('Title & Abstract');
-        await expect(authorPage.locator('input[name="prefix-en"]')).toBeVisible();
+        await expect(prefix).toBeVisible();
         await expect(authorPub.saveButton()).toBeDisabled();
-        await authorPage.locator('input[name="prefix-en"]').fill('Zzz');
+        await prefix.fill('Zzz');
         await authorPub.gotoWorkflow(submissionId, {author: true});
         await authorPub.openEntry('Title & Abstract');
-        await expect(authorPage.locator('input[name="prefix-en"]')).toHaveValue('');
+        await expect(prefix).toHaveValue('');
 
         // The author view has no Permissions & Disclosure entry (positive
         // control: the sibling Metadata entry is offered).
         await expect(authorPub.entryLink('Metadata')).toBeVisible();
         await expect(authorPub.entryLink('Permissions & Disclosure')).toHaveCount(0);
 
-        // The Journal Manager publishes (no issue: continuous publication).
+        // The Journal Manager publishes (no issue: continuous publication);
+        // the header reads "Status: Published".
         await managerPub.gotoWorkflow(submissionId);
         await managerPub.openEntry('Title & Abstract');
         await managerPub.publish();
+        await managerPub.expectStatus('Published');
 
         // The published version tells the Author it cannot be edited.
         await authorPub.gotoWorkflow(submissionId, {author: true});
         await authorPub.openEntry('Title & Abstract');
-        await expect(
-            authorPage.getByText('This version has been published and can not be edited.')
-        ).toBeVisible({timeout: 30_000});
+        await expect(publishedBanner).toBeVisible({timeout: 30_000});
         await expect(authorPub.saveButton()).toBeDisabled();
 
-        // Unpublish, then restore the Author's editing through the
-        // assignment's permission checkbox (Rule 2; the not-restored
-        // pre-state is A4's, not asserted).
-        await managerPub.unpublish();
-        await managerPub.gotoWorkflow(submissionId);
+        // The Journal Manager ticks "Allow this person to make changes to
+        // the publication…" on the Author's assignment (a published item's
+        // workflow opens on a Publication page, so the stage screen first).
+        await managerPub.openStage('Submission');
         await managerPub.allowParticipantMetadataEdit('Alex Author');
 
-        // The Author saves again at once.
+        // The published version is still read-only for the Author, with
+        // its banner.
         await authorPub.gotoWorkflow(submissionId, {author: true});
         await authorPub.openEntry('Title & Abstract');
+        await expect(publishedBanner).toBeVisible({timeout: 30_000});
+        await expect(authorPub.saveButton()).toBeDisabled();
+
+        // "Create New Version", confirmed as offered: a published Version
+        // of Record 1.0 yields "Version of Record 1.1".
+        await managerPub.gotoWorkflow(submissionId);
+        await managerPub.createNewVersion({expectLabel: V2});
+
+        // The new version's Title & Abstract shows the Author no banner and
+        // offers Save (Rule 9). Save is NOT pressed here: the refusal that
+        // follows while the other version is published is A16 (header).
+        await authorPub.gotoWorkflow(submissionId, {author: true});
+        await authorPub.openVersionEntry(V2, 'Title & Abstract');
         await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
-        await authorPage.locator('input[name="prefix-en"]').fill('The');
+        await expect(publishedBanner).toHaveCount(0);
+        await expect(editorWarning).toHaveCount(0);
+        // Positive control for the absent banner: the published version's
+        // page still carries it.
+        await authorPub.openVersionEntry(V1, 'Title & Abstract');
+        await expect(publishedBanner).toBeVisible({timeout: 30_000});
+        await expect(authorPub.saveButton()).toBeDisabled();
+
+        // The Journal Manager unpublishes (from the published version's
+        // page). The Author's assignment permission is left as it was: the
+        // "Edit Assignment" box reads still ticked, and nothing is re-ticked.
+        await managerPub.gotoWorkflow(submissionId);
+        await managerPub.openVersionEntry(V1, 'Title & Abstract');
+        await managerPub.unpublish();
+        await managerPub.openStage('Submission');
+        expect(await managerPub.participantMetadataEditAllowed('Alex Author')).toBe(true);
+
+        // Rule 10: opening another Publication page drops an unsaved edit
+        // without any prompt, on the now editable page too. The typed value
+        // is read back before leaving (the control that the edit was there),
+        // the Metadata page's heading bounds the navigation, no browser
+        // dialog and no in-app prompt appear, and the value is gone on
+        // return.
+        await authorPub.gotoWorkflow(submissionId, {author: true});
+        await authorPub.openVersionEntry(V1, 'Title & Abstract');
+        await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
+        await expect(publishedBanner).toHaveCount(0);
+        const browserDialogs = [];
+        const onDialog = (dialog) => {
+            browserDialogs.push(dialog.type());
+            dialog.dismiss().catch(() => {});
+        };
+        authorPage.on('dialog', onDialog);
+        await prefix.fill('Zzz');
+        await expect(prefix).toHaveValue('Zzz');
+        await authorPub.openVersionEntry(V1, 'Metadata');
+        await expect(
+            authorPage.getByRole('dialog').filter({hasText: /unsaved|discard|leave this page/i})
+        ).toHaveCount(0);
+        expect(browserDialogs).toEqual([]);
+        authorPage.off('dialog', onDialog);
+        await authorPub.openVersionEntry(V1, 'Title & Abstract');
+        await expect(prefix).toHaveValue('');
+
+        // The Author saves at once, with no re-tick: "The" as Prefix on
+        // either version is there after a reload.
+        await prefix.fill('The');
+        await authorPub.save();
+        await authorPub.openVersionEntry(V2, 'Title & Abstract');
+        await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
+        await expect(prefix).toHaveValue('');
+        await prefix.fill('The');
         await authorPub.save();
         await authorPub.gotoWorkflow(submissionId, {author: true});
-        await authorPub.openEntry('Title & Abstract');
-        await expect(authorPage.locator('input[name="prefix-en"]')).toHaveValue('The');
-    });
+        await authorPub.openVersionEntry(V1, 'Title & Abstract');
+        await expect(prefix).toHaveValue('The');
+        await authorPub.openVersionEntry(V2, 'Title & Abstract');
+        await expect(prefix).toHaveValue('The');
 
-    test('S3b: a scheduled article locks the permitted Author out, with no banner', async ({asUser, ojsApi}, testInfo) => {
-        test.slow();
-        test.setTimeout(240_000);
-        const tag = makeTag('s3b', testInfo);
-        const {manager, author} = await seedJournal(ojsApi, tag);
-        const {submissionId} = await ojsApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: author,
-            title: `Submission ${tag}s`,
-        });
-
-        const managerPage = await (await asUser(manager)).newPage();
-        const managerPub = new PublicationScreen(managerPage, tag);
-        const authorPage = await (await asUser(author)).newPage();
-        const authorPub = new PublicationScreen(authorPage, tag);
-
-        // Give the Author's assignment the metadata-edit permission — the
-        // positive control: they can save while nothing is scheduled.
-        await managerPub.gotoWorkflow(submissionId);
-        await managerPub.allowParticipantMetadataEdit('Ada Author');
-        await authorPub.gotoWorkflow(submissionId, {author: true});
+        // Journal only: a different submission of the same Author, the
+        // permission ticked the same way — the positive control: the Author
+        // saves while nothing is scheduled.
+        await managerPub.gotoWorkflow(scheduledId);
+        await managerPub.allowParticipantMetadataEdit('Alex Author');
+        await authorPub.gotoWorkflow(scheduledId, {author: true});
         await authorPub.openEntry('Title & Abstract');
         await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
-        await authorPage.locator('input[name="prefix-en"]').fill('A');
+        await prefix.fill('A');
         await authorPub.save();
 
-        // Schedule to a future issue through the dependable route (spec
-        // seeding note: Publication Settings first, then the panel).
-        await createIssue(managerPage, tag, {
-            volume: '9',
-            number: '9',
-            year: '2099',
-            title: 'Future issue 2099',
-        });
-        await managerPub.gotoWorkflow(submissionId);
-        await managerPub.scheduleToFutureIssue(/Vol\. 9 No\. 9 \(2099\)/);
+        // Schedule it to the seeded future issue through the dependable
+        // route (spec seeding note: Publication Settings first, then the
+        // panel); the header reads "Status: Scheduled".
+        await managerPub.gotoWorkflow(scheduledId);
+        await managerPub.scheduleToFutureIssue(/Vol\. 2 No\. 1 \(2015\)/);
+        await managerPub.expectStatus('Scheduled');
 
-        // The Author's page is read-only with no banner at all (Rule 9).
-        await authorPub.gotoWorkflow(submissionId, {author: true});
+        // The Author's page is read-only with no banner at all (Rule 9);
+        // the fields are shown (control for the absent banner text).
+        await authorPub.gotoWorkflow(scheduledId, {author: true});
         await authorPub.openEntry('Title & Abstract');
-        await expect(authorPage.locator('input[name="prefix-en"]')).toBeVisible({
-            timeout: 30_000,
-        });
+        await expect(prefix).toBeVisible({timeout: 30_000});
+        await expect(prefix).toHaveValue('A');
         await expect(authorPub.saveButton()).toBeDisabled();
         await expect(authorPage.getByText('can not be edited')).toHaveCount(0);
-        await expect(
-            authorPage.getByText('Warning: This version has been published')
-        ).toHaveCount(0);
+        await expect(editorWarning).toHaveCount(0);
+
+        // "Create New Version" is offered on the scheduled item.
+        await managerPub.gotoWorkflow(scheduledId);
+        await expect(managerPub.createNewVersionLink()).toBeVisible({timeout: 30_000});
+        await managerPub.createNewVersion({expectLabel: V2});
+
+        // The permitted Author saves on the new version, while the
+        // scheduled one stays read-only with no banner.
+        await authorPub.gotoWorkflow(scheduledId, {author: true});
+        await authorPub.openVersionEntry(V2, 'Title & Abstract');
+        await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
+        await expect(authorPage.getByText('can not be edited')).toHaveCount(0);
+        await prefix.fill('B');
+        await authorPub.save();
+        await authorPub.gotoWorkflow(scheduledId, {author: true});
+        await authorPub.openVersionEntry(V2, 'Title & Abstract');
+        await expect(prefix).toHaveValue('B');
+        await authorPub.openVersionEntry(V1, 'Title & Abstract');
+        await expect(prefix).toHaveValue('A');
+        await expect(authorPub.saveButton()).toBeDisabled();
+        await expect(authorPage.getByText('can not be edited')).toHaveCount(0);
+        await expect(editorWarning).toHaveCount(0);
     });
 
     test('S4: a published version warns the editor and stays editable', async ({asUser, ojsApi, page}, testInfo) => {
@@ -654,18 +746,79 @@ test.describe('publication metadata', () => {
 
     test('S6: change the submission language', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
-        test.setTimeout(240_000);
+        test.setTimeout(360_000);
         const tag = makeTag('s6', testInfo);
         const {manager, author} = await seedJournal(ojsApi, tag, {bilingual: true});
-        const {submissionId} = await ojsApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: author,
-            title: `Submission ${tag}s`,
-        });
+        const [{submissionId}, published, versioned] = await Promise.all([
+            ojsApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}s`,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}p`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}p`,
+                published: true,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}v`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}v`,
+            }),
+        ]);
 
         const page = await (await asUser(manager)).newPage();
         const pub = new PublicationScreen(page, tag);
+
+        // Controls first, on the items that never change language. A
+        // published item: the stage screens keep the readout without the
+        // button, and no Publication page offers "Change" (the readout's
+        // own absence there is A6's question — not asserted). A published
+        // item's workflow opens on a Publication page, so the stage check
+        // navigates to the Submission stage screen first.
+        await pub.gotoWorkflow(published.submissionId);
+        await pub.openStage('Submission');
+        await expect(page.getByText('Current Submission Language:')).toBeVisible({
+            timeout: 30_000,
+        });
+        await expect(pub.changeLanguageButton()).toHaveCount(0);
+        await pub.openEntry('Title & Abstract');
+        await expect(pub.saveButton()).toBeVisible({timeout: 30_000});
+        await expect(pub.changeLanguageButton()).toHaveCount(0);
+
+        // A second version removes "Change" too (positive control: the
+        // single-version item offers it before the version is created).
+        await pub.gotoWorkflow(versioned.submissionId);
+        await pub.openEntry('Title & Abstract');
+        await expect(pub.changeLanguageButton()).toBeVisible({timeout: 30_000});
+        await pub.createNewVersion({
+            versionStage: 'VoR',
+            versionIsMinor: 'false',
+            expectLabel: 'Version of Record 1.0',
+        });
+        await pub.gotoWorkflow(versioned.submissionId);
+        await pub.openVersionEntry('Version of Record 1.0', 'Title & Abstract');
+        await expect(pub.saveButton()).toBeVisible({timeout: 30_000});
+        await expect(pub.changeLanguageButton()).toHaveCount(0);
+
+        // The Author never gets the button: their stage screen shows the
+        // readout, their Publication pages neither readout nor button.
+        const authorPage = await (await asUser(author)).newPage();
+        const authorPub = new PublicationScreen(authorPage, tag);
+        await authorPub.gotoWorkflow(submissionId, {author: true});
+        await expect(authorPage.getByText('Current Submission Language:')).toBeVisible({
+            timeout: 30_000,
+        });
+        await authorPub.openEntry('Title & Abstract');
+        await expect(authorPage.locator('input[name="prefix-en"]')).toBeVisible({
+            timeout: 30_000,
+        });
+        await expect(authorPage.getByText('Current Submission Language:')).toHaveCount(0);
+        await expect(authorPub.changeLanguageButton()).toHaveCount(0);
 
         // Stage screens show the readout without the button; Publication
         // pages add "Change".
@@ -749,96 +902,6 @@ test.describe('publication metadata', () => {
         await expect(
             contributorPanel.locator('input[name="givenName-fr_CA"]')
         ).toHaveValue('Ada', {timeout: 30_000});
-    });
-
-    test('S6b: where the language readout and Change are offered', async ({asUser, ojsApi}, testInfo) => {
-        test.slow();
-        test.setTimeout(240_000);
-        const tag = makeTag('s6b', testInfo);
-        const {manager, author} = await seedJournal(ojsApi, tag, {bilingual: true});
-        const [plain, published, versioned] = await Promise.all([
-            ojsApi.createSubmission({
-                tag: `${tag}a`,
-                context: tag,
-                submitter: author,
-                title: `Submission ${tag}a`,
-            }),
-            ojsApi.createSubmission({
-                tag: `${tag}p`,
-                context: tag,
-                submitter: author,
-                title: `Submission ${tag}p`,
-                published: true,
-            }),
-            ojsApi.createSubmission({
-                tag: `${tag}v`,
-                context: tag,
-                submitter: author,
-                title: `Submission ${tag}v`,
-            }),
-        ]);
-
-        const page = await (await asUser(manager)).newPage();
-        const pub = new PublicationScreen(page, tag);
-
-        // Positive control: the unpublished single-version submission
-        // offers "Change" on a Publication page.
-        await pub.gotoWorkflow(plain.submissionId);
-        await pub.openEntry('Title & Abstract');
-        await expect(pub.changeLanguageButton()).toBeVisible({timeout: 30_000});
-
-        // A published item: the stage screens keep the readout without the
-        // button, and no Publication page offers "Change" (the readout's
-        // own absence there is A6's question — not asserted). A published
-        // item's workflow opens on a Publication page, so the stage check
-        // navigates to the Submission stage screen first.
-        await pub.gotoWorkflow(published.submissionId);
-        await page.getByRole('link', {name: 'Submission', exact: true}).last().click();
-        await expect(
-            page.getByRole('heading', {name: 'Workflow: Submission'})
-        ).toBeVisible({timeout: 30_000});
-        await expect(page.getByText('Current Submission Language:')).toBeVisible({
-            timeout: 30_000,
-        });
-        await expect(pub.changeLanguageButton()).toHaveCount(0);
-        await pub.openEntry('Title & Abstract');
-        await expect(pub.saveButton()).toBeVisible({timeout: 30_000});
-        await expect(pub.changeLanguageButton()).toHaveCount(0);
-
-        // A second version removes "Change" too.
-        await pub.gotoWorkflow(versioned.submissionId);
-        await pub.openEntry('Title & Abstract');
-        await expect(pub.changeLanguageButton()).toBeVisible({timeout: 30_000});
-        await page.getByRole('link', {name: 'Create New Version', exact: true}).click();
-        const versionDialog = page
-            .getByRole('dialog')
-            .filter({hasText: 'Which version should metadata be copied from?'});
-        await expect(
-            versionDialog.getByRole('button', {name: 'Confirm', exact: true})
-        ).toBeVisible({timeout: 30_000});
-        await versionDialog.locator('select[name="versionStage"]').selectOption('VoR');
-        await versionDialog.locator('select[name="versionIsMinor"]').selectOption('false');
-        await versionDialog.getByRole('button', {name: 'Confirm', exact: true}).click();
-        await expect(versionDialog).toHaveCount(0, {timeout: 30_000});
-        await pub.gotoWorkflow(versioned.submissionId);
-        await pub.openEntry('Title & Abstract');
-        await expect(pub.saveButton()).toBeVisible({timeout: 30_000});
-        await expect(pub.changeLanguageButton()).toHaveCount(0);
-
-        // The Author never gets the button: their stage screen shows the
-        // readout, their Publication pages neither readout nor button.
-        const authorPage = await (await asUser(author)).newPage();
-        const authorPub = new PublicationScreen(authorPage, tag);
-        await authorPub.gotoWorkflow(plain.submissionId, {author: true});
-        await expect(authorPage.getByText('Current Submission Language:')).toBeVisible({
-            timeout: 30_000,
-        });
-        await authorPub.openEntry('Title & Abstract');
-        await expect(authorPage.locator('input[name="prefix-en"]')).toBeVisible({
-            timeout: 30_000,
-        });
-        await expect(authorPage.getByText('Current Submission Language:')).toHaveCount(0);
-        await expect(authorPub.changeLanguageButton()).toHaveCount(0);
     });
 
     test('S7: reset every article\'s permissions', async ({asUser, ojsApi, page}, testInfo) => {

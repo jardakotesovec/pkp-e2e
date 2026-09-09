@@ -336,6 +336,11 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
   `name?`, `genre?`, `group?`).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
+- Context: an option to skip `admin`'s manager enrolment in the new context
+  (every `createContext` enrols the site administrator as a manager; the
+  "site admin with no manager role" state, sync rr3 2026-09-09, is
+  reachable only through the screens and only for a user who is not the
+  one signed in).
 - Context passthroughs: `notifyAllAuthors` (Settings › Workflow › Emails
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining

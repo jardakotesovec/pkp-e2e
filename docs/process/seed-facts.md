@@ -416,6 +416,17 @@ behind a line; that scratch is deleted after review.
   field and a references box on OJS, OMP and OPS; a scratch context seeded
   `metadata: {keywords: 'off'}` shows no "Keywords" field (U21 runs,
   2026-09-07).
+- A fresh scratch journal has no issues; "Schedule For Publication" › Review
+  Publishing Details then carries no "Issue Assignment" group and the confirm
+  window reads "…This will be published immediately without any issue
+  association…", so a publish-now leg needs no scratch issue, only a
+  scheduled leg does. OJS scratch journal, 2026-09-09 (U40 K1,
+  `.reports/U40/ccK1/mgr-publish-ojs.json`).
+- The Author role's "Permit submission metadata edit." is unticked on a fresh
+  journal and press and ticked on a fresh preprint server; the Participants
+  panel's "Edit Assignment" box for the submitter starts from it. Settings ›
+  Users & Roles › Roles › Author › Edit, all three apps, 2026-09-09 (U40 K1,
+  `.reports/U40/ccK1/roles-permit-metadata-edit-*.json`).
 
 A scratch context at the other end of a setting is seeded through the
 scenario API's passthrough keys (scenarios.md "Configuring a scratch

@@ -998,9 +998,12 @@ HTTP 404 both with and without a submission id — an error, not a screen; the
 waivers stand).
 
 <a id="fn-p"></a>
-**p** — OPS absence, install facts: the preprint server's stage roster is
-Production only (`APP\core\Application::getApplicationStages()` in ops-main —
-"Only one stage in OPS"), it inherits an empty review-stage list, registers
+**p** — OPS absence, install facts: the preprint server's stage roster holds
+no review stage (`APP\core\Application::getApplicationStages()` in ops-main,
+commented "Only one stage in OPS": Production alone until 2026-09-08, and
+Production plus `WORKFLOW_STAGE_ID_DONE` since pkp/pkp-lib#13109, ops
+`16bbd9b90e`; every app's list gained Done that day, OJS `3bfe1f9f68`, OMP
+`5d2b2fea7`), it inherits an empty review-stage list, registers
 no review-stage decision types (`APP\decision\Repository::getDecisionTypes()`:
 decline/revert/post cluster only), and serializes no review stage or
 decisions (`APP\submission\maps\Schema` short-circuits to production/done).

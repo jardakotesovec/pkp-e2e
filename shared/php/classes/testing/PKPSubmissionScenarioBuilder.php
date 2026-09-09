@@ -85,7 +85,6 @@ use PKP\core\Registry;
 use PKP\db\DAORegistry;
 use PKP\notification\Notification;
 use PKP\security\Role;
-use PKP\stageAssignment\StageAssignment;
 use PKP\submission\action\EditorAction;
 use PKP\submission\reviewAssignment\ReviewAssignment;
 use PKP\submission\reviewer\ReviewerAction;
@@ -558,23 +557,16 @@ abstract class PKPSubmissionScenarioBuilder
                     throw new SpecException('published', 'The publish endpoint would refuse this publication: ' . json_encode($errors));
                 }
 
-                // Mirrored from PKPSubmissionController::publishPublication
-                // (~1426-1445): publish without status stamping, sweep the
-                // author stage assignments to canChangeMetadata = 0
-                // (controller-only code — exists nowhere else), then
-                // re-derive submission status/current publication off a
-                // fresh fetch.
+                // Mirrored from PKPSubmissionController::publishPublication:
+                // publish without status stamping, then re-derive submission
+                // status/current publication off a fresh fetch. The
+                // controller's sweep of author stage assignments to
+                // canChangeMetadata = 0 was removed upstream by
+                // pkp/pkp-lib#13109 (lib/pkp 18f402e585, in every app since
+                // 2026-09-08), so the seed no longer mirrors it: an Author's
+                // permission survives a seeded publish exactly as it survives
+                // a screen publish.
                 Repo::publication()->publish($publication, false);
-
-                $stageAssignments = StageAssignment::withSubmissionIds([$submission->getId()])
-                    ->get();
-                foreach ($stageAssignments as $stageAssignment) {
-                    $userGroup = $stageAssignment->userGroup;
-                    if ($userGroup && $userGroup->roleId === Role::ROLE_ID_AUTHOR) {
-                        $stageAssignment->canChangeMetadata = 0;
-                        $stageAssignment->save();
-                    }
-                }
 
                 $submission = Repo::submission()->get($submission->getId());
                 Repo::submission()->updateStatus($submission);
