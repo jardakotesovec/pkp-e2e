@@ -354,6 +354,7 @@ Scripts run through `bin/probe.js`:
 
 ```bash
 npm run probe-servers -- --start                    # once per session: php -S per app at base+50, and +90
+npm run fleet-prep -- --feature sync --apps ojs [--reset]   # instead, on a cold (just reset) database: the probe server answers 500 to `bootstrapProbe()` until the runner's setup project has installed it (sync 2026-09-10)
 PROBE_FEATURE=U03 PROBE_AGENT=g1 node bin/probe.js all my-probe.js   # or ojs|omp|ops; ONLY=ojs,omp narrows
 ```
 

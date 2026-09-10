@@ -3,7 +3,7 @@
 Temporary report (RUNBOOK "What goes where"): delete once the fix ships.
 Ledger row: `docs/tracking/app-changes.md` row 12. Found 2026-09-04 by the
 U05 probes on the 2026-09-02 pkp tips; still present on pkp `main` for
-omp, ops and pkp-lib as of 2026-09-04 (fetched and checked).
+omp, ops and pkp-lib as of 2026-09-10 (fetched and checked; omp `14be789b5`, ops `9db7bd3d7e` still ship no `classes/notification/Notification.php`).
 
 ## What a user sees
 

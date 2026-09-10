@@ -7,7 +7,7 @@
 {{spec_path}}          docs/specs/U<nn>-<feature>.md (claim-checked)
 {{scenarios}}          the canonical scenario numbers this app runs, common plus app-specific
 {{suite_path}}         apps/{{app}}/playwright/tests/U<nn>-<feature>.spec.js
-{{page_objects}}       page object(s) to create or extend, with the path, and who else will reuse them
+{{page_objects}}       page object(s) to create or extend, with the path, and who else will reuse them; when two authors of one session extend the same shared page object, name one of them its owner here and tell the other to return its locator needs as proposed method names (U23 revision, 2026-09-08: parallel edits of `EditorialDashboardPage.js` overrode and once corrupted each other)
 {{example_suites}}     one or two shipped suites in apps/{{app}}/playwright/tests/ to copy the shape from
 {{feature_facts}}      feature-specific facts step 8 needs that are not screen facts (a scenario that ends the session, a browser dialog a step raises), or "none"
 {{situation}}          fresh: a new suite (RUNBOOK step 8); or revision: the suite exists (RUNBOOK "Revising a shipped feature"), naming the scenario numbers added and the scenarios whose bullets grew

@@ -1,7 +1,7 @@
 <!--
 {{repo_root}}     absolute path of the pkp-e2e checkout
 {{app}}           the app whose checkout holds the change: ojs, omp or ops (a pkp-lib PR is read inside that app's `lib/pkp`)
-{{pr}}            the PR as "pkp/<repo>#<n>" plus its merge commit or commit range in the checkout, e.g. "pkp/pkp-lib#13191, `44ef66eb90`"
+{{pr}}            the PR as "pkp/<repo>#<n>" plus its merge commit or commit range in the checkout, e.g. "pkp/pkp-lib#13191, `44ef66eb90`"; a range is the merge's own parents (`<merge>^1..<merge>^2`, and a diff extracted as `git diff <merge>^1...<merge>^2`), never a plain baseline range, which carries the other PRs merged in between (sync 2026-09-10)
 {{other_apps}}    where the same change stands in the other apps: "omp and ops carry it too" or "omp and ops not yet (their lib/pkp pointer is at `7ab247a737`)" or "app-only change"
 {{fleet_json}}    .reports/sync/fleet.json, or "no fleet: read only, return the written suspicions for the session to reproduce"
 {{agent}}         PROBE_AGENT, e.g. rr1 (scripts and outputs under .reports/sync/{{agent}}/)
