@@ -6,6 +6,32 @@ feature"; its classed table is `coverage-revision/U<nn>.md`. A row and its
 file are deleted when the feature's session commits; the file goes with
 the last row.
 
+## Trial: no tier on the next revision session (agreed 2026-09-12)
+
+The next revision session (the queue's next H spec, U28) runs its scenario
+writer without the tier's count, to test whether the tier adds anything
+the writer's own judgment does not. Nothing else in the loop changes, and
+no process doc changes until the result is in.
+
+- **Render the scenario-writer brief with this in place of step 1's
+  "the extra sized by RUNBOOK 'Budget'":** a state nothing passes
+  through gets a scenario of its own when an editor, author or reviewer
+  would meet it in an ordinary week of running the journal, and goes
+  under "Left out — Budget" with that reason otherwise. Cover in the
+  cheapest form available, in this order: a bullet in a scenario already
+  passing by, a second seeded object inside an existing test, a scenario
+  of its own. No count, no tier.
+- **The report (step 5) adds one block:** the states the writer left
+  under Budget against the states the classed table marks as over the
+  extra (this file's row and `coverage-revision/U28.md`), as three
+  counts and the row texts: left out by both, covered by the writer but
+  cut by the tier, cut by the writer but bought by the tier; plus the
+  suite's test count before and after.
+- **Then stop.** The maintainer reads the comparison and decides whether
+  the tier goes (RUNBOOK "Budget", TEMPLATE "Spending the tier", the
+  FEATURE-MAP tier column, MAINTENANCE "Re-budget", this file's shape).
+  Delete this section with the decision.
+
 One line per spec, FEATURE-MAP order, in this shape:
 
 `U<nn> · <tier> · main/guard gaps: ride <n> · own <n> · no seed <n> · states over the extra <n> · scenarios to add <n> · suite fixes <n> · <status>`
