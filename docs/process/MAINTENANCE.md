@@ -193,8 +193,11 @@ affected rows and in the next Mattermost summary.
 
 A developer whose OJS, OMP or OPS pull request fails the e2e check asks on
 Mattermost whether they hit a bug or changed behavior the tests encode; the
-thread where they asked is where the answer goes. The work is the sync
-loop's critical triage, on one PR:
+thread where they asked is where the answer goes. The same steps serve a
+PR the team asks to have prepared before its merge, red or not (maintainer
+request, 2026-09-12): the review, the accommodation and the companion are
+done at the PR ref, so the merge session is only step 5. The work is the
+sync loop's critical triage, on one PR:
 
 1. **Reproduce at the PR ref** ("Start on the right code" below, merge-base
    check first), on reset databases, running the failing suites. A pkp-lib
