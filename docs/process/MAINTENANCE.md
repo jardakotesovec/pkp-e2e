@@ -299,9 +299,16 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    in the "Findings first, short" shape. Leave the checkouts on the apps'
    tips afterwards so the daily session starts where it expects.
 8. **On the merge ping**, "A developer's PR fails the suite" step 5:
-   rebase the companion onto `main`, run the touched suites once,
-   fast-forward, advance the baselines past the merge commits, delete the
-   row. Nothing else is left to review then.
+   `npm run fetch-apps -- --update`, confirm the merge with `git
+   range-diff <base>..<reviewed head> <new base>..<merged head>` (a rebase
+   before the merge is fine when it reads all `=`; anything else is
+   re-read), rebase the companion onto `main`, run the touched suites
+   once on reset databases (one app at a time: three suites in parallel
+   on the VM produce load flakes), fast-forward, delete the row and the
+   remote branch. The baselines advance past the merge only when every
+   tip commit up to it has been reviewed; when the tips carry unreviewed
+   commits beside the PR, the log entry lists them and the next daily
+   sync advances (the rule of sync loop step 6 holds here too).
 
 ## Coverage requests
 
