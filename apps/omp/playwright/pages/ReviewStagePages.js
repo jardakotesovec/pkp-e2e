@@ -583,6 +583,34 @@ async function closeUploadWizard(page, wizard) {
     await expect(wizard.locator('select[id^="genreId"]')).toBeHidden({timeout: 20_000});
 }
 
+/** The stage's Participants panel (the Vue participant manager). */
+function participantPanel(modal) {
+    return modal.locator('[data-cy="participant-manager"]');
+}
+
+/**
+ * Select a review round in the workflow side menu ("Review Round {n}") and
+ * wait for the stage heading to name it.
+ */
+async function selectRound(modal, round, stage = 'External Review') {
+    await modal.getByText(`Review Round ${round}`, {exact: true}).first().click();
+    await expect(
+        modal.getByRole('heading', {name: `Workflow: ${stage} (Round ${round})`})
+    ).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * Record "Create New Review Round" from the current round: the full-page
+ * wizard (heading "New Review Round…") walked to its completion panel.
+ */
+async function createNewReviewRound(page, modal) {
+    await decisionButton(modal, DECISIONS.newRound).click();
+    await expect(
+        page.getByRole('heading', {level: 1, name: /New Review Round/})
+    ).toBeVisible({timeout: 15_000});
+    await walkDecisionWizard(page);
+}
+
 /** The pre-3.5 author-dashboard address (Rule 17): redirects to My Submissions. */
 function oldAuthorDashboardUrl(contextPath, submissionId) {
     return `/index.php/${contextPath}/authorDashboard/submission/${submissionId}`;
@@ -626,6 +654,9 @@ module.exports = {
     uploadReviewFileInDialog,
     startUploadWizard,
     closeUploadWizard,
+    participantPanel,
+    selectRound,
+    createNewReviewRound,
     oldAuthorDashboardUrl,
     oldReviewRoundInfoUrl,
 };

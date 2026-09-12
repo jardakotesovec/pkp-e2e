@@ -3,32 +3,25 @@
  * @file playwright/tests/U27-reviewer-assignment-absence.spec.js
  *
  * U27 — Reviewer assignment & management
- * (lib/pkp/docs/e2e/specs/U27-reviewer-assignment-and-management.md): the OPS
- * ABSENCE test, spec scenario 15. OPS installs no review stage and no
- * reviewer role (spec footnote p, install facts) — no "Reviewers" panel
- * exists on any preprint workflow screen and Users & Roles offers no
- * reviewer group — so per RUNBOOK multi-app rule 3 the whole feature costs
- * this ONE absence test, with a positive control per assertion (Production's
- * own controls render; a Moderator-role search returns users).
+ * (docs/specs/U27-reviewer-assignment-and-management.md): the OPS ABSENCE
+ * test, spec scenario 15. OPS installs no review stage and no reviewer role
+ * (spec footnote p, install facts) — no "Reviewers" panel exists on any
+ * preprint workflow screen, Users & Roles offers no reviewer group and the
+ * server's email templates hold no reviewer-flow template — so per RUNBOOK
+ * multi-app rule 3 the whole feature costs this ONE absence test, with a
+ * positive control per assertion (Production's own controls render; a
+ * Moderator-role search returns users; the server's own templates list).
+ * The spec's Coverage section is the record of everything else left out.
  *
- * Deliberately NOT covered here (and why):
- * - The entire feature — the Reviewers panel, Add Reviewer window (search,
- *   Create New Reviewer, Enroll Existing User), row statuses and actions,
- *   reminders, read/confirm/thank, unassign/cancel/reinstate/resend, log
- *   response, history, editorial notes (spec scenarios 1–14, Rules 1–23):
- *   none of these surfaces exist on OPS. The OJS and OMP suites own them.
- * - The spec's Findings register entries (A1–A17, OMP1–2): all concern
- *   OJS/OMP reviewer surfaces; nothing to assert or park on OPS.
- * - The install nuance recorded in spec footnote p — the generic "Create New
- *   Role" form's permission-level list still offering "Reviewer" (an
- *   application-level enum, with no reviewer group seeded or reachable) —
- *   is a recorded fact, not a contract this suite freezes; the create-role
- *   modal is not opened. The Roles-tab assertions below scope to the grid's
- *   rows for the same reason (the grid's filter select carries the same
- *   application-wide enum).
- * - The review-stage absence itself (stage menu, rounds, decision buttons)
- *   is the neighboring feature's record — asserted by
- *   review-stage-absence.spec.js (U26 scenario 14), not restated here.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
+ * - A1 🐞, A2 🐞, A7 🐞, A8 🐞, A12 🐞, A13 🐞, A15 🐞, A16 🐞, A18 🐞,
+ *   A19 🐞, A21 🐞, A22 🐞, OMP2 🐞 (journal and press reviewer surfaces
+ *   that do not exist on a preprint server).
+ * - A4 ❓, A6 ❓, A17 ❓, A23 ❓, A24 ❓, A3 ✅, A5 ✅, A9 ✅, A10 ✅, A11 ✅,
+ *   A14 ✅, A20 ✅, A25 ✅, OMP1 ✅, OPS1 ✅ (nothing to assert or park
+ *   here; OPS1 is the retired "missing unassign template" reading, whose
+ *   baseline fact this test's email-templates read states).
  *
  * Seeding: a scratch preprint server (throwaway manager/moderator/author) +
  * one submitted preprint via the scenario endpoints. `publicknowledge` and
@@ -43,7 +36,7 @@ function makeTag(prefix) {
 }
 
 test.describe('reviewer-assignment & management (U27) — OPS absence', () => {
-    test('scenario 15 {OPS}: no reviewer surfaces on a preprint server', async ({asUser, pkpApi}) => {
+    test('S15 {OPS}: no reviewer surfaces on a preprint server', async ({asUser, pkpApi}) => {
         const tag = makeTag('u27s15');
         const manager = `m${tag}`;
         const moderator = `mod${tag}`;
@@ -128,8 +121,43 @@ test.describe('reviewer-assignment & management (U27) — OPS absence', () => {
         await expect(roleRows.filter({hasText: 'Moderator'})).toBeVisible();
         await expect(roleRows.filter({hasText: 'Preprint Server manager'})).toBeVisible();
         // …and no group row names any reviewer role (bounded by the same
-        // grid's rendered rows; scoped to rows — see header note on the
-        // filter's application-wide enum).
+        // grid's rendered rows; scoped to rows — the grid's filter select and
+        // the generic "Create New Role" form carry an application-wide
+        // permission-level enum that still lists "Reviewer", a recorded
+        // install nuance (footnote p), not a group of this server).
         await expect(roleRows.filter({hasText: /Review/i})).toHaveCount(0);
+
+        // ── Surface 3: the server's email templates ─────────────────────────
+        // Settings › Workflow › Emails offers "Add and edit templates", which
+        // opens the Manage Emails page: the list of every email the server
+        // sends, one entry per email with its "Edit {name}" action.
+        await page.goto(`/index.php/${tag}/management/settings/workflow#emails`);
+        await page.getByRole('link', {name: 'Add and edit templates'}).click();
+        await expect(page.getByRole('heading', {name: 'Manage Emails'})).toBeVisible();
+        const emails = page.locator('main .listPanel__item');
+        const emailTitles = page.locator('main .listPanel__itemTitle');
+        // Positive control: the server's own emails list — the pending-
+        // moderation acknowledgement and the moderator assignment, each with
+        // its edit action.
+        await expect(
+            emailTitles.filter({hasText: 'Submission Acknowledgement (Pending Moderation)'})
+        ).toBeVisible();
+        await expect(
+            emails.getByRole('button', {name: 'Edit Moderator Assigned (Auto)'})
+        ).toBeVisible();
+        // …and no reviewer-flow template among them (bounded by the same
+        // list having just rendered): no review request, no reminder, no
+        // cancel notice, nothing addressed to a reviewer. Read on the entry
+        // titles, because "Reinstate Submission Declined Without Review" is
+        // a decision template of the server's own.
+        await expect(emailTitles.filter({hasText: /^Review /})).toHaveCount(0);
+        await expect(emailTitles.filter({hasText: /Reviewer/})).toHaveCount(0);
+        await expect(emailTitles.filter({hasText: /Remind/})).toHaveCount(0);
+        await expect(emailTitles.filter({hasText: /Cancel/})).toHaveCount(0);
+        // Nor a "Reviewer" audience: the list's "Sent From" / "Sent To"
+        // filters offer the server's roles only.
+        const filters = page.locator('main').getByRole('button');
+        await expect(filters.filter({hasText: /^Moderator$/}).first()).toBeVisible();
+        await expect(filters.filter({hasText: /^Reviewer$/})).toHaveCount(0);
     });
 });

@@ -51,9 +51,12 @@ Within the panel, "review managers" below means:
 Journal Manager, Editor, and an assigned Section Editor or Guest Editor. A
 Site Administrator takes part through whatever journal role grants them
 stage access. Holding no role in the journal, they are refused at the
-workflow screen itself ([A3](#a3), retired) <sup>a</sup>. On the seeded
-installs the one assistant-level group the stage's assignment dialog offers
-for this stage is Funding Coordinator. The Author reaches the same workflow screen for their
+workflow screen itself ([A3](#a3), retired) <sup>a</sup>. A review manager
+who is themself a reviewer of the submission is kept off every stage of it,
+so they never see the panel, their own row included
+([→ a reviewing manager's access](U24-workflow-screen-and-stage-access.md#a4)).
+On the seeded installs the one assistant-level group the stage's assignment
+dialog offers for this stage is Funding Coordinator. The Author reaches the same workflow screen for their
 own submission, but while reviews are underway they get no Reviewers panel at
 all: no table, no reviewer identities. Whether and when a reduced read-only
 list of completed reviews appears is owned by
@@ -66,7 +69,7 @@ list of completed reviews appears is owned by
 | **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants: any round, including past rounds. The past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds) <sup>a</sup> |
 | **"Create New Reviewer" / "Enroll Existing User"** | • Journal Manager, Editor, assigned Section Editor and Guest Editor: the two links inside the Add Reviewer window. A Site Administrator's access runs through such a journal role (see the preamble)<br>• Assistant-level participants: the two links never appear <sup>a</sup> |
 | **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants, depending on the assignment's state. Rule 3 says when each action appears and in which order the menu lists them; the operations are Rules 12–21; the Email Reviewer window is described under Fields <sup>a</sup> |
-| **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor: about a user holding a Reviewer role, never about themselves<br>• Assistant-level participants: the entry is absent <sup>l</sup> |
+| **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor: about a user holding a Reviewer role. They never meet their own row, because a reviewer of the submission is kept off its stages (see the preamble)<br>• Assistant-level participants: the entry is absent <sup>l</sup> |
 | **"Login As" the reviewer** | • Whoever may impersonate that reviewer. The row entry appears only then. The rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
 | **Author on the workflow screen** | • None of the above. An assigned Author gets none of these entries, even when they also hold an editorial role on the submission, because the panel itself is absent (see the preamble). The server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
 
@@ -191,7 +194,7 @@ under the prompt "Record the response on behalf of the reviewer". Submit
    | "Review Submitted" | Review in, no editor has opened it yet ([A10](#a10), retired: opening now marks it viewed); also after "Revert Decision" on a "Complete" row (Rule 16) | reviewer's recommendation {OJS} |
    | "Review Viewed" | An editor opened the review (Rule 14a); also after "Revert Decision" on a "Reviewer Thanked" row (Rule 16) | reviewer's recommendation {OJS} |
    | "Complete" | An editor marked the review complete (Rule 14a) | reviewer's recommendation {OJS} |
-   | "Reviewer Thanked" | Thank-you sent or recorded (Rule 16) | reviewer's recommendation {OJS} |
+   | "Reviewer Thanked" | Thank-you sent or recorded; also a second "Mark as Complete" on a reverted, previously thanked review (Rule 16) | reviewer's recommendation {OJS} |
    | "Request Cancelled" | Assignment cancelled (hover: "The editor cancelled this review request.") | — |
 
    A "Competing Interests" badge is appended when the reviewer declared any.
@@ -344,7 +347,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     reviewer in the next step.". Confirming shows "The review has been
     marked as complete.". The row turns "Complete" (with the recommendation
     under the status {OJS}) and offers "Thank Reviewer" and "Revert
-    Decision" (Rule 16). In the still-open window "Mark as Complete" goes
+    Decision"; a review thanked before a revert turns "Reviewer Thanked"
+    instead (Rule 16). In the still-open window "Mark as Complete" goes
     disabled and "Modify Review" stays available. <sup>i</sup>
 14b. **Modifying a review.** "Modify Review" first asks "Modify this
     review?" with the text "You are about to modify the review submitted by
@@ -381,8 +385,11 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     "Revert Decision" asks "Unconsider this Review". Confirming returns a
     "Complete" row to "Review Submitted" and a "Reviewer Thanked" row to
     "Review Viewed", with no notice shown either way, so the review can be
-    re-examined. The review content is untouched and the revert is logged.
-    <sup>j</sup>
+    re-examined. The acknowledgement itself survives the revert: "Mark as
+    Complete" on that "Review Viewed" row turns it "Reviewer Thanked"
+    straight away, with "Revert Decision" alone and no second "Thank
+    Reviewer" ⚠ [A27](#a27). The review content is untouched and the revert
+    is logged. <sup>j</sup>
 17. <a id="unassign"></a> **Unassign vs Cancel.** Before the reviewer has
     responded, the entry reads "Unassign Reviewer", and removing them
     deletes the row outright. The notice reads "Reviewer removed." and
@@ -433,7 +440,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
 
 - **Adding a reviewer** → the row appears with the notice "{name} was
   assigned to review this submission and sent an email notification.", or
-  "…was not sent an email notification." with the skip box. The reviewer
+  "{name} was assigned to review this submission and was not sent an email
+  notification." with the skip box. The reviewer
   gets a "Review pending." task in their own task list. Unless skipped, they
   also get the request email (subject "Invitation to review" {OJS} /
   "Manuscript Review Request" {OMP}, or "Request to review a revised
@@ -467,11 +475,12 @@ under the prompt "Record the response on behalf of the reviewer". Submit
   Each send stamps the History "Reminder" date and the activity log. A
   reviewer response resets the reminder bookkeeping. That is the same reset
   that erases the History "Reminder" milestone ⚠ [A15](#a15). <sup>h</sup>
-- **Marking a review complete** (Rule 14a) → the reviewer's "Review
-  pending." task is cleared, the completion is logged in the submission's
-  activity log, and the review is deposited to the reviewer's ORCID record
-  when one is authenticated (the deposit consent flow is the *ORCID
-  integration* feature). <sup>i</sup>
+- **Marking a review complete** (Rule 14a) → the completion is logged in
+  the submission's activity log, and the review is deposited to the
+  reviewer's ORCID record when one is authenticated (the deposit consent
+  flow is the *ORCID integration* feature). The reviewer's "Review
+  pending." task is already gone by then: their own submit clears it
+  (*Reviewer's review*). <sup>i</sup>
 - **Modifying a review** (Rule 14b) → an attributed activity-log entry per
   save: "The following was modified in this review: Comments." (or
   "…Reviewer Recommendation." {OJS}), each with a "View changes" action
@@ -481,11 +490,15 @@ under the prompt "Record the response on behalf of the reviewer". Submit
   modification. <sup>i</sup>
 - **Thanking** → the acknowledgement email (unless skipped) and the
   acknowledged date in History. <sup>j</sup>
-- **Unassigning/cancelling** → the notice email (unless skipped). The
-  unassign notice subject is "Your reviewer assignment for "{title}" has
-  been removed"; the cancel notice subject is "Your review for "{title}" has
-  been cancelled". The reviewer's "Review pending." task is removed. The
-  action is logged. Nothing else is cleaned up: the reviewer's other
+- **Unassigning/cancelling** → the notice email (unless skipped). Both
+  notices arrive under the subject "Your review for "{title}" has been
+  cancelled"; the unassign notice's own subject, "Your reviewer assignment
+  for "{title}" has been removed", is never the one sent, though its body
+  is the removal text ("…you have been removed from the reviewer assignment
+  for "{title}"…") ⚠ [A26](#a26). On a press that body ends "in
+  {$journalName}." with the placeholder printed literally where the press's
+  name belongs ⚠ [OMP3](#omp3). The reviewer's "Review pending." task is
+  removed. The action is logged. Nothing else is cleaned up: the reviewer's other
   participations on the submission are untouched. <sup>k</sup>
 - **Reinstating / resending** → the respective email (unless skipped; the
   reinstate notice asks "Can you still review something for {journal}?")
@@ -547,135 +560,466 @@ review forms* unless said otherwise. <sup>n</sup>
 
 ## Canonical scenarios
 
-Every scenario runs on the seeded journal with ready accounts and scratch
-submissions; scenario 3's new reviewer is a throwaway address, and each
-email is read in the mailbox of the address it was sent to. The accounts and
-the tooling recipe are in the footnote. <sup>s</sup>
+Scenarios 2, 3, 4, 6, 7, 9 and 11 run on a scratch journal with throwaway
+accounts: a Journal Manager who also holds the Reviewer role (2), a fresh
+address (3), a user to enroll (4), reviewers whose mailbox and task list are
+read (6, 7, 9, 11) and an active review form (9). Every other scenario runs
+on the seeded journal with ready accounts and scratch submissions. Each
+email is read in the mailbox of the address it was sent to. The accounts,
+the passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
-1. **Invite a reviewer** — Editor: on a round with review files, press "Add
-   Reviewer", search the list for a seeded reviewer by name, and press
-   "Select Reviewer". Check the prefilled request letter and the two due
-   dates (the defaults come from the journal's review setup), then press
-   "Add Reviewer". The panel lists the reviewer as "Request Sent" (the row's
-   response-deadline line is missing ⚠ [A7](#a7)), and the reviewer's
-   mailbox holds the request email. Verify it arrived, because a silent
-   failure mode exists (⚠ [A18](#a18)): submitting the form with the letter
-   emptied gives no feedback at all while still creating the row, and no
-   request email goes out. <sup>s</sup>
-2. **The list warns before anonymity breaks** — Editor: in "Locate a
-   Reviewer", find a reviewer who is also a Journal Manager. The entry is
-   locked with the author-identity warning and no Select button. Press
-   "Unlock": the "Select Reviewer" button appears. Also verify that a
-   reviewer already on the round shows "This reviewer has already been
-   assigned to this review round." with no way to select them again.
-3. **Create a brand-new reviewer** — Journal Manager: in the Add Reviewer
-   window choose "Create New Reviewer", fill in a given name and an email,
-   press "Suggest" beside Username (a username appears), and press "Add
-   Reviewer". The row appears as "Request Sent". The new address's mailbox
-   holds the registration email with a password and the review request.
-   Signing in with that password lands on the "Change Password" form
-   ([→ sign-in flows](U01-login-and-sessions.md)). <sup>s</sup>
-4. **Enroll an existing user** — Journal Manager: choose "Enroll Existing
-   User", type a seeded author's name into the autocomplete, pick them, and
-   press "Add Reviewer". The row appears. Opening the journal's users list
-   shows the user now also holds the Reviewer role. Control: typing the name
-   of an existing reviewer into the same autocomplete finds nothing.
-5. **Deadlines are validated** — Editor: in the Add Reviewer form set the
-   review due date before the response due date and submit. No assignment
-   is created and the window stays open. The only statement of the rule is
-   the guidance sentence "Review due date must be greater or equal to
-   response due date."; no error message appears ⚠ [A8](#a8). Correct the
-   dates; the submission succeeds and the row appears.
-6. **Edit an assignment, reviewer is told** — Editor: on a "Request Sent"
-   row open "Edit", move the review due date a week later, and save. Sign in
-   as the reviewer: their account shows the "Review assignment updated."
-   task, and their mailbox holds the change notice. Control: an edit that
-   changes only the file ticks sends nothing new.
-7. **Remind an overdue reviewer** — Editor: on a row showing "Overdue", the
-   row's button reads "Send Reminder". Open it,
-   verify the schedule readout, and press "Send Reminder". The notice
-   "Notification sent." appears, the reviewer's mailbox holds the reminder,
-   and the row's "History" now lists a "Reminder" date. Check it before the
-   reviewer responds, because their response erases the line
-   ⚠ [A15](#a15). Control: a row that is not overdue offers no "Send
-   Reminder" button. <sup>s</sup>
-8. **Log a response on the reviewer's behalf** — Editor: on an unanswered
-   row open "Log Response", choose "Reviewer has accepted the invitation to
-   review", and press "Log Response". The row reads "Request Accepted" with
-   the review due date. Control: the "Log Response" entry is gone from that
-   row's menu afterwards.
-9. **Read, rate, mark complete, thank** — with a submitted review on the
-   round, Editor: the row reads "Review Submitted". Open "Read
-   Review": the "Review Details" window opens and the row behind it turns
-   "Review Viewed" at once (it stays after a reload). See the reviewer's
-   comments split into "For author and editor" / "For editor" ({OMP}: "For
-   editor only"). Then, once the window has settled ⚠ [A21](#a21), click a
-   star under "Reviewer rating": the toast "Reviewer rating saved" appears.
-   Press "Mark as Complete" and confirm "Mark this review as complete?". The
-   toast "The review has been marked as complete." appears and the row turns
-   "Complete". Press "Thank Reviewer" and send: the notice reads "Thank you
-   email sent to reviewer.", the row reads "Reviewer Thanked", and the
-   thank-you is in the reviewer's mailbox. Then press "Revert Decision" and
-   confirm "Unconsider this Review": the row returns to "Review Viewed".
-   <sup>s</sup>
-10. **Download the review** — Editor: in the "Review Details" window open
-    "Download Review Form" and fetch "Author-Only Sections Displayed (PDF)"
-    and "Editor Form Shows All Review Sections (PDF)". Both download. The
-    author-only file omits the editor-only remarks and shows the reviewer
-    anonymized, while the full one carries both comment blocks and the
-    reviewer's name.
-11. **Unassign before, cancel after** — Editor: unassign an unanswered
-    reviewer ("Unassign Reviewer", then submit). The notice reads "Reviewer
-    removed." and the row is gone. On a second, accepted reviewer the same
-    menu entry reads "Cancel Reviewer". The window opens with its template
-    chooser above the notice, and cancelling leaves the row as "Request
-    Cancelled". Press "Reinstate Reviewer" on it: the row returns to its
-    dated state ("Request Accepted" or "Overdue"), and the reviewer's
-    mailbox holds the cancel notice ("Your review for … has been cancelled")
-    and the reinstate notice.
-12. **Decline, then ask again** — with a declined row, Editor: the row reads
-    "Request Declined". Open "Resend Review Request", keep the fresh
-    dates, and send. The row reads "Request Resent" ⚠ [A2](#a2) and the
-    reviewer's mailbox holds the reconsider request.
+1. **Invite a reviewer**
+
+   Given: Editor, on a round with review files, with two Reviewers of the
+   journal not yet invited.
+
+   - **"Add Reviewer"**: press it: the window opens on "Locate a Reviewer"
+     with no request form and no submit button below the list. Search the
+     first reviewer by name and press "Select Reviewer": the name and email
+     address show with a "Change" link, and the request form appears below
+     them with the prefilled request letter and the two due dates
+     ("Response Due Date", "Review Due Date"), preset from the journal's
+     review setup.
+   - **"Change"**: press it: the search shows again. Select the same
+     reviewer again.
+   - **The add**: press "Add Reviewer": the notice reads "{name} was
+     assigned to review this submission and sent an email notification."
+     and the row reads "Request Sent" (its "Response due:" line is missing
+     ⚠ [A7](#a7)). The reviewer's mailbox holds the request email
+     ("Invitation to review" {OJS} / "Manuscript Review Request" {OMP}),
+     sent under the Editor's name, and the submission's activity log
+     records the assignment. Verify the email arrived: a request submitted
+     with the letter emptied creates the row without any feedback and sends
+     nothing ⚠ [A18](#a18).
+   - **"Editorial Notes"**: open the row's "More Actions" menu and press
+     "Editorial Notes": the window shows one text field under the guidance
+     "Record notes about this reviewer that you would like to make visible
+     to other administrators, managers and all editors. Notes will be
+     visible for future review assignments." ⚠ [A4](#a4).
+   - **"Do not send email to Reviewer."**: add the second reviewer the same
+     way with that box ticked: the notice reads "{name} was assigned to
+     review this submission and was not sent an email notification." and
+     the row reads "Request Sent".
+   - **Control**: the second reviewer's mailbox holds no request email.
+     <sup>s</sup>
+
+2. **The list warns before anonymity breaks**
+
+   Given: Editor, on a round with one reviewer invited, on a journal where
+   a second Reviewer also holds the Journal Manager role.
+
+   - **A locked entry**: in "Locate a Reviewer", search the manager-reviewer
+     by name: the entry is locked with "This reviewer is locked because they
+     have been assigned a role which allows them to view the author's
+     identity. Anonymous peer review can not be guaranteed. Would you like
+     to unlock this reviewer anyway?" and no Select button. Press "Unlock":
+     the "Select Reviewer" button appears. Select them and press "Add
+     Reviewer": their row reads "Request Sent".
+   - **An already-assigned entry**: open "Add Reviewer" again and search
+     the first reviewer: the entry is dimmed with "This reviewer has already
+     been assigned to this review round." and cannot be selected.
+   - **Control**: Journal Manager (not a reviewer of the submission): the
+     "More Actions" menu on the first reviewer's row offers "Editorial
+     Notes". <sup>s</sup>
+
+3. **Create a brand-new reviewer**
+
+   Given: Journal Manager, in the Add Reviewer window of a round, with a
+   fresh email address.
+
+   - **"Create New Reviewer"**: choose it: the account fields appear above
+     the request form, and "Appear on the masthead" is ticked and disabled.
+     Type "Petra" as the given name and the fresh address in Email, then
+     press "Suggest" beside Username: a lowercase username appears.
+   - **Duplicates refused**: replace the username with the Journal Manager's
+     own username and press "Add Reviewer": the toast "The selected username
+     is already in use by another user." appears. Restore the suggested
+     username, replace the email with the Journal Manager's own address and
+     press "Add Reviewer": the toast "The selected email address is already
+     in use by another user." appears.
+   - **The add**: restore the fresh address and press "Add Reviewer": the
+     row reads "Request Sent", and the journal's users list shows the new
+     account with the Reviewer role.
+   - **The new account's mailbox**: holds the welcome email ("Registration
+     as Reviewer…") with the username and a password, and the request
+     email.
+   - **First sign-in**: sign in with that password: the "Change Password"
+     form opens ([→ sign-in flows](U01-login-and-sessions.md)).
+   - **Control**: the create form shows no reviewer role select, one
+     reviewer group serving the stage. <sup>s</sup>
+
+4. **Enroll an existing user**
+
+   Given: Journal Manager, in the Add Reviewer window of a round, with an
+   Author of the journal who holds no reviewer role.
+
+   - **"Enroll Existing User"**: choose it: the form is headed "Enroll an
+     Existing User as Reviewer" with "Search By Name", a one-option
+     reviewer role select and the ticked, disabled "Appear on the masthead"
+     box. Press "Add Reviewer" with the field empty: "This field is
+     required." shows above it. Type the Author's name and pick them: the
+     message clears. Press "Add Reviewer": the row reads "Request Sent".
+   - **The users list**: the journal's users list shows the user now also
+     holds the Reviewer role.
+   - **Control**: typing the name of an existing reviewer into the same
+     autocomplete finds nothing. <sup>s</sup>
+
+5. **Deadlines are validated**
+
+   Given: Editor, in the Add Reviewer window with a reviewer selected.
+
+   - **Inverted dates**: set "Review Due Date" before "Response Due Date"
+     and press "Add Reviewer": no assignment is created and the window
+     stays open. The only statement of the rule is the guidance sentence
+     "Review due date must be greater or equal to response due date."; no
+     error message appears ⚠ [A8](#a8).
+   - **Control**: correct the dates and press "Add Reviewer": the row
+     appears.
+
+6. **Edit an assignment, reviewer is told**
+
+   Given: Editor, on a round with two review files and a "Request Sent"
+   row, whose Reviewer is ready to sign in.
+
+   - **"Edit", the dates**: open the row's "Edit": the "Edit Review" window
+     shows the guidance "Review due date must be greater or equal to
+     response due date.". Set "Review Due Date" before "Response Due Date"
+     and save: the save is refused and the window stays open ⚠ [A8](#a8).
+     Set "Review Due Date" a week after the original date and save.
+   - **The reviewer's side**: Reviewer: sign in: the header's Tasks panel
+     holds "Review pending." and "Review assignment updated." for the
+     submission, and the mailbox holds the change notice.
+   - **"Files To Be Reviewed"**: Editor: open "Edit" again and untick every
+     file: "No Files Selected" appears. Tick the first file back: the
+     warning disappears. Save. Reviewer: the files offered for review are
+     the first file alone.
+   - **Control**: the reviewer's mailbox holds no second change notice and
+     the Tasks panel no second "Review assignment updated.": an edit that
+     changes only the file ticks sends nothing. <sup>s</sup>
+
+7. **Remind an overdue reviewer**
+
+   Given: Editor, on a round with two reviewers: one whose response date
+   has passed without an answer, and one still on schedule.
+
+   - **The overdue row**: reads "Overdue" in red with "Response due:
+     {date}", and its button reads "Send Reminder".
+   - **"Review Reminder"**: press "Send Reminder": the window shows the
+     reviewer's name and address, the template chooser preset to the
+     reminder template, the message, and the "Review Schedule" dates
+     "Editor's Request", "Response Due Date" and "Review Due Date". Press
+     "Send Reminder": the notice "Notification sent." appears and the
+     reviewer's mailbox holds "A reminder to please complete your review".
+   - **"History"**: open the row's "History": the "History" modal lists a
+     dated "Reminder" milestone. Check it before the reviewer responds,
+     because their response erases the line ⚠ [A15](#a15).
+   - **"Email Reviewer"**: on the on-schedule row open "Email Reviewer":
+     "To" shows the reviewer's name. Type "A question about your review" in
+     Subject and "Will you meet the review date?" in Body, then press "Send
+     Email": the reviewer's mailbox holds that email.
+   - **Control**: the on-schedule row, reading "Request Sent", offers no
+     "Send Reminder" button. <sup>s</sup>
+
+8. **Log a response on the reviewer's behalf**
+
+   Given: Editor, on a "Request Sent" row.
+
+   - **"Log Response"**: open it, choose "Reviewer has accepted the
+     invitation to review", and press "Log Response": the row reads
+     "Request Accepted" with "Review due: {date}".
+   - **Control**: the "Log Response" entry is gone from that row's menu
+     afterwards.
+
+9. **Read, rate, mark complete, thank**
+
+   Given: Editor, on a round of a journal with an active review form, where
+   one Reviewer has submitted a review with both comment blocks and a second
+   Reviewer's request is unanswered; both Reviewers are ready to sign in.
+
+   - **"Read Review"**: the row reads "Review Submitted". Press "Read
+     Review": the "Review Details: {submission title}" window opens and the
+     row behind it turns "Review Viewed" at once (it stays after a reload).
+     The window shows "Review Submitted: {date and time}" and the
+     reviewer's comments split into "For author and editor" / "For editor"
+     ({OMP}: "For editor only").
+   - **"Reviewer rating"**: once the window has settled ⚠ [A21](#a21),
+     click a star under "Reviewer rating": the toast "Reviewer rating
+     saved" appears. Press "Cancel" and "Read Review" again: the star is
+     still selected.
+   - **"Edit" after submission**: open the row's "Edit": the window offers
+     no "Review Form" select.
+   - **The unanswered row**: the second reviewer's row has no "Actions"
+     button, and its "Edit" still offers the "Review Form" select.
+   - **"Mark as Complete"**: in "Read Review" press it and confirm "Mark
+     this review as complete?": the toast "The review has been marked as
+     complete." appears; in the still-open window "Mark as Complete" is
+     disabled and "Modify Review" stays available; the row turns
+     "Complete" and offers "Thank Reviewer" and "Revert Decision".
+   - **The reviewer's side**: Reviewer: sign in: the Tasks panel holds no
+     "Review pending." for the submission. Editor: the submission's
+     activity log records the completion.
+   - **"Thank Reviewer"**: press it, then "Thank Reviewer" in the window:
+     the notice reads "Thank you email sent to reviewer.", the row reads
+     "Reviewer Thanked", and the
+     thank-you is in the reviewer's mailbox. The row's "History" lists
+     "Assigned", "Notified", "Confirm", "Completed" and "Acknowledged",
+     each dated.
+   - **"Revert Decision"**: press it and confirm "Unconsider this Review":
+     the row returns to "Review Viewed" with no notice. "Read Review" shows
+     the comments unchanged, and the activity log records the revert.
+   - **The second reviewer's review**: Reviewer (the second): accept the
+     request and submit a review. Editor: that row reads "Review
+     Submitted".
+   - **Thank without email**: press that row's "Read Review", then "Mark as
+     Complete" and confirm; press "Thank Reviewer" and submit the window
+     with "Do not send email to Reviewer." ticked: the notice reads "Review
+     marked as acknowledged. Email not sent." and the row reads "Reviewer
+     Thanked".
+   - **Control**: the second reviewer's mailbox holds no thank-you, while
+     the first reviewer's holds one. <sup>s</sup>
+
+10. **Download the review**
+
+    Given: Editor, in the "Review Details" window of a submitted review
+    with both comment blocks.
+
+    - **"Download Review Form"**: open it and fetch "Author-Only Sections
+      Displayed (PDF)" and "Editor Form Shows All Review Sections (PDF)":
+      both download.
+    - **The author-only file**: omits the editor-only remarks and shows the
+      reviewer anonymized.
+    - **Control**: the full file carries both comment blocks and the
+      reviewer's name.
+
+11. **Unassign before, cancel after**
+
+    Given: Editor, on a round with two reviewers: one invited and
+    unanswered, and one who accepted and is also listed on the stage's
+    Participants panel as a Funding Coordinator; the unanswered Reviewer is
+    ready to sign in.
+
+    - **"Unassign Reviewer"**: on the unanswered row the menu entry reads
+      "Unassign Reviewer". Open it: the window shows the template chooser
+      above the notice and the "Do not send email to Reviewer." box. Press
+      "Unassign Reviewer": the notice reads "Reviewer removed." and the row
+      is gone.
+    - **The unassigned reviewer's side**: their mailbox holds the removal
+      notice ("…you have been removed from the reviewer assignment for
+      "{title}"…"), under the subject "Your review for "{title}" has been
+      cancelled" ⚠ [A26](#a26) ({OMP}: its last words print "in
+      {$journalName}." ⚠ [OMP3](#omp3)). Reviewer: sign in: the Tasks
+      panel holds no "Review pending." for the submission.
+    - **"Cancel Reviewer"**: Editor: on the accepted row the same menu entry
+      reads "Cancel Reviewer". The window opens with its template chooser
+      above the notice. Press "Cancel Reviewer": the row stays as "Request
+      Cancelled" (hover: "The editor cancelled this review request."), its
+      menu offers "Reinstate Reviewer" in place of "Review Details", "Edit"
+      and the cancel entry, and the reviewer's mailbox holds "Your review
+      for "{title}" has been cancelled".
+    - **Participants**: the stage's Participants panel still lists the
+      cancelled reviewer as a Funding Coordinator.
+    - **"Reinstate Reviewer"**: press it, then "Reinstate Reviewer" in the
+      window: the notice reads "Reviewer reinstated.", the row returns to
+      its dated state ("Request
+      Accepted" or "Overdue"), and the reviewer's mailbox holds the
+      reinstate notice ("Can you still review something for {journal}?").
+    - **Control**: the reinstated row's menu again offers "Review Details",
+      "Edit" and "Cancel Reviewer", with no "Reinstate Reviewer" entry.
+      <sup>s</sup>
+
+12. **Decline, then ask again**
+
+    Given: Editor, on a round whose Reviewer declined the request.
+
+    - **The declined row**: reads "Request Declined" (hover: "The reviewer
+      declined this review request."), and its menu offers "Resend Review
+      Request" and no "Log Response".
+    - **"Resend Review Request"**: open it: the message, the "Do not send
+      email to Reviewer." box and fresh "Response Due Date" and "Review Due
+      Date" pickers, each preset from its own configured interval as at add
+      time. Keep the dates and send: the notice reads "Request to reconsider
+      the review assignment was sent.", the row reads "Request Resent" (its
+      "Response due:" line prints the review deadline ⚠ [A2](#a2)), and the
+      reviewer's mailbox holds the reconsider request.
+    - **Control**: the resent row's menu again offers "Unassign Reviewer"
+      and "Log Response". <sup>s</sup>
 
 App-specific:
 
-13. **{OMP} Two review stages, two reviewer pools** — Press Editor: on a
-    monograph in Internal Review, press "Add Reviewer" and search an
-    Internal Reviewer by name: found. Search an External Reviewer by name:
-    "No items found.". Send the monograph to External Review, press "Add
-    Reviewer" there and repeat: now the External Reviewer is found and the
-    Internal one is not [OMP1](#omp1). Assert through the search, because
-    the window's opening, unsearched list does not apply the split
-    ⚠ [OMP2](#omp2). Every scenario above runs the same on both stages.
-    <sup>o</sup> <sup>s</sup>
-14. **{OJS} The recommendation runs through the table** — Editor: after
-    scenario 9's "Mark as Complete", the "Complete" row's status cell shows
-    the reviewer's recommendation under the status. The "Review Details"
-    window displays it read-only, on its "Recommendation:" line and again
-    in the "Reviewer Recommendation" group ⚠ [A23](#a23). Changing it on
-    the reviewer's behalf runs through "Modify Review" (scenario 16).
-    {OMP} Control: on a press neither the status cell nor the window shows
-    any recommendation [OMP1](#omp1).
-15. **{OPS} No reviewer surfaces on a preprint server** — Preprint Server
-    Manager: open any preprint's workflow. No "Reviewers" panel exists on
-    any screen, and Users & Roles offers no reviewer group to assign.
-    Positive control: the same workflow screen offers the Production
-    stage's own controls, so the screen itself is working. <sup>p</sup>
-16. **The editor modifies a submitted review** (common: runs on OJS and
-    OMP like scenarios 1–12) — with a submitted review on the round,
-    Editor: in the "Review Details" window press "Modify Review" and
-    confirm "Modify this review?". In the "Modify Review" window that
-    opens, edit the "For author and editor" comment ({OJS}: also pick a
-    different "Recommendation"), and press "Save Changes". The edit window
-    closes, and the view window now shows "Last modified by {name}" under
-    its title with the edited text ({OJS}: and the new recommendation; on
-    a press the window offers no recommendation field [OMP1](#omp1)). The
-    submission's activity log lists "The following was modified in this
-    review: Comments." ({OJS}: and "…Reviewer Recommendation.") attributed
-    to the editor, each with a "View changes" action. Control: the "For
-    editor" ({OMP}: "For editor only") comment offers no edit control in
-    either window. <sup>s</sup>
+13. **Two review stages, two reviewer pools** {OMP}
+
+    Given: Press Editor, on a monograph in Internal Review, with an Internal
+    Reviewer, an External Reviewer and an Author of the press.
+
+    - **Internal Review's "Add Reviewer"**: search the Internal Reviewer by
+      name: found. Search the External Reviewer by name: "No items found.".
+      Assert through the search, because the window's opening, unsearched
+      list does not apply the split ⚠ [OMP2](#omp2).
+    - **Internal Review's "Enroll Existing User"**: type the External
+      Reviewer's name into "Search By Name": nothing is found.
+    - **Control**: type the Author's name: found.
+    - **External Review's "Add Reviewer"**: record "Send to External
+      Review", press "Add Reviewer" there and repeat: now the External
+      Reviewer is found and the Internal one is not [OMP1](#omp1).
+    - **External Review's "Enroll Existing User"**: type the Internal
+      Reviewer's name: nothing is found; the Author's name is still found.
+      <sup>o</sup> <sup>s</sup>
+
+14. **The recommendation runs through the table** {OJS}
+
+    Given: Editor, on a "Complete" row of a journal (the end of scenario
+    9's "Mark as Complete").
+
+    - **The status cell**: shows the reviewer's recommendation under
+      "Complete".
+    - **"Review Details"**: the window displays it read-only, on its
+      "Recommendation:" line and again in the "Reviewer Recommendation"
+      group ⚠ [A23](#a23). Changing it on the reviewer's behalf runs
+      through "Modify Review" (scenario 16).
+    - **Control** {OMP}: on a press neither the status cell nor the window
+      shows any recommendation [OMP1](#omp1).
+
+15. **No reviewer surfaces on a preprint server** {OPS}
+
+    Given: Preprint Server Manager, on any preprint's workflow.
+
+    - **The workflow screen**: no "Reviewers" panel exists on any of its
+      screens.
+    - **Users & Roles**: offers no reviewer group to assign.
+    - **Email templates**: the server's email templates (Settings ›
+      Workflow › Emails) hold no reviewer-flow template: no review request,
+      no reminder, no cancel notice.
+    - **Control**: the same workflow screen offers the Production stage's
+      own controls, so the screen itself is working. <sup>p</sup>
+
+16. **The editor modifies a submitted review**
+
+    Given: Editor, in the "Review Details" window of a submitted review
+    with both comment blocks.
+
+    - **"Modify Review"**: press it: the dialog "Modify this review?" reads
+      "You are about to modify the review submitted by {reviewer name}. All
+      modifications will be recorded in the activity log.". Confirm: the
+      "Modify Review" window opens stacked over the first, naming the
+      submission ({OJS}: with a "Submitted recommendation:" line).
+    - **"Save Changes"**: replace the "For author and editor" comment with
+      "Revised by the editor." ({OJS}: also pick a different
+      "Recommendation") and press "Save Changes": the edit window closes,
+      and the view window shows "Last modified by {name}" under its title
+      with the edited text ({OJS}: and the new recommendation; on a press
+      the window offers no recommendation field [OMP1](#omp1)).
+    - **The activity log**: lists "The following was modified in this
+      review: Comments." ({OJS}: and "…Reviewer Recommendation.")
+      attributed to the Editor, each with a "View changes" action.
+    - **Control**: the "For editor" ({OMP}: "For editor only") comment
+      offers no edit control in either window. <sup>s</sup>
+
+17. **The Author sees no Reviewers panel**
+
+    Given: Author, whose submission is in review with a reviewer's request
+    underway.
+
+    - **The review stage**: open the submission from My Submissions and
+      its review stage: no "Reviewers" panel, no table, no "Add Reviewer"
+      and no reviewer identity anywhere on the screen.
+    - **Control**: Editor: the same submission's review stage lists the
+      reviewer's row in the "Reviewers" panel. <sup>s</sup>
+
+18. **An assistant-level participant's panel**
+
+    Given: Funding Coordinator, assigned to the review stage of a
+    submission whose round has one reviewer invited.
+
+    - **The panel**: the "Reviewers" panel lists the row with its five
+      columns: "Reviewer", "Reviewer status", "Type", "Actions" and "More
+      Actions".
+    - **"Add Reviewer"**: press it: the window opens on "Locate a
+      Reviewer" with no "Create New Reviewer" and no "Enroll Existing
+      User" link.
+    - **The row menu**: open the row's "More Actions" menu: it holds no
+      "Editorial Notes" entry.
+    - **Control**: Editor: on the same submission the Add Reviewer window
+      offers both links and the row's menu offers "Editorial Notes".
+      <sup>s</sup>
+
+19. **A later round's request**
+
+    Given: Editor, on Round 2 of a submission whose only Round 1 reviewer's
+    review was marked complete, with a second Reviewer of the journal never
+    assigned.
+
+    - **Round 2's panel**: lists no reviewer, while "Review Round 1" still
+      lists the completed reviewer's row alone.
+    - **"Add Reviewer" on Round 2**: press it: the Round 1 reviewer sits at
+      the top of the list, flagged "This reviewer completed a review in the
+      last round.", with the button "Reassign".
+    - **"Reassign"**: press it and, with the request letter prefilled, press
+      "Add Reviewer": the row reads "Request Sent" on Round 2, and the
+      reviewer's mailbox holds "Request to review a revised submission".
+    - **Control**: the second reviewer's entry carries no flag and its
+      button reads "Select Reviewer". <sup>s</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - "Overdue" (red) on a missed review date, with "Review due: {date}" (Rule 2)
+  - the reminder window's "Review Acceptance Date" in place of "Response Due Date" once the reviewer has responded (Fields)
+  - "Revert Decision" on a "Complete" row returning it to "Review Submitted" (Rule 16)
+  - the preselected "Review Type", "Public Visibility" and a section's default "Review Form" (Fields, Rule 10, Settings)
+  - the non-default review setup ends: weeks to respond and to complete, the one-click placeholder in the editor's preview and a fresh keyed link per reminder (Settings, Rule 9)
+  - the "Competing Interests" badge on a journal with a competing-interests policy (Rule 2)
+  - "Send Review To ORCID" with "Send this review to the reviewer's ORCID?" for a reviewer with an authenticated iD (Rules 3, 23)
+  - the reviewer search entry's details: paging past 30 entries, the ORCID iD link styles, the headline counts and the expanded statistics (Rule 5)
+  - the search aids: the "Filters" sliders, the author names with "Show All {N} Authors", the "Same institution as author" badge (Rule 6)
+  - "Editorial Notes" read-only in the reviewer search (Rules 5, 22)
+  - the reviewer role select when more than one reviewer group serves the stage (Fields)
+  - "No Files Selected" in the Add Reviewer window on a round with no files (Fields, Rule 11)
+  - "Save changes to this review?" before modifying a complete, publicly visible review on a journal running open review (Rule 14b)
+- **Budget** — variants:
+  - the "Reviewing Interests" tag field of Create New Reviewer (Fields)
+  - the menu order (Rule 3), the chooser's refill on a pick (Fields), the blank list sections omitted (Rule 5) and Modify Review's "Cancel" (Rule 14b)
+- **Nothing new to test**:
+  - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports (Rule 15), a logged decline (Rule 20)
+  - the press's Internal Review stage running scenarios 1–12 as External Review does (Purpose; scenario 13 covers what differs)
+- **Register carries it**:
+  - A6 (an assistant-level participant's table omitting declined and cancelled rows; Actors row 2, Rule 17)
+  - A4 (one shared note per reviewer, rewritten from any submission; Rule 22)
+  - A19 (the template chooser as a one-option select on every add; Fields)
+  - A18 (an emptied request letter: the row created with no feedback and no email; Fields)
+  - A8 (the inverted-date refusal showing no message; Fields, Rule 9)
+  - A16 (a wrongly formatted typed date looking accepted while the old value is submitted; Fields)
+  - A17 (past dates accepted without a warning; Fields, Rule 9)
+  - A13 (Email Reviewer sending with an empty body; Fields)
+  - A7 (a "Request Sent" row without its "Response due:" line; Rule 2)
+  - A2 (a "Request Resent" row's "Response due:" line showing the review deadline; Rule 2)
+  - A1 (the ORCID entry offered in every state; Rule 23)
+  - OMP2 (the press's opening list ignoring the stage split; Rule 5)
+  - A22 (the window's guidance promising an upload control; Rule 14a)
+  - A23 (the recommendation shown twice, under two labels; Rule 14a)
+  - A21 (a rating star clicked too early not taking; Rule 14a)
+  - A25 (the same window from the dashboard's review indicators, recommendation included; Rule 14a)
+  - A24 (a modification save marking an incomplete review complete, reachable from no screen; Rule 14b)
+  - A12 (the change notice's unsubscribe page omitting the type; Side effects)
+  - A15 (the reviewer's response erasing the "Reminder" milestone; Rules 13, 21)
+  - A26 (the unassign notice arriving under the cancel notice's subject; Side effects)
+  - OMP3 (the press's unassign notice printing "{$journalName}" literally; Side effects)
+  - A27 (a second "Mark as Complete" on a reverted, previously thanked review reading "Reviewer Thanked" at once; Rule 16)
+- **No seed**:
+  - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reminder" and log stamps (Rule 13, Side effects, Settings)
+  - the "Reviewer Files" the reviewer attached, read-only in the Review Details window (Rule 14a)
+  - {OJS} "Mark as Complete" disabled with its message while the review carries no recommendation or leaves required form fields unanswered (Rule 14a)
+- **Owned by another feature**:
+  - a review manager who is also a reviewer of the submission opening its review stage: the no-access box on every stage, so their own row's menu is never reached (Actors preamble and row 6; *Workflow screen & stage access*, its finding A4)
+  - "Login As" on a reviewer row (Actors row 7; *Sign-in & sessions*)
+  - the ORCID deposit itself, from the menu entry and on completion (Rule 23, Side effects; *ORCID integration*)
+  - the round status box, adds on a past round and the review type gating the author's access (Rules 4, 10, Actors row 3; *Review stage & rounds*)
+  - the 3- and 4-week fallback when the review setup is unset (Rule 9; *Review setup & review forms*)
+  - a logged response's emails and bookkeeping (Rule 20, Side effects; *Reviewer's review*)
+  - the invitation record behind the request (Side effects; *User invitations*)
+  - adding a suggested reviewer, and the window opened from a suggestion (Side effects, Settings; *Reviewer suggestions*)
+  - the one-click keyed link in request and reminder emails (Settings; *Reviewer's review*)
 
 ## Findings register
 
@@ -699,11 +1043,14 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A21](#a21) | A rating star clicked just after the Review Details window opens can silently revert unsaved | 🐞 | user-visible | @beaug 2026-08-29 · risk accepted |
 | [A22](#a22) | The Review Details guidance tells the editor to "upload the file below", but the window has no upload control | 🐞 | minor | @beaug 2026-08-29 · ticket to follow |
 | [OMP2](#omp2) | {OMP} The Add Reviewer window's opening list ignores the internal/external stage split; only searching filters by stage | 🐞 | user-visible | — |
+| [A26](#a26) | The unassign notice reaches the reviewer under the cancel notice's subject, "Your review for "{title}" has been cancelled" | 🐞 | minor | — |
+| [OMP3](#omp3) | {OMP} The unassign notice's body prints "{$journalName}" literally where the press's name belongs | 🐞 | minor | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
 | [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
 | [A24](#a24) | Saving a modification would mark a not-yet-complete review complete; no current screen reaches it | ❓ | latent | — |
+| [A27](#a27) | A review thanked, reverted and marked complete again reads "Reviewer Thanked" at once, with no "Complete" step and no second "Thank Reviewer" | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 | [A25](#a25) | Retired: {OJS} opened from the dashboard popover, a submitted review's Review Details window omitted the recommendation; fixed upstream (pkp/ui-library#971) | ✅ | retired | re-verified live (claude), 2026-09-03 — fixed upstream |
 | [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
@@ -1041,6 +1388,31 @@ in-progress review.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: code reading.
 <sup>[f-a24](#fn-a24)</sup>
 
+<a id="a26"></a>
+**A26 — The unassign notice arrives under the cancel notice's subject** · 🐞
+· minor.
+An unanswered reviewer removed with "Unassign Reviewer" gets an email whose
+subject reads "Your review for "{title}" has been cancelled" over the
+removal wording ("…you have been removed from the reviewer assignment for
+"{title}"…"). The unassign notice's own subject, "Your reviewer assignment
+for "{title}" has been removed", is never sent. The reviewer is told two
+different things in one message.
+Basis: test run. <sup>[f-a26](#fn-a26)</sup>
+
+<a id="a27"></a>
+**A27 — A re-completed review skips "Complete" once it was thanked** · ❓ ·
+minor.
+"Revert Decision" on a "Reviewer Thanked" row returns it to "Review
+Viewed", but the acknowledgement stays: pressing "Mark as Complete" again
+turns the row "Reviewer Thanked" at once, with "Revert Decision" alone.
+There is no "Complete" step and no "Thank Reviewer" button, so the reviewer
+cannot be thanked a second time from the row.
+Question: should the revert also withdraw the acknowledgement, so that a
+re-completed review can be thanked again? Lean: the status is honest, since
+the thank-you really went out and History keeps its "Acknowledged" date,
+but a "Thank Reviewer" that is gone for good deserves a product look.
+Basis: test run. <sup>[f-a27](#fn-a27)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1082,6 +1454,15 @@ The server-rendered opening list omits the stage filter that its own request
 parameters carry.
 Basis: live probe (positive and negative controls on both stages).
 <sup>[f-omp2](#fn-omp2)</sup>
+
+<a id="omp3"></a>
+**OMP3 — The unassign notice prints "{$journalName}" on a press** · 🐞 ·
+minor.
+On a press, the removal notice's sentence "…you have been removed from the
+reviewer assignment for "{title}" in {$journalName}." reaches the reviewer
+with that placeholder printed literally where the press's name belongs. On
+a journal the same sentence carries the journal's name.
+Basis: test run. <sup>[f-omp3](#fn-omp3)</sup>
 
 ### OPS
 
@@ -1475,7 +1856,14 @@ and toast texts, the live row flips (Viewed on open, Complete on
 mark-as-complete, surviving reload), rating persistence across
 close/reopen, "Last modified by {name}" after a save, the stacked Modify
 Review window, and the OMP absences — all as written in Rules 14a/14b.
-ORCID row action guard bug: finding A1 (note f-a1).
+ORCID row action guard bug: finding A1 (note f-a1). Test run 2026-09-12 (OMP, scenario 9, one run): the reviewer's Tasks
+panel read "No Items" right after their own "Submit Review", before any
+editor had opened the review — `PKPReviewerReviewStep3Form::execute()`
+deletes the reviewer's REVIEW_ASSIGNMENT task on submit, and
+`reviewConfirmed()`'s own delete of the same task then finds nothing left;
+the clearing belongs to the reviewer's submit (*Reviewer's review*). Both
+suites read the panel after "Mark as Complete" and find no "Review
+pending.", which still holds.
 
 <a id="fn-j"></a>
 **j** — `ThankReviewerForm` (template `thankReviewerForm.tpl`, AFFW-645):
@@ -1494,7 +1882,9 @@ both thank notices verbatim, and the thank-you-mail / suppressed-mail
 controls both passed. Claim check 2026-08-02: the same journey re-driven as
 a Section Editor on OJS and on the OMP twin — both revert directions
 identical; the OMP thank mail "Thank you for your review" arrived under the
-acting editor's name.
+acting editor's name. Test run 2026-09-12 (OJS and OMP, scenario 9, one run each): a second
+"Mark as Complete" on the reverted, previously thanked row landed straight
+on "Reviewer Thanked" (finding A27, note f-a27).
 
 <a id="fn-k"></a>
 **k** — Unassign/cancel (machinery reworked upstream by pkp/pkp-lib#13035,
@@ -1558,7 +1948,10 @@ locale/en/emails.po. Log
 Response (both apps): accept → "Request Accepted", decline → "Request
 Declined", no mail to the reviewer, and the assigned editors received the
 same response mails a real reviewer click sends, From set to the reviewer's
-address.
+address. Test run 2026-09-12 (OJS and OMP, scenario 11): the unassigned
+reviewer's message arrived under the cancel subject with the unassign body
+(finding A26, note f-a26), and on the press with its `{$journalName}`
+uncompiled (finding OMP3, note f-omp3).
 
 <a id="fn-l"></a>
 **l** — Email: `EmailReviewerForm` (template `emailReviewerForm.tpl`,
@@ -1612,7 +2005,10 @@ editor; request subjects "Invitation to review" (OJS) / "Manuscript Review
 Request" (OMP), and "Request to review a revised submission" with the
 reconsider wording for the subsequent-round template. Claim check
 2026-08-02: a UI-added reviewer's own Tasks list showed "Review pending."
-with the submission title (OMP).
+with the submission title (OMP). Test run 2026-09-12 (OJS and OMP, scenario 1): the skip-email notice
+reads the full sentence "{name} was assigned to review this submission and
+was not sent an email notification." (`notification.addedReviewerNoEmail`);
+the shorter quote the spec once carried never appears.
 
 <a id="fn-n"></a>
 **n** — Settings inventory (config surfaces owned elsewhere): context data
@@ -1661,23 +2057,69 @@ controls rendering as the positive control. One install nuance: the generic
 application-level enum; no reviewer group is seeded and none is reachable.
 
 <a id="fn-s"></a>
-**s** — Scenario seeding: seeded journal/press (`publicknowledge`), roster
-accounts per the e2e harness (OJS reviewers `reviewer.julia/paul/amara/adam`;
-OMP splits julia/paul as External and amara/adam as Internal Reviewers);
-mutating flows run on scratch submissions created through the test scenario
-endpoints (`reviewRounds[].reviewers[]` seeding exists, incl. accepted /
-declined / submitted states and per-reviewer review forms); mail observed in
-the mail catcher with per-test throwaway recipients. Overdue rows (scenario
-7) are seeded with passed due dates rather than waited for. The baseline
-journal seeds double-anonymous review with deadlines and reminder
-thresholds; scratch contexts are used for anything needing different review
-setup. Claim check 2026-08-02: scenario 1 driven end-to-end as a Section
+**s** — Scenario seeding. The seeded journal or press is `publicknowledge`;
+roster accounts sign in with the username doubled as the password:
+`editor.diana` is the Editor, `manager.maya` the Journal Manager,
+`assistant.rita` the Funding Coordinator, `author.alex` the Author, and
+`reviewer.julia`, `reviewer.paul`, `reviewer.amara` and `reviewer.adam` the
+Reviewers (OMP splits julia/paul as External and amara/adam as Internal
+Reviewers). Submissions are scratch, built through `POST
+scenarios/submission` (scenarios.md) with `decisions:
+['sendExternalReview']` (OMP: `['skipInternalReview']` with
+`reviewRounds[].stage: 'external'`) for a submission in Round 1 and
+`reviewRounds[].reviewers[]` for the reviewer state (`invited`, `accepted`,
+`declined`, `completed`); the seed carries no files, so review files are
+uploaded through the round's Files for Review panel first; a reviewer
+named in the seed leaves the Add Reviewer search, so a scenario that adds
+through the screen keeps a spare reviewer out of the seed. Scratch journals
+come from `POST scenarios/context` with throwaway `users[]` (role keys
+`manager`, `author`, `externalReviewer`, `funding`); the mail catcher is
+Mailpit, read by the recipient's address and, for a roster reviewer,
+scoped by the scratch submission's title. Overdue rows are produced with a
+passed due date rather than waited for. Per scenario: 1 seeds no reviewer
+and adds two roster reviewers on screen. 2: a scratch journal with a
+throwaway `manager`, an `author`, a user holding `['externalReviewer',
+'manager']` and a second `externalReviewer` seeded `invited`. 3: a scratch
+journal; the fresh address is a throwaway mailbox never used before. 4: a
+scratch journal with a throwaway `author` to enroll and an
+`externalReviewer` for the control. 5: any round with a spare roster
+reviewer. 6: a scratch journal with a throwaway `externalReviewer` seeded
+`invited`, two files uploaded to the round before the edit. 7: a scratch
+journal with two throwaway reviewers seeded `invited`, one given a past
+response date through the Edit window (the screen's only route to
+backdating, finding A17). 8: a roster reviewer seeded `invited`. 9: a
+scratch journal with `reviewForms[]` holding one active form, a throwaway
+reviewer seeded `accepted` who submits the review on their own screen with
+both comment blocks, and a second throwaway reviewer seeded `invited`. 10
+and 16: a roster reviewer seeded `completed` with `comments`. 11: a
+scratch journal with two throwaway reviewers, one seeded `invited`, the
+other holding `['externalReviewer', 'funding']`, seeded `accepted` and
+assigned to the stage through `participants[]` as `funding`. 12: a roster
+reviewer seeded `declined`. 13: a monograph seeded `decisions:
+['sendInternalReview']` with `reviewRounds[].stage: 'internal'`; "Send to
+External Review" recorded on screen. 14: 9's end state; the press control
+on a monograph with a `completed` reviewer. 15: any seeded preprint. 17:
+`author.alex` submits, `reviewer.julia` seeded `invited`. 18:
+`assistant.rita` assigned through `participants[]` as `funding`,
+`reviewer.julia` seeded `invited`. 19: `reviewer.julia` seeded `completed`
+on Round 1, "Mark as Complete" pressed in her Review Details window and
+"Create New Review Round" recorded on screen (the wizard belongs to
+*Review stage & rounds*); `reviewer.paul` is the never-assigned control.
+Claim check 2026-08-02: scenario 1 driven end-to-end as a Section
 Editor (previously covered by other roles); scenarios 8–14 re-driven as a
 Section Editor on OJS with OMP twins for 9, 13 and 14; scenario 15 stands
 on the earlier OPS probe of the same date. Upstream-sync probe 2026-08-29
 (modify-reviews rework; OJS scratch journal + OMP publicknowledge press,
 manager role): scenarios 9, 10 and 14 re-driven on the reworked Review
-Details windows, and scenario 16 driven end-to-end on both apps.
+Details windows, and scenario 16 driven end-to-end on both apps. Test run 2026-09-12 (OJS and OMP): scenario 2's own-row read was
+dropped, because the manager-reviewer opening the editorial dashboard met
+"You don't currently have access to that stage of the workflow." with no
+panel on both apps (the reviewing-manager finding of *Workflow screen &
+stage access*, its A4); scenario 9's "Thank without email" runs on the
+second reviewer after their own accept and submit (the OMP suite; the OJS
+suite leaves that bullet undriven, since its earlier shape on the reverted
+row met finding A27); scenario 11 reads the removal notice by recipient
+and title (OJS) or body (OMP), never by subject (finding A26).
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js::getItemActions`: the guard reads
@@ -1990,6 +2432,29 @@ parity scenario and tests for the two entry paths remain PARKED by
 maintainer ruling (2026-09-01) pending a separate discussion; none were
 added here.
 
+<a id="fn-a26"></a>
+**f-a26** — Test run 2026-09-12 (OJS and OMP, scenario 11): the message
+to the unassigned throwaway reviewer read subject `Your review for
+"{title}" has been cancelled` over the `emails.reviewerUnassign.body` text,
+both read from Mailpit the same day. Mechanism:
+`PKPReviewerGridHandler::updateClearReview()` fetches the email template by
+`ReviewCancel::getEmailTemplateKey()` for the Unassign and the Cancel form
+alike, and `createMail()` sets the mailable's subject from that template,
+so `ReviewerUnassign`'s own REVIEWER_UNASSIGN subject (installed by
+`I12903_ReviewerUnassignEmailTemplate`, note k) never reaches the mail. The
+suites match the removal mail by recipient and title (OJS) or body (OMP)
+and assert the subject neither way.
+
+<a id="fn-a27"></a>
+**f-a27** — Test run 2026-09-12 (OJS and OMP, scenario 9, one run each):
+after "Revert Decision" the row read "Review Viewed"; confirming a second
+"Mark as Complete" left it at "Reviewer Thanked" with "Revert Decision"
+alone, no "Complete" state in between. Mechanism, note j: `unconsiderReview`
+resets only the considered flag, `dateAcknowledged` is never cleared, and
+`ReviewAssignment::getStatus()` ranks a set acknowledged date above a
+completed one, so the acknowledgement wins again on re-confirm. Neither
+suite asserts the path (the register carries it).
+
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
 by `ojs-main DashboardHandler`; the authoritative per-app switch is
@@ -2013,6 +2478,15 @@ Mechanism: the server-rendered panel builds its initial list without the
 review-stage filter that its own request parameters carry
 (`PKPSelectReviewerListPanel`); the search's refetch goes through the
 reviewers listing, which applies it.
+
+<a id="fn-omp3"></a>
+**f-omp3** — Test run 2026-09-12 (scenario 11; the two messages read from
+Mailpit the same day): the OMP message's body read `… in {$journalName}.`
+verbatim, while the OJS message read the scratch journal's name in that
+place. The template text is the same in both apps' own `locale/en/emails.po`
+(`emails.reviewerUnassign.body`, the 2026-08 unassign template of note k):
+it names `{$journalName}`, the journal-only variable, where the app-neutral
+context-name variable belongs, so a press leaves the placeholder as typed.
 
 <a id="fn-ops1"></a>
 **f-ops1** — Code+registry inspection 2026-08-27 (pkp/ops main

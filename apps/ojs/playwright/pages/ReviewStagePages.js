@@ -768,9 +768,16 @@ exports.searchReviewerList = async function searchReviewerList(page, modal, name
  * @param {import('@playwright/test').Page} page
  * @param {import('@playwright/test').Locator} modal from openAddReviewerModal
  * @param {string} name
+ * @param {{action?: string, search?: boolean}} options `action`: the entry's
+ *   button verb, "Select" (default) or, for a previous round's completed
+ *   reviewer, "Reassign"; `search: false` takes the entry from the opening
+ *   list without a search.
  */
-exports.selectReviewer = async function selectReviewer(page, modal, name) {
-    const item = await exports.searchReviewerList(page, modal, name);
+exports.selectReviewer = async function selectReviewer(page, modal, name, {action = 'Select', search = true} = {}) {
+    const item = search
+        ? await exports.searchReviewerList(page, modal, name)
+        : modal.locator('.listPanel--selectReviewer .listPanel__item').filter({hasText: name});
+    await expect(item).toBeVisible({timeout: 30_000});
     await page.waitForFunction(() => {
         const textarea = document.querySelector(
             '#reviewerFormFooter textarea[name="personalMessage"]'
@@ -787,7 +794,7 @@ exports.selectReviewer = async function selectReviewer(page, modal, name) {
     // click on the just-replaced node — retry until the request form has
     // actually swapped in for the search grid.
     await expect(async () => {
-        await item.getByRole('button', {name: `Select ${name}`}).click({timeout: 5_000});
+        await item.getByRole('button', {name: `${action} ${name}`}).click({timeout: 5_000});
         await expect(modal.locator('#regularReviewerForm')).toBeVisible({timeout: 3_000});
     }).toPass({timeout: 30_000});
     await expect(modal.locator('[id^="selectedReviewerName"]')).toHaveText(name);
@@ -838,6 +845,198 @@ exports.completeAssignParticipantForm = async function completeAssignParticipant
 exports.assignParticipant = async function assignParticipant(page, options) {
     await page.getByRole('button', {name: 'Assign', exact: true}).click();
     await exports.completeAssignParticipantForm(page, options);
+};
+
+// ---------------------------------------------------------------------------
+// Reviewer row helpers (the reviewer-assignment spec, U27)
+// ---------------------------------------------------------------------------
+
+/**
+ * Open a reviewer row's "More Actions" menu and return the menu (headlessui
+ * portals it to the document root, so its items resolve page-wide).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openRowMenu = async function openRowMenu(page, row) {
+    await row.getByRole('button', {name: 'More Actions'}).click();
+    const menu = page.getByRole('menu');
+    await expect(menu.getByRole('menuitem').first()).toBeVisible({timeout: 30_000});
+    return menu;
+};
+
+/**
+ * Close an open row menu by pressing its button again (never Escape, which
+ * also closes the workflow dialog underneath).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.closeRowMenu = async function closeRowMenu(page, row) {
+    await row.getByRole('button', {name: 'More Actions'}).click();
+    await expect(page.getByRole('menu')).toHaveCount(0, {timeout: 30_000});
+};
+
+/**
+ * Open a reviewer row's "More Actions" menu and click one entry by its exact
+ * accessible name ("Edit" must not match "Editorial Notes").
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ * @param {string} name the menu entry
+ */
+exports.clickRowAction = async function clickRowAction(page, row, name) {
+    const menu = await exports.openRowMenu(page, row);
+    await menu.getByRole('menuitem', {name, exact: true}).click();
+};
+
+/**
+ * The row's status title span ("Request Sent", "Overdue", …): it carries
+ * `text-negative` when the state is shown in red and a `title` tooltip on
+ * the declined and cancelled states.
+ *
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.statusTitle = function statusTitle(row) {
+    return row.locator('span.text-base-bold').first();
+};
+
+/**
+ * Upload files to the round through the "Files for Review" panel's
+ * selection window, tick them and confirm. Returns after the panel lists
+ * every file.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('./ReviewStagePages.js').WorkflowPage} workflow
+ * @param {Array<string | {name: string, mimeType: string, buffer: Buffer}>} files
+ */
+exports.uploadReviewFiles = async function uploadReviewFiles(page, workflow, files) {
+    const dialog = await exports.openReviewFilesDialog(page);
+    for (const file of files) {
+        await exports.uploadInReviewFilesDialog(page, dialog, {file});
+        await exports.reviewFilesCheckbox(dialog, fileName(file)).check();
+    }
+    await exports.confirmReviewFilesDialog(page, dialog);
+    for (const file of files) {
+        await expect(workflow.panelRow('Files for Review', fileName(file))).toBeVisible({
+            timeout: 30_000,
+        });
+    }
+};
+
+/**
+ * Open a reviewer row's "Edit" window (the legacy "Edit Review" form) and
+ * wait for its fields.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openEditReview = async function openEditReview(page, row) {
+    await exports.clickRowAction(page, row, 'Edit');
+    const modal = exports.legacyModal(page, 'editReviewForm');
+    await expect(modal.locator('input[name="isReviewPubliclyVisible"]')).toBeVisible({
+        timeout: 30_000,
+    });
+    return modal;
+};
+
+/**
+ * Press the Edit Review window's "OK" and wait for the form to go (a
+ * successful save closes the window; the caller asserts a refused save by
+ * the form staying).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} modal from openEditReview
+ */
+exports.saveEditReview = async function saveEditReview(page, modal) {
+    await modal.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(modal.locator('form#editReviewForm')).toBeHidden({timeout: 30_000});
+    await waitForJQueryIdle(page);
+};
+
+/**
+ * The Edit Review window's "Files To Be Reviewed" checkbox of one file.
+ *
+ * @param {import('@playwright/test').Locator} modal from openEditReview
+ * @param {string} name the listed file name
+ */
+exports.editReviewFileCheckbox = function editReviewFileCheckbox(modal, name) {
+    return modal.getByRole('row').filter({hasText: name}).locator('input[name="selectedFiles[]"]');
+};
+
+/**
+ * Record "Create New Review Round" from the workflow's decision area
+ * (the wizard titles itself "New Review Round") and return once the
+ * workflow shows Round 2.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('./ReviewStagePages.js').WorkflowPage} workflow
+ * @param {number} round the round the decision creates
+ */
+exports.createNewReviewRound = async function createNewReviewRound(page, workflow, round) {
+    await workflow.decisionButton('Create New Review Round').click();
+    const decision = new exports.DecisionPage(page);
+    await decision.expectOpen('New Review Round');
+    await decision.completeAll();
+    await workflow.expectPageTitle(`Review (Round ${round})`);
+};
+
+/**
+ * Set a legacy form's TinyMCE box (by its textarea name) once the editor
+ * is initialized; text written earlier is wiped by the editor's own init
+ * (patterns.md "UI realities"). The editor is saved back to its textarea
+ * so the form posts the text.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} textareaName e.g. 'message'
+ * @param {string} html
+ */
+exports.typeRichText = async function typeRichText(page, textareaName, html) {
+    const editorId = await page.waitForFunction(
+        (name) => {
+            const textarea = document.querySelector(`form textarea[name="${name}"]`);
+            const mce = window.tinyMCE || window.tinymce;
+            const editor = textarea && mce?.get(textarea.id);
+            return editor?.initialized ? textarea.id : false;
+        },
+        textareaName,
+        {timeout: 30_000}
+    );
+    await page.evaluate(
+        ([id, value]) => {
+            const mce = window.tinyMCE || window.tinymce;
+            const editor = mce.get(id);
+            editor.setContent(value);
+            editor.fire('change');
+            editor.save();
+        },
+        [await editorId.jsonValue(), html]
+    );
+};
+
+/**
+ * The submission's "Activity Log & Notes" window, opened from the workflow
+ * header's "Activity Log" button; returns the dialog once its grid answered.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.openActivityLog = async function openActivityLog(page) {
+    await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
+    const log = page.getByRole('dialog').filter({hasText: 'Activity Log & Notes'});
+    await expect(log.getByRole('row').first()).toBeVisible({timeout: 30_000});
+    await waitForJQueryIdle(page);
+    return log;
+};
+
+/**
+ * Close a legacy side window (Activity Log, History) through its own
+ * "Close" button.
+ *
+ * @param {import('@playwright/test').Locator} dialog
+ */
+exports.closeSideWindow = async function closeSideWindow(dialog) {
+    await dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
+    await expect(dialog).toBeHidden({timeout: 30_000});
 };
 
 module.exports.waitForJQueryIdle = waitForJQueryIdle;

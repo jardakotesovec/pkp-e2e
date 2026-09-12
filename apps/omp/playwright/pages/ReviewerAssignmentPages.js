@@ -89,8 +89,29 @@ function selectButton(entry) {
  * too early: locator pitfall "AJAX-loaded email templates").
  */
 async function selectReviewerAndAwaitForm(page, addModal, name) {
+    await awaitLetterEditorReady(page);
     await selectButton(reviewerListEntry(addModal, name)).click();
     await awaitRequestFormReady(page, addModal);
+}
+
+/**
+ * Wait for the Add Reviewer window's request-letter editor (TinyMCE on the
+ * hidden `personalMessage` textarea) to be initialized. The selection
+ * handler prefills the letter through the editor's API, so a Select or
+ * Reassign clicked earlier silently loses the prefill (patterns.md
+ * "Reviewer-select copies the email template into TinyMCE client-side");
+ * a search's own round trip used to mask the race, an unsearched pick
+ * (a later round's "Reassign") does not.
+ */
+async function awaitLetterEditorReady(page) {
+    await page.waitForFunction(() => {
+        const textarea = document.querySelector(
+            '#reviewerFormFooter textarea[name="personalMessage"]'
+        );
+        // eslint-disable-next-line no-undef
+        const mce = window.tinyMCE || window.tinymce;
+        return !!(textarea && mce?.get(textarea.id)?.initialized);
+    }, undefined, {timeout: 30_000});
 }
 
 /** Wait for the shared request form (letter + date pickers) to be live. */
@@ -388,15 +409,190 @@ async function openModifyReview(page, readModal, settledText) {
     return {editModal, commentBody};
 }
 
+/** One entry of an open row menu, by its exact label. */
+function menuEntry(menu, name) {
+    return menu.getByRole('menuitem', {name, exact: true});
+}
+
+/**
+ * Close an open row menu without touching the workflow dialog underneath
+ * (Escape would close that too — locator pitfall 7): the row's own "More
+ * Actions" button toggles the menu shut.
+ */
+async function closeRowMenu(page, row, menu) {
+    await row.getByRole('button', {name: 'More Actions'}).click();
+    await expect(menu).toBeHidden();
+}
+
+/** The Reviewers panel's column headers (Rule 1), by exact label. */
+function columnHeader(modal, name) {
+    return reviewerPanel(modal).getByRole('columnheader', {name, exact: true});
+}
+
+/**
+ * The status cell's title line (`ReviewerManagerCellStatusInfo`): the bold
+ * span carrying the state's label; an overdue state adds `text-negative`
+ * (the red), a declined or cancelled one a `title` tooltip.
+ */
+function statusTitle(row, text) {
+    return row.locator('span.text-base-bold').filter({hasText: text});
+}
+
+/**
+ * The toasts on screen (`.pkpNotification`, the app's notification stack;
+ * a dismissed or expired one lingers hidden in the DOM, so only visible
+ * ones count).
+ */
+function toasts(page) {
+    return page.locator('.pkpNotification:visible');
+}
+
+/**
+ * Open the row's "Editorial Notes" window (More Actions › Editorial Notes,
+ * form#reviewerGossipForm) and return it, settled on its guidance sentence.
+ */
+async function openEditorialNotes(page, row) {
+    const menu = await openRowMenu(page, row);
+    await menuEntry(menu, 'Editorial Notes').click();
+    const notesModal = topModal(page);
+    await expect(
+        notesModal.getByText(/Record notes about this reviewer/)
+    ).toBeVisible({timeout: 20_000});
+    return notesModal;
+}
+
+/** Open the row's "History" window and return it, settled on "Assigned". */
+async function openHistory(page, row) {
+    const menu = await openRowMenu(page, row);
+    await menuEntry(menu, 'History').click();
+    const historyModal = topModal(page);
+    await expect(historyModal.getByText('Assigned').first()).toBeVisible({
+        timeout: 20_000,
+    });
+    return historyModal;
+}
+
+/**
+ * Close a legacy (FBV) window through its header "Close" control (its
+ * bottom "Cancel" is an `<a>` link and posts a cancel on some forms; the
+ * header control only closes). `[data-cy="active-modal"]` marks the top
+ * window only, so the close resolves once the workflow modal's own
+ * heading is the active one again.
+ */
+async function closeLegacyWindow(page, modal) {
+    await modal.getByRole('button', {name: 'Close', exact: true}).click();
+    await expect(
+        page
+            .locator('[data-cy="active-modal"]')
+            .getByRole('heading', {name: /^Workflow:/})
+            .first()
+    ).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * Open the submission's Activity Log (the workflow header's "Activity Log"
+ * button; a legacy grid in a dialog) and return the dialog, settled on its
+ * table.
+ */
+async function openActivityLog(page) {
+    await page
+        .getByRole('button', {name: 'Activity Log', exact: true})
+        .click();
+    const log = page.getByRole('dialog', {name: /Activity Log/});
+    await expect(log.getByRole('table').first()).toBeVisible({timeout: 30_000});
+    return log;
+}
+
+/** The newest activity-log row carrying `text`. */
+function activityLogRow(log, text) {
+    return log.getByRole('row').filter({hasText: text}).first();
+}
+
+/** The "Search By Name" autocomplete input of the Enroll Existing User form. */
+function enrollSearchBox(addModal) {
+    return addModal.locator('[id^="userId_container"] input[type="text"]').first();
+}
+
+/**
+ * Type a name into the enroll autocomplete and wait for its own response
+ * (`get-users-not-assigned-as-reviewers`), the bound for presence and
+ * absence reads alike; returns the suggestion list.
+ */
+async function enrollAutocomplete(page, addModal, phrase) {
+    const box = enrollSearchBox(addModal);
+    await box.fill('');
+    const answered = page.waitForResponse((r) =>
+        r.url().includes('get-users-not-assigned-as-reviewers')
+    );
+    await box.pressSequentially(phrase, {delay: 20});
+    await answered;
+    return page.locator('.ui-autocomplete');
+}
+
+/** The "Review Form" select of an Add or Edit window (Rule 10). */
+function reviewFormSelect(scope) {
+    return scope.locator('select[name="reviewFormId"]');
+}
+
+/** The "Choose a predefined message…" template chooser of a legacy window. */
+function templateChooser(scope) {
+    return scope.locator('select[name="template"]');
+}
+
+/** The "Do not send email to Reviewer." box of a legacy window. */
+function skipEmailBox(scope) {
+    return scope.locator('input[name="skipEmail"]');
+}
+
+/**
+ * A later-round entry's "Reassign" button (Rule 8). Its accessible name is
+ * "Reassign {full name}" (the visible "Reassign" text is aria-hidden).
+ */
+function reassignButton(entry) {
+    return entry.getByRole('button', {name: /^Reassign /});
+}
+
+/**
+ * Press the row's "Thank Reviewer" button and return the window, settled on
+ * its prefilled message (TinyMCE `message`).
+ */
+async function openThankReviewer(page, row) {
+    await row.getByRole('button', {name: 'Thank Reviewer'}).click();
+    const thankModal = topModal(page);
+    await expect(
+        thankModal.getByRole('button', {name: 'Thank Reviewer', exact: true})
+    ).toBeVisible({timeout: 20_000});
+    await awaitTinyMce(page, 'message');
+    return thankModal;
+}
+
 module.exports = {
     reviewerPanel,
     reviewerRow,
     openRowMenu,
+    menuEntry,
+    closeRowMenu,
+    columnHeader,
+    statusTitle,
+    toasts,
+    openEditorialNotes,
+    openHistory,
+    closeLegacyWindow,
+    openActivityLog,
+    activityLogRow,
+    enrollSearchBox,
+    enrollAutocomplete,
+    reviewFormSelect,
+    templateChooser,
+    skipEmailBox,
+    reassignButton,
+    openThankReviewer,
     openAddReviewer,
     searchReviewerList,
     reviewerListEntry,
     selectButton,
     selectReviewerAndAwaitForm,
+    awaitLetterEditorReady,
     awaitRequestFormReady,
     addReviewerFromList,
     openEditReview,
