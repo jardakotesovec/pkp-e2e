@@ -363,26 +363,34 @@ the account's roles, never on which dashboard page it opens from:
 
 Scenarios 6, 13, 15 and 16, and scenario 9 on a journal, run on the seeded
 journal with ready accounts; the rest run on a scratch journal with
-throwaway accounts and scratch submissions, so the view counts hold only
-what the scenario built. The accounts, passwords, mail catcher's address,
-tooling recipe and each scenario's starting state are in its footnote.
+throwaway accounts and scratch submissions (scenario 17 on two, one per
+setting end), so the view counts hold only what the scenario built. The
+accounts, passwords, mail catcher's address, tooling recipe and each
+scenario's starting state are in its footnote.
 
 1. **Land and walk the views**
 
    Given: Journal Manager, on the journal's login page, the journal holding
-   one active submission and one published one.
+   one new submission, one in copyediting {OJS OMP}, one in production and
+   one published one.
 
    - **Landing**: sign in: the editorial dashboard opens in the "Assigned
      to me" view, under the sidebar's "Editor Dashboard" group, which has
      one entry per view with a count badge and the "Search submissions" box
      at its top.
-   - **The table**: the heading names the view with its count ("Active
-     submissions (1)") over the columns "ID", "Submissions", "Stage",
-     "Days", "Editorial Activity" and "Actions"; a Stage cell names the
-     stage in plain text with a small colored dot beside it.
+   - **The "Reviews overdue" badge** {OJS OMP}: its count badge is colored
+     while it reads 0; the other badges are plain.
+   - **The table**: the heading names the view with its count ("Published
+     (1)") over the columns "ID", "Submissions", "Stage", "Days",
+     "Editorial Activity" and "Actions"; a Stage cell names the stage in
+     plain text with a small colored dot beside it.
    - **The views**: open each entry in turn: each opens the list under its
      own heading with its count, the published submission under "Published"
-     ("Published (1)") and the active one under "Active submissions".
+     ("Published (1)") and the others under "Active submissions".
+   - **The stage views**: the copyediting submission lists under "All in
+     copyediting stage", its activity cell reading "Copyedited Files
+     Uploaded: {count}" {OJS OMP}; the production one lists under "All in
+     production stage" with an empty activity cell.
    - **Control**: a view whose badge reads 0 shows a single "No Items" row
      under its heading. <sup>s1</sup>
 
@@ -459,8 +467,9 @@ tooling recipe and each scenario's starting state are in its footnote.
 5. **Filter the list**
 
    Given: Journal Manager, on "Active submissions" of a journal where one
-   submission has been idle for 30 days or more and the others are fresh;
-   a Section Editor of the same journal.
+   submission has been idle for 30 days or more and the others are fresh,
+   with two sections and one submission in the second {OJS OPS}; a Section
+   Editor of the same journal, assigned to one submission.
 
    - **"Filters"**: press it: a side panel titled "Filters" opens with
      "Days since last activity", "Clear Filters" and "Apply Filters"; set
@@ -469,11 +478,22 @@ tooling recipe and each scenario's starting state are in its footnote.
      follows, and a chip for the filter shows above the table with "Clear
      Filters" beside it.
    - **"Clear Filters"**: press it: the full view is back.
-   - **Switching views**: apply the same filter again, then open
-     "Published": the chip is gone and the view shows its full list.
+   - **"Section"** {OJS OPS}: press "Filters", tick the second section in
+     "Section" and press "Apply Filters": the list narrows to the
+     submission in that section, with a chip for the filter above the
+     table; press "Clear Filters".
    - **"Assigned To Editor"**: the manager's panel lists the field (labelled
      "Assigned to Moderator" on a preprint server); its suggest list offers
-     nothing until a name is typed.
+     nothing until a name is typed; type the Section Editor's name, pick
+     them from the list and press "Apply Filters": the list narrows to the
+     submission they are assigned to, with a chip for the filter above the
+     table.
+   - **A chip's X**: with that filter still active, set "Days since last
+     activity" to 30 and press "Apply Filters", then press the Days chip's
+     X: that chip alone goes, the "Assigned To Editor" chip stays, and the
+     list shows the Section Editor's submission again.
+   - **Switching views**: with that chip still active, open "Published":
+     the chip is gone and the view shows its full list.
    - **Control**: Section Editor: open the same panel: there is no
      "Assigned To Editor" field, while "Days since last activity" is there.
      <sup>s5</sup>
@@ -503,7 +523,8 @@ tooling recipe and each scenario's starting state are in its footnote.
    - **"Days"**: click it: the rows reorder by idle time the same way, the
      address following.
    - **Paging**: on a view with more than 30 rows, pager controls sit under
-     the list, and page 2 shows the rest.
+     the list, and page 2 shows the rest; the address does not record
+     which page is showing.
    - **Control**: reloading the sorted address brings the rows back in the
      same order. <sup>s7</sup>
 
@@ -524,34 +545,49 @@ tooling recipe and each scenario's starting state are in its footnote.
 
 9. **Review activity at a glance** {OJS OMP}
 
-   Given: Journal Manager, with one submission in review whose round has no
-   reviewers yet, and a second whose round has two review requests out,
-   unanswered.
+   Given: Journal Manager; four submissions in review: one whose round has
+   no reviewers yet, one whose round has two review requests out,
+   unanswered, and a third reviewer who declined, one whose author was
+   asked for revisions this round, and one asked for revisions to be taken
+   to a new review round.
 
    - **No reviewers yet**: the first row's cell offers "Assign Reviewers";
      press it: the Add Reviewer window opens; close it.
    - **Two requests out**: the second row's cell shows two countdown
-     indicators, and the submission lists under "Awaiting reviews".
-   - **A popover**: click one indicator: it names the reviewer, the review
-     type and "Awaiting Response from the reviewer", with "Edit Due Date",
-     "View details" and "Unassign".
+     indicators and an icon for the declined reviewer, and the submission
+     lists under "Awaiting reviews".
+   - **A popover**: click one countdown indicator: it names the reviewer,
+     the review type and "Awaiting Response from the reviewer", with "Edit
+     Due Date", "View details" and "Unassign".
+   - **The declined reviewer's popover**: click the icon: "Review Request
+     declined on {date}", with "Resend Review Request", "View details" and
+     "Cancel Reviewer".
    - **"View details"**: press it: the window the workflow's Reviewers
-     panel opens for that reviewer appears; close it: the list reloads.
-   - **Reviewer**: one of the two accepts the request and submits their
-     review.
+     panel opens for that reviewer appears; close it.
+   - **Reviewer**: one of the two accepts the request.
+   - **The accepted request**: back on the list, that reviewer's indicator
+     is still a countdown ring; its popover reads "Ongoing review - request
+     accepted", with "Edit Due Date", "View details" and "Cancel Reviewer".
+   - **Reviewer**: the same reviewer submits their review.
    - **The completed review**: that reviewer's indicator is now a done
-     mark; its popover reads "Review completed on {date}" with "View unread
-     recommendation"; press it and close the window that opens: reopened,
-     the popover offers "View recommendation". The submission now lists
-     under "Reviews submitted" too.
+     mark; its popover reads "Review completed on {date}" (on a journal it
+     also names the reviewer's recommendation; a press shows the sentence
+     without one) with "View unread recommendation"; press it and close the
+     window that opens: reopened, the popover offers "View recommendation".
+     The submission now lists under "Reviews submitted" too.
+   - **Revisions asked**: the third row's cell reads "Revisions requested
+     from author" and the fourth's "Revisions requested from the author to
+     be taken to a new review round".
    - **Control**: the other reviewer's indicator is still a countdown ring
      whose popover reads "Awaiting Response from the reviewer".
      <sup>s9</sup>
 
 10. **The conflict row**
 
-    Given: Journal Manager who also holds the Author role, with one
-    submission they authored and another they did not.
+    Given: Journal Manager who also holds the Author role and, on a journal
+    or press, the Reviewer role, with one submission they authored, another
+    they did not, and, on a journal or press, a third in review that they
+    are on as a reviewer.
 
     - **Their own submission's row**: the activity cell reads "You cannot
       access this submission as a Journal Manager since you are the author.
@@ -559,6 +595,9 @@ tooling recipe and each scenario's starting state are in its footnote.
       button at all: no "View" and no "Assign Editor".
     - **"My Submissions as Author"**: the same submission sits normally
       under that sidebar group.
+    - **The submission they review** {OJS OMP}: its activity cell carries
+      a conflict notice that sends them to "Review Assignments"; judge it
+      by that phrase. The row offers no button either.
     - **Control**: the other submission's row keeps its "View".
       <sup>s10</sup>
 
@@ -567,15 +606,25 @@ tooling recipe and each scenario's starting state are in its footnote.
     Given: Journal Manager, and a Section Editor assigned to one submission
     titled "Declined study".
 
-    - **Journal Manager**: decline the submission from its stage (the
-      decision belongs to the stage features), then open "Declined": the
-      row is listed with its Stage cell reading "Declined" and its activity
-      cell "Declined during the {stage} stage.", and it keeps "View".
+    - **Journal Manager**: on "Active submissions", press "View" on the
+      row and decline the submission from its stage inside the panel (the
+      decision belongs to the stage features); close the panel: the
+      heading total and the "Declined" badge move without a reload; open
+      "Declined": the row is listed with its Stage cell reading "Declined"
+      and its activity cell "Declined during the {stage} stage.", and it
+      keeps "View".
     - **Section Editor**: their "Editor Dashboard" group has no "Declined"
       entry [A1](#a1) and, on a journal or press, no "Needs editor" entry
       either; the submission is gone from every one of their views.
     - **Their global search**: type Declined study into "Search
       submissions" and submit: "Search Results (1)" lists it, with "View".
+    - **Deleted inside the panel**: Journal Manager: on "Declined", press
+      "View" on the row, press its stage's "Delete" and confirm (the dialog
+      belongs to
+      [→ the workflow screen](U24-workflow-screen-and-stage-access.md#delete-dialog)):
+      the panel closes on the refreshed list, from which the row is gone,
+      and the "Declined" badge and the heading total follow within a few
+      seconds, without a reload.
     - **Control**: the Journal Manager's own group offers "Declined" and,
       on a journal or press, "Needs editor". <sup>s11</sup>
 
@@ -594,7 +643,16 @@ tooling recipe and each scenario's starting state are in its footnote.
       a checkbox on the two incomplete rows only and "Delete Incomplete
       Submissions" and "Cancel" above; the delete button is disabled until
       a row is ticked.
-    - **Delete**: tick both and press "Delete Incomplete Submissions": the
+    - **"Cancel"**: tick one row and press "Cancel" above the list:
+      selection mode ends with nothing deleted, both incomplete rows still
+      listed; choose "Delete Incomplete Submissions" again, tick one row,
+      press "Delete Incomplete Submissions" and then "Cancel" in the
+      dialog: the same.
+    - **A view switch in selection mode**: choose "Delete Incomplete
+      Submissions" once more, tick one row, open "Published" and return to
+      "Active submissions": no row is ticked and nothing was deleted.
+    - **Delete**: choose "Delete Incomplete Submissions" again, tick both
+      and press "Delete Incomplete Submissions": the
       "Confirm Delete of Incomplete Submissions" dialog reads "Are you sure
       you want to delete the selected items? This action cannot be undone.
       Please confirm to proceed."; press "Confirm": both rows are gone, and
@@ -662,34 +720,37 @@ App-specific:
     - **Control**: Journal Manager: the same address opens the dashboard.
       <sup>s16</sup>
 
+17. **A review confirmed, with and without a minimum** {OJS OMP}
+
+    Given: Journal Manager; two journals, one at the install default of
+    "Reviews required" and one where it is set to 1, each holding one
+    submission in review whose single reviewer has submitted their review.
+
+    - **Before**: on each journal the row's activity cell shows the
+      reviewer's indicator alone, no sentence, and the submission lists
+      under "Reviews submitted"; on the journal with the minimum it lists
+      under "Needs reviews" too.
+    - **Journal Manager confirms**: on the journal with the minimum, click
+      the indicator and press "View unread recommendation": the window the
+      workflow's Reviewers panel opens for reading the review appears;
+      confirm the review there
+      ([→ reading and confirming](U27-reviewer-assignment-and-management.md#read-review))
+      and close it: the list reloads.
+    - **The confirmed review**: the indicator's popover now reads "Review
+      was confirmed by editor", with "View recommendation".
+    - **With a minimum set**: the activity cell reads "Minimum required
+      number of reviews have been confirmed. A decision is needed."
+    - **At the default**: the same confirmation on the other journal ends
+      with the activity cell reading "All reviews are confirmed and a
+      decision is needed."
+    - **Control**: on the journal with the minimum, "Needs reviews" no
+      longer lists the submission once its review is confirmed.
+      <sup>s17</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
-- **Budget** — states:
-  - "Needs reviews" (Rule 2)
-  - "Reviews required" at a non-default count: the "Minimum required number of reviews…" message {OJS OMP} (Settings, Rule 9e)
-  - "All reviews are confirmed and a decision is needed." (Rule 9e)
-  - "Revisions requested from author" (Rule 9e)
-  - "Revisions requested from the author to be taken to a new review round" after a resubmit decision (Rule 9e)
-  - "Author revisions submitted" (Rule 2)
-  - "All in copyediting stage" (Rule 2) and "Copyedited Files Uploaded: {count}" {OJS OMP} (Rule 9g)
-  - "All in production stage" (Rule 2)
-  - the "Ongoing review - request accepted" popover with "Cancel Reviewer" (Rule 10)
-  - the "Review Request declined on {date}" popover with "Resend Review Request" (Rule 10)
-  - the "Review was confirmed by editor" popover (Rule 10)
-  - the conflict row as a reviewer, its notice pointing to "Review Assignments" {OJS OMP} (Rule 9a)
-  - the "Section" filter on a journal with more than one section {OJS OPS} (Fields)
-  - the "Categories" filter (Fields)
-  - "Assigned To Editor" narrowing the view to the picked editor's submissions (Fields, Rule 8)
-  - the counts following a decision taken, or a submission deleted, inside the workflow panel (Rule 13)
-- **Budget** — variants:
-  - the "Reviews overdue" badge colored whatever it counts, zero included {OJS OMP} (Rule 1)
-  - the pager's page never in the address (Rules 4, 5)
-  - a chip's X dropping just that filter (Rule 8)
-  - "Cancel", in the dialog or above the list, leaving nothing deleted (Rule 12)
-  - changing the view, search or filters dropping the selection (Rule 12)
-  - the completed-review popover naming the recommendation on a journal and not on a press (Rule 10)
 - **Nothing new to test**:
   - Site Administrator, journal-wide like the Journal Manager (Actors row 2; the Journal Manager's views, scenario 2)
   - assistants, assigned-only like the Section Editor (Actors row 2; the Section Editor's views, scenario 2)
@@ -704,8 +765,9 @@ Left out of the scenarios above, by reason:
   - A8 (the opt-out labelled "Weekly email of outstanding tasks")
   - OMP1 (no series filter on a press)
 - **No seed**:
-  - "Reviews overdue" (Rule 2) and the "Review Request overdue by {days} days" popover (Rule 10)
-  - "Revisions submitted", plus "New review round to be created" (Rule 9e)
+  - "Reviews overdue" (Rule 2) and the "Review Request overdue by {days} days" popover (Rule 10): no seed backdates a request or a review deadline
+  - "Author revisions submitted" (Rule 2), "Revisions submitted" and "New review round to be created" (Rule 9e): no seed uploads the author's revisions
+  - the "Categories" filter narrowing to a submission in a category (Fields): no seed puts a submission in a category, and a scratch journal gets no categories
   - recommending editors on board: the three recommendation messages {OJS OMP} (Rule 9f)
   - the monthly "Outstanding editorial tasks for {journal}" email: its recipients, up to 20 items, links and in-app notification {OJS OMP} (Actors row 8, Side effects)
   - nothing sent to editors with nothing outstanding, to opted-out or removed accounts, to assistants or to Site Administrators (Side effects, Settings)
@@ -1226,11 +1288,18 @@ a listing/search/filter pass would settle it; lean: holds.
 **s1 — scenario 1 seeding.** A scratch journal (the suites' choice, so every
 badge count is the scenario's own) with a throwaway Journal Manager
 (`manager`) and Author (`author`; passwords = username doubled, as for
-every throwaway account below), holding one submitted submission and one
-`published: true`, both by the author. Sign in on the journal's own login
-page (`{path}/login`): landing on `dashboard/editorial` "Assigned to me"
-is the landing rule in *[My Submissions](U22-my-submissions.md)*,
-"Landing". The "No Items" control uses whichever view's badge reads 0.
+every throwaway account below), holding one submitted submission, one in
+copyediting (`decisions: ['skipExternalReview']`, OJS and OMP), one in
+production (`decisions: ['skipExternalReview', 'sendToProduction']` on
+OJS and OMP; on OPS the submitted preprint already sits on Production, so
+one seed serves both) and one `published: true`, all by the author. Sign
+in on the journal's own login page (`{path}/login`): landing on
+`dashboard/editorial` "Assigned to me" is the landing rule in
+*[My Submissions](U22-my-submissions.md)*, "Landing". The "Reviews
+overdue" badge color is the attention variant (fn-d). The copyediting
+cell's count is expected at 0, since a seeded submission carries no files
+(scenarios.md); the suites match the label and read the number. The
+"No Items" control uses whichever view's badge reads 0.
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** A scratch journal with a throwaway Journal
@@ -1271,9 +1340,17 @@ cannot be seeded, because the scenario endpoints cannot backdate last
 activity (checked 2026-08-26), so the suites set the slider to 30 against
 fresh rows and assert the chip, the narrowing (to no rows) and the
 restore; the slider keeps rows idle *at or above* the value (fn-i). The
-"Switching views" bullet re-applies the filter, then opens "Published".
-The suggest list is opened without typing. The Section Editor leg reuses
-s2's account.
+"Section" leg (OJS and OPS) needs a two-section scratch context
+(`sections: [{abbrev: …}, {abbrev: …}]`) with one submission seeded under
+the second (`section: <abbrev>`); OMP's context accepts no `series[]`
+and its panel has no series field (OMP1). The "Assigned To Editor" leg
+needs the throwaway Section Editor assigned to one submission
+(`participants: [{username: <se>, role: 'sectionEditor'}]`); the suggest
+list is opened without typing first, then the name is typed and picked.
+The chip's-X leg adds the Days filter at 30 on top (the list empties)
+and drops the Days chip: the editor's chip and its one row are back. The
+"Switching views" bullet opens "Published" with the editor's chip still
+active. The Section Editor's control leg reuses the same account.
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** The seeded journal: a scratch submission by
@@ -1300,30 +1377,56 @@ a throwaway Section Editor to assign. On OMP the submission stage precedes
 internal review as on OJS.
 
 <a id="fn-s9"></a>
-**s9 — scenario 9 seeding.** {OJS OMP} Two submissions moved to review
+**s9 — scenario 9 seeding.** {OJS OMP} Four submissions moved to review
 (`decisions: ['sendExternalReview']`): one with `reviewRounds:
-[{reviewers: []}]`, one with two reviewers `invited`. OJS runs it on the
-seeded journal (`manager.maya`, `author.alex`, `reviewer.julia` and
-`reviewer.paul`); OMP on a scratch press with throwaway reviewers, since
-the roster reviewers are not enrolled on a scratch context. Seed *both*
-requests as invited, not accepted (observed 2026-08-26): the "Awaiting
-Response from the reviewer" popover belongs to an open request — an
-already-accepted one shows the "Ongoing review - request accepted"
-popover instead. "View details" opens the "Review Details: {title}"
-window (fn-k). The reviewer completes through their own wizard
-([reviewer flows](U28-reviewers-review.md)), then the list is reloaded.
+[{reviewers: []}]`, one with two reviewers `invited` and a third
+`status: 'declined'`, one with `decisions: ['sendExternalReview',
+'requestRevisions']` and one with `decisions: ['sendExternalReview',
+'resubmit']` (the "Request Revisions" decision with and without "Require
+New Review Round"). OJS runs it on the seeded journal (`manager.maya`,
+`author.alex`, `reviewer.julia` and `reviewer.paul` invited,
+`reviewer.amara` declined); OMP on a scratch press with throwaway
+reviewers, since the roster reviewers are not enrolled on a scratch
+context. Seed the two open requests as invited, not accepted (observed
+2026-08-26): the "Awaiting Response from the reviewer" popover belongs to
+an open request — an already-accepted one shows the "Ongoing review -
+request accepted" popover instead, which is what the "accepted request"
+bullet reads after the reviewer's on-screen accept. The declined
+reviewer's icon and popover are the declined row of the Rule 10 table
+(fn-k). "View details" opens the "Review Details: {title}" window (fn-k).
+The reviewer accepts and later completes through their own wizard
+([reviewer flows](U28-reviewers-review.md)), the list reloaded after
+each.
 
 <a id="fn-s10"></a>
 **s10 — scenario 10 seeding.** A scratch journal; a Manager+Author combo
-account (`roles: ['manager', 'author']`) with one submission it submitted,
-plus an unrelated submission as the positive "View" control.
+account (`roles: ['manager', 'author']`, plus `'externalReviewer'` on OJS
+and OMP) with one submission it submitted, an unrelated submission as the
+positive "View" control, and on OJS and OMP a third moved to review with
+the combo account invited as its reviewer (`decisions:
+['sendExternalReview'], reviewRounds: [{reviewers: [{username: <combo>,
+status: 'invited'}]}]`). The reviewer notice is the second fixed sentence
+of fn-j; the test matches it by "Review Assignments", not by its role
+wording (A3).
 
 <a id="fn-s11"></a>
 **s11 — scenario 11 seeding.** s2's assigned submission, titled "Declined
-study", declined by the manager from its current stage. The Section Editor
-checks: no "Declined" sidebar entry (and on OJS and OMP no "Needs editor"
-entry — rosters live-probed 2026-08-26, fn-b), submission absent from all
-views, found via global search.
+study", seeded active and declined by the manager on screen, from its
+current stage inside the workflow panel opened by "View", so the badge and
+total can be read after the panel closes (Rule 13, fn-d). The decision is
+the "Decline Submission" wizard on every app: the Submission stage's on OJS
+and OMP, the Production stage's on OPS, where a submitted preprint already
+sits on Production ([→ Submission stage](U25-submission-stage.md)). Test
+run 2026-09-12 on OPS: the wizard opened from inside the panel under the
+heading "Decline Submission", and the row's activity cell then read
+"Declined during the Production stage." (Rule 9b). The Section Editor checks:
+no "Declined" sidebar entry (and on OJS and OMP no "Needs editor" entry —
+rosters live-probed 2026-08-26, fn-b), submission absent from all views,
+found via global search. The delete leg presses the declined stage's
+"Delete" inside the panel and confirms the "Delete" dialog (fn-d,
+live-probed 2026-09-02 on all three apps): the count reload runs through
+a five-second trailing throttle, so the badge read allows up to five
+seconds and never reloads the page.
 
 <a id="fn-s12"></a>
 **s12 — scenario 12 seeding.** A scratch journal; two incomplete
@@ -1331,8 +1434,12 @@ submissions (`submitted: false`) by two throwaway authors plus one
 submitted control. The author leg signs in as one of the two and reads My
 Submissions ("Incomplete submissions"; "Active submissions" on OPS) and
 the mail catcher (fn-s3 names it) scoped to that author's address, paired
-with a positive control. The grayed entry is read by reopening "More Actions" on the same
-page after the deletion. The Section Editor negative leg asserts the "More
+with a positive control. The two "Cancel" legs and the view-switch leg
+(fn-m, live-probed 2026-08-26: dialog-Cancel exits selection mode
+entirely; a view change drops the selection) run before the delete, each
+re-entering selection mode through "More Actions"; after each, both
+incomplete rows are asserted still listed. The grayed entry is read by
+reopening "More Actions" on the same page after the deletion. The Section Editor negative leg asserts the "More
 Actions" button itself is absent — count 0, not a menu missing one entry
 (positive control: the same account sees the button row's other
 controls).
@@ -1372,6 +1479,27 @@ only on every app) types `{journal path}/dashboard/editorial`; the control
 is `manager.maya` at the same address. Live-probed 2026-08-26 on all three
 apps (fn-a): the author-only account got "The current role does not have
 access to this operation."
+
+<a id="fn-s17"></a>
+**s17 — scenario 17 seeding.** {OJS OMP} Two scratch journals, each with
+a throwaway Journal Manager, Author and `externalReviewer`: one created
+without a `review` key (the install default, "Minimum Confirmed Reviews
+Required" 0, seed-facts.md), one with `review: {numReviewsPerSubmission:
+1}` (scenarios.md "Configuring a scratch context"). Each holds one
+submission moved to review (`decisions: ['sendExternalReview']`; on OMP
+`skipInternalReview` reaches the external stage the same way) with
+`reviewRounds: [{reviewers: [{username: <reviewer>, status:
+'completed'}]}]`: a submitted, unconfirmed review, whose popover is the
+completed row of the Rule 10 table. Confirming is "Mark as Complete" in
+the "Review Details: {title}" window the popover's "View unread
+recommendation" opens (fn-k;
+[→ reading and confirming](U27-reviewer-assignment-and-management.md#read-review)).
+The "Needs reviews" membership is asserted only on the journal with the
+minimum: at the default the view keeps the row too (fn-b: a setting of 0
+behaves as a floor of one), but that is a footnote fact the body does not
+state, so no scenario relies on it. Message strings: fn-j (the
+minimum-required sentence replaced the all-confirmed one once a minimum
+was set, OJS + OMP).
 
 <a id="fn-a1"></a>
 **a1 — A1 evidence.** `TYPE_DECLINED`'s role list is

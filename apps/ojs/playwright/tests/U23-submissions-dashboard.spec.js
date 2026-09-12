@@ -3,39 +3,45 @@
  * @file playwright/tests/U23-submissions-dashboard.spec.js
  *
  * Submissions dashboard (editorial) — OJS suite, one test per canonical
- * scenario the spec runs on OJS (common scenarios 1–12 and 16 + the
+ * scenario the spec runs on OJS (common scenarios 1–12, 16 and 17 + the
  * OJS-specific 13; scenario 14 is OMP-only, 15 OPS-only).
  * Spec: docs/specs/U23-submissions-dashboard.md.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 ❓ (S11 asserts the roster facts as written; whether editors should
- *   keep a declined view stays open), A2 ❓ (S12 asserts the "Complete
- *   submission" button's presence only, never presses it), A3 ❓ (S10
- *   asserts the conflict notice by wording-neutral fragments), A7 ❓ (S9
- *   reads indicators as a Journal Manager only), A8 ❓.
- * - A4 🐞, A6 🐞 (the cancelled-by-editor and review-overdue popovers are
- *   never opened), A5 🐞 (S7 never makes the third, un-sorting click).
+ * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓.
+ * - A4 🐞, A5 🐞, A6 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
  * are read-only. Tests that assert counts or sidebar badges isolate on
- * scratch journals with throwaway users; S6, S9, S13 and S16 run on
- * publicknowledge and scope every claim by the seed tag through the list's
- * own search, bounded by that search's response or the heading count.
- * Absence assertions carry same-shape positive controls. Mailbox reads are
- * scoped by the scenario's own throwaway recipients (PRINCIPLES A8) and
- * settled by the scenario's last list read. No hard-coded waits. Everything
- * runs in the parallel `ojs` project.
+ * scratch journals with throwaway users (S17 on two, one per end of the
+ * journal's "Reviews required" setting, seeded through the context's
+ * `review` passthrough key); S6, S9, S13 and S16 run on publicknowledge and
+ * scope every claim by the seed tag through the list's own search, bounded
+ * by that search's response or the heading count. Absence assertions carry
+ * same-shape positive controls. Mailbox reads are scoped by the scenario's
+ * own throwaway recipients (PRINCIPLES A8) and settled by the scenario's
+ * last list read. The decline of S11 and the review confirmation of S17 are
+ * driven on screen (the stage's decision wizard, the "Review Details"
+ * window) because the scenarios read the list's live counts after them.
+ * No hard-coded waits: the count reload after a delete inside the panel
+ * runs through the app's own five-second throttle and is read by an
+ * auto-waited expect, never a reload. Everything runs in the parallel `ojs`
+ * project.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {
+    DecisionPage,
+    acceptReviewRequest,
     completeAssignParticipantForm,
     performReview,
     reviewDetailsModal,
+    markReviewComplete,
     closeReviewDetails,
 } = require('../pages/ReviewStagePages.js');
 
@@ -67,8 +73,9 @@ test.describe('submissions dashboard', () => {
         const tag = makeTag('s1', testInfo);
         const manager = `${tag}mg`;
         const author = `${tag}au`;
-        // A scratch journal so every view count is deterministic: one
-        // submitted, unassigned submission and one published one (fn-s1).
+        // A scratch journal so every view count is deterministic: one new
+        // submission, one in copyediting, one in production and one
+        // published (fn-s1).
         await ojsApi.createContext({
             tag,
             users: [
@@ -77,6 +84,14 @@ test.describe('submissions dashboard', () => {
             ],
         });
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `arta ${tag}`});
+        await ojsApi.createSubmission({
+            tag, context: tag, submitter: author, title: `copy ${tag}`,
+            decisions: ['skipExternalReview'],
+        });
+        await ojsApi.createSubmission({
+            tag, context: tag, submitter: author, title: `prod ${tag}`,
+            decisions: ['skipExternalReview', 'sendToProduction'],
+        });
         await ojsApi.createSubmission({
             tag, context: tag, submitter: author, title: `pubs ${tag}`, published: true,
         });
@@ -99,15 +114,27 @@ test.describe('submissions dashboard', () => {
         // The control: an empty view shows a single "No Items" row (Rule 5).
         await expect(page.getByText('No Items')).toBeVisible();
 
-        // The table: the heading names the view with its count over the six
-        // columns; a Stage cell names the stage in plain text with a small
-        // colored dot beside it (Rule 5).
-        await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 1);
+        // The "Reviews overdue" badge is colored (the attention variant,
+        // fn-d) while it reads 0; the other badges are plain, a zero one and
+        // a non-zero one read the same way as the controls (Rule 1).
+        await dash.expectViewCount('Reviews overdue', 0);
+        await expect(dash.viewBadge('Reviews overdue')).toHaveClass(/\bbg-attention\b/);
+        await dash.expectViewCount('Needs reviews', 0);
+        await expect(dash.viewBadge('Needs reviews')).not.toHaveClass(/\bbg-attention\b/);
+        await dash.expectViewCount('Active submissions', 3);
+        await expect(dash.viewBadge('Active submissions')).not.toHaveClass(/\bbg-attention\b/);
+
+        // The table: the heading names the view with its count ("Published
+        // (1)") over the six columns; a Stage cell names the stage in plain
+        // text with a small colored dot beside it (Rule 5).
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 1);
         for (const name of ['ID', 'Submissions', 'Stage', 'Days', 'Editorial Activity', 'Actions']) {
             await expect(dash.columnHeader(name)).toBeVisible();
         }
         await expect(dash.columnHeader('Status')).toHaveCount(0); // positive control for the name match
+        await dash.openView('Active submissions');
+        await dash.expectViewHeading('Active submissions', 3);
         const activeRow = dash.row(`arta ${tag}`);
         await expect(dash.stageCell(activeRow)).toHaveText(/^\s*Submission\s*$/);
         await expect(dash.stageDot(activeRow)).toBeVisible();
@@ -115,11 +142,13 @@ test.describe('submissions dashboard', () => {
         // The views: walk the manager's full roster (Rule 2): each sidebar
         // entry opens the list under its own heading with its count, and
         // the entry's badge carries the same number; the published
-        // submission under "Published", the active one under "Active
-        // submissions".
+        // submission under "Published" ("Published (1)"), the others under
+        // "Active submissions". "Needs editor" is pinned to its own badge:
+        // which of the seeded rows count as editor-less is the seed's, not
+        // the scenario's, claim.
         const roster = [
-            ['Active submissions', 1],
-            ['Needs editor', 1],
+            ['Active submissions', 3],
+            ['Needs editor', null],
             ['All in submission stage', 1],
             ['Needs reviews', 0],
             ['Awaiting reviews', 0],
@@ -127,13 +156,14 @@ test.describe('submissions dashboard', () => {
             ['Reviews overdue', 0],
             ['Author revisions submitted', 0],
             ['All in review stage', 0],
-            ['All in copyediting stage', 0],
-            ['All in production stage', 0],
+            ['All in copyediting stage', 1],
+            ['All in production stage', 1],
             ['Scheduled for publication', 0],
             ['Published', 1],
             ['Declined', 0],
         ];
-        for (const [name, count] of roster) {
+        for (const [name, pinned] of roster) {
+            const count = pinned === null ? await dash.readViewCount(name) : pinned;
             await dash.openView(name);
             await dash.expectViewHeading(name, count);
             await dash.expectViewCount(name, count);
@@ -141,13 +171,37 @@ test.describe('submissions dashboard', () => {
                 await expect(dash.row(`pubs ${tag}`)).toBeVisible();
                 await expect(dash.row(`arta ${tag}`)).toHaveCount(0);
             }
+            if (name === 'Active submissions') {
+                for (const title of [`arta ${tag}`, `copy ${tag}`, `prod ${tag}`]) {
+                    await expect(dash.row(title)).toBeVisible();
+                }
+                await expect(dash.row(`pubs ${tag}`)).toHaveCount(0);
+            }
         }
         // Control: the last view (Declined) reads 0 and shows "No Items".
         await expect(page.getByText('No Items')).toBeVisible();
         await expect(dash.row(`arta ${tag}`)).toHaveCount(0);
-        await dash.openView('Active submissions');
-        await expect(dash.row(`arta ${tag}`)).toBeVisible();
-        await expect(dash.row(`pubs ${tag}`)).toHaveCount(0);
+
+        // The stage views: the copyediting submission under "All in
+        // copyediting stage", its activity cell reading "Copyedited Files
+        // Uploaded: {count}" (a seeded submission carries no files, so the
+        // label is matched and the number read — fn-s1); the production one
+        // under "All in production stage" with an empty activity cell
+        // (Rules 9g, 9i).
+        await dash.openView('All in copyediting stage');
+        await dash.expectViewHeading('All in copyediting stage', 1);
+        const copyRow = dash.row(`copy ${tag}`);
+        await expect(copyRow).toBeVisible();
+        await expect(dash.stageCell(copyRow)).toHaveText(/^\s*Copyediting\s*$/);
+        await expect(dash.activityCell(copyRow)).toHaveText(/^\s*Copyedited Files Uploaded: \d+\s*$/);
+        await expect(dash.row(`prod ${tag}`)).toHaveCount(0);
+        await dash.openView('All in production stage');
+        await dash.expectViewHeading('All in production stage', 1);
+        const prodRow = dash.row(`prod ${tag}`);
+        await expect(prodRow).toBeVisible();
+        await expect(dash.stageCell(prodRow)).toHaveText(/^\s*Production\s*$/);
+        await expect(dash.activityCell(prodRow)).toHaveText(/^\s*$/);
+        await expect(dash.row(`copy ${tag}`)).toHaveCount(0);
     });
 
     test('S2: assigned-only scope', async ({asUser, ojsApi}, testInfo) => {
@@ -411,16 +465,29 @@ test.describe('submissions dashboard', () => {
         const manager = `${tag}mg`;
         const se = `${tag}se`;
         const author = `${tag}au`;
+        const SECOND_SECTION = 'Second section';
+        // A two-section journal (the first entry renames the default
+        // section, fn-s5) with the Section Editor assigned to one
+        // submission and a second submission in the second section.
         await ojsApi.createContext({
             tag,
+            sections: [
+                {abbrev: 'ART', title: 'Articles'},
+                {abbrev: 'SEC', title: SECOND_SECTION},
+            ],
             users: [
                 account(manager, 'Mara', 'Manager', ['manager']),
                 account(se, 'Sela', 'Sectioneditor', ['sectionEditor']),
                 account(author, 'Ada', 'Author', ['author']),
             ],
         });
-        await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `acta ${tag}`});
-        await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `actb ${tag}`});
+        await ojsApi.createSubmission({
+            tag, context: tag, submitter: author, title: `acta ${tag}`,
+            participants: [{username: se, role: 'sectionEditor'}],
+        });
+        await ojsApi.createSubmission({
+            tag, context: tag, submitter: author, title: `actb ${tag}`, section: 'SEC',
+        });
         // A published one, so "Published" has a full list to show after the
         // view switch.
         await ojsApi.createSubmission({
@@ -434,8 +501,7 @@ test.describe('submissions dashboard', () => {
         await dash.expectViewHeading('Active submissions', 2);
 
         // "Filters": a side panel titled "Filters" with "Days since last
-        // activity", "Clear Filters" and "Apply Filters" (a one-section
-        // scratch journal has no Section/Issues/Categories fields).
+        // activity", "Clear Filters" and "Apply Filters".
         let modal = await dash.openFilters();
         await expect(modal.getByText('Filters', {exact: true}).first()).toBeVisible();
         await expect(modal.getByText('Days since last activity')).toBeVisible();
@@ -458,31 +524,69 @@ test.describe('submissions dashboard', () => {
         await dash.expectViewHeading('Active submissions', 2);
         await expect(dash.filterChip('Days since last activity')).toHaveCount(0);
 
-        // Switching views: apply the same filter again, then open
-        // "Published": the chip is gone and the view shows its full list.
-        await dash.openFilters();
-        await dash.setDaysSinceLastActivity(30);
+        // "Section": tick the second section and apply: the list narrows to
+        // the submission in that section, with a chip for the filter above
+        // the table (Fields table); "Clear Filters" restores the view.
+        modal = await dash.openFilters();
+        await expect(modal.getByText('Section', {exact: true})).toBeVisible();
+        await expect(dash.filterCheckbox('Articles')).toBeVisible(); // positive control for the field
+        await dash.filterCheckbox(SECOND_SECTION).check();
         await dash.applyFilters();
-        await expect(dash.filterChip('Days since last activity')).toBeVisible();
-        await dash.expectViewHeading('Active submissions', 0);
-        await dash.openView('Published');
-        await dash.expectViewHeading('Published', 1);
-        await expect(dash.row(`pubs ${tag}`)).toBeVisible();
-        await expect(dash.filterChip('Days since last activity')).toHaveCount(0);
-        await expect(dash.clearFiltersButton()).toHaveCount(0);
+        await expect(dash.filterChip(`Section: ${SECOND_SECTION}`)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`actb ${tag}`)).toBeVisible();
+        await expect(dash.row(`acta ${tag}`)).toHaveCount(0);
+        await dash.clearFiltersButton().click();
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.filterChip('Section:')).toHaveCount(0);
+        await expect(dash.row(`acta ${tag}`)).toBeVisible();
 
         // "Assigned To Editor": the manager's panel lists the field, and its
-        // suggest list offers nothing until a name is typed (positive
-        // control: a typed name brings the manager up as an option).
+        // suggest list offers nothing until a name is typed; type the
+        // Section Editor's name, pick them and apply: the list narrows to
+        // the submission they are assigned to, with a chip for the filter.
         modal = await dash.openFilters();
         await expect(modal.getByText('Assigned To Editor')).toBeVisible();
         const editorField = dash.filterSuggestField('Assigned To Editor');
         await editorField.click();
         await expect(dash.suggestOptions()).toHaveCount(0);
-        await editorField.pressSequentially('Mara', {delay: 25});
-        await expect(dash.suggestOptions().filter({hasText: 'Mara Manager'})).toBeVisible();
+        await editorField.pressSequentially('Sela', {delay: 25});
+        await expect(dash.suggestOptions().filter({hasText: 'Sela Sectioneditor'})).toBeVisible();
         await expect(dash.suggestOptions()).toHaveCount(1);
-        await page.keyboard.press('Escape');
+        await dash.pickSuggestOption('Sela Sectioneditor');
+        await dash.applyFilters();
+        const editorChip = 'Assigned To Editor: Sela Sectioneditor';
+        await expect(dash.filterChip(editorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`acta ${tag}`)).toBeVisible();
+        await expect(dash.row(`actb ${tag}`)).toHaveCount(0);
+
+        // A chip's X: with that filter still active, add the Days filter at
+        // 30 (the list empties), then press the Days chip's X: that chip
+        // alone goes, the editor's chip stays, and the list shows the
+        // Section Editor's submission again.
+        await dash.openFilters();
+        await dash.setDaysSinceLastActivity(30);
+        await dash.applyFilters();
+        await expect(dash.filterChip('Days since last activity')).toBeVisible();
+        await expect(dash.filterChip(editorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 0);
+        await expect(page.getByText('No Items')).toBeVisible();
+        await dash.filterChipButton('Days since last activity').click();
+        await expect(dash.filterChip('Days since last activity')).toHaveCount(0);
+        await expect(dash.filterChip(editorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`acta ${tag}`)).toBeVisible();
+        await expect(dash.row(`actb ${tag}`)).toHaveCount(0);
+
+        // Switching views: with the editor's chip still active, open
+        // "Published": the chip is gone and the view shows its full list.
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 1);
+        await expect(dash.row(`pubs ${tag}`)).toBeVisible();
+        await expect(dash.filterChip(editorChip)).toHaveCount(0);
+        await expect(dash.filterChip('Days since last activity')).toHaveCount(0);
+        await expect(dash.clearFiltersButton()).toHaveCount(0);
 
         // Control: a Section Editor's panel has no "Assigned To Editor"
         // field, while the Days field is there.
@@ -533,11 +637,12 @@ test.describe('submissions dashboard', () => {
         await expect(dash.workflowDialog()).toHaveCount(0);
     });
 
-    test('S7: sort the list', async ({asUser, ojsApi}, testInfo) => {
+    test('S7: sort and page', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s7', testInfo);
         const manager = `${tag}mg`;
         const author = `${tag}au`;
+        const ROWS = 31; // one page of 30 plus one, for the paging leg (fn-s7)
         await ojsApi.createContext({
             tag,
             users: [
@@ -545,17 +650,36 @@ test.describe('submissions dashboard', () => {
                 account(author, 'Ada', 'Author', ['author']),
             ],
         });
-        // Seeded in order, so the returned ids ascend with the titles.
+        // Seeded in order, so the returned ids ascend with the titles: "ida"
+        // first, "idc" last, the filler rows between them.
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `ida${tag}`});
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `idb${tag}`});
+        for (let i = 0; i < ROWS - 3; i++) {
+            await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `fill${i}${tag}`});
+        }
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `idc${tag}`});
 
         const page = await (await asUser(manager)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
         await dash.goto();
         await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 3);
+        await dash.expectViewHeading('Active submissions', ROWS);
         const firstDataRow = dash.firstDataRow();
+
+        // Paging: the list pages at 30 rows, pager controls sit under it,
+        // page 2 shows the rest, and the address does not record which
+        // page is showing (Rules 4–5; the sort legs below are the positive
+        // control for what the address does record).
+        await expect(dash.dataRows()).toHaveCount(30);
+        await expect(dash.pager()).toBeVisible();
+        const firstPageRowText = await firstDataRow.innerText();
+        await dash.pagerPageButton(2).click();
+        await expect(dash.dataRows()).toHaveCount(1);
+        await expect(firstDataRow).not.toHaveText(firstPageRowText);
+        await dash.expectViewHeading('Active submissions', ROWS);
+        await expect(page).not.toHaveURL(/[?&](page|offset|currentPage)=/);
+        await dash.pagerPageButton(1).click();
+        await expect(dash.dataRows()).toHaveCount(30);
 
         // First click on "ID": descending, recorded in the address (Rules
         // 4–5). Never a third click — the un-sort state is register A5.
@@ -587,7 +711,7 @@ test.describe('submissions dashboard', () => {
         await expect(page).toHaveURL(/sortDirection=descending/);
         await expect(firstDataRow).toContainText(`idc${tag}`);
         await page.reload();
-        await dash.expectViewHeading('Active submissions', 3);
+        await dash.expectViewHeading('Active submissions', ROWS);
         await expect(firstDataRow).toContainText(`idc${tag}`);
     });
 
@@ -666,8 +790,10 @@ test.describe('submissions dashboard', () => {
     test('S9: review activity at a glance', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s9', testInfo);
-        // Two submissions in external review round 1: one with no reviewers,
-        // one with two invitations out (fn-s9).
+        // Four submissions in external review round 1: one with no
+        // reviewers, one with two invitations out and a third reviewer who
+        // declined, one with revisions requested this round and one with
+        // revisions to be taken to a new round (fn-s9).
         await ojsApi.createSubmission({
             tag, context: JOURNAL, submitter: 'author.alex', title: `norev ${tag}`,
             decisions: ['sendExternalReview'],
@@ -679,7 +805,16 @@ test.describe('submissions dashboard', () => {
             reviewRounds: [{reviewers: [
                 {username: 'reviewer.julia', status: 'invited'},
                 {username: 'reviewer.paul', status: 'invited'},
+                {username: 'reviewer.amara', status: 'declined'},
             ]}],
+        });
+        await ojsApi.createSubmission({
+            tag, context: JOURNAL, submitter: 'author.alex', title: `revreq ${tag}`,
+            decisions: ['sendExternalReview', 'requestRevisions'],
+        });
+        await ojsApi.createSubmission({
+            tag, context: JOURNAL, submitter: 'author.alex', title: `resub ${tag}`,
+            decisions: ['sendExternalReview', 'resubmit'],
         });
 
         const page = await (await asUser('manager.maya')).newPage();
@@ -691,6 +826,15 @@ test.describe('submissions dashboard', () => {
         const rowTwoRev = dash.row(`tworev ${tag}`);
         await expect(rowNoRev).toBeVisible();
         await expect(rowTwoRev).toBeVisible();
+        /** Re-list the tagged rows on a view after the reviewer acted in
+         * their own session: a fresh page load, because clicking the view
+         * already open neither refetches nor clears the in-page phrase. */
+        const relist = async (view) => {
+            await dash.goto();
+            await dash.openView(view);
+            await dash.searchFor(tag);
+            await expect(rowTwoRev).toBeVisible({timeout: 30_000});
+        };
 
         // No reviewers yet: the cell offers "Assign Reviewers", which opens
         // the Add Reviewer window (Rule 9e); close it.
@@ -713,11 +857,14 @@ test.describe('submissions dashboard', () => {
             .click();
         await expect(addReviewerModal).toHaveCount(0, {timeout: 30_000});
 
-        // Two requests out: two countdown indicators, and the submission
-        // lists under "Awaiting reviews" (Rule 2; read below, after the
-        // popover legs, from that view).
+        // Two requests out: two countdown indicators and an icon for the
+        // declined reviewer (Rule 10), and the submission lists under
+        // "Awaiting reviews" (Rule 2; read below, after the popover legs,
+        // from that view).
         const awaiting = dash.activityIndicator(rowTwoRev, /Awaiting Response from the reviewer/);
         await expect(awaiting).toHaveCount(2);
+        const declined = dash.activityIndicator(rowTwoRev, /Review Request declined on/);
+        await expect(declined).toHaveCount(1);
 
         // A popover: it names the reviewer, the review type and the status,
         // with the three working buttons (Rule 10).
@@ -729,10 +876,26 @@ test.describe('submissions dashboard', () => {
         await expect(popover.getByRole('button', {name: 'Edit Due Date', exact: true})).toBeVisible();
         await expect(popover.getByRole('button', {name: 'View details', exact: true})).toBeVisible();
         await expect(popover.getByRole('button', {name: 'Unassign', exact: true})).toBeVisible();
+        await expect(popover.getByRole('button', {name: 'Cancel Reviewer', exact: true})).toHaveCount(0);
+
+        // The declined reviewer's popover: "Review Request declined on
+        // {date}", with "Resend Review Request", "View details" and "Cancel
+        // Reviewer" (the declined row of the Rule 10 table).
+        await dash.closeActivityPopover(rowTwoRev);
+        await declined.click();
+        const declinedPopover = dash.activityPopover(rowTwoRev);
+        await expect(declinedPopover).toContainText(/Review Request declined on \d{4}-\d{2}-\d{2}/);
+        await expect(declinedPopover).toContainText('Amara Reviewer');
+        await expect(declinedPopover.getByRole('button', {name: 'Resend Review Request', exact: true})).toBeVisible();
+        await expect(declinedPopover.getByRole('button', {name: 'View details', exact: true})).toBeVisible();
+        await expect(declinedPopover.getByRole('button', {name: 'Cancel Reviewer', exact: true})).toBeVisible();
+        await expect(declinedPopover.getByRole('button', {name: 'Unassign', exact: true})).toHaveCount(0);
+        await dash.closeActivityPopover(rowTwoRev);
 
         // "View details": the window the workflow's Reviewers panel opens
         // for that reviewer ("Review Details: {title}") appears; closing it
         // reloads the list.
+        await awaiting.first().click();
         await popover.getByRole('button', {name: 'View details', exact: true}).click();
         const details = reviewDetailsModal(page);
         await expect(details).toBeVisible({timeout: 30_000});
@@ -740,30 +903,51 @@ test.describe('submissions dashboard', () => {
         await closeReviewDetails(page, details);
         await refetch;
         await expect(rowTwoRev).toBeVisible({timeout: 30_000});
-        await page.keyboard.press('Escape');
-        await expect(dash.activityPopover(rowTwoRev)).toHaveCount(0);
+        await dash.closeActivityPopover(rowTwoRev);
 
         // The submission lists under "Awaiting reviews".
         await dash.openView('Awaiting reviews');
         await dash.searchFor(tag);
         await expect(dash.row(`tworev ${tag}`)).toBeVisible({timeout: 30_000});
 
-        // Reviewer: one of the two accepts the request and submits their
-        // review (the reviewer's own wizard, U28).
+        // Reviewer: one of the two accepts the request (the reviewer's own
+        // wizard, U28).
         const juliaPage = await (await asUser('reviewer.julia')).newPage();
-        await performReview(juliaPage, JOURNAL, twoRevId, {});
+        await acceptReviewRequest(juliaPage, JOURNAL, twoRevId);
+
+        // The accepted request: back on the list, that reviewer's indicator
+        // is still a countdown ring; its popover reads "Ongoing review -
+        // request accepted", with "Edit Due Date", "View details" and
+        // "Cancel Reviewer" (positive control for the change: the awaiting
+        // indicators are down to one).
+        await relist('Active submissions');
+        const accepted = dash.activityIndicator(rowTwoRev, /Ongoing review - request accepted/);
+        await expect(accepted).toHaveCount(1);
+        await expect(dash.activityIndicator(rowTwoRev, /Awaiting Response from the reviewer/)).toHaveCount(1);
+        await accepted.click();
+        const acceptedPopover = dash.activityPopover(rowTwoRev);
+        await expect(acceptedPopover).toContainText('Ongoing review - request accepted');
+        await expect(acceptedPopover).toContainText('Julia Reviewer');
+        await expect(acceptedPopover.getByRole('button', {name: 'Edit Due Date', exact: true})).toBeVisible();
+        await expect(acceptedPopover.getByRole('button', {name: 'View details', exact: true})).toBeVisible();
+        await expect(acceptedPopover.getByRole('button', {name: 'Cancel Reviewer', exact: true})).toBeVisible();
+        await expect(acceptedPopover.getByRole('button', {name: 'Unassign', exact: true})).toHaveCount(0);
+        await dash.closeActivityPopover(rowTwoRev);
+
+        // Reviewer: the same reviewer submits their review.
+        await performReview(juliaPage, JOURNAL, twoRevId, {recommendation: 'Accept Submission'});
 
         // The completed review: that reviewer's indicator is now a done
-        // mark; its popover reads "Review completed on {date}" with "View
-        // unread recommendation".
-        await dash.openView('Active submissions');
-        await dash.searchFor(tag);
-        await expect(rowTwoRev).toBeVisible({timeout: 30_000});
+        // mark; its popover reads "Review completed on {date}", names the
+        // recommendation (a journal), with "View unread recommendation".
+        await relist('Active submissions');
         const completed = dash.activityIndicator(rowTwoRev, /Review completed on/);
         await expect(completed).toHaveCount(1);
+        await expect(dash.activityIndicator(rowTwoRev, /Ongoing review - request accepted/)).toHaveCount(0);
         await completed.click();
         let completedPopover = dash.activityPopover(rowTwoRev);
-        await expect(completedPopover).toContainText(/Review completed on/);
+        await expect(completedPopover).toContainText(/Review completed on \d{4}-\d{2}-\d{2}/);
+        await expect(completedPopover).toContainText('Accept Submission');
         const unread = completedPopover.getByRole('button', {name: 'View unread recommendation', exact: true});
         await expect(unread).toBeVisible();
         await expect(
@@ -778,8 +962,7 @@ test.describe('submissions dashboard', () => {
         await closeReviewDetails(page, details);
         await refetch;
         await expect(rowTwoRev).toBeVisible({timeout: 30_000});
-        await page.keyboard.press('Escape');
-        await expect(dash.activityPopover(rowTwoRev)).toHaveCount(0);
+        await dash.closeActivityPopover(rowTwoRev);
         await dash.activityIndicator(rowTwoRev, /Review completed on/).click();
         completedPopover = dash.activityPopover(rowTwoRev);
         await expect(
@@ -788,8 +971,17 @@ test.describe('submissions dashboard', () => {
         await expect(
             completedPopover.getByRole('button', {name: 'View unread recommendation', exact: true})
         ).toHaveCount(0);
-        await page.keyboard.press('Escape');
-        await expect(dash.activityPopover(rowTwoRev)).toHaveCount(0);
+        await dash.closeActivityPopover(rowTwoRev);
+
+        // Revisions asked: the third row's cell reads "Revisions requested
+        // from author" and the fourth's "Revisions requested from the
+        // author to be taken to a new review round" (Rule 9e).
+        const revReqCell = dash.activityCell(dash.row(`revreq ${tag}`));
+        await expect(revReqCell).toContainText('Revisions requested from author');
+        await expect(revReqCell).not.toContainText('new review round');
+        await expect(dash.activityCell(dash.row(`resub ${tag}`))).toContainText(
+            'Revisions requested from the author to be taken to a new review round'
+        );
 
         // Control: the other reviewer's indicator is still a countdown ring
         // whose popover reads "Awaiting Response from the reviewer".
@@ -798,7 +990,7 @@ test.describe('submissions dashboard', () => {
         await stillAwaiting.click();
         await expect(dash.activityPopover(rowTwoRev)).toContainText('Awaiting Response from the reviewer');
         await expect(dash.activityPopover(rowTwoRev)).toContainText('Paul Reviewer');
-        await page.keyboard.press('Escape');
+        await dash.closeActivityPopover(rowTwoRev);
 
         // The submission now lists under "Reviews submitted" too.
         await dash.openView('Reviews submitted');
@@ -811,21 +1003,30 @@ test.describe('submissions dashboard', () => {
         const tag = makeTag('s10', testInfo);
         const combo = `${tag}ma`;
         const author = `${tag}au`;
+        // The combo account holds Manager, Author and Reviewer (fn-s10): one
+        // submission it submitted, an unrelated one as the "View" control,
+        // and a third in review with the combo account invited as its
+        // reviewer.
         await ojsApi.createContext({
             tag,
             users: [
-                account(combo, 'Mara', 'Combo', ['manager', 'author']),
+                account(combo, 'Mara', 'Combo', ['manager', 'author', 'externalReviewer']),
                 account(author, 'Ada', 'Author', ['author']),
             ],
         });
         await ojsApi.createSubmission({tag, context: tag, submitter: combo, title: `own ${tag}`});
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `other ${tag}`});
+        await ojsApi.createSubmission({
+            tag, context: tag, submitter: author, title: `revd ${tag}`,
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{reviewers: [{username: combo, status: 'invited'}]}],
+        });
 
         const page = await (await asUser(combo)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
         await dash.goto();
         await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', 3);
 
         // Their own submission's row shows the conflict notice and offers no
         // button at all (Rule 9a; the notice's role wording is register ❓
@@ -836,6 +1037,18 @@ test.describe('submissions dashboard', () => {
         await expect(dash.viewButton(rowOwn)).toHaveCount(0);
         await expect(dash.assignEditorButton(rowOwn)).toHaveCount(0);
         await expect(rowOwn.getByRole('button')).toHaveCount(0);
+
+        // The submission they review: its activity cell carries a conflict
+        // notice that sends them to "Review Assignments" (judged by that
+        // phrase, A3), and the row offers no button either: no "View", no
+        // "Assign Reviewers" and no reviewer indicator.
+        const rowRevd = dash.row(`revd ${tag}`);
+        await expect(rowRevd).toContainText('You cannot access this submission');
+        await expect(rowRevd).toContainText('Review Assignments');
+        await expect(rowRevd).not.toContainText('My Submissions');
+        await expect(dash.viewButton(rowRevd)).toHaveCount(0);
+        await expect(dash.assignReviewersButton(rowRevd)).toHaveCount(0);
+        await expect(rowRevd.getByRole('button')).toHaveCount(0);
 
         // Control: the other submission's row keeps its "View" (and its
         // "Assign Editor").
@@ -867,31 +1080,54 @@ test.describe('submissions dashboard', () => {
                 account(author, 'Ada', 'Author', ['author']),
             ],
         });
-        // The Section Editor's assigned submission, declined from the
-        // Submission stage (the decision belongs to the stage features),
-        // plus a second assigned, active one as the positive control for
-        // their views.
+        // The Section Editor's assigned submission, seeded active and
+        // declined on screen below (fn-s11), plus a second assigned, active
+        // one as the positive control for their views.
         await ojsApi.createSubmission({
             tag, context: tag, submitter: author, title: `decl ${tag}`,
             participants: [{username: se, role: 'sectionEditor'}],
-            decisions: ['initialDecline'],
         });
         await ojsApi.createSubmission({
             tag, context: tag, submitter: author, title: `live ${tag}`,
             participants: [{username: se, role: 'sectionEditor'}],
         });
 
-        // Journal Manager: "Declined" lists the row with its Stage cell
-        // reading "Declined" and its activity cell "Declined during the
-        // {stage} stage.", and it keeps "View" (Rule 9b).
+        // Journal Manager: on "Active submissions", press "View" on the row
+        // and decline the submission from its Submission stage inside the
+        // panel (the "Decline Submission" wizard belongs to U25).
         const mgPage = await (await asUser(manager)).newPage();
         const mgDash = new EditorialDashboardPage(mgPage, tag);
         await mgDash.goto();
+        await mgDash.expectViewCount('Declined', 0);
+        await mgDash.openView('Active submissions');
+        await mgDash.expectViewHeading('Active submissions', 2);
+        await mgDash.expectViewCount('Active submissions', 2);
+        await mgDash.viewButton(mgDash.row(`decl ${tag}`)).click();
+        await mgDash.expectWorkflowOpen();
+        await mgDash.workflowDialog().getByRole('button', {name: 'Decline Submission', exact: true}).click();
+        const decision = new DecisionPage(mgPage);
+        await decision.expectOpen('Decline Submission');
+        await decision.completeAll();
+
+        // Close the panel: the heading total and the "Declined" badge move
+        // without a reload (Rule 13; the wizard's "View Submission" returns
+        // to the view it left, "Active submissions", with the panel open).
+        await mgDash.expectWorkflowOpen();
+        await mgDash.closeWorkflow();
+        await mgDash.expectViewHeading('Active submissions', 1);
+        await mgDash.expectViewCount('Declined', 1);
+        await mgDash.expectViewCount('Active submissions', 1);
+        await expect(mgDash.row(`live ${tag}`)).toBeVisible();
+        await expect(mgDash.row(`decl ${tag}`)).toHaveCount(0);
+
+        // Open "Declined": the row is listed with its Stage cell reading
+        // "Declined" and its activity cell "Declined during the {stage}
+        // stage.", and it keeps "View" (Rule 9b).
         await mgDash.openView('Declined');
         await mgDash.expectViewHeading('Declined', 1);
         const declRow = mgDash.row(`decl ${tag}`);
         await expect(mgDash.stageCell(declRow)).toHaveText(/^\s*Declined\s*$/);
-        await expect(declRow).toContainText('Declined during the Submission stage.');
+        await expect(mgDash.activityCell(declRow)).toHaveText(/^\s*Declined during the Submission stage\.\s*$/);
         await expect(mgDash.viewButton(declRow)).toBeVisible();
 
         // Section Editor: their group has no "Declined" entry (A1) and no
@@ -936,6 +1172,24 @@ test.describe('submissions dashboard', () => {
         await seDash.expectViewHeading('Search Results', 1);
         await expect(seDash.row(`decl ${tag}`)).toBeVisible();
         await expect(seDash.viewButton(seDash.row(`decl ${tag}`))).toBeVisible();
+
+        // Deleted inside the panel: Journal Manager: on "Declined", press
+        // "View" on the row, press its stage's "Delete" and confirm the
+        // "Delete" dialog (U24's): the panel closes on the refreshed list,
+        // from which the row is gone, and the "Declined" badge and the
+        // heading total follow within a few seconds (the count reload runs
+        // through a five-second trailing throttle, fn-d: the reads below
+        // are auto-waited, never a reload).
+        await mgDash.openView('Declined');
+        await mgDash.expectViewHeading('Declined', 1);
+        const workflow = new WorkflowPage(mgPage, tag);
+        await workflow.openFromRow(mgDash.row(`decl ${tag}`));
+        await workflow.deleteSubmission({confirm: true});
+        await expect(mgDash.workflowDialog()).toHaveCount(0);
+        await expect(mgDash.row(`decl ${tag}`)).toHaveCount(0);
+        await expect(mgPage.getByText('No Items')).toBeVisible();
+        await mgDash.expectViewCount('Declined', 0);
+        await mgDash.expectViewHeading('Declined', 0);
 
         // Control: the Journal Manager's own group offers "Declined" and
         // "Needs editor".
@@ -1003,14 +1257,61 @@ test.describe('submissions dashboard', () => {
         await expect(rowKeep.getByRole('checkbox')).toHaveCount(0);
         await expect(dash.bulkDeleteButton()).toBeDisabled();
 
-        // Delete: tick both and press the button: the confirm dialog reads
-        // its sentence; "Confirm" removes both rows, and the badges and the
-        // heading total drop without a reload (Rules 12–13).
+        /** Both incomplete rows are still listed beside the submitted one. */
+        const expectNothingDeleted = async () => {
+            await dash.expectViewHeading('Active submissions', 3);
+            await expect(rowA).toBeVisible();
+            await expect(rowB).toBeVisible();
+            await expect(rowKeep).toBeVisible();
+        };
+
+        // "Cancel": tick one row and press "Cancel" above the list:
+        // selection mode ends (no checkbox, no delete button) with nothing
+        // deleted, both incomplete rows still listed.
+        await dash.checkRowCheckbox(rowA);
+        await expect(dash.bulkDeleteButton()).toBeEnabled();
+        await dash.bulkDeleteCancelButton().click();
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expectNothingDeleted();
+
+        // … choose "Delete Incomplete Submissions" again, tick one row,
+        // press "Delete Incomplete Submissions" and then "Cancel" in the
+        // dialog: the same.
+        await dash.enterBulkDeleteSelection();
+        await dash.checkRowCheckbox(rowA);
+        await expect(dash.bulkDeleteButton()).toBeEnabled();
+        await dash.bulkDeleteButton().click();
+        const dialog = dash.bulkDeleteConfirmDialog();
+        await expect(dialog).toBeVisible({timeout: 30_000});
+        await expect(dialog).toContainText(BULK_DELETE_CONFIRM);
+        await dialog.getByRole('button', {name: 'Cancel', exact: true}).click();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expectNothingDeleted();
+
+        // A view switch in selection mode: choose "Delete Incomplete
+        // Submissions" once more, tick one row, open "Published" and return
+        // to "Active submissions": no row is ticked and nothing was deleted.
+        await dash.enterBulkDeleteSelection();
+        await dash.checkRowCheckbox(rowA);
+        await expect(rowA.getByRole('checkbox')).toBeChecked(); // positive control for the tick
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 0);
+        await dash.openView('Active submissions');
+        await expectNothingDeleted();
+        await expect(page.getByRole('checkbox', {checked: true})).toHaveCount(0);
+
+        // Delete: choose "Delete Incomplete Submissions" again, tick both
+        // and press the button: the confirm dialog reads its sentence;
+        // "Confirm" removes both rows, and the badges and the heading total
+        // drop without a reload (Rules 12–13).
+        await dash.enterBulkDeleteSelection();
         await dash.checkRowCheckbox(rowA);
         await expect(dash.bulkDeleteButton()).toBeEnabled();
         await dash.checkRowCheckbox(rowB);
         await dash.bulkDeleteButton().click();
-        const dialog = dash.bulkDeleteConfirmDialog();
         await expect(dialog).toBeVisible({timeout: 30_000});
         await expect(dialog).toContainText(BULK_DELETE_CONFIRM);
         await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
@@ -1153,5 +1454,143 @@ test.describe('submissions dashboard', () => {
         await dash.expectViewHeading('Assigned to me');
         await expect(mgPage.getByText(ACCESS_DENIED)).toHaveCount(0);
         await expect(dash.menuGroupLink()).toBeVisible();
+    });
+
+    test('S17: a review confirmed, with and without a minimum', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        const MINIMUM_SENTENCE =
+            'Minimum required number of reviews have been confirmed. A decision is needed.';
+        const ALL_CONFIRMED_SENTENCE = 'All reviews are confirmed and a decision is needed.';
+        // Two scratch journals, one at the install default of "Reviews
+        // required" (no `review` key) and one with the minimum set to 1
+        // through the context's passthrough key; each holds one submission
+        // in review whose single reviewer has submitted their review
+        // (fn-s17).
+        const seedJournal = async (suffix, contextExtras) => {
+            const tag = makeTag(`s17${suffix}`, testInfo);
+            const manager = `${tag}mg`;
+            const author = `${tag}au`;
+            const reviewer = `${tag}rv`;
+            await ojsApi.createContext({
+                tag,
+                ...contextExtras,
+                users: [
+                    account(manager, 'Mara', 'Manager', ['manager']),
+                    account(author, 'Ada', 'Author', ['author']),
+                    account(reviewer, 'Rita', 'Reviewer', ['externalReviewer']),
+                ],
+            });
+            await ojsApi.createSubmission({
+                tag, context: tag, submitter: author, title: `done ${tag}`,
+                decisions: ['sendExternalReview'],
+                reviewRounds: [{reviewers: [{username: reviewer, status: 'completed'}]}],
+            });
+            const page = await (await asUser(manager)).newPage();
+            const dash = new EditorialDashboardPage(page, tag);
+            return {tag, page, dash};
+        };
+        const withMinimum = await seedJournal('m', {review: {numReviewsPerSubmission: 1}});
+        const atDefault = await seedJournal('d', {});
+
+        /**
+         * Confirm the row's submitted review from its popover: "View unread
+         * recommendation" opens the "Review Details: {title}" window the
+         * workflow's Reviewers panel opens; "Mark as Complete" there (U27),
+         * then close it: the list reloads. Returns after the popover is
+         * dismissed.
+         */
+        const confirmReview = async ({page, dash, tag}) => {
+            const row = dash.row(`done ${tag}`);
+            const completed = dash.activityIndicator(row, /Review completed on/);
+            await expect(completed).toHaveCount(1);
+            await completed.click();
+            const popover = dash.activityPopover(row);
+            await expect(popover).toContainText(/Review completed on \d{4}-\d{2}-\d{2}/);
+            await popover.getByRole('button', {name: 'View unread recommendation', exact: true}).click();
+            const details = reviewDetailsModal(page);
+            await expect(details).toBeVisible({timeout: 30_000});
+            await markReviewComplete(page, details);
+            const refetch = dash.listReload();
+            await closeReviewDetails(page, details);
+            await refetch;
+            await expect(row).toBeVisible({timeout: 30_000});
+            await dash.closeActivityPopover(row);
+        };
+
+        /** The confirmed review's popover reads "Review was confirmed by
+         * editor", with "View recommendation" (the confirmed row of the
+         * Rule 10 table); the done mark is gone. */
+        const expectConfirmedPopover = async ({page, dash, tag}) => {
+            const row = dash.row(`done ${tag}`);
+            const confirmed = dash.activityIndicator(row, /Review was confirmed by editor/);
+            await expect(confirmed).toHaveCount(1);
+            await expect(dash.activityIndicator(row, /Review completed on/)).toHaveCount(0);
+            await confirmed.click();
+            const popover = dash.activityPopover(row);
+            await expect(popover).toContainText('Review was confirmed by editor');
+            await expect(popover.getByRole('button', {name: 'View recommendation', exact: true})).toBeVisible();
+            await expect(
+                popover.getByRole('button', {name: 'View unread recommendation', exact: true})
+            ).toHaveCount(0);
+            await dash.closeActivityPopover(row);
+        };
+
+        // Before: on each journal the row's activity cell shows the
+        // reviewer's indicator alone, no sentence, and the submission lists
+        // under "Reviews submitted"; on the journal with the minimum it
+        // lists under "Needs reviews" too.
+        for (const journal of [withMinimum, atDefault]) {
+            const {dash, tag} = journal;
+            await dash.goto();
+            await dash.expectViewCount('Reviews submitted', 1);
+            await dash.openView('Reviews submitted');
+            await dash.expectViewHeading('Reviews submitted', 1);
+            const row = dash.row(`done ${tag}`);
+            await expect(row).toBeVisible();
+            await expect(dash.activityIndicator(row, /Review completed on/)).toHaveCount(1);
+            await expect(dash.activityCell(row)).not.toContainText('decision is needed');
+            await expect(dash.activityCell(row)).not.toContainText('confirmed');
+        }
+        await withMinimum.dash.expectViewCount('Needs reviews', 1);
+        await withMinimum.dash.openView('Needs reviews');
+        await withMinimum.dash.expectViewHeading('Needs reviews', 1);
+        await expect(withMinimum.dash.row(`done ${withMinimum.tag}`)).toBeVisible();
+
+        // Journal Manager confirms, on the journal with the minimum.
+        await withMinimum.dash.openView('Active submissions');
+        await withMinimum.dash.expectViewHeading('Active submissions', 1);
+        await confirmReview(withMinimum);
+
+        // The confirmed review: the popover now reads "Review was confirmed
+        // by editor", with "View recommendation".
+        await expectConfirmedPopover(withMinimum);
+
+        // With a minimum set: the activity cell reads the minimum-required
+        // sentence (Rule 9e).
+        const minRow = withMinimum.dash.row(`done ${withMinimum.tag}`);
+        await expect(withMinimum.dash.activityCell(minRow)).toContainText(MINIMUM_SENTENCE);
+        await expect(withMinimum.dash.activityCell(minRow)).not.toContainText(ALL_CONFIRMED_SENTENCE);
+
+        // At the default: the same confirmation on the other journal ends
+        // with the all-confirmed sentence.
+        await atDefault.dash.openView('Active submissions');
+        await atDefault.dash.expectViewHeading('Active submissions', 1);
+        await confirmReview(atDefault);
+        await expectConfirmedPopover(atDefault);
+        const defRow = atDefault.dash.row(`done ${atDefault.tag}`);
+        await expect(atDefault.dash.activityCell(defRow)).toContainText(ALL_CONFIRMED_SENTENCE);
+        await expect(atDefault.dash.activityCell(defRow)).not.toContainText(MINIMUM_SENTENCE);
+
+        // Control: on the journal with the minimum, "Needs reviews" no
+        // longer lists the submission once its review is confirmed
+        // (positive control: "Reviews submitted" still does).
+        await withMinimum.dash.expectViewCount('Needs reviews', 0);
+        await withMinimum.dash.openView('Needs reviews');
+        await withMinimum.dash.expectViewHeading('Needs reviews', 0);
+        await expect(withMinimum.dash.row(`done ${withMinimum.tag}`)).toHaveCount(0);
+        await expect(withMinimum.page.getByText('No Items')).toBeVisible();
+        await withMinimum.dash.openView('Reviews submitted');
+        await withMinimum.dash.expectViewHeading('Reviews submitted', 1);
+        await expect(withMinimum.dash.row(`done ${withMinimum.tag}`)).toBeVisible();
     });
 });

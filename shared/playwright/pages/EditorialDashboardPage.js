@@ -25,8 +25,9 @@
  *   the per-reviewer activity indicators with their popovers (U23 Rules
  *   9–10);
  * - the column headers and a row's Stage / Editorial Activity cells (U23
- *   Rule 5), the Filters panel's suggest-list fields, and the "More
- *   Actions" menu's grayed state (U23 Rule 12).
+ *   Rule 5), the Filters panel's suggest-list and checkbox fields, the
+ *   pager's page buttons, the sidebar badges' color variant (U23 Rule 1)
+ *   and the "More Actions" menu's grayed state (U23 Rule 12).
  */
 const {expect} = require('@playwright/test');
 const {MySubmissionsPage} = require('./MySubmissionsPage.js');
@@ -65,6 +66,26 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         return this.sideNav()
             .locator('a[href*="dashboard/editorial"]')
             .filter({has: this.page.getByText(name, {exact: true})});
+    }
+
+    /**
+     * A view entry's count badge (the `<Badge>` beside the label). Its
+     * classes carry the color variant: `bg-attention` on the entries the
+     * sidebar flags for attention ("Reviews overdue", whatever it counts),
+     * `bg-secondary` with `text-primary` on the plain ones (U23 Rule 1).
+     */
+    viewBadge(name) {
+        return this.viewLink(name)
+            .locator('span')
+            .filter({hasText: /^\s*\d+\s*$/})
+            .first();
+    }
+
+    /** The number a view entry's badge reads right now (U23 Rule 5: the
+     * heading's total is expected to match it). */
+    async readViewCount(name) {
+        const text = await this.viewBadge(name).innerText();
+        return Number(text.trim());
     }
 
     /** The sidebar's global search box (label "Search submissions"). Once a
@@ -222,6 +243,30 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         return this.page.getByRole('option');
     }
 
+    /** Pick a suggest-list option by its text ("Sela Sectioneditor"); the
+     * field then holds the pick and the list closes. */
+    async pickSuggestOption(text) {
+        const option = this.suggestOptions().filter({hasText: text});
+        await expect(option).toBeVisible({timeout: 30_000});
+        await option.click();
+        await expect(this.suggestOptions()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * A checkbox option of the open Filters panel by its label: the
+     * "Section" field's sections on a journal or preprint server (U23
+     * Fields table; a press has no such field), and any other options
+     * field the panel grows.
+     */
+    filterCheckbox(label) {
+        return this.filtersModal().getByRole('checkbox', {name: label, exact: true});
+    }
+
+    /** The pager's button for page `n` (accessible name "Go to Page n"). */
+    pagerPageButton(n) {
+        return this.pager().getByRole('button', {name: new RegExp(`Page ${n}$`)});
+    }
+
     /**
      * Open the "More Actions" menu and return its "Delete Incomplete
      * Submissions" entry, which is grayed (`aria-disabled`) while the
@@ -246,6 +291,20 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
     /** The popover a reviewer activity indicator opens inside its row. */
     activityPopover(row) {
         return row.locator('[id^="headlessui-popover-panel"]');
+    }
+
+    /**
+     * Dismiss a row's open activity popover with a click outside it (on the
+     * page heading): Escape closes it only while focus is inside, and a
+     * window opened from the popover leaves focus elsewhere when it
+     * closes. No-op when none is open.
+     */
+    async closeActivityPopover(row) {
+        const panel = this.activityPopover(row);
+        if (await panel.count()) {
+            await this.heading().click();
+        }
+        await expect(panel).toHaveCount(0, {timeout: 30_000});
     }
 
     /** A sortable column header's sort button ('ID' or 'Days') — the button

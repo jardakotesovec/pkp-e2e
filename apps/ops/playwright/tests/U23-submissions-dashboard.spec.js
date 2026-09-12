@@ -13,13 +13,10 @@
  * the record of everything else left out.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
- * - A1 ❓ (S11 asserts the roster facts as written), A2 ❓ (S12 and S15
- *   assert the "Complete submission" button's presence only, never press
- *   it), A3 ❓ (S10 asserts the conflict notice by wording-neutral
- *   fragments), A7 ❓, A8 ❓, OMP1 ❓.
- * - A4 🐞, A6 🐞 (review popovers: no review stage here), A5 🐞 (S7 never
- *   makes the third, un-sorting click).
+ * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
+ * Coverage section is the record of everything else left out):
+ * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓, OMP1 ❓.
+ * - A4 🐞, A5 🐞, A6 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. Tests that assert counts or sidebar badges isolate on
@@ -28,12 +25,18 @@
  * own search, bounded by the heading count. Absence assertions carry
  * same-shape positive controls. Mailbox reads are scoped by the scenario's
  * own throwaway recipients (PRINCIPLES A8) and settled by the scenario's
- * last list read. No hard-coded waits. Everything runs in the parallel
- * `ops` project.
+ * last list read. The decline of S11 is driven on screen (the Production
+ * stage's "Decline Submission" wizard opened from inside the panel) because
+ * the scenario reads the list's live counts after it. No hard-coded waits:
+ * the count reload after a delete inside the panel runs through the app's
+ * own five-second throttle and is read by an auto-waited expect, never a
+ * reload. Everything runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {EditorialDashboardPage} = require('../pages/EditorialDashboardPage.js');
 const {MySubmissionsPage} = require('../pages/MySubmissionsPage.js');
+const {DecisionPage} = require('../pages/DecisionPage.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 const SERVER = 'publicknowledge';
 const ACCESS_DENIED = 'The current role does not have access to this operation.';
@@ -82,7 +85,9 @@ test.describe('submissions dashboard (editorial)', () => {
         test.slow();
         const tag = makeTag('s1', testInfo);
         // A scratch server so every badge holds only this test's rows: one
-        // active, two posted, one declined preprint.
+        // submitted preprint (on a preprint server it already sits on
+        // Production, so one seed serves both the "new" and the
+        // "production" object, fn-s1), one posted, one declined.
         const mgr = `${tag}mg`;
         await opsApi.createContext({
             tag,
@@ -93,7 +98,6 @@ test.describe('submissions dashboard (editorial)', () => {
         });
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `acta${tag}`});
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `puba${tag}`, published: true});
-        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `pubb${tag}`, published: true});
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `decl${tag}`, decisions: ['decline']});
 
         // Landing: a manager lands on the editorial dashboard, "Assigned to
@@ -118,23 +122,29 @@ test.describe('submissions dashboard (editorial)', () => {
             ['Active submissions', 1],
             ['All in production stage', 1],
             ['Scheduled for publication', 0],
-            ['Published', 2],
+            ['Published', 1],
             ['Declined', 1],
         ];
         for (const [name, count] of expectedCounts) {
             await dash.expectViewCount(name, count);
         }
 
-        // The table: the heading names the view with its count over the six
-        // columns; a Stage cell names the stage in plain text with a small
-        // colored dot beside it (Rule 5; "Production" is the preprint
-        // server's one stage).
-        await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 1);
+        // The table: the heading names the view with its count ("Published
+        // (1)") over the six columns; a Stage cell names the stage in plain
+        // text with a small colored dot beside it (Rule 5; "Production" is
+        // the preprint server's one stage, read on the active row).
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 1);
         for (const name of COLUMNS) {
             await expect(dash.columnHeader(name)).toBeVisible();
         }
         await expect(dash.columnHeader('Status')).toHaveCount(0); // positive control for the name match
+        const pubRow = dash.row(`puba${tag}`);
+        await expect(pubRow).toBeVisible();
+        await expect(dash.stageCell(pubRow)).toHaveText(/\S/);
+        await expect(dash.stageDot(pubRow)).toBeVisible();
+        await dash.openView('Active submissions');
+        await dash.expectViewHeading('Active submissions', 1);
         const activeRow = dash.row(`acta${tag}`);
         await expect(activeRow).toBeVisible();
         await expect(dash.stageCell(activeRow)).toHaveText(/^\s*Production\s*$/);
@@ -142,15 +152,22 @@ test.describe('submissions dashboard (editorial)', () => {
 
         // The views: open each entry in turn — each opens the list under its
         // own heading with its count; a view holding nothing shows a single
-        // "No Items" row (Rules 2, 5).
+        // "No Items" row (Rules 2, 5). The stage view: the production
+        // preprint lists under "All in production stage" with an empty
+        // activity cell (Rule 9i; its "View" is the cell read's control).
         await dash.openView('All in production stage');
         await dash.expectViewHeading('All in production stage', 1);
-        await expect(dash.row(`acta${tag}`)).toBeVisible();
+        const prodRow = dash.row(`acta${tag}`);
+        await expect(prodRow).toBeVisible();
+        await expect(dash.stageCell(prodRow)).toHaveText(/^\s*Production\s*$/);
+        await expect(dash.activityCell(prodRow)).toHaveText(/^\s*$/);
+        await expect(dash.viewButton(prodRow)).toBeVisible();
+        await expect(dash.row(`puba${tag}`)).toHaveCount(0);
         await dash.openView('Scheduled for publication');
         await dash.expectViewHeading('Scheduled for publication', 0);
         await expect(page.getByText('No Items')).toBeVisible();
         await dash.openView('Published');
-        await dash.expectViewHeading('Published', 2);
+        await dash.expectViewHeading('Published', 1);
         await expect(dash.row(`puba${tag}`)).toBeVisible();
         await expect(dash.row(`acta${tag}`)).toHaveCount(0);
         await dash.openView('Declined');
@@ -400,23 +417,31 @@ test.describe('submissions dashboard (editorial)', () => {
     test('S5: filter the list; the Moderator panel has no assigned-to field', async ({asUser, opsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
-        // Two fresh preprints (the idle one cannot be seeded: a 30-day floor
-        // leaves nothing, fn-s5) and one posted, so "Published" has a full
-        // list after the view switch. A scratch OPS server has one section
-        // and no categories, so the manager's panel offers exactly
-        // "Assigned to Moderator" and "Days since last activity" (Fields).
+        const SECOND_SECTION = 'Second section';
+        // A two-section server (the first entry renames the default
+        // section, fn-s5) with the Moderator assigned to one preprint and a
+        // second preprint in the second section; both fresh (the idle one
+        // cannot be seeded: a 30-day floor leaves nothing, fn-s5), plus one
+        // posted, so "Published" has a full list after the view switch.
         const mgr = `${tag}mg`;
         const mod = `${tag}md`;
         await opsApi.createContext({
             tag,
+            sections: [
+                {abbrev: 'PRE', title: 'Preprints'},
+                {abbrev: 'SEC', title: SECOND_SECTION},
+            ],
             users: [
                 user(mgr, 'Greta', 'Manager', ['manager']),
                 user(mod, 'Mira', 'Moderator', ['sectionEditor']),
                 user(`${tag}au`, 'Ada', 'Author', ['author']),
             ],
         });
-        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `acta${tag}`});
-        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `actb${tag}`});
+        await opsApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: `acta${tag}`,
+            participants: [{username: mod, role: 'sectionEditor'}],
+        });
+        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `actb${tag}`, section: 'SEC'});
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `pubs${tag}`, published: true});
 
         const page = await (await asUser(mgr)).newPage();
@@ -448,23 +473,28 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(dash.row(`actb${tag}`)).toBeVisible();
         await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
 
-        // Switching views: apply the same filter again, then open
-        // "Published": the chip is gone and the view shows its full list.
-        await dash.openFilters();
-        await dash.setDaysSinceLastActivity(30);
+        // "Section": tick the second section and apply: the list narrows to
+        // the preprint in that section, with a chip for the filter above
+        // the table (Fields table); "Clear Filters" restores the view.
+        modal = await dash.openFilters();
+        await expect(modal.getByText('Section', {exact: true})).toBeVisible();
+        await expect(dash.filterCheckbox('Preprints')).toBeVisible(); // positive control for the field
+        await dash.filterCheckbox(SECOND_SECTION).check();
         await dash.applyFilters();
-        await expect(dash.filterChip(DAYS_FILTER)).toBeVisible();
-        await dash.expectViewHeading('Active submissions', 0);
-        await dash.openView('Published');
-        await dash.expectViewHeading('Published', 1);
-        await expect(dash.row(`pubs${tag}`)).toBeVisible();
-        await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
-        await expect(dash.clearFiltersButton()).toHaveCount(0);
+        await expect(dash.filterChip(`Section: ${SECOND_SECTION}`)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`actb${tag}`)).toBeVisible();
+        await expect(dash.row(`acta${tag}`)).toHaveCount(0);
+        await dash.clearFiltersButton().click();
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.filterChip('Section:')).toHaveCount(0);
+        await expect(dash.row(`acta${tag}`)).toBeVisible();
 
         // "Assigned to Moderator" (the OPS label of "Assigned To Editor"):
         // the manager's panel lists the field, and its suggest list offers
-        // nothing until a name is typed (positive control: a typed name
-        // brings the Moderator up as an option).
+        // nothing until a name is typed; type the Moderator's name, pick
+        // them and apply: the list narrows to the preprint they are
+        // assigned to, with a chip for the filter.
         modal = await dash.openFilters();
         await expect(modal.getByText(ASSIGNED_FILTER)).toBeVisible();
         const assignedField = dash.filterSuggestField(ASSIGNED_FILTER);
@@ -473,6 +503,40 @@ test.describe('submissions dashboard (editorial)', () => {
         await assignedField.pressSequentially('Mira', {delay: 25});
         await expect(dash.suggestOptions().filter({hasText: 'Mira Moderator'})).toBeVisible();
         await expect(dash.suggestOptions()).toHaveCount(1);
+        await dash.pickSuggestOption('Mira Moderator');
+        await dash.applyFilters();
+        const moderatorChip = `${ASSIGNED_FILTER}: Mira Moderator`;
+        await expect(dash.filterChip(moderatorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`acta${tag}`)).toBeVisible();
+        await expect(dash.row(`actb${tag}`)).toHaveCount(0);
+
+        // A chip's X: with that filter still active, add the Days filter at
+        // 30 (the list empties), then press the Days chip's X: that chip
+        // alone goes, the Moderator's chip stays, and the list shows the
+        // Moderator's preprint again.
+        await dash.openFilters();
+        await dash.setDaysSinceLastActivity(30);
+        await dash.applyFilters();
+        await expect(dash.filterChip(DAYS_FILTER)).toBeVisible();
+        await expect(dash.filterChip(moderatorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 0);
+        await expect(page.getByText('No Items')).toBeVisible();
+        await dash.filterChipButton(DAYS_FILTER).click();
+        await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
+        await expect(dash.filterChip(moderatorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`acta${tag}`)).toBeVisible();
+        await expect(dash.row(`actb${tag}`)).toHaveCount(0);
+
+        // Switching views: with the Moderator's chip still active, open
+        // "Published": the chip is gone and the view shows its full list.
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 1);
+        await expect(dash.row(`pubs${tag}`)).toBeVisible();
+        await expect(dash.filterChip(moderatorChip)).toHaveCount(0);
+        await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
+        await expect(dash.clearFiltersButton()).toHaveCount(0);
 
         // Control: the Moderator's panel has no "Assigned to Moderator"
         // field, while the Days field is there.
@@ -652,11 +716,12 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(mySub.viewButton(authorRow)).toBeVisible();
     });
 
-    test('S11: declined out of the Moderator\'s sight', async ({asUser, opsApi}, testInfo) => {
+    test('S11: declined out of the Moderator\'s sight', async ({asUser, opsApi, appContext}, testInfo) => {
         test.slow();
         const tag = makeTag('s11', testInfo);
-        // Two preprints assigned to the Moderator; the manager side declines
-        // one (seeded — the decline itself is decision-feature territory).
+        // Two preprints assigned to the Moderator, both seeded active; the
+        // manager declines one on screen below (fn-s11), the other is the
+        // positive control for the Moderator's views.
         const mgr = `${tag}mg`;
         const mod = `${tag}md`;
         await opsApi.createContext({
@@ -670,25 +735,50 @@ test.describe('submissions dashboard (editorial)', () => {
         await opsApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `decl${tag}`,
             participants: [{username: mod, role: 'sectionEditor'}],
-            decisions: ['decline'],
         });
         await opsApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `ctrl${tag}`,
             participants: [{username: mod, role: 'sectionEditor'}],
         });
 
-        // The manager finds it under "Declined": the Stage cell reads
-        // "Declined", the activity cell "Declined during the {stage}
-        // stage." — Production, the preprint server's one stage — and the
-        // row keeps its "View" (Rule 9b).
+        // Preprint Server Manager: on "Active submissions", press "View" on
+        // the row and decline the preprint from its stage inside the panel
+        // (the Production stage's "Decline Submission" wizard, a preprint
+        // server's one decision; it belongs to the stage features).
         const mgrPage = await (await asUser(mgr)).newPage();
         const mgrDash = new EditorialDashboardPage(mgrPage, tag);
         await mgrDash.goto();
+        await mgrDash.expectViewCount('Declined', 0);
+        await mgrDash.openView('Active submissions');
+        await mgrDash.expectViewHeading('Active submissions', 2);
+        await mgrDash.expectViewCount('Active submissions', 2);
+        await mgrDash.viewButton(mgrDash.row(`decl${tag}`)).click();
+        await mgrDash.expectWorkflowOpen();
+        await mgrDash.declineSubmissionButton().click();
+        const decision = new DecisionPage(mgrPage);
+        await decision.expectOpen('Decline Submission');
+        await decision.completeAll();
+
+        // Close the panel: the heading total and the "Declined" badge move
+        // without a reload (Rule 13; the wizard's "View Submission" returns
+        // to the view it left, "Active submissions", with the panel open).
+        await mgrDash.expectWorkflowOpen();
+        await mgrDash.closeWorkflow();
+        await mgrDash.expectViewHeading('Active submissions', 1);
+        await mgrDash.expectViewCount('Declined', 1);
+        await mgrDash.expectViewCount('Active submissions', 1);
+        await expect(mgrDash.row(`ctrl${tag}`)).toBeVisible();
+        await expect(mgrDash.row(`decl${tag}`)).toHaveCount(0);
+
+        // Open "Declined": the row is listed with its Stage cell reading
+        // "Declined", the activity cell "Declined during the {stage}
+        // stage." — Production, the preprint server's one stage — and the
+        // row keeps its "View" (Rule 9b).
         await mgrDash.openView('Declined');
         await mgrDash.expectViewHeading('Declined', 1);
         const declRow = mgrDash.row(`decl${tag}`);
         await expect(mgrDash.stageCell(declRow)).toHaveText(/^\s*Declined\s*$/);
-        await expect(declRow).toContainText('Declined during the Production stage.');
+        await expect(mgrDash.activityCell(declRow)).toHaveText(/^\s*Declined during the Production stage\.\s*$/);
         await expect(mgrDash.viewButton(declRow)).toBeVisible();
 
         // The Moderator's sidebar has no "Declined" entry (their "Published"
@@ -724,6 +814,27 @@ test.describe('submissions dashboard (editorial)', () => {
         await modDash.expectViewHeading('Search Results', 1);
         await expect(modDash.row(`decl${tag}`)).toBeVisible();
         await expect(modDash.viewButton(modDash.row(`decl${tag}`))).toBeVisible();
+
+        // Deleted inside the panel: the manager, on "Declined", presses
+        // "View" on the row (a declined preprint's panel lands on its
+        // "Preprint" pages, so the Production stage is selected first, the
+        // U24 OPS fact), presses the stage's "Delete" and confirms the
+        // "Delete" dialog (U24's): the panel closes on the refreshed list,
+        // from which the row is gone, and the "Declined" badge and the
+        // heading total follow within a few seconds (the count reload runs
+        // through a five-second trailing throttle, fn-d: the reads below
+        // are auto-waited, never a reload).
+        await mgrDash.openView('Declined');
+        await mgrDash.expectViewHeading('Declined', 1);
+        const workflow = new WorkflowPage(mgrPage, tag, {appContext, labels: {publicationGroup: 'Preprint'}});
+        await workflow.openFromRow(mgrDash.row(`decl${tag}`));
+        await workflow.selectStage('Production');
+        await workflow.deleteSubmission({confirm: true});
+        await expect(mgrDash.workflowNavEntry()).toHaveCount(0);
+        await expect(mgrDash.row(`decl${tag}`)).toHaveCount(0);
+        await expect(mgrPage.getByText('No Items')).toBeVisible();
+        await mgrDash.expectViewCount('Declined', 0);
+        await mgrDash.expectViewHeading('Declined', 0);
 
         // Control: the manager's own group offers "Declined".
         await expect(mgrDash.viewLink('Declined')).toBeVisible();
@@ -787,14 +898,64 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(rowKeep.getByRole('checkbox')).toHaveCount(0);
         await expect(dash.bulkDeleteButton()).toBeDisabled();
 
-        // Delete: tick both and press the button: the confirm dialog reads
-        // its sentence; "Confirm" removes both rows, and the badges and the
-        // heading total drop without a reload (Rules 12–13).
+        /** Both incomplete rows are still listed beside the submitted one,
+         * their Stage cell reading "Production". */
+        const expectNothingDeleted = async () => {
+            await dash.expectViewHeading('Active submissions', 3);
+            await expect(rowA).toBeVisible();
+            await expect(rowB).toBeVisible();
+            await expect(rowKeep).toBeVisible();
+            await expect(dash.stageCell(rowA)).toHaveText(/^\s*Production\s*$/);
+            await expect(dash.stageCell(rowB)).toHaveText(/^\s*Production\s*$/);
+        };
+
+        // "Cancel": tick one row and press "Cancel" above the list:
+        // selection mode ends (no checkbox, no delete button) with nothing
+        // deleted, both incomplete rows still listed.
+        await dash.checkRowCheckbox(rowA);
+        await expect(dash.bulkDeleteButton()).toBeEnabled();
+        await dash.bulkDeleteCancelButton().click();
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expectNothingDeleted();
+
+        // … choose "Delete Incomplete Submissions" again, tick one row,
+        // press "Delete Incomplete Submissions" and then "Cancel" in the
+        // dialog: the same.
+        await dash.enterBulkDeleteSelection();
+        await dash.checkRowCheckbox(rowA);
+        await expect(dash.bulkDeleteButton()).toBeEnabled();
+        await dash.bulkDeleteButton().click();
+        const dialog = dash.bulkDeleteConfirmDialog();
+        await expect(dialog).toBeVisible({timeout: 30_000});
+        await expect(dialog).toContainText(BULK_DELETE_CONFIRM);
+        await dialog.getByRole('button', {name: 'Cancel', exact: true}).click();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expectNothingDeleted();
+
+        // A view switch in selection mode: choose "Delete Incomplete
+        // Submissions" once more, tick one row, open "Published" and return
+        // to "Active submissions": no row is ticked and nothing was deleted.
+        await dash.enterBulkDeleteSelection();
+        await dash.checkRowCheckbox(rowA);
+        await expect(rowA.getByRole('checkbox')).toBeChecked(); // positive control for the tick
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 0);
+        await dash.openView('Active submissions');
+        await expectNothingDeleted();
+        await expect(page.getByRole('checkbox', {checked: true})).toHaveCount(0);
+
+        // Delete: choose "Delete Incomplete Submissions" again, tick both
+        // and press the button: the confirm dialog reads its sentence;
+        // "Confirm" removes both rows, and the badges and the heading total
+        // drop without a reload (Rules 12–13).
+        await dash.enterBulkDeleteSelection();
         await dash.checkRowCheckbox(rowA);
         await expect(dash.bulkDeleteButton()).toBeEnabled();
         await dash.checkRowCheckbox(rowB);
         await dash.bulkDeleteButton().click();
-        const dialog = dash.bulkDeleteConfirmDialog();
         await expect(dialog).toBeVisible({timeout: 30_000});
         await expect(dialog).toContainText(BULK_DELETE_CONFIRM);
         await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
