@@ -2,25 +2,25 @@
 /**
  * @file playwright/tests/U26-review-stage-absence.spec.js
  *
- * U26 — Review stage & rounds
- * (lib/pkp/docs/e2e/specs/U26-review-stage-and-rounds.md): the OPS ABSENCE
- * test, spec scenario 14. OPS does not install a review stage — a preprint
- * server's workflow goes straight from submission to Production (spec footnote
- * p, an install fact) — so per RUNBOOK multi-app rule 3 the whole feature
- * costs this ONE absence test, with a positive control per assertion.
+ * Review stage & rounds — OPS suite, the ABSENCE test only, spec scenario
+ * 14. OPS installs no review stage: a preprint server's workflow goes
+ * straight from submission to Production (spec footnote p, an install
+ * fact), so scenarios 1–13 carry badges that exclude a preprint server and
+ * the whole feature costs this ONE test, with a positive control per
+ * absence. Spec: docs/specs/U26-review-stage-and-rounds.md; its Coverage
+ * section is the record of everything else left out.
  *
- * Deliberately NOT covered here (and why):
- * - The entire review-stage feature — rounds, the round status box and its
- *   sentences, Files for Review / Revisions Uploaded panels, decision and
- *   recommendation buttons, the author view, side effects (spec scenarios
- *   1–13): none of these screens exist on OPS. They are covered by the OJS
- *   and OMP suites for this feature.
- * - The spec's Findings register entries (A1–A7, OJS1, OMP1–2): all concern
- *   OJS/OMP review surfaces; nothing to assert or park on OPS.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
+ * - A1 🐞, OJS1 🐞, A9 🐞, A10 🐞 (review-stage surfaces that do not exist
+ *   on a preprint server).
+ * - A2 ❓, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, OMP2 ❓, OMP3 ❓, OMP1 ✅
+ *   (journal and press review surfaces; nothing to assert or park here).
  *
  * Seeding: a scratch preprint server + one submitted preprint via the
  * scenario endpoints (throwaway manager/author). `publicknowledge` and the
- * seeded roster are not touched.
+ * seeded roster are not touched. No hard-coded waits; runs in the parallel
+ * `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
 
@@ -30,7 +30,7 @@ function makeTag(prefix) {
 }
 
 test.describe('review stage & rounds (U26) — OPS absence', () => {
-    test('scenario 14 {OPS}: no review stage on a preprint server', async ({asUser, pkpApi}) => {
+    test('S14 {OPS}: no review stage on a preprint server', async ({asUser, pkpApi}) => {
         const tag = makeTag('u26s14');
         const manager = `m${tag}`;
         const author = `a${tag}`;

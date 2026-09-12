@@ -135,11 +135,14 @@ and the reviewer forms to *Reviewer assignment & management*.
 8. <a id="review-files"></a> **Files for Review.** Each round carries its own
    set of files under review, the files the reviewers of that round are
    given, in the panel headed "Files for Review". The panel's selection
-   dialog ("Current Review Files For Round {N}") lists the submission's
-   workflow files with checkboxes. Ticking a file adds it to the round, new
-   files can be uploaded from the same dialog, and no file is ever deleted
-   here. Confirming reports "Review files updated." Unticking a file, though,
-   changes nothing the editor can see: the panel lists it exactly as before,
+   dialog ("Current Review Files For Round {N}") opens listing the round's
+   own review files with checkboxes. Ticking its box "Show files from all
+   accessible workflow stages." adds the submission's other workflow files
+   to the list, a file still on the Submission stage among them. Ticking a
+   file adds it to the round, new files can be uploaded from the same
+   dialog, and no file is ever deleted here. Confirming reports "Review
+   files updated." Unticking a file, though, changes nothing the editor can
+   see: the panel lists it exactly as before,
    and the dialog's checkboxes do not reliably mirror the panel
    ⚠ [A7](#a7). <sup>h</sup>
 9. <a id="revisions"></a> **Revisions Uploaded.** Each round also carries the
@@ -251,9 +254,12 @@ and the reviewer forms to *Reviewer assignment & management*.
   Journal Managers, Editors and Section Editors assigned to the stage. It is
   sent under the author's own name and address. All of this takes effect the
   moment the file is attached in the upload window's first step. Closing the
-  wizard without finishing does not undo the upload or recall the email. To
-  avoid a flood, the same editor is not emailed again for further uploads
-  within a day unless they have signed in since the last notice. <sup>l</sup>
+  window through its header "Close" without finishing keeps the file and the
+  email. Pressing the window's own "Cancel" link after the file was attached,
+  though, removes the file again while the email already sent stands
+  ⚠ [A11](#a11). To avoid a flood, the same editor is not emailed again
+  for further uploads within a day unless they have signed in since the
+  last notice. <sup>l</sup>
 - **Request Revisions decision.** Each author assigned to the stage gets a
   task naming the submission in the header's Tasks panel. On a journal it reads "Revision required.", on a
   press "Revisions to consider in External Review." ⚠ [OMP3](#omp3). Their
@@ -320,110 +326,332 @@ and the reviewer forms to *Reviewer assignment & management*.
 
 ## Canonical scenarios
 
-Every scenario runs on the seeded journal with ready accounts and scratch
-submissions; scenario 4's notice is read in the mailbox of the editor it was
-sent to. The accounts and the tooling recipe are in the footnote. <sup>s</sup>
+Scenarios 4 and 7, and the second submission of scenario 11, run on a
+scratch journal with throwaway accounts: an editor whose mailbox scenario 4
+reads, a reviewer whose assignment lists scenario 7 reads, and a Section
+Editor who is the only editorial participant. Every other scenario runs on
+the seeded journal with ready accounts and scratch submissions. The
+accounts, the passwords and the tooling recipe are in the footnote.
+<sup>s</sup>
 
-1. **Round 1 opens with the submission**: Editor: on a new submission's
-   workflow, record the decision that sends it to review ("Send for Review").
-   The workflow menu now shows "Review" with the entry "Review Round 1"
-   selected. The page title reads "Review (Round 1)", and the status box
-   says "Round 1 Status — Waiting for reviewers to be assigned." The Files
-   for Review panel lists the files chosen when sending to review.
-2. **The status line follows the reviewers**: Editor: add a reviewer to the
-   round (Reviewers panel). The status becomes "Awaiting responses from
-   reviewers." After the reviewer submits their review, it reads "New
-   reviews have been submitted." Then open the review through the Reviewers
-   panel's "Read Review" action and confirm "Mark as Complete" in the
-   "Review Details" window. The status now reads "All reviews are confirmed
-   and a decision is needed."
-3. **Request revisions within the round**: Editor: press "Request
-   Revisions", keep "Revisions will not be subject to a new round of peer
-   reviews.", and complete the wizard. The status box reads "Revisions have
-   been requested." The Author signs in. Their task list holds a revisions
-   task for this submission, and the submission's review stage shows the
-   "Upload revisions" button.
-4. **Author uploads a revision**: Author: on the review stage, press "Upload
-   revisions" and complete the upload. The Revisions Uploaded panel lists
-   the file. The status box (editor view) now reads "Revisions have been
-   submitted and a decision is needed." The author's task is gone, and the
-   assigned editors' mailboxes hold the revised-version notice.
-5. **Request revisions toward a new round**: Editor: press "Request
-   Revisions", choose "Revisions will be subject to a new round of peer
-   reviews.", and complete the wizard. The status reads "Revisions requested
-   from the author to be taken to a new review round." Author: upload one
-   revised file. The status reads "Revisions submitted. A new review round
-   needs to be created." ⚠ [A1](#a1) After this upload the bottom "Upload
-   revisions" button is gone and the task list still reads "Resubmit for
-   review." A further file can be added only through the Revisions Uploaded
-   panel's own "Upload" control.
-6. **A new round**: Editor: press "Create New Review Round". In the wizard's
-   file step the revised file is already ticked. Keep it and record the
-   decision. The menu gains "Review Round 2" (selected), the status reads
-   "Waiting for reviewers to be assigned.", and the Files for Review panel
-   of Round 2 lists the carried file. Selecting "Review Round 1" shows its
-   reviewers and files, no decision buttons, and the note "The submission
-   has been advanced to the next round of review".
-7. **Cancel a round**: Editor: on a Round 2 whose only reviewer has not yet
-   responded to the invitation, press "Cancel Review Round" and confirm
-   through the wizard. "Review Round 2" disappears from the menu, the
-   submission stands on Round 1, and the invited reviewer no longer finds
-   the assignment in any of their assignment lists.
-   Additionally verify: on a submission whose Round 1 is cancelled, the
-   submission returns to the Submission stage.
-8. **Cancelling is blocked once a review is in**: Editor: on a round with a
-   completed review, verify that "Cancel Review Round" is not offered among
-   the buttons.
-9. **Accept out of review**: Editor: press "Accept Submission" and complete
-   the wizard. The submission moves to Copyediting. Selecting the review
-   stage still shows the rounds, and the status box reports that the
-   submission is now in the Copyediting stage.
-10. **Decline, revert, delete**: Editor: press "Decline Submission" and
-    complete the wizard. The buttons are replaced by "Revert Decline". A
-    Journal Manager additionally sees "Delete"; a Section Editor does not.
-    Press "Revert Decline" and complete it. The submission is back in review
-    and the status line again reflects the round's reviewer state.
-11. **Recommend-only round**: on a round with at least one reviewer added
-    (one who declined is enough, Rule 6), a Section Editor limited to
-    recommendations, assigned alongside a deciding Editor (Rule 13), opens
-    the current round. There are no decision buttons. The buttons read
-    "Recommend Revisions", "Recommend Accept", "Recommend Decline" instead,
-    and the status box reads "Awaiting recommendations from editors." They
-    record "Accept Submission" as a recommendation (wizard per *Editorial
-    decision recording*). The deciding Editor's screen then shows the
-    "Recommendation" box listing "Accept Submission", and the status box
-    reads "All recommendations are in and a decision is needed." With a
-    second recommending editor still pending, it would read "New editorial
-    recommendations have been submitted." instead.
-12. **Author reads an open review**: with a completed **open** review on the
-    round, the Author opens the review stage. The reviewers list names the
-    reviewer and offers "Read Review". That opens the review with the
-    reviewer's name, date and recommendation (there is no recommendation
-    line on a press ⚠ [OMP2](#omp2)). On a press the remarks the reviewer
-    shared with the author follow. On a journal, expect no review text in
-    the window, even when the reviewer shared remarks ⚠ [OJS1](#ojs1). The
-    window's attachments section is not part of this scenario's pass/fail
-    and must not be asserted by tests ⚠ [A3](#a3). As a control, use an
-    **anonymous** completed review on another submission: the author's
-    review stage shows no reviewers list at all, not even an empty one. The
-    author also finds the decision letters under "Notifications" and can
-    open each read-only (Rule 16).
+1. **Round 1 opens with the submission**
+
+   Given: Editor, on the Submission stage of a new submission that has two
+   submission files.
+
+   - **"Send for Review"**: record the decision that sends the submission
+     to review, unticking the second file in its wizard so only the first
+     goes with it: the workflow menu shows "Review" with the entry "Review
+     Round 1" selected, the page title reads "Review (Round 1)", the box at
+     the top reads "Round 1 Status — Waiting for reviewers to be assigned.",
+     and the "Files for Review" panel lists the file chosen when sending to
+     review.
+   - **"Current Review Files For Round 1"**: open the "Files for Review"
+     panel's selection dialog: it lists the file already under review
+     alone, with a checkbox. Tick "Show files from all accessible workflow
+     stages.": the second file, still on the Submission stage, joins the
+     list. Tick it and confirm: "Review files updated." appears and the
+     panel lists both files.
+   - **Uploading from the dialog**: open the dialog again and upload a new
+     file from it, then confirm: "Review files updated." appears and the
+     panel lists the new file too; the files listed before are still
+     listed, because nothing in this dialog deletes a file.
+   - **Control**: the "Review" entry holds "Review Round 1" alone; a later
+     round comes only from "Create New Review Round" (scenario 6).
+     <sup>s</sup>
+
+2. **The status line follows the reviewers**
+
+   Given: Editor, on a Round 1 that reads "Waiting for reviewers to be
+   assigned.", with a Reviewer of the journal ready to review.
+
+   - **"Add Reviewer"**: in the Reviewers panel add the reviewer (the
+     request itself belongs to *Reviewer assignment & management*): the box
+     reads "Awaiting responses from reviewers."
+   - **The reviewer's review**: Reviewer: accept the request, then submit
+     the review. Editor: the box reads "New reviews have been submitted."
+   - **"Read Review"**: in the Reviewers panel open "Read Review" and
+     confirm "Mark as Complete" in the "Review Details" window: the box
+     reads "All reviews are confirmed and a decision is needed."
+   - **Control**: with the request accepted and the review not yet
+     submitted, the box still reads "Awaiting responses from reviewers.".
+     <sup>s</sup>
+
+3. **Request revisions within the round**
+
+   Given: Editor, on the current round of a submission in review, whose
+   Author is ready to sign in.
+
+   - **"Request Revisions"**: press it: the wizard opens on the choice
+     "Require New Review Round" with "Revisions will not be subject to a
+     new round of peer reviews." preselected. Keep it and complete the
+     wizard: the box reads "Revisions have been requested."
+   - **Author**: sign in: the header's Tasks panel holds "Revision
+     required." naming the submission (on a press "Revisions to consider in
+     External Review." [OMP3](#omp3)), and the submission's review stage
+     shows the "Upload revisions" button at the bottom of the screen.
+   - **Control**: the round's "Revisions Uploaded" panel still reads "No
+     Items": the sentence stands while no revised file has arrived.
+     <sup>s</sup>
+
+4. **Author uploads a revision**
+
+   Given: Author, on a round that reads "Revisions have been requested.",
+   with one Editor assigned to the stage and a second Editor of the journal
+   not assigned to it.
+
+   - **"Upload revisions", first step only**: press "Upload revisions",
+     attach a file in the upload window's first step, then close the
+     window through its header "Close" without finishing, accepting the
+     browser's leave-without-saving prompt if it asks (the window's own
+     "Cancel" link is a different path [A11](#a11)): the "Revisions
+     Uploaded" panel lists the file all the same.
+   - **The Editor's screen**: Editor: the box reads "Revisions have been
+     submitted and a decision is needed."
+   - **Tasks**: Author: the "Revision required." task is gone from the
+     header's Tasks panel.
+   - **Mailbox**: the assigned Editor's mailbox holds an email with the
+     subject "Revised Version Uploaded", sent under the Author's own name
+     and address.
+   - **A second upload the same day**: Author: press "Upload revisions"
+     again and complete the upload: the panel lists both files, and the
+     assigned Editor's mailbox holds no second notice.
+   - **After the Editor signs in**: Editor: sign in again. Author: upload a
+     third file: a fresh "Revised Version Uploaded" email arrives in the
+     Editor's mailbox.
+   - **Control**: the Editor not assigned to the stage has no "Revised
+     Version Uploaded" email in their mailbox. <sup>s</sup>
+
+5. **Request revisions toward a new round**
+
+   Given: Editor, on the current round of a submission in review, whose
+   Author is ready to sign in.
+
+   - **"Request Revisions", new round**: press "Request Revisions", choose
+     "Revisions will be subject to a new round of peer reviews.", and
+     complete the wizard, which continues under the heading "Resubmit for
+     Review": the box reads "Revisions requested from the author to be
+     taken to a new review round."
+   - **Author**: sign in: the header's Tasks panel holds "Resubmit for
+     review."; on the review stage press "Upload revisions" and complete
+     the upload: the "Revisions Uploaded" panel lists the file.
+   - **The Editor's screen**: Editor: the box reads "Revisions submitted. A
+     new review round needs to be created."
+   - **A further file**: Author: the "Revisions Uploaded" panel's own
+     "Upload" control opens the same upload wizard (the bottom "Upload
+     revisions" button is gone and the "Resubmit for review." task stays
+     [A1](#a1); neither is a pass or fail here).
+   - **Control**: after the in-round upload of scenario 4, the bottom
+     "Upload revisions" button is still offered. <sup>s</sup>
+
+6. **A new round**
+
+   Given: Editor, on a Round 1 with one reviewer and a revised file in its
+   "Revisions Uploaded" panel (the end of scenario 5).
+
+   - **"Create New Review Round"**: press it: the wizard's file step offers
+     the revised file, already ticked. Keep it and record the decision: the
+     menu gains "Review Round 2", selected; the page title reads "Review
+     (Round 2)"; the box reads "Round 2 Status — Waiting for reviewers to
+     be assigned."; Round 2's "Files for Review" panel lists the carried
+     file, and its Reviewers panel lists no reviewer.
+   - **"Review Round 1"**: select it: its reviewers and files show, there
+     are no decision buttons, and the box, headed "Status", reads "The
+     submission has been advanced to the next round of review".
+   - **Control**: select "Review Round 2" again: the decision buttons are
+     back and the box is headed "Round 2 Status". <sup>s</sup>
+
+7. **Cancel a round**
+
+   Given: Editor, on a Round 2 whose only reviewer has been invited and has
+   not responded, and a second submission on its Round 1.
+
+   - **"Cancel Review Round"**: press it and confirm through the wizard:
+     "Review Round 2" disappears from the menu and the submission stands
+     on Round 1.
+   - **The reviewer's lists**: Reviewer: the withdrawn invitation is in
+     none of the reviewer dashboard's assignment lists.
+   - **Round 1 cancelled**: Editor: on the second submission press "Cancel
+     Review Round" and confirm: the submission is back on the Submission
+     stage.
+   - **Control**: before the cancel, the same Reviewer's assignment lists
+     held the Round 2 request. <sup>s</sup>
+
+8. **Cancelling is blocked once a review is in**
+
+   Given: Editor, on the current round of a submission whose one reviewer
+   completed a review, and a second submission whose round's only reviewer
+   declined the request.
+
+   - **The buttons**: "Cancel Review Round" is not among the decision
+     buttons and nothing stands in its place; "Request Revisions", "Accept
+     Submission", "Create New Review Round" and "Decline Submission" are
+     offered.
+   - **A declined reviewer**: on the second submission's round, "Cancel
+     Review Round" is absent equally.
+   - **Control**: on a round whose only reviewer has not yet responded,
+     "Cancel Review Round" is offered (scenario 7). <sup>s</sup>
+
+9. **Accept out of review**
+
+   Given: Editor, on the current round of a submission in review.
+
+   - **"Accept Submission"**: press it (the highlighted button) and
+     complete the wizard: the submission moves to the Copyediting stage.
+   - **The review stage afterwards**: select "Review" › "Review Round 1":
+     the round is still listed and the box reads "The submission is
+     currently in the Copyediting stage."
+   - **Control**: the box is headed plain "Status", no longer "Round 1
+     Status". <sup>s</sup>
+
+10. **Decline, revert, delete**
+
+    Given: Journal Manager, and a Section Editor assigned to the stage, on
+    the current round of a submission whose one reviewer accepted the
+    request and has not submitted a review.
+
+    - **"Decline Submission"**: Journal Manager: press it and complete the
+      wizard: the box reads "Submission declined." and the decision buttons
+      are replaced by "Revert Decline" and "Delete".
+    - **The Section Editor's screen**: Section Editor: on the same declined
+      submission the buttons are "Revert Decline" alone, with no "Delete".
+    - **"Revert Decline"**: Journal Manager: press it and complete it: the
+      submission is back in review and the box again reads the round's
+      reviewer sentence, "Awaiting responses from reviewers.".
+    - **Control**: before the decline, no "Delete" stood among the Journal
+      Manager's buttons. <sup>s</sup>
+
+11. **Recommend-only round**
+
+    Given: a Section Editor assigned to the stage and limited to
+    recommendations, alongside a deciding Editor, on the current round of
+    a submission whose one reviewer declined the request (a declined
+    reviewer counts as a reviewer record); and a second submission where
+    such a Section Editor is the only editorial participant.
+
+    - **The recommending editor's screen**: Section Editor: open the
+      current round: there are no decision buttons; the buttons read
+      "Recommend Revisions", "Recommend Accept", "Recommend Decline", and
+      the box reads "Awaiting recommendations from editors."
+    - **Recording**: record "Accept Submission" as a recommendation (the
+      wizard belongs to *Editorial decision recording*).
+    - **The deciding Editor's screen**: Editor: the "Recommendation" box
+      lists "Accept Submission", and the status box reads "All
+      recommendations are in and a decision is needed."
+    - **Sole recommending editor**: Section Editor: open the second
+      submission's round: no buttons of either kind; the "Recommendation"
+      box reads "You can not make a recommendation until an editor is
+      assigned with permission to record a decision."
+    - **Control**: before the recommendation is recorded, the deciding
+      Editor's screen shows no "Recommendation" box. <sup>s</sup>
+
+12. **Author reads an open review**
+
+    Given: Author, with two submissions in review: the first with an open
+    review accepted and not yet submitted, and a decision letter already
+    sent to them; the second with a completed anonymous review and no
+    letter.
+
+    - **Fresh in review**: open the second submission's review stage: the
+      "Revisions Uploaded" panel and the Discussions panel are there; no
+      "Notifications" list, no reviewers list (not even an empty one), and
+      no "Upload revisions" button, the round having no revision request.
+    - **An open review under way**: open the first submission's review
+      stage: no reviewers list yet.
+    - **Reviewer**: the open reviewer types "Shared remarks for the
+      author." in "For author and editor" and submits the review (on a
+      journal, with the recommendation "Accept Submission").
+    - **"Read Review"**: Author: the first submission's review stage now
+      lists the reviewer with "Read Review". Open it: the window shows the
+      reviewer's name, completion date and recommendation (none on a press
+      [OMP2](#omp2)); on a press the typed remark follows; on a journal no
+      review text shows at all [OJS1](#ojs1). The window's attachments
+      section is outside this scenario's pass or fail and is asserted by
+      no test [A3](#a3).
+    - **"Notifications"**: on the same screen the "Notifications" list
+      holds the decision letter as a subject line and a date. Click it: the
+      full letter opens read-only in a side panel.
+    - **Old addresses**: open `{journal}/authorDashboard/submission/{id}`
+      with the first submission's id: My Submissions opens with that
+      submission's workflow open. Open
+      `{journal}/authorDashboard/reviewRoundInfo/{id}`, then the same
+      address without an id: a bare "404 Not Found" page each time.
+    - **Control**: the second submission's review stage, its anonymous
+      review completed, shows no reviewers list at all, not even an empty
+      one. <sup>s</sup>
 
 App-specific:
 
-13. **{OMP} Straight to External Review**: Press Editor: on a new
-    monograph's Submission stage, choose "Send to External Review", which
-    skips Internal Review. External Review "Review Round 1" opens exactly as
-    in scenario 1, and scenarios 2–12 run identically on the press
-    [OMP1](#omp1). The workflow menu also carries the separate "Internal
-    Review" stage entry, which is documented separately.
-14. **{OPS} No review stage on a preprint server**: Preprint Server
-    Manager: open any preprint's workflow. The menu offers no Review entry.
-    The stages go straight to Production, and no round, reviewer or review
-    file surface exists anywhere on the screen. Positive control: the same
-    screen offers the Production stage's own controls (for example posting
-    or declining the preprint), so the workflow itself is working.
-    <sup>p</sup>
+13. **Straight to External Review** {OMP}
+
+    Given: Press Editor, on the Submission stage of a new monograph.
+
+    - **"Send to External Review"**: choose it, which skips Internal
+      Review: External Review's "Review Round 1" opens exactly as in
+      scenario 1, and scenarios 2–12 run identically on the press
+      [OMP1](#omp1).
+    - **The workflow menu**: it also carries the separate "Internal Review"
+      stage entry, whose screens are documented separately.
+    - **Control**: the External Review screen is scenario 1's, with nothing
+      added by the press's extra stage: the same panels, buttons and status
+      box. <sup>s</sup>
+
+14. **No review stage on a preprint server** {OPS}
+
+    Given: Preprint Server Manager, on any preprint's workflow.
+
+    - **The workflow menu**: it offers no Review entry. The stages go
+      straight to Production, and no round, reviewer or review file
+      surface exists anywhere on the screen.
+    - **Control**: the same screen offers the Production stage's own
+      controls (for example posting or declining the preprint), so the
+      workflow itself is working. <sup>p</sup> <sup>s</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - "A review is overdue." winning over an unread review and reviews still underway (Rules 5–6)
+  - "Returned back to review." once every review is confirmed, and the reviewer sentences until then (Rules 5–6, Cross-feature)
+  - "Minimum number of confirmed reviews required: {N}." replacing the submitted and confirmed sentences (Settings)
+  - deleting the only revised file flipping the status back to "requested" (Rule 7)
+  - "New editorial recommendations have been submitted." with a second recommending editor pending (Rule 5)
+  - declined or removed reviewers not counted in the status (Rule 6)
+  - no reviewer record: "Waiting for reviewers to be assigned." even while recommendations are awaited (Rule 6)
+  - "Submission accepted." (Rule 5)
+  - a past round after review: "The submission advanced to the next review round, was accepted, and is currently in the {stage} stage." (Rule 4)
+- **Nothing new to test**:
+  - Funding Coordinator, the one assistant-level group the stage's assignment dialog offers (Actors row 1; the same screen as the editorial roles of scenario 1)
+  - editorial roles filing revisions through the "Revisions Uploaded" panel's own controls (Actors row 4; the panel of scenario 4)
+  - round created: the internal notice surfaces nowhere (Side effects)
+- **Register carries it**:
+  - A5 (production assistant roles with no way in; one assigned elsewhere refused; Actors row 1)
+  - A2 (the same status box for every role; the author gets the editor's wording; Actors row 2, Rule 4)
+  - A7 (unticking a file changes nothing the editor can see; the checkboxes do not mirror the panel; Rule 8)
+  - A1 (the bottom "Upload revisions" button gone after the first new-round upload while the panel's "Upload" still works; Rule 9)
+  - A1 (the "Resubmit for review." task staying after the upload; Side effects)
+  - A8 (a past round's panels still act: a reviewer or file lands there; Rules 1, 10)
+  - OMP2 (no recommendation line on a press; Rule 15)
+  - OJS1 (the journal's window showing no review text; Rule 15)
+  - A3 (the window's attachments section; Rule 15)
+  - A4 (a round whose only reviewers declined reading "All reviews are confirmed and a decision is needed."; Rule 6)
+  - A9 (the author's revisions task never returning after the only revised file is deleted; Rule 7, Side effects)
+  - A10 (the "Revisions Uploaded" description on a round with no revision request; Rule 9)
+  - A6 (the restored round's box no longer recalling its revision request; Rule 12)
+  - A11 (the upload window's "Cancel" link removing the attached file while the "Revised Version Uploaded" email stands; Side effects)
+  - OMP3 (the press's task wording "Revisions to consider in External Review."; Side effects)
+- **Owned by another feature**:
+  - the workflow address of a submission one has no right to, and its access error (Actors; *Workflow screen & stage access*, scenario 6)
+  - "The {stage} stage has not yet been initiated." before the stage starts (Rule 4; *Workflow screen & stage access*, scenario 2)
+  - the cancelled round's files staying in the submission's records, which no screen of this stage lists once the round is gone (Rule 12; *Submission files*)
+  - the author response panel once a response is requested, never on a press (Rule 14; *Author response to reviews*, scenario 4)
+  - the Discussions panel in both views (Rule 14; *Tasks & discussions*)
+  - the My Submissions row "Revision requested" with "Submit revisions" (Side effects; *My Submissions*, scenario 4)
+  - round cancelled: the author and reviewer email steps (Side effects; *Editorial decision recording*)
+  - the reviewer suggestions panel when suggestions are enabled (Settings; *Reviewer suggestions*, scenario 2)
+  - the Reviewers panel's actions, the decision wizard, the participants and the file-manager mechanics (Cross-feature; *Reviewer assignment & management*, *Editorial decision recording*, *Stage participants*, *Submission files*)
+  - the press's separate, earlier Internal Review stage [OMP1](#omp1) (Purpose; the Internal Review stage's own spec)
 
 ## Findings register
 
@@ -445,6 +673,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | After a round is cancelled, the restored round's status box no longer mentions its unresolved revision request | ❓ | user-visible | — |
 | [A7](#a7) | Unticking a file in the review-files dialog changes nothing the editor can see, and the checkboxes do not mirror the panel | ❓ | minor | — |
 | [A8](#a8) | A past round's panels still act: a reviewer added or a file uploaded there lands in the closed round | ❓ | user-visible | — |
+| [A11](#a11) | The upload window's "Cancel" link removes the attached file, but the "Revised Version Uploaded" email already sent to the editors stands | ❓ | minor | — |
 | [OMP2](#omp2) | A press collects no reviewer recommendation (intended, confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | rebase check (claude), 2026-08-25 — form-field half intended |
 | [OMP3](#omp3) | On a press the fresh revisions task reads "Revisions to consider in External Review.", not the journal's "Revision required." | ❓ | minor | — |
 | [OMP1](#omp1) | Presses run an additional Internal Review stage before External Review | ✅ | — | — |
@@ -587,6 +816,24 @@ the sentence describes an event that never happened. The panel is empty at
 that point, so what is wrong is the explanation, not the files. Still, a
 reader is told revisions were requested when they were not.
 Since: 2026-08-02 · Basis: probe. <sup>[f-a10](#fn-a10)</sup>
+
+<a id="a11"></a>
+**A11 — The upload window's "Cancel" removes a file the editors were already told about** · ❓ · minor.
+The "Revised Version Uploaded" email and the status flip happen the moment
+the author attaches a file in the upload window's first step. When the
+author then presses the window's own "Cancel" link instead of finishing,
+the file is removed again: the "Revisions Uploaded" panel is back to "No
+Items" and the editor's box back to "Revisions have been requested.", while
+the email already sent stands. Closing the window through its header
+"Close" keeps the file. The editor is sent to look for a revision that is
+gone, and nothing on the screen explains the email. Seen once, on a
+journal.
+Question: should the notice wait until the author finishes the upload, or
+should "Cancel" keep a file the editors were already told about? Lean: the
+notice is early; the file removal reads as the window doing what its
+"Cancel" promises.
+Since: 2026-09-12 · Basis: test run (a journal, one run; the press was not
+driven on this path). <sup>[f-a11](#fn-a11)</sup>
 
 ### OJS
 
@@ -860,7 +1107,13 @@ selected & not yet in stage → copied in and linked to the round
 never deletes. Success notice `notification.updatedReviewFiles` "Review files
 updated." No app subclasses this pair (empty chains). On-screen panel
 heading "Files for Review" live-probed 2026-07-31 (note a); the dialog's
-checkbox behavior probed the same day (finding A7).
+checkbox behavior probed the same day (finding A7). Test runs 2026-09-12
+(OJS and OMP, scenario 1): the dialog opened under a "Review Files" heading
+with the round's review file alone and the box "Show files from all
+accessible workflow stages." unticked; ticking the box reloaded the list
+with the Submission-stage file, whose checkbox was then ticked and
+confirmed with "Review files updated." (the Rule 8 wording was corrected on
+that observation).
 
 <a id="fn-i"></a>
 **i** — Author upload button: `workflowConfigAuthorOJS.js` external-review
@@ -942,6 +1195,10 @@ own name and address; subject "Revised Version Uploaded". Probed 2026-07-31
 stage received nothing for an upload — the assigned-to-the-stage qualifier is
 load-bearing — and after the assigned editor signed in again, a further
 upload sent a fresh notice (the sign-in branch re-arms the daily throttle).
+Test runs 2026-09-12 (OJS and OMP, scenario 4): the window closed through
+its header "Close" after the step-1 attach left the file in the panel and
+one notice in the mail catcher; the wizard's own "Cancel" link is note
+f-a11.
 
 <a id="fn-m"></a>
 **m** — `PendingRevisionsNotificationManager`
@@ -1049,21 +1306,54 @@ editor-confirmed review the scenario seeder cannot produce, so it was
 deferred by cost, not oversight (claim check 2026-07-31).
 
 <a id="fn-s"></a>
-**s** — Scenario seeding: run on the seeded test journal/press
-(`publicknowledge`) with seeded editor/section-editor/author/reviewer roster
-accounts; mutating flows use scratch submissions created through the test
-scenario endpoints; mail observed in the test mail catcher with per-test
-throwaway recipient addresses. Recommend-only setup (scenario 11): assign a
-Section Editor as participant with the recommendation-only limitation (stage-
-participants feature), alongside a deciding-editor participant — without one
-the recommendation buttons do not render (Rule 13). Exact usernames per the e2e harness roster at
-test-authoring time. Seeding caveat observed 2026-07-31 while building probe
-fixtures, twice independently (a probe run on the seeded journal's own state
-provided the contrast): on scratch
-journals, submitting assigns no editor even with a matching section editor
-seeded, so every recipe must include an explicit participant-assignment step
-before the workflow steps — the auto-assignment behavior itself belongs to
-the *Submission stage* feature, not this register.
+**s** — Scenario seeding. The seeded journal or press is `publicknowledge`;
+roster accounts sign in with the username doubled as the password:
+`editor.diana` is the Editor (a manager-level account, so a deciding editor
+wherever it is assigned; the seeded journal assigns it to every submission
+in its sections on submit), `manager.maya` the Journal Manager,
+`sectioneditor.ana` the Section Editor, `author.alex` and `author.bea` the
+Authors, `reviewer.julia` and `reviewer.paul` the Reviewers. Submissions
+are scratch, built through `POST scenarios/submission` (scenarios.md) with
+`decisions: ['sendExternalReview']` for a submission in Round 1 and
+`reviewRounds[].reviewers[]` for its reviewer state (`invited`, `accepted`,
+`declined`, `completed`); the seed carries no files, so a file is uploaded
+through the Submission Files panel first. Scratch journals come from `POST
+scenarios/context` with throwaway `users[]`; the mail catcher is Mailpit,
+read by the throwaway recipient's address. Per scenario: 1 seeds no
+decision, uploads two files and records "Send for Review" on screen. 2
+adds the reviewer through "Add Reviewer" (a reviewer named in the seed
+leaves that search) and drives the review on the reviewer's own page. 3
+and 5 seed an `accepted` reviewer and record the decision on screen. 4
+runs on a scratch journal with a throwaway `editor`, a second `editor` for
+the control and an `author`, seeded `decisions: ['sendExternalReview',
+'requestRevisions']`; the first editor is assigned to the stage through the
+Participants panel (the "Journal editor" group), the second never. 6
+continues 5's state, or seeds `decisions: ['sendExternalReview',
+'resubmit']` and uploads the revised file as the author. 7: a scratch
+journal with throwaway `manager`, `author` and `externalReviewer`; two
+`reviewRounds[]` entries give Round 2, the second with the reviewer
+`invited`; the second submission has one round. 8: `status: 'completed'`
+on the first submission's reviewer, `status: 'declined'` on the second's.
+9: any round. 10: a reviewer `status: 'accepted'`; `sectioneditor.ana`
+assigned to the stage through `participants[]`; `manager.maya` declines
+and reverts. 11: a reviewer `status: 'declined'`; the recommendation-only
+limitation is set on screen in the Participants panel's "Edit" window for
+`sectioneditor.ana` (the flag belongs to *Stage participants*), the
+deciding editor being the auto-assigned `editor.diana`; the second
+submission sits on a scratch journal with one throwaway `sectionEditor` as
+its only participant, limited the same way. 12: `author.bea` submits both;
+the open reviewer (`reviewer.julia`) is added on screen with "Review Type"
+"Open" (a seeded reviewer carries the journal's default type, anonymous)
+and accepts on screen before the author's first step; the letter comes from
+a decision the editor records on screen; the control submission seeds
+`reviewer.paul` `status: 'completed'`; the old addresses are typed. 13: a
+monograph seeded with no decision; "Send to External Review" recorded on
+screen. 14: any seeded preprint. Seeding caveat observed 2026-07-31, twice
+independently (a probe run on the seeded journal's own state provided the
+contrast): on scratch journals, submitting assigns no editor even with a
+matching section editor seeded, so every scratch-journal recipe assigns
+its participants before the workflow steps; the auto-assignment behavior
+itself belongs to the *Submission stage* feature, not this register.
 
 <a id="fn-a1"></a>
 **f-a1** — Guard list in note i: the four-entry status list contains
@@ -1162,6 +1452,20 @@ and OMP, for editor-side and author-side deletion of the only revised file;
 the later file add that re-creates a task observed live on the press and
 code-traced on the journal. The spec's prior revival claim was corrected by
 the same check.
+
+<a id="fn-a11"></a>
+**f-a11** — Test run 2026-09-12 (OJS, scenario 4, one run): after the
+step-1 attach and the window's "Cancel" link, the author's Revisions
+Uploaded table showed its "No Items" row, the editor's box read "Revisions
+have been requested." and the bottom "Upload revisions" button was offered,
+while the mail catcher held the assigned editor's "Revised Version Uploaded"
+notice from the author's address. The green runs on OJS and OMP close the
+window through its header "Close" instead and the file stays (note l).
+Mechanism, read not driven: lib/pkp
+`js/controllers/wizard/fileUpload/FileUploadWizardHandler.js`
+`wizardCancelRequested` deletes the uploaded file when cancel follows an
+upload; the email goes out at the step-1 add (note l). The press was not
+driven on the Cancel path.
 
 <a id="fn-a10"></a>
 **f-a10** — Probed 2026-08-02, editorial view (Journal/Press Manager), on

@@ -13,3 +13,5 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-09-12 · U26 · test author tojs · two runs lost to screen facts the spec and footnote h leave out: the review-files window lists the round's files only until "Show files from all accessible workflow stages." is ticked, and the upload wizard's "Cancel" link deletes the uploaded file where the header "Close" keeps it · footnote h naming the stage box, and Side effects (or footnote l) naming which close keeps the file
+2026-09-12 · U26 · test author tomp · one probe rerun lost to the kit: `screen(page)` after closing a legacy window over the workflow waits 30 s for a second visible dialog and throws, so a "read the screen after the close" step must skip `screen()` and read locators directly · a `screen()` that records however many dialogs are open (zero or one) instead of waiting for the count it saw before

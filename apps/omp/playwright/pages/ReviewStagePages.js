@@ -461,6 +461,139 @@ async function openTasksPanel(page) {
     return panel;
 }
 
+/**
+ * Open the "Files for Review" panel's selection window ("Current Review
+ * Files For Round N": the submission's workflow files with checkboxes, an
+ * "Upload Review File" link, "OK" to confirm). Resolves the window.
+ */
+async function openReviewFilesDialog(page, modal) {
+    await modal.getByRole('button', {name: 'Upload/Select Files'}).click();
+    const dialog = topModal(page);
+    await expect(
+        dialog.getByRole('link', {name: 'Upload Review File'})
+    ).toBeVisible({timeout: 20_000});
+    return dialog;
+}
+
+/**
+ * The review-files window opens listing the review stage's own files only;
+ * its "Show files from all accessible workflow stages." box reloads the
+ * list with the submission's other workflow files (the Submission stage's
+ * among them). Ticks it and waits for `fileName`'s row (seen 2026-09-12,
+ * tomp: a submission file not yet under review is absent until then).
+ */
+async function showAllStageFiles(dialog, fileName) {
+    await dialog
+        .getByRole('checkbox', {name: 'Show files from all accessible workflow stages.'})
+        .check();
+    await expect(reviewFileCheckbox(dialog, fileName)).toBeVisible({timeout: 20_000});
+}
+
+/** The checkbox of one file's row in the review-files window. */
+function reviewFileCheckbox(dialog, fileName) {
+    return dialog
+        .getByRole('row')
+        .filter({hasText: fileName})
+        .locator('input[type="checkbox"]')
+        .first();
+}
+
+/**
+ * Confirm the review-files window with "OK" and wait for the "Review files
+ * updated." notice; then wait until the round's "Files for Review" list
+ * carries every name in `expectedFiles`. The notice is a server-side
+ * trivial notification fetched by the page (parallel lesson 2), so the
+ * list read is the durable bound.
+ */
+async function confirmReviewFilesDialog(page, modal, dialog, expectedFiles) {
+    await dialog.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(page.getByText('Review files updated.').first()).toBeVisible({
+        timeout: 20_000,
+    });
+    for (const fileName of expectedFiles) {
+        await expect(
+            primaryRegion(modal).getByRole('row').filter({hasText: fileName}).first()
+        ).toBeVisible({timeout: 20_000});
+    }
+}
+
+/**
+ * Upload a new file from inside the review-files window ("Upload Review
+ * File" opens the legacy three-step wizard over it). Returns once the
+ * wizard is gone and the new file's row is in the window; its box is left
+ * as it arrives (the test reads it).
+ */
+async function uploadReviewFileInDialog(page, dialog, fileName) {
+    await dialog.getByRole('link', {name: 'Upload Review File'}).click();
+    const wizard = topModal(page);
+    const genre = wizard.locator('select[id^="genreId"]');
+    await expect(genre).toBeVisible({timeout: 20_000});
+    await genre.selectOption({label: 'Book Manuscript'});
+    await page.locator('input[type="file"]').last().setInputFiles({
+        name: fileName,
+        mimeType: 'text/plain',
+        buffer: Buffer.from(`Review file ${fileName}`),
+    });
+    await expect(wizard.getByRole('button', {name: /Change File/})).toBeVisible({timeout: 20_000});
+    await wizard.getByRole('button', {name: 'Continue', exact: true}).click();
+    await expect(wizard.getByRole('tab', {name: '2. Review Details'})).toHaveAttribute('aria-selected', 'true', {timeout: 20_000});
+    await wizard.getByRole('button', {name: 'Continue', exact: true}).click();
+    await expect(wizard.getByRole('tab', {name: '3. Confirm'})).toHaveAttribute('aria-selected', 'true', {timeout: 20_000});
+    await wizard.getByRole('button', {name: 'Complete', exact: true}).click();
+    await expect(wizard.getByRole('tab', {name: '3. Confirm'})).toBeHidden({timeout: 20_000});
+    await expect(reviewFileCheckbox(dialog, fileName)).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * The first step only of the legacy upload wizard an Upload control has
+ * just opened: pick the component and transfer the file (the "Change File"
+ * button is the transfer's own signal). Returns the wizard, still open on
+ * step 1.
+ */
+async function startUploadWizard(page, fileName) {
+    const wizard = topModal(page);
+    await expect(wizard.getByText(/^Upload .* File$/).first()).toBeVisible({
+        timeout: 20_000,
+    });
+    const genre = wizard.locator('select[id^="genreId"]');
+    await expect(genre).toBeVisible({timeout: 20_000});
+    await genre.selectOption({label: 'Book Manuscript'});
+    await page.locator('input[type="file"]').last().setInputFiles({
+        name: fileName,
+        mimeType: 'text/plain',
+        buffer: Buffer.from(`Revised file ${fileName}`),
+    });
+    await expect(wizard.getByRole('button', {name: /Change File/})).toBeVisible({
+        timeout: 20_000,
+    });
+    return wizard;
+}
+
+/**
+ * Close the upload wizard's window without finishing it, through the
+ * window's own "Close" control (not the wizard's "Cancel" link, which
+ * posts a cancel that discards the transferred file). The page asks "The
+ * data on this form has changed. Do you wish to continue without saving?"
+ * in a browser confirm, which is accepted (Playwright dismisses it
+ * otherwise and the window stays). Live-driven 2026-09-12 (tomp).
+ */
+async function closeUploadWizard(page, wizard) {
+    page.once('dialog', (dialog) => dialog.accept());
+    await wizard.getByRole('button', {name: 'Close', exact: true}).click();
+    await expect(wizard.locator('select[id^="genreId"]')).toBeHidden({timeout: 20_000});
+}
+
+/** The pre-3.5 author-dashboard address (Rule 17): redirects to My Submissions. */
+function oldAuthorDashboardUrl(contextPath, submissionId) {
+    return `/index.php/${contextPath}/authorDashboard/submission/${submissionId}`;
+}
+
+/** The pre-3.5 per-round address (Rule 17): answers a bare 404 page. */
+function oldReviewRoundInfoUrl(contextPath, submissionId = null) {
+    return `/index.php/${contextPath}/authorDashboard/reviewRoundInfo` +
+        (submissionId === null ? '' : `/${submissionId}`);
+}
+
 module.exports = {
     STATUS,
     DECISIONS,
@@ -486,4 +619,13 @@ module.exports = {
     completeStandaloneUploadWizard,
     assignParticipant,
     openTasksPanel,
+    openReviewFilesDialog,
+    showAllStageFiles,
+    reviewFileCheckbox,
+    confirmReviewFilesDialog,
+    uploadReviewFileInDialog,
+    startUploadWizard,
+    closeUploadWizard,
+    oldAuthorDashboardUrl,
+    oldReviewRoundInfoUrl,
 };

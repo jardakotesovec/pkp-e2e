@@ -11,11 +11,17 @@
  *   buttons, the Request Revisions entry modal.
  * - DecisionPage — the full-page decision wizard (decision/record/…):
  *   composer steps, promote-files step, Record Decision, success dialog.
- * - uploadViaWizard — the legacy jQuery file-upload wizard (3 tabs:
- *   Upload File → Review Details → Confirm).
- * - addReviewer / performReview / assignParticipant — the legacy grid flows
- *   around the review stage (Add Reviewer form, reviewer steps 1–4, the
- *   stage-participant form).
+ * - uploadViaWizard / uploadFirstStepOnly / inMemoryFile — the legacy jQuery
+ *   file-upload wizard (3 tabs: Upload File → Review Details → Confirm), and
+ *   its first step abandoned after the transfer.
+ * - openReviewFilesDialog / reviewFilesCheckbox / uploadInReviewFilesDialog /
+ *   confirmReviewFilesDialog — the "Files for Review" panel's selection
+ *   window ("Current Review Files For Round {N}").
+ * - addReviewer / acceptReviewRequest / performReview / assignParticipant —
+ *   the legacy grid flows around the review stage (Add Reviewer form,
+ *   reviewer steps 1–4, the stage-participant form).
+ * - signInAgain — a real login in a session-less context (the daily
+ *   revised-version throttle re-arms on a sign-in).
  * - reviewDetailsModal / openReviewDetails / awaitReviewDetailsSettled /
  *   markReviewComplete / closeReviewDetails — the Vue "Review Details" side
  *   modal that replaced the legacy read-review window (form#readReviewForm
@@ -28,6 +34,8 @@
 const path = require('path');
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
 
 /** Default upload fixture (app-local). */
@@ -36,6 +44,22 @@ const FIXTURE_PDF_NAME = 'article.pdf';
 
 exports.FIXTURE_PDF = FIXTURE_PDF;
 exports.FIXTURE_PDF_NAME = FIXTURE_PDF_NAME;
+
+/**
+ * An in-memory upload payload for `setInputFiles()`, so a scenario that
+ * needs several distinctly named files needs no fixture per name.
+ *
+ * @param {string} name the file name the screens will list
+ */
+exports.inMemoryFile = function inMemoryFile(name) {
+    return {name, mimeType: 'text/plain', buffer: Buffer.from(`Seeded upload ${name}`)};
+};
+
+/** The listed name of a `file` argument (a fixture path or an in-memory payload). */
+function fileName(file) {
+    return typeof file === 'string' ? path.basename(file) : file.name;
+}
+exports.fileName = fileName;
 
 exports.WorkflowPage = class WorkflowPage extends BasePage {
     /**
@@ -264,15 +288,14 @@ function uploadWizardDialog(page) {
 exports.uploadWizardDialog = uploadWizardDialog;
 
 /**
- * Drive the legacy 3-tab file-upload wizard (Upload File → Review Details →
- * Confirm) already opened by a panel's Upload control or the author's
- * "Upload revisions" button.
+ * The wizard's first step: pick the component and attach the file, then
+ * wait until the transfer has landed (the step's "Continue" enables only
+ * then).
  *
- * @param {import('@playwright/test').Page} page
- * @param {{genre?: string, file?: string}} options
+ * @param {import('@playwright/test').Locator} dialog from uploadWizardDialog
+ * @param {{genre: string, file: string | {name: string, mimeType: string, buffer: Buffer}}} options
  */
-exports.uploadViaWizard = async function uploadViaWizard(page, {genre = 'Article Text', file = FIXTURE_PDF} = {}) {
-    const dialog = uploadWizardDialog(page);
+async function attachInWizard(dialog, {genre, file}) {
     const fileInput = dialog.locator('input[type="file"]');
     await expect(fileInput).toBeAttached({timeout: 30_000});
     const genreSelect = dialog.locator('select[id^="genreId"]');
@@ -280,9 +303,162 @@ exports.uploadViaWizard = async function uploadViaWizard(page, {genre = 'Article
         await genreSelect.selectOption({label: genre});
     }
     await fileInput.setInputFiles(file);
-    const continueButton = dialog.getByRole('button', {name: 'Continue', exact: true});
-    await expect(continueButton).toBeEnabled({timeout: 30_000});
-    await continueButton.click();
+    await expect(dialog.getByRole('button', {name: 'Continue', exact: true})).toBeEnabled({
+        timeout: 30_000,
+    });
+}
+
+/**
+ * Attach a file in the already-open upload wizard's first step, then close
+ * the window without finishing, through the side modal's own "Close" (the
+ * Side-effects claim: the upload stands from the first step). The wizard's
+ * bottom "Cancel" link is a different path: the wizard's cancel handler
+ * deletes the file it uploaded (FileUploadWizardHandler.wizardCancelRequested),
+ * so it is not "closing without finishing".
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {{genre?: string, file?: string | {name: string, mimeType: string, buffer: Buffer}}} options
+ */
+exports.uploadFirstStepOnly = async function uploadFirstStepOnly(page, {genre = 'Article Text', file = FIXTURE_PDF} = {}) {
+    const dialog = uploadWizardDialog(page);
+    await attachInWizard(dialog, {genre, file});
+    // A browser confirm() on the way out would be dismissed by default,
+    // which keeps the window open; accept one if the screen asks.
+    page.once('dialog', (d) => d.accept().catch(() => {}));
+    await dialog.getByRole('button', {name: 'Close', exact: true}).click();
+    await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    await waitForJQueryIdle(page);
+};
+
+/**
+ * The "Files for Review" panel's selection window, "Current Review Files
+ * For Round {N}", opened by the panel's "Upload/Select Files" button. It
+ * lists the submission's workflow files with a checkbox each, carries the
+ * "Upload Review File" link, and "OK" confirms the selection.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.openReviewFilesDialog = async function openReviewFilesDialog(page) {
+    await page.getByRole('button', {name: 'Upload/Select Files', exact: true}).click();
+    const dialog = page.getByRole('dialog').filter({hasText: /Current Review Files For Round/});
+    await expect(dialog.getByRole('link', {name: 'Upload Review File'})).toBeVisible({timeout: 30_000});
+    await waitForJQueryIdle(page);
+    return dialog;
+};
+
+/**
+ * Tick the window's "Show files from all accessible workflow stages." box:
+ * the list opens on the review stage's own files, and a file still on the
+ * Submission stage is listed only once the box is ticked (seen 2026-09-12,
+ * `.reports/U26/test-ojs-findings.md` T-ojs-1). The grid refetches on the
+ * tick; the caller waits on the row it needs.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} dialog from openReviewFilesDialog
+ */
+exports.showFilesFromAllStages = async function showFilesFromAllStages(page, dialog) {
+    await dialog.getByRole('checkbox', {name: 'Show files from all accessible workflow stages.'}).check();
+    await waitForJQueryIdle(page);
+};
+
+/**
+ * The checkbox of the named file's row in the review-files window.
+ *
+ * @param {import('@playwright/test').Locator} dialog from openReviewFilesDialog
+ * @param {string} name the listed file name
+ */
+exports.reviewFilesCheckbox = function reviewFilesCheckbox(dialog, name) {
+    return dialog.getByRole('row').filter({hasText: name}).getByRole('checkbox');
+};
+
+/**
+ * Upload a new file from inside the review-files window ("Upload Review
+ * File" opens the same three-step wizard) and wait for its row to appear
+ * in the window's list.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} dialog from openReviewFilesDialog
+ * @param {{genre?: string, file?: string | {name: string, mimeType: string, buffer: Buffer}}} options
+ */
+exports.uploadInReviewFilesDialog = async function uploadInReviewFilesDialog(page, dialog, {genre = 'Article Text', file = FIXTURE_PDF} = {}) {
+    await dialog.getByRole('link', {name: 'Upload Review File'}).click();
+    await exports.uploadViaWizard(page, {genre, file});
+    await expect(dialog.getByRole('row').filter({hasText: fileName(file)})).toBeVisible({
+        timeout: 30_000,
+    });
+};
+
+/**
+ * Confirm the review-files window with "OK" and wait for it to close. The
+ * success notice, "Review files updated.", is the caller's assertion.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} dialog from openReviewFilesDialog
+ */
+exports.confirmReviewFilesDialog = async function confirmReviewFilesDialog(page, dialog) {
+    await dialog.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(dialog).toBeHidden({timeout: 30_000});
+    await waitForJQueryIdle(page);
+};
+
+/**
+ * Accept a review request as the signed-in reviewer and stop on step 2
+ * (guidelines), leaving the review under way and not submitted. The
+ * wizard steps are jQuery tabs whose past panels stay in the DOM hidden,
+ * so every read is visibility-filtered.
+ *
+ * @param {import('@playwright/test').Page} page an authenticated reviewer page
+ * @param {string} contextPath
+ * @param {number} submissionId
+ */
+exports.acceptReviewRequest = async function acceptReviewRequest(page, contextPath, submissionId) {
+    await page.goto(`/index.php/${contextPath}/reviewer/submission/${submissionId}`);
+    const acceptButton = page
+        .getByRole('button', {name: /Accept Review, Continue to Step #2/})
+        .filter({visible: true});
+    await expect(acceptButton).toBeVisible({timeout: 30_000});
+    const privacy = page.locator('input[name="privacyConsent"]').filter({visible: true});
+    if (await privacy.count()) {
+        await privacy.check();
+    }
+    await acceptButton.click();
+    await expect(
+        page.getByRole('button', {name: 'Continue to Step #3'}).filter({visible: true})
+    ).toBeVisible({timeout: 30_000});
+};
+
+/**
+ * A fresh sign-in through the site login form, in a new context that
+ * carries no cached session: the app's "signed in since" bookkeeping
+ * (the revised-version notice's daily throttle) counts only a real login.
+ * The caller closes the returned context.
+ *
+ * @param {import('@playwright/test').Browser} browser
+ * @param {string | undefined} baseURL the worker's server
+ * @param {string} username a roster or throwaway account (password rule: the username doubled)
+ */
+exports.signInAgain = async function signInAgain(browser, baseURL, username) {
+    const context = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}});
+    const page = await context.newPage();
+    const login = new LoginPage(page);
+    await login.goto();
+    await login.signIn(username, getPassword(username));
+    return context;
+};
+
+/**
+ * Drive the legacy 3-tab file-upload wizard (Upload File → Review Details →
+ * Confirm) already opened by a panel's Upload control or the author's
+ * "Upload revisions" button.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {{genre?: string, file?: string | {name: string, mimeType: string, buffer: Buffer}}} options
+ *   `file`: a fixture path or an `inMemoryFile()` payload.
+ */
+exports.uploadViaWizard = async function uploadViaWizard(page, {genre = 'Article Text', file = FIXTURE_PDF} = {}) {
+    const dialog = uploadWizardDialog(page);
+    await attachInWizard(dialog, {genre, file});
+    await dialog.getByRole('button', {name: 'Continue', exact: true}).click();
     // Review Details tab
     await expect(dialog.getByRole('tab', {name: '2. Review Details'})).toHaveAttribute(
         'aria-selected',
