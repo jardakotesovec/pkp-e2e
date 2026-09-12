@@ -195,7 +195,7 @@ affected rows and in the next Mattermost summary.
 A developer whose OJS, OMP or OPS pull request fails the e2e check asks on
 Mattermost whether they hit a bug or changed behavior the tests encode; the
 thread where they asked is where the answer goes. A PR the team wants
-checked before its merge, red or not, is a "Pre-merge review" (next
+checked before its merge, red or not, is a "PR review" (next
 section), which runs these same steps ahead of time. The work is the
 sync loop's critical triage, on one PR:
 
@@ -228,10 +228,11 @@ sync loop's critical triage, on one PR:
    and happens on request; a companion waiting more than a few weeks gets a
    nudge in the PR's thread, because its base drifts.
 
-## Pre-merge review: a PR or issue link shared in the channel
+## PR review: a PR or issue link shared in the channel
 
-The team's name for it is **pre-merge review** ("pre-merge review for
-pkp-lib#13317"). Someone posts a link to a pkp-lib or app pull request, or
+The team's name for it is **PR review** ("PR review for pkp-lib#13317";
+not a code review: the suite's verdict on the change, prepared before
+the merge). Someone posts a link to a pkp-lib or app pull request, or
 to an issue that lists PRs, and asks for it to be checked before the merge,
 in any words. The answer is the sync loop run on that change at its own
 ref, so the merge session has nothing left to discover: the review, the
