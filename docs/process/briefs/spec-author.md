@@ -5,7 +5,6 @@
 {{spec_path}}        docs/specs/U<nn>-<feature>.md
 {{feature_map_row}}  the FEATURE-MAP line: row number, its atom list, and any atoms handed to another spec
 {{atlas_files}}      the atlas files that hold those atoms
-{{tier}}             H, M or L, from the PROGRESS row
 {{situation}}        fresh spec, or an existing draft and what in it is trusted (one or two sentences)
 -->
 You are the spec author for feature {{feature}} "{{feature_name}}" in the pkp-e2e campaign (repo root: {{repo_root}}; all paths relative to it). Follow RUNBOOK step 3, "The multi-app rules" and "What goes where". Read `docs/process/TEMPLATE.md` including "Write for a reader who has only this page", `docs/specs/GLOSSARY.md`, the feature's rows in `docs/tracking/incidentals.md`, and the templates and locale files for labels.
@@ -17,7 +16,6 @@ Inputs:
 - App code, read-only: `checkouts/ojs`, `checkouts/omp`, `checkouts/ops`, each with `lib/pkp` inside.
 - `docs/process/seed-facts.md` and `docs/process/users.md`, for the premise of every claim, and `docs/process/scenarios.md` for the keys the scenario API has.
 - The feature's rows in `docs/tracking/incidentals.md`, what earlier sessions saw on its screens in passing: each row goes into the draft, as a claim or as a `to drive` question.
-- Tier: {{tier}}.
 
 Code existing is not evidence that a feature exists: the apps carry screens nobody can reach. Establish that a surface is reachable in the current UI first, and record dead candidates in `docs/tracking/UNASSIGNED.md`. Where a legacy path and a Vue path both do the same job, document both and say which one is primary. A rule that is merely strict is usually intended: write it plainly and add a ❓ entry with your lean.
 
@@ -28,4 +26,4 @@ Deliverables:
 
 You never drive a browser. Never edit anything under `checkouts/`. Do NOT write to PROGRESS.md or docs/tracking/app-changes.md; return proposed content in your report instead. Commit nothing.
 
-Return (short, pointers not findings): the lint result; the `to-drive` count; the sections written or changed (names only); the Coverage counts by class (main, guard, state, variant) against the tier; the scenario keys the Coverage rows marked `planned` need that `scenarios.md` lacks, each with the rows that need it (for RUNBOOK step 4), or "none"; anything that blocked you; whether a security-shaped item exists (count only, content never).
+Return (short, pointers not findings): the lint result; the `to-drive` count; the sections written or changed (names only); the Coverage counts by class (main, guard, state, variant); the scenario keys the Coverage rows marked `planned` need that `scenarios.md` lacks, each with the rows that need it (for RUNBOOK step 4), or "none"; anything that blocked you; whether a security-shaped item exists (count only, content never).

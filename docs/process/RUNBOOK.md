@@ -33,9 +33,7 @@ orchestrator.
 3. **Draft.** A spec author writes `docs/specs/U<nn>-<feature>.md` per
    TEMPLATE, all three apps from the start, Coverage rows classed and
    `planned`, no scenarios, open questions as `to drive:` footnotes
-   (`briefs/spec-author.md`). The orchestrator writes the scenario count
-   next to the tier in the PROGRESS row from the author's class counts
-   ("Budget"). Gate: the spec, lint zero, the PROGRESS row.
+   (`briefs/spec-author.md`). Gate: the spec, lint zero.
 4. **Harness.** Only when the author's return names a scenario key
    `scenarios.md` lacks: a harness agent builds it with its parity row and
    re-runs the shipped suites that seed through it (`briefs/harness.md`); a
@@ -51,7 +49,7 @@ orchestrator.
    the chunk reports directly; a fold agent folds the change list into the
    spec (`briefs/fold.md`). Gate: `claims.txt`, `fold-log.md`, lint zero,
    `claims.txt` regenerated.
-6. **Scenarios.** A fresh writer spends the tier by the Coverage classes,
+6. **Scenarios.** A fresh writer spends the Coverage table by class ("Budget"),
    composes the canonical scenarios from the verified body, and turns the
    Coverage table into the "Left out" list after them
    (`briefs/scenario-writer.md`). Gate: scenarios in the spec, the
@@ -65,21 +63,22 @@ orchestrator.
    `npm run test:final -- --feature U<nn>` is the second green, re-run after
    any fix. Gate: `test-<app>-green.log`, `final-run-<app>.log`.
 9. **Progress.** The orchestrator sets the frontmatter to `status: verified`
-   (its one inline spec edit) and replaces the PROGRESS row: status, tests
-   per app, and a note in the fixed shape (tests per app · register counts ·
-   one headliner ID · budget cuts as states / variants · open blocker ·
-   low-confidence IDs). Gate: the row, lint zero after the flip.
+   (its one inline spec edit) and replaces the PROGRESS row: status, scenario
+   count, tests per app, and a note in the fixed shape (tests per app ·
+   register counts · one headliner ID · budget cuts as states / variants · open
+   blocker · low-confidence IDs). Gate: the row, lint zero after the flip.
 10. **Commit.** One commit in this repo, everything the campaign produced;
     `.reports/` never (session scratch, gitignored, deletable after review;
     the kept checks under `shared/playwright/checks/` are the exception).
     App checkouts are read-only: pkp push URLs are disabled by construction,
     app changes go through maintainer-reviewed PRs, a bad push gets a
     follow-up commit, never a force-push. Gate: the commit.
-11. **Report.** What was built, the register highlights, anything
-    low-confidence; if anything was routed to the private file, the
-    verification probe (`briefs/security-verify.md`) has run and the report
-    gives counts only. Then stop; the next feature starts in a fresh session.
-    Gate: `security · <date> · none | routed, see private file` in phase-status.
+11. **Report.** What was built, the register highlights, each suite's summed
+    test time from its final-run log ("Budget"), anything low-confidence; if
+    anything was routed to the private file, the verification probe
+    (`briefs/security-verify.md`) has run and the report gives counts only.
+    Then stop; the next feature starts in a fresh session. Gate: `security ·
+    <date> · none | routed, see private file` in phase-status.
 
 ## What goes where
 
@@ -102,20 +101,20 @@ Per app about 700 tests and 25 minutes for the full suite on a fresh
 database; the measured sizes and times are in the PROGRESS banner, kept
 current by the maintenance session. CI runs one job per app with four
 workers and no sharding yet: a suite that grows past the cap gets a shard
-matrix in `run-app.yml`, never a cut. A feature's scenario count is
-everything important plus a fixed extra. The important half, the main
-and guard rows of the spec's classed Coverage table (TEMPLATE
-"Coverage"), is always covered, however many there are, so a complex
-feature grows by itself and stays one spec. The extra is the tier, set
-by the feature's importance in FEATURE-MAP: H buys about 6–8 further
-scenarios for state rows, M 3–4, L 1–2. A state whose given a scenario
-already holds rides in it as a bullet and is not counted; the extra
-counts the states that need a given of their own. At step 3 the orchestrator
-writes the resulting count next to the tier in the PROGRESS row (`H ·
-15`) from the spec author's class counts. The scenario writer spends the
-extra on the most used states first, and what it does not reach is
-written under the section's "Budget" bullet, never dropped silently,
-where the maintainer can pull any item back in.
+matrix in `run-app.yml`, never a cut. A feature's scenarios cover
+everything important and everything a user meets in ordinary use,
+whatever the count. The main and guard rows of the spec's classed
+Coverage table (TEMPLATE "Coverage") are always covered, so a complex
+feature grows by itself and stays one spec. A state rides as a bullet in
+a scenario that passes through it or whose given already holds it; a
+state nothing passes through gets a scenario of its own when an editor,
+author or reviewer would meet it in an ordinary week of running the
+journal, and goes under the section's "Budget" bullet with that reason
+otherwise, never dropped silently, where the maintainer can pull it
+back. Variants ride or are left out. No count per feature sizes this:
+the bound is the suite's measured minutes, and each feature's report
+(step 11) states its suites' summed test time so growth is seen when it
+happens, not at the cap.
 
 ## The multi-app rules
 
@@ -153,8 +152,8 @@ Test files cite these by number, so the numbers are stable.
    row. Forked-copy code with identical logic is one feature, but every
    shared claim there needs probe evidence. OMP/OPS-only surfaces stay out of
    scope until the maintainer extends it. Size alone never splits a
-   feature: a complex feature stays one spec and its tier grows
-   ("Budget").
+   feature: a complex feature stays one spec and its scenario list
+   grows ("Budget").
 8. **Look in the class hierarchy first.** For a load-bearing lib/pkp class
    read each app's subclass chain: an empty subclass is positive evidence of
    shared behavior, an override is intended divergence, a missing override
@@ -186,7 +185,7 @@ Per feature: the spec is `verified` and lint-clean, all three apps are
 covered per the multi-app rules, each suite is green twice, the PROGRESS row
 is updated, everything is committed; team review of verdicts is never a gate.
 Campaign: the unclaimed atom count in FEATURE-MAP is zero, every PROGRESS row
-is `done` or `parked`, each app's suite is within budget.
+is `done` or `parked`, each app's suite is within the cap ("Budget").
 
 ## Resuming a feature mid-flight
 
@@ -199,19 +198,18 @@ note names the last gate reached.
 
 A spec shipped before a rule changed is brought up to it in a session of
 its own, launched by the maintainer like a feature session (the
-maintenance session never builds), one feature at a time, H tiers first.
-The body stays verified, so there is no draft and no claim check. The
-queue is `docs/tracking/coverage-revision.md`, one row per spec still to
-revise; the spec's classed Coverage table, in TEMPLATE's draft shape, is
-`docs/tracking/coverage-revision/U<nn>.md`: `S<n>` in "Runs in" where a
-scenario already covers the row, `planned` where none does, and under the
-table the plan for each gap (rides in `S<n>`, a scenario of its own, or
-no seed) and the suite mismatches `lint-spec.mjs --tests` reports. The
-table is the spend: the extra counts the states the existing scenarios
-already cover, so a spec past its extra gains guards, plus the states an
-existing scenario's given already holds, ridden as bullets at no cost;
-its other states stay under "Budget", where the maintainer can pull one
-back.
+maintenance session never builds), one feature at a time, in queue
+order. The body stays verified, so there is no draft and no claim check.
+The queue is `docs/tracking/coverage-revision.md`, one row per spec still
+to revise; the spec's classed Coverage table, in TEMPLATE's draft shape,
+is `docs/tracking/coverage-revision/U<nn>.md`: `S<n>` in "Runs in" where
+a scenario already covers the row, `planned` where none does, blank
+where the writer decides, and under the table the plan for each gap
+(rides in `S<n>`, a scenario of its own, or no seed) and the suite
+mismatches `lint-spec.mjs --tests` reports. The writer spends the table
+as "Budget" says. A spec whose "Left out" list was cut by count before
+that rule has no table: its "Budget" items are the rows, decided the
+same way, and its scenarios keep their shape.
 
 1. **Claim and fleet prep** as steps 1 and 2.
 2. **Scenarios.** A scenario writer (`briefs/scenario-writer.md`, situation
@@ -236,5 +234,5 @@ back.
    fold and `test:final` as step 8. Gate: the green logs,
    `node docs/process/lint/lint-spec.mjs --tests <spec>` zero.
 5. **Progress, commit, report** as steps 9 to 11: the PROGRESS row in the
-   fixed shape with the scenario count beside the tier; the feature's
+   fixed shape with the scenario count; the feature's
    file under `coverage-revision/` and its queue row deleted.

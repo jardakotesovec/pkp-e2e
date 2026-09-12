@@ -65,7 +65,7 @@ behavior under test.
 
 Tests are organized by feature: one spec file (or a small set) per feature,
 named after the spec (`U<nn>-<feature>.spec.js`). The feature list and
-budgets live in `docs/tracking/PROGRESS.md`. Placement: genuinely
+scenario counts live in `docs/tracking/PROGRESS.md`. Placement: genuinely
 app-agnostic infrastructure goes in `shared/playwright/`; every feature suite
 goes in its own app's `apps/<app>/playwright/tests/`. Folders stay flat until
 25 to 30 spec files make natural clusters obvious.
@@ -179,7 +179,7 @@ The base seed is `apps/<app>/playwright/fixtures/bootstrap.js`: the journal
 spec was verified against them. The configured half of a feature is
 covered on scratch contexts: each setting a spec lists is probed at both
 ends, and its non-default end is a classed Coverage row that gets a
-scenario when the tier reaches it (TEMPLATE "Coverage"), seeded through
+scenario when a user meets it in ordinary use (TEMPLATE "Coverage"), seeded through
 the scenario API's passthrough keys (scenarios.md "Configuring a scratch
 context"), never by driving a settings screen in a test. A bootstrap change, should one ever be needed,
 requires checking every implemented spec against the new defaults,

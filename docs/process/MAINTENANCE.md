@@ -70,8 +70,7 @@ The apps move; the suite follows. The baselines live in
    still answers. To find which spec a commit touches, grep
    `docs/specs/` for the class and file names in the diff.
 3. **Triage every change** (next section). Each lands as one of: no impact,
-   accommodate in an existing spec and its tests, not covered yet, or
-   re-budget.
+   accommodate in an existing spec and its tests, or not covered yet.
 4. **Accommodate.** Run the RUNBOOK loop on the changed slice, same gates,
    same `.reports/<feature>/phase-status.md`: the feature's kept checks
    for the chunks whose screens changed (`shared/playwright/checks/<feature>/`),
@@ -152,11 +151,6 @@ decide deliberately. This decision is how the suite stays organised.
   that a shipped spec points at is the previous case, limited to the
   pointer. The atlas is never extended (FEATURE-MAP's header says why);
   a new surface is described in its FEATURE-MAP row when that is built.
-- **Re-budget.** A feature grew enough that its tier under-covers it, or
-  shrank so its tier overspends. Change the tier in its PROGRESS row with a
-  one-line dated rationale, and grow or prune scenarios and tests to match.
-  The global ceilings in RUNBOOK "Budget" still hold. If a tier
-  bump would breach a ceiling, take the trade-off to Mattermost first.
 - **No impact.** An internal refactor with no spec-visible behavior change.
   The subclass-chain reasoning (RUNBOOK multi-app rule 8) plus a green suite
   run is the evidence. Note nothing.

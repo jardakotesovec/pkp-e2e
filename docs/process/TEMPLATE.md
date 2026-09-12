@@ -345,9 +345,9 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      by-hand recipe for building it (create a journal, invite accounts)
      never enters the body. The flow starts where the feature's screens
      start.
-     SPENDING THE TIER: by the Coverage classes (the Coverage comment,
-     "Spending the tier"): main and guard rows always, states as far as
-     the tier's extra reaches, variants only inside a scenario already
+     SPENDING THE TABLE: by the Coverage classes (the Coverage comment,
+     "Spending the table"): main and guard rows always, states a user
+     meets in ordinary use, variants only inside a scenario already
      there. Depth
      goes INSIDE a scenario, as controls, variants and quoted outcomes,
      never as a second scenario on the same state. A bug path gets a
@@ -424,20 +424,21 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
                 register carries it). Test: would a test here assert
                 anything a covered row does not?
 
-     SPENDING THE TIER (the scenario writer, step 6): every main and guard
-     row first. A guard rides inside the main scenario that triggers it
-     (the email is read after the accept, the refusal is pressed on the
-     way past) and gets a scenario of its own only when no main scenario
-     opens its actor or state. Then state rows, the most used first. A
-     state whose given a scenario already holds rides in it as a bullet
-     (the dashboard's views on the seeded journal, walked in one
-     scenario, one bullet each) and costs nothing; a state that needs a
-     given of its own (a setting's non-default end, a submission in a
-     stage the seed lacks, another signed-in role) gets a scenario, as
-     many as the tier's extra buys (RUNBOOK "Budget" says how many). A
-     variant is covered only when it rides inside a scenario
-     already there. A main or guard row is never cut for budget, whatever
-     the count.
+     SPENDING THE TABLE (the scenario writer, step 6): every main and
+     guard row first. A guard rides inside the main scenario that
+     triggers it (the email is read after the accept, the refusal is
+     pressed on the way past) and gets a scenario of its own only when no
+     main scenario opens its actor or state. Then state rows. A state a
+     scenario passes through, or whose given a scenario already holds,
+     rides in it as a bullet (the dashboard's views on the seeded
+     journal, walked in one scenario, one bullet each) and costs nothing;
+     a state that needs a given of its own (a setting's non-default end,
+     a submission in a stage the seed lacks, another signed-in role) gets
+     a scenario when an editor, author or reviewer would meet it in an
+     ordinary week of running the journal, and goes under "Budget" with
+     that reason otherwise (RUNBOOK "Budget"). No count sizes this. A
+     variant is covered only when it rides inside a scenario already
+     there. A main or guard row is never left out.
 
      FINAL SHAPE: the "Left out" list alone, under this heading, placed
      after the canonical scenarios. What IS checked is the scenarios
