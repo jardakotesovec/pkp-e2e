@@ -194,10 +194,9 @@ affected rows and in the next Mattermost summary.
 
 A developer whose OJS, OMP or OPS pull request fails the e2e check asks on
 Mattermost whether they hit a bug or changed behavior the tests encode; the
-thread where they asked is where the answer goes. The same steps serve a
-PR the team asks to have prepared before its merge, red or not (maintainer
-request, 2026-09-12): the review, the accommodation and the companion are
-done at the PR ref, so the merge session is only step 5. The work is the
+thread where they asked is where the answer goes. A PR the team wants
+checked before its merge, red or not, is a "Pre-merge review" (next
+section), which runs these same steps ahead of time. The work is the
 sync loop's critical triage, on one PR:
 
 1. **Reproduce at the PR ref** ("Start on the right code" below, merge-base
@@ -228,6 +227,80 @@ sync loop's critical triage, on one PR:
    one-line log entry, and delete the companion row. The merge is manual
    and happens on request; a companion waiting more than a few weeks gets a
    nudge in the PR's thread, because its base drifts.
+
+## Pre-merge review: a PR or issue link shared in the channel
+
+The team's name for it is **pre-merge review** ("pre-merge review for
+pkp-lib#13317"). Someone posts a link to a pkp-lib or app pull request, or
+to an issue that lists PRs, and asks for it to be checked before the merge,
+in any words. The answer is the sync loop run on that change at its own
+ref, so the merge session has nothing left to discover: the review, the
+regression hunt, the spec fold and the suites, all before `main` moves. The
+product is a companion branch, ready to fast-forward when the app PRs
+merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
+
+1. **Resolve the PR set.** From an issue link, take the PRs its body or
+   timeline lists for `main` (`gh api repos/pkp/pkp-lib/issues/<n>` and
+   `.../timeline`); stable-branch PRs are ignored unless the request names
+   them. A pkp-lib PR normally comes with one app PR per app, two of them
+   submodule-only. Record each PR's head SHA, base SHA, fork and branch
+   name; the companion is named exactly like the app PRs' branch (they
+   share one in practice).
+2. **Set the checkouts to the PR refs** ("Session hygiene", "Start on the
+   right code"): `git fetch upstream pull/<n>/head:pr-<n>` in the app,
+   `git fetch origin pull/<n>/head:pr-<n>` in its `lib/pkp`, merge-base
+   check against each repo's tip first, then `git checkout pr-<n>` and
+   `git submodule update --init lib/pkp lib/ui-library`. A PR based on an
+   old tip is "needs a rebase before e2e can verify". `composer install`
+   in `lib/pkp`, `npm run build` when `lib/ui-library` or `js/` moved
+   since the checkout was last built, `npm run mount`, `npm run
+   reset:<app>`, `npm run fleet-prep -- --feature sync --apps <app>`.
+   Note in the sync log which unreviewed tip commits the PR ref carries
+   along; they stay the daily sync's range.
+3. **Read and triage** the diff against the issue's stated intention
+   (sync loop steps 2 and 3) on the companion branch, created from
+   `main` before any edit. Accommodate in place as step 4 says: the spec
+   spans the change contradicts, lint zero, the persona on a rewritten
+   scenario; a footnote cites the drive "at the PR head `<sha>`, before
+   its merge". Tests change only when a shipped scenario's behavior
+   changes; a new behavior worth a scenario is a coverage change for that
+   spec's revision, noted in the sync log.
+4. **Hunt regressions** as step 5: the regression reader
+   (`briefs/regression-read.md`) on the app whose checkout holds the
+   change, plus direct drives for what the fleets cannot reach (an upgrade
+   migration is driven through a PHP driver against the fresh install's
+   tables; see `checks/sync/pkp-lib-13317/`). Kept checks go under
+   `shared/playwright/checks/sync/<repo>-<pr>/` on the companion, with the
+   before-evidence recorded at the previous tip. A confirmed regression or
+   intention gap follows step 5's report and DMs; a behavior the issue
+   leaves open is a ❓ in the owning spec, posted in the thread, and the
+   team's reply is recorded as the entry's verdict the same day.
+5. **Run the suites.** The full suite of every app whose checkout carries
+   the change, on a reset database at four workers; a submodule-only app
+   PR whose lib/pkp change is verified on the first app takes its own
+   PR check's green run as evidence, unless the change has app-specific
+   surface. A red test gets a solo rerun at the PR ref and, if it reds
+   again, the same rerun at the app's tip on the same database and on a
+   fresh one: red at both refs is a flake class (ci-triage), red only at
+   the PR ref is the PR's. Traces kept on failure (`--trace
+   retain-on-failure`) save a second reproduction.
+6. **CI at the PR refs from the companion.** Push the companion, then
+   `gh workflow run e2e.yml --ref <companion> -f <app>_repo=<fork>/<app>
+   -f <app>_ref=<head sha>` for each app (harness.md "CI"). Do not push
+   the companion again while the dispatch runs: a push run and a dispatch
+   share one concurrency group and the newer cancels the older. The app
+   PR's own check picks the companion up by name on its next run.
+7. **Record and report.** Companion row `ready` in ci-triage with what
+   the merge session must do; a dated sync-log entry with one line per
+   change, the run lines and the CI run ids, and "baselines not advanced"
+   stated; commit and push the companion; the thread gets the verdict
+   (green at the PR ref, needs a rebase, or a regression with the report)
+   in the "Findings first, short" shape. Leave the checkouts on the apps'
+   tips afterwards so the daily session starts where it expects.
+8. **On the merge ping**, "A developer's PR fails the suite" step 5:
+   rebase the companion onto `main`, run the touched suites once,
+   fast-forward, advance the baselines past the merge commits, delete the
+   row. Nothing else is left to review then.
 
 ## Coverage requests
 

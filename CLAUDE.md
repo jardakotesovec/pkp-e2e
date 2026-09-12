@@ -11,6 +11,9 @@ not here. `docs/README.md` is the map of the documentation.
   `docs/process/MAINTENANCE.md`, `docs/tracking/upstream-sync.md` and
   `docs/tracking/ci-triage.md`. Check ci-triage FIRST when a CI failure is
   reported: one root cause often reds ojs, omp and ops as three messages.
+  A PR or issue link shared with a request to check it before merging is
+  a **pre-merge review**: `docs/process/MAINTENANCE.md` "Pre-merge
+  review", which produces a companion branch named like the app PR.
 - Test contract: `docs/process/PRINCIPLES.md`. Harness knowledge:
   `docs/process/{harness,patterns,scenarios,users}.md`. Spec contract:
   `docs/process/TEMPLATE.md` plus `docs/specs/GLOSSARY.md`.
