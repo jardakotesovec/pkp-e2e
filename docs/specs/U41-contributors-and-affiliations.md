@@ -970,9 +970,9 @@ the user's default-locale value when the profile has none there. Driven
 cached record planted under exactly the profile's text, the en and fr_CA
 submissions' contributor rows carried the text as `name` (fr_CA under
 both locales) and no `ror`, where the same steps at `b48c22ca06` stored
-the `ror` and no name. A language change inside the wizard does not carry
-the copied name into the new language: [Submission wizard](U21-submission-wizard.md)
-A13. The profile/masthead field itself is `user.json`'s plain multilingual
+the `ror` and no name. A language change inside the wizard asks for the
+copied name in the new language like any typed institution, by design:
+[Submission wizard](U21-submission-wizard.md) A13. The profile/masthead field itself is `user.json`'s plain multilingual
 `affiliation` string, separate machinery.
 
 <a id="fn-e"></a>
