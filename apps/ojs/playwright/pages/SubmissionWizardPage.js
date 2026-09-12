@@ -21,7 +21,10 @@
  * running app while this suite was built (2026-08-25); the Review step's
  * Confirmation section, the Details step's Keywords chips, the footer's
  * autosave status, the For the Editors comments box and the Contributors
- * list's primary-contact badge were added on the 2026-09-07 revision.
+ * list's primary-contact badge were added on the 2026-09-07 revision; the
+ * start form's field legends and section policy, the rail's unreached
+ * entries, the required mark, the Data Availability Statement and Subjects
+ * fields and the bare 404 page on 2026-09-12.
  */
 const path = require('path');
 const {expect} = require('@playwright/test');
@@ -90,6 +93,30 @@ exports.StartSubmissionPage = class StartSubmissionPage extends BasePage {
 
     sectionRadio(title) {
         return this.page.getByRole('radio', {name: title, exact: true});
+    }
+
+    /** A Submission Language radio (offered with two or more submission languages). */
+    languageRadio(name) {
+        return this.page.getByRole('radio', {name});
+    }
+
+    /**
+     * The legend of one of the start form's option groups ("Section",
+     * "Submission Language"): the group is on the form only when the
+     * journal leaves a choice (Rule 4).
+     */
+    fieldLegend(label) {
+        return this.page
+            .locator('legend.pkpFormField--options__legend')
+            .filter({hasText: new RegExp(`^\\s*${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)});
+    }
+
+    /**
+     * A section's policy, shown under the "Section" list once that section
+     * is picked (an HTML field labelled with the section's title).
+     */
+    sectionPolicy(text) {
+        return this.page.locator('.pkpFormField--html').filter({hasText: text});
     }
 
     /** The not-accepting notice (submissions disabled). */
@@ -198,6 +225,23 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         return this.page
             .locator('button.pkpSteps__step__label')
             .filter({hasText: endAnchored(name)});
+    }
+
+    /** A rail entry not yet reached: a plain span, nothing to click (Rule 8). */
+    railUnreached(name) {
+        return this.page
+            .locator('span.pkpSteps__step__label')
+            .filter({hasText: endAnchored(name)});
+    }
+
+    /** The "404 Not Found" heading of the bare page a deleted draft's address answers (Rule 16). */
+    notFoundHeading() {
+        return this.page.getByRole('heading', {name: '404 Not Found'});
+    }
+
+    /** The app header (the journal's design around the wizard). */
+    appBanner() {
+        return this.page.getByRole('banner');
     }
 
     /**
@@ -338,6 +382,27 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
     /** The Details step's Keywords chip input (present only when asked for). */
     keywordsInput(locale = 'en') {
         return this.page.locator(`#titleAbstract-keywords-control-${locale}`);
+    }
+
+    /**
+     * The "* Required" mark on a wizard form field, found from the field's
+     * control id (the mark sits in the field's label or legend).
+     */
+    requiredMark(controlId) {
+        return this.page
+            .locator('.pkpFormField')
+            .filter({has: this.page.locator(`#${controlId}, #${controlId}_ifr`)})
+            .locator('.pkpFormFieldLabel__required');
+    }
+
+    /** The Details step's Data Availability Statement editor (a TinyMCE iframe; shown when asked for). */
+    dataAvailabilityEditor(locale = 'en') {
+        return this.page.locator(`#dataAvailability-dataAvailability-control-${locale}_ifr`);
+    }
+
+    /** The For the Editors step's Subjects chip input (shown when asked for). */
+    subjectsInput(locale = 'en') {
+        return this.page.locator(`#forTheEditors-subjects-control-${locale}`);
     }
 
     /** Type one keyword into the chips box (Enter commits the chip). */

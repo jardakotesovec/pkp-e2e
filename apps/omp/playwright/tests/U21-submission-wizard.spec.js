@@ -38,10 +38,11 @@
  * passthrough keys: `copyrightNotice`, `metadata`,
  * `submissionAcknowledgement` and its copies, `supportedSubmissionLocales`)
  * or Mailpit is read (PRINCIPLES A8 — every mail assertion is scoped by a
- * unique throwaway recipient). The settings scenarios 7, 8, 9 and 13 switch
- * their setting through the manager's own screen, as the spec's bullets
- * say. All tests run in the parallel `omp` project; nothing global is
- * touched.
+ * unique throwaway recipient). S5 runs on two scratch presses (two
+ * submission languages; the builder's defaults) as its given says. The
+ * settings scenarios 7, 8, 9 and 13 switch their setting through the
+ * manager's own screen, as the spec's bullets say. All tests run in the
+ * parallel `omp` project; nothing global is touched.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
@@ -53,7 +54,11 @@ const {
     submitButton,
     submittingToLine,
     railEntry,
+    railButton,
+    backButton,
+    backTo,
     expectStep,
+    gotoStep,
     expectWizardOpen,
     beginSubmission,
     continueTo,
@@ -66,6 +71,9 @@ const {
     fillRichText,
     richTextBody,
     wizardField,
+    wizardFieldLabel,
+    reviewItem,
+    startFormLegend,
     addKeyword,
     contributorRows,
     addContributor,
@@ -268,6 +276,37 @@ test.describe('Submission wizard (U21)', () => {
         // the Files panel read the same way).
         await uploadWizardFile(page, `ms-${tag}.txt`);
         await continueTo(page, STEPS.details);
+        const detailsHash = new URL(page.url()).hash;
+        const detailsHashRe = new RegExp(`${detailsHash.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+        expect(detailsHash, 'each step pushes its own "#…" part').toMatch(/^#./);
+        await continueTo(page, STEPS.contributors);
+
+        // "Back" and the step rail (Rule 8): on Contributors the "#…" part
+        // of the address has moved on from Details'; "Back" shows Details
+        // again, the tab title reads "Make a Submission: Details" and the
+        // address carries Details' "#…" part once more. "Back" once more:
+        // Upload Files, which offers no "Back" of its own (positive
+        // control: its "Continue", read the same way).
+        await expect(page).not.toHaveURL(detailsHashRe);
+        await backTo(page, STEPS.details);
+        await expect(page).toHaveTitle(/^Make a Submission: Details\b/);
+        await expect(page).toHaveURL(detailsHashRe);
+        await backTo(page, STEPS.files);
+        await expect(page).not.toHaveURL(detailsHashRe);
+        await expect(footer(page).getByRole('button', {name: 'Continue', exact: true})).toBeVisible();
+        await expect(backButton(page)).toHaveCount(0);
+
+        // In the rail, "Details", already reached, is a button and reopens
+        // directly; "Review", not yet reached, is plain text, not a button,
+        // and pressing its label changes nothing (the current step stays
+        // Upload Files).
+        await expect(railButton(page, /Details\s*$/)).toHaveCount(1);
+        await expect(railEntry(page, /Review\s*$/)).toBeVisible();
+        await expect(railButton(page, /Review\s*$/)).toHaveCount(0);
+        await railEntry(page, /Review\s*$/).click();
+        await expectStep(page, STEPS.files);
+        await gotoStep(page, STEPS.details);
+        await expect(page).toHaveURL(detailsHashRe);
         await continueTo(page, STEPS.contributors);
         await continueTo(page, STEPS.editors);
         await openReview(page);
@@ -495,6 +534,11 @@ test.describe('Submission wizard (U21)', () => {
         const page = await (await asUser(author.username)).newPage();
         await page.goto(ownUrl);
         await expectWizardOpen(page);
+        // (Positive control for the bare 404 below: the wizard page comes
+        // dressed in the press's design — stylesheets and the page
+        // heading — read the same way there.)
+        await expect(page.locator('link[rel="stylesheet"]').first()).toBeAttached();
+        await expect(page.getByRole('heading', {level: 1}).first()).toBeVisible();
         await cancelDraft(page);
         await expect(page.getByRole('link', {name: 'Create a new submission'})).toBeVisible();
         await expect(page.getByRole('link', {name: 'Return to your dashboard'})).toBeVisible();
@@ -510,9 +554,17 @@ test.describe('Submission wizard (U21)', () => {
         await expect(mySub.row(`Submission ${tag}c`)).toBeVisible();
         await expect(mySub.row(new RegExp(`Submission ${tag}(?![a-z0-9])`))).toHaveCount(0);
 
-        // The deleted draft's wizard address now answers a bare 404.
+        // The deleted draft's wizard address, noted before cancelling, now
+        // answers only a bare page-not-found error without the press's
+        // design: the whole page is the one line "404 Not Found", no
+        // stylesheet, no tab title (Rule 16; the wizard page above is the
+        // control).
         const response = await page.goto(ownUrl);
         expect(response.status()).toBe(404);
+        await expect(page.locator('body')).toHaveText('404 Not Found');
+        await expect(page.getByRole('heading', {name: '404 Not Found'})).toBeVisible();
+        await expect(page.locator('link[rel="stylesheet"]')).toHaveCount(0);
+        await expect(page).toHaveTitle('');
 
         // The Press Manager on another author's draft: the footer offers
         // "Cancel"; confirming lands on "Submission cancelled".
@@ -534,43 +586,96 @@ test.describe('Submission wizard (U21)', () => {
         expect(await pkpMail.count({to: manager.email})).toBe(0);
     });
 
-    test('S5: change the submission settings midway (work type — OMP1)', async ({ompApi, asUser}, testInfo) => {
+    test('S5: change the submission settings midway (work type and language — OMP1)', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s5');
-        const seeded = await seedDraft(ompApi, tag);
 
-        const page = await (await asUser('author.alex')).newPage();
-        await page.goto(wizardUrl(PK, seeded.submissionId, {localePrefix: PK_PREFIX}));
+        // The first press: two submission languages (the given; a press has
+        // no sections — OMP1), a throwaway Author and their draft.
+        const press = await seedPress(ompApi, tag, ['author'], {
+            context: {supportedLocales: ['en', 'fr_CA'], supportedSubmissionLocales: ['en', 'fr_CA']},
+        });
+        const author = press.users.author;
+        const seeded = await seedDraft(ompApi, tag, {
+            context: press.path,
+            submitter: author.username,
+        });
+
+        const page = await (await asUser(author.username)).newPage();
+        await page.goto(wizardUrl(press.path, seeded.submissionId));
         await expectWizardOpen(page);
 
-        // The press states the work type with a "Change" control — always
-        // present, even with one language (Rules 7, 11 / OMP1).
-        await expect(submittingToLine(page)).toContainText('Submitting a Monograph.');
+        // The press states the work type and the language with a "Change"
+        // control (Rules 7, 11 / OMP1).
+        await expect(submittingToLine(page)).toContainText('Submitting a Monograph in English.');
 
-        // "Change Submission Settings" offers the Submission Type pair.
+        // "Change Submission Settings" offers the Submission Type pair and
+        // the language.
         const modal = await openChangeSettings(page);
         const monograph = modal.getByRole('radio', {name: WORK_TYPES.monograph});
         await expect(monograph).toBeChecked();
         await expect(
             modal.getByRole('radio', {name: WORK_TYPES.editedVolume})
         ).toBeVisible();
+        await expect(modal.getByRole('radio', {name: 'English', exact: true})).toBeChecked();
+        await expect(modal.getByRole('radio', {name: 'French (Canada)', exact: true})).toBeVisible();
 
-        // Pick the other type and save: the wizard reloads and the line
-        // names the new type (scenario 5).
+        // Pick the other type and the other language and save: the wizard
+        // reloads and the line names the new type and language (scenario 5).
         await modal.getByRole('radio', {name: WORK_TYPES.editedVolume}).check();
+        await modal.getByRole('radio', {name: 'French (Canada)', exact: true}).check();
         await modal.getByRole('button', {name: 'Save', exact: true}).click();
         await expect(submittingToLine(page)).toContainText(
-            'Submitting an Edited Volume.',
+            'Submitting an Edited Volume in French (Canada).',
             {timeout: 30_000}
         );
 
-        // Control: the draft reopened from My Submissions still names the
-        // new type.
-        const mySub = new MySubmissionsPage(page, PK);
+        // Review, one panel per language: the Details and For the Editors
+        // panels each appear twice, once per language (Rule 12); Files once
+        // (positive control, read the same way).
+        await continueTo(page, STEPS.details);
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await openReview(page);
+        await expect(reviewPanel(page, /^Details \(/)).toHaveCount(2);
+        await expect(reviewPanel(page, 'Details (English)')).toBeVisible();
+        await expect(reviewPanel(page, 'Details (French (Canada))')).toBeVisible();
+        await expect(reviewPanel(page, /^For the Editors \(/)).toHaveCount(2);
+        await expect(reviewPanel(page, 'For the Editors (English)')).toBeVisible();
+        await expect(reviewPanel(page, 'For the Editors (French (Canada))')).toBeVisible();
+        await expect(reviewPanel(page, 'Files')).toHaveCount(1);
+
+        // One section, one language: the start form. On a second press at
+        // the builder's defaults (one submission language; no section on a
+        // press ever), "Make a Submission" shows no "Submission Language"
+        // list — the first, bilingual press's start form does (positive
+        // control, read the same way) — while a press asks for the
+        // Submission Type as always (OMP1). Begin: the wizard opens on
+        // Upload Files.
+        await page.goto(startUrl(press.path));
+        await expect(startFormLegend(page, 'Submission Type')).toBeVisible({timeout: 20_000});
+        await expect(startFormLegend(page, 'Submission Language')).toBeVisible();
+        const single = await seedPress(ompApi, `${tag}s`, ['author']);
+        const singlePage = await (await asUser(single.users.author.username)).newPage();
+        await singlePage.goto(startUrl(single.path));
+        await expect(startFormLegend(singlePage, 'Submission Type')).toBeVisible({timeout: 20_000});
+        await expect(singlePage.getByRole('radio', {name: WORK_TYPES.monograph})).toBeVisible();
+        await expect(startFormLegend(singlePage, 'Submission Language')).toHaveCount(0);
+        await beginSubmission(singlePage, {title: 'Single section'});
+
+        // One section, one language: the wizard header. With one language
+        // the header names no language, but on a press the work-type line
+        // and its "Change" control remain (Rule 11 / OMP1).
+        await expect(submittingToLine(singlePage)).toHaveText(/^\s*Submitting a Monograph\.\s*Change\s*$/);
+        await expect(submittingToLine(singlePage).getByRole('button', {name: 'Change'})).toBeVisible();
+
+        // Control: the first press's draft, reopened from My Submissions,
+        // still names the new type and language.
+        const mySub = new MySubmissionsPage(page, press.path);
         await mySub.goto();
         const row = await mySub.findRowByTag(tag);
         await mySub.completeSubmissionButton(row).click();
         await expectWizardOpen(page);
-        await expect(submittingToLine(page)).toContainText('Submitting an Edited Volume.');
+        await expect(submittingToLine(page)).toContainText('Submitting an Edited Volume in French (Canada).');
     });
 
     test('S6: validation blocks an empty submission until the file is fixed', async ({ompApi, asUser}, testInfo) => {
@@ -610,6 +715,33 @@ test.describe('Submission wizard (U21)', () => {
             /upload at least one Book Manuscript file/
         );
         await expect(submitButton(page)).toBeEnabled();
+
+        // A section that waives abstracts: a press has no section at intake
+        // and requires an abstract only if its setup says so (OMP1, Rule
+        // 13), so any draft reaches Review with the abstract empty and no
+        // abstract complaint. A third draft, begun from the start form so
+        // nothing is filled in: on Details the "Abstract" label carries no
+        // "Required" mark (positive control: "Title" does); on Review the
+        // Details panel's Abstract item reads "None provided" without "This
+        // field is required." (positive control: the Files panel's
+        // complaint, read the same way on the same screen).
+        await page.goto(startUrl(PK, {localePrefix: PK_PREFIX}));
+        await beginSubmission(page, {title: `Submission ${tag}w`});
+        await continueTo(page, STEPS.details);
+        await expect(wizardFieldLabel(page, /^Title/)).toContainText('Required');
+        await expect(wizardFieldLabel(page, /^Abstract/)).toBeVisible();
+        await expect(wizardFieldLabel(page, /^Abstract/)).not.toContainText('Required');
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await openReview(page);
+        await expect(problemsBanner(page)).toBeVisible();
+        await expect(reviewPanel(page, 'Files')).toContainText(
+            /upload at least one Book Manuscript file/
+        );
+        const abstractItem = reviewItem(reviewPanel(page, 'Details'), 'Abstract');
+        await expect(abstractItem).toContainText('None provided');
+        await expect(abstractItem).not.toContainText('This field is required.');
+        await expect(reviewPanel(page, 'Details')).not.toContainText('This field is required.');
 
         // A contributor named in another language only: on a bilingual
         // scratch press, a second draft's co-author is named in English,
@@ -1129,11 +1261,13 @@ test.describe('Submission wizard (U21)', () => {
     test('S17: required metadata blocks the submit', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s17');
 
-        // A press whose setup requires keywords during submission (seeded
-        // through `metadata: {keywords: 'require'}`), a complete draft
+        // A press whose setup requires keywords during submission and asks
+        // for subjects and a data availability statement without requiring
+        // them (seeded through `metadata: {keywords: 'require', subjects:
+        // 'request', dataAvailability: 'request'}`), a complete draft
         // (scenario 17).
         const press = await seedPress(ompApi, tag, ['author'], {
-            settings: {metadata: {keywords: 'require'}},
+            settings: {metadata: {keywords: 'require', subjects: 'request', dataAvailability: 'request'}},
         });
         const author = press.users.author;
         const seeded = await seedDraft(ompApi, tag, {
@@ -1150,18 +1284,37 @@ test.describe('Submission wizard (U21)', () => {
         // Details panel, and a disabled Submit (Rule 13).
         await continueTo(page, STEPS.details);
         await expect(wizardField(page, /^Keywords/)).toBeVisible();
+        await expect(wizardFieldLabel(page, /^Keywords/)).toContainText('Required');
+        // Asked, not required: "Details" also shows a data availability
+        // statement and "For the Editors" a field for subjects, neither
+        // marked required; both stay empty.
+        await expect(wizardField(page, /^Data Availability Statement/)).toBeVisible();
+        await expect(wizardFieldLabel(page, /^Data Availability Statement/)).not.toContainText('Required');
         await continueTo(page, STEPS.contributors);
         await continueTo(page, STEPS.editors);
+        await expect(wizardField(page, /^Subjects/)).toBeVisible();
+        await expect(wizardFieldLabel(page, /^Subjects/)).not.toContainText('Required');
         await openReview(page);
         await expect(problemsBanner(page)).toContainText(
             'There are one or more problems that need to be fixed before you can submit.'
         );
         const detailsPanel = reviewPanel(page, 'Details');
-        const keywordsItem = detailsPanel
-            .locator('.submissionWizard__reviewPanel__item')
-            .filter({hasText: 'Keywords'});
+        const keywordsItem = reviewItem(detailsPanel, 'Keywords');
         await expect(keywordsItem).toContainText('This field is required.');
         await expect(submitButton(page)).toBeDisabled();
+
+        // With both left empty, "Review" raises no complaint about either
+        // (the keywords item above, read the same way, is the positive
+        // control): their items read "None provided" and nothing else is
+        // flagged on their panels.
+        const dataItem = reviewItem(detailsPanel, 'Data Availability Statement');
+        await expect(dataItem).toContainText('None provided');
+        await expect(dataItem).not.toContainText('This field is required.');
+        const editorsPanel = reviewPanel(page, 'For the Editors');
+        const subjectsItem = reviewItem(editorsPanel, 'Subjects');
+        await expect(subjectsItem).toContainText('None provided');
+        await expect(subjectsItem).not.toContainText('This field is required.');
+        await expect(editorsPanel).not.toContainText('This field is required.');
 
         // "Edit" on the Details panel, type the keyword, return: the
         // complaint is gone and Submit is enabled.
@@ -1173,6 +1326,31 @@ test.describe('Submission wizard (U21)', () => {
         await expect(keywordsItem).toContainText('wizard');
         await expect(keywordsItem).not.toContainText('This field is required.');
         await expect(submitButton(page)).toBeEnabled();
+        // "Submit stays enabled" with the asked-not-required items still
+        // empty: nothing on their panels is flagged after the fix either.
+        await expect(dataItem).toContainText('None provided');
+        await expect(subjectsItem).toContainText('None provided');
+
+        // Keywords at the install default: on the seeded press, which asks
+        // for keywords without requiring them, "Details" shows a "Keywords"
+        // field not marked required (positive control: the "Title" label's
+        // "Required" mark, and the require-press's "Keywords" label above,
+        // read the same way), and "Review" passes with it empty.
+        const alexDraft = await seedDraft(ompApi, `${tag}d`);
+        const alex = await (await asUser('author.alex')).newPage();
+        await alex.goto(wizardUrl(PK, alexDraft.submissionId, {localePrefix: PK_PREFIX}));
+        await expectWizardOpen(alex);
+        await uploadWizardFile(alex, `ms-${tag}d.txt`);
+        await continueTo(alex, STEPS.details);
+        await expect(wizardFieldLabel(alex, /^Title/)).toContainText('Required');
+        await expect(wizardField(alex, /^Keywords/)).toBeVisible();
+        await expect(wizardFieldLabel(alex, /^Keywords/)).not.toContainText('Required');
+        await continueTo(alex, STEPS.contributors);
+        await continueTo(alex, STEPS.editors);
+        await openReview(alex);
+        await expect(problemsBanner(alex)).toHaveCount(0);
+        await expect(reviewItem(reviewPanel(alex, 'Details'), 'Keywords')).toContainText('None provided');
+        await expect(submitButton(alex)).toBeEnabled();
 
         // Control: on a press whose setup does not ask for keywords,
         // "Details" shows no "Keywords" field (positive control: the Title

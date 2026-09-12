@@ -43,7 +43,6 @@ final run, progress and commit. One line per spec, FEATURE-MAP order:
 
 `U<nn> · Budget items: states <n> · variants <n> · <status>`
 
-U21 · Budget items: states 11 · variants 8 · pending
 U23 · Budget items: states 16 · variants 6 · pending
 U26 · Budget items: states 9 · variants 0 · pending
 U27 · Budget items: states 13 · variants 2 · pending

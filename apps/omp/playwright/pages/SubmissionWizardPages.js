@@ -47,6 +47,28 @@ function railEntry(page, label) {
         .filter({hasText: label});
 }
 
+/**
+ * A reached step's rail BUTTON (Rule 8: completed and current steps reopen
+ * from the rail; an unreached step renders as a plain span, so this
+ * locator counts 0 for it while `railEntry` still finds its label).
+ */
+function railButton(page, label) {
+    return page
+        .locator('.pkpSteps__buttons button.pkpSteps__step__label')
+        .filter({hasText: label});
+}
+
+/** The footer's "Back" button (absent on the first step, Rule 8). */
+function backButton(page) {
+    return footer(page).getByRole('button', {name: 'Back', exact: true});
+}
+
+/** Step back one step with the footer's "Back" and wait for arrival. */
+async function backTo(page, label) {
+    await backButton(page).click();
+    await expectStep(page, label);
+}
+
 /** The rail's current-step button. */
 function currentRailStep(page) {
     return page.locator('.pkpSteps__step__label--current');
@@ -311,6 +333,27 @@ function wizardField(page, labelRe) {
         .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: labelRe})});
 }
 
+/**
+ * A wizard form field's label element: a required field's label carries
+ * the "* Required" mark ("Title * Required"), an optional one does not.
+ */
+function wizardFieldLabel(page, labelRe) {
+    return wizardField(page, labelRe).locator('label.pkpFormFieldLabel');
+}
+
+/** A Review-step panel's item by its field label ("Abstract", "Keywords"…). */
+function reviewItem(panel, label) {
+    return panel.locator('.submissionWizard__reviewPanel__item').filter({hasText: label});
+}
+
+/**
+ * The start form's radio-list legend ("Submission Type", "Submission
+ * Language"; the language list shows only with two submission languages).
+ */
+function startFormLegend(page, text) {
+    return page.locator('legend').filter({hasText: text});
+}
+
 /** Add a keyword chip on the Details step (Enter commits the term). */
 async function addKeyword(page, term) {
     const input = page.locator(`#${CONTROLS.keywords}`);
@@ -372,6 +415,9 @@ module.exports = {
     submitButton,
     submittingToLine,
     railEntry,
+    railButton,
+    backButton,
+    backTo,
     currentRailStep,
     expectStep,
     gotoStep,
@@ -388,6 +434,9 @@ module.exports = {
     fillRichText,
     richTextBody,
     wizardField,
+    wizardFieldLabel,
+    reviewItem,
+    startFormLegend,
     addKeyword,
     contributorRows,
     addContributor,

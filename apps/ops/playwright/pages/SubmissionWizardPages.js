@@ -15,6 +15,10 @@
  * asks for a Galley Label, then the legacy upload wizard demands a Preprint
  * Component before accepting the file; the fourth step is "For Readers"; the
  * submit-confirmation dialog branches on whether the user may post.
+ *
+ * Added on the 2026-09-12 revision: the rail's reached/unreached entries
+ * and "Back", the start form's legends and section policy, the required
+ * mark, Review items and the bare 404 page.
  */
 const path = require('path');
 const {expect} = require('../support/fixtures.js');
@@ -64,9 +68,84 @@ function railEntry(page, label) {
         .filter({hasText: label});
 }
 
+/**
+ * A reached step's rail BUTTON (Rule 8: completed and current steps reopen
+ * from the rail; an unreached step renders as a plain span, so this
+ * locator counts 0 for it while `railEntry` still finds its label).
+ */
+function railButton(page, label) {
+    return page
+        .locator('.pkpSteps__buttons button.pkpSteps__step__label')
+        .filter({hasText: label});
+}
+
+/** A rail entry not yet reached: a plain span, nothing to click (Rule 8). */
+function railUnreached(page, label) {
+    return page
+        .locator('.pkpSteps__buttons span.pkpSteps__step__label')
+        .filter({hasText: label});
+}
+
+/** The footer's "Back" button (absent on the first step, Rule 8). */
+function backButton(page) {
+    return footer(page).getByRole('button', {name: 'Back', exact: true});
+}
+
+/** Step back one step with the footer's "Back" and wait for arrival. */
+async function backTo(page, label) {
+    await backButton(page).click();
+    await expectStep(page, label);
+}
+
+/**
+ * Reopen a reached step from the rail. A click swallowed by a footer
+ * re-render is retried when the rail has not moved.
+ */
+async function gotoStep(page, label) {
+    for (let attempt = 0; ; attempt++) {
+        await railButton(page, label).click();
+        try {
+            await expect(currentRailStep(page)).toContainText(label, {timeout: 5_000});
+            return;
+        } catch (error) {
+            if (attempt >= 2) {
+                throw error;
+            }
+        }
+    }
+}
+
 /** The rail's current-step button. */
 function currentRailStep(page) {
     return page.locator('.pkpSteps__step__label--current');
+}
+
+/** The app header around the wizard (the server's design; a bare 404 has none). */
+function appBanner(page) {
+    return page.getByRole('banner');
+}
+
+/** The "404 Not Found" heading of the bare page a deleted draft's address answers (Rule 16). */
+function notFoundHeading(page) {
+    return page.getByRole('heading', {name: '404 Not Found'});
+}
+
+/**
+ * The start form's option-group legend ("Section", "Submission Language"):
+ * a group is on the form only when the server leaves a choice (Rule 4).
+ */
+function startFormLegend(page, text) {
+    return page
+        .locator('legend.pkpFormField--options__legend')
+        .filter({hasText: new RegExp(`^\\s*${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)});
+}
+
+/**
+ * A section's policy on the start form: an HTML field labelled with the
+ * section's title, shown only while that section's radio is checked.
+ */
+function sectionPolicy(page, text) {
+    return page.locator('.pkpFormField--html').filter({hasText: text});
 }
 
 /** Assert the rail's current step by its visible label. */
@@ -370,6 +449,19 @@ function wizardField(page, labelRe) {
         .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: labelRe})});
 }
 
+/**
+ * A wizard form field's label element: a required field's label carries
+ * the "* Required" mark ("Title * Required"), an optional one does not.
+ */
+function wizardFieldLabel(page, labelRe) {
+    return wizardField(page, labelRe).locator('label.pkpFormFieldLabel');
+}
+
+/** A Review-step panel's item by its field label ("Abstract", "Keywords"…). */
+function reviewItem(panel, label) {
+    return panel.locator('.submissionWizard__reviewPanel__item').filter({hasText: label});
+}
+
 /** Add a keyword chip on the Details step (Enter commits the term). */
 async function addKeyword(page, term) {
     const input = page.locator(`#${CONTROLS.keywords}`);
@@ -439,7 +531,16 @@ module.exports = {
     submitButton,
     submittingToLine,
     railEntry,
+    railButton,
+    railUnreached,
+    backButton,
+    backTo,
+    gotoStep,
     currentRailStep,
+    appBanner,
+    notFoundHeading,
+    startFormLegend,
+    sectionPolicy,
     expectStep,
     expectWizardOpen,
     fillStartTitle,
@@ -455,6 +556,8 @@ module.exports = {
     fillRichText,
     richTextBody,
     wizardField,
+    wizardFieldLabel,
+    reviewItem,
     addKeyword,
     contributorRows,
     addContributor,

@@ -21,18 +21,14 @@
  *   completion screen's wording), A8 🐞 (S11 asserts auto-assignment on the
  *   seeded first journal and the needs-editor path on a section with NO
  *   configured editor), A10 🐞, OPS3, OPS5, OPS7 🐞.
- * - T-ojs-1 (scenario 12's manager draft in a deactivated section, which
- *   the app answers with the "Section Closed" page, not the wizard) and
- *   T-ojs-2 (scenario 17's control on the seeded journal, whose Details
- *   step shows an optional "Keywords" field): `.reports/U21/test-ojs-findings.md`,
- *   run of 2026-09-07; the contradicted reads are left out until the fold
- *   settles them.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (journal-level state runs on scratch journals with throwaway
  * users, configured through the context passthrough keys: `sections[]`
- * with `wordCount`, `supportedSubmissionLocales`, `copyrightNotice`,
- * `metadata`, `submissionAcknowledgement` and its two copy keys). Mailpit
+ * with `wordCount` and `policy`, `supportedSubmissionLocales`,
+ * `copyrightNotice`, `metadata`, `submissionAcknowledgement` and its two
+ * copy keys; a second scratch journal at the builder's defaults is the
+ * one-section, one-language journal of scenario 5). Mailpit
  * assertions are scoped by unique throwaway recipients (PRINCIPLES A8) and
  * every silence is bounded by a control message read the same way. Waits
  * are event-based (the Review check on its own `_validateOnly` response, the
@@ -330,6 +326,33 @@ test.describe('submission wizard', () => {
         await wizard.uploadFile();
         await wizard.continueTo('Details');
         await wizard.continueTo('Contributors');
+
+        // "Back" and the step rail (Rule 8): from Contributors, "Back" shows
+        // Details again, the tab title names the step and the address's
+        // "#…" part follows it; a second "Back" shows Upload Files, which
+        // offers no "Back" of its own (bounded by its "Continue").
+        await wizard.pressUntil(wizard.backButton(), (timeout) =>
+            expect(wizard.currentStepLabel()).toContainText('Details', {timeout})
+        );
+        await expect(page).toHaveTitle(/^Make a Submission: Details/);
+        await expect(page).toHaveURL(/#details$/);
+        await wizard.pressUntil(wizard.backButton(), (timeout) =>
+            expect(wizard.currentStepLabel()).toContainText('Upload Files', {timeout})
+        );
+        await expect(page).toHaveTitle(/^Make a Submission: Upload Files/);
+        await expect(page).toHaveURL(/#files$/);
+        await expect(wizard.continueButton()).toBeVisible();
+        await expect(wizard.backButton()).toHaveCount(0);
+        // In the rail, Details (reached) is a button that reopens the step;
+        // Review (not reached) is a plain entry with nothing to click.
+        await expect(wizard.railButton('Details')).toBeVisible();
+        await expect(wizard.railUnreached('Review')).toBeVisible();
+        await expect(wizard.railButton('Review')).toHaveCount(0);
+        await wizard.gotoStep('Details');
+        await expect(page).toHaveURL(/#details$/);
+        await wizard.continueTo('Contributors');
+        await expect(page).toHaveURL(/#contributors$/);
+
         await expect(page.getByText('Ada Author').first()).toBeVisible();
         await wizard.continueTo('For the Editors');
 
@@ -513,9 +536,21 @@ test.describe('submission wizard', () => {
         const managerPage = await (await asUser(journal.manager)).newPage();
         const managerWizard = new SubmissionWizardPage(managerPage, journal.path);
         await managerWizard.goto(other.submissionId);
+        // The address noted before cancelling, and the journal's design
+        // around the wizard (the control for the bare page below).
+        const deletedAddress = managerPage.url();
+        await expect(managerWizard.appBanner()).toBeVisible();
         await expect(managerWizard.cancelButton()).toBeVisible();
         await managerWizard.cancelAndConfirm();
         await expect(managerPage.getByRole('link', {name: 'Create a new submission'})).toBeVisible();
+
+        // The deleted draft's address answers only a bare page-not-found,
+        // without the journal's design (Rule 16).
+        await managerPage.goto(deletedAddress);
+        await expect(managerWizard.notFoundHeading()).toBeVisible({timeout: 30_000});
+        await expect(managerWizard.appBanner()).toHaveCount(0);
+        await expect(managerPage.getByRole('link')).toHaveCount(0);
+        await expect(managerPage.locator('.pkpSteps')).toHaveCount(0);
 
         // Mailboxes: no email arrives for either cancel. The bound is the
         // manager's own "Save for Later" on the surviving draft, whose
@@ -570,7 +605,58 @@ test.describe('submission wizard', () => {
         await expect(wizard.submittingToLine()).toContainText('Beta', {timeout: 45_000});
         await expect(wizard.submittingToLine()).toContainText(/Français|French/);
 
-        // Control: reopened from My Submissions the draft still names them.
+        // Review, one panel per language (Rule 12): the Details and For the
+        // Editors panels each appear twice, once per submission language;
+        // the Files panel, not per language, appears once (the control).
+        await wizard.expectStep('Upload Files');
+        await wizard.continueTo('Details');
+        await wizard.continueTo('Contributors');
+        await wizard.continueTo('For the Editors');
+        await wizard.continueToReview(submissionId);
+        await expect(wizard.reviewPanel(/^Files$/)).toHaveCount(1);
+        await expect(wizard.reviewPanel(/^Details \(/)).toHaveCount(2);
+        await expect(wizard.reviewPanel(/^For the Editors \(/)).toHaveCount(2);
+        await expect(wizard.reviewPanel(/^Details \(/).first()).toBeVisible();
+
+        // Control for the one-section bullets: this journal's start form
+        // offers the Section and Submission Language lists.
+        const start = new StartSubmissionPage(page, journal.path);
+        await start.goto();
+        await expect(start.heading()).toBeVisible({timeout: 30_000});
+        await expect(start.fieldLegend('Section')).toBeVisible();
+        await expect(start.fieldLegend('Submission Language')).toBeVisible();
+        await expect(start.sectionRadio('Alpha')).toBeVisible();
+        await expect(start.languageRadio(/Français|French/)).toBeVisible();
+
+        // One section, one language: the start form. On a second journal at
+        // the builder's defaults the form shows neither list; a title alone
+        // begins the draft and the wizard opens on Upload Files (Rule 4).
+        const single = await seedScratchJournal(ojsApi, `${tag}s`);
+        const singlePage = await (await asUser(single.author)).newPage();
+        const singleStart = new StartSubmissionPage(singlePage, single.path);
+        await singleStart.goto();
+        await expect(singleStart.heading()).toBeVisible({timeout: 30_000});
+        await expect(singleStart.beginButton()).toBeVisible();
+        await expect(singleStart.fieldLegend('Section')).toHaveCount(0);
+        await expect(singleStart.fieldLegend('Submission Language')).toHaveCount(0);
+        await expect(singlePage.getByRole('radio')).toHaveCount(0);
+        await singleStart.fillTitle('Single section');
+        await singleStart.checklistBox().check();
+        await singleStart.privacyBox().check();
+        await singleStart.begin();
+        const singleWizard = new SubmissionWizardPage(singlePage, single.path);
+        await singleWizard.expectLoaded();
+        await singleWizard.expectStep('Upload Files');
+
+        // One section, one language: the wizard header carries no
+        // "Submitting to…" line and no "Change" control (Rule 11; the first
+        // journal's line above is the control).
+        await expect(singleWizard.submissionDetailsLine()).toContainText('Single section');
+        await expect(singleWizard.submittingToLine()).toHaveCount(0);
+        await expect(singlePage.getByRole('button', {name: 'Change', exact: true})).toHaveCount(0);
+
+        // Control: the first journal's draft, reopened from My Submissions,
+        // still names the new section and language.
         await page.goto(`/index.php/${journal.path}/dashboard/mySubmissions`);
         const row = await findRowByTag(page, tag);
         await row.getByRole('button', {name: 'Complete submission', exact: true}).click();
@@ -676,6 +762,31 @@ test.describe('submission wizard', () => {
         );
         await expect(wizard2.reviewPanel(/^Files$/)).toContainText(FIXTURE_PDF_NAME);
         await expect(wizard2.submitButton()).toBeDisabled();
+
+        // A section that waives abstracts (Rule 13): a third draft, started
+        // the same way in the seeded "Reviews" section, reaches Review with
+        // the abstract empty and the Details panel raises no abstract
+        // complaint; the file complaint on the Files panel is the control
+        // that the check ran (the first draft's Details complaint above is
+        // the control that an abstract-requiring section does complain).
+        await start.goto();
+        await start.fillTitle(`Submission ${tag}r`);
+        await start.sectionRadio('Reviews').check();
+        await start.checklistBox().check();
+        await start.privacyBox().check();
+        await start.begin();
+        await wizard.expectLoaded();
+        const waived = Number(new URL(page.url()).searchParams.get('id'));
+        await wizard.continueTo('Details');
+        await wizard.continueTo('Contributors');
+        await wizard.continueTo('For the Editors');
+        await wizard.continueToReview(waived);
+        await expect(wizard.errorBanner()).toBeVisible();
+        await expect(wizard.reviewPanel('Files')).toContainText(
+            'You must upload at least one Article Text file.'
+        );
+        await expect(wizard.reviewPanel('Details')).toBeVisible();
+        await expect(wizard.reviewPanel('Details').getByText('This field is required.')).toHaveCount(0);
     });
 
     test('S7: the journal stops accepting submissions', async ({asUser, ojsApi}, testInfo) => {
@@ -947,20 +1058,22 @@ test.describe('submission wizard', () => {
     test('S12: closed and restricted sections', async ({asUser, ojsApi}, testInfo) => {
         test.setTimeout(300_000);
         const tag = makeTag('s12', testInfo);
-        // Several open sections, Alpha with an abstract word limit of 10
-        // (the `sections[].wordCount` passthrough).
+        // Several open sections, Alpha with an abstract word limit of 10 and
+        // Beta with a section policy (the `sections[].wordCount` and
+        // `sections[].policy` passthroughs).
+        const policy = `Beta takes short reports only (${tag}).`;
         const journal = await seedScratchJournal(ojsApi, tag, {
             manager: true,
             sections: [
                 {abbrev: 'ALP', title: 'Alpha', wordCount: 10},
-                {abbrev: 'BET', title: 'Beta'},
+                {abbrev: 'BET', title: 'Beta', policy: `<p>${policy}</p>`},
                 {abbrev: 'RHO', title: 'Rho'},
                 {abbrev: 'DEL', title: 'Delta'},
             ],
         });
         // The author's draft in the section that will be deactivated, one in
-        // the word-limited section, and the manager's own draft in the
-        // section to be restricted.
+        // the word-limited section, and the manager's own drafts in the
+        // section to be restricted and the section to be deactivated.
         const {submissionId} = await seedDraft(ojsApi, tag, journal.path, journal.author, {
             section: 'DEL',
         });
@@ -969,6 +1082,9 @@ test.describe('submission wizard', () => {
         });
         const managerRestricted = await seedDraft(ojsApi, `${tag}r`, journal.path, journal.manager, {
             section: 'RHO',
+        });
+        const managerDeactivated = await seedDraft(ojsApi, `${tag}d`, journal.path, journal.manager, {
+            section: 'DEL',
         });
 
         // The manager restricts Rho to editors and deactivates Delta
@@ -986,6 +1102,16 @@ test.describe('submission wizard', () => {
         await expect(start.sectionRadio('Beta')).toBeVisible();
         await expect(start.sectionRadio('Rho')).toHaveCount(0);
         await expect(start.sectionRadio('Delta')).toHaveCount(0);
+
+        // A section's policy: picking Beta shows its policy under the
+        // Section list; Alpha, with none, shows no policy (the control).
+        await expect(start.sectionPolicy(policy)).toHaveCount(0);
+        await start.sectionRadio('Beta').check();
+        await expect(start.sectionPolicy(policy)).toBeVisible();
+        await expect(start.sectionPolicy(policy)).toContainText('Beta');
+        await start.sectionRadio('Alpha').check();
+        await expect(start.sectionRadio('Alpha')).toBeChecked();
+        await expect(start.sectionPolicy(policy)).toHaveCount(0);
 
         // … while the manager still sees the restricted (not the
         // deactivated) one.
@@ -1031,10 +1157,16 @@ test.describe('submission wizard', () => {
         await expect(managerWizard.errorBanner()).toHaveCount(0);
         await expect(managerWizard.submitButton()).toBeEnabled();
 
-        // The manager's own draft in the deactivated section is not read:
-        // its wizard address answered the "Section Closed" page instead of
-        // the wizard (T-ojs-1, `.reports/U21/test-ojs-findings.md`), so the
-        // scenario's Review-step reading could not be taken.
+        // The manager's own draft in the deactivated section: reopening it
+        // shows the same "Section Closed" page the author gets, and the
+        // wizard never opens (Rule 17; the restricted draft's wizard above
+        // is the control).
+        await managerPage.goto(`/index.php/${journal.path}/submission?id=${managerDeactivated.submissionId}`);
+        await expect(managerWizard.sectionClosedHeading()).toBeVisible({timeout: 30_000});
+        await expect(
+            managerPage.getByText(/is not accepting submissions to the Delta section/)
+        ).toBeVisible();
+        await expect(managerPage.locator('.pkpSteps')).toHaveCount(0);
 
         // Every section closed: the manager deactivates the remaining open
         // sections too; the author's "Make a Submission" is the "Not
@@ -1149,12 +1281,13 @@ test.describe('submission wizard', () => {
     });
 
     test('S17: required metadata blocks the submit', async ({asUser, ojsApi}, testInfo) => {
-        test.slow();
+        test.setTimeout(300_000);
         const tag = makeTag('s17', testInfo);
-        // A journal whose setup requires keywords during submission (the
-        // `metadata` passthrough).
+        // A journal whose setup requires keywords during submission and asks
+        // for subjects and a data availability statement without requiring
+        // them (the `metadata` passthrough).
         const journal = await seedScratchJournal(ojsApi, tag, {
-            settings: {metadata: {keywords: 'require'}},
+            settings: {metadata: {keywords: 'require', subjects: 'request', dataAvailability: 'request'}},
         });
         const {submissionId} = await seedDraft(ojsApi, tag, journal.path, journal.author);
 
@@ -1164,13 +1297,21 @@ test.describe('submission wizard', () => {
         await wizard.expectStep('Upload Files');
         await wizard.uploadFile();
 
-        // Details shows a "Keywords" field; leave it empty and reach Review:
-        // the banner, the Details panel's keywords complaint, Submit
-        // disabled (Rules 7, 13).
+        // Details shows a "Keywords" field, marked required; leave it empty
+        // and reach Review: the banner, the Details panel's keywords
+        // complaint, Submit disabled (Rules 7, 13). Asked, not required:
+        // Details also shows the Data Availability Statement and For the
+        // Editors a Subjects field, neither marked required (the keywords
+        // mark is the control); both stay empty.
         await wizard.continueTo('Details');
         await expect(wizard.keywordsInput()).toBeVisible();
+        await expect(wizard.requiredMark('titleAbstract-keywords-control-en')).toBeVisible();
+        await expect(wizard.dataAvailabilityEditor()).toBeVisible();
+        await expect(wizard.requiredMark('dataAvailability-dataAvailability-control-en')).toHaveCount(0);
         await wizard.continueTo('Contributors');
         await wizard.continueTo('For the Editors');
+        await expect(wizard.subjectsInput()).toBeVisible();
+        await expect(wizard.requiredMark('forTheEditors-subjects-control-en')).toHaveCount(0);
         await wizard.continueToReview(submissionId);
         await expect(wizard.errorBanner()).toBeVisible();
         await expect(wizard.reviewPanel('Details')).toContainText('Keywords');
@@ -1187,13 +1328,63 @@ test.describe('submission wizard', () => {
         await revalidated;
         await expect(wizard.reviewPanel('Details')).toContainText('wizard');
         await expect(wizard.reviewPanel('Details').getByText('This field is required.')).toHaveCount(0);
+        // Asked, not required: with the statement and the subjects still
+        // empty, Review raises no complaint about either (the keywords
+        // complaint above is the control) and Submit stays enabled.
+        await expect(wizard.reviewPanel('For the Editors')).toBeVisible();
+        await expect(wizard.reviewPanel('For the Editors').getByText('This field is required.')).toHaveCount(0);
         await expect(wizard.errorBanner()).toHaveCount(0);
         await expect(wizard.submitButton()).toBeEnabled();
 
-        // Control: the scenario's control on the seeded journal (Details with
-        // no "Keywords" field) is not read: that journal's Details step
-        // showed an optional "Keywords" field (T-ojs-2,
-        // `.reports/U21/test-ojs-findings.md`). Review passing without a
-        // keyword on a journal that does not require one is S2's reading.
+        // Keywords at the install default: on the seeded journal, which asks
+        // for keywords without requiring them, Details shows a "Keywords"
+        // field with no required mark, and Review passes with it empty.
+        const seeded = await ojsApi.createSubmission({
+            tag: `${tag}k`,
+            context: JOURNAL,
+            submitter: 'author.alex',
+            title: `Submission ${tag}k`,
+            section: 'ART',
+            submitted: false,
+        });
+        const alexPage = await (await asUser('author.alex')).newPage();
+        const alexWizard = new SubmissionWizardPage(alexPage, JOURNAL);
+        await alexWizard.goto(seeded.submissionId);
+        await alexWizard.expectStep('Upload Files');
+        await alexWizard.uploadFile();
+        await alexWizard.continueTo('Details');
+        await expect(alexWizard.keywordsInput()).toBeVisible();
+        await expect(alexWizard.requiredMark('titleAbstract-abstract-control-en')).toBeVisible();
+        await expect(alexWizard.requiredMark('titleAbstract-keywords-control-en')).toHaveCount(0);
+        await alexWizard.continueTo('Contributors');
+        await alexWizard.continueTo('For the Editors');
+        await alexWizard.continueToReview(seeded.submissionId);
+        await expect(alexWizard.reviewPanel('Files')).toContainText(FIXTURE_PDF_NAME);
+        await expect(alexWizard.errorBanner()).toHaveCount(0);
+        await expect(alexWizard.submitButton()).toBeEnabled();
+
+        // Control: a journal whose setup does not ask for keywords (the
+        // keywords item switched off) shows no "Keywords" field on Details
+        // (the Title editor is the control that the step rendered), and
+        // Review passes without one.
+        const off = await seedScratchJournal(ojsApi, `${tag}o`, {
+            settings: {metadata: {keywords: 'off'}},
+        });
+        const offDraft = await seedDraft(ojsApi, `${tag}o`, off.path, off.author);
+        const offPage = await (await asUser(off.author)).newPage();
+        const offWizard = new SubmissionWizardPage(offPage, off.path);
+        await offWizard.goto(offDraft.submissionId);
+        await offWizard.expectStep('Upload Files');
+        await offWizard.uploadFile();
+        await offWizard.continueTo('Details');
+        await expect(offWizard.titleEditorBody()).toBeVisible();
+        await expect(offWizard.keywordsInput()).toHaveCount(0);
+        await expect(offPage.getByText('Keywords', {exact: true})).toHaveCount(0);
+        await offWizard.continueTo('Contributors');
+        await offWizard.continueTo('For the Editors');
+        await offWizard.continueToReview(offDraft.submissionId);
+        await expect(offWizard.reviewPanel('Files')).toContainText(FIXTURE_PDF_NAME);
+        await expect(offWizard.errorBanner()).toHaveCount(0);
+        await expect(offWizard.submitButton()).toBeEnabled();
     });
 });

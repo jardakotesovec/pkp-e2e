@@ -14,19 +14,8 @@
  * bullet (no "Make a Submission" block plugin, no such block on the reader
  * site). What the scenarios leave out is the spec's Coverage section.
  *
- * Deliberate non-coverage (register IDs from the spec's Findings register —
- * 🐞 findings are never asserted as contract; ❓-parked claims are not
- * coverage gaps): OPS3 (S4's cancel is the manager's; the author's own
- * "Cancel" is not exercised), OPS5 (S15's can-post control makes no mail
- * assertion), OPS2 (S9 reads the enrolment only after "Begin Submission"),
- * OPS4 (the completion screen is read by its own submitter only), OPS6
- * (S11 finds the needs-an-editor email by subject only), OPS7 (S9's and
- * S12's "Not Allowed" body text is not read), A4 (S3 waits for the autosave
- * itself; the footer's reading before a save is not asserted), A5 (S16 reads
- * the copyright log entry by its tail only), A6 (no double-submit), A7
- * (S10's "Off" leg asserts the silence only), A2 (S3's "Save for Later" is
- * the author's own), A1 (S8 asserts the as-built behavior), A8 (S11's
- * auto-assignment half runs on the seeded server only).
+ * Not covered (register IDs; PRINCIPLES M3): OPS2, OPS3, OPS4, OPS5, OPS6,
+ * OPS7, A1, A2, A4, A5, A6, A7, A8.
  *
  * Seeding: scenario endpoints only. Drafts (`submitted: false`) on the
  * read-only `publicknowledge` server for author-only flows; scratch servers
@@ -34,12 +23,14 @@
  * setting differs from the install default (seeded through the context
  * passthrough keys: `copyrightNotice`, `metadata`,
  * `submissionAcknowledgement` and its copies, `sections[]` with
- * `wordCount`, `supportedSubmissionLocales`), a section is mutated, or
- * Mailpit is read (PRINCIPLES A8 — every mail assertion is scoped by a
- * unique throwaway recipient). The settings scenarios 7, 8, 9 and 12 switch
- * their setting through the manager's own screen, as the spec's bullets
- * say. All tests run in the parallel `ops` project; nothing global is
- * touched.
+ * `wordCount`, `policy` and `abstractsNotRequired`,
+ * `supportedSubmissionLocales`; a second scratch server at the builder's
+ * defaults is scenario 5's one-section, one-language server), a section is
+ * mutated, or Mailpit is read (PRINCIPLES A8 — every mail assertion is
+ * scoped by a unique throwaway recipient). The settings scenarios 7, 8, 9
+ * and 12 switch their setting through the manager's own screen, as the
+ * spec's bullets say. All tests run in the parallel `ops` project; nothing
+ * global is touched.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
@@ -53,6 +44,15 @@ const {
     submitButton,
     submittingToLine,
     railEntry,
+    railButton,
+    railUnreached,
+    backButton,
+    backTo,
+    gotoStep,
+    appBanner,
+    notFoundHeading,
+    startFormLegend,
+    sectionPolicy,
     expectStep,
     expectWizardOpen,
     beginSubmission,
@@ -67,6 +67,8 @@ const {
     fillRichText,
     richTextBody,
     wizardField,
+    wizardFieldLabel,
+    reviewItem,
     addKeyword,
     contributorRows,
     addContributor,
@@ -373,10 +375,42 @@ test.describe('Submission wizard (U21)', () => {
         // (scenario 2 / OPS1).
         await addGalleyFile(page);
         await continueTo(page, STEPS.details);
+        await expect(page).toHaveURL(/#details$/);
+        await continueTo(page, STEPS.contributors);
+        await expect(page).toHaveURL(/#contributors$/);
+
+        // "Back" and the step rail (Rule 8): on Contributors press "Back":
+        // Details shows again, the tab title reads "Make a Submission:
+        // Details" and the address's "#…" part follows the step. "Back"
+        // once more: Upload Files, which offers no "Back" of its own
+        // (positive control: its "Continue", read the same way).
+        await backTo(page, STEPS.details);
+        await expect(page).toHaveTitle(/^Make a Submission: Details\b/);
+        await expect(page).toHaveURL(/#details$/);
+        await backTo(page, STEPS.files);
+        await expect(page).toHaveTitle(/^Make a Submission: Upload Files\b/);
+        await expect(page).toHaveURL(/#files$/);
+        await expect(footer(page).getByRole('button', {name: 'Continue', exact: true})).toBeVisible();
+        await expect(backButton(page)).toHaveCount(0);
+
+        // In the rail, "Details", already reached, is a button that reopens
+        // the step directly; "Review", not yet reached, is plain text, not
+        // a button, and pressing its label changes nothing (the current
+        // step stays Upload Files).
+        await expect(railButton(page, /Details\s*$/)).toHaveCount(1);
+        await expect(railUnreached(page, /Review\s*$/)).toBeVisible();
+        await expect(railButton(page, /Review\s*$/)).toHaveCount(0);
+        await railEntry(page, /Review\s*$/).click();
+        await expectStep(page, STEPS.files);
+        await expect(page).toHaveURL(/#files$/);
+        await gotoStep(page, STEPS.details);
+        await expect(page).toHaveURL(/#details$/);
         await continueTo(page, STEPS.contributors);
         await continueTo(page, STEPS.readers);
+        await expect(page).toHaveURL(/#editors$/);
         await setRelationStatus(page);
         await openReview(page);
+        await expect(page).toHaveURL(/#review$/);
         await expect(problemsBanner(page)).toHaveCount(0);
         await expect(reviewPanel(page, 'Files').getByRole('heading', {name: 'Files'})).toBeVisible();
         await expect(confirmationHeading(page)).toHaveCount(0);
@@ -603,14 +637,31 @@ test.describe('Submission wizard (U21)', () => {
         const managerPage = await (await asUser(manager.username)).newPage();
         await managerPage.goto(otherUrl);
         await expectWizardOpen(managerPage);
+        // The address noted from the address bar before cancelling, and the
+        // server's design around the wizard (the header, a stylesheet, the
+        // step rail): the control for the bare page below, read the same way.
+        const deletedAddress = managerPage.url();
+        expect(deletedAddress).toContain(`id=${other.submissionId}`);
+        await expect(appBanner(managerPage)).toBeVisible();
+        await expect(managerPage.locator('link[rel="stylesheet"]').first()).toBeAttached();
         await expect(footer(managerPage).locator('#cancelSubmission')).toBeVisible();
         await cancelDraft(managerPage);
         await expect(managerPage.getByRole('link', {name: 'Create a new submission'})).toBeVisible();
         await expect(managerPage.getByRole('link', {name: 'Return to your dashboard'})).toBeVisible();
 
-        // The deleted draft's wizard address now answers a bare 404.
-        const response = await managerPage.goto(otherUrl);
+        // The deleted draft's address: re-typed, it answers only a bare
+        // page-not-found error without the server's design: the whole page
+        // is the one line "404 Not Found", no header, no stylesheet, no
+        // step rail, no links, no tab title (Rule 16).
+        const response = await managerPage.goto(deletedAddress);
         expect(response.status()).toBe(404);
+        await expect(notFoundHeading(managerPage)).toBeVisible({timeout: 20_000});
+        await expect(managerPage.locator('body')).toHaveText('404 Not Found');
+        await expect(appBanner(managerPage)).toHaveCount(0);
+        await expect(managerPage.locator('link[rel="stylesheet"]')).toHaveCount(0);
+        await expect(managerPage.locator('.pkpSteps')).toHaveCount(0);
+        await expect(managerPage.getByRole('link')).toHaveCount(0);
+        await expect(managerPage).toHaveTitle('');
 
         // The draft is gone from the author's My Submissions: the "Active
         // submissions" view counts the spare draft alone and lists it
@@ -675,8 +726,60 @@ test.describe('Submission wizard (U21)', () => {
             {timeout: 30_000}
         );
 
-        // Control: the draft reopened from My Submissions still names the
-        // new section and language.
+        // Review, one panel per language: press "Continue" until Review:
+        // the Details and For Readers panels each appear twice, once per
+        // language (Rule 12); Files once (positive control, read the same
+        // way).
+        await expectStep(page, STEPS.files);
+        await continueTo(page, STEPS.details);
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.readers);
+        await openReview(page);
+        await expect(reviewPanel(page, /^Details \(/)).toHaveCount(2);
+        await expect(reviewPanel(page, 'Details (English)')).toBeVisible();
+        await expect(reviewPanel(page, 'Details (French (Canada))')).toBeVisible();
+        await expect(reviewPanel(page, /^For Readers \(/)).toHaveCount(2);
+        await expect(reviewPanel(page, 'For Readers (English)')).toBeVisible();
+        await expect(reviewPanel(page, 'For Readers (French (Canada))')).toBeVisible();
+        await expect(reviewPanel(page, 'Files')).toHaveCount(1);
+
+        // Positive control for the one-section bullets: this server's start
+        // form offers the "Section" and "Submission Language" lists.
+        await page.goto(startUrl(server.path));
+        await expect(startFormLegend(page, 'Section')).toBeVisible({timeout: 20_000});
+        await expect(startFormLegend(page, 'Submission Language')).toBeVisible();
+        await expect(page.getByRole('radio', {name: 'Second Section', exact: true})).toBeVisible();
+        await expect(page.getByRole('radio', {name: 'French (Canada)', exact: true})).toBeVisible();
+
+        // One section, one language: the start form. On a second server at
+        // the builder's defaults (one section, one submission language),
+        // "Make a Submission" shows neither list; a title alone begins the
+        // draft, no section having been asked for, and the wizard opens on
+        // Upload Files (Rule 4).
+        const single = await seedServer(opsApi, `${tag}s`, ['author']);
+        const singlePage = await (await asUser(single.users.author.username)).newPage();
+        await singlePage.goto(startUrl(single.path));
+        await expect(
+            singlePage.getByRole('button', {name: 'Begin Submission'})
+        ).toBeVisible({timeout: 20_000});
+        await expect(startFormLegend(singlePage, 'Section')).toHaveCount(0);
+        await expect(startFormLegend(singlePage, 'Submission Language')).toHaveCount(0);
+        await expect(singlePage.getByRole('radio')).toHaveCount(0);
+        await beginSubmission(singlePage, {title: 'Single section'});
+
+        // One section, one language: the wizard header. Above the step rail
+        // no "Submitting to…" line and no "Change" control appear (Rule 11;
+        // the first server's line above is the control; the submission's
+        // own details line, read the same way, is the landmark).
+        await expect(singlePage.locator('.submissionWizard__submissionDetails')).toContainText(
+            'Single section'
+        );
+        await expect(submittingToLine(singlePage)).toHaveCount(0);
+        await expect(singlePage.getByText(/^Submitting to the/)).toHaveCount(0);
+        await expect(singlePage.getByRole('button', {name: 'Change', exact: true})).toHaveCount(0);
+
+        // Control: the first server's draft, reopened from My Submissions,
+        // still names the new section and language.
         const mySub = new MySubmissionsPage(page, server.path);
         await mySub.goto();
         const row = await mySub.findRowByTag(tag);
@@ -722,6 +825,57 @@ test.describe('Submission wizard (U21)', () => {
             /upload at least one Preprint Text file/
         );
         await expect(submitButton(page)).toBeEnabled();
+
+        // A section that waives abstracts (Rule 13): the seeded server's one
+        // section requires an abstract, so a scratch server carries a
+        // second section seeded `abstractsNotRequired: true`. A third
+        // draft, begun from the start form in that section so nothing is
+        // filled in: on Details the "Abstract" label carries no "Required"
+        // mark (positive control: "Title" does); straight to Review, the
+        // Details panel raises no abstract complaint, its Abstract item
+        // reading "None provided", while the Files panel's missing-galley
+        // complaint shows the check ran. Positive control, read the same
+        // way: a fourth draft begun in the abstract-requiring section,
+        // whose Abstract label carries the mark and whose Details panel
+        // does complain.
+        const waiving = await seedServer(opsApi, `${tag}w`, ['author'], {
+            sections: [
+                {abbrev: 'PRE', title: {en: 'Preprints'}},
+                {abbrev: 'WAV', title: {en: 'Waived'}, abstractsNotRequired: true},
+            ],
+        });
+        const waivingPage = await (await asUser(waiving.users.author.username)).newPage();
+        await waivingPage.goto(startUrl(waiving.path));
+        await beginSubmission(waivingPage, {title: `Submission ${tag}w`, section: 'Waived'});
+        await expect(submittingToLine(waivingPage)).toContainText('Submitting to the Waived section');
+        await continueTo(waivingPage, STEPS.details);
+        await expect(wizardFieldLabel(waivingPage, /^Title/)).toContainText('Required');
+        await expect(wizardFieldLabel(waivingPage, /^Abstract/)).toBeVisible();
+        await expect(wizardFieldLabel(waivingPage, /^Abstract/)).not.toContainText('Required');
+        await continueTo(waivingPage, STEPS.contributors);
+        await continueTo(waivingPage, STEPS.readers);
+        await openReview(waivingPage);
+        await expect(problemsBanner(waivingPage)).toContainText(PROBLEMS_BANNER);
+        await expect(reviewPanel(waivingPage, 'Files')).toContainText(
+            /upload at least one Preprint Text file/
+        );
+        const waivedAbstract = reviewItem(reviewPanel(waivingPage, 'Details'), 'Abstract');
+        await expect(waivedAbstract).toContainText('None provided');
+        await expect(waivedAbstract).not.toContainText('This field is required.');
+        await expect(reviewPanel(waivingPage, 'Details')).not.toContainText('This field is required.');
+
+        await waivingPage.goto(startUrl(waiving.path));
+        await beginSubmission(waivingPage, {title: `Submission ${tag}p`, section: 'Preprints'});
+        await expect(submittingToLine(waivingPage)).toContainText('Submitting to the Preprints section');
+        await continueTo(waivingPage, STEPS.details);
+        await expect(wizardFieldLabel(waivingPage, /^Abstract/)).toContainText('Required');
+        await continueTo(waivingPage, STEPS.contributors);
+        await continueTo(waivingPage, STEPS.readers);
+        await openReview(waivingPage);
+        await expect(problemsBanner(waivingPage)).toContainText(PROBLEMS_BANNER);
+        await expect(reviewItem(reviewPanel(waivingPage, 'Details'), 'Abstract')).toContainText(
+            'This field is required.'
+        );
 
         // A contributor named in another language only: on a bilingual
         // scratch server, a second draft's co-author is named in English,
@@ -1080,12 +1234,14 @@ test.describe('Submission wizard (U21)', () => {
 
     test('S12: closed and restricted sections gate intake and block a draft', async ({opsApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s12');
-        // Several open sections, Alpha with an abstract word limit of 10
-        // (the `sections[].wordCount` passthrough).
+        // Several open sections, Alpha with an abstract word limit of 10 and
+        // Open Extra with a section policy (the `sections[].wordCount` and
+        // `sections[].policy` passthroughs).
+        const policy = `Open Extra takes short reports only (${tag}).`;
         const server = await seedServer(opsApi, tag, ['manager', 'author'], {
             sections: [
                 {abbrev: 'ALP', title: {en: 'Alpha'}, wordCount: 10},
-                {abbrev: 'OPN', title: {en: 'Open Extra'}},
+                {abbrev: 'OPN', title: {en: 'Open Extra'}, policy: {en: `<p>${policy}</p>`}},
                 {abbrev: 'EDO', title: {en: 'Editors Only'}},
                 {abbrev: 'DOO', title: {en: 'Doomed'}},
             ],
@@ -1093,8 +1249,8 @@ test.describe('Submission wizard (U21)', () => {
         const author = server.users.author;
         const manager = server.users.manager;
         // The author's draft in the section that will be deactivated, one
-        // in the word-limited section, and the manager's own draft in the
-        // section to be restricted.
+        // in the word-limited section, and the manager's own drafts in the
+        // section to be restricted and the section to be deactivated.
         const seeded = await seedDraft(opsApi, tag, {
             context: server.path,
             submitter: author.username,
@@ -1109,6 +1265,11 @@ test.describe('Submission wizard (U21)', () => {
             context: server.path,
             submitter: manager.username,
             section: 'EDO',
+        });
+        const managerDeactivated = await seedDraft(opsApi, `${tag}d`, {
+            context: server.path,
+            submitter: manager.username,
+            section: 'DOO',
         });
 
         // The manager restricts one section to editors and deactivates
@@ -1134,6 +1295,18 @@ test.describe('Submission wizard (U21)', () => {
         await expect(
             authorPage.getByRole('radio', {name: 'Doomed', exact: true})
         ).toHaveCount(0);
+
+        // A section's policy: picking Open Extra shows its policy under the
+        // "Section" list, labelled with the section's title; Alpha, with
+        // none, shows no policy (the control, read the same way).
+        await expect(startFormLegend(authorPage, 'Section')).toBeVisible();
+        await expect(sectionPolicy(authorPage, policy)).toHaveCount(0);
+        await authorPage.getByRole('radio', {name: 'Open Extra', exact: true}).check();
+        await expect(sectionPolicy(authorPage, policy)).toBeVisible();
+        await expect(sectionPolicy(authorPage, policy)).toContainText('Open Extra');
+        await authorPage.getByRole('radio', {name: 'Alpha', exact: true}).check();
+        await expect(authorPage.getByRole('radio', {name: 'Alpha', exact: true})).toBeChecked();
+        await expect(sectionPolicy(authorPage, policy)).toHaveCount(0);
 
         // The manager is additionally offered the restricted section — but
         // not the deactivated one (Rule 3).
@@ -1192,6 +1365,22 @@ test.describe('Submission wizard (U21)', () => {
         await expect(problemsBanner(managerPage)).toHaveCount(0);
         await expect(submitButton(managerPage)).toBeEnabled();
 
+        // An editor's draft, the deactivated half: the manager's own draft
+        // in the deactivated section answers its wizard address with the
+        // same "Section Closed" page the author gets, naming the section,
+        // and the wizard never opens (Rule 17; the restricted draft's wizard
+        // above is the control).
+        await managerPage.goto(wizardUrl(server.path, managerDeactivated.submissionId));
+        await expect(
+            managerPage.getByRole('heading', {name: 'Section Closed'})
+        ).toBeVisible({timeout: 20_000});
+        await expect(
+            managerPage.getByText(/is not accepting submissions to the Doomed section/)
+        ).toBeVisible();
+        await expect(managerPage.getByRole('link', {name: 'Site Admin'})).toBeVisible();
+        await expect(managerPage.locator('.pkpSteps')).toHaveCount(0);
+        await expect(managerPage.getByRole('heading', {name: /Make a Submission/})).toHaveCount(0);
+
         // Every section closed: the manager deactivates the remaining open
         // sections too; the author's "Make a Submission" is the "Not
         // Allowed" page (Rule 3; the explanation is a raw locale code on a
@@ -1224,12 +1413,6 @@ test.describe('Submission wizard (U21)', () => {
         await expect(
             authorPage.getByRole('radio', {name: 'Doomed', exact: true})
         ).toHaveCount(0);
-
-        // An editor's draft, the deactivated half, is not read: the
-        // manager's own draft in the deactivated section answered its
-        // wizard address with the "Section Closed" page instead of the
-        // wizard (T-ops-1, `.reports/U21/test-ops-findings.md`), so the
-        // scenario's Review-step reading could not be taken.
     });
 
     test('S13+S14 (absence): no Reviewer Suggestions step, no Submission Type, no reader-site block', async ({opsApi, asUser}, testInfo) => {
@@ -1404,11 +1587,13 @@ test.describe('Submission wizard (U21)', () => {
     test('S17: required metadata blocks the submit', async ({opsApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s17');
 
-        // A server whose setup requires keywords during submission (seeded
-        // through `metadata: {keywords: 'require'}`), a complete draft
+        // A server whose setup requires keywords during submission and asks
+        // for subjects and a data availability statement without requiring
+        // them (seeded through `metadata: {keywords: 'require', subjects:
+        // 'request', dataAvailability: 'request'}`), a complete draft
         // (scenario 17).
         const server = await seedServer(opsApi, tag, ['author'], {
-            settings: {metadata: {keywords: 'require'}},
+            settings: {metadata: {keywords: 'require', subjects: 'request', dataAvailability: 'request'}},
         });
         const author = server.users.author;
         const seeded = await seedDraft(opsApi, tag, {
@@ -1425,18 +1610,37 @@ test.describe('Submission wizard (U21)', () => {
         // Details panel, and a disabled Submit (Rule 13).
         await continueTo(page, STEPS.details);
         await expect(wizardField(page, /^Keywords/)).toBeVisible();
-        await expect(wizardField(page, /^Keywords/)).toContainText('Required');
+        await expect(wizardFieldLabel(page, /^Keywords/)).toContainText('Required');
+        // Asked, not required: "Details" also shows a data availability
+        // statement and "For Readers" a field for subjects, neither marked
+        // required (the Keywords mark above is the control); both stay
+        // empty.
+        await expect(wizardField(page, /^Data Availability Statement/)).toBeVisible();
+        await expect(wizardFieldLabel(page, /^Data Availability Statement/)).not.toContainText('Required');
         await continueTo(page, STEPS.contributors);
         await continueTo(page, STEPS.readers);
+        await expect(wizardField(page, /^Subjects/)).toBeVisible();
+        await expect(wizardFieldLabel(page, /^Subjects/)).not.toContainText('Required');
         await setRelationStatus(page);
         await openReview(page);
         await expect(problemsBanner(page)).toContainText(PROBLEMS_BANNER);
         const detailsPanel = reviewPanel(page, 'Details');
-        const keywordsItem = detailsPanel
-            .locator('.submissionWizard__reviewPanel__item')
-            .filter({hasText: 'Keywords'});
+        const keywordsItem = reviewItem(detailsPanel, 'Keywords');
         await expect(keywordsItem).toContainText('This field is required.');
         await expect(submitButton(page)).toBeDisabled();
+
+        // With both left empty, "Review" raises no complaint about either
+        // (the keywords complaint above, read the same way, is the
+        // control): their items read "None provided" and the For Readers
+        // panel flags nothing.
+        const dataItem = reviewItem(detailsPanel, 'Data Availability Statement');
+        await expect(dataItem).toContainText('None provided');
+        await expect(dataItem).not.toContainText('This field is required.');
+        const readersPanel = reviewPanel(page, 'For Readers');
+        const subjectsItem = reviewItem(readersPanel, 'Subjects');
+        await expect(subjectsItem).toContainText('None provided');
+        await expect(subjectsItem).not.toContainText('This field is required.');
+        await expect(readersPanel).not.toContainText('This field is required.');
 
         // "Edit" on the Details panel, type the keyword, return: the
         // complaint is gone and Submit is enabled.
@@ -1448,11 +1652,40 @@ test.describe('Submission wizard (U21)', () => {
         await expect(keywordsItem).toContainText('wizard');
         await expect(keywordsItem).not.toContainText('This field is required.');
         await expect(submitButton(page)).toBeEnabled();
+        // "Submit" stays enabled with the asked-not-required items still
+        // empty: nothing on their panels is flagged after the fix either.
+        await expect(dataItem).toContainText('None provided');
+        await expect(subjectsItem).toContainText('None provided');
+        await expect(readersPanel).not.toContainText('This field is required.');
+
+        // Keywords at the install default: on the seeded server, which asks
+        // for keywords without requiring them, "Details" shows a "Keywords"
+        // field not marked required (positive control: the "Abstract"
+        // label's mark, and the require-server's Keywords mark above, read
+        // the same way), and "Review" passes with it empty.
+        const alexDraft = await seedDraft(opsApi, `${tag}k`);
+        const alex = await (await asUser('author.alex')).newPage();
+        await alex.goto(wizardUrl(PK, alexDraft.submissionId, {localePrefix: PK_PREFIX}));
+        await expectWizardOpen(alex);
+        await addGalleyFile(alex);
+        await continueTo(alex, STEPS.details);
+        await expect(wizardFieldLabel(alex, /^Abstract/)).toContainText('Required');
+        await expect(wizardField(alex, /^Keywords/)).toBeVisible();
+        await expect(wizardFieldLabel(alex, /^Keywords/)).not.toContainText('Required');
+        await continueTo(alex, STEPS.contributors);
+        await continueTo(alex, STEPS.readers);
+        await setRelationStatus(alex);
+        await openReview(alex);
+        await expect(reviewPanel(alex, 'Files')).toContainText('Preprint Text');
+        await expect(problemsBanner(alex)).toHaveCount(0);
+        await expect(reviewItem(reviewPanel(alex, 'Details'), 'Keywords')).toContainText('None provided');
+        await expect(submitButton(alex)).toBeEnabled();
 
         // Control: on a server whose setup does not ask for keywords (a
-        // scratch server seeded `metadata: {keywords: 'off'}`), "Details"
-        // shows no "Keywords" field (positive control: the Title field,
-        // read the same way) and Review passes without one.
+        // scratch server seeded `metadata: {keywords: 'off'}`, since the
+        // seeded server asks for them by install default), "Details" shows
+        // no "Keywords" field (positive control: the Title field, read the
+        // same way) and Review passes without one.
         const offTag = `${tag}c`;
         const off = await seedServer(opsApi, offTag, ['author'], {
             settings: {metadata: {keywords: 'off'}},
@@ -1474,11 +1707,5 @@ test.describe('Submission wizard (U21)', () => {
         await openReview(offPage);
         await expect(problemsBanner(offPage)).toHaveCount(0);
         await expect(submitButton(offPage)).toBeEnabled();
-
-        // The spec places this control on the seeded server, but the
-        // seeded server asks for keywords (optional, the install default):
-        // its "Details" showed a "Keywords" field (T-ops-2,
-        // `.reports/U21/test-ops-findings.md`), so the control runs on the
-        // keywords-off scratch server above.
     });
 });

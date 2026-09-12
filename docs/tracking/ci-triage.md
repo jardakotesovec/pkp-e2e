@@ -109,6 +109,16 @@ trips.
   button is still offered, at most three times, behind `continueTo()`,
   `continueToReview()` and `submitAndConfirm()`. **Watch condition**: a
   hardened press reds again with its retry exhausted.
+- **A wizard rich-text fill lost to a re-render under load** (U21 S3,
+  OPS, local). The Autosave bullet types "Autosave check" into the Title
+  box and reads it back; in the 2026-09-12 U21 revision's first OPS final
+  run, started while the OJS final was still running (two full suites at
+  eight workers each on 10 cores), the box read the seeded title again
+  for the whole 10 s wait, so the fill was overwritten by the form's own
+  re-render; green alone (1.1 min) and never seen with one suite running.
+  Finals now run one app at a time. **Watch condition**: a red with one
+  suite running or at CI's four workers; then anchor the fill on the
+  editor's settled state before typing.
 - **Contributor reorder under load** (U41 S2, OPS; the OJS twin shares the
   code shape). The Cancel leg's "Increase position" press, issued right
   after "Order" while the list re-rendered into ordering mode, left the

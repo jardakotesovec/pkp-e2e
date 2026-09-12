@@ -456,9 +456,11 @@ them live are the subject of *Submission intake configuration*.
 ## Canonical scenarios
 
 Scenarios 1 to 4, 6, 9, 14 and 15 run on the seeded journal with ready
-accounts, as does the assigned-editor half of scenario 11; the drafts and
-submissions are scratch. The others change a journal setting, a section or
-a language, so they run on a scratch journal with throwaway accounts, and
+accounts, as do the assigned-editor half of scenario 11 and the
+install-default bullet of scenario 17; the drafts and submissions are
+scratch, and so is the section that waives abstracts in scenario 6 on a
+preprint server. The others change a journal setting, a section or a
+language, so they run on a scratch journal with throwaway accounts, and
 scenario 10's second contributor and copy addresses are throwaway too.
 The accounts, their passwords, the mail catcher's address and the tooling
 recipe are in the footnote. <sup>s</sup>
@@ -492,6 +494,13 @@ recipe are in the footnote. <sup>s</sup>
    - **Details**: the title arrives pre-filled; type "An abstract for the
      wizard scenario." as the abstract if the section demands one, and
      press "Continue".
+   - **"Back" and the step rail**: on "Contributors" press "Back":
+     "Details" shows again, and the browser tab title reads "Make a
+     Submission: Details", the address bar's "#…" part changing with the
+     step. Press "Back" once more: "Upload Files" shows again and offers
+     no "Back" of its own. In the step rail, "Details", already reached,
+     reopens directly; "Review", not yet reached, is not clickable.
+     Reopen "Details" from the rail and press "Continue".
    - **Contributors**: the step already lists you; press "Continue".
    - **For the Editors**: press "Continue".
    - **Review**: "Checking your submission" clears with no banner. Tick the
@@ -558,6 +567,9 @@ recipe are in the footnote. <sup>s</sup>
    - **Journal Manager on another author's draft**: open its wizard: the
      footer offers "Cancel"; press it and confirm with "OK": "Submission
      cancelled" appears.
+   - **The deleted draft's address**: open the wizard address that draft
+     had, noted from the address bar before cancelling: only a bare
+     page-not-found error shows, without the journal's design.
    - **Mailboxes**: no email arrives, in the author's mailbox or the
      Journal Manager's.
    - **Control**: the Section Editor assigned as a participant to another
@@ -567,7 +579,8 @@ recipe are in the footnote. <sup>s</sup>
 5. **Change settings midway**
 
    Given: Author, on a draft in a journal with two open sections and two
-   submission languages.
+   submission languages, and a second journal with one submission
+   language and one open section.
 
    - **The header**: above the step rail the wizard reads "Submitting to
      the {section} section in {language}." with a "Change" control beside
@@ -577,8 +590,22 @@ recipe are in the footnote. <sup>s</sup>
      language and save: the wizard reloads and the line now names the new
      section and language. On a press the panel offers the Submission Type
      and the language instead [OMP1](#omp1).
-   - **Control**: the draft reopened from My Submissions still names the
-     new section and language. <sup>k</sup>
+   - **Review, one panel per language**: press "Continue" until "Review":
+     the Details and For the Editors panels each appear twice, once per
+     language.
+   - **One section, one language: the start form**: on the second
+     journal, open "Make a Submission": the start form shows no
+     "Submission Language" list and, on a journal or preprint server, no
+     "Section" list either; type Single section in "Title" and press
+     "Begin Submission": the wizard opens on "Upload Files", no section
+     having been asked for. A press asks for the Submission Type as always
+     [OMP1](#omp1).
+   - **One section, one language: the wizard header**: above the step
+     rail no "Submitting to…" line and no "Change" control appear. On a
+     press the work-type line and its "Change" control remain
+     [OMP1](#omp1).
+   - **Control**: the first journal's draft, reopened from My Submissions,
+     still names the new section and language. <sup>k</sup>
 
 6. **Validation blocks an empty submission**
 
@@ -599,6 +626,11 @@ recipe are in the footnote. <sup>s</sup>
      languages and none in the submission language, reach "Review": the
      banner appears, the Contributors panel carries the complaint, and
      "Submit" is disabled.
+   - **A section that waives abstracts**: on a third draft, in a section
+     that does not require an abstract ("Reviews" on the seeded journal),
+     leave the abstract empty and reach "Review": the Details panel raises
+     no abstract complaint. A press has no section at intake and requires
+     an abstract only if its setup says so [OMP1](#omp1).
    - **Control**: with every item fixed, the banner is gone and "Submit" is
      enabled, any copyright box ticked (scenario 2). <sup>l</sup>
 
@@ -698,13 +730,18 @@ App-specific:
 12. **Closed and restricted sections** {OJS OPS}
 
     Given: Journal Manager and Author, on a journal with several open
-    sections, one of them with an abstract word limit of 10 words.
+    sections, one with an abstract word limit of 10 words and one with a
+    section policy; the Journal Manager has a complete draft in the section
+    to be restricted and one in the section to be deactivated.
 
     - **Restricting and deactivating**: Journal Manager: restrict one
       section to editors and deactivate another.
     - **The start form**: Author: "Make a Submission" no longer offers
       either section, while a Journal Manager is still offered the
       restricted one, not the deactivated one.
+    - **A section's policy**: Author: on "Make a Submission", pick the
+      section that has a policy: the policy shows under the "Section"
+      list.
     - **Word limit**: Author: on a draft in the section with the word
       limit, on "Details", type "This abstract has more words than the
       section allows, fourteen of them in all." as the abstract and reach
@@ -798,7 +835,8 @@ App-specific:
 17. **Required metadata blocks the submit**
 
     Given: Author, on a complete draft in a journal whose setup requires
-    keywords during submission.
+    keywords during submission and asks for subjects and a data
+    availability statement without requiring them.
 
     - **"Details"**: the step shows a "Keywords" field; leave it empty and
       reach "Review": the problems banner (scenario 6) appears, the Details
@@ -806,6 +844,14 @@ App-specific:
     - **"Edit"**: press the Details panel's "Edit", type wizard in
       "Keywords" and return to "Review": the complaint is gone and "Submit"
       is enabled.
+    - **Asked, not required**: "Details" also shows a data availability
+      statement, and "For the Editors" a field for subjects; with both left
+      empty, "Review" raises no complaint about either and "Submit" stays
+      enabled.
+    - **Keywords at the install default**: on a journal at the install
+      default, which asks for keywords without requiring them, "Details"
+      shows a "Keywords" field not marked required, and "Review" passes
+      with it empty.
     - **Control**: on a journal whose setup does not ask for keywords (a
       scratch journal with the keywords item switched off, since the seeded
       journal asks for them by install default), "Details" shows no
@@ -816,31 +862,18 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Budget** — states:
-  - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9)
-  - Submit As offered to a user with two submitting roles, with the editorial-role hint (Fields)
-  - the Details and For the Editors panels once per language on Review (Rule 12)
-  - one language and one open section, with no "Submitting to…" line or "Change" control (Rule 11)
-  - a section that waives abstracts, and a press requiring one only when its setup says so (Rule 13)
-  - keywords and the other metadata fields at their "ask" end (Settings, "Metadata asked of authors")
-  - the data availability statement at its "ask" end (Settings, "References, data citations, data availability, funders")
-  - the category picker (Settings, "Categories")
-  - the "Before you begin" guidance (Settings, "Start-of-submission guidance, checklist, privacy statement")
-  - one open section applied without being shown (Rule 4)
-  - the reader-site "Make a Submission" block once enabled {OJS OMP} (Actors row 6, Rule 1)
+  - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
+  - Submit As offered to a user with two submitting roles, with the editorial-role hint (Fields): a second role with submission access is a grant few authors hold
 - **Budget** — variants:
-  - old bookmarked wizard addresses forwarding to the current wizard (Rule 1)
-  - a section's policy shown under the list (Fields)
-  - the start form with no checklist or privacy statement configured (Settings, "Start-of-submission guidance, checklist, privacy statement")
-  - "Back", absent on the first step, the rail reopening reached steps only, the tab title and address per step (Rule 8)
-  - editing the "#…" part of the address, and a reload ignoring it (Rule 8)
-  - the "Disconnected" dialog when a save fails (Rule 10)
-  - the deleted draft's wizard address answering a bare page-not-found (Rule 16)
-  - a Journal Manager unsubscribed from the "needs an editor" email (Side effects)
+  - old bookmarked wizard addresses forwarding to the current wizard (Rule 1): a bookmark from an earlier version is one few authors keep
+  - editing the "#…" part of the address to open a step ahead, and a reload ignoring it (Rule 8): an author does not edit the address by hand
+  - the "Disconnected" dialog when a save fails (Rule 10): a failed save is the dropped connection above
 - **Nothing new to test**:
   - Site Administrator opening any draft and offered "Cancel" (Actors rows 3–4; the Journal Manager's offer, scenario 4)
   - every other role, with no "Cancel" control to press (Actors row 4; the Section Editor's screen, scenario 4)
   - the closing screens shown to whoever may open the submission, the cancelled screen naming nothing (Actors row 5)
   - a screening plugin granting can-post {OPS} (Settings, "Author screening"; the manager's variants, scenario 15's control)
+  - disciplines, supporting agencies, coverage, rights, source and type at their "ask" end (Settings, "Metadata asked of authors"; the same field pattern as subjects, scenario 17)
 - **Register carries it**:
   - A2 (the resume-link email going to a Journal Manager who pressed "Save for Later")
   - A6 (submitting the same draft twice)
@@ -853,6 +886,11 @@ Left out of the scenarios above, by reason:
   - a journal with a task template for the first workflow stage (Side effects, "Editorial task templates run")
   - a preprint server configured to register DOIs {OPS} (Side effects, "DOIs are assigned")
   - the site-wide substitution of the site's privacy statement (Settings, "Start-of-submission guidance, checklist, privacy statement")
+  - the "Before you begin" guidance, and the start form with no checklist or privacy statement configured (Settings, "Start-of-submission guidance, checklist, privacy statement"); no scenario key sets or clears them
+  - the category picker (Settings, "Categories"); no scenario key turns on "let authors pick categories"
+  - the reader-site "Make a Submission" block once enabled {OJS OMP} (Actors row 6, Rule 1); no scenario key enables a plugin or places a sidebar block
+  - a press whose setup requires an abstract (Rule 13); no scenario key sets it
+  - a Journal Manager unsubscribed from the "needs an editor" email (Side effects); no scenario key sets a user's email opt-outs
 - **Owned by another feature**:
   - the Upload Files panel and its file types (*Submission files*)
   - the contributors panel (*Contributors & affiliations*)
@@ -1873,25 +1911,37 @@ the copy in the mail catcher; 2's log bullet reads the activity log there.
 needs `sectioneditor.ana` assigned to the draft's submission for the
 control (the scenario builder's `participants[]` passthrough, or manually
 as `manager.maya` through the workflow screen's Participants panel — note
-f) and `manager.maya` for the manager's cancel. 5: a scratch journal with
-two open sections and two submission languages (the context builder's
-`sections[]` and `supportedSubmissionLocales` passthroughs). 6's
+f) and `manager.maya` for the manager's cancel; 4's deleted-address bullet
+re-types the cancelled draft's `submission?id={id}` address. 5: a scratch
+journal with two open sections and two submission languages (the context
+builder's `sections[]` and `supportedSubmissionLocales` passthroughs), and
+for the one-section bullets a second scratch journal at the builder's
+defaults (no `sections[]`, no `supportedSubmissionLocales`: one section,
+one submission language; a scratch press at the same defaults for the
+press half). 6's
 contributor bullet: a scratch submission whose second contributor carries a
 name in the second language only (a builder recipe to settle at test time;
-a missing key goes back to the harness step). 7–8, 11–13: `manager.maya`
+a missing key goes back to the harness step); 6's waived-abstract bullet:
+OJS the seeded `REV` "Reviews" section (`abstractsNotRequired`), OPS a
+scratch server with a section seeded `abstractsNotRequired: true` (the
+seeded server's one section requires an abstract), OMP any draft (the
+press asks no abstract at intake). 7–8, 11–13: `manager.maya`
 flips `disableSubmissions`, section flags (`editorRestricted`,
 `isInactive`, the section form's word count for 12's word-limit bullet)
 and "Reviewer Suggestion at Submission" (Settings → Workflow → Review) on a
-scratch journal. 9: two scratch users with no role in the context. 10 sets
+scratch journal; 12's policy bullet: one of the open scratch sections
+seeded with a `policy`. 9: two scratch users with no role in the context. 10 sets
 Workflow → Emails' "Submission Confirmation" (all authors, submitting
 author only, off; the copy to the contact; an extra copy address) on a
 scratch journal, with throwaway contributor and copy addresses for
 mail-catcher scoping. 16: a scratch journal with a copyright notice (the
-context's `copyrightNotice`); 17: a scratch journal whose metadata setting
-`keywords` is `require`, and for the control a second one with `keywords`
-`off` (the seeded context asks for keywords by install default, so its
-Details step shows the field; run 2026-09-07 on all three apps), with a
-throwaway Author on each. Never mutate the
+context's `copyrightNotice`); 17: a scratch journal seeded `metadata:
+{keywords: 'require', subjects: 'request', dataAvailability: 'request'}`,
+and for the control a second one with `keywords` `off` (the seeded
+context asks for keywords by install default, so its Details step shows
+the field; run 2026-09-07 on all three apps), with a throwaway Author on
+each; 17's install-default bullet: the seeded context as `author.alex`
+(or a scratch one with no `metadata` key). Never mutate the
 shared roster or seeded sections — scratch sections/users for every
 closure test.
 
