@@ -286,10 +286,11 @@ and the reviewer forms to *Reviewer assignment & management*.
   *Review setup & review forms*). When set, the round status box shows
   "Minimum number of confirmed reviews required: {N}." while reviews are
   being gathered. While confirmed reviews remain below that minimum, this
-  line replaces the submitted- and confirmed-review sentences ("New reviews
-  have been submitted.", "All reviews are confirmed and a decision is
-  needed."). "Awaiting responses from reviewers." still appears beneath it
-  while reviews are underway. <sup>r</sup>
+  line replaces the confirmed-review sentence ("All reviews are confirmed and
+  a decision is needed.") alone; the round's own sentence still appears
+  beneath it: "Awaiting responses from reviewers." while reviews are
+  underway, "New reviews have been submitted." once a review arrives.
+  <sup>r</sup>
 - **Reviewer suggestions enabled** (publication settings). Adds a reviewer
   suggestions panel to the stage. The panel belongs to *Reviewer
   suggestions*. <sup>a</sup>
@@ -326,13 +327,14 @@ and the reviewer forms to *Reviewer assignment & management*.
 
 ## Canonical scenarios
 
-Scenarios 4 and 7, and the second submission of scenario 11, run on a
-scratch journal with throwaway accounts: an editor whose mailbox scenario 4
-reads, a reviewer whose assignment lists scenario 7 reads, and a Section
-Editor who is the only editorial participant. Every other scenario runs on
-the seeded journal with ready accounts and scratch submissions. The
-accounts, the passwords and the tooling recipe are in the footnote.
-<sup>s</sup>
+Scenarios 4, 7 and 15, and the second submission of scenario 11, run on
+separate scratch journals with throwaway accounts: an editor whose mailbox
+scenario 4 reads, a reviewer whose assignment lists scenario 7 reads, and a
+Section Editor as the only editorial participant; scenario 15's journal
+alone has "Minimum Confirmed Reviews Required" set to 2 (the others keep the
+default of 0). Every other scenario runs on the seeded journal with ready
+accounts and scratch submissions. Accounts, passwords and the tooling recipe
+are in the footnote. <sup>s</sup>
 
 1. **Round 1 opens with the submission**
 
@@ -489,6 +491,11 @@ accounts, the passwords and the tooling recipe are in the footnote.
      offered.
    - **A declined reviewer**: on the second submission's round, "Cancel
      Review Round" is absent equally.
+   - **A declined reviewer beside an accepted one**: on a third submission
+     whose round holds one reviewer who declined the request and one who
+     accepted it, the box reads "Awaiting responses from reviewers.": the
+     declined reviewer is not counted in the status. "Cancel Review Round"
+     is absent here too.
    - **Control**: on a round whose only reviewer has not yet responded,
      "Cancel Review Round" is offered (scenario 7). <sup>s</sup>
 
@@ -501,8 +508,13 @@ accounts, the passwords and the tooling recipe are in the footnote.
    - **The review stage afterwards**: select "Review" › "Review Round 1":
      the round is still listed and the box reads "The submission is
      currently in the Copyediting stage."
-   - **Control**: the box is headed plain "Status", no longer "Round 1
-     Status". <sup>s</sup>
+   - **A past round after acceptance**: on a second submission that went
+     through two rounds and was accepted from Round 2, select "Review" ›
+     "Review Round 1": the box, headed plain "Status", reads "The
+     submission advanced to the next review round, was accepted, and is
+     currently in the Copyediting stage."
+   - **Control**: on the first submission the box is headed plain "Status",
+     no longer "Round 1 Status". <sup>s</sup>
 
 10. **Decline, revert, delete**
 
@@ -542,6 +554,10 @@ accounts, the passwords and the tooling recipe are in the footnote.
       submission's round: no buttons of either kind; the "Recommendation"
       box reads "You can not make a recommendation until an editor is
       assigned with permission to record a decision."
+    - **No reviewer record**: on that second submission's round, which has
+      no reviewer, the status box reads "Waiting for reviewers to be
+      assigned.", not "Awaiting recommendations from editors.": the
+      recommendation sentences need at least one reviewer record.
     - **Control**: before the recommendation is recorded, the deciding
       Editor's screen shows no "Recommendation" box. <sup>s</sup>
 
@@ -607,20 +623,37 @@ App-specific:
       controls (for example posting or declining the preprint), so the
       workflow itself is working. <sup>p</sup> <sup>s</sup>
 
+15. **A minimum of confirmed reviews** {OJS OMP}
+
+    Given: Editor, on a scratch journal whose "Minimum Confirmed Reviews
+    Required" is 2, on the current round of a submission whose one reviewer
+    accepted the request.
+
+    - **The review underway**: the box reads "Minimum number of confirmed
+      reviews required: 2." with "Awaiting responses from reviewers." beneath
+      it.
+    - **The review submitted**: Reviewer: submit the review. Editor: the
+      box reads "Minimum number of confirmed reviews required: 2." with "New
+      reviews have been submitted." beneath it.
+    - **"Read Review"**: in the Reviewers panel open "Read Review" and
+      confirm "Mark as Complete" in the "Review Details" window: the box
+      reads "Minimum number of confirmed reviews required: 2." alone; "All
+      reviews are confirmed and a decision is needed." does not appear.
+    - **Control**: on the seeded journal, whose "Minimum Confirmed Reviews
+      Required" is 0, scenario 2's confirmed review reads "All reviews are
+      confirmed and a decision is needed." with no minimum line.
+      <sup>s</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Budget** — states:
-  - "A review is overdue." winning over an unread review and reviews still underway (Rules 5–6)
-  - "Returned back to review." once every review is confirmed, and the reviewer sentences until then (Rules 5–6, Cross-feature)
-  - "Minimum number of confirmed reviews required: {N}." replacing the submitted and confirmed sentences (Settings)
-  - deleting the only revised file flipping the status back to "requested" (Rule 7)
-  - "New editorial recommendations have been submitted." with a second recommending editor pending (Rule 5)
-  - declined or removed reviewers not counted in the status (Rule 6)
-  - no reviewer record: "Waiting for reviewers to be assigned." even while recommendations are awaited (Rule 6)
-  - "Submission accepted." (Rule 5)
-  - a past round after review: "The submission advanced to the next review round, was accepted, and is currently in the {stage} stage." (Rule 4)
+  - "Returned back to review." once every review is confirmed, and the reviewer sentences until then (Rules 5–6, Cross-feature): sending a submission back from Copyediting is not an ordinary week's action, and the sentence needs every review confirmed after the return
+  - deleting the only revised file flipping the status back to "requested" (Rule 7): an author seldom deletes their only revised file; the task half of the path is A9
+  - "New editorial recommendations have been submitted." with a second recommending editor pending (Rule 5): two recommending editors on one submission is not an ordinary week's set-up; scenario 11 walks the other two recommendation sentences with one
+  - "Submission accepted." (Rule 5): after "Accept Submission" the submission sits on Copyediting and the box reads Rule 4's stage sentence (scenario 9), so an editor does not meet this sentence on this stage
+  - the box once the confirmed reviews reach the minimum (Settings): a second review submitted and confirmed on screen for one line, whose wording this page does not state
 - **Nothing new to test**:
   - Funding Coordinator, the one assistant-level group the stage's assignment dialog offers (Actors row 1; the same screen as the editorial roles of scenario 1)
   - editorial roles filing revisions through the "Revisions Uploaded" panel's own controls (Actors row 4; the panel of scenario 4)
@@ -641,6 +674,8 @@ Left out of the scenarios above, by reason:
   - A6 (the restored round's box no longer recalling its revision request; Rule 12)
   - A11 (the upload window's "Cancel" link removing the attached file while the "Revised Version Uploaded" email stands; Side effects)
   - OMP3 (the press's task wording "Revisions to consider in External Review."; Side effects)
+- **No seed**:
+  - "A review is overdue." winning over an unread review and reviews still underway (Rules 5–6): no seed backdates a request or a review deadline
 - **Owned by another feature**:
   - the workflow address of a submission one has no right to, and its access error (Actors; *Workflow screen & stage access*, scenario 6)
   - "The {stage} stage has not yet been initiated." before the stage starts (Rule 4; *Workflow screen & stage access*, scenario 2)
@@ -1292,15 +1327,21 @@ reviews* (Rule 14 carries the pointer).
 "Minimum Confirmed Reviews Required") → dashboard passes
 `contextMinReviewsPerSubmission`; `WorkflowSubmissionStatus.vue` adds
 `dashboard.minimumConfirmedReviewsRequired` "Minimum number of confirmed
-reviews required: {$number}." and applies minimum-aware overrides for the
-submitted/confirmed reviewer statuses. Probed
+reviews required: {$number}." and applies a minimum-aware override to the
+confirmed reviewer status. Probed
 2026-07-31: with a minimum of 2 and one confirmed review, the box carried only
 the minimum line. Claim check 2026-07-31: with
 two accepted and none confirmed, the box carried the minimum line **plus**
 "Awaiting responses from reviewers." — identical on OJS and OMP — so the
-override suppresses only the submitted/confirmed sentences, not the
-in-progress one; the body's earlier "no status sentence at all" claim was
-corrected on that observation. The wording once the minimum is met remains
+body's earlier "no status sentence at all" claim was corrected on that
+observation. Test run 2026-09-12 (OJS and OMP, scenario 15): with a minimum
+of 2 and one review submitted and not yet confirmed, the box carried the
+minimum line **plus** "New reviews have been submitted."; the body's earlier
+claim that the submitted sentence does not appear was corrected on that run.
+So the override suppresses only the confirmed sentence: the component's
+minimum branch drops the round's own sentence for the confirmed status
+alone (`REVIEW_ROUND_STATUS_REVIEWS_COMPLETED`) and otherwise prints the
+minimum line above it. The wording once the minimum is met remains
 unobserved live: crossing the threshold needs a UI-submitted,
 editor-confirmed review the scenario seeder cannot produce, so it was
 deferred by cost, not oversight (claim check 2026-07-31).
@@ -1333,22 +1374,33 @@ continues 5's state, or seeds `decisions: ['sendExternalReview',
 journal with throwaway `manager`, `author` and `externalReviewer`; two
 `reviewRounds[]` entries give Round 2, the second with the reviewer
 `invited`; the second submission has one round. 8: `status: 'completed'`
-on the first submission's reviewer, `status: 'declined'` on the second's.
-9: any round. 10: a reviewer `status: 'accepted'`; `sectioneditor.ana`
+on the first submission's reviewer, `status: 'declined'` on the second's;
+the third seeds two reviewers, `status: 'declined'` and `status:
+'accepted'`. 9: any round for the first submission; the second seeds
+`decisions: ['sendExternalReview', 'newExternalReviewRound', 'accept']`
+(the second round gets no reviewer, and "Accept Submission" lands on it).
+10: a reviewer `status: 'accepted'`; `sectioneditor.ana`
 assigned to the stage through `participants[]`; `manager.maya` declines
 and reverts. 11: a reviewer `status: 'declined'`; the recommendation-only
 limitation is set on screen in the Participants panel's "Edit" window for
 `sectioneditor.ana` (the flag belongs to *Stage participants*), the
 deciding editor being the auto-assigned `editor.diana`; the second
 submission sits on a scratch journal with one throwaway `sectionEditor` as
-its only participant, limited the same way. 12: `author.bea` submits both;
+its only participant, limited the same way, and its round seeds no
+reviewer (`reviewers: []`). 12: `author.bea` submits both;
 the open reviewer (`reviewer.julia`) is added on screen with "Review Type"
 "Open" (a seeded reviewer carries the journal's default type, anonymous)
 and accepts on screen before the author's first step; the letter comes from
 a decision the editor records on screen; the control submission seeds
 `reviewer.paul` `status: 'completed'`; the old addresses are typed. 13: a
 monograph seeded with no decision; "Send to External Review" recorded on
-screen. 14: any seeded preprint. Seeding caveat observed 2026-07-31, twice
+screen. 14: any seeded preprint. 15: a scratch journal created with
+`review: {numReviewsPerSubmission: 2}` and throwaway `editor`, `author`
+and `externalReviewer`; the editor is assigned to the stage through
+`participants[]`, the submission seeds `decisions: ['sendExternalReview']`
+and the reviewer `status: 'accepted'`, whose wizard then opens on step 1;
+the review is submitted on the reviewer's own page as in scenario 2 and
+confirmed on screen. Seeding caveat observed 2026-07-31, twice
 independently (a probe run on the seeded journal's own state provided the
 contrast): on scratch journals, submitting assigns no editor even with a
 matching section editor seeded, so every scratch-journal recipe assigns

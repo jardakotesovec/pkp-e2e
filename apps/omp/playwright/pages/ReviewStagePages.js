@@ -28,7 +28,20 @@ const STATUS = {
     advancedToNextRound:
         'The submission has been advanced to the next round of review',
     inCopyediting: 'The submission is currently in the Copyediting stage.',
+    advancedAndAccepted:
+        'The submission advanced to the next review round, was accepted, and is currently in the Copyediting stage.',
+    minimumConfirmed:
+        'Minimum required number of reviews have been confirmed. A decision is needed.',
 };
+
+/**
+ * The status box's first line on a press whose "Minimum Confirmed Reviews
+ * Required" is above 0 (`dashboard.minimumConfirmedReviewsRequired`,
+ * S15). A press at the default of 0 renders no such line.
+ */
+function minimumLine(number) {
+    return `Minimum number of confirmed reviews required: ${number}.`;
+}
 
 /** The five external-review decision buttons (Rule 11, OMP labels). */
 const DECISIONS = {
@@ -102,6 +115,17 @@ async function expectRoundStatus(modal, round, sentence) {
         primary.getByRole('heading', {name: `Round ${round} Status`, exact: true})
     ).toBeVisible({timeout: 15_000});
     await expect(primary.getByText(sentence, {exact: true})).toBeVisible();
+}
+
+/**
+ * The "Round {N} Status" box itself (heading, optional minimum line,
+ * sentence), for reads of the whole box's text: the heading's bordered
+ * parent (`WorkflowSubmissionStatus.vue`).
+ */
+function roundStatusBox(modal, round) {
+    return primaryRegion(modal)
+        .getByRole('heading', {name: `Round ${round} Status`, exact: true})
+        .locator('..');
 }
 
 /** Assert the past-round / past-stage box: plain "Status" heading + sentence. */
@@ -635,7 +659,9 @@ module.exports = {
     decisionButton,
     openEditorial,
     openAuthorView,
+    minimumLine,
     expectRoundStatus,
+    roundStatusBox,
     expectPlainStatus,
     awaitComposerReady,
     walkDecisionWizard,

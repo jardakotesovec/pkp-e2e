@@ -3,7 +3,8 @@
  * @file playwright/tests/U26-review-stage-and-rounds.spec.js
  *
  * Review stage & rounds — OJS suite, one test per canonical scenario the spec
- * runs on OJS (common scenarios 1–12; scenario 13 is OMP-only, 14 OPS-only).
+ * runs on OJS (common scenarios 1–12 and the journal-and-press scenario 15;
+ * scenario 13 is OMP-only, 14 OPS-only).
  * Spec: docs/specs/U26-review-stage-and-rounds.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -56,6 +57,12 @@ const REVISED_SUBJECT = 'Revised Version Uploaded';
 const REVISION_TASK = 'Revision required.';
 const SOLE_RECOMMENDER_TEXT =
     'You can not make a recommendation until an editor is assigned with permission to record a decision.';
+const AWAITING_RESPONSES = 'Awaiting responses from reviewers.';
+const NEW_REVIEWS = 'New reviews have been submitted.';
+const ALL_CONFIRMED = 'All reviews are confirmed and a decision is needed.';
+/** The status box's first line on a journal whose minimum of confirmed reviews is 2 (S15). */
+const MINIMUM_LINE = 'Minimum number of confirmed reviews required: 2.';
+const MINIMUM_LINE_PREFIX = 'Minimum number of confirmed reviews required';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -606,6 +613,17 @@ test.describe('review stage & rounds', () => {
         const {submissionId: invitedId} = await seedInReview(ojsApi, `${tag}c`, {
             reviewRounds: [{reviewers: [{username: 'reviewer.adam', status: 'invited'}]}],
         });
+        // The third submission: one reviewer declined, one accepted.
+        const {submissionId: mixedId} = await seedInReview(ojsApi, `${tag}d`, {
+            reviewRounds: [
+                {
+                    reviewers: [
+                        {username: 'reviewer.paul', status: 'declined'},
+                        {username: 'reviewer.julia', status: 'accepted'},
+                    ],
+                },
+            ],
+        });
 
         const editorPage = await (await asUser('sectioneditor.ana')).newPage();
         const workflow = new WorkflowPage(editorPage, JOURNAL);
@@ -627,6 +645,17 @@ test.describe('review stage & rounds', () => {
         await expect(workflow.decisionButton('Decline Submission')).toBeVisible();
         await expect(workflow.decisionButton('Cancel Review Round')).toHaveCount(0);
 
+        // A declined reviewer beside an accepted one: the declined reviewer
+        // is not counted in the status, which reads the accepted reviewer's
+        // sentence; the button is absent here too (the other decisions stand,
+        // so the action area has rendered).
+        await workflow.gotoEditorial(mixedId);
+        await workflow.expectStatus('Round 1 Status', AWAITING_RESPONSES);
+        await expect(workflow.statusBox('Round 1 Status')).not.toContainText(NEW_REVIEWS);
+        await expect(workflow.decisionButton('Accept Submission')).toBeVisible();
+        await expect(workflow.decisionButton('Request Revisions')).toBeVisible();
+        await expect(workflow.decisionButton('Cancel Review Round')).toHaveCount(0);
+
         // Control: while the invitation is unanswered the button is offered.
         await workflow.gotoEditorial(invitedId);
         await expect(workflow.decisionButton('Cancel Review Round')).toBeVisible();
@@ -636,6 +665,12 @@ test.describe('review stage & rounds', () => {
         test.slow();
         const tag = makeTag('s9', testInfo);
         const {submissionId} = await seedInReview(ojsApi, tag);
+        // The second submission went through two rounds and was accepted
+        // from Round 2 (the promoting decision consumes the one round plan;
+        // the new-round decision adds Round 2 with no reviewer, footnote s).
+        const {submissionId: acceptedId} = await seedInReview(ojsApi, `${tag}b`, {
+            decisions: ['sendExternalReview', 'newExternalReviewRound', 'accept'],
+        });
 
         const editorPage = await (await asUser('sectioneditor.ana')).newPage();
         const workflow = new WorkflowPage(editorPage, JOURNAL);
@@ -651,6 +686,19 @@ test.describe('review stage & rounds', () => {
         await workflow.expectPageTitle('Copyediting');
         await workflow.selectRound(1);
         await workflow.expectStatus('Status', 'The submission is currently in the Copyediting stage.');
+        await expect(workflow.statusBox('Round 1 Status')).toHaveCount(0);
+
+        // A past round after acceptance: on the second submission, Round 1
+        // (the round before the accepting one) reads the advanced-and-accepted
+        // sentence under the plain "Status" heading.
+        await workflow.gotoEditorial(acceptedId);
+        await workflow.expectPageTitle('Copyediting');
+        await expect(workflow.roundLink(2)).toBeVisible();
+        await workflow.selectRound(1);
+        await workflow.expectStatus(
+            'Status',
+            'The submission advanced to the next review round, was accepted, and is currently in the Copyediting stage.'
+        );
         await expect(workflow.statusBox('Round 1 Status')).toHaveCount(0);
     });
 
@@ -811,6 +859,15 @@ test.describe('review stage & rounds', () => {
         for (const label of [...RECOMMENDATION_BUTTONS, ...DECISION_BUTTONS]) {
             await expect(soleWorkflow.decisionButton(label)).toHaveCount(0);
         }
+
+        // No reviewer record: the round seeds no reviewer, so the box reads
+        // the waiting sentence, not the recommendation one (the positive
+        // control is the first submission's box above, read the same way,
+        // which carried the recommendation sentence on its declined reviewer).
+        await soleWorkflow.expectStatus('Round 1 Status', 'Waiting for reviewers to be assigned.');
+        await expect(soleWorkflow.statusBox('Round 1 Status')).not.toContainText(
+            'Awaiting recommendations from editors.'
+        );
     });
 
     test('S12: author reads an open review', async ({asUser, ojsApi}, testInfo) => {
@@ -945,5 +1002,84 @@ test.describe('review stage & rounds', () => {
         await expect(authorPage.getByRole('heading', {name: 'Revisions Uploaded'})).toBeVisible();
         await expect(reviewersTable).toHaveCount(0);
         await expect(readReview).toHaveCount(0);
+    });
+
+    test('S15: a minimum of confirmed reviews', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s15', testInfo);
+        const editor = `edi${tag}`;
+        const author = `au${tag}`;
+        const reviewer = `rev${tag}`;
+        const reviewerName = 'Rita Reviewer';
+        // A scratch journal whose "Minimum Confirmed Reviews Required" is 2
+        // (the context's `review` passthrough key), with throwaway accounts;
+        // a scratch journal's submit assigns no editor (footnote s), so the
+        // editor is assigned through `participants[]`. The seeded `accepted`
+        // reviewer's wizard opens on step 1.
+        await ojsApi.createContext({
+            tag,
+            review: {numReviewsPerSubmission: 2},
+            users: [
+                {username: editor, roles: ['editor']},
+                {username: author, roles: ['author']},
+                {username: reviewer, givenName: 'Rita', familyName: 'Reviewer', roles: ['externalReviewer']},
+            ],
+        });
+        const {submissionId} = await seedInReview(ojsApi, tag, {
+            context: tag,
+            submitter: author,
+            reviewRounds: [{reviewers: [{username: reviewer, status: 'accepted'}]}],
+            participants: [{username: editor, role: 'editor'}],
+        });
+        // The control: the seeded journal (minimum 0) with a submitted review
+        // the editor confirms on screen, the state scenario 2 ends in.
+        const {submissionId: controlId} = await seedInReview(ojsApi, `${tag}b`, {
+            reviewRounds: [{reviewers: [{username: 'reviewer.amara', status: 'completed'}]}],
+        });
+
+        // The review underway: the minimum line, then the reviewer sentence.
+        const editorPage = await (await asUser(editor)).newPage();
+        const workflow = new WorkflowPage(editorPage, tag);
+        await workflow.gotoEditorial(submissionId);
+        await workflow.expectPageTitle('Review (Round 1)');
+        await expect(workflow.statusLines('Round 1 Status')).toHaveText([MINIMUM_LINE, AWAITING_RESPONSES]);
+
+        // The review submitted: the reviewer submits on their own page; the
+        // editor's box reads the minimum line with the submitted sentence
+        // beneath it.
+        const reviewerPage = await (await asUser(reviewer)).newPage();
+        await performReview(reviewerPage, tag, submissionId);
+        await editorPage.reload();
+        await workflow.expectOpen();
+        await expect(workflow.statusLines('Round 1 Status')).toHaveText([MINIMUM_LINE, NEW_REVIEWS]);
+
+        // "Read Review" → "Mark as Complete": the box reads the minimum line
+        // alone; the all-confirmed sentence does not appear.
+        const reviewerRow = workflow.panelRow('Reviewers', reviewerName);
+        const readModal = await openReviewDetails(editorPage, reviewerRow);
+        await markReviewComplete(editorPage, readModal);
+        await closeReviewDetails(editorPage, readModal);
+        await editorPage.reload();
+        await workflow.expectOpen();
+        await expect(workflow.statusLines('Round 1 Status')).toHaveText([MINIMUM_LINE]);
+        await expect(workflow.statusBox('Round 1 Status')).not.toContainText(ALL_CONFIRMED);
+
+        // Control: on the seeded journal, whose minimum is 0, the submitted
+        // review reads its sentence with no minimum line, and once confirmed
+        // the box reads the all-confirmed sentence alone.
+        const anaPage = await (await asUser('sectioneditor.ana')).newPage();
+        const control = new WorkflowPage(anaPage, JOURNAL);
+        await control.gotoEditorial(controlId);
+        await expect(control.statusLines('Round 1 Status')).toHaveText([NEW_REVIEWS]);
+        await expect(control.statusBox('Round 1 Status')).not.toContainText(MINIMUM_LINE_PREFIX);
+        const controlRow = control.panelRow('Reviewers', 'Amara Reviewer');
+        const controlModal = await openReviewDetails(anaPage, controlRow);
+        await markReviewComplete(anaPage, controlModal);
+        await closeReviewDetails(anaPage, controlModal);
+        await anaPage.reload();
+        await control.expectOpen();
+        await expect(control.statusLines('Round 1 Status')).toHaveText([ALL_CONFIRMED]);
+        await expect(control.statusBox('Round 1 Status')).not.toContainText(MINIMUM_LINE_PREFIX);
     });
 });

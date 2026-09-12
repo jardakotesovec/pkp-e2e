@@ -5,8 +5,9 @@
  * U26 — Review stage & rounds, OMP suite (spec:
  * lib/pkp/docs/e2e/specs/U26-review-stage-and-rounds.md). One test per
  * canonical scenario the spec runs on a press: common scenarios 1–12 in OMP
- * vocabulary (press, monograph, External Review — glossary substitution)
- * plus OMP-specific scenario 13 (skip-internal entry). Scenario 14 is
+ * vocabulary (press, monograph, External Review — glossary substitution),
+ * OMP-specific scenario 13 (skip-internal entry) and scenario 15 (the
+ * review minimum, OJS and OMP). Scenario 14 is
  * OPS-only. On a press the entry into External Review used throughout is the
  * Submission-stage "Send to External Review" decision (skip-internal,
  * OMP1); the Internal Review STAGE itself is out of scope by charter and no
@@ -25,7 +26,9 @@
  * recipient (Mailpit is shared across fleets — never cleared, every mail
  * claim scoped by recipient address naming app + test); S11's second
  * submission sits on a scratch press too (a Series Editor who is the only
- * editorial participant, which the seeded press's auto-assignment forbids).
+ * editorial participant, which the seeded press's auto-assignment forbids);
+ * S15 runs on a scratch press created with the review minimum through the
+ * context's `review` passthrough key (the seeded press keeps the default 0).
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
@@ -39,7 +42,9 @@ const {
     decisionButton,
     openEditorial,
     openAuthorView,
+    minimumLine,
     expectRoundStatus,
+    roundStatusBox,
     expectPlainStatus,
     awaitComposerReady,
     walkDecisionWizard,
@@ -542,6 +547,14 @@ test.describe('Review stage & rounds (U26)', () => {
         const seededB = await seedInExternalReview(ompApi, tagB, {
             reviewers: [{username: 'reviewer.paul', status: 'declined'}],
         });
+        // A third whose round holds a declined reviewer beside an accepted one.
+        const tagC = `${tag}c`;
+        const seededC = await seedInExternalReview(ompApi, tagC, {
+            reviewers: [
+                {username: 'reviewer.paul', status: 'declined'},
+                {username: 'reviewer.julia', status: 'accepted'},
+            ],
+        });
 
         const juliaPage = await (await asUser('reviewer.julia')).newPage();
         await completeReviewAsReviewer(
@@ -570,11 +583,30 @@ test.describe('Review stage & rounds (U26)', () => {
         await expect(decisionButton(modalB, DECISIONS.newRound)).toBeVisible();
         await expect(decisionButton(modalB, DECISIONS.decline)).toBeVisible();
         await expect(decisionButton(modalB, DECISIONS.cancelRound)).toHaveCount(0);
+
+        // A declined reviewer beside an accepted one: the box reads the
+        // accepted reviewer's sentence (the declined one is not counted),
+        // and "Cancel Review Round" is absent here too, the other four
+        // buttons being the positive read of the same region.
+        const modalC = await openEditorial(page, PK, seededC.submissionId);
+        await expectRoundStatus(modalC, 1, STATUS.awaitingResponses);
+        await expect(decisionButton(modalC, DECISIONS.requestRevisions)).toBeVisible();
+        await expect(decisionButton(modalC, DECISIONS.accept)).toBeVisible();
+        await expect(decisionButton(modalC, DECISIONS.newRound)).toBeVisible();
+        await expect(decisionButton(modalC, DECISIONS.decline)).toBeVisible();
+        await expect(decisionButton(modalC, DECISIONS.cancelRound)).toHaveCount(0);
+        await expect(actionsRegion(modalC).getByRole('button')).toHaveCount(4);
     });
 
     test('S9: accept out of review', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u26s9');
         const seeded = await seedInExternalReview(ompApi, tag);
+        // A second submission that went through two rounds and was accepted
+        // from Round 2 (the new round gets no reviewer).
+        const tagB = `${tag}b`;
+        const seededB = await seedInExternalReview(ompApi, tagB, {
+            extraDecisions: ['newExternalReviewRound', 'accept'],
+        });
 
         const page = await (await asUser('manager.maya')).newPage();
         const modal = await openEditorial(page, PK, seeded.submissionId);
@@ -597,6 +629,24 @@ test.describe('Review stage & rounds (U26)', () => {
             modal2.getByRole('heading', {name: 'Workflow: External Review (Round 1)'})
         ).toBeVisible();
         await expectPlainStatus(modal2, STATUS.inCopyediting);
+        // Control: the box is headed plain "Status", no longer "Round 1 Status".
+        await expect(
+            primaryRegion(modal2).getByRole('heading', {name: 'Round 1 Status', exact: true})
+        ).toHaveCount(0);
+
+        // A past round after acceptance: the second submission's Round 1
+        // reads the advanced-and-accepted sentence with the press's
+        // Copyediting stage name, headed plain "Status".
+        const modalB = await openEditorial(page, PK, seededB.submissionId);
+        await expect(
+            modalB.getByRole('heading', {name: 'Workflow: Copyediting'})
+        ).toBeVisible();
+        await modalB.getByText('Review Round 1', {exact: true}).first().click();
+        await expect(
+            modalB.getByRole('heading', {name: 'Workflow: External Review (Round 1)'})
+        ).toBeVisible();
+        await expectPlainStatus(modalB, STATUS.advancedAndAccepted);
+        await expect(primaryRegion(modalB).getByText(STATUS.inCopyediting, {exact: true})).toHaveCount(0);
     });
 
     test('S10: decline, revert, delete', async ({ompApi, asUser}, testInfo) => {
@@ -734,7 +784,7 @@ test.describe('Review stage & rounds (U26)', () => {
             context: tagB,
             submitter: `au${tagB}`,
             decisions: ['skipInternalReview'],
-            reviewRounds: [{stage: 'external'}],
+            reviewRounds: [{stage: 'external', reviewers: []}],
         });
         const mgrPage = await (await asUser(manager)).newPage();
         const mgrModal = await openEditorial(mgrPage, tagB, seededB.submissionId);
@@ -744,11 +794,22 @@ test.describe('Review stage & rounds (U26)', () => {
             resultName: `Se${tagB} Editor`,
             recommendOnly: true,
         });
+        // No reviewer record: the round without a reviewer reads the
+        // waiting sentence, not the recommendation one (Ravi's round above,
+        // with its declined reviewer, is the positive read of that sentence).
+        await expectRoundStatus(mgrModal, 1, STATUS.waiting);
+        await expect(
+            primaryRegion(mgrModal).getByText(STATUS.awaitingRecommendations, {exact: true})
+        ).toHaveCount(0);
         const solePage = await (await asUser(soleEditor)).newPage();
         const soleModal = await openEditorial(solePage, tagB, seededB.submissionId);
         // No buttons of either kind (Ravi's recommendation buttons above are
         // the positive read of the same region)…
         await expect(soleModal.getByRole('heading', {name: 'Recommendation'})).toBeVisible();
+        await expectRoundStatus(soleModal, 1, STATUS.waiting);
+        await expect(
+            primaryRegion(soleModal).getByText(STATUS.awaitingRecommendations, {exact: true})
+        ).toHaveCount(0);
         await expect(
             actionsRegion(soleModal).getByRole('button', {name: /^Recommend /})
         ).toHaveCount(0);
@@ -932,5 +993,86 @@ test.describe('Review stage & rounds (U26)', () => {
         await expect(
             modal2.getByText('Internal Review', {exact: true}).first()
         ).toBeVisible();
+    });
+
+    test('S15: a minimum of confirmed reviews', async ({ompApi, asUser}, testInfo) => {
+        const tag = makeTag(testInfo, 'u26s15');
+        const editor = `ed${tag}`;
+        const author = `au${tag}`;
+        const reviewer = `rv${tag}`;
+        const reviewerName = `Rev${tag} Reviewer`;
+        const MINIMUM = minimumLine(2);
+
+        // Scratch press with "Minimum Confirmed Reviews Required" at 2
+        // through the context's `review` passthrough key; a throwaway
+        // Press Editor, Author and External Reviewer. The editor is assigned
+        // to the stage in the seed (a scratch press assigns no editor on
+        // submit, footnote s); the reviewer accepted and has not submitted.
+        await ompApi.createContext({
+            tag,
+            review: {numReviewsPerSubmission: 2},
+            users: [
+                {username: editor, roles: ['editor'], givenName: `Ed${tag}`, familyName: 'Editor'},
+                {username: author, roles: ['author'], givenName: `Au${tag}`, familyName: 'Author'},
+                {username: reviewer, roles: ['externalReviewer'], givenName: `Rev${tag}`, familyName: 'Reviewer'},
+            ],
+        });
+        const seeded = await ompApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: author,
+            decisions: ['skipInternalReview'],
+            reviewRounds: [{stage: 'external', reviewers: [{username: reviewer, status: 'accepted'}]}],
+            participants: [{username: editor, role: 'editor'}],
+        });
+
+        // The review underway: the minimum line, with the reviewer sentence
+        // beneath it.
+        const page = await (await asUser(editor)).newPage();
+        let modal = await openEditorial(page, tag, seeded.submissionId);
+        await expectRoundStatus(modal, 1, STATUS.awaitingResponses);
+        await expect(roundStatusBox(modal, 1)).toHaveText(
+            `Round 1 Status ${MINIMUM} ${STATUS.awaitingResponses}`
+        );
+
+        // The review submitted: the minimum line, with "New reviews have
+        // been submitted." beneath it.
+        const reviewerPage = await (await asUser(reviewer)).newPage();
+        await completeReviewAsReviewer(reviewerPage, tag, seeded.submissionId, `Review remarks ${tag}.`);
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        await expectRoundStatus(modal, 1, STATUS.newReviews);
+        await expect(roundStatusBox(modal, 1)).toHaveText(
+            `Round 1 Status ${MINIMUM} ${STATUS.newReviews}`
+        );
+
+        // "Read Review" → "Mark as Complete": the box reads the minimum line
+        // alone; "All reviews are confirmed and a decision is needed." does
+        // not appear (nor the minimum's own "confirmed" sentence: one of two).
+        await confirmReviewAsEditor(page, modal, reviewerName);
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        await expect(roundStatusBox(modal, 1).getByText(MINIMUM, {exact: true})).toBeVisible();
+        await expect(roundStatusBox(modal, 1).getByText(STATUS.reviewsConfirmed, {exact: true})).toHaveCount(0);
+        await expect(roundStatusBox(modal, 1).getByText(STATUS.minimumConfirmed, {exact: true})).toHaveCount(0);
+        await expect(roundStatusBox(modal, 1)).toHaveText(`Round 1 Status ${MINIMUM}`);
+
+        // Control: on the seeded press (minimum 0) a confirmed review reads
+        // "All reviews are confirmed and a decision is needed." with no
+        // minimum line (S2's end state, reached the same way).
+        const tagB = `${tag}b`;
+        const seededB = await seedInExternalReview(ompApi, tagB, {
+            reviewers: [{username: 'reviewer.paul', status: 'completed'}],
+        });
+        const mayaPage = await (await asUser('manager.maya')).newPage();
+        let mayaModal = await openEditorial(mayaPage, PK, seededB.submissionId);
+        await expectRoundStatus(mayaModal, 1, STATUS.newReviews);
+        await confirmReviewAsEditor(mayaPage, mayaModal, 'Paul Reviewer');
+        mayaModal = await openEditorial(mayaPage, PK, seededB.submissionId);
+        await expectRoundStatus(mayaModal, 1, STATUS.reviewsConfirmed);
+        await expect(
+            roundStatusBox(mayaModal, 1).getByText(/Minimum number of confirmed reviews required/)
+        ).toHaveCount(0);
+        await expect(roundStatusBox(mayaModal, 1)).toHaveText(
+            `Round 1 Status ${STATUS.reviewsConfirmed}`
+        );
     });
 });

@@ -127,6 +127,16 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     }
 
     /**
+     * The status box's lines, one `p` each, in screen order: on a journal
+     * with a "Minimum Confirmed Reviews Required" the minimum line comes
+     * first and the round sentence (when one shows) second. Assert the
+     * whole array to read a box "alone" or "first line".
+     */
+    statusLines(heading) {
+        return this.statusBox(heading).locator('p');
+    }
+
+    /**
      * A PkpTable panel wrapper (header + controls + table) located via the
      * table's accessible name (aria-labelledby = the panel h3). `.last()`
      * resolves to the innermost wrapping div, which contains the panel's own
