@@ -207,7 +207,10 @@ itself enforces before submission is Rule 13.
     is supported), plus the section on a journal or preprint server, or the
     Submission Type on a press [OMP1](#omp1). Saving applies the change and
     reloads the wizard so every step reflects it. A section change can
-    change what the Details step requires (Rule 13). With only one language
+    change what the Details step requires (Rule 13). A language change
+    leaves the contributor record copied from the author's profile in the
+    first language, so the new language's given name and institution name
+    are asked for again before submitting ⚠ [A13](#a13). With only one language
     and one open section, no "Submitting to…" line or "Change" control
     appears at all. The exception is a press, where the work-type line and
     its "Change" control always remain, because the type can always be
@@ -893,6 +896,7 @@ are the source; badges, Impact and Basis:
 | [A2](#a2) | The save-for-later confirmation email goes to whoever pressed the button, not to the submitting author | ❓ | latent | — |
 | [A3](#a3) | The submissions-closed notice shown to would-be authors ends with an instruction meant for managers | ❓ | minor | — |
 | [A9](#a9) | Pressing "Begin Submission" silently enrolls a pure Section Editor as Author, and probably a pure Site Administrator too | ❓ | latent | — |
+| [A13](#a13) | Changing the submission language inside the wizard leaves the copied contributor affiliation and given name in the first language, so Review asks the author to type them again | ❓ | user-visible | — |
 | [OPS2](#ops2) | A preprint server enrolls a roleless visitor as Author on merely opening the start screen | ❓ | latent | — |
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
@@ -1022,6 +1026,26 @@ force: no acknowledgement goes out, and saving the screen again keeps it
 so. But the screen no longer says which option applies, so a manager
 cannot tell "off" from a choice never made. Basis: probe.
 <sup>[fn-a12](#fn-a12)</sup>
+
+<a id="a13"></a>
+**A13 — Changing the language mid-wizard drops the copied affiliation from the new language** · ❓ · user-visible.
+The Details step's "Change" lets the author switch the submission language
+after the draft exists. The contributor record the draft copied from the
+author's profile (given name, affiliation) stays in the first language
+only, so the Contributors panel reads "The primary language French
+(Canada) is required" under Affiliations and the Review step refuses with
+"The affiliation name is missing in French (Canada) for one or more
+affiliations for one or more of the contributors." (or the given-name
+line first) until the author types them again. Typed institution names
+always met this; since the profile copy stopped matching names to the
+registry (2026-09-12), an author whose profile text matches a registry
+record, who used to receive a language-free registry institution, meets it
+too. Question: should a language change carry the copied names into the
+new language, the way draft creation fills the submission language from
+the profile, or should the submit check accept the default-language name?
+Lean: carry them over on the change, since the creation-time fallback
+already expresses that intent.
+Since: 2026-09-12 (the typed-text case predates it) · Basis: probe. <sup>[fn-a13](#fn-a13)</sup>
 
 ### OMP
 
@@ -1792,6 +1816,36 @@ Workflow → Emails reopened after saving "Do not send an email." listed
 only." and "Do not send an email." all unchecked, and the acknowledgement
 stayed off. The form is the shared lib/pkp Emails settings form, so OMP
 and OPS are expected to match; not reopened there.
+
+<a id="fn-a13"></a>
+**fn-a13** — Language change and the copied contributor. The wizard's
+"Change Submission Settings" form PUTs `submissions/{id}`
+(`PKPSubmissionController::edit()`), which saves the new `locale` and
+nothing else; only the workflow's `changeLocale` route calls
+`copyMultilingualData()`. `Repo::affiliation()->migrateUserAffiliation()`
+fills the submission locale from the profile's default-locale text at
+draft creation only (pkp/pkp-lib#13317, issue #13274; before it a profile
+text with an exact registry match became a `ror` link with no name, which
+`validateSubmit()` skips). Driven 2026-09-12 on OJS at the ojs PR head
+`75df364d49` / pkp-lib `3f82add062`, before the merge (kept as
+`checks/sync/pkp-lib-13317/wizard-locale-change.js`): scratch journal en +
+fr_CA, two authors with the English profile text "Registry University …"
+and a cached registry record planted under exactly that text; drafts
+started in en carried the text as `name.en` with `ror` null; "Change" →
+French (Canada) → Save answered 200 and left `submissions.locale` =
+`fr_CA` with the affiliation and the given name still `{en}`; the Edit
+panel's Affiliations table read "The primary language French (Canada) is
+required / 1 of 2 languages completed / Type the institution name in
+French (Canada)"; Review showed the problems banner with "The given name
+is missing in French (Canada) for one or more of the contributors." for
+the author whose given name was en only and "The affiliation name is
+missing in French (Canada) for one or more affiliations for one or more of
+the contributors." for the one with both. The same run without a registry
+record at the OJS tip `cea48a066b` (before the PR) showed the same two
+messages, so the limitation predates the PR for typed text; the same
+planting at pkp-lib `b48c22ca06` stored the `ror` and no name, the
+population the PR moves. Not driven on OMP or OPS (their checkouts lack
+the change; the wizard code is shared).
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
