@@ -1049,4 +1049,219 @@ exports.closeSideWindow = async function closeSideWindow(dialog) {
     await expect(dialog).toBeHidden({timeout: 30_000});
 };
 
+// ---------------------------------------------------------------------------
+// The "Locate a Reviewer" list's aids, the request form's presets, the
+// reminder window's schedule, the revert and the Modify Review window
+// (U27 revision, 2026-09-13)
+// ---------------------------------------------------------------------------
+
+/**
+ * The author names shown in bold above the "Locate a Reviewer" list (the
+ * first four contributors; `AdvancedSearchReviewerContainer`).
+ *
+ * @param {import('@playwright/test').Locator} modal from openAddReviewerModal
+ */
+exports.reviewerSearchAuthors = function reviewerSearchAuthors(modal) {
+    return modal.locator('.pkpAdvancedSearchReviewerContainer .author_row strong');
+};
+
+/**
+ * Open the list's "Filters" sidebar (hidden until its button is pressed)
+ * and return it.
+ *
+ * @param {import('@playwright/test').Locator} modal from openAddReviewerModal
+ */
+exports.openReviewerSearchFilters = async function openReviewerSearchFilters(modal) {
+    const sidebar = modal.locator('.listPanel--selectReviewer .listPanel__sidebar');
+    if (!(await sidebar.locator('.pkpFilter').count())) {
+        await modal.getByRole('button', {name: 'Filters', exact: true}).click();
+    }
+    await expect(sidebar.locator('.pkpFilter').first()).toBeVisible({timeout: 30_000});
+    return sidebar;
+};
+
+/**
+ * One slider filter of the "Filters" sidebar, by its title ("Rated at
+ * least", "Reviews completed", …). Its range input(s) are `sliders`;
+ * `enable` is the "Add filter: {title}" button beside it that enables
+ * them, and `clear` the same button once the filter is on, then reading
+ * "Clear filter: {title}", which disables them again.
+ *
+ * @param {import('@playwright/test').Locator} sidebar from openReviewerSearchFilters
+ * @param {string} title
+ */
+exports.reviewerSearchFilter = function reviewerSearchFilter(sidebar, title) {
+    const filter = sidebar.locator('.pkpFilter').filter({
+        has: sidebar.page().locator('.pkpFilter__inputTitle', {hasText: new RegExp(`^\\s*${title}\\s*$`)}),
+    });
+    return {
+        filter,
+        sliders: filter.locator('input[type="range"]'),
+        enable: filter.getByRole('button', {name: `Add filter: ${title}`, exact: true}),
+        clear: filter.getByRole('button', {name: `Clear filter: ${title}`, exact: true}),
+    };
+};
+
+/**
+ * The entries of the "Locate a Reviewer" list as shown (the page on
+ * screen, 30 at most).
+ *
+ * @param {import('@playwright/test').Locator} modal from openAddReviewerModal
+ */
+exports.reviewerListItems = function reviewerListItems(modal) {
+    return modal.locator('.listPanel--selectReviewer .listPanel__item');
+};
+
+/**
+ * The list's "View additional pages" bar, shown once the pool exceeds a
+ * page.
+ *
+ * @param {import('@playwright/test').Locator} modal from openAddReviewerModal
+ */
+exports.reviewerListPagination = function reviewerListPagination(modal) {
+    return modal.getByRole('navigation', {name: 'View additional pages'});
+};
+
+/**
+ * A "Review Type" radio of the Add Reviewer request form or the Edit
+ * Review window, by its label ("Open", "Anonymous Reviewer/Anonymous
+ * Author", …).
+ *
+ * @param {import('@playwright/test').Locator} scope the window
+ * @param {string} label
+ */
+exports.reviewTypeRadio = function reviewTypeRadio(scope, label) {
+    return scope.getByRole('radio', {name: label, exact: true});
+};
+
+/**
+ * The "Publicly Show Reviewer Comments" box of the same two windows.
+ *
+ * @param {import('@playwright/test').Locator} scope the window
+ */
+exports.publicVisibilityCheckbox = function publicVisibilityCheckbox(scope) {
+    return scope.locator('input[name="isReviewPubliclyVisible"]');
+};
+
+/**
+ * The "No Files Selected" inline warning of the Add Reviewer request form
+ * or the Edit Review window (`#noFilesWarning`, shown by the window's own
+ * script).
+ *
+ * @param {import('@playwright/test').Locator} scope the window
+ */
+exports.noFilesWarning = function noFilesWarning(scope) {
+    return scope.locator('#noFilesWarning');
+};
+
+/**
+ * The file checkboxes of the "Files To Be Reviewed" list in the same two
+ * windows (none on a round without files).
+ *
+ * @param {import('@playwright/test').Locator} scope the window
+ */
+exports.reviewFileCheckboxes = function reviewFileCheckboxes(scope) {
+    return scope.locator('input[name="selectedFiles[]"]');
+};
+
+/**
+ * Open a row's "Send Reminder" window and wait for its "Review Schedule"
+ * section.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openSendReminder = async function openSendReminder(page, row) {
+    await row.getByRole('button', {name: 'Send Reminder', exact: true}).click();
+    const modal = exports.legacyModal(page, 'sendReminderForm');
+    await expect(modal.getByText('Review Schedule')).toBeVisible({timeout: 30_000});
+    return modal;
+};
+
+/**
+ * The read-only date fields of the reminder window's "Review Schedule",
+ * as their labels in screen order ("Editor's Request", then "Response Due
+ * Date" or "Review Acceptance Date", then "Review Due Date").
+ *
+ * @param {import('@playwright/test').Locator} modal from openSendReminder
+ */
+exports.reviewScheduleLabels = function reviewScheduleLabels(modal) {
+    return modal
+        .locator('form#sendReminderForm')
+        .locator('label[for^="dateNotified"], label[for^="dateConfirmed"], label[for^="responseDue"], label[for^="reviewDueDate"]');
+};
+
+/**
+ * Press the reminder window's own "Send Reminder" and wait for the form to
+ * go; the "Notification sent." notice is the caller's assertion.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} modal from openSendReminder
+ */
+exports.submitSendReminder = async function submitSendReminder(page, modal) {
+    await modal
+        .locator('form#sendReminderForm')
+        .getByRole('button', {name: 'Send Reminder', exact: true})
+        .click();
+    await expect(modal.locator('form#sendReminderForm')).toBeHidden({timeout: 30_000});
+    await waitForJQueryIdle(page);
+};
+
+/**
+ * Press a row's "Revert Decision" and confirm "Unconsider this Review";
+ * returns once the dialog has closed. The row's new state is the caller's
+ * assertion.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.revertReviewDecision = async function revertReviewDecision(page, row) {
+    await row.getByRole('button', {name: 'Revert Decision', exact: true}).click();
+    const dialog = page.getByRole('dialog').filter({hasText: 'Unconsider this Review'});
+    await expect(dialog).toBeVisible({timeout: 30_000});
+    await dialog.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(dialog).toBeHidden({timeout: 30_000});
+};
+
+/**
+ * The "Modify Review" window stacked over the Review Details window.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.modifyReviewModal = function modifyReviewModal(page) {
+    return page.getByRole('dialog', {name: 'Modify Review'});
+};
+
+/**
+ * Press the Review Details window's "Modify Review", confirm the "Modify
+ * this review?" dialog and return the "Modify Review" window once open.
+ * The dialog's text is the caller's assertion.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} readModal from openReviewDetails
+ */
+exports.openModifyReview = async function openModifyReview(page, readModal) {
+    await exports.awaitReviewDetailsSettled(readModal);
+    await readModal.getByRole('button', {name: 'Modify Review', exact: true}).click();
+    const confirm = page.locator('[data-cy="dialog"]').filter({hasText: 'Modify this review?'});
+    await expect(confirm).toBeVisible({timeout: 30_000});
+    await confirm.getByRole('button', {name: 'Modify Review', exact: true}).click();
+    const editModal = exports.modifyReviewModal(page);
+    await expect(editModal).toBeVisible({timeout: 30_000});
+    return editModal;
+};
+
+/**
+ * Press the "Modify Review" window's "Cancel": the window closes and the
+ * view window beneath shows again.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ */
+exports.cancelModifyReview = async function cancelModifyReview(page, editModal) {
+    await editModal.getByRole('button', {name: 'Cancel', exact: true}).click();
+    await expect(editModal).toBeHidden({timeout: 30_000});
+    await expect(exports.reviewDetailsModal(page)).toBeVisible({timeout: 30_000});
+};
+
 module.exports.waitForJQueryIdle = waitForJQueryIdle;

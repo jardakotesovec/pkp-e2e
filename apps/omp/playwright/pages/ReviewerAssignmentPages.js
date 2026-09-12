@@ -214,10 +214,12 @@ async function pickDate(page, scope, fieldName, date) {
     await dp
         .locator('select.ui-datepicker-month')
         .selectOption(String(date.getMonth()));
+    // Bounded: a calendar the window's overlay covers never takes the
+    // click, and the default wait would eat the whole test timeout.
     await dp
         .getByRole('link', {name: String(date.getDate()), exact: true})
         .first()
-        .click();
+        .click({timeout: 20_000});
     await expect(
         scope.locator(`input[type="hidden"][name="${fieldName}"]`).first()
     ).toHaveValue(isoDate(date));
@@ -412,6 +414,127 @@ async function openModifyReview(page, readModal, settledText) {
 /** One entry of an open row menu, by its exact label. */
 function menuEntry(menu, name) {
     return menu.getByRole('menuitem', {name, exact: true});
+}
+
+/** Every entry of an open row menu, in screen order (Rule 3's order). */
+function menuEntries(menu) {
+    return menu.getByRole('menuitem');
+}
+
+/**
+ * The "Submission Authors" box above the Add Reviewer list
+ * (`AdvancedSearchReviewerContainer`): each author row bolds the name
+ * (`<strong>`) beside its affiliations (Rule 6).
+ */
+function authorList(addModal) {
+    return addModal.locator('.pkpAdvancedSearchReviewerContainer');
+}
+
+/** The bold name of one author row in the box above the list. */
+function authorName(addModal, name) {
+    return authorList(addModal).locator('li.author_row strong').filter({hasText: name});
+}
+
+/**
+ * Open the list's "Filters" sidebar (its header button toggles it; the
+ * sidebar is closed on arrival) and return it, settled on its heading.
+ */
+async function openFiltersSidebar(addModal) {
+    const sidebar = addModal.locator('.listPanel__sidebar');
+    if (!(await sidebar.count())) {
+        await addModal.getByRole('button', {name: 'Filters', exact: true}).click();
+    }
+    await expect(sidebar.getByRole('heading', {name: 'Filters'})).toBeVisible({
+        timeout: 10_000,
+    });
+    return sidebar;
+}
+
+/** One slider filter of the sidebar, by its title (Rule 6). */
+function filterSlider(sidebar, title) {
+    return sidebar.locator('.pkpFilter--slider').filter({hasText: title});
+}
+
+/** The range input of a slider filter (disabled until enabled). */
+function filterSliderInput(slider) {
+    return slider.locator('input[type="range"]');
+}
+
+/**
+ * The enable button beside a slider filter; its accessible name is
+ * "Add filter: {title}" (the visible glyph is decorative), and it turns
+ * into "Clear filter: {title}" once pressed.
+ */
+function filterEnableButton(slider, title) {
+    return slider.getByRole('button', {name: `Add filter: ${title}`});
+}
+
+/** The clear button of an enabled slider filter ("Clear filter: {title}"). */
+function filterClearButton(slider, title) {
+    return slider.getByRole('button', {name: `Clear filter: ${title}`});
+}
+
+/** Every entry of the Add Reviewer list (one page of it). */
+function listEntries(addModal) {
+    return addModal.locator('.listPanel__item');
+}
+
+/** The list's pagination bar (`nav` named "View additional pages"). */
+function paginationBar(addModal) {
+    return addModal.getByRole('navigation', {name: 'View additional pages'});
+}
+
+/**
+ * The "No Files Selected" warning of an Add or Edit window
+ * (`#noFilesWarning`, shown once the "Files To Be Reviewed" grid has loaded
+ * with nothing ticked).
+ */
+function noFilesWarning(scope) {
+    return scope.locator('#noFilesWarning').getByText('No Files Selected');
+}
+
+/** The "Files To Be Reviewed" grid of an Add or Edit window. */
+function filesToBeReviewedGrid(scope) {
+    return scope.locator('#limitReviewFilesGrid');
+}
+
+/** A "Review Type" radio of an Add or Edit window, by its exact label. */
+function reviewTypeRadio(scope, label) {
+    return scope.getByRole('radio', {name: label, exact: true});
+}
+
+/** The "Publicly Show Reviewer Comments" box of an Add or Edit window. */
+function publicVisibilityBox(scope) {
+    return scope.locator('input[name="isReviewPubliclyVisible"]');
+}
+
+/**
+ * Press the row's "Send Reminder" button and return the "Review Reminder"
+ * window, settled on its "Review Schedule" group with the message loaded
+ * (TinyMCE `message`). Callers press "Send Reminder" in the window.
+ */
+async function openReminder(page, row) {
+    await row.getByRole('button', {name: 'Send Reminder', exact: true}).click();
+    const reminderModal = topModal(page);
+    await expect(reminderModal.getByText('Review Schedule')).toBeVisible({
+        timeout: 20_000,
+    });
+    await awaitTinyMce(page, 'message');
+    return reminderModal;
+}
+
+/**
+ * Press the row's "Revert Decision" and confirm the "Unconsider this
+ * Review" dialog (Rule 16). Callers read the row's new state afterwards.
+ */
+async function revertDecision(page, row) {
+    await row.getByRole('button', {name: 'Revert Decision'}).click();
+    const dialog = page
+        .getByRole('dialog')
+        .filter({hasText: 'Unconsider this Review'});
+    await expect(dialog).toBeVisible({timeout: 10_000});
+    await dialog.getByRole('button', {name: 'OK'}).click();
+    await expect(dialog).toBeHidden({timeout: 10_000});
 }
 
 /**
@@ -648,6 +771,22 @@ module.exports = {
     reviewerRow,
     openRowMenu,
     menuEntry,
+    menuEntries,
+    authorList,
+    authorName,
+    openFiltersSidebar,
+    filterSlider,
+    filterSliderInput,
+    filterEnableButton,
+    filterClearButton,
+    listEntries,
+    paginationBar,
+    noFilesWarning,
+    filesToBeReviewedGrid,
+    reviewTypeRadio,
+    publicVisibilityBox,
+    openReminder,
+    revertDecision,
     closeRowMenu,
     columnHeader,
     statusTitle,

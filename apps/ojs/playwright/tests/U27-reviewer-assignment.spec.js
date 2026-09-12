@@ -3,7 +3,7 @@
  * @file playwright/tests/U27-reviewer-assignment.spec.js
  *
  * Reviewer assignment & management — OJS suite, one test per canonical
- * scenario the spec runs on OJS (common scenarios 1–12 and 16–19 +
+ * scenario the spec runs on OJS (common scenarios 1–12 and 16–20 +
  * OJS-specific 14; scenario 13 is OMP-only, 15 OPS-only — they live in
  * those trees).
  * Spec: docs/specs/U27-reviewer-assignment-and-management.md
@@ -12,13 +12,14 @@
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
  * - A1 🐞, A2 🐞, A7 🐞, A8 🐞, A9 🐞, A12 🐞, A13 🐞, A14 🐞, A16 🐞,
- *   A18 🐞, A19 🐞, A21 🐞, A22 🐞 (the refusals and races these name are
- *   walked where a scenario passes through them — S5's inverted dates, S6's
- *   refused edit, the settle-then-rate in S9 — and asserted neither way).
- * - A3 ❓, A4 ❓, A6 ❓, A15 ❓, A17 ❓, A23 ❓, A24 ❓, A25 ❓ (parked; S14
+ *   A18 🐞, A19 🐞, A21 🐞, A22 🐞, A26 🐞 (the refusals and races these
+ *   name are walked where a scenario passes through them — S5's inverted
+ *   dates, S6's refused edit, the settle-then-rate in S9, S11's unassign
+ *   notice read by recipient and title — and asserted neither way).
+ * - A3 ❓, A4 ❓, A6 ❓, A15 ❓, A17 ❓, A23 ❓, A24 ❓, A27 ❓ (parked; S14
  *   and S16 anchor the recommendation on the "Recommendation:" line only).
  * - Retired: A5, A10 (opening the window marks the row "Review Viewed" by
- *   design; S9 asserts it as contract), A11.
+ *   design; S9 asserts it as contract), A11, A25.
  * - S10 note: the two PDFs are asserted as real downloads; the author-only /
  *   full content split is asserted on the same menu's XML exports (mpdf
  *   compresses PDF text streams — the split is byte-identical logic).
@@ -62,6 +63,21 @@ const {
     typeRichText,
     openActivityLog,
     closeSideWindow,
+    reviewerSearchAuthors,
+    openReviewerSearchFilters,
+    reviewerSearchFilter,
+    reviewerListItems,
+    reviewerListPagination,
+    reviewTypeRadio,
+    publicVisibilityCheckbox,
+    noFilesWarning,
+    reviewFileCheckboxes,
+    openSendReminder,
+    reviewScheduleLabels,
+    submitSendReminder,
+    revertReviewDecision,
+    openModifyReview,
+    cancelModifyReview,
     waitForJQueryIdle,
 } = require('../pages/ReviewStagePages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
@@ -233,8 +249,26 @@ test.describe('reviewer-assignment', () => {
         ).toBeVisible();
         await closeSideWindow(log);
 
+        // The row's "More Actions" menu lists "Review Details", "Edit",
+        // "Unassign Reviewer", "Email Reviewer" and "History" in that order,
+        // then "Editorial Notes" and "Log Response". The manager-level
+        // editor's menu also carries a "Login As" entry between "History"
+        // and "Editorial Notes" (the spec's Coverage list owns it to
+        // *Sign-in & sessions*), read out of the sequence.
+        const menu = await openRowMenu(editorPage, row);
+        const entries = (await menu.getByRole('menuitem').allTextContents()).map((s) => s.trim());
+        expect(entries.filter((s) => s !== 'Login As')).toEqual([
+            'Review Details',
+            'Edit',
+            'Unassign Reviewer',
+            'Email Reviewer',
+            'History',
+            'Editorial Notes',
+            'Log Response',
+        ]);
+
         // "Editorial Notes": one text field under the guidance sentence.
-        await clickRowAction(editorPage, row, 'Editorial Notes');
+        await menu.getByRole('menuitem', {name: 'Editorial Notes', exact: true}).click();
         const notesModal = legacyModal(editorPage, 'reviewerGossipForm');
         await expect(
             notesModal.getByText(
@@ -285,6 +319,9 @@ test.describe('reviewer-assignment', () => {
         const locked = `lock${tag}`;
         const lockedName = `Lock${tag}`;
         const assignedName = `reva${tag}`;
+        // Thirty never-assigned reviewers push the pool past a page.
+        const pool = Array.from({length: 30}, (_, i) => `rp${String(i + 1).padStart(2, '0')}${tag}`);
+        const neverAssigned = pool[6];
         // Scratch journal: the locked entry needs a reviewer who also holds a
         // manager role — never a mutation of the shared roster.
         await ojsApi.createContext({
@@ -294,6 +331,7 @@ test.describe('reviewer-assignment', () => {
                 {username: author, roles: ['author']},
                 {username: locked, givenName: lockedName, roles: ['externalReviewer', 'manager']},
                 {username: assignedName, roles: ['externalReviewer']},
+                ...pool.map((username) => ({username, roles: ['externalReviewer']})),
             ],
         });
         const {submissionId} = await seedInReview(ojsApi, tag, {
@@ -306,6 +344,58 @@ test.describe('reviewer-assignment', () => {
         const workflow = new WorkflowPage(managerPage, tag);
         await workflow.gotoEditorial(submissionId);
         const modal = await openAddReviewerModal(managerPage);
+
+        // The opening list: the submission's author named in bold above it,
+        // 30 entries above the "View additional pages" bar (the pool is 32
+        // reviewers plus the manager-reviewer).
+        await expect(reviewerSearchAuthors(modal)).toHaveText([author]);
+        await expect(reviewerListPagination(modal)).toBeVisible({timeout: 30_000});
+        await expect(reviewerListItems(modal)).toHaveCount(30);
+
+        // The "Filters" sidebar: five sliders by name, each disabled until
+        // its enable button is pressed; pressing the one beside "Reviews
+        // completed" enables that slider (the others stay disabled).
+        const sidebar = await openReviewerSearchFilters(modal);
+        const filterTitles = [
+            'Rated at least',
+            'Reviews completed',
+            'Days since last review assigned',
+            'Active reviews currently assigned',
+            'Average days to complete review',
+        ];
+        await expect(sidebar.locator('.pkpFilter__inputTitle')).toHaveText(filterTitles);
+        for (const title of filterTitles) {
+            const {sliders, enable} = reviewerSearchFilter(sidebar, title);
+            await expect(sliders.first()).toBeAttached();
+            for (const slider of await sliders.all()) {
+                await expect(slider).toBeDisabled();
+            }
+            await expect(enable).toBeVisible();
+        }
+        const completed = reviewerSearchFilter(sidebar, 'Reviews completed');
+        await completed.enable.click();
+        await expect(completed.sliders.first()).toBeEnabled();
+        await expect(completed.sliders).toHaveCount(1);
+        await expect(reviewerSearchFilter(sidebar, 'Rated at least').sliders.first()).toBeDisabled();
+
+        // The same button, now "Clear filter: Reviews completed", disables
+        // the slider again (a search made while the filter stays on drops
+        // the never-assigned reviewers — register A28, walked, not
+        // asserted).
+        await expect(completed.enable).toHaveCount(0);
+        await completed.clear.click();
+        await expect(completed.sliders.first()).toBeDisabled();
+        await expect(completed.clear).toHaveCount(0);
+        await expect(completed.enable).toBeVisible();
+
+        // A never-assigned reviewer's entry: the name, the completed count
+        // "0" and "Never assigned" (the "{N} active" badge asserted neither
+        // way, finding T-ojs-5 in
+        // .reports/U27/test-ojs-findings-2026-09-13.md, folded).
+        const neverItem = await searchReviewerList(managerPage, modal, neverAssigned);
+        await expect(neverItem.locator('.listPanel__itemTitle')).toContainText(neverAssigned);
+        await expect(neverItem.locator('.listPanel__item--reviewer__complete')).toHaveText('0');
+        await expect(neverItem).toContainText('Never assigned');
 
         // The manager-reviewer is locked with the author-identity warning and
         // no Select button; "Unlock" frees it, and the add lands as
@@ -585,6 +675,13 @@ test.describe('reviewer-assignment', () => {
         const modal = await openAddReviewerModal(editorPage);
         await selectReviewer(editorPage, modal, 'Julia Reviewer');
 
+        // "Files To Be Reviewed" on a round with no files (the seed carries
+        // none): the list is empty and the inline warning "No Files
+        // Selected" shows.
+        await expect(noFilesWarning(modal)).toBeVisible({timeout: 30_000});
+        await expect(noFilesWarning(modal)).toContainText('No Files Selected');
+        await expect(reviewFileCheckboxes(modal)).toHaveCount(0);
+
         // The permanent guidance sentence states the rule.
         await expect(modal.getByText(DATE_RULE)).toBeVisible();
 
@@ -726,6 +823,7 @@ test.describe('reviewer-assignment', () => {
         const manager = `mgr${tag}`;
         const author = `au${tag}`;
         const overdueReviewer = `rev${tag}`;
+        const acceptedReviewer = `revc${tag}`;
         const onTimeReviewer = `revb${tag}`;
         // Scratch journal: private toast queue + throwaway reminder mailbox.
         await ojsApi.createContext({
@@ -734,6 +832,7 @@ test.describe('reviewer-assignment', () => {
                 {username: manager, roles: ['manager']},
                 {username: author, roles: ['author']},
                 {username: overdueReviewer, roles: ['externalReviewer']},
+                {username: acceptedReviewer, roles: ['externalReviewer']},
                 {username: onTimeReviewer, roles: ['externalReviewer']},
             ],
         });
@@ -742,6 +841,7 @@ test.describe('reviewer-assignment', () => {
             submitter: author,
             reviewers: [
                 {username: overdueReviewer, status: 'invited'},
+                {username: acceptedReviewer, status: 'accepted'},
                 {username: onTimeReviewer, status: 'invited'},
             ],
         });
@@ -750,13 +850,20 @@ test.describe('reviewer-assignment', () => {
         const workflow = new WorkflowPage(managerPage, tag);
         await workflow.gotoEditorial(submissionId);
         const row = workflow.panelRow('Reviewers', overdueReviewer);
+        const acceptedRow = workflow.panelRow('Reviewers', acceptedReviewer);
         await expect(row).toBeVisible();
+        await expect(acceptedRow).toBeVisible();
 
         // Overdue recipe (spec footnote s): backdate the response due date
-        // through the Edit window — the screen's own route to a passed date.
+        // through the Edit window — the screen's own route to a passed date;
+        // the accepted reviewer gets both dates backdated the same way.
         const editModal = await openEditReview(managerPage, row);
         await pickDate(managerPage, editModal, 'responseDueDate', daysFromNow(-1));
         await saveEditReview(managerPage, editModal);
+        const editAccepted = await openEditReview(managerPage, acceptedRow);
+        await pickDate(managerPage, editAccepted, 'responseDueDate', daysFromNow(-2));
+        await pickDate(managerPage, editAccepted, 'reviewDueDate', daysFromNow(-1));
+        await saveEditReview(managerPage, editAccepted);
 
         // The overdue row reads "Overdue" in red with "Response due: {date}",
         // and its button reads "Send Reminder".
@@ -803,6 +910,34 @@ test.describe('reviewer-assignment', () => {
         await expect(historyLine(historyModal, 'Assigned').locator('strong')).toHaveText(/^\d{4}-\d{2}-\d{2}/);
         await expect(historyLine(historyModal, 'Reminder').locator('strong')).toHaveText(/^\d{4}-\d{2}-\d{2}/);
         await closeSideWindow(historyModal);
+
+        // The overdue review: the accepted reviewer's row reads "Overdue" in
+        // red with "Review due: {date}" and its button "Send Reminder"; this
+        // time the window's "Review Schedule" reads "Editor's Request",
+        // "Review Acceptance Date" and "Review Due Date" (no "Response Due
+        // Date"); sending shows "Notification sent." and the accepted
+        // reviewer's mailbox holds the reminder.
+        await expect(statusTitle(acceptedRow)).toHaveText('Overdue');
+        await expect(statusTitle(acceptedRow)).toHaveClass(/text-negative/);
+        await expect(acceptedRow).toContainText(`Review due: ${ymd(daysFromNow(-1))}`);
+        const acceptedReminder = await openSendReminder(managerPage, acceptedRow);
+        await expect(acceptedReminder.locator('input[name="reviewerName"]')).toHaveValue(
+            new RegExp(`${acceptedReviewer}.*${acceptedReviewer}@mail\\.test`)
+        );
+        await expect(reviewScheduleLabels(acceptedReminder)).toHaveText([
+            "Editor's Request",
+            'Review Acceptance Date',
+            'Review Due Date',
+        ]);
+        await expect(acceptedReminder.locator('form#sendReminderForm').getByText('Response Due Date')).toHaveCount(0);
+        // The first reminder's notice has expired before the second is read.
+        await expect(toasts(managerPage)).toHaveText('', {timeout: 30_000});
+        await submitSendReminder(managerPage, acceptedReminder);
+        await expect(notice(managerPage, 'Notification sent.')).toBeVisible({timeout: 30_000});
+        await pkpMail.find({
+            to: `${acceptedReviewer}@mail.test`,
+            subject: 'A reminder to please complete your review',
+        });
 
         // "Email Reviewer" on the on-schedule row: "To" shows the reviewer's
         // name; the typed subject and body reach their mailbox.
@@ -1068,13 +1203,33 @@ test.describe('reviewer-assignment', () => {
         await workflow.expectOpen();
         await expect(unansweredRow).toContainText('Review Submitted');
 
-        // Thank without email: Read Review, Mark as Complete and confirm,
-        // then Thank Reviewer with "Do not send email to Reviewer." ticked —
-        // the notice says so and the row reads "Reviewer Thanked".
+        // "Revert Decision" on "Complete": Read Review, Mark as Complete and
+        // confirm: the row reads "Complete"; Revert Decision and confirm
+        // "Unconsider this Review": the row returns to "Review Submitted"
+        // with no notice (the toast area, empty once the complete notice has
+        // expired, stays empty as the row changes), and Read Review shows
+        // the comments unchanged.
+        const completeSecond = await openReviewDetails(managerPage, unansweredRow);
+        await markReviewComplete(managerPage, completeSecond);
+        await closeReviewDetails(managerPage, completeSecond);
+        await expect(statusTitle(unansweredRow)).toHaveText('Complete');
+        await expect(toasts(managerPage)).toHaveText('', {timeout: 30_000});
+        await revertReviewDecision(managerPage, unansweredRow);
+        await expect(statusTitle(unansweredRow)).toHaveText('Review Submitted', {timeout: 30_000});
+        await expect(toasts(managerPage)).toHaveText('');
+        const revertedSecond = await openReviewDetails(managerPage, unansweredRow);
+        await expect(revertedSecond.getByText(`Second comment ${tag}`)).toBeVisible({timeout: 30_000});
+        await closeReviewDetails(managerPage, revertedSecond);
+
+        // Thank without email: Read Review, Mark as Complete and confirm —
+        // the row reads "Complete" and offers "Thank Reviewer"; then Thank
+        // Reviewer with "Do not send email to Reviewer." ticked — the notice
+        // says so and the row reads "Reviewer Thanked".
         const secondModal = await openReviewDetails(managerPage, unansweredRow);
         await markReviewComplete(managerPage, secondModal);
         await closeReviewDetails(managerPage, secondModal);
-        await expect(unansweredRow).toContainText('Complete');
+        await expect(statusTitle(unansweredRow)).toHaveText('Complete');
+        await expect(unansweredRow.getByRole('button', {name: 'Thank Reviewer', exact: true})).toBeVisible();
         await unansweredRow.getByRole('button', {name: 'Thank Reviewer', exact: true}).click();
         const thankModal2 = legacyModal(managerPage, 'sendThankYouForm');
         await expect(thankModal2.locator('form#sendThankYouForm')).toBeVisible({timeout: 30_000});
@@ -1476,6 +1631,15 @@ test.describe('reviewer-assignment', () => {
         // different recommendation (required select).
         const editModal = editorPage.getByRole('dialog', {name: 'Modify Review'});
         await expect(editModal).toBeVisible({timeout: 30_000});
+
+        // "Cancel": the "Modify Review" window closes and the view window
+        // shows again (its "Modify Review" button back in reach); then
+        // "Modify Review" is pressed and confirmed again.
+        await cancelModifyReview(editorPage, editModal);
+        await expect(readModal.getByText(`Original comment ${tag}`)).toBeVisible();
+        await expect(readModal.getByRole('button', {name: 'Modify Review', exact: true})).toBeEnabled();
+        await openModifyReview(editorPage, readModal);
+        await expect(editModal).toBeVisible({timeout: 30_000});
         const commentsEditorId = 'reviewDetailsForm-comments-control';
         await editorPage.waitForFunction(
             (id) => !!window.tinymce?.get(id)?.initialized,
@@ -1699,5 +1863,82 @@ test.describe('reviewer-assignment', () => {
             subject: 'Request to review a revised submission',
             contains: tag,
         });
+    });
+
+    test("S20: the journal's review setup presets the request", async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(240_000);
+        const tag = makeTag('s20', testInfo);
+        const editor = `ed${tag}`;
+        const author = `au${tag}`;
+        const reviewer = `rev${tag}`;
+        // Scratch journal with a review setup of its own (the `review`
+        // passthrough): one week to respond, two to complete, "Open" as the
+        // default review type, reviewer comments publicly shown; the
+        // reviewer stays out of the round's seed.
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: editor, roles: ['editor']},
+                {username: author, roles: ['author']},
+                {username: reviewer, roles: ['externalReviewer']},
+            ],
+            review: {
+                numWeeksPerResponse: 1,
+                numWeeksPerReview: 2,
+                defaultReviewMode: 'open',
+                defaultReviewPublicVisibility: true,
+            },
+        });
+        const {submissionId} = await seedInReview(ojsApi, tag, {context: tag, submitter: author});
+
+        const editorPage = await (await asUser(editor)).newPage();
+        const workflow = new WorkflowPage(editorPage, tag);
+        await workflow.gotoEditorial(submissionId);
+
+        // The request form: the dates preset one and two weeks from today
+        // (the datepicker's hidden altField carries the Y-m-d value), "Open"
+        // the selected "Review Type", "Publicly Show Reviewer Comments"
+        // ticked.
+        const modal = await openAddReviewerModal(editorPage);
+        await selectReviewer(editorPage, modal, reviewer);
+        await expect(dueDateValue(modal, 'responseDueDate')).toHaveValue(ymd(daysFromNow(7)));
+        await expect(dueDateValue(modal, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(14)));
+        await expect(reviewTypeRadio(modal, 'Open')).toBeChecked();
+        await expect(reviewTypeRadio(modal, 'Anonymous Reviewer/Anonymous Author')).not.toBeChecked();
+        await expect(publicVisibilityCheckbox(modal)).toBeChecked();
+
+        // The add: the row reads "Request Sent"; its "Edit" window shows
+        // "Open" selected and the box ticked.
+        await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+        await expect(modal).toHaveCount(0, {timeout: 30_000});
+        await waitForJQueryIdle(editorPage);
+        await editorPage.reload();
+        await workflow.expectOpen();
+        const row = workflow.panelRow('Reviewers', reviewer);
+        await expect(row).toBeVisible();
+        await expect(row).toContainText('Request Sent');
+        const editModal = await openEditReview(editorPage, row);
+        await expect(reviewTypeRadio(editModal, 'Open')).toBeChecked();
+        await expect(publicVisibilityCheckbox(editModal)).toBeChecked();
+        await closeSideWindow(editModal);
+
+        // Control: on the seeded journal (install defaults) the Add Reviewer
+        // window, with a reviewer selected, presets both dates four weeks
+        // from today, selects "Anonymous Reviewer/Anonymous Author" and
+        // leaves the box unticked.
+        const controlTag = `${tag}c`;
+        const control = await seedInReview(ojsApi, controlTag);
+        const anaPage = await (await asUser('sectioneditor.ana')).newPage();
+        const controlWorkflow = new WorkflowPage(anaPage, JOURNAL);
+        await controlWorkflow.gotoEditorial(control.submissionId);
+        const controlModal = await openAddReviewerModal(anaPage);
+        await selectReviewer(anaPage, controlModal, 'Julia Reviewer');
+        await expect(dueDateValue(controlModal, 'responseDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
+        await expect(dueDateValue(controlModal, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
+        await expect(reviewTypeRadio(controlModal, 'Anonymous Reviewer/Anonymous Author')).toBeChecked();
+        await expect(reviewTypeRadio(controlModal, 'Open')).not.toBeChecked();
+        await expect(publicVisibilityCheckbox(controlModal)).not.toBeChecked();
+        await closeSideWindow(controlModal);
     });
 });

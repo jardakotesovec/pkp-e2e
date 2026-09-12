@@ -230,9 +230,11 @@ under the prompt "Record the response on behalf of the reviewer". Submit
    affiliation and ORCID iD. The iD is a link showing the iD URL; an
    unauthenticated iD carries the suffix "(unauthenticated)" and an outline
    ORCID logo, an authenticated one the bare URL and the solid logo. The
-   entry also shows headline counts ("{N} active", "Reviewer rating: {N}"
-   stars), days since the last assignment ("{N} days ago" / "Yesterday" /
-   "Never assigned"), and reviewing interests. It expands to full
+   entry also shows the count of completed reviews ("0" for a reviewer never
+   assigned), a "{N} active" badge only while the reviewer has at least one
+   active review (a never-assigned reviewer's entry carries none), "Reviewer
+   rating: {N}" stars, days since the last assignment ("{N} days ago" /
+   "Yesterday" / "Never assigned"), and reviewing interests. It expands to full
    statistics, always shown: active reviews, "Reviews completed", "Review
    requests declined", "Review requests cancelled", "Days since last review
    assigned", "Average days to complete review". "Reviewing Interests",
@@ -243,7 +245,10 @@ under the prompt "Record the response on behalf of the reviewer". Submit
    five slider controls: "Rated at least" (stars), "Reviews completed",
    "Days since last review assigned" (range), "Active reviews currently
    assigned" (range), "Average days to complete review". Each slider sits
-   disabled until its per-filter enable button is pressed. Above the list,
+   disabled until its per-filter enable button is pressed; pressing the same
+   button again clears the filter and disables the slider. While "Reviews
+   completed" is enabled, a name search for a reviewer never assigned
+   answers "No items found." ⚠ [A28](#a28). Above the list,
    the submission's author names with affiliations are shown so the editor
    can spot conflicts: the first four in bold, the rest collapsed behind a
    "Show All {N} Authors" / "Show Less" toggle. A reviewer whose affiliation
@@ -560,13 +565,15 @@ review forms* unless said otherwise. <sup>n</sup>
 
 ## Canonical scenarios
 
-Scenarios 2, 3, 4, 6, 7, 9 and 11 run on a scratch journal with throwaway
-accounts: a Journal Manager who also holds the Reviewer role (2), a fresh
-address (3), a user to enroll (4), reviewers whose mailbox and task list are
-read (6, 7, 9, 11) and an active review form (9). Every other scenario runs
-on the seeded journal with ready accounts and scratch submissions. Each
-email is read in the mailbox of the address it was sent to. The accounts,
-the passwords and the tooling recipe are in the footnote. <sup>s</sup>
+Scenarios 2, 3, 4, 6, 7, 9, 11 and 20 run on a scratch journal with
+throwaway accounts: a Journal Manager who also holds the Reviewer role and
+a reviewer pool past thirty (2), a fresh address (3), a user to enroll (4),
+reviewers whose mailbox and task list are read (6, 7, 9, 11), an active
+review form (9) and a review setup of the journal's own (20). Every other
+scenario, and scenario 20's control, runs on the seeded journal with ready
+accounts and scratch submissions. Each email is read in the mailbox of the
+address it was sent to. The accounts, the passwords and the tooling recipe
+are in the footnote. <sup>s</sup>
 
 1. **Invite a reviewer**
 
@@ -591,8 +598,10 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
      records the assignment. Verify the email arrived: a request submitted
      with the letter emptied creates the row without any feedback and sends
      nothing ⚠ [A18](#a18).
-   - **"Editorial Notes"**: open the row's "More Actions" menu and press
-     "Editorial Notes": the window shows one text field under the guidance
+   - **"Editorial Notes"**: open the row's "More Actions" menu: it lists
+     "Review Details", "Edit", "Unassign Reviewer", "Email Reviewer" and
+     "History" in that order, then "Editorial Notes" and "Log Response".
+     Press "Editorial Notes": the window shows one text field under the guidance
      "Record notes about this reviewer that you would like to make visible
      to other administrators, managers and all editors. Notes will be
      visible for future review assignments." ⚠ [A4](#a4).
@@ -605,9 +614,23 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 2. **The list warns before anonymity breaks**
 
-   Given: Editor, on a round with one reviewer invited, on a journal where
-   a second Reviewer also holds the Journal Manager role.
+   Given: Journal Manager holding no Reviewer role, on a round with one
+   reviewer invited, on a journal with over thirty Reviewers, one also a
+   Journal Manager, the rest never assigned.
 
+   - **The opening list**: press "Add Reviewer": the submission's author is
+     named in bold above the list, the "Filters" sidebar offers the five
+     sliders "Rated at least", "Reviews completed", "Days since last review
+     assigned", "Active reviews currently assigned" and "Average days to
+     complete review", each slider disabled until the enable button beside
+     it is pressed, and the list shows 30 entries above a "View additional
+     pages" bar. Press the enable button beside "Reviews completed": that
+     slider is enabled (a name search made while it stays enabled drops the
+     never-assigned reviewers ⚠ [A28](#a28)). Press the same button again,
+     now reading "Clear filter: Reviews completed": the slider is disabled
+     again. Search one of the never-assigned reviewers by name: the entry
+     shows the name, the completed count "0" and "Never assigned", with no
+     "{N} active" badge.
    - **A locked entry**: in "Locate a Reviewer", search the manager-reviewer
      by name: the entry is locked with "This reviewer is locked because they
      have been assigned a role which allows them to view the author's
@@ -618,9 +641,8 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **An already-assigned entry**: open "Add Reviewer" again and search
      the first reviewer: the entry is dimmed with "This reviewer has already
      been assigned to this review round." and cannot be selected.
-   - **Control**: Journal Manager (not a reviewer of the submission): the
-     "More Actions" menu on the first reviewer's row offers "Editorial
-     Notes". <sup>s</sup>
+   - **Control**: the signed-in manager owns no row: "More Actions" on the
+     first reviewer's row offers "Editorial Notes". <sup>s</sup>
 
 3. **Create a brand-new reviewer**
 
@@ -666,8 +688,11 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 5. **Deadlines are validated**
 
-   Given: Editor, in the Add Reviewer window with a reviewer selected.
+   Given: Editor, in the Add Reviewer window of a round with no files, with
+   a reviewer selected.
 
+   - **"Files To Be Reviewed"**: the list is empty and shows the inline
+     warning "No Files Selected".
    - **Inverted dates**: set "Review Due Date" before "Response Due Date"
      and press "Add Reviewer": no assignment is created and the window
      stays open. The only statement of the rule is the guidance sentence
@@ -699,8 +724,9 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 7. **Remind an overdue reviewer**
 
-   Given: Editor, on a round with two reviewers: one whose response date
-   has passed without an answer, and one still on schedule.
+   Given: Editor, on a round with three reviewers: one whose response date
+   has passed without an answer, one who accepted and whose review date
+   has passed, and one still on schedule.
 
    - **The overdue row**: reads "Overdue" in red with "Response due:
      {date}", and its button reads "Send Reminder".
@@ -713,6 +739,13 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **"History"**: open the row's "History": the "History" modal lists a
      dated "Reminder" milestone. Check it before the reviewer responds,
      because their response erases the line ⚠ [A15](#a15).
+   - **The overdue review**: the accepted reviewer's row reads "Overdue" in
+     red with "Review due: {date}", and its button reads "Send Reminder".
+     Press it: this time the "Review Schedule" dates are "Editor's
+     Request", "Review Acceptance Date" and "Review Due Date". Press "Send
+     Reminder" in the window: the notice "Notification sent." appears and
+     the accepted reviewer's mailbox holds "A reminder to please complete
+     your review".
    - **"Email Reviewer"**: on the on-schedule row open "Email Reviewer":
      "To" shows the reviewer's name. Type "A question about your review" in
      Subject and "Will you meet the review date?" in Body, then press "Send
@@ -748,8 +781,9 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
      still selected.
    - **"Edit" after submission**: open the row's "Edit": the window offers
      no "Review Form" select.
-   - **The unanswered row**: the second reviewer's row has no "Actions"
-     button, and its "Edit" still offers the "Review Form" select.
+   - **The unanswered row**: the second reviewer's row ("Request Sent") has
+     no button where the first row shows "Read Review"; its "Edit" still
+     offers the "Review Form" select.
    - **"Mark as Complete"**: in "Read Review" press it and confirm "Mark
      this review as complete?": the toast "The review has been marked as
      complete." appears; in the still-open window "Mark as Complete" is
@@ -770,8 +804,14 @@ the passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **The second reviewer's review**: Reviewer (the second): accept the
      request and submit a review. Editor: that row reads "Review
      Submitted".
+   - **"Revert Decision" on "Complete"**: press that row's "Read Review",
+     then "Mark as Complete" and confirm: the row reads "Complete". Press
+     "Revert Decision" and confirm "Unconsider this Review": the row
+     returns to "Review Submitted" with no notice, and "Read Review" shows
+     the comments unchanged.
    - **Thank without email**: press that row's "Read Review", then "Mark as
-     Complete" and confirm; press "Thank Reviewer" and submit the window
+     Complete" and confirm: the row reads "Complete" and offers "Thank
+     Reviewer"; press "Thank Reviewer" and submit the window
      with "Do not send email to Reviewer." ticked: the notice reads "Review
      marked as acknowledged. Email not sent." and the row reads "Reviewer
      Thanked".
@@ -902,6 +942,8 @@ App-specific:
       modifications will be recorded in the activity log.". Confirm: the
       "Modify Review" window opens stacked over the first, naming the
       submission ({OJS}: with a "Submitted recommendation:" line).
+    - **"Cancel"**: press it: the "Modify Review" window closes and the
+      view window shows again. Press "Modify Review" and confirm again.
     - **"Save Changes"**: replace the "For author and editor" comment with
       "Revised by the editor." ({OJS}: also pick a different
       "Recommendation") and press "Save Changes": the edit window closes,
@@ -959,27 +1001,43 @@ App-specific:
     - **Control**: the second reviewer's entry carries no flag and its
       button reads "Select Reviewer". <sup>s</sup>
 
+20. **The journal's review setup presets the request**
+
+    Given: Editor, on a round of a journal whose review setup allows one
+    week to respond and two to complete, defaults the review type to
+    "Open" and reviewer comments to publicly shown, with a Reviewer of the
+    journal not yet invited.
+
+    - **The request form**: press "Add Reviewer", search the reviewer by
+      name and press "Select Reviewer": "Response Due Date" is preset to
+      the date one week from today and "Review Due Date" to the date two
+      weeks from today, "Open" is the selected "Review Type", and
+      "Publicly Show Reviewer Comments" is ticked.
+    - **The add**: press "Add Reviewer": the row reads "Request Sent". Open
+      the row's "Edit": the "Edit Review" window shows "Open" selected and
+      "Publicly Show Reviewer Comments" ticked.
+    - **Control**: Editor, on the seeded journal: the Add Reviewer window,
+      with a reviewer selected, presets both dates four weeks from today,
+      selects "Anonymous Reviewer/Anonymous Author" and leaves "Publicly
+      Show Reviewer Comments" unticked. <sup>s</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Budget** — states:
-  - "Overdue" (red) on a missed review date, with "Review due: {date}" (Rule 2)
-  - the reminder window's "Review Acceptance Date" in place of "Response Due Date" once the reviewer has responded (Fields)
-  - "Revert Decision" on a "Complete" row returning it to "Review Submitted" (Rule 16)
-  - the preselected "Review Type", "Public Visibility" and a section's default "Review Form" (Fields, Rule 10, Settings)
-  - the non-default review setup ends: weeks to respond and to complete, the one-click placeholder in the editor's preview and a fresh keyed link per reminder (Settings, Rule 9)
-  - the "Competing Interests" badge on a journal with a competing-interests policy (Rule 2)
-  - "Send Review To ORCID" with "Send this review to the reviewer's ORCID?" for a reviewer with an authenticated iD (Rules 3, 23)
-  - the reviewer search entry's details: paging past 30 entries, the ORCID iD link styles, the headline counts and the expanded statistics (Rule 5)
-  - the search aids: the "Filters" sliders, the author names with "Show All {N} Authors", the "Same institution as author" badge (Rule 6)
-  - "Editorial Notes" read-only in the reviewer search (Rules 5, 22)
-  - the reviewer role select when more than one reviewer group serves the stage (Fields)
-  - "No Files Selected" in the Add Reviewer window on a round with no files (Fields, Rule 11)
-  - "Save changes to this review?" before modifying a complete, publicly visible review on a journal running open review (Rule 14b)
+  - "Save changes to this review?" before modifying a complete, publicly visible review on a journal running open review (Rule 14b): an editor modifies a completed, public review in a rare week
+  - "Send Review To ORCID" with "Send this review to the reviewer's ORCID?" for a reviewer with an authenticated iD (Rules 3, 23): met only on a journal with ORCID enabled and a reviewer who linked an iD
+  - the one-click placeholder in the editor's preview and a fresh keyed link per reminder (Settings, Rule 13): one-click access is off by default, and an editor with it on reads past the placeholder and never compares two reminders' links
+  - "Editorial Notes" read-only in the reviewer search (Rules 5, 22): read there only after someone saved a note on that reviewer, a rare week
+  - the reviewer search entry expanded to its full statistics (Rule 5): opened only when an editor weighs candidates, not on every add
+  - the ORCID iD link styles in the reviewer search (Rule 5): shown only on a journal with ORCID enabled and reviewers who linked an iD
+  - narrowing the reviewer search with a "Filters" slider (Rule 6): a pool of a page or two is read whole, never narrowed
+  - the "{N} active" badge on a reviewer with a review underway (Rule 5): read only when an editor weighs a busy reviewer against a free one, not on every add
 - **Budget** — variants:
-  - the "Reviewing Interests" tag field of Create New Reviewer (Fields)
-  - the menu order (Rule 3), the chooser's refill on a pick (Fields), the blank list sections omitted (Rule 5) and Modify Review's "Cancel" (Rule 14b)
+  - the "Reviewing Interests" tag field of Create New Reviewer (Fields): filled only when an editor creates an account with interests to record
+  - the chooser's refill on a pick (Fields): needs an alternate template a journal seldom adds
+  - the blank list sections omitted (Rule 5): seen only in an expanded entry
 - **Nothing new to test**:
   - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports (Rule 15), a logged decline (Rule 20)
   - the press's Internal Review stage running scenarios 1–12 as External Review does (Purpose; scenario 13 covers what differs)
@@ -1006,10 +1064,16 @@ Left out of the scenarios above, by reason:
   - A26 (the unassign notice arriving under the cancel notice's subject; Side effects)
   - OMP3 (the press's unassign notice printing "{$journalName}" literally; Side effects)
   - A27 (a second "Mark as Complete" on a reverted, previously thanked review reading "Reviewer Thanked" at once; Rule 16)
+  - A28 (a never-assigned reviewer dropping out of the search while "Reviews completed" is enabled; Rule 6)
 - **No seed**:
   - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reminder" and log stamps (Rule 13, Side effects, Settings)
   - the "Reviewer Files" the reviewer attached, read-only in the Review Details window (Rule 14a)
   - {OJS} "Mark as Complete" disabled with its message while the review carries no recommendation or leaves required form fields unanswered (Rule 14a)
+  - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
+  - the "Competing Interests" badge on a journal with a competing-interests policy (Rule 2): the seed records no reviewer's competing-interests declaration
+  - the reviewer role select when more than one reviewer group serves the stage (Fields): the seed creates no second reviewer group
+  - "Show All {N} Authors" over the reviewer search (Rule 6): the seed builds no submission with more than four contributors
+  - the "Same institution as author" badge (Rule 6): seeded accounts and contributors carry no affiliation
 - **Owned by another feature**:
   - a review manager who is also a reviewer of the submission opening its review stage: the no-access box on every stage, so their own row's menu is never reached (Actors preamble and row 6; *Workflow screen & stage access*, its finding A4)
   - "Login As" on a reviewer row (Actors row 7; *Sign-in & sessions*)
@@ -1051,6 +1115,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
 | [A24](#a24) | Saving a modification would mark a not-yet-complete review complete; no current screen reaches it | ❓ | latent | — |
 | [A27](#a27) | A review thanked, reverted and marked complete again reads "Reviewer Thanked" at once, with no "Complete" step and no second "Thank Reviewer" | ❓ | minor | — |
+| [A28](#a28) | With the "Reviews completed" slider enabled, a name search for a reviewer never assigned answers "No items found." | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 | [A25](#a25) | Retired: {OJS} opened from the dashboard popover, a submitted review's Review Details window omitted the recommendation; fixed upstream (pkp/ui-library#971) | ✅ | retired | re-verified live (claude), 2026-09-03 — fixed upstream |
 | [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
@@ -1413,6 +1478,20 @@ the thank-you really went out and History keeps its "Acknowledged" date,
 but a "Thank Reviewer" that is gone for good deserves a product look.
 Basis: test run. <sup>[f-a27](#fn-a27)</sup>
 
+<a id="a28"></a>
+**A28 — "Reviews completed" hides the never-assigned reviewers** · ❓ · minor.
+In "Locate a Reviewer", once the "Reviews completed" slider is enabled, at
+its lowest value and nothing else changed, a name search for a reviewer
+who was never assigned answers "No items found.". Clearing the filter
+brings the entry back. An editor narrowing the list by completed reviews
+loses the newcomers without a word.
+Question: should a count filter admit reviewers with no review history, or
+is dropping them the design? Lean: a defect, because the slider's lowest
+value reads as "any number" and the same list shows those reviewers the
+moment the filter is cleared; seen once per app, so it stays a question
+until the search is re-driven with the slider enabled.
+Basis: test run. <sup>[f-a28](#fn-a28)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1635,7 +1714,16 @@ entry showed the bare iD URL, no suffix, beside the solid green logo
 (`Orcid` icon). Both icons are decorative SVGs with no accessible name, so
 the "(unauthenticated)" suffix is the only textual marker
 (`SelectReviewerListItem.vue`: `item.orcid` → link, `item.orcidIsVerified`
-→ icon, `item.orcidDisplayValue` → visible text).
+→ icon, `item.orcidDisplayValue` → visible text). Test run 2026-09-13
+(OJS and OMP, scenario 2, one run each): a never-assigned reviewer's entry
+read the name, the completed count "0" and "Never assigned", with no
+"active" text anywhere in it — `SelectReviewerListItem.vue` renders the
+active badge only while `item.reviewsActive` is non-zero (`v-if=
+"item.reviewsActive && canSelect"`), so "{N} active" is a conditional
+badge, not a headline every entry shows; the earlier "0 active" reading
+never appears. Neither suite asserts the badge either way. The count
+filter's exclusion of never-assigned reviewers is finding A28 (note
+f-a28).
 
 <a id="fn-d"></a>
 **d** — Add form shell: `ReviewerForm` (defaults: review method from context
@@ -2079,15 +2167,20 @@ scoped by the scratch submission's title. Overdue rows are produced with a
 passed due date rather than waited for. Per scenario: 1 seeds no reviewer
 and adds two roster reviewers on screen. 2: a scratch journal with a
 throwaway `manager`, an `author`, a user holding `['externalReviewer',
-'manager']` and a second `externalReviewer` seeded `invited`. 3: a scratch
+'manager']`, a second `externalReviewer` seeded `invited`, and thirty more
+throwaway `externalReviewer` accounts never assigned, so the opening list
+pages and one of them is the entry read. 3: a scratch
 journal; the fresh address is a throwaway mailbox never used before. 4: a
 scratch journal with a throwaway `author` to enroll and an
 `externalReviewer` for the control. 5: any round with a spare roster
-reviewer. 6: a scratch journal with a throwaway `externalReviewer` seeded
+reviewer; the seed carries no files, so nothing is uploaded. 6: a scratch
+journal with a throwaway `externalReviewer` seeded
 `invited`, two files uploaded to the round before the edit. 7: a scratch
-journal with two throwaway reviewers seeded `invited`, one given a past
-response date through the Edit window (the screen's only route to
-backdating, finding A17). 8: a roster reviewer seeded `invited`. 9: a
+journal with three throwaway reviewers, two seeded `invited` and one
+`accepted`; one invited reviewer is given a past response date through
+the Edit window (the screen's only route to backdating, finding A17), and
+the accepted one past response and review dates the same way. 8: a
+roster reviewer seeded `invited`. 9: a
 scratch journal with `reviewForms[]` holding one active form, a throwaway
 reviewer seeded `accepted` who submits the review on their own screen with
 both comment blocks, and a second throwaway reviewer seeded `invited`. 10
@@ -2105,6 +2198,14 @@ on a monograph with a `completed` reviewer. 15: any seeded preprint. 17:
 on Round 1, "Mark as Complete" pressed in her Review Details window and
 "Create New Review Round" recorded on screen (the wizard belongs to
 *Review stage & rounds*); `reviewer.paul` is the never-assigned control.
+20: a scratch journal created with the `review` passthrough
+(`numWeeksPerResponse: 1`, `numWeeksPerReview: 2`, `defaultReviewMode:
+'open'`, `defaultReviewPublicVisibility: true`; scenarios.md "Configuring
+a scratch context") and a throwaway `externalReviewer` kept out of the
+round's seed; the control is a scratch submission on `publicknowledge`
+with a spare roster reviewer, the seeded journal being at the install
+defaults (seed-facts.md: both deadlines 4 weeks, "Anonymous
+Reviewer/Anonymous Author", "Publicly Show Reviewer Comments" off).
 Claim check 2026-08-02: scenario 1 driven end-to-end as a Section
 Editor (previously covered by other roles); scenarios 8–14 re-driven as a
 Section Editor on OJS with OMP twins for 9, 13 and 14; scenario 15 stands
@@ -2119,7 +2220,11 @@ stage access*, its A4); scenario 9's "Thank without email" runs on the
 second reviewer after their own accept and submit (the OMP suite; the OJS
 suite leaves that bullet undriven, since its earlier shape on the reverted
 row met finding A27); scenario 11 reads the removal notice by recipient
-and title (OJS) or body (OMP), never by subject (finding A26).
+and title (OJS) or body (OMP), never by subject (finding A26). Test run
+2026-09-13 (OJS and OMP): scenario 2's never-assigned entry is read after
+"Reviews completed" is cleared on the OMP suite, while the OJS suite still
+searches with the slider enabled (finding A28, note f-a28); neither
+asserts the "{N} active" badge either way (note c).
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js::getItemActions`: the guard reads
@@ -2454,6 +2559,24 @@ resets only the considered flag, `dateAcknowledged` is never cleared, and
 `ReviewAssignment::getStatus()` ranks a set acknowledged date above a
 completed one, so the acknowledgement wins again on re-confirm. Neither
 suite asserts the path (the register carries it).
+
+<a id="fn-a28"></a>
+**f-a28** — Test run 2026-09-13 (scenario 2, one run per app). OMP: the
+suite's name search for a throwaway never-assigned reviewer, made after
+pressing "Add filter: Reviews completed" with the slider at its minimum,
+ended on "No items found." with the "Clear filter: Reviews completed"
+button showing; the same search after clearing the filter found the entry
+(the suite now clears first). OJS: the suite searches with the filter still
+enabled and passes, yet the screen it recorded that day read the same way
+— the search box holding the name, "Clear filter: Reviews completed"
+shown, the list "No items found." — once the filtered list had loaded; the
+assertion had matched the entry before that load, so the pass is a race,
+not a journal difference. Mechanism lean: the reviewers listing's
+completed-reviews clause compares the count against a per-reviewer
+statistics row a never-assigned reviewer does not have
+(`lib/pkp/classes/user/Collector.php`, the completed-reviews `when`
+clause), so the comparison fails for them at any value. Not re-driven;
+neither suite asserts the filtered result.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
