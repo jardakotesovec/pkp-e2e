@@ -85,15 +85,22 @@ trips.
   the OJS re-run the same day. **Watch condition**: a second full-suite
   incident; then anchor the hover on the indicator's own accessible name
   and wait for both indicators before hovering.
-- **A wizard Continue press swallowed the instant a step becomes current**
-  (U21 S12, OJS). CI run 34215183797 (2026-09-08, pkp-e2e `main` at
-  `aa12a61`, a docs-only push) red on both attempts: the press issued right
-  after the rail showed "2 Details" fired no save and the rail stayed put
-  for the 30 s wait. The same tree (`9bd62a9`, the revert of 2026-09-09)
-  and the same app tips were green on run 34354844582, on the nightly
-  34183869175 and locally, so the class is timing, not a regression.
-  **Watch condition**: a second red; then `continueTo()` re-presses when
-  the rail has not moved within a few seconds.
+- **A wizard press swallowed the instant a step becomes current** (U21
+  S10 and S12, OJS, CI only). CI run 34215183797 (2026-09-08, pkp-e2e
+  `main` at `aa12a61`, a docs-only push) red on both attempts of S12: the
+  Continue press issued right after the rail showed "2 Details" fired no
+  save and the rail stayed put for the 30 s wait; green on the same tree
+  and tips elsewhere. Second incident 2026-09-12, pkp-e2e run 34687878464
+  (companion `13274` at the ojs PR ref `75df364d49`): S10 red on both
+  attempts (the Review step's "Submit" press opened no confirmation
+  dialog, no `/submit` request in the server log; the retry stuck on "2
+  Details") and S12 red once on the same "2 Details" wait, green on
+  retry; both green locally at the same ref. Watch condition tripped;
+  hardened 2026-09-12: `SubmissionWizardPage.pressUntil()` gives a
+  footer press an 8 s window for its outcome and presses again while the
+  button is still offered, at most three times, behind `continueTo()`,
+  `continueToReview()` and `submitAndConfirm()`. **Watch condition**: a
+  hardened press reds again with its retry exhausted.
 - **Contributor reorder under load** (U41 S2, OPS; the OJS twin shares the
   code shape). The Cancel leg's "Increase position" press, issued right
   after "Order" while the list re-rendered into ordering mode, left the

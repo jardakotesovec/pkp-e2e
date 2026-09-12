@@ -225,10 +225,33 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         }
     }
 
+    /**
+     * Press a footer button until its outcome shows (ci-triage flake watch,
+     * "a wizard press swallowed the instant a step becomes current"): the
+     * press issued right as a step mounts occasionally fires nothing, so the
+     * outcome gets a short window and the button is pressed again while it is
+     * still offered, at most three presses.
+     */
+    async pressUntil(button, outcome) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await button.click();
+            try {
+                await outcome(8_000);
+                return;
+            } catch (e) {
+                if (attempt === 2 || !(await button.isVisible().catch(() => false))) {
+                    break;
+                }
+            }
+        }
+        await outcome(30_000);
+    }
+
     /** Press Continue and wait for the named step to become current. */
     async continueTo(name) {
-        await this.continueButton().click();
-        await this.expectStep(name);
+        await this.pressUntil(this.continueButton(), (timeout) =>
+            expect(this.currentStepLabel()).toContainText(name, {timeout})
+        );
     }
 
     /**
@@ -248,8 +271,7 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
     /** Enter the Review step (via Continue) and wait out the check. */
     async continueToReview(submissionId) {
         const validated = this.armValidation(submissionId);
-        await this.continueButton().click();
-        await this.expectStep('Review');
+        await this.continueTo('Review');
         await validated;
     }
 
@@ -404,11 +426,10 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
 
     /** Press Submit, confirm the dialog, land on "Submission complete". */
     async submitAndConfirm() {
-        await this.submitButton().click();
         const dialog = this.page
             .getByRole('dialog')
             .filter({hasText: 'will be submitted to'});
-        await expect(dialog).toBeVisible({timeout: 30_000});
+        await this.pressUntil(this.submitButton(), (timeout) => expect(dialog).toBeVisible({timeout}));
         await dialog.getByRole('button', {name: 'Submit', exact: true}).click();
         await expect(
             this.page.getByRole('heading', {name: 'Submission complete'})
