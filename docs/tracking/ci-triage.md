@@ -148,6 +148,12 @@ trips.
   incident, or a red on CI's fresh database; then read the table's own
   fetches in a retained trace (`--trace retain-on-failure`) before the
   opener re-presses.
+- **ORCID connect popup not arriving under load** (U04 S2, OJS, once).
+  The `waitForEvent('popup')` after the profile's connect button ran to
+  the 60 s test timeout while three suites shared the VM (2026-09-12,
+  merge of companion `13274`, `.reports/sync/merge13274-ojs.log`); green
+  alone in 5.5 s. **Watch condition**: a second incident, or one at four
+  workers alone on the VM.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop
@@ -165,4 +171,3 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
-| pkp/ojs#5817 + pkp/pkp-lib#13317 (omp#2458, ops#1397 submodule-only; issue pkp/pkp-lib#13274, affiliation upgrade and the profile-affiliation copy) | `13274` | ready | 2026-09-12 | Prepared before merge at the maintainer's request (pre-merge trial): U41 cross-feature line and footnote d reworded (the profile affiliation is copied verbatim, never matched to a registry record; submission-locale fallback), kept checks `checks/sync/pkp-lib-13317/` (runtime.js and migration.js with migrate-driver.php, all 16 upgrade cases as the issue's table). At merge: rebase onto `main`, run U41 and U21 once, fast-forward, advance the ojs and pkp-lib baselines past the merge, delete this row. |
