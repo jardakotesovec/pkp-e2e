@@ -11,9 +11,9 @@ RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
 baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
 reported failure. Suite size (RUNBOOK "Budget"; last full `test:final`,
-2026-09-09, on the 4-core VM at `PLAYWRIGHT_WORKERS=4`, CI's setting): OJS
-208 tests · 10.9 min · OMP 206 · 10.8 min · OPS 143 · 5.3 min (the OJS and
-OPS serial projects ran separately after a flake in the main project).
+2026-09-11, on the 4-core VM at `PLAYWRIGHT_WORKERS=4`, CI's setting): OJS
+209 tests · 10.6 min · OMP 207 · 10.4 min · OPS 144 · 6.1 min (the OJS
+serial project did not run behind a flake in the main project).
 
 ## Features
 

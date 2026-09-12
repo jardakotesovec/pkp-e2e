@@ -377,9 +377,22 @@ test.describe('Contributors & affiliations (U41)', () => {
         await reloaded.closePreview();
 
         // "Order" again, move a row, "Cancel" — the saved order is back.
-        await reloaded.orderButton().click();
-        await reloaded.moveUpButton('Alex Author').click();
-        await expect(reloaded.rows().first()).toContainText('Alex Author');
+        // The move is content-verified like the save above: an arrow press
+        // issued while the list re-renders into ordering mode can be
+        // swallowed (ci-triage flake watch; CI run 34466942823, 2026-09-10),
+        // so each bounded attempt (re-)enters ordering, waits for the row's
+        // own arrow and passes only when the list shows the move. A repeat
+        // press on an already-first row is a no-op.
+        await expect(async () => {
+            if (!(await reloaded.saveOrderButton().isVisible())) {
+                await reloaded.orderButton().click({timeout: 2_000});
+            }
+            await expect(reloaded.moveUpButton('Alex Author')).toBeVisible({timeout: 5_000});
+            await reloaded.moveUpButton('Alex Author').click({timeout: 2_000});
+            await expect(reloaded.rows().first()).toContainText('Alex Author', {
+                timeout: 2_000,
+            });
+        }).toPass({intervals: [1_000, 2_000], timeout: 60_000});
         await reloaded.cancelOrderButton().click();
         await expect(reloaded.rows().first()).toContainText('Greta Zeta', {
             timeout: 30_000,

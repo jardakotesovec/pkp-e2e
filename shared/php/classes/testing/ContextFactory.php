@@ -11,8 +11,9 @@
  *
  * @brief Creates a journal/press/server through the SAME service the admin
  * "hosted contexts" flow uses — schema defaults, default user groups, genres,
- * navigation menus, email templates, Context::add hooks, and the acting
- * user's auto-enrolment as Manager all included (that acting user is the
+ * navigation menus, email templates, default editorial task templates,
+ * Context::add hooks, and the acting user's auto-enrolment as Manager all
+ * included (that acting user is the
  * seeding request's admin, which is why every scratch context counts admin
  * among its managers — recorded parity fact).
  *
@@ -23,6 +24,7 @@ namespace PKP\testing;
 
 use APP\core\Application;
 use PKP\context\Context;
+use PKP\facades\Repo;
 use PKP\services\interfaces\EntityWriteInterface;
 
 class ContextFactory
@@ -85,6 +87,13 @@ class ContextFactory
         $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
         $context = Application::getContextDAO()->newDataObject();
         $context->setAllData($params);
-        return $contextService->add($context, $request);
+        $context = $contextService->add($context, $request);
+        // The admin hosted-contexts endpoint's tail (PKPContextController::add,
+        // since pkp/pkp-lib#12593, 2026-08-03): the registry's default
+        // editorial task templates (`registry/taskTemplates.xml`, all
+        // include=false) are installed into every new context. Parity
+        // ledger 2026-09-11.
+        Repo::editorialTask()->installTaskTemplates($context);
+        return $context;
     }
 }

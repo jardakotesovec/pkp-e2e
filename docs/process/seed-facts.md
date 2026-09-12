@@ -120,6 +120,13 @@ behind a line; that scratch is deleted after review.
   submitted" where lib/pkp says "Initial submission completed."); grep the
   app's `locale/en/locale.po` before quoting a lib/pkp string. Activity Log,
   OJS, 2026-09-07 (U21 tojs).
+- Every context, the seeded one and each scratch one, carries the registry's
+  default editorial task templates (`registry/taskTemplates.xml`: 10 on OJS
+  and OMP across stages 1, 3, 4 and 5; 2 on OPS, both Production), all with
+  "include" off, so no submission gets an auto-created task until a
+  template is switched on. Installed by the context factory since
+  2026-09-11 (parity ledger); `edit_task_templates` per app, sync 2026-09-11
+  (`.reports/sync/s11/tasktemplates-13213.log`).
 - The seed creates no submissions on any app. Every Editor Dashboard view
   counts 0 until a test seeds one through `POST scenarios/submission`, so a
   probe premise like "any existing submission" needs a seed first. Editor

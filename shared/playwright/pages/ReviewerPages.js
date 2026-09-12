@@ -353,7 +353,21 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
         if (privacy && (await this.privacyBox.count())) {
             await this.privacyBox.check();
         }
-        await this.acceptButton.click();
+        // Content-verified bounded retry (ci-triage flake watch, U28 S10):
+        // under load the press is occasionally swallowed and step 2 never
+        // becomes current. Press, give the step a short window, and press
+        // once more while the accept button is still offered.
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await this.acceptButton.click();
+            try {
+                await expect(this.tab(2)).toHaveAttribute('aria-selected', 'true', {timeout: 10_000});
+                return;
+            } catch (e) {
+                if (attempt === 2 || !(await this.acceptButton.isVisible())) {
+                    break;
+                }
+            }
+        }
         await this.expectStep(2);
     }
 
