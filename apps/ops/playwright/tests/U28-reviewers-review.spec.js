@@ -12,21 +12,16 @@
  * per assertion (PRINCIPLES M4): the same role's own dashboard, reached the
  * same way (a typed address), renders with its sidebar and list.
  *
- * Deliberately NOT covered here (and why):
- * - The entire feature — the reviewer's list and its views, the four-step
- *   wizard (request, guidelines, download & review, completion), accept /
- *   decline, review forms, recommendations, competing interests, saving and
- *   submitting, the editor's side, previous rounds (spec scenarios 1–16,
- *   Rules 1–23): none of these screens exist on OPS. The OJS and OMP suites
- *   own them.
- * - The spec's Findings register entries for OJS/OMP: no OPS counterpart;
- *   nothing to assert or park here.
- * - The scenario's "Create New Role" sentences and its Variant (a
- *   manager-made role at the "Reviewer" permission level and what its
- *   holder sees): register OPS1's territory, a 🐞 finding this suite never
- *   freezes (PRINCIPLES M3). The create-role window is not opened, and the
- *   Roles-tab assertion below scopes to the grid's ROWS because the grid's
- *   filter select carries the same application-wide permission-level enum.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
+ * Coverage section is the record of the rest):
+ * - OPS1 🐞 (scenario 17's "A home-made reviewer role" bullet: the
+ *   Reviewer-level role is created and saved below, but no user is given
+ *   it and its list page is never opened).
+ * - A1 🐞, A2 🐞, A4 🐞, A5 🐞, A6 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞,
+ *   OMP2 🐞, OMP3 🐞, A3 ❓, A11 ❓, A13 ❓, OMP1 ✅, A8 ✅, OMP4 ✅
+ *   (journal and press reviewer surfaces that do not exist on a preprint
+ *   server; nothing to assert or park here).
  *
  * Seeding: a scratch preprint server (throwaway Preprint Server Manager,
  * Moderator and Author) + one submitted preprint via the scenario endpoints
@@ -35,6 +30,7 @@
  */
 const {test, expect} = require('../support/fixtures.js');
 const {UsersRolesPage} = require('../pages/UserInvitationPages.js');
+const {waitForJQueryIdle} = require('../support/legacy.js');
 
 /** Single hyphenless alphanumeric token — tag conventions in patterns.md. */
 function makeTag(prefix) {
@@ -68,7 +64,7 @@ async function expectNoReviewerPages(page, serverPath, submissionId) {
 }
 
 test.describe("reviewer's review (U28) — OPS absence", () => {
-    test('scenario 17 {OPS}: no reviewer surfaces on a preprint server', async ({asUser, pkpApi}) => {
+    test('S17 {OPS}: no reviewer surfaces on a preprint server', async ({asUser, pkpApi}) => {
         const tag = makeTag('u28s17');
         const manager = `m${tag}`;
         const moderator = `mod${tag}`;
@@ -151,8 +147,48 @@ test.describe("reviewer's review (U28) — OPS absence", () => {
         await expect(roleRows.filter({hasText: 'Preprint Server manager'})).toBeVisible();
         await expect(roleRows.filter({hasText: 'Moderator'})).toBeVisible();
         // …and no row names any reviewer role (bounded by the same grid's
-        // rendered rows; scoped to rows — see the header on the filter's
-        // application-wide enum).
+        // rendered rows; scoped to rows, because the grid's filter select
+        // carries the application-wide permission-level enum, which still
+        // lists "Reviewer" — the very level the window below offers).
         await expect(roleRows.filter({hasText: /Review/i})).toHaveCount(0);
+
+        // …its "Create New Role" window still offers the "Reviewer"
+        // permission level (a legacy modal; form `#userGroupForm`, a
+        // "Cancel" link and an "OK" button).
+        await managerPage.locator('#roleGridContainer')
+            .getByRole('link', {name: 'Create New Role', exact: true})
+            .or(managerPage.locator('#roleGridContainer').getByRole('button', {name: 'Create New Role', exact: true}))
+            .first().click();
+        const roleForm = managerPage.locator('#userGroupForm');
+        const level = roleForm.getByRole('combobox', {name: /^Permission level/});
+        await expect(level).toBeVisible();
+        await expect(level.locator('option', {hasText: /^Reviewer$/})).toHaveCount(1);
+        // Positive control, read the same way: at a stage-taking level
+        // ("Moderator"; the window opens on "Manager", which, like
+        // "Reviewer" and "Reader", takes no stage) the only stage,
+        // "Production", is offered enabled…
+        const production = roleForm.getByRole('checkbox', {name: 'Production', exact: true});
+        await level.selectOption({label: 'Moderator'});
+        await expect(production).toBeEnabled();
+        // …and choosing "Reviewer" greys it out (bounded by the same
+        // window having just rendered). The spec's "the only stage" is not
+        // asserted: this build's "Stage Assignment" list and Roles grid
+        // carry a second stage, "Done", which stays enabled under
+        // "Reviewer" — returned as T-ops-1 (.reports/U28/test-ops-findings.md)
+        // for the fold, never frozen here either way.
+        await level.selectOption({label: 'Reviewer'});
+        await expect(production).toBeDisabled();
+        // …while the role still saves: "OK" closes the window and the grid
+        // lists the new role at the "Reviewer" level (the sixth row).
+        const roleName = `Scratch Reviewer ${tag}`;
+        await roleForm.locator('[name="name[en]"]').fill(roleName);
+        await roleForm.locator('[name="abbrev[en]"]').fill('SR');
+        await roleForm.getByRole('button', {name: 'OK', exact: true}).click();
+        await waitForJQueryIdle(managerPage);
+        await expect(roleForm).toBeHidden();
+        const savedRow = roleRows.filter({hasText: roleName});
+        await expect(savedRow).toBeVisible();
+        await expect(savedRow).toContainText('Reviewer');
+        await expect(roleRows.filter({hasText: 'Moderator'})).toBeVisible();
     });
 });

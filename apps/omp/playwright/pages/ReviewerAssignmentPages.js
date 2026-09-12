@@ -566,8 +566,85 @@ async function openThankReviewer(page, row) {
     return thankModal;
 }
 
+/**
+ * "OK" on an open Edit window (form#editReviewForm); resolves once the
+ * window has closed. `[data-cy="active-modal"]` marks the top window only,
+ * so the close is read as the "Review Type" group leaving the top window.
+ * The window refuses silently (stays open, `update-review` 200) when the
+ * review due date is earlier than the response due date (screen notes pA).
+ */
+async function saveEditReview(editModal) {
+    await editModal.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(editModal.getByText('Review Type')).toBeHidden({timeout: 20_000});
+}
+
+/**
+ * Move one due date of the row's assignment through its Edit window, by a
+ * calendar pick (a typed date is discarded, screen notes pD1): `fieldName`
+ * is `responseDueDate` or `reviewDueDate`. The screens' only route to an
+ * overdue assignment (U28 footnote s): a past date is accepted, and the
+ * reviewer receives "Your review assignment has been changed".
+ */
+async function moveDueDate(page, row, fieldName, date) {
+    const editModal = await openEditReview(page, row);
+    await pickDate(page, editModal, fieldName, date);
+    await saveEditReview(editModal);
+}
+
+/**
+ * Press the overdue row's "Send Reminder" (a row control, not a menu
+ * entry) and send the "Review Reminder" window as it comes (template
+ * preset, message loaded into TinyMCE `message`). Resolves once the window
+ * has closed; the reminder email carries its own one-click link when the
+ * setting is on (U28 Rule 16).
+ */
+async function sendReminder(page, row) {
+    await row.getByRole('button', {name: 'Send Reminder', exact: true}).click();
+    const reminderModal = topModal(page);
+    await expect(reminderModal.getByText('Review Schedule')).toBeVisible({timeout: 20_000});
+    await awaitTinyMce(page, 'message');
+    await reminderModal.getByRole('button', {name: 'Send Reminder', exact: true}).click();
+    await expect(reminderModal.getByText('Review Schedule')).toBeHidden({timeout: 20_000});
+}
+
+/**
+ * "Cancel Reviewer" from an answered row's More Actions (U27 Rule 12): the
+ * window (form#cancelReviewForm, a template chooser, the message, the
+ * skip box) is sent as it comes. Resolves once the row reads "Request
+ * Cancelled".
+ */
+async function cancelReviewer(page, row) {
+    const menu = await openRowMenu(page, row);
+    await menuEntry(menu, 'Cancel Reviewer').click();
+    const cancelModal = topModal(page);
+    await expect(cancelModal.getByText('Choose a predefined message to use')).toBeVisible({timeout: 20_000});
+    await awaitTinyMce(page, 'personalMessage');
+    await cancelModal.getByRole('button', {name: 'Cancel Reviewer', exact: true}).click();
+    await expect(row).toContainText('Request Cancelled', {timeout: 20_000});
+}
+
+/**
+ * "Resend Review Request" from a declined row's More Actions (U27 Rule
+ * 13): the window is sent as it comes (fresh due dates preset, message in
+ * TinyMCE `personalMessage`). Resolves once the row reads "Request Resent";
+ * the reviewer's list then shows the request as unanswered again.
+ */
+async function resendReviewRequest(page, row) {
+    const menu = await openRowMenu(page, row);
+    await menuEntry(menu, 'Resend Review Request').click();
+    const resendModal = topModal(page);
+    await awaitTinyMce(page, 'personalMessage');
+    await resendModal.getByRole('button', {name: 'Resend Review Request', exact: true}).click();
+    await expect(row).toContainText('Request Resent', {timeout: 20_000});
+}
+
 module.exports = {
     reviewerPanel,
+    saveEditReview,
+    moveDueDate,
+    sendReminder,
+    cancelReviewer,
+    resendReviewRequest,
     reviewerRow,
     openRowMenu,
     menuEntry,

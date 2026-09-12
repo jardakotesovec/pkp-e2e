@@ -83,7 +83,42 @@ exports.ReviewerAssignmentsPage = class ReviewerAssignmentsPage extends BasePage
         this.editorGroup = this.sidebar.getByRole('region', {name: 'Editor Dashboard'});
         this.table = page.locator('main table');
         this.searchBox = page.getByRole('textbox', {name: /Search submissions, ID/});
-        this.filtersButton = page.getByRole('button', {name: 'Filters', exact: true});
+        this.filtersButton = page.locator('main').getByRole('button', {name: 'Filters', exact: true});
+        this.startNewSubmissionLink = this.sidebar.getByRole('link', {name: 'Start A New Submission', exact: true});
+    }
+
+    /** Every link of the sidebar, in DOM order (the group's own toggle, the six views, "Start A New Submission"). */
+    sidebarLinks() {
+        return this.sidebar.getByRole('link');
+    }
+
+    /** The reviewer group's six view links in the sidebar's order (their text starts with the count). */
+    viewLinks() {
+        return this.reviewerGroup.getByRole('treeitem').getByRole('link');
+    }
+
+    /** The table's tick boxes (bulk controls): none on the reviewer's list. */
+    bulkBoxes() {
+        return this.table.getByRole('checkbox');
+    }
+
+    /** Press "Filters" and return the open "Filters" window (its form holds the journal's groups). */
+    async openFilters() {
+        await this.filtersButton.click();
+        const dialog = this.page.getByRole('dialog').filter({hasText: 'Apply Filters'});
+        await expect(dialog.getByRole('button', {name: 'Apply Filters', exact: true})).toBeVisible({timeout: 30_000});
+        return dialog;
+    }
+
+    /** Close the "Filters" window without applying (its header "Close"). */
+    async closeFilters(dialog) {
+        await dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(dialog).toBeHidden({timeout: 30_000});
+    }
+
+    /** Text shown above the table about an applied filter or search ("Filters:", "Search:"); none by default. */
+    appliedFiltersText() {
+        return this.page.locator('main').getByText(/^(Filters?|Search):/);
     }
 
     /** The list's address for a view (a key of REVIEWER_VIEWS, or a raw id). */
@@ -204,12 +239,14 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
         this.saveAndContinueButton = page.getByRole('button', {name: 'Save and continue', exact: true});
         this.declineLink = page.getByRole('link', {name: 'Decline Review Request'});
         this.privacyBox = page.locator('input[name="privacyConsent"]');
+        this.privacyStatementLink = page.locator('#reviewStep1Form').getByRole('link', {name: 'privacy statement'});
         this.viewAllDetailsLink = page.getByRole('link', {name: 'View All Submission Details'});
         this.aboutDueDatesLink = page.getByRole('link', {name: 'About Due Dates'});
         this.competingInterestsLink = page.getByRole('link', {name: /Competing Interests/}).first();
         this.noCompetingInterestsRadio = page.locator('input[name="competingInterestOption"][value="noCompetingInterests"]');
         this.hasCompetingInterestsRadio = page.locator('input[name="competingInterestOption"][value="hasCompetingInterests"]');
-        this.competingInterestsBody = page.frameLocator('iframe[id^="reviewerCompetingInterests"]').locator('body');
+        this.competingInterestsFrame = page.locator('iframe[id^="reviewerCompetingInterests"]');
+        this.competingInterestsBody = this.competingInterestsFrame.contentFrame().locator('body');
 
         // Step 2
         this.continueToStep3Button = page.getByRole('button', {name: 'Continue to Step #3'});
@@ -225,8 +262,13 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
         this.messageBox = page.locator('#reviewStep3MessageBox');
         this.reviewerFilesGrid = page.locator('#reviewAttachmentsGridContainer');
         this.uploadFileLink = this.reviewerFilesGrid.getByRole('link', {name: 'Upload File', exact: true});
+        // The grid keeps a hidden "No Files" body once rows exist: read the visible one.
+        this.noReviewerFiles = this.reviewerFilesGrid.locator('tbody.empty');
         this.guidelinesLink = page.locator('a[id^="viewGuidelines-viewReviewGuidelines-button"]');
         this.discussionsAddButton = page.locator('main').getByRole('button', {name: 'Add', exact: true});
+        this.step3Form = page.locator('#reviewStep3Form');
+        this.formTextField = this.step3Form.locator('input[type="text"][name^="reviewFormResponses"]');
+        this.formDropdown = this.step3Form.locator('select[name^="reviewFormResponses"]');
 
         // Step 4
         this.completedHeading = page.getByRole('heading', {name: 'Review Submitted'});
@@ -271,6 +313,29 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
     async selectStep(step) {
         await this.tab(step).click();
         await this.expectStep(step);
+    }
+
+    /** A step's tab panel ("3. Download & Review"), read whole for what the step shows and in which order. */
+    tabPanel(step) {
+        return this.page.getByRole('tabpanel', {name: new RegExp(`^${step}\\.`)});
+    }
+
+    /**
+     * Assert the given texts appear in the panel of `step` in this order
+     * (each read on the settled panel; a missing text fails by name).
+     */
+    async expectOrder(step, texts) {
+        const panel = this.tabPanel(step);
+        for (const text of texts) {
+            await expect(panel, `step ${step} shows "${text}"`).toContainText(text);
+        }
+        const whole = await panel.innerText();
+        let from = 0;
+        for (const text of texts) {
+            const at = whole.indexOf(text, from);
+            expect(at, `"${text}" follows the text before it on step ${step}`).toBeGreaterThanOrEqual(0);
+            from = at + text.length;
+        }
     }
 
     // ---------------------------------------------------------------------
@@ -435,10 +500,46 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
     // Step 3 — download & review
     // ---------------------------------------------------------------------
 
-    /** Type into a TinyMCE box through the editor (a fill() bypasses the model). */
+    /**
+     * Type into a TinyMCE box through the editor (a fill() bypasses the
+     * model). Waits until every editor on screen reports `initialized`
+     * (text typed earlier is wiped), verifies the box holds the text, then
+     * flushes the editors into their textareas: a submit right after fast
+     * typing once posted the statement without its tail under eight
+     * workers (tojs note, 2026-09-12).
+     */
     async typeInto(body, text) {
-        await body.click();
-        await body.pressSequentially(text);
+        await this.page.waitForFunction(() => {
+            const mce = window.tinyMCE || window.tinymce;
+            const editors = mce ? mce.get() : [];
+            const shown = editors.filter((editor) => {
+                const container = editor.getContainer && editor.getContainer();
+                return !!container && container.getClientRects().length > 0;
+            });
+            return shown.length > 0 && shown.every((editor) => editor.initialized);
+        }, undefined, {timeout: 30_000});
+        // Content-verified bounded retry: the competing-interests editor
+        // re-initializes shortly after its radio reveals it, and keystrokes
+        // landing during the re-init are lost (the box keeps the head of
+        // the text). A retry clears the box first and types again.
+        let attempt = 0;
+        await expect(async () => {
+            if (attempt++ > 0) {
+                await body.fill('');
+            }
+            await body.click();
+            await body.pressSequentially(text);
+            await expect(body).toContainText(text, {timeout: 3_000});
+        }).toPass({intervals: [500, 1_000, 2_000], timeout: 30_000});
+        await this.page.evaluate(() => {
+            const mce = window.tinyMCE || window.tinymce;
+            for (const editor of mce.get()) {
+                if (editor.initialized) {
+                    editor.fire('change');
+                    editor.save();
+                }
+            }
+        });
     }
 
     async typeComments(text) {
@@ -457,6 +558,26 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
     /** A review-form radio option by its label. */
     formRadio(label) {
         return this.page.getByRole('radio', {name: label, exact: true});
+    }
+
+    /** A review-form checkbox-group option by its label. */
+    formCheckbox(label) {
+        return this.step3Form.getByRole('checkbox', {name: label, exact: true});
+    }
+
+    /** The labels of the OJS "Recommendation" list, in order ("Choose One" first). */
+    async recommendationOptions() {
+        return this.recommendationSelect.locator('option').allInnerTexts();
+    }
+
+    /** Step 3's "Review Guidelines" link: open the dialog of that name and return it. */
+    async openGuidelines() {
+        await this.guidelinesLink.click();
+        const dialog = this.page.getByRole('dialog').filter({
+            has: this.page.getByRole('heading', {name: 'Review Guidelines', exact: true}),
+        });
+        await expect(dialog).toBeVisible({timeout: 30_000});
+        return dialog;
     }
 
     /** "Save for Later": press and wait for the toast. */
@@ -528,11 +649,27 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
      * text file and waits for its "Reviewer Files" row.
      */
     async uploadReviewerFile(fileName) {
+        const wizard = await this.openReviewerUploadWizard();
+        await this.finishReviewerUpload(wizard, fileName);
+    }
+
+    /** Press "Upload File" and return the open upload wizard (its "1. Upload File" tab on screen). */
+    async openReviewerUploadWizard() {
         await this.uploadFileLink.click();
         const wizard = this.page
             .getByRole('dialog')
             .filter({has: this.page.getByRole('tab', {name: '1. Upload File'})});
         await expect(wizard.getByRole('tab', {name: '1. Upload File'})).toBeVisible({timeout: 30_000});
+        return wizard;
+    }
+
+    /** The upload wizard's file-type list (the editor's wizard has one; the reviewer's has none). */
+    uploadGenreSelect(wizard) {
+        return wizard.locator('select[id^="genreId"]');
+    }
+
+    /** Attach an in-memory text file in an OPEN upload wizard and finish its three steps. */
+    async finishReviewerUpload(wizard, fileName) {
         await this.page.locator('input[type="file"]').last().setInputFiles({
             name: fileName,
             mimeType: 'text/plain',
@@ -555,6 +692,11 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
     /** The "Round {N} Review Submitted on …" line. */
     previousReviewLine(round) {
         return this.previousReviewsBox.locator('p').filter({hasText: `Round ${round} Review Submitted on`});
+    }
+
+    /** Every "Round {N} Review Submitted on …" line of the box. */
+    previousReviewLines() {
+        return this.previousReviewsBox.locator('p').filter({hasText: /Round \d+ Review Submitted on/});
     }
 
     /** "Read Round {N} Review": open the round-history window and wait for its content. */

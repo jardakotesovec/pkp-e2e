@@ -46,7 +46,6 @@ U15 · M · main/guard gaps: ride 4 · own 2 · no seed 1 · states over the ext
 U22 · L · main/guard gaps: ride 7 · own 0 · no seed 0 · states over the extra 7 · scenarios to add 0 · suite fixes 1 · pending
 U24 · M · main/guard gaps: ride 18 · own 8 · no seed 2 · states over the extra 21 · scenarios to add 4 · suite fixes 2 · pending
 U25 · M · main/guard gaps: ride 3 · own 2 · no seed 1 · states over the extra 3 · scenarios to add 2 · suite fixes 9 · pending
-U28 · H · main/guard gaps: ride 11 · own 3 · no seed 0 · states over the extra 13 · scenarios to add 1 · suite fixes 1 · pending
 U29 · M · main/guard gaps: ride 7 · own 2 · no seed 1 · states over the extra 6 · scenarios to add 2 · suite fixes 1 · pending
 U40 · M · main/guard gaps: ride 10 · own 1 · no seed 0 · states over the extra 12 · scenarios to add 1 · suite fixes 2 · pending
 U41 · M · main/guard gaps: ride 9 · own 2 · no seed 2 · states over the extra 6 · scenarios to add 3 · suite fixes 5 · pending
