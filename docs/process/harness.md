@@ -264,9 +264,10 @@ processes before re-running.
   PR of this repo, and nightly against the apps' `main`. Its
   `workflow_dispatch` form takes `ojs_ref`, `omp_ref` and `ops_ref`, so a
   branch of this repo can be run against a pinned app commit:
-  `gh workflow run e2e.yml --ref <branch> -f ojs_ref=<sha>`. `gh` works on
-  this repo (it lives under `jardakotesovec`, outside the pkp org the bot
-  token is blocked from).
+  `gh workflow run e2e.yml --ref <branch> -f ojs_ref=<sha>`; a PR head on
+  a contributor's fork needs `-f ojs_repo=<fork>/ojs` beside it, and a
+  dispatch cancels the branch's in-flight push run (one concurrency group).
+  `gh` works on this repo and, since 2026-09-12, on the pkp org.
 - `.github/workflows/run-app.yml` is the reusable job. Each app repo's
   `e2e-tests.yml` calls it on every push and PR with `app_ref` set to the
   commit under test; it runs this repo's `main` unless `e2e_ref` is given.
@@ -276,10 +277,12 @@ processes before re-running.
 - CI runs with `PLAYWRIGHT_WORKERS=4` and `--retries=1`. Failure artifacts
   include `.server-logs/`.
 - The latest run of `e2e-tests.yml` on an app repo's `main` is the
-  authoritative "is the app's tip red?" answer. Without a token:
+  authoritative "is the app's tip red?" answer:
+  `gh run list -R pkp/<app> --workflow e2e-tests.yml --branch main`, then
+  `--log-failed` and `gh run download` on the run (ci-triage "Where to
+  look"). Without a token
   `https://api.github.com/repos/pkp/<app>/actions/workflows/e2e-tests.yml/runs?branch=main&per_page=5`
-  lists the runs with their head SHAs; logs and artifacts need a token, so
-  per-test detail comes from a local reproduction at that SHA.
+  still lists the runs with their head SHAs.
 
 ## Verify before trusting
 

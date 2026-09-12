@@ -8,11 +8,16 @@ and "A developer's PR fails the suite" say what to do with them.
 **Where to look.** Besides this repo's `e2e` workflow, every app repo runs
 the suite through its thin hook on every push to its `main`. The latest run
 on `pkp/<app>` Actions (main branch) is the authoritative answer to "is the
-app's tip red?", and its head SHA is the commit to reproduce against. The
-bot's GitHub token is blocked from the pkp org (fine-grained token lifetime
-policy), so `gh -R pkp/<app>` answers 403. Run and job metadata is
-reachable unauthenticated through the public REST API; logs and artifacts
-are not, so per-test detail comes from a local reproduction at the head SHA.
+app's tip red?", and its head SHA is the commit to reproduce against.
+`gh run view -R pkp/<app> <run> --log-failed` names the failed tests and
+`gh run download -R pkp/<app> <run>` fetches the Playwright artifacts
+(error contexts and `.server-logs/`) since 2026-09-12, when the bot's
+token was reissued under the pkp org's 366-day lifetime cap for
+fine-grained tokens; should it lapse again (`gh -R pkp/<app>` answers
+403), run and job metadata stay reachable unauthenticated through the
+public REST API and per-test detail comes from a local reproduction at
+the head SHA. A local reproduction is still the evidence for a verdict;
+the log only says where to look.
 
 ## Open — known-red tests on `main`
 
@@ -95,7 +100,10 @@ trips.
   attempts (the Review step's "Submit" press opened no confirmation
   dialog, no `/submit` request in the server log; the retry stuck on "2
   Details") and S12 red once on the same "2 Details" wait, green on
-  retry; both green locally at the same ref. Watch condition tripped;
+  retry; both green locally at the same ref. The ojs PR's own run
+  34683529824 (read once the token worked) is the same class: U31 S1 red
+  on both attempts and U21 S12 once, all on the "2 Details" wait after
+  Continue. Watch condition tripped;
   hardened 2026-09-12: `SubmissionWizardPage.pressUntil()` gives a
   footer press an 8 s window for its outcome and presses again while the
   button is still offered, at most three times, behind `continueTo()`,

@@ -65,10 +65,11 @@ The apps move; the suite follows. The baselines live in
    checkout and in its `lib/pkp` (shared: review its range once, then each
    app's pointer position). Read the commits, the PRs and the GitHub issues
    they link to, not just titles: the issue states the intention, the
-   yardstick for "intended change" versus "bug". The bot's token is blocked
-   from the pkp org, so read them through the public REST API without a
-   token (`https://api.github.com/repos/pkp/<repo>/pulls/<n>`,
-   `.../issues/<n>`). To find which spec a commit touches, grep
+   yardstick for "intended change" versus "bug". `gh` reaches the pkp org
+   since 2026-09-12 (the bot's token was reissued under the org's 366-day
+   lifetime cap); the public REST API without a token
+   (`https://api.github.com/repos/pkp/<repo>/pulls/<n>`, `.../issues/<n>`)
+   still answers if it lapses again. To find which spec a commit touches, grep
    `docs/specs/` for the class and file names in the diff.
 3. **Triage every change** (next section). Each lands as one of: no impact,
    accommodate in an existing spec and its tests, not covered yet, or
