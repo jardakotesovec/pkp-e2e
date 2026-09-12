@@ -343,8 +343,10 @@ screen, Rule 12): <sup>e</sup>
 - **User profiles and the masthead** use a separate, plain-text
   affiliation field, not this feature's institution records. The two meet
   only when a new submission copies the submitting author's profile
-  affiliation into their contributor record, matching it against stored
-  registry records by exact name. <sup>d</sup>
+  affiliation into their contributor record: the text arrives as a typed
+  institution name, never as a registry record, and a submission started
+  in a language the profile has no affiliation for receives the profile's
+  default-language text under that language. <sup>d</sup>
 
 ## Canonical scenarios
 
@@ -958,11 +960,18 @@ server-side (10 s timeout; per-user 20/60 s and global 40/300 s rate
 limits with their own 429 strings; failure → 404, basis of A5).
 Display: `Affiliation::getAffiliationName()` prefers the cached registry
 record's names, falling back to the stored manual name. User-profile
-bridge: `Repository::migrateUserAffiliation()` exact-name-matches the
-profile's plain-text affiliation against the cached registry records
-when a submission copies the profile — the profile/masthead field itself
-is `user.json`'s plain multilingual `affiliation` string, separate
-machinery.
+bridge: `Repository::migrateUserAffiliation()` copies the profile's
+plain-text `affiliation` per locale into the contributor's `name` and
+never sets `ror` (pkp/pkp-lib#13317, issue #13274; before it an exact
+name match against the cached registry records produced a `ror` link and
+no name, the issue's complaint), and fills the submission locale from
+the user's default-locale value when the profile has none there. Driven
+2026-09-12 on OJS at the PR head `3f82add062`, before its merge: with a
+cached record planted under exactly the profile's text, the en and fr_CA
+submissions' contributor rows carried the text as `name` (fr_CA under
+both locales) and no `ror`, where the same steps at `b48c22ca06` stored
+the `ror` and no name. The profile/masthead field itself is `user.json`'s
+plain multilingual `affiliation` string, separate machinery.
 
 <a id="fn-e"></a>
 **e — contributor roles.** Records: `contributor_roles` per context,
