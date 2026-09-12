@@ -1,9 +1,9 @@
 # Maintenance: the resident QA agent
 
-MAINTENANCE mode is a long-running agent on a VM (run through
+The MAINTENANCE session is a long-running agent on a VM (run through
 claude-threads) that acts as the PKP team's QA specialist for the e2e suite
 and talks to the team on Mattermost. It adds to the RUNBOOK loop, never
-replaces it, and is active when the PROGRESS banner names it.
+replaces it, and is active when the PROGRESS banner says so.
 
 ## The daily session
 
@@ -40,10 +40,8 @@ would meet the same thing, the docs do not already say it (grep first) and
 it is not one screen's fact or general Playwright knowledge; what passes is
 a kit change or a clause on an existing entry, never a new section, and a
 harness key a row asks for is listed under scenarios.md "Field shapes not
-built yet", not built. Then the session ends. Shipped specs are not brought up to later rules one by one; the
-maintainer schedules a revision pass over the existing specs and suites
-when the process has settled. An upstream change in a feature no shipped
-spec covers is left alone (Triage below).
+built yet", not built. Then the session ends. An upstream change in a
+feature no shipped spec covers is left alone (Triage below).
 
 ## Role & goals
 
@@ -65,11 +63,11 @@ The apps move; the suite follows. The baselines live in
    checkout and in its `lib/pkp` (shared: review its range once, then each
    app's pointer position). Read the commits, the PRs and the GitHub issues
    they link to, not just titles: the issue states the intention, the
-   yardstick for "intended change" versus "bug". `gh` reaches the pkp org
-   since 2026-09-12 (the bot's token was reissued under the org's 366-day
-   lifetime cap); the public REST API without a token
+   yardstick for "intended change" versus "bug". `gh` reaches the pkp org;
+   should the bot's token lapse (ci-triage.md "Where to look"), the public
+   REST API without a token
    (`https://api.github.com/repos/pkp/<repo>/pulls/<n>`, `.../issues/<n>`)
-   still answers if it lapses again. To find which spec a commit touches, grep
+   still answers. To find which spec a commit touches, grep
    `docs/specs/` for the class and file names in the diff.
 3. **Triage every change** (next section). Each lands as one of: no impact,
    accommodate in an existing spec and its tests, not covered yet, or
@@ -107,9 +105,9 @@ The apps move; the suite follows. The baselines live in
    the log and nothing more. The reproduction must hold on reset
    databases before it is a finding. A confirmed regression, and a
    finding that contradicts the linked issue's stated intention, gets a
-   detailed report under `docs/reports/<date>-<repo>-<pr>.md` (maintainer
-   ruling, 2026-09-09): the change and its intention; one section per
-   finding with the exact numbered steps a person follows on a fresh
+   detailed report under `docs/reports/<date>-<repo>-<pr>.md`: the change
+   and its intention; one section per finding with the exact numbered
+   steps a person follows on a fresh
    install, the expected and observed outcome with the on-screen strings
    verbatim, the request and response where the browser showed one, the
    cause in the developer layer, the kept script and snapshot pointers,
@@ -152,8 +150,8 @@ decide deliberately. This decision is how the suite stays organised.
   that no row claims. Leave it alone; the feature session that builds that
   row reads the app as it is then. A change to a pending feature's surface
   that a shipped spec points at is the previous case, limited to the
-  pointer. The atlas is never extended: it is the frozen Phase-0 inventory,
-  and a new surface is described in its FEATURE-MAP row when that is built.
+  pointer. The atlas is never extended (FEATURE-MAP's header says why);
+  a new surface is described in its FEATURE-MAP row when that is built.
 - **Re-budget.** A feature grew enough that its tier under-covers it, or
   shrank so its tier overspends. Change the tier in its PROGRESS row with a
   one-line dated rationale, and grow or prune scenarios and tests to match.
@@ -185,7 +183,7 @@ affected rows and in the next Mattermost summary.
 - **Never post** security-file content (only the fact of routing),
   credentials, or speculation presented as a finding.
 - A team reply that changes campaign rules is a maintainer ruling: encode
-  it in the owning doc (RUNBOOK, TEMPLATE, PRINCIPLES or this file). A team
+  it where RUNBOOK "What goes where" sends process learnings. A team
   reply that settles a register entry (confirmed, overturned, risk accepted,
   ticket to follow) is recorded in the spec as TEMPLATE "Findings register"
   prescribes.
@@ -195,8 +193,8 @@ affected rows and in the next Mattermost summary.
 A developer whose OJS, OMP or OPS pull request fails the e2e check asks on
 Mattermost whether they hit a bug or changed behavior the tests encode; the
 thread where they asked is where the answer goes. The same steps serve a
-PR the team asks to have prepared before its merge, red or not (maintainer
-request, 2026-09-12): the review, the accommodation and the companion are
+PR the team asks to have prepared before its merge, red or not: the
+review, the accommodation and the companion are
 done at the PR ref, so the merge session is only step 5. The work is the
 sync loop's critical triage, on one PR:
 
@@ -285,9 +283,9 @@ the answer; the spec and the test are the record.
 
 - **Keep `main` green.** It backs every app repo's PR check, so a red suite
   is the top-priority interrupt. Match every reported failure against
-  `docs/tracking/ci-triage.md` before diagnosing it as new and follow its
-  "Triage protocol": one reply for the three per-app messages, a regression
-  stays red until the fix lands, and its row is the record.
+  `docs/tracking/ci-triage.md` before diagnosing it as new. One reply
+  covers the three per-app messages, a regression stays red until the fix
+  lands, and its row is the record.
 - **Fix stale artifacts as you go.** Everything the campaign created is a
   living artifact (process docs, page objects, fixtures, helpers, earlier
   suites, the lint gate, the `_test` scenario API with its parity entry);
@@ -298,8 +296,8 @@ the answer; the spec and the test are the record.
   holding the verbatim on-screen strings, the reader on the rewritten
   spans, lint zero, and the spec named in the report; a correction too
   large or uncertain to fold becomes that spec's ❓ entry with a lean.
-  Maintenance never changes app code beyond what the app-changes rule
-  allows, and never moves content routed to the private security file.
+  Maintenance never changes app code beyond what RUNBOOK step 10 allows,
+  and never moves content routed to the private security file.
 - **Keep the budget measured.** After every full `test:final`, replace the
   PROGRESS banner's suite line with each app's test count and run time
   from the `final-run-<app>.log` summary lines, dated, so RUNBOOK

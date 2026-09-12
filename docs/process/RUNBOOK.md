@@ -9,22 +9,22 @@ security-shaped is quarantined in the maintainer's private file. When a rule
 gets in the way of that, the rule changes.
 
 This file and `docs/tracking/PROGRESS.md` are the source of truth; a session
-becomes correct by reading them, never by memory. The PROGRESS banner names
-the mode: REVIEW (one feature per session, then stop) or MAINTENANCE
-(`MAINTENANCE.md`, with this loop binding underneath). Paths are relative to
-the repo root; `../e2e_ng/` is the maintainer's private directory.
+becomes correct by reading them, never by memory. A session is either a
+FEATURE session (one feature, then stop for the maintainer's review) or the
+MAINTENANCE session (`MAINTENANCE.md`, with this loop binding underneath);
+the PROGRESS banner says whether the resident agent is active. Paths are
+relative to the repo root; `../e2e_ng/` is the maintainer's private
+directory.
 
 ## The loop
 
 Each role's rules live in its brief template, `docs/process/briefs/<role>.md`;
 the orchestrator renders briefs from them (`briefs/README.md`), judges
 results, and alone writes PROGRESS rows and `app-changes.md`. Every agent that
-drives screens opens with the Frame (`briefs/frame.md`): QA of the apps' own
-screens as a signed-in role on a disposable install, never a request the
-screens would not send; where what a screen offers and what happens disagree,
-that disagreement is the deliverable. A feature session does the feature and
-nothing else. Every step ends in a file, and `.reports/<feature>/phase-status.md`
-gets one line per gate passed (`<gate> · <date> · <file>`), appended by the
+drives screens opens with the Frame (`briefs/frame.md`), which sets what this
+testing is and is not. A feature session does the feature and nothing else.
+Every step ends in a file, and `.reports/<feature>/phase-status.md` gets one
+line per gate passed (`<gate> · <date> · <file>`), appended by the
 orchestrator.
 
 1. **Claim.** Set the feature's PROGRESS row to `in_progress`. Gate: the row.
@@ -135,10 +135,9 @@ Test files cite these by number, so the numbers are stable.
    ("Revising a shipped feature").
 3. **Tests are written per app, derived from the spec.** Each suite covers
    the common scenarios in its app's own context plus its app-specific ones;
-   duplication between suites is fine. Never assert a 🐞 finding as the
-   contract; a claim parked on an open ❓ is not a coverage gap; an absent
-   feature costs one absence test with a positive control per assertion;
-   each suite's file header says what it deliberately does not cover.
+   duplication between suites is fine. An absent feature costs one absence
+   test with a positive control per assertion. What a test may assert is
+   PRINCIPLES M3 and M4.
 4. **Probing is cross-app by construction.** Every exclusivity claim ("only X
    can", "never shows") gets a read-only control probe in the other apps, and
    a probe item that spans apps is owned by one agent driving all fleets.

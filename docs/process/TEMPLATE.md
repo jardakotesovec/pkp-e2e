@@ -434,8 +434,8 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      scenario, one bullet each) and costs nothing; a state that needs a
      given of its own (a setting's non-default end, a submission in a
      stage the seed lacks, another signed-in role) gets a scenario, as
-     many as the tier's extra buys (H about 6–8, M 3–4, L 1–2; RUNBOOK
-     "Budget"). A variant is covered only when it rides inside a scenario
+     many as the tier's extra buys (RUNBOOK "Budget" says how many). A
+     variant is covered only when it rides inside a scenario
      already there. A main or guard row is never cut for budget, whatever
      the count.
 
