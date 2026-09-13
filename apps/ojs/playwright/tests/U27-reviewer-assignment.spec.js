@@ -226,8 +226,6 @@ test.describe('reviewer-assignment', () => {
         ).toBeVisible({timeout: 30_000});
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
-        await editorPage.reload();
-        await workflow.expectOpen();
         const row = workflow.panelRow('Reviewers', firstName);
         await expect(row).toBeVisible();
         await expect(row).toContainText('Request Sent');
@@ -297,8 +295,6 @@ test.describe('reviewer-assignment', () => {
         ).toBeVisible({timeout: 30_000});
         await expect(modal2).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
-        await editorPage.reload();
-        await workflow.expectOpen();
         const secondRow = workflow.panelRow('Reviewers', secondName);
         await expect(secondRow).toContainText('Request Sent');
 
@@ -413,8 +409,6 @@ test.describe('reviewer-assignment', () => {
         await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(managerPage);
-        await managerPage.reload();
-        await workflow.expectOpen();
         const lockedRow = workflow.panelRow('Reviewers', lockedName);
         await expect(lockedRow).toContainText('Request Sent');
 
@@ -515,8 +509,6 @@ test.describe('reviewer-assignment', () => {
         await form.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(createModal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(managerPage);
-        await managerPage.reload();
-        await workflow.expectOpen();
         const row = workflow.panelRow('Reviewers', givenName);
         await expect(row).toBeVisible();
         await expect(row).toContainText('Request Sent');
@@ -633,8 +625,6 @@ test.describe('reviewer-assignment', () => {
         await form.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(enrollModal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(managerPage);
-        await managerPage.reload();
-        await workflow.expectOpen();
         const row = workflow.panelRow('Reviewers', enrollee);
         await expect(row).toBeVisible();
         await expect(row).toContainText('Request Sent');
@@ -699,8 +689,6 @@ test.describe('reviewer-assignment', () => {
         await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
-        await editorPage.reload();
-        await workflow.expectOpen();
         // Exactly one row: the refused submit created nothing (a leftover
         // assignment would have made this second add a refused duplicate).
         await expect(workflow.panelRow('Reviewers', 'Julia Reviewer')).toHaveCount(1);
@@ -1852,8 +1840,6 @@ test.describe('reviewer-assignment', () => {
         await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
-        await editorPage.reload();
-        await workflow.expectOpen();
         await workflow.expectPageTitle('Review (Round 2)');
         const round2Row = workflow.panelRow('Reviewers', 'Julia Reviewer');
         await expect(round2Row).toBeVisible();
@@ -1913,8 +1899,6 @@ test.describe('reviewer-assignment', () => {
         await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
-        await editorPage.reload();
-        await workflow.expectOpen();
         const row = workflow.panelRow('Reviewers', reviewer);
         await expect(row).toBeVisible();
         await expect(row).toContainText('Request Sent');
