@@ -66,7 +66,7 @@ stage spec's row "Open the review stage". <sup>a</sup>
 ## Fields & validation
 
 The request page is an email editor; the response window is a two-field
-form. Both are listed here.
+form.
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -75,7 +75,7 @@ form. Both are listed here.
 | "Subject" (request page) | yes | Prefilled "Request For Author Response To Reviewer Feedback" from the template; emptied, "Submit Request" is refused with a generic "Error" dialog (Rule 4a) ⚠ [A5](#a5) <sup>f</sup> |
 | "Message" (request page) | yes | Rich text (bold, italic, superscript, subscript, link) prefilled from the "Request Author Review Response" template (Rule 4), with the "Submit Author Response" button and the reviewers' comments (Rule 5) already in it; emptied, "Submit Request" is refused the same way [A5](#a5) <sup>f</sup> |
 | "Attach Files" (request page) | no | A toolbar button opening the "Attach Files" window with four sources: "Upload File", "Submission Files" (the author's files from the submission stage), "Review Files" (files uploaded by this round's reviewers) and "Library Files" <sup>f</sup> |
-| "Author Response" (response window) | yes | Rich text (bold, italic, underline, bullet list), one box per form language of the journal; the submit button stays greyed while it is empty <sup>b</sup> |
+| "Author Response" (response window) | yes | Rich text (bold, italic, underline, bullet list), one box per form language, so one on the seeded journal; the submit button stays greyed while the box is empty <sup>b</sup> |
 | "Authors" (response window) | yes, at least one | One checkbox per contributor of the submission, described as "Author contributors who this response is being submitted on behalf of."; an assigned co-author who is not on the Contributors list has no box; the submit button stays greyed while none is ticked <sup>b</sup> |
 
 ## Rules & state
@@ -88,9 +88,8 @@ form. Both are listed here.
    author, columns "Author" and "Response Status", and the header button
    "Request Response"; once a response exists, a third column without a
    visible heading holds the row actions of Rule 10. In the author view
-   the same stage ends with a card
-   headed "Author Response", and only in the states of Rule 6; a round in
-   any other state shows the author no card at all. <sup>c</sup>
+   the same stage ends with a card headed "Author Response", only in the
+   states of Rule 6; in any other state the author sees no card. <sup>c</sup>
 
 <a id="status"></a>
 2. **"Response Status"** reads one of three things:
@@ -223,7 +222,7 @@ form. Both are listed here.
    address their suggestions, clarify any points, and indicate any
    revisions you plan to make. Your response will be shared with the
    editorial team and may be sent back to reviewers if needed." Under it
-   the two fields of Fields, then "Submit Response" (greyed until both are
+   the two fields of Fields, then "Submit Response" (greyed until both fields are
    filled) and "Cancel" (closes, nothing kept). "Submit Response" closes
    the window with no message; the card flips to "A response was submitted
    by {name}" (Rule 6), and in the editor's table every author row shows
@@ -274,32 +273,31 @@ form. Both are listed here.
     the author then reads "The submission has been advanced to the next
     round of review"). A past round keeps its response, readable through
     the same "View" once that round is chosen in the workflow menu, and
-    its "Request Response" still follows Rule 3, so a response can be
-    requested for a past round whose reviews are complete and that holds
-    none. Nothing on the Copyediting or Production stage shows a response.
-    <sup>m</sup>
+    its "Request Response" still follows Rule 3, so a past round with
+    its reviews complete and no response can be asked for one. Nothing on
+    the Copyediting or Production stage shows a response. <sup>m</sup>
 
 <a id="recipients"></a>
 13. **Who is asked, who is named.** The request goes to every assigned
     author of the review stage as one email: "To" lists them, one chip
     each, and cannot be edited, and the greeting names them all, in no
-    fixed order ("Hello Alex Author, Bea Author," in one run, "Hello Bea
-    Author, Alex Author," in another). With "Notify All Authors" at its default
+    fixed order. With "Notify All Authors" at its default
     (Settings › Workflow › Emails, under "Editorial Decisions": "Send an
     email notification to all authors of the submission."), every other
     contributor who has an email address also receives a copy (Side
     effects). The "Authors" boxes of the response window list the
     submission's contributors, account or not, so a response can speak
-    for a contributor who was never emailed, while an assigned co-author
-    who is not a contributor has no box. <sup>n</sup>
+    for a contributor who was never emailed (Fields). <sup>n</sup>
 
 <a id="by-address"></a>
 14. **By address.** The request page's address is
-    `{journal}/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={round}&submissionId={id}`
-    (3 is the review stage). An editorial role who may open the submission
-    gets the page for any of its rounds; named with a round that does not
-    exist or belongs to another submission, the access-denied page reads
-    "Invalid review round.". Every other role (a Section Editor or Guest
+    `{journal}/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={round id}&submissionId={id}`
+    (3 is the review stage; the round id is the round's identifier, not
+    its number in the workflow menu, read from the address bar once
+    "Request Response" is pressed on that round). An editorial role who
+    may open the submission gets the page for any of its rounds; with a
+    round id no submission has, or another submission's, the access-denied
+    page reads "Invalid review round.". Every other role (a Section Editor or Guest
     Editor not assigned to the submission, Funding Coordinator, Author,
     Reviewer, Reader) gets the access-denied page "The current role does
     not have access to this operation."; the review stage itself is not
@@ -358,8 +356,8 @@ form. Both are listed here.
 - **"Minimum Confirmed Reviews Required"** (Settings › Workflow › Review,
   "Setup"; *Review setup & review forms*): 0 on a fresh install and on the
   seeded journal, so a round is ready only when every reviewer has
-  submitted; above 0, the round is also ready as soon as that many reviews
-  stand "Complete", whatever the other reviewers have done (Rule 3).
+  submitted; above 0, as soon as that many reviews stand "Complete"
+  (Rule 3).
 - **"Notify All Authors"** (Settings › Workflow › Emails, under "Editorial
   Decisions"; *Emails management*): the default, "Send an email
   notification to all authors of the submission.", copies the request to
@@ -401,10 +399,11 @@ form. Both are listed here.
 
 ## Canonical scenarios
 
-The scenarios run on the seeded journal with ready accounts and scratch
-submissions; the one that raises "Minimum Confirmed Reviews Required"
-runs on a scratch journal configured for it, with throwaway accounts; the
-press and preprint-server absence runs on the seeded press and preprint
+Scenarios 1 to 4, 6 and 8 run on the seeded journal with ready accounts
+and scratch submissions; scenario 5, which raises "Minimum Confirmed
+Reviews Required" and conducts its reviews openly, runs on a scratch
+journal configured for both, with throwaway accounts; the press and
+preprint-server absence, scenario 7, runs on the seeded press and preprint
 server with ready accounts. A review that is "in" is a completed
 review the scenario starts from. Each email is read in the mailbox of the
 address it was sent to. Accounts, passwords and the tooling recipe are in
@@ -415,7 +414,8 @@ the footnote. <sup>s</sup>
    Given: Editor, with two submissions in review, the first with one
    Reviewer who accepted the request and has not reviewed, the second with
    its one review in, recommending "Revisions Required" with the comment
-   "The method needs a control group.".
+   "The method needs a control group.", beside a second Reviewer whose
+   request was declined.
 
    - **"Awaiting reviews"**: open the first submission's review stage.
      After the Reviewers panel the table "Author Response" lists one row,
@@ -444,6 +444,10 @@ the footnote. <sup>s</sup>
      have now been completed.", shows the "Submit Author Response" button,
      then the same reviewer block, and closes with "Kind regards," over
      the Editor's name.
+   - **The declined request contributes nothing**: the row read "Ready to
+     invite author" although the second Reviewer's request was declined,
+     and the email holds one reviewer block, none for the declined
+     request.
    - **The author's view**: Author: open the second submission's review
      stage from My Submissions: the "Notifications" list holds one row for
      that email, and the stage ends with the card "Author Response"
@@ -468,7 +472,7 @@ the footnote. <sup>s</sup>
      Response".
    - **Writing the response**: press "Submit Response": the window opens
      again with "Submit Response" greyed. Type "We added a control group."
-     in "Author Response": still greyed. Under "Authors" ("Author
+     in the one "Author Response" box: still greyed. Under "Authors" ("Author
      contributors who this response is being submitted on behalf of.")
      tick the one box, the Author's own name: "Submit Response" is
      enabled. Press it: the window closes with no message and the card
@@ -527,16 +531,24 @@ the footnote. <sup>s</sup>
 
    Given: Author and a second assigned author (a co-author with an account
    who is not on the Contributors list), with a submission whose round has
-   its one review in and a Request Revisions decision recorded, and no
-   request sent.
+   its one review in and a Request Revisions decision recorded, its
+   decision email in the Author's mailbox, and no request sent.
 
+   - **The decision email's button**: Author: in the mailbox the email
+     "Your submission has been reviewed and we encourage you to submit
+     revisions" carries "Submit Author Response"; press it: My Submissions
+     opens with the submission's workflow on the review stage, the round
+     selected, and the window "Submit Your Response to Reviewer Feedback"
+     already open; press "Cancel": the window closes, the screen stays on
+     the round, and the card "Author Response" reads "Respond to Reviews"
+     with "Submit Response".
    - **The card without a request**: the co-author opens the review stage
      from My Submissions. The status box reads "Revisions have been
      requested." and the stage ends with the card "Author Response"
      reading "Respond to Reviews" with "Submit Response".
    - **The co-author's response**: press it: under "Authors" the only box
      is the Author's name, the co-author having none; type "We will add
-     the control group." in "Author Response", tick the box and press
+     the control group." in the "Author Response" box, tick the box and press
      "Submit Response": the card reads "A response was submitted by
      {name}", {name} being the co-author.
    - **The Author's view**: Author: open the same round: the card reads "A
@@ -553,10 +565,10 @@ the footnote. <sup>s</sup>
 5. **One confirmed review is enough when the minimum says so**
 
    Given: Journal Manager, on a scratch journal with "Minimum Confirmed
-   Reviews Required" set to 1 and a submission in review with two
-   Reviewers, the first's review in recommending "Revisions Required" with
-   the comment "Shorten the introduction." and the second's request
-   accepted.
+   Reviews Required" set to 1 whose reviews are conducted openly, and a
+   submission in review with two Reviewers, the first's review in
+   recommending "Revisions Required" with the comment "Shorten the
+   introduction." and the second's request accepted.
 
    - **Before "Mark as Complete"**: open the round. The "Author Response"
      row reads "Awaiting reviews" and "Request Response" is greyed.
@@ -568,33 +580,44 @@ the footnote. <sup>s</sup>
    - **The email**: press "Request Response", then "Submit Request", and
      read the email in the Author's mailbox: it opens "All peer reviews
      for your submission titled "{submission title}" have now been
-     completed." ⚠ [A6](#a6) and holds one reviewer block, "Reviewer 1:",
-     "Recommendation: Revisions Required" and "Shorten the introduction.".
+     completed." ⚠ [A6](#a6) and holds one reviewer block, "Recommendation:
+     Revisions Required" and "Shorten the introduction.".
+   - **The open review's heading**: the block is headed with the first
+     Reviewer's name alone, in place of "Reviewer 1:", the review having
+     been conducted openly.
    - **Control**: the email holds no second reviewer block; the review
      still due contributes nothing.
 
 6. **Who may request**
 
    Given: Section Editor and Funding Coordinator assigned to the review
-   stage, Author and Journal Manager, with a ready round (its one review
-   in) on a submission in the Section Editor's section.
+   stage, Author, a co-author with an account assigned to the review
+   stage, and Journal Manager, with a ready round (its one review in) on a
+   submission in the Section Editor's section.
 
    - **Section Editor**: open the round: the "Author Response" table reads
      "Ready to invite author" and "Request Response" is enabled; press it:
-     the page "Request Author Response" opens; press "Cancel": the round
-     shows again.
+     the page "Request Author Response" opens, its address holding the
+     round id (Rule 14); press "Cancel": the round shows again.
+   - **The request to both assigned authors**: the table lists two rows,
+     the Author and the co-author, both reading "Ready to invite author";
+     press "Request Response" again: "To" holds two chips, the Author and
+     the co-author, with no box to add anyone; press "Submit Request": the
+     Author's mailbox and the co-author's hold the same email, "Request
+     For Author Response To Reviewer Feedback", whose greeting "Hello"
+     names both, in either order.
    - **Funding Coordinator**: open the round: the same table with "Request
      Response" enabled; press it: the access-denied page "The current role
      does not have access to this operation." shows instead of the request
      page ⚠ [A3](#a3).
-   - **Author, by the typed address**: type this round's request-page
-     address (Rule 14): the access-denied page "The current role does not
+   - **Author, by the typed address**: type the Rule 14 address with
+     that round id: the access-denied page "The current role does not
      have access to this operation." shows and the review stage does not.
-   - **A wrong round number**: Journal Manager: type the address with a
-     round number that does not exist: the access-denied page reads
+   - **A round id that does not exist**: Journal Manager: type the
+     address with 99999 as the round id: the access-denied page reads
      "Invalid review round.".
    - **Control**: the Journal Manager typing the address with the round's
-     real number gets the "Request Author Response" page (reached this way
+     own id gets the "Request Author Response" page (reached this way
      it has nowhere to return to ⚠ [A4](#a4)).
 
 7. **A press and a preprint server** {OMP OPS}
@@ -614,7 +637,7 @@ the footnote. <sup>s</sup>
      ⚠ [OMP1](#omp1).
    - **Preprint Server Manager**: open the preprint's Production stage: no
      "Author Response" table; type the preprint's Rule 14 address (stage
-     3, round 1): the access-denied page "A workflow stage was not
+     3, round id 1): the access-denied page "A workflow stage was not
      specified.".
    - **Moderator**: the same address shows the same page.
    - **Preprint Author**: the same address shows "The current role does
@@ -623,17 +646,41 @@ the footnote. <sup>s</sup>
      (Rule 14) gets the "Request Author Response" page with the press
      Author in "To"; the absence is the workflow screen's alone.
 
+8. **A past round's response beside an empty new round**
+
+   Given: Editor and Author, with a submission in its second review
+   round, round 1's one review in and round 2's one Reviewer having
+   accepted the request and not reviewed.
+
+   - **The new round**: open the review stage and choose round 2 in the
+     workflow menu: the "Author Response" row reads "Awaiting reviews" and
+     "Request Response" is greyed.
+   - **The past round's request**: choose round 1 in the workflow menu:
+     the row reads "Ready to invite author" and "Request Response" is
+     enabled; press it, then "Submit Request": the dialog "Request for
+     review response sent" opens, and its link "View Submission Summary"
+     returns to round 1.
+   - **The author's past round**: Author: open the review stage from My
+     Submissions and choose round 1 in the workflow menu: the status box
+     reads "The submission has been advanced to the next round of review"
+     and the stage ends with the card "Author Response" reading "Respond
+     to Reviews" with "Submit Response"; press it, type "We answered the
+     first round's reviews." in the "Author Response" box, tick the one box and
+     press "Submit Response": the card reads "A response was submitted by
+     {name}", {name} being the Author.
+   - **The editor's two rounds**: Editor: choose round 1 in the workflow
+     menu: the row reads "A response was submitted by {name}" and "…" ›
+     "View" opens "Author Response to Reviews" showing "We answered the
+     first round's reviews."; choose round 2: the row still reads
+     "Awaiting reviews" with no "…" and "Request Response" greyed.
+   - **Control**: Author: choose round 2 in the workflow menu: the stage
+     ends with no "Author Response" card; the request and the response
+     belong to round 1 alone.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
-- **Budget** — states:
-  - a request on a round with two assigned authors (one email, "To" naming both; Rule 13)
-  - a past round keeping its response while the new round starts empty (Rule 12)
-  - a declined request beside a completed review, the round still ready (Rule 3)
-- **Budget** — variants:
-  - the revisions email's "Submit Author Response" pressed on a journal (pressed on the press in scenario 7; on the journal the author opens the round from My Submissions)
-  - an open review's name in the email instead of "Reviewer 1:" (Rule 5)
 - **Nothing new to test**:
   - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
   - Guest Editor (the Section Editor's gate, scenario 6)
@@ -843,7 +890,7 @@ email's button lands the author on the same empty stage. Since: 2026-07-31
 **q** — `AuthorResponse::isPublic()`: true when the round's non-declined, non-cancelled `review_assignments` rows all have `is_review_publicly_visible` set; surfaced in `ReviewRoundAuthorResponseResource` as `isPublic` and consumed by `lib/ui-library/src/frontend/components/PkpOpenReview/PkpOpenReviewAuthorResponseContent.vue`. `AuthorResponse` also carries a `doiId` whose settings form fields are commented out in `ojs classes/components/forms/context/DoiSetupSettingsForm.php` ("Functionality for author response DOIs exists but is not currently supported"), so no screen sets it. Not probed: no screen in this feature shows either.
 
 <a id="fn-s"></a>
-**s** — Scenario tooling. Ready accounts: `editor.diana` (Editor; manager level), `manager.maya` (Journal Manager), `sectioneditor.ana` (Section Editor of "Articles"), `assistant.rita` (Funding Coordinator, review-stage access), `reviewer.julia` and `reviewer.paul` (Reviewers), `author.alex` (submitter) and `author.bea` (co-author with an account, never a contributor); passwords per `docs/process/users.md`. A submission in review: `POST scenarios/submission` `{submitter: 'author.alex', decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}], participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]}`. A review that is in: `status: 'completed'`, with the optional `recommendation` (OJS only: `accept` by default, `pendingRevisions` = "Revisions Required") and `comments` (the "For author and editor" text; default "Seeded review comments for {tag}."); the seed runs the reviewer wizard's own steps, so the app's "Review complete…" and "Thank you for your submission…" emails go out and a mailbox count is matched by the submission title. The round id for a typed address comes from the seed response (`reviewRounds[].id`). Scenario 1: two submissions, one `accepted`, one `completed` with `recommendation: 'pendingRevisions', comments: 'The method needs a control group.'`; the seeded journal's review mode is anonymous, so the email's heading reads "Reviewer 1:"; a test waits for the composer (the iframe present and "Loading" gone) before "Submit Request", and reads the sent email by the submission title in `author.alex`'s mailbox. Scenario 2: scenario 1's ready submission after one request; the signed-out click on the email's button is a fresh browser context opening the href; `editor.diana`'s mailbox is counted by the submission title before and after. Scenario 3: scenario 2's state (the request sent and `author.alex`'s response submitted through the window); after "Delete" › "OK" a test polls the table for "Ready to invite author" (note l). Scenario 4: `decisions: ['sendExternalReview', 'requestRevisions']` with the reviewer `completed` and `{username: 'author.bea', role: 'author'}` in `participants`; the seeded decision sends no email, so the scenario opens the round from My Submissions; the co-author is a stage assignment, not a contributor, so the "Authors" boxes show one name. Scenario 5: `POST scenarios/context` with `review: {numReviewsPerSubmission: 1}` and `users[]` holding a `manager`, two `externalReviewer`s and an `author`, then a submission with the first reviewer `completed` (`recommendation: 'pendingRevisions', comments: 'Shorten the introduction.'`) and the second `accepted`; a roster reviewer named on a scratch context is assigned but not enrolled (seed-facts 2026-09-05), hence the throwaway reviewers. Scenario 6: scenario 1's ready shape (section "Articles", `sectioneditor.ana` assigned) plus `{username: 'assistant.rita', role: 'funding'}` in `participants`; the wrong-round address uses `reviewRoundId=99999`; the Journal Manager's real-round address is opened without `ret`, hence the A4 aside. Scenario 7: OMP `decisions: ['sendExternalReview']` with `reviewRounds: [{stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]` (no `recommendation` on a press) and the Request Revisions decision recorded by `editor.diana` through the wizard ("Require New Review Round" › "Next", "Notify Authors", "Notify Reviewers", "Record Decision"), which sends the decision email the scenario reads; OPS a plain submitted preprint (OPS refuses `reviewRounds`), with `manager.maya` as Preprint Server Manager, `sectioneditor.ana` as Moderator and `author.alex` as its Author, the address typed with `stageId=3&reviewRoundId=1`. Emails are read in Mailpit by recipient address (PRINCIPLES A8; the roster mailboxes are shared, so a test matches the submission title in the subject line's body or uses a throwaway author). The request page's address: `…/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={id}&submissionId={id}` (on a press `stageId=3` is External Review).
+**s** — Scenario tooling. Ready accounts: `editor.diana` (Editor; manager level), `manager.maya` (Journal Manager), `sectioneditor.ana` (Section Editor of "Articles"), `assistant.rita` (Funding Coordinator, review-stage access), `reviewer.julia` and `reviewer.paul` (Reviewers), `author.alex` (submitter) and `author.bea` (co-author with an account, never a contributor); passwords per `docs/process/users.md`. A submission in review: `POST scenarios/submission` `{submitter: 'author.alex', decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}], participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]}`. A review that is in: `status: 'completed'`, with the optional `recommendation` (OJS only: `accept` by default, `pendingRevisions` = "Revisions Required") and `comments` (the "For author and editor" text; default "Seeded review comments for {tag}."); the seed runs the reviewer wizard's own steps, so the app's "Review complete…" and "Thank you for your submission…" emails go out and a mailbox count is matched by the submission title. The round id for a typed address comes from the seed response (`reviewRounds[].id`). Scenario 1: two submissions, one `accepted`, one `completed` with `recommendation: 'pendingRevisions', comments: 'The method needs a control group.'` beside `{username: 'reviewer.paul', status: 'declined'}` in the same `reviewers[]`; the seeded journal's review mode is anonymous, so the email's heading reads "Reviewer 1:"; a test waits for the composer (the iframe present and "Loading" gone) before "Submit Request", and reads the sent email by the submission title in `author.alex`'s mailbox. Scenario 2: scenario 1's ready submission after one request; the signed-out click on the email's button is a fresh browser context opening the href; `editor.diana`'s mailbox is counted by the submission title before and after. Scenario 3: scenario 2's state (the request sent and `author.alex`'s response submitted through the window); after "Delete" › "OK" a test polls the table for "Ready to invite author" (note l). Scenario 4: `decisions: ['sendExternalReview']` with the reviewer `completed` and `{username: 'author.bea', role: 'author'}` in `participants`, then the Request Revisions decision recorded by `manager.maya` through the wizard, as scenario 7's press decision is, which sends the decision email the Author's bullet reads in `author.alex`'s mailbox by the submission title (a seeded `requestRevisions` sends none); the co-author opens the round from My Submissions; the co-author is a stage assignment, not a contributor, so the "Authors" boxes show one name. Scenario 5: `POST scenarios/context` with `review: {numReviewsPerSubmission: 1, defaultReviewMode: 'open'}` and `users[]` holding a `manager`, two `externalReviewer`s and an `author`, then a submission with the first reviewer `completed` (`recommendation: 'pendingRevisions', comments: 'Shorten the introduction.'`) and the second `accepted`; a submission seeded after the mode is set carries open as its assignments' review type (seed-facts 2026-09-05), so the email's block is headed with the first reviewer's full name and no colon (note g); a roster reviewer named on a scratch context is assigned but not enrolled (seed-facts 2026-09-05), hence the throwaway reviewers. Scenario 6: scenario 1's ready shape without the declined reviewer (section "Articles", `sectioneditor.ana` assigned) plus `{username: 'assistant.rita', role: 'funding'}` and `{username: 'author.bea', role: 'author'}` in `participants`; the one request email is found in `author.alex`'s and `author.bea`'s mailboxes by the submission title (both addresses sit in its To header, note n); the wrong-round address uses `reviewRoundId=99999`; the Journal Manager's real-round address is opened without `ret`, hence the A4 aside. Scenario 7: OMP `decisions: ['sendExternalReview']` with `reviewRounds: [{stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]` (no `recommendation` on a press) and the Request Revisions decision recorded by `editor.diana` through the wizard ("Require New Review Round" › "Next", "Notify Authors", "Notify Reviewers", "Record Decision"), which sends the decision email the scenario reads; OPS a plain submitted preprint (OPS refuses `reviewRounds`), with `manager.maya` as Preprint Server Manager, `sectioneditor.ana` as Moderator and `author.alex` as its Author, the address typed with `stageId=3&reviewRoundId=1`. Scenario 8: `decisions: ['sendExternalReview']` with two `reviewRounds[]` entries, `[{reviewers: [{username: 'reviewer.julia', status: 'completed'}]}, {reviewers: [{username: 'reviewer.paul', status: 'accepted'}]}]`: the decision seeds the first entry into round 1 and the entry left over builds round 2 (the shape note m relies on; seed-facts 2026-09-06), so round 1 is the past round and round 2 the current one; the response is written through the window on round 1, never seeded; the request email is read in `author.alex`'s mailbox by the submission title. Emails are read in Mailpit by recipient address (PRINCIPLES A8; the roster mailboxes are shared, so a test matches the submission title in the subject line's body or uses a throwaway author). The request page's address: `…/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={id}&submissionId={id}` (on a press `stageId=3` is External Review).
 
 <a id="fn-f-a1"></a>
 **f-a1** — Note e: neither `AuthorResponseRequestManagerCellStatus.vue` nor `canRequestReviewRoundAuthorResponse` reads `isAuthorResponseRequested`, and `PKPReviewController::requestAuthorResponse()` refuses only when a response exists, so a second `POST …/requestResponse` sends a second email and sets the flag again. The author's config (note c) does read the flag. Live-probed 2026-09-06: three sends on one round, each `POST …/requestResponse` 200, three Mailpit messages, three "Notifications" rows and three "An email has been sent" log rows, the table unchanged throughout.

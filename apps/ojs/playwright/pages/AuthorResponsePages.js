@@ -328,6 +328,25 @@ exports.RequestAuthorResponsePage = class RequestAuthorResponsePage extends Base
         return this.page.locator('.pkpAutosuggest--disabled');
     }
 
+    /** The "To" chips, one badge per assigned author (Rule 13). */
+    recipientChips() {
+        return this.recipientsDisabled().locator('.pkpAutosuggest__selection');
+    }
+
+    /** One "To" chip by the author's display name. */
+    recipientChip(name) {
+        return this.recipientChips().filter({hasText: name});
+    }
+
+    /**
+     * The box that would add a recipient. The autosuggest renders its input
+     * only while enabled, so on the request page this resolves to nothing
+     * (Rule 13: "no box to add anyone"); assert it with `toHaveCount(0)`.
+     */
+    recipientAddBox() {
+        return this.recipientsDisabled().locator('.pkpAutosuggest__input');
+    }
+
     cancelButton() {
         return this.page.getByRole('button', {name: 'Cancel', exact: true});
     }
