@@ -19,7 +19,8 @@
  * - the sidebar's global "Search submissions" box and the "Search Results"
  *   view it opens (U23 Rule 7);
  * - the search/filter chips row above the table and its clear controls;
- * - the "Filters" button and the Filters side panel (U23 Rule 8);
+ * - the Filters side panel's editors-only fields (U23 Rule 8; the button,
+ *   the panel and its plain fields are inherited);
  * - the sortable ID / Days column headers and the pager (U23 Rules 4–5);
  * - activity-cell action buttons ("Assign Editor", "Assign Reviewers") and
  *   the per-reviewer activity indicators with their popovers (U23 Rules
@@ -34,10 +35,30 @@ const {MySubmissionsPage} = require('./MySubmissionsPage.js');
 
 exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissionsPage {
     async goto(query = '') {
-        await this.page.goto(
-            this.contextUrl(this.contextPath, `/dashboard/editorial${query}`)
-        );
+        await this.page.goto(this.url(query));
         await expect(this.heading()).toBeVisible({timeout: 30_000});
+    }
+
+    /**
+     * The dashboard's own address, `{context}/dashboard/editorial` (plus an
+     * optional query): the landing of an account holding an editorial role
+     * (U22 Rule 3, scenario 5), which the inherited `url()` would otherwise
+     * misreport as the author list's.
+     */
+    url(query = '') {
+        return this.contextUrl(this.contextPath, `/dashboard/editorial${query}`);
+    }
+
+    /**
+     * The landing an editorial account gets from the context's login or the
+     * retired list address (U22 Rule 3, fn-s5): the "Assigned to me" view
+     * at this address, with the "Editor Dashboard" group in the sidebar.
+     * Pass a count to pin the heading's total.
+     */
+    async expectLanded(count = null) {
+        await expect(this.page).toHaveURL(/\/dashboard\/editorial/, {timeout: 30_000});
+        await this.expectViewHeading('Assigned to me', count);
+        await expect(this.menuGroupLink()).toBeVisible({timeout: 30_000});
     }
 
     /** Open the dashboard directly on a view by its address (Rule 4). */
@@ -156,30 +177,6 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         return this.page.getByRole('button', {name: 'Clear Filters', exact: true});
     }
 
-    /** The "Filters" button above the list. */
-    filtersButton() {
-        return this.page.getByRole('button', {name: 'Filters', exact: true});
-    }
-
-    /** The Filters side panel (title "Filters", Apply/Clear buttons). */
-    filtersModal() {
-        return this.page
-            .locator('[data-cy="active-modal"]')
-            .filter({has: this.page.getByRole('button', {name: 'Apply Filters', exact: true})});
-    }
-
-    /** Open the Filters panel and wait for its form. The side-modal wrapper
-     * reports visibility: hidden (patterns.md locator pitfall 5) — anchor
-     * the wait on the panel's own Apply button, never the wrapper. */
-    async openFilters() {
-        await this.filtersButton().click();
-        const modal = this.filtersModal();
-        await expect(
-            modal.getByRole('button', {name: 'Apply Filters', exact: true})
-        ).toBeVisible({timeout: 30_000});
-        return modal;
-    }
-
     /**
      * Set the "Days since last activity" slider (PrimeVue slider — keyboard
      * driven; starts at 0, step 1).
@@ -212,14 +209,6 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         return this.page.getByRole('columnheader', {
             name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'),
         });
-    }
-
-    /** A row's Stage cell (the third column: the stage or outcome named in
-     * plain text beside a small colored dot, U23 Rule 5). The ID column is
-     * the row's header (`th`), so among the row's `cell`s Stage is the
-     * second. */
-    stageCell(row) {
-        return row.getByRole('cell').nth(1);
     }
 
     /** The small colored dot beside the Stage cell's text (`bg-stage-*`). */
@@ -288,25 +277,6 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         await expect(this.bulkDeleteMenuItem()).toBeHidden({timeout: 30_000});
     }
 
-    /** The popover a reviewer activity indicator opens inside its row. */
-    activityPopover(row) {
-        return row.locator('[id^="headlessui-popover-panel"]');
-    }
-
-    /**
-     * Dismiss a row's open activity popover with a click outside it (on the
-     * page heading): Escape closes it only while focus is inside, and a
-     * window opened from the popover leaves focus elsewhere when it
-     * closes. No-op when none is open.
-     */
-    async closeActivityPopover(row) {
-        const panel = this.activityPopover(row);
-        if (await panel.count()) {
-            await this.heading().click();
-        }
-        await expect(panel).toHaveCount(0, {timeout: 30_000});
-    }
-
     /** A sortable column header's sort button ('ID' or 'Days') — the button
      * inside the columnheader carries the label plus a screen-reader "Sort"
      * text (TableColumn.vue). */
@@ -352,16 +322,11 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
 
     /** A row's Editorial Activity cell (fifth column, U23 Rule 9); empty
      * once a Submission-stage row has its editor (Rule 9i). The ID column
-     * is the row's header (`th`), so among the row's `cell`s it is the
-     * fourth (the fifth is "Actions", whose text reads "View"). */
+     * is the row's header (`th`) and the editorial list has a "Days"
+     * column, so among the row's `cell`s it is the fourth (the fifth is
+     * "Actions", whose text reads "View"). */
     activityCell(row) {
         return row.getByRole('cell').nth(3);
-    }
-
-    /** Close the open Filters panel without applying (Escape). */
-    async closeFilters() {
-        await this.page.keyboard.press('Escape');
-        await expect(this.filtersModal()).toHaveCount(0, {timeout: 30_000});
     }
 
     /** The "Review Details: {title}" window a popover's "View details"

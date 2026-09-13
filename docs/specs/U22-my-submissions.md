@@ -221,55 +221,235 @@ menu entry and the journal's intake gates belong to *[Submission wizard](U21-sub
 
 ## Canonical scenarios
 
-Every scenario runs on the seeded journal, signed in as a ready account
-holding only the Author role, with scratch submissions in the states the
-scenario names. The account and the tooling recipe are in each scenario's
+Scenario 1 runs on the seeded journal as a ready account holding only the
+Author role, with scratch submissions; scenarios 2, 4 and 5 run on
+scratch journals of their own with throwaway accounts, and scenario 3 with a
+throwaway author, on the seeded journal where its issues are needed {OJS}
+and on a scratch journal otherwise. The accounts, the submissions' titles,
+the mail catcher's address and the tooling recipe are in each scenario's
 footnote.
 
-1. **Track and open a submission** — Author: on the journal's login page,
-   sign in as an account whose only role is Author and that has one
-   submitted submission. You land on My Submissions, in the "Active
-   submissions" view. The row shows the submission's ID, its authors and
-   title, and its current stage in a bubble. Press "View". The submission's
-   workflow opens as a panel over the list. Close it. The list is back.
+1. **Track and open a submission**
+
+   Given: an account holding only the Author role, with one submitted
+   submission on the seeded journal, on the journal's login page.
    <sup>s1</sup>
-2. **Resume and clean up drafts** — Author with two drafts, one of them
-   saved partway with "Save for Later", and one submitted submission: open
-   the "Incomplete submissions" view. On a preprint server the drafts sit
-   under "Active submissions" instead [OPS1](#ops1). Each draft row shows
-   the "Incomplete" stage bubble ("Production" on a preprint server, the
-   same [OPS1](#ops1) difference), offers "Complete submission", and has no
-   "View". Press "Complete submission" on the saved draft. The submission
-   wizard reopens at the step it was saved. Return to the list. Switch to
-   "Active submissions", where draft and submitted rows sit together, and
-   open "More Actions" → "Delete Incomplete Submissions". Tick the other
-   draft's checkbox. The submitted row has no checkbox. Press "Delete
-   Incomplete Submissions", then press "Confirm" in the dialog. The draft is
-   gone and the sidebar counts drop. On a preprint server the confirm step
-   fails instead: an error dialog reports that the deletion is not
-   permitted, and the draft stays [OPS2](#ops2). <sup>s2</sup>
-3. **Browse the views and search** — Author with two published submissions
-   and a declined one: walk the sidebar's view entries. Each opens the list
-   under that view's heading with its count. The published submissions
-   appear under "Published", and the declined one under "Declined" with its
-   "Declined" stage bubble. A view holding nothing shows "No Items". On the
-   "Published" view, type one published submission's title into the search
-   box. The list narrows to that submission alone, and the heading count
-   follows ("Published (1)"). <sup>s3</sup>
+
+   - **The journal's login page**: sign in: you land on My Submissions in
+     the "Active submissions" view, and the sidebar shows the "My
+     Submissions as Author" group (Rules 1, 3).
+   - **The retired submission-list address**: open
+     `{journal path}/submissions`: it forwards to the same list (Rule 3).
+   - **The row**: shows the submission's ID, its authors and title, and its
+     current stage in a bubble; its Editorial Activity cell is empty, the
+     submission awaiting the editorial team's first move (Rules 4, 7e).
+   - **"View"**: press it: the submission's workflow opens as a panel over
+     the list, and the page address now records which submission is open
+     (Rule 8).
+   - **Closing the panel**: close it: the list is back, at the exact
+     address it left (Rule 8).
+   - **The old author-dashboard link**: open
+     `{journal path}/authorDashboard/submission/{id}` with the
+     submission's ID: My Submissions opens with that submission's workflow
+     panel already open (Rule 3).
+   - **The same link in a second author's browser**: a second account
+     holding only the Author role, signed in, opens it: an access-denied
+     page (Rule 3).
+   - **Control**: a signed-in account holding no Author role, a Journal
+     Manager who does not author, types the list's address
+     `{journal path}/dashboard/mySubmissions`: the access-denied page
+     (Actors row 1).
+
+2. **Resume and clean up drafts**
+
+   Given: an account holding only the Author role on a scratch journal,
+   with two drafts, one of them saved on the "Details" step with "Save for
+   Later", and one submitted submission. <sup>s2</sup>
+
+   - **"Incomplete submissions"**: open the view: it lists the two drafts
+     and not the submitted submission. On a preprint server the drafts sit
+     under "Active submissions" instead [OPS1](#ops1). Each draft row shows
+     the "Incomplete" stage bubble ("Production" on a preprint server
+     [OPS1](#ops1)), offers "Complete submission", and has no "View"
+     (Rules 2, 4, 6).
+   - **"Complete submission" on the saved draft**: press it: the
+     submission wizard reopens at "Details" (Rule 6). Return to the list.
+     Press "Complete submission" on the other draft, only to note the
+     address the wizard opens at, and return again.
+   - **"Active submissions"**: switch to it: draft and submitted rows sit
+     together, the drafts listed here as well as under "Incomplete
+     submissions", one submission appearing in several views (Rule 2).
+   - **"More Actions" → "Delete Incomplete Submissions"**: choose it: a
+     checkbox appears on each draft row and none on the submitted row
+     (Rule 9). Tick the other draft's checkbox.
+   - **"Delete Incomplete Submissions", then "Confirm"**: press the button
+     above the list, then "Confirm" in the "Confirm Delete of Incomplete
+     Submissions" dialog: the draft is gone and the sidebar counts drop
+     without a reload (Rules 9, 10). On a preprint server the confirm step
+     fails instead: an error dialog reports that the deletion is not
+     permitted, and the draft stays [OPS2](#ops2).
+   - **The deleted draft** {OJS OMP}: it is listed under neither "Active
+     submissions" nor "Incomplete submissions", nothing on the list offers
+     to restore it, and no email arrives in the author's mailbox (Side
+     effects).
+   - **Its wizard address** {OJS OMP}: open the address noted above: the
+     wizard no longer opens (Side effects).
+   - **Control**: the submitted row had no checkbox and is still listed
+     after the delete: a submitted submission is never deleted here
+     (Actors row 6, Rule 9).
+
+3. **Browse the views and search**
+
+   Given: an account holding only the Author role with two published
+   submissions, one declined at the Submission stage, one in Copyediting
+   {OJS OMP} and one scheduled into an issue {OJS}, beside another
+   author's submitted submission on the same journal. <sup>s3</sup>
+
+   - **The sidebar's view entries**: walk them: each opens the list under
+     that view's heading with its count, and the entry's badge carries the
+     same number (Rules 1, 2).
+   - **"Active submissions"** {OJS OMP}: the submission in Copyediting is
+     listed here, its Editorial Activity cell reading "Copyedited Files
+     Uploaded: 0" (Rules 2, 7c).
+   - **"Scheduled for publication"** {OJS}: the submission scheduled into
+     an issue is listed here, its Editorial Activity cell reading "To be
+     published in issue {issue}" (Rules 2, 7d). On a press or preprint
+     server nothing feeds the view [A3](#a3).
+   - **"Published"**: the two published submissions are listed here
+     (Rule 2).
+   - **"Declined"**: the declined submission is listed here with its
+     "Declined" stage bubble and an empty Editorial Activity cell (Rules 2,
+     4, 7e).
+   - **A view holding nothing**: open one none of the seeded submissions
+     falls under (the footnote names one per app): it shows "No Items"
+     (Rule 4).
+   - **The search box on "Published"**: type the first published
+     submission's title (the footnote names the titles): the list narrows
+     to that submission alone, and the heading count follows, "Published
+     (1)" (Rule 5).
+   - **"Filters"**: press it: the panel offers the days-since-last-activity
+     filter and, only where the journal has them, the section {OJS OPS},
+     categories and issue {OJS} filters (a press offers no series filter
+     [OMP1](#omp1)); "Assigned To Editor" is not among them (Rule 5).
+   - **The author's mailbox**: no email has arrived through any of the
+     above: the list sends nothing (Side effects).
+   - **Control**: the other author's submission is listed under none of
+     the views, and searching its title on "Active submissions" finds no
+     row (Actors row 2, Rule 5).
 
 App-specific:
 
-4. **Act on a revision request** {OJS OMP} — Author whose submission's
-   review round has revisions requested and one assigned reviewer who has
-   not yet completed a review (on a press, either of its review stages
-   qualifies): the row's activity cell reads "Revision requested" with
-   "Submit revisions", and the submission also lists under
-   "Revisions requested". Press "Submit revisions" and upload a file through the
-   three-step dialog ("Upload File" → "Review Details" → "Confirm"). Back on
-   the list, the submission now sits under "Revisions submitted", the
-   sidebar badges have moved with it, and its activity cell shows the review
-   progress counter ("Review update 0/1"). On a preprint server there is no
-   review, so this scenario has no analogue. <sup>s4</sup>
+4. **Act on a revision request** {OJS OMP}
+
+   Given: an account holding only the Author role on a scratch journal at
+   its default review type, with one submission whose review round has
+   revisions requested and one assigned reviewer who has not yet completed
+   a review (on a press, either of its review stages qualifies, and a
+   further submission sits in its Internal Review round with revisions
+   requested), and a second submission under review with two reviewers,
+   one of whom has completed; and, on a second scratch journal whose
+   default review type is Open, an author's submission under review whose
+   single reviewer has completed. <sup>s4</sup>
+
+   - **"Revisions requested"**: the submission is listed here; its row's
+     Editorial Activity cell reads "Revision requested" with "Submit
+     revisions" (Rules 2, 7a).
+   - **"Submit revisions"**: press it: the upload dialog opens directly,
+     with three steps, "Upload File", "Review Details" and "Confirm", and
+     no title of its own; upload a file (the footnote names it) through
+     them (Rule 7a).
+   - **Back on the list**: the submission now sits under "Revisions
+     submitted", the sidebar badges have moved with it without a reload,
+     and its Editorial Activity cell shows the review progress counter,
+     "Review update 0/1", not a "revisions submitted" message (Rules 7a,
+     7b, 10) [A1](#a1).
+   - **A press's Internal Review round** {OMP}: the further submission is
+     listed under "Revisions requested" with the same "Revision requested"
+     cell and "Submit revisions"; uploading a file the same way moves it
+     under "Revisions submitted" with the counter (Rule 7a).
+   - **Under review, nothing asked**: under "Active submissions" the second
+     submission's cell reads "Review update 1/2" and shows no "Reviewers
+     assigned:" row: a review that is not open never shows its reviewer
+     (Rule 7b).
+   - **A completed open review**: on the journal whose default review type
+     is Open, the submission's cell reads "Review update 1/1" with a
+     "Reviewers assigned:" row of one avatar; the avatar's popover names
+     the reviewer and the review type (Rule 7b).
+   - **Control**: the delivered submission's row no longer offers "Submit
+     revisions", which shows only while the round awaits the author's
+     revisions (Rule 7a).
+
+   A preprint server has no review stage, so this scenario has no analogue
+   there: its author sidebar carries only "Active submissions", "Scheduled
+   for publication", "Published" and "Declined" (Rule 2), and no row ever
+   offers "Submit revisions".
+
+5. **Landing for an account holding other roles too** {OJS OMP OPS}
+
+   Given: a scratch journal with three throwaway accounts holding two roles
+   each, Author and Reviewer {OJS OMP}, Author and Section Editor, and
+   Section Editor and Reviewer {OJS OMP}, each on the journal's login page.
+   <sup>s5</sup>
+
+   - **Author and Reviewer** {OJS OMP}: sign in: the browser lands on the
+     reviewer dashboard, with the "My Submissions as Author" group still in
+     the sidebar (Rule 3).
+   - **Author and Section Editor**: sign in: the browser lands on the
+     Dashboard, with the "My Submissions as Author" group still in the
+     sidebar (Rule 3).
+   - **Section Editor and Reviewer** {OJS OMP}: sign in: the browser lands
+     on the Dashboard (Rule 3).
+   - **Control**: an account holding only the Author role on the same
+     journal lands on My Submissions, as in scenario 1 (Rule 3).
+
+   A preprint server has no Reviewer role, so only the Author and Section
+   Editor account runs there.
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — variants:
+  - the list logging nothing (Side effects): the body names no screen where
+    a log of the list's own use would be read; scenario 3 reads the mailbox
+- **Nothing new to test**:
+  - a Journal Manager who also authors seeing their authored submissions
+    like any author (Actors preamble; scenario 1's Author sees the same
+    list)
+  - revisions requested for a new round rather than the current one
+    (Rule 7a): the cell reads "Revision requested" with "Submit revisions"
+    as in scenario 4
+  - reopening the open panel's recorded address from a bookmark (Rule 8):
+    scenario 1's old author-dashboard link opens the panel from an address
+- **Register carries it**:
+  - A2 (a submission declined during review keeping the review counter;
+    Rule 7e)
+  - A3 (nothing feeding "Scheduled for publication" on a press or preprint
+    server; Rule 2; scenario 3 marks it)
+  - A4 (the editors' "Assigned To Editor" filter on a manager-author's own
+    list; Rule 5)
+  - A5 (an old link to a draft opening the workflow panel the list never
+    offers; Rule 3)
+  - OMP1 (no series filter on a press; Rule 5; scenario 3 marks it)
+- **Owned by another feature**:
+  - "Start A New Submission" beside the menu group (Rule 1; *Submission
+    wizard*, scenario 1)
+  - the site-wide login page of a multi-journal site leading to the site
+    index (Rule 3; *Login & sessions*, scenario 1)
+  - sorting and paging (Rule 4; *Submissions dashboard*, scenario 7)
+  - a wizard step merely continued past not being remembered (Rule 6;
+    *Submission wizard*, scenario 3)
+  - the uploaded file landing in the round's revisions, and the upload's
+    side effects (Rule 7a, Side effects; *Review stage & rounds*,
+    scenario 4)
+  - the grayed-out "Delete Incomplete Submissions" entry, the button
+    disabled until a selection, and Cancel or a changed view, search or
+    filter dropping the selection (Rule 9; *Submissions dashboard*,
+    scenario 12)
+  - the drafts' wizard, the workflow behind "View", and the stage states
+    and review anonymity rules the cells report (Cross-feature;
+    *Submission wizard*, *Workflow screen & stage access*, *Submission
+    stage*, *Review stage & rounds*)
 
 ## Findings register
 
@@ -622,40 +802,106 @@ count following ("Active submissions (1)"); clearing restored the rows.
 Mechanics owned by *Submissions dashboard*.
 
 <a id="fn-s1"></a>
-**s1 — scenario 1 seeding.** One roster author account holding only the
-Author role, with one submitted (not incomplete) scratch submission in the
-seeded journal. Any stage works; the Submission stage keeps the activity
-cell empty (Rule 7e), which is expected.
+**s1 — scenario 1 seeding.** The seeded journal `publicknowledge`. The
+Author is the roster's `author.alex` (Author only on all three apps), with
+one scratch submission from `POST scenarios/submission` (`submitted` at its
+default, no decisions: the Submission stage keeps the activity cell empty,
+Rule 7e; on OPS the preprint sits at Production, fn-d). The second author
+is `author.bea` (Author only); the control's Journal Manager is
+`manager.maya` (Journal Manager only, fn-a's manager-only probe).
+Addresses: the list `{journal path}/dashboard/mySubmissions`; the retired
+list address `{journal path}/submissions` (the suites reach the landing
+through it, since the sign-in fixture caches cookies at the site login and
+asserts nothing about where sign-in lands); the old author-dashboard link
+`{journal path}/authorDashboard/submission/{id}`. Denial wording per fn-a
+(the address, "The current role does not have access to this operation.")
+and fn-c (the other author's link, "You don't currently have access to that
+stage of the workflow.").
 
 <a id="fn-s2"></a>
-**s2 — scenario 2 seeding.** Same author with two scratch drafts (wizard
-started, never submitted) and one submitted submission as the
-no-checkbox control. The deletion leg runs on "Active submissions"
-because the "Incomplete submissions" view never lists a submitted row —
-the no-checkbox control is unobservable there; checkboxes-only-on-drafts
-verified on the Active view of all three apps (2026-08-26). For a
-deterministic resume step, save the first draft with "Save for Later"
-before leaving the wizard (Rule 6). OPS: the drafts sit under "Active submissions" with
-"Production" bubbles (probed 2026-08-26), and the deletion leg ends at the
-OPS2 error dialog — the suite must not assert successful deletion there
-(and must not pin the refusal as contract; it is a 🐞).
+**s2 — scenario 2 seeding.** A scratch journal from `POST scenarios/context`
+with one throwaway `author`, two drafts (`submitted: false`) and one
+submitted submission as the no-checkbox control. The scenario API has no
+saved-step key: the suite opens the first draft's wizard, continues to
+"Details" and presses "Save for Later" there before the list is opened, so
+the resume step is deterministic (Rule 6). The wizard address is
+`{journal path}/submission?id={id}` (fn-f). The deletion leg runs on
+"Active submissions" because the "Incomplete submissions" view never lists
+a submitted row: the no-checkbox control is unobservable there;
+checkboxes-only-on-drafts verified on the Active view of all three apps
+(2026-08-26). The mailbox is the mail catcher, Mailpit at
+`http://127.0.0.1:8025`, read for the author's address before and after
+the delete. OPS: the drafts sit under "Active
+submissions" with "Production" bubbles (probed 2026-08-26), and the
+deletion leg ends at the OPS2 error dialog: the suite must not assert
+successful deletion there (and must not pin the refusal as contract; it is
+a 🐞), so the two {OJS OMP} bullets after the confirm step do not run
+there.
 
 <a id="fn-s3"></a>
-**s3 — scenario 3 seeding.** Same author with two published and one
-declined scratch submissions (publish and decline via the stage features'
-builders); two published rows make the search step's narrowing observable
-("Published (2)" → "Published (1)"). The empty-view check uses whichever view holds nothing after
-seeding (e.g. "Scheduled for publication"). Decline the submission from
-the Submission stage, not mid-review, so its activity cell stays clear of
-A2's counter — probed 2026-08-26 (OJS): declined at the Submission stage,
-the row lists under "Declined" with stage bubble "Declined" and an empty
-activity cell (confirming A2 is specific to declines during review).
+**s3 — scenario 3 seeding.** A throwaway `author` from `POST
+scenarios/context` (on OJS minted in a helper context, the submissions then
+seeded in `publicknowledge`, whose issues feed the scheduled view; on OMP
+and OPS on the scratch context itself), with scratch submissions from
+`POST scenarios/submission`: two published (`decisions:
+['skipExternalReview', 'sendToProduction']`, `published: true`; on OJS
+`issue` Vol 1 No 2 (2014), the published one), one declined from the
+Submission stage (`decisions: ['initialDecline']`, not mid-review, so its
+activity cell stays clear of A2's counter: probed 2026-08-26, OJS, stage
+bubble "Declined" and an empty cell), on OJS and OMP one in Copyediting
+(`decisions: ['skipExternalReview']`, no copyedited file uploaded, hence
+"0"), and on OJS one scheduled into the unpublished issue Vol 2 No 1
+(2015) (`published: true` with that `issue`: fn-a3's control, the row
+reading "To be published in issue Vol. 2 No. 1 (2015)"). The other
+author's submission is one submitted by `author.alex` on `publicknowledge`
+or by a second throwaway author on the scratch context. Two published rows
+make the search step's narrowing observable ("Published (2)" → "Published
+(1)"); the titles carry the run's tag, the first published one being the
+search term. The empty view: "Revisions requested" on OJS and OMP, "Active
+submissions" on OPS. The Filters panel on `publicknowledge` (OJS) offers
+Section, Issues, Categories and "Days since last activity" (fn-j); a
+scratch context carries its one default section and no categories (no key
+seeds them), so on OMP and OPS the panel is expected to offer "Days since
+last activity" alone. The mail catcher, Mailpit at
+`http://127.0.0.1:8025`, is read for the author's address before and after
+the walk.
 
 <a id="fn-s4"></a>
-**s4 — scenario 4 seeding.** {OJS OMP} A scratch submission in review
-round 1 with the Request Revisions decision recorded (revisions not yet
-uploaded) and one assigned reviewer; the author account as in s1. Expected
-cell after the upload: "Review update 0/1".
+**s4 — scenario 4 seeding.** {OJS OMP} A scratch journal from `POST
+scenarios/context` with a throwaway `author` and two `externalReviewer`s
+(OMP: plus an `internalReviewer`), at the default review type
+(double-anonymous while `review.defaultReviewMode` is unset). Submissions
+from `POST scenarios/submission`: the revision-request one with
+`decisions: ['sendExternalReview', 'requestRevisions']` and one
+`reviewRounds[]` reviewer at `status: 'accepted'` (revisions not yet
+uploaded; expected cell after the upload "Review update 0/1"); the
+under-review one with `decisions: ['sendExternalReview']` and two
+reviewers, one `accepted` and one `completed` (OMP takes no
+`recommendation` key); on OMP the internal-round one with `decisions:
+['sendInternalReview', 'requestRevisionsInternal']` and a `reviewRounds[]`
+entry with `stage: 'internal'` and the internal reviewer `accepted` (fn-g:
+the upload lands in the internal round). The second journal is a further
+scratch context created with `review: {defaultReviewMode: 'open'}`, its own
+throwaway author and reviewer, and one submission with `decisions:
+['sendExternalReview']` and its reviewer `completed`: the review method is
+stamped from the context's default at assignment time (scenarios.md), which
+is why the open and the anonymous completed reviews sit on different
+journals. The uploaded file is a small text file named after the run's
+tag, walked through the shared three-step upload helper. Counter and
+popover wording per fn-h.
+
+<a id="fn-s5"></a>
+**s5 — scenario 5 seeding.** A scratch journal from `POST scenarios/context`
+with four throwaway accounts: `roles: ['author', 'externalReviewer']`,
+`['author', 'sectionEditor']`, `['sectionEditor', 'externalReviewer']` and
+`['author']` (the control); on OPS, which has no reviewer key, only the
+`['author', 'sectionEditor']` account (its Section Editor is the Moderator
+group) and the control. Landings per fn-c: the reviewer dashboard is
+`dashboard/reviewAssignments`, the Dashboard `dashboard/editorial` (its
+"Assigned to me" view), My Submissions `dashboard/mySubmissions`; the
+suites may reach each landing through the retired `{journal
+path}/submissions` address, which forwards the same way (Rule 3), as
+scenario 1's does.
 
 <a id="fn-a1"></a>
 **a1 — A1 evidence.** `dashboard.reviewUpdateCounts` and the

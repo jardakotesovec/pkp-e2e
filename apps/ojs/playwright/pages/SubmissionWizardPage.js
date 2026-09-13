@@ -570,12 +570,27 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         ).toBeVisible({timeout: 45_000});
     }
 
+    /** The "Saved for Later" screen's heading (the answer to Save for Later). */
+    savedForLaterHeading() {
+        return this.page.getByRole('heading', {name: 'Saved for Later'});
+    }
+
     /** Press Save for Later, land on the "Saved for Later" screen. */
     async saveForLater() {
         await this.saveForLaterButton().click();
-        await expect(
-            this.page.getByRole('heading', {name: 'Saved for Later'})
-        ).toBeVisible({timeout: 45_000});
+        await expect(this.savedForLaterHeading()).toBeVisible({timeout: 45_000});
+    }
+
+    /**
+     * Walk an open draft's wizard forward to the named step with Continue
+     * and press Save for Later there, so "Complete submission" later
+     * reopens the wizard at that step (U22 Rule 6, fn-s2: the scenario API
+     * has no saved-step key). A seeded draft opens on "Upload Files";
+     * "Details" is one Continue on.
+     */
+    async saveForLaterAt(stepName) {
+        await this.continueTo(stepName);
+        await this.saveForLater();
     }
 
     /** The "Change Submission Settings" side panel. */

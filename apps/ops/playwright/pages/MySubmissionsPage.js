@@ -14,7 +14,8 @@
  *
  * The re-anchoring is a mixin (`withOpsWorkflowPanel`) because the same
  * panel serves the editorial dashboard too — the OPS EditorialDashboardPage
- * applies it on top of the shared editorial POM.
+ * applies it on top of the shared editorial POM. The subclass adds OPS's
+ * own label for the editors' assignment filter (U22 Rule 5).
  */
 const {expect} = require('@playwright/test');
 const {MySubmissionsPage: SharedMySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
@@ -61,4 +62,24 @@ exports.withOpsWorkflowPanel = withOpsWorkflowPanel;
 
 exports.MySubmissionsPage = class MySubmissionsPage extends withOpsWorkflowPanel(
     SharedMySubmissionsPage
-) {};
+) {
+    /**
+     * The editors' assignment filter under OPS's own label, "Assigned to
+     * Moderator" (the app's editor.po; a journal's reads "Assigned To
+     * Editor"): absent from an author-only account's Filters panel (U22
+     * Rule 5), so a suite asserting that absence names both labels.
+     */
+    assignedToModeratorField() {
+        return this.filterField('Assigned to Moderator');
+    }
+
+    /**
+     * Every editors'-assignment label the Filters panel could carry on a
+     * preprint server: the lib/pkp wording and OPS's override. Both are
+     * absent for an author-only account; the days filter beside them is
+     * the positive control.
+     */
+    editorAssignmentFilterLabels() {
+        return ['Assigned To Editor', 'Assigned to Moderator'];
+    }
+};

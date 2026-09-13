@@ -297,6 +297,22 @@ function uploadWizardDialog(page) {
 }
 exports.uploadWizardDialog = uploadWizardDialog;
 
+/** The upload wizard's step tabs ("1. Upload File", "2. Review Details", "3. Confirm"). */
+exports.uploadWizardSteps = function uploadWizardSteps(dialog) {
+    return dialog.getByRole('tab');
+};
+
+/**
+ * Any titled heading inside the upload wizard's side modal (the Vue side
+ * modal's h1 is filled from the legacy options' title). The revision-upload
+ * wizard the author's list opens has no title of its own (U22 Rule 7a), so
+ * this locator is expected empty there; the step tabs are the positive
+ * control that the dialog's text is being read.
+ */
+exports.uploadWizardTitles = function uploadWizardTitles(dialog) {
+    return dialog.getByRole('heading').filter({hasText: /\S/});
+};
+
 /**
  * The wizard's first step: pick the component and attach the file, then
  * wait until the transfer has landed (the step's "Continue" enables only

@@ -18,7 +18,8 @@
  *
  * Added on the 2026-09-12 revision: the rail's reached/unreached entries
  * and "Back", the start form's legends and section policy, the required
- * mark, Review items and the bare 404 page.
+ * mark, Review items and the bare 404 page. Added for U22's 2026-09-13
+ * revision: `saveForLaterAt` (a draft saved on a named step).
  */
 const path = require('path');
 const {expect} = require('../support/fixtures.js');
@@ -389,6 +390,17 @@ async function saveForLater(page) {
     ).toBeVisible({timeout: 30_000});
 }
 
+/**
+ * Continue from the open step to the named step and save there with "Save
+ * for Later" (U22 fn-s2: the wizard resumes only at a SAVED step, and the
+ * scenario API has no saved-step key). Resolves on the Saved for Later
+ * screen.
+ */
+async function saveForLaterAt(page, label) {
+    await continueTo(page, label);
+    await saveForLater(page);
+}
+
 /** Open the "Change Submission Settings" panel from the header line. */
 async function openChangeSettings(page) {
     await submittingToLine(page).getByRole('button', {name: 'Change'}).click();
@@ -633,6 +645,7 @@ module.exports = {
     confirmSubmit,
     completeAndSubmitDraft,
     saveForLater,
+    saveForLaterAt,
     cancelDraft,
     openChangeSettings,
 };

@@ -163,7 +163,10 @@ trips.
   workers, `.reports/U05/final-run-ojs.log`: the same `aria-disabled="true"`
   tab for 63 polls after the hardened accept, the one red of 209; green
   alone in 49 s, `.reports/U05/u28s10-rerun-0913.log`); the bounded retry
-  did not cover it, so the leg needs a second look.
+  did not cover it, so the leg needs a second look. Tripped again the same
+  day (U22 revision session, the second OJS final at four workers,
+  `.reports/U22/final-run-ojs-attempt2.log`: the same tab, 63 polls, the
+  one red of 212).
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a
@@ -190,7 +193,10 @@ trips.
   four-worker full-run class on this VM: red in four of the seven OJS
   finals of 2026-09-13 (attempts 2, 3, 6 and 7, both variants,
   `.reports/U05/final-run-ojs-attempt{2,3,6,7}.log`), the one red of 209
-  in the last. Next step as above: a retained trace of the table's fetches.
+  in the last, and in the fourth OJS final of the U22 revision session
+  the same day (`.reports/U22/final-run-ojs-attempt4.log`, the table not
+  found for 30 s, one of two reds in 212). Next step as above: a retained
+  trace of the table's fetches.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -244,7 +250,29 @@ trips.
   to the scratch press's `/orcid/about` ran to the 60 s test timeout in the
   second U06 revision local final 2026-09-13 (load 15–19 on the Mac from
   the desktop, `.reports/U06/final-run-omp-run2-red.log`); green alone in
-  5.4 s. **Watch condition**: a second incident, or one on the VM or CI.
+  5.4 s. **Watch condition tripped 2026-09-13** (U22 revision session,
+  the first OJS final at four workers on the VM,
+  `.reports/U22/final-run-ojs-attempt1.log`: U05 S6's `page.goto` of the
+  emailed unsubscribe link on worker 8002 ran to the 240 s test timeout,
+  the one red of 212; green in the next full run, red the same way in
+  the third and the fourth, `.reports/U22/final-run-ojs-attempt{3,4}.log`,
+  three of four). The worker
+  server's log settles where it hangs: the second `goto` of the link,
+  right after the same browser's other tab signed in and was closed,
+  never reaches the server (the journal's last request is the closed
+  tab's dashboard poll, six seconds earlier), so it is the browser, not
+  the app; the OMP incident above was not traced. Two of three OJS
+  finals on the VM: the leg wants the closed tab's requests settled (or a
+  fresh page) before the `goto`, U05's session to decide.
+- **Submission wizard "Continue" not advancing under load** (U04 S10,
+  OMP, once). The wizard's rail stayed on "2 Details" for the 20 s wait
+  of `SubmissionWizardPages.continueTo()` after the Continue press in the
+  first OMP final of the U22 revision session (2026-09-13, four workers
+  on the VM, `.reports/U22/final-run-omp-attempt1.log`, the one red of
+  210); green in the next full run (`.reports/U22/final-run-omp.log`).
+  The same shape as the review wizard's accept leg above, on the
+  submission wizard's own rail. **Watch condition**: a second incident;
+  then `continueTo()` gets the same content-verified bounded retry.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop
