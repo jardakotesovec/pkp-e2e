@@ -220,7 +220,7 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
                 // 24% of the OJS wall time for 4% of the work (2026-09-13).
                 name: `${appName}-serial`,
                 testDir: path.join(appTestDir, 'serial'),
-                workers: Math.min(4, workers),
+                workers,
                 dependencies: ['shared', appName],
             },
         ],
