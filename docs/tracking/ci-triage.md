@@ -156,6 +156,11 @@ trips.
   (press, wait up to 10 s for step 2 to become current, press again while
   the accept button is still offered, at most three presses). **Watch
   condition**: the hardened leg reds again with its retry exhausted.
+  **Tripped 2026-09-13** (U05 revision session, the OJS final at four
+  workers, `.reports/U05/final-run-ojs.log`: the same `aria-disabled="true"`
+  tab for 63 polls after the hardened accept, the one red of 209; green
+  alone in 49 s, `.reports/U05/u28s10-rerun-0913.log`); the bounded retry
+  did not cover it, so the leg needs a second look.
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a
@@ -170,7 +175,53 @@ trips.
   unreachable without a token. **Watch condition**: a second full-run
   incident, or a red on CI's fresh database; then read the table's own
   fetches in a retained trace (`--trace retain-on-failure`) before the
-  opener re-presses.
+  opener re-presses. **Tripped 2026-09-13** (U05 revision session, the
+  second OJS final of the day on the database the first had used,
+  `.reports/U05/final-run-ojs-attempt2.log`: the "Author Response" table
+  not found for 30 s, one of two reds in 209). **Red again on a reset
+  database** the same day: the third OJS final, run right after
+  `fleet-prep --reset --apps ojs`, red on U30 S4 alone (208 passed,
+  `.reports/U05/final-run-ojs-attempt3.log`, this time the co-author
+  row's "More Actions" button re-attaching for the whole 180 s test
+  timeout, the second variant above), so the used-database reading no longer holds: it is a
+  four-worker full-run class on this VM: red in four of the seven OJS
+  finals of 2026-09-13 (attempts 2, 3, 6 and 7, both variants,
+  `.reports/U05/final-run-ojs-attempt{2,3,6,7}.log`), the one red of 209
+  in the last. Next step as above: a retained trace of the table's fetches.
+- **Participants menu still open after the impersonation return** (U01
+  S7, OJS, once). In the fourth OJS final of the U05 revision session
+  (2026-09-13, four workers, `.reports/U05/final-run-ojs-attempt4.log`)
+  the assertion that the Participants panel's menu holds no item after
+  "Login As" and the return found two items for 10 s; the only red of
+  209, the same test green in the three finals before it. **Tripped the
+  same day**: the fifth final, on the same database (used by the two
+  finals before it), red on the same assertion alone
+  (`.reports/U05/final-run-ojs-attempt5.log`); the assertion is the
+  second press of the Editor's own "More Actions" button meant to close
+  the menu, so under load the press lands while the panel re-renders and
+  the menu stays open. Red again in the sixth final, on a reset database,
+  and alone right after it (`.reports/U05/u01s7-rerun-0913.log`), so not
+  a used-database class. **Diagnosed and fixed 2026-09-13** (probe record
+  `.reports/U05/diag-u01s7.md`): the step is `UsersRolesMenu.close()`
+  on the Users & Roles row menu, and the race is the page object's: the
+  bundled headlessui MenuButton moves focus into the menu two animation
+  frames (23–41 ms) after the click and handles Escape only there, so
+  an Escape sent to the page inside that window hits the button and is
+  ignored; the suite's open, two expects and close run in about the
+  same 20–40 ms, so load tips it. The OJS `close()` and OPS
+  `closeMenu()` now press Escape on the menu element itself (focus
+  first); green alone on both (`.reports/U05/u01s7-rerun2-0913.log`,
+  `.reports/U05/ops-u01-closemenu-0913.log`). **Watch condition**: the
+  hardened close reds again.
+- **Enroll-reviewer form's "This field is required." not shown under
+  load** (U27 S4, OJS, once). In the same 2026-09-13 second OJS final
+  (`.reports/U05/final-run-ojs-attempt2.log`, U05 revision session, four
+  workers, a used database) the "Add Reviewer" press on the empty
+  "Enroll Existing User" form showed no "This field is required." for
+  30 s; green alone in 14 s on the same database
+  (`.reports/U05/u27s4-rerun-0913.log`). **Watch condition**: a second
+  sighting; then retain a trace to see whether the press reached the
+  server or the form re-rendered.
 - **ORCID connect popup not arriving under load** (U04 S2, OJS, once).
   The `waitForEvent('popup')` after the profile's connect button ran to
   the 60 s test timeout while three suites shared the VM (2026-09-12,

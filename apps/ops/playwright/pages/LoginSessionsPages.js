@@ -174,7 +174,11 @@ exports.UsersRolesTable = class UsersRolesTable extends BasePage {
     }
 
     async closeMenu() {
-        await this.page.keyboard.press('Escape');
+        // headlessui moves focus into the menu a frame after the button's
+        // click and handles Escape only there; an Escape sent to the page
+        // in that frame hits the button and is ignored (ci-triage, U01 S7,
+        // 2026-09-13). Pressing it on the menu itself focuses it first.
+        await this.items.first().locator('xpath=ancestor::*[@role="menu"][1]').press('Escape');
         await expect(this.items).toHaveCount(0);
     }
 

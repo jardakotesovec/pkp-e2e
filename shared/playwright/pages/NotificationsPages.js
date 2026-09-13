@@ -12,7 +12,10 @@
  * - `UnsubscribePage` — the reader-facing page a notification email's
  *   footer link opens (`templates/notification/unsubscribeNotificationsForm.tpl`
  *   and `…Result.tpl`; Rule 8);
- * - the toast helpers (`layouts/backend.tpl` `.app__notifications`; Rule 9).
+ * - the toast helpers (`layouts/backend.tpl` `.app__notifications`; Rule 9);
+ * - `ReaderHeader` — the reader-facing header's user menu
+ *   (`frontend/components/header.tpl` `#navigationUserWrapper`): the
+ *   signed-in name with its unread count and the entries under it (Rule 4).
  *
  * App neutrality (PRINCIPLES M2): every string here is a lib/pkp string
  * shared by the three apps ("Tasks", "Close", "Mark Read", "Mark New",
@@ -39,7 +42,21 @@
  *   "Unsubscribe", `form#unsubscribeNotificationForm` with one
  *   `input#emailNotification{Type}` per row (every one ticked on arrival),
  *   the "user profile" link and a `button.submit` "Unsubscribe"; the result
- *   page has no form and the same address (wait on the POST, not the URL).
+ *   page has no form and the same address (wait on the POST, not the URL);
+ * - a broken footer link answers the bare page `<h1>404 Not Found</h1>`,
+ *   no title, no journal header (probed 2026-09-13, `.reports/U05/tojs`);
+ * - the reader-side user menu is `#navigationUserWrapper > ul > li > a`
+ *   (the name, `data-toggle="dropdown"`) holding `span.task_count` for the
+ *   roles Rule 4 names, and under it a hidden `ul.dropdown-menu` whose
+ *   entries are links ("Dashboard" with its own `span.task_count` where the
+ *   name has one, "View Profile", "Logout"); the entries are in the DOM but
+ *   hidden until the name is pressed (probed 2026-09-13, `.reports/U05/tojs`);
+ * - a task row's text link (`a.pkp_linkaction_details`) is shorter than its
+ *   cell, so the cell's bottom-right corner is the blank part of the row
+ *   (Rule 2c; probed 2026-09-13, the window stayed open);
+ * - a toast lives 5 s (`Page.vue` `expire: Date.now() + 5000`), swept every
+ *   250 ms unless the pointer rests on the toast area (`:hover` on the
+ *   container pauses the sweep for every toast).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
@@ -64,10 +81,47 @@ function toastCloseButton(toast) {
     return toast.getByRole('button', {name: 'Close'});
 }
 
+/** How long a toast lives once the pointer is off the toast area (`Page.vue`). */
+const TOAST_LIFETIME_MS = 5000;
+
+/**
+ * `below` is stacked under `above` (Rule 9: each new toast under the last):
+ * both visible, and the second's top edge below the first's.
+ */
+async function expectStackedBelow(above, below) {
+    await expect(above).toBeVisible();
+    await expect(below).toBeVisible();
+    const [top, bottom] = await Promise.all([above.boundingBox(), below.boundingBox()]);
+    expect(top, 'the upper toast has a box').toBeTruthy();
+    expect(bottom, 'the lower toast has a box').toBeTruthy();
+    expect(bottom.y).toBeGreaterThan(top.y);
+}
+
+/**
+ * Rest the pointer on `toast` and hold it there past the toast's own
+ * lifetime, reading it visible all the while (the one claim in this spec
+ * that only the app's own timer bounds: "stays while the pointer rests on
+ * it"); then move the pointer off and wait for the toast to disappear by
+ * itself. `lifetimeMs` is the app's constant, never a guess.
+ */
+async function expectStaysWhileHovered(page, toast, {lifetimeMs = TOAST_LIFETIME_MS} = {}) {
+    await toast.hover();
+    const start = Date.now();
+    while (Date.now() - start < lifetimeMs + 1000) {
+        await expect(toast).toBeVisible();
+        await page.waitForTimeout(250);
+    }
+    await page.mouse.move(0, 0);
+    await expect(toast).toBeHidden({timeout: lifetimeMs + 10_000});
+}
+
 exports.DISCUSSION_TASK = DISCUSSION_TASK;
+exports.TOAST_LIFETIME_MS = TOAST_LIFETIME_MS;
 exports.toasts = toasts;
 exports.successToasts = successToasts;
 exports.toastCloseButton = toastCloseButton;
+exports.expectStackedBelow = expectStackedBelow;
+exports.expectStaysWhileHovered = expectStaysWhileHovered;
 
 exports.TasksPanel = class TasksPanel extends BasePage {
     /**
@@ -97,6 +151,16 @@ exports.TasksPanel = class TasksPanel extends BasePage {
             count ? new RegExp(`^\\s*Tasks\\s*${count}\\s*$`) : /^\s*Tasks\s*$/,
             {timeout: 30_000}
         );
+    }
+
+    /** The badge's number as the bell shows it now (0 when there is no badge). */
+    async count() {
+        const text = (await this.bell().innerText()).replace(/\s+/g, ' ').trim();
+        const match = text.match(/^Tasks(?: (\d+))?$/);
+        if (!match) {
+            throw new Error(`TasksPanel.count: the bell reads "${text}"`);
+        }
+        return match[1] ? Number(match[1]) : 0;
     }
 
     // ---------------------------------------------------------------------
@@ -137,6 +201,25 @@ exports.TasksPanel = class TasksPanel extends BasePage {
     /** The row(s) carrying `text` (a sentence, a title or both). */
     row(text) {
         return this.rows().filter({hasText: text});
+    }
+
+    /** The row(s) whose sentence matches `pattern` (a RegExp on the `.message`). */
+    rowsOpening(pattern) {
+        return this.rows().filter({has: this.page.locator('.task .message', {hasText: pattern})});
+    }
+
+    /**
+     * Every row as "{sentence} | {title}" in the window's order, read in one
+     * pass so two windows can be compared (Rule 2d: the same rows from any
+     * journal's editorial page and from the site-level Profile page).
+     */
+    async rowTexts() {
+        return this.rows().evaluateAll((rows) =>
+            rows.map((row) => {
+                const text = (selector) => (row.querySelector(selector)?.textContent || '').replace(/\s+/g, ' ').trim();
+                return `${text('.task .message')} | ${text('.task .details .submission')}`;
+            })
+        );
     }
 
     /** The empty list's "No Items" cell. */
@@ -184,6 +267,23 @@ exports.TasksPanel = class TasksPanel extends BasePage {
      */
     async openTask(row) {
         await this.link(row).click();
+    }
+
+    /**
+     * Press the blank part of the row (Rule 2c): the task cell's bottom-right
+     * corner, below the link that wraps the sentence and the title. Nothing
+     * happens: the window stays open with the row as it was, on the same
+     * address; the caller's next press of the link is the positive control.
+     */
+    async pressBlankPart(row) {
+        const cell = row.locator('td').last();
+        const box = await cell.boundingBox();
+        expect(box, 'the task cell has a box').toBeTruthy();
+        const address = this.page.url();
+        await cell.click({position: {x: box.width - 4, y: box.height - 4}});
+        await expect(this.dialog()).toBeVisible();
+        await expect(row).toBeVisible();
+        await expect(this.page).toHaveURL(address);
     }
 
     // ---------------------------------------------------------------------
@@ -283,4 +383,105 @@ exports.UnsubscribePage = class UnsubscribePage extends BasePage {
     resultSentence() {
         return this.page.locator('.page_unsubscribe_notifications p').first();
     }
+
+    /**
+     * Rule 8a's three broken links, built from an emailed one
+     * (`…/unsubscribe?validate={code}&id={n}`): `codeOnly` (everything from
+     * the "&" on deleted), `idOnly` (the code and its name cut out, so the
+     * address ends "?id={n}") and `unknownId` (intact, 999999999 in place
+     * of the notification number).
+     */
+    static brokenLinks(link) {
+        if (!/\/notification\/unsubscribe\?validate=[^&]+&id=\d+$/.test(link)) {
+            throw new Error(`UnsubscribePage.brokenLinks: unexpected link shape ${link}`);
+        }
+        return {
+            codeOnly: link.replace(/&id=\d+$/, ''),
+            idOnly: link.replace(/validate=[^&]+&/, ''),
+            unknownId: link.replace(/id=\d+$/, 'id=999999999'),
+        };
+    }
+
+    /**
+     * Open `url` and read the bare "404 Not Found" page (Rule 8a): the
+     * response is a 404, the page's whole text is that heading, and no
+     * journal header or Unsubscribe form is on it.
+     */
+    async expectNotFound(url) {
+        const response = await this.page.goto(url);
+        expect(response, 'a response').toBeTruthy();
+        expect(response.status(), `${url} answered`).toBe(404);
+        await expect(this.page.getByRole('heading', {name: '404 Not Found', exact: true})).toBeVisible();
+        await expect(this.page.locator('body')).toHaveText(/^\s*404 Not Found\s*$/);
+        await expect(this.page.locator('#navigationUserWrapper')).toHaveCount(0);
+        await expect(this.form).toHaveCount(0);
+    }
+
+    /** Press "user profile" (Rule 8e); the caller asserts the landing (Login or the Profile page). */
+    async pressProfileLink() {
+        await this.profileLink().first().click();
+        await this.page.waitForLoadState('domcontentloaded');
+    }
 };
+
+exports.ReaderHeader = class ReaderHeader extends BasePage {
+    /**
+     * The reader-facing header's user menu (Rule 4): the signed-in name
+     * (a dropdown toggle) with its unread count where the role has one, and
+     * the entries under it ("Dashboard", "View Profile", "Logout"; a Site
+     * Administrator also "Administration").
+     *
+     * @param {import('@playwright/test').Page} page a reader-facing page (a journal's or the site's home)
+     */
+    constructor(page) {
+        super(page);
+        this.wrapper = page.locator('#navigationUserWrapper');
+        this.toggle = this.wrapper.locator('> ul > li > a[data-toggle="dropdown"]');
+        this.menu = this.wrapper.locator('ul.dropdown-menu');
+    }
+
+    /** The count beside the name (`span.task_count` inside the toggle). */
+    nameCount() {
+        return this.toggle.locator('span.task_count');
+    }
+
+    /** "{name} {count}": the name is followed by the number the bell shows (Rule 4). */
+    async expectCount(username, count) {
+        await expect(this.toggle).toBeVisible({timeout: 30_000});
+        await expect(this.nameCount()).toHaveText(String(count));
+        await expect(this.toggle).toHaveText(new RegExp(`^\\s*${escapeRegExp(username)}\\s+${count}\\s*$`));
+    }
+
+    /** The bare name: no count element and no number after the name (Rule 4). */
+    async expectBareName(username) {
+        await expect(this.toggle).toBeVisible({timeout: 30_000});
+        await expect(this.toggle).toHaveText(new RegExp(`^\\s*${escapeRegExp(username)}\\s*$`));
+        await expect(this.nameCount()).toHaveCount(0);
+    }
+
+    /** Press the name: the entries under it show. */
+    async open() {
+        await this.toggle.click();
+        await expect(this.entry('View Profile')).toBeVisible({timeout: 30_000});
+    }
+
+    /** An entry under the name, by the start of its text ("Dashboard" matches "Dashboard 1"). */
+    entry(name) {
+        return this.menu.getByRole('link', {name: new RegExp(`^${escapeRegExp(name)}(\\s+\\d+)?$`)});
+    }
+
+    /** The count after "Dashboard" (`span.task_count` inside that entry). */
+    dashboardCount() {
+        return this.entry('Dashboard').locator('span.task_count');
+    }
+
+    /** The open menu's entries, as their texts with whitespace collapsed. */
+    async entryTexts() {
+        const texts = await this.menu.getByRole('link').allInnerTexts();
+        return texts.map((text) => text.replace(/\s+/g, ' ').trim());
+    }
+};
+
+function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

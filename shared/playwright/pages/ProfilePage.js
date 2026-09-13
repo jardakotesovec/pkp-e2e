@@ -660,6 +660,12 @@ exports.ProfilePage = class ProfilePage extends BasePage {
         });
     }
 
+    /** Every row's sentence, in screen order, groups flattened. */
+    async notificationSentences() {
+        const table = await this.notificationTable();
+        return table.flatMap((entry) => entry.rows);
+    }
+
     /** All "Enable these types of notifications." boxes. */
     allowBoxes() {
         return this.form('notifications').getByRole('checkbox', {
