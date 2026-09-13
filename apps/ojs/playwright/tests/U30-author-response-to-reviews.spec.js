@@ -443,7 +443,6 @@ test.describe('author response to reviews', () => {
         }
 
         // The editor sees the response and gains the row menu; and is not told.
-        await editorPage.reload();
         await editorWorkflow.gotoEditorial(submissionId);
         await table.expectVisible();
         await table.expectStatus(ALEX, STATUS.submittedBy(ALEX));
@@ -545,7 +544,6 @@ test.describe('author response to reviews', () => {
 
         // The editor sees the second response; the activity log holds the
         // request email row and none for the response's edit/delete.
-        await managerPage.reload();
         await managerWorkflow.gotoEditorial(submissionId);
         await table.expectStatus(ALEX, STATUS.submittedBy(ALEX));
         await expect(table.moreActions(ALEX)).toBeVisible();
@@ -704,7 +702,6 @@ test.describe('author response to reviews', () => {
             const readModal = await openReviewDetails(page, reviewerRow);
             await markReviewComplete(page, readModal);
             await closeReviewDetails(page, readModal);
-            await page.reload();
             await workflow.gotoEditorial(submissionId);
             await table.expectStatus('Ada Writer', STATUS.ready);
             await expect(table.requestResponseButton()).toBeEnabled();
