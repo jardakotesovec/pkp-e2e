@@ -31,19 +31,38 @@ function runJobs({appRoot = process.env.PKP_APP_ROOT, timeoutMs = 180_000} = {})
     if (!appRoot) {
         throw new Error('runJobs: appRoot missing (PKP_APP_ROOT unset — run through the app playwright.config.js)');
     }
-    try {
-        return execFileSync('php', ['lib/pkp/tools/jobs.php', 'run'], {
-            cwd: appRoot,
-            env: process.env, // PKP_CONFIG_FILE points the tool at the test config
-            encoding: 'utf8',
-            timeout: timeoutMs,
-            maxBuffer: 16 * 1024 * 1024,
-        });
-    } catch (error) {
-        if (error && typeof error.stdout === 'string') {
-            return error.stdout;
+    const jobs = (command) => {
+        try {
+            return execFileSync('php', ['lib/pkp/tools/jobs.php', command], {
+                cwd: appRoot,
+                env: process.env, // PKP_CONFIG_FILE points the tool at the test config
+                encoding: 'utf8',
+                timeout: timeoutMs,
+                maxBuffer: 16 * 1024 * 1024,
+            });
+        } catch (error) {
+            if (error && typeof error.stdout === 'string') {
+                return error.stdout;
+            }
+            throw error;
         }
-        throw error;
+    };
+    const output = jobs('run');
+    // The serial project runs on several workers, and a job this test
+    // dispatched may be reserved by another worker's runner at this moment:
+    // "run" then returns with the job still executing. Wait until the queue
+    // (reserved jobs included) is empty, so the caller's side effects exist
+    // when it looks for them ("We have N queued jobs" is the total's report).
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+        const total = jobs('total').match(/We have (\d+) queued jobs/);
+        if (!total || total[1] === '0') {
+            return output;
+        }
+        if (Date.now() > deadline) {
+            throw new Error(`runJobs: ${total[1]} jobs still queued after ${timeoutMs} ms`);
+        }
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
     }
 }
 
