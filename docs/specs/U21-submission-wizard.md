@@ -207,7 +207,11 @@ itself enforces before submission is Rule 13.
     is supported), plus the section on a journal or preprint server, or the
     Submission Type on a press [OMP1](#omp1). Saving applies the change and
     reloads the wizard so every step reflects it. A section change can
-    change what the Details step requires (Rule 13). With only one language
+    change what the Details step requires (Rule 13). A language change
+    saves the language only; the Review step then asks for the new
+    language's title, metadata, contributor names and typed institution
+    names, the ones copied from the author's profile included [A13](#a13).
+    With only one language
     and one open section, no "Submitting to…" line or "Change" control
     appears at all. The exception is a press, where the work-type line and
     its "Change" control always remain, because the type can always be
@@ -935,6 +939,7 @@ are the source; badges, Impact and Basis:
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
 | [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all; "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | ✅ | retired | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
+| [A13](#a13) | Changing the submission language inside the wizard leaves every language-bound value, the copied contributor affiliation and given name included, to be filled for the new language before submitting | ✅ | — | @jarda.kotesovec 2026-09-12 · intended |
 | [OMP1](#omp1) | A press submits by work type (Monograph / Edited Volume), with no section at intake and an optional Series later | ✅ | — | — |
 | [OPS1](#ops1) | A preprint server's wizard is galley-based and single-stage: license & relation questions, moderation-aware messaging, can-post variants | ✅ | — | — |
 
@@ -1060,6 +1065,31 @@ force: no acknowledgement goes out, and saving the screen again keeps it
 so. But the screen no longer says which option applies, so a manager
 cannot tell "off" from a choice never made. Basis: probe.
 <sup>[fn-a12](#fn-a12)</sup>
+
+<a id="a13"></a>
+**A13 — Changing the language mid-wizard asks for the new language's values, the copied affiliation included** · ✅ · intended.
+The Details step's "Change" lets the author switch the submission
+language after the draft exists. The change saves the language and
+nothing else, and the wizard leans on the Review step's check for what the
+new language still lacks: the title, the required metadata, each
+contributor's given name and each typed institution's name. The
+contributor record copied from the author's profile is one of those
+values, so the Contributors panel reads "The primary language French
+(Canada) is required" under Affiliations and Review refuses with "The
+affiliation name is missing in French (Canada) for one or more
+affiliations for one or more of the contributors." until it is typed. A
+registry-picked institution has no per-language name and is exempt, which
+is why authors whose profile text matched a registry record never saw the
+prompt while the profile copy still linked such matches; since
+2026-09-12 the copy is always a typed name (pkp/pkp-lib#13317), so they
+see it like everyone else. Copying values into a new language happens
+only on the workflow's language change after submission.
+Since: 2026-09-12 · Basis: probe. <sup>[fn-a13](#fn-a13)</sup>
+
+> **Reviewed — @jarda.kotesovec, 2026-09-12**: ✅ intended (was ❓). The
+> wizard's language change relies on validation and the author updates
+> the inputs for the new language; the copy-over belongs to the
+> post-submission language change.
 
 ### OMP
 
@@ -1830,6 +1860,37 @@ Workflow → Emails reopened after saving "Do not send an email." listed
 only." and "Do not send an email." all unchecked, and the acknowledgement
 stayed off. The form is the shared lib/pkp Emails settings form, so OMP
 and OPS are expected to match; not reopened there.
+
+<a id="fn-a13"></a>
+**fn-a13** — Language change and the copied contributor. The wizard's
+"Change Submission Settings" form PUTs `submissions/{id}`
+(`PKPSubmissionController::edit()`), which saves the new `locale` and
+nothing else; only the workflow's `changeLocale` route calls
+`copyMultilingualData()`. `Repo::affiliation()->migrateUserAffiliation()`
+fills the submission locale from the profile's default-locale text at
+draft creation only (pkp/pkp-lib#13317, issue #13274; before it a profile
+text with an exact registry match became a `ror` link with no name, which
+`validateSubmit()` skips). Driven 2026-09-12 on OJS at the ojs PR head
+`75df364d49` / pkp-lib `3f82add062`, before the merge (kept as
+`checks/sync/pkp-lib-13317/wizard-locale-change.js`): scratch journal en +
+fr_CA, two authors with the English profile text "Registry University …"
+and a cached registry record planted under exactly that text; drafts
+started in en carried the text as `name.en` with `ror` null; "Change" →
+French (Canada) → Save answered 200 and left `submissions.locale` =
+`fr_CA` with the affiliation and the given name still `{en}`; the Edit
+panel's Affiliations table read "The primary language French (Canada) is
+required / 1 of 2 languages completed / Type the institution name in
+French (Canada)"; Review showed the problems banner with "The given name
+is missing in French (Canada) for one or more of the contributors." for
+the author whose given name was en only and "The affiliation name is
+missing in French (Canada) for one or more affiliations for one or more of
+the contributors." for the one with both. The same run without a registry
+record at the OJS tip `cea48a066b` (before the PR) showed the same two
+messages, so the limitation predates the PR for typed text; the same
+planting at pkp-lib `b48c22ca06` stored the `ror` and no name, the
+population the PR moves. Not driven on OMP or OPS (their checkouts lack
+the change; the wizard code is shared). Ruled expected by
+@jarda.kotesovec in the session's thread, 2026-09-12.
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds

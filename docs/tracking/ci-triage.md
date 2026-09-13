@@ -154,6 +154,27 @@ trips.
   (press, wait up to 10 s for step 2 to become current, press again while
   the accept button is still offered, at most three presses). **Watch
   condition**: the hardened leg reds again with its retry exhausted.
+- **Author Response table re-rendering on a used database** (U30 S4,
+  OJS). The editor's "Author Response" table on the co-author scenario
+  keeps re-rendering: the opener's reload waited 30 s for the table in a
+  full run at four workers (2026-09-12, companion `13274` at the ojs PR
+  ref `75df364d49`, `.reports/sync/pr13274-final-ojs.log`), and alone on
+  that used database the co-author row's "More Actions" button was
+  detached and re-attached for the whole 180 s test timeout, at the PR ref
+  and at the OJS tip `cea48a066b` alike; green in 15 s on a reset database
+  at both refs, twice in a row, and in the second full run (209 passed).
+  Same family as U01 S8: state accumulated by a full run. The ojs PR's own
+  CI run 34683529824 (21 min, red) fits it, its per-test detail being
+  unreachable without a token. **Watch condition**: a second full-run
+  incident, or a red on CI's fresh database; then read the table's own
+  fetches in a retained trace (`--trace retain-on-failure`) before the
+  opener re-presses.
+- **ORCID connect popup not arriving under load** (U04 S2, OJS, once).
+  The `waitForEvent('popup')` after the profile's connect button ran to
+  the 60 s test timeout while three suites shared the VM (2026-09-12,
+  merge of companion `13274`, `.reports/sync/merge13274-ojs.log`); green
+  alone in 5.5 s. **Watch condition**: a second incident, or one at four
+  workers alone on the VM.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop
