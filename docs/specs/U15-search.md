@@ -48,7 +48,7 @@ Distribution settings say otherwise (Rule 13). <sup>a</sup>
 | **Open the site-wide Search page** | • Any visitor, by typing its address (Rule 10 gives its form); no link on the site's pages leads there <sup>i</sup> |
 | **Search, refine by date, page through results** | • Anyone who can open the page. There is nothing to sign in for and nothing a role adds <sup>a</sup> |
 | **See an article that is not published in the results** | • Nobody, whatever their role: the results hold only articles that have a published version, and a decline alone does not unpublish (Rule 2) <sup>c</sup> |
-| **Open a found article** | • Anyone, on an open-access article. On a journal whose content is behind subscriptions, the result is listed for everyone and the article page itself decides what the reader may open (Rule 16) <sup>f</sup> |
+| **Open a found article** | • Anyone, on an open-access article. On a journal whose content is behind subscriptions, the result is listed for everyone and the article page itself decides what the reader may open (Rule 16). On a press or server, a declined article's result opens "404 Not Found" for a visitor (Rule 2, [OMP3](#omp3) [OPS4](#ops4)) <sup>f</sup> |
 | **Rebuild the search index** | • The site's system administrator, from the command line on the server, with the tool named in the Reference table at the end of this spec; no screen offers it (Side effects) <sup>o</sup> |
 | **Change what search covers and how it runs** | • The system administrator, in the configuration file (Settings that modify behavior). The Journal Manager sets the results-per-page count and the publishing mode on the journal's own settings screens, described in their owning features (Settings that modify behavior) <sup>n</sup> |
 
@@ -89,9 +89,12 @@ shared. <sup>b</sup>
    workflow, a version scheduled for a future issue, an unpublished article
    and a deleted one are never listed, for any user (Actors & permissions).
    A decline alone does not unpublish: a published article that is returned
-   to the workflow and then declined keeps its published version, stays in
-   the results, and still opens its landing page (the decline itself is
-   described in [Submission stage](U25-submission-stage.md)). <sup>c</sup>
+   to the workflow and then declined keeps its published version and stays
+   in the results on every application. On a journal its title still opens
+   the landing page; on a press or a preprint server a visitor who presses
+   the title gets the page "404 Not Found" instead, so the result is a dead
+   link for readers ⚠ [OMP3](#omp3) ⚠ [OPS4](#ops4). The decline itself is
+   described in [Submission stage](U25-submission-stage.md). <sup>c</sup>
 3. **What text is searched.** The words are looked for in the article's
    title (with its prefix and subtitle), its abstract and the names of its
    contributors. The text of the article's galleys is not searched: the
@@ -387,113 +390,360 @@ configuration file (config.inc.php), search section; no screen shows them.
 
 Every scenario runs on a scratch journal holding the published articles it
 names, each carrying a made-up word that appears nowhere else on the site;
-scenarios 4, 5 and 9 sign in with throwaway accounts on it. The site's
+scenarios 4, 5, 9 and 12 sign in with throwaway accounts on it. The site's
 background jobs have run since the articles were published, so the index
 holds them (Rule 12): a search that expects a hit is judged only once the
-jobs have run. The tooling recipe, and how the jobs are run, are in the
-footnote. <sup>s</sup>
+jobs have run. The tooling recipe, the mail catcher's address and how the
+jobs are run are in the footnote. <sup>s</sup>
 
-1. **Find an article by a word in its title** — a visitor, on a scratch
-   journal holding two published articles, each with its own made-up word
-   in its title: on the journal's home page press "Search" in the header.
-   The page "Search" opens with an empty search box. Type the made-up word
-   from one article's title and press "Search". The list holds exactly
-   that article: its title, its contributors and its published date, and
-   no galley links; the other article is absent. Pressing the title opens
-   the article's landing page. Use the browser's Back button to return to
-   the Search page: the box still holds the word. <sup>s1</sup>
-2. **Abstract and contributor names are searched too** — a visitor: search
-   the made-up word that appears only in one article's abstract; exactly
-   that article is listed. Search the made-up family name of one article's
-   contributor; exactly that article is listed. Search the made-up word
-   from one article's title typed all in capitals; that article is listed.
-   <sup>s2</sup>
-3. **Nothing found** — a visitor: search a made-up word that appears
-   nowhere. The list is empty and the page reads "No Results" (on a press:
-   "No titles were found which matched your search for "{word}"." followed
-   by "Search again", which jumps to the search box). <sup>s3</sup>
-4. **Only published articles are found** — a visitor, then the Journal
-   Manager: the scratch journal also holds a submission that carries the
-   same made-up word in its title but has never been published. Search the
-   word: only the published article is listed. Sign in as Journal Manager
-   and search again: the same one article, and still not the unpublished
-   submission. <sup>s4</sup>
-5. **Unpublishing removes, republishing restores** — Journal Manager, then
-   a visitor: search the made-up word of a published article and see it
-   listed. Open the article's workflow, go to its Publication tab and
-   press "Unpublish" ("Unpost" on a server) at the top right. A visitor
-   searching the word now gets "No Results" (on a press, the "No titles
-   were found…" line), without any wait. Publish it again, then run the
-   site's background jobs: until they have run, the visitor's search still
-   reads "No Results"; once they have run, it lists the article again.
-   <sup>s5</sup>
-6. **Paging through a long list** — a visitor, on a scratch journal with 27
-   published articles that share one made-up word: search the word. The
-   page lists 25 articles, reads "1 - 25 of 27 items", and offers the page
-   links "2", ">" and ">>" (the current "1" is plain text). Press "2":
-   the page lists the remaining 2, reads "26 - 27 of 27 items", offers
-   "<<", "<" and "1", and the search box still holds the word. <sup>s6</sup>
-7. **Narrow by publication date** {OJS OPS} — a visitor, on a scratch
-   journal with two articles sharing a made-up word, one published on the
-   1st of a month and one on the 15th: search the word; both are listed.
-   Under "Advanced filters", set "Published After" to the 10th of that
-   month (Year, Month and Day all chosen) and press "Search": only the
-   article of the 15th is listed, and the three selects still show the
-   10th. Set the three "Published After" selects back to their blank
-   entries, set "Published Before" to the 10th (again all three parts) and
-   press "Search": only the article of the 1st is listed. On a press this
-   scenario does not run; check its absence instead: the press's Search
-   page shows no "Advanced filters" and no date selects, only the search
-   box and "Search" at its foot. <sup>s7</sup>
+1. **Find an article by a word in its title**
+
+   Given: a visitor, on a scratch journal holding two published articles,
+   each with its own made-up word in its title.
+
+   - **The header's "Search" link**: on the journal's home page press
+     "Search" in the header: the page "Search" opens with an empty search
+     box.
+   - **A title word**: type the made-up word from one article's title and
+     press "Search": the list holds exactly that article: its title, its
+     contributors and its published date, and no galley links.
+   - **Under the list**, on a journal or server: the line "1 - 1 of 1
+     items" and no page links, the list being a single page (Rules 7, 8);
+     a press shows its "1 Titles" count instead (scenario 11).
+   - **The status line**, on a journal or server: above the results, a
+     line that only a screen reader or the browser's accessibility
+     inspector shows reads "Found one item." (Rule 7).
+   - **The title**: pressing it opens the article's landing page.
+   - **Back**: use the browser's Back button to return to the Search page:
+     the box still holds the word.
+   - **The mail catcher**: holds no email from the searches (Side effects).
+   - **Control**: the other article is absent from the list. <sup>s1</sup>
+
+2. **Abstract and contributor names are searched too**
+
+   Given: a visitor, on a scratch journal holding two published articles,
+   each with its own made-up word in its title; the first article is
+   titled "The publications of children about {its made-up word}", its
+   abstract holds a second made-up word that appears nowhere else, one of
+   its contributors has a made-up family name, and its title in French
+   carries a made-up word its English title lacks; the second article is
+   titled "The {its made-up word} study".
+
+   - **A word in the abstract**: type the first article's abstract word and
+     press "Search": exactly that article is listed.
+   - **A contributor's family name**: type the made-up family name and
+     press "Search": exactly that article is listed.
+   - **Capitals**: type the first article's title word all in capitals and
+     press "Search": that article is listed.
+   - **The French title**: with the site read in English, type the made-up
+     word from the first article's French title and press "Search": that
+     article is listed (Rule 3).
+   - **Whole words**: type "publi" and press "Search": "No Results" (on a
+     press, the "No titles were found…" line), although the first article's
+     title holds "publications"; type "publication": the first article is
+     listed; type "child": "No Results", although its title holds
+     "children"; type "children": the first article is listed (Rule 4).
+   - **Common words**: type "the" alone and press "Search": "No Results",
+     although both titles hold it; type "the", a space and the first
+     article's title word: the same one article as the word alone
+     (Rule 4).
+   - **Punctuation and syntax**: type the first article's title word
+     between quotation marks and press "Search": the same one article; type
+     the word and "children" with "AND" between them, spaces around it: the
+     same one article; type the word and "children" joined by a hyphen, no
+     spaces: "No Results", although both words are in the title (Rule 4).
+   - **Control**: the second article, which carries none of the searched
+     words, is absent from every list. <sup>s2</sup>
+
+3. **Nothing found**
+
+   Given: a visitor, on a scratch journal holding one published article
+   with its own made-up word in its title.
+
+   - **A word that appears nowhere**: type a made-up word that appears
+     nowhere and press "Search": the list is empty and the page reads "No
+     Results" (on a press: "No titles were found which matched your search
+     for "{word}"." followed by "Search again", which jumps to the search
+     box).
+   - **Control**: the article's own title word, searched the same way,
+     lists it. <sup>s3</sup>
+
+4. **Only published articles are found**
+
+   Given: a visitor, then the Journal Manager, on a scratch journal holding
+   a published article with a made-up word in its title and a submission
+   that carries the same word in its title but has never been published.
+
+   - **A visitor**: type the word and press "Search": only the published
+     article is listed.
+   - **The Journal Manager, signed in**: search the word again: the same
+     one article.
+   - **Control**: the unpublished submission is listed for neither the
+     visitor nor the Journal Manager. <sup>s4</sup>
+
+5. **Unpublishing removes, republishing restores**
+
+   Given: the Journal Manager, then a visitor, on a scratch journal holding
+   one published article with its own made-up word in its title.
+
+   - **Before**: the Journal Manager, signed in, searches the made-up word:
+     the article is listed.
+   - **"Unpublish"**: open the article's workflow, go to its Publication
+     tab and press "Unpublish" ("Unpost" on a server) at the top right. A
+     visitor searching the word now gets "No Results" (on a press, the "No
+     titles were found…" line), without any wait.
+   - **Published again**: publish it again, then run the site's background
+     jobs: once they have run, the visitor's search lists the article
+     again.
+   - **Control**: until the jobs have run, the visitor's search still reads
+     "No Results". <sup>s5</sup>
+
+6. **Paging through a long list**
+
+   Given: a visitor, on a scratch journal with 27 published articles that
+   share one made-up word in their titles.
+
+   - **Page 1**: type the word and press "Search": the page lists 25
+     articles, reads "1 - 25 of 27 items", and offers the page links "2",
+     ">" and ">>".
+   - **Page 2**: press "2": the page lists the remaining 2, reads "26 - 27
+     of 27 items", offers "<<", "<" and "1", and the search box still holds
+     the word.
+   - **Paging keeps the date filters** {OJS OPS}: under "Advanced filters",
+     set "Published After" to the 1st of January of the current year (Year,
+     Month and Day all chosen) and press "Search": the page still reads
+     "1 - 25 of 27 items"; press "2": the three "Published After" selects
+     still show that date (Rule 8).
+   - **Control**: on each page the current page's number is plain text
+     among the links, not a link: "1" on the first page, "2" on the second.
+     <sup>s6</sup>
+
+7. **Narrow by publication date** {OJS OPS}
+
+   Given: a visitor, on a scratch journal with two articles sharing a
+   made-up word in their titles, one published on the 1st of a month and
+   one on the 15th, and a second scratch journal on which no publication
+   date has ever been entered.
+
+   - **Both listed**: type the word and press "Search": both are listed.
+   - **"Published After"**: under "Advanced filters", set "Published After"
+     to the 10th of that month (Year, Month and Day all chosen) and press
+     "Search": only the article of the 15th is listed, and the three
+     selects still show the 10th.
+   - **"Published Before"**: set the three "Published After" selects back
+     to their blank entries, set "Published Before" to the 10th (again all
+     three parts) and press "Search": only the article of the 1st is
+     listed.
+   - **Empty box with a filter**: clear the search box, leave "Published
+     Before" at the 10th and press "Search": only the article of the 1st is
+     listed (Rule 5).
+   - **Month and Day without a Year**: type the word again, set the three
+     "Published Before" selects back to their blank entries, and under
+     "Published After" choose that month in "Month" and 10 in "Day",
+     leaving "Year" blank; press "Search": both articles are listed and
+     the three selects go blank (Rule 9).
+   - **A journal with nothing published**: on the second scratch journal
+     open the Search page: the Year lists under both filters offer only
+     blank entries and the page reads "No Results" (Rule 9).
+   - **Control**: on a press this scenario does not run; check its absence
+     instead: the press's Search page shows no "Advanced filters" and no
+     date selects, only the search box and "Search" at its foot.
+     <sup>s7</sup>
 
 Journal-specific:
 
-8. **Search the whole site** {OJS} — a visitor, on a site with two scratch
-   journals each holding one published article with its own made-up word:
-   open the site-wide Search page by typing its address, the site's own
-   address followed by /index.php/index/search, for example
-   https://example.org/index.php/index/search (no link leads there;
-   Rule 10). Search
-   the first word:
-   the first journal's article is listed with that journal's name under
-   its title, and its title opens the article inside that journal. Search
-   the second word: the second journal's article, likewise. Under
-   "Advanced filters", choose the first journal in "By Journal" and search
-   the second word: "No Results", while the select shows blank again
-   ([OJS2](#ojs2)). <sup>s8</sup>
-9. **A journal that does not publish online** {OJS} — Journal Manager, then
-   a visitor and a Reader: on the scratch journal's Settings › Distribution
-   › Access, set "Publishing Mode" to "OJS will not be used to publish the
-   journal's contents online." and save. A visitor pressing the header's
-   "Search" link (still shown) lands on the Login page ([OJS3](#ojs3)). A
-   signed-in Reader opening the journal's Search page gets "This journal
-   does not publish its content online." instead of the page. The Journal
-   Manager, signed in, opens the same address and gets the Search page.
-   Set "Publishing Mode" back to "The journal will provide open access to
-   its contents." and save; the visitor gets the page again. <sup>s9</sup>
+8. **Search the whole site** {OJS}
+
+   Given: a visitor, on a site with two scratch journals each holding one
+   published article with its own made-up word in its title.
+
+   - **The home page's address**: open the site's home page; the address
+     the browser then shows ends in a language code (such as
+     /index.php/index/en). Adding /index/search after it gives a
+     page-not-found error (Rule 10).
+   - **The site-wide address**: open the site-wide Search page by typing
+     its address in full, the site's own address followed by
+     /index.php/index/search, for example
+     https://example.org/index.php/index/search (no link leads there;
+     Rule 10).
+   - **The first word**: type it and press "Search": the first journal's
+     article is listed with that journal's name under its title, and its
+     title opens the article inside that journal.
+   - **The second word**: search it: the second journal's article,
+     likewise.
+   - **Control**: under "Advanced filters", choose the first journal in
+     "By Journal" and search the second word: "No Results", while the
+     select shows blank again ([OJS2](#ojs2)). <sup>s8</sup>
+
+9. **A journal that does not publish online** {OJS}
+
+   Given: the Journal Manager, then a visitor and a Reader, on a scratch
+   journal.
+
+   - **Settings › Distribution › Access**: set "Publishing Mode" to "OJS
+     will not be used to publish the journal's contents online." and save.
+   - **A visitor**: pressing the header's "Search" link (still shown) lands
+     on the Login page ([OJS3](#ojs3)).
+   - **A signed-in Reader**: opening the journal's Search page gets "This
+     journal does not publish its content online." instead of the page.
+   - **Control**: the Journal Manager, signed in, opens the same address
+     and gets the Search page; with "Publishing Mode" set back to "The
+     journal will provide open access to its contents." and saved, the
+     visitor gets the page again. <sup>s9</sup>
 
 Preprint-server-specific:
 
-10. **Search from the archive header** {OPS} — a visitor: on the server's
-    home page, the archive header shows an empty search box and a "Search"
-    button above the latest preprints. Type a preprint's made-up word and
-    press "Search". The Search page opens with the word in its search box
-    and that one preprint listed, its date line reading "Downloads: 0 -
-    Submitted {date} - Posted {date}". The same box and button sit at the
-    top of the server's Preprints page and behave the same way.
-    <sup>s10</sup>
+10. **Search from the archive header** {OPS}
+
+    Given: a visitor, on a scratch preprint server holding one posted
+    preprint with its own made-up word in its title.
+
+    - **The home page's archive header**: shows an empty search box and a
+      "Search" button above the latest preprints. Type the preprint's
+      made-up word and press "Search": the Search page opens with the word
+      in its search box and that one preprint listed, its date line reading
+      "Downloads: 0 - Submitted {date} - Posted {date}".
+    - **The Preprints page**: the same box and button sit at its top and
+      behave the same way.
+    - **Control**: return to the home page: its archive box is empty again
+      (Rule 17). <sup>s10</sup>
 
 Press-specific:
 
-11. **The press's Search page** {OMP} — a visitor: on the press's home page
-    press "Search" in the header. The page "Search" shows the heading and,
-    at its foot, a search box and a "Search" button, with no Advanced
-    filters and no list. Type a book's made-up word and press "Search":
-    the page reads "1 Titles" and "One title was found which matched your
-    search for "{word}"." with a "Search again" link, and lists the book
-    with its cover, title, contributors and date; the title opens the
-    book's catalog page. Press "Search again": the page jumps to the search
-    box, which still holds the word. <sup>s11</sup>
+11. **The press's Search page** {OMP}
+
+    Given: a visitor, on a scratch press holding one published book with
+    its own made-up word in its title.
+
+    - **The header's "Search" link**: on the press's home page press
+      "Search" in the header: the page "Search" shows the heading and, at
+      its foot, a search box and a "Search" button.
+    - **The word**: type the book's made-up word and press "Search": the
+      page reads "1 Titles" and "One title was found which matched your
+      search for "{word}"." with a "Search again" link, and lists the book
+      with its cover, title, contributors and date.
+    - **The title**: opens the book's catalog page.
+    - **"Search again"**: press it: the page jumps to the search box, which
+      still holds the word.
+    - **Control**: the page as first opened, before any word was typed,
+      showed no list; the Advanced filters of a journal's page are absent
+      throughout. <sup>s11</sup>
+
+Common to every application:
+
+12. **Declined after publication, still listed; deleted, gone at once**
+
+    Given: the Journal Manager and a visitor, on a scratch journal holding
+    two published articles, each with its own made-up word in its title.
+
+    - **Before**: the visitor types the first article's word and presses
+      "Search": the article is listed.
+    - **Returned to the workflow and declined**: the Journal Manager opens
+      the first article's workflow, presses "Return to Workflow"
+      ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#done))
+      and then declines it with "Decline Submission"
+      ([Submission stage](U25-submission-stage.md) describes the decline).
+      The visitor's search for the word still lists the article on every
+      application; its title opens the landing page on a journal, and on a
+      press or preprint server the page "404 Not Found" [OMP3](#omp3)
+      [OPS4](#ops4) (Rule 2).
+    - **Deleted**: the Journal Manager deletes the declined submission with
+      "Delete" ([Submission stage](U25-submission-stage.md#delete)). The
+      visitor's search for the word reads "No Results" at once (on a press,
+      the "No titles were found…" line), with no wait for the site's
+      background jobs (Side effects).
+    - **Control**: the second article, searched by its word, is listed
+      after the decline and after the delete. <sup>s12</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - "Items per page" changed on Settings › Website › Setup › Lists, the
+    results per page following it (Rule 8, Settings): the Journal Manager
+    sets it once when the journal is set up, not in an ordinary week
+- **Budget** — variants:
+  - keywords, subjects, section names and funders not searched by the box
+    (Rule 3): no seeded article carries a keyword, subject or funder
+  - a page number beyond the last page, "No Results" with the words kept
+    (Rule 8): met only through a stale or edited address, never from the
+    page's links
+- **Nothing new to test**:
+  - on a journal that does not publish online, the other managerial and
+    assistant-level roles getting the page (Actors row 1): scenario 9's
+    Journal Manager sees the same page
+  - on that journal, an Author, Translator or Reviewer getting the sentence
+    (Actors row 1): scenario 9's Reader sees the same sentence
+  - a press having no publishing mode and no gate (Actors row 1, Rule 13):
+    scenario 11's visitor gets the page as any visitor does
+- **Register carries it**:
+  - OPS2 (a server's gate and hidden archive box unreachable from its
+    settings; Rules 13, 17, Settings)
+  - OMP1 and OPS3 (the rebuild for one press or server by path rebuilding
+    every one; Side effects)
+  - A11 (galley text never searched, and the galley converters having no
+    reachable effect; Rule 3, Settings)
+  - A5 (several words all matching on PostgreSQL, any one on MySQL; Rule 4)
+  - A6 (the bare Search page listing every article on a journal or server
+    and nothing on a press; Rule 5)
+  - OJS1 and OPS1 (the screen-reader count with several hits; Rule 7)
+  - A2 ("Published Before" leaving out the chosen day; Rule 9)
+  - A1 (a Year without Month and Day ignored, the selects showing an
+    unchosen date; Rule 9)
+  - A14 (a day the month lacks applied as the next month's date; Rule 9)
+  - A15 (the Year lists following the dates on unpublished articles too;
+    Rule 9)
+  - A10 (a press or server site's site-wide page: no picker, no name under
+    the results; Rule 10)
+  - A16 (whether a journal's own configuration should govern its site-wide
+    presence; Rule 10)
+  - A4 (results in no particular order, stable on repeat; Rule 11)
+  - A7 (a newer version unpublished: the older one listed again after the
+    jobs, the newer one's words still finding it; Rule 12)
+  - A3 (edits after publication never reaching the index; Rule 12)
+  - A8 and A12 (the address-only refinements, paging keeping the sort
+    alone, the date sort answering an error page; Rules 8, 14)
+  - A13 (a page number that is not a number giving a completely empty page;
+    Rule 8)
+  - OMP3 and OPS4 (a declined book or preprint still listed, its title
+    opening "404 Not Found" for a visitor; Rule 2)
+  - A9 (two configuration settings nothing reads; Settings)
+- **No seed**:
+  - a subscription journal's restricted articles listed like any other,
+    with no lock (Actors row 5, Rule 16): no scenario key seeds a
+    subscription journal's access rules
+  - unpublishing an issue removing its articles at once, and publishing it
+    again listing them after the jobs (Rule 12, Side effects): no scenario
+    key creates an issue on a scratch journal, so no seeded article sits in
+    one
+  - the system administrator's command-line rebuild, and the emptied index
+    it starts from (Actors row 6, Side effects): the command-line tools are
+    reference only, so the test tooling runs the site's background jobs and
+    no other command-line tool
+  - installing or upgrading the site rebuilding the whole index (Side
+    effects): the test tooling neither installs nor upgrades
+  - the OpenSearch driver's relevance ranking, inclusive "Published Before"
+    and multi-value refinements, and the OpenSearch index name (Settings):
+    no OpenSearch server on the test installs, and the test tooling does
+    not change the configuration file
+- **Owned by another feature**:
+  - publishing a new version of an article, findable once the jobs have run
+    (Rule 12; the version is created and published in *Publish, schedule &
+    versions*, scenarios 4 and 5)
+  - the "Search" link in every reader-page header, absent on the Search
+    page, the site's pages and the dashboards, and no page linking to the
+    site-wide page (Rule 1, Actors row 2, Rule 10; *Navigation menus & site
+    chrome*)
+  - requiring sign-in to view the site putting the page behind Login
+    (Settings; *Users & Roles › Site Access Options*, site-wide)
+  - the editorial "Search submissions" box (Cross-feature; *Submissions
+    dashboard*)
+  - the publishing flow, issues, Return to Workflow, Decline and Delete,
+    the landing pages and the subscription rules (Cross-feature; *Publish,
+    schedule & versions*, *Issues*, *Workflow screen & stage access*,
+    *Submission stage*, *Article landing page & reading*, *Monograph
+    landing page*, *Subscriptions & open access control*)
 
 ## Findings register
 
@@ -513,8 +763,10 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OJS1](#ojs1) | With more than one result, the screen-reader count reads out a raw code | 🐞 | minor | — |
 | [OJS2](#ojs2) | On the site-wide page, "By Journal" limits the first page only and never shows as chosen | 🐞 | user-visible | — |
 | [OMP1](#omp1) | The index-rebuild tool ignores the press path it is given and rebuilds every press | 🐞 | invisible | — |
+| [OMP3](#omp3) | A book declined after publication stays listed, but its title opens "404 Not Found" for a visitor | 🐞 | user-visible | — |
 | [OPS1](#ops1) | The screen-reader result count always says "Found one item." | 🐞 | minor | — |
 | [OPS3](#ops3) | The index-rebuild tool ignores the server path it is given and rebuilds every server | 🐞 | invisible | — |
+| [OPS4](#ops4) | A preprint declined after posting stays listed, but its title opens "404 Not Found" for a visitor | 🐞 | user-visible | — |
 | [A2](#a2) | "Published Before" leaves out the chosen day itself | ❓ | minor | — |
 | [A4](#a4) | Results come in no particular order | ❓ | user-visible | — |
 | [A5](#a5) | Whether several words must all match or any one may depends on the site's database | ❓ | user-visible | — |
@@ -774,6 +1026,16 @@ the same. The page has been the press's own since the press application
 was built, so it reads as a design choice rather than drift.
 Basis: probe. <sup>f-omp2</sup>
 
+<a id="omp3"></a>
+**OMP3 — A declined book stays listed, but its page is gone for readers** · 🐞 · user-visible.
+A book that was published, returned to the workflow and then declined is
+still listed by search, its title linking to its catalog page as before,
+but a visitor who presses the title gets the page "404 Not Found" and
+nothing else. The signed-in Press Manager still gets the catalog page. The
+result is a dead link for every reader; on a journal the same article's
+landing page stays open ([OPS4](#ops4) for a preprint server).
+Basis: test run. <sup>f-omp3</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -805,6 +1067,14 @@ Basis: judgment. <sup>f-ops2</sup>
 As [OMP1](#omp1): the command-line rebuild accepts and checks a server
 path, then rebuilds every server on the site.
 Basis: judgment. <sup>f-ops3</sup>
+
+<a id="ops4"></a>
+**OPS4 — A declined preprint stays listed, but its page is gone for readers** · 🐞 · user-visible.
+As [OMP3](#omp3): a preprint that was posted, returned to the workflow and
+then declined is still listed by search, its title linking to its landing
+page as before, but a visitor who presses the title gets the page "404 Not
+Found" and nothing else. Seen once; a journal keeps the landing page open.
+Basis: test run. <sup>f-ops4</sup>
 
 ### Seen on the way, owned elsewhere
 
@@ -920,7 +1190,12 @@ was never listed, for a visitor, a Journal Manager, a Section Editor or a
 Reader. A published article returned to the workflow ("Return to
 Workflow" → "Confirm") and declined ("Decline Submission" → "Record
 Decision"; stage bubble "Declined") stayed listed and its result opened the
-live landing page, on all three apps. OJS subscription case: an article in
+live landing page, on all three apps; the probe did not record whether the
+page was read signed out. Suite runs of 2026-09-13, the page read as a
+visitor after the same decline: OJS `article/view/{id}` answered the
+landing page; OMP `catalog/book/{id}` and OPS `preprint/view/{id}`
+answered status 404 with the page "404 Not Found" (f-omp3, f-ops4). OJS
+subscription case: an article in
 an issue whose Access tab reads "Subscription" (the journal's Publishing
 Mode set to "The journal will require subscriptions to access some or all
 of its contents.") was listed with exactly the same markup as an open one
@@ -1297,35 +1572,59 @@ posting mode does not store).
 <a id="fn-s"></a>
 **s — seeding for the scenarios.** Scratch contexts and published
 submissions come from the scenario API (`docs/process/scenarios.md`):
-`POST scenarios/context`, then `createSubmission` with `published: true`,
-a chosen `title`, `abstract`, and contributor names (OJS accepts a
-published seed without an `issue`; `metadata.datePublished` for scenario
-7's two dates, or set the date through the workflow's "Publication Date" /
-"Date Posted" field before publishing). Publishing through the API
-dispatches the index job exactly as the UI does, so every scenario that
-expects a hit must run in the serial project and call `runJobs()` after
-seeding and after any republish (fn-k). Use one made-up token per article
-(whitespace-free, letters only, e.g. `zq{tag}title`), since PostgreSQL
-full-text drops digits-only tokens and stems words. On shared fleets
-another session's drain may run this session's jobs first; count results,
-not jobs.
+`POST scenarios/context` with the throwaway `users[]` a scenario signs in
+with (a manager, an author as submitter, a reader), then `POST
+scenarios/submission` with `submitted: true`, `published: true`, a chosen
+`title`, `abstract` and the submitter's contributor names (OJS accepts a
+published seed without an `issue`). `metadata.datePublished` is not built
+(scenarios.md "Field shapes not built yet"), so scenario 7's two dates are
+set through the workflow's "Publication Date" / "Date Posted" field before
+publishing, as the suites do. Publishing through the API dispatches the
+index job exactly as the UI does, so every scenario that expects a hit
+must run in the serial project and call `runJobs()` after seeding and
+after any republish (fn-k). Use one made-up token per article
+(whitespace-free, letters only, e.g. `zq{tag}title`, all of one length so
+none is a stem or prefix of another), since PostgreSQL full-text drops
+digits-only tokens and stems words. On shared fleets another session's
+drain may run this session's jobs first; count results, not jobs. No key
+seeds a decline or a delete after publishing, so scenario 12 drives them
+on screen (fn-s12).
 
 <a id="fn-s1"></a>
 **s1** — Two published articles in a scratch journal, each with its own
 token in the title; header link `a.pkp_search` → `search`; expect one
 `li` in `ul.search_results` (OMP: one `.obj_monograph_summary`).
-Live-probed 2026-09-02 on all three apps (fn-a, fn-f).
+Live-probed 2026-09-02 on all three apps (fn-a, fn-f). The count line is
+`{page_info}` (`navigation.items`) and the page links `{page_links}`,
+absent with one page; the status line is the sr-only `div[role=status]`
+with `search.searchResults.foundSingle` (OJS/OPS only; OMP renders
+`catalog.browseTitles`, fn-g). The mail read: `pkpMail` scoped to the
+scratch context's throwaway addresses (`<username>@mail.test`), zero
+messages after the searches; the Mailpit inbox is shared, so scope the
+read (scenarios.md "Mailpit").
 
 <a id="fn-s2"></a>
 **s2** — Tokens placed in `abstract` and in a contributor's `familyName`
 only; the capitals step relies on the database's case folding
 (PostgreSQL `to_tsvector` lower-cases). Live-probed 2026-09-02 on all
-three apps (fn-c).
+three apps (fn-c). The French title: `title` as a locale map `{en: "The
+publications of children about {token}", fr_CA: "… {frToken}"}` on a
+context created with `supportedLocales` and `supportedSubmissionLocales`
+both holding `fr_CA` beside `en` (scenarios.md "Multilingual fields" and
+`POST scenarios/context`; the metadata locales follow
+`supportedSubmissionLocales`), the visitor reading in English; the index
+holds one row per locale and the query has no locale filter (fn-c, the
+French-title probe of 2026-09-02). The real words "The", "publications",
+"of", "children" in the first title and "The … study" in the second carry
+the whole-word, common-word and punctuation steps, each of which fn-d
+probed on 2026-09-02 ("publi", "publication", "child", "children", "the",
+quotation marks, "AND", the hyphen). Strings as fn-s3.
 
 <a id="fn-s3"></a>
 **s3** — Strings: `search.noResults` "No Results" (OJS/OPS);
 `catalog.noTitlesSearch` and `search.searchAgain` (OMP). Live-probed
-2026-09-02 (fn-g).
+2026-09-02 (fn-g). One published article with its own token is seeded as
+the positive control (the suites already do so).
 
 <a id="fn-s4"></a>
 **s4** — The unpublished sibling: `createSubmission` with `submitted:
@@ -1343,20 +1642,36 @@ search. Live-probed 2026-09-02 on all three apps (fn-k).
 **s6** — 27 published articles sharing one token; page size is the
 scratch context's `itemsPerPage` default 25. Strings `navigation.items`;
 links from `smartyPageLinks()`. Live-probed 2026-09-02 on all three apps
-(fn-g).
+(fn-g). The date-filter step (OJS/OPS): the articles are published on the
+seed day, so the Year list holds that year alone; `dateFromYear` = the
+current year, `dateFromMonth` = 1, `dateFromDay` = 1 chosen on the
+selects; `smartyPageLinks()` forwards `dateFrom*`, and the "2" link kept
+the selection in the 2026-09-02 probe (fn-g).
 
 <a id="fn-s7"></a>
-**s7** — `metadata.datePublished` of the 1st and 15th of a past month;
-choose all three parts of each filter (A1). The "before the 10th" step is
-unaffected by A2. Live-probed 2026-09-02 on OJS and OPS with 2024-06-01
-and 2024-06-15 (fn-h).
+**s7** — The 1st and 15th of a past month, set through the workflow's
+"Publication Settings" ("Publication Date" / OPS "Date Posted") before
+"Publish" / "Post" by the scratch context's manager (`metadata.datePublished`
+is not built, fn-s); choose all three parts of each filter (A1). The
+"before the 10th" step is unaffected by A2. Live-probed 2026-09-02 on OJS
+and OPS with 2024-06-01 and 2024-06-15 (fn-h). The empty-box step keeps
+`dateTo*` set: the `->when($builder->query, …)` clause is skipped and the
+`whereDate` stays (fn-e, fn-h). Month and Day without a Year:
+`getUserDateVar()` returns null and the selects re-render blank (fn-h,
+f-a1: "Sep + 2 … (no Year) → unfiltered, all three selects blank"). The
+journal with nothing published: a second `POST scenarios/context` with no
+submission at all, so `getDateBoundaries()` is empty and each Year list
+yields a single blank entry (fn-h, the empty-journal probe of 2026-09-02).
 
 <a id="fn-s8"></a>
 **s8** — Two scratch journals, one article each; site-level address
 `<host>/index/search` (or `<host>/index.php/index/search`; appending
 `/index/search` to the home page's shown `…/index.php/index/en` gives
 "404 Not Found", fn-i); `select#searchContext` "By Journal". Live-probed
-2026-09-02 (fn-i, f-ojs2).
+2026-09-02 (fn-i, f-ojs2). The language-code step opens `<host>/` (which
+lands on `…/index.php/index/en`) and then requests
+`<host>/index.php/index/index/search`: "404 Not Found" (fn-i, re-checked
+2026-09-02).
 
 <a id="fn-s9"></a>
 **s9** — Settings › Distribution › Access, publishing mode radio
@@ -1374,6 +1689,22 @@ Live-probed 2026-09-02 (fn-p).
 **s11** — `catalog.browseTitles` renders "1 Titles" (no singular form);
 `catalog.foundTitleSearch`; named anchor `search-form`. Live-probed
 2026-09-02 (fn-g).
+
+<a id="fn-s12"></a>
+**s12** — Two published articles seeded as fn-s, the manager from the
+context's `users[]`. On screen, as the manager: the workflow header's
+"Return to Workflow" → "Confirm" (U24 #done), then "Decline Submission" →
+"Record Decision" on the stage the article was published from (OPS:
+Production; stage bubble "Declined"), then "Delete" ("Are you sure you
+want to permanently delete this submission?"). The decline leaves the
+publication `status = STATUS_PUBLISHED`, so the SQL still lists it on every
+app; `article/view/{id}` still answers on OJS, while `catalog/book/{id}`
+and `preprint/view/{id}` answered a visitor 404 in the suite runs of
+2026-09-13 (fn-c, f-omp3, f-ops4), so the press and server expectations
+end at the listing and the title's address; the delete cascades the
+`submissions_fulltext` rows (`ON DELETE CASCADE`, fn-k), so the visitor's
+"No Results" is read with no `runJobs()` in between. Live-probed
+2026-09-02 on all three apps (fn-c, fn-k).
 
 <a id="fn-f-a1"></a>
 **f-a1** — fn-h: `getUserDateVar()` returns null when a part is missing,
@@ -1556,6 +1887,18 @@ are empty subclasses, so the difference is entirely in the templates.
 Live-probed 2026-09-02: count line, the three sentences, "Search again",
 two-per-row summaries and the catalog link, as fn-g and fn-f record.
 
+<a id="fn-f-omp3"></a>
+**f-omp3** — fn-c, fn-s12. Suite run of 2026-09-13 on a scratch press,
+and a hand probe the same day: after "Return to Workflow" → "Confirm",
+"Decline Submission" → "Record Decision", the visitor's search still
+listed the book with its title linking to `catalog/book/{id}`; that
+address answered status 404 with the page "404 Not Found" (the run's page
+snapshot holds the level-1 heading "404 Not Found" and nothing else). The
+same address had answered 200 with the book's title before the decline,
+and answered 200 to the signed-in Press Manager after it. Mechanism not
+traced; the decline leaves the publication's status published (fn-s12),
+so the catalog page's own gate, not the index, refuses the visitor.
+
 <a id="fn-f-ops1"></a>
 **f-ops1** — fn-g: `{if $results->count > 1}` reads a property the
 paginator does not have. Live-probed 2026-09-02: "Found one item." with 1,
@@ -1575,6 +1918,17 @@ the setting; every actor got the Search page and the archive box, no
 <a id="fn-f-ops3"></a>
 **f-ops3** — fn-o: `$server` assigned, `$journal` filtered. Judgment from
 the tool's source; not run.
+
+<a id="fn-f-ops4"></a>
+**f-ops4** — fn-c, fn-s12. Suite run of 2026-09-13 on a scratch server,
+seen once: after "Return to Workflow" → "Confirm" and, on the Production
+stage, "Decline Submission" → "Record Decision" (stage bubble "Declined"),
+the visitor's search still listed the preprint with its title linking to
+`preprint/view/{id}`; that address answered 404 with the page "404 Not
+Found" (the run's page snapshot holds the level-1 heading "404 Not Found"
+and nothing else), where an undeclined preprint's `preprint/view/{id}` had
+answered 200 earlier in the same run. Not read as the signed-in Preprint
+Server Manager. Mechanism not traced (f-omp3).
 
 ## Reference — entry points & surfaces
 

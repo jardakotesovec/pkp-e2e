@@ -20,10 +20,14 @@
  *   option), the "Search" button, the results `ul.search_results > li`
  *   (each a `frontend/objects/preprint_summary.tpl` block: `.title a`,
  *   `.authors`, `.details`, no `.galleys_links` when hidden), the
- *   "No Results" notice (`.cmp_notification.notice`) and the pagination
+ *   "No Results" notice (`.cmp_notification.notice`), the pagination
  *   (`.cmp_pagination`: `{page_info}` "{from} - {to} of {total} items" and
  *   `smartyPageLinks()` links "<<", "<", numbers, ">", ">>", the current
- *   page as a plain `<strong>`).
+ *   page as a plain `<strong>`; no link at all on a single page) and the
+ *   screen-reader-only status line above the results
+ *   (`div.pkp_screen_reader[role=status]`, "Found one item." with one hit;
+ *   with more, OPS1's wrong text, never asserted), read from the element's
+ *   text, never on screen.
  * - ArchiveHeaderSearch — the archive header's search form on the server's
  *   home page and its Preprints page
  *   (`ops/templates/frontend/components/searchForm_archive.tpl`:
@@ -175,6 +179,30 @@ exports.SearchPage = class SearchPage extends BasePage {
         return this.page.locator('.page_search .cmp_notification.notice', {hasText: 'No Results'});
     }
 
+    /**
+     * The status line above the results that only a screen reader (or the
+     * accessibility inspector) shows: "Found one item." with one hit
+     * (Rule 7). Read its text; it is never visible.
+     */
+    statusLine() {
+        return this.page.locator('.page_search div[role="status"].pkp_screen_reader');
+    }
+
+    /** Exactly one result, the one titled `title`; returns it. */
+    async expectOnlyResult(title) {
+        await expect(this.result(title)).toHaveCount(1, {timeout: 30_000});
+        await expect(this.results()).toHaveCount(1);
+        await expect(this.noResultsNotice()).toHaveCount(0);
+        return this.result(title);
+    }
+
+    /** Nothing matched: the "No Results" notice, an empty list, no pagination. */
+    async expectNoResults() {
+        await expect(this.noResultsNotice()).toBeVisible({timeout: 30_000});
+        await expect(this.results()).toHaveCount(0);
+        await expect(this.pagination()).toHaveCount(0);
+    }
+
     // ---------------------------------------------------------------------
     // Paging
     // ---------------------------------------------------------------------
@@ -182,6 +210,11 @@ exports.SearchPage = class SearchPage extends BasePage {
     /** The block under the results: "{from} - {to} of {total} items" and the page links. */
     pagination() {
         return this.page.locator('.page_search .cmp_pagination');
+    }
+
+    /** Every page link under the list (none on a single page, Rule 8). */
+    pageLinks() {
+        return this.pagination().getByRole('link');
     }
 
     /** A page link by its exact text ("2", ">", ">>", "<<", "<", "1"). */
@@ -222,16 +255,42 @@ exports.SearchPage = class SearchPage extends BasePage {
     }
 
     /**
-     * Choose Year, Month and Day of a date filter, by their visible labels
-     * ("2024", "Jun", "10").
+     * Choose the given parts of a date filter, by their visible labels
+     * ("2024", "Jun", "10"; Day is not zero-padded). A part left out is not
+     * touched (scenario 7's Month-and-Day-without-a-Year step leaves Year
+     * blank).
      *
      * @param {'dateFrom'|'dateTo'} prefix
-     * @param {{year: string|number, month: string, day: string|number}} date
+     * @param {{year?: string|number, month?: string, day?: string|number}} date
      */
     async setDate(prefix, {year, month, day}) {
-        await this.dateSelect(prefix, 'Year').selectOption({label: String(year)});
-        await this.dateSelect(prefix, 'Month').selectOption({label: month});
-        await this.dateSelect(prefix, 'Day').selectOption({label: String(day)});
+        if (year !== undefined) {
+            await this.dateSelect(prefix, 'Year').selectOption({label: String(year)});
+        }
+        if (month !== undefined) {
+            await this.dateSelect(prefix, 'Month').selectOption({label: month});
+        }
+        if (day !== undefined) {
+            await this.dateSelect(prefix, 'Day').selectOption({label: String(day)});
+        }
+    }
+
+    /** A date filter's Year list entries (the leading blank one included). */
+    yearOptions(prefix) {
+        return this.dateSelect(prefix, 'Year').locator('option');
+    }
+
+    /**
+     * The Year list offers only blank entries (a server on which no
+     * publication date has ever been entered, Rule 9): every entry's value
+     * is empty, and there is at least one.
+     */
+    async expectYearListBlank(prefix) {
+        const values = await this.yearOptions(prefix).evaluateAll((options) =>
+            options.map((option) => /** @type {HTMLOptionElement} */ (option).value)
+        );
+        expect(values.length).toBeGreaterThan(0);
+        expect(values.every((value) => value === '')).toBe(true);
     }
 
     /** Put the three selects of a date filter back on their blank entries. */

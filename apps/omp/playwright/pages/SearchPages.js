@@ -11,8 +11,10 @@
  *
  * Also the two publication controls scenario 5 drives on the workflow's
  * Title & Abstract page ("Unpublish" and "Publish" at the top right, each
- * with its confirm window); the frame around them is the shared
- * WorkflowPage.
+ * with its confirm window), and scenario 12's "Decline Submission" on the
+ * stage a published book is returned to (`declineFromStage`); the frame
+ * around them is the shared WorkflowPage, whose `returnToWorkflow()` and
+ * `deleteSubmission()` drive scenario 12's other two steps.
  *
  * DOM facts (confirmed live 2026-09-02, probes A/B/E and this suite):
  * - the form is `form.pkp_search[role=search]` labelled "Book Search",
@@ -29,6 +31,7 @@
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
+const {walkDecisionWizard} = require('./ReviewStagePages.js');
 
 /** The press's three result sentences, verbatim (locale.po catalog.*). */
 const SENTENCES = {
@@ -145,9 +148,19 @@ exports.PressSearchPage = class PressSearchPage extends BasePage {
         await expect(this.countLine).toHaveCount(0);
     }
 
+    /** A book by its title is absent from the list (the results block settled). */
+    async expectAbsent(title) {
+        await expect(this.result(title)).toHaveCount(0);
+    }
+
     /** A page link ("2", ">", ">>", "<<", "<", "1"). */
     pageLink(name) {
         return this.pagination.getByRole('link', {name, exact: true});
+    }
+
+    /** Every page link under the list (none on a single page). */
+    pageLinks() {
+        return this.pagination.getByRole('link');
     }
 
     /** The current page's number, plain text among the links. */
@@ -248,4 +261,21 @@ exports.CatalogEntryControls = class CatalogEntryControls {
         await expect(this.unpublishButton).toBeVisible({timeout: 30_000});
         await expect(this.workflow.controlsLeft()).toContainText('Published');
     }
+};
+
+/**
+ * Scenario 12's decline: press "Decline Submission" among the stage's
+ * action buttons of an open workflow panel (the stage the book was
+ * published from, once "Return to Workflow" has brought it back), walk the
+ * full-page wizard to "Record Decision" and its completion panel. The
+ * caller reopens the workflow afterwards.
+ *
+ * @param {import('../../../../shared/playwright/pages/WorkflowPage.js').WorkflowPage} workflow
+ */
+exports.declineFromStage = async function declineFromStage(workflow) {
+    const page = workflow.page;
+    await workflow.actionButton('Decline Submission').click();
+    await expect(page.getByRole('heading', {level: 1, name: /Decline Submission/})).toBeVisible({timeout: 15_000});
+    await walkDecisionWizard(page);
+    await expect(page.getByText('View Submission Summary')).toBeVisible();
 };

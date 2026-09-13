@@ -23,6 +23,9 @@
  *   with `.title a` (the landing-page link; outside a journal the link
  *   carries the journal's name in `span.subtitle`), `.meta .authors`,
  *   `.meta .published` and never a `.galleys_links` list (hideGalleys);
+ * - one or more hits: a screen-reader-only `div.pkp_screen_reader[role=status]`
+ *   above the list ("Found one item." with one hit; the plural is OJS1's
+ *   raw code, never asserted), read from the element's text, not on screen;
  * - nothing found: a `span[role=status]` wrapping `.cmp_notification`
  *   "No Results" and no `.cmp_pagination`;
  * - paging: `.cmp_pagination` with the "{from} - {to} of {total} items"
@@ -152,17 +155,24 @@ exports.SearchPage = class SearchPage extends BasePage {
     }
 
     /**
-     * Choose all three parts of a date filter (a partly chosen filter is
-     * A1's territory and is never used here).
+     * Choose the given parts of a date filter; a part left out is not
+     * touched (scenario 7's Month-and-Day-without-a-Year step leaves Year
+     * blank). Labels as shown: year "2024", month "Jun", day "10" (Day is
+     * not zero-padded).
      *
      * @param {'dateFrom'|'dateTo'} prefix
-     * @param {{year: string, month: string, day: string}} date labels as
-     *   shown: year "2024", month "Jun", day "10"
+     * @param {{year?: string, month?: string, day?: string}} date
      */
     async setDate(prefix, {year, month, day}) {
-        await this.dateSelect(prefix, 'Year').selectOption({label: year});
-        await this.dateSelect(prefix, 'Month').selectOption({label: month});
-        await this.dateSelect(prefix, 'Day').selectOption({label: day});
+        if (year !== undefined) {
+            await this.dateSelect(prefix, 'Year').selectOption({label: year});
+        }
+        if (month !== undefined) {
+            await this.dateSelect(prefix, 'Month').selectOption({label: month});
+        }
+        if (day !== undefined) {
+            await this.dateSelect(prefix, 'Day').selectOption({label: day});
+        }
     }
 
     /** Put a date filter's three selects back to their blank entries. */
@@ -177,6 +187,31 @@ exports.SearchPage = class SearchPage extends BasePage {
         await expect(this.dateSelect(prefix, 'Year').locator('option:checked')).toHaveText(year);
         await expect(this.dateSelect(prefix, 'Month').locator('option:checked')).toHaveText(month);
         await expect(this.dateSelect(prefix, 'Day').locator('option:checked')).toHaveText(day);
+    }
+
+    /** Assert a date filter's three selects all show their blank entry. */
+    async expectDateBlank(prefix) {
+        for (const part of ['Year', 'Month', 'Day']) {
+            await expect(this.dateSelect(prefix, part)).toHaveValue('');
+        }
+    }
+
+    /** A date filter's Year list entries (the leading blank one included). */
+    yearOptions(prefix) {
+        return this.dateSelect(prefix, 'Year').locator('option');
+    }
+
+    /**
+     * The Year list offers only blank entries (a journal on which no
+     * publication date has ever been entered, Rule 9): every option's value
+     * is empty, and there is at least one.
+     */
+    async expectYearListBlank(prefix) {
+        const values = await this.yearOptions(prefix).evaluateAll((options) =>
+            options.map((option) => option.value)
+        );
+        expect(values.length).toBeGreaterThan(0);
+        expect(values.every((value) => value === '')).toBe(true);
     }
 
     /** The site-wide page's "By Journal" select (Rule 10). */
@@ -202,6 +237,15 @@ exports.SearchPage = class SearchPage extends BasePage {
         return result.locator('.title a');
     }
 
+    /**
+     * The status line above the results that only a screen reader shows
+     * (Rule 7): "Found one item." with one hit. Read its text; it is never
+     * visible.
+     */
+    statusLine() {
+        return this.page.locator('.page_search div[role="status"].pkp_screen_reader');
+    }
+
     /** The "No Results" notice (nothing found). */
     noResultsNotice() {
         return this.page.locator('.page_search .cmp_notification').filter({hasText: 'No Results'});
@@ -223,6 +267,11 @@ exports.SearchPage = class SearchPage extends BasePage {
     /** The paging block under the list ("{from} - {to} of {total} items" plus links). */
     pagination() {
         return this.page.locator('.page_search .cmp_pagination');
+    }
+
+    /** Every page link under the list (none on a single page). */
+    pageLinks() {
+        return this.pagination().getByRole('link');
     }
 
     /** A page link by its text ("2", ">", ">>", "<<", "<", "1"). */
