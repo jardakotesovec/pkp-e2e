@@ -650,12 +650,23 @@ test.describe('submissions dashboard', () => {
                 account(author, 'Ada', 'Author', ['author']),
             ],
         });
-        // Seeded in order, so the returned ids ascend with the titles: "ida"
-        // first, "idc" last, the filler rows between them.
+        // Only the two ends are ordered — "ida" is seeded first and "idc"
+        // last, so the ids the sort legs read ascend with those titles. The
+        // filler rows in between carry no order of their own, so they are
+        // seeded in small concurrent batches: the worker's server takes them
+        // one at a time either way, and the batch only keeps it from idling
+        // between seeds (small enough that a queued seed never sits out its
+        // own request timeout).
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `ida${tag}`});
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `idb${tag}`});
-        for (let i = 0; i < ROWS - 3; i++) {
-            await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `fill${i}${tag}`});
+        const fillers = Array.from({length: ROWS - 3}, (unused, i) => `fill${i}${tag}`);
+        const BATCH = 4;
+        for (let i = 0; i < fillers.length; i += BATCH) {
+            await Promise.all(
+                fillers
+                    .slice(i, i + BATCH)
+                    .map((title) => ojsApi.createSubmission({tag, context: tag, submitter: author, title}))
+            );
         }
         await ojsApi.createSubmission({tag, context: tag, submitter: author, title: `idc${tag}`});
 
