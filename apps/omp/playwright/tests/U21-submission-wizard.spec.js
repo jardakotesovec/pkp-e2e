@@ -407,6 +407,11 @@ test.describe('Submission wizard (U21)', () => {
         });
 
         const page = await (await asUser(author.username)).newPage();
+        // The wizard's autosave clock is the page's own: its timer saves
+        // when a minute has passed since the last save. Install the browser
+        // clock before the wizard loads so the minute can be handed to the
+        // page instead of waited out (A5: no sleeps).
+        await page.clock.install();
         await page.goto(wizardUrl(press.path, seeded.submissionId));
         await expectWizardOpen(page);
         await continueTo(page, STEPS.details);
@@ -431,6 +436,11 @@ test.describe('Submission wizard (U21)', () => {
             {timeout: 100_000, polling: 50}
         );
         await fillRichText(page, CONTROLS.title, 'Autosave check');
+        // Typing has stopped; jump the page's clock past the wizard's
+        // one-minute mark so its own timer queues the change, and once more
+        // so the next turn of that timer sends it.
+        await page.clock.fastForward(61_000);
+        await page.clock.fastForward(1_000);
         await saved;
         await flashed;
         await expect(footer(page)).toContainText(/Last saved \d+ seconds? ago/);
