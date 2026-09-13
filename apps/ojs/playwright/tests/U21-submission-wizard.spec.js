@@ -432,6 +432,11 @@ test.describe('submission wizard', () => {
 
         const page = await (await asUser(journal.author)).newPage();
         const wizard = new SubmissionWizardPage(page, journal.path);
+        // The wizard's autosave clock is the page's own: its timer saves
+        // when a minute has passed since the last save. Install the browser
+        // clock before the wizard loads so the minute can be handed to the
+        // page instead of waited out (A5: no sleeps).
+        await page.clock.install();
         await wizard.goto(submissionId);
         await wizard.continueTo('Details');
 
@@ -443,6 +448,9 @@ test.describe('submission wizard', () => {
         const savingFlash = wizard.waitForSavingFlash();
         const autosaved = wizard.armAutosave(submissionId);
         await wizard.fillTitle(newTitle);
+        // Typing has stopped; jump the page's clock past the wizard's
+        // one-minute mark so its own timer fires the save now.
+        await wizard.passAutosaveClock();
         const response = await autosaved;
         expect(response.ok()).toBeTruthy();
         await savingFlash;

@@ -369,6 +369,21 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         );
     }
 
+    /**
+     * Hand the page the minute its autosave clock waits for.
+     *
+     * The wizard checks on a half-second timer whether a minute has passed
+     * since the last save and, if it has, queues the changed form; the next
+     * turn of that timer sends it. `page.clock.install()` must already have
+     * run (before the wizard loaded), and the changes must already be typed,
+     * so the two jumps below stand in for the minute the test would
+     * otherwise idle through.
+     */
+    async passAutosaveClock() {
+        await this.page.clock.fastForward(61_000);
+        await this.page.clock.fastForward(1_000);
+    }
+
     /** The Details step's Title editor body (TinyMCE iframe). */
     titleEditorBody(locale = 'en') {
         return this.page.frameLocator(`#titleAbstract-title-control-${locale}_ifr`).locator('body');
