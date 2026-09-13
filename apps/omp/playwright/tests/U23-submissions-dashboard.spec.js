@@ -711,18 +711,27 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
                 user(`${tag}au`, 'Ada', 'Author', ['author']),
             ],
         });
-        // Seeded in order, so the returned ids ascend with the titles: "ida"
-        // first, "idc" last, the filler rows between them.
+        // Only the two ends are ordered — "ida" is seeded first and "idc"
+        // last, so the ids the sort legs read ascend with those titles. The
+        // filler rows in between carry no order of their own, so they are
+        // seeded in small concurrent batches: the worker's server takes them
+        // one at a time either way, and the batch only keeps it from idling
+        // between seeds (small enough that a queued seed never sits out its
+        // own request timeout).
         const first = await ompApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `ida${tag}`,
         });
         await ompApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `idb${tag}`,
         });
-        for (let i = 0; i < ROWS - 3; i++) {
-            await ompApi.createSubmission({
-                tag, context: tag, submitter: `${tag}au`, title: `fill${i}${tag}`,
-            });
+        const fillers = Array.from({length: ROWS - 3}, (unused, i) => `fill${i}${tag}`);
+        const BATCH = 4;
+        for (let i = 0; i < fillers.length; i += BATCH) {
+            await Promise.all(
+                fillers.slice(i, i + BATCH).map((title) =>
+                    ompApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title})
+                )
+            );
         }
         const last = await ompApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `idc${tag}`,
