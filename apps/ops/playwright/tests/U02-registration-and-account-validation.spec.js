@@ -17,33 +17,19 @@
  * servers), and Mailpit reads are scoped by a unique throwaway recipient
  * (PRINCIPLES A8).
  *
- * Deliberately NOT covered here (and why):
- * - Scenario 3's reviewer registration itself ({OJS OMP}): no reviewer role
- *   exists on a preprint server; only the absence is asserted (Rule 7).
- * - OPS1 (🐞: the site-level page asks for reviewing interests on a server
- *   site with no reviewer role): a finding, never asserted as contract
- *   (PRINCIPLES M3); scenario 6 leaves that box alone.
- * - A3 (🐞: the site-level notification opt-in records nothing), A4 (🐞:
- *   closed servers listed with nothing to tick), A2 (🐞: headless activation
- *   pages, no Login link after activating), A6 (🐞: registration with
- *   validation required and no technical support contact ends on an empty
- *   page), A1 (🐞: activation-link lifetime ignores validation_timeout):
- *   findings, never asserted; scenario 7's server sets its support contact
- *   first, and the emailed link is used well inside its lifetime.
- * - A5 (❓: the Register page's "Login" link drops its Roles-tab
- *   destination) and A7 (❓: Reader granted while closed to
- *   self-registration): parked on the register; a claim parked on an open ❓
- *   is not a coverage gap (M3).
- * - Rule 9's interrupted-destination continuation, Rule 3 (registration on
- *   a sign-in-restricted server), Rule 2's disabled-server and all-closed
- *   site states: no canonical scenario exercises them; the all-closed state
- *   would touch the seeded server's settings (A1 of PRINCIPLES).
- * - Rule 14's expired link and the monthly cleanup (Side effects): clock-
- *   and scheduler-gated; Rule 16 (name copied into the site language): the
- *   spec itself says no scenario exercises it.
- * - reCAPTCHA: needs Google's service, unreachable behind the dead-port
- *   proxy (harness.md); the JavaScript-off ALTCHA refusal is a browser
- *   configuration, not a screen.
+ * Not covered, by register ID (the spec's Coverage section is the record
+ * of everything else left out): A1, A2 (the activation pages are asserted
+ * by their sentences, never by a heading), A3, A4, A5, A6 (S7 sets the
+ * technical support contact first, as fn-s says), A7, OPS1 (S6 and S7 leave
+ * the site-level interests box alone). Scenario 3 is {OJS OMP}: only its
+ * absence control runs here (Rule 7).
+ *
+ * Every registration and every sign-in that follows one runs in a browser
+ * context the test opens itself (`newVisitor`), never the shared `.auth`
+ * storage state; "a second browser" is a second such context, and S7's
+ * browser without JavaScript is one created with `javaScriptEnabled: false`
+ * (fn-s). S5's disabled server is a second scratch context seeded with
+ * `enabled: false`.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
@@ -53,7 +39,11 @@ const {
     RegisterPage,
     RegistrationCompletePage,
     ProfileRolesTab,
+    ProfileNotificationsTab,
+    ProfileNameTabs,
+    ActivationPage,
     ServerSettingsPages,
+    loginFormRegisterLink,
 } = require('../pages/RegistrationPages.js');
 
 const APP = 'ops';
@@ -83,6 +73,10 @@ const ACTIVATED =
     'Thank you for activating your account. You may now log in using the credentials you supplied when you created your account.';
 const VALIDATE_SUBJECT = 'Validate Your Account';
 const INVITATION_UNAVAILABLE = 'Invitation Unavailable';
+const SPAM_CHECK = 'You must complete the validation check used to prevent spam submissions.';
+const ACCESS_DENIED = 'The current role does not have access to this operation.';
+/** The site's contact, the sender of site-level mail (fn-s). */
+const SITE_CONTACT = {name: 'Open Preprint Systems', email: 'admin@mail.test'};
 
 /** Single hyphenless alphanumeric token — tag conventions in patterns.md. */
 function makeTag(prefix) {
@@ -121,14 +115,28 @@ async function fillRegistrant(register, r) {
     });
 }
 
-/** A fresh signed-out browser context (never inherits any storage state). */
-async function newVisitor(browser, baseURL) {
+/**
+ * A fresh signed-out browser context (never inherits any storage state).
+ * `javaScriptEnabled: false` makes S7's browser without JavaScript.
+ */
+async function newVisitor(browser, baseURL, {javaScriptEnabled = true} = {}) {
     const context = await browser.newContext({
         baseURL,
+        javaScriptEnabled,
         storageState: {cookies: [], origins: []},
     });
     await disableMotion(context);
     return context;
+}
+
+/** The "Validate Your Account" email for an address: its summary, full body and the emailed `invitation/accept` link. */
+async function validationMail(pkpMail, email) {
+    const summary = await pkpMail.find({to: email, subject: VALIDATE_SUBJECT});
+    const full = await pkpMail.fullMessage(summary.ID);
+    const haystack = `${full.Text || ''}\n${full.HTML || ''}`;
+    const match = haystack.match(/https?:\/\/[^\s"'<>]*\/invitation\/accept\?[^\s"'<>]+/);
+    expect(match, 'validation email must carry the activation link').not.toBeNull();
+    return {summary, full, link: match[0].replace(/&amp;/g, '&')};
 }
 
 /**
@@ -149,8 +157,12 @@ async function signInAt(page, base, contextPath, username, password) {
 }
 
 test.describe('registration & account validation (U2) — OPS', () => {
-    test('scenario 1: register with the server and land on the completion page', async ({page}) => {
-        const r = makeRegistrant(makeTag('u02s1'));
+    test('S1: register with the server and land on the completion page', async ({browser, baseURL, pkpMail}) => {
+        test.slow();
+        const tag = makeTag('u02s1');
+        const r = makeRegistrant(tag);
+        const visitor = await newVisitor(browser, baseURL);
+        const page = await visitor.newPage();
         const register = new RegisterPage(page);
 
         // From the server homepage, the header's "Register" (Rule 1).
@@ -161,6 +173,9 @@ test.describe('registration & account validation (U2) — OPS', () => {
 
         await fillRegistrant(register, r);
         await register.privacyConsentBox.check();
+        // The notification box arrives unticked and is left so (Rule 6).
+        await expect(register.emailConsentBox).toBeVisible();
+        await expect(register.emailConsentBox).not.toBeChecked();
         await register.submit();
 
         // "Registration complete" with the three server-level links and no
@@ -182,9 +197,77 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(roles.ownBox('Reader')).toBeChecked();
         await expect(roles.ownBox('Author')).not.toBeChecked();
         expect(await roles.ownContextBoxes.evaluateAll((els) => els.filter((el) => el.checked).length)).toBe(1);
+
+        // Notifications: the server's public-announcement email off ("Do not
+        // send me an email…" ticked on the "Public Announcements" row), the
+        // in-app notification itself still on; a row of another group at
+        // its default (email not blocked) is the contrast (Rule 6, fn-e).
+        const notifications = new ProfileNotificationsTab(page);
+        await notifications.select();
+        await expect(notifications.publicAnnouncementsHeading).toBeVisible();
+        await expect(notifications.allowBox('notificationNewAnnouncement')).toBeChecked();
+        await expect(notifications.emailBox('notificationNewAnnouncement')).toBeChecked();
+        await expect(notifications.allowBox('notificationSubmissionSubmitted')).toBeChecked();
+        await expect(notifications.emailBox('notificationSubmissionSubmitted')).not.toBeChecked();
+
+        // The mail catcher: nothing for the new address (no welcome email;
+        // the registration's request has long answered, so the read is
+        // settled). The positive control that the catcher receives this
+        // app's mail is S7's "Validate Your Account" message in the same run.
+        expect(await pkpMail.count({to: r.email})).toBe(0);
+
+        // The second visitor: a private address typed while signed out → the
+        // Login page; its "Register" link BELOW the form carries the
+        // destination; registering there continues to the typed address and
+        // is refused as a Reader (Rule 9, fn-h).
+        const second = await (await newVisitor(browser, baseURL)).newPage();
+        const secondR = makeRegistrant(tag, 'b');
+        await second.goto(`/index.php/${PK}/en/dashboard/mySubmissions`);
+        await new LoginPage(second).expectForm();
+        await expect(second).toHaveURL(/\/login/);
+        await loginFormRegisterLink(second).click();
+        const register2 = new RegisterPage(second);
+        await expect(register2.heading).toBeVisible();
+        await fillRegistrant(register2, secondR);
+        await register2.privacyConsentBox.check();
+        await register2.submit();
+        await expect(second.getByText(ACCESS_DENIED)).toBeVisible({timeout: 20_000});
+        await expect(second).toHaveURL(/\/user\/authorizationDenied/);
+        await expect(new RegistrationCompletePage(second).heading).toHaveCount(0);
+        await expect(userNav(second)).toContainText(secondR.username);
+
+        // The third visitor: the server's French Register page; the profile's
+        // [en] boxes then show the copy into the site's primary language
+        // (Rule 16, fn-k). The French page's own strings are not asserted.
+        const third = await (await newVisitor(browser, baseURL)).newPage();
+        const thirdR = makeRegistrant(tag, 'c');
+        const register3 = new RegisterPage(third);
+        await register3.gotoFrench(PK);
+        await expect(register3.form).toBeVisible();
+        await register3.fill({
+            givenName: 'Prénom',
+            familyName: 'Nom',
+            affiliation: 'Laboratoire FR',
+            countryCode: 'IS',
+            email: thirdR.email,
+            username: thirdR.username,
+            password: thirdR.password,
+            password2: thirdR.password,
+        });
+        await register3.privacyConsentBox.check();
+        await register3.submitInPageLanguage();
+        await expect(register3.form).toHaveCount(0);
+        await expect(userNav(third)).toContainText(thirdR.username);
+        const names = new ProfileNameTabs(third);
+        await names.goto(PK);
+        await names.selectIdentity();
+        await expect(names.givenName('en')).toHaveValue('Prénom');
+        await expect(names.familyName('en')).toHaveValue('Nom');
+        await names.selectContact();
+        await expect(names.affiliation('en')).toHaveValue('Laboratoire FR');
     });
 
-    test('scenario 2: the form refuses bad input', async ({page}) => {
+    test('S2: the form refuses bad input', async ({page}) => {
         const r = makeRegistrant(makeTag('u02s2'));
         const register = new RegisterPage(page);
         await register.goto(PK);
@@ -215,7 +298,7 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(register.errorLines).toHaveText([PASSWORD_SHORT]);
     });
 
-    test('scenario 3 {OJS OMP}: the server\'s Register offers no reviewer box (absence)', async ({page}) => {
+    test('S3 {OJS OMP}: the server\'s Register offers no reviewer box (absence)', async ({page}) => {
         const register = new RegisterPage(page);
         await register.goto(PK);
         await expect(register.heading).toBeVisible();
@@ -235,7 +318,7 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(register.reviewerInterestsInput).toHaveCount(0);
     });
 
-    test('scenario 4: privacy consent is required when a statement exists', async ({page, context, browser, baseURL, opsApi, asUser}) => {
+    test('S4: privacy consent is required when a statement exists', async ({page, context, browser, baseURL, opsApi, asUser}) => {
         test.slow();
         const tag = makeTag('u02s4');
         const manager = `m${tag}`;
@@ -293,15 +376,39 @@ test.describe('registration & account validation (U2) — OPS', () => {
         }
     });
 
-    test('scenario 5: closed registration', async ({page, opsApi, asUser}) => {
+    test('S5: closed registration', async ({browser, baseURL, opsApi, asUser}) => {
         test.slow();
         const tag = makeTag('u02s5');
         const manager = `m${tag}`;
         await opsApi.createContext({tag, users: [{username: manager, roles: ['manager']}]});
+        // The second scratch server, disabled since its creation (fn-s).
+        const disabled = makeTag('u02s5d');
+        await opsApi.createContext({tag: disabled, context: {enabled: false}});
 
         // The Server Manager closes registration on Site Access Options.
         const managerPage = await (await asUser(manager)).newPage();
         await new ServerSettingsPages(managerPage, tag).closeRegistration();
+
+        // The Server Manager, still signed in, at the closed server's Register
+        // address: "Registration complete", "Make a New Submission" included,
+        // never the closed message (Rule 4).
+        const managerRegister = new RegisterPage(managerPage);
+        await managerRegister.goto(tag);
+        const managerComplete = new RegistrationCompletePage(managerPage);
+        await managerComplete.expectShown();
+        await expect(managerComplete.newSubmissionLink).toBeVisible();
+        await expect(managerPage.getByText(CLOSED_MESSAGE)).toHaveCount(0);
+        await expect(managerRegister.form).toHaveCount(0);
+
+        // …and at the disabled server's Register address: "Registration
+        // complete" even there (Rules 2 and 4).
+        await managerRegister.goto(disabled);
+        await managerComplete.expectShown();
+        await expect(managerRegister.form).toHaveCount(0);
+        await expect(new LoginPage(managerPage).form).toHaveCount(0);
+
+        // A visitor, signed out, in a second browser.
+        const page = await (await newVisitor(browser, baseURL)).newPage();
 
         // The server's header offers "Login" (control) and no "Register".
         await page.goto(`/index.php/${tag}`);
@@ -325,6 +432,27 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(page.getByRole('main').getByRole('link', {name: 'Login', exact: true})).toBeVisible();
         await expect(register.form).toHaveCount(0);
 
+        // The disabled server's Register address: its Login page instead,
+        // whose own "Register" links (header and in-form) lead straight back
+        // to that Login page, with no word that the server is disabled
+        // (Rule 2, fn-s).
+        const disabledLogin = new LoginPage(page);
+        const disabledLoginUrl = new RegExp(`/index\\.php/${disabled}/login`);
+        await register.goto(disabled);
+        await disabledLogin.expectForm();
+        await expect(page).toHaveURL(disabledLoginUrl);
+        await expect(register.form).toHaveCount(0);
+        await expect(page.getByText(/disabled/i)).toHaveCount(0);
+        await userNav(page).getByRole('link', {name: 'Register', exact: true}).click();
+        await disabledLogin.expectForm();
+        await expect(page).toHaveURL(disabledLoginUrl);
+        await expect(register.form).toHaveCount(0);
+        await loginFormRegisterLink(page).click();
+        await disabledLogin.expectForm();
+        await expect(page).toHaveURL(disabledLoginUrl);
+        await expect(register.form).toHaveCount(0);
+        await expect(page.getByText(/disabled/i)).toHaveCount(0);
+
         // The site homepage's "Register" still opens the site-level page,
         // because the seeded server is open.
         await page.goto('/index.php/index');
@@ -335,12 +463,13 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(register.readerBox(PK_NAME)).toBeVisible();
     });
 
-    test('scenario 6: register from the site homepage with roles in two servers', async ({page, opsApi}) => {
+    test('S6: register from the site homepage with roles in two servers', async ({browser, baseURL, opsApi}) => {
         test.slow();
         const tag = makeTag('u02s6');
         const scratchName = `Scratch server ${tag}`;
         await opsApi.createContext({tag, context: {name: scratchName}});
         const r = makeRegistrant(tag);
+        const page = await (await newVisitor(browser, baseURL)).newPage();
 
         // The site homepage (the server list) → header "Register" (Rule 1).
         await page.goto('/index.php/index');
@@ -356,21 +485,28 @@ test.describe('registration & account validation (U2) — OPS', () => {
             await expect(block).toBeVisible();
             await expect(block.locator('fieldset.roles > legend')).toHaveText(ROLES_PROMPT);
             await expect(register.readerBox(name)).toBeVisible();
-            await expect(block.locator('input[name^="reviewerGroup"]')).toHaveCount(0);
+            await expect(register.contextRoleBoxes(name)).toHaveCount(1);
         }
 
-        // Ticking a role brings that server's consent line into view.
+        // Before anything is ticked: no box ticked, no consent line under
+        // either server (on a preprint server the line appears only once a
+        // role is ticked), and no site consent box, the site having no
+        // statement of its own (Rule 5).
+        await expect(register.checkedBoxes).toHaveCount(0);
         for (const name of [PK_NAME, scratchName]) {
             await expect(register.contextConsentLine(name)).not.toHaveClass(/context_privacy_visible/);
+            expect(await register.contextConsentLineOnScreen(name)).toBe(false);
+        }
+        await expect(register.siteConsentBox).toHaveCount(0);
+
+        // Ticking a role brings that server's consent line into view (the
+        // positive control of the off-screen read above).
+        for (const name of [PK_NAME, scratchName]) {
             await register.readerBox(name).check();
             await expect(register.contextConsentLine(name)).toHaveClass(/context_privacy_visible/);
+            expect(await register.contextConsentLineOnScreen(name)).toBe(true);
             await expect(register.contextConsentLine(name)).toContainText(CONTEXT_CONSENT_LABEL);
             await register.contextConsentBox(name).check();
-        }
-        // The site's own consent box exists only when the site has a
-        // statement (Rule 5); tick it when it is there.
-        if ((await register.siteConsentBox.count()) > 0) {
-            await register.siteConsentBox.check();
         }
 
         await fillRegistrant(register, r);
@@ -394,9 +530,40 @@ test.describe('registration & account validation (U2) — OPS', () => {
             await expect(section.getByRole('checkbox', {name: 'Author', exact: true})).not.toBeChecked();
         }
         expect(await roles.roleBoxes.evaluateAll((els) => els.filter((el) => el.checked).length)).toBe(2);
+
+        // The second visitor: the site-level page with nothing ticked, no
+        // server and no role: no consent line on the page, and the form
+        // registers with no consent at all (Rule 5); "Registration complete"
+        // with the two site-level links only (Control), then the Roles tab
+        // with no role ticked in any server (Rule 8).
+        const second = await (await newVisitor(browser, baseURL)).newPage();
+        const secondR = makeRegistrant(tag, 'b');
+        const register2 = new RegisterPage(second);
+        await register2.goto('index');
+        await expect(register2.heading).toBeVisible();
+        await expect(register2.contextsLegend).toHaveText(CONTEXTS_PROMPT);
+        await expect(register2.checkedBoxes).toHaveCount(0);
+        for (const name of [PK_NAME, scratchName]) {
+            await expect(register2.contextConsentLine(name)).not.toHaveClass(/context_privacy_visible/);
+            expect(await register2.contextConsentLineOnScreen(name)).toBe(false);
+        }
+        await expect(register2.siteConsentBox).toHaveCount(0);
+        await fillRegistrant(register2, secondR);
+        await register2.submit();
+        const complete2 = new RegistrationCompletePage(second);
+        await complete2.expectShown();
+        await expect(register2.errorLines).toHaveCount(0);
+        await complete2.expectActions(['Edit My Profile', 'Continue Browsing']);
+        const roles2 = new ProfileRolesTab(second);
+        await roles2.goto(PK);
+        // Both servers are listed (the positive control) and no box is ticked.
+        await expect(roles2.ownBox('Reader')).toBeVisible();
+        await expect(roles2.contextSection(scratchName).first()).toBeAttached();
+        await expect(roles2.roleBoxes.first()).toBeAttached();
+        await expect(roles2.form.locator('input[type="checkbox"]:checked')).toHaveCount(0);
     });
 
-    test('scenario 7: email validation', async ({page, opsApi, asUser, pkpMail, variants}) => {
+    test('S7: email validation', async ({browser, opsApi, asUser, pkpMail, variants}) => {
         test.slow();
         const tag = makeTag('u02s7');
         const manager = `m${tag}`;
@@ -404,15 +571,33 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await opsApi.createContext({tag, users: [{username: manager, roles: ['manager']}]});
         const r = makeRegistrant(tag);
         const base = variants.validation;
+        const registerUrl = `${base}/index.php/${tag}/user/register`;
 
         // The scratch server needs a technical support contact to send the
         // validation email (Rule 12; the seeded server has none — A6).
         const managerPage = await (await asUser(manager)).newPage();
         await new ServerSettingsPages(managerPage, tag).setTechnicalSupportContact(support);
 
-        // Register on the validation variant (ALTCHA verifies in the browser).
+        // A browser without JavaScript: the ALTCHA widget posts nothing, the
+        // form comes back refused with the spam line, no account created
+        // (Fields & validation "Spam check", fn-f).
+        const noJs = await (await newVisitor(browser, base, {javaScriptEnabled: false})).newPage();
+        await noJs.goto(registerUrl);
+        const registerNoJs = new RegisterPage(noJs);
+        await expect(registerNoJs.heading).toBeVisible();
+        await fillRegistrant(registerNoJs, r);
+        await registerNoJs.privacyConsentBox.check();
+        await registerNoJs.submit();
+        await expect(registerNoJs.errorBox).toContainText(ERRORS_HEADING);
+        await expect(registerNoJs.errorLines).toHaveText([SPAM_CHECK]);
+        await expect(noJs.getByRole('heading', {name: PENDING_TITLE})).toHaveCount(0);
+
+        // With JavaScript on, the same username and email register: the
+        // refused attempt created no account (Rule 15). ALTCHA verifies in
+        // the browser as "Register" is pressed.
+        const page = await (await newVisitor(browser, base)).newPage();
         const register = new RegisterPage(page);
-        await page.goto(`${base}/index.php/${tag}/user/register`);
+        await page.goto(registerUrl);
         await expect(register.heading).toBeVisible();
         await fillRegistrant(register, r);
         await register.privacyConsentBox.check();
@@ -426,6 +611,17 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(page.getByRole('main').getByRole('link')).toHaveText(['Home']);
         await expect(userNav(page).getByRole('link', {name: 'Login', exact: true})).toBeVisible();
         await expect(userNav(page).getByRole('link', {name: 'Register', exact: true})).toBeVisible();
+        await expect(userNav(page)).not.toContainText(r.username);
+
+        // The same username and email again: the unvalidated account already
+        // claims them (Rule 15).
+        await page.goto(registerUrl);
+        await expect(register.heading).toBeVisible();
+        await fillRegistrant(register, r);
+        await register.privacyConsentBox.check();
+        await register.submitThroughAltcha();
+        await expect(register.errorBox).toContainText(ERRORS_HEADING);
+        await expect(register.errorLines).toHaveText([USERNAME_TAKEN, EMAIL_TAKEN]);
 
         // Signing in before activating is refused with the disabled reason.
         await signInAt(page, base, tag, r.username, r.password);
@@ -434,24 +630,33 @@ test.describe('registration & account validation (U2) — OPS', () => {
 
         // The "Validate Your Account" email, from the technical support
         // contact, carries the activation link (Rule 12).
-        const message = await pkpMail.find({to: r.email, subject: VALIDATE_SUBJECT});
-        expect(message.From.Address).toBe(support.email);
-        expect(message.From.Name).toBe(support.name);
-        const full = await pkpMail.fullMessage(message.ID);
-        const haystack = `${full.Text || ''}\n${full.HTML || ''}`;
-        const match = haystack.match(/https?:\/\/[^\s"'<>]*\/invitation\/accept\?[^\s"'<>]+/);
-        expect(match, 'validation email must carry the activation link').not.toBeNull();
-        const activationLink = match[0].replace(/&amp;/g, '&');
+        const mail = await validationMail(pkpMail, r.email);
+        expect(mail.summary.From.Address).toBe(support.email);
+        expect(mail.summary.From.Name).toBe(support.name);
+        const activationLink = mail.link;
         expect(activationLink.startsWith(base)).toBe(true);
 
         // The link: "Confirm and activate your account" + "Activate Account";
-        // pressing it activates (Rule 13).
+        // the button's own address is captured at the press; pressing it
+        // activates (Rule 13).
         await page.goto(activationLink);
-        await expect(page.getByText(ACTIVATE_DESCRIPTION)).toBeVisible();
-        await page.getByRole('link', {name: 'Activate Account', exact: true}).click();
-        await expect(page.getByText(ACTIVATED)).toBeVisible();
+        const activation = new ActivationPage(page);
+        await expect(activation.description).toBeVisible();
+        await expect(activation.activateButton).toBeVisible();
+        const activateHref = await activation.activateHref();
+        expect(activateHref).toMatch(/\/user\/activateUser\//);
+        await activation.activateButton.click();
+        await expect(activation.activated).toBeVisible();
 
-        // Sign-in works now and lands on the server homepage.
+        // The button's own address reopened: the Login page, silently (Rule 13).
+        await page.goto(activateHref);
+        await new LoginPage(page).expectForm();
+        await expect(page.getByRole('heading', {name: 'Login', exact: true})).toBeVisible();
+        await expect(activation.activated).toHaveCount(0);
+        await expect(page.getByRole('heading', {name: INVITATION_UNAVAILABLE})).toHaveCount(0);
+
+        // Sign-in on the server's Login page works now, the same credentials
+        // as before activation (Control), and lands on the server homepage.
         await signInAt(page, base, tag, r.username, r.password);
         await page.waitForURL((url) => !url.pathname.includes('/login'), {waitUntil: 'commit'});
         await expect(page).toHaveURL(new RegExp(`/index\\.php/${tag}(/index)?/?$`));
@@ -463,19 +668,60 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(page.getByRole('heading', {name: INVITATION_UNAVAILABLE})).toBeVisible();
         await expect(page.getByRole('link', {name: 'Login', exact: true})).toBeVisible();
         await expect(page.getByRole('link', {name: 'Register', exact: true})).toBeVisible();
+        await expect(activation.activateButton).toHaveCount(0);
+
+        // The second visitor: the variant's site-level page, "Reader" under
+        // the seeded server (its only box) and its consent line →
+        // "Registration awaiting verification" (Rule 11); the mail From the
+        // site contact reading "an account with , but…" (Rule 12); activate;
+        // sign in on the site's Login page, landing on the site's server
+        // list (Rule 13).
+        const second = await (await newVisitor(browser, base)).newPage();
+        const secondR = makeRegistrant(tag, 'b');
+        const siteRegister = new RegisterPage(second);
+        await second.goto(`${base}/index.php/index/user/register`);
+        await expect(siteRegister.heading).toBeVisible();
+        await expect(siteRegister.contextsLegend).toHaveText(CONTEXTS_PROMPT);
+        await expect(siteRegister.contextRoleBoxes(PK_NAME)).toHaveCount(1);
+        await siteRegister.readerBox(PK_NAME).check();
+        await expect(siteRegister.contextConsentLine(PK_NAME)).toHaveClass(/context_privacy_visible/);
+        await siteRegister.contextConsentBox(PK_NAME).check();
+        await fillRegistrant(siteRegister, secondR);
+        await siteRegister.submitThroughAltcha();
+        await expect(second.getByRole('heading', {name: PENDING_TITLE})).toBeVisible();
+        await expect(second.getByText(pendingSentence(secondR.email))).toBeVisible();
+        await expect(userNav(second)).not.toContainText(secondR.username);
+        // Before activating, the same credentials are refused (Control).
+        await signInAt(second, base, 'index', secondR.username, secondR.password);
+        await expect(second.getByText(DISABLED_PREFIX + pendingSentence(secondR.email))).toBeVisible();
+        const siteMail = await validationMail(pkpMail, secondR.email);
+        expect(siteMail.summary.From.Address).toBe(SITE_CONTACT.email);
+        expect(siteMail.summary.From.Name).toBe(SITE_CONTACT.name);
+        expect(siteMail.full.Text).toContain('You have created an account with , but');
+        await second.goto(siteMail.link);
+        const siteActivation = new ActivationPage(second);
+        await expect(siteActivation.description).toBeVisible();
+        await siteActivation.activateButton.click();
+        await expect(siteActivation.activated).toBeVisible();
+        await signInAt(second, base, 'index', secondR.username, secondR.password);
+        await second.waitForURL((url) => !url.pathname.includes('/login'), {waitUntil: 'commit'});
+        await expect(second).toHaveURL(/\/index\.php\/index(\/en)?(\/index)?\/?$/);
+        await expect(userNav(second)).toContainText(secondR.username);
     });
 
-    test('scenario 8: a signed-in user opening Register sees the completion page', async ({asUser, appContext}) => {
-        // A plain Reader/Author account: the three server-level links.
+    test('S8: a signed-in user opening Register sees the completion page', async ({asUser, appContext}) => {
+        // A plain Reader/Author account: the three server-level links, no
+        // "View Submissions" (Rule 10).
         const authorPage = await (await asUser(appContext.seed.actors.author)).newPage();
         const complete = new RegistrationCompletePage(authorPage);
         await authorPage.goto(`/index.php/${PK}/user/register`);
         await complete.expectShown();
         await expect(authorPage.locator('form#register')).toHaveCount(0);
         await complete.expectActions(['Make a New Submission', 'Edit My Profile', 'Continue Browsing']);
+        await expect(complete.viewSubmissionsLink).toHaveCount(0);
 
         // A Moderator (OPS's Section Editor) sees "View Submissions" as well
-        // (Rule 10).
+        // (Rule 10); pressing it opens the list headed "Assigned to me".
         const moderatorPage = await (await asUser(appContext.seed.actors.sectionEditor)).newPage();
         const moderatorComplete = new RegistrationCompletePage(moderatorPage);
         await moderatorPage.goto(`/index.php/${PK}/user/register`);
@@ -486,10 +732,17 @@ test.describe('registration & account validation (U2) — OPS', () => {
             'Edit My Profile',
             'Continue Browsing',
         ]);
+        await moderatorComplete.viewSubmissionsLink.click();
+        await moderatorPage.waitForURL(/\/dashboard\/editorial/, {waitUntil: 'commit'});
+        await expect(moderatorPage.getByRole('heading', {name: /^Assigned to me/})).toBeVisible({timeout: 20_000});
 
-        // The site-level address: "Edit My Profile" and "Continue Browsing" only.
+        // The site-level address: "Edit My Profile" and "Continue Browsing"
+        // only, for the Moderator too (Control).
         await authorPage.goto('/index.php/index/user/register');
         await complete.expectShown();
         await complete.expectActions(['Edit My Profile', 'Continue Browsing']);
+        await moderatorPage.goto('/index.php/index/user/register');
+        await moderatorComplete.expectShown();
+        await moderatorComplete.expectActions(['Edit My Profile', 'Continue Browsing']);
     });
 });

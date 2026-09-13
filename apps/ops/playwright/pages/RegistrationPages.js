@@ -11,6 +11,16 @@
  * - RegistrationCompletePage — the "Registration complete" landing.
  * - ProfileRolesTab — the profile's Roles tab (user/profile → "Roles"), read
  *   through its self-registration checkboxes.
+ * - ProfileNotificationsTab — the profile's Notifications tab
+ *   (form#notificationSettingsForm), read for a row's "Enable these types of
+ *   notifications." and "Do not send me an email…" boxes (spec fn-e).
+ * - ProfileNameTabs — the profile's Identity and Contact tabs, read for the
+ *   `[en]` boxes a registration on the French page copied into (spec fn-k).
+ * - ActivationPage — the page the emailed "Validate Your Account" link opens
+ *   ("Confirm and activate your account" → "Activate Account", an anchor
+ *   styled as a button) and the thank-you page after it (spec fn-i).
+ * - loginFormRegisterLink — the Login page's "Register" link BELOW the form,
+ *   the one carrying the interrupted destination (spec fn-h).
  * - ServerSettingsPages — the three manager screens this feature's
  *   scenarios drive on a scratch server: Settings › Server › Contact
  *   (technical support contact), Settings › Users & Roles › Site Access
@@ -71,15 +81,28 @@ exports.RegisterPage = class RegisterPage extends BasePage {
     }
 
     /**
-     * Fill the "Profile" and "Login" fieldsets. Any key left out is left as is.
+     * The server's French Register page: the language code sits where "/en"
+     * does (Rule 1; the seeded server carries fr_CA as a UI language).
      *
-     * @param {{givenName?: string, familyName?: string, affiliation?: string, country?: string, email?: string, username?: string, password?: string, password2?: string}} values
+     * @param {string} contextPath
+     */
+    async gotoFrench(contextPath) {
+        await this.page.goto(this.contextUrl(contextPath, '/fr_CA/user/register'));
+    }
+
+    /**
+     * Fill the "Profile" and "Login" fieldsets. Any key left out is left as is.
+     * `country` picks the Country by its English label; `countryCode` by its
+     * option value (the ISO code), the same on every language of the page.
+     *
+     * @param {{givenName?: string, familyName?: string, affiliation?: string, country?: string, countryCode?: string, email?: string, username?: string, password?: string, password2?: string}} values
      */
     async fill(values) {
         if (values.givenName !== undefined) await this.givenNameInput.fill(values.givenName);
         if (values.familyName !== undefined) await this.familyNameInput.fill(values.familyName);
         if (values.affiliation !== undefined) await this.affiliationInput.fill(values.affiliation);
-        if (values.country !== undefined) await this.countrySelect.selectOption({label: values.country});
+        if (values.countryCode !== undefined) await this.countrySelect.selectOption({value: values.countryCode});
+        else if (values.country !== undefined) await this.countrySelect.selectOption({label: values.country});
         if (values.email !== undefined) await this.emailInput.fill(values.email);
         if (values.username !== undefined) await this.usernameInput.fill(values.username);
         if (values.password !== undefined) await this.passwordInput.fill(values.password);
@@ -103,6 +126,18 @@ exports.RegisterPage = class RegisterPage extends BasePage {
         return this.contextBlock(name).getByRole('checkbox', {name: 'Reader', exact: true});
     }
 
+    /** Every role box of a site-level server block (a preprint server offers "Reader" only). */
+    contextRoleBoxes(name) {
+        return this.contextBlock(name).locator(
+            'input[name^="readerGroup"], input[name^="authorGroup"], input[name^="reviewerGroup"]'
+        );
+    }
+
+    /** Every ticked box of the whole form (site-level: servers, roles, consents). */
+    get checkedBoxes() {
+        return this.form.locator('input[type="checkbox"]:checked');
+    }
+
     /** The per-server consent line of a site-level server block. */
     contextConsentBox(name) {
         return this.contextBlock(name).locator('input[name^="privacyConsent"]');
@@ -113,9 +148,32 @@ exports.RegisterPage = class RegisterPage extends BasePage {
         return this.contextBlock(name).locator('.context_privacy');
     }
 
+    /**
+     * Whether a server's consent line is on screen. Until a role is ticked
+     * the line is parked off the left edge (`.context_privacy` at
+     * `left: -9999px`; the theme's register.less), which Playwright's own
+     * visibility still counts as visible, so the read is the line's box.
+     *
+     * @param {string} name
+     * @returns {Promise<boolean>}
+     */
+    async contextConsentLineOnScreen(name) {
+        const box = await this.contextConsentLine(name).boundingBox();
+        return box !== null && box.x + box.width > 0;
+    }
+
     /** Press "Register". Waits for nothing — the caller asserts the outcome. */
     async submit() {
         await this.registerButton.click();
+    }
+
+    /**
+     * Press the form's submit button whatever language the page is in (the
+     * French page's reads "S'inscrire"; the page's own strings are not
+     * asserted).
+     */
+    async submitInPageLanguage() {
+        await this.form.locator('button.submit[type="submit"]').click();
     }
 
     /**
@@ -209,6 +267,113 @@ exports.ProfileRolesTab = class ProfileRolesTab extends BasePage {
         return this.form.locator('div.section').filter({
             has: this.page.locator('ul.checkbox_and_radiobutton > label', {hasText: exact}),
         });
+    }
+};
+
+/**
+ * The Login page's "Register" link BELOW the form (`form#login a.register`),
+ * the one carrying the page's interrupted destination (`source`) into the
+ * Register form (Rule 9, spec fn-h). The header's "Register" is another link.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.loginFormRegisterLink = (page) => page.locator('form#login a.register');
+
+/**
+ * The profile's "Notifications" tab (form#notificationSettingsForm): each
+ * row pairs an "Enable these types of notifications." box (`#{settingName}`)
+ * with a "Do not send me an email for these types of notifications." box
+ * (`#email{SettingName}`); "Public Announcements" holds the announcement
+ * row on a preprint server (spec fn-e).
+ */
+exports.ProfileNotificationsTab = class ProfileNotificationsTab extends BasePage {
+    constructor(page) {
+        super(page);
+        this.tab = page.getByRole('tab', {name: 'Notifications', exact: true});
+        this.form = page.locator('form#notificationSettingsForm');
+        this.publicAnnouncementsHeading = this.form.getByRole('heading', {name: 'Public Announcements'});
+    }
+
+    /** Press the tab on the profile page already open. */
+    async select() {
+        await this.tab.click();
+        await expect(this.form).toBeVisible({timeout: 20_000});
+    }
+
+    /** The "Enable these types of notifications." box of a row (`notificationNewAnnouncement`). */
+    allowBox(settingName) {
+        return this.form.locator(`input#${settingName}`);
+    }
+
+    /** The "Do not send me an email…" box of a row (`emailNotificationNewAnnouncement`). */
+    emailBox(settingName) {
+        return this.form.locator(`input#email${settingName.charAt(0).toUpperCase()}${settingName.slice(1)}`);
+    }
+};
+
+/**
+ * The profile's "Identity" and "Contact" tabs, read for the `[en]` boxes a
+ * registration on another language's page copied into (Rule 16, spec fn-k).
+ */
+exports.ProfileNameTabs = class ProfileNameTabs extends BasePage {
+    constructor(page) {
+        super(page);
+        this.heading = page.getByRole('heading', {name: 'Profile', exact: true});
+        this.identityTab = page.getByRole('tab', {name: 'Identity', exact: true});
+        this.identityForm = page.locator('form#identityForm');
+        this.contactTab = page.getByRole('tab', {name: 'Contact', exact: true});
+        this.contactForm = page.locator('form#contactForm');
+    }
+
+    /** Open the profile's English address (the boxes are `[en]` whichever language the page is in). */
+    async goto(contextPath) {
+        await this.page.goto(this.contextUrl(contextPath, '/en/user/profile'));
+        await expect(this.heading).toBeVisible({timeout: 20_000});
+    }
+
+    async selectIdentity() {
+        await this.identityTab.click();
+        await expect(this.identityForm).toBeVisible({timeout: 20_000});
+    }
+
+    async selectContact() {
+        await this.contactTab.click();
+        await expect(this.contactForm).toBeVisible({timeout: 20_000});
+    }
+
+    givenName(locale = 'en') {
+        return this.identityForm.locator(`input[name="givenName[${locale}]"]`);
+    }
+
+    familyName(locale = 'en') {
+        return this.identityForm.locator(`input[name="familyName[${locale}]"]`);
+    }
+
+    affiliation(locale = 'en') {
+        return this.contactForm.locator(`input[name="affiliation[${locale}]"]`);
+    }
+};
+
+/**
+ * The activation page the emailed link opens ("Confirm and activate your
+ * account" with the "Activate Account" control, an anchor styled as a
+ * button, spec fn-i) and the thank-you page after it.
+ */
+exports.ActivationPage = class ActivationPage extends BasePage {
+    constructor(page) {
+        super(page);
+        this.description = page.getByText('Confirm and activate your account');
+        this.activateButton = page.getByRole('link', {name: 'Activate Account', exact: true});
+        this.activated = page.getByText(
+            'Thank you for activating your account. You may now log in using the credentials you supplied when you created your account.'
+        );
+    }
+
+    /** The absolute address the "Activate Account" control leads to. */
+    async activateHref() {
+        const href = await this.activateButton.getAttribute('href');
+        expect(href, 'the href behind "Activate Account"').toBeTruthy();
+        return new URL(/** @type {string} */ (href), this.page.url()).toString();
     }
 };
 

@@ -253,11 +253,12 @@ except the two password boxes, which come back empty and must be retyped.
     account and answers "Thank you for activating your account. You may now
     log in using the credentials you supplied when you created your
     account." Neither page carries a heading, and the second offers no link
-    to the Login page ⚠ [A2](#a2). Signing in now works and lands on the
-    journal's homepage (after a site-level registration, on the site's
-    journal list). Opening the button's own address a second time silently
-    lands on the Login page; the browser's Back button instead reloads the
-    emailed link, which by then shows "Invitation Unavailable" (Rule 14).
+    to the Login page ⚠ [A2](#a2). Signing in now works: on the journal's
+    Login page it lands on the journal's homepage, on the site's Login page
+    (after a site-level registration) on the site's journal list. Opening
+    the button's own address a second time silently lands on the Login
+    page; the browser's Back button instead reloads the emailed link, which
+    by then shows "Invitation Unavailable" (Rule 14).
     <sup>i</sup>
 14. **A dead link.** The emailed link works for a limited time. Under the
     hood it is an invitation, so it lives as long as invitations do: 3 days
@@ -280,8 +281,7 @@ except the two password boxes, which come back empty and must be retyped.
 16. **Name and affiliation are stored in the language of the page** the
     visitor registered on, and copied into the site's primary language when
     that differs; the copy is what the profile shows, while the value kept
-    under the page's language has no screen of its own. No scenario in this
-    spec exercises this. <sup>k</sup>
+    under the page's language has no screen of its own. <sup>k</sup>
 
 ## Side effects
 
@@ -417,110 +417,307 @@ except the two password boxes, which come back empty and must be retyped.
 
 ## Canonical scenarios
 
-Scenarios 1–3 register throwaway accounts on the seeded journal; scenarios
-4–6 run on a scratch journal (6 on the seeded journal as well); scenario 7
-runs on an install that requires email validation; scenario 8 uses ready
+Scenarios 1–3 register throwaway accounts on the seeded journal (scenario 1
+three of them, the second from the Login page's link and the third on the
+journal's French page, each in a browser of its own); scenarios 4–6 run on
+a scratch journal (5 on two, one of them disabled; 6 on the seeded journal
+as well, with a second throwaway account registered with nothing ticked);
+scenario 7 runs on an install that requires email validation and runs the
+ALTCHA spam check, its first attempt from a browser without JavaScript and
+its second account registered on the site-level page; scenario 8 uses ready
 accounts. The ready accounts and their passwords and the tooling recipe are
 in the footnote. <sup>s</sup>
 
-1. **Register with a journal and land on the completion page** — a
-   visitor, signed out: open the journal's homepage and press "Register" in
-   the header. On "Register", fill in Given Name, Affiliation, Country,
-   Email, a new Username and the same password twice, tick "Yes, I agree to
-   have my data collected and stored according to the privacy statement.",
-   and press "Register".
-   The page "Registration complete" appears, reading "Thanks for
-   registering! What would you like to do next?" with "Make a New
-   Submission", "Edit My Profile" and "Continue Browsing" and no "View
-   Submissions". The header now shows the new username where "Register"
-   and "Login" were. "Edit My Profile" › Roles shows "Reader" ticked and no
-   other role ticked. <sup>s</sup>
-2. **The form refuses bad input** — a visitor, signed out: on "Register",
-   fill the profile fields and tick the privacy consent, then submit with
-   the username of an existing account typed with a capital letter, that
-   account's email typed in capitals, a short password and a different
-   repeat. The page re-shows with "Errors occurred processing this form:"
-   listing exactly three lines, in this order: "The selected username is
-   already in use by another user.", "The passwords do not match." and
-   "The selected email address is already in use by another user."; the
-   username stays as typed and both password boxes are empty. Now type a
-   new username, a new email and a password shorter than the site minimum,
-   the same in both boxes, make sure the privacy consent is still ticked,
-   and submit: one line, "The password must be at least {N} characters.",
-   with {N} the site's minimum. <sup>s</sup>
-3. **Register as a reviewer** {OJS OMP} — a visitor, signed out: on a
-   journal's "Register", fill the form, tick the privacy consent and "Yes,
-   I would like to be contacted with requests to review submissions to
-   this journal.", and in the "Reviewing interests" box that appears under
-   it type two interests separated by a comma; press "Register". "Registration
-   complete" now also offers "View Submissions", which opens a submissions
-   list headed "Action Required by me". "Edit My Profile" › Roles shows the
-   Reviewer role ticked, "Reader" not ticked, and both interests listed
-   separately under "Reviewing interests". On a preprint server this
-   scenario does not run; check its absence instead: the server's "Register"
-   shows no reviewer box, while the notification box that sits beside it on
-   a journal is present. <sup>s</sup>
-4. **Privacy consent is required when a statement exists** — a visitor,
-   signed out, on a scratch journal's "Register" (a new journal comes with
-   the default Privacy Statement): the box "Yes, I agree to have my data
-   collected and stored according to the privacy statement." is present,
-   and "privacy statement" opens the journal's "Privacy Statement" page in
-   a new tab. Submit a valid form with it unticked: "You must agree to the
-   terms of the privacy statement." Tick it, retype the password twice and
-   submit: "Registration complete". Then the Journal Manager, under
-   Settings › Website › Setup › Privacy Statement, empties the statement
-   and saves ("Saved"). A visitor, signed out, on that journal's
-   "Register": the box is absent, and the same form, with a fresh username
-   and email, registers without it. <sup>s</sup>
-5. **Closed registration** — Journal Manager, on a scratch journal: under
-   Settings › Users & Roles › Site Access Options choose "The Journal
-   Manager will register all user accounts…" and save. A visitor, signed
-   out: the journal's header and its Login page offer no "Register". Type
-   the journal's Register address (Rule 1) into the address bar: a page
-   titled "Register" reads "This journal is currently not accepting user
-   registrations." with a "Login" link. The site homepage's "Register"
-   still opens the site-level page, because the seeded journal is still
-   open. <sup>s</sup>
-6. **Register from the site homepage with roles in two journals** — a
-   visitor, signed out, on a site with the seeded journal and a scratch
-   journal: open the site homepage (Rule 1) and press "Register".
-   Under "Which journals on this site would you like to register with?"
-   both journals are listed with "Request the following roles.". Tick
-   "Reader" under one and, on a journal or press, the reviewer role under
-   the other (a preprint server offers "Reader" only). Under each ticked
-   journal a line "Yes, I agree to have my data collected and stored
-   according to this journal's privacy statement." appears (on a press site
-   it was there from the start [OMP2](#omp2)); tick both, and, if the site's
-   own consent box "Yes, I agree to have my data collected and stored
-   according to the privacy statement." is on the page as well (it is only
-   when the site itself has a Privacy Statement, Rule 5), tick that too.
-   Fill the form and press "Register". "Registration complete" appears with "Edit My Profile"
-   and "Continue Browsing" only, no "Make a New Submission" and no "View
-   Submissions". "Edit My Profile" › Roles shows exactly the ticked roles
-   in their journals. <sup>s</sup>
-7. **Email validation** — on an install configured to require email
-   validation (a configuration-file setting, see *Settings* below), a
-   visitor, signed out: register with a journal that has a technical
-   support contact, ticking its privacy consent. The page "Registration awaiting verification" appears with
-   "We've sent a confirmation email to you at {email}…", its only link the
-   breadcrumb's "Home", and the header still shows a signed-out site. Try
-   to sign in: "Your account has been disabled for the following reason:
-   We've sent a confirmation email to you at {email}…". Open the "Validate
-   Your Account" email, sent from the journal's technical support contact,
-   and follow its link: a page reads "Confirm and activate your account"
-   with an "Activate Account" button. Press it: "Thank you for activating
-   your account. You may now log in using the credentials you supplied when
-   you created your account." Sign in: it works, landing on the journal
-   homepage. Open the emailed link once more: the "Invitation Unavailable"
-   page with "Login" and "Register" buttons. <sup>s</sup>
-8. **A signed-in user opening Register sees the completion page** — any
-   signed-in user: type the journal's Register address (Rule 1) into the
-   address bar.
-   The "Registration complete" page appears, not the form, offering "Make a
-   New Submission", "Edit My Profile" and "Continue Browsing". A user who
-   holds one of the roles Rule 10 lists, a Section Editor say, sees "View
-   Submissions" as well. The site-level address (Rule 1) answers with "Edit
-   My Profile" and "Continue Browsing" only. <sup>s</sup>
+1. **Register with a journal and land on the completion page**
+
+   Given: a visitor, signed out, on the seeded journal's homepage; a second
+   and a third visitor, signed out, each in a browser of their own.
+   <sup>s</sup>
+
+   - **"Register" in the header**: open the journal's homepage and press
+     "Register" in the header.
+   - **The "Register" form**: on "Register", fill in Given Name,
+     Affiliation, Country, Email, a new Username and the same password
+     twice, tick "Yes, I agree to have my data collected and stored
+     according to the privacy statement.", leave "Yes, I would like to be
+     notified of new publications and announcements." unticked, as it
+     arrives, and press "Register".
+   - **"Registration complete"**: the page "Registration complete" appears,
+     reading "Thanks for registering! What would you like to do next?" with
+     "Make a New Submission", "Edit My Profile" and "Continue Browsing". The
+     header now shows the new username where "Register" and "Login" were.
+   - **The profile's Roles tab**: "Edit My Profile" › Roles shows "Reader"
+     ticked and no other role ticked.
+   - **The profile's Notifications tab**: "Edit My Profile" › Notifications
+     shows the journal's public-announcement emails switched off, the
+     in-app notifications themselves still on (Rule 6).
+   - **The mail catcher**: nothing has arrived for the new account's
+     address: no welcome email is sent (*Side effects*).
+   - **The second visitor, a private address typed while signed out**: the
+     second visitor types the address of a page of the journal that a
+     Reader may not open, a submissions list say (the footnote names the
+     one used): the Login page appears instead. Press the "Register" link below the Login form and register
+     there, the same form with a fresh username and email: the browser
+     continues to the typed address, not to the completion page, and is
+     refused there with "The current role does not have access to this
+     operation." (Rule 9).
+   - **The third visitor, the journal's French Register page**: the third
+     visitor opens the journal's Register page with the French language
+     code, fr_CA, in its address where "/en" sits (Rule 1) and fills in the
+     same form with Prénom as the given
+     name, Nom as the family name and Laboratoire FR as the affiliation, a
+     fresh username and email, and submits it; the profile then shows
+     Prénom, Nom and Laboratoire FR, the copy into the site's primary
+     language; the value kept under the page's language has no screen of
+     its own (Rule 16).
+   - **Control**: the completion page offered no "View Submissions"
+     (Rule 10).
+
+2. **The form refuses bad input**
+
+   Given: a visitor, signed out, on the seeded journal's "Register" page,
+   with an existing account's username and email at hand. <sup>s</sup>
+
+   - **Taken values, a short password and a different repeat**: fill the
+     profile fields and tick the privacy consent, then submit with the
+     username of an existing account typed with a capital letter, that
+     account's email typed in capitals, a short password and a different
+     repeat: the page re-shows with "Errors occurred processing this form:"
+     listing exactly three lines, in this order: "The selected username is
+     already in use by another user.", "The passwords do not match." and
+     "The selected email address is already in use by another user."; the
+     username stays as typed and both password boxes are empty.
+   - **A password shorter than the minimum**: now type a new username, a
+     new email and a password shorter than the site minimum, the same in
+     both boxes, make sure the privacy consent is still ticked, and submit:
+     one line, "The password must be at least {N} characters.", with {N}
+     the site's minimum.
+   - **Control**: the username with the capital letter drew the "already in
+     use" line alone, not the format sentence "The username can contain
+     only lower-case alphanumeric characters, underscores, and hyphens, and
+     must begin and end with an alphanumeric character.": a name both badly
+     formed and taken gets only the taken line (*Fields & validation*,
+     "Username").
+
+3. **Register as a reviewer** {OJS OMP}
+
+   Given: a visitor, signed out, on the seeded journal's "Register" page.
+   <sup>s</sup>
+
+   - **The reviewer offer**: fill the form, tick the privacy consent and
+     "Yes, I would like to be contacted with requests to review submissions
+     to this journal.", and in the "Reviewing interests" box that appears
+     under it type ethics, statistics (two interests separated by a comma);
+     press "Register".
+   - **"Registration complete"**: "Registration complete" now also offers
+     "View Submissions", which opens a submissions list headed "Action
+     Required by me".
+   - **The profile's Roles tab**: "Edit My Profile" › Roles shows the
+     Reviewer role ticked, "Reader" not ticked, and both interests listed
+     separately under "Reviewing interests".
+   - **Control**: on a preprint server this scenario does not run; check
+     its absence instead: the server's "Register" shows no reviewer box,
+     while the notification box that sits beside it on a journal is
+     present.
+
+4. **Privacy consent is required when a statement exists**
+
+   Given: a visitor, signed out, on a scratch journal's "Register" page (a
+   new journal comes with the default Privacy Statement). <sup>s</sup>
+
+   - **The consent box**: the box "Yes, I agree to have my data collected
+     and stored according to the privacy statement." is present, and
+     "privacy statement" opens the journal's "Privacy Statement" page in a
+     new tab.
+   - **Submitted unticked**: submit a valid form with it unticked: "You
+     must agree to the terms of the privacy statement."
+   - **Submitted ticked**: tick it, retype the password twice and submit:
+     "Registration complete".
+   - **Journal Manager, the statement emptied**: then the Journal Manager,
+     under Settings › Website › Setup › Privacy Statement, empties the
+     statement and saves ("Saved").
+   - **Control**: a visitor, signed out, on that journal's "Register": the
+     box is absent, and the same form, with a fresh username and email,
+     registers without it.
+
+5. **Closed registration**
+
+   Given: Journal Manager, signed in on a scratch journal, on a site that
+   also hosts the seeded journal and a second scratch journal, disabled
+   since its creation; a visitor, signed out, in a second browser.
+   <sup>s</sup>
+
+   - **Site Access Options**: under Settings › Users & Roles › Site Access
+     Options choose "The Journal Manager will register all user accounts…"
+     and save.
+   - **Journal Manager at the closed journal's Register address**: still
+     signed in, type the journal's Register address (Rule 1) into the
+     address bar: "Registration complete", "Make a New Submission"
+     included, never the closed message (Rule 4).
+   - **Journal Manager at the disabled journal's Register address**: type
+     the disabled journal's Register address: "Registration complete" even
+     there (Rules 2 and 4).
+   - **The visitor's header and Login page**: the visitor, signed out: the
+     journal's header and its Login page offer no "Register".
+   - **The typed Register address**: type the journal's Register address
+     (Rule 1) into the address bar: a page titled "Register" reads "This
+     journal is currently not accepting user registrations." with a "Login"
+     link.
+   - **The disabled journal's Register address**: type the disabled
+     journal's Register address: the journal's Login page shows instead,
+     and its own "Register" links lead straight back to that Login page,
+     with no word that the journal is disabled (Rule 2).
+   - **Control**: the site homepage's "Register" still opens the site-level
+     page, because the seeded journal is still open.
+
+6. **Register from the site homepage with roles in two journals**
+
+   Given: a visitor, signed out, on a site with the seeded journal and a
+   scratch journal, the site itself having no Privacy Statement; a second
+   visitor, signed out, in a second browser. <sup>s</sup>
+
+   - **The site homepage**: open the site homepage (Rule 1) and press
+     "Register".
+   - **"Which journals on this site would you like to register with?"**:
+     under "Which journals on this site would you like to register with?"
+     both journals are listed with "Request the following roles.".
+   - **Before anything is ticked**: no consent line sits under either
+     journal, a journal whose roles are left unticked asking for no
+     consent (Rule 5); on a press site every press's line is on screen from
+     the start [OMP2](#omp2).
+   - **The role boxes**: tick "Reader" under one and, on a journal or
+     press, the reviewer role under the other (a preprint server offers
+     "Reader" only).
+   - **The consent lines**: under each ticked journal a line "Yes, I agree
+     to have my data collected and stored according to this journal's
+     privacy statement." appears (on a press site it was there from the
+     start [OMP2](#omp2)); tick both, and, if the site's own consent box
+     "Yes, I agree to have my data collected and stored according to the
+     privacy statement." is on the page as well (it is only when the site
+     itself has a Privacy Statement, Rule 5), tick that too.
+   - **"Register"**: fill the form and press "Register": "Registration
+     complete" appears with "Edit My Profile" and "Continue Browsing" only.
+   - **The profile's Roles tab**: "Edit My Profile" › Roles shows exactly
+     the ticked roles in their journals.
+   - **The second visitor, nothing ticked**: the second visitor opens the
+     site-level page (Rule 1), ticks no journal and no role, fills the form
+     with a fresh username and email and presses "Register": no consent
+     line is on the page, and the form registers with no consent at all
+     (Rule 5);
+     "Registration complete" appears, and the profile's Roles tab shows no
+     role ticked in any journal (Rule 8).
+   - **Control**: the completion page offered, after either registration,
+     no "Make a New Submission" and no "View Submissions", the reviewer
+     role ticked or nothing at all (Rule 10).
+
+7. **Email validation**
+
+   Given: on an install configured to require email validation and to run
+   the ALTCHA spam check on registration (configuration-file settings, see
+   *Settings* below), a visitor, signed out, on the "Register" page of a
+   journal that has a technical support contact, first in a browser with
+   JavaScript switched off; a second visitor, signed out, in a browser of
+   their own. <sup>s</sup>
+
+   - **A browser without JavaScript**: fill the form, ticking the privacy
+     consent, and press "Register": the page re-shows with "Errors occurred
+     processing this form:" and the line "You must complete the validation
+     check used to prevent spam submissions.", and no account is created
+     (*Fields & validation*, "Spam check").
+   - **"Register" with JavaScript on**: register with the journal, the
+     same username and email, ticking its privacy consent: the page
+     "Registration awaiting verification" appears with "We've sent a
+     confirmation email to you at {email}…", its only link the breadcrumb's
+     "Home", and the header still shows a signed-out site; the username and
+     email were still free, the refused attempt having created no account
+     (Rule 15).
+   - **The same username and email again**: a second registration on the
+     same journal is refused with "The selected username is already in use
+     by another user." and "The selected email address is already in use by
+     another user.": the unvalidated account already claims them (Rule 15).
+   - **Signing in before activating**: try to sign in: "Your account has
+     been disabled for the following reason: We've sent a confirmation
+     email to you at {email}…".
+   - **The "Validate Your Account" email**: open the email, sent from the
+     journal's technical support contact, and follow its link: a page reads
+     "Confirm and activate your account" with an "Activate Account" button.
+   - **"Activate Account"**: press it: "Thank you for activating your
+     account. You may now log in using the credentials you supplied when
+     you created your account."
+   - **The button's own address reopened**: open the address the "Activate
+     Account" button led to a second time: the Login page shows, silently
+     (Rule 13).
+   - **Signing in after activating**: sign in on the journal's Login page:
+     it works, landing on the journal homepage.
+   - **The emailed link once more**: opened again, the "Invitation
+     Unavailable" page with "Login" and "Register" buttons.
+   - **The second visitor, the site-level page**: opens the site-level
+     Register page (Rule 1), ticks "Reader" under one journal and that
+     journal's consent line, fills the form with a fresh username and email
+     and presses "Register": "Registration awaiting verification" again
+     (Rule 11); the "Validate Your Account" email arrives from the site's
+     contact, its sentence reading "You have created an account with ,
+     but…", the site never having been given a title (Rule 12); follow its
+     link, press "Activate Account" and sign in on the site's Login page:
+     it works, landing on the site's journal list (Rule 13).
+   - **Control**: the sign-in refused before "Activate Account" and the one
+     that worked after it used the same username and password; only the
+     activation changed (Rules 11 and 13).
+
+8. **A signed-in user opening Register sees the completion page**
+
+   Given: an Author, signed in on the seeded journal; a Section Editor's
+   account ready. <sup>s</sup>
+
+   - **The Author at the journal's Register address**: type the journal's
+     Register address (Rule 1) into the address bar: the "Registration
+     complete" page appears, not the form, offering "Make a New
+     Submission", "Edit My Profile" and "Continue Browsing", no "View
+     Submissions" (Rule 10).
+   - **A Section Editor at the same address**: the Section Editor, holding
+     a role Rule 10 lists, sees "View Submissions" as well; pressing it
+     opens the list headed "Assigned to me".
+   - **Control**: the site-level address (Rule 1) answers with "Edit My
+     Profile" and "Continue Browsing" only, for the Section Editor too
+     (Rule 10).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Nothing new to test**:
+  - the "Register" link on the Login and lost-password pages (Rule 1; scenario 1's header entry opens the same page)
+  - the header's "Register" on the Login page carrying no destination (Rule 9; scenario 1's link below the form)
+  - the User Registration option's wording on a press and a preprint server (Settings; scenario 5's option)
+- **Register carries it**:
+  - A3 (the site-level notification box records nothing; Rule 6)
+  - A7 (Reader granted though closed to self-registration; Rule 7)
+  - A4 (closed journals listed with no roles under them; Rule 8)
+  - A6 (no technical support contact: an empty page and a stranded account; Rule 12)
+  - A2 (the activation pages carry no heading and no Login link; Rule 13)
+  - A1 (`validation_timeout` promises 14 days and changes nothing; Rule 14)
+  - OMP1 (on a press site the site-level consent errors render as raw codes)
+  - OMP2 (on a press site every press's consent line is shown before a role is ticked; scenario 6 marks it)
+  - OPS1 (a preprint-server site's page asks for reviewing interests with no reviewer role)
+- **No seed**:
+  - every journal closed: the site-level page closes and the site Login drops the link (Rule 2)
+  - a restricted journal still rendering the form, its header offering "Register" (Rule 3): what is missing is a `restrictSiteAccess` key on `POST scenarios/context` (Settings "Site Access"); a Journal Manager's tick would be set-up for a visitor's read, not a step
+  - the site's own statement present: the site consent asked (Rule 5)
+  - `sitewide_privacy_statement` on: only the site consent asked (Rule 5)
+  - the Reviewer role closed to self-registration: box and interests gone (Rule 7): what is missing is a per-role "Allow user self-registration" passthrough on `POST scenarios/context` (a `userGroups[]` key)
+  - the self-registration flag deciding the site-level boxes per journal (Settings, Rule 8): the same missing passthrough
+  - the link expiring after 3 days (Rule 14, `expiration_days`)
+  - the monthly cleanup deleting unvalidated accounts older than the period (Side effects)
+  - reCAPTCHA on Register (Settings "Spam checks")
+  - the site password policy: a non-default minimum applied to the Password field (Settings)
+- **Owned by another feature**:
+  - a signed-in user adding roles on the profile's Roles tab (Actors row 7; *User profile*)
+  - a Section Editor refused on Users & Roles (Actors row 8; *Roles configuration*)
+  - OPS: opening "Make a New Submission" enrolling the Reader as Author (Rule 7; *Submission wizard*)
+  - an altered key answering a bare "404 Not Found" (Rule 14; *User invitations*)
+  - a dead-link account staying disabled until "Enable User" (Rule 14; *Users management*)
+  - the last-login date set on the first sign-in (Side effects; *Login & sessions*)
+  - the ORCID block on the journal-level page (Settings; *ORCID integration*)
 
 ## Findings register
 
@@ -1202,31 +1399,75 @@ level) or the `privacyConsent[…]` line under each ticked context (site
 level); a scratch context from `POST scenarios/context` arrives with the
 same default statement. Roster passwords are the username doubled
 (`users.md`). Scenarios 1–3, 6–7: a throwaway username per test and app
-(pattern `u02<case>-<app>`), email `<username>@mail.test`, observed in the
+(pattern `u02<case>-<app>`; Mailpit is shared by the fleets, so the app is
+part of every address), email `<username>@mail.test`, observed in the
 mail catcher scoped by recipient; profile Roles tab reached via "Edit My
-Profile". Scenario 2 reuses `reader.rosa`'s username and email as the taken
-values (typed `Reader.Rosa`, `READER.ROSA@MAIL.TEST`); the site minimum is 6
-on the test installs. Scenario 3's absence control on OPS: the notification
-checkbox present, the reviewer box absent. Scenarios 4–6: a scratch context
-from `POST scenarios/context` (Journal Manager `manager.maya` or the scratch
-manager). Scenario 4's second half empties the rich-text field on Settings ›
-Website › Setup › "Privacy Statement" and saves ("Saved"; the save echoes an
-empty `privacyStatement`) before the visitor reloads Register; the
-closed-registration option (scenario 5) is on Settings › Users & Roles ›
-Site Access Options. Scenario 6 needs two open contexts, the seeded one plus
-the scratch one, and ticks the consent line under each. Scenario 7 runs
-against the validation-variant server (the fleet's fixed extra server with
-`require_validation = On` and `altcha = on`, reached through the `variants`
-fixture; the harness notes describe it) on a scratch context from `POST
-scenarios/context` whose Journal Manager first sets Settings › Journal ›
-Contact › "Technical Support Contact" (name and email; "Saved"): the seeded
-context has no support contact, so registering there under validation
-crashes (A6). Mail is read from Mailpit scoped by the throwaway address;
-the "once more" step reopens the emailed `invitation/accept` link, not the
-"Activate Account" button's address. Scenario 8: `author.alex` and
-`sectioneditor.ana` (a Section Editor on OJS and OMP, a Moderator on OPS;
-`editor.diana` is not seeded on OPS, where Login answers "Invalid
-username/email or password. Please try again.").
+Profile". Scenario 1 registers three accounts: `u02s1-<app>` from the
+header's "Register", with the notification box (`input[name=emailConsent]`,
+unticked on load) left unticked, after which "Edit My Profile" ›
+Notifications is read for the "Public Announcements" rows (note e names
+the boxes) and Mailpit, scoped by `u02s1-<app>@mail.test`, must hold no
+message; `u02s1b-<app>` in a fresh browser context after typing
+`{context}/en/dashboard/mySubmissions` signed out (the Login page's hidden
+`source` carries the address into the form behind the "Register" link
+below the Login form; the refusal lands on `user/authorizationDenied`, note
+h); `u02s1c-<app>` in a fresh browser context on
+`{context}/fr_CA/user/register` (the seeded journals carry `fr_CA` as a UI
+language on all three apps, `seed-facts.md`; the French page's own strings
+are not asserted), the profile's Identity and Contact tabs then read for the
+`[en]` boxes (note k). Scenario 2 reuses `reader.rosa`'s username and email
+as the taken values (typed `Reader.Rosa`, `READER.ROSA@MAIL.TEST`); the site
+minimum is 6 on the test installs. Scenario 3's absence control on OPS: the
+notification checkbox present, the reviewer box absent. Scenarios 4–6: a
+scratch context from `POST scenarios/context` (Journal Manager
+`manager.maya` or the scratch manager). Scenario 4's second half empties
+the rich-text field on Settings › Website › Setup › "Privacy Statement" and
+saves ("Saved"; the save echoes an empty `privacyStatement`) before the
+visitor reloads Register; the closed-registration option (scenario 5) is
+on Settings › Users & Roles › Site Access Options. Scenario 5 seeds two
+scratch contexts, the second with `context.enabled: false` (the disabled
+journal; `admin` is enrolled as a manager in every scratch context, and
+Rule 4 holds for any signed-in user); the manager's session stays signed
+in for the two completion-page reads at `{closed context}/user/register`
+and `{disabled context}/user/register`, the visitor's reads run in a fresh
+browser context, where the disabled context's Register address, its Login
+page's header "Register" and the in-form "Register" link all answer
+`{disabled context}/login` (note g). Scenario 6 needs two open contexts,
+the seeded one plus the scratch one, and ticks the consent line under each;
+the site has no privacy statement of its own (`seed-facts.md`), so no site
+consent box is on the page; its second account, `u02s6b-<app>`, registers
+in a fresh browser context at `index/user/register` with nothing ticked,
+its Roles tab then reached through the profile address (`user/profile`, the
+seeded context's) and read for no ticked box anywhere (note c). Scenario 7
+runs against the validation-variant server (the fleet's fixed extra server
+with `require_validation = On` and `altcha = on`, reached through the
+`variants` fixture; the harness notes describe it) on a scratch context
+from `POST scenarios/context` whose Journal Manager first sets Settings ›
+Journal › Contact › "Technical Support Contact" (name and email; "Saved"):
+the seeded context has no support contact, so registering there under
+validation crashes (A6). Its first attempt, username `u02s7-<app>`, runs in
+a browser context created with JavaScript disabled (Playwright's
+`javaScriptEnabled: false`; the ALTCHA widget then posts no `altcha` field,
+note f); the same username and email then register with JavaScript on, and
+the duplicate form retypes the same two values. Mail is read from Mailpit
+scoped by the throwaway address; the "Activate Account" button's address
+(`user/activateUser/{username}?invitationId=…&invitationKey=…`) is captured
+at the press and reopened after it (it answers the Login page, note i); the
+"once more" step reopens the emailed `invitation/accept` link, not the
+button's address. The site-level account, `u02s7b-<app>`, registers in a
+fresh browser context at the variant server's `index/user/register` with
+"Reader" ticked under the seeded context and that context's consent line;
+its mail comes From the site contact (`admin@mail.test`, named "Open
+Journal Systems" / "Open Monograph Press" / "Open Preprint Systems" on the
+fleets) and reads "an account with , but…" because the test site's title
+is empty in both locales (`seed-facts.md`), the fleets' state rather than a
+claim about a titled site; after activating, sign-in on the site's Login
+page (`index/login`) lands on `index/index`, the site's context list (note
+i). Scenario 8: `author.alex` and `sectioneditor.ana` (a Section Editor on
+OJS and OMP, a Moderator on OPS; `editor.diana` is not seeded on OPS, where
+Login answers "Invalid username/email or password. Please try again.");
+"View Submissions" for the Section Editor opens `dashboard/editorial`,
+heading "Assigned to me (N)" (note h).
 
 <a id="fn-a1"></a>
 **f-a1** — `config.TEMPLATE.inc.php` `[email] validation_timeout = 14` with

@@ -10,7 +10,15 @@
  *   validation-variant server included, via an absolute origin).
  * - RegistrationCompletePage — the "Registration complete" landing.
  * - ProfileRolesTab — the profile's Roles tab (journal- or site-level).
+ * - ProfileNotificationsTab — the profile's Notifications tab, the
+ *   "Public Announcements" rows' two boxes (Rule 6).
+ * - ProfileNameTabs — the Identity and Contact tabs' `[en]` name and
+ *   affiliation boxes (Rule 16).
+ * - ActivationPage — the emailed link's "Confirm and activate your account"
+ *   page, its "Activate Account" button and the thank-you page (Rule 13).
  * - siteHeader(page) — the front-end user navigation (#navigationUser).
+ * - loginFormRegisterLink(page) — the "Register" link below the Login form
+ *   (the one that carries an interrupted destination, Rule 9).
  *
  * Labels are the live locale strings (lib/pkp/locale/en/user.po).
  */
@@ -23,6 +31,26 @@ function siteHeader(page) {
 }
 
 exports.siteHeader = siteHeader;
+
+/**
+ * The "Register" link below the Login form (`form#login a.register`), not
+ * the header's: it carries the Login page's interrupted destination into
+ * the Register form (Rule 9).
+ */
+function loginFormRegisterLink(page) {
+    return page.locator('form#login').getByRole('link', {name: 'Register', exact: true});
+}
+
+exports.loginFormRegisterLink = loginFormRegisterLink;
+
+/** The "Public Announcements" rows' setting names on a journal (note e). */
+const PUBLIC_ANNOUNCEMENT_SETTINGS = [
+    'notificationNewAnnouncement',
+    'notificationPublishedIssue',
+    'notificationOpenAccess',
+];
+
+exports.PUBLIC_ANNOUNCEMENT_SETTINGS = PUBLIC_ANNOUNCEMENT_SETTINGS;
 
 exports.RegisterPage = class RegisterPage extends BasePage {
     /**
@@ -59,6 +87,8 @@ exports.RegisterPage = class RegisterPage extends BasePage {
         this.siteConsent = this.form.locator('input[name="privacyConsent[0]"]');
         this.submitButton = this.form.locator('button.submit');
         this.loginLink = this.form.getByRole('link', {name: 'Login', exact: true});
+        // The interrupted destination the Login page's link carried in (Rule 9).
+        this.sourceField = this.form.locator('input[name="source"]');
         this.errors = page.locator('#formErrors');
         this.errorLines = page.locator('#formErrors li');
     }
@@ -73,6 +103,20 @@ exports.RegisterPage = class RegisterPage extends BasePage {
 
     async goto() {
         await this.page.goto(this.url());
+    }
+
+    /**
+     * The page's address with a language code where "/en" sits
+     * (`{context}/fr_CA/user/register`, Rule 1); journal-level only.
+     *
+     * @param {string} locale
+     */
+    localeUrl(locale) {
+        return `${this.origin}/index.php/${this.contextPath}/${locale}/user/register`;
+    }
+
+    async gotoLocale(locale) {
+        await this.page.goto(this.localeUrl(locale));
     }
 
     async expectForm() {
@@ -106,6 +150,42 @@ exports.RegisterPage = class RegisterPage extends BasePage {
     /** The per-journal consent line inside a site-level block. */
     contextConsent(block) {
         return block.locator('.context_privacy');
+    }
+
+    /** The consent box inside a site-level block's consent line. */
+    contextConsentBox(block) {
+        return this.contextConsent(block).locator('input[type="checkbox"]');
+    }
+
+    /** A role box inside a site-level block ("Reader", "Reviewer"). */
+    contextRoleBox(block, name) {
+        return block.getByRole('checkbox', {name, exact: true});
+    }
+
+    /**
+     * The consent lines shown on the site-level page. A line that is not
+     * shown is parked off-screen (`left: -9999px`), not hidden, so it still
+     * counts as visible to Playwright; the theme marks a shown line with
+     * `context_privacy_visible` and the viewport read confirms it.
+     */
+    visibleConsentLines() {
+        return this.form.locator('.context_privacy.context_privacy_visible');
+    }
+
+    /** No consent line under this block (nothing of its roles ticked, Rule 5). */
+    async expectConsentHidden(block) {
+        const line = this.contextConsent(block);
+        await expect(line).toHaveCount(1);
+        await expect(line).not.toHaveClass(/context_privacy_visible/);
+        await expect(line).not.toBeInViewport();
+    }
+
+    /** The block's consent line is on screen (a role of it ticked, Rule 5). */
+    async expectConsentShown(block) {
+        const line = this.contextConsent(block);
+        await expect(line).toHaveClass(/context_privacy_visible/);
+        await line.scrollIntoViewIfNeeded();
+        await expect(line).toBeInViewport();
     }
 
     /**
@@ -202,5 +282,130 @@ exports.ProfileRolesTab = class ProfileRolesTab extends BasePage {
         return this.form.locator('.section').filter({
             has: this.page.locator('label', {hasText: journalName}),
         });
+    }
+
+    /** Every role box of the form, the folded other journals' included. */
+    allBoxes() {
+        return this.form.locator('input[type="checkbox"]');
+    }
+
+    /** The ticked role boxes of the form, any journal. */
+    checkedBoxes() {
+        return this.form.locator('input[type="checkbox"]:checked');
+    }
+};
+
+exports.ProfileNotificationsTab = class ProfileNotificationsTab extends BasePage {
+    /**
+     * @param {import('@playwright/test').Page} page
+     * @param {string} contextPath journal path
+     */
+    constructor(page, contextPath) {
+        super(page);
+        this.contextPath = contextPath;
+        this.form = page.locator('form#notificationSettingsForm');
+        this.tab = page.locator('#profileTabs').getByRole('tab', {name: 'Notifications', exact: true});
+    }
+
+    /** From the profile page, select the Notifications tab (AJAX-loaded). */
+    async open() {
+        await expect(this.page.getByRole('heading', {name: 'Profile', exact: true})).toBeVisible();
+        await this.tab.click();
+        await expect(this.form).toBeVisible({timeout: 30_000});
+    }
+
+    /**
+     * A row's two boxes: "Enable these types of notifications." (`#{setting}`)
+     * and "Do not send me an email for these types of notifications."
+     * (`#email{Setting}`).
+     */
+    pair(settingName) {
+        const emailName = `email${settingName.charAt(0).toUpperCase()}${settingName.slice(1)}`;
+        return {
+            allow: this.form.locator(`input#${settingName}`),
+            email: this.form.locator(`input#${emailName}`),
+        };
+    }
+
+    /** Every "Enable these types of notifications." box. */
+    allowBoxes() {
+        return this.form.getByRole('checkbox', {name: 'Enable these types of notifications.'});
+    }
+
+    /** Every ticked "Do not send me an email…" box. */
+    checkedEmailBoxes() {
+        return this.form.locator('input[type="checkbox"][id^="email"]:checked');
+    }
+};
+
+exports.ProfileNameTabs = class ProfileNameTabs extends BasePage {
+    /**
+     * The Identity tab (the page opens on it) and the Contact tab, read for
+     * the `[en]` boxes: the copy into the site's primary language (Rule 16).
+     *
+     * @param {import('@playwright/test').Page} page
+     * @param {string} contextPath journal path
+     */
+    constructor(page, contextPath) {
+        super(page);
+        this.contextPath = contextPath;
+        this.heading = page.getByRole('heading', {name: 'Profile', exact: true});
+        this.identityForm = page.locator('form#identityForm');
+        this.contactForm = page.locator('form#contactForm');
+        this.contactTab = page.locator('#profileTabs').locator('> ul > li > a[name="contact"]');
+    }
+
+    /** The profile in English (`{context}/en/user/profile`), open on Identity. */
+    async goto() {
+        await this.page.goto(`/index.php/${this.contextPath}/en/user/profile`);
+        await expect(this.heading).toBeVisible({timeout: 30_000});
+        await expect(this.identityForm).toBeVisible({timeout: 30_000});
+    }
+
+    givenName(locale = 'en') {
+        return this.identityForm.locator(`input[name="givenName[${locale}]"]`);
+    }
+
+    familyName(locale = 'en') {
+        return this.identityForm.locator(`input[name="familyName[${locale}]"]`);
+    }
+
+    /** Select the Contact tab (AJAX-loaded). */
+    async openContact() {
+        await this.contactTab.click();
+        await expect(this.contactForm).toBeVisible({timeout: 30_000});
+    }
+
+    affiliation(locale = 'en') {
+        return this.contactForm.locator(`input[name="affiliation[${locale}]"]`);
+    }
+};
+
+exports.ActivationPage = class ActivationPage extends BasePage {
+    constructor(page) {
+        super(page);
+        this.confirmText = page.getByText('Confirm and activate your account');
+        // An anchor styled as a button (no form), to user/activateUser/… (note i).
+        this.activateButton = page.getByRole('link', {name: 'Activate Account', exact: true});
+        this.thankYou = page.getByText(
+            'Thank you for activating your account. You may now log in using the credentials you supplied when you created your account.'
+        );
+        this.unavailableHeading = page.getByRole('heading', {name: 'Invitation Unavailable'});
+        this.unavailableLanding = page.locator('.page_invitation_unavailable');
+    }
+
+    /**
+     * Press "Activate Account" and return the absolute address it led to,
+     * resolved against the page (the variant server's origin, not the
+     * worker's), for the "reopened" read (Rule 13).
+     */
+    async activate() {
+        await expect(this.confirmText).toBeVisible();
+        const href = await this.activateButton.getAttribute('href');
+        expect(href, 'the address behind "Activate Account"').toBeTruthy();
+        const address = new URL(/** @type {string} */ (href), this.page.url()).toString();
+        await this.activateButton.click();
+        await expect(this.thankYou).toBeVisible();
+        return address;
     }
 };

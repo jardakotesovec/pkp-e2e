@@ -57,15 +57,28 @@ exports.RegisterPage = class RegisterPage extends BasePage {
     }
 
     /**
+     * The press's French Register address (Rule 1: the language code sits
+     * where "/en" does; the seeded press carries fr_CA as a UI language).
+     */
+    static contextUrlFr(contextPath) {
+        return `/index.php/${contextPath}/fr_CA/user/register`;
+    }
+
+    /**
      * Fill the "Profile" and "Login" sections.
      *
-     * @param {{givenName: string, familyName?: string, affiliation?: string, country?: string, email: string, username: string, password: string, password2?: string}} values
+     * `countryCode` picks the Country by its option value (the ISO code),
+     * which is the same on every language of the page; `country` picks it by
+     * its English label.
+     *
+     * @param {{givenName: string, familyName?: string, affiliation?: string, country?: string, countryCode?: string, email: string, username: string, password: string, password2?: string}} values
      */
     async fillIdentity({
         givenName,
         familyName = 'Tester',
         affiliation = 'Public Knowledge Project',
         country = 'Iceland',
+        countryCode = null,
         email,
         username,
         password,
@@ -74,7 +87,7 @@ exports.RegisterPage = class RegisterPage extends BasePage {
         await this.givenName.fill(givenName);
         await this.familyName.fill(familyName);
         await this.affiliation.fill(affiliation);
-        await this.country.selectOption({label: country});
+        await this.country.selectOption(countryCode ? {value: countryCode} : {label: country});
         await this.email.fill(email);
         await this.username.fill(username);
         await this.password.fill(password);
@@ -93,13 +106,66 @@ exports.RegisterPage = class RegisterPage extends BasePage {
         return this.contextBlock(name).getByRole('checkbox', {name: role, exact: true});
     }
 
+    /** Every role box of a press's site-level block (`readerGroup[…]`, `reviewerGroup[…]`). */
+    contextRoleBoxes(name) {
+        return this.contextBlock(name).locator(
+            'input[name^="readerGroup"], input[name^="reviewerGroup"]'
+        );
+    }
+
     /** The per-press consent line inside a press's site-level block. */
     contextConsent(name) {
         return this.contextBlock(name).locator('input[name^="privacyConsent"]');
     }
 
+    /** The per-press consent sentence (the label beside the line's box). */
+    contextConsentText(name) {
+        return this.contextBlock(name).locator('.context_privacy');
+    }
+
     async submit() {
         await this.submitButton.click();
+    }
+
+    /**
+     * Press the form's submit button whatever language the page is in (the
+     * French page's button reads "S'inscrire"; the page's own strings are
+     * not asserted).
+     */
+    async submitInPageLanguage() {
+        await this.form.locator('button.submit[type="submit"]').click();
+    }
+};
+
+/**
+ * The Login page's "Register" link BELOW the form (`form#login a.register`),
+ * the one that carries the page's interrupted destination into the
+ * Register form (Rule 9). The header's "Register" is a different link.
+ */
+exports.loginFormRegisterLink = (page) => page.locator('form#login a.register');
+
+/** The refusal page a Reader meets at a private address (Rule 9). */
+exports.ACCESS_DENIED = 'The current role does not have access to this operation.';
+
+/**
+ * The activation page the emailed link opens ("Confirm and activate your
+ * account" with the "Activate Account" control, an anchor styled as a
+ * button; spec fn-i) and the thank-you page after it.
+ */
+exports.ActivationPage = class ActivationPage extends BasePage {
+    constructor(page) {
+        super(page);
+        this.description = page.getByText('Confirm and activate your account');
+        this.activateButton = page.getByRole('link', {name: 'Activate Account'});
+        this.activated = page.getByText(
+            'Thank you for activating your account. You may now log in using the credentials you supplied when you created your account.'
+        );
+    }
+
+    /** The absolute address the "Activate Account" control leads to. */
+    async activateHref() {
+        const href = await this.activateButton.getAttribute('href');
+        return new URL(href || '', this.page.url()).toString();
     }
 };
 
@@ -129,12 +195,21 @@ exports.ProfileRolesTab = class ProfileRolesTab extends BasePage {
         // the other presses are folded under "Register with other presses".
         this.currentContextRoles = this.userGroups.locator('ul.checkbox_and_radiobutton').first();
         this.checkedBoxes = this.userGroups.locator('input[type="checkbox"]:checked');
+        // Every role box on the tab, the current press's and the folded
+        // presses' alike (the positive control of a "no role ticked" read).
+        this.allBoxes = this.userGroups.locator('input[type="checkbox"]');
         this.interestChips = this.form.locator('#interests li.tagit-choice .tagit-label');
     }
 
     /** Open the tab from the profile at `contextPath` (`index` = site level). */
     async open(contextPath) {
         await this.page.goto(`/index.php/${contextPath}/user/profile`);
+        await this.tab.click();
+        await this.userGroups.waitFor({state: 'visible', timeout: 20_000});
+    }
+
+    /** Press the tab on the profile page already open. */
+    async select() {
         await this.tab.click();
         await this.userGroups.waitFor({state: 'visible', timeout: 20_000});
     }
@@ -153,5 +228,81 @@ exports.ProfileRolesTab = class ProfileRolesTab extends BasePage {
 
     contextBox(name, role) {
         return this.contextSection(name).getByRole('checkbox', {name: role, exact: true});
+    }
+};
+
+/**
+ * The profile page's "Notifications" tab (form#notificationSettingsForm).
+ * Each row pairs an "Enable these types of notifications." box
+ * (`#{settingName}`) with a "Do not send me an email for these types of
+ * notifications." box (`#email{SettingName}`); the "Public Announcements"
+ * group holds the announcement row on a press (spec fn-e).
+ */
+exports.ProfileNotificationsTab = class ProfileNotificationsTab extends BasePage {
+    constructor(page) {
+        super(page);
+        this.tab = page.getByRole('tab', {name: 'Notifications'});
+        this.form = page.locator('form#notificationSettingsForm');
+        this.publicAnnouncementsHeading = this.form.getByRole('heading', {
+            name: 'Public Announcements',
+        });
+    }
+
+    /** Press the tab on the profile page already open. */
+    async select() {
+        await this.tab.click();
+        await this.form.waitFor({state: 'visible', timeout: 20_000});
+    }
+
+    /** The "Enable these types of notifications." box of a row (`notificationNewAnnouncement`). */
+    allowBox(settingName) {
+        return this.form.locator(`input#${settingName}`);
+    }
+
+    /** The "Do not send me an email…" box of a row (`emailNotificationNewAnnouncement`). */
+    emailBox(settingName) {
+        const emailSettingName = `email${settingName.charAt(0).toUpperCase()}${settingName.slice(1)}`;
+        return this.form.locator(`input#${emailSettingName}`);
+    }
+};
+
+/**
+ * The profile page's "Identity" and "Contact" tabs, read for the `[en]`
+ * boxes a registration on another language's page copied into (Rule 16).
+ */
+exports.ProfileNameTabs = class ProfileNameTabs extends BasePage {
+    constructor(page) {
+        super(page);
+        this.identityTab = page.getByRole('tab', {name: 'Identity'});
+        this.identityForm = page.locator('form#identityForm');
+        this.contactTab = page.getByRole('tab', {name: 'Contact'});
+        this.contactForm = page.locator('form#contactForm');
+    }
+
+    /** The profile's English address (the boxes are `[en]` whichever language the page is in). */
+    static url(contextPath) {
+        return `/index.php/${contextPath}/en/user/profile`;
+    }
+
+    async selectIdentity() {
+        await this.identityTab.click();
+        await this.identityForm.waitFor({state: 'visible', timeout: 20_000});
+    }
+
+    async selectContact() {
+        await this.contactTab.click();
+        await this.contactForm.waitFor({state: 'visible', timeout: 20_000});
+    }
+
+    givenName(locale = 'en') {
+        return this.identityForm.locator(`input[name="givenName[${locale}]"]`);
+    }
+
+    familyName(locale = 'en') {
+        return this.identityForm.locator(`input[name="familyName[${locale}]"]`);
+    }
+
+    affiliation(locale = 'en') {
+        return this.contactForm.locator(`input[name="affiliation[${locale}]"]`);
     }
 };
