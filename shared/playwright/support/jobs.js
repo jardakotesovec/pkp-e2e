@@ -50,19 +50,36 @@ function runJobs({appRoot = process.env.PKP_APP_ROOT, timeoutMs = 180_000} = {})
     const output = jobs('run');
     // The serial project runs on several workers, and a job this test
     // dispatched may be reserved by another worker's runner at this moment:
-    // "run" then returns with the job still executing. Wait until the queue
-    // (reserved jobs included) is empty, so the caller's side effects exist
-    // when it looks for them ("We have N queued jobs" is the total's report).
+    // "run" then returns with the job still executing (and the tool's
+    // "total" counts unreserved jobs only). Wait until the queue is empty,
+    // reserved jobs included, so the caller's side effects exist when it
+    // looks for them. The count comes from the fleet's own test API on
+    // worker 0's server, which is up for the whole run.
     const deadline = Date.now() + timeoutMs;
+    const basePort = process.env.PLAYWRIGHT_BASE_PORT || '8000';
+    const countUrl = `http://127.0.0.1:${basePort}/index.php/index/api/v1/_test/jobs`;
     for (;;) {
-        const total = jobs('total').match(/We have (\d+) queued jobs/);
-        if (!total || total[1] === '0') {
+        let counts = null;
+        try {
+            counts = JSON.parse(
+                execFileSync('curl', ['-s', '-H', `X-Test-Key: ${process.env.TEST_API_KEY || ''}`, countUrl], {
+                    encoding: 'utf8',
+                    timeout: 10_000,
+                })
+            );
+        } catch {
+            // the server did not answer; ask again below
+        }
+        if (counts && counts.queued === 0 && counts.reserved === 0) {
             return output;
         }
         if (Date.now() > deadline) {
-            throw new Error(`runJobs: ${total[1]} jobs still queued after ${timeoutMs} ms`);
+            throw new Error(`runJobs: jobs still in the queue after ${timeoutMs} ms: ${JSON.stringify(counts)}`);
         }
-        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500);
+        if (counts && counts.queued > 0) {
+            jobs('run');
+        }
     }
 }
 

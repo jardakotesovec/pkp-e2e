@@ -57,7 +57,7 @@ function principalContact(tag) {
 // credentials stand — no real ORCID traffic is possible from these tests
 // (see header); S2's popup asserts the sandbox URL only, without driving it.
 test.describe('ORCID integration (queued email)', () => {
-    test('S4: "Request verification" emails the contributor an authorization link', async ({asUser, opsApi, pkpMail}, testInfo) => {
+    test('S4: "Request verification" emails the contributor an authorization link @solo', async ({asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s4', testInfo);
         const tagMember = makeTag('s4m', testInfo);

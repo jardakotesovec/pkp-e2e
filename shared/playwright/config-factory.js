@@ -220,8 +220,19 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
                 // 24% of the OJS wall time for 4% of the work (2026-09-13).
                 name: `${appName}-serial`,
                 testDir: path.join(appTestDir, 'serial'),
-                workers,
+                workers: Math.min(4, workers),
+                grepInvert: /@solo/,
                 dependencies: ['shared', appName],
+            },
+            {
+                // A test that asserts "not yet, until the jobs run" cannot
+                // share the queue with other tests' drains: it runs alone,
+                // after the serial project, tagged @solo in its title.
+                name: `${appName}-solo`,
+                testDir: path.join(appTestDir, 'serial'),
+                workers: 1,
+                grep: /@solo/,
+                dependencies: [`${appName}-serial`],
             },
         ],
         // One PHP server per worker; `php -S` is single-threaded. The ready
