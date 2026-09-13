@@ -191,6 +191,15 @@ trips.
   finals of 2026-09-13 (attempts 2, 3, 6 and 7, both variants,
   `.reports/U05/final-run-ojs-attempt{2,3,6,7}.log`), the one red of 209
   in the last. Next step as above: a retained trace of the table's fetches.
+- **CI worker server refusing connections during the login smoke** (OJS
+  job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
+  its OJS job on the shared login smoke alone: `socket hang up` on the
+  scenario API and `net::ERR_CONNECTION_REFUSED` at `127.0.0.1:8000`
+  on the retry too, so the worker server had died or never answered;
+  the OMP and OPS jobs of the same run passed, and the U04 push's run
+  34768503126 an hour earlier was green on all three. No local
+  counterpart. **Watch condition**: a second CI job lost to a refused
+  worker port; then read the job's server log step.
 - **Participants menu still open after the impersonation return** (U01
   S7, OJS, once). In the fourth OJS final of the U05 revision session
   (2026-09-13, four workers, `.reports/U05/final-run-ojs-attempt4.log`)
