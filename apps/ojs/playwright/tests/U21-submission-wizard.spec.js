@@ -826,8 +826,8 @@ test.describe('submission wizard', () => {
         await expect(start.notAcceptingNotice()).toBeVisible({timeout: 30_000});
         await expect(start.beginButton()).toHaveCount(0);
 
-        // Positive control: re-enabling brings the sidebar entry back.
-        await managerPage.goto(`/index.php/${journal.path}/management/settings/workflow`);
+        // Positive control: re-enabling brings the sidebar entry back (the
+        // manager's page is still the workflow settings form).
         await saveContextSettingsCheckbox(managerPage, 'Disable Submissions', false);
         await authorPage.goto(`/index.php/${journal.path}/dashboard/mySubmissions`);
         await expect(authorPage.getByRole('link', {name: 'Start A New Submission'})).toBeVisible();
@@ -903,8 +903,8 @@ test.describe('submission wizard', () => {
         await expect(u1Row).toContainText('Author');
 
         // Control: with the Author role's self-registration off, the same
-        // kind of user gets the "Not Allowed" page instead.
-        await managerPage.goto(`/index.php/${journal.path}/management/settings/access`);
+        // kind of user gets the "Not Allowed" page instead. (The manager's
+        // page is still Users & Roles, read just above.)
         await managerPage.locator('#roles-button').click();
         await waitForJQueryIdle(managerPage);
         await openGridRowEdit(managerPage, 'Author', 'Edit');
