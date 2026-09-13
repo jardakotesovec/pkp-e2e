@@ -85,7 +85,10 @@ Keys:
   (default `<username>@mail.test`), `password` (default: the username
   twice), `sections` or `series` (sub-editor assignments, by section abbrev
   or series path), and `orcid` plus `orcidIsVerified` for a pre-set ORCID
-  iD. Role keys are the app's default user-group keys. An unknown key fails
+  iD, stored the way the submission key `author` below stores it
+  (`orcidIsVerified: true` carries the sign-in completion's live
+  permission, `false` the iD alone). Role keys are the app's default
+  user-group keys. An unknown key fails
   with a 400 that lists the app's whole set. See `users.md` for the keys and
   their traps. A scratch context's reviewer is created here too: the seeded
   reviewers are not enrolled on a scratch context, so they are absent from
@@ -214,8 +217,24 @@ Keys:
   other than the submitter, the same row the workflow's Assign Participant
   form writes, without that form's email and notification.
 - `published` (default false). Requires `submitted: true`.
-- `author`: `{orcid, orcidIsVerified}` on the submitter's contributor record,
-  a pre-verified ORCID iD without the OAuth flow.
+- `author`: `{orcid, orcidIsVerified}` on the submitter's contributor record.
+  `orcidIsVerified: true` stores what ORCID's own sign-in leaves when the
+  emailed link completes, the verified mark plus a live permission: a
+  fixture access token (`test-orcid-access-token-<tag>`, a fixture like the
+  dummy client credentials, since ORCID's service is unreachable), the
+  scope the app requests for the context's API type (`/authenticate`
+  public, `/activities/update` member), a refresh token and an expiry
+  twenty years out, the lifetime ORCID's tokens carry. `false` stores the
+  iD alone, the typed-in, unauthenticated state. The app's own gates read
+  the token, not the mark, so the two states differ on screen: with the
+  ORCID tab's author-email toggle on, recording Accept queues the
+  "Submission ORCID" request for the unauthenticated contributor and
+  nothing for the verified one (U04 scenario 8; read from the queue table
+  after seeded Accepts, 2026-09-13, OJS and OMP), and the contributor form
+  shows the verified one's solid-icon iD with Delete and no "Request
+  verification" (the Contributors list itself shows no iD). A verified iD
+  whose token the app has since dropped as expired, a state a deposit
+  produces, has no key.
 - `reviewerSuggestions[]` (OJS, OMP): the entries of the wizard's "Reviewer
   Suggestions" step, each `{givenName, familyName, email, affiliation,
   suggestionReason}`, created the way the step's "Add Reviewer Suggestion"

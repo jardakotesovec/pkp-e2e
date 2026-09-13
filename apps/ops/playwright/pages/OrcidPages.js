@@ -2,9 +2,9 @@
  * @file playwright/pages/OrcidPages.js
  *
  * OPS-local Page Objects and helpers for the ORCID integration feature
- * (spec: lib/pkp/docs/e2e/specs/U04-orcid-integration.md, read with the
- * application glossary: "journal" = preprint server, "Journal Manager" =
- * Preprint Server Manager).
+ * (spec: docs/specs/U04-orcid-integration.md, read with the application
+ * glossary: "journal" = preprint server, "Journal Manager" = Preprint
+ * Server Manager).
  *
  * Surfaces:
  * - OrcidSettingsTab — the "ORCID" tab on Settings → Users & Roles
@@ -12,14 +12,20 @@
  *   identical on OPS per spec footnote a).
  * - ProfileIdentityPage — the profile's Identity tab ORCID block
  *   (identityForm.tpl + orcidProfile.tpl: connect button, About link,
- *   verified #orcid-link, #deleteOrcidButton).
+ *   verified #orcid-link, the unauthenticated iD link, #deleteOrcidButton).
  * - Workflow/contributor helpers — the preprint workflow dialog (OPS lands
- *   straight on "Workflow: Production"), its Publication → Contributors
- *   panel and the contributor edit modal's "ORCID iD" field (FieldOrcid).
+ *   straight on "Workflow: Production"), its Preprint → Contributors panel
+ *   and the contributor add/edit modal's "ORCID iD" field (FieldOrcid) with
+ *   its "Request verification" dialog.
+ * - AboutOrcidPage — the public "What is ORCID?" page (`/orcid/about`) and
+ *   its "How and why" section (public- or member-API wording).
+ * - orcidEmailLinks — the two links of an ORCID request email (Rule 14).
  *
  * Verbatim strings and DOM anchors were live-confirmed by the U04 probes
  * (2026-08-07; every OPS spot/control leg matched OJS exactly). Retained
- * evidence: lib/pkp/docs/e2e/specs/U04-orcid-integration.md footnotes.
+ * evidence: docs/specs/U04-orcid-integration.md footnotes. The
+ * unauthenticated link, the request-dialog helper, the About page and the
+ * email-link reader were added on the 2026-09-13 revision.
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
@@ -79,6 +85,12 @@ exports.ProfileIdentityPage = class ProfileIdentityPage extends BasePage {
         this.aboutLink = this.orcidContainer.getByRole('link', {name: 'What is ORCID?'});
         // Verified state: the bare-iD link with the solid icon.
         this.orcidLink = this.form.locator('#orcid-link');
+        // Unauthenticated state: the hollow-icon link suffixed
+        // "(unauthenticated)" beside the "Authorize and Connect…" button
+        // (orcidProfile.tpl's `$orcid && !$orcidAuthenticated` branch).
+        this.unauthenticatedLink = this.orcidContainer
+            .locator('a[target="_blank"]')
+            .filter({hasText: '(unauthenticated)'});
         this.deleteButton = this.form.locator('#deleteOrcidButton');
     }
 
@@ -160,4 +172,129 @@ exports.openContributorEditor = async function openContributorEditor(page, name)
  */
 exports.orcidField = function orcidField(modal) {
     return modal.locator('.pkpFormField').filter({hasText: 'ORCID iD'});
+};
+
+/** The Rule 8 question every "Request verification" press asks. */
+exports.REQUEST_QUESTION =
+    'Would you like to send an email to this author requesting they verify their ORCID?';
+
+/** The line the dialog adds on a contributor not yet saved (Rule 8). */
+exports.REQUEST_WAITS_FOR_SAVE = 'The email will be sent once the author has been created.';
+
+/** The requested state of the field (Rule 8): the field's text and the resend link. */
+exports.REQUESTED_TEXT = 'ORCID Verification has been requested!';
+exports.RESEND_LINK_TEXT = 'Resend Verification Email';
+
+/**
+ * The "Request ORCID verification" confirm dialog a contributor form's
+ * "Request verification" opens (Rule 8).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.orcidRequestDialog = function orcidRequestDialog(page) {
+    return page.getByRole('dialog').filter({hasText: exports.REQUEST_QUESTION});
+};
+
+/**
+ * Press "Request verification" on a contributor form's ORCID iD field and
+ * confirm its dialog with "Yes". On a saved contributor the request leaves
+ * at once (the confirm is bounded by `orcid/requestAuthorVerification/…`
+ * answering OK); on the add form it is only remembered (`saved: false`),
+ * so nothing is posted and only the dialog and the field are read. The
+ * dialog is gone after "Yes", so its text is read before confirming.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @param {{saved?: boolean}} [options]
+ * @returns {Promise<string>} the dialog's text, read before it was confirmed
+ */
+exports.requestVerification = async function requestVerification(page, field, {saved = true} = {}) {
+    await field.getByRole('button', {name: 'Request verification'}).click();
+    const dialog = exports.orcidRequestDialog(page);
+    await expect(dialog).toContainText('Request ORCID verification');
+    const dialogText = await dialog.innerText();
+    const requested = saved
+        ? page.waitForResponse(
+              (response) =>
+                  response.url().includes('/orcid/requestAuthorVerification/') && response.ok()
+          )
+        : Promise.resolve();
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    await requested;
+    await expect(dialog).toHaveCount(0);
+    await expect(field).toContainText(exports.REQUESTED_TEXT);
+    return dialogText;
+};
+
+/** The "What is ORCID?" public page (Rule 10; `{server}/orcid/about`). */
+exports.AboutOrcidPage = class AboutOrcidPage extends BasePage {
+    /**
+     * @param {import('@playwright/test').Page} page
+     */
+    constructor(page) {
+        super(page);
+        this.body = page.locator('.page_message');
+        this.heading = page.getByRole('heading', {name: 'What is ORCID?'});
+        this.howAndWhyHeading = page.getByRole('heading', {
+            name: 'How and why we collect ORCID iDs?',
+        });
+        this.displayHeading = page.getByRole('heading', {name: 'Where are ORCID iDs displayed?'});
+    }
+
+    /**
+     * Open the page by a server path, or by an absolute link taken from an
+     * email (its host is the install's configured base URL, worker 0's
+     * server, which shares the fleet's database; only the path is
+     * followed, on this page's own server).
+     *
+     * @param {string} target
+     */
+    async goto(target) {
+        let url = `/index.php/${target}/orcid/about`;
+        if (/^https?:/.test(target)) {
+            const link = new URL(target);
+            url = `${link.pathname}${link.search}`;
+        }
+        await this.page.goto(url);
+        await expect(this.heading).toBeVisible();
+        await expect(this.howAndWhyHeading).toBeVisible();
+        await expect(this.displayHeading).toBeVisible();
+    }
+
+    /**
+     * The text of the "How and why" section: what sits between its heading
+     * and the next one (the member-API wording is wrapped in a description
+     * box, the public-API wording is bare, so the read is by text).
+     */
+    async howAndWhyText() {
+        const text = await this.body.innerText();
+        const start = text.indexOf('How and why we collect ORCID iDs?');
+        const end = text.indexOf('Where are ORCID iDs displayed?');
+        if (start < 0 || end < start) {
+            throw new Error('AboutOrcidPage: the "How and why" section was not found');
+        }
+        return text.slice(start + 'How and why we collect ORCID iDs?'.length, end).trim();
+    }
+};
+
+/**
+ * The two links every ORCID request email carries (Rule 14): the personal
+ * authorization link (leading to ORCID's site) and the What-is-ORCID link,
+ * read by their hrefs because the two templates word the link texts
+ * differently (screen-notes, tojs 2026-09-13).
+ *
+ * @param {string} html the message's HTML body
+ * @returns {{authorization: string|null, about: string|null}}
+ */
+exports.orcidEmailLinks = function orcidEmailLinks(html) {
+    const hrefs = [];
+    const anchorRe = /<a\b[^>]*href=(["'])([^"']+)\1/gi;
+    let match;
+    while ((match = anchorRe.exec(html)) !== null) {
+        hrefs.push(match[2].replace(/&amp;/g, '&'));
+    }
+    return {
+        authorization: hrefs.find((href) => /orcid\.org\/oauth\/authorize/.test(href)) || null,
+        about: hrefs.find((href) => /\/orcid\/about/.test(href)) || null,
+    };
 };

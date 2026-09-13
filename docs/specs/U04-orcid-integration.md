@@ -31,7 +31,7 @@ own features. This table covers only the ORCID capability on each of them.
 | **Enable & configure ORCID site-wide** | • Site Administrator: the "ORCID" tab on Site Settings. The tab exists only while the install hosts more than one journal (Rule 2) <sup>b</sup> |
 | **Connect / authorize own iD** | • Any signed-in user: profile, Identity tab (Rules 5–6)<br>• Any visitor: a journal's registration page (Rule 7). Not offered on the site-level registration page <sup>c</sup> |
 | **Remove own iD** | • The user themselves: "Delete" beside the connected iD on the Identity tab (Rule 6c) <sup>d</sup> |
-| **Request a contributor's verification by email** | • Site Administrator; Journal Manager; Section Editor assigned to the submission: "Request verification" on the contributor's ORCID iD field (Rule 8)<br>• Author of the submission: the same button, from the submission wizard's Contributors step. The contributor list on the author's own dashboard is read-only<br>• ⚠ [A5](#a5) an Assistant who can edit the contributor is offered the same button. The request is refused, yet the field reports it as sent <sup>e</sup> |
+| **Request a contributor's verification by email** | • Site Administrator; Journal Manager; Section Editor assigned to the submission: "Request verification" on the contributor's ORCID iD field (Rule 8)<br>• Author of the submission: the same button, from the submission wizard's Contributors step. On a journal or press the contributor list on the author's own dashboard is read-only. On a preprint server that list offers "Edit" on the author's not-yet-posted preprint, and the form it opens carries the same button (the preprint baseline is described in [Contributors & affiliations](U41-contributors-and-affiliations.md#ops1))<br>• ⚠ [A5](#a5) an Assistant who can edit the contributor is offered the same button. The request is refused, yet the field reports it as sent <sup>e</sup> |
 | **Remove a contributor's iD** | • The same roles as the row above: "Delete" on the contributor's ORCID iD field (Rule 8a) ⚠ [A5](#a5) <sup>e</sup> |
 | **Verify via the emailed link** | • Whoever holds the emailed authorization link. It works signed out, and the link is single-use (Rule 9) <sup>f</sup> |
 | **Send a review to ORCID** {OJS} | • Site Administrator; Journal Manager; Section Editor: "Send Review To ORCID" on the reviewer's row (Rule 12)<br>• ⚠ [A1](#a1) a Press Manager is offered the same action, though a press deposits nothing <sup>g</sup> |
@@ -157,15 +157,15 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
     incomplete review. <sup>g</sup>
 13. **Automatic author emails {OJS OMP}.** With the settings tab's email
     toggle on, recording the editorial decision Accept (or Skip Review) emails
-    every contributor who does not yet hold a live verified iD the
-    verification request of Rule 8 ⚠ [A6](#a6). ⚠ [OPS1](#ops1) a preprint
+    every contributor who does not yet hold a verified iD with a live
+    permission (Rule 11) the verification request of Rule 8 ⚠ [A6](#a6). ⚠ [OPS1](#ops1) a preprint
     server shows the toggle but has no accepting decision to trigger it. <sup>k</sup>
-14. **Which email goes out.** Under a public API the request email is
-    "Submission ORCID", which asks the contributor to connect their iD. Under
-    a member API it is "Requesting ORCID record access", which asks for
-    deposit permission. The re-authorization mail of Rule 11 is "Requesting
-    updated ORCID record access". All three carry the personal authorization
-    link and the What-is-ORCID link, and are sent from the journal's
+14. **Which email goes out.** Under a public API the request email's subject
+    line reads "Submission ORCID", which asks the contributor to connect
+    their iD. Under a member API it reads "Requesting ORCID record access",
+    which asks for deposit permission. The re-authorization mail of Rule 11
+    is "Requesting updated ORCID record access". All three carry the personal
+    authorization link and the What-is-ORCID link, sent from the journal's
     principal contact. ⚠ [OPS2](#ops2) on a preprint server none of the three
     appears on the Emails settings screen. The re-authorization mail was once
     listed nowhere; it gained its journal and press rows upstream
@@ -237,75 +237,268 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
 ## Canonical scenarios
 
 Every scenario runs on a scratch journal with throwaway accounts, ORCID
-enabled with sandbox credentials (scenario 7's journal has it disabled); no
-step completes ORCID's own sign-in, and the iDs a scenario starts from are
-seeded. The mail catcher and the tooling recipe are in the footnote.
-<sup>s</sup>
+enabled with sandbox credentials (scenario 1's journal starts with it off,
+scenario 7's has it disabled); no step completes ORCID's own sign-in, and
+the iDs a scenario starts from are seeded. Scenarios 4, 7 and 8 run on two
+scratch journals each (4's second on the Member Sandbox API, 7's with ORCID
+enabled, 8's with the email toggle off), scenarios 4 and 8 read the mail
+catcher, and scenario 10 signs in as the Author. The tooling recipe is in
+the footnote. <sup>s</sup>
 
-1. **Turn ORCID on for a journal**: Journal Manager: open Settings → Users &
-   Roles, tab "ORCID". Tick "Enable ORCID functionality"; the API fields
-   appear. Pick "Public Sandbox" and enter any placeholder Client ID and
-   Client Secret. Both must be filled in, but the save does not check them
-   against ORCID. Save.
-   Open your profile's Identity tab in another tab: an ORCID block with a
-   "Create or Connect your ORCID iD" button has appeared. Untick and save
-   again (control): the ORCID block is gone, and the tab shows no ORCID field
-   at all. <sup>s</sup>
-2. **The connect offer, and the About link that doesn't go there**: any
-   signed-in user on an ORCID-enabled journal: on the Identity tab, press
-   "Create or Connect your ORCID iD". A small popup window opens on an ORCID
-   sign-in address while the profile tab stays put. On an offline install
-   the popup shows a connection error; that is expected. Close it. Press the
-   "What is ORCID?" link beside the button: ⚠ [A4](#a4) the same popup opens
-   instead of the What-is-ORCID page. <sup>s</sup>
-3. **Remove a connected iD from the profile**: a user whose account holds a
-   verified iD (seeded): the Identity tab shows the iD as a link with the
-   solid ORCID icon and a "Delete" button. Press Delete. The dialog asks "Are
-   you sure you want to remove this ORCID?"; confirm. The iD is gone and the
-   "Create or Connect your ORCID iD" button is back. <sup>s</sup>
-4. **Ask a contributor to verify**: Journal Manager: on a submission's
-   Contributors list, edit a contributor who has no iD. The ORCID iD field
-   shows "Request verification". Press it. The dialog asks "Would you like to
-   send an email to this author requesting they verify their ORCID?";
-   confirm. For an already-saved contributor the email leaves at once; only a
-   contributor still being added waits for the save (Rule 8). Then save. The
-   field now reads "ORCID Verification has been requested!". The
-   contributor's mailbox holds the request email with a personal
-   authorization link (leading to ORCID's site) and the What-is-ORCID link. <sup>s</sup>
-5. **Remove a contributor's iD**: Journal Manager: edit a contributor whose
-   iD is unauthenticated (seeded). The field shows the hollow-icon iD link,
-   the not-verified warning, and "Delete". Press Delete and confirm: the iD
-   is gone, and the field offers "Request verification" again. <sup>s</sup>
-6. **The public ORCID pages by URL**: signed-out visitor: type the journal's
-   `/orcid/about` address. The "What is ORCID?" page renders with the
-   journal's chrome. Type `/orcid/verify`. The "ORCID Authorization" page
-   answers "Your ORCID iD could not be verified. The link is no longer
-   valid." and "Please contact the journal manager with your name, ORCID iD,
-   and details of your submission." ⚠ [A8](#a8). A stale or truncated
-   emailed link gets an explanation, never an error page. <sup>s</sup>
-7. **A journal with ORCID off shows none of it**: visitor and Journal
-   Manager on a scratch journal with ORCID disabled: the registration page
-   has no ORCID block, a contributor form has no ORCID iD field, and the
-   profile's Identity tab shows no ORCID field at all. Positive control: the
-   same screens on the enabled journal show the Rule 5 and Rule 8
-   controls. <sup>s</sup>
+1. **Turn ORCID on for a journal**
+
+   Given: a Journal Manager, signed in, on a scratch journal with ORCID not
+   yet enabled. <sup>s</sup>
+
+   - **The "ORCID" tab**: open Settings → Users & Roles, tab "ORCID". Tick
+     "Enable ORCID functionality"; the API fields appear. Pick "Public
+     Sandbox" and enter a placeholder Client ID, APP-TEST, and a placeholder
+     Client Secret, test-secret. Both must be filled in, but the save does
+     not check them against ORCID. Save.
+   - **The profile's Identity tab, in another browser tab**: an ORCID block
+     with a "Create or Connect your ORCID iD" button has appeared.
+   - **Control**: untick "Enable ORCID functionality" and save again: the
+     ORCID block is gone, and the Identity tab shows no ORCID field at all.
+
+2. **The connect offer, and the About link that doesn't go there**
+
+   Given: any signed-in user whose account holds no iD, on the profile's
+   Identity tab of a scratch journal with ORCID enabled. <sup>s</sup>
+
+   - **"Create or Connect your ORCID iD"**: press it. A small popup window
+     opens on an ORCID sign-in address while the profile tab stays put. On
+     an offline install the popup shows a connection error; that is
+     expected. Close it.
+   - **The "What is ORCID?" link beside the button**: press it: ⚠ [A4](#a4)
+     the same popup opens instead of the What-is-ORCID page.
+   - **Control**: the popup is a window of its own: the profile tab under it
+     stays where it was, on the Identity tab's own address, and only the
+     popup shows the ORCID sign-in address.
+
+3. **Remove a connected iD from the profile**
+
+   Given: a user whose account holds a verified iD (seeded), signed in, on
+   the profile's Identity tab of a scratch journal with ORCID enabled; a
+   second user of the same journal whose account holds an unauthenticated
+   iD (seeded), in a browser of their own, signed in. <sup>s</sup>
+
+   - **The Identity tab, verified iD**: shows the iD as a link with the solid
+     ORCID icon and a "Delete" button; the connect button and the "What is
+     ORCID?" link beside it are gone (Rule 5).
+   - **The second user's Identity tab, unauthenticated iD**: shows the iD as
+     a hollow-icon link suffixed "(unauthenticated)" and an "Authorize and
+     Connect your ORCID iD" button (Rule 5).
+   - **"Delete"**: on the first user's tab, press Delete. The dialog asks
+     "Are you sure you want to remove this ORCID?"; confirm. The iD is gone.
+   - **Control**: the "Create or Connect your ORCID iD" button is back.
+
+4. **Ask a contributor to verify**
+
+   Given: a Journal Manager, signed in, on a scratch journal with a
+   submission whose contributor has no iD; a second scratch journal on the
+   Member Sandbox API with the same, its Journal Manager signed in as well;
+   each journal with a principal contact of its own. <sup>s</sup>
+
+   - **The contributor's ORCID iD field**: on the submission's Contributors
+     list, edit a contributor who has no iD. The ORCID iD field shows
+     "Request verification". Press it. The dialog asks "Would you like to
+     send an email to this author requesting they verify their ORCID?";
+     confirm. A saved contributor's email leaves at once; one still being
+     added waits for the save (Rule 8).
+   - **The field after the request**: on the open form, the field reads
+     "ORCID Verification has been requested!", with a "Resend Verification
+     Email" link beside it. Save, reopen the contributor: it reads the same
+     (Rule 8).
+   - **The contributor's mailbox**: holds the request email, subject line
+     "Submission ORCID" on this public-API journal (Rule 14), with a
+     personal authorization link (leading to ORCID's site) and the
+     What-is-ORCID link, sent from the journal's principal contact (Rule 14).
+   - **The member-API journal**: on the second journal, request verification
+     for its contributor the same way: that contributor's mailbox holds the
+     subject line "Requesting ORCID record access" instead, with the same
+     two links, sent from that journal's principal contact (Rule 14).
+   - **The What-is-ORCID link in each email**: open it: each journal's "What
+     is ORCID?" page renders, and the member-API journal's "How and why"
+     section differs from the public-API journal's (Rule 10).
+   - **A contributor being added**: back on the first journal's Contributors
+     list, add a contributor: Given Name Nova, Email a throwaway address of
+     its own (the footnote names it), Country Canada. On the new form press
+     "Request verification": the dialog now adds "The email will be sent
+     once the author has been created."; confirm. The new address's mailbox
+     holds nothing: the request is remembered and waits for the save
+     (Rule 8).
+   - **Control**: save the new contributor: the address's mailbox now holds
+     the request email, the positive control for the empty read above
+     (Rule 8).
+
+5. **Remove a contributor's iD**
+
+   Given: a Journal Manager, signed in, on a scratch journal with a
+   submission whose contributor's iD is unauthenticated (seeded). <sup>s</sup>
+
+   - **The contributor's ORCID iD field**: edit the contributor. The field
+     shows the hollow-icon iD link, the not-verified warning, and "Delete".
+   - **"Delete"**: press Delete and confirm: the iD is gone.
+   - **Control**: the field offers "Request verification" again.
+
+6. **The public ORCID pages by URL**
+
+   Given: a visitor, signed out, on a scratch journal with ORCID enabled.
+   <sup>s</sup>
+
+   - **The "What is ORCID?" page**: type the journal's `/orcid/about`
+     address. The "What is ORCID?" page renders inside the journal's own
+     header and footer.
+   - **The "ORCID Authorization" page**: type `/orcid/verify`. The "ORCID
+     Authorization" page answers "Your ORCID iD could not be verified. The
+     link is no longer valid." and "Please contact the journal manager with
+     your name, ORCID iD, and details of your submission." ⚠ [A8](#a8). A
+     stale or truncated emailed link gets an explanation, never an error
+     page.
+   - **Control**: `/orcid/about`, typed the same way while signed out,
+     rendered its page, so the "no longer valid" answer is `/orcid/verify`'s
+     own, an explanation and never an error page.
+
+7. **A journal with ORCID off shows none of it**
+
+   Given: a visitor and a Journal Manager on a scratch journal with ORCID
+   disabled; a second scratch journal with ORCID enabled. <sup>s</sup>
+
+   - **The registration page**: has no ORCID block.
+   - **A contributor form**: has no ORCID iD field.
+   - **The profile's Identity tab**: shows no ORCID field at all.
+   - **The site-level Register page**: the site's own Register page, reached
+     from the site homepage that lists the journals, shows no ORCID block
+     either, while the enabled journal's Register page offers "Create or
+     Connect your ORCID iD" at the top of its form (Actors row 3).
+   - **Registering without connecting**: on the enabled journal's Register
+     page, fill in the form with a throwaway username and email (the
+     footnote names them; the form's own fields belong to *Registration &
+     account validation*) and press "Register" without pressing "Create or
+     Connect your ORCID iD": the registration completes as any registration
+     does; connecting is never required to register (Rule 7).
+   - **Control**: the same screens on the enabled journal show the Rule 5
+     and Rule 8 controls: "Create or Connect your ORCID iD" on the Identity
+     tab and at the top of the registration form, "Request verification" on
+     the contributor's ORCID iD field.
 
 App-specific:
 
-8. **{OJS OMP} Accepting a submission asks the authors**: Journal Manager:
-   with the ORCID email toggle on, record Accept on a submission in review.
-   Each contributor without a verified iD receives the Rule 14 request email
-   (observe the mailbox). With the toggle off (control), accepting a second
-   submission sends nothing. <sup>s</sup>
-9. **{OJS} Send a review to ORCID**: Journal Manager, on a journal
-   configured with the Member Sandbox API. The API type gates only the
-   background deposit, never the row action's presence (Rule 12). On a
-   submission whose reviewer holds a verified iD (seeded), open the Reviewers
-   table row menu: "Send Review To ORCID" is offered ⚠ [A1](#a1) even before
-   the review is complete. After the review is complete, press it. The dialog
-   asks "Send this review to the reviewer's ORCID?"; confirm. The dialog
-   closes with no message of any kind. The deposit itself happens in the
-   background (Rule 12). <sup>s</sup>
+8. **Accepting a submission asks the authors** {OJS OMP}
+
+   Given: a Journal Manager, signed in, on a scratch journal with the ORCID
+   email toggle on and two submissions in review, the second submitted by a
+   contributor whose iD is verified (seeded); a second scratch journal with
+   the toggle off and a submission in review. <sup>s</sup>
+
+   - **Accept with the toggle on**: record Accept on the first submission in
+     review. Each contributor without a verified iD receives the Rule 14
+     request email, subject line "Submission ORCID" on this public-API
+     journal (observe the mailbox).
+   - **A contributor already verified**: record Accept on the second
+     submission: nothing arrives for its verified contributor's address
+     (Rule 13); the first submission's email is the positive control.
+   - **Control**: with the toggle off, accepting the second journal's
+     submission sends nothing: its contributor's mailbox holds no request
+     email. On a preprint server this scenario does not
+     run: its ORCID tab shows the same toggle, but the server has no
+     accepting decision to trigger it [OPS1](#ops1).
+
+9. **Send a review to ORCID** {OJS}
+
+   Given: a Journal Manager, signed in, on a scratch journal configured with
+   the Member Sandbox API, with a submission in review whose reviewer holds
+   a verified iD (seeded) and whose second reviewer holds no iD. <sup>s</sup>
+
+   - **The Reviewers table, before the review is complete**: the API type
+     gates only the background deposit, never the row action's presence
+     (Rule 12). Open the row menu of the reviewer with the verified iD:
+     "Send Review To ORCID" is offered ⚠ [A1](#a1) even before the review is
+     complete.
+   - **After the review is complete** (that reviewer has submitted their
+     review): press "Send Review To ORCID". The dialog asks "Send this
+     review to the reviewer's ORCID?"; confirm. The dialog closes with no
+     message of any kind. The deposit itself happens in the background
+     (Rule 12).
+   - **Control**: the second reviewer's row menu, their account holding no
+     iD, offers no "Send Review To ORCID": the row action's presence depends
+     on the reviewer's verified iD alone (Rule 12).
+
+10. **Where the Author can request verification** {OJS OMP OPS}
+
+    Given: an Author, signed in, on a scratch journal with ORCID enabled,
+    with a submitted submission of their own and a second one of their own
+    not yet submitted; the journal's Journal Manager, in a browser of their
+    own, signed in. <sup>s</sup>
+
+    - **The submitted submission's Contributors list**: open the submission
+      from the author's dashboard. On a journal or press its Contributors
+      list is read-only; no contributor can be opened for editing, so no
+      ORCID iD field and no "Request verification" is reached (Actors
+      row 5). On a preprint server the same list offers "Order", "Preview"
+      and "Add Contributor", and the author's own row "Edit" and "Delete"
+      (the preprint baseline: [Contributors & affiliations](U41-contributors-and-affiliations.md#ops1)):
+      press "Edit"; the ORCID iD field offers "Request verification". Close
+      the form without pressing it.
+    - **The wizard's Contributors step**: open the unsubmitted submission
+      from the dashboard; the submission wizard opens. Go on to its
+      Contributors step and open the Author's own contributor for editing
+      (the step's own controls belong to *Contributors & affiliations*): the
+      ORCID iD field shows "Request verification". Press it. The dialog asks
+      "Would you like to send an email to this author requesting they verify
+      their ORCID?"; confirm: the field reads "ORCID Verification has been
+      requested!" (Rule 8; Actors row 5).
+    - **Control**: the Journal Manager opens the submitted submission's
+      Contributors list and edits the same contributor: the ORCID iD field
+      offers "Request verification" (Rule 8).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Nothing new to test**:
+  - a Site Administrator on the journal's ORCID tab (Actors row 1; scenario 1's Journal Manager sees the same tab)
+  - a Site Administrator or an assigned Section Editor requesting verification (Actors row 5; scenario 4's button)
+  - a contributor's verified iD also offering "Delete" (Rule 8a; scenario 5's unauthenticated one)
+  - a public-API journal offering "Send Review To ORCID" too (Rule 12; scenario 9's row action, the API type gating only the deposit)
+  - Skip Review also triggering the emails (Rule 13; scenario 8's Accept)
+  - the ORCID request log level, no user-facing change (Settings)
+- **Register carries it**:
+  - A9 (the site tab absent on a single-journal install; Rule 2)
+  - A5 (an Assistant offered "Request verification" and "Delete", refused yet reported sent; Actors rows 5–6)
+  - A1 (a Press Manager offered "Send Review To ORCID"; Actors row 8)
+  - A4 ("What is ORCID?" beside the button opening the popup; Rule 6a; scenario 2 marks it)
+  - A3 (the registration sign-in filling the form, the iD landing unauthenticated; Rule 7)
+  - A2 (the landing after Deny showing a raw placeholder; Rule 9)
+  - A8 (the failure line saying "journal manager" on presses and preprint servers; Rule 9; scenario 6 marks it)
+  - A1 (the action offered before the review is complete; Rule 12; scenario 9 marks it)
+  - A6 (the toggle's label misdescribing when it fires; Rule 13)
+  - OPS2 (the preprint server's Emails screen lacking the three ORCID rows; Rule 14)
+  - OPS3 (the legacy ORCID Profile plugin on preprint servers; Rule 16)
+- **No seed**:
+  - the Site Administrator enabling ORCID site-wide (Actors row 2, Rule 2): Site Settings → ORCID is one setting shared by every test running at once, so it stays off
+  - the journal tab locked read-only under the site-wide configuration (Rule 3): the same site-wide setting
+  - the sign-in completion storing the verified iD and reloading the tab (Rule 5): ORCID's own sign-in cannot complete on the test installs, so verified iDs are seeded instead
+  - the emailed link completing verification, signed out (Actors row 7, Rule 9): the same sign-in
+  - the emailed link being single-use (Actors row 7, Rule 9): the same sign-in
+  - denying at ORCID's consent screen clearing the stored iD (Rule 6b): ORCID's consent screen
+  - the landing answering "An ORCID iD was already stored for this submission." (Rule 9): the same sign-in
+  - the success landing returning to the front page after ten seconds (Rule 9): the same sign-in
+  - the landing after an authorization adding "The submission has been added to your ORCID record." or promising it on publication (Side effects): the same sign-in
+  - publishing depositing works to contributors with a live permission (Rule 11): deposits need ORCID's own service
+  - a public-API contributor's deposit pausing with the "Requesting updated ORCID record access" email (Rules 11, 14): the same deposit
+  - works updated in place on later publishes (Rule 11): the same deposit
+  - presses depositing nothing, OMP1 (Rule 11): the same deposit
+  - publishing depositing the article's completed reviews (Rule 12): the same deposit
+  - City plus the journal's country required for review deposits, else skipped silently (Settings; Rule 12): the same deposit
+  - the Sandbox variants aiming at ORCID's test service (Settings): the same service
+  - removing an iD cancelling the token at ORCID (Side effects): the same service
+  - the ORCID request log written at the chosen level (Side effects): the application log is not read by the suites
+  - a verified contributor whose permission has lapsed being asked again on Accept (Rule 13): no seed for a lapsed permission
+- **Owned by another feature**:
+  - the invitation wizard's "Verify ORCID iD" step, present only while ORCID is enabled (Rule 15; *User invitations*)
+  - the reviewer-suggestion form's plain "ORCID iD" field (Rule 15; *Reviewer suggestions*)
+  - the reviewer lists' verified and unauthenticated icons (Rule 15; *Reviewer assignment & management*)
 
 ## Findings register
 
@@ -585,7 +778,11 @@ requested state, resend link, both iD states and the delete confirmation as
 described; the deferred-request dialog adds "The email will be sent once the
 author has been created." and the mail goes out on save; an Author reaches
 the button from the submission wizard's Contributors step (the dashboard
-contributor list is read-only for them).
+contributor list is read-only for them on OJS and OMP; test run 2026-09-13
+on OPS: the submitting author's dashboard list on an unposted preprint
+carried "Order", "Preview", "Add Contributor" and the row's "Edit" and
+"Delete", and "Edit" opened the form with the ORCID iD field's "Request
+verification", the *Contributors & affiliations* OPS1 baseline).
 
 <a id="fn-f"></a>
 **f** — Pages: `PKP\pages\orcid\OrcidHandler` (ROUTE-021), ops
@@ -731,14 +928,63 @@ reviewer-list display: see note h.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding: scratch journals/submissions via the scenario
-endpoints; ORCID enabled with dummy sandbox credentials (the OAuth exchange
-itself needs orcid.org — outbound HTTP fails fast at the test config's
-dead-port `[proxy]`, and no real ORCID account backs the dummy
-`APP-TESTCLIENTID` pair — scenario steps stop at the popup/emailed link,
-and deposit outcomes rest on code, notes g and j). Verified/unauthenticated iDs are
-seeded directly (`user_settings`/`author_settings`: `orcid`,
-`orcidIsVerified` — recipe proven in the 2026-08-07 reviewer-list probe).
-Emails observed in Mailpit with per-test throwaway recipients.
+endpoints (`POST scenarios/context`, `POST scenarios/submission`,
+`scenarios.md`), one scratch context per test and app, its tag carrying app,
+scenario and run, every account a `users[]` entry (`<username>@mail.test`,
+password the username twice), the Journal Manager a `manager` role entry.
+ORCID is enabled with dummy sandbox credentials through the context's
+`orcid` key (`orcid: {}` = enabled, Public Sandbox, the dummy
+`APP-TESTCLIENTID` pair; scenario 1's and scenario 7's first journal omit the
+key, which leaves ORCID off; scenario 9's journal and scenario 4's second
+journal pass `apiType: memberSandbox`; scenario 8's two journals pass
+`sendMailToAuthorsOnPublication` true and false). The OAuth exchange itself
+needs orcid.org — outbound HTTP fails fast at the test config's dead-port
+`[proxy]`, and no real ORCID account backs the dummy pair — so scenario
+steps stop at the popup/emailed link, and deposit outcomes rest on code,
+notes g and j. Verified/unauthenticated iDs are seeded directly
+(`user_settings`/`author_settings`: `orcid`, `orcidIsVerified` — recipe
+proven in the 2026-08-07 reviewer-list probe; since 2026-09-13 a verified
+seed also stamps the access-token fields the profile popup's completion
+stores, so it counts as live for Rules 11 and 13, as the 2026-09-13 OJS
+serial run showed: no "Submission ORCID" to the verified submitter after
+Accept beside the unverified contributor's), the iD ORCID's sandbox
+example `https://sandbox.orcid.org/0000-0002-1825-0097`: a `users[]` entry
+with `orcid` and `orcidIsVerified: true` is scenario 3's first user and
+scenario 9's first reviewer (`externalReviewer`), with `orcidIsVerified:
+false` scenario 3's second user; scenario 9's second reviewer and scenario
+4's contributors carry no `orcid`; the submission seed's `author: {orcid,
+orcidIsVerified}` sets the submitter's contributor record, `false` for
+scenario 5's unauthenticated contributor and `true` for the submitter of
+scenario 8's second submission on the toggle-on journal. Scenario 9's
+submission carries `decisions: ['sendExternalReview']` and one
+`reviewRounds[]` entry naming both reviewers `accepted`; the review is
+completed on screen through the reviewer wizard before the row action is
+pressed. Every ORCID mailable is queued mail and the fleets run with the
+job runner off, so scenarios 4 and 8, the two that read the mail catcher,
+live in each app's `tests/serial/` suite, which drains the queue (`php
+lib/pkp/tools/jobs.php run`) after the action and reads Mailpit scoped by
+the throwaway recipient; every silence claim (scenario 8's toggle-off
+journal and its verified submitter, scenario 4's not-yet-saved contributor)
+waits on a positive control delivered by the same drain. Scenario 4's
+journals set `context.contactName` ("ORCID Contact <tag>") and
+`context.contactEmail` (`contact-<tag>@mail.test`) and the request email's
+From is read against them; its added contributor's address is
+`nova-<tag>@mail.test`, typed on the Contributors list's add form (Given
+Name, Email and the form's required Country). Scenario 7's second journal is
+the enabled one (`orcid: {}`), the site-level Register page is the site's
+`index/user/register` (present because the install hosts more than one
+context once any scratch context exists), and its registration types a
+throwaway username `u04s7-<app>` with `<username>@mail.test`. Scenario 6
+types `{journal}/orcid/about` and `{journal}/orcid/verify`. Scenario 10's
+submissions are two seeds by the same `author` submitter, `submitted: true`
+(opened from the author's dashboard, My Submissions on OJS, whose
+contributor list offers no edit on OJS and OMP; on OPS the row's "Edit" is
+pressed, the field read and the form closed) and `submitted: false` (a wizard-resumable
+draft that opens on "Upload Files"; the Contributors step is reached with
+"Continue"; the request's email is queued mail the parallel suite never
+drains, so the field alone is read); its Control signs in as the journal's
+`manager` entry. Site-level ORCID stays off throughout: Site Settings →
+ORCID is a shared singleton across every parallel worker and fleet.
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js` "ORCID reviewer deposit" block:

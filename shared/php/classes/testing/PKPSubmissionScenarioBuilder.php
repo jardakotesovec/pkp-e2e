@@ -47,8 +47,11 @@
  *   through ORCID's own OAuth sign-in, which can never complete in the test
  *   env (outbound HTTP fails fast at the dead-port `[proxy]` in
  *   config.test.inc.php, and the sandbox ORCID credentials are dummies), so
- *   the unauthenticated/verified field states are seeded directly
- *   (the same author_settings rows the OAuth landing stores, minus tokens).
+ *   the unauthenticated/verified field states are seeded directly: the same
+ *   author_settings rows the emailed link's landing stores
+ *   (VerifyIdentityWithOrcid::setIdentityData), a verified iD carrying the
+ *   live access token, scope, refresh token and expiry too
+ *   (UserSeeder::orcidOAuthData; parity ledger 2026-09-13).
  * - reviewRounds[].reviewers[].reviewForm "<title>" — attaches the context's
  *   ACTIVE review form of that exact title to the assignment (U28), the
  *   same Repo::reviewAssignment()->edit(['reviewFormId']) the reviewer
@@ -379,14 +382,14 @@ abstract class PKPSubmissionScenarioBuilder
                 Repo::publication()->edit($publication, ['primaryContactId' => $authorId]);
 
                 if ($authorPlan !== null) {
-                    // Same author_settings rows the OAuth verify landing
-                    // stores (orcid, orcidIsVerified), written through the
-                    // real author repository; token fields deliberately
-                    // absent (parity ledger 2026-08-07).
-                    Repo::author()->edit(Repo::author()->get($authorId), [
-                        'orcid' => $authorPlan['orcid'],
-                        'orcidIsVerified' => $authorPlan['orcidIsVerified'],
-                    ]);
+                    // The author_settings rows the OAuth verify landing
+                    // stores (orcid, orcidIsVerified, and for a verified iD
+                    // the access token, scope, refresh token and expiry),
+                    // written through the real author repository.
+                    Repo::author()->edit(
+                        Repo::author()->get($authorId),
+                        UserSeeder::orcidOAuthData($context, $authorPlan['orcid'], $authorPlan['orcidIsVerified'], $tag)
+                    );
                     $authorPlan = null;
                 }
             }

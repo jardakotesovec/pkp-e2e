@@ -23,8 +23,10 @@ namespace PKP\testing;
 
 use APP\core\Application;
 use APP\facades\Repo;
+use Carbon\Carbon;
 use PKP\context\Context;
 use PKP\core\Core;
+use PKP\orcid\OrcidManager;
 use PKP\db\DAORegistry;
 use PKP\security\Role;
 use PKP\security\Validation;
@@ -48,10 +50,10 @@ class UserSeeder
         // through ORCID's own OAuth sign-in, which can never complete in the
         // test env (outbound HTTP fails fast at the dead-port `[proxy]` in
         // config.test.inc.php, and the sandbox ORCID credentials are dummies)
-        // — so the verified/unauthenticated states are seeded directly
-        // (`orcid` + `orcidIsVerified`, the same user_settings rows the OAuth
-        // landing stores, minus the token fields — deliberate deviation,
-        // parity ledger 2026-08-07).
+        // — so the verified/unauthenticated states are seeded directly:
+        // `orcid` + `orcidIsVerified`, and for a verified iD the OAuth
+        // access fields the sign-in's completion stores too (see
+        // orcidOAuthData(); parity ledger 2026-08-07 and 2026-09-13).
         $orcid = $spec->get('orcid');
         $orcidIsVerified = (bool) $spec->get('orcidIsVerified', false);
         if ($orcidIsVerified && !$orcid) {
@@ -71,6 +73,49 @@ class UserSeeder
             'structureKey' => $structureKey,
             'orcid' => $orcid !== null ? (string) $orcid : null,
             'orcidIsVerified' => $orcidIsVerified,
+        ];
+    }
+
+    /**
+     * The seconds-to-live ORCID's token responses carry (`expires_in`): 20
+     * years, for public and member scopes alike. The app never stores the
+     * lifetime, only `now + expires_in`, so this is the one fixture value the
+     * seed needs beyond the token strings.
+     */
+    public const ORCID_TOKEN_EXPIRES_IN = 631138518;
+
+    /**
+     * The ORCID settings an identity (user or contributor) carries, keyed the
+     * way `AuthorizeUserData::getOrcidOAuthAccessData()` and
+     * `VerifyIdentityWithOrcid::setIdentityData()` build them after ORCID's
+     * sign-in completes: the iD, the verified mark, the access-denied marker
+     * cleared, and the access token, its scope, the refresh token and the
+     * expiry. Verified in the app is only ever the result of that completion,
+     * so `orcidIsVerified: true` seeds the whole live set: the token strings
+     * are fixtures (ORCID's service is unreachable, like the dummy client
+     * credentials), the scope is the one the app requests for the context's
+     * API type (`OrcidManager::buildOAuthUrl()`), and the expiry is computed
+     * the way the completion computes it. An unverified iD stores the iD and
+     * the mark alone, as a typed-in iD does.
+     *
+     * @param string $fixtureKey a per-identity suffix for the token strings
+     */
+    public static function orcidOAuthData(Context $context, string $orcid, bool $verified, string $fixtureKey): array
+    {
+        if (!$verified) {
+            return ['orcid' => $orcid, 'orcidIsVerified' => false];
+        }
+        $scope = OrcidManager::isMemberApiEnabled($context)
+            ? OrcidManager::ORCID_API_SCOPE_MEMBER
+            : OrcidManager::ORCID_API_SCOPE_PUBLIC;
+        return [
+            'orcid' => $orcid,
+            'orcidIsVerified' => true,
+            'orcidAccessDenied' => null,
+            'orcidAccessToken' => "test-orcid-access-token-{$fixtureKey}",
+            'orcidAccessScope' => $scope,
+            'orcidRefreshToken' => "test-orcid-refresh-token-{$fixtureKey}",
+            'orcidAccessExpiresOn' => Carbon::now()->addSeconds(self::ORCID_TOKEN_EXPIRES_IN)->toDateTimeString(),
         ];
     }
 
@@ -102,8 +147,12 @@ class UserSeeder
         }
 
         if (($plan['orcid'] ?? null) !== null) {
-            $user->setOrcid($plan['orcid']);
-            $user->setData('orcidIsVerified', $plan['orcidIsVerified']);
+            // The same setter the profile popup's completion runs
+            // (AuthorizeUserData::execute(), case 'profile'), fed the array
+            // shape getOrcidOAuthAccessData() builds there.
+            $user->setVerifiedOrcidOAuthData(
+                self::orcidOAuthData($context, $plan['orcid'], $plan['orcidIsVerified'], $username)
+            );
             Repo::user()->edit($user);
         }
 

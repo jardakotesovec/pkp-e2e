@@ -100,9 +100,11 @@ trips.
   during a full-suite run and passes in isolation; the hover target is
   settled before both indicators have rendered. Seen once, 2026-09-04
   (U05 final run, `.reports/U05/final-run-ojs.log`), green alone and on
-  the OJS re-run the same day. **Watch condition**: a second full-suite
-  incident; then anchor the hover on the indicator's own accessible name
-  and wait for both indicators before hovering.
+  the OJS re-run the same day; seen a second time 2026-09-13 (U04 final
+  run, `.reports/U04/final-run-ojs-run1-red.log`), green alone in 14.7 s.
+  **Watch condition tripped** 2026-09-13: the next maintenance session
+  anchors the hover on the indicator's own accessible name and waits for
+  both indicators before hovering.
 - **A wizard press swallowed the instant a step becomes current** (U21
   S10 and S12, OJS, CI only). CI run 34215183797 (2026-09-08, pkp-e2e
   `main` at `aa12a61`, a docs-only push) red on both attempts of S12: the
