@@ -502,10 +502,17 @@ exports.ReviewerRequestWindow = class ReviewerRequestWindow {
             .last();
     }
 
+    /**
+     * Press "Cancel" and wait for one window fewer (counted, as `close()`
+     * does: a `.last()` handle re-resolves to the outer window once a
+     * stacked inner one is gone, so a visibility wait on it never ends).
+     */
     async cancel() {
-        const dialog = this.dialog();
+        const before = await exports.ReviewerRequestWindow.all(this.page).count();
         await this.cancelControl().click();
-        await expect(dialog).toBeHidden({timeout: 30_000});
+        await expect(exports.ReviewerRequestWindow.all(this.page)).toHaveCount(Math.max(0, before - 1), {
+            timeout: 30_000,
+        });
     }
 
     /** The header "Close" arrow (the window's first Close). */
@@ -524,6 +531,23 @@ exports.ReviewerRequestWindow = class ReviewerRequestWindow {
     /** A field error text inside the form ("This field is required."). */
     formError(text) {
         return this.dialog().getByText(text, {exact: true});
+    }
+
+    /**
+     * The "Review Request" message body: the window's one visible editor
+     * iframe (a hidden twin with the same id exists: U31 screen notes).
+     */
+    messageBody() {
+        return this.dialog().frameLocator('iframe:visible').first().locator('body');
+    }
+
+    /** Type at the end of the "Review Request" message (the editor is initialized by expectOpen). */
+    async appendToMessage(text) {
+        const body = this.messageBody();
+        await body.click();
+        await this.page.keyboard.press('Control+End');
+        await this.page.keyboard.type(text);
+        await expect(body).toContainText(text);
     }
 };
 

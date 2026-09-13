@@ -40,9 +40,8 @@
  * - A9 🐞: S3 and S5 assert the entry's text leaves the list; the blank row
  *   it leaves behind is asserted neither way.
  * - A10 🐞: no test presses the inner window's "Back to Search".
- * - A2 ❓, A3 ❓ (ORCID box; a matched suggestion after unassign) and the
- *   Budget states and settings in the spec's Coverage section: none here — breadth is the
- *   spec's, depth the test's (PRINCIPLES M6).
+ * - A2 ❓, A3 ❓ (ORCID box; a matched suggestion after unassign): none here —
+ *   breadth is the spec's, depth the test's (PRINCIPLES M6).
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch press
  * created with `review: {reviewerSuggestionEnabled: true}` and throwaway
@@ -61,6 +60,7 @@ const {test, expect} = require('../support/fixtures.js');
 const appContext = require('../support/app.context.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {
     STEPS,
     wizardUrl,
@@ -133,6 +133,13 @@ const PAT = (email) => ({
     email,
     affiliation: 'Peer College',
     suggestionReason: 'Has reviewed for us before.',
+});
+const KIM = (email) => ({
+    givenName: 'Kim',
+    familyName: 'Kept',
+    email,
+    affiliation: 'Kept Institute',
+    suggestionReason: 'Still pending after the round.',
 });
 
 const fullName = (person) => `${person.givenName} ${person.familyName}`;
@@ -249,6 +256,16 @@ test.describe('reviewer-suggestions', () => {
             title: `Submission ${tag}`,
             submitted: false,
         });
+        // The same author's second draft, for "Submit" with no suggestion
+        // (its title carries the tag apart from the first's, so a row read
+        // by "Submission {tag}" stays unique).
+        const second = await ompApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: author,
+            title: `Second draft ${tag}`,
+            submitted: false,
+        });
 
         const authorPage = await (await asUser(author)).newPage();
         const step = new ReviewerSuggestionStep(authorPage);
@@ -352,7 +369,10 @@ test.describe('reviewer-suggestions', () => {
         await addDup.close();
         await expect(step.entries()).toHaveCount(2);
 
-        // Edit Kay: the window is titled "Edit", prefilled; the badge changes.
+        // Edit Kay: the window is titled "Edit", prefilled. Closed without
+        // "Save" after a change: no warning (no dialog is left once the
+        // window is gone; the Delete dialog below is the positive control,
+        // read the same way) and the badge is unchanged.
         const edit = await step.openEdit(step.entry(kayEmail));
         await expect(edit.givenName()).toHaveValue(kay.givenName);
         await expect(edit.familyName()).toHaveValue(kay.familyName);
@@ -360,7 +380,16 @@ test.describe('reviewer-suggestions', () => {
         await expect(edit.affiliation()).toHaveValue(kay.affiliation);
         await expect(edit.reasonBody()).toContainText(kay.suggestionReason);
         await edit.affiliation().fill('Open University');
-        await edit.save();
+        await edit.close();
+        await expect(authorPage.getByRole('dialog')).toHaveCount(0);
+        await expect(step.entry(kayEmail)).toContainText(kay.affiliation);
+        await expect(step.entry(kayEmail)).not.toContainText('Open University');
+
+        // "Edit" again, change and "Save": the badge changes.
+        const editAgain = await step.openEdit(step.entry(kayEmail));
+        await expect(editAgain.affiliation()).toHaveValue(kay.affiliation);
+        await editAgain.affiliation().fill('Open University');
+        await editAgain.save();
         await expect(step.entry(kayEmail)).toContainText('Open University');
         await expect(step.entry(kayEmail)).not.toContainText(kay.affiliation);
 
@@ -380,12 +409,42 @@ test.describe('reviewer-suggestions', () => {
         await saveForLater(authorPage);
         const mine = new MySubmissionsPage(authorPage, tag);
         await mine.goto();
-        const draftRow = await mine.findRowByTag(tag);
+        await mine.searchFor(tag);
+        const draftRow = mine.row(`Submission ${tag}`);
+        await expect(draftRow).toBeVisible({timeout: 30_000});
         await mine.completeSubmissionButton(draftRow).click();
         await expectWizardOpen(authorPage);
         await gotoStep(authorPage, STEPS.reviewerSuggestions);
         await expect(step.entry(kayEmail)).toContainText(fullName(kay));
         await expect(step.entries()).toHaveCount(1);
+
+        // The Press Manager on the draft: the Editor Dashboard's "All in
+        // submission stage" view lists it as "Incomplete" with one button,
+        // "Complete submission", which opens the draft's wizard; its step
+        // lists Kay with "Edit" and "Delete" and offers "Add Reviewer
+        // Suggestion". The author's session stays on the draft meanwhile.
+        const managerPage = await (await asUser(manager)).newPage();
+        const dash = new EditorialDashboardPage(managerPage, tag);
+        await dash.goto();
+        await dash.openView('All in submission stage');
+        await dash.searchFor(tag);
+        const draftRowForManager = dash.row(`Submission ${tag}`);
+        await expect(draftRowForManager).toBeVisible({timeout: 30_000});
+        await expect(dash.stageCell(draftRowForManager)).toHaveText(/Incomplete/);
+        await expect(dash.completeSubmissionButton(draftRowForManager)).toBeVisible();
+        await expect(dash.viewButton(draftRowForManager)).toHaveCount(0);
+        await expect(draftRowForManager.getByRole('button')).toHaveCount(1);
+        await dash.completeSubmissionButton(draftRowForManager).click();
+        await managerPage.waitForURL(/\/submission\?id=\d+/, {waitUntil: 'commit', timeout: 30_000});
+        await expectWizardOpen(managerPage);
+        const managerStep = new ReviewerSuggestionStep(managerPage);
+        await gotoStep(managerPage, STEPS.reviewerSuggestions);
+        await expect(managerStep.entries()).toHaveCount(1);
+        const kayForManager = managerStep.entry(kayEmail);
+        await expect(kayForManager).toContainText(fullName(kay));
+        await expect(managerStep.editButton(kayForManager)).toBeVisible();
+        await expect(managerStep.deleteButton(kayForManager)).toBeVisible();
+        await expect(managerStep.addButton()).toBeVisible();
 
         // The Review step's block: name, address, affiliation, no reason.
         await openReview(authorPage);
@@ -398,12 +457,35 @@ test.describe('reviewer-suggestions', () => {
         await expect(block).not.toContainText(kay.suggestionReason);
         await expect(step.reviewBlockWarning()).toHaveCount(0);
 
-        // Submit. The author's view shows no suggestions panel on any stage
-        // the menu lists (the stage heading is each read's landmark).
+        // Submit: the submission is in.
         await confirmSubmit(authorPage);
+
+        // The second draft, nothing added on its step: the Review step's
+        // block warns, and "Submit" goes through.
+        await authorPage.goto(wizardUrl(tag, second.submissionId));
+        await expectWizardOpen(authorPage);
+        await uploadWizardFile(authorPage, `${tag}b.txt`);
+        await continueTo(authorPage, STEPS.details);
+        await continueTo(authorPage, STEPS.contributors);
+        await continueTo(authorPage, STEPS.editors);
+        await continueTo(authorPage, STEPS.reviewerSuggestions);
+        await expect(step.emptyText()).toBeVisible();
+        await expect(step.entries()).toHaveCount(0);
+        await openReview(authorPage);
+        await expect(step.reviewBlockWarning()).toBeVisible();
+        await expect(step.reviewBlockEntries()).toHaveCount(0);
+        await confirmSubmit(authorPage);
+
+        // The author's view of the first submission, opened from My
+        // Submissions, shows no suggestions panel on any stage the menu
+        // lists (the stage heading is each read's landmark).
         const authorWorkflow = workflowFor(authorPage, tag);
         const authorPanel = new SuggestedReviewersPanel(authorPage);
-        await authorWorkflow.gotoAuthor(submissionId);
+        await mine.goto();
+        await mine.searchFor(tag);
+        const submittedRow = mine.row(`Submission ${tag}`);
+        await expect(submittedRow).toBeVisible({timeout: 30_000});
+        await authorWorkflow.openFromRow(submittedRow, submissionId);
         await authorWorkflow.expectStageHeading('Submission');
         await expect(authorPanel.heading()).toHaveCount(0);
         const stages = await authorWorkflow.stageLabels();
@@ -414,7 +496,6 @@ test.describe('reviewer-suggestions', () => {
         }
 
         // Press Manager, Submission stage: the panel lists Kay, no action.
-        const managerPage = await (await asUser(manager)).newPage();
         const workflow = workflowFor(managerPage, tag);
         const panel = new SuggestedReviewersPanel(managerPage);
         await workflow.gotoEditorial(submissionId);
@@ -444,6 +525,32 @@ test.describe('reviewer-suggestions', () => {
         await expect(railEntry(alexPage, STEPS.editors)).toHaveCount(1);
         await expect(railEntry(alexPage, /Review\s*$/)).toHaveCount(1);
         await expect(railEntry(alexPage, STEPS.reviewerSuggestions)).toHaveCount(0);
+
+        // … and on a monograph of the seeded press in External Review round
+        // 1 (no suggestion can be seeded there) the Press Manager's
+        // Submission and External Review stages show no "Reviewers
+        // Suggested by Author" panel (Participants is the positive
+        // control), and the Reviewers panel's "Add Reviewer" window opens
+        // with "Locate a Reviewer" and no suggestions list.
+        const controlInReview = await seedInReview(ompApi, {
+            tag: `${tag}r`,
+            context: PRESS,
+            submitter: 'author.alex',
+        });
+        const mayaPage = await (await asUser('manager.maya')).newPage();
+        const mayaWorkflow = workflowFor(mayaPage, PRESS);
+        const mayaPanel = new SuggestedReviewersPanel(mayaPage);
+        await mayaWorkflow.gotoEditorial(controlInReview.submissionId, {menuKey: 'workflow_1'});
+        await mayaWorkflow.expectStageHeading('Submission');
+        await expect(mayaWorkflow.participantsHeading()).toBeVisible();
+        await expect(mayaPanel.heading()).toHaveCount(0);
+        await mayaWorkflow.gotoEditorial(controlInReview.submissionId, {menuKey: roundKey(controlInReview)});
+        await mayaWorkflow.expectStageHeading(EXTERNAL_ROUND_1);
+        await expect(mayaWorkflow.participantsHeading()).toBeVisible();
+        await expect(mayaPanel.heading()).toHaveCount(0);
+        const mayaModal = await openAddReviewerWindow(mayaPage, mayaWorkflow);
+        await expect(mayaModal.getByRole('heading', {name: 'Locate a Reviewer', exact: true})).toBeVisible();
+        await expect(new SuggestionList(mayaPage, mayaModal).heading()).toHaveCount(0);
     });
 
     test('S2: the editor turns suggestions into reviewers from the panel', async ({asUser, ompApi, pkpMail}, testInfo) => {
@@ -458,6 +565,9 @@ test.describe('reviewer-suggestions', () => {
         const lee = LEE(mailOf(readerUser));
         const nova = NOVA(`nova.${tag}@mail.test`);
         const novaUsername = `nova${tag}`;
+        const novaOtherEmail = `nova.other.${tag}@mail.test`;
+        const novaOtherUsername = `novaother${tag}`;
+        const kim = KIM(`kim.${tag}@mail.test`);
         await seedPress(ompApi, tag, [
             {username: manager, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
             {username: author, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
@@ -469,6 +579,17 @@ test.describe('reviewer-suggestions', () => {
             context: tag,
             submitter: author,
             reviewerSuggestions: [kay, lee, nova],
+        });
+        // A second monograph moved on to Copyediting after External Review
+        // round 1, its one suggestion still pending (the U24 shape).
+        const copyediting = await ompApi.createSubmission({
+            tag: `${tag}k`,
+            context: tag,
+            submitter: author,
+            title: `Submission ${tag}k`,
+            decisions: ['sendExternalReview', 'accept'],
+            reviewRounds: [{stage: 'external', reviewers: []}],
+            reviewerSuggestions: [kim],
         });
         const control = await seedInReview(ompApi, {tag: `${tag}c`, context: tag, submitter: author});
         const {submissionId} = seed;
@@ -522,6 +643,22 @@ test.describe('reviewer-suggestions', () => {
         await expect(ReviewerRequestWindow.all(page)).toHaveCount(0);
         await expect(panel.row(fullName(kay))).toBeVisible();
 
+        // Open it again, type at the end of the "Review Request" message
+        // and press the "Close" arrow: the window closes without asking
+        // (the one dialog left is the workflow, its Participants heading
+        // reachable again; while the window was open it was the one dialog
+        // and the workflow behind it hidden: pitfall 6) and Kay stays.
+        request = await panel.addReviewerFromRow(fullName(kay));
+        await expect(request.selectedReviewerName()).toHaveText(fullName(kay));
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await expect(workflow.participantsHeading()).toHaveCount(0);
+        await request.appendToMessage('Please reply within a week.');
+        await request.close();
+        await expect(ReviewerRequestWindow.all(page)).toHaveCount(0);
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await expect(workflow.participantsHeading()).toBeVisible();
+        await expect(panel.row(fullName(kay))).toBeVisible();
+
         // Open it again and press "Add Reviewer": Kay joins the Reviewers
         // panel and leaves the suggestions at once, with no reload.
         request = await panel.addReviewerFromRow(fullName(kay));
@@ -545,9 +682,30 @@ test.describe('reviewer-suggestions', () => {
         await expect(panel.row(fullName(lee))).toHaveCount(0);
         await expect(panel.row(fullName(nova))).toBeVisible();
 
-        // Nova (no account): "Create New Reviewer", prefilled; an empty
-        // "Username" is refused and Nova stays; a username adds her and the
-        // panel leaves the External Review stage.
+        // Nova (no account), "Email" changed: "Create New Reviewer",
+        // prefilled; with another address and a username of its own, "Add
+        // Reviewer" lists Nova in the Reviewers panel while her row stays in
+        // the panel with its "…" menu (the address differs: Rule 11).
+        request = await panel.addReviewerFromRow(fullName(nova));
+        await expect(request.createHeading()).toBeVisible();
+        await expect(request.createGivenName()).toHaveValue(nova.givenName);
+        await expect(request.createFamilyName()).toHaveValue(nova.familyName);
+        await expect(request.createEmail()).toHaveValue(nova.email);
+        await expect(request.createAffiliation()).toHaveValue(nova.affiliation);
+        await request.createEmail().fill(novaOtherEmail);
+        await request.username().fill(novaOtherUsername);
+        await request.submit();
+        await expect(ReviewerRequestWindow.all(page)).toHaveCount(0);
+        await expect(reviewerRow(reviewers(), fullName(nova))).toHaveCount(1);
+        await expect(panel.heading()).toBeVisible();
+        await expect(panel.rows()).toHaveCount(1);
+        await expect(panel.row(fullName(nova))).toBeVisible();
+        await expect(panel.moreActionsButton(fullName(nova))).toBeVisible();
+
+        // Nova's row again: "Create New Reviewer", the four boxes filled as
+        // before; an empty "Username" is refused and Nova stays; a username
+        // adds her a second time and the panel leaves the External Review
+        // stage.
         request = await panel.addReviewerFromRow(fullName(nova));
         await expect(request.createHeading()).toBeVisible();
         await expect(request.createGivenName()).toHaveValue(nova.givenName);
@@ -562,12 +720,13 @@ test.describe('reviewer-suggestions', () => {
         await request.username().fill(novaUsername);
         await request.submit();
         await expect(ReviewerRequestWindow.all(page)).toHaveCount(0);
-        await expect(reviewerRow(reviewers(), fullName(nova))).toBeVisible();
+        await expect(reviewerRow(reviewers(), fullName(nova))).toHaveCount(2);
         await expect(reviewerRow(reviewers(), fullName(kay))).toBeVisible();
         await expect(reviewerRow(reviewers(), fullName(lee))).toBeVisible();
         await expect(panel.heading()).toHaveCount(0);
 
-        // Kay's mailbox holds the request; Nova's the welcome and the request.
+        // Kay's mailbox holds the request; Nova's, at the suggested
+        // address, the welcome and the request.
         await pkpMail.find({to: kay.email, subject: REVIEW_REQUEST_SUBJECT, contains: tag});
         await pkpMail.find({to: nova.email, subject: WELCOME_SUBJECT});
         await pkpMail.find({to: nova.email, subject: REVIEW_REQUEST_SUBJECT, contains: tag});
@@ -580,6 +739,27 @@ test.describe('reviewer-suggestions', () => {
             await expect(panel.row(name)).toBeVisible();
             await expect(panel.row(name).getByRole('button')).toHaveCount(0);
         }
+        await expect(page.getByRole('button', {name: 'Ava Author More Actions', exact: true})).toBeVisible();
+
+        // A monograph moved on to Copyediting: the External Review stage
+        // lists Kim with no "…" menu on the row (the row's text is the
+        // positive control), the Submission stage with no action either.
+        await workflow.gotoEditorial(copyediting.submissionId, {menuKey: roundKey(copyediting)});
+        await workflow.expectStageHeading(EXTERNAL_ROUND_1);
+        await expect(panel.heading()).toBeVisible();
+        await expect(panel.rows()).toHaveCount(1);
+        const kimRow = panel.row(fullName(kim));
+        await expect(kimRow).toBeVisible();
+        await expect(kimRow).toContainText(kim.affiliation);
+        await expect(kimRow).toContainText(kim.suggestionReason);
+        await expect(panel.moreActionsButton(fullName(kim))).toHaveCount(0);
+        await expect(kimRow.getByRole('button')).toHaveCount(0);
+        await workflow.gotoEditorial(copyediting.submissionId, {menuKey: 'workflow_1'});
+        await workflow.expectStageHeading('Submission');
+        await expect(panel.rows()).toHaveCount(1);
+        await expect(panel.row(fullName(kim))).toBeVisible();
+        await expect(panel.row(fullName(kim)).getByRole('button')).toHaveCount(0);
+        await expect(panel.moreActionsButton(fullName(kim))).toHaveCount(0);
         await expect(page.getByRole('button', {name: 'Ava Author More Actions', exact: true})).toBeVisible();
 
         // Control: a monograph with no suggestion shows the panel on neither stage.
@@ -672,13 +852,32 @@ test.describe('reviewer-suggestions', () => {
         await expect(list.entry(fullName(pat))).toHaveCount(0);
         await list.select(fullName(nova));
         await expect(ReviewerRequestWindow.all(page)).toHaveCount(2);
-        const inner = new ReviewerRequestWindow(page);
+        let inner = new ReviewerRequestWindow(page);
         await inner.expectOpen();
         await expect(inner.createHeading()).toBeVisible();
         await expect(inner.createGivenName()).toHaveValue(nova.givenName);
         await expect(inner.createFamilyName()).toHaveValue(nova.familyName);
         await expect(inner.createEmail()).toHaveValue(nova.email);
         await expect(inner.createAffiliation()).toHaveValue(nova.affiliation);
+
+        // A username typed, then the inner window's "Cancel": it closes
+        // without asking (the outer window is the one dialog left, the two
+        // Add Reviewer windows were the two a moment before; the workflow
+        // behind them is hidden: pitfall 6), Nova's entry keeps its "Select
+        // Reviewer"; reopened, "Username" is empty.
+        await inner.username().fill(novaUsername);
+        await expect(page.getByRole('dialog')).toHaveCount(2);
+        await inner.cancel();
+        await expect(ReviewerRequestWindow.all(page)).toHaveCount(1);
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await expect(list.selectButton(list.entry(fullName(nova)))).toBeVisible();
+        await list.select(fullName(nova));
+        await expect(ReviewerRequestWindow.all(page)).toHaveCount(2);
+        inner = new ReviewerRequestWindow(page);
+        await inner.expectOpen();
+        await expect(inner.createHeading()).toBeVisible();
+        await expect(inner.createEmail()).toHaveValue(nova.email);
+        await expect(inner.username()).toHaveValue('');
         await inner.username().fill(novaUsername);
         await inner.submit();
 

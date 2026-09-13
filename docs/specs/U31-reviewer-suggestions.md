@@ -80,10 +80,9 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
    submission wizard carries a step "Reviewer Suggestions" between "For the
    Editors" and "Review". Above the panel the step shows the
    journal's guidance text, which arrives as "When submitting, you have the
-   option to suggest several potential reviewers. …" and is edited under
-   Settings › Workflow › Submission, "Author Guidance", box "For Reviewer
-   Suggestion"; the default text misspells "valuable" as "valueable"
-   ⚠ [A7](#a7). <sup>c</sup> <sup>t15</sup>
+   option to suggest several potential reviewers. …" (the "For Reviewer
+   Suggestion" setting); the default text misspells "valuable" as
+   "valueable" ⚠ [A7](#a7). <sup>c</sup> <sup>t15</sup>
 2. **The step's panel.** The panel is headed "Reviewer Suggestions" with an
    "Add Reviewer Suggestion" button. Each entry shows the person's full
    name, their affiliation as a badge, and the email address on the line
@@ -126,9 +125,9 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
      row. <sup>f</sup> <sup>t6</sup>
    - 8b. On the Review stage the panel lists only pending suggestions. While
      the Review stage is the submission's current stage, each row ends in a
-     "…" menu (labelled "{name} More Actions") holding one action, "Add
-     Reviewer". Once the submission has moved on to Copyediting, the rows
-     show without the menu. <sup>f</sup>
+     "…" menu (named "{name} More Actions" to screen readers) holding one
+     action, "Add Reviewer". Once the submission has moved on to
+     Copyediting, the rows show without the menu. <sup>f</sup>
    - 8c. When the last pending suggestion is turned into a reviewer, the
      panel disappears from the Review stage. <sup>f</sup>
    - 8d. Switching "Reviewer Suggestion at Submission" off hides the panel
@@ -183,10 +182,10 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
       New Reviewer" form, prefilled as in Rule 9. When that inner "Add
       Reviewer" succeeds, the inner window closes, the entry leaves the
       suggestions list (its emptied row stays as a gap until the window is
-      reopened ⚠ [A9](#a9)), the new reviewer appears in "Locate a
-      Reviewer" marked as already assigned, and the outer window stays open
-      until the editor presses the "Close" arrow at its top, its only close
-      control. Closing either window discards what was typed without
+      reopened ⚠ [A9](#a9)), the new reviewer appears under "Locate a
+      Reviewer" with the same notice and no button, and the outer window
+      stays open until the editor presses the "Close" arrow at its top, its
+      only close control. Closing either window discards what was typed without
       asking. The inner form's "Back to Search" opens a whole further Add
       Reviewer window inside the inner one instead of returning to the
       outer list ⚠ [A10](#a10). <sup>h</sup> <sup>t9</sup>
@@ -213,8 +212,7 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
     language. The window opens with one box each; on a journal with more
     than one form language, a button named for each other language (for
     example "French") adds that language's boxes. "Email" and "ORCID iD"
-    have one box. The seeded and scratch journals have one form language.
-    <sup>b</sup>
+    have one box. <sup>b</sup>
 
 ## Side effects
 
@@ -233,7 +231,7 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
   journal. On, the wizard gains the "Reviewer Suggestions" step (Rule 1)
   and the editors' panel shows on the Submission and Review stages
   (Rule 8); switched off again, the panel hides on every stage and the
-  suggestions are kept (Rule 8d). A preprint server has no such checkbox.
+  suggestions are kept (Rule 8d).
 - **"For Reviewer Suggestion"** (Settings › Workflow › Submission, "Author
   Guidance"; *Submission intake configuration*): the guidance text above
   the step's panel, with a default text (Rule 1); a custom text shows on
@@ -277,8 +275,9 @@ correct {N} errors." drops by one, and "Save" comes back with the last one.
 Scenarios 1 to 5 run on scratch journals created with "Reviewer Suggestion
 at Submission" on, with throwaway accounts and scratch submissions;
 scenario 1's control and scenario 6 run on the seeded journal and preprint
-server with ready accounts. Accounts, passwords and the tooling recipe are
-in the footnote. <sup>s</sup>
+server with ready accounts. Accounts, passwords, each scenario's own
+suggested addresses and typed username, and the tooling recipe are in the
+footnote. <sup>s</sup>
 
 1. **The author suggests reviewers on a draft**
 
@@ -318,7 +317,10 @@ in the footnote. <sup>s</sup>
      be accepted as a third [A6](#a6)); close the window.
    - **Editing**: press "Edit" on Kay's entry: the window is titled "Edit"
      with her values filled in; change "Affiliation" to Open University
-     and press "Save": the entry's badge reads "Open University".
+     and close the window without "Save": no warning shows and the
+     entry's badge still reads "Public Knowledge University". Press "Edit"
+     again, change "Affiliation" to Open University and press "Save": the
+     entry's badge reads "Open University".
    - **Deleting**: press "Delete" on Lee's entry: a dialog titled "Delete
      Reviewer Suggestion" asks "Are you sure you want to remove this
      suggestion? This action can not be undone."; press "Cancel": the
@@ -326,20 +328,36 @@ in the footnote. <sup>s</sup>
      Suggestion": the entry is gone.
    - **"Save for Later"**: press "Save for Later" and reopen the draft from
      My Submissions: the step lists "Kay Suggested" again.
-   - **The Review step and "Submit"**: press "Continue": the "Review"
-     step's "Reviewer Suggestions" block, with its "Edit" button, shows
-     the full name, the email address and the affiliation, and no reason.
-     Press "Submit" and confirm in the dialog that follows: the submission
-     is in.
-   - **The author's view after submitting**: open it from My Submissions:
-     no stage of the author's view shows a suggestions panel [A4](#a4).
+   - **The Journal Manager on the draft**: Journal Manager: the Editor
+     Dashboard's "All in submission stage" view lists the draft as
+     "Incomplete" with one button, "Complete submission"; press it: the
+     draft's wizard opens; on its "Reviewer Suggestions" step, "Kay
+     Suggested" is listed with "Edit" and "Delete", and "Add Reviewer
+     Suggestion" is offered.
+   - **The Review step and "Submit"**: Author, on the draft again: press
+     "Continue": the "Review" step's "Reviewer Suggestions" block, with
+     its "Edit" button, shows the full name, the email address and the
+     affiliation, and no reason. Press "Submit" and confirm in the dialog
+     that follows: the submission is in.
+   - **"Submit" with no suggestion**: on a second draft of the same
+     Author, walked to the "Review" step with nothing added on its
+     "Reviewer Suggestions" step: the block shows the warning "No
+     reviewers have been suggested for this submission."; press "Submit"
+     and confirm in the dialog that follows: the submission is in.
+   - **The author's view after submitting**: open the first submission
+     from My Submissions: no stage of the author's view shows a
+     suggestions panel [A4](#a4).
    - **The Journal Manager's read**: Journal Manager, on the same
      submission's Submission stage: under the Participants panel,
      "Reviewers Suggested by Author" lists Kay's initials, "Kay Suggested",
      "Open University" and the reason, with no action on the row.
    - **Control**: on the seeded journal, where "Reviewer Suggestion at
      Submission" is off, a new draft's wizard has no "Reviewer
-     Suggestions" step. <sup>s1</sup>
+     Suggestions" step, and on a submission of that journal in review
+     round 1 the Journal Manager's Submission and Review stages show no
+     "Reviewers Suggested by Author" panel and the Reviewers panel's "Add
+     Reviewer" window opens with no "Select a Reviewer from Reviewer
+     Suggestions" list. <sup>s1</sup>
 
 2. **The editor turns suggestions into reviewers from the panel**
 
@@ -352,33 +370,48 @@ in the footnote. <sup>s</sup>
      Suggested by Author" lists all three with initials, full name,
      affiliation and reason, and no action on any row.
    - **Review stage**: the same panel lists the three, and each row ends in
-     a "…" menu labelled "{name} More Actions" holding one action, "Add
-     Reviewer".
+     a "…" menu, named "{name} More Actions" to screen readers, holding one
+     action, "Add Reviewer".
    - **Kay's row, an account with the Reviewer role**: press "Add
      Reviewer": the Add Reviewer window opens on "Selected Reviewer"
      showing her name and email, with no "Locate a Reviewer", the "Review
      Request" message and both due dates already filled. Press "Cancel":
      the window closes without asking and Kay stays in the panel. Open it
-     again and press "Add Reviewer": the Reviewers panel lists Kay, and
-     her row leaves "Reviewers Suggested by Author" at once, with no
-     reload.
+     again, type "Please reply within a week." at the end of the "Review
+     Request" message and press the "Close" arrow: the window closes
+     without asking and Kay stays in the panel. Open it again and press
+     "Add Reviewer": the Reviewers panel lists Kay, and her row leaves
+     "Reviewers Suggested by Author" at once, with no reload.
    - **Lee's row, an account without the role**: press "Add Reviewer": the
      window opens on "Enroll an Existing User as Reviewer" with "Search By
      Name" holding "Lee Second (lee.second@mail.test)" and "Enroll the
      user with this reviewer user group" set to "Reviewer" (on a press
      "External Reviewer"). Press "Add Reviewer": the Reviewers panel lists
      Lee and his row is gone from the panel.
-   - **Nova's row, no account**: press "Add Reviewer": the window opens on
-     "Create New Reviewer" with "Given Name", "Family Name", "Email" and
-     "Affiliation" filled from the suggestion. Press "Add Reviewer" with
-     "Username" empty: "This field is required." shows under the box and
-     Nova stays in the panel. Type nova in "Username" and press "Add
-     Reviewer": the Reviewers panel lists Nova, and "Reviewers Suggested
-     by Author" disappears from the Review stage.
-   - **Mailboxes**: Kay's holds the review request; Nova's the new
-     reviewer's welcome email and the request.
+   - **Nova's row, "Email" changed**: press "Add Reviewer": the window
+     opens on "Create New Reviewer" with "Given Name", "Family Name",
+     "Email" and "Affiliation" filled from the suggestion. Change "Email"
+     to nova.other@mail.test, type novaother in "Username" and press "Add
+     Reviewer": the Reviewers panel lists Nova, and Nova's row stays in
+     "Reviewers Suggested by Author" with its "…" menu, the suggestion
+     still pending because the address differs.
+   - **Nova's row, no account**: press "Add Reviewer" on the row again:
+     the window opens on "Create New Reviewer" with the four boxes filled
+     as before. Press "Add Reviewer" with "Username" empty: "This field is
+     required." shows under the box and Nova stays in the panel. Type nova
+     in "Username" and press "Add Reviewer": the Reviewers panel lists
+     Nova a second time, and "Reviewers Suggested by Author" disappears
+     from the Review stage.
+   - **Mailboxes**: Kay's holds the review request; Nova's, at the
+     suggested address, the new reviewer's welcome email and the request.
+     <sup>s</sup>
    - **Submission stage again**: "Reviewers Suggested by Author" still
      lists all three, with no action on any row.
+   - **A submission moved on to Copyediting**: on a second submission of
+     the same journal, moved on to Copyediting after review round 1 with
+     its one suggestion, Kim Kept, still pending, open the Review stage:
+     "Reviewers Suggested by Author" lists Kim with no "…" menu on the
+     row; the Submission stage lists Kim with no action either.
    - **Control**: a submission of the same journal with no suggestion shows
      the panel on neither stage. <sup>s2</sup>
 
@@ -388,7 +421,7 @@ in the footnote. <sup>s</sup>
    suggestions are Kay Suggested (on the round from the start, not through
    "Add Reviewer", so her suggestion is still pending: Rule 11), Pat Peer
    (an account holding the Reviewer role, not on the round) and Nova
-   Newcomer (no account).
+   Newcomer (no account carries the address).
 
    - **The list**: press the Reviewers panel's own "Add Reviewer": the
      window opens with a list "Select a Reviewer from Reviewer
@@ -405,11 +438,15 @@ in the footnote. <sup>s</sup>
    - **Nova's entry, no account**: press "Select Reviewer" on Nova's entry:
      a second "Add Reviewer" window opens on top, on "Create New Reviewer"
      with "Given Name", "Family Name", "Email" and "Affiliation" filled
-     from the suggestion; type nova in "Username" and press "Add
-     Reviewer": the inner window closes, Nova's entry leaves the list (its
-     emptied row stays as a gap [A9](#a9)), Nova appears in "Locate a
-     Reviewer" marked as already assigned, and the outer window stays
-     open.
+     from the suggestion. Type nova in "Username" and press the inner
+     window's "Cancel": it closes without asking, and Nova's entry still
+     shows its "Select Reviewer" button; press "Select Reviewer" on Nova's
+     entry again: the inner window opens with "Username" empty, what was
+     typed discarded. Type nova in "Username" and press "Add Reviewer":
+     the inner window closes, Nova's entry leaves the list (its
+     emptied row stays as a gap [A9](#a9)), Nova appears under "Locate a
+     Reviewer" with the notice Kay's entry shows and no button, and the
+     outer window stays open.
    - **After closing**: press the "Close" arrow at its top: the Reviewers
      panel lists Kay, Pat and Nova, and the Review stage's "Reviewers
      Suggested by Author" lists Kay alone, with her "…" menu.
@@ -489,15 +526,6 @@ in the footnote. <sup>s</sup>
 
 Left out of the scenarios above, by reason:
 
-- **Budget** — states:
-  - "Reviewer Suggestion at Submission" switched off after suggestions exist, then on again (Rule 8d)
-  - a submission moved on to Copyediting, its rows without the "…" menu
-- **Budget** — variants:
-  - the panel and the list with the setting off (scenario 1's control reads the wizard step only)
-  - "Submit" with no suggestion (the warning is advisory)
-  - "Create New Reviewer" with "Email" changed (the suggestion stays pending)
-  - a window closed with unsaved text (the suggestion window, the Add Reviewer window, the inner window)
-  - the Journal Manager in an author's draft wizard (the Author's step, one route more)
 - **Nothing new to test**:
   - assigned Section Editor, Guest Editor and Site Administrator (the Journal Manager's offer, scenarios 2 and 3)
   - Reviewer and Reader (no screen offers them anything)
@@ -508,6 +536,8 @@ Left out of the scenarios above, by reason:
   - A9 (the emptied entry's blank row)
   - A10 (the inner window's "Back to Search")
   - A5's "Enroll an Existing User as Reviewer" path for the Funding Coordinator, not driven
+- **No seed**:
+  - "Reviewer Suggestion at Submission" switched off after suggestions exist, then on again (Rule 8d): no scenario key changes a journal's setting once the journal exists, and a suggestion can be seeded only where the setting is on
 - **Owned by another feature**:
   - the "For Reviewer Suggestion" guidance text (*Submission intake configuration*)
   - a second form language's boxes in the suggestion window (*Languages & locales*)
@@ -693,16 +723,16 @@ Basis: probe. <sup>f-omp1</sup>
 **k** — No mailable, `Notification` type or `SubmissionLog` event references `ReviewerSuggestion` (`grep -r ReviewerSuggestion lib/pkp/classes/mail lib/pkp/classes/notification lib/pkp/classes/log` is empty); the controller's `add`/`edit`/`delete` write the model and return it. `approveAndAttachReviewer()` writes `approved_at`, `approver_id`, `reviewer_id` only. The request email, `ReviewerRegister` welcome email and the grid's log rows are `ReviewerForm::execute()` / `CreateReviewerForm::execute()` as documented in *Reviewer assignment & management*. Live-probed 2026-09-06 (Side effects), OJS and OMP: add, edit and delete on a draft sent nothing to the suggested or the author's address (counted per recipient; the mail catcher sits at its 500-message cap); after the submit the Activity Log held "Article submitted" (OJS) / "Initial submission completed." (OMP) and the needs-an-editor email row only; after each "Add Reviewer" from the panel it gained "{name} has been assigned to review submission {id} for review round 1." and "An email has been sent: Invitation to review" (OJS) / "Manuscript Review Request" (OMP), no row naming a suggestion; the no-account address received "Registration as Reviewer with {journal}" and the request, the others the request only.
 
 <a id="fn-s"></a>
-**s** — Tooling. A scratch journal with the feature on: `POST scenarios/context` with `review: {reviewerSuggestionEnabled: true}` and `users[]` holding the throwaway `author`, `editor` (manager level) or `sectionEditor`, plus one `externalReviewer` for the "account with a Reviewer role" path and one `reader` for the "account without a Reviewer role" path (the seeded reviewers are not enrolled on a scratch context). The wizard scenario starts from `POST scenarios/submission` with `submitted: false` and opens `submission?id={id}` as the author. The editor-side scenarios need suggestions on a submitted submission: `POST scenarios/submission` takes `reviewerSuggestions[]` (`givenName` required, `familyName`, `email` required and unique within the list, `affiliation`, `suggestionReason`; the context must carry `review.reviewerSuggestionEnabled: true`; OPS refuses the key), built 2026-09-06 and byte-identical in the database to a suggestion typed on the step. An address once turned into a reviewer holds the Reviewer role for every other submission of the context, so the Create and Enroll paths need a fresh address per submission; the "ORCID iD" box needs `orcid: {enabled: true}` on the context; a second form language is ticked under Settings › Website › Setup › Languages "Forms" (`supportedLocales` belongs under `context` in the create call). The Funding Coordinator path needs a scratch `funding` participant on the submission (`assistant.rita` is assigned to nothing on `publicknowledge`). The default-off control runs on `publicknowledge` (seed-facts: "Reviewer Suggestion at Submission" off) with `author.alex` and `editor.diana`; the preprint-server absence with `author.alex` and `manager.maya` on OPS. Passwords: the username twice; `admin`/`admin`.
+**s** — Tooling. A scratch journal with the feature on: `POST scenarios/context` with `review: {reviewerSuggestionEnabled: true}` and `users[]` holding the throwaway `author`, `editor` (manager level) or `sectionEditor`, plus one `externalReviewer` for the "account with a Reviewer role" path and one `reader` for the "account without a Reviewer role" path (the seeded reviewers are not enrolled on a scratch context). The wizard scenario starts from `POST scenarios/submission` with `submitted: false` and opens `submission?id={id}` as the author. The editor-side scenarios need suggestions on a submitted submission: `POST scenarios/submission` takes `reviewerSuggestions[]` (`givenName` required, `familyName`, `email` required and unique within the list, `affiliation`, `suggestionReason`; the context must carry `review.reviewerSuggestionEnabled: true`; OPS refuses the key), built 2026-09-06 and byte-identical in the database to a suggestion typed on the step. An address once turned into a reviewer holds the Reviewer role for every other submission of the context, so the Create and Enroll paths need a fresh address per submission; the "ORCID iD" box needs `orcid: {enabled: true}` on the context; a second form language is ticked under Settings › Website › Setup › Languages "Forms" (`supportedLocales` belongs under `context` in the create call). The Funding Coordinator path needs a scratch `funding` participant on the submission (`assistant.rita` is assigned to nothing on `publicknowledge`). The default-off control runs on `publicknowledge` (seed-facts: "Reviewer Suggestion at Submission" off) with `author.alex` for the draft and `manager.maya` for the editorial reads of a submission seeded in review there (`decisions: ['sendExternalReview']`, one `reviewRounds[]` entry; no `reviewerSuggestions[]`, which the seed refuses where the setting is off). A submission in Copyediting is `decisions: ['sendExternalReview', 'accept']` with one `reviewRounds[]` entry, `reviewerSuggestions[]` riding on it as on any seed; the preprint-server absence with `author.alex` and `manager.maya` on OPS. Emails are read in Mailpit by the recipient's address (PRINCIPLES A8; the catcher sits at its cap, note k, so a suite matches the fresh recipient and the tag-bearing title). Usernames belong to the install, so each scenario types a username of its own in "Create New Reviewer": the body's `nova` stands for it, and the suites tag the typed username per run as they do the fresh addresses. Passwords: the username twice; `admin`/`admin`.
 
 <a id="fn-s1"></a>
-**s1** — Scenario 1: Rules 1–7 and Fields, on a scratch journal with a throwaway `author` and `editor`; `POST scenarios/submission` with `submitted: false`, opened at `submission?id={id}` as the author. The four "This field is required." messages and the "Please correct 4 errors." summary are note b; the reopen route is My Submissions' "Complete submission"; the Journal Manager's read is Rule 8a. The control runs on `publicknowledge` as `author.alex` (the setting off, seed-facts).
+**s1** — Scenario 1: Rules 1–7 and Fields, Actors row 1, on a scratch journal with a throwaway `author` and `editor`; `POST scenarios/submission` with `submitted: false`, opened at `submission?id={id}` as the author, and a second such draft for the same `author` for the "Submit" with no suggestion (the wizard's own required file is uploaded on each before "Submit"). The four "This field is required." messages and the "Please correct 4 errors." summary are note b; the "Edit" window closed with a change typed is Rule 4 (note d); the reopen route is My Submissions' "Complete submission"; the Journal Manager's opening of the draft is Actors row 1 (note t1), as the throwaway `editor`, from the Editor Dashboard's "All in submission stage" view; the Journal Manager's read after the submit is Rule 8a. The control runs on `publicknowledge` (the setting off, seed-facts) as `author.alex` for the draft and as `manager.maya` for the panel and list absences on a submission seeded in review there (note s), Rules 8 and 10 at the setting's off end.
 
 <a id="fn-s2"></a>
-**s2** — Scenario 2: Rules 8a–8c, 9 (all three modes) and 11, as the scratch `editor`; `POST scenarios/submission` with `reviewRounds` for round 1 and `reviewerSuggestions[]` holding the throwaway `externalReviewer`'s address, the throwaway `reader`'s address and a fresh address (note s: the Create and Enroll paths need an address no account carries in the context). The mailbox read is Side effects' second bullet. The control is a second `POST scenarios/submission` in review with no `reviewerSuggestions`.
+**s2** — Scenario 2: Rules 8a–8c, 9 (all three modes) and 11, as the scratch `editor`; `POST scenarios/submission` with `reviewRounds` for round 1 and `reviewerSuggestions[]` holding the throwaway `externalReviewer`'s address, the throwaway `reader`'s address and a fresh address (note s: the Create and Enroll paths need an address no account carries in the context). The "Close" arrow after typing is Rule 9's closing sentence (note g). The "Email" change on Nova's row uses a second fresh address that no account and no suggestion of the context carries, and a username of its own, so the account it creates matches nothing and the row's second "Add Reviewer" still opens "Create New Reviewer" (note i; the suite picks both fresh addresses per run). The mailbox read is Side effects' second bullet, in Mailpit by each address (note s). The Copyediting read is Rule 8b's last sentence (note f, note t6): a second `POST scenarios/submission` on the same journal with `decisions: ['sendExternalReview', 'accept']`, one `reviewRounds[]` entry and `reviewerSuggestions[]` holding one more fresh address. The control is a third `POST scenarios/submission` in review with no `reviewerSuggestions`.
 
 <a id="fn-s3"></a>
-**s3** — Scenario 3: Rule 10 (both bullets, the assigned notice) and Rule 11, as the scratch `editor`; `reviewRounds[].reviewers[]` seeds the first `externalReviewer` on round 1 while `reviewerSuggestions[]` carries their address (the seeded assignment leaves the suggestion pending: note h), a second `externalReviewer` for the in-window select, and a fresh address for the inner "Create New Reviewer". The control reuses scenario 2's no-suggestion submission.
+**s3** — Scenario 3: Rule 10 (both bullets, the assigned notice, the inner window's close with a username typed: note h) and Rule 11, as the scratch `editor`; `reviewRounds[].reviewers[]` seeds the first `externalReviewer` on round 1 while `reviewerSuggestions[]` carries their address (the seeded assignment leaves the suggestion pending: note h), a second `externalReviewer` for the in-window select, and a fresh address for the inner "Create New Reviewer"; that address and the typed username are scenario 3's own (note s), so the account it creates is not scenario 2's. The suite finds Nova under "Locate a Reviewer" by searching her name before reading the notice. The control reuses scenario 2's no-suggestion submission.
 
 <a id="fn-s4"></a>
 **s4** — Scenario 4: Actors rows 2 and 4, A1 and A5, as a scratch `funding` participant on the submission (note s); `reviewerSuggestions[]` with the `externalReviewer`'s address and a fresh address. The "Enroll an Existing User as Reviewer" path was not driven for this role (note f-a5).

@@ -59,7 +59,11 @@ trips.
   2026-09-08. U40 S4 red on OMP in the first of the U26 revision-2 local
   finals 2026-09-12 (load ~16 on 10 cores), green alone; U43 S4 (a click
   hitting the 180 s test timeout) red on OMP in the accepted run 2026-09-13,
-  green alone in 12 s. **Watch condition**: a
+  green alone in 12 s; U26 S10 (the decision wizard's "Notify Authors"
+  composer read empty for its 20 s wait) and U40 S3 (the "Publication: Title
+  & Abstract" heading not found in 30 s) red on OMP in the first U31
+  revision local final 2026-09-13 (load over 100 on 10 cores from the
+  desktop), both green in the second full run. **Watch condition**: a
   hardened test reds again with retries exhausted.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
