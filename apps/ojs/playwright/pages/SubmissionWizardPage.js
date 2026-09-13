@@ -430,6 +430,62 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         return this.contributorItem(name).getByText('Primary Contact', {exact: true});
     }
 
+    /**
+     * The contributor "Edit" side panel of the Contributors step, anchored on
+     * the form's own given-name box (the wrapper reports `visibility: hidden`,
+     * patterns.md locator pitfall 5). Its boxes are the contributor form's
+     * (`ContributorForm.php`, U41): `givenName-en`, `familyName-en`,
+     * `preferredPublicName-en`, `email`, `url` as `input[name]`, the
+     * country a native `select[name="country"]`, the bio a TinyMCE editor
+     * `#contributor-biography-control-{locale}_ifr`, the affiliations a
+     * table under `#contributor-affiliations`, and, on a journal with ORCID
+     * enabled, the "ORCID iD" field with its "Request verification" button
+     * (U04). Read live 2026-09-13 (`.reports/U03/tojs/contributor-fields-ojs.json`).
+     */
+    contributorEditModal() {
+        return this.page
+            .locator('[data-cy="active-modal"]')
+            .filter({has: this.page.locator('[id^="contributor-givenName"]')});
+    }
+
+    /** Open a Contributors-step list item's "Edit" and return its panel. */
+    async openContributorEdit(name) {
+        await this.contributorItem(name).getByRole('button', {name: 'Edit', exact: true}).click();
+        const modal = this.contributorEditModal();
+        await expect(modal.locator('[id^="contributor-givenName"]')).toBeVisible({timeout: 30_000});
+        return modal;
+    }
+
+    /** A text box of the contributor form by its field name (`givenName-en`, `email`, `url`, …). */
+    contributorInput(modal, fieldName) {
+        return modal.locator(`input[name="${fieldName}"]`);
+    }
+
+    contributorCountry(modal) {
+        return modal.locator('select[name="country"]');
+    }
+
+    /** The "Affiliations" field (its table lists each affiliation by institution name). */
+    contributorAffiliations(modal) {
+        return modal.locator('#contributor-affiliations');
+    }
+
+    /** The bio statement editor's body. */
+    contributorBioBody(modal, locale = 'en') {
+        return modal.frameLocator(`#contributor-biography-control-${locale}_ifr`).locator('body');
+    }
+
+    /** The ORCID field's "Request verification" button (a contributor with no verified iD). */
+    contributorRequestVerificationButton(modal) {
+        return modal.getByRole('button', {name: 'Request verification'});
+    }
+
+    /** Close the panel without saving (its "Close" button). */
+    async closeContributorEdit(modal) {
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(modal).toHaveCount(0, {timeout: 30_000});
+    }
+
     /** The Review step's final "Confirmation" section (copyright notice). */
     confirmationHeading() {
         return this.page.getByRole('heading', {name: 'Confirmation', exact: true});

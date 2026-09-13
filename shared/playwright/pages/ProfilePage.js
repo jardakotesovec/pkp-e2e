@@ -199,6 +199,35 @@ exports.ProfilePage = class ProfilePage extends BasePage {
         }
     }
 
+    /**
+     * Press a tab while the open tab holds changes that were never sent, and
+     * answer the browser's own question ("The data on this form has changed.
+     * Do you wish to continue without saving?", Rule 2) yourself: `proceed:
+     * false` presses Cancel and leaves the open tab as it is; `proceed: true`
+     * presses OK and waits for the pressed tab's form. Returns the question
+     * as the browser showed it. Fails when no question comes.
+     */
+    async openAnswering(tab, {proceed}) {
+        // The question blocks the page until it is answered, and the click
+        // does not return before then, so the answer is armed first.
+        let message = null;
+        const answered = this.page.waitForEvent('dialog', {timeout: 30_000}).then(async (dialog) => {
+            message = dialog.message();
+            if (proceed) {
+                await dialog.accept();
+            } else {
+                await dialog.dismiss();
+            }
+        });
+        await this.tabLink(tab).click();
+        await answered;
+        if (proceed) {
+            await waitForJQueryIdle(this.page);
+            await expect(this.form(tab)).toBeVisible({timeout: 30_000});
+        }
+        return message;
+    }
+
     /** The currently visible tab panel. */
     panel() {
         return this.tabs.locator('.ui-tabs-panel:visible');
@@ -320,6 +349,16 @@ exports.ProfilePage = class ProfilePage extends BasePage {
         return this.form('contact').locator('select[name="country"]');
     }
 
+    /** The "Working Languages" boxes, one per site language (Rule 7). */
+    workingLanguageBoxes() {
+        return this.form('contact').locator('input[name="locales[]"]');
+    }
+
+    /** One "Working Languages" box by its locale key (`en`, `fr_CA`). */
+    workingLanguageBox(locale) {
+        return this.form('contact').locator(`input[name="locales[]"][value="${locale}"]`);
+    }
+
     /** The pending-change notice (Rule 6a), with its "Cancel" button. */
     pendingEmailNotice() {
         return this.form('contact').getByText('You have requested a change of your email to');
@@ -363,16 +402,31 @@ exports.ProfilePage = class ProfilePage extends BasePage {
         return this.currentContextSection().getByRole('checkbox', {name, exact: true});
     }
 
-    /** A named context's section (the other-contexts fold, or the site-level list). */
+    /**
+     * A named context's box list (the other-contexts fold, or the site-level
+     * list): the `ul.checkbox_and_radiobutton` whose own label is the
+     * context's name (the `.section` around it nests inside the fold's
+     * section, so the list, never the section, is the anchor).
+     */
     contextSection(contextName) {
-        return this.form('roles').locator('.section').filter({
+        return this.form('roles').locator('ul.checkbox_and_radiobutton').filter({
             has: this.page.locator('label', {hasText: contextName}),
         });
+    }
+
+    /** A role box under a named context's section (the fold, or the site-level list). */
+    contextRoleBox(contextName, name) {
+        return this.contextSection(contextName).getByRole('checkbox', {name, exact: true});
     }
 
     /** The fold's toggle link ("Register with other …" / "Hide other …"). */
     otherContextsLink() {
         return this.form('roles').locator('#userGroupExtras a.toggleExtras');
+    }
+
+    /** Press the fold's link (open it, or close it again). */
+    async toggleOtherContexts() {
+        await this.otherContextsLink().click();
     }
 
     /**
@@ -399,6 +453,21 @@ exports.ProfilePage = class ProfilePage extends BasePage {
     /** The saved interest chips, in order. */
     interestChips() {
         return this.form('roles').locator('#interests ul.tagit .tagit-label');
+    }
+
+    /**
+     * The words offered while typing an interest (the jQuery UI autocomplete
+     * menu tag-it opens under the box; Rule 8d).
+     */
+    interestSuggestions() {
+        return this.page.locator('ul.tagit-autocomplete .ui-menu-item-wrapper');
+    }
+
+    /** Type into the interests box without ending the word (the suggestions open). */
+    async typeInterest(text) {
+        const input = this.interestsInput();
+        await input.click();
+        await input.pressSequentially(text);
     }
 
     /**
@@ -456,6 +525,15 @@ exports.ProfilePage = class ProfilePage extends BasePage {
         await uploaded;
         await reloaded;
         await this.expectOpen('public');
+    }
+
+    /**
+     * Choose a file and wait for nothing: the refusal paths (Rule 9a), where
+     * the caller reads `uploaderError()`, the browser alert it registered a
+     * handler for, and the absence of a reload.
+     */
+    async chooseImageFile(filePath) {
+        await this.imageFileInput().setInputFiles(filePath);
     }
 
     /** Press "Delete" under the image; the page reloads on the Public tab. */

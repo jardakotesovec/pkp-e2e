@@ -30,9 +30,21 @@ class UsersAccessPage {
         this.usersTable = page.getByRole('table', {name: /Current Users \(\d+\)/});
     }
 
-    async goto() {
-        await this.page.goto(`/index.php/${this.contextPath}/management/settings/access`);
-        await expect(this.inviteButton).toBeVisible();
+    /**
+     * Open the screen; with a `locale` the address names it
+     * (`/{context}/{locale}/management/settings/access`), the page's
+     * buttons are translated (or raw keys, U03 screen-notes) and the search
+     * box is the landmark instead. Opening it in another language flips the
+     * session's language for every later screen.
+     */
+    async goto({locale = null} = {}) {
+        const localePart = locale ? `/${locale}` : '';
+        await this.page.goto(`/index.php/${this.contextPath}${localePart}/management/settings/access`);
+        if (locale) {
+            await expect(this.page.getByRole('searchbox').first()).toBeVisible({timeout: 30_000});
+        } else {
+            await expect(this.inviteButton).toBeVisible();
+        }
     }
 
     /** The invitations-table heading carries the live row count. */

@@ -98,7 +98,7 @@ never reach the screen. <sup>j</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Profile Image" | no | An upload area ("Drag and drop a file here to begin upload", button "Upload File"); the file picker offers .jpg, .jpeg, .png and .gif, and nothing on screen names the accepted types. A .jpg or .png is shrunk and cropped to 150 × 150 pixels by the browser before sending; a refused file is announced in the upload area and in a browser alert (Rule 9a). Once an image exists, a "Delete" button sits under it (Rule 9b) <sup>f</sup> |
+| "Profile Image" | no | An upload area ("Drag and drop a file here to begin upload", button "Upload File"); the file picker offers .jpg, .jpeg, .png and .gif, and nothing on screen names the accepted types. A .jpg or .png is shrunk and cropped to 150 × 150 pixels by the browser before sending. A file whose name ends in anything else is refused by the upload area itself, with "File extension error." and nothing sent; a file the server refuses is announced in the upload area and in a browser alert (Rule 9a). Once an image exists, a "Delete" button sits under it (Rule 9b) <sup>f</sup> |
 | "Bio Statement (e.g., department and rank)" (multilingual, rich text) | no | Free text; shown to readers on a published item's page (Rule 9d) <sup>f</sup> |
 | "Homepage URL" | no | Must be a full web address including "http://" or "https://", else "Please enter a valid URL." under the box and nothing is sent; that sentence stays after the corrected address is saved [A15](#a15). Up to 255 characters <sup>f</sup> |
 
@@ -305,8 +305,12 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
      not be uploaded or revised.", shown inside the upload area (where it
      stays until the next upload or reload) and as a browser alert box that
      has to be dismissed, with no page reload; the image the account already
-     had is gone on the next reload ⚠ [A2](#a2). A file that is not an image
-     is refused the same way, and the existing image survives.
+     had is gone on the next reload ⚠ [A2](#a2). A file whose name does not
+     end in .jpg, .jpeg, .png or .gif (a .txt, say) never leaves the browser:
+     the upload area itself shows "File extension error.", with no alert and
+     no reload. A file with an image's name that is not an image is sent and
+     refused the same way as the oversized .gif, and the existing image
+     survives.
    - 9b. **Deleting the image.** "Delete" removes the image at once, with no
      confirmation, and reloads the page on the Public tab without the
      button; the bio statement and homepage stay.
@@ -540,137 +544,453 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
 
 ## Canonical scenarios
 
-Scenarios 2–9 change an account, so each runs as a throwaway account on a
-scratch journal, never as a ready account; scenarios 1 and 10, which only
-look, use a ready account on the seeded journal. Read an email in the
-mailbox of the address it was sent to. The ready accounts and their
-passwords, the mail catcher's address and the tooling recipe are in the
-footnote. <sup>s</sup>
+Scenarios 2–9, 11 and 12 change an account, so each runs as a throwaway
+account on a scratch journal (scenario 6 on two), never as a ready account;
+scenarios 1 and 10, which leave the account as they found it, use ready
+accounts on the seeded journal. Read an email in the mailbox of the address it was sent to. The
+ready accounts and their passwords, the mail catcher's address and the
+tooling recipe are in the footnote. <sup>s</sup>
 
-1. **Reach the profile and its tabs** — Author, signed in on the journal:
-   open the top-right user menu and press "Edit Profile". A page headed
-   "Profile" opens on the "Identity" tab, showing the username as plain text
-   and the "Given Name" and "Family Name" boxes filled with the account's
-   names. Press each tab in turn: "Contact", "Roles", "Public", "Password",
-   "Notifications", "API Key" each open with a "Save" button (the API Key tab
-   with its own button instead), and every tab ends with the privacy
-   sentence. Copy the page's address from the browser's address bar, sign
-   out, and paste that address back into the address bar: the Login page
-   appears, and signing in continues to the Profile page.
-2. **Rename yourself and change your initials** — Author: on "Identity",
-   clear "Given Name" and press "Save". "This field is required." appears
-   under the box and nothing is saved. Fill the name back in, set "Preferred
-   Public Name" to a new display name, type two lowercase letters into
-   "Preferred Avatar Initials" (they turn into capitals as you type; a third
-   letter is not accepted) and save. "Your changes have been saved."
-   appears inside the tab, and nothing at the top right. Reload the page:
-   the top-right avatar shows the two capitals,
-   and the top bar still shows the username. Signed in as the Journal
-   Manager (a second browser is easiest), open the Users & Roles screen,
-   "Users" tab: the account is listed under the preferred public name. Back
-   as the Author, clear "Preferred Public Name" and "Preferred Avatar
-   Initials" and save again: after a reload the avatar returns to the
-   name's initials.
-3. **Update contact details** — Author: on "Contact", set "Country" to the
-   blank entry, change "Phone", and save: "This field is required." appears
-   under "Country" and nothing is saved. Choose a country, change "Phone"
-   and "Affiliation", and save: "Your changes have been saved.", and
-   reopening the tab shows the new values. Type the email address of another
-   existing account (any ready account from the footnote) into "Email",
-   change "Phone" again, and save: "The selected email address is already in
-   use by another user." appears at the top right and as the text of the
-   box's label. Press another tab: it opens at once, with no question about
-   unsaved changes. Press "Contact" again: the address is unchanged and the
-   phone change is lost.
-4. **Change the email address by confirming the emailed link** — Author: on
-   "Contact", enter a fresh throwaway address and save. The tab now reads
-   "You have requested a change of your email to "{new}"…" with a "Cancel"
-   button and the "Email" box is read-only, still showing the old address;
-   a second browser signed in as the same account keeps working. The
-   mailbox of the account's old address now holds a message "Confirm account
-   contact email change request", from the account holder's own name, and
-   the new address receives nothing ⚠ [A8](#a8); the message names the new
-   address. In the browser that is still signed in, open the message's
-   "confirm" link. The browser lands on the profile's "Contact" tab with
-   "Email" editable and showing the new address. Sign out; on the Login page
-   enter the new address in "Username or Email" with the unchanged password:
-   it works. Sign out and try the old address the same way: it is refused.
-5. **Cancel, and reject, an email change** — Author: request a change to a
-   throwaway address as in scenario 4, then press the tab's "Cancel". "Your
-   changes have been saved." appears inside the tab, the notice disappears
-   and "Email" shows the old address, editable. Still signed in, open the "confirm" link
-   of the message that arrived: the "Invitation Unavailable" page. Request
-   another change (a second message arrives), and this time open the new
-   message's "reject" link, still signed in: the "Decline Invitation" page;
-   press "Confirm Decline Invitation". The browser lands on the "Contact"
-   tab with the old address in force and "Your changes have been saved." at
-   the top right, and the "confirm" link of that second message now also
-   shows "Invitation Unavailable".
-6. **Take a role and give it up** — a Reader who holds no other role: on
-   "Roles", under the heading "Roles",
-   the boxes offered on a journal are "Reader" (ticked), "Author" and
-   "Reviewer"; on a press they are "Reader", "Author", "Chapter Author" and
-   "External Reviewer" [OMP1](#omp1); on a preprint server "Reader" and
-   "Author" only [OPS1](#ops1). (That is the set of a journal whose role
-   settings nobody has changed; see *Settings*.) No box for any editorial
-   role exists, and the journal is not named. Below the boxes a closed fold
-   reads "Register with other journals" on a journal, "Register with other
-   presses" on a press and "Register with other servers" on a preprint
-   server. Tick "Author" and save: "Your changes have been saved.". Reload:
-   "Author" stays ticked, and on the Journal Manager's Users & Roles screen
-   ("Users" tab) the account is now listed with the Reader and Author roles.
-   Untick "Author" and save: the Author role is gone from that list. On a
-   journal or press, add two "Reviewing interests" (Enter after the first, a
-   comma after the second) and save: both are listed on reopening; on a
-   preprint server the box does not exist and the tab ends after the fold.
-7. **Set a profile image, then remove it** — Author: on "Public", choose a
-   .png larger than 150 × 150 in the upload area. The page reloads at once
-   on the "Public" tab with a "Delete" button under "Profile Image". Enter a
-   bio statement and a homepage without "http://" and save: "Please enter a
-   valid URL." appears under "Homepage URL" and the bio stays in its box;
-   correct it and save: "Your changes have been saved." at the top right,
-   while "Please enter a valid URL." is still under the box [A15](#a15) (a
-   reload clears it). Press "Delete": the page reloads with no "Delete"
-   button, and the bio statement and homepage are still there.
-8. **Change the password** — Author, signed in in two browsers. A *valid new
-   password* here is one at least as long as the hint under "New password"
-   says (6 characters on a default install) and no longer than 32, different
-   from the current password, typed the same in both new-password boxes. On
-   "Password", enter a wrong current password and a valid new password
-   twice, and save: the notice "Errors occurred processing this form" with
-   "The current password you entered was incorrect." and the three boxes
-   emptied. Enter the right current password with two different new
-   passwords: "The passwords do not match." in the notice and again under
-   "New password". Enter the current password as the new one twice: "Your
-   new password is the same as your old password.". Enter a valid new
-   password twice and save: "Your changes have been saved." at the top
-   right, while the previous attempt's error notice is still above the form
-   [A11](#a11); the password has changed all the same. In the other browser,
-   load the page afresh (a full reload, not a tab press): it lands on the
-   Login page. Sign out and sign in with the new password: it works; the old
-   one is refused.
-9. **Create and delete an API key** — Author: on "API Key", the box reads
-   "None" beside a "Create API Key" button (a tab with no button at all
-   means the installation has no API secret, Rule 12d, and the scenario
-   cannot run there). Press it: a long key replaces "None", the
-   button now reads "Delete", the note warns that deleting revokes access,
-   and "Your changes have been saved." shows inside the tab. Reload the
-   tab: the same key is shown. Press "Delete", press Cancel in the dialog:
-   the key stays. Press "Delete" again and OK: the box reads "None",
-   "Create API Key" is back, and the saved message shows inside the tab
-   again.
-10. **The Notifications tab is a form of paired boxes** — Journal Manager: open
-    "Notifications". The tab opens with the sentence quoted in Rule 11
-    ("Select the system events that you wish to be notified about. …"),
-    followed by the groups "Public Announcements", "Submission Events",
-    "Reviewing Events" and "Editors" (the same four groups on a journal, a
-    press and a preprint server; only the rows inside them differ), each row
-    with "Enable these types of notifications." and "Do not send me an email
-    for these types of notifications.", and a "Save" button. Untick one "Enable…" box: its
-    email box greys out. Press "Save": "Your changes have been saved.".
-    Reopen the tab: the box is still unticked. Tick it again and save to
-    restore. (What each box changes is tested in
-    [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md).)
+1. **Reach the profile and its tabs**
+
+   Given: an Author, signed in on the seeded journal, on an installation
+   with an API secret configured (Rule 12d); a Reader, signed in on the
+   same journal in a second browser. <sup>s</sup>
+
+   - **"Edit Profile" in the user menu**: open the top-right user menu and
+     press "Edit Profile": a page headed "Profile" opens on the "Identity"
+     tab, showing the username as plain text and the "Given Name" and
+     "Family Name" boxes filled with the account's names.
+   - **The seven tabs**: press each tab in turn: "Contact", "Roles",
+     "Public", "Password", "Notifications" and "API Key" each open with a
+     "Save" button (the API Key tab with its own button instead), and every
+     tab ends with the sentence "Your data is stored in accordance with our
+     privacy statement.".
+   - **The privacy link**: press "privacy statement" on any tab: the
+     journal's "Privacy Statement" page opens in a new browser tab
+     (Rule 14).
+   - **A tab named in the address**: copy the page's address from the
+     browser's address bar. Open it with "/contact" added after "profile":
+     the page opens on "Contact". Open it with "/nowhere" added instead: the
+     page opens on "Identity" without comment (Rule 2).
+   - **Signed out at the profile address**: sign out and open the copied
+     address: the Login page appears, and signing in continues to the
+     Profile page.
+   - **Control**: the Reader, in the second browser, opens the same copied
+     address: the "Identity" tab shows the Reader's own username, never the
+     Author's; no address opens someone else's profile (*Actors &
+     permissions*).
+
+2. **Rename yourself and change your initials**
+
+   Given: an Author, signed in on a scratch journal with French as a
+   second language, on the profile's "Identity" tab; the journal's Journal
+   Manager signed in in a second browser. <sup>s</sup>
+
+   - **"Given Name" emptied**: clear "Given Name" and press "Save": "This
+     field is required." appears under the box and nothing is saved.
+   - **A preferred name and initials**: fill the name back in, set
+     "Preferred Public Name" to "Dr. Pat Profile", type "zq" into
+     "Preferred Avatar Initials" (the letters turn into capitals as you
+     type; a third letter is not accepted) and save: "Your changes have
+     been saved." appears inside the tab, and nothing at the top right.
+   - **The avatar after a reload**: reload the page: the top-right avatar
+     shows "ZQ", and the top bar still shows the username.
+   - **Users & Roles**: the Journal Manager opens the Users & Roles screen,
+     "Users" tab: the account is listed under "Dr. Pat Profile".
+   - **The same list in French**: the Journal Manager opens the same list
+     with "/fr_CA" in place of "/en" in its address: the account is listed
+     by its given and family name; a preferred name typed in English does
+     not carry to a screen shown in French (Rule 4).
+   - **The site-level address**: the Author types the site-level profile
+     address (the journal's profile address with "index" in place of the
+     journal's path) into the address bar: the browser lands on the
+     journal's own profile page, the account holding a role in exactly one
+     journal (Rule 3).
+   - **Back to the name's initials**: on "Identity", clear "Preferred Public
+     Name" and "Preferred Avatar Initials" and save again: after a reload
+     the avatar returns to the name's initials. Clear "Family Name" as well
+     and save: after a reload the avatar shows the given name's first
+     letter alone (Rule 5).
+   - **Control**: after each reload the top bar showed the username beside
+     the avatar, never "Dr. Pat Profile", and the journal's public homepage
+     shows the username in its header as well (Rule 4).
+
+3. **Update contact details**
+
+   Given: an Author, signed in on a scratch journal of a site with two
+   languages, English and French, on the profile's "Contact" tab, with the
+   email address of another existing account at hand. <sup>s</sup>
+
+   - **"Country" left blank**: set "Country" to the blank entry, set "Phone"
+     to "555 0100", and save: "This field is required." appears under
+     "Country" and nothing is saved.
+   - **Another tab, the change unsent**: press "Identity": the browser's
+     own dialog asks "The data on this form has changed. Do you wish to
+     continue without saving?". Press Cancel: the "Contact" tab stays as it
+     is, "555 0100" still typed. Press "Identity" again and OK: "Identity"
+     opens, and reopening "Contact" shows "Phone" as it was before
+     (Rule 2).
+   - **A valid save**: choose "Canada" in "Country", set "Phone" to
+     "555 0100" and "Affiliation" to "Contact Institute", and save: "Your
+     changes have been saved." at the top right, and reopening the tab
+     shows the new values.
+   - **"Working Languages"**: the block lists two boxes, one per site
+     language; tick the second and save: "Your changes have been saved.";
+     reopening the tab shows it ticked, and the site is still shown in the
+     same language as before (Rule 7).
+   - **Another account's address**: type the other account's email address
+     into "Email", set "Phone" to "555 0199", and save: "The selected email
+     address is already in use by another user." appears at the top right
+     and as the text of the box's label.
+   - **Another tab after the refused save**: press "Identity": it opens at
+     once, with no question about unsaved changes [A17](#a17).
+   - **Control**: press "Contact" again: the address is unchanged and
+     "Phone" reads "555 0100"; the refused save saved none of the tab's
+     other changes (*Fields & validation*, "Email").
+
+4. **Change the email address by confirming the emailed link**
+
+   Given: an Author, signed in on a scratch journal in two browsers, on
+   the profile's "Contact" tab in the first, with a fresh throwaway address
+   at hand. <sup>s</sup>
+
+   - **The request**: type the throwaway address into "Email" and save: the
+     tab now reads "You have requested a change of your email to "{new
+     address}". We have already sent you an email with directions on how to
+     validate the changed email." with a "Cancel" button, and the "Email"
+     box is read-only, still showing the old address.
+   - **The second browser**: in the second browser, signed in as the same
+     account, press "Identity": the tab opens with the account's names; the
+     session carries on unaffected (Rule 6a).
+   - **The mailbox**: the mailbox of the account's old address now holds a
+     message "Confirm account contact email change request", from the
+     account holder's own name, naming the new address; the new address
+     receives nothing [A8](#a8).
+   - **The "confirm" link, signed in**: in the first browser, open the
+     message's "confirm" link: the browser lands on the profile's "Contact"
+     tab with "Email" editable and showing the new address, and "Your
+     changes have been saved." at the top right (Rule 6c).
+   - **No further email**: neither mailbox receives a further message
+     (*Side effects*).
+   - **Signing in with the new address**: sign out; on the Login page enter
+     the new address in "Username or Email" with the unchanged password: it
+     works.
+   - **Control**: sign out and try the old address the same way: it is
+     refused; the old address no longer identifies the account (Rule 6c).
+
+5. **Cancel, and reject, an email change**
+
+   Given: an Author, signed in on a scratch journal, on the profile's
+   "Contact" tab, with three fresh throwaway addresses at hand; a second
+   browser, signed out. <sup>s</sup>
+
+   - **"Cancel" on the tab**: request a change to the first throwaway
+     address as in scenario 4, then press the tab's "Cancel": "Your changes
+     have been saved." appears inside the tab, the notice disappears and
+     "Email" shows the old address, editable.
+   - **The cancelled message's "confirm" link**: still signed in, open the
+     "confirm" link of the message that arrived: the "Invitation
+     Unavailable" page.
+   - **The "reject" link, signed in**: request a change to the second
+     throwaway address (a second message arrives) and open the new
+     message's "reject" link, still signed in: the "Decline Invitation"
+     page asking "Are you sure you want to decline this invitation? Confirm
+     the decline by clicking the button below.". Press "Confirm Decline
+     Invitation": the browser lands on the "Contact" tab with the old
+     address in force and "Your changes have been saved." at the top right.
+   - **The rejected message's "confirm" link**: the "confirm" link of that
+     second message now also shows "Invitation Unavailable".
+   - **The "confirm" link, signed out**: request a change to the third
+     throwaway address (a third message arrives) and open its "confirm"
+     link in the signed-out second browser: the Login page appears first;
+     sign in with the username and the unchanged password: the "Contact"
+     tab shows the third address, editable, the account having switched to
+     it before the tab appeared (Rule 6c).
+   - **Control**: the mailbox of the old address holds the three request
+     messages and nothing else: "Cancel" sent no email (Rule 6e).
+
+6. **Take a role and give it up**
+
+   Given: a Reader, holding no other role, signed in on a scratch journal,
+   on the profile's "Roles" tab, the same account a Reader of a second
+   scratch journal as well; the journals' Journal Manager signed in in a
+   second browser. <sup>s</sup>
+
+   - **The boxes under "Roles"**: under the heading "Roles" the boxes
+     offered on a journal are "Reader" (ticked), "Author" and "Reviewer";
+     on a press "Reader", "Author", "Chapter Author" and "External
+     Reviewer" [OMP1](#omp1); on a preprint server "Reader" and "Author"
+     only [OPS1](#ops1) (a journal with its default role settings; see
+     *Settings*). No box for any editorial role exists, and the journal is
+     not named.
+   - **The closed fold**: below the boxes a closed fold reads "Register
+     with other journals" on a journal, "Register with other presses" on a
+     press and "Register with other servers" on a preprint server.
+   - **Taking "Author"**: tick "Author" and save: "Your changes have been
+     saved.". Reload: "Author" stays ticked, on the Journal Manager's Users
+     & Roles screen ("Users" tab) the account is now listed with the Reader
+     and Author roles, and the journal's public "Editorial Masthead" page
+     does not list the account (*Side effects*).
+   - **Giving "Author" up**: untick "Author" and save: the Author role is
+     gone from that list, and the "Editorial Masthead" page still does not
+     list the account.
+   - **A role in the other journal**: press "Register with other journals"
+     (on a press "Register with other presses", on a preprint server
+     "Register with other servers"): the link now reads "Hide other
+     journals" / "Hide other presses" / "Hide other servers", and the list
+     names the second journal with its own boxes, "Reader" ticked. Tick
+     "Author" under it and save: on the second journal's Users & Roles
+     screen ("Users" tab) the account is listed with the Reader and Author
+     roles (Rule 8c).
+   - **"Reviewing interests"**: on a journal or press, add two
+     "Reviewing interests", "glaciology" (press Enter after it) and
+     "ethnobotany" (a comma after it), and save: both are listed on
+     reopening. On a preprint server the box does not exist and the tab
+     ends after the fold [OPS1](#ops1).
+   - **An interest suggested to another user**: on a journal or press, the
+     Journal Manager, on their own profile's "Roles" tab, types "glac" into
+     "Reviewing interests": "glaciology" is suggested (Rule 8d).
+   - **The site-level Roles tab**: the Reader types the site-level profile
+     address (as in scenario 2) into the address bar: the account holding a
+     role in two journals, the page stays at the site level, and its "Roles"
+     tab lists both journals inline, each under its own name, with no
+     "Register with other journals" link (Rule 3).
+   - **The site-level Notifications tab**: on the site-level page's
+     "Notifications", untick the first row's "Enable these types of
+     notifications." box and save: "Your changes have been saved.". The
+     first scratch journal's own profile, reopened on "Notifications",
+     shows that box still ticked: the site-level choices are kept apart
+     from the journal's (Rule 11).
+   - **Control**: the Journal Manager's own "Roles" tab shows the same
+     boxes, with no "Journal Manager" box among them: every user sees the
+     same boxes, only the ticks differ (Rule 8a).
+
+7. **Set a profile image, then remove it**
+
+   Given: an Author, signed in on a scratch journal, on the profile's
+   "Public" tab, with a .png larger than 150 × 150 pixels, a plain-text
+   file, and a copy of that text file whose name ends in ".png" at hand.
+   <sup>s</sup>
+
+   - **A .png upload**: choose the .png in the upload area: the page
+     reloads at once on the "Public" tab with a "Delete" button under
+     "Profile Image".
+   - **A plain-text file under its own name**: drop the .txt file into the
+     upload area: "File extension error." appears inside the upload area,
+     with no browser alert and no page reload, and the "Delete" button is
+     still there.
+   - **A text file named as an image**: drop the copy named ".png": "The
+     file could not be uploaded or revised." appears inside the upload area
+     and as a browser alert box to dismiss, with no page reload. Reload the
+     page: the "Delete" button is still there; the existing image survives
+     (Rule 9a).
+   - **A homepage refused**: type "Profile bio." into "Bio Statement" and
+     "example.org/home" (without "http://") into "Homepage URL" and save:
+     "Please enter a valid URL." appears under "Homepage URL" and the bio
+     stays in its box.
+   - **The homepage corrected**: correct it to "https://example.org/home"
+     and save: "Your changes have been saved." at the top right, while
+     "Please enter a valid URL." is still under the box [A15](#a15) (a
+     reload clears it).
+   - **"Delete"**: press "Delete": the page reloads on the "Public" tab
+     with no "Delete" button.
+   - **Control**: after that reload "Profile bio." and
+     "https://example.org/home" are still in their boxes: "Delete" removed
+     the image alone (Rule 9b).
+
+8. **Change the password**
+
+   Given: an Author, signed in on a scratch journal in two browsers, on the
+   profile's "Password" tab in the first. <sup>s</sup>
+
+   - **A wrong current password**: type "wrongpass" into "Current
+     password" and "newpass99" (at least as long as the hint under "New
+     password" says, 6 on a default install, and not the current password)
+     into both new-password boxes, and save: the
+     notice "Errors occurred processing this form" with "The current
+     password you entered was incorrect.", and the three boxes emptied.
+   - **Two different new passwords**: type the right current password,
+     "newpass99" into "New password" and "newpass98" into "Repeat new
+     password", and save: "The passwords do not match." in the notice and
+     again under "New password".
+   - **The current password as the new one**: type the current password
+     into all three boxes and save: "Your new password is the same as your
+     old password.".
+   - **A new password under the minimum**: type the right current password
+     and "np1" into both new-password boxes, and save: "The password must
+     be at least {N} characters." in the notice and under "New password",
+     in place of the hint (Rule 10a).
+   - **A valid change**: type the right current password and "newpass99"
+     into both new-password boxes, and save: "Your changes have been
+     saved." at the top right, while the previous attempt's error notice is
+     still above the form [A11](#a11); the password has changed all the
+     same.
+   - **The other browser**: in the other browser, load the page afresh (a
+     full reload, not a tab press): it lands on the Login page.
+   - **The mailbox**: the account's mailbox has received nothing: no email
+     is sent on a password change (*Side effects*).
+   - **Signing in with the new password**: sign out and sign in with
+     "newpass99": it works.
+   - **Control**: sign out and sign in with the old password: it is refused
+     (Rule 10b).
+
+9. **Create and delete an API key**
+
+   Given: an Author, signed in on a scratch journal, on the profile's "API
+   Key" tab, on an installation with an API secret configured (without one
+   the tab has no button, Rule 12d, and the scenario cannot run).
+   <sup>s</sup>
+
+   - **No key**: the box reads "None" beside a "Create API Key" button with
+     the note "Generating a new API key will invalidate any existing key
+     for this user."
+   - **"Create API Key"**: press it: a long key replaces "None", the button
+     now reads "Delete", the note now reads "Deleting a key will revoke
+     access to any application that uses it.", and "Your changes have been
+     saved." shows inside the tab.
+   - **The tab reloaded**: reload the tab: the same key is shown.
+   - **"Delete", then Cancel**: press "Delete", then Cancel in the browser's
+     dialog "Are you sure you want to delete this API key?": the key stays.
+   - **"Delete", then OK**: press "Delete" again and OK: the box reads
+     "None", "Create API Key" is back, and the saved message shows inside
+     the tab again.
+   - **A second key**: press "Create API Key" again: the new key differs
+     from the deleted one (Rule 12b).
+   - **Control**: throughout, no message appeared at the top right of the
+     page: the API Key tab answers inside the tab (Rule 2).
+
+10. **The Notifications tab is a form of paired boxes**
+
+    Given: a Journal Manager, signed in on the seeded journal, on the
+    profile's "Notifications" tab. <sup>s</sup>
+
+    - **The description and the groups**: the tab opens with "Select the
+      system events that you wish to be notified about. Unchecking an item
+      will prevent notifications of the event from showing up in the system
+      and also from being emailed to you. Checked events will appear in the
+      system and you have an extra option to receive or not the same
+      notification by email.", followed by the groups "Public
+      Announcements", "Submission Events", "Reviewing Events" and "Editors"
+      (the same four groups on a journal, a press and a preprint server;
+      only the rows inside them differ), each row with "Enable these types
+      of notifications." and "Do not send me an email for these types of
+      notifications.", and a "Save" button.
+    - **An "Enable…" box unticked**: untick the first row's "Enable these
+      types of notifications." box: its email box greys out. Press "Save":
+      "Your changes have been saved.". Reopen the tab: the box is still
+      unticked. Tick it again and save to restore. (What each box changes
+      is tested in
+      [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md).)
+    - **"Save" on the Roles tab with nothing changed**: on "Roles", press
+      "Save" without touching a box: "Your changes have been saved.";
+      reopening the tab shows the ticks as they were, and on the Users &
+      Roles screen ("Users" tab) the account's row still reads "Journal
+      manager" (on a press "Press manager", on a preprint server "Preprint
+      Server manager"): a role the tab never shows is untouched by Save
+      (Rule 8b).
+    - **Control**: reopen "Notifications" after the restore: the box is
+      ticked and its email box is no longer greyed out; the pairing is
+      applied again when the tab is reopened (Rule 11).
+
+11. **A profile edited while impersonating is the impersonated user's**
+
+    Given: a Journal Manager, signed in on a scratch journal and
+    impersonating a throwaway Author of that journal through Login As
+    (the action belongs to
+    [Login & sessions](U01-login-and-sessions.md#who-may-impersonate)); the
+    Author signed in in a second browser. <sup>s</sup>
+
+    - **"Edit Profile" while impersonating**: open the top-right user menu
+      and press "Edit Profile": the page headed "Profile" opens on
+      "Identity", showing the Author's username as plain text (*Actors &
+      permissions*).
+    - **The Author's Contact tab**: on "Contact", choose "Canada" in
+      "Country", set "Affiliation" to "Impersonated Institute" and save:
+      "Your changes have been saved." at the top right.
+    - **The Author, in the second browser**: opens "Edit Profile" ›
+      "Contact": "Affiliation" reads "Impersonated Institute"; the change
+      made while impersonating is the Author's.
+    - **Control**: the Journal Manager, back in their own account through
+      "Logout as {username}" (*Login & sessions*), opens "Edit Profile" ›
+      "Contact": their own "Affiliation" is unchanged.
+
+12. **The profile is copied into a new submission's first contributor**
+
+    Given: an Author, signed in on a scratch journal with ORCID enabled,
+    whose account holds a verified ORCID iD, on the profile's "Identity"
+    tab. <sup>s</sup>
+
+    - **"Preferred Public Name"**: set "Preferred Public Name" to "Dr. Pat
+      Profile" and save: "Your changes have been saved." inside the tab.
+    - **The Contact tab**: on "Contact", choose "Canada" in "Country", set
+      "Affiliation" to "Profile Institute" and save: "Your changes have
+      been saved." at the top right.
+    - **The Public tab**: on "Public", type "Profile bio." into "Bio
+      Statement" and "https://example.org/profile" into "Homepage URL" and
+      save: "Your changes have been saved." at the top right.
+    - **A new submission's first contributor**: start a new submission
+      (the *Submission wizard*) and, on its Contributors step, open the
+      first contributor's "Edit" dialog: it carries the account's email,
+      the country "Canada", the affiliation "Profile Institute", the bio
+      statement "Profile bio." and the homepage
+      "https://example.org/profile" (Rule 7).
+    - **The name and the ORCID**: the contributor is named by the given and
+      family name, its own preferred-name box empty although the profile's
+      "Preferred Public Name" reads "Dr. Pat Profile" [A13](#a13), and the
+      dialog offers "Request verification" although the profile's ORCID iD
+      is verified [A16](#a16).
+    - **Control**: back on the profile's "Contact", set "Affiliation" to
+      "Later Institute" and save; the submission's first contributor,
+      reopened, still reads "Profile Institute": after the copy the two are
+      independent (*Cross-feature interactions*).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — variants:
+  - no submission or activity-log entry written by this page (*Side effects*): the log is a submission's, and reading its silence needs a submission and a positive control for nothing this page does
+- **Nothing new to test**:
+  - "View Profile" in the menu under the username on the journal's public pages (Rule 1; scenario 1's "Edit Profile" opens the same page)
+- **Register carries it**:
+  - A1 (the tab named in a site-level address lost on the forward; Rule 3)
+  - A2 (an oversized .gif refused and the existing image wiped; Rule 9a)
+  - A3 (a site-level request's "reject" link answering a blank server error; Rule 6d)
+  - A4 (a journal closed to registrations leaving an empty section and listed name-only; Rules 8a and 8c)
+  - A7 (the password boxes stopping at 32 characters; *Fields & validation*)
+  - A10 (a site-level request's message signing off "Array"; *Side effects*)
+  - A11 (the stale error notice beside the saved message; Rule 10b; scenario 8 marks it)
+  - A12 (the Password tab's "Cancel" doing nothing; Rule 10c)
+  - A14 (the site-level privacy link opening "404 Not Found"; Rule 14)
+  - A15 (the refused homepage's sentence outliving the corrected save; Rule 9c; scenario 7 marks it)
+  - A17 (the values typed before a refused Contact save dropped on the next tab, unasked; Rule 2; scenario 3 marks it)
+  - OPS2 (the "Change Email Address Invitation" template missing from a preprint server's list; *Side effects*)
+  - A5 (the "role scheduled to begin" banner shown wherever the user has no role; Rule 13)
+  - A6 (unticking a box ending a role a manager granted, without warning; Rule 8b)
+  - A8 (the confirmation message going to the current address, not the new one; Rule 6b; scenario 4 marks it)
+  - A9 (the profile image and homepage shown on no reader-facing page; Rule 9d)
+  - A13 (a new submission's first contributor getting the given-plus-family name, not the preferred one; Rule 4; scenario 12 marks it)
+  - A16 (a verified ORCID not reaching the first contributor; Rule 7; scenario 12 marks it)
+- **No seed**:
+  - no API secret configured: the API Key tab without its button (Rule 12d; `api_key_secret`)
+  - a Site Administrator on a site with a single journal at the site-level address (Rule 3)
+  - a request lapsing after 3 days (Rule 6f; `expiration_days`)
+  - a site with a single language hiding "Working Languages" (Rule 7)
+  - the compromised-password check on: a leaked password refused (Rule 10a; *Settings* "Site password policy")
+  - a non-default "Minimum password length (characters)": the hint's number (*Settings* "Site password policy")
+  - applications using a deleted key losing access (*Side effects*)
+  - audit lines in the server log with `log_audit` on (*Side effects*)
+  - the "Your role is scheduled to begin on {date}" banner (Rule 13): a dated, accepted role invitation
+  - "User Registration" closed: no boxes anywhere on the Roles tab (*Settings*, Rule 8a): what is missing is a passthrough for the Site Access Options choice on `POST scenarios/context`; a Journal Manager's choice would be set-up for the Reader's read, not a step
+  - "Allow user self-registration" off for a role: its box gone (*Settings*, Rule 8a): the same missing per-role passthrough (a `userGroups[]` key)
+  - the journal's form languages deciding the multilingual boxes, and the site's languages the site-level ones (*Settings* "Languages"): a `supportedFormLocales` passthrough
+- **Owned by another feature**:
+  - "Affiliation" beside a team member's name on the "Editorial Masthead" (Rule 7; *Journal identity & about pages*)
+  - the bio statement under "Author Biography" on a published item's page (Rule 9d; *Article landing page & reading*)
+  - an outstanding password-reset link dying with a password change (Rule 10b; *Login & sessions*)
+  - the ORCID block on the Identity tab (*Settings*; *ORCID integration*)
+  - the "Statistics report summary." row disappearing when the editorial-report email is off (*Settings*; *Notifications center & email preferences*)
 
 ## Findings register
 
@@ -1336,7 +1656,16 @@ upload, but the picture again did not render on the test installs, so
 whether it displays is settled only on an install where the image address
 answers; after `example.org` was refused and `https://example.org` saved,
 `label.error` "Please enter a valid URL." stayed visible under the box
-beside the toast, through further typing, until a reload (A15).
+beside the toast, through further typing, until a reload (A15). Seen in the
+2026-09-13 suite runs, all three apps (Rule 9a, scenario 7): the plupload
+filter (`extensions: "jpg,jpeg,png,gif"`, the same list as the input's
+`accept`) refused a text fixture under its `.txt` name inside the browser,
+"File extension error." in `#plupload .pkpUploaderError` with no
+`uploadProfileImage` request, no dialog and no page load, while the same
+bytes under a `.png` name were sent once and answered "The file could not
+be uploaded or revised." in the area and as an alert; "Delete" was still
+present after a reload in both cases, so the earlier probes' "a file that is
+not an image" was the `.png`-named case only.
 
 <a id="fn-g"></a>
 **g** — `PKP\user\form\ChangePasswordForm` (`user/changePassword.tpl`,
@@ -1531,33 +1860,89 @@ g).
 read-only, so every mutating scenario runs as a **scratch user** in a
 **scratch context** (`POST scenarios/context` with `users[]`, scenarios.md;
 throwaway users exist only there, and the scratch context arrives open for
-registration with every default role). Scenario 1 `author.alex` on
-`publicknowledge` (read-only). Scenarios 2, 3, 7, 9: a scratch author in the
-scratch context; scenario 3's "another account's address" is any roster
-address. Scenarios 4–5: a scratch author with a unique throwaway
-`@mail.test` address, mail observed in the test mail catcher scoped by that
-recipient (PRINCIPLES A8): the catcher is Mailpit, one shared instance at
-`MAILPIT_URL` (default `http://127.0.0.1:8025`, scenarios.md), so a message
-is found by its recipient address, never by position; "a second browser" =
-a second Playwright context signed in as the same scratch user. Scenario 6: a scratch user seeded with
-`roles: ['reader']`; the Users & Roles check as the scratch context's
-manager (`admin` is enrolled as one, seed-facts). Scenario 8: a scratch
-author in two browser contexts; never change a roster password. Scenario 10:
-`manager.maya` on `publicknowledge` (enrolled on all three apps; OPS seeds
-no editor), restoring the box afterwards. The 32-character cap (A7) is
-avoided by keeping scratch passwords short. Seed facts that bind these
-scenarios (2026-09-03): a scenario-seeded user has no Country, so every
-Contact save (scenarios 3–5) chooses one first; the fleets' scratch
-contexts all accept registrations, so the other-journal fold (scenario 6)
-is always present and long; `publicknowledge` has no published item, so a
-reader-facing check of the bio needs a scenario-published scratch
-submission; the site's "Check passwords against compromised password
-databases" box is unticked on the fleets, so the Password tab accepts
-`password1234`, and ticked it refuses `qwerty123456` there too (no outside
-service needed; 2026-09-04). A refused upload raises a browser alert, so a
-test of Rule 9a registers a dialog handler; the profile picture does not
-render on the test installs, so suites assert the "Delete" button, never
-the picture.
+registration with every default role, `admin` enrolled as its manager).
+Scenario 1: `author.alex` on `publicknowledge` (read-only), the tab-in-the-address
+reads at `{context}/user/profile/contact` and `{context}/user/profile/nowhere`,
+the privacy link opening `{context}/about/privacy` in a new page; the control
+is `reader.rosa` in a second browser context at the copied `user/profile`
+address. Scenarios 2, 3, 7, 9, 11, 12: a scratch author in the scratch
+context; the Users & Roles reads run as the scratch context's manager (`admin`
+or a scratch `manager`). Scenario 2's context is seeded
+`context.supportedLocales: ['en', 'fr_CA']` so the French listing's address
+(`{context}/fr_CA/management/settings/access`) works there (seed-facts,
+2026-09-06); its site-level read opens `index/user/profile` with no tab named
+(the forward lands on `{context}/user/profile`; A1's stray `?0=` arises only
+when a tab is named). Scenario 3's "another account's address" is any roster
+address; its "Working Languages" block shows two boxes on the fleets (site
+languages `en` and `fr_CA`), the second one ticked. Scenarios 4–5: a scratch
+author with unique throwaway `@mail.test` addresses, mail observed in the
+test mail catcher scoped by that recipient (PRINCIPLES A8): the catcher is
+Mailpit, one shared instance at `MAILPIT_URL` (default
+`http://127.0.0.1:8025`, scenarios.md), so a message is found by its
+recipient address, never by position; "a second browser" = a second
+Playwright context, signed in as the same scratch user in scenario 4 and
+signed out in scenario 5 (its Login page continues to the Contact tab after
+the sign-in; the sign-in uses the username). Scenario 5's control is
+`count()` of the old address's inbox = 3 after the third message is found.
+Scenario 6: a scratch user seeded `roles: ['reader']` in the first scratch
+context, then a second `POST scenarios/context` naming the same username with
+`roles: ['reader']`, which enrols it there too (seed-facts, 2026-09-04); the
+Users & Roles checks as each context's manager (`admin` is enrolled in both);
+the masthead is `{context}/about/editorialMasthead`, read for the absence
+of the user's name; the other-journal fold on the fleets lists every
+registration-open scratch context and is long, so the second journal is found
+by name; the interest words are shared across tests and the suggestion check
+asserts presence only; the site-level page is `index/user/profile` (the user
+holds two contexts, so no forward), its Notifications tab
+`index/user/profile/notificationSettings` and the journal-level read
+`{contextA}/user/profile/notificationSettings`, the first row's "Enable…" box
+restored afterwards. Scenario 7's .png is a fixture larger than 150 × 150;
+the two non-images are one text fixture set on the same file input twice,
+under its own `.txt` name (refused by the uploader's extension filter before
+any request) and under a `.png` name (sent, refused by the server); the
+server's refusal raises a browser alert, so the test registers a dialog
+handler, and the accepted .png's reload and that alert are the controls for
+"no reload" and "no alert" on the `.txt`; the profile picture
+does not render on the test installs, so suites assert the "Delete" button,
+never the picture (seed-facts). Scenario 8: a scratch author in two browser
+contexts; never change a roster password; the minimum is 6 on the fleets; the
+32-character cap (A7) is avoided by keeping scratch passwords short; the
+site's "Check passwords against compromised password databases" box is
+unticked on the fleets, so the Password tab accepts `password1234`, and
+ticked it refuses `qwerty123456` there too (no outside service needed;
+2026-09-04); the no-email read is `expectNone` scoped by the scratch address,
+bounded by a message the test itself triggers to that address afterwards (an
+email-change request, scenario 4's, whose message arrives). Scenario 9: the
+fleets' `config.test.inc.php` sets `api_key_secret`
+(`shared/playwright/make-test-config.js`), so the button is present.
+Scenario 10: `manager.maya` on `publicknowledge` (enrolled on all three apps;
+OPS seeds no editor), restoring the box afterwards; the Roles save with
+nothing changed is the only write, and Rule 8b says it changes nothing; the
+Users & Roles read expects the role as that screen prints it, "Journal
+manager" / "Press manager" / "Preprint Server manager" per app (each app's
+default manager group name, `default.groups.name.manager` in its
+`locale/en/default.po`; seen in the 2026-09-13 suite runs). Scenario 11: a scratch `manager` and a scratch
+`author` in `users[]`; the manager impersonates from Settings › Users &
+Roles › Users, the row menu's "Login As" and its dialog's OK, and returns
+through the user menu's "Logout as {username}" (U01's `LoginAsDialog` page
+object); the Author's read runs in a second browser context signed in as the
+scratch author. Scenario 12: a scratch context seeded
+`orcid: {enabled: true}` and a scratch author with `orcid` and
+`orcidIsVerified: true` (scenarios.md `users[]`); the submission is started
+on screen from My Submissions › "New Submission" so the wizard's own copy
+runs, its Contributors step read after the first "Continue"s, the draft
+reopened for the control from My Submissions › "Incomplete" on a journal and
+a press, and on a preprint server, which has no "Incomplete" view, from
+"Active submissions" (the row's "Complete submission" button; the *My
+Submissions* spec's OPS finding), the wizard starting again at "Upload
+Files" on every app; the contributor's
+"Edit" dialog is *Contributors & affiliations*' screen, read for the six
+copied values and for "Request verification" only. Seed facts that bind
+these scenarios (2026-09-03): a scenario-seeded user has no Country, so every
+Contact save (scenarios 3–5, 11, 12) chooses one first; the fleets' scratch
+contexts all accept registrations, so the other-journal fold (scenario 6) is
+always present; `publicknowledge` has no published item, so a reader-facing
+check of the bio needs a scenario-published scratch submission.
 
 <a id="fn-a1"></a>
 **f-a1** — `ProfileHandler::profile()`: with no context and exactly one

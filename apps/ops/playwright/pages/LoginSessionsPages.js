@@ -289,6 +289,25 @@ exports.LoginAsRefusalPage = class LoginAsRefusalPage extends BasePage {
 };
 
 /**
+ * Login As from a "Current Users" row of Users & Roles, confirmed with OK
+ * (U03 S11's given): the row's menu, "Login As", the dialog's OK, then the
+ * impersonated user's own landing (an Author's My Submissions). Returns the
+ * `login/signInAsUser/{id}` address the browser visited.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row
+ */
+exports.loginAsFromUsersRow = async function loginAsFromUsersRow(page, row) {
+    const usersTable = new exports.UsersRolesTable(page);
+    const dialog = new exports.LoginAsDialog(page);
+    await usersTable.rowAction(row, 'Login As');
+    await dialog.expectOpen();
+    const address = await dialog.ok();
+    await page.waitForURL(/\/dashboard\//, {waitUntil: 'commit', timeout: 30_000});
+    return address;
+};
+
+/**
  * A fresh, explicitly-anonymous context (never inherits cached storage
  * state; parallel lesson 8). Callers close it themselves.
  */

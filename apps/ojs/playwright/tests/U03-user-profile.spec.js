@@ -3,73 +3,44 @@
  * @file playwright/tests/U03-user-profile.spec.js
  *
  * User profile — OJS suite, one test per canonical scenario the spec runs on
- * OJS (scenarios 1–10; the spec lists no OJS-specific scenario).
+ * OJS (scenarios 1–12, all common; the spec lists no OJS-specific scenario).
  * Spec: docs/specs/U03-user-profile.md
  *
- * Deliberately NOT covered (one line per omission, citing the register ID or
- * rule):
- * - A1 🐞 (a site-level address naming a tab lands on Identity for a
- *   one-journal user): every test opens the journal-level page; the
- *   site-level profile of Rule 3 is not driven.
- * - A2 🐞 (a refused oversize .gif wipes the existing image): S7 uploads
- *   one accepted .png only; no refusal is driven.
- * - A3 🐞 / A10 🐞 (site-level email change: dead "reject" link, "Array"
- *   sign-off): site-level requests are not driven.
- * - A4 🐞 (a closed journal keeps an empty section on the Roles tab): the
- *   registration setting is not touched.
- * - A5 ❓ (the scheduled-role banner ignores which journal is open) and Rule
- *   13: a dated role invitation is the user-invitations feature's surface.
- * - A6 ❓ (a self-service box also drops a manager-granted role, locking an
- *   author out of My Submissions): S6 ticks and unticks a role the user
- *   took themselves and never asserts the lock-out.
- * - A7 🐞 (the Password tab's 32-character cap): scratch passwords stay
- *   short; the cap is asserted neither way.
- * - A8 ❓ (the confirmation goes to the old address): S4 reads the message
- *   where the app delivers it and asserts the new address received nothing
- *   only as the scenario states it; which mailbox should confirm is open.
- * - A9 ❓ (the image is shown nowhere public) and Rule 9d: no reader-facing
- *   page is opened; seed-facts also says the picture never renders on the
- *   test installs, so S7 asserts the "Delete" button, never the picture.
- * - A11 🐞 (a stale error notice survives a successful password change):
- *   S8 asserts the saved toast after the earlier refusals, never the notice.
- * - A12 🐞 (the Password tab's "Cancel" does nothing): not pressed.
- * - A13 ❓ / A16 ❓ (the preferred public name and a verified ORCID do not
- *   reach a new submission's first contributor) and Rule 7's contributor
- *   copy: the submission wizard's surface; not driven here.
- * - A14 🐞 (the site-level privacy link is dead): the link is asserted
- *   present on every tab (S1) and never opened.
- * - A15 🐞 ("Please enter a valid URL." outlives the corrected save): S7
- *   asserts the refusal, then the saved toast, never the stale sentence.
- * - Rule 6f (a request lapses after the invitation lifetime): a clock, not a
- *   screen, settles it; Rule 7's "Working Languages" on a one-language site
- *   (a site-wide change) and the masthead affiliation; Rule 8d's Add
- *   Reviewer search (U27's surface); Rule 10a's compromised-password refusal
- *   (a site-settings singleton, PRINCIPLES A7/A9); Rule 12d (no API secret:
- *   a config state with no screen, PRINCIPLES D9); the audit lines and the
- *   Notifications tab's meaning (*Notifications center*): rule details
- *   outside the canonical scenarios; not covered.
- * - Fields: the Identity tab's second-language boxes (French is not a form
- *   language on the fleets, seed-facts) and the family-name-without-given-
- *   name refusal; the Contact tab's Signature and Mailing Address; the
- *   Phone cut at 24 characters: not canonical scenarios; not covered.
+ * Deliberately NOT covered (register IDs from the spec's Findings register —
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
+ * A2 🐞, A3 🐞, A4 🐞, A5 ❓, A6 ❓, A7 🐞, A8 ❓, A9 ❓, A10 🐞, A11 🐞,
+ * A12 🐞, A14 🐞. Where a test passes through one (S3 presses a tab after
+ * the refused Contact save, A17; S7 saves the corrected homepage, A15; S4
+ * reads the confirmation where the app delivers it, A8; S8 saves after the
+ * refusals, A11) it asserts the effect the spec states and leaves the
+ * finding's own claim unasserted either way. S12 reads the first
+ * contributor's name and ORCID field as the screen shows them today, the
+ * given-plus-family name with an empty preferred-name box and "Request
+ * verification", because the register's A13 ❓ and A16 ❓ describe exactly
+ * that; the read is a record of today's screen, never a pass of the hint's
+ * promise. The spec's Coverage section records everything else left out.
  *
  * Isolation: every account that changes is a throwaway user in a scratch
  * journal seeded through the scenario endpoint (unique tags); the roster
  * and `publicknowledge` are only read (S1). Scenario 10 runs as a scratch
  * journal's own manager rather than `manager.maya`, so no seeded user's
- * notification choices are touched (PRINCIPLES A7). Every sign-in happens in
- * the test's own fresh browser context through the real Login form, never
- * through the shared .auth cache, because a password change ends the
- * account's other sessions and a sign-out ends the cached one; the only
- * cached identity used is `admin` (a scratch journal's auto-enrolled
- * manager) for the Users & Roles reads. Mailpit reads are scoped by the
- * throwaway recipient (PRINCIPLES A8) and every silence claim has a positive
- * control. A refused image upload raises a browser alert (Rule 9a), so S7
- * registers a dialog handler before its upload. No hard-coded waits.
+ * notification choices are touched (PRINCIPLES A7). Every sign-in that a
+ * scenario may end (sign-out, password change, impersonation) or move into
+ * French (S2's Journal Manager reads Users & Roles in French, which flips
+ * that session's language) happens in the test's own fresh browser context
+ * through the real Login form, never through the shared .auth cache; the
+ * cached identities used are `reader.rosa` (S1's control read), scratch
+ * managers that only read (S6) and S2's scratch manager is fresh. Mailpit
+ * reads are scoped by the throwaway recipient (PRINCIPLES A8) and every
+ * silence claim is bounded by a message the test itself triggers. A
+ * refused image upload raises a browser alert (Rule 9a), so S7 records
+ * every dialog before its uploads; S3 answers the unsaved-changes question
+ * itself; S9 answers the delete question. No hard-coded waits.
  */
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {
     ProfilePage,
     SAVED_MESSAGE,
@@ -77,25 +48,34 @@ const {
     openUserNav,
 } = require('../../../../shared/playwright/pages/ProfilePage.js');
 const {UsersRolesPage} = require('../pages/UserInvitationPages.js');
+const {UserMenu, LoginAsDialog} = require('../pages/LoginSessionsPages.js');
+const {StartSubmissionPage, SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 const {getPassword, getEmail} = require('../../../../shared/playwright/data/users.js');
 
 const JOURNAL = 'publicknowledge';
 const REQUIRED = 'This field is required.';
 const EMAIL_TAKEN = 'The selected email address is already in use by another user.';
 const URL_INVALID = 'Please enter a valid URL.';
+const UPLOAD_REFUSED = 'The file could not be uploaded or revised.';
+const UNSAVED_QUESTION = 'The data on this form has changed. Do you wish to continue without saving?';
 const CURRENT_PASSWORD_WRONG = 'The current password you entered was incorrect.';
 const PASSWORDS_MISMATCH = 'The passwords do not match.';
 const PASSWORD_SAME_AS_OLD = 'Your new password is the same as your old password.';
+const PASSWORD_TOO_SHORT = 'The password must be at least 6 characters.';
 const ERRORS_HEADING = 'Errors occurred processing this form';
 const LOGIN_ERROR = 'Invalid username/email or password. Please try again.';
 const CHANGE_EMAIL_SUBJECT = 'Confirm account contact email change request';
 const OTHER_JOURNALS = 'Register with other journals';
+const HIDE_OTHER_JOURNALS = 'Hide other journals';
 const NOTIFICATIONS_INTRO =
     'Select the system events that you wish to be notified about. Unchecking an item will prevent notifications of the event from showing up in the system and also from being emailed to you. Checked events will appear in the system and you have an extra option to receive or not the same notification by email.';
 const NOTIFICATION_GROUPS = ['Public Announcements', 'Submission Events', 'Reviewing Events', 'Editors'];
 const API_KEY_GENERATE_NOTE = 'Generating a new API key will invalidate any existing key for this user.';
 const API_KEY_REMOVE_NOTE = 'Deleting a key will revoke access to any application that uses it.';
 const IMAGE_FIXTURE = path.resolve(__dirname, '../fixtures/files/profile-image-400.png');
+const TEXT_FIXTURE = path.resolve(__dirname, '../fixtures/files/not-an-image.txt');
+const TEXT_AS_IMAGE_FIXTURE = path.resolve(__dirname, '../fixtures/files/not-an-image.png');
+const TEST_ORCID = 'https://orcid.org/0000-0002-1825-0097';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -109,8 +89,9 @@ async function anonContext(browser, baseURL) {
 
 /**
  * Fresh UI login on a journal's Login page, in its own context. Used for
- * every actor whose session this suite may end (sign-out, password change),
- * so the shared .auth cache is never poisoned.
+ * every actor whose session this suite may end (sign-out, password change,
+ * impersonation) or move into another language, so the shared .auth cache
+ * is never poisoned.
  */
 async function freshLogin(browser, baseURL, contextPath, username, password = getPassword(username)) {
     const context = await anonContext(browser, baseURL);
@@ -146,31 +127,54 @@ async function expectSignInRefused(browser, baseURL, contextPath, username, pass
 }
 
 /**
- * Count the tab-save POSTs a page sends from now on: the "nothing is sent"
- * claims of a browser-side refusal read this after the refusal shows, and
- * the same test's later save (awaited through `ProfilePage.save()`) is the
- * positive control.
+ * Count the POSTs matching `pattern` a page sends from now on: the "nothing
+ * is sent" claims of a browser-side refusal read this after the refusal
+ * shows, and the same test's later accepted request is the positive
+ * control.
  */
-function countSaves(page) {
+function countPosts(page, pattern) {
     const counter = {count: 0};
     page.on('request', (request) => {
-        if (request.method() === 'POST' && /\/profile-tab\/save-/.test(request.url())) {
+        if (request.method() === 'POST' && pattern.test(request.url())) {
             counter.count += 1;
         }
     });
     return counter;
 }
 
-/** Users & Roles (Users tab) of a scratch journal, as its auto-enrolled manager `admin`. */
-async function usersRolesRow(adminPage, contextPath, username, email) {
-    const usersRoles = new UsersRolesPage(adminPage, contextPath);
-    await usersRoles.goto();
-    const search = adminPage.getByRole('searchbox');
+/** The profile tabs' save POSTs. */
+function countSaves(page) {
+    return countPosts(page, /\/profile-tab\/save-/);
+}
+
+/**
+ * Users & Roles (Users tab) of a journal, as a manager of it, in the
+ * language the address names (none: the session's own). The table's
+ * accessible name is translated, so the row is found among the page's rows
+ * by the account's email address, which no language changes.
+ */
+async function usersRolesRow(managerPage, contextPath, username, email, {locale = null} = {}) {
+    const localePart = locale ? `/${locale}` : '';
+    await managerPage.goto(`/index.php/${contextPath}${localePart}/management/settings/access`);
+    const search = managerPage.getByRole('searchbox');
+    await expect(search).toBeVisible({timeout: 30_000});
     await search.fill(username);
     await search.press('Enter');
-    const row = usersRoles.userRow(email);
+    const row = managerPage.getByRole('row').filter({hasText: email});
     await expect(row).toBeVisible({timeout: 30_000});
     return row;
+}
+
+/**
+ * The journal's public "Editorial Masthead" page, read for the absence of
+ * a name: the heading and the page's own "View Editorial History" link are
+ * the positive control that the page rendered its content.
+ */
+async function expectMastheadWithout(page, contextPath, name) {
+    await page.goto(`/index.php/${contextPath}/about/editorialMasthead`);
+    await expect(page.getByRole('heading', {name: 'Editorial Masthead'})).toBeVisible();
+    await expect(page.getByRole('link', {name: 'Editorial History', exact: true})).toBeVisible();
+    await expect(page.getByRole('main')).not.toContainText(name);
 }
 
 /** Pull the emailed "confirm" and "reject" links out of one change-email message. */
@@ -192,8 +196,17 @@ async function requestEmailChange(profile, newEmail) {
     await expect(profile.email()).toHaveAttribute('readonly', /.*/);
 }
 
+/** Open the user menu's "Edit Profile" and wait for the Identity tab. */
+async function openEditProfile(page, contextPath) {
+    await openUserNav(page);
+    await userNav(page).getByRole('link', {name: 'Edit Profile', exact: true}).click();
+    const profile = new ProfilePage(page, contextPath);
+    await profile.expectOpen('identity');
+    return profile;
+}
+
 test.describe('user profile', () => {
-    test('S1: reach the profile and its tabs', {tag: '@smoke'}, async ({browser, baseURL}) => {
+    test('S1: reach the profile and its tabs', {tag: '@smoke'}, async ({browser, baseURL, asUser}) => {
         test.slow();
         // Fresh session: the scenario ends with a sign-out, which would kill a
         // cached session for parallel tests.
@@ -201,10 +214,7 @@ test.describe('user profile', () => {
         try {
             // On an editorial screen, the user menu's "Edit Profile" (Rule 1).
             await page.goto(`/index.php/${JOURNAL}/dashboard/mySubmissions`);
-            await openUserNav(page);
-            await userNav(page).getByRole('link', {name: 'Edit Profile', exact: true}).click();
-            const profile = new ProfilePage(page, JOURNAL);
-            await profile.expectOpen('identity');
+            const profile = await openEditProfile(page, JOURNAL);
             await expect(page).toHaveURL(/\/user\/profile/);
             await profile.expectSelectedTab('identity');
             await expect(profile.tabs.getByRole('tab')).toHaveText([
@@ -243,9 +253,40 @@ test.describe('user profile', () => {
             await expect(profile.privacySentence()).toBeVisible();
             await expect(profile.privacyLink()).toBeVisible();
 
-            // Copy the address, sign out, paste it back: the Login page, and
-            // signing in continues to the profile (Actors row 1).
-            const address = page.url();
+            // The privacy link opens the journal's Privacy Statement in a new
+            // browser tab (Rule 14).
+            const [privacyTab] = await Promise.all([
+                context.waitForEvent('page'),
+                profile.privacyLink().click(),
+            ]);
+            await privacyTab.waitForLoadState();
+            await expect(privacyTab).toHaveURL(new RegExp(`/${JOURNAL}/(en/)?about/privacy`));
+            await expect(privacyTab.getByRole('heading', {name: 'Privacy Statement'})).toBeVisible();
+            await privacyTab.close();
+
+            // The copied address with a tab named after "profile": a known
+            // name opens that tab, an unknown one opens Identity (Rule 2).
+            const address = page.url().replace(/[#?].*$/, '');
+            expect(address).toMatch(/\/user\/profile$/);
+            await page.goto(`${address}/contact`);
+            await profile.expectOpen('contact');
+            await profile.expectSelectedTab('contact');
+            await page.goto(`${address}/nowhere`);
+            await profile.expectOpen('identity');
+            await profile.expectSelectedTab('identity');
+            await expect(profile.tabs.getByRole('tab', {selected: true})).toHaveCount(1);
+
+            // Control: the Reader, in a second browser, at the same address
+            // sees their own profile, never the Author's (Actors).
+            const readerPage = await (await asUser('reader.rosa')).newPage();
+            await readerPage.goto(address);
+            const readerProfile = new ProfilePage(readerPage, JOURNAL);
+            await readerProfile.expectOpen('identity');
+            await expect(readerProfile.usernameText()).toContainText('reader.rosa');
+            await expect(readerProfile.usernameText()).not.toContainText('author.alex');
+
+            // Sign out, paste the address back: the Login page, and signing
+            // in continues to the profile (Actors row 1).
             await signOut(page);
             await page.goto(address);
             const loginPage = new LoginPage(page);
@@ -258,18 +299,27 @@ test.describe('user profile', () => {
         }
     });
 
-    test('S2: rename yourself and change your initials', async ({browser, baseURL, ojsApi, asUser}, testInfo) => {
+    test('S2: rename yourself and change your initials', async ({browser, baseURL, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s2', testInfo);
         const username = `${tag}au`;
+        const manager = `${tag}mg`;
         const email = `${username}@mail.test`;
-        const preferredName = `Dr. Ulla P. ${tag}`;
+        const preferredName = `Dr. Pat Profile ${tag}`;
+        // French among the journal's languages, so its French listing address works (fn-s).
         await ojsApi.createContext({
             tag,
-            users: [{username, givenName: 'Ulla', familyName: 'Bergmann', roles: ['author']}],
+            context: {supportedLocales: ['en', 'fr_CA']},
+            users: [
+                {username, givenName: 'Ulla', familyName: 'Bergmann', roles: ['author']},
+                {username: manager, givenName: 'Mona', familyName: 'Manager', roles: ['manager']},
+            ],
         });
 
         const {context, page} = await freshLogin(browser, baseURL, tag, username);
+        // The Journal Manager's session is fresh: its French read flips the
+        // session's language, which a cached state would leak.
+        const managerSession = await freshLogin(browser, baseURL, tag, manager);
         try {
             const profile = new ProfilePage(page, tag);
             await profile.goto('identity');
@@ -297,18 +347,32 @@ test.describe('user profile', () => {
             await expect(profile.toast).not.toContainText(SAVED_MESSAGE);
 
             // After a reload the avatar shows the capitals and the top bar
-            // still the username (Rules 4–5).
+            // still the username, never the preferred name (Rules 4–5).
             await page.reload();
             await profile.expectOpen('identity');
             const avatar = userNav(page).getByRole('button', {name: /^ZQ /});
             await expect(avatar).toBeVisible();
             await expect(avatar).toContainText(username);
+            await expect(avatar).not.toContainText(preferredName);
 
             // The Journal Manager's Users & Roles lists the preferred name
-            // (Rule 4; `admin` is the scratch journal's auto-enrolled manager).
-            const adminPage = await (await asUser('admin')).newPage();
-            const row = await usersRolesRow(adminPage, tag, username, email);
+            // (Rule 4).
+            const row = await usersRolesRow(managerSession.page, tag, username, email);
             await expect(row).toContainText(preferredName);
+
+            // The same list in French lists the given and family name: a
+            // preferred name typed in English does not carry (Rule 4; the
+            // row's presence is the control).
+            const frenchRow = await usersRolesRow(managerSession.page, tag, username, email, {locale: 'fr_CA'});
+            await expect(managerSession.page).toHaveURL(/\/fr_CA\//);
+            await expect(frenchRow).toContainText('Ulla Bergmann');
+            await expect(frenchRow).not.toContainText(preferredName);
+
+            // The site-level address forwards a one-journal user to the
+            // journal's own profile (Rule 3).
+            await page.goto('/index.php/index/user/profile');
+            await expect(page).toHaveURL(new RegExp(`/${tag}/(en/)?user/profile`));
+            await profile.expectOpen('identity');
 
             // Cleared again: the avatar returns to the name's initials.
             await profile.preferredPublicName().fill('');
@@ -317,12 +381,36 @@ test.describe('user profile', () => {
             await expect(profile.inTabNotice('identity')).toContainText(SAVED_MESSAGE);
             await page.reload();
             await profile.expectOpen('identity');
-            await expect(userNav(page).getByRole('button', {name: /^UB /})).toBeVisible();
-            const rowAgain = await usersRolesRow(adminPage, tag, username, email);
+            const initials = userNav(page).getByRole('button', {name: /^UB /});
+            await expect(initials).toBeVisible();
+            await expect(initials).toContainText(username);
+            await expect(initials).not.toContainText(preferredName);
+            const rowAgain = await usersRolesRow(managerSession.page, tag, username, email);
             await expect(rowAgain).toContainText('Ulla Bergmann');
             await expect(rowAgain).not.toContainText(preferredName);
+
+            // The family name cleared as well: the given name's first letter
+            // alone (Rule 5).
+            await profile.familyName().fill('');
+            await profile.save();
+            await expect(profile.inTabNotice('identity')).toContainText(SAVED_MESSAGE);
+            await page.reload();
+            await profile.expectOpen('identity');
+            const letter = userNav(page).getByRole('button', {name: /^U /});
+            await expect(letter).toBeVisible();
+            await expect(letter).toContainText(username);
+            await expect(letter).not.toContainText(preferredName);
+
+            // Control: the journal's public homepage shows the username in
+            // its header as well (Rule 4).
+            await page.goto(`/index.php/${tag}`);
+            await expect(
+                page.getByRole('banner').getByRole('link', {name: new RegExp(`^${username}`)})
+            ).toBeVisible();
+            await expect(page.getByRole('banner')).not.toContainText(preferredName);
         } finally {
             await context.close();
+            await managerSession.context.close();
         }
     });
 
@@ -345,38 +433,74 @@ test.describe('user profile', () => {
             // A blank Country is refused in the browser; nothing is saved
             // (Fields Contact; a seeded user has no country, seed-facts).
             await profile.country().selectOption({value: ''});
-            await profile.phone().fill('555-0100');
+            await profile.phone().fill('555 0100');
             await profile.saveButton().click();
             await expect(profile.fieldError(REQUIRED)).toBeVisible();
             expect(saves.count).toBe(0);
-            await profile.open('identity');
+
+            // Another tab, the change unsent: the browser's own question;
+            // Cancel keeps the Contact tab with the phone still typed, OK
+            // opens Identity and Contact reopens with Phone as it was (Rule 2).
+            const question = await profile.openAnswering('identity', {proceed: false});
+            expect(question).toBe(UNSAVED_QUESTION);
+            await profile.expectSelectedTab('contact');
+            await expect(profile.phone()).toHaveValue('555 0100');
+            await profile.openAnswering('identity', {proceed: true});
+            await profile.expectSelectedTab('identity');
             await profile.open('contact');
             await expect(profile.phone()).toHaveValue('');
+            expect(saves.count).toBe(0);
 
             // Country, phone and affiliation save; reopening shows them (Rule 7).
             await profile.country().selectOption({label: 'Canada'});
-            await profile.phone().fill('555-0101');
-            await profile.affiliation().fill(`Affiliation ${tag}`);
+            await profile.phone().fill('555 0100');
+            await profile.affiliation().fill('Contact Institute');
             await profile.save();
             expect(saves.count).toBe(1);
             await expect(profile.toast).toContainText(SAVED_MESSAGE);
             await profile.open('identity');
             await profile.open('contact');
-            await expect(profile.phone()).toHaveValue('555-0101');
-            await expect(profile.affiliation()).toHaveValue(`Affiliation ${tag}`);
+            await expect(profile.phone()).toHaveValue('555 0100');
+            await expect(profile.affiliation()).toHaveValue('Contact Institute');
             await expect(profile.country()).toHaveValue('CA');
 
-            // Another account's address: refused by the server at the top
-            // right and in the box's label; the phone change is lost.
-            await profile.email().fill(getEmail('author.alex'));
-            await profile.phone().fill('555-0102');
+            // "Working Languages": one box per site language; the second
+            // ticked and saved, held on reopening, the site still shown in
+            // English (Rule 7).
+            await expect(profile.workingLanguageBoxes()).toHaveCount(2);
+            await expect(profile.workingLanguageBox('en')).toBeVisible();
+            await profile.workingLanguageBox('fr_CA').check();
             await profile.save();
-            await expect(profile.toast).toContainText(EMAIL_TAKEN);
-            await expect(profile.emailLabel()).toContainText(EMAIL_TAKEN);
+            expect(saves.count).toBe(2);
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
             await profile.open('identity');
             await profile.open('contact');
+            await expect(profile.workingLanguageBox('fr_CA')).toBeChecked();
+            await expect(profile.heading).toBeVisible();
+            await expect(profile.tabEntry('contact')).toBeVisible();
+            await expect(profile.saveButton()).toBeVisible();
+
+            // Another account's address: refused by the server at the top
+            // right and in the box's label.
+            await profile.email().fill(getEmail('author.alex'));
+            await profile.phone().fill('555 0199');
+            await profile.save();
+            expect(saves.count).toBe(3);
+            await expect(profile.toast).toContainText(EMAIL_TAKEN);
+            await expect(profile.emailLabel()).toContainText(EMAIL_TAKEN);
+
+            // Another tab after the refused save: Identity opens (the tab
+            // handler's question, asked or not, is A17's own claim and is
+            // answered OK if it comes, never asserted either way).
+            await profile.open('identity');
+            await profile.expectSelectedTab('identity');
+
+            // Control: Contact again: the address unchanged, the phone as
+            // saved; the refused save saved none of the tab's other changes.
+            await profile.open('contact');
             await expect(profile.email()).toHaveValue(email);
-            await expect(profile.phone()).toHaveValue('555-0101');
+            await expect(profile.phone()).toHaveValue('555 0100');
+            await expect(profile.affiliation()).toHaveValue('Contact Institute');
         } finally {
             await context.close();
         }
@@ -389,16 +513,20 @@ test.describe('user profile', () => {
         const username = `${tag}au`;
         const oldEmail = `${username}@mail.test`;
         const newEmail = `${username}new@mail.test`;
+        const controlEmail = `${username}ctl@mail.test`;
         await ojsApi.createContext({
             tag,
             users: [{username, givenName: 'Dee', familyName: 'Probe', roles: ['author']}],
         });
 
         // Two browsers signed in as the same account; the second parked on
-        // the profile.
+        // the profile's Contact tab.
         const first = await freshLogin(browser, baseURL, tag, username);
         const second = await freshLogin(browser, baseURL, tag, username);
         try {
+            const otherProfile = new ProfilePage(second.page, tag);
+            await otherProfile.goto('contact');
+
             const profile = new ProfilePage(first.page, tag);
             await profile.goto('contact');
             await requestEmailChange(profile, newEmail);
@@ -411,10 +539,12 @@ test.describe('user profile', () => {
             await expect(profile.email()).toHaveValue(oldEmail);
             await expect(profile.email()).not.toBeEditable();
 
-            // The other session keeps working.
-            const otherProfile = new ProfilePage(second.page, tag);
-            await otherProfile.goto('identity');
-            await otherProfile.open('roles');
+            // The second browser: "Identity" opens with the account's names;
+            // the session carries on through the pending request (Rule 6a).
+            await otherProfile.open('identity');
+            await expect(otherProfile.givenName()).toHaveValue('Dee');
+            await expect(otherProfile.familyName()).toHaveValue('Probe');
+            await expect(otherProfile.usernameText()).toContainText(username);
 
             // One message to the OLD address from the account holder's own
             // name, naming the new address; nothing to the new address (Rule
@@ -438,12 +568,24 @@ test.describe('user profile', () => {
             await expect(profile.email()).toHaveValue(newEmail);
             await expect(profile.email()).toBeEditable();
             await expect(profile.pendingEmailNotice()).toHaveCount(0);
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
 
             // Sign out; the new address signs in with the unchanged password.
             await signOut(first.page);
             const loginPage = new LoginPage(first.page);
             await loginPage.signIn(newEmail, getPassword(username));
             await expect(first.page).not.toHaveURL(/\/login/);
+
+            // No further email after the confirm (Side effects): a later
+            // request, made now, goes to the address current by then (Rule
+            // 6b) and bounds the read; until it arrived the old address
+            // held its one request and the new address nothing.
+            await profile.goto('contact');
+            await requestEmailChange(profile, controlEmail);
+            await pkpMail.find({to: newEmail, subject: CHANGE_EMAIL_SUBJECT, contains: controlEmail});
+            expect(await pkpMail.count({to: oldEmail})).toBe(1);
+            expect(await pkpMail.count({to: newEmail})).toBe(1);
+            expect(await pkpMail.count({to: controlEmail})).toBe(0);
 
             // The old address is refused.
             await expectSignInRefused(browser, baseURL, tag, oldEmail, getPassword(username));
@@ -461,12 +603,14 @@ test.describe('user profile', () => {
         const oldEmail = `${username}@mail.test`;
         const firstNew = `${username}one@mail.test`;
         const secondNew = `${username}two@mail.test`;
+        const thirdNew = `${username}three@mail.test`;
         await ojsApi.createContext({
             tag,
             users: [{username, givenName: 'Cal', familyName: 'Probe', roles: ['author']}],
         });
 
         const {context, page} = await freshLogin(browser, baseURL, tag, username);
+        const second = await anonContext(browser, baseURL);
         try {
             const profile = new ProfilePage(page, tag);
             await profile.goto('contact');
@@ -517,20 +661,65 @@ test.describe('user profile', () => {
             // That message's "confirm" link is now dead too.
             await page.goto(secondLinks.confirm);
             await expect(page.getByRole('heading', {name: 'Invitation Unavailable'})).toBeVisible();
+
+            // A third request; its "confirm" link in the signed-out second
+            // browser: the Login page first, and after the sign-in the
+            // Contact tab with the third address, already in force (Rule 6c).
+            await profile.goto('contact');
+            await requestEmailChange(profile, thirdNew);
+            const thirdMessage = await pkpMail.find({
+                to: oldEmail,
+                subject: CHANGE_EMAIL_SUBJECT,
+                contains: thirdNew,
+            });
+            const thirdLinks = await changeEmailLinks(pkpMail, thirdMessage);
+            const secondPage = await second.newPage();
+            await secondPage.goto(thirdLinks.confirm);
+            await expect(secondPage.locator('form#login')).toBeVisible();
+            await new LoginPage(secondPage).signIn(username, getPassword(username));
+            await secondPage.waitForURL(/\/user\/profile/, {waitUntil: 'commit', timeout: 30_000});
+            const secondProfile = new ProfilePage(secondPage, tag);
+            await secondProfile.expectOpen('contact');
+            await expect(secondProfile.email()).toHaveValue(thirdNew);
+            await expect(secondProfile.email()).toBeEditable();
+            await expect(secondProfile.pendingEmailNotice()).toHaveCount(0);
+
+            // Control: the old address's mailbox holds the three requests
+            // and nothing else; "Cancel" sent no email (Rule 6e).
+            expect(await pkpMail.count({to: oldEmail, subject: CHANGE_EMAIL_SUBJECT})).toBe(3);
+            expect(await pkpMail.count({to: oldEmail})).toBe(3);
         } finally {
             await context.close();
+            await second.close();
         }
     });
 
     test('S6: take a role and give it up', async ({browser, baseURL, ojsApi, asUser}, testInfo) => {
         test.slow();
+        test.setTimeout(180_000);
         const tag = makeTag('s6', testInfo);
+        const tagB = makeTag('s6b', testInfo);
         const username = `${tag}rd`;
+        const manager = `${tag}mg`;
         const email = `${username}@mail.test`;
+        const name = 'Rae Scratch';
         const contextName = `Scratch context ${tag}`;
+        const contextNameB = `Scratch context ${tagB}`;
+        // The same Reader (and the same manager) enrolled in a second scratch
+        // journal by naming the username again (fn-s).
         await ojsApi.createContext({
             tag,
-            users: [{username, givenName: 'Rae', familyName: 'Scratch', roles: ['reader']}],
+            users: [
+                {username, givenName: 'Rae', familyName: 'Scratch', roles: ['reader']},
+                {username: manager, givenName: 'Mona', familyName: 'Manager', roles: ['manager']},
+            ],
+        });
+        await ojsApi.createContext({
+            tag: tagB,
+            users: [
+                {username, givenName: 'Rae', familyName: 'Scratch', roles: ['reader']},
+                {username: manager, givenName: 'Mona', familyName: 'Manager', roles: ['manager']},
+            ],
         });
 
         const {context, page} = await freshLogin(browser, baseURL, tag, username);
@@ -549,8 +738,9 @@ test.describe('user profile', () => {
             await expect(profile.otherContextsLinkText()).toHaveText(OTHER_JOURNALS);
             expect(await profile.isOtherContextsOpen()).toBe(false);
 
-            // Tick Author, save, reload: held; Users & Roles lists both roles
-            // (Rule 8b).
+            // Tick Author, save, reload: held; Users & Roles lists both roles;
+            // the public masthead does not list the account (Rule 8b, Side
+            // effects).
             await profile.roleBox('Author').check();
             await profile.save();
             await expect(profile.toast).toContainText(SAVED_MESSAGE);
@@ -558,23 +748,44 @@ test.describe('user profile', () => {
             await page.reload();
             await profile.expectOpen('roles');
             await expect(profile.roleBox('Author')).toBeChecked();
-            const adminPage = await (await asUser('admin')).newPage();
-            let row = await usersRolesRow(adminPage, tag, username, email);
+            const managerPage = await (await asUser(manager)).newPage();
+            let row = await usersRolesRow(managerPage, tag, username, email);
             await expect(row).toContainText('Reader');
             await expect(row).toContainText('Author');
+            await expectMastheadWithout(managerPage, tag, name);
 
-            // Untick Author, save: the role is gone from that list.
+            // Untick Author, save: the role is gone from that list; the
+            // masthead still does not list the account.
             await profile.roleBox('Author').uncheck();
             await profile.save();
             await expect(profile.toast).toContainText(SAVED_MESSAGE);
-            row = await usersRolesRow(adminPage, tag, username, email);
+            row = await usersRolesRow(managerPage, tag, username, email);
             await expect(row).toContainText('Reader');
             await expect(row).not.toContainText('Author');
+            await expectMastheadWithout(managerPage, tag, name);
+
+            // A role in the other journal: the fold opened reads "Hide other
+            // journals" and names the second journal with its own boxes,
+            // Reader ticked; Author ticked there and saved is listed on the
+            // second journal's Users & Roles (Rule 8c).
+            await profile.toggleOtherContexts();
+            await expect(profile.otherContextsLinkText()).toHaveText(HIDE_OTHER_JOURNALS);
+            expect(await profile.isOtherContextsOpen()).toBe(true);
+            await expect(profile.contextSection(contextNameB)).toBeVisible();
+            await expect(profile.contextRoleBox(contextNameB, 'Reader')).toBeChecked();
+            await expect(profile.contextRoleBox(contextNameB, 'Author')).not.toBeChecked();
+            await profile.contextRoleBox(contextNameB, 'Author').check();
+            await profile.save();
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
+            const rowB = await usersRolesRow(managerPage, tagB, username, email);
+            await expect(rowB).toContainText('Reader');
+            await expect(rowB).toContainText('Author');
 
             // Two reviewing interests (Enter, then a comma) save with the tab
             // and are listed on reopening (Rule 8d).
             const alpha = `${tag}alpha`;
             const beta = `${tag}beta`;
+            await profile.goto('roles');
             await profile.addInterest(alpha, {terminator: 'Enter'});
             await profile.addInterest(beta, {terminator: ','});
             await profile.save();
@@ -582,6 +793,57 @@ test.describe('user profile', () => {
             await profile.open('identity');
             await profile.open('roles');
             await expect(profile.interestChips()).toHaveText([alpha, beta]);
+
+            // The site-level Roles tab: the account holding a role in two
+            // journals, the page stays at the site level and lists both
+            // journals inline, each under its own name, with no fold link
+            // (Rule 3; the journal-level link above is the control).
+            const site = new ProfilePage(page, null);
+            await site.goto('identity');
+            await expect(page).toHaveURL(/\/index\/(en\/)?user\/profile/);
+            await site.open('roles');
+            await expect(site.contextSection(contextName)).toBeVisible();
+            await expect(site.contextRoleBox(contextName, 'Reader')).toBeChecked();
+            await expect(site.contextRoleBox(contextName, 'Author')).not.toBeChecked();
+            await expect(site.contextSection(contextNameB)).toBeVisible();
+            await expect(site.contextRoleBox(contextNameB, 'Reader')).toBeChecked();
+            await expect(site.contextRoleBox(contextNameB, 'Author')).toBeChecked();
+            await expect(site.otherContextsLink()).toHaveCount(0);
+            await expect(site.form('roles')).not.toContainText(OTHER_JOURNALS);
+
+            // The site-level Notifications tab: the first row's "Enable…"
+            // box unticked and saved; the first journal's own tab shows the
+            // box still ticked (Rule 11). Restored afterwards (fn-s).
+            await site.open('notifications');
+            const sitePair = site.notificationPair('notificationNewAnnouncement');
+            await expect(sitePair.allow).toBeChecked();
+            await sitePair.allow.uncheck();
+            await site.save();
+            await expect(site.toast).toContainText(SAVED_MESSAGE);
+            await site.open('identity');
+            await site.open('notifications');
+            await expect(sitePair.allow).not.toBeChecked();
+            await profile.goto('notifications');
+            await expect(profile.notificationPair('notificationNewAnnouncement').allow).toBeChecked();
+            await site.goto('identity');
+            await site.open('notifications');
+            await sitePair.allow.check();
+            await site.save();
+            await expect(site.toast).toContainText(SAVED_MESSAGE);
+
+            // An interest suggested to another user: the Journal Manager, on
+            // their own Roles tab, is offered the saved word while typing
+            // (Rule 8d; typed, never saved).
+            const managerProfile = new ProfilePage(managerPage, tag);
+            await managerProfile.goto('roles');
+            await managerProfile.typeInterest(alpha.slice(0, -3));
+            await expect(managerProfile.interestSuggestions().filter({hasText: alpha})).toBeVisible();
+
+            // Control: the Journal Manager's own Roles tab shows the same
+            // boxes, with no "Journal Manager" box (Rule 8a).
+            expect(await managerProfile.currentContextRoleLabels()).toEqual(['Reader', 'Author', 'Reviewer']);
+            await expect(managerProfile.roleBox('Journal Manager')).toHaveCount(0);
+            await expect(managerProfile.form('roles').getByText('Journal Manager')).toHaveCount(0);
         } finally {
             await context.close();
         }
@@ -598,10 +860,15 @@ test.describe('user profile', () => {
 
         const {context, page} = await freshLogin(browser, baseURL, tag, username);
         try {
-            // A refused upload raises a browser alert (Rule 9a): the handler
-            // goes on before any upload, so a refusal fails the test instead
-            // of hanging it.
-            page.on('dialog', (dialog) => dialog.accept());
+            // A refused upload raises a browser alert (Rule 9a): every dialog
+            // is recorded and dismissed from here on, so a refusal is read
+            // instead of hanging the test.
+            /** @type {string[]} */
+            const alerts = [];
+            page.on('dialog', (dialog) => {
+                alerts.push(dialog.message());
+                dialog.accept();
+            });
             const profile = new ProfilePage(page, tag);
             await profile.goto('public');
             await expect(profile.form('public').getByRole('button', {name: 'Upload File'})).toBeVisible();
@@ -612,6 +879,44 @@ test.describe('user profile', () => {
             await profile.uploadImage(IMAGE_FIXTURE);
             await profile.expectSelectedTab('public');
             await expect(profile.deleteImageButton()).toBeVisible();
+            expect(alerts).toEqual([]);
+
+            // A file that is not an image (Rule 9a). A plain-text file by its
+            // own name: the uploader refuses it before anything is sent, with
+            // "File extension error." inside the upload area, no alert and no
+            // page reload (T-ojs-1 of the 2026-09-13 run: the spec's sentence
+            // is the server's, see below). The reload that the accepted .png
+            // caused above is the control for "no page reload"; the alert of
+            // the second refusal below is the control for "no alert".
+            let reloaded = false;
+            page.once('load', () => {
+                reloaded = true;
+            });
+            const uploads = countPosts(page, /upload-profile-image/);
+            await profile.chooseImageFile(TEXT_FIXTURE);
+            await expect(profile.uploaderError()).toHaveText('File extension error.');
+            expect(uploads.count).toBe(0);
+            expect(reloaded).toBe(false);
+            expect(alerts).toEqual([]);
+            await expect(profile.deleteImageButton()).toBeVisible();
+
+            // The same text under an image's name: sent, refused by the
+            // server with "The file could not be uploaded or revised." inside
+            // the upload area and as a browser alert, with no page reload;
+            // after a reload the "Delete" button is still there, the existing
+            // image survives (Rule 9a).
+            await profile.chooseImageFile(TEXT_AS_IMAGE_FIXTURE);
+            await expect(profile.uploaderError()).toHaveText(UPLOAD_REFUSED);
+            await expect.poll(() => alerts).toEqual([UPLOAD_REFUSED]);
+            await expect.poll(() => uploads.count).toBe(1);
+            expect(reloaded).toBe(false);
+            await expect(profile.deleteImageButton()).toBeVisible();
+            await page.reload();
+            await profile.expectOpen('public');
+            await profile.expectSelectedTab('public');
+            await expect(profile.deleteImageButton()).toBeVisible();
+            // (The error line is an always-present box; the reload empties it.)
+            await expect(profile.uploaderError()).toHaveText('');
 
             // A bio and a homepage without "http://": refused in the browser,
             // nothing sent, the bio stays (Rule 9c).
@@ -620,14 +925,15 @@ test.describe('user profile', () => {
             await profile.expectBioEditorReady();
             await profile.bioEditorBody().click();
             await profile.bioEditorBody().fill(bio);
-            await profile.homepage().fill('example.org');
+            await profile.homepage().fill('example.org/home');
             await profile.saveButton().click();
             await expect(profile.fieldError(URL_INVALID)).toBeVisible();
             expect(saves.count).toBe(0);
             await expect(profile.bioEditorBody()).toContainText(bio);
 
-            // Corrected: saved at the top right.
-            await profile.homepage().fill('https://example.org');
+            // Corrected: saved at the top right (the stale sentence is A15's
+            // own claim and is not asserted).
+            await profile.homepage().fill('https://example.org/home');
             await profile.save();
             expect(saves.count).toBe(1);
             await expect(profile.toast).toContainText(SAVED_MESSAGE);
@@ -638,7 +944,7 @@ test.describe('user profile', () => {
             await profile.expectSelectedTab('public');
             await expect(profile.form('public').getByRole('button', {name: 'Upload File'})).toBeVisible();
             await expect(profile.deleteImageButton()).toHaveCount(0);
-            await expect(profile.homepage()).toHaveValue('https://example.org');
+            await expect(profile.homepage()).toHaveValue('https://example.org/home');
             await profile.expectBioEditorReady();
             await expect(profile.bioEditorBody()).toContainText(bio);
         } finally {
@@ -646,11 +952,13 @@ test.describe('user profile', () => {
         }
     });
 
-    test('S8: change the password', async ({browser, baseURL, ojsApi}, testInfo) => {
+    test('S8: change the password', async ({browser, baseURL, ojsApi, pkpMail}, testInfo) => {
         test.slow();
         test.setTimeout(180_000);
         const tag = makeTag('s8', testInfo);
         const username = `${tag}au`;
+        const email = `${username}@mail.test`;
+        const controlEmail = `${username}ctl@mail.test`;
         // Short passwords on purpose: the boxes cut input at 32 characters (A7).
         const current = `pw${tag}`;
         const next = `new${tag}`;
@@ -668,9 +976,7 @@ test.describe('user profile', () => {
 
             const profile = new ProfilePage(first.page, tag);
             await profile.goto('password');
-            await expect(
-                profile.form('password').getByText('The password must be at least 6 characters.')
-            ).toBeVisible();
+            await expect(profile.form('password').getByText(PASSWORD_TOO_SHORT)).toBeVisible();
 
             // A wrong current password: the notice with that sentence, the
             // three boxes emptied (Rule 10a).
@@ -695,6 +1001,14 @@ test.describe('user profile', () => {
             await profile.save();
             await expect(profile.passwordErrorNotice()).toContainText(PASSWORD_SAME_AS_OLD);
 
+            // A new password under the minimum: the too-short sentence in the
+            // notice and under "New password", in place of the hint (Rule 10a).
+            await profile.fillPasswords({current, next: 'np1'});
+            await profile.save();
+            await expect(profile.passwordErrorNotice()).toContainText(PASSWORD_TOO_SHORT);
+            await expect(profile.newPasswordSubLabel()).toHaveText(PASSWORD_TOO_SHORT);
+            await expect(profile.form('password').getByText(PASSWORD_TOO_SHORT)).toHaveCount(2);
+
             // A valid new password: saved at the top right (Rule 10b); the
             // earlier notice is A11's and is not asserted.
             await profile.fillPasswords({current, next});
@@ -705,6 +1019,16 @@ test.describe('user profile', () => {
             await second.page.goto(other.url('identity'));
             await expect(second.page.locator('form#login')).toBeVisible();
             await expect(second.page).toHaveURL(/\/login/);
+
+            // The mailbox: no email on a password change (Side effects). The
+            // read is bounded by a message the test triggers to the same
+            // address afterwards, an email-change request from the session
+            // that stays signed in (fn-s): once that arrived, it is the
+            // address's only message.
+            await profile.open('contact');
+            await requestEmailChange(profile, controlEmail);
+            await pkpMail.find({to: email, subject: CHANGE_EMAIL_SUBJECT, contains: controlEmail});
+            expect(await pkpMail.count({to: email})).toBe(1);
 
             // The session that changed it stays signed in; after a sign-out
             // the new password works and the old one is refused.
@@ -771,6 +1095,17 @@ test.describe('user profile', () => {
             await expect(profile.createApiKeyButton()).toBeVisible();
             await expect(profile.deleteApiKeyButton()).toHaveCount(0);
             await expect(profile.inTabNotice('apiKey')).toContainText(SAVED_MESSAGE);
+
+            // A second key differs from the deleted one (Rule 12b).
+            await profile.createApiKey();
+            expect(saves.count).toBe(3);
+            await expect(profile.apiKeyBox()).toHaveValue(/^eyJ[\w-]+\.[\w-]+\.[\w-]+$/);
+            const secondKey = await profile.apiKeyBox().inputValue();
+            expect(secondKey).not.toBe(key);
+            await expect(profile.deleteApiKeyButton()).toBeVisible();
+
+            // Control: throughout, no message at the top right (Rule 2).
+            await expect(profile.toast).not.toContainText(SAVED_MESSAGE);
         } finally {
             await context.close();
         }
@@ -780,6 +1115,7 @@ test.describe('user profile', () => {
         test.slow();
         const tag = makeTag('s10', testInfo);
         const username = `${tag}mg`;
+        const email = `${username}@mail.test`;
         // A scratch journal's own manager, so no seeded account's choices change.
         await ojsApi.createContext({
             tag,
@@ -821,9 +1157,228 @@ test.describe('user profile', () => {
             await expect(pair.email).toBeEnabled();
             await profile.save();
             await expect(profile.toast).toContainText(SAVED_MESSAGE);
+
+            // "Save" on the Roles tab with nothing changed: saved, the ticks
+            // as they were, and Users & Roles still lists the Journal Manager
+            // role the tab never shows (Rule 8b).
+            await profile.open('roles');
+            const labels = await profile.currentContextRoleLabels();
+            expect(labels).toEqual(['Reader', 'Author', 'Reviewer']);
+            const ticksBefore = await profile.currentContextSection().getByRole('checkbox').evaluateAll(
+                (boxes) => boxes.map((box) => /** @type {HTMLInputElement} */ (box).checked)
+            );
+            await profile.save();
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
             await profile.open('identity');
-            await profile.open('notifications');
+            await profile.open('roles');
+            const ticksAfter = await profile.currentContextSection().getByRole('checkbox').evaluateAll(
+                (boxes) => boxes.map((box) => /** @type {HTMLInputElement} */ (box).checked)
+            );
+            expect(ticksAfter).toEqual(ticksBefore);
+            // (The role reads "Journal manager" on the screen, lowercase m:
+            // T-ojs-2 of the 2026-09-13 run.)
+            const row = await usersRolesRow(page, tag, username, email);
+            await expect(row).toContainText('Journal manager');
+
+            // Control: reopen "Notifications" after the restore: the box is
+            // ticked and its email box no longer greyed out (Rule 11).
+            await profile.goto('notifications');
             await expect(pair.allow).toBeChecked();
+            await expect(pair.email).toBeEnabled();
+        } finally {
+            await context.close();
+        }
+    });
+
+    test('S11: a profile edited while impersonating is the impersonated user\'s', async ({browser, baseURL, ojsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(180_000);
+        const tag = makeTag('s11', testInfo);
+        const manager = `${tag}mg`;
+        const author = `${tag}au`;
+        const authorEmail = `${author}@mail.test`;
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: manager, givenName: 'Mona', familyName: 'Manager', roles: ['manager']},
+                {username: author, givenName: 'Ann', familyName: 'Impersonated', roles: ['author']},
+            ],
+        });
+
+        // Fresh sessions: Login As migrates the manager's session (U01), and
+        // the Author's own browser only reads.
+        const managerSession = await freshLogin(browser, baseURL, tag, manager);
+        const authorSession = await freshLogin(browser, baseURL, tag, author);
+        try {
+            const page = managerSession.page;
+            const userMenu = new UserMenu(page);
+            const usersRoles = new UsersRolesPage(page, tag);
+            const dialog = new LoginAsDialog(page);
+
+            // The given: the Journal Manager impersonates the Author through
+            // Users & Roles › "Login As" and its dialog's OK (fn-s; U01).
+            await usersRoles.goto();
+            const search = page.getByRole('searchbox');
+            await search.fill(author);
+            await search.press('Enter');
+            const row = usersRoles.userRow(authorEmail);
+            await expect(row).toBeVisible({timeout: 30_000});
+            await usersRoles.rowAction(row, 'Login As');
+            await dialog.expectOpen();
+            await dialog.ok();
+            await page.waitForURL(/\/dashboard\/mySubmissions/, {waitUntil: 'commit', timeout: 30_000});
+            await userMenu.expectImpersonating(author);
+
+            // "Edit Profile" while impersonating: the Author's username as
+            // plain text (Actors).
+            const profile = await openEditProfile(page, tag);
+            await expect(profile.usernameText()).toContainText(author);
+            await expect(profile.usernameText()).not.toContainText(manager);
+            await expect(profile.givenName()).toHaveValue('Ann');
+
+            // The Author's Contact tab saved while impersonating.
+            await profile.open('contact');
+            await profile.country().selectOption({label: 'Canada'});
+            await profile.affiliation().fill('Impersonated Institute');
+            await profile.save();
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
+
+            // The Author, in the second browser, reads the change.
+            const authorProfile = await openEditProfile(authorSession.page, tag);
+            await expect(authorProfile.usernameText()).toContainText(author);
+            await authorProfile.open('contact');
+            await expect(authorProfile.affiliation()).toHaveValue('Impersonated Institute');
+            await expect(authorProfile.country()).toHaveValue('CA');
+
+            // Control: the Journal Manager, back in their own account through
+            // "Logout as {username}", reads their own Affiliation unchanged
+            // (the seeded account has none; the Author's value is not there).
+            await userMenu.logoutAs(author);
+            await page.goto(`/index.php/${tag}/dashboard/editorial`);
+            await userMenu.expectOwnSession();
+            const ownProfile = await openEditProfile(page, tag);
+            await expect(ownProfile.usernameText()).toContainText(manager);
+            await expect(ownProfile.usernameText()).not.toContainText(author);
+            await ownProfile.open('contact');
+            await expect(ownProfile.affiliation()).toHaveValue('');
+            await expect(ownProfile.affiliation()).not.toHaveValue('Impersonated Institute');
+        } finally {
+            await managerSession.context.close();
+            await authorSession.context.close();
+        }
+    });
+
+    test('S12: the profile is copied into a new submission\'s first contributor', async ({browser, baseURL, ojsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(180_000);
+        const tag = makeTag('s12', testInfo);
+        const username = `${tag}au`;
+        const email = `${username}@mail.test`;
+        // ORCID enabled on the journal and a verified iD on the account (fn-s).
+        await ojsApi.createContext({
+            tag,
+            orcid: {enabled: true},
+            users: [
+                {
+                    username,
+                    givenName: 'Pat',
+                    familyName: 'Profile',
+                    roles: ['author'],
+                    orcid: TEST_ORCID,
+                    orcidIsVerified: true,
+                },
+            ],
+        });
+
+        const {context, page} = await freshLogin(browser, baseURL, tag, username);
+        try {
+            const profile = new ProfilePage(page, tag);
+            await profile.goto('identity');
+
+            // "Preferred Public Name": saved inside the tab.
+            await profile.preferredPublicName().fill('Dr. Pat Profile');
+            await profile.save();
+            await expect(profile.inTabNotice('identity')).toContainText(SAVED_MESSAGE);
+
+            // The Contact tab: a country and an affiliation, saved at the top right.
+            await profile.open('contact');
+            await profile.country().selectOption({label: 'Canada'});
+            await profile.affiliation().fill('Profile Institute');
+            await profile.save();
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
+
+            // The Public tab: a bio and a homepage, saved at the top right.
+            await profile.open('public');
+            await profile.expectBioEditorReady();
+            await profile.bioEditorBody().click();
+            await profile.bioEditorBody().fill('Profile bio.');
+            await profile.homepage().fill('https://example.org/profile');
+            await profile.save();
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
+
+            // A new submission started on screen from My Submissions, the
+            // wizard walked to its Contributors step and no further (fn-s).
+            const mine = new MySubmissionsPage(page, tag);
+            await mine.goto();
+            await page.getByRole('link', {name: 'Start A New Submission'}).click();
+            const start = new StartSubmissionPage(page, tag);
+            await expect(start.heading()).toBeVisible({timeout: 30_000});
+            await start.fillTitle(`Submission ${tag}`);
+            await start.checklistBox().check();
+            await start.privacyBox().check();
+            await start.begin();
+            const wizard = new SubmissionWizardPage(page, tag);
+            await wizard.expectLoaded();
+            await wizard.expectStep('Upload Files');
+            await wizard.continueTo('Details');
+            await wizard.continueTo('Contributors');
+
+            // The first contributor's "Edit" dialog carries the profile's
+            // email, country, affiliation, bio statement and homepage (Rule 7).
+            await expect(wizard.contributorItem('Pat Profile')).toBeVisible();
+            let modal = await wizard.openContributorEdit('Pat Profile');
+            await expect(wizard.contributorInput(modal, 'email')).toHaveValue(email);
+            await expect(wizard.contributorCountry(modal)).toHaveValue('CA');
+            await expect(wizard.contributorAffiliations(modal)).toContainText('Profile Institute');
+            await expect(wizard.contributorBioBody(modal)).toHaveText('Profile bio.');
+            await expect(wizard.contributorInput(modal, 'url')).toHaveValue('https://example.org/profile');
+
+            // The name and the ORCID, as the screen shows them today: the
+            // given and family name with an empty preferred-name box although
+            // the profile's "Preferred Public Name" is set (A13), and "Request
+            // verification" although the profile's iD is verified (A16). A
+            // record of today's screen, never a pass of the hint's promise.
+            await expect(wizard.contributorInput(modal, 'givenName-en')).toHaveValue('Pat');
+            await expect(wizard.contributorInput(modal, 'familyName-en')).toHaveValue('Profile');
+            await expect(wizard.contributorInput(modal, 'preferredPublicName-en')).toHaveValue('');
+            await expect(wizard.contributorItem('Pat Profile')).not.toContainText('Dr. Pat Profile');
+            await expect(wizard.contributorRequestVerificationButton(modal)).toBeVisible();
+            await wizard.closeContributorEdit(modal);
+
+            // Control: the profile's Affiliation changed afterwards; the draft
+            // reopened from My Submissions › "Incomplete" still carries the
+            // copied one (Cross-feature interactions).
+            await profile.goto('contact');
+            await profile.affiliation().fill('Later Institute');
+            await profile.save();
+            await expect(profile.toast).toContainText(SAVED_MESSAGE);
+            await profile.open('identity');
+            await profile.open('contact');
+            await expect(profile.affiliation()).toHaveValue('Later Institute');
+            await mine.goto();
+            await mine.openView('Incomplete submissions');
+            const row = await mine.findRowByTag(tag);
+            await mine.completeSubmissionButton(row).click();
+            await wizard.expectLoaded();
+            // The reopened draft starts again at "Upload Files", the later
+            // rail entries unreached, so Continue is the way to Contributors.
+            await wizard.expectStep('Upload Files');
+            await wizard.continueTo('Details');
+            await wizard.continueTo('Contributors');
+            modal = await wizard.openContributorEdit('Pat Profile');
+            await expect(wizard.contributorAffiliations(modal)).toContainText('Profile Institute');
+            await expect(wizard.contributorAffiliations(modal)).not.toContainText('Later Institute');
+            await wizard.closeContributorEdit(modal);
         } finally {
             await context.close();
         }

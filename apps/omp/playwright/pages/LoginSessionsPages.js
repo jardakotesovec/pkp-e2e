@@ -8,7 +8,9 @@
  * "Current Users" table (a Vue `<user-access-manager>`: search box, rows,
  * the per-row "More Actions" menu), the "Login As" page dialog, the
  * `login/signInAsUser/{id}` address and the two refusal pages it answers
- * with, and the cookie filter that plays a browser restart (spec fn-s).
+ * with, the cookie filter that plays a browser restart (spec fn-s), and the
+ * user menu's impersonation reads and "Logout as {username}" (shared with
+ * U03's S11).
  *
  * Function exports, the shape of `ReviewStagePages.js`; every function
  * takes the page (or a locator) it works on.
@@ -94,6 +96,85 @@ async function persistentCookies(context) {
     return cookies.filter((cookie) => cookie.expires > 0);
 }
 
+/**
+ * The top-nav user menu (`TopNavActions.vue`). `.last()`: the workflow side
+ * modal renders its own copy of the top nav above the page's, and the last
+ * one is the interactive one.
+ */
+const userNav = (page) => page.locator('[data-cy="app-user-nav"]').last();
+
+/** Open the user menu and return its nav element. */
+async function openUserMenu(page) {
+    await userNav(page).locator('> button').click();
+    const nav = userNav(page).locator('nav');
+    await expect(nav).toBeVisible();
+    return nav;
+}
+
+/** Close the user menu by toggling its button (never Escape near a workflow dialog). */
+async function closeUserMenu(page) {
+    await userNav(page).locator('> button').click();
+}
+
+/** The user menu's plain "Logout" entry (absent while impersonating). */
+const logoutLink = (nav) => nav.getByRole('link', {name: 'Logout', exact: true});
+
+/**
+ * The user menu holds no "You are currently logged in as" line: the
+ * session is the account's own. The plain "Logout" entry is the positive
+ * control (the menu rendered). Leaves the menu closed.
+ */
+async function expectOwnSession(page) {
+    const nav = await openUserMenu(page);
+    await expect(logoutLink(nav)).toBeVisible();
+    await expect(nav.getByText(/logged in as/)).toHaveCount(0);
+    await closeUserMenu(page);
+}
+
+/**
+ * The user menu while impersonating `username`: the "You are currently
+ * logged in as" line, "Logout as {username}", no plain "Logout". Leaves the
+ * menu closed.
+ */
+async function expectImpersonating(page, username) {
+    const nav = await openUserMenu(page);
+    await expect(nav.getByText(`You are currently logged in as ${username}`)).toBeVisible();
+    await expect(nav.getByRole('link', {name: `Logout as ${username}`}).first()).toBeVisible();
+    await expect(logoutLink(nav)).toHaveCount(0);
+    await closeUserMenu(page);
+}
+
+/** Confirm the "Login As" dialog with OK (the dialog must be open). */
+async function confirmLoginAsDialog(page) {
+    const dialog = loginAsDialog(page);
+    await expect(dialog.getByText(MSG.confirmLoginAs)).toBeVisible();
+    await dialog.getByRole('button', {name: 'OK'}).click();
+}
+
+/**
+ * Login As from a "Current Users" row of Users & Roles, confirmed with OK:
+ * the browser visits `login/signInAsUser/{id}` (returned) and lands on the
+ * impersonated user's own home (an Author's My Submissions).
+ */
+async function loginAsFromUsersRow(page, row) {
+    await (await openUserRowMenu(page, row)).filter({hasText: 'Login As'}).click();
+    const visited = page.waitForRequest(/\/login\/signInAsUser\/\d+$/);
+    await confirmLoginAsDialog(page);
+    const request = await visited;
+    await page.waitForURL(/\/dashboard\//, {waitUntil: 'commit', timeout: 30_000});
+    return request.url();
+}
+
+/**
+ * Press the user menu's "Logout as {username}": the impersonator's own
+ * session is back, no password asked; waits to land on their Dashboard.
+ */
+async function logoutAs(page, username) {
+    const nav = await openUserMenu(page);
+    await nav.getByRole('link', {name: `Logout as ${username}`}).first().click();
+    await page.waitForURL(/\/dashboard\//, {waitUntil: 'commit', timeout: 30_000});
+}
+
 module.exports = {
     MSG,
     siteHomeUrl,
@@ -112,4 +193,12 @@ module.exports = {
     noAdminRightsCause,
     usersListLink,
     persistentCookies,
+    userNav,
+    openUserMenu,
+    closeUserMenu,
+    expectOwnSession,
+    expectImpersonating,
+    confirmLoginAsDialog,
+    loginAsFromUsersRow,
+    logoutAs,
 };

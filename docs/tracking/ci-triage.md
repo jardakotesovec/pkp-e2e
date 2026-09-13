@@ -79,16 +79,20 @@ trips.
   final run and again alone 2026-09-07, green in two full runs earlier that
   day; OJS red in a local final run 2026-09-08 (U23 revision), the first
   time on a journal. **Watch condition**: reds on CI.
-- **U01 S8 hangs on a used database** (OJS, local only so far). After a
+- **U01 S8 hangs on a used database** (OJS and once OPS, local only so far). After a
   day's probes, checks and suite runs on one database, "S8: editor
   impersonates a participant from the Participants panel" hit its 4-minute
   timeout twice in a row (the editor's dashboard showed 129 assigned
   submissions); it passed in 8 s right after `reset:ojs` and the final
   run was green. Seen 2026-09-05 (U29 session, `.reports/U29/pw-out-u01s8`
-  in git-ignored scratch). CI runs on a fresh database, so no CI incident
-  yet. **Watch condition**: S8 reds in CI, or a local run on a fresh
-  database reds; then bisect the participant panel against submission
-  volume.
+  in git-ignored scratch). A milder OPS sighting 2026-09-13 (U03
+  revision, first local final at workers auto, a database reset that
+  morning and used by three author runs): the impersonated author's
+  workflow window opened but its "Submission {tag}" title was not found in
+  10 s, green alone in 11 s (`.reports/U03/final-run-ops-run1-red.log`).
+  CI runs on a fresh database, so no CI incident yet. **Watch
+  condition**: S8 reds in CI, or a local run on a fresh database reds;
+  then bisect the participant panel against submission volume.
 - **Reviewer-indicator popover under load** (U23 S9, OJS). The row with
   two reviewers opens the wrong reviewer's popover (Paul instead of Julia)
   during a full-suite run and passes in isolation; the hover target is

@@ -36,14 +36,31 @@ exports.UsersRolesPage = class UsersRolesPage extends BasePage {
         this.userSearchInput = page.getByRole('searchbox');
     }
 
-    /** Navigate to Users & Roles and wait for the Invitations table fetch. */
-    async goto() {
+    /**
+     * Navigate to Users & Roles and wait for the Invitations table fetch.
+     * With a `locale` the address names it
+     * (`/{context}/{locale}/management/settings/access`); the page's
+     * headings are then translated or raw keys (U03 screen-notes), so the
+     * language-neutral search box is the landmark instead. Opening the
+     * screen in another language flips the session's language for every
+     * later screen, so a later English read names `/en/` itself.
+     *
+     * @param {{locale?: string|null}} [options]
+     */
+    async goto({locale = null} = {}) {
         const invitationsFetch = this.page.waitForResponse(
             (r) => r.url().includes('/invitations/userRoleAssignment') && r.request().method() === 'GET'
         );
-        await this.page.goto(this.contextUrl(this.contextPath, '/management/settings/access'));
+        const localePart = locale ? `/${locale}` : '';
+        await this.page.goto(
+            this.contextUrl(this.contextPath, `${localePart}/management/settings/access`)
+        );
         await invitationsFetch;
-        await expect(this.invitationsHeading).toBeVisible();
+        if (locale) {
+            await expect(this.userSearchInput.first()).toBeVisible({timeout: 30_000});
+        } else {
+            await expect(this.invitationsHeading).toBeVisible();
+        }
     }
 
     /**
