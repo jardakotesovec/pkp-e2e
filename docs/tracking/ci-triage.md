@@ -65,7 +65,8 @@ trips.
   revision local final 2026-09-13 (load over 100 on 10 cores from the
   desktop), both green in the second full run; U40 S4 (the edited abstract not
   found in 30 s) red on OMP in the first U03 revision final 2026-09-13, green
-  alone in 5 s and in the second full run. **Watch condition**: a
+  alone in 5 s and in the second full run; U40 S4 red on OMP in the first
+  U06 revision final 2026-09-13, green alone in 5.1 s. **Watch condition**: a
   hardened test reds again with retries exhausted.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
@@ -179,6 +180,11 @@ trips.
   merge of companion `13274`, `.reports/sync/merge13274-ojs.log`); green
   alone in 5.5 s. **Watch condition**: a second incident, or one at four
   workers alone on the VM.
+- **A page load hanging under desktop load** (U04 S6, OMP, once). `page.goto`
+  to the scratch press's `/orcid/about` ran to the 60 s test timeout in the
+  second U06 revision local final 2026-09-13 (load 15–19 on the Mac from
+  the desktop, `.reports/U06/final-run-omp-run2-red.log`); green alone in
+  5.4 s. **Watch condition**: a second incident, or one on the VM or CI.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

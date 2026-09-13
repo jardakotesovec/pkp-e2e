@@ -2,7 +2,7 @@
  * @file playwright/pages/UserInvitationPages.js
  *
  * OMP page objects for the user-invitations feature (spec:
- * lib/pkp/docs/e2e/specs/U06-user-invitations.md, RUNBOOK step 7).
+ * docs/specs/U06-user-invitations.md, RUNBOOK step 8).
  *
  * Three surfaces:
  * - UsersAccessPage — Settings → Users & Roles (Users tab): the Invitations
@@ -75,6 +75,7 @@ class UsersAccessPage {
     async searchUsers(phrase) {
         const box = this.page.getByRole('searchbox').first();
         await box.click();
+        await box.fill(''); // a second search on the same page starts from an empty box
         await box.pressSequentially(phrase);
         const settled = this.page.waitForResponse(
             (r) =>
@@ -117,10 +118,112 @@ class SendInvitationWizard {
         this.sentDialog = page
             .locator('[data-cy="dialog"]')
             .filter({hasText: 'Invitation Sent'});
+        this.subjectField = page.getByLabel('Subject');
+        /** The compose step's body: a TinyMCE editor, its text inside the iframe. */
+        this.composeBody = page.frameLocator('iframe').first().locator('body');
+        /** Rule 13's masthead confirmation (editUser mode). */
+        this.mastheadDialog = page
+            .locator('[data-cy="dialog"]')
+            .filter({hasText: 'Confirm masthead visibility change'});
+        /** Rule 13's Remove Role dialog: the confirmation on a removable row, the refusal on a last role. */
+        this.removeRoleDialog = page
+            .locator('[data-cy="dialog"]')
+            .filter({has: page.getByRole('heading', {name: 'Remove Role'})});
+        /** The confirmation's confirm button (absent on the last-role refusal). */
+        this.removeRoleConfirmButton = this.removeRoleDialog.getByRole('button', {name: 'Remove Role', exact: true});
+        /** The last-role refusal's single button. */
+        this.removeRoleCloseButton = this.removeRoleDialog.getByRole('button', {name: 'Close', exact: true});
+        /**
+         * The app's generic "Error" dialog (a failed request's raw message,
+         * spec finding OMP1 on the masthead change). Dismissed, never asserted.
+         */
+        this.errorDialog = page
+            .locator('[data-cy="dialog"]')
+            .filter({has: page.getByRole('heading', {name: 'Error', exact: true})});
     }
 
     footerButton(name) {
         return this.footer.getByRole('button', {name, exact: true});
+    }
+
+    /**
+     * The compose step's body as the screen shows it (placeholders such as
+     * `{$RECIPIENTNAME}` unsubstituted), after the template has loaded.
+     */
+    async composeBodyText() {
+        await expect(this.subjectField).toBeVisible();
+        await expect(
+            this.page.locator('.composer__loadingTemplateMask'),
+        ).toHaveCount(0);
+        return this.composeBody.innerText();
+    }
+
+    /**
+     * A CURRENT role's row in the editUser wizard's roles table (Rule 13):
+     * it carries the masthead select and no role select (a new-role row
+     * carries both, and its role options can name a role held earlier).
+     */
+    currentRoleRow(roleName) {
+        return this.page
+            .getByRole('row')
+            .filter({hasText: roleName})
+            .filter({has: this.page.locator('select[name="masthead"]')})
+            .filter({hasNot: this.page.locator('select[name="userGroupId"]')});
+    }
+
+    /** The masthead select of a current role's row. */
+    mastheadSelect(roleName) {
+        return this.currentRoleRow(roleName).locator('select[name="masthead"]');
+    }
+
+    /**
+     * Pick the other masthead value on a current role's row and return it,
+     * leaving the confirmation dialog open ("Confirm" / "Cancel").
+     */
+    async pickOtherMasthead(roleName) {
+        const select = this.mastheadSelect(roleName);
+        const current = await select.inputValue();
+        const other = current === 'true' ? 'false' : 'true';
+        await select.selectOption(other);
+        await expect(this.mastheadDialog).toBeVisible();
+        return other;
+    }
+
+    /**
+     * Confirm the open masthead dialog and wait for it to close. A press
+     * answers with the "Error" dialog (OMP1): it is dismissed with OK when it
+     * shows, and nothing about it is asserted.
+     */
+    async confirmMasthead() {
+        await this.mastheadDialog.getByRole('button', {name: 'Confirm', exact: true}).click();
+        await expect(this.mastheadDialog).toBeHidden();
+        await this.dismissErrorDialog();
+    }
+
+    /** Press OK on the generic "Error" dialog when one is open (OMP1). */
+    async dismissErrorDialog() {
+        if ((await this.errorDialog.count()) > 0) {
+            await this.errorDialog.getByRole('button', {name: 'OK', exact: true}).click();
+            await expect(this.errorDialog).toBeHidden();
+        }
+    }
+
+    /** Press "Remove Role" on a current role's row; the dialog that opens is left open. */
+    async pressRemoveRole(roleName) {
+        await this.currentRoleRow(roleName)
+            .getByRole('button', {name: 'Remove Role'})
+            .click();
+        await expect(this.removeRoleDialog).toBeVisible();
+    }
+
+    /** A roles-table row's END DATE cell (third column: role, start, end, masthead). */
+    endDateCell(row) {
+        return row.locator('td, th').nth(2);
+    }
+
+    /** Inline field errors inside one new-role row (`.pkpFieldError__message`). */
+    rowFieldErrors(row) {
+        return row.locator('.pkpFieldError__message');
     }
 
     /** Step 1 — enter a search term and advance ("Search User" is the step's own next button). */
@@ -199,10 +302,26 @@ class AcceptInvitationWizard {
         this.acceptedDialog = page
             .locator('[data-cy="dialog"]')
             .filter({hasText: "You've been assigned a new role in OMP"});
+        /** The wizard's step rail (its accessible name is a raw locale key, A7). */
+        this.stepsList = page.getByRole('list').filter({hasText: 'Review & create account'}).last();
+        /** The ORCID step's two buttons (Rule 7). */
+        this.verifyOrcidButton = page.getByRole('button', {name: 'Verify ORCID iD', exact: true});
+        this.skipOrcidButton = page.getByRole('button', {name: 'Skip ORCID verification'});
+        /** The consent label's link (Settings: Privacy Statement). */
+        this.privacyStatementLink = page.getByRole('link', {name: 'Privacy Statement'});
+        /** The Password field's helper text stating the site minimum. */
+        this.passwordDescription = page.getByText(/It should be at least \d+ characters long/);
+        /** The inline error a refused password shows under the field. */
+        this.passwordError = page.locator('.pkpFieldError__message').filter({hasText: /password/i});
     }
 
     footerButton(name) {
         return this.footer.getByRole('button', {name, exact: true});
+    }
+
+    /** The current step's heading ("STEP n - <name>"). */
+    stepHeading(name) {
+        return this.page.getByRole('heading', {name: new RegExp(`STEP \\d+ - ${name}`)});
     }
 
     /** "Create OMP account" step (new invitees only). */
@@ -210,6 +329,19 @@ class AcceptInvitationWizard {
         await this.usernameField.fill(username);
         await this.passwordField.fill(password);
         await this.privacyCheckbox.check();
+        await this.footerButton('Save and continue').click();
+    }
+
+    /**
+     * Type a password on "Create OMP account" and press Save and continue
+     * without waiting for the step to change (for a password the step refuses).
+     */
+    async submitAccount({username, password}) {
+        await this.usernameField.fill(username);
+        await this.passwordField.fill(password);
+        if (!(await this.privacyCheckbox.isChecked())) {
+            await this.privacyCheckbox.check();
+        }
         await this.footerButton('Save and continue').click();
     }
 

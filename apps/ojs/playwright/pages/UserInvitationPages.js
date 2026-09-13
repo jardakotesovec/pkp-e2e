@@ -79,10 +79,91 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
         this.sendButton = page.getByRole('button', {name: 'Invite user to the role'});
         this.sentDialog = page.getByRole('dialog').filter({hasText: 'Invitation Sent'});
         this.emailInput = page.getByLabel(/^Email/);
+        // The compose step's Message box is a TinyMCE iframe; its body is the
+        // text the step shows (and what the sent email's body is compared to).
+        this.bodyEditor = page.frameLocator('iframe').locator('body');
+        // The steps rail (its list carries the raw ##invitation.wizard.completeSteps##
+        // token as its name, register A7, so it is found by its content).
+        this.stepsList = page.locator('main').getByRole('list').filter({hasText: 'Enter details'});
+        // Rule 13's immediate-action dialogs on an existing member's roles table.
+        this.mastheadDialog = page.getByRole('dialog', {name: 'Confirm masthead visibility change'});
+        this.removeRoleDialog = page.getByRole('dialog', {name: 'Remove Role'});
     }
 
     stepHeading(name) {
         return this.page.getByRole('heading', {name});
+    }
+
+    /** A pill of the steps rail ("Search User", "Enter details", …). */
+    stepPill(name) {
+        return this.stepsList.getByRole('listitem').filter({hasText: name});
+    }
+
+    /**
+     * The visible text of the main region on the "Enter details" step, read
+     * once the step is on screen. Two walks for the same address read the
+     * same text (Rule 3's "no hint of a pending invitation").
+     */
+    async readDetailsStep() {
+        await expect(this.stepHeading(/Enter details/)).toBeVisible();
+        return (await this.page.locator('main').innerText()).replace(/\s+/g, ' ').trim();
+    }
+
+    /**
+     * The compose step's Message body as the editor shows it (its variables
+     * still unsubstituted, e.g. "{$RECIPIENTNAME}"), read settled: non-empty
+     * and the same across two reads.
+     */
+    async readBody() {
+        await expect(this.bodyEditor).not.toHaveText('');
+        let last = await this.bodyEditor.innerText();
+        await expect
+            .poll(async () => {
+                const now = await this.bodyEditor.innerText();
+                const same = now === last;
+                last = now;
+                return same;
+            })
+            .toBe(true);
+        return last;
+    }
+
+    /**
+     * A current-role row of an existing member's roles table (editUser mode),
+     * by the role's name: the rows that carry a "Journal Masthead" select and
+     * "Remove Role" (Rule 13). The new-role rows (a "Select a new role"
+     * combobox, whose options also name roles) are excluded.
+     *
+     * @param {string} role the role's visible name ("Author")
+     */
+    currentRoleRow(role) {
+        return this.page
+            .getByRole('row')
+            .filter({hasText: role})
+            .filter({hasNot: this.page.getByLabel(/^Select a new role/)});
+    }
+
+    /** The Journal Masthead select of a current-role row (values "true"/"false"). */
+    mastheadSelect(row) {
+        return row.getByRole('combobox');
+    }
+
+    /** The "Remove Role" button of a current-role row. */
+    removeRoleButton(row) {
+        return row.getByRole('button', {name: 'Remove Role'});
+    }
+
+    /** The newest new-role row (the one carrying "Select a new role"). */
+    newRoleRow() {
+        return this.page
+            .getByRole('row')
+            .filter({has: this.page.getByLabel(/^Select a new role/)})
+            .last();
+    }
+
+    /** The inline "This field is required." errors inside a row. */
+    requiredErrors(row) {
+        return row.getByText('This field is required.');
     }
 
     /** Step 1 — search, then land on "Enter details". */
@@ -158,10 +239,56 @@ exports.AcceptInvitationWizard = class AcceptInvitationWizard extends BasePage {
         this.acceptedDialog = page
             .getByRole('dialog')
             .filter({hasText: "You've been assigned a new role in OJS"});
+        // The ORCID step (Rules 5, 7): shown only when ORCID is on for the
+        // journal and the recipient has no verified iD.
+        // Exact: the rail's current pill is also a button named "1 Verify ORCID iD".
+        this.verifyOrcidButton = page.getByRole('button', {name: 'Verify ORCID iD', exact: true});
+        this.skipOrcidButton = page.getByRole('button', {name: 'Skip ORCID verification'});
+        // "Create OJS account" (Rules 5, 9; Fields "Accept wizard").
+        this.passwordHint = page.getByText(/^It should be at least \d+ characters long/);
+        this.privacyStatementLink = page.getByRole('link', {name: 'Privacy Statement'});
+        // The steps rail, found by the review step every recipient gets.
+        this.stepsList = page.locator('main').getByRole('list').filter({hasText: 'Review & create account'});
     }
 
     stepHeading(name) {
         return this.page.getByRole('heading', {name});
+    }
+
+    /** A pill of the steps rail ("Verify ORCID iD", "Create OJS account", …). */
+    stepPill(name) {
+        return this.stepsList.getByRole('listitem').filter({hasText: name});
+    }
+
+    async expectOnOrcidStep() {
+        await expect(this.stepHeading(/Verify ORCID iD/)).toBeVisible();
+    }
+
+    async expectOnAccountStep() {
+        await expect(this.stepHeading(/Create OJS account/)).toBeVisible();
+    }
+
+    /** "Skip ORCID verification" → the next step (Rule 7). */
+    async skipOrcid() {
+        await this.skipOrcidButton.click();
+    }
+
+    /**
+     * Fill the account step and press "Save and continue" without expecting
+     * the next step (for a refused password, whose inline error is read by
+     * `fieldError`).
+     */
+    async submitAccount({username, password}) {
+        await this.expectOnAccountStep();
+        await this.usernameInput.fill(username);
+        await this.passwordInput.fill(password);
+        await this.privacyCheckbox.check();
+        await this.saveAndContinueButton.click();
+    }
+
+    /** An inline field error by its text. */
+    fieldError(text) {
+        return this.page.getByText(text);
     }
 
     /** "Create OJS account" step (new invitees; ORCID is off in test contexts). */

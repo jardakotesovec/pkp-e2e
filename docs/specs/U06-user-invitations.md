@@ -134,13 +134,19 @@ Accept wizard (new invitee):
     and the old links stop working ⚠ [A3](#a3). <sup>q</sup>
 13. The user row's Edit action opens the same wizard for an existing member,
     with no search step. Inside its roles table, **removing** a current role
-    or changing its masthead visibility takes effect immediately, each behind
-    its own confirmation, and the member is emailed either way (see *Side
-    effects*) ⚠ [OMP1](#omp1). **Adding** a role is only a proposal. It takes
-    effect when the member accepts the resulting invitation. A member's last
-    active role cannot be removed. In this wizard the send path stays inactive
-    while no new role row exists. An empty row is enough to activate it, and
-    missing role fields are rejected on the next step with inline
+    or changing its masthead visibility takes effect at once, each behind its
+    own confirmation, and the member is emailed either way (see *Side
+    effects*) ⚠ [OMP1](#omp1). A removed role stays listed: its row keeps its
+    place in the roles table with End Date set to today and "User Removed
+    From Role" where its Remove Role button was. **Adding** a role is only a
+    proposal. It takes effect when the member accepts the resulting
+    invitation. A member's last active role cannot be removed. Pressing its
+    Remove Role opens no confirmation: a "Remove Role" dialog answers "You
+    cannot remove the role. At least one role must be assigned to the user."
+    with a single "Close" button, and the role keeps its Remove Role button
+    and masthead select. In this wizard "Save And Continue" on the details
+    step stays inactive while no new role row exists. An empty row is enough
+    to activate it; pressing it rejects the missing role fields with inline
     errors. <sup>c</sup> <sup>i</sup>
 14. A disabled user cannot be invited. Reaching one through the search step
     shows "The user is currently disabled." with instructions to enable them
@@ -170,10 +176,12 @@ Accept wizard (new invitee):
   visibility.
 - **On role removal or masthead change** (the user-row wizard, Rule 13): the
   member is emailed at once ("You have been removed from a role" / "Your
-  journal masthead visibility has been updated"), and the confirmation dialog
-  says so up front. ⚠ [OMP1](#omp1) On a press or preprint server the
-  masthead email fails with a raw error shown to the manager, though the
-  visibility change itself sticks. <sup>r</sup>
+  journal masthead visibility has been updated"). Only the masthead
+  confirmation says so up front ("The user will be notified of this
+  change."); the removal confirmation warns of the lost access and
+  permissions and says nothing of an email. ⚠ [OMP1](#omp1) On a press or
+  preprint server the masthead email fails with a raw error shown to the
+  manager, though the visibility change itself sticks. <sup>r</sup>
 - **No notice to the inviter**: nobody is emailed or notified when the
   recipient accepts or declines ⚠ [A5](#a5). The pending row simply
   disappears. From the manager's screens, an acceptance and a decline can be
@@ -219,80 +227,295 @@ Accept wizard (new invitee):
 
 ## Canonical scenarios
 
-Every scenario runs on the seeded journal: the Journal Manager is a ready
-account, each invitee is a throwaway address, and scenario 3's existing user
-is a ready account not yet holding the offered role. The accounts and the
-tooling recipe are in the footnote. <sup>s</sup>
+Every scenario but 9 runs on a scratch journal of its own, with a throwaway
+Journal Manager, throwaway invitee addresses and the emails read in the
+mail catcher; scenarios 3, 7, 8 and 10 start with an extra throwaway user
+(scenario 7 with two), scenario 10's journal has ORCID enabled and its
+extra user holds a verified ORCID iD, and scenario 9 browses the seeded
+preprint server as its ready Preprint Server Manager. The accounts, the
+addresses and the tooling recipe are in the footnote. <sup>s</sup>
 
-1. **Invite a newcomer to a role**: Journal Manager: on Users & Roles, press
-   "Invite to a role". On "Search User", enter an email address no account
-   uses and continue. The wizard reports the user is not known to the journal
-   and moves to "Enter details". Fill in the given name and add a role row:
-   pick a role, set today's start date, and choose "Appear on the masthead" in
-   the masthead select, which starts blank. (If you choose Reviewer instead,
-   that text shows fixed, with nothing to select.) Continue to the compose
-   step, adjust the subject, and press "Invite user to the role". An
-   "Invitation Sent" dialog appears. Press "View All Users". The browser
-   returns to Users & Roles, where the Invitations table shows the row as
-   "Invited {date}", and the recipient's mailbox holds the invitation listing
-   the offered role and two links. <sup>s</sup>
-2. **Newcomer accepts and gets an account**: signed-out visitor: open the
-   emailed accept link. Walk the wizard: skip ORCID verification (if the
-   ORCID step is shown), choose a username and password and tick the privacy
-   consent on "Create OJS account", fill in name and country on "Enter
-   details", check the summary on "Review & create account" (its Edit button
-   reopens the details), and press "Accept And Continue to OJS". A dialog
-   announces the new role. ⚠ [A4](#a4) Its "View All Submissions" button
-   lands on the sign-in screen. Signing in with the new credentials succeeds,
-   the account holds the offered role, and the invitation's row is gone from
-   the manager's Invitations table.
-3. **Existing user accepts an additional role**: Journal Manager: invite an
-   existing registered user who does not yet hold the offered role, found by
-   exact email on "Search User". The wizard confirms the user exists and shows
-   their details read-only. Send with one new role. Recipient (signed out):
-   open the accept link. The review step opens directly (at most an ORCID
-   step precedes it), with no password prompt and no account fields. Accept.
-   ⚠ [A4](#a4) The browser lands on the sign-in screen still signed out.
-   Signing in the usual way shows the role on the account, and the manager
-   sees the name under Current Users.
-4. **Recipient declines**: recipient of a pending invitation: open the emailed
-   decline link. A "Decline Invitation" page asks for confirmation. Press
-   "Confirm Decline Invitation". The browser lands on the sign-in page, no
-   role was granted, the invitation's row is gone from the Invitations table,
-   and both emailed links now show "Invitation Unavailable".
-5. **Manager cancels a pending invitation**: Journal Manager: on the
-   invitation's row menu, choose "Cancel Invite". The confirmation dialog
-   recaps the invitee (email, role, status, affiliation). Confirm. The row
-   disappears, and the recipient's accept link now shows "Invitation
-   Unavailable" with Login and Register buttons.
-6. **Manager edits a pending invitation**: Journal Manager: on the
-   invitation's row menu, choose Edit. A dialog warns the current invitation
-   will be canceled and a new one sent. Proceed. The wizard opens prefilled
-   without the search step. Change the role set and send. The recipient's
-   mailbox holds a second invitation email whose links work. The first
-   email's links no longer do ⚠ [A3](#a3).
-7. **Wrong person signed in**: a signed-in user who is not the invitee opens
-   an accept link addressed to an existing user. The page refuses with
-   "Invitation not accepted. You're logged in as a different user." and offers
-   to log out. After logging out and reopening the link, the real flow starts.
-8. **Propose a role via the user row**: Journal Manager: open Edit on an
-   existing member's row in the users list. The wizard opens on their details
-   with no search step. The roles table shows the current roles with Remove
-   Role and masthead controls. These act immediately and email the member
-   (⚠ [OMP1](#omp1) on a press or preprint server the masthead confirmation
-   shows an error, though the change sticks). The send button stays inactive
-   until a new role row is added. Add one and send. The member receives an
-   invitation email, and the role appears on their account only after they
-   accept it (scenario 3's flow).
+1. **Invite a newcomer to a role**
+
+   Given: a Journal Manager, signed in, on a scratch journal. <sup>s</sup>
+
+   - **Users & Roles**: press "Invite to a role".
+   - **"Search User"**: enter an email address no account uses (the footnote
+     names it) and continue: the wizard answers "The user does not have a
+     role in this journal" and moves to "Enter details".
+   - **"Enter details"**: fill in Given Name Nova and add a role row: pick
+     the offered role (the footnote names it per app), set Start Date to
+     today, and choose "Appear on the masthead" in the masthead select,
+     which starts blank. (If you choose Reviewer instead, that text shows
+     fixed, with nothing to select.) Continue to the compose step.
+   - **The compose step**: replace the subject with a marker of this run
+     (the footnote names it) and press "Invite user to the role": an
+     "Invitation Sent" dialog appears.
+   - **"View All Users"**: press it: the browser returns to Users & Roles,
+     where the Invitations table shows the row as "Invited {date}".
+   - **The recipient's mailbox**: holds the invitation email, sent from the
+     Journal Manager, listing the offered role with its start date and
+     masthead visibility and the accept and decline links (Side effects).
+   - **The email's subject and body**: the subject is the marker typed on
+     the compose step and the body the text that step showed at send time
+     (Side effects).
+   - **A second send to the same address**: press "Invite to a role" again,
+     search the same address and walk the wizard the same way to "Invite
+     user to the role": the wizard gives no hint that a pending invitation
+     exists, and afterwards the Invitations table holds only the newer row
+     (Rule 3).
+   - **Control**: under Current Users the address has no row: a new
+     invitee's account exists only from the moment they accept (Rule 9).
+
+2. **Newcomer accepts and gets an account**
+
+   Given: a signed-out visitor holding the accept link of a pending
+   invitation to a throwaway address, sent as in scenario 1 on a scratch
+   journal with ORCID off. <sup>s</sup>
+
+   - **The accept link**: open it: the wizard opens on "Create OJS account"
+     with no "Verify ORCID iD" step, ORCID being off on this journal
+     (Rule 5).
+   - **The password's minimum on "Create OJS account"**: the Password field
+     states its minimum, six characters on a default install; Pass5, five
+     characters, is refused and the step does not advance (Settings).
+   - **"Create OJS account"**: choose a username and password (the footnote
+     names them) and tick the privacy consent.
+   - **The consent checkbox's label**: links to the journal's Privacy
+     Statement page (Settings).
+   - **"Enter details"**: fill in Given Name Nova and Country Canada.
+   - **"Review & create account"**: check the summary; its Edit button
+     reopens the details. Press "Accept And Continue to OJS": a dialog
+     announces the new role.
+   - **"View All Submissions"**: ⚠ [A4](#a4) the dialog's "View All
+     Submissions" button lands on the sign-in screen.
+   - **The sign-in screen**: signing in with the new credentials succeeds,
+     and the account holds the offered role.
+   - **Control**: the invitation's row is gone from the manager's
+     Invitations table, beside the account now holding the role (Rule 11).
+
+3. **Existing user accepts an additional role**
+
+   Given: a Journal Manager, signed in, on a scratch journal with a
+   throwaway user who holds the Author role and not the offered one, the
+   user signed out. <sup>s</sup>
+
+   - **"Search User"**: press "Invite to a role" on Users & Roles and search
+     the user's exact email address: the wizard confirms the user exists and
+     shows their details read-only.
+   - **"Enter details" and the compose step**: add one new role row (the
+     offered role, Start Date today, "Appear on the masthead") and send.
+   - **The recipient's mailbox**: holds the invitation email listing the
+     offered role and, as a role already held, Author (Side effects).
+   - **The accept link**: signed out, open it: the review step opens
+     directly (at most an ORCID step precedes it), with no password prompt
+     and no account fields.
+   - **The link opened, the accept button not pressed**: on the manager's
+     Users & Roles the row still reads "Invited {date}": opening the link
+     alone never accepts the roles (Rule 5).
+   - **"Accept And Continue to OJS"**: press it. ⚠ [A4](#a4) The browser
+     lands on the sign-in screen still signed out.
+   - **The sign-in screen**: signing in the usual way shows the role on the
+     account, and the manager sees the name under Current Users.
+   - **Control**: the invitation's row is gone from the Invitations table
+     (Rule 11), where it still stood before the accept button was pressed.
+
+4. **Recipient declines**
+
+   Given: the recipient of a pending invitation to a throwaway address,
+   sent as in scenario 1, signed out, holding the emailed links. <sup>s</sup>
+
+   - **The decline link**: open it: a "Decline Invitation" page asks for
+     confirmation.
+   - **The page open, not yet confirmed**: on the manager's Users & Roles
+     the row still reads "Invited {date}": opening the decline link alone
+     declines nothing (Rule 10).
+   - **"Confirm Decline Invitation"**: press it: the browser lands on the
+     sign-in page, no role was granted, and the invitation's row is gone
+     from the Invitations table.
+   - **Control**: both emailed links now show "Invitation Unavailable"
+     (Rule 4).
+
+5. **Manager cancels a pending invitation**
+
+   Given: a Journal Manager, signed in, on a scratch journal with a pending
+   invitation to a throwaway address, sent as in scenario 1, its email in
+   the recipient's mailbox. <sup>s</sup>
+
+   - **The invitation's row menu**: choose "Cancel Invite": the confirmation
+     dialog recaps the invitee (email, role, status, affiliation).
+   - **Confirm**: the row disappears.
+   - **The recipient's accept link**: now shows "Invitation Unavailable"
+     with Login and Register buttons.
+   - **Control**: the same accept link with its end cut off shows a
+     not-found error instead, never the "Invitation Unavailable" page
+     (Rule 4).
+
+6. **Manager edits a pending invitation**
+
+   Given: a Journal Manager, signed in, on a scratch journal with a pending
+   invitation to a throwaway address, sent as in scenario 1, its email in
+   the recipient's mailbox. <sup>s</sup>
+
+   - **The invitation's row menu**: choose Edit: a dialog warns the current
+     invitation will be canceled and a new one sent. Proceed.
+   - **The wizard**: opens prefilled without the search step. Change the
+     role set (the footnote names the roles), replace the subject with a
+     second marker of this run and send.
+   - **The recipient's mailbox**: holds a second invitation email.
+   - **Control**: the second email's links work, its accept link opening
+     the accept wizard, while the first email's links no longer do
+     ⚠ [A3](#a3).
+
+7. **Wrong person signed in**
+
+   Given: a Journal Manager, signed in, on a scratch journal with two
+   throwaway users: a member holding the Author role, and a bystander,
+   signed in in a browser of their own. <sup>s</sup>
+
+   - **The member's invitation**: invite the member to a further role as in
+     scenario 3: their mailbox holds the accept link.
+   - **The accept link in the bystander's browser**: open it: the page
+     refuses with "Invitation not accepted. You're logged in as a different
+     user." and offers to log out.
+   - **Control**: press "Logout", which ends that session, and reopen the
+     link: the real flow starts (Rule 6).
+
+8. **Propose a role via the user row**
+
+   Given: a Journal Manager, signed in, on a scratch journal with a
+   throwaway member holding two roles, Author and Reader. <sup>s</sup>
+
+   - **Edit on the member's row in the users list**: press it: the wizard
+     opens on their details with no search step. The roles table shows the
+     current roles with Remove Role and masthead controls. These act
+     immediately and email the member.
+   - **The masthead control on the Author row**: pick the other of "Appear
+     on the masthead" and "Does not appear on the masthead": the
+     confirmation dialog says "The user will be notified of this change.";
+     confirm: the change takes effect at once, and on a journal the member's
+     mailbox holds "Your journal masthead visibility has been updated"
+     (Rule 13, Side effects). ⚠ [OMP1](#omp1) On a press or preprint server the
+     masthead confirmation shows an error, though the change sticks.
+   - **Remove Role on the Reader row**: press it: the confirmation asks "Are
+     you sure you want to remove this role? The user will lose access and
+     permissions associated with it." and says nothing of an email; confirm
+     with "Remove Role": the row stays in the roles table with its End Date
+     set to today and "User Removed From Role" in place of its button, and
+     the member's mailbox holds "You have been removed from a role" (Rule 13,
+     Side effects).
+   - **Remove Role on the Author row, now the last active role**: press it:
+     no confirmation opens; a "Remove Role" dialog answers "You cannot remove
+     the role. At least one role must be assigned to the user." with a
+     single "Close" button. Press "Close": the row keeps its Remove Role
+     button and masthead select (Rule 13).
+   - **"Save And Continue" on the details step**: stays inactive until a new
+     role row is added.
+   - **An empty role row**: add a role row and leave it empty: "Save And
+     Continue" activates; press it: the missing role fields are rejected
+     with inline errors (Rule 13).
+   - **The filled row**: fill it in (the offered role, Start Date today,
+     "Appear on the masthead") and send: the member receives an invitation
+     email.
+   - **Control**: the role appears on the member's account only after they
+     accept it (scenario 3's flow), while the removal and the masthead
+     change above took effect at once (Rule 13).
 
 App-specific:
 
-9. **{OPS} The invitation template is missing from the Emails screen**:
-   Preprint Server Manager: open the Emails settings screen and search for
-   "User Invited to Role Notification". The list answers "No items found."
-   ⚠ [OPS1](#ops1) Meanwhile scenario 1, run on the same server, still
-   delivers the invitation email (positive control). On a journal or press
-   the same search finds the template with an Edit button.
+9. **The invitation template is missing from the Emails screen** {OPS}
+
+   Given: a Preprint Server Manager, signed in, on the seeded preprint
+   server. <sup>s</sup>
+
+   - **The Emails settings screen**: open it and search for "User Invited to
+     Role Notification": the list answers "No items found."
+     ⚠ [OPS1](#ops1)
+   - **Control**: scenario 1, run on the same install, still delivers the
+     invitation email; on a journal or press the same search finds the
+     template with an Edit button.
+
+10. **The ORCID step, shown only to a recipient without a verified iD** {OJS OMP OPS}
+
+    Given: a Journal Manager, signed in, on a scratch journal with ORCID
+    enabled, with a throwaway user who holds the Author role and a verified
+    ORCID iD (seeded), the user signed out. <sup>s</sup>
+
+    - **A newcomer's invitation**: invite an email address no account uses
+      (the footnote names it) as in scenario 1: its mailbox holds the accept
+      link.
+    - **The newcomer's accept link**: signed out, open it: the wizard opens
+      on "Verify ORCID iD", which offers the "Verify ORCID iD" button and
+      "Skip ORCID verification" and no other Continue button (Rules 5, 7).
+      Leave "Verify ORCID iD" unpressed.
+    - **"Skip ORCID verification"**: press it: "Create OJS account" opens
+      (Rule 5).
+    - **The verified user's invitation**: invite the throwaway user to a
+      further role as in scenario 3: their mailbox holds the accept link.
+    - **Control**: that accept link, opened signed out, opens the review
+      step directly with no "Verify ORCID iD" step: the step shows only to a
+      recipient without a verified ORCID iD (Rule 5).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - a past start date taking effect as the acceptance day (Rule 8): a
+    manager rarely backdates a start date, and the body names no screen
+    where a role's start date is read back after acceptance
+- **Budget** — variants:
+  - the template choice on the compose step (Actors row 7): the body states
+    no outcome of the choice to read
+  - "Back" to the search step clearing everything entered (Rule 15): the
+    body names no screen where the cleared fields are read back
+  - "Cancel" asking for confirmation only when something changed (Rule 15):
+    the body names neither the confirmation's wording nor where a cancel
+    lands
+- **Nothing new to test**:
+  - a Site Administrator sending, editing, cancelling or proposing (Actors
+    rows 1–5; scenarios 1, 5, 6 and 8's Journal Manager sees the same
+    screens)
+- **Register carries it**:
+  - A1 (which roles the wizard's own address admits; Actors row 2)
+  - A3 (the links of a replaced invitation dying with a not-found error;
+    Rules 3, 4, 12; scenario 6 marks it)
+  - A2 (an invitation being composed, purged by the daily cleanup; Rule 1,
+    Side effects)
+  - A4 (the link never signing anyone in, every recipient landing on the
+    sign-in screen; Rules 6, 9; scenarios 2 and 3 mark it)
+  - OMP1 (the masthead email failing with a raw error on presses and
+    preprint servers; Side effects; scenario 8 marks it)
+  - A6 (Edit on a disabled member's row opening an error over an empty
+    wizard; Rule 14)
+  - A5 ("Invitation Sent" promising updates never delivered; Rule 15, Side
+    effects)
+  - A7 (the email's wording slips, greeting a new invitee by address; Side
+    effects)
+  - A8 (added role rows carrying no accessible field names)
+- **No seed**:
+  - a pending invitation past its deadline, the link stopped and no role
+    granted (Rules 1, 2, 4): the test tooling cannot backdate a deadline
+  - "Verify ORCID iD" through ORCID's sign-in window (Rule 7): ORCID's
+    service is unreachable from the test installs
+  - a disabled user met on the search step, "The user is currently
+    disabled." and no role row (Rule 14): the test tooling cannot disable a
+    user
+  - the daily cleanup removing expired invitations (Side effects): the test
+    tooling does not run the scheduled task
+  - the invitation lifetime from the configuration file (Settings): the
+    test tooling does not change the configuration file
+- **Owned by another feature**:
+  - the masthead listing updating per the chosen visibility after
+    acceptance (Rule 8, Side effects; the masthead page: *Roles settings*)
+  - editing the stored invitation email template on the Emails screen
+    (Actors row 8; *Emails management*)
+  - other invitation kinds landing through the invitation-link landing
+    (Rule 4, Cross-feature; *Review assignments*, *Registration & account
+    validation*, *User profile*)
+  - who reaches the Users & Roles screen (Cross-feature; *User management*)
+  - which roles exist to be offered, their levels and the masthead concept
+    (Cross-feature; *Roles settings*)
 
 ## Findings register
 
@@ -383,8 +606,10 @@ Basis: probe. <sup>[f-a6](#fn-a6)</sup>
 The invitation email greets a new invitee by their email address even when a
 name was entered, and offers roles "as a Author". The search step reads
 "Enter at least one details…" and "…invite to take a additional roles". The
-masthead confirmation says "journal masthead" on presses and preprint servers
-too. The "Invitation Unavailable" page closes with "Please contact the
+masthead confirmation reads "This will update whether this user appears on
+the journal masthead for the selected role." on a press and a preprint
+server too, under a column named "Press Masthead" or "Server Masthead". The
+"Invitation Unavailable" page closes with "Please contact the
 journal manager for further assistance." on presses and preprint servers as
 well. Raw untranslated tokens ("##common.help##",
 "##userAccess.management.options##") show on the management screens of all
@@ -465,7 +690,20 @@ when a user or invitation is given), submit disabled until changes
 Live-confirmed 2026-07-31 (edit-user probe): Edit on a member's row opened
 the wizard with no search step — a two-step rail against the create flow's
 three — showing read-only identity fields and the roles table with its
-immediate Remove Role and masthead controls.
+immediate Remove Role and masthead controls. Test run 2026-09-13 (Rule 13,
+scenario 8; the OJS, OMP and OPS suites, OJS and OMP also by hand before
+the run): Remove Role on a member's last active role opened the "Remove
+Role" dialog "You cannot remove the role. At least one role must be assigned
+to the user." with one "Close" button and sent no request — the table's own
+`removeUserGroup` check on `numberOfActiveRoles` (roles without an end
+date) fires before any `endRole` call — and after Close the row still held
+its Remove Role button and masthead select; on a removable row the
+confirmation read "Are you sure you want to remove this role? The user will
+lose access and permissions associated with it." (`user.removeRole.message`,
+buttons "Remove Role" / "Cancel"), and after confirming (`endRole` 200) the
+row stayed listed with End Date set to that day and "User Removed From Role"
+in its last cell, the same on the wizard reopened from the user row (OJS,
+OPS). Basis: test run.
 
 <a id="fn-d"></a>
 **d** — Statuses: `PKP\invitation\core\enums\InvitationStatus`
@@ -661,19 +899,41 @@ draft (see f-a2).
 
 <a id="fn-r"></a>
 **r** — Removal email "You have been removed from a role"; masthead email
-"Your journal masthead visibility has been updated"; dialog copy "The user
-will be notified of this change." (live probe 2026-07-31; both delivered on
-OJS).
+"Your journal masthead visibility has been updated"; the masthead dialog's
+copy `user.masthead.update.message` ends "The user will be notified of this
+change." (live probe 2026-07-31; both delivered on OJS). The removal
+dialog's copy `user.removeRole.message` carries no such sentence: test run
+2026-09-13, all three apps, the removal email delivered on each (the
+2026-07-31 sentence had been read on the masthead dialog alone).
 Masthead template key `USER_ROLE_MASTHEAD_UPDATE` — OMP/OPS seeding gap in
 f-omp1.
 
 <a id="fn-s"></a>
-**s** — Scenario seeding: run on the seeded test journal/press/server
-(`publicknowledge`) with the seeded Journal Manager / Press Manager / Preprint
-Server Manager account; recipients use unique throwaway mailbox addresses per
-app and test; mail observed in the test mail catcher. Exact usernames per the
-e2e harness roster (test-authoring time). Scenario 3's "seeded user" is any
-roster account not yet holding the offered role.
+**s** — Scenario seeding: every scenario but 9 gets a scratch context per
+test and app from `POST scenarios/context` (`scenarios.md`), its tag
+carrying app, scenario and run, every account a `users[]` entry
+(`<username>@mail.test`, password the username twice), the Journal Manager
+a `manager` role entry. Extra entries: scenario 3's user and scenario 7's
+member an `author` entry; scenario 7's bystander a `reader` entry (any
+signed-in account that is not the invitee, the manager included, serves);
+scenario 8's member `roles: ['author', 'reader']`; scenario 10's context
+passes `orcid: {}` (ORCID enabled on the dummy Public Sandbox pair; every
+other context omits the key, which leaves ORCID off) and its user an
+`author` entry with `orcid` (the sandbox example
+`https://sandbox.orcid.org/0000-0002-1825-0097`) and `orcidIsVerified:
+true`, the seed that stamps the live permission ORCID's own sign-in would
+store. Invitee addresses are `rcpt<tag>@mail.test`, typed on "Search
+User"; the subject marker typed on the compose step is `Invitation<tag>`
+(scenario 6's first send `<tag>first`, its second `<tag>second`), and every
+mailbox read is Mailpit scoped by the recipient plus that marker
+(`pkpMail.find({to, contains})`), the accept and decline links pulled from
+the message body; scenario 8's masthead email is read on OJS only (f-omp1).
+Scenario 2's account is `acc<tag>` / `Password<tag>`, the refused control
+`Pass5`. The offered role is one the invitee does not hold: Copyeditor on
+OJS, Author or External Reviewer on OMP, Moderator on OPS; scenario 6's
+replacement changes the row to a second such role (Author on OJS,
+Copyeditor on OMP). Scenario 9 signs in as the seeded preprint server's
+ready Preprint Server Manager (`manager.maya`) and only browses.
 
 <a id="fn-a1"></a>
 **f-a1** — Role assignment vs screen gate: note b vs note a. The atlas route
@@ -724,8 +984,10 @@ disabled-user banner; the banner renders only on the search path
 <a id="fn-a7"></a>
 **f-a7** — Copy items, all observed on live probes 2026-07-31: email
 greeting by address and "as a Author" (invitation email); "journal masthead"
-wording on OMP/OPS
-masthead dialogs; search-step grammar "Enter at least
+wording on OMP/OPS masthead dialogs (`user.masthead.update.message`, which
+neither app's `locale/en/user.po` overrides; re-read verbatim by the
+2026-09-13 OMP and OPS test runs beside the "Press Masthead" / "Server
+Masthead" column); search-step grammar "Enter at least
 one details…" / "…invite to take a additional roles"; raw locale keys
 `##common.help##` and `##userAccess.management.options##` on the management
 screens of all three apps; and (claim check 2026-07-31) the
@@ -744,7 +1006,10 @@ duplicate-id scan + aria snapshot on OJS; shared component, all three apps).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
-independent sessions); OJS control clean, member's email delivered (note r).
+independent sessions; re-read word for word by the 2026-09-13 OMP and OPS
+test runs: the "Error" dialog with its one "OK" button, the PUT answering
+500 on the press, the select holding the new value after OK and after a reload, no
+masthead email); OJS control clean, member's email delivered (note r).
 Install-seed check 2026-07-31: only OJS's `registry/emailTemplates.xml` seeds
 `USER_ROLE_MASTHEAD_UPDATE`; the OMP and OPS registries carry no masthead
 template, and the `I11800_AddUserRoleMastheadUpdateEmail` migration adds it
