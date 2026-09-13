@@ -304,10 +304,21 @@ class ReviewFormsList extends BasePage {
         return this.rows().filter({hasText: title});
     }
 
-    /** A row's "In Review" and "Completed" counts. */
+    /**
+     * A row's "In Review" and "Completed" counts.
+     *
+     * The grid redraws a row after every save, so this can be called while
+     * the row is on screen but its cells are not in yet: a bare read of all
+     * the cells then comes back short and the count is undefined. Wait on
+     * the last cell the counts need, then read each one through its own
+     * locator.
+     */
     async rowCounts(row) {
-        const cells = await row.locator('td').allInnerTexts();
-        return {inReview: Number(cells[1].trim()), completed: Number(cells[2].trim())};
+        const cells = row.locator('td');
+        await expect(cells.nth(2)).toBeVisible({timeout: 30_000});
+        const inReview = await cells.nth(1).innerText();
+        const completed = await cells.nth(2).innerText();
+        return {inReview: Number(inReview.trim()), completed: Number(completed.trim())};
     }
 
     /** A row's "Active" tick. */
