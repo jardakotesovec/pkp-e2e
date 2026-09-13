@@ -233,12 +233,16 @@ title ⚠ [A3](#a3):
 ## Side effects
 
 - **On a reset request**: one email, "Password Reset Confirmation", goes to
-  the matching account, sent from the site's principal contact, containing
+  the matching account, sent from the site's contact address, containing
   the single reset link (Rule 8). No other flow in this spec sends mail.
   <sup>e</sup>
-- **On every sign-in**: the account's last-login date is updated (it shows on
-  users-management screens). Completing a forced change or an emailed reset
-  also ends the account's other sessions (Rules 9, 11). <sup>b</sup> <sup>f</sup>
+- **On every sign-in**: the account's last-login date is recorded, but the
+  Users & Roles screen does not show it: its "Current Users" table has the
+  columns "Name", "Email", "Roles", "Start Date", "Affiliation" and "More
+  Actions" ("Start Date" is the role's start), and a row's "Edit" page shows
+  each role's start and end dates only ⚠ [A9](#a9). Completing a forced
+  change or an emailed reset also ends the account's other sessions
+  (Rules 9, 11). <sup>b</sup> <sup>f</sup>
 - **On impersonation**: everything done while impersonating is recorded as
   the impersonated user. Submissions, decisions and emails all carry the
   target's name, as the confirmation dialog warns (Rule 12). Submission
@@ -318,79 +322,252 @@ title ⚠ [A3](#a3):
 
 ## Canonical scenarios
 
-Scenarios 1–3, 7 and 8 use ready accounts on the seeded journal (8 on a
-scratch submission); scenarios 4–6 act on a throwaway account, because
-each changes its password. The ready accounts and their passwords and the
+Scenarios 1 to 3, 7 and 8 use ready accounts on the seeded journal (1 on a
+site that also hosts a scratch journal, 8 on a scratch submission);
+scenarios 4 to 6 act on a throwaway account of a scratch journal, because
+each changes its password. Scenarios 2 and 4 keep the same account signed
+in in a second browser. The ready accounts and their passwords and the
 tooling recipe are in the footnote. <sup>s</sup>
 
-1. **Sign in and land on the Dashboard** — Editor: open the journal's Login
-   page. Enter the right username with a wrong password. The page answers
-   "Invalid username/email or password. Please try again." and keeps the
-   username filled in. Enter the correct password and press "Login". The
-   browser lands on the Dashboard. <sup>s</sup>
-2. **Sign out** — any signed-in user: open the top-right user menu (the
-   initials button) and press "Logout". The browser returns to the Login
-   page, signed out, and the "Username or Email" box already holds the
-   departed account's email address. Opening any dashboard address now shows
-   the Login page, not the dashboard. The exception is the address that ends
-   at the word "dashboard", which answers a blank error page ⚠ [A7](#a7).
-3. **A bookmarked private page waits for sign-in** — Editor, signed out:
-   paste a submission workflow address into the browser. The Login page
-   appears instead of the submission. Sign in. The browser continues
-   straight to the submission that was asked for, not to the Dashboard.
-4. **Recover a forgotten password** — Author, signed out: press "Forgot your
-   password?" on the Login page, enter the account's email address, and
-   submit. The page answers that a confirmation has been sent if the address
-   matched. Open the emailed "Password Reset Confirmation" message and follow
-   its link. On "Reset Password", enter a new password twice and save. The
-   page answers "Password has been updated successfully. Please login with
-   updated password." and you are still signed out. Sign in with the new
-   password: it works. The old password now fails with the generic error.
+1. **Sign in and land on the Dashboard**
+
+   Given: Editor, signed out, on the Login page of a journal whose site
+   also hosts a second journal; a Reader's account ready. <sup>s</sup>
+
+   - **An empty box**: type the Editor's username in "Username or Email",
+     leave "Password" empty and press "Login": the browser itself refuses
+     the submission and prompts to fill the field in; nothing reaches the
+     site (Rule 2).
+   - **A wrong password**: type not-the-password in "Password" and press
+     "Login": the page answers "Invalid username/email or password. Please
+     try again." and keeps the username filled in.
+   - **The correct password**: untick "Keep me logged in", type the
+     correct password and press "Login": the browser lands on the
+     Dashboard.
+   - **The Login page while signed in**: open the Login page's address
+     again: the Dashboard shows instead of the form (Rule 1).
+   - **A browser restart**: close the browser and open it again on the
+     Dashboard address: the Dashboard shows, still signed in, the box
+     having been unticked (Rule 5).
+   - **The Editor's row on Users & Roles**: Journal Manager: on Settings ›
+     Users & Roles, search for the Editor by name: the "Current Users"
+     table lists the Editor's row, its "Roles" cell naming the Editor's
+     role, under the columns "Name", "Email", "Roles", "Start Date",
+     "Affiliation" and "More Actions"; none of them is a last-login date
+     [A9](#a9) (Side effects).
+   - **The site-level Login page**: Editor: sign out, open the site's own
+     homepage and press "Login" at its top right: the same form; sign in:
+     the browser lands on the site home page, not the Dashboard (Rule 3).
+   - **Control**: sign out, open the journal's Login page and sign in as
+     the Reader: the browser lands on the journal home page, not the
+     Dashboard (Rule 3).
+
+2. **Sign out**
+
+   Given: any signed-in user, on the Dashboard, the same account also
+   signed in in a second browser. <sup>s</sup>
+
+   - **"Logout"**: open the top-right user menu (the initials button) and
+     press "Logout": the browser returns to the Login page, signed out,
+     and the "Username or Email" box already holds the departed account's
+     email address.
+   - **The second browser**: in the second browser, open the Dashboard:
+     it shows, the account still signed in there; signing out ended only
+     the first browser's session (Rule 6).
+   - **Control**: in the first browser, opening any dashboard address now
+     shows the Login page, not the dashboard. The exception is the address
+     that ends at the word "dashboard", which answers a blank error page
+     ⚠ [A7](#a7).
+
+3. **A bookmarked private page waits for sign-in**
+
+   Given: Editor, signed out, with a submission's workflow address at
+   hand. <sup>s</sup>
+
+   - **The bookmarked address**: paste the submission's workflow address
+     into the browser: the Login page appears instead of the submission.
+   - **Signing in**: sign in: the browser continues straight to the
+     submission that was asked for, not to the Dashboard.
+   - **Control**: the Login page that appeared was the plain form:
+     nothing on it named the submission being held (Rule 4).
+
+4. **Recover a forgotten password**
+
+   Given: Author, signed out, on a scratch journal, the same account also
+   signed in in a second browser; that journal's Login As address for a
+   Reader at hand (Rule 14). <sup>s</sup>
+
+   - **An address no account holds**: press "Forgot your password?" on the
+     Login page, type nobody@mail.test in "Registered user's email" and
+     submit: the page answers "A confirmation has been sent to your email
+     address if a matching account was found. Please follow the
+     instructions in the email to reset your password." with a "Login"
+     link back.
+   - **The account's address**: press "Login", then "Forgot your
+     password?" again, type the account's email address and submit: the
+     same answer; the email "Password Reset Confirmation" arrives in the
+     account's mailbox, sent from the site's contact address, and nothing
+     arrives for nobody@mail.test (Rule 7).
+   - **"Reset Password"**: open the email and follow its link: on "Reset
+     Password", type Recovered1 in "New password" and "Repeat new
+     password" and save: the page answers "Password has been updated
+     successfully. Please login with updated password." with a "Login"
+     link, and you are still signed out.
+   - **The second browser**: in the second browser, open My Submissions:
+     the Login page shows instead; that session ended when the new
+     password was saved (Rule 9).
+   - **The new password**: press "Login" and sign in with Recovered1: it
+     works; the browser lands signed in, where an ordinary sign-in would
+     (Rule 3).
+   - **Login As by address, as an Author**: open the Reader's Login As
+     address: the access-denied page answers "The current role does not
+     have access to this operation." and nothing of the refused screen
+     renders (Rule 17).
+   - **The same address, signed out**: press "Logout" in the user menu
+     and open the address again: the Login page shows instead (Rule 17).
+   - **Control**: on that Login page the old password now fails with
+     "Invalid username/email or password. Please try again.".
+
+5. **A stale or altered reset link is refused**
+
+   Given: the same Author, signed in with the new password after
+   scenario 4, with the emailed link still at hand. <sup>s</sup>
+
+   - **The link while signed in**: open the emailed link: the browser is
+     sent to the Author's home instead of the form (Rule 1).
+   - **The link after the change**: press "Logout" in the user menu and
+     open the emailed link again, the password having been changed and the
+     account signed in since: the page answers "Sorry, the link you clicked
+     on has expired or is not valid. Please try resetting your password
+     again." with a "Reset Password" link back to the lost-password form.
+   - **A mangled code**: open the link with its code mangled: the same
+     answer.
+   - **Control**: a link from a fresh "Forgot your password?" request for
+     the same address opens the "Reset Password" form (Rule 9); the
+     refusal is the stale link's own.
+
+6. **Forced password change at first sign-in** {OJS OMP}
+
+   Given: Editor, on a scratch journal with a submission in review.
    <sup>s</sup>
-5. **A stale or altered reset link is refused** — the same Author, signed
-   out again (signed in, the link just bounces home, Rule 1): open the
-   emailed link again after the password was changed and the account signed
-   in. The page answers "Sorry, the link you clicked on has expired or is
-   not valid. Please try resetting your password again." with a link back
-   to the lost-password form. A link with a mangled code answers the same.
-6. **Forced password change at first sign-in** — Editor, on a submission in
-   review: in the "Add Reviewer" window, choose "Create New Reviewer" and
-   create a reviewer with a throwaway email address. The registration email
-   delivers a username and a generated password. Sign in with them. Instead
-   of landing anywhere, the "Change Password" form appears. Enter the
-   emailed password as the current one and a new password twice. Pressing
-   "OK" signs the reviewer in and lands them on the Dashboard, the landing
-   their reviewer role earns (Rule 3). Signing in again with the new password
-   is normal. {OJS OMP; a preprint server has no review stage, so no screen
-   there sets the flag — no OPS analogue.} <sup>s</sup>
-7. **Administrator impersonates a user and returns** — Site Administrator:
-   on Users & Roles, open an Author's row menu and choose "Login As". A
-   dialog warns that all actions will be attributed to that user. Press OK.
-   The browser is now that Author's session: their name, their My
-   Submissions. The top bar shows the administrator's initials with the
-   Author's overlaid in a warning color, and the user menu reads "You are
-   currently logged in as {author}". Choose "Logout as {author}". The
-   administrator is back in their own session, with no password asked.
-   <sup>s</sup>
-8. **Editor impersonates a participant from the Participants panel** —
-   Editor, on a submission's workflow: on the Participants panel, open a
-   Section Editor participant's row menu, choose "Login As", and confirm.
-   The browser lands on the same submission as that participant, and the
-   top of the Participants panel now offers "Logout as {that participant}".
-   Press it to return to the editor's view of the same submission.
-   Impersonating the submission's Author instead lands on the author's own
-   My Submissions view, which shows no Participants panel. The way back is
-   then the user menu's "Logout as {author}" entry. On a journal or press
-   the Reviewers table offers the same row action for reviewers {OJS OMP; a
-   preprint server has no Reviewers table}. <sup>i</sup>
-9. **Administration asks for the password again** — Site Administrator, on
-   an install configured with a re-authentication window (see *Settings*):
-   open Administration. The "Confirm Access" page appears, naming the
-   administrator and asking for their password. A wrong password re-shows
-   the form with the generic sign-in error. The right one opens
-   Administration. Leave Administration alone past the window and come
-   back: the gate shows again. Pressing Cancel on it leads back out, not
-   into Administration. <sup>s</sup>
+
+   - **"Create New Reviewer"**: on the submission's review stage, in the
+     "Add Reviewer" window choose "Create New Reviewer" and create a
+     reviewer with the throwaway address nova.reviewer@mail.test and the
+     username nova.
+   - **The registration email**: the registration email delivers a
+     username and a generated password.
+   - **Signing in with them**: on the Login page sign in with them:
+     instead of landing anywhere, the "Change Password" form appears.
+   - **"Change Password"**: type the emailed password in "Current
+     password" and Changed1 in "New password" and "Repeat new password",
+     then press "OK": the reviewer is signed in and lands on the Dashboard,
+     the landing their reviewer role earns (Rule 3).
+   - **Control**: signing in again with Changed1 is normal: the browser
+     lands on the Dashboard with no "Change Password" form.
+
+   A preprint server has no review stage, so no screen there sets the
+   flag: no OPS analogue.
+
+7. **Administrator impersonates a user and returns**
+
+   Given: Site Administrator, signed in on the seeded journal. <sup>s</sup>
+
+   - **The user menu before impersonating**: open the top-right user menu
+     (the initials button): it offers "Logout"; copy the link behind that
+     entry, because the menu no longer offers it while impersonating
+     (Rule 15).
+   - **The administrator's own row**: on Users & Roles, open the
+     administrator's own row menu: it offers no "Login As" (Rule 14).
+   - **"Login As" on an Author's row**: open an Author's row menu and
+     choose "Login As": a dialog warns "Log in as this user? All actions
+     you perform will be attributed to this user." with OK and Cancel.
+   - **Cancel**: press Cancel: the dialog closes and the browser is still
+     the administrator's own session; the user menu holds no "You are
+     currently logged in as" line (Rule 13).
+   - **OK**: choose "Login As" again and press OK: the browser is now that
+     Author's session: their name, their My Submissions. The top bar shows
+     the administrator's initials with the Author's overlaid in a warning
+     color, and the user menu reads "You are currently logged in as
+     {author}"; it offers no plain "Logout", only "Logout as {author}"
+     (Rule 6).
+   - **"Logout as {author}"**: choose "Logout as {author}": the
+     administrator is back in their own session, with no password asked.
+   - **Control**: impersonate the Author again the same way and type the
+     copied sign-out address instead: the Login page shows, the browser
+     signed out of both identities and not back in the administrator's
+     account; opening Users & Roles now shows the Login page too
+     (Rules 4, 15).
+
+8. **Editor impersonates a participant from the Participants panel**
+
+   Given: Editor, on a submission's workflow on the seeded journal with a
+   Section Editor assigned as participant and an Author, the submission in
+   review with a Reviewer who accepted the request {OJS OMP}; a throwaway
+   account holding a role only on a scratch journal, for the Journal
+   Manager's case. <sup>i</sup> <sup>s</sup>
+
+   - **"Login As" on the Section Editor's row**: on the Participants
+     panel, the Editor's own row offers no "Login As" (Rule 14); open a
+     Section Editor participant's row menu, choose "Login As", and
+     confirm: the browser lands on the same submission as that
+     participant, and the top of the Participants panel now offers "Logout
+     as {that participant}".
+   - **"Logout as {that participant}"**: press it to return to the
+     editor's view of the same submission.
+   - **The Author's row**: impersonating the submission's Author instead
+     lands on the author's own My Submissions view, which shows no
+     Participants panel. The way back is then the user menu's "Logout as
+     {author}" entry.
+   - **The Reviewers table** {OJS OMP}: on the submission's review stage,
+     the Reviewer's row menu in the Reviewers table offers "Login As"; a
+     preprint server has no Reviewers table.
+   - **Journal Manager, a hand-built address to an out-of-reach user**:
+     Journal Manager: on Users & Roles, choose "Login As" on the Author's
+     row and press OK, copy the address the browser visited from its
+     history (it ends in a number identifying that user), choose "Logout
+     as {author}", then open that address with the number changed to the
+     one identifying the scratch journal's account: the page answers
+     "Sorry, you do not have administrative rights over this user…",
+     listing the possible causes, with a link back to the users list
+     (Rule 14).
+   - **Control**: opened with the copied number, the Author's own, the
+     same address impersonates the Author again, and "Logout as {author}"
+     returns the Journal Manager (Rule 14); the refusal is the
+     out-of-reach account's alone.
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Nothing new to test**:
+  - a wrong or unknown username getting the same sentence (Rule 2; scenario 1's wrong password)
+  - roles held only in other journals landing on the journal home page (Rule 3; scenario 1's Reader)
+- **Register carries it**:
+  - A7 (the address ending at the word "dashboard" answering a blank error; Rule 4)
+  - A5 (no users screen offering the forced-change flag; Rule 11)
+  - A8 (Login As from a stale session answering a blank error; Rule 14)
+  - A4 (Login As still offered mid-impersonation; Rule 15)
+- **No seed**:
+  - a disabled account refused, with or without a reason (Rule 2)
+  - the Site Administrator passing Confirm Access (Actors row 7): what is missing is a per-context way to set the re-authentication window; the configuration file's `password_timeout` is run-global
+  - Confirm Access's window lapse, no replay, and the direct address going home (Rule 16): the same missing window setting
+  - other Site Administrators never offered Login As (Rule 14): what is missing is a second site administrator
+  - a forced change ending the account's other sessions (Rule 11): what is missing is the flag set on an account that is already signed in elsewhere; no screen or key sets it (A5)
+  - "Keep me logged in" extending past the idle limit (Rule 5, `remember_me_lifetime`)
+  - the reset link expiring on the clock (Rule 8, `reset_seconds`)
+  - a link whose username no longer exists landing on the lost-password page (Rule 10)
+  - a session ending on a network-address change (Rule 18, `session_check_ip`)
+  - the password policy: minimum length, compromised check (Settings)
+  - rate limiting on: refusals during the cool-down, A6 (Settings)
+  - a session ending at browser close (Settings, `session_expire_on_close`)
+  - forced https for login or the site (Settings, `force_login_ssl`, `force_ssl`)
+  - the idle session lifetime (Settings, `session_lifetime`)
+- **Owned by another feature**:
+  - the "Expire User Sessions" tool ending every session (Rule 18; *System administration & jobs*)
+  - an action taken while impersonating carrying the target's name, and its activity-log line "{impersonator} (acting as {target})" (Side effects): no action of this feature writes a log entry; the actions belong to the workflow stages and the log screen to *Submission activity log & notes*
+  - spam checks on login and lost-password (Settings; *Registration & account validation*)
+  - registration disabled removing the Register links (Settings; *Roles configuration*)
 
 ## Findings register
 
@@ -408,6 +585,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A7](#a7) | Signed out, the address ending at the word "dashboard" answers a blank server error instead of the Login page | 🐞 | user-visible | Jarda 2026-08-25 |
 | [A8](#a8) | Login As answers a blank server error when the browser's session can no longer be fully resolved (e.g. it outlived a server-side reset) | 🐞 | minor | Jarda 2026-08-25 |
 | [A5](#a5) | No users screen offers the "must change password" flag, so a forced change cannot be required on an existing account | ❓ | user-visible | Jarda 2026-08-25 · to triage |
+| [A9](#a9) | The last-login date is recorded on every sign-in, but no users screen shows it, so a manager cannot see when an account last signed in | ❓ | minor | — |
 | [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down; the concealment is intended | ✅ | latent | Jarda 2026-08-25 |
 
 ### All apps
@@ -554,6 +732,21 @@ Since: 2026-08-25 · Basis: observed on a running site + code inspection.
 > the bare-dashboard error (A7): both are missing signed-out guards on
 > older page routes.
 
+<a id="a9"></a>
+**A9 — The last-login date has no screen** · ❓ · minor.
+Every sign-in records the account's last-login date, but no users screen
+shows it: the Users & Roles list's columns are "Name", "Email", "Roles",
+"Start Date" (the role's start), "Affiliation" and "More Actions", and a
+row's "Edit" page shows each role's start and end dates only. A Journal
+Manager who wants to know when an account last signed in has nowhere to
+look.
+Question: where does the product mean to show the date (a Users & Roles
+column, the row's "Edit" page), or is it kept only so that a sign-in kills
+an outstanding reset link (Rule 8)? Lean: show it on the Users & Roles
+list, where a manager looks for an account; that screen belongs to *Users
+management*, so the ruling is that feature's.
+Since: 2026-09-13 · Basis: test run. <sup>[f-a9](#fn-a9)</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -604,7 +797,8 @@ renders above the form. Last-login: `Validation::registerUserSession()` sets
 landings, the signed-in bounce off Login and lost-password, and the
 interrupted visit — a held workflow address shows the plain Login page (no
 visible mention of the pending destination) and continues to that
-submission after sign-in.
+submission after sign-in. No screen shows the last-login date: test run
+2026-09-13, finding A9 (note f-a9).
 
 <a id="fn-c"></a>
 **c** — Remember: `Validation::login(..., $remember)` → Laravel
@@ -832,19 +1026,57 @@ cool-down: finding A6.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding: the seeded test journal/press/server
-(`publicknowledge`) and roster accounts (passwords = username doubled):
-scenario 1 `editor.diana`; 2–3 any roster account / `editor.diana`; 4–5
-`author.alex` with mail observed in the test mail catcher (throwaway
-recipient addresses when creating scratch users); 6 a scratch reviewer
-created via Create New Reviewer on a scratch submission in review — the
-generated password is read from the test mail catcher (never flag a shared
-roster account — cached sign-ins of other tests would break); 7 `admin`
-impersonating `author.alex`; 8 `editor.diana` on a scratch submission with
-a roster section editor assigned as participant via the workflow Assign
-modal and `author.alex` as author, reviewer variant with `reviewer.julia`;
-9 requires `password_timeout` set in `config.test.inc.php` for the run.
-Scenario 4's account caveat: resetting a roster password must be undone or
-done on a scratch user for the same reason as 6.
+(`publicknowledge`) and roster accounts (passwords = username doubled;
+`admin`/`admin`). Scenario 1 `editor.diana` (OPS enrols no Editor: the
+Moderator `sectioneditor.ana` stands in), the Reader `reader.rosa`, and
+`manager.maya` for the Users & Roles read (Settings › Users & Roles ›
+Users of the seeded journal, the "Current Users" table searched by the
+Editor's given name; no column carries `dateLastLogin`, finding A9); the
+second journal that makes the site multi-journal is a `POST
+scenarios/context` with the test's tag and no `users[]`, the site-level
+Login page being `index/login`; the browser restart is tooling: a fresh
+browser context that carries over only the signed-in context's cookies
+holding an expiry date, as a real restart does. Scenarios 2–3 any roster
+account / `editor.diana`; scenario 2's second browser is a second browser
+context signed in as the same account before "Logout" is pressed, and
+scenario 3's submission is a `POST scenarios/submission` on the seeded
+journal. Scenarios 4–5 a throwaway `author` on a scratch journal (`POST
+scenarios/context` with `users: [{username, roles: ['author']},
+{username, roles: ['reader']}]`; the `reader` exists to be "another
+account": the Login As address scenario 4 types is
+`login/signInAsUser/{id}` with that user's id from the context response,
+built rather than captured), with mail observed in the test mail catcher
+by the throwaway address; nobody@mail.test holds no account on the test
+installs (every account's address is `<username>@mail.test`) and its
+silence is read after the account's own email arrived; scenario 4's
+second browser is a second browser context signed in as the throwaway
+before the reset is saved; scenario 5's fresh link is a second
+lost-password request for the same address. Scenario 6 a scratch reviewer
+created via Create New Reviewer on a scratch submission in review (`POST
+scenarios/context` with a throwaway `editor` and `author`, `POST
+scenarios/submission` with `decisions: ['sendExternalReview']`); the
+generated password is read from the test mail catcher; the body's `nova`
+and nova.reviewer@mail.test stand for a username and address the suites
+tag per run (never flag a shared roster account: cached sign-ins of other
+tests would break). Scenario 7 `admin` impersonating `author.alex`; the
+sign-out address is the href behind the user menu's "Logout" entry
+(`login/signOut`), captured before the first Login As; the
+administrator's own row is found by searching Users & Roles for `admin`.
+Scenario 8 `editor.diana` (OPS: `manager.maya`) on a scratch submission
+in the seeded journal's Articles section, which auto-assigns the section's
+editors (`sectioneditor.ana` as the Section Editor participant), with
+`author.alex` as submitter and the reviewer variant with `reviewer.julia`
+(`reviewRounds: [{reviewers: [{username: 'reviewer.julia', status:
+'accepted'}]}]`); the Journal Manager is `manager.maya`, the out-of-reach
+account a throwaway `reader` of a `POST scenarios/context` scratch
+journal: a scratch user holds roles only there, outside `manager.maya`'s
+journals, while `admin` is enrolled as a manager in every scratch context
+and so never finds a user out of reach; the number in the address is that
+user's id from the context response, and the copied address is
+`login/signInAsUser/{id}` as the browser visited it from the Author's
+row (no return address on the Users & Roles surface, note i). Scenario 4's
+account caveat: resetting a roster password must be undone or done on a
+scratch user for the same reason as 6.
 
 <a id="fn-a1"></a>
 **f-a1** — `maxlength="32"` hardcoded on the password inputs of
@@ -941,6 +1173,24 @@ that state) into the int-typed second parameter of
 GET → 302 to Login; freshly signed-in session → impersonation proceeds
 (200 → dashboard). Fix per ruling: treat an unresolvable session user as
 signed out (redirect to Login) before the administration-level check.
+
+<a id="fn-a9"></a>
+**f-a9** — `dateLastLogin`, set by `Validation::registerUserSession()` and
+read only by `Validation::generatePasswordResetHash()` (note f). Test run
+2026-09-13 (OJS, OMP, OPS, the suites' scenario 1 as `manager.maya`):
+Settings › Users & Roles › Users ("Current Users (N)", the shared
+ui-library `UserAccessManager` table) carries the column headers "Name",
+"Email", "Roles", "Start Date", "Affiliation", "More Actions", the Editor's
+row reading "Diana Editor editor.diana@mail.test Journal editor 2026-09-13"
+(OMP "Press editor"; OPS the Moderator "Ana Section Editor … Moderator"),
+the date being the role's start; the row's "Edit" leaves for
+`management/settings/user/{id}`, the invitation wizard, showing Email,
+ORCID iD, Given Name, Family Name, Affiliation, "View more details" and the
+role rows with "Start Date" / "End Date"; the list's own fetch
+(`api/v1/users`) carries no `dateLastLogin`, the ui-library has no consumer
+of the field outside its mocks, and Administration's index links no users
+list. The suites assert the row and the six headers and the date neither
+way.
 
 ## Reference — entry points & surfaces
 

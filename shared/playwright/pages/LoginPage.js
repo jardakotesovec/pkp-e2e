@@ -8,6 +8,7 @@
  * never see the truncation. (The underlying UI limitation is a product
  * finding for the Login & sessions spec, not something to assert around.)
  */
+const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
 
 exports.LoginPage = class LoginPage extends BasePage {
@@ -16,10 +17,50 @@ exports.LoginPage = class LoginPage extends BasePage {
         this.usernameInput = page.locator('input#username');
         this.passwordInput = page.locator('input#password');
         this.submitButton = page.locator('form#login button[type="submit"]');
+        this.form = page.locator('form#login');
+        this.rememberMeCheckbox = page.locator('form#login input[name="remember"]');
+        this.forgotPasswordLink = page.getByRole('link', {name: 'Forgot your password?'});
     }
 
     async goto() {
         await this.page.goto(this.siteUrl('/en/login'));
+    }
+
+    /**
+     * A context's own Login page (`/index.php/{contextPath}/login`), which
+     * decides where the user lands (Rule 3 of U01).
+     *
+     * @param {string} contextPath
+     */
+    async gotoContext(contextPath) {
+        await this.page.goto(this.contextUrl(contextPath, '/login'));
+    }
+
+    /** The form is on screen (the signed-out answer to a private address). */
+    async expectForm() {
+        await expect(this.form).toBeVisible();
+    }
+
+    /**
+     * Tick or untick "Keep me logged in".
+     *
+     * @param {boolean} on
+     */
+    async setRememberMe(on) {
+        await this.rememberMeCheckbox.setChecked(on);
+    }
+
+    /**
+     * Fill both boxes and press the button without waiting for a redirect,
+     * for a submission expected to stay on the page (a wrong password).
+     *
+     * @param {string} username
+     * @param {string} password
+     */
+    async submitCredentials(username, password) {
+        await this.usernameInput.fill(username);
+        await this.fillPassword(password);
+        await this.submitButton.click();
     }
 
     /**

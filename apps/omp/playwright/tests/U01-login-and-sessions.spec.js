@@ -2,44 +2,61 @@
 /**
  * @file playwright/tests/U01-login-and-sessions.spec.js
  *
- * U1 — Login & sessions, OMP suite (spec:
- * lib/pkp/docs/e2e/specs/U01-login-and-sessions.md). One test per canonical
- * scenario the spec runs on a press (common scenarios 1–8, in OMP
- * vocabulary: press, Press Manager, Series Editor — glossary substitution).
+ * U01 — Login & sessions, OMP suite (spec:
+ * docs/specs/U01-login-and-sessions.md). One test per canonical scenario
+ * the spec runs on a press (common scenarios 1–8, in OMP vocabulary:
+ * press, Press Manager, Series Editor — glossary substitution).
  *
- * Deliberate non-coverage:
- * - Scenario 9 / Rule 16 (Confirm Access): config-gated on
- *   `[security] password_timeout`, which is off in the shared test config.
- *   Turning it on mid-run is a global config edit that hits every parallel
- *   worker (PRINCIPLES D9) — declared non-covered rather than
- *   covered unsafely.
- * - Rule 5 (session lifetimes / "Keep me logged in" windows), Rule 18
- *   (session_check_ip, Expire User Sessions tool) and the spam checks
- *   (reCAPTCHA / ALTCHA) are likewise config- or tool-gated: not covered.
- * - Rate limiting (spec *Settings*, register A6 ❓): needs a site-settings
- *   mutation (shared singleton) and the register holds an open question on
- *   the lockout answer — not covered.
- * - Register findings are never asserted as contract: A1 (🐞 32-char
- *   password boxes — the sign-in helper lifts the maxlength attribute, the
- *   cap itself is unasserted), A2 (🐞 "Keep me logged in" pre-ticked), A3
- *   (🐞 raw locale key in the reset form's browser tab — the page heading is
- *   asserted instead). A4/A5 (❓ open questions) carry no coverage claim;
- *   scenario 6 drives the one screen-driven path that sets the
- *   forced-change flag (Create New Reviewer), per A5's register entry.
+ * Not covered, by register ID (the spec's Coverage section is the record
+ * of everything else left out): A1 (the sign-in helper lifts the 32-char
+ * maxlength; the cap itself is unasserted), A2 (the pre-ticked "Keep me
+ * logged in" box: S1 unticks it without asserting its arrival state), A3
+ * (the reset form's browser-tab title; the page heading is asserted
+ * instead), A4, A5 (S6 drives the one screen-driven path that sets the
+ * forced-change flag, Create New Reviewer), A6, A7 (S2's control reads a
+ * dashboard address that is not the bare "dashboard" one), A8.
  *
  * Seeding: scenario endpoints only. Scratch submissions ride the read-only
- * `publicknowledge` press; the reset-flow tests use scratch presses with
+ * `publicknowledge` press; S1 adds a scratch press with no users so the
+ * site hosts a second press; S4, S5 and S8 use scratch presses with
  * throwaway users because a roster password must never change and every
  * mail assertion needs a unique throwaway recipient naming app + test
  * (Mailpit is one shared instance across the three fleets — never cleared).
- * Impersonation and sign-out tests always sign in through a FRESH context
- * (never the cached `.auth` storage state): `signInAs`/`signOutAs`/`signOut`
- * migrate or destroy the session they run in, and a cached session shared
- * with parallel tests must not be the one destroyed.
+ * Every sign-in, sign-out and impersonation runs in a FRESH browser context
+ * the test opens itself (`freshPage`), never the cached `.auth` storage
+ * state: `signInAs`/`signOutAs`/`signOut` migrate or destroy the session
+ * they run in, and a cached session shared with parallel tests must not be
+ * the one destroyed. "A second browser" (S2, S4) is a second such context;
+ * S1's "browser restart" is a fresh context seeded with the signed-in
+ * context's expiry-dated cookies (spec fn-s).
  */
 const {test: baseTest, expect} = require('../support/fixtures.js');
+const {
+    MSG: SESSION_MSG,
+    siteHomeUrl,
+    siteLoginUrl,
+    usersScreenUrl,
+    signInAsUserUrl,
+    keepMeLoggedIn,
+    searchUsers,
+    userRow,
+    openUserRowMenu,
+    closeUserRowMenu,
+    loginAsDialog,
+    accessDeniedMessage,
+    noAdminRightsMessage,
+    noAdminRightsCause,
+    usersListLink,
+    persistentCookies,
+} = require('../pages/LoginSessionsPages.js');
 
 const PK = 'publicknowledge';
+const EDITOR = {username: 'editor.diana', password: 'editor.dianaeditor.diana'};
+const MANAGER = {username: 'manager.maya', password: 'manager.mayamanager.maya'};
+const ADMIN = {username: 'admin', password: 'admin'};
+const READER = {username: 'reader.rosa', password: 'reader.rosareader.rosa'};
+/** The site's contact address, the sender of the reset email (Side effects). */
+const SITE_CONTACT_EMAIL = 'admin@mail.test';
 
 const MSG = {
     genericError: 'Invalid username/email or password. Please try again.',
@@ -51,8 +68,7 @@ const MSG = {
         'Sorry, the link you clicked on has expired or is not valid. Please try resetting your password again.',
     mustChange: 'You must choose a new password before you can log in to this site',
     wrongCurrent: 'The current password you entered was incorrect.',
-    confirmLoginAs:
-        'Log in as this user? All actions you perform will be attributed to this user.',
+    confirmLoginAs: SESSION_MSG.confirmLoginAs,
 };
 
 /** Parallel-safe unique tag: single alphanumeric token, ≤32 chars. */
@@ -62,6 +78,8 @@ function makeTag(testInfo, scenarioKey) {
 }
 
 const loginUrl = (contextPath) => `/index.php/${contextPath}/en/login`;
+const editorialUrl = (contextPath) => `/index.php/${contextPath}/en/dashboard/editorial`;
+const mySubmissionsUrl = (contextPath) => `/index.php/${contextPath}/en/dashboard/mySubmissions`;
 
 /**
  * Fill and submit the login form the page is currently showing. Lifts the
@@ -86,6 +104,12 @@ async function signIn(page, {username, password, contextPath = PK}) {
     });
 }
 
+/** The plain Login page, signed out: the form, on a `/login` address. */
+async function expectLoginPage(page) {
+    await expect(page).toHaveURL(/\/login/);
+    await expect(page.locator('form#login')).toBeVisible();
+}
+
 /**
  * The top-nav user menu. `.last()`: the workflow side modal renders its own
  * copy of the top nav above the page's — the last one is the interactive one.
@@ -108,6 +132,29 @@ async function closeUserMenu(page) {
     await userNav(page).locator('> button').click();
 }
 
+/** The user menu's plain "Logout" entry (absent while impersonating). */
+const logoutLink = (nav) => nav.getByRole('link', {name: 'Logout', exact: true});
+
+/**
+ * The user menu holds no "You are currently logged in as" line: the
+ * session is the account's own. The plain "Logout" entry is the positive
+ * control (the menu rendered).
+ */
+async function expectOwnSession(page) {
+    const nav = await openUserMenu(page);
+    await expect(logoutLink(nav)).toBeVisible();
+    await expect(nav.getByText(/logged in as/)).toHaveCount(0);
+    await closeUserMenu(page);
+}
+
+/** Press the user menu's "Logout": the Login page, signed out (Rule 6). */
+async function logoutFromMenu(page) {
+    const nav = await openUserMenu(page);
+    await logoutLink(nav).click();
+    await page.waitForURL(/\/login/, {timeout: 15_000});
+    await expect(page.locator('form#login')).toBeVisible();
+}
+
 /** The workflow side modal (bottom of the modal stack), awaited. */
 async function awaitWorkflow(page) {
     const modal = page.locator('[data-cy="active-modal"]').first();
@@ -117,10 +164,18 @@ async function awaitWorkflow(page) {
     return modal;
 }
 
+/** Assert the "Login As" dialog (title + verbatim warning, OK and Cancel). */
+async function expectLoginAsDialog(page) {
+    const dialog = loginAsDialog(page);
+    await expect(dialog.getByText(MSG.confirmLoginAs)).toBeVisible();
+    await expect(dialog.getByRole('button', {name: 'OK'})).toBeVisible();
+    await expect(dialog.getByRole('button', {name: 'Cancel'})).toBeVisible();
+    return dialog;
+}
+
 /** Confirm the "Login As" dialog (title + verbatim warning) with OK. */
 async function confirmLoginAsDialog(page) {
-    const dialog = page.locator('[data-cy="dialog"]').filter({hasText: 'Login As'});
-    await expect(dialog.getByText(MSG.confirmLoginAs)).toBeVisible();
+    const dialog = await expectLoginAsDialog(page);
     await dialog.getByRole('button', {name: 'OK'}).click();
 }
 
@@ -131,16 +186,21 @@ async function confirmLoginAsDialog(page) {
  * about the session itself (sign-in, sign-out, impersonation, forced
  * change): those flows destroy or migrate the very session they run in, so
  * they must never run on the shared `.auth` storage-state cache.
+ * `freshPage(null, {cookies})` seeds the new context with the given cookies
+ * (S1's browser restart: the expiry-dated cookies of another context).
  */
 const test = baseTest.extend({
     freshPage: async ({browser, baseURL}, use) => {
         const contexts = [];
-        await use(async (credentials = null) => {
+        await use(async (credentials = null, {cookies = []} = {}) => {
             const context = await browser.newContext({
                 baseURL,
                 storageState: {cookies: [], origins: []},
             });
             contexts.push(context);
+            if (cookies.length) {
+                await context.addCookies(cookies);
+            }
             const page = await context.newPage();
             if (credentials) {
                 await signIn(page, credentials);
@@ -163,11 +223,16 @@ async function seedMonograph(ompApi, tag, extra = {}) {
     });
 }
 
-/** Scratch press with one throwaway author whose mailbox is per-test. */
+/**
+ * Scratch press with one throwaway author whose mailbox is per-test, and a
+ * throwaway reader to be "another account" (the Login As address of S4).
+ * The returned `readerId` is the reader's id from the context response.
+ */
 async function seedResetActor(ompApi, tag) {
     const username = `rst${tag}`;
     const email = `${tag}@mail.test`;
-    await ompApi.createContext({
+    const readerUsername = `rdr${tag}`;
+    const created = await ompApi.createContext({
         tag,
         users: [
             {
@@ -177,15 +242,24 @@ async function seedResetActor(ompApi, tag) {
                 familyName: 'Reset',
                 email,
             },
+            {
+                username: readerUsername,
+                roles: ['reader'],
+                givenName: `Rdr${tag}`,
+                familyName: 'Reader',
+            },
         ],
     });
-    return {contextPath: tag, username, email, password: username + username};
+    const readerId = created.users.find((user) => user.username === readerUsername).id;
+    return {contextPath: tag, username, email, password: username + username, readerId};
 }
 
-/** Request a reset for `email` from `contextPath`'s lost-password page and
- * return the emailed link (scoped read: unique throwaway recipient). */
-async function requestResetLink(page, pkpMail, {contextPath, email}) {
-    await page.goto(loginUrl(contextPath));
+/**
+ * From the Login page the page is on: press "Forgot your password?", type
+ * `email` and submit; the page answers the confirmation sentence with a
+ * "Login" link back (Rule 7), whether or not an account holds the address.
+ */
+async function requestReset(page, email) {
     await page.getByRole('link', {name: 'Forgot your password?'}).click();
     await expect(
         page.getByRole('heading', {name: 'Reset Password'})
@@ -197,7 +271,11 @@ async function requestResetLink(page, pkpMail, {contextPath, email}) {
     await page.getByRole('button', {name: 'Reset Password'}).click();
     await expect(page.getByText(MSG.resetRequested)).toBeVisible();
     await expect(page.getByRole('link', {name: 'Login'}).first()).toBeVisible();
+}
 
+/** Read the "Password Reset Confirmation" email of `email` (scoped read:
+ * unique throwaway recipient) and return its link plus the summary. */
+async function readResetLink(pkpMail, email) {
     const summary = await pkpMail.find({
         to: email,
         subject: 'Password Reset Confirmation',
@@ -208,7 +286,15 @@ async function requestResetLink(page, pkpMail, {contextPath, email}) {
         ? match[0]
         : pkpMail.extractLink(full.HTML, /reset/i);
     expect(link, 'reset email carries the reset link').toBeTruthy();
-    return link;
+    return {link, summary};
+}
+
+/** Request a reset for `email` from `contextPath`'s lost-password page and
+ * return the emailed link. */
+async function requestResetLink(page, pkpMail, {contextPath, email}) {
+    await page.goto(loginUrl(contextPath));
+    await requestReset(page, email);
+    return (await readResetLink(pkpMail, email)).link;
 }
 
 /** Complete the set-a-new-password form the emailed link opens. */
@@ -230,23 +316,71 @@ async function completeReset(page, link, newPassword) {
     await expect(page.getByRole('link', {name: 'Login'}).first()).toBeVisible();
 }
 
+/**
+ * Login As from a users row of Users & Roles, confirmed with OK: the
+ * browser visits `login/signInAsUser/{id}` (returned, as the address the
+ * scenario copies from the history) and lands on the target's home.
+ */
+async function loginAsFromUsersRow(page, row) {
+    await (await openUserRowMenu(page, row)).filter({hasText: 'Login As'}).click();
+    const visited = page.waitForRequest(/\/login\/signInAsUser\/\d+$/);
+    await confirmLoginAsDialog(page);
+    const request = await visited;
+    return request.url();
+}
+
+/** The user menu while impersonating `username`: the line, "Logout as", no plain "Logout". */
+async function expectImpersonating(page, username) {
+    const nav = await openUserMenu(page);
+    await expect(nav.getByText(`You are currently logged in as ${username}`)).toBeVisible();
+    await expect(nav.getByRole('link', {name: `Logout as ${username}`}).first()).toBeVisible();
+    await expect(logoutLink(nav)).toHaveCount(0);
+    return nav;
+}
+
 test.describe('Login & sessions (U1)', () => {
     test.beforeEach(async ({}, testInfo) => testInfo.setTimeout(180_000));
 
-    test('S1: sign in and land on the Dashboard', async ({freshPage}) => {
+    test('S1: sign in and land on the Dashboard', async ({ompApi, freshPage}, testInfo) => {
+        // A site that also hosts a second press (no users: it exists to make
+        // the site multi-press, spec fn-s).
+        const tag = makeTag(testInfo, 'u1s1');
+        await ompApi.createContext({tag});
+        const secondPressName = `Scratch context ${tag}`;
+
         const page = await freshPage();
+        // Nothing reaches the site on a browser-refused submission: count the
+        // sign-in requests; the wrong-password submission below is the
+        // positive control that bounds the read (the counter then moves).
+        let signInRequests = 0;
+        page.on('request', (request) => {
+            if (/\/login\/signIn$/.test(request.url())) signInRequests += 1;
+        });
         await page.goto(loginUrl(PK));
         await expect(page.getByRole('heading', {name: 'Login'})).toBeVisible();
 
-        // Wrong password: one generic sentence, username kept.
-        await submitLoginForm(page, 'editor.diana', 'not-the-password');
-        await expect(page.getByText(MSG.genericError)).toBeVisible();
-        await expect(page.locator('input#username')).toHaveValue('editor.diana');
-
-        // Correct password: lands on the editorial dashboard.
+        // An empty box: the browser's own required-field refusal.
         const passwordInput = page.locator('input#password');
+        await expect(passwordInput).toHaveAttribute('required', '');
+        await page.locator('input#username').fill(EDITOR.username);
+        await page.locator('form#login button[type="submit"]').click();
+        await expect(page).toHaveURL(loginUrl(PK));
+        expect(await passwordInput.evaluate((el) => el.validity.valueMissing)).toBe(true);
+        expect(await passwordInput.evaluate((el) => el.matches(':invalid'))).toBe(true);
+        await expect(page.locator('input#username')).toHaveValue(EDITOR.username);
+
+        // Wrong password: one generic sentence, username kept.
+        await submitLoginForm(page, EDITOR.username, 'not-the-password');
+        await expect(page.getByText(MSG.genericError)).toBeVisible();
+        await expect(page.locator('input#username')).toHaveValue(EDITOR.username);
+        expect(signInRequests, 'the empty box sent nothing; the wrong password sent one').toBe(1);
+
+        // Correct password, "Keep me logged in" unticked: lands on the
+        // editorial dashboard.
+        await keepMeLoggedIn(page).uncheck();
+        await expect(keepMeLoggedIn(page)).not.toBeChecked();
         await passwordInput.evaluate((el) => el.removeAttribute('maxlength'));
-        await passwordInput.fill('editor.dianaeditor.diana');
+        await passwordInput.fill(EDITOR.password);
         await page.locator('form#login button[type="submit"]').click();
         await page.waitForURL(/\/dashboard\/editorial/, {
             timeout: 15_000,
@@ -255,13 +389,77 @@ test.describe('Login & sessions (U1)', () => {
         await expect(
             page.getByRole('heading', {name: /Assigned to me/})
         ).toBeVisible({timeout: 20_000});
+
+        // The Login page while signed in: the Dashboard instead of the form.
+        await page.goto(loginUrl(PK));
+        await expect(page).toHaveURL(/\/dashboard\/editorial/);
+        await expect(
+            page.getByRole('heading', {name: /Assigned to me/})
+        ).toBeVisible({timeout: 20_000});
+        await expect(page.locator('form#login')).toHaveCount(0);
+
+        // A browser restart: a fresh context carrying only the expiry-dated
+        // cookies of the signed-in one opens the Dashboard address signed in.
+        const kept = await persistentCookies(page.context());
+        expect(kept.length, 'the sign-in left a cookie that survives a restart').toBeGreaterThan(0);
+        const restarted = await freshPage(null, {cookies: kept});
+        await restarted.goto(editorialUrl(PK));
+        await expect(restarted).toHaveURL(/\/dashboard\/editorial/);
+        await expect(
+            restarted.getByRole('heading', {name: /Assigned to me/})
+        ).toBeVisible({timeout: 20_000});
+        await expect(restarted.locator('form#login')).toHaveCount(0);
+
+        // The last-login date: Press Manager, the users-management screen
+        // (Users & Roles › Users) with the Editor's row settled by the
+        // list's own response. The screen offers Name, Email, Roles, Start
+        // Date, Affiliation and More Actions, and no last-login date on the
+        // row or its Edit page: T-omp-1 (.reports/U01/test-omp-findings.md).
+        // The row read stays; the date is not asserted against a column the
+        // screen does not have.
+        const managerPage = await freshPage(MANAGER);
+        await managerPage.goto(usersScreenUrl(PK));
+        await searchUsers(managerPage, 'Diana');
+        const editorRow = userRow(managerPage, 'editor.diana@mail.test');
+        await expect(editorRow).toBeVisible();
+        await expect(editorRow).toContainText('Diana Editor');
+        await expect(editorRow).toContainText('Press editor');
+
+        // The site-level Login page: sign out, the site's own homepage,
+        // "Login" at its top right, the same form; sign in: the site home
+        // page (the press list), not the Dashboard (Rule 3).
+        await logoutFromMenu(page);
+        await page.goto(siteHomeUrl());
+        await page.getByRole('link', {name: 'Login', exact: true}).first().click();
+        await expect(page).toHaveURL(new RegExp(`${siteLoginUrl()}$`));
+        await expect(page.getByRole('heading', {name: 'Login'})).toBeVisible();
+        await expect(page.locator('form#login')).toBeVisible();
+        await submitLoginForm(page, EDITOR.username, EDITOR.password);
+        await page.waitForURL((url) => !url.pathname.includes('/login'), {
+            timeout: 15_000,
+            waitUntil: 'commit',
+        });
+        await expect(page).toHaveURL(/\/index\.php\/index\/en(\/index)?$/);
+        await expect(page.getByText(secondPressName)).toBeVisible();
+        await expect(page).not.toHaveURL(/dashboard/);
+
+        // Control: the Reader lands on the press home page, not the Dashboard.
+        await page.goto(`/index.php/${PK}/login/signOut`);
+        await page.goto(loginUrl(PK));
+        await submitLoginForm(page, READER.username, READER.password);
+        await page.waitForURL((url) => !url.pathname.includes('/login'), {
+            timeout: 15_000,
+            waitUntil: 'commit',
+        });
+        await expect(page).toHaveURL(new RegExp(`/index\\.php/${PK}/en(/index)?$`));
+        await expect(page).toHaveTitle('Public Knowledge Press');
+        await expect(page).not.toHaveURL(/dashboard/);
     });
 
     test('S2: sign out', async ({freshPage}) => {
-        const page = await freshPage({
-            username: 'editor.diana',
-            password: 'editor.dianaeditor.diana',
-        });
+        const page = await freshPage(EDITOR);
+        // The same account signed in in a second browser (context).
+        const secondBrowser = await freshPage(EDITOR);
 
         // User menu (top-right initials) → Logout → back on the Login page.
         const nav = await openUserMenu(page);
@@ -275,10 +473,19 @@ test.describe('Login & sessions (U1)', () => {
             'editor.diana@mail.test'
         );
 
-        // A dashboard address now shows the Login page, not the dashboard.
-        await page.goto(`/index.php/${PK}/en/dashboard/editorial`);
-        await expect(page).toHaveURL(/\/login/);
-        await expect(page.locator('form#login')).toBeVisible();
+        // The second browser: still signed in; the sign-out ended only the
+        // first browser's session (Rule 6).
+        await secondBrowser.goto(editorialUrl(PK));
+        await expect(secondBrowser).toHaveURL(/\/dashboard\/editorial/);
+        await expect(
+            secondBrowser.getByRole('heading', {name: /Assigned to me/})
+        ).toBeVisible({timeout: 20_000});
+        await expect(secondBrowser.locator('form#login')).toHaveCount(0);
+
+        // Control: a dashboard address now shows the Login page, not the
+        // dashboard (not the bare "dashboard" address: A7, unasserted).
+        await page.goto(editorialUrl(PK));
+        await expectLoginPage(page);
     });
 
     test('S3: a bookmarked private page waits for sign-in', async ({ompApi, freshPage}, testInfo) => {
@@ -306,26 +513,72 @@ test.describe('Login & sessions (U1)', () => {
     test('S4: recover a forgotten password', async ({ompApi, pkpMail, freshPage}, testInfo) => {
         const tag = makeTag(testInfo, 'u1s4');
         const actor = await seedResetActor(ompApi, tag);
-        const newPassword = `newpw${tag}`;
+        const newPassword = 'Recovered1';
+        const loginAsAddress = signInAsUserUrl(actor.contextPath, actor.readerId);
 
+        // The same account signed in in a second browser before the reset.
+        const secondBrowser = await freshPage({
+            username: actor.username,
+            password: actor.password,
+            contextPath: actor.contextPath,
+        });
+        await expect(secondBrowser).toHaveURL(/\/dashboard\/mySubmissions/);
+
+        // An address no account holds: the same confirmation sentence.
         const page = await freshPage();
-        const link = await requestResetLink(page, pkpMail, actor);
+        await page.goto(loginUrl(actor.contextPath));
+        await requestReset(page, 'nobody@mail.test');
+
+        // The account's address: the same answer; the email arrives from the
+        // site's contact address, and nothing for nobody@mail.test (read
+        // after the account's own email arrived, which bounds the silence).
+        await page.getByRole('link', {name: 'Login'}).first().click();
+        await expect(page.locator('form#login')).toBeVisible();
+        await requestReset(page, actor.email);
+        const {link, summary} = await readResetLink(pkpMail, actor.email);
+        expect(summary.From.Address).toBe(SITE_CONTACT_EMAIL);
+        await pkpMail.expectNone({
+            to: 'nobody@mail.test',
+            contains: tag,
+            afterControl: {to: actor.email, subject: 'Password Reset Confirmation'},
+        });
+
+        // "Reset Password": the new password saved; still signed out.
         await completeReset(page, link, newPassword);
+        await page.goto(mySubmissionsUrl(actor.contextPath));
+        await expectLoginPage(page);
 
-        // Resetting did NOT sign the user in.
-        await page.goto(`/index.php/${actor.contextPath}/en/dashboard/mySubmissions`);
-        await expect(page).toHaveURL(/\/login/);
+        // The second browser: its next navigation shows the Login page; that
+        // session ended when the new password was saved (Rule 9).
+        await secondBrowser.goto(mySubmissionsUrl(actor.contextPath));
+        await expectLoginPage(secondBrowser);
 
-        // The old password now fails with the generic error…
+        // The new password: press "Login" and sign in with it; lands where an
+        // ordinary sign-in would (an author: My Submissions).
+        await submitLoginForm(page, actor.username, newPassword);
+        await page.waitForURL(/\/dashboard\/mySubmissions/, {timeout: 15_000, waitUntil: 'commit'});
+        await expectOwnSession(page);
+
+        // Login As by address, as an Author: the access-denied page and
+        // nothing of the refused screen (the session stays the author's own).
+        await page.goto(loginAsAddress);
+        await expect(page).toHaveURL(/user\/authorizationDenied/);
+        await expect(accessDeniedMessage(page)).toBeVisible();
+        await expect(page.locator('form#login')).toHaveCount(0);
+        await page.goto(mySubmissionsUrl(actor.contextPath));
+        await expect(page).toHaveURL(/\/dashboard\/mySubmissions/);
+        await expectOwnSession(page);
+
+        // The same address, signed out: the Login page instead (Rule 17).
+        await logoutFromMenu(page);
+        await page.goto(loginAsAddress);
+        await expectLoginPage(page);
+        await expect(accessDeniedMessage(page)).toHaveCount(0);
+
+        // Control: the old password now fails with the generic error.
         await submitLoginForm(page, actor.username, actor.password);
         await expect(page.getByText(MSG.genericError)).toBeVisible();
-
-        // …and the new one signs in.
-        const passwordInput = page.locator('input#password');
-        await passwordInput.evaluate((el) => el.removeAttribute('maxlength'));
-        await passwordInput.fill(newPassword);
-        await page.locator('form#login button[type="submit"]').click();
-        await page.waitForURL(/\/dashboard\//, {timeout: 15_000, waitUntil: 'commit'});
+        await expectLoginPage(page);
     });
 
     test('S5: a stale or altered reset link is refused', async ({ompApi, pkpMail, freshPage}, testInfo) => {
@@ -344,19 +597,38 @@ test.describe('Login & sessions (U1)', () => {
             contextPath: actor.contextPath,
         });
 
-        // The used link now answers the dead-link page, with a way back.
-        const deadPage = await freshPage();
-        await deadPage.goto(link);
-        await expect(deadPage.getByText(MSG.staleLink)).toBeVisible();
+        // The link while signed in: the Author's home instead of the form.
+        await page.goto(link);
+        await expect(page).toHaveURL(/\/dashboard\/mySubmissions/);
+        await expect(page.getByRole('heading', {name: 'Reset Password'})).toHaveCount(0);
+        await expect(page.locator('input[name="password"]')).toHaveCount(0);
+
+        // The link after the change: "Logout" in the user menu, then the used
+        // link answers the dead-link page, with a way back.
+        await logoutFromMenu(page);
+        await page.goto(link);
+        await expect(page.getByText(MSG.staleLink)).toBeVisible();
         await expect(
-            deadPage.getByRole('link', {name: 'Reset Password'})
+            page.getByRole('link', {name: 'Reset Password'})
         ).toBeVisible();
 
         // A link with a mangled code answers the same.
         const mangled = link.replace(/confirm=[0-9a-f]{8}/, 'confirm=deadbeef');
         expect(mangled).not.toBe(link);
-        await deadPage.goto(mangled);
-        await expect(deadPage.getByText(MSG.staleLink)).toBeVisible();
+        await page.goto(mangled);
+        await expect(page.getByText(MSG.staleLink)).toBeVisible();
+        await expect(
+            page.getByRole('link', {name: 'Reset Password'})
+        ).toBeVisible();
+
+        // Control: a fresh request's link opens "Reset Password" (Rule 9);
+        // the refusal was the stale link's own.
+        const freshLink = await requestResetLink(page, pkpMail, actor);
+        expect(freshLink).not.toBe(link);
+        await page.goto(freshLink);
+        await expect(page.getByRole('heading', {name: 'Reset Password'})).toBeVisible();
+        await expect(page.locator('input[name="password"]').first()).toBeVisible();
+        await expect(page.getByText(MSG.staleLink)).toHaveCount(0);
     });
 
     test('S6: forced password change at first sign-in', async ({ompApi, pkpMail, asUser, freshPage}, testInfo) => {
@@ -455,39 +727,58 @@ test.describe('Login & sessions (U1)', () => {
 
     test('S7: administrator impersonates a user and returns', async ({freshPage}) => {
         // Fresh sign-in: impersonation migrates the session it runs in.
-        const page = await freshPage({username: 'admin', password: 'admin'});
+        const page = await freshPage(ADMIN);
 
-        // Users & Roles → the Author's row menu offers "Login As".
-        await page.goto(`/index.php/${PK}/management/settings/access`);
-        const searchBox = page.getByRole('searchbox').first();
-        await searchBox.click();
-        await searchBox.pressSequentially('Alex');
-        const settled = page.waitForResponse((response) =>
-            decodeURIComponent(response.url()).includes('searchPhrase=Alex')
-        );
-        await searchBox.press('Enter');
-        await settled;
-        const row = page
-            .getByRole('table', {name: /Current Users/})
-            .getByRole('row')
-            .filter({hasText: 'Alex Author'})
-            .first();
+        // The user menu before impersonating: it offers "Logout"; the link
+        // behind it is the sign-out address (Rule 15), copied now.
+        const navBefore = await openUserMenu(page);
+        const signOutAddress = await logoutLink(navBefore).getAttribute('href');
+        expect(signOutAddress).toMatch(/\/login\/signOut$/);
+        await closeUserMenu(page);
+
+        // The administrator's own row on Users & Roles offers no "Login As";
+        // "Edit" is the positive control (the menu rendered).
+        await page.goto(usersScreenUrl(PK));
+        await searchUsers(page, 'admin');
+        const ownRow = userRow(page, 'admin@mail.test');
+        await expect(ownRow).toBeVisible();
+        const ownMenu = await openUserRowMenu(page, ownRow);
+        await expect(ownMenu.filter({hasText: 'Edit'})).toBeVisible();
+        await expect(ownMenu.filter({hasText: 'Login As'})).toHaveCount(0);
+        await closeUserRowMenu(ownRow);
+
+        // "Login As" on an Author's row: the dialog warns, verbatim, with OK
+        // and Cancel.
+        await searchUsers(page, 'Alex');
+        const row = userRow(page, 'Alex Author');
         await expect(row).toBeVisible();
-        await row.getByRole('button', {name: /management[. ]options/i}).click();
-        await page.getByRole('menuitem', {name: 'Login As'}).click();
+        await (await openUserRowMenu(page, row)).filter({hasText: 'Login As'}).click();
+        const dialog = await expectLoginAsDialog(page);
 
-        // The dialog warns, verbatim; OK continues the session as the Author.
+        // Cancel: the dialog closes; still the administrator's own session.
+        await dialog.getByRole('button', {name: 'Cancel'}).click();
+        await expect(dialog).toHaveCount(0);
+        await expect(page).toHaveURL(/management\/settings\/access/);
+        await expectOwnSession(page);
+
+        // OK: the browser is now the Author's session: their name, their My
+        // Submissions; the user menu says who is being worn and offers no
+        // plain "Logout", only "Logout as {author}".
+        await (await openUserRowMenu(page, row)).filter({hasText: 'Login As'}).click();
         await confirmLoginAsDialog(page);
         await page.waitForURL(/\/dashboard\/mySubmissions/, {
             timeout: 20_000,
             waitUntil: 'commit',
         });
-
-        // The user menu says who is being worn — the impersonated account.
-        const nav = await openUserMenu(page);
         await expect(
-            nav.getByText('You are currently logged in as author.alex')
-        ).toBeVisible();
+            page.getByRole('link', {name: 'My Submissions as Author'})
+        ).toBeVisible({timeout: 20_000});
+        await expect(page.getByRole('heading', {name: /Active submissions/})).toBeVisible();
+        // The top bar: the administrator's initials with the Author's over
+        // them (the button names both accounts; the warning color itself is
+        // unasserted).
+        await expect(userNav(page).locator('> button')).toHaveAccessibleName(/admin.*author\.alex/);
+        const nav = await expectImpersonating(page, 'author.alex');
 
         // "Logout as {author}" restores the administrator, no password asked.
         await nav.getByRole('link', {name: 'Logout as author.alex'}).first().click();
@@ -495,11 +786,27 @@ test.describe('Login & sessions (U1)', () => {
             timeout: 20_000,
             waitUntil: 'commit',
         });
-        const restoredNav = await openUserMenu(page);
-        await expect(restoredNav.getByText(/logged in as/)).toHaveCount(0);
-        await expect(
-            restoredNav.getByRole('link', {name: 'Logout', exact: true})
-        ).toBeVisible();
+        await expectOwnSession(page);
+
+        // Control: impersonate the Author again and type the copied sign-out
+        // address instead: the Login page, signed out of both identities;
+        // Users & Roles then shows the Login page too (Rules 4, 15).
+        await page.goto(usersScreenUrl(PK));
+        await searchUsers(page, 'Alex');
+        await (await openUserRowMenu(page, userRow(page, 'Alex Author'))).filter({hasText: 'Login As'}).click();
+        await confirmLoginAsDialog(page);
+        await page.waitForURL(/\/dashboard\/mySubmissions/, {
+            timeout: 20_000,
+            waitUntil: 'commit',
+        });
+        await expectImpersonating(page, 'author.alex');
+        await closeUserMenu(page);
+        await page.goto(signOutAddress);
+        await expectLoginPage(page);
+        await page.goto(editorialUrl(PK));
+        await expectLoginPage(page);
+        await page.goto(usersScreenUrl(PK));
+        await expectLoginPage(page);
     });
 
     test('S8: editor impersonates a participant from the Participants panel', async ({ompApi, freshPage}, testInfo) => {
@@ -511,12 +818,17 @@ test.describe('Login & sessions (U1)', () => {
             ],
         });
         const editorialPath = `/index.php/${PK}/en/dashboard/editorial?workflowSubmissionId=${seeded.submissionId}`;
+        // A throwaway account holding a role only on a scratch press: out of
+        // the Press Manager's reach (spec fn-s).
+        const scratchTag = makeTag(testInfo, 'u1s8x');
+        const scratch = await ompApi.createContext({
+            tag: scratchTag,
+            users: [{username: `rdr${scratchTag}`, roles: ['reader']}],
+        });
+        const outOfReachId = scratch.users.find((user) => user.username === `rdr${scratchTag}`).id;
 
         // Fresh sign-in: impersonation migrates the session it runs in.
-        const page = await freshPage({
-            username: 'editor.diana',
-            password: 'editor.dianaeditor.diana',
-        });
+        const page = await freshPage(EDITOR);
         await page.goto(editorialPath);
         let modal = await awaitWorkflow(page);
 
@@ -538,8 +850,21 @@ test.describe('Login & sessions (U1)', () => {
         await reviewerDialog.getByRole('button', {name: 'Cancel'}).click();
         await expect(reviewerDialog).toHaveCount(0);
 
-        // Participants panel → a Series Editor participant's row → Login As.
+        // The Editor's own row on the Participants panel offers no "Login As"
+        // (Rule 14); the menu's other entries are the positive control.
         const participants = modal.locator('[data-cy="participant-manager"]');
+        await participants
+            .getByRole('button', {name: /Diana Editor More Actions/})
+            .click();
+        const ownMenu = participants.getByRole('menuitem');
+        await expect(ownMenu.first()).toBeVisible();
+        await expect(ownMenu.filter({hasText: 'Login As'})).toHaveCount(0);
+        await participants
+            .getByRole('button', {name: /Diana Editor More Actions/})
+            .click();
+        await expect(ownMenu).toHaveCount(0);
+
+        // Participants panel → a Series Editor participant's row → Login As.
         await participants
             .getByRole('button', {name: /Ana Section Editor More Actions/})
             .click();
@@ -604,5 +929,51 @@ test.describe('Login & sessions (U1)', () => {
             {timeout: 20_000, waitUntil: 'commit'}
         );
         await awaitWorkflow(page);
+
+        // Press Manager, a hand-built address to an out-of-reach user: Login
+        // As on the Author's row of Users & Roles, the visited address copied
+        // (it ends in the Author's id), "Logout as", then the address with
+        // the scratch reader's id: the Rule 14 refusal, its causes and the
+        // link back to the users list.
+        const managerPage = await freshPage(MANAGER);
+        await managerPage.goto(usersScreenUrl(PK));
+        await searchUsers(managerPage, 'Alex');
+        const copiedAddress = await loginAsFromUsersRow(managerPage, userRow(managerPage, 'Alex Author'));
+        expect(copiedAddress).toMatch(/\/login\/signInAsUser\/\d+$/);
+        await managerPage.waitForURL(/\/dashboard\/mySubmissions/, {
+            timeout: 20_000,
+            waitUntil: 'commit',
+        });
+        const wornNav = await expectImpersonating(managerPage, 'author.alex');
+        await wornNav.getByRole('link', {name: 'Logout as author.alex'}).first().click();
+        await managerPage.waitForURL(/\/dashboard\/editorial/, {
+            timeout: 20_000,
+            waitUntil: 'commit',
+        });
+        await expectOwnSession(managerPage);
+        const outOfReachAddress = copiedAddress.replace(/\d+$/, String(outOfReachId));
+        expect(outOfReachAddress).not.toBe(copiedAddress);
+        await managerPage.goto(outOfReachAddress);
+        await expect(noAdminRightsMessage(managerPage)).toBeVisible();
+        await expect(noAdminRightsCause(managerPage)).toBeVisible();
+        await expect(usersListLink(managerPage)).toBeVisible();
+        await expect(managerPage).not.toHaveURL(/dashboard/);
+
+        // Control: the copied number, the Author's own, impersonates the
+        // Author again and "Logout as {author}" returns the Press Manager;
+        // the refusal is the out-of-reach account's alone.
+        await managerPage.goto(copiedAddress);
+        await managerPage.waitForURL(/\/dashboard\/mySubmissions/, {
+            timeout: 20_000,
+            waitUntil: 'commit',
+        });
+        await expect(noAdminRightsMessage(managerPage)).toHaveCount(0);
+        const wornAgain = await expectImpersonating(managerPage, 'author.alex');
+        await wornAgain.getByRole('link', {name: 'Logout as author.alex'}).first().click();
+        await managerPage.waitForURL(/\/dashboard\/editorial/, {
+            timeout: 20_000,
+            waitUntil: 'commit',
+        });
+        await expectOwnSession(managerPage);
     });
 });
