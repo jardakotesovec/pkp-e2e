@@ -65,7 +65,8 @@ trips.
   revision local final 2026-09-13 (load over 100 on 10 cores from the
   desktop), both green in the second full run; U40 S4 (the edited abstract not
   found in 30 s) red on OMP in the first U03 revision final 2026-09-13, green
-  alone in 5 s and in the second full run. **Watch condition**: a
+  alone in 5 s and in the second full run; U40 S4 red on OMP in the first
+  U06 revision final 2026-09-13, green alone in 5.1 s. **Watch condition**: a
   hardened test reds again with retries exhausted.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
@@ -100,9 +101,11 @@ trips.
   during a full-suite run and passes in isolation; the hover target is
   settled before both indicators have rendered. Seen once, 2026-09-04
   (U05 final run, `.reports/U05/final-run-ojs.log`), green alone and on
-  the OJS re-run the same day. **Watch condition**: a second full-suite
-  incident; then anchor the hover on the indicator's own accessible name
-  and wait for both indicators before hovering.
+  the OJS re-run the same day; seen a second time 2026-09-13 (U04 final
+  run, `.reports/U04/final-run-ojs-run1-red.log`), green alone in 14.7 s.
+  **Watch condition tripped** 2026-09-13: the next maintenance session
+  anchors the hover on the indicator's own accessible name and waits for
+  both indicators before hovering.
 - **A wizard press swallowed the instant a step becomes current** (U21
   S10 and S12, OJS, CI only). CI run 34215183797 (2026-09-08, pkp-e2e
   `main` at `aa12a61`, a docs-only push) red on both attempts of S12: the
@@ -228,6 +231,11 @@ trips.
   merge of companion `13274`, `.reports/sync/merge13274-ojs.log`); green
   alone in 5.5 s. **Watch condition**: a second incident, or one at four
   workers alone on the VM.
+- **A page load hanging under desktop load** (U04 S6, OMP, once). `page.goto`
+  to the scratch press's `/orcid/about` ran to the 60 s test timeout in the
+  second U06 revision local final 2026-09-13 (load 15–19 on the Mac from
+  the desktop, `.reports/U06/final-run-omp-run2-red.log`); green alone in
+  5.4 s. **Watch condition**: a second incident, or one on the VM or CI.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

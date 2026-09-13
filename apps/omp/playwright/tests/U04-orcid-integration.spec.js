@@ -5,54 +5,31 @@
  * ORCID integration — OMP suite, one test per canonical scenario the spec
  * runs on a press, in press vocabulary (glossary substitution: press,
  * monograph, Press Manager). Parallel-safe scenarios live here (S1–S3,
- * S5–S7); the two scenarios that assert on queued-job ORCID email (S4, S8)
- * live in tests/serial/U04-orcid-integration.spec.js — ORCID mail only reaches
- * Mailpit after an explicit queue-worker run, which must never happen while
- * parallel agents seed (patterns.md parallel lesson 7). The spec's
- * scenario 9 is {OJS}-only (review deposits) and does not run on the press.
- * Spec: docs/specs/U04-orcid-integration.md
+ * S5–S7, S10); the two scenarios that assert on queued-job ORCID email
+ * (S4, S8) live in tests/serial/U04-orcid-integration.spec.js — ORCID mail
+ * only reaches Mailpit after an explicit queue-worker run, which must never
+ * happen while parallel agents seed (patterns.md parallel lesson 7). The
+ * spec's scenario 9 is {OJS}-only (review deposits) and does not run on the
+ * press. Spec: docs/specs/U04-orcid-integration.md
  *
- * Deliberately NOT covered (one line per omission, citing the register ID):
- * - A8 🐞: S6 asserts the verification-failure explanation, never the
- *   closing "Please contact the journal manager …" sentence — its
- *   journal-vocabulary wording on a press is the open bug's record.
- * - A1 🐞 (OMP leg) / scenario 9 {OJS}: a Press Manager is offered "Send
- *   Review To ORCID" though a press deposits nothing — the register's
- *   record; the review-deposit scenario itself is flagged {OJS} and has no
- *   press analogue, so no test here touches the Reviewers-table action.
- * - A4 🐞: S2 asserts the connect button's popup only; the "What is ORCID?"
- *   link's misrouted click is the open bug — the link's own target working
- *   by URL is S6's assertion.
- * - A2 🐞: the ORCID-denied landing needs ORCID's live consent screen —
- *   unreachable from the egress-firewalled fleets; the raw-placeholder
- *   rendering is the open bug.
- * - A5 🐞: the Assistant's refused-yet-reported-success contributor controls
- *   are the open bug; no test drives them.
- * - A3 ❓: whether a registration-connected iD should arrive verified is an
- *   open question needing the OAuth leg — not covered (S7 covers the
- *   registration block's presence/absence only).
- * - A6 ❓: the email toggle's label wording is an open question; serial S8
- *   asserts the toggle's behavior, never its label.
- * - A9 ❓ / Rules 2–3 site-wide override: Site Settings → ORCID is a shared
- *   singleton across every parallel worker and fleet — site-level ORCID
- *   stays OFF and untouched; the press-tab lock state is unreachable
- *   without it. Deferred with the register's A9.
- * - Rule 5/9 OAuth completion legs (verified-connect round trip, emailed-link
- *   verify success/duplicate): ORCID's sign-in cannot complete on an offline
- *   install — scenarios stop at the popup (spec footnote s); verified states
- *   are seeded.
- * - Rule 11 deposit outcomes / OMP1 ✅: a press requests and verifies iDs
- *   but deposits nothing — the intended difference is code-based (footnote
- *   f-omp1) and its observable half (nothing arrives at ORCID) is
- *   unobservable on an egress-firewalled install; not asserted either way.
- * - Rule 15 riders (invitation ORCID step, reviewer-suggestion field,
- *   reviewer-list icons) are owned by their own features' suites.
- * - Rule 14's Emails-screen rows and A7 ❓ belong to Emails management.
+ * Not covered, by register ID (the spec's Coverage section is the record
+ * of everything else left out): A8 (S6 asserts the failure explanation,
+ * never the closing "journal manager" sentence), A1 (the Press Manager's
+ * "Send Review To ORCID"; no test touches the Reviewers-table action), A4
+ * (S2 asserts the connect button's popup only; the "What is ORCID?" link's
+ * own page is S6's by URL), A2, A5, A3 (S7 registers without connecting
+ * and asserts the block's presence only), A6 (serial S8 asserts the
+ * toggle's behavior, never its label), A9 (site-level ORCID stays off and
+ * untouched: a shared singleton across every worker and fleet).
  *
  * Every test seeds its own scratch press via the scenario endpoints
  * (publicknowledge and the seeded roster stay untouched); ORCID enablement
  * and iD fixture states use the U4 scenario passthroughs (context `orcid`,
- * users[] `orcid`/`orcidIsVerified`, submission `author`).
+ * users[] `orcid`/`orcidIsVerified`, submission `author`). ORCID's own
+ * sign-in never completes on the fleets (dead-port proxy, dummy
+ * credentials), so every scenario stops at the popup; verified and
+ * unauthenticated iDs are seeded. S10's request email is queued mail this
+ * parallel suite never drains, so the field alone is read there.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
@@ -61,8 +38,20 @@ const {
     openContributors,
     openContributorEditor,
     orcidField,
+    requestVerification,
+    REQUESTED_TEXT,
 } = require('../pages/OrcidPages.js');
 const {openEditorial} = require('../pages/ReviewStagePages.js');
+const {ContributorsScreen} = require('../pages/ContributorPages.js');
+const {RegisterPage, RegistrationCompletePage} = require('../pages/RegistrationPages.js');
+const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {
+    STEPS,
+    expectWizardOpen,
+    expectStep,
+    continueTo,
+    openContributorEdit,
+} = require('../pages/SubmissionWizardPages.js');
 
 /** A seedable test iD (ORCID's own example iD, sandbox-hosted). */
 const TEST_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
@@ -153,9 +142,13 @@ test.describe('ORCID integration', () => {
     test('S3: a verified iD is removed from the profile via Delete', async ({asUser, ompApi}, testInfo) => {
         const tag = makeTag('s3', testInfo);
         const holder = `usr${tag}`;
+        const unauthenticated = `una${tag}`;
         await ompApi.createContext({
             tag,
-            users: [{username: holder, roles: ['author'], orcid: TEST_ORCID, orcidIsVerified: true}],
+            users: [
+                {username: holder, roles: ['author'], orcid: TEST_ORCID, orcidIsVerified: true},
+                {username: unauthenticated, roles: ['author'], orcid: TEST_ORCID, orcidIsVerified: false},
+            ],
             orcid: {},
         });
 
@@ -171,6 +164,24 @@ test.describe('ORCID integration', () => {
         await expect(profile.deleteButton).toBeVisible();
         await expect(profile.connectButton).toHaveCount(0);
         await expect(profile.aboutLink).toHaveCount(0);
+
+        // The second user's Identity tab, in a browser of their own:
+        // the unauthenticated iD as a hollow-icon link suffixed
+        // "(unauthenticated)" and the "Authorize and Connect" button (Rule 5).
+        const secondProfile = new ProfileIdentityPage(
+            await (await asUser(unauthenticated)).newPage(), tag
+        );
+        await secondProfile.goto();
+        await expect(secondProfile.unauthenticatedLink).toBeVisible();
+        await expect(secondProfile.unauthenticatedLink).toHaveAttribute('href', TEST_ORCID);
+        await expect(secondProfile.unauthenticatedLink).toContainText(
+            `${TEST_ORCID} (unauthenticated)`
+        );
+        await expect(secondProfile.unauthenticatedLink.locator('svg.orcid_icon')).toBeVisible();
+        await expect(secondProfile.connectButton).toBeVisible();
+        await expect(secondProfile.connectButton).toContainText('Authorize and Connect your ORCID iD');
+        await expect(secondProfile.orcidLink).toHaveCount(0);
+        await expect(secondProfile.deleteButton).toHaveCount(0);
 
         // Delete asks for confirmation; confirming removes the iD at once —
         // no separate save (Rule 6c).
@@ -287,11 +298,53 @@ test.describe('ORCID integration', () => {
 
         // Registration page (signed out): no ORCID block on the off press;
         // the enabled press shows it (positive control).
-        await page.goto(`/index.php/${tagOff}/user/register`);
-        await expect(page.getByRole('button', {name: 'Register', exact: true})).toBeVisible();
+        const register = new RegisterPage(page);
+        await page.goto(RegisterPage.contextUrl(tagOff));
+        await expect(register.submitButton).toBeVisible();
         await expect(page.locator('#connect-orcid-button')).toHaveCount(0);
-        await page.goto(`/index.php/${tagOn}/user/register`);
+        await page.goto(RegisterPage.contextUrl(tagOn));
         await expect(page.locator('#connect-orcid-button')).toBeVisible();
+
+        // The site-level Register page (the site hosts more than one press
+        // once a scratch press exists): no ORCID block either, while the
+        // enabled press's Register page offers "Create or Connect your ORCID
+        // iD" at the top of its form (Actors row 3).
+        await page.goto(RegisterPage.siteUrl());
+        await expect(register.heading).toBeVisible();
+        await expect(register.submitButton).toBeVisible();
+        await expect(page.locator('#connect-orcid-button')).toHaveCount(0);
+        await page.goto(RegisterPage.contextUrl(tagOn));
+        const connectButton = register.form.locator('#connect-orcid-button');
+        await expect(connectButton).toBeVisible();
+        await expect(connectButton).toContainText('Create or Connect your ORCID iD');
+        await expect(register.givenName).toBeVisible();
+        const [buttonBox, firstFieldBox] = await Promise.all([
+            connectButton.boundingBox(),
+            register.givenName.boundingBox(),
+        ]);
+        expect(buttonBox.y).toBeLessThan(firstFieldBox.y);
+
+        // Registering without connecting (Rule 7): the form is U02's; only
+        // the completion is asserted, the connect button never pressed and
+        // the form's hidden iD left empty.
+        const username = `u04s7-${tagOn}`;
+        await register.fillIdentity({
+            givenName: 'Seven',
+            email: `${username}@mail.test`,
+            username,
+            password: `${username}${username}`,
+        });
+        if (await register.privacyConsent.count()) {
+            await register.privacyConsent.check();
+        }
+        await expect(register.form.locator('input[name="orcid"]')).toHaveValue('');
+        let popupOpened = false;
+        page.once('popup', () => {
+            popupOpened = true;
+        });
+        await register.submit();
+        await expect(new RegistrationCompletePage(page).heading).toBeVisible();
+        expect(popupOpened).toBe(false);
 
         // Profile Identity tab: no ORCID field at all on the off press;
         // the connect block on the enabled one (Rules 4–5).
@@ -321,5 +374,79 @@ test.describe('ORCID integration', () => {
         await openContributors(onManagerPage);
         const onModal = await openContributorEditor(onManagerPage, `aut${tagOn}`);
         await expect(orcidField(onModal).getByRole('button', {name: 'Request verification'})).toBeVisible();
+    });
+
+    test('S10: the Author\'s contributor list is read-only; the wizard offers the request', async ({asUser, ompApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s10', testInfo);
+        const manager = `mgr${tag}`;
+        const author = `aut${tag}`;
+        await ompApi.createContext({
+            tag,
+            users: [
+                {username: manager, roles: ['manager']},
+                {username: author, roles: ['author']},
+            ],
+            orcid: {},
+        });
+        const submittedTitle = `subm${tag}`;
+        const draftTitle = `draft${tag}`;
+        const {submissionId} = await ompApi.createSubmission({
+            tag, context: tag, submitter: author, title: submittedTitle, submitted: true,
+        });
+        const draft = await ompApi.createSubmission({
+            tag: `${tag}d`, context: tag, submitter: author, title: draftTitle, submitted: false,
+        });
+
+        // The submitted submission, opened from the author's dashboard: its
+        // Contributors list is read-only — the contributor is listed, no Edit
+        // opens it, no Add Contributor, so no ORCID iD field and no "Request
+        // verification" is reached (Actors row 5).
+        const authorPage = await (await asUser(author)).newPage();
+        const mySub = new MySubmissionsPage(authorPage, tag);
+        await mySub.goto();
+        const row = await mySub.findRowByTag(submittedTitle);
+        await mySub.viewButton(row).click();
+        await mySub.expectWorkflowOpen();
+        const contributors = new ContributorsScreen(authorPage);
+        await contributors.openFromWorkflow();
+        await expect(contributors.row(author)).toBeVisible();
+        await expect(contributors.previewButton()).toBeVisible();
+        await expect(contributors.row(author).getByRole('button', {name: 'Edit', exact: true})).toHaveCount(0);
+        await expect(contributors.addContributorButton()).toHaveCount(0);
+        await expect(authorPage.getByText('ORCID iD', {exact: true})).toHaveCount(0);
+        await expect(authorPage.getByRole('button', {name: 'Request verification'})).toHaveCount(0);
+
+        // Back to the dashboard by address (the workflow panel's own Close is
+        // U22's; a fresh load is the settled way to leave it here).
+        await mySub.goto();
+
+        // The draft, opened from the dashboard, reopens the wizard on Upload
+        // Files; "Continue" twice reaches Contributors, whose own contributor
+        // opens for editing: the ORCID iD field offers "Request verification";
+        // confirming the dialog flips the field (Rule 8; Actors row 5). The
+        // email is queued mail this parallel suite never drains.
+        const draftRow = await mySub.findRowByTag(draftTitle);
+        await mySub.completeSubmissionButton(draftRow).click();
+        await expectWizardOpen(authorPage);
+        expect(authorPage.url()).toContain(`id=${draft.submissionId}`);
+        await expectStep(authorPage, STEPS.files);
+        await continueTo(authorPage, STEPS.details);
+        await continueTo(authorPage, STEPS.contributors);
+        const wizardModal = await openContributorEdit(authorPage, author);
+        const wizardField = orcidField(wizardModal);
+        await expect(wizardField.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        await requestVerification(authorPage, wizardField);
+        await expect(wizardField).toContainText(REQUESTED_TEXT);
+        await expect(wizardField.getByRole('button', {name: 'Request verification'})).toHaveCount(0);
+
+        // Control: the Press Manager, in a browser of their own, edits the
+        // same contributor on the submitted submission: "Request verification"
+        // is offered (Rule 8).
+        const managerPage = await (await asUser(manager)).newPage();
+        await openEditorial(managerPage, tag, submissionId);
+        await openContributors(managerPage);
+        const modal = await openContributorEditor(managerPage, author);
+        await expect(orcidField(modal).getByRole('button', {name: 'Request verification'})).toBeVisible();
     });
 });

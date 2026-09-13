@@ -3,8 +3,8 @@
  * @file playwright/pages/OrcidPages.js
  *
  * OMP-local Page Objects and helpers for the ORCID integration feature
- * (spec: lib/pkp/docs/e2e/specs/U04-orcid-integration.md, read in press
- * vocabulary per the application glossary).
+ * (spec: docs/specs/U04-orcid-integration.md, read in press vocabulary per
+ * the application glossary).
  *
  * Surfaces:
  * - OrcidSettingsTab — the "ORCID" tab on Settings → Users & Roles
@@ -12,8 +12,16 @@
  *   probe-groupA item 1).
  * - ProfileIdentityPage — the profile's Identity tab ORCID block
  *   (identityForm.tpl + orcidProfile.tpl: connect button, About link,
- *   verified #orcid-link, #deleteOrcidButton; OMP spot in probe-groupB
- *   items 5 and 7).
+ *   verified #orcid-link, the unauthenticated iD link with its
+ *   "(unauthenticated)" suffix, #deleteOrcidButton; OMP spot in
+ *   probe-groupB items 5 and 7).
+ * - AboutOrcidPage — the public "What is ORCID?" page (orcidAbout.tpl),
+ *   reached by URL or from the request email's link; its "How and why"
+ *   section is the member-vs-public difference of Rule 10.
+ * - Request-verification helpers — the "Request ORCID verification"
+ *   confirm dialog of the contributor form (FieldOrcid), on a saved
+ *   contributor (the request leaves at once) and on the add form (the
+ *   request waits for the save), and the request email's two links.
  * - Contributor-panel helpers — the workflow's Publication → Contributors
  *   list and the contributor edit modal's "ORCID iD" field (FieldOrcid —
  *   the shared component, rendered identically on the press per
@@ -80,6 +88,11 @@ exports.ProfileIdentityPage = class ProfileIdentityPage extends BasePage {
         this.aboutLink = this.orcidContainer.getByRole('link', {name: 'What is ORCID?'});
         // Verified state: the bare-iD link with the solid icon.
         this.orcidLink = this.form.locator('#orcid-link');
+        // Unauthenticated state: the iD link (hollow icon) suffixed
+        // "(unauthenticated)", beside the "Authorize and Connect" button.
+        this.unauthenticatedLink = this.orcidContainer
+            .locator('a[target="_blank"]')
+            .filter({hasText: '(unauthenticated)'});
         this.deleteButton = this.form.locator('#deleteOrcidButton');
     }
 
@@ -139,4 +152,110 @@ exports.openContributorEditor = async function openContributorEditor(page, name)
  */
 exports.orcidField = function orcidField(modal) {
     return modal.locator('.pkpFormField').filter({hasText: 'ORCID iD'});
+};
+
+/** The "What is ORCID?" public page (Rule 10; `{context}/orcid/about`). */
+exports.AboutOrcidPage = class AboutOrcidPage extends BasePage {
+    /**
+     * @param {import('@playwright/test').Page} page
+     */
+    constructor(page) {
+        super(page);
+        this.body = page.locator('.page_message');
+        this.heading = page.getByRole('heading', {name: 'What is ORCID?'});
+        this.howAndWhyHeading = page.getByRole('heading', {
+            name: 'How and why we collect ORCID iDs?',
+        });
+        this.displayHeading = page.getByRole('heading', {name: 'Where are ORCID iDs displayed?'});
+    }
+
+    /** Open the page by its address (a context path, or an absolute link from an email). */
+    async goto(target) {
+        const url = /^https?:/.test(target) ? target : `/index.php/${target}/orcid/about`;
+        await this.page.goto(url);
+        await expect(this.heading).toBeVisible();
+        await expect(this.howAndWhyHeading).toBeVisible();
+        await expect(this.displayHeading).toBeVisible();
+    }
+
+    /**
+     * The text of the "How and why" section: what sits between its heading
+     * and the next one (the member-API wording is wrapped in a description
+     * box, the public-API wording is bare, so the read is by text).
+     */
+    async howAndWhyText() {
+        const text = await this.body.innerText();
+        const start = text.indexOf('How and why we collect ORCID iDs?');
+        const end = text.indexOf('Where are ORCID iDs displayed?');
+        if (start < 0 || end < start) {
+            throw new Error('AboutOrcidPage: the "How and why" section was not found');
+        }
+        return text.slice(start + 'How and why we collect ORCID iDs?'.length, end).trim();
+    }
+};
+
+/**
+ * The "Request ORCID verification" confirm dialog a contributor form's
+ * "Request verification" opens (Rule 8).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.orcidRequestDialog = function orcidRequestDialog(page) {
+    return page
+        .getByRole('dialog')
+        .filter({hasText: 'Would you like to send an email to this author requesting they verify their ORCID?'});
+};
+
+/**
+ * Press "Request verification" on a contributor form's ORCID iD field and
+ * confirm its dialog with "Yes". On a saved contributor the request leaves
+ * at once (the confirm is bounded by the request answering OK); on the add
+ * form it is only remembered (`saved: false`), so nothing is awaited.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @param {{saved?: boolean}} [options]
+ * @returns {Promise<string>} the dialog's text, read before it was confirmed
+ */
+exports.requestVerification = async function requestVerification(page, field, {saved = true} = {}) {
+    await field.getByRole('button', {name: 'Request verification'}).click();
+    const dialog = exports.orcidRequestDialog(page);
+    await expect(dialog).toContainText('Request ORCID verification');
+    const dialogText = await dialog.innerText();
+    const requested = saved
+        ? page.waitForResponse(
+              (response) =>
+                  response.url().includes('/orcid/requestAuthorVerification/') && response.ok()
+          )
+        : Promise.resolve();
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    await requested;
+    await expect(dialog).toHaveCount(0);
+    return dialogText;
+};
+
+/** The requested state of the field (Rule 8): the disabled button's text and the resend link. */
+exports.REQUESTED_TEXT = 'ORCID Verification has been requested!';
+exports.RESEND_LINK_TEXT = 'Resend Verification Email';
+
+/**
+ * The two links every ORCID request email carries (Rule 14): the personal
+ * authorization link (leading to ORCID's site) and the What-is-ORCID link,
+ * read by their hrefs because the two templates word the link texts
+ * differently.
+ *
+ * @param {string} html the message's HTML body
+ * @returns {{authorization: string|null, about: string|null}}
+ */
+exports.orcidEmailLinks = function orcidEmailLinks(html) {
+    const hrefs = [];
+    const anchorRe = /<a\b[^>]*href=(["'])([^"']+)\1/gi;
+    let match;
+    while ((match = anchorRe.exec(html)) !== null) {
+        hrefs.push(match[2].replace(/&amp;/g, '&'));
+    }
+    return {
+        authorization: hrefs.find((href) => /orcid\.org\/oauth\/authorize/.test(href)) || null,
+        about: hrefs.find((href) => /\/orcid\/about/.test(href)) || null,
+    };
 };
