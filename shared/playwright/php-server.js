@@ -52,6 +52,11 @@ function phpServerEnv({configFile, testApiKey}) {
     return {
         PKP_CONFIG_FILE: configFile,
         TEST_API_KEY: testApiKey || '',
+        // `php -S` answers one request at a time, so a page's document and
+        // its burst of API calls queue behind each other on the worker's
+        // server. With request workers the built-in server forks and serves
+        // them concurrently (PHP ≥ 7.4, fork-capable platforms only).
+        PHP_CLI_SERVER_WORKERS: process.env.PHP_CLI_SERVER_WORKERS || '4',
     };
 }
 
