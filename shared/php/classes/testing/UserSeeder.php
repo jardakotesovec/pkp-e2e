@@ -29,7 +29,6 @@ use PKP\core\Core;
 use PKP\orcid\OrcidManager;
 use PKP\db\DAORegistry;
 use PKP\security\Role;
-use PKP\security\Validation;
 use PKP\user\User;
 use PKP\userGroup\UserGroup;
 
@@ -142,7 +141,11 @@ class UserSeeder
             $user->setEmail($plan['email']);
             $user->setDateRegistered(Core::getCurrentDate());
             $user->setInlineHelp(1);
-            $user->setPassword(Validation::encryptCredentials($username, $plan['password']));
+            // bcrypt at cost 4, not the app's cost 12 (Validation::encryptCredentials):
+            // a seeded user is a fixture, and cost 12 is ~250 ms of CPU per user
+            // (some 400 users per OJS run). password_verify accepts any cost; a
+            // real form login rehashes the row at cost 12 (rehash-on-login).
+            $user->setPassword(password_hash($plan['password'], PASSWORD_BCRYPT, ['cost' => 4]));
             Repo::user()->add($user);
         }
 

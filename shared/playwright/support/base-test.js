@@ -71,15 +71,14 @@ const test = base.test.extend({
             await use(undefined);
             return;
         }
-        const statePath = await ensureAuthStateFor(browser, user, {baseURL});
-        await use(statePath);
+        await use(await ensureAuthStateFor(browser, user, {baseURL}));
     },
 
     asUser: async ({browser, baseURL}, use) => {
         const openedContexts = [];
         await use(async (username) => {
-            const statePath = await ensureAuthStateFor(browser, username, {baseURL});
-            const context = await browser.newContext({baseURL, storageState: statePath});
+            const storageState = await ensureAuthStateFor(browser, username, {baseURL});
+            const context = await browser.newContext({baseURL, storageState});
             await disableMotion(context);
             openedContexts.push(context);
             return context;
