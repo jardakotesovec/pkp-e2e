@@ -106,7 +106,9 @@ jobs:
       # app's lib/pkp before the run so CI measures it against main's baseline
       # (docs/reports/2026-09-14-suite-performance.md, "OJS-side findings").
       - name: Apply the pkp-lib installer patch under test
-        run: git -C app/lib/pkp apply --verbose "$GITHUB_WORKSPACE/e2e/docs/reports/2026-09-14-pkp-lib-usergroup-installSettings.patch"
+        run: |
+          git -C app/lib/pkp apply --verbose "$GITHUB_WORKSPACE/e2e/docs/reports/2026-09-14-pkp-lib-usergroup-installSettings.patch"
+          git -C app/lib/pkp apply --verbose "$GITHUB_WORKSPACE/e2e/docs/reports/2026-09-14-pkp-lib-persistent-db-connection.patch"
 
       - name: Set up PHP 8.3
         uses: shivammathur/setup-php@v2
