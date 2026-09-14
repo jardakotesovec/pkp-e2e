@@ -1293,9 +1293,12 @@ waivers stand).
 **p** — OPS absence, install facts: the preprint server's stage roster holds
 no review stage (`APP\core\Application::getApplicationStages()` in ops-main,
 commented "Only one stage in OPS": Production alone until 2026-09-08, and
-Production plus `WORKFLOW_STAGE_ID_DONE` since pkp/pkp-lib#13109, ops
+Production plus `WORKFLOW_STAGE_ID_DONE` from pkp/pkp-lib#13109, ops
 `16bbd9b90e`; every app's list gained Done that day, OJS `3bfe1f9f68`, OMP
-`5d2b2fea7`), it inherits an empty review-stage list, registers
+`5d2b2fea7`; Production alone again since 2026-09-12, pkp/pkp-lib#13312, ops
+`97d8a0d2e8`, lib/pkp `65901c4f7a`, every app's list losing Done that day,
+OJS `0dbb274a45`, OMP `ce63a5cd8`, Done kept in
+`PKPApplication::getValidStages()` for the stage-access policy alone), it inherits an empty review-stage list, registers
 no review-stage decision types (`APP\decision\Repository::getDecisionTypes()`:
 decline/revert/post cluster only), and serializes no review stage or
 decisions (`APP\submission\maps\Schema` short-circuits to production/done).

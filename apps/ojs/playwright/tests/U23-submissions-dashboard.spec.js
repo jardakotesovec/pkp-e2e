@@ -867,9 +867,13 @@ test.describe('submissions dashboard', () => {
         await expect(declined).toHaveCount(1);
 
         // A popover: it names the reviewer, the review type and the status,
-        // with the three working buttons (Rule 10).
-        await awaiting.first().click();
-        const popover = dash.activityPopover(rowTwoRev);
+        // with the three working buttons (Rule 10). The two awaiting
+        // indicators carry the same accessible name and arrive in either
+        // order, so the one opened is picked by the reviewer its popover
+        // names, after both have rendered (ci-triage, 2026-09-13).
+        const popover = await dash.openActivityPopoverFor(
+            rowTwoRev, /Awaiting Response from the reviewer/, 'Julia Reviewer', {count: 2}
+        );
         await expect(popover).toContainText('Awaiting Response from the reviewer');
         await expect(popover).toContainText('Julia Reviewer');
         await expect(popover).toContainText('Anonymous Reviewer/Anonymous Author');
@@ -895,7 +899,9 @@ test.describe('submissions dashboard', () => {
         // "View details": the window the workflow's Reviewers panel opens
         // for that reviewer ("Review Details: {title}") appears; closing it
         // reloads the list.
-        await awaiting.first().click();
+        await dash.openActivityPopoverFor(
+            rowTwoRev, /Awaiting Response from the reviewer/, 'Julia Reviewer', {count: 2}
+        );
         await popover.getByRole('button', {name: 'View details', exact: true}).click();
         const details = reviewDetailsModal(page);
         await expect(details).toBeVisible({timeout: 30_000});

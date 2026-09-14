@@ -18,10 +18,11 @@
  *   save): never asserted, and no test runs with the summary at "Require" —
  *   scratch presses stay at the fresh-context default (off), per the spec's
  *   own scenario seeding notes.
- * - A16 🐞 (the permitted Author's Save on a new version of a published
- *   item is offered and refused): S3 creates the new version and asserts
- *   the contract on it (no banner, Save offered) but never presses that
- *   Save while the other version is published; the refusal is not driven.
+ * - A16 ✅ retired (fixed upstream in pkp/pkp-lib#13312, 2026-09-12;
+ *   verified 2026-09-14): S3 now presses the permitted Author's Save on
+ *   the new version while the other version is still published, waits
+ *   for the "Saved" footer and reads "The" back after a reload; after the
+ *   unpublish the formerly published version saves the same way.
  * - A17 ❓ (the Author's Contributors page on that new version): never
  *   opened.
  * - A13 🐞 (Cancel leaves the reset button greyed): S7's Cancel leg asserts
@@ -578,13 +579,20 @@ test.describe('Publication metadata (U40)', () => {
         await expect(saveButton(authorPage)).toBeDisabled();
 
         // The manager creates a new version; on it the author finds no
-        // banner and Save offered (Rule 9). That Save is NOT pressed while
-        // the other version is published: its refusal is A16 🐞.
+        // banner and Save offered (Rule 9). That Save is pressed while the
+        // other version is still published (A16 retired 2026-09-14,
+        // header): "The" as Prefix, the footer reads "Saved", and after a
+        // reload Prefix reads "The".
         await openVersionPage(managerPage, PK, submissionId, v1);
         const v2 = await createNewVersionFromWorkflow(managerPage);
         await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
         await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
         await expect(authorPage.getByText(banner)).toHaveCount(0);
+        const prefixInput2 = field(authorPage, /^Prefix/).locator('input').first();
+        await prefixInput2.fill('The');
+        await savePublicationForm(authorPage);
+        await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
+        await expect(prefixInput2).toHaveValue('The', {timeout: 30_000});
 
         // The manager unpublishes the published version. Nothing is
         // re-ticked: the assignment's box is read as still ticked (the
@@ -634,13 +642,10 @@ test.describe('Publication metadata (U40)', () => {
         await expect(prefixInput).toHaveValue('The');
         await expect(richBody(authorPage, /^Subtitle/)).not.toContainText(draftSubtitle);
 
-        // The new version saves for the author as well, and keeps it.
+        // The new version still offers Save and keeps the "The" saved on
+        // it while the other version was published.
         await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
         await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
-        const prefixInput2 = field(authorPage, /^Prefix/).locator('input').first();
-        await prefixInput2.fill('The');
-        await savePublicationForm(authorPage);
-        await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
         await expect(prefixInput2).toHaveValue('The');
     });
 

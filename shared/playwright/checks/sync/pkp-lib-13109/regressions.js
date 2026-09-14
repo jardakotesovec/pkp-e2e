@@ -119,7 +119,8 @@ forEachApp(async (app) => {
         for (const r of roleRows) log('S4 row', r.cells[0]?.text, '|', r.cells.slice(2).map((c) => `${c.text}:${c.links.map((l) => l.title).join('/') || (c.inputs[0] ? `input ${c.inputs[0].checked ? 'checked' : 'unchecked'}${c.inputs[0].disabled ? ' disabled' : ''}` : '-')}`).join(' ; '));
         await snap(page, 's4-roles-grid');
         // Author row › Edit
-        const authorRow = grid.locator('tr.gridRow').filter({hasText: /^\s*Author\b/}).first();
+        // The row's first cell reads "Settings" (the row-actions cell) before the name, so anchor on a line of its own.
+        const authorRow = grid.locator('tr.gridRow').filter({hasText: /(^|\n)\s*Author\s*(\n|$)/}).first();
         if (await authorRow.count()) {
             const controls = await legacyRowControls(page, authorRow);
             await controls.getByRole('link', {name: 'Edit', exact: true}).click();

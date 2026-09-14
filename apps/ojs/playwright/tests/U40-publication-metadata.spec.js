@@ -44,11 +44,11 @@
  * - A15 🐞: S6 gates the language panel on its own loading (the French
  *   description) before picking a language, so the stale-panel behavior
  *   is never entered.
- * - A16 🐞: on the new version of a published item S3 asserts what the
- *   page offers the permitted Author (no banner, Save enabled — Rule 9's
- *   contract) and never presses Save there; the refused save is the
- *   finding. The Author saves on the new version only once the item is
- *   unpublished, and on the scheduled item (where the save is kept).
+ * - A16 ✅ retired (fixed upstream in pkp/pkp-lib#13312, 2026-09-12;
+ *   verified 2026-09-14): S3 now presses the permitted Author's Save on
+ *   the new version while the other version is still published, waits
+ *   for the "Saved" footer and reads "The" back after a reload; after the
+ *   unpublish the formerly published version saves the same way.
  * - A17 ❓: the Author's Contributors page on the new version is not
  *   opened.
  * - OJS1 🐞: scenario 6's leg on an article published into a not-yet-
@@ -468,13 +468,20 @@ test.describe('publication metadata', () => {
         await managerPub.createNewVersion({expectLabel: V2});
 
         // The new version's Title & Abstract shows the Author no banner and
-        // offers Save (Rule 9). Save is NOT pressed here: the refusal that
-        // follows while the other version is published is A16 (header).
+        // offers Save (Rule 9). The Save is pressed while the other version
+        // is still published (A16 retired 2026-09-14, header): "The" as
+        // Prefix, the footer reads "Saved", and after a reload Prefix reads
+        // "The".
         await authorPub.gotoWorkflow(submissionId, {author: true});
         await authorPub.openVersionEntry(V2, 'Title & Abstract');
         await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
         await expect(publishedBanner).toHaveCount(0);
         await expect(editorWarning).toHaveCount(0);
+        await prefix.fill('The');
+        await authorPub.save();
+        await authorPub.gotoWorkflow(submissionId, {author: true});
+        await authorPub.openVersionEntry(V2, 'Title & Abstract');
+        await expect(prefix).toHaveValue('The', {timeout: 30_000});
         // Positive control for the absent banner: the published version's
         // page still carries it.
         await authorPub.openVersionEntry(V1, 'Title & Abstract');
@@ -517,15 +524,14 @@ test.describe('publication metadata', () => {
         await authorPub.openVersionEntry(V1, 'Title & Abstract');
         await expect(prefix).toHaveValue('');
 
-        // The Author saves at once, with no re-tick: "The" as Prefix on
-        // either version is there after a reload.
+        // The Author saves at once on the other (formerly published)
+        // version, with no re-tick: "The" as Prefix; the new version still
+        // carries the "The" saved above, and both read "The" after a reload.
         await prefix.fill('The');
         await authorPub.save();
         await authorPub.openVersionEntry(V2, 'Title & Abstract');
         await expect(authorPub.saveButton()).toBeEnabled({timeout: 30_000});
-        await expect(prefix).toHaveValue('');
-        await prefix.fill('The');
-        await authorPub.save();
+        await expect(prefix).toHaveValue('The');
         await authorPub.gotoWorkflow(submissionId, {author: true});
         await authorPub.openVersionEntry(V1, 'Title & Abstract');
         await expect(prefix).toHaveValue('The');

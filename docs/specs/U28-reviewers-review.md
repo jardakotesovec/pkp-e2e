@@ -181,9 +181,11 @@ give no access to any screen in this spec. <sup>l</sup>
    date and component (the whole list absent, before and after accepting,
    when "Restrict File Access" is on: the files are then on step 3 only,
    Settings); the link "View All Submission Details", which opens a
-   read-only window with the title, the abstract, and the authors only
-   when the review type discloses them (an "Open" review names them, "Anonymous
-   Reviewer/Anonymous Author" does not); the "Review Schedule" block
+   read-only window with the title and the abstract; the authors, and
+   any supporting agencies the journal has recorded, appear in that
+   window only when the review type discloses the authors (an "Open"
+   review does, "Anonymous Reviewer/Anonymous Author" does not, and
+   then neither row is shown); the "Review Schedule" block
    with three read-only dates, "Editor's Request", "Response Due Date" and
    "Review Due Date"; the link "About Due Dates", which opens a dialog
    reading "The editor asks that you either accept or decline the review
@@ -1367,7 +1369,14 @@ assignments when the setting is on). "View All Submission Details":
 (`useReviewerSubmissionDetailsForm.js`: title, authors only when
 `publication.authorsString` is non-empty — the API blanks it for anonymous
 review types —, abstract, data citations when enabled, data availability,
-funding statement, keywords, subjects, disciplines) (AFFU-145; GRID-063 is
+funding statement, keywords, subjects, disciplines, and since 2026-09-11
+supporting agencies, `submission.supportingAgencies` "Supporting Agencies",
+only when the localized list is non-empty, added after disciplines by
+ui-library `db5b2813` (pkp/pkp-lib#13304, ui-library #983), while the
+publication API map answers `supportingAgencies` as an empty list when
+the caller's review assignment anonymizes the authors, lib/pkp
+`40df36903d` (fix PR #13309); both in every app's tip on 2026-09-14, ojs
+`f0cde27fda`, omp `bbd28d570`, ops `04bbf46097`) (AFFU-145; GRID-063 is
 the legacy modal handler the atlas recorded, now superseded by the Vue
 modal — the probe confirms which one renders). Schedule fields
 `dateNotified`/`responseDue`/`dateDue` read-only (AFFU-146; labels
@@ -1393,8 +1402,20 @@ OMP), date, component; "View All Submission Details" showed "Title" and
 "Abstract" alone for "Anonymous Reviewer/Anonymous Author" and "Title",
 "Authors", "Abstract" for "Open" ("Anonymous Reviewer/Disclosed Author" not
 driven; the seeded submissions carry no keywords, so the window's other
-metadata rows listed above were never seen and the body names only the
-title, the abstract and the authors); dates `YYYY-MM-DD`; the
+metadata rows listed above were never seen and the body named only the
+title, the abstract and the authors until 2026-09-14). Live-probed
+2026-09-14 (OJS, scratch journal, Supporting Agencies enabled, the term
+"Agency Alpha 13304" on the publication, two reviewers on one round; kept
+script `shared/playwright/checks/sync/pkp-lib-13304/details-modal.js`,
+outputs `.reports/sync/s14-13304/`): the "Anonymous Reviewer/Anonymous
+Author" reviewer's window listed the rows "Title" and "Abstract" only and
+its `publications/{id}` fetch answered `supportingAgencies: {"en": []}` and
+`authorsString: ""`; the "Open" reviewer's window listed "Title",
+"Authors", "Abstract", "Supporting Agencies" (authors "Au Thorside
+(Author)", value "Agency Alpha 13304") and the fetch carried the term;
+"Anonymous Reviewer/Disclosed Author" not driven (the anonymizer treats
+it like Open); OMP not driven; scenarios 4 and 13 keep their text, the
+seeded submissions carrying no agencies; dates `YYYY-MM-DD`; the
 consent box is `required` and the unticked press is stopped by the
 browser-side validator with a `label.error` "This field is required."
 under the box (the server's "You must agree to the terms of the privacy
@@ -1894,11 +1915,26 @@ server, scenario 17): the Roles grid carried a second stage column,
 disabled and a "Done" box left enabled; Done joined every app's stage
 list on 2026-09-08 (pkp/pkp-lib#13109, ops `a72cacc1c5` / pkp-lib
 `b48c22ca06`; [→ Done](U24-workflow-screen-and-stage-access.md#done)) and
-the Roles screen was written for its absence, which upstream is fixing in
-pkp/pkp-lib#13312 (open). The scenario therefore reads "Production"
+the Roles screen was written for its absence, which upstream was fixing in
+pkp/pkp-lib#13312 (open that day). The scenario therefore reads "Production"
 greyed out and the role saved and does not count the stages; once the fix
 lands, the list under "Reviewer" holds "Production" alone and the grid no
-"Done" column.
+"Done" column. The fix landed 2026-09-12 (pkp/pkp-lib#13312 "Use DONE stage only for auth checks" (lib/pkp `65901c4f7a` + `716419c770`, merge `0356122fdc`; ojs `0dbb274a45` / omp `ce63a5cd8` / ops `97d8a0d2e8`, merged 2026-09-12)): Done is out of
+every app's `getApplicationStages()` again and kept in
+`PKPApplication::getValidStages()` for the auth policy alone, so the grid
+(`UserGroupGridHandler`) and the role form's "Stage Assignment" boxes
+(`UserGroupForm`, `WorkflowStageDAO::getWorkflowStageTranslationKeys()`
+filtered by the app list) no longer know it. Live 2026-09-14 (OJS, a reset
+server at ojs `f0cde27fda`; the kept reproduction
+`shared/playwright/checks/sync/pkp-lib-13109/regressions.js`, outputs
+`.reports/sync/s14-13109/`): the Roles grid's headers read "Role Name",
+"Permission level", "Submission", "Review", "Copyediting", "Production" —
+no "Done" column — and the Author role's "Edit" form offers exactly the
+four "Stage Assignment" boxes "Submission", "Review", "Copyediting",
+"Production" (the second run of the day, `.reports/sync/s14-13109b/`,
+after the script's Author-row filter was fixed); OMP and OPS not
+re-driven (the same one-line app-side change). The scenario's text
+stands.
 
 <a id="fn-q"></a>
 **q** — OMP: `Application::hasCustomizableReviewerRecommendation()` returns

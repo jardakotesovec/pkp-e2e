@@ -172,10 +172,11 @@ test.describe("reviewer's review (U28) — OPS absence", () => {
         await expect(production).toBeEnabled();
         // …and choosing "Reviewer" greys it out (bounded by the same
         // window having just rendered). The spec's "the only stage" is not
-        // asserted: this build's "Stage Assignment" list and Roles grid
-        // carry a second stage, "Done", which stays enabled under
-        // "Reviewer" — returned as T-ops-1 (.reports/U28/test-ops-findings.md)
-        // for the fold, never frozen here either way.
+        // asserted: between 2026-09-08 and 2026-09-12 (pkp/pkp-lib#13109,
+        // then #13312) the "Stage Assignment" list and the Roles grid
+        // carried a second stage, "Done", enabled under "Reviewer"
+        // (T-ops-1, folded into the spec's scenario 17 footnote); the
+        // stage count stays unasserted either way.
         await level.selectOption({label: 'Reviewer'});
         await expect(production).toBeDisabled();
         // …while the role still saves: "OK" closes the window and the grid

@@ -320,6 +320,37 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         return row.getByRole('button', {name: statusPattern});
     }
 
+    /**
+     * Open the popover of the row's indicator that belongs to a named
+     * reviewer and return it. The indicator's accessible name carries only
+     * the status headline; the reviewer's name is rendered inside the
+     * popover, and a submission's review assignments arrive unordered
+     * (Postgres, no ORDER BY), so a positional pick among same-status
+     * indicators opens either reviewer. This waits for the row's expected
+     * number of `statusPattern` indicators (`count`, when given), then
+     * opens each in turn until the popover names `reviewerName`, closing
+     * the others.
+     */
+    async openActivityPopoverFor(row, statusPattern, reviewerName, {count = null} = {}) {
+        const indicators = this.activityIndicator(row, statusPattern);
+        if (count !== null) {
+            await expect(indicators).toHaveCount(count, {timeout: 30_000});
+        }
+        const total = await indicators.count();
+        const panel = this.activityPopover(row);
+        for (let i = 0; i < total; i++) {
+            await indicators.nth(i).click();
+            await expect(panel).toBeVisible({timeout: 30_000});
+            if ((await panel.innerText()).includes(reviewerName)) {
+                return panel;
+            }
+            await this.closeActivityPopover(row);
+        }
+        throw new Error(
+            `No ${statusPattern} indicator of the row names "${reviewerName}" (${total} checked)`
+        );
+    }
+
     /** A row's Editorial Activity cell (fifth column, U23 Rule 9); empty
      * once a Submission-stage row has its editor (Rule 9i). The ID column
      * is the row's header (`th`) and the editorial list has a "Days"

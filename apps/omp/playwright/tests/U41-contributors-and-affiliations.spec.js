@@ -452,11 +452,26 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.closePreview(preview);
 
         // Order again, move a row, Cancel — the saved order is back.
-        await screen.orderButton().click();
-        await page
-            .getByRole('button', {name: 'Increase position of Alex Author'})
-            .click();
-        await expect(screen.rows().first()).toContainText('Alex Author');
+        // The move is content-verified like the save above: an arrow press
+        // issued while the list re-renders into ordering mode can be
+        // swallowed (ci-triage flake watch, seen on the OPS twin; CI run
+        // 34466942823, 2026-09-10; the OMP twin locally at four workers,
+        // 2026-09-14), so each bounded attempt (re-)enters ordering, waits
+        // for the row's own arrow and passes only when the list shows the
+        // move. A repeat press on an already-first row is a no-op.
+        const alexUp = page.getByRole('button', {
+            name: 'Increase position of Alex Author',
+        });
+        await expect(async () => {
+            if (!(await screen.saveOrderButton().isVisible())) {
+                await screen.orderButton().click({timeout: 2_000});
+            }
+            await expect(alexUp).toBeVisible({timeout: 5_000});
+            await alexUp.click({timeout: 2_000});
+            await expect(screen.rows().first()).toContainText('Alex Author', {
+                timeout: 2_000,
+            });
+        }).toPass({intervals: [1_000, 2_000], timeout: 60_000});
         await screen.cancelOrderingButton().click();
         await expect(screen.rows().first()).toContainText(`Bora ${family}`, {
             timeout: 30_000,

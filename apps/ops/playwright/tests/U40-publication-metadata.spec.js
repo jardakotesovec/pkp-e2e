@@ -19,11 +19,11 @@
  *   reach into unposted/declined submissions): S7 runs the reset on a server
  *   whose only submission is posted and asserts only that item; nothing is
  *   asserted about unposted or declined items.
- * - A16 🐞 (the permitted Author's Save on a new version of a posted item
- *   is offered and refused): S3 asserts only the contract side — no banner
- *   and Save offered on the new version — and never presses that Save
- *   while the other version is posted; the refusal is asserted neither
- *   way. The saves S3 drives on both versions come after the unpost.
+ * - A16 ✅ retired (fixed upstream in pkp/pkp-lib#13312, 2026-09-12;
+ *   verified 2026-09-14): S3 now presses the permitted Author's Save on
+ *   the new version while the other version is still posted, waits for
+ *   the "Saved" footer and reads "The" back after a reload; after the
+ *   unpost the formerly posted version saves the same way.
  * - A17 ❓ (the Author's Contributors page on a new version of a posted
  *   item): never opened; nothing about contributor saves is asserted.
  * - A13 🐞 (the reset button stays greyed after Cancel): S7 reloads the
@@ -462,9 +462,10 @@ test.describe('Publication metadata (U40)', () => {
         // the menu gains "Author Original 1.1". On the new version the
         // Author's Title & Abstract carries no banner and Save is offered
         // (Rule 9); the posted version, read the same way by address, keeps
-        // its banner and disabled Save — the positive control. Pressing that
-        // offered Save while the other version is posted is A16 🐞 and is
-        // not driven (header).
+        // its banner and disabled Save — the positive control. That offered
+        // Save is pressed while the other version is still posted (A16
+        // retired 2026-09-14, header): "The" as Prefix, the footer reads
+        // "Saved", and after a reload Prefix reads "The".
         await openWorkflow(managerPage, PK, submissionId);
         const newPublication = await createNewVersion(managerPage);
         await expect(
@@ -484,6 +485,12 @@ test.describe('Publication metadata (U40)', () => {
         });
         await expect(authorScreen.saveButton()).toBeEnabled({timeout: 30_000});
         await expect(authorPage.getByText(bannerText)).toHaveCount(0);
+        await prefix.fill('The');
+        await authorScreen.save();
+        await openPublicationPage(authorPage, PK, submissionId, newPublication.id, {
+            author: true,
+        });
+        await expect(prefix).toHaveValue('The', {timeout: 30_000});
 
         // The manager unposts. With two versions the workflow opens on the
         // newest one, so the posted version is opened by address; its
@@ -491,21 +498,24 @@ test.describe('Publication metadata (U40)', () => {
         await openPublicationPage(managerPage, PK, submissionId, publicationId);
         await unpostPreprint(managerPage);
 
-        // The Author saves AT ONCE, with no re-tick of the permission
-        // (Rule 9; A4 retired 2026-09-09): "The" typed as Prefix on either
-        // version is kept after a reload, and neither page carries the
-        // banner any more.
+        // The Author saves AT ONCE on the other (formerly posted) version,
+        // with no re-tick of the permission (Rule 9; A4 retired
+        // 2026-09-09): "The" typed as Prefix is kept after a reload; the new
+        // version still carries the "The" saved on it above, and neither
+        // page carries the banner any more.
         for (const versionId of [publicationId, newPublication.id]) {
             await openPublicationPage(authorPage, PK, submissionId, versionId, {
                 author: true,
             });
             await expect(authorScreen.saveButton()).toBeEnabled({timeout: 30_000});
             await expect(authorPage.getByText(bannerText)).toHaveCount(0);
-            await authorScreen.input('titleAbstract', 'prefix', 'en').fill('The');
-            await authorScreen.save();
-            await openPublicationPage(authorPage, PK, submissionId, versionId, {
-                author: true,
-            });
+            if (versionId === publicationId) {
+                await authorScreen.input('titleAbstract', 'prefix', 'en').fill('The');
+                await authorScreen.save();
+                await openPublicationPage(authorPage, PK, submissionId, versionId, {
+                    author: true,
+                });
+            }
             await expect(authorScreen.input('titleAbstract', 'prefix', 'en')).toHaveValue(
                 'The',
                 {timeout: 30_000}

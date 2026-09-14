@@ -611,8 +611,11 @@ round created; "Send to Internal Review" opened Internal Review Round 1.
 <a id="fn-p"></a>
 **p** — `ops-main/classes/core/Application::getApplicationStages()` returned
 `[WORKFLOW_STAGE_ID_PRODUCTION]` only until 2026-09-08; since pkp/pkp-lib#13109
-(ops `16bbd9b90e`) it returns Production and `WORKFLOW_STAGE_ID_DONE` (6), as
-every app's list now ends with Done, which changes nothing on this screen: the
+(ops `16bbd9b90e`) it returned Production and `WORKFLOW_STAGE_ID_DONE` (6), as
+every app's list then ended with Done; since 2026-09-12 it returns Production
+alone again (pkp/pkp-lib#13312, ops `97d8a0d2e8`, lib/pkp `65901c4f7a`: Done out
+of every app's list, kept in `PKPApplication::getValidStages()` for the
+stage-access policy alone). Neither changes anything on this screen: the
 OPS workflow menu (`useWorkflowNavigationConfigOPS.js::getWorkflowItems()`)
 decides its own entries and pushes only the
 Production stage entry (`manager.publication.productionStage` "Production"), and
@@ -667,5 +670,5 @@ are unaffected.
 - `lib/pkp/classes/decision/types/` — `SendExternalReview`, `SkipExternalReview`, `InitialDecline`, `RevertInitialDecline`; OMP `omp-main/classes/decision/types/` — `SkipInternalReview`, `SendInternalReview`
 - `lib/pkp/api/v1/_submissions/PKPBackendSubmissionsController.php::delete()` · `lib/pkp/classes/submission/Repository.php::canCurrentUserDelete()`
 - `lib/pkp/controllers/grid/files/submission/{Author,Editor}SubmissionDetailsFilesGridHandler.php` (GRID-032/033) · `lib/pkp/templates/controllers/tab/authorDashboard/submission.tpl` (AFFW-706)
-- `ops-main/classes/core/Application.php::getApplicationStages()` — OPS stage list: Production, plus Done since pkp/pkp-lib#13109 (2026-09-08)
+- `ops-main/classes/core/Application.php::getApplicationStages()` — OPS stage list: Production; Done added by pkp/pkp-lib#13109 (2026-09-08) and removed again by pkp/pkp-lib#13312 (2026-09-12, ops `97d8a0d2e8`; Done now in `PKPApplication::getValidStages()` only)
 - App divergence points checked: no app subclass of either files-grid handler or of the OJS decision types; OMP adds its internal-review decision set; OPS reduces the workflow to one stage

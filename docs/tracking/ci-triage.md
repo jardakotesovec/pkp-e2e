@@ -34,8 +34,7 @@ the fix lands.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
-| pkp-lib `f4db6d22c4` + ojs `3bfe1f9f68` / omp `5d2b2fea7` / ops `16bbd9b90e` (pkp/pkp-lib#13273, issue #13109) | The "Done" stage now sits in each app's `Application::getApplicationStages()` while its lib/pkp callers assume it absent: Statistics › Editorial Activity shows a permanent "0 Done" row under Active Submissions (the monthly editorial report mail shares the loop); Settings › Users & Roles › Roles gains a "Done" column whose toggle is live on the Journal manager, Reviewer and Reader rows while their other stages are locked, and the role form a "Done" box; every submission's `stages` carries a Done entry and a discussion's "Attach Workflow Files" stage picker lists a disabled "Done" for every submission | OJS OMP OPS (each app's stage list; shared lib/pkp callers; reproduced on OJS) | `checks/sync/pkp-lib-13109/regressions.js` (records `s3-stats-editorial`, `s4-roles-grid`, `s4b-author-role-form`, `s5-stage-options`, `s2-api`); fixed when the stats table has four rows, the Roles grid no "Done" column (or locked like the other stages), the picker and `stages` four stages | thread 2026-09-08; re-read and re-confirmed from scratch 2026-09-09 (rr3), DMs to @beaug and @jarda.kotesovec sent 2026-09-09 (the 2026-09-08 DMs never arrived); still reproduces 2026-09-10 at ojs `8fc931bcf8` / pkp-lib `c59325d675` with the kept script (`.reports/sync/s10/`: "0 Done" under Active Submissions, the "Done" column with a live Journal-manager toggle, the disabled "Done" picker entry, five `stages`); the fresh-install stage-6 gap is with upstream (jardakotesovec on the issue, 2026-09-09; fix PRs pkp/pkp-lib#13312 and pkp/ojs#5816 posted by Vitaliy-1 2026-09-10, unmerged at pkp-lib `0b40119a89`) | Cause: `WorkflowStageDAO::getWorkflowStageTranslationKeys()`, `UserGroupGridCellProvider`, `PKPStatsHandler`, `submission/maps/Schema::getPropertyStages()` and the other `getApplicationStages()` callers were written with Done absent (the Schema's own comment says so); the apps' `getApplicationStages()` gained `WORKFLOW_STAGE_ID_DONE` at the PR. Reported with it, not a regression: on a fresh install no role receives stage 6 (`Repo::userGroup()->installSettings()` caps registry stages at Production), so the grant `registry/userGroups.xml` and the upgrade migration make never lands on a fresh 3.6 install — with the visible consequence U40 K1 drove on all three apps (2026-09-09): the issue's own case, an Author with the permission editing a new version while another is published, still fails, because the published submission rests in Done and the Author's group holds no stage 6, so the screen offers Save and the write answers 401 `user.authorization.accessibleWorkflowStage` (U40 register, the entry folded from K1-1); an upgraded install that ran the migration should pass that case (the fleets never upgrade, so unverified), and the install-side fix is the `<= WORKFLOW_STAGE_ID_PRODUCTION` cap in `UserGroup\Repository::installSettings()`; and `canCurrentUserChangeMetadata` left the submission object (`GET submissions/{id}` omits it, `_submissions` items emit it as `null` because `getSubmissionsListProps()` still names it) and lives on each publication. Delete the row when the upstream fix lands. |
-| pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-10 at ojs `8fc931bcf8` (`afterCancel` fileId 2, `article-rev.pdf`, `status:false`); #13288 still open at `5f995d86af`. Delete the row when #13288 lands. |
+| pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`. Delete the row when #13288 lands. |
 
 ## Flake watch — known non-deterministic failure classes
 
@@ -103,9 +102,17 @@ trips.
   (U05 final run, `.reports/U05/final-run-ojs.log`), green alone and on
   the OJS re-run the same day; seen a second time 2026-09-13 (U04 final
   run, `.reports/U04/final-run-ojs-run1-red.log`), green alone in 14.7 s.
-  **Watch condition tripped** 2026-09-13: the next maintenance session
-  anchors the hover on the indicator's own accessible name and waits for
-  both indicators before hovering.
+  Watch condition tripped 2026-09-13; **hardened 2026-09-14**: the two
+  awaiting indicators share one accessible name ("Awaiting Response from
+  the reviewer", the reviewer's name lives only inside the opened
+  popover) and the submission's review assignments come back in no
+  fixed order (`reviewAssignment/Collector.php` has no `ORDER BY`), so
+  the class is "unordered same-status indicators", not a render race;
+  `EditorialDashboardPage.openActivityPopoverFor()` now waits for the
+  row's expected indicator count, opens the candidates in turn and
+  returns the popover naming the reviewer (OJS S9's two Julia legs;
+  the OMP S9 already tolerated either order). Green alone on OJS and OMP
+  (14 s each). **Watch condition**: a red with the hardened opener.
 - **A wizard press swallowed the instant a step becomes current** (U21
   S10 and S12, OJS, CI only). CI run 34215183797 (2026-09-08, pkp-e2e
   `main` at `aa12a61`, a docs-only push) red on both attempts of S12: the
@@ -150,7 +157,11 @@ trips.
   condition tripped; hardened 2026-09-11: the leg is a content-verified
   bounded retry like the Save leg (re-enter ordering if dropped, wait for
   the row's own arrow, press, pass only when the list shows the move), on
-  OPS and OJS. **Watch condition**: the hardened leg reds again with its
+  OPS and OJS. The OMP twin, left without it, red the same way in the
+  sync session's OMP final at four workers 2026-09-14
+  (`.reports/sync/final-run-omp.log`, the one red of 214; green alone in
+  7.7 s) → hardened the same day with the same bounded retry (green
+  alone twice). **Watch condition**: a hardened leg reds again with its
   retry exhausted.
 - **Review wizard step not advancing on "Accept" under load** (U28 S10,
   OJS; the shared `ReviewerPages.accept()` serves OMP and OPS too). The
@@ -174,7 +185,7 @@ trips.
   one red of 212), and a third time (U24 revision session, the first OJS
   final at four workers on a reset database,
   `.reports/U24/final-run-ojs-attempt{1,2}.log`: one of two reds in 216,
-  in both OJS finals of that session).
+  in both OJS finals of that session). Green in the sync session's OJS final at four workers 2026-09-14 (229 passed, traces retained).
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a
@@ -212,7 +223,9 @@ trips.
   used database afterwards, the button re-attaching until the test
   timeout, `.reports/U24/ojs-reds-alone.log`, while U28 S10 went green
   alone beside it). Next step as above: a retained trace of the table's
-  fetches.
+  fetches. Green in the sync session's OJS final at four workers
+  2026-09-14 (229 passed, run with `--trace retain-on-failure` for exactly
+  this class; no trace to read yet).
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -294,8 +307,27 @@ trips.
   on "2 Details" for the 20 s wait again, the one red of 214; the first
   OMP final of the same session had U21 S6 red on the same rail wait,
   `.reports/U24/final-run-omp-attempt1.log`, dated under the wizard-press
-  entry above), so `continueTo()` is due its bounded retry: a maintenance
-  task, not done in the feature session.
+  entry above). **Hardened 2026-09-14**: OMP's `SubmissionWizardPages`
+  gained a module-level `pressUntil()` in the OJS shape (an 8 s window
+  per press, pressed again while the button is still offered, at most
+  three times, then the 30 s wait) behind `continueTo()`, `openReview()`
+  and `confirmSubmit()`; OPS's partial 5 s × 3 loop was replaced by the
+  same helper on the same three methods. Green alone: OMP U04 S10
+  (10.7 s), OMP U21 S6 (20.8 s), OPS U21 S6 (27 s). **Watch condition**:
+  a hardened press reds again with its retry exhausted at four workers.
+- **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
+  `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
+  and the tests' is local: between 00:00 and 02:00 CEST every "today + N
+  weeks" due-date assertion (U27 S1, S7, S8, S12, S20; U28 S10; U29 S1,
+  OJS and OMP) reads a day off. CI runs in UTC and never sees it; a
+  night run on the Mac or the VM does. **Watch condition**: a red of this
+  shape outside that window; then the tests' date helper computes in UTC.
+- **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
+  maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
+  guidelines typed by the manager missing for the reviewer, S7
+  `ReviewFormsList.rowCounts()` on a half-drawn row, S9 green alone; the
+  `rowCounts()` cell wait sits on the unmerged `perf/test-side` branch).
+  **Watch condition**: a red at four workers on the VM or on CI.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

@@ -160,10 +160,34 @@ async function beginSubmission(page, {title, workType = null}) {
     await expectStep(page, STEPS.files);
 }
 
+/**
+ * Press a footer button until its outcome shows (ci-triage flake watch,
+ * "a wizard press swallowed the instant a step becomes current"): the
+ * press issued right as a step mounts occasionally fires nothing, so the
+ * outcome gets a short window and the button is pressed again while it is
+ * still offered, at most three presses.
+ */
+async function pressUntil(button, outcome) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+        await button.click();
+        try {
+            await outcome(8_000);
+            return;
+        } catch (e) {
+            if (attempt === 2 || !(await button.isVisible().catch(() => false))) {
+                break;
+            }
+        }
+    }
+    await outcome(30_000);
+}
+
 /** Advance one step with the footer's "Continue" and wait for arrival. */
 async function continueTo(page, label) {
-    await footer(page).getByRole('button', {name: 'Continue', exact: true}).click();
-    await expectStep(page, label);
+    await pressUntil(
+        footer(page).getByRole('button', {name: 'Continue', exact: true}),
+        (timeout) => expect(currentRailStep(page)).toContainText(label, {timeout})
+    );
 }
 
 /**
@@ -203,12 +227,12 @@ async function openReview(page, {viaRail = false} = {}) {
             r.request().method() === 'POST' &&
             r.status() < 500
     );
-    if (viaRail) {
-        await railEntry(page, STEPS.review).click();
-    } else {
-        await footer(page).getByRole('button', {name: 'Continue', exact: true}).click();
-    }
-    await expectStep(page, STEPS.review);
+    const target = viaRail
+        ? railEntry(page, STEPS.review)
+        : footer(page).getByRole('button', {name: 'Continue', exact: true});
+    await pressUntil(target, (timeout) =>
+        expect(currentRailStep(page)).toContainText(STEPS.review, {timeout})
+    );
     await validated;
     await expect(page.locator('.submissionWizard__loadingReview')).toHaveCount(0, {
         timeout: 20_000,
@@ -227,11 +251,10 @@ function problemsBanner(page) {
 async function confirmSubmit(page) {
     const submit = footer(page).getByRole('button', {name: 'Submit', exact: true});
     await expect(submit).toBeEnabled({timeout: 20_000});
-    await submit.click();
     const dialog = page
         .getByRole('dialog')
         .filter({hasText: 'Are you sure you want to complete this submission?'});
-    await expect(dialog).toBeVisible({timeout: 10_000});
+    await pressUntil(submit, (timeout) => expect(dialog).toBeVisible({timeout}));
     await dialog.getByRole('button', {name: 'Submit', exact: true}).click();
     await expect(
         page.getByRole('heading', {name: 'Submission complete'})
