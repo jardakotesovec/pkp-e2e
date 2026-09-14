@@ -177,7 +177,12 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         outputDir: path.join(suiteDir, 'test-results'),
         workers,
         fullyParallel: true,
-        reporter: [['list']],
+        reporter: [
+            ['list'],
+            ...(process.env.PROFILE_OUT
+                ? [[path.join(__dirname, 'support', 'profile-reporter.js')]]
+                : []),
+        ],
         timeout: 60_000,
         expect: {timeout: 10_000},
         use: {

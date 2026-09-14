@@ -36,7 +36,10 @@ const RESTART_LIMIT = 20;
  * @returns {string}
  */
 function phpServerCommand({appRoot, port, logFile}) {
-    const serve = `php -d max_execution_time=120 -S 127.0.0.1:${port} -t "${appRoot}" >> "${logFile}" 2>&1`;
+    const prepend = process.env.PHP_AUTO_PREPEND
+        ? ` -d auto_prepend_file="${process.env.PHP_AUTO_PREPEND}"`
+        : '';
+    const serve = `php -d max_execution_time=120${prepend} -S 127.0.0.1:${port} -t "${appRoot}" >> "${logFile}" 2>&1`;
     return `: > "${logFile}"; n=0; until ${serve}; do s=$?; n=$((n+1)); [ "$n" -ge ${RESTART_LIMIT} ] && exit 1; echo "[harness] php -S died (exit $s); restart $n" >> "${logFile}"; sleep 1; done`;
 }
 

@@ -49,6 +49,9 @@ jobs:
       TEST_API_KEY: ci-test-key
       MAILPIT_URL: http://127.0.0.1:8025
       PLAYWRIGHT_WORKERS: 4
+      PROFILE_OUT: ${{ runner.temp }}/profile-${{ inputs.app }}.jsonl
+      PHP_AUTO_PREPEND: ${{ github.workspace }}/e2e/shared/playwright/support/reqprof.php
+      REQPROF_OUT: ${{ runner.temp }}/reqprof-${{ inputs.app }}.jsonl
     services:
       postgres:
         image: postgres:16
@@ -190,6 +193,16 @@ jobs:
           OMP_ROOT: ${{ github.workspace }}/app
           OPS_ROOT: ${{ github.workspace }}/app
         run: npx playwright test -c configs/${{ inputs.app }}.config.js --retries=1
+
+      - name: Upload the profiles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: profile-${{ inputs.app }}
+          path: |
+            ${{ runner.temp }}/profile-${{ inputs.app }}.jsonl
+            ${{ runner.temp }}/reqprof-${{ inputs.app }}.jsonl
+          if-no-files-found: warn
 
       - name: Upload test artifacts on failure
         if: failure()
