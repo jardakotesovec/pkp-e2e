@@ -134,8 +134,9 @@ test.describe('notifications center & email preferences (queued email)', () => {
         // "Publish Issue" with the email box left ticked; then the jobs.
         await gotoFutureIssues(managerPage, tag);
         await publishIssue(managerPage, identification);
-        const output = runJobs();
-        expect(output).toContain('IssuePublishedNotifyUsers');
+        // Another serial worker's drain may already have popped the
+        // IssuePublishedNotifyUsers job; the mailbox below is the evidence.
+        runJobs();
 
         // The Author's mailbox holds the issue email, its subject the issue's
         // title, ending with the issue footer; the Reader's holds none.

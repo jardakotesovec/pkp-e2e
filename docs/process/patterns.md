@@ -175,6 +175,12 @@ over.
    pending jobs, even inside a `Mail::fake()` seeding window, committing side
    effects while swallowing the message. Never run either while parallel
    workers are seeding. The project chain guarantees this in normal runs.
+   Inside the serial project several workers drain at once, so a test may
+   find its job already run by another test's drain; that is fine for a
+   test that looks for the effect after its own drain (which also waits for
+   jobs other runners are still executing), and wrong for a test that
+   asserts "not yet, until the jobs run": tag that one `@solo` and it runs
+   alone in the `<app>-solo` project after the serial one.
 8. **"Anonymous" contexts are not anonymous under `test.use({user})`.**
    `browser.newContext()` inherits the file's storageState, and editors can
    *preview* unpublished articles, so an expected 404 becomes a 200. Pass an

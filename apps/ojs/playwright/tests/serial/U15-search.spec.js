@@ -327,7 +327,7 @@ test.describe('Search (queue-drained index)', () => {
         await expect(managerSearch.resultByTitle(unpublishedTitle)).toHaveCount(0);
     });
 
-    test('S5: Unpublishing removes, republishing restores', async ({page, asUser, ojsApi}, testInfo) => {
+    test('S5: Unpublishing removes, republishing restores @solo', async ({page, asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
         const [word] = makeWords(1);

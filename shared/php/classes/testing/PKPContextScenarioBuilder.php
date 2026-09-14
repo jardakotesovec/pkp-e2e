@@ -79,6 +79,7 @@ namespace PKP\testing;
 
 use APP\core\Application;
 use PKP\context\Context;
+use Illuminate\Support\Facades\DB;
 use PKP\db\DAORegistry;
 use PKP\orcid\OrcidManager;
 use PKP\reviewForm\ReviewFormElement;
@@ -169,8 +170,28 @@ abstract class PKPContextScenarioBuilder
             throw new SpecException('context.path', "A context with path \"{$contextData['path']}\" already exists — tags must be unique per run");
         }
 
-        // Execute phase.
-        $context = $this->contextFactory->create($contextParams);
+        // Execute phase. PKPContextService::add resequences every context
+        // row (UPDATE journals SET seq …) before it installs the defaults,
+        // and inside the request's transaction those row locks are held to
+        // the commit — every other worker's context seed queues behind this
+        // one for the whole ~2 s build (measured 2026-09-13: eight
+        // concurrent seeds finished 2.2 s apart; 7.4 s average wait per
+        // seed over a full OJS run). So the context itself is created in
+        // autocommit mode, each statement releasing its locks at once, and
+        // the transaction resumes for the rest of the build. The parse
+        // phase above has already refused every spec error before the
+        // first write, so a half-built context needs an unexpected failure.
+        $inTransaction = DB::transactionLevel() > 0;
+        if ($inTransaction) {
+            DB::commit();
+        }
+        try {
+            $context = $this->contextFactory->create($contextParams);
+        } finally {
+            if ($inTransaction) {
+                DB::beginTransaction();
+            }
+        }
 
         if ($orcidSettings !== null) {
             // The same service call the ORCID settings tab's form save runs

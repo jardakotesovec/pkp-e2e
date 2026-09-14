@@ -211,10 +211,28 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
                 dependencies: ['setup'],
             },
             {
+                // The serial project's contract is "after the parallel
+                // project" (patterns.md parallel lesson 7: a runner drains
+                // the shared queue, so nothing may seed while one runs), not
+                // "one test at a time": its specs seed their own scratch
+                // contexts and the queue's pop is FOR UPDATE SKIP LOCKED, so
+                // concurrent runners are safe. At one worker the project was
+                // 24% of the OJS wall time for 4% of the work (2026-09-13).
                 name: `${appName}-serial`,
                 testDir: path.join(appTestDir, 'serial'),
-                workers: 1,
+                workers: Math.min(4, workers),
+                grepInvert: /@solo/,
                 dependencies: ['shared', appName],
+            },
+            {
+                // A test that asserts "not yet, until the jobs run" cannot
+                // share the queue with other tests' drains: it runs alone,
+                // after the serial project, tagged @solo in its title.
+                name: `${appName}-solo`,
+                testDir: path.join(appTestDir, 'serial'),
+                workers: 1,
+                grep: /@solo/,
+                dependencies: [`${appName}-serial`],
             },
         ],
         // One PHP server per worker; `php -S` is single-threaded. The ready

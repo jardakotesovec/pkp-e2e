@@ -363,7 +363,7 @@ test.describe('Search (U15)', () => {
         await expect(managerSearch.result(draftTitle)).toHaveCount(0);
     });
 
-    test('S5: unposting removes, reposting restores', async ({page, opsApi, asUser}, testInfo) => {
+    test('S5: unposting removes, reposting restores @solo', async ({page, opsApi, asUser}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
         const [word] = makeWords(1);

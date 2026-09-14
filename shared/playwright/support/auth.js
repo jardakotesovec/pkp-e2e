@@ -24,7 +24,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const {request} = require('@playwright/test');
+const {request, devices} = require('@playwright/test');
 const {LoginPage} = require('../pages/LoginPage.js');
 const {getPassword} = require('../data/users.js');
 const {disableMotion} = require('./motion.js');
@@ -59,6 +59,57 @@ async function ensureAuthStateFor(browser, username, {baseURL}) {
     }
 
     fs.mkdirSync(authDir, {recursive: true});
+    const state =
+        (await signInOverHttp(username, getPassword(username), {baseURL})) ??
+        (await signInInBrowser(browser, username, getPassword(username), {baseURL}));
+    // Atomic publish: rename can't expose a half-written file to the
+    // parallel workers reading this path.
+    const tmpPath = `${statePath}.${process.pid}.tmp`;
+    fs.writeFileSync(tmpPath, JSON.stringify(state));
+    fs.renameSync(tmpPath, statePath);
+    return statePath;
+}
+
+/**
+ * The login form posted over plain HTTP: the login page for its CSRF token,
+ * then signIn, and the resulting cookies as a storage state. Two requests
+ * instead of a browser page, a form and the signed-in landing page (some
+ * 270 sign-ins per OJS run, about a second each in the browser, 2026-09-13).
+ * The browser's user agent is sent so the session matches the contexts that
+ * will use it. Returns null when the app did not sign the user in (the
+ * redirect stays on /login), leaving the browser path to try and report.
+ *
+ * @returns {Promise<object|null>} storage state
+ */
+async function signInOverHttp(username, password, {baseURL}) {
+    const http = await request.newContext({
+        baseURL,
+        userAgent: devices['Desktop Chrome'].userAgent,
+    });
+    try {
+        const loginPage = await http.get('/index.php/index/en/login');
+        const token = (await loginPage.text()).match(/name="csrfToken"[^>]*value="([^"]+)"/);
+        if (!loginPage.ok() || !token) {
+            return null;
+        }
+        const signIn = await http.post('/index.php/index/en/login/signIn', {
+            form: {csrfToken: token[1], source: '', username, password},
+            maxRedirects: 0,
+        });
+        const location = signIn.headers().location || '';
+        if (signIn.status() !== 302 || location.includes('/login')) {
+            return null;
+        }
+        return await http.storageState();
+    } catch {
+        return null;
+    } finally {
+        await http.dispose();
+    }
+}
+
+/** The login form driven in a browser page; the fallback. */
+async function signInInBrowser(browser, username, password, {baseURL}) {
     const context = await browser.newContext({
         baseURL,
         storageState: {cookies: [], origins: []},
@@ -68,16 +119,11 @@ async function ensureAuthStateFor(browser, username, {baseURL}) {
         const page = await context.newPage();
         const loginPage = new LoginPage(page);
         await loginPage.goto();
-        await loginPage.signIn(username, getPassword(username));
-        // Atomic publish: rename can't expose a half-written file to the
-        // parallel workers reading this path.
-        const tmpPath = `${statePath}.${process.pid}.tmp`;
-        fs.writeFileSync(tmpPath, JSON.stringify(await context.storageState()));
-        fs.renameSync(tmpPath, statePath);
+        await loginPage.signIn(username, password);
+        return await context.storageState();
     } finally {
         await context.close();
     }
-    return statePath;
 }
 
 module.exports = {ensureAuthStateFor};

@@ -124,11 +124,16 @@ Two facts worth knowing before you write a test:
   PHP warnings). Look there when debugging server-side errors. A server
   adopted through `reuseExistingServer` (a stray one on a worker port)
   keeps logging wherever it was started.
-- **Project chain**: `setup → {shared, <app>} → <app>-serial`. The setup
-  project probes `GET /api/v1/_test/bootstrap`. Warm, it is a no-op in under
-  a second. Cold, it installs the schema through `tools/installTest.php` and
-  seeds. The serial project runs alone at the end and holds only
-  globally-scanning specs and queue drains.
+- **Project chain**: `setup → {shared, <app>} → <app>-serial → <app>-solo`.
+  The setup project probes `GET /api/v1/_test/bootstrap`. Warm, it is a no-op
+  in under a second. Cold, it installs the schema through
+  `tools/installTest.php` and seeds. The serial project runs after everything
+  else and holds only globally-scanning specs and queue drains; it uses up to
+  four workers, since its specs seed their own scratch contexts and
+  `runJobs()` waits until the shared queue is empty, reserved jobs included.
+  A test that asserts "still nothing, until the jobs run" cannot share the
+  queue with other tests' drains: it carries `@solo` in its title and runs
+  alone in the solo project, last.
 - **Animations are globally disabled** (`reducedMotion: 'reduce'` plus the
   `motion.js` CSS in every context). `trace: 'on-first-retry'` records nothing
   while retries are 0. Turn retries on when hunting a failure.

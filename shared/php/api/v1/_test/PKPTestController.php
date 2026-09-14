@@ -72,6 +72,7 @@ abstract class PKPTestController extends PKPBaseController
     public function getGroupRoutes(): void
     {
         Route::get('bootstrap', $this->probe(...))->name('_test.bootstrap.probe');
+        Route::get('jobs', $this->jobs(...))->name('_test.jobs');
         Route::post('bootstrap', $this->bootstrap(...))->name('_test.bootstrap');
         Route::post('scenarios/context', $this->contextScenario(...))->name('_test.scenarios.context');
         Route::post('scenarios/submission', $this->submissionScenario(...))->name('_test.scenarios.submission');
@@ -154,6 +155,22 @@ abstract class PKPTestController extends PKPBaseController
                 return parent::send($view, $data, $callback);
             }
         });
+    }
+
+    /**
+     * GET jobs — the queue's size, reserved jobs included (the jobs tool's
+     * "total" and "list" count unreserved jobs only). A serial test's drain
+     * waits on this until the queue is empty, so a job another worker's
+     * runner is still executing cannot be looked for before it lands.
+     */
+    public function jobs(): JsonResponse
+    {
+        return response()->json([
+            // Only jobs a drain would run now: a job released with a retry
+            // delay (available_at in the future) is not waited for.
+            'queued' => DB::table('jobs')->whereNull('reserved_at')->where('available_at', '<=', time())->count(),
+            'reserved' => DB::table('jobs')->whereNotNull('reserved_at')->count(),
+        ], 200);
     }
 
     /**

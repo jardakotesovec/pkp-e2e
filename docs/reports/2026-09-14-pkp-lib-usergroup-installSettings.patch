@@ -1,0 +1,22 @@
+diff --git a/classes/userGroup/Repository.php b/classes/userGroup/Repository.php
+index a40b36371..72a5266fd 100644
+--- a/classes/userGroup/Repository.php
++++ b/classes/userGroup/Repository.php
+@@ -557,11 +557,13 @@ class Repository
+             ]);
+ 
+             $userGroup->save();
++        }
+ 
+-            // Install the settings in the current locale for this context
+-            foreach ($installedLocales as $locale) {
+-                $this->installLocale($locale, $contextId);
+-            }
++        // Install the localized names once per locale, after every group of
++        // the context exists (installLocale() loads and re-saves all of the
++        // context's groups, so calling it inside the loop above is quadratic).
++        foreach ($installedLocales as $locale) {
++            $this->installLocale($locale, $contextId);
+         }
+ 
+         self::forgetEditorialCache($contextId);

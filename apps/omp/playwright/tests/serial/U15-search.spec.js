@@ -316,7 +316,7 @@ test.describe('Search — the press Search page', () => {
         await managerSearch.expectAbsent(unpublishedTitle);
     });
 
-    test('S5: Unpublishing removes, republishing restores', async ({page, asUser, ompApi, appContext}, testInfo) => {
+    test('S5: Unpublishing removes, republishing restores @solo', async ({page, asUser, ompApi, appContext}, testInfo) => {
         test.slow();
         const tag = makeTag('5', testInfo);
         const word = makeWord();
