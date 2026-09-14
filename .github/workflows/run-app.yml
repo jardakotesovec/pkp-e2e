@@ -48,7 +48,7 @@ jobs:
       PKP_CONFIG_FILE: ${{ github.workspace }}/app/config.test.inc.php
       TEST_API_KEY: ci-test-key
       MAILPIT_URL: http://127.0.0.1:8025
-      PLAYWRIGHT_WORKERS: 4
+      PLAYWRIGHT_WORKERS: 6
     services:
       postgres:
         image: postgres:16
