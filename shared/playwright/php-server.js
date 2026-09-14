@@ -56,7 +56,10 @@ function phpServerEnv({configFile, testApiKey}) {
         // its burst of API calls queue behind each other on the worker's
         // server. With request workers the built-in server forks and serves
         // them concurrently (PHP ≥ 7.4, fork-capable platforms only).
-        PHP_CLI_SERVER_WORKERS: process.env.PHP_CLI_SERVER_WORKERS || '4',
+        // Opt-in: with several request workers five tests fail on client-state
+        // races (docs/reports/2026-09-14-suite-performance.md), so the default
+        // stays at one until those are understood.
+        PHP_CLI_SERVER_WORKERS: process.env.PHP_CLI_SERVER_WORKERS || '1',
     };
 }
 
