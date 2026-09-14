@@ -67,12 +67,16 @@ orchestrator.
    count, tests per app, and a note in the fixed shape (tests per app ·
    register counts · one headliner ID · budget cuts as states / variants · open
    blocker · low-confidence IDs). Gate: the row, lint zero after the flip.
-10. **Commit.** One commit in this repo, everything the campaign produced;
-    `.reports/` never (session scratch, gitignored, deletable after review;
-    the kept checks under `shared/playwright/checks/` are the exception).
-    App checkouts are read-only: pkp push URLs are disabled by construction,
-    app changes go through maintainer-reviewed PRs, a bad push gets a
-    follow-up commit, never a force-push. Gate: the commit.
+10. **Commit and push.** One commit in this repo, everything the campaign
+    produced, pushed to `origin main` in the same step: the push's CI run
+    is the fresh-box full run the local finals may not reach, and the app
+    repos' PR checks call this `main`, so unpushed work counts for
+    nothing. `.reports/` never (session scratch, gitignored, deletable
+    after review; the kept checks under `shared/playwright/checks/` are
+    the exception). App checkouts are read-only: pkp push URLs are
+    disabled by construction, app changes go through maintainer-reviewed
+    PRs, a bad push gets a follow-up commit, never a force-push. Gate:
+    the commit on `origin/main`.
 11. **Report.** What was built, the register highlights, each suite's summed
     test time from its final-run log ("Budget"), anything low-confidence; if
     anything was routed to the private file, the verification probe
@@ -177,13 +181,13 @@ Test files cite these by number, so the numbers are stable.
   runs no explore or plan agents during a feature. Between gates the files
   under `.reports/<feature>/` are the status.
 - When context runs low, or two launches in a row fail: finish the gate,
-  commit what is commit-worthy, end; a fresh session resumes.
+  commit and push what is commit-worthy, end; a fresh session resumes.
 
 ## Definition of done
 
 Per feature: the spec is `verified` and lint-clean, all three apps are
 covered per the multi-app rules, each suite is green twice, the PROGRESS row
-is updated, everything is committed; team review of verdicts is never a gate.
+is updated, everything is committed and pushed; team review of verdicts is never a gate.
 Campaign: the unclaimed atom count in FEATURE-MAP is zero, every PROGRESS row
 is `done` or `parked`, each app's suite is within the cap ("Budget").
 
@@ -233,6 +237,6 @@ same way, and its scenarios keep their shape.
    `S<n>`, the header's "not covered" block cut to register IDs; then the
    fold and `test:final` as step 8. Gate: the green logs,
    `node docs/process/lint/lint-spec.mjs --tests <spec>` zero.
-5. **Progress, commit, report** as steps 9 to 11: the PROGRESS row in the
+5. **Progress, commit and push, report** as steps 9 to 11: the PROGRESS row in the
    fixed shape with the scenario count; the feature's
    file under `coverage-revision/` and its queue row deleted.
