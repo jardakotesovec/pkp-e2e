@@ -83,6 +83,24 @@ and the session endpoint are each worth about a tenth alone and share
 ground. The single-lever branches are `perf-r2-session` and `perf-r2-hash`
 (local), `perf-testside-ci`, and the base with one patch each.
 
+## The new baseline against the persistent connection
+
+After the decision, three more runs on the Mac (OJS, 4 workers, fresh
+installs, the installer patch applied): `main` with items 1–3 merged,
+the same plus the persistent-connection patch and `persistent = On`, and
+the baseline again as a control.
+
+| condition | wall |
+|---|---|
+| new baseline | 537 s |
+| new baseline + persistent connection | **454 s (−15%)** |
+| new baseline, control | 535 s |
+
+The evening machine ran about 12% slower than at 15:00 (the same
+combination measured 402 s then), so compare within this table only. The
+patch is worth a sixth of the suite on top of everything merged; whether
+to carry it is the maintainer's call, held for the upstream discussion.
+
 ## The CI numbers
 
 Runner-to-runner variance decides how these read: the unchanged base
