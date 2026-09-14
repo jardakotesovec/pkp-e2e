@@ -17,8 +17,10 @@ locally; use CI for green or red.
 
 **Decision (2026-09-14 evening):** the cheap seeded hashes, the session
 endpoint and the six test-side commits are merged to `main`; the
-persistent-connection patch is held for its upstream PR (its file stays
-next to this report), the context cache is parked on `perf-round2-n1`.
+persistent-connection change goes upstream with the installer PR as an
+undocumented setting (its patch stays next to this report; the test
+config already sets the key), the context cache is parked on
+`perf-round2-n1`.
 
 ## The definitive numbers (the Mac, idle)
 
@@ -98,8 +100,8 @@ the baseline again as a control.
 
 The evening machine ran about 12% slower than at 15:00 (the same
 combination measured 402 s then), so compare within this table only. The
-patch is worth a sixth of the suite on top of everything merged; whether
-to carry it is the maintainer's call, held for the upstream discussion.
+patch is worth a sixth of the suite on top of everything merged; it goes
+upstream with the installer PR as an undocumented setting.
 
 ## The CI numbers
 
