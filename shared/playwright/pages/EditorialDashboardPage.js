@@ -336,12 +336,13 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
         return this.page.getByRole('dialog', {name: /^Review Details:/});
     }
 
-    /** Arm a wait for the list's next reload (its submissions fetch); call
-     * before the action that should reload the list and await the promise
-     * after it. */
+    /** Arm a wait for the list's next reload (its submissions fetch — the
+     * "Assigned to me" view fetches `_submissions/assigned`, every other
+     * view `_submissions`); call before the action that should reload the
+     * list and await the promise after it. */
     listReload() {
         return this.page.waitForResponse(
-            (r) => r.request().method() === 'GET' && /\/_submissions\?/.test(r.url()),
+            (r) => r.request().method() === 'GET' && /\/_submissions(\/assigned)?\?/.test(r.url()),
             {timeout: 30_000}
         );
     }

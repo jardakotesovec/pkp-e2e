@@ -11,7 +11,12 @@
  * sub-entries, the version nodes and their pages), the main-column heading,
  * the status box, the "no access" box, the publication-page control
  * regions, and the three confirm dialogs the frame itself carries (Delete,
- * Return to Workflow, Return to Done).
+ * Return to Workflow, Return to Done). The U24 revision (2026-09-13) added
+ * the doors and their refusals: the older typed addresses (`workflow/access`,
+ * `authorDashboard/submission`), the access-denied page's sentence, the
+ * "Error" dialog over the empty shell (Rule 3), the publication page's
+ * "Status:" line, the "Activity Log" window's rows, the version-node labels,
+ * the public page's preview notice, and the Cancel legs of the dialogs.
  * Feature spec: docs/specs/U24-workflow-screen-and-stage-access.md.
  *
  * What lives elsewhere: what each stage entry shows once open (decision
@@ -52,8 +57,23 @@
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
 
-/** The no-access box's whole text (Rule 13). */
+/** The no-access box's whole text (Rule 13); also the stage gate's page (Rule 2a). */
 const NO_ACCESS_TEXT = "You don't currently have access to that stage of the workflow.";
+
+/**
+ * The access-denied page's sentences (Rules 2–3, fn-b): the role gate
+ * (the dashboard address typed by an Author, Reviewer or Reader; the
+ * "Error" dialog for a refused submission), the stage gate (NO_ACCESS_TEXT
+ * on the older editorial addresses), the author-dashboard address typed by
+ * a non-Author (the body quotes its first sentence), and the deleted
+ * submission's "Error" dialog.
+ */
+const ACCESS_DENIED = {
+    role: 'The current role does not have access to this operation.',
+    stage: NO_ACCESS_TEXT,
+    notAuthor: 'You do not currently have sufficient privileges to view the submission.',
+    invalidSubmission: 'Invalid submission.',
+};
 
 /** The three confirm dialogs of Rules 18–19: title and body, verbatim. */
 const DIALOGS = {
@@ -115,6 +135,89 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
             this.contextPath,
             `/dashboard/mySubmissions?workflowSubmissionId=${submissionId}${key}`
         );
+    }
+
+    /** The older editorial workflow address, `{context}/workflow/access/{id}` (Rule 2a). */
+    workflowAccessUrl(submissionId) {
+        return this.contextUrl(this.contextPath, `/workflow/access/${submissionId}`);
+    }
+
+    /** The old author-dashboard address, `{context}/authorDashboard/submission/{id}` (Rule 2b). */
+    authorDashboardUrl(submissionId) {
+        return this.contextUrl(this.contextPath, `/authorDashboard/submission/${submissionId}`);
+    }
+
+    /**
+     * Type an older address and let it forward (Rules 2a–2b): resolves once
+     * the browser is on the dashboard address (`dashboard/editorial` or
+     * `dashboard/mySubmissions`) with the panel open.
+     */
+    async gotoForwarding(url, submissionId) {
+        await this.page.goto(url);
+        await this.page.waitForURL((u) => /\/dashboard\/(editorial|mySubmissions)/.test(u.pathname), {
+            waitUntil: 'commit',
+            timeout: 30_000,
+        });
+        await this.expectOpen(submissionId);
+    }
+
+    /**
+     * The access-denied page's sentence (one of `ACCESS_DENIED`, or any
+     * text), the answer a typed address gives at the page (Rules 2–3). A
+     * substring match: the non-Author's page carries a second sentence
+     * ("Please edit your profile …") in the same text node.
+     */
+    accessDeniedText(message) {
+        return this.page.getByText(message);
+    }
+
+    /**
+     * Type an address and read the refusal at the page: the sentence is
+     * shown, the browser sits on the site's `authorizationDenied` page and
+     * no panel is open (the positive control is the sentence itself).
+     */
+    async expectAccessDeniedPage(url, message) {
+        await this.page.goto(url);
+        await expect(this.accessDeniedText(message)).toBeVisible({timeout: 30_000});
+        await expect(this.page).toHaveURL(/authorizationDenied/);
+        await this.expectClosed();
+    }
+
+    /** The "Error" dialog `useFetch` raises over the shell (Rule 3, fn-c). */
+    errorDialog() {
+        return this.page.getByRole('dialog', {name: 'Error', exact: true});
+    }
+
+    /**
+     * The empty shell of Rule 3: the panel's header holds the submission
+     * number and nothing else (no contributors' line, no title), and the
+     * "Error" dialog on top reads `message` with an "OK" button. Leaves the
+     * dialog open; `dismissErrorDialog()` presses "OK". The shell is read
+     * through CSS: behind the open "Error" dialog it is aria-hidden, so a
+     * role query returns nothing (patterns.md locator pitfall 6). The
+     * number is matched as the line's leading token (the shell keeps the
+     * "Refreshing data" spinner's text), and the title paragraph is empty
+     * (an empty `p`, on every app), never a paragraph with text.
+     */
+    async expectErrorShell(submissionId, message) {
+        const dialog = this.errorDialog();
+        await expect(dialog).toBeVisible({timeout: 30_000});
+        await expect(dialog).toContainText(message);
+        await expect(dialog.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
+        const header = this.page.locator('[data-cy="sidemodal-header"]');
+        await expect(header).toBeVisible({timeout: 30_000});
+        await expect(header.locator('.text-xl-medium').first()).toHaveText(
+            new RegExp(`^\\s*${submissionId}\\b`),
+            {timeout: 30_000}
+        );
+        await expect(header.locator('h1 span.underline')).toHaveCount(0);
+        await expect(header.locator('p').filter({hasText: /\S/})).toHaveCount(0);
+    }
+
+    /** Press the "Error" dialog's "OK"; the shell stays (U25's finding, not asserted here). */
+    async dismissErrorDialog() {
+        await this.errorDialog().getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(this.errorDialog()).toHaveCount(0, {timeout: 30_000});
     }
 
     /** Open a submission's workflow on the editorial dashboard by address. */
@@ -229,6 +332,49 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     async headerButtonLabels() {
         const labels = await this.header().getByRole('button').allInnerTexts();
         return labels.map((s) => s.trim()).filter(Boolean);
+    }
+
+    /**
+     * The header offers exactly these buttons, left to right (Rule 6): an
+     * auto-waited read, so a header still filling in settles first.
+     */
+    async expectHeaderButtons(labels) {
+        await expect
+            .poll(() => this.headerButtonLabels(), {timeout: 30_000})
+            .toEqual(labels);
+    }
+
+    /** The "Activity Log & Notes" window the header's "Activity Log" opens. */
+    activityLogDialog() {
+        return this.page.getByRole('dialog').filter({hasText: 'Activity Log & Notes'});
+    }
+
+    /** Press "Activity Log" and wait for the window's log table. */
+    async openActivityLog() {
+        await this.headerButton('Activity Log').click();
+        const dialog = this.activityLogDialog();
+        await expect(dialog.getByText('Event', {exact: true})).toBeVisible({timeout: 30_000});
+        return dialog;
+    }
+
+    /** A row of the open Activity Log whose text carries `text` (a log sentence). */
+    activityLogRow(text) {
+        return this.activityLogDialog().getByRole('row').filter({hasText: text});
+    }
+
+    /** Close the Activity Log window with its own "Close". */
+    async closeActivityLog() {
+        await this.activityLogDialog().getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(this.activityLogDialog()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * The notice on the public page "Preview" opens in the same tab (Rule
+     * 6): "This is a preview and has not been published." followed by a
+     * "View submission" link.
+     */
+    previewNotice() {
+        return this.page.getByText(/This is a preview and has not been published\./);
     }
 
     // ---------------------------------------------------------------------
@@ -348,6 +494,26 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
         await expect(this.pageLink('Title & Abstract')).toBeVisible({timeout: 30_000});
     }
 
+    /** The version nodes' labels, in menu order (newest last; Rule 9). */
+    async versionNodeLabels() {
+        return (await this.menuEntries())
+            .filter((e) => e.level === 2 && VERSION_NODE_PATTERN.test(e.label))
+            .map((e) => e.label);
+    }
+
+    /** The round sub-entries listed under the review stage entry, in order (Rule 8). */
+    async roundLabels() {
+        const entries = await this.menuEntries();
+        const start = entries.findIndex((e) => e.level === 2 && e.label === this.labels.reviewStage);
+        if (start < 0) return [];
+        const out = [];
+        for (const e of entries.slice(start + 1)) {
+            if (e.level <= 2) break;
+            out.push(e.label);
+        }
+        return out;
+    }
+
     /** Labels of the entries carrying the active-stage stripe. */
     async stripedLabels() {
         return (await this.menuEntries()).filter((e) => e.striped).map((e) => e.label);
@@ -451,6 +617,35 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     /** The language line's "Change" link (offered to the roles U40 names). */
     changeLanguageLink() {
         return this.languageLine().getByRole('button', {name: 'Change', exact: true});
+    }
+
+    /**
+     * The publication page's read-only "Status: {state}" line in the left
+     * control region (Rule 17), matched on its whole text.
+     */
+    publicationStatusLine() {
+        return this.controlsLeft().getByText(/^\s*Status:\s*\S/);
+    }
+
+    async expectPublicationStatus(state) {
+        await expect(this.controlsLeft()).toContainText(`Status: ${state}`, {timeout: 30_000});
+    }
+
+    /**
+     * The left region's items' text, top to bottom (the language line, the
+     * status line), so "the region's first item is Status: …" is readable.
+     * On a preprint server the status line and the "Relations" dropdown
+     * share one item, read as "Status: Unposted Relations"; match the
+     * item's start, never its whole text.
+     */
+    async controlsLeftItems() {
+        const texts = await this.controlsLeft().locator(':scope > *').allInnerTexts();
+        return texts.map((t) => t.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    }
+
+    /** A publishing control in the right region ("Preview", "Schedule For Publication", "Unpublish", …). */
+    publishingControl(label) {
+        return this.controlsRight().getByRole('button', {name: label, exact: true});
     }
 
     /** The status box by its heading ("Status" or "Round N Status"). */
@@ -562,5 +757,6 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
 };
 
 exports.NO_ACCESS_TEXT = NO_ACCESS_TEXT;
+exports.ACCESS_DENIED = ACCESS_DENIED;
 exports.WORKFLOW_DIALOGS = DIALOGS;
 exports.VERSION_NODE_PATTERN = VERSION_NODE_PATTERN;

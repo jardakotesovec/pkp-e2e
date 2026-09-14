@@ -124,7 +124,12 @@ trips.
   footer press an 8 s window for its outcome and presses again while the
   button is still offered, at most three times, behind `continueTo()`,
   `continueToReview()` and `submitAndConfirm()`. **Watch condition**: a
-  hardened press reds again with its retry exhausted.
+  hardened press reds again with its retry exhausted. **Seen locally on
+  OMP 2026-09-13** (U24 revision session, the first OMP final at four
+  workers, `.reports/U24/final-run-omp-attempt1.log`: U21 S6's rail
+  still reading "2 Details" for the 44-poll wait on "Contributors" after
+  Continue, the one red of 214; the class's first local and first OMP
+  sighting, beside U04 S10's OMP entry below).
 - **A wizard rich-text fill lost to a re-render under load** (U21 S3,
   OPS, local). The Autosave bullet types "Autosave check" into the Title
   box and reads it back; in the 2026-09-12 U21 revision's first OPS final
@@ -166,7 +171,10 @@ trips.
   did not cover it, so the leg needs a second look. Tripped again the same
   day (U22 revision session, the second OJS final at four workers,
   `.reports/U22/final-run-ojs-attempt2.log`: the same tab, 63 polls, the
-  one red of 212).
+  one red of 212), and a third time (U24 revision session, the first OJS
+  final at four workers on a reset database,
+  `.reports/U24/final-run-ojs-attempt{1,2}.log`: one of two reds in 216,
+  in both OJS finals of that session).
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a
@@ -195,8 +203,16 @@ trips.
   `.reports/U05/final-run-ojs-attempt{2,3,6,7}.log`), the one red of 209
   in the last, and in the fourth OJS final of the U22 revision session
   the same day (`.reports/U22/final-run-ojs-attempt4.log`, the table not
-  found for 30 s, one of two reds in 212). Next step as above: a retained
-  trace of the table's fetches.
+  found for 30 s, one of two reds in 212), and in the first OJS final of
+  the U24 revision session the same day, on a reset database
+  (`.reports/U24/final-run-ojs-attempt1.log`: the co-author row's "More
+  Actions" button detached and re-attached until the browser closed, one
+  of two reds in 216; the second OJS final of that session red the same
+  way, `.reports/U24/final-run-ojs-attempt2.log`, and red alone on that
+  used database afterwards, the button re-attaching until the test
+  timeout, `.reports/U24/ojs-reds-alone.log`, while U28 S10 went green
+  alone beside it). Next step as above: a retained trace of the table's
+  fetches.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -273,6 +289,13 @@ trips.
   The same shape as the review wizard's accept leg above, on the
   submission wizard's own rail. **Watch condition**: a second incident;
   then `continueTo()` gets the same content-verified bounded retry.
+  **Tripped 2026-09-13** (U24 revision session, the second OMP final at
+  four workers, `.reports/U24/final-run-omp-attempt2.log`: U04 S10's rail
+  on "2 Details" for the 20 s wait again, the one red of 214; the first
+  OMP final of the same session had U21 S6 red on the same rail wait,
+  `.reports/U24/final-run-omp-attempt1.log`, dated under the wizard-press
+  entry above), so `continueTo()` is due its bounded retry: a maintenance
+  task, not done in the feature session.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop

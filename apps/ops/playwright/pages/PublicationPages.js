@@ -325,6 +325,22 @@ function statusReadout(page) {
 exports.statusReadout = statusReadout;
 
 /**
+ * The "Relations" dropdown that ends the publication page's left control
+ * region on a preprint server (U24 Rule 17, for the Moderator and the
+ * Author alike; the OPS-only item of that region). Live 2026-09-13: a
+ * `button` named "Relations" under `[data-cy="workflow-controls-left"]`.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function relationsControl(page) {
+    return page
+        .locator('[data-cy="workflow-controls-left"]')
+        .getByRole('button', {name: 'Relations', exact: true});
+}
+
+exports.relationsControl = relationsControl;
+
+/**
  * Open the workflow straight onto ONE version's Publication page: the side
  * menu mirrors its selection into the `workflowMenuKey` query param
  * (useWorkflowMenu), so a specific version is reached by address without

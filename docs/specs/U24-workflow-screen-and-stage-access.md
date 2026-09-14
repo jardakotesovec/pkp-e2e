@@ -566,133 +566,529 @@ from the menu belongs to its own feature.
 
 ## Canonical scenarios
 
-Every scenario runs on the seeded journal with ready accounts; the
-submissions, and the assignments on them, are scratch. The accounts, their
-passwords and the tooling recipe are in the footnote. <sup>s</sup>
+Every scenario but 12 runs on the seeded journal with ready accounts; the
+submissions and their assignments are scratch. Scenario 12 runs on a
+scratch journal with throwaway accounts, and so does scenario 14 on a
+press or preprint server. The accounts, their passwords, the mail
+catcher's address and the tooling recipe are in the footnote.
+<sup>s</sup>
 
-1. **Open a submission's workflow from the editorial dashboard**. Editor:
-   on the dashboard, press "View" on a freshly submitted article. A panel
-   opens over the list. Its header shows the submission number, the
-   contributors' names underlined, the full title, and the bubble
-   "Submission". The left menu shows a "Workflow" group listing
-   "Submission", "Review", "Copyediting", "Production" (the first with a
-   coloured stripe) and a "Publication" group with one version node whose
-   pages start "Title & Abstract", "Contributors", "Metadata". The main
-   column is headed "Workflow: Submission". The address bar now contains the
-   submission number. Press "Close": the list is back. On a preprint server
-   the "Workflow" group lists "Production" only and the bubble reads
-   "Production" [OPS1](#ops1).
-2. **Walk the stages of a submission in review** {OJS OMP}. Editor: open a
-   submission that is in Review Round 1. The panel lands on "Review Round
-   1" under "Review" ("External Review" on a press), headed "Workflow:
-   Review (Round 1)" ("Workflow: External Review (Round 1)" on a press),
-   with a box headed "Round 1 Status". Select "Submission": the box reads
-   "Status" / "The submission is currently in the Review stage." ("… in the
-   External Review stage." on a press) above the stage's panels. Select
-   "Copyediting": the box reads "The Copyediting stage has not yet been
-   initiated." and no panels appear below it; only the "Participants" list
-   stays on the right. Select "Production": the same box naming
-   Production, with a "Schedule For Publication" button (so labelled on a
-   press too) and the "Participants" list, still no panels. On a press,
-   for a monograph sent straight to External Review from the Submission
-   stage (so that Internal Review was skipped), "Internal Review" reads
-   "The Internal Review stage has not yet been initiated." with nothing
-   below it, not even the "Participants" list. A preprint server has one
-   stage and cannot run this scenario; scenario 10 covers it.
-3. **A stage outside the role's stage set**. Copyeditor assigned to a
-   submission in Review: open it from the dashboard. The panel lands on
-   "Review Round 1" and the main column is one box reading "You don't
-   currently have access to that stage of the workflow." with nothing
-   else. Select "Submission": the same box. Select "Copyediting": instead,
-   the line "Current Submission Language: English" and the box "The
-   Copyediting stage has not yet been initiated.", with the "Participants"
-   list on the right (no "Assign" button) and no panels. The "Publication"
-   group shows its heading with no version node beneath it; pressing the
-   heading changes nothing. Control: an Editor on the same submission sees
-   the review round's panels and a version node with pages. On a preprint
-   server there is no Copyeditor role and no assistant with stage access,
-   so the scenario has no analogue there.
-4. **The production-only pages**. Funding Coordinator assigned to a
-   submission in Review (a journal or press): open it and expand the
-   version node. On a journal the pages are "Title & Abstract",
-   "Contributors", "Metadata", "References", "Funding", "JATS XML"; there
-   is no "Body Text", "Galleys", "Media", "Permissions & Disclosure" or
-   "Publication Settings". On a press the list runs "Title & Abstract",
-   "Contributors", "Chapters", "Metadata", "Publication Formats", "Media",
-   "References", "Funding", with no "Catalog Entry" or "Permissions &
-   Disclosure" ("Media" is listed there, unlike on a journal
-   [OMP2](#omp2)). Control: a Journal Manager on the same submission sees
-   those pages as well, and "Create New Version" after the node. On a
-   preprint server the assistant role has no stage access, so the scenario
-   has no analogue; a Moderator sees the full roster.
-5. **Deep link and reload**. Editor: open a submission and select
-   "Contributors" under the version node. Copy the address bar and open it
-   in a new tab: the panel opens directly on "Publication: Contributors".
-   Reload: the same. Press "Close": the address loses the submission and
-   entry parts and the list is back.
-6. **Typed addresses forward**. Editor: type the journal's
-   `…/workflow/access/<number>` address for a submission. The editorial
-   dashboard opens on "Assigned to me" with that submission's workflow panel
-   open. Author: type `…/authorDashboard/submission/<number>` for your own
-   submission. My Submissions opens with the panel open (on a preprint
-   server, on "Preprint: Title & Abstract"). Control: the Author types the
-   `…/workflow/access/<number>` address and is turned away with a page
-   reading "You don't currently have access to that stage of the
-   workflow."; an Editor types the author-dashboard address and gets "You
-   do not currently have sufficient privileges to view the submission.".
-7. **The author's view**. Author: from My Submissions, press "View" on your
-   own submission. The header offers "Library" and nothing else. On a
-   journal or press the "Workflow" group lists every stage; the
-   "Publication" group's version node lists, in the order Rule 10 gives
-   for the app, "Title & Abstract", "Contributors", "Metadata" and the
-   metadata pages the journal has switched on ("References" and "Funding"
-   on a fresh install), plus "Galleys" and "Media" on a journal, or
-   "Chapters", "Publication Formats" and "Media" on a press; it never
-   lists "Identifiers", "JATS XML", "Permissions & Disclosure" or
-   "Publication Settings"; there is no "Create New Version". Control: an
-   Editor opening the same submission sees "Activity Log" in the header and
-   "Permissions & Disclosure" in the list. On a preprint server the author's
-   panel has no "Workflow" group, lands on "Preprint: Title & Abstract",
-   and the node ends with "Production Tasks & Discussions" [OPS1](#ops1).
-8. **View, Done and the two return buttons**. Journal Manager: open a
-   submission that went through Production and is published. The bubble
-   reads "Published"; the header offers "View" and "Return to Workflow"; no
-   stage entry is striped; selecting "Production" shows the box "Status" /
-   "Submission published.". Press "Return to Workflow": a dialog reads
-   "Return this submission to the workflow stage it occupied before it was
-   moved to Done." Confirm. The bubble now reads "Production", the
-   "Production" entry is striped and shows its panels with no "Status" box,
-   and the header offers "Preview" and "Return to Done" in place of "View"
-   and "Return to Workflow". Press "Return to Done": the dialog reads
-   "Return this submission to the Done stage." Confirm: the bubble reads
-   "Published" again and "View" is back. Control: a Layout Editor assigned
-   to the same submission sees "View" (then "Preview") but neither return
-   button. On a preprint server no assistant can open the panel; the
-   control there is the Author, whose header reads "Library" throughout.
+1. **Open a submission's workflow from the editorial dashboard**
+
+   Given: Editor, on the dashboard, with a freshly submitted article.
+
+   - **"View" on the row**: press it: a panel opens over the list, and the
+     address bar now contains the submission number (Rules 1, 12).
+   - **The header**: shows the submission number, the contributors' names
+     underlined, the full title, and the bubble "Submission"; the header
+     offers "Activity Log" and "Library" and neither "View" nor "Preview"
+     while the submission sits in Submission. On a preprint server, where
+     a queued preprint sits in Production, the bubble reads "Production"
+     and the header offers "Preview", "Activity Log" and "Library"
+     [OPS1](#ops1) (Rules 4, 5, 6).
+   - **The side menu**: a "Workflow" group listing "Submission", "Review",
+     "Copyediting", "Production" (the first with a coloured stripe; on a
+     preprint server "Production" only [OPS1](#ops1)) and a "Publication"
+     group with one version node whose pages start "Title & Abstract",
+     "Contributors", "Metadata" (Rules 7, 9, 10).
+   - **The main column**: headed "Workflow: Submission" (Rule 7).
+   - **Control**: press "Close": the list is back, the panel gone (Rule 1).
+
+2. **Walk the stages of a submission in review** {OJS OMP}
+
+   Given: Editor, with one submission in Review Round 1 and a second in
+   Review Round 2, both on the dashboard.
+
+   - **The landing entry**: open the Round 1 submission: the panel lands on
+     "Review Round 1" under "Review" ("External Review" on a press), headed
+     "Workflow: Review (Round 1)" ("Workflow: External Review (Round 1)" on
+     a press), with a box headed "Round 1 Status"; the bubble reads "Review
+     (Round 1)" ("External Review (Round 1)" on a press) (Rules 5, 8, 11,
+     15c).
+   - **"Submission"**: select it: the stage begins with "Current Submission
+     Language: English", a read-out with no "Change" link, and the box
+     reads "Status" / "The submission is currently in the Review stage."
+     ("… in the External Review stage." on a press) above the stage's
+     panels (Rules 14, 15b).
+   - **"Copyediting"**: select it: the same language line, and the box
+     reads "The Copyediting stage has not yet been initiated." with no
+     panels below it; only the "Participants" list stays on the right
+     (Rules 14, 15a, 16).
+   - **"Production"**: select it: the same box naming Production, with a
+     "Schedule For Publication" button (so labelled on a press too) and the
+     "Participants" list, still no panels (Rules 15a, 16).
+   - **A press's skipped Internal Review** {OMP}: for a monograph sent
+     straight to External Review from the Submission stage (so that
+     Internal Review was skipped), "Internal Review" reads "The Internal
+     Review stage has not yet been initiated." with nothing below it, not
+     even the "Participants" list (Rules 15a, 16).
+   - **The Round 2 submission**: open it: the "Review" entry lists "Review
+     Round 1", "Review Round 2" in that order, the panel lands on "Review
+     Round 2", striped together with "Review", and "Review Round 1" reads
+     "The submission has been advanced to the next round of review"
+     (Rules 8, 11, 15c).
+   - **Control**: on the Round 1 submission "Review Round 1" alone sits
+     under "Review", and its box is headed "Round 1 Status", not "Status"
+     (Rules 8, 15c).
+
+   A preprint server has one stage and cannot run this scenario; scenario
+   10 covers it.
+
+3. **A stage outside the role's stage set** {OJS OMP}
+
+   Given: Copyeditor, assigned to a submission in Review, with a second
+   submission in Review to which nobody assigned them.
+
+   - **The landing entry**: open the assigned submission from the
+     dashboard: the panel lands on "Review Round 1" and the main column is
+     one box reading "You don't currently have access to that stage of the
+     workflow." with nothing else (Rules 11, 13).
+   - **"Submission"**: select it: the same box (Rule 13).
+   - **Reload on "Submission"**: reload the page: the panel reopens on
+     "Submission", the box still the whole answer, and the address keeps
+     the entry (Rule 12).
+   - **"Copyediting"**: select it: instead, the line "Current Submission
+     Language: English" and the box "The Copyediting stage has not yet been
+     initiated.", with the "Participants" list on the right (no "Assign"
+     button) and no panels (Rules 14, 15a, 16).
+   - **The "Publication" group**: shows its heading with no version node
+     beneath it; pressing the heading changes nothing [A2](#a2) (Rule 9).
+   - **The other submission's dashboard address**: type the dashboard
+     address of the submission nobody assigned them to: the panel opens
+     with only the submission number in its header and an "Error" dialog
+     on top reading "The current role does not have access to this
+     operation." with an "OK" button; behind the shell the list shows its
+     "Assigned to me" view (Rule 3).
+   - **The other submission's older address**: type its
+     `…/workflow/access/<number>` address: an access-denied page, no panel
+     (Rule 2a; Actors row 1).
+   - **Control**: an Editor on the assigned submission sees the review
+     round's panels and a version node with pages (Rules 9, 13).
+
+   On a preprint server there is no Copyeditor role and no assistant with
+   stage access, so the scenario has no analogue there; scenario 11 covers
+   the preprint server's assistant [OPS1](#ops1).
+
+4. **The production-only pages** {OJS OMP}
+
+   Given: Funding Coordinator, assigned to a submission in Review (a
+   journal or press).
+
+   - **The version node**: open the submission and expand the node. On a
+     journal the pages are "Title & Abstract", "Contributors", "Metadata",
+     "References", "Funding", "JATS XML"; there is no "Body Text",
+     "Galleys", "Media", "Permissions & Disclosure" or "Publication
+     Settings". On a press the list runs "Title & Abstract",
+     "Contributors", "Chapters", "Metadata", "Publication Formats",
+     "Media", "References", "Funding", with no "Catalog Entry" or
+     "Permissions & Disclosure" ("Media" is listed there, unlike on a
+     journal [OMP2](#omp2)) (Rule 10).
+   - **The header**: offers "Library" and no "Activity Log" (Actors row 7).
+   - **"Title & Abstract"**: select it: the page opens under "Publication:
+     Title & Abstract" with "Current Submission Language: English" and no
+     "Change" link, under it "Status: Unscheduled", and no region of
+     publishing controls on the right (Rules 9, 17).
+   - **Control**: a Journal Manager on the same submission sees those pages
+     as well, and "Create New Version" after the node; on "Title &
+     Abstract" the language line carries "Change" and the right-hand
+     region offers "Schedule For Publication" ("Publish" on a press)
+     without "Preview", the submission being in Review (Rules 9, 17).
+
+   On a preprint server the assistant role has no stage access, so the
+   scenario has no analogue; a Moderator sees the full roster (scenario
+   10) [OPS1](#ops1).
+
+5. **Deep link and reload**
+
+   Given: Editor, with a freshly submitted article open in its panel.
+
+   - **"Contributors" under the version node**: select it, copy the address
+     bar and open it in a new tab: the panel opens directly on
+     "Publication: Contributors" (Rule 12).
+   - **Reload**: the same (Rule 12).
+   - **An entry that does not exist**: the part of the address after the
+     "?" names the submission and the selected entry; replace the entry's
+     name with `nonsense` and open the address: the panel opens at
+     its landing entry, headed "Workflow: Submission" ("Workflow:
+     Production" on a preprint server), and the address is rewritten to
+     that entry (Rules 11, 12).
+   - **Control**: press "Close": the address loses the submission and
+     entry parts and the list is back (Rules 1, 12).
+
+6. **Typed addresses forward**
+
+   Given: Editor and Author, with the Author's submitted article, a second
+   Author's submitted article and a draft of the first Author's, each
+   signed in on the journal.
+
+   - **The editorial workflow address**: the Editor types the journal's
+     `…/workflow/access/<number>` address for the submission: the
+     editorial dashboard opens on "Assigned to me" with that submission's
+     workflow panel open (Rule 2a).
+   - **The dashboard address for a draft**: the Editor types the dashboard
+     address of the draft: the panel opens, its bubble reading
+     "Incomplete" ("Production" on a preprint server [OPS3](#ops3))
+     [A3](#a3) (Rules 2c, 5).
+   - **The old author-dashboard address**: the Author types
+     `…/authorDashboard/submission/<number>` for their own submission: My
+     Submissions opens with the panel open (on a preprint server, on
+     "Preprint: Title & Abstract") (Rules 2b, 11).
+   - **The Author at the editorial addresses**: the Author types the
+     `…/workflow/access/<number>` address and is turned away with a page
+     reading "You don't currently have access to that stage of the
+     workflow."; the Author types the submission's dashboard address and
+     gets the access-denied page "The current role does not have access to
+     this operation." and no panel (Rules 2a, 3).
+   - **A stranger Author at the old author-dashboard address**: the second
+     Author types `…/authorDashboard/submission/<number>` for the first
+     Author's submission: the access-denied page reading "You don't
+     currently have access to that stage of the workflow." (Rule 2b).
+   - **Control**: an Editor types the author-dashboard address and gets
+     "You do not currently have sufficient privileges to view the
+     submission." (Rule 2b).
+
+7. **The author's view**
+
+   Given: Author, on My Submissions, with their own submission in
+   Copyediting (a queued preprint on a preprint server) and a second
+   Author's submitted article on the same journal.
+
+   - **"View" on the row**: press it: the header offers "Library" and
+     nothing else, and the bubble reads "Copyediting" ("Production" on a
+     preprint server) (Rules 5, 6).
+   - **The "Workflow" group**: on a journal or press it lists every stage;
+     select "Submission", "Review Round 1", "Copyediting" and "Production"
+     in turn (on a press "Submission", "Internal Review", "External
+     Review"'s "Review Round 1", "Copyediting" and "Production"): each
+     begins with "Current Submission Language: English", none shows the
+     box "You don't currently have access to that stage of the workflow.",
+     and none has a "Participants" column (Rules 13, 14, 16).
+   - **The version node**: lists, in the order Rule 10 gives for the app,
+     "Title & Abstract", "Contributors", "Metadata" and the metadata pages
+     the journal has switched on ("References" and "Funding" on a fresh
+     install), plus "Galleys" and "Media" on a journal, or "Chapters",
+     "Publication Formats" and "Media" on a press; it never lists
+     "Identifiers", "JATS XML", "Permissions & Disclosure" or "Publication
+     Settings"; there is no "Create New Version" (Rules 9, 10).
+   - **"Title & Abstract"**: select it: no language line; the region's
+     first item is "Status: Unscheduled" ("Unposted" on a preprint server,
+     followed by a "Relations" dropdown), and no region of publishing
+     controls on the right (Rule 17).
+   - **An entry copied from an Editor's address**: take the entry's name
+     from the part after the "?" of an Editor's address while "Permissions
+     & Disclosure" is selected, and add it to the Author's own My
+     Submissions address for the same submission: the panel opens at the
+     landing entry, "Workflow: Copyediting" ("Preprint: Title & Abstract"
+     on a preprint server), and the address is rewritten to that entry
+     (Rules 11, 12).
+   - **The other Author's submission**: type the My Submissions address for
+     the second Author's submission: the panel with only the submission
+     number in its header and an "Error" dialog reading "The current role
+     does not have access to this operation." with "OK", over My
+     Submissions (Rule 3).
+   - **Control**: an Editor opening the same submission sees "Activity
+     Log" and "Preview" in the header and "Permissions & Disclosure" in
+     the list; pressing "Preview" opens the submission's public page in
+     the same tab, carrying "This is a preview and has not been
+     published." (Rules 6, 10).
+
+   On a preprint server the author's panel has no "Workflow" group, lands
+   on "Preprint: Title & Abstract", and the node ends with "Production
+   Tasks & Discussions" [OPS1](#ops1).
+
+8. **View, Done and the two return buttons**
+
+   Given: Journal Manager, with a submission that went through Production
+   and is published, a second one published straight from the Submission
+   stage {OJS OMP}, and a third scheduled into an issue {OJS}.
+
+   - **The published submission**: open it: the bubble reads "Published";
+     the header offers "View" and "Return to Workflow"; no stage entry is
+     striped; the panel lands on "Publication: Title & Abstract", which
+     shows no language line, "Status: Published" first and "Unpublish" on
+     the right ("Status: Posted" and "Unpost" on a preprint server) (Rules
+     5, 6, 11, 17, 18).
+   - **"Production"**: select it: the box "Status" / "Submission
+     published." (Rule 15d).
+   - **The review entries** {OJS OMP}: select "Review Round 1": the box is
+     headed "Status" and reads "The submission is currently in the
+     Production stage."; select "Review" itself: "The submission advanced
+     to the next review round, was accepted, and is currently in the
+     Production stage." (Rules 8, 15b).
+   - **"Return to Workflow", then "Cancel"**: press the button: a dialog
+     titled "Return to Workflow" reads "Return this submission to the
+     workflow stage it occupied before it was moved to Done." with
+     "Confirm" and "Cancel"; press "Cancel": the bubble still reads
+     "Published" (Rule 18a).
+   - **"Return to Workflow", then "Confirm"**: the bubble now reads
+     "Production", the "Production" entry is striped and shows its panels
+     with no "Status" box, and the header offers "Preview" and "Return to
+     Done" in place of "View" and "Return to Workflow" (Rules 6, 18a).
+   - **"Title & Abstract" after the return**: select it: the line "Current
+     Submission Language: English" is back, "Change" included, above
+     "Status: Published" ("Status: Posted" on a preprint server) (Rule 17).
+   - **"Return to Done", then "Cancel"**: press the button: the dialog
+     titled "Return to Done" reads "Return this submission to the Done
+     stage."; press "Cancel": the bubble still reads "Production" (Rule
+     18b).
+   - **"Return to Done", then "Confirm"**: the bubble reads "Published"
+     again and "View" is back (Rule 18b).
+   - **"Activity Log"**: open it: the log holds "{editor} returned this
+     submission to the workflow." and "{editor} returned this submission
+     to the Done stage.", and no email reached the author's mailbox (Rule
+     18; Side effects).
+   - **"Unpublish" from Done**: select "Title & Abstract", press
+     "Unpublish" ("Unpost" on a preprint server) and confirm its dialog
+     (the dialog is *[Publish, schedule &
+     versions](U49-publish-schedule-and-versions.md)*'): the submission
+     leaves Done by itself: the bubble reads "Production", the
+     "Production" entry is striped, and the header offers "Preview" and no
+     "Return to Done"; close the panel and open the submission again: it
+     lands on "Production" (Rules 11, 18, 18b; Side effects).
+   - **The submission published from the Submission stage** {OJS OMP}:
+     open it, press "Return to Workflow" and "Confirm": the bubble reads
+     "Submission", the header offers neither "View" nor "Preview" but
+     "Return to Done", and "Production" reads "The Production stage has
+     not yet been initiated." (Rules 6, 18a).
+   - **The scheduled submission** {OJS}: open it: the bubble reads
+     "Scheduled", the header offers "Preview", and the panel lands on
+     "Publication: Title & Abstract" with "Production" striped (Rules 5,
+     6, 11).
+   - **Control**: the published submission's assigned Layout Editor,
+     opening it after the first bullet, sees "View", the version node with
+     its pages, the production-only pages included, and neither return
+     button; after "Return to Workflow" / "Confirm", "Preview" and still
+     neither (Rules 9, 10, 18). On a preprint server no assistant can open
+     the panel; the control there is the Author, whose header reads
+     "Library" throughout [OPS1](#ops1).
 
 App-specific:
 
-9. **{OMP} The press's five-stage menu**. Press Editor: open a monograph in
-   External Review Round 1. The "Workflow" group lists "Submission",
-   "Internal Review", "External Review", "Copyediting", "Production", with
-   "Review Round 1" under "External Review" and the main column headed
-   "Workflow: External Review (Round 1)". A "Marketing" group sits between
-   "Workflow" and "Publication". The version node lists "Title &
-   Abstract", "Contributors", "Chapters", "Metadata", "Publication
-   Formats", "Media", "References", "Funding", "Catalog Entry",
-   "Permissions & Disclosure", and no "JATS XML" or "Body Text"
-   [OMP1](#omp1). Control: a Funding Coordinator assigned to the same
-   monograph still sees "Media" (and the "Marketing" group) but not
-   "Catalog Entry" or "Permissions & Disclosure" ⚠ [OMP2](#omp2).
-10. **{OPS} The single-stage preprint workflow**. Moderator: open a queued
-    preprint. The "Workflow" group lists "Production" only, striped; the
-    main column is headed "Workflow: Production" and shows no status box.
-    The "Preprint" group's version node ends with "Permissions &
-    Disclosure", "Preprint entry". Open a declined preprint: the panel lands
-    on "Preprint: Title & Abstract", not on "Production" ⚠ [OPS2](#ops2).
-    Control: select "Production" on that declined preprint: the main column
-    is headed "Workflow: Production" and offers the stage's own buttons,
-    "Revert Decline" among them [OPS1](#ops1).
+9. **{OMP} The press's five-stage menu**
+
+   Given: Press Editor, with a monograph in External Review Round 1.
+
+   - **The "Workflow" group**: open the monograph: the group lists
+     "Submission", "Internal Review", "External Review", "Copyediting",
+     "Production", with "Review Round 1" under "External Review" and the
+     main column headed "Workflow: External Review (Round 1)" (Rules 7,
+     8).
+   - **The "Marketing" group**: sits between "Workflow" and "Publication"
+     (Rule 7).
+   - **The version node**: lists "Title & Abstract", "Contributors",
+     "Chapters", "Metadata", "Publication Formats", "Media", "References",
+     "Funding", "Catalog Entry", "Permissions & Disclosure", and no "JATS
+     XML" or "Body Text" [OMP1](#omp1) (Rule 10).
+   - **Control**: a Funding Coordinator assigned to the same monograph
+     still sees "Media" (and the "Marketing" group) but not "Catalog
+     Entry" or "Permissions & Disclosure" [OMP2](#omp2) (Rule 10).
+
+10. **{OPS} The single-stage preprint workflow**
+
+    Given: Moderator, with a queued preprint and a declined preprint in
+    their section.
+
+    - **The queued preprint**: open it: the "Workflow" group lists
+      "Production" only, striped; the main column is headed "Workflow:
+      Production" and shows no status box (Rules 7, 15).
+    - **The "Preprint" group**: its version node ends with "Permissions &
+      Disclosure", "Preprint entry", never lists "Identifiers", and the
+      group has no "Create New Version" (Rules 9, 10).
+    - **"Title & Abstract"**: select it: "Current Submission Language:
+      English" with "Change", under it "Status: Unposted" and a
+      "Relations" dropdown, and no region of publishing controls on the
+      right (Rule 17).
+    - **The declined preprint**: open it: the bubble reads "Declined" and
+      the panel lands on "Preprint: Title & Abstract", not on "Production"
+      [OPS2](#ops2) (Rules 5, 11).
+    - **Control**: select "Production" on that declined preprint: the main
+      column is headed "Workflow: Production" and offers the stage's own
+      buttons, "Revert Decline" among them [OPS1](#ops1).
+
+11. **Refused at every door** {OJS OMP OPS}
+
+    Given: a Reviewer assigned to a submitted article, their review
+    accepted {OJS OMP}, a Reader, and on a preprint server an Editorial
+    Board Member, each signed in on the journal.
+
+    - **The Reviewer at the dashboard address** {OJS OMP}: type the
+      submission's dashboard address: the access-denied page "The current
+      role does not have access to this operation." and no panel
+      (Rule 3).
+    - **The Reviewer at the editorial workflow address** {OJS OMP}: type
+      `…/workflow/access/<number>`: a page reading "You don't currently
+      have access to that stage of the workflow." (Rule 2a).
+    - **The Reviewer at the old author-dashboard address** {OJS OMP}: type
+      `…/authorDashboard/submission/<number>`: "You do not currently have
+      sufficient privileges to view the submission." (Rule 2b).
+    - **The Reader at the three addresses**: type the same three
+      addresses: the same three answers, in the same order (Rules 2a, 2b,
+      3).
+    - **The Editorial Board Member at the dashboard address** {OPS}: type
+      it: the panel opens with only the submission number in its header
+      and an "Error" dialog reading "The current role does not have access
+      to this operation." with "OK" (Rule 3) [OPS1](#ops1).
+    - **Control**: an Editor typing the submission's dashboard address
+      gets the panel with the submission's header (Rule 2c).
+
+    A preprint server has no Reviewer role, so only the Reader and the
+    Editorial Board Member run there [OPS1](#ops1).
+
+12. **A manager assigned in another role** {OJS OMP}
+
+    Given: on a scratch journal, an account holding the Journal Manager
+    and Layout Editor roles, assigned as Layout Editor to a submission in
+    Review Round 1, with a second submission in Review Round 1 to which
+    they are not assigned.
+
+    - **The landing entry**: open the assigned submission: the panel lands
+      on "Review Round 1" and the main column is the one box "You don't
+      currently have access to that stage of the workflow." (Actors row 2;
+      Rules 11, 13).
+    - **"Submission" and "Copyediting"**: select each ("Internal Review"
+      too on a press): the same box (Rule 13).
+    - **"Production"**: select it: "Current Submission Language: English"
+      and the box "The Production stage has not yet been initiated.", with
+      the "Schedule For Publication" button and the "Participants" list
+      (Rules 14, 15a, 16).
+    - **The header**: offers "Library" and no "Activity Log" (Actors
+      row 7).
+    - **Control**: the same account opens the second submission:
+      "Submission", "Review Round 1", "Copyediting" and "Production" each
+      open without the box, and the header offers "Activity Log" (Actors
+      rows 2, 7).
+
+    A preprint server has no assistant role with a stage set, so the
+    scenario has no analogue there [OPS1](#ops1).
+
+13. **An assigned Section Editor's header and publication controls** {OJS OMP}
+
+    Given: Section Editor, assigned to a submission in Production.
+
+    - **The header**: open the submission: it offers "Preview", "Activity
+      Log" and "Library" (Rule 6; Actors row 7).
+    - **The stages**: select "Submission", "Review Round 1" ("External
+      Review"'s round on a press), "Copyediting" and "Production" in turn:
+      each begins with "Current Submission Language: English" and none
+      shows the box "You don't currently have access to that stage of the
+      workflow." (Actors row 2; Rules 13, 14).
+    - **"Title & Abstract"**: select it: "Current Submission Language:
+      English" with "Change", under it "Status: Unscheduled", and no
+      region of publishing controls on the right; the "Publication" group
+      has no "Create New Version" (Rules 9, 17).
+    - **Control**: a Journal Manager on the same submission gets "Create
+      New Version" after the node and, on "Title & Abstract", a right-hand
+      region offering "Preview" and "Schedule For Publication" ("Publish"
+      on a press) (Rules 9, 17).
+
+    On a preprint server the Moderator is this role's analogue; scenario
+    10 covers it.
+
+14. **Delete a submission and follow its stale addresses** {OJS OMP OPS}
+
+    Given: Journal Manager, with an Author's submission declined at the
+    Submission stage (a preprint declined at Production) and the same
+    Author's second, submitted article.
+
+    - **The declined submission**: open it: the bubble reads "Declined"
+      and the panel lands on "Submission", striped (on a preprint server
+      on "Preprint: Title & Abstract" [OPS2](#ops2); select "Production"
+      there); note the address (Rules 5, 11, 12).
+    - **"Delete", then "Cancel"**: on the stage that holds the decision
+      buttons press "Delete" (where the button is offered is
+      *[Submission stage](U25-submission-stage.md#delete)*'s rule): a
+      dialog titled "Delete" reads "Are you sure you want to permanently
+      delete this submission?" with "Confirm" and then "Cancel" in red;
+      press "Cancel": the panel and the "Delete" button stay (Rule 19).
+    - **"Delete", then "Confirm"**: the panel closes, the address loses
+      the submission part, the list is back refreshed, the submission is
+      gone from its "Declined" view, and within a few seconds the side
+      menu's "Declined" count is one lower (Rule 19; Side effects).
+    - **The author's mailbox**: no email has arrived (Side effects).
+    - **The stale dashboard address**: type the address noted: the panel
+      with only the submission number in its header and an "Error" dialog
+      reading "Invalid submission." with "OK" (Rule 3).
+    - **The Author at My Submissions**: the Author types the My Submissions
+      address for the deleted submission: the same shell and "Error" /
+      "Invalid submission." over My Submissions (Rule 3).
+    - **Control**: the Author types the My Submissions address for their
+      second submission: the panel opens with its header (Rule 2c).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - the language line gone once a second version exists (Rule 17): a
+    second version comes from "Create New Version"
+  - a journal's second version beside a published one offering "Publish"
+    (Rule 17)
+  - publishing again after an unpublish sending the submission straight
+    back to Done without "Return to Done" (Rule 18b): scenario 8 stops at
+    the unpublish
+  - a submission declined in review landing on the round it was declined
+    in (Rule 11): scenario 14 declines at the Submission stage
+  - the "Status: Scheduled" line and "Unschedule" on a scheduled
+    submission's publication page (Rule 17): scenario 8 reads the
+    scheduled submission's bubble, header and landing only
+  - "Preview" with "Post" on a queued preprint's publication page for the
+    Preprint Server Manager (Rule 17): scenario 10 opens it as the
+    Moderator
+- **Nothing new to test**:
+  - an unassigned Section Editor at the doors (Actors rows 1–2): refused
+    as scenario 3's Copyeditor is for the submission nobody assigned them
+    to
+  - the app's stage roster, fixed per application (Settings): scenarios
+    1, 9 and 10 list each app's stages
+- **Register carries it**:
+  - A1 (a stage-naming address forwarding to the usual landing entry,
+    not the named stage; Rule 2a)
+  - A3 (the stage-naming addresses refusing an incomplete submission that
+    the dashboard address opens; Rules 2a, 2c; scenario 6 marks it)
+  - A4 (a manager who also reviews the submission getting no stage
+    panels and a header without contributors; Actors row 2, Rule 4)
+  - A5 (the stage-numbered address with no or an unknown stage number
+    showing a blank page; Rule 2a)
+  - A6 (the review stage's own entry folding the rounds and reading
+    "advanced to the next round of review"; Rule 8)
+  - A7 (no status box on "Submission" and "Copyediting" in Done for a
+    submission published straight from the Submission stage; Rule 15)
+  - A8 (a Site Administrator holding no role in the journal at the doors;
+    Rule 3)
+  - A9 (an old-shape address to a deleted submission showing a bare "404
+    Not Found"; Rule 19)
+  - OMP3 (a press keeping "Identifiers" after the plugin is turned off;
+    Settings)
+  - OPS2 (a preprint declined at Production landing on "Title &
+    Abstract"; Rule 11; scenario 10 marks it)
+  - OPS3 (a preprint server's draft bubble reading "Production"; Rule 5;
+    scenario 6 marks it)
+  - OPS4 (a preprint server's author opening their own draft to an
+    "Error" dialog over the panel; Rule 2c)
+- **No seed**:
+  - the "Payments" dropdown once submission payments are set up, and its
+    absence for the Author (Actors row 5, Settings)
+  - the deletion refused behind the dialog for a role never shown the
+    button (Actors row 11, Rule 19)
+  - the "References", "Data" and "Funding" pages following the journal's
+    metadata options (Settings, Rule 10)
+  - an identifier plugin adding "Identifiers" to the editorial roster
+    (Settings)
+  - a role group's changed stage set changing access from the next open
+    (Settings)
+- **Owned by another feature**:
+  - changing the submission language, choosing a version and creating
+    one (Actors row 12; *Publication metadata*, *Publish, schedule &
+    versions*)
+  - "OK" leaving the empty shell open behind the "Error" dialog (Rule 3;
+    *Submission stage*)
+  - the "Delete" button withheld from an assigned Section Editor on a
+    declined submission (Actors row 11; *Submission stage*, scenario 6)
+  - the contents of the stages and pages, the header windows, the
+    decision buttons, the participants, the lists' "View" actions and
+    their counts (Cross-feature; *Submission stage*, *Review stage &
+    rounds*, *Publication metadata*, *Publish, schedule & versions*,
+    *Submissions dashboard*, *My Submissions*)
 
 ## Findings register
 
@@ -989,7 +1385,7 @@ Basis: probe. <sup>[f-ops4](#fn-ops4)</sup>
 **q** — OMP: `omp/classes/core/Application::getApplicationStages()` adds `WORKFLOW_STAGE_ID_INTERNAL_REVIEW` (= 2); `useWorkflowNavigationConfigOMP.js` pushes the five stage items, a `marketing` group (`settings.libraryFiles.category.marketing` "Marketing"; `audience`, `representatives`, `publicationDates`) for the editorial dashboard only, and the `chapters` / `publicationFormats` pages in both rosters; `omp/pages/workflow/WorkflowHandler.php` adds the `internalReview` op. All out of scope per the FEATURE-MAP. Live-probed 2026-09-02: the five entries, the "Marketing" group ("Audience", "Representatives", "Publication Dates") for the Press Editor, an assigned Funding Coordinator and an assigned Copyeditor alike, absent for the Author; "Chapters" and "Publication Formats" in both rosters.
 
 <a id="fn-s"></a>
-**s** — Seeding uses the seeded test journal/press/server (`publicknowledge`) and roster accounts (passwords = username doubled), scratch submissions via the scenario submission endpoint, submitter `author.alex`. Scenario 1: `editor.diana` (OPS: `manager.maya`, since OPS enrols no Editor), a fresh `submitted: true` submission. 2: `decisions: ['sendExternalReview']` and one `reviewRounds` entry (OMP: the external stage; add `sendInternalReview` seeds for the press's other stage). 3: the scenario-2 shape plus `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]` (the seed writes the assignment row the Assign form would; the group's stage set, Copyediting only, drives the gate); control `editor.diana`. 4: the scenario-2 shape plus `participants: [{username: 'assistant.rita', role: 'funding'}]` (Funding Coordinator: stages Submission and Review on OJS/OMP); control `manager.maya`; OPS has no `funding` key. 5–6: `editor.diana` and `author.alex` on the scenario-1 submission; the typed addresses are `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`. 7: `author.alex` on a submission at Copyediting (`['sendExternalReview','accept']`); control `editor.diana`. 8: `manager.maya` on `decisions: ['sendExternalReview','accept','sendToProduction']`, one `reviewRounds` entry and `published: true` (OJS: `issue` = Vol 1 No 2); the seed rests in Done on every app straight away, and because it passed through Production "Return to Workflow" lands it on "Production" (a `published: true` seed without decisions returns to "Submission" instead); control `layouteditor.leo` seeded as `participants` role `layoutEditor` (OJS/OMP; on OPS the control is the Author). 9: OMP fleet, `editor.diana`, `decisions: ['sendExternalReview']`, one external round; control `assistant.rita` as `funding`. 10: OPS fleet, `sectioneditor.ana` (Moderator); the declined preprint via `decisions: ['decline']`. Never mutate a shared roster submission. Press seeds pass `series: 'monographs'`: a monograph seeded without a series auto-assigns no Series editor (unlike a journal, where section editors are auto-assigned), so the Editor's "Assigned to me" list omits it and an "assigned Series editor" needs an explicit `participants` entry.
+**s** — Seeding uses the seeded test journal/press/server (`publicknowledge`) and roster accounts (passwords = username doubled), scratch submissions via the scenario submission endpoint, submitter `author.alex`. Scenario 1: `editor.diana` (OPS: `manager.maya`, since OPS enrols no Editor), a fresh `submitted: true` submission. 2: `decisions: ['sendExternalReview']` and one `reviewRounds` entry (OMP: the external stage; add `sendInternalReview` seeds for the press's other stage). 3: the scenario-2 shape plus `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]` (the seed writes the assignment row the Assign form would; the group's stage set, Copyediting only, drives the gate); control `editor.diana`. 4: the scenario-2 shape plus `participants: [{username: 'assistant.rita', role: 'funding'}]` (Funding Coordinator: stages Submission and Review on OJS/OMP); control `manager.maya`; OPS has no `funding` key. 5–6: `editor.diana` and `author.alex` on the scenario-1 submission; the typed addresses are `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`. 7: `author.alex` on a submission at Copyediting (`['sendExternalReview','accept']`); control `editor.diana`. 8: `manager.maya` on `decisions: ['sendExternalReview','accept','sendToProduction']`, one `reviewRounds` entry and `published: true` (OJS: `issue` = Vol 1 No 2); the seed rests in Done on every app straight away, and because it passed through Production "Return to Workflow" lands it on "Production" (a `published: true` seed without decisions returns to "Submission" instead); control `layouteditor.leo` seeded as `participants` role `layoutEditor` (OJS/OMP; on OPS the control is the Author). 9: OMP fleet, `editor.diana`, `decisions: ['sendExternalReview']`, one external round; control `assistant.rita` as `funding`. 10: OPS fleet, `sectioneditor.ana` (Moderator); the declined preprint via `decisions: ['decline']`. Never mutate a shared roster submission. Press seeds pass `series: 'monographs'`: a monograph seeded without a series auto-assigns no Series editor (unlike a journal, where section editors are auto-assigned), so the Editor's "Assigned to me" list omits it and an "assigned Series editor" needs an explicit `participants` entry. Revision seeds, 2026-09-13, in the same scheme: 1 reads the header buttons on its seed. 2 adds a second seed with two rounds, `decisions: ['sendExternalReview']` and two `reviewRounds` entries (the second entry builds Round 2; OMP: both external). 3 adds a second scenario-2-shape seed without the `participants` entry, typed at `{journal}/dashboard/editorial?workflowSubmissionId={id}` and `{journal}/workflow/access/{id}`. 4 reads the header and "Title & Abstract" on its seed. 5 rewrites the address's `workflowMenuKey` to `nonsense`. 6 adds `author.bea` as the stranger Author, with nothing seeded for her: she types `{journal}/authorDashboard/submission/{id}` for `author.alex`'s submission only; `author.alex` at `{journal}/dashboard/editorial?workflowSubmissionId={id}`, and a draft (`submitted: false`, submitter `author.alex`) typed by the Editor at that dashboard address. 7 adds `author.bea`'s `submitted: true` submission, typed by `author.alex` at `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the copied entry is the Editor's `workflowMenuKey=publication_{publicationId}_license`; OPS: `author.alex` on a plain `submitted: true` preprint, control `manager.maya`. 8 adds a seed `published: true` without decisions (OJS `issue` Vol 1 No 2; OJS and OMP) and, on OJS, the scheduled seed `decisions: ['sendExternalReview','accept','sendToProduction']` with one `reviewRounds` entry beside `published: true` and `issue` Vol 2 No 1 (2015), the unpublished issue, which lists the article as scheduled (the shape *My Submissions*' scenario 3 seeds); `published: true` alone with that issue leaves the bubble "Submission" and the panel on the Submission stage; the unpublish is driven on "Title & Abstract" through the "Unpublish" ("Unpost") dialog, and the mailbox read is `author.alex`'s address in the mail catcher, Mailpit at `http://127.0.0.1:8025`. 10 reads "Title & Abstract" on the queued preprint. 11: the scenario-2 seed, whose `reviewRounds` entry seeds `reviewer.julia` at `status: 'accepted'` (OJS, OMP); `reader.rosa` on every app; OPS `assistant.rita` (Editorial Board Member) on a `submitted: true` preprint; the doors are `{journal}/dashboard/editorial?workflowSubmissionId={id}`, `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`; control `editor.diana` (OPS `manager.maya`). 12: OJS and OMP fleets, a scratch journal from the context scenario with `users`: one account `roles: ['manager', 'layoutEditor']`, one `roles: ['author']` as submitter and one `roles: ['externalReviewer']` for the round; two submissions of the scenario-2 shape, one with `participants: [{username: <the two-role account>, role: 'layoutEditor'}]`. 13: `participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]` on `decisions: ['sendExternalReview', 'accept', 'sendToProduction']` with one `reviewRounds` entry (press: `series: 'monographs'`); control `manager.maya`. 14: `manager.maya` on `decisions: ['decline']` (OPS: the same on the preprint), submitter `author.alex`, plus a second `submitted: true` submission of `author.alex`; the Author types `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the mailbox read is `author.alex`'s address in the mail catcher, Mailpit as in 8. 14 on OJS runs on `publicknowledge` as above; on OMP and OPS it runs on a scratch press / preprint server from the context scenario with `users` `roles: ['manager']` and `roles: ['author']`, the throwaway Manager and Author standing in for `manager.maya` and `author.alex`, so the "Declined" count and the mailbox are the test's own (the seeded context's "Declined" count moves under other suites' declined seeds).
 
 <a id="fn-a1"></a>
 **f-a1** — `PKPWorkflowHandler::index()` and `access()` redirect to `dashboard/editorial` with `workflowSubmissionId` only; the stage id that `identifyStageId()` resolved and `WorkflowStageAccessPolicy` checked is dropped. `useWorkflowMenu.js` would honour a `workflowMenuKey=workflow_{stageId}` if one were appended. Live-probed 2026-09-02 (OJS, OMP): `workflow/index/{id}/4`, `/5`, `workflow/editorial/{id}`, `workflow/production/{id}` (and on OMP `workflow/internalReview/{id}` on a monograph with no internal round) on a submission in Review Round 1 all landed on "Review Round 1" (`workflowMenuKey=workflow_3_{round}`); OPS has one stage, so the landing and the named stage coincide.
