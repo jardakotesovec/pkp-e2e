@@ -48,6 +48,36 @@ context-cache patch is worth a further 3% locally (dashboard load 883 →
 826 ms), where Postgres round trips are cheap; on a runner with Postgres
 in a service container it should be worth more.
 
+## Each item alone (the Mac, OJS, 4 workers)
+
+Seven more runs, each round-2 item on its own on top of the base, fresh
+install every time, `--retries=1`. "Span" is the parallel project's wall,
+"summed" the sum of the passed tests' durations (retried attempts
+excluded); the percentage is against the mean of the two base runs (540 s
+span). The afternoon runs (test-side, session, hashes) shared the machine
+with a busy editor; the evening ones (persistent, cache, control) had it
+quiet, and single runs here carry about ±5%.
+
+| condition | wall | span | summed | vs base span |
+|---|---|---|---|---|
+| base, 16:25 (one flaky retry) | 627 s | 567 s | 1,915 s | |
+| base control, 19:36 | 574 s | 513 s | 2,016 s | |
+| persistent connection only | 469 s | 411 s | 1,624 s | **−24%** |
+| cheap seeded hashes only | 512 s | 461 s | 1,816 s | **−15%** |
+| context cache only | 541 s | 481 s | 1,896 s | −11% |
+| test-side only | 545 s | 486 s | 1,908 s | −10% |
+| session endpoint only | 548 s | 489 s | 1,925 s | −10% |
+
+The items overlap, which is why they add up to far more than the combined
+branch's −29%: the persistent connection cheapens every request, including
+the seeding and sign-in requests the other three shorten. For picking:
+the persistent connection is the biggest single item and the smallest
+change (five lines in pkp-lib plus one config key); the cheap hashes are
+second and purely harness-side; the context cache, the test-side commits
+and the session endpoint are each worth about a tenth alone and share
+ground. The single-lever branches are `perf-r2-session` and `perf-r2-hash`
+(local), `perf-testside-ci`, and the base with one patch each.
+
 ## The CI numbers
 
 Runner-to-runner variance decides how these read: the unchanged base
@@ -215,7 +245,8 @@ the suite by ±15%, more than any single item below.
   install and runs with the profile reporter; ten runs back to back, base
   and round 2 interleaved, 14:46–15:41 local (well clear of the midnight
   date window). The driver and the per-run `def4-*.jsonl`/`.log` profiles
-  are in `.reports/perf-2026-09-13/` next to `definitive3.sh`. Flakes there:
+  are in `.reports/perf-2026-09-13/` next to `definitive3.sh`; the
+  single-lever pass is `definitive5.sh` there. Flakes there:
   U24 S14 (both attempts, base at 8 workers; one attempt in the two round-2
   8-worker runs) and OMP U01 S6 once (a workflow modal not appearing,
   passed on retry).
