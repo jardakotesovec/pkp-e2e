@@ -160,9 +160,9 @@ over.
    single whitespace-free token. Never `'Published article {tag}'`.
 4. **Mailpit is shared across workers AND fleets.** The rules and the
    `pkpMail` API are in `scenarios.md` "Mailpit" (PRINCIPLES A8).
-5. **`.auth/{user}.json` can go stale after impersonation flows.**
-   `signInAs`/`signOutAs` migrate the session. `ensureAuthStateFor` probes the
-   file before reuse and logs in again when needed. Specs do nothing special.
+5. **Sessions are minted per test through `POST _test/session`**, so
+   `signInAs`/`signOutAs` migrating a session never strands another test's
+   cookies. Specs do nothing special.
 6. **Server-side outbound HTTP fails fast at the dead-port `[proxy]`**
    (the config contract in `harness.md`); a test never depends on the app
    reaching an external service.
@@ -287,7 +287,6 @@ no cleanup fixture.
 - **A stray server on a worker port** is adopted by a Playwright run
   (`reuseExistingServer`) instead of it starting its own, so nothing else
   may listen on the worker band (`harness.md` "The fleets").
-- **`.auth/` files** hold session cookies and are gitignored.
 
 ## UI realities learned the hard way
 

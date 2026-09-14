@@ -30,6 +30,7 @@
 
 namespace PKP\API\v1\_test;
 
+use APP\core\Application;
 use APP\facades\Repo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -41,6 +42,7 @@ use PKP\core\PKPBaseController;
 use PKP\core\PKPRequest;
 use PKP\core\Registry;
 use PKP\security\authorization\PublicAccessPolicy;
+use PKP\security\Validation;
 use PKP\testing\PKPBootstrapSeeder;
 use PKP\testing\PKPContextScenarioBuilder;
 use PKP\testing\PKPSubmissionScenarioBuilder;
@@ -74,6 +76,7 @@ abstract class PKPTestController extends PKPBaseController
         Route::get('bootstrap', $this->probe(...))->name('_test.bootstrap.probe');
         Route::get('jobs', $this->jobs(...))->name('_test.jobs');
         Route::post('bootstrap', $this->bootstrap(...))->name('_test.bootstrap');
+        Route::post('session', $this->session(...))->name('_test.session');
         Route::post('scenarios/context', $this->contextScenario(...))->name('_test.scenarios.context');
         Route::post('scenarios/submission', $this->submissionScenario(...))->name('_test.scenarios.submission');
     }
@@ -120,6 +123,30 @@ abstract class PKPTestController extends PKPBaseController
     public function bootstrap(Request $illuminateRequest): JsonResponse
     {
         return $this->runBuilder(fn () => $this->bootstrapSeeder()->seed((array) $illuminateRequest->json()->all()));
+    }
+
+    /**
+     * Sign a user in without the login form: {username} → the session
+     * registered server-side, the session cookie on the response, and the
+     * user's id. The login form costs a page load plus a bcrypt verify at
+     * cost 12 (some 400 ms per test on a runner); this is one 40 ms request
+     * (support/auth.js). Disabled accounts answer 403 like the form would.
+     */
+    public function session(Request $illuminateRequest): JsonResponse
+    {
+        $username = (string) $illuminateRequest->json('username');
+        $user = Repo::user()->getByUsername($username, true);
+        if (!$user) {
+            return response()->json(['error' => "unknown user {$username}"], 404);
+        }
+        $reason = null;
+        if (!Validation::registerUserSession($user, $reason)) {
+            return response()->json(['error' => $reason ?: 'disabled'], 403);
+        }
+        // The guard queues the cookie on the Illuminate response singleton;
+        // the page router sends it from there, the API router does not.
+        Application::get()->getRequest()->getSessionGuard()->sendCookies();
+        return response()->json(['userId' => $user->getId(), 'username' => $username], 200);
     }
 
     public function contextScenario(Request $illuminateRequest): JsonResponse
