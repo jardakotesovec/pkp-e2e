@@ -1,24 +1,63 @@
-# Suite performance, round 2: the CI runner, 2026-09-14
+# Suite performance, round 2, 2026-09-14
 
 The first round (`2026-09-14-suite-performance.md`) was measured on the
-Mac. This round is measured only on GitHub's 4-vCPU `ubuntu-latest`
-runners, because that is where the suites run and because the Mac was busy.
-Every branch here sits on top of `perf-pkplib-ci`, that is `main` plus the
-pkp-lib installer patch applied to `lib/pkp` before the run (the maintainer
-is taking that patch upstream this week, so it counts as given). The goal
-was the OJS suite from about 22 minutes to 15.
+Mac. This round was explored and first measured on GitHub's 4-vCPU
+`ubuntu-latest` runners while the Mac was busy, then measured definitively
+on the Mac once it was free. Every branch here sits on top of
+`perf-pkplib-ci`, that is `main` plus the pkp-lib installer patch applied
+to `lib/pkp` before the run (the maintainer is taking that patch upstream
+this week, so it counts as given). The goal was the OJS suite from about
+22 minutes on CI to 15.
 
-Runner-to-runner variance is the first finding, and it decides how the
-rest reads: the unchanged base commit ran at 21.8, 22.4 and 17.1 minutes
-(summed test time 4,237 / 4,264 / 3,402 s), and the round-2 commit at
-17.0, 19.9, 19.5 and 18.2 minutes, each pair of runs a uniform shift in
-every spec file. One sample cannot resolve anything under about 20%, so
-the table gives every sample, averages are compared over all of them, and
-the per-file ratio is the tool that separates a change from a slow VM: a
-real change shows up in the files that exercise it, a slow VM slows every
-file alike.
+The short version: on an idle machine round 2 takes **29% off the OJS
+suite at 4 workers** (563 → 402 s), 16% off OMP and 21% off OPS; the CI
+runners could not show it, because the VM a run lands on moves the same
+commit by ±15%, and the CI averages came out at −5%. Measure performance
+locally; use CI for green or red.
 
-## The numbers
+## The definitive numbers (the Mac, idle)
+
+Fresh install before every run, `--retries=1` as on CI, the three pkp-lib
+patches applied to the checkouts per condition and reverted after, the
+profile reporter on. "Base" is `main` plus the installer patch;
+"round 2" is `perf-round2` (its code plus the persistent-connection
+patch); "+ cache" adds the context-cache patch (`perf-round2-n1`).
+
+| suite | workers | base | round 2 | + cache |
+|---|---|---|---|---|
+| OJS | 4 (the CI regime) | 563 s | **402 s (−29%)** | 389 s (−31%) |
+| OJS | 8 | 388 s* | 311 s (−20%) | 308 s (−21%) |
+| OJS parallel project | 8 | 335 s span, 2,605 s summed | 262 s, 2,004 s (−23%) | 261 s, 1,951 s (−25%) |
+| OMP | 8 | 328 s | 276 s (−16%) | — |
+| OPS | 8 | 194 s | 154 s (−21%) | — |
+
+\* The base run at 8 workers went red on U24 S14 in both attempts, so its
+serial and solo projects did not run; 388 s is the measured 346 s plus the
+43 s those projects took in the round-2 run. The parallel-project row is
+the clean comparison at 8 workers. U24 S14 reads the base journal's
+"Declined" count, deletes a submission and expects the count one lower,
+while other tests decline submissions on the same journal in between
+("4 Declined" for 1, then "3" for 4): a shared-count flake at 8 workers
+that passes at 4 and on CI. It is on `main`, not on the branches, and
+belongs in the flake queue.
+
+Settled here too: **U21 is faster, not slower**, 206 → 113 s at 4 workers
+(S3 67 → 5.6 s through `page.clock`, every other scenario 1–4 s quicker
+from the cheaper sign-in), so the +13% CI reading was the VM. The
+context-cache patch is worth a further 3% locally (dashboard load 883 →
+826 ms), where Postgres round trips are cheap; on a runner with Postgres
+in a service container it should be worth more.
+
+## The CI numbers
+
+Runner-to-runner variance decides how these read: the unchanged base
+commit ran at 21.8, 22.4 and 17.1 minutes (summed test time 4,237 / 4,264
+/ 3,402 s), and the round-2 commit at 17.0, 19.9, 19.5 and 18.2 minutes,
+each pair of runs a uniform shift in every spec file. One sample cannot
+resolve anything under about 20%, so the table gives every sample, and
+the per-file ratio between two runs is the tool that separates a change
+from a slow VM: a real change shows up in the files that exercise it, a
+slow VM slows every file alike.
 
 OJS, 4 workers, the Playwright step only (pre-test steps are under two
 minutes and cached; they are not part of this round). "Summed" is the sum
@@ -46,20 +85,19 @@ OMP and OPS from the same runs, suite wall in minutes:
 | round 2 + context cache | 15.9 | 8.5 |
 | round 2, 6 workers | 15.7 | 9.1 |
 
-Reading it honestly: averaged over every sample, round 2's summed test
-time is 3,786 s against the base's 3,968 s, **−4.6%**, and its mean wall
-18.7 minutes against 20.4. Per file (averaged the same way) the change is
-where the profile said it would be, U27 0.84, U29 0.89, U49 and U04 0.90,
-U26 0.91, U24/U25 0.92, and flat on the base-journal specs (U02, U05, U06
-1.00–1.02, U28 1.00); U21 is the one file slower, 1.13, which points at
-the `page.clock` change in U21 S3 on the runner and deserves a look before
-that commit is kept. The within-run measurements are firmer than the
-cross-run ones: the profile shows the prelude 780 → 640 s and the form
-sign-ins gone, and the persistent connection is 10 ms of every request.
-Put together that is 5–10% of the suite, not the 30% the target needed.
-The 15-minute mark was not reached; on today's VMs the same commit lands
-anywhere between 17 and 22 minutes, and that spread is larger than
-everything this round changed.
+Averaged over every sample, round 2's summed test time on CI is 3,786 s
+against the base's 3,968 s, −4.6%, and its mean wall 18.7 minutes against
+20.4. Per file (averaged the same way) the change is where the profile
+said it would be, U27 0.84, U29 0.89, U49 and U04 0.90, U26 0.91, U24/U25
+0.92, flat on the base-journal specs (U02, U05, U06, U28 at 1.00–1.02).
+The within-run measurements are firmer than the cross-run ones: the
+profile shows the prelude 780 → 640 s and the form sign-ins gone, and the
+persistent connection is 10 ms of every request. Why the runner shows a
+quarter of the Mac's gain is the runner itself: CPU-saturated, every
+request three to four times slower, so the fixed waits the round removed
+are a smaller share of a test there, and the VM lottery on top. The
+15-minute mark on CI was not reached; on today's VMs the same commit lands
+anywhere between 17 and 22 minutes.
 
 ## Where the runner's time goes
 
@@ -95,7 +133,8 @@ everywhere. That is also why 6 workers gain less than the Mac's 10 did.
 1. **The six test-side commits** from `perf/test-side` (the U21 autosave
    through `page.clock`, U27/U30/U21 reloads and duplicate navigations
    dropped, U23 S7 batched seeds, the rowCounts wait). Alone: OJS 22 → 17.9
-   minutes on CI, the single biggest item of the round.
+   minutes on CI, the single biggest item of the round; U21 alone 206 →
+   113 s on the Mac.
 2. **`POST /api/v1/_test/session`** (`PKPTestController::session`): the
    app registers the session server-side and answers with the cookie, one
    request instead of the login page plus a bcrypt verify, or the
@@ -129,11 +168,11 @@ everywhere. That is also why 6 workers gain less than the Mac's 10 did.
   the publication version string taken from the already-joined
   submission context instead of a submission fetch per row. The dashboard
   list drops from 1,055 to about 470 statements and the responses are
-  byte-identical, but the CI sample landed on a slow VM (every file +5–14%)
-  and the effect, an estimated 130 s of DB round trips per run, is under
-  the noise floor. Worth an upstream PR on its own merits; one caveat to
-  state there: a long-lived CLI process (queue worker, scheduler) keeps the
-  memo across jobs.
+  byte-identical. On the Mac it is a further 3% on top of round 2 (OJS 4
+  workers 402 → 389 s, the dashboard load 883 → 826 ms); the CI sample
+  landed on a slow VM and showed nothing. Worth an upstream PR on its own
+  merits; one caveat to state there: a long-lived CLI process (queue
+  worker, scheduler) keeps the memo across jobs.
 - **6 workers.** Wall −10% alone (19.7 vs 21.8/22.4) but +23% per test,
   and on round 2 it gained nothing (19.0 vs 17.0/19.9). More flakes under
   contention (OMP U21 S3, U41 S2). Not recommended for the runner.
@@ -170,6 +209,16 @@ the suite by ±15%, more than any single item below.
 
 ## Method notes
 
+- The definitive pass on the Mac: a driver that, per run, checks out the
+  branch, mounts the overlays, reverts `lib/pkp`, applies the condition's
+  patches, adds or removes `persistent = On` in the test config, resets the
+  install and runs with the profile reporter; ten runs back to back, base
+  and round 2 interleaved, 14:46–15:41 local (well clear of the midnight
+  date window). The driver and the per-run `def4-*.jsonl`/`.log` profiles
+  are in `.reports/perf-2026-09-13/` next to `definitive3.sh`. Flakes there:
+  U24 S14 (both attempts, base at 8 workers; one attempt in the two round-2
+  8-worker runs) and OMP U01 S6 once (a workflow modal not appearing,
+  passed on retry).
 - A private sandbox for single-request work: a copy of `checkouts/ojs`
   without `.git` and `node_modules`, its own `*_test` database installed
   with `tools/installTest.php`, `php -S` on a free port, `POST
