@@ -3,8 +3,7 @@
  * @file lib/pkp/playwright/reset.js
  *
  * reset:<app> — nuke the test install so the next run performs a cold
- * bootstrap: drop + recreate the test database, wipe the test files dir and
- * the storage-state cache (playwright/.auth/).
+ * bootstrap: drop + recreate the test database and wipe the test files dir.
  *
  * This is the ONE place allowed to dispatch on the configured DB driver
  * (PRINCIPLES D8): everything else in the harness goes through
@@ -48,15 +47,6 @@ if (filesDir && /test/.test(path.basename(filesDir)) && fs.existsSync(filesDir))
     }
 } else if (filesDir) {
     console.log(`reset: leaving files dir alone (${filesDir} — name does not contain "test" or missing)`);
-}
-
-const authDir = path.join(
-    process.env.PKP_SUITE_DIR || path.join(appRoot, 'playwright'),
-    '.auth'
-);
-if (fs.existsSync(authDir)) {
-    console.log(`reset: wiping ${authDir}`);
-    fs.rmSync(authDir, {recursive: true, force: true});
 }
 
 console.log('reset: done — next run will cold-bootstrap.');

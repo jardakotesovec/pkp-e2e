@@ -29,7 +29,6 @@ apps/<app>/playwright/
 ├── fixtures/
 │   ├── bootstrap.js   # Static seed for the base context (journal/press/server, 18 users, sections, …)
 │   └── files/         # Upload fixtures
-└── .auth/             # Storage-state cache per user (gitignored)
 ```
 
 **`shared/playwright/` holds shared infrastructure only.** Base fixtures,
@@ -43,7 +42,7 @@ shared/playwright/
 ├── tests/                   # bootstrap.setup.js (setup project), login.spec.js (smoke)
 ├── support/
 │   ├── base-test.js         # The extended `test` fixture — start here
-│   ├── auth.js              # ensureAuthStateFor — storage-state cache w/ liveness probe
+│   ├── auth.js              # ensureAuthStateFor — a session per call via POST _test/session
 │   ├── api.js               # pkpApi — test-API client (bootstrap, createContext, createSubmission)
 │   ├── mail.js              # pkpMail — Mailpit HTTP API wrapper
 │   ├── jobs.js              # runJobs — drain the fleet's queued jobs (serial project only)
@@ -54,7 +53,7 @@ shared/playwright/
 ├── probe/                   # The probe kit (patterns.md "Probe kit"); scripts import it, tests never do
 ├── checks/<feature>/<chunk>/ # Kept claim-check scripts, re-runnable by a maintenance session (briefs/claim-check.md)
 ├── data/users.js            # The 18 baseline identities + getPassword()/getEmail()
-├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir + .auth/
+├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir
 ├── make-test-config.js      # generate config.test.inc.php from the app template (run through bin/with-app.js)
 └── config-factory.js        # definePkpConfig({appName, appRoot, basePort}) — all three apps
 ```

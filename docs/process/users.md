@@ -114,29 +114,24 @@ never hit the limit.
 ## Login flow internals
 
 `ensureAuthStateFor(browser, username, {baseURL})` in
-`shared/playwright/support/auth.js`:
+`shared/playwright/support/auth.js` returns a storage state (cookies) for
+`browser.newContext()`, minted fresh on every call:
 
-1. If `apps/<app>/playwright/.auth/<username>.json` exists, **probe** it.
-   The probe replays the cookies and requests the profile URL, following
-   redirects. The cached state is live when the request ends with a 200
-   outside `/login` (`ok() && !url.includes('/login')`). A probe with
-   redirects disabled cannot work here: even a signed-in profile request
-   redirects twice (first to the locale prefix, then into the context).
-2. Otherwise perform a real UI login at `/index.php/index/en/login`, using
-   the stable ids `input#username`, `input#password` and
-   `form#login button`. Wait for the redirect away from `/login`
-   (`waitUntil: 'commit'`), then save `storageState()` to the file.
-3. Two workers may race on a missing or stale file. Both log in, which is
-   allowed (concurrent sessions are permitted), and the last write wins.
-   The file is written atomically (temp file, then rename), so a reader
-   never sees a half-written file.
+1. `POST /api/v1/_test/session` with `{username}` (the test API key in
+   `X-Test-Key`). The app registers the session server-side and answers
+   with its cookie: one request, about 40 ms. Unknown users answer 404,
+   disabled accounts 403, and the helper falls through.
+2. Fallback: the login form posted over HTTP (the login page for its CSRF
+   token, then `login/signIn`), and as a last resort the form driven in a
+   browser page. Both cost a bcrypt verify at cost 12, which is why the
+   endpoint exists.
 
-**Why the probe exists.** Impersonation flows (`signInAs`/`signOutAs`)
-migrate the session id and destroy the previous session row, which strands
-the cached cookies. The probe catches that without special-casing those
-tests.
+A fresh session per test means impersonation flows (`signInAs`/
+`signOutAs`), which migrate the session id and destroy the previous session
+row, can never strand another test's cookies. Until 2026-09-14 the state
+was cached in `.auth/<username>.json` and probed before every use.
 
-How tests use it: `test.use({user: 'editor.diana'})` sets the file's default
+How tests use it: `test.use({user: 'editor.diana'})` sets the default
 identity (the `storageState` fixture in `base-test.js` wires it up).
 `asUser()` opens extra authenticated contexts for additional actors.
 
@@ -150,8 +145,7 @@ when it finds leftover install debris, and refuses any DB whose name lacks
 "test". It then seeds `publicknowledge` and the 17 non-admin users from
 `apps/<app>/playwright/fixtures/bootstrap.js`.
 
-Stale `.auth/` files are recreated on demand. `npm run reset:<app>` forces a
-full cold bootstrap.
+`npm run reset:<app>` forces a full cold bootstrap.
 
 ## The `publicknowledge` context
 
