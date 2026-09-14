@@ -15,6 +15,11 @@ runners could not show it, because the VM a run lands on moves the same
 commit by ±15%, and the CI averages came out at −5%. Measure performance
 locally; use CI for green or red.
 
+**Decision (2026-09-14 evening):** the cheap seeded hashes, the session
+endpoint and the six test-side commits are merged to `main`; the
+persistent-connection patch is held for its upstream PR (its file stays
+next to this report), the context cache is parked on `perf-round2-n1`.
+
 ## The definitive numbers (the Mac, idle)
 
 Fresh install before every run, `--retries=1` as on CI, the three pkp-lib
