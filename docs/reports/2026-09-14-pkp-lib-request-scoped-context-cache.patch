@@ -1,0 +1,204 @@
+--- a/classes/context/ContextDAO.php
++++ b/classes/context/ContextDAO.php
+@@ -33,6 +33,27 @@
+ abstract class ContextDAO extends SchemaDAO
+ {
+     /**
++     * Contexts already loaded during this request, keyed by context id. A null
++     * entry records that no context exists with that id.
++     *
++     * The DAO is a per-request singleton (@see \PKP\db\DAORegistry::getDAO()),
++     * so this memo lives and dies with the request. Every write path in this
++     * class empties it, and nothing else in the application writes to the
++     * context tables outside of migrations.
++     *
++     * @var array<int,?T>
++     */
++    protected array $contextsById = [];
++
++    /**
++     * The id of each context looked up by path during this request, keyed by
++     * path. A null entry records that no context exists with that path.
++     *
++     * @var array<string,?int>
++     */
++    protected array $contextIdsByPath = [];
++
++    /**
+      * Retrieve the IDs and names of all contexts in an associative array.
+      *
+      * @return array<int,string>
+@@ -79,6 +100,29 @@
+     }
+ 
+     /**
++     * @copydoc SchemaDAO::getById()
++     *
++     * The context and all of its settings are kept for the rest of the request:
++     * a single page hit asks for the same context dozens of times while
++     * building URLs and mapping entities to the API schemas.
++     *
++     * @param int $objectId
++     *
++     * @return ?T
++     */
++    public function getById($objectId)
++    {
++        $objectId = (int) $objectId;
++        if (!array_key_exists($objectId, $this->contextsById)) {
++            $this->contextsById[$objectId] = parent::getById($objectId);
++        }
++
++        // Hand out a copy so that callers keep the object they have always had
++        $context = $this->contextsById[$objectId];
++        return $context ? clone $context : null;
++    }
++
++    /**
+      * Retrieve a context by path.
+      *
+      * @param string $path
+@@ -87,15 +131,76 @@
+      */
+     public function getByPath($path)
+     {
++        $path = (string) $path;
++        if (array_key_exists($path, $this->contextIdsByPath)) {
++            $contextId = $this->contextIdsByPath[$path];
++            return $contextId === null ? null : $this->getById($contextId);
++        }
++
+         $result = $this->retrieve(
+             'SELECT * FROM ' . $this->tableName . ' WHERE path = ?',
+-            [(string) $path]
++            [$path]
+         );
+         $row = (array) $result->current();
+-        return $row ? $this->_fromRow($row) : null;
++        $context = $row ? $this->_fromRow($row) : null;
++
++        $this->contextIdsByPath[$path] = $context?->getId();
++        if ($context) {
++            $this->contextsById[$context->getId()] = $context;
++            return clone $context;
++        }
++        return null;
+     }
+ 
+     /**
++     * Forget the contexts loaded during this request.
++     *
++     * Called by every method here that writes to the context tables, so that a
++     * request which edits a context still reads back the new values.
++     */
++    protected function flushCache(): void
++    {
++        $this->contextsById = [];
++        $this->contextIdsByPath = [];
++    }
++
++    /**
++     * @copydoc SchemaDAO::insertObject()
++     */
++    public function insertObject($object)
++    {
++        try {
++            return parent::insertObject($object);
++        } finally {
++            $this->flushCache();
++        }
++    }
++
++    /**
++     * @copydoc SchemaDAO::updateObject()
++     */
++    public function updateObject($object)
++    {
++        try {
++            parent::updateObject($object);
++        } finally {
++            $this->flushCache();
++        }
++    }
++
++    /**
++     * @copydoc SchemaDAO::deleteById()
++     */
++    public function deleteById(int $objectId): int
++    {
++        try {
++            return parent::deleteById($objectId);
++        } finally {
++            $this->flushCache();
++        }
++    }
++
++    /**
+      * Retrieve all contexts.
+      *
+      * @param bool $enabledOnly true iff only enabled contexts should be included
+@@ -205,5 +310,7 @@
+         foreach ($result as $key => $value) {
+             $this->update('UPDATE ' . $this->tableName . ' SET seq = ? WHERE ' . $this->primaryKeyColumn . ' = ?', [$key + 1, $value->context_id]);
+         }
++
++        $this->flushCache();
+     }
+ }
+--- a/classes/publication/Collector.php
++++ b/classes/publication/Collector.php
+@@ -155,7 +155,7 @@
+     {
+         $qb = DB::table('publications as p')
+             ->join('submissions as s', 'p.submission_id', '=', 's.submission_id')
+-            ->select(['p.*', 's.locale AS submission_locale']); // see DAO::fromRow for use of submission_locale
++            ->select(['p.*', 's.locale AS submission_locale', 's.context_id AS submission_context_id']); // see DAO::fromRow for use of submission_locale and submission_context_id
+ 
+         if (isset($this->contextIds)) {
+             $qb->whereIn('s.context_id', $this->contextIds);
+--- a/classes/publication/DAO.php
++++ b/classes/publication/DAO.php
+@@ -101,12 +101,12 @@
+     public function get(int $id, ?int $submissionId = null): ?Publication
+     {
+         // This is overridden due to the need to include submission_locale
+-        // to the fromRow function
++        // and submission_context_id to the fromRow function
+         $row = DB::table('publications as p')
+             ->join('submissions as s', 'p.submission_id', '=', 's.submission_id')
+             ->where('p.publication_id', '=', $id)
+             ->when($submissionId !== null, fn (Builder $query) => $query->where('s.submission_id', '=', $submissionId))
+-            ->select(['p.*', 's.locale AS submission_locale'])
++            ->select(['p.*', 's.locale AS submission_locale', 's.context_id AS submission_context_id'])
+             ->first();
+         return $row ? $this->fromRow($row, [$id], (object) []) : null;
+     }
+@@ -166,7 +166,15 @@
+         // Set the primary locale from the submission
+         $publication->setData('locale', $row->submission_locale);
+ 
+-        $publicationVersionString = Repo::publication()->getVersionString($publication);
++        // Take the submission's context from the row that is already joined in,
++        // rather than letting getVersionString() fetch the submission and its
++        // context again for every publication in a list
++        $publicationVersionString = Repo::publication()->getVersionString(
++            $publication,
++            submissionContext: isset($row->submission_context_id)
++                ? app()->get('context')->get((int) $row->submission_context_id)
++                : null
++        );
+         $publication->setData('versionString', $publicationVersionString);
+ 
+         $publication->setData('citationsRaw', new class ($publication->getId()) implements \Stringable {
+--- a/classes/publication/maps/Schema.php
++++ b/classes/publication/maps/Schema.php
+@@ -201,7 +201,8 @@
+                     $output[$prop] = $publication->getFullTitles('html');
+                     break;
+                 case 'versionString':
+-                    $output[$prop] = Repo::publication()->getVersionString($publication);
++                    // The submission is already at hand, so it does not have to be loaded again
++                    $output[$prop] = Repo::publication()->getVersionString($publication, $this->submission);
+                     break;
+                 case 'canCurrentUserChangeMetadata':
+                     $output[$prop] = Repo::submission()->canEditPublication($publication, PKPApplication::get()->getRequest()->getUser());
