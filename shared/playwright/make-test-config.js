@@ -61,6 +61,9 @@ const PATCHES = {
         username: process.env.TEST_DB_USERNAME || 'ojs',
         password: process.env.TEST_DB_PASSWORD || 'ojs',
         name: dbName,
+        // Honoured by the pkp-lib persistent-connection patch under test
+        // (docs/reports/2026-09-14-pkp-lib-persistent-db-connection.patch).
+        persistent: 'On',
     },
     i18n: {
         installed_locales: process.env.TEST_LOCALES || 'en,fr_CA',
