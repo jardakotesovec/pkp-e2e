@@ -906,16 +906,19 @@ test.describe('notifications center & email preferences', () => {
         // The site-level bell: the same "Tasks" window with the same rows as
         // from a journal's editorial page (Rule 2d). The list moves while
         // parallel workers seed, so the pair of reads is repeated until it
-        // agrees.
+        // agrees. The rows are compared sorted: the window orders by creation
+        // time alone, so rows parallel workers raised in the same second come
+        // back in no fixed order between two reads (ci-triage, 2026-09-15).
         const adminTasks = new TasksPanel(adminPage);
+        const sorted = (rows) => [...rows].sort();
         let journalRows = [];
         let siteRows = [];
         for (let attempt = 0; attempt < 3; attempt++) {
             await gotoEditorial(adminPage, JOURNAL);
-            journalRows = await readTaskRows(adminPage);
+            journalRows = sorted(await readTaskRows(adminPage));
             await siteProfile.goto('notifications');
             await expect(adminTasks.bell()).toBeVisible({timeout: 30_000});
-            siteRows = await readTaskRows(adminPage);
+            siteRows = sorted(await readTaskRows(adminPage));
             if (JSON.stringify(siteRows) === JSON.stringify(journalRows)) {
                 break;
             }

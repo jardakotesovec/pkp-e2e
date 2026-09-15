@@ -458,31 +458,6 @@ trips.
   dashboard and Add Reviewer classes above: a list fetched again after
   the window closes. **Watch condition**: a second incident; then read
   whether the panel's reload after the window's save is awaited.
-- **"Declined" count read while another test declines on the shared
-  journal** (U24 S14, OJS, local 8 workers, reproducible). The test reads
-  the sidebar's "Declined" count on `publicknowledge`, deletes its own
-  declined submission and expects the count one lower; the count is
-  journal-wide, and U26 S10 (decline, revert, delete on the same journal)
-  declines between the read and the assertion when the two overlap. Red in
-  the maintainer's first two local 8-worker runs at the merged tips
-  2026-09-15 (`.reports/flake-local/run{1,2}.log`, U26 S10 finishing
-  alongside both times), green in the two runs where S14 finished first;
-  alone, the pair on two workers with `--repeat-each 4` reds S14 2 of 4
-  (`.reports/flake-local/collision-s14-s10.log`). U22 S3 and U25 S4 also
-  leave declined submissions on that journal. Not seen at four workers on
-  the VM or CI. **Fix (test-side, queued)**: seed S14's declined submission
-  on a scratch journal so the count is 1 → 0, or assert against the API's
-  declined total read at the same moment.
-- **Tasks window rows in a different order between two reads** (U05 S7,
-  OJS, once). The site-level Tasks window and the journal's listed the
-  same 20 rows in a different order among rows created in the same second
-  by parallel workers, and the test's three-read retry never agreed
-  (2026-09-15, the maintainer's third local 8-worker run at the merged
-  tips, `.reports/flake-local/run3.log`); green alone 2 of 2.
-  `TaskNotificationsGridHandler` orders by `created_at desc` alone, so
-  ties have no stable order. **Fix (test-side, queued)**: compare the two
-  reads sorted, the claim being "the same rows". Upstream nit worth a
-  line to the team: a secondary order on the notification id.
 - **Author's Title & Abstract section empty after the manager's publish**
   (U40 S3, OJS, once, local). After the manager published, the author's
   reload fetched the submission and the publication (both 200 in worker

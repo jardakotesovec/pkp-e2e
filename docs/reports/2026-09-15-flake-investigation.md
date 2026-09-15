@@ -317,6 +317,24 @@ green alone afterwards (2 or 3 repeats on two workers). What the reds are:
   30 s) and U29 S9 (the reviewer's step-3 recommendation select read no
   options) are the known "under load" shapes, one sighting each.
 
+**After the two test-side fixes** (U24 S14 on a scratch journal like its
+OMP and OPS twins, so the count is 1 → 0; U05 S7 comparing the two Tasks
+reads sorted), three more full runs the same way
+(`.reports/flake-local/run{5..7}.log`):
+
+| run | result |
+|---|---|
+| 5 | 231 passed (5.9 min) |
+| 6 | 231 passed (5.9 min) |
+| 7 | 231 passed (5.6 min) |
+
+Nine reds in four runs before, none in three after, and the serial and
+solo projects ran for the first time. One caveat on the comparison: the
+desktop had gone quiet by then (load average 12 to 19 against 89 to 152
+during runs 1 to 4), so the load-shaped one-offs had less chance to show;
+the two fixes remove the only reproducible red (U24 S14, 2 of 4 alone with
+its partner before the fix, 0 of 2 after) and the order tie.
+
 ## 6. Next
 
 0. Status 2026-09-15 evening: the native-scroll change and the keyed

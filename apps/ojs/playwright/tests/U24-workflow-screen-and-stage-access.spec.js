@@ -844,15 +844,35 @@ test.describe('workflow screen & stage access', () => {
         test.slow();
         const tag = makeTag('s14', testInfo);
         const secondTag = makeTag('s14b', testInfo);
-        const {submissionId} = await seed(ojsApi, tag, {decisions: ['decline']});
-        const {submissionId: secondId} = await seed(ojsApi, secondTag);
-        const authorMailbox = {to: getEmail('author.alex'), contains: tag};
+        // A scratch journal: the side menu's "Declined" count read below is
+        // journal-wide, and on the seeded journal other workers decline
+        // submissions of their own meanwhile (ci-triage, 2026-09-15).
+        const manager = `${tag}mg`;
+        const author = `${tag}au`;
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: manager, roles: ['manager']},
+                {username: author, roles: ['author']},
+            ],
+        });
+        const seedOn = (subTag, extra = {}) =>
+            ojsApi.createSubmission({
+                tag: subTag,
+                context: tag,
+                submitter: author,
+                title: `Submission ${subTag}`,
+                ...extra,
+            });
+        const {submissionId} = await seedOn(tag, {decisions: ['decline']});
+        const {submissionId: secondId} = await seedOn(secondTag);
+        const authorMailbox = {to: `${author}@mail.test`, contains: tag};
         const mailBefore = await pkpMail.count(authorMailbox);
 
         // The declined submission: bubble "Declined", landing on
         // "Submission", striped (Rules 5, 11, 12); the address is noted.
-        const {page, workflow} = await workflowAs(asUser, appContext, 'manager.maya');
-        const dash = new EditorialDashboardPage(page, JOURNAL);
+        const {page, workflow} = await workflowAs(asUser, appContext, manager, tag);
+        const dash = new EditorialDashboardPage(page, tag);
         await workflow.gotoEditorial(submissionId);
         await workflow.expectStage('Declined');
         await workflow.expectStageHeading('Submission');
@@ -860,7 +880,8 @@ test.describe('workflow screen & stage access', () => {
         await workflow.expectStriped('Submission');
         await expect.poll(() => workflow.menuKeyFromUrl(), {timeout: 30_000}).toMatch(/^workflow_/);
         const staleAddress = page.url();
-        const declinedBefore = await dash.readViewCount('Declined');
+        // The Manager's side menu: "Declined" counts the one submission.
+        await dash.expectViewCount('Declined', 1);
 
         // "Delete", then "Cancel": the panel and the button stay (Rule 19).
         await workflow.deleteSubmission({confirm: false});
@@ -881,7 +902,7 @@ test.describe('workflow screen & stage access', () => {
         await dash.searchFor(tag);
         await expect(dash.emptyState()).toBeVisible({timeout: 30_000});
         await expect(dash.row(tag)).toHaveCount(0);
-        await dash.expectViewCount('Declined', declinedBefore - 1);
+        await dash.expectViewCount('Declined', 0);
 
         // The author's mailbox: nothing arrived — the count scoped to the
         // author's address and this seed's tag is unchanged, read after the
@@ -895,15 +916,15 @@ test.describe('workflow screen & stage access', () => {
 
         // The Author at My Submissions: the same shell and dialog over My
         // Submissions (Rule 3).
-        const author = await workflowAs(asUser, appContext, 'author.alex');
-        await author.page.goto(author.workflow.authorUrl(submissionId));
-        await author.workflow.expectErrorShell(submissionId, ACCESS_DENIED.invalidSubmission);
-        await expect(author.page).toHaveURL(/\/dashboard\/mySubmissions/);
+        const authorView = await workflowAs(asUser, appContext, author, tag);
+        await authorView.page.goto(authorView.workflow.authorUrl(submissionId));
+        await authorView.workflow.expectErrorShell(submissionId, ACCESS_DENIED.invalidSubmission);
+        await expect(authorView.page).toHaveURL(/\/dashboard\/mySubmissions/);
 
         // Control: the Author's second submission opens with its header
         // (Rule 2c).
-        await author.workflow.gotoAuthor(secondId);
-        await expect(author.workflow.titleLine()).toHaveText(`Submission ${secondTag}`);
-        await expect(author.workflow.errorDialog()).toHaveCount(0);
+        await authorView.workflow.gotoAuthor(secondId);
+        await expect(authorView.workflow.titleLine()).toHaveText(`Submission ${secondTag}`);
+        await expect(authorView.workflow.errorDialog()).toHaveCount(0);
     });
 });
