@@ -61,6 +61,18 @@ exports.REVIEW_SIDE_TABS = SIDE_TABS;
 const SAVED_NOTICE = 'Your changes have been saved.';
 exports.SAVED_NOTICE = SAVED_NOTICE;
 
+/** The refusal under an empty required box (a Vue field or a legacy form's box). */
+const REQUIRED_ERROR = 'This field is required.';
+exports.REQUIRED_ERROR = REQUIRED_ERROR;
+
+/** The item window's refusal of an empty "Item" once a type is chosen (a page notice). */
+const ITEM_QUESTION_REQUIRED = 'A question is required for the form item. (English)';
+exports.ITEM_QUESTION_REQUIRED = ITEM_QUESTION_REQUIRED;
+
+/** The "Form Items" row's "Delete" question (the window shows it before removing). */
+const ITEM_DELETE_CONFIRM = 'Confirm delete of a published form item...';
+exports.ITEM_DELETE_CONFIRM = ITEM_DELETE_CONFIRM;
+
 /** Select-all on the platform's key (TinyMCE ignores the other modifier). */
 const SELECT_ALL = process.platform === 'darwin' ? 'Meta+A' : 'Control+A';
 
@@ -211,6 +223,11 @@ class SetupForm extends VueSettingsForm {
     /** A box by the sentence beside it (the public-visibility, access and suggestion boxes). */
     checkbox(label) {
         return this.form.getByRole('checkbox', {name: label});
+    }
+
+    /** The "Publicly Show Reviewer Comments" box, by its sentence. */
+    get publicCommentsBox() {
+        return this.checkbox('Make reviewer comments publicly visible with published content');
     }
 
     /** A reminder slider's handle by its label. */
@@ -400,10 +417,24 @@ class ReviewFormsList extends BasePage {
         await expect(window).toBeHidden({timeout: 30_000});
     }
 
-    /** "Create Review Form": open the window, type the title, save; the row appears. */
-    async createForm(title) {
+    /** "Create Review Form": open the window and wait for its "Title" box. */
+    async openCreateForm() {
         await this.createLink.click();
         await expect(this.titleInput).toBeVisible({timeout: 30_000});
+    }
+
+    /** Press the form window's "Save" without waiting for an outcome (a refused save keeps the window). */
+    async pressFormSave() {
+        await this.formSaveButton.click();
+    }
+
+    /** The form window's "This field is required." reasons (under "Title" when refused empty). */
+    formFieldErrors() {
+        return this.formFields.getByText(REQUIRED_ERROR);
+    }
+
+    /** Type the title into the open form window and save; the window closes and the row appears. */
+    async saveOpenForm(title) {
         await this.titleInput.fill(title);
         const saved = this.page.waitForResponse((r) => r.url().includes('/update-review-form') && r.request().method() === 'POST');
         await this.formSaveButton.click();
@@ -411,6 +442,12 @@ class ReviewFormsList extends BasePage {
         await expect(this.formFields).toBeHidden({timeout: 30_000});
         await waitForJQueryIdle(this.page);
         await expect(this.row(title).first()).toBeVisible({timeout: 30_000});
+    }
+
+    /** "Create Review Form": open the window, type the title, save; the row appears. */
+    async createForm(title) {
+        await this.openCreateForm();
+        await this.saveOpenForm(title);
     }
 
     /** The "Form Items" grid inside the window. */
@@ -467,12 +504,18 @@ class ReviewFormsList extends BasePage {
         return this.itemForm.locator('#elementOptionsListbuilderContainer tbody tr.gridRow').filter({hasText: text});
     }
 
-    /**
-     * Fill and save the open item window: the question, the two boxes, the
-     * type and any response options; waits for the window to close and the
-     * item's row to list.
-     */
-    async saveItem({question, required = false, included = true, type, options = []}) {
+    /** The item window (headed "Create New Item" or "Edit"), as a dialog. */
+    itemWindow() {
+        return this.page.getByRole('dialog').filter({has: this.itemForm}).last();
+    }
+
+    /** The item window's heading. */
+    itemWindowHeading() {
+        return this.itemWindow().getByRole('heading').first();
+    }
+
+    /** Wait for the item window's question editor to be ready for typing. */
+    async awaitItemWindowReady() {
         await expect(this.itemQuestionBody).toBeVisible({timeout: 30_000});
         // Type only once the editor is initialized: text typed before that
         // is wiped when the initialization loads the (empty) box.
@@ -481,7 +524,17 @@ class ReviewFormsList extends BasePage {
             const mce = window.tinyMCE || window.tinymce;
             return !!(textarea && mce?.get(textarea.id)?.initialized);
         }, undefined, {timeout: 30_000});
-        await typeRichText(this.page, this.itemQuestionBody, question);
+    }
+
+    /**
+     * Fill the open item window without saving: the question (when given),
+     * the two boxes, the type and any response options.
+     */
+    async fillItem({question = null, required = false, included = true, type, options = []}) {
+        await this.awaitItemWindowReady();
+        if (question !== null) {
+            await typeRichText(this.page, this.itemQuestionBody, question);
+        }
         if (required) {
             await this.itemRequiredBox.check();
         }
@@ -494,6 +547,31 @@ class ReviewFormsList extends BasePage {
         for (const option of options) {
             await this.addResponseOption(option);
         }
+    }
+
+    /** Press the item window's "Save" without waiting for an outcome (a refused save keeps the window). */
+    async pressItemSave() {
+        await this.awaitItemWindowReady();
+        await this.itemSaveButton.click();
+    }
+
+    /** The item window's "This field is required." reasons under its boxes (the type's, when refused unchosen). */
+    itemFieldErrors() {
+        return this.itemForm.getByText(REQUIRED_ERROR);
+    }
+
+    /** The page notice refusing an empty "Item" once a type is chosen. */
+    itemQuestionNotice() {
+        return this.page.getByText(ITEM_QUESTION_REQUIRED).first();
+    }
+
+    /**
+     * Fill and save the open item window: the question, the two boxes, the
+     * type and any response options; waits for the window to close and the
+     * item's row to list.
+     */
+    async saveItem({question, required = false, included = true, type, options = []}) {
+        await this.fillItem({question, required, included, type, options});
         const saved = this.page.waitForResponse((r) => r.url().includes('/update-review-form-element') && r.request().method() === 'POST');
         await this.itemSaveButton.click();
         const response = await saved;
@@ -505,6 +583,17 @@ class ReviewFormsList extends BasePage {
         await expect(this.itemForm).toBeHidden({timeout: 30_000});
         await waitForJQueryIdle(this.page);
         await expect(this.itemRow(question)).toBeVisible({timeout: 30_000});
+    }
+
+    /**
+     * A "Form Items" row's "Delete": press it, read the question and confirm
+     * with "OK"; the row is gone once the grid redraws.
+     */
+    async deleteItem(row) {
+        const controls = await this.rowControls(row);
+        await this.control(controls, 'Delete').click();
+        await this.answerConfirm(ITEM_DELETE_CONFIRM, 'OK');
+        await expect(row).toHaveCount(0, {timeout: 30_000});
     }
 
     /** The preview's answer control for a question: the radio/checkbox by label, or the box. */
@@ -528,6 +617,36 @@ class ReviewerRecommendationsTable extends BasePage {
         this.typeSelect = this.window.locator('select[name="type"]');
         this.statusSelect = this.window.locator('select[name="status"]');
         this.saveButton = this.window.getByRole('button', {name: 'Save', exact: true});
+        // The refused save's foot: "Please correct 2 errors." and "Jump to next error".
+        this.errorSummary = this.window.locator('.pkpFormErrors');
+        this.jumpToErrorButton = this.window.getByRole('button', {name: 'Jump to next error'});
+    }
+
+    /** The red reason under one of the window's boxes (`title` or `type`; empty while none). */
+    fieldError(field) {
+        const control = field === 'type' ? this.typeSelect : this.titleInput;
+        return control
+            .locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " pkpFormField__control ")][1]')
+            .locator('.pkpFieldError');
+    }
+
+    /** "Add Recommendation": open the window and wait for its boxes. */
+    async openAdd() {
+        await this.addButton.click();
+        await expect(this.titleInput).toBeVisible({timeout: 30_000});
+    }
+
+    /** Fill the open window and save; it closes and the row appears. */
+    async saveOpenWindow({title, type, status = null}) {
+        await this.titleInput.fill(title);
+        await this.typeSelect.selectOption({label: type});
+        if (status) {
+            await this.statusSelect.selectOption({label: status});
+        }
+        await expect(this.saveButton).toBeEnabled({timeout: 30_000});
+        await this.saveButton.click();
+        await expect(this.titleInput).toBeHidden({timeout: 30_000});
+        await expect(this.row(title)).toBeVisible({timeout: 30_000});
     }
 
     rows() {
@@ -579,16 +698,8 @@ class ReviewerRecommendationsTable extends BasePage {
 
     /** "Add Recommendation": fill the window and save; the row appears. */
     async add({title, type, status = null}) {
-        await this.addButton.click();
-        await expect(this.titleInput).toBeVisible({timeout: 30_000});
-        await this.titleInput.fill(title);
-        await this.typeSelect.selectOption({label: type});
-        if (status) {
-            await this.statusSelect.selectOption({label: status});
-        }
-        await this.saveButton.click();
-        await expect(this.titleInput).toBeHidden({timeout: 30_000});
-        await expect(this.row(title)).toBeVisible({timeout: 30_000});
+        await this.openAdd();
+        await this.saveOpenWindow({title, type, status});
     }
 }
 exports.ReviewerRecommendationsTable = ReviewerRecommendationsTable;

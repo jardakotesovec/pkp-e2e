@@ -4,28 +4,19 @@
  *
  * U29 — Review setup & review forms
  * (docs/specs/U29-review-setup-and-review-forms.md): the OPS ABSENCE test,
- * spec scenario 11. OPS installs no review stage (spec footnote b, install
- * facts), so its Settings › Workflow screen has no "Review" tab and nothing
- * in the spec has a screen on a preprint server. Per RUNBOOK multi-app
+ * spec scenario 11 (S11). OPS installs no review stage (spec footnote b,
+ * install facts), so its Settings › Workflow screen has no "Review" tab and
+ * nothing in the spec has a screen on a preprint server. Per RUNBOOK multi-app
  * rule 3 the whole feature costs OPS this ONE absence test, with a positive
  * control per assertion (PRINCIPLES M4): the same Workflow Settings screen,
  * reached the same way (the sidebar's Settings group, then a typed
  * address), renders its four remaining tabs.
  *
- * Deliberately NOT covered here (and why):
- * - The entire feature — the "Setup", "Reviewer Guidance", "Review Forms"
- *   and "Reviewer Recommendations" side tabs, their forms, windows and
- *   effects on the Reviewers panel and the reviewer's wizard (spec
- *   scenarios 1–10, Rules 1–23): none of these screens exist on OPS. The
- *   OJS and OMP suites own them.
- * - Scenario 11's cross-app half ("Review" sits between "Submission" and the
- *   library tab on the seeded journal and press): an OPS suite drives OPS
- *   only; the OJS and OMP suites assert the tab on their own apps.
- * - The Actors table's denied-page rows (a Moderator or Author typing the
- *   Workflow Settings address): a shared access claim, not an absence; the
- *   OJS and OMP suites cover it on the apps that have the screen.
- * - The spec's Findings register entries (all OJS/OMP surfaces): no OPS
- *   counterpart; nothing to assert or park here.
+ * Deliberately NOT covered (register IDs from the spec's Findings register —
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): none
+ * on OPS; every register entry names an OJS or OMP surface. The spec's
+ * Coverage section records everything else left out, and scenarios 1–10,
+ * 12 and 13 (badged {OJS OMP}) belong to the OJS and OMP suites.
  *
  * Seeding: a scratch preprint server with a throwaway Preprint Server
  * Manager via the scenario endpoint. The seeded `publicknowledge` server
@@ -66,7 +57,7 @@ async function expectNoReviewTab(page) {
 }
 
 test.describe('review setup & review forms (U29) — OPS absence', () => {
-    test('scenario 11 {OPS}: no review settings on a preprint server', async ({asUser, pkpApi}) => {
+    test('S11 {OPS}: no review settings on a preprint server', async ({asUser, pkpApi}) => {
         const tag = makeTag('u29s11');
         const manager = `m${tag}`;
 

@@ -424,32 +424,23 @@ The tabs of this spec are themselves the settings other review features
 read; the list below is what changes *these* screens.
 
 - **The app's review stages.** OPS has none, so the "Review" tab is absent
-  (the absence paragraph; scenario 11). A press has two, which is why
-  "Reviewer Guidance" carries two guideline boxes [OMP2](#omp2); scenario 5
-  runs on both apps and reads the press's second box.
+  (the absence paragraph). A press has two, which is why "Reviewer
+  Guidance" carries two guideline boxes [OMP2](#omp2).
 - **Reviewer recommendations are a journal feature.** The "Reviewer
-  Recommendations" tab exists on a journal only [OMP1](#omp1); scenarios 9
-  and 10 are OJS scenarios, and OMP's suite carries one absence check.
+  Recommendations" tab exists on a journal only [OMP1](#omp1).
 - **Form languages** (Settings › Website › Setup › Languages, the "Forms"
   column; *Languages & locales*): a second form language adds a language
   switch at the top of the "Reviewer Guidance" form and a twin under each
-  "Review Forms" box (Rule 16). No scenario of its own: the seeded and
-  scratch journals have one form language, and multilingual box mechanics
-  belong to the languages spec.
+  "Review Forms" box (Rule 16).
 - **A role's settings access** (Settings › Users & Roles › Roles; *Roles
   configuration*): a manager-level role whose settings access is switched
-  off loses the "Settings" group and this screen with it (Actors). No
-  scenario: the switch is the roles spec's; Actors' access rows are probed
-  with the seeded roles.
+  off loses the "Settings" group and this screen with it (Actors).
 - **A section's default "Review Form"** (Settings › Journal › Sections, on a
   journal; *Sections*): set, Add Reviewer preselects that form for
   submissions in the section instead of "None / Free Form Review" (Rule
-  12). No scenario: the field is the sections spec's and a test cannot seed
-  it; the preselect is read once by hand.
+  12).
 - **The test installs' clock.** The daily reminder task and the mail queue
-  are off on the test installs, so Rule 9 is described from the code and
-  the reminder emails have no scenario; the sliders' saving does (scenario
-  1).
+  are off on the test installs, so Rule 9 is described from the code.
 
 ## Cross-feature interactions
 
@@ -482,117 +473,429 @@ read; the list below is what changes *these* screens.
 
 ## Canonical scenarios
 
-Scenarios 1 to 8 each start on their own scratch journal at install
-defaults, with throwaway accounts (Journal Manager, Reviewer, Author and a
-seeded submission in review); scenarios 9 and 10 are journal-only; scenario
-11 runs on the seeded preprint server with a ready account. Access checks
-use the seeded journal's ready accounts. <sup>s0</sup>
+Scenarios 1 to 10 and 13 each start on their own scratch journal at the
+install defaults (scenario 13's with the two settings its given names),
+with throwaway accounts (Journal Manager, Reviewer, Author) and a seeded
+submission in review; scenario 12 runs on the seeded journal with ready
+accounts and scenario 11 on the seeded preprint server with one. The
+accounts, their passwords, the mail catcher's address and the tooling
+recipe are in the footnote. <sup>s0</sup>
 
-1. **Save the review setup**: Journal Manager: open Settings › Workflow ›
-   "Review" › "Setup". Choose "Open" under "Default Review Mode", type 2 in
-   "Default Response Deadline" and 1 in "Minimum Confirmed Reviews
-   Required", drag "Review Request Response - Before Due Date" to 3 (the
-   box beside it reads "3 days before due date"), press "Save": "Saved"
-   appears beside the button. Reload the page and open "Review" › "Setup"
-   again: every value shows as saved. Open the submission's review stage and
-   press "Add Reviewer": "Review Type" has "Open" preselected and "Response
-   Due Date" is two weeks from today. <sup>s1</sup>
+1. **Save the review setup**
 
-2. **A refused deadline saves nothing**: Journal Manager: on "Setup", type
-   `abc` in "Default Completion Deadline" and change "Default Review Mode"
-   to "Anonymous Reviewer/Disclosed Author", press "Save". "This is not a
-   valid integer." appears under the deadline, "Please correct one error."
-   beside "Save" at the foot of the form and the page notice "The form was
-   not saved because 1 error(s) were encountered. Please correct these errors and try
-   again."; "Save" is greyed out. Reload and open "Setup" again: the
-   deadline reads 4 and the review mode reads "Anonymous
-   Reviewer/Anonymous Author". Repeat with `-1`: the refusal under the box
-   reads "This must be at least 0.". <sup>s2</sup>
+   Given: Journal Manager, on a scratch journal at the install defaults,
+   with a submission in review whose one request to the Reviewer was made
+   before any change.
 
-3. **Unsaved edits survive a tab switch, not a reload**: Journal Manager:
-   on "Setup", change "Default Response Deadline" to 6, press the "Reviewer
-   Guidance" side tab without saving and come back to "Setup": no warning
-   appeared and the box still reads 6. Reload the page and open "Setup"
-   again: no prompt appeared and the box reads 4. <sup>s3</sup>
+   - **"Setup"**: open Settings › Workflow › "Review" › "Setup"; choose
+     "Open" under "Default Review Mode", tick "Make reviewer comments
+     publicly visible with published content" under "Publicly Show Reviewer
+     Comments", type 2 in "Default Response Deadline" and 1 in "Minimum
+     Confirmed Reviews Required", drag "Review Request Response - Before
+     Due Date" to 3 (the box beside it reads "3 days before due date") and
+     press "Save": "Saved" appears beside the button (Rule 2; Fields).
+   - **After a reload**: reload the page and open "Review" › "Setup" again:
+     every value shows as saved (Rule 2).
+   - **Add Reviewer**: open the submission's review stage and press "Add
+     Reviewer": "Review Type" has "Open" preselected, "Publicly Show
+     Reviewer Comments" arrives ticked and "Response Due Date" is two weeks
+     from today (Rules 3, 4, 7).
+   - **The round status**: the round status box on the review stage now
+     opens with the line "Minimum number of confirmed reviews required: 1."
+     (Rule 8).
+   - **The earlier request**: in the Reviewers panel, open the Reviewer's
+     row's "Edit" window: the request keeps what it was made with: "Anonymous Reviewer/Anonymous
+     Author" as its review type, "Publicly Show Reviewer Comments" unticked
+     and "Response Due Date" four weeks from today, the day it was made
+     (Rules 3, 4, 7).
+   - **The Reviewer's mailbox**: no email has arrived from the save (Rule 2;
+     Side effects).
+   - **Control**: before the save, "Setup" read the install defaults:
+     "Anonymous Reviewer/Anonymous Author", the box under "Publicly Show
+     Reviewer Comments" unticked, 4 in both deadlines, 0 in "Minimum
+     Confirmed Reviews Required" and "No reminder set" beside all four
+     sliders (Fields). <sup>s1</sup>
 
-4. **Guidance reaches the reviewer**: Journal Manager: on "Reviewer
-   Guidance", type "Judge the method first." into "Review Guidelines" and
-   "Declare any funding link." into "Competing Interests", press "Save".
-   Reviewer (with an open request on the submission): open the request;
-   step 1 shows a "Competing Interests" block with the choices "I do not
-   have any competing interests" and "I may have competing interests
-   (Specify below)", and its link "Competing Interests" opens a window
-   reading "Declare any funding link."; press "OK", accept, and step 2
-   shows "Reviewer Guidelines" then "Judge the method first.". <sup>s4</sup>
+2. **A refused deadline saves nothing**
 
-5. **The guidelines box per app**: Journal Manager: on "Reviewer Guidance",
-   the guideline box reads "Review Guidelines" on a journal; on a press two
-   boxes read "Internal Review Guidelines" and "External Review Guidelines",
-   in that order [OMP2](#omp2). Tick "Present a link to how to ensure all
-   files are anonymized during upload", press "Save", reload and open
-   "Reviewer Guidance" again: the box stays ticked. Press the words "how to
-   ensure all files are anonymized": a window "How to ensure all files are
-   anonymized" opens; "Close" closes it. <sup>s5</sup>
+   Given: Journal Manager, on "Setup" of a scratch journal at the install
+   defaults.
 
-6. **Build a review form and offer it**: Journal Manager: on "Review
-   Forms", press "Create Review Form", type "Method check" as "Title" and
-   press "Save": the window closes, the page shows "Your changes have been
-   saved." and the list has a row "Method check" with "In Review" 0,
-   "Completed" 0 and "Active" unticked. Open the row's "Edit" › "Form
-   Items" › "Create New Item": type "Is the method sound?" as "Item", tick
-   "Reviewers required to complete item", choose "Radio buttons (you can
-   only choose one)", add "Yes" and "No" under "Response Options", "Save".
-   Add a second item "Other remarks" of type "Extended text box". "Preview
-   Form" shows the title, "Is the method sound?" followed by "*" with two
-   radio buttons and "Other remarks" with a text box. Close the window.
-   Open the submission's "Add Reviewer": it has no "Review Form" list. Tick
-   "Active" on the row and press "OK" in the "Confirm" window; "Add
-   Reviewer" now has a "Review Form" list with "None / Free Form Review"
-   and "Method check". <sup>s6</sup>
+   - **The refusal**: type `abc` in "Default Completion Deadline", change
+     "Default Review Mode" to "Anonymous Reviewer/Disclosed Author" and
+     press "Save": "This is not a valid integer." appears under the
+     deadline, "Please correct one error." beside "Save" at the foot of the
+     form and the page notice "The form was not saved because 1 error(s)
+     were encountered. Please correct these errors and try again."; "Save"
+     is greyed out (Rule 2; Fields).
+   - **After a reload**: reload and open "Setup" again: the deadline reads 4
+     and the review mode reads "Anonymous Reviewer/Anonymous Author"
+     (Rule 2).
+   - **A negative number**: repeat with `-1`: the refusal under the box
+     reads "This must be at least 0." (Fields).
+   - **Control**: the same box takes a whole number: scenario 1's 2 saves
+     with "Saved" beside the button and no page notice (Rule 2; Fields).
+     <sup>s2</sup>
 
-7. **A form in use is frozen**: Journal Manager, on a journal whose active
-   form "Method check" is carried by one open request: the row reads "In
-   Review" 1 and offers "Copy" and "Preview" but no "Edit" and no "Delete".
-   "Preview" opens a window headed "Preview" on "Preview Form" with
-   "Review Form" and "Form Items" greyed out. Press "Copy" and "OK": "Your
-   changes have been saved." shows, a second, unticked "Method check" row
-   appears at the bottom with "Edit" and "Delete" offered, and its "Edit"
-   › "Form Items" lists the same items. <sup>s7</sup>
+3. **Unsaved edits survive a tab switch, not a reload**
 
-8. **Deactivate and delete an unused form**: Journal Manager: on an active
-   form nobody carries, untick "Active", read "Are you sure you wish to
-   deactivate this review form? It will no longer be available for new
-   review assignments." and press "OK": "Your changes have been saved."
-   shows, the tick is gone and, with no other active form, the submission's
-   "Add Reviewer" has no "Review Form" list. Open the row's "Delete", press
-   "OK" on "Are you sure you wish to delete this review form?": the row is
-   gone. <sup>s8</sup>
+   Given: Journal Manager, on "Setup" of a scratch journal at the install
+   defaults.
 
-9. **Add and retire a recommendation** {OJS}: Journal Manager: on
-   "Reviewer Recommendations" the table lists "Accept Submission",
-   "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere",
-   "Decline Submission" and "See Comments", all ticked. Press "Add
-   Recommendation", type "Accept with minor changes", choose "Approved",
-   leave "Active Upon Saving", press "Save": the window closes and the row
-   appears last, ticked. Untick "See Comments" and press "Yes" on "Are you
-   sure you want to deactivate the recommendation See Comments": the row
-   is unticked (whether it stays put or drops to the bottom is not fixed
-   ⚠ [A7](#a7)). Reviewer (accepted request on the submission): step 3's
-   "Recommendation" list ends with "Accept with minor changes" and has no
-   "See Comments". <sup>s9</sup>
+   - **The tab switch**: change "Default Response Deadline" to 6, press the
+     "Reviewer Guidance" side tab without saving and come back to "Setup":
+     no warning appeared and the box still reads 6 (Rule 2).
+   - **The reload**: reload the page and open "Setup" again: no prompt
+     appeared and the box reads 4 (Rule 2).
+   - **Control**: a saved value does survive the reload: scenario 1's values
+     show as saved after its reload (Rule 2). <sup>s3</sup>
 
-10. **A recommendation in use loses its menu** {OJS}: Journal Manager, after
-    a reviewer submitted a review recommending "Accept with minor changes":
-    that row has no "More Actions" menu, while an unused custom row still
-    offers "Edit" and "Delete"; "Delete" › "Yes" on the unused row removes
-    it. <sup>s10</sup>
+4. **Guidance reaches the reviewer**
 
-11. **No review settings on a preprint server** {OPS}: Preprint Server
-    Manager: Settings › Workflow shows the tabs "Submission", "Preprint
-    Server Library", "Emails" and "Tasks and Discussions" and no "Review"
-    tab; the same screen on the seeded journal and press shows "Review"
-    between "Submission" and the library tab (the positive control).
-    <sup>s11</sup>
+   Given: Journal Manager, on "Reviewer Guidance" of a scratch journal at
+   the install defaults; a Reviewer with an open request on the journal's
+   submission.
+
+   - **The texts**: type "Judge the method first." into "Review Guidelines"
+     and "Declare any funding link." into "Competing Interests", press
+     "Save": "Saved" appears beside the button (Rule 2; Fields).
+   - **The Reviewer's step 1**: Reviewer: open the request: step 1 shows a
+     "Competing Interests" block with the choices "I do not have any
+     competing interests" and "I may have competing interests (Specify
+     below)", and its link "Competing Interests" opens a window reading
+     "Declare any funding link."; press "OK" (Rule 10).
+   - **Step 2**: accept the request: step 2 shows "Reviewer Guidelines"
+     then "Judge the method first." (Rule 10).
+   - **Control**: step 1 does not print "Declare any funding link." itself;
+     only the link's window does (Rule 10). <sup>s4</sup>
+
+5. **The guidelines box per app**
+
+   Given: Journal Manager, on Settings › Workflow › "Review" of a scratch
+   journal at the install defaults.
+
+   - **The side tabs**: "Review" lists "Setup", "Reviewer Guidance", "Review
+     Forms" and "Reviewer Recommendations"; on a press the first three
+     only, a press having no "Reviewer Recommendations" tab [OMP1](#omp1)
+     (Rule 1).
+   - **The guideline boxes**: on "Reviewer Guidance" the guideline box reads
+     "Review Guidelines" on a journal; on a press two boxes read "Internal
+     Review Guidelines" and "External Review Guidelines", in that order
+     [OMP2](#omp2) (Fields; Rule 10).
+   - **The instructions window**: press the words "how to ensure all files
+     are anonymized" inside the sentence "Present a link to how to ensure
+     all files are anonymized during upload": a window "How to ensure all
+     files are anonymized" opens; "Close" closes it (Fields).
+   - **The anonymizing box**: tick the box, press "Save", reload and open
+     "Reviewer Guidance" again: the box stays ticked (Fields; Rule 2).
+   - **Control**: pressing the words left the box unticked; only the tick
+     sets it (Fields). <sup>s5</sup>
+
+6. **Build a review form and offer it**
+
+   Given: Journal Manager, on "Review Forms" of a scratch journal at the
+   install defaults, which reads "No Items", with a submission in review.
+
+   - **A refused form**: press "Create Review Form" and "Save" with "Title"
+     empty: "This field is required." appears under the box and the window
+     stays open (Fields).
+   - **The form**: type "Method check" as "Title" and press "Save": the
+     window closes, the page shows "Your changes have been saved." and the
+     list has a row "Method check" with "In Review" 0, "Completed" 0 and
+     "Active" unticked (Rules 12, 13).
+   - **A refused item**: open the row's "Edit" › "Form Items", which reads
+     "No Items", and press "Create New Item"; press "Save" with nothing
+     filled: "This field is required." appears under "Item type"; choose
+     "Radio buttons (you can only choose one)" and press "Save" with "Item"
+     still empty: the notice "A question is required for the form item.
+     (English)" shows and nothing under the box (Rule 14; Fields).
+   - **The items**: type "Is the method sound?" as "Item", tick "Reviewers
+     required to complete item", keep "Radio buttons (you can only choose
+     one)", add "Yes" and "No" under "Response Options", each with "Add
+     Item", typed into the new row and fixed with Enter, and press "Save":
+     the window closes with "Your changes have been saved." and the row is
+     listed under "Item". Add a second item "Other remarks" of type
+     "Extended text box": it lands under the first (Rule 14; Fields).
+   - **Edit and delete an item**: add a third item "Scratch question" of
+     type "Single line text box"; open its row's "Edit" (the item window,
+     headed "Edit"), change "Item" to "Scratch question, reworded"
+     and press "Save": "Your changes have been saved." shows and the row
+     reads the new text; press the row's "Delete", read "Confirm delete of
+     a published form item..." and confirm: the row is gone and two items
+     remain (Rule 14).
+   - **"Preview Form"**: shows the title, "Is the method sound?" followed by
+     "*" with two radio buttons and "Other remarks" with a text box; close
+     the window (Rule 13).
+   - **Activate**: tick "Active" on the row, read "Are you sure you wish to
+     activate this review form? Once it's assigned to a review you will no
+     longer be able to deactivate it." and press "OK" in the "Confirm"
+     window: "Your changes have been saved." shows and the submission's
+     "Add Reviewer" now has a "Review Form" list with "None / Free Form
+     Review" and "Method check" (Rules 12, 12a).
+   - **Control**: before the tick, the submission's "Add Reviewer" had no
+     "Review Form" list, the form being inactive (Rule 12).
+     <sup>s6</sup>
+
+7. **A form in use is frozen**
+
+   Given: Journal Manager, on "Review Forms" of a scratch journal whose
+   active form "Method check", of two items, is carried by the Reviewer's
+   open request on the submission, beside a second Reviewer's request
+   whose free-form review is already submitted.
+
+   - **The row**: "Method check" reads "In Review" 1 and offers "Copy" and
+     "Preview" but no "Edit" and no "Delete" (Rule 12).
+   - **"Preview"**: opens a window headed "Preview" on "Preview Form" with
+     "Review Form" and "Form Items" greyed out; pressing them does nothing;
+     close it (Rule 13).
+   - **"Copy"**: press "Copy" and "OK" on "Are you sure you wish to create a
+     copy of this review form?": "Your changes have been saved." shows, a
+     second, unticked "Method check" row appears at the bottom with "Edit"
+     and "Delete" offered, and its "Edit" › "Form Items" lists the same
+     items (Rule 12b).
+   - **The open request's "Edit" window**: on the submission's review
+     stage, open the Reviewer's row's "Edit": its "Review Form" list has
+     "Method check" selected, not the first entry "None / Free Form
+     Review"; close it without saving (Rule 12).
+   - **The completed request's "Edit" window**: open the other row's
+     "Edit": the window has no "Review Form" list, though "Method check" is
+     active; close it (Rule 12).
+   - **Deactivate while carried**: back on "Review Forms", untick "Active"
+     on the first "Method check" row, read "Are you sure you wish to
+     deactivate this review form? It will no longer be available for new
+     review assignments." and press "OK": "Your changes have been saved."
+     shows and the tick is gone, though in use [A2](#a2) (Rule 12a).
+   - **The Reviewer's step 3**: Reviewer: open the request and go on to
+     step 3: it still shows "Method check" with its items instead of the
+     two free-text boxes (Rules 12a, 15).
+   - **Control**: the submission's "Add Reviewer" now has no "Review Form"
+     list, the copy being inactive: the deactivated form left the editors'
+     lists at once (Rule 12a).
+     <sup>s7</sup>
+
+8. **Deactivate and delete an unused form**
+
+   Given: Journal Manager, on "Review Forms" of a scratch journal with one
+   active form, "Style check", that no request carries, and a submission
+   in review.
+
+   - **Deactivate**: untick "Active", read "Are you sure you wish to
+     deactivate this review form? It will no longer be available for new
+     review assignments." and press "OK": "Your changes have been saved."
+     shows and the tick is gone (Rule 12a).
+   - **Add Reviewer**: with no other active form, the submission's "Add
+     Reviewer" has no "Review Form" list (Rules 12, 12a).
+   - **Delete**: open the row's "Delete", press "OK" on "Are you sure you
+     wish to delete this review form?": the row is gone (Rule 12c).
+   - **Control**: before the untick, the submission's "Add Reviewer" offered
+     the "Review Form" list with "Style check" under "None / Free Form
+     Review" (Rule 12). <sup>s8</sup>
+
+9. **Add and retire a recommendation** {OJS}
+
+   Given: Journal Manager, on "Reviewer Recommendations" of a scratch
+   journal at the install defaults; a Reviewer with an accepted request on
+   the journal's submission.
+
+   - **The starting entries**: the table lists "Accept Submission",
+     "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere",
+     "Decline Submission" and "See Comments", all ticked (Rule 17).
+   - **A refused entry**: press "Add Recommendation" and "Save" with the
+     boxes empty: "This field is required." appears under "Review
+     Recommendations" and under "Recommendation type", "Please correct 2
+     errors." with "Jump to next error" at the foot; the window stays open
+     and "Save" is greyed out until the boxes are filled (Fields).
+   - **The new entry**: type "Accept with minor changes" in "Review
+     Recommendations", choose "Approved" under "Recommendation type", leave
+     "Active Upon Saving" and press "Save": the window closes and the row
+     appears last, ticked (Rule 17).
+   - **Deactivate an entry**: untick "See Comments" and press "Yes" on "Are
+     you sure you want to deactivate the recommendation See Comments": the
+     row is unticked (whether it stays put or drops to the bottom is not
+     fixed [A7](#a7)) (Rule 17).
+   - **The Reviewer's list**: Reviewer: open the request and go on to step
+     3: its "Recommendation" list ends with "Accept with minor changes" and
+     has no "See Comments" (Rule 17).
+   - **Control**: the five starting entries left ticked are all on the
+     Reviewer's list (Rule 17). <sup>s9</sup>
+
+10. **A recommendation in use loses its menu** {OJS}
+
+    Given: Journal Manager, on "Reviewer Recommendations" of a scratch
+    journal with two custom entries, "Accept with minor changes", chosen by
+    the Reviewer on a submitted review, and "Needs a native speaker",
+    chosen by nobody.
+
+    - **The entry in use**: the row "Accept with minor changes" has no "More
+      Actions" menu (Rule 18).
+    - **Deactivate the entry in use**: untick "Accept with minor changes"
+      and press "Yes" on "Are you sure you want to deactivate the
+      recommendation Accept with minor changes": on the submission's review
+      stage the Reviewers panel still prints "Accept with minor changes"
+      under the Reviewer's status "Review Submitted", and its "Read Review"
+      still lists "Recommendation: Accept with minor changes" at the top
+      while its "Reviewer Recommendation" section prints "-" [A6](#a6)
+      (Rules 17, 18; Side effects).
+    - **The unused entry**: back on the table, the row "Needs a native
+      speaker" offers "More Actions" with "Edit" and "Delete"; press
+      "Delete" and "Yes" on "Are you sure you want to delete the
+      recommendation Needs a native speaker": the row is gone (Rule 18).
+    - **Control**: tick "Accept with minor changes" again and press "Yes" on
+      "Are you sure you want to activate the recommendation Accept with
+      minor changes": the "Reviewer Recommendation" section of "Read
+      Review" prints the title again (Rule 18). <sup>s10</sup>
+
+11. **No review settings on a preprint server** {OPS}
+
+    Given: Preprint Server Manager, on the seeded preprint server.
+
+    - **Settings › Workflow**: shows the tabs "Submission", "Preprint Server
+      Library", "Emails" and "Tasks and Discussions" and no "Review" tab
+      (Purpose).
+    - **Control**: the same screen on the seeded journal and press shows
+      "Review" between "Submission" and the library tab (Rule 1).
+      <sup>s11</sup>
+
+12. **The other roles are refused the screen**
+
+    Given: on the seeded journal, a Section Editor, an Assistant, a
+    Reviewer and an Author, each signed in in turn.
+
+    - **Section Editor**: the sidebar has no "Settings" group; type the
+      address of Settings › Workflow, the one a Journal Manager's
+      "Settings" › "Workflow" opens: the page reads "The current role does
+      not have access to this operation." (Actors row 1).
+    - **Assistant**: the same: no "Settings" group in the sidebar, and the
+      typed address lands on "The current role does not have access to
+      this operation." (Actors row 1).
+    - **Reviewer**: the same (Actors row 1).
+    - **Author**: the same (Actors row 1).
+    - **Control**: the Journal Manager's sidebar has the collapsed
+      "Settings" group, which opened lists "Workflow", leading to the page
+      with its "Review" tab (Actors row 1; Rule 1). <sup>s12</sup>
+
+13. **A submitted review on a form with an item kept from the author**
+
+    Given: on a scratch journal with "Minimum Confirmed Reviews Required"
+    at 1 and an active form "Method check" of two items, "Is the method
+    sound?" ("Radio buttons (you can only choose one)", "Yes" / "No") with
+    "Included in message to author" ticked and "Other remarks" ("Extended
+    text box") with it unticked, a Reviewer with an accepted request
+    carrying the form on a submission in review, and a Journal Manager.
+
+    - **The form's row before the review**: Journal Manager: on "Review
+      Forms", "Method check" reads "In Review" 1 and "Completed" 0
+      (Rule 12).
+    - **The Reviewer's step 3**: Reviewer: open the request and go on to
+      step 3: it shows "Method check", "Is the method sound?" with its two
+      radio buttons and "Other remarks" with a text box instead of the two
+      free-text boxes; choose "Yes", type "The sample is small." in "Other
+      remarks", on a journal pick "Accept Submission" under
+      "Recommendation", press "Submit Review" and confirm "Are you sure you
+      want to submit this review?" (Rules 15, 17).
+    - **The form's row after the review**: Journal Manager: "Method check"
+      now reads "In Review" 0 and "Completed" 1 (Rule 12).
+    - **The round status**: on the submission's review stage the round
+      status opens with "Minimum number of confirmed reviews required: 1."
+      (Rule 8).
+    - **"Read Review"**: the Reviewer's row reads "Review Submitted"; press
+      "Read Review": the window shows both items with their answers, "Is
+      the method sound?" with "Yes" and "Other remarks" with "The sample is
+      small.": the editor reads the review in full, whatever the item's box
+      (Rule 15).
+    - **"Mark as Complete"**: press it in the window and confirm: the round
+      status keeps its first line and the round's own line under it reads
+      "Minimum required number of reviews have been confirmed. A decision
+      is needed." (Rule 8).
+    - **Control**: with the review submitted but not yet marked complete,
+      the line under "Minimum number of confirmed reviews required: 1." did
+      not read "Minimum required number of reviews have been confirmed. A
+      decision is needed.": a submitted or viewed review does not count as
+      confirmed (Rule 8). <sup>s13</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - ordering the forms and a form's items with "Order", "Done" and "Cancel
+    ordering", and the editors' "Review Form" lists following the order
+    (Rules 12d, 14): scenario 6 builds one form and scenario 7's second row
+    is a copy with the same title, so no scenario holds two forms it can
+    tell apart
+- **Nothing new to test**:
+  - the Editor and the Site Administrator opening the screen (Actors row
+    1): the same "Settings" group and offer scenario 1's Journal Manager
+    uses
+  - the Reader's typed address (Actors row 1): the page scenario 12's four
+    roles land on, with no sidebar to look at first
+  - "Review Due Date" preset from "Default Completion Deadline" (Rule 7):
+    the way scenario 1 reads "Response Due Date"
+  - an emptied "Minimum Confirmed Reviews Required" coming back "0"
+    (Fields)
+  - step 3's "Reviewer Guidelines" block and its "Review Guidelines" window
+    (Rule 10): the text scenario 4 reads on step 2
+  - "Cancel" on the activate or deactivate "Confirm" window leaving the
+    tick as it was (Rule 12a)
+  - saving on the "Edit" window's "Review Form" tab closing it with the
+    notice (Rule 13): the notice scenario 6 reads on the create
+  - the "Single word text box", "Checkboxes (you can choose one or more)"
+    and "Drop-down box" item types (Rule 14): scenario 6's radio buttons
+    keep "Response Options" and its text boxes show a box the same way
+  - "Edit Recommendation" on an unused entry, prefilled, and the six
+    starting entries editing and deleting alike {OJS} (Rule 18): the
+    "Delete" scenario 10 presses on an unused custom entry
+  - "Recommendation type" shown nowhere after the save (Fields)
+- **Register carries it**:
+  - A1 (an "After Due Date" reminder never sent without an earlier
+    reminder; Rule 9d)
+  - A2 (the "Active" tick still toggling on a form in use; Rule 12;
+    scenario 7 marks it)
+  - A3 (a deadline saved as 0 or empty presetting three and four weeks;
+    Rule 7)
+  - A4 (a reload landing on "Submission" › "Disable Submissions" whatever
+    tab was open; Rule 1)
+  - A5 (a text-type save dropping "Response Options" without the warning;
+    Rule 14)
+  - A6 (a deactivated recommendation reading "-" in the "Reviewer
+    Recommendation" section; Rule 18; scenario 10 marks it)
+  - A7 (the "Reviewer Recommendations" table's order not fixed; Rule 17;
+    scenario 9 marks it)
+  - A8 (a declined request counting in neither column; Rule 12)
+  - A9 (the reviewer row's "Edit" window detaching a deactivated form;
+    Rule 12a)
+  - OMP3 (the "Internal Review Guidelines" toolbar without quote and list
+    buttons; Fields)
+- **No seed**:
+  - the automatic reminder email, the "Reminder" date and the activity-log
+    row (Rule 9; Side effects): the test installs' daily clock is off
+    (Settings)
+  - a second form language's switch and twin boxes (Rule 16; Settings)
+- **Owned by another feature**:
+  - "Restrict File Access" on: the files only after accepting (Rule 5;
+    *Reviewer's review*, scenario 9)
+  - "One-click Reviewer Access" on: the sign-in-free link in the request
+    and reminder emails (Rule 5; *Reviewer's review*, scenario 10)
+  - "Reviewer Suggestion at Submission" on: the wizard's "Reviewer
+    Suggestions" step and the editors' view of the suggestions (Rule 6;
+    *Submission wizard*, scenario 13; *Reviewer suggestions*)
+  - the guidelines left empty, "This publisher has not set any reviewer
+    guidelines." on step 2, and "Competing Interests" left empty, no block
+    on step 1 (Rule 10; *Reviewer's review*, scenarios 2 and 13)
+  - a press's Internal Reviewer reading the internal text and its External
+    Reviewer the external [OMP2](#omp2) (Rule 10; *Reviewer's review*)
+  - the upload window's "How to ensure all files are anonymized" link with
+    the box on (Rule 11; *Submission files*)
+  - a journal section's "Review Form" list and its default form preselected
+    in Add Reviewer (Rule 12; Settings; *Sections*)
+  - a required item stopping "Submit Review" on the wizard's step 3
+    (Rule 15; *Reviewer's review*, scenario 8)
+  - the reviews an editor copies into a decision email, the unticked item
+    left out (Rule 15; *Editorial decision recording*)
+  - the author's own reading of an open review, the unticked item left out
+    (Rule 15; *Review stage & rounds*, scenario 12)
+  - a manager-level role whose settings access is switched off losing the
+    screen (Settings; *Roles configuration*)
 
 ## Findings register
 
@@ -1199,13 +1502,18 @@ created there), then `POST scenarios/submission` with
 and `reviewForms[]` passthrough keys (scenarios.md "Configuring a scratch
 context") seed the configured ends where a scenario starts from them
 (scenario 7 seeds an active form and a reviewer carrying it through
-`reviewForm:`). Access checks: the seeded journal `publicknowledge` with
+`reviewForm:`, beside a second `externalReviewer` with `status:
+'completed'` and no `reviewForm`; scenario 1's request is seeded before
+the save, at the defaults; scenario 13's context keys are in its own
+footnote). Access checks and scenario 12: the seeded journal `publicknowledge` with
 `manager.maya`, `editor.diana`, `sectioneditor.ana`, `assistant.rita`,
 `reviewer.julia`, `author.alex`, `reader.rosa` (passwords: the username
 twice; `admin` / `admin`). Scenario 11: the seeded OPS server with
 `manager.maya`; the journal and press controls with the same account.
-Mail is read in the mail catcher (Mailpit, `http://127.0.0.1:8025`) though
-no scenario here expects mail.
+Mail is read in the mail catcher (Mailpit, `http://127.0.0.1:8025`),
+scoped by the throwaway reviewer's address; scenario 1's absence read
+needs a positive control the same way (scenarios.md "Mailpit"), and no
+scenario here expects mail.
 
 <a id="fn-s1"></a>
 **s1** — Scenario 1 exercises Rules 2, 3, 7 and the sliders' saving; the
@@ -1258,7 +1566,12 @@ Reviewer list is `ReviewerForm::fetch()` over
 "None / Free Form Review" as the empty choice, rendered only when at least
 one form is active. Live-probed 2026-09-05 on both apps (footnote f): the
 create, item and preview steps on one context, the activation and the Add
-Reviewer list on another seeded with two inactive forms.
+Reviewer list on another seeded with two inactive forms. The options: the
+suites add each one with "Add Item", the text typed into the new
+`newRowId[possibleResponse]` box and Enter, which lists it as a fixed row,
+and press "Save" with no row open (every green run since 2026-09-05 on both
+apps); a row still open at "Save" once raced the save and left the window
+open.
 
 <a id="fn-s7"></a>
 **s7** — Scenario 7: `reviewForms: [{title: 'Method check', elements: […]}]`
@@ -1302,6 +1615,27 @@ through "Delete" › "Yes".
 <a id="fn-s11"></a>
 **s11** — Scenario 11: footnote b, live-probed 2026-09-06 on all three
 apps.
+
+<a id="fn-s12"></a>
+**s12** — Scenario 12: footnote c (`CanAccessSettingsPolicy`), live-probed
+2026-09-06 on the seeded journal and press with `sectioneditor.ana`,
+`assistant.rita`, `reviewer.julia` and `author.alex`, the typed address
+`{journal}/management/settings/workflow`; the control with `manager.maya`.
+
+<a id="fn-s13"></a>
+**s13** — Scenario 13: `POST scenarios/context` with `review:
+{numReviewsPerSubmission: 1}` and `reviewForms: [{title: 'Method check',
+elements: [{question: 'Is the method sound?', type: 'radiobuttons',
+options: ['Yes', 'No']}, {question: 'Other remarks', type: 'textarea',
+included: false}]}]`, then the submission with `reviewRounds:
+[{reviewers: [{username, status: 'accepted', reviewForm: 'Method
+check'}]}]` (scenarios.md "reviewForms[]" and "reviewRounds[]"); the
+review is submitted through the wizard on screen so the answers are the
+scenario's (a `completed` seed carries a form only while no item is
+required, and its answers are the seed's). The counts and the editor's
+window: footnote f (0 / 1 after the submit; the item with `included` off
+present in the editor's window, 2026-09-05); the round status lines before
+and after "Mark as Complete": footnote d (2026-09-06).
 
 <a id="fn-f-a1"></a>
 **f-a1** — `PKP\task\ReviewReminder::executeActions()`: the

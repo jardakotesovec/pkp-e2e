@@ -128,6 +128,39 @@ function roundStatusBox(modal, round) {
         .locator('..');
 }
 
+/**
+ * The "Round {N} Status" box's lines under its heading, in order: the
+ * optional minimum line first, then the round's own sentence
+ * (`WorkflowSubmissionStatus.vue` prints each in its own paragraph).
+ * Waits for the heading first, so the read is settled.
+ */
+async function roundStatusLines(modal, round) {
+    const box = roundStatusBox(modal, round);
+    await expect(box.getByRole('heading', {name: `Round ${round} Status`, exact: true})).toBeVisible({timeout: 15_000});
+    const text = await box.innerText();
+    return text
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter((line) => line && line !== `Round ${round} Status`);
+}
+
+/**
+ * Assert the "Round {N} Status" box opens with `first` (its first line
+ * under the heading; U29 S1 and S13: "Minimum number of confirmed reviews
+ * required: N.") and, when given, carries `second` as the line under it.
+ */
+async function expectRoundStatusOpensWith(modal, round, first, second = null) {
+    const box = roundStatusBox(modal, round);
+    await expect(box.getByText(first, {exact: true})).toBeVisible({timeout: 15_000});
+    await expect(async () => {
+        const lines = await roundStatusLines(modal, round);
+        expect(lines[0]).toBe(first);
+        if (second !== null) {
+            expect(lines[1]).toBe(second);
+        }
+    }).toPass({timeout: 15_000});
+}
+
 /** Assert the past-round / past-stage box: plain "Status" heading + sentence. */
 async function expectPlainStatus(modal, sentence) {
     const primary = primaryRegion(modal);
@@ -781,6 +814,8 @@ module.exports = {
     minimumLine,
     expectRoundStatus,
     roundStatusBox,
+    roundStatusLines,
+    expectRoundStatusOpensWith,
     expectPlainStatus,
     awaitComposerReady,
     walkDecisionWizard,

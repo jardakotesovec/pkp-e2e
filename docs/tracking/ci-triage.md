@@ -319,8 +319,12 @@ trips.
   again, the one red of 216; green alone right after,
   `.reports/U25/rerun-omp-login.log`). Three reds in one day at the
   day's new tips and the perf round-2 harness, always `reader.rosa`, the
-  last persona of the loop. Next step: the cookie-jar read above, for the
-  maintenance session, first thing.
+  last persona of the loop. **Fourth sighting** (the U29 revision
+  session's first OJS final at four workers on a reset database the same
+  evening, `.reports/U29/final-run-ojs-attempt1.log`: `reader.rosa` again,
+  the one red of 220, the 13 serial tests skipped behind it; green alone
+  in 15.5 s, `.reports/U29/rerun-ojs-login.log`). Next step: the
+  cookie-jar read above, for the maintenance session, first thing.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the

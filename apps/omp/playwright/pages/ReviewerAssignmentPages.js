@@ -657,6 +657,44 @@ function reviewFormSelect(scope) {
     return scope.locator('select[name="reviewFormId"]');
 }
 
+/** The selected entry of an Add or Edit window's "Review Form" list. */
+function reviewFormSelected(scope) {
+    return reviewFormSelect(scope).locator('option:checked');
+}
+
+/**
+ * Close a row's "Edit" window without saving: its "Cancel" (a legacy
+ * form's link, patterns.md pitfall 7). Waits for the window's "Review
+ * Type" group to go and the workflow heading to be back.
+ */
+async function cancelEditReview(page, editModal) {
+    await editModal.getByRole('link', {name: 'Cancel', exact: true}).click();
+    await expect(editModal.getByText('Review Type')).toBeHidden({timeout: 20_000});
+    await expect(
+        page.locator('[data-cy="active-modal"]').getByRole('heading', {name: /^Workflow:/}).first()
+    ).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * Close the "Review Details" window with its "Cancel" and wait for the
+ * reviewer row (unmounted while the window is open) to be back with
+ * `rowText`.
+ */
+async function closeReadReview(page, modal, readModal, reviewerName, rowText) {
+    await readModal.getByRole('button', {name: 'Cancel', exact: true}).click();
+    await expect(readModal).toBeHidden({timeout: 20_000});
+    await expect(reviewerRow(modal, reviewerName)).toContainText(rowText, {timeout: 20_000});
+}
+
+/**
+ * The "Review Details" window's text, whitespace-folded, for order reads
+ * (a review-form answer follows its question; U29 S13).
+ */
+async function reviewDetailsText(readModal) {
+    const text = await readModal.innerText();
+    return text.replace(/\s+/g, ' ').trim();
+}
+
 /** The "Choose a predefined message…" template chooser of a legacy window. */
 function templateChooser(scope) {
     return scope.locator('select[name="template"]');
@@ -799,6 +837,10 @@ module.exports = {
     enrollSearchBox,
     enrollAutocomplete,
     reviewFormSelect,
+    reviewFormSelected,
+    cancelEditReview,
+    closeReadReview,
+    reviewDetailsText,
     templateChooser,
     skipEmailBox,
     reassignButton,

@@ -1372,4 +1372,83 @@ exports.cancelModifyReview = async function cancelModifyReview(page, editModal) 
     await expect(exports.reviewDetailsModal(page)).toBeVisible({timeout: 30_000});
 };
 
+// ---------------------------------------------------------------------------
+// The review setup's effects on the stage: the request windows' presets,
+// the round status's lines, the Reviewers row's status cell and the Review
+// Details window's recommendation and form-item reads (U29 revision,
+// 2026-09-15)
+// ---------------------------------------------------------------------------
+
+/**
+ * The hidden datepicker altField carrying a due date's submitted Y-m-d
+ * value, in the Add Reviewer request form or the reviewer row's "Edit"
+ * window (the visible input's id is runtime-suffixed).
+ *
+ * @param {import('@playwright/test').Locator} scope the window
+ * @param {string} fieldPrefix 'responseDueDate' | 'reviewDueDate'
+ */
+exports.dueDateField = function dueDateField(scope, fieldPrefix) {
+    return scope.locator(`input[id^="${fieldPrefix}"][id$="-altField"]`);
+};
+
+/**
+ * The "Review Form" list of the Add Reviewer request form or the "Edit"
+ * window: rendered only while the journal has an active form, and never on
+ * a completed review's window (the review-setup spec, Rule 12).
+ *
+ * @param {import('@playwright/test').Locator} scope the window
+ */
+exports.reviewFormSelect = function reviewFormSelect(scope) {
+    return scope.locator('select[name="reviewFormId"]');
+};
+
+/**
+ * A Reviewers row's status cell: the status title ("Review Submitted")
+ * and, on a journal, the chosen recommendation printed under it.
+ *
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.statusCell = function statusCell(row) {
+    return row.locator('td').first();
+};
+
+/**
+ * The Review Details window's "Recommendation: {title}" line near its top
+ * (an `h2` "Recommendation:" beside the title), rendered once the window
+ * has settled.
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ */
+exports.recommendationLine = function recommendationLine(modal) {
+    return modal.getByRole('heading', {name: 'Recommendation:', exact: true}).locator('xpath=..');
+};
+
+/**
+ * The window's "Reviewer Recommendation" section (a journal only): the
+ * group headed so, whose "Recommendation" value paragraph prints the
+ * chosen entry's title, or "-" while that entry is deactivated.
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ */
+exports.recommendationSection = function recommendationSection(modal) {
+    return modal.getByRole('group', {name: 'Reviewer Recommendation'});
+};
+
+/** The section's value paragraph (the title, or "-"). */
+exports.recommendationValue = function recommendationValue(modal) {
+    return exports.recommendationSection(modal).locator('p');
+};
+
+/**
+ * A review form item's block in the window: the `h2` question with the
+ * reviewer's answer beneath it (the editor reads every item, whatever its
+ * "Included in message to author" box).
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ * @param {string} question the item's text
+ */
+exports.reviewItemBlock = function reviewItemBlock(modal, question) {
+    return modal.getByRole('heading', {name: question, exact: true}).locator('xpath=..');
+};
+
 module.exports.waitForJQueryIdle = waitForJQueryIdle;
