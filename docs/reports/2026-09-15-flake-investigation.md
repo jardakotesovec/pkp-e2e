@@ -253,6 +253,12 @@ after the window opens. Full OMP U26+U27 34 of 34 and OJS U26+U27 32 of
 
 ## 6. Next
 
+0. Status 2026-09-15 evening: the maintainer ships the native-scroll
+   change and the keyed publication form; patch C (the reviewer rating)
+   is deferred for a closer read. A smaller variant was sketched in the
+   session: take only `considered`/`dateConsidered` from the "viewed"
+   response instead of the whole body, so a status update cannot carry a
+   stale rating; not yet written or verified.
 1. Open the two ui-library pull requests from the patches (both apply
    on `db5b2813`); the probe and the trace timeline above are the
    reproduction stories. After they merge, drop `pressUntil()`'s retry
