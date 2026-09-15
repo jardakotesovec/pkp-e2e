@@ -193,6 +193,13 @@ files dir it must carry:
   SMTP to Mailpit and other 127.0.0.1 traffic are unaffected. Do not remove
   it, and re-add it by hand on new machines. There is no OS-level firewall
   and no DTD mirror.
+- `[database] persistent = On` (the generator writes it since 2026-09-14;
+  pkp-lib honours it since `77b76d7664`). The fleet's `php -S` servers then
+  keep their PDO connection between requests, so `npm run reset:<app>`
+  drops the database with `dropdb --force` (the idle backends are
+  terminated; the servers reconnect). A `config.test.inc.php` generated
+  before that date lacks the key: regenerate it with the command above
+  (keep the old `app_key` through `TEST_APP_KEY`), then reset.
 - `enable_minified = On`. Backend pages then load `js/pkp.min.js` instead of
   about 107 separate scripts. The bundle is committed in the app. When its
   sources change, recompile it with the Closure minify pass in

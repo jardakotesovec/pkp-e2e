@@ -60,9 +60,13 @@ as a button. Pressing one shows that language's column ("{Field} in
 field. Only the submission language's copy is ever required (Rule 3). The
 one-line editors (Title, Subtitle) keep Bold, Italic, Underline, Superscript
 and Subscript behind a "Formatting" menu that appears once the field has
-focus. The Abstract, Plain Language Summary and statement editors show a
-toolbar of Bold, Italic, Superscript, Subscript and a link button, with no
-underline and no lists. A save that fails shows "Please correct one error."
+focus. The Abstract and Plain Language Summary editors show a toolbar of
+Bold, Italic, Superscript, Subscript, a link button, Bullet list and
+Numbered list, with no underline; a list made with those two buttons is
+kept as a list after Save (since 2026-09-15). The statement editors
+(Funding Statement,
+Data Availability Statement) show the same toolbar without the two list
+buttons. A save that fails shows "Please correct one error."
 (or "… {n} errors.") under the form, with a "Go to {Field}: {message}" button
 for each failing field and a "Jump to next error" button, and marks the
 failing field. A save the server refuses additionally shows the toast "The
@@ -1181,7 +1185,24 @@ Bold, Italic, Underline, Superscript, Subscript; the Abstract's visible
 toolbar is Bold, Italic, Superscript, Subscript, "Insert/edit link"
 (editor setting `bold italic superscript subscript | link`) — the Plain
 Language Summary editor showed the same toolbar; Funding Statement and
-Data Availability Statement use the same editor component (code). On a
+Data Availability Statement use the same editor component (code).
+Since pkp-lib `3964db27b5` (pkp/pkp-lib#13325, PR #13326, 2026-09-15)
+`TitleAbstractForm` gives the Abstract and Plain Language Summary
+editors `bold italic superscript subscript | link | bullist numlist`
+with the `link` and `lists` plugins; re-driven 2026-09-15 on all three
+apps (manager, Title & Abstract of a submitted scratch submission,
+`checks/sync/pkp-lib-13325/abstract-lists.js`, `.reports/sync/s15-13325/`):
+both toolbars read Bold, Italic, Superscript, Subscript, "Insert/edit
+link", "Bullet list", "Numbered list" while Title and Subtitle kept
+their "Formatting" menu; a two-item bullet list typed after the seeded
+abstract saved (200) and read back after a reload as
+`<ul><li>First item</li><li>Second item</li></ul>` in the editor and in
+`GET publications/{id}` (`abstract.en`). The statement forms
+(`PKPDataAvailabilityForm`, the funding statement) set no toolbar of
+their own and keep the component's default without the list buttons
+(code, not re-driven). The reader-side rendering of such a list
+(`allowed_html` lists `ul`, `ol`, `li[class]`) and the JATS export the
+issue also names were not driven. On a
 section with word count 20 (OJS, OPS) a 40-word abstract showed "Word
 Count: 40/20" with a red inline icon and Save was refused by the server
 (400) with "The abstract is too long. It should be 20 words or less. It

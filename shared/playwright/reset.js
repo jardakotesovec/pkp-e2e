@@ -60,7 +60,11 @@ function recreateDatabase({driver, host, username, password, name}) {
             }
             const hostArgs = host ? ['-h', host] : [];
             const userArgs = username ? ['-U', username] : [];
-            execFileSync('dropdb', ['--if-exists', ...hostArgs, ...userArgs, name], {stdio: 'inherit', env});
+            // --force: with `persistent = On` in the test config (make-test-config.js) the fleet's
+            // php -S servers keep a PDO connection open between requests, and a plain dropdb then
+            // fails with "database is being accessed by other users" while a probe server is up
+            // (sync 2026-09-15). The forced drop terminates those idle backends; the servers reconnect.
+            execFileSync('dropdb', ['--force', '--if-exists', ...hostArgs, ...userArgs, name], {stdio: 'inherit', env});
             execFileSync('createdb', [...hostArgs, ...userArgs, name], {stdio: 'inherit', env});
             break;
         }

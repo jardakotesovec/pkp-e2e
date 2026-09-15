@@ -34,8 +34,8 @@ the fix lands.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
-| pkp-lib `716419c770` (pkp/pkp-lib#13312, issue #13109; the surface first opened by #13273 `f4db6d22c4`) | The discussion attacher's "Select submission stage" list ("Add" › "Attach Files" › "Attach Workflow Files") offers a disabled "Done" on every submission, because `submission/maps/Schema::getPropertyStages()` now iterates `getValidStages()` (app stages plus Done) and every submission's `stages` carries a Done entry | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-13109/regressions.js` (`s5-stage-options`, `s2-api`); fixed when the select lists four stages and `stages` has no Done entry for a submission outside Done | thread 2026-09-08 (with the 13109 regression); the two other surfaces fixed by #13312 on 2026-09-12; this one ruled a bug by @jarda.kotesovec in the 2026-09-14 session thread | Register: U24 A10 (with the ruling). Cause: the map's five-entry `stages` is what #13312 chose ("Fix valid workflow stages retrieval"), so the fix belongs either in the map (Done only for a submission resting in Done, as the synthetic block already does) or in the attacher's filter. Re-run the kept script each sync; delete the row when the select ends with Production. |
-| pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`. Delete the row when #13288 lands. |
+| pkp-lib `716419c770` (pkp/pkp-lib#13312, issue #13109; the surface first opened by #13273 `f4db6d22c4`) | The discussion attacher's "Select submission stage" list ("Add" › "Attach Files" › "Attach Workflow Files") offers a disabled "Done" on every submission, because `submission/maps/Schema::getPropertyStages()` now iterates `getValidStages()` (app stages plus Done) and every submission's `stages` carries a Done entry | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-13109/regressions.js` (`s5-stage-options`, `s2-api`); fixed when the select lists four stages and `stages` has no Done entry for a submission outside Done | thread 2026-09-08 (with the 13109 regression); the two other surfaces fixed by #13312 on 2026-09-12; this one ruled a bug by @jarda.kotesovec in the 2026-09-14 session thread | Register: U24 A10 (with the ruling). Cause: the map's five-entry `stages` is what #13312 chose ("Fix valid workflow stages retrieval"), so the fix belongs either in the map (Done only for a submission resting in Done, as the synthetic block already does) or in the attacher's filter. Re-run the kept script each sync; delete the row when the select ends with Production. Re-run 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-13109/`): the select still ends with a disabled "Done", the stats table and the Roles grid still four stages. |
+| pkp-lib `74a8d58571` (pkp/pkp-lib#12352, issue #12347) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`; still reproduces 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-12352/`: `status:false`, fileId 2 `article-rev.pdf` current). Delete the row when #13288 lands. |
 
 ## Flake watch — known non-deterministic failure classes
 
@@ -160,6 +160,16 @@ trips.
   ui-library upstream); the harness now passes `reducedMotion` to the
   `asUser` contexts, which it never had. The `pressUntil` retry stays
   until the patch lands. **Watch condition**: unchanged.
+  **Seen on a footer button
+  without the bounded retry 2026-09-15** (sync session, the second OJS
+  final at four workers on a reset database,
+  `.reports/sync/final-run-ojs-attempt2.log`): U22 S2's "Save for Later"
+  press on the Details step, issued right after `continueTo('Details')`
+  returned, left the wizard on "Make a Submission: Details" for the 45 s
+  wait for the "Saved for Later" heading (the error context shows the
+  step still current and the button still offered), one of two reds in
+  216. `SubmissionWizardPage.saveForLater()` presses once; the next
+  step is the same `pressUntil()` shape behind it. Green alone in 14.1 s right after (`.reports/sync/s15-ojs-reds-alone2.log`) and in the traced third final (229 passed).
 - **A wizard rich-text fill lost to a re-render under load** (U21 S3,
   OPS, local). The Autosave bullet types "Autosave check" into the Title
   box and reads it back; in the 2026-09-12 U21 revision's first OPS final
@@ -215,6 +225,7 @@ trips.
   (`test.use({trace: 'retain-on-failure'})`), so the next CI red carries
   one. The mechanism is not the wizard's scroll animation (a legacy jQuery
   page); read the trace before hardening again.
+  **Tripped again 2026-09-15** (sync session, the first OJS final at four workers on a reset database with the perf round-2 harness and `persistent = On`, `.reports/sync/final-run-ojs.log`: the same `aria-disabled="true"` tab for 63 polls after the hardened accept, one of three reds in 216; green alone in 45.9 s, `.reports/sync/s15-ojs-reds-alone.log`). Red again in the second OJS final the same day (`.reports/sync/final-run-ojs-attempt2.log`, one of two reds) and then **red alone** on that used database (`.reports/sync/s15-ojs-reds-alone2.log`, 1.2 min: the reminder-link leg's accept, the `2. Guidelines` tab disabled for 63 polls), the class's first alone red; green in the traced third final on a reset database (229 passed, 17.1 min) so still no trace, and green first try on CI the same day (pkp-e2e run 34952057769, ojs run 34956195225). Next step unchanged: a retained trace of the accept POST from a red run.
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a
@@ -255,6 +266,29 @@ trips.
   fetches. Green in the sync session's OJS final at four workers
   2026-09-14 (229 passed, run with `--trace retain-on-failure` for exactly
   this class; no trace to read yet).
+- **Login smoke's profile probe landing on the login page under load**
+  (shared `login.spec.js`, OJS, once). In the sync session's first OJS
+  final at four workers 2026-09-15 (a reset database, the perf round-2
+  harness and `persistent = On` for the first time on the VM,
+  `.reports/sync/final-run-ojs.log`) the smoke's loop over the seeded
+  personas signed `reader.rosa` in through the form (the page left
+  `/login`) but the request-context probe of `/index.php/index/user/profile`
+  answered with the login page (`…/login?source=%2Findex.php%2Findex%2Fuser%2Fprofile`),
+  so the smoke red and the 13 serial tests behind it did not run; green
+  alone in 27.5 s (`.reports/sync/s15-ojs-reds-alone.log`), and green on
+  CI at the same tree and tips. **Watch condition**: a second sighting;
+  then read whether the probe's cookie jar carried the fresh session
+  cookie (the smoke closes and reopens a context per persona).
+- **"Create New Version" dialog's stage select empty under load** (U49
+  S6, OJS, once). The dialog opened with its "Publication Stage" options
+  listed but the select's value "" for the 10 s wait for "VoR" (the
+  published version's stage, expected preselected) in the same 2026-09-15
+  OJS final (`.reports/sync/final-run-ojs.log`, error context in
+  `pw-out-final-ojs/U49-publish-schedule-and-v-8f1b4-…`); green alone in
+  9.4 s. The opener waits for the select to be visible, not for the
+  form's value to arrive. **Watch condition**: a second sighting; then
+  `openCreateVersionDialog()` waits for a non-empty stage value before
+  returning.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the

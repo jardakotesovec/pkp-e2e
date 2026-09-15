@@ -10,11 +10,9 @@ pending row; feature sessions are launched by the maintainer under the
 RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
 baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
-reported failure. Suite size (RUNBOOK "Budget"; last full runs, 2026-09-14, on the 4-core VM at
-`PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time): OJS 229 tests ·
-19.5 min with `--trace retain-on-failure` on (the untraced 2026-09-11 run
-was 209 tests · 10.6 min; the next untraced final gives the budget
-number) · OMP 214 · 12.5 min · OPS 153 · 7.1 min.
+reported failure. Suite size (RUNBOOK "Budget"; last full runs, 2026-09-15, on the 4-core VM at
+`PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time, the first VM
+runs with the perf round-2 harness and `persistent = On`): OJS 229 tests · 17.1 min with `--trace retain-on-failure` on (the day's two untraced OJS finals red on flake classes: 216 tests in 11.0 and 11.5 min with the 13 serial and solo tests skipped behind the red; the next untraced green final gives the budget number) · OMP 225 · 10.4 min · OPS 153 · 6.1 min.
 
 ## Features
 

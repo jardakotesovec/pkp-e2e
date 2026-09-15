@@ -1169,7 +1169,11 @@ commits — grepped every template, page, class and plugin; only the
 class files and autoloader entries exist. OPS lacks the app-side form
 subclass the handler instantiates, so its add/edit ops would fail
 outright there. Treated as dead code: no screen reaches it, so it is
-recorded here and excluded from rules, scenarios and probes.
+recorded here and excluded from rules, scenarios and probes. Deleted
+upstream 2026-09-14 (pkp-lib `648fee2e04`, issue pkp/pkp-lib#12827, with
+the app-side `AuthorForm.php` subclasses in ojs `4632d9cae0` and omp
+`fda2070ab`; the QuickSubmit plugin was its last user), so from the
+2026-09-15 sync the class files are gone too.
 
 <a id="fn-n"></a>
 **n — pin note.** OJS's pkp-lib pin (`87999c45`) carries one commit
@@ -1550,6 +1554,6 @@ Interests" (live-probed 2026-08-28, fn j).
   `article_summary.tpl` (OJS), `templates/frontend/components/authors.tpl` +
   `objects/monograph_full.tpl` / `monograph_summary.tpl` (OMP),
   `objects/preprint_details.tpl` / `preprint_summary.tpl` (OPS).
-- Legacy (unreachable): `lib/pkp/controllers/grid/users/author/
-  AuthorGridHandler.php` + `form/PKPAuthorForm.php` +
-  `templates/controllers/grid/users/author/*`.
+- Legacy (unreachable, deleted upstream 2026-09-14, footnote m):
+  `lib/pkp/controllers/grid/users/author/AuthorGridHandler.php` +
+  `form/PKPAuthorForm.php` + `templates/controllers/grid/users/author/*`.
