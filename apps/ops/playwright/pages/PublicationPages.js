@@ -26,6 +26,16 @@
  *   Version" dialog and a participant's "Edit Assignment" window (Rule 2's
  *   "Allow this person to make changes to the publication…" box); added
  *   2026-09-09 for scenario 3's new-version and after-unpost legs.
+ * - Added 2026-09-15 (the coverage revision): the form's refusal readouts
+ *   (`fieldError`, `errorSummary`, `goToErrorButton`), the Abstract's word
+ *   counter (`wordLimit`, `wordLimitErrorMark`), the published-version
+ *   warning (`publishedWarning`), `setEditAssignmentPermission` (Rule 2's
+ *   box saved through "OK"), `watchPublicationSaves` (a request watcher for
+ *   "nothing is sent" claims), `metadataUpdatedLogCount` (the Activity
+ *   Log's "Submission metadata updated" lines), `addDiscussion` (the
+ *   discussions panel's form, the mail the suite causes as its Mailpit
+ *   positive control), `licenseBlock` (the landing page's "License" block)
+ *   and `expectPrecedes` (a DOM-order read for "in that order" claims).
  *
  * Labels are the live locale strings (ops + lib/pkp locale/en/*.po at the
  * pinned commits); DOM shapes from lib/ui-library WorkflowPublicationForm /
@@ -201,6 +211,46 @@ exports.PublicationScreen = class PublicationScreen {
         // revert an uncommitted editor value before Save serializes it,
         // making the save honestly persist the OLD content).
         return savedResponse;
+    }
+
+    /** A field's inline error ("This field is required.", "This is not a
+     * valid URL.") — class `pkpFieldError` inside the field wrapper
+     * (patterns.md locator pitfall 14). */
+    fieldError(formId, name, locale = null) {
+        return this.fieldWrapper(formId, name, locale).locator('.pkpFieldError');
+    }
+
+    /** The form's error summary ("Please correct one error." / "… {n}
+     * errors."), rendered under the form after a refused save. */
+    errorSummary() {
+        return this.page.getByText(/Please correct (one|\d+) errors?\./);
+    }
+
+    /** The summary's "Go to {Field}: {message}" button for one field. */
+    goToErrorButton(fieldLabel) {
+        return this.page.getByRole('button', {name: new RegExp(`^Go to ${fieldLabel}`)});
+    }
+
+    /** The rich-text field's "Word Count: {n}/{limit}" readout (present
+     * only when the section sets a limit — Rule 5). */
+    wordLimit(formId, name, locale = null) {
+        return this.fieldWrapper(formId, name, locale).locator(
+            '.pkpFormField--richTextarea__wordLimit'
+        );
+    }
+
+    /** The counter's error mark, an inline icon rendered only while the
+     * count is over the limit (FieldRichTextarea `icon="Error"`). */
+    wordLimitErrorMark(formId, name, locale = null) {
+        return this.wordLimit(formId, name, locale).locator('svg');
+    }
+
+    /** The editorial banner on a published version's pages (Rule 8; the
+     * "Warning:" prefix is a sibling element, so the sentence is matched). */
+    publishedWarning() {
+        return this.page.getByText(
+            'This version has been published. Editing it may impact the published content.'
+        );
     }
 
     /** The "Current Submission Language: {language}" readout (Rule 13a).
@@ -428,3 +478,156 @@ async function openEditAssignment(page, displayName) {
 }
 
 exports.openEditAssignment = openEditAssignment;
+
+/**
+ * Set a participant's "Allow this person to make changes to the
+ * publication…" box (Rule 2) through the open stage screen's "Edit
+ * Assignment" window and press "OK". Bounded by the window closing and
+ * the legacy grid settling.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} displayName the participant as the panel names them
+ * @param {boolean} allowed the box's wanted state
+ */
+async function setEditAssignmentPermission(page, displayName, allowed) {
+    const modal = await openEditAssignment(page, displayName);
+    const box = modal.locator('input[name="canChangeMetadata"]');
+    await expect(box).toBeVisible({timeout: 30_000});
+    if (allowed) {
+        await box.check();
+    } else {
+        await box.uncheck();
+    }
+    await modal.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(modal).toHaveCount(0, {timeout: 30_000});
+    await waitForJQueryIdle(page);
+}
+
+exports.setEditAssignmentPermission = setEditAssignmentPermission;
+
+/**
+ * Watch the page for publication saves (the tunneled PUT: a POST to
+ * `…/publications/{id}`), for "nothing is sent" claims: a refusal made in
+ * the browser adds no entry, and the next accepted save adds one — the
+ * positive control of the same watcher. `stop()` detaches the listener.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @returns {{seen: string[], stop: () => void}}
+ */
+function watchPublicationSaves(page) {
+    const seen = [];
+    const listener = (request) => {
+        if (request.method() === 'POST' && /\/publications\/\d+/.test(request.url())) {
+            seen.push(request.url());
+        }
+    };
+    page.on('request', listener);
+    return {seen, stop: () => page.off('request', listener)};
+}
+
+exports.watchPublicationSaves = watchPublicationSaves;
+
+/**
+ * Open the workflow header's "Activity Log", count its "Submission
+ * metadata updated" lines and close it again (Rule 4 / Side effects: one
+ * line per accepted save, none for a refusal). The grid is read once its
+ * rows have landed (a seeded submission always carries its submit lines).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<number>}
+ */
+async function metadataUpdatedLogCount(page) {
+    await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
+    const logModal = page.locator('[data-cy="active-modal"]').last();
+    await expect(logModal.getByText('Activity Log & Notes')).toBeVisible({timeout: 30_000});
+    await waitForJQueryIdle(page);
+    await expect(logModal.locator('tr.gridRow').first()).toBeVisible({timeout: 30_000});
+    const count = await logModal.getByText('Submission metadata updated').count();
+    await logModal.getByRole('button', {name: 'Close'}).first().click();
+    // The workflow panel is itself an active-modal, so the log's closing
+    // is judged on its own title leaving.
+    await expect(page.getByText('Activity Log & Notes')).toHaveCount(0, {timeout: 30_000});
+    return count;
+}
+
+exports.metadataUpdatedLogCount = metadataUpdatedLogCount;
+
+/**
+ * Add a discussion from the open stage screen's "Production Tasks &
+ * Discussions" panel: a "Name", the listed participants' boxes (the
+ * creator's own box arrives ticked; the form refuses a save with fewer
+ * than two, "At least two participants are required for a discussion.",
+ * so at least one other is named; every other participant is left as it
+ * is), a message, "Save" (`POST …/submissions/{id}/tasks`). Each ticked
+ * participant, the creator included, receives the discussion email, which
+ * is the mail this suite causes as the positive control of its Mailpit
+ * absence reads (PRINCIPLES A8; U05's form, verified there).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {{name: string, message: string, participants: string[]}} options
+ *   `participants`: usernames whose boxes are ticked besides the creator's
+ */
+async function addDiscussion(page, {name, message, participants}) {
+    const panel = page.locator('[data-cy="discussion-manager"]').first();
+    await expect(
+        panel.getByRole('heading', {name: 'Production Tasks & Discussions'})
+    ).toBeVisible({timeout: 30_000});
+    await panel.getByRole('button', {name: 'Add', exact: true}).click();
+    const modal = page
+        .locator('[data-cy="active-modal"]')
+        .filter({has: page.locator('input[name="title"]')});
+    await modal.locator('input[name="title"]').fill(name);
+    for (const username of participants) {
+        const box = modal.getByRole('checkbox', {name: new RegExp(username)});
+        await expect(box).toBeVisible({timeout: 30_000});
+        await box.check();
+    }
+    const body = modal.frameLocator('iframe').first().locator('body');
+    await body.click();
+    await body.fill(message);
+    const saved = page.waitForResponse(
+        (r) => r.request().method() === 'POST' && /\/submissions\/\d+\/tasks$/.test(r.url()),
+        {timeout: 30_000}
+    );
+    await modal.getByRole('button', {name: 'Save', exact: true}).click();
+    const response = await saved;
+    expect(response.ok(), `discussion save answered ${response.status()}`).toBe(true);
+    await expect(modal).toHaveCount(0, {timeout: 30_000});
+}
+
+exports.addDiscussion = addDiscussion;
+
+/**
+ * The landing page's "License" block (`.item.copyright`, Rule 15): the
+ * "License" heading, then with a Creative Commons address the
+ * "Copyright (c) {year} {holder}" line and the badge, with any other
+ * address a link labelled with the statement (or "License"), and the
+ * server's License Terms last.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function licenseBlock(page) {
+    return page.locator('.item.copyright');
+}
+
+exports.licenseBlock = licenseBlock;
+
+/**
+ * Assert `first` comes before `second` in document order (an "after
+ * Abstract" field, a "Data Availability Statement" block above the
+ * "Funding Statement" one). Both locators must resolve to one element.
+ *
+ * @param {import('@playwright/test').Locator} first
+ * @param {import('@playwright/test').Locator} second
+ */
+async function expectPrecedes(first, second) {
+    await expect(first).toBeVisible({timeout: 30_000});
+    await expect(second).toBeVisible({timeout: 30_000});
+    const follows = await first.evaluate(
+        (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING),
+        await second.elementHandle()
+    );
+    expect(follows, 'the first element precedes the second').toBe(true);
+}
+
+exports.expectPrecedes = expectPrecedes;

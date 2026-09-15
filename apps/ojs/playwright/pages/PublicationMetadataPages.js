@@ -14,8 +14,13 @@
  *   Language" readout with its "Change" panel, the "Schedule For
  *   Publication" panel (Review Publishing Details), Unpublish, "Create New
  *   Version", and the participant "Edit Assignment" permission (tick, and
- *   a read of the box that leaves it as it was). The U49 PublishScreen
- *   extends this class with the publish-flow specifics.
+ *   a read of the box that leaves it as it was, and a set to either
+ *   state), the Participants panel's "Notify" window (the one mail a
+ *   test causes itself, the positive control of every mailbox absence),
+ *   the refused saves (the server's 4xx and the client-side "This field
+ *   is required." that sends nothing), the abstract's word-limit line and
+ *   the Permissions & Disclosure fields with their lock state. The U49
+ *   PublishScreen extends this class with the publish-flow specifics.
  * - Issue helpers (legacy jQuery grid at /manageIssues) — create a future
  *   issue, publish it without notifying users, and set its published date
  *   through the date-picker calendar (the visible input's altField only
@@ -27,7 +32,20 @@
  * their toolbar behind a "Formatting" drop-down that opens a floating
  * toolbar overflow (`.tox-toolbar__overflow`) with Bold / Italic /
  * Underline / Superscript / Subscript buttons; useFetch tunnels PUT via
- * POST, so form saves are matched as POSTs.
+ * POST, so form saves are matched as POSTs. Revision facts (probed
+ * 2026-09-15, `.reports/U40/tojs`): the "Notify" window is the legacy
+ * `form#notifyForm` with a "Choose a predefined message" select
+ * (`name="template"`) and one TinyMCE box whose id starts `message-`; sent
+ * with no template chosen it answers 500, so the helper picks "Discussion
+ * (Submission)" (its body fetch fills the box, which the message then
+ * replaces) and the mail carries that subject; the word-limit line is
+ * `.pkpFormField--richTextarea__wordLimit` ("Word Count: {n}/{limit}",
+ * one per rich-text field and locale) and over the limit it gains a
+ * `.text-negative` icon; an over-limit abstract is refused by the server
+ * (400) while an empty required one is refused in the browser (no
+ * request); an invalid License URL is the server's 400 with "This is not
+ * a valid URL."; the "Current Submission Language" readout's "Change" is a
+ * button inside the readout's own element.
  */
 const {expect} = require('@playwright/test');
 const {waitForJQueryIdle} = require('../support/legacy.js');
@@ -232,6 +250,92 @@ exports.PublicationScreen = class PublicationScreen {
     }
 
     /**
+     * Press Save on a form the server refuses: waits for the publications
+     * write to answer with a non-OK status and returns that response. The
+     * caller asserts the field message and the summary.
+     */
+    async saveRefusedByServer() {
+        const refused = this.page.waitForResponse(
+            (r) =>
+                r.url().includes('/publications/') &&
+                r.request().method() === 'POST' &&
+                !r.ok(),
+            {timeout: 30_000}
+        );
+        await this.saveButton().click();
+        return refused;
+    }
+
+    /**
+     * Press Save on a form the browser refuses before sending anything:
+     * counts the publications writes fired from the press until the given
+     * refusal message is on screen (the bound), and returns that count (0
+     * when nothing was sent).
+     *
+     * @param {import('@playwright/test').Locator} refusal the message that bounds the wait
+     * @returns {Promise<number>}
+     */
+    async saveRefusedInPlace(refusal) {
+        let sent = 0;
+        const onRequest = (request) => {
+            if (request.url().includes('/publications/') && request.method() === 'POST') {
+                sent += 1;
+            }
+        };
+        this.page.on('request', onRequest);
+        try {
+            await this.saveButton().click();
+            await expect(refusal).toBeVisible({timeout: 30_000});
+        } finally {
+            this.page.off('request', onRequest);
+        }
+        return sent;
+    }
+
+    /** The error summary's "Go to {field}" jump button. */
+    goToFieldButton(field) {
+        return this.page.getByRole('button', {name: new RegExp(`^Go to ${field}`)});
+    }
+
+    /** A field's inline error (`.pkpFieldError`) carrying the given text. */
+    fieldError(text) {
+        return this.page.locator('.pkpFieldError').filter({hasText: text});
+    }
+
+    /**
+     * The first rich-text field's "Word Count: {n}/{limit}" line (the
+     * Abstract's on Title & Abstract; a Plain Language Summary line follows
+     * it when that field is enabled).
+     */
+    wordLimitLine() {
+        return this.page.locator('.pkpFormField--richTextarea__wordLimit').first();
+    }
+
+    /** The red error mark the word-count line gains over the limit. */
+    wordLimitErrorIcon() {
+        return this.wordLimitLine().locator('.text-negative');
+    }
+
+    /**
+     * The Permissions & Disclosure fields and their lock furniture: the
+     * three inputs, every "Override" link on the page, and the three
+     * automatic-value descriptions.
+     */
+    permissionsFields() {
+        return {
+            holder: this.page.locator('input[name="copyrightHolder-en"]'),
+            year: this.page.locator('input[name="copyrightYear"]'),
+            licenseUrl: this.page.locator('input[name="licenseUrl"]'),
+            overrides: this.page.getByRole('button', {name: 'Override', exact: true}),
+            holderDescription: this.page.getByText(/Copyright will be assigned automatically to/),
+            yearDescription: this.page.getByText(
+                'The copyright year will be set automatically when this is published in an issue.'
+            ),
+            licenseDescription: this.page.getByText(/The license will be set automatically to/),
+        };
+    }
+
+    /**
      * Set a TinyMCE field's content the way a save reads it (the backing
      * textarea never updates — patterns.md). Waits for the editor to
      * initialize first.
@@ -292,6 +396,13 @@ exports.PublicationScreen = class PublicationScreen {
     /** The readout's "Change" button (editorial Publication pages only). */
     changeLanguageButton() {
         return this.page.getByRole('button', {name: 'Change', exact: true});
+    }
+
+    /** The "Change" button inside the readout's own line (absent for a
+     * viewer who may not edit; the bare changeLanguageButton() sweeps the
+     * page). */
+    readoutChangeButton() {
+        return this.languageReadoutLine().getByRole('button', {name: 'Change', exact: true});
     }
 
     /** The "Change Submission Language For" side panel. */
@@ -393,7 +504,10 @@ exports.PublicationScreen = class PublicationScreen {
      * Assignment" radio group (rendered after its own fetch); without
      * issues the group never appears — hence the bounded conditional wait.
      *
-     * @param {{backIssueLabel?: RegExp}} options
+     * @param {{backIssueLabel?: RegExp, futureIssueLabel?: RegExp}} options
+     *   backIssueLabel picks "Assign To Current/Back Issue" and that issue;
+     *   futureIssueLabel picks "Assign To Future Issue and Publish
+     *   Immediately" and that issue.
      */
     /**
      * Wait for the panel's Issue Assignment group to finish its async
@@ -408,10 +522,20 @@ exports.PublicationScreen = class PublicationScreen {
         });
     }
 
-    async publish({backIssueLabel} = {}) {
+    async publish({backIssueLabel, futureIssueLabel} = {}) {
         const panel = await this.openPublishPanel();
         await this.fillVersionDetails(panel);
-        if (backIssueLabel) {
+        if (futureIssueLabel) {
+            // "Assign To Future Issue and Publish Immediately": continuous
+            // publication into a not-yet-published issue.
+            const futureRadio = panel.getByRole('radio', {
+                name: 'Assign To Future Issue and Publish Immediately',
+            });
+            await expect(futureRadio).toBeVisible({timeout: 30_000});
+            await this.awaitAssignmentPreselected(panel);
+            await futureRadio.check();
+            await this.selectIssueOption(panel, futureIssueLabel);
+        } else if (backIssueLabel) {
             const backRadio = panel.getByRole('radio', {
                 name: 'Assign To Current/Back Issue',
             });
@@ -560,6 +684,103 @@ exports.PublicationScreen = class PublicationScreen {
         await expect(checkbox).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(this.page);
         return allowed;
+    }
+
+    /**
+     * Open a participant's "Edit Assignment" form, set "Allow this person to
+     * make changes to the publication…" to the wanted state and press OK.
+     * Returns the state the box arrived in.
+     *
+     * @param {string} displayName e.g. 'Carla Copyeditor'
+     * @param {boolean} allowed
+     * @returns {Promise<boolean>}
+     */
+    async setParticipantMetadataEdit(displayName, allowed) {
+        await this.page
+            .getByRole('button', {name: `${displayName} More Actions`})
+            .first()
+            .click();
+        await this.page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+        const dialog = this.page
+            .getByRole('dialog')
+            .filter({hasText: 'Edit Assignment'});
+        const checkbox = dialog.locator('input[name="canChangeMetadata"]');
+        await expect(checkbox).toBeVisible({timeout: 30_000});
+        const arrived = await checkbox.isChecked();
+        await checkbox.setChecked(allowed);
+        await dialog.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(checkbox).toHaveCount(0, {timeout: 30_000});
+        await waitForJQueryIdle(this.page);
+        return arrived;
+    }
+
+    /**
+     * On a stage screen's Participants panel, open a participant's "Notify"
+     * window, pick the "Discussion (Submission)" template, replace the
+     * message and press "Notify": the one mail a test sends itself (the
+     * positive control of a mailbox absence, PRINCIPLES A8) and one
+     * discussion task for the participant. Bounded by the send answering OK.
+     *
+     * @param {string} displayName e.g. 'Xena Spare'
+     * @param {string} message html, e.g. '<p>Control u40s1…</p>'
+     */
+    async notifyParticipant(displayName, message) {
+        await this.page
+            .getByRole('button', {name: `${displayName} More Actions`})
+            .first()
+            .click();
+        await this.page.getByRole('menuitem', {name: 'Notify', exact: true}).click();
+        const form = this.page.locator('form#notifyForm');
+        const notifyButton = form.getByRole('button', {name: 'Notify', exact: true});
+        await expect(notifyButton).toBeVisible({timeout: 30_000});
+        const bodyFetched = this.page.waitForResponse(
+            (r) => /fetch-template-body/.test(r.url()) && r.ok(),
+            {timeout: 30_000}
+        );
+        await form.locator('select[name="template"]').selectOption({label: 'Discussion (Submission)'});
+        await bodyFetched;
+        await waitForJQueryIdle(this.page);
+        // The template's body lands in the box a beat after its fetch
+        // answers; a message set before that is overwritten by it. Wait for
+        // the box to hold the template, then replace it and read it back.
+        // A closed Notify window leaves its editor registered in TinyMCE,
+        // so the box is the one inside the form that is on screen now.
+        const editorId = await this.page.waitForFunction(
+            () => {
+                const form = document.querySelector('form#notifyForm');
+                const editor = (window.tinymce?.get() || []).find(
+                    (e) =>
+                        /^message/.test(e.id) &&
+                        e.initialized &&
+                        form?.contains(e.getElement()) &&
+                        e.getContent().trim() !== ''
+                );
+                return editor ? editor.id : null;
+            },
+            undefined,
+            {timeout: 30_000}
+        );
+        const id = await editorId.jsonValue();
+        await this.page.evaluate(
+            ([editor, value]) => {
+                const box = window.tinymce.get(editor);
+                box.setContent(value);
+                box.fire('change');
+            },
+            [id, message]
+        );
+        await expect
+            .poll(() => this.page.evaluate((editor) => window.tinymce.get(editor).getContent(), id), {
+                timeout: 30_000,
+            })
+            .toBe(message);
+        const sent = this.page.waitForResponse(
+            (r) => /send-notification/.test(r.url()) && r.ok(),
+            {timeout: 30_000}
+        );
+        await notifyButton.click();
+        await sent;
+        await waitForJQueryIdle(this.page);
     }
 
     /** Open the workflow's "Activity Log" modal ("Activity Log & Notes"). */

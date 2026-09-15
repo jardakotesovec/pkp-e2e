@@ -405,12 +405,10 @@ it for a per-item value (Rule 11). <sup>g</sup>
   and shows "Other license URL" selected with an empty address, which
   means "no default license". These feed Rules 11, 12 and 14. <sup>m</sup>
 - **Sections › Word Count / "Do not require abstracts"** (journal,
-  preprint server): the abstract policy of Rule 5. Owned by the sections
-  feature.
+  preprint server): the abstract policy of Rule 5.
 - **Roles › "Permit submission metadata edit."** per role, and the
   per-participant "Allow this person to make changes to the
-  publication…" checkbox: the assignment side of Rule 2. Owned by the
-  roles and stage-participants features.
+  publication…" checkbox: the assignment side of Rule 2.
 - **Submission languages** (Settings › Website › Languages): more than
   one submission-metadata language adds the per-field language switch
   (Rule 3) and the choices in Change Submission Language (Rule 13).
@@ -471,165 +469,460 @@ it for a per-item value (Rule 11). <sup>g</sup>
 
 ## Canonical scenarios
 
-Scenarios 1, 3, 4 and 11 run on the seeded journal with ready accounts
+Scenarios 1, 3, 4, 11 and 12 run on the seeded journal with ready accounts
 and scratch submissions; scenarios 2 and 5–10 run on a scratch journal
-with throwaway accounts, because each changes journal settings or
-rewrites every submission in the journal. Each scenario's accounts and
-seeding are in its footnote.
+with throwaway accounts. Each scenario's accounts, seeding and the mail
+catcher's address are in its footnote.
 
-1. **Edit the title and abstract** — Journal Manager: open a submitted,
-   unpublished submission's workflow, then the Publication area, then
-   "Title & Abstract". The page is headed "Publication: Title & Abstract"
-   and shows Prefix (with "Examples: A, The"), Title, Subtitle and
-   Abstract, filled with what the author entered. Type "The" as Prefix,
-   add a Subtitle, make one word of the Title italic (click into the
-   Title, open "Formatting", pick Italic), and change the Abstract. Press
-   Save: "Saved" appears beside the button. Clear the Title and Save
-   again: the summary "Please correct one error. Go to Title: This field
-   is required. Jump to next error" appears with "This field is required."
-   under Title, and nothing is saved. Restore the title and Save. Reload
-   the page: prefix, subtitle, italic title and abstract are as saved. The
-   submission's title in the dashboard list reads with the new prefix.
-   The Activity Log shows a new "Submission metadata updated" line.
-   <sup>s1</sup>
-2. **The Metadata page follows the journal's setup** — Journal Manager,
-   on a scratch journal: on Settings › Workflow › Metadata untick every
-   "Enable … metadata" box and save. The submission's "Metadata" page now
-   reads "No metadata fields are currently enabled." with no Save button.
-   Enable Keywords and Coverage. The page shows exactly Keywords and
-   Coverage. Type "ocean acidification" in Keywords and press Enter: a
-   chip appears with a "Remove ocean acidification" button. Press it and
-   the chip goes. Add it again, then a term nobody has used before. Both
-   become chips. Save and reload: both chips are there. Disable Coverage
-   after filling it, then re-enable it: the value is back. <sup>s2</sup>
-3. **The Author before and after publication** — Author, then Journal
-   Manager: as the Author, open your own submitted submission's "Title &
-   Abstract". On a journal or press the fields are shown but Save is
-   disabled, and nothing typed persists on reload. On a preprint
-   server the page saves like scenario 1 [OPS1](#ops1). As the Journal
-   Manager, publish the submission, on a journal without an issue; its
-   header reads "Status: Published". Back as the Author: the
-   published version's Title & Abstract shows "This version has been
-   published and can not be edited." ("… has been posted and can not be
-   edited." on the preprint server) and Save is disabled, on the
-   preprint server too. Journal Manager: on a stage screen's
-   Participants panel open the Author's "Edit Assignment"; on a journal
-   or press tick "Allow this person to make changes to the publication…"
-   and OK (on a preprint server it is already ticked). Author: the
-   published version is still read-only, with its banner. Journal
-   Manager: on the Publication area press "Create New Version" and
-   confirm. Author: the new version's Title & Abstract shows no banner
-   and Save is offered; type "The" as Prefix and press Save: the form
-   footer reads "Saved" and after a reload Prefix reads "The". Journal
-   Manager: unpublish. Author: "The" typed as Prefix on the other
-   version now saves as well and is there after a reload.
-   Journal only: on a different submission of the same Author, tick the
-   permission the same way, then schedule it to a future issue
-   by the dependable route under Cross-feature interactions; its header
-   reads "Status: Scheduled". Its Title & Abstract is read-only for the
-   Author with no banner at all; after the Journal Manager's "Create New
-   Version", the Author saves on the new version while the scheduled
-   one stays read-only. <sup>s3</sup>
-4. **Editing a published version** — Journal Manager, on a published
-   item: every Publication page shows "Warning: This version has been
-   published. Editing it may impact the published content." Change the
-   Abstract on Title & Abstract and Save: "Saved". Open the item's
-   landing page as a reader: the new abstract is shown. <sup>s4</sup>
-5. **Copyright and license: defaults, override, publish** — Journal
-   Manager, on a scratch journal whose Settings › Distribution › License
-   holds Copyright Holder "Author", the "CC Attribution 4.0" license and
-   a License Terms paragraph: open an unpublished submission's
-   "Permissions & Disclosure". Copyright Holder is locked with "Copyright
-   will be assigned automatically to {contributor name} (Author) when
-   this is published." (the role label is part of the string,
-   [A11](#a11)) and an "Override" link. Copyright Year is locked with its
-   basis sentence. License URL is locked with "The license will be set
-   automatically to CC Attribution 4.0 when this is published." Press
-   Override under Copyright Holder, type "Example Society", Save. Publish
-   the item. Reopen the page: Copyright Holder "Example Society"
-   (unlocked), Copyright Year the current year, License URL the CC
-   Attribution 4.0 address, all editable. Open the landing page: the
-   "License" block shows "Copyright (c) {year} Example Society", the
-   Creative Commons badge with "This work is licensed under a Creative
-   Commons Attribution 4.0 International License." and the License Terms
-   paragraph. Control: on a scratch journal with no default license and
-   no terms, a published item's landing page has no "License" block.
-   <sup>s5</sup>
-6. **Change the submission language** — Journal Manager, on a scratch
-   journal with two submission languages and one unpublished,
-   single-version submission in the first language: any Publication page
-   reads "Current Submission Language: {first language}" with a "Change"
-   button. Every stage screen shows the readout without it. Press
-   Change: the panel "Change Submission Language For" names the item and
-   offers both languages under Submission Language. Cancel closes it
-   with nothing changed. Press again and pick the second language: the
-   warning about metadata and copied names appears with a Title box
-   (required) in the second language and, in a section that requires
-   abstracts, an Abstract box. Type a title, leave the abstract empty,
-   Confirm: "This field is required." appears under Abstract and nothing
-   is sent ([A14](#a14)). Fill it, Confirm. The screen reloads on Title &
-   Abstract, open in the second language with the new title. The readout
-   names the second language. The first language's title is still there
-   in the column the form's language bar reveals. The contributor's
-   "Edit" form shows the given and family names in the second language,
-   copied from the first. Controls: on a published item, and on an item
-   with two versions, there is neither readout nor "Change" on any
-   Publication page (the stage screens keep the readout). The Author's
-   pages never show the button. Journal only: an article published into a
-   future issue that is not yet published still shows "Change", and
-   confirming a change there ends in the toast "You can not change
-   language of this submission…" with the panel still open
-   ([OJS1](#ojs1)). <sup>s6</sup>
-7. **Reset every item's permissions** — Journal Manager, on a scratch
-   journal with one published item carrying an overridden Copyright
-   Holder (scenario 5), one unpublished submission and one declined
-   submission: open Tools › Permissions and press "Reset Article
-   Permissions". The browser's own confirm box reads "Are you sure you
-   wish to reset permissions data for all articles? This action can not
-   be undone." ("… for all preprints? …" on a preprint server; the
-   press's sentence is structurally different ⚠ [OMP3](#omp3)). Cancel:
-   nothing changes, and the button stays greyed ([A13](#a13)). Reload,
-   press again, OK: the toast "Article permissions were successfully
-   reset." appears. The published item's Permissions & Disclosure now
-   shows the journal's default holder instead of "Example Society", and
-   the landing page's copyright line follows. The unpublished and the
-   declined submission's pages also carry filled-in values, unlocked, and
-   each item's Activity Log gains one "Submission metadata updated" line
-   attributed to you ([A3](#a3)). On a journal set to the article's
-   publication date, and on a preprint server, their Copyright Year reads
-   1970 ([A2](#a2)). On a press it reads the current year. <sup>s7</sup>
-8. **Statements reach the reader** — Journal Manager: on Settings ›
-   Workflow › Metadata enable "Data Availability Statement" and "Funding
-   Statement". The submission's Publication area gains a "Data" entry.
-   Enter a statement there and Save. On "Metadata" fill Funding Statement
-   and Save. Publish. The landing page shows a "Data Availability
-   Statement" block and a "Funding Statement" block with the texts.
-   Disable the data availability statement in Settings: the "Data" entry
-   disappears from the workflow (data citations off), and the published
-   page still shows the statement. <sup>s8</sup>
+1. **Edit the title and abstract**
+
+   Given: Journal Manager, on the seeded journal, with a submitted,
+   unpublished scratch submission.
+
+   - **"Title & Abstract"**: open the submission's workflow, then the
+     Publication area, then "Title & Abstract": the page is headed
+     "Publication: Title & Abstract" and shows Prefix (with "Examples: A,
+     The"), Title, Subtitle and Abstract, filled with what the author
+     entered (Rule 1; Fields).
+   - **The save**: type "The" as Prefix and "A field note" as Subtitle,
+     make one word of the Title italic (click into the Title, open
+     "Formatting", pick Italic), replace the Abstract with "Revised
+     abstract." and press Save: "Saved" appears beside the button
+     (Rule 4).
+   - **An empty Title**: clear the Title and press Save again: the summary
+     "Please correct one error. Go to Title: This field is required. Jump
+     to next error" appears with "This field is required." under Title,
+     and nothing is saved (Rule 5; Fields).
+   - **An empty Abstract**: restore the title, clear the Abstract and press
+     Save: on a journal or preprint server "This field is required."
+     appears under Abstract before the save is even sent; on a press the
+     footer reads "Saved", the press applying no abstract requirement
+     [OMP2](#omp2) (Rule 5; Fields).
+   - **After a reload**: restore the abstract, press Save and reload the
+     page: prefix, subtitle, italic title and abstract are as saved
+     (Rule 4).
+   - **The dashboard and the log**: the submission's title in the dashboard
+     list reads with the new prefix, and the Activity Log shows a new
+     "Submission metadata updated" line (Fields; Side effects).
+   - **The mailbox**: no email has arrived for the submission's Author
+     from the save (Side effects).
+   - **Control**: the refused saves wrote nothing: the Activity Log gained
+     one "Submission metadata updated" line per "Saved" and none for a
+     refusal (Rule 4; Side effects). <sup>s1</sup>
+
+2. **The Metadata page follows the journal's setup**
+
+   Given: Journal Manager, on a scratch journal with a scratch submission;
+   on a journal or preprint server the submission's section sets a "Word
+   Count" of 50, and a second scratch submission sits in a section set to
+   "Do not require abstracts".
+
+   - **Nothing enabled**: on Settings › Workflow › Metadata untick every
+     "Enable … metadata" box and save: the submission's "Metadata" page
+     now reads "No metadata fields are currently enabled." with no Save
+     button (Rule 6).
+   - **Two items enabled**: enable Keywords and Coverage: the page shows
+     exactly Keywords and Coverage (Rule 6).
+   - **Keywords**: type "ocean acidification" in Keywords and press Enter:
+     a chip appears with a "Remove ocean acidification" button; press it
+     and the chip goes; add it again, then "benthic flux", a term nobody
+     has used before: both become chips; Save and reload: both chips are
+     there (Rule 7; Fields).
+   - **Coverage off and on**: type "Pacific, 2020s" in Coverage and Save;
+     disable Coverage on the settings screen, then re-enable it: the value
+     is back (Rule 6).
+   - **Plain Language Summary**: on the settings screen tick "Enable plain
+     language summary metadata", choose "Ask the author to provide a plain
+     language summary during submission." under it and save: the
+     submission's "Title & Abstract" shows "Plain Language Summary" after
+     Abstract (Rule 5; Fields; Settings).
+   - **Publisher ID**: on the same screen tick the box under "Publisher
+     ID" that enables it for publications ("Enable for Publications" on a
+     journal, "Enable for Monographs" on a press, "Enable for Preprints"
+     on a preprint server) and, on a journal, "Enable article number
+     metadata" under "Article Number", and save: the "Metadata" page also
+     shows "Publisher ID" and, on a journal, "Article Number" (Fields;
+     Settings).
+   - **Over the word limit** (journal, preprint server): on the first
+     submission's "Title & Abstract" the Abstract shows "Word Count:
+     {n}/50"; type the word "over" 51 times into the Abstract: the counter
+     gains a red error mark; press Save: the save is refused with "The
+     abstract is too long. It should be 50 words or less. It is currently
+     51 words long." and nothing is saved (Rule 5; Fields).
+   - **No abstract required** (journal, preprint server): on the second
+     submission's "Title & Abstract" clear the Abstract and press Save:
+     "Saved" (Rule 5; Fields).
+   - **Control**: before the untick the "Metadata" page showed "Keywords",
+     enabled on a fresh journal, with a Save button (Rule 6).
+     <sup>s2</sup>
+
+3. **The Author before and after publication**
+
+   Given: Author and Journal Manager, on the seeded journal, with the
+   Author's own submitted scratch submission; on a journal, a second
+   submitted scratch submission of the same Author and a scratch future
+   issue.
+
+   - **The author view**: Author: open your own submission's Publication
+     area: it lists "Title & Abstract" and "Metadata" and no "Permissions &
+     Disclosure", in every app (Rule 1; Actors row 2); open "Title &
+     Abstract": on a journal or press the fields are shown but Save is
+     disabled, and nothing typed persists on reload; on a preprint server
+     the page saves like scenario 1 [OPS1](#ops1) (Rules 9, 10).
+   - **An unsaved edit**: type "The" as Prefix, open "Metadata" and come
+     back to "Title & Abstract": no prompt appeared and Prefix is empty
+     (Rule 10).
+   - **Publishing**: Journal Manager: publish the submission, on a journal
+     without an issue; its header reads "Status: Published" (Rule 9).
+   - **The published version**: Author: the published version's Title &
+     Abstract shows "This version has been published and can not be
+     edited." ("… has been posted and can not be edited." on the preprint
+     server) and Save is disabled, on the preprint server too (Rule 9).
+   - **The permission**: Journal Manager: on a stage screen's Participants
+     panel open the Author's "Edit Assignment"; on a journal or press tick
+     "Allow this person to make changes to the publication…" and OK (on a
+     preprint server it is already ticked) (Rule 2). Author: the published
+     version is still read-only, with its banner (Rule 9).
+   - **A new version**: Journal Manager: on the Publication area press
+     "Create New Version" and confirm. Author: the new version's Title &
+     Abstract shows no banner and Save is offered; type "The" as Prefix,
+     open "Metadata" and come back: Prefix is empty, the edit dropped on
+     an editable page too (Rules 9, 10).
+   - **The Author's save on the new version**: type "The" as Prefix and
+     press Save: the form footer reads "Saved" and after a reload Prefix
+     reads "The", whether the other version is published or only
+     scheduled (Rule 9).
+   - **The other version's own copy**: switch to the published version:
+     its Title & Abstract still shows the banner and its Prefix is empty
+     (Rules 3, 9).
+   - **After an unpublish**: Journal Manager: unpublish. Author: "The"
+     typed as Prefix on the other version now saves as well and is there
+     after a reload (Rule 9).
+   - **A scheduled article** (journal only): on the second submission tick
+     the permission the same way, then schedule it to the future issue by
+     the dependable route under Cross-feature interactions; its header
+     reads "Status: Scheduled"; its Title & Abstract is read-only for the
+     Author with no banner at all (Rule 9); Journal Manager: its
+     "Permissions & Disclosure" shows Copyright Holder and Copyright Year
+     still locked with their descriptions and License URL still empty, the
+     seeded journal having no default license: scheduling fills nothing
+     (Rule 12); after the Journal Manager's "Create New Version", the
+     Author saves on the new version while the scheduled one stays
+     read-only (Rule 9).
+   - **Control**: the lock is the Author's: the Journal Manager's Title &
+     Abstract on the published version stays editable, with the banner
+     "Warning: This version has been published. Editing it may impact the
+     published content." (Rule 8). <sup>s3</sup>
+
+4. **Editing a published version**
+
+   Given: Journal Manager, on the seeded journal, with a published scratch
+   submission.
+
+   - **The banner**: every Publication page shows "Warning: This version
+     has been published. Editing it may impact the published content."
+     (Rule 8).
+   - **The save**: replace the Abstract on Title & Abstract with "Abstract
+     after publication." and press Save: "Saved" (Rules 4, 8).
+   - **The reader's page**: open the item's landing page as a reader: the
+     new abstract is shown (Rule 8).
+   - **Control**: before the save the landing page showed the abstract as
+     submitted (Rule 8). <sup>s4</sup>
+
+5. **Copyright and license: defaults, override, publish**
+
+   Given: Journal Manager, on a scratch journal whose Settings ›
+   Distribution › License holds Copyright Holder "Author", the "CC
+   Attribution 4.0" license and a License Terms paragraph, with an
+   unpublished scratch submission; a second scratch journal with no
+   default license and no terms, with a published scratch submission.
+
+   - **The locked fields**: open the submission's "Permissions &
+     Disclosure": Copyright Holder is locked with "Copyright will be
+     assigned automatically to {contributor name} (Author) when this is
+     published." (the role label is part of the string, [A11](#a11)) and
+     an "Override" link; Copyright Year is locked with its basis sentence;
+     License URL is locked with "The license will be set automatically to
+     CC Attribution 4.0 when this is published." (Rule 11; Fields).
+   - **The override**: press Override under Copyright Holder, type
+     "Example Society", Save: "Saved" (Rule 11).
+   - **A refused License URL**: press Override under License URL, type
+     "licence" and press Save: "This is not a valid URL." appears under
+     License URL with the summary "Please correct one error. Go to License
+     URL: This is not a valid URL. Jump to next error", and nothing is
+     saved; reload: License URL is locked again with its sentence (Rule 4;
+     Fields).
+   - **Publishing**: publish the item; reopen the page: Copyright Holder
+     "Example Society" (unlocked), Copyright Year the current year,
+     License URL the CC Attribution 4.0 address, all editable (Rule 12).
+   - **The reader's page**: open the landing page: the "License" block
+     shows "Copyright (c) {year} Example Society", the Creative Commons
+     badge with "This work is licensed under a Creative Commons
+     Attribution 4.0 International License." and the License Terms
+     paragraph; on a press the copyright line is a separate line above the
+     block [OMP1](#omp1) (Rule 15).
+   - **No statement blocks**: the same page shows no "Data Availability
+     Statement" and no "Funding Statement" heading, both fields being
+     empty (Rule 15).
+   - **Another License URL**: on "Permissions & Disclosure" replace License
+     URL with "https://example.org/license" and press Save: the landing
+     page's "License" block now shows a link to that address labelled with
+     the copyright statement in place of the badge, the terms below it; on
+     a press the link is labelled "License" [OMP1](#omp1) (Rule 15).
+   - **The override cleared**: clear Copyright Holder and press Save:
+     "Saved"; reload: Copyright Holder is locked again with its sentence
+     and "Override" (Rule 11); the landing page's link now reads "License"
+     and no "Copyright (c)" line shows (Rule 15).
+   - **Terms without a license**: clear License URL and press Save: the
+     landing page's "License" block is the heading and the License Terms
+     paragraph alone; on a press a "License" link that leads nowhere sits
+     above the terms [OMP5](#omp5) (Rule 15).
+   - **The journal without a default license**: on the second journal, the
+     published item's "Permissions & Disclosure" reads Copyright Holder
+     the journal's name, unlocked, no holder having been chosen (Rule 12),
+     and License URL empty and plain-editable, with no description and no
+     "Override" (Rule 11; Fields).
+   - **Control**: that item's landing page has no "License" block, the
+     journal having no default license and no terms (Rule 15).
+     <sup>s5</sup>
+
+6. **Change the submission language**
+
+   Given: Journal Manager, on a scratch journal with two submission
+   languages and one unpublished, single-version scratch submission in
+   the first language, its section requiring abstracts on a journal or
+   preprint server; the submission's Author; for the controls, a
+   published submission and one with two versions; on a journal, an
+   article published into a future issue that is not yet published.
+
+   - **The readout and the button**: any Publication page reads "Current
+     Submission Language: {first language}" with a "Change" button; every
+     stage screen shows the readout without it (Rule 13a).
+   - **Cancel**: press Change: the panel "Change Submission Language For"
+     names the item and offers both languages under Submission Language;
+     Cancel closes it with nothing changed (Rules 13b, 13c).
+   - **The panel's boxes**: press Change again and pick the second
+     language: the warning about metadata and copied names appears with a
+     Title box (required) in the second language and, in a section that
+     requires abstracts, an Abstract box; a press asks for the title only
+     (Rule 13b).
+   - **A refused Confirm** (journal, preprint server): type "Second-language
+     title" as Title, leave the Abstract empty, Confirm: "This field is
+     required." appears under Abstract and nothing is sent ([A14](#a14))
+     (Rule 13b).
+   - **Confirm**: type "Second-language abstract." as Abstract (on a press,
+     the title alone) and Confirm: the screen reloads on Title & Abstract,
+     open in the second language with the new title; the readout names
+     the second language; the first language's title is still there in
+     the column the form's language bar reveals (Rules 3, 13c).
+   - **The copied names**: the contributor's "Edit" form shows the given
+     and family names and the affiliation in the second language, copied
+     from the first (Rule 13c; Side effects).
+   - **Without the button**: on the published item, and on the item with
+     two versions, there is neither readout nor "Change" on any
+     Publication page, while the stage screens keep the readout
+     ([A6](#a6)) (Rule 13a).
+   - **An article in an unpublished issue** (journal only): the article
+     published into the future issue that is not yet published still
+     shows "Change", and confirming a change there ends in the toast "You
+     can not change language of this submission…" with the panel still
+     open ([OJS1](#ojs1)) (Rules 13a, 13c).
+   - **Control**: the Author's Publication pages show no readout and never
+     the button, while their stage screens show the readout; on a preprint
+     server the Author sees no readout anywhere (Rule 13a).
+     <sup>s6</sup>
+
+7. **Reset every item's permissions**
+
+   Given: Journal Manager, on a scratch journal with one published item
+   carrying an overridden Copyright Holder (scenario 5), one unpublished
+   submission and one declined submission, on a journal with Copyright
+   Year set to "Use the article's publication date"; the unpublished
+   submission's Author.
+
+   - **The confirm box**: open Tools › Permissions and press "Reset Article
+     Permissions": the browser's own confirm box reads "Are you sure you
+     wish to reset permissions data for all articles? This action can not
+     be undone." ("… for all preprints? …" on a preprint server; the
+     press's sentence is structurally different [OMP3](#omp3)) (Rule 14).
+   - **Cancel**: nothing changes, and the button stays greyed
+     ([A13](#a13)) (Rule 14).
+   - **OK**: reload, press again, OK: the toast "Article permissions were
+     successfully reset." appears (Rule 14).
+   - **The published item**: its Permissions & Disclosure now shows the
+     journal's default holder instead of "Example Society", and the
+     landing page's copyright line follows (Rule 14).
+   - **Every other submission**: the unpublished and the declined
+     submission's pages also carry filled-in values, unlocked, and each
+     item's Activity Log gains one "Submission metadata updated" line
+     attributed to you ([A3](#a3)) (Rule 14; Side effects).
+   - **The year**: on a journal set to the article's publication date, and
+     on a preprint server, their Copyright Year reads 1970 ([A2](#a2));
+     on a press it reads the current year (Rule 14).
+   - **Nobody else is told**: no email has arrived from the reset, and the
+     Author, signed in, finds no notification of it (Side effects).
+   - **Control**: before OK the published item's Permissions & Disclosure
+     read "Example Society" and the unpublished submission's Copyright
+     Holder and Copyright Year were locked and empty (Rules 11, 12).
+     <sup>s7</sup>
+
+8. **Statements reach the reader**
+
+   Given: Journal Manager, on a scratch journal with a scratch submission.
+
+   - **The settings**: on Settings › Workflow › Metadata enable "Data
+     Availability Statement" and "Funding Statement": the submission's
+     Publication area gains a "Data" entry (Rules 6, 16; Settings).
+   - **The statements**: on "Data" type "Data are held by the authors." as
+     Data Availability Statement and Save; on "Metadata" type "Funded by
+     the Example Society." as Funding Statement and Save (Rule 16;
+     Fields).
+   - **The reader's page**: publish: the landing page shows a "Data
+     Availability Statement" block and a "Funding Statement" block with
+     the texts, in that order (Rule 15).
+   - **The statement disabled**: disable the data availability statement
+     in Settings: the "Data" entry disappears from the workflow (data
+     citations off), and the published page still shows the statement
+     (Rules 15, 16).
+   - **Control**: with both fields empty, scenario 5's published page
+     showed neither heading (Rule 15). <sup>s8</sup>
 
 App-specific:
 
-9. **{OJS} Copyright year from the issue** — Journal Manager, on a
-   scratch journal with Copyright Year set to "Use the issue's
-   publication date" and a back issue published last year: assign an
-   unpublished submission to that issue and publish it. Permissions &
-   Disclosure shows Copyright Year = the issue's year, not this year. The
-   landing page's copyright line agrees. <sup>s9</sup>
-10. **{OMP} A chapter license for an edited volume** — Press Manager: on
-    an Edited Volume's "Permissions & Disclosure" a fourth field,
-    "Default Chapter License URL", appears locked with an Override link
-    describing the license it inherits. On a Monograph the field is
-    absent [OMP4](#omp4). Override it with another license address, Save,
-    reload: the address is kept. <sup>s10</sup>
-11. **{OPS} The license the author chose is already there** — Author,
-    then Preprint Server Manager: submit a preprint choosing a license in
-    the wizard's License section. As the manager, open its "Permissions &
-    Disclosure": License URL holds the chosen address, unlocked (no
-    Override link), while the sentence beneath still names the server's
-    default license ([OPS2](#ops2)). Post the preprint: the landing page's
-    "License" block shows the chosen license's badge and sentence.
-    <sup>s11</sup>
+9. **Copyright year from the issue** {OJS}
+
+   Given: Journal Manager, on a scratch journal with the "CC Attribution
+   4.0" license and Copyright Year set to "Use the issue's publication
+   date", a back issue published last year, a future issue with no
+   publication date yet, and three unpublished scratch submissions.
+
+   - **The dated issue**: assign the first submission to the back issue
+     and publish it: Permissions & Disclosure shows Copyright Year = the
+     issue's year, not this year; the landing page's "Copyright (c)" line
+     agrees (Rules 12, 15).
+   - **The issue without a date**: publish the second submission into the
+     future issue: its Copyright Year reads the current year, the year of
+     publishing (Rule 12).
+   - **The reset on the issue basis**: open Tools › Permissions, press
+     "Reset Article Permissions" and OK: the first article's Copyright
+     Year still reads the issue's year, and the third, unpublished
+     submission's reads the current year (Rule 14).
+   - **Control**: before the publish, the first submission's Copyright
+     Year was locked with the description naming the issue's publication
+     date as its basis (Fields). <sup>s9</sup>
+
+10. **A chapter license for an edited volume** {OMP}
+
+    Given: Press Manager, on a scratch press with an Edited Volume and a
+    Monograph submission.
+
+    - **The Edited Volume**: on its "Permissions & Disclosure" a fourth
+      field, "Default Chapter License URL", appears locked with an Override
+      link describing the license it inherits [OMP4](#omp4) (Fields).
+    - **The override**: press Override, type
+      "https://example.org/chapter-license", Save, reload: the address is
+      kept (Rule 11).
+    - **Control**: on the Monograph the field is absent [OMP4](#omp4)
+      (Fields). <sup>s10</sup>
+
+11. **The license the author chose is already there** {OPS}
+
+    Given: Author, then Preprint Server Manager, on the seeded preprint
+    server.
+
+    - **The wizard**: Author: submit a preprint choosing "CC
+      Attribution-ShareAlike 4.0" in the wizard's License section
+      (Cross-feature interactions).
+    - **"Permissions & Disclosure"**: Preprint Server Manager: open its
+      "Permissions & Disclosure": License URL holds the chosen address,
+      unlocked (no Override link), while the sentence beneath still names
+      the server's default license ([OPS2](#ops2)) (Fields).
+    - **The reader's page**: post the preprint: the landing page's
+      "License" block shows the chosen license's badge and sentence
+      (Rule 15).
+    - **Control**: scenario 5's submission, seeded without a wizard choice,
+      arrives with License URL locked under the same sentence (Rule 11).
+      <sup>s11</sup>
+
+12. **An assistant saves only with the permission**
+
+    Given: Journal Manager and a Copyeditor (on a preprint server, a
+    Section Editor), on the seeded journal, with an unpublished,
+    single-version scratch submission at the stage the participant is
+    assigned to.
+
+    - **The assignment's box**: Journal Manager: on a stage screen's
+      Participants panel open the participant's "Edit Assignment": "Allow
+      this person to make changes to the publication…" arrives unticked
+      for the Copyeditor; on a preprint server it arrives ticked for the
+      Section Editor: untick it and press OK (Rule 2).
+    - **The pages without the permission**: Copyeditor: open the
+      submission's "Title & Abstract": Save is present but disabled and
+      the fields still look editable ([A8](#a8)); type "The" as Prefix and
+      reload: Prefix is empty (Rule 10; Actors row 3). The page reads
+      "Current Submission Language: {language}" with no "Change" after it
+      (Actors row 4; Rule 13a).
+    - **The permission granted**: Journal Manager: open the "Edit
+      Assignment" again, tick the box and press OK (Rule 2).
+    - **The pages with the permission**: Copyeditor: reload "Title &
+      Abstract": Save is offered; type "The" as Prefix and press Save:
+      "Saved" appears beside the button and after a reload Prefix reads
+      "The" (Rule 4; Actors row 3); "Change" now follows the readout
+      (Actors row 4; Rule 13a).
+    - **Control**: the Journal Manager, who holds no assignment on the
+      submission, saves on the same page with "Saved" and sees "Change"
+      beside the readout throughout (Rule 2; Actors rows 3, 4).
+      <sup>s12</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Nothing new to test**:
+  - a Section Editor or Guest Editor opening the pages while assigned to
+    the current stage (Actors row 1): the pages scenario 12's Copyeditor
+    opens and scenario 1's Journal Manager saves on
+  - the "(acting as {user})" suffix on the log line under Login As (Side
+    effects): scenario 1's line, with the real user named
+  - Copyright Holder "Journal" chosen on Settings › Distribution › License
+    (Rule 12): the journal's name scenario 5 reads with no holder chosen
+- **Register carries it**:
+  - A1 (every other Publication page refused while the plain language
+    summary is required; Rule 5; Settings)
+  - A5 (a merely scheduled article still offering "Change"; Rule 13a)
+  - A10 (term suggestions from terms already recorded; Rule 7)
+  - A12 ("Custom copyright statement" accepted with an empty statement;
+    Rule 12; Settings)
+  - A15 (the freshly opened panel acting before its loading settles;
+    Rule 13b)
+  - A17 (the Author's Contributors page offering editing on a new version
+    of a published item; Rule 9)
+  - OMP5 (the press's "License" link that leads nowhere with terms and no
+    license; Rule 15; scenario 5 marks it)
+- **Owned by another feature**:
+  - an assistant assigned to another stage seeing "Publication" with no
+    pages beneath it (Actors row 1; Rule 1; *Workflow screen & stage
+    access*, scenario 3)
+  - the preprint server's author view with the Preprint pages and
+    "Production Tasks & Discussions" only (Rule 1; *Workflow screen &
+    stage access*, scenarios 7 and 10)
+  - a file's name in the new language after a language change (Rule 13c;
+    Side effects; *Submission files*)
+  - the data-citations part of the Data page (Rule 16; *Citations &
+    references*)
+  - the ask/require radio's effect on the wizard (Rule 6; Settings;
+    *Submission wizard*)
+  - the sections' "Do not require abstracts" and "Word Count" settings
+    screen (Settings; *Sections*)
+  - the Roles' "Permit submission metadata edit." setting and the
+    participant checkbox's own screens (Rule 2; Settings; *Roles
+    configuration*, *Stage participants*)
+  - the wizard's Details, "For the Editors" and License steps
+    (Cross-feature interactions; *Submission wizard*)
+  - publishing, scheduling, unpublishing and versions (Cross-feature
+    interactions; *Publish, schedule & versions*)
+  - metadata travelling outward with DOI registration and export (Side
+    effects; *Identifiers*, *Import & export*)
 
 ## Findings register
 
@@ -1651,12 +1944,23 @@ is present on all three apps, "Article Number" on OJS only.
 **s1 — scenario 1 seeding.** One scratch submission past the wizard (any
 stage before publication) in the seeded journal; Journal Manager
 account. The dashboard list renders `fullTitle` (prefix + title), so the
-prefix check reads there or on the workflow header.
+prefix check reads there or on the workflow header. Mail is read in
+the mail catcher (Mailpit, `http://127.0.0.1:8025`), scoped by the
+submitter's throwaway address; the absence read after "Saved" needs a
+positive control the same way (scenarios.md "Mailpit").
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** Scratch journal (the metadata settings are
 mutated) with one scratch submission. Set Plain Language Summary to off
-first, or every Metadata save is refused (A1).
+first, or every Metadata save is refused (A1); the summary bullet
+enables it at "Ask", never "Require". The word-limit and no-abstract
+bullets (OJS, OPS) seed the journal's `sections[]` with `wordCount: 50`
+on the first section and `abstractsNotRequired: true` on a second, with
+one scratch submission in each; the Publisher ID box for publications is
+`enablePublisherId` (OJS "Enable for Publications", OMP "Enable for
+Monographs", OPS "Enable for Preprints"; each suite's S2 ticked its
+app's box and ran green 2026-09-15, the OJS screen read that day
+showing "Enable for Publications" and no "Enable for Articles").
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** A roster Author's own submitted submission
@@ -1688,7 +1992,8 @@ preprint page (OPS).
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** Scratch journal whose License settings are
 set as stated, plus a second scratch journal with no default license and
-empty License Terms for the absence control. The contributor-names
+empty License Terms for the absence control, its one scratch submission
+published for the holder and License URL reads. The contributor-names
 string in the holder description is `Publication::getAuthorString()`
 (names joined with commas/"and", each with its role names in
 parentheses — A11). Live-probed 2026-08-28 end to end on all three
@@ -1702,7 +2007,8 @@ submission; for the controls, one published submission and one with a
 second version (Publish, schedule & versions' "Create New Version").
 For the abstract leg the submission's section must require abstracts
 (a section with "Do not require abstracts" shows the Title box only, as
-does any press). Live-probed 2026-08-28 on all three apps (fn-i). The
+does any press). The Author of the control is the submission's
+throwaway submitter. Live-probed 2026-08-28 on all three apps (fn-i). The
 OJS-only leg: an article published with "Assign To Future Issue and
 Publish Immediately" into an unpublished future issue (Issues › Future
 Issues › "Create Issue"); a seeded published item with no issue is the
@@ -1722,7 +2028,11 @@ Submission" at the Submission stage; OPS "Decline"). The 1970 leg needs
 the journal at "Use the article's publication date" (OJS) or any
 preprint server; a press keeps the current year (fn-h). Live-probed
 2026-08-28 on all three apps (fn-k, f-a2, f-a3); the declined item
-behaved exactly like the unpublished one on each app.
+behaved exactly like the unpublished one on each app. The absence read
+after the reset: the unpublished submission's throwaway submitter, in
+the mail catcher (Mailpit, `http://127.0.0.1:8025`, scoped by that
+address, with a positive control; scenarios.md "Mailpit") and on the
+dashboard after signing in.
 
 <a id="fn-s8"></a>
 **s8 — scenario 8 seeding.** Scratch journal; the "Data" entry's
@@ -1731,7 +2041,11 @@ them). The published page keeps rendering the stored statement (fn-f).
 
 <a id="fn-s9"></a>
 **s9 — scenario 9 seeding.** OJS scratch journal at `copyrightYearBasis`
-= issue, a published back issue dated last year; the fallback (issue
+= issue, a published back issue dated last year and a future issue
+seeded `published: false` (no date); three scratch submissions, the
+second published into the future issue with "Assign To Future Issue and
+Publish Immediately" (continuous publication, the issue still undated),
+the third left unpublished for the reset; the fallback (issue
 without a date → current year) is fn-h. Seeding caveat (live 2026-08-28):
 "Publish Issue" replaced a Date Published entered before publishing
 with today's date, so an article published into it got the current
@@ -1757,6 +2071,24 @@ Attribution-ShareAlike 4.0" chosen; after "Post" the preprint page
 showed "Copyright (c) 2026 Alice Probe (Author)", the CC BY-SA badge and
 "This work is licensed under a Creative Commons Attribution-ShareAlike
 4.0 International License." (f-ops2 for the description).
+
+<a id="fn-s12"></a>
+**s12 — scenario 12 seeding.** Seeded journal with ready accounts:
+`manager.maya` and `copyeditor.carla` (OJS, OMP; the Copyeditor's stage
+is Copyediting, so the scratch submission is walked there with
+`decisions: ['accept']` and seeded `participants: [{username:
+'copyeditor.carla', role: 'copyeditor'}]`, whose row carries the role's
+default, no permission); on OPS `sectioneditor.ana` as `{role:
+'sectionEditor'}` (the seeded server enrols no Copyeditor and has the
+Production stage only; the Moderator's default assignment carries the
+permission, hence the untick first). The assignment is changed on the
+scratch submission only, so the roster stays untouched and the scenario
+runs on the seeded journal like scenario 3. Live-probed 2026-08-28 on
+all three apps (fn-b: with the box unticked the Copyeditor's, on OPS the
+Moderator's, Title & Abstract had Save disabled and nothing typed
+persisted, with it ticked Save worked and persisted; fn-i: the readout
+with "Change" once the permission was ticked; the permission-off readout
+state was not separately captured).
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1 evidence.** `PKP\publication\Repository::validate()`: the

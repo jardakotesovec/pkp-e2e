@@ -2,70 +2,81 @@
 /**
  * @file playwright/tests/U40-publication-metadata.spec.js
  *
- * Publication metadata — OMP suite: one test per canonical COMMON scenario
- * as a press runs it (spec scenarios 1–8, in OMP vocabulary: press, press
- * manager, monograph, catalog book page, series not sections) plus the
- * OMP-specific scenario 10 (chapter licensing on an Edited Volume). The
- * press markers ride inside the common tests: no abstract policy or word
- * counter (OMP2 ✅, in S1), the copyright line printed outside the License
- * block on the book page (OMP1 ✅, in S5/S7), the language-change panel
- * asking for the title only (Rule 13b's press leg, in S6), and the
- * Edited Volume vs Monograph difference (OMP4 ✅, in S10).
+ * Publication metadata — OMP suite: one test per canonical scenario the
+ * spec runs on a press (S1–S8 and S12 common, S10 press-only; S9 is the
+ * journal's issue-year scenario and S11 the preprint server's wizard
+ * license), in the press's own vocabulary: Press Manager, monograph,
+ * catalog book page, series not sections. The press markers ride inside
+ * the common tests: no abstract policy or word counter (OMP2, S1), the
+ * copyright line printed outside the License block on the book page and
+ * the "License" label on a non-CC link (OMP1, S5/S7), the terms-without-
+ * license block asserted as the scenario's own sentence (OMP5, S5), the
+ * language-change panel asking for the title only (Rule 13b's press leg,
+ * S6), the press's own reset-confirm wording asserted only as "not the
+ * journal's sentence" (OMP3, S7) and the Edited Volume's chapter field
+ * (OMP4, S10). S2's word-limit and no-abstract bullets are {OJS OPS} and
+ * do not run here; S12's participant is the press's Copyeditor.
  * Spec: docs/specs/U40-publication-metadata.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register):
- * - A1 🐞 (a required Plain Language Summary blocks every other page's
- *   save): never asserted, and no test runs with the summary at "Require" —
- *   scratch presses stay at the fresh-context default (off), per the spec's
- *   own scenario seeding notes.
- * - A16 ✅ retired (fixed upstream in pkp/pkp-lib#13312, 2026-09-12;
- *   verified 2026-09-14): S3 now presses the permitted Author's Save on
- *   the new version while the other version is still published, waits
- *   for the "Saved" footer and reads "The" back after a reload; after the
- *   unpublish the formerly published version saves the same way.
- * - A17 ❓ (the Author's Contributors page on that new version): never
- *   opened.
- * - A13 🐞 (Cancel leaves the reset button greyed): S7's Cancel leg asserts
- *   only that nothing was reset, then reloads the page before pressing
- *   again — the button's (broken) state is never asserted.
- * - A2 🐞 is OJS/OPS-only (a press stamps the current year); the press's
- *   year is asserted in S7 only for the published item, because the tool's
- *   reach into unpublished/declined submissions is the open question A3 ❓
- *   — neither the reach nor its per-item log lines are asserted.
- * - OMP5 🐞 (a "License" link that leads nowhere with terms but no
- *   license): the terms-without-license state is never built.
- * - OMP3 ❓ (the press's older reset wording): S7 accepts/dismisses the
- *   native confirm without asserting its text.
- * - A8 ❓ (read-only pages keep fields typeable): read-only views assert
- *   the disabled Save button only — nothing types into a read-only field.
- * - A5/A6 ❓ (scheduled-state language change; the vanished readout's
- *   intent), A10 ❓ (term suggestions — S2 types terms and never asserts a
- *   suggestion), A11 ❓ (the "(Author)" role suffix in the automatic
- *   holder — S5 matches the contributor's name, not the full string),
- *   A12 ❓ (empty custom copyright statement — the option is never chosen),
- *   A14 ❓ (journal/preprint-only: a press's language panel has no Abstract
- *   box) are open questions, not coverage gaps.
- * Everything else the spec leaves out is recorded in its Coverage section.
+ * Deliberately NOT covered (register IDs from the spec's Findings register —
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
+ * A2 🐞 (journal/preprint-only; the press's year is asserted as the
+ * scenario's own sentence), A13 🐞 (S7's Cancel asserts only that nothing
+ * was reset and reloads before pressing again), OJS1 🐞 (journal-only),
+ * OMP5 🐞 (S5 asserts the scenario's sentence, never where the link
+ * leads), A3 ❓ (S7 asserts the scenario's own sentence on the unpublished
+ * and declined items), A5 ❓, A6 ❓, A8 ❓ (a read-only page's fields are
+ * asserted typeable only as the scenario's own sentence), A10 ❓, A11 ❓
+ * (S5 matches the contributor's name inside the holder sentence, not the
+ * role suffix), A12 ❓, A14 ❓ (journal/preprint-only), A15 ❓, A17 ❓, OMP3 ❓,
+ * OPS2 ❓. The spec's Coverage section records everything else left out.
  *
- * Seeding: scenario endpoints only; publicknowledge and the seeded roster
- * are read-only (settings mutations run on scratch presses with throwaway
- * users; publicknowledge tests only add their own tagged submissions, per
- * PRINCIPLES A1). Waits are event-based (publication/context API
- * responses, the form footer's "Saved" status, web-first assertions) — no
- * hard-coded sleeps. Everything runs in the parallel `omp` project.
+ * Seeding: scenario endpoints only. S3, S4 and S12 run on the seeded press
+ * with the ready accounts and only add their own tagged submissions; every
+ * other test seeds its own scratch press with throwaway users whose
+ * addresses carry app + test (u40omps1w0…@mail.test), because it changes
+ * press settings, rewrites every submission in the press, or reads a
+ * mailbox (S1's mailbox silence needs a throwaway submitter, footnote s1,
+ * so S1 runs on a scratch press). publicknowledge and the 18 seeded users
+ * are never changed (A1, A7). Every absence is a settled read paired with a
+ * positive control taken the same way; a mailbox silence is bounded by a
+ * discussion email the test itself sends to a second throwaway account
+ * (A8, `pkpMail.expectNone`). Waits are event-based (publication/context
+ * API responses, the form footer's "Saved" status, web-first assertions) —
+ * no hard-coded sleeps. Everything runs in the parallel `omp` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {unpublishFromWorkflow: unpublishDialog} = require('../pages/PublicationPages.js');
+const {
+    TasksPanel,
+    DISCUSSION_TASK,
+} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
 const CC_BY = 'https://creativecommons.org/licenses/by/4.0';
 const CC_BY_SA = 'https://creativecommons.org/licenses/by-sa/4.0';
+const CC_BY_SENTENCE =
+    'This work is licensed under a Creative Commons Attribution 4.0 International License.';
+const PUBLISHED_WARNING =
+    'Warning: This version has been published. Editing it may impact the published content.';
+const PUBLISHED_LOCK = 'This version has been published and can not be edited.';
+const METADATA_UPDATED = 'Submission metadata updated';
+/** The journal's and preprint server's reset confirm sentence (Rule 14). */
+const JOURNAL_RESET_CONFIRM =
+    'Are you sure you wish to reset permissions data for all articles? This action can not be undone.';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
     return `u40omp${scenario}w${testInfo.parallelIndex}${Math.random()
         .toString(36)
         .slice(2, 8)}`;
+}
+
+/** A throwaway user spec for `createContext`; its address names app + test. */
+function scratchUser(tag, suffix, givenName, familyName, roles) {
+    const username = `${tag}${suffix}`;
+    return {username, givenName, familyName, email: `${username}@mail.test`, roles};
 }
 
 /**
@@ -79,6 +90,14 @@ async function openWorkflow(page, contextPath, submissionId, {author = false} = 
     );
     await expect(
         page.getByRole('link', {name: 'Publication', exact: true})
+    ).toBeVisible({timeout: 30_000});
+}
+
+/** From an open workflow view, open a stage screen and wait for its heading. */
+async function openStage(page, label) {
+    await page.getByRole('link', {name: label, exact: true}).click();
+    await expect(
+        page.getByRole('heading', {name: `Workflow: ${label}`})
     ).toBeVisible({timeout: 30_000});
 }
 
@@ -115,9 +134,24 @@ function richBody(page, labelRe) {
     return field(page, labelRe).frameLocator('iframe').first().locator('body');
 }
 
+/** The Prefix box (submission-language column). */
+function prefixInput(page) {
+    return field(page, /^Prefix/).locator('input').first();
+}
+
 /** The publication form's Save button (the only page-level Save). */
 function saveButton(page) {
     return page.getByRole('button', {name: 'Save', exact: true});
+}
+
+/** The "Current Submission Language: {language}" readout. */
+function languageReadout(page, language) {
+    return page.getByText(`Current Submission Language: ${language}`);
+}
+
+/** The readout's "Change" button (Rule 13a). */
+function changeButton(page) {
+    return page.getByRole('button', {name: 'Change', exact: true});
 }
 
 /**
@@ -138,6 +172,17 @@ async function savePublicationForm(page) {
     await expect(
         page.locator('.pkpFormPage__status', {hasText: 'Saved'})
     ).toBeVisible({timeout: 30_000});
+}
+
+/**
+ * Open the header's "Activity Log" window and return its rows carrying
+ * `text` (the caller counts or reads them, then closes the window).
+ */
+async function activityLogRows(page, text) {
+    await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
+    const log = page.getByRole('dialog', {name: /Activity Log/});
+    await expect(log.getByText('Event', {exact: true})).toBeVisible({timeout: 30_000});
+    return log.getByRole('row').filter({hasText: text});
 }
 
 /** Open Settings › Workflow › Metadata on a scratch press. */
@@ -214,21 +259,19 @@ async function publishFromWorkflow(page) {
     ).toBeVisible({timeout: 30_000});
 }
 
-/** Unpublish the open workflow's current publication (confirm dialog). */
+/**
+ * Unpublish the open workflow's current publication (the shared page
+ * object's dialog), resolved once the header offers "Publish" again.
+ */
 async function unpublishFromWorkflow(page) {
-    await page.getByRole('button', {name: 'Unpublish', exact: true}).click();
-    const dialog = page.getByRole('dialog', {name: 'Unpublish'});
-    await expect(dialog).toBeVisible({timeout: 30_000});
-    const unpublished = page.waitForResponse(
-        (r) => r.url().includes('/unpublish') && r.ok(),
-        {timeout: 30_000}
-    );
-    await dialog.getByRole('button', {name: 'Unpublish', exact: true}).click();
-    await unpublished;
+    await unpublishDialog(page);
     await expect(
         page.getByRole('button', {name: 'Publish', exact: true})
     ).toBeVisible({timeout: 30_000});
 }
+
+/** The workflowMenuKey suffix of a Publication page. */
+const PAGE_KEYS = {'Title & Abstract': 'titleAbstract', Metadata: 'metadata'};
 
 /**
  * Open one version's Publication page straight by address, through the
@@ -237,13 +280,19 @@ async function unpublishFromWorkflow(page) {
  * the page heading AND the form's Save button, which renders after its own
  * fetch (a Save read straight after the heading is still absent).
  */
-async function openVersionPage(page, contextPath, submissionId, publicationId, {author = false} = {}) {
+async function openVersionPage(
+    page,
+    contextPath,
+    submissionId,
+    publicationId,
+    {author = false, entry = 'Title & Abstract'} = {}
+) {
     const dashboard = author ? 'mySubmissions' : 'editorial';
     await page.goto(
-        `/index.php/${contextPath}/dashboard/${dashboard}?workflowSubmissionId=${submissionId}&workflowMenuKey=publication_${publicationId}_titleAbstract`
+        `/index.php/${contextPath}/dashboard/${dashboard}?workflowSubmissionId=${submissionId}&workflowMenuKey=publication_${publicationId}_${PAGE_KEYS[entry]}`
     );
     await expect(
-        page.getByRole('heading', {name: 'Publication: Title & Abstract'})
+        page.getByRole('heading', {name: `Publication: ${entry}`})
     ).toBeVisible({timeout: 30_000});
     await expect(saveButton(page)).toBeVisible({timeout: 30_000});
 }
@@ -282,13 +331,14 @@ async function createNewVersionFromWorkflow(page) {
 }
 
 /**
- * From an open workflow view, open the Production stage's Participants
- * panel and the named participant's "Edit Assignment" window. Returns the
- * window and its "Allow this person to make changes to the publication…"
- * box; the caller ticks + OK, or reads + Cancel (a link, pitfall 7).
+ * From an open workflow view, open a stage's Participants panel (Production
+ * unless `stage` names another) and the named participant's "Edit
+ * Assignment" window. Returns the window and its "Allow this person to make
+ * changes to the publication…" box; the caller ticks + OK, or reads +
+ * Cancel (a link, pitfall 7).
  */
-async function openEditAssignment(page, displayName) {
-    await page.getByRole('link', {name: 'Production', exact: true}).click();
+async function openEditAssignment(page, displayName, {stage = 'Production'} = {}) {
+    await openStage(page, stage);
     await page.getByRole('button', {name: new RegExp(`${displayName} More Actions`)}).click();
     await page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
     const dialog = page.getByRole('dialog', {name: 'Edit Assignment'});
@@ -300,10 +350,67 @@ async function openEditAssignment(page, displayName) {
     return {dialog, permissionBox};
 }
 
+/** Tick or untick the assignment's permission box and press OK. */
+async function setAssignmentPermission(assignment, on) {
+    if (on) {
+        await assignment.permissionBox.check();
+    } else {
+        await assignment.permissionBox.uncheck();
+    }
+    await assignment.dialog.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(assignment.dialog).toHaveCount(0, {timeout: 30_000});
+}
+
+/** Close the "Edit Assignment" window without saving (its Cancel is a link). */
+async function cancelEditAssignment(assignment) {
+    await assignment.dialog.getByRole('link', {name: 'Cancel', exact: true}).click();
+    await expect(assignment.dialog).toHaveCount(0, {timeout: 30_000});
+}
+
+/**
+ * On the open stage screen, "Add" a discussion in its "… Tasks & Discussions"
+ * panel with one participant ticked (the creator's own box arrives ticked)
+ * and a message, bounded by the tasks POST. The app emails the ticked
+ * participant, which is what the mailbox and Tasks-bell controls use.
+ */
+async function addDiscussion(page, {name, participantUsername, message}) {
+    const panel = page.locator('[data-cy="discussion-manager"]').first();
+    await expect(panel.getByRole('heading', {name: /Tasks & Discussions$/})).toBeVisible({
+        timeout: 30_000,
+    });
+    await panel.getByRole('button', {name: 'Add', exact: true}).click();
+    const modal = page
+        .locator('[data-cy="active-modal"]')
+        .filter({has: page.locator('input[name="title"]')});
+    await modal.locator('input[name="title"]').fill(name);
+    const participantBox = modal.getByRole('checkbox', {name: new RegExp(participantUsername)});
+    await expect(participantBox).toBeVisible({timeout: 30_000});
+    await participantBox.check();
+    const body = modal.frameLocator('iframe').first().locator('body');
+    await body.click();
+    await body.fill(message);
+    const saved = page.waitForResponse(
+        (r) => r.request().method() === 'POST' && /\/submissions\/\d+\/tasks$/.test(r.url()),
+        {timeout: 30_000}
+    );
+    await modal.getByRole('button', {name: 'Save', exact: true}).click();
+    const response = await saved;
+    expect(response.ok(), `discussion save answered ${response.status()}`).toBe(true);
+    await expect(modal).toHaveCount(0, {timeout: 30_000});
+}
+
 /** The catalog book page URL (publicknowledge is bilingual → /en prefix). */
 function bookUrl(contextPath, submissionId) {
     const prefix = contextPath === PK ? PK_PREFIX : '';
     return `/index.php/${contextPath}${prefix}/catalog/book/${submissionId}`;
+}
+
+/** The book page's own copyright line and License block (OMP1). */
+function copyrightLine(page) {
+    return page.locator('.item.copyright');
+}
+function licenseBlock(page) {
+    return page.locator('.item.license');
 }
 
 // Traces are kept for this file's failures (docs/tracking/ci-triage.md flake
@@ -312,45 +419,68 @@ function bookUrl(contextPath, submissionId) {
 test.use({trace: 'retain-on-failure'});
 
 test.describe('Publication metadata (U40)', () => {
-    test('S1: edit the title and abstract (press: no abstract policy)', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
+    test('S1: edit the title and abstract (press: no abstract policy)', {tag: '@smoke'}, async ({asUser, ompApi, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s1', testInfo);
-        const {submissionId} = await ompApi.createSubmission({
+        const author = scratchUser(tag, 'au', 'Ada', 'Author', ['author']);
+        const other = scratchUser(tag, 'b', 'Bea', 'Author', ['author']);
+        await ompApi.createContext({
             tag,
-            context: PK,
-            submitter: 'author.alex',
-            title: `Submission ${tag}`,
+            users: [scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']), author, other],
         });
+        const [{submissionId}, otherSubmission] = await Promise.all([
+            ompApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: author.username,
+                title: `Submission ${tag}`,
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}b`,
+                context: tag,
+                submitter: other.username,
+                title: `Other ${tag}`,
+            }),
+        ]);
+        const revisedAbstract = 'Revised abstract.';
 
-        const page = await (await asUser('manager.maya')).newPage();
-        await openWorkflow(page, PK, submissionId);
+        const page = await (await asUser(`${tag}mg`)).newPage();
+        await openWorkflow(page, tag, submissionId);
         await openPublicationPage(page, 'Title & Abstract');
 
         // The page's fixed furniture: Prefix with its guidance, Title,
-        // Subtitle, Abstract prefilled with the seeded value.
+        // Subtitle, Abstract prefilled with what the author entered.
         await expect(page.getByText('Examples: A, The')).toBeVisible();
-        await expect(field(page, /^Prefix/)).toBeVisible();
+        await expect(prefixInput(page)).toBeVisible();
         await expect(field(page, /^Subtitle/)).toBeVisible();
         await expect(richBody(page, /^Title\b/)).toContainText(`Submission ${tag}`);
+        await expect(richBody(page, /^Abstract/)).toContainText(`Seeded abstract for ${tag}s.`);
 
-        // Fill prefix and subtitle.
-        await field(page, /^Prefix/).locator('input').first().fill('The');
+        // The save: prefix, subtitle, the title italicized through the
+        // "Formatting" menu that appears once the editor has focus (its
+        // options portal to the document root as a toolbar carrying
+        // Underline, unlike the Abstract's own toolbar), the abstract
+        // replaced. A press shows no word counter (OMP2).
+        await prefixInput(page).fill('The');
         const subtitleBody = richBody(page, /^Subtitle/);
         await subtitleBody.click();
-        await subtitleBody.fill(`Sub ${tag}`);
-
-        // Change the abstract to a 40-word text: a press shows no word
-        // counter and applies no limit or requirement (OMP2).
-        const abstractText = Array.from({length: 40}, (_, i) => `word${i}`).join(' ');
+        await subtitleBody.fill('A field note');
+        const titleBody = richBody(page, /^Title\b/);
+        await titleBody.click();
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.getByRole('button', {name: 'Formatting'}).click();
+        const formatMenu = page
+            .locator('[role="toolbar"]')
+            .filter({has: page.getByRole('button', {name: 'Underline', exact: true})});
+        await formatMenu.getByRole('button', {name: 'Italic', exact: true}).click();
         const abstractBody = richBody(page, /^Abstract/);
         await abstractBody.click();
-        await abstractBody.fill(abstractText);
+        await abstractBody.fill(revisedAbstract);
         await expect(field(page, /^Abstract/).getByText(/Word Count:/)).toHaveCount(0);
         await savePublicationForm(page);
 
-        // Clearing the Title is refused in the browser: summary + field
-        // message, nothing saved.
-        const titleBody = richBody(page, /^Title\b/);
+        // An empty Title is refused in the browser: summary + field
+        // message; nothing is sent (the log control below counts).
         await titleBody.click();
         await page.keyboard.press('ControlOrMeta+a');
         await page.keyboard.press('Delete');
@@ -358,44 +488,44 @@ test.describe('Publication metadata (U40)', () => {
         await expect(page.getByText('Please correct one error.')).toBeVisible({
             timeout: 30_000,
         });
-        await expect(page.getByText('This field is required.').first()).toBeVisible();
+        await expect(
+            page.getByRole('button', {name: /^Go to Title: This field is required\./})
+        ).toBeVisible();
+        await expect(page.getByRole('button', {name: 'Jump to next error'})).toBeVisible();
+        await expect(field(page, /^Title\b/).getByText('This field is required.')).toBeVisible();
+
+        // An empty Abstract: restored title (retyped and italicized again:
+        // a plain retype loses the formatting the reload below reads),
+        // cleared abstract, Save — a press applies no abstract requirement,
+        // so the footer reads "Saved" (OMP2, the scenario's own sentence).
         await titleBody.click();
         await titleBody.fill(`Submission ${tag}`);
-
-        // Italicize the whole title through the "Formatting" menu that
-        // appears once the editor has focus (its options portal to the
-        // document root as a toolbar carrying Underline, unlike the
-        // Abstract's own toolbar).
         await page.keyboard.press('ControlOrMeta+a');
         await page.getByRole('button', {name: 'Formatting'}).click();
-        const formatMenu = page
-            .locator('[role="toolbar"]')
-            .filter({has: page.getByRole('button', {name: 'Underline', exact: true})});
         await formatMenu.getByRole('button', {name: 'Italic', exact: true}).click();
-        await savePublicationForm(page);
-
-        // A reload shows the saved values; the title's italics survived.
-        await openWorkflow(page, PK, submissionId);
-        await openPublicationPage(page, 'Title & Abstract');
-        await expect(field(page, /^Prefix/).locator('input').first()).toHaveValue('The');
-        await expect(richBody(page, /^Subtitle/)).toContainText(`Sub ${tag}`);
-        await expect(richBody(page, /^Abstract/)).toContainText('word39');
-        await expect(richBody(page, /^Title\b/).locator('i')).toContainText(
-            `Submission ${tag}`
-        );
-
-        // A press's abstract is optional: emptied, the form still saves
-        // (OMP2 — no "This field is required." for the abstract).
-        const abstractBody2 = richBody(page, /^Abstract/);
-        await abstractBody2.click();
+        await abstractBody.click();
         await page.keyboard.press('ControlOrMeta+a');
         await page.keyboard.press('Delete');
         await savePublicationForm(page);
 
+        // After a reload: the abstract restored and saved, everything as
+        // saved; the title's italics survived.
+        await abstractBody.click();
+        await abstractBody.fill(revisedAbstract);
+        await savePublicationForm(page);
+        await openWorkflow(page, tag, submissionId);
+        await openPublicationPage(page, 'Title & Abstract');
+        await expect(prefixInput(page)).toHaveValue('The');
+        await expect(richBody(page, /^Subtitle/)).toContainText('A field note');
+        await expect(richBody(page, /^Abstract/)).toContainText(revisedAbstract);
+        await expect(richBody(page, /^Title\b/).locator('i')).toContainText(
+            `Submission ${tag}`
+        );
+
         // The dashboard list renders the full title with the prefix (the
         // side-nav global search flips to the cross-status Search Results
         // view; search commits on Enter only).
-        await page.goto(`/index.php/${PK}/dashboard/editorial`);
+        await page.goto(`/index.php/${tag}/dashboard/editorial`);
         const search = page
             .getByRole('navigation', {name: 'Site Navigation'})
             .getByRole('searchbox')
@@ -406,12 +536,32 @@ test.describe('Publication metadata (U40)', () => {
             timeout: 30_000,
         });
 
-        // Every successful save logged "Submission metadata updated".
-        await openWorkflow(page, PK, submissionId);
-        await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
-        const log = page.getByRole('dialog', {name: /Activity Log/});
-        await expect(log.getByText('Submission metadata updated').first()).toBeVisible({
-            timeout: 30_000,
+        // The log: a new "Submission metadata updated" line.
+        await openWorkflow(page, tag, submissionId);
+        const logRows = await activityLogRows(page, METADATA_UPDATED);
+        await expect(logRows.first()).toBeVisible({timeout: 30_000});
+
+        // Control: the refused save wrote nothing — one line attributed to
+        // the saving manager per "Saved" (three), none for the refusal (the
+        // seeded wizard walk's own lines carry the submitter's name).
+        await expect(logRows.filter({hasText: 'Mona Manager'})).toHaveCount(3);
+        await expect(logRows.filter({hasText: 'Ada Author'})).toHaveCount(
+            (await logRows.count()) - 3
+        );
+
+        // The mailbox: nothing arrived for the submission's Author from the
+        // saves, bounded by a discussion email this test sends to the
+        // other author on their own monograph (A8).
+        const discussion = `Control ${tag}`;
+        await openWorkflow(page, tag, otherSubmission.submissionId);
+        await addDiscussion(page, {
+            name: discussion,
+            participantUsername: other.username,
+            message: `Control message ${tag}.`,
+        });
+        await pkpMail.expectNone({
+            to: author.email,
+            afterControl: {to: other.email, subject: discussion},
         });
     });
 
@@ -421,20 +571,8 @@ test.describe('Publication metadata (U40)', () => {
         await ompApi.createContext({
             tag,
             users: [
-                {
-                    username: `${tag}mg`,
-                    givenName: 'Mona',
-                    familyName: 'Manager',
-                    email: `${tag}mg@mail.test`,
-                    roles: ['manager'],
-                },
-                {
-                    username: `${tag}au`,
-                    givenName: 'Ada',
-                    familyName: 'Author',
-                    email: `${tag}au@mail.test`,
-                    roles: ['author'],
-                },
+                scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
             ],
         });
         const {submissionId} = await ompApi.createSubmission({
@@ -446,8 +584,14 @@ test.describe('Publication metadata (U40)', () => {
 
         const page = await (await asUser(`${tag}mg`)).newPage();
 
-        // Untick every enabled "Enable … metadata" box (a fresh press has
-        // keywords on by default) and save.
+        // Control: on a fresh press the Metadata page shows "Keywords"
+        // (enabled by install default) with a Save button.
+        await openWorkflow(page, tag, submissionId);
+        await openPublicationPage(page, 'Metadata');
+        await expect(field(page, /^Keywords/)).toBeVisible();
+        await expect(saveButton(page)).toBeVisible();
+
+        // Untick every enabled "Enable … metadata" box and save.
         await openMetadataSettings(page, tag);
         const form = metadataSettingsForm(page);
         const checkedBoxes = form.locator('input[type="checkbox"]:checked');
@@ -493,10 +637,10 @@ test.describe('Publication metadata (U40)', () => {
         await expect(removeChip).toHaveCount(0);
         await keywordInput.fill('ocean acidification');
         await keywordInput.press('Enter');
-        await keywordInput.fill(`term${tag}`);
+        await keywordInput.fill(`benthic flux ${tag}`);
         await keywordInput.press('Enter');
-        await expect(page.getByRole('button', {name: `Remove term${tag}`})).toBeVisible();
-        await field(page, /^Coverage/).locator('input').first().fill('Pacific Ocean, 2020');
+        await expect(page.getByRole('button', {name: `Remove benthic flux ${tag}`})).toBeVisible();
+        await field(page, /^Coverage/).locator('input').first().fill('Pacific, 2020s');
         await savePublicationForm(page);
 
         // Reload: both chips and the coverage value are there.
@@ -505,9 +649,9 @@ test.describe('Publication metadata (U40)', () => {
         await expect(
             page.getByRole('button', {name: 'Remove ocean acidification'})
         ).toBeVisible({timeout: 30_000});
-        await expect(page.getByRole('button', {name: `Remove term${tag}`})).toBeVisible();
+        await expect(page.getByRole('button', {name: `Remove benthic flux ${tag}`})).toBeVisible();
         await expect(field(page, /^Coverage/).locator('input').first()).toHaveValue(
-            'Pacific Ocean, 2020'
+            'Pacific, 2020s'
         );
 
         // Disabling Coverage hides the field but keeps the value; on
@@ -526,9 +670,43 @@ test.describe('Publication metadata (U40)', () => {
         await openWorkflow(page, tag, submissionId);
         await openPublicationPage(page, 'Metadata');
         await expect(field(page, /^Coverage/).locator('input').first()).toHaveValue(
-            'Pacific Ocean, 2020',
+            'Pacific, 2020s',
             {timeout: 30_000}
         );
+
+        // Plain Language Summary at "Ask", and the Publisher ID for
+        // monographs (the press's "Enable for Monographs" box; a press has
+        // no Article Number section).
+        await openMetadataSettings(page, tag);
+        await form
+            .getByRole('checkbox', {name: 'Enable plain language summary metadata'})
+            .check();
+        await form
+            .getByRole('radio', {
+                name: 'Ask the author to provide a plain language summary during submission.',
+            })
+            .check();
+        await form.getByRole('checkbox', {name: 'Enable for Monographs', exact: true}).check();
+        await expect(form.getByText('Article Number', {exact: true})).toHaveCount(0);
+        await saveSettingsForm(page, form);
+
+        // Title & Abstract shows "Plain Language Summary" after Abstract…
+        await openWorkflow(page, tag, submissionId);
+        await openPublicationPage(page, 'Title & Abstract');
+        await expect(field(page, /^Plain Language Summary/)).toBeVisible();
+        const labels = await page
+            .locator('label.pkpFormFieldLabel')
+            .evaluateAll((nodes) => nodes.map((n) => (n.textContent || '').trim()));
+        const abstractAt = labels.findIndex((l) => l.startsWith('Abstract'));
+        const summaryAt = labels.findIndex((l) => l.startsWith('Plain Language Summary'));
+        expect(abstractAt).toBeGreaterThanOrEqual(0);
+        expect(summaryAt).toBeGreaterThan(abstractAt);
+
+        // …and the Metadata page also shows "Publisher ID".
+        await openPublicationPage(page, 'Metadata');
+        await expect(field(page, /^Publisher ID/)).toBeVisible();
+        await expect(field(page, /^Keywords/)).toBeVisible();
+        await expect(field(page, /^Article Number/)).toHaveCount(0);
     });
 
     test('S3: the press author before and after publication', async ({asUser, ompApi}, testInfo) => {
@@ -542,28 +720,64 @@ test.describe('Publication metadata (U40)', () => {
             decisions: ['skipExternalReview', 'sendToProduction'],
         });
 
-        // On a press the author's page is read-only from submission on:
-        // the fields render, Save is unavailable.
+        // The author view lists "Title & Abstract" and "Metadata" and no
+        // "Permissions & Disclosure" (the manager's view below has it).
         const authorPage = await (await asUser('author.alex')).newPage();
+        const nativeDialogs = [];
+        authorPage.on('dialog', (dialog) => {
+            nativeDialogs.push(dialog.type());
+            dialog.accept().catch(() => {});
+        });
         await openWorkflow(authorPage, PK, submissionId, {author: true});
+        await expect(
+            authorPage.getByRole('link', {name: 'Title & Abstract', exact: true})
+        ).toBeVisible();
+        await expect(authorPage.getByRole('link', {name: 'Metadata', exact: true})).toBeVisible();
+        await expect(
+            authorPage.getByRole('link', {name: 'Permissions & Disclosure', exact: true})
+        ).toHaveCount(0);
+
+        // On a press the author's page is read-only from submission on:
+        // the fields render, Save is unavailable, and nothing typed
+        // persists on reload.
         await openPublicationPage(authorPage, 'Title & Abstract');
         await expect(richBody(authorPage, /^Title\b/)).toContainText(`Submission ${tag}`);
         await expect(saveButton(authorPage)).toBeDisabled();
+        await prefixInput(authorPage).fill('The');
+        await expect(prefixInput(authorPage)).toHaveValue('The');
+        await openWorkflow(authorPage, PK, submissionId, {author: true});
+        await openPublicationPage(authorPage, 'Title & Abstract');
+        await expect(saveButton(authorPage)).toBeVisible();
+        await expect(prefixInput(authorPage)).toHaveValue('');
+
+        // An unsaved edit: "The" typed, Metadata opened and Title &
+        // Abstract reopened — no prompt (browser or in-app: the one
+        // dialog open stays the workflow window) and Prefix is empty.
+        await prefixInput(authorPage).fill('The');
+        await expect(prefixInput(authorPage)).toHaveValue('The');
+        await openPublicationPage(authorPage, 'Metadata');
+        await expect(authorPage.getByRole('dialog')).toHaveCount(1);
+        expect(nativeDialogs).toEqual([]);
+        await openPublicationPage(authorPage, 'Title & Abstract');
+        await expect(saveButton(authorPage)).toBeVisible();
+        await expect(prefixInput(authorPage)).toHaveValue('');
 
         // The press manager publishes the monograph (the Publish control
         // sits on the Publication pages); the head reads "Status: Published".
         const managerPage = await (await asUser('manager.maya')).newPage();
         await openWorkflow(managerPage, PK, submissionId);
+        await expect(
+            managerPage.getByRole('link', {name: 'Permissions & Disclosure', exact: true})
+        ).toBeVisible();
         await openPublicationPage(managerPage, 'Title & Abstract');
         await publishFromWorkflow(managerPage);
         await expect(statusReadout(managerPage)).toContainText('Published', {timeout: 30_000});
 
         // The author now sees the published-version banner, Save still
         // unavailable.
-        const banner = 'This version has been published and can not be edited.';
         await openWorkflow(authorPage, PK, submissionId, {author: true});
         await openPublicationPage(authorPage, 'Title & Abstract');
-        await expect(authorPage.getByText(banner)).toBeVisible();
+        await expect(authorPage.getByText(PUBLISHED_LOCK)).toBeVisible();
         await expect(saveButton(authorPage)).toBeDisabled();
 
         // The manager ticks "Allow this person to make changes to the
@@ -573,85 +787,77 @@ test.describe('Publication metadata (U40)', () => {
         // ticked" read).
         let assignment = await openEditAssignment(managerPage, 'Alex Author');
         await expect(assignment.permissionBox).not.toBeChecked();
-        await assignment.permissionBox.check();
-        await assignment.dialog.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(assignment.dialog).toHaveCount(0, {timeout: 30_000});
+        await setAssignmentPermission(assignment, true);
 
         // The published version is still read-only for the author, with
         // its banner.
         await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
-        await expect(authorPage.getByText(banner)).toBeVisible();
+        await expect(authorPage.getByText(PUBLISHED_LOCK)).toBeVisible();
         await expect(saveButton(authorPage)).toBeDisabled();
 
         // The manager creates a new version; on it the author finds no
-        // banner and Save offered (Rule 9). That Save is pressed while the
-        // other version is still published (A16 retired 2026-09-14,
-        // header): "The" as Prefix, the footer reads "Saved", and after a
-        // reload Prefix reads "The".
+        // banner and Save offered (Rule 9), and an unsaved "The" is dropped
+        // on this editable page too when Metadata is opened and the page
+        // reopened, with no prompt.
         await openVersionPage(managerPage, PK, submissionId, v1);
         const v2 = await createNewVersionFromWorkflow(managerPage);
         await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
         await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
-        await expect(authorPage.getByText(banner)).toHaveCount(0);
-        const prefixInput2 = field(authorPage, /^Prefix/).locator('input').first();
-        await prefixInput2.fill('The');
+        await expect(authorPage.getByText(PUBLISHED_LOCK)).toHaveCount(0);
+        await prefixInput(authorPage).fill('The');
+        await expect(prefixInput(authorPage)).toHaveValue('The');
+        await openVersionPage(authorPage, PK, submissionId, v2, {author: true, entry: 'Metadata'});
+        await expect(authorPage.getByRole('dialog')).toHaveCount(1);
+        expect(nativeDialogs).toEqual([]);
+        await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
+        await expect(prefixInput(authorPage)).toHaveValue('');
+
+        // The Author's save on the new version, while the other version is
+        // still published: "The" as Prefix, the footer reads "Saved", and
+        // after a reload Prefix reads "The".
+        await prefixInput(authorPage).fill('The');
         await savePublicationForm(authorPage);
         await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
-        await expect(prefixInput2).toHaveValue('The', {timeout: 30_000});
+        await expect(prefixInput(authorPage)).toHaveValue('The', {timeout: 30_000});
+
+        // The other version's own copy: the published version still shows
+        // the banner and its Prefix is empty.
+        await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
+        await expect(authorPage.getByText(PUBLISHED_LOCK)).toBeVisible();
+        await expect(saveButton(authorPage)).toBeDisabled();
+        await expect(prefixInput(authorPage)).toHaveValue('');
+
+        // Control: the lock is the Author's — the manager's Title &
+        // Abstract on the published version stays editable, with the
+        // editor's warning banner (Rule 8).
+        await openVersionPage(managerPage, PK, submissionId, v1);
+        await expect(managerPage.getByText(PUBLISHED_WARNING)).toBeVisible();
+        await expect(saveButton(managerPage)).toBeEnabled();
 
         // The manager unpublishes the published version. Nothing is
         // re-ticked: the assignment's box is read as still ticked (the
         // positive control that the permission survived the publish and
         // the unpublish) and closed with Cancel.
-        await openVersionPage(managerPage, PK, submissionId, v1);
         await unpublishFromWorkflow(managerPage);
         assignment = await openEditAssignment(managerPage, 'Alex Author');
         await expect(assignment.permissionBox).toBeChecked();
-        await assignment.dialog.getByRole('link', {name: 'Cancel', exact: true}).click();
-        await expect(assignment.dialog).toHaveCount(0, {timeout: 30_000});
+        await cancelEditAssignment(assignment);
 
         // The author saves at once on the formerly published version: no
         // banner, "The" as Prefix, Saved, and there after a reload.
         await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
         await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
-        await expect(authorPage.getByText(banner)).toHaveCount(0);
-        const prefixInput = field(authorPage, /^Prefix/).locator('input').first();
-        await prefixInput.fill('The');
+        await expect(authorPage.getByText(PUBLISHED_LOCK)).toHaveCount(0);
+        await prefixInput(authorPage).fill('The');
         await savePublicationForm(authorPage);
         await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
-        await expect(prefixInput).toHaveValue('The');
-
-        // Rule 10: leaving the page with an unsaved edit prompts nothing
-        // and drops the edit. The typed subtitle is read back from the
-        // editor first (so the drop is of a real edit); the switch to
-        // Metadata is bounded by its heading; no browser dialog and no
-        // in-app dialog other than the workflow window itself appears
-        // (the Unpublish and Create New Version windows above are read
-        // through the same dialog role, the positive control); reopened,
-        // Title & Abstract shows the saved prefix (positive control) and
-        // not the subtitle.
-        const draftSubtitle = `Draft ${tag}`;
-        const subtitleBody = richBody(authorPage, /^Subtitle/);
-        await subtitleBody.click();
-        await subtitleBody.fill(draftSubtitle);
-        await expect(subtitleBody).toContainText(draftSubtitle);
-        const nativeDialogs = [];
-        authorPage.on('dialog', (dialog) => {
-            nativeDialogs.push(dialog.type());
-            dialog.accept().catch(() => {});
-        });
-        await openPublicationPage(authorPage, 'Metadata', {version: 'Version of Record 1.0'});
-        await expect(authorPage.getByRole('dialog')).toHaveCount(1);
-        expect(nativeDialogs).toEqual([]);
-        await openVersionPage(authorPage, PK, submissionId, v1, {author: true});
-        await expect(prefixInput).toHaveValue('The');
-        await expect(richBody(authorPage, /^Subtitle/)).not.toContainText(draftSubtitle);
+        await expect(prefixInput(authorPage)).toHaveValue('The');
 
         // The new version still offers Save and keeps the "The" saved on
         // it while the other version was published.
         await openVersionPage(authorPage, PK, submissionId, v2, {author: true});
         await expect(saveButton(authorPage)).toBeEnabled({timeout: 30_000});
-        await expect(prefixInput2).toHaveValue('The');
+        await expect(prefixInput(authorPage)).toHaveValue('The');
     });
 
     test('S4: editing a published version warns and reaches readers', async ({asUser, ompApi, page}, testInfo) => {
@@ -665,18 +871,25 @@ test.describe('Publication metadata (U40)', () => {
             decisions: ['skipExternalReview', 'sendToProduction'],
             published: true,
         });
+        const seededAbstract = `Seeded abstract for ${tag}.`;
         const newAbstract = `Edited abstract ${tag}`;
+
+        // Control: before the save the book page shows the abstract as
+        // submitted.
+        await page.goto(bookUrl(PK, submissionId));
+        await expect(page.getByText(seededAbstract)).toBeVisible({timeout: 30_000});
+        await expect(page.getByText(newAbstract)).toHaveCount(0);
 
         const managerPage = await (await asUser('manager.maya')).newPage();
         await openWorkflow(managerPage, PK, submissionId);
         await openPublicationPage(managerPage, 'Title & Abstract');
-        const warning =
-            'Warning: This version has been published. Editing it may impact the published content.';
-        await expect(managerPage.getByText(warning)).toBeVisible();
+        await expect(managerPage.getByText(PUBLISHED_WARNING)).toBeVisible();
 
-        // The same banner on another Publication page.
+        // The same banner on the other Publication pages.
         await openPublicationPage(managerPage, 'Metadata');
-        await expect(managerPage.getByText(warning)).toBeVisible();
+        await expect(managerPage.getByText(PUBLISHED_WARNING)).toBeVisible();
+        await openPublicationPage(managerPage, 'Permissions & Disclosure');
+        await expect(managerPage.getByText(PUBLISHED_WARNING)).toBeVisible();
 
         // The form stays editable; a save changes what readers see at once.
         await openPublicationPage(managerPage, 'Title & Abstract');
@@ -692,6 +905,7 @@ test.describe('Publication metadata (U40)', () => {
 
         await page.goto(bookUrl(PK, submissionId));
         await expect(page.getByText(newAbstract)).toBeVisible({timeout: 30_000});
+        await expect(page.getByText(seededAbstract)).toHaveCount(0);
     });
 
     test('S5: copyright and license — defaults, override, publish, book page', async ({asUser, ompApi, page}, testInfo) => {
@@ -699,6 +913,7 @@ test.describe('Publication metadata (U40)', () => {
         const tag = makeTag('s5', testInfo);
         const controlTag = `${tag}c`;
         const year = String(new Date().getFullYear());
+        const controlPressName = `Scratch context ${controlTag}`;
 
         // Press A: holder "Author", CC BY 4.0, license terms. Press B
         // (control): fresh defaults — no holder, no license, no terms.
@@ -706,32 +921,15 @@ test.describe('Publication metadata (U40)', () => {
             ompApi.createContext({
                 tag,
                 users: [
-                    {
-                        username: `${tag}mg`,
-                        givenName: 'Mona',
-                        familyName: 'Manager',
-                        email: `${tag}mg@mail.test`,
-                        roles: ['manager'],
-                    },
-                    {
-                        username: `${tag}au`,
-                        givenName: 'Alice',
-                        familyName: 'Probe',
-                        email: `${tag}au@mail.test`,
-                        roles: ['author'],
-                    },
+                    scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                    scratchUser(tag, 'au', 'Alice', 'Probe', ['author']),
                 ],
             }),
             ompApi.createContext({
                 tag: controlTag,
                 users: [
-                    {
-                        username: `${controlTag}au`,
-                        givenName: 'Ada',
-                        familyName: 'Author',
-                        email: `${controlTag}au@mail.test`,
-                        roles: ['author'],
-                    },
+                    scratchUser(controlTag, 'mg', 'Mona', 'Manager', ['manager']),
+                    scratchUser(controlTag, 'au', 'Ada', 'Author', ['author']),
                 ],
             }),
         ]);
@@ -758,6 +956,8 @@ test.describe('Publication metadata (U40)', () => {
                 published: true,
             }),
         ]);
+        const licenseSentence =
+            'The license will be set automatically to CC Attribution 4.0 when this is published.';
 
         // Permissions & Disclosure before publishing: the three fields
         // arrive locked with an Override each, their descriptions naming
@@ -767,60 +967,153 @@ test.describe('Publication metadata (U40)', () => {
         const holderField = field(managerPage, /^Copyright Holder/);
         const yearField = field(managerPage, /^Copyright Year/);
         const licenseField = field(managerPage, /^License URL/);
-        await expect(holderField.locator('input').first()).toBeDisabled();
+        const holderInput = holderField.locator('input').first();
+        const yearInput = yearField.locator('input').first();
+        const licenseInput = licenseField.locator('input').first();
+        await expect(holderInput).toBeDisabled();
         await expect(holderField.getByRole('button', {name: 'Override'})).toBeVisible();
         await expect(
             holderField.getByText(/Copyright will be assigned automatically to .*Alice Probe/)
         ).toBeVisible();
-        await expect(yearField.locator('input').first()).toBeDisabled();
+        await expect(yearInput).toBeDisabled();
         await expect(
             yearField.getByText(
                 'The copyright year will be set automatically based on the publication date.'
             )
         ).toBeVisible();
-        await expect(licenseField.locator('input').first()).toBeDisabled();
-        await expect(
-            licenseField.getByText(
-                'The license will be set automatically to CC Attribution 4.0 when this is published.'
-            )
-        ).toBeVisible();
+        await expect(licenseInput).toBeDisabled();
+        await expect(licenseField.getByText(licenseSentence)).toBeVisible();
 
         // Override the holder and save.
         await holderField.getByRole('button', {name: 'Override'}).click();
-        await holderField.locator('input').first().fill('Example Society');
+        await holderInput.fill('Example Society');
         await savePublicationForm(managerPage);
+
+        // A refused License URL: "licence" under Override is refused with
+        // the field message and the summary, nothing saved; after a reload
+        // the field is locked again with its sentence (the holder override
+        // is still there, the positive read).
+        await licenseField.getByRole('button', {name: 'Override'}).click();
+        await licenseInput.fill('licence');
+        await saveButton(managerPage).click();
+        await expect(licenseField.getByText('This is not a valid URL.')).toBeVisible({
+            timeout: 30_000,
+        });
+        await expect(managerPage.getByText('Please correct one error.')).toBeVisible();
+        await expect(
+            managerPage.getByRole('button', {name: /^Go to License URL: This is not a valid URL\./})
+        ).toBeVisible();
+        await expect(managerPage.getByRole('button', {name: 'Jump to next error'})).toBeVisible();
+        await openWorkflow(managerPage, tag, submissionId);
+        await openPublicationPage(managerPage, 'Permissions & Disclosure');
+        await expect(holderInput).toHaveValue('Example Society');
+        await expect(licenseInput).toBeDisabled();
+        await expect(licenseInput).toHaveValue('');
+        await expect(licenseField.getByRole('button', {name: 'Override'})).toBeVisible();
+        await expect(licenseField.getByText(licenseSentence)).toBeVisible();
 
         // Publish; the empty fields fill from the defaults, the override
         // survives, everything is unlocked.
         await publishFromWorkflow(managerPage);
         await openWorkflow(managerPage, tag, submissionId);
         await openPublicationPage(managerPage, 'Permissions & Disclosure');
-        await expect(holderField.locator('input').first()).toHaveValue('Example Society');
-        await expect(holderField.locator('input').first()).toBeEnabled();
+        await expect(holderInput).toHaveValue('Example Society');
+        await expect(holderInput).toBeEnabled();
         await expect(holderField.getByRole('button', {name: 'Override'})).toHaveCount(0);
-        await expect(yearField.locator('input').first()).toHaveValue(year);
-        await expect(licenseField.locator('input').first()).toHaveValue(CC_BY);
+        await expect(yearInput).toHaveValue(year);
+        await expect(yearInput).toBeEnabled();
+        await expect(licenseInput).toHaveValue(CC_BY);
+        await expect(licenseInput).toBeEnabled();
 
         // The book page prints the copyright line as its own line (OMP1)
-        // and the License block with the CC badge sentence and the terms.
+        // and the License block with the CC badge, its sentence and the
+        // terms; no statement blocks, both fields being empty (the License
+        // block on the same page is the positive read).
         await page.goto(bookUrl(tag, submissionId));
-        await expect(page.locator('.item.copyright')).toContainText(
+        await expect(copyrightLine(page)).toContainText(
             `Copyright (c) ${year} Example Society`
         );
-        const licenseBlock = page.locator('.item.license');
-        await expect(licenseBlock).toContainText(
-            'This work is licensed under a Creative Commons Attribution 4.0 International License.'
-        );
-        await expect(licenseBlock).toContainText(`Terms paragraph ${tag}.`);
+        await expect(licenseBlock(page)).toContainText(CC_BY_SENTENCE);
+        await expect(licenseBlock(page).locator('img')).toHaveCount(1);
+        await expect(licenseBlock(page)).toContainText(`Terms paragraph ${tag}.`);
+        await expect(page.locator('.item.dataAvailability')).toHaveCount(0);
+        await expect(page.locator('.item.fundingStatement')).toHaveCount(0);
+        await expect(page.getByRole('heading', {name: 'Data Availability Statement'})).toHaveCount(0);
+        await expect(page.getByRole('heading', {name: 'Funding Statement'})).toHaveCount(0);
+
+        // Another License URL: the block shows a link to that address, on a
+        // press labelled "License" (OMP1), the terms below it, the badge
+        // sentence gone.
+        await licenseInput.fill('https://example.org/license');
+        await savePublicationForm(managerPage);
+        await page.goto(bookUrl(tag, submissionId));
+        const otherLink = licenseBlock(page).getByRole('link', {name: 'License', exact: true});
+        await expect(otherLink).toHaveAttribute('href', 'https://example.org/license');
+        await expect(licenseBlock(page)).toContainText(`Terms paragraph ${tag}.`);
+        await expect(licenseBlock(page)).not.toContainText(CC_BY_SENTENCE);
+        await expect(copyrightLine(page)).toContainText(`Copyright (c) ${year} Example Society`);
+
+        // The override cleared: "Saved"; after a reload the holder is
+        // locked again with its sentence and "Override"; the book page's
+        // link still reads "License" and no "Copyright (c)" line shows.
+        await holderInput.fill('');
+        await savePublicationForm(managerPage);
+        await openWorkflow(managerPage, tag, submissionId);
+        await openPublicationPage(managerPage, 'Permissions & Disclosure');
+        await expect(holderInput).toBeDisabled();
+        await expect(holderField.getByRole('button', {name: 'Override'})).toBeVisible();
+        await expect(
+            holderField.getByText(/Copyright will be assigned automatically to .*Alice Probe/)
+        ).toBeVisible();
+        await page.goto(bookUrl(tag, submissionId));
+        await expect(
+            licenseBlock(page).getByRole('link', {name: 'License', exact: true})
+        ).toBeVisible();
+        await expect(copyrightLine(page)).toHaveCount(0);
+        await expect(page.getByText('Copyright (c)')).toHaveCount(0);
+
+        // Terms without a license: License URL cleared, the block is the
+        // heading and the terms; on a press a "License" link sits above the
+        // terms (OMP5: the scenario's own sentence, never where it leads).
+        await expect(licenseInput).toBeEnabled();
+        await licenseInput.fill('');
+        await savePublicationForm(managerPage);
+        await page.goto(bookUrl(tag, submissionId));
+        await expect(licenseBlock(page).getByRole('heading', {name: 'License'})).toBeVisible();
+        await expect(licenseBlock(page)).toContainText(`Terms paragraph ${tag}.`);
+        await expect(licenseBlock(page)).not.toContainText(CC_BY_SENTENCE);
+        await expect(licenseBlock(page).locator('img')).toHaveCount(0);
+        await expect(licenseBlock(page).locator('a').filter({hasText: 'License'})).toHaveCount(1);
+
+        // The press without a default license: the published item's
+        // Permissions & Disclosure reads the press's name as holder,
+        // unlocked, and License URL empty and plain-editable with no
+        // description and no "Override".
+        const controlManager = await (await asUser(`${controlTag}mg`)).newPage();
+        await openWorkflow(controlManager, controlTag, control.submissionId);
+        await openPublicationPage(controlManager, 'Permissions & Disclosure');
+        const controlHolder = field(controlManager, /^Copyright Holder/);
+        const controlLicense = field(controlManager, /^License URL/);
+        await expect(controlHolder.locator('input').first()).toHaveValue(controlPressName);
+        await expect(controlHolder.locator('input').first()).toBeEnabled();
+        await expect(controlHolder.getByRole('button', {name: 'Override'})).toHaveCount(0);
+        await expect(controlLicense.locator('input').first()).toHaveValue('');
+        await expect(controlLicense.locator('input').first()).toBeEnabled();
+        await expect(controlLicense.getByRole('button', {name: 'Override'})).toHaveCount(0);
+        await expect(
+            controlLicense.getByText(/The license will be set automatically/)
+        ).toHaveCount(0);
+        // (Press A's holder sentence above is the positive control for the
+        // absent description; its Override links for the absent link.)
 
         // Control: no default license and no terms → no License block at
         // all; the press still prints its copyright line (OMP1's press
         // baseline), which also bounds the absence read.
         await page.goto(bookUrl(controlTag, control.submissionId));
-        await expect(page.locator('.item.copyright')).toContainText(
-            `Copyright (c) ${year}`
+        await expect(copyrightLine(page)).toContainText(
+            `Copyright (c) ${year} ${controlPressName}`
         );
-        await expect(page.locator('.item.license')).toHaveCount(0);
+        await expect(licenseBlock(page)).toHaveCount(0);
     });
 
     test('S6: change the submission language (press: title only)', async ({asUser, ompApi}, testInfo) => {
@@ -833,23 +1126,11 @@ test.describe('Publication metadata (U40)', () => {
                 supportedSubmissionLocales: ['en', 'fr_CA'],
             },
             users: [
-                {
-                    username: `${tag}mg`,
-                    givenName: 'Mona',
-                    familyName: 'Manager',
-                    email: `${tag}mg@mail.test`,
-                    roles: ['manager'],
-                },
-                {
-                    username: `${tag}au`,
-                    givenName: 'Ada',
-                    familyName: 'Author',
-                    email: `${tag}au@mail.test`,
-                    roles: ['author'],
-                },
+                scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
             ],
         });
-        const [{submissionId}, published] = await Promise.all([
+        const [{submissionId, publicationId: v1}, published] = await Promise.all([
             ompApi.createSubmission({
                 tag: `${tag}s`,
                 context: tag,
@@ -872,38 +1153,32 @@ test.describe('Publication metadata (U40)', () => {
         await openWorkflow(page, tag, submissionId);
 
         // The stage screen shows the readout without a Change button.
-        await expect(
-            page.getByText('Current Submission Language: English')
-        ).toBeVisible();
-        await expect(page.getByRole('button', {name: 'Change', exact: true})).toHaveCount(0);
+        await expect(languageReadout(page, 'English')).toBeVisible();
+        await expect(changeButton(page)).toHaveCount(0);
 
         // A Publication page shows the readout with the Change button.
         await openPublicationPage(page, 'Title & Abstract');
-        await expect(
-            page.getByText('Current Submission Language: English')
-        ).toBeVisible();
-        const changeButton = page.getByRole('button', {name: 'Change', exact: true});
-        await expect(changeButton).toBeVisible();
+        await expect(languageReadout(page, 'English')).toBeVisible();
+        await expect(changeButton(page)).toBeVisible();
 
         // Cancel closes the panel with nothing changed. Every open is
         // bounded by the panel's own form fetch (changeLanguageMetadata):
         // interacting with a still-loading panel can slip an empty Confirm
-        // past the required check (observed while building this suite —
-        // reported to the spec's register, not asserted either way).
+        // past the required check (A15 — not asserted either way).
         let formLoaded = page.waitForResponse(
             (r) => r.url().includes('changeLanguageMetadata') && r.ok(),
             {timeout: 30_000}
         );
-        await changeButton.click();
+        await changeButton(page).click();
         const panel = page.getByRole('dialog', {name: /Change Submission Language/});
         await expect(panel).toBeVisible({timeout: 30_000});
+        await expect(panel.getByText(`Submission ${tag}`)).toBeVisible();
         await formLoaded;
         await expect(panel.getByRole('radio', {name: 'English'})).toBeChecked();
+        await expect(panel.getByRole('radio', {name: 'French (Canada)'})).toBeVisible();
         await panel.getByRole('button', {name: 'Cancel', exact: true}).click();
         await expect(panel).toHaveCount(0, {timeout: 30_000});
-        await expect(
-            page.getByText('Current Submission Language: English')
-        ).toBeVisible();
+        await expect(languageReadout(page, 'English')).toBeVisible();
 
         // Pick French: the warning appears with a required Title box and —
         // on a press — no Abstract box (Rule 13b's press leg).
@@ -911,7 +1186,7 @@ test.describe('Publication metadata (U40)', () => {
             (r) => r.url().includes('changeLanguageMetadata') && r.ok(),
             {timeout: 30_000}
         );
-        await changeButton.click();
+        await changeButton(page).click();
         await expect(panel).toBeVisible({timeout: 30_000});
         await formLoaded;
         await panel.getByRole('radio', {name: 'French (Canada)'}).check();
@@ -951,9 +1226,7 @@ test.describe('Publication metadata (U40)', () => {
         await expect(
             page.getByRole('heading', {name: 'Publication: Title & Abstract'})
         ).toBeVisible({timeout: 60_000});
-        await expect(
-            page.getByText('Current Submission Language: French (Canada)')
-        ).toBeVisible();
+        await expect(languageReadout(page, 'French (Canada)')).toBeVisible();
         await expect(richBody(page, /^Title\b/)).toContainText(frTitle);
 
         // The language bar reveals the English column with the old title
@@ -974,7 +1247,11 @@ test.describe('Publication metadata (U40)', () => {
             .toContain(`Submission ${tag}`);
 
         // The contributor's names were copied into the new language: the
-        // Edit form's Given Name, now opening in French, holds the copy.
+        // Edit form, now opening in French, holds the given and family
+        // names. (The affiliation copy has no seed key — a scratch user
+        // carries no affiliation and the contributor form's affiliation
+        // field is a ROR lookup that dies at the dead-port proxy — so the
+        // names are what this test reads; harness need reported.)
         await openPublicationPage(page, 'Contributors');
         const item = page.getByRole('listitem').filter({hasText: 'Ada Author'}).first();
         await item.getByRole('button', {name: 'Edit', exact: true}).click();
@@ -985,83 +1262,133 @@ test.describe('Publication metadata (U40)', () => {
         await expect(
             contributorPanel.locator('input[name^="givenName"]').first()
         ).toHaveValue('Ada');
+        await expect(
+            contributorPanel.locator('input[name^="familyName"]').first()
+        ).toHaveValue('Author');
         // (No Cancel control on this panel; the next navigation discards it.)
 
-        // Controls: the published item shows neither readout nor Change on
-        // its Publication pages, while its stage screen keeps the readout
-        // without the button.
+        // Without the button: the published item, and the item with two
+        // versions, show neither readout nor Change on their Publication
+        // pages, while their stage screens keep the readout without the
+        // button (A6 — the scenario's own sentence).
         await openWorkflow(page, tag, published.submissionId);
         await openPublicationPage(page, 'Title & Abstract');
         await expect(page.getByText('Current Submission Language:')).toHaveCount(0);
-        await page.getByRole('link', {name: 'Production', exact: true}).click();
-        await expect(
-            page.getByText('Current Submission Language: English')
-        ).toBeVisible({timeout: 30_000});
-        await expect(page.getByRole('button', {name: 'Change', exact: true})).toHaveCount(0);
+        await expect(changeButton(page)).toHaveCount(0);
+        await openStage(page, 'Production');
+        await expect(languageReadout(page, 'English')).toBeVisible({timeout: 30_000});
+        await expect(changeButton(page)).toHaveCount(0);
 
-        // The author's Publication pages never show readout or button.
+        await openWorkflow(page, tag, submissionId);
+        await openVersionPage(page, tag, submissionId, v1);
+        await createNewVersionFromWorkflow(page);
+        await openVersionPage(page, tag, submissionId, v1);
+        await expect(page.getByText('Current Submission Language:')).toHaveCount(0);
+        await expect(changeButton(page)).toHaveCount(0);
+        await openStage(page, 'Submission');
+        await expect(languageReadout(page, 'French (Canada)')).toBeVisible({timeout: 30_000});
+        await expect(changeButton(page)).toHaveCount(0);
+
+        // Control: the author's stage screen shows the readout (never the
+        // button), and their Publication pages show neither. (The author's
+        // view of a published item opens on Title & Abstract, so the stage
+        // screen is reached through its link.)
         const authorPage = await (await asUser(`${tag}au`)).newPage();
-        await openWorkflow(authorPage, tag, submissionId, {author: true});
+        await openWorkflow(authorPage, tag, published.submissionId, {author: true});
+        await openStage(authorPage, 'Production');
+        await expect(languageReadout(authorPage, 'English')).toBeVisible({timeout: 30_000});
+        await expect(changeButton(authorPage)).toHaveCount(0);
         await openPublicationPage(authorPage, 'Title & Abstract');
         await expect(authorPage.getByText('Current Submission Language:')).toHaveCount(0);
-        await expect(
-            authorPage.getByRole('button', {name: 'Change', exact: true})
-        ).toHaveCount(0);
+        await expect(changeButton(authorPage)).toHaveCount(0);
     });
 
-    test('S7: reset every monograph\'s permissions', async ({asUser, ompApi, page}, testInfo) => {
+    test('S7: reset every monograph\'s permissions', async ({asUser, ompApi, page, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s7', testInfo);
         const year = String(new Date().getFullYear());
         const pressName = `Scratch context ${tag}`;
+        const author = scratchUser(tag, 'au', 'Ada', 'Author', ['author']);
+        const other = scratchUser(tag, 'b', 'Bea', 'Author', ['author']);
         await ompApi.createContext({
             tag,
-            users: [
-                {
-                    username: `${tag}mg`,
-                    givenName: 'Mona',
-                    familyName: 'Manager',
-                    email: `${tag}mg@mail.test`,
-                    roles: ['manager'],
-                },
-                {
-                    username: `${tag}au`,
-                    givenName: 'Ada',
-                    familyName: 'Author',
-                    email: `${tag}au@mail.test`,
-                    roles: ['author'],
-                },
-            ],
+            users: [scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']), author, other],
         });
-        const {submissionId} = await ompApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: `${tag}au`,
-            title: `Submission ${tag}`,
-            decisions: ['skipExternalReview', 'sendToProduction'],
-            published: true,
-        });
+        // The published item and the declined one are the other author's;
+        // the unpublished submission is the Author's whose silence is read.
+        const [published, unpublished, declined] = await Promise.all([
+            ompApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: other.username,
+                title: `Submission ${tag}`,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                published: true,
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}u`,
+                context: tag,
+                submitter: author.username,
+                title: `Unpublished ${tag}`,
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}d`,
+                context: tag,
+                submitter: other.username,
+                title: `Declined ${tag}`,
+                decisions: ['initialDecline'],
+            }),
+        ]);
 
         // Override the published item's Copyright Holder.
         const managerPage = await (await asUser(`${tag}mg`)).newPage();
-        await openWorkflow(managerPage, tag, submissionId);
+        await openWorkflow(managerPage, tag, published.submissionId);
         await openPublicationPage(managerPage, 'Permissions & Disclosure');
-        const holderField = field(managerPage, /^Copyright Holder/);
-        const holderInput = holderField.locator('input').first();
+        const holderInput = field(managerPage, /^Copyright Holder/).locator('input').first();
+        const yearInput = field(managerPage, /^Copyright Year/).locator('input').first();
         await expect(holderInput).toBeEnabled();
         await holderInput.fill('Example Society');
         await savePublicationForm(managerPage);
 
-        // Tools › Permissions. Cancelling the native confirm resets nothing.
+        // Control: before OK the unpublished submission's Copyright Holder
+        // and Copyright Year are locked and empty; the unpublished and the
+        // declined item's "Submission metadata updated" lines so far (the
+        // seeded wizard walk writes its own, attributed to the submitter)
+        // are counted for the +1 read after the reset.
+        const linesBefore = {};
+        for (const item of [unpublished, declined]) {
+            await openWorkflow(managerPage, tag, item.submissionId);
+            await openPublicationPage(managerPage, 'Permissions & Disclosure');
+            await expect(holderInput).toBeDisabled();
+            await expect(holderInput).toHaveValue('');
+            await expect(yearInput).toBeDisabled();
+            await expect(yearInput).toHaveValue('');
+            const rows = await activityLogRows(managerPage, METADATA_UPDATED);
+            await expect(rows.filter({hasText: 'Mona Manager'})).toHaveCount(0);
+            linesBefore[item.submissionId] = await rows.count();
+        }
+
+        // Tools › Permissions: the browser's own confirm box, whose
+        // sentence on a press is not the journal's (OMP3 — the scenario's
+        // own sentence, its wording not asserted). Cancelling resets
+        // nothing.
+        const confirms = [];
         await managerPage.goto(`/index.php/${tag}/management/tools`);
         await managerPage.getByRole('tab', {name: 'Permissions'}).click();
         const resetButton = managerPage.getByRole('button', {
             name: 'Reset Monograph Permissions',
         });
         await expect(resetButton).toBeVisible({timeout: 30_000});
-        managerPage.once('dialog', (dialog) => dialog.dismiss());
+        managerPage.once('dialog', (dialog) => {
+            confirms.push({type: dialog.type(), message: dialog.message()});
+            dialog.dismiss();
+        });
         await resetButton.click();
-        await openWorkflow(managerPage, tag, submissionId);
+        await expect.poll(() => confirms.length).toBe(1);
+        expect(confirms[0].type).toBe('confirm');
+        expect(confirms[0].message).not.toBe('');
+        expect(confirms[0].message).not.toBe(JOURNAL_RESET_CONFIRM);
+        await openWorkflow(managerPage, tag, published.submissionId);
         await openPublicationPage(managerPage, 'Permissions & Disclosure');
         await expect(holderInput).toHaveValue('Example Society');
 
@@ -1083,17 +1410,78 @@ test.describe('Publication metadata (U40)', () => {
 
         // The override is gone: the press's default holder (its own name)
         // and the current year, and the book page's copyright line follows.
-        await openWorkflow(managerPage, tag, submissionId);
+        await openWorkflow(managerPage, tag, published.submissionId);
         await openPublicationPage(managerPage, 'Permissions & Disclosure');
         await expect(holderInput).toHaveValue(pressName, {timeout: 30_000});
-        await expect(field(managerPage, /^Copyright Year/).locator('input').first()).toHaveValue(
-            year
-        );
+        await expect(yearInput).toHaveValue(year);
 
-        await page.goto(bookUrl(tag, submissionId));
-        await expect(page.locator('.item.copyright')).toContainText(
+        await page.goto(bookUrl(tag, published.submissionId));
+        await expect(copyrightLine(page)).toContainText(
             `Copyright (c) ${year} ${pressName}`
         );
+
+        // Every other submission: the unpublished and the declined one
+        // carry filled-in values, unlocked, with the press's current year
+        // (A3, A2 — the scenario's own sentences), and each Activity Log
+        // gained one "Submission metadata updated" line attributed to the
+        // manager.
+        for (const item of [unpublished, declined]) {
+            await openWorkflow(managerPage, tag, item.submissionId);
+            await openPublicationPage(managerPage, 'Permissions & Disclosure');
+            await expect(holderInput).toHaveValue(pressName, {timeout: 30_000});
+            await expect(holderInput).toBeEnabled();
+            await expect(yearInput).toHaveValue(year);
+            await expect(yearInput).toBeEnabled();
+            const rows = await activityLogRows(managerPage, METADATA_UPDATED);
+            await expect(rows).toHaveCount(linesBefore[item.submissionId] + 1, {
+                timeout: 30_000,
+            });
+            await expect(rows.filter({hasText: 'Mona Manager'})).toHaveCount(1);
+        }
+
+        // Nobody else is told. The mailbox: nothing arrived for the
+        // unpublished submission's Author from the reset, bounded by a
+        // discussion email this test sends to the other author on the
+        // published item after the reset (A8).
+        const discussion = `Control ${tag}`;
+        await openWorkflow(managerPage, tag, published.submissionId);
+        await openStage(managerPage, 'Production');
+        await addDiscussion(managerPage, {
+            name: discussion,
+            participantUsername: other.username,
+            message: `Control message ${tag}.`,
+        });
+        await pkpMail.expectNone({
+            to: author.email,
+            afterControl: {to: other.email, subject: discussion},
+        });
+
+        // The Author, signed in, finds no notification: the Tasks bell has
+        // no badge and its window reads "No Items"; the other author's
+        // bell, read the same way, carries the discussion (the positive
+        // control).
+        const authorPage = await (await asUser(author.username)).newPage();
+        await authorPage.goto(`/index.php/${tag}/dashboard/mySubmissions`);
+        const authorTasks = new TasksPanel(authorPage);
+        await authorTasks.expectCount(0);
+        await authorTasks.open();
+        await expect(authorTasks.noItems()).toBeVisible({timeout: 30_000});
+        await expect(authorTasks.rows()).toHaveCount(0);
+
+        const otherPage = await (await asUser(other.username)).newPage();
+        await otherPage.goto(`/index.php/${tag}/dashboard/mySubmissions`);
+        const otherTasks = new TasksPanel(otherPage);
+        await expect(otherTasks.bell()).toHaveText(/Tasks\s*[1-9]/, {timeout: 30_000});
+        await otherTasks.open();
+        await expect(
+            otherTasks.row(
+                DISCUSSION_TASK({
+                    creatorName: 'Mona Manager',
+                    name: discussion,
+                    message: `Control message ${tag}.`,
+                })
+            )
+        ).toHaveCount(1, {timeout: 30_000});
     });
 
     test('S8: statements reach the reader', async ({asUser, ompApi, page}, testInfo) => {
@@ -1102,20 +1490,8 @@ test.describe('Publication metadata (U40)', () => {
         await ompApi.createContext({
             tag,
             users: [
-                {
-                    username: `${tag}mg`,
-                    givenName: 'Mona',
-                    familyName: 'Manager',
-                    email: `${tag}mg@mail.test`,
-                    roles: ['manager'],
-                },
-                {
-                    username: `${tag}au`,
-                    givenName: 'Ada',
-                    familyName: 'Author',
-                    email: `${tag}au@mail.test`,
-                    roles: ['author'],
-                },
+                scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
             ],
         });
         const {submissionId} = await ompApi.createSubmission({
@@ -1126,8 +1502,8 @@ test.describe('Publication metadata (U40)', () => {
             decisions: ['skipExternalReview', 'sendToProduction'],
             published: true,
         });
-        const dataStatement = `Data are available on request ${tag}.`;
-        const fundingStatement = `Funded by the Example Fund ${tag}.`;
+        const dataStatement = `Data are held by the authors ${tag}.`;
+        const fundingStatement = `Funded by the Example Society ${tag}.`;
 
         // Control: before anything is filled the book page shows neither
         // block (bounded by the page having rendered its title).
@@ -1165,12 +1541,16 @@ test.describe('Publication metadata (U40)', () => {
         await fundingBody.fill(fundingStatement);
         await savePublicationForm(managerPage);
 
-        // Both blocks reach the reader.
+        // Both blocks reach the reader, the data availability block first.
         await page.goto(bookUrl(tag, submissionId));
         await expect(page.locator('.item.dataAvailability')).toContainText(dataStatement);
         await expect(page.locator('.item.fundingStatement')).toContainText(
             fundingStatement
         );
+        const blocks = page.locator('.item.dataAvailability, .item.fundingStatement');
+        await expect(blocks).toHaveCount(2);
+        await expect(blocks.nth(0)).toHaveClass(/dataAvailability/);
+        await expect(blocks.nth(1)).toHaveClass(/fundingStatement/);
 
         // Disabling the statement removes the "Data" entry (data citations
         // are off on a fresh press) but readers keep seeing the statement.
@@ -1198,20 +1578,8 @@ test.describe('Publication metadata (U40)', () => {
         await ompApi.createContext({
             tag,
             users: [
-                {
-                    username: `${tag}mg`,
-                    givenName: 'Mona',
-                    familyName: 'Manager',
-                    email: `${tag}mg@mail.test`,
-                    roles: ['manager'],
-                },
-                {
-                    username: `${tag}au`,
-                    givenName: 'Ada',
-                    familyName: 'Author',
-                    email: `${tag}au@mail.test`,
-                    roles: ['author'],
-                },
+                scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
             ],
         });
         const managerPage = await (await asUser(`${tag}mg`)).newPage();
@@ -1260,11 +1628,100 @@ test.describe('Publication metadata (U40)', () => {
         await expect(chapterField.locator('input').first()).toBeEnabled();
         await expect(chapterField.getByRole('button', {name: 'Override'})).toHaveCount(0);
 
-        // A Monograph has no such field — bounded by the page's other
-        // license fields rendering.
+        // Control: a Monograph has no such field — bounded by the page's
+        // other license fields rendering.
         await openWorkflow(managerPage, tag, monograph.submissionId);
         await openPublicationPage(managerPage, 'Permissions & Disclosure');
         await expect(field(managerPage, /^License URL/)).toBeVisible();
         await expect(field(managerPage, /^Default Chapter License URL/)).toHaveCount(0);
+    });
+
+    test('S12: a copyeditor saves only with the permission', async ({asUser, ompApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        // A monograph walked to Copyediting (the Copyeditor's stage) with
+        // the seeded Copyeditor assigned; the row carries the role's
+        // default, which on a press is no permission (footnote s12).
+        const {submissionId} = await ompApi.createSubmission({
+            tag,
+            context: PK,
+            submitter: 'author.alex',
+            title: `Submission ${tag}`,
+            decisions: ['skipExternalReview'],
+            participants: [{username: 'copyeditor.carla', role: 'copyeditor'}],
+        });
+
+        // The assignment's box arrives unticked for the Copyeditor.
+        const managerPage = await (await asUser('manager.maya')).newPage();
+        await openWorkflow(managerPage, PK, submissionId);
+        let assignment = await openEditAssignment(managerPage, 'Carla Copyeditor', {
+            stage: 'Copyediting',
+        });
+        await expect(assignment.permissionBox).not.toBeChecked();
+        await cancelEditAssignment(assignment);
+
+        // Control, before: the Press Manager, who holds no assignment,
+        // saves on the page with "Saved" and sees "Change" beside the
+        // readout.
+        await openPublicationPage(managerPage, 'Title & Abstract');
+        await expect(languageReadout(managerPage, 'English')).toBeVisible();
+        await expect(changeButton(managerPage)).toBeVisible();
+        const managerSubtitle = richBody(managerPage, /^Subtitle/);
+        await managerSubtitle.click();
+        await managerSubtitle.fill(`Control ${tag}`);
+        await savePublicationForm(managerPage);
+
+        // The pages without the permission: Save present but disabled,
+        // the fields still typeable (A8 — the scenario's own sentence);
+        // "The" typed as Prefix is gone after a reload; the readout with
+        // no "Change" after it.
+        const copyeditorPage = await (await asUser('copyeditor.carla')).newPage();
+        await openWorkflow(copyeditorPage, PK, submissionId);
+        await openPublicationPage(copyeditorPage, 'Title & Abstract');
+        await expect(saveButton(copyeditorPage)).toBeVisible();
+        await expect(saveButton(copyeditorPage)).toBeDisabled();
+        await expect(prefixInput(copyeditorPage)).toBeEnabled();
+        await prefixInput(copyeditorPage).fill('The');
+        await expect(prefixInput(copyeditorPage)).toHaveValue('The');
+        await expect(languageReadout(copyeditorPage, 'English')).toBeVisible();
+        await expect(changeButton(copyeditorPage)).toHaveCount(0);
+        await openWorkflow(copyeditorPage, PK, submissionId);
+        await openPublicationPage(copyeditorPage, 'Title & Abstract');
+        await expect(saveButton(copyeditorPage)).toBeDisabled();
+        await expect(prefixInput(copyeditorPage)).toHaveValue('');
+        await expect(richBody(copyeditorPage, /^Subtitle/)).toContainText(`Control ${tag}`);
+
+        // The permission granted: the box ticked and OK.
+        await openWorkflow(managerPage, PK, submissionId);
+        assignment = await openEditAssignment(managerPage, 'Carla Copyeditor', {
+            stage: 'Copyediting',
+        });
+        await expect(assignment.permissionBox).not.toBeChecked();
+        await setAssignmentPermission(assignment, true);
+
+        // The pages with the permission: Save offered; "The" as Prefix
+        // saves with "Saved" and is there after a reload; "Change" now
+        // follows the readout.
+        await openWorkflow(copyeditorPage, PK, submissionId);
+        await openPublicationPage(copyeditorPage, 'Title & Abstract');
+        await expect(saveButton(copyeditorPage)).toBeEnabled({timeout: 30_000});
+        await expect(languageReadout(copyeditorPage, 'English')).toBeVisible();
+        await expect(changeButton(copyeditorPage)).toBeVisible();
+        await prefixInput(copyeditorPage).fill('The');
+        await savePublicationForm(copyeditorPage);
+        await openWorkflow(copyeditorPage, PK, submissionId);
+        await openPublicationPage(copyeditorPage, 'Title & Abstract');
+        await expect(prefixInput(copyeditorPage)).toHaveValue('The', {timeout: 30_000});
+        await expect(changeButton(copyeditorPage)).toBeVisible();
+
+        // Control, after: the manager still saves with "Saved" and still
+        // sees "Change" beside the readout.
+        await openWorkflow(managerPage, PK, submissionId);
+        await openPublicationPage(managerPage, 'Title & Abstract');
+        await expect(changeButton(managerPage)).toBeVisible();
+        await expect(prefixInput(managerPage)).toHaveValue('The');
+        await managerSubtitle.click();
+        await managerSubtitle.fill(`Control after ${tag}`);
+        await savePublicationForm(managerPage);
     });
 });

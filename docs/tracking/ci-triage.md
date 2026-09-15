@@ -294,7 +294,11 @@ trips.
   row's "More Actions" button detached and re-attached for the whole
   180 s test timeout, one of two reds in 216; red alone the same way on
   that used database afterwards, `.reports/U25/rerun-ojs-u30s4.log`,
-  3.0 min).
+  3.0 min). **Red again 2026-09-15 evening** (U40 revision session, the
+  first OJS final at four workers on a reset database,
+  `.reports/U40/final-run-ojs-attempt1.log`: the same button detached and
+  re-attached until the browser closed at the 180 s timeout, the one red
+  in 221 with the 13 serial tests skipped behind it).
 - **Login smoke's profile probe landing on the login page under load**
   (shared `login.spec.js`, OJS twice and OMP once). In the sync session's first OJS
   final at four workers 2026-09-15 (a reset database, the perf round-2
@@ -323,8 +327,13 @@ trips.
   session's first OJS final at four workers on a reset database the same
   evening, `.reports/U29/final-run-ojs-attempt1.log`: `reader.rosa` again,
   the one red of 220, the 13 serial tests skipped behind it; green alone
-  in 15.5 s, `.reports/U29/rerun-ojs-login.log`). Next step: the
-  cookie-jar read above, for the maintenance session, first thing.
+  in 15.5 s, `.reports/U29/rerun-ojs-login.log`). **Fifth sighting** (the
+  U40 revision session's second OJS final at four workers on a reset
+  database the same evening, `.reports/U40/final-run-ojs-attempt2.log`:
+  `reader.rosa` again, the one red of 221, the 13 serial tests skipped
+  behind it; green alone right after, `.reports/U40/rerun-ojs-login.log`).
+  Next step: the cookie-jar read above, for the maintenance session,
+  first thing.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the
