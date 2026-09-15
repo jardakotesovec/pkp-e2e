@@ -103,6 +103,34 @@ combination measured 402 s then), so compare within this table only. The
 patch is worth a sixth of the suite on top of everything merged; it goes
 upstream with the installer PR as an undocumented setting.
 
+## Everything in (2026-09-15)
+
+Both pkp-lib changes were merged upstream on 2026-09-15 (`2eb00ced8` the
+installer fix, `77b76d766` the persistent connection, documented in the
+config templates by the team) and the app tips point at them, so from here
+every run carries the whole of rounds 1 and 2.
+
+| suite | workers | 13 Sep baseline | everything in | |
+|---|---|---|---|---|
+| OJS | 4 | 705 s | **423 s** | −40%, all green |
+| OJS | 8 | 578 s | **328 s** (parallel span 282 s) | −43%, three retried flakes inside |
+| OMP | 8 | 565 s | parallel project 408 s | see below |
+| OPS | 8 | 253 s | parallel project 207 s | see below |
+
+OMP and OPS went red locally on U40 S3 (the author's publication save
+never posts) in both attempts, so their serial and solo projects did not
+run and the table gives the parallel project's span; OJS's U40 S3 passes.
+The same commits are green on CI, the test fails alone locally with the
+persistent connection on and off alike, and the UI bundles were rebuilt
+with the update, so the cause is a local difference (PHP 8.4 here, 8.3 on
+the runner, is the first thing to check) and belongs to the maintenance
+session, not to this round.
+
+CI at the same tips, one dispatch sample (run 34949343760): OJS parallel
+summed 3,468 s against yesterday's 4,237 / 4,264 / 3,402 s; OMP 16.2 min;
+OPS 9.4 min; the OJS wall not comparable because U28 S10 failed both
+attempts and skipped the tail.
+
 ## The CI numbers
 
 Runner-to-runner variance decides how these read: the unchanged base
