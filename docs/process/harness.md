@@ -214,6 +214,12 @@ to spot: seeding succeeds and the browser step dies.
 - `PKP_CONFIG_FILE`: absolute path to `config.test.inc.php`
 - `PLAYWRIGHT_BASE_PORT` / `PLAYWRIGHT_WORKERS`: worker 0's port, and the
   worker count (unset = auto-detect, see above)
+- `PLAYWRIGHT_CPU_THROTTLE`: opt-in race amplifier for flake hunting
+  (`shared/playwright/support/throttle.js`): every page of every context
+  runs its main thread that many times slower (DevTools protocol, Chromium
+  only). A short probe at 6 reproduces the main-thread jank a loaded CI
+  runner shows; a long scenario at 2–4 only runs into its own timeouts
+  (2026-09-15). Never in CI or a final.
 - `TEST_API_KEY`: enables and gates `/api/v1/_test/*`. The namespace answers
   404 unless the var is in the server's environment, and 403 unless the
   request's `X-Test-Key` header matches.

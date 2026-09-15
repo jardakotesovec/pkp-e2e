@@ -68,6 +68,16 @@ trips.
   alone in 5 s and in the second full run; U40 S4 red on OMP in the first
   U06 revision final 2026-09-13, green alone in 5.1 s. **Watch condition**: a
   hardened test reds again with retries exhausted.
+  **U40 S4 on OMP, mechanism found 2026-09-15** (a retained trace,
+  `docs/reports/2026-09-15-flake-investigation.md`): `WorkflowPublicationForm`
+  is one component instance for every Publication page, and on a page
+  change it re-fetches the form without clearing the one on screen, so
+  the previous page's form stays editable until the fetch lands and then
+  resets. The test's fill and blur ran on the stale Title & Abstract form
+  18 ms before the re-fetch landed; the PUT carried the seeded abstract.
+  Patch: `docs/reports/2026-09-15-ui-library-publication-form-clear.patch`
+  (clear the form while the next one loads); its A/B is in the report.
+  The U40 OMP file keeps traces on failure since 2026-09-15.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
   runs and passes alone. Last incidents: S1 red in two consecutive local
@@ -138,6 +148,18 @@ trips.
   still reading "2 Details" for the 44-poll wait on "Contributors" after
   Continue, the one red of 214; the class's first local and first OMP
   sighting, beside U04 S10's OMP entry below).
+  **Mechanism found 2026-09-15** (`docs/reports/2026-09-15-flake-investigation.md`):
+  the step rail (`Steps.vue`) animates a 500 ms scroll to the page title
+  after every step change; under a janky main thread Playwright's
+  two-frame stability check passes mid-animation, the mouse-down lands on
+  Continue, the animation's final jump moves the page and the mouse-up
+  lands in the abstract's editor iframe (Playwright validates only the
+  first pointer event of a click). Probe at 6× CPU throttle: 11 of 24
+  presses lost on the stock bundle, 0 of 24 with the reduced-motion patch
+  (`docs/reports/2026-09-15-ui-library-steps-reduced-motion.patch`, for
+  ui-library upstream); the harness now passes `reducedMotion` to the
+  `asUser` contexts, which it never had. The `pressUntil` retry stays
+  until the patch lands. **Watch condition**: unchanged.
 - **A wizard rich-text fill lost to a re-render under load** (U21 S3,
   OPS, local). The Autosave bullet types "Autosave check" into the Title
   box and reads it back; in the 2026-09-12 U21 revision's first OPS final
@@ -187,6 +209,12 @@ trips.
   final at four workers on a reset database,
   `.reports/U24/final-run-ojs-attempt{1,2}.log`: one of two reds in 216,
   in both OJS finals of that session). Green in the sync session's OJS final at four workers 2026-09-14 (229 passed, traces retained).
+  The hottest single flake on CI (23 first-attempt reds in nine days,
+  `docs/reports/2026-09-15-ci-flake-tally.md`), never with a trace of the
+  failing attempt; since 2026-09-15 the U28 file keeps traces on failure
+  (`test.use({trace: 'retain-on-failure'})`), so the next CI red carries
+  one. The mechanism is not the wizard's scroll animation (a legacy jQuery
+  page); read the trace before hardening again.
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a

@@ -306,6 +306,11 @@ function bookUrl(contextPath, submissionId) {
     return `/index.php/${contextPath}${prefix}/catalog/book/${submissionId}`;
 }
 
+// Traces are kept for this file's failures (docs/tracking/ci-triage.md flake
+// watch, 2026-09-15): it holds the hottest single flake on CI, and the option
+// is worker-scoped, so it cannot sit on the one test.
+test.use({trace: 'retain-on-failure'});
+
 test.describe('Publication metadata (U40)', () => {
     test('S1: edit the title and abstract (press: no abstract policy)', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
         test.slow();

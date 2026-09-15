@@ -1,0 +1,26 @@
+diff --git a/src/pages/workflow/components/publication/WorkflowPublicationForm.vue b/src/pages/workflow/components/publication/WorkflowPublicationForm.vue
+index d5da5b38..dafe2001 100644
+--- a/src/pages/workflow/components/publication/WorkflowPublicationForm.vue
++++ b/src/pages/workflow/components/publication/WorkflowPublicationForm.vue
+@@ -45,13 +45,19 @@ const {data: publicationForm, fetch: fetchForm} = useFetch(publicationFormUrl);
+ watch(
+ 	relativeUrl,
+ 	() => {
+-		fetchForm();
++		// This component instance serves every Publication page in turn, so
++		// take the previous page's form off the screen while the next one
++		// loads: anything typed into a form that is about to be replaced
++		// would be lost when the fetch lands.
++		fetchForm({clearData: true});
+ 	},
+ 	{immediate: true},
+ );
+ 
+ watch(publicationForm, (newPublicationForm) => {
+-	newPublicationForm.canSubmit = props.canEdit;
++	if (newPublicationForm) {
++		newPublicationForm.canSubmit = props.canEdit;
++	}
+ });
+ 
+ const displayNoFieldsEnabled = computed(() => {

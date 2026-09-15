@@ -225,6 +225,11 @@ async function openReviewPendingRows(page, title) {
     return {tasks, rows: tasks.row('Review pending.').filter({hasText: title})};
 }
 
+// Traces are kept for this file's failures (docs/tracking/ci-triage.md flake
+// watch, 2026-09-15): it holds the hottest single flake on CI, and the option
+// is worker-scoped, so it cannot sit on the one test.
+test.use({trace: 'retain-on-failure'});
+
 test.describe('reviewer\'s review', () => {
     test('S1: the request appears in the reviewer\'s list', {tag: '@smoke'}, async ({browser, baseURL, ojsApi}, testInfo) => {
         test.slow();

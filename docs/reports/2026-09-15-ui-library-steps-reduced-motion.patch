@@ -1,0 +1,54 @@
+diff --git a/src/components/Steps/Steps.vue b/src/components/Steps/Steps.vue
+index 0c2e0c53..26bca76a 100644
+--- a/src/components/Steps/Steps.vue
++++ b/src/components/Steps/Steps.vue
+@@ -194,9 +194,7 @@ export default {
+ 				this.setStartedLine();
+ 				this.setFocusIn(this.$el.querySelector('.pkpStep:not([hidden])'));
+ 				if (this.scrollTo) {
+-					this.$scrollTo(this.scrollTo, 500, {
+-						offset: -50,
+-					});
++					this.scrollToTop();
+ 				}
+ 			});
+ 		},
+@@ -245,6 +243,38 @@ export default {
+ 			this.steps.forEach((step) => step.isActive(step.id === stepId));
+ 		},
+ 
++		/**
++		 * Bring the top of the steps back into view after a step change.
++		 *
++		 * The scroll is animated unless the user asked for reduced motion
++		 * (WCAG 2.3.3). A page that keeps moving for 500ms after the step
++		 * changed also moves whatever sits under the pointer, so a press
++		 * started on a button during the animation can end on another
++		 * element and be lost; with reduced motion the jump is instant.
++		 */
++		scrollToTop() {
++			const reduceMotion =
++				typeof window.matchMedia === 'function' &&
++				window.matchMedia('(prefers-reduced-motion: reduce)').matches;
++			if (!reduceMotion) {
++				this.$scrollTo(this.scrollTo, 500, {
++					offset: -50,
++				});
++				return;
++			}
++			const target =
++				typeof this.scrollTo === 'string'
++					? document.querySelector(this.scrollTo)
++					: this.scrollTo;
++			const el = target && target.$el ? target.$el : target;
++			if (el && typeof el.getBoundingClientRect === 'function') {
++				window.scrollTo(
++					window.scrollX,
++					window.scrollY + el.getBoundingClientRect().top - 50,
++				);
++			}
++		},
++
+ 		/**
+ 		 * Set the current step
+ 		 *

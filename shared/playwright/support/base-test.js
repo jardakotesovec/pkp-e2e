@@ -27,6 +27,7 @@ const base = require('@playwright/test');
 const {VALIDATION_PORT_OFFSET} = require('../config-factory.js');
 const {ensureAuthStateFor} = require('./auth.js');
 const {disableMotion} = require('./motion.js');
+const {throttleCpu} = require('./throttle.js');
 const {PkpApi} = require('./api.js');
 const {PkpMail} = require('./mail.js');
 
@@ -63,6 +64,7 @@ const test = base.test.extend({
     // Kill animations in the default context (and thus `page`) — see motion.js.
     context: async ({context}, use) => {
         await disableMotion(context);
+        await throttleCpu(context);
         await use(context);
     },
 
@@ -78,8 +80,9 @@ const test = base.test.extend({
         const openedContexts = [];
         await use(async (username) => {
             const storageState = await ensureAuthStateFor(browser, username, {baseURL});
-            const context = await browser.newContext({baseURL, storageState});
+            const context = await browser.newContext({baseURL, storageState, reducedMotion: 'reduce'});
             await disableMotion(context);
+            await throttleCpu(context);
             openedContexts.push(context);
             return context;
         });
