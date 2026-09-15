@@ -437,7 +437,10 @@ from the menu belongs to its own feature.
     Unpublishing the last published version sends it back the same way,
     automatically, to the stage it was published from; the panel then lands
     on that stage (Rule 11), and a submission that is in Done yet no longer
-    published cannot be met on these screens. Two header buttons let a
+    published cannot be met on these screens. Done is a resting place, not
+    a stage files are attached to, yet the discussion attacher's "Select
+    submission stage" list offers it, disabled, on every submission ⚠
+    [A10](#a10). Two header buttons let a
     deciding editor (the roles the Actors table names) move it by hand:
     - 18a. **"Return to Workflow"**, offered while the submission rests in
       Done. It opens a dialog titled "Return to Workflow" reading "Return
