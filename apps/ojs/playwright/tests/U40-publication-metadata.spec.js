@@ -184,6 +184,11 @@ async function configureLicenseSettings(page, contextPath, {holder, license, ter
     await saved;
 }
 
+// Traces are kept for this file's failures (docs/tracking/ci-triage.md flake
+// watch, 2026-09-15): S3's Title & Abstract section rendered empty once in a
+// local run, and the option is worker-scoped, so it cannot sit on the one test.
+test.use({trace: 'retain-on-failure'});
+
 test.describe('publication metadata', () => {
     test('S1: edit the title and abstract; an empty title is refused', {tag: '@smoke'}, async ({asUser, ojsApi}, testInfo) => {
         test.slow();

@@ -50,6 +50,9 @@ trips.
   window widens. The harness mitigates with outcome-keyed retries and
   content-verified saves (U40 S4 on OJS and OPS, U49 S11 on OJS since
   2026-09-01); the fix is upstream. Reported to the team 2026-08-29.
+  U26 S6 on OJS joined the list 2026-09-15 (the maintainer's second local
+  8-worker run at the merged tips, `.reports/flake-local/run2.log`: the
+  new-round wizard's composer mask still up after 30 s), green alone 2 of 2.
   Last incidents: U21 S11 red on OMP with its retry exhausted 2026-09-03 (run
   33745718330), green on the targeted rerun; U40 S6 then U40 S4 red on OMP in
   two consecutive local final runs 2026-09-05 (U29 session, load average ~15
@@ -128,7 +131,11 @@ trips.
   row's expected indicator count, opens the candidates in turn and
   returns the popover naming the reviewer (OJS S9's two Julia legs;
   the OMP S9 already tolerated either order). Green alone on OJS and OMP
-  (14 s each). **Watch condition**: a red with the hardened opener.
+  (14 s each). Seen 2026-09-15 in the maintainer's first local 8-worker run
+  at the merged tips (`.reports/flake-local/run1.log`) at an earlier point:
+  the search for the tagged row after the reviewer's accept found nothing
+  in 30 s (the hardened opener was not reached); green alone 2 of 2.
+  **Watch condition**: a red with the hardened opener.
 - **A wizard press swallowed the instant a step becomes current** (U21
   S10 and S12, OJS, CI only). CI run 34215183797 (2026-09-08, pkp-e2e
   `main` at `aa12a61`, a docs-only push) red on both attempts of S12: the
@@ -447,6 +454,59 @@ trips.
   dashboard and Add Reviewer classes above: a list fetched again after
   the window closes. **Watch condition**: a second incident; then read
   whether the panel's reload after the window's save is awaited.
+- **"Declined" count read while another test declines on the shared
+  journal** (U24 S14, OJS, local 8 workers, reproducible). The test reads
+  the sidebar's "Declined" count on `publicknowledge`, deletes its own
+  declined submission and expects the count one lower; the count is
+  journal-wide, and U26 S10 (decline, revert, delete on the same journal)
+  declines between the read and the assertion when the two overlap. Red in
+  the maintainer's first two local 8-worker runs at the merged tips
+  2026-09-15 (`.reports/flake-local/run{1,2}.log`, U26 S10 finishing
+  alongside both times), green in the two runs where S14 finished first;
+  alone, the pair on two workers with `--repeat-each 4` reds S14 2 of 4
+  (`.reports/flake-local/collision-s14-s10.log`). U22 S3 and U25 S4 also
+  leave declined submissions on that journal. Not seen at four workers on
+  the VM or CI. **Fix (test-side, queued)**: seed S14's declined submission
+  on a scratch journal so the count is 1 → 0, or assert against the API's
+  declined total read at the same moment.
+- **Tasks window rows in a different order between two reads** (U05 S7,
+  OJS, once). The site-level Tasks window and the journal's listed the
+  same 20 rows in a different order among rows created in the same second
+  by parallel workers, and the test's three-read retry never agreed
+  (2026-09-15, the maintainer's third local 8-worker run at the merged
+  tips, `.reports/flake-local/run3.log`); green alone 2 of 2.
+  `TaskNotificationsGridHandler` orders by `created_at desc` alone, so
+  ties have no stable order. **Fix (test-side, queued)**: compare the two
+  reads sorted, the claim being "the same rows". Upstream nit worth a
+  line to the team: a secondary order on the notification id.
+- **Author's Title & Abstract section empty after the manager's publish**
+  (U40 S3, OJS, once, local). After the manager published, the author's
+  reload fetched the submission and the publication (both 200 in worker
+  4's server log, `.reports/flake-local/server-logs-run3/server-8004.log`)
+  but the section under "Publication: Title & Abstract" showed neither
+  the "This version has been published and can not be edited." notice nor
+  the form for 30 s, and no `_components/titleAbstract` request followed
+  in 37 s (2026-09-15, `.reports/flake-local/run3.log`,
+  `results-run3/U40-*/error-context.md`). The section's items are empty
+  while `selectedPublication` is null (`useWorkflowConfigOJS._getItems`);
+  green alone 3 of 3 and in the other three runs. The OJS U40 file now
+  keeps traces on failure (`test.use({trace: 'retain-on-failure'})`, like
+  the OMP one). **Watch condition**: a red with the trace; then read
+  whether the publication fetch was aborted by a second `selectPublicationId`.
+- **Dashboard user menu not visible 10 s after sign-in under load** (U01
+  S1, OJS, once). The sign-in landed on `/dashboard/editorial` (the URL
+  committed) but `[data-cy="app-user-nav"]` was not visible within the
+  default 10 s (2026-09-15, the maintainer's second local 8-worker run at
+  the merged tips, `.reports/flake-local/run2.log`); green alone 2 of 2.
+  **Watch condition**: a second sighting; then give the landing a 30 s wait.
+- **Dashboard heading "(0)" after a reload under load** (U23 S7, OJS,
+  once). After `page.reload()` of the sorted address on a scratch journal
+  holding 31 submissions the heading read "Active submissions (0)" for the
+  whole 30 s wait (2026-09-15, the maintainer's first local 8-worker run
+  at the merged tips, `.reports/flake-local/run1.log`; no artefacts kept,
+  the next run wiped test-results); green alone 3 of 3. **Watch
+  condition**: a second sighting with test-results kept; then read the
+  list request the reload issued.
 - **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
   `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
   and the tests' is local: between 00:00 and 02:00 CEST every "today + N
@@ -459,6 +519,9 @@ trips.
   guidelines typed by the manager missing for the reviewer, S7
   `ReviewFormsList.rowCounts()` on a half-drawn row, S9 green alone; the
   `rowCounts()` cell wait sits on the unmerged `perf/test-side` branch).
+  S9 again 2026-09-15 in the maintainer's fourth local 8-worker run at the
+  merged tips (`.reports/flake-local/run4.log`: the reviewer's step-3
+  recommendation select read no options), green alone 2 of 2.
   **Watch condition**: a red at four workers on the VM or on CI.
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).

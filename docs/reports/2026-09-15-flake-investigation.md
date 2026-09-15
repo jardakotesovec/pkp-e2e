@@ -264,6 +264,59 @@ after the window opens. Full OMP U26+U27 34 of 34 and OJS U26+U27 32 of
 | Keyed variant: OMP U40 S4 ×20 (helper form) and ×10 (appended form); OJS U40+U49+U41 and OMP U40+U41 specs on keyed builds | 20 of 20 and 10 of 10; OJS specs 32 of 32; OMP 20 of 21, the one red being U40 S3's author save answered 401 on the day's used database, 9 of 9 red on stock and keyed bundles alike and 6 of 6 green on both after `reset:omp` (ci-triage) |
 | Full OJS suite, pristine checkouts, harness change, 8 workers | 214 of 216 green in 6.2 min; U24 S14 red on the journal's Declined count (7, expected 5: the day's repeats on the same database) and U05 S7 red once on the Tasks dialog's table (30 s), both green alone right after (16 s) |
 
+## 5b. Four local OJS runs at the merged tips
+
+Four full OJS suite runs on the Mac (8 workers, a busy desktop, load
+average over 100 on 10 cores) at upstream `main` `ae597ff9d9` (ui-library
+`977e460c64` with the per-call reduced-motion scroll, pkp-lib
+`b262d27b81`), each on a reset database (`.reports/flake-local/run{1..4}.log`,
+the test-results and worker server logs of runs 2 to 4 kept beside them):
+
+| run | result | reds |
+|---|---|---|
+| 1 | 215 passed, 3 red (5.2 min) | U23 S7, U23 S9, U24 S14 |
+| 2 | 215 passed, 3 red (4.8 min) | U01 S1, U24 S14, U26 S6 |
+| 3 | 216 passed, 2 red (6.2 min) | U05 S7, U40 S3 |
+| 4 | 217 passed, 1 red (6.0 min) | U29 S9 |
+
+The two classes fixed upstream did not show: no U21 wizard press lost and
+no U40 S4 in 4 × 36 wizard tests and 4 × 6 publication-form tests. The
+serial and solo projects were skipped in every run (they depend on a green
+parallel project locally), so 218 of 231 ran each time. Every red was
+green alone afterwards (2 or 3 repeats on two workers). What the reds are:
+
+- **U24 S14 twice, a cross-test collision, reproducible.** The test reads
+  the sidebar's "Declined" count on the shared journal, deletes its own
+  declined submission and expects the count one lower; U26 S10 (decline,
+  revert, delete on the same journal) finished alongside it in both red
+  runs and after it in the two green ones. Alone, the pair on two workers
+  with `--repeat-each 4` reds S14 2 of 4
+  (`.reports/flake-local/collision-s14-s10.log`). The fix is test-side:
+  seed S14's declined submission on a scratch journal so the count is
+  1 → 0, or assert against the API's declined total read at the same
+  moment.
+- **U05 S7 once, an order tie.** The site-level Tasks window and the
+  journal's listed the same rows in a different order among rows created
+  in the same second by parallel workers; `TaskNotificationsGridHandler`
+  orders by `created_at desc` alone, so ties have no stable order between
+  two reads. Test-side: compare the two reads sorted. Upstream nit: a
+  secondary order on the notification id.
+- **U40 S3 once, unexplained.** After the manager's publish, the author's
+  reload fetched the submission and the publication (both 200 in worker
+  4's server log) but the "Publication: Title & Abstract" section stayed
+  empty for 30 s: no "This version has been published" notice, no form,
+  and no `_components/titleAbstract` request in the following 37 s. The
+  section's items are empty while `selectedPublication` is null
+  (`useWorkflowConfigOJS._getItems`); why it stayed null needs a trace,
+  so the OJS U40 file now keeps traces on failure like the OMP one.
+- **The rest, load.** U01 S1 (the user menu not visible 10 s after the
+  dashboard committed), U23 S7 (the heading read "Active submissions (0)"
+  for 30 s after a reload of a scratch journal holding 31), U23 S9 (the
+  search for the tagged row found nothing in 30 s after the reviewer's
+  accept), U26 S6 (the decision wizard's composer mask still up after
+  30 s) and U29 S9 (the reviewer's step-3 recommendation select read no
+  options) are the known "under load" shapes, one sighting each.
+
 ## 6. Next
 
 0. Status 2026-09-15 evening: the native-scroll change and the keyed
