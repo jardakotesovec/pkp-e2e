@@ -635,6 +635,125 @@ async function createNewReviewRound(page, modal) {
     await walkDecisionWizard(page);
 }
 
+/**
+ * The coloured stage label under the submission's title in the workflow
+ * header ("Submission", "Declined", "Copyediting", …; U25 Rules 4, 8).
+ */
+function stageLabel(modal) {
+    return modal.locator('[data-cy="sidemodal-header"] span[class*="bg-stage-"] + span');
+}
+
+async function expectStageLabel(modal, label) {
+    await expect(stageLabel(modal)).toHaveText(label, {timeout: 20_000});
+}
+
+/**
+ * Any status box in the stage's panel column (a bordered box headed by an
+ * h3: "Status" or "Round N Status"); the plain panels are tables, not
+ * bordered boxes (`WorkflowSubmissionStatus.vue`).
+ */
+function anyStatusBox(modal) {
+    return primaryRegion(modal).locator('div.border').filter({has: modal.page().locator('h3')});
+}
+
+/**
+ * The stage's panel column shows no status box at all (U25 Rule 8), the
+ * "Submission Files" heading being the settled positive read of the same
+ * column.
+ */
+async function expectNoStatusBox(modal) {
+    await expect(
+        primaryRegion(modal).getByRole('heading', {name: 'Submission Files'})
+    ).toBeVisible({timeout: 20_000});
+    await expect(anyStatusBox(modal)).toHaveCount(0);
+}
+
+/**
+ * The plain "Status" box sits at the top of the panel column, above the
+ * "Submission Files" panel, and reads `sentence` (U25 Rules 8–9): an
+ * ordered read of the column's headings, then the box's text.
+ */
+async function expectStatusBoxAboveFiles(modal, sentence) {
+    await expect(
+        primaryRegion(modal).getByRole('heading', {name: /^(Status|Submission Files)$/})
+    ).toHaveText(['Status', 'Submission Files'], {timeout: 20_000});
+    await expectPlainStatus(modal, sentence);
+}
+
+/**
+ * The panel headings of the Submission stage's main column, in order
+ * (U25 Rule 1): "Submission Files" then "Desk Review Tasks & Discussions".
+ */
+const SUBMISSION_PRIMARY_PANELS = ['Submission Files', 'Desk Review Tasks & Discussions'];
+
+async function expectSubmissionPanels(modal) {
+    await expect(
+        primaryRegion(modal).getByRole('heading', {
+            name: /^(Submission Files|Desk Review Tasks & Discussions)$/,
+        })
+    ).toHaveText(SUBMISSION_PRIMARY_PANELS, {timeout: 20_000});
+    await expect(
+        secondaryRegion(modal).getByRole('heading', {name: 'Participants', exact: true})
+    ).toBeVisible();
+}
+
+/**
+ * The workflow menu's entries listed under a stage entry ("Review Round 1"
+ * under "External Review"), in order: the PanelMenu indentation classes
+ * give the level (2 = stage, 3 = round), as the shared WorkflowPage reads
+ * them.
+ */
+async function menuEntriesUnder(modal, stageLabelText) {
+    const entries = await modal
+        .getByRole('navigation')
+        .getByRole('link')
+        .evaluateAll((anchors) =>
+            anchors.map((a) => {
+                const cls = a.className;
+                let level = 1;
+                if (/!px-(7|9)\b/.test(cls)) level = 2;
+                if (/!px-(10|12)\b/.test(cls)) level = 3;
+                if (/!px-(14|16)\b/.test(cls)) level = 4;
+                return {label: (a.textContent || '').trim(), level};
+            })
+        );
+    const start = entries.findIndex((e) => e.level === 2 && e.label === stageLabelText);
+    if (start < 0) return [];
+    const out = [];
+    for (const e of entries.slice(start + 1)) {
+        if (e.level <= 2) break;
+        out.push(e.label);
+    }
+    return out;
+}
+
+/** The right-hand column's panel headings, in order ("Participants", then "Reviewers Suggested by Author" when shown). */
+function secondaryHeadings(modal) {
+    return secondaryRegion(modal).getByRole('heading', {
+        name: /^(Participants|Reviewers Suggested by Author)$/,
+    });
+}
+
+/**
+ * The "Reviewers Suggested by Author" panel's heading in the right-hand
+ * column, and a suggested reviewer's row (the list right after the
+ * heading) by the person's full name (U25 Rule 1; the panel's mechanics
+ * are the shared ReviewerSuggestionPages').
+ */
+function suggestedReviewersHeading(modal) {
+    return secondaryRegion(modal).getByRole('heading', {
+        name: 'Reviewers Suggested by Author',
+        exact: true,
+    });
+}
+
+function suggestedReviewerRow(modal, name) {
+    return suggestedReviewersHeading(modal)
+        .locator('xpath=following::ul[1]')
+        .locator('li')
+        .filter({hasText: name});
+}
+
 /** The pre-3.5 author-dashboard address (Rule 17): redirects to My Submissions. */
 function oldAuthorDashboardUrl(contextPath, submissionId) {
     return `/index.php/${contextPath}/authorDashboard/submission/${submissionId}`;
@@ -685,4 +804,15 @@ module.exports = {
     createNewReviewRound,
     oldAuthorDashboardUrl,
     oldReviewRoundInfoUrl,
+    stageLabel,
+    expectStageLabel,
+    anyStatusBox,
+    expectNoStatusBox,
+    expectStatusBoxAboveFiles,
+    SUBMISSION_PRIMARY_PANELS,
+    expectSubmissionPanels,
+    menuEntriesUnder,
+    secondaryHeadings,
+    suggestedReviewersHeading,
+    suggestedReviewerRow,
 };

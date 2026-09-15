@@ -18,7 +18,6 @@ that reason). One line per spec, FEATURE-MAP order, in this shape:
 `U<nn> · main/guard gaps: ride <n> · own <n> · no seed <n> · undecided states <n> · variants <n> · scenarios to add <n> · suite fixes <n> · <status>`
 
 U05 · main/guard gaps: ride 8 · own 2 · no seed 5 · undecided states 9 · variants 4 · scenarios to add 2 · suite fixes 0 · at the final-run gate 2026-09-13 (OMP, OPS green; OJS waits for one green full run, PROGRESS row)
-U25 · main/guard gaps: ride 3 · own 2 · no seed 1 · undecided states 3 · variants 0 · scenarios to add 2 · suite fixes 9 · pending
 U29 · main/guard gaps: ride 7 · own 2 · no seed 1 · undecided states 6 · variants 0 · scenarios to add 2 · suite fixes 1 · pending
 U40 · main/guard gaps: ride 10 · own 1 · no seed 0 · undecided states 12 · variants 0 · scenarios to add 1 · suite fixes 2 · pending
 U41 · main/guard gaps: ride 9 · own 2 · no seed 2 · undecided states 6 · variants 0 · scenarios to add 3 · suite fixes 5 · pending

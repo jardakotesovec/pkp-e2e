@@ -205,62 +205,245 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
 
 ## Canonical scenarios
 
-Every scenario runs on the seeded journal with ready accounts and scratch
-submissions; scenarios 2 to 6 reach their states by recording the decisions
-on screen. The accounts, their passwords and the tooling recipe are in the
+Every scenario but 11 runs on the seeded journal with ready accounts and
+scratch submissions, scenarios 2 to 6 reaching their states by recording
+the decisions on screen; scenario 11 runs on a scratch journal with
+throwaway accounts. A preprint server has no Submission stage, so only
+scenario 9, its absence scenario, runs there; the accounts, their
+passwords, the mail catcher's address and the tooling recipe are in the
 footnote. <sup>s</sup>
 
-1. **Open a new submission at the Submission stage**. Editor: open a freshly
-   submitted article's workflow and land on the Submission stage. The screen
-   shows the "Submission Files" panel listing the author's uploaded file, the
-   "Desk Review Tasks & Discussions" panel and the Participants panel. At the
-   top are the decision buttons "Send for Review", "Accept and Skip Review" and
-   "Decline Submission". <sup>s</sup>
-2. **Send the submission to review**. Editor: press "Send for Review" and
-   complete the decision wizard. The workflow moves to the Review stage. The
-   menu now shows "Review" with "Review Round 1", and no decision buttons
-   remain on the Submission stage. <sup>s</sup>
-3. **Accept and skip review**. Editor: on a second new submission, press
-   "Accept and Skip Review" and complete the wizard. The submission moves to the
-   Copyediting stage. Reopening the Submission stage shows its panels but no
-   decision buttons.
-4. **Decline a submission**. Editor: on a third new submission, press "Decline
-   Submission" and complete the wizard. Back on the Submission stage, the onward
-   buttons are gone and "Revert Decline" is offered in their place. A Journal
-   Manager additionally sees "Delete"; a Section Editor does not.
-5. **Revert a decline**. Editor: on the declined submission from scenario 4,
-   press "Revert Decline" and complete the wizard. The submission returns to the
-   queued state, and the onward buttons "Send for Review", "Accept and Skip
-   Review" and "Decline Submission" are offered again.
-6. **Delete a declined submission**. Journal Manager: on a declined submission,
-   press "Delete". A dialog asks "Are you sure you want to permanently delete
-   this submission?" Confirm. The submission is removed and the workflow
-   closes. Open the Dashboard's "Declined" view: the submission no longer
-   appears. Control: on
-   the same declined submission a Section Editor sees no "Delete" button.
-7. **The author's view**. Author: from My Submissions, open your own new
-   submission's workflow. The Submission stage shows the "Submission Files"
-   panel and the "Desk Review Tasks & Discussions" panel, and no decision
-   buttons. There is no way to send, accept, decline or delete the submission
-   from the author's view. <sup>s</sup>
+1. **Open a new submission at the Submission stage** {OJS OMP}
+
+   Given: Editor, on the dashboard, with a freshly submitted article
+   carrying the author's uploaded file.
+
+   - **The Submission stage**: open the article's workflow: it lands on the
+     Submission stage, which shows the "Submission Files" panel listing the
+     author's uploaded file, the "Desk Review Tasks & Discussions" panel and
+     the "Participants" panel, in that order (Rule 1).
+   - **The decision buttons**: at the top of the screen, "Send for Review",
+     "Accept and Skip Review" and "Decline Submission" (on a press the
+     roster scenario 8 reads [OMP1](#omp1)) (Rules 2–4).
+   - **"Schedule For Publication"** {OJS}: a journal also offers this button
+     at the top; press it: the panel moves to the publication's "Title &
+     Abstract"; select "Submission" in the workflow menu again: the three
+     decision buttons are still offered, no decision having been recorded
+     (Rule 7).
+   - **Control**: no status box sits above the "Submission Files" panel, and
+     the stage label under the submission's title reads "Submission"
+     (Rules 4, 8).
+
+2. **Send the submission to review** {OJS OMP}
+
+   Given: Editor, with a freshly submitted article open at its Submission
+   stage.
+
+   - **"Send for Review"**: press it ("Send to External Review" on a press
+     [OMP1](#omp1)) and complete the decision wizard: the workflow moves to
+     the Review stage, and the workflow menu now shows "Review" with "Review
+     Round 1" (on a press "External Review" with "Review Round 1") (Rule 2;
+     Side effects).
+   - **The Submission stage after the move**: select "Submission" in the
+     workflow menu: its panels show, and no decision buttons remain
+     (Rule 9).
+   - **Control**: before the decision, the same screen offered "Send for
+     Review", "Accept and Skip Review" and "Decline Submission" (Rules 2–4).
+
+3. **Accept and skip review** {OJS OMP}
+
+   Given: Editor, with a second freshly submitted article open at its
+   Submission stage.
+
+   - **"Accept and Skip Review"**: press it and complete the wizard: the
+     submission moves to the Copyediting stage (Rule 3).
+   - **The Submission stage after the move**: select "Submission" in the
+     workflow menu: a status box now sits at the top of the panel column,
+     above the "Submission Files" panel, reading "The submission is
+     currently in the Copyediting stage."; the panels show below it, and no
+     decision buttons (Rules 8, 9).
+   - **Control**: before the decision, no status box sat above "Submission
+     Files" (Rule 8).
+
+4. **Decline a submission** {OJS OMP}
+
+   Given: Editor, with a third freshly submitted article open at its
+   Submission stage, and on the same journal a Journal Manager and a
+   Section Editor assigned to that article.
+
+   - **"Decline Submission"**: press it and complete the wizard: back on the
+     Submission stage, the stage label under the submission's title reads
+     "Declined" in place of "Submission", the onward buttons are gone and
+     "Revert Decline" is offered in their place; on a journal the "Schedule
+     For Publication" shortcut stays [A1](#a1) (Rules 4, 5, 7).
+   - **The Journal Manager**: opens the declined submission: "Revert
+     Decline" and, additionally, "Delete" (Rule 6).
+   - **Control**: the Section Editor opens the declined submission: "Revert
+     Decline" and no "Delete" (Rule 6; Actors row 7).
+
+5. **Revert a decline** {OJS OMP}
+
+   Given: Editor, with the declined submission of scenario 4 open at its
+   Submission stage.
+
+   - **"Revert Decline"**: press it and complete the wizard: the submission
+     returns to the queued state: the stage label reads "Submission" again,
+     and the onward buttons "Send for Review", "Accept and Skip Review" and
+     "Decline Submission" are offered again (Rules 4, 5).
+   - **Control**: "Revert Decline" and "Delete" are no longer offered, each
+     being offered only while the submission stands declined (Actors rows
+     6–7).
+
+6. **Delete a declined submission** {OJS OMP}
+
+   Given: Journal Manager, with an Author's submission declined at the
+   Submission stage and open there.
+
+   - **"Delete"**: press it: a dialog asks "Are you sure you want to
+     permanently delete this submission?"; confirm: the submission is
+     removed and the workflow panel closes (Rule 6).
+   - **The dashboard's "Declined" view**: open it: the submission no longer
+     appears (Rule 6; Side effects).
+   - **The Author's mailbox**: no email has arrived (Side effects).
+   - **Control**: a Section Editor assigned to the same declined submission,
+     opening it before the delete, sees "Revert Decline" and no "Delete"
+     button (Actors row 7).
+
+7. **The author's view** {OJS OMP}
+
+   Given: Author, on My Submissions, with their own freshly submitted
+   article.
+
+   - **The Submission stage**: open the article's workflow: it shows the
+     "Submission Files" panel and the "Desk Review Tasks & Discussions"
+     panel, and nothing else: no "Participants" panel (Rule 10).
+   - **The top of the screen**: no decision buttons, no "Delete", and no
+     "Schedule For Publication" shortcut (on a journal, where the editorial
+     view offers one); there is no way to send, accept, decline or delete
+     the submission from the author's view (Rule 10; Actors row 8).
+   - **Control**: an Editor opening the same submission sees the
+     "Participants" panel and the decision buttons "Send for Review",
+     "Accept and Skip Review" and "Decline Submission" (Rules 1–4).
 
 App-specific:
 
-8. **{OMP} A press's Submission-stage decisions**. Press Editor: on a new
-   monograph's Submission stage, the buttons read, in order: "Send to External
-   Review" (which skips the internal review stage), "Accept and Skip Review",
-   "Decline Submission", and last "Send to Internal Review" (which routes into
-   the internal review stage). The journal's "Schedule For Publication" shortcut
-   is absent. Choosing "Send to External Review" opens External Review Round 1
-   directly [OMP1](#omp1). The Internal Review stage itself is documented
-   separately.
-9. **{OPS} No Submission stage on a preprint server**. Preprint Server Manager:
-   open any preprint's workflow. The menu offers only the Production stage. No
-   Submission entry appears, and none of the send-to-review, accept-and-skip, or
-   Submission-stage decision buttons exist anywhere on the screen. Positive
-   control: the Production stage shows its own controls ("Post the preprint",
-   "Decline Submission"), so the workflow itself is working [OPS1](#ops1).
-   <sup>p</sup>
+8. **{OMP} A press's Submission-stage decisions**
+
+   Given: Press Editor, with two new monographs, each open at its Submission
+   stage in turn.
+
+   - **The decision buttons**: on the first monograph, the buttons read, in
+     order: "Send to External Review", "Accept and Skip Review", "Decline
+     Submission", and last "Send to Internal Review"; the journal's
+     "Schedule For Publication" shortcut is absent (Rules 2, 7)
+     [OMP1](#omp1).
+   - **"Send to External Review"**: press it and complete the wizard: it
+     skips the internal review stage and opens External Review Round 1
+     directly: the workflow menu shows "External Review" with "Review Round
+     1" (Rule 2) [OMP1](#omp1).
+   - **"Send to Internal Review"**: on the second monograph, press it and
+     complete the wizard: the submission moves into the earlier Internal
+     Review stage instead: the workflow menu shows "Internal Review" with
+     "Review Round 1"; the Internal Review stage itself is documented
+     separately (Rule 2) [OMP1](#omp1).
+   - **Control**: after either move, the monograph's Submission stage shows
+     its panels and no decision buttons (Rule 9).
+
+9. **{OPS} No Submission stage on a preprint server**
+
+   Given: Preprint Server Manager, with a submitted preprint.
+
+   - **The workflow menu**: open the preprint's workflow: the workflow menu
+     offers only "Production"; no "Submission" entry appears [OPS1](#ops1).
+   - **The decision buttons**: none of the send-to-review buttons ("Send for
+     Review", "Send to External Review", "Send to Internal Review"), "Accept
+     and Skip Review" or the "Schedule For Publication" shortcut exists
+     anywhere on the screen [OPS1](#ops1).
+   - **Control**: the Production stage shows its own controls, "Post the
+     preprint" and "Decline Submission", so the workflow itself is working
+     [OPS1](#ops1).
+
+10. **An assistant assigned at the Submission stage** {OJS OMP}
+
+    Given: Funding Coordinator, on the dashboard, assigned to a freshly
+    submitted article.
+
+    - **The Submission stage**: open the article's workflow: the "Submission
+      Files" panel, the "Desk Review Tasks & Discussions" panel and the
+      "Participants" panel show, in that order (Actors row 1; Rule 1).
+    - **The decision buttons**: none: no "Send for Review", "Accept and Skip
+      Review" or "Decline Submission" (on a press none of scenario 8's
+      roster) (Actors row 2).
+    - **"Schedule For Publication"** {OJS}: a journal offers the shortcut at
+      the top of the screen to this role too; press it: the panel moves to
+      the publication's "Title & Abstract" (Actors row 8; Rule 7). A press
+      shows no such button (Rule 7).
+    - **Control**: an Editor opening the same submission is offered "Send
+      for Review", "Accept and Skip Review" and "Decline Submission" (Rules
+      2–4).
+
+11. **Reviewers suggested by the author** {OJS OMP}
+
+    Given: on a scratch journal with "Reviewer Suggestion at Submission" on,
+    an Editor and two submitted articles, the first carrying the one
+    reviewer suggestion its author entered when submitting, "Sam Suggested"
+    with the reason "Knows the field.", the second carrying none.
+
+    - **The first article's Submission stage**: open it: a fourth panel
+      headed "Reviewers Suggested by Author" sits under the "Participants"
+      panel and lists "Sam Suggested" with the reason "Knows the field."
+      (Rule 1; Settings).
+    - **Control**: open the second article: the "Submission Files", "Desk
+      Review Tasks & Discussions" and "Participants" panels, and no
+      "Reviewers Suggested by Author" panel (Rule 1).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — states:
+  - the author's submission-status summary on a submission that has left
+    the Submission stage (Rule 10): scenario 7 opens a submission still at
+    the stage
+- **Nothing new to test**:
+  - the panels for an assigned Section Editor, Guest Editor or Site
+    Administrator (Actors row 1): the three panels scenario 1 reads as the
+    Editor and scenario 10 as the Funding Coordinator
+  - an Editor's or a Site Administrator's "Delete" on a declined submission
+    (Actors row 7, Rule 6): the button scenario 6 presses as the Journal
+    Manager
+- **Register carries it**:
+  - A1 (the "Schedule For Publication" shortcut shown while the submission
+    stands declined; Rule 7; scenario 4 marks it)
+  - A2 (a recommending editor's reduced subset of the decision buttons;
+    Actors rows 2–3)
+  - A3 (the empty workflow shell behind the "Invalid submission." error
+    after a delete; Rule 6)
+- **No seed**:
+  - the delete refused behind the button for a role never shown it (Actors
+    row 7)
+  - the "Schedule For Publication" shortcut for a recommend-only editor
+    (Actors row 8, Rule 7): no seed sets an assignment's recommend-only
+    flag
+- **Owned by another feature**:
+  - a Copyeditor, Layout Editor or Proofreader assigned here getting the
+    no-access box (Actors row 1; *Workflow screen & stage access*,
+    scenario 3)
+  - a deleted submission's stale dashboard address answering "Error" /
+    "Invalid submission." (Rule 6; *Workflow screen & stage access*,
+    scenario 14)
+  - the old author-dashboard address forwarding the Author to the panel
+    (Rule 11; *Workflow screen & stage access*, scenario 6; *My
+    Submissions*, scenario 1)
+  - each decision's email, notification and log entry, and the decision
+    wizard itself (Side effects; Cross-feature; *Editorial decision
+    recording*)
+  - the panels' mechanics and the decisions' destinations (Cross-feature;
+    *Submission files*, *Tasks & discussions*, *Stage participants*,
+    *Reviewer suggestions*, *Review stage & rounds*, *Copyediting stage*,
+    *Publish, schedule & versions*)
+  - a preprint server's decline, revert and post on the Production stage
+    (Cross-feature; *Production stage*, *Publish, schedule & versions*)
 
 ## Findings register
 
@@ -637,17 +820,36 @@ its decisions as expected (finding OPS1). Cited from the body as
 <a id="fn-s"></a>
 **s** — Scenario seeding uses the seeded test journal/press (`publicknowledge`)
 and roster accounts (passwords = username doubled). New submissions are seeded
-through the scenario submission endpoint with no decisions
-(`submitted: true`, stage 1); the declined and post-decision states are reached
-by driving the decision wizard through the UI so the emails and transitions are
-real. Scenario 1–5 `editor.diana` (a Journal-editor-group account with decision
-rights) on scratch submissions with `author.alex` as author; 4 also needs a
-`manager.maya` (Journal Manager) and a `sectioneditor.ana` (Section Editor) to
-contrast the Delete button; 6 `manager.maya` on a declined scratch submission;
-7 `author.alex` on their own scratch submission; 8 a scratch press submission
-via the OMP fleet; 9 a scratch preprint via the OPS fleet. Never decline or
-delete a shared roster submission — use scratch submissions so parallel tests
-are unaffected.
+through the scenario submission endpoint with no decisions (`submitted: true`,
+stage 1), submitter `author.alex`; a seed carries no files, so scenario 1
+provides "the author's uploaded file" through the "Submission Files" panel's
+own "Upload" wizard. The declined and post-decision states are reached by
+driving the decision wizard through the UI so the emails and transitions are
+real. Scenarios 1–5: `editor.diana` (a Journal-editor-group account with
+decision rights) on scratch submissions; 4 also needs `manager.maya` (Journal
+Manager) and `sectioneditor.ana` (Section Editor, assigned on submit as the
+seeded section's or series' editor: OJS ART, OMP `series: 'monographs'`) to
+contrast the Delete button. 6: `manager.maya` on a declined scratch
+submission, `sectioneditor.ana` assigned as in 4; the mailbox read is
+`author.alex`'s address in the mail catcher, Mailpit at
+`http://127.0.0.1:8025` (other suites' decision mail to `author.alex` arrives
+there in parallel, so the test may run 6 on a scratch journal from the
+context scenario with throwaway `roles: ['manager']`, `['sectionEditor']` and
+`['author']` accounts, as *Workflow screen & stage access*' scenario 14
+does). 7: `author.alex` on their own scratch submission, control
+`editor.diana`. 8: two scratch monographs via the OMP fleet (`series:
+'monographs'`), `editor.diana`. 9: a scratch preprint via the OPS fleet,
+`manager.maya`. 10: `assistant.rita` (Funding Coordinator, stages Submission
+and Review) seeded as `participants: [{username: 'assistant.rita', role:
+'funding'}]` on a scratch submission, control `editor.diana`. 11: OJS and OMP
+fleets, a scratch journal from the context scenario with `review:
+{reviewerSuggestionEnabled: true}` and `users` of one `roles: ['editor']` and
+one `roles: ['author']` account; two `submitted: true` submissions by that
+author, the first with `reviewerSuggestions: [{givenName: 'Sam', familyName:
+'Suggested', email: 'sam.suggested@mail.test', suggestionReason: 'Knows the
+field.'}]`, the second without the key (OPS answers 400 on both keys, and
+the seeded journal keeps the setting off). Never decline or delete a shared
+roster submission — use scratch submissions so parallel tests are unaffected.
 
 ## Reference — entry points & surfaces
 

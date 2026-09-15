@@ -277,9 +277,15 @@ trips.
   alone beside it). Next step as above: a retained trace of the table's
   fetches. Green in the sync session's OJS final at four workers
   2026-09-14 (229 passed, run with `--trace retain-on-failure` for exactly
-  this class; no trace to read yet).
+  this class; no trace to read yet). **Red again 2026-09-15** (U25
+  revision session, the first OJS final at four workers on a reset
+  database, `.reports/U25/final-run-ojs-attempt1.log`: the co-author
+  row's "More Actions" button detached and re-attached for the whole
+  180 s test timeout, one of two reds in 216; red alone the same way on
+  that used database afterwards, `.reports/U25/rerun-ojs-u30s4.log`,
+  3.0 min).
 - **Login smoke's profile probe landing on the login page under load**
-  (shared `login.spec.js`, OJS, once). In the sync session's first OJS
+  (shared `login.spec.js`, OJS twice and OMP once). In the sync session's first OJS
   final at four workers 2026-09-15 (a reset database, the perf round-2
   harness and `persistent = On` for the first time on the VM,
   `.reports/sync/final-run-ojs.log`) the smoke's loop over the seeded
@@ -291,6 +297,19 @@ trips.
   CI at the same tree and tips. **Watch condition**: a second sighting;
   then read whether the probe's cookie jar carried the fresh session
   cookie (the smoke closes and reopens a context per persona).
+  **Tripped 2026-09-15** (U25 revision session, the first OJS final at
+  four workers on a reset database at the day's new tips,
+  `.reports/U25/final-run-ojs-attempt1.log`: `reader.rosa` again, the
+  same `profile probe landed on login`, one of two reds in 216, the 13
+  serial and solo tests skipped behind it; green alone in 16.1 s,
+  `.reports/U25/rerun-ojs-login.log`). **Third sighting the same day, the
+  first on OMP** (the U25 session's second OMP final at four workers on a
+  reset database, `.reports/U25/final-run-omp-attempt2.log`: `reader.rosa`
+  again, the one red of 216; green alone right after,
+  `.reports/U25/rerun-omp-login.log`). Three reds in one day at the
+  day's new tips and the perf round-2 harness, always `reader.rosa`, the
+  last persona of the loop. Next step: the cookie-jar read above, for the
+  maintenance session, first thing.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the
@@ -400,6 +419,30 @@ trips.
   database state, not the build. Not seen on CI (fresh database). **Watch
   condition**: a red on CI or on a reset database; then read which stage
   assignment the author's permission tick lands on.
+- **Edit Review window's file checkbox re-ticked under load** (U27 S6,
+  OMP, once). In the "Files To Be Reviewed" grid of the Edit Review
+  window, the test unticks both files, reads "No Files Selected", then
+  `check()`s the first box back: the click landed while the legacy grid
+  was re-rendering ("element is not stable" twice before the click) and
+  the readback found the box's state unchanged, "Clicking the checkbox
+  did not change its state" (2026-09-15, U25 revision's OMP final at four
+  workers, `.reports/U25/final-run-omp.log`, error context
+  `pw-out-final-omp/U27-reviewer-assignment-Re-4ce6a-…/error-context.md`);
+  green alone in 21 s on the same used database. **Watch condition**: a
+  second incident; then wait for the grid's reload to settle (the
+  `waitForJQueryIdle` helper) between the unticks and the re-tick.
+- **New reviewer missing from the Reviewers list under load** (U01 S6,
+  OMP, once). After "Create New Reviewer" in the Add Reviewer window, the
+  review stage's Reviewers panel did not list the throwaway reviewer's
+  name for the 30 s wait (2026-09-15, the U25 revision session's third
+  OMP final at four workers on a reset database,
+  `.reports/U25/final-run-omp-attempt3.log`, the one red of 216; error
+  context `pw-out-final-omp-attempt3/U01-login-and-sessions-…/error-context.md`);
+  green alone in 9.1 s on the same used database
+  (`.reports/U25/rerun-omp-u01s6.log`). Same family as the reviewer
+  dashboard and Add Reviewer classes above: a list fetched again after
+  the window closes. **Watch condition**: a second incident; then read
+  whether the panel's reload after the window's save is awaited.
 - **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
   `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
   and the tests' is local: between 00:00 and 02:00 CEST every "today + N

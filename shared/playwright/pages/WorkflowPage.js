@@ -48,7 +48,11 @@
  *   active-stage stripe (`!border-s-8`) and the selection (`bg-selection-dark`);
  * - the main column is `[data-cy="workflow-primary-items"]`; the status
  *   box and the no-access box are both a `div.border` with a `p`, the status
- *   box additionally carrying an `h3` ("Status" / "Round N Status");
+ *   box additionally carrying an `h3` ("Status" / "Round N Status"); its
+ *   direct children run language line, status box (when one shows), then
+ *   the stage's panels, so "above Submission Files" is the box's next
+ *   sibling; every panel heading in the dialog is an `h3`, the right-hand
+ *   column's included (U25 probe, 2026-09-15);
  * - the action buttons sit in `[data-cy="workflow-action-items"]`, the
  *   right-hand column in `[data-cy="workflow-secondary-items"]`, and the
  *   publication pages' control regions in `[data-cy="workflow-controls-left"]`
@@ -664,6 +668,46 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
         return this.primaryColumn().locator('div.border').filter({has: this.page.locator('h3')});
     }
 
+    /**
+     * No status box on the stage (Rule 15's quiet state: the active stage
+     * before the submission has moved on). An absence read: pair it with a
+     * bounding control on the same screen, a panel or button rendered.
+     */
+    async expectNoStatusBox() {
+        await expect(this.anyStatusBox()).toHaveCount(0);
+    }
+
+    /**
+     * The status box sits at the top of the panel column, directly above the
+     * named panel: it reads `body`, and its next sibling in the main column
+     * is the panel's wrapper (the language line precedes both). Confirmed
+     * on the Submission stage after a move (U25 probe, 2026-09-15).
+     */
+    async expectStatusAbovePanel(body, panelTitle, heading = 'Status') {
+        await this.expectStatus(body, heading);
+        const next = this.statusBox(heading).locator('xpath=following-sibling::*[1]');
+        await expect(next.getByRole('table', {name: panelTitle, exact: true})).toBeVisible({
+            timeout: 30_000,
+        });
+    }
+
+    /** Every level-3 heading of the open panel, top to bottom: the status box's "Status", the main-column panels, then the right-hand column's ("Participants", "Reviewers Suggested by Author"). Read as text content, so a CSS uppercase leaves it alone. */
+    async panelHeadingLabels() {
+        const texts = await this.dialog().locator('h3').allTextContents();
+        return texts.map((t) => t.replace(/\s+/g, ' ').trim()).filter(Boolean);
+    }
+
+    /**
+     * The open panel's level-3 headings are exactly these, in this order: the
+     * one read that states which panels a stage shows and that nothing else
+     * does (an auto-waited poll, so a column still filling in settles first).
+     */
+    async expectPanelHeadings(labels) {
+        await expect
+            .poll(() => this.panelHeadingLabels(), {timeout: 30_000})
+            .toEqual(labels);
+    }
+
     /** The no-access box of Rule 13 (a bordered box with no heading). */
     noAccessBox() {
         return this.primaryColumn().locator('div.border').filter({hasText: NO_ACCESS_TEXT});
@@ -705,6 +749,23 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     /** A stage action button by its exact label ("Schedule For Publication", "Delete", …). */
     actionButton(label) {
         return this.actionItems().getByRole('button', {name: label, exact: true});
+    }
+
+    /** Every stage action button's label, left to right ([] when the stage offers none). */
+    async actionButtonLabels() {
+        const labels = await this.actionItems().getByRole('button').allInnerTexts();
+        return labels.map((s) => s.trim()).filter(Boolean);
+    }
+
+    /**
+     * Press a stage action button that jumps to a publication page rather
+     * than recording a decision (a journal's "Schedule For Publication" opens
+     * "Title & Abstract") and wait for that page's heading. The stage entry
+     * stays in the menu: `selectStage()` returns to it.
+     */
+    async pressShortcutToPage(label, pageLabel) {
+        await this.actionButton(label).click();
+        await this.expectPageHeading(pageLabel);
     }
 
     // ---------------------------------------------------------------------

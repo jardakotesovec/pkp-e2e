@@ -8,7 +8,13 @@
  * - WorkflowPage — the per-submission workflow dialog on the editorial
  *   (dashboard/editorial) and author (dashboard/mySubmissions) dashboards:
  *   round menu, status box, file/reviewer/participant panels, decision
- *   buttons, the Request Revisions entry modal.
+ *   buttons, the Request Revisions entry modal; plus, delegating to the
+ *   shared frame (`shared/playwright/pages/WorkflowPage.js`, held as
+ *   `frame`), the Submission stage's reads of U25: the stage label, the
+ *   status box above "Submission Files" or its absence, the exact ordered
+ *   panel headings, the action region's buttons, the "Schedule For
+ *   Publication" press to "Title & Abstract" and the return to
+ *   "Submission", the "Reviewers Suggested by Author" panel, Delete.
  * - DecisionPage — the full-page decision wizard (decision/record/…):
  *   composer steps, promote-files step, Record Decision, success dialog.
  * - uploadViaWizard / uploadFirstStepOnly / inMemoryFile — the legacy jQuery
@@ -34,6 +40,9 @@
 const path = require('path');
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
+const {WorkflowPage: WorkflowFrame} = require('../../../../shared/playwright/pages/WorkflowPage.js');
+const {SuggestedReviewersPanel, SUGGESTED_PANEL_HEADING} =
+    require('../../../../shared/playwright/pages/ReviewerSuggestionPages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
@@ -69,6 +78,12 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     constructor(page, contextPath) {
         super(page);
         this.contextPath = contextPath;
+        /**
+         * The shared workflow frame (header, side menu, main column, action
+         * region: `shared/playwright/pages/WorkflowPage.js`), which the
+         * stage-independent reads below delegate to.
+         */
+        this.frame = new WorkflowFrame(page, contextPath);
     }
 
     /** Open a submission's workflow on the editorial dashboard. */
@@ -182,7 +197,84 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     participantMoreActions(name) {
         return this.page.getByRole('button', {name: `${name} More Actions`});
     }
+
+    // ---------------------------------------------------------------------
+    // The Submission stage (U25): stage label, status box, panels, shortcut
+    // ---------------------------------------------------------------------
+
+    /** The stage label under the title reads exactly this ("Submission", "Declined", …). */
+    async expectStage(label) {
+        await this.frame.expectStage(label);
+    }
+
+    /**
+     * No status box on the stage: the quiet state while the submission has
+     * not left it (U25 Rule 8). An absence read: the caller pairs it with a
+     * panel or button rendered on the same screen.
+     */
+    async expectNoStatusBox() {
+        await this.frame.expectNoStatusBox();
+    }
+
+    /** The status box reads `body` and sits directly above "Submission Files" (U25 Rule 8). */
+    async expectStatusAboveFiles(body) {
+        await this.frame.expectStatusAbovePanel(body, 'Submission Files');
+    }
+
+    /** The open panel's level-3 headings are exactly these, in order (U25 Rules 1, 10). */
+    async expectPanelHeadings(labels) {
+        await this.frame.expectPanelHeadings(labels);
+    }
+
+    /** A button of the stage's action region, by exact label (decision buttons and the shortcut). */
+    actionButton(label) {
+        return this.frame.actionButton(label);
+    }
+
+    /** Every button of the action region, left to right ([] when it offers none). */
+    async actionButtonLabels() {
+        return this.frame.actionButtonLabels();
+    }
+
+    /** Press "Schedule For Publication": the panel moves to "Publication: Title & Abstract" (U25 Rule 7). */
+    async pressScheduleForPublication() {
+        await this.frame.pressShortcutToPage('Schedule For Publication', 'Title & Abstract');
+    }
+
+    /** A workflow-menu stage entry by label ("Submission", "Review", "Copyediting", "Production"). */
+    stageLink(label) {
+        return this.frame.stageLink(label);
+    }
+
+    /** Select "Submission" in the workflow menu and wait for "Workflow: Submission". */
+    async selectSubmissionStage() {
+        await this.frame.selectStage('Submission');
+    }
+
+    /** The "Reviewers Suggested by Author" panel under Participants (shared POM). */
+    suggestedReviewers() {
+        return new SuggestedReviewersPanel(this.page);
+    }
+
+    /** The suggestions panel lists the named person with the author's reason (U25 Rule 1). */
+    async expectSuggestedReviewer(name, reason) {
+        const row = this.suggestedReviewers().row(name);
+        await expect(row).toBeVisible({timeout: 30_000});
+        await expect(row).toContainText(reason);
+    }
+
+    /** No suggestions panel: an absence read, paired by the caller with the panels that do show. */
+    async expectNoSuggestedReviewersPanel() {
+        await expect(this.suggestedReviewers().heading()).toHaveCount(0);
+    }
+
+    /** The stage's "Delete" button and its confirm dialog; on confirm the panel closes (U25 Rule 6). */
+    async deleteSubmission({confirm = true} = {}) {
+        await this.frame.deleteSubmission({confirm});
+    }
 };
+
+exports.SUGGESTED_PANEL_HEADING = SUGGESTED_PANEL_HEADING;
 
 /**
  * The full-page decision wizard (decision/record/{id}). Steps render as a
