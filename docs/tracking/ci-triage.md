@@ -79,6 +79,9 @@ trips.
   (a fresh component per Publication section; the earlier
   `...-publication-form-clear.patch` kept the instance and cleared the
   form instead); the A/Bs are in the report.
+  **Merged upstream 2026-09-15** (ui-library `70b0892042`): a section
+  switch mounts a fresh form. Once the sync baselines carry it, the U40
+  `blur()` before Save and app-changes row 9 (c) can be revisited.
   The U40 OMP file keeps traces on failure since 2026-09-15.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
@@ -163,7 +166,12 @@ trips.
   native scrolling and a stylesheet rule, `2026-09-15-native-scroll-*.patch`,
   same result); the harness now passes `reducedMotion` to the
   `asUser` contexts, which it never had. The `pressUntil` retry stays
-  until the patch lands. **Watch condition**: unchanged.
+  until the patch lands. **Merged upstream 2026-09-15** (ui-library
+  `393dd28952`/`d5d7017074`, pkp-lib `b262d27b81`, ojs `e0e0275a55`, omp
+  `6eb3b935ad`, ops `fb72f079ba`): the plugin is gone, the stylesheet
+  decides and reduced motion means an instant jump. Once the sync
+  baselines carry these, `pressUntil()` can go back to a single press.
+  **Watch condition**: a lost press at tips carrying the merge.
   **Seen on a footer button
   without the bounded retry 2026-09-15** (sync session, the second OJS
   final at four workers on a reset database,

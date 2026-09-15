@@ -253,16 +253,19 @@ after the window opens. Full OMP U26+U27 34 of 34 and OJS U26+U27 32 of
 
 ## 6. Next
 
-0. Status 2026-09-15 evening: the maintainer ships the native-scroll
-   change and the keyed publication form; patch C (the reviewer rating)
-   is deferred for a closer read. A smaller variant was sketched in the
+0. Status 2026-09-15 evening: the native-scroll change and the keyed
+   publication form are merged upstream (ui-library `393dd28952`,
+   `d5d7017074`, `70b0892042`; pkp-lib `b262d27b81`; ojs `e0e0275a55`,
+   omp `6eb3b935ad`, ops `fb72f079ba`); patch C (the reviewer rating)
+   is deferred for a closer read. Whether the flake rate moved is a
+   question for `bin/ci-flake-tally/run.sh` in two weeks, the same
+   tally as section 1. A smaller variant was sketched in the
    session: take only `considered`/`dateConsidered` from the "viewed"
    response instead of the whole body, so a status update cannot carry a
    stale rating; not yet written or verified.
-1. Open the two ui-library pull requests from the patches (both apply
-   on `db5b2813`); the probe and the trace timeline above are the
-   reproduction stories. After they merge, drop `pressUntil()`'s retry
-   loop and app-changes row 9 (c).
+1. Done (item 0). After the next sync carries the merges, drop
+   `pressUntil()`'s retry loop and revisit app-changes row 9 (c) and the
+   U40 `blur()`, verifying at the new tips first.
 2. U28 S10: wait for the next CI red, it now carries a trace; read it
    before touching `accept()` again.
 3. U30 S4: the maintenance session's VM finals already run with
