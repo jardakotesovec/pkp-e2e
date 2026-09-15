@@ -87,6 +87,31 @@ still lose the second click, which is the same bug for humans and worth a
 sentence in the PR. The whole U21 OJS spec is green on the patched bundle
 (16 of 16, 27 s at eight workers).
 
+**The native variant (preferred, same day).** The maintainer asked whether
+the vue-scrollto plugin could go in favour of the browser's own scrolling
+and whether that would pick the preference up by itself. Measured on a
+plain page in Chromium under Playwright's reduced-motion emulation: a JS
+`behavior: 'smooth'` argument ignores the preference (animated either
+way), while CSS `scroll-behavior: smooth` with a `prefers-reduced-motion`
+media rule and a plain `scrollTo`/`scrollIntoView` call is animated
+normally and instant under the preference. So the native shape is the
+stylesheet deciding and the scripts staying silent. The plugin had three
+call sites, all in ui-library (the step rail, the form's page change and
+its jump to the first error field, the last inside the side modal's
+scroll container); nothing else used it. Patches, one per repository:
+`2026-09-15-native-scroll-ui-library.patch` (a `useScrollTo`
+composable with its Storybook doc, the three call sites, the rule in
+`_global.less` scoped to `html` and `.pkp-modal-scroll-container`, the
+dependency and the Storybook registration dropped),
+`2026-09-15-native-scroll-pkp-lib.patch` (`js/load.js` no longer
+registers it) and `2026-09-15-native-scroll-ojs.patch` (`package.json`
+and the vite dependency list). Verified the same way as the first patch:
+throttled probe 0 of 24 presses lost, U21 spec 16 of 16, bundle 5.5 KB
+smaller. The scoped rule leaves the legacy grids' jQuery `scrollTop`
+setters alone. Three other `scrollIntoView({behavior: 'smooth'})` calls
+in ui-library (open review, usage chart, task info) ignore the preference
+the same way and could drop their argument in a follow-up.
+
 **Test-side.** Nothing new is needed; `pressUntil()` stays until the
 patch ships, then it can go.
 
@@ -167,6 +192,7 @@ into, so the tests need nothing.
 | U21 S10 + S12 ×5, throttle 2 | S12 green ×5 (4.5 min each); S10 timed out in fixture teardown, not the class |
 | Wizard press probe (section 2) | as tabled |
 | U21 OJS spec, patched bundle, 8 workers | 16 of 16 green |
+| Native variant: throttled probe, U21 spec, full OJS suite | 0 of 24 lost (twice: helper and composable builds); 16 of 16; full suite 214 of 216 in 6.5 min, the same two reds as the pristine run (U05 S7's Tasks list and U24 S14's Declined count, both moved by parallel tests on the shared journal) |
 | OMP U40 S4 A/B (section 3) | as tabled |
 | Full OJS suite, pristine checkouts, harness change, 8 workers | 214 of 216 green in 6.2 min; U24 S14 red on the journal's Declined count (7, expected 5: the day's repeats on the same database) and U05 S7 red once on the Tasks dialog's table (30 s), both green alone right after (16 s) |
 

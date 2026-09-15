@@ -157,7 +157,9 @@ trips.
   first pointer event of a click). Probe at 6× CPU throttle: 11 of 24
   presses lost on the stock bundle, 0 of 24 with the reduced-motion patch
   (`docs/reports/2026-09-15-ui-library-steps-reduced-motion.patch`, for
-  ui-library upstream); the harness now passes `reducedMotion` to the
+  ui-library upstream; the preferred variant replaces the plugin with
+  native scrolling and a stylesheet rule, `2026-09-15-native-scroll-*.patch`,
+  same result); the harness now passes `reducedMotion` to the
   `asUser` contexts, which it never had. The `pressUntil` retry stays
   until the patch lands. **Watch condition**: unchanged.
   **Seen on a footer button

@@ -1,0 +1,205 @@
+diff --git a/.storybook/preview.js b/.storybook/preview.js
+index 65b25572..c549e292 100644
+--- a/.storybook/preview.js
++++ b/.storybook/preview.js
+@@ -14,7 +14,6 @@ import FloatingVue from 'floating-vue';
+ 
+ import ModalManager from '@/components/Modal/ModalManager.vue';
+ 
+-import VueScrollTo from 'vue-scrollto';
+ 
+ import '../src/styles/_import.less';
+ import '../src/styles/_global.less';
+@@ -60,7 +59,6 @@ setup((app) => {
+ 		},
+ 	});
+ 
+-	app.use(VueScrollTo);
+ 
+ 	app.directive('strip-unsafe-html', stripUnsafeHtml);
+ 
+diff --git a/package.json b/package.json
+index 8feca6b6..8c87cfef 100644
+--- a/package.json
++++ b/package.json
+@@ -49,8 +49,7 @@
+     "vue": "^3.5.13",
+     "vue-chartjs": "^5.3.2",
+     "vue-draggable-plus": "^0.6.0",
+-    "vue-router": "^4.5.0",
+-    "vue-scrollto": "^2.20.0"
++    "vue-router": "^4.5.0"
+   },
+   "devDependencies": {
+     "@chromatic-com/storybook": "^5.0.2",
+diff --git a/src/components/Form/Form.vue b/src/components/Form/Form.vue
+index 652c96dd..e06b236e 100644
+--- a/src/components/Form/Form.vue
++++ b/src/components/Form/Form.vue
+@@ -79,6 +79,7 @@
+ </template>
+ 
+ <script>
++import {useScrollTo} from '@/composables/useScrollTo';
+ import FormLocales from './FormLocales.vue';
+ import FormPage from './FormPage.vue';
+ import {shouldShowField, requireWhen} from './formHelpers';
+@@ -547,9 +548,8 @@ export default {
+ 				pageId = this.pages[currentPageIndex - 1].id;
+ 			}
+ 			this.currentPage = pageId;
+-			this.$scrollTo(this.$el, 500, {
+-				offset: -50,
+-			});
++			const {scrollTo} = useScrollTo();
++			scrollTo(this.$el, {offset: -50});
+ 		},
+ 
+ 		/**
+@@ -606,10 +606,8 @@ export default {
+ 						containers.length > 0
+ 							? containers[containers.length - 1]
+ 							: undefined;
+-					this.$scrollTo($el, 500, {
+-						offset: -50,
+-						container: lastContainer,
+-					});
++					const {scrollTo} = useScrollTo();
++					scrollTo($el, {offset: -50, container: lastContainer});
+ 				} else {
+ 					this.setCurrentPage(group.pageId);
+ 				}
+diff --git a/src/components/Steps/Steps.vue b/src/components/Steps/Steps.vue
+index 0c2e0c53..f80e5a36 100644
+--- a/src/components/Steps/Steps.vue
++++ b/src/components/Steps/Steps.vue
+@@ -83,6 +83,7 @@
+ </template>
+ 
+ <script>
++import {useScrollTo} from '@/composables/useScrollTo';
+ import debounce from 'debounce';
+ import elementResizeEvent from 'element-resize-event';
+ import PkpButton from '@/components/Button/Button.vue';
+@@ -194,9 +195,8 @@ export default {
+ 				this.setStartedLine();
+ 				this.setFocusIn(this.$el.querySelector('.pkpStep:not([hidden])'));
+ 				if (this.scrollTo) {
+-					this.$scrollTo(this.scrollTo, 500, {
+-						offset: -50,
+-					});
++					const {scrollTo} = useScrollTo();
++					scrollTo(this.scrollTo, {offset: -50});
+ 				}
+ 			});
+ 		},
+diff --git a/src/composables/useScrollTo.js b/src/composables/useScrollTo.js
+new file mode 100644
+index 00000000..937eb49a
+--- /dev/null
++++ b/src/composables/useScrollTo.js
+@@ -0,0 +1,41 @@
++/**
++ * Scrolls an element to the top of the window, or of a scrolling container,
++ * with the browser's own scrolling.
++ *
++ * Whether the scroll animates is the stylesheet's decision (`scroll-behavior`
++ * in `_global.less`), so `prefers-reduced-motion` is honoured without any
++ * script knowing about it. Replaces the vue-scrollto plugin, which always
++ * animated on the main thread.
++ */
++export function useScrollTo() {
++	/**
++	 * Scroll an element into view at the top of its scrolling ancestor
++	 *
++	 * @param {string|Element|{$el: Element}} target A selector, an element
++	 *   or a component instance
++	 * @param {Object} [options]
++	 * @param {number} [options.offset=0] Pixels to stop short of the element;
++	 *   negative leaves room above it (-50 keeps it clear of a sticky header)
++	 * @param {Element} [options.container] A scrolling ancestor to scroll
++	 *   instead of the window
++	 */
++	function scrollTo(target, {offset = 0, container = null} = {}) {
++		const element =
++			typeof target === 'string' ? document.querySelector(target) : target;
++		const el = element && element.$el ? element.$el : element;
++		if (!el || typeof el.getBoundingClientRect !== 'function') {
++			return;
++		}
++		const top = el.getBoundingClientRect().top + offset;
++		if (container) {
++			container.scrollTo({
++				top:
++					container.scrollTop + top - container.getBoundingClientRect().top,
++			});
++			return;
++		}
++		window.scrollTo({top: window.scrollY + top});
++	}
++
++	return {scrollTo};
++}
+diff --git a/src/composables/useScrollTo.mdx b/src/composables/useScrollTo.mdx
+new file mode 100644
+index 00000000..768e3ecd
+--- /dev/null
++++ b/src/composables/useScrollTo.mdx
+@@ -0,0 +1,26 @@
++import {Meta} from '@storybook/addon-docs/blocks';
++
++<Meta title="Composables/useScrollTo" />
++
++# useScrollTo
++
++`useScrollTo` scrolls an element to the top of the window, or of a scrolling container, using the browser's own scrolling. Whether the scroll animates is decided by the stylesheet (`scroll-behavior` in `_global.less`, which switches to an instant jump under `prefers-reduced-motion: reduce`), so callers never choose an animation themselves.
++
++## Examples
++
++### Bring the top of a component back into view
++
++```js
++const {scrollTo} = useScrollTo();
++scrollTo(this.$el, {offset: -50});
++```
++
++### Scroll inside a side modal instead of the page
++
++```js
++const {scrollTo} = useScrollTo();
++const container = document.querySelector('div.pkp-modal-scroll-container');
++scrollTo(fieldElement, {offset: -50, container});
++```
++
++`target` accepts a selector, an element or a component instance. `offset` is added to the final position, so a negative value leaves room above the element (for a sticky header).
+diff --git a/src/styles/_global.less b/src/styles/_global.less
+index c3e28363..4da63294 100644
+--- a/src/styles/_global.less
++++ b/src/styles/_global.less
+@@ -2,6 +2,26 @@
+ 
+ @tailwind base;
+ 
++/*
++   Programmatic scrolls (the submission wizard's step change, a form's page
++   change or jump to its first error, see useScrollTo) animate unless the
++   user asked the OS or browser for reduced motion. The scripts scroll with
++   the browser's own API and leave the choice here, so the preference is
++   honoured for free. scroll-behavior is not inherited: the rule on html
++   covers the document's own scrolling only, and the side modal's body is a
++   separate scroller, so it is named too.
++   */
++html,
++.pkp-modal-scroll-container {
++	scroll-behavior: smooth;
++}
++@media (prefers-reduced-motion: reduce) {
++	html,
++	.pkp-modal-scroll-container {
++		scroll-behavior: auto;
++	}
++}
++
+ /*
+    Apply some styles for backward-compatibility as tailwind by
+    default resets styling of headers
