@@ -1,0 +1,171 @@
+diff --git a/src/pages/workflow/WorkflowPage.vue b/src/pages/workflow/WorkflowPage.vue
+index 0e07e4c8..cdb46e1c 100644
+--- a/src/pages/workflow/WorkflowPage.vue
++++ b/src/pages/workflow/WorkflowPage.vue
+@@ -43,7 +43,7 @@
+ 					:is="workflowStore.Components[item.component] || item.component"
+ 					v-bind="item.props"
+ 					v-for="(item, index) in workflowStore.headerItems"
+-					:key="`${index} - ${item.component} - ${item?.props?.namespace}`"
++					:key="`${index} - ${item.component} - ${item?.props?.namespace} - ${item.key}`"
+ 				/>
+ 			</div>
+ 		</template>
+@@ -74,7 +74,7 @@
+ 									"
+ 									v-bind="subitem.props"
+ 									v-for="(subitem, subindex) in item"
+-									:key="`${subindex} - ${subitem.component} - ${subitem?.props?.namespace}`"
++									:key="`${subindex} - ${subitem.component} - ${subitem?.props?.namespace} - ${subitem.key}`"
+ 								/>
+ 							</div>
+ 						</div>
+@@ -82,7 +82,7 @@
+ 							:is="workflowStore.Components[item.component] || item.component"
+ 							v-else
+ 							v-bind="item.props"
+-							:key="`else ${index} - ${item.component} - ${item?.props?.namespace}`"
++							:key="`else ${index} - ${item.component} - ${item?.props?.namespace} - ${item.key}`"
+ 						/>
+ 					</template>
+ 				</div>
+@@ -96,7 +96,7 @@
+ 						:is="workflowStore.Components[item.component] || item.component"
+ 						v-bind="item.props"
+ 						v-for="(item, index) in workflowStore.primaryControlsRight"
+-						:key="`${index} - ${item.component} - ${item?.props?.namespace}`"
++						:key="`${index} - ${item.component} - ${item?.props?.namespace} - ${item.key}`"
+ 					/>
+ 				</div>
+ 			</template>
+@@ -110,7 +110,7 @@
+ 						:is="workflowStore.Components[item.component] || item.component"
+ 						v-bind="item.props"
+ 						v-for="(item, index) in workflowStore.primaryItems"
+-						:key="`${index} - ${item.component} - ${item?.props?.namespace}`"
++						:key="`${index} - ${item.component} - ${item?.props?.namespace} - ${item.key}`"
+ 					/>
+ 				</div>
+ 			</template>
+@@ -123,7 +123,7 @@
+ 						:is="workflowStore.Components[item.component] || item.component"
+ 						v-for="(item, index) in workflowStore.actionItems"
+ 						v-bind="item.props"
+-						:key="`${index} - ${item.component} - ${item?.props?.namespace}`"
++						:key="`${index} - ${item.component} - ${item?.props?.namespace} - ${item.key}`"
+ 					></component>
+ 				</div>
+ 			</template>
+@@ -136,7 +136,7 @@
+ 						:is="workflowStore.Components[item.component] || item.component"
+ 						v-for="(item, index) in workflowStore.secondaryItems"
+ 						v-bind="item.props"
+-						:key="`${index} - ${item.component} - ${item?.props?.namespace}`"
++						:key="`${index} - ${item.component} - ${item?.props?.namespace} - ${item.key}`"
+ 					></component>
+ 				</div>
+ 			</template>
+diff --git a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigAuthorOJS.js b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigAuthorOJS.js
+index 1e359c10..f449e817 100644
+--- a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigAuthorOJS.js
++++ b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigAuthorOJS.js
+@@ -325,6 +325,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-titleAbstract',
+ 					props: {
+ 						formName: 'titleAbstract',
+ 						submission,
+@@ -364,6 +365,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-metadata',
+ 					props: {
+ 						formName: 'metadata',
+ 						submission,
+@@ -420,6 +422,7 @@ export const PublicationConfig = {
+ 			if (pageInitConfig?.publicationSettings?.supportsDataAvailability) {
+ 				items.push({
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-dataAvailability',
+ 					props: {
+ 						formName: 'dataAvailability',
+ 						submission,
+diff --git a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOJS.js b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOJS.js
+index a89b99d6..9b15e95d 100644
+--- a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOJS.js
++++ b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOJS.js
+@@ -885,6 +885,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-titleAbstract',
+ 					props: {
+ 						formName: 'titleAbstract',
+ 						submission,
+@@ -924,6 +925,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-metadata',
+ 					props: {
+ 						formName: 'metadata',
+ 						submission,
+@@ -980,6 +982,7 @@ export const PublicationConfig = {
+ 			if (pageInitConfig?.publicationSettings?.supportsDataAvailability) {
+ 				items.push({
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-dataAvailability',
+ 					props: {
+ 						formName: 'dataAvailability',
+ 						submission,
+@@ -1024,6 +1027,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-identifier',
+ 					props: {
+ 						formName: 'identifier',
+ 						submission,
+@@ -1109,6 +1113,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-permissionDisclosure',
+ 					props: {
+ 						formName: 'permissionDisclosure',
+ 						submission,
+@@ -1129,6 +1134,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-issue',
+ 					props: {
+ 						formName: 'issue',
+ 						submission,
+diff --git a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOMP.js b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOMP.js
+index f55c7cff..152e4d9c 100644
+--- a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOMP.js
++++ b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOMP.js
+@@ -611,6 +611,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-catalogEntry',
+ 					props: {
+ 						formName: 'catalogEntry',
+ 						submission,
+diff --git a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOPS.js b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOPS.js
+index f581b477..8b16e63c 100644
+--- a/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOPS.js
++++ b/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOPS.js
+@@ -314,6 +314,7 @@ export const PublicationConfig = {
+ 			return [
+ 				{
+ 					component: 'WorkflowPublicationForm',
++					key: 'WorkflowPublicationForm-issue',
+ 					props: {
+ 						formName: 'issue',
+ 						submission,

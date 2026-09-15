@@ -159,6 +159,24 @@ on a page change, so the form leaves the screen while its successor
 loads (the `v-if="form"` already hides it), and a null guard on the
 `canSubmit` watcher. The OJS and OPS U40 twins run the same component.
 
+**The keyed variant (preferred, same day).** The maintainer's reading:
+the instance should not survive a section switch at all. The workflow
+page keys every configured item by its position, component name and
+`namespace`, which is why one `WorkflowPublicationForm` serves every
+Publication section in turn. `2026-09-15-ui-library-publication-form-key.patch`
+appends a configured item's own `key` to the workflow page's key string
+(`${index} - ${component} - ${namespace} - ${item.key}`, at its seven
+sites; the positional identity stays and the key only adds to it) and gives the
+eleven `WorkflowPublicationForm` sites across the OJS, OMP and OPS configs
+`key: 'WorkflowPublicationForm-<formName>'`, so a section switch mounts a
+fresh instance with no form to type into until its own fetch lands. A
+version switch already remounted (the OJS config returns no items while
+the new publication loads), so the key needs only the form name. The
+first patch's `clearData` is then unnecessary and is not part of it.
+Same A/B on the Mac at eight workers: OMP U40 S4 20 of 20 green against
+the stock bundle's 4 failures in 30. The publication specs on keyed
+builds: see section 5.
+
 **Test-side.** `openPublicationPage()` could wait for the
 `_components/<form>` response before returning, which would also cover
 the window; with the patch in place the form simply is not there to type
@@ -194,6 +212,7 @@ into, so the tests need nothing.
 | U21 OJS spec, patched bundle, 8 workers | 16 of 16 green |
 | Native variant: throttled probe, U21 spec, full OJS suite | 0 of 24 lost (twice: helper and composable builds); 16 of 16; full suite 214 of 216 in 6.5 min, the same two reds as the pristine run (U05 S7's Tasks list and U24 S14's Declined count, both moved by parallel tests on the shared journal) |
 | OMP U40 S4 A/B (section 3) | as tabled |
+| Keyed variant: OMP U40 S4 ×20 (helper form) and ×10 (appended form); OJS U40+U49+U41 and OMP U40+U41 specs on keyed builds | 20 of 20 and 10 of 10; OJS specs 32 of 32; OMP 20 of 21, the one red being U40 S3's author save answered 401 on the day's used database, 9 of 9 red on stock and keyed bundles alike and 6 of 6 green on both after `reset:omp` (ci-triage) |
 | Full OJS suite, pristine checkouts, harness change, 8 workers | 214 of 216 green in 6.2 min; U24 S14 red on the journal's Declined count (7, expected 5: the day's repeats on the same database) and U05 S7 red once on the Tasks dialog's table (30 s), both green alone right after (16 s) |
 
 ## 6. Next

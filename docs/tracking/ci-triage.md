@@ -75,8 +75,10 @@ trips.
   the previous page's form stays editable until the fetch lands and then
   resets. The test's fill and blur ran on the stale Title & Abstract form
   18 ms before the re-fetch landed; the PUT carried the seeded abstract.
-  Patch: `docs/reports/2026-09-15-ui-library-publication-form-clear.patch`
-  (clear the form while the next one loads); its A/B is in the report.
+  Patch: `docs/reports/2026-09-15-ui-library-publication-form-key.patch`
+  (a fresh component per Publication section; the earlier
+  `...-publication-form-clear.patch` kept the instance and cleared the
+  form instead); the A/Bs are in the report.
   The U40 OMP file keeps traces on failure since 2026-09-15.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
@@ -380,6 +382,16 @@ trips.
   same helper on the same three methods. Green alone: OMP U04 S10
   (10.7 s), OMP U21 S6 (20.8 s), OPS U21 S6 (27 s). **Watch condition**:
   a hardened press reds again with its retry exhausted at four workers.
+- **Author's save of a new version answered 401 on a used database**
+  (U40 S3, OMP, local). After a day of repeats on one database, the
+  author's Prefix save on the manager's fresh version got
+  `user.authorization.accessibleWorkflowStage` ("You don't currently have
+  access to that stage of the workflow") and the test's response wait ran
+  out: 9 of 9 red across two bundles (stock and the keyed publication-form
+  patch) on 2026-09-15, 6 of 6 green on both right after `reset:omp`, so
+  database state, not the build. Not seen on CI (fresh database). **Watch
+  condition**: a red on CI or on a reset database; then read which stage
+  assignment the author's permission tick lands on.
 - **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
   `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
   and the tests' is local: between 00:00 and 02:00 CEST every "today + N
