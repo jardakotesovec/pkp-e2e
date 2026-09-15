@@ -1,0 +1,113 @@
+diff --git a/src/managers/ReviewerManager/ReviewDetailsRating.vue b/src/managers/ReviewerManager/ReviewDetailsRating.vue
+index af735060..b85d3f7a 100644
+--- a/src/managers/ReviewerManager/ReviewDetailsRating.vue
++++ b/src/managers/ReviewerManager/ReviewDetailsRating.vue
+@@ -4,14 +4,14 @@
+ 			v-for="option in options"
+ 			:key="option.value"
+ 			class="flex cursor-pointer items-center gap-x-2 text-lg-normal"
+-			:class="isSaving && 'text-disabled'"
++			:class="isDisabled && 'text-disabled'"
+ 		>
+ 			<input
+ 				v-model="quality"
+ 				type="radio"
+ 				name="quality"
+ 				:value="option.value"
+-				:disabled="isSaving"
++				:disabled="isDisabled"
+ 				@change="emit('change', quality)"
+ 			/>
+ 			<span v-if="!option.stars">{{ option.label }}</span>
+@@ -40,8 +40,8 @@ const props = defineProps({
+ 		type: Object,
+ 		required: true,
+ 	},
+-	/** Disables the options while the parent stores the rating. */
+-	isSaving: {
++	/** Disables the options while the parent loads or stores the assignment (any response resets them). */
++	isDisabled: {
+ 		type: Boolean,
+ 		default: () => false,
+ 	},
+diff --git a/src/managers/ReviewerManager/useReviewAssignment.js b/src/managers/ReviewerManager/useReviewAssignment.js
+index 8b778aee..105cafd8 100644
+--- a/src/managers/ReviewerManager/useReviewAssignment.js
++++ b/src/managers/ReviewerManager/useReviewAssignment.js
+@@ -53,6 +53,7 @@ export function useReviewAssignment({
+ 		fetch: sendViewed,
+ 		data: viewedReviewAssignment,
+ 		isSuccess: isViewedRecorded,
++		isLoading: isMarkingViewed,
+ 	} = useFetch(considerApiUrl, {
+ 		method: 'PUT',
+ 		body: {considered: pkp.const.REVIEW_ASSIGNMENT_VIEWED},
+@@ -124,6 +125,7 @@ export function useReviewAssignment({
+ 	return {
+ 		reviewAssignment,
+ 		isLoadingAssignment,
++		isMarkingViewed,
+ 		isConfirmed,
+ 		isConfirming,
+ 		isSavingRating,
+diff --git a/src/managers/ReviewerManager/useReviewDetails.js b/src/managers/ReviewerManager/useReviewDetails.js
+index 9a142ca4..45fb203c 100644
+--- a/src/managers/ReviewerManager/useReviewDetails.js
++++ b/src/managers/ReviewerManager/useReviewDetails.js
+@@ -30,6 +30,7 @@ export function useReviewDetails({
+ 	const {
+ 		reviewAssignment: reviewAssignmentRef,
+ 		isLoadingAssignment,
++		isMarkingViewed,
+ 		isConfirmed,
+ 		isConfirming,
+ 		isSavingRating,
+@@ -50,6 +51,17 @@ export function useReviewDetails({
+ 		() => isLoadingAssignment.value || isLoadingReviewContent.value,
+ 	);
+ 
++	// Every response that replaces the assignment (the load, the "viewed"
++	// round-trip, the rating's own save) resets the rating options to the
++	// server's value, so a rating picked while one is in flight would be
++	// reverted when it lands. The options stay disabled until all have settled.
++	const isRatingDisabled = computed(
++		() =>
++			isLoadingAssignment.value ||
++			isMarkingViewed.value ||
++			isSavingRating.value,
++	);
++
+ 	const {form, set, hasUnansweredRequiredFields} = useReviewDetailsForm(
+ 		{
+ 			submission,
+@@ -59,7 +71,7 @@ export function useReviewDetails({
+ 			reviewContent,
+ 			recommendations,
+ 			isLoadingReview,
+-			isSavingRating,
++			isRatingDisabled,
+ 			onDownload: downloadReview,
+ 			onRatingChange: rateReviewer,
+ 		},
+diff --git a/src/managers/ReviewerManager/useReviewDetailsForm.js b/src/managers/ReviewerManager/useReviewDetailsForm.js
+index 5442bdc2..ecda60d7 100644
+--- a/src/managers/ReviewerManager/useReviewDetailsForm.js
++++ b/src/managers/ReviewerManager/useReviewDetailsForm.js
+@@ -24,7 +24,7 @@ export function useReviewDetailsForm(
+ 		reviewContent,
+ 		recommendations = [],
+ 		isLoadingReview = ref(false),
+-		isSavingRating = ref(false),
++		isRatingDisabled = ref(false),
+ 		onSubmit = async () => ({}),
+ 		onDownload = () => {},
+ 		onRatingChange = () => {},
+@@ -125,7 +125,7 @@ export function useReviewDetailsForm(
+ 				component: ReviewDetailsRating,
+ 				componentProps: {
+ 					reviewAssignment: reviewAssignment.value,
+-					isSaving: isSavingRating,
++					isDisabled: isRatingDisabled,
+ 					onChange: onRatingChange,
+ 				},
+ 				groupId: 'reviewRating',

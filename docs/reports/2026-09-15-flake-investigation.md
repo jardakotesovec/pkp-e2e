@@ -183,6 +183,41 @@ builds: see section 5.
 the window; with the patch in place the form simply is not there to type
 into, so the tests need nothing.
 
+## 3b. Patch C: the reviewer rating reverted by the "viewed" round-trip
+
+**What the suite sees.** OMP U27 S9 (rank 5 on CI, 8 flaky runs in three
+weeks): a star clicked in the Review Details window "did not change its
+state" (Playwright's `check()` verifies the state after the click), even
+though the test first waits for "Modify Review" to enable. app-changes
+row 11 recorded the shape on 2026-08-29 and the suites work around it
+with outcome-keyed re-clicks.
+
+**Mechanism** (`useReviewDetails.js`, `useReviewAssignment.js`,
+`ReviewDetailsRating.vue`). Opening the window loads the assignment and
+then sends the "viewed" round-trip (`PUT …/consider`); each response
+replaces the assignment object, and the rating component resets its
+options to the server's value on every replacement (so a rejected save
+also resets). "Modify Review" enables when the load completes, before
+the "viewed" response, so a star clicked in that window is saved and then
+overwritten on screen by the "viewed" response, which the server built
+before the rating was written. The options were disabled only during
+their own save.
+
+**Reproduction.** A page route that lets the "viewed" request through but
+holds its response 1.5 s, in the U27 S9 flow, then asserts the five-star
+radio after the response lands: stock 3 of 3 reverted to unchecked (the
+"Reviewer rating saved" toast having shown), patched 3 of 3 held. Holding
+the request instead does not reproduce it (the server then writes the
+rating first), which is why the CI failures depend on server timing.
+
+**The patch** (`2026-09-15-ui-library-reviewer-rating-lock.patch`): the
+assignment composable exposes `isMarkingViewed`, the details composable
+derives `isRatingDisabled` from the load, the "viewed" round-trip and the
+rating save, and the rating component takes it as `isDisabled` instead of
+`isSaving`. A person sees the stars greyed for the round-trip's duration
+after the window opens. Full OMP U26+U27 34 of 34 and OJS U26+U27 32 of
+32 on patched builds.
+
 ## 4. What changed in this repo
 
 - `shared/playwright/support/throttle.js` and base-test.js:
