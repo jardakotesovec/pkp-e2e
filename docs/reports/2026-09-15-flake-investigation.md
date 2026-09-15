@@ -112,6 +112,19 @@ setters alone. Three other `scrollIntoView({behavior: 'smooth'})` calls
 in ui-library (open review, usage chart, task info) ignore the preference
 the same way and could drop their argument in a follow-up.
 
+*Follow-up the same evening:* the global `scroll-behavior: smooth` rule
+also animated the `scrollIntoView` calls Cypress makes for its own
+actionability checks and broke that suite, so the merged version decides
+per call instead: `useScrollTo` reads `prefers-reduced-motion` and passes
+`behavior: 'instant'` or `'smooth'` to the native `scrollTo`, and the
+stylesheet rule is gone. Verified at the merged tips (ojs `3d0b1df3f3`,
+ui-library `d5d7017074` plus the working-tree change): a motion probe
+opening the wizard in two contexts saw the post-step scroll animate over
+~150 ms without the preference and land instantly with it (3 of 3 each);
+the throttled press probe lost 0 of 24; U21 16 of 16. For the three
+`scrollIntoView` calls above, the same per-call choice applies rather
+than dropping the argument.
+
 **Test-side.** Nothing new is needed; `pressUntil()` stays until the
 patch ships, then it can go.
 

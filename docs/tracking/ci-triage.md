@@ -168,8 +168,12 @@ trips.
   `asUser` contexts, which it never had. The `pressUntil` retry stays
   until the patch lands. **Merged upstream 2026-09-15** (ui-library
   `393dd28952`/`d5d7017074`, pkp-lib `b262d27b81`, ojs `e0e0275a55`, omp
-  `6eb3b935ad`, ops `fb72f079ba`): the plugin is gone, the stylesheet
-  decides and reduced motion means an instant jump. Once the sync
+  `6eb3b935ad`, ops `fb72f079ba`): the plugin is gone and reduced motion
+  means an instant jump (decided per call in `useScrollTo` since the
+  same-day follow-up: a global `scroll-behavior: smooth` rule broke the
+  Cypress suite's own scrolls; verified here at the merged tips: the
+  scroll animates without the preference, jumps with it, the throttled
+  probe loses 0 of 24 presses, U21 16 of 16). Once the sync
   baselines carry these, `pressUntil()` can go back to a single press.
   **Watch condition**: a lost press at tips carrying the merge.
   **Seen on a footer button
