@@ -150,8 +150,8 @@ def interm_of(d): return [x for x in d["failed"] if x["nearby"] or x["green_sha"
 def score(d): return len(d["flaky"]) + len(interm_of(d))
 
 out = []
-dates = sorted(r["date"] for r in per_run) or [dt.date.today().isoformat()]
-out.append(f"# CI flake tally: runs created {dates[0]} .. {dates[-1]} (fetched {dt.datetime.utcnow().strftime('%Y-%m-%d %H:%MZ')})\n")
+dates = sorted(r["date"][:10] for r in per_run) or [dt.date.today().isoformat()]
+out.append(f"# CI flake tally: runs created {dates[0]} .. {dates[-1]} (fetched {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%MZ')})\n")
 out.append("Sources: `gh run list` + `gh run view --log` on jardakotesovec/pkp-e2e (workflow `e2e`, 3 jobs ojs/omp/ops per run, apps at pkp/<app> main tip) and pkp/ojs, pkp/omp, pkp/ops (workflow `e2e`, the thin hook calling run-app.yml; 1 job per run). Cancelled runs (superseded pushes) were not inspected. CI runs `npx playwright test --retries=1` with the list reporter.\n")
 out.append("Definitions:\n- **flaky** = failed the first attempt, passed the retry (job stays green). Direct evidence of non-determinism.\n- **failed** = both attempts failed (job red). Sub-signals: *green rerun same sha* = a later run of the same repo at the same head SHA succeeded; *passed nearby Nx* = the same test passed in N other completed jobs of the same repo + branch + app within ±36 h, both before and after the failure, and the job had at most 3 failed tests (larger clusters are regressions). Either marks the failure as **intermittent**. A failed incident with neither is most likely a real regression at that ref (every push is a new SHA, so consecutive failures across SHAs are consistent with a regression).\n- **(exp)** = pkp-e2e run on a non-main branch (perf-* experiments with patched pkp-lib, or a companion branch); count with care.\n- flake score = flaky + intermittent failed.\n")
 
@@ -178,7 +178,7 @@ out.append("")
 
 out.append("## Base rate: completed jobs carrying at least one flaky test\n")
 week0 = dt.date.fromisoformat(dates[0])
-def wk(d): return 1 + (dt.date.fromisoformat(d) - week0).days // 7
+def wk(d): return 1 + (dt.date.fromisoformat(d[:10]) - week0).days // 7
 out.append(f"A completed job = the Playwright summary printed (any conclusion). Weeks count from the first run's date ({dates[0]}), seven days each.\n")
 out.append("| app | completed jobs | jobs with ≥1 flaky | share | flaky incidents | red jobs (≥1 failed) | red jobs, isolated (≤3 failed) | red jobs, cluster (4+) |")
 out.append("|---|---|---|---|---|---|---|---|")
