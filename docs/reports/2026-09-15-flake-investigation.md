@@ -165,8 +165,9 @@ page keys every configured item by its position, component name and
 `namespace`, which is why one `WorkflowPublicationForm` serves every
 Publication section in turn. `2026-09-15-ui-library-publication-form-key.patch`
 appends a configured item's own `key` to the workflow page's key string
-(`${index} - ${component} - ${namespace} - ${item.key}`, at its seven
-sites; the positional identity stays and the key only adds to it) and gives the
+(`${index} - ${component} - ${namespace} - ${item.key}`, built by one
+`itemKey()` helper for the page's seven key sites; the positional identity
+stays and the key only adds to it) and gives the
 eleven `WorkflowPublicationForm` sites across the OJS, OMP and OPS configs
 `key: 'WorkflowPublicationForm-<formName>'`, so a section switch mounts a
 fresh instance with no form to type into until its own fetch lands. A
