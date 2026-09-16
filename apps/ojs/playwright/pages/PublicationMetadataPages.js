@@ -217,6 +217,65 @@ exports.PublicationScreen = class PublicationScreen {
     }
 
     /**
+     * Press "Create New Version" and Confirm its dialog untouched (U49 Rule
+     * 11: an untouched Confirm answers everything). On a never-published
+     * item the dialog arrives with the source "Unassigned version ({date})"
+     * and no stage, so the copy is a second "Unassigned version ({date})"
+     * with the same name as its source (read live 2026-09-16,
+     * `.reports/U41/tojs/after-new-version-ojs.json`); the copy is told
+     * apart by the id the version POST answers with, not by name. Returns
+     * the new publication's id.
+     *
+     * @returns {Promise<number>}
+     */
+    async createNewVersionUntouched() {
+        const link = this.createNewVersionLink();
+        if (!(await link.isVisible())) {
+            await this.page.getByRole('link', {name: 'Publication', exact: true}).click();
+        }
+        await link.click();
+        const dialog = this.page
+            .getByRole('dialog')
+            .filter({hasText: 'Which version should metadata be copied from?'});
+        await expect(dialog.locator('select[name="versionSource"]')).toBeVisible({
+            timeout: 30_000,
+        });
+        const created = this.page.waitForResponse(
+            (r) =>
+                r.url().includes('/version') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
+        const response = await created;
+        const publication = await response.json();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        return publication.id;
+    }
+
+    /**
+     * Open one version's Publication page by address: the workflow reads
+     * `workflowMenuKey` from the URL (`publication_{publicationId}_{page}`,
+     * useWorkflowNavigationConfigOJS.js), which is the only way to tell two
+     * same-named versions apart. Waits for the "Publication: {name}"
+     * heading.
+     *
+     * @param {number} submissionId
+     * @param {number} publicationId
+     * @param {'contributors'|'titleAbstract'|'metadata'} pageKey
+     * @param {string} heading the page's heading name ("Contributors")
+     */
+    async gotoVersionPage(submissionId, publicationId, pageKey, heading) {
+        await this.page.goto(
+            `/index.php/${this.contextPath}/dashboard/editorial?workflowSubmissionId=${submissionId}&workflowMenuKey=publication_${publicationId}_${pageKey}`
+        );
+        await expect(
+            this.page.getByRole('heading', {name: `Publication: ${heading}`})
+        ).toBeVisible({timeout: 30_000});
+    }
+
+    /**
      * Open a Publication entry and wait for its "Publication: {name}" page
      * heading. The Publication group is expanded by default; clicking the
      * group header would collapse it, so it is only clicked when the entry

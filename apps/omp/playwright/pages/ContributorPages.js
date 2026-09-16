@@ -42,9 +42,13 @@ exports.stubRegistrySearch = stubRegistrySearch;
 exports.ContributorsScreen = class ContributorsScreen {
     /**
      * @param {import('@playwright/test').Page} page
+     * @param {{root?: string}} [options] the panel's root selector; the
+     *   default is the workflow's and the wizard's Contributors step
+     *   (the same component, `.contributorsListPanel`).
      */
-    constructor(page) {
+    constructor(page, {root = '.contributorsListPanel'} = {}) {
         this.page = page;
+        this.root = root;
     }
 
     /**
@@ -77,12 +81,26 @@ exports.ContributorsScreen = class ContributorsScreen {
 
     /** The contributors list panel container. */
     panel() {
-        return this.page.locator('.contributorsListPanel');
+        return this.page.locator(this.root);
+    }
+
+    /** The emptied list's "No items found." line (Rule 5). */
+    emptyMessage() {
+        return this.panel().getByText('No items found.', {exact: true});
     }
 
     /** The contributor rows, in display order. */
     rows() {
         return this.panel().getByRole('listitem');
+    }
+
+    /**
+     * The rows read by CSS, for a count taken while a side window is open
+     * over the list (the panel is aria-hidden beneath it, so a role-based
+     * read returns nothing: patterns.md locator pitfalls 4 and 6).
+     */
+    rowsBehindWindow() {
+        return this.panel().locator('.listPanel__item');
     }
 
     /** The row carrying the given contributor name. */
@@ -157,6 +175,11 @@ exports.ContributorsScreen = class ContributorsScreen {
             .filter({has: this.page.getByRole('cell', {name: format, exact: true})});
     }
 
+    /** A preview row's rendered value (the cell after the Format cell). */
+    previewValue(dialog, format) {
+        return this.previewRow(dialog, format).getByRole('cell').nth(1);
+    }
+
     async closePreview(dialog) {
         await dialog.getByRole('button', {name: 'Close'}).click();
         await expect(dialog).toHaveCount(0, {timeout: 30_000});
@@ -188,11 +211,83 @@ exports.ContributorsScreen = class ContributorsScreen {
         return dialog;
     }
 
-    /** A form field's container inside an open panel, by its label text. */
+    /**
+     * Confirm an open "Delete Contributor" dialog with its "Delete
+     * Contributor" button, bounded by the contributor endpoint answering
+     * OK (DELETE travels as POST), and wait for the row to go.
+     */
+    async confirmDelete(dialog, name) {
+        const deleted = this.page.waitForResponse(
+            (r) =>
+                r.url().includes('/contributors/') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await dialog.getByRole('button', {name: 'Delete Contributor', exact: true}).click();
+        await deleted;
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        await expect(this.row(name)).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** Delete a row's contributor: open its dialog and confirm. */
+    async deleteContributor(name) {
+        const dialog = await this.openRowDelete(name);
+        await this.confirmDelete(dialog, name);
+    }
+
+    /**
+     * A form field's container inside an open panel, by its label text (a
+     * `<label>` on a text field, the `<legend>` of an options group such
+     * as Contributor Roles or Publication Lists).
+     */
     field(dialog, labelRe) {
         return dialog.locator('.pkpFormField').filter({
-            has: this.page.locator('label.pkpFormFieldLabel').filter({hasText: labelRe}),
+            has: this.page.locator('.pkpFormFieldLabel, legend').filter({hasText: labelRe}),
         });
+    }
+
+    /** The "This field is required." line under a field (Fields & validation). */
+    requiredError(dialog, labelRe) {
+        return this.field(dialog, labelRe).getByText('This field is required.', {exact: true});
+    }
+
+    /** The form foot's "Please correct {n} errors." summary line. */
+    errorSummary(dialog) {
+        return dialog.getByText(/Please correct (one|\d+) errors?\./);
+    }
+
+    /** The foot's "Go to {field}: …" jump link naming a refused field. */
+    jumpLink(dialog, fieldLabel) {
+        return dialog.getByText(new RegExp(`^Go to ${fieldLabel}:`));
+    }
+
+    /** The "Jump to next error" control the refused form offers. */
+    jumpToNextError(dialog) {
+        return dialog.getByText('Jump to next error', {exact: true});
+    }
+
+    /** The panel's Save button. */
+    saveButton(dialog) {
+        return dialog.getByRole('button', {name: 'Save', exact: true});
+    }
+
+    /** A "Contributor Type" radio ("Person", "Organization or group", "Anonymous"). */
+    typeRadio(dialog, label) {
+        return dialog.getByRole('radio', {name: label, exact: true});
+    }
+
+    /** The "Include this contributor when identifying authors in lists of publications." box. */
+    publicationListsBox(dialog) {
+        return dialog.getByRole('checkbox', {
+            name: 'Include this contributor when identifying authors in lists of publications.',
+        });
+    }
+
+    /** Close an open panel without saving (its header "Close"). */
+    async closePanel(dialog) {
+        await dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
     }
 
     /** The TinyMCE body of a rich-text panel field (first = primary language). */
@@ -278,6 +373,36 @@ exports.ContributorsScreen = class ContributorsScreen {
         );
         await this.setPrimaryContactButton(name).click();
         await saved;
+    }
+
+    // ---- CRediT roles (inside an open Add/Edit panel) ----
+
+    /** The "CRediT roles and the degrees of contribution" table. */
+    creditRolesTable(dialog) {
+        return dialog.getByRole('table', {
+            name: 'CRediT roles and the degrees of contribution',
+        });
+    }
+
+    /**
+     * Press "Add Another Role" and pick a role and a degree on the new
+     * row (each cell holds a native select; the role's is first).
+     */
+    async addCreditRole(dialog, role, degree) {
+        const rowsBefore = await this.creditRolesTable(dialog).locator('tbody tr select').count();
+        await dialog.getByRole('button', {name: 'Add Another Role', exact: true}).click();
+        const selects = this.creditRolesTable(dialog).locator('tbody tr select');
+        await expect(selects).toHaveCount(rowsBefore + 2, {timeout: 30_000});
+        // A new row arrives set to the first role not yet taken (its own
+        // option then reads disabled), so the role is picked only when the
+        // row does not already hold it.
+        const roleSelect = selects.nth(rowsBefore);
+        const current = (await roleSelect.locator('option:checked').textContent()) || '';
+        if (current.trim() !== role) {
+            await roleSelect.selectOption({label: role});
+        }
+        await expect(roleSelect.locator('option:checked')).toHaveText(role);
+        await selects.nth(rowsBefore + 1).selectOption({label: degree});
     }
 
     // ---- Affiliations (inside an open Add/Edit panel) ----

@@ -203,6 +203,33 @@ trips.
   Finals now run one app at a time. **Watch condition**: a red with one
   suite running or at CI's four workers; then anchor the fill on the
   editor's settled state before typing.
+- **A rich-text read thrown inside the editor under load** (U40 S2, OPS,
+  once). `PublicationScreen.readRichText()` (`apps/ops/playwright/pages/PublicationPages.js:164`)
+  evaluates the editor's `getContent()` and it threw `TypeError: Cannot
+  read properties of undefined (reading 'serialize')` from inside TinyMCE
+  in the U41 revision session's first OPS final at four workers on a
+  reset database 2026-09-16 (`.reports/U41/final-run-ops-attempt1.log`,
+  the one red of 153, the 10 serial tests skipped behind it): the editor
+  answered the read before its serializer existed. Green in the next
+  full run on a reset database (`.reports/U41/final-run-ops.log`, 153 in
+  5.7 min). **Watch condition**: a second sighting; then `readRichText()`
+  waits for the editor's settled state (its `initialized` flag or a
+  bounded retry of the read) before evaluating.
+- **The Notify window's template body never landing in the editor under
+  load** (U41 S3, OJS, once). `PublicationScreen.notifyParticipant()`
+  (`apps/ojs/playwright/pages/PublicationMetadataPages.js`, U40's helper,
+  U41 S3's positive mail control) selects "Discussion (Submission)", waits
+  for the template fetch, then waits 30 s for a TinyMCE editor inside
+  `form#notifyForm` that is initialized and non-empty; in the U41 revision
+  session's second OJS final at four workers on a reset database
+  2026-09-16 (`.reports/U41/final-run-ojs.log`, the one red of 235, the
+  13 serial tests skipped behind it) the window was open with the template
+  selected and the fetch answered, but the editor's iframe held one empty
+  paragraph for the whole wait (the error context). Green alone in 10 s
+  right after (`.reports/U41/rerun-ojs-s3.log`), green in the day's first
+  OJS final and in every author run. **Watch condition**: a second
+  sighting; then the helper re-selects the template once when the box
+  stays empty (a content-verified bounded retry, the pattern above).
 - **Contributor reorder under load** (U41 S2, OPS; the OJS twin shares the
   code shape). The Cancel leg's "Increase position" press, issued right
   after "Order" while the list re-rendered into ordering mode, left the
@@ -332,8 +359,13 @@ trips.
   database the same evening, `.reports/U40/final-run-ojs-attempt2.log`:
   `reader.rosa` again, the one red of 221, the 13 serial tests skipped
   behind it; green alone right after, `.reports/U40/rerun-ojs-login.log`).
-  Next step: the cookie-jar read above, for the maintenance session,
-  first thing.
+  **Sixth sighting, the second on OMP** (the U41 revision session's OMP
+  final at four workers on a reset database 2026-09-16,
+  `.reports/U41/final-run-omp.log`: `reader.rosa` again, the one red of
+  218, the 11 serial tests skipped behind it; green alone in 14.3 s,
+  `.reports/U41/rerun-omp-login.log`, the serial project green alone
+  right after, `.reports/U41/rerun-omp-serial.log`). Next step: the
+  cookie-jar read above, for the maintenance session, first thing.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the
@@ -410,7 +442,12 @@ trips.
   tab's dashboard poll, six seconds earlier), so it is the browser, not
   the app; the OMP incident above was not traced. Two of three OJS
   finals on the VM: the leg wants the closed tab's requests settled (or a
-  fresh page) before the `goto`, U05's session to decide.
+  fresh page) before the `goto`, U05's session to decide. **Seen again
+  2026-09-16** (the U41 revision session's first OJS final at four
+  workers on a reset database, `.reports/U41/final-run-ojs-attempt1.log`:
+  U05 S6 to the 240 s timeout the same way, the one red of 235, the 13
+  serial tests skipped behind it; the serial project green alone in
+  32.2 s, `.reports/U41/rerun-ojs-serial.log`).
 - **Submission wizard "Continue" not advancing under load** (U04 S10,
   OMP, once). The wizard's rail stayed on "2 Details" for the 20 s wait
   of `SubmissionWizardPages.continueTo()` after the Continue press in the

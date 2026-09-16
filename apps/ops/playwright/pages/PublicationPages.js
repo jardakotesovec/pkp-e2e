@@ -553,6 +553,32 @@ async function metadataUpdatedLogCount(page) {
 exports.metadataUpdatedLogCount = metadataUpdatedLogCount;
 
 /**
+ * Open the workflow header's "Activity Log", read its row count and its
+ * "Submission metadata updated" count, and close it again: the "no new
+ * entry" reads of U41 (a contributor add, edit or delete writes nothing;
+ * "Set Primary Contact" writes one "Submission metadata updated" line, the
+ * positive control). Same opener as `metadataUpdatedLogCount`; added
+ * 2026-09-16.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<{rows: number, metadataUpdated: number}>}
+ */
+async function activityLogCounts(page) {
+    await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
+    const logModal = page.locator('[data-cy="active-modal"]').last();
+    await expect(logModal.getByText('Activity Log & Notes')).toBeVisible({timeout: 30_000});
+    await waitForJQueryIdle(page);
+    await expect(logModal.locator('tr.gridRow').first()).toBeVisible({timeout: 30_000});
+    const rows = await logModal.locator('tr.gridRow').count();
+    const metadataUpdated = await logModal.getByText('Submission metadata updated').count();
+    await logModal.getByRole('button', {name: 'Close'}).first().click();
+    await expect(page.getByText('Activity Log & Notes')).toHaveCount(0, {timeout: 30_000});
+    return {rows, metadataUpdated};
+}
+
+exports.activityLogCounts = activityLogCounts;
+
+/**
  * Add a discussion from the open stage screen's "Production Tasks &
  * Discussions" panel: a "Name", the listed participants' boxes (the
  * creator's own box arrives ticked; the form refuses a save with fewer

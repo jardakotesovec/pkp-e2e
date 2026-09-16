@@ -64,8 +64,9 @@ required field missing never leaves the form. **"This field is required."**
 appears in red under the field. The form's foot shows **"Please correct one
 error."**, or **"Please correct {n} errors."** when there are several, with
 a **"Jump to next error"** link until every error is fixed. After a refused
-save, the Save button stays disabled until a field with an error is
-edited. <sup>c</sup> <sup>n</sup>
+save, Save stays disabled while any flagged field still carries its error.
+Editing a flagged field clears that field's message alone, and Save enables
+once no error is left. <sup>c</sup> <sup>n</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -350,132 +351,434 @@ screen, Rule 12): <sup>e</sup>
 
 ## Canonical scenarios
 
-Scenarios 1–3, 6 and 7 run on the seeded journal with ready accounts and
-scratch submissions; scenarios 4, 5 and 8 run on a scratch journal with
-throwaway accounts, because each needs the journal set up differently (a
-second submission language, added contributor roles, the
-competing-interests requirement). Each scenario's accounts and seeding
-are in its footnote.
+Scenarios 1–3, 6, 7, 9 and 10 run on the seeded journal with ready
+accounts and scratch submissions; scenarios 4, 5, 8 and 11 run on a
+scratch journal with throwaway accounts, because each needs the journal
+set up differently (a second submission language, added contributor
+roles, the competing-interests requirement, a review type). Each
+scenario's accounts, seeding and the mail catcher's address are in its
+footnote.
 
-1. **Maintain the contributor list** — Journal Manager: open a
-   submission's workflow, then the Publication area, then "Contributors".
-   The submitting author is already listed with an "Author" badge and the
-   "Primary Contact" badge. Press "Add Contributor". The panel opens with
-   "Contributor Type" set to "Person". Fill Given Name, Email and Country,
-   tick the "Author" role, and Save. The panel closes and the new row
-   shows the name with an "Author" badge. Add a second contributor as
-   "Organization or group". The name fields swap to "Organization Name".
-   Fill it, Email and Country, tick "Author", and Save. Open the person's
-   "Edit", add a Family Name, and Save. The row updates. Press "Delete"
-   on the organization. The dialog "Delete Contributor" asks "Are you
-   sure you want to remove {name} as a contributor? This action can not
-   be undone." Cancel keeps the row. Press Delete again and confirm: the
-   row is removed. <sup>s1</sup>
-2. **Reorder and preview the display formats** — Journal Manager, on a
-   submission with two Person contributors with distinct family names.
-   Scenario 1 leaves exactly that, since its organization was deleted.
-   The list shows the submitting author first and the added contributor
-   second, on every reload (Rule 6). Press "Preview". "List
-   of Contributors" shows "Abbreviated" as the first contributor's family
-   name plus "et al.", and "Full" as both names, each followed by
-   "(Author)" and separated by a semicolon. Close it and press "Order".
-   Up/down arrows replace the row buttons. Move the second contributor up
-   and press "Save Order". Reload the page: the order holds, and
-   "Abbreviated" in Preview now names the other family name. Press
-   "Order" again, move a row, and press "Cancel". The saved order is
-   back. <sup>s2</sup>
-3. **Move the primary contact** — Journal Manager, on a submission with
-   two contributors. The submitting author's row carries "Primary
-   Contact", and the other row offers "Set Primary Contact". Press "Set
-   Primary Contact" on the other row. The badge moves at once, with no
-   confirmation. Delete that new primary contact. The remaining row still
-   shows only "Set Primary Contact": the submission now has no primary
-   contact at all, and nothing warned about it. Press "Schedule For
-   Publication", the button in the Publication area's header above the
-   pages, beside "Status: Unscheduled". Continue past "Review Publishing
-   Details" (its "Confirm" button) to the final confirmation: "All
-   publication requirements have been met." The missing contact is never
-   mentioned (⚠ [A2](#a2)). Back out with "Close". The dialog's only
-   other button is "Publish"; there is no Cancel. Nothing is published,
-   yet the header's status may no longer read "Unscheduled". The earlier
-   "Confirm" already recorded the version choice, so a changed status
-   label with nothing published is the expected outcome here, not a
-   failure. The publish dialog's own mechanics belong to
-   *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*. <sup>s3</sup>
-4. **Record affiliations, typed and registry-backed** — Journal Manager,
-   editing a contributor. Under "Affiliations", type a made-up
-   institution name of four or more characters, pick the typed text
-   itself from the suggestions, and press "Add". The institution joins
-   the list, with "Edit institution name" and "Remove institution" behind
-   its row-expander button ("Click to edit or delete"). On a journal with
-   a second submission language, "Edit institution name" opens one name
-   box per language with a "{count} of {total} languages completed"
-   status. Then type a real university's
-   name and pick the suggestion that shows its country and the ROR mark.
-   The entry's row links to the registry record and offers only "Remove
-   institution". Known exception: on an install whose server cannot reach
-   the registry, the picked suggestion still shows normally, but pressing
-   "Add" raises an "Error" dialog. The entry is added anyway and saves
-   without a display name ([A5](#a5)). Save the contributor and reopen
-   Edit: both institutions are there. Remove one. "Are you sure?" asks
-   "The affiliation {name} will be deleted."; "Yes" removes it.
-   <sup>s4</sup>
-5. **Manage the journal's contributor roles** — Journal Manager:
-   Settings → Workflow → Submission → "Contributor Roles". The table
-   lists "Author" (AUTHOR) and "Translator" (TRANSLATOR); on a press it
-   also lists "Chapter Author" and "Volume editor" (Rule 11). Press "Add
-   Role", pick identifier EDITOR, name it in every language ("Fill name
-   in all of the languages."), and Save. "Contributor role saved" appears
-   and the row appears. On a submission, edit a contributor and tick the
-   new role. Its badge joins the row. Back on the settings screen, "Delete
-   Role" on the new role now refuses after the type-to-confirm, with a
-   modal "Error" dialog: "One or more contributors are using this role.
-   Change the role to another before delete." "OK" returns to the list
-   with the role still there. Untick the role on the contributor, then
-   delete the role again. Type the identifier into the confirm box. The
-   confirm button, labeled with a whole warning sentence (⚠ [A12](#a12)),
-   enables only on an exact match. The dialog "Role Deleted" confirms.
-   Now try "Delete Role" on "Author". While the submission's contributor
-   still holds the "Author" role, the same in-use "Error" dialog refuses
-   again. With both refusals applicable, the in-use one is shown
-   (Rule 13). Move the contributor off the role: tick "Translator", untick
-   "Author", Save. On a press also delete "Chapter Author" the same way,
-   so that "Author" is the last AUTHOR-identifier role. "Chapter Author"
-   shares the identifier AUTHOR, so its dialog also asks for "AUTHOR"; the
-   role deleted is the one whose row's "…" menu was opened. Try once
-   more: the "Error" dialog now reads "Last AUTHOR role cannot be
-   deleted." <sup>s5</sup>
-6. **Readers see the contributors** — Reader: on a published item with
-   two contributors. One of them has a typed affiliation, a Bio Statement
-   and two roles, and is listed first. Open the landing page. The
-   authors block credits both in list order: names, the affiliation name,
-   and each contributor's role names. An "Author Biography" section shows
-   "{name}, {affiliation}" above the statement. It is headed in the
-   singular because only one contributor has a Bio Statement (Rule 14). A
-   listing page naming the item (an issue's table of contents, a press's
-   catalog list, the preprint server's archive) shows the author line as
-   names with roles in parentheses. On a press, a book with five or more
-   contributors compacts the credits to a single flowed line of names
-   joined by semicolons, with no affiliations, ROR marks, ORCID icons or
-   role names ([OMP1](#omp1)). Where one of the five has an affiliation,
-   its only trace is a dangling comma after the name (⚠ [A1](#a1)).
-   <sup>s6</sup>
-7. **Keep a contributor out of publication lists** — Journal Manager,
-   then Reader. Edit the second of two contributors and untick "Include
-   this contributor when identifying authors in lists of publications."
-   Save. "Preview" now omits them from the "Publication Lists" row, while
-   "Full" keeps them. On the published item, the landing page still
-   credits both. A press's catalog list drops the unticked contributor,
-   while a journal's and a preprint server's listings still show them
-   (⚠ [A3](#a3)). <sup>s7</sup>
-8. **Require competing interests** — Journal Manager: on the workflow
-   settings' Metadata screen, tick "Require submitting Authors to file a
-   Competing Interest (CI) statement with their submission." and save.
-   Editing any contributor now shows a required "Competing Interests"
-   field. Saving it empty is refused on the form: "This field is
-   required." in red under the field, and "Please correct one error." at
-   the foot. Filling it saves. Untick the setting: the field is gone from
-   the form. <sup>s8</sup>
+1. **Maintain the contributor list**
+
+   Given: Journal Manager, on the seeded journal, with a submitted
+   scratch submission.
+
+   - **"Contributors"**: open the submission's workflow, then the
+     Publication area, then "Contributors": the entry sits second, right
+     after "Title & Abstract", and the page is headed "Contributors" with
+     "Order", "Preview" and "Add Contributor" above the rows; the
+     submitting author is already listed with an "Author" badge, the
+     "Primary Contact" badge, "Edit" and "Delete" (Rules 2, 3, 10).
+   - **An empty save**: press "Add Contributor": the panel opens with
+     "Contributor Type" set to "Person"; press Save with nothing filled:
+     "This field is required." appears in red under Given Name, Email,
+     Country and Contributor Roles, the foot reads "Please correct 4
+     errors." with "Jump to next error", and Save stays disabled while
+     any of them is still empty; type "Alan" as Given Name and only its
+     message goes, with Save still disabled (Fields).
+   - **A bad Email and Homepage URL**: type "not-an-address" as Email
+     and "not a web address" as Homepage URL, pick "Canada" as Country,
+     tick "Author" and press Save: the save is refused and the panel
+     stays open, with an error under Email and under Homepage URL
+     (Fields).
+   - **The person**: replace Email with "alan@example.test", clear
+     Homepage URL and press Save: the panel closes and the new row shows
+     "Alan" with an "Author" badge (Rule 4).
+   - **The type switch**: press "Add Contributor", type "Casey" as Given
+     Name, then choose "Organization or group": the name fields swap to
+     "Organization Name"; type "Probe Org" there, "org@example.test" as
+     Email, pick "Canada", tick "Author" and press Save: the row shows
+     "Probe Org" with an "Author" badge; open its "Edit" and choose
+     "Person": Given Name is empty, the other type's entry discarded on
+     save as the guidance warns; choose "Organization or group" again
+     and press Save (Fields; Rule 4).
+   - **Edit**: open the person's "Edit", type "Mwandenga" as Family Name
+     and press Save: the row updates to "Alan Mwandenga" (Rule 4).
+   - **An Anonymous contributor**: press "Add Contributor" and choose
+     "Anonymous": there are no name fields, ROR ID, Homepage URL, Bio
+     Statement or Affiliations, only Email, Country, Contributor Roles,
+     CRediT roles and Publication Lists; type "anon@example.test" as
+     Email, pick "Canada", tick "Author" and press Save: the row is
+     titled "Anonymous" with an "Author" badge, and "Preview"'s "Full"
+     row ends "; Anonymous (Author)" (Fields; Rules 3, 7).
+   - **Delete**: press "Delete" on "Probe Org": the dialog "Delete
+     Contributor" asks "Are you sure you want to remove Probe Org as a
+     contributor? This action can not be undone."; "Cancel" keeps the
+     row; press "Delete" again and confirm with "Delete Contributor":
+     the row is removed; delete the "Anonymous" row the same way, its
+     dialog asking to remove "Anonymous" (Rules 3, 5).
+   - **Nothing else happens**: no email arrived in the mail catcher from
+     these saves, and the submission's Activity Log & Notes → History
+     has no new entry (Side effects).
+   - **Control**: the log's silence is read against scenario 3's line:
+     "Set Primary Contact" on this same submission writes one
+     "Submission metadata updated" entry (Side effects). <sup>s1</sup>
+
+2. **Reorder and preview the display formats**
+
+   Given: Journal Manager, on the seeded journal, with scenario 1's
+   submission: two Person contributors with distinct family names, as
+   scenario 1 leaves it once its organization and its Anonymous row are
+   deleted.
+
+   - **Preview**: the list shows the submitting author first and the
+     added contributor second; press "Preview": "List of Contributors"
+     shows "Abbreviated" as the first contributor's family name plus
+     "et al.", and "Full" as both names, each followed by "(Author)" and
+     separated by a semicolon (Rules 6, 7).
+   - **Save Order**: close it and press "Order": up/down arrows replace
+     the row buttons; move the second contributor up and press "Save
+     Order"; reload the page: the order holds, and "Abbreviated" in
+     Preview now names the other family name (Rule 6).
+   - **Cancel**: press "Order" again, move a row and press "Cancel": the
+     saved order is back (Rule 6).
+   - **A new version**: open the first contributor's "Edit", under
+     "Affiliations" type "Probe Institute", pick the typed text and press
+     "Add", then Save; press "Create New Version" in the Publication
+     area's side menu, offered whatever the version's state
+     (*[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*),
+     and press "Confirm" in its dialog unchanged: the new version's
+     "Contributors" lists the same rows in the saved order, each with its
+     "Author" badge, the "Primary Contact" badge on the submitting
+     author's row, and "Probe Institute" under "Affiliations" in the
+     first contributor's "Edit" (the row never shows it, [A1](#a1))
+     (Rule 1; Fields).
+   - **Control**: before "Save Order", the list showed the submitting
+     author first and the added contributor second on every reload, and
+     "Abbreviated" named their family name (Rule 6). <sup>s2</sup>
+
+3. **Move the primary contact**
+
+   Given: Journal Manager, on the seeded journal, with a submission with
+   two contributors.
+
+   - **"Set Primary Contact"**: the submitting author's row carries
+     "Primary Contact" and the other row offers "Set Primary Contact";
+     press "Set Primary Contact" on the other row: the badge moves at
+     once, with no confirmation (Rule 10).
+   - **The log and the mailbox**: the submission's Activity Log & Notes
+     → History shows one new entry, "Submission metadata updated", and
+     no email has arrived (Side effects).
+   - **Deleting the primary contact**: delete that new primary contact:
+     the remaining row still shows only "Set Primary Contact": the
+     submission now has no primary contact, and nothing warned about it
+     (Rules 5, 10).
+   - **The publish dialog**: on a journal press "Schedule For
+     Publication", the button in the Publication area's header beside
+     "Status: Unscheduled", and continue past "Review Publishing Details"
+     (its "Confirm" button) to the final window; on a press the same
+     button reads "Publish" and opens the "Schedule For Publication"
+     window at once, with no "Review Publishing Details" step. The window
+     reads "All publication requirements have been met." (on a press
+     followed by "Are you sure you want to make this catalog entry
+     public?"); the missing contact is never mentioned (⚠ [A2](#a2));
+     back out with "Close": the window's only other button is "Publish",
+     no Cancel. Nothing is published. On a journal the header's status
+     may no longer read "Unscheduled" and the Activity Log holds a second
+     "Submission metadata updated" entry: the earlier "Confirm" recorded
+     the version choice, a save on the publication itself, so both are
+     expected, not a failure. On a preprint server the button reads
+     "Post" and opens "Post the preprint"; that window's own mechanics,
+     like the journal's and the press's, belong to
+     *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*.
+   - **The last contributor**: press "Delete" on the remaining row and
+     confirm with "Delete Contributor": the emptied list shows "No items
+     found." beneath the unchanged "Order", "Preview" and "Add
+     Contributor" buttons, and "Preview"'s three formats show nothing
+     (Rule 5).
+   - **Control**: the deletes wrote nothing: after the first delete the
+     Activity Log still held the move's one "Submission metadata updated"
+     entry, and the last delete added none: the count stays at the
+     publish step's two entries on a journal and at the move's one on a
+     press (Side effects). <sup>s3</sup>
+
+4. **Record affiliations, typed and registry-backed**
+
+   Given: Journal Manager, on a scratch journal with a second submission
+   language, editing a contributor of a scratch submission.
+
+   - **A typed institution**: under "Affiliations", type "Probe
+     Institute" (four or more characters), pick the typed text from the
+     suggestions and press "Add": the institution joins the list, with
+     "Edit institution name" and "Remove institution" behind its
+     row-expander button ("Click to edit or delete") (Fields).
+   - **The per-language names**: "Edit institution name" opens one name
+     box per language, "Type the institution name in {language}", with a
+     "{count} of {total} languages completed" status (Fields).
+   - **An empty primary-language name**: clear the submission language's
+     box and press Save: the save is refused with "Please provide
+     affiliation name in the submission primary locale." under the
+     field, while the foot's summary misprints it as "Go to
+     Affiliations: [object Object]" ([A7](#a7)); type "Probe Institute"
+     back into the box (Fields).
+   - **A registry-backed institution**: type "Simon Fraser University",
+     pick the suggestion that shows its country and the ROR mark, and
+     press "Add": the entry's row links to the registry record and
+     offers only "Remove institution". On an install whose server cannot
+     reach the registry, the picked suggestion still shows, but "Add"
+     raises an "Error" dialog; the entry is added anyway and saves
+     without a display name ([A5](#a5)) (Fields; Rule 16).
+   - **Both saved**: Save the contributor and reopen "Edit": both
+     institutions are there (Rule 4; Fields).
+   - **Removing one**: press "Remove institution" on "Probe Institute":
+     "Are you sure?" asks "The affiliation Probe Institute will be
+     deleted."; "Yes" removes it (Fields).
+   - **Control**: the second language's name box stayed empty throughout
+     and no save was refused for it: only the submission language's copy
+     is ever required (Fields). <sup>s4</sup>
+
+5. **Manage the journal's contributor roles**
+
+   Given: Journal Manager, on a scratch journal with a scratch submission
+   whose contributor holds the "Author" role.
+
+   - **The Contributor Roles screen**: Settings → Workflow → Submission →
+     "Contributor Roles": the table lists "Author" (AUTHOR) and
+     "Translator" (TRANSLATOR); on a press it also lists "Chapter Author"
+     and "Volume editor" (Rule 11).
+   - **Add Role**: press "Add Role", pick identifier EDITOR, type
+     "Handling editor" as the Role Name in every language ("Fill name in
+     all of the languages.") and Save: "Contributor role saved" appears
+     and the row appears (Rule 12; Fields).
+   - **"Edit Role"**: open "Edit" behind the new row's "…" menu: the Role
+     Identifier drop-down offers only EDITOR, the role's own identifier
+     (Rule 12; Fields).
+   - **The role in use**: on the submission, edit the contributor and
+     tick "Handling editor": its badge joins the row; back on the
+     settings screen, "Delete Role" on the new role now refuses after the
+     type-to-confirm, with a modal "Error" dialog: "One or more
+     contributors are using this role. Change the role to another before
+     delete."; "OK" returns to the list with the role still there
+     (Rule 13).
+   - **The deletion**: untick the role on the contributor, then delete
+     the role again: type "EDITOR" into the confirm box; the confirm
+     button, labeled with a whole warning sentence (⚠ [A12](#a12)),
+     enables only on an exact match; the dialog "Role Deleted" confirms
+     (Rule 13).
+   - **The last AUTHOR role**: try "Delete Role" on "Author": while the
+     submission's contributor still holds the "Author" role, the same
+     in-use "Error" dialog refuses again; with both refusals applicable,
+     the in-use one is shown (Rule 13); move the contributor off the
+     role: tick "Translator", untick "Author", Save; on a press also
+     delete "Chapter Author" the same way, leaving "Author" the last
+     AUTHOR-identifier role: "Chapter Author" shares the identifier
+     AUTHOR, so its dialog also asks for "AUTHOR", and the role deleted
+     is the one whose row's "…" menu was opened; try once more: the
+     "Error" dialog now reads "Last AUTHOR role cannot be deleted."
+     (Rule 13).
+   - **Control**: the new role, once no contributor held it, went through
+     the same dialog to "Role Deleted": the refusals are the held role's
+     and the last AUTHOR role's alone (Rule 13). <sup>s5</sup>
+
+6. **Readers see the contributors**
+
+   Given: Reader, on the seeded journal, with a published item with two
+   contributors, the first with a typed affiliation, a Bio Statement,
+   two roles and the CRediT role "Conceptualization" at the degree
+   "Lead"; on a press, also a second published book with five
+   contributors, one with an affiliation.
+
+   - **The landing page**: open the landing page: the authors block
+     credits both in list order: names, the affiliation name, each
+     contributor's role names, and the first contributor's CRediT role
+     with its degree (Rule 14; Fields).
+   - **"Author Biography"**: an "Author Biography" section shows
+     "{name}, {affiliation}" above the statement, headed in the singular
+     because only one contributor has a Bio Statement (Rule 14).
+   - **A listing**: a listing page naming the item (an issue's table of
+     contents, a press's catalog list, the preprint server's archive)
+     shows the author line as names with roles in parentheses (Rule 15).
+   - **No contact mark**: neither the landing page nor the listing marks
+     either contributor as the primary contact (Rule 10).
+   - **A book with five contributors**: on a press, open the second
+     book's page: with five or more contributors the credits compact to
+     a single flowed line of names joined by semicolons, with no
+     affiliations, ROR marks, ORCID icons or role names ([OMP1](#omp1));
+     the affiliated contributor's only trace is a dangling comma after
+     the name (⚠ [A1](#a1)) (Rule 14).
+   - **Control**: in the workflow, the item's "Contributors" list shows
+     the "Primary Contact" badge on the submitting author's row, the
+     choice readers never see (Rules 3, 10). <sup>s6</sup>
+
+7. **Keep a contributor out of publication lists**
+
+   Given: Journal Manager, then Reader, on the seeded journal, with
+   scenario 6's published item and its two contributors.
+
+   - **The untick**: edit the second of the two contributors, untick
+     "Include this contributor when identifying authors in lists of
+     publications." and Save: "Preview" now omits them from the
+     "Publication Lists" row, while "Full" keeps them (Rule 8; Fields).
+   - **The reader pages**: on the published item, the landing page still
+     credits both; a press's catalog list drops the unticked
+     contributor, while a journal's and a preprint server's listings
+     still show them (⚠ [A3](#a3)) (Rules 8, 14, 15).
+   - **"Abbreviated" ignores the tick**: re-tick the second contributor,
+     untick the first the same way and Save: "Publication Lists" now
+     omits the first, while "Abbreviated" still reads the first
+     contributor's family name plus "et al.", so the two formats
+     disagree about who leads the author line (Rule 8).
+   - **Control**: before any untick, "Publication Lists" and "Full" read
+     the same names and roles (Rule 7). <sup>s7</sup>
+
+8. **Require competing interests**
+
+   Given: Journal Manager, on a scratch journal with a scratch submission
+   and its contributor.
+
+   - **The setting**: on the workflow settings' Metadata screen, tick
+     "Require submitting Authors to file a Competing Interest (CI)
+     statement with their submission." and save: editing any contributor
+     now shows a required "Competing Interests" field (Settings;
+     Fields).
+   - **An empty statement**: press Save with it empty: the save is
+     refused on the form: "This field is required." in red under the
+     field, and "Please correct one error." at the foot (Fields).
+   - **A statement**: type "No competing interests." and press Save: the
+     panel closes (Rule 4; Fields).
+   - **The setting off**: untick the setting: the field is gone from the
+     form (Settings).
+   - **The setting on again**: tick the setting again and reopen the
+     contributor's "Edit": the "Competing Interests" field is back with
+     "No competing interests." intact (Settings).
+   - **Control**: before the tick, the same contributor's form had no
+     "Competing Interests" field (Settings; Fields). <sup>s8</sup>
+
+9. **The read-only list**
+
+   Given: Author, on the seeded journal, with the Author's own submitted
+   scratch submission carrying a second contributor, and a second, not
+   yet submitted draft of the same Author.
+
+   - **The Author's list**: open your own submission's Publication area,
+     then "Contributors": the rows show names and role badges, and the
+     "Preview" button is there; "Order", "Add Contributor", "Set Primary
+     Contact", "Edit" and "Delete" are absent, and no row carries the
+     "Primary Contact" badge, so the primary contact cannot be told
+     apart (⚠ [A6](#a6)) (Rule 9; Actors row 2).
+   - **Preview**: press "Preview": "List of Contributors" opens with its
+     "Abbreviated", "Publication Lists" and "Full" rows (Rule 7).
+   - **The wizard's Contributors step**: open the draft in the submission
+     wizard and go to its Contributors step: the same list, with
+     "Order", "Preview" and "Add Contributor" above the rows and "Edit"
+     and "Delete" on the row, editable as always there (Actors row 3;
+     Cross-feature interactions).
+   - **A preprint server**: on a preprint server the submitting author's
+     list on their own not-yet-posted preprint carries the full controls
+     instead: "Order", "Preview" and "Add Contributor" above the rows,
+     and "Primary Contact" or "Set Primary Contact", "Edit" and "Delete"
+     on each row ([OPS1](#ops1)) (Actors row 2).
+   - **Control**: the Journal Manager's "Contributors" on the same
+     submission shows "Order", "Preview" and "Add Contributor" above the
+     rows, and each row's "Primary Contact" or "Set Primary Contact",
+     "Edit" and "Delete" (Rules 2, 3). <sup>s9</sup>
+
+App-specific:
+
+10. **An Edited Volume credits its volume editors** {OMP}
+
+    Given: Reader, on the seeded press, with a published Edited Volume
+    with two contributors, the second holding the "Volume editor" role
+    alone.
+
+    - **The book page**: open the catalog's book page: it credits the
+      volume editor in place of the contributor list, the name suffixed
+      "(ed)", with the role name "Volume editor"; the first contributor
+      is not credited there (Rule 14; [OMP2](#omp2)).
+    - **The catalog list**: the catalog list's line for the volume keeps
+      the full contributor list: both names, each with its roles in
+      parentheses (Rule 15; [OMP2](#omp2)).
+    - **Control**: scenario 6's two-contributor monograph's book page
+      credits every contributor in list order (Rule 14). <sup>s10</sup>
+
+11. **The reviewer's browser never receives the contributor list** {OJS OMP}
+
+    Given: Reviewer, on a scratch journal at the install defaults, whose
+    review type keeps the authors' identity from the reviewer ("Anonymous
+    Reviewer/Anonymous Author"), with a submission in review and the
+    Reviewer's accepted request on it; a second scratch journal whose
+    default review type is "Open", seeded the same way.
+
+    - **The anonymous assignment**: open the request from the reviewer
+      dashboard and read the data the page fetched (the browser's own
+      network view): the contributor list is withheld, so the data
+      carries no contributor; the reviewer's screens are not read here:
+      what they show of authorship belongs to the review features
+      (Rule 17).
+    - **Control**: on the open assignment the same data carries the full
+      contributor list (Rule 17). A preprint server installs no review
+      stage, so the scenario has no end there. <sup>s11</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Nothing new to test**:
+  - Preferred Public Name (Fields): another text box on the form
+    scenario 1 fills
+  - the search box disabled while a picked entry sits under "Selected"
+    (Fields): the pick-then-"Add" flow scenario 4 runs
+  - a contributor added after a saved order still joining at the end
+    (Rule 6): scenario 2's read of a new contributor joining last
+  - "Abbreviated" built from a given name, an Organization Name or
+    "Anonymous" (Rule 7): the family-name form scenario 2 reads
+  - "Author Biographies" in the plural with two statements (Rule 14):
+    the singular heading scenario 6 reads
+  - the Contributors entry, the affiliations field and the registry
+    lookup with no setting to remove them (Settings): every scenario's
+    given
+- **Register carries it**:
+  - A4 (a typed ROR ID surviving the type switch; Fields)
+  - A7 (the form foot's "Go to Affiliations: [object Object]"; Fields;
+    scenario 4 marks it)
+  - A8 (institution text typed but never picked dropped on save;
+    Fields)
+  - A9 (the landing page's ROR link without an accessible name;
+    Rule 14)
+  - A10 (the typed affiliation's name boxes announced wrongly; Fields)
+  - A11 (registry suggestions staying off after the "ROR API Error"
+    dialog; Fields)
+  - A13 (a Role Name saved with another language's box empty; Fields)
+  - A14 (a one-role journal: no roles choice and every save failing;
+    Fields; Settings)
+  - A16 (the auto-created contributor without a Country, every edit
+    refused until one is chosen; Fields)
+  - A17 (the "{count} of {total} languages" total following the
+    publication's languages; Fields)
+  - A18 (an Anonymous save with Email and Country empty accepted;
+    Fields)
+  - OPS2 (the Competing Interests label rendering raw on a preprint
+    server; Fields)
+- **No seed**:
+  - a failed registry search: the "ROR API Error" dialog and the text
+    left as a typed entry (Fields)
+  - the install storing a picked institution's registry record, and the
+    monthly self-update (Rule 16; Side effects)
+  - a registry-backed affiliation's ROR mark linking to its record on
+    the landing page (Rule 14): the test installs' server cannot reach
+    the registry, so a registry-backed affiliation with a name cannot
+    be built
+- **Owned by another feature**:
+  - the ORCID iD field while ORCID is enabled (Fields; Settings; *ORCID
+    integration*)
+  - the ORCID iD icon on the landing page (Rule 14; *ORCID integration*)
+  - the ORCID verification email (Side effects; *ORCID integration*)
+  - a section hiding author lines (Rule 15; *Sections*)
+  - contributor data travelling outward: DOI registration, export and
+    citation displays (Side effects; *Identifiers*, *Import & export*)
+  - changing the submission language copying names and typed
+    affiliation names (Side effects; *Publication metadata*, its
+    scenario 6)
+  - the wizard shell and the auto-created submitting author's record
+    (Cross-feature interactions; *Submission wizard*)
+  - the edit gate and the published-version banners (Cross-feature
+    interactions; *Publication metadata*, its scenarios 3, 4 and 12)
+  - the Funder field's reuse of the registry lookup (Cross-feature
+    interactions; *Funding*)
+  - a new submission copying the submitting author's profile affiliation
+    into their contributor record as a typed institution name
+    (Cross-feature interactions; *Submission wizard*)
 
 ## Findings register
 
@@ -530,10 +833,10 @@ Basis: code reading + probe. <sup>f-a1</sup>
 Deleting the contributor who is the primary contact removes the badge
 from the list entirely. No other contributor inherits it, and no warning
 or prompt appears. The publication simply has no primary contact until
-someone notices and sets one. The publish flow does not catch it either.
-"Review Publishing Details" and the final "Schedule For Publication"
-check ("All publication requirements have been met.") pass with no
-mention of the missing contact.
+someone notices and sets one. The publish flow does not catch it either:
+the "Schedule For Publication" window ("All publication requirements have
+been met."), and on a journal the "Review Publishing Details" step before
+it, pass with no mention of the missing contact.
 Question: should deletion be blocked, warn, or hand the badge to another
 contributor? Lean: at least a warning. The deletion is offered without
 any hint that the contact point is being lost.
@@ -895,8 +1198,14 @@ live-probed 2026-08-28, the form's client-side required check refuses
 first — no request is sent — with "This field is required." under the
 field and "Please correct one error." / "Jump to next error" at the
 foot (same shape for Country). A four-error empty save showed "Please
-correct 4 errors." with the Save button disabled until an errored
-field was edited (live-probed 2026-08-28, OJS/OMP/OPS identically). ORCID writes via these endpoints
+correct 4 errors." with the Save button disabled (live-probed
+2026-08-28, OJS/OMP/OPS identically). The re-enable, from the suites'
+runs of 2026-09-16 on all three apps: with Given Name filled and its
+message gone, Save stayed disabled for a ten-second read while the
+other three messages showed, and enabled once Email, Country and a role
+were filled too; the shared form footer disables Save while the form
+holds any field error (`FormFooter.vue`, `isLastPage &&
+Object.keys(errors).length`). ORCID writes via these endpoints
 are refused outright (`api.orcid.403.cannotUpdateAuthorOrcid`) — the
 ORCID flows run through their own endpoints (U04). Type switching:
 `removeIrrelevantContributorTypeData()` nulls the other type's fields
@@ -1050,7 +1359,9 @@ Live-probed 2026-08-28 (OJS, per-action isolation): add, edit, delete
 and reorder each left the activity-log count and the mailbox untouched,
 while "Set Primary Contact" alone added exactly one history row,
 "Submission metadata updated" — it rides the publication PUT (fn b),
-which logs a metadata update without naming the actual change.
+which logs a metadata update without naming the actual change. The
+journal's "Review Publishing Details" Confirm is a save on the same
+publication and logs the same line (s3).
 
 <a id="fn-g"></a>
 **g — versioning.** `PKP\publication\Repository::version()` clones every
@@ -1187,10 +1498,17 @@ handling — the probes run on all three apps regardless.
 
 <a id="fn-s1"></a>
 **s1 — scenario 1 seeding.** One scratch submission (any stage before
-publication) in the seeded journal, submitted by a roster author so the
-auto-created contributor exists; Journal Manager account. The
+publication) in the seeded journal, submitted by an author account so
+the auto-created contributor exists; Journal Manager account. The
 organization contributor exercises the type switch and A4's ROR ID box
-if desired.
+if desired. The empty Person save's four errors are Given Name, Email,
+Country and Contributor Roles (fn c). Mail is read in the mail catcher
+(Mailpit, `http://127.0.0.1:8025`), scoped by the submitter's address,
+so the submitter is a throwaway account (created on a scratch context,
+the only place users are created, and submitting to the seeded journal,
+as U40's scenario 1 does); the absence is read against a positive
+control the test itself sends the same way (scenarios.md "Mailpit").
+The log is the submission's Activity Log & Notes → History.
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** The scenario-1 submission with two PERSON
@@ -1199,11 +1517,26 @@ contributors with distinct family names. "et al." from
 re-fetches the publication. The suites still open with a Save-Order pin
 (submitter first), a workaround from when A15 made "Abbreviated" and the
 row order nondeterministic; since A15's retirement (2026-09-03) it is
-belt-and-braces, not load-bearing.
+belt-and-braces, not load-bearing. The version copy: the typed
+affiliation is added through the contributor form before the copy (no
+seed key exists for contributors or affiliations, scenarios.md "Field
+shapes not built yet"); "Create New Version" is the Publication area's
+side-menu item (*Publish, schedule & versions*).
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** Same submission; the submitting author's
-contributor is the seeded primary contact (created at submission).
+contributor is the seeded primary contact (created at submission). The
+log read is Activity Log & Notes → History; the mailbox read and its
+positive control as in s1. Suite runs of 2026-09-16: on OJS the
+"Review Publishing Details" Confirm added a second "Submission metadata
+updated" row by the Journal Manager (the run's count read 2 where the
+move had left 1, and the deletes before and after added none), so the
+journal's closing read is two rows; on OMP the header's "Publish"
+opened the "Schedule For Publication" window at once, its text "All
+publication requirements have been met. Are you sure you want to make
+this catalog entry public?" with a "Publish" button and the header's
+"Close", and the closing read stayed at the move's one row; the OPS
+suite leaves the publish step to *Publish, schedule & versions*.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** The multilingual leg needs a scratch
@@ -1211,12 +1544,17 @@ journal with a second submission language. The registry leg needs
 internet browser-side (suggestions come live from the public registry)
 AND server-side (the record cache) — the campaign's test installs block
 server-side egress, so there the registry leg deterministically shows
-A5's shape and suites cover the typed-name path plus that shape.
+A5's shape and suites cover the typed-name path plus that shape. The
+empty-name refusal: clear the submission language's "Type the
+institution name in {language}" box under "Edit institution name"
+before Save (fn d).
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** Scratch journal (roles are mutated); one
 scratch submission with a contributor to hold the new role for the
-in-use refusal.
+in-use refusal. The "Edit Role" read opens "Edit" behind the new row's
+"…" menu and reads the Role Identifier drop-down (fn e: the select
+collapses to the role's own value).
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** One published scratch submission per app
@@ -1225,16 +1563,63 @@ list, on OPS the archive. The suites still run "Order" → "Save Order"
 once before publishing, an A15-era workaround that is no longer needed
 since its retirement (2026-09-03). The
 ≥5-contributor OMP leg needs a second
-scratch monograph with five contributors.
+scratch monograph with five contributors. The CRediT role and its
+degree are picked on the contributor form ("CRediT roles and the
+degrees of contribution"); no seed key exists for contributors, CRediT
+roles or the primary contact beyond the submitter's own record, so the
+set is built through the panel.
 
 <a id="fn-s7"></a>
 **s7 — scenario 7 seeding.** The scenario-6 publications; re-publish or
 edit as needed after the untick. The cross-app assertion pair is the
-point: OMP omits, OJS/OPS show (A3).
+point: OMP omits, OJS/OPS show (A3). The "Abbreviated" read re-ticks
+the second contributor and unticks the first through the same form,
+then reads Preview.
 
 <a id="fn-s8"></a>
 **s8 — scenario 8 seeding.** Scratch journal (the setting is mutated);
-any submission with a contributor.
+any submission with a contributor. The re-tick is made on the same
+Metadata screen; no context passthrough exists for the setting
+(scenarios.md "Configuring a scratch context").
+
+<a id="fn-s9"></a>
+**s9 — scenario 9 seeding.** Seeded journal. The Author is the roster
+author who submitted the scratch submission (`submitter`); the second
+contributor is added through the panel by the Journal Manager (ready
+account), who is also the control; the OJS-A and OMP-A tests already
+drive this leg. The wizard leg is a second submission of the same Author
+with `submitted: false` (scenarios.md: a wizard-resumable draft, listed
+under the author's Incomplete list). The preprint-server leg is the same
+seed on the seeded preprint server with `published: false` (the OPS1
+test; fn b, f-ops1).
+
+<a id="fn-s10"></a>
+**s10 — scenario 10 seeding.** Seeded press; `POST scenarios/submission`
+with `workType: editedVolume` and `published: true` (scenarios.md
+"OMP:"); the second contributor and its "Volume editor" role are set
+through the panel (tick "Volume editor", untick "Author") before the
+publish, no seed key existing for contributors. The book page is the
+catalog's book page, the listing the catalog list. The OMP2 test already
+drives it (f-omp2: "Vera Editorova (ed)" with role "Volume editor").
+
+<a id="fn-s11"></a>
+**s11 — scenario 11 seeding.** Two scratch journals from `POST
+scenarios/context`, each with throwaway accounts (a manager, an author
+as `submitter`, an `externalReviewer`): one at the install defaults
+("Default Review Mode" "Anonymous Reviewer/Anonymous Author", seed-facts
+"Settings › Workflow › Review"), one with `review.defaultReviewMode:
+open`; each with one submission seeded `decisions:
+['sendExternalReview']` and `reviewRounds: [{reviewers: [{username,
+status: 'accepted'}]}]` (OMP: the external round), the builder stamping
+the assignment's review type from the context's default (seed-facts,
+2026-09-05). The read is the page's own traffic, the contributors
+request the reviewer's submission page makes, captured in the browser's
+network view or by the suite's response listener; fn l holds the probed
+shape (empty contributor list and empty author strings on the anonymous
+assignment; the full list, with an Authors row in the reviewer's
+submission-details view, on the open one). OPS answers 400 on `review`
+and `reviewRounds` (scenarios.md "OPS:"), so the suite there carries
+nothing for this scenario.
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1 evidence.** `ContributorsListPanel.vue` binds the row

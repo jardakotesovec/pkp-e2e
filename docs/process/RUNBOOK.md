@@ -182,6 +182,14 @@ Test files cite these by number, so the numbers are stable.
   under `.reports/<feature>/` are the status.
 - When context runs low, or two launches in a row fail: finish the gate,
   commit and push what is commit-worthy, end; a fresh session resumes.
+- **Keep the thread ticking while waiting.** A session that runs inside
+  claude-threads (the Mattermost bot) is paused as idle after 10 silent
+  minutes, and a background agent, a full suite or a CI run is silence to
+  it. Whenever the next event is more than a few minutes away, arm a
+  keepalive (a Monitor that ticks every 6 minutes, re-armed at its
+  30-minute expiry) and post one line per tick: the gate that is running
+  and what the files show, nothing else. The ticks double as the polling
+  points for the finals and the CI run; the keepalive stops at the report.
 
 ## Definition of done
 

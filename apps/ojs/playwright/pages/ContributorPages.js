@@ -326,6 +326,168 @@ exports.ContributorsPanel = class ContributorsPanel {
             .locator('td')
             .nth(1);
     }
+
+    /**
+     * A preview row by its Format label ("Abbreviated" / "Publication
+     * Lists" / "Full"); the three rows are the preview's whole table.
+     */
+    previewRow(dialog, format) {
+        return dialog.getByRole('row').filter({hasText: format});
+    }
+
+    /** The emptied list's "No items found." line under the header buttons. */
+    noItemsMessage() {
+        return this.panel().getByText('No items found.', {exact: true});
+    }
+
+    /** Every "Primary Contact" badge in the list (zero on a read-only list). */
+    primaryContactBadges() {
+        return this.rows().locator('.pkpBadge').filter({hasText: 'Primary Contact'});
+    }
+
+    /** An open panel's Save button. */
+    saveButton(dialog) {
+        return dialog.getByRole('button', {name: 'Save', exact: true});
+    }
+
+    /** The "Contributor Type" radio by its label ("Person" / "Organization or group" / "Anonymous"). */
+    typeRadio(dialog, label) {
+        return dialog.getByRole('radio', {name: label, exact: true});
+    }
+
+    /** Choose a contributor type; the form re-renders its fields for it. */
+    async chooseType(dialog, label) {
+        await this.typeRadio(dialog, label).check();
+    }
+
+    /**
+     * The form field (`.pkpFormField`) wrapping the given control. The
+     * wrappers carry no ids except Affiliations and CRediT roles (read live
+     * 2026-09-16, `.reports/U41/tojs/empty-save-ojs.json`), so a field is
+     * found by the control it holds.
+     *
+     * @param {import('@playwright/test').Locator} dialog
+     * @param {import('@playwright/test').Locator} control
+     */
+    fieldOf(dialog, control) {
+        return dialog.locator('.pkpFormField').filter({has: control});
+    }
+
+    /** A named text box or select of the form (`givenName-en`, `email`, `url`, `country`). */
+    control(dialog, name) {
+        return dialog.locator(`[name="${name}"]`);
+    }
+
+    /**
+     * The field wrapping a named control. The inner locator is built from
+     * the page, never from the dialog: a `has` locator is resolved relative
+     * to the field, and a dialog-scoped chain never matches inside it.
+     */
+    fieldByName(dialog, name) {
+        return this.fieldOf(dialog, this.page.locator(`[name="${name}"]`));
+    }
+
+    /** The "Contributor Roles" field (the wrapper of the "Author" box). */
+    rolesField(dialog) {
+        return this.fieldOf(dialog, this.page.getByRole('checkbox', {name: 'Author', exact: true}));
+    }
+
+    /** A field's inline error(s) (`.pkpFieldError`). */
+    fieldError(field) {
+        return field.locator('.pkpFieldError');
+    }
+
+    /** The foot's "Please correct {n} errors." / "Please correct one error." line. */
+    errorSummary(dialog, count) {
+        const text = count === 1 ? 'Please correct one error.' : `Please correct ${count} errors.`;
+        // A substring match: the foot's line is not its element's whole text
+        // (an exact match found nothing, run 1 of 2026-09-16).
+        return dialog.getByText(text);
+    }
+
+    /**
+     * Press Save on a panel the form or the server refuses, bounded by the
+     * given refusal being on screen. Client-side refusals send nothing; the
+     * server's (a bad Email or Homepage URL) answer 400 and the form shows
+     * the field messages — either way the panel stays open.
+     *
+     * @param {import('@playwright/test').Locator} dialog
+     * @param {import('@playwright/test').Locator} refusal
+     */
+    async saveRefused(dialog, refusal) {
+        await this.saveButton(dialog).click();
+        await expect(refusal).toBeVisible({timeout: 30_000});
+        await expect(dialog).toBeVisible();
+    }
+
+    /** The "Homepage URL" box. */
+    async fillUrl(dialog, url) {
+        await dialog.locator('input[name="url"]').fill(url);
+    }
+
+    /** The "Organization Name" box (Organization type only). */
+    organizationNameInput(dialog) {
+        return dialog.locator('input[name="organizationName-en"]');
+    }
+
+    /** The "Publication Lists" tick box. */
+    publicationListsBox(dialog) {
+        return dialog.getByRole('checkbox', {
+            name: 'Include this contributor when identifying authors in lists of publications.',
+        });
+    }
+
+    /** The "CRediT roles and the degrees of contribution" field. */
+    creditRolesField(dialog) {
+        return dialog.locator('#contributor-creditRoles');
+    }
+
+    /**
+     * Add a CRediT role: press the field's "Add Another Role" and set the
+     * new (last) row's Role and Degree selects by their option labels
+     * (FieldCreditRoles.vue: one FieldSelect per column, the row's "Remove
+     * Role" beside them).
+     */
+    async addCreditRole(dialog, roleLabel, degreeLabel) {
+        const field = this.creditRolesField(dialog);
+        await field.getByRole('button', {name: 'Add Another Role', exact: true}).click();
+        const row = field.locator('tbody tr').last();
+        const roleSelect = row.locator('select').first();
+        const degreeSelect = row.locator('select').nth(1);
+        await expect(roleSelect).toBeVisible({timeout: 30_000});
+        // A new row arrives on the taxonomy's first role, and a role a row
+        // already holds is a disabled option (FieldCreditRoles.vue's
+        // roleOptions), so the wanted role is picked only when the row is
+        // not on it already.
+        const currentRole = (await roleSelect.locator('option:checked').textContent()) || '';
+        if (currentRole.trim() !== roleLabel) {
+            await roleSelect.selectOption({label: roleLabel});
+        }
+        await expect(roleSelect.locator('option:checked')).toHaveText(roleLabel);
+        await degreeSelect.selectOption({label: degreeLabel});
+        await expect(degreeSelect.locator('option:checked')).toHaveText(degreeLabel);
+    }
+
+    /**
+     * The affiliation row's per-language name boxes under "Edit institution
+     * name" (one per submission language, in the journal's locale order).
+     */
+    affiliationNameBoxes(dialog, name) {
+        return this.affiliationRow(dialog, name).locator('input[name="name"]');
+    }
+
+    /**
+     * One language's name box under "Edit institution name", by the box's
+     * own label "Type the institution name in {language}" — the read that
+     * survives an emptied name (the row then carries no institution text
+     * to filter on). The English box's accessible name runs into the next
+     * box's label (A10), so the label anchors the start.
+     */
+    affiliationNameBox(dialog, language) {
+        return this.affiliationsField(dialog)
+            .getByRole('textbox', {name: new RegExp(`^Type the institution name in ${language}`)})
+            .first();
+    }
 };
 
 exports.ContributorRolesScreen = class ContributorRolesScreen {
@@ -424,5 +586,31 @@ exports.ContributorRolesScreen = class ContributorRolesScreen {
     /** The "Role Deleted" success dialog. */
     roleDeletedDialog() {
         return this.page.getByRole('dialog', {name: 'Role Deleted'});
+    }
+
+    /** The "Edit Role" side panel (the Add panel's twin, prefilled). */
+    editRoleDialog() {
+        return this.page.getByRole('dialog', {name: 'Edit Role'});
+    }
+
+    /** Open a role row's "Edit" behind its "…" menu and return the panel. */
+    async openEditRole(rowText) {
+        await this.openRoleAction(rowText, 'Edit');
+        const dialog = this.editRoleDialog();
+        await expect(dialog.locator('select[name="contributorRoleIdentifier"]')).toBeVisible({
+            timeout: 30_000,
+        });
+        return dialog;
+    }
+
+    /** The panel's "Role Identifier" drop-down. */
+    identifierSelect(dialog) {
+        return dialog.locator('select[name="contributorRoleIdentifier"]');
+    }
+
+    /** Close an Add/Edit Role panel without saving (its header "Close"). */
+    async closeRoleDialog(dialog) {
+        await dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
     }
 };

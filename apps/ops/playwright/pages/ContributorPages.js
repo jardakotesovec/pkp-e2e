@@ -35,6 +35,20 @@
  * ContributorsListPanel.vue / ContributorsPreviewModal.vue /
  * FieldAffiliations.vue / Orderer.vue, confirmed against the running OPS
  * fleet while this suite was built (2026-08-28).
+ *
+ * Added 2026-09-16 (the coverage revision): an optional `root` for the
+ * constructor, so the same reads run on the wizard's Contributors step
+ * (`.listPanel--contributor`, which mounts no `contributor-manager`
+ * wrapper); the form's refusal readouts (`fieldError`, `errorSummary`,
+ * `jumpToNextErrorButton`, `saveButton`, `closePanel`, `typeRadio`); the
+ * CRediT table (`creditRolesTable`, `addCreditRole`: "Add Another Role"
+ * arrives with "Conceptualization" preselected and that option disabled,
+ * so only the Degree is picked); the affiliation row by position and its
+ * per-language name box (`affiliationRowAt`, `affiliationNameBox`,
+ * `affiliationError`: clearing the primary-language box re-renders the row
+ * as "The primary language English is required", so a row filtered by the
+ * institution name loses it); the emptied list's "No items found."
+ * (`emptyMessage`) and a preview row's display cell (`previewValue`).
  */
 const {expect} = require('@playwright/test');
 
@@ -42,8 +56,10 @@ exports.ContributorsScreen = class ContributorsScreen {
     /**
      * @param {import('@playwright/test').Page} page
      */
-    constructor(page) {
+    constructor(page, {root = null} = {}) {
         this.page = page;
+        /** @type {import('@playwright/test').Locator | null} */
+        this.root = root;
     }
 
     /**
@@ -74,9 +90,15 @@ exports.ContributorsScreen = class ContributorsScreen {
         await expect(this.panel()).toBeVisible();
     }
 
-    /** The contributors list panel (ContributorManager mount). */
+    /** The contributors list panel (ContributorManager mount), or the
+     * `root` the constructor was given (the wizard step's list panel). */
     panel() {
-        return this.page.locator('[data-cy="contributor-manager"]');
+        return this.root || this.page.locator('[data-cy="contributor-manager"]');
+    }
+
+    /** The emptied list's "No items found." line (spec Rule 5). */
+    emptyMessage() {
+        return this.panel().getByText('No items found.', {exact: true});
     }
 
     /** The list's rows, in display order. */
@@ -198,6 +220,71 @@ exports.ContributorsScreen = class ContributorsScreen {
         return panel;
     }
 
+    /** The open panel's Save button. */
+    saveButton(panel) {
+        return panel.getByRole('button', {name: 'Save', exact: true});
+    }
+
+    /** Close the open panel without saving (its "Close" button). */
+    async closePanel(panel) {
+        await panel.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(panel).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** A "Contributor Type" radio ("Person", "Organization or group",
+     * "Anonymous"). */
+    typeRadio(panel, label) {
+        return panel.getByRole('radio', {name: label, exact: true});
+    }
+
+    /** A field's inline error ("This field is required.") — class
+     * `pkpFieldError` inside the field wrapper (patterns.md locator pitfall
+     * 14); the Contributor Roles group renders its error under its own id
+     * (`contributor-contributorRoles-error`, live 2026-09-16). */
+    fieldError(panel, name, locale = null) {
+        if (name === 'contributorRoles') {
+            return panel.locator('#contributor-contributorRoles-error');
+        }
+        return panel
+            .locator('.pkpFormField')
+            .filter({has: this.page.locator(`#${this.controlId(name, locale)}`)})
+            .locator('.pkpFieldError');
+    }
+
+    /** The form foot's summary ("Please correct one error." / "… {n}
+     * errors."). */
+    errorSummary(panel) {
+        return panel.getByText(/Please correct (one|\d+) errors?\./);
+    }
+
+    /** The foot's "Jump to next error" button. */
+    jumpToNextErrorButton(panel) {
+        return panel.getByRole('button', {name: 'Jump to next error', exact: true});
+    }
+
+    /** The "CRediT roles and the degrees of contribution" table. */
+    creditRolesTable(panel) {
+        return panel.locator('#contributor-creditRoles');
+    }
+
+    /**
+     * Add a CRediT role through "Add Another Role": the new row arrives with
+     * the first unpicked role ("Conceptualization" on a fresh record)
+     * preselected and that option disabled, so the row's role is what the
+     * table offers and only the Degree is picked. Returns the row.
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {{degree: string}} options the Degree label ("Lead", "Equal", "Supporting")
+     */
+    async addCreditRole(panel, {degree}) {
+        const table = this.creditRolesTable(panel);
+        await table.getByRole('button', {name: 'Add Another Role', exact: true}).click();
+        const row = table.locator('tbody tr').last();
+        await expect(row.locator('select[name="degree"]')).toBeVisible({timeout: 10_000});
+        await row.locator('select[name="degree"]').selectOption({label: degree});
+        return row;
+    }
+
     /** A form field's control id (FieldBase compileId). */
     controlId(name, locale = null) {
         return locale
@@ -303,6 +390,39 @@ exports.ContributorsScreen = class ContributorsScreen {
             .filter({hasText: name});
     }
 
+    /** An affiliation row by position (a row whose name box was cleared
+     * no longer carries the institution name). */
+    affiliationRowAt(panel, index) {
+        return this.affiliationsField(panel).locator('tbody tr').nth(index);
+    }
+
+    /**
+     * A typed entry's per-language name box, "Type the institution name in
+     * {language}" (open behind "Edit institution name"; the accessible name
+     * grows with the next box's label once a box is emptied, so it is
+     * matched by prefix).
+     *
+     * @param {import('@playwright/test').Locator} row from affiliationRow()/affiliationRowAt()
+     * @param {string} language "English", "French (Canada)"
+     */
+    affiliationNameBox(row, language) {
+        const escaped = language.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return row.getByRole('textbox', {name: new RegExp(`^Type the institution name in ${escaped}`)});
+    }
+
+    /** A typed entry's name boxes in document order (the primary language
+     * first); the boxes after the first carry no accessible name (A10), so
+     * they are reached by position. */
+    affiliationNameBoxes(row) {
+        return row.locator('input[name="name"]');
+    }
+
+    /** The Affiliations field's inline error ("Please provide affiliation
+     * name in the submission primary locale."). */
+    affiliationError(panel) {
+        return this.affiliationsField(panel).locator('.pkpFieldError');
+    }
+
     /**
      * Add a hand-typed institution: type the name (4+ characters fires
      * the — stubbed — registry query), pick the typed text itself from
@@ -371,6 +491,11 @@ exports.ContributorsScreen = class ContributorsScreen {
         return this.previewModal()
             .locator('tr')
             .filter({has: this.page.getByText(label, {exact: true})});
+    }
+
+    /** A preview row's display cell (its text; empty on an emptied list). */
+    previewValue(label) {
+        return this.previewRow(label).locator('td').last();
     }
 
     async closePreview() {
