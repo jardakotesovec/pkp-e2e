@@ -14,7 +14,8 @@
  *   same FunderManager as mounted on the wizard's Details step: the funders
  *   table (aria-label "Funders"), the Order / Save Order and Add Funder top
  *   buttons, the row "…" (More Actions) menus, the Add/Edit Funder side
- *   panel (typed-name path + grants sub-table) and the delete confirmation.
+ *   panel (typed-name path + grants sub-table, its refusals) and the
+ *   delete confirmation.
  * - stubRegistrySearch — routes the browser-side ROR registry query
  *   (api.ror.org, fired straight from the Funder field) to an empty result
  *   set, so no test depends on the public registry being reachable. The
@@ -31,7 +32,8 @@
  * Labels are the live locale strings (lib/pkp/locale/en/*.po); DOM shapes
  * from lib/ui-library src/managers/FunderManager/* and
  * src/components/Form/fields/FieldFunder*.vue, confirmed against the
- * running OMP app while this suite was built (2026-08-28).
+ * running OMP app while this suite was built (2026-08-28) and revised
+ * (2026-09-16).
  */
 const {expect} = require('@playwright/test');
 
@@ -117,6 +119,28 @@ exports.FundingScreen = class FundingScreen {
     }
 
     /**
+     * In ordering mode, move a row one place up. The row's up/down buttons
+     * carry no accessible name (spec A5 🐞, never asserted), so the arrow
+     * is reached positionally — the first button in the row is "up".
+     */
+    async moveRowUp(name) {
+        await this.row(name).locator('button').first().click();
+    }
+
+    /** Press "Save Order", bounded by the funders order API answering OK. */
+    async saveOrder() {
+        const saved = this.page.waitForResponse(
+            (r) =>
+                r.url().includes('/funders/order') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await this.saveOrderButton().click();
+        await saved;
+    }
+
+    /**
      * The Add/Edit Funder side panel — a dialog named by its title
      * (the workflow page is itself a dialog; disambiguate by name).
      *
@@ -126,21 +150,56 @@ exports.FundingScreen = class FundingScreen {
         return this.page.getByRole('dialog', {name: title});
     }
 
-    /**
-     * A row's "…" menu button. Hidden (not removed) on read-only views, so
-     * role queries — which skip hidden nodes — count it 0 there.
-     */
-    rowMoreActions(name) {
-        return this.row(name).getByRole('button', {name: 'More Actions'});
+    /** The panel's footer "Save". */
+    saveButton(panel) {
+        return panel.getByRole('button', {name: 'Save', exact: true});
+    }
+
+    /** The panel's refusal summary ("Please correct one error."). */
+    errorSummary(panel) {
+        return panel.getByText('Please correct one error.');
+    }
+
+    /** The Funder field's "nothing chosen" message. */
+    funderFieldError(panel) {
+        return panel.getByText('Search and select a Funder or enter a Funder name').first();
+    }
+
+    /** The Funder field's registry search box (shown while nothing is chosen). */
+    searchInput(panel) {
+        return panel.locator('input.pkpAutosuggest__input');
+    }
+
+    /** The per-language funder name boxes (shown once a typed name is chosen). */
+    nameBoxes(panel) {
+        return panel.locator('input[name="name"]');
+    }
+
+    /** The "Delete" under the chosen funder, which clears the field. */
+    funderDeleteButton(panel) {
+        return panel
+            .locator('.pkpFormField--funder')
+            .getByRole('button', {name: 'Delete', exact: true});
     }
 
     /**
-     * Open a row action ("Edit" / "Delete"). Headlessui menus portal to the
-     * document root, so the menu item is looked up on the page.
+     * Type a name into the Funder search and pick the typed text itself
+     * from the top of the suggestions; the primary-language name box then
+     * appears (pre-filled with the typed text).
+     *
+     * @param {import('@playwright/test').Locator} panel from dialog()
+     * @param {string} name
      */
-    async openRowAction(name, action) {
-        await this.rowMoreActions(name).click();
-        await this.page.getByRole('menuitem', {name: action, exact: true}).click();
+    async pickTypedFunder(panel, name) {
+        const search = this.searchInput(panel);
+        await search.click();
+        await search.pressSequentially(name, {delay: 15});
+        await panel
+            .locator('li.autosuggest__results-item')
+            .filter({hasText: name})
+            .first()
+            .click();
+        await expect(this.nameBoxes(panel).first()).toBeVisible({timeout: 10_000});
     }
 
     /**
@@ -154,25 +213,34 @@ exports.FundingScreen = class FundingScreen {
      * @param {string} name
      */
     async fillTypedFunderName(panel, name) {
-        const search = panel.locator('input.pkpAutosuggest__input');
-        await search.click();
-        await search.pressSequentially(name, {delay: 15});
-        await panel
-            .locator('li.autosuggest__results-item')
-            .filter({hasText: name})
-            .first()
-            .click();
-        const nameBoxes = panel.locator('input[name="name"]');
-        await expect(nameBoxes.first()).toBeVisible({timeout: 10_000});
+        await this.pickTypedFunder(panel, name);
+        const nameBoxes = this.nameBoxes(panel);
         const count = await nameBoxes.count();
         for (let i = 0; i < count; i++) {
             await nameBoxes.nth(i).fill(name);
         }
     }
 
+    /** The grants sub-table's rows. */
+    grantRows(panel) {
+        return panel.locator('.pkpFormField--funder-grants tbody tr');
+    }
+
+    /** A grant cell's input by column ("grantDoi" | "grantNumber" | "grantName") and row index. */
+    grantCell(panel, column, index = 0) {
+        return panel.locator(`input[name="${column}"]`).nth(index);
+    }
+
+    /** The grants sub-table's DOI-format refusal ("This is not formatted correctly."). */
+    grantDoiError(panel) {
+        return panel
+            .locator('.pkpFormField--funder-grants')
+            .getByText('This is not formatted correctly.');
+    }
+
     /**
      * Add one grant row in the panel's Funder Grants sub-table and fill its
-     * cells (any subset).
+     * cells (any subset; a row added with nothing given stays blank).
      *
      * @param {import('@playwright/test').Locator} panel
      * @param {{grantName?: string, grantNumber?: string, grantDoi?: string}} grant
@@ -205,8 +273,14 @@ exports.FundingScreen = class FundingScreen {
                 r.ok(),
             {timeout: 30_000}
         );
-        await panel.getByRole('button', {name: 'Save', exact: true}).click();
+        await this.saveButton(panel).click();
         await saved;
+        await expect(panel).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** Close the panel with its header "Close" without saving. */
+    async closePanel(panel) {
+        await panel.getByRole('button', {name: 'Close'}).click();
         await expect(panel).toHaveCount(0, {timeout: 30_000});
     }
 
@@ -233,6 +307,42 @@ exports.FundingScreen = class FundingScreen {
         }
     }
 
+    /**
+     * A row's "…" menu button. Hidden (not removed) on read-only views, so
+     * role queries — which skip hidden nodes — count it 0 there.
+     */
+    rowMoreActions(name) {
+        return this.row(name).getByRole('button', {name: 'More Actions'});
+    }
+
+    /**
+     * An open row menu's item ("Edit" / "Delete"). Headlessui menus portal
+     * to the document root, so the item is looked up on the page.
+     */
+    rowMenuItem(action) {
+        return this.page.getByRole('menuitem', {name: action, exact: true});
+    }
+
+    /** Open a row's "…" menu (the caller reads or picks its items). */
+    async openRowMenu(name) {
+        await this.rowMoreActions(name).click();
+        await expect(this.rowMenuItem('Edit')).toBeVisible({timeout: 30_000});
+    }
+
+    /** Open a row action ("Edit" / "Delete") from the row's "…" menu. */
+    async openRowAction(name, action) {
+        await this.openRowMenu(name);
+        await this.rowMenuItem(action).click();
+    }
+
+    /** Open a row's "Edit" and return the "Edit Funder" panel once shown. */
+    async openRowEdit(name) {
+        await this.openRowAction(name, 'Edit');
+        const panel = this.dialog('Edit Funder');
+        await expect(panel).toBeVisible({timeout: 30_000});
+        return panel;
+    }
+
     /** The delete confirmation dialog (Rule 6). */
     deleteConfirmDialog() {
         return this.page
@@ -241,5 +351,22 @@ exports.FundingScreen = class FundingScreen {
                 hasText:
                     'Are you sure you wish to delete this item? This action cannot be undone.',
             });
+    }
+
+    /**
+     * Confirm an open delete dialog with "OK", bounded by the funders API
+     * answering OK (useFetch tunnels DELETE via POST).
+     */
+    async confirmDelete(confirm) {
+        const deleted = this.page.waitForResponse(
+            (r) =>
+                r.url().includes('/funders/') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await confirm.getByRole('button', {name: 'OK', exact: true}).click();
+        await deleted;
+        await expect(confirm).toHaveCount(0, {timeout: 30_000});
     }
 };

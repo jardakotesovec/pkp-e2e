@@ -227,9 +227,17 @@ trips.
   selected and the fetch answered, but the editor's iframe held one empty
   paragraph for the whole wait (the error context). Green alone in 10 s
   right after (`.reports/U41/rerun-ojs-s3.log`), green in the day's first
-  OJS final and in every author run. **Watch condition**: a second
-  sighting; then the helper re-selects the template once when the box
-  stays empty (a content-verified bounded retry, the pattern above).
+  OJS final and in every author run. Second sighting 2026-09-16, the U43
+  revision's first OJS final at four workers on a reset database (the one
+  red of 236, `.reports/U43/final-run-ojs-attempt1.log`, the same
+  `waitForFunction` timeout at the same line); third sighting the same
+  session's second OJS final on a reset database, from U41 S1's mail
+  control through the same helper (`.reports/U43/final-run-ojs.log`, the
+  one red of 236, both times green alone right after,
+  `rerun-ojs-s3.log` and `rerun-ojs-s1.log`). **Watch condition met**:
+  the helper re-selects the template once when the box stays empty (a
+  content-verified bounded retry, the pattern above); the maintenance
+  session applies it.
 - **Contributor reorder under load** (U41 S2, OPS; the OJS twin shares the
   code shape). The Cancel leg's "Increase position" press, issued right
   after "Order" while the list re-rendered into ordering mode, left the

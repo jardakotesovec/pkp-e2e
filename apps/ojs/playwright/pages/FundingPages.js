@@ -17,11 +17,15 @@
  *   typed-text option the tests pick renders independently of the
  *   suggestions payload (Autosuggest `allowCustom`), so the manual-name
  *   path under test is unchanged by the stub.
+ * - landingFunders — the article landing page's "Funders" block and its
+ *   funder entries in display order (Rule 9).
  *
  * Labels are the live locale strings (lib/pkp/locale/en/*.po); DOM shapes
  * from lib/ui-library src/managers/FunderManager/* and
  * src/components/Form/fields/FieldFunder*.vue, confirmed against the
- * running app while this suite was built (2026-08-28).
+ * running app while this suite was built (2026-08-28) and revised
+ * (2026-09-16: the panel's refusals, the Funder field's two states, the
+ * grant rows, the row menu, the wizard's sections and its require warning).
  */
 const {expect} = require('@playwright/test');
 
@@ -228,4 +232,153 @@ exports.FundingScreen = class FundingScreen {
                     'Are you sure you wish to delete this item? This action cannot be undone.',
             });
     }
+
+    // --- The panel's refusals and the Funder field's two states (revision
+    // 2026-09-16; DOM from FieldFunder.vue / FieldFunderGrants.vue: the
+    // Funder field is `.pkpFormField--funder`, the grants sub-table
+    // `.pkpFormField--funder-grants`, a field message `.pkpFieldError`).
+
+    /** The panel's Save button. */
+    saveButton(panel) {
+        return panel.getByRole('button', {name: 'Save', exact: true});
+    }
+
+    /**
+     * The foot's "Please correct one error." line — a substring match, the
+     * line is not its element's whole text (U41 tojs, 2026-09-16).
+     */
+    errorSummary(panel) {
+        return panel.getByText('Please correct one error.');
+    }
+
+    /** The Funder field (`.pkpFormField--funder`). */
+    funderField(panel) {
+        return panel.locator('.pkpFormField--funder');
+    }
+
+    /** The Funder field's message ("Search and select a Funder or enter a Funder name"). */
+    funderFieldError(panel) {
+        return this.funderField(panel).locator('.pkpFieldError');
+    }
+
+    /** The "Search for a funder by name" box (the field's search state). */
+    funderSearchInput(panel) {
+        return this.funderField(panel).locator('input.pkpAutosuggest__input');
+    }
+
+    /** The per-language name boxes of a chosen typed-name funder. */
+    funderNameBoxes(panel) {
+        return this.funderField(panel).locator('input[name="name"]');
+    }
+
+    /**
+     * The "Delete" button under the chosen funder (Rule 5: clears the
+     * field so you can search again). Scoped to the Funder field, so the
+     * grant rows' own "Delete" links never match.
+     */
+    deleteChosenFunderButton(panel) {
+        return this.funderField(panel).getByRole('button', {name: 'Delete', exact: true});
+    }
+
+    /**
+     * Type a name in the search box and pick the typed text itself from
+     * the top of the suggestions; leaves the per-language name boxes as
+     * they arrive (the primary one pre-filled with the typed text).
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} name
+     */
+    async pickTypedFunder(panel, name) {
+        const search = this.funderSearchInput(panel);
+        await search.click();
+        await search.pressSequentially(name, {delay: 15});
+        await panel
+            .locator('li.autosuggest__results-item')
+            .filter({hasText: name})
+            .first()
+            .click();
+        await expect(this.funderNameBoxes(panel).first()).toBeVisible({timeout: 10_000});
+    }
+
+    /** The "Funder Grants" sub-table's rows (one per grant, blank or filled). */
+    grantRows(panel) {
+        return panel.locator('.pkpFormField--funder-grants tbody tr');
+    }
+
+    /** The Grant DOI cell's message ("This is not formatted correctly."). */
+    grantDoiError(panel) {
+        return panel
+            .locator('.pkpFormField--funder-grants')
+            .locator('.pkpFieldError')
+            .filter({hasText: 'This is not formatted correctly.'});
+    }
+
+    /**
+     * Press Save on a panel the form refuses in place: the given field
+     * message and the foot's "Please correct one error." appear, the
+     * panel stays open and Save is disabled (Fields & validation).
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {import('@playwright/test').Locator} fieldMessage
+     */
+    async saveRefused(panel, fieldMessage) {
+        await this.saveButton(panel).click();
+        await expect(fieldMessage.first()).toBeVisible({timeout: 30_000});
+        await expect(this.errorSummary(panel)).toBeVisible({timeout: 30_000});
+        await expect(panel).toBeVisible();
+        await expect(this.saveButton(panel)).toBeDisabled();
+    }
+
+    /**
+     * Open a row's "…" menu and return its items (headlessui portals the
+     * menu to the document root; close it with `closeRowMenu`).
+     */
+    async openRowMenu(name) {
+        await this.rowMoreActions(name).click();
+        const items = this.page.getByRole('menuitem');
+        await expect(items.first()).toBeVisible({timeout: 30_000});
+        return items;
+    }
+
+    /** Close an open row menu without choosing (Escape). */
+    async closeRowMenu() {
+        await this.page.keyboard.press('Escape');
+        await expect(this.page.getByRole('menuitem')).toHaveCount(0, {timeout: 30_000});
+    }
+
+    // --- The wizard's Details step (Rule 10, 11).
+
+    /**
+     * The current step's sections (`.panelSection`, each headed by an h2).
+     * Every step's sections sit in the DOM; only the current step's are
+     * shown, so the read is the visible ones.
+     */
+    wizardSections() {
+        return this.page.locator('.panelSection:visible');
+    }
+
+    /** The Details step's "Funders" section (the one holding the funders table). */
+    wizardFundersSection() {
+        return this.wizardSections().filter({has: this.page.getByRole('table', {name: 'Funders', exact: true})});
+    }
+
+    /** The Review step's "Funders are required." warning (Rule 11). */
+    fundersRequiredWarning() {
+        return this.page.locator('.submissionWizard__fundersEmptyWarning');
+    }
+};
+
+/**
+ * The landing page's "Funders" block (`section#funding-data`, Rule 9) and
+ * its funder entries in display order (one `li > span.funder` each).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.landingFunders = function landingFunders(page) {
+    const block = page.locator('#funding-data');
+    return {
+        block,
+        heading: block.getByRole('heading', {name: 'Funders'}),
+        funderNames: block.locator('span.funder'),
+    };
 };
