@@ -288,10 +288,11 @@ page. Every row below assumes the journal has public comments switched on
     ⚠ [OPS1](#ops1), and so does Settings › Website; the Site
     Administrator enrolled as a Press Manager or Preprint Server Manager
     is a manager there and gets in. <sup>m</sup>
-18. **When the article or the account goes.** Deleting a submission (a
-    published article is unpublished, declined on its Submission stage and
-    deleted there: *[Submission stage](U25-submission-stage.md)*'s "Delete")
-    deletes its comments and their reports. Merging a user account into
+18. **When the article or the account goes.** Deleting a submission (an
+    article published straight from the Submission stage is unpublished,
+    declined there and deleted: *[Submission
+    stage](U25-submission-stage.md)*'s "Delete") deletes its comments and
+    their reports. Merging a user account into
     another (Users & Roles › Users › the row's "Merge user") deletes the
     comments and the reports the merged account wrote; "Remove User" on
     the same row only ends the person's roles in the journal and keeps
@@ -379,54 +380,460 @@ page. Every row below assumes the journal has public comments switched on
 Every scenario runs on a scratch journal with throwaway accounts (the
 seeded journal keeps public comments off and has no published article);
 each scenario's accounts, seeding and the mail catcher's address are in its
-footnote. <sup>s0</sup>
+footnote. Scenarios 1 to 7 run on a journal, a press and a preprint server
+alike: on a press and a preprint server, where nothing writes a comment,
+their comments come from the tooling. Scenarios 8 to 13 need the article's
+landing page and run on a journal; scenario 14 reads the absence on a press
+and a preprint server. <sup>s0</sup>
+
+1. **Switching public comments on and off** {OJS OMP OPS}
+
+   Given: Journal Manager, on a scratch journal with public comments on and
+   a published article carrying one approved comment; a second, fresh
+   scratch journal on which public comments were never switched on.
+
+   - **The "Comments" tab**: open Settings › Website › the "Content" tab ›
+     the "Comments" side tab: the box "Enable Public Comments" is ticked,
+     and "Save" is enabled with nothing changed.
+   - **Switching off**: untick the box and press "Save": "Saving" shows for
+     a moment, then the whole Website Settings page reloads and lands on
+     Appearance › Theme, and no "Saved" appears ⚠ [A5](#a5); reopen the
+     "Content" tab's "Comments" side tab: the box is unticked.
+   - **The side menu after the reload**: the editorial side menu no longer
+     offers Content › Comments (on a journal the "Content" group keeps
+     "Issues", on a press "Catalog"; on a preprint server the group is
+     gone).
+   - **The landing page** {OJS}: reload the article's page: neither the
+     section "Comments on this publication" nor the sidebar block
+     "Comments" is there.
+   - **The page by address**: open the Comments page's address
+     ("…/management/settings/userComments" after the journal's address):
+     the page opens and still lists the comment under "All" and "Approved"
+     ⚠ [A4](#a4).
+   - **Switching on again**: tick the box and press "Save": the page
+     reloads the same way; the side menu carries Content › Comments again,
+     and {OJS} the article's page shows both blocks with the comment
+     exactly as before.
+   - **An unsaved tick**: untick the box without pressing "Save", open the
+     "Appearance" tab and come back to the "Content" tab's "Comments" side
+     tab: the box is still unticked and nothing was asked; open the
+     dashboard and return to the tab: the box is ticked, the unsaved change
+     dropped.
+   - **Control**: on the fresh journal the same tab shows the box unticked,
+     the side menu offers no Content › Comments, and the Comments page,
+     opened by its address, reads "No Items" under every tab. <sup>s1</sup>
+
+2. **Approving and hiding on the Comments page** {OJS OMP OPS}
+
+   Given: Journal Manager, on a scratch journal with public comments on and
+   a published article carrying three comments: a pending one by a Reader
+   whose profile carries a verified ORCID iD and an affiliation, an
+   approved one, and an approved one that a second Reader has reported; a
+   second journal on the site holding a comment of its own.
+
+   - **Content › Comments**: press the side menu's Content › Comments: the
+     page headed "Comments" opens with the tabs "All", "Approved",
+     "Hidden/Needs Approval" and "Reported" over a table with the columns
+     "Submission", "Comment", "User" and "Status". Under "All" the three
+     rows: "Submission" reads "{submission number}. {authors} ; {title}",
+     "Comment" the comment's text cut to one line, "User" the writer's
+     name, and "Status" "Hidden/Needs Approval" for the pending comment,
+     "Approved" for the second and "Approved, Reported" for the third.
+   - **The tabs**: "Approved" lists the two approved comments, every row's
+     "Status" reading "Approved"; "Hidden/Needs Approval" the pending one;
+     "Reported" the reported one, its "Status" reading "Reported". The
+     chosen tab is written into the page's address after "#", and a reload
+     comes back on it.
+   - **Another journal's comment**: on no tab.
+   - **The comment panel**: on the pending comment's row press "…" ("More
+     Actions") › "View Comment": the panel "View comment details by
+     {writer}" opens over the page, with the same submission line as the
+     table's "Submission" cell above its title; "Comment preview" shows the
+     date and time, the text, the writer's name, their ORCID iD as a link
+     with a solid icon and their affiliation; the "Reports" table reads "No
+     one has reported this comment yet"; on the right the note "Approving
+     this comment will make it visible to all users on the site", "Approve
+     Comment" highlighted and "Hide Comment" grayed out; the page's address
+     now carries the comment's number.
+   - **"Approve Comment"**: press it: the notice "The comment has been
+     updated successfully." shows at the top right, the panel closes and
+     the table reloads: the row has left "Hidden/Needs Approval" for
+     "Approved". Reopen its panel: the note reads "This comment was
+     approved on {date} by {moderator}.", "Approve Comment" is grayed out
+     and "Hide Comment" enabled; press "Close": the number leaves the
+     address.
+   - **The landing page after the approval** {OJS}: signed out, the
+     article's page lists the comment with its date and time, its text, the
+     writer's name, the ORCID iD as a link with a solid icon and the
+     affiliation, and the sidebar reads "All Comments (3)".
+   - **"Hide Comment"**: open the reported comment's panel and press "Hide
+     Comment": the notice "The comment has been updated successfully.", the
+     panel closes and the row leaves "Approved" for "Hidden/Needs
+     Approval"; it stays on "Reported", and under "All" its "Status" reads
+     "Hidden/Needs Approval, Reported".
+   - **The landing page after the hide** {OJS}: signed out, the hidden
+     comment is gone and the sidebar reads "All Comments (2)"; its writer,
+     signed in, sees it with the notice "Your comment will be visible when
+     the editor approves it" above its date ⚠ [A1](#a1).
+   - **Control**: the second journal's Comments page lists its own comment
+     alone and none of this journal's. <sup>s2</sup>
+
+3. **Reports on the Comments page** {OJS OMP OPS}
+
+   Given: Journal Manager, on a scratch journal with public comments on and
+   a published article carrying two approved comments, one of them reported
+   twice, by two Readers with reasons of their own, the other never
+   reported.
+
+   - **The "Reported" tab**: lists the reported comment alone, its "Status"
+     reading "Reported".
+   - **The "Reports" table**: open that comment's panel ("…" › "View
+     Comment"): under the preview the table "Reports", described "This is
+     the list of all the users who have reported this comment", with the
+     columns "Reported By", "Reason" and "Date Reported" and one row per
+     report.
+   - **"View Report"**: on the first row press "…" › "View Report": the
+     panel "View report details by {reporter}" opens over the comment panel
+     with "Report preview": the date and time, the reason as typed and the
+     reporter's name, and the button "Delete Report"; the address carries
+     the report's number as well as the comment's.
+   - **"Close" on the report panel**: press it: the comment panel stays
+     open, and both numbers leave the address, the comment's included
+     ⚠ [A8](#a8).
+   - **"Delete Report" from the report panel**: open the first report again
+     and press "Delete Report": the dialog "Delete Report" reads "Are you
+     sure you want to delete this report? This action cannot be undone."
+     with "Delete" and "Cancel"; press "Delete": the notice "The report has
+     been deleted successfully." shows, the report panel closes and the
+     "Reports" table reloads with one row.
+   - **"Delete Report" from the row**: on the remaining row press "…" ›
+     "Delete Report" and then "Delete": the notice again, and the table
+     reads "No one has reported this comment yet"; the note on the right
+     still reads "This comment was approved on {date} by {moderator}.".
+     Press "Close": the table reloads, the comment is gone from "Reported",
+     and under "All" its "Status" reads "Approved".
+   - **Control**: the never-reported comment's panel reads "No one has
+     reported this comment yet", and its row is on "Approved" and never on
+     "Reported", before and after. <sup>s3</sup>
+
+4. **Deleting a comment as a moderator** {OJS OMP OPS}
+
+   Given: Journal Manager, on a scratch journal with public comments on and
+   a published article carrying three comments: two approved, one of them
+   reported, and one pending.
+
+   - **From the row**: on the unreported approved comment's row press "…" ›
+     "Delete Comment": the dialog "Delete Comment" reads "Are you sure you
+     want to delete this comment? This action cannot be undone." with
+     "Delete" and "Cancel"; press "Delete": the notice "The comment has
+     been deleted successfully." shows and the table reloads without the
+     row.
+   - **From the panel**: open the reported comment's panel and note the
+     page's address, which carries the comment's number; press "Delete
+     Comment" and then "Delete": the notice shows, the panel closes and the
+     table reloads without the row; the comment is on no tab and "Reported"
+     reads "No Items".
+   - **The noted address**: open it: the page opens on "All" under the
+     dialog "Error" reading "The requested resource was not found." with
+     "OK".
+   - **The landing page** {OJS}: signed out, the article's page lists no
+     comment; the version's heading reads "{version} (0)" and the sidebar
+     "All Comments (0)".
+   - **Control**: the pending comment is still listed under "All" and
+     "Hidden/Needs Approval" after both deletions. <sup>s4</sup>
+
+5. **The moderators' tasks** {OJS OMP OPS}
+
+   Given: a Journal Manager, an Editor {OJS OMP} and a Section Editor of a
+   scratch journal with public comments on and a published article carrying
+   an approved comment of more than 200 characters by a Reader, reported by
+   a second Reader with a reason of more than 200 characters; no moderator
+   has opened their Tasks panel yet.
+
+   - **The Journal Manager's Tasks panel**: two unread rows: "A comment has
+     been submitted and is pending review by a moderator." with the
+     comment's text under it, cut to its first 200 characters and "...",
+     and "A report was submitted for a comment and requires review by a
+     moderator." with the reason under it, cut the same way.
+   - **The Editor's Tasks panel** {OJS OMP}: the same two rows.
+   - **Pressing the comment's row**: the Comments page opens with that
+     comment's panel already open.
+   - **Pressing the report's row**: the Comments page opens with the
+     comment panel and the report panel on top of it.
+   - **Profile › Notifications**: the tab lists no row about comments: the
+     tasks cannot be switched off.
+   - **After "Hide Comment"**: hide the comment from its panel: the
+     "pending review" row stays in every moderator's panel ⚠ [A2](#a2).
+   - **After "Delete Report"**: delete the report from the "Reports" table:
+     the "requires review" row leaves every moderator's panel; the "pending
+     review" row stays.
+   - **After "Delete Comment"**: delete the comment from its panel: the
+     "pending review" row leaves every moderator's panel.
+   - **Mailboxes**: the writer's, the reporter's and each moderator's
+     mailbox hold no email about the comment, the report, the hide or the
+     deletions; judge each mailbox only after an email sent to it by
+     other means has arrived (the footnote names one).
+   - **Control**: the Section Editor's Tasks panel gained no row at any
+     step. <sup>s5</sup>
+
+6. **Who opens the Comments page** {OJS OMP OPS}
+
+   Given: a Section Editor, an Author and a Reader of a scratch journal
+   with public comments on, a signed-out visitor's browser, and the Journal
+   Manager.
+
+   - **The Section Editor**: signed in, the editorial side menu has no
+     "Content" group; the Comments page's address
+     ("…/management/settings/userComments" after the journal's address)
+     answers the access-denied page ("The current role does not have access
+     to this operation.").
+   - **The Author**: the dashboard's side menu has no "Content" group; the
+     address answers the access-denied page.
+   - **The Reader**: the address answers the access-denied page.
+   - **Signed out**: the address answers the Login page.
+   - **Control**: the Journal Manager's side menu holds Content › Comments,
+     and the address opens the page headed "Comments". <sup>s6</sup>
+
+7. **More than a page of comments** {OJS OMP OPS}
+
+   Given: Journal Manager, on a scratch journal with public comments on and
+   a published article carrying 26 approved comments.
+
+   - **The first page**: under "All" the table lists 25 rows with the page
+     links under it; press the second page's link: one row.
+   - **Coming back to a tab**: from the second page open "Approved" (25
+     rows and the page links again) and come back to "All": the second
+     page is still shown.
+   - **The landing page** {OJS}: signed out, the version's part, headed
+     "{version} (26)", lists 25 comments and then the button "Show more
+     (1)"; press it: the remaining comment is appended below them and the
+     button is absent.
+   - **Control**: "Hidden/Needs Approval" and "Reported", with nothing to
+     list, read "No Items" and carry no page links. <sup>s7</sup>
+
+8. **Writing a comment** {OJS}
+
+   Given: two Readers and the Journal Manager of a scratch journal with
+   public comments on and a published article carrying one approved comment
+   by the second Reader; a second published article of the journal with no
+   comment; a signed-out visitor's browser.
+
+   - **Signed out**: open the article's landing page: under the abstract
+     and details the section "Comments on this publication" holds one part,
+     headed "{version} (1)" and open, with the button "Log in to comment"
+     and then the approved comment with its date and time, its text and the
+     writer's name, and no "…" button on it; in the column beside the
+     article the block "Comments" holds the link "All Comments (1)" and the
+     button "Log in to comment". Press "All Comments (1)": the page scrolls
+     to the main block.
+   - **"Log in to comment"**: press it: the journal's Login page opens; sign
+     in as the first Reader: the browser returns to the same article at the
+     comments' address with the main block on screen and, in the version's
+     part, the comment box (its placeholder "What do you think about this
+     publication? Type your comments here.") and "Submit".
+   - **"Submit" while the box is empty**: "Submit" is grayed out; type three
+     spaces: still grayed out; type "A first reader comment." in the box:
+     "Submit" is enabled.
+   - **Submitting**: press "Submit": the box empties and the comment appears
+     at the top of the version's comments with a help icon and the notice
+     "Your comment will be visible when the editor approves it" above its
+     date; the heading reads "{version} (2)" while the sidebar still reads
+     "All Comments (1)"; no message announces the submit.
+   - **The "…" menus**: the "…" button on the own comment offers "Delete
+     Comment" alone; on the second Reader's comment it offers "Report"
+     alone.
+   - **Formatting**: type `<b>bold</b> <script>alert(1)</script> plain` in
+     the box and press "Submit": the new comment shows "bold" in bold and
+     "plain", the script gone, and no message appears.
+   - **The second Reader**: signed in on the same page, sees the approved
+     comment alone, the heading reading "{version} (1)"; the "…" on their
+     own comment offers "Delete Comment" alone.
+   - **The Journal Manager**: signed in on the same page, sees the approved
+     comment alone as well, its "…" offering "Report" alone.
+   - **Control**: the journal's second article shows the first Reader,
+     signed in, "{version} (0)" and "All Comments (0)": comments on other
+     articles never show. <sup>s8</sup>
+
+9. **Reporting a comment** {OJS}
+
+   Given: a Reader and the Journal Manager of a scratch journal with public
+   comments on and a published article carrying an approved comment by a
+   second Reader whose profile carries no affiliation.
+
+   - **"Report"**: signed in as the Reader, on the comment's "…" press
+     "Report": the dialog "Report Comment" opens with the line "Report the
+     following comment by {writer}", the comment's text, the box "Please
+     tell us why you want to report this comment", and the buttons "Submit"
+     and "Cancel".
+   - **An empty reason**: press "Submit" with the box empty: the dialog
+     stays open and no message appears ⚠ [A3](#a3).
+   - **A filed report**: type "Off topic." in the box and press "Submit":
+     the dialog closes; nothing on the page confirms the report, the
+     comment looks as before, and its "…" menu offers "Report" again
+     ⚠ [A3](#a3).
+   - **The Comments page**: the Journal Manager: "Reported" lists the
+     comment with "Status" "Reported", and under "All" its "Status" reads
+     "Approved, Reported"; its panel's "Reports" table holds one row:
+     "Reported By" the Reader's name, "Reason" "Off topic." and "Date
+     Reported" the day's date; the note on the right still reads "This
+     comment was approved on {date} by {moderator}.".
+   - **Control**: the Journal Manager, signed in on the landing page, gets
+     the same "…" menu on the comment, "Report" alone, and nothing more.
+     <sup>s9</sup>
+
+10. **Deleting one's own comment** {OJS}
+
+    Given: a Reader and the Journal Manager of a scratch journal with public
+    comments on and a published article carrying two approved comments: the
+    Reader's, which a second Reader has reported, and the second Reader's;
+    the Journal Manager's Tasks panel holds the rows about the Reader's
+    comment and its report.
+
+    - **"Delete Comment"**: signed in as the Reader, on the own comment's
+      "…" press "Delete Comment": the dialog "Delete Comment" reads "Are you
+      sure you want to delete the following comment?" with the comment's
+      text in bold under it, and the buttons "Delete" and "Cancel"; press
+      "Delete": the comment leaves the list at once while the heading still
+      reads "{version} (2)"; reload the page: "{version} (1)".
+    - **The Comments page**: the Journal Manager: the comment is on no tab,
+      and "Reported" reads "No Items".
+    - **The Tasks panel**: the Journal Manager's panel no longer holds the
+      row about the comment or the row about its report.
+    - **Control**: the second Reader's comment is still listed on the
+      landing page and under "All" and "Approved". <sup>s10</sup>
+
+11. **A new version closes the old discussion** {OJS}
+
+    Given: two Readers and the Journal Manager of a scratch journal with
+    public comments on and a published article with one published version
+    carrying two approved comments, one by each Reader; the Journal Manager
+    on the article's workflow page.
+
+    - **A new version**: the Journal Manager creates a new version of the
+      article and publishes it (*[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*).
+    - **The parts**: the first Reader, signed in, reloads the article's
+      page: "Comments on this publication" now holds two parts: the newest
+      version's, headed "{version} (0)" and open, with the comment box and
+      "Submit", and the older version's, headed "{version} (2)" and closed.
+    - **One part open at a time**: press the older part's heading: it opens
+      and the newest closes; press it again: it closes.
+    - **The older part**: shows, in place of the box, the notice
+      "Discussion is closed on this version, please comment on the latest
+      version above." with an alert icon, and its two comments with their
+      "…" menus; on the second Reader's comment press "Report", type
+      "Reported from the old version." in the box and press "Submit": the
+      Journal Manager's Comments page lists the comment on "Reported".
+    - **The newest part**: type "A comment on the new version." in the box
+      and press "Submit": the comment appears under the newest part with
+      the notice "Your comment will be visible when the editor approves
+      it", and the heading reads "{version} (1)"; the older part's heading
+      still reads "{version} (2)".
+    - **The sidebar**: "All Comments (2)": the approved comments over every
+      version, the pending one not counted.
+    - **Control**: signed out, the same page shows "Log in to comment" in
+      the newest part only, and the closed notice in the older.
+      <sup>s11</sup>
+
+12. **The article is unpublished, published again and deleted** {OJS}
+
+    Given: a Reader and the Journal Manager of a scratch journal with public
+    comments on and an article published straight from the Submission stage
+    carrying two comments by the Reader, one approved and reported by a
+    second Reader, one pending; a second published article carrying an
+    approved comment; the Journal Manager on the first article's workflow
+    page.
+
+    - **Unpublished**: the Journal Manager unpublishes the version
+      (*[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*):
+      the Comments page still lists both comments; the article's page
+      answers "404 Not Found" signed out and to the Reader.
+    - **Published again**: the Journal Manager publishes the version again:
+      signed out, the article's page shows the approved comment under
+      "{version} (1)"; the Reader sees both, "{version} (2)", the pending
+      one with its notice.
+    - **Deleted**: the Journal Manager unpublishes the version again,
+      presses "Decline Submission" on the Submission stage and then "Delete"
+      (*[Submission stage](U25-submission-stage.md)*): the Comments page
+      lists neither comment on any tab and "Reported" reads "No Items".
+    - **The Tasks panel**: the Journal Manager's rows about both comments
+      and the report stay in the panel, blank ⚠ [A10](#a10).
+    - **Control**: the second article's comment is still listed under "All"
+      and "Approved". <sup>s12</sup>
+
+13. **The writer's account is merged away or removed from the journal** {OJS}
+
+    Given: two Readers, A and B, and the Journal Manager of a scratch
+    journal with public comments on and a published article carrying an
+    approved comment by A, reported by B, and an approved comment by B; the
+    Journal Manager's Tasks panel holds the rows about both comments and the
+    report; the Journal Manager on Settings › Users & Roles › Users.
+
+    - **"Merge user"**: on B's row press "Merge user" and merge the account
+      into A's: B's comment is gone from every tab of the Comments page and
+      from the landing page; A's comment's "Reports" table reads "No one has
+      reported this comment yet" and "Reported" reads "No Items".
+    - **"Remove User"**: on A's row press "Remove User" and confirm: A's
+      comment is still listed under "All" and "Approved".
+    - **The Tasks panel**: the Journal Manager's rows about B's comment and
+      B's report stay in the panel, blank ⚠ [A10](#a10).
+    - **Control**: the row about A's comment still opens the Comments page
+      with that comment's panel. <sup>s13</sup>
+
+14. **No reader-side half on a press or a preprint server** {OMP OPS}
+
+    Given: the Press Manager (on a preprint server the Preprint Server
+    Manager) and a Reader of a scratch press with public comments on and a
+    published monograph (on a preprint server, a posted preprint); a
+    signed-out visitor's browser.
+
+    - **The landing page, signed out**: the monograph's landing page carries
+      no section "Comments on this publication", no "Comments" block in the
+      sidebar and no "Log in to comment".
+    - **The landing page, signed in**: the Reader sees the same page: no
+      comment box, no "Submit" and no comment.
+    - **The "Comments" tab**: the Press Manager opens Settings › Website › the
+      "Content" tab › the "Comments" side tab: the box "Enable Public
+      Comments", ticked, and "Save".
+    - **The Comments page**: the side menu's "Content" group holds
+      "Comments" (beside "Catalog" on a press; alone on a preprint server);
+      press it: the page headed "Comments" lists "No Items" under each of
+      "All", "Approved", "Hidden/Needs Approval" and "Reported".
+    - **Control**: untick the box and press "Save" (scenario 1): Content ›
+      Comments leaves the side menu while the landing page reads exactly as
+      before: the setting changes only the side menu here. <sup>s14</sup>
 
 ## Coverage
 
-<!-- Draft table (RUNBOOK steps 3 to 5). One row per Actors row, per state of the
-     comment and per setting end; classed by TEMPLATE's four tests. -->
+Left out of the scenarios above, by reason:
 
-| Who, state or setting | Class | Runs in | Why not |
-|-----------------------|-------|---------|---------|
-| A signed-in Reader writes a comment on the latest version and sees it with the pending notice (Actors row 2, Rule 5) | main | planned | |
-| A moderator approves the comment on the Comments page; it shows to a visitor who is not signed in (Actors row 6, Rules 12, 13, 6b) | main | planned | |
-| A signed-in visitor reports another person's comment; the report is listed in the comment panel (Actors row 3, Rules 8, 15) | main | planned | |
-| A moderator hides an approved comment; it leaves the landing page for everyone but its writer (Rules 13, 6a) | main | planned | |
-| A moderator deletes a comment from the row menu and from the panel (Actors row 4, Rule 14) | main | planned | |
-| A moderator deletes a report from the row and from the report panel (Rule 15) | main | planned | |
-| The Journal Manager switches "Enable Public Comments" on and off; the result read on the reloaded page, never a "Saved" (Actors row 5, Rule 2, A5) | main | planned | |
-| A visitor who is not signed in sees approved comments only, no "…" menu, and "Log in to comment" in both blocks (Actors row 1, Rules 6b, 7, 4b) | guard | planned | |
-| Another signed-in visitor, a moderator included, does not see a pending or hidden comment on the landing page (Rule 6b) | guard | planned | |
-| The comment's own menu offers "Delete Comment" and no "Report"; another person's offers "Report" and no "Delete Comment" (Rule 7) | guard | planned | |
-| The writer deletes their own comment; it is gone from the Comments page with its report (Actors row 4, Rule 9) | guard | planned | |
-| Each moderator's Tasks panel gains the "pending review" row on a comment and the "requires review" row on a report; pressing each opens the right panel (Side effects, Rule 16) | guard | planned | |
-| Deleting the comment removes the moderators' tasks about it and its report (Side effects) | guard | planned | |
-| No email reaches the writer, the reporter or the moderators at any step (Side effects) | guard | planned | |
-| A Section Editor, an Author and a Reader get the access-denied page at the Comments page's address and no Content › Comments entry (Actors row 6) | guard | planned | |
-| "Enable Public Comments" off: no blocks on the landing page, no menu entry, the Comments page still open by address with the comments kept (Rule 2b, Settings bullet 1) | guard | planned | |
-| On a press and a preprint server: no comments block on the monograph or preprint landing page, the "Comments" settings tab present, the Comments page reading "No Items" (the absence paragraph) | guard | planned | |
-| Comments of another journal are absent from the landing page's list and from the Comments page (Rules 6b, 10a) | guard | planned | |
-| Comment on an older version closed with "Discussion is closed on this version…" after a new version is published; its comments still listed under its heading with their "…" menus, one part open at a time (Rules 3a, 4a) | state | planned | |
-| The four tabs and the "Status" cell wording: "Approved", "Hidden/Needs Approval", ", Reported" (Rule 10) | state | planned | |
-| The comment panel's approval note before and after approval, "Approve Comment" and "Hide Comment" grayed out in turn (Rules 12, 13) | state | planned | |
-| A comment with no reports: "No one has reported this comment yet" (Fields) | state | planned | |
-| A second report on the same comment from the same person (Rule 8) | state | | Register carries it |
-| "Show more ({remaining})" after 25 comments on one version, and the Comments page's second page after 25 rows (Rule 6c, 10c) | state | planned | |
-| A comment writer with an ORCID iD and an affiliation: the iD link and the affiliation shown under the comment and in the panel (Rule 6b, Fields) | state | planned | |
-| The Site Administrator holding no manager role in the journal on the Comments page: opens on a journal, refused on a press and a preprint server (Rule 17) | state | | Register carries it |
-| The Site Administrator with Reader as the only journal role: the "Error" dialog over the Comments page on a journal (Rule 17) | state | | Register carries it |
-| An Editor whose role does not permit settings changes is refused the "Comments" tab and still opens the Comments page (Actors rows 5, 6) {OJS OMP} | state | planned | OPS: no second manager-level role to untick |
-| Deleting the submission deletes its comments and their reports; the moderators' tasks about them stay behind (Rule 18) | state | planned | |
-| Merging the writer's account away deletes their comments and reports; "Remove User" keeps them (Rule 18) | state | planned | |
-| The article's only version unpublished: its page answers "404 Not Found", the Comments page keeps the comments, published again they show (Rule 18) | state | planned | |
-| A shared address, or a task link, naming a comment that no longer exists: the "Error" dialog "The requested resource was not found." over "All" (Rules 12, 18) | state | planned | |
-| "Items per page" at another value (Settings bullet 2) | variant | | Nothing new to test |
-| "Cancel" on the report, delete-comment and delete-report dialogs (Rules 8, 9, 14, 15) | variant | | Nothing new to test |
-| The shared address with a comment number opened directly (Rule 12) | variant | | Nothing new to test |
-| An older version's own page showing the article's blocks (Rule 4a) | variant | | Nothing new to test |
-| An Editor (manager-level) as the moderator, or at the switch, instead of the Journal Manager (Actors) | variant | | Nothing new to test |
-| Closing the report panel clears both numbers from the address (Rule 15) | variant | | Register carries it |
-| The comment's "…" button without a name for a screen reader (Rule 7) | variant | | Register carries it |
+- **Budget** — states:
+  - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
+  - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
+- **Nothing new to test**:
+  - "Items per page" at another value (Settings bullet 2): the same paging scenario 7 reads at 25
+  - "Cancel" on the "Report Comment", "Delete Comment" and "Delete Report" dialogs (Rules 8, 9, 14, 15): the dialogs scenarios 3, 4, 9 and 10 open, left as they are
+  - the shared address with a comment number opened directly (Rule 12): the same panel scenarios 2 and 5 open by "View Comment" and from a task row
+  - an older version's own page showing the article's blocks (Rule 4a): the parts scenario 11 reads on the article's page
+  - an Editor as the moderator, or at the switch, instead of the Journal Manager (Actors rows 5 and 6): the same screens scenarios 1 to 4 read
+  - an Assistant and a Reviewer at the Comments page's address (Actors row 6): the refusal scenario 6's Section Editor, Author and Reader meet
+  - a hidden comment approved again, its note rewritten (Rule 13): the note scenario 2 reads after the first approval
+  - the "Report Comment" dialog's line with the writer's affiliation in parentheses (Rule 8): a wording variant of the line scenario 9 reads
+- **Register carries it**:
+  - A3 (a second report on the same comment by the same person; Rule 8)
+  - A6 (the unverified ORCID iD's dead link under a comment and in the comment panel; Rule 6b)
+  - A7 (the comment's "…" button without a name for a screen reader; Rule 7)
+  - A8 (closing the report panel clearing both numbers from the address; Rule 15; scenario 3 marks it)
+  - A9 (the Site Administrator with Reader as their only journal role, the "Error" dialog over the Comments page; Rule 17)
+  - OMP1 and OPS1 (the Site Administrator holding no manager role: the Comments page open on a journal, refused on a press and a preprint server; Rule 17)
+- **Owned by another feature**:
+  - the Tasks panel's own controls on a comment task, Mark Read and Delete (Cross-feature interactions; *Notifications center & email preferences*, scenario 2)
+  - creating and publishing the new version scenario 11 needs (Cross-feature interactions; *Publish, schedule & versions*, scenarios 4 and 5)
+  - unpublishing and publishing again the version scenario 12 walks through (Rule 18; *Publish, schedule & versions*, scenarios 3 and 10)
+  - declining and deleting the submission scenario 12 ends with (Rule 18; *Submission stage*, scenarios 4 and 6)
+  - "Remove User" and "Merge user" themselves, beyond what they do to comments (Rule 18; *Users management*)
+  - "Permit changes to Settings" on a role (Cross-feature interactions; *Users management*)
+  - the profile's name, ORCID iD and affiliation a comment shows (Cross-feature interactions; *User profile*, *ORCID integration*)
+  - the Website settings screen around the "Comments" tab, and "Items per page" itself (Cross-feature interactions; *Journal identity & about pages*, *Appearance & theming*)
 
 ## Findings register
 
@@ -1060,8 +1467,10 @@ publication's status only; the landing page stops answering for a
 submission with no published version, and `getPublishedPublications()`
 drops the version from the block. The `notifications` rows have no such
 cascade (footnote l, A10). Live-probed 2026-09-16 (Rule 18, A10) on a
-journal: no stage of a published or unpublished submission offers
-"Delete"; after "Decline Submission" on the Submission stage the stage
+journal, on a `published: true` seed without `decisions` (published
+straight from the Submission stage, back there after the unpublish): no
+stage of a published or unpublished submission offers "Delete"; after
+"Decline Submission" on the Submission stage the stage
 offered "Schedule For Publication, Revert Decline, Delete", and "Delete"
 ("Are you sure you want to permanently delete this submission?" /
 "Confirm") took the submission's comments off every tab of the Comments
@@ -1110,6 +1519,150 @@ shares a second and lists in no fixed order. Mailpit reads scope by
 throwaway recipient (scenarios.md "Mailpit"); its total never moves at
 the 500-message cap. The preamble itself describes how the scenarios are
 set up and names no screen.
+
+<a id="fn-s1"></a>
+**s1 — scenario 1.** A scratch context seeded `enablePublicComments: true`
+with a submission `published: true` carrying `userComments: [{user, text,
+approved: true}]`, the writer a throwaway `reader`; the manager is the
+scratch `manager`. The fresh journal of the control is a second scratch
+context created without the `enablePublicComments` key and without
+comments (the row at 0, scenarios.md). The save is read on the reloaded
+page: the address still ends "#publicComments", the "Content" tab is
+reopened by hand, and no test waits for "Saved" (A5); the side menu is
+read after that reload. The Comments page's address is
+`{context}/management/settings/userComments`. Runs on the three apps; the
+landing-page bullets on OJS at `article/view/{id}`.
+
+<a id="fn-s2"></a>
+**s2 — scenario 2.** Throwaway `users[]`: the pending comment's writer a
+`reader` with `orcid` and `orcidIsVerified: true` (the solid icon,
+footnote f-a6); `users[]` has no affiliation key, so the test sets the
+writer's affiliation on the account's Profile › Contact before the pages
+are read (a comment shows whatever the profile holds at load), or the
+harness step adds the key. Two more `reader`s: one writes the approved
+comment, the other the approved-and-reported one, reported by the first
+(a reporter must not be the writer). The three `userComments[]` entries
+may go in one call: the bullets locate rows by their "User" or "Comment"
+cell, never by position (a batch shares one second and lists in no fixed
+order). A seeded approval's note names the seeding `admin`; the note the
+scenario reads is the one after the on-screen "Approve Comment", which
+names the manager. The second journal is a second scratch context with its
+own published submission and one comment. The landing-page bullets run on
+OJS, signed out and then as the writer.
+
+<a id="fn-s3"></a>
+**s3 — scenario 3.** Two approved `userComments[]` by one `reader`; the
+first with `reports: [{user, note}, {user, note}]` by two other `reader`s,
+the second with none. Two reports seeded in one call share a second, so
+"the first row" is whichever the table lists first and no order between
+them is asserted. The address after "View Report" reads
+`?commentId={n}&reportId={r}` (footnote k); the A8 read is the address
+with neither key while the comment panel is still open. Three apps.
+
+<a id="fn-s4"></a>
+**s4 — scenario 4.** Three `userComments[]` by two `reader`s: approved
+without a report, approved with one report by the other reader, and
+pending; rows are located by their "Comment" text. The noted address is
+`…/userComments?commentId={n}`, which answers the "Error" dialog once the
+comment is gone (footnote j). The landing page is read on OJS, signed
+out. Three apps.
+
+<a id="fn-s5"></a>
+**s5 — scenario 5.** Moderators: the scratch `manager`, an `editor` (OJS
+and OMP; OPS has no editor key) and a `sectionEditor` (the Moderator on
+OPS). The writer and the reporter are two `reader`s; the comment's `text`
+and the report's `note` are each 300 characters, so the rows show the
+first 200 and "..." (footnote l). Seeded comments and reports raise the
+rows as typed ones do; `admin`, the auto-enrolled manager, gets them too
+and is not read. The Tasks panel is the bell on any editorial page
+(*Notifications center & email preferences*). Mailboxes: Mailpit at
+`MAILPIT_URL`, read by throwaway recipient, never by count; the control
+email is one sent to the same recipient by the Users & Roles row's
+"Email" (footnote l), waited for before the absence is judged
+(`expectNone` with `afterControl`). Three apps.
+
+<a id="fn-s6"></a>
+**s6 — scenario 6.** Throwaway `sectionEditor`, `author` and `reader`
+(on OPS the Section Editor is the Moderator). The access-denied page is
+`…/user/authorizationDenied?message=user.authorization.roleBasedAccessDenied`,
+answered with HTTP 200 (footnote m); signed out, the address answers the
+Login page with the address as `source`. A Reader's login lands on the
+reader-facing home and offers no dashboard (seed-facts), so only the
+address is read for the Reader. Three apps.
+
+<a id="fn-s7"></a>
+**s7 — scenario 7.** 26 `userComments[]` entries, `approved: true`, by
+one `reader`, seeded in one call (one second, no fixed order; no row is
+located by position); "Items per page" at its install default 25
+(seed-facts). The second page's link reads "Go to Page 2" under
+"Showing 1 to 25 of 26" (footnote i). The landing-page bullet runs on
+OJS, signed out. Three apps.
+
+<a id="fn-s8"></a>
+**s8 — scenario 8.** Two `reader`s and the `manager`; one approved
+`userComments[]` entry by the second reader; a second `published: true`
+submission with none. The landing page is `article/view/{id}`; "Log in to
+comment" carries the article's address as `source` and returns to
+"…#public-comments" (footnote f); a test asserts the address and the
+box, never a scroll position. "Submit" grayed out is the button's
+disabled state, not a missing button. The formatting bullet's text is
+typed as written; bold and "plain" survive, the script does not
+(footnote f). The sidebar's count stays until the next page load.
+
+<a id="fn-s9"></a>
+**s9 — scenario 9.** The reporter a `reader`, the writer a second `reader`
+with no affiliation (a throwaway `users[]` account has none by default),
+and the `manager`; one approved `userComments[]` entry by the writer. An
+empty reason sends no request (footnote g); "Date Reported" shows the
+date as "2026-09-16"-style (footnote k). A second report by the same
+person is A3's and is not driven.
+
+<a id="fn-s10"></a>
+**s10 — scenario 10.** Two `reader`s, A and B, and the `manager`; A's
+comment `approved: true` with `reports: [{user: B, note}]`, B's comment
+`approved: true`. The manager's two task rows come from the seed. The
+heading's count changes on the next load (footnote h).
+
+<a id="fn-s11"></a>
+**s11 — scenario 11.** Two `reader`s and the `manager`; one `published:
+true` submission with two approved `userComments[]` entries, one per
+reader. No scenario key seeds a second version: the manager creates and
+publishes it on the workflow screen ("Create New Version", then
+"Publish"; *Publish, schedule & versions* scenarios 4 and 5, whose
+openers wait for the version dialog's stage select). The parts read
+"Version of Record 1.1 (0)" and "Version of Record 1.0 (2)" (footnote d).
+
+<a id="fn-s12"></a>
+**s12 — scenario 12.** Reader A (`reader`) writes both comments: one
+`approved: true` with `reports: [{user: B, note}]` by reader B, one
+pending; both submissions `published: true` with no `decisions`, so the
+unpublish returns the first to the Submission stage (the bubble read
+"Submission", footnote o) and "Decline Submission" is offered there.
+Unpublish and publish again on the workflow's Publication area
+(*Publish, schedule & versions* scenarios 3 and 10); then "Decline
+Submission" and "Delete" on the Submission stage, confirmed with
+"Confirm" (footnote o). The "404 Not Found" is read signed out and as
+reader A. The rows that stay: two comment rows and one report row,
+pressable but dead (footnote f-a10).
+
+<a id="fn-s13"></a>
+**s13 — scenario 13.** Readers A and B (`reader`) and the `manager`; A's
+comment `approved: true` with `reports: [{user: B, note}]`, B's comment
+`approved: true`. "Merge user" opens the window "Merge user" listing the
+journal's users; A's row's "Settings" reveals "Merge into this User", and
+the confirm names both usernames (footnote o). "Remove User" asks "Remove
+this user from this journal? This action will unenroll the user from all
+roles within this journal." (footnote o). The rows that stay: B's comment
+row and B's report row (footnote f-a10).
+
+<a id="fn-s14"></a>
+**s14 — scenario 14.** A scratch press or preprint server seeded
+`enablePublicComments: true` with a `published: true` submission (posted,
+on the server) and a throwaway `reader`; no `userComments[]`, so the
+Comments page reads "No Items". The landing page is the published item's
+public page, reached from the press's catalog or the server's archive;
+its absence assertions pair with the positive control of the same
+scenario (PRINCIPLES M4). OMP and OPS only.
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1.** `PkpCommentsNotificationMessageNeedsApproval.vue` shows the
