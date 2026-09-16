@@ -89,7 +89,12 @@ Keys:
   (`orcidIsVerified: true` carries the sign-in completion's live
   permission, `false` the iD alone). Role keys are the app's default
   user-group keys. An unknown key fails
-  with a 400 that lists the app's whole set. See `users.md` for the keys and
+  with a 400 that lists the app's whole set. An entry naming an account
+  that already exists (`admin`, a roster user) adds the roles to that
+  account instead of creating one: the one way to give the site
+  administrator a non-manager role in a scratch context, after which
+  their manager role can be ended on their own edit page (U14 claim
+  check K1, 2026-09-16). See `users.md` for the keys and
   their traps. A scratch context's reviewer is created here too: the seeded
   reviewers are not enrolled on a scratch context, so they are absent from
   its Add Reviewer search and refused the wizard.
@@ -306,6 +311,11 @@ Keys:
   read the context's `enablePublicComments` (the API does not either):
   seeded comments on a comments-off context exist and list on the Comments
   page, which is the "switched off with comments kept" state.
+  A batch seeded in one call is created within the same second and the
+  Comments page (newest first) lists it in no fixed order, and past
+  "Items per page" rows the older ones land on page 2: seed a comment a
+  test must find by row in its own later call, or open it by its
+  address `?commentId=N` (U14 claim check K3, 2026-09-16).
 
 App-specific keys:
 
@@ -482,7 +492,10 @@ write into the same inbox. The rules below follow from that.
 - **Pair every absence claim with a positive control.** Wait for a message
   you expect to arrive the same way, then assert that the target message did
   not. The control also bounds the wait, so the test never waits on
-  silence. `expectNone` does this for you.
+  silence. `expectNone` does this for you. The inbox-wide message count is
+  no evidence of silence: at Mailpit's 500-message cap it never moves,
+  so only a recipient-scoped read with a sent control proves that nothing
+  went out (U14 claim check K4, 2026-09-16).
 
 Note on the word "tag": everywhere else in these docs it means the seed tag
 from `patterns.md`. Mailpit tags are a different thing and are not used.

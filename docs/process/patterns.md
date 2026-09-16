@@ -36,8 +36,12 @@ Each of these has bitten at least once.
    hook: `#{name}-button` (`#review-button`, `#setup-button`).
 2. **Nested tab groups.** The top-level *Setup* tab and Appearance → Setup are
    different tabs. Reach the outer one via `#setup-button` and the inner one
-   via the visible-tab role. The sidebar's "Settings" group is collapsed, and
-   its entries are not in the DOM until the group is opened.
+   via the visible-tab role. The sidebar ("Site Navigation") is a PrimeVue
+   panelmenu: every group's entries are in the DOM, the closed groups'
+   regions `display:none`; only the open group header carries
+   `aria-expanded`, the others carry none, so read a group by its header's
+   `aria-controls` region and open it by pressing the header (U14 claim
+   check K1, 2026-09-16).
 3. **Headlessui menus (More Actions).** Items are `role="menuitem"`, and the
    menu portals to the document root. Scope to `page`, not to the row.
 4. **Side modals.** Scope via `[data-cy="active-modal"]`. When modals stack,
@@ -96,7 +100,11 @@ Each of these has bitten at least once.
     settings save shows only that inline status for about five seconds and
     no page notice; a refusal shows the page bar "The form was not saved
     because…", and its field errors carry class `pkpFieldError` (a
-    `[class*=error]` sweep misses them).
+    `[class*=error]` sweep misses them). One exception: Settings › Website
+    › Content › "Comments" shows "Saving" and then reloads the whole
+    Website Settings page onto Appearance › Theme, and "Saved" never
+    appears; wait for the reload, not the status (U14 claim check K1,
+    2026-09-16).
 15. **`getByRole` name strings are substring matches.** `{name: 'View'}`
     matches "Assign Re**view**ers". Use `exact: true` or an anchored regex for
     short common words. The wizard rail is the standing trap: a "wait until
