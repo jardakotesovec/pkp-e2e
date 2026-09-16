@@ -498,7 +498,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(screen.saveButton(dialog)).toBeEnabled();
         await screen.saveButton(dialog).click();
         await expect(screen.errorSummary(dialog)).toBeVisible({timeout: 30_000});
-        await expect(screen.jumpLink(dialog, 'Email address')).toBeVisible();
+        await expect(screen.jumpLink(dialog, /Email( address)?/)).toBeVisible();
         await expect(screen.jumpLink(dialog, 'Homepage URL')).toBeVisible();
         await expect(dialog).toBeVisible();
         await expect(screen.rowsBehindWindow()).toHaveCount(1);

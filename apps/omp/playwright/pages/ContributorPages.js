@@ -257,9 +257,15 @@ exports.ContributorsScreen = class ContributorsScreen {
         return dialog.getByText(/Please correct (one|\d+) errors?\./);
     }
 
-    /** The foot's "Go to {field}: …" jump link naming a refused field. */
+    /**
+     * The foot's "Go to {field}: …" jump link naming a refused field. The
+     * label is a string or a RegExp source (the Email field reads "Email"
+     * on one install and "Email address" on another, since pkp-lib
+     * defines `user.email` in both common.po and user.po).
+     */
     jumpLink(dialog, fieldLabel) {
-        return dialog.getByText(new RegExp(`^Go to ${fieldLabel}:`));
+        const label = fieldLabel instanceof RegExp ? fieldLabel.source : fieldLabel;
+        return dialog.getByText(new RegExp(`^Go to ${label}:`));
     }
 
     /** The "Jump to next error" control the refused form offers. */

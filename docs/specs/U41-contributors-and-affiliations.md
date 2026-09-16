@@ -75,7 +75,7 @@ once no error is left. <sup>c</sup> <sup>n</sup>
 | **Family Name** | No | Text, multilingual. Person only. |
 | **Preferred Public Name** | No | Text, multilingual. Person only. Guidance: "Please provide the full name as the author should be identified on the published work. Example: Dr. Alan P. Mwandenga" |
 | **Organization Name** | Yes (Organization) | Text, multilingual. Organization only. |
-| **Email** | Yes | Text; must be an email address. Not enforced for an Anonymous contributor, despite the marker ([A18](#a18)). |
+| **Email** | Yes | Text; must be an email address. Not enforced for an Anonymous contributor, despite the marker ([A18](#a18)). The label reads "Email" on some installs and "Email address" on others ⚠ [A19](#a19). |
 | **Country** | Yes | Drop-down of countries. The submitting author's auto-created contributor can arrive with no country. Every later edit of that contributor is then refused until one is chosen ⚠ [A16](#a16). Not enforced for an Anonymous contributor ([A18](#a18)). |
 | **ROR ID** | No | Organization only. A plain text box ("Enter organization's ROR ID."), separate from the Affiliations field below. Anything typed is accepted without a shape check ⚠ [A4](#a4). |
 | **Homepage URL** | No | Must be a web address. |
@@ -748,6 +748,8 @@ Left out of the scenarios above, by reason:
     publication's languages; Fields)
   - A18 (an Anonymous save with Email and Country empty accepted;
     Fields)
+  - A19 (the email field labeled "Email" or "Email address" by the
+    install; Fields)
   - OPS2 (the Competing Interests label rendering raw on a preprint
     server; Fields)
 - **No seed**:
@@ -807,6 +809,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A13](#a13) | A contributor role's name saves with a language left empty, despite the required marker | ❓ | minor | — |
 | [A17](#a17) | The typed affiliation's "{count} of {total} languages" total may follow the publication's languages, not the journal's | ❓ | minor | — |
 | [A18](#a18) | An Anonymous contributor's Email and Country are marked "* Required" but save empty | ❓ | minor | — |
+| [A19](#a19) | The contributor form's email field is labeled "Email" on one install and "Email address" on another, and the error summary's "Go to …:" link follows the label | ❓ | minor | — |
 | [OMP1](#omp1) | A book with five or more contributors compacts to bare name-and-affiliation lines | ✅ | user-visible | — |
 | [OMP2](#omp2) | An Edited Volume's book page credits volume editors instead of the contributor list | ✅ | user-visible | — |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's contributors | ✅ | user-visible | — |
@@ -1026,6 +1029,20 @@ contributor, or their required markers dropped? Lean: drop the markers.
 An entry with no identity of its own plausibly has no contact details,
 and nothing downstream is observed to need them.
 Basis: probe. <sup>f-a18</sup>
+
+<a id="a19"></a>
+**A19 — The email field's label differs between installs** · ❓ · minor.
+The contributor form's email field is labeled "Email" on one install and
+"Email address" on another, with no setting behind the difference. The
+refused form's error summary follows suit: "Go to Email: This is not a
+valid email address." on the one, "Go to Email address: This is not a
+valid email address." on the other. Seen on a press; the form is shared,
+so a journal and a preprint server are expected to split the same way.
+This spec names the field "Email", the reading both labels contain.
+Question: which label should the form carry, "Email" or "Email address"?
+Lean: a wording call either way; the defect is that the install, not the
+product, decides.
+Since: 2023-02-16 (3½ years) · Basis: test run. <sup>f-a19</sup>
 
 ### OMP
 
@@ -1838,6 +1855,26 @@ only a role ticked, the save posted and returned 200, the stored
 record carrying `"email":null,"country":null` and
 `fullName: "Anonymous"`. The throwaway record deleted normally through
 the row's Delete dialog.
+
+<a id="fn-f-a19"></a>
+**f-a19 — A19 evidence.** Seen 2026-09-16 on two OMP installs at the
+same tip. CI's fresh box (pkp-e2e `main` run 35080349964, job "omp /
+e2e (omp)"): scenario 1's test, then asserting the literal "Email
+address", went red twice at the "Go to Email address:" read; the run's
+aria snapshot shows the textbox "Email * Required" and the summary's
+"Go to Email: This is not a valid email address." (`.reports/U41/
+ci-omp-artifacts/…/error-context.md`, lines 57–60 and 372–378). The
+VM's green runs of the same tip (`.reports/U41/test-omp-green.log`,
+`final-run-omp.log`) passed that literal assertion, so its form read
+"Email address" and "Go to Email address: …". Mechanism: pkp-lib
+defines the locale key `user.email` twice — `locale/en/common.po` line
+2029 "Email address" and `locale/en/user.po` line 168 "Email" — and
+`classes/components/forms/publication/ContributorForm.php` line 112
+labels the field `__('user.email')`, so whichever file the install
+loads last supplies the string. The duplicate dates from the .po merge
+of 2023-02-16 (pkp-lib `4ad3d52ba2`, pkp/pkp-lib#8598). Not read on
+OJS or OPS. The test now reads the label as `/Email( address)?/`
+(`.reports/U41/test-omp-fix-green.log`).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP
