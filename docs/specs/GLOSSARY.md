@@ -280,7 +280,10 @@ The long form of the legend. Each spec's Conventions line carries the three symb
 - **Findings register.** The spec's single home for everything that deviates
   or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
   ruling · ✅ an intended difference. **Impact** is one plain word
-  (user-visible / minor / invisible / latent).
+  (user-visible / minor / invisible / latent). A ✅ entry whose impact
+  reads *retired* is a former 🐞 or ❓ that was fixed upstream or
+  overturned; its one line says why and when, and any verdict quoted
+  under it is the record of the earlier ruling.
 - **Coverage.** The canonical scenarios are what the automated suites
   check: a scenario's bold leads name what it opens, its badge which apps
   run it. The Coverage section lists what they leave out and why: a

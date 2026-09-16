@@ -18,6 +18,7 @@
  */
 const {expect} = require('../support/fixtures.js');
 const {topModal} = require('./ReviewStagePages.js');
+const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
 
 /** The Reviewers panel of a workflow modal. */
 function reviewerPanel(modal) {
@@ -341,15 +342,30 @@ async function openReadReview(page, modal, reviewerName) {
  * "Reviewer rating saved" toast is client-emitted (no shared server queue).
  */
 async function rateReview(page, readModal, stars) {
+    const radio = readModal.getByRole('radio', {name: `${stars} out of 5 stars`});
+    // Under load the legacy window's form is still re-rendering when the
+    // click lands and the radio stays unchecked ("Clicking the checkbox did
+    // not change its state"; ci-triage "Review Details window's star-rating
+    // radio not registering the click under load"): wait for the window's
+    // jQuery to go idle, then press and re-check the radio's state in a
+    // bounded retry, at most three presses.
+    await waitForJQueryIdle(page);
     const saved = page.waitForResponse(
         (r) =>
             r.url().includes('/reviewAssignments/') &&
             !r.url().includes('/consider') &&
             r.request().method() === 'POST'
     );
-    await readModal
-        .getByRole('radio', {name: `${stars} out of 5 stars`})
-        .check();
+    for (let attempt = 1; ; attempt++) {
+        try {
+            await radio.check({timeout: 10_000});
+            break;
+        } catch (error) {
+            if (attempt >= 3 || !/did not change its state/.test(String(error.message))) throw error;
+            await waitForJQueryIdle(page);
+        }
+    }
+    await expect(radio).toBeChecked();
     await saved;
     await expect(page.getByText('Reviewer rating saved').first()).toBeVisible({
         timeout: 20_000,

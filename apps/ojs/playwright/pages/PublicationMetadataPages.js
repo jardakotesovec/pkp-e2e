@@ -804,22 +804,40 @@ exports.PublicationScreen = class PublicationScreen {
         // the box to hold the template, then replace it and read it back.
         // A closed Notify window leaves its editor registered in TinyMCE,
         // so the box is the one inside the form that is on screen now.
-        const editorId = await this.page.waitForFunction(
-            () => {
-                const form = document.querySelector('form#notifyForm');
-                const editor = (window.tinymce?.get() || []).find(
-                    (e) =>
-                        /^message/.test(e.id) &&
-                        e.initialized &&
-                        form?.contains(e.getElement()) &&
-                        e.getContent().trim() !== ''
+        // Under load the box sometimes keeps its one empty paragraph after
+        // the fetch answered (ci-triage "The Notify window's template body
+        // never landing in the editor under load"), so when the wait runs
+        // out once, the template's change handler is fired again, its fetch
+        // awaited, and the wait repeated: a content-verified bounded retry.
+        const templateInBox = () => {
+            const form = document.querySelector('form#notifyForm');
+            const editor = (window.tinymce?.get() || []).find(
+                (e) =>
+                    /^message/.test(e.id) &&
+                    e.initialized &&
+                    form?.contains(e.getElement()) &&
+                    e.getContent().trim() !== ''
+            );
+            return editor ? editor.id : null;
+        };
+        let id = null;
+        for (let attempt = 1; id === null; attempt++) {
+            try {
+                const editorId = await this.page.waitForFunction(templateInBox, undefined, {
+                    timeout: attempt === 1 ? 15_000 : 30_000,
+                });
+                id = await editorId.jsonValue();
+            } catch (error) {
+                if (attempt >= 2) throw error;
+                const refetched = this.page.waitForResponse(
+                    (r) => /fetch-template-body/.test(r.url()) && r.ok(),
+                    {timeout: 30_000}
                 );
-                return editor ? editor.id : null;
-            },
-            undefined,
-            {timeout: 30_000}
-        );
-        const id = await editorId.jsonValue();
+                await form.locator('select[name="template"]').dispatchEvent('change');
+                await refetched;
+                await waitForJQueryIdle(this.page);
+            }
+        }
         await this.page.evaluate(
             ([editor, value]) => {
                 const box = window.tinymce.get(editor);

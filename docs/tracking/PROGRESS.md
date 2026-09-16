@@ -10,9 +10,8 @@ pending row; feature sessions are launched by the maintainer under the
 RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
 baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
-reported failure. Suite size (RUNBOOK "Budget"; last full runs, 2026-09-15 and 2026-09-16, on the 4-core VM at
-`PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time, the first VM
-runs with the perf round-2 harness and `persistent = On`; the U29 and U40 revisions' finals the same evening at the day's new tips; the U41, U43 and U49 revisions' finals 2026-09-16): OJS 238 tests · 13.1 min · OMP 232 · 11.1 min · OPS 153 · 6.1 min.
+reported failure. Suite size (RUNBOOK "Budget"; last full runs 2026-09-16 on the 4-core VM at
+`PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time, the daily sync's finals at the day's tips): OJS 238 tests · 13.3 min · OMP 232 · 11.1 min · OPS 153 · 6.5 min.
 
 ## Features
 

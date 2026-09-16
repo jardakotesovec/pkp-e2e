@@ -438,9 +438,10 @@ from the menu belongs to its own feature.
     automatically, to the stage it was published from; the panel then lands
     on that stage (Rule 11), and a submission that is in Done yet no longer
     published cannot be met on these screens. Done is a resting place, not
-    a stage files are attached to, yet the discussion attacher's "Select
-    submission stage" list offers it, disabled, on every submission ⚠
-    [A10](#a10). Two header buttons let a
+    a stage files are attached to: in a discussion's "Add" › "Attach Files"
+    › "Attach Workflow Files" step, the "Select submission stage" list ends
+    with Production and never offers Done [A10](#a10). Two header buttons
+    let a
     deciding editor (the roles the Actors table names) move it by hand:
     - 18a. **"Return to Workflow"**, offered while the submission rests in
       Done. It opens a dialog titled "Return to Workflow" reading "Return
@@ -1104,7 +1105,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 |----|-----------------------------|------|--------|--------|
 | [A5](#a5) | A stage address with a missing or unknown stage number shows a blank page instead of a message or a forward | 🐞 | latent | — |
 | [A9](#a9) | An old-shape workflow bookmark to a deleted submission shows a bare "404 Not Found" page instead of a message or a forward | 🐞 | minor | — |
-| [A10](#a10) | The discussion attacher's "Select submission stage" list offers a disabled "Done" for every submission | 🐞 | minor | jarda.kotesovec 2026-09-14 · confirmed 🐞 |
 | [OMP3](#omp3) | A press keeps listing the "Identifiers" page, now empty, after the identifier plugin is turned off | 🐞 | minor | — |
 | [OPS3](#ops3) | A preprint server's draft is labelled "Production" in the header bubble, not "Incomplete" | 🐞 | minor | — |
 | [A1](#a1) | A bookmarked stage address opens the workflow at its usual landing entry, not at the stage the address names | ❓ | minor | — |
@@ -1119,6 +1119,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OPS4](#ops4) | A preprint server's author opening their own draft's panel gets an "Error" dialog over an otherwise open panel | ❓ | minor | — |
 | [OMP1](#omp1) | A press adds an Internal Review stage, a Marketing group and Chapters / Publication Formats pages, none described here | ✅ | — | — |
 | [OPS1](#ops1) | A preprint server has one stage, no assistant with stage access, and an author's view without a "Workflow" group | ✅ | — | — |
+| [A10](#a10) | The discussion attacher's "Select submission stage" list offers a disabled "Done" for every submission | ✅ | retired | jarda.kotesovec 2026-09-14 · confirmed |
 
 ### All apps
 
@@ -1241,20 +1242,6 @@ of Rule 3. Expected: the access-denied page, or the forward to the dashboard
 and its dialog. Only an old bookmark or an old email link reaches it.
 Basis: probe. <sup>[f-a9](#fn-a9)</sup>
 
-<a id="a10"></a>
-**A10 — A disabled "Done" in the "Select submission stage" list** · 🐞 · minor.
-An editor attaching workflow files to a discussion ("Add" › "Attach
-Files" › "Attach Workflow Files") finds the "Select submission stage"
-list offering Submission, Review, Copyediting, Production and a greyed-out
-"Done", on every submission, whatever stage it rests in. Done is no
-workflow stage a file can belong to (footnote m); before 2026-09-08 the
-list ended with Production. Expected: the four workflow stages only.
-Since: 2026-09-08 (pkp/pkp-lib#13273), kept by pkp/pkp-lib#13312 · Basis: probe. <sup>[f-a10](#fn-a10)</sup>
-
-> **Reviewed — jarda.kotesovec, 2026-09-14**: confirmed 🐞. Ruling: listing
-> Done in the "Select submission stage" list is a bug, to be fixed
-> upstream; the entry stays open until the list ends with Production.
-
 ### OMP
 
 <a id="omp1"></a>
@@ -1346,6 +1333,15 @@ or let it open without the error; the half-open panel is the worst of the
 three.
 Basis: probe. <sup>[f-ops4](#fn-ops4)</sup>
 
+### Retired
+
+<a id="a10"></a>
+**A10 — A disabled "Done" in the "Select submission stage" list** · ✅ · retired. Fixed upstream (pkp/ui-library#985, 2026-09-15), verified 2026-09-16 on a reset OJS: the "Select submission stage" list ends with Production, nothing disabled (Rule 18). <sup>[f-a10](#fn-a10)</sup>
+
+> **Reviewed — jarda.kotesovec, 2026-09-14**: confirmed 🐞. Ruling: listing
+> Done in the "Select submission stage" list is a bug, to be fixed
+> upstream; the entry stays open until the list ends with Production.
+
 ---
 
 <a id="footnotes"></a>
@@ -1433,7 +1429,7 @@ Basis: probe. <sup>[f-ops4](#fn-ops4)</sup>
 **f-a9** — `PKPWorkflowHandler::access()` and `index()` run `SubmissionRequiredPolicy` before any redirect; for an id that no longer exists the policy's failure is a 404 with no template. Live-probed 2026-09-02 (OJS, OMP, OPS, `manager.maya`, after confirming "Delete" on a declined seed): `workflow/access/{id}` → 302 to the `/en/` form → HTTP 404, page body exactly "404 Not Found" (`h1` "404 Not Found"), no journal chrome, no forward; the dashboard address for the same id gave the panel shell with "Error" / "Invalid submission." / "OK" (note c).
 
 <a id="fn-a10"></a>
-**f-a10** — The list is built from the submission's `stages[]` (the "Attach Workflow Files" step's stage select, `useFileManagerActions` / the legacy `WorkflowStagesGridHandler` chain reading `submission.stages`), and since pkp/pkp-lib#13273 (2026-09-08) `submission/maps/Schema::getPropertyStages()` emits a Done entry for every submission: first from the apps' `getApplicationStages()`, and since pkp/pkp-lib#13312 (`716419c770`, 2026-09-12: the apps' lists lose Done again but the map iterates `PKPApplication::getValidStages()`, app stages plus Done) from the map itself, so the fix for issue #13109's Roles-grid and statistics symptoms left this list as it was. Live 2026-09-09 and again 2026-09-14 on a reset OJS at ojs `f0cde27fda` / lib/pkp `1967e76f38` (the kept reproduction `shared/playwright/checks/sync/pkp-lib-13109/regressions.js`, `.reports/sync/s14-13109/s5-*`): a submission in the Submission stage answered `stages` with five entries, the fifth `{id: 6, label: "Done", isActiveStage: false}`, and the select's options read Submission, Review, Copyediting, Production and "Done" with `disabled`. Before 2026-09-08 the map added Done only for a submission resting in Done (the synthetic block, still present). OMP and OPS share the map and the component; not re-driven. Reported to the team 2026-09-08/09 with the 13109 regression; the 2026-09-14 ruling above settles the remaining surface.
+**f-a10** — The list is built from the submission's `stages[]` (the "Attach Workflow Files" step's stage select, `useFileManagerActions` / the legacy `WorkflowStagesGridHandler` chain reading `submission.stages`), and since pkp/pkp-lib#13273 (2026-09-08) `submission/maps/Schema::getPropertyStages()` emits a Done entry for every submission: first from the apps' `getApplicationStages()`, and since pkp/pkp-lib#13312 (`716419c770`, 2026-09-12: the apps' lists lose Done again but the map iterates `PKPApplication::getValidStages()`, app stages plus Done) from the map itself, so the fix for issue #13109's Roles-grid and statistics symptoms left this list as it was. Live 2026-09-09 and again 2026-09-14 on a reset OJS at ojs `f0cde27fda` / lib/pkp `1967e76f38` (the kept reproduction `shared/playwright/checks/sync/pkp-lib-13109/regressions.js`, `.reports/sync/s14-13109/s5-*`): a submission in the Submission stage answered `stages` with five entries, the fifth `{id: 6, label: "Done", isActiveStage: false}`, and the select's options read Submission, Review, Copyediting, Production and "Done" with `disabled`. Before 2026-09-08 the map added Done only for a submission resting in Done (the synthetic block, still present). OMP and OPS share the map and the component; not re-driven. Reported to the team 2026-09-08/09 with the 13109 regression; the 2026-09-14 ruling above settles the remaining surface. Fixed upstream by pkp/ui-library#985 (`b3ee741f`, merged 2026-09-15, Blesilda Biazon): `useSubmission().getWorkflowStages()` filters the submission's `stages[]` to the editorial workflow stages (Done excluded, mirroring `PKPApplication::getNonWorkflowStages()`) and `useFileAttacherWorkflowStage.js` builds the "Select submission stage" options from it; the API's `stages` property keeps its Done entry (by design since pkp/pkp-lib#13312), only the list changed. Verified 2026-09-16 on a reset OJS at ojs `ae597ff9d9` / lib/pkp `b262d27b81` / ui-library `977e460c` with the same kept reproduction (`.reports/sync/s16-13109/s5-stage-options-ojs.json`): the select's options read Submission, Review, Copyediting, Production, none disabled, and `GET submissions/{id}` still answers five `stages` entries, the fifth `{id: 6, label: "Done", isActiveStage: false}`. OMP and OPS share the component; not re-driven. Retired 2026-09-16.
 
 <a id="fn-omp2"></a>
 **f-omp2** — Note h: `useWorkflowNavigationConfigOMP.js::getPublicationItemsEditorial()` pushes `media` before the settings-gated pages and outside the `permissions.canAccessProduction` block; `…OJS.js` and `…OPS.js` push it inside that block. Live-probed 2026-09-02: `assistant.rita` as Funding Coordinator on a monograph in External Review Round 1 saw "Title & Abstract", "Contributors", "Chapters", "Metadata", "Publication Formats", "Media", "References", "Funding" and no "Catalog Entry" or "Permissions & Disclosure"; the same role on a journal article in Review Round 1 saw "Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML" and no "Media".

@@ -34,8 +34,7 @@ the fix lands.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
-| pkp-lib `716419c770` (pkp/pkp-lib#13312, issue #13109; the surface first opened by #13273 `f4db6d22c4`) | The discussion attacher's "Select submission stage" list ("Add" › "Attach Files" › "Attach Workflow Files") offers a disabled "Done" on every submission, because `submission/maps/Schema::getPropertyStages()` now iterates `getValidStages()` (app stages plus Done) and every submission's `stages` carries a Done entry | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-13109/regressions.js` (`s5-stage-options`, `s2-api`); fixed when the select lists four stages and `stages` has no Done entry for a submission outside Done | thread 2026-09-08 (with the 13109 regression); the two other surfaces fixed by #13312 on 2026-09-12; this one ruled a bug by @jarda.kotesovec in the 2026-09-14 session thread | Register: U24 A10 (with the ruling). Cause: the map's five-entry `stages` is what #13312 chose ("Fix valid workflow stages retrieval"), so the fix belongs either in the map (Done only for a submission resting in Done, as the synthetic block already does) or in the attacher's filter. Re-run the kept script each sync; delete the row when the select ends with Production. Re-run 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-13109/`): the select still ends with a disabled "Done", the stats table and the Roles grid still four stages. |
-| pkp/pkp-lib#13286 (tracking issue; introduced by pkp-lib `74a8d58571`, pkp/pkp-lib#12352 for issue #12347; fix PR #13288 open) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`; still reproduces 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-12352/`: `status:false`, fileId 2 `article-rev.pdf` current). Delete the row when #13288 lands. |
+| pkp/pkp-lib#13286 (tracking issue; introduced by pkp-lib `74a8d58571`, pkp/pkp-lib#12352 for issue #12347; fix PR #13288 open) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`; still reproduces 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-12352/`: `status:false`, fileId 2 `article-rev.pdf` current); still reproduces 2026-09-16 at ojs `ae597ff9d9` / pkp-lib `b262d27b81` on a reset database (`.reports/sync/s16-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`. Delete the row when #13288 lands. |
 
 ## Flake watch — known non-deterministic failure classes
 
@@ -86,6 +85,9 @@ trips.
   switch mounts a fresh form. Once the sync baselines carry it, the U40
   `blur()` before Save and app-changes row 9 (c) can be revisited.
   The U40 OMP file keeps traces on failure since 2026-09-15.
+  **Baselines carry `70b0892042` since 2026-09-16** (sync); the U40 OMP
+  `blur()` stays (a harmless commit), app-changes row 9 (c) is closed on
+  the tips, (a) and (b) stay open.
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
   runs and passes alone. Last incidents: S1 red in two consecutive local
@@ -192,7 +194,7 @@ trips.
   wait for the "Saved for Later" heading (the error context shows the
   step still current and the button still offered), one of two reds in
   216. `SubmissionWizardPage.saveForLater()` presses once; the next
-  step is the same `pressUntil()` shape behind it. Green alone in 14.1 s right after (`.reports/sync/s15-ojs-reds-alone2.log`) and in the traced third final (229 passed).
+  step is the same `pressUntil()` shape behind it. Green alone in 14.1 s right after (`.reports/sync/s15-ojs-reds-alone2.log`) and in the traced third final (229 passed). **Baselines carry the merge since 2026-09-16** (sync: ojs `ae597ff9d9`, omp `0ec98a508`, ops `9ce633ee1d` with pkp-lib `b262d27b81` and ui-library `977e460c`, the per-call reduced-motion follow-up); `pressUntil()` stays as a content-verified bounded retry, which presses again only when a press was lost, so the watch condition above is live and a lost press shows as the retry firing.
 - **A wizard rich-text fill lost to a re-render under load** (U21 S3,
   OPS, local). The Autosave bullet types "Autosave check" into the Title
   box and reads it back; in the 2026-09-12 U21 revision's first OPS final
@@ -203,28 +205,6 @@ trips.
   Finals now run one app at a time. **Watch condition**: a red with one
   suite running or at CI's four workers; then anchor the fill on the
   editor's settled state before typing.
-- **A rich-text read thrown inside the editor under load** (U40 S2, OPS,
-  three times; helper fixed 2026-09-16). `PublicationScreen.readRichText()` (`apps/ops/playwright/pages/PublicationPages.js:164`)
-  evaluates the editor's `getContent()` and it threw `TypeError: Cannot
-  read properties of undefined (reading 'serialize')` from inside TinyMCE
-  in the U41 revision session's first OPS final at four workers on a
-  reset database 2026-09-16 (`.reports/U41/final-run-ops-attempt1.log`,
-  the one red of 153, the 10 serial tests skipped behind it): the editor
-  answered the read before its serializer existed. Green in the next
-  full run on a reset database (`.reports/U41/final-run-ops.log`, 153 in
-  5.7 min). Second sighting 2026-09-16 in the U49 revision session's first
-  OPS final on a reset database at four workers
-  (`.reports/U49/final-run-ops-attempt1.log`, the one red of 143 with
-  every U49 test green, the same `serialize` TypeError); green alone in
-  22 s, then red again the same way in that session's second OPS final
-  on a reset database (`final-run-ops-attempt2.log`, the one red of
-  143). **Watch condition met, fix applied 2026-09-16** (U49 revision
-  session): `readRichText()` now waits for the editor's `initialized`
-  flag and retries the read in a bounded loop (twenty tries, 500 ms
-  apart) before giving up; U40 S2 green alone with the fix in 37 s
-  (`.reports/U49/rerun-ops-u40s2-fixed.log`) and the session's third OPS
-  final green with it (153 in 6.1 min, `final-run-ops.log`). Close this
-  entry once a full OPS run at four workers passes it on CI.
 - **The Notify window's template body never landing in the editor under
   load** (U41 S3, OJS, once). `PublicationScreen.notifyParticipant()`
   (`apps/ojs/playwright/pages/PublicationMetadataPages.js`, U40's helper,
@@ -244,10 +224,14 @@ trips.
   session's second OJS final on a reset database, from U41 S1's mail
   control through the same helper (`.reports/U43/final-run-ojs.log`, the
   one red of 236, both times green alone right after,
-  `rerun-ojs-s3.log` and `rerun-ojs-s1.log`). **Watch condition met**:
-  the helper re-selects the template once when the box stays empty (a
-  content-verified bounded retry, the pattern above); the maintenance
-  session applies it.
+  `rerun-ojs-s3.log` and `rerun-ojs-s1.log`). **Watch condition met, hardened
+  2026-09-16** (sync session): `notifyParticipant()` waits 15 s for the
+  template in the box and, when that runs out, fires the template
+  select's change handler again, awaits its fetch and waits 30 s more (a
+  content-verified bounded retry, the pattern above); U41 S1 and S3 green
+  alone with it (`.reports/sync/s16-alone-ojs.log`, 11.0 s and 7.9 s).
+  **Watch condition**: the hardened helper reds again with its retry
+  exhausted.
 - **Contributor reorder under load** (U41 S2, OPS; the OJS twin shares the
   code shape). The Cancel leg's "Increase position" press, issued right
   after "Order" while the list re-rendered into ordering mode, left the
@@ -382,8 +366,18 @@ trips.
   `.reports/U41/final-run-omp.log`: `reader.rosa` again, the one red of
   218, the 11 serial tests skipped behind it; green alone in 14.3 s,
   `.reports/U41/rerun-omp-login.log`, the serial project green alone
-  right after, `.reports/U41/rerun-omp-serial.log`). Next step: the
-  cookie-jar read above, for the maintenance session, first thing.
+  right after, `.reports/U41/rerun-omp-serial.log`). **Instrumented 2026-09-16** (sync session): when the probe lands on
+  the login page the smoke writes one `login smoke:` line to the run log
+  with the probe's status and URL, the page's URL and the context's
+  cookie jar (names and value lengths), attaches it to the test, and
+  probes once more a second later; a second miss still reds the test, so
+  the next sighting carries the jar read and says whether the session was
+  merely late. Read at the tips: the form sign-in regenerates the session
+  id (`PKPSessionGuard::updateSession()`, `migrate(true)`), and the
+  harness sets no `PHP_CLI_SERVER_WORKERS`, so each worker's `php -S`
+  serves requests one after another and a cross-process session-write
+  lag is not the mechanism. **Watch condition**: the log line at the next
+  sighting.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the
@@ -521,9 +515,16 @@ trips.
   `pw-out-final-omp/U27-reviewer-assignment-Re-ee493-…/error-context.md`);
   green alone in 33 s (`.reports/U49/rerun-omp-u27s9.log`). The same
   symptom as the U27 S6 checkbox entry above, on a legacy window control.
-  **Watch condition**: a second incident; then wait for the window's
-  jQuery idle before the click and re-check the radio's state in a
-  bounded retry.
+  **Tripped 2026-09-16** (sync session, the OMP final at four workers on a
+  reset database at the day's tips, `.reports/sync/final-run-omp.log`:
+  the same "Clicking the checkbox did not change its state" on the "5 out
+  of 5 stars" radio, the one red of 221); **hardened the same day**:
+  `rateReview()` waits for the window's jQuery to go idle, then presses
+  and re-checks the radio's state in a bounded retry (at most three
+  presses) and asserts it checked before the save is awaited; green alone
+  twice (`.reports/sync/s16-rerun-omp-u27s9-{1,2}.log`, 48.8 s and
+  47.7 s). **Watch condition**: the hardened press reds again with its
+  retry exhausted.
 - **New reviewer missing from the Reviewers list under load** (U01 S6,
   OMP, once). After "Create New Reviewer" in the Add Reviewer window, the
   review stage's Reviewers panel did not list the throwaway reviewer's
