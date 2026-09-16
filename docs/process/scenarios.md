@@ -154,6 +154,15 @@ Keys:
   store no row, and a context saved at `off` reopens the Emails screen
   with no "Submission Confirmation" option selected, as it does after a
   by-hand save (U21's register).
+- `postedAcknowledgement` (OPS only, boolean): the "Preprint Posted"
+  option of Settings › Workflow › Emails, `true` "Send an email to all
+  authors." (the install default) or `false` "Do not send an email.",
+  saved as that form saves (the OPS `EmailSetupForm`'s own field, stored
+  as `1` / `0`). It is what `SendPostedAcknowledgement` reads when a
+  preprint is posted, so at `false` the "Preprint Posted Acknowledgement"
+  is not sent while the version notice still is (U49 scenario 15). A
+  non-boolean is a 400; OJS and OMP answer 400 on the key, as on any key
+  their context schema lacks.
 
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,

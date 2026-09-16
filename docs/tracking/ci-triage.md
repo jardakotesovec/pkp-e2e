@@ -204,7 +204,7 @@ trips.
   suite running or at CI's four workers; then anchor the fill on the
   editor's settled state before typing.
 - **A rich-text read thrown inside the editor under load** (U40 S2, OPS,
-  once). `PublicationScreen.readRichText()` (`apps/ops/playwright/pages/PublicationPages.js:164`)
+  three times; helper fixed 2026-09-16). `PublicationScreen.readRichText()` (`apps/ops/playwright/pages/PublicationPages.js:164`)
   evaluates the editor's `getContent()` and it threw `TypeError: Cannot
   read properties of undefined (reading 'serialize')` from inside TinyMCE
   in the U41 revision session's first OPS final at four workers on a
@@ -212,9 +212,19 @@ trips.
   the one red of 153, the 10 serial tests skipped behind it): the editor
   answered the read before its serializer existed. Green in the next
   full run on a reset database (`.reports/U41/final-run-ops.log`, 153 in
-  5.7 min). **Watch condition**: a second sighting; then `readRichText()`
-  waits for the editor's settled state (its `initialized` flag or a
-  bounded retry of the read) before evaluating.
+  5.7 min). Second sighting 2026-09-16 in the U49 revision session's first
+  OPS final on a reset database at four workers
+  (`.reports/U49/final-run-ops-attempt1.log`, the one red of 143 with
+  every U49 test green, the same `serialize` TypeError); green alone in
+  22 s, then red again the same way in that session's second OPS final
+  on a reset database (`final-run-ops-attempt2.log`, the one red of
+  143). **Watch condition met, fix applied 2026-09-16** (U49 revision
+  session): `readRichText()` now waits for the editor's `initialized`
+  flag and retries the read in a bounded loop (twenty tries, 500 ms
+  apart) before giving up; U40 S2 green alone with the fix in 37 s
+  (`.reports/U49/rerun-ops-u40s2-fixed.log`) and the session's third OPS
+  final green with it (153 in 6.1 min, `final-run-ops.log`). Close this
+  entry once a full OPS run at four workers passes it on CI.
 - **The Notify window's template body never landing in the editor under
   load** (U41 S3, OJS, once). `PublicationScreen.notifyParticipant()`
   (`apps/ojs/playwright/pages/PublicationMetadataPages.js`, U40's helper,
@@ -500,6 +510,20 @@ trips.
   green alone in 21 s on the same used database. **Watch condition**: a
   second incident; then wait for the grid's reload to settle (the
   `waitForJQueryIdle` helper) between the unticks and the re-tick.
+- **Review Details window's star-rating radio not registering the click
+  under load** (U27 S9, OMP, once). `ReviewerAssignmentPages.rateReview()`
+  (`apps/omp/playwright/pages/ReviewerAssignmentPages.js:352`) `check()`s
+  the "5 out of 5 stars" radio in the "Review Details:" window and the
+  readback found it unchanged, "Clicking the checkbox did not change its
+  state" (2026-09-16, the U49 revision session's first OMP final at four
+  workers on a reset database, `.reports/U49/final-run-omp-attempt1.log`,
+  the one red of 221 with every U49 test green; error context
+  `pw-out-final-omp/U27-reviewer-assignment-Re-ee493-…/error-context.md`);
+  green alone in 33 s (`.reports/U49/rerun-omp-u27s9.log`). The same
+  symptom as the U27 S6 checkbox entry above, on a legacy window control.
+  **Watch condition**: a second incident; then wait for the window's
+  jQuery idle before the click and re-check the radio's state in a
+  bounded retry.
 - **New reviewer missing from the Reviewers list under load** (U01 S6,
   OMP, once). After "Create New Reviewer" in the Add Reviewer window, the
   review stage's Reviewers panel did not list the throwaway reviewer's

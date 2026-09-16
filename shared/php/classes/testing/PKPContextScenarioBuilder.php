@@ -70,6 +70,10 @@
  *   copySubmissionAckPrimaryContact (bool), copySubmissionAckAddress
  *   (string, comma-separated) — Settings › Workflow › Emails "Submission
  *   Confirmation" (U21; PKPEmailSetupForm).
+ * - postedAcknowledgement (bool) — Settings › Workflow › Emails "Preprint
+ *   Posted" (U49; OPS EmailSetupForm::FIELD_POSTED_ACK, read by
+ *   SendPostedAcknowledgement and OPS mail\Repository). Only the OPS
+ *   context schema carries the key, so OJS and OMP answer 400 on it.
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -271,8 +275,9 @@ abstract class PKPContextScenarioBuilder
      * rows their Settings › Workflow forms save (U21): `copyrightNotice`
      * (Submission › Author Guidelines), `metadata` (Submission › Metadata)
      * and the Emails tab's `submissionAcknowledgement`,
-     * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress`. Only
-     * keys the app's context schema carries are accepted.
+     * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress` and, on
+     * the preprint server only, `postedAcknowledgement` (U49). Only keys
+     * the app's context schema carries are accepted.
      *
      * @return array{settings: array, specKeys: array}
      */
@@ -350,6 +355,22 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['copySubmissionAckAddress'] = $value;
             $specKeys['copySubmissionAckAddress'] = 'copySubmissionAckAddress';
+        }
+
+        if ($root->has('postedAcknowledgement')) {
+            // The Emails tab's "Preprint Posted" radio (OPS
+            // EmailSetupForm::FIELD_POSTED_ACK): true "Send an email to all
+            // authors.", false "Do not send an email.". The field exists in
+            // the OPS context schema only; the form posts the radio's value
+            // as a string that the PUT's convertStringsToSchema turns back
+            // into the schema's boolean, and the stored row is 1 / 0.
+            $hasProperty('postedAcknowledgement') || throw new SpecException('postedAcknowledgement', 'postedAcknowledgement is not a setting of this app\'s Emails form (the "Preprint Posted" option exists on OPS only)');
+            $value = $root->get('postedAcknowledgement');
+            if (!is_bool($value)) {
+                throw new SpecException('postedAcknowledgement', 'postedAcknowledgement must be a boolean (true "Send an email to all authors.", false "Do not send an email.")');
+            }
+            $settings['postedAcknowledgement'] = $value;
+            $specKeys['postedAcknowledgement'] = 'postedAcknowledgement';
         }
 
         return ['settings' => $settings, 'specKeys' => $specKeys];

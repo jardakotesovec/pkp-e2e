@@ -36,6 +36,12 @@
  *   discussions panel's form, the mail the suite causes as its Mailpit
  *   positive control), `licenseBlock` (the landing page's "License" block)
  *   and `expectPrecedes` (a DOM-order read for "in that order" claims).
+ * - Added 2026-09-16 (U49's coverage revision): the preprint page's date
+ *   line and "Versions" list (`preprintDateLine`, `preprintVersionsList`;
+ *   templates/frontend/objects/preprint_details.tpl) and
+ *   `switchOffPublishedEmail` (the Author's Profile › Notifications opt-out
+ *   of the "Publication Published" email, saved through the tab's own
+ *   Save).
  *
  * Labels are the live locale strings (ops + lib/pkp locale/en/*.po at the
  * pinned commits); DOM shapes from lib/ui-library WorkflowPublicationForm /
@@ -161,11 +167,28 @@ exports.PublicationScreen = class PublicationScreen {
      * patterns.md). */
     async readRichText(formId, name, locale = null) {
         const id = this.controlId(formId, name, locale);
-        return this.page.evaluate(
-            // @ts-ignore tinymce is the page's global
-            (fieldId) => window.tinymce?.get(fieldId)?.getContent(),
-            id
-        );
+        // Under load the editor can answer this read before its serializer
+        // exists and getContent() throws a TypeError from inside TinyMCE
+        // (ci-triage "A rich-text read thrown inside the editor under
+        // load", U40 S2, three sightings): wait for the editor's
+        // initialized flag and retry the read, bounded. A missing editor
+        // still reads as undefined, as before.
+        let lastError;
+        for (let attempt = 0; attempt < 20; attempt++) {
+            try {
+                return await this.page.evaluate((fieldId) => {
+                    // @ts-ignore tinymce is the page's global
+                    const editor = window.tinymce?.get(fieldId);
+                    if (!editor) return undefined;
+                    if (!editor.initialized) throw new Error('editor not initialized');
+                    return editor.getContent();
+                }, id);
+            } catch (error) {
+                lastError = error;
+                await this.page.waitForTimeout(500);
+            }
+        }
+        throw lastError;
     }
 
     /** The field wrapper element around a control (label, description,
@@ -657,3 +680,63 @@ async function expectPrecedes(first, second) {
 }
 
 exports.expectPrecedes = expectPrecedes;
+
+/**
+ * The preprint page's date block ("Posted {date}"; after a later version
+ * "{date} — Updated on {date}" — `submission.updatedOn`): `.item.published`
+ * of templates/frontend/objects/preprint_details.tpl, rendered only once
+ * the shown version carries a date. Read on a signed-out page.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function preprintDateLine(page) {
+    return page.locator('.item.published');
+}
+
+exports.preprintDateLine = preprintDateLine;
+
+/**
+ * The preprint page's "Versions" list (`.sub_item.versions` inside the
+ * date block): one "{date} ({version})" entry per POSTED version, newest
+ * first; an unposted draft adds nothing to it.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function preprintVersionsList(page) {
+    return page.locator('.sub_item.versions');
+}
+
+exports.preprintVersionsList = preprintVersionsList;
+
+/**
+ * As the signed-in user, switch off the email of Profile › Notifications ›
+ * "Submission Events" row "A new version of your submission, "Title", was
+ * published." and save the tab through its own "Save" (the
+ * `…/profile-tab/save-notification-settings` POST). The row's second box
+ * reads "Do not send me an email for these types of notifications."
+ * (`emailNotificationPublicationPublished`): it arrives UNTICKED and the
+ * opt-out is TICKING it (the form stores the ticked ones as
+ * `blocked_emailed_notification`; live 2026-09-16, the U49 OPS run's
+ * T-ops-1). The task notice is untouched by it (the "Enable these types of
+ * notifications." box stays ticked). Reopens the tab and asserts the box
+ * stayed ticked. Shared users are never brought here (PRINCIPLES A7): a
+ * throwaway account on a scratch server only.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} contextPath
+ */
+async function switchOffPublishedEmail(page, contextPath) {
+    const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
+    const profile = new ProfilePage(page, contextPath);
+    await profile.goto('notifications');
+    const pair = profile.notificationPair('notificationPublicationPublished');
+    await expect(pair.allow).toBeChecked({timeout: 30_000});
+    await expect(pair.email).not.toBeChecked();
+    await pair.email.check();
+    await profile.save();
+    await profile.goto('notifications');
+    await expect(pair.allow).toBeChecked({timeout: 30_000});
+    await expect(pair.email).toBeChecked();
+}
+
+exports.switchOffPublishedEmail = switchOffPublishedEmail;
