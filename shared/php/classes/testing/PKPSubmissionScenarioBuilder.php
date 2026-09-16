@@ -69,6 +69,26 @@
  *   only while the context's reviewerSuggestionEnabled is on, so a seed on
  *   a context with it off is a 400; OPS (no API mount, no step) refuses
  *   the key.
+ * - userComments[] {user*, text*, approved? (default false), reports[]
+ *   {user*, note*}} — reader comments on the published publication and
+ *   their reports (U14): the same UserComment::query()->create() the
+ *   comments API's POST runs (UserCommentController::submit), the same
+ *   Repo::userComment()->addReport() its POST {id}/reports runs, and the
+ *   controller's own notifyModerators() fan-out after each (one
+ *   NOTIFICATION_LEVEL_TASK row per manager and site admin of the context:
+ *   USER_COMMENT_POSTED on the comment, USER_COMMENT_REPORTED on the
+ *   report), invoked on the controller by reflection so the moderator
+ *   roster and the notification rows are the app's own, never mirrored.
+ *   `approved: true` is the moderator's PUT {id}/setApproval written the
+ *   way that action writes it (isApproved, approvedAt now, approvedByUserId
+ *   the acting moderator — the seeding admin, a manager of every scratch
+ *   context). The key needs `published: true` (the comment box exists on a
+ *   published landing page only and the API refuses a publication that is
+ *   not the current one); a report needs an approved comment (only the
+ *   writer sees a pending or hidden one, so the "…" menu offers "Report"
+ *   on approved comments alone) and a reporter other than the writer
+ *   (one's own comment offers no "Report"). Text and note go through the
+ *   form requests' PKPString::stripUnsafeHtml, as posted text does.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -86,6 +106,7 @@ use PKP\context\Context;
 use PKP\controllers\grid\users\reviewer\form\traits\HasReviewDueDate;
 use PKP\core\Registry;
 use PKP\db\DAORegistry;
+use PKP\core\PKPString;
 use PKP\notification\Notification;
 use PKP\security\Role;
 use PKP\submission\action\EditorAction;
@@ -98,6 +119,7 @@ use PKP\validation\ValidatorFactory;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
 use PKP\user\User;
+use PKP\userComment\UserComment;
 use PKP\userGroup\UserGroup;
 
 abstract class PKPSubmissionScenarioBuilder
@@ -283,6 +305,7 @@ abstract class PKPSubmissionScenarioBuilder
         }
 
         $publishOverlayPlan = $this->parsePublishOverlay($context, $root);
+        $commentPlans = $this->parseUserComments($root, $published);
         $root->assertConsumed();
 
         if ($published && !$submitted) {
@@ -298,7 +321,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = $this->forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -337,10 +360,12 @@ abstract class PKPSubmissionScenarioBuilder
         array $publishOverlayPlan,
         ?array $authorPlan = null,
         array $participantPlans = [],
-        array $suggestionPlans = []
+        array $suggestionPlans = [],
+        array $commentPlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
+        $seededComments = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -575,6 +600,16 @@ abstract class PKPSubmissionScenarioBuilder
                 Repo::submission()->updateStatus($submission);
                 Repo::submission()->updateCurrentPublication($submission);
             }
+
+            if ($commentPlans !== []) {
+                $submission = Repo::submission()->get($submissionId);
+                $seededComments = $this->seedUserComments(
+                    $context,
+                    (int) $submission->getData('currentPublicationId'),
+                    $commentPlans,
+                    $editor
+                );
+            }
         } finally {
             Registry::set('user', $previousActingUser);
         }
@@ -597,7 +632,130 @@ abstract class PKPSubmissionScenarioBuilder
             'reviewRounds' => $rounds,
             'reviewAssignments' => $seededAssignments,
             'reviewerSuggestions' => $seededSuggestions,
+            'userComments' => $seededComments,
         ];
+    }
+
+    /**
+     * Read userComments[] (U14): each entry a reader's comment on the
+     * published publication, optionally approved and reported. Parse-phase:
+     * no writes. The refusals follow the screens: no comment without a
+     * published publication (the box exists on a published landing page
+     * only, and AddComment refuses a publication that is not the
+     * submission's current one), no report on a comment that is not
+     * approved (nobody but the writer sees a pending or hidden comment, so
+     * the "…" menu offers "Report" on approved comments alone), no report
+     * by the writer (their own menu offers "Delete Comment" and no
+     * "Report"). Text and note are stripped as the form requests strip the
+     * posted values (AddComment::validated, AddReport::validated).
+     *
+     * @return array<int, array{user: User, text: string, approved: bool, reports: array<int, array{user: User, note: string}>}>
+     */
+    protected function parseUserComments(Spec $root, bool $published): array
+    {
+        if (!$root->has('userComments')) {
+            return [];
+        }
+        if (!$published) {
+            throw new SpecException('userComments', 'userComments needs published: true — the comment box exists on a published item\'s landing page only, and the comments API refuses a publication that is not the submission\'s current published version');
+        }
+        $plans = [];
+        foreach ($root->childList('userComments') as $spec) {
+            $username = (string) $spec->require('user');
+            $user = Repo::user()->getByUsername($username, true);
+            if (!$user) {
+                throw new SpecException("{$spec->path}.user", "Unknown username \"{$username}\"");
+            }
+            $text = $spec->require('text');
+            if (!is_string($text) || trim($text) === '') {
+                throw new SpecException("{$spec->path}.text", 'text must be a non-empty string (the box\'s "Submit" posts its text; the API refuses an empty one)');
+            }
+            $approved = $spec->get('approved', false);
+            if (!is_bool($approved)) {
+                throw new SpecException("{$spec->path}.approved", 'approved must be a boolean (true: approved on the Comments page, false: pending)');
+            }
+            $reports = [];
+            foreach ($spec->childList('reports') as $reportSpec) {
+                if (!$approved) {
+                    throw new SpecException("{$spec->path}.reports", 'reports need approved: true — nobody but the writer sees a pending or hidden comment on the landing page, so the "…" menu offers "Report" on approved comments alone');
+                }
+                $reporterName = (string) $reportSpec->require('user');
+                $reporter = Repo::user()->getByUsername($reporterName, true);
+                if (!$reporter) {
+                    throw new SpecException("{$reportSpec->path}.user", "Unknown username \"{$reporterName}\"");
+                }
+                if ($reporter->getId() === $user->getId()) {
+                    throw new SpecException("{$reportSpec->path}.user", 'a comment\'s own writer is offered no "Report" (their menu holds "Delete Comment" alone), so a self-report cannot be seeded');
+                }
+                $note = $reportSpec->require('note');
+                if (!is_string($note) || trim($note) === '') {
+                    throw new SpecException("{$reportSpec->path}.note", 'note must be a non-empty string (the "Report Comment" dialog\'s reason box; the API refuses an empty one)');
+                }
+                $reports[] = ['user' => $reporter, 'note' => PKPString::stripUnsafeHtml($note)];
+            }
+            $plans[] = [
+                'user' => $user,
+                'text' => PKPString::stripUnsafeHtml($text),
+                'approved' => $approved,
+                'reports' => $reports,
+            ];
+        }
+        return $plans;
+    }
+
+    /**
+     * Write the parsed comments the way the comments API writes them
+     * (UserCommentController): the comment through UserComment::create()
+     * with the writer as its user (submit), the approval as setApproval
+     * writes it (isApproved, approvedAt now, approvedByUserId the acting
+     * moderator), each report through Repo::userComment()->addReport()
+     * (submitReport), and after the comment and after each report the
+     * controller's own notifyModerators() — the task row per manager and
+     * site admin of the context that the Tasks panel lists — invoked by
+     * reflection so the roster query and the createNotification call are
+     * the controller's, not a copy. The request's context is already forced
+     * to the submission's (build()), which is what Repo::userComment() and
+     * notifyModerators() read.
+     *
+     * @return array<int, array{id: int, user: string, approved: bool, reports: int[]}>
+     */
+    protected function seedUserComments(Context $context, int $publicationId, array $plans, User $moderator): array
+    {
+        $controller = new \PKP\API\v1\comments\UserCommentController();
+        $notifyModerators = new \ReflectionMethod($controller, 'notifyModerators');
+        $seeded = [];
+        foreach ($plans as $plan) {
+            $comment = UserComment::query()->create([
+                'userId' => $plan['user']->getId(),
+                'contextId' => $context->getId(),
+                'publicationId' => $publicationId,
+                'commentText' => $plan['text'],
+                'isApproved' => false,
+            ]);
+            $notifyModerators->invoke($controller, $comment->id, Application::ASSOC_TYPE_COMMENT, Notification::NOTIFICATION_TYPE_USER_COMMENT_POSTED);
+
+            if ($plan['approved']) {
+                $comment->isApproved = true;
+                $comment->approvedAt = now();
+                $comment->approvedByUserId = $moderator->getId();
+                $comment->save();
+            }
+
+            $reportIds = [];
+            foreach ($plan['reports'] as $report) {
+                $reportId = Repo::userComment()->addReport($comment, $report['user'], $report['note']);
+                $notifyModerators->invoke($controller, $reportId, Application::ASSOC_TYPE_COMMENT_REPORT, Notification::NOTIFICATION_TYPE_USER_COMMENT_REPORTED);
+                $reportIds[] = $reportId;
+            }
+
+            $seeded[] = [
+                'id' => (int) $comment->id,
+                'user' => $plan['user']->getUsername(),
+                'approved' => $plan['approved'],
+                'reports' => $reportIds,
+            ];
+        }
+        return $seeded;
     }
 
     /**

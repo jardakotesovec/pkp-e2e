@@ -239,6 +239,15 @@ touched.
   here.
 - **Submission wizard** — the author's multi-step submission flow; its
   Contributors step hosts the author-side ORCID request.
+- **Comments page** — the manager's moderation list for public comments,
+  reached from the editorial side menu's Content › Comments (address
+  `management/settings/userComments`): tabs "All", "Approved",
+  "Hidden/Needs Approval", "Reported", a "…" menu per row, and the comment
+  and report panels. Distinct from the "Comments" tab of Settings › Website
+  › Content, which holds the switch "Enable Public Comments". **Settled
+  usage**: "the Comments page" for the moderation list, "public comments"
+  for the feature; the reader-side block is "the comments block" on the
+  landing page.
 
 ## The test install (used in Canonical scenarios)
 

@@ -74,6 +74,12 @@
  *   Posted" (U49; OPS EmailSetupForm::FIELD_POSTED_ACK, read by
  *   SendPostedAcknowledgement and OPS mail\Repository). Only the OPS
  *   context schema carries the key, so OJS and OMP answer 400 on it.
+ * - enablePublicComments (bool) — Settings › Website › Content › "Comments"
+ *   tab's "Enable Public Comments" box (U14; ContentCommentsForm, a lib/pkp
+ *   form the three apps share, so the key applies to all of them). Off on
+ *   every fresh context (the schema default, stored as 0); on, a published
+ *   item's landing page carries the comments blocks (OJS) and the
+ *   moderators' side menu the Content › Comments entry (every app).
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -276,8 +282,9 @@ abstract class PKPContextScenarioBuilder
      * (Submission › Author Guidelines), `metadata` (Submission › Metadata)
      * and the Emails tab's `submissionAcknowledgement`,
      * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress` and, on
-     * the preprint server only, `postedAcknowledgement` (U49). Only keys
-     * the app's context schema carries are accepted.
+     * the preprint server only, `postedAcknowledgement` (U49); and the
+     * Website › Content › Comments tab's `enablePublicComments` (U14). Only
+     * keys the app's context schema carries are accepted.
      *
      * @return array{settings: array, specKeys: array}
      */
@@ -371,6 +378,22 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['postedAcknowledgement'] = $value;
             $specKeys['postedAcknowledgement'] = 'postedAcknowledgement';
+        }
+
+        if ($root->has('enablePublicComments')) {
+            // The Website › Content › "Comments" tab's one box, "Enable
+            // Public Comments" (ContentCommentsForm: a checkbox FieldOptions
+            // over the schema's boolean, default false). The form posts the
+            // box's state form-encoded ("true" / "false"), which the save's
+            // convertStringsToSchema turns back into the boolean; the stored
+            // row is 1 / 0. Shared by the three apps' context schemas.
+            $hasProperty('enablePublicComments') || throw new SpecException('enablePublicComments', 'enablePublicComments is not a setting of this app\'s context schema');
+            $value = $root->get('enablePublicComments');
+            if (!is_bool($value)) {
+                throw new SpecException('enablePublicComments', 'enablePublicComments must be a boolean (true: the "Enable Public Comments" box ticked, false: unticked)');
+            }
+            $settings['enablePublicComments'] = $value;
+            $specKeys['enablePublicComments'] = 'enablePublicComments';
         }
 
         return ['settings' => $settings, 'specKeys' => $specKeys];

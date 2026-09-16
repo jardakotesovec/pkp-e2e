@@ -163,6 +163,18 @@ Keys:
   is not sent while the version notice still is (U49 scenario 15). A
   non-boolean is a 400; OJS and OMP answer 400 on the key, as on any key
   their context schema lacks.
+- `enablePublicComments` (boolean): the "Enable Public Comments" box of
+  Settings › Website › the "Content" tab › the "Comments" side tab, saved
+  as that form saves (its whole request is `enablePublicComments=true`, a
+  form-encoded POST to `contexts/{id}`; stored as `1` / `0`). The tab is
+  lib/pkp's, so the key applies to the three apps alike. Every fresh
+  context carries the row at `0`, so `publicknowledge` and a scratch
+  context without the key have comments off, and every comments scenario
+  runs on a scratch context seeded `true`. With it on, a published
+  article's landing page carries the two comments blocks (OJS only; a
+  press's or preprint server's landing page has none) and every
+  moderator's side menu the Content › Comments entry. A non-boolean is a
+  400 (U14 harness, 2026-09-16).
 
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
@@ -267,6 +279,33 @@ Keys:
   other submission of the context, so a scenario that needs the Create or
   Enroll path seeds a fresh address per submission. Live-driven 2026-09-06,
   OJS and OMP (`.reports/U31/cc-K3.md`).
+- `userComments[]`: reader comments on the published publication, each
+  `{user, text, approved, reports}`. `user` (required) is an existing
+  username, the writer; `text` (required) the comment; `approved` (default
+  `false`) leaves it pending or marks it approved the way the Comments
+  page's "Approve Comment" does (`approvedAt` now, `approvedByUserId` the
+  seeding admin, a manager of every scratch context); `reports[]`, each
+  `{user, note}` (both required), the reports the landing page's "…" ›
+  "Report" dialog files. The comment is created as the landing page's
+  "Submit" creates it (`POST comments`) and the report as the dialog's
+  "Submit" does (`POST comments/{id}/reports`), and each fires the
+  moderators' task the screens fire: one "A comment has been submitted and
+  is pending review by a moderator." row per manager and site admin of the
+  context, one "A report was submitted for a comment and requires review by
+  a moderator." row per report (the controller's own fan-out; no email).
+  Refusals follow the screens: the key needs `published: true` (a 400
+  otherwise; the box exists on a published landing page only), a report
+  needs `approved: true` (nobody but the writer sees a pending comment, so
+  only an approved one can be reported) and a reporter other than the
+  writer (one's own menu has no "Report"); an unknown username, an empty
+  text or note and a non-boolean `approved` are 400s. Text and note are
+  stripped as posted text is (`stripUnsafeHtml`), so a `<script>` tag in
+  either is dropped. The key applies wherever the Comments page exists,
+  so OMP and OPS accept it too, with the seeded rows listed on their
+  Comments page; the landing-page blocks are OJS's alone. The key does not
+  read the context's `enablePublicComments` (the API does not either):
+  seeded comments on a comments-off context exist and list on the Comments
+  page, which is the "switched off with comments kept" state.
 
 App-specific keys:
 
@@ -303,10 +342,22 @@ Facts tests rely on, all parity-checked against the UI path:
   "<name> More Actions" menu on each row. On a seeded draft the wizard
   still opens on "Upload Files"; its "Reviewer Suggestions" step is the
   fifth, four "Continue"s on.
+- Seeded comments read on screen as by-hand ones do (U14 harness,
+  2026-09-16, OJS driven, OMP and OPS read): the writer sees a pending one
+  under "Your comment will be visible when the editor approves it" and
+  everyone the approved ones, the sidebar's "All Comments (N)" counting the
+  approved ones only; the Comments page lists each with its Status cell
+  ("Hidden/Needs Approval", "Approved", "Approved, Reported"), and the
+  moderators' Tasks panels carry the rows. Two timing facts: every comment
+  of one seed shares its `created_at` second, so the on-screen order among
+  them (newest first) is not fixed, and a seeded approval is stamped in
+  the comment's own second where a by-hand one lands later.
 
 The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`),
-`reviewAssignments[]` and `reviewerSuggestions[]` (`id`, `email`). `stageId`
+`reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`) and
+`userComments[]` (`id`, `user`, `approved`, `reports[]` of report ids, in
+the order seeded). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
@@ -356,8 +407,8 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Attach Review Files" source, U30); `reviewRounds[].reviewers[].status:
   'cancelled'` (U30, the readiness question); `reviewRounds[].revisionsUploaded`
   (the author's "Upload" is refused on a round where revisions were not
-  requested, U30); `commentsForEditor`; `userComments[]` (`user`, `text`, `approved?`, needs a published
-  publication); `metrics` (OJS only: `views?`, `downloads?`, `months?`).
+  requested, U30); `commentsForEditor`; `metrics` (OJS only: `views?`,
+  `downloads?`, `months?`).
 - Publication: `galleys[]` (`label`, `locale?`, and either `file`, a basename
   under `apps/<app>/playwright/fixtures/files/`, or `urlRemote`);
   `metadata.datePublished` (without it, publish stamps today);
@@ -375,8 +426,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   submission-intake settings (the checklist and the privacy statement,
   U58), `supportedFormLocales` (Website › Setup ›
   Languages "Forms" column; the settings forms stay single-language until
-  it is set, U29), `enablePublicComments`,
-  `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
+  it is set, U29), `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), ISSNs,
   `plugins: {pluginName: {enabled, settings}}`
