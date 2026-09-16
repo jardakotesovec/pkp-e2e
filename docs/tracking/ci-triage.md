@@ -385,9 +385,29 @@ trips.
   OJS final (`.reports/sync/final-run-ojs.log`, error context in
   `pw-out-final-ojs/U49-publish-schedule-and-v-8f1b4-…`); green alone in
   9.4 s. The opener waits for the select to be visible, not for the
-  form's value to arrive. **Watch condition**: a second sighting; then
-  `openCreateVersionDialog()` waits for a non-empty stage value before
-  returning.
+  form's value to arrive. **Tripped 2026-09-16, the first on CI and on
+  OPS** (pkp-e2e push run 35126077430 at `00be9dc`, the OPS job red on
+  U49 S6 on both attempts, 142 passed and 10 did not run: the second
+  "Create New Version" dialog of the test, opened right after "Author
+  Original 1.1" appeared, had no checked option in its stage select for
+  the 10 s wait for "Author Original (AO)"; green on the VM the same day
+  in the OPS final and alone; the U49 push's own run 35115933110 the
+  day before was green on OPS with the same test, so a timing class, not
+  a fresh-install fact). The artifact's error context (both attempts,
+  `.reports/sync/s16-ci-ops-artifacts/`): the source combobox on "Author
+  Original 1.1", the "Publication Stage" combobox listing "Author
+  Original (AO)" with no option selected, "Revision Significance" listing
+  both with none selected, a `status` element still in the dialog, so the
+  form's values from the source version had not arrived in 10 s. **Hardened the same day**: the three
+  openers (OPS `createNewVersionViaDialog()`, OJS
+  `PublishScreen.openCreateVersionDialog()`, OMP
+  `openCreateVersionDialog()`) give the stage select up to 15 s to carry
+  a value before returning, without failing a form that preselects
+  nothing; U49 S6 green alone on the three apps
+  (`.reports/sync/s16-rerun-{ops,ojs,omp}-u49s6.log`). **Watch
+  condition**: the read reds again behind the hardened opener; then the
+  CI artifact's error context says whether the value ever arrives on a
+  fresh install.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the

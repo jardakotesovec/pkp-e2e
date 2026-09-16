@@ -235,6 +235,13 @@ async function createNewVersionViaDialog(page, mutate) {
     await expect(dialog.locator('#version-versionSource-control')).toBeVisible({
         timeout: 30_000,
     });
+    // The form's values arrive a beat after its selects render (ci-triage
+    // "'Create New Version' dialog's stage select empty under load"): give the
+    // stage select up to 15 s to carry a value before the caller reads it; a
+    // form that preselects nothing continues after the wait.
+    await expect(dialog.locator('#version-versionStage-control'))
+        .not.toHaveValue('', {timeout: 15_000})
+        .catch(() => {});
     if (mutate) {
         await mutate(dialog);
     }
