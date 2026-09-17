@@ -10,9 +10,9 @@ replaces it, and is active when the PROGRESS banner says so.
 The VM runs one session a day, scheduled through claude-threads. The
 scheduled prompt only points here; this section is the day's order.
 
-1. Read the PROGRESS banner, this file, `ci-triage.md` and
-   `upstream-sync.md`; work from files, never from memory of earlier
-   sessions.
+1. Read the PROGRESS banner, this file, `ci-triage.md`,
+   `upstream-sync.md` and `upstream-sync-stable-3_5_0.md`; work from
+   files, never from memory of earlier sessions.
 2. Start on the right code and reset the databases ("Session hygiene").
 3. Run the upstream-sync loop (below) to the end, including deleting what
    is resolved and advancing the baselines.
@@ -21,12 +21,16 @@ scheduled prompt only points here; this section is the day's order.
    new. A daily check also catches a red nobody has reported yet.
 5. Merge any companion whose app PR has merged ("A developer's PR fails
    the suite", step 5).
-6. If about a month has passed since the last open-questions post noted in
+6. Read the stable line for regressions ("The stable line:
+   `stable-3_5_0`" below): the regression hunt alone, after `main` is
+   synced and green, never before.
+7. If about a month has passed since the last open-questions post noted in
    the PROGRESS banner, post `npm run questions` to the channel.
-7. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
+8. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
    and post a one-paragraph summary to the channel: what was synced, what
-   was red and why, what was changed, with the day's regression report
-   (step 5) attached as a file when there is one.
+   was red and why, what was changed, what the stable line's read found,
+   with the day's regression report (sync loop step 5) attached as a file
+   when there is one.
 
 A ping about a developer's failing PR during the day follows "A
 developer's PR fails the suite".
@@ -134,6 +138,79 @@ The apps move; the suite follows. The baselines live in
    the ones that are resolved. Commit. The baseline only advances when the
    range is actually triaged; a partial review leaves it where it was and
    says so in the log.
+
+## The stable line: `stable-3_5_0`
+
+The team ships 3.5 fixes from `stable-3_5_0`, most of them backports of
+what `main` already received. The daily session hunts regressions there
+too (maintainer ruling 2026-09-17), and does nothing else there: of the
+sync loop it runs steps 1, 2, 5 and 6, never 3 or 4. The specs and the
+suites describe `main`, and 3.5 has diverged too far for them to mean
+anything on it (the OJS `@smoke` set at the 2026-09-17 tips: 9 of 39
+green). So no suite runs on the line, no spec follows it, no CI backs it,
+and a red suite there is not evidence of anything.
+
+The line has its own checkouts beside the `main` ones, so both can be
+read and driven side by side (harness.md "The fleets"):
+`checkouts/stable-3_5_0/<app>`, ports 9000 / 9100 / 9200, databases
+`<app>_test_3_5`. `PKP_E2E_LINE=stable-3_5_0` in front of a harness
+command points it at the line; without it every command means `main`.
+
+1. **Pull.** `npm run fetch-apps -- --line stable-3_5_0 --update`, then
+   `PKP_E2E_LINE=stable-3_5_0 npm run mount`.
+2. **List the range and how it relates to `main`.** Per repo, from the
+   baselines in `docs/tracking/upstream-sync-stable-3_5_0.md`:
+   `node bin/line-range.js --line stable-3_5_0 --repo <ojs|omp|ops|pkp-lib|ui-library> <baseline>`
+   (`--app omp` reads a submodule at another app's pointer). Each commit
+   comes back as one of three, and the class decides the work (a merge
+   and a `pointer bump`, a commit that only moves submodule pointers,
+   carry nothing of their own):
+   - `=main <sha>`: the same patch as a `main` commit. The `main` read's
+     verdict carries over, cited from `upstream-sync.md` by its date. What
+     is left is what only 3.5 has: grep the changed symbols' callers in
+     the line checkout and put the answer in the log line. A twin `main`
+     has not read yet is read on `main` first, in the same session.
+   - `~main <sha,…>`: `main` has the same subject or issue number and a
+     different patch, an adapted backport. `git range-diff <main sha>^!
+     <stable sha>^!` inside the line checkout (both histories are there)
+     shows what the backport changed to fit the older code; that
+     difference and the 3.5 callers are the read. This class is where a
+     stable-only regression most likely sits.
+   - `stable-only`: no counterpart on `main`. The full question of sync
+     loop step 5.
+3. **Hunt regressions** as sync loop step 5, same bar: a trivial commit
+   gets its answer in the log line, a substantive one gets a reader
+   rendered from `briefs/regression-read.md` with `{{line}}` set to
+   `stable-3_5_0`, and nothing unconfirmed is reported. The reproduction
+   runs on the line's fleet:
+   `PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature sync-3_5 --reset --apps <app>`
+   installs 3.5, seeds it and starts the probe server (9050 / 9150 /
+   9250). The "before" side is the previous stable tip or, for a backport,
+   the `main` fleet, which stays up on its own ports. The `_test` seeding
+   works on the line for contexts, users and submissions (driven on OJS
+   2026-09-17 with `checks/sync/pkp-lib-13325/abstract-lists.js`
+   unchanged); a scenario key that reaches a `main`-only class answers 500
+   naming the class. Guard that spot in the builder (`class_exists`,
+   `method_exists`: a no-op on `main`) when it is a line or two, otherwise
+   set the state through the screens. Never bend a builder further than
+   that for the line.
+4. **Report** a confirmed regression as sync loop step 5 says, with the
+   branch in the report's title and file name
+   (`docs/reports/<date>-<repo>-<pr>-stable-3_5_0.md`) and one sentence on
+   whether `main` shows the same, driven on both. A regression `main`
+   shows too is `main`'s finding first and takes the usual path there. A
+   stable-only one gets the DMs, the ci-triage "Open regressions" row with
+   `stable-3_5_0` in its Apps cell, and its kept script under
+   `shared/playwright/checks/sync/<repo>-<pr>/` beside the `main` twin's
+   when there is one. No register entry: the specs describe `main`.
+5. **Advance the line's baselines** in
+   `docs/tracking/upstream-sync-stable-3_5_0.md` with a dated entry, one
+   line per commit (sha, class with the `main` twin, verdict), and re-run
+   the open stable-line regression rows at the new tips. The rule of sync
+   loop step 6 holds: a range not fully read leaves its baseline where it
+   was and says so. `main` comes first: on a day the `main` sync
+   accommodated a spec or `main` is red, the line's range may wait for the
+   next session, stated in one log line.
 
 ## Triage: where does a change land?
 
@@ -339,7 +416,8 @@ the answer; the spec and the test are the record.
   `lib/ui-library`); then `npm run mount`. Findings from a PR checkout are
   reported against that PR, never filed as `main` behavior.
 - **Start clean: reset the databases.** `npm run reset:<app>` for every
-  fleet the session will touch, before any probing or test run. Never
+  fleet the session will touch, before any probing or test run (with
+  `PKP_E2E_LINE=stable-3_5_0` in front for the stable line's fleets). Never
   attribute a finding to the app until it reproduces on a fresh reset.
 - **One full-suite run at a time on the VM, never two of the same app**,
   even targeted ones: the cores cannot carry two suites, and Mailpit is one

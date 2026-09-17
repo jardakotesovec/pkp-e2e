@@ -18,13 +18,48 @@ const APPS = {
     ops: {basePort: 8200},
 };
 
-/** @returns {{name: string, root: string, suiteDir: string, basePort: number}} */
+// A second set of checkouts on a stable branch, beside the `main` ones
+// (harness.md "The fleets"): checkouts/<line>/<app>, ports shifted, DBs
+// suffixed, so both lines stay up side by side. PKP_E2E_LINE selects one for
+// every script that resolves an app here; unset is `main`.
+const LINES = {
+    'stable-3_5_0': {branch: 'stable-3_5_0', portShift: 1000, dbSuffix: '_3_5'},
+};
+
+/** @returns {{name: string, branch: string, portShift: number, dbSuffix: string}|null} */
+function resolveLine(name = process.env.PKP_E2E_LINE) {
+    if (!name || name === 'main') {
+        return null;
+    }
+    if (!LINES[name]) {
+        console.error(`Unknown line "${name}" — one of: main, ${Object.keys(LINES).join(', ')}`);
+        process.exit(1);
+    }
+    return {name, ...LINES[name]};
+}
+
+/** @returns {{name: string, root: string, suiteDir: string, basePort: number, line: string}} */
 function resolveApp(name) {
     if (!APPS[name]) {
         console.error(`Unknown app "${name}" — one of: ${Object.keys(APPS).join(', ')}`);
         process.exit(1);
     }
     loadEnv(REPO_ROOT, '.env');
+    const line = resolveLine();
+    if (line) {
+        const root = path.join(REPO_ROOT, 'checkouts', line.name, name);
+        if (!fs.existsSync(path.join(root, 'config.TEMPLATE.inc.php'))) {
+            console.error(`No ${line.name} checkout of ${name} — npm run fetch-apps -- --line ${line.name} ${name}`);
+            process.exit(1);
+        }
+        return {
+            name,
+            root,
+            suiteDir: path.join(REPO_ROOT, 'apps', name, 'playwright'),
+            basePort: APPS[name].basePort + line.portShift,
+            line: line.name,
+        };
+    }
     // Relative <APP>_ROOT values (the self-contained checkouts/<app> default)
     // are anchored to the repo root, not the caller's cwd.
     const raw = process.env[`${name.toUpperCase()}_ROOT`];
@@ -41,13 +76,19 @@ function resolveApp(name) {
         root,
         suiteDir: path.join(REPO_ROOT, 'apps', name, 'playwright'),
         basePort: APPS[name].basePort,
+        line: 'main',
     };
 }
 
-/** The apps whose <APP>_ROOT the repo .env names, in registry order. */
+/** The apps whose <APP>_ROOT the repo .env names (on a line: whose checkout exists), in registry order. */
 function configuredApps() {
     loadEnv(REPO_ROOT, '.env');
+    const line = resolveLine();
+    if (line) {
+        return Object.keys(APPS).filter((name) =>
+            fs.existsSync(path.join(REPO_ROOT, 'checkouts', line.name, name, 'config.TEMPLATE.inc.php')));
+    }
     return Object.keys(APPS).filter((name) => !!process.env[`${name.toUpperCase()}_ROOT`]);
 }
 
-module.exports = {APPS, REPO_ROOT, resolveApp, configuredApps};
+module.exports = {APPS, LINES, REPO_ROOT, resolveApp, resolveLine, configuredApps};

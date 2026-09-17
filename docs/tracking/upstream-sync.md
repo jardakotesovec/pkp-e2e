@@ -2,6 +2,8 @@
 
 The last-reviewed commit of each app and of `lib/pkp`, advanced by the
 MAINTENANCE upstream-sync loop (`docs/process/MAINTENANCE.md`).
+The `stable-3_5_0` branch, read for regressions only, has its own file:
+`upstream-sync-stable-3_5_0.md`.
 
 ## Baselines
 

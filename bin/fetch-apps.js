@@ -5,8 +5,15 @@
  * Provision self-contained app checkouts under checkouts/<app> so the
  * campaign never drives a development checkout:
  *
- *   node bin/fetch-apps.js [ojs] [omp] [ops] [--rebuild] [--update]
- *   (default: all apps)
+ *   node bin/fetch-apps.js [ojs] [omp] [ops] [--rebuild] [--update] [--line <line>]
+ *   (default: all apps, the `main` line)
+ *
+ * --line stable-3_5_0 (or PKP_E2E_LINE) provisions the same thing for a
+ * stable branch beside the `main` checkouts (bin/apps.js LINES, harness.md
+ * "The fleets"): checkouts/<line>/<app> on that branch, ports shifted, DBs
+ * suffixed, its own files dirs. A stable branch whose lib/pkp predates
+ * PKP_CONFIG_FILE gets the one-line Config.php change as a working-tree
+ * edit, re-applied after every --update.
  *
  * Per app: clone pkp/<app> `main` with FULL history (the campaign's minimal
  * main-repo changes are merged there; the jardakotesovec fork lags —
@@ -27,7 +34,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const {execFileSync, spawnSync} = require('child_process');
-const {APPS, REPO_ROOT} = require('./apps.js');
+const {APPS, REPO_ROOT, resolveLine} = require('./apps.js');
 
 const FORK_OWNER = 'jardakotesovec';
 const UPSTREAM_OWNER = 'pkp';
@@ -37,9 +44,24 @@ const DISABLED_PUSH_URL = 'DISABLED-push-to-pkp-remotes-is-forbidden';
 const args = process.argv.slice(2);
 const rebuild = args.includes('--rebuild');
 const update = args.includes('--update');
-const requested = args.filter((a) => a !== '--rebuild' && a !== '--update');
+let lineName = process.env.PKP_E2E_LINE;
+const requested = [];
+for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--rebuild' || a === '--update') continue;
+    if (a === '--line' || a.startsWith('--line=')) {
+        lineName = a === '--line' ? args[++i] : a.slice('--line='.length);
+        continue;
+    }
+    requested.push(a);
+}
+const line = resolveLine(lineName);
+const BRANCH = line ? line.branch : 'main';
+const PORT_SHIFT = line ? line.portShift : 0;
+const DB_SUFFIX = line ? line.dbSuffix : '';
 
-const CHECKOUTS = path.join(REPO_ROOT, 'checkouts');
+const MAIN_CHECKOUTS = path.join(REPO_ROOT, 'checkouts');
+const CHECKOUTS = line ? path.join(MAIN_CHECKOUTS, line.name) : MAIN_CHECKOUTS;
 const FILES_ROOT = path.join(CHECKOUTS, 'files');
 const names = requested.length ? requested : Object.keys(APPS);
 for (const name of names) {
@@ -48,6 +70,10 @@ for (const name of names) {
         process.exit(1);
     }
 }
+
+// The line's Config.php edit: the same line `main` carries.
+const CONFIG_FILE_BEFORE = "define('CONFIG_FILE', \\PKP\\core\\Core::getBaseDir() . '/config.inc.php');";
+const CONFIG_FILE_AFTER = "define('CONFIG_FILE', getenv('PKP_CONFIG_FILE') ?: \\PKP\\core\\Core::getBaseDir() . '/config.inc.php');";
 
 const run = (cwd, cmd, args, opts = {}) => {
     console.log(`  $ ${cmd} ${args.join(' ')}`);
@@ -63,12 +89,16 @@ function fetchApp(name) {
         fs.mkdirSync(CHECKOUTS, {recursive: true});
         // Clone from pkp (the fork lags), but NAME the remote `upstream` and
         // disable its push URL before anything else happens in the checkout.
+        // A line borrows the main checkout's objects for the clone, then
+        // stands alone (--dissociate).
+        const mainCheckout = path.join(MAIN_CHECKOUTS, name);
         run(CHECKOUTS, 'git', [
-            'clone', '--branch', 'main', '--origin', 'upstream',
+            'clone', '--branch', BRANCH, '--origin', 'upstream',
+            ...(line ? ['--reference-if-able', mainCheckout, '--dissociate'] : []),
             `https://github.com/${UPSTREAM_OWNER}/${name}.git`, name,
         ]);
     } else {
-        console.log('  clone: exists, skipping (--update moves it to current upstream main)');
+        console.log(`  clone: exists, skipping (--update moves it to current upstream ${BRANCH})`);
     }
     run(dir, 'git', ['remote', 'set-url', '--push', 'upstream', DISABLED_PUSH_URL]);
 
@@ -93,11 +123,25 @@ function fetchApp(name) {
         } catch { return ''; }
     };
     const uiBefore = fresh ? '' : uiRev();
+    const configPhp = path.join(dir, 'lib', 'pkp', 'classes', 'config', 'Config.php');
     if (!fresh && update) {
-        run(dir, 'git', ['fetch', 'upstream', 'main']);
-        run(dir, 'git', ['checkout', '-B', 'main', 'FETCH_HEAD']);
+        if (line && fs.existsSync(configPhp)) {
+            // Drop the line's Config.php edit so the pointer can move; re-applied below.
+            run(path.join(dir, 'lib', 'pkp'), 'git', ['checkout', '--', 'classes/config/Config.php']);
+        }
+        run(dir, 'git', ['fetch', 'upstream', BRANCH]);
+        run(dir, 'git', ['checkout', '-B', BRANCH, 'FETCH_HEAD']);
     }
     run(dir, 'git', ['submodule', 'update', '--init', '--recursive']);
+    if (line && !fs.readFileSync(configPhp, 'utf8').includes('PKP_CONFIG_FILE')) {
+        const source = fs.readFileSync(configPhp, 'utf8');
+        if (!source.includes(CONFIG_FILE_BEFORE)) {
+            console.error(`  ${configPhp}: no CONFIG_FILE define in the expected shape — the harness cannot select its test config on this branch`);
+            process.exit(1);
+        }
+        fs.writeFileSync(configPhp, source.replace(CONFIG_FILE_BEFORE, CONFIG_FILE_AFTER));
+        console.log(`  lib/pkp on ${BRANCH} predates PKP_CONFIG_FILE: Config.php edited in the working tree`);
+    }
     const uiMoved = !fresh && update && uiRev() !== uiBefore;
     if (uiMoved) console.log('  lib/ui-library moved: the UI bundle will be rebuilt');
 
@@ -149,7 +193,7 @@ function fetchApp(name) {
             `# Generated by bin/fetch-apps.js for the self-contained ${name} checkout.`,
             `PKP_CONFIG_FILE=${path.join(dir, 'config.test.inc.php')}`,
             'TEST_API_KEY=playwright-test-key',
-            `PLAYWRIGHT_BASE_PORT=${APPS[name].basePort}`,
+            `PLAYWRIGHT_BASE_PORT=${APPS[name].basePort + PORT_SHIFT}`,
             'MAILPIT_URL=http://127.0.0.1:8025',
             '',
         ].join('\n'));
@@ -161,7 +205,7 @@ function fetchApp(name) {
     const filesDir = path.join(FILES_ROOT, `${name}-test`);
     fs.mkdirSync(filesDir, {recursive: true});
 
-    const dbName = `${name}_test`;
+    const dbName = `${name}_test${DB_SUFFIX}`;
     const dbUser = process.env.TEST_DB_USERNAME || os.userInfo().username;
     const exists = spawnSync('psql', [
         '-XtAc', `SELECT 1 FROM pg_database WHERE datname = '${dbName}'`, 'postgres',
@@ -183,7 +227,7 @@ function fetchApp(name) {
             env: {
                 ...process.env,
                 PKP_APP_ROOT: dir,
-                PLAYWRIGHT_BASE_PORT: String(APPS[name].basePort),
+                PLAYWRIGHT_BASE_PORT: String(APPS[name].basePort + PORT_SHIFT),
                 TEST_DB_NAME: dbName,
                 TEST_DB_USERNAME: dbUser,
                 TEST_DB_PASSWORD: process.env.TEST_DB_PASSWORD || dbUser,
@@ -198,7 +242,9 @@ function fetchApp(name) {
         console.log(`  wrote ${configFile}`);
     }
 
-    console.log(`${name}: ready — set ${name.toUpperCase()}_ROOT=${dir} in .env, then npm run mount`);
+    console.log(line
+        ? `${name}: ready — PKP_E2E_LINE=${line.name} npm run mount`
+        : `${name}: ready — set ${name.toUpperCase()}_ROOT=${dir} in .env, then npm run mount`);
 }
 
 names.forEach(fetchApp);

@@ -30,7 +30,9 @@ One row per regression the sync loop confirmed on reset databases and
 reported to the team (MAINTENANCE step 5), in territory no shipped suite
 reds on. Re-checked against the new tips every sync (step 6) by re-running
 its kept reproduction under `shared/playwright/checks/sync/`; deleted when
-the fix lands.
+the fix lands. A regression only the stable line shows (MAINTENANCE "The
+stable line") names `stable-3_5_0` in its Apps cell and is re-run on that
+line's fleet.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
@@ -674,6 +676,12 @@ trips.
   (harness.md "Runtime model"), so a recurrence now costs one test. It was
   never pinned; if it recurs, add core-dump capture to CI before
   diagnosing.
+- **U01 S1's dashboard landing right after a cold bootstrap** (once, OJS,
+  2026-09-17 on the VM: an `@smoke`-only run at four workers on a database
+  reset seconds before; `page.waitForURL(/dashboard/editorial/)` timed out
+  at 15 s after the journal's login address, 38 of 39 green; the file
+  green alone minutes later, 9 of 9). **Watch condition**: a second
+  sighting in a full run or on CI.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

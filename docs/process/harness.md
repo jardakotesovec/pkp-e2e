@@ -84,6 +84,44 @@ an existing checkout to the current upstream `main` and rebuilds the UI
 bundle (`js/build.js`) when `lib/ui-library` moved; a bundle older than the
 submodule makes retired UI defects reappear (U43 A13, 2026-09-04).
 
+### The stable line
+
+A second set of checkouts on `stable-3_5_0` sits beside the `main` ones,
+for the daily regression hunt on that branch (MAINTENANCE "The stable
+line") and for driving 3.5 and `main` side by side. No suite is meant to
+run there.
+
+| App | Checkout | Base port | Test DB |
+|---|---|---|---|
+| OJS | `checkouts/stable-3_5_0/ojs` | 9000 | `ojs_test_3_5` |
+| OMP | `checkouts/stable-3_5_0/omp` | 9100 | `omp_test_3_5` |
+| OPS | `checkouts/stable-3_5_0/ops` | 9200 | `ops_test_3_5` |
+
+- The registry is `LINES` in `bin/apps.js`. **`PKP_E2E_LINE=stable-3_5_0`
+  in front of any harness command points it at the line** (`mount`,
+  `reset:<app>`, `fleet-prep`, `probe-servers`, `bin/probe.js`, the
+  Playwright configs); unset means `main`, and `.env` is not involved.
+  The port bands, the files dirs (`checkouts/stable-3_5_0/files/`) and the
+  probe servers' pid files (`.reports/servers-stable-3_5_0/`) are the
+  line's own, so both lines' servers stay up together. The server logs
+  share `apps/<app>/playwright/.server-logs/`, told apart by port.
+- `npm run fetch-apps -- --line stable-3_5_0 [--update]` provisions and
+  moves it, same remotes and push rules as `main`'s.
+- `stable-3_5_0` has no `PKP_CONFIG_FILE` support, so `fetch-apps` makes
+  that one-line change to `lib/pkp/classes/config/Config.php` in the
+  line's working tree (the same line `main` carries) and re-applies it
+  after every `--update`. `git status` in the line's `lib/pkp` shows that
+  one file modified; nothing else under the line's checkouts is edited.
+- The overlays are written for `main`. On the line the install, the
+  bootstrap seed and the context, user and submission scenarios work
+  (2026-09-17, all three apps); two seed steps for `main`-only features
+  are skipped there behind `method_exists` / `class_exists` (the task
+  templates in `ContextFactory`, the contributor type and roles in
+  `PKPSubmissionScenarioBuilder`). A scenario key that reaches another
+  `main`-only class answers 500 naming it.
+- `bin/line-range.js` lists a line's commits since a baseline with each
+  one's relation to `main` (same patch, adapted backport, stable-only).
+
 Every fleet uses fixed port bands above its base port; nothing else may
 listen there:
 

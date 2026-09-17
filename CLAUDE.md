@@ -9,7 +9,9 @@ not here. `docs/README.md` is the map of the documentation.
   (live state and the mode banner). Never re-derive the process from memory.
 - **Maintenance sessions** (the resident QA agent) also read
   `docs/process/MAINTENANCE.md`, `docs/tracking/upstream-sync.md` and
-  `docs/tracking/ci-triage.md`. Check ci-triage FIRST when a CI failure is
+  `docs/tracking/ci-triage.md`, plus
+  `docs/tracking/upstream-sync-stable-3_5_0.md` for the regression-only
+  read of `stable-3_5_0`. Check ci-triage FIRST when a CI failure is
   reported: one root cause often reds ojs, omp and ops as three messages.
   A PR or issue link shared with a request to check it before merging is
   a **PR review**: `docs/process/MAINTENANCE.md` "PR review", which
@@ -27,6 +29,12 @@ Operational facts:
   against app-side edits; the checkouts are read-only and commits happen
   only in this repo (RUNBOOK step 10). Suites run from here:
   `npm run test:ojs|omp|ops`, `reset:<app>`.
+- A second set of checkouts on `stable-3_5_0` lives in
+  `checkouts/stable-3_5_0/<app>` (ports 9000/9100/9200, DBs
+  `<app>_test_3_5`), for regression reads and side-by-side drives only:
+  no suite or spec follows it. `PKP_E2E_LINE=stable-3_5_0` in front of a
+  harness command selects it; `npm run fetch-apps -- --line stable-3_5_0`
+  provisions it (harness.md "The stable line").
 - CI: `.github/workflows/e2e.yml` (the matrix) and `run-app.yml` (reusable,
   also called by the app repos' thin hooks at run time). A broken `main`
   here breaks every app PR check, so keep `main` green.

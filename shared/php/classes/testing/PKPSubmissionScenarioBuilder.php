@@ -394,15 +394,18 @@ abstract class PKPSubmissionScenarioBuilder
             if ((int) $submitAsUserGroup->roleId === Role::ROLE_ID_AUTHOR) {
                 $author = Repo::author()->newAuthorFromUser($submitter, $submission, $context);
                 $author->setData('publicationId', $publication->getId());
-                $author->setData('contributorType', ContributorType::PERSON->getName());
-                $author->setContributorRoles(
-                    ContributorRole::query()
-                        ->withContextId($context->getId())
-                        ->withIdentifier(ContributorRoleIdentifier::AUTHOR->getName())
-                        ->limit(1)
-                        ->get()
-                        ->all()
-                );
+                // Contributor types and roles are absent on the stable-3_5_0 line.
+                if (class_exists(ContributorType::class)) {
+                    $author->setData('contributorType', ContributorType::PERSON->getName());
+                    $author->setContributorRoles(
+                        ContributorRole::query()
+                            ->withContextId($context->getId())
+                            ->withIdentifier(ContributorRoleIdentifier::AUTHOR->getName())
+                            ->limit(1)
+                            ->get()
+                            ->all()
+                    );
+                }
                 $authorId = Repo::author()->add($author);
                 Repo::publication()->edit($publication, ['primaryContactId' => $authorId]);
 

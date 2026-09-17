@@ -28,6 +28,8 @@ record changes still in effect.
   calling a red build new.
 - `docs/tracking/upstream-sync.md`: the last app commits the suite was
   reviewed against.
+- `docs/tracking/upstream-sync-stable-3_5_0.md`: the last `stable-3_5_0`
+  commits read for regressions (no suite runs on that branch).
 - `docs/tracking/app-changes.md`: app defects the tests work around, and
   any app code the campaign changed.
 - `docs/tracking/parity-ledger.md`: evidence that the test-data builders

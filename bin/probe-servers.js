@@ -27,11 +27,13 @@
 const fs = require('fs');
 const path = require('path');
 const {spawn} = require('child_process');
-const {APPS, REPO_ROOT} = require('./apps.js');
+const {APPS, REPO_ROOT, resolveLine} = require('./apps.js');
 const {resolveProbeApp, PROBE_PORT_OFFSET} = require('../shared/playwright/probe/index.js');
 const {phpServerCommand, phpServerEnv, phpServerStatus} = require('../shared/playwright/php-server.js');
 
-const PID_DIR = path.join(REPO_ROOT, '.reports', 'servers');
+// One pid dir per line (PKP_E2E_LINE), so both lines' probe servers stay up side by side.
+const LINE = resolveLine();
+const PID_DIR = path.join(REPO_ROOT, '.reports', LINE ? `servers-${LINE.name}` : 'servers');
 const USAGE = 'usage: node bin/probe-servers.js --start|--stop|--status [--app ojs|omp|ops]';
 
 function parseArgs(argv) {

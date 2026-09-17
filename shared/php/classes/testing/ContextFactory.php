@@ -131,8 +131,10 @@ class ContextFactory
         // since pkp/pkp-lib#12593, 2026-08-03): the registry's default
         // editorial task templates (`registry/taskTemplates.xml`, all
         // include=false) are installed into every new context. Parity
-        // ledger 2026-09-11.
-        Repo::editorialTask()->installTaskTemplates($context);
+        // ledger 2026-09-11. The stable-3_5_0 line has no such repository.
+        if (method_exists(Repo::class, 'editorialTask')) {
+            Repo::editorialTask()->installTaskTemplates($context);
+        }
         return $context;
     }
 
