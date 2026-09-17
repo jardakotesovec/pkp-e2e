@@ -285,7 +285,9 @@ The long form of the legend. Each spec's Conventions line carries the three symb
   behind the finding: *probe* = seen on a running install; *commit* =
   traced in the app's change history; *code* = read from the app's code
   and not seen running; *judgment* = the author's reading of the app, not
-  yet seen running.
+  yet seen running. A **Since** date before it, on a dated entry, is the day
+  the behavior began (the day of the app change that brought it); the Basis
+  date is the day it was seen.
 - **Findings register.** The spec's single home for everything that deviates
   or needs a decision: 🐞 a defect (the author's call) · ❓ needs a product
   ruling · ✅ an intended difference. **Impact** is one plain word

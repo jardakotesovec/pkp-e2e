@@ -673,10 +673,24 @@ everywhere.
 <a id="fn-b"></a>
 **b** — `PKP\pages\invitation\InitializeInvitationUIHandler` (ROUTE-013)
 assigns ops `create`/`edit` to `ROLE_ID_SITE_ADMIN`, `ROLE_ID_MANAGER`,
-`ROLE_ID_SUB_EDITOR`, `ROLE_ID_ASSISTANT` (+ `ContextAccessPolicy`); the API
-(`PKP\API\v1\invitations\InvitationController`, API-024) uses the same
-four-role authorizer for add/populate/invite/cancel. The offering screen is
-gated narrower (note a) — the mismatch is finding A1.
+`ROLE_ID_SUB_EDITOR`, `ROLE_ID_ASSISTANT` (+ `ContextAccessPolicy`). The API
+(`PKP\API\v1\invitations\InvitationController`, API-024) shared that
+four-role list until pkp/pkp-lib#13340 (`0dce988b35`, `c767c313b9`,
+2026-09-16; issue pkp/pkp-lib#13299, with the follow-up pkp/pkp-lib#13339
+named in a code comment on the list). Since then its route group for listing,
+reading, adding, populating, sending, previewing the email of and cancelling
+an invitation lists `ROLE_ID_SITE_ADMIN` and `ROLE_ID_MANAGER` only, and the
+`UserRoleAssignmentInvitePayload` validation (`UserGroupBelongsToContextRule`)
+refuses a user group of another journal: "The provided user group does not
+belong to the invitation's context". The page handler's list is unchanged, so
+the mismatch of finding A1 now sits between the page on one side and both the
+offering screen (note a) and the API on the other. Code-read 2026-09-17 on
+OJS (lib/pkp `efbba94ae7`); the OMP and OPS lib/pkp pointers sit at
+`360badeef5`, before the commits. The wizard's own flows are unchanged for
+the Site Administrator and a Journal Manager (driven 2026-09-17 on OJS, two
+scratch journals: a create-flow invitation to a user whose only role is in the
+other journal and an edit-flow "Add Another Role" for a member of both, each
+sent and accepted with every call answering 200).
 
 <a id="fn-c"></a>
 **c** — Users-grid Edit → `ManagementHandler::editUser()` (ROUTE-017 rider) →
@@ -941,7 +955,9 @@ row records the same mismatch. Live check 2026-07-31, all three apps:
 Author and Reviewer
 denied at the wizard address; the section-editor and assistant-level outcomes
 are recorded in the maintainer's private security file. OPS has no seeded
-reviewer account, so that one cell was untestable.
+reviewer account, so that one cell was untestable. Re-checked 2026-09-17 on
+OJS after pkp/pkp-lib#13340; the outcome for the section-editor and assistant
+levels is again recorded in the maintainer's private security file.
 
 <a id="fn-a2"></a>
 **f-a2** — `scopeExpired()` includes `orWhereNull('expiry_date')` (note e);

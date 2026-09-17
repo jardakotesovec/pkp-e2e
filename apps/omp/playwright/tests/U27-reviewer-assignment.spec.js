@@ -17,8 +17,9 @@
  *
  * Not covered, by register ID (the spec's Coverage section is the record of
  * everything else left out; 🐞 findings are never asserted as contract):
- * OMP2, OMP3, A2, A7, A8, A12, A13, A16, A17, A18, A19, A21, A22, A23, A24,
- * A26, A27, A1, A4, A6, A15, A25.
+ * OMP2, OMP3, OMP4, OMP5, OMP6, A2, A7, A8, A12, A13, A16, A17, A18, A19,
+ * A21, A22, A23, A26, A27, A29, A30, A31, A1, A4, A6, A15, A25 (A24 is
+ * retired: spec Rule 14d, under Budget, no test drives it yet).
  *
  * Seeding: scenario endpoints only. Tests that read a server-fed notice
  * ("{name} was assigned…", "Reviewer removed.") or a reviewer's mailbox or

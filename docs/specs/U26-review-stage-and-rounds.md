@@ -1193,8 +1193,15 @@ anonymous-only control the same day — no reviewers
 panel mounts in the author view, matching the mount guard above.
 API-side control: review assignments serialized to
 authors/reviewers are anonymized unless the review method is open. The modal
-form posts nothing (no submit button); the grid's second operation
-(`reviewRead`) is never sent by any screen. No app subclasses
+form posts nothing (no submit button). The grid's second operation,
+`reviewRead`, was never sent by any screen, and the Author role no longer
+holds it: pkp/pkp-lib#13343 (`f80f5b9483`, 2026-09-16, "Do not allow access
+for authors to reviewRead") took it out of `AuthorReviewerGridHandler`'s Author role
+assignment and out of its `ReviewAssignmentRequiredPolicy` operation list,
+which leaves the Author `fetchGrid`, `fetchRow` and `readReview`, so the
+"Read Review" window is unchanged. Code-read 2026-09-17 on OJS (lib/pkp
+`efbba94ae7`); the OMP and OPS lib/pkp pointers sit at `360badeef5`, before
+the commit, and receive it with their next pointer bump. No app subclasses
 `AuthorReviewerGridHandler` (empty chains).
 
 <a id="fn-k"></a>

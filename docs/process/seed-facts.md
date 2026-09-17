@@ -330,6 +330,11 @@ behind a line; that scratch is deleted after review.
 - A "Request Sent" row in the Reviewers panel shows no "Review due:" line;
   the dates are in the row's "Edit" window and on the reviewer's step 1.
   Reviewers panel. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K2.md`).
+- A reviewer seeded `invited`, `accepted` or `declined` has a "Review
+  Details" entry and an enabled "Modify Review" like a `completed` one; on a
+  press the window's "Mark as Complete" is enabled too unless the request
+  carries a review form with a required question. Reviewers panel.
+  Live-driven 2026-09-17, OJS and OMP (`.reports/sync/s17/cc-S17.md`).
 - The one-click link in a request or reminder email is
   `invitation/accept?id=N&key=…`, which answers a redirect to
   `reviewer/submission?submissionId=…&reviewId=…`. Mailpit; the reviewer

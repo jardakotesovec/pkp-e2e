@@ -218,7 +218,10 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
    - 6c. **Confirm.** Opening "confirm" while the request is pending switches
      the account to the new address at once and lands on the profile's
      Contact tab, showing the new address, editable, with "Your changes have
-     been saved." at the top right. A signed-out browser
+     been saved." at the top right. {OJS} An account with roles in more
+     than one journal, having asked for the change inside one of them,
+     lands on the site-level profile's Contact tab (Rule 3), not that
+     journal's ⚠ [A18](#a18). A signed-out browser
      meets the Login page first, and the address has already switched by the
      time the tab appears. From then on the user signs in with the new
      address; the old one no longer identifies the account.
@@ -228,8 +231,13 @@ both survive a Save (Rule 11). The types and what the boxes do belong to
      "Confirm Decline Invitation" button. Pressing it discards the request
      and lands on the Contact tab with the old address still in force and
      "Your changes have been saved." at the top right (a signed-out visitor
-     is sent to the Login page, the request already discarded). On a site-level request the reject link answers a blank
-     server error and the request stays pending ⚠ [A3](#a3).
+     is sent to the Login page, the request already discarded). {OJS} For
+     an account with roles in more than one journal that Contact tab is
+     the site-level profile's, as after "confirm" [A18](#a18). A
+     site-level request (Rule 3) is rejected the same way in OJS (since
+     the upstream change of 2026-09-16); in OMP and OPS its "reject" link
+     answers a blank server error and the request stays pending
+     ⚠ [A3](#a3).
    - 6e. **Cancel.** The tab's "Cancel" discards the pending request without
      email: the notice disappears, "Email" becomes editable again showing
      the old address, and the emailed links stop working. The only feedback
@@ -956,7 +964,7 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (the tab named in a site-level address lost on the forward; Rule 3)
   - A2 (an oversized .gif refused and the existing image wiped; Rule 9a)
-  - A3 (a site-level request's "reject" link answering a blank server error; Rule 6d)
+  - A3 (in OMP and OPS, a site-level request's "reject" link answering a blank server error; Rule 6d)
   - A4 (a journal closed to registrations leaving an empty section and listed name-only; Rules 8a and 8c)
   - A7 (the password boxes stopping at 32 characters; *Fields & validation*)
   - A10 (a site-level request's message signing off "Array"; *Side effects*)
@@ -965,6 +973,7 @@ Left out of the scenarios above, by reason:
   - A14 (the site-level privacy link opening "404 Not Found"; Rule 14)
   - A15 (the refused homepage's sentence outliving the corrected save; Rule 9c; scenario 7 marks it)
   - A17 (the values typed before a refused Contact save dropped on the next tab, unasked; Rule 2; scenario 3 marks it)
+  - A18 (in OJS, "confirm" and "reject" landing an account with roles in more than one journal on the site-level profile; Rules 6c and 6d)
   - OPS2 (the "Change Email Address Invitation" template missing from a preprint server's list; *Side effects*)
   - A5 (the "role scheduled to begin" banner shown wherever the user has no role; Rule 13)
   - A6 (unticking a box ending a role a manager granted, without warning; Rule 8b)
@@ -1005,7 +1014,7 @@ unless its Basis line says otherwise.
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | For a user with a role in exactly one journal, a site-level profile address naming a tab lands on the Identity tab with a stray "?0=…" in the address | 🐞 | minor | — |
 | [A2](#a2) | A .gif larger than 150 × 150 is refused, and the account's existing profile image is wiped anyway | 🐞 | latent | — |
-| [A3](#a3) | The emailed "reject" link of an email change requested from the site-level profile answers a blank server error | 🐞 | latent | — |
+| [A3](#a3) | In OMP and OPS, the emailed "reject" link of an email change requested from the site-level profile answers a blank server error; fixed in OJS | 🐞 | latent | — |
 | [A4](#a4) | A journal closed to registrations leaves an empty section on its own Roles tab and is listed name-only, with no boxes, elsewhere | 🐞 | minor | — |
 | [A7](#a7) | The Password tab's three boxes stop accepting input at 32 characters (the *Login & sessions* cap) | 🐞 | user-visible | — |
 | [A10](#a10) | The email-change message of a site-level request signs off "Kind regards, Array" | 🐞 | latent | — |
@@ -1014,6 +1023,7 @@ unless its Basis line says otherwise.
 | [A14](#a14) | On the site-level profile every tab's "privacy statement" link opens a "404 Not Found" page | 🐞 | minor | — |
 | [A15](#a15) | "Please enter a valid URL." stays under "Homepage URL" after the corrected address is saved, beside the saved message | 🐞 | minor | — |
 | [A17](#a17) | After a Contact save the server refused, the typed values are still on screen, but pressing another tab drops them at once, with no question asked | 🐞 | user-visible | — |
+| [A18](#a18) | In OJS, "confirm" and "reject" land an account with roles in more than one journal on the site-level profile, outside the journal where it asked for the email change | 🐞 | minor | — |
 | [OPS2](#ops2) | A preprint server sends the email-change message but its emails list has no "Change Email Address Invitation" row to edit | 🐞 | user-visible | — |
 | [A5](#a5) | The "role scheduled to begin" banner shows in any journal where the user has no role, even when the waiting role is elsewhere | ❓ | minor | — |
 | [A6](#a6) | A user can drop a Reader, Author or Reviewer role a manager gave them by unticking it; an Author is then locked out of My Submissions without warning | ❓ | user-visible | — |
@@ -1050,14 +1060,18 @@ should.
 Basis: probe, 2026-09-03; re-checked 2026-09-04. <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
-**A3 — The "reject" link of a site-level email change crashes** · 🐞 · latent.
+**A3 — The "reject" link of a site-level email change crashes** {OMP OPS} · 🐞 · latent.
 An email change requested from the site-level profile (Rule 3, a multi-journal
 site) produces links without a journal in them. Its "confirm" link works. Its
 "reject" link, which should show the "Decline Invitation" page, answers a
 blank page instead (no heading, no text), because that page insists on a
 journal. The request stays pending; the user can still cancel it from the
-Contact tab.
-Basis: probe, 2026-09-03; re-checked 2026-09-04. <sup>[f-a3](#fn-a3)</sup>
+Contact tab. In OJS the upstream change of 2026-09-16 fixed the defect: the
+same link shows the "Decline Invitation" page and "Confirm Decline
+Invitation" discards the request (where the user then lands: [A18](#a18)).
+OMP and OPS had not received that fix by 2026-09-17; there the blank page
+was last seen 2026-09-04.
+Basis: probe, 2026-09-03; re-checked 2026-09-04; the fix in OJS seen 2026-09-17. <sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
 **A4 — A closed journal still takes its place on the Roles tab** · 🐞 · minor.
@@ -1223,6 +1237,23 @@ saving?", is not asked here (Rule 2), although it exists for exactly this
 case: the tab shows values that were never saved, and the re-rendered tab
 has simply stopped watching them. A defect, not a choice.
 Basis: probe, 2026-09-04 (claim check). <sup>[f-a17](#fn-a17)</sup>
+
+<a id="a18"></a>
+**A18 — Confirming or rejecting an email change takes a multi-journal account out of its journal** {OJS} · 🐞 · minor.
+An account with roles in two journals, signed in at one of them, requests an
+email change on that journal's Contact tab. "confirm", and "reject" followed
+by "Confirm Decline Invitation", should each land on that journal's Contact
+tab (Rules 6c and 6d). Both land on the site-level profile's Contact tab
+instead (Rule 3): the page is titled with the site's name ("Profile | Open
+Journal Systems" on a test install) under the site's header, not the
+journal's, with "Your changes have been saved." at the top right and the
+right address in force. An account with a role in one journal lands on its
+journal's Contact tab, because the site-level profile forwards it there
+(Rule 3). The change completes; the user is taken out of the journal they
+were working in. The landing moved with the upstream change of 2026-09-16
+that fixed [A3](#a3) in OJS; OMP and OPS had not received it by
+2026-09-17.
+Since: 2026-09-16 · Basis: probe, 2026-09-17 (OJS only). <sup>[f-a18](#fn-a18)</sup>
 
 ### OMP
 
@@ -1519,7 +1550,46 @@ a one-language site (the `count > 1` guard; a site-wide change — settle by
 unticking `fr_CA` under Administration › Site Settings › Languages and
 reopening any Contact tab), and the three-day lapse (settle with a request
 older than `expiration_days`: no notice on Contact, both links answering
-"Invitation Unavailable").
+"Invitation Unavailable"). Since pkp/pkp-lib#13181 (lib/pkp `4d9ec3cbd0`
+"Respect Invitation's context rather than request's" and `aeac6f75cf` "Fix
+redirect to profile/contact after needed login", both 2026-09-16; on OJS at
+lib/pkp `efbba94ae7`, while the OMP and OPS lib/pkp pointers sit at
+`360badeef5`, before both) the links are built differently on OJS:
+`InvitationHandler::getActionUrl()` takes the path from the invitation's own
+journal (`Invitation::getContextPath()`, `index` when it has none) instead of
+the request's, and writes no language segment (`urlLocaleForPage: ''`). The
+email-change invitation is created without a journal wherever the change is
+requested (`BaseProfileForm::execute()`: `$invite->initialize($user->getId())`),
+so on OJS every message's "confirm" and "reject" links read
+`index/invitation/accept?id=…&key=…` and `index/invitation/decline?id=…&key=…`,
+and the site answers each with one redirect that inserts the language
+(`index/en/invitation/…`); OMP and OPS still mail
+`{press or server}/invitation/…` for a request made inside one. The redirect
+controllers (`ChangeProfileEmailInviteRedirectController::acceptHandle()` and
+`confirmDecline()`, `InvitationActionRedirectController::declineHandle()`)
+take the same path, so both landings go to `index/user/profile/contact`, and
+`ProfileHandler::profile()` forwards a one-journal account from there to
+`{journal}/user/profile/contact`, the tab now kept as a path (`aeac6f75cf`
+passes `$args` as the path). Live-probed 2026-09-17, OJS, three runs, two of
+them on a freshly reset database (Rules 6c–6d; the kept script
+`shared/playwright/checks/sync/pkp-lib-13181/emailchange-links.js`, key `s2`;
+outputs `.reports/sync/s17-13181/` and `.reports/sync/s17-13181b/`): a
+one-journal author's request saved at `{journal}/user/profile#contact` mailed
+the two `index/invitation/…` links; "confirm", signed in, went
+`index/invitation/accept` → `index/en/invitation/accept` →
+`index/en/user/profile/contact` → `{journal}/user/profile/contact` →
+`{journal}/user/profile#contact`, the journal's Contact tab with the new
+address editable and the saved toast; "reject" showed "Decline Invitation" at
+`index/en/invitation/decline`, and "Confirm Decline Invitation" (POST
+`index/en/invitation/confirmDecline`) followed the same forward to the
+journal's Contact tab, the old address kept, the toast shown; "confirm",
+signed out, showed the Login page under the site's header
+(`index/en/login?source=…/index/en/user/profile/contact`) and after sign-in
+the same forward reached the journal's Contact tab with the address already
+switched; a used link showed "Invitation Unavailable" with "Login" and
+"Register" leading to the site's `index/en/login` and
+`index/en/user/register`. Rules 6c and 6d read as written for that account;
+the two-journal account is finding A18.
 
 <a id="fn-e"></a>
 **e** — `PKP\user\form\RolesForm` (`user/rolesForm.tpl` → `user/userGroups.tpl`
@@ -1992,7 +2062,25 @@ three apps, as a two-journal user: the site-level request's links read
 answered HTTP 500 with an empty body, the Contact tab still pending
 afterwards; "confirm" landed on `index/en/user/profile#contact` with the new
 address. Live-probed 2026-09-04 (claim check), all three apps: holds (500, 407 bytes, empty
-title; the tab's "Cancel" then cleared the request).
+title; the tab's "Cancel" then cleared the request). Fixed on OJS by
+pkp/pkp-lib#13181 (lib/pkp `4d9ec3cbd0`, 2026-09-16; OJS at lib/pkp
+`efbba94ae7`): `declineHandle()` builds the form's address from
+`$this->invitation->getContextPath()` (`index` for an invitation without a
+journal) and no longer reads `$request->getContext()`; since that commit
+every email-change link is the site-level one, wherever the request was made
+(note d). Live-probed 2026-09-17, OJS, three runs, two on a freshly reset
+database: a two-journal account's request, saved on one journal's Contact
+tab, mailed `index/invitation/decline?id=…&key=…`; opened signed in, it went
+`index/invitation/decline` 302 → `index/en/invitation/decline` 200, the
+"Decline Invitation" page; "Confirm Decline Invitation" POSTed
+`index/en/invitation/confirmDecline` 302 → the Contact tab, the request gone
+and the old address kept (the landing is finding A18). A request saved on
+the site-level profile itself was not driven that day; it creates the same
+journal-less invitation and mails the same address. The OMP and OPS lib/pkp
+pointers sat at `360badeef5`, before the commit, on 2026-09-17 and were not
+re-driven, so the entry stays open for them on the 2026-09-04 evidence. The
+next upstream sync that finds both pointers past `4d9ec3cbd0` re-drives the
+site-level "reject" link on OMP and OPS and, if it holds, retires A3.
 
 <a id="fn-a4"></a>
 **f-a4** — `user/userGroups.tpl`: `{if $currentContext}` renders the
@@ -2174,6 +2262,50 @@ opened the other one); a phone typed into the re-rendered tab after the
 server refusal raised it as well, and a tab whose last save succeeded asked
 nothing.
 
+<a id="fn-a18"></a>
+**f-a18** — pkp/pkp-lib#13181 ("Invitation accept/decline URLs name the
+wrong journal when the invitation is sent from a queued job"), lib/pkp
+`4d9ec3cbd0` and `aeac6f75cf` (both 2026-09-16), on OJS at lib/pkp
+`efbba94ae7`; the OMP and OPS pointers sat at `360badeef5`, before both, on
+2026-09-17. `InvitationHandler::getActionUrl()` and
+`ChangeProfileEmailInviteRedirectController` (the redirects of
+`acceptHandle()` and `confirmDecline()`) take the path from
+`Invitation::getContextPath()`, and the email-change invitation never
+receives the journal it was requested in (`BaseProfileForm::execute()`:
+`$invite->initialize($user->getId())`, no context id), so both landings are
+`index/user/profile/contact`; `ProfileHandler::profile()` forwards only an
+account with exactly one journal (note b). Before the commits
+`getActionUrl()` took the request's journal (`$request->getContext()`), so a
+request made inside journal A mailed `{A}/invitation/…` and both landings
+were `{A}/user/profile#contact` (the pre-change code; the 2026-09-03/04
+probes of note d, which drove one-journal accounts; and, live-probed
+2026-09-17 with the kept script below on OPS, whose lib/pkp `360badeef5`
+still carries the pre-change code: an account with roles in two servers,
+signed in at server A, got the links `{A}/invitation/accept?…` and
+`{A}/invitation/decline?…` and landed on `{A}/user/profile#contact` after
+"confirm" and after "reject"). Live-probed 2026-09-17,
+OJS, three runs, two on a freshly reset database (the kept script
+`shared/playwright/checks/sync/pkp-lib-13181/emailchange-links.js`, key `s3`,
+with `s2` the one-journal control; outputs `.reports/sync/s17-13181/` and
+`.reports/sync/s17-13181b/`): an author enrolled in two scratch journals,
+signed in at A, saved the request at `{A}/user/profile#contact`; the links
+read `index/invitation/accept|decline?id=…&key=…`; "confirm" went
+`index/invitation/accept` → `index/en/invitation/accept` →
+`index/en/user/profile/contact` → 200 `index/en/user/profile#contact`, page
+title "Profile | Open Journal Systems", the header reading "Journals" and
+"Open Journal Systems", the Contact tab with the new address and the toast
+"Your changes have been saved."; "reject" then "Confirm Decline Invitation"
+landed on the same address with the old address kept and the toast. The
+one-journal control landed on `{journal}/user/profile#contact` each time.
+Not driven: the signed-out "confirm" of a two-journal account, OMP, and
+OPS with the change. Passing the request's context id to `initialize()`, or falling back to
+the request's journal when the invitation has none, would restore the
+landing. Written up for the team in
+`docs/reports/2026-09-17-pkp-lib-13181.md` (a temporary report, deleted once
+addressed; git history keeps it), whose second finding (a "reject" link
+mailed before the upgrade) has no state on a fresh install and is not in
+this spec.
+
 <a id="fn-omp1"></a>
 **f-omp1** — `omp/registry/userGroups.xml`: `permitSelfRegistration="true"`
 on `default.groups.name.author` ("Author"), `chapterAuthor` ("Chapter
@@ -2227,7 +2359,7 @@ user's request delivered the same mail. Live-probed 2026-09-04 (claim check): ho
 | Password tab | Profile → "Password" | AFFU-089..092 |
 | Notifications tab (shell only) | Profile → "Notifications" | AFFU-058 (boxes AFFU-093..095: [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md)) |
 | API Key tab | Profile → "API Key" | AFFU-096..098 |
-| Email-change confirmation mail + links | `CHANGE_EMAIL` → `{journal}/invitation/accept?id=…&key=…` · `invitation/decline?…` → POST `confirmDecline` | MAIL-003 |
+| Email-change confirmation mail + links | `CHANGE_EMAIL` → {OJS, since pkp/pkp-lib#13181} `index/invitation/accept?id=…&key=…` · `index/invitation/decline?…` for every request · {OMP OPS} `{press or server}/invitation/accept?id=…&key=…` · `…/invitation/decline?…` (`index/…` for a site-level request) → POST `confirmDecline` | MAIL-003 |
 | User record | `lib/pkp/schemas/user.json` (the fields these tabs edit) | SET-027 |
 | Config, no screen | `config.inc.php` `[security] api_key_secret` · `[invitations] expiration_days` · `[logs] log_audit` | — |
 
