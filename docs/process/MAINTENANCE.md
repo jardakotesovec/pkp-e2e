@@ -23,7 +23,8 @@ scheduled prompt only points here; this section is the day's order.
    the suite", step 5).
 6. Read the stable line for regressions ("The stable line:
    `stable-3_5_0`" below): the regression hunt alone, after `main` is
-   synced and green, never before.
+   synced and green, never before, because the `main` read is its
+   context: most of what 3.5 receives was read on `main` first.
 7. If about a month has passed since the last open-questions post noted in
    the PROGRESS banner, post `npm run questions` to the channel.
 8. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
@@ -178,7 +179,17 @@ command points it at the line; without it every command means `main`.
      stable-only regression most likely sits.
    - `stable-only`: no counterpart on `main`. The full question of sync
      loop step 5.
-3. **Hunt regressions** as sync loop step 5, same bar: a trivial commit
+3. **Carry `main`'s findings over.** Before reading the line's own
+   range, ask of every regression the `main` sync confirmed today and of
+   every ci-triage "Open regressions" row whether 3.5 has it too: the
+   introducing commits' twins are in the line's history when
+   `git log --oneline --grep '#<issue>' HEAD` inside the line checkout
+   (or the listing above) names them. When they are, run the row's kept
+   script on the line's fleet (below) and add the answer to the row and
+   to the report: "3.5 shows it too" or "3.5 does not, at `<sha>`". A
+   regression the team will fix on `main` and backport is one report, not
+   two.
+4. **Hunt regressions** as sync loop step 5, same bar: a trivial commit
    gets its answer in the log line, a substantive one gets a reader
    rendered from `briefs/regression-read.md` with `{{line}}` set to
    `stable-3_5_0`, and nothing unconfirmed is reported. The reproduction
@@ -194,7 +205,7 @@ command points it at the line; without it every command means `main`.
    `method_exists`: a no-op on `main`) when it is a line or two, otherwise
    set the state through the screens. Never bend a builder further than
    that for the line.
-4. **Report** a confirmed regression as sync loop step 5 says, with the
+5. **Report** a confirmed regression as sync loop step 5 says, with the
    branch in the report's title and file name
    (`docs/reports/<date>-<repo>-<pr>-stable-3_5_0.md`) and one sentence on
    whether `main` shows the same, driven on both. A regression `main`
@@ -203,7 +214,7 @@ command points it at the line; without it every command means `main`.
    `stable-3_5_0` in its Apps cell, and its kept script under
    `shared/playwright/checks/sync/<repo>-<pr>/` beside the `main` twin's
    when there is one. No register entry: the specs describe `main`.
-5. **Advance the line's baselines** in
+6. **Advance the line's baselines** in
    `docs/tracking/upstream-sync-stable-3_5_0.md` with a dated entry, one
    line per commit (sha, class with the `main` twin, verdict), and re-run
    the open stable-line regression rows at the new tips. The rule of sync
