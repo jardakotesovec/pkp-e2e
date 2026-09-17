@@ -1,6 +1,6 @@
 ---
 name: reader-comments-and-moderation
-status: draft
+status: verified
 ---
 
 # Reader comments & moderation {OJS}

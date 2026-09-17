@@ -636,7 +636,11 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         const response = await deleted;
         expect(response.ok(), `Delete Report answered ${response.status()}`).toBe(true);
         await expect(this.confirmDialog('Delete Report')).toBeHidden({timeout: T});
-        await expect(this.reportPanel()).toBeHidden({timeout: T});
+        // Gone from the DOM, not merely hidden: while the closing report panel
+        // is still registered as open, the next "Delete Report" from a row
+        // closes "it" again instead of refetching the table (ci-triage flake
+        // watch, 2026-09-17).
+        await expect(this.reportPanel()).toHaveCount(0, {timeout: T});
         await refetched;
     }
 
@@ -675,8 +679,23 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         await expect(this.reportPanel()).toBeVisible({timeout: T});
     }
 
+    /**
+     * Wait out the modal store's close window. The store keeps a closed side
+     * modal's slot for 450 ms on a timer, and its `isSideModalOpened()` reads
+     * the slot, not the open flag; a "Delete Report" confirmed from a row
+     * inside that window takes the "close the report panel" branch and never
+     * refetches the table, which keeps the deleted row (red in every local
+     * full run of 2026-09-17, green alone, on CI and under tracing). A page
+     * timer set now with a longer delay is due after the app's, so it fires
+     * after it whatever the load; no hand can be this fast.
+     */
+    async pastSideModalCloseWindow() {
+        await this.page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
+    }
+
     /** "…" › "Delete Report" on a report row: the confirm dialog opens. */
     async deleteReportFromRow(row) {
+        await this.pastSideModalCloseWindow();
         await this.openReportMenu(row);
         await this.menuItem('Delete Report').click();
         await expect(this.confirmDialog('Delete Report')).toBeVisible({timeout: T});

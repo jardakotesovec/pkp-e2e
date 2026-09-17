@@ -887,8 +887,23 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         return this.reportPanel();
     }
 
+    /**
+     * Wait out the modal store's close window. The store keeps a closed side
+     * modal's slot for 450 ms on a timer, and its `isSideModalOpened()` reads
+     * the slot, not the open flag; a "Delete Report" confirmed from a row
+     * inside that window takes the "close the report panel" branch and never
+     * refetches the table, which keeps the deleted row (red in every local
+     * full run of 2026-09-17, green alone, on CI and under tracing). A page
+     * timer set now with a longer delay is due after the app's, so it fires
+     * after it whatever the load; no hand can be this fast.
+     */
+    async pastSideModalCloseWindow() {
+        await this.page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
+    }
+
     /** "Delete Report" from a report row's menu, then "Delete" (Rule 15). */
     async deleteReportFromRow(reportRow) {
+        await this.pastSideModalCloseWindow();
         await this.openRowMenu(reportRow);
         await this.menuItem('Delete Report').click();
         await this.confirmDeleteReport();

@@ -422,7 +422,12 @@ trips.
   (`.reports/U11/alone-ops-u49s6.log`). Three sightings now, one on CI:
   the source-version values not arriving under load is the class, not
   the wait's length; for the maintenance session to read the dialog's
-  fetch for the second version.
+  fetch for the second version. **Fourth sighting 2026-09-17** (U14
+  feature session, the VM, OMP final attempt 3 on a reset database at
+  four workers, `.reports/U14/final-run-omp-attempt3.log`, the one red of
+  233): U49 S4's first "Create New Version" dialog, the stage select ""
+  through the 10 s wait for "VoR" behind the hardened opener; the first
+  sighting on OMP and in S4, so the class is the dialog's, not S6's.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -622,6 +627,14 @@ trips.
   headless Chromium on darwin against the keyed `WorkflowPublicationForm`
   (sync 2026-09-16). **Watch condition**: a red of this read on CI or the
   VM; until then the OPS full green on a Mac push is CI's.
+- **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
+  OJS, once: 2026-09-17, the VM's first U14 final at four workers,
+  `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
+  and the dialog was still counted 30 s later (the test's positive mail
+  control, `UsersPage.sendEmail`); green in the second final the same day
+  (255 of 255) and in the file's own runs. Watch condition: a second
+  sighting; then the error context says whether the form re-rendered
+  with a refusal or the close never ran.
 - **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
   `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
   and the tests' is local: between 00:00 and 02:00 CEST every "today + N

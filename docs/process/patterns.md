@@ -55,7 +55,17 @@ Each of these has bitten at least once.
    an address that lands a side modal on top at once (the Comments page with `?commentId=N`) is hidden from role queries
    behind that modal: read the page's own heading by CSS (`main h1`), never
    `getByRole('heading')`, or the read races the modal and loses on CI (U14
-   S5 OJS, red on both attempts of two push runs, 2026-09-17).
+   S5 OJS, red on both attempts of two push runs, 2026-09-17). The modal
+   store keeps a closed side modal's slot for 450 ms on a timer and its
+   `isSideModalOpened()` reads the slot, not the open flag, so an action
+   that branches on it right after a close takes the wrong branch (the
+   Comments page's "Delete Report" from a row, confirmed inside the window,
+   closes "the report panel" again instead of refetching and keeps the
+   deleted row: red in five of five untraced local full runs on the three
+   apps, green alone, on CI and under tracing). Wait the window out with a
+   page timer longer than the app's (`pastSideModalCloseWindow()` in the
+   U14 page objects): it is due after the app's timer, so it fires after
+   it whatever the load.
 
 5. **The side-modal outer wrapper reports `visibility: hidden`** while it
    opens, and permanently on some wrappers. Anchor `toBeVisible()` on inner
