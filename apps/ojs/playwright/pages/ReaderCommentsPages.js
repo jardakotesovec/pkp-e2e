@@ -598,8 +598,14 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         await this.tableSettled();
     }
 
+    /**
+     * The page's "Comments" heading, by CSS: opened at a comment's address the
+     * comment panel lands on top at once, and as a modal it hides the page
+     * behind it from role queries (red on CI on both attempts, 2026-09-17,
+     * where the panel wins the race the VM loses).
+     */
     heading() {
-        return this.page.locator('main').getByRole('heading', {level: 1, name: 'Comments', exact: true});
+        return this.page.locator('main h1', {hasText: /^\s*Comments\s*$/});
     }
 
     tabs() {

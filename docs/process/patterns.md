@@ -51,7 +51,12 @@ Each of these has bitten at least once.
    form. A closed Vue side modal leaves a hidden shell in the DOM until the
    next navigation, so `getByRole` on the table behind it returns nothing
    until then; and a Vue form's "Save" is disabled after a refused save
-   until the flagged boxes change (a click on it hangs).
+   until the flagged boxes change (a click on it hangs). A page opened at
+   an address that lands a side modal on top at once (the Comments page with `?commentId=N`) is hidden from role queries
+   behind that modal: read the page's own heading by CSS (`main h1`), never
+   `getByRole('heading')`, or the read races the modal and loses on CI (U14
+   S5 OJS, red on both attempts of two push runs, 2026-09-17).
+
 5. **The side-modal outer wrapper reports `visibility: hidden`** while it
    opens, and permanently on some wrappers. Anchor `toBeVisible()` on inner
    content, never on the wrapper.
