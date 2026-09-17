@@ -87,6 +87,33 @@
  *   every fresh context (the schema default, stored as 0); on, a published
  *   item's landing page carries the comments blocks (OJS) and the
  *   moderators' side menu the Content › Comments entry (every app).
+ * - enableAnnouncements (bool), announcementsIntroduction (localized),
+ *   numAnnouncementsHomepage (int ≥ 0 or null) — Settings › Website › Setup ›
+ *   "Announcements" tab's three fields (U12; PKPAnnouncementSettingsForm, a
+ *   lib/pkp form the three apps share; OMP labels the text "Additional
+ *   Information"). Off / empty / empty on every fresh context.
+ * - sidebar (list of block plugin names, e.g. ['AnnouncementFeedBlockPlugin'])
+ *   — Settings › Website › Appearance › Setup "Sidebar" (U12;
+ *   PKPAppearanceSetupForm, shared by the three apps). Validated as the form's
+ *   save is (PKPContextService::validate refuses a block no enabled plugin of
+ *   the context provides) after the context's block plugins are loaded the way
+ *   a request inside the context loads them (loadBlockPlugins()).
+ * - plugins {<lowercased plugin class name>: {enabled*, settings?}} — the
+ *   Settings › Website › Plugins grid's enable / disable for that context
+ *   (U12; PluginGridHandler::enable: the plugin's `enabled` setting for the
+ *   context and the audit-log line, its session-bound toast not mirrored) and
+ *   the plugin's own settings window (each setting through
+ *   Plugin::updateSetting, as its form's execute writes it). Site-wide plugins
+ *   are refused (their state is global, D9).
+ * - announcementTypes[] {name*} and announcements[] {title*, descriptionShort?,
+ *   description?, dateExpire?, type?} — the "Announcement Types" grid's Add
+ *   window (AnnouncementTypeForm::execute: AnnouncementTypeDAO::insertObject)
+ *   and the Announcements panel's "Add Announcement" › "Save" (U12;
+ *   PKPAnnouncementController::add: Repo::announcement()->validate,
+ *   Announcement::create, then the controller's own notifyUsers() with "Send
+ *   Email" unticked, invoked by reflection). Seeded last, after users[], so
+ *   the queued notification reaches the scratch users the way the panel's
+ *   Save reaches every user with a role.
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -95,13 +122,20 @@
 namespace PKP\testing;
 
 use APP\core\Application;
+use APP\facades\Repo;
+use PKP\announcement\Announcement;
 use PKP\context\Context;
 use Illuminate\Support\Facades\DB;
 use PKP\db\DAORegistry;
 use PKP\orcid\OrcidManager;
+use PKP\plugins\Plugin;
+use PKP\plugins\PluginRegistry;
 use PKP\reviewForm\ReviewFormElement;
+use PKP\security\AuditEvent;
+use PKP\security\AuditLog;
 use PKP\services\interfaces\EntityWriteInterface;
 use PKP\submission\reviewAssignment\ReviewAssignment;
+use Psr\Log\LogLevel;
 use PKP\testing\ContextFactory;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
@@ -181,6 +215,9 @@ abstract class PKPContextScenarioBuilder
         $reviewSettings = $this->parseReviewSettings($root, $primaryLocale);
         $intakeSettings = $this->parseIntakeSettings($root, $primaryLocale);
         $reviewFormPlans = $this->parseReviewForms($root, $primaryLocale);
+        $pluginPlans = $this->parsePlugins($root);
+        $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
+        $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $root->assertConsumed();
 
         if (Application::getContextDAO()->getByPath((string) $contextData['path'])) {
@@ -218,12 +255,24 @@ abstract class PKPContextScenarioBuilder
             $context = $contextService->edit($context, $orcidSettings, Application::get()->getRequest());
         }
 
+        // The Plugins grid's enable / disable and the plugins' own settings
+        // windows, before the settings forms: the Appearance "Sidebar" save
+        // refuses a block whose plugin is not enabled for the context.
+        $touchedPlugins = [];
+        foreach ($pluginPlans as $plan) {
+            $touchedPlugins[] = $this->applyPlugin($context, $plan);
+        }
+
         // The settings forms' save (Review "Setup" / "Reviewer Guidance",
-        // Submission "Author Guidelines" / "Metadata", Emails): PUT
-        // contexts/{id} → PKPContextController::edit validates against the
-        // context schema with the context's form locales, then
-        // PKPContextService::edit writes.
+        // Submission "Author Guidelines" / "Metadata", Emails, Website ›
+        // Setup "Announcements", Appearance "Sidebar"): PUT contexts/{id} →
+        // PKPContextController::edit validates against the context schema
+        // with the context's form locales, then PKPContextService::edit
+        // writes.
         $formSettings = ($reviewSettings ?? []) + $intakeSettings['settings'];
+        if (array_key_exists('sidebar', $formSettings)) {
+            $this->loadBlockPlugins($context, $touchedPlugins);
+        }
         if ($formSettings !== []) {
             $specKeys = $intakeSettings['specKeys'] + array_combine(
                 array_keys($reviewSettings ?? []),
@@ -251,12 +300,261 @@ abstract class PKPContextScenarioBuilder
             $users[] = ['id' => $user->getId(), 'username' => $user->getUsername()];
         }
 
+        // Announcement types, then announcements: after users[], so the
+        // panel's own notification fan-out reaches the scratch users.
+        $announcementTypes = [];
+        $typeIds = [];
+        foreach ($announcementTypePlans as $plan) {
+            $typeId = $this->addAnnouncementType($context, $plan);
+            $typeIds[$plan['key']] = $typeId;
+            $announcementTypes[] = ['id' => $typeId, 'name' => $plan['key']];
+        }
+        $announcements = [];
+        foreach ($announcementPlans as $plan) {
+            $announcements[] = $this->addAnnouncement($context, $plan, $typeIds);
+        }
+
         return [
             'tag' => $tag,
             'contextId' => $context->getId(),
             'path' => $context->getPath(),
             'users' => $users,
+            'announcementTypes' => $announcementTypes,
+            'announcements' => $announcements,
         ];
+    }
+
+    /**
+     * The optional `plugins` map → one plan per plugin: the plugin instance
+     * (every category loaded from disk, as the Plugins grid lists them),
+     * its wanted state and its settings. Parse phase: no writes.
+     *
+     * @return array<int, array{key: string, plugin: Plugin, enabled: bool, settings: array}>
+     */
+    protected function parsePlugins(Spec $root): array
+    {
+        $spec = $root->child('plugins');
+        if ($spec === null) {
+            return [];
+        }
+        $byName = [];
+        foreach (PluginRegistry::loadAllPlugins() as $plugin) {
+            $byName[strtolower($plugin->getName())] = $plugin;
+        }
+        $plans = [];
+        foreach (array_keys((array) $root->get('plugins')) as $key) {
+            $plugin = $byName[strtolower((string) $key)] ?? throw new SpecException("plugins.{$key}", "plugins.{$key} names no installed plugin (keys are the plugin's lowercased class name, e.g. announcementfeedplugin)");
+            if ($plugin->isSitePlugin()) {
+                throw new SpecException("plugins.{$key}", "plugins.{$key} is a site-wide plugin; its state is global, not a scratch context's");
+            }
+            $planSpec = $spec->child((string) $key);
+            $enabled = $planSpec->require('enabled');
+            if (!is_bool($enabled)) {
+                throw new SpecException("plugins.{$key}.enabled", "plugins.{$key}.enabled must be a boolean");
+            }
+            if ($enabled ? !$plugin->getCanEnable() : !$plugin->getCanDisable()) {
+                throw new SpecException("plugins.{$key}.enabled", "plugins.{$key} cannot be " . ($enabled ? 'enabled' : 'disabled') . ' from the Plugins grid');
+            }
+            $settings = [];
+            if ($planSpec->has('settings')) {
+                $raw = $planSpec->get('settings');
+                if (!is_array($raw) || array_is_list($raw)) {
+                    throw new SpecException("plugins.{$key}.settings", "plugins.{$key}.settings must be a map of setting name to scalar value");
+                }
+                foreach ($raw as $name => $value) {
+                    if (!is_scalar($value) && $value !== null) {
+                        throw new SpecException("plugins.{$key}.settings.{$name}", "plugins.{$key}.settings.{$name} must be a scalar (what the plugin's settings window posts)");
+                    }
+                    $settings[(string) $name] = $value;
+                }
+            }
+            $planSpec->assertConsumed();
+            $plans[] = ['key' => (string) $key, 'plugin' => $plugin, 'enabled' => $enabled, 'settings' => $settings];
+        }
+        return $plans;
+    }
+
+    /**
+     * Enable or disable one plugin for the context the way the Plugins
+     * grid does (PluginGridHandler::enable / ::disable): the plugin's
+     * `enabled` setting for the context (LazyLoadPlugin::setEnabled writes
+     * the request's context; the builder names the scratch context) and
+     * the audit-log line. Not mirrored: the grid's trivial "plugin
+     * enabled" toast for the acting user. Then each setting as the plugin's
+     * settings form's execute writes it (Plugin::updateSetting).
+     */
+    protected function applyPlugin(Context $context, array $plan): Plugin
+    {
+        $plugin = $plan['plugin']; /** @var Plugin $plugin */
+        $plugin->updateSetting($context->getId(), 'enabled', $plan['enabled'], 'bool');
+        AuditLog::log($plan['enabled'] ? AuditEvent::PLUGIN_ENABLE : AuditEvent::PLUGIN_DISABLE, LogLevel::NOTICE, [
+            'pluginName' => $plugin->getName(),
+            'category' => $plugin->getCategory(),
+        ]);
+        foreach ($plan['settings'] as $name => $value) {
+            $plugin->updateSetting($context->getId(), $name, $value);
+        }
+        return $plugin;
+    }
+
+    /**
+     * Load the context's block plugins the way a request inside the context
+     * has them before the Appearance form's save validates "Sidebar"
+     * (PKPContextService::validate: PluginRegistry::loadCategory('blocks',
+     * true) must know the block). The builder runs at site level, where
+     * the generic plugins registered with no context and provided no
+     * blocks, so the stand-alone blocks enabled for the context are loaded
+     * for it, and every generic plugin the `plugins` key enabled is
+     * registered again for the context (Plugin::register with the context
+     * id), which is where a plugin such as the Announcement Feed registers
+     * the block it provides.
+     *
+     * @param Plugin[] $touchedPlugins
+     */
+    protected function loadBlockPlugins(Context $context, array $touchedPlugins): void
+    {
+        PluginRegistry::loadCategory('blocks', true, $context->getId());
+        foreach ($touchedPlugins as $plugin) {
+            if ($plugin->getCategory() === 'generic' && $plugin->getEnabled($context->getId())) {
+                $plugin->register('generic', $plugin->getPluginPath(), $context->getId());
+            }
+        }
+    }
+
+    /**
+     * The optional `announcementTypes[]` list → one plan per type: its
+     * localized name and the primary-locale name announcements[] refer to.
+     * Parse phase: no writes.
+     */
+    protected function parseAnnouncementTypes(Spec $root, string $primaryLocale): array
+    {
+        $plans = [];
+        foreach ($root->childList('announcementTypes') as $spec) {
+            $name = $spec->localized('name', $primaryLocale);
+            if ($name === null || trim((string) ($name[$primaryLocale] ?? '')) === '') {
+                throw new SpecException("{$spec->path}.name", 'An announcement type needs a name in the primary locale (the "Add Announcement Type" window\'s "Name")');
+            }
+            $key = (string) $name[$primaryLocale];
+            if (isset(array_column($plans, 'key', 'key')[$key])) {
+                throw new SpecException("{$spec->path}.name", "Two announcement types are named \"{$key}\"; announcements[].type refers to a type by its name");
+            }
+            $spec->assertConsumed();
+            $plans[] = ['key' => $key, 'name' => $name];
+        }
+        return $plans;
+    }
+
+    /**
+     * The optional `announcements[]` list → the props the panel's "Save"
+     * posts to POST announcements, per entry. Parse phase: the shape and
+     * the type reference only; the app's own validation runs at write time
+     * against the context's form locales.
+     */
+    protected function parseAnnouncements(Spec $root, string $primaryLocale, array $typePlans): array
+    {
+        $typeKeys = array_column($typePlans, 'key');
+        $plans = [];
+        foreach ($root->childList('announcements') as $spec) {
+            $title = $spec->localized('title', $primaryLocale);
+            if ($title === null) {
+                throw new SpecException("{$spec->path}.title", 'An announcement needs a title (the panel\'s "Title")');
+            }
+            $params = ['title' => $title];
+            foreach (['descriptionShort', 'description'] as $key) {
+                if ($spec->has($key)) {
+                    $value = $spec->get($key);
+                    if (!is_string($value) && !is_array($value)) {
+                        throw new SpecException("{$spec->path}.{$key}", "{$key} must be a string or a locale map");
+                    }
+                    $params[$key] = $spec->localized($key, $primaryLocale);
+                }
+            }
+            if ($spec->has('dateExpire')) {
+                // The panel's "Expiry Date" box: typed as YYYY-MM-DD; the
+                // app's validator refuses any other shape (400 naming the
+                // key). A past date is accepted, as the box accepts it.
+                $value = $spec->get('dateExpire');
+                if (!is_string($value)) {
+                    throw new SpecException("{$spec->path}.dateExpire", 'dateExpire must be a date string, YYYY-MM-DD as the "Expiry Date" box is typed');
+                }
+                $params['dateExpire'] = $value;
+            }
+            $type = null;
+            if ($spec->has('type')) {
+                $type = $spec->get('type');
+                if (!is_string($type) || !in_array($type, $typeKeys, true)) {
+                    throw new SpecException("{$spec->path}.type", 'type must name an entry of announcementTypes[] by its primary-locale name' . ($typeKeys ? ' (one of: ' . implode(', ', $typeKeys) . ')' : ' (none declared)'));
+                }
+            }
+            $spec->assertConsumed();
+            $plans[] = ['path' => $spec->path, 'params' => $params, 'type' => $type];
+        }
+        return $plans;
+    }
+
+    /**
+     * Create one announcement type the way the "Announcement Types" grid's
+     * Add window does (AnnouncementTypeForm::execute: a new data object
+     * with the context id and the localized name, AnnouncementTypeDAO::
+     * insertObject).
+     */
+    protected function addAnnouncementType(Context $context, array $plan): int
+    {
+        $announcementTypeDao = DAORegistry::getDAO('AnnouncementTypeDAO'); /** @var \PKP\announcement\AnnouncementTypeDAO $announcementTypeDao */
+        $announcementType = $announcementTypeDao->newDataObject();
+        $announcementType->setContextId($context->getId());
+        $announcementType->setName($plan['name'], null);
+        return $announcementTypeDao->insertObject($announcementType);
+    }
+
+    /**
+     * Create one announcement the way the panel's "Save" does
+     * (PKPAnnouncementController::add): the props with the app's context
+     * assoc type and the context id, Repo::announcement()->validate against
+     * the context's form locales (a refusal is a 400 naming the entry's
+     * field, the panel's own message), Announcement::create (the model's
+     * save fires Announcement::add), then the controller's own
+     * notifyUsers() — the queued NewAnnouncementNotifyUsers job for every
+     * user of the context subscribed to the notification, with "Send an
+     * email about this to all registered users." unticked (the box's
+     * default) — invoked by reflection so the roster query and the batch
+     * are the controller's, not a copy. The image is a state the panel
+     * builds (out of scope).
+     *
+     * @return array{id: int, title: string}
+     */
+    protected function addAnnouncement(Context $context, array $plan, array $typeIds): array
+    {
+        $params = $plan['params'];
+        // The panel posts every box, filled or not: an empty "Short
+        // Description" / "Announcement" arrives as an empty string per form
+        // locale, "Image", "Expiry Date" and the type as empty strings the
+        // controller's convertStringsToSchema turns into null, and each is
+        // stored as an empty setting row (parity drive 2026-09-17: by-hand
+        // rows `description` = '' per locale and `image` = ''), so the
+        // builder posts the same.
+        foreach ((array) $context->getSupportedFormLocales() as $locale) {
+            foreach (['title', 'descriptionShort', 'description'] as $key) {
+                $params[$key][$locale] ??= '';
+            }
+        }
+        $params['image'] = null;
+        $params['dateExpire'] ??= null;
+        $params['typeId'] = $plan['type'] !== null ? $typeIds[$plan['type']] : null;
+        $params['assocType'] = Application::getContextAssocType();
+        $params['assocId'] = $context->getId();
+        $errors = Repo::announcement()->validate(null, $params, (array) $context->getSupportedFormLocales(), $context->getPrimaryLocale());
+        if (!empty($errors)) {
+            $field = explode('.', (string) array_key_first($errors))[0];
+            throw new SpecException("{$plan['path']}.{$field}", 'The Add Announcement panel would refuse this: ' . json_encode($errors));
+        }
+        $announcement = Announcement::create($params);
+
+        $controller = new \PKP\API\v1\announcements\PKPAnnouncementController();
+        $notifyUsers = new \ReflectionMethod($controller, 'notifyUsers');
+        $notifyUsers->invoke($controller, Application::get()->getRequest(), $context, $announcement->id, false);
+
+        return ['id' => $announcement->id, 'title' => (string) ($params['title'][$context->getPrimaryLocale()] ?? reset($params['title']))];
     }
 
     /**
@@ -401,6 +699,56 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['enablePublicComments'] = $value;
             $specKeys['enablePublicComments'] = 'enablePublicComments';
+        }
+
+        // Settings › Website › Setup › "Announcements"
+        // (PKPAnnouncementSettingsForm, a lib/pkp form the three apps share):
+        // the "Enable announcements" box (a checkbox FieldOptions over the
+        // schema's boolean), "Introduction" (a multilingual rich text;
+        // "Additional Information" on OMP) and "Display on Homepage" (a
+        // FieldText over the schema's integer, min:0; emptied it posts null).
+        if ($root->has('enableAnnouncements')) {
+            $hasProperty('enableAnnouncements') || throw new SpecException('enableAnnouncements', 'enableAnnouncements is not a setting of this app\'s context schema');
+            $value = $root->get('enableAnnouncements');
+            if (!is_bool($value)) {
+                throw new SpecException('enableAnnouncements', 'enableAnnouncements must be a boolean (true: the "Enable announcements" box ticked, false: unticked)');
+            }
+            $settings['enableAnnouncements'] = $value;
+            $specKeys['enableAnnouncements'] = 'enableAnnouncements';
+        }
+        if ($root->has('announcementsIntroduction')) {
+            $hasProperty('announcementsIntroduction') || throw new SpecException('announcementsIntroduction', 'announcementsIntroduction is not a setting of this app\'s context schema');
+            $value = $root->get('announcementsIntroduction');
+            if (!is_string($value) && !is_array($value)) {
+                throw new SpecException('announcementsIntroduction', 'announcementsIntroduction must be a string or a locale map');
+            }
+            $settings['announcementsIntroduction'] = $root->localized('announcementsIntroduction', $primaryLocale);
+            $specKeys['announcementsIntroduction'] = 'announcementsIntroduction';
+        }
+        if ($root->has('numAnnouncementsHomepage')) {
+            $hasProperty('numAnnouncementsHomepage') || throw new SpecException('numAnnouncementsHomepage', 'numAnnouncementsHomepage is not a setting of this app\'s context schema');
+            $value = $root->get('numAnnouncementsHomepage');
+            if ($value !== null && !is_int($value)) {
+                throw new SpecException('numAnnouncementsHomepage', 'numAnnouncementsHomepage must be a whole number (the "Display on Homepage" box) or null (the box emptied)');
+            }
+            $settings['numAnnouncementsHomepage'] = $value;
+            $specKeys['numAnnouncementsHomepage'] = 'numAnnouncementsHomepage';
+        }
+
+        // Settings › Website › Appearance › Setup "Sidebar"
+        // (PKPAppearanceSetupForm's orderable FieldOptions over the schema's
+        // list of block plugin names; shared by the three apps). The list is
+        // the blocks in their order; the form's save refuses a name no
+        // enabled block plugin of the context carries, and so does the
+        // builder (build() loads the context's blocks first).
+        if ($root->has('sidebar')) {
+            $hasProperty('sidebar') || throw new SpecException('sidebar', 'sidebar is not a setting of this app\'s context schema');
+            $value = $root->get('sidebar');
+            if (!is_array($value) || !array_is_list($value) || array_filter($value, fn ($name) => !is_string($name) || $name === '') !== []) {
+                throw new SpecException('sidebar', 'sidebar must be a list of block plugin names (e.g. ["AnnouncementFeedBlockPlugin"]), in the order the Sidebar shows them');
+            }
+            $settings['sidebar'] = array_values($value);
+            $specKeys['sidebar'] = 'sidebar';
         }
 
         return ['settings' => $settings, 'specKeys' => $specKeys];

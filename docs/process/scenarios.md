@@ -190,10 +190,82 @@ Keys:
   press's or preprint server's landing page has none) and every
   moderator's side menu the Content › Comments entry. A non-boolean is a
   400 (U14 harness, 2026-09-16).
+- `enableAnnouncements` (boolean), `announcementsIntroduction` (localized
+  text) and `numAnnouncementsHomepage` (a whole number of zero or more, or
+  null for the box emptied): the three fields of Settings › Website › Setup
+  › the "Announcements" tab ("Enable announcements", "Introduction", called
+  "Additional Information" on a press, and "Display on Homepage"), saved as
+  that form saves (one form-encoded PUT to `contexts/{id}`; stored as `1` /
+  `0`, the text per locale, the number as typed). The tab is lib/pkp's, so
+  the keys apply to the three apps alike, and it shows the text and the
+  number only while the box is ticked. A fresh context has no row for any
+  of the three: announcements off, no introduction, no home page block.
+  A non-boolean, a non-string text, a negative number or text in the
+  number are 400s (U12 harness, 2026-09-17).
+- `sidebar`: the "Sidebar" list of Settings › Website › Appearance ›
+  "Setup", a list of block plugin names in the order the sidebar shows
+  them, saved as that form saves (the same PUT; stored as a JSON list). The
+  names are what the form posts, the plugin's registry name: the
+  lowercased class name for a stand-alone block (`informationblockplugin`,
+  `languagetoggleblockplugin`, `browseblockplugin`, `subscriptionblockplugin`)
+  and `AnnouncementFeedBlockPlugin` for the block the OJS Announcement Feed
+  plugin provides. The form offers only the blocks of plugins enabled in
+  the context, and the builder refuses the rest the way the save does
+  (a 400 naming `sidebar` with the form's own message), so on OJS the feed
+  block needs `plugins: {announcementfeedplugin: {enabled: true}}` in the
+  same request. Applies to the three apps alike; a fresh context has no
+  block placed. Not a list of strings: a 400.
+- `plugins`: a map from a plugin's lowercased class name (the Plugins
+  grid's `plugin` id, e.g. `announcementfeedplugin`) to `{enabled,
+  settings?}`. `enabled` (boolean, required) is the grid's "Enabled" box
+  for that context, written as the grid writes it (the plugin's `enabled`
+  setting for the context and the audit-log line; the grid's toast is
+  not mirrored); `settings` is a map of setting name to scalar value,
+  each written as the plugin's own settings window writes it
+  (`Plugin::updateSetting`; the Announcement Feed window's are
+  `displayPage`, one of `all`, `homepage`, `announcement`, and
+  `recentItems`, a whole number above zero). A name that matches no
+  installed plugin, a plugin the grid cannot enable or disable, a site-wide
+  plugin (its state is global) or a non-boolean `enabled` are 400s. The
+  Announcement Feed plugin is OFF on every fresh journal, `publicknowledge`
+  included: its `settings.xml` is never installed (the plugin does not
+  declare it as a context settings file), so a fresh journal has no
+  `enabled` row, the Plugins grid lists it unticked, the feeds answer 404
+  and the Appearance "Sidebar" list lacks the block until a manager ticks
+  the plugin. Every feed scenario therefore seeds the plugin on (U12
+  harness, 2026-09-17).
+- `announcementTypes[]`: the "Announcement Types" tab's types, each
+  `{name}` (localized, required in the primary locale), created the way the
+  tab's "Add Announcement Type" window saves. `announcements[]`: the
+  Announcements page's announcements, each `title` (localized, required
+  in the primary locale), `descriptionShort` and `description`
+  (localized rich text, as the panel's "Short Description" and
+  "Announcement" boxes hold it: `<p>…</p>`), `dateExpire` (`YYYY-MM-DD`
+  as the "Expiry Date" box is typed; any other shape is the panel's own
+  refusal as a 400; a past date is accepted, so an expired announcement is
+  seedable) and `type` (the primary-locale name of an entry of
+  `announcementTypes[]`). Each is created the way the panel's "Save" is
+  (the announcements API's add: the same validation against the context's
+  form locales, the same model write, then the same queued notification
+  for every user of the context with "Send an email…" unticked, so the
+  job queue holds one job per seeded announcement until a test drains it;
+  no email). Seeded after `users[]`, so the scratch users are among those
+  notified, as they would be after a by-hand add. The image is not
+  seedable (the panel builds it). The response lists the created
+  `announcementTypes` and `announcements` with their ids, which the
+  announcement's page address (`announcement/view/{id}`) needs. A
+  scratch context's announcements page needs `enableAnnouncements: true`
+  in the same request to be reachable (U12 harness, 2026-09-17).
+  Announcements seeded in one request share a posted-date second, so
+  their order on the public list and in the panel is arbitrary (it
+  differed between OJS and OMP for one seed): a test that asserts order
+  seeds distinct titles it finds by search, or adds the newest by hand
+  (U12 claim check K4, 2026-09-17).
 
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
-`path` and the created `users` (id and username).
+`path`, the created `users` (id and username), `announcementTypes` (id and
+name) and `announcements` (id and title).
 
 ## `POST scenarios/submission`
 
@@ -444,11 +516,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining
   submission-intake settings (the checklist and the privacy statement,
-  U58), `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
+  U58), `submitWithCategories`, `publishingMode`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
-  `registrationAgency`, `doiCreationTime`), ISSNs,
-  `plugins: {pluginName: {enabled, settings}}`
-  keyed by the plugin's lowercased class name, OJS
+  `registrationAgency`, `doiCreationTime`), ISSNs, OJS
   `issues[]` with `accessStatus`, and OJS `subscriptions[]` where
   `'expired'` seeds an active row with a past end date.
 - Named scenario fixtures (`submission-draft`, `submission-in-review`,

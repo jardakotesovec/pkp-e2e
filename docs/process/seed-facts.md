@@ -281,6 +281,41 @@ behind a line; that scratch is deleted after review.
   Setup › Announcements; Announcements › Add; Issues › Future Issues ›
   Publish Issue. Live-probed 2026-09-04, all three apps (`.reports/U05/pA`
   P24–P26).
+- `publicknowledge` has "Enable announcements" unticked and an empty
+  Announcements page on all three apps; every scratch context starts the
+  same way. The site's announcements are off at a reset too, and the site's
+  Announcements tab (shown once a second context exists) saves, edits,
+  deletes and searches on all three apps, its API answering 200 (unlike the
+  site's highlights API). Settings › Website › Setup › Announcements;
+  Administration › Site Settings › Announcements. Live-probed 2026-09-17,
+  all three apps (`.reports/U12/ccK1`, `ccK3`).
+- An announcement's image is stored as
+  `public/journals|presses|contexts/<id>/announcements/<announcementId>.<ext>`
+  and the public pages print its absolute disk path as the image address,
+  which never loads on the test installs: a test asserts the `alt` text
+  and the file, never the picture. Live-probed 2026-09-17, all three apps
+  (`.reports/U12/ccK2`, seen by K3 and K4 too).
+- The "Announcement Feed Plugin" is disabled on every fresh journal,
+  `publicknowledge` included (its `settings.xml` is never installed);
+  the feed rows' given is `plugins: {announcementfeedplugin: {enabled:
+  true}}` plus `sidebar: ['AnnouncementFeedBlockPlugin']`. Settings ›
+  Website › Plugins. Live-probed 2026-09-17, OJS (`.reports/U12/harness`,
+  `ccK5`).
+- A public address the app refuses (an announcement with announcements
+  off, a route with no handler) answers a bare "404 Not Found" page with
+  an empty browser title on all three apps. Live-probed 2026-09-17
+  (`.reports/U12/ccK4`).
+- Every row of a user's Notifications settings starts with "Enable these
+  types of notifications." ticked and "Do not send me an email for these
+  types of notifications." unticked, the registration form's preset
+  included. Profile › Notifications. Live-probed 2026-09-17, all three apps
+  (`.reports/U12/ccK5`).
+- A scratch preprint server's Settings › Website › Appearance › Setup
+  "Sidebar" list offers "Web Feed Plugin" and "Language Toggle Block"
+  alone (no Information block), and its Plugins grid lists "Web Feed
+  Plugin" and no "Announcement Feed Plugin"; OMP likewise has no
+  "Announcement Feed Plugin" row. Live 2026-09-17, OPS and OMP (the U12
+  suites' S7 absence tests).
 - `participants: [{role: 'manager'}]` on a submitted `POST
   scenarios/submission` surfaced in the Participants panel and the
   discussion form on OPS only, not on OJS or OMP (seen once, cause not
