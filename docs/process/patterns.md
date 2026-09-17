@@ -231,6 +231,15 @@ over.
     whose nested `form#userSearchForm` puts a "Search" submit first in DOM
     order. `form.locator('button[type=submit]').first()` clicks Search and
     silently clears your picked radio. Click Save by accessible name.
+14. **A one-shot read of an XHR-loaded table races the fetch.**
+    `expect(await grid.rows().evaluateAll(…)).toEqual([…])` reads whatever the
+    legacy grid or list panel holds the instant the page object returns, and
+    under a full run at auto workers that is `[]` (U12 S3 on OPS, 2026-09-17,
+    the types grid right after `goto()`; green alone and in every lighter
+    run). Read rows through a locator assertion (`toHaveCount`, `toHaveText`)
+    or wrap the read in `await expect.poll(() => …)`; a plain
+    `expect(await …)` is settled only on a server-rendered page after its
+    navigation, a mail-catcher read after the drain, or an already-open panel.
 
 ## Tag conventions
 

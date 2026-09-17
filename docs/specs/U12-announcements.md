@@ -1,6 +1,6 @@
 ---
 name: announcements
-status: draft
+status: verified
 ---
 
 # Announcements {OJS OMP OPS}

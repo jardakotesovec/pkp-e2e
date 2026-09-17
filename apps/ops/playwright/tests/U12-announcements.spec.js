@@ -442,7 +442,7 @@ test.describe('announcements', () => {
         await panel.expiryInput().fill(tomorrow);
         await panel.save();
         await expect(list.rows()).toHaveCount(2);
-        expect(await list.rowTitles()).toEqual(['Workshop', 'Call for papers']);
+        await expect.poll(() => list.rowTitles()).toEqual(['Workshop', 'Call for papers']);
         const workshopId = await list.idOf('Workshop');
         await publicList.goto();
         expect(await publicList.titles()).toEqual(['Workshop', 'Call for papers']);
@@ -470,7 +470,7 @@ test.describe('announcements', () => {
         await panel.titleInput().fill('Workshop 2027');
         await panel.save();
         await expect(list.rows()).toHaveCount(2);
-        expect(await list.rowTitles()).toEqual(['Workshop 2027', 'Call for papers']);
+        await expect.poll(() => list.rowTitles()).toEqual(['Workshop 2027', 'Call for papers']);
         await publicList.goto();
         expect(await publicList.titles()).toEqual(['Workshop 2027', 'Call for papers']);
 
@@ -604,10 +604,10 @@ test.describe('announcements', () => {
         await expect(list.rows()).toHaveCount(3);
         await list.search('call');
         await expect(list.rows()).toHaveCount(1);
-        expect(await list.rowTitles()).toEqual(['Call for papers']);
+        await expect.poll(() => list.rowTitles()).toEqual(['Call for papers']);
         await list.search('june');
         await expect(list.rows()).toHaveCount(1);
-        expect(await list.rowTitles()).toEqual(['Call for papers']);
+        await expect.poll(() => list.rowTitles()).toEqual(['Call for papers']);
         await list.search('june call');
         await expect(list.emptyMessage()).toBeVisible();
         await expect(list.rows()).toHaveCount(0);
@@ -648,7 +648,7 @@ test.describe('announcements', () => {
         await types.save();
         await expect(types.toast('Announcement type added.')).toBeVisible();
         await expect(types.row('Event')).toHaveCount(1);
-        expect(await types.rowNames()).toEqual(['Conference', 'Event']);
+        await expect.poll(() => types.rowNames()).toEqual(['Conference', 'Event']);
 
         // A type edited: the arrow, "Edit", the same window; saved, the
         // toast; the row reads the new name once the page is reloaded
@@ -659,7 +659,7 @@ test.describe('announcements', () => {
         await expect(types.toast('Announcement type edited.')).toBeVisible();
         await admin.goto();
         await admin.openTypesTab();
-        expect(await admin.types().rowNames()).toEqual(['Conference 2027', 'Event']);
+        await expect.poll(() => admin.types().rowNames()).toEqual(['Conference 2027', 'Event']);
 
         // A typed announcement: the panel now offers "Announcement Type"
         // with the two round buttons, none chosen; "Event" chosen and
@@ -699,7 +699,7 @@ test.describe('announcements', () => {
         await typesAgain.confirmDialog().getByRole('button', {name: 'OK', exact: true}).click();
         await expect(typesAgain.toast('Announcement type removed.')).toBeVisible();
         await expect(typesAgain.row('Event')).toHaveCount(0);
-        expect(await typesAgain.rowNames()).toEqual(['Conference 2027']);
+        await expect.poll(() => typesAgain.rowNames()).toEqual(['Conference 2027']);
         await publicList.goto();
         expect((await publicList.titles()).sort()).toEqual(['Call for papers', 'Reading group']);
         await gotoHome(visitor, tag);
@@ -771,13 +771,13 @@ test.describe('announcements', () => {
         await expect(panel.saveButton()).toBeEnabled();
         await panel.save();
         await expect(list.rows()).toHaveCount(2);
-        expect(await list.rowTitles()).toEqual(['Second call', 'Call for papers']);
+        await expect.poll(() => list.rowTitles()).toEqual(['Second call', 'Call for papers']);
 
         // The list and the pages in French: the French title where there
         // is one, the primary-language title otherwise (Rule 14).
         await admin.goto({locale: 'fr_CA'});
         await expect(list.rows()).toHaveCount(2);
-        expect(await list.rowTitles()).toEqual(['Appel à contributions', 'Call for papers']);
+        await expect.poll(() => list.rowTitles()).toEqual(['Appel à contributions', 'Call for papers']);
         await publicList.goto('fr_CA');
         expect(await publicList.titles()).toEqual(['Appel à contributions', 'Call for papers']);
         await expect(publicList.summary('Appel à contributions').summary).toContainText('Date limite le 1er juin.');

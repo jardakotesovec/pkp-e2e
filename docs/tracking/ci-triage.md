@@ -636,6 +636,22 @@ trips.
   (255 of 255) and in the file's own runs. Watch condition: a second
   sighting; then the error context says whether the form re-rendered
   with a refusal or the close never ran.
+- **Tasks dialog missing the report's task row** (U14 S5, the
+  moderators' tasks: OJS twice, OMP once and OPS once, 2026-09-17, the
+  U12 session's Mac full runs on reset databases at auto workers,
+  `.reports/U12/final-run-ojs-attempt{1,2}.log`,
+  `final-run-omp-attempt1.log`, `final-run-ops.log`). `expect(reportRow).toHaveCount(1)`
+  reads 0 for 10 s while the comment's own task row is there (OJS spec
+  line 647, OMP line 174); green alone on both apps the same day
+  (`.reports/U12/alone-ojs-u14s5-u28s14.log`,
+  `alone-omp-u01s6-u14s5.log`), green on the VM's finals and on CI
+  (35200505897) at the same tree. A load-shaped read on the Mac; unread
+  whether the report's job had not run yet or the dialog was read before
+  its second fetch. Because the app project fails, the serial and solo
+  projects are skipped on every such run, so a Mac full run's serial
+  tests need a `--project=<app>-serial --no-deps` run of their own.
+  Watch condition: a red on CI or the VM; until then a Mac full run
+  reads N−1 on every app.
 - **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
   `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
   and the tests' is local: between 00:00 and 02:00 CEST every "today + N

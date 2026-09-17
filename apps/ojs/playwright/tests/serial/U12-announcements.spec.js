@@ -325,12 +325,12 @@ test.describe('announcements (queued email; the site)', () => {
             await expect(list.rows()).toHaveCount(1);
             await list.search('maintenance');
             await expect(list.rows()).toHaveCount(1);
-            expect(await list.rowTitles()).toEqual(['Site maintenance']);
+            await expect.poll(() => list.rowTitles()).toEqual(['Site maintenance']);
             const panel = await list.openEdit('Site maintenance');
             await panel.titleInput().fill('Site maintenance on Sunday');
             await panel.save();
             await expect(list.rows()).toHaveCount(1);
-            expect(await list.rowTitles()).toEqual(['Site maintenance on Sunday']);
+            await expect.poll(() => list.rowTitles()).toEqual(['Site maintenance on Sunday']);
 
             // The site's pages on: the site's Announcements page with its
             // heading, introduction and the summary; the site's home page
