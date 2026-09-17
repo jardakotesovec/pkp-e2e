@@ -408,6 +408,21 @@ trips.
   condition**: the read reds again behind the hardened opener; then the
   CI artifact's error context says whether the value ever arrives on a
   fresh install.
+  **Watch condition tripped 2026-09-17** (U11 feature session, the Mac,
+  OPS final attempt 2 on a reset database at auto workers,
+  `.reports/U11/final-run-ops.log`): behind the hardened opener the same
+  read redded with `element(s) not found` for the checked stage option,
+  and the error context
+  (`pw-out-final-ops/U49-publish-schedule-and-v-2e450-…/error-context.md`)
+  shows the CI artifact's shape again: the source combobox on "Author
+  Original 1.1", "Publication Stage" listing "Author Original (AO)" with
+  no option selected, "Revision Significance" with none selected, a
+  `status` element still in the dialog, so the value did not arrive in
+  15 s + 10 s either; green alone in 2.4 s right after
+  (`.reports/U11/alone-ops-u49s6.log`). Three sightings now, one on CI:
+  the source-version values not arriving under load is the class, not
+  the wait's length; for the maintenance session to read the dialog's
+  fetch for the second version.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -557,6 +572,15 @@ trips.
   dashboard and Add Reviewer classes above: a list fetched again after
   the window closes. **Watch condition**: a second incident; then read
   whether the panel's reload after the window's save is awaited.
+  **Second incident 2026-09-17** (U11 feature session, the Mac, OMP
+  final attempt 1 on a reset database at auto workers,
+  `.reports/U11/final-run-omp-attempt1.log`, the one red of 225), at a
+  different step: the active window's "Workflow:" heading not visible
+  in 20 s (`pw-out-final-omp-attempt1/U01-login-and-sessions-…/error-context.md`);
+  green alone in 8.5 s (`.reports/U11/alone-omp-u01s6.log`) and the
+  second full run green (236). The watch condition is met; the read of
+  the panel's reload, and now of the workflow window's open under
+  load, is the maintenance session's.
 - **Author's Title & Abstract section empty after the manager's publish**
   (U40 S3, OJS, once, local). After the manager published, the author's
   reload fetched the submission and the publication (both 200 in worker

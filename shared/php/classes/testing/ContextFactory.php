@@ -18,6 +18,13 @@
  * among its managers — recorded parity fact).
  *
  * parseParams() is read-only (spec + service validation); create() mutates.
+ *
+ * context.supportedFormLocales (U11) — the Languages settings grid's "Forms"
+ * column: create() runs, per locale ticked beyond the primary, the steps
+ * LanguageGridHandler::saveLanguageSetting runs for a `supportedFormLocales`
+ * tick (PKPContextService::restoreLocaleDefaults, the reviewer
+ * recommendations' localized titles, then one PKPContextService::edit with
+ * the sorted list), never a raw settings write.
  */
 
 namespace PKP\testing;
@@ -32,7 +39,7 @@ class ContextFactory
     /**
      * @param Spec $spec context keys: path*, name, acronym, description,
      *   primaryLocale, supportedLocales, supportedSubmissionLocales,
-     *   contactName, contactEmail, enabled
+     *   supportedFormLocales, contactName, contactEmail, enabled
      */
     public function parseParams(Spec $spec): array
     {
@@ -41,6 +48,7 @@ class ContextFactory
         $primaryLocale = (string) $spec->get('primaryLocale', $site->getPrimaryLocale());
         $supportedLocales = (array) $spec->get('supportedLocales', [$primaryLocale]);
         $supportedSubmissionLocales = $spec->get('supportedSubmissionLocales');
+        $supportedFormLocales = $spec->get('supportedFormLocales');
         $path = (string) $spec->require('path');
 
         $params = array_filter([
@@ -65,6 +73,30 @@ class ContextFactory
             $params['supportedAddedSubmissionLocales'] = (array) $supportedSubmissionLocales;
         }
 
+        if ($supportedFormLocales !== null) {
+            // The Languages settings grid's "Forms" column. The grid lists the
+            // site's locales and refuses to untick the primary locale, so the
+            // list must be a set of locale codes carrying the primary; the
+            // builder further requires each one under "UI" (supportedLocales)
+            // — a form locale with no UI locale is a state no scenario needs.
+            $key = ($spec->path === '' ? '' : "{$spec->path}.") . 'supportedFormLocales';
+            if (!is_array($supportedFormLocales) || $supportedFormLocales === [] || array_keys($supportedFormLocales) !== range(0, count($supportedFormLocales) - 1)) {
+                throw new SpecException($key, 'supportedFormLocales must be a non-empty list of locale codes (the Languages grid\'s "Forms" column)');
+            }
+            foreach ($supportedFormLocales as $locale) {
+                if (!is_string($locale) || $locale === '') {
+                    throw new SpecException($key, 'supportedFormLocales must be a list of locale code strings');
+                }
+                if (!in_array($locale, $supportedLocales, true)) {
+                    throw new SpecException($key, "supportedFormLocales carries \"{$locale}\", which is not among the context's supportedLocales (tick it under \"UI\" first)");
+                }
+            }
+            if (!in_array($primaryLocale, $supportedFormLocales, true)) {
+                throw new SpecException($key, "supportedFormLocales must carry the primary locale \"{$primaryLocale}\" (the Languages grid refuses to untick it)");
+            }
+            $params['supportedFormLocales'] = array_values(array_unique($supportedFormLocales));
+        }
+
         $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
         $errors = $contextService->validate(
             EntityWriteInterface::VALIDATE_ACTION_ADD,
@@ -85,15 +117,51 @@ class ContextFactory
     {
         $request = Application::get()->getRequest();
         $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
+        // The "Forms" locales are ticked on the Languages grid after the
+        // context exists (add() itself sets the primary locale alone).
+        $supportedFormLocales = $params['supportedFormLocales'] ?? null;
+        unset($params['supportedFormLocales']);
         $context = Application::getContextDAO()->newDataObject();
         $context->setAllData($params);
         $context = $contextService->add($context, $request);
+        if ($supportedFormLocales !== null) {
+            $context = $this->enableFormLocales($context, $supportedFormLocales);
+        }
         // The admin hosted-contexts endpoint's tail (PKPContextController::add,
         // since pkp/pkp-lib#12593, 2026-08-03): the registry's default
         // editorial task templates (`registry/taskTemplates.xml`, all
         // include=false) are installed into every new context. Parity
         // ledger 2026-09-11.
         Repo::editorialTask()->installTaskTemplates($context);
+        return $context;
+    }
+
+    /**
+     * Tick locales under the Languages settings grid's "Forms" column the way
+     * LanguageGridHandler::saveLanguageSetting does for
+     * `setting=supportedFormLocales&value=1`, one tick per locale not yet
+     * ticked: restore that locale's default context settings
+     * (PKPContextService::restoreLocaleDefaults), add the reviewer
+     * recommendations' localized titles, then PKPContextService::edit with
+     * the pushed-and-sorted list. Not mirrored: the grid's trivial
+     * "Locale settings saved." notification for the acting user (a
+     * session-bound toast, parity ledger 2026-09-16).
+     */
+    public function enableFormLocales(Context $context, array $locales): Context
+    {
+        $request = Application::get()->getRequest();
+        $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
+        foreach ($locales as $locale) {
+            $current = (array) $context->getData('supportedFormLocales');
+            if (in_array($locale, $current, true)) {
+                continue;
+            }
+            array_push($current, $locale);
+            sort($current);
+            $contextService->restoreLocaleDefaults($context, $request, $locale);
+            Repo::reviewerRecommendation()->setLocalizedDataOnNewLocaleAdd($context, $locale);
+            $context = $contextService->edit($context, ['supportedFormLocales' => array_values(array_unique($current))], $request);
+        }
         return $context;
     }
 }

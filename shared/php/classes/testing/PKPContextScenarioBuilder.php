@@ -29,6 +29,13 @@
  *   submission-locale toggles: sets supportedSubmissionLocales and keeps
  *   supportedSubmissionMetadataLocales / supportedAddedSubmissionLocales in
  *   step, as the grid handler does when a locale is enabled for submissions.
+ * - context.supportedFormLocales (U11) — the same grid's "Forms" column:
+ *   ContextFactory::create ticks each listed locale beyond the primary the
+ *   way LanguageGridHandler::saveLanguageSetting does (restoreLocaleDefaults,
+ *   the reviewer recommendations' localized titles, one
+ *   PKPContextService::edit per tick). Each locale must be among
+ *   supportedLocales and the primary locale must be listed; the settings
+ *   forms and the Highlights panel then carry one field set per locale.
  * - orcid {enabled?, apiType?, clientId?, clientSecret?, city?,
  *   sendMailToAuthorsOnPublication?} — the "ORCID" settings-tab state (U4);
  *   written through PKPContextService::edit(), the same service the tab's

@@ -70,13 +70,23 @@ Keys:
   with a 400.
 - `context`: `path` (defaults to the tag), `name` (defaults to "Scratch
   context {tag}"), `acronym`, `description`, `primaryLocale`,
-  `supportedLocales`, `supportedSubmissionLocales`, `contactName`,
-  `contactEmail`, `enabled`. `supportedSubmissionLocales` mirrors the
-  Languages settings grid's submission toggles and keeps the metadata
-  locales in step, exactly as the grid does. A scratch context needs
-  `supportedLocales` to include a locale before that locale's URL segment
-  (`/fr_CA/`) works there; the seeded journals already carry it as a UI
-  language.
+  `supportedLocales`, `supportedSubmissionLocales`, `supportedFormLocales`,
+  `contactName`, `contactEmail`, `enabled`. `supportedSubmissionLocales`
+  mirrors the Languages settings grid's submission toggles and keeps the
+  metadata locales in step, exactly as the grid does. A scratch context
+  needs `supportedLocales` to include a locale before that locale's URL
+  segment (`/fr_CA/`) works there; the seeded journals already carry it as
+  a UI language. `supportedFormLocales` mirrors the same grid's "Forms"
+  column: a list of locale codes, each already in `supportedLocales`, the
+  primary locale among them (the grid refuses to untick it; anything else
+  is a 400). Each listed locale is ticked the way the grid ticks it (that
+  locale's default settings texts restored, the reviewer recommendations'
+  titles added in it on a journal or press, then the list saved through
+  the context service), so every settings form and the Highlights panel
+  carry one field set per listed locale: "Add Highlight" shows the
+  "French" and "English" toggles and "Title in French" beside "Title". A
+  context created without the key has the primary locale alone under
+  "Forms", and its forms are single-language even with French under "UI".
 - `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
   entry renames the default section. OMP's context scenario does not accept
   a `series[]` list yet and answers 400 on the key.
@@ -434,9 +444,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining
   submission-intake settings (the checklist and the privacy statement,
-  U58), `supportedFormLocales` (Website › Setup ›
-  Languages "Forms" column; the settings forms stay single-language until
-  it is set, U29), `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
+  U58), `submitWithCategories`, `publishingMode`, `enableAnnouncements`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), ISSNs,
   `plugins: {pluginName: {enabled, settings}}`

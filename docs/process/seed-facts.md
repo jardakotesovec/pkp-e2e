@@ -439,3 +439,29 @@ A scratch context at the other end of a setting is seeded through the
 scenario API's passthrough keys (scenarios.md "Configuring a scratch
 context"); the validation-variant server (harness.md) covers the
 config-file settings.
+- On a fleet whose only context is `publicknowledge`, Administration › Site
+  Settings shows one tab, "Site Setup", with the side tabs "Security",
+  "Languages", "Bulk Emails" and "Statistics"; the "Appearance",
+  "Announcements" and "Plugins" tabs and the "Settings", "Information",
+  "Navigation", "Highlights" and "ORCID" side tabs appear once a second
+  context exists (the first scratch context). Site Settings, all three apps,
+  2026-09-16 (U11 claim check K2, `.reports/U11/cc-K2.md` Rule 12).
+- The site's "Site Name" is empty on a fresh install, and the site Settings
+  form refuses every save until it is filled; the site home's `<title>` is
+  empty meanwhile. Site Settings › Setup › Settings, all three apps,
+  2026-09-16 (U11 claim check K3; K3 filled it with "Test site" on the
+  fleets, a reset clears it).
+- At the 2026-09-16 tips the site-level highlights list (Site Setup ›
+  Highlights, on a multi-context site) cannot save, order or refresh: every
+  request the panel sends answers 500, so no probe or test can seed a site
+  highlight through the screens (U11 register, `.reports/U11/cc-K2.md`
+  K2-1).
+- A highlight's image is stored under the context's public files
+  directory, `public/journals/<id>/highlights/<highlightId>.<ext>` on OJS,
+  `public/presses/<id>/…` on OMP, `public/contexts/<id>/…` on OPS; the
+  slide's image address is that path on the origin and never loads on the
+  test installs (the same public-files reason as the profile image), and
+  each page view with a slide image writes a `NotFoundHttpException` to the
+  app's log. Every upload box reads "Max filesize: 100MiB" on the probe
+  servers. Home page and Highlights panel, all three apps, 2026-09-16 (U11
+  claim checks K1 and K2).
