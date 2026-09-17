@@ -176,7 +176,11 @@ test.describe('Announcements (U12), queued email and the site', () => {
         await panel.fill({title: CFP, shortDescription: CFP_SHORT});
         await panel.sendEmailBox().check();
         const cfp = await panel.save();
-        await expect(list.titles()).toHaveText([CFP, 'Board meeting']);
+        // Two by-hand adds within one second share a posted second, so the
+        // two rows come in either order (scenarios.md): read them sorted.
+        await expect(list.titles()).toHaveCount(2);
+        await expect.poll(async () => (await list.titles().allTextContents()).map((t) => t.trim()).sort())
+            .toEqual([CFP, 'Board meeting'].sort());
         await pub.gotoList(tag);
         await expect(pub.summary(CFP)).toHaveCount(1);
         expect(await pkpMail.count({to: manager.email, subject: CFP})).toBe(0);
