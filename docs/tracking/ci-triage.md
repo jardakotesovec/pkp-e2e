@@ -609,6 +609,19 @@ trips.
   the next run wiped test-results); green alone 3 of 3. **Watch
   condition**: a second sighting with test-results kept; then read the
   list request the reload issued.
+- **OPS U40 S1's undo read red on the Mac only** ("edit the title and
+  abstract", `@smoke`; deterministic on the Mac, 2026-09-16/17). After
+  `ControlOrMeta+z` in the Title editor the TinyMCE body reads "" instead
+  of the restored title (spec line 263): red 3 of 3 for the U11 harness
+  agent with and without its change (`.reports/U11/harness/pw-ops-u40-s1-unpatched/`),
+  and in both U11 OPS finals on reset databases (`.reports/U11/final-run-ops-attempt1.log`,
+  `final-run-ops.log`); the OJS and OMP S1 counterparts green on the Mac,
+  and OPS green on CI (35017665886) and on the VM's final at the same tips
+  (2026-09-16). A Mac-only class, so an OPS full run on the Mac reads
+  146 of 147 by design until it is read; unverified hunch: Meta+z under
+  headless Chromium on darwin against the keyed `WorkflowPublicationForm`
+  (sync 2026-09-16). **Watch condition**: a red of this read on CI or the
+  VM; until then the OPS full green on a Mac push is CI's.
 - **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
   `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
   and the tests' is local: between 00:00 and 02:00 CEST every "today + N
