@@ -7,8 +7,8 @@ register, never here.
 **Mode: MAINTENANCE** (since 2026-08-29). The resident QA agent runs per
 `docs/process/MAINTENANCE.md`, one session a day, and never builds a
 pending row; feature sessions are launched by the maintainer under the
-RUNBOOK loop. Open questions last posted to the team: never yet. Upstream
-baselines: `docs/tracking/upstream-sync.md`. CI failures, flake watch and
+RUNBOOK loop. Upstream baselines: `docs/tracking/upstream-sync.md`. CI
+failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
 reported failure. Suite size (RUNBOOK "Budget"; last full runs 2026-09-18 on the 4-core VM at
 `PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time, the daily sync's finals, all green on the first run): OJS 262 tests · 14.6 min · OMP 251 · 12.1 min · OPS 172 · 7.1 min. On CI's fresh box OJS took 24.8 min on push run 35200505897 (2026-09-17), at the 25-minute line: the shard matrix in `run-app.yml` is the next task (MAINTENANCE "Keep the budget measured").

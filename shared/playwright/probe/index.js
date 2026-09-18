@@ -306,9 +306,11 @@ async function forEachApp(fn) {
  * record. Returns {browser, context, page, close}.
  *
  * @param {object} app the bag from withApp
- * @param {{storageState?: object|string, headless?: boolean}} [options]
+ * @param {{storageState?: object|string, headless?: boolean, record?: boolean}} [options]
+ *   `record: false` attaches no response or console listener, so the run
+ *   record stays empty for a check that must leave no address behind.
  */
-async function launch(app, {storageState, headless = true} = {}) {
+async function launch(app, {storageState, headless = true, record: keepRecord = true} = {}) {
     if (!app || !app.baseURL) {
         throw new Error('probe: launch(app) needs the bag from withApp');
     }
@@ -321,7 +323,7 @@ async function launch(app, {storageState, headless = true} = {}) {
         storageState: storageState || {cookies: [], origins: []},
     });
     await disableMotion(context);
-    context.on('response', (response) => {
+    if (keepRecord) context.on('response', (response) => {
         const url = response.url();
         const status = response.status();
         if (!url.includes('/api/') && status < 400) {
@@ -356,13 +358,13 @@ async function launch(app, {storageState, headless = true} = {}) {
         }
         record.console.push({at: new Date().toISOString(), type, text: String(text).slice(0, 300), url});
     };
-    page.on('console', (message) => {
+    if (keepRecord) page.on('console', (message) => {
         const type = message.type();
         if (type === 'error' || type === 'warning') {
             logConsole(type, message.text(), (message.location() || {}).url || page.url());
         }
     });
-    page.on('pageerror', (error) => {
+    if (keepRecord) page.on('pageerror', (error) => {
         logConsole('pageerror', error.message || String(error), page.url());
     });
     console.log(`[probe] ${app.name}: ${app.baseURL} (key from ${app.keySource})`);
@@ -455,8 +457,16 @@ async function screen(page) {
     const region = hasMain ? main.first() : page.locator('body');
     const aria = {main: await region.ariaSnapshot(), dialogs: []};
     const dialogs = page.locator('[role="dialog"]:visible');
+    let lastDialog = null;
     for (const dialog of await dialogs.all()) {
-        aria.dialogs.push(await dialog.ariaSnapshot());
+        // A dialog listed during its closing animation is gone by the
+        // snapshot; without the short timeout the read waits 30 s and throws.
+        try {
+            aria.dialogs.push(await dialog.ariaSnapshot({timeout: 1000}));
+            lastDialog = dialog;
+        } catch {
+            // closed between the list and the snapshot: not on screen
+        }
     }
     return {
         url: page.url(),
@@ -465,7 +475,7 @@ async function screen(page) {
         text: {
             header: await innerTextOf(page.locator('header')),
             main: await innerTextOf(hasMain ? main : page.locator('body')),
-            dialog: aria.dialogs.length ? await innerTextOf(dialogs.last()) : null,
+            dialog: lastDialog ? await innerTextOf(lastDialog) : null,
         },
     };
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // open-questions.mjs — list every ❓ Findings-register entry still waiting for a
-// product ruling, grouped by spec (MAINTENANCE "Post the open questions monthly").
+// product ruling, grouped by spec. On demand, when the maintainer wants to put
+// questions or bugs to the team; no session runs it on a schedule.
 // run: npm run questions
 import fs from 'node:fs';
 import path from 'node:path';

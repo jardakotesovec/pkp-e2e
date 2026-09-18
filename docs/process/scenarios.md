@@ -195,7 +195,9 @@ Keys:
   null for the box emptied): the three fields of Settings › Website › Setup
   › the "Announcements" tab ("Enable announcements", "Introduction", called
   "Additional Information" on a press, and "Display on Homepage"), saved as
-  that form saves (one form-encoded PUT to `contexts/{id}`; stored as `1` /
+  that form saves (one form-encoded POST to `contexts/{id}`, the Vue form
+  sending PUT as a POST with an `X-Http-Method-Override` header, so a
+  `waitForResponse` on method PUT never matches; stored as `1` /
   `0`, the text per locale, the number as typed). The tab is lib/pkp's, so
   the keys apply to the three apps alike, and it shows the text and the
   number only while the box is ticked. A fresh context has no row for any
@@ -481,7 +483,7 @@ A scenario that runs with a setting at its non-default end (TEMPLATE
 "Coverage", its decision rule) gets a scratch context
 from `POST scenarios/context` created with that setting through a
 passthrough key, the way `orcid` works today. A passthrough saves what the
-settings form's form-encoded PUT would (values as strings, an emptied text
+settings form's form-encoded POST would (values as strings, an emptied text
 box as null: the app's schema refuses the PHP constants the form config
 carries), and `psql <app>_test` is the parity ground truth (U21 harness
 run, 2026-09-07). A key family the API does
@@ -576,6 +578,11 @@ write into the same inbox. The rules below follow from that.
   no evidence of silence: at Mailpit's 500-message cap it never moves,
   so only a recipient-scoped read with a sent control proves that nothing
   went out (U14 claim check K4, 2026-09-16).
+- **The cheapest positive control is a discussion.** It needs the opener's
+  box plus one more of the stage's participants (one alone is refused with
+  "At least two participants are required for a discussion."), and it
+  mails every ticked box, the opener's included, so a no-mail control on an
+  account never sends that control itself.
 
 Note on the word "tag": everywhere else in these docs it means the seed tag
 from `patterns.md`. Mailpit tags are a different thing and are not used.

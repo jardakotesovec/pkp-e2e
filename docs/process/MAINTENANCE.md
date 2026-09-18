@@ -25,9 +25,7 @@ scheduled prompt only points here; this section is the day's order.
    `stable-3_5_0`" below): the regression hunt alone, after `main` is
    synced and green, never before, because the `main` read is its
    context: most of what 3.5 receives was read on `main` first.
-7. If about a month has passed since the last open-questions post noted in
-   the PROGRESS banner, post `npm run questions` to the channel.
-8. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
+7. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
    and post a one-paragraph summary to the channel: what was synced, what
    was red and why, what was changed, what the stable line's read found,
    with the day's regression report (sync loop step 5) attached as a file
@@ -45,8 +43,14 @@ would meet the same thing, the docs do not already say it (grep first) and
 it is not one screen's fact or general Playwright knowledge; what passes is
 a kit change or a clause on an existing entry, never a new section, and a
 harness key a row asks for is listed under scenarios.md "Field shapes not
-built yet", not built. Then the session ends. An upstream change in a
-feature no shipped spec covers is left alone (Triage below).
+built yet", not built. Most rows earn nothing, and that is the expected
+outcome: a retry or a wrong first guess is the ordinary cost of driving a
+screen, and every clause added is a line every later agent reads. A row
+whose fact one closer read of the spec or the brief would have given, or
+whose fix the session that wrote it already made (a corrected brief, a new
+footnote), earns nothing either. When in doubt, delete. Then the session
+ends. An upstream change in a feature no shipped spec covers is left alone
+(Triage below).
 
 ## Role & goals
 
@@ -411,8 +415,12 @@ the answer; the spec and the test are the record.
 
 ## Session hygiene
 
-- **Start on the right code.** The checkouts hold whatever the previous
-  task left; check before assuming. The default is pkp upstream `main`
+- **Start on the right code.** This repo first: `git pull --ff-only origin
+  main`, because the maintainer also commits from another machine. A pull
+  that cannot fast-forward means the tree holds work an earlier session
+  never pushed: look at it before anything else, never discard it. Then
+  the checkouts, which hold whatever the previous task left; check before
+  assuming. The default is pkp upstream `main`
   (`npm run fetch-apps -- --update`). When reviewing a PR, its ref IS the
   right state: `git fetch upstream pull/<n>/head` (inside `lib/pkp` for a
   pkp-lib PR), or add the contributor's remote fetch-only (`git remote add
@@ -440,8 +448,10 @@ the answer; the spec and the test are the record.
 - **End pushed, not just committed.** The VM's working tree is not a durable
   home: work that reaches a commit-worthy gate is committed AND pushed to
   pkp-e2e `main` before the session ends, tracking updates included, under
-  the push rules of RUNBOOK step 10. A push that breaks CI breaks every app
-  PR check.
+  the push rules of RUNBOOK step 10. `git fetch` before the push; when
+  `main` moved during the session, rebase onto it keeping both sides of the
+  append-only tracking files (the sync logs, friction, incidentals), then
+  push. A push that breaks CI breaks every app PR check.
 
 ## Standing duties
 
@@ -475,8 +485,3 @@ the answer; the spec and the test are the record.
 - **Delete what is resolved.** A fixed ci-triage row, a merged companion
   row, a report the team has acted on: delete it, git keeps it (RUNBOOK
   "What goes where"). Tracking files hold only what is open.
-- **Post the open questions monthly.** `npm run questions` lists every ❓
-  register entry still waiting for a product ruling, grouped by spec. Post
-  it to Mattermost about once a month so the team can settle them in small
-  batches, and note the date in the PROGRESS banner so the next session
-  knows when the month is up.

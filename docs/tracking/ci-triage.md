@@ -654,13 +654,6 @@ trips.
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run
   reads N−1 on every app.
-- **Local midnight** (the maintainer's overnight runs, 2026-09-13/14,
-  `docs/reports/2026-09-14-suite-performance.md`). The app clock is UTC
-  and the tests' is local: between 00:00 and 02:00 CEST every "today + N
-  weeks" due-date assertion (U27 S1, S7, S8, S12, S20; U28 S10; U29 S1,
-  OJS and OMP) reads a day off. CI runs in UTC and never sees it; a
-  night run on the Mac or the VM does. **Watch condition**: a red of this
-  shape outside that window; then the tests' date helper computes in UTC.
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7

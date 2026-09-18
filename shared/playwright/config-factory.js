@@ -142,6 +142,11 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         process.env.PKP_CONFIG_FILE || path.join(appRoot, 'config.test.inc.php');
     basePort = parseInt(process.env.PLAYWRIGHT_BASE_PORT || String(basePort), 10);
     process.env.PLAYWRIGHT_BASE_PORT = String(basePort);
+    // The PHP servers run in UTC; dates the runner and its workers compute
+    // (due dates, "today") must sit in the same zone, or a run between
+    // local midnight and 00:00 UTC is a day ahead of the app. CI is UTC
+    // already; this pins the Mac and the VM.
+    process.env.TZ = process.env.TZ || 'UTC';
 
     // Playwright's own default (50% of cores) can't be used directly because
     // the server fleet below must match the worker count at config time.

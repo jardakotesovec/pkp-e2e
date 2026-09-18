@@ -40,7 +40,7 @@ Task:
 1. Read the whole private file `{{security_file}}`. Find the Open entry to verify: {{entry_hint}}.
 2. Verify it as "The private file" says, on every app the entry names, through the screens where possible.
 3. Update the entry as "The private file" says (confirmed: `status: verified {{date}}` with its `verified-by:` line; not confirmed or not verifiable here: delete it, or revert an older entry to what it was before this feature's probe extended it). Leave the file tidy as it says.
-4. Keep every detail inside the private file. Scripts and snapshots go under `.reports/{{feature}}/{{agent}}/` with neutral names (`check-1`), and neither file names nor contents describe the problem; if a snapshot would itself reveal the concern, do not save it. Run scripts with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}} node bin/probe.js <app> <script>`. This session is {{vm_or_local}}.
+4. Keep every detail inside the private file. Scripts and snapshots go under `.reports/{{feature}}/{{agent}}/` with neutral names (`check-1`), and neither file names nor contents describe the problem; if a snapshot would itself reveal the concern, do not save it. Run scripts with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}} node bin/probe.js <app> <script>`, and open the browser with `launch(app, {record: false})` so the kit's own run record carries no address. This session is {{vm_or_local}}.
 
 Read `.reports/{{feature}}/screen-notes.md` first and append what you learn (`note()` in the kit). Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 

@@ -35,7 +35,8 @@ Each of these has bitten at least once.
 1. **OJS tabs are `role="tab"`, not `button`.** Top-level tabs have a stable
    hook: `#{name}-button` (`#review-button`, `#setup-button`).
 2. **Nested tab groups.** The top-level *Setup* tab and Appearance → Setup are
-   different tabs. Reach the outer one via `#setup-button` and the inner one
+   different tabs. Reach the outer one via `#setup-button` (`.first()` on Administration ›
+   Site Settings, where the inner tab carries the same id) and the inner one
    via the visible-tab role. The sidebar ("Site Navigation") is a PrimeVue
    panelmenu: every group's entries are in the DOM, the closed groups'
    regions `display:none`; only the open group header carries
@@ -48,7 +49,10 @@ Each of these has bitten at least once.
    filter by a distinctive inner element, never `.first()` or `.last()`.
    A legacy side window's content loads by AJAX after the dialog opens and
    `idle()` returns before it: use the kit's `settled()` on a field of its
-   form. A closed Vue side modal leaves a hidden shell in the DOM until the
+   form. The page has one jQuery UI calendar (`#ui-datepicker-div`); opened
+   from a second legacy window on the same page it sits under that window
+   and the day click hangs its full timeout, so land the page afresh before
+   the second window's date. A closed Vue side modal leaves a hidden shell in the DOM until the
    next navigation, so `getByRole` on the table behind it returns nothing
    until then; and a Vue form's "Save" is disabled after a refused save
    until the flagged boxes change (a click on it hangs). A page opened at
@@ -214,7 +218,11 @@ over.
    `maxRedirects: 0` probes must use the prefixed URL. **The rule inverts on
    single-locale journals** (most scratch journals): the bare URL serves
    directly and the `/en/` form 302s back. Probe scratch journals bare and
-   `publicknowledge` prefixed.
+   `publicknowledge` prefixed. A visit under another segment (`/fr_CA/…`)
+   switches the session's language for every later request, so a French
+   read is followed by `/en/` addresses or a fresh context; the site's own
+   pages follow the site's languages, prefixed on the bilingual test site,
+   bare on a one-language scratch context.
 10. **Tags behind COUNT assertions need a per-run random component**, because
     long-lived DBs accumulate leftovers. **Tags behind SEARCH must be single
     hyphenless alphanumeric tokens.** Postgres splits `edd7-w0-x` into tokens
@@ -325,8 +333,8 @@ no cleanup fixture.
 - **There is no `queries` table.** Discussions live in `edit_tasks`, and
   `Repo::submission()->submit()` auto-creates editorial tasks. Any older doc
   or SQL that mentions `queries` or `query_participants` is stale.
-- **Dashboard search commits on Enter only** (`Search.vue`
-  `@keydown.enter.prevent`). `fill()` alone never filters. The two search
+- **Every pkp Search box commits on Enter only** (the dashboard's and the
+  list panels' share `Search.vue`, `@keydown.enter.prevent`). `fill()` alone never filters. The two search
   boxes differ. The IN-PAGE box (accessible name `/Search submissions, ID/`)
   narrows the CURRENT view: the heading keeps the view's name and count. Only
   the SIDE-NAV global box (name prefix `Search submissions`; its accessible
@@ -433,7 +441,8 @@ animations off and a response listener that records URL, method, status and
 size (never a body) of every `/api/` call and every status ≥ 400 into
 `run-<app>-<HHMMSS>.json`, one record per process (HHMMSS from its start),
 which also carries the browser's console errors and warnings and uncaught
-page errors (`console`, capped at 200). `screen(page)` is the screen as data: the aria snapshot of
+page errors (`console`, capped at 200); `launch(app, {record: false})`
+keeps the record empty for a check that must leave nothing behind. `screen(page)` is the screen as data: the aria snapshot of
 the main region (the body when the page has no `main`) and of every open
 dialog, plus the verbatim `innerText` of header and main, because aria
 snapshots normalise punctuation, and `text.dialog`, the innerText of the
