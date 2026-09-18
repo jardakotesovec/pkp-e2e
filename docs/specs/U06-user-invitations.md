@@ -153,11 +153,13 @@ Accept wizard (new invitee):
     first, and no role row can be added. Reaching the same person through the
     users list's Edit action shows the same warning above their details and
     current roles. On both paths "Add Another Role" and "Save And Continue"
-    are shown but inactive. ⚠ [A9](#a9) Both paths list the person's current
-    roles, and each still keeps an active masthead select and an active
-    "Remove Role". Pressed through the Edit action, both act at once as in
-    Rule 13, with the email to the disabled user; on the search path they
-    were seen active and were not pressed. <sup>i</sup>
+    are shown but inactive. Both paths list the person's current roles, and
+    each keeps an active masthead select and an active "Remove Role", by
+    design: a manager can still end a disabled user's roles. Pressed through
+    the Edit action, both act at once as in Rule 13, with the email to the
+    disabled user, whose wording does not allow for a disabled account
+    ⚠ [A9](#a9); on the search path they were seen active and were not
+    pressed. <sup>i</sup>
 15. Wizard navigation (send side). "Back" returns one step, and returning to
     the search step clears everything entered. "Cancel" asks for confirmation
     only when something was changed. The final button reads "Invite user to
@@ -187,7 +189,8 @@ Accept wizard (new invitee):
   permissions and says nothing of an email. ⚠ [OMP1](#omp1) On a press or
   preprint server the masthead email fails with a raw error shown to the
   manager, though the visibility change itself sticks. A disabled member is
-  emailed the same way ⚠ [A9](#a9). <sup>r</sup>
+  emailed the same way, in words written for an active account
+  ⚠ [A9](#a9). <sup>r</sup>
 - **No notice to the inviter**: nobody is emailed or notified when the
   recipient accepts or declines ⚠ [A5](#a5). The pending row simply
   disappears. From the manager's screens, an acceptance and a decline can be
@@ -496,8 +499,8 @@ Left out of the scenarios above, by reason:
     sign-in screen; Rules 6, 9; scenarios 2 and 3 mark it)
   - OMP1 (the masthead email failing with a raw error on presses and
     preprint servers; Side effects; scenario 8 marks it)
-  - A9 (a disabled user's current roles still removable and their masthead
-    setting still changeable, with the email; Rule 14, Side effects)
+  - A9 (the role-removal email telling a disabled user their account is
+    still active; Rule 14, Side effects)
   - A5 ("Invitation Sent" promising updates never delivered; Rule 15, Side
     effects)
   - A7 (the email's wording slips, greeting a new invitee by address; Side
@@ -542,7 +545,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | user-visible | — |
 | [A1](#a1) | The send wizard's address is gated more widely than the screen that offers it | ❓ | latent | — |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
-| [A9](#a9) | A disabled user's current roles can still be removed and their masthead setting changed, and the disabled user is emailed | ❓ | minor | — |
+| [A9](#a9) | The role-removal email tells a disabled user their account "is still active"; the active "Remove Role" and masthead select on their screen are intended | ❓ | minor | @beaug 2026-09-18 · controls intended, email wording open |
 | [A6](#a6) | Retired: Edit on a disabled member's row opened an error over an empty wizard; it now opens their details with the disabled-user warning (Rule 14) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
 
 ### All apps
@@ -626,24 +629,29 @@ changing. Sighted use is unaffected.
 Basis: probe (accessibility-tree check). <sup>[f-a8](#fn-a8)</sup>
 
 <a id="a9"></a>
-**A9 — A disabled user's current roles can still be changed** · ❓ · minor.
+**A9 — The role-removal email tells a disabled user their account is still active** · ❓ · minor.
 On a disabled user's details step the warning says no role can be assigned,
-and "Add Another Role" and "Save And Continue" are inactive (Rule 14). Yet
-each current role keeps an active masthead select and an active "Remove
-Role", on the search path as well as through the users list's Edit action.
-Pressed through the Edit action (the search path's were seen active and not
-pressed), both act at once as for any member (Rule 13): the role ends, and the disabled user is emailed "You
-have been removed from a role", whose text tells them "Your account with
-{journal} is still active and any other roles you previously held are still
-active." On a journal the masthead change emails them too; on a press or
-preprint server it answers the raw error of [OMP1](#omp1). The upstream
-issue that brought the warning to this screen expects every field on it to be
-inactive for a disabled user.
-Question: should a disabled user's current roles stay editable on this
-screen, and should a disabled user be emailed about the change? Lean: 🐞. The
-issue states the intention, and the removal email's "still active" is untrue
-for this person.
+and "Add Another Role" and "Save And Continue" are inactive (Rule 14). Each
+current role keeps an active masthead select and an active "Remove Role",
+on the search path as well as through the users list's Edit action; that is
+intended (see the review below). Pressed through the Edit action (the search
+path's were seen active and not pressed), both act at once as for any member
+(Rule 13): the role ends, and the disabled user is emailed "You have been
+removed from a role", whose text tells them "Your account with {journal} is
+still active and any other roles you previously held are still active." For
+a disabled account that sentence is untrue. On a journal the masthead change
+emails them too; on a press or preprint server it answers the raw error of
+[OMP1](#omp1).
+Question: should the removal email, or any email, go to a disabled user in
+these words? Lean: the text was written before a disabled user could reach
+this screen and wants a variant, or no email, for a disabled account.
 Basis: probe, all three apps. <sup>[f-a9](#fn-a9)</sup>
+
+> **Reviewed — @beaug, 2026-09-18**: ❓ stands, narrowed. Ruling: "Remove
+> Role" and the masthead select are to stay active for a disabled user; that
+> half is intended and is no longer part of the question. The removal
+> email's language did not take into account that the user is disabled; this
+> may be intended and may be patched in the future.
 
 ### OMP and OPS
 
@@ -675,7 +683,7 @@ Basis: probe + code. <sup>[f-ops1](#fn-ops1)</sup>
 ### Retired
 
 <a id="a6"></a>
-**A6 — Edit on a disabled member opens a broken wizard** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13313, 2026-09-15), verified 2026-09-18 on OJS, OMP and OPS: Edit on a disabled user's row opens their details and current roles under "The user is currently disabled.", with no error (Rule 14); what stays open is [A9](#a9). <sup>[f-a6](#fn-a6)</sup>
+**A6 — Edit on a disabled member opens a broken wizard** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13313, 2026-09-15), verified 2026-09-18 on OJS, OMP and OPS: Edit on a disabled user's row opens their details and current roles under "The user is currently disabled.", with no error (Rule 14); the email its role controls send is [A9](#a9)'s. <sup>[f-a6](#fn-a6)</sup>
 
 ---
 
@@ -1049,7 +1057,8 @@ invite for roles" filled (email, names, the roles table with the user's
 roles) under the banner, no error dialog, "Add Another Role" and "Save And
 Continue" disabled, no new-role row; the enabled control opens the same step
 with no banner and an active "Add Another Role". The first half of the
-intention is met; the second is [A9](#a9)'s. Retired 2026-09-18.
+intention is met; on the second see [A9](#a9) and its review of 2026-09-18
+(the current roles' controls stay active by design). Retired 2026-09-18.
 
 <a id="fn-a7"></a>
 **f-a7** — Copy items, all observed on live probes 2026-07-31: email
@@ -1095,7 +1104,10 @@ A second disabled user met on the search path showed the same enabled
 controls, left unpressed, and received nothing, as did both enabled controls
 and the disabling itself. Whether the search path showed these controls
 enabled before 2026-09-15 was not traced; the Edit path could not reach them
-until then (f-a6). Intention: the issue's sentence quoted in f-a6.
+until then (f-a6). Intention: the issue's sentence quoted in f-a6 reads as if every
+field were to be inactive; @beaug ruled on 2026-09-18 (Mattermost, the daily
+sync's thread) that "Remove Role" and the masthead select are to stay active
+for a disabled user, which leaves the email's wording as the open half.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
