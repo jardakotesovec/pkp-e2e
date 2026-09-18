@@ -436,6 +436,12 @@ behind a line; that scratch is deleted after review.
   "Submit"; a Section Editor not assigned to a submission gets "Error" on
   its workflow page. Live-driven 2026-09-05, OJS and OMP
   (`.reports/U29-medium/cc-K2.md`).
+- The draft seeded `submitted: false` reopens on "Upload Files" with
+  "Details" not yet reached (its inputs sit hidden in the DOM); "Continue"
+  reaches it without a file. The submission scenario has no term keys
+  (keywords, subjects, disciplines, agencies): save them on Publication ›
+  Metadata as a manager, which a published version accepts too. All three
+  apps, 2026-09-18 (sync claim check S18b).
 - {OJS} The "Reviewer Recommendations" table keeps no fixed order once a
   row is toggled or edited; a reviewer's "Save for Later" gives the review
   a recommendation without submitting it. Live-driven 2026-09-05

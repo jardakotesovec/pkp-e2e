@@ -505,7 +505,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   under `apps/<app>/playwright/fixtures/files/`, or `urlRemote`);
   `metadata.datePublished` (without it, publish stamps today);
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
-  `name?`, `genre?`, `group?`).
+  `name?`, `genre?`, `group?`); `metadata.keywords` and the other term
+  lists per language (a published submission carrying terms, the source of
+  U40's suggestions; sync 2026-09-18, two agents took the on-screen detour).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - Context: an option to skip `admin`'s manager enrolment in the new context
   (every `createContext` enrols the site administrator as a manager; the

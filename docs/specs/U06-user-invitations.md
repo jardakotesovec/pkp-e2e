@@ -150,9 +150,14 @@ Accept wizard (new invitee):
     errors. <sup>c</sup> <sup>i</sup>
 14. A disabled user cannot be invited. Reaching one through the search step
     shows "The user is currently disabled." with instructions to enable them
-    first, and no role row can be added. ⚠ [A6](#a6) Reaching the same person
-    through the users list's Edit action shows an error message over an empty
-    wizard instead of that warning. <sup>i</sup>
+    first, and no role row can be added. Reaching the same person through the
+    users list's Edit action shows the same warning above their details and
+    current roles. On both paths "Add Another Role" and "Save And Continue"
+    are shown but inactive. ⚠ [A9](#a9) Both paths list the person's current
+    roles, and each still keeps an active masthead select and an active
+    "Remove Role". Pressed through the Edit action, both act at once as in
+    Rule 13, with the email to the disabled user; on the search path they
+    were seen active and were not pressed. <sup>i</sup>
 15. Wizard navigation (send side). "Back" returns one step, and returning to
     the search step clears everything entered. "Cancel" asks for confirmation
     only when something was changed. The final button reads "Invite user to
@@ -181,7 +186,8 @@ Accept wizard (new invitee):
   change."); the removal confirmation warns of the lost access and
   permissions and says nothing of an email. ⚠ [OMP1](#omp1) On a press or
   preprint server the masthead email fails with a raw error shown to the
-  manager, though the visibility change itself sticks. <sup>r</sup>
+  manager, though the visibility change itself sticks. A disabled member is
+  emailed the same way ⚠ [A9](#a9). <sup>r</sup>
 - **No notice to the inviter**: nobody is emailed or notified when the
   recipient accepts or declines ⚠ [A5](#a5). The pending row simply
   disappears. From the manager's screens, an acceptance and a decline can be
@@ -461,6 +467,10 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Budget** — states:
+  - a disabled user met on the search step and through the users list's Edit
+    action, "The user is currently disabled." and the two inactive buttons
+    on both (Rule 14): a manager rarely sets out to invite a person they
+    have disabled
   - a past start date taking effect as the acceptance day (Rule 8): a
     manager rarely backdates a start date, and the body names no screen
     where a role's start date is read back after acceptance
@@ -486,8 +496,8 @@ Left out of the scenarios above, by reason:
     sign-in screen; Rules 6, 9; scenarios 2 and 3 mark it)
   - OMP1 (the masthead email failing with a raw error on presses and
     preprint servers; Side effects; scenario 8 marks it)
-  - A6 (Edit on a disabled member's row opening an error over an empty
-    wizard; Rule 14)
+  - A9 (a disabled user's current roles still removable and their masthead
+    setting still changeable, with the email; Rule 14, Side effects)
   - A5 ("Invitation Sent" promising updates never delivered; Rule 15, Side
     effects)
   - A7 (the email's wording slips, greeting a new invitee by address; Side
@@ -498,9 +508,6 @@ Left out of the scenarios above, by reason:
     granted (Rules 1, 2, 4): the test tooling cannot backdate a deadline
   - "Verify ORCID iD" through ORCID's sign-in window (Rule 7): ORCID's
     service is unreachable from the test installs
-  - a disabled user met on the search step, "The user is currently
-    disabled." and no role row (Rule 14): the test tooling cannot disable a
-    user
   - the daily cleanup removing expired invitations (Side effects): the test
     tooling does not run the scheduled task
   - the invitation lifetime from the configuration file (Settings): the
@@ -529,13 +536,14 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A3](#a3) | The links of a replaced invitation (edited or re-sent) die with a bare not-found error | 🐞 | minor | — |
 | [A4](#a4) | Nobody is signed in after accepting; every recipient lands on the sign-in screen | 🐞 | user-visible | — |
 | [A5](#a5) | "Invitation Sent" promises decision updates that are never delivered | 🐞 | user-visible | — |
-| [A6](#a6) | Edit on a disabled member's row opens a broken wizard instead of the disabled-user warning | 🐞 | user-visible | — |
 | [A7](#a7) | Small wording and untranslated-text defects across the invitation screens and emails | 🐞 | minor | — |
 | [A8](#a8) | Added role rows carry no accessible field names; a screen reader hears row 1's labels | 🐞 | user-visible | — |
 | [OMP1](#omp1) | Confirming a masthead change shows a raw email-template error on presses and preprint servers | 🐞 | user-visible | — |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | user-visible | — |
 | [A1](#a1) | The send wizard's address is gated more widely than the screen that offers it | ❓ | latent | — |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
+| [A9](#a9) | A disabled user's current roles can still be removed and their masthead setting changed, and the disabled user is emailed | ❓ | minor | — |
+| [A6](#a6) | Retired: Edit on a disabled member's row opened an error over an empty wizard; it now opens their details with the disabled-user warning (Rule 14) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
 
 ### All apps
 
@@ -593,14 +601,6 @@ acceptance and a decline cannot be told apart from Users & Roles, except for
 the new name an acceptance adds under Current Users.
 Basis: probe, with a mail-delivery positive control. <sup>[f-a5](#fn-a5)</sup>
 
-<a id="a6"></a>
-**A6 — Edit on a disabled member opens a broken wizard** · 🐞 · user-visible.
-Pressing Edit on a disabled user's row pops "Error — The requested resource
-was not found." over a wizard whose roles table is empty. The disabled-user
-warning that the search path shows (Rule 14) never appears here. Observed on
-a journal; the screen is shared.
-Basis: probe. <sup>[f-a6](#fn-a6)</sup>
-
 <a id="a7"></a>
 **A7 — Small copy defects across these screens and emails** · 🐞 · minor.
 The invitation email greets a new invitee by their email address even when a
@@ -624,6 +624,26 @@ screen-reader user editing the second or later row hears no name at all for
 its role, start date, or masthead field, and cannot tell which row they are
 changing. Sighted use is unaffected.
 Basis: probe (accessibility-tree check). <sup>[f-a8](#fn-a8)</sup>
+
+<a id="a9"></a>
+**A9 — A disabled user's current roles can still be changed** · ❓ · minor.
+On a disabled user's details step the warning says no role can be assigned,
+and "Add Another Role" and "Save And Continue" are inactive (Rule 14). Yet
+each current role keeps an active masthead select and an active "Remove
+Role", on the search path as well as through the users list's Edit action.
+Pressed through the Edit action (the search path's were seen active and not
+pressed), both act at once as for any member (Rule 13): the role ends, and the disabled user is emailed "You
+have been removed from a role", whose text tells them "Your account with
+{journal} is still active and any other roles you previously held are still
+active." On a journal the masthead change emails them too; on a press or
+preprint server it answers the raw error of [OMP1](#omp1). The upstream
+issue that brought the warning to this screen expects every field on it to be
+inactive for a disabled user.
+Question: should a disabled user's current roles stay editable on this
+screen, and should a disabled user be emailed about the change? Lean: 🐞. The
+issue states the intention, and the removal email's "still active" is untrue
+for this person.
+Basis: probe, all three apps. <sup>[f-a9](#fn-a9)</sup>
 
 ### OMP and OPS
 
@@ -651,6 +671,12 @@ is present with an Edit button. This reads as a side effect of the preprint
 server keeping its own list of emails, not an intended trim: the template
 ships seeded and is in active use.
 Basis: probe + code. <sup>[f-ops1](#fn-ops1)</sup>
+
+### Retired
+
+<a id="a6"></a>
+**A6 — Edit on a disabled member opens a broken wizard** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13313, 2026-09-15), verified 2026-09-18 on OJS, OMP and OPS: Edit on a disabled user's row opens their details and current roles under "The user is currently disabled.", with no error (Rule 14); what stays open is [A9](#a9). <sup>[f-a6](#fn-a6)</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -796,7 +822,8 @@ the masthead" for reviewer groups, with no select rendered (claim check
 2026-07-31; on-screen text only — the public masthead page was not probed);
 an added
 row's END DATE cell renders "---" with no input (claim check 2026-07-31);
-disabled-user warning `userInvitation.user.disable*` and
+disabled-user warning `userInvitation.user.disable*` (on the search path and,
+since pkp/pkp-lib#13313, on the users-grid Edit path, f-a6) and
 `isSubmitting` also stuck while `userGroupsToAdd` is empty. Payload contract:
 `userGroupsToAdd[]` = `{userGroupId, masthead (required bool), dateStart
 (required date), dateEnd (optional)}` (`UserRoleAssignmentInvitePayload` +
@@ -806,7 +833,14 @@ Another Role" alone enables "Save And Continue" — missing role fields error
 inline on continue; disabled-user banner full text "The user is currently
 disabled. The user was disabled. You cannot assign them a role while they are
 disabled. Please enable the user first to invite them to a role.", with both
-buttons disabled (enabled-user control passed).
+buttons disabled (enabled-user control passed). Re-driven 2026-09-18 on OJS,
+OMP and OPS (Rule 14; scratch users disabled through the users grid's row
+menu "Disable User" › "OK"): searched by email and by username, the step
+opens under the heading "The user is currently disabled." with the same
+paragraph, no new-role row, "Add Another Role" and "Save And Continue"
+disabled; the Edit path shows the same (f-a6); the enabled control gets an
+empty new-role row and both buttons active. The current roles' masthead
+selects and "Remove Role" stay enabled on both paths (f-a9).
 
 <a id="fn-j"></a>
 **j** — Mailable `PKP\mail\mailables\UserRoleAssignmentInvitationNotify`
@@ -994,8 +1028,28 @@ normally.
 <a id="fn-a6"></a>
 **f-a6** — Users-grid Edit on a disabled member (live probe 2026-07-31): error
 toast "The requested resource was not found.", empty roles table, no
-disabled-user banner; the banner renders only on the search path
+disabled-user banner; the banner rendered only on the search path
 (`userInvitation.user.disable*`, note i). Enabled-user control passed.
+Cause: `PKPUserController::get()` read the user with `Repo::user()->get($userId)`,
+which leaves disabled users out, so `GET users/{userId}` answered 404 and the
+wizard opened empty. Fixed upstream by pkp/pkp-lib#13313 (lib/pkp
+`2ecbd331ee`, 2026-09-15, Touhidur Rahman, "Disable user edit page load
+fix"): the controller reads with `get($userId, true)` and
+`UserRoleAssignmentInviteResource` passes a `disabled` flag in the invitation
+payload, which the details step answers with the banner. The issue, still
+open on 2026-09-18, states the intention: "Should not throw an error. I would
+also assume that this user is disabled so all fields are disabled meaning
+they can't be edited." Verified 2026-09-18 on OJS (ojs `7c8d69af3e` /
+lib/pkp `14473fe784`), OMP (`c6a132892`) and OPS (`4bb66b1469`, both lib/pkp
+`1bcd4dd55f`), each driven twice as a scratch manager and read once as
+`admin`, with the kept check `shared/playwright/checks/sync/pkp-lib-13313/s18a.js`:
+Edit on the row of a scratch user disabled through the row menu's "Disable
+User" answers `GET users/{userId}` 200 and opens "STEP 1 - Enter details and
+invite for roles" filled (email, names, the roles table with the user's
+roles) under the banner, no error dialog, "Add Another Role" and "Save And
+Continue" disabled, no new-role row; the enabled control opens the same step
+with no banner and an active "Add Another Role". The first half of the
+intention is met; the second is [A9](#a9)'s. Retired 2026-09-18.
 
 <a id="fn-a7"></a>
 **f-a7** — Copy items, all observed on live probes 2026-07-31: email
@@ -1019,6 +1073,29 @@ every `label[for]` resolves to the first row's control; no
 shows row 2's combobox/textbox without an accessible name. Observed
 2026-07-31 (claim check —
 duplicate-id scan + aria snapshot on OJS; shared component, all three apps).
+
+<a id="fn-a9"></a>
+**f-a9** — The payload's `disabled` flag (f-a6) gates the banner
+(`UserInvitationDetailsFormStep.vue`), the new-role rows and "Add Another
+Role" (`UserInvitationUserGroupsTable.vue`) and the continue button
+(`isSubmitting` in `UserInvitationPageStore.js`); the same table's
+current-role rows render their masthead `FieldSelect` and "Remove Role"
+without reading it. Live 2026-09-18 on OJS, OMP and OPS
+(tips and kept check as in f-a6; a scratch user holding Author and Reader,
+disabled through the users grid's row menu, opened through Edit): "Remove
+Role" on the Reader row opened the usual confirmation and, confirmed,
+`PUT users/{userId}/endRole/{userGroupId}` answered 200, the row showing End
+Date today and "User Removed From Role"; the disabled user's mailbox then
+held "You have been removed from a role" (`USER_ROLE_END`, whose body carries
+the "still active" sentence). The masthead select on the Author row opened
+"Confirm masthead visibility change"; "Cancel" put the value back; "Confirm"
+saved with `PUT users/{userId}/masthead/{userGroupId}` 200 and a second email
+on OJS, and answered 500 with OMP1's error dialog on OMP and OPS, no email.
+A second disabled user met on the search path showed the same enabled
+controls, left unpressed, and received nothing, as did both enabled controls
+and the disabling itself. Whether the search path showed these controls
+enabled before 2026-09-15 was not traced; the Edit path could not reach them
+until then (f-a6). Intention: the issue's sentence quoted in f-a6.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two

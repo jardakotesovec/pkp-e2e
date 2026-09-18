@@ -10,7 +10,7 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓,
- * A2 ❓, A3 🐞, A4 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞, OMP1 🐞. Where a test
+ * A2 ❓, A3 🐞, A4 🐞, A5 🐞, A7 🐞, A8 🐞, A9 ❓, OMP1 🐞. Where a test
  * passes through one (S2/S3/S8 sign in afresh after accepting, S6 reads a
  * replaced link as "not opening the flow", S8 dismisses whatever the masthead
  * confirmation answers with and reads the change itself, and reads the

@@ -91,7 +91,7 @@ item's help text.
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Keywords**, **Subjects**, **Disciplines**, **Supporting Agencies** | No | Term lists, multilingual. Type a term and press Enter (or pick a suggestion) to add it as a chip with its own "Remove {term}" button. Suggestions are terms already recorded in this journal for that item and language (Rule 7). Any typed term is accepted. |
+| **Keywords**, **Subjects**, **Disciplines**, **Supporting Agencies** | No | Term lists, multilingual. Type a term and press Enter (or pick a suggestion) to add it as a chip with its own "Remove {term}" button. Suggestions are terms already on a published version in this journal for that item and language (Rule 7b). Any typed term is accepted. |
 | **Coverage**, **Rights**, **Source**, **Type** | No | Plain text, multilingual. |
 | **Funding Statement** | No | Rich text, multilingual. Shown to readers under "Funding Statement" (Rule 15). The structured funders list is a separate page; see *[Funding](U43-funding.md)*. |
 | **Publisher ID** | No | Plain text, single value. Present when the journal enables publisher IDs for publications (see *Identifiers*). |
@@ -198,12 +198,26 @@ it for a per-item value (Rule 11). <sup>g</sup>
    shows them again. With nothing enabled the page reads "No metadata
    fields are currently enabled." and has no Save button. <sup>e</sup>
 7. **Term lists (keywords, subjects, disciplines, supporting agencies).**
-   Typing in the field shows suggestions drawn from terms already
-   recorded in this journal for the same item and language, on any
-   submission. Enter or a click adds the term as a chip. The chip's ×
-   removes it. A term nobody has used before is accepted as typed.
-   Suggestions are refreshed after each save, so a term added on one
-   submission is offered on the next ⚠ [A10](#a10). <sup>e</sup>
+   - **7a — adding and removing terms.** Type a term and press Enter,
+     or click a suggestion: the term becomes a chip. The chip's ×
+     removes it. A term nobody has used before is accepted as typed. A
+     term that is already a chip on the field is still among its
+     suggestions; adding it again shows a second identical chip until
+     Save, and the reopened page shows the term once. <sup>e</sup>
+   - **7b — suggestions.** Typing in the field shows suggestions: terms
+     already recorded for the same item and language on a published
+     version in this journal. The first entry of the list is always the
+     typed text itself, in every app, so a suggestion is an entry below
+     it. A term on a submission that is not
+     published (still in the workflow, declined, or unpublished again)
+     is not offered, and neither is another journal's term. The Author
+     is offered the same list in the submission wizard's "Details"
+     step. The list is fetched as you type, so a term is offered on
+     other submissions as soon as the version carrying it is published,
+     without reloading the page. This is OJS since the upstream change
+     of 2026-09-13; OMP and OPS had not received that change by
+     2026-09-18, and there the suggestions do not follow this rule and
+     the list is often empty ⚠ [A10](#a10). <sup>e</sup>
 8. **A published version warns editors, and stays editable.** On every
    Publication page of a published version, an editorial role sees the
    banner "Warning: This version has been published. Editing it may
@@ -878,6 +892,13 @@ App-specific:
 
 Left out of the scenarios above, by reason:
 
+- **Budget** — states:
+  - a term offered on a second submission once the version carrying it
+    is published, with a term on an unpublished submission not offered
+    (Rule 7b)
+- **Budget** — variants:
+  - a term added twice showing two chips until Save and one on the
+    reopened page (Rule 7a)
 - **Nothing new to test**:
   - a Section Editor or Guest Editor opening the pages while assigned to
     the current stage (Actors row 1): the pages scenario 12's Copyeditor
@@ -890,7 +911,8 @@ Left out of the scenarios above, by reason:
   - A1 (every other Publication page refused while the plain language
     summary is required; Rule 5; Settings)
   - A5 (a merely scheduled article still offering "Change"; Rule 13a)
-  - A10 (term suggestions from terms already recorded; Rule 7)
+  - A10 (a press's and a preprint server's suggestions not following
+    the rule, often an empty list; Rule 7b)
   - A12 ("Custom copyright statement" accepted with an empty statement;
     Rule 12; Settings)
   - A15 (the freshly opened panel acting before its loading settles;
@@ -927,7 +949,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-28; A16, A17 and the
-retirement of A4 2026-09-09; the retirement of A16 2026-09-14), unreviewed unless an entry notes otherwise;
+retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18), unreviewed unless an entry notes otherwise;
 the team settles them on spec review. The summary
 is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
 and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -937,6 +959,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved, even after the summary is stored, and a journal's pre-scheduling panel is refused silently | 🐞 | user-visible | — |
 | [A2](#a2) | Reset permissions stamps Copyright Year 1970 on unpublished items (journal on article-date basis; preprint server) | 🐞 | user-visible | — |
 | [A15](#a15) | The freshly opened language panel acts before its loading settles: stale guidance and prefill kept (journal), an empty required Title accepted (press), the old language's text stored as the new title (preprint server) | 🐞 | user-visible | — |
+| [A10](#a10) | In OMP and OPS the term suggestions do not follow the rule and the list is often empty; fixed in OJS | 🐞 | minor | upstream sync (claude), 2026-09-18 — settled to a defect, OMP and OPS |
 | [A13](#a13) | Cancelling the reset-permissions confirm box leaves the button greyed until a reload | 🐞 | minor | — |
 | [OJS1](#ojs1) | An article published into a not-yet-published issue keeps "Change", and every language change on it is refused | 🐞 | minor | — |
 | [OMP5](#omp5) | With License Terms but no license, the book page shows a "License" link that leads nowhere | 🐞 | minor | — |
@@ -945,7 +968,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A5](#a5) | A scheduled article may still offer and allow Change Submission Language (code reading; the state was not reached live) | ❓ | minor | — |
 | [A6](#a6) | The "Current Submission Language" readout leaves the Publication pages once a second version exists or the item is published | ❓ | minor | — |
 | [A8](#a8) | Read-only pages keep their fields typeable with Save unavailable | ❓ | minor | — |
-| [A10](#a10) | No term suggestion appeared on the Metadata page, even for a term already recorded in the journal | ❓ | minor | — |
 | [A11](#a11) | The automatic copyright holder carries the contributor's role: "Copyright (c) 2026 Alice Probe (Author)" on the reader's page | ❓ | minor | — |
 | [A12](#a12) | "Custom copyright statement" saves with an empty statement; items then publish with no holder | ❓ | minor | — |
 | [A14](#a14) | The language panel's Abstract is required but described as "recommended" | ❓ | minor | — |
@@ -1072,17 +1094,21 @@ Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a9</sup>
 
 <a id="a10"></a>
-**A10 — Term suggestions did not appear** · ❓ · minor.
-Typing a term in Keywords that is already recorded on another submission
-of the same journal offered nothing but the typed text itself. No
-suggestion appeared on any of the three apps' test installs, on the same
-or another submission.
-Question: are suggestions expected here, or does the lookup need
-something this install lacks? Lean: the field is built to suggest, and
-the rule stands as written. Settled by one suggestion appearing while
-typing a term already recorded on another submission of the same
-journal.
-Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a10</sup>
+**A10 — Term suggestions do not follow the rule** {OMP OPS} · 🐞 · minor.
+Typing in Keywords, Subjects, Disciplines or Supporting Agencies should
+offer the terms Rule 7b names. In OMP and OPS the suggestions still come
+from an older lookup that does not follow that rule, and the list is
+often empty: nothing is offered but the typed text itself, even for a
+term the rule says should be there. The empty lists seen in all three
+apps on 2026-08-28 came from that older lookup. In OJS the upstream
+change of 2026-09-13 (pkp/pkp-lib#12163) replaced it: suggestions appear
+there as Rule 7b states, and the rule is written for the new lookup. OMP
+and OPS had not received the change by 2026-09-18.
+Since: live-probed 2026-08-28 · Basis: probe; the fix in OJS seen
+2026-09-18.
+Re-checked: upstream sync (claude), 2026-09-18 — settled from an open
+question to a defect, scoped to OMP and OPS: suggestions are expected,
+and they appear in OJS. <sup>f-a10</sup>
 
 <a id="a11"></a>
 **A11 — The automatic copyright holder names the contributor's role** · ❓ · minor.
@@ -1517,8 +1543,13 @@ context key `agencies` for the last), `coverage`/`rights`/`source`/`type`
 config: "No metadata fields are currently enabled.". Suggestions:
 `FieldControlledVocab.vue` GETs `vocabs?vocab=…&submissionId=…&term=…&locale=…`
 (`PKPVocabController::getMany()`, roles MANAGER/SITE_ADMIN/SUB_EDITOR/
-ASSISTANT/AUTHOR): entries of that vocabulary in the context, in the
-requested locale, filtered by the typed term; `allowCustom: true`.
+ASSISTANT/AUTHOR): since pkp/pkp-lib#12163 (lib/pkp `14473fe784`)
+entries of that vocabulary on published versions in the context
+(`withContextIdAndPublishedPublications()`), in the requested locale,
+filtered by the typed term (a partial, case-insensitive match; the
+controller caps the list at 200, read not driven); `allowCustom: true`.
+Every typing sends a fresh request about a quarter of a second after
+the typing stops, so nothing is cached between reads.
 `FieldBaseAutosuggest` also supports a "vocabularies" browser
 (`VocabularyModal.vue`), but `PKPMetadataForm` passes none — the modal
 serves only the Categories picker (wizard "For the Editors",
@@ -1542,8 +1573,27 @@ Article Number: "The article number can be used in citations and other
 metadata instead of page numbers.");
 Coverage disabled → hidden, re-enabled → "Pacific Ocean, 2020" back. A
 typed keyword became a chip with a "Remove ocean acidification" button;
-an unknown term was accepted; both persisted after Save and reload. The
-suggestion lookup is A10's (f-a10).
+an unknown term was accepted; both persisted after Save and reload.
+Live-probed 2026-09-18 (Rules 7a, 7b; the Fields row), a scratch
+journal's manager typing a shared stem on a queued submission, OJS at
+lib/pkp `14473fe784`: offered were the terms of two published
+submissions of the journal; not offered were the terms of a queued and
+of a declined submission, the term of a published submission of a
+second scratch journal (offered there, to that journal's manager), a
+French (Canada) term while typing in the English field (offered in the
+French field only, which offered no English one), and any keyword while
+typing in Subjects. A queued submission's term was not offered until
+that submission was published, then offered at the next typing with the
+reading window not reloaded; a second term saved on an already
+published version was offered at the next typing; after "Unpublish" on
+one source its term was no longer offered. An Author typing the stem in
+the wizard's "Details" Keywords got the same list as the manager.
+Mid-word and upper-case typing matched. On all three apps: a click on
+an option added the chip; a term already a chip on the field was still
+offered, picking it or typing it again with Enter showed a second
+identical chip, Save answered "Saved" and the reopened page showed the
+term once. OMP and OPS sat at lib/pkp `1bcd4dd55f`, one commit before
+the change, that day: their lookup is A10's (f-a10).
 
 <a id="fn-f"></a>
 **f — Data page.** `PKPDataAvailabilityForm`: one `FieldRichTextarea`
@@ -2242,8 +2292,23 @@ acidification" saved as a keyword on one submission, typing "acid",
 field's own lookup (`GET vocabs?vocab=submissionKeyword&…&term=…`,
 observed in the browser's traffic) answered 200 with an empty list
 every time. `PKPVocabController::getMany()` is the path (fn-e); whether
-the install's database or the lookup is at fault was not settled — no
-MySQL control was available.
+the install's database or the lookup is at fault was not settled that
+day — no MySQL control was available.
+Live-probed 2026-09-18 again, after pkp/pkp-lib#12163 ("We should limit the
+source of suggestions to published submissions"; lib/pkp `14473fe784`,
+in OJS only that day, OMP and OPS at `1bcd4dd55f`, one commit before
+it). On OJS suggestions appeared as Rule 7b states (fn-e), in each of
+two scratch journals for that journal's own published terms, so the
+question is answered: suggestions are expected, and the lookup was at
+fault, not the database. What is left of the 2026-08-28 observation on
+OJS is by design: that drive saved "ocean acidification" on an
+unpublished submission, which the changed lookup does not offer. On OMP
+and OPS, still on the old lookup, the lists did not follow Rule 7b and
+the empty answer was reproduced (200 with an empty list for a term on a
+published version in the same press or server). The next upstream sync
+that finds both pointers past `14473fe784` re-runs the kept check
+(`shared/playwright/checks/sync/pkp-lib-12163/term-suggestions.js`) on
+OMP and OPS and, if the lists follow Rule 7b, retires A10.
 
 <a id="fn-f-a11"></a>
 **f-a11 — A11 evidence.** `PKPPublication::getAuthorString()` joins each

@@ -409,7 +409,7 @@ test.describe('Publication metadata (U40)', () => {
         // Keywords (Rule 7): Enter adds the typed term as a chip with its
         // "Remove {term}" button; the chip's button removes it; "benthic
         // flux", a term nobody has used before, is accepted as typed.
-        // (Suggestions from other submissions are A10's open question —
+        // (Suggestions from other submissions are Rule 7b's and A10's —
         // never asserted.)
         const chip = page.getByRole('button', {name: 'Remove ocean acidification'});
         await keywordsInput.click();

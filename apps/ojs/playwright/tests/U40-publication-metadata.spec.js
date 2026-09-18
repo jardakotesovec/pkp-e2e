@@ -21,7 +21,7 @@
  * Disclosure, never the language button), A6 ❓ (S6 asserts only the
  * "Change" button's absence once published or versioned), A8 ❓ (S3 and
  * S12 assert only the scenarios' own sentences: Save disabled, the fields
- * shown, nothing typed kept), A10 ❓ (no term suggestion is asserted),
+ * shown, nothing typed kept), A10 🐞 {OMP OPS} (no term suggestion is asserted),
  * A11 ❓ (the automatic holder's description is asserted only up to the
  * contributor's name), A12 ❓ (no empty custom copyright statement), A13 🐞
  * (S7's Cancel leg asserts only that nothing was reset and reloads before

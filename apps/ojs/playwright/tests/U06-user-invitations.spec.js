@@ -8,7 +8,7 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓,
- * A2 ❓, A3 🐞, A4 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞. Where a test passes
+ * A2 ❓, A3 🐞, A4 🐞, A5 🐞, A7 🐞, A8 🐞, A9 ❓. Where a test passes
  * through one (S2/S3/S8 sign in afresh after accepting, S6 reads a replaced
  * link as "not opening the flow") it asserts the effect the spec states and
  * leaves the finding's own claim unasserted either way.

@@ -1198,7 +1198,12 @@ the site-level completion page, redirected (2026-09-02, all three apps) to
 `{seeded context}/en/user/profile?0=roles`, the journal-level tab with the
 seeded context first and the rest folded, so an earlier flat-list reading
 did not reproduce; a user holding no role in any context was not probed;
-the "Register in … as…" string was not seen.
+the "Register in … as…" string was not seen. Since pkp/pkp-lib#13181
+(lib/pkp `aeac6f75cf`, 2026-09-16; live-probed 2026-09-18, all three apps)
+that forward keeps the tab and writes no `?0=`: `index/en/user/profile/roles`
+ends on `{context}/user/profile#roles` with Roles open, and "Edit My Profile"
+(`index/en/user/profile`, no tab named) on `{context}/user/profile` with
+Identity open (*User profile* Rule 3, its retired finding A1).
 Live-probed 2026-09-02 on all three apps. A valid
 journal-level registration on the seeded context stayed at
 `{context}/en/user/register`, title "Registration complete", "Thanks for

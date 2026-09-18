@@ -13,7 +13,7 @@
  * of everything else left out): A1, A2, A3 (S6 asserts only that a replaced
  * invitation's old accept link does not open the accept flow; the bare-404
  * page is the bug), A4 (S2 and S3 verify acceptance by a fresh sign-in, not
- * the signed-out landing), A5, A6, A7, A8, OMP1 (S8 dismisses whatever the
+ * the signed-out landing), A5, A7, A8, A9, OMP1 (S8 dismisses whatever the
  * masthead confirmation answers with and reads the change itself; the
  * masthead email is read on OJS only, fn-s).
  *

@@ -19,8 +19,8 @@
  * tab). The fold reads "Register with other servers" / "Hide other servers".
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 🐞, A4 🐞, A5 ❓, A6 ❓, A7 🐞, A8 ❓, A9 ❓, A10 🐞, A11 🐞,
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap):
+ * A2 🐞, A18 🐞, A4 🐞, A5 ❓, A6 ❓, A7 🐞, A8 ❓, A9 ❓, A10 🐞, A11 🐞,
  * A12 🐞, A14 🐞, OPS2 🐞. Where a test passes through one (S3 presses a
  * tab after the refused Contact save, A17; S7 saves the corrected homepage,
  * A15; S4 reads the confirmation where the app delivers it, A8; S8 saves
