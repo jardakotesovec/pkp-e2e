@@ -113,15 +113,13 @@ The apps move; the suite follows. The baselines live in
    the log and nothing more. The reproduction must hold on reset
    databases before it is a finding. A confirmed regression, and a
    finding that contradicts the linked issue's stated intention, gets a
-   detailed report under `docs/reports/<date>-<repo>-<pr>.md`: the change
-   and its intention; one section per finding with the exact numbered
-   steps a person follows on a fresh
-   install, the expected and observed outcome with the on-screen strings
-   verbatim, the request and response where the browser showed one, the
-   cause in the developer layer, the kept script and snapshot pointers,
-   and what stays unverified. The report is posted into the session's
-   thread as a file with the day's summary AND sent as a direct message
-   to @beaug and @jarda.kotesovec the same day; the regression gets a row
+   report under `docs/reports/<date>-<repo>-<pr>.md` in the shape of
+   `docs/process/REPORT.md`: impact in plain words first, then steps a
+   person follows on a fresh install with expected and observed verbatim,
+   the cause, a proposed fix, and the evidence last. The report is
+   posted into the session's thread as a file with the day's summary AND
+   sent as a direct message to @beaug and @jarda.kotesovec the same day;
+   the regression gets a row
    in `ci-triage.md` "Open regressions" linking the report, with its
    reproduction script kept under `shared/playwright/checks/sync/<pr>/`
    (the checks layout, importing the kit as `require('../../../probe')`),
@@ -293,9 +291,10 @@ sync loop's critical triage, on one PR:
 2. **Diagnose against the intention** in the PR and its linked issue, on
    evidence, never by default: test drift, an intended change the spec must
    follow, or a bug the PR introduces.
-3. **Bug.** Report it to the developer with the evidence: what the screen
-   offers, what happens, at which commit. Nothing enters the register, the
-   spec describes `main`; if the PR merges with the bug, the sync loop
+3. **Bug.** Report it to the developer in `REPORT.md`'s shape: what the
+   screen offers, what happens, at which commit, and what would fix it.
+   Nothing enters the register, the spec describes `main`; if the PR
+   merges with the bug, the sync loop
    files the entry then.
 4. **Intended change.** Create a companion branch in pkp-e2e from `main`,
    named exactly like the developer's branch (for a PR pair, the app PR's

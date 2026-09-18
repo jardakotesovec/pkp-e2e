@@ -18,15 +18,21 @@
 
 An observation enters marked `unverified`. Before the session report, the orchestrator dispatches one targeted verification probe on the disposable install, through the screens where possible. Where only a direct request can settle it, that single constructed check is allowed for verification, never for exploration, and its content obeys the same quarantine. Confirmed: the entry stays, marked `verified` with the date and its `verified-by` line. Not confirmed, or not verifiable in this environment: the entry is deleted, and if the underlying claim still matters the spec gets a generic ❓ entry.
 
-Any agent may write the file; the quarantine is about where content goes, not who writes it. Every write is read-first: read the whole file, and if an observation matches an existing entry (same guard, same screen, same root cause, even on another app or role), update that entry's `observed` line with the date and new context instead of adding another. One entry per distinct problem, ever. Every entry uses this shape:
+Any agent may write the file; the quarantine is about where content goes, not who writes it. Every write is read-first: read the whole file, and if an observation matches an existing entry (same guard, same screen, same root cause, even on another app or role), update that entry's `observed` line with the date and new context instead of adding another. One entry per distinct problem, ever. The maintainer hands entries to the team as they are, so each one is `docs/process/REPORT.md` in miniature: impact first, steps a person can follow, a proposed fix. Every entry uses this shape:
 
 ```
 ## SEC-YYYYMMDD-<slug> — one-line problem statement
 status: unverified | verified YYYY-MM-DD
 where: <app(s) · screen · role>
-observed: <2–4 lines, what was actually seen>
+impact: <one or two sentences for someone who runs a journal: who can see or do what they should not, what that reaches, and the severity in one word>
+steps: <the preconditions in one line (fresh install, the roles and data a person creates), then numbered steps with the names as they appear on screen; where only a request shows it, that one request and its response>
+observed: <what was actually seen, on-screen strings verbatim>
+cause: <the class and method, and why, when traced; otherwise "not traced">
+fix: <the smallest change that would close it, marked as a proposal; otherwise "none proposed">
 verified-by: <the one check that settled it>
 ```
+
+An unverified entry may leave `cause` and `fix` at their placeholders; the verification probe fills what it learned.
 
 The file has two sections. **Open** holds the entries above. **Handled** holds one line per closed item (`SEC-id — disposition, date`, where the disposition is fixed, accepted or dismissed); the maintainer moves entries there on review. Handled lines are tombstones: check them before filing, and do not re-file a handled problem unless the behavior has demonstrably changed (then file a new Open entry naming the old id). If the file is absent, create it with the two headings. An absent file or an empty Open section means "no open concerns", not "never checked". At session end, after the verification pass, the file is left tidy: dismissed entries deleted, duplicates merged, every remaining Open entry distinct and `verified`.
 

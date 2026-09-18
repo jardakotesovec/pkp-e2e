@@ -52,7 +52,9 @@ Read in this order:
    each kind of finding goes. `docs/process/briefs/` holds the brief
    template for each subagent role plus the shared Frame (`frame.md`) and
    digest block (`digest-block.md`); the orchestrator fills the slots.
-2. `docs/process/TEMPLATE.md`: how a spec is written, section by section.
+2. `docs/process/TEMPLATE.md`: how a spec is written, section by section;
+   `docs/process/REPORT.md`: how a regression or defect report handed to
+   the team is written.
 3. `docs/process/PRINCIPLES.md`: the rules every test follows.
 4. `docs/process/harness.md`: how the Playwright harness is laid out and run.
    Then `patterns.md` (conventions and pitfalls), `scenarios.md` (seeding
