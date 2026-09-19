@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **9 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **12 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -175,3 +175,30 @@ until their specs exist. Do not force-claim the defects themselves.
    2026-08-28 (spec-author sweep of templates/pages/plugins in all three
    checkouts). Resolves: maintainer confirmation as dead code (removal
    candidate).
+10. **AFFW-243 dead-code candidate** — attached to **U33** (claimed; the
+    production-stage spec's Reference table documents the waiver). The
+    "Change decision" link (`WorkflowActionChangeDecision.vue`) is imported
+    and registered in `WorkflowPageOPS.vue` and mounted by no workflow
+    config in any app: a grep of the three `lib/ui-library/src` trees finds
+    only the import and the `Components` entry, so no screen renders it.
+    Code-verified 2026-09-19 (spec-author sweep; checkouts ojs 7c8d69af3e, omp
+    0ec98a508, ops 9ce633ee1d). Resolves: maintainer confirmation as dead code
+    (removal candidate).
+11. **GRID-022 unmounted legacy grid** — attached to **U33** (claimed; the
+    production-stage spec's Reference table documents the waiver). The
+    legacy `ProductionReadyFilesGridHandler` is referenced by no template,
+    config or page in the three checkouts; the Vue "Production Ready Files"
+    list (`useFileManagerConfig.js` `PRODUCTION_READY_FILES`, listing
+    through the submission-files API and uploading through the shared
+    upload wizard) is the live surface. Code-verified 2026-09-19 (checkouts
+    as above). Resolves: maintainer confirmation as dead code (removal
+    candidate).
+12. **GRID-023 unreachable outside OMP's publication formats** — attached to
+    **U33** (claimed; the production-stage spec's Reference table documents
+    the waiver). `ManageProofFilesGridHandler` is mounted only from
+    `templates/controllers/grid/files/proof/manageProofFiles.tpl`, which
+    only OMP's `PublicationFormatGridHandler` renders inside the
+    publication-format window (outside the campaign per FEATURE-MAP's U46
+    note); on a journal or preprint server no screen reaches it.
+    Code-verified 2026-09-19 (checkouts as above). Resolves: out of scope on
+    OMP; dead on OJS and OPS pending maintainer confirmation.

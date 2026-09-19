@@ -6,8 +6,10 @@
  *
  *   node bin/mount.js [ojs] [omp] [ops]     (default: every app with <APP>_ROOT set)
  *
- * Per app: copies apps/<app>/php/** to the app root and shared/php/** to
- * lib/pkp/, keeps the copies out of git via .git/info/exclude, and writes a
+ * Per app: copies apps/<app>/php/** to the app root, shared/php/** to
+ * lib/pkp/ and apps/<app>/playwright/fixtures/files/** to
+ * classes/testing/fixtures/, keeps the copies out of git via
+ * .git/info/exclude, and writes a
  * manifest (.pkp-e2e-mount.json) of what it wrote. Guard rails:
  *  - refuses to overwrite a mounted file that was hand-edited in the app
  *    checkout (edits belong in this repo — re-run after fixing);
@@ -41,8 +43,15 @@ function overlayFiles(appName) {
     };
     const appPhp = path.join(REPO_ROOT, 'apps', appName, 'php');
     const sharedPhp = path.join(REPO_ROOT, 'shared', 'php');
+    const fixtures = path.join(REPO_ROOT, 'apps', appName, 'playwright', 'fixtures', 'files');
     walk(appPhp, appPhp, '');
     walk(sharedPhp, sharedPhp, path.join('lib', 'pkp'));
+    // The suite's fixture files, so a builder can store one the way an
+    // upload does (the submission `galleys[].file` key reads them from
+    // classes/testing/fixtures/ in the checkout).
+    if (fs.existsSync(fixtures)) {
+        walk(fixtures, fixtures, path.join('classes', 'testing', 'fixtures'));
+    }
     return pairs;
 }
 

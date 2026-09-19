@@ -13,13 +13,15 @@
  * the server's first section). OPS has no review stage, so the `reviewRounds`
  * key is REJECTED outright — never silently ignored. The workflow start stage
  * (production) comes from the OPS submission schema default, not from this
- * builder.
+ * builder. `galleys[]` (core) recomputes the preprint grid's single notice
+ * type after each galley.
  */
 
 namespace APP\testing;
 
 use APP\facades\Repo;
 use PKP\context\Context;
+use PKP\notification\Notification;
 use PKP\testing\PKPSubmissionScenarioBuilder;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
@@ -41,6 +43,16 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
             ->getMany()
             ->first();
         return $firstSection ? ['sectionId' => $firstSection->getId()] : [];
+    }
+
+    /**
+     * OPS's PreprintGalleyGridHandler::updateGalley recomputes "awaiting
+     * representations" alone: a preprint server never raises "assign a
+     * production user".
+     */
+    protected function galleyNoticeTypes(): array
+    {
+        return [Notification::NOTIFICATION_TYPE_AWAITING_REPRESENTATIONS];
     }
 
     protected function assertReviewRoundsSupported(Spec $root): void

@@ -89,6 +89,26 @@
  *   on approved comments alone) and a reporter other than the writer
  *   (one's own comment offers no "Report"). Text and note go through the
  *   form requests' PKPString::stripUnsafeHtml, as posted text does.
+ * - galleys[] {label*, locale?, file | urlRemote} — galleys on the
+ *   submission's current publication (U33), OJS and OPS only (OMP has
+ *   publication formats, so the key is a 400 there): the same
+ *   Repo::galley()->add() the "Galleys" page's "Add galley" › "Create New
+ *   Galley" window runs (ArticleGalleyForm / PreprintGalleyForm::execute),
+ *   followed by the grid handler's own notice recompute (updateGalley:
+ *   NotificationManager::updateNotification of the app's galley notice
+ *   types on a submission at Copyediting or Production), then, for `file`,
+ *   the upload wizard "Upload a File Ready for Publication" step for step:
+ *   the file service's add() into the submission's directory, a new
+ *   SubmissionFile at SUBMISSION_FILE_PROOF hung on the galley
+ *   (ASSOC_TYPE_REPRESENTATION, the app's submission-file repository links
+ *   galley.submissionFileId), and the "Review Details" step's save
+ *   (SubmissionFilesMetadataForm::execute + PKPManageFileApiHandler::
+ *   saveMetadata's author-notification update and MetadataChanged event).
+ *   `file` is a basename under apps/<app>/playwright/fixtures/files/,
+ *   which bin/mount.js copies to classes/testing/fixtures/ in the checkout;
+ *   the genre is the first the wizard's list offers (the context's first
+ *   non-dependent genre, "Article Text"). `urlRemote` seeds the window's
+ *   "Remotely hosted content" galley with no file (the wizard cancelled).
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -104,16 +124,21 @@ use PKP\author\contributorRole\ContributorRoleIdentifier;
 use PKP\author\contributorRole\ContributorType;
 use PKP\context\Context;
 use PKP\controllers\grid\users\reviewer\form\traits\HasReviewDueDate;
+use PKP\core\Core;
 use PKP\core\Registry;
 use PKP\db\DAORegistry;
 use PKP\core\PKPString;
+use PKP\file\FileManager;
 use PKP\notification\Notification;
+use PKP\observers\events\MetadataChanged;
 use PKP\security\Role;
+use PKP\stageAssignment\StageAssignment;
 use PKP\submission\action\EditorAction;
 use PKP\submission\reviewAssignment\ReviewAssignment;
 use PKP\submission\reviewer\ReviewerAction;
 use PKP\submission\reviewRound\ReviewRound;
 use PKP\submission\reviewer\suggestion\ReviewerSuggestion;
+use PKP\submissionFile\SubmissionFile;
 use PKP\validation\MultilingualInput;
 use PKP\validation\ValidatorFactory;
 use PKP\testing\Spec;
@@ -167,6 +192,25 @@ abstract class PKPSubmissionScenarioBuilder
     /** OPS overrides to reject reviewer suggestions (no API mount, no wizard step). */
     protected function assertReviewerSuggestionsSupported(Spec $root): void
     {
+    }
+
+    /** OMP overrides to reject galleys (a press has publication formats, no "Galleys" page). */
+    protected function assertGalleysSupported(Spec $root): void
+    {
+    }
+
+    /**
+     * The notice types the app's galley grid recomputes after a galley is
+     * saved (ArticleGalleyGridHandler::updateGalley passes the lib/pkp pair;
+     * OPS's PreprintGalleyGridHandler passes "awaiting representations"
+     * alone, since a preprint server never raises "assign a production user").
+     */
+    protected function galleyNoticeTypes(): array
+    {
+        return [
+            Notification::NOTIFICATION_TYPE_ASSIGN_PRODUCTIONUSER,
+            Notification::NOTIFICATION_TYPE_AWAITING_REPRESENTATIONS,
+        ];
     }
 
     /** App hook before publish (OJS: issue assignment). Overlay parse happens here too. */
@@ -306,6 +350,7 @@ abstract class PKPSubmissionScenarioBuilder
 
         $publishOverlayPlan = $this->parsePublishOverlay($context, $root);
         $commentPlans = $this->parseUserComments($root, $published);
+        $galleyPlans = $this->parseGalleys($context, $root, $locale);
         $root->assertConsumed();
 
         if ($published && !$submitted) {
@@ -321,7 +366,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = $this->forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -361,11 +406,13 @@ abstract class PKPSubmissionScenarioBuilder
         ?array $authorPlan = null,
         array $participantPlans = [],
         array $suggestionPlans = [],
-        array $commentPlans = []
+        array $commentPlans = [],
+        array $galleyPlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
         $seededComments = [];
+        $seededGalleys = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -571,6 +618,13 @@ abstract class PKPSubmissionScenarioBuilder
                 $roundIndex++;
             }
 
+            // Galleys on the current publication, added the way the "Galleys"
+            // page adds them, before a publish: an editor builds the galleys
+            // and then publishes, so a published seed carries them published.
+            if ($galleyPlans !== []) {
+                $seededGalleys = $this->seedGalleys($context, $submissionId, $galleyPlans, $editor);
+            }
+
             if ($published) {
                 $submission = Repo::submission()->get($submissionId);
                 $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
@@ -636,7 +690,187 @@ abstract class PKPSubmissionScenarioBuilder
             'reviewAssignments' => $seededAssignments,
             'reviewerSuggestions' => $seededSuggestions,
             'userComments' => $seededComments,
+            'galleys' => $seededGalleys,
         ];
+    }
+
+    /**
+     * Read galleys[] (U33): each entry a galley on the submission's current
+     * publication, as the "Galleys" page's "Create New Galley" window and
+     * the upload wizard it opens create one. Parse-phase: no writes. The
+     * window's refusals are the seed's: a label is required, the language
+     * must be one the window's list offers (the context's submission
+     * locales and the submission's own), and the entry names exactly one
+     * of `file` (a basename under apps/<app>/playwright/fixtures/files/,
+     * mounted at classes/testing/fixtures/) or `urlRemote`.
+     *
+     * @return array<int, array{label: string, locale: string, file: ?string, path: ?string, urlRemote: ?string}>
+     */
+    protected function parseGalleys(Context $context, Spec $root, string $submissionLocale): array
+    {
+        if (!$root->has('galleys')) {
+            return [];
+        }
+        $this->assertGalleysSupported($root);
+        $offeredLocales = array_unique(array_merge([$submissionLocale], (array) $context->getSupportedSubmissionLocales()));
+        $fixtureDir = Core::getBaseDir() . '/classes/testing/fixtures';
+        $plans = [];
+        foreach ($root->childList('galleys') as $spec) {
+            $label = $spec->require('label');
+            if (!is_string($label) || trim($label) === '') {
+                throw new SpecException("{$spec->path}.label", 'label must be a non-empty string (the "Create New Galley" window requires a label)');
+            }
+            $locale = (string) $spec->get('locale', $submissionLocale);
+            if (!in_array($locale, $offeredLocales, true)) {
+                throw new SpecException("{$spec->path}.locale", 'locale must be one the "Create New Galley" window\'s language list offers: ' . implode(', ', $offeredLocales));
+            }
+            $hasFile = $spec->has('file');
+            $hasRemote = $spec->has('urlRemote');
+            if ($hasFile === $hasRemote) {
+                throw new SpecException($spec->path, 'A galley names exactly one of "file" (a fixture basename) or "urlRemote"');
+            }
+            $file = null;
+            $path = null;
+            $urlRemote = null;
+            if ($hasFile) {
+                $file = (string) $spec->get('file');
+                if ($file === '' || $file !== basename($file)) {
+                    throw new SpecException("{$spec->path}.file", 'file is a basename under apps/<app>/playwright/fixtures/files/, no directory part');
+                }
+                $path = "{$fixtureDir}/{$file}";
+                if (!is_file($path)) {
+                    throw new SpecException("{$spec->path}.file", "No fixture \"{$file}\" under {$fixtureDir} (bin/mount.js copies apps/<app>/playwright/fixtures/files/ there; re-run npm run mount)");
+                }
+            } else {
+                $urlRemote = (string) $spec->get('urlRemote');
+                if (trim($urlRemote) === '') {
+                    throw new SpecException("{$spec->path}.urlRemote", 'urlRemote must be a non-empty string');
+                }
+            }
+            $plans[] = ['label' => $label, 'locale' => $locale, 'file' => $file, 'path' => $path, 'urlRemote' => $urlRemote];
+        }
+        return $plans;
+    }
+
+    /**
+     * Seed the parsed galleys the way the "Galleys" page does, acting as
+     * the editor: ArticleGalleyForm / PreprintGalleyForm::execute
+     * (Repo::galley()->add), the grid handler's updateGalley notice
+     * recompute, then for a file the wizard's SubmissionFilesUploadForm::
+     * execute (file service add + Repo::submissionFile()->add at the proof
+     * stage on the galley; the app repository links the galley's
+     * submissionFileId) and the "Review Details" save
+     * (SubmissionFilesMetadataForm::execute → Repo::submissionFile()->edit,
+     * PKPManageFileApiHandler::saveMetadata's author-notification update and
+     * MetadataChanged event).
+     *
+     * @return array<int, array{id: int, label: string, submissionFileId: ?int}>
+     */
+    protected function seedGalleys(Context $context, int $submissionId, array $plans, User $editor): array
+    {
+        $request = Application::get()->getRequest();
+        $seeded = [];
+        foreach ($plans as $plan) {
+            $submission = Repo::submission()->get($submissionId);
+            $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
+
+            // "Create New Galley" › Save (ArticleGalleyForm::execute).
+            $galleyId = Repo::galley()->add(Repo::galley()->newDataObject([
+                'publicationId' => $publication->getId(),
+                'label' => $plan['label'],
+                'locale' => $plan['locale'],
+                'urlPath' => null,
+                'urlRemote' => $plan['urlRemote'],
+            ]));
+
+            // ArticleGalleyGridHandler::updateGalley's tail.
+            if (in_array((int) $submission->getData('stageId'), [WORKFLOW_STAGE_ID_EDITING, WORKFLOW_STAGE_ID_PRODUCTION], true)) {
+                $notificationMgr = new \APP\notification\NotificationManager();
+                $notificationMgr->updateNotification(
+                    $request,
+                    $this->galleyNoticeTypes(),
+                    null,
+                    Application::ASSOC_TYPE_SUBMISSION,
+                    $submissionId
+                );
+            }
+
+            $submissionFileId = null;
+            if ($plan['path'] !== null) {
+                // "Upload a File Ready for Publication" › step 1
+                // (SubmissionFilesUploadForm::execute).
+                $fileManager = new FileManager();
+                $extension = $fileManager->parseFileExtension($plan['file']);
+                $submissionDir = Repo::submissionFile()->getSubmissionDir($context->getId(), $submissionId);
+                $fileId = app()->get('file')->add($plan['path'], $submissionDir . '/' . uniqid() . '.' . $extension);
+
+                $submissionFile = Repo::submissionFile()->dao->newDataObject();
+                $submissionFile->setData('fileId', $fileId);
+                $submissionFile->setData('fileStage', SubmissionFile::SUBMISSION_FILE_PROOF);
+                $submissionFile->setData('name', $plan['file'], $submission->getData('locale'));
+                $submissionFile->setData('submissionId', $submissionId);
+                $submissionFile->setData('uploaderUserId', $editor->getId());
+                $submissionFile->setData('assocType', Application::ASSOC_TYPE_REPRESENTATION);
+                $submissionFile->setData('assocId', $galleyId);
+                $submissionFile->setData('genreId', $this->defaultGalleyGenreId($context));
+                $submissionFileId = Repo::submissionFile()->add($submissionFile);
+
+                // Step 2 "Review Details" › Continue
+                // (PKPManageFileApiHandler::saveMetadata).
+                $submissionFile = Repo::submissionFile()->get($submissionFileId);
+                Repo::submissionFile()->edit($submissionFile, [
+                    'name' => [$submission->getData('locale') => $plan['file']],
+                    'caption' => null,
+                    'credit' => null,
+                    'copyrightOwner' => null,
+                    'terms' => null,
+                    'subject' => null,
+                    'creator' => null,
+                    'description' => null,
+                    'publisher' => null,
+                    'sponsor' => null,
+                    'source' => null,
+                    'language' => null,
+                    'dateCreated' => null,
+                ]);
+                $authorUserIds = StageAssignment::withSubmissionIds([$submissionId])
+                    ->withRoleIds([Role::ROLE_ID_AUTHOR])
+                    ->get()
+                    ->pluck('user_id')
+                    ->all();
+                $notificationMgr = new \APP\notification\NotificationManager();
+                $notificationMgr->updateNotification(
+                    $request,
+                    [Notification::NOTIFICATION_TYPE_PENDING_EXTERNAL_REVISIONS],
+                    $authorUserIds,
+                    Application::ASSOC_TYPE_SUBMISSION,
+                    $submissionId
+                );
+                event(new MetadataChanged(Repo::submission()->get($submissionId)));
+            }
+
+            $seeded[] = [
+                'id' => $galleyId,
+                'label' => $plan['label'],
+                'submissionFileId' => $submissionFileId,
+            ];
+        }
+        return $seeded;
+    }
+
+    /**
+     * The genre the upload wizard's list offers first: the context's
+     * non-dependent genres in their sequence (SubmissionFilesUploadForm::
+     * _retrieveGenreList → GenreDAO::getByDependenceAndContextId(false)).
+     */
+    protected function defaultGalleyGenreId(Context $context): int
+    {
+        $genreDao = DAORegistry::getDAO('GenreDAO'); /** @var \PKP\submission\GenreDAO $genreDao */
+        $genre = $genreDao->getByDependenceAndContextId(false, $context->getId())->next();
+        if (!$genre) {
+            throw new SpecException('galleys', 'The context has no non-dependent genre for the upload wizard to offer');
+        }
+        return (int) $genre->getId();
     }
 
     /**

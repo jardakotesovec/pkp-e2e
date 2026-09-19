@@ -431,6 +431,14 @@ trips.
   233): U49 S4's first "Create New Version" dialog, the stage select ""
   through the 10 s wait for "VoR" behind the hardened opener; the first
   sighting on OMP and in S4, so the class is the dialog's, not S6's.
+  **Sighted 2026-09-20 on the Mac, OPS, four times in a row alone** (U33
+  harness step, `.reports/U33/harness/pw-ops-U49-*.log`) on the day's used
+  OPS database, once with the pre-change scenario builder mounted
+  (`pw-ops-U49-ab-head.log`): the second dialog's "Publication Stage"
+  select listed "Author Original (AO)" with nothing checked for the whole
+  wait. Green on the same Mac the day before on a reset database (the U32
+  finals), so used-database state, not the galley key; the U33 final on a
+  reset database is the next read.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -630,7 +638,8 @@ trips.
   headless Chromium on darwin against the keyed `WorkflowPublicationForm`
   (sync 2026-09-16); red again in the U32 session's OPS final on a reset
   database at four workers, 2026-09-19, the only red of 161
-  (`.reports/U32/final-run-ops-attempt1.log`). **Watch condition**: a red
+  (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
+  2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
   push is CI's.
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,

@@ -64,7 +64,10 @@ The PHP side has the same split. Shared builders live in
 `api/v1/_test/{index.php,TestController.php}`, `classes/testing/*` subclasses
 and `tools/installTest.php` under `apps/<app>/php/`. `bin/mount.js` copies
 all of it into the app checkout at its runtime paths (`lib/pkp/…` and the app
-root). Edit here, then re-run mount.
+root), and the suite's fixture files
+(`apps/<app>/playwright/fixtures/files/`) to `classes/testing/fixtures/`,
+where a builder that stores a file the way an upload does reads them
+(the submission `galleys[].file` key). Edit here, then re-run mount.
 
 ## The fleets
 

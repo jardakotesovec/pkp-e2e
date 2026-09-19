@@ -11,7 +11,8 @@
  *
  * @brief OMP submission scenario overlays: `series` (path) + `seriesPosition`
  * on the publication (both optional — monographs need no series), and the
- * per-round `stage: internal|external` key on reviewRounds.
+ * per-round `stage: internal|external` key on reviewRounds. `galleys` is
+ * rejected: a press has publication formats, not galleys.
  */
 
 namespace APP\testing;
@@ -56,6 +57,12 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
             $props['seriesPosition'] = (string) $seriesPosition;
         }
         return $props;
+    }
+
+    /** A press has publication formats, not galleys: the key is refused, never dropped (PRINCIPLES D4). */
+    protected function assertGalleysSupported(Spec $root): void
+    {
+        throw new SpecException('galleys', 'OMP has publication formats, not galleys — galleys cannot be seeded on this app (no "Galleys" page exists)');
     }
 
     protected function reviewStageIdForRound(Spec $roundSpec): int

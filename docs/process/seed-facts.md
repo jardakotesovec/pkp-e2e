@@ -531,6 +531,18 @@ config-file settings.
   they open the author view from My Submissions). Settings › Users & Roles
   › Roles; the Copyediting entry. OJS and OMP, 2026-09-19 (U32 ccK1,
   `mgr-roles-grid-*`, `s1-pe-workflow_4-*`, `s1-tr-workflow_4-author-address-*`).
+- On a press, a `published: true` seed writes the same "Catalog Management"
+  notice the screen's "Publish" writes, so the Production entry of a
+  seed-published monograph heads "Catalog Management" for every role. On a
+  journal a `published: true` article carries no galley, so its assigned
+  editor still reads the "Assign a user to create galleys…" notice after
+  publication. Production entry, OJS and OMP, 2026-09-19 (U33 ccK2).
+- The Roles grid (Settings › Users & Roles › Roles) has one live box per
+  stage column and row, ticked or unticked with one click; the boxes are
+  greyed on the manager-level rows, on the Reviewer row outside the Review
+  column and on the Reader row. The Journal/Press Manager row shows every
+  stage box empty on OJS and OMP and ticked on OPS. All three apps,
+  2026-09-19 (U33 ccK3).
 - The manager role's Roles row ("Journal manager", "Press manager",
   "Preprint Server manager") has no "Edit"; every other role's stages are
   the "Stage Assignment" boxes of its "Edit" form, and a role's last

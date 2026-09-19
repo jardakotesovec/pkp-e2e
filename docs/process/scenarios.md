@@ -401,6 +401,30 @@ Keys:
   test must find by row in its own later call, or open it by its
   address `?commentId=N` (U14 claim check K3, 2026-09-16).
 
+- `galleys[]` (OJS, OPS): galleys on the submission's current publication,
+  each `{label, locale, file}` or `{label, locale, urlRemote}`, created the
+  way the workflow's "Galleys" page creates them, after the decisions and
+  before a publish (an editor builds the galleys, then publishes, so a
+  `published: true` seed carries them published). `label` is required (the
+  "Create New Galley" window's own rule); `locale` defaults to the
+  submission's locale, the window's preselected language, and must be one
+  the window's list offers (the context's submission locales); exactly one
+  of `file` or `urlRemote` is named (a 400 otherwise). `file` is a basename
+  under `apps/<app>/playwright/fixtures/files/` (`article.pdf` on OJS,
+  `preprint.pdf` on OPS; `bin/mount.js` copies the folder into the
+  checkout, so a new fixture needs a re-mount) and is stored as the
+  wizard "Upload a File Ready for Publication" stores it: a real file in
+  the submission's directory, a submission file at the proof stage hung on
+  the galley, named after the fixture, of the genre the wizard's list
+  offers first ("Article Text" / "Preprint Text"; the list preselects
+  nothing, and the seed has no `genre` key), and the wizard's four
+  activity-log rows. `urlRemote` is the window's "Remotely hosted content"
+  galley, with no file. Each galley is created acting as `admin`, so the
+  file's uploader and the log rows' user are `admin`, where a screen
+  upload names the editor; everything else, the notification rows
+  included, is what the screen leaves (parity ledger 2026-09-19). OMP
+  answers 400: a press has publication formats, not galleys.
+
 App-specific keys:
 
 - OJS: `section` (abbrev; defaults to the journal's first section) and
@@ -413,12 +437,15 @@ App-specific keys:
   `reviewRounds` is rejected with a 400, because OPS has no review stage,
   and so is `reviewerSuggestions`, because OPS mounts no reviewer
   suggestions and its wizard has no such step.
+- OMP: `galleys` is rejected with a 400, because a press has publication
+  formats and no "Galleys" page.
 
 Facts tests rely on, all parity-checked against the UI path:
 
 - A submitted seed carries the same notifications the real submit endpoint
   creates, and the submitter is the publication's primary contact.
-- Seeded submissions carry no files. A test that needs "the author's
+- Seeded submissions carry no files, a `galleys[].file` proof file aside. A
+  test that needs "the author's
   uploaded file" uploads it through the panel under test. The wizard's
   required-genre check blocks a seeded draft's submit until a file is
   uploaded. Review-round files are also grant-based; see `patterns.md`.
@@ -446,12 +473,20 @@ Facts tests rely on, all parity-checked against the UI path:
   of one seed shares its `created_at` second, so the on-screen order among
   them (newest first) is not fixed, and a seeded approval is stamped in
   the comment's own second where a by-hand one lands later.
+- A seeded galley reads on screen as a by-hand one does (U33 harness,
+  2026-09-19, OJS and OPS driven): the "Galleys" page lists it as
+  "<label> <language>" with the row's menu, and on OJS the assigned
+  editor's "Assign a user to create galleys…" / "Awaiting Galleys." notice
+  is gone from the Production entry, the galley row being what the notice
+  logic counts (a remote galley counts too). A seeded submission with no
+  `galleys` keeps the notice, as before.
 
 The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`),
-`reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`) and
+`reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`),
 `userComments[]` (`id`, `user`, `approved`, `reports[]` of report ids, in
-the order seeded). `stageId`
+the order seeded) and `galleys[]` (`id`, `label`, `submissionFileId`, null
+for a remote galley). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
@@ -503,9 +538,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   (the author's "Upload" is refused on a round where revisions were not
   requested, U30); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
-- Publication: `galleys[]` (`label`, `locale?`, and either `file`, a basename
-  under `apps/<app>/playwright/fixtures/files/`, or `urlRemote`);
-  `metadata.datePublished` (without it, publish stamps today);
+- Publication: `metadata.datePublished` (without it, publish stamps today);
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
   `name?`, `genre?`, `group?`); `metadata.keywords` and the other term
   lists per language (a published submission carrying terms, the source of
@@ -553,6 +586,20 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   submissions carry no files, so a copyediting decision or list scenario
   uploads through the lists' own "Upload/Select Files" window or the
   Submission stage's "Upload" first. U32 claim check, 2026-09-18/19.
+- The Production notice ("Assign a user to create galleys using the Assign
+  link in the Participants list." on OJS; "Awaiting approval." on OMP)
+  shows for an assigned editor after `sendToProduction` on both the
+  `accept` and the `skipExternalReview` path, unlike the Copyediting
+  notice above. U33 claim check, 2026-09-19.
+- A user seeded in `participants[]` is not offered by that submission's
+  "Assign" form (the form lists only users not yet assigned to the stage),
+  so a scenario that assigns through the form seeds the user in the
+  context and leaves them out of `participants[]`. U33 claim check,
+  2026-09-19.
+- `participants[]` with `role: 'sectionEditor'` seeds a Moderator on OPS.
+  There is no `recommendOnly` key: a recommend-only assignment is made on
+  screen through the participant row's "Edit" form (boxes "recommendOnly"
+  and "canChangeMetadata"), as U32 does. U33 claim check, 2026-09-19.
 - `Repo::stageAssignment()->build()` uses `firstOr`. Re-assigning the same
   user and role silently keeps the existing row and drops new flags such as
   `canChangeMetadata`. If a participant needs different flags from the
