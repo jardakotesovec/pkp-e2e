@@ -628,8 +628,11 @@ trips.
   (2026-09-16). A Mac-only class, so an OPS full run on the Mac reads
   146 of 147 by design until it is read; unverified hunch: Meta+z under
   headless Chromium on darwin against the keyed `WorkflowPublicationForm`
-  (sync 2026-09-16). **Watch condition**: a red of this read on CI or the
-  VM; until then the OPS full green on a Mac push is CI's.
+  (sync 2026-09-16); red again in the U32 session's OPS final on a reset
+  database at four workers, 2026-09-19, the only red of 161
+  (`.reports/U32/final-run-ops-attempt1.log`). **Watch condition**: a red
+  of this read on CI or the VM; until then the OPS full green on a Mac
+  push is CI's.
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -675,6 +678,23 @@ trips.
   at 15 s after the journal's login address, 38 of 39 green; the file
   green alone minutes later, 9 of 9). **Watch condition**: a second
   sighting in a full run or on CI.
+- **Site-level Tasks window disagreeing with the journal's under load**
+  (U05 S7, OJS, once). The test reads the Tasks rows from the journal's
+  editorial page and then from the site-level bell and compares the sorted
+  lists, retrying the pair of reads three times; with eight workers seeding
+  submissions the lists differed on all three attempts (a parallel U05 S3
+  "Control" submission's task present in the site read only). First OJS
+  final of the U32 session, 2026-09-19, workers auto on the Mac
+  (`.reports/U32/final-run-ojs-attempt1.log`); every other test green (254
+  of 255). **Tripped the same day**: the second auto-worker final showed the
+  same row again and U14 S5 (the moderators' task row not found in the
+  Tasks window within 10 s) beside it (`final-run-ojs-attempt2.log`); both
+  green alone (`rerun-alone-u05s7-u14s5.log`, 3 passed) and the third final
+  at `PLAYWRIGHT_WORKERS=4`, CI's setting, green 270 of 270
+  (`final-run-ojs.log`). So far an eight-worker class on the Mac only. Fix
+  to make: the U05 S7 read filters to the test's own submissions, or its
+  read pair retries longer; U14 S5's wait is bounded at 10 s.
+
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

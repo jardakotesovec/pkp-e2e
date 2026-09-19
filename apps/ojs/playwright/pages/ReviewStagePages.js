@@ -924,11 +924,14 @@ exports.selectReviewer = async function selectReviewer(page, modal, name, {actio
  * Participants panel's "Assign" or the dashboard row's "Assign Editor").
  *
  * @param {import('@playwright/test').Page} page
- * @param {{group: string, name: string, searchName: string, recommendOnly?: boolean}} options
+ * @param {{group: string, name: string, searchName: string, recommendOnly?: boolean, template?: string}} options
  *   group: user-group option label (e.g. 'Journal manager'); name: display
- *   name shown in the results grid; searchName: name fragment to search by.
+ *   name shown in the results grid; searchName: name fragment to search by;
+ *   template: an exact entry of "Choose a predefined message" ("Request
+ *   Copyedit"), whose body is fetched into the TinyMCE message box before
+ *   the form is saved (U32); without it the message box stays empty.
  */
-exports.completeAssignParticipantForm = async function completeAssignParticipantForm(page, {group, name, searchName, recommendOnly = false}) {
+exports.completeAssignParticipantForm = async function completeAssignParticipantForm(page, {group, name, searchName, recommendOnly = false, template = null}) {
     const modal = page
         .getByRole('dialog')
         .filter({has: page.locator('select[name="filterUserGroupId"]')});
@@ -948,6 +951,22 @@ exports.completeAssignParticipantForm = async function completeAssignParticipant
         .check();
     if (recommendOnly) {
         await modal.locator('input[name="recommendOnly"]').check();
+    }
+    if (template) {
+        // The template's body arrives by AJAX into the TinyMCE box behind
+        // textarea[name="message"]; saving before it lands sends an empty
+        // message (U32 claim check K2, 2026-09-18).
+        await modal.locator('select[name="template"]').selectOption({label: template});
+        await page.waitForFunction(
+            () => {
+                const textarea = [...document.querySelectorAll('[role="dialog"] textarea[name="message"]')].pop();
+                const mce = window.tinyMCE || window.tinymce;
+                const editor = textarea && mce?.get(textarea.id);
+                return !!(editor && editor.getContent().length > 20);
+            },
+            undefined,
+            {timeout: 30_000}
+        );
     }
     await modal.getByRole('button', {name: 'OK', exact: true}).click();
     await expect(modal).toHaveCount(0, {timeout: 30_000});

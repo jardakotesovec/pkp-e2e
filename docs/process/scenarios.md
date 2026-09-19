@@ -544,6 +544,15 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   `review_rounds.status`.
 - `NewExternalReviewRound` has two wizard steps (notifyAuthors and
   PromoteFiles), not one.
+- The Copyediting notice ("Assign a copyeditor using the Assign link in the
+  Participants list." / "Awaiting Copyedits.") shows only on a submission
+  that reached Copyediting through `accept` from a review round; a
+  `skipExternalReview` seed (or an on-screen "Accept and Skip Review")
+  never shows it, so a notice scenario seeds `accept`. The box is read by
+  its level-3 "Notification" heading, not by a `notices` selector. Seeded
+  submissions carry no files, so a copyediting decision or list scenario
+  uploads through the lists' own "Upload/Select Files" window or the
+  Submission stage's "Upload" first. U32 claim check, 2026-09-18/19.
 - `Repo::stageAssignment()->build()` uses `firstOr`. Re-assigning the same
   user and role silently keeps the existing row and drops new flags such as
   `canChangeMetadata`. If a participant needs different flags from the

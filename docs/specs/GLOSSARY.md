@@ -69,9 +69,10 @@ touched.
 - **Assigned (to the stage)** — listed on that stage's Participants panel;
   the precondition for Section Editors, Guest Editors and assistants to act
   on a submission.
-- **Deciding editor** — a Journal Manager or Editor, or an assigned Section
-  or Guest Editor whose participation is NOT limited to recommendations;
-  the set that gets real decision buttons. **Settled usage**: specs say
+- **Deciding editor** — a Journal Manager or Editor, an assigned Production
+  editor (a manager-level role), or an assigned Section or Guest Editor whose
+  participation is NOT limited to recommendations; the set that gets real
+  decision buttons. **Settled usage**: specs say
   "deciding editor" / "recommending editor"; the collective "review
   managers" is retired.
 - **Recommending editor (recommend-only)** — an assigned editor whose

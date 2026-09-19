@@ -474,12 +474,17 @@ async function completeStandaloneUploadWizard(page, fileName) {
 
 /**
  * Assign a stage participant through the Participants panel's legacy
- * Assign dialog. `group` is the visible user-group option label.
+ * Assign dialog. `group` is the visible user-group option label. `template`
+ * is an exact entry of "Choose a predefined message" ("Request Copyedit" on
+ * the Copyediting stage, U32); choosing one fetches the template's body
+ * into the message box, so the save waits for the editor to hold it (an
+ * empty box after a fetch posts no message). Without it the box is left
+ * as it arrives, empty.
  */
 async function assignParticipant(
     page,
     modal,
-    {group, query, resultName, recommendOnly = false}
+    {group, query, resultName, recommendOnly = false, template = null}
 ) {
     await modal
         .locator('[data-cy="participant-manager"]')
@@ -496,6 +501,20 @@ async function assignParticipant(
     await dlg.getByRole('radio').first().check();
     if (recommendOnly) {
         await dlg.locator('#recommendOnly').check();
+    }
+    if (template) {
+        await dlg.locator('select[name="template"]').selectOption({label: template});
+        const messageId = await dlg.locator('textarea[name="message"]').getAttribute('id');
+        await expect
+            .poll(
+                () =>
+                    page.evaluate(
+                        (id) => (window.tinymce?.get(id)?.getContent() || '').length,
+                        messageId
+                    ),
+                {timeout: 20_000}
+            )
+            .toBeGreaterThan(20);
     }
     await dlg.getByRole('button', {name: 'OK', exact: true}).click();
     await expect(

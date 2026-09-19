@@ -74,6 +74,37 @@ exports.UsersRolesPage = class UsersRolesPage extends BasePage {
     }
 
     /**
+     * Switch to the "Roles" tab (a legacy grid, `#roleGridContainer`) and
+     * wait for its first row. Call after `goto()`.
+     */
+    async openRolesTab() {
+        await this.page.getByRole('tab', {name: 'Roles', exact: true}).click();
+        await expect(this.roleRows().first()).toBeVisible({timeout: 30_000});
+    }
+
+    /** The Roles grid's data rows. */
+    roleRows() {
+        return this.page.locator('#roleGridContainer tr.gridRow');
+    }
+
+    /**
+     * The "Role Name" cell of every row, top to bottom: the cell's text
+     * without its "Settings" arrow (the manager row has none). One read for
+     * "the screen lists these roles and no other".
+     */
+    async roleNames() {
+        return this.roleRows().evaluateAll((rows) =>
+            rows.map((row) => {
+                const cell = row.querySelector('td');
+                return (cell ? cell.textContent || '' : '')
+                    .replace(/\s+/g, ' ')
+                    .replace(/^\s*Settings\s+/, '')
+                    .trim();
+            })
+        );
+    }
+
+    /**
      * A pending-invitation row (status cell always reads "Invited {date}",
      * which distinguishes it from a Current Users row with the same email).
      *

@@ -220,10 +220,16 @@ behind a line; that scratch is deleted after review.
   journal and site level; a test that saves Contact picks a Country first.
   Live-probed 2026-09-03, all three apps (`.reports/U03/pA` P7, `pC` P13,
   `pJ` P42).
-- A scratch context has no discussion templates, so the Participants
-  "Notify" form offers an empty template list and composes nothing.
-  Workflow › Participants › Notify. Live-probed 2026-09-03, all three apps
-  (`.reports/U03/pC` P15).
+- Every scratch context offers the stage's task and discussion templates
+  in the Participants "Assign" form's "Choose a predefined message" list
+  (registry templates installed by the context factory since 2026-09-11):
+  "Discussion (Copyediting)" and "Request Copyedit" at Copyediting on OJS
+  and OMP, "Discussion (Production)" and "Assign Editor" on a preprint
+  server; choosing one fills the message box with the template body.
+  Workflow › Participants › Assign. Live-driven 2026-09-18, all three apps
+  (`.reports/U32/ccK2/n1-se-assign-cancel-form-{ojs,omp}.json`,
+  `ops-assign-form-ops.json`); the 2026-09-03 "empty template list" read
+  predates the factory change.
 - The editorial statistics email is on by default on `publicknowledge` and
   on every scratch context, so the Profile › Notifications tab shows the
   "Statistics report summary." row. Settings › Workflow › Emails › "For
@@ -511,3 +517,28 @@ config-file settings.
   app's log. Every upload box reads "Max filesize: 100MiB" on the probe
   servers. Home page and Highlights panel, all three apps, 2026-09-16 (U11
   claim checks K1 and K2).
+- A submission seeded with `skipExternalReview` (or moved by an on-screen
+  "Accept and Skip Review") carries no "Assign a copyeditor…" notice for
+  its assigned editors, and a later on-screen "Assign" does not create one;
+  the notice appears only on a submission accepted from review (`accept`).
+  Copyediting entry, OJS and OMP, 2026-09-19 (U32 ccK1,
+  `.reports/U32/ccK1/s2-se-before-*`, `s3-se-after-workflow_4-*`).
+- The `productionEditor` key resolves to a manager-level group (Roles grid
+  Permission level "Journal Manager" / "Press Manager"; stages Copyediting
+  and Production only), so an assigned Production editor decides, assigns
+  and reads the editors' notices; `translator`, `volumeEditor` and
+  `chapterAuthor` are author-level (the editorial dashboard refuses them;
+  they open the author view from My Submissions). Settings › Users & Roles
+  › Roles; the Copyediting entry. OJS and OMP, 2026-09-19 (U32 ccK1,
+  `mgr-roles-grid-*`, `s1-pe-workflow_4-*`, `s1-tr-workflow_4-author-address-*`).
+- The manager role's Roles row ("Journal manager", "Press manager",
+  "Preprint Server manager") has no "Edit"; every other role's stages are
+  the "Stage Assignment" boxes of its "Edit" form, and a role's last
+  remaining stage cannot be unticked although the form answers "Your
+  changes have been saved.". Settings › Users & Roles › Roles, all three
+  apps, 2026-09-19 (U32 ccK1, `mgr-roles-grid-*`,
+  `mgr-role-copyeditor-last-stage-off-*`).
+- The Participants "Assign" form never offers the manager group; its user
+  grid refreshes only when the search form is submitted after the group is
+  chosen. Workflow › Participants › Assign, OJS and OMP, 2026-09-19 (U32
+  ccK1, `s1-mgr-assign-form-*`, `s2-mgr-assign-deciding-assign-form-*`).
