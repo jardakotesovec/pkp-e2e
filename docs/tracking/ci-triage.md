@@ -281,6 +281,10 @@ trips.
   one. The mechanism is not the wizard's scroll animation (a legacy jQuery
   page); read the trace before hardening again.
   **Tripped again 2026-09-15** (sync session, the first OJS final at four workers on a reset database with the perf round-2 harness and `persistent = On`, `.reports/sync/final-run-ojs.log`: the same `aria-disabled="true"` tab for 63 polls after the hardened accept, one of three reds in 216; green alone in 45.9 s, `.reports/sync/s15-ojs-reds-alone.log`). Red again in the second OJS final the same day (`.reports/sync/final-run-ojs-attempt2.log`, one of two reds) and then **red alone** on that used database (`.reports/sync/s15-ojs-reds-alone2.log`, 1.2 min: the reminder-link leg's accept, the `2. Guidelines` tab disabled for 63 polls), the class's first alone red; green in the traced third final on a reset database (229 passed, 17.1 min) so still no trace, and green first try on CI the same day (pkp-e2e run 34952057769, ojs run 34956195225). Next step unchanged: a retained trace of the accept POST from a red run.
+  **Sighted again on CI 2026-09-19** (pkp-e2e push run 35436736454 at
+  `55bc9d0`, the U32 push: OJS red on U28 S10 on both attempts, 1.7 min
+  each, 254 passed and the 15 serial tests behind it did not run; OMP and
+  OPS green). Read by the U33 session before its own push run 35474559640.
 - **Author Response table re-rendering on a used database** (U30 S4,
   OJS). The editor's "Author Response" table on the co-author scenario
   keeps re-rendering: the opener's reload waited 30 s for the table in a
