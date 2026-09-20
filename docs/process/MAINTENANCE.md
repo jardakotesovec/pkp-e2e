@@ -433,12 +433,6 @@ the answer; the spec and the test are the record.
   when the diff touches `package-lock.json` or buildable sources (`js/`,
   `lib/ui-library`); then `npm run mount`. Findings from a PR checkout are
   reported against that PR, never filed as `main` behavior.
-- **Watch the usage limits.** RUNBOOK "Model discipline" binds here too:
-  `claude -p "/usage"` at session start, after every agent return and
-  before every launch or full run, never mid-agent. Spend the week's
-  capacity, but never start an agent or a final the remaining session or
-  weekly margin cannot carry to its end; when the next step would not
-  fit, end pushed with the sync log naming the step reached.
 - **Start clean: reset the databases.** `npm run reset:<app>` for every
   fleet the session will touch, before any probing or test run (with
   `PKP_E2E_LINE=stable-3_5_0` in front for the stable line's fleets). Never

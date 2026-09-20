@@ -168,20 +168,6 @@ Test files cite these by number, so the numbers are stable.
 
 - Fable runs every role; subagents inherit the session model; `/model` is
   checked at session start.
-- **Watch the usage limits and pause before they hit.** `claude -p "/usage"`
-  prints the session window and the weekly all-models and Fable
-  percentages with their reset times. Read it at session start, after
-  every agent return and before every launch, never mid-agent. The goal is
-  to spend the week's full capacity, so no fixed threshold stops the work
-  early; the loss to avoid is an agent or a suite killed by a limit
-  mid-run, and a feature left where the next session cannot resume it.
-  Take one agent's cost as the difference between two readings, and launch
-  the next agent only when the remaining margin covers it; near a limit
-  run single agents (one claim-check chunk at a time) instead of a
-  fan-out. When the next agent would not fit, finish the gate, commit and
-  push with the PROGRESS note naming the gate reached ("Resuming a
-  feature mid-flight"), and end; the session that follows the reset
-  resumes from `phase-status.md`.
 - A refusal, safeguard flag or downgrade: discard the attempt, never
   re-press, reword or respawn onto another model; record the gate reached in
   the PROGRESS note and stop for maintainer review. A technical stall is not
