@@ -71,7 +71,7 @@ trips.
   desktop), both green in the second full run; U40 S4 (the edited abstract not
   found in 30 s) red on OMP in the first U03 revision final 2026-09-13, green
   alone in 5 s and in the second full run; U40 S4 red on OMP in the first
-  U06 revision final 2026-09-13, green alone in 5.1 s. **Watch condition**: a
+  U06 revision final 2026-09-13, green alone in 5.1 s; U40 S6 (the "This field is required." message not shown in 10 s after the cleared title's "Confirm") red on OMP in the first U35 local final 2026-09-20 (4 workers), green alone in 13.5 s. **Watch condition**: a
   hardened test reds again with retries exhausted.
   **U40 S4 on OMP, mechanism found 2026-09-15** (a retained trace,
   `docs/reports/2026-09-15-flake-investigation.md`): `WorkflowPublicationForm`
@@ -704,7 +704,10 @@ trips.
   Tasks window within 10 s) beside it (`final-run-ojs-attempt2.log`); both
   green alone (`rerun-alone-u05s7-u14s5.log`, 3 passed) and the third final
   at `PLAYWRIGHT_WORKERS=4`, CI's setting, green 270 of 270
-  (`final-run-ojs.log`). So far an eight-worker class on the Mac only. Fix
+  (`final-run-ojs.log`). Tripped again at `PLAYWRIGHT_WORKERS=4` in the second U35 local
+  final 2026-09-20 (a parallel U05 S11 title in the site read only,
+  `.reports/U35/final-run-ojs-attempt2.log`), green alone in 13 s
+  (`final-ojs-u05s7-alone.log`), so no longer eight-worker only. Fix
   to make: the U05 S7 read filters to the test's own submissions, or its
   read pair retries longer; U14 S5's wait is bounded at 10 s.
 

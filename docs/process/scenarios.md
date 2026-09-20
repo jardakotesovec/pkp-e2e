@@ -449,9 +449,14 @@ Facts tests rely on, all parity-checked against the UI path:
   uploaded file" uploads it through the panel under test. The wizard's
   required-genre check blocks a seeded draft's submit until a file is
   uploaded. Review-round files are also grant-based; see `patterns.md`.
-- A real wizard submit auto-assigns the section's editors, so `participants`
-  on a submitted seed is additive. Seeding `participants: []` together with
-  `submitted: false` is what produces a genuine needs-editor state.
+- A real wizard submit auto-assigns the section's editors on
+  `publicknowledge` (a scratch context assigns nobody: app-changes row 3),
+  so `participants` on a submitted seed is additive there. Seeding
+  `participants: []` together with `submitted: false` is what produces a
+  genuine needs-editor state. A scenario that needs a setting's effect on
+  an automatic assignment flips the setting on the seeded journal and
+  restores it afterwards, as the U35 claim check K5 did (every flipped
+  setting restored and reread), 2026-09-20.
 - An author-editor state needs a user enrolled in both groups who is also
   the submitter; a bare stage assignment without the global author role
   does not trip author checks. A second `participants` entry for the same
@@ -618,6 +623,13 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   The press's Production notice "Awaiting approval." is a level-3 heading
   of its own, not under a "Notification" heading. U34 claim check,
   2026-09-20.
+- Leaving the "Assign Participant" window by its back arrow with a person
+  chosen, or "Edit Assignment" by "Cancel" with a box changed, asks the
+  browser confirm "The data on this form has changed. Do you wish to
+  continue without saving?", so the script registers `page.on('dialog')`
+  before the press; continuing closes the window and saves nothing.
+  "Assign Participant"'s own "Cancel" closes silently. U35 claim check,
+  2026-09-20.
 
 
 ## Mailpit
@@ -636,6 +648,9 @@ write into the same inbox. The rules below follow from that.
   `X-Tags`. `pkpMail` refuses any read without a recipient. Mailpit's
   `to:` search matches the To header only: a Cc or Bcc recipient is not
   found by it (U30 claim check K2).
+- **Two chunks driving at once share the inbox too.** Each scopes its
+  reads by its own throwaway addresses and the titles it seeded, and reads
+  nothing else (U35 claim check K4 alongside K2, 2026-09-20).
 - **`contains` is a content marker, not a scope.** It searches a substring
   in subject and body. Use it when the test controls some text in the
   message. It supplements the recipient scope and never replaces it. On a
@@ -654,6 +669,11 @@ write into the same inbox. The rules below follow from that.
   "At least two participants are required for a discussion."), and it
   mails every ticked box, the opener's included, so a no-mail control on an
   account never sends that control itself.
+- **On OPS a "Notify" read needs its toast caught in flight.** The
+  "Notification sent to users." toast is added and gone before a settled
+  read (OJS and OMP keep it), so a test that pairs the Mailpit read with
+  the toast waits for the toast's appearance, not for a settled page (U35
+  claim check K4, 2026-09-20).
 
 Note on the word "tag": everywhere else in these docs it means the seed tag
 from `patterns.md`. Mailpit tags are a different thing and are not used.

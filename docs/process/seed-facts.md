@@ -323,11 +323,17 @@ behind a line; that scratch is deleted after review.
   "Announcement Feed Plugin" row. Live 2026-09-17, OPS and OMP (the U12
   suites' S7 absence tests).
 - `participants: [{role: 'manager'}]` on a submitted `POST
-  scenarios/submission` surfaced in the Participants panel and the
-  discussion form on OPS only, not on OJS or OMP (seen once, cause not
-  investigated); the Participants "Assign" form offers no Manager group on
+  scenarios/submission` writes the row on every app but lists it in the
+  Participants panel and the discussion form on OPS only: a participant row
+  is listed on the stages its group holds (`user_group_stage`), and the
+  manager group holds Production on OPS and no stage on OJS and OMP. The
+  same holds for any stageless group: an OPS `editorialBoardMember` seeded
+  in `participants[]` is listed nowhere and the account is refused the
+  workflow ("Error / The current role does not have access to this
+  operation."). The Participants "Assign" form offers no Manager group on
   OJS or OMP. Workflow › Participants. Seen 2026-09-04 (`.reports/U05/pU`
-  P36).
+  P36); the cause read 2026-09-20 (U35 ccK1, `q1-*-wf5-ops`,
+  `q1-eb-wf5-ops`).
 - A wizard submission started from a scratch context's start page needs a
   title, the checklist and privacy boxes, one file with a genre, and (on OJS
   and OPS, not OMP) an abstract before its final "Submit"; the wizard asks
@@ -586,3 +592,90 @@ config-file settings.
   `GET emailTemplates?searchPhrase=` from the decision wizard's "Find
   Template" (the search box answers an "Error" window). Live-driven
   2026-09-20, all three apps (`.reports/U34/cc-K2.md` K2-9).
+- `POST scenarios/submission` refuses `participants[].recommendOnly` with
+  400 "Unsupported spec key participants.0.recommendOnly". All three apps,
+  2026-09-20 (U35 ccK1).
+- A scratch manager holding only the manager group is not offered by
+  "Assign Participant" › "Production editor" (membership decides the person
+  list), so a "manager assigned as Production editor" state needs `users[]`
+  with `roles: ['manager', 'productionEditor']` and a `participants[]` entry
+  with `role: 'productionEditor'`. Workflow › Participants › Assign,
+  2026-09-20 (U35 ccK1).
+- Every submitted `POST scenarios/submission` on a scratch context, with or
+  without `participants[]`, leaves one "A new article/monograph/preprint has
+  been submitted to which an editor/a moderator needs to be assigned." row
+  in every manager's Tasks panel and sends no needs-editor mail; seeded
+  `participants[]` editors do not clear it, only an on-screen "Assign" of a
+  manager- or editor-level role does, so a "no needs-editor task" read needs
+  the row cleared first. The Author's wizard on a scratch context sends the
+  needs-editor mail "A new submission needs an editor to be assigned:
+  "{title}"" to every manager and raises the same row. Tasks panel.
+  Live-driven 2026-09-20, all three apps (U35 ccK2,
+  `.reports/U35/ccK2/r12-before-tasks-mgr-*.json`; ccK4 on OJS and OPS).
+- On this Postgres install a legacy form that posts an empty id answers
+  HTTP 500 ("invalid input syntax for type bigint"): "Assign Participant"
+  and "Notify" with a typed message and the template list left blank
+  (`save-participant`, `send-notification`); the stage assignment is still
+  written before the error. Workflow › Participants. Live-driven
+  2026-09-20, all three apps (U35 ccK2).
+- OPS: `fetch-template-body` for "Assign Editor" answers 500 (a null mail
+  view); "Discussion (Production)" answers 200. Workflow › Participants ›
+  Assign, 2026-09-20 (U35 ccK2).
+- A seeded review assignment carries `review_method = 2` (double-anonymous)
+  on OJS and OMP when the context has no `review.defaultReviewMode`;
+  `review: {defaultReviewMode: 'open'}` on `POST scenarios/context` gives
+  method 3. 2026-09-20 (U35 ccK2).
+- The "Assign Participant" user grid pages with a "Load more" link
+  (`fetch-rows …Page=2`), not on scroll; twenty rows per page. Workflow ›
+  Participants › Assign, OJS, 2026-09-20 (U35 ccK2).
+- OPS: a preprint server has one stage entry, "Production"; the address
+  `workflowMenuKey=workflow_1` lands on "Workflow: Production" and its
+  "Assign" window is the Production stage's (`stageId=5`). 2026-09-20 (U35
+  ccK2; the OPS test run, `.reports/U35/test-ops-findings.md` T-ops-1).
+- A press's Internal Review stage entry (`workflow_2`) has no Participants
+  panel; the round entry (`workflow_2_<roundId>`) has it. OMP, 2026-09-20
+  (U35 ccK2).
+- The automatic assignment of the section's editors at submit, by the seed
+  or by the Author's wizard, happens on `publicknowledge` only: on a scratch
+  context created with `sections[]` and `users[].sections` neither assigns
+  the section's editor (`subeditor_submission_group` row present;
+  app-changes row 3). Workflow › Participants. Seen 2026-09-20 on OJS (seed
+  and wizard) and OPS (seed) (U35 ccK3).
+- The Roles form shows the recommend-only box on every role, greyed out on
+  the non-editor roles; the manager-level forms' "Permit submission metadata
+  edit." box is ticked and greyed out. Settings › Users & Roles › Roles, all
+  three apps, 2026-09-20 (`.reports/U35/ccK3/roles-forms-*.json`).
+- The "Assign Participant" window's "Close" arrow with a person chosen
+  asks the browser confirm "The data on this form has changed. Do you wish to continue
+  without saving?" (a Playwright script needs `page.on('dialog')` before
+  the press); continuing closes the window and saves nothing. "Edit
+  Assignment"'s "Cancel" with a box changed closes with no question (the
+  claim check's question there came from a locator that pressed the "Close"
+  arrow). Workflow › Participants. Live-driven 2026-09-20, all three apps
+  (U35 ccK2 K2-10, ccK3; the OJS and OMP test runs, T-ojs-1, T-omp-3).
+- The seeded contexts' principal contact is "Site Admin" <admin@mail.test>
+  on all three apps, so the automatic assignment's email reads From "Site
+  Admin" (OJS, OMP; OPS sends none). Settings › Contact, 2026-09-20 (U35
+  ccK4).
+- OMP's wizard offers the series as a radio group on the "For the Editors"
+  step; a submission with no series chosen assigns nobody and raises the
+  managers' needs-editor mail and task, on the seeded press too. Submission
+  wizard, OMP, 2026-09-20 (U35 ccK4).
+- `editor.diana` holds one group on the seeded journal and press (Journal
+  editor / Press editor; its section assignments are ART and REV / both
+  series), so the seeded section forms list her once ("Assign Diana Editor
+  as Journal editor" / "…as Press editor"), and no seeded person on any app
+  can be ticked in two roles under "Editorial Assignments"; users.md's
+  "also a section editor of both sections" means the Journal editor group's
+  section assignments, not a second role. Settings › Journal › Sections ›
+  "Edit", 2026-09-20 (`.reports/U35/ccK5/b-maya-section-form-{ojs,omp,ops}.json`).
+- A recipient's "Do not send me an email…" under "Discussion added." or
+  "Discussion activity." does not stop a "Notify" message from the
+  Participants panel, and no separate discussion notification email is sent
+  beside it. Profile › Notifications, all three apps, 2026-09-20
+  (`.reports/U35/ccK5/n-r*-mails-*.json`).
+- On the seeded journal `publicknowledge` a submitted `POST
+  scenarios/submission` raises no "needs an editor" row: the seed
+  auto-assigns the section's editors there, unlike a scratch context
+  (the line above). Tasks panel, OJS, 2026-09-20 (U35 OJS test author,
+  `.reports/U35/test-ojs-findings.md`).

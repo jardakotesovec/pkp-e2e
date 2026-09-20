@@ -13,13 +13,15 @@
  * Participants panel's "Assign" form (the legacy "Assign Participant"
  * window: the role select, the user grid, the "Choose a predefined message"
  * select) is here too, read-only, for the absence tests that assert which
- * roles and messages a preprint server offers (U32 S10); the OJS
- * counterpart is `ReviewStagePages.completeAssignParticipantForm`.
+ * roles and messages a preprint server offers (U32 S10), delegating to
+ * the U35 `StageParticipantsPages.AssignParticipantWindow`, which owns the
+ * driven window; the OJS counterpart is
+ * `ReviewStagePages.completeAssignParticipantForm`.
  * Feature spec: docs/specs/U23-submissions-dashboard.md.
  */
-const {expect} = require('@playwright/test');
 const {EditorialDashboardPage: SharedEditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {withOpsWorkflowPanel} = require('./MySubmissionsPage.js');
+const {AssignParticipantWindow} = require('./StageParticipantsPages.js');
 
 exports.EditorialDashboardPage = class EditorialDashboardPage extends withOpsWorkflowPanel(
     SharedEditorialDashboardPage
@@ -44,47 +46,34 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends withOpsWor
     }
 
     /**
-     * The legacy "Assign Participant" window the "Assign" button opens: the
-     * dialog carrying the role select (`select[name="filterUserGroupId"]`).
-     * The workflow panel is a dialog too, so the window is the last match.
+     * The legacy "Assign Participant" window the "Assign" button opens
+     * (the U35 `AssignParticipantWindow` owns the driven window; these
+     * readers delegate to it so the U32 absence test keeps its API).
      */
     assignParticipantForm() {
-        return this.page
-            .getByRole('dialog')
-            .filter({has: this.page.locator('select[name="filterUserGroupId"]')})
-            .last();
+        return new AssignParticipantWindow(this.page).dialog();
     }
 
     /** Press "Assign" and wait for the window's role select and message select. */
     async openAssignParticipantForm() {
         await this.participantsAssignButton().click();
-        const form = this.assignParticipantForm();
-        await expect(form.locator('select[name="filterUserGroupId"]')).toBeVisible({timeout: 30_000});
-        await expect(form.locator('select[name="template"]')).toBeVisible({timeout: 30_000});
-        return form;
+        const window = new AssignParticipantWindow(this.page);
+        await window.expectOpen();
+        return window.dialog();
     }
 
     /** The "Locate a User" role select's option labels, in order (blank entries dropped). */
     async assignParticipantGroupOptions() {
-        return this._optionLabels(this.assignParticipantForm().locator('select[name="filterUserGroupId"]'));
+        return new AssignParticipantWindow(this.page).roleOptions();
     }
 
     /** The "Choose a predefined message" select's option labels, in order (blank entries dropped). */
     async assignParticipantTemplateOptions() {
-        return this._optionLabels(this.assignParticipantForm().locator('select[name="template"]'));
+        return new AssignParticipantWindow(this.page).templateOptions();
     }
 
     /** Close the window with its bottom "Cancel" (an `<a>` link on this legacy form, patterns.md pitfall 7). */
     async cancelAssignParticipantForm() {
-        const form = this.assignParticipantForm();
-        await form.getByRole('link', {name: /^\s*Cancel\s*$/}).last().click();
-        await expect(form).toHaveCount(0, {timeout: 30_000});
-    }
-
-    async _optionLabels(select) {
-        const labels = await select.locator('option').evaluateAll((options) =>
-            options.map((o) => (o.textContent || '').trim())
-        );
-        return labels.filter(Boolean);
+        await new AssignParticipantWindow(this.page).cancel();
     }
 };
