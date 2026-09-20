@@ -7,8 +7,18 @@
  * workflow renders as a side modal ([data-cy="active-modal"]); legacy grid
  * and wizard modals stack above it; decision wizards are full-page flows
  * ending in a completion panel with a "View Submission Summary" link.
+ *
+ * For U34 (2026-09-20) the file also holds `DecisionWorkflow`: what a
+ * decision scenario reads and builds around the wizard on a press (the
+ * decision buttons of the internal and external rounds, the "Request
+ * Revisions" choice window, the minimum-reviews dialog, "Read Review" ›
+ * "Mark as Complete", the "Recommendation" box and "Change decision", the
+ * recommend-only flag, the discussions rows, the author's "Notifications"
+ * list and "Read Review" window, the Library and the stage uploads).
  */
 const {expect} = require('../support/fixtures.js');
+const {WorkflowPage: WorkflowFrame} = require('../../../../shared/playwright/pages/WorkflowPage.js');
+const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
 
 /** Round status sentences (lib/pkp locale, editor wording — Rule 5). */
 const STATUS = {
@@ -817,6 +827,309 @@ function oldReviewRoundInfoUrl(contextPath, submissionId = null) {
         (submissionId === null ? '' : `/${submissionId}`);
 }
 
+// ---------------------------------------------------------------------
+// Around the decision wizard (U34, 2026-09-20; spec
+// docs/specs/U34-editorial-decision-recording.md Rules 13–15): what a
+// decision scenario reads and builds on a press's workflow before and
+// after the wizard. The wizard itself is `DecisionWizardPages.js`.
+// ---------------------------------------------------------------------
+
+/** The heading of a press's review round ("External Review (Round 1)", "Internal Review (Round 1)"). */
+function roundTitle(round = 1, stage = 'External Review') {
+    return `${stage} (Round ${round})`;
+}
+
+/**
+ * A press's workflow as a decision scenario uses it: the shared frame
+ * (`shared/playwright/pages/WorkflowPage.js`, held as `frame`: the header,
+ * the side menu, the action region, the Activity Log, the access-denied
+ * page) plus the round's decision buttons, the "Request Revisions" choice
+ * window (Rule 14; an external round only), the minimum-reviews dialog
+ * (Rule 15), the Reviewers panel's "Read Review" › "Mark as Complete", the
+ * "Recommendation" box and "Change decision" (Rule 13), the Participants
+ * row's recommend-only flag, the discussions rows and a discussion's
+ * window, the author's "Notifications" list and "Read Review" window, the
+ * header's "Library" › "Add a file", and the "Submission Files" and
+ * "Revisions Uploaded" uploads (footnote s1's givens built on screen).
+ */
+class DecisionWorkflow {
+    /**
+     * @param {import('@playwright/test').Page} page
+     * @param {string} contextPath
+     * @param {{appContext?: any}} [options]
+     */
+    constructor(page, contextPath, {appContext} = {}) {
+        this.page = page;
+        this.contextPath = contextPath;
+        this.frame = new WorkflowFrame(page, contextPath, {appContext});
+    }
+
+    /** Open a monograph's workflow on the editorial dashboard. */
+    async gotoEditorial(submissionId) {
+        await this.frame.gotoEditorial(submissionId);
+    }
+
+    /** Open the author's view of the same workflow (My Submissions). */
+    async gotoAuthor(submissionId) {
+        await this.frame.gotoAuthor(submissionId);
+    }
+
+    /** The workflow panel is mounted. */
+    async expectOpen() {
+        await this.frame.expectOpen();
+    }
+
+    /** The main column's heading, e.g. expectPageTitle('External Review (Round 1)'). */
+    async expectPageTitle(title) {
+        await expect(this.frame.dialog().getByRole('heading', {name: `Workflow: ${title}`, exact: true})).toBeVisible({
+            timeout: 30_000,
+        });
+    }
+
+    /**
+     * A panel's wrapper (heading, controls and table), found through the
+     * table's accessible name; `.last()` is the innermost wrapping div, so
+     * a button found inside is that panel's own.
+     */
+    panel(title) {
+        return this.frame
+            .dialog()
+            .locator('div')
+            .filter({has: this.page.getByRole('table', {name: title, exact: true})})
+            .last();
+    }
+
+    /** A row of the named panel carrying `text`. */
+    panelRow(title, text) {
+        return this.panel(title).getByRole('row').filter({hasText: text});
+    }
+
+    /** A Reviewers panel row by the reviewer's name. */
+    reviewerRow(name) {
+        return this.frame.dialog().locator('[data-cy="reviewer-manager"]').getByRole('row').filter({hasText: name});
+    }
+
+    /** A Participants row by the person's display name. */
+    participantRow(name) {
+        return this.frame.secondaryColumn().getByRole('listitem').filter({hasText: name});
+    }
+
+    /** The lines of a status box ("Round 1 Status"), one `p` each. */
+    statusLines(heading) {
+        return this.frame.statusBox(heading).locator('p');
+    }
+
+    /** The action region's buttons are exactly these, left to right (auto-waited). */
+    async expectDecisionButtons(labels) {
+        await expect.poll(() => this.frame.actionButtonLabels(), {timeout: 30_000}).toEqual(labels);
+    }
+
+    /** The "Request Revisions" side window (Rule 14), a dialog named by its title. */
+    requestRevisionsWindow() {
+        return this.page.getByRole('dialog', {name: 'Request Revisions', exact: true});
+    }
+
+    /**
+     * Press "Request Revisions" (or "Recommend Revisions") on an external
+     * round and wait for the window with its "Require New Review Round"
+     * choice; returned open.
+     */
+    async openRequestRevisionsWindow(buttonLabel = 'Request Revisions') {
+        await this.frame.actionButton(buttonLabel).click();
+        const win = this.requestRevisionsWindow();
+        await expect(win).toBeVisible({timeout: 30_000});
+        await expect(win.getByRole('button', {name: 'Next', exact: true})).toBeVisible({timeout: 30_000});
+        return win;
+    }
+
+    /** One of the window's two options, by its label. */
+    revisionOption(win, label) {
+        return win.getByRole('radio', {name: label, exact: true});
+    }
+
+    /** The window's "Next": the wizard opens for the chosen decision. */
+    async pressNext(win) {
+        await win.getByRole('button', {name: 'Next', exact: true}).click();
+        await expect(win).toBeHidden({timeout: 30_000});
+    }
+
+    /** The window's close control (the cross): the choice is abandoned. */
+    async closeRequestRevisionsWindow(win) {
+        await win.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(win).toBeHidden({timeout: 30_000});
+    }
+
+    /** The "Proceed Without Minimum Confirmed Reviews?" dialog (Rule 15). */
+    minimumReviewsDialog() {
+        return this.page.getByRole('dialog', {name: 'Proceed Without Minimum Confirmed Reviews?', exact: true});
+    }
+
+    /** Press a decision button and wait for the minimum-reviews dialog; returned open. */
+    async pressExpectingMinimumDialog(buttonLabel) {
+        await this.frame.actionButton(buttonLabel).click();
+        const dialog = this.minimumReviewsDialog();
+        await expect(dialog).toBeVisible({timeout: 30_000});
+        return dialog;
+    }
+
+    /** Answer the dialog ("Yes, Continue" or "Cancel"); it closes. */
+    async answerMinimumDialog(label) {
+        await this.minimumReviewsDialog().getByRole('button', {name: label, exact: true}).click();
+        await expect(this.minimumReviewsDialog()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * The editor's "Read Review" › "Mark as Complete" on a reviewer's row
+     * (`confirmReviewAsEditor`); the row then reads "Complete".
+     */
+    async confirmReview(reviewerName) {
+        await confirmReviewAsEditor(this.page, this.frame.dialog(), reviewerName);
+    }
+
+    /** The round's "Recommendation" box (a bordered box headed "Recommendation"). */
+    recommendationBox() {
+        return this.frame
+            .dialog()
+            .locator('div.border')
+            .filter({has: this.page.getByRole('heading', {name: 'Recommendation', exact: true})});
+    }
+
+    /** The box's "Change decision" button (the recommending editor's). */
+    changeDecisionButton() {
+        return this.frame.actionItems().getByRole('button', {name: 'Change decision', exact: true});
+    }
+
+    /**
+     * Participants row › "More Actions" › "Edit" › tick "Assignment
+     * privileges" (the recommend-only flag) › "OK": the assignment becomes
+     * a recommending one (no seed key; scenarios.md "Decision behaviour
+     * worth knowing").
+     */
+    async setRecommendOnly(name) {
+        await this.participantRow(name).getByRole('button', {name: /More Actions/}).click();
+        await this.page.getByRole('menuitem', {name: 'Edit', exact: true}).click();
+        const form = this.page.getByRole('dialog').filter({has: this.page.locator('input[name="recommendOnly"]')});
+        const box = form.locator('input[name="recommendOnly"]');
+        await expect(box).toBeVisible({timeout: 30_000});
+        await box.check();
+        await form.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(form).toBeHidden({timeout: 30_000});
+        await waitForJQueryIdle(this.page);
+    }
+
+    /** The rows of "Review Tasks & Discussions" carrying `text`. */
+    discussionRow(text) {
+        return this.panel('Review Tasks & Discussions').getByRole('row').filter({hasText: text});
+    }
+
+    /** A discussion's window, a dialog titled with its subject. */
+    discussionWindow(subject) {
+        return this.page.getByRole('dialog', {name: subject, exact: true});
+    }
+
+    /** Open a discussion row's first control: its window, settled on its "Participants" heading. */
+    async openDiscussion(row, subject) {
+        await row.locator('a, button').first().click();
+        const win = this.discussionWindow(subject);
+        await expect(win).toBeVisible({timeout: 30_000});
+        await expect(win.getByRole('heading', {name: 'Participants', exact: true})).toBeVisible({timeout: 30_000});
+        return win;
+    }
+
+    /** Close a discussion window through its "Close". */
+    async closeDiscussion(win) {
+        await win.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(win).toBeHidden({timeout: 30_000});
+    }
+
+    /** The author's "Notifications" heading on their review stage (U26 Rule 16). */
+    notificationsHeading() {
+        return this.frame.dialog().getByRole('heading', {name: 'Notifications', exact: true});
+    }
+
+    /**
+     * The list under it (the innermost div holding the heading). The `has`
+     * locator is page-level: one scoped to the dialog is re-queried from
+     * each candidate div and never matches.
+     */
+    notificationsList() {
+        return this.frame
+            .dialog()
+            .locator('div')
+            .filter({has: this.page.getByRole('heading', {name: 'Notifications', exact: true})})
+            .last();
+    }
+
+    /** A letter's line in the list, by its subject. */
+    notificationItem(subject) {
+        return this.notificationsList().getByRole('listitem').filter({hasText: subject});
+    }
+
+    /** The author's "Read Review" window (the legacy `readReviewForm`), titled "Review: {title}". */
+    authorReadReviewWindow() {
+        return this.page.getByRole('dialog').filter({has: this.page.locator('form#readReviewForm')});
+    }
+
+    /** Press the reviewer row's "Read Review" as the author and return the window. */
+    async openAuthorReadReview(reviewerName) {
+        await this.reviewerRow(reviewerName).getByRole('button', {name: 'Read Review', exact: true}).click();
+        const win = this.authorReadReviewWindow();
+        await expect(win.getByRole('heading', {name: reviewerName})).toBeVisible({timeout: 30_000});
+        return win;
+    }
+
+    /**
+     * The header's "Library" › "Add a file": name, the first real type, the
+     * file, "OK"; the row then lists in the window, which is closed
+     * (footnote s1's given). Returns the chosen type's label.
+     */
+    async addLibraryFile({name, file}) {
+        await this.frame.headerButton('Library').click();
+        const win = this.page.getByRole('dialog').filter({hasText: 'Submission Library'}).last();
+        const addLink = win.getByRole('link', {name: 'Add a file', exact: true});
+        await expect(addLink).toBeVisible({timeout: 30_000});
+        await waitForJQueryIdle(this.page);
+        await addLink.click();
+        const form = this.page.getByRole('dialog').filter({has: this.page.locator('input[name^="libraryFileName"]')}).last();
+        const nameBox = form.locator('input[name^="libraryFileName"]').first();
+        await expect(nameBox).toBeVisible({timeout: 30_000});
+        await nameBox.fill(name);
+        const type = form.locator('select[name="fileType"]');
+        const options = await type
+            .locator('option')
+            .evaluateAll((els) => els.map((o) => ({value: /** @type {HTMLOptionElement} */ (o).value, label: (o.textContent || '').trim()})));
+        const chosen = options.find((o) => o.value && o.value !== '') || options[0];
+        await type.selectOption(chosen.value);
+        await form.locator('input[type="file"]').setInputFiles(file);
+        await expect(form.locator('input[name="temporaryFileId"]')).not.toHaveValue('', {timeout: 30_000});
+        await form.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(form.locator('input[name^="libraryFileName"]')).toHaveCount(0, {timeout: 30_000});
+        await waitForJQueryIdle(this.page);
+        await expect(win.getByRole('row').filter({hasText: name})).toBeVisible({timeout: 30_000});
+        await win.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(win).toBeHidden({timeout: 30_000});
+        await waitForJQueryIdle(this.page);
+        return chosen.label;
+    }
+
+    /** A panel's "Upload": one in-memory file through the press's upload wizard ("Book Manuscript"). */
+    async uploadIntoPanel(panelTitle, fileName) {
+        await this.panel(panelTitle).getByRole('button', {name: 'Upload', exact: true}).click();
+        await completeUploadWizard(this.page, fileName);
+        await expect(this.panelRow(panelTitle, fileName)).toBeVisible({timeout: 30_000});
+    }
+
+    /** The Submission stage's "Submission Files" › "Upload". */
+    async uploadSubmissionFile(fileName) {
+        await this.uploadIntoPanel('Submission Files', fileName);
+    }
+
+    /** The round's "Revisions Uploaded" › "Upload" (the editorial path). */
+    async uploadRevision(fileName) {
+        await this.uploadIntoPanel('Revisions Uploaded', fileName);
+    }
+}
+
 module.exports = {
     STATUS,
     DECISIONS,
@@ -869,4 +1182,6 @@ module.exports = {
     secondaryHeadings,
     suggestedReviewersHeading,
     suggestedReviewerRow,
+    roundTitle,
+    DecisionWorkflow,
 };
