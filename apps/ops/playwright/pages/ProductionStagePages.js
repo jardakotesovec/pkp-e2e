@@ -160,6 +160,16 @@ exports.ProductionStagePage = class ProductionStagePage {
     }
 
     /**
+     * The "Recommendation" box a journal's review round shows a
+     * recommending editor (an absence read here: a preprint server records
+     * no recommendations, U34 register OPS1). Read by its heading, at any
+     * level, since the box's heading level differs from the panels'.
+     */
+    recommendationBox() {
+        return this.frame.dialog().getByRole('heading', {name: /^Recommendation$/i});
+    }
+
+    /**
      * Press "Post the preprint": the newest version's "Title & Abstract"
      * page opens under the "Preprint" group (Rule 6).
      */

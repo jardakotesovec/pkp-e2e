@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **12 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **13 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -202,3 +202,15 @@ until their specs exist. Do not force-claim the defects themselves.
     note); on a journal or preprint server no screen reaches it.
     Code-verified 2026-09-19 (checkouts as above). Resolves: out of scope on
     OMP; dead on OJS and OPS pending maintainer confirmation.
+13. **NOTIF-021..028 normal-level notices with no reader** — attached to
+    **U34** (claimed; the decision-recording spec's register entry A5
+    documents it). `EditorDecisionNotificationManager::updateNotification()`
+    writes an author notice on every decision, but only the two revision
+    types are task-level and reach the header Tasks panel; the normal-level
+    ones ("Submission accepted.", "Production process started." and the
+    rest) are fetched by no template or Vue component in lib/pkp, the
+    ui-library or the three apps (`WorkflowNotificationDisplay.vue` asks for
+    the copyediting and production notice types alone); the retired author
+    dashboard was their surface. Code-verified 2026-09-20 (checkouts as
+    above). Resolves: maintainer confirmation as dead display (the rows are
+    still written; removal candidate for the message and URL branches).

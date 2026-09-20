@@ -604,6 +604,21 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   user and role silently keeps the existing row and drops new flags such as
   `canChangeMetadata`. If a participant needs different flags from the
   automatic author assignment, use a different user as the submitter.
+- A second `reviewRounds[]` entry builds round 2 with its reviewer, which
+  is the one way to reach "Cancel Review Round" with a reviewer on it. A
+  declined preprint (OPS) opens on its publication tab ("Title & Abstract"),
+  with "Revert Decline" on the Production entry. A decision wizard opened
+  by a hand-typed address without `ret` closes on "View Submission" and
+  "View All Submissions". U34 claim check, 2026-09-20.
+- "Request Revisions", "Resubmit for Review", "Accept Submission" and
+  "Decline Submission" on a round with completed reviews carry a "Notify
+  Reviewers" page, so a one-page read of them misses "Record Decision".
+  The OJS reviewer wizard's step 3 needs `select[name="reviewerRecommendationId"]`
+  set before "Submit Review" completes (silent otherwise; OMP has no list).
+  The press's Production notice "Awaiting approval." is a level-3 heading
+  of its own, not under a "Notification" heading. U34 claim check,
+  2026-09-20.
+
 
 ## Mailpit
 

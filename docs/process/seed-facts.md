@@ -554,3 +554,35 @@ config-file settings.
   grid refreshes only when the search form is submitted after the group is
   chosen. Workflow › Participants › Assign, OJS and OMP, 2026-09-19 (U32
   ccK1, `s1-mgr-assign-form-*`, `s2-mgr-assign-deciding-assign-form-*`).
+- A reviewer seeded `reviewRounds[].reviewers[].status: 'completed'` is a
+  submitted review ("Review Submitted"), not an editor-confirmed one: the
+  "Minimum Confirmed Reviews Required" count of Settings › Workflow › Review
+  ignores it until the editor's "Read Review" › "Mark as Complete"
+  ("Complete") or "Thank Reviewer" ("Reviewer Thanked"), so a scenario that
+  needs the minimum met confirms the seeded reviews on screen. Reviewers
+  panel; the decision buttons. Live-driven 2026-09-20, OJS and OMP
+  (`.reports/U34/cc-K4.md` seed-facts corrections; `s3-se1-accept*`).
+- Payments (OJS): Settings › Distribution › Payments saves "Enable",
+  "Currency" and "Payment Plugins", and the chosen plugin's own boxes
+  ("Manual Payment Instructions" for the manual plugin) sit on the same tab
+  and must be filled, or the plugin counts as unconfigured and "Accept
+  Submission" shows no "Request Payment" page; the "Article Processing
+  Charge" is set on the "Payments" page ("Payment Types" tab) the side
+  menu gains after the save. A press has the Distribution tab but no
+  "Payments" page. Live-driven 2026-09-20, OJS and OMP
+  (`.reports/U34/cc-K4.md`; `pay-mgr-settings-payments-reloaded`,
+  `pay-mgr-payment-types-labels`, `omppay-mgr-payments-url`).
+- A scratch user's `givenName`/`familyName` are what the Participants panel
+  and the Composer's "To" chips show; a discussion's "Created by" and the
+  discussion window's "Message from" show the *username*. Workflow ›
+  Discussions. Live-driven 2026-09-20, OJS and OMP
+  (`.reports/U34/cc-K4.md`; `s1-se1-after-accept-discussions`).
+- The Contributors page's `workflowMenuKey` is
+  `publication_<publicationId>_contributors` (the publication's id, not the
+  submission's; a key with the submission id lands on the workflow), so a
+  script opens it through the side menu's "Contributors" entry. Live-driven
+  2026-09-20, all three apps (`.reports/U34/cc-K2.md`).
+- A Section Editor (OJS, OMP) or Moderator (OPS) gets 401 on
+  `GET emailTemplates?searchPhrase=` from the decision wizard's "Find
+  Template" (the search box answers an "Error" window). Live-driven
+  2026-09-20, all three apps (`.reports/U34/cc-K2.md` K2-9).

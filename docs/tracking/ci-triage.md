@@ -643,7 +643,7 @@ trips.
   (sync 2026-09-16); red again in the U32 session's OPS final on a reset
   database at four workers, 2026-09-19, the only red of 161
   (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
-  2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`). **Watch condition**: a red
+  2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
   push is CI's.
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
