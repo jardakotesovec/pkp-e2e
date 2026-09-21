@@ -36,8 +36,8 @@ line's fleet.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
-| pkp/pkp-lib#13286 (tracking issue; introduced by pkp-lib `74a8d58571`, pkp/pkp-lib#12352 for issue #12347; fix PR #13288 open) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`; still reproduces 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-12352/`: `status:false`, fileId 2 `article-rev.pdf` current); still reproduces 2026-09-16 at ojs `ae597ff9d9` / pkp-lib `b262d27b81` on a reset database (`.reports/sync/s16-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`; still reproduces 2026-09-17 at ojs `c0ca4b3caf` / pkp-lib `efbba94ae7` on a reset database (`.reports/sync/s17-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`; still reproduces 2026-09-18 at ojs `7c8d69af3e` / pkp-lib `14473fe784` on a database reset that morning (`.reports/sync/s18-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`. 3.5 does not carry the introducing commit (`git log --grep '#12352'` empty at lib/pkp `9ce915e07e`; upstream's #13286 records its Variant 2 on 3.5, not driven here). Delete the row when #13288 lands. |
-| pkp/pkp-lib#13181 (commits `4d9ec3cbd0`, `aeac6f75cf`, 2026-09-16; no PR page) | Email-change links: (1) an account with roles in two journals lands on the site-level profile (`index/en/user/profile#contact`) after "confirm" or "reject" instead of the journal it asked in; (2) a pending request's "reject" link in the shape mailed before the change (`{journal}/invitation/decline`), one-language journal on a two-language site: "Confirm Decline Invitation" ends in a blank GET 500, request still pending | OJS OMP OPS · stable-3_5_0 too | `checks/sync/pkp-lib-13181/emailchange-links.js`; fixed when `s3.confirm.landing.url` and `s3.reject.landing.url` read `{A}/user/profile#contact`, and when `s4.chain` ends on the Contact tab with `s4.stillPending` 0 | 2026-09-17 (thread + DMs to @beaug, @jarda.kotesovec) | Report: `docs/reports/2026-09-17-pkp-lib-13181.md`. Cause: the email-change invitation is created without a journal (`BaseProfileForm::execute()`), so the new `Invitation::getContextPath()` answers `index` for it; the decline form's address takes the site path while its language segment follows the served journal. Weight minor (1) and low, transitional (2). Register entry in U03 for (1). Reproduced three times 2026-09-17 on OJS `c0ca4b3caf` / pkp-lib `efbba94ae7`, twice on a freshly reset database (`.reports/sync/s17-13181/`, `s17-13181b/`). **2026-09-18**: OMP (`c6a132892`) and OPS (`4bb66b1469`) received the change with lib/pkp `1bcd4dd55f` and show both findings as OJS (`7c8d69af3e`) does, kept script on databases reset that morning (`.reports/sync/s18-13181-{ojs,omp,ops}/`); U03 A18 now covers the three apps, A3 and A1 retired (the same change fixed them, `checks/sync/pkp-lib-13181/a1-a3-redrive.js`). **3.5 shows it too**, at ojs `63c7e555cc` / lib/pkp `9ce915e07e` (twins `ac6b031624`, `78d439c8b8`; the kept script on the line's fresh OJS fleet, `.reports/sync-3_5/s18-13181-ojs/`: both landings `index/en/user/profile#contact`, `s4.chain` ending in GET 500, `stillPending` 1); the report carries the update. |
+| pkp/pkp-lib#13286 (tracking issue; introduced by pkp-lib `74a8d58571`, pkp/pkp-lib#12352 for issue #12347; fix PR #13288 open) | Upload wizard: step-1 "Cancel" after a revision upload no longer restores the previous file when a different user had renamed it (`cancel-file-upload` answers `status:false`) | OJS OMP OPS (shared lib/pkp; reproduced on OJS) | `checks/sync/pkp-lib-12352/cancel-restore.js`, MODE=main; fixed when `afterCancel` reads the original fileId and "Renamed by B.pdf" | 2026-09-07 (thread + DMs to @beaug, @jarda.kotesovec) | Cause: `Repository::edit()` logs the new file, so `PKPManageFileApiHandler::findMatchedLogEntry()` finds no entry with the original uploader's username plus the pre-revision name and fileId. Broken at `74a8d58571`, working at `4ddab4b9cf` (upstream-sync log 2026-09-07). Upstream re-filed it as pkp/pkp-lib#13286 (a pre-existing restore bug #12352 exposed; its Variant 2, the renamer revising, fails on 3.4 and 3.5 too); fix PR pkp/pkp-lib#13288 (`e07727add6`, plus ojs#5801 tests only) verified 2026-09-08 with the kept script at the PR head, MODE=main and MODE=other both restore fileId, name and uploader with `status:true` and leave no dangling log rows. Still reproduces 2026-09-14 at ojs `f0cde27fda` / pkp-lib `1967e76f38` with the kept script on a reset database (`.reports/sync/s14-12352/`: `afterCancel` fileId 2, `article-rev.pdf`, `status:false`; before that 2026-09-10 at ojs `8fc931bcf8`); #13288 still open at `5f995d86af`; still reproduces 2026-09-15 at ojs `c40cf7644c` / pkp-lib `7ea748823e` on a reset database (`.reports/sync/s15-12352/`: `status:false`, fileId 2 `article-rev.pdf` current); still reproduces 2026-09-16 at ojs `ae597ff9d9` / pkp-lib `b262d27b81` on a reset database (`.reports/sync/s16-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`; still reproduces 2026-09-17 at ojs `c0ca4b3caf` / pkp-lib `efbba94ae7` on a reset database (`.reports/sync/s17-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`; still reproduces 2026-09-18 at ojs `7c8d69af3e` / pkp-lib `14473fe784` on a database reset that morning (`.reports/sync/s18-12352/`: `afterCancel` fileId 2 `article-rev.pdf` current), #13288 still open at `5f995d86af`. 3.5 does not carry the introducing commit (`git log --grep '#12352'` empty at lib/pkp `9ce915e07e`; upstream's #13286 records its Variant 2 on 3.5, not driven here). Still reproduces 2026-09-21 at ojs `cc81df882a` / pkp-lib `63945bbd82` on a database reset that morning (`.reports/sync/s21-12352/`: `afterCancel` fileId 4 `article-rev.pdf` current, `status:false`); #13288 still open, its head now `35bb1839df`. **3.5 read 2026-09-21**: the line now carries the #12347 backport (`36a9b59083`, PR pkp/pkp-lib#12350, merged 2026-09-18; at ojs `769450f2d4` / lib/pkp `6acb1be2eb`) and does NOT show it: the kept script on the line's fresh OJS fleet (`.reports/sync-3_5/s21-12352-ojs/`) restores fileId 1 `Renamed by B.pdf` with `status:true`, because the backport logs the edit under the original file's id (`assocId => $submissionFile->getId()`) where `main`'s `74a8d58571` logs the new one. Delete the row when #13288 lands. |
+| pkp/pkp-lib#13181 (commits `4d9ec3cbd0`, `aeac6f75cf`, 2026-09-16; no PR page) | Email-change links: (1) an account with roles in two journals lands on the site-level profile (`index/en/user/profile#contact`) after "confirm" or "reject" instead of the journal it asked in; (2) a pending request's "reject" link in the shape mailed before the change (`{journal}/invitation/decline`), one-language journal on a two-language site: "Confirm Decline Invitation" ends in a blank GET 500, request still pending | OJS OMP OPS · stable-3_5_0 too | `checks/sync/pkp-lib-13181/emailchange-links.js`; fixed when `s3.confirm.landing.url` and `s3.reject.landing.url` read `{A}/user/profile#contact`, and when `s4.chain` ends on the Contact tab with `s4.stillPending` 0 | 2026-09-17 (thread + DMs to @beaug, @jarda.kotesovec) | Report: `docs/reports/2026-09-17-pkp-lib-13181.md`. Cause: the email-change invitation is created without a journal (`BaseProfileForm::execute()`), so the new `Invitation::getContextPath()` answers `index` for it; the decline form's address takes the site path while its language segment follows the served journal. Weight minor (1) and low, transitional (2). Register entry in U03 for (1). Reproduced three times 2026-09-17 on OJS `c0ca4b3caf` / pkp-lib `efbba94ae7`, twice on a freshly reset database (`.reports/sync/s17-13181/`, `s17-13181b/`). **2026-09-18**: OMP (`c6a132892`) and OPS (`4bb66b1469`) received the change with lib/pkp `1bcd4dd55f` and show both findings as OJS (`7c8d69af3e`) does, kept script on databases reset that morning (`.reports/sync/s18-13181-{ojs,omp,ops}/`); U03 A18 now covers the three apps, A3 and A1 retired (the same change fixed them, `checks/sync/pkp-lib-13181/a1-a3-redrive.js`). **3.5 shows it too**, at ojs `63c7e555cc` / lib/pkp `9ce915e07e` (twins `ac6b031624`, `78d439c8b8`; the kept script on the line's fresh OJS fleet, `.reports/sync-3_5/s18-13181-ojs/`: both landings `index/en/user/profile#contact`, `s4.chain` ending in GET 500, `stillPending` 1); the report carries the update. Still reproduces 2026-09-21 on `main` at ojs `cc81df882a` / pkp-lib `63945bbd82` (`.reports/sync/s21-13181/`: both landings `index/en/user/profile#contact`, `s4.chain` ending in GET 500, `stillPending` 1) and on the line at ojs `769450f2d4` / lib/pkp `6acb1be2eb` (`.reports/sync-3_5/s21-13181-ojs/`, the same three reads). |
 
 ## Flake watch — known non-deterministic failure classes
 
@@ -384,7 +384,23 @@ trips.
   harness sets no `PHP_CLI_SERVER_WORKERS`, so each worker's `php -S`
   serves requests one after another and a cross-process session-write
   lag is not the mechanism. **Watch condition**: the log line at the next
-  sighting.
+  sighting. **Seventh sighting, the first with the instrumented line
+  2026-09-21** (sync session, the OJS final at four workers on a reset
+  database, `.reports/sync/final-run-ojs.log` line 64, the one red of 275
+  with the 16 serial and solo tests skipped behind it): `reader.rosa`
+  again; the page had left the form for `/index/en/index`, the context's
+  jar held `currentLocale`, `OJSTESTSID` (40 chars) and a
+  `remember_web_…` cookie (132 chars), and BOTH probes of
+  `/index.php/index/en/user/profile` (the second a second later) answered
+  200 at the login page with the profile as `source`. So the session
+  cookie was there and the write was not merely late: the request-context
+  probe is refused a session the page holds, on the last persona of the
+  loop. The worker's server log is not retained locally (only CI keeps
+  `.server-logs/`), so what the server saw is unknown. **Watch
+  condition**: the next sighting; the smoke should then record the
+  probe's request headers (does `context.request` send the jar's
+  `OJSTESTSID`?) and a `page.goto` of the same address for comparison,
+  or run the smoke with a trace retained on failure.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the
@@ -442,7 +458,7 @@ trips.
   select listed "Author Original (AO)" with nothing checked for the whole
   wait. Green on the same Mac the day before on a reset database (the U32
   finals), so used-database state, not the galley key; the U33 final on a
-  reset database is the next read.
+  reset database is the next read. **Sighted 2026-09-21 on the VM, OMP** (sync session, the OMP final at four workers on a reset database, `.reports/sync/final-run-omp.log`: U49 S4's first "Create New Version" dialog, "Publication Stage" `""` through the wait for "VoR" behind the hardened opener, the one red of 267 with the 14 serial tests skipped behind it; green alone in 10.2 s, `.reports/sync/s21-rerun-omp-u49s4.log`, the serial and solo projects green alone). The read of the dialog's fetch is still owed.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -710,6 +726,39 @@ trips.
   (`final-ojs-u05s7-alone.log`), so no longer eight-worker only. Fix
   to make: the U05 S7 read filters to the test's own submissions, or its
   read pair retries longer; U14 S5's wait is bounded at 10 s.
+
+- **Manage Emails template window gone before its "Saved" read** (U34 S7,
+  OJS and OMP, CI). The nightly pkp-e2e run 35558115088 (2026-09-21, `main`
+  at `735bb76`, the same tree and the same app tips as the green push run
+  35534810553 seven hours earlier) red on U34 S7 on both attempts on OJS
+  and on OMP: `ManageEmailsPage.save()` awaited the `POST …/emailTemplates`
+  200 and then waited 30 s for a `[role="status"]` reading "Saved" inside
+  the "Add Email Template" window, and the error context shows the window
+  gone and the mailable's "Templates" list already holding the new
+  template. Mechanism: `ManageEmailsPage.vue` `templateSaved()` runs
+  `setTimeout(() => closeSideModal(EditTemplateModal), 1000)`, so the
+  status lives one second after the save; the "Edit" of the default
+  template through the same helper passed each time (the read landed
+  inside the second), the "Add Template" one did not. Green alone on the
+  VM at the same tips before any change (`.reports/sync/s21-u34s7-ojs-alone1.log`,
+  15.4 s). **Hardened 2026-09-21** (sync session): `save()` in both
+  `DecisionSettingsPages.js` no longer reads the status; it waits up to
+  5 s for the window to close on its own and presses "Close" only when it
+  is still open, and `addTemplate()` asserts the new template in the
+  mailable's list; S7 green alone on OJS (20.1 s) and OMP (22.3 s),
+  `.reports/sync/s21-u34s7-{ojs-alone2,omp-alone1}.log`. **Watch
+  condition**: the hardened save reds again.
+- **Submission wizard autosave not firing within its 100 s wait** (U21
+  S3, OMP, CI, once). In the same nightly run 35558115088 the OMP S3
+  ("save for later and resume from the emailed link") typed the title on
+  the Details step and waited 100 s for the wizard's own timed save
+  (`PUT /publications/{id}`) and for the footer's "Saving" flash; neither
+  came (`page.waitForResponse` and `page.waitForFunction` both at 100 s,
+  the error context showing the wizard still on Details); green on the
+  retry (flaky, 1.8 min), so the job passed. A different mechanism from
+  the OPS entry above (a fill lost to a re-render): here the timer's save
+  never left the page. **Watch condition**: a second sighting; then read
+  whether the autosave timer is paused while the title editor has focus.
 
 
 ## Companion branches — pkp-e2e branches waiting on app PRs

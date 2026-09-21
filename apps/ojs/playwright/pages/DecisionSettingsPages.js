@@ -156,9 +156,20 @@ exports.ManageEmailsPage = class ManageEmailsPage extends BasePage {
         const id = await visibleEditorId(this.page, form);
         await setEditorContent(this.page, id, bodyHtml);
         await this.save(form);
+        // The saved template joins the mailable's "Templates" list.
+        await expect(win.getByRole('listitem').filter({hasText: name})).toBeVisible({timeout: 30_000});
     }
 
-    /** Press the template window's "Save", wait for the API's answer and the "Saved" status, then close it. */
+    /**
+     * Press the template window's "Save" and wait for the API's answer and
+     * the window to go. The window shows "Saved" and closes itself about a
+     * second after the save (`ManageEmailsPage.vue` `templateSaved()`,
+     * `setTimeout(closeSideModal, 1000)`), so the status is not waited for:
+     * under load it is gone before a read lands (CI nightly 2026-09-21, OJS
+     * and OMP, both attempts; ci-triage "Flake watch"). The saved template
+     * is then asserted by its caller from the mailable's list. "Close" is
+     * pressed only when the window is still open after its own timer.
+     */
     async save(form) {
         const saved = this.page.waitForResponse(
             (r) => r.url().includes('/emailTemplates') && r.request().method() === 'POST' && r.ok(),
@@ -166,9 +177,14 @@ exports.ManageEmailsPage = class ManageEmailsPage extends BasePage {
         );
         await form.getByRole('button', {name: 'Save', exact: true}).click();
         await saved;
-        await expect(form.locator('[role="status"]').filter({hasText: 'Saved'})).toBeVisible({timeout: 30_000});
-        await form.getByRole('button', {name: 'Close', exact: true}).first().click();
-        await expect(form).toBeHidden({timeout: 30_000});
+        const closedItself = await form
+            .waitFor({state: 'hidden', timeout: 5_000})
+            .then(() => true)
+            .catch(() => false);
+        if (!closedItself) {
+            await form.getByRole('button', {name: 'Close', exact: true}).first().click();
+            await expect(form).toBeHidden({timeout: 30_000});
+        }
     }
 
     /** Close the mailable's window. */

@@ -24,8 +24,8 @@
  * scheduling on a preprint server); A8, A11, A14 and OPS2 (only the
  * scenario's own sentence is asserted: the typed Prefix, the holder
  * sentence with its "(Author)", the panel's refusal, the License URL
- * description beneath the wizard's choice); A10, A12 and A17 (never
- * exercised).
+ * description beneath the wizard's choice); A10 (✅ retired 2026-09-21), A12 and A17
+ * (never exercised).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only at the server level — S1, S3, S4 and S12 mutate only their
@@ -409,7 +409,7 @@ test.describe('Publication metadata (U40)', () => {
         // Keywords (Rule 7): Enter adds the typed term as a chip with its
         // "Remove {term}" button; the chip's button removes it; "benthic
         // flux", a term nobody has used before, is accepted as typed.
-        // (Suggestions from other submissions are Rule 7b's and A10's —
+        // (Suggestions from other submissions are Rule 7b's, retired A10's —
         // never asserted.)
         const chip = page.getByRole('button', {name: 'Remove ocean acidification'});
         await keywordsInput.click();

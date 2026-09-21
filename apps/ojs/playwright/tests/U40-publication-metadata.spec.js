@@ -21,7 +21,7 @@
  * Disclosure, never the language button), A6 ❓ (S6 asserts only the
  * "Change" button's absence once published or versioned), A8 ❓ (S3 and
  * S12 assert only the scenarios' own sentences: Save disabled, the fields
- * shown, nothing typed kept), A10 🐞 {OMP OPS} (no term suggestion is asserted),
+ * shown, nothing typed kept), A10 ✅ retired 2026-09-21 (no term suggestion is asserted),
  * A11 ❓ (the automatic holder's description is asserted only up to the
  * contributor's name), A12 ❓ (no empty custom copyright statement), A13 🐞
  * (S7's Cancel leg asserts only that nothing was reset and reloads before
@@ -30,7 +30,8 @@
  * A15 🐞 (S6 gates the language panel on its own loading before picking),
  * A17 ❓ (the Author's Contributors page on the new version is not
  * opened), OJS1 🐞 (scenario 6's leg on an article published into a
- * not-yet-published issue is skipped), OMP1–OMP5 and OPS1–OPS2 (press- and
+ * not-yet-published issue is skipped), OJS2 ❓ (no scheduled article's
+ * terms are read as suggestions), OMP1–OMP5 and OPS1–OPS2 (press- and
  * preprint-only, in those trees). The spec's Coverage section records
  * everything else left out.
  *

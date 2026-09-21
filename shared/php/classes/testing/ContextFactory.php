@@ -161,7 +161,9 @@ class ContextFactory
             array_push($current, $locale);
             sort($current);
             $contextService->restoreLocaleDefaults($context, $request, $locale);
-            Repo::reviewerRecommendation()->setLocalizedDataOnNewLocaleAdd($context, $locale);
+            if (method_exists(Repo::class, 'reviewerRecommendation')) { // main only; a no-op on stable-3_5_0 (MAINTENANCE "The stable line")
+                Repo::reviewerRecommendation()->setLocalizedDataOnNewLocaleAdd($context, $locale);
+            }
             $context = $contextService->edit($context, ['supportedFormLocales' => array_values(array_unique($current))], $request);
         }
         return $context;

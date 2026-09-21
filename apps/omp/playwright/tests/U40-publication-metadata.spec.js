@@ -26,7 +26,7 @@
  * OMP5 🐞 (S5 asserts the scenario's sentence, never where the link
  * leads), A3 ❓ (S7 asserts the scenario's own sentence on the unpublished
  * and declined items), A5 ❓, A6 ❓, A8 ❓ (a read-only page's fields are
- * asserted typeable only as the scenario's own sentence), A10 🐞, A11 ❓
+ * asserted typeable only as the scenario's own sentence), A10 ✅ retired 2026-09-21, A11 ❓
  * (S5 matches the contributor's name inside the holder sentence, not the
  * role suffix), A12 ❓, A14 ❓ (journal/preprint-only), A15 ❓, A17 ❓, OMP3 ❓,
  * OPS2 ❓. The spec's Coverage section records everything else left out.

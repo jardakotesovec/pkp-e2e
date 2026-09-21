@@ -210,14 +210,12 @@ it for a per-item value (Rule 11). <sup>g</sup>
      typed text itself, in every app, so a suggestion is an entry below
      it. A term on a submission that is not
      published (still in the workflow, declined, or unpublished again)
-     is not offered, and neither is another journal's term. The Author
+     is not offered ⚠ [OJS2](#ojs2), and neither is another journal's
+     term. The Author
      is offered the same list in the submission wizard's "Details"
      step. The list is fetched as you type, so a term is offered on
      other submissions as soon as the version carrying it is published,
-     without reloading the page. This is OJS since the upstream change
-     of 2026-09-13; OMP and OPS had not received that change by
-     2026-09-18, and there the suggestions do not follow this rule and
-     the list is often empty ⚠ [A10](#a10). <sup>e</sup>
+     without reloading the page. <sup>e</sup>
 8. **A published version warns editors, and stays editable.** On every
    Publication page of a published version, an editorial role sees the
    banner "Warning: This version has been published. Editing it may
@@ -911,8 +909,6 @@ Left out of the scenarios above, by reason:
   - A1 (every other Publication page refused while the plain language
     summary is required; Rule 5; Settings)
   - A5 (a merely scheduled article still offering "Change"; Rule 13a)
-  - A10 (a press's and a preprint server's suggestions not following
-    the rule, often an empty list; Rule 7b)
   - A12 ("Custom copyright statement" accepted with an empty statement;
     Rule 12; Settings)
   - A15 (the freshly opened panel acting before its loading settles;
@@ -949,7 +945,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-28; A16, A17 and the
-retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18), unreviewed unless an entry notes otherwise;
+retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18; OJS2 and the retirement of A10 2026-09-21), unreviewed unless an entry notes otherwise;
 the team settles them on spec review. The summary
 is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
 and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -959,7 +955,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved, even after the summary is stored, and a journal's pre-scheduling panel is refused silently | 🐞 | user-visible | — |
 | [A2](#a2) | Reset permissions stamps Copyright Year 1970 on unpublished items (journal on article-date basis; preprint server) | 🐞 | user-visible | — |
 | [A15](#a15) | The freshly opened language panel acts before its loading settles: stale guidance and prefill kept (journal), an empty required Title accepted (press), the old language's text stored as the new title (preprint server) | 🐞 | user-visible | — |
-| [A10](#a10) | In OMP and OPS the term suggestions do not follow the rule and the list is often empty; fixed in OJS | 🐞 | minor | upstream sync (claude), 2026-09-18 — settled to a defect, OMP and OPS |
 | [A13](#a13) | Cancelling the reset-permissions confirm box leaves the button greyed until a reload | 🐞 | minor | — |
 | [OJS1](#ojs1) | An article published into a not-yet-published issue keeps "Change", and every language change on it is refused | 🐞 | minor | — |
 | [OMP5](#omp5) | With License Terms but no license, the book page shows a "License" link that leads nowhere | 🐞 | minor | — |
@@ -971,10 +966,12 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A11](#a11) | The automatic copyright holder carries the contributor's role: "Copyright (c) 2026 Alice Probe (Author)" on the reader's page | ❓ | minor | — |
 | [A12](#a12) | "Custom copyright statement" saves with an empty statement; items then publish with no holder | ❓ | minor | — |
 | [A14](#a14) | The language panel's Abstract is required but described as "recommended" | ❓ | minor | — |
+| [OJS2](#ojs2) | Whether a scheduled article's terms are offered as suggestions: Rule 7b names no scheduled source | ❓ | minor | — |
 | [OMP3](#omp3) | The press's reset-permissions wording is the older text | ❓ | minor | — |
 | [OPS2](#ops2) | A wizard-chosen license shows beside a sentence promising the server's default | ❓ | minor | — |
 | [A4](#a4) | Retired: publishing leaves the Author's edit permission as it was, and the Author saves at once after an unpublish | ✅ | retired | re-probe (claude), 2026-09-09 — fixed upstream |
 | [A16](#a16) | Retired: on a new version of a published item the permitted Author's Save goes through and the edit is there after a reload | ✅ | retired | re-probe (claude), 2026-09-14 — fixed upstream |
+| [A10](#a10) | Retired: term suggestions follow Rule 7b in all three apps | ✅ | retired | upstream sync (claude), 2026-09-18 — settled to a defect, OMP and OPS; retired upstream sync (claude), 2026-09-21 |
 | [A7](#a7) | Retired: an over-limit abstract is refused on Save with its own message, an empty required one before the save is sent | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [A9](#a9) | Retired: the wizard's Details step does show Plain Language Summary at "Ask" and at "Require" | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [OMP1](#omp1) | The book page prints the copyright line outside the License block | ✅ | minor | — |
@@ -1093,23 +1090,6 @@ leg.
 Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a9</sup>
 
-<a id="a10"></a>
-**A10 — Term suggestions do not follow the rule** {OMP OPS} · 🐞 · minor.
-Typing in Keywords, Subjects, Disciplines or Supporting Agencies should
-offer the terms Rule 7b names. In OMP and OPS the suggestions still come
-from an older lookup that does not follow that rule, and the list is
-often empty: nothing is offered but the typed text itself, even for a
-term the rule says should be there. The empty lists seen in all three
-apps on 2026-08-28 came from that older lookup. In OJS the upstream
-change of 2026-09-13 (pkp/pkp-lib#12163) replaced it: suggestions appear
-there as Rule 7b states, and the rule is written for the new lookup. OMP
-and OPS had not received the change by 2026-09-18.
-Since: live-probed 2026-08-28 · Basis: probe; the fix in OJS seen
-2026-09-18.
-Re-checked: upstream sync (claude), 2026-09-18 — settled from an open
-question to a defect, scoped to OMP and OPS: suggestions are expected,
-and they appear in OJS. <sup>f-a10</sup>
-
 <a id="a11"></a>
 **A11 — The automatic copyright holder names the contributor's role** · ❓ · minor.
 With Copyright Holder set to "Author", the holder the journal fills in
@@ -1202,6 +1182,15 @@ button is offered for a change that always fails: the screen and the
 refusal disagree about whether the item counts as published.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ojs1</sup>
 
+<a id="ojs2"></a>
+**OJS2 — A scheduled article's terms** · ❓ · minor.
+Whether a scheduled article's terms are offered — Rule 7b names
+published, in-workflow, declined and unpublished-again sources but not
+an article scheduled for a future issue.
+Question: are a scheduled article's terms offered as suggestions before
+its issue is published? Lean: not offered until the issue is published.
+Basis: code. <sup>f-ojs2</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1281,6 +1270,9 @@ Since: live-probed 2026-08-28 · Basis: probe. <sup>f-ops2</sup>
 
 <a id="a16"></a>
 **A16 — The Author's Save on a new version of a published item is offered and refused** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13312), verified 2026-09-14 on all three apps: the permitted Author's save on the new version goes through while the other version is published, the footer reads "Saved" and the edit is there after a reload (Rule 9). <sup>f-a16</sup>
+
+<a id="a10"></a>
+**A10 — Term suggestions did not follow the rule on the press and the preprint server** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12163): the suggestions follow Rule 7b on OJS since 2026-09-18 and on OMP and OPS since 2026-09-21. <sup>f-a10</sup>
 
 ---
 
@@ -1593,7 +1585,8 @@ an option added the chip; a term already a chip on the field was still
 offered, picking it or typing it again with Enter showed a second
 identical chip, Save answered "Saved" and the reopened page showed the
 term once. OMP and OPS sat at lib/pkp `1bcd4dd55f`, one commit before
-the change, that day: their lookup is A10's (f-a10).
+the change, that day: their lookup was the pre-change one, retired
+A10's (f-a10).
 
 <a id="fn-f"></a>
 **f — Data page.** `PKPDataAvailabilityForm`: one `FieldRichTextarea`
@@ -2305,10 +2298,17 @@ OJS is by design: that drive saved "ocean acidification" on an
 unpublished submission, which the changed lookup does not offer. On OMP
 and OPS, still on the old lookup, the lists did not follow Rule 7b and
 the empty answer was reproduced (200 with an empty list for a term on a
-published version in the same press or server). The next upstream sync
-that finds both pointers past `14473fe784` re-runs the kept check
-(`shared/playwright/checks/sync/pkp-lib-12163/term-suggestions.js`) on
-OMP and OPS and, if the lists follow Rule 7b, retires A10.
+published version in the same press or server). The kept check
+(`shared/playwright/checks/sync/pkp-lib-12163/term-suggestions.js`) was
+left for the upstream sync that would find both pointers past
+`14473fe784`.
+Re-run 2026-09-21 on OMP (`7f9455d5a`) and OPS (`53b40233f0`), both with
+lib/pkp `63945bbd82` past `14473fe784`, with the same kept check on
+databases reset that morning (`.reports/sync/s21-12163/`): every read
+matches the OJS record of 2026-09-18 (published sources offered, the
+later-published one without a reload, the unpublished one dropped, the
+other press's or server's term offered only there, the Author's wizard
+list the same). A10 retired.
 
 <a id="fn-f-a11"></a>
 **f-a11 — A11 evidence.** `PKPPublication::getAuthorString()` joins each
@@ -2477,6 +2477,17 @@ Change › French (Canada) › Title + Abstract › Confirm → `PUT
 …/changeLocale` 403 with the body quoted in fn-i, shown as the toast,
 panel unchanged. The seeded published item without an issue showed no
 readout (f-a6).
+
+<a id="fn-f-ojs2"></a>
+**f-ojs2 — OJS2 evidence.** Lean: not offered. The suggestions lookup
+(`PKPVocabController::getMany()`, footnote e) keeps only publications
+whose status is published
+(`ControlledVocab::scopeWithContextIdAndPublishedPublications()`,
+`where('status', PKPSubmission::STATUS_PUBLISHED)`, lib/pkp
+`63945bbd82`), and a scheduled article's version carries the scheduled
+status until its issue is published (OJS `Repository::publish()` sets
+`STATUS_SCHEDULED` for an issue not yet published, OJS `cc81df882a`);
+not driven (code read, 2026-09-21, upstream sync).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** fn-l template comparison (OMP
