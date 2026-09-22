@@ -10,7 +10,7 @@ pending row; feature sessions are launched by the maintainer under the
 RUNBOOK loop. Upstream baselines: `docs/tracking/upstream-sync.md`. CI
 failures, flake watch and
 companion branches: `docs/tracking/ci-triage.md`, checked first on any
-reported failure. Suite size (RUNBOOK "Budget"; last full runs 2026-09-21 on the 4-core VM at
+reported failure. Suite size (RUNBOOK "Budget"; last full runs 2026-09-22 on the 4-core VM at `PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time, the daily sync's finals, serial and solo projects included; OMP's tip did not move that day, so its line is the 2026-09-21 final): OJS 291 tests · 17.5 min · OMP 281 · 13.2 min (267 in the app project, the 14 serial and solo tests alone) · OPS 179 · 8.0 min. On CI's fresh box OJS took 27.8 min of tests (29.5 min job) on the nightly run 35683638739 (2026-09-22; 26.6 min on 2026-09-21, 24.8 on 2026-09-17), past the 25-minute line: the shard matrix in `run-app.yml` is the next task (MAINTENANCE "Keep the budget measured").
 `PLAYWRIGHT_WORKERS=4`, CI's setting, one app at a time, the daily sync's finals; OJS and OMP each one known-class red in the app project, the serial and solo projects green alone): OJS 275 tests · 15.7 min · OMP 267 · 13.2 min · OPS 179 · 8.0 min. On CI's fresh box OJS took 26.6 min on the nightly run 35558115088 (2026-09-21; 24.8 min on 2026-09-17), past the 25-minute line: the shard matrix in `run-app.yml` is the next task (MAINTENANCE "Keep the budget measured").
 
 ## Features

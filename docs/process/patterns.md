@@ -52,7 +52,8 @@ Each of these has bitten at least once.
    form. The page has one jQuery UI calendar (`#ui-datepicker-div`); opened
    from a second legacy window on the same page it sits under that window
    and the day click hangs its full timeout, so land the page afresh before
-   the second window's date. A closed Vue side modal leaves a hidden shell in the DOM until the
+   the second window's date. A closed Vue side modal (and a legacy one closed
+   by its own "Cancel", U32 ccK3) leaves a hidden shell in the DOM until the
    next navigation, so `getByRole` on the table behind it returns nothing
    until then; and a Vue form's "Save" is disabled after a refused save
    until the flagged boxes change (a click on it hangs). A page opened at
@@ -69,7 +70,11 @@ Each of these has bitten at least once.
    apps, green alone, on CI and under tracing). Wait the window out with a
    page timer longer than the app's (`pastSideModalCloseWindow()` in the
    U14 page objects): it is due after the app's timer, so it fires after
-   it whatever the load.
+   it whatever the load. The workflow dialog behind an inner window stays
+   aria-hidden through that same slot after the window closes, so a
+   dialog-scoped role read taken at once finds no row ("no row menu"):
+   wait on the row locator itself or read through page-level role queries
+   (U35 ccK3, 2026-09-20).
 
 5. **The side-modal outer wrapper reports `visibility: hidden`** while it
    opens, and permanently on some wrappers. Anchor `toBeVisible()` on inner
@@ -146,7 +151,13 @@ Each of these has bitten at least once.
   level. Storage state is cached across runs.
 - Several actors: the `asUser` fixture opens extra authenticated contexts.
   They close themselves at teardown. Do not `ctx.close()` by hand unless the
-  test is about a closed session.
+  test is about a closed session. Never combine it with a describe-level
+  `test.use({user})`: that mints the default user's session at test setup
+  and strands the later `asUser` contexts on the same worker server (both
+  land on `/login`, even when the test never touches `page`), so a
+  multi-actor test sets no default user and opens every actor through
+  `asUser` (U32 tojs on OJS, 2026-09-19; the U33 and U35 suites re-learned
+  it).
 - Anonymous: omit `user`. But read parallel lesson 8 before trusting a context
   to be anonymous.
 

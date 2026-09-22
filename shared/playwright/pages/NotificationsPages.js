@@ -76,6 +76,20 @@ function successToasts(page) {
     return page.locator('.pkpNotification.pkpNotification--success');
 }
 
+/**
+ * Run `action` with a wait for the success toast `text` already armed, so a
+ * toast raised during the action is caught even when the action's own waits
+ * (a save response, jQuery idle, a window closing) outlive the toast's
+ * lifetime (TOAST_LIFETIME_MS): reading it only after the action returns lost
+ * U35 S2's "User added as a stage participant." on CI (2026-09-22).
+ */
+async function expectToastDuring(page, text, action, {timeout = 30_000} = {}) {
+    const seen = expect(successToasts(page).filter({hasText: text})).toBeVisible({timeout});
+    seen.catch(() => {});
+    await action();
+    await seen;
+}
+
 /** A toast's "×" control (named "Close" for screen readers). */
 function toastCloseButton(toast) {
     return toast.getByRole('button', {name: 'Close'});
@@ -119,6 +133,7 @@ exports.DISCUSSION_TASK = DISCUSSION_TASK;
 exports.TOAST_LIFETIME_MS = TOAST_LIFETIME_MS;
 exports.toasts = toasts;
 exports.successToasts = successToasts;
+exports.expectToastDuring = expectToastDuring;
 exports.toastCloseButton = toastCloseButton;
 exports.expectStackedBelow = expectStackedBelow;
 exports.expectStaysWhileHovered = expectStaysWhileHovered;

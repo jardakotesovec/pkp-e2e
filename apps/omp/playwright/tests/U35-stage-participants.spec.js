@@ -64,7 +64,7 @@
  * `omp` project.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {TasksPanel, toasts, successToasts, expectStackedBelow} = require('../../../../shared/playwright/pages/NotificationsPages.js');
+const {TasksPanel, toasts, successToasts, expectStackedBelow, expectToastDuring} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
 const {UsersAccessPage, SendInvitationWizard} = require('../pages/UserInvitationPages.js');
 const {
@@ -324,8 +324,7 @@ test.describe('stage participants', () => {
         await expect(edit.privilegesHeading()).toBeHidden();
         await expect(edit.recommendOnlyBox()).toBeHidden();
         await edit.metadataBox().check();
-        await edit.ok();
-        await expect(successToasts(managerPage).filter({hasText: CHANGED_TOAST})).toBeVisible({timeout: 30_000});
+        await expectToastDuring(managerPage, CHANGED_TOAST, () => edit.ok());
         edit = await panel.openEdit(panel.row(COPYEDITOR_NAME));
         await expect(edit.metadataBox()).toBeChecked();
         await edit.metadataBox().uncheck();
@@ -486,8 +485,7 @@ test.describe('stage participants', () => {
         await expect(assign.metadataBox()).toBeChecked();
         await assign.recommendOnlyBox().check();
         expect((await assign.message()).text).toBe('');
-        await assign.okAndClose();
-        await expect(successToasts(managerPage).filter({hasText: ADDED_TOAST})).toBeVisible({timeout: 30_000});
+        await expectToastDuring(managerPage, ADDED_TOAST, () => assign.okAndClose());
         await expect(panel.row(ANA_NAME, SE_ROLE)).toHaveCount(1, {timeout: 30_000});
         await expect(panel.recommendLine(panel.row(ANA_NAME))).toHaveCount(1, {timeout: 30_000});
         await expect(panel.recommendLine(panel.row(RAVI_NAME))).toHaveCount(0);
@@ -559,8 +557,7 @@ test.describe('stage participants', () => {
         edit = await panel.openEdit(panel.row(ANA_NAME));
         await expect(edit.recommendOnlyBox()).toBeChecked();
         await edit.recommendOnlyBox().uncheck();
-        await edit.ok();
-        await expect(successToasts(managerPage).filter({hasText: CHANGED_TOAST})).toBeVisible({timeout: 30_000});
+        await expectToastDuring(managerPage, CHANGED_TOAST, () => edit.ok());
         await expect(panel.recommendLine(panel.row(ANA_NAME))).toHaveCount(0, {timeout: 30_000});
         await expect(panel.row(ANA_NAME)).toHaveCount(1);
         edit = await panel.openEdit(panel.row(ANA_NAME));
@@ -672,8 +669,7 @@ test.describe('stage participants', () => {
         await expect(assign.privilegesHeading()).toBeHidden();
         await expect(assign.recommendOnlyBox()).toBeHidden();
         expect((await assign.message()).text).toBe('');
-        await assign.okAndClose();
-        await expect(successToasts(managerPage).filter({hasText: ADDED_TOAST})).toBeVisible({timeout: 30_000});
+        await expectToastDuring(managerPage, ADDED_TOAST, () => assign.okAndClose());
         await expectRowNames(panel).toEqual([users.funding.displayName, users.author.displayName]);
         await expect.poll(() => panel.rowSummaries()).toContain(`${users.funding.displayName} | Funding coordinator`);
         await withTasks(managerContext, tag, async (tasks) => {
@@ -852,9 +848,10 @@ test.describe('stage participants', () => {
         // participants (Rules 4e, 8a).
         await notify.chooseTemplate('Discussion (Copyediting)');
         expect((await notify.message()).text).toBe('Please enter your message.');
-        await notify.notify();
-        await expect(notify.dialog).toBeHidden({timeout: 30_000});
-        await expect(successToasts(managerPage).filter({hasText: SENT_TOAST})).toBeVisible({timeout: 30_000});
+        await expectToastDuring(managerPage, SENT_TOAST, async () => {
+            await notify.notify();
+            await expect(notify.dialog).toBeHidden({timeout: 30_000});
+        });
         const discussions = panel.discussions();
         await expect(discussions.row('Discussion (Copyediting)')).toHaveCount(1, {timeout: 30_000});
         let discussion = await discussions.open(discussions.row('Discussion (Copyediting)'), 'Discussion (Copyediting)');
@@ -890,8 +887,7 @@ test.describe('stage participants', () => {
         await expect(edit.metadataBox()).toBeHidden();
         await expect(edit.okButton()).toBeVisible();
         await expect(edit.cancelLink()).toBeVisible();
-        await edit.ok();
-        await expect(successToasts(managerPage).filter({hasText: CHANGED_TOAST})).toBeVisible({timeout: 30_000});
+        await expectToastDuring(managerPage, CHANGED_TOAST, () => edit.ok());
 
         // Who the person list offers: the third Series editor and not the
         // assigned one; the elsewhere-only name and the ended one: "No

@@ -541,7 +541,12 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Attach Review Files" source, U30); `reviewRounds[].reviewers[].status:
   'cancelled'` (U30, the readiness question); `reviewRounds[].revisionsUploaded`
   (the author's "Upload" is refused on a round where revisions were not
-  requested, U30); `commentsForEditor`; `metrics` (OJS only: `views?`,
+  requested, U30); `reviewRounds[].reviewers[].status: 'complete'` (the
+  editor-confirmed "Mark as Complete" state the minimum-reviews count needs;
+  `completed` is the reviewer's submit, U34); `files[]` (the Submission
+  stage's files: seeded submissions carry none, so a copyediting,
+  production or decision drive uploads through "Upload/Select Files" first,
+  U32); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
 - Publication: `metadata.datePublished` (without it, publish stamps today);
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
@@ -561,8 +566,10 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   U58), `submitWithCategories`, `publishingMode`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), ISSNs, OJS
-  `issues[]` with `accessStatus`, and OJS `subscriptions[]` where
-  `'expired'` seeds an active row with a past end date.
+  `issues[]` with `accessStatus`, OJS `subscriptions[]` where
+  `'expired'` seeds an active row with a past end date, and OJS `payments`
+  (`enabled`, `currency`, `paymentPluginName`, `manualInstructions`,
+  `publicationFee`; the instructions gate is in seed-facts, U34).
 - Named scenario fixtures (`submission-draft`, `submission-in-review`,
   `submission-in-round-2`, `submission-published`) and a typed scenario
   client. Until a suite shows the need, tests call
@@ -683,7 +690,10 @@ The API:
 - `find({to, contains, subject?, timeoutMs?, poll?})`: the canonical
   assertion. Polls Mailpit search scoped by recipient and content marker
   until a message matches, and returns the newest match. Default timeout
-  20 s, poll 500 ms.
+  20 s, poll 500 ms. `subject` goes into the query quoted whole, so a
+  subject that itself carries quotes (`Your review for "{title}" has been
+  cancelled`) matches nothing: pass a quote-free fragment or use `contains`
+  (U34 tojs, 2026-09-20).
 - `expectNone({to, contains, afterControl: {to, contains}})`: the negative
   assertion done right. Waits for the control message first, then asserts
   zero matches for the target.

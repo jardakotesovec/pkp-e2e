@@ -161,7 +161,9 @@ Two facts worth knowing before you write a test:
   runners want workers = cores and pin the env var explicitly (CI uses 4).
 - **Server output** goes to
   `apps/<app>/playwright/.server-logs/server-<port>.log` (request log plus
-  PHP warnings). Look there when debugging server-side errors. A server
+  PHP warnings); the probe servers' is `server-<port>-probe.log` beside it.
+  Look there when debugging server-side errors (a 500 a probe's traffic
+  shows). A server
   adopted through `reuseExistingServer` (a stray one on a worker port)
   keeps logging wherever it was started.
 - **Project chain**: `setup → {shared, <app>} → <app>-serial → <app>-solo`.
