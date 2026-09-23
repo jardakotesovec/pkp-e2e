@@ -583,9 +583,17 @@ trips.
   (sync 2026-09-16); red again in the U32 session's OPS final on a reset
   database at four workers, 2026-09-19, the only red of 161
   (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
-  2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it). **Watch condition**: a red
+  2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it), and in the U36 session's, 2026-09-23, beside U03 S5, red alone too (`.reports/U36/final-run-ops.log`, `alone-ops-U40S1.log`; serial and solo green alone). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
   push is CI's.
+- **Profile save response not seen in 30 s** (U03 S5, "cancel, and
+  reject, an email change", OPS, once: 2026-09-23, the U36 session's OPS
+  final on a reset database on the Mac at auto workers,
+  `.reports/U36/final-run-ops.log`). `ProfilePage.waitForSave()`
+  (`page.waitForResponse` on the tab's save POST) timed out at 30 s;
+  green alone (`.reports/U36/alone-ops-U03S5.log`). Watch condition: a
+  second sighting; then the error context says whether the save was
+  never sent or answered before the wait was armed.
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -605,7 +613,9 @@ trips.
   `alone-omp-u01s6-u14s5.log`), green on the VM's finals and on CI
   (35200505897) at the same tree. A load-shaped read on the Mac; unread
   whether the report's job had not run yet or the dialog was read before
-  its second fetch. Because the app project fails, the serial and solo
+  its second fetch. Sighted again 2026-09-23, the U36 session's OJS final
+  on a reset database at auto workers, the only red of 288, green alone
+  (`.reports/U36/final-run-ojs.log`, `alone-ojs-U14S5.log`). Because the app project fails, the serial and solo
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run

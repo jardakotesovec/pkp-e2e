@@ -124,6 +124,18 @@
  *   users[].roles; recommendOnly is refused where the form offers no box
  *   (roles below sub-editor level) and permitMetadataEdit false on a
  *   manager-level role (the form forces it on). Applied before users[].
+ * - components {<name>: false | {metadata?, dependent?, supplementary?,
+ *   required?}} — Settings › Workflow › Submission › "Components" (U36),
+ *   the component grid of every app: a name among the components every new
+ *   context gets (registry/genres.xml, named in the primary locale) with
+ *   `false` is that row's "Delete" (GenreGridHandler::deleteGenre: the
+ *   in-use check, then the DAO's soft delete), with an object its "Edit"
+ *   window's save; any other name is "Add Component"'s save. Both saves run
+ *   the grid's own GenreForm (initData from the stored component, the
+ *   window's fields as the spec sets them, execute). `metadata` is the
+ *   "File Metadata" list (document / artwork / supplementary), the three
+ *   booleans the "File Type" boxes and "Require with Submissions". Applied
+ *   after the settings forms, before users[].
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -230,6 +242,7 @@ abstract class PKPContextScenarioBuilder
         $reviewFormPlans = $this->parseReviewForms($root, $primaryLocale);
         $pluginPlans = $this->parsePlugins($root);
         $rolePlans = $this->parseRoleOptions($root);
+        $componentPlans = $this->parseComponents($root, $primaryLocale);
         $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $root->assertConsumed();
@@ -295,6 +308,11 @@ abstract class PKPContextScenarioBuilder
             $context = $this->saveFormSettings($context, $formSettings, $specKeys);
         }
 
+        $components = [];
+        foreach ($componentPlans as $plan) {
+            $components[] = $this->applyComponent($context, $plan);
+        }
+
         foreach ($rolePlans as $plan) {
             $this->applyRoleOptions($context, $plan);
         }
@@ -339,7 +357,144 @@ abstract class PKPContextScenarioBuilder
             'users' => $users,
             'announcementTypes' => $announcementTypes,
             'announcements' => $announcements,
+            'components' => $components,
         ];
+    }
+
+    /**
+     * The optional `components` map → one plan per entry, in the map's
+     * order. A name is matched against the components every new context
+     * gets (registry/genres.xml, each named in the context's primary
+     * locale, the name the "Components" list shows): a match is that row's
+     * "Delete" (false) or "Edit" (an object), anything else an "Add
+     * Component". Parse phase: no writes, so every refusal comes before the
+     * context exists.
+     *
+     * @return array<int, array{name: string, key: ?string, remove: bool, fields: array<string, mixed>}>
+     */
+    protected function parseComponents(Spec $root, string $primaryLocale): array
+    {
+        $spec = $root->child('components');
+        if ($spec === null) {
+            return [];
+        }
+        $raw = (array) $root->get('components');
+        if (array_is_list($raw)) {
+            throw new SpecException('components', 'components must be a map of component name to false (delete) or {metadata?, dependent?, supplementary?, required?}');
+        }
+        $defaults = [];
+        $xml = simplexml_load_file(Core::getBaseDir() . '/registry/genres.xml');
+        foreach ($xml->genre as $genre) {
+            $defaults[__((string) $genre['localeKey'], [], $primaryLocale)] = (string) $genre['key'];
+        }
+        $categories = [
+            'document' => \PKP\submission\Genre::GENRE_CATEGORY_DOCUMENT,
+            'artwork' => \PKP\submission\Genre::GENRE_CATEGORY_ARTWORK,
+            'supplementary' => \PKP\submission\Genre::GENRE_CATEGORY_SUPPLEMENTARY,
+        ];
+        $plans = [];
+        foreach ($raw as $name => $value) {
+            $name = (string) $name;
+            $key = $defaults[$name] ?? null;
+            $specKey = "components.{$name}";
+            if (trim($name) === '') {
+                throw new SpecException($specKey, 'A component needs a name (the window\'s "Name" box is required)');
+            }
+            if ($value === false) {
+                $spec->get($name);
+                if ($key === null) {
+                    throw new SpecException($specKey, "No component \"{$name}\" to delete. A new context's components: " . implode(', ', array_map(fn ($n) => "\"{$n}\"", array_keys($defaults))));
+                }
+                $plans[] = ['name' => $name, 'key' => $key, 'remove' => true, 'fields' => []];
+                continue;
+            }
+            if (!is_array($value)) {
+                throw new SpecException($specKey, "{$specKey} must be false (the row's \"Delete\") or an object of the window's fields");
+            }
+            $planSpec = $spec->child($name);
+            $fields = [];
+            if ($planSpec->has('metadata')) {
+                $metadata = $planSpec->get('metadata');
+                if (!is_string($metadata) || !isset($categories[$metadata])) {
+                    throw new SpecException("{$specKey}.metadata", '"File Metadata" is one of: ' . implode(', ', array_keys($categories)));
+                }
+                $fields['category'] = $categories[$metadata];
+            }
+            foreach (['dependent', 'supplementary', 'required'] as $box) {
+                if (!$planSpec->has($box)) {
+                    continue;
+                }
+                $boxValue = $planSpec->get($box);
+                if (!is_bool($boxValue)) {
+                    throw new SpecException("{$specKey}.{$box}", "{$specKey}.{$box} must be a boolean");
+                }
+                $fields[$box] = $boxValue;
+            }
+            $planSpec->assertConsumed();
+            if ($key !== null && $fields === []) {
+                throw new SpecException($specKey, "{$specKey} changes nothing; give metadata, dependent, supplementary or required, or false to delete it");
+            }
+            $plans[] = ['name' => $name, 'key' => $key, 'remove' => false, 'fields' => $fields];
+        }
+        return $plans;
+    }
+
+    /**
+     * One "Components" grid action on the new context, run the way the grid
+     * runs it, with the request's context pointed at the scratch context
+     * (the form and the handler read it):
+     * - "Delete" (GenreGridHandler::deleteGenre): refused while a
+     *   submission file uses the component, else GenreDAO::deleteObject,
+     *   which disables the row (a soft delete).
+     * - "Edit" › "Save" and "Add Component" › "Save" (updateGenre →
+     *   GenreForm::execute): the form initialised as the window opens
+     *   (initData from the stored component; a new one empty), the fields
+     *   the window posts set — a new component's name in the primary locale
+     *   and an empty box for each other form locale, "File Metadata" at its
+     *   first option (Document) unless set, unticked boxes absent, "Require
+     *   with Submissions" at "No", an empty "Key" — then execute. Not
+     *   mirrored: the form's POST and CSRF checks (the request's).
+     *
+     * @return array{id: int, name: string, action: string}
+     */
+    protected function applyComponent(Context $context, array $plan): array
+    {
+        $genreDao = DAORegistry::getDAO('GenreDAO'); /** @var \PKP\submission\GenreDAO $genreDao */
+        $restore = ContextFactory::forceRequestContext($context);
+        try {
+            $genre = $plan['key'] !== null ? $genreDao->getByKey($plan['key'], $context->getId()) : null;
+            if ($plan['key'] !== null && !$genre) {
+                throw new SpecException("components.{$plan['name']}", "The new context has no component \"{$plan['name']}\"");
+            }
+            if ($plan['remove']) {
+                $inUse = Repo::submissionFile()->getCollector()->filterByGenreIds([$genre->getId()])->getCount();
+                if ($inUse) {
+                    throw new SpecException("components.{$plan['name']}", __('manager.genres.alertDelete'));
+                }
+                $genreDao->deleteObject($genre);
+                return ['id' => (int) $genre->getId(), 'name' => $plan['name'], 'action' => 'removed'];
+            }
+            $form = new \PKP\controllers\grid\settings\genre\form\GenreForm($genre ? $genre->getId() : null);
+            $form->initData(['gridId' => 'grid-settings-genre-genregrid']);
+            if (!$genre) {
+                $names = [];
+                foreach ((array) $context->getSupportedFormLocales() as $formLocale) {
+                    $names[$formLocale] = '';
+                }
+                $names[$context->getPrimaryLocale()] = $plan['name'];
+                $form->setData('name', $names);
+                $form->setData('category', \PKP\submission\Genre::GENRE_CATEGORY_DOCUMENT);
+                $form->setData('required', 0);
+                $form->setData('key', '');
+            }
+            foreach ($plan['fields'] as $field => $value) {
+                $form->setData($field, $field === 'required' ? (int) $value : ($value ?: null));
+            }
+            $form->execute();
+            return ['id' => (int) $form->getGenreId(), 'name' => $plan['name'], 'action' => $genre ? 'edited' : 'added'];
+        } finally {
+            $restore();
+        }
     }
 
     /**

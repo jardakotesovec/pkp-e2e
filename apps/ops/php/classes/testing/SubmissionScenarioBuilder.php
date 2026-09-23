@@ -60,6 +60,12 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
         throw new SpecException('reviewRounds', 'OPS has no review stage — reviewRounds cannot be seeded on this app');
     }
 
+    /** A preprint server shows no workflow file list (U36): files[] is refused, never dropped (PRINCIPLES D4). */
+    protected function assertFilesSupported(string $specKey): void
+    {
+        throw new SpecException($specKey, 'OPS shows no workflow file list (its submission wizard and Production stage manage galleys) — files cannot be seeded on this app; use galleys');
+    }
+
     protected function assertReviewerSuggestionsSupported(Spec $root): void
     {
         throw new SpecException('reviewerSuggestions', 'OPS mounts no reviewer-suggestions API and its wizard has no "Reviewer Suggestions" step — reviewerSuggestions cannot be seeded on this app');

@@ -262,6 +262,32 @@ Keys:
   and the Appearance "Sidebar" list lacks the block until a manager ticks
   the plugin. Every feed scenario therefore seeds the plugin on (U12
   harness, 2026-09-17).
+- `components`: Settings › Workflow › Submission › the "Components" tab
+  (its list "Article Components", "Monograph Components" on a press,
+  "Preprint Components" on a preprint server), a map from a component's
+  name to `false` or `{metadata?, dependent?, supplementary?, required?}`.
+  A name among the components every new context gets, as the list shows
+  it in the primary locale ("Article Text", "Research Instrument", …,
+  "Other"; a press's "Book Manuscript", "Glossary", …), is that row's
+  "Settings" › "Delete" with `false` (refused while a file uses it, as the
+  grid refuses; in the database the row is disabled, not dropped, and on
+  screen the Components list no longer shows it and no upload list offers
+  it) or its "Settings" ›
+  "Edit" › "Save" with an object; any other name is "Add a Component" ›
+  "Save" with the name in the primary locale. `metadata` is the window's
+  "File Metadata" list, `document`, `artwork` or `supplementary`
+  ("Supplementary Content"); `dependent` and `supplementary` its two "File
+  Type" boxes; `required` its "Require with Submissions" (`true` is "Yes,
+  require submitting authors to upload one or more of these files.").
+  Unset, an edit keeps the stored value and an added component gets the
+  window's own start: Document, both boxes unticked, "No", an empty
+  "Key". Both saves run the grid's own form, so the rows are the
+  screen's (U36 harness, 2026-09-23, three apps). An unknown name with
+  `false`, an edit that sets nothing, another word for `metadata` and a
+  non-boolean box are 400s. Parity fact: "Add a Component" saves the new
+  component at position 0, the first default's own position, so the list
+  and the upload lists show the two in no fixed order (the grid and the
+  wizard's list of one context differed; the same on screen and seeded).
 - `announcementTypes[]`: the "Announcement Types" tab's types, each
   `{name}` (localized, required in the primary locale), created the way the
   tab's "Add Announcement Type" window saves. `announcements[]`: the
@@ -293,7 +319,8 @@ Keys:
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
 `path`, the created `users` (id and username), `announcementTypes` (id and
-name) and `announcements` (id and title).
+name), `announcements` (id and title) and `components` (`id`, `name`,
+`action`: `added`, `edited` or `removed`, in the order seeded).
 
 ## `POST scenarios/submission`
 
@@ -320,8 +347,9 @@ Keys:
   (and OMP's `newInternalReviewRound`) creates its round but consumes no
   entry, so that round gets no reviewers, and every entry left after the
   decisions builds a further round of its own.
-- `reviewRounds[]`, each with `reviewers[]` of `{username, status,
-  reviewForm, recommendation, comments}` where `status` is `invited`
+- `reviewRounds[]`, each with `files[]` (see `files[]` below) and
+  `reviewers[]` of `{username, status, reviewForm, recommendation,
+  comments}` where `status` is `invited`
   (default), `accepted`, `declined` or `completed`, and `reviewForm` is the
   exact title of one of the context's active review forms (seeded through
   `reviewForms[]`), attached the way the reviewer row's "Edit" window
@@ -437,6 +465,38 @@ Keys:
   test must find by row in its own later call, or open it by its
   address `?commentId=N` (U14 claim check K3, 2026-09-16).
 
+- `files[]` (OJS, OMP): files on the Submission stage's "Submission
+  Files" list, each `{file, genre?, uploader?, note?}`. `file` is a
+  fixture basename, as for `galleys[]` below (`article.pdf`, `notes.md`,
+  `article.html` for an HTML file with "Dependent Files"); the list shows
+  the fixture's own name. `genre` is the component, by the name the
+  upload lists show ("Article Text", "Book Manuscript", "Other", …, or one
+  a `components` seed added); it must be one they offer (enabled, not a
+  dependent one such as "Image": that is offered only by "Upload a
+  Dependent File"), and it defaults to the first main-work component
+  ("Article Text", a press's "Book Manuscript"). `uploader` (default the
+  submitter) decides the path: the submitter's file is the submission
+  wizard's "Files" panel ("Add File", then the component's button),
+  uploaded before the submit, so a `submitted: false` draft carries it
+  too; anyone else's is the workflow's "Submission Files" › "Upload"
+  wizard after the submit, acting as that person, who must be offered it
+  (the site admin, a manager of the context, or a sub-editor or assistant
+  in this request's `participants[]`; anyone else, or any other uploader
+  on a draft, is a 400). `note` is a note on the file, the file's "More
+  Actions" › "More Information" › "Notes" › "Add Note", written by `admin`
+  (the Notes tab reads "admin admin" as its writer); a draft has no
+  "More Information", so a note there is a 400. Each
+  `reviewRounds[].files[]` entry, `{file, genre?}`, is a file on that
+  round's "Files for Review": "Upload/Select Files" › "Upload Review
+  File" by `admin`, then the window's "OK" with the new row ticked (the
+  file is marked viewable), before the round's reviewers are added; each
+  seeded reviewer is then given every file of the round, as the "Add
+  Reviewer" form's file list, all ticked, gives them, so the reviewer's
+  step 1 lists them under "Review Files". Every file is written as its
+  screen writes it (U36 harness, 2026-09-23, OJS and OMP driven), the
+  files' uploader aside: a round file's uploader and its log rows name
+  `admin`, where a screen upload names the editor. OPS answers 400 on
+  both: a preprint server shows no workflow file list.
 - `galleys[]` (OJS, OPS): galleys on the submission's current publication,
   each `{label, locale, file}` or `{label, locale, urlRemote}`, created the
   way the workflow's "Galleys" page creates them, after the decisions and
@@ -445,7 +505,10 @@ Keys:
   "Create New Galley" window's own rule); `locale` defaults to the
   submission's locale, the window's preselected language, and must be one
   the window's list offers (the context's submission locales); exactly one
-  of `file` or `urlRemote` is named (a 400 otherwise). `file` is a basename
+  of `file` or `urlRemote` is named (a 400 otherwise). A seeded galley's file reads
+  back only through the publication's "Preview" › galley link ›
+  "Download" (its suggested file name); the Galleys page shows only
+  "<label> <language>" (U36 K5, 2026-09-23). `file` is a basename
   under `apps/<app>/playwright/fixtures/files/` (`article.pdf` on OJS,
   `preprint.pdf` on OPS; `bin/mount.js` copies the folder into the
   checkout, so a new fixture needs a re-mount) and is stored as the
@@ -472,7 +535,8 @@ App-specific keys:
 - OPS: `section` (abbrev or path; defaults to the server's first section).
   `reviewRounds` is rejected with a 400, because OPS has no review stage,
   and so is `reviewerSuggestions`, because OPS mounts no reviewer
-  suggestions and its wizard has no such step.
+  suggestions and its wizard has no such step, and `files`, because a
+  preprint server shows no workflow file list.
 - OMP: `galleys` is rejected with a 400, because a press has publication
   formats and no "Galleys" page.
 
@@ -480,11 +544,13 @@ Facts tests rely on, all parity-checked against the UI path:
 
 - A submitted seed carries the same notifications the real submit endpoint
   creates, and the submitter is the publication's primary contact.
-- Seeded submissions carry no files, a `galleys[].file` proof file aside. A
-  test that needs "the author's
-  uploaded file" uploads it through the panel under test. The wizard's
-  required-genre check blocks a seeded draft's submit until a file is
-  uploaded. Review-round files are also grant-based; see `patterns.md`.
+- Seeded submissions carry no files unless `files[]` or
+  `reviewRounds[].files[]` names them (a `galleys[].file` proof file
+  aside). A test whose behavior under test is the upload itself uploads
+  through the panel under test. The wizard's required-genre check blocks a
+  seeded draft's submit until a file of the required component is on it.
+  Review-round files are also grant-based; see `patterns.md`: a reviewer
+  seeded on a round before the file existed is not given it.
 - A real wizard submit auto-assigns the section's editors on
   `publicknowledge` only (the install's first context; a scratch context
   gets none, `seed-facts.md`), so `participants` on a submitted seed is
@@ -531,8 +597,10 @@ The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`),
 `reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`),
 `userComments[]` (`id`, `user`, `approved`, `reports[]` of report ids, in
-the order seeded) and `galleys[]` (`id`, `label`, `submissionFileId`, null
-for a remote galley). `stageId`
+the order seeded), `galleys[]` (`id`, `label`, `submissionFileId`, null
+for a remote galley) and `files[]` (`submissionFileId`, `file`,
+`fileStage`, `reviewRoundId`, null on "Submission Files", and `uploader`;
+the root entries in order, then each round's). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
@@ -584,10 +652,10 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   (the author's "Upload" is refused on a round where revisions were not
   requested, U30); `reviewRounds[].reviewers[].status: 'complete'` (the
   editor-confirmed "Mark as Complete" state the minimum-reviews count needs;
-  `completed` is the reviewer's submit, U34); `files[]` (the Submission
-  stage's files: seeded submissions carry none, so a copyediting,
-  production or decision drive uploads through "Upload/Select Files" first,
-  U32); `commentsForEditor`; `metrics` (OJS only: `views?`,
+  `completed` is the reviewer's submit, U34); `files[].list` (a file on
+  a later list, "Draft Files", "Copyedited Files" or "Production Ready
+  Files": `files[]` seeds "Submission Files" and a round's "Files for
+  Review" only, U36); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
 - Publication: `metadata.datePublished` (without it, publish stamps today);
   `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
@@ -641,7 +709,8 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   `skipExternalReview` seed (or an on-screen "Accept and Skip Review")
   never shows it, so a notice scenario seeds `accept`. The box is read by
   its level-3 "Notification" heading, not by a `notices` selector. Seeded
-  submissions carry no files, so a copyediting decision or list scenario
+  submissions carry no Copyediting files (`files[]` seeds "Submission
+  Files" only), so a copyediting decision or list scenario
   uploads through the lists' own "Upload/Select Files" window or the
   Submission stage's "Upload" first. U32 claim check, 2026-09-18/19.
 - The Production notice ("Assign a user to create galleys using the Assign

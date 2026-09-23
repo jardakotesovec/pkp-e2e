@@ -18,6 +18,7 @@
 namespace APP\testing;
 
 use PKP\context\Context;
+use PKP\notification\Notification;
 use PKP\testing\PKPSubmissionScenarioBuilder;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
@@ -63,6 +64,18 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
     protected function assertGalleysSupported(Spec $root): void
     {
         throw new SpecException('galleys', 'OMP has publication formats, not galleys — galleys cannot be seeded on this app (no "Galleys" page exists)');
+    }
+
+    /**
+     * OMP's ManageFileApiHandler::getUpdateNotifications adds the internal
+     * review's "revisions pending" notice to the lib/pkp one (U36).
+     */
+    protected function fileMetadataNoticeTypes(): array
+    {
+        return [
+            Notification::NOTIFICATION_TYPE_PENDING_EXTERNAL_REVISIONS,
+            Notification::NOTIFICATION_TYPE_PENDING_INTERNAL_REVISIONS,
+        ];
     }
 
     protected function reviewStageIdForRound(Spec $roundSpec): int

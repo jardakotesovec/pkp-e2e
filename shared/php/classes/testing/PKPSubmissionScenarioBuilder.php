@@ -114,6 +114,36 @@
  *   the genre is the first the wizard's list offers (the context's first
  *   non-dependent genre, "Article Text"). `urlRemote` seeds the window's
  *   "Remotely hosted content" galley with no file (the wizard cancelled).
+ * - files[] {file*, genre?, uploader?, note?} and reviewRounds[].files[]
+ *   {file*, genre?} — submission files (U36), OJS and OMP only (a preprint
+ *   server shows no workflow file list, so OPS refuses both). A root entry
+ *   is a file on the Submission stage's "Submission Files" list. Uploaded
+ *   by the submitter (the default), it is the submission wizard's "Files"
+ *   panel upload, before the submit and as the submitter: the step for step
+ *   of POST submissions/{id}/files (PKPSubmissionFileController::add:
+ *   the file service's add, Repo::submissionFile()->validate and ->add at
+ *   SUBMISSION_FILE_SUBMISSION, the name the uploaded file's own) and the
+ *   panel's component choice (PUT submissions/{id}/files/{fileId}
+ *   {genreId}: validate, ->edit). Uploaded by anyone else (a manager, the
+ *   site admin, or a sub-editor or assistant seeded in participants[]), it
+ *   is the workflow's "Upload" on "Submission Files" after the submit,
+ *   acting as that user: the upload wizard's step 1
+ *   (SubmissionFilesUploadForm::execute) and step 2
+ *   (PKPManageFileApiHandler::saveMetadata), as galleys[] runs them. `note`
+ *   is the file's "More Information" › "Notes" › "Add Note", posted by the
+ *   acting editor (admin): NewFileNoteForm::execute and the handler's own
+ *   notePosted event-log row (FileInformationCenterHandler::_logEvent). A
+ *   round entry is the "Files for Review" list's "Upload/Select Files" ›
+ *   "Upload Review File", acting as the editor, into the round before its
+ *   reviewers are added, then that window's "OK" with the uploaded rows
+ *   ticked (ManageReviewFilesForm::execute, which marks them viewable),
+ *   and every seeded reviewer of the round is granted the round's
+ *   files the way the Add Reviewer form's file list (all ticked by
+ *   default, LimitReviewFilesGridHandler::isDataElementSelected) grants
+ *   them (ReviewerForm::execute → ReviewFilesDAO::grant). `file` is a
+ *   fixture basename, as for galleys[]; `genre` the name of one of the
+ *   components the upload lists offer (enabled, not dependent), default
+ *   the first main-work one ("Article Text", "Book Manuscript").
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -202,6 +232,21 @@ abstract class PKPSubmissionScenarioBuilder
     /** OMP overrides to reject galleys (a press has publication formats, no "Galleys" page). */
     protected function assertGalleysSupported(Spec $root): void
     {
+    }
+
+    /** OPS overrides to reject submission files (no workflow file list on a preprint server). */
+    protected function assertFilesSupported(string $specKey): void
+    {
+    }
+
+    /**
+     * The notice types the upload wizard's "Review Details" save recomputes
+     * for the authors (PKPManageFileApiHandler::getUpdateNotifications; OMP's
+     * ManageFileApiHandler adds the internal-review one).
+     */
+    protected function fileMetadataNoticeTypes(): array
+    {
+        return [Notification::NOTIFICATION_TYPE_PENDING_EXTERNAL_REVISIONS];
     }
 
     /**
@@ -316,9 +361,20 @@ abstract class PKPSubmissionScenarioBuilder
                     'comments' => $comments,
                 ];
             }
+            $roundFiles = [];
+            if ($roundSpec->has('files')) {
+                $this->assertFilesSupported("{$roundSpec->path}.files");
+                foreach ($roundSpec->childList('files') as $fileSpec) {
+                    $roundFiles[] = [
+                        'fixture' => $this->resolveFixture((string) $fileSpec->require('file'), "{$fileSpec->path}.file"),
+                        'genreId' => $this->resolveUploadGenreId($context, $fileSpec),
+                    ];
+                }
+            }
             $roundPlans[] = [
                 'stageId' => $this->reviewStageIdForRound($roundSpec),
                 'reviewers' => $reviewers,
+                'files' => $roundFiles,
             ];
         }
 
@@ -390,6 +446,7 @@ abstract class PKPSubmissionScenarioBuilder
         $publishOverlayPlan = $this->parsePublishOverlay($context, $root);
         $commentPlans = $this->parseUserComments($root, $published);
         $galleyPlans = $this->parseGalleys($context, $root, $locale);
+        $filePlans = $this->parseFiles($context, $root, $submitter, $submitted, $participantPlans);
         $root->assertConsumed();
 
         if ($published && !$submitted) {
@@ -405,7 +462,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans);
         } finally {
             $restoreRouterContext();
         }
@@ -430,12 +487,14 @@ abstract class PKPSubmissionScenarioBuilder
         array $participantPlans = [],
         array $suggestionPlans = [],
         array $commentPlans = [],
-        array $galleyPlans = []
+        array $galleyPlans = [],
+        array $filePlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
         $seededComments = [];
         $seededGalleys = [];
+        $seededFiles = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -523,6 +582,13 @@ abstract class PKPSubmissionScenarioBuilder
                 ];
             }
 
+            // The wizard's "Files" panel, as the submitter, before submit.
+            foreach ($filePlans as $i => $plan) {
+                if ($plan['byWizard']) {
+                    $filePlans[$i]['submissionFileId'] = $this->uploadThroughSubmissionWizard($context, $submissionId, $submitter, $plan['fixture'], $plan['genreId']);
+                }
+            }
+
             if ($submitted) {
                 $submission = Repo::submission()->get($submissionId);
                 Repo::submission()->submit($submission, $context);
@@ -558,8 +624,38 @@ abstract class PKPSubmissionScenarioBuilder
             );
         }
 
-        // Decisions + review rounds, acting as the editor (admin).
+        // "Submission Files" › "Upload" by the team, after the submit and
+        // before any decision (the Submission stage's list), then each
+        // file's "More Information" › "Add Note", by the acting editor.
         $editor = $this->actingEditor();
+        foreach ($filePlans as $i => $plan) {
+            if (!$plan['byWizard']) {
+                $filePlans[$i]['submissionFileId'] = $this->uploadThroughWizard(
+                    $context,
+                    $submissionId,
+                    $plan['uploader'],
+                    $plan['fixture'],
+                    SubmissionFile::SUBMISSION_FILE_SUBMISSION,
+                    null,
+                    null,
+                    $plan['genreId']
+                );
+            }
+        }
+        foreach ($filePlans as $plan) {
+            if ($plan['note'] !== null) {
+                $this->addFileNote($plan['submissionFileId'], $plan['note'], $editor);
+            }
+            $seededFiles[] = [
+                'submissionFileId' => $plan['submissionFileId'],
+                'file' => $plan['fixture']['file'],
+                'fileStage' => SubmissionFile::SUBMISSION_FILE_SUBMISSION,
+                'reviewRoundId' => null,
+                'uploader' => $plan['uploader']->getUsername(),
+            ];
+        }
+
+        // Decisions + review rounds, acting as the editor (admin).
         $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO'); /** @var \PKP\submission\reviewRound\ReviewRoundDAO $reviewRoundDao */
         $roundIndex = 0;
         $seededAssignments = [];
@@ -588,6 +684,7 @@ abstract class PKPSubmissionScenarioBuilder
                 if (in_array($newStageId, [WORKFLOW_STAGE_ID_INTERNAL_REVIEW, WORKFLOW_STAGE_ID_EXTERNAL_REVIEW]) && $roundIndex < count($roundPlans)) {
                     $round = $reviewRoundDao->getLastReviewRoundBySubmissionId($submissionId, $newStageId);
                     if ($round) {
+                        $seededFiles = array_merge($seededFiles, $this->seedRoundFiles($context, $submissionId, $round, $roundPlans[$roundIndex]['files'], $editor));
                         $seededAssignments = array_merge(
                             $seededAssignments,
                             $this->seedRoundReviewers($context, $submissionId, $round, $roundPlans[$roundIndex]['reviewers'])
@@ -634,6 +731,7 @@ abstract class PKPSubmissionScenarioBuilder
                         $round->getId()
                     );
                 }
+                $seededFiles = array_merge($seededFiles, $this->seedRoundFiles($context, $submissionId, $round, $plan['files'], $editor));
                 $seededAssignments = array_merge(
                     $seededAssignments,
                     $this->seedRoundReviewers($context, $submissionId, $round, $plan['reviewers'])
@@ -714,6 +812,7 @@ abstract class PKPSubmissionScenarioBuilder
             'reviewerSuggestions' => $seededSuggestions,
             'userComments' => $seededComments,
             'galleys' => $seededGalleys,
+            'files' => $seededFiles,
         ];
     }
 
@@ -736,7 +835,6 @@ abstract class PKPSubmissionScenarioBuilder
         }
         $this->assertGalleysSupported($root);
         $offeredLocales = array_unique(array_merge([$submissionLocale], (array) $context->getSupportedSubmissionLocales()));
-        $fixtureDir = Core::getBaseDir() . '/classes/testing/fixtures';
         $plans = [];
         foreach ($root->childList('galleys') as $spec) {
             $label = $spec->require('label');
@@ -756,14 +854,7 @@ abstract class PKPSubmissionScenarioBuilder
             $path = null;
             $urlRemote = null;
             if ($hasFile) {
-                $file = (string) $spec->get('file');
-                if ($file === '' || $file !== basename($file)) {
-                    throw new SpecException("{$spec->path}.file", 'file is a basename under apps/<app>/playwright/fixtures/files/, no directory part');
-                }
-                $path = "{$fixtureDir}/{$file}";
-                if (!is_file($path)) {
-                    throw new SpecException("{$spec->path}.file", "No fixture \"{$file}\" under {$fixtureDir} (bin/mount.js copies apps/<app>/playwright/fixtures/files/ there; re-run npm run mount)");
-                }
+                ['file' => $file, 'path' => $path] = $this->resolveFixture((string) $spec->get('file'), "{$spec->path}.file");
             } else {
                 $urlRemote = (string) $spec->get('urlRemote');
                 if (trim($urlRemote) === '') {
@@ -820,56 +911,17 @@ abstract class PKPSubmissionScenarioBuilder
 
             $submissionFileId = null;
             if ($plan['path'] !== null) {
-                // "Upload a File Ready for Publication" › step 1
-                // (SubmissionFilesUploadForm::execute).
-                $fileManager = new FileManager();
-                $extension = $fileManager->parseFileExtension($plan['file']);
-                $submissionDir = Repo::submissionFile()->getSubmissionDir($context->getId(), $submissionId);
-                $fileId = app()->get('file')->add($plan['path'], $submissionDir . '/' . uniqid() . '.' . $extension);
-
-                $submissionFile = Repo::submissionFile()->dao->newDataObject();
-                $submissionFile->setData('fileId', $fileId);
-                $submissionFile->setData('fileStage', SubmissionFile::SUBMISSION_FILE_PROOF);
-                $submissionFile->setData('name', $plan['file'], $submission->getData('locale'));
-                $submissionFile->setData('submissionId', $submissionId);
-                $submissionFile->setData('uploaderUserId', $editor->getId());
-                $submissionFile->setData('assocType', Application::ASSOC_TYPE_REPRESENTATION);
-                $submissionFile->setData('assocId', $galleyId);
-                $submissionFile->setData('genreId', $this->defaultGalleyGenreId($context));
-                $submissionFileId = Repo::submissionFile()->add($submissionFile);
-
-                // Step 2 "Review Details" › Continue
-                // (PKPManageFileApiHandler::saveMetadata).
-                $submissionFile = Repo::submissionFile()->get($submissionFileId);
-                Repo::submissionFile()->edit($submissionFile, [
-                    'name' => [$submission->getData('locale') => $plan['file']],
-                    'caption' => null,
-                    'credit' => null,
-                    'copyrightOwner' => null,
-                    'terms' => null,
-                    'subject' => null,
-                    'creator' => null,
-                    'description' => null,
-                    'publisher' => null,
-                    'sponsor' => null,
-                    'source' => null,
-                    'language' => null,
-                    'dateCreated' => null,
-                ]);
-                $authorUserIds = StageAssignment::withSubmissionIds([$submissionId])
-                    ->withRoleIds([Role::ROLE_ID_AUTHOR])
-                    ->get()
-                    ->pluck('user_id')
-                    ->all();
-                $notificationMgr = new \APP\notification\NotificationManager();
-                $notificationMgr->updateNotification(
-                    $request,
-                    [Notification::NOTIFICATION_TYPE_PENDING_EXTERNAL_REVISIONS],
-                    $authorUserIds,
-                    Application::ASSOC_TYPE_SUBMISSION,
-                    $submissionId
+                // "Upload a File Ready for Publication": the upload wizard.
+                $submissionFileId = $this->uploadThroughWizard(
+                    $context,
+                    $submissionId,
+                    $editor,
+                    ['file' => $plan['file'], 'path' => $plan['path']],
+                    SubmissionFile::SUBMISSION_FILE_PROOF,
+                    Application::ASSOC_TYPE_REPRESENTATION,
+                    $galleyId,
+                    $this->defaultGalleyGenreId($context)
                 );
-                event(new MetadataChanged(Repo::submission()->get($submissionId)));
             }
 
             $seeded[] = [
@@ -879,6 +931,358 @@ abstract class PKPSubmissionScenarioBuilder
             ];
         }
         return $seeded;
+    }
+
+    /**
+     * A fixture basename under apps/<app>/playwright/fixtures/files/, which
+     * bin/mount.js copies to classes/testing/fixtures/ in the checkout.
+     *
+     * @return array{file: string, path: string}
+     */
+    protected function resolveFixture(string $file, string $specKey): array
+    {
+        $fixtureDir = Core::getBaseDir() . '/classes/testing/fixtures';
+        if ($file === '' || $file !== basename($file)) {
+            throw new SpecException($specKey, 'file is a basename under apps/<app>/playwright/fixtures/files/, no directory part');
+        }
+        $path = "{$fixtureDir}/{$file}";
+        if (!is_file($path)) {
+            throw new SpecException($specKey, "No fixture \"{$file}\" under {$fixtureDir} (bin/mount.js copies apps/<app>/playwright/fixtures/files/ there; re-run npm run mount)");
+        }
+        return ['file' => $file, 'path' => $path];
+    }
+
+    /**
+     * The upload wizard (FileUploadWizardHandler), acting as the uploader:
+     * step 1 "Upload File" (SubmissionFilesUploadForm::execute: the file
+     * service's add into the submission's directory, a new SubmissionFile
+     * named after the uploaded file, of the chosen component, on the list's
+     * file stage and assoc — a review round is the wizard's reviewRoundId)
+     * and step 2 "Review Details" › Continue
+     * (PKPManageFileApiHandler::saveMetadata: SubmissionFilesMetadataForm::
+     * execute → Repo::submissionFile()->edit with the name and the empty
+     * artwork and supplementary boxes, the authors' notice recompute and the
+     * MetadataChanged event; its "revisions requested" clean-up needs a
+     * review round the handler never authorizes, so it never runs). Step 3
+     * writes nothing.
+     *
+     * @param array{file: string, path: string} $fixture
+     */
+    protected function uploadThroughWizard(Context $context, int $submissionId, User $uploader, array $fixture, int $fileStage, ?int $assocType, ?int $assocId, int $genreId): int
+    {
+        $request = Application::get()->getRequest();
+        $previousActingUser = Registry::get('user');
+        Registry::set('user', $uploader);
+        try {
+            $submission = Repo::submission()->get($submissionId);
+            $fileManager = new FileManager();
+            $extension = $fileManager->parseFileExtension($fixture['file']);
+            $submissionDir = Repo::submissionFile()->getSubmissionDir($context->getId(), $submissionId);
+            $fileId = app()->get('file')->add($fixture['path'], $submissionDir . '/' . uniqid() . '.' . $extension);
+
+            $submissionFile = Repo::submissionFile()->dao->newDataObject();
+            $submissionFile->setData('fileId', $fileId);
+            $submissionFile->setData('fileStage', $fileStage);
+            $submissionFile->setData('name', $fixture['file'], $submission->getData('locale'));
+            $submissionFile->setData('submissionId', $submissionId);
+            $submissionFile->setData('uploaderUserId', $uploader->getId());
+            $submissionFile->setData('assocType', $assocType);
+            $submissionFile->setData('assocId', $assocId);
+            $submissionFile->setData('genreId', $genreId);
+            $submissionFileId = Repo::submissionFile()->add($submissionFile);
+
+            $submissionFile = Repo::submissionFile()->get($submissionFileId);
+            Repo::submissionFile()->edit($submissionFile, [
+                'name' => [$submission->getData('locale') => $fixture['file']],
+                'caption' => null,
+                'credit' => null,
+                'copyrightOwner' => null,
+                'terms' => null,
+                'subject' => null,
+                'creator' => null,
+                'description' => null,
+                'publisher' => null,
+                'sponsor' => null,
+                'source' => null,
+                'language' => null,
+                'dateCreated' => null,
+            ]);
+            $submitterAssignments = StageAssignment::withSubmissionIds([$submissionId])
+                ->withRoleIds([Role::ROLE_ID_AUTHOR])
+                ->get();
+            $notificationMgr = new \APP\notification\NotificationManager();
+            $notificationMgr->updateNotification(
+                $request,
+                $this->fileMetadataNoticeTypes(),
+                $submitterAssignments->pluck('user_id')->all(),
+                Application::ASSOC_TYPE_SUBMISSION,
+                $submissionId
+            );
+            event(new MetadataChanged(Repo::submission()->get($submissionId)));
+            return $submissionFileId;
+        } finally {
+            Registry::set('user', $previousActingUser);
+        }
+    }
+
+    /**
+     * The submission wizard's "Files" panel, acting as the submitter (the
+     * caller's acting user): the upload is POST submissions/{id}/files
+     * (PKPSubmissionFileController::add, step for step: the file service's
+     * add, the name the uploaded file's own, the lone-genre default, the
+     * repository's validate against the context's submission metadata
+     * locales, then add), and the panel's component choice is PUT
+     * submissions/{id}/files/{fileId} {genreId}
+     * (PKPSubmissionFileController::edit: validate, then edit).
+     *
+     * @param array{file: string, path: string} $fixture
+     */
+    protected function uploadThroughSubmissionWizard(Context $context, int $submissionId, User $submitter, array $fixture, int $genreId): int
+    {
+        $submission = Repo::submission()->get($submissionId);
+        $submissionLocale = $submission->getData('locale');
+        $allowedLocales = $context->getSupportedSubmissionMetadataLocales();
+
+        $fileManager = new FileManager();
+        $extension = $fileManager->parseFileExtension($fixture['file']);
+        $submissionDir = Repo::submissionFile()->getSubmissionDir($context->getId(), $submissionId);
+        $fileId = app()->get('file')->add($fixture['path'], $submissionDir . '/' . uniqid() . '.' . $extension);
+
+        $params = [
+            'fileStage' => SubmissionFile::SUBMISSION_FILE_SUBMISSION,
+            'fileId' => $fileId,
+            'submissionId' => $submissionId,
+            'uploaderUserId' => (int) $submitter->getId(),
+            'name' => [$submissionLocale => $fixture['file']],
+        ];
+        $genreDao = DAORegistry::getDAO('GenreDAO'); /** @var \PKP\submission\GenreDAO $genreDao */
+        $genres = $genreDao->getEnabledByContextId($context->getId());
+        [$firstGenre, $secondGenre] = [$genres->next(), $genres->next()];
+        if ($firstGenre && !$secondGenre) {
+            $params['genreId'] = $firstGenre->getId();
+        }
+        $errors = Repo::submissionFile()->validate(null, $params, $allowedLocales, $submissionLocale);
+        if (!empty($errors)) {
+            app()->get('file')->delete($fileId);
+            throw new SpecException('files', 'The "Files" panel\'s upload would be refused: ' . json_encode($errors));
+        }
+        $submissionFileId = Repo::submissionFile()->add(Repo::submissionFile()->newDataObject($params));
+
+        if ((int) ($params['genreId'] ?? 0) !== $genreId) {
+            $submissionFile = Repo::submissionFile()->get($submissionFileId);
+            $edit = ['genreId' => $genreId];
+            $errors = Repo::submissionFile()->validate($submissionFile, $edit, $allowedLocales, $submissionLocale);
+            if (!empty($errors)) {
+                throw new SpecException('files', 'The "Files" panel\'s component choice would be refused: ' . json_encode($errors));
+            }
+            Repo::submissionFile()->edit($submissionFile, $edit);
+        }
+        return $submissionFileId;
+    }
+
+    /**
+     * Upload the parsed round files into the round, acting as the editor,
+     * the way "Files for Review" › "Upload/Select Files" › "Upload Review
+     * File" does: the upload wizard on the stage's review-file stage with
+     * the round as its assoc (the submission-file DAO writes the
+     * review_round_files row), then the window's "OK" over the ticked rows.
+     *
+     * @return array<int, array{submissionFileId: int, file: string, fileStage: int, reviewRoundId: int, uploader: string}>
+     */
+    protected function seedRoundFiles(Context $context, int $submissionId, ReviewRound $round, array $plans, User $editor): array
+    {
+        $fileStage = (int) $round->getStageId() === WORKFLOW_STAGE_ID_INTERNAL_REVIEW
+            ? SubmissionFile::SUBMISSION_FILE_INTERNAL_REVIEW_FILE
+            : SubmissionFile::SUBMISSION_FILE_REVIEW_FILE;
+        $seeded = [];
+        foreach ($plans as $plan) {
+            $submissionFileId = $this->uploadThroughWizard(
+                $context,
+                $submissionId,
+                $editor,
+                $plan['fixture'],
+                $fileStage,
+                Application::ASSOC_TYPE_REVIEW_ROUND,
+                $round->getId(),
+                $plan['genreId']
+            );
+            $seeded[] = [
+                'submissionFileId' => $submissionFileId,
+                'file' => $plan['fixture']['file'],
+                'fileStage' => $fileStage,
+                'reviewRoundId' => (int) $round->getId(),
+                'uploader' => $editor->getUsername(),
+            ];
+        }
+        if ($seeded !== []) {
+            // The window's "OK" with every uploaded row ticked (an upload
+            // lands unticked, so the user ticks it): ManageReviewFilesForm::
+            // execute over the grid's rows, the round's review files, which
+            // marks each viewable (a Repo edit and its fileEdited rows).
+            $roundFiles = Repo::submissionFile()
+                ->getCollector()
+                ->filterBySubmissionIds([$submissionId])
+                ->filterByReviewRoundIds([$round->getId()])
+                ->filterByFileStages([$fileStage])
+                ->getMany();
+            $stageSubmissionFiles = [];
+            foreach ($roundFiles as $roundFile) {
+                $stageSubmissionFiles[$roundFile->getId()] = ['submissionFile' => $roundFile];
+            }
+            $previousActingUser = Registry::get('user');
+            Registry::set('user', $editor);
+            try {
+                $form = new \PKP\controllers\grid\files\review\form\ManageReviewFilesForm($submissionId, $round->getStageId(), $round->getId());
+                $form->setData('selectedFiles', array_keys($stageSubmissionFiles));
+                $form->execute($stageSubmissionFiles);
+            } finally {
+                Registry::set('user', $previousActingUser);
+            }
+        }
+        return $seeded;
+    }
+
+    /**
+     * "More Information" › "Notes" › "Add Note" on a file, acting as the
+     * writer: FileInformationCenterHandler::saveNote's NewFileNoteForm::
+     * execute (the note row, the textarea's text as typed) and its
+     * notePosted event-log row (the handler's own _logEvent). Not mirrored:
+     * the "Note posted." toast for the acting user.
+     */
+    protected function addFileNote(int $submissionFileId, string $text, User $writer): void
+    {
+        $request = Application::get()->getRequest();
+        $previousActingUser = Registry::get('user');
+        Registry::set('user', $writer);
+        try {
+            $form = new \PKP\controllers\informationCenter\form\NewFileNoteForm($submissionFileId);
+            $form->setData('newNote', $text);
+            $form->execute();
+            $handler = new \PKP\controllers\informationCenter\FileInformationCenterHandler();
+            $handler->_logEvent(
+                $request,
+                Repo::submissionFile()->get($submissionFileId),
+                \PKP\log\event\EventLogEntry::SUBMISSION_LOG_NOTE_POSTED,
+                Application::ASSOC_TYPE_SUBMISSION_FILE
+            );
+        } finally {
+            Registry::set('user', $previousActingUser);
+        }
+    }
+
+    /**
+     * Read files[] (U36): files on the "Submission Files" list. Parse-phase:
+     * no writes. The screens' reach is the seed's: a file uploaded by the
+     * submitter is the wizard's (so allowed on a draft); anyone else uploads
+     * through the workflow, which exists only once the submission is
+     * submitted, and must be someone the "Upload" is offered to there (the
+     * site admin, a manager of the context, or a sub-editor or assistant
+     * assigned in this request's participants[]). A note needs the
+     * workflow's "More Information", so a submitted submission.
+     *
+     * @param array<int, array{user: User, userGroup: UserGroup}> $participantPlans
+     * @return array<int, array{fixture: array, genreId: int, uploader: User, byWizard: bool, note: ?string, submissionFileId: ?int}>
+     */
+    protected function parseFiles(Context $context, Spec $root, User $submitter, bool $submitted, array $participantPlans): array
+    {
+        if (!$root->has('files')) {
+            return [];
+        }
+        $this->assertFilesSupported('files');
+        $plans = [];
+        foreach ($root->childList('files') as $spec) {
+            $fixture = $this->resolveFixture((string) $spec->require('file'), "{$spec->path}.file");
+            $genreId = $this->resolveUploadGenreId($context, $spec);
+            $uploader = $submitter;
+            if ($spec->has('uploader')) {
+                $username = (string) $spec->get('uploader');
+                $uploader = Repo::user()->getByUsername($username, true);
+                if (!$uploader) {
+                    throw new SpecException("{$spec->path}.uploader", "Unknown uploader username \"{$username}\"");
+                }
+            }
+            $byWizard = $uploader->getId() === $submitter->getId();
+            if (!$byWizard) {
+                if (!$submitted) {
+                    throw new SpecException("{$spec->path}.uploader", 'Only the submitter uploads to a draft (the wizard\'s "Files" panel); anyone else uploads on the workflow, which a draft does not have');
+                }
+                if (!$this->mayUploadOnWorkflow($context, $uploader, $participantPlans)) {
+                    throw new SpecException("{$spec->path}.uploader", "\"{$uploader->getUsername()}\" is offered no \"Upload\" on \"Submission Files\": the uploader must be the submitter, the site admin, a manager of the context, or a sub-editor or assistant assigned in participants[]");
+                }
+            }
+            $note = null;
+            if ($spec->has('note')) {
+                $note = $spec->get('note');
+                if (!is_string($note) || trim($note) === '') {
+                    throw new SpecException("{$spec->path}.note", 'note must be a non-empty string (the "Add Note" box\'s text)');
+                }
+                if (!$submitted) {
+                    throw new SpecException("{$spec->path}.note", 'A note is added in the workflow\'s "More Information" window, which a draft does not have');
+                }
+            }
+            $plans[] = [
+                'fixture' => $fixture,
+                'genreId' => $genreId,
+                'uploader' => $uploader,
+                'byWizard' => $byWizard,
+                'note' => $note,
+                'submissionFileId' => null,
+            ];
+        }
+        return $plans;
+    }
+
+    /** Whether the workflow's "Submission Files" list offers this user "Upload". */
+    protected function mayUploadOnWorkflow(Context $context, User $user, array $participantPlans): bool
+    {
+        if ($user->hasRole([Role::ROLE_ID_SITE_ADMIN], \PKP\core\PKPApplication::SITE_CONTEXT_ID)
+            || $user->hasRole([Role::ROLE_ID_MANAGER], $context->getId())) {
+            return true;
+        }
+        foreach ($participantPlans as $plan) {
+            if ($plan['user']->getId() === $user->getId()
+                && in_array((int) $plan['userGroup']->roleId, [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT], true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * An entry's `genre`: the name (any locale) of one of the components the
+     * upload lists offer — the context's enabled, non-dependent genres, the
+     * list of the upload wizard's "Article Component" and of the submission
+     * wizard's "What kind of file is this?" (GenreDAO::
+     * getByDependenceAndContextId(false)); absent, the first main-work one. A
+     * dependent component is offered only by the "Upload a Dependent File"
+     * wizard, so it is refused.
+     */
+    protected function resolveUploadGenreId(Context $context, Spec $spec): int
+    {
+        $genreDao = DAORegistry::getDAO('GenreDAO'); /** @var \PKP\submission\GenreDAO $genreDao */
+        if (!$spec->has('genre')) {
+            // The first main-work component (neither dependent nor
+            // supplementary: "Article Text", "Book Manuscript"), the first
+            // button the wizard's "Files" panel offers; else the first the
+            // upload lists offer.
+            $genres = $genreDao->getByDependenceAndContextId(false, $context->getId());
+            while ($genre = $genres->next()) {
+                if (!$genre->getSupplementary()) {
+                    return (int) $genre->getId();
+                }
+            }
+            return $this->defaultGalleyGenreId($context);
+        }
+        $name = (string) $spec->get('genre');
+        $genres = $genreDao->getByDependenceAndContextId(false, $context->getId());
+        $names = [];
+        while ($genre = $genres->next()) {
+            if (in_array($name, (array) $genre->getName(null), true)) {
+                return (int) $genre->getId();
+            }
+            $names[] = $genre->getLocalizedName();
+        }
+        throw new SpecException("{$spec->path}.genre", "No component \"{$name}\" among those the upload lists offer in \"{$context->getPath()}\": " . implode(', ', array_map(fn ($n) => "\"{$n}\"", $names)));
     }
 
     /**
@@ -1180,6 +1584,16 @@ abstract class PKPSubmissionScenarioBuilder
         $reviewFormDao = DAORegistry::getDAO('ReviewFormDAO'); /** @var \PKP\reviewForm\ReviewFormDAO $reviewFormDao */
         $reviewForm = $reviewFormDao->getById($reviewFormId, Application::getContextAssocType(), $context->getId());
 
+        // The round's files the Add Reviewer form lists (ReviewerForm::
+        // execute: the review-file stage of the round's stage).
+        $roundFiles = Repo::submissionFile()
+            ->getCollector()
+            ->filterBySubmissionIds([$submissionId])
+            ->filterByReviewRoundIds([$round->getId()])
+            ->filterByFileStages([(int) $round->getStageId() === WORKFLOW_STAGE_ID_INTERNAL_REVIEW ? SubmissionFile::SUBMISSION_FILE_INTERNAL_REVIEW_FILE : SubmissionFile::SUBMISSION_FILE_REVIEW_FILE])
+            ->getMany();
+        $reviewFilesDao = DAORegistry::getDAO('ReviewFilesDAO'); /** @var \PKP\submission\ReviewFilesDAO $reviewFilesDao */
+
         foreach ($reviewers as $plan) {
             $reviewer = $plan['user'];
             $submission = Repo::submission()->get($submissionId);
@@ -1211,6 +1625,13 @@ abstract class PKPSubmissionScenarioBuilder
                 'reviewFormId' => $reviewForm ? $reviewFormId : null,
                 'considered' => ReviewAssignment::REVIEW_ASSIGNMENT_NEW,
             ]);
+
+            // The form's file list (the round's review files, every box
+            // ticked by default): ReviewerForm::execute grants each. A
+            // round seeded without files has none, so nothing is granted.
+            foreach ($roundFiles as $roundFile) {
+                $reviewFilesDao->grant($assignment->getId(), $roundFile->getId());
+            }
 
             if ($plan['reviewFormId'] !== null) {
                 // The reviewer row's "Edit" window (EditReviewForm::execute

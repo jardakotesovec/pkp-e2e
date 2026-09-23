@@ -173,10 +173,21 @@ behind a line; that scratch is deleted after review.
   Settings › Users & Roles › Users of the scratch context. Seen
   2026-08-25 on all three apps (U21 note on the needs-editor mail: "every
   Manager (including the auto-enrolled admin)").
-- Seeded submissions carry no files; a test uploads through the panel under
-  test. The submission's Submission Files panel. Parity check 2026-07-31
-  (`docs/tracking/parity-ledger.md`: `submission_files` 0 against the
-  wizard's 1; scenarios.md "POST scenarios/submission").
+- A seeded submission carries files only where `files[]` (OJS, OMP:
+  "Submission Files") or `reviewRounds[].files[]` (a round's "Files for
+  Review") names them, a galley's file aside; OPS refuses both (400). A
+  seeded author file shows on "Submission Files" under its fixture name
+  with its component. On a journal whose submission languages are English
+  and French every file form ("2. Review Details", "Edit a file") shows
+  the language tabs "French (Canada)" / "English" whatever the
+  submission's own languages. Workflow lists and the upload wizard,
+  scratch contexts, OJS and OMP, 2026-09-23 (`.reports/U36/cc-K1.md`,
+  `cc-K2.md`).
+- Deleting a submission file also deletes every copy made from it through
+  "Upload/Select Files" (a "Submission Files" original's copy in "Draft
+  Files"), with no Activity Log line for the copy; a probe that deletes an
+  original seeds a fresh submission for any later leg on the copy. OJS and
+  OMP, 2026-09-23 (`.reports/U36/cc-K1.md` K1-7).
 - The task and job runners are off (`[schedule] task_runner = Off`,
   `[queues] job_runner = Off` in `config.test.inc.php`, written by
   `shared/playwright/make-test-config.js`); nothing queued or scheduled
@@ -460,10 +471,17 @@ behind a line; that scratch is deleted after review.
   the round status box. Live-driven 2026-09-05, OJS and OMP
   (`.reports/U29-medium/cc-K1.md`).
 - A submission seeded `submitted: false` opens the author's wizard at
-  `submission?id=<id>`; every uploaded file needs its type chosen before
-  "Submit"; a Section Editor not assigned to a submission gets "Error" on
+  `submission?id=<id>`; a file left without a component does not stop
+  "Submit" (only a required component with no file does: "You must upload
+  at least one Article Text file."; the file then shows in "Submission
+  Files" with an empty "Type", U36 K4-8, 2026-09-23); a Section Editor not assigned to a submission gets "Error" on
   its workflow page. Live-driven 2026-09-05, OJS and OMP
   (`.reports/U29-medium/cc-K2.md`).
+- On the probe servers a 101 MiB file is refused in the submission
+  wizard's "Files" panel with "File is too big (101MiB). Max filesize:
+  100MiB."; a file of exactly 100 MiB fails on the server ("Invalid JSON
+  response from server."); 99 MiB uploads. OJS and OMP, 2026-09-23
+  (`.reports/U36/cc-K4.md` K4-5, K4-6).
 - The draft seeded `submitted: false` reopens on "Upload Files" with
   "Details" not yet reached (its inputs sit hidden in the DOM); "Continue"
   reaches it without a file. The submission scenario has no term keys

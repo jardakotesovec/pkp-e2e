@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **16 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **18 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -199,7 +199,9 @@ until their specs exist. Do not force-claim the defects themselves.
     `templates/controllers/grid/files/proof/manageProofFiles.tpl`, which
     only OMP's `PublicationFormatGridHandler` renders inside the
     publication-format window (outside the campaign per FEATURE-MAP's U46
-    note); on a journal or preprint server no screen reaches it.
+    note); on a journal or preprint server no screen reaches it. The
+    window's form, AFFW-612, is U36's atom and shares this verdict (the
+    submission-files spec's Reference table, 2026-09-23).
     Code-verified 2026-09-19 (checkouts as above). Resolves: out of scope on
     OMP; dead on OJS and OPS pending maintainer confirmation.
 13. **NOTIF-021..028 normal-level notices with no reader** — attached to
@@ -248,3 +250,31 @@ until their specs exist. Do not force-claim the defects themselves.
     `fetchTemplateBody`, which stay claimed. Code-verified 2026-09-22
     (checkouts as above). Resolves: maintainer confirmation as dead code
     (removal candidate for the rendering ops and the row class).
+17. **AFFW-599 proof-file "Edit Metadata" tabset unreachable outside OMP's
+    publication formats** — attached to **U36** (claimed; the
+    submission-files spec's Reference table documents the waiver).
+    `PKPManageFileApiHandler::editMetadata()` renders the
+    `editMetadata.tpl` tabset ("Edit Metadata", "Identifiers") only for a
+    proof file; the Vue file lists never hold proof files, the galley
+    rows (`GalleyManager`) offer no file-edit action, and the legacy
+    selection windows list no proof stage
+    (`SubmissionFilesCategoryGridDataProvider::_getFileStagesByStageId()`),
+    so on a journal or preprint server no screen opens it; OMP overrides
+    the op for its publication-format proof files (outside the campaign).
+    Code-verified 2026-09-23 (U36 spec author; checkouts ojs `38781720df`,
+    lib/pkp `f8bacd765`, ui-library `5d138aa9`). Resolves: out of scope on
+    OMP; dead on OJS and OPS pending maintainer confirmation.
+18. **AFFW-594 revision-only wizard with nothing to revise, liveness
+    unknown** — attached to **U36** (claimed; the submission-files spec's
+    Reference table notes it). The message "There are no files for you to
+    revise at this time." renders only for a `revisionOnly` upload with no
+    preset file and no revisable file. The only callers passing
+    `revisionOnly` without a preset file are `AddRevisionLinkAction`, built
+    by `PendingRevisionsNotificationManager::getNotificationContents()` and
+    the legacy `ReviewRevisionsGridDataProvider`; the header Tasks grid
+    shows the notice's message, not its contents
+    (`NotificationsGridCellProvider`), and the galley "Change File" always
+    presets the file. No current screen was found rendering that link.
+    Code read 2026-09-23 (U36 spec author; checkouts as above). Resolves:
+    a live probe of the pending-revisions notice's surfaces, then
+    maintainer confirmation as dead or a claim in the spec.
