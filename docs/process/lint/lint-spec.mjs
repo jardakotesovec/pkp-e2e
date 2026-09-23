@@ -20,6 +20,9 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const SPECS_DIR = path.resolve(SCRIPT_DIR, '../../specs');
 const BADGES = ['🐞', '❓', '✅'];
 const BADGE_ORDER = { '🐞': 0, '❓': 1, '✅': 2 };
+// The app failing behind a finding: "· crash: server" after the impact word (GLOSSARY "Findings register").
+const CRASH_WORDS = ['server', 'script', 'both'];
+const crashWord = (line) => { const m = line.match(/crash:\s*([a-z]+)/i); return m ? m[1].toLowerCase() : null; };
 
 // ---------------------------------------------------------------- document model
 
@@ -181,17 +184,21 @@ function checkRegister(doc, out) {
             if (!hm) { out.push({ line: i + 2, check: 'register', msg: `entry #${anchor[1]} has no "**ID — title**" opening line` }); continue; }
             if (!badge) out.push({ line: i + 2, check: 'register', msg: `entry ${hm[1]} has no badge (🐞/❓/✅)` });
             if (hm[1].toLowerCase() !== anchor[1]) out.push({ line: i + 2, check: 'register', msg: `entry ${hm[1]} does not match its anchor #${anchor[1]}` });
-            entries.push({ id: hm[1], anchor: anchor[1], badge, line: i + 2, group: doc.h3[i] || '' });
+            const crash = crashWord(head);
+            if (crash && !CRASH_WORDS.includes(crash))
+                out.push({ line: i + 2, check: 'register', msg: `entry ${hm[1]} crash word "${crash}" is not one of ${CRASH_WORDS.join(' / ')}` });
+            entries.push({ id: hm[1], anchor: anchor[1], badge, crash, line: i + 2, group: doc.h3[i] || '' });
             continue;
         }
         const row = line.match(/^\|\s*\[([A-Z]{1,3}\d+)\]\(#([a-z]{1,3}\d+)\)\s*\|/);
-        if (row) summary.push({ id: row[1], badge: BADGES.find((b) => line.includes(b)) || null, line: i + 1 });
+        if (row) summary.push({ id: row[1], badge: BADGES.find((b) => line.includes(b)) || null, crash: crashWord(line), line: i + 1 });
     }
     // summary table ↔ entries, 1:1 on ID and badge, sorted 🐞 → ❓ → ✅
     for (const s of summary) {
         const e = entries.find((x) => x.id === s.id);
         if (!e) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id} has no entry` });
         else if (e.badge && s.badge !== e.badge) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id} badge ${s.badge || '(none)'} ≠ entry badge ${e.badge}` });
+        else if ((e.crash || s.crash) && e.crash !== s.crash) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id} crash word ${s.crash || '(none)'} ≠ entry crash word ${e.crash || '(none)'}` });
     }
     for (const e of entries) if (!summary.some((s) => s.id === e.id))
         out.push({ line: e.line, check: 'register', msg: `entry ${e.id} is missing from the summary table` });

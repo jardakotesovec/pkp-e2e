@@ -425,6 +425,13 @@ process holds all three apps. The exception is `PKP_APP_ROOT` and
 because `base-test.js` reads them: a suite page object is required inside
 `fn`, never at the top of the script (U21 tops, 2026-09-07).
 
+The run record (`run-<app>-<HHMMSS>.json`) keeps every response of 400 or
+more and the console's errors; its `crashes` list is the subset that means
+the app itself failed (a response of 500 or more, an uncaught page error),
+and the kit prints their count when the process ends. Each one is a
+finding in its own right, reported on the digest block's `Crash:` line
+even when the screen showed nothing.
+
 ```js
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag} =
     require('../../shared/playwright/probe');

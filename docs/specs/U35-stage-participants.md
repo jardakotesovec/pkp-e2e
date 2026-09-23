@@ -939,13 +939,13 @@ entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | A Section Editor's "OK" on "Edit Assignment" saves nothing and shows the form again | 🐞 | user-visible | — |
-| [A3](#a3) | A message typed with no predefined message chosen is not sent, and the window stays open with no reason given, on "Assign" and on "Notify" | 🐞 | user-visible | — |
+| [A3](#a3) | A message typed with no predefined message chosen is not sent, and the window stays open with no reason given, on "Assign" and on "Notify" | 🐞 | user-visible · crash: server | — |
 | [A4](#a4) | "OK" on "Assign Participant" with nobody chosen, or with a person from the previous role's list, assigns nobody and gives no reason | 🐞 | minor | — |
 | [A5](#a5) | The discussion a message opens is listed as created by the person it was sent to | 🐞 | minor | — |
 | [A6](#a6) | "Assign Editor" gives the new editor no task, unlike the other request messages | 🐞 | minor | — |
 | [A7](#a7) | "Edit" is logged as a new assignment | 🐞 | minor | — |
 | [A9](#a9) | A "Permissions" tick carries over when another role is chosen in "Assign", and is saved | 🐞 | minor | — |
-| [A10](#a10) | A message template added in Settings is listed but fills nothing and cannot be sent | 🐞 | user-visible | — |
+| [A10](#a10) | A message template added in Settings is listed but fills nothing and cannot be sent | 🐞 | user-visible · crash: server | — |
 | [A11](#a11) | Choosing a person who reviews the submission anonymously shows no warning, and "OK" assigns them | 🐞 | user-visible | — |
 | [A12](#a12) | "OK" on the "No changes can be made to this participant" window reports "The stage assignment has been changed." | 🐞 | minor | — |
 | [A14](#a14) | The Activity Log's "User" column names the participant, not the editor who assigned, changed or removed them | 🐞 | minor | — |
@@ -953,7 +953,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | A message's email arrives although the person ticked "Do not send me an email…" for "Discussion added." | 🐞 | user-visible | — |
 | [OJS1](#ojs1) | The automatic assignment email tells the editor to select "Send to Review"; the button reads "Send for Review" | 🐞 | minor | — |
 | [OMP1](#omp1) | A press's Internal Review offers no predefined message, so no message can be sent from its Participants panel | 🐞 | user-visible | — |
-| [OPS2](#ops2) | On a preprint server "Assign Editor" leaves "Message" as it was | 🐞 | minor | — |
+| [OPS2](#ops2) | On a preprint server "Assign Editor" leaves "Message" as it was | 🐞 | minor · crash: server | — |
 | [OPS3](#ops3) | A preprint server never sends its automatic assignment email | 🐞 | user-visible | — |
 | [OPS4](#ops4) | On a preprint server the notice after "Assign", "Edit" or "Notify" can show in the Production entry's "Notification" box instead of at the top right | 🐞 | minor | — |
 | [A2](#a2) | A Section Editor may "Remove" rows they may not "Edit": their own, manager-level ones, and a recommending editor another editor's | ❓ | minor | — |
@@ -986,14 +986,15 @@ the rows a person may not change should not be removable by them either.
 Basis: probe. <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
-**A3 — A message without a predefined message is dropped** · 🐞 · user-visible.
+**A3 — A message without a predefined message is dropped** · 🐞 · user-visible · crash: server.
 The list reads "Choose a predefined message to use, or fill out the form
 below.", so an editor who leaves it on its blank entry and types a message
 expects that message to be sent. On "Assign", "OK" leaves the window open
 as filled with no reason given, yet the person is assigned: the row
 appears once the page is opened again, and the Activity Log gets no line
 for it. On "Notify" the window stays open with no reason given. In both
-cases no email goes out and no discussion opens.
+cases no email goes out and no discussion opens. Behind both buttons the
+request fails on the server, and nothing on screen says so.
 Basis: probe. <sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
@@ -1057,7 +1058,7 @@ and "OK" saves it so.
 Basis: probe. <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a10"></a>
-**A10 — Templates added in Settings cannot be used** · 🐞 · user-visible.
+**A10 — Templates added in Settings cannot be used** · 🐞 · user-visible · crash: server.
 A template added in Settings › Workflow › "Tasks and Discussions" is listed
 in "Choose a predefined message…" but cannot be used. Chosen in "Assign" or
 "Notify", it leaves "Message" as it was. Sent with a message typed, the
@@ -1065,7 +1066,8 @@ window stays open with no reason given and no email goes out, whether or
 not the recipient holds one of the template's roles. "OK" on "Assign"
 still assigns the person, and a template limited to no role still adds a
 discussion named after it, with no message, to the stage's discussions
-panel.
+panel. Choosing the template and sending it both fail on the server, and
+nothing on screen says so.
 Basis: probe. <sup>[f-a10](#fn-a10)</sup>
 
 <a id="a11"></a>
@@ -1167,14 +1169,15 @@ install difference in the roles, not in the panel.
 Basis: probe. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="ops2"></a>
-**OPS2 — "Assign Editor" is empty on a preprint server** · 🐞 · minor.
+**OPS2 — "Assign Editor" is empty on a preprint server** · 🐞 · minor · crash: server.
 Choosing "Assign Editor" in the predefined messages is expected to fill
 "Message" with a letter, as it does on a journal or press. On a preprint
 server "Message" is left as it was: empty in a fresh window, and any text
 typed or left by an earlier choice stays. Left empty, nothing is sent and
 only "User added as a stage participant." shows; with text typed, the
 email "Assign Editor" goes out with that text, and the discussion and the
-Tasks row appear.
+Tasks row appear. The request that should fetch the letter fails on the
+server, and nothing on screen says so.
 Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 
 <a id="ops3"></a>

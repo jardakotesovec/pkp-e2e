@@ -187,6 +187,9 @@ function runRecord(app) {
             responses: [],
             console: [],
             warnings: [],
+            // Every response of 500 or more and every uncaught page error:
+            // the app failing, a finding on its own (GLOSSARY "crash").
+            crashes: [],
         });
     }
     return runs.get(app.name);
@@ -212,10 +215,17 @@ function flush() {
         for (const record of runs.values()) {
             record.endedAt = new Date().toISOString();
             const stamp = record.startedAt.slice(11, 19).replace(/:/g, '');
-            fs.writeFileSync(
-                path.join(dir, `run-${record.app}-${stamp}.json`),
-                JSON.stringify(record, null, 2),
-            );
+            const file = path.join(dir, `run-${record.app}-${stamp}.json`);
+            fs.writeFileSync(file, JSON.stringify(record, null, 2));
+            if (record.crashes.length > 0) {
+                const server = record.crashes.filter((c) => c.kind === 'server').length;
+                const script = record.crashes.length - server;
+                console.error(
+                    `[probe] ${record.app}: the app failed ${record.crashes.length} time(s) during this run ` +
+                        `(${server} server error(s), ${script} page script error(s)); each is a finding — ` +
+                        `see "crashes" in ${path.basename(file)}`,
+                );
+            }
         }
         // flush() runs at the end of withApp and again on exit: append only
         // the rows not written yet.
@@ -303,7 +313,9 @@ async function forEachApp(fn) {
  * A headless Chromium at 1280×900 with animations off, baseURL on the probe
  * server, and a response listener that records URL, method, status and size
  * (never a body) for `/api/` calls and every status ≥ 400 into the run
- * record. Returns {browser, context, page, close}.
+ * record. A status ≥ 500 and an uncaught page error also go into the
+ * record's `crashes` list (kind `server` | `script`), counted on the
+ * console when the process ends. Returns {browser, context, page, close}.
  *
  * @param {object} app the bag from withApp
  * @param {{storageState?: object|string, headless?: boolean, record?: boolean}} [options]
@@ -337,6 +349,9 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
             size: null,
         };
         record.responses.push(entry);
+        if (status >= 500 && record.crashes.length < CONSOLE_CAP) {
+            record.crashes.push({at: entry.at, kind: 'server', status, method: entry.method, url});
+        }
         const length = response.headers()['content-length'];
         if (length !== undefined) {
             entry.size = parseInt(length, 10);
@@ -366,6 +381,9 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
     });
     if (keepRecord) page.on('pageerror', (error) => {
         logConsole('pageerror', error.message || String(error), page.url());
+        if (record.crashes.length < CONSOLE_CAP) {
+            record.crashes.push({at: new Date().toISOString(), kind: 'script', text: String(error.message || error).slice(0, 300), url: page.url()});
+        }
     });
     console.log(`[probe] ${app.name}: ${app.baseURL} (key from ${app.keySource})`);
     return {

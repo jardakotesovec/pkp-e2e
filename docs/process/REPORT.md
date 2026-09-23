@@ -51,8 +51,11 @@ Temporary: delete once acted on.
 ```
 
 **Summary.** Two or three sentences. What a user does, what happens
-instead of what they expect, and since when. No paths, no request names,
-no commit shas: those are in the header line and the evidence.
+instead of what they expect, and since when. When the app itself fails
+(the register's crash word), the first sentence says so and on which
+side: the server, or the page's own script in the browser. No paths, no
+request names, no commit shas: those are in the header line and the
+evidence.
 
 **Impact.** Who meets it (which role, on which screen, how often in
 ordinary use), what they lose (data, time, a message, a wrong landing),

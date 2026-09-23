@@ -76,7 +76,9 @@ reference for the reader:
 
 - Findings register: every entry opens `**ID — title** · badge · impact`
   under its own anchor; IDs are dense per prefix and in document order; the
-  summary table mirrors the entries (same badge, sorted 🐞 → ❓ → ✅); every
+  summary table mirrors the entries (same badge, the same crash word when
+  the head carries one, sorted 🐞 → ❓ → ✅); a crash word is one of server /
+  script / both; every
   🐞 or ❓ entry is marked in the body with exactly one `⚠ [A1](#a1)`, a ✅
   entry with a plain link and never ⚠; a `### Retired` entry needs no marker.
 - Links: every link, anchor and `<sup>` mark resolves both ways, anchors are
@@ -505,7 +507,7 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      plain `[OMP2](#omp2)` for ✅ intended divergences.
 
      Entry anatomy (5–8 lines):
-     **A1 — <short title>** · 🐞 · user-visible.
+     **A1 — <short title>** · 🐞 · user-visible[ · crash: server | script | both].
      <Symptom, 1–3 sentences: present tense, the user as subject, expected
      versus observed. State it at the weight it earns (rule 4).>
      <For ❓ only> Question: <the one sentence the team answers>. Lean: <the
@@ -529,6 +531,14 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      An author re-check that changes a verdict is a plain `Re-checked:
      <check> (claude), <date> — <outcome>` line; "Reviewed" is reserved
      for a human.
+
+     CRASHES. When the drive saw the app fail behind the finding (a request
+     answering a server error, the page's script failing: the digest block's
+     `Crash:` line, the probe kit's run record), the head carries the crash
+     word after the impact, the summary row repeats it in its Impact cell
+     ("user-visible · crash: server"), and the symptom says in screen words
+     that the app failed, not merely declined. The status code and the
+     server-log line stay in the footnote (rule 1).
 
      `Since:` only when dated (omit the line otherwise). One sentence of
      rationale for a 🐞-versus-✅ call is welcome ("worked for OPS's whole
