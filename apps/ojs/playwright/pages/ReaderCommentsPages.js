@@ -935,9 +935,12 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         await reportsRefetched;
     }
 
-    /** Press the comment panel's "Close": the table reloads (Rule 12). */
-    async closeCommentPanel() {
-        const refetched = this.listRefetch();
+    /**
+     * Press the comment panel's "Close". The table reloads only when something
+     * changed in the panel (a report deleted); pass `changed` then (Rule 12).
+     */
+    async closeCommentPanel({changed = false} = {}) {
+        const refetched = changed ? this.listRefetch() : null;
         await this.closeButton(this.commentPanel()).click();
         await expect(this.commentPanel()).toHaveCount(0, {timeout: 30_000});
         await refetched;

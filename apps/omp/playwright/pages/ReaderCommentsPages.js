@@ -569,13 +569,17 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         await this.tableSettled();
     }
 
-    /** Press the panel's "Close": the panel goes and the table refetches (Rule 12). */
-    async closeCommentPanel() {
-        const refetched = this.page
-            .waitForResponse((r) => r.request().method() === 'GET' && /\/api\/v1\/comments\?/.test(r.url()), {
-                timeout: 10_000,
-            })
-            .catch(() => null);
+    /**
+     * Press the panel's "Close": the panel goes. The table refetches only when
+     * something changed in the panel (a report deleted); pass `changed` then (Rule 12).
+     */
+    async closeCommentPanel({changed = false} = {}) {
+        const refetched = changed
+            ? this.page.waitForResponse(
+                  (r) => r.request().method() === 'GET' && /\/api\/v1\/comments\?/.test(r.url()),
+                  {timeout: T}
+              )
+            : null;
         await this.closeButton().click();
         await expect(this.commentPanel()).toBeHidden({timeout: T});
         await refetched;

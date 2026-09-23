@@ -527,7 +527,7 @@ test.describe('reader comments & moderation', () => {
         await expect(comments.noReports()).toBeVisible();
         await expect(comments.reportRows()).toHaveCount(0);
         await expect(comments.note()).toHaveText(APPROVED_NOTE);
-        await comments.closeCommentPanel();
+        await comments.closeCommentPanel({changed: true});
         await comments.openTab('Reported');
         await expect(comments.row(reportedText)).toHaveCount(0);
         await expect(comments.noItems()).toBeVisible();

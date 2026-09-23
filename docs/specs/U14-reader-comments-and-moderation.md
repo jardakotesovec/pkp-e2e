@@ -230,8 +230,10 @@ page. Every row below assumes the journal has public comments switched on
     Comments page with that panel open (Rule 16). A number no comment has
     (a deleted comment's, for instance) opens the page on "All" under the
     dialog "Error" reading "The requested resource was not found." with
-    "OK". Closing the panel drops the number from the address and reloads
-    the table. The right-hand note
+    "OK". Closing the panel drops the number from the address. The table
+    behind it reloads only when something changed in the panel, a report
+    deleted from it for instance; a panel only viewed and then closed does
+    not reload the table. The right-hand note
     reads "Approving this comment will make it visible to all users on the
     site" while the comment is pending or hidden, and "This comment was
     approved on {date} by {moderator}." once it is approved. <sup>j</sup>
@@ -262,8 +264,9 @@ page. Every row below assumes the journal has public comments switched on
     into the address as well, and "Delete Report". Closing the report
     panel, or deleting the report from it, drops both numbers from the
     address, the comment's included, although the comment panel stays open
-    ⚠ [A8](#a8); the comment panel's own "Close" then reloads the table
-    (Rule 12). "Delete Report", from
+    ⚠ [A8](#a8). Once a report has been deleted, from either panel, the
+    comment panel's own "Close" reloads the table (Rule 12). "Delete
+    Report", from
     the row or from the report panel, opens the dialog "Delete Report":
     "Are you sure you want to delete this report? This action cannot be
     undone." with "Delete" and "Cancel"; "Delete" shows "The report has
@@ -510,7 +513,8 @@ and a preprint server. <sup>s0</sup>
      "Delete Report" and then "Delete": the notice again, and the table
      reads "No one has reported this comment yet"; the note on the right
      still reads "This comment was approved on {date} by {moderator}.".
-     Press "Close": the table reloads, the comment is gone from "Reported",
+     Press "Close": with the reports deleted, the table reloads, the
+     comment is gone from "Reported",
      and under "All" its "Status" reads "Approved".
    - **Control**: the never-reported comment's panel reads "No one has
      reported this comment yet", and its row is on "Approved" and never on
@@ -1301,7 +1305,18 @@ while unapproved, `is-disabled` when approved), `deleteComment`
 (warnable), `hideComment` (`is-disabled` while unapproved).
 `commentToggleApproval()` PUTs `comments/{id}/setApproval` with
 `approved`, on success toasts `manager.userComment.commentUpdated` and
-closes the modal; the modal's `onClose` refetches the list.
+closes the modal, whose `onClose` refetches the list.
+With pkp/ui-library#853 (issue pkp/pkp-lib#13359, not yet merged) that
+refetch depends on the modal store's `dataChanged` flag: `useFetch` sets
+it through `modalStore.markModalDataChanged()` on a successful POST, PUT
+or DELETE made from the panel (the approval, a report's deletion from the
+"Reports" table), a nested report panel's flag passes to the comment
+panel when it closes, and `closeSideModalById()` hands `onClose` a
+`{dataChanged}` object; `userCommentStore.js`'s `commentView()` `onClose`
+refetches only when `shouldTriggerDataChange()` reads it true, and
+`reportView()`'s `onClose` does the same for the reports. The change is
+in lib/ui-library, shared by the three apps: OJS carries it at the PR
+head, OMP and OPS with their next submodule update.
 `setApproval()` stores `isApproved`, `approvedAt` = now or null,
 `approvedByUserId` = the moderator or null; the resource exposes
 `approvedByUserName` to moderators. `commentView()` writes `commentId`
@@ -1331,7 +1346,14 @@ from every tab and from the landing page; a deleted or mistyped number in
 the address gave the "Error" dialog "The requested resource was not
 found." over "All"; Escape closed the panel like "Close"; the browser's
 Back reopened it; the mail catcher held nothing for the writer or the
-manager throughout.
+manager throughout. Driven 2026-09-23 on OJS at the PR head `cab09538`
+of pkp/ui-library#853, before its merge (Rules 12, 15): a comment panel
+only viewed and closed sent no `GET …/api/v1/comments` refetch, so the
+tests of scenarios 2, 3 and 13, which waited for one after a view-only
+"Close", went red in the OJS PR check (run 35770880623) and again
+locally; the "Close" after deleting the comment's two reports still
+refetched the list. The same tests pass at the tip's lib/ui-library
+`2034439a`, where every close refetched.
 
 <a id="fn-k"></a>
 **k — reports.** `UserCommentReportsTable.vue`: label

@@ -585,7 +585,8 @@ catcher's address are in its footnote.
      back to "Title & Abstract": no prompt appeared and Prefix is empty
      (Rule 10).
    - **Publishing**: Journal Manager: publish the submission, on a journal
-     without an issue; its header reads "Status: Published" (Rule 9).
+     without an issue; its header reads "Status: Published" (Rule 9)
+     ⚠ [→ Publish, schedule & versions](U49-publish-schedule-and-versions.md#a8).
    - **The published version**: Author: the published version's Title &
      Abstract shows "This version has been published and can not be
      edited." ("… has been posted and can not be edited." on the preprint

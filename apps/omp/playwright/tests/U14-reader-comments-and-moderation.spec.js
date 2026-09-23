@@ -603,7 +603,7 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(comments.approvalNote()).toHaveText(APPROVED_NOTE);
         // "Close": the table reloads, the comment is gone from "Reported",
         // and under "All" its "Status" reads "Approved".
-        await comments.closeCommentPanel();
+        await comments.closeCommentPanel({changed: true});
         await comments.expectSelectedTab('Reported');
         await comments.expectNoItems();
         await comments.openTab('All');

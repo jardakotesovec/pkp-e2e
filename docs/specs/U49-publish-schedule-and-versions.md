@@ -153,7 +153,14 @@ page, described in *Catalog management*. It saves onto the shown version.
    though it blocks nothing ⚠ [A7](#a7). On a journal whose settings
    *require* a plain language summary, a version without one gets neither
    text nor button. The Confirm is refused with no message and publishing
-   is never reached ⚠ [OJS1](#ojs1). <sup>l</sup>
+   is never reached ⚠ [OJS1](#ojs1). Confirming closes the window, and
+   the Publication area should then show the new state at once: the
+   head's status and, in place of the publish button, "Unpublish"
+   ("Unpost") or "Unschedule" (Rules 6, 8, 9). A journal's usual path,
+   through "Review Publishing Details", does. On a press and a preprint
+   server, and on a journal whose confirmation window opened directly
+   (Rule 3), the area keeps the old state until the page is reloaded
+   ⚠ [A8](#a8). <sup>l</sup>
 5. **What the issue choice decides {OJS}.** The four assignments map to
    outcomes. Only the choices the journal's issues allow are offered: with
    no future issue there are no "Future Issue" options, and with no issues
@@ -447,8 +454,8 @@ each scenario's seeding are in its footnote.
      1.0" on a preprint server); on a press or preprint server a
      requirement-shaped stage sentence sits under the all-met line
      ([A7](#a7)) (Rule 4). Confirm.
-   - **Published**: the head now reads "Status: Published" ("Posted"),
-     and the reader page is live (Rule 8).
+   - **Published**: the head now reads "Status: Published" ("Posted")
+     ⚠ [A8](#a8), and the reader page is live (Rule 8).
    - **The notices** {OMP}: the Production stage's banner is replaced by
      "Status / Submission published." and the catalog notice (Rule 17).
    - **The Activity Log**: the workflow's Activity Log & Notes → History
@@ -560,7 +567,8 @@ each scenario's seeding are in its footnote.
    - **Publish**: Journal Manager: press the publish button (a journal's
      panel offers the saved issue choice pre-filled; Confirm); the window
      names "Version of Record 1.1" ("Author Original 1.1"); Confirm: the
-     reader page now serves the new version and its "Versions" list
+     head reads "Status: Published" ("Posted") ⚠ [A8](#a8); the reader
+     page now serves the new version and its "Versions" list
      gains the new entry; the saved summary appears nowhere on the page
      ⚠ [A5](#a5); the Activity Log adds "A new version was published."
      (Rules 8, 13; Side effects).
@@ -689,7 +697,7 @@ each scenario's seeding are in its footnote.
       directly); on a journal its text names the kept issue outcome;
       Confirm: on a
       press or preprint server the item returns to "Published"/"Posted"
-      carrying its ORIGINAL date; on a journal the kept issue choice
+      carrying its ORIGINAL date ⚠ [A8](#a8); on a journal the kept issue choice
       decides again: the article goes straight back to "Published", its
       issue still unpublished (Rule 10).
     - **Control**: scenario 1's first publish stamped today, and its
@@ -780,7 +788,7 @@ each scenario's seeding are in its footnote.
     - **"Publish"**: press it: the confirmation still reads "…make this
       catalog entry public?" ⚠ [OMP1](#omp1); confirm: the head reads
       "Status: Scheduled", the catalog page stays down, and the offered
-      controls become "Preview" and "Unschedule" (Rule 6).
+      controls become "Preview" and "Unschedule" ⚠ [A8](#a8) (Rule 6).
     - **Nothing stamped or sent**: "Date Published" still reads
       "2030-01-01" (Rule 8); no "Publication Published" email arrives for
       the Author, and their Tasks hold no notice (Side effects).
@@ -802,7 +810,8 @@ each scenario's seeding are in its footnote.
       requirements met, the version to be assigned ("Author Original
       1.0") and a "Related Publication" line (on a fresh preprint: "This
       preprint's relations have not been entered."); Confirm: the head
-      reads "Status: Posted" and the preprint page is live (Rules 4, 8).
+      reads "Status: Posted" ⚠ [A8](#a8) and the preprint page is live
+      (Rules 4, 8).
     - **The acknowledgement**: the contributors receive a posting
       acknowledgement, mis-titled "New Version Posted Acknowledgement"
       even on this first post ⚠ [OPS4](#ops4); the contributor without
@@ -906,6 +915,8 @@ Left out of the scenarios above, by reason:
     Rules 2, 8)
   - A7 (the requirement-shaped stage sentence under the all-met line on
     a press or preprint server; Rule 4; scenario 1 passes it)
+  - A8 (the Publication area keeping the unpublished state after the
+    confirmation closes; Rule 4; scenarios 1, 5, 10, 14 and 15 mark it)
   - OJS1 (a required plain language summary refusing the panel's Confirm
     with no message; Rule 4)
   - OJS3 (a journal's version address naming a number the article has
@@ -971,6 +982,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 |----|------------------------------|------|--------|--------|
 | [A5](#a5) | The published Summary of Changes appears on no reader page; the promised amendment notice never renders | 🐞 | user-visible | — |
 | [A6](#a6) | Merely creating an unpublished version rewrites the live reader page's date line | 🐞 | user-visible | — |
+| [A8](#a8) | After "Publish" (press), "Post" (preprint server) or a journal's directly opened confirmation, the window closes but the Publication area still shows the unpublished state until a page reload | 🐞 | user-visible | — |
 | [OJS1](#ojs1) | With a plain language summary required, the panel's Confirm is refused with no message and publishing is unreachable | 🐞 | user-visible | — |
 | [OJS2](#ojs2) | On a journal with no published issues, a "Schedule Only" choice (the panel's first pick, or one saved on Publication Settings) is not honored: the flow publishes immediately | 🐞 | user-visible | — |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | user-visible | — |
@@ -1093,6 +1105,27 @@ assigned form. Question: should the notice say the stage WILL be assigned
 rather than "must be"? Lean: yes. A first-time publisher reads a
 contradiction. Since: 2026-08-29 · Basis: probe.
 <sup>[f-a7](#fn-a7)</sup>
+
+<a id="a8"></a>
+**A8 — The workflow still shows "unpublished" after publishing** · 🐞 · user-visible.
+On a press, pressing "Publish" and then the confirmation window's
+"Publish" publishes the book and closes the window, but the Publication
+area still reads "Status: Unscheduled" and offers "Preview" and
+"Publish"; "Unpublish" never appears. A preprint server's "Post" does the
+same, with no "Unpost", and so does a future-dated schedule in both, with
+no "Unschedule". On a journal the usual path, through "Review Publishing
+Details", still updates the area; but when the confirmation window opens
+directly (closed once unconfirmed, then "Schedule For Publication"
+pressed again), "Publish" leaves "Status: Unpublished" with "Preview" and
+"Schedule For Publication". A page reload shows the published or
+scheduled state: the act happened, only the screen missed it. Expected,
+as before this change, the new status and "Unpublish" ("Unpost") or
+"Unschedule" as soon as the window closes. An editor told nothing
+happened is likely to press again or think publishing failed. The press
+and the preprint server were seen with their shared interface code moved
+to this change, which they receive with their next update.
+Since: pkp/ui-library#853 (`cab09538`, not yet merged; issue
+pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a8](#fn-a8)</sup>
 
 ### OJS
 
@@ -1843,6 +1876,39 @@ and working; OPS identical in shape ("Author Original 1.0", button
 "Post"). Republishing the now-staged version collapsed the two
 sentences to "The publication version is "Version of Record 1.0"".
 Strings: `publication.required.versionStage[.assignment|.alreadyAssignment]`.
+
+<a id="fn-a8"></a>
+**f-a8** — The confirmation is the legacy `PublishHandler` window
+(`lib/pkp/templates/controllers/modals/publish/publish.tpl`). Its
+`<pkp-form>` is mounted by `pkp.registry.init` as a separate Vue app, so
+the `markDataChanged` that pkp/ui-library#853 (issue pkp/pkp-lib#13359)
+injects into `Form.vue` is null there; the form saves through `$.ajax`,
+not `useFetch`, and `AjaxModalWrapper.vue`'s `onVueFormSuccess()` closes
+the window with `closeModal({formId, data})` without marking it changed.
+`closeSideModalById()` then hands `onClose` `{dataChanged: false}`, and
+`workflowStore.js`'s `triggerDataChange(finishedData)` returns without
+reloading; before the PR the close led to an unconditional
+`triggerDataChange()`. A journal's usual path still updates because the
+"Review Publishing Details" panel's save flags the window slot the
+confirmation then reuses. Driven 2026-09-23 at the PR head `cab09538`,
+before its merge, on reset databases: the OMP full suite with
+lib/ui-library at the PR head (OMP `7f9455d5a`) red on scenarios 1, 5, 9,
+10 and 14 and on *Publication metadata*'s scenarios 3 and 5, each waiting
+for "Unpublish" or "Unschedule" after the publish request answered 200
+(the snapshot after scenario 1's publish: "Status: Unscheduled",
+"Preview", "Publish"); the OPS full suite (OPS `15f0b6e0bd`) red on
+scenarios 1, 5, 9, 10 and 15 and on *Publication metadata*'s 3, 5 and 11,
+waiting for "Unpost" or "Unschedule". The same spec files on the same
+databases with lib/ui-library rebuilt at the tip's `2034439a`: OMP 38/38,
+OPS 23/23. OJS (`802202cb3e`), the kept check
+`shared/playwright/checks/sync/ui-library-853/publish-stale.js`: the
+direct path sent no GET in the 5 s after the close and kept "Status:
+Unpublished" with "Preview" and "Schedule For Publication" at
+`cab09538`; at `2034439a` both the panel path and the direct path
+updated. OMP's and OPS's own lib/ui-library pointers (`977e460c`,
+`5d138aa9`) predate the change. Written up for the team in
+`docs/reports/2026-09-23-ui-library-853-publish.md` (a temporary report,
+deleted once addressed; git history keeps it).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — Live 2026-08-28 (metadata spec, register A1): with

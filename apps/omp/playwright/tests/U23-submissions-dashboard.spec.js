@@ -1043,10 +1043,18 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
             completedPopover.getByRole('button', {name: 'View recommendation', exact: true})
         ).toHaveCount(0);
 
-        // Press it and close the window that opens: reopened, the popover
-        // offers "View recommendation".
+        // Press it, read, and close the window that opens: reopened, the
+        // popover offers "View recommendation". The window marks the review
+        // read once it has loaded; closed before that mark lands, the list
+        // keeps "View unread recommendation" (U27 ⚠ A32), so the reader
+        // waits for it.
+        const marked = page.waitForResponse(
+            (r) => /\/reviewAssignments\/\d+\/consider$/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
         await unread.click();
         await expect(details).toBeVisible({timeout: 20_000});
+        expect((await marked).ok()).toBe(true);
         reloaded = dash.listReload();
         await closeReviewDetails(details);
         await reloaded;
