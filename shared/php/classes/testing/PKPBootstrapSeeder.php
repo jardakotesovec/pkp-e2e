@@ -30,7 +30,9 @@ abstract class PKPBootstrapSeeder
 
     public function __construct()
     {
-        $this->userSeeder = new UserSeeder();
+        // The roster is shared by every worker: the app's own password hash
+        // (UserSeeder::seed()).
+        $this->userSeeder = new UserSeeder(appHash: true);
         $this->contextFactory = new ContextFactory();
     }
 

@@ -120,12 +120,6 @@ trips.
   CI runs on a fresh database, so no CI incident yet. **Watch
   condition**: S8 reds in CI, or a local run on a fresh database reds;
   then bisect the participant panel against submission volume.
-  **Tripped 2026-09-23 above the knee** (OPS full run at 10 workers on
-  the 8-core VM, a database reset seconds before,
-  `.reports/workers-8core/run-ops-w10.log`): the impersonated
-  participant's "Workflow: Production" heading not found in 10 s; green
-  in the sweep's other five runs (6, 8, 10 and 12 workers). The fresh database rules out
-  volume for this sighting, so load is the lead.
 - **Reviewer-indicator popover under load** (U23 S9, OJS). The row with
   two reviewers opens the wrong reviewer's popover (Paul instead of Julia)
   during a full-suite run and passes in isolation; the hover target is
@@ -342,72 +336,6 @@ trips.
   `.reports/U40/final-run-ojs-attempt1.log`: the same button detached and
   re-attached until the browser closed at the 180 s timeout, the one red
   in 221 with the 13 serial tests skipped behind it).
-- **Login smoke's profile probe landing on the login page under load**
-  (shared `login.spec.js`, OJS twice and OMP once). In the sync session's first OJS
-  final at four workers 2026-09-15 (a reset database, the perf round-2
-  harness and `persistent = On` for the first time on the VM,
-  `.reports/sync/final-run-ojs.log`) the smoke's loop over the seeded
-  personas signed `reader.rosa` in through the form (the page left
-  `/login`) but the request-context probe of `/index.php/index/user/profile`
-  answered with the login page (`…/login?source=%2Findex.php%2Findex%2Fuser%2Fprofile`),
-  so the smoke red and the 13 serial tests behind it did not run; green
-  alone in 27.5 s (`.reports/sync/s15-ojs-reds-alone.log`), and green on
-  CI at the same tree and tips. **Watch condition**: a second sighting;
-  then read whether the probe's cookie jar carried the fresh session
-  cookie (the smoke closes and reopens a context per persona).
-  **Tripped 2026-09-15** (U25 revision session, the first OJS final at
-  four workers on a reset database at the day's new tips,
-  `.reports/U25/final-run-ojs-attempt1.log`: `reader.rosa` again, the
-  same `profile probe landed on login`, one of two reds in 216, the 13
-  serial and solo tests skipped behind it; green alone in 16.1 s,
-  `.reports/U25/rerun-ojs-login.log`). **Third sighting the same day, the
-  first on OMP** (the U25 session's second OMP final at four workers on a
-  reset database, `.reports/U25/final-run-omp-attempt2.log`: `reader.rosa`
-  again, the one red of 216; green alone right after,
-  `.reports/U25/rerun-omp-login.log`). Three reds in one day at the
-  day's new tips and the perf round-2 harness, always `reader.rosa`, the
-  last persona of the loop. **Fourth sighting** (the U29 revision
-  session's first OJS final at four workers on a reset database the same
-  evening, `.reports/U29/final-run-ojs-attempt1.log`: `reader.rosa` again,
-  the one red of 220, the 13 serial tests skipped behind it; green alone
-  in 15.5 s, `.reports/U29/rerun-ojs-login.log`). **Fifth sighting** (the
-  U40 revision session's second OJS final at four workers on a reset
-  database the same evening, `.reports/U40/final-run-ojs-attempt2.log`:
-  `reader.rosa` again, the one red of 221, the 13 serial tests skipped
-  behind it; green alone right after, `.reports/U40/rerun-ojs-login.log`).
-  **Sixth sighting, the second on OMP** (the U41 revision session's OMP
-  final at four workers on a reset database 2026-09-16,
-  `.reports/U41/final-run-omp.log`: `reader.rosa` again, the one red of
-  218, the 11 serial tests skipped behind it; green alone in 14.3 s,
-  `.reports/U41/rerun-omp-login.log`, the serial project green alone
-  right after, `.reports/U41/rerun-omp-serial.log`). **Instrumented 2026-09-16** (sync session): when the probe lands on
-  the login page the smoke writes one `login smoke:` line to the run log
-  with the probe's status and URL, the page's URL and the context's
-  cookie jar (names and value lengths), attaches it to the test, and
-  probes once more a second later; a second miss still reds the test, so
-  the next sighting carries the jar read and says whether the session was
-  merely late. Read at the tips: the form sign-in regenerates the session
-  id (`PKPSessionGuard::updateSession()`, `migrate(true)`), and the
-  harness sets no `PHP_CLI_SERVER_WORKERS`, so each worker's `php -S`
-  serves requests one after another and a cross-process session-write
-  lag is not the mechanism. **Watch condition**: the log line at the next
-  sighting. **Seventh sighting, the first with the instrumented line
-  2026-09-21** (sync session, the OJS final at four workers on a reset
-  database, `.reports/sync/final-run-ojs.log` line 64, the one red of 275
-  with the 16 serial and solo tests skipped behind it): `reader.rosa`
-  again; the page had left the form for `/index/en/index`, the context's
-  jar held `currentLocale`, `OJSTESTSID` (40 chars) and a
-  `remember_web_…` cookie (132 chars), and BOTH probes of
-  `/index.php/index/en/user/profile` (the second a second later) answered
-  200 at the login page with the profile as `source`. So the session
-  cookie was there and the write was not merely late: the request-context
-  probe is refused a session the page holds, on the last persona of the
-  loop. The worker's server log is not retained locally (only CI keeps
-  `.server-logs/`), so what the server saw is unknown. **Watch
-  condition**: the next sighting; the smoke should then record the
-  probe's request headers (does `context.request` send the jar's
-  `OJSTESTSID`?) and a `page.goto` of the same address for comparison,
-  or run the smoke with a trace retained on failure.
 - **"Create New Version" dialog's stage select empty under load** (U49
   S6, OJS, once). The dialog opened with its "Publication Stage" options
   listed but the select's value "" for the 10 s wait for "VoR" (the
@@ -615,15 +543,9 @@ trips.
   dashboard and Add Reviewer classes above: a list fetched again after
   the window closes. **Watch condition**: a second incident; then read
   whether the panel's reload after the window's save is awaited.
-  **Second incident 2026-09-17** (U11 feature session, the Mac, OMP
-  final attempt 1 on a reset database at auto workers,
-  `.reports/U11/final-run-omp-attempt1.log`, the one red of 225), at a
-  different step: the active window's "Workflow:" heading not visible
-  in 20 s (`pw-out-final-omp-attempt1/U01-login-and-sessions-…/error-context.md`);
-  green alone in 8.5 s (`.reports/U11/alone-omp-u01s6.log`) and the
-  second full run green (236). The watch condition is met; the read of
-  the panel's reload, and now of the workflow window's open under
-  load, is the maintenance session's.
+  (The 2026-09-17 incident, the "Workflow:" heading not visible in 20 s
+  on a reset database, was the roster rehash that signed shared-persona
+  sessions out at the start of a run, fixed 2026-09-23 in `UserSeeder`.)
 - **Author's Title & Abstract section empty after the manager's publish**
   (U40 S3, OJS, once, local). After the manager published, the author's
   reload fetched the submission and the publication (both 200 in worker
@@ -638,12 +560,6 @@ trips.
   keeps traces on failure (`test.use({trace: 'retain-on-failure'})`, like
   the OMP one). **Watch condition**: a red with the trace; then read
   whether the publication fetch was aborted by a second `selectPublicationId`.
-- **Dashboard user menu not visible 10 s after sign-in under load** (U01
-  S1, OJS, once). The sign-in landed on `/dashboard/editorial` (the URL
-  committed) but `[data-cy="app-user-nav"]` was not visible within the
-  default 10 s (2026-09-15, the maintainer's second local 8-worker run at
-  the merged tips, `.reports/flake-local/run2.log`); green alone 2 of 2.
-  **Watch condition**: a second sighting; then give the landing a 30 s wait.
 - **Dashboard heading "(0)" after a reload under load** (U23 S7, OJS,
   once). After `page.reload()` of the sorted address on a scratch journal
   holding 31 submissions the heading read "Active submissions (0)" for the
@@ -708,26 +624,6 @@ trips.
   (harness.md "Runtime model"), so a recurrence now costs one test. It was
   never pinned; if it recurs, add core-dump capture to CI before
   diagnosing.
-- **U01 S1's dashboard landing right after a cold bootstrap** (once, OJS,
-  2026-09-17 on the VM: an `@smoke`-only run at four workers on a database
-  reset seconds before; `page.waitForURL(/dashboard/editorial/)` timed out
-  at 15 s after the journal's login address, 38 of 39 green; the file
-  green alone minutes later, 9 of 9). **Watch condition**: a second
-  sighting in a full run or on CI.
-  **Tripped 2026-09-23** (the worker sweep on the new 8-core VM, OPS full
-  runs on databases reset seconds before, `.reports/workers-8core/`): the
-  moderator's `waitForURL(/dashboard/editorial/)` timed out at 15 s in
-  both 6-worker runs and the 12-worker run, one of the first tests of the
-  run each time, the 12 serial and solo tests skipped behind it; green in
-  the 8-worker run. The same class on the other apps in that day's
-  8-worker finals, again among the first ten tests of a run: OJS U01 S7
-  (the impersonated `author.alex` not in the user menu in 10 s,
-  `run-ojs-w8.log`) and OMP U01 S6 (`run-omp-w8.log`), each skipping the
-  serial and solo projects. The worker servers start with every run, so
-  each one's PHP opcache and compiled templates are cold at every run,
-  not only after a reset. Next: read whether the first dashboard render after a
-  cold bootstrap (template and cache compilation under a full worker
-  fleet) outlasts 15 s, and warm it in the setup project if so.
 - **Site-level Tasks window disagreeing with the journal's under load**
   (U05 S7, OJS, once). The test reads the Tasks rows from the journal's
   editorial page and then from the site-level bell and compares the sorted
@@ -780,6 +676,14 @@ trips.
   the OPS entry above (a fill lost to a re-render): here the timer's save
   never left the page. **Watch condition**: a second sighting; then read
   whether the autosave timer is paused while the title editor has focus.
+- **U15 S5 red in the solo project behind a used database** (OJS, once,
+  2026-09-23 on the 8-core VM). The `ojs-serial` and `ojs-solo` projects
+  run alone (`--no-deps`, eight workers) right after an OJS full run on
+  the same database: the 14 serial and U04 S4 green, "S5: Unpublishing
+  removes, republishing restores" red; the solo project green alone right
+  after (2 of 2, `.reports/cold-start/ojs-serial-solo-and-u14s5.log`);
+  the failure's error context was overwritten by that rerun. **Watch
+  condition**: a red in a full run or on CI; keep the error context.
 - **A success toast read only after the action's own waits** (U35 S2,
   OJS, CI, once). The nightly pkp-e2e run 35683638739 (2026-09-22, `main`
   at `66021a2`) red on OJS U35 S2 on the first attempt (37.3 s): after

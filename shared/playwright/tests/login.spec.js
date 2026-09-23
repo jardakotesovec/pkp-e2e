@@ -32,22 +32,7 @@ test.describe('login smoke', () => {
 
                 // The signed-in check the UI itself relies on: the profile
                 // screen serves (an anonymous request ends on /login instead).
-                // Under load the first probe has landed on the login page
-                // (ci-triage "Login smoke's profile probe landing on the login
-                // page under load"): the run log then records what the jar
-                // and the page held, and one more probe a second later
-                // decides, so a sighting's evidence sits in the log.
-                const probe = () => context.request.get('/index.php/index/user/profile');
-                let profile = await probe();
-                if (profile.url().includes('/login')) {
-                    const cookies = (await context.cookies()).map((c) => `${c.name}[${c.value.length}]`);
-                    const first = `first probe ${profile.status()} at ${profile.url()}; page at ${page.url()}; jar ${cookies.join(' ') || 'empty'}`;
-                    await page.waitForTimeout(1000);
-                    profile = await probe();
-                    const second = `second probe ${profile.status()} at ${profile.url()}`;
-                    console.log(`login smoke: ${username}: ${first}; ${second}`);
-                    await test.info().attach(`${username}-profile-probe`, {body: `${first}\n${second}\n`, contentType: 'text/plain'});
-                }
+                const profile = await context.request.get('/index.php/index/user/profile');
                 expect(profile.ok(), `${username}: profile probe`).toBeTruthy();
                 expect(profile.url(), `${username}: profile probe landed on login`).not.toContain('/login');
             } finally {

@@ -29,11 +29,21 @@ use PKP\core\Core;
 use PKP\orcid\OrcidManager;
 use PKP\db\DAORegistry;
 use PKP\security\Role;
+use PKP\security\Validation;
 use PKP\user\User;
 use PKP\userGroup\UserGroup;
 
 class UserSeeder
 {
+    /**
+     * @param bool $appHash hash passwords the way the app does
+     *   (Validation::encryptCredentials) instead of at cost 4; the
+     *   bootstrap roster needs it, see seed()
+     */
+    public function __construct(protected bool $appHash = false)
+    {
+    }
+
     /**
      * Read one user spec into a plain plan. $structureKey names the
      * sub-editor assignment list ('sections' or 'series').
@@ -144,8 +154,20 @@ class UserSeeder
             // bcrypt at cost 4, not the app's cost 12 (Validation::encryptCredentials):
             // a seeded user is a fixture, and cost 12 is ~250 ms of CPU per user
             // (some 400 users per OJS run). password_verify accepts any cost; a
-            // real form login rehashes the row at cost 12 (rehash-on-login).
-            $user->setPassword(password_hash($plan['password'], PASSWORD_BCRYPT, ['cost' => 4]));
+            // real form login rehashes the row at cost 12 (rehash-on-login), and
+            // the changed hash signs out every other session of the user
+            // (AuthenticateSession compares the hash it stored in the session).
+            // A scenario user belongs to one test, so that stays inside the
+            // test; the bootstrap roster is shared by every worker, and one
+            // test's form login of a persona signed the others' sessions of
+            // it out at the start of each run on a fresh install (ci-triage
+            // "U01 S1's dashboard landing right after a cold bootstrap"), so
+            // the roster gets the app's own hash, which never needs a rehash.
+            $user->setPassword(
+                $this->appHash
+                    ? Validation::encryptCredentials($username, $plan['password'])
+                    : password_hash($plan['password'], PASSWORD_BCRYPT, ['cost' => 4])
+            );
             Repo::user()->add($user);
         }
 

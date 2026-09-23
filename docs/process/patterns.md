@@ -200,7 +200,12 @@ over.
    `pkpMail` API are in `scenarios.md` "Mailpit" (PRINCIPLES A8).
 5. **Sessions are minted per test through `POST _test/session`**, so
    `signInAs`/`signOutAs` migrating a session never strands another test's
-   cookies. Specs do nothing special.
+   cookies. Specs do nothing special. A change to a user's password hash
+   signs out every session of that user (Laravel's `AuthenticateSession`),
+   and a form login rehashes a hash the app would not write, so the shared
+   roster is seeded with the app's own hash (`UserSeeder`, `appHash`); a
+   test that changes a roster persona's password would sign out every
+   other worker's session of it.
 6. **Server-side outbound HTTP fails fast at the dead-port `[proxy]`**
    (the config contract in `harness.md`); a test never depends on the app
    reaching an external service.
