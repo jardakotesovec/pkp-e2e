@@ -35,8 +35,10 @@ const {phpServerCommand, phpServerEnv, phpServerReadyUrl} = require('./php-serve
  * browser waits), and the measured knee on a 10-core (8P+2E) Mac was exactly
  * the performance-core count — the efficiency cores only add overhead. So:
  * performance cores where the OS can tell them apart (Apple Silicon sysctl,
- * Intel hybrid sysfs), cores - 2 on homogeneous machines. CI runners pin
- * PLAYWRIGHT_WORKERS explicitly (a 4-vcpu runner measured best at 4).
+ * Intel hybrid sysfs), every core on homogeneous machines: the 8-core VM
+ * (2026-09-23) flattened at 8 (OPS and OJS slower at 6, OPS no faster and
+ * redder at 10 and 12), as a 4-vcpu CI runner measured best at 4. CI pins
+ * PLAYWRIGHT_WORKERS explicitly.
  */
 function detectWorkers() {
     try {
@@ -70,7 +72,7 @@ function detectWorkers() {
     } catch {
         // Fall through: no P/E split detectable on this machine.
     }
-    return Math.max(2, os.cpus().length - 2);
+    return Math.max(2, os.cpus().length);
 }
 
 /**

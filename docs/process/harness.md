@@ -156,9 +156,11 @@ Two facts worth knowing before you write a test:
   instead of stranding its worker for the rest of the run.
 - **Worker count**: `PLAYWRIGHT_WORKERS`, or auto-detect when unset. The
   auto-detect uses the performance-core count where the OS exposes it (Apple
-  Silicon sysctl, Intel hybrid sysfs), otherwise CPU cores minus 2, with a
-  minimum of 2. The measured sweet spot matches the P-core count. Small CI
-  runners want workers = cores and pin the env var explicitly (CI uses 4).
+  Silicon sysctl, Intel hybrid sysfs), otherwise every CPU core, with a
+  minimum of 2. The measured knee is one worker per fast core: the P-cores
+  on the Mac, 8 on the 8-core VM (2026-09-23: OPS and OJS slower at 6, OPS
+  no faster and redder at 10 and 12), 4 on CI's 4-vcpu runners, which pin
+  the env var explicitly.
 - **Server output** goes to
   `apps/<app>/playwright/.server-logs/server-<port>.log` (request log plus
   PHP warnings); the probe servers' is `server-<port>-probe.log` beside it.

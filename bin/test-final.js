@@ -10,7 +10,7 @@
  * Each app runs `npm run test:<app> -- --reporter=list --output
  * .reports/<feature>/pw-out-final-<app>`, with its console in
  * .reports/<feature>/final-run-<app>.log. PLAYWRIGHT_WORKERS is left to the
- * environment (the VM pins 4; unset auto-detects). One summary line per app,
+ * environment (unset auto-detects, 8 on the VM). One summary line per app,
  * exit 1 if any suite fails.
  *
  * A server already answering on an app's base port would be adopted by the

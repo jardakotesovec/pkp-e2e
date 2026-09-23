@@ -120,6 +120,12 @@ trips.
   CI runs on a fresh database, so no CI incident yet. **Watch
   condition**: S8 reds in CI, or a local run on a fresh database reds;
   then bisect the participant panel against submission volume.
+  **Tripped 2026-09-23 above the knee** (OPS full run at 10 workers on
+  the 8-core VM, a database reset seconds before,
+  `.reports/workers-8core/run-ops-w10.log`): the impersonated
+  participant's "Workflow: Production" heading not found in 10 s; green
+  in the sweep's other five runs (6, 8, 10 and 12 workers). The fresh database rules out
+  volume for this sighting, so load is the lead.
 - **Reviewer-indicator popover under load** (U23 S9, OJS). The row with
   two reviewers opens the wrong reviewer's popover (Paul instead of Julia)
   during a full-suite run and passes in isolation; the hover target is
@@ -708,6 +714,20 @@ trips.
   at 15 s after the journal's login address, 38 of 39 green; the file
   green alone minutes later, 9 of 9). **Watch condition**: a second
   sighting in a full run or on CI.
+  **Tripped 2026-09-23** (the worker sweep on the new 8-core VM, OPS full
+  runs on databases reset seconds before, `.reports/workers-8core/`): the
+  moderator's `waitForURL(/dashboard/editorial/)` timed out at 15 s in
+  both 6-worker runs and the 12-worker run, one of the first tests of the
+  run each time, the 12 serial and solo tests skipped behind it; green in
+  the 8-worker run. The same class on the other apps in that day's
+  8-worker finals, again among the first ten tests of a run: OJS U01 S7
+  (the impersonated `author.alex` not in the user menu in 10 s,
+  `run-ojs-w8.log`) and OMP U01 S6 (`run-omp-w8.log`), each skipping the
+  serial and solo projects. The worker servers start with every run, so
+  each one's PHP opcache and compiled templates are cold at every run,
+  not only after a reset. Next: read whether the first dashboard render after a
+  cold bootstrap (template and cache compilation under a full worker
+  fleet) outlasts 15 s, and warm it in the setup project if so.
 - **Site-level Tasks window disagreeing with the journal's under load**
   (U05 S7, OJS, once). The test reads the Tasks rows from the journal's
   editorial page and then from the site-level bell and compares the sorted

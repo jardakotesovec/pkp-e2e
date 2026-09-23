@@ -360,11 +360,12 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    leaves open is a ❓ in the owning spec, posted in the thread, and the
    team's reply is recorded as the entry's verdict the same day.
 5. **Run the suites.** The full suite of every app whose checkout carries
-   the change, on a reset database at four workers; a submodule-only app
-   PR whose lib/pkp change is verified on the first app takes its own
-   PR check's green run as evidence, unless the change has app-specific
-   surface. A red test gets a solo rerun at the PR ref and, if it reds
-   again, the same rerun at the app's tip on the same database and on a
+   the change, on a reset database at the VM's auto-detected workers; a
+   submodule-only app PR whose lib/pkp change is verified on the first app
+   takes its own PR check's green run as evidence, unless the change has
+   app-specific surface. A red test gets a solo rerun at the PR ref and,
+   if it reds again, the same rerun at the app's tip on the same database
+   and on a
    fresh one: red at both refs is a flake class (ci-triage), red only at
    the PR ref is the PR's. Traces kept on failure (`--trace
    retain-on-failure`) save a second reproduction.
@@ -441,9 +442,11 @@ the answer; the spec and the test are the record.
   even targeted ones: the cores cannot carry two suites, and Mailpit is one
   shared instance whose recipient scoping is per app. Announce a full run
   in the session's thread; `npm run test:final` runs the three suites one
-  after another. Run full suites with `PLAYWRIGHT_WORKERS=4`, the measured
-  plateau on the 4-core VM. Targeted `--grep` probes of different apps are
-  fine at any time.
+  after another. Run full suites at the auto-detected count, 8 on the
+  8-core VM (the measured knee, harness.md "Runtime model"; OPS 4.2 min
+  there against 8.0 at four workers on the old 4-core VM), and pin
+  `PLAYWRIGHT_WORKERS=4` only to reproduce a red at CI's setting.
+  Targeted `--grep` probes of different apps are fine at any time.
 - **End pushed, not just committed.** The VM's working tree is not a durable
   home: work that reaches a commit-worthy gate is committed AND pushed to
   pkp-e2e `main` before the session ends, tracking updates included, under
