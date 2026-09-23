@@ -63,7 +63,13 @@ for (repo, rid), meta in sorted(runs.items(), key=lambda kv: kv[1]["createdAt"])
             _, name, concl, st, en, steps = (ln.split("\t") + [""] * 6)[:6]
             app = re.search(r"\((\w+)\)", name)
             app = app.group(1) if app else name
-            jobs[app] = dict(conclusion=concl, failed_steps=steps)
+            if app in jobs:  # another shard of the app (run-app.yml runs each app as shards): merge
+                j = jobs[app]
+                if concl != "success":
+                    j["conclusion"] = concl
+                j["failed_steps"] = ";".join(x for x in (j["failed_steps"], steps) if x)
+            else:
+                jobs[app] = dict(conclusion=concl, failed_steps=steps)
             continue
         parts = ln.split("\t", 2)
         if len(parts) < 3:
@@ -87,7 +93,7 @@ for (repo, rid), meta in sorted(runs.items(), key=lambda kv: kv[1]["createdAt"])
             continue
         m = SUM_RE.match(body)
         if m:
-            summary[app][m.group(2)] = int(m.group(1))
+            summary[app][m.group(2)] = summary[app].get(m.group(2), 0) + int(m.group(1))  # summed over the app's shards
             continue
         if INFRA_RE.search(body):
             infra[app].append(body.strip()[:160])
@@ -152,7 +158,7 @@ def score(d): return len(d["flaky"]) + len(interm_of(d))
 out = []
 dates = sorted(r["date"][:10] for r in per_run) or [dt.date.today().isoformat()]
 out.append(f"# CI flake tally: runs created {dates[0]} .. {dates[-1]} (fetched {dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%MZ')})\n")
-out.append("Sources: `gh run list` + `gh run view --log` on jardakotesovec/pkp-e2e (workflow `e2e`, 3 jobs ojs/omp/ops per run, apps at pkp/<app> main tip) and pkp/ojs, pkp/omp, pkp/ops (workflow `e2e`, the thin hook calling run-app.yml; 1 job per run). Cancelled runs (superseded pushes) were not inspected. CI runs `npx playwright test --retries=1` with the list reporter.\n")
+out.append("Sources: `gh run list` + `gh run view --log` on jardakotesovec/pkp-e2e (workflow `e2e`, one job per app shard, merged per app here (3 shards per app since 2026-09-23), apps at pkp/<app> main tip) and pkp/ojs, pkp/omp, pkp/ops (workflow `e2e`, the thin hook calling run-app.yml; 1 job per run). Cancelled runs (superseded pushes) were not inspected. CI runs `npx playwright test --retries=1` with the list reporter.\n")
 out.append("Definitions:\n- **flaky** = failed the first attempt, passed the retry (job stays green). Direct evidence of non-determinism.\n- **failed** = both attempts failed (job red). Sub-signals: *green rerun same sha* = a later run of the same repo at the same head SHA succeeded; *passed nearby Nx* = the same test passed in N other completed jobs of the same repo + branch + app within ±36 h, both before and after the failure, and the job had at most 3 failed tests (larger clusters are regressions). Either marks the failure as **intermittent**. A failed incident with neither is most likely a real regression at that ref (every push is a new SHA, so consecutive failures across SHAs are consistent with a regression).\n- **(exp)** = pkp-e2e run on a non-main branch (perf-* experiments with patched pkp-lib, or a companion branch); count with care.\n- flake score = flaky + intermittent failed.\n")
 
 out.append("## Runs inspected per repo\n")

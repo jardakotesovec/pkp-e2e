@@ -103,9 +103,10 @@ orchestrator.
 
 Per app about 700 tests and 25 minutes for the full suite on a fresh
 database; the measured sizes and times are in the PROGRESS banner, kept
-current by the maintenance session. CI runs one job per app with four
-workers and no sharding yet: a suite that grows past the cap gets a shard
-matrix in `run-app.yml`, never a cut. A feature's scenarios cover
+current by the maintenance session. CI runs each app as three shards of
+four workers (`run-app.yml`, since 2026-09-23), so the 25 minutes bind a
+shard: a suite that grows past the cap gets another shard there, never a
+cut. A feature's scenarios cover
 everything important and everything a user meets in ordinary use,
 whatever the count. The main and guard rows of the spec's classed
 Coverage table (TEMPLATE "Coverage") are always covered, so a complex

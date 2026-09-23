@@ -474,8 +474,9 @@ the answer; the spec and the test are the record.
 - **Keep the budget measured.** After every full `test:final`, replace the
   PROGRESS banner's suite line with each app's test count and run time
   from the `final-run-<app>.log` summary lines, dated, so RUNBOOK
-  "Budget" rests on a number; when an app approaches 25 minutes, the
-  shard matrix in `run-app.yml` is the next task, never a cut.
+  "Budget" rests on a number; CI runs each app as three shards
+  (`run-app.yml`), so when a shard's Playwright step approaches 25
+  minutes on CI, one more shard there is the next task, never a cut.
 - **Leave the revision queue to the maintainer.**
   `docs/tracking/coverage-revision.md` lists the shipped specs awaiting
   RUNBOOK "Revising a shipped feature"; each is a session the maintainer

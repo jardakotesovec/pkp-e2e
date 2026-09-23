@@ -334,8 +334,12 @@ processes before re-running.
   The hooks also pass `companion_branch`, the PR's branch name: when a
   pkp-e2e branch of the same name exists, the suite runs from it instead
   (MAINTENANCE "A developer's PR fails the suite").
-- CI runs with `PLAYWRIGHT_WORKERS=4` and `--retries=1`. Failure artifacts
-  include `.server-logs/`.
+- CI runs each app as three shards (`--shard=n/3`, one job each with its
+  own services and install, check names `e2e (<app>) n/3`) at
+  `PLAYWRIGHT_WORKERS=4` and `--retries=1`; the shard count is set in
+  `run-app.yml` alone, and the app hooks follow it since they call that
+  workflow at `main`. Failure artifacts are per shard
+  (`playwright-artifacts-<app>-<n>`) and include `.server-logs/`.
 - The latest run of `e2e-tests.yml` on an app repo's `main` is the
   authoritative "is the app's tip red?" answer:
   `gh run list -R pkp/<app> --workflow e2e-tests.yml --branch main`, then

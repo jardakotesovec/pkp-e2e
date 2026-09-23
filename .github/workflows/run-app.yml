@@ -2,6 +2,14 @@
 # suite — services, app + pkp-e2e checkouts, mount, config generation, run.
 # Called by this repo's e2e.yml matrix AND by the thin per-app hook workflows
 # in the application repositories (which pass their own repo/sha).
+#
+# The suite runs as SHARDS (RUNBOOK "Budget"): one job per shard, each with
+# its own Postgres, Mailpit and app install, running `--shard=n/N` of the
+# suite at four workers. Playwright splits every project's tests across the
+# shards and runs the dependency projects (setup, the app project before
+# its serial and solo projects) inside each shard, so a shard is a complete,
+# smaller run. The shard count lives here alone (the job name, SHARDS and
+# the matrix); the app hooks pick a change up on their next run.
 name: run-app
 
 on:
@@ -40,9 +48,14 @@ on:
 
 jobs:
   e2e:
-    name: e2e (${{ inputs.app }})
+    name: e2e (${{ inputs.app }}) ${{ matrix.shard }}/3
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     env:
+      SHARDS: 3
       APP_REPO: ${{ inputs.app_repo }}
       APP_REF: ${{ inputs.app_ref }}
       PKP_CONFIG_FILE: ${{ github.workspace }}/app/config.test.inc.php
@@ -183,13 +196,13 @@ jobs:
           OJS_ROOT: ${{ github.workspace }}/app
           OMP_ROOT: ${{ github.workspace }}/app
           OPS_ROOT: ${{ github.workspace }}/app
-        run: npx playwright test -c configs/${{ inputs.app }}.config.js --retries=1
+        run: npx playwright test -c configs/${{ inputs.app }}.config.js --retries=1 --shard=${{ matrix.shard }}/${{ env.SHARDS }}
 
       - name: Upload test artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts-${{ inputs.app }}
+          name: playwright-artifacts-${{ inputs.app }}-${{ matrix.shard }}
           path: |
             e2e/apps/${{ inputs.app }}/playwright/test-results/
             e2e/apps/${{ inputs.app }}/playwright/.server-logs/
