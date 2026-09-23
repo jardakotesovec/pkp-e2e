@@ -287,6 +287,36 @@ behind a line; that scratch is deleted after review.
   row does not stop a Participants message's email. Profile ›
   Notifications; Mailpit. Live-driven 2026-09-22, all three apps (U35 ccK3
   K3-8).
+- A scratch user's "Discussion added." row on Profile › Notifications
+  arrives with "Enable these types of notifications." ticked and "Do not
+  send me an email…" unticked. Live-driven 2026-09-23, all three apps
+  (`.reports/U37/cc-K5.md`, `cc-K4.md`).
+- In the "Add" window of a stage's "Tasks & Discussions" panel (unlike the
+  Participants form above), a template added in Settings › Workflow ›
+  "Tasks and Discussions" fills "Name" and the message and saves like an
+  installed one, placeholders resolved. A preprint server's "Assign Editor"
+  fills "Name" only; the box keeps its old text, but "Save" treats it as
+  empty. A "Find Template" search holding "task(s)" or "discussion(s)"
+  answers 500 with an "Error" window. Live-driven 2026-09-23, all three
+  apps (`.reports/U37/cc-K3.md`).
+- A template switched on for "Auto-add at stage" makes its item for a
+  seeded submission at the submit into the first stage (OPS: Production)
+  and at a stage change driven on screen ("Send To Production", "Move To
+  Copyediting" on a journal or press, "Unpost" on a preprint server); it
+  is made again only after it is deleted, and its first message keeps the
+  recipient and sender placeholders unfilled. Settings › Workflow and the
+  stage panel, live-driven 2026-09-23, all three apps
+  (`.reports/U37/cc-K4.md`).
+- A seeded `accepted` reviewer's wizard shows no "Review Tasks &
+  Discussions" panel until they walk to step 3. After "Cancel Reviewer",
+  and for a declined request, the wizard address answers "The current user
+  is not assigned as a reviewer for the requested document.", so the
+  reviewer's panel is gone too. Reviewer wizard, live-driven 2026-09-23,
+  OJS and OMP (`.reports/U37/cc-K1.md`).
+- A reviewer seeded in two `reviewRounds` entries holds two open requests,
+  rounds 1 and 2, and a discussion lists them under the reviewer as
+  "Round 1 - {mode}, Round 2 - {mode}". Live-driven 2026-09-23, OJS and OMP
+  (`.reports/U37/cc-K7.md`).
 - A scratch context never receives an automatic editor assignment: a
   submission sent through the wizard into a section with a sub-editor gets
   none, and the managers get "A new submission needs an editor to be

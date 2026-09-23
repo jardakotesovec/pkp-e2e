@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **19 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **21 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -296,3 +296,24 @@ until their specs exist. Do not force-claim the defects themselves.
     Code-verified 2026-09-23 (checkouts ojs 802202cb3e, omp 7f9455d5a,
     ops 15f0b6e0bd). Resolves: maintainer confirmation as dead code
     (removal candidates).
+20. **API-044 note delete unreachable and always refused** — attached to
+    **U37** (claimed; the tasks-and-discussions spec's Reference table
+    lists the route). `DELETE submissions/{id}/tasks/{taskId}/notes/{noteId}`
+    has no caller in the ui-library (no screen offers deleting a message),
+    and it cannot succeed: `NoteAccessPolicy` (write) denies every note
+    that is not the head note, and `EditorialTaskController::deleteNote()`
+    refuses the head note. Code-verified 2026-09-23 (U37 spec author;
+    checkouts ojs `802202cb3e`, lib/pkp `5af3b3933`, ui-library
+    `2034439a`). Resolves: maintainer confirmation as dead (removal
+    candidate), or a screen for deleting a reply with a policy that allows
+    it.
+21. **Unrendered discussions-manager pieces** — attached to **U37**
+    (claimed). `useDiscussionManagerConfig.js` grants
+    `TASKS_AND_DISCUSSIONS_SEARCH`, but nothing renders it and the store's
+    `discussionSearch()` calls an action `useDiscussionManagerActions.js`
+    does not define; the texts `task.reopenThisTask` /
+    `task.confirmReopenTask` are reachable only through a box that is
+    always disabled (the spec's register entry A13); and
+    `editorialTask/Repository::countOpenPerStage()` has no caller.
+    Code-verified 2026-09-23 (checkouts as above). Resolves: maintainer
+    confirmation as dead code.

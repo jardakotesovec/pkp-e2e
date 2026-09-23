@@ -140,6 +140,16 @@
  *   "File Metadata" list (document / artwork / supplementary), the three
  *   booleans the "File Type" boxes and "Require with Submissions". Applied
  *   after the settings forms, before users[].
+ * - taskTemplates[] {stage*, title*, type?, dueInterval?, roles?, include?,
+ *   message?} — Settings › Workflow › "Tasks and Discussions" (U37): an
+ *   installed template of that stage, matched by its primary-locale title,
+ *   is its "Edit" › "Save"; any other title the stage's "Add template" ›
+ *   "Save". The window's JSON body through AddTaskTemplate /
+ *   UpdateTaskTemplate's own rules and PKPEditTaskTemplateController::add /
+ *   ::update themselves (ApiCall). `include` is "Auto-add at stage",
+ *   `roles` "Limit access to specific roles", `type` "task" with
+ *   `dueInterval` (P1W … P3M) the task information. Applied after the
+ *   settings forms and components, before users[].
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -255,6 +265,7 @@ abstract class PKPContextScenarioBuilder
         $pluginPlans = $this->parsePlugins($root);
         $rolePlans = $this->parseRoleOptions($root);
         $componentPlans = $this->parseComponents($root, $primaryLocale);
+        $templatePlans = $this->parseTaskTemplates($root);
         $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $root->assertConsumed();
@@ -325,6 +336,11 @@ abstract class PKPContextScenarioBuilder
             $components[] = $this->applyComponent($context, $plan);
         }
 
+        $taskTemplates = [];
+        foreach ($templatePlans as $plan) {
+            $taskTemplates[] = $this->applyTaskTemplate($context, $plan);
+        }
+
         foreach ($rolePlans as $plan) {
             $this->applyRoleOptions($context, $plan);
         }
@@ -370,7 +386,173 @@ abstract class PKPContextScenarioBuilder
             'announcementTypes' => $announcementTypes,
             'announcements' => $announcements,
             'components' => $components,
+            'taskTemplates' => $taskTemplates,
         ];
+    }
+
+    /**
+     * The optional `taskTemplates[]` list (U37) → one plan per entry: a
+     * template of Settings › Workflow › "Tasks and Discussions". An entry
+     * whose title matches a template the new context already holds on
+     * that stage (the installed ones, named in the primary locale) is that
+     * row's "Edit" › "Save"; any other title is the stage's "Add template"
+     * › "Save". Parse phase: shapes and role keys only (the role keys
+     * against the roles every new context gets); no writes.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function parseTaskTemplates(Spec $root): array
+    {
+        if (!$root->has('taskTemplates')) {
+            return [];
+        }
+        $roleKeys = [];
+        $xml = simplexml_load_file(Core::getBaseDir() . '/registry/userGroups.xml');
+        foreach ($xml->group as $group) {
+            $roleKeys[] = preg_replace('/^default\.groups\.name\./', '', (string) $group['name']);
+        }
+        $intervals = array_column(\PKP\editorialTask\enums\EditorialTaskDueInterval::cases(), 'value');
+        $plans = [];
+        foreach ($root->childList('taskTemplates') as $spec) {
+            $plan = [
+                'path' => $spec->path,
+                'stageId' => ApiCall::stageId((string) $spec->require('stage'), "{$spec->path}.stage"),
+                'title' => (string) $spec->require('title'),
+                'fields' => [],
+            ];
+            if ($spec->has('type')) {
+                $type = (string) $spec->get('type');
+                if (!in_array($type, ['discussion', 'task'], true)) {
+                    throw new SpecException("{$spec->path}.type", 'type must be "discussion" or "task" (the "Enter task information" box)');
+                }
+                $plan['fields']['type'] = $type;
+            }
+            if ($spec->has('dueInterval')) {
+                $interval = (string) $spec->get('dueInterval');
+                if (!in_array($interval, $intervals, true)) {
+                    throw new SpecException("{$spec->path}.dueInterval", 'dueInterval must be one of the "Due Date" list\'s values: ' . implode(', ', $intervals) . ' (P1W "1 week from the creation date" … P3M "3 months …")');
+                }
+                $plan['fields']['dueInterval'] = $interval;
+            }
+            if ($spec->has('roles')) {
+                $roles = $spec->get('roles');
+                if (!is_array($roles) || !array_is_list($roles) || $roles === []) {
+                    throw new SpecException("{$spec->path}.roles", 'roles must be a non-empty list of role keys ("Limit access to specific roles" with those boxes ticked)');
+                }
+                foreach ($roles as $i => $roleKey) {
+                    if (!in_array((string) $roleKey, $roleKeys, true)) {
+                        sort($roleKeys);
+                        throw new SpecException("{$spec->path}.roles.{$i}", "Unknown role key \"{$roleKey}\". This app's keys: " . implode(', ', $roleKeys));
+                    }
+                }
+                $plan['fields']['roles'] = array_map('strval', $roles);
+            }
+            if ($spec->has('include')) {
+                $include = $spec->get('include');
+                if (!is_bool($include)) {
+                    throw new SpecException("{$spec->path}.include", 'include must be a boolean (the "Auto-add at stage" box)');
+                }
+                $plan['fields']['include'] = $include;
+            }
+            if ($spec->has('message')) {
+                // The "Discussion" box is a rich-text editor, which posts a
+                // paragraph for plain typed text; markup is kept.
+                $message = (string) $spec->get('message');
+                $plan['fields']['message'] = ($message !== '' && !str_starts_with(ltrim($message), '<')) ? "<p>{$message}</p>" : $message;
+            }
+            $plans[] = $plan;
+        }
+        return $plans;
+    }
+
+    /**
+     * Save one template the way its window's "Save" does: the body the
+     * window posts (title, stageId, restrictToUserGroups, userGroupIds or
+     * null, include, dueInterval or null for a discussion, description,
+     * type), for an edit started from the stored template as the window
+     * opens with it, validated with AddTaskTemplate / UpdateTaskTemplate's
+     * own rules and handed to PKPEditTaskTemplateController::add or
+     * ::update itself (ApiCall). The window's own refusals are the seed's:
+     * a task needs a "Due Date", a limited template at least one role, and
+     * each role must be one of the boxes the window offers (the roles that
+     * work on the stage, `userGroups?stageIds=`). A new template's message
+     * defaults to a seeded line, since the box is required.
+     *
+     * @return array{id: int, title: string, stage: string, action: string}
+     */
+    protected function applyTaskTemplate(Context $context, array $plan): array
+    {
+        $restore = ContextFactory::forceRequestContext($context);
+        try {
+            $primaryLocale = $context->getPrimaryLocale();
+            $existing = \PKP\editorialTask\Template::query()
+                ->withContextId($context->getId())
+                ->withStageId($plan['stageId'])
+                ->with('userGroups')
+                ->get()
+                ->first(fn ($template) => $template->getLocalizedData('title', $primaryLocale) === $plan['title']);
+            $taskType = \PKP\editorialTask\enums\EditorialTaskType::TASK->value;
+            $fields = $plan['fields'];
+            if ($existing) {
+                if ($fields === []) {
+                    throw new SpecException($plan['path'], "An edit of the installed template \"{$plan['title']}\" that sets nothing; give type, dueInterval, roles, include or message");
+                }
+                $isTask = isset($fields['type']) ? $fields['type'] === 'task' : (int) $existing->type === $taskType;
+                $restricted = isset($fields['roles']) ? true : (bool) $existing->restrictToUserGroups;
+                $userGroupIds = $existing->userGroups->map(fn ($userGroup) => (int) $userGroup->id)->values()->all();
+                $body = [
+                    'title' => $existing->getLocalizedData('title'),
+                    'include' => (bool) $existing->include,
+                    'dueInterval' => $isTask ? ($fields['dueInterval'] ?? $existing->dueInterval) : null,
+                    'description' => $existing->getLocalizedData('description') ?? '',
+                ];
+            } else {
+                $isTask = ($fields['type'] ?? 'discussion') === 'task';
+                $restricted = isset($fields['roles']);
+                $userGroupIds = [];
+                $body = [
+                    'title' => $plan['title'],
+                    'include' => false,
+                    'dueInterval' => $isTask ? ($fields['dueInterval'] ?? null) : null,
+                    'description' => '<p>Seeded template text for ' . htmlspecialchars($plan['title']) . '.</p>',
+                ];
+            }
+            if (!$isTask && isset($fields['dueInterval'])) {
+                throw new SpecException("{$plan['path']}.dueInterval", 'A discussion template has no "Due Date": dueInterval needs type "task"');
+            }
+            if ($isTask && $body['dueInterval'] === null) {
+                throw new SpecException("{$plan['path']}.dueInterval", 'A task template\'s "Due Date" is required: give dueInterval');
+            }
+            if (isset($fields['roles'])) {
+                $offered = \PKP\userGroup\UserGroup::withContextIds([$context->getId()])->withStageIds([$plan['stageId']])->get();
+                $userGroupIds = [];
+                foreach ($fields['roles'] as $i => $roleKey) {
+                    $userGroup = $this->userSeeder->resolveUserGroup($context, $roleKey, "{$plan['path']}.roles.{$i}");
+                    if (!$offered->contains(fn ($group) => (int) $group->id === (int) $userGroup->id)) {
+                        throw new SpecException("{$plan['path']}.roles.{$i}", "The window offers only the roles that work on the stage; \"{$roleKey}\" does not");
+                    }
+                    $userGroupIds[] = (int) $userGroup->id;
+                }
+            }
+            $body['stageId'] = $plan['stageId'];
+            $body['restrictToUserGroups'] = $restricted;
+            $body['userGroupIds'] = $restricted ? $userGroupIds : null;
+            $body['include'] = $fields['include'] ?? $body['include'];
+            $body['description'] = $fields['message'] ?? $body['description'];
+            $body['type'] = $isTask ? $taskType : \PKP\editorialTask\enums\EditorialTaskType::DISCUSSION->value;
+
+            $controller = ApiCall::controller(\PKP\API\v1\editTaskTemplates\PKPEditTaskTemplateController::class);
+            if ($existing) {
+                $request = ApiCall::request(\PKP\API\v1\editTaskTemplates\formRequests\UpdateTaskTemplate::class, 'PUT', $body, ['templateId' => $existing->id], $plan['path'], 'The template window\'s "Save" would be refused');
+                $saved = ApiCall::answer($controller->update($request), $plan['path'], 'The template window\'s "Save" failed');
+            } else {
+                $request = ApiCall::request(\PKP\API\v1\editTaskTemplates\formRequests\AddTaskTemplate::class, 'POST', $body, [], $plan['path'], 'The template window\'s "Save" would be refused');
+                $saved = ApiCall::answer($controller->add($request), $plan['path'], 'The template window\'s "Save" failed');
+            }
+            return ['id' => (int) $saved['id'], 'title' => $plan['title'], 'stage' => ApiCall::stageWord($plan['stageId']), 'action' => $existing ? 'edited' : 'added'];
+        } finally {
+            $restore();
+        }
     }
 
     /**

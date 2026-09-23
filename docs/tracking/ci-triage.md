@@ -73,7 +73,7 @@ trips.
   desktop), both green in the second full run; U40 S4 (the edited abstract not
   found in 30 s) red on OMP in the first U03 revision final 2026-09-13, green
   alone in 5 s and in the second full run; U40 S4 red on OMP in the first
-  U06 revision final 2026-09-13, green alone in 5.1 s; U40 S6 (the "This field is required." message not shown in 10 s after the cleared title's "Confirm") red on OMP in the first U35 local final 2026-09-20 (4 workers), green alone in 13.5 s. **Watch condition**: a
+  U06 revision final 2026-09-13, green alone in 5.1 s; U40 S6 (the "This field is required." message not shown in 10 s after the cleared title's "Confirm") red on OMP in the first U35 local final 2026-09-20 (4 workers), green alone in 13.5 s. Sighted 2026-09-23 on the Mac: red in 5 of 5 runs during the U37 harness step on a used OMP database, the file alone and `--repeat-each 3` included, and also with the builders at HEAD (`.reports/U37/harness/rerun-omp-U40-S6-baseline.log`); then red in the U37 OMP final on a reset database at auto workers, the only red of 291 (`.reports/U37/final-run-omp.log`), and green alone right after (`alone-omp-U40S6.log`). Unread whether used-database state or load drives it. **Watch condition**: a
   hardened test reds again with retries exhausted.
   **U40 S4 on OMP, mechanism found 2026-09-15** (a retained trace,
   `docs/reports/2026-09-15-flake-investigation.md`): `WorkflowPublicationForm`
@@ -394,7 +394,7 @@ trips.
   select listed "Author Original (AO)" with nothing checked for the whole
   wait. Green on the same Mac the day before on a reset database (the U32
   finals), so used-database state, not the galley key; the U33 final on a
-  reset database is the next read. **Sighted 2026-09-21 on the VM, OMP** (sync session, the OMP final at four workers on a reset database, `.reports/sync/final-run-omp.log`: U49 S4's first "Create New Version" dialog, "Publication Stage" `""` through the wait for "VoR" behind the hardened opener, the one red of 267 with the 14 serial tests skipped behind it; green alone in 10.2 s, `.reports/sync/s21-rerun-omp-u49s4.log`, the serial and solo projects green alone). The read of the dialog's fetch is still owed.
+  reset database is the next read. **Sighted 2026-09-21 on the VM, OMP** (sync session, the OMP final at four workers on a reset database, `.reports/sync/final-run-omp.log`: U49 S4's first "Create New Version" dialog, "Publication Stage" `""` through the wait for "VoR" behind the hardened opener, the one red of 267 with the 14 serial tests skipped behind it; green alone in 10.2 s, `.reports/sync/s21-rerun-omp-u49s4.log`, the serial and solo projects green alone). The read of the dialog's fetch is still owed. **Sighted 2026-09-23 on the Mac, OPS** (U37 session, the OPS final on a reset database at auto workers, `.reports/U37/final-run-ops.log`): U49 S6's second dialog, "Publication Stage" with nothing checked for the wait for "Author Original (AO)"; red once more alone (`alone-ops-U49S6.log`), then green 3 of 3 alone with `--repeat-each 3` (`alone-ops-U49S6-rep.log`); the U37 harness's OPS U49 run on the same tree was green.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -621,7 +621,7 @@ trips.
   whether the report's job had not run yet or the dialog was read before
   its second fetch. Sighted again 2026-09-23, the U36 session's OJS final
   on a reset database at auto workers, the only red of 288, green alone
-  (`.reports/U36/final-run-ojs.log`, `alone-ojs-U14S5.log`). Because the app project fails, the serial and solo
+  (`.reports/U36/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-23 in the U37 session's OJS final, the only red of 299, green alone (`.reports/U37/final-run-ojs.log`, `alone-ojs-U14S5.log`). Because the app project fails, the serial and solo
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run

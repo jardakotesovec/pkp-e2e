@@ -144,6 +144,14 @@
  *   fixture basename, as for galleys[]; `genre` the name of one of the
  *   components the upload lists offer (enabled, not dependent), default
  *   the first main-work one ("Article Text", "Book Manuscript").
+ * - tasks[] {title*, creator*, participants*, type?, stage?, owner?,
+ *   dateDue?, started?, message?} — discussions and tasks on a stage's
+ *   "Tasks & Discussions" panel (U37), each the panel's "Add" › "Save" by
+ *   its creator, after everything else: the window's JSON body through
+ *   the AddTask request's own rules and EditorialTaskController::addTask
+ *   itself (ApiCall), then, for a started task, ::startTask ("Begin Task
+ *   Upon Saving"). A past dateDue (the window refuses one, A10) is the one
+ *   lifted rule: it stands for a due date passed since the save.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -448,6 +456,7 @@ abstract class PKPSubmissionScenarioBuilder
         $commentPlans = $this->parseUserComments($root, $published);
         $galleyPlans = $this->parseGalleys($context, $root, $locale);
         $filePlans = $this->parseFiles($context, $root, $submitter, $submitted, $participantPlans);
+        $taskPlans = $this->parseTasks($root, $submitted, $tag);
         $root->assertConsumed();
 
         if ($published && !$submitted) {
@@ -463,7 +472,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -489,13 +498,15 @@ abstract class PKPSubmissionScenarioBuilder
         array $suggestionPlans = [],
         array $commentPlans = [],
         array $galleyPlans = [],
-        array $filePlans = []
+        array $filePlans = [],
+        array $taskPlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
         $seededComments = [];
         $seededGalleys = [];
         $seededFiles = [];
+        $seededTasks = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -793,6 +804,12 @@ abstract class PKPSubmissionScenarioBuilder
             Registry::set('user', $previousActingUser);
         }
 
+        // Discussions and tasks, last: each is the stage panel's "Add" ›
+        // "Save" by its creator on the submission as built.
+        if ($taskPlans !== []) {
+            $seededTasks = $this->seedTasks(Repo::submission()->get($submissionId), $taskPlans);
+        }
+
         // ---- Response.
         $submission = Repo::submission()->get($submissionId);
         $rounds = [];
@@ -814,6 +831,7 @@ abstract class PKPSubmissionScenarioBuilder
             'userComments' => $seededComments,
             'galleys' => $seededGalleys,
             'files' => $seededFiles,
+            'tasks' => $seededTasks,
         ];
     }
 
@@ -1848,6 +1866,195 @@ abstract class PKPSubmissionScenarioBuilder
     }
 
     /** The editor decisions are attributed to: the installer's admin. */
+    /** The default first message of a seeded discussion or task. */
+    public const DEFAULT_TASK_MESSAGE = 'Seeded message for {tag}.';
+
+    /**
+     * Read tasks[] (U37): each entry a discussion or task on one stage's
+     * "Tasks & Discussions" panel, as its "Add" window saves it. Parse
+     * phase: shapes and usernames only; the window's own refusals (Rule 8:
+     * participants assigned to the stage, the creator among them unless
+     * manager-level, two for a discussion, one owner for a task, the
+     * anonymity rules) are the controller's validation, run at execute.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function parseTasks(Spec $root, bool $submitted, string $tag): array
+    {
+        if (!$root->has('tasks')) {
+            return [];
+        }
+        if (!$submitted) {
+            throw new SpecException('tasks', 'A draft has no workflow and no "Tasks & Discussions" panel: tasks needs submitted: true');
+        }
+        $resolveUser = function (string $username, string $specKey): User {
+            $user = Repo::user()->getByUsername($username, true);
+            if (!$user) {
+                throw new SpecException($specKey, "Unknown username \"{$username}\"");
+            }
+            return $user;
+        };
+        $plans = [];
+        foreach ($root->childList('tasks') as $spec) {
+            $type = (string) $spec->get('type', 'discussion');
+            if (!in_array($type, ['discussion', 'task'], true)) {
+                throw new SpecException("{$spec->path}.type", 'type must be "discussion" or "task" (the "Enter task information" box)');
+            }
+            $isTask = $type === 'task';
+            $title = (string) $spec->require('title');
+            $stageId = $spec->has('stage') ? ApiCall::stageId((string) $spec->get('stage'), "{$spec->path}.stage") : null;
+            $creator = $resolveUser((string) $spec->require('creator'), "{$spec->path}.creator");
+            $usernames = $spec->require('participants');
+            if (!is_array($usernames) || !array_is_list($usernames)) {
+                throw new SpecException("{$spec->path}.participants", 'participants must be a list of usernames (the ticked "Participants" boxes)');
+            }
+            $participants = [];
+            foreach ($usernames as $i => $username) {
+                $participants[] = $resolveUser((string) $username, "{$spec->path}.participants.{$i}");
+            }
+            foreach (['owner', 'dateDue', 'started'] as $taskKey) {
+                if (!$isTask && $spec->has($taskKey)) {
+                    throw new SpecException("{$spec->path}.{$taskKey}", "\"{$taskKey}\" belongs to a task (type: \"task\"); a discussion has no task information");
+                }
+            }
+            $owner = null;
+            $dateDue = null;
+            $started = false;
+            if ($isTask) {
+                $owner = $resolveUser((string) $spec->require('owner'), "{$spec->path}.owner");
+                $dateDue = (string) $spec->require('dateDue');
+                $parsed = \DateTime::createFromFormat('!Y-m-d', $dateDue);
+                if (!$parsed || $parsed->format('Y-m-d') !== $dateDue) {
+                    throw new SpecException("{$spec->path}.dateDue", 'dateDue must be a date as YYYY-MM-DD');
+                }
+                $started = $spec->get('started', true);
+                if (!is_bool($started)) {
+                    throw new SpecException("{$spec->path}.started", 'started must be a boolean ("Begin Task Upon Saving" or "Create Task (Do Not Start)")');
+                }
+            }
+            // The message box is a rich-text editor, which posts a paragraph
+            // ("<p>…</p>") for plain typed text: wrap a bare string the same
+            // way; a string that already carries markup is kept.
+            $message = (string) $spec->get('message', str_replace('{tag}', $tag, self::DEFAULT_TASK_MESSAGE));
+            if ($message !== '' && !str_starts_with(ltrim($message), '<')) {
+                $message = "<p>{$message}</p>";
+            }
+            $plans[] = [
+                'path' => $spec->path,
+                'type' => $type,
+                'title' => $title,
+                'stageId' => $stageId,
+                'creator' => $creator,
+                'participants' => $participants,
+                'owner' => $owner,
+                'dateDue' => $dateDue,
+                'started' => $started,
+                'message' => $message,
+            ];
+        }
+        return $plans;
+    }
+
+    /**
+     * Save each parsed item the way the panel's "Add" window saves it, as
+     * its creator: the window's JSON body (type, title, stageId, dateDue,
+     * participants with the owner's isResponsible, the message as
+     * `description`, no files) run through the AddTask request's own
+     * rules and handed to EditorialTaskController::addTask itself (the
+     * task, its participants, the head note, the "created" History entry,
+     * then notifyParticipants: one "Discussion added." Tasks row and one
+     * email, faked, with its email-log row, per participant and the
+     * creator, and on Copyediting and Production the stage notices'
+     * update). A task with started true is then "Begin Task Upon Saving"'s
+     * second call, EditorialTaskController::startTask, as the creator.
+     *
+     * One deliberate difference: the window refuses a due date before
+     * today (A10), so a past dateDue stands for a task whose due date has
+     * passed since it was saved; the seed lifts that one rule
+     * (`after_or_equal:today`) and nothing else, and every other row of
+     * the item is stamped at the seed's time (parity ledger 2026-09-23).
+     *
+     * @return array<int, array{id: int, title: string, type: string, stage: string}>
+     */
+    protected function seedTasks(\APP\submission\Submission $submission, array $plans): array
+    {
+        $appStages = Application::getApplicationStages();
+        $currentStageId = (int) $submission->getData('stageId');
+        $reached = array_values(array_filter($appStages, fn (int $stageId) => $stageId <= $currentStageId));
+        $seeded = [];
+        foreach ($plans as $plan) {
+            $stageId = $plan['stageId'] ?? (in_array($currentStageId, $appStages, true) ? $currentStageId : end($reached));
+            if (!in_array($stageId, $reached, true)) {
+                throw new SpecException("{$plan['path']}.stage", 'The submission has not reached the ' . ApiCall::stageWord($stageId) . ' stage, so its panel is not on screen yet (stages reached: ' . implode(', ', array_map(fn (int $id) => ApiCall::stageWord($id), $reached)) . ')');
+            }
+            $isTask = $plan['type'] === 'task';
+            $participants = [];
+            foreach ($plan['participants'] as $user) {
+                $participant = ['userId' => $user->getId()];
+                if ($isTask) {
+                    $participant['isResponsible'] = $user->getId() === $plan['owner']->getId();
+                }
+                $participants[] = $participant;
+            }
+            if ($isTask && !in_array($plan['owner']->getId(), array_column($participants, 'userId'), true)) {
+                throw new SpecException("{$plan['path']}.owner", 'The owner list offers only the people ticked under "Participants": the owner must be one of participants');
+            }
+            $body = [
+                'type' => $isTask ? \PKP\editorialTask\enums\EditorialTaskType::TASK->value : \PKP\editorialTask\enums\EditorialTaskType::DISCUSSION->value,
+                'title' => $plan['title'],
+                'stageId' => $stageId,
+                'participants' => $participants,
+                'description' => $plan['message'],
+                'submissionFileIds' => [],
+            ];
+            if ($isTask) {
+                $body['dateDue'] = $plan['dateDue'];
+            }
+            $pastDue = $isTask && $plan['dateDue'] < date('Y-m-d');
+
+            $previousActingUser = Registry::get('user');
+            Registry::set('user', $plan['creator']);
+            try {
+                $request = ApiCall::request(
+                    \PKP\API\v1\submissions\tasks\formRequests\AddTask::class,
+                    'POST',
+                    $body,
+                    ['submissionId' => $submission->getId()],
+                    $plan['path'],
+                    'The "Add" window\'s "Save" would be refused',
+                    $pastDue ? fn (array $rules) => array_merge($rules, [
+                        'dateDue' => array_values(array_filter($rules['dateDue'], fn ($rule) => $rule !== 'after_or_equal:today')),
+                    ]) : null
+                );
+                $controller = ApiCall::controller(
+                    \PKP\API\v1\submissions\tasks\EditorialTaskController::class,
+                    [Application::ASSOC_TYPE_SUBMISSION => $submission]
+                );
+                $task = ApiCall::answer($controller->addTask($request), $plan['path'], 'The "Add" window\'s "Save" failed');
+                if ($isTask && $plan['started']) {
+                    $startRequest = ApiCall::request(
+                        \Illuminate\Http\Request::class,
+                        'PUT',
+                        [],
+                        ['submissionId' => $submission->getId(), 'taskId' => $task['id']],
+                        $plan['path'],
+                        ''
+                    );
+                    ApiCall::answer($controller->startTask($startRequest), "{$plan['path']}.started", '"Begin Task Upon Saving" could not start the task');
+                }
+            } finally {
+                Registry::set('user', $previousActingUser);
+            }
+            $seeded[] = [
+                'id' => (int) $task['id'],
+                'title' => $plan['title'],
+                'type' => $plan['type'],
+                'stage' => ApiCall::stageWord($stageId),
+            ];
+        }
+        return $seeded;
+    }
+
     protected function actingEditor(): User
     {
         $admin = Repo::user()->getByUsername('admin', true);

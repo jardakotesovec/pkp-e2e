@@ -143,6 +143,17 @@ Keys:
     "Remove Role" emails the member; the seed does not.
   `affiliation` and `pastRoles` are 400s on an account that already
   exists (the roster, `admin`): only a new account takes them.
+  `disabled: true` disables the new account the way Settings › Users &
+  Roles does (the row menu's "Disable User", the reason box left empty,
+  "OK": `disabled` 1 and an empty reason, as on screen; U37 harness,
+  2026-09-23, three apps). It is refused on an account that already
+  exists, since a roster account is shared by every worker. The account
+  is disabled when the context is created, before any submission seed,
+  so a disabled participant seeded into `participants[]` or `tasks[]`
+  gets none of the "Discussion added." rows or emails a seeded item
+  sends: that is the state after an item saved while they were
+  disabled, and it differs from "disabled after the item" only in the
+  first message's row and email they would have had.
 - `orcid`: the state of the ORCID settings tab, saved through the same
   service the tab's form uses. The defaults below apply only when the
   `orcid` key is given at all; a context created without it arrives with
@@ -343,6 +354,35 @@ Keys:
   component at position 0, the first default's own position, so the list
   and the upload lists show the two in no fixed order (the grid and the
   wizard's list of one context differed; the same on screen and seeded).
+- `taskTemplates[]`: templates of Settings › Workflow › "Tasks and
+  Discussions", each `{stage, title, type?, dueInterval?, roles?,
+  include?, message?}`. `stage` (required) is a stage word, `submission`,
+  `review` (the external review), `internalReview` (OMP only),
+  `copyediting` or `production` (the only one on OPS); another word is a
+  400 naming the app's own. A `title` matching a template the new context
+  already holds on that stage (the installed ones, named in the primary
+  locale: "Discussion (Submission)", "Assign Editor", "Request Copyedit",
+  …) is that row's "More Actions" › "Edit" › "Save", keeping what the
+  entry does not set; any other title is the stage's "Add template" ›
+  "Save". `type` `task` is "Enter task information" ticked, and a task
+  needs `dueInterval`, the "Due Date" list's value: `P1W` ("1 week from
+  the creation date"), `P2W`, `P3W`, `P4W`, `P1M`, `P1M15D` ("1.5
+  months"), `P2M`, `P2M15D` or `P3M`; a discussion refuses it. `roles`, a
+  list of role keys (those of `users[].roles`), is "Limit access to
+  specific roles" with those boxes ticked; the window offers only the
+  roles that work on the stage, so another is a 400. `include` (boolean)
+  is "Automatically add this task and/or discussion when a submission
+  reaches the stage", the list's "Auto-add at stage". `message` is the
+  "Discussion" box (a bare string posted as a paragraph); a new template
+  without one gets "Seeded template text for {title}.", since the box is
+  required. The body the window posts goes through the templates API's own
+  rules and controller, so every row is the screen's (U37 harness,
+  2026-09-23, three apps). With `include` on, every later
+  seeded submission that reaches the stage gets the item the application
+  makes by itself, at the submit for the first stage and at the decision
+  for a later one: "Created by: system", no participants (so only
+  manager-level people see it), a task due after the interval with an
+  empty "Task Owner:", its first message the template's text.
 - `announcementTypes[]`: the "Announcement Types" tab's types, each
   `{name}` (localized, required in the primary locale), created the way the
   tab's "Add Announcement Type" window saves. `announcements[]`: the
@@ -374,8 +414,9 @@ Keys:
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
 `path`, the created `users` (id and username), `announcementTypes` (id and
-name), `announcements` (id and title) and `components` (`id`, `name`,
-`action`: `added`, `edited` or `removed`, in the order seeded).
+name), `announcements` (id and title), `components` (`id`, `name`,
+`action`: `added`, `edited` or `removed`, in the order seeded) and
+`taskTemplates` (`id`, `title`, `stage`, `action`: `added` or `edited`).
 
 ## `POST scenarios/submission`
 
@@ -590,6 +631,38 @@ Keys:
   included, is what the screen leaves (parity ledger 2026-09-19). OMP
   answers 400: a press has publication formats, not galleys.
 
+- `tasks[]`: discussions and tasks on a stage's "Tasks & Discussions"
+  panel, each `{title, creator, participants, type?, stage?, owner?,
+  dateDue?, started?, message?}`, saved after everything else in the
+  request (decisions, rounds, galleys, publish) as the panel's "Add" ›
+  "Save" saves them. `title` is "Name"; `creator` (required) the username
+  of the person who pressed "Add"; `participants` (required) the usernames
+  ticked under "Participants", the creator included when they are ticked
+  (the window pre-ticks them). `type` is `discussion` (the default) or
+  `task`; a task needs `owner` (one of `participants`, the "Task owner"
+  radio) and `dateDue` (`YYYY-MM-DD`), and `started` is the drop-down,
+  `true` (the default) "Begin Task Upon Saving", `false` "Create Task
+  (Do Not Start)"; a discussion refuses all three. `stage` is a stage word
+  as for the context's `taskTemplates[]`, default the submission's
+  current stage, and must be one the submission has reached (a later
+  panel is not on screen yet). `message` is the first message (default
+  "Seeded message for {tag}.", a bare string posted as a paragraph). The
+  window's JSON body goes through the tasks API's own rules and
+  controller, acting as the creator, so the refusals are the window's
+  (Rule 8: participants assigned to that stage or manager-level, the
+  creator among them unless manager-level, two for a discussion, one
+  owner for a task, the anonymous-review rules; a 400 with the app's
+  text) and every row is the screen's: the item, its participants, the
+  head note, the History's "created" (and "initiated") line, one
+  "Discussion added." Tasks row and one email-log row per participant and
+  the creator (mail is faked), and on Copyediting and Production the
+  stage notices' update (U37 harness, 2026-09-23, three apps driven). The
+  one lifted rule: the window refuses a due date before today, so a past
+  `dateDue` stands for a task whose due date has passed since it was
+  saved; the item's other dates are the seed's time, so its History says
+  it was created after its due date. A draft (`submitted: false`) refuses
+  the key. The three apps alike.
+
 App-specific keys:
 
 - OJS: `section` (abbrev; defaults to the journal's first section) and
@@ -651,6 +724,15 @@ Facts tests rely on, all parity-checked against the UI path:
   of one seed shares its `created_at` second, so the on-screen order among
   them (newest first) is not fixed, and a seeded approval is stamped in
   the comment's own second where a by-hand one lands later.
+- Seeded discussions and tasks read on screen as by-hand ones do (U37
+  harness, 2026-09-23, three apps): the rows under "Yet to begin" or "In
+  progress", "Created by: {username}" or "Task Owner: {username}", the
+  Due Date. A task seeded with a past `dateDue` reads as overdue: the
+  row stays in its group with "This task is overdue. Remind the task
+  owner to complete it as soon as possible" first in "Activity", and its
+  window's badge reads "Overdue". Items seeded in one request share their
+  `created_at` second, so the panel's oldest-first order among them is
+  not fixed: a test that asserts order seeds them in separate calls.
 - A seeded galley reads on screen as a by-hand one does (U33 harness,
   2026-09-19, OJS and OPS driven): the "Galleys" page lists it as
   "<label> <language>" with the row's menu, and on OJS the assigned
@@ -664,9 +746,10 @@ The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`),
 `userComments[]` (`id`, `user`, `approved`, `reports[]` of report ids, in
 the order seeded), `galleys[]` (`id`, `label`, `submissionFileId`, null
-for a remote galley) and `files[]` (`submissionFileId`, `file`,
+for a remote galley), `files[]` (`submissionFileId`, `file`,
 `fileStage`, `reviewRoundId`, null on "Submission Files", and `uploader`;
-the root entries in order, then each round's). `stageId`
+the root entries in order, then each round's) and `tasks[]` (`id`,
+`title`, `type`, `stage`, in the order seeded). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
@@ -679,7 +762,9 @@ view or assign a participant.
 Implementation: `shared/php/api/v1/_test/PKPTestController.php` and the
 builders in `shared/php/classes/testing/` (`PKPBootstrapSeeder`,
 `PKPContextScenarioBuilder`, `PKPSubmissionScenarioBuilder`, `Spec`,
-`UserSeeder`, `ContextFactory`). Each app subclasses them under
+`UserSeeder`, `ContextFactory`, and `ApiCall`, which runs an app API
+controller's own action on the JSON body a screen sends, for the keys
+that save through one). Each app subclasses them under
 `apps/<app>/php/api/v1/_test/` and `apps/<app>/php/classes/testing/`. The
 JavaScript client is `pkpApi` in `shared/playwright/support/api.js`
 (`bootstrapProbe`, `bootstrap`, `createContext`, `createSubmission`).

@@ -230,6 +230,14 @@ touched.
   header ("Review pending.", "Revision required."…), cleared by the
   corresponding action. Not to be confused with the Submission-stage
   discussions panel headed "Desk Review Tasks & Discussions".
+- **Discussions panel; discussion vs task** — the per-stage panel headed
+  "{Stage} Tasks & Discussions" ("Desk Review Tasks & Discussions" on the
+  Submission stage). A **discussion** is a named thread of messages among
+  the people ticked as its participants; a **task** is a discussion that
+  also has a due date and one participant responsible for it (its "Task
+  Owner"), and is started and completed. Distinct from the header's Tasks
+  panel above, where each message also lands. The tasks-and-discussions
+  spec owns the panel and its templates.
 - **Notifications (author's list)** — on the author's review stage, the list
   of emails editors sent about this submission (decision emails re-read
   here). Distinct from toast notices and from the header Tasks panel; specs

@@ -88,9 +88,14 @@ class UserSeeder
             $key = $affiliation !== null ? 'affiliation' : 'pastRoles';
             throw new SpecException("{$spec->path}.{$key}", "\"{$key}\" is seeded on an account this entry creates only; \"{$username}\" already exists");
         }
+        $disabled = $spec->get('disabled', false);
+        if (!is_bool($disabled)) {
+            throw new SpecException("{$spec->path}.disabled", 'disabled must be a boolean (the account disabled on Users & Roles)');
+        }
         return [
             'specPath' => $spec->path,
             'username' => $username,
+            'disabled' => $disabled,
             'roles' => $roles,
             'pastRoles' => $pastRoles,
             'masthead' => $masthead,
@@ -261,6 +266,11 @@ class UserSeeder
         $username = $plan['username'];
 
         $user = Repo::user()->getByUsername($username, true);
+        if ($user && ($plan['disabled'] ?? false)) {
+            // A shared account (the roster, admin) is used by every worker:
+            // disabling it would break unrelated suites (PRINCIPLES A7).
+            throw new SpecException("{$plan['specPath']}.disabled", "\"{$username}\" is an existing account; disabled applies to a new throwaway account only");
+        }
         if (!$user) {
             $user = Repo::user()->newDataObject();
             $user->setUsername($username);
@@ -366,6 +376,10 @@ class UserSeeder
             }
         }
 
+        if ($plan['disabled'] ?? false) {
+            $user = $this->disable($user);
+        }
+
         return $user;
     }
 
@@ -400,6 +414,24 @@ class UserSeeder
             \PKP\userGroup\Repository::forgetEditorialCache($context->getId());
             \PKP\userGroup\Repository::forgetEditorialHistoryCache($context->getId());
         }
+    }
+
+    /**
+     * Disable the account the way Settings › Users & Roles › Users does:
+     * the row's "Disable" opens the grid's "Disable User" window
+     * (UserGridHandler::editDisableUser) and its "OK" posts
+     * `disableReason` to disableUser, which runs UserDisableForm::execute
+     * (the user's disabled flag and reason, the audit-log line, the
+     * account's other sessions ended). The reason box is posted empty, as
+     * it is when left unfilled. Acting as the seeding admin, who has full
+     * administration over a throwaway account. Not run: the form's POST
+     * and CSRF checks (the request's) and the grid's refresh event.
+     */
+    protected function disable(User $user): User
+    {
+        $form = new \PKP\controllers\grid\settings\user\form\UserDisableForm($user->getId(), false);
+        $form->setData('disableReason', '');
+        return $form->execute();
     }
 
     /**
