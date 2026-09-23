@@ -210,8 +210,8 @@ touched.
   the account. **Settled usage**: "activation link" for the emailed link,
   "validation" for the requirement.
 - **Principal contact** — the journal's configured contact identity that
-  system emails (password resets, ORCID requests, automatic reminders) are
-  sent from. Distinct from a publication's **primary contact (contributor)** —
+  the journal's own emails (such as automatic reminders) are sent from;
+  password resets come from the site, not from it. Distinct from a publication's **primary contact (contributor)** —
   the badge on its Contributors list ("The world" above).
 - **ORCID iD: verified vs unauthenticated** — *verified* means the person
   completed ORCID's own sign-in for this install, so the iD carries an

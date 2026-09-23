@@ -13,7 +13,6 @@ when the spec absorbs it.
 | U01 Login & sessions | Password-reset link opened while signed in | Lands silently on the dashboard, no message. | 2026-09-04 | U03 claim check K5 |
 | U57 Languages & locales | Settings › Website › Setup › Languages | The "Forms" box saved on the first click without flipping on screen. | 2026-09-04 | U03 claim check K6 |
 | U38 Submission activity log & notes | Workflow › "Activity Log & Notes" modal on a seeded submission | Rendered blank for about 30 seconds. | 2026-09-04 | U03 claim check K3 |
-| U07 Journal identity & about pages | Editorial Masthead public page | Content and layout observed while checking affiliations; the U03 spec keeps only a pointer. | 2026-09-03 | U03 probes pF, pJ |
 | U37 Tasks & discussions | Workflow › Discussions "Add" (and reply), OMP and OPS | Saving a discussion fails with `Class "APP\notification\Notification" not found`; the row is stored, no task or email follows (app-changes row 12 overlay works around it on the fleets). | 2026-09-04 | U05 probe pN |
 | U62 Plugins management | Settings › Website › Plugins › Plugin Gallery, all three apps | The Plugin Gallery grid answers a 500 instead of a message when outbound HTTP is unavailable (the fleets have a dead proxy). | 2026-09-04 | U05 probe pR P6 |
 | U37 Tasks & discussions | Workflow › Discussions, an open discussion, OPS | The Author's second message in a discussion did not save in two attempts while the Manager's reply went through (seen once). | 2026-09-04 | U05 claim check ccK2 (K2-2) |
@@ -94,3 +93,14 @@ when the spec absorbs it.
 | U58 Submission intake configuration | Settings › Workflow › Submission (OJS "Author Guidance") and the OMP and OPS settings forms | Typed, unsaved text is dropped on leaving the page with nothing asking. | 2026-09-23 | U36 claim check K4 (K4-11), K5 |
 | U38 Submission activity log & notes | Activity Log, OMP | A publication format's file event prints the raw placeholder "{$formatName}". | 2026-09-23 | U36 claim check K5 (K5-7) |
 | U30 Author response to reviews | Workflow side menu "Review", OJS | Opening it logs a TypeError from the Author Response panel in the console (seen twice); nothing visible fails. | 2026-09-23 | U36 claim check K5 (K5-8) |
+| U06 User invitations | Users list "Edit" page, all three apps | The page heading is empty, and a new role row added but not saved is dropped without a warning on leaving. | 2026-09-23 | U07 claim check K1 (Rule 3), K4 sweep |
+| U06 User invitations | Users list "Edit" page, an ended role's row | The ended role's row keeps an active masthead select (not pressed). | 2026-09-23 | U07 claim check K4-9 |
+| U06 User invitations | Invitation email to an existing reader | The email says the recipient's name will appear on the masthead "as a Reader". | 2026-09-23 | U07 claim check K4-10 |
+| U03 User profile | Profile › "API Key" tab | The privacy link's address carries whitespace. | 2026-09-23 | U07 claim check K1 (cross-feature) |
+| U10 Appearance & theming | Reader header with a logo set | The header logo has no alt text. | 2026-09-23 | U07 claim check K2 |
+| U14 Reader comments & moderation | Settings › Comments | The browser title is the journal name alone. | 2026-09-23 | U07 claim check K1 (Rule 3) |
+| U53 Users management | Users list after "Remove User" | The removed user stays in the users list with no role. | 2026-09-23 | U07 claim check K4-3 |
+| U58 Submission intake configuration | Side menu of the editorial screens, submissions disabled | "Start A New Submission" disappears from the side menu while the journal is not accepting submissions. | 2026-09-23 | U07 claim check K1 (Rule 4) |
+| U59 Hosted journals (site admin) | Site index page | The browser title and the page heading are empty. | 2026-09-23 | U07 claim check K2 |
+| U60 Site settings | `index/about` signed out | Lands on Login rather than a site About page (seen once, undetermined). | 2026-09-23 | U07 claim check K3-15 |
+| U10 Appearance & theming | Settings › Website › Appearance › "Editorial Masthead" and "Sidebar", all three apps | Screen-reader names: each role's up arrow is announced "Decrease position of {role}"; the Sidebar checkboxes carry both position labels. | 2026-09-23 | U07 claim check K3-9 |

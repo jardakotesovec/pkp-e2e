@@ -108,6 +108,41 @@ Keys:
   their traps. A scratch context's reviewer is created here too: the seeded
   reviewers are not enrolled on a scratch context, so they are absent from
   its Add Reviewer search and refused the wizard.
+  Three more per-entry keys feed the About pages (U07 harness, 2026-09-23,
+  three apps):
+  - `affiliation` (a string, or a locale map; a bare string lands under
+    the context's primary locale): the Profile › Contact "Affiliation",
+    the line "Editorial Masthead" and "Editorial History" print under the
+    name. The Contact tab cannot save it without "Country*", so a by-hand
+    affiliation always comes with a country; the seeded account has none
+    (nothing on the About pages reads it).
+  - `masthead`: a map from a role key of the entry (`roles` or
+    `pastRoles`) to `true`, "Appear on the masthead" (every role's
+    default), or `false`, "Does not appear on the masthead": the per-role
+    choice of the invitation and of the users list's "Edit" page (its
+    roles table's "Journal Masthead" select). A member seeded `false` is
+    left off "Editorial Masthead" (and "Editorial History") for that
+    role; the choice is per role. `false` on a reviewer role is a
+    400: the table prints "Appear on the masthead" there and offers no
+    choice. The screen's change sends the member an email the seed does
+    not, and on OMP and OPS answers 500 after saving the choice (U06's
+    register: the `USER_ROLE_MASTHEAD_UPDATE` template is missing there);
+    the seeded row equals the saved one.
+  - `pastRoles[]`, each `{role, dateStart?, dateEnd?}` (`YYYY-MM-DD`,
+    start ≤ end ≤ today; both default to today): a role period that has
+    ended, given and then ended the way the "Edit" page's "Remove Role"
+    ends it (`endAssignments`: the end stamped now, the masthead and
+    history lists refreshed). "Editorial History" lists the member under
+    the role with "<start year> – <end year>" ("2026 – 2026" with the
+    defaults, all a screen can make), and "Editorial Masthead" no longer
+    does. An earlier start or end is a state no screen makes (the
+    invitation moves a past start to today, and "Remove Role" ends now):
+    the builder passes the start through the role service and writes the
+    end onto the ended row (D9). `roles` stays required and non-empty:
+    the screens refuse to remove a user's last role. The screen's
+    "Remove Role" emails the member; the seed does not.
+  `affiliation` and `pastRoles` are 400s on an account that already
+  exists (the roster, `admin`): only a new account takes them.
 - `orcid`: the state of the ORCID settings tab, saved through the same
   service the tab's form uses. The defaults below apply only when the
   `orcid` key is given at all; a context created without it arrives with
@@ -218,11 +253,13 @@ Keys:
   same request. Applies to the three apps alike; a fresh context has no
   block placed. Not a list of strings: a 400.
 - `roles`: a map from a role key (the keys of `users[].roles`, e.g.
-  `sectionEditor`) to `{recommendOnly?, permitMetadataEdit?}` (booleans,
-  at least one): the two "Role Options" boxes of Settings › Users & Roles ›
-  Roles, the role's "Settings" › "Edit" window ("This role is only allowed
-  to recommend a review decision and will require an authorised editor to
-  record a final decision." and "Permit submission metadata edit."). Saved
+  `sectionEditor`) to `{recommendOnly?, permitMetadataEdit?,
+  permitSettings?, masthead?}` (booleans, at least one): the "Role
+  Options" boxes of Settings › Users & Roles › Roles, the role's
+  "Settings" › "Edit" window ("This role is only allowed to recommend a
+  review decision and will require an authorised editor to record a final
+  decision.", "Permit submission metadata edit.", "Consider role in
+  masthead list" and "Permit changes to Settings"). Saved
   by running that window's own form, so the save is the screen's: the
   role's flags, the audit-log line, and the role's stages saved again from
   the boxes the window shows. That last part is a parity fact: the window
@@ -243,6 +280,24 @@ Keys:
   Manager's and the Section Editor's levels only), `permitMetadataEdit:
   false` on a manager-level role (the form saves it on whatever is posted)
   and a non-boolean are 400s. The three apps alike.
+  `masthead` (U07): `true` lists the role's members who chose to appear
+  on "Editorial Masthead" under the role's name, `false` leaves the role
+  off it and off "Editorial History"; any role takes it (on a reviewer
+  role it changes nothing: reviewers are listed by their completed
+  reviews). Install defaults: ticked on `editor`, `sectionEditor`,
+  `externalReviewer` and `editorialBoardMember` (OPS: `sectionEditor`,
+  "Moderator", and `editorialBoardMember`). A role ticked or unticked on
+  screen after the masthead was last read shows so on the next load, three
+  apps (driven 2026-09-23). `permitSettings` (U07): `false` on a
+  manager-level role other than the Journal Manager (OJS and OMP `editor`
+  and `productionEditor`) takes the Settings pages from its members: no
+  "Settings" in the side menu, and a Settings address redirects to a page
+  reading "The current role does not have access to this operation.".
+  `true` below manager level is a 400 (the window disables the box there),
+  and so is `false` on `manager`: its row has no "Settings" link, and the
+  window disables the box on the acting user's only settings role, which
+  `manager` is for the seeding admin. OPS has no manager-level role but
+  `manager`, so the key cannot remove the Settings pages there.
 - `plugins`: a map from a plugin's lowercased class name (the Plugins
   grid's `plugin` id, e.g. `announcementfeedplugin`) to `{enabled,
   settings?}`. `enabled` (boolean, required) is the grid's "Enabled" box
@@ -369,7 +424,18 @@ Keys:
   list) and `comments` (the "For author and editor" text, default "Seeded
   review comments for {tag}.", stored as the paragraph TinyMCE posts). Both
   are a 400 on any other status, and `completed` refuses a review form with
-  required questions, as the wizard does. A seeded `accepted` assignment
+  required questions, as the wizard does. A third, `dateCompleted`
+  (`YYYY-MM-DD`, today or earlier; `completed` only, a 400 otherwise),
+  backdates the submitted review: the wizard completes it today, then
+  every date of the assignment (requested, notified, accepted, completed,
+  both due dates) moves by the same number of days, so it reads as a
+  review requested, accepted and submitted around that day; the
+  submission, round, notifications and activity log keep today's dates
+  (D9: no screen submits a review on another day). A review submitted
+  last calendar year is what lists its reviewer under "Peer Reviewers in
+  Previous Year" on "Editorial Masthead" (OJS and OMP; on OMP only an
+  external-review round counts), with the sentence naming that year
+  (U07 harness, 2026-09-23). A seeded `accepted` assignment
   opens the wizard on step 1 (the on-screen accept lands on step 2). These
   are the only per-reviewer keys. Due dates and the review method are not
   parameters:
@@ -684,6 +750,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   `'expired'` seeds an active row with a past end date, and OJS `payments`
   (`enabled`, `currency`, `paymentPluginName`, `manualInstructions`,
   `publicationFee`; the instructions gate is in seed-facts, U34).
+- Context: `country` (a scratch context has none, so the first Settings ›
+  Journal › "Masthead" save and Hosted Journals › "Edit" ask for one before
+  anything else saves; U07 claim check 2026-09-23).
 - Named scenario fixtures (`submission-draft`, `submission-in-review`,
   `submission-in-round-2`, `submission-published`) and a typed scenario
   client. Until a suite shows the need, tests call

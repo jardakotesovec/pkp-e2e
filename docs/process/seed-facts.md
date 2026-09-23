@@ -143,6 +143,44 @@ behind a line; that scratch is deleted after review.
   U02 note s); scratch context seen 2026-09-03 on the probe-kit smoke run,
   where a registration on the +90 variant ended in U02's finding A6 until a
   manager set the contact.
+  Settings › Journal › "Contact" refuses to save anything until the
+  support "Name" and "Email address" are typed. All three apps, 2026-09-23
+  (U07 claim check K3-4, `.reports/U07/ccK3`).
+- A scratch context from `POST scenarios/context` has no Country, and no
+  journal initials unless `context.acronym` is given; its principal contact
+  is "Site Admin" <admin@mail.test>. Settings › Journal › "Masthead" refuses
+  "Save" ("This field is required.") until both are filled, and
+  Administration › Hosted Journals › "Edit" answers 400 on Country until one
+  is picked. All three apps, 2026-09-23 (U07 claim check K1, K3;
+  `.reports/U07/ccK1/saves-<app>.json`).
+- A journal created on Administration › Hosted Journals has the principal
+  contact typed on the create form and no technical support contact; the
+  form requires "Languages" and "Primary locale", and "Country" is optional.
+  All three apps, 2026-09-23 (U07 claim check K2, `.reports/U07/ccK2`).
+- The Citation Style Language plugin is off on a scratch context, so its
+  article, book and preprint pages show no "How to Cite" until a manager
+  enables it on Settings › Website › "Plugins". All three apps, 2026-09-23
+  (U07 claim check K2, `.reports/U07/ccK2/x03b-plugins-csl-<app>`).
+- The password reset email is sent by the site (the application's name,
+  `admin@mail.test` on the test installs), never by the journal's principal
+  contact. All three apps, 2026-09-23 (U07 claim check K2).
+- The default Information texts (Settings › Website › "Setup" ›
+  "Information") hold full addresses of the server the context was created
+  on (on `publicknowledge` the installer's port 8000), so their links never
+  match a probe or worker server's address. OJS and OMP, 2026-09-23 (U07
+  claim check K3).
+- The site's "Enable institutional statistics" (Administration › Site
+  Settings › Statistics) is unticked on a fresh install, so no side menu
+  shows "Institutions"; the page still opens by address. All three apps,
+  2026-09-23 (U07 claim check K1, `inst-site-statistics-*`).
+- "Consider role in masthead list" (Settings › Users & Roles › Roles › a
+  role's "Edit") arrives ticked on Journal editor, Section editor, Reviewer
+  and Editorial Board Member (OJS); Press editor, Series editor, External
+  Reviewer and Editorial Board Member (OMP; Internal Reviewer unticked);
+  Moderator and Editorial Board Member (OPS). "Production editor" arrives
+  unticked. On a preprint server the manager role's row reads "Preprint
+  Server manager" at permission level "Manager". Fresh scratch contexts,
+  2026-09-23 (U07 claim check K1, K4; `.reports/U07/ccK4` record `roleBoxes`).
 - The site title is empty in both locales, which is why site-level mail
   reads "an account with , but…". Administration › Site Settings › Site
   Setup › Settings "Site Name". Claim check 2026-09-02, all three apps

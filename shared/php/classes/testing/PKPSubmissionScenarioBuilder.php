@@ -22,7 +22,7 @@
  * abstract, locale, submitted (explicit false = wizard-resumable draft),
  * decisions[] (real decision names, app-resolved), reviewRounds[] with
  * reviewers[] {username, status: invited|accepted|declined|completed,
- * reviewForm, recommendation, comments}, published.
+ * reviewForm, recommendation, comments, dateCompleted}, published.
  * Overlays: OJS section/issue; OMP series/seriesPosition + per-round stage
  * internal|external; OPS section (reviewRounds REJECTED — no review stage).
  * Richer keys return per feature, each with a parity entry.
@@ -332,7 +332,7 @@ abstract class PKPSubmissionScenarioBuilder
                 // list (OJS only — a press's step 3 has no such field) and
                 // the "For author and editor" box. Meaningless on any other
                 // status, so a 400 rather than a silently dropped key.
-                foreach (['recommendation', 'comments'] as $step3Key) {
+                foreach (['recommendation', 'comments', 'dateCompleted'] as $step3Key) {
                     if ($reviewerSpec->has($step3Key) && $status !== 'completed') {
                         throw new SpecException("{$reviewerSpec->path}.{$step3Key}", "\"{$step3Key}\" applies to status \"completed\" only");
                     }
@@ -359,6 +359,7 @@ abstract class PKPSubmissionScenarioBuilder
                     'reviewFormId' => $reviewFormId,
                     'recommendationId' => $recommendationId,
                     'comments' => $comments,
+                    'dateCompleted' => $status === 'completed' ? $this->parseDateCompleted($reviewerSpec) : null,
                 ];
             }
             $roundFiles = [];
@@ -1656,6 +1657,9 @@ abstract class PKPSubmissionScenarioBuilder
                         // step 2 and step 3's "Submit Review".
                         $this->runReviewerStep($request, $submission, $assignment, 1);
                         $this->completeReview($request, $submission, $assignment, $plan['comments'], $plan['recommendationId']);
+                        if ($plan['dateCompleted'] !== null) {
+                            $this->backdateCompletedReview($assignment->getId(), $plan['dateCompleted']);
+                        }
                     } else {
                         // accepted / declined: the bare ReviewerAction call,
                         // as before. A seeded acceptance therefore leaves
@@ -1725,6 +1729,57 @@ abstract class PKPSubmissionScenarioBuilder
             'commentsPrivate' => '',
             'reviewerRecommendationId' => $recommendationId,
         ]);
+    }
+
+    /**
+     * `reviewers[].dateCompleted` (U07): the day a `completed` review was
+     * submitted, `YYYY-MM-DD`, today or earlier. Parse phase: no writes.
+     */
+    protected function parseDateCompleted(Spec $reviewerSpec): ?string
+    {
+        $value = $reviewerSpec->get('dateCompleted');
+        if ($value === null) {
+            return null;
+        }
+        $parsed = is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)
+            ? \DateTime::createFromFormat('!Y-m-d', $value)
+            : false;
+        if (!$parsed || $parsed->format('Y-m-d') !== $value) {
+            throw new SpecException("{$reviewerSpec->path}.dateCompleted", 'dateCompleted must be a date written YYYY-MM-DD');
+        }
+        if ($value > \Carbon\Carbon::today()->toDateString()) {
+            throw new SpecException("{$reviewerSpec->path}.dateCompleted", 'dateCompleted must not be after today');
+        }
+        return $value;
+    }
+
+    /**
+     * Move a review the wizard has just completed back to the given day
+     * (D9: no screen or service completes a review on another day than
+     * today). The wizard's own completion runs first; then every date the
+     * assignment carries (assigned, notified, confirmed, completed, due,
+     * response due, and any other set one) is shifted by the same number
+     * of days, so the assignment keeps the wizard's own intervals and reads
+     * as a review requested, accepted and submitted around that day. Written
+     * through the review-assignment repository's edit, the app's own write.
+     * The submission, its round, the event log and the notifications keep
+     * today's dates.
+     */
+    protected function backdateCompletedReview(int $reviewAssignmentId, string $day): void
+    {
+        $assignment = Repo::reviewAssignment()->get($reviewAssignmentId);
+        $completed = \Carbon\Carbon::parse($assignment->getDateCompleted());
+        $days = (int) round($completed->copy()->startOfDay()->diffInDays(\Carbon\Carbon::parse($day)->startOfDay(), false));
+        if ($days === 0) {
+            return;
+        }
+        $shifted = [];
+        foreach ($assignment->_data as $key => $value) {
+            if (str_starts_with($key, 'date') && is_string($value) && $value !== '') {
+                $shifted[$key] = \Carbon\Carbon::parse($value)->addDays($days)->format('Y-m-d H:i:s');
+            }
+        }
+        Repo::reviewAssignment()->edit($assignment, $shifted);
     }
 
     /**

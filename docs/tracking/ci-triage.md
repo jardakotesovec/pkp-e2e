@@ -443,7 +443,13 @@ trips.
   the 60 s test timeout while three suites shared the VM (2026-09-12,
   merge of companion `13274`, `.reports/sync/merge13274-ojs.log`); green
   alone in 5.5 s. **Watch condition**: a second incident, or one at four
-  workers alone on the VM.
+  workers alone on the VM. **Tripped 2026-09-23** (U07 feature session):
+  OMP this time, in the first OMP final at eight workers with nothing else
+  on the VM, the one red of 281 (`waitForEvent('popup')` to the 60 s
+  timeout; the failure snapshot is the fixture page, not the user's, so
+  it shows nothing; `.reports/U07/final-run-omp-attempt1-red.log`). Owed
+  by the next maintenance session: a trace of the popup wait on a
+  repeated run.
 - **A page load hanging under desktop load** (U04 S6, OMP, once). `page.goto`
   to the scratch press's `/orcid/about` ran to the 60 s test timeout in the
   second U06 revision local final 2026-09-13 (load 15–19 on the Mac from

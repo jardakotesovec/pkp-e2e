@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **18 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **19 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -278,3 +278,21 @@ until their specs exist. Do not force-claim the defects themselves.
     Code read 2026-09-23 (U36 spec author; checkouts as above). Resolves:
     a live probe of the pending-revisions notice's surfaces, then
     maintainer confirmation as dead or a claim in the spec.
+19. **Unlinked information ops, OMP's `contentOnly`, the contact page's
+    `contactTitle`** — attached to **U07** (claimed; the
+    journal-identity spec's notes u and v document them). OJS
+    `InformationHandler` answers `competingInterestGuidelines` (reading
+    the context setting `competingInterestsPolicy`) and OMP's answers
+    `competingInterestPolicy` (reading `competingInterestPolicy`); no
+    context schema of the three apps defines either setting, so the page
+    is always empty. Both apps' `sampleCopyrightWording` op prints
+    `manager.setup.copyrightNotice.sample`. No template, menu type,
+    email or Vue component in the three checkouts links any of these
+    ops (`grep -rn` over `.tpl`, `.php`, `.js`, `.vue`, `.xml`, `.json`
+    outside the page handlers and `pages/information/index.php`). OMP's
+    `contentOnly` request parameter (hides the header and footer of an
+    information page) is set by nothing. `contact.tpl` prints
+    `contactTitle`, which no form, schema property or API writes.
+    Code-verified 2026-09-23 (checkouts ojs 802202cb3e, omp 7f9455d5a,
+    ops 15f0b6e0bd). Resolves: maintainer confirmation as dead code
+    (removal candidates).

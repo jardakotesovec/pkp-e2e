@@ -114,16 +114,20 @@
  *   Email" unticked, invoked by reflection). Seeded last, after users[], so
  *   the queued notification reaches the scratch users the way the panel's
  *   Save reaches every user with a role.
- * - roles {<role key>: {recommendOnly?, permitMetadataEdit?}} — Settings ›
- *   Users & Roles › Roles, a role's "Edit" › "Role Options" (U35): the
- *   role's "This role is only allowed to recommend…" and "Permit submission
- *   metadata edit." boxes, saved by running the Roles grid's own form
+ * - roles {<role key>: {recommendOnly?, permitMetadataEdit?, permitSettings?,
+ *   masthead?}} — Settings › Users & Roles › Roles, a role's "Edit" › "Role
+ *   Options" (U35, U07): the role's "This role is only allowed to
+ *   recommend…", "Permit submission metadata edit.", "Consider role in
+ *   masthead list" and "Permit changes to Settings" boxes, saved by running
+ *   the Roles grid's own form
  *   (UserGroupForm: initData from the stored role, the two boxes set, then
  *   execute — its assignment rewrite on a metadata change, its stage
  *   re-save and its audit-log line included). Keys are the role keys of
  *   users[].roles; recommendOnly is refused where the form offers no box
  *   (roles below sub-editor level) and permitMetadataEdit false on a
- *   manager-level role (the form forces it on). Applied before users[].
+ *   manager-level role (the form forces it on); permitSettings true below
+ *   manager level (the box is disabled there) and false on the Journal
+ *   Manager (no "Settings" link; the lock-out guard). Applied before users[].
  * - components {<name>: false | {metadata?, dependent?, supplementary?,
  *   required?}} — Settings › Workflow › Submission › "Components" (U36),
  *   the component grid of every app: a name among the components every new
@@ -168,6 +172,14 @@ use PKP\testing\UserSeeder;
 
 abstract class PKPContextScenarioBuilder
 {
+    /**
+     * The "Role Options" boxes of a role's Roles › "Settings" › "Edit"
+     * window the `roles` key sets: "This role is only allowed to
+     * recommend…", "Permit submission metadata edit.", "Consider role in
+     * masthead list" (masthead) and "Permit changes to Settings".
+     */
+    public const ROLE_OPTIONS = ['recommendOnly', 'permitMetadataEdit', 'permitSettings', 'masthead'];
+
     protected ContextFactory $contextFactory;
     protected UserSeeder $userSeeder;
 
@@ -516,15 +528,10 @@ abstract class PKPContextScenarioBuilder
         }
         $raw = $root->get('roles');
         if (array_is_list($raw)) {
-            throw new SpecException('roles', 'roles must be a map of role key to {recommendOnly?, permitMetadataEdit?}');
+            throw new SpecException('roles', 'roles must be a map of role key to {recommendOnly?, permitMetadataEdit?, permitSettings?, masthead?}');
         }
         // Role key → role id, from the roles every new context gets.
-        $roleIds = [];
-        $xml = simplexml_load_file(Core::getBaseDir() . '/registry/userGroups.xml');
-        foreach ($xml->group as $group) {
-            $key = preg_replace('/^default\.groups\.name\./', '', (string) $group['name']);
-            $roleIds[$key] = (int) hexdec((string) $group['roleId']);
-        }
+        $roleIds = UserSeeder::registryRoleIds();
         // UserGroupForm::getRecommendOnlyRoles() and the user-group
         // repository's NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES.
         $recommendOnlyRoles = [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR];
@@ -540,7 +547,7 @@ abstract class PKPContextScenarioBuilder
             }
             $planSpec = $spec->child($key);
             $options = [];
-            foreach (['recommendOnly', 'permitMetadataEdit'] as $option) {
+            foreach (self::ROLE_OPTIONS as $option) {
                 if (!$planSpec->has($option)) {
                     continue;
                 }
@@ -556,9 +563,23 @@ abstract class PKPContextScenarioBuilder
             if (($options['permitMetadataEdit'] ?? true) === false && in_array($roleIds[$key], $alwaysPermitMetadataRoles, true)) {
                 throw new SpecException("roles.{$key}.permitMetadataEdit", "The manager-level role \"{$key}\" always permits metadata edit (the Roles form saves it on whatever is posted)");
             }
+            // "Permit changes to Settings": the window enables the box for
+            // manager-level roles only (UserGroupForm::getPermitSettingsRoles,
+            // and execute() stores false on any other role), and disables it
+            // on the acting user's only settings role so no one locks
+            // themselves out (UserGroupFormHandler::updatePermitSettings).
+            // The acting admin holds the Journal Manager role alone when
+            // the roles are saved (ContextFactory's enrolment; users[] comes
+            // later), and that row has no "Settings" link at all.
+            if (($options['permitSettings'] ?? false) && $roleIds[$key] !== Role::ROLE_ID_MANAGER) {
+                throw new SpecException("roles.{$key}.permitSettings", "The Roles form offers \"Permit changes to Settings\" for manager-level roles only, not for \"{$key}\"");
+            }
+            if (($options['permitSettings'] ?? true) === false && $key === 'manager') {
+                throw new SpecException("roles.{$key}.permitSettings", 'The Journal Manager role cannot lose "Permit changes to Settings": its Roles row has no "Settings" link, and the form disables the box on the acting user\'s only settings role');
+            }
             $planSpec->assertConsumed();
             if ($options === []) {
-                throw new SpecException("roles.{$key}", "roles.{$key} sets nothing; give recommendOnly and/or permitMetadataEdit");
+                throw new SpecException("roles.{$key}", "roles.{$key} sets nothing; give one of " . implode(', ', self::ROLE_OPTIONS));
             }
             $plans[] = ['key' => $key, 'options' => $options];
         }

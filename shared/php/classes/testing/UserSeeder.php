@@ -17,6 +17,12 @@
  * against each group's stored nameLocaleKey, so the vocabulary is exactly the
  * set of default groups the app ships (`default.groups.name.<key>` → key). A
  * key the app does not ship throws a SpecException that lists the whole set.
+ *
+ * U07 keys: `affiliation` (the Profile › Contact "Affiliation"), `masthead`
+ * (per role key, the "Appear on the masthead" / "Does not appear on the
+ * masthead" choice) and `pastRoles[]` (role periods that have ended, the
+ * users list's "Edit" › "Remove Role", with an optional earlier start or
+ * end date the screens cannot set: D9).
  */
 
 namespace PKP\testing;
@@ -26,6 +32,7 @@ use APP\facades\Repo;
 use Carbon\Carbon;
 use PKP\context\Context;
 use PKP\core\Core;
+use PKP\userGroup\relationships\UserUserGroup;
 use PKP\orcid\OrcidManager;
 use PKP\db\DAORegistry;
 use PKP\security\Role;
@@ -68,10 +75,26 @@ class UserSeeder
         if ($orcidIsVerified && !$orcid) {
             throw new SpecException("{$spec->path}.orcidIsVerified", 'orcidIsVerified requires an orcid value');
         }
+        $pastRoles = $this->parsePastRoles($spec);
+        $masthead = $this->parseMasthead($spec, $roles, $pastRoles);
+        $affiliation = $spec->get('affiliation');
+        if ($affiliation !== null && !is_string($affiliation) && !(is_array($affiliation) && !array_is_list($affiliation))) {
+            throw new SpecException("{$spec->path}.affiliation", 'affiliation must be a string or a locale map');
+        }
+        if (($affiliation !== null || $pastRoles !== []) && Repo::user()->getByUsername($username, true)) {
+            // Both write what an account already carries (its profile, its
+            // assignments in the context), and the accounts that exist are
+            // the shared roster and admin (A1): only a new account takes them.
+            $key = $affiliation !== null ? 'affiliation' : 'pastRoles';
+            throw new SpecException("{$spec->path}.{$key}", "\"{$key}\" is seeded on an account this entry creates only; \"{$username}\" already exists");
+        }
         return [
             'specPath' => $spec->path,
             'username' => $username,
             'roles' => $roles,
+            'pastRoles' => $pastRoles,
+            'masthead' => $masthead,
+            'affiliation' => $affiliation,
             'givenName' => $spec->get('givenName', $username),
             'familyName' => $spec->get('familyName'),
             'email' => (string) $spec->get('email', "{$username}@mail.test"),
@@ -83,6 +106,105 @@ class UserSeeder
             'orcid' => $orcid !== null ? (string) $orcid : null,
             'orcidIsVerified' => $orcidIsVerified,
         ];
+    }
+
+    /**
+     * Role key → role id of the default roles every new context gets
+     * (registry/userGroups.xml, the file PKPContextService::add installs),
+     * so a parse-phase check can refuse a key or a choice before any write.
+     *
+     * @return array<string, int>
+     */
+    public static function registryRoleIds(): array
+    {
+        $roleIds = [];
+        $xml = simplexml_load_file(Core::getBaseDir() . '/registry/userGroups.xml');
+        foreach ($xml->group as $group) {
+            $key = preg_replace('/^default\.groups\.name\./', '', (string) $group['name']);
+            $roleIds[$key] = (int) hexdec((string) $group['roleId']);
+        }
+        return $roleIds;
+    }
+
+    /**
+     * `pastRoles[]`: each `{role, dateStart?, dateEnd?}`, a role period that
+     * has ended. Dates are `YYYY-MM-DD`, start ≤ end ≤ today; both default
+     * to today, the period "Remove Role" leaves on a role given today.
+     *
+     * @return array<int, array{role: string, dateStart: ?string, dateEnd: ?string, specPath: string}>
+     */
+    protected function parsePastRoles(Spec $spec): array
+    {
+        $today = Carbon::today()->toDateString();
+        $plans = [];
+        foreach ($spec->childList('pastRoles') as $pastSpec) {
+            $role = $pastSpec->require('role');
+            if (!is_string($role)) {
+                throw new SpecException("{$pastSpec->path}.role", 'role must be a role key string');
+            }
+            $dates = [];
+            foreach (['dateStart', 'dateEnd'] as $key) {
+                $value = $pastSpec->get($key);
+                if ($value !== null) {
+                    $parsed = is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)
+                        ? \DateTime::createFromFormat('!Y-m-d', $value)
+                        : false;
+                    if (!$parsed || $parsed->format('Y-m-d') !== $value) {
+                        throw new SpecException("{$pastSpec->path}.{$key}", "{$key} must be a date written YYYY-MM-DD");
+                    }
+                }
+                $dates[$key] = $value;
+            }
+            $start = $dates['dateStart'] ?? $today;
+            $end = $dates['dateEnd'] ?? $today;
+            if ($end > $today) {
+                throw new SpecException("{$pastSpec->path}.dateEnd", 'dateEnd must not be after today: a role ending later is still current (the ended period is what this key seeds)');
+            }
+            if ($start > $end) {
+                throw new SpecException("{$pastSpec->path}.dateStart", 'dateStart must not be after dateEnd');
+            }
+            $pastSpec->assertConsumed();
+            $plans[] = ['role' => $role, 'dateStart' => $dates['dateStart'], 'dateEnd' => $dates['dateEnd'], 'specPath' => $pastSpec->path];
+        }
+        return $plans;
+    }
+
+    /**
+     * `masthead`: a map from a role key of this entry (`roles` or
+     * `pastRoles`) to the masthead choice for it, `true` "Appear on the
+     * masthead" (the default for every role) or `false` "Does not appear on
+     * the masthead". A reviewer role has no choice on the screens (the
+     * table prints "Appear on the masthead", the API refuses a change), so
+     * `false` there is a 400.
+     *
+     * @return array<string, bool>
+     */
+    protected function parseMasthead(Spec $spec, array $roles, array $pastRoles): array
+    {
+        $raw = $spec->get('masthead');
+        if ($raw === null) {
+            return [];
+        }
+        if (!is_array($raw) || ($raw !== [] && array_is_list($raw))) {
+            throw new SpecException("{$spec->path}.masthead", 'masthead must be a map of role key to true ("Appear on the masthead") or false ("Does not appear on the masthead")');
+        }
+        $entryKeys = array_merge(array_map('strval', $roles), array_column($pastRoles, 'role'));
+        $roleIds = self::registryRoleIds();
+        $choices = [];
+        foreach ($raw as $key => $value) {
+            $key = (string) $key;
+            if (!in_array($key, $entryKeys, true)) {
+                throw new SpecException("{$spec->path}.masthead.{$key}", "masthead names \"{$key}\", which is not among this user's roles or pastRoles");
+            }
+            if (!is_bool($value)) {
+                throw new SpecException("{$spec->path}.masthead.{$key}", "masthead.{$key} must be a boolean");
+            }
+            if ($value === false && ($roleIds[$key] ?? null) === Role::ROLE_ID_REVIEWER) {
+                throw new SpecException("{$spec->path}.masthead.{$key}", "A reviewer role always appears (the user's roles table offers no choice for it and the API refuses one)");
+            }
+            $choices[$key] = $value;
+        }
+        return $choices;
     }
 
     /**
@@ -149,6 +271,11 @@ class UserSeeder
                 $user->setFamilyName($value, $nameLocale);
             }
             $user->setEmail($plan['email']);
+            // Profile › Contact "Affiliation" (ContactForm::execute:
+            // setAffiliation per locale, saved with the account).
+            foreach ($this->asLocalized($plan['affiliation'] ?? null, $locale) as $affiliationLocale => $value) {
+                $user->setAffiliation($value, $affiliationLocale);
+            }
             $user->setDateRegistered(Core::getCurrentDate());
             $user->setInlineHelp(1);
             // bcrypt at cost 4, not the app's cost 12 (Validation::encryptCredentials):
@@ -181,6 +308,13 @@ class UserSeeder
             Repo::user()->edit($user);
         }
 
+        // Ended periods first, so "Remove Role" below ends only the period
+        // it just gave (endAssignments ends every active row of the role).
+        foreach ($plan['pastRoles'] ?? [] as $pastPlan) {
+            $userGroup = $this->resolveUserGroup($context, $pastPlan['role'], "{$pastPlan['specPath']}.role");
+            $this->seedPastRole($context, $user, $userGroup, $pastPlan, $plan['masthead'][$pastPlan['role']] ?? true);
+        }
+
         $assignedGroups = [];
         foreach ($plan['roles'] as $i => $roleKey) {
             $userGroup = $this->resolveUserGroup($context, (string) $roleKey, "{$plan['specPath']}.roles.{$i}");
@@ -195,7 +329,11 @@ class UserSeeder
             // left by self-registration — not the path the roster mirrors.
             // Whether a user actually shows on the public masthead is still
             // gated by the GROUP's own masthead flag, exactly as in the app.
-            Repo::userGroup()->assignUserToGroup($user->getId(), $userGroup->id, null, null, true);
+            // `masthead` (U07): false is the "Does not appear on the
+            // masthead" choice, stored on the same row as the invitation's
+            // acceptance stores it (UserRoleAssignmentReceiveController::
+            // finalize → assignUserToGroup(…, masthead)).
+            Repo::userGroup()->assignUserToGroup($user->getId(), $userGroup->id, null, null, $plan['masthead'][(string) $roleKey] ?? true);
             $assignedGroups[] = $userGroup;
         }
 
@@ -229,6 +367,39 @@ class UserSeeder
         }
 
         return $user;
+    }
+
+    /**
+     * One ended role period, the way the screens make one: the role given
+     * (assignUserToGroup with the masthead choice, as an accepted
+     * invitation gives it) and then ended by the users list's "Edit" ›
+     * "Remove Role" (PUT users/{id}/endRole/{userGroupId} →
+     * Repository::endAssignments: date_end now, the masthead and history
+     * caches cleared, the audit-log line; the controller's "role ended"
+     * email is the one mail not sent, seeding mail being dropped anyway).
+     * No screen gives a start date before today (the invitation moves a
+     * past one to today) nor an end date before today, so an earlier
+     * `dateStart` goes through assignUserToGroup's own parameter and an
+     * earlier `dateEnd` is written onto the ended row afterwards (D9: no
+     * service sets it), the two caches cleared again for it.
+     */
+    protected function seedPastRole(Context $context, User $user, UserGroup $userGroup, array $pastPlan, bool $masthead): void
+    {
+        $userUserGroup = Repo::userGroup()->assignUserToGroup(
+            $user->getId(),
+            $userGroup->id,
+            $pastPlan['dateStart'],
+            null,
+            (int) $userGroup->roleId === Role::ROLE_ID_REVIEWER ? true : $masthead
+        );
+        Repo::userGroup()->endAssignments($context->getId(), $user->getId(), $userGroup->id);
+        if ($pastPlan['dateEnd'] !== null && $pastPlan['dateEnd'] !== Carbon::today()->toDateString()) {
+            UserUserGroup::query()
+                ->withUserUserGroupId((int) $userUserGroup->getKey())
+                ->update(['date_end' => $pastPlan['dateEnd'] . ' 00:00:00']);
+            \PKP\userGroup\Repository::forgetEditorialCache($context->getId());
+            \PKP\userGroup\Repository::forgetEditorialHistoryCache($context->getId());
+        }
     }
 
     /**
