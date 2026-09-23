@@ -59,12 +59,19 @@ exports.HighlightsTab = class HighlightsTab {
         await expect(this.panel()).toBeVisible({timeout: T});
     }
 
-    /** The Setup side tab that opens the list (`##common.highlights##` in French, A7). */
+    /**
+     * The Setup side tab that opens the list. In French it read the raw key
+     * `##common.highlights##` (A7) until pkp-lib 25182919bf (2026-09-23)
+     * translated it "En vedette"; either label is accepted while the apps'
+     * lib/pkp pointers catch up.
+     */
     sideTab(locale = 'en') {
         return this.page
             .locator('#setup')
             .first()
-            .getByRole('tab', {name: locale === 'fr_CA' ? '##common.highlights##' : 'Highlights', exact: true});
+            .getByRole('tab', locale === 'fr_CA'
+                ? {name: /^(##common\.highlights##|En vedette)$/}
+                : {name: 'Highlights', exact: true});
     }
 
     /** The list panel. */

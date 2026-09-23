@@ -23,6 +23,7 @@ the log only says where to look.
 
 | ID | Signature (what CI shows) | Apps | Canonical entry | Status | First seen / last confirmed |
 |----|---------------------------|------|-----------------|--------|-----------------------------|
+| U11-S4-fr | OJS U11 S4 "highlights in a second language" times out at 180 s waiting for the fr_CA Setup side tab named "##common.highlights##" (both attempts) | ojs (ops next: same locator) | U11 register A7 (the raw French key) | Worked around 2026-09-24: upstream pkp-lib `25182919bf` (translations merge, pulled into ojs `main` by `644168e69a` on 2026-09-23) translates `common.highlights` fr_CA "En vedette", fixing A7's tab; the OJS and OPS `HighlightsPages.sideTab()` locators accept either label (U11 green on both at the pinned baselines). **For the next daily sync:** review the range `5af3b39336..25182919bf` (18 locale files), retire or narrow A7 in the U11 spec on each app as its lib/pkp pointer passes `25182919bf`, then make the locator read "En vedette" alone and delete this row | first seen: pkp-e2e push run 35923257131 at `ac454ea` (2026-09-23, OJS shard 1/3); the U07 push's run 35905025036 before the submodule update was green |
 
 ## Open regressions — confirmed upstream regressions awaiting a fix
 
