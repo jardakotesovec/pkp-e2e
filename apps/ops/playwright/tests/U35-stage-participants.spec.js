@@ -2,527 +2,693 @@
 /**
  * @file playwright/tests/U35-stage-participants.spec.js
  *
- * Stage participants — OPS suite, one test per scenario the spec runs on a
- * preprint server in the parallel project: scenario 7 ("The preprint
- * server's panel": the one "Production" entry and its rows, "Assign
- * Participant" landed by either stage key, a manager assigned, the rows' menus by role,
- * "Edit" on a Moderator's and on the Author's row, "Login As" and the
- * Author's view without the panel) and scenario 8 ("A Moderator assigned
- * and notified": the managers' task, a refused "OK", an Author assigned
- * with the task kept, a Moderator assigned with "Discussion (Production)",
- * the mailbox, the Tasks rows, "Notify" refused with "Message" empty,
- * "Remove" and the removed Moderator's landing). Scenario 9 ("The
- * Moderators assigned at submit") flips the seeded server's Moderator
- * role and lives in tests/serial/U35-stage-participants.spec.js. Scenarios
- * 1–6 are badged {OJS OMP}: the preprint server's own scenarios stand in
- * for them (RUNBOOK multi-app rule 3), so the suite carries no absence
- * test beyond S7's Control (the Author's view has no panel).
+ * Stage participants — OPS suite, one test per canonical scenario the spec
+ * runs on a preprint server, in the server's own words (Preprint Server
+ * manager, Moderator, preprint, the single Production entry): the five
+ * common scenarios 3–7 with their preprint-server variants, and the
+ * server's own scenario 9 ("Assign a Moderator"). Scenarios 1, 2 and 8 are
+ * badged {OJS OMP}: scenario 9 is scenario 1's analogue, a preprint server
+ * has no Copyediting stage and no Copyeditor (scenario 2), and scenario 8's
+ * automatic email is never sent here, which is register OPS3 🐞 and so is
+ * never asserted (M3). The bullets a common scenario badges {OJS OMP} (the
+ * other stages, the Production editor, the "Needs editor" view) have no
+ * surface on a preprint server and are not run.
  * Spec: docs/specs/U35-stage-participants.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): OPS2 🐞
- * (S7 chooses "Assign Editor" as the scenario does and asserts the
- * assignment alone, never that "Message" stays as it was); A10 🐞 (S8
- * asserts that "OK" with nobody chosen keeps the window open and assigns
- * nobody, never that it says nothing); A8 🐞 (S8 reads the discussion's
- * participants, never its "Created by" line); A2 🐞 (every message step
- * chooses a predefined message first); A13 ❓ (S8 reads the removal's log
- * sentence, never the log's "User" column); A7 ❓ (S7 reads the
- * Moderator's own row for "Notify", "Remove" and the absent "Login As",
- * never for the absent "Edit"); OPS3 🐞 (register-carried: the serial
- * spec reads no Moderator mailbox) and OPS4 ❓ (the category form); A1, A3, A4, A5, A6, A9, A11, A12, OJS1 and OMP1
- * (journal and press surfaces, or states no OPS scenario reaches). OPS1 ✅
- * is what S7's role list asserts. The spec's Coverage section records
- * everything else left out. The spec's "Submission" entry on a preprint
- * server does not exist (finding T-ops-1, `.reports/U35/test-ops-findings.md`):
- * the suite reads the side menu's stage entries as exactly ["Production"]
- * and lands by both stage keys on "Workflow: Production".
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * - A5 🐞: S6 reads the message's discussion row and its window, never
+ *   whose name the row lists under "Created by".
+ * - A14 🐞: S5 and S9 read the Activity Log's event sentences, never the
+ *   "User" column of the assignment and removal lines.
+ * - OPS2 🐞: S9 reads "Assign Editor" in the predefined-message list and
+ *   never chooses it.
+ * - OPS3 🐞: scenario 8 has no run here (see above).
+ * - A1 🐞, A3 🐞, A4 🐞, A6 🐞, A7 🐞, A9 🐞, A10 🐞, A11 🐞, A12 🐞, A15 🐞,
+ *   A16 🐞, A2 ❓, A8 ❓, A13 ❓: no scenario reaches them here.
+ * - OPS1 ✅: S9 reads the manager role offered in "Assign" as the spec's
+ *   text. OJS1, OMP1: other apps' territory.
+ * - T-ops-1 (returned to the fold, not yet in the register): a participant
+ *   notice may land in the Production entry's own "Notification" box
+ *   instead of the top-right toast; S6 and S9 accept either place
+ *   (`participantNotice`) and assert neither as the contract.
  *
- * Seeding: scenario endpoints only. S7 runs on the read-only
- * `publicknowledge` with the roster (A1, A7): its seeded preprint
- * auto-assigns the section's two Moderators (footnote s), and every
- * change it makes (a manager assigned, a Moderator limited, an
- * impersonation) is scoped to its own submission or its own session. S8
- * runs on a scratch preprint server with throwaway users, since it reads
- * a mailbox (A8: every read scoped by a throwaway address, the second
- * Author's silence bounded by the Moderator's message) and needs a
- * submission nobody but its Author is assigned to. Tags are unique per
- * run (M5); waits are web-first (A5); the "Notification sent to users."
- * toast vanishes on OPS before a settled read, so the toasts are caught
- * by an observer armed before the press and the effect (the row, the
- * discussion, the mailbox) is the assertion.
+ * S3 acts as the shared `manager.maya`, so it reads each "OK" by the
+ * save's answer (`save-participant`), never by the notice, which any
+ * concurrent session of that account can take (patterns.md parallel lesson
+ * 2); the notice wording is asserted by the tests that act as throwaway
+ * accounts: "User added as a stage participant." in S9, "Notification
+ * sent to users." and the empty-"Notify" warning in S6. "The stage
+ * assignment has been changed." is asserted by no test.
+ *
+ * Seeding: scenario endpoints only; publicknowledge and the seeded roster
+ * are read-only (A1, A7). Every test seeds its own submission with a unique
+ * tag (M5). S3 runs on the seeded server, whose preprints in section `PRE`
+ * arrive with the section's Moderators assigned automatically
+ * (`sectioneditor.ana` is edited and restored, `sectioneditor.ravi` is the
+ * control). Every other test runs on a scratch server with throwaway
+ * accounts (footnote s), because each reads a mailbox (Mailpit is shared,
+ * A8), needs a second manager the roster lacks, or changes a role's
+ * options. A person a scenario assigns on screen is seeded in the server
+ * only (a seeded participant leaves the "Assign" list). S6's given (the
+ * second Moderator's unticked "Enable these types of notifications." on
+ * "Discussion added.") has no scenario key and is set on that person's own
+ * Profile › Notifications tab, as footnote s says. A message is always sent
+ * with a predefined message chosen: with the list left blank the send
+ * answers 500 on the Postgres test database (scenarios.md "Decision
+ * behaviour worth knowing"). Every absence is read with a settled locator
+ * (the exact row list, the exact menu, a recipient-scoped mail read after
+ * a control) and paired with a positive control taken the same way (M4,
+ * M6). Waits are web-first (A5). Everything runs in the parallel `ops`
+ * project.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
+const {TasksPanel, DISCUSSION_TASK} = require('../../../../shared/playwright/pages/NotificationsPages.js');
+const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
 const {
     ParticipantsPanel,
-    ENTRY_KEYS,
-    TOASTS,
-    NOTIFY_EMPTY_MESSAGE,
-    LOGIN_AS_SENTENCE,
+    RoleOptionsForm,
+    RemoveParticipantDialog,
+    notice,
+    stageNotice,
+    NOTICES,
+    BOX_LABELS,
+    TEMPLATE_LABEL,
     REMOVE_SENTENCE,
-    armToastObserver,
-    expectObservedToast,
-} = require('../pages/StageParticipantsPages.js');
+    RECOMMEND_ONLY_LINE,
+    LeavePageDialogs,
+} = require('../../../../shared/playwright/pages/StageParticipantsPages.js');
+const appContext = require('../support/app.context.js');
 
-const CONTEXT = 'publicknowledge';
+const SERVER = 'publicknowledge';
 
-/** The seeded preprint server's people (users.md; the OPS bootstrap). */
-const MANAGER = 'manager.maya';
-const AUTHOR = 'author.alex';
-const MODERATORS = {
-    'Ana Section Editor': 'sectioneditor.ana',
-    'Ravi Section Editor': 'sectioneditor.ravi',
+/** OPS's role names as the screens spell them. */
+const ROLE = {
+    manager: 'Preprint Server manager',
+    moderator: 'Moderator',
+    author: 'Author',
 };
-const AUTHOR_NAME = 'Alex Author';
-/** The Site Administrator's row and radio, by the username the names carry either way. */
-const ADMIN_ROW = /admin/i;
-const ADMIN_MENU = /admin.*More Actions$/i;
 
-/** The preprint server's roles and predefined messages (Rules 4a, 4e; OPS1). */
-const OPS_ROLES = ['Preprint Server manager', 'Moderator', 'Author'];
-const OPS_TEMPLATES = ['Discussion (Production)', 'Assign Editor'];
-const DISCUSSION_TEMPLATE = 'Discussion (Production)';
-const DISCUSSION_TEXT = 'Please enter your message.';
+/** The one stage entry's menu key and its discussions panel (OPS). */
+const PRODUCTION = 'workflow_5';
+const DISCUSSIONS = 'Production Tasks & Discussions';
 
-/** The managers' task (Rule 12) and the refusals (Rule 10). */
-const NEEDS_MODERATOR = 'A new preprint has been submitted to which a moderator needs to be assigned.';
-const NO_ROLE_ACCESS = 'The current role does not have access to this operation.';
+/** The stage's predefined message a scenario sends (Rule 5a, OPS column). */
+const DISCUSSION = 'Discussion (Production)';
 
-/** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
+/** The "Discussion added." row's setting (Profile › Notifications). */
+const DISCUSSION_SETTING = 'notificationNewQuery';
+
+/** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
     return `u35${scenario}opsw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** A throwaway account for `createContext`'s `users[]`. */
-function account(username, givenName, familyName, roles) {
-    return {username, givenName, familyName, email: `${username}@mail.test`, roles};
-}
-
+/** A throwaway or roster account's address (scenarios.md: `<username>@mail.test`). */
 const mailOf = (username) => `${username}@mail.test`;
 
-/** A page as a given user, with the panel's page object for it. */
-async function panelAs(asUser, appContext, username, contextPath) {
-    const page = await (await asUser(username)).newPage();
-    const panel = new ParticipantsPanel(page, contextPath, {appContext});
-    return {page, panel, workflow: panel.frame};
-}
-
-/** The same labels, order aside (the spec lists a menu's entries, not their order). */
-const sorted = (labels) => [...labels].sort();
+/** A mail body with its whitespace folded, for sentence matching. */
+const flat = (text) => (text || '').replace(/\s+/g, ' ');
 
 /**
- * The empty shell a removed participant lands on (Rule 10): the panel's
- * header holds the submission number and the "Error" dialog on top reads
- * `message`. Read through the `data-cy` hook, not by role: the dialog
- * stacks over the panel, which goes aria-hidden beneath it (patterns.md
- * pitfall 6; the OPS U24 suite's helper).
+ * A scratch preprint server holding the given throwaway accounts, each
+ * `{key: [givenName, familyName, roles]}`; returns them by key with
+ * `username`, `name` (the full name) and `email`.
  */
-async function expectErrorShell(workflow, submissionId, message) {
-    const header = workflow.page.locator('[data-cy="sidemodal-header"]');
-    await expect(header.locator('.text-xl-medium').first()).toHaveText(new RegExp(`^\\s*${submissionId}\\b`), {
-        timeout: 30_000,
+async function seedServer(opsApi, tag, accounts) {
+    const people = {};
+    for (const [key, [givenName, familyName, roles]] of Object.entries(accounts)) {
+        const username = `${key}${tag}`;
+        people[key] = {username, givenName, familyName, roles, name: `${givenName} ${familyName}`, email: mailOf(username)};
+    }
+    await opsApi.createContext({
+        tag,
+        context: {name: `Server ${tag}`},
+        users: Object.values(people).map(({username, givenName, familyName, roles}) => ({username, givenName, familyName, roles})),
     });
-    const dialog = workflow.errorDialog();
-    await expect(dialog).toBeVisible({timeout: 30_000});
-    await expect(dialog).toContainText(message);
-    await expect(dialog.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
+    return people;
 }
 
-/** Open the header's Tasks panel on a fresh dashboard landing and return it with its rows settled. */
-async function openTasks(page, contextPath, view = 'editorial') {
-    await page.goto(`/index.php/${contextPath}/dashboard/${view}`);
+/** A participants[] entry for a seeded account. */
+const part = (person, role, extra = {}) => ({username: person.username, role, ...extra});
+
+/**
+ * A participant notice as a preprint server shows it: the toast at the top
+ * right, or, when the Production entry's own notification box drained it
+ * first, that box headed "Notification" (an app race, T-ops-1; worked
+ * around, never asserted as the contract).
+ */
+const participantNotice = (page, text) => notice(page, text).or(stageNotice(page, text)).first();
+
+/** Open a signed-in page for `person` (every actor goes through `asUser`). */
+async function pageFor(asUser, username) {
+    return (await asUser(username)).newPage();
+}
+
+/** The Participants panel of a preprint server's workflow. */
+const panelOn = (page, contextPath) => new ParticipantsPanel(page, contextPath, {appContext});
+
+/** Open the header's Tasks panel on a server's editorial dashboard and return it. */
+async function openTasks(page, contextPath) {
+    await page.goto(`/index.php/${contextPath}/dashboard/editorial`);
     const tasks = new TasksPanel(page);
     await expect(tasks.bell()).toBeVisible({timeout: 30_000});
     await tasks.open();
-    await expect(tasks.rows().or(tasks.noItems()).first()).toBeVisible({timeout: 30_000});
     return tasks;
 }
 
-test.describe('stage participants (U35) — OPS', () => {
-    test("S7: the preprint server's panel", async ({asUser, opsApi, appContext}, testInfo) => {
+/** A person's Profile › Notifications box set and saved (the given footnote s sets on screen). */
+async function setNotificationBox(asUser, contextPath, username, settingName, box, checked) {
+    const page = await pageFor(asUser, username);
+    const profile = new ProfilePage(page, contextPath);
+    await profile.goto('notifications');
+    await profile.notificationPair(settingName)[box].setChecked(checked);
+    await profile.save();
+    const again = new ProfilePage(page, contextPath);
+    await again.goto('notifications');
+    await expect(again.notificationPair(settingName)[box]).toBeChecked({checked});
+    await page.close();
+}
+
+test.describe('stage participants', () => {
+    test('S3: change an assignment with "Edit"', async ({asUser, opsApi}, testInfo) => {
         test.slow();
-        const tag = makeTag('s7', testInfo);
-        const title = `Preprint ${tag}`;
+        const tag = makeTag('s3', testInfo);
+        const {submissionId} = await opsApi.createSubmission({
+            tag,
+            context: SERVER,
+            submitter: 'author.alex',
+            title: `Preprint ${tag}`,
+        });
+        const ana = {givenName: 'Ana', familyName: 'Section Editor', name: 'Ana Section Editor'};
+        const ravi = {givenName: 'Ravi', familyName: 'Section Editor', name: 'Ravi Section Editor'};
 
-        // Given: the seeded server, the manager not assigned, a submitted
-        // preprint by author.alex whose section's two Moderators are
-        // assigned by the seed beside its Author (footnote s), and the
-        // Site Administrator holding the manager role on the server.
-        const seeded = await opsApi.createSubmission({tag, context: CONTEXT, submitter: AUTHOR, title});
+        const page = await pageFor(asUser, 'manager.maya');
+        const panel = panelOn(page, SERVER);
+        await panel.goto(submissionId, {menuKey: PRODUCTION});
+        /**
+         * "OK" on "Edit Assignment", read by the save's own answer instead of
+         * the notice: S3 acts as the shared `manager.maya`, whose notices any
+         * concurrent session of that account can take (patterns.md parallel
+         * lesson 2).
+         */
+        const okSaved = async (editWindow) => {
+            const saved = page.waitForResponse((r) => r.url().includes('save-participant'), {timeout: 30_000});
+            await editWindow.ok();
+            const response = await saved;
+            expect(response.status()).toBe(200);
+            expect((await response.json()).status).toBe(true);
+        };
+        /** A row's lines after the initials badge. */
+        const linesOf = async (person) =>
+            ((await panel.rowLines()).find((lines) => lines[1] === person.name) || []).slice(1);
+        const plain = (person) => [person.name, ROLE.moderator];
+        const limited = (person) => [person.name, ROLE.moderator, RECOMMEND_ONLY_LINE];
+        await expect.poll(() => linesOf(ana)).toEqual(plain(ana));
+        await expect.poll(() => linesOf(ravi)).toEqual(plain(ravi));
 
-        // ── One entry, one list ──────────────────────────────────────────
-        // The spec's "Submission" entry does not exist on a preprint
-        // server (finding T-ops-1; the OPS U25 suite's absence read): the
-        // side menu's stage entries are exactly ["Production"], and the
-        // address typed with the Submission stage's key lands on
-        // "Workflow: Production" like the Production key does. On both
-        // landings: the panel with "Assign", the two Moderators' rows and
-        // the Author's (Rules 1, 2).
-        const manager = await panelAs(asUser, appContext, MANAGER, CONTEXT);
-        await manager.panel.gotoByKey(seeded.submissionId, ENTRY_KEYS.Submission);
-        await expect.poll(() => manager.panel.stageLabels(), {timeout: 30_000}).toEqual(['Production']);
-        await expect(manager.workflow.stageLink('Submission')).toHaveCount(0);
-        await expect(manager.panel.heading()).toBeVisible({timeout: 30_000});
-        await expect(manager.panel.assignButton()).toBeVisible();
-        await expect(manager.panel.rows()).toHaveText([/Moderator/, /Moderator/, /Author/], {timeout: 30_000});
-        for (const name of Object.keys(MODERATORS)) {
-            await expect(manager.panel.row(name)).toContainText('Moderator');
-        }
-        await expect(manager.panel.row(AUTHOR_NAME)).toContainText('Author');
-        const firstModerator = (await manager.panel.rows().first().innerText()).includes('Ana')
-            ? 'Ana Section Editor'
-            : 'Ravi Section Editor';
-        const secondModerator = firstModerator === 'Ana Section Editor' ? 'Ravi Section Editor' : 'Ana Section Editor';
+        // "Edit Assignment": the participant in bold with the role, the boxes
+        // as the assignment stands, and no message box.
+        let win = await panel.openEdit(ana.name, ROLE.moderator);
+        await expect(win.title()).toHaveText('Edit Assignment');
+        await expect(win.form()).toContainText('Participant');
+        await expect(win.form()).toContainText(`${ana.name} (${ROLE.moderator})`);
+        await expect(win.boldName(ana.name)).toBeVisible();
+        await expect(win.recommendOnlyBox()).not.toBeChecked();
+        await expect(win.metadataBox()).toBeChecked();
+        await expect(win.messageFields()).toHaveCount(0);
 
-        // ── "Assign Participant" from either address ─────────────────────
-        // Press "Assign": the role list "Preprint Server manager",
-        // "Moderator", "Author" (OPS1), the first selected, the predefined
-        // messages "Discussion (Production)" and "Assign Editor";
-        // "Cancel"; landed by the Production key: the same rows and the
-        // same window (Rules 4a, 4e).
-        let assign = await manager.panel.openAssign();
-        expect(await assign.roleOptions()).toEqual(OPS_ROLES);
-        expect(await assign.selectedRole()).toBe(OPS_ROLES[0]);
-        expect(sorted(await assign.templateOptions())).toEqual(sorted(OPS_TEMPLATES));
-        await assign.cancel();
-        await manager.panel.gotoProduction(seeded.submissionId);
-        await expect(manager.panel.rows()).toHaveText([/Moderator/, /Moderator/, /Author/], {timeout: 30_000});
-        await expect(manager.panel.rows().first()).toContainText(firstModerator);
-        await expect(manager.panel.row(AUTHOR_NAME)).toContainText('Author');
-        assign = await manager.panel.openAssign();
-        expect(await assign.roleOptions()).toEqual(OPS_ROLES);
-        expect(await assign.selectedRole()).toBe(OPS_ROLES[0]);
-        expect(sorted(await assign.templateOptions())).toEqual(sorted(OPS_TEMPLATES));
+        // Both boxes changed: the notice and the third line.
+        await win.recommendOnlyBox().check();
+        await win.metadataBox().uncheck();
+        await okSaved(win);
+        await expect.poll(() => linesOf(ana)).toEqual(limited(ana));
+        await expect.poll(() => linesOf(ravi)).toEqual(plain(ravi));
 
-        // ── A manager assigned ───────────────────────────────────────────
-        // With "Preprint Server manager" selected press "Search" and choose
-        // the Site Administrator's row: "Assignment privileges" with its
-        // box and no "Permissions" (Rules 4c, 6); choose "Assign Editor"
-        // (what it does to "Message" is OPS2, not asserted); "OK": "User
-        // added as a stage participant." and the row "Preprint Server
-        // manager" first, on the landing by either key (Rules 1, 2, 4f).
-        await assign.search('admin');
-        await expect(assign.userRow(ADMIN_ROW).first()).toBeVisible({timeout: 30_000});
-        await assign.chooseUser(ADMIN_ROW);
-        await expect(assign.privilegesHeading()).toBeVisible({timeout: 30_000});
-        await expect(assign.recommendOnlyBox()).toBeVisible();
-        await expect(assign.permissionsHeading()).toBeHidden();
-        await expect(assign.metadataBox()).toBeHidden();
-        await assign.chooseTemplate('Assign Editor');
-        await armToastObserver(manager.page);
-        await assign.ok();
-        await expectObservedToast(manager.page, TOASTS.added);
-        await expect(manager.panel.rows()).toHaveCount(4, {timeout: 30_000});
-        await expect(manager.panel.rows().first()).toContainText(ADMIN_ROW);
-        await expect(manager.panel.rows().first()).toContainText('Preprint Server manager');
-        await manager.panel.gotoByKey(seeded.submissionId, ENTRY_KEYS.Submission);
-        await expect(manager.panel.rows()).toHaveCount(4, {timeout: 30_000});
-        await expect(manager.panel.rows().first()).toContainText(ADMIN_ROW);
-        await expect(manager.panel.rows().first()).toContainText('Preprint Server manager');
+        // "Edit" again: the boxes as saved; "Cancel" closes.
+        await panel.reland();
+        win = await panel.openEdit(ana.name, ROLE.moderator);
+        await expect(win.recommendOnlyBox()).toBeChecked();
+        await expect(win.metadataBox()).not.toBeChecked();
+        await win.cancel();
 
-        // ── The rows' menus ──────────────────────────────────────────────
-        // The Site Administrator's row: "Edit", "Notify", "Remove", no
-        // "Login As"; the first Moderator's row all four (Actors rows 3–6).
-        expect(sorted(await manager.panel.readMenu(ADMIN_MENU))).toEqual(sorted(['Edit', 'Notify', 'Remove']));
-        expect(sorted(await manager.panel.readMenu(firstModerator))).toEqual(
-            sorted(['Edit', 'Notify', 'Login As', 'Remove'])
-        );
+        // ("Another stage" is {OJS OMP}: the server's only entry is Production.)
 
-        // ── "Edit" on a Moderator's row ──────────────────────────────────
-        // "Edit Assignment" with "Assignment privileges" clear and
-        // "Permissions" ticked; tick the first and "OK": "The stage
-        // assignment has been changed." and the row's line, on the
-        // landing by either key (Rules 2, 5a, 7).
-        let edit = await manager.panel.openEdit(firstModerator);
-        await expect(edit.privilegesHeading()).toBeVisible();
-        await expect(edit.recommendOnlyBox()).not.toBeChecked();
-        await expect(edit.permissionsHeading()).toBeVisible();
-        await expect(edit.metadataBox()).toBeChecked();
-        await edit.recommendOnlyBox().check();
-        await armToastObserver(manager.page);
-        await edit.ok();
-        await expectObservedToast(manager.page, TOASTS.changed);
-        await expect(manager.panel.recommendOnlyMark(firstModerator)).toBeVisible({timeout: 30_000});
-        await expect(manager.panel.recommendOnlyMark(secondModerator)).toHaveCount(0);
-        await manager.panel.gotoProduction(seeded.submissionId);
-        await expect(manager.panel.recommendOnlyMark(firstModerator)).toBeVisible({timeout: 30_000});
-        await expect(manager.panel.recommendOnlyMark(secondModerator)).toHaveCount(0);
+        // Back to the start: the notice, and the third line gone.
+        await panel.reland();
+        win = await panel.openEdit(ana.name, ROLE.moderator);
+        await win.recommendOnlyBox().uncheck();
+        await win.metadataBox().check();
+        await okSaved(win);
+        await expect.poll(() => linesOf(ana)).toEqual(plain(ana));
 
-        // ── "Edit" on the Author's row ───────────────────────────────────
-        // "Permissions" with its box ticked and no "Assignment privileges";
-        // "Cancel" (Rules 6, 7).
-        edit = await manager.panel.openEdit(AUTHOR_NAME);
-        await expect(edit.permissionsHeading()).toBeVisible();
-        await expect(edit.metadataBox()).toBeChecked();
-        await expect(edit.privilegesHeading()).toBeHidden();
-        await expect(edit.recommendOnlyBox()).toBeHidden();
-        await edit.cancel();
-
-        // ── The Moderator's panel ────────────────────────────────────────
-        // The second Moderator opens the preprint at "Production": "Assign"
-        // beside the heading; their own row's menu holds "Notify" and
-        // "Remove" and no "Login As" (the absent "Edit" is A7, parked);
-        // the Site Administrator's row "Notify" and "Remove"; the first
-        // Moderator's and the Author's rows "Edit", "Notify" and "Remove"
-        // (Actors rows 2–6).
-        const moderator = await panelAs(asUser, appContext, MODERATORS[secondModerator], CONTEXT);
-        await moderator.panel.gotoProduction(seeded.submissionId);
-        await expect(moderator.panel.heading()).toBeVisible({timeout: 30_000});
-        await expect(moderator.panel.assignButton()).toBeVisible();
-        await expect(moderator.panel.rows()).toHaveCount(4, {timeout: 30_000});
-        const own = await moderator.panel.readMenu(secondModerator);
-        expect(own).toEqual(expect.arrayContaining(['Notify', 'Remove']));
-        expect(own).not.toContain('Login As');
-        expect(sorted(await moderator.panel.readMenu(ADMIN_MENU))).toEqual(sorted(['Notify', 'Remove']));
-        expect(sorted(await moderator.panel.readMenu(firstModerator))).toEqual(sorted(['Edit', 'Notify', 'Remove']));
-        expect(sorted(await moderator.panel.readMenu(AUTHOR_NAME))).toEqual(sorted(['Edit', 'Notify', 'Remove']));
-
-        // ── "Login As" ───────────────────────────────────────────────────
-        // As the manager, on the second Moderator's row "…" › "Login As":
-        // the dialog with its sentence, "OK" and "Cancel"; "OK": the
-        // editorial dashboard with this preprint open, as the Moderator;
-        // the list opens with "Logout as {name}" above the rows; press it:
-        // the same preprint as the manager again, the row offering "Login
-        // As" once more (Rule 9).
-        const loginAs = await manager.panel.openLoginAs(secondModerator);
-        await expect(loginAs).toContainText(LOGIN_AS_SENTENCE);
-        await expect(loginAs.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
-        await expect(loginAs.getByRole('button', {name: 'Cancel', exact: true})).toBeVisible();
-        await loginAs.getByRole('button', {name: 'OK', exact: true}).click();
-        await manager.page.waitForURL(/dashboard\/editorial/, {waitUntil: 'commit', timeout: 30_000});
-        await manager.workflow.expectOpen(seeded.submissionId);
-        await expect(manager.panel.logoutAsButton(secondModerator)).toBeVisible({timeout: 30_000});
-        await expect(manager.panel.firstEntry()).toContainText(`Logout as ${secondModerator}`);
-        await expect(manager.panel.rows()).toHaveCount(4, {timeout: 30_000});
-        const asModerator = await manager.panel.readMenu(secondModerator);
-        expect(asModerator).not.toContain('Login As');
-        await manager.panel.logoutAs(secondModerator, seeded.submissionId);
-        await expect(manager.panel.firstEntry()).not.toContainText('Logout as');
-        expect(await manager.panel.readMenu(secondModerator)).toContain('Login As');
-
-        // ── Control ──────────────────────────────────────────────────────
-        // The Author, opening the preprint from My Submissions, has no
-        // "Participants" panel, where the manager's view showed it; the
-        // author's own workflow navigation is the
-        // settled read (Rule 1; Actors row 1).
-        const author = await panelAs(asUser, appContext, AUTHOR, CONTEXT);
-        await author.workflow.gotoAuthor(seeded.submissionId);
-        await expect(
-            author.page.getByRole('dialog').getByRole('navigation').getByRole('link', {name: 'Preprint', exact: true})
-        ).toBeVisible({timeout: 30_000});
-        await expect(author.panel.panel()).toHaveCount(0);
-        await expect(author.panel.heading()).toHaveCount(0);
+        // Control: the second Moderator's row never changed.
+        await expect.poll(() => linesOf(ravi)).toEqual(plain(ravi));
     });
 
-    test('S8: a Moderator assigned and notified', async ({asUser, opsApi, appContext, pkpMail}, testInfo) => {
+    test('S4: what an assigned editor may change on the panel', async ({asUser, opsApi}, testInfo) => {
         test.slow();
-        const tag = makeTag('s8', testInfo);
-        const managerName = `${tag}mg`;
-        const moderatorName = `${tag}md`;
-        const authorName = `${tag}au`;
-        const secondAuthorName = `${tag}au2`;
-        const managerDisplay = 'Mira Manager';
-        const moderatorDisplay = 'Mona Moderator';
-        const secondAuthorDisplay = 'Abe Authortwo';
-        const title = `Preprint ${tag}`;
-
-        // Given: a scratch preprint server with a throwaway Preprint Server
-        // Manager, a Moderator and two Authors; the first Author's
-        // submitted preprint with nobody else assigned (a scratch context
-        // assigns nobody by itself, footnote s).
-        await opsApi.createContext({
+        test.setTimeout(300_000);
+        const tag = makeTag('s4', testInfo);
+        const p = await seedServer(opsApi, tag, {
+            sa: ['Sam', 'Moderator', ['sectionEditor']],
+            sb: ['Sue', 'Second', ['sectionEditor']],
+            ed: ['Erin', 'Manager', ['manager']],
+            mgr: ['Mira', 'Manager', ['manager']],
+            au: ['Ava', 'Author', ['author']],
+        });
+        const {submissionId} = await opsApi.createSubmission({
             tag,
-            context: {name: `Preprint server ${tag}`},
-            users: [
-                account(managerName, 'Mira', 'Manager', ['manager']),
-                account(moderatorName, 'Mona', 'Moderator', ['sectionEditor']),
-                account(authorName, 'Ada', 'Author', ['author']),
-                account(secondAuthorName, 'Abe', 'Authortwo', ['author']),
+            context: tag,
+            submitter: p.au.username,
+            title: `Preprint ${tag}`,
+            participants: [
+                part(p.sa, 'sectionEditor'),
+                part(p.sb, 'sectionEditor', {recommendOnly: true}),
+                part(p.ed, 'manager', {recommendOnly: true}),
             ],
         });
-        const seeded = await opsApi.createSubmission({tag, context: tag, submitter: authorName, title});
-        expect(await pkpMail.count({to: mailOf(moderatorName)})).toBe(0);
-        expect(await pkpMail.count({to: mailOf(secondAuthorName)})).toBe(0);
 
-        // ── The managers' task ───────────────────────────────────────────
-        // The header's Tasks panel lists "A new preprint has been submitted
-        // to which a moderator needs to be assigned." for the title (Rule 12).
-        const manager = await panelAs(asUser, appContext, managerName, tag);
-        let tasks = await openTasks(manager.page, tag);
-        await expect(tasks.row(title).filter({hasText: NEEDS_MODERATOR})).toHaveCount(1);
-        await tasks.close();
+        // The deciding Moderator: "Assign"; their own row and the recommending
+        // Preprint Server manager's row offer no "Edit"; the second
+        // Moderator's row does, both boxes ticked; "Cancel" asks nothing.
+        const saPage = await pageFor(asUser, p.sa.username);
+        const saDialogs = new LeavePageDialogs(saPage);
+        const sa = panelOn(saPage, tag);
+        await sa.goto(submissionId);
+        await sa.expectRows([
+            ParticipantsPanel.lines(p.ed, ROLE.manager, {recommendOnly: true}),
+            ParticipantsPanel.lines(p.sa, ROLE.moderator),
+            ParticipantsPanel.lines(p.sb, ROLE.moderator, {recommendOnly: true}),
+            ParticipantsPanel.lines(p.au, ROLE.author),
+        ]);
+        await expect(sa.assignButton()).toBeVisible();
+        await sa.expectMenu(p.sa.name, ['Notify', 'Remove']);
+        await sa.expectMenu(p.ed.name, ['Notify', 'Remove']);
+        let win = await sa.openEdit(p.sb.name);
+        await expect(win.recommendOnlyBox()).toBeChecked();
+        await expect(win.metadataBox()).toBeChecked();
+        await win.cancel();
+        expect(saDialogs.count()).toBe(0);
 
-        // ── "OK" with nobody chosen ──────────────────────────────────────
-        // Open the preprint at "Production" and press "Assign"; with
-        // "Preprint Server manager" selected and no row chosen press "OK":
-        // the window stays open (what it says is A10, not asserted);
-        // "Cancel": the panel still lists the Author's row alone (Rule 4f).
-        await manager.panel.gotoProduction(seeded.submissionId);
-        await expect(manager.panel.rows()).toHaveCount(1, {timeout: 30_000});
-        await expect(manager.panel.row('Ada Author')).toContainText('Author');
-        let assign = await manager.panel.openAssign();
-        expect(await assign.selectedRole()).toBe(OPS_ROLES[0]);
-        await assign.pressOk();
-        await expect(assign.roleSelect()).toBeVisible();
-        await assign.cancel();
-        await expect(manager.panel.rows()).toHaveCount(1, {timeout: 30_000});
-        await expect(manager.panel.row('Ada Author')).toContainText('Author');
+        // The recommending Moderator: "Assign"; the deciding Moderator's row
+        // offers no "Edit"; the Author's does, with "Permissions" and no
+        // "Assignment privileges".
+        const sbPage = await pageFor(asUser, p.sb.username);
+        const sb = panelOn(sbPage, tag);
+        await sb.goto(submissionId);
+        await expect(sb.assignButton()).toBeVisible();
+        await sb.expectMenu(p.sa.name, ['Notify', 'Remove']);
+        win = await sb.openEdit(p.au.name);
+        await expect(win.metadataBox()).toBeVisible();
+        await expect(win.recommendOnlyBox()).toHaveCount(0);
+        await win.cancel();
 
-        // ── An Author assigned keeps the task ────────────────────────────
-        // "Assign", "Author", "Search", the second Author's row:
-        // "Permissions" with its box ticked and no "Assignment privileges"
-        // (Rules 4c, 6); "Message" empty, "OK": "User added as a stage
-        // participant." and a second "Author" row (Rule 4f); the Tasks
-        // panel still lists the task (Rule 12).
-        assign = await manager.panel.openAssign();
-        await assign.selectRole('Author');
-        await assign.search('Abe');
-        await expect(assign.userRow(secondAuthorDisplay).first()).toBeVisible({timeout: 30_000});
-        await assign.chooseUser(secondAuthorDisplay);
-        await expect(assign.permissionsHeading()).toBeVisible({timeout: 30_000});
-        await expect(assign.metadataBox()).toBeChecked();
-        await expect(assign.privilegesHeading()).toBeHidden();
-        await expect(assign.recommendOnlyBox()).toBeHidden();
-        expect(await assign.messageText()).toBe('');
-        await armToastObserver(manager.page);
-        await assign.ok();
-        await expectObservedToast(manager.page, TOASTS.added);
-        await expect(manager.panel.rows()).toHaveText([/Author/, /Author/], {timeout: 30_000});
-        await expect(manager.panel.row(secondAuthorDisplay)).toContainText('Author');
-        tasks = await openTasks(manager.page, tag);
-        await expect(tasks.row(title).filter({hasText: NEEDS_MODERATOR})).toHaveCount(1);
-        await tasks.close();
+        // The recommending Preprint Server manager: the deciding Moderator's
+        // row offers "Edit", with "Permissions" and no "Assignment privileges".
+        const edPage = await pageFor(asUser, p.ed.username);
+        const ed = panelOn(edPage, tag);
+        await ed.goto(submissionId);
+        win = await ed.openEdit(p.sa.name);
+        await expect(win.metadataBox()).toBeVisible();
+        await expect(win.recommendOnlyBox()).toHaveCount(0);
+        await win.cancel();
 
-        // ── A Moderator assigned with "Discussion (Production)" ──────────
-        // "Assign", "Moderator", "Search", the Moderator's row: "Assignment
-        // privileges" clear and "Permissions" ticked (Rules 4c, 5b, 6);
-        // "Discussion (Production)" fills "Message" with "Please enter
-        // your message." (Rule 4e); "OK": both toasts, the "Moderator" row
-        // above the Authors' (Rules 1, 4f), the discussion on the stage's
-        // panel with the Moderator and the manager as its participants,
-        // and the task gone from the Tasks panel (Rules 8a, 8b, 12).
-        await manager.panel.gotoProduction(seeded.submissionId);
-        assign = await manager.panel.openAssign();
-        await assign.selectRole('Moderator');
-        await assign.search('Mona');
-        await expect(assign.userRow(moderatorDisplay).first()).toBeVisible({timeout: 30_000});
-        await assign.chooseUser(moderatorDisplay);
-        await expect(assign.privilegesHeading()).toBeVisible({timeout: 30_000});
-        await expect(assign.recommendOnlyBox()).not.toBeChecked();
-        await expect(assign.permissionsHeading()).toBeVisible();
-        await expect(assign.metadataBox()).toBeChecked();
-        await assign.chooseTemplate(DISCUSSION_TEMPLATE, {fills: DISCUSSION_TEXT});
-        expect(await assign.messageText()).toBe(DISCUSSION_TEXT);
-        await armToastObserver(manager.page);
-        await assign.ok();
-        await expectObservedToast(manager.page, TOASTS.added);
-        await expectObservedToast(manager.page, TOASTS.sent);
-        await expect(manager.panel.rows()).toHaveText([/Moderator/, /Author/, /Author/], {timeout: 30_000});
-        await expect(manager.panel.rows().first()).toContainText(moderatorDisplay);
-        const discussions = manager.panel.discussions();
-        await expect(discussions.row(DISCUSSION_TEMPLATE)).toHaveCount(1, {timeout: 30_000});
-        let view = await discussions.open(DISCUSSION_TEMPLATE);
-        await expect(view).toContainText(moderatorDisplay);
-        await expect(view).toContainText(managerDisplay);
-        await discussions.close();
-        tasks = await openTasks(manager.page, tag);
-        await expect(tasks.row(title).filter({hasText: NEEDS_MODERATOR})).toHaveCount(0);
-        await tasks.close();
+        // (The Production editor bullet is {OJS OMP}: a server has none.)
 
-        // ── The Moderator's mailbox ──────────────────────────────────────
-        // The email "Discussion (Production)" with the manager's name on
-        // the From line (Rule 8a).
-        const mail = await pkpMail.find({to: mailOf(moderatorName), subject: DISCUSSION_TEMPLATE});
-        expect(mail.Subject).toBe(DISCUSSION_TEMPLATE);
-        expect(mail.From).toEqual({Name: managerDisplay, Address: mailOf(managerName)});
-        expect(await pkpMail.count({to: mailOf(moderatorName)})).toBe(1);
+        // Control: the Preprint Server manager assigned to nothing is offered
+        // "Edit" on the two rows where the deciding Moderator had none.
+        const mgrPage = await pageFor(asUser, p.mgr.username);
+        const mgr = panelOn(mgrPage, tag);
+        await mgr.goto(submissionId);
+        for (const person of [p.sa, p.ed]) {
+            await mgr.openMenu(person.name);
+            await expect(mgr.menuItem('Edit')).toBeVisible();
+            await mgr.closeMenu(person.name);
+        }
+    });
 
-        // ── The Moderator's Tasks panel ──────────────────────────────────
-        // "{the manager} started a discussion: Discussion (Production): …" (Rule 8a).
-        const moderator = await panelAs(asUser, appContext, moderatorName, tag);
-        const moderatorTasks = await openTasks(moderator.page, tag);
+    test('S5: remove a participant', async ({asUser, opsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s5', testInfo);
+        const p = await seedServer(opsApi, tag, {
+            mgr: ['Mira', 'Manager', ['manager']],
+            mo: ['Moe', 'Moderator', ['sectionEditor']],
+            au: ['Ava', 'Author', ['author']],
+        });
+        const {submissionId} = await opsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: p.au.username,
+            title: `Preprint ${tag}`,
+            participants: [part(p.mo, 'sectionEditor')],
+        });
+
+        // The given: the Preprint Server manager opens a discussion with the
+        // Moderator through their row's "Notify" (footnote s).
+        const page = await pageFor(asUser, p.mgr.username);
+        const panel = panelOn(page, tag);
+        await panel.goto(submissionId, {menuKey: PRODUCTION});
+        const notify = await panel.openNotify(p.mo.name, ROLE.moderator);
+        await notify.chooseTemplate(DISCUSSION);
+        await notify.send();
+
+        // Control, before "OK": the discussion names the Moderator.
+        await panel.reland();
+        let discussion = await panel.openDiscussion(panel.discussionRows(DISCUSSIONS, DISCUSSION), DISCUSSION);
+        await discussion.expectParticipants([p.mgr.username, p.mo.username]);
+        await discussion.close();
+
+        // The dialog: "Remove" in red, the question, "OK" in red and
+        // "Cancel"; "Cancel" keeps the row.
+        await panel.reland();
+        await panel.openMenu(p.mo.name, ROLE.moderator);
+        await expect(panel.menuItem('Remove')).toHaveClass(/text-negative/);
+        await panel.menuItem('Remove').click();
+        let dialog = new RemoveParticipantDialog(page);
+        await dialog.expectOpen();
+        await expect(dialog.title()).toBeVisible();
+        await expect(dialog.root).toContainText(REMOVE_SENTENCE);
+        await expect(dialog.okButton()).toHaveClass(/text-negative/);
+        await expect(dialog.cancelButton()).toBeVisible();
+        await dialog.cancel();
+        await panel.expectRows([ParticipantsPanel.lines(p.mo, ROLE.moderator), ParticipantsPanel.lines(p.au, ROLE.author)]);
+
+        // "OK": the Moderator row is gone (the Author's stays).
+        dialog = await panel.openRemove(p.mo.name, ROLE.moderator);
+        await dialog.ok();
+        await panel.expectRows([ParticipantsPanel.lines(p.au, ROLE.author)]);
+
+        // ("The other stages" and "The dashboard" are {OJS OMP}.)
+
+        // The discussion no longer names the Moderator.
+        await panel.reland();
+        discussion = await panel.openDiscussion(panel.discussionRows(DISCUSSIONS, DISCUSSION), DISCUSSION);
+        await discussion.expectParticipants([p.mgr.username]);
+        await discussion.close();
+
+        // The Activity Log.
+        await panel.reland();
+        await panel.frame.openActivityLog();
         await expect(
-            moderatorTasks.row(`${managerDisplay} started a discussion: ${DISCUSSION_TEMPLATE}:`)
+            panel.frame.activityLogRow(`${p.mo.name} (${p.mo.username}) was removed from this submission as a Moderator.`)
         ).toHaveCount(1);
-        await moderatorTasks.close();
+        await panel.frame.closeActivityLog();
+    });
 
-        // ── "Notify" with "Message" empty ────────────────────────────────
-        // As the manager, on the Moderator's row "…" › "Notify": "Start
-        // Discussion", "Begin a discussion between yourself and {name}.",
-        // the predefined-message list and "Message", the one button
-        // "Notify" and no "Cancel"; "Notify" with "Message" empty: the
-        // window stays open and "Please ensure…" shows at the top right
-        // (a toast, caught by the observer armed before the press: finding
-        // T-ops-2) (Rule 8; Fields).
-        await manager.panel.gotoProduction(seeded.submissionId);
-        const notify = await manager.panel.openNotify(moderatorDisplay);
-        await expect(notify.dialog()).toContainText('Start Discussion');
-        await expect(notify.dialog()).toContainText(`Begin a discussion between yourself and ${moderatorDisplay}.`);
-        await expect(notify.templateSelect()).toBeVisible();
-        await expect(notify.messageTextarea()).toBeAttached();
-        await expect(notify.notifyButton()).toBeVisible();
-        await expect(notify.cancelControls()).toHaveCount(0);
-        await armToastObserver(manager.page);
-        await notify.pressNotify();
-        await expectObservedToast(manager.page, NOTIFY_EMPTY_MESSAGE);
-        await expect(notify.templateSelect()).toBeVisible();
-        await expect(notify.notifyButton()).toBeVisible();
-        await notify.close();
+    test('S6: notify a participant', async ({asUser, opsApi, pkpMail}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s6', testInfo);
+        const title = `Preprint ${tag}`;
+        const message = 'Please check the reference list.';
+        const p = await seedServer(opsApi, tag, {
+            mgr: ['Mira', 'Manager', ['manager']],
+            sa: ['Sam', 'Moderator', ['sectionEditor']],
+            sb: ['Sue', 'Second', ['sectionEditor']],
+            au: ['Ava', 'Author', ['author']],
+        });
+        const {submissionId} = await opsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: p.au.username,
+            title,
+            participants: [part(p.sa, 'sectionEditor'), part(p.sb, 'sectionEditor')],
+        });
+        // The given: the second Moderator unticked "Enable these types of
+        // notifications." on "Discussion added." (no scenario key; footnote s).
+        await setNotificationBox(asUser, tag, p.sb.username, DISCUSSION_SETTING, 'allow', false);
 
-        // ── "Remove" ─────────────────────────────────────────────────────
-        // On the Moderator's row "…" › "Remove": the dialog "Remove
-        // Participant" with its sentence, "OK" and "Cancel"; "OK": the row
-        // leaves the panel, on the landing by either key; the discussion lists
-        // the manager as its only participant; the Activity Log reads
-        // "{name} ({username}) was removed from this submission as a
-        // Moderator." (the column it is filed under is A13, not asserted)
-        // (Rules 2, 10; Side effects).
-        const remove = await manager.panel.openRemove(moderatorDisplay);
-        await expect(remove).toContainText('Remove Participant');
-        await expect(remove).toContainText(REMOVE_SENTENCE);
-        await expect(remove.getByRole('button', {name: 'Cancel', exact: true})).toBeVisible();
-        const removed = manager.page.waitForResponse(
-            (r) => /delete-participant/.test(r.url()) && r.request().method() === 'POST',
-            {timeout: 30_000}
-        );
-        await remove.getByRole('button', {name: 'OK', exact: true}).click();
-        await removed;
-        await expect(manager.panel.row(moderatorDisplay)).toHaveCount(0, {timeout: 30_000});
-        await expect(manager.panel.rows()).toHaveText([/Author/, /Author/], {timeout: 30_000});
-        await manager.panel.gotoByKey(seeded.submissionId, ENTRY_KEYS.Submission);
-        await expect(manager.panel.rows()).toHaveText([/Author/, /Author/], {timeout: 30_000});
-        await expect(manager.panel.row(moderatorDisplay)).toHaveCount(0);
-        await manager.panel.gotoProduction(seeded.submissionId);
-        await expect(discussions.row(DISCUSSION_TEMPLATE)).toHaveCount(1, {timeout: 30_000});
-        view = await discussions.open(DISCUSSION_TEMPLATE);
-        await expect(view).toContainText(managerDisplay);
-        await expect(view).not.toContainText(moderatorDisplay);
-        await discussions.close();
-        await manager.workflow.openActivityLog();
+        // The "Notify" window.
+        const page = await pageFor(asUser, p.mgr.username);
+        const panel = panelOn(page, tag);
+        await panel.goto(submissionId, {menuKey: PRODUCTION});
+        const win = await panel.openNotify(p.sa.name);
+        await expect(win.title()).toHaveText('Notify');
+        await expect(win.startDiscussionHeading()).toBeVisible();
+        await expect(win.sentence(p.sa.name)).toBeVisible();
+        await expect(win.templateLabel()).toBeVisible();
+        await expect(win.root.getByText(/^\s*Message\*?\s*$/)).toBeVisible();
+        await expect(win.notifyButton()).toBeVisible();
+        await expect(win.cancelControls()).toHaveCount(0);
+
+        // "Message" empty: the window stays, with the warning.
+        await win.notifyButton().click();
+        await expect(notice(page, NOTICES.notifyRefused)).toBeVisible();
+        await expect(win.notifyButton()).toBeVisible();
+
+        // A predefined message, replaced by the manager's text.
+        await win.chooseTemplate(DISCUSSION);
+        expect(flat(await win.messageText()).trim()).toBe('Please enter your message.');
+        await win.typeMessage(message);
+        await win.send();
+        await expect(participantNotice(page, NOTICES.notified)).toBeVisible();
+
+        // The first Moderator's mailbox.
+        const mail = await pkpMail.find({to: p.sa.email, subject: DISCUSSION});
+        expect(mail.From.Address).toBe(p.mgr.email);
+        const full = await pkpMail.fullMessage(mail.ID);
+        const body = flat(full.Text);
+        expect(body.trim().startsWith(message)).toBe(true);
+        expect(body).toContain('Reply to this comment at');
+        expect(pkpMail.extractLink(full.HTML, 'unsubscribe')).toMatch(/\/notification\/unsubscribe\?/);
+
+        // The discussion: one "Discussion (Production)" (the empty "Notify"
+        // added none), its participants and first entry.
+        await panel.reland();
+        const rows = panel.discussionRows(DISCUSSIONS, DISCUSSION);
+        await expect(rows).toHaveCount(1);
+        const discussion = await panel.openDiscussion(rows, DISCUSSION);
+        await discussion.expectParticipants([p.sa.username, p.mgr.username]);
+        await expect(discussion.entries().first()).toContainText(message);
+        await discussion.close();
+
+        // The first Moderator's Tasks panel.
+        const task = DISCUSSION_TASK({creatorName: p.mgr.name, name: DISCUSSION, message});
+        const saPage = await pageFor(asUser, p.sa.username);
+        const saTasks = await openTasks(saPage, tag);
+        await expect(saTasks.row(task).filter({hasText: title})).toHaveCount(1);
+
+        // The Activity Log.
+        await panel.reland();
+        await panel.frame.openActivityLog();
+        await expect(panel.frame.activityLogRow('Notification sent to users.').filter({hasText: p.mgr.name})).toHaveCount(1);
+        const emailRow = panel.frame.activityLogRow(`An email has been sent: ${DISCUSSION}`);
+        await expect(emailRow).toHaveCount(1);
+        await expect(await panel.revealViewEmailLink(emailRow)).toBeVisible();
+        await panel.frame.closeActivityLog();
+
+        // "Notify" to the second Moderator: sent, a second discussion.
+        await panel.reland();
+        const second = await panel.openNotify(p.sb.name);
+        await second.chooseTemplate(DISCUSSION);
+        await second.typeMessage(message);
+        await second.send();
+        await expect(participantNotice(page, NOTICES.notified)).toBeVisible();
+        await panel.reland();
+        await expect(panel.discussionRows(DISCUSSIONS, DISCUSSION)).toHaveCount(2);
+
+        // The second Moderator's mailbox and Tasks panel stay empty of it;
+        // control: the first one's email, sent the same way, arrived.
+        await pkpMail.expectNone({
+            to: p.sb.email,
+            subject: DISCUSSION,
+            afterControl: {to: p.sa.email, subject: DISCUSSION},
+        });
+        const sbPage = await pageFor(asUser, p.sb.username);
+        const sbTasks = await openTasks(sbPage, tag);
+        await expect(sbTasks.grid()).toBeVisible();
+        await expect(sbTasks.rows().filter({hasText: title})).toHaveCount(0);
+    });
+
+    test("S7: a role's options: recommend only, and no metadata permission", async ({asUser, opsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s7', testInfo);
+        const p = await seedServer(opsApi, tag, {
+            mgr: ['Mira', 'Manager', ['manager']],
+            sa: ['Sam', 'Moderator', ['sectionEditor']],
+            sb: ['Sue', 'Second', ['sectionEditor']],
+            sc: ['Tia', 'Third', ['sectionEditor']],
+            m2: ['Max', 'Another', ['manager']],
+            au: ['Ava', 'Author', ['author']],
+        });
+        const first = await opsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: p.au.username,
+            title: `First ${tag}`,
+            participants: [part(p.sa, 'sectionEditor')],
+        });
+        const second = await opsApi.createSubmission({
+            tag: `${tag}b`,
+            context: tag,
+            submitter: p.au.username,
+            title: `Second ${tag}`,
+            participants: [part(p.sb, 'sectionEditor')],
+        });
+
+        // An assignment before the change.
+        const page = await pageFor(asUser, p.mgr.username);
+        const panel = panelOn(page, tag);
+        await panel.goto(first.submissionId, {menuKey: PRODUCTION});
+        let win = await panel.openEdit(p.sa.name);
+        await expect(win.recommendOnlyBox()).not.toBeChecked();
+        await expect(win.metadataBox()).toBeChecked();
+        await win.cancel();
+
+        // The Role Options of the Moderator role.
+        const roles = new RoleOptionsForm(page, tag);
+        await roles.gotoRoles();
+        await roles.openRole(ROLE.moderator);
+        await expect(roles.roleOptionsHeading()).toBeVisible();
+        await roles.recommendOnlyBox().check();
+        await roles.permitMetadataEditBox().uncheck();
+        await roles.save();
+
+        // The existing assignments: the permission withdrawn, the limit not
+        // set, no third line.
+        for (const [submission, person] of [
+            [first, p.sa],
+            [second, p.sb],
+        ]) {
+            await panel.goto(submission.submissionId, {menuKey: PRODUCTION});
+            win = await panel.openEdit(person.name);
+            await expect(win.metadataBox()).not.toBeChecked();
+            await expect(win.recommendOnlyBox()).not.toBeChecked();
+            await win.cancel();
+            await expect
+                .poll(async () => (await panel.rowLines()).find((lines) => lines[1] === person.name))
+                .toEqual(ParticipantsPanel.lines(person, ROLE.moderator));
+        }
+
+        // A new assignment starts from the role's options.
+        await panel.goto(first.submissionId, {menuKey: PRODUCTION});
+        let assign = await panel.openAssign();
+        await assign.chooseRole(ROLE.moderator);
+        await assign.search();
+        await assign.choosePerson(p.sc.name);
+        await expect(assign.recommendOnlyBox()).toBeVisible();
+        await expect(assign.recommendOnlyBox()).toBeChecked();
+        await expect(assign.metadataBox()).toBeVisible();
+        await expect(assign.metadataBox()).not.toBeChecked();
+        await assign.ok();
+        await expect
+            .poll(async () => (await panel.rowLines()).find((lines) => lines[1] === p.sc.name))
+            .toEqual(ParticipantsPanel.lines(p.sc, ROLE.moderator, {recommendOnly: true}));
+
+        // Control: the Preprint Server manager role, left as it was.
+        await panel.reland();
+        assign = await panel.openAssign();
+        expect(await assign.selectedRole()).toBe(ROLE.manager);
+        await assign.choosePerson(p.m2.name);
+        await expect(assign.recommendOnlyBox()).toBeVisible();
+        await expect(assign.recommendOnlyBox()).not.toBeChecked();
+        await expect(assign.metadataBox()).toBeHidden();
+        await expect(assign.boxHeading('Permissions')).toBeHidden();
+        await assign.cancel();
+    });
+
+    test('S9: assign a Moderator on a preprint server', {tag: '@smoke'}, async ({asUser, opsApi, pkpMail}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s9', testInfo);
+        const message = 'Please moderate this preprint.';
+        const p = await seedServer(opsApi, tag, {
+            mgr: ['Mira', 'Manager', ['manager']],
+            m2: ['Max', 'Another', ['manager']],
+            mo: ['Moe', 'Moderator', ['sectionEditor']],
+            au: ['Ava', 'Author', ['author']],
+            a2: ['Abe', 'Second', ['author']],
+        });
+        const {submissionId} = await opsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: p.au.username,
+            title: `Preprint ${tag}`,
+        });
+
+        // The role list: the manager role, "Moderator" and "Author", the
+        // manager role preselected; no box shows before a person is chosen.
+        const page = await pageFor(asUser, p.mgr.username);
+        const panel = panelOn(page, tag);
+        await panel.goto(submissionId, {menuKey: PRODUCTION});
+        await panel.expectRows([ParticipantsPanel.lines(p.au, ROLE.author)]);
+        let win = await panel.openAssign();
+        await expect(win.title()).toHaveText('Assign Participant');
+        expect(await win.roleOptions()).toEqual([ROLE.manager, ROLE.moderator, ROLE.author]);
+        expect(await win.selectedRole()).toBe(ROLE.manager);
+        await expect(win.recommendOnlyBox()).toBeHidden();
+        await expect(win.metadataBox()).toBeHidden();
+
+        // "Moderator": "Assignment privileges" unticked, "Permissions" ticked.
+        await win.chooseRole(ROLE.moderator);
+        await win.search();
+        await win.expectPeople([p.mo.name]);
+        await win.choosePerson(p.mo.name);
+        await expect(win.boxHeading('Assignment privileges')).toBeVisible();
+        await expect(win.recommendOnlyBox()).toBeVisible();
+        await expect(win.recommendOnlyBox()).not.toBeChecked();
+        await expect(win.boxHeading('Permissions')).toBeVisible();
+        await expect(win.metadataBox()).toBeVisible();
+        await expect(win.metadataBox()).toBeChecked();
+        await expect(win.root.getByText(BOX_LABELS.recommendOnly)).toBeVisible();
+        await expect(win.root.getByText(BOX_LABELS.canChangeMetadata)).toBeVisible();
+
+        // The predefined message: a blank entry, "Discussion (Production)"
+        // and "Assign Editor"; the discussion template, replaced; "OK".
+        await expect(win.root.getByText(TEMPLATE_LABEL, {exact: true})).toBeVisible();
+        expect((await win.templateOptions()).sort()).toEqual(['', DISCUSSION, 'Assign Editor'].sort()); // the list has no fixed order (spec note f)
+        await win.chooseTemplate(DISCUSSION);
+        expect(flat(await win.messageText()).trim()).toBe('Please enter your message.');
+        await win.typeMessage(message);
+        await win.ok();
+        await expect(participantNotice(page, NOTICES.added)).toBeVisible();
+        await panel.expectRows([ParticipantsPanel.lines(p.mo, ROLE.moderator), ParticipantsPanel.lines(p.au, ROLE.author)]);
+
+        // The Moderator's mailbox: from the manager, the message, the
+        // discussion footer and its unsubscribe link.
+        const mail = await pkpMail.find({to: p.mo.email, subject: DISCUSSION});
+        expect(mail.From.Address).toBe(p.mgr.email);
+        const full = await pkpMail.fullMessage(mail.ID);
+        const body = flat(full.Text);
+        expect(body.trim().startsWith(message)).toBe(true);
+        expect(body).toContain('Reply to this comment at');
+        expect(body).toMatch(/or unsubscribe .*from emails sent by/);
+        expect(pkpMail.extractLink(full.HTML, 'unsubscribe')).toMatch(/\/notification\/unsubscribe\?/);
+
+        // The Activity Log.
+        await panel.reland();
+        await panel.frame.openActivityLog();
         await expect(
-            manager.workflow.activityLogRow(
-                `${moderatorDisplay} (${moderatorName}) was removed from this submission as a Moderator.`
-            )
-        ).toBeVisible({timeout: 30_000});
-        await manager.workflow.closeActivityLog();
+            panel.frame.activityLogRow(`${p.mo.name} (${p.mo.username}) was assigned to this submission as a Moderator.`)
+        ).toHaveCount(1);
+        await panel.frame.closeActivityLog();
 
-        // ── The removed Moderator's landing ──────────────────────────────
-        // The workflow address answers the dashboard with the dialog
-        // "Error / The current role does not have access to this
-        // operation." (Rule 10).
-        await moderator.page.goto(moderator.workflow.editorialUrl(seeded.submissionId, 'workflow_5'));
-        await expectErrorShell(moderator.workflow, seeded.submissionId, NO_ROLE_ACCESS);
+        // "Author": "Permissions" ticked, no "Assignment privileges"; "Cancel".
+        await panel.reland();
+        win = await panel.openAssign();
+        await win.chooseRole(ROLE.author);
+        await win.search();
+        await win.choosePerson(p.a2.name);
+        await expect(win.metadataBox()).toBeVisible();
+        await expect(win.metadataBox()).toBeChecked();
+        await expect(win.recommendOnlyBox()).toBeHidden();
+        await expect(win.boxHeading('Assignment privileges')).toBeHidden();
+        await win.cancel();
 
-        // ── Control ──────────────────────────────────────────────────────
-        // The second Author, assigned with "Message" empty, has no email
-        // once the Moderator's has arrived, and no row in their Tasks
-        // panel (Side effects).
-        expect(await pkpMail.count({to: mailOf(secondAuthorName)})).toBe(0);
-        const secondAuthor = await panelAs(asUser, appContext, secondAuthorName, tag);
-        const authorTasks = await openTasks(secondAuthor.page, tag, 'mySubmissions');
-        await expect(authorTasks.noItems()).toBeVisible();
-        await expect(authorTasks.rows()).toHaveCount(0);
-        await authorTasks.close();
+        // Control: the second Preprint Server Manager from the preselected
+        // role's list: "Assignment privileges" appears, no "Permissions".
+        win = await panel.openAssign();
+        expect(await win.selectedRole()).toBe(ROLE.manager);
+        await win.choosePerson(p.m2.name);
+        await expect(win.recommendOnlyBox()).toBeVisible();
+        await expect(win.boxHeading('Assignment privileges')).toBeVisible();
+        await expect(win.metadataBox()).toBeHidden();
+        await expect(win.boxHeading('Permissions')).toBeHidden();
+        await win.cancel();
+        await panel.expectRows([ParticipantsPanel.lines(p.mo, ROLE.moderator), ParticipantsPanel.lines(p.au, ROLE.author)]);
     });
 });

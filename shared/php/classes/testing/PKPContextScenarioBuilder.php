@@ -114,6 +114,16 @@
  *   Email" unticked, invoked by reflection). Seeded last, after users[], so
  *   the queued notification reaches the scratch users the way the panel's
  *   Save reaches every user with a role.
+ * - roles {<role key>: {recommendOnly?, permitMetadataEdit?}} — Settings ›
+ *   Users & Roles › Roles, a role's "Edit" › "Role Options" (U35): the
+ *   role's "This role is only allowed to recommend…" and "Permit submission
+ *   metadata edit." boxes, saved by running the Roles grid's own form
+ *   (UserGroupForm: initData from the stored role, the two boxes set, then
+ *   execute — its assignment rewrite on a metadata change, its stage
+ *   re-save and its audit-log line included). Keys are the role keys of
+ *   users[].roles; recommendOnly is refused where the form offers no box
+ *   (roles below sub-editor level) and permitMetadataEdit false on a
+ *   manager-level role (the form forces it on). Applied before users[].
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -125,6 +135,8 @@ use APP\core\Application;
 use APP\facades\Repo;
 use PKP\announcement\Announcement;
 use PKP\context\Context;
+use PKP\controllers\grid\settings\roles\form\UserGroupForm;
+use PKP\core\Core;
 use Illuminate\Support\Facades\DB;
 use PKP\db\DAORegistry;
 use PKP\orcid\OrcidManager;
@@ -133,6 +145,7 @@ use PKP\plugins\PluginRegistry;
 use PKP\reviewForm\ReviewFormElement;
 use PKP\security\AuditEvent;
 use PKP\security\AuditLog;
+use PKP\security\Role;
 use PKP\services\interfaces\EntityWriteInterface;
 use PKP\submission\reviewAssignment\ReviewAssignment;
 use Psr\Log\LogLevel;
@@ -216,6 +229,7 @@ abstract class PKPContextScenarioBuilder
         $intakeSettings = $this->parseIntakeSettings($root, $primaryLocale);
         $reviewFormPlans = $this->parseReviewForms($root, $primaryLocale);
         $pluginPlans = $this->parsePlugins($root);
+        $rolePlans = $this->parseRoleOptions($root);
         $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $root->assertConsumed();
@@ -281,6 +295,10 @@ abstract class PKPContextScenarioBuilder
             $context = $this->saveFormSettings($context, $formSettings, $specKeys);
         }
 
+        foreach ($rolePlans as $plan) {
+            $this->applyRoleOptions($context, $plan);
+        }
+
         foreach ($reviewFormPlans as $plan) {
             $this->addReviewForm($context, $plan);
         }
@@ -322,6 +340,115 @@ abstract class PKPContextScenarioBuilder
             'announcementTypes' => $announcementTypes,
             'announcements' => $announcements,
         ];
+    }
+
+    /**
+     * The optional `roles` map → one plan per role key: the "Role Options"
+     * boxes of that role's Settings › Users & Roles › Roles "Edit" form.
+     * Role keys are checked against the default roles the app installs in
+     * every new context (registry/userGroups.xml, the file
+     * PKPContextService::add installs), so an unknown key or a box the form
+     * does not offer is a 400 before the context exists. Parse phase: no
+     * writes.
+     *
+     * @return array<int, array{key: string, options: array<string, bool>}>
+     */
+    protected function parseRoleOptions(Spec $root): array
+    {
+        $spec = $root->child('roles');
+        if ($spec === null) {
+            return [];
+        }
+        $raw = $root->get('roles');
+        if (array_is_list($raw)) {
+            throw new SpecException('roles', 'roles must be a map of role key to {recommendOnly?, permitMetadataEdit?}');
+        }
+        // Role key → role id, from the roles every new context gets.
+        $roleIds = [];
+        $xml = simplexml_load_file(Core::getBaseDir() . '/registry/userGroups.xml');
+        foreach ($xml->group as $group) {
+            $key = preg_replace('/^default\.groups\.name\./', '', (string) $group['name']);
+            $roleIds[$key] = (int) hexdec((string) $group['roleId']);
+        }
+        // UserGroupForm::getRecommendOnlyRoles() and the user-group
+        // repository's NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES.
+        $recommendOnlyRoles = [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR];
+        $alwaysPermitMetadataRoles = Repo::userGroup()::NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES;
+
+        $plans = [];
+        foreach (array_keys($raw) as $key) {
+            $key = (string) $key;
+            if (!isset($roleIds[$key])) {
+                $known = array_keys($roleIds);
+                sort($known);
+                throw new SpecException("roles.{$key}", "Unknown role key \"{$key}\". This app's keys: " . implode(', ', $known));
+            }
+            $planSpec = $spec->child($key);
+            $options = [];
+            foreach (['recommendOnly', 'permitMetadataEdit'] as $option) {
+                if (!$planSpec->has($option)) {
+                    continue;
+                }
+                $value = $planSpec->get($option);
+                if (!is_bool($value)) {
+                    throw new SpecException("roles.{$key}.{$option}", "roles.{$key}.{$option} must be a boolean (the box ticked or unticked)");
+                }
+                $options[$option] = $value;
+            }
+            if (($options['recommendOnly'] ?? false) && !in_array($roleIds[$key], $recommendOnlyRoles, true)) {
+                throw new SpecException("roles.{$key}.recommendOnly", "The Roles form offers the recommend-only box for editor roles only, not for \"{$key}\"");
+            }
+            if (($options['permitMetadataEdit'] ?? true) === false && in_array($roleIds[$key], $alwaysPermitMetadataRoles, true)) {
+                throw new SpecException("roles.{$key}.permitMetadataEdit", "The manager-level role \"{$key}\" always permits metadata edit (the Roles form saves it on whatever is posted)");
+            }
+            $planSpec->assertConsumed();
+            if ($options === []) {
+                throw new SpecException("roles.{$key}", "roles.{$key} sets nothing; give recommendOnly and/or permitMetadataEdit");
+            }
+            $plans[] = ['key' => $key, 'options' => $options];
+        }
+        return $plans;
+    }
+
+    /**
+     * Save one role's "Role Options" the way the Roles grid's "Edit" › "OK"
+     * does (UserGroupGridHandler::updateUserGroup → UserGroupForm::execute):
+     * the form is initialised from the stored role, exactly the posted
+     * fields the unchanged form carries, the two boxes are set as the spec
+     * asks, and the form's own execute runs — the role's flags, the rewrite
+     * of every existing assignment's canChangeMetadata when the metadata
+     * box changed, the role's stages re-saved from the ticked boxes (the
+     * form has none for the Done stage, so that row goes; every workflow
+     * stage for a manager-level role, as the form always does) and the
+     * audit-log line.
+     * The form reads the request's context, so the router is pointed at the
+     * scratch context for the call. Not mirrored: the grid's trivial toast
+     * for the acting user and its validate() (name and abbreviation are the
+     * stored ones; the POST and CSRF checks are the request's).
+     */
+    protected function applyRoleOptions(Context $context, array $plan): void
+    {
+        $userGroup = $this->userSeeder->resolveUserGroup($context, $plan['key'], "roles.{$plan['key']}");
+        $restore = ContextFactory::forceRequestContext($context);
+        try {
+            $form = new UserGroupForm($context->getId(), $userGroup->id);
+            $form->initData();
+            // The browser posts the ticked "Stage Assignment" boxes, and the
+            // form renders a box only for the app's workflow stages
+            // (initData's `stages`), so a stored stage the form has no box
+            // for (the installer's Done stage, 6) is not posted and the
+            // save drops it, as the screen's save does.
+            $form->setData('assignedStages', array_values(array_intersect(
+                (array) $form->getData('assignedStages'),
+                array_keys((array) $form->getData('stages'))
+            )));
+            foreach ($plan['options'] as $option => $value) {
+                $form->setData($option, $value);
+            }
+            $form->execute();
+        } finally {
+            $restore();
+        }
     }
 
     /**

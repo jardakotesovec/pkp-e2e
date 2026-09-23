@@ -36,12 +36,17 @@
  *   the reviewReady event-log row are the app's own. 'accepted' keeps the
  *   bare confirmReview (step stays 1 — a documented deviation the U28
  *   suites walk from).
- * - participants[] {username*, role*} — non-submitter stage assignments
- *   (U21: an assigned Section Editor opening another author's draft), the
- *   same Repo::stageAssignment()->build() row the workflow's Assign
- *   Participant form writes, with the user group's own recommendOnly /
- *   permitMetadataEdit defaults; the assignment email and notification the
- *   UI flow sends are deliberately absent (seed-side, Mail::fake anyway).
+ * - participants[] {username*, role*, recommendOnly?, canChangeMetadata?} —
+ *   non-submitter stage assignments (U21: an assigned Section Editor opening
+ *   another author's draft), the same Repo::stageAssignment()->build() row
+ *   the workflow's Assign Participant form writes. recommendOnly and
+ *   canChangeMetadata (U35) are that window's "Assignment privileges" and
+ *   "Permissions" boxes, defaulting to the user group's own recommendOnly /
+ *   permitMetadataEdit as the window pre-ticks them; recommendOnly is
+ *   refused on a role below sub-editor level and canChangeMetadata false on
+ *   a manager-level role, as the window offers neither. The assignment
+ *   email and notification the UI flow sends are deliberately absent
+ *   (seed-side, Mail::fake anyway).
  * - author {orcid*, orcidIsVerified?} — ORCID iD fixture state on the
  *   submitter's contributor record (U4): a connected iD is only reachable
  *   through ORCID's own OAuth sign-in, which can never complete in the test
@@ -327,9 +332,43 @@ abstract class PKPSubmissionScenarioBuilder
                 if (!$participant) {
                     throw new SpecException("{$participantSpec->path}.username", "Unknown participant username \"{$username}\"");
                 }
+                $userGroup = $userSeeder->resolveUserGroup($context, $roleKey, "{$participantSpec->path}.role");
+                // The "Assign Participant" window's two boxes (U35). Each
+                // starts from the role's own setting (the window's script
+                // pre-ticks them from the Roles screen), so an absent key
+                // keeps that default. "Assignment privileges" (recommend
+                // only) is offered for manager- and sub-editor-level roles
+                // alone (AddParticipantForm::initialize); "Permissions" for
+                // every role but a manager-level one, whose assignment
+                // always carries the permission (AddParticipantForm::execute
+                // forces it). A value the window cannot post is a 400.
+                $recommendOnly = (bool) $userGroup->recommendOnly;
+                if ($participantSpec->has('recommendOnly')) {
+                    $value = $participantSpec->get('recommendOnly');
+                    if (!is_bool($value)) {
+                        throw new SpecException("{$participantSpec->path}.recommendOnly", 'recommendOnly must be a boolean (the "Assignment privileges" box)');
+                    }
+                    if ($value && !in_array((int) $userGroup->roleId, [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR], true)) {
+                        throw new SpecException("{$participantSpec->path}.recommendOnly", "The \"Assign Participant\" window offers \"Assignment privileges\" for editor roles only, not for \"{$roleKey}\"");
+                    }
+                    $recommendOnly = $value;
+                }
+                $canChangeMetadata = (bool) $userGroup->permitMetadataEdit;
+                if ($participantSpec->has('canChangeMetadata')) {
+                    $value = $participantSpec->get('canChangeMetadata');
+                    if (!is_bool($value)) {
+                        throw new SpecException("{$participantSpec->path}.canChangeMetadata", 'canChangeMetadata must be a boolean (the "Permissions" box)');
+                    }
+                    if (!$value && (int) $userGroup->roleId === Role::ROLE_ID_MANAGER) {
+                        throw new SpecException("{$participantSpec->path}.canChangeMetadata", "An assignment in the manager-level role \"{$roleKey}\" always carries the metadata permission (the window offers no \"Permissions\" box for it)");
+                    }
+                    $canChangeMetadata = $value;
+                }
                 $participantPlans[] = [
                     'user' => $participant,
-                    'userGroup' => $userSeeder->resolveUserGroup($context, $roleKey, "{$participantSpec->path}.role"),
+                    'userGroup' => $userGroup,
+                    'recommendOnly' => $recommendOnly,
+                    'canChangeMetadata' => $canChangeMetadata,
                 ];
             }
         }
@@ -364,28 +403,12 @@ abstract class PKPSubmissionScenarioBuilder
         // build invokes (notification managers, mailables) read
         // $request->getContext(). Force the router's context to the
         // submission's context for the duration of the build.
-        $restoreRouterContext = $this->forceRequestContext($context);
+        $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
             return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans);
         } finally {
             $restoreRouterContext();
         }
-    }
-
-    /**
-     * Point the current router at a context so $request->getContext() answers
-     * during the build; returns a restorer. Test-harness-only reflection — the
-     * production code path never runs this.
-     */
-    private function forceRequestContext(Context $context): callable
-    {
-        $router = Application::get()->getRequest()->getRouter();
-        $property = new \ReflectionProperty(\PKP\core\PKPRouter::class, '_context');
-        $previous = $property->isInitialized($router) ? $property->getValue($router) : null;
-        $property->setValue($router, $context);
-        return function () use ($router, $property, $previous): void {
-            $property->setValue($router, $previous);
-        };
     }
 
     private function execute(
@@ -522,16 +545,16 @@ abstract class PKPSubmissionScenarioBuilder
         }
 
         // Non-submitter participants: the same stage-assignment row the
-        // workflow's Assign Participant form writes (group defaults for
-        // recommendOnly / permitMetadataEdit; no email or notification —
-        // recorded parity deviation).
+        // workflow's Assign Participant form writes (its two boxes, which
+        // start from the role's recommendOnly / permitMetadataEdit; no
+        // email or notification — recorded parity deviation).
         foreach ($participantPlans as $plan) {
             Repo::stageAssignment()->build(
                 $submissionId,
                 $plan['userGroup']->id,
                 $plan['user']->getId(),
-                $plan['userGroup']->recommendOnly,
-                $plan['userGroup']->permitMetadataEdit
+                $plan['recommendOnly'],
+                $plan['canChangeMetadata']
             );
         }
 

@@ -217,6 +217,32 @@ Keys:
   block needs `plugins: {announcementfeedplugin: {enabled: true}}` in the
   same request. Applies to the three apps alike; a fresh context has no
   block placed. Not a list of strings: a 400.
+- `roles`: a map from a role key (the keys of `users[].roles`, e.g.
+  `sectionEditor`) to `{recommendOnly?, permitMetadataEdit?}` (booleans,
+  at least one): the two "Role Options" boxes of Settings › Users & Roles ›
+  Roles, the role's "Settings" › "Edit" window ("This role is only allowed
+  to recommend a review decision and will require an authorised editor to
+  record a final decision." and "Permit submission metadata edit."). Saved
+  by running that window's own form, so the save is the screen's: the
+  role's flags, the audit-log line, and the role's stages saved again from
+  the boxes the window shows. That last part is a parity fact: the window
+  has a box for each workflow stage but none for the Done stage (6) the
+  installer gives most roles, so a role saved through the key, as by the
+  screen, loses its Done-stage row (OJS Section editor `1,3,4,5,6` becomes
+  `1,3,4,5`, OPS Moderator `5,6` becomes `5`; U35 harness, 2026-09-22,
+  three apps), and a manager-level role is saved with every workflow stage,
+  as the form always saves it, so seed `roles.manager` only once a screen
+  that saves the Journal Manager role has been driven. The roles the key names are saved before `users[]`, so a
+  context seeded with it has no assignment the metadata change could
+  rewrite; the rewrite of existing assignments is a screen action. With
+  `recommendOnly: true` the "Assign" window pre-ticks "Assignment
+  privileges" for that role and `participants[]` defaults to it; with
+  `permitMetadataEdit: false` it leaves "Permissions" unticked. Refusals
+  follow the window: an unknown role key, `recommendOnly: true` on a role
+  below sub-editor level (the window offers the box for the Journal
+  Manager's and the Section Editor's levels only), `permitMetadataEdit:
+  false` on a manager-level role (the form saves it on whatever is posted)
+  and a non-boolean are 400s. The three apps alike.
 - `plugins`: a map from a plugin's lowercased class name (the Plugins
   grid's `plugin` id, e.g. `announcementfeedplugin`) to `{enabled,
   settings?}`. `enabled` (boolean, required) is the grid's "Enabled" box
@@ -323,9 +349,19 @@ Keys:
   context's `numWeeksPerResponse` and `numWeeksPerReview` and its
   `defaultReviewMode` (double-anonymous when unset). Any other key fails
   with a 400.
-- `participants[]` of `{username, role}`: extra stage assignments for people
-  other than the submitter, the same row the workflow's Assign Participant
-  form writes, without that form's email and notification.
+- `participants[]` of `{username, role, recommendOnly, canChangeMetadata}`:
+  extra stage assignments for people other than the submitter, the same
+  row the workflow's Assign Participant form writes, without that form's
+  email and notification. `recommendOnly` and `canChangeMetadata`
+  (booleans) are that window's "Assignment privileges" and "Permissions"
+  boxes; each defaults to the role's own setting, as the window pre-ticks
+  it (the context key `roles`), so an install-default Section Editor is
+  seeded with the permission and without the limit. A seeded
+  `recommendOnly: true` row reads "Only allowed to recommend an editorial
+  decision" under the person's role in the Participants panel. Refusals
+  follow the window: `recommendOnly: true` on a role below sub-editor level
+  and `canChangeMetadata: false` on a manager-level role are 400s (U35
+  harness, 2026-09-22, three apps).
 - `published` (default false). Requires `submitted: true`.
 - `author`: `{orcid, orcidIsVerified}` on the submitter's contributor record.
   `orcidIsVerified: true` stores what ORCID's own sign-in leaves when the
@@ -450,13 +486,18 @@ Facts tests rely on, all parity-checked against the UI path:
   required-genre check blocks a seeded draft's submit until a file is
   uploaded. Review-round files are also grant-based; see `patterns.md`.
 - A real wizard submit auto-assigns the section's editors on
-  `publicknowledge` (a scratch context assigns nobody: app-changes row 3),
-  so `participants` on a submitted seed is additive there. Seeding
-  `participants: []` together with `submitted: false` is what produces a
-  genuine needs-editor state. A scenario that needs a setting's effect on
-  an automatic assignment flips the setting on the seeded journal and
-  restores it afterwards, as the U35 claim check K5 did (every flipped
-  setting restored and reread), 2026-09-20.
+  `publicknowledge` only (the install's first context; a scratch context
+  gets none, `seed-facts.md`), so `participants` on a submitted seed is
+  additive there. Seeding `participants: []` together with
+  `submitted: false` is what produces a genuine needs-editor state.
+- A seeded participant is not everything the screen's "Assign" leaves
+  (U35 harness, 2026-09-22, three apps): the submission's Activity Log has
+  no "participantAdded" line for it, and an editor seeded on a submitted
+  seed leaves the "needs an editor" task rows
+  (`NOTIFICATION_TYPE_EDITOR_ASSIGNMENT_REQUIRED`, one per manager) in
+  place, where the screen's "Assign" of an editor deletes them. A test
+  about the task, the log line or the "Needs editor" state assigns the
+  editor on screen.
 - An author-editor state needs a user enrolled in both groups who is also
   the submitter; a bare stage assignment without the global author role
   does not trip author checks. A second `participants` entry for the same
@@ -554,6 +595,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   lists per language (a published submission carrying terms, the source of
   U40's suggestions; sync 2026-09-18, two agents took the on-screen detour).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
+- User: `users[].notifications`, the Profile › Notifications pairs
+  (`{settingName: {enabled, email}}`); U35 S6 and S8, like U12 and U05, set
+  them on the person's own Notifications tab until it exists.
 - Context: an option to skip `admin`'s manager enrolment in the new context
   (every `createContext` enrols the site administrator as a manager; the
   "site admin with no manager role" state, sync rr3 2026-09-09, is
@@ -609,9 +653,11 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   context and leaves them out of `participants[]`. U33 claim check,
   2026-09-19.
 - `participants[]` with `role: 'sectionEditor'` seeds a Moderator on OPS.
-  There is no `recommendOnly` key: a recommend-only assignment is made on
-  screen through the participant row's "Edit" form (boxes "recommendOnly"
-  and "canChangeMetadata"), as U32 does. U33 claim check, 2026-09-19.
+  U33 claim check, 2026-09-19.
+- On the Postgres test database a Participants "Assign" or "Notify" with a
+  message typed and no predefined message chosen answers 500, so a script
+  that types a message picks a template first. U35 claim check,
+  2026-09-22.
 - `Repo::stageAssignment()->build()` uses `firstOr`. Re-assigning the same
   user and role silently keeps the existing row and drops new flags such as
   `canChangeMetadata`. If a participant needs different flags from the
@@ -629,13 +675,6 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   set before "Submit Review" completes (silent otherwise; OMP has no list).
   The press's Production notice "Awaiting approval." is a level-3 heading
   of its own, not under a "Notification" heading. U34 claim check,
-  2026-09-20.
-- Leaving the "Assign Participant" window by its back arrow with a person
-  chosen, or "Edit Assignment" by "Cancel" with a box changed, asks the
-  browser confirm "The data on this form has changed. Do you wish to
-  continue without saving?", so the script registers `page.on('dialog')`
-  before the press; continuing closes the window and saves nothing.
-  "Assign Participant"'s own "Cancel" closes silently. U35 claim check,
   2026-09-20.
 
 
@@ -655,9 +694,6 @@ write into the same inbox. The rules below follow from that.
   `X-Tags`. `pkpMail` refuses any read without a recipient. Mailpit's
   `to:` search matches the To header only: a Cc or Bcc recipient is not
   found by it (U30 claim check K2).
-- **Two chunks driving at once share the inbox too.** Each scopes its
-  reads by its own throwaway addresses and the titles it seeded, and reads
-  nothing else (U35 claim check K4 alongside K2, 2026-09-20).
 - **`contains` is a content marker, not a scope.** It searches a substring
   in subject and body. Use it when the test controls some text in the
   message. It supplements the recipient scope and never replaces it. On a
@@ -676,11 +712,6 @@ write into the same inbox. The rules below follow from that.
   "At least two participants are required for a discussion."), and it
   mails every ticked box, the opener's included, so a no-mail control on an
   account never sends that control itself.
-- **On OPS a "Notify" read needs its toast caught in flight.** The
-  "Notification sent to users." toast is added and gone before a settled
-  read (OJS and OMP keep it), so a test that pairs the Mailpit read with
-  the toast waits for the toast's appearance, not for a settled page (U35
-  claim check K4, 2026-09-20).
 
 Note on the word "tag": everywhere else in these docs it means the seed tag
 from `patterns.md`. Mailpit tags are a different thing and are not used.

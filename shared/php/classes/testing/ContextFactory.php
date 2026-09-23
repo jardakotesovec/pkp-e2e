@@ -149,6 +149,25 @@ class ContextFactory
      * "Locale settings saved." notification for the acting user (a
      * session-bound toast, parity ledger 2026-09-16).
      */
+    /**
+     * Point the current router at a context so $request->getContext() answers
+     * during a build (the builders run at site level); returns a restorer.
+     * Test-harness-only reflection — the production code path never runs
+     * this. Used where a builder runs an app form or service that reads the
+     * request's context (the submission build; the Roles form of the
+     * context scenario's `roles` key).
+     */
+    public static function forceRequestContext(Context $context): callable
+    {
+        $router = Application::get()->getRequest()->getRouter();
+        $property = new \ReflectionProperty(\PKP\core\PKPRouter::class, '_context');
+        $previous = $property->isInitialized($router) ? $property->getValue($router) : null;
+        $property->setValue($router, $context);
+        return function () use ($router, $property, $previous): void {
+            $property->setValue($router, $previous);
+        };
+    }
+
     public function enableFormLocales(Context $context, array $locales): Context
     {
         $request = Application::get()->getRequest();

@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **15 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **16 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -214,33 +214,37 @@ until their specs exist. Do not force-claim the defects themselves.
     dashboard was their surface. Code-verified 2026-09-20 (checkouts as
     above). Resolves: maintainer confirmation as dead display (the rows are
     still written; removal candidate for the message and URL branches).
-14. **NOTIF-014, 016, 017, 018 editor-assignment notices with no reader** —
-    attached to **U35** (claimed; the stage-participants spec's footnote o
-    documents it). `EditorAssignmentNotificationManager::updateNotification()`
-    writes a user-less, task-level "An editor must be assigned before
-    review is initiated…" (or the editing / production wording) for every
-    stage without an editor assignment and deletes it once one exists,
-    recomputed from `StageParticipantGridHandler::saveParticipant()` /
-    `deleteParticipant()` and `SubEditorsDAO::assignEditors()`; no
-    template, page handler, API route or Vue component fetches those four
-    types (`WorkflowNotificationDisplay.vue` asks for the copyediting and
-    production pairs alone), and the apps' `pages/workflow/WorkflowHandler.php::getEditorAssignmentNotificationTypeByStageId()`
-    has no caller in any checkout. Code-verified 2026-09-20 (checkouts as
-    above). Resolves: maintainer confirmation as dead display (the rows
-    are still written; removal candidate for the delegate, the helper and
-    the three notice strings).
-15. **GRID-054 legacy participants grid rendering unmounted** — attached to
-    **U35** (claimed; the stage-participants spec's Reference table
-    documents the waiver). `StageParticipantGridHandler`'s `fetchGrid`,
-    `fetchCategory` and `fetchRow`, with `StageParticipantGridCategoryRow`,
-    `StageParticipantGridRow` (its own "Remove", "Edit", "Notify" and
-    "Login As" link actions and the grid-level "Logout as" action) and
-    `StageParticipantGridCellProvider` (the "(Role ended)" suffix), are
-    loaded by no template, config or Vue component in the three checkouts;
-    the Vue `ParticipantManager` is the live surface and opens only the
-    handler's `addParticipant`, `saveParticipant`, `deleteParticipant`,
-    `viewNotify`, `sendNotification` and `fetchTemplateBody` ops. The
-    "(Role ended)" mark is lost with it (the spec's register entry A4).
-    Code-verified 2026-09-20 (checkouts as above). Resolves: maintainer
-    confirmation as dead code (removal candidate for the rendering half;
-    the form ops stay).
+14. **NOTIF-014, NOTIF-016..018 per-stage editor-assignment notices with no
+    reader** — attached to **U35** (claimed; the stage-participants spec's
+    note o and Reference table document it).
+    `EditorAssignmentNotificationManager::updateNotification()` still
+    creates and deletes the per-stage "An editor must be assigned before
+    review is initiated…" rows (no user, task level) on every assignment and
+    removal, but no template or Vue component in lib/pkp, the ui-library or
+    the three apps fetches those types (`WorkflowNotificationDisplay.vue`
+    asks for the copyediting and production types only), and
+    `WorkflowHandler::getEditorAssignmentNotificationTypeByStageId()` has no
+    caller. Code-verified 2026-09-22 (checkouts ojs 7c8d69af3e, omp
+    c6a132892, ops 4bb66b1469). Resolves: maintainer confirmation as dead
+    display (removal candidate; OMP's internal-review sibling NOTIF-015 is
+    the same).
+15. **NOTIF-046 editor-assign task never raised** — attached to **U35**
+    (claimed; the spec's register entry A6 documents it).
+    `PKPStageParticipantNotifyForm::sendMessage()` raises
+    `NOTIFICATION_TYPE_EDITOR_ASSIGN` only for the template key
+    `EDITOR_ASSIGN`, while every installed "Assign Editor" template carries
+    `EDITOR_ASSIGN_SUBMISSION`, `_REVIEW` or `_PRODUCTION`
+    (`registry/taskTemplates.xml` in all three apps); nothing else raises
+    the type. Code-verified 2026-09-22 (checkouts as above). Resolves: a
+    fix (match the per-stage keys) or maintainer confirmation as dead.
+16. **GRID-054 legacy grid rendering ops unmounted** — attached to **U35**
+    (claimed; the spec's note o documents the waiver). The
+    `StageParticipantGridHandler` ops that render the old participants grid
+    (`fetchGrid`, `fetchRow`, `fetchCategory`, with `StageParticipantGridRow`
+    and its link actions) and `fetchUserList` are loaded by no template,
+    page or Vue component; the Vue Participants panel (VUE-043) is the live
+    surface and calls only `addParticipant`, `saveParticipant`,
+    `deleteParticipant`, `viewNotify`, `sendNotification` and
+    `fetchTemplateBody`, which stay claimed. Code-verified 2026-09-22
+    (checkouts as above). Resolves: maintainer confirmation as dead code
+    (removal candidate for the rendering ops and the row class).
