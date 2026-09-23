@@ -609,7 +609,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   submission-intake settings (the checklist and the privacy statement,
   U58), `submitWithCategories`, `publishingMode`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
-  `registrationAgency`, `doiCreationTime`), ISSNs, OJS
+  `registrationAgency`, `doiCreationTime`), ISSNs, `licenseUrl` (copied
+  into a publication when it is published, so it must be set before a
+  `published` seed; sync rr14, 2026-09-22), OJS
   `issues[]` with `accessStatus`, OJS `subscriptions[]` where
   `'expired'` seeds an active row with a past end date, and OJS `payments`
   (`enabled`, `currency`, `paymentPluginName`, `manualInstructions`,
