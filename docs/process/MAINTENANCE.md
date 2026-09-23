@@ -327,7 +327,13 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    timeline lists for `main` (`gh api repos/pkp/pkp-lib/issues/<n>` and
    `.../timeline`); stable-branch PRs are ignored unless the request names
    them. A pkp-lib PR normally comes with one app PR per app, two of them
-   submodule-only. Record each PR's head SHA, base SHA, fork and branch
+   submodule-only, but not always: a pkp-lib or ui-library PR often has
+   an app PR for one app only. The shared code still reaches all three,
+   so every app gets the shared PRs' branches checked out individually in
+   its submodules (step 2), whether it has its own PR or not (maintainer
+   ruling, 2026-09-23: pkp-lib#13359 had ojs#5444 only, and OMP's and
+   OPS's suites at ui-library#853's head found the major finding OJS
+   could not show). Record each PR's head SHA, base SHA, fork and branch
    name; the companion is named exactly like the app PRs' branch (they
    share one in practice).
 2. **Set the checkouts to the PR refs** ("Session hygiene", "Start on the
@@ -340,7 +346,15 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    since the checkout was last built, `npm run mount`, `npm run
    reset:<app>`, `npm run fleet-prep -- --feature sync --apps <app>`.
    Note in the sync log which unreviewed tip commits the PR ref carries
-   along; they stay the daily sync's range.
+   along; they stay the daily sync's range. An app without its own PR
+   stays on its tip with the shared PR checked out in the submodule
+   (`git fetch origin pull/<n>/head:pr-<n>` and `git checkout pr-<n>` in
+   `lib/pkp` or `lib/ui-library`, then the same install, build, mount and
+   reset); so does an app whose PR is only a pointer bump on an older
+   base, which makes the checkout the merge result. When the app's
+   pointer lags the shared PR's base, name the reviewed or unreviewed
+   commits in between in the log. `git submodule update lib/pkp
+   lib/ui-library` and a rebuild put it back at step 7.
 3. **Read and triage** the diff against the issue's stated intention
    (sync loop steps 2 and 3) on the companion branch, created from
    `main` before any edit. Accommodate in place as step 4 says: the spec
@@ -359,11 +373,13 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    intention gap follows step 5's report and DMs; a behavior the issue
    leaves open is a ❓ in the owning spec, posted in the thread, and the
    team's reply is recorded as the entry's verdict the same day.
-5. **Run the suites.** The full suite of every app whose checkout carries
-   the change, on a reset database at the VM's auto-detected workers; a
-   submodule-only app PR whose lib/pkp change is verified on the first app
-   takes its own PR check's green run as evidence, unless the change has
-   app-specific surface. A red test gets a solo rerun at the PR ref and,
+5. **Run the suites.** The full suite of every app, each with the shared
+   PR in its submodule (step 2), on a reset database at the VM's
+   auto-detected workers, one app at a time. A red that an app without its
+   own PR shows is the PR's once the same spec files are green with the
+   submodule rebuilt at the PR's base on the same database; that app meets
+   it with its next pointer update, so it is a finding, never a companion
+   test edit. A red test gets a solo rerun at the PR ref and,
    if it reds again, the same rerun at the app's tip on the same database
    and on a
    fresh one: red at both refs is a flake class (ci-triage), red only at
@@ -371,7 +387,10 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    retain-on-failure`) save a second reproduction.
 6. **CI at the PR refs from the companion.** Push the companion, then
    `gh workflow run e2e.yml --ref <companion> -f <app>_repo=<fork>/<app>
-   -f <app>_ref=<head sha>` for each app (harness.md "CI"). Do not push
+   -f <app>_ref=<head sha>` for each app with a PR (harness.md "CI"); an
+   app without one runs at `main`, which checks the companion's tests at
+   its tip, while its run at the shared PR's head stays step 5's local
+   one (CI builds app refs, not submodule branches). Do not push
    the companion again while the dispatch runs: a push run and a dispatch
    share one concurrency group and the newer cancels the older. The app
    PR's own check picks the companion up by name on its next run.
