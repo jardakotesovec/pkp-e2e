@@ -775,9 +775,14 @@ trips.
   before running the action; the twelve read-after-action sites in the
   OJS and OMP U35 suites (the Edit Assignment "OK", the Assign "OK", the
   Notify send) use it; both suites green alone after the change
-  (`.reports/sync/s22-u35-{ojs,omp}-alone.log`). **Watch condition**: an
-  armed read reds again; then the toast never rose (read the save
-  response's notification payload).
+  (`.reports/sync/s22-u35-{ojs,omp}-alone.log`). The 2026-09-23 U35
+  transplant (`ac20788`) replaced those suites with the trial build's,
+  whose S2 is another scenario and which read their toasts their own way;
+  the class stands, `expectToastDuring` stays in `NotificationsPages.js`
+  for the next site that reads a toast after the action. **Watch
+  condition**: a U35 toast read reds on CI; then arm it with
+  `expectToastDuring` (or the toast never rose: read the save response's
+  notification payload).
 
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
