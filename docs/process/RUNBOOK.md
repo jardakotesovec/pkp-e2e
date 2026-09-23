@@ -166,12 +166,12 @@ Test files cite these by number, so the numbers are stable.
 
 ## Model discipline
 
-- Fable runs every role; subagents inherit the session model; `/model` is
-  checked at session start.
-- A refusal, safeguard flag or downgrade: discard the attempt, never
-  re-press, reword or respawn onto another model; record the gate reached in
-  the PROGRESS note and stop for maintainer review. A technical stall is not
-  a flag: respawn on a narrower slice, at most twice.
+- Fable or Opus, whichever the session runs on, runs every role; subagents
+  inherit the session model, no per-role pins.
+- A refusal or safeguard flag: discard the attempt, never re-press or
+  reword; record the gate reached in the PROGRESS note and stop for
+  maintainer review. A technical stall is not a flag: respawn on a narrower
+  slice, at most twice.
 - The orchestrator never probes, verifies or edits a spec inline (the
   `status:` flip excepted); agents that drive screens are always fresh, one
   or two at a time, cut for about 40 browser calls each (an agent still
