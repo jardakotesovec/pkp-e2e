@@ -10,6 +10,16 @@ it with their next lib/ui-library update. stable-3_5_0: does not carry
 the change. Tracked in the companion row `optimize-table-reloads` in
 `docs/tracking/ci-triage.md`. Temporary: delete once acted on.
 
+**Update 2026-09-23 (fixed in the PR before its merge).** The PR head is
+now `51f0c727`, which adds `markDataChanged?.()` to
+`onVueFormSuccess()`, the smallest fix proposed below. Verified on OJS
+on a fresh reset: the kept check reads `stale: false` on both paths, and
+the workflow refetches the submission and publication after the close.
+The app PR checks at `51f0c727` are green on all three apps, including
+OMP's and OPS's formerly red publish scenarios (ojs#5444 run
+35881450909, omp#2471 run 35882950730, ops#1412 run 35883039899).
+Nothing left to do; this report is deleted when the PR merges.
+
 ## Summary
 
 In OMP, pressing "Publish" and confirming publishes the book, but the

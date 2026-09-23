@@ -255,9 +255,8 @@ and the reviewer forms to *Reviewer assignment & management*.
   sent under the author's own name and address. All of this takes effect the
   moment the file is attached in the upload window's first step. Closing the
   window through its header "Close" without finishing keeps the file and the
-  email. The "Revisions Uploaded" panel behind the window should list the
-  file as it closes; instead it stays empty until the page is reloaded
-  ⚠ [A12](#a12). Pressing the window's own "Cancel" link after the file was attached,
+  email, and the "Revisions Uploaded" panel behind the window lists the file
+  as it closes. Pressing the window's own "Cancel" link after the file was attached,
   though, removes the file again while the email already sent stands
   ⚠ [A11](#a11). To avoid a flood, the same editor is not emailed again
   for further uploads within a day unless they have signed in since the
@@ -409,7 +408,7 @@ are in the footnote. <sup>s</sup>
      window through its header "Close" without finishing, accepting the
      browser's leave-without-saving prompt if it asks (the window's own
      "Cancel" link is a different path [A11](#a11)): the "Revisions
-     Uploaded" panel lists the file all the same ⚠ [A12](#a12).
+     Uploaded" panel lists the file all the same.
    - **The Editor's screen**: Editor: the box reads "Revisions have been
      submitted and a decision is needed."
    - **Tasks**: Author: the "Revision required." task is gone from the
@@ -675,7 +674,6 @@ Left out of the scenarios above, by reason:
   - A10 (the "Revisions Uploaded" description on a round with no revision request; Rule 9)
   - A6 (the restored round's box no longer recalling its revision request; Rule 12)
   - A11 (the upload window's "Cancel" link removing the attached file while the "Revised Version Uploaded" email stands; Side effects)
-  - A12 (the author's "Revisions Uploaded" panel staying empty after the window is closed at the file step, until a reload; Side effects; scenario 4 marks it)
   - OMP3 (the press's task wording "Revisions to consider in External Review."; Side effects)
 - **No seed**:
   - "A review is overdue." winning over an unread review and reviews still underway (Rules 5–6): no seed backdates a request or a review deadline
@@ -704,7 +702,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OJS1](#ojs1) | On a journal, the author's "Read Review" window shows no review text; remarks shared with the author are missing (a press shows them) | 🐞 | user-visible | — |
 | [A9](#a9) | Deleting the only revised file flips the status back but never returns the author's revisions task | 🐞 | minor | — |
 | [A10](#a10) | The Revisions Uploaded panel says files were "submitted by the author after revisions were requested" on rounds where no revisions were requested | 🐞 | minor | — |
-| [A12](#a12) | An author who closes "Upload revisions" after the file step sees an empty "Revisions Uploaded" panel until a page reload, although the file is uploaded | 🐞 | minor | — |
 | [A2](#a2) | The author sees the editor's status wording; the author-tailored wording exists but is never shown | ❓ | user-visible | — |
 | [A3](#a3) | What the read-review window's attachments section lists: observation recorded privately with the maintainer pending a fix | ❓ | latent | — |
 | [A4](#a4) | A round whose only reviewers declined reports "All reviews are confirmed and a decision is needed." | ❓ | user-visible | — |
@@ -716,6 +713,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP2](#omp2) | A press collects no reviewer recommendation (intended, confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | rebase check (claude), 2026-08-25 — form-field half intended |
 | [OMP3](#omp3) | On a press the fresh revisions task reads "Revisions to consider in External Review.", not the journal's "Revision required." | ❓ | minor | — |
 | [OMP1](#omp1) | Presses run an additional Internal Review stage before External Review | ✅ | — | — |
+| [A12](#a12) | Retired: an author who closed "Upload revisions" after the file step saw an empty "Revisions Uploaded" panel until a page reload; fixed in pkp/ui-library#853 before its merge, never on `main` | ✅ | retired | re-probe at the PR head (claude), 2026-09-23 — fixed before merge |
 
 ### All apps
 
@@ -874,20 +872,6 @@ notice is early; the file removal reads as the window doing what its
 Since: 2026-09-12 · Basis: test run (a journal, one run; the press was not
 driven on this path). <sup>[f-a11](#fn-a11)</sup>
 
-<a id="a12"></a>
-**A12 — An upload window closed at the file step leaves the author's panel empty** · 🐞 · minor.
-An author who presses "Upload revisions", attaches the file in the first
-step and closes the window through its header "Close" has uploaded the
-file (Side effects), but the "Revisions Uploaded" panel behind the window
-still reads "No Items"; a page reload lists the file. Expected, as before
-this change and as the change itself promises for upload windows (the file
-may already be uploaded when the window closes early, so an upload window
-reloads the panel on every close), the file listed as the window closes.
-An author shown an empty panel is likely to upload the same file again.
-The file panels' own "Upload" control still reloads on every close.
-Since: pkp/ui-library#853 (`cab09538`, not yet merged; issue
-pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a12](#fn-a12)</sup>
-
 ### OJS
 
 <a id="ojs1"></a>
@@ -949,6 +933,11 @@ created, and a second mechanism refiles it under its own wording. The effect
 is wording-level only.
 Basis: probe (2026-07-31, the same flow driven on both
 apps). <sup>[f-omp3](#fn-omp3)</sup>
+
+### Retired
+
+<a id="a12"></a>
+**A12 — An upload window closed at the file step leaves the author's panel empty** · ✅ · retired. Fixed in pkp/ui-library#853 at `51f0c727` before its merge, 2026-09-23; never on `main`. <sup>[f-a12](#fn-a12)</sup>
 
 ---
 
@@ -1570,12 +1559,13 @@ window is `authorReadReview.tpl` via `AuthorReviewerGridHandler::readReview`
 **f-a12** — pkp/ui-library#853 (issue pkp/pkp-lib#13359, which keeps
 "File upload modals still reload the table when closed, since a file can
 already be uploaded even if the upload is closed before the final step
-completes") changes `workflowStore.js`'s `fileUpload()`, which the
-author's "Upload revisions" button uses, from `() => triggerDataChange()`
-to `async (finishedData) => await triggerDataChange(finishedData)`. The
-legacy upload wizard stores the file through its own jQuery request, so
-nothing flags the window changed, `closeSideModalById()` hands the close
-`{dataChanged: false}`, and `triggerDataChange()` returns without
+completes") changed, at its earlier head `cab09538`,
+`workflowStore.js`'s `fileUpload()`, which the author's "Upload
+revisions" button uses, from `() => triggerDataChange()` to `async
+(finishedData) => await triggerDataChange(finishedData)`. The legacy
+upload wizard stores the file through its own jQuery request, so nothing
+flagged the window changed, `closeSideModalById()` handed the close
+`{dataChanged: false}`, and `triggerDataChange()` returned without
 reloading. `fileManagerStore.js`'s `fileUpload()`, behind the panels' own
 "Upload", keeps the unconditional `() => triggerDataChange()`. Driven
 2026-09-23 at the PR head `cab09538`, before its merge: on OJS
@@ -1591,7 +1581,14 @@ head and green at `2034439a` on the same database; OJS's test reloads
 the page before it looks. OMP's and OPS's own lib/ui-library pointers
 predate the change. Written up for the team in
 `docs/reports/2026-09-23-ui-library-853-upload.md` (a temporary report,
-deleted once addressed; git history keeps it).
+deleted once addressed; git history keeps it). Fixed at the PR head
+`51f0c727`, before its merge: `fileUpload()` reloads unconditionally
+again (`async () => await triggerDataChange()`). Verified 2026-09-23 on
+OJS on a fresh reset with lib/ui-library at `51f0c727`: `upload-stale.js`
+read `stale: false`, the panel listing the file right after the close,
+with `…/files`, `…/stages/3/tasks` and `…/emails/authorEmails` fetched;
+OMP's test of scenario 4 passed in pkp/omp#2471's CI with this companion
+at `51f0c727` (run 35882950730).
 
 <a id="fn-omp1"></a>
 **f-omp1** — OMP stage roster and decision registry in note q; internal

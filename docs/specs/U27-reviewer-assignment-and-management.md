@@ -346,8 +346,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     label now means what it says). The row behind it reads "Review Viewed"
     once the window closes, when the table reloads, and stays there. A
     window closed within a moment of opening, before the mark is saved,
-    leaves the row at "Review Submitted", with no reload, until the page is
-    reloaded ⚠ [A32](#a32). Clicking a
+    can leave the row at "Review Submitted" until the page is reloaded
+    ⚠ [A32](#a32). Clicking a
     rating star saves immediately, with the toast "Reviewer rating saved",
     and the rating persists across close and reopen. A click in the first
     moments after the window opens can silently not take ⚠ [A21](#a21).
@@ -1188,7 +1188,7 @@ Left out of the scenarios above, by reason:
   - A29 ("Modify Review" worded as an edit on a request with no review, and a declined request's "Confirmed:" line; Rules 14c, 14d)
   - A30 ("Modify Review" offered on a declined request and its save refused; Rule 14d)
   - A31 (an assistant-level participant offered "Modify Review" and refused on "Save Changes"; Actors row 5)
-  - A32 (a Review Details window closed before its opening has marked the review read, leaving the row "Review Submitted"; Rule 14a)
+  - A32 (a Review Details window closed within a moment of opening, before the mark is saved, leaving the row "Review Submitted"; Rule 14a)
   - OMP4 (a press's "Mark as Complete" enabled on a request with no review; Rule 14c)
   - OMP5 (a press accepting an empty "Save Changes" as the reviewer's review; Rule 14d)
   - OMP6 (the review-form block saying "this journal" on a press; Rule 14b)
@@ -1239,7 +1239,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A31](#a31) | An assistant-level participant is offered "Modify Review", and "Save Changes" answers "The current role does not have access to this operation." | 🐞 | minor | — |
 | [OMP4](#omp4) | {OMP} "Mark as Complete" is enabled on a request with no review; confirming records a completed review nobody wrote and leaves the reviewer on a first step that offers nothing | 🐞 | user-visible | — |
 | [OMP6](#omp6) | {OMP} The Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." on a press | 🐞 | minor | — |
-| [A32](#a32) | A Review Details window closed before its opening has marked the review read leaves the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | — |
+| [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1661,23 +1661,24 @@ Since: 2026-08-29 (the modify-reviews rework) · Basis: probe.
 <sup>[f-a31](#fn-a31)</sup>
 
 <a id="a32"></a>
-**A32 — A review window closed quickly leaves the review unread on screen** · 🐞 · minor.
+**A32 — A review window closed quickly can leave the review unread on screen** · 🐞 · minor.
 Opening a submitted review's Review Details window marks the review
-viewed as soon as the window has loaded it (Rule 14a). An editor who
-closes the window before that mark is saved (within a fraction of a
-second on a quick server, longer on a slow connection) still sees
-"Review Submitted" in the workflow's Reviewers row, and nothing reloads.
-Opened from the submissions dashboard's "View unread recommendation", the
-list reloads when the window closes, but the review's popover still
-offers "View unread recommendation". A page reload shows "Review Viewed"
-and "View recommendation": the review was marked, only the screen missed
-it. Expected, as before this change, the row to read "Review Viewed" and
-the popover to offer "View recommendation" once the mark is saved. The
-window no longer tells the table to catch up after the mark: the table
-reloads at the close only when the mark was already saved, and the
-dashboard's reload at the close can run before the mark is saved.
-Since: pkp/ui-library#853 (`cab09538`, not yet merged; issue
-pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a32](#fn-a32)</sup>
+viewed as soon as the window has loaded it, and the table behind it
+reloads when the window closes (Rule 14a). An editor who closes the
+window within a moment of opening it can still see "Review Submitted" in
+the workflow's Reviewers row, or "View unread recommendation" in the
+submissions dashboard's popover. Closed before the window has loaded the
+review (about a fifth of a second on a quick server, longer on a slow
+connection), the mark is sent only after the close: the Reviewers table
+does not reload at all, and the dashboard's list reloads before the mark.
+Closed later, while the mark is being saved, the table or list reloads
+at the close but can read the review before the mark is saved. A page
+reload shows "Review Viewed" and "View recommendation": the review was
+marked, only the screen missed it. Expected, as before this change, the
+row to read "Review Viewed" and the popover to offer "View
+recommendation" once the mark is saved.
+Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; not yet
+merged; issue pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a32](#fn-a32)</sup>
 
 ### OMP
 
@@ -1897,9 +1898,9 @@ received). Since the 2026-08-29 modify-reviews rework the viewed state is
 set by opening the Review Details window — the PUT `…/consider` fired on
 open (note i); re-driven live 2026-08-29 on both apps: opening flipped a
 "Review Submitted" row to "Review Viewed" without a reload and the status
-survived one. With pkp/ui-library#853 (driven 2026-09-23 at the PR head
-`cab09538`, before its merge) the row catches up when the window closes
-instead, through the table's reload (Rule 14a, note f-a32). Cell rendering:
+survived one. With pkp/ui-library#853 (driven 2026-09-23 at the PR heads
+`cab09538` and `51f0c727`, before its merge) the row catches up when the
+window closes instead, through the table's reload (Rule 14a, note f-a32). Cell rendering:
 `useReviewerManagerConfig.js::getCellStatusItems` — titles quoted in Rule 2
 from `editor.review.requestSent` "Request Sent", `.requestAccepted`,
 `common.overdue`, `editor.review.requestDeclined`(+`.tooltip`),
@@ -2156,9 +2157,10 @@ GET/PUT `…/review` behind "Save Changes" (`editReview`; on a request with
 no review it stamps `dateCompleted`, `dateConfirmed` and `step` 4, Rule
 14d, note f-a24). The UI sends each PUT
 as a POST carrying `X-Http-Method-Override: PUT`. At pkp/ui-library#853's head
-(`cab09538`, not yet merged) the window no longer reloads the Reviewers
-table itself after the mark; the mark sets the window's `dataChanged`
-flag and the table's `onClose` reloads at the close when it is set
+(`51f0c727`, not yet merged) the window no longer reloads the Reviewers
+table itself after the mark; `useReviewAssignment.js` sets the window's
+`dataChanged` flag (`markDataChanged?.()`) just before sending the mark,
+and the table's `onClose` reloads at the close when it is set
 (note f-a32). Labels:
 `editor.review.markAsComplete` "Mark as Complete", `common.saveChanges`
 "Save Changes", `editor.review.reviewLastModifiedBy` "Last modified by
@@ -2963,29 +2965,48 @@ answered (`loadReviewAssignment().then(async () => { if (await
 markViewedIfNew()) onDataChangedFn(); })`); pkp/ui-library#853 (issue
 pkp/pkp-lib#13359) removes that (`loadReviewAssignment().then(markViewedIfNew)`,
 the `onDataChangedFn` prop gone) and relies on the modal store's
-`dataChanged` flag, which `useFetch` sets through
-`modalStore.markModalDataChanged()` only when the `…/consider` call has
-answered; `closeSideModalById()` reads the flag at the moment of closing,
-so a mark answering after the close flags a window already closed and the
-Reviewers table's `onClose` (`triggerDataChange`) returns without
-reloading. The dashboard passes its unconditional `refetchCallback`, which
-reloads at every close and can go out before the mark (in a failing trace
-the `_submissions` GET at +0 ms, the `…/consider` POST at +18 ms). Driven
-2026-09-23 on OJS at the PR head `cab09538`, before its merge, with the
-kept check `shared/playwright/checks/sync/ui-library-853/stale-read.js`,
-which holds the `…/consider` call until the window has closed: from the
-workflow, the row read "Review Submitted" after "Cancel" with no GET sent
-after it, and "Review Viewed" after a reload; from the dashboard,
-`/_submissions` reloaded once and the popover still offered "View unread
-recommendation". The same check at the tip's lib/ui-library `2034439a`,
-on the same database: the row read "Review Viewed" right after "Cancel",
-and the popover offered "View recommendation". The OJS PR check of
-pkp/ojs#5444 (run 35770880623) was red on the dashboard's scenario 9 in
-U23 for the same race, and the same test went red once in eight repeats
-at the PR head. OMP shares the window and gets the change with its next
+`dataChanged` flag. At the PR's earlier head `cab09538`, `useFetch` set
+the flag through `modalStore.markModalDataChanged()` only when the
+`…/consider` call had answered; `closeSideModalById()` reads the flag at
+the moment of closing, so a mark answering after the close flagged a
+window already closed and the Reviewers table's `onClose`
+(`triggerDataChange`) returned without reloading. The dashboard passes
+its unconditional `refetchCallback`, which reloads at every close and can
+go out before the mark (in a failing trace the `_submissions` GET at
++0 ms, the `…/consider` POST at +18 ms). Driven 2026-09-23 on OJS at
+`cab09538`, before its merge, with the kept check
+`shared/playwright/checks/sync/ui-library-853/stale-read.js`, which holds
+the `…/consider` call until the window has closed: from the workflow, the
+row read "Review Submitted" after "Cancel" with no GET sent after it, and
+"Review Viewed" after a reload; from the dashboard, `/_submissions`
+reloaded once and the popover still offered "View unread recommendation".
+The same check at the tip's lib/ui-library `2034439a`, on the same
+database: the row read "Review Viewed" right after "Cancel", and the
+popover offered "View recommendation". The OJS PR check of pkp/ojs#5444
+(run 35770880623) was red on *Submissions dashboard*'s scenario 9 for the
+same race, and the same test went red once in eight repeats at
+`cab09538`. OMP shares the window and gets the change with its next
 submodule update. Written up for the team in
 `docs/reports/2026-09-23-ui-library-853.md` (a temporary report, deleted
-once addressed; git history keeps it).
+once addressed; git history keeps it). At the PR head `51f0c727`, before
+its merge (driven 2026-09-23 on OJS on a fresh reset with lib/ui-library
+at `51f0c727`): `useReviewAssignment.js` calls `markDataChanged?.()` just
+before sending the mark (POST `…/reviewAssignments/{id}/consider`), so a
+window closed while that call is in flight is flagged and the Reviewers
+table reloads at the close. Two gaps remain. (a) That reload runs
+alongside the mark and can read the review before it is saved:
+`stale-read.js`, holding the call until after the close, still read
+stale on both surfaces (the workflow refetched `/submissions/{id}`, its
+files, tasks and participants, and the row still read "Review
+Submitted"; the dashboard reloaded `/_submissions` and the popover still
+offered "View unread recommendation"). (b) A window closed before the
+call is even sent (within about 0.2 s of opening, before the assignment
+has loaded) is not flagged: the workflow table does not reload, and the
+dashboard's unconditional reload runs before the call. In real
+conditions: the earlier form of *Submissions dashboard* scenario 9's
+test, with no wait before "Cancel", repeated 16 times at `51f0c727`, went
+red twice; both traces show the list GET 14–25 ms before the mark's
+POST. A page reload shows "Review Viewed" and "View recommendation".
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only

@@ -248,7 +248,7 @@ the account's roles, never on which dashboard page it opens from:
     | "Review Request overdue by {days} days" | "Edit Due Date" · "View details" · "Unassign" |
     | "Ongoing review - request accepted" | "Edit Due Date" · "View details" · "Cancel Reviewer" |
     | "Review overdue by {days} days" (described as a missed *response* and dated with the review deadline ⚠ [A6](#a6)) | "Edit Due Date" · "View details" · "Cancel Reviewer" |
-    | "Review completed on {date}" | "View unread recommendation" (then "View recommendation" once read; a review window closed before it has marked the review read leaves "View unread recommendation" until a page reload ⚠ [→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#a32)) |
+    | "Review completed on {date}" | "View unread recommendation" (then "View recommendation" once read; a review window closed within a moment of opening, before its mark as read is saved, can leave "View unread recommendation" until a page reload ⚠ [→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#a32)) |
     | "Review was confirmed by editor" | "View recommendation" |
     | "Review Request declined on {date}" | "Resend Review Request" · "View details" · "Cancel Reviewer" |
     | "Reviewer cancelled review request" (shown when the *editor* cancelled ⚠ [A4](#a4)) | "Resend Review Request" · "View details" |
@@ -572,8 +572,8 @@ scenario's starting state are in its footnote.
    - **The completed review**: that reviewer's indicator is now a done
      mark; its popover reads "Review completed on {date}" (on a journal it
      also names the reviewer's recommendation; a press shows the sentence
-     without one) with "View unread recommendation"; press it, and once
-     the window that opens shows the review, close it: reopened, the
+     without one) with "View unread recommendation"; press it, read the
+     review in the window that opens, and close it: reopened, the
      popover offers "View recommendation" ⚠ [→ Reviewer assignment &
      management](U27-reviewer-assignment-and-management.md#a32).
      The submission now lists under "Reviews submitted" too.
@@ -1216,17 +1216,20 @@ opens — "Edit Review", "Review Details: {title}", "Unassign Reviewer",
 "Cancel Reviewer", "Resend Review Request" — and the list refetched after
 the window closed, including a close without saving. With
 pkp/ui-library#853 (issue pkp/pkp-lib#13359; driven
-2026-09-23 on OJS at the PR head `cab09538`, before its merge) the
-handlers still refetch at every close: `refetchCallback` ignores the
-close's `dataChanged` flag, and `openWorkflowModal()`'s `onClose` always
-refetches. The review window marks the review read (`…/consider`) only
-once it has loaded, and the dashboard's refetch at the close can go out
-before that call: a window closed that soon leaves "View unread
-recommendation" until a page reload (the kept check
-`shared/playwright/checks/sync/ui-library-853/stale-read.js`, which holds
-that call until the window has closed: one `/_submissions` reload, the
-popover still "View unread recommendation"; at the tip's lib/ui-library
-`2034439a` it offered "View recommendation"),
+2026-09-23 on OJS at the PR heads `cab09538` and `51f0c727`, before its
+merge) the handlers still refetch at every close: `refetchCallback`
+ignores the close's `dataChanged` flag, and `openWorkflowModal()`'s
+`onClose` always refetches. The review window marks the review read
+(`…/consider`) only once it has loaded, and the dashboard's refetch at
+the close can go out before that call or alongside it: a window closed
+that soon leaves "View unread recommendation" until a page reload (the
+kept check `shared/playwright/checks/sync/ui-library-853/stale-read.js`,
+which holds that call until the window has closed: one `/_submissions`
+reload, the popover still "View unread recommendation", at both heads;
+at the tip's lib/ui-library `2034439a` it offered "View
+recommendation"). At `51f0c727` scenario 9's earlier test, with no wait
+before "Cancel", went red twice in 16 repeats, the list GET 14–25 ms
+before the mark;
 *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md#a32)*.
 
 <a id="fn-l"></a>

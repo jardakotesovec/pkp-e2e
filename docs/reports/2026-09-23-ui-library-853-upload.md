@@ -8,6 +8,13 @@ OMP's and OPS's own pointers predate the change. stable-3_5_0: does not
 carry the change. Tracked in the companion row `optimize-table-reloads`
 in `docs/tracking/ci-triage.md`. Temporary: delete once acted on.
 
+**Update 2026-09-23 (fixed in the PR before its merge).** The PR head is
+now `51f0c727`: `workflowStore.fileUpload()` reloads unconditionally, as
+proposed below. Verified on OJS on a fresh reset: the kept check reads
+`stale: false`, and "Revisions Uploaded" lists the file right after the
+close. OMP's U26 S4 passes in omp#2471's check (run 35882950730).
+Nothing left to do; this report is deleted when the PR merges.
+
 ## Summary
 
 The issue keeps one exception to "reload only when something changed":
