@@ -4,12 +4,17 @@
 # in the application repositories (which pass their own repo/sha).
 #
 # The suite runs as SHARDS (RUNBOOK "Budget"): one job per shard, each with
-# its own Postgres, Mailpit and app install, running `--shard=n/N` of the
-# suite at four workers. Playwright splits every project's tests across the
-# shards and runs the dependency projects (setup, the app project before
-# its serial and solo projects) inside each shard, so a shard is a complete,
-# smaller run. The shard count lives here alone (the job name, SHARDS and
-# the matrix); the app hooks pick a change up on their next run.
+# its own Postgres, Mailpit and app install, at four workers. Playwright
+# shards only the projects named on the command line and runs their
+# dependency projects IN FULL on every shard (a single `--shard` of the
+# whole config split the two leaf projects' four tests and re-ran the app
+# project on every shard, 2026-09-23), so each shard runs three passes:
+# the shared and app projects sharded (setup, one test, as their
+# dependency), then the serial project and then the solo project, each
+# sharded with `--no-deps` on the now-installed app, which keeps their
+# contract (after the parallel project; solo alone). The shard count lives
+# here alone (the job name, SHARDS and the matrix); the app hooks pick a
+# change up on their next run.
 name: run-app
 
 on:
@@ -196,7 +201,12 @@ jobs:
           OJS_ROOT: ${{ github.workspace }}/app
           OMP_ROOT: ${{ github.workspace }}/app
           OPS_ROOT: ${{ github.workspace }}/app
-        run: npx playwright test -c configs/${{ inputs.app }}.config.js --retries=1 --shard=${{ matrix.shard }}/${{ env.SHARDS }}
+        run: |
+          app=${{ inputs.app }}; shard=${{ matrix.shard }}/${{ env.SHARDS }}; rc=0
+          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=shared --project=$app || rc=1
+          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-serial --no-deps --pass-with-no-tests || rc=1
+          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-solo --no-deps --pass-with-no-tests || rc=1
+          exit $rc
 
       - name: Upload test artifacts on failure
         if: failure()
