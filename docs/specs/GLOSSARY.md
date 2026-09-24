@@ -224,6 +224,19 @@ touched.
 
 ## Screen furniture
 
+- **Header, editorial header, side menu** — the *header* (public header)
+  tops every reader-facing page of a journal or of the site: the logo or
+  name, the primary navigation menu, "Search", and at the top right the
+  user menu ("Login" and "Register", or the signed-in username with
+  "Dashboard", "View Profile", "Logout" under it). The *editorial header*
+  is the dark bar across the editorial screens (the Dashboard, Settings,
+  a workflow): the journals switcher, the journal's name, the help icon,
+  the Tasks bell and the initials button of the user's menu; windows that
+  open from the right repeat its right-hand part. The *side menu* is the
+  menu down the left of the editorial screens ("Editor Dashboard",
+  "Settings", "Statistics"…; some specs say "backend sidebar"), distinct
+  from the public pages' *sidebar* of blocks. The navigation-menus spec
+  owns the three frames; each entry's own feature owns the page it opens.
 - **Participants panel** — the per-stage list of assigned users; assignment
   and the recommend-only flag live in its Stage-participants forms.
 - **Tasks (header panel)** — the per-user to-do list opened from the site

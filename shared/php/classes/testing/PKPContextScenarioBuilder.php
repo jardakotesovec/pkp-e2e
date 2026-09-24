@@ -153,6 +153,13 @@
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
+ * App overlays (parseOverlay / executeOverlay, as in PKPBootstrapSeeder):
+ * - OJS issues[] {volume*, number*, year*, published?} (U08) — the
+ *   bootstrap payload's own issues list and seeding path
+ *   (BootstrapSeeder::parseIssues / ::addIssues): Issues › "Create Issue"
+ *   with the "Title" box unticked, then "Publish Issue" with the email box
+ *   unticked. Applied after users[]; the response lists the issues' ids.
+ *   OMP and OPS read no overlay, so the key answers 400 there.
  */
 
 namespace PKP\testing;
@@ -226,6 +233,25 @@ abstract class PKPContextScenarioBuilder
         );
     }
 
+    /**
+     * Parse app-overlay root keys (OJS: `issues[]`, U08). Returns an opaque
+     * plan; the default reads nothing, so an overlay key another app does
+     * not have is left unconsumed and answers 400.
+     */
+    protected function parseOverlay(Spec $root): array
+    {
+        return [];
+    }
+
+    /**
+     * Execute the app overlay once the context, its structures and users[]
+     * exist; returns extra response entries (OJS: `issues`).
+     */
+    protected function executeOverlay(Context $context, array $overlayPlan): array
+    {
+        return [];
+    }
+
     /** OPS overrides to refuse the review-setup keys (no review stage). */
     protected function assertReviewSupported(string $key): void
     {
@@ -268,6 +294,7 @@ abstract class PKPContextScenarioBuilder
         $templatePlans = $this->parseTaskTemplates($root);
         $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
+        $overlayPlan = $this->parseOverlay($root);
         $root->assertConsumed();
 
         if (Application::getContextDAO()->getByPath((string) $contextData['path'])) {
@@ -364,6 +391,9 @@ abstract class PKPContextScenarioBuilder
             $users[] = ['id' => $user->getId(), 'username' => $user->getUsername()];
         }
 
+        // The app overlay (OJS issues[]), after users[] as in the bootstrap.
+        $overlay = $this->executeOverlay($context, $overlayPlan);
+
         // Announcement types, then announcements: after users[], so the
         // panel's own notification fan-out reaches the scratch users.
         $announcementTypes = [];
@@ -387,7 +417,7 @@ abstract class PKPContextScenarioBuilder
             'announcements' => $announcements,
             'components' => $components,
             'taskTemplates' => $taskTemplates,
-        ];
+        ] + $overlay;
     }
 
     /**

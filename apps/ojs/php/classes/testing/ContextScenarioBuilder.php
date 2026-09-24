@@ -11,7 +11,7 @@
  *
  * @brief OJS scratch-journal scenario (a fresh journal gets its default
  * "Articles" section from the Context::add hook; user section assignments
- * resolve by abbrev).
+ * resolve by abbrev; the issues[] overlay, U08).
  */
 
 namespace APP\testing;
@@ -48,5 +48,17 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
     protected function addStructure(Context $context, array $plan, int $sequence): int
     {
         return BootstrapSeeder::addSection($context, $plan, $sequence);
+    }
+
+    /** `issues[]` (U08): the bootstrap payload's issues list, same shape. */
+    protected function parseOverlay(Spec $root): array
+    {
+        return ['issues' => BootstrapSeeder::parseIssues($root)];
+    }
+
+    /** The bootstrap's own issue path; the response lists the issues. */
+    protected function executeOverlay(Context $context, array $overlayPlan): array
+    {
+        return ['issues' => BootstrapSeeder::addIssues($context, $overlayPlan['issues'] ?? [], asTheForm: true)];
     }
 }

@@ -68,8 +68,11 @@ if real, their specs' own probes will resurface them.)
 - What: Vue manager component for navigation menus.
 - Why parked: unmounted in any app; only its form modal (VUE-066, claimed by
   U08) is wired.
-- Resolves: Phase-1 grep/probe at spec time for U08 — if a mount appears, claim
-  there; else confirmed dead-code candidate.
+- Resolves: settled at U08 spec time (2026-09-23): no `NavigationMenuManager.vue`
+  exists in any app's ui-library (ojs 2034439a, omp 977e460c, ops 5d138aa9);
+  `managers/NavigationMenuManager/` holds only the form modal (VUE-066, claimed
+  by U08, opened from the legacy grid), its field, its composable and stories.
+  Confirmed dead atlas row; retire candidate.
 
 ### API-030 — open-peer-review data API (+ unmounted display components)
 - What: OJS-mounted API whose display components (`PkpCite`, `PkpOpenReview`,
@@ -333,3 +336,19 @@ until their specs exist. Do not force-claim the defects themselves.
     `802202cb3e`, lib/pkp `5af3b3933`, ui-library `2034439a`; omp
     `7f9455d5a`; ops `15f0b6e0bd`). Resolves: maintainer confirmation as
     dead code (removal candidates).
+23. **Unrendered fallback menus and the legacy menu form** — attached to
+    **U08** (claimed; the navigation-menus spec's Reference table
+    documents the waiver). Each app's
+    `templates/frontend/components/primaryNavMenu.tpl` (AFFR-004, AFFR-005,
+    AFFR-006: a hand-written primary menu for a journal with none
+    configured) is included by no template, page or plugin in any
+    checkout: `header.tpl` renders only `{load_menu name="primary"}`,
+    which draws nothing when no menu fills the area. The legacy
+    `PKP\controllers\grid\navigationMenus\form\NavigationMenuForm` and
+    `templates/controllers/grid/navigationMenus/form/navigationMenuForm.tpl`
+    (named by AFFM-031) are instantiated nowhere since the grid opens the
+    Vue `NavigationMenuManagerFormModal` (pkp-lib#12177, 2026-01-22); the
+    items grid's `saveSequence` op has no ordering feature behind it.
+    Code-verified 2026-09-23 (U08 spec author; checkouts ojs `802202cb3e`,
+    omp `7f9455d5a`, ops `15f0b6e0bd`). Resolves: maintainer confirmation
+    as dead code (removal candidates).

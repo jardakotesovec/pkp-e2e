@@ -601,6 +601,25 @@ trips.
   green alone (`.reports/U36/alone-ops-U03S5.log`). Watch condition: a
   second sighting; then the error context says whether the save was
   never sent or answered before the wait was armed.
+- **"Cancel upload" on a throttled upload** (U36 S9, OJS and OMP:
+  2026-09-24, the U08 harness regression re-runs on the VM at auto
+  workers while three test authors ran suites on the same fleets,
+  `.reports/U08/harness/regression.log`). Red in the OJS suite run with
+  the new context builder and with the old one, green alone on both; on
+  OMP red once alone, then green twice. Lean: the 243-byte fixture
+  finishes uploading before "Cancel upload" is pressed. Watch condition:
+  a sighting in a final or on CI; then give the test a fixture large
+  enough to outlast the press. Tripped the same day: the U08 OJS final
+  on a reset database at auto workers, red beside U14 S5 on the same
+  read (the reloaded panel not empty), green alone
+  (`.reports/U08/final-run-ojs-attempt1.log`, `alone-ojs-reds.log`).
+  The lean did not hold: with the throttle slowed from 4 KB/s to 64
+  bytes/s the test went red 3 of 3 alone on OJS and 2 of 3 on OMP
+  (`.reports/U08/u36s9-fix-{ojs,omp}.log`; change reverted), so a slower
+  upload makes the file land more often, which points at "Cancel upload"
+  not stopping an upload already sent rather than at a fast fixture.
+  Next: a diagnostic read of the upload request and the file list
+  around the press before any test change (possibly a U36 finding).
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -622,7 +641,7 @@ trips.
   whether the report's job had not run yet or the dialog was read before
   its second fetch. Sighted again 2026-09-23, the U36 session's OJS final
   on a reset database at auto workers, the only red of 288, green alone
-  (`.reports/U36/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-23 in the U37 session's OJS final, the only red of 299, green alone (`.reports/U37/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U38 session's OJS and OMP finals on reset databases at auto workers (OJS beside U35 S2, OMP the only red of 306), green alone on both (`.reports/U38/final-run-{ojs,omp}.log`). Because the app project fails, the serial and solo
+  (`.reports/U36/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-23 in the U37 session's OJS final, the only red of 299, green alone (`.reports/U37/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U38 session's OJS and OMP finals on reset databases at auto workers (OJS beside U35 S2, OMP the only red of 306), green alone on both (`.reports/U38/final-run-{ojs,omp}.log`). Again 2026-09-24 in the U08 session's OJS final on a reset database on the VM at auto workers, beside U36 S9, green alone (`.reports/U08/final-run-ojs-attempt1.log`, `alone-ojs-reds.log`). Because the app project fails, the serial and solo
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run

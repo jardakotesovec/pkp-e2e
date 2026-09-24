@@ -90,6 +90,27 @@ Keys:
 - `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
   entry renames the default section. OMP's context scenario does not accept
   a `series[]` list yet and answers 400 on the key.
+- `issues[]` (OJS only; OMP and OPS answer 400 on the key): the bootstrap
+  payload's shape, each `{volume, number, year, published?}` (`volume`
+  and `year` whole numbers, `number` a string or a whole number, all three
+  required; `published` a boolean, default false). Each issue is created
+  the way Issues › Future Issues › "Create Issue" › "Save" creates it with
+  those three boxes filled and the form's "Title" box unticked (the form
+  arrives with it ticked and then refuses an empty title): shown as "Vol.
+  {volume} No. {number} ({year})", no title, its access status derived
+  from the journal's publishing mode as the form derives it (open on a
+  fresh journal), an empty title and description row in each form locale
+  (the bootstrap's issues have neither row; nothing on screen differs). A `published` issue is then
+  published the way the row's "Publish Issue" › "OK" publishes it with
+  "Send an email about this to all registered users." unticked (the box
+  arrives ticked; ticked, the screen also queues an email job per batch
+  of the journal's users, which the seed does not): published today and
+  made the journal's current issue, so with
+  several the last published entry is "Current". Issues are created in
+  list order after `users[]`. A published submission lands in one through
+  the submission scenario's `issue` key below (U08 harness, 2026-09-24).
+  The response lists the created `issues` (`id`, `volume`, `number`,
+  `year`, `published`); an issue's page is `issue/view/{id}`.
 - `users[]`: throwaway accounts. Each entry takes `username` and `roles`
   (both required, roles non-empty), `givenName`, `familyName`, `email`
   (default `<username>@mail.test`), `password` (default: the username
@@ -416,7 +437,8 @@ usernames but never creates them. The response returns `tag`, `contextId`,
 `path`, the created `users` (id and username), `announcementTypes` (id and
 name), `announcements` (id and title), `components` (`id`, `name`,
 `action`: `added`, `edited` or `removed`, in the order seeded) and
-`taskTemplates` (`id`, `title`, `stage`, `action`: `added` or `edited`).
+`taskTemplates` (`id`, `title`, `stage`, `action`: `added` or `edited`),
+and on OJS `issues` (see `issues[]`).
 
 ## `POST scenarios/submission`
 
@@ -839,7 +861,8 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   `registrationAgency`, `doiCreationTime`), ISSNs, `licenseUrl` (copied
   into a publication when it is published, so it must be set before a
   `published` seed; sync rr14, 2026-09-22), OJS
-  `issues[]` with `accessStatus`, OJS `subscriptions[]` where
+  `issues[].accessStatus` (and an issue's title, description or cover;
+  `issues[]` itself is built, U08), OJS `subscriptions[]` where
   `'expired'` seeds an active row with a past end date, and OJS `payments`
   (`enabled`, `currency`, `paymentPluginName`, `manualInstructions`,
   `publicationFee`; the instructions gate is in seed-facts, U34).

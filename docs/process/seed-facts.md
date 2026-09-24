@@ -722,3 +722,42 @@ config-file settings.
   "Send Reminder" only once its response due date is before the server's
   date. Reviewers panel, the reviewer row's "Edit" window, OJS, 2026-09-24
   (`.reports/U38/cc-K2.md`).
+- Settings › Distribution › "Access" shows no "Publishing Mode" choice
+  ticked on `publicknowledge` or on a scratch journal, so both publish
+  openly; a preprint server never stores its "Posting Mode" choice. OJS and
+  OPS, 2026-09-23 (U08 claim check K1-7, K2).
+- A scratch context's "About the Journal" text is empty, so its About page
+  is the heading alone. All three apps, 2026-09-23 (U08 claim check K1).
+- A scratch press has no series and no category, so the Navigation tab's
+  "Add item" offers no "Series" or "Category" type there;
+  `publicknowledge` offers both. The context scenario has no key for
+  either. OMP, 2026-09-23 (U08 claim check K1, K4-16).
+- Installed navigation item titles read French on `fr_CA` pages only on a
+  context whose "Forms" languages include French; `publicknowledge`
+  (French under "UI" only) and a scratch context without
+  `supportedFormLocales` keep every public menu entry English. All three
+  apps, 2026-09-23 (U08 claim check K1, K2, K3).
+- With `publicknowledge` the only context, Administration › Site Settings
+  has no "Navigation" side tab. All three apps, 2026-09-23 (U08 claim check
+  K1, `.reports/U08/ccK1/00-onejournal-*`).
+- DOIs are on by default on `publicknowledge` and every scratch context:
+  "Allow Digital Object Identifiers…" ticked, the first kind ticked
+  ("Articles", "Monographs", "Preprints"), no prefix; managers' side menus
+  show "DOIs". All three apps, 2026-09-24 (U08 claim check K2).
+- The journal's own Settings › Distribution › "Statistics" "Enable
+  institutional statistics" box appears once the site's box is ticked and
+  is unticked on `publicknowledge` and a scratch context; "Institutions"
+  needs both. All three apps, 2026-09-24 (U08 claim check K2-10).
+- The manager role's row on Settings › Users & Roles › Roles has no
+  "Settings" arrow and no "Edit". All three apps, 2026-09-24 (U08 claim
+  check K2).
+- Settings › Website › "Setup" › "Lists" reads "Items per page" 25 and
+  "Page links" 10 on every context; the OJS archive, the OMP catalog and
+  the OPS preprint lists follow "Items per page" at once. All three apps,
+  2026-09-23 (U08 claim check K3).
+- On Settings › Users & Roles › Users the installer's `admin` account reads
+  "admin admin". All three apps, 2026-09-23 (U08 claim check K3).
+- While the site has no "Site Name", Administration's editorial header shows
+  the application's name ("Open Journal Systems", "Open Monograph Press",
+  "Open Preprint Systems") where the site's name would stand. All three
+  apps, 2026-09-23 (U08 claim check K1, K4).
