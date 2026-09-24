@@ -12,7 +12,7 @@
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
  * - A1 🐞, A2 🐞, A7 🐞, A8 🐞, A9 🐞, A12 🐞, A13 🐞, A14 🐞, A16 🐞,
- *   A15 🐞, A18 🐞, A19 🐞, A21 🐞, A22 🐞, A26 🐞, A30 🐞, A31 🐞, A34 🐞 (the refusals and races these
+ *   A15 🐞, A18 🐞, A19 🐞, A21 🐞, A22 🐞, A26 🐞, A30 🐞, A31 🐞 (the refusals and races these
  *   name are walked where a scenario passes through them — S5's inverted
  *   dates, S6's refused edit, the settle-then-rate in S9, S11's unassign
  *   notice read by recipient and title — and asserted neither way).
@@ -22,7 +22,8 @@
  *   design; S9 asserts it as contract), A11, A24 (an editor's "Modify
  *   Review" save submitting the review for the reviewer is the designed
  *   behavior, spec Rule 14d, under Budget: no test drives it yet), A25,
- *   A27, A33, A35 (the thank stands after a revert, intended).
+ *   A27, A33, A35 (the thank stands after a revert, intended), A34 (not a
+ *   finding: translation lag).
  * - S10 note: the two PDFs are asserted as real downloads; the author-only /
  *   full content split is asserted on the same menu's XML exports (mpdf
  *   compresses PDF text streams — the split is byte-identical logic).

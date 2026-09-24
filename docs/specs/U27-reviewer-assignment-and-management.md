@@ -577,9 +577,7 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     assignment currently tracks as reached, by design until a full event
     log replaces it ([A35](#a35), retired). Marked complete again, the
     review lists the first "Reviewer Thanked" date again, followed by the
-    new "Review Completed" one. In a language other than English an
-    untranslated placeholder stands where the "Reviewer Reminded" label
-    belongs ⚠ [A34](#a34).
+    new "Review Completed" one.
     <sup>l</sup>
 22. **Editorial Notes.** "Editorial Notes" opens the notes editors keep
     about a reviewer. Its guidance text names the audience: "administrators,
@@ -1244,7 +1242,6 @@ Left out of the scenarios above, by reason:
   - A30 ("Modify Review" offered on a declined request and its save refused; Rule 14d)
   - A31 (an assistant-level participant offered "Modify Review" and refused on "Save Changes"; Actors row 5)
   - A32 (a Review Details window closed within a moment of opening, before the mark is saved, leaving the row "Review Submitted"; Rule 14a)
-  - A34 (an untranslated placeholder for "Reviewer Reminded" in a language other than English; Rules 14c, 21)
   - OMP4 (a press's "Mark as Complete" enabled on a request with no review; Rule 14c)
   - OMP5 (a press accepting an empty "Save Changes" as the reviewer's review; Rule 14d)
   - OMP6 (the review-form block saying "this journal" on a press; Rule 14b)
@@ -1296,7 +1293,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP4](#omp4) | {OMP} "Mark as Complete" is enabled on a request with no review; confirming records a completed review nobody wrote and leaves the reviewer on a first step that offers nothing | 🐞 | user-visible | — |
 | [OMP6](#omp6) | {OMP} The Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." on a press | 🐞 | minor | — |
 | [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | @blessie 2026-09-24 · risk accepted, not fixing |
-| [A34](#a34) | In a language other than English, History and Review Details show "##editor.review.reviewerReminded##" where the "Reviewer Reminded" label belongs | 🐞 | minor | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1310,6 +1306,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
 | [A27](#a27) | Retired: a review thanked, reverted and marked complete again reads "Reviewer Thanked" at once, with no second "Thank Reviewer"; intended, the revert takes back only the completion and the thank already went out | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
 | [A33](#a33) | Retired: a review thanked, taken back and marked complete again names the first thank in Review Details, not the newer completion; intended, the thank stands after a revert | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
+| [A34](#a34) | Retired: the new "Reviewer Reminded" label read as a raw key outside English before its translations arrived; not a finding, translations follow through the usual process | ✅ | retired | @jarda.kotesovec 2026-09-24 · not a finding |
 | [A35](#a35) | Retired: after "Revert Decision", History drops the "Reviewer Thanked" line although the thank-you email went out; intended, History shows only the dates tracked today until an event log replaces it | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
 | [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor; fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
 | [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates; no review process, and the window is unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
@@ -1729,23 +1726,6 @@ Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; merged
 > before it closes the window, as scenario 9 of the submissions dashboard
 > does.
 
-<a id="a34"></a>
-**A34 — "Reviewer Reminded" is untranslated in other languages** · 🐞 · minor.
-With the interface in a language other than English, the reminder
-milestone reads "##editor.review.reviewerReminded##" followed by its date
-and time, in History and in the Review Details window's dated line alike. In
-Français (Canada) History read "{date and time} Rappel" before the
-relabelling of the review dates in History and Review Details
-(pkp/pkp-lib#13263, September 2026), and every other label it introduced
-shows in French ("Demande envoyée",
-"Demande acceptée", "Évaluation soumise"). Expected: the label in the
-interface's language. The label is new and exists in English only, so the
-next translation update should close this; until then a screen that was
-translated shows a placeholder.
-Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346; issue
-pkp/pkp-lib#13263) · Basis: probe.
-<sup>[f-a34](#fn-a34)</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -1886,6 +1866,9 @@ Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="a33"></a>
 **A33 — Review Details names an older thank as the latest step** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: the thank stands after "Revert Decision", so a review marked complete again names that first thank and its date in Review Details (Rule 14a). <sup>[f-a33](#fn-a33)</sup>
+
+<a id="a34"></a>
+**A34 — "Reviewer Reminded" is untranslated in other languages** · ✅ · retired. Not a finding, ruled by @jarda.kotesovec on 2026-09-24: a new label arrives in English first and its translations follow through the usual process. <sup>[f-a34](#fn-a34)</sup>
 
 <a id="a35"></a>
 **A35 — History drops the thank after "Revert Decision"** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: History shows only the dates the assignment currently tracks, and a proper event log is to replace it later, so the "Reviewer Thanked" line leaving it after "Revert Decision" stands (Rule 21). <sup>[f-a35](#fn-a35)</sup>
