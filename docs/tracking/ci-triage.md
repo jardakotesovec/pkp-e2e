@@ -620,6 +620,10 @@ trips.
   not stopping an upload already sent rather than at a fast fixture.
   Next: a diagnostic read of the upload request and the file list
   around the press before any test change (possibly a U36 finding).
+  Also red once in the OMP final at the merged tips of pkp-lib#13359
+  (2026-09-24, reset database, eight workers,
+  `.reports/pr13359/merge-omp.log`, error context kept beside it: the
+  reloaded panel still lists `article.pdf`); green alone right after.
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -791,4 +795,3 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
-| pkp/ui-library#853 + pkp/ojs#5444, pkp/omp#2471, pkp/ops#1412 (all submodule-only; issue pkp/pkp-lib#13359, reload tables only when a side modal changed something) | `optimize-table-reloads` | ready | 2026-09-23 | Prepared before merge at the maintainer's request; three findings reported at `cab09538`, the developer's fix `51f0c727` verified 2026-09-23: publish (OMP/OPS) and upload fixed (U49 A8, U26 A12 retired, their reports deleted at merge), the Review Details race narrowed, then risk accepted by @blessie 2026-09-24 (U27 A32 keeps the verdict; its report deleted). App PR checks at `51f0c727` with this companion green on all three apps (ojs#5444 35881450909, omp#2471 35882950730, ops#1412 35883039899); rebased onto `main` `ef1c65c` (U36, U07), dispatch 35910473882 at the three PR heads green. Test changes: U14 `closeCommentPanel({changed})` in the three apps (view-only closes no longer reload), U23 S9 (OJS, OMP) waits for the mark-as-read before "Cancel"; specs U14, U23, U26, U27, U49 folded; kept checks `checks/sync/ui-library-853/`; CI dispatch 35871041025 green (ojs at the PR head, omp/ops at `main`). At merge: rebase onto `main`, run the OJS suite at the merged tip (and OMP/OPS U14 and U23 at their tips), fast-forward, delete this row; the OMP/OPS publish reds arrive with their lib/ui-library update unless the PR fixes them first. |

@@ -1677,8 +1677,8 @@ reload shows "Review Viewed" and "View recommendation": the review was
 marked, only the screen missed it. Expected, as before this change, the
 row to read "Review Viewed" and the popover to offer "View
 recommendation" once the mark is saved.
-Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; not yet
-merged; issue pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a32](#fn-a32)</sup>
+Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; merged
+2026-09-24 as `1afd40a9`; issue pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a32](#fn-a32)</sup>
 
 > **Reviewed — @blessie, 2026-09-24**: confirmed 🐞, risk accepted.
 > Ruling: not worth fixing; a person rarely closes the window that fast,
@@ -2163,8 +2163,8 @@ deposit `SendReviewToOrcid` — consent/config is the ORCID feature);
 GET/PUT `…/review` behind "Save Changes" (`editReview`; on a request with
 no review it stamps `dateCompleted`, `dateConfirmed` and `step` 4, Rule
 14d, note f-a24). The UI sends each PUT
-as a POST carrying `X-Http-Method-Override: PUT`. At pkp/ui-library#853's head
-(`51f0c727`, not yet merged) the window no longer reloads the Reviewers
+as a POST carrying `X-Http-Method-Override: PUT`. Since pkp/ui-library#853
+(`51f0c727`, merged 2026-09-24 as `1afd40a9`) the window no longer reloads the Reviewers
 table itself after the mark; `useReviewAssignment.js` sets the window's
 `dataChanged` flag (`markDataChanged?.()`) just before sending the mark,
 and the table's `onClose` reloads at the close when it is set

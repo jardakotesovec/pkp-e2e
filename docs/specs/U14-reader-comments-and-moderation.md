@@ -1306,7 +1306,8 @@ while unapproved, `is-disabled` when approved), `deleteComment`
 `commentToggleApproval()` PUTs `comments/{id}/setApproval` with
 `approved`, on success toasts `manager.userComment.commentUpdated` and
 closes the modal, whose `onClose` refetches the list.
-With pkp/ui-library#853 (issue pkp/pkp-lib#13359, not yet merged) that
+Since pkp/ui-library#853 (issue pkp/pkp-lib#13359, merged 2026-09-24 as
+`1afd40a9`) that
 refetch depends on the modal store's `dataChanged` flag: `useFetch` sets
 it through `modalStore.markModalDataChanged()` on a successful POST, PUT
 or DELETE made from the panel (the approval, a report's deletion from the
@@ -1315,8 +1316,8 @@ panel when it closes, and `closeSideModalById()` hands `onClose` a
 `{dataChanged}` object; `userCommentStore.js`'s `commentView()` `onClose`
 refetches only when `shouldTriggerDataChange()` reads it true, and
 `reportView()`'s `onClose` does the same for the reports. The change is
-in lib/ui-library, shared by the three apps: OJS carries it at the PR
-head, OMP and OPS with their next submodule update.
+in lib/ui-library, shared by the three apps; all three carry it since
+their submodule updates of 2026-09-24.
 `setApproval()` stores `isApproved`, `approvedAt` = now or null,
 `approvedByUserId` = the moderator or null; the resource exposes
 `approvedByUserName` to moderators. `commentView()` writes `commentId`
