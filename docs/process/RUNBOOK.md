@@ -38,7 +38,7 @@ orchestrator.
    `scenarios.md` lacks: a harness agent builds it with its parity row and
    re-runs the shipped suites that seed through it (`briefs/harness.md`); a
    test author who meets a missing key at step 8 sends the loop back here.
-   Gate: `.reports/<feature>/harness/report.md`.
+   Gate: `.reports/<feature>/harness/harness-log.md`.
 5. **Claim check.** `npm run seed-facts -- --check` to zero, then
    `node docs/process/lint/lint-spec.mjs --claims <spec>` into
    `.reports/<feature>/claims.txt`. The orchestrator cuts `claims.txt` into

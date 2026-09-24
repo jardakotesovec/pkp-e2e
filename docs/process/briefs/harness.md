@@ -6,7 +6,7 @@
 {{keys}}           the key family or keys to build, as the spec author's return named them, each with the Coverage rows (settings, states) that need it
 {{fleet_json}}     .reports/{{feature}}/fleet.json
 {{agent}}          PROBE_AGENT for the parity drive, e.g. h{{feature}} (scripts and outputs under .reports/{{feature}}/harness/)
-{{report_path}}    .reports/{{feature}}/harness/report.md
+{{report_path}}    .reports/{{feature}}/harness/harness-log.md (no file name an agent writes may start with report, summary, findings or analysis: Claude Code refuses a subagent's Write of one)
 {{frame}}          docs/process/briefs/frame.md, pasted verbatim
 -->
 {{frame}}
