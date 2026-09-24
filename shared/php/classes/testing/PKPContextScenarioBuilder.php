@@ -79,6 +79,14 @@
  *   boolean, which the form posts whether or not the "References" item is
  *   ticked). A fresh context has no row, which reads as off; on, a reference
  *   added afterwards queues the lookup job chain (Repo::citation()).
+ * - enablePublisherId (list of the form's values) — the same "Metadata"
+ *   screen's "Publisher ID" boxes (U44; the app's MetadataSettingsForm
+ *   FieldOptions, whose options are read from the form itself, so each app
+ *   accepts exactly the boxes its screen offers: a journal publication /
+ *   galley / issue / issueGalley, a press publication / chapter /
+ *   representation / file, a preprint server publication / galley). An
+ *   empty list is every box unticked, which the form posts as '' and the
+ *   save turns into [].
  * - submissionAcknowledgement (off / submittingAuthor / allAuthors),
  *   copySubmissionAckPrimaryContact (bool), copySubmissionAckAddress
  *   (string, comma-separated) — Settings › Workflow › Emails "Submission
@@ -1245,7 +1253,8 @@ abstract class PKPContextScenarioBuilder
      * The optional submission-intake passthroughs → the context-settings
      * rows their Settings › Workflow forms save (U21): `copyrightNotice`
      * (Submission › Author Guidelines), `metadata` and
-     * `citationsMetadataLookup` (U42) (Submission › Metadata)
+     * `citationsMetadataLookup` (U42) and `enablePublisherId` (U44)
+     * (Submission › Metadata)
      * and the Emails tab's `submissionAcknowledgement`,
      * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress` and, on
      * the preprint server only, `postedAcknowledgement` (U49); and the
@@ -1314,6 +1323,33 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['citationsMetadataLookup'] = $value;
             $specKeys['citationsMetadataLookup'] = 'citationsMetadataLookup';
+        }
+
+        if ($root->has('enablePublisherId')) {
+            // The Metadata screen's "Publisher ID" boxes (U44): a checkbox
+            // FieldOptions whose ticked values the form posts as a list (an
+            // empty list as '', which convertStringsToSchema turns into []).
+            // The accepted values are the app form's own options, read from
+            // the form the Settings page builds; the context schema is wider
+            // on a preprint server (it allows issue / issueGalley, which the
+            // OPS form does not offer).
+            $value = $root->get('enablePublisherId');
+            $form = new \APP\components\forms\context\MetadataSettingsForm('', Application::getContextDAO()->newDataObject());
+            $offered = array_column($form->getField('enablePublisherId')->options, 'value');
+            $expected = 'enablePublisherId must be a list of the "Publisher ID" boxes this app\'s Metadata screen offers: ' . implode(', ', $offered);
+            if (!is_array($value) || !array_is_list($value)) {
+                throw new SpecException('enablePublisherId', $expected);
+            }
+            foreach ($value as $i => $item) {
+                if (!is_string($item) || !in_array($item, $offered, true)) {
+                    throw new SpecException("enablePublisherId.{$i}", $expected);
+                }
+            }
+            if (count(array_unique($value)) !== count($value)) {
+                throw new SpecException('enablePublisherId', 'enablePublisherId names a box twice; the screen ticks each box once');
+            }
+            $settings['enablePublisherId'] = $value;
+            $specKeys['enablePublisherId'] = 'enablePublisherId';
         }
 
         if ($root->has('submissionAcknowledgement')) {

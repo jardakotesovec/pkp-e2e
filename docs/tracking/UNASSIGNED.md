@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **26 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **27 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -402,3 +402,24 @@ until their specs exist. Do not force-claim the defects themselves.
     `71bb244152`, omp `a36551804`, ops `07141ae4df`, lib/pkp
     `25182919bf`, staticPages `45d02c0`, customBlockManager `1f8d452`).
     Resolves: maintainer confirmation as dead code (removal candidates).
+27. **Unreached identifier pieces** — attached to **U44** (claimed; the
+    identifiers spec's Reference table lists them). OPS
+    `controllers/grid/pubIds/form/AssignPublicIdentifiersForm.php` and
+    `templates/controllers/grid/pubIds/form/assignPublicIdentifiersForm.tpl`
+    (AFFW-607): no OPS handler builds the form. The OJS template's
+    `PKPSubmission` branch posts to `tab.issueEntry.IssueEntryTabHandler`
+    `assignPubIds`, a handler that exists in no app (AFFW-605's live
+    half is the issue branch, "Publish Issue"). The submission branch of
+    each app's `publicIdentifiersForm.tpl` (the article's identifiers
+    moved to the Vue "Identifiers" page). OJS and OPS
+    `ManageFileApiHandler` `identifiers` / `updateIdentifiers` /
+    `clearPubId` (GRID-067, GRID-100): `editMetadata.tpl` shows its
+    "Identifiers" tab only when `showIdentifierTab` is assigned, which only
+    OMP's subclass does, so no OJS or OPS screen opens them (a typed
+    address still reaches them). OJS `issueForm.tpl`'s `$pubIdPlugins`
+    loop (`IssueForm` never assigns the variable) and the OJS
+    `PubIdPlugin::manage()` verb `assignPubIds` (no URN screen posts
+    it). Code-verified 2026-09-24 (U44 spec author; checkouts ojs
+    `71bb244152`, omp `a365518044`, ops `07141ae4df`, lib/pkp
+    `25182919bf`, ui-library `1afd40a911`). Resolves: maintainer
+    confirmation as dead code (removal candidates).

@@ -566,7 +566,7 @@ trips.
   (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
   2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it), and in the U36 session's, 2026-09-23, beside U03 S5, red alone too (`.reports/U36/final-run-ops.log`, `alone-ops-U40S1.log`; serial and solo green alone), and in the U38 session's, 2026-09-24, beside U49 S6, red alone too (`.reports/U38/final-run-ops.log`; serial and solo green alone). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
-  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`).
+  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`). Again 2026-09-24 in the U44 session's OPS final on a reset database at auto workers, the only red of 215; serial and solo 13 green alone (`.reports/U44/final-run-ops.log`, `alone-ops-serial-solo.log`).
 - **Profile save response not seen in 30 s** (U03 S5, "cancel, and
   reject, an email change", OPS, once: 2026-09-23, the U36 session's OPS
   final on a reset database on the Mac at auto workers,
@@ -623,7 +623,7 @@ trips.
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run
-  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`).
+  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`).
   **Tripped 2026-09-23 on the VM**: OJS full run
   at eight workers on a reset database (companion
   `optimize-table-reloads`, lib/ui-library at `51f0c727`,
@@ -662,7 +662,7 @@ trips.
   (`final-run-ojs.log`). Tripped again at `PLAYWRIGHT_WORKERS=4` in the second U35 local
   final 2026-09-20 (a parallel U05 S11 title in the site read only,
   `.reports/U35/final-run-ojs-attempt2.log`), green alone in 13 s
-  (`final-ojs-u05s7-alone.log`), so no longer eight-worker only. Fix
+  (`final-ojs-u05s7-alone.log`), so no longer eight-worker only. First OMP sighting 2026-09-24, the U44 session's OMP final on a reset database at auto workers, the only red of 334 (a parallel U05 S3 "Later" submission's task in the site read only), green alone in 11 s; serial and solo 14 green alone (`.reports/U44/final-run-omp.log`, `alone-omp-U05S7.log`, `alone-omp-serial-solo.log`). Fix
   to make: the U05 S7 read filters to the test's own submissions, or its
   read pair retries longer; U14 S5's wait is bounded at 10 s.
 

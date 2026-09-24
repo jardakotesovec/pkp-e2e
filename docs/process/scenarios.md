@@ -241,6 +241,26 @@ Keys:
   chain never runs and the reference stays at processing status 0, not
   processed. Applies to the three apps alike; a non-boolean is a 400 (U42
   harness, 2026-09-24).
+- `enablePublisherId`: the same screen's "Publisher ID" boxes, a list of
+  the values of the boxes to tick, saved as that form saves (the screen
+  posts `enablePublisherId[]=…` per ticked box, `enablePublisherId=` with
+  none; stored as a JSON list, `[]` for none). The values are the app's
+  own boxes, read from its form: a journal `publication` ("Enable for
+  Publications"), `galley` ("Enable for Galleys"), `issue` ("Enable for
+  Issues"), `issueGalley` ("Enable for Issue Galleys"); a press
+  `publication` ("Enable for Monographs"), `chapter` ("Enable for
+  Chapters"), `representation` ("Enable for Publication Formats"),
+  `file` ("Enable for Files"); a preprint server `publication` ("Enable
+  for Preprints") and `galley` ("Enable for Galleys"). Another app's
+  value (OPS `issue`, which the preprint server's context schema allows
+  but its screen does not offer), an unknown one, a value named twice
+  and anything but a list of strings are 400s. A fresh context has no
+  row, which reads as every box unticked, so `publicknowledge` has
+  publisher IDs off; `[]` is the state after a manager unticks every box
+  and saves. The list is stored in the order given (the screen stores
+  the order the boxes were ticked; nothing reads the order). The screen's
+  "Save" also writes every other item of the form; the key writes this
+  row alone (U44 harness, 2026-09-24, three apps).
 - `submissionAcknowledgement`: who gets the "Submission Confirmation"
   email of Settings › Workflow › Emails, `allAuthors` (the default),
   `submittingAuthor` or `off`; with it `copySubmissionAckPrimaryContact`
@@ -394,6 +414,13 @@ Keys:
   in that window. It is OFF on every fresh context, `publicknowledge`
   included (no `enabled` row). The Usage Event plugin stays refused as
   site-wide (U09 harness, 2026-09-24).
+  The URN plugin (`urnpubidplugin`) is off on every
+  fresh journal and press too, and its settings window always stores
+  every one of its keys, so a seed gives every key the window writes,
+  `urnCheckNo` at least: without it the article's "Identifiers" page
+  renders empty (its form arrives with no fields), while `urnCheckNo:
+  false` shows the URN box. On OPS `urnpubidplugin` is a 400, since a
+  preprint server has no URN plugin (U44 claim check K1, K2, 2026-09-24).
 - `components`: Settings › Workflow › Submission › the "Components" tab
   (its list "Article Components", "Monograph Components" on a press,
   "Preprint Components" on a preprint server), a map from a component's

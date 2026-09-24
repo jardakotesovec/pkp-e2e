@@ -848,3 +848,27 @@ config-file settings.
   the step rail sends nothing, the wizard's own autosave comes about a
   minute later, and "Submit" does not wait for it (U42 claim check K4,
   2026-09-24; U42 A18).
+- The "URN" plugin is disabled on every fresh journal and press; `plugins:
+  {urnpubidplugin: {enabled, settings}}` seeds it and its settings window's
+  keys. A preprint server has no URN plugin: its Plugins grid shows the
+  "Public Identifier Plugins" heading with no rows, and the key answers
+  400. Settings › Website › "Plugins", all three apps, 2026-09-24 (U44
+  claim check K2, `w-02-plugins-untouched-*`, `x-01-plugins-control-ops`).
+- A preprint server ships no "Dublin Core Indexing Plugin"; "Google Scholar
+  Indexing Plugin" and, on a journal and a press, "Dublin Core Indexing
+  Plugin" arrive ticked on `publicknowledge` and on every scratch context.
+  Settings › Website › Plugins, all three apps, 2026-09-24 (U44 claim
+  check K4, `.reports/U44/ccK4/pk-maya-plugins-*`).
+- A submission's number and its first publication's number differ on these
+  installs (OJS 537/551, OMP 512/524 for new seeds), so a check that needs
+  them equal never meets it on a first version. 2026-09-24 (U44 claim check
+  K2, `k2-state-<app>.json`).
+- {OMP} A publication format's "Select Files" offers only production-ready
+  files, so a seed whose `files[]` sit at the submission stage gives it an
+  empty list; a format file comes from "Change File" (the upload wizard).
+  Publication › Publication Formats, 2026-09-24 (U44 claim check K1).
+- {OMP} A publication format shows on the book page (its details block,
+  identifiers included) only once its row reads "Approved" and
+  "Available"; a format created on screen arrives "Awaiting Approval" and
+  "Not Available". Publication › Publication Formats, 2026-09-24 (U44
+  claim check K4, `.reports/U44/ccK4/extra-available-after-omp`).
