@@ -118,7 +118,8 @@ function announcementsDir(contextId) {
     const appRoot = process.env.PKP_APP_ROOT;
     const cfg = fs.readFileSync(path.join(appRoot, 'config.test.inc.php'), 'utf8');
     const m = cfg.match(/^public_files_dir\s*=\s*(.+)$/m);
-    const pub = m ? m[1].trim() : path.join(appRoot, 'public');
+    // Relative to the app root, as the app reads it (make-test-config.js).
+    const pub = path.resolve(appRoot, m ? m[1].trim() : 'public');
     return path.join(pub, 'contexts', String(contextId), 'announcements');
 }
 

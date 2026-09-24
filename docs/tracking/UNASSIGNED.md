@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **25 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **26 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -384,3 +384,21 @@ until their specs exist. Do not force-claim the defects themselves.
     `71bb244152`, omp `a36551804`, ops `07141ae4df`, lib/pkp
     `25182919bf`, ui-library `1afd40a9`). Resolves: maintainer
     confirmation as dead code (removal candidates).
+26. **Unreached custom-page and static-page pieces** — attached to **U09**
+    (claimed; the custom-pages spec's Reference table lists them). The
+    `view` and `index` ops of `lib/pkp/pages/navigationMenu/` without a
+    custom item (`NavigationMenuItemHandler::view()` returns `false` when
+    no item was handed over; `index()` redirects there): no template,
+    menu or JS links `navigationMenu/view`, the custom page being served
+    at its own path through the `LoadHandler` hook. In the Static Pages
+    plugin (OJS, OMP): `StaticPageGridHandler::index()` and
+    `templates/staticPages.tpl` (the tab uses `staticPagesTab.tpl` and
+    loads `fetchGrid` directly), and the locale strings `pageSaved`,
+    `pageDeleted`, `editStaticPage`, `addNewPage`, `settingInstructions`,
+    `editInstructions`, `noneExist` have no caller, while the form's
+    `nameRequired` key has no string; in Custom Block Manager the
+    `plugins.generic.customBlock.nameRegEx` string has no caller.
+    Code-verified 2026-09-24 (U09 spec author; checkouts ojs
+    `71bb244152`, omp `a36551804`, ops `07141ae4df`, lib/pkp
+    `25182919bf`, staticPages `45d02c0`, customBlockManager `1f8d452`).
+    Resolves: maintainer confirmation as dead code (removal candidates).

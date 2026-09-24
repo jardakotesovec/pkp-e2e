@@ -245,6 +245,16 @@ files dir it must carry:
   terminated; the servers reconnect). A `config.test.inc.php` generated
   before that date lacks the key: regenerate it with the command above
   (keep the old `app_key` through `TEST_APP_KEY`), then reset.
+- `public_files_dir = public`, relative to the app root as the template
+  says (the generator writes it since 2026-09-24 and refuses an absolute
+  `TEST_PUBLIC_FILES_DIR`). `PKPUploadPublicFileController` prefixes the
+  base directory, so an absolute value made every picture upload through
+  a formatted-text box answer 500 and printed disk paths as public image
+  addresses (U09 K5-6); the other readers resolve it from the base
+  directory the app `chdir()`s to. A suite that reads the value from the
+  config resolves it against `PKP_APP_ROOT`. A config generated before
+  that date carries the absolute path: regenerate it (keep `app_key`
+  through `TEST_APP_KEY`). CI generates it fresh on every run.
 - `enable_minified = On`. Backend pages then load `js/pkp.min.js` instead of
   about 107 separate scripts. The bundle is committed in the app. When its
   sources change, recompile it with the Closure minify pass in

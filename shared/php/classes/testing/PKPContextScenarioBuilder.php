@@ -110,7 +110,9 @@
  *   context and the audit-log line, its session-bound toast not mirrored) and
  *   the plugin's own settings window (each setting through
  *   Plugin::updateSetting, as its form's execute writes it). Site-wide plugins
- *   are refused (their state is global, D9).
+ *   are refused (their state is global, D9); "site-wide" is asked as the
+ *   context's grid asks it, so the Custom Block Manager, site-wide only
+ *   outside a context, is enabled for the context (U09).
  * - announcementTypes[] {name*} and announcements[] {title*, descriptionShort?,
  *   description?, dateExpire?, type?} — the "Announcement Types" grid's Add
  *   window (AnnouncementTypeForm::execute: AnnouncementTypeDAO::insertObject)
@@ -976,7 +978,7 @@ abstract class PKPContextScenarioBuilder
         $plans = [];
         foreach (array_keys((array) $root->get('plugins')) as $key) {
             $plugin = $byName[strtolower((string) $key)] ?? throw new SpecException("plugins.{$key}", "plugins.{$key} names no installed plugin (keys are the plugin's lowercased class name, e.g. announcementfeedplugin)");
-            if ($plugin->isSitePlugin()) {
+            if ($this->isSitePluginInContext($plugin)) {
                 throw new SpecException("plugins.{$key}", "plugins.{$key} is a site-wide plugin; its state is global, not a scratch context's");
             }
             $planSpec = $spec->child((string) $key);
@@ -988,6 +990,11 @@ abstract class PKPContextScenarioBuilder
                 throw new SpecException("plugins.{$key}.enabled", "plugins.{$key} cannot be " . ($enabled ? 'enabled' : 'disabled') . ' from the Plugins grid');
             }
             $settings = [];
+            if ($planSpec->has('settings') && strtolower($plugin->getName()) === 'customblockmanagerplugin') {
+                // Its window ("Manage Custom Blocks") is a list of blocks, not
+                // a form of scalar settings; the key does not seed blocks.
+                throw new SpecException("plugins.{$key}.settings", "plugins.{$key} has no settings window of scalar settings (its \"Manage Custom Blocks\" list is not seeded by this key)");
+            }
             if ($planSpec->has('settings')) {
                 $raw = $planSpec->get('settings');
                 if (!is_array($raw) || array_is_list($raw)) {
@@ -1004,6 +1011,27 @@ abstract class PKPContextScenarioBuilder
             $plans[] = ['key' => (string) $key, 'plugin' => $plugin, 'enabled' => $enabled, 'settings' => $settings];
         }
         return $plans;
+    }
+
+    /**
+     * Whether the plugin is site-wide as the context's Plugins grid sees it
+     * (PluginLevelRequiredPolicy, PluginGridRow::_canEdit and
+     * LazyLoadPlugin::setEnabled all ask Plugin::isSitePlugin() inside the
+     * context's request). The builder runs at site level, where a plugin
+     * that answers from the request (the Custom Block Manager: "site-wide
+     * only when the request has no context") would report itself
+     * site-wide, so the question is asked with a stand-in context on the
+     * router. Parse phase: the scratch context does not exist yet, and a
+     * plugin's answer reads no more than whether a context is present.
+     */
+    protected function isSitePluginInContext(Plugin $plugin): bool
+    {
+        $restore = ContextFactory::forceRequestContext(Application::getContextDAO()->newDataObject());
+        try {
+            return (bool) $plugin->isSitePlugin();
+        } finally {
+            $restore();
+        }
     }
 
     /**

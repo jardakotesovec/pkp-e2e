@@ -81,7 +81,7 @@ async function snap(page, name, extra = {}) {
 function announcementsDir(app, contextId) {
     const cfg = fs.readFileSync(app.configFile, 'utf8');
     const m = cfg.match(/^public_files_dir\s*=\s*(.+)$/m);
-    const pub = m ? m[1].trim() : path.join(app.root, 'public');
+    const pub = path.resolve(app.root, m ? m[1].trim() : 'public'); // relative to the app root since 2026-09-24
     const seg = {ojs: 'journals', omp: 'presses', ops: 'contexts'}[app.name];
     return path.join(pub, seg, String(contextId), 'announcements');
 }

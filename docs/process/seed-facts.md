@@ -237,6 +237,57 @@ behind a line; that scratch is deleted after review.
   update checks); Mailpit and other `127.0.0.1` traffic are unaffected. No
   screen shows it. Maintainer ruling 2026-08-20; harness.md
   "config.test.inc.php".
+- The public files directory is `public_files_dir = public`, relative to
+  the app root as the config template requires (generated since
+  2026-09-24; before, an absolute path). Pictures uploaded through a
+  formatted-text box ("Insert/edit image" › "Upload", journal and site,
+  `api/v1/_uploadPublicFile`) are stored under
+  `public/site/images/<username>/<file name>` and served at
+  `/public/site/images/…` on the origin; a second upload of a name the
+  folder already holds is stored as `<name>-<32 hex>.<ext>`. A context's
+  logo lands in `public/journals|presses|contexts/<id>/` and the header
+  shows it. With the absolute path every such upload answered 500 "The
+  public files directory was not found…" and every public image address
+  was a disk path. The site's own "Page Footer" bar has no picture button
+  (Bold, Italic, Superscript, Subscript, "Insert/edit link"); the site's
+  upload goes through a Navigation item's "Content". Settings › Website ›
+  Appearance › Setup ("Page Footer", "Logo"), Administration › Site
+  Settings › Navigation. Live-driven 2026-09-24, all three apps
+  (`.reports/U09/hU09b/confirm-public-*.json`; U09 claim check K5-6).
+- Picture uploads beyond the file name: a pasted or dropped picture is
+  stored as `mceclip<N>.png`, a name the sanitizing reduces to nothing as
+  `.png`, and a picture uploaded in the image window and then cancelled is
+  stored anyway. The probe servers take uploads up to 2 MB
+  (`upload_max_filesize`) in requests up to 8 MB (`post_max_size`),
+  whatever a box's own "Max filesize" line says: over 2 MB an upload
+  answers 500 "Path cannot be empty" or 400 "One or more files could not
+  be uploaded.", over 8 MB 500 "The POST data is too large.". A
+  drive that must reach the 5000 KB picture allowance uploads pictures
+  under 2 MB (three 1000×650 random-pixel PNGs of about 1906 KB). All
+  three apps, 2026-09-24 (U09 claim check K5, K5b).
+- "Static Pages Plugin" {OJS OMP} arrives unticked on a scratch journal
+  (Settings › Website › "Plugins" › "Installed Plugins", "Generic
+  Plugins"), so there is no "Static Pages" tab until a manager ticks it or
+  `plugins: {staticpagesplugin: {enabled: true}}` seeds it; OPS lists no
+  such plugin. "Custom Block Manager" is unticked on a new journal and on
+  the site; the site's Plugins list (Administration › Site Settings ›
+  Plugins) lists both, unticked (OPS the second alone). A new journal's
+  "Users must be registered and log in to view the journal site." (OMP
+  "press site.", OPS "server site.") under Settings › Users & Roles ›
+  "Site Access Options" is unticked. Live 2026-09-24, three apps (U09
+  claim check K2, K3, K4).
+- The test installs run PostgreSQL, where "Delete" on a custom block
+  answers 500 and deletes nothing (U09 A14), so a scratch block stays for
+  good; a block made on the site stays on the site until the next reset.
+  Live 2026-09-24, three apps (U09 claim check K3).
+- On the fleets the sidebar Language block's links land on the site home
+  (`index.php/index/<locale>`): its link carries the server name without
+  the probe or worker server's port. A script that needs a page in another
+  language opens `{journal}/<locale>/{path}`. Three apps, 2026-09-24 (U09
+  claim check K1).
+- The fleets host hundreds of contexts (470 OJS, 246 OMP, 90 OPS on
+  2026-09-24), so no drive there reaches a one-journal site; a one-journal
+  end is a code read or a fresh install (U09 claim check K4).
 - The compromised-password check is a site setting, off on every fleet
   (Administration › Site Settings › Security, "Check passwords against
   compromised password databases" unticked), so Profile › Password accepts
@@ -355,10 +406,13 @@ behind a line; that scratch is deleted after review.
   only the full `https://orcid.org/…` form; a bare iD or a number is refused
   with "The ORCID iD you specified is invalid. Please include the full URI".
   Live-driven 2026-09-06, OJS and OMP (`.reports/U31/cc-K2.md` K2-3).
-- On the test installs the profile image's address is the public files
+- Until 2026-09-24 (the absolute `public_files_dir`, see "Install
+  defaults") the profile image's address was the public files
   directory's filesystem path appended to the origin, so the picture never
-  loads (404); a suite asserts the "Delete" control and the stored file,
-  never the rendered picture. Profile › Public. Live-probed 2026-09-03/04,
+  loaded (404); a suite asserts the "Delete" control and the stored file,
+  never the rendered picture. Since the relative value the address is
+  `/public/site/…` (the logo and editor pictures were driven loading; the
+  profile image not re-driven). Profile › Public. Live-probed 2026-09-03/04,
   all three apps (`.reports/U03/pF` P27; `.reports/U03/cc-K5.md`).
 - `POST scenarios/submission` with `submitted: true` raises the "needs an
   editor" task for every Manager of the context (the auto-enrolled `admin`
@@ -398,8 +452,9 @@ behind a line; that scratch is deleted after review.
   all three apps (`.reports/U12/ccK1`, `ccK3`).
 - An announcement's image is stored as
   `public/journals|presses|contexts/<id>/announcements/<announcementId>.<ext>`
-  and the public pages print its absolute disk path as the image address,
-  which never loads on the test installs: a test asserts the `alt` text
+  and until 2026-09-24 the public pages printed its absolute disk path as
+  the image address, which never loaded (the relative `public_files_dir`
+  since, not re-driven for announcements): a test asserts the `alt` text
   and the file, never the picture. Live-probed 2026-09-17, all three apps
   (`.reports/U12/ccK2`, seen by K3 and K4 too).
 - The "Announcement Feed Plugin" is disabled on every fresh journal,
@@ -621,8 +676,9 @@ config-file settings.
 - A highlight's image is stored under the context's public files
   directory, `public/journals/<id>/highlights/<highlightId>.<ext>` on OJS,
   `public/presses/<id>/…` on OMP, `public/contexts/<id>/…` on OPS; the
-  slide's image address is that path on the origin and never loads on the
-  test installs (the same public-files reason as the profile image), and
+  slide's image address was that path on the origin and never loaded on
+  the test installs until 2026-09-24 (the same public-files reason as the
+  profile image; not re-driven since), and
   each page view with a slide image writes a `NotFoundHttpException` to the
   app's log. Every upload box reads "Max filesize: 100MiB" on the probe
   servers. Home page and Highlights panel, all three apps, 2026-09-16 (U11

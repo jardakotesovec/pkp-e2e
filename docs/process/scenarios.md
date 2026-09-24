@@ -383,7 +383,17 @@ Keys:
   `enabled` row, the Plugins grid lists it unticked, the feeds answer 404
   and the Appearance "Sidebar" list lacks the block until a manager ticks
   the plugin. Every feed scenario therefore seeds the plugin on (U12
-  harness, 2026-09-17).
+  harness, 2026-09-17). "Site-wide" is asked the way the context's grid
+  asks it, inside the context: the Custom Block Manager counts as
+  site-wide only on Administration › Site Settings, so
+  `plugins: {customblockmanagerplugin: {enabled: true}}` enables it for
+  the scratch context on the three apps (the grid's "Custom Block
+  Manager" row ticked, its "Settings" link offering "Manage Custom
+  Blocks", whose window opens on "No custom blocks have been created.").
+  The key seeds no block: `settings` on it is a 400, and blocks are added
+  in that window. It is OFF on every fresh context, `publicknowledge`
+  included (no `enabled` row). The Usage Event plugin stays refused as
+  site-wide (U09 harness, 2026-09-24).
 - `components`: Settings › Workflow › Submission › the "Components" tab
   (its list "Article Components", "Monograph Components" on a press,
   "Preprint Components" on a preprint server), a map from a component's

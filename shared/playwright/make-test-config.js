@@ -17,7 +17,8 @@
  *   TEST_DB_NAME          database name, must contain "test" (default ojs_test)
  *   TEST_DB_USERNAME / TEST_DB_PASSWORD   DB credentials (default ojs / ojs)
  *   TEST_FILES_DIR        files dir (default <appRoot>/../files-test)
- *   TEST_PUBLIC_FILES_DIR public files dir (default <appRoot>/public)
+ *   TEST_PUBLIC_FILES_DIR public files dir, RELATIVE to the app root
+ *                         (default `public`, the template's own value)
  *   TEST_LOCALES          installed_locales (default en,fr_CA)
  *   TEST_APP_KEY          app key (default: random per invocation)
  */
@@ -38,8 +39,18 @@ const appKey =
     `base64:${crypto.randomBytes(32).toString('base64')}`;
 const filesDir =
     process.env.TEST_FILES_DIR || path.join(appRoot, '..', 'files-test');
-const publicFilesDir =
-    process.env.TEST_PUBLIC_FILES_DIR || path.join(appRoot, 'public');
+// Relative, as config.TEMPLATE.inc.php demands ("relative to the base
+// directory"): PKPUploadPublicFileController prefixes Core::getBaseDir(), so
+// an absolute value made every picture upload through the formatted-text
+// editor answer 500 "The public files directory was not found…", and the
+// public pages printed a disk path as every public image's address (U09
+// claim check K5-6). The app chdir()s to its base directory, so the other
+// readers resolve the relative value there too.
+const publicFilesDir = process.env.TEST_PUBLIC_FILES_DIR || 'public';
+if (path.isAbsolute(publicFilesDir)) {
+    console.error(`make-test-config: TEST_PUBLIC_FILES_DIR "${publicFilesDir}" is absolute — it must be relative to the app root.`);
+    process.exit(1);
+}
 
 // Section → key → value. One entry per deliberate test-env decision.
 const PATCHES = {
