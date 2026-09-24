@@ -61,6 +61,7 @@ const {
     completeAndSubmitDraft,
 } = require('../pages/SubmissionWizardPages.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -230,18 +231,13 @@ function versionDialog(page) {
  * @param {(dialog: import('@playwright/test').Locator) => Promise<void>} [mutate]
  */
 async function createNewVersionViaDialog(page, mutate) {
+    // The dialog takes its stage from the loaded version at mount.
+    await new WorkflowPage(page, PK).expectVersionLoaded();
     await page.getByRole('link', {name: 'Create New Version', exact: true}).click();
     const dialog = versionDialog(page);
     await expect(dialog.locator('#version-versionSource-control')).toBeVisible({
         timeout: 30_000,
     });
-    // The form's values arrive a beat after its selects render (ci-triage
-    // "'Create New Version' dialog's stage select empty under load"): give the
-    // stage select up to 15 s to carry a value before the caller reads it; a
-    // form that preselects nothing continues after the wait.
-    await expect(dialog.locator('#version-versionStage-control'))
-        .not.toHaveValue('', {timeout: 15_000})
-        .catch(() => {});
     if (mutate) {
         await mutate(dialog);
     }

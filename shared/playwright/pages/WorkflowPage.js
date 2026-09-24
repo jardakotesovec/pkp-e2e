@@ -313,6 +313,19 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
         return this.header().getByRole('heading', {level: 1}).locator('span.underline');
     }
 
+    /**
+     * The version the menu points at has loaded. The store empties its
+     * selected publication each time the menu moves to another version
+     * (after "Create New Version", to the new one) and the contributors
+     * line renders only once it is back. The "Create New Version" dialog
+     * copies its stage from it once, at mount, so opened before that it
+     * keeps an empty "Publication Stage" (ci-triage "'Create New Version'
+     * dialog's stage select empty under load").
+     */
+    async expectVersionLoaded() {
+        await expect(this.contributorsLine()).toHaveCount(1, {timeout: 30_000});
+    }
+
     /** The full title of the version being shown (the dialog description). */
     titleLine() {
         return this.header().locator('p').first();

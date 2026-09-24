@@ -43,13 +43,16 @@
 const {expect} = require('@playwright/test');
 const {PublicationScreen} = require('./PublicationMetadataPages.js');
 const {uploadViaWizard} = require('./ReviewStagePages.js');
+const {WorkflowPage: WorkflowFrame} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 exports.PublishScreen = class PublishScreen extends PublicationScreen {
     /**
-     * Open the "Create New Version" dialog from the side menu and wait for
-     * its selects to arrive.
+     * Open the "Create New Version" dialog from the side menu once the
+     * version shown has loaded (the dialog takes its stage from it at
+     * mount) and wait for its selects to arrive.
      */
     async openCreateVersionDialog() {
+        await new WorkflowFrame(this.page, null).expectVersionLoaded();
         await this.page
             .getByRole('link', {name: 'Create New Version', exact: true})
             .click();
@@ -59,13 +62,6 @@ exports.PublishScreen = class PublishScreen extends PublicationScreen {
         await expect(dialog.locator('select[name="versionStage"]')).toBeVisible({
             timeout: 30_000,
         });
-        // The form's values arrive a beat after its selects render (ci-triage
-        // "'Create New Version' dialog's stage select empty under load"): give the
-        // stage select up to 15 s to carry a value before the caller reads it; a
-        // form that preselects nothing continues after the wait.
-        await expect(dialog.locator('select[name="versionStage"]'))
-            .not.toHaveValue('', {timeout: 15_000})
-            .catch(() => {});
         return dialog;
     }
 

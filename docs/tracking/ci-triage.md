@@ -338,63 +338,35 @@ trips.
   re-attached until the browser closed at the 180 s timeout, the one red
   in 221 with the 13 serial tests skipped behind it).
 - **"Create New Version" dialog's stage select empty under load** (U49
-  S6, OJS, once). The dialog opened with its "Publication Stage" options
-  listed but the select's value "" for the 10 s wait for "VoR" (the
-  published version's stage, expected preselected) in the same 2026-09-15
-  OJS final (`.reports/sync/final-run-ojs.log`, error context in
-  `pw-out-final-ojs/U49-publish-schedule-and-v-8f1b4-…`); green alone in
-  9.4 s. The opener waits for the select to be visible, not for the
-  form's value to arrive. **Tripped 2026-09-16, the first on CI and on
-  OPS** (pkp-e2e push run 35126077430 at `00be9dc`, the OPS job red on
-  U49 S6 on both attempts, 142 passed and 10 did not run: the second
-  "Create New Version" dialog of the test, opened right after "Author
-  Original 1.1" appeared, had no checked option in its stage select for
-  the 10 s wait for "Author Original (AO)"; green on the VM the same day
-  in the OPS final and alone; the U49 push's own run 35115933110 the
-  day before was green on OPS with the same test, so a timing class, not
-  a fresh-install fact). The artifact's error context (both attempts,
-  `.reports/sync/s16-ci-ops-artifacts/`): the source combobox on "Author
-  Original 1.1", the "Publication Stage" combobox listing "Author
-  Original (AO)" with no option selected, "Revision Significance" listing
-  both with none selected, a `status` element still in the dialog, so the
-  form's values from the source version had not arrived in 10 s. **Hardened the same day**: the three
-  openers (OPS `createNewVersionViaDialog()`, OJS
+  S4/S6, OJS, OMP and OPS; sightings from 2026-09-15 to 2026-09-24 on
+  the VM, the Mac and twice on CI: push run 35126077430 and, on
+  2026-09-24, push run 35987189615 at `1cd4325`, OPS shard 1/3 red on
+  both attempts, the second dialog's "Publication Stage" with nothing
+  checked for the wait for "Author Original (AO)"). **Cause read
+  2026-09-24** (the daily session): nothing arrives late inside the
+  dialog. `useWorkflowVersionForm()` copies the stage from the store's
+  `selectedPublication` once, at mount, and the workflow store empties
+  `selectedPublication` each time the menu moves to another version
+  (`selectPublicationId()`, run by a pre-flush watch, so before the
+  version dialog leaves the page) until that version's GET answers. The
+  openers pressed "Create New Version" as soon as the side menu listed
+  the new version (the submission refetch), so under load the dialog
+  mounted inside that gap and kept an empty stage and no preselected
+  "Minor Revision" for good; the hardened 15 s wait for a value could
+  never help. Reproduced deterministically with every
+  `…/publications/{id}` GET held 6 s on a reset OPS database
+  (`.reports/sync/s24b-u49s6/old-delay.log`: red on the first dialog).
+  **Fixed the same day**: `WorkflowPage.expectVersionLoaded()` waits
+  for the header's contributors line (rendered only once the selected
+  publication is back) and the three openers (OPS
+  `createNewVersionViaDialog()`, OJS
   `PublishScreen.openCreateVersionDialog()`, OMP
-  `openCreateVersionDialog()`) give the stage select up to 15 s to carry
-  a value before returning, without failing a form that preselects
-  nothing; U49 S6 green alone on the three apps
-  (`.reports/sync/s16-rerun-{ops,ojs,omp}-u49s6.log`). **Watch
-  condition**: the read reds again behind the hardened opener; then the
-  CI artifact's error context says whether the value ever arrives on a
-  fresh install.
-  **Watch condition tripped 2026-09-17** (U11 feature session, the Mac,
-  OPS final attempt 2 on a reset database at auto workers,
-  `.reports/U11/final-run-ops.log`): behind the hardened opener the same
-  read redded with `element(s) not found` for the checked stage option,
-  and the error context
-  (`pw-out-final-ops/U49-publish-schedule-and-v-2e450-…/error-context.md`)
-  shows the CI artifact's shape again: the source combobox on "Author
-  Original 1.1", "Publication Stage" listing "Author Original (AO)" with
-  no option selected, "Revision Significance" with none selected, a
-  `status` element still in the dialog, so the value did not arrive in
-  15 s + 10 s either; green alone in 2.4 s right after
-  (`.reports/U11/alone-ops-u49s6.log`). Three sightings now, one on CI:
-  the source-version values not arriving under load is the class, not
-  the wait's length; for the maintenance session to read the dialog's
-  fetch for the second version. **Fourth sighting 2026-09-17** (U14
-  feature session, the VM, OMP final attempt 3 on a reset database at
-  four workers, `.reports/U14/final-run-omp-attempt3.log`, the one red of
-  233): U49 S4's first "Create New Version" dialog, the stage select ""
-  through the 10 s wait for "VoR" behind the hardened opener; the first
-  sighting on OMP and in S4, so the class is the dialog's, not S6's.
-  **Sighted 2026-09-20 on the Mac, OPS, four times in a row alone** (U33
-  harness step, `.reports/U33/harness/pw-ops-U49-*.log`) on the day's used
-  OPS database, once with the pre-change scenario builder mounted
-  (`pw-ops-U49-ab-head.log`): the second dialog's "Publication Stage"
-  select listed "Author Original (AO)" with nothing checked for the whole
-  wait. Green on the same Mac the day before on a reset database (the U32
-  finals), so used-database state, not the galley key; the U33 final on a
-  reset database is the next read. **Sighted 2026-09-21 on the VM, OMP** (sync session, the OMP final at four workers on a reset database, `.reports/sync/final-run-omp.log`: U49 S4's first "Create New Version" dialog, "Publication Stage" `""` through the wait for "VoR" behind the hardened opener, the one red of 267 with the 14 serial tests skipped behind it; green alone in 10.2 s, `.reports/sync/s21-rerun-omp-u49s4.log`, the serial and solo projects green alone). The read of the dialog's fetch is still owed. **Sighted 2026-09-23 on the Mac, OPS** (U37 session, the OPS final on a reset database at auto workers, `.reports/U37/final-run-ops.log`): U49 S6's second dialog, "Publication Stage" with nothing checked for the wait for "Author Original (AO)"; red once more alone (`alone-ops-U49S6.log`), then green 3 of 3 alone with `--repeat-each 3` (`alone-ops-U49S6-rep.log`); the U37 harness's OPS U49 run on the same tree was green. **Sighted 2026-09-24 on the Mac, OPS** (U38 session, the OPS final on a reset database at auto workers, beside U40 S1, `.reports/U38/final-run-ops.log`): U49 S6 "minor and major numbering", a `toHaveText` read timing out at 10 s; green alone. Sighted 2026-09-24 in the U39 session's OPS final on a reset database at auto workers (beside the Mac-only U40 S1), green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`).
+  `openCreateVersionDialog()`) call it before the press; the 15 s value
+  wait is gone. Green with the 6 s hold (`fixed-delay.log`) and U49 on
+  the three apps on reset databases, first run (OJS 16, OMP 14, OPS 13;
+  `u49-<app>.log`). **Watch condition**: any red of this read behind the
+  new opener; then read the error context's header for the contributors
+  line.
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -787,7 +759,16 @@ trips.
   nothing and whose assertions now compare the set. **Watch condition**:
   a second sighting; then the assertion compares the set, or reads the
   order from the app's query.
-
+- **U02 S6's consent line read on screen before anything is ticked**
+  (OPS, once: 2026-09-24, push run 35987189615 at `1cd4325`, shard 1/3,
+  green on the retry). `register.contextConsentLineOnScreen(name)` read
+  `true` for "expected false" right after `not.toHaveClass(/context_privacy_visible/)`
+  passed: the line had no visible class yet sat on screen. The on-screen
+  read is a one-shot `boundingBox()`, not a retrying assertion; a
+  stylesheet that places the hidden line off screen and had not applied
+  yet is the unverified guess. **Watch condition**: a second sighting;
+  then the read retries (`expect.poll`) and the error context says which
+  of the two servers' lines was on screen.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

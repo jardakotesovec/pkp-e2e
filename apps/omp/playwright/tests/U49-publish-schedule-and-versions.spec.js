@@ -41,6 +41,7 @@
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -255,6 +256,8 @@ async function openCreateVersionDialog(page) {
     if (!(await item.isVisible())) {
         await page.getByRole('link', {name: 'Publication', exact: true}).click();
     }
+    // The dialog takes its stage from the loaded version at mount.
+    await new WorkflowPage(page, PK).expectVersionLoaded();
     await item.click();
     const dialog = page.getByRole('dialog', {name: 'Create New Version'});
     await expect(dialog).toBeVisible({timeout: 30_000});
@@ -263,13 +266,6 @@ async function openCreateVersionDialog(page) {
     await expect(dialog.getByLabel('Publication Stage')).toBeVisible({
         timeout: 30_000,
     });
-    // The form's values arrive a beat after its selects render (ci-triage
-    // "'Create New Version' dialog's stage select empty under load"): give the
-    // stage select up to 15 s to carry a value before the caller reads it; a
-    // form that preselects nothing continues after the wait.
-    await expect(dialog.getByLabel('Publication Stage'))
-        .not.toHaveValue('', {timeout: 15_000})
-        .catch(() => {});
     return dialog;
 }
 
