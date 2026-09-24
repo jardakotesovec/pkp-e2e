@@ -297,8 +297,21 @@ behind a line; that scratch is deleted after review.
 - PDF full text is not indexed, so a search on galley content finds nothing.
   The Search page. harness.md states it; U15 finding A11 says no galley
   text of any type reaches the index on any install (a product defect, not
-  a test-side setting). No dated probe of a PDF galley on record —
-  unverified, re-probe at next opportunity.
+  a test-side setting). Probed for HTML on 2026-09-24, OJS and OPS: after
+  the queued jobs ran, a word only in a published HTML galley found "No
+  Results" while the title word found the item (U46 claim check K1). The
+  PDF fixtures (`article.pdf`, `preprint.pdf`) hold no text, so a PDF
+  galley cannot be probed with them.
+- The submission emails a seeded submission's Activity Log lists as sent
+  ("A new submission needs an editor…", "Thank you for your
+  submission…") never reach Mailpit; an on-screen action's emails do.
+  OJS and OPS, 2026-09-24 (U46 claim check K1).
+- Submission languages are the second list on Settings › Website › Setup
+  › Languages, "Submission Languages". A new context lists its primary
+  language alone; another language comes in through "Add/Remove
+  Languages" with every box unticked and counts once "Submissions" is
+  ticked. The first list ("Website Languages") has no Submissions column.
+  Live-driven 2026-09-24, OJS and OPS (U46 claim check K2).
 - `editor.diana` is at the manager permission level: the `editor` key
   resolves to "Journal editor" / "Press editor", whose Roles row reads
   "Journal Manager" / "Press Manager", so the account passes manager gates

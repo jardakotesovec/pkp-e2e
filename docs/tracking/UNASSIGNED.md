@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **27 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **28 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -423,3 +423,21 @@ until their specs exist. Do not force-claim the defects themselves.
     `71bb244152`, omp `a365518044`, ops `07141ae4df`, lib/pkp
     `25182919bf`, ui-library `1afd40a911`). Resolves: maintainer
     confirmation as dead code (removal candidates).
+28. **Unreached galley-grid pieces** — attached to **U46** (claimed; the
+    galleys spec's Reference table notes them). OJS
+    `ArticleGalleyGridHandler`'s rendering operations (`fetchGrid`,
+    `fetchRow` with its `uploadFile` event), `ArticleGalleyGridRow`'s row
+    actions ("Edit a Layout Galley" / "View Galley", the upload action,
+    "Delete") and `ArticleGalleyGridCellProvider`, the grid's own "Add
+    galley" link and `js/controllers/grid/articleGalleys/ArticleGalleyGridHandler.js`:
+    loaded only through `representationsGridUrl`, which the retired
+    author dashboard (`PKPAuthorDashboardHandler`) assigns and no current
+    screen reads; the workflow's "Galleys" page (`GalleyManager`) calls
+    only the edit, delete and ordering operations. OPS's copies stay live
+    in the submission wizard's "Upload Files" step (`templates/submission/galleys.tpl`,
+    U21); OPS `WorkflowHandler::_getRepresentationsGridUrl()` has no
+    caller. The `galleyView` window's heading `submission.layout.viewGalley`
+    is reached on OPS only (an OJS Author has no row menu). Code-verified
+    2026-09-24 (U46 spec author; checkouts ojs `71bb244152`, ops
+    `07141ae4df`, lib/pkp `25182919bf`, ui-library `1afd40a9`). Resolves:
+    maintainer confirmation as dead code (removal candidates on OJS).

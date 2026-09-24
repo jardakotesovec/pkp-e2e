@@ -627,7 +627,7 @@ trips.
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run
-  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`).
+  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`). Again 2026-09-24 in the U46 session's OMP and OPS finals on reset databases at auto workers, green alone on both (`.reports/U46/final-run-{omp,ops}.log`, `alone-{omp,ops}-reds.log`).
   **Tripped 2026-09-23 on the VM**: OJS full run
   at eight workers on a reset database (companion
   `optimize-table-reloads`, lib/ui-library at `51f0c727`,
@@ -778,6 +778,19 @@ trips.
   nothing and whose assertions now compare the set. **Watch condition**:
   a second sighting; then the assertion compares the set, or reads the
   order from the app's query.
+- **Three first sightings in one Mac final set** (U46 session, 2026-09-24,
+  reset databases at auto workers, each green alone right after). OJS
+  U27 S11 "unassign before, cancel after, reinstate": the reviewer's row
+  (`<name> More Actions`) not visible in 10 s, with a 500 on
+  `GET …/_submissions/reviewerAssignments?active=true` in the worker log
+  a minute before (`.reports/U46/final-run-ojs.log`, `alone-ojs-reds.log`).
+  OMP U35 S7 "a role's options": the "Assign Participant" window's
+  `filterUserGroupId` select not visible in 30 s
+  (`final-run-omp.log`, `alone-omp-reds.log`). OJS U12 S6 "the site's
+  announcements" in the `ojs-serial` project run alone after the final:
+  the "Announcement type added." notice not found
+  (`alone-ojs-serial-solo.log`, `alone-ojs-U12S6.log`). **Watch
+  condition**: a second sighting of any; then read its trace.
 - **U02 S6's consent line read on screen before anything is ticked**
   (OPS, once: 2026-09-24, push run 35987189615 at `1cd4325`, shard 1/3,
   green on the retry). `register.contextConsentLineOnScreen(name)` read

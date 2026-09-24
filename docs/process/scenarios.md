@@ -727,8 +727,11 @@ Keys:
   before a publish (an editor builds the galleys, then publishes, so a
   `published: true` seed carries them published). `label` is required (the
   "Create New Galley" window's own rule); `locale` defaults to the
-  submission's locale, the window's preselected language, and must be one
-  the window's list offers (the context's submission locales); exactly one
+  submission's locale and must be one the window's list offers (the
+  context's submission locales); the window itself preselects the
+  context's primary language instead, so a seeded galley on a submission
+  in another language differs from a by-hand one left at the window's
+  default (U46 ccK2, 2026-09-24); exactly one
   of `file` or `urlRemote` is named (a 400 otherwise). A seeded galley's file reads
   back only through the publication's "Preview" › galley link ›
   "Download" (its suggested file name); the Galleys page shows only
@@ -748,7 +751,12 @@ Keys:
   galley, with no file. Each galley is created acting as `admin`, so the
   file's uploader and the log rows' user are `admin`, where a screen
   upload names the editor; everything else, the notification rows
-  included, is what the screen leaves (parity ledger 2026-09-19). OMP
+  included, is what the screen leaves (parity ledger 2026-09-19); on OPS
+  the Author's "Change File" is refused on a file someone else uploaded,
+  so it is always refused on a seeded galley (U46 OPS3). Seeded galleys,
+  like by-hand ones, are all stored at position 0, so the page's order is
+  loose until an order is saved (U46 A7). No key makes a second version:
+  a test uses the header's "Create New Version". OMP
   answers 400: a press has publication formats, not galleys.
 
 - `tasks[]`: discussions and tasks on a stage's "Tasks & Discussions"
