@@ -781,7 +781,11 @@ config-file settings.
   Member) the workflow opens and "Activity Log" offers "Notes" alone; with
   Reader left the workflow answers "Error / The current role does not have
   access to this operation." over an empty page. Workflow and Activity
-  Log, all three apps, 2026-09-23 (`.reports/U38/cc-K1.md` K1-8).
+  Log, all three apps, 2026-09-23 (`.reports/U38/cc-K1.md` K1-8). Such an
+  administrator keeps the Settings Wizard, whose "Appearance" saves, while
+  Settings › Website answers the access-denied page on a press and a
+  server and opens under an "Error" window on a journal. All three apps,
+  2026-09-24 (U10 claim check K5, `.reports/U10/ccK5/x-*`).
 - Every submission has Activity Log lines from its first save, so
   "History" never reads "No Items": a draft begun on the start page shows
   two "Submission metadata updated" lines, and a seeded submission with no
@@ -885,3 +889,38 @@ config-file settings.
   "Available"; a format created on screen arrives "Awaiting Approval" and
   "Not Available". Publication › Publication Formats, 2026-09-24 (U44
   claim check K4, `.reports/U44/ccK4/extra-available-after-omp`).
+- {OMP} The catalog's series links ("Show Series") list only series that
+  hold a published book. A scratch press has no series (see above): one is
+  added on Settings › Press › Series › "Add Series", and a book goes into
+  it through `POST scenarios/submission` `series: <path>`. Catalog page,
+  2026-09-24 (U10 claim check K1-8, `.reports/U10/ccK1/68-series2-omp.json`).
+- The usage-statistics chart never has data on a fleet (no log
+  processing): with a chart chosen, every item page shows an empty
+  "Downloads" chart. All three apps, 2026-09-24 (U10 claim check K1-6).
+- {OJS} Settings › Website › Appearance › "Theme" "Journal Content
+  Organization" shows "Include the current issue's table of contents"
+  alone ticked on `publicknowledge` (issues seeded, "Theme" never saved)
+  and on a scratch journal seeded with an unpublished issue, and "Include
+  recent most published articles" alone on a scratch journal with no
+  issue. 2026-09-24 (U10 claim check K2, `.reports/U10/ccK2/pk-theme-ojs`,
+  `u-theme-ojs`, `e-theme-ojs`).
+- ""Make a Submission" Block" {OJS OMP} is disabled on every new journal
+  and press, `publicknowledge` included (its `settings.xml` is never
+  installed; no `enabled` row), so Settings › Website › Appearance ›
+  Setup "Sidebar" offers no box for it until a manager enables it on
+  Settings › Website › "Plugins". "Browse Block" is listed and disabled on
+  a journal and a server, enabled on a press. A new context's "Sidebar"
+  list reads "Web Feed Plugin", "Information Block", "Subscription Block",
+  "Language Toggle Block" (OJS) and "Web Feed Plugin", "Information
+  Block", "Language Toggle Block", "Browse Block" (OMP); OPS as above.
+  All three apps, 2026-09-24 (U10 claim check K3,
+  `.reports/U10/ccK3/fresh-plugins-*`, `fresh-setup-*`).
+- The sidebar's "Language Toggle Block" prints nothing on a context with
+  one interface language; a scratch context needs
+  `context.supportedLocales: ['en', 'fr_CA']` for it to show. Public home,
+  all three apps, 2026-09-24 (U10 claim check K3, `sb-public-home-*`).
+- On a fresh context the "Date & Time" formats (Settings › Website ›
+  "Setup") are stored empty, so the tab and the pages use the
+  configuration file's defaults ("2026-09-24", "2026-09-24 07:17 PM").
+  {OMP} "Cover Image Max Width" and "Height" are stored as 106 and 100.
+  All three apps, 2026-09-24 (U10 claim check K4, `.reports/U10/ccK4/fresh-*`).

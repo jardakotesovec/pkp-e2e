@@ -602,6 +602,10 @@ trips.
   `i13263`): OMP and OJS finals on reset databases at eight workers,
   beside U14 S5 on both, green alone on both
   (`.reports/i13263/final-run-{omp,ojs}.log`, `alone-{omp,ojs}-reds.log`).
+  Again 2026-09-24 in the U10 session's OJS final on a reset database at
+  eight workers, beside U14 S5, and in its second OMP final, the only red
+  of 350; green alone on both (`.reports/U10/final-run-ojs-attempt1.log`,
+  `final-run-omp-attempt2.log`, `alone-ojs-reds.log`, `alone-omp-reds-2.log`).
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -639,6 +643,11 @@ trips.
   `i13263`): OMP and OJS finals on reset databases at eight workers,
   beside U36 S9 on both, green alone on both
   (`.reports/i13263/final-run-{omp,ojs}.log`, `alone-{omp,ojs}-reds.log`).
+  Again 2026-09-24 in the U10 session's OJS final (beside U36 S9) and
+  OMP final (the only red of 350; the second OMP final's only red was
+  U36 S9), reset databases at eight workers; green
+  alone on both (`.reports/U10/final-run-{ojs,omp}-attempt1.log`,
+  `alone-{ojs,omp}-reds.log`).
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7
@@ -790,7 +799,12 @@ trips.
   announcements" in the `ojs-serial` project run alone after the final:
   the "Announcement type added." notice not found
   (`alone-ojs-serial-solo.log`, `alone-ojs-U12S6.log`). **Watch
-  condition**: a second sighting of any; then read its trace.
+  condition**: a second sighting of any; then read its trace. **Tripped
+  for U12 S6** 2026-09-24 in the U10 session: OMP `omp-serial` and
+  `omp-solo` run alone after the finals, the same "Announcement type
+  added." notice not found at spec line 378, green alone right after
+  (`.reports/U10/serial-solo-omp.log`, `alone-omp-U12S6.log`); the trace
+  read is the next daily session's.
 - **U02 S6's consent line read on screen before anything is ticked**
   (OPS, once: 2026-09-24, push run 35987189615 at `1cd4325`, shard 1/3,
   green on the retry). `register.contextConsentLineOnScreen(name)` read

@@ -49,6 +49,29 @@ if (filesDir && /test/.test(path.basename(filesDir)) && fs.existsSync(filesDir))
     console.log(`reset: leaving files dir alone (${filesDir} — name does not contain "test" or missing)`);
 }
 
+// The app's own caches are keyed by context id, and the recreated database hands out
+// the same ids again: the Laravel store (plugin settings, 24 h) and the compiled
+// per-context stylesheets (`<id>-stylesheet-<hash>.css`) would otherwise answer for a
+// context that no longer exists (U10 claim check K3, 2026-09-24). This is what the
+// admin's "Clear Data Caches" flushes, plus the stylesheets; the compiled templates stay.
+const cacheDir = path.join(appRoot, 'cache');
+const storeDir = path.resolve(appRoot, (config.cache || {}).path || 'cache/opcache');
+if (fs.existsSync(cacheDir)) {
+    console.log(`reset: clearing the app's data caches under ${cacheDir}`);
+    for (const dir of [storeDir, path.join(cacheDir, '_db')]) {
+        if (fs.existsSync(dir)) {
+            for (const entry of fs.readdirSync(dir)) {
+                fs.rmSync(path.join(dir, entry), {recursive: true, force: true});
+            }
+        }
+    }
+    for (const entry of fs.readdirSync(cacheDir)) {
+        if (entry.endsWith('.css')) {
+            fs.rmSync(path.join(cacheDir, entry), {force: true});
+        }
+    }
+}
+
 console.log('reset: done — next run will cold-bootstrap.');
 
 function recreateDatabase({driver, host, username, password, name}) {

@@ -53,7 +53,7 @@ shared/playwright/
 ├── probe/                   # The probe kit (patterns.md "Probe kit"); scripts import it, tests never do
 ├── checks/<feature>/<chunk>/ # Kept claim-check scripts, re-runnable by a maintenance session (briefs/claim-check.md)
 ├── data/users.js            # The 18 baseline identities + getPassword()/getEmail()
-├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir
+├── reset.js                 # reset:<app> — drop+recreate DB, wipe files dir and the app's data caches
 ├── make-test-config.js      # generate config.test.inc.php from the app template (run through bin/with-app.js)
 └── config-factory.js        # definePkpConfig({appName, appRoot, basePort}) — all three apps
 ```
@@ -306,7 +306,7 @@ npm run test:ojs                     # full run for one fleet
 npm run test:ojs -- --project=ojs    # only the app project (name varies per app)
 npm run test:ojs -- --ui             # Playwright UI mode — best for iterating
 PWDEBUG=1 npm run test:ojs           # step-through
-npm run reset:ojs                    # nuke the test DB (forces cold bootstrap next run)
+npm run reset:ojs                    # nuke the test DB and the app's data caches (forces cold bootstrap next run)
 npm run probe-servers -- --start|--status|--stop [--app ojs]   # detached probe servers at base+50 (and +90)
 npm run fleet-prep -- --feature U03 [--reset] [--apps ojs,omp]  # per app: reset?, setup project, probe server; .reports/U03/fleet.json (a subset run keeps the other apps' entries)
 npm run test:final -- --feature U03 [--apps ojs] [--grep @smoke] # the suites one after another; logs in .reports/U03/final-run-<app>.log

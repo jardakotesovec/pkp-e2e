@@ -89,9 +89,10 @@ abstract class PKPBootstrapSeeder
             fn (Spec $spec) => $this->parseStructure($spec),
             $root->childList($this->structureKey())
         );
-        $categoryPlans = array_map(
-            fn (Spec $spec) => $this->parseCategory($spec),
-            $root->childList('categories')
+        $categoryPlans = CategorySeeder::parse(
+            $root,
+            (string) $contextParams['primaryLocale'],
+            $contextParams['supportedFormLocales'] ?? [(string) $contextParams['primaryLocale']]
         );
         $userPlans = array_map(
             fn (Spec $spec) => $this->userSeeder->parse($spec, $this->structureKey()),
@@ -108,7 +109,7 @@ abstract class PKPBootstrapSeeder
             $this->addStructure($context, $plan, $sequence++);
         }
         foreach ($categoryPlans as $plan) {
-            $this->addCategory($context, $plan, null);
+            CategorySeeder::add($context, $plan, null);
         }
         $users = [];
         foreach ($userPlans as $plan) {
@@ -127,41 +128,5 @@ abstract class PKPBootstrapSeeder
             'contextId' => $context->getId(),
             'users' => $users,
         ];
-    }
-
-    protected function parseCategory(Spec $spec): array
-    {
-        return [
-            'path' => (string) $spec->require('path'),
-            'title' => $spec->get('title'),
-            'children' => array_map(
-                fn (Spec $child) => $this->parseCategory($child),
-                $spec->childList('children')
-            ),
-        ];
-    }
-
-    protected function addCategory(Context $context, array $plan, ?int $parentId): int
-    {
-        $locale = $context->getPrimaryLocale();
-        $category = Repo::category()->newDataObject();
-        $category->setData('contextId', $context->getId());
-        $category->setData('path', $plan['path']);
-        $title = is_array($plan['title']) ? $plan['title'] : [$locale => $plan['title'] ?? $plan['path']];
-        foreach ($title as $titleLocale => $value) {
-            $category->setData('title', $value, $titleLocale);
-        }
-        $category->setData('parentId', $parentId);
-        // The category form always submits a sort option — its select
-        // defaults to the app's default (CategoryForm ~124-131:
-        // Repo::submission()->getDefaultSortOption()); a UI-created category
-        // never stores NULL here (parity fix 2026-08-23).
-        $category->setData('sortOption', Repo::submission()->getDefaultSortOption());
-        $categoryId = Repo::category()->add($category);
-
-        foreach ($plan['children'] as $childPlan) {
-            $this->addCategory($context, $childPlan, $categoryId);
-        }
-        return $categoryId;
     }
 }

@@ -52,7 +52,8 @@ Payload keys:
   `policy`, `wordCount`, `abstractsNotRequired`, `identifyType`. OPS: `abbrev`
   (required), `path`, `title`, `policy`, `wordCount`, `abstractsNotRequired`.
   OMP series: `path` (required), `title`, `description`.
-- `categories[]` with `path` (required), `title`, and nested `children[]`.
+- `categories[]` with `path` (required), `title`, and nested `children[]`,
+  seeded by the same code as the context scenario's `categories[]` below.
 - `issues[]` (OJS only) with `volume`, `number`, `year` (all required) and
   `published`.
 - `users[]` with roles and sub-editor assignments. Same shape as the context
@@ -90,6 +91,30 @@ Keys:
 - `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
   entry renames the default section. OMP's context scenario does not accept
   a `series[]` list yet and answers 400 on the key.
+- `categories[]` (the three apps): the bootstrap payload's shape and
+  seeding code, each `{path, title?, children[]?}`, `children` a nested
+  list of the same shape (subcategories, to any depth). Each category is
+  created the way Settings › Journal (Press, Server) › "Categories" ›
+  "Add Category" › "Save" creates it with "Name" and "Path" filled and
+  the rest of the window left as it opens (no description, no cover
+  image, no "Editorial Assignments", the "Order of …" list on
+  "Publication date (newest first)"); a child the way the parent row's
+  "More Actions" › "Add" does. `title` is a string (under the primary
+  locale) or a locale map, default the path; an empty string reads as
+  absent. Refusals (400, before the context exists): a path with
+  anything but letters, digits, `/`, `.`, `_` and `-`, a path used twice
+  anywhere in the list, a title locale the context's forms lack (add it
+  to `context.supportedFormLocales` first), a missing path. Seeded after
+  the sections, before `users[]`. The response lists every category as
+  `categories` (`id`, `path`, `parentId`), depth first. The visitor's
+  page of one is `catalog/category/{path}` (OPS
+  `preprints/category/{path}`), and the Categories tab lists only the
+  top-level ones until a row's "Expand sub-categories" is pressed (U10
+  harness, 2026-09-24, three apps driven). A scratch context created
+  without the key has no category: the submission lists' "Filters"
+  window then offers no "Categories" (the U22, U23 and U28 suites rely on
+  it on a scratch context), and on a journal the home page's "Include a
+  listing of categories" row has nothing to list.
 - `issues[]` (OJS only; OMP and OPS answer 400 on the key): the bootstrap
   payload's shape, each `{volume, number, year, published?}` (`volume`
   and `year` whole numbers, `number` a string or a whole number, all three
@@ -533,7 +558,8 @@ name), `announcements` (id and title), `components` (`id`, `name`,
 `action`: `added`, `edited` or `removed`, in the order seeded),
 `taskTemplates` (`id`, `title`, `stage`, `action`: `added` or `edited`),
 `libraryFiles` (`id`, `name`, `type`, `fileName`, `originalFileName`,
-`publicAccess`, in the order seeded) and on OJS `issues` (see `issues[]`).
+`publicAccess`, in the order seeded), `categories` (see `categories[]`)
+and on OJS `issues` (see `issues[]`).
 
 ## `POST scenarios/submission`
 
@@ -857,7 +883,11 @@ App-specific keys:
 
 - OJS: `section` (abbrev; defaults to the journal's first section) and
   `issue` (`{volume, number, year}` matching a seeded issue, used when
-  `published` is true).
+  `published` is true). `published: true` into an issue not yet published
+  gives a scheduled article (status 5, the workflow's "Assign To Future
+  Issue and Schedule Only"), not a published one; an article published at
+  once into a future issue comes only from the workflow's "Assign To
+  Future Issue and Publish Immediately" (U10 claim check K2, 2026-09-24).
 - OMP: `series` (path) and `seriesPosition`, both optional; `workType`
   (`monograph`, the default, or `editedVolume`); and per review round
   `stage: internal | external` (default external).

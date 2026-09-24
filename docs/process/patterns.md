@@ -267,6 +267,14 @@ over.
     or wrap the read in `await expect.poll(() => …)`; a plain
     `expect(await …)` is settled only on a server-rendered page after its
     navigation, a mail-catcher read after the drain, or an already-open panel.
+15. **A file chooser opened from the keyboard needs interception already on.**
+    `page.waitForEvent('filechooser')` switches Playwright's chooser
+    interception on without waiting for the browser, and switches it off again
+    when its listener goes, so an Enter pressed right after it can open the
+    native dialog unseen: U10 S3 on OPS lost the event in 5 of 8 loaded runs
+    (2026-09-24). Keep one `page.on('filechooser', () => {})` for the page's
+    life, armed when the page object is built (`AppearancePages.js`
+    `armFileChooser`), and make one round trip to the page before the key.
 
 ## Tag conventions
 

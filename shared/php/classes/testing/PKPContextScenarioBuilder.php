@@ -185,6 +185,12 @@
  *   a press also "Contracts"), `publicAccess` the "Public Access" box,
  *   `file` a fixture basename (default the app's PDF fixture). Applied
  *   after the task templates, before users[].
+ * - categories[] {path*, title?, children[]?} — Settings › <context> ›
+ *   "Categories" (U10): the bootstrap payload's own list and seeding path
+ *   (CategorySeeder: the "Add Category" window's validation and repository
+ *   write; children are the row's "More Actions" › "Add"). Applied after
+ *   the structures, before users[]; the response lists every category as
+ *   {id, path, parentId}, depth first.
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -315,6 +321,11 @@ abstract class PKPContextScenarioBuilder
             fn (Spec $spec) => $this->parseStructure($spec),
             $root->childList($this->structureKey())
         );
+        $categoryPlans = CategorySeeder::parse(
+            $root,
+            (string) $contextParams['primaryLocale'],
+            $contextParams['supportedFormLocales'] ?? [(string) $contextParams['primaryLocale']]
+        );
         $userPlans = array_map(
             fn (Spec $spec) => $this->userSeeder->parse($spec, $this->structureKey()),
             $root->childList('users')
@@ -431,6 +442,13 @@ abstract class PKPContextScenarioBuilder
             $this->addStructure($context, $plan, $sequence++);
         }
 
+        // Settings › <context> › "Categories", after the structures as in
+        // the bootstrap (U10).
+        $categories = [];
+        foreach ($categoryPlans as $plan) {
+            array_push($categories, ...CategorySeeder::add($context, $plan, null));
+        }
+
         $users = [];
         foreach ($userPlans as $plan) {
             $user = $this->userSeeder->seed(
@@ -468,6 +486,7 @@ abstract class PKPContextScenarioBuilder
             'components' => $components,
             'taskTemplates' => $taskTemplates,
             'libraryFiles' => $libraryFiles,
+            'categories' => $categories,
         ] + $overlay;
     }
 

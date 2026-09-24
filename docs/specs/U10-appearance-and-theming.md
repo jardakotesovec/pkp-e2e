@@ -1,0 +1,2250 @@
+---
+name: appearance-and-theming
+status: verified
+---
+
+# Appearance & theming
+
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+
+## Purpose
+
+A journal's managers decide how its public site looks and what its home
+page holds. On Settings › Website they choose the theme and its options
+(the fonts, the header's colour, what the home page shows), upload a logo,
+a homepage image, a favicon and a style sheet of their own, write the
+page footer and extra text for the home page, choose which blocks stand
+in the sidebar of the public pages and in what order, order the roles on
+the public masthead, and set how long lists run before they page and how
+dates and times are written. Every visitor meets the result on every
+public page of the journal. The Site Administrator can also set a
+journal's theme from the journal's Settings Wizard. The look of the
+site's own pages (the site's home page and the pages outside any journal)
+is set on Administration › Site Settings, which *Site settings*
+describes. <sup>a</sup>
+
+## Actors & permissions
+
+Who opens the Settings pages, and what every other role gets there, is set
+out in [Journal identity & about pages](U07-journal-identity-and-about-pages.md#settings-access):
+the manager-level roles of the journal whose role allows changes to
+Settings, and the Site Administrator. This spec calls them "whoever opens
+the Settings pages". On a press or a preprint server the Site
+Administrator opens them only through a manager-level role held there,
+and without one gets the access-denied page
+([Journal identity & about pages](U07-journal-identity-and-about-pages.md#a1));
+on a journal, an administrator with no role there gets Settings ›
+Website under an "Error" window reading "The current role does not have
+access to this operation." ([Reader comments & moderation](U14-reader-comments-and-moderation.md#a9)).
+A Site Administrator with no role in the journal still changes its theme
+from the Settings Wizard (Rule 34). Visitors need no account. <sup>a</sup>
+
+| Action | Who may, and when |
+|--------|--------------------|
+| **Change and save the "Appearance" tabs ("Theme", "Setup", "Editorial Masthead", "Advanced") and the "Lists" and "Date & Time" tabs** (Settings › Website) | • whoever opens the Settings pages; nobody else <sup>a</sup> <sup>td1</sup> |
+| **Change a journal's theme from its Settings Wizard** (Administration › Hosted Journals, the journal's "Settings wizard", "Appearance"; Rule 34) | • the Site Administrator alone <sup>b</sup> <sup>td2</sup> |
+| **See the result** (the home page, and the header, footer and sidebar of every public page of the journal) | • any visitor, signed in or not; on a journal that requires visitors to sign in, or that is not enabled, a signed-out visitor gets the Login page instead ([Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 22) <sup>a</sup> |
+
+## Fields & validation
+
+The tabs this spec describes sit on Settings › Website. The top tab
+"Appearance" holds the side tabs "Theme", "Setup", "Editorial Masthead"
+and "Advanced"; the top tab "Setup" holds, among side tabs other features
+describe, "Lists" and "Date & Time" (the full list of who describes which
+tab is in [Journal identity & about pages](U07-journal-identity-and-about-pages.md),
+Rule 2). Each side tab is one form with a "Save" button at its foot. A
+refused save, the "Saved" note beside the button and the language buttons
+of a journal with a second form language work as on Settings › Journal,
+which [Journal identity & about pages](U07-journal-identity-and-about-pages.md)
+describes. A field marked "per language" takes a value in each form
+language (Rule 3). <sup>c</sup>
+
+**The upload boxes.** "Logo", the thumbnail, "Homepage Image", "Favicon"
+and the style sheet are upload boxes: "Upload File", or a file dropped on
+"Drop files here to upload". A picture then shows as a small preview with an
+"Alternate text" box beside it and the guidance "Describe this image for
+visitors viewing the site in a text-only browser or with assistive
+devices. Example: "Our editor speaking at the PKP conference.""; a style
+sheet shows its file name. "Remove" empties the box. While a picture box
+holds a picture it shows no "Upload File" and no drop area, so a new
+picture goes in by the mouse only once "Remove" has emptied the box. The
+box keeps its "Upload File" for keyboard and screen-reader users: on a
+page opened with a saved picture, that hidden button takes the
+keyboard's focus, Enter on it opens the file chooser, and the chosen
+picture takes the old one's place. On a box that opened with a saved
+file, removing or replacing that file adds "Restore Original", which
+brings back the saved file and its alternate text; a box that opened
+empty has no "Restore Original". A picture that replaces a saved one
+arrives with an empty "Alternate text" box; saved as it is, the new
+picture has no description. A file of a type the box does not take is
+refused in the box ("You can't upload files of this type.") and nothing
+is sent; after a refusal made with "Upload File", that button and the
+tab's "Save" stay disabled ⚠ [A7](#a7). An upload counts only once the
+tab is saved. <sup>d</sup> <sup>td3</sup>
+
+**"Theme"** (Settings › Website › "Appearance" › "Theme"; the page opens
+on this tab). On a journal the fields follow "Theme" in the order below; a
+preprint server has the same fields without "Journal Content
+Organization"; a press shows "Typography", "Press Summary", "Header
+Background Image", "Colour", "Show Series" and "Usage statistics display
+options", in that order. <sup>e</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Theme" | — | A list of the installed themes, under "New themes may be installed from the Plugins tab at the top of this page."; a stock install offers "Default Theme" alone (Rule 4) <sup>k</sup> |
+| "Typography" | no | Seven choices under "Choose a font combination that suits this journal." ("…this press.", "…this server."): "Noto Sans: A digital-native font designed by Google for extensive language support." (chosen on a new journal), "Noto Serif: A serif variant of Google's digital-native font.", "Noto Serif/Noto Sans: A complementary pairing with serif headings and sans-serif body text.", "Noto Sans/Noto Serif: A complementary pairing with sans-serif headings and serif body text.", "Lato: A popular modern sans-serif font.", "Lora: A wide-set serif font good for reading online.", "Lora/Open Sans: A complimentary pairing with serif headings and sans-serif body text." (Rule 5) <sup>e</sup> |
+| "Colour" | no | A colour picker with a box for the colour's code, under "Choose a colour for the header."; "#1E6292" on a new journal (Rule 6) <sup>e</sup> |
+| "Journal Summary" ("Press Summary", "Server Summary") | no | One box, "Show the journal summary on the homepage." ("…the press summary…", "…the server summary…"), unticked on a new journal (Rule 7) <sup>e</sup> |
+| "Journal Content Organization" {OJS} | no | Three boxes under "Choose how your journal's content will be organized on the homepage.": "Include the current issue's table of contents", "Include recent most published articles" and "Include a listing of categories"; which are ticked on a journal that never saved the tab: Rule 10 [OJS1](#ojs1) <sup>e</sup> |
+| "Header Background Image" | no | One box, "Show the homepage image as the header background.", under "When a homepage image has been uploaded, display it in the background of the header instead of it's usual position on the homepage."; unticked on a new journal (Rule 8) <sup>e</sup> |
+| "Usage statistics display options" | no | Three choices: "Do not display submission usage statistics chart for reader." (chosen on a new journal), "Use bar type of the chart for usage statistics display." and "Use line type of the chart for usage statistics display." (Rule 9) <sup>e</sup> |
+| "Show Series" {OMP} | no | One box, "Add list of links to all of the press's series on the catalog page", unticked on a new press [OMP1](#omp1) <sup>e</sup> |
+
+**"Setup"** (Settings › Website › "Appearance" › "Setup"). Some fields
+carry a help text, shown from the small icon beside the label. <sup>f</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Logo" | no | Upload box for a picture, per language. Empty on a new journal (Rule 20) <sup>f</sup> |
+| "Journal thumbnail" ("Press thumbnail", "Server thumbnail") | no | Upload box for a picture, per language, with the help "A small logo or representation of the journal that can be used in lists of journals." ("…press…", "…server…"). Empty on a new journal (Rule 21) <sup>f</sup> |
+| "Homepage Image" | no | Upload box for a picture, per language, with the help "Upload an image to display prominently on the homepage.". Empty on a new journal (Rules 8, 18) <sup>f</sup> |
+| "Page Footer" | no | Formatted text, per language, with the help "Enter any images, text or HTML code that you'd like to appear at the bottom of your website.": bold, italic, superscript, subscript, a link, a block quote, bulleted and numbered lists, a picture ([→ pictures](U09-custom-pages-and-blocks.md#image-upload)) and a source-code view. Empty on a new journal (Rule 22) <sup>f</sup> |
+| "Sidebar" | no | An orderable list with one box per block, each row with a drag handle and up and down arrows. What it offers and what the order does: Rules 23–25 <sup>s</sup> |
+| "Featured Books" {OMP} | no | One box, "Display featured books on the home page" [OMP1](#omp1) <sup>f</sup> <sup>td4</sup> |
+| "New Releases" {OMP} | no | One box, "Display new releases on the home page" [OMP1](#omp1) <sup>f</sup> <sup>td4</sup> |
+| "Order of monographs" {OMP} | no | Six choices under "Choose how to order books in the catalog.": "Title (A-Z)", "Title (Z-A)", "Publication date (oldest first)", "Publication date (newest first)", "Series position (lowest first)", "Series position (highest first)"; none is marked on a new press [OMP1](#omp1) <sup>f</sup> <sup>td4</sup> |
+
+On a press the three catalog fields come after "Sidebar", and the thumbnail
+comes after "Logo" on every app. <sup>f</sup>
+
+**"Editorial Masthead"** (Settings › Website › "Appearance" › "Editorial
+Masthead"). <sup>u</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Editorial Masthead" | — | Under "Define the order of masthead roles for public display.", a list of role names, each with a drag handle and up and down arrows and no box to tick. Which roles, and what the order does: Rule 28 <sup>u</sup> |
+| "Reviewers" | — | A note with no control: "Reviewers will be displayed in a standardized format to maintain uniformity and ensure easy discoverability in this section." It shows on a preprint server too <sup>u</sup> <sup>td5</sup> |
+
+**"Advanced"** (Settings › Website › "Appearance" › "Advanced"). <sup>h</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Journal style sheet" ("Press style sheet", "Server style sheet") | no | Upload box that takes ".css" files only; one file for every language. Once uploaded, the box shows the file's own name and "Remove", and still does after "Save"; once the page is loaded again it shows "styleSheet.css", a link to the stored file, and "Remove". Empty on a new journal (Rule 26) <sup>h</sup> |
+| "Favicon" | no | Upload box, per language, that takes ".ico", ".png" and ".gif" pictures only. Empty on a new journal (Rule 27) <sup>h</sup> |
+| "Additional Content" | no | Formatted text, per language, under "Anything entered here will appear on your homepage.", with the same buttons as "Page Footer". Empty on a new journal (Rule 19) <sup>h</sup> |
+| "Cover Image Max Width", "Cover Image Max Height" {OMP} | yes | Two boxes, each under "Images will be reduced when larger than this size but will never be blown up or stretched to fit these dimensions.", 106 and 100 on a new press. A whole number of 1 or more: emptied, "Save" is refused with "This is not a valid integer. This must be at least 1." under the box; "0" with "This must be at least 1."; text with "This is not a valid integer." (Settings bullet 19) [OMP1](#omp1) <sup>h</sup> <sup>td4</sup> |
+
+**"Lists"** (Settings › Website › "Setup" › "Lists"). <sup>i</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Items per page" | yes | A small box under "Limit the number of items (for example, submissions, users, or editing assignments) to show in a list before showing subsequent items in another page."; 25 on a new journal. A whole number of 1 or more: emptied, "Save" is refused before anything is sent with "This field is required."; "0" and a negative number are refused with "This must be at least 1."; text or a decimal with "This is not a valid integer." There is no upper limit: 100000 saves (Rule 29) <sup>i</sup> <sup>td6</sup> |
+| "Page links" | yes | A small box under "Limit the number of links to display to subsequent pages in a list."; 10 on a new journal; refused as "Items per page" is (Rule 30) <sup>i</sup> <sup>td6</sup> |
+
+**"Date & Time"** (Settings › Website › "Setup" › "Date & Time"). Under
+the heading "Date and Time Formats" and the sentence "Choose the preferred
+format for dates and times. A custom format can be entered using the
+special format characters." (the last two words a link to a page
+explaining those characters), five groups of choices, each per language.
+Each choice but the last is written as today's date and time in its
+pattern, by the clock of the manager's own computer; the last is "Custom"
+with a box for a pattern of one's own. The examples below are for 24
+September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| "Date" | no | "September 24, 2026" (chosen on a new journal), "September 24 2026", "24 September 2026", "2026 September 24", "Custom" <sup>j</sup> |
+| "Date (Short)" | no | "2026-09-24" (chosen on a new journal), "24-09-2026", "09/24/2026", "24.09.2026", "Custom" <sup>j</sup> |
+| "Time" | no | "15:05", "03:05 PM" (chosen on a new journal), "3:05PM", "Custom"; the pages print the third choice in lower case ("3:05pm") ⚠ [A8](#a8) <sup>j</sup> |
+| "Date & Time" | no | One ready choice, the saved "Date" and "Time" joined by " - " ("September 24, 2026 - 03:05 PM", chosen on a new journal), then "Custom" (Rule 32) <sup>j</sup> |
+| "Date & Time (Short)" | no | One ready choice, the saved "Date (Short)" and "Time" joined by a space ("2026-09-24 03:05 PM", chosen on a new journal), then "Custom" (Rule 32) <sup>j</sup> |
+
+## Rules & state
+
+**The tabs**
+
+1. **Where they are.** Settings › Website opens on "Appearance" ›
+   "Theme". The "Theme", "Setup", "Editorial Masthead", "Advanced",
+   "Lists" and "Date & Time" tabs belong to the journal the page was
+   opened in; a second journal on the same site has its own set. <sup>c</sup>
+2. **Saving and leaving.** "Save" stores the fields of its own tab and
+   nothing else, shows "Saved" beside the button, and the public pages
+   show the change from their next load. A change left unsaved behaves
+   as on every Settings page ([Journal identity & about pages](U07-journal-identity-and-about-pages.md),
+   Rule 5): it waits in its box while the manager moves between the
+   side tabs, and is gone without a question once the page is left, so
+   a "Page Footer" typed and not saved is not there after the next load.
+   The same holds on "Theme": a changed choice is still there when the
+   manager opens another side tab and comes back, and "Save" then
+   stores it. <sup>c</sup> <sup>td8</sup>
+3. **Languages.** With a second form language (Settings › Website ›
+   "Setup" › "Languages", "Forms"; *Languages & locales*), each field
+   marked "per language" takes a value in each language, and each group
+   on "Date & Time" is chosen once per language. A visitor sees the
+   logo (with its alternate text), homepage image, favicon, "Page
+   Footer" and "Additional Content" of their own language; where it has
+   none, the primary language's; where that has none either, another
+   language's (an English visitor reads a French-only "Page Footer").
+   Dates print in the formats chosen for the visitor's language.
+   <sup>y</sup> <sup>td9</sup>
+
+**The theme**
+
+4. **The theme.** The theme chosen under "Theme" draws every public page
+   of the journal; the editorial screens do not change with it. It also
+   names the menu areas a navigation menu can fill
+   ([Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md),
+   Rule 8). A stock install has "Default Theme" alone, so the list
+   offers no other choice; further themes are installed and enabled as
+   plugins (*Plugins management*). Rules 5 to 10 describe the default
+   theme's fields. <sup>k</sup> <sup>td10</sup>
+5. **"Typography".** After "Save", the text and the headings of the
+   public pages use the chosen fonts: a single name sets both; a pair
+   ("Noto Serif/Noto Sans") sets the headings to the first and the text
+   to the second. The journal's name in the header, shown while no logo
+   is set, takes the headings' font. <sup>l</sup> <sup>td11</sup>
+6. **"Colour".** After "Save", the header of every public page (the band
+   holding the logo or the journal's name and the primary menu) takes the
+   chosen colour. With a light colour the header's text turns dark so it
+   stays readable. A code the colour box cannot read as a colour
+   ("red", "#12345") stays in the box but changes nothing: "Save" shows
+   "Saved" and keeps the colour chosen before. <sup>l</sup> <sup>td11</sup>
+7. **The summary on the home page.** Ticked, the home page gains a
+   section headed "About the Journal" ("About the Press", "About the
+   Server") holding the "Journal Summary" text of Settings › Journal ›
+   "Masthead" ([Journal identity & about pages](U07-journal-identity-and-about-pages.md),
+   Rule 8), and the skip link to it
+   ([Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md),
+   Rule 22). Where the section sits: Rule 12. <sup>m</sup> <sup>td12</sup>
+8. **"Header Background Image".** Ticked while a "Homepage Image" is set,
+   the picture fills the background of the header on every public page
+   of the journal, and the home page no longer shows it in its body
+   (Rule 18). Ticked with no homepage image, nothing changes.
+   <sup>q</sup> <sup>td13</sup>
+9. **"Usage statistics display options".** A chart choice adds a section
+   headed "Downloads" to each article's landing page, holding a bar or a
+   line chart of its downloads by month; an article with no downloads
+   yet shows an empty chart. The landing-page features (*Article landing
+   page & reading*, on a press *Monograph landing page*) describe the
+   section. <sup>z</sup> <sup>td14</sup>
+10. **"Journal Content Organization"** {OJS}. Each ticked box adds a part
+    to the home page (Rule 12): the current issue (Rule 14), the recent
+    articles (Rule 13), the categories (Rule 15). Until the tab is saved,
+    which boxes count as ticked depends on the journal: with at least one
+    issue, published or not, "Include the current issue's table of
+    contents" alone; with no issue, "Include recent most published
+    articles" alone. A journal that never saved the tab therefore changes
+    its home page by itself when its first issue is created
+    ⚠ [OJS2](#ojs2). A save with none of the three ticked shows "Saved"
+    but keeps no choice: the tab reopens with that default ticked, and
+    the home page shows that part ⚠ [OJS5](#ojs5). <sup>o</sup>
+    <sup>td15</sup>
+
+**The home page**
+
+11. **One page per journal.** The journal's home page is its address
+    with nothing after the journal's path; the header's logo or name
+    leads there. Its parts are this feature's, except the carousel
+    ([Highlights](U11-highlights.md)) and the announcements
+    ([Announcements](U12-announcements.md)), which sit in it. <sup>m</sup>
+12. **What it shows, top to bottom.** Each part shows only while its
+    condition holds. A journal or press with nothing set and nothing
+    published shows the header, the footer and an empty page between
+    them; a preprint server's shows its search box and the "Latest
+    preprints" heading. <sup>m</sup> <sup>td16</sup>
+
+    | Journal {OJS} | Press {OMP} | Preprint server {OPS} |
+    |---|---|---|
+    | the carousel | the carousel | the carousel |
+    | the homepage image (Rule 18) | the homepage image | the homepage image |
+    | the categories (Rule 15) | "About the Press" (Rule 7) | the announcements |
+    | "About the Journal" (Rule 7) | "Featured": books featured in the catalog, while "Featured Books" is ticked ([OMP1](#omp1)) | a search box and the category links (*Sections*) |
+    | the announcements | "New Releases": books marked as new releases, while "New Releases" is ticked | "Latest preprints" (Rule 16) |
+    | "Latest Publications" (Rule 13) | the announcements | "About the Server" (Rule 7) |
+    | "Current Issue" (Rule 14) | "Additional Content" (Rule 19) | "Additional Content" |
+    | "Additional Content" (Rule 19) | | |
+
+    A preprint server's page is fixed in this order, with no choice of
+    its parts but the summary [OPS1](#ops1).
+13. **"Latest Publications"** {OJS}. Under this heading, the journal's
+    published articles that are not in a published issue (published with
+    no issue, or assigned to an issue not yet published), the most
+    recently submitted first, each shown as its article summary
+    (*Article landing page & reading*) ⚠ [OJS3](#ojs3); to a screen
+    reader each title is a heading of the section's own level
+    ⚠ [OJS6](#ojs6). Under the list "{from} - {to} of {total} items"
+    ("1 - 2 of 2 items"), and, with more
+    articles than "Items per page", page links: "<<" and "<" when not on
+    the first page, the page numbers (Rule 30), then ">" and ">>" when not
+    on the last. With no such article the section is absent. <sup>n</sup>
+    <sup>td17</sup>
+14. **"Current Issue"** {OJS}. Under this heading, the current issue's
+    name ("Vol. 1 No. 2 (2014)"), its table of contents (*Issues*), and
+    the link "View All Issues" to the archive. It shows while the journal
+    has a current issue and Settings › Distribution › "Access" ›
+    "Publishing Mode" is not "OJS will not be used to publish the
+    journal's contents online." (*Subscriptions & open access control*).
+    <sup>o</sup> <sup>td18</sup>
+15. **The categories** {OJS}. A row of links, one per top-level category
+    of the journal, each opening that category's page (*Categories*);
+    subcategories are not listed. With no category the row is absent.
+    <sup>o</sup> <sup>td19</sup>
+16. **"Latest preprints"** {OPS}. The heading shows always, even with
+    nothing posted. Under it, up to ten posted preprints, the most
+    recently posted day first, each shown as its preprint summary
+    (*Article landing page & reading*), with no page links: "Items per
+    page" does not apply. Preprints posted on the same day come in no
+    fixed order, so on a day with more than ten posts which ten show is
+    not fixed. <sup>p</sup> <sup>td20</sup>
+17. **Featured books and new releases** {OMP}. Which books are featured or
+    marked as new releases is set on the catalog (*Catalog management*),
+    and so is the order of the featured ones ("Order Features"); the new
+    releases come newest first by publication date. The "Setup" boxes
+    only show or hide the two lists. A ticked box with no book to show
+    adds nothing. <sup>m</sup> <sup>td4</sup>
+18. **The homepage image.** Unless "Header Background Image" is ticked
+    (Rule 8), the "Homepage Image" shows under the carousel. On a journal
+    it is stretched or shrunk to the full width of the page's main
+    column; on a press and a preprint server it shows at the size it was
+    uploaded, shrunk to fit when wider. A journal gives it the "Alternate
+    text" as its description, and with the box empty gives it no text
+    alternative at all ⚠ [OJS7](#ojs7); a press and a preprint server
+    show it with an empty description, whatever was typed ⚠ [A1](#a1).
+    <sup>q</sup> <sup>td21</sup>
+19. **"Additional Content".** The text shows at the foot of the home page,
+    after every other part, and on no other page. <sup>m</sup>
+    <sup>td22</sup>
+
+**Logo, thumbnail and footer**
+
+20. **"Logo".** Set, the logo stands in the header of every public page of
+    the journal in place of the journal's name, as a link to the home page
+    ([Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md),
+    Rule 15a), at the size it was uploaded up to 80 pixels high; a
+    taller logo is scaled down to that height (a 1600 × 160 logo shows
+    at 800 × 80). Its "Alternate text" is its description; without one
+    the logo has none, and the link has no name a screen reader can read
+    ⚠ [A2](#a2). Removed and saved, the name comes back. <sup>r</sup>
+    <sup>td23</sup>
+21. **The thumbnail.** Set, it shows beside the journal in the list of
+    journals on the site's home page, with its "Alternate text" as its
+    description (*Hosted journals* describes the list). <sup>r</sup>
+    <sup>td24</sup>
+22. **"Page Footer".** Set, the text shows at the foot of every public
+    page of the journal, above the application's logo
+    ([Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md),
+    Rule 20). <sup>r</sup> <sup>td25</sup>
+
+**The sidebar**
+
+23. **What "Sidebar" offers.** One box per block of a plugin that is
+    enabled in the journal (Settings › Website › "Plugins" › "Installed
+    Plugins"; *Plugins management*), labelled with the plugin's name; a
+    custom block's box reads the block's name followed by "(Custom
+    Block)", while the sidebar shows its title. A new journal offers "Web
+    Feed Plugin", "Information Block", "Subscription Block" and "Language
+    Toggle Block"; a press offers "Browse Block" in place of
+    "Subscription Block"; a preprint server offers "Web Feed Plugin" and
+    "Language Toggle Block" alone. ""Make a Submission" Block" is not
+    among them: its plugin is disabled on a new journal and press
+    (Settings bullet 23). Enabling a plugin with a block adds its box, and
+    a custom block adds one per block
+    ([Custom pages & blocks](U09-custom-pages-and-blocks.md), Rule 18). No
+    box is ticked on a new journal. The ticked boxes come first, in their
+    sidebar order, and the unticked ones after them, so a block added
+    later joins the unticked ones. Dragging a row or pressing its up or
+    down arrow moves it; a screen reader hears the arrows as "Increase
+    position of {block}" and "Decrease position of {block}" ⚠ [A3](#a3).
+    <sup>s</sup> <sup>td26</sup>
+24. **Placing.** After "Save", every ticked block shows, in the list's
+    order, in the sidebar beside the content of every public page of the
+    journal; an unticked block shows nowhere. A block with nothing to
+    show adds nothing (the "Language Toggle Block" on a journal with one
+    interface language). With no block ticked the public pages have no
+    sidebar; the content keeps its width and stands in the middle of the
+    page. What each block holds belongs to the block's own feature:
+    <sup>s</sup> <sup>td26</sup>
+
+    | Block | Described in |
+    |---|---|
+    | "Information Block" {OJS OMP} | [Journal identity & about pages](U07-journal-identity-and-about-pages.md) |
+    | ""Developed By" Block" | [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md) |
+    | a custom block | [Custom pages & blocks](U09-custom-pages-and-blocks.md) |
+    | ""Make a Submission" Block" {OJS OMP} | [Submission wizard](U21-submission-wizard.md) |
+    | "Language Toggle Block" | *Languages & locales* |
+    | "Web Feed Plugin"; the announcement feed's block {OJS} | *Web feeds*; [Announcements](U12-announcements.md) |
+    | "Subscription Block" {OJS} | *Subscriptions & open access control* |
+    | "Browse Block" (enabled on a new press) | *Catalog browse* |
+
+25. **A placed block whose plugin is disabled.** It leaves the sidebar and
+    the "Sidebar" list at once, and keeps its place: enabled again, it is
+    back in its place, unless "Setup" was saved in between with a changed
+    "Sidebar" list, which drops the place and brings it back unticked.
+    Meanwhile, "Save" on "Setup" with the "Sidebar" list untouched is
+    refused under "Sidebar" with "The {name} block can not be found.
+    Please make sure the plugin is installed and enabled." ⚠ [A4](#a4),
+    where {name} is the block's internal name, not its label ("The
+    languagetoggleblockplugin block can not be found. …"; for a custom
+    block, its name). <sup>s</sup> <sup>td27</sup>
+
+**Style sheet and favicon**
+
+26. **The style sheet.** After "Save", the uploaded file is loaded on
+    every public page of the journal after the theme's own styles, so its
+    rules win over the theme's where they are as specific: a rule for
+    every heading turns the home page's headings red, while an article
+    page's "Published" label keeps the theme's grey. The editorial
+    screens do not load it.
+    "Remove" and "Save" take it off the pages, but the file itself stays
+    where it was, still opening at its address ⚠ [A5](#a5). <sup>t</sup>
+    <sup>td28</sup>
+27. **"Favicon".** Set, it is the icon in the browser's tab on every public
+    page and every editorial screen of the journal. Without one, the tab
+    shows the browser's own default icon. <sup>t</sup> <sup>td29</sup>
+
+**The masthead order**
+
+28. **"Editorial Masthead".** The list holds every role of the journal
+    whose "Consider role in masthead list" is ticked (Settings › Users &
+    Roles › "Roles"; *Roles configuration*), the Reviewer role excepted:
+    on a new journal "Journal editor", "Section editor" and "Editorial
+    Board Member" ("Press editor", "Series editor" and "Editorial Board
+    Member" on a press; "Moderator" and "Editorial Board Member" on a
+    preprint server). Until the tab is first saved, the list follows the
+    roles' permission levels, a newly ticked role included; once it has
+    been saved, a role ticked later joins at the end. After "Save", the
+    list's order is the order of the role
+    headings on the public "Editorial Masthead" and "Editorial History"
+    pages ([Journal identity & about pages](U07-journal-identity-and-about-pages.md),
+    Rule 14a). The arrows' names for a screen reader: [A3](#a3).
+    <sup>u</sup> <sup>td30</sup>
+
+**Lists**
+
+29. **"Items per page".** The number of entries a list shows before it
+    pages, on the lists that page: the listing pages of
+    [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md)
+    (Rule 24), the home page's "Latest Publications" {OJS} (Rule 13), the
+    results of the Search page ([Search](U15-search.md)) and a category's
+    page (*Categories*); on a press a category's page shows only its first
+    page ⚠ [OMP2](#omp2). It is also the number of rows the older
+    editorial lists start with before they page, such as Settings › Users
+    & Roles › "Roles" (*Roles configuration*); the "Users" list there
+    shows 25 a page whatever the number (*Users management*).
+    <sup>v</sup> <sup>td31</sup>
+30. **"Page links".** The most page numbers a list shows at once, on the
+    lists that number their pages: the home page's "Latest Publications"
+    {OJS}, the Search page's results, a category's page on a journal
+    and a preprint server, and Settings › Users & Roles › "Roles". The
+    current page's number sits in the middle of them when there are pages
+    on both sides. The listing pages with "Previous" and "Next" do not
+    use it. <sup>v</sup> <sup>td32</sup>
+
+**Dates and times**
+
+31. **Where the formats print.** The feature that owns each page
+    describes the date it prints; a changed format shows there from the
+    next load. <sup>w</sup> <sup>td33</sup>
+    - "Date (Short)": an article's date on its landing page and in its
+      "Versions" list, an issue's date {OJS}, the date of each
+      announcement ([Announcements](U12-announcements.md)), the dates in
+      a preprint's summary {OPS}, and an article's date in the Search
+      page's results {OJS}.
+    - "Date" {OMP}: a book's "Published" date on its page and its date
+      in the catalog's and the Search page's lists; the book's
+      "Versions" list uses "Date (Short)".
+    - "Date & Time (Short)": the date and time of a submission file's
+      notes and a library file's "Date uploaded".
+32. **The two combined choices follow the others.** On the tab, choosing
+    another "Date", "Date (Short)" or "Time" rewrites the ready choice of
+    "Date & Time" or "Date & Time (Short)" to the new combination, and a
+    combined group that was on its ready choice moves with it. Choosing
+    the first "Date (Short)" back brings the combined choice back too,
+    and "Save" stores the two in step. A combined group on "Custom"
+    stays there; only its ready choice's label follows. <sup>j</sup>
+    <sup>td34</sup>
+33. **"Custom".** Choosing "Custom" and typing a pattern in its box
+    ("d/m/Y") saves that pattern, and the dates print in it. A "Custom"
+    left with an empty box saves no format, and the dates print in the
+    installation's default for that group (Settings bullet 27). Under
+    "Date (Short)" that save also leaves the editorial dates showing the
+    time without the date ⚠ [A9](#a9). <sup>j</sup> <sup>td35</sup>
+
+**The Settings Wizard**
+
+34. **Its "Appearance" tab.** The Site Administrator's Settings Wizard of
+    a journal is reached from Administration › Hosted Journals: the
+    journal's row's arrow offers "Edit", "Remove" and "Settings wizard".
+    The wizard's top tabs are "Journal Settings" ("Setup" on a press,
+    "Server Settings" on a preprint server), "Plugins" and "Users"; the
+    first holds the side tabs "Journal" ("Press", "Server"),
+    "Appearance", "Languages", "Search Indexing" and "Restrict Bulk
+    Emails". "Appearance" holds the fields of the journal's own "Theme"
+    tab (Fields), and a save there changes the journal as a save on its
+    own tab does. A change there is kept while another of the wizard's
+    side tabs is open, and dropped without a question when the page is
+    reloaded or left. Every tab but "Appearance" is *Hosted journals*'s.
+    On a journal with no issue, the wizard shows "Include the current
+    issue's table of contents" ticked where the journal's own tab shows
+    "Include recent most published articles", and a save there stores
+    what the wizard shows ⚠ [OJS4](#ojs4). <sup>x</sup> <sup>td36</sup>
+
+**Other languages of the interface**
+
+35. **French.** In the French interface the "Theme" tab shows raw codes in
+    place of some labels ⚠ [A6](#a6): on a journal the "Journal Content
+    Organization" field, its description and its three boxes; on a press
+    the only entry of the "Thème" list and every label, description and
+    choice of the default theme's fields, "Press Summary" included; on a
+    preprint server "Usage statistics display options" and its three
+    choices. <sup>td37</sup>
+
+## Side effects
+
+- None beyond the pages themselves: saving these tabs sends no email,
+  creates no notification and writes no line to any log a manager can
+  read. <sup>c</sup>
+- Uploaded pictures and the style sheet are stored as public files of the
+  journal, reachable by their address by anyone; "Remove" and "Save"
+  delete a picture's file, and leave the style sheet's in place
+  ([A5](#a5)). <sup>d</sup>
+
+## Settings that modify behavior
+
+The fields of this feature's own tabs, then the settings of other screens
+that change them.
+
+1. **"Theme"** (Settings › Website › "Appearance" › "Theme"; "Default
+   Theme", the only one installed). Another theme, once installed as a
+   plugin: Rule 4. <sup>k</sup>
+2. **"Typography"** (the same tab; "Noto Sans: …"). Another choice: Rule 5.
+   <sup>e</sup>
+3. **"Colour"** (the same tab; "#1E6292"). Another colour: Rule 6.
+   <sup>e</sup>
+4. **"Journal Summary"** (the same tab; unticked). Ticked: Rule 7.
+   <sup>e</sup>
+5. **"Journal Content Organization"** {OJS} (the same tab; ticked as Rule
+   10 says). Each box ticked or unticked: Rules 13–15; none ticked:
+   Rule 10. <sup>o</sup>
+6. **"Header Background Image"** (the same tab; unticked). Ticked with a
+   homepage image: Rule 8. <sup>q</sup>
+7. **"Usage statistics display options"** (the same tab; "Do not display
+   submission usage statistics chart for reader."). A chart: Rule 9.
+   <sup>z</sup>
+8. **"Show Series"** {OMP} (the same tab; unticked). Ticked: the catalog
+   page lists links to the press's series ("Series: …") when more than
+   one series holds a published book (*Catalog browse*). <sup>e</sup>
+9. **"Logo"** (Settings › Website › "Appearance" › "Setup"; none). Set:
+   Rule 20. <sup>r</sup>
+10. **The thumbnail** (the same tab; none). Set: Rule 21. <sup>r</sup>
+11. **"Homepage Image"** (the same tab; none). Set: Rule 18, and with
+    bullet 6, Rule 8. <sup>q</sup>
+12. **"Page Footer"** (the same tab; empty). Set: Rule 22. <sup>r</sup>
+13. **"Sidebar"** (the same tab; no block ticked). Ticked blocks: Rule 24.
+    <sup>s</sup>
+14. **"Featured Books", "New Releases", "Order of monographs"** {OMP} (the
+    same tab; see Fields). They show or hide the home page's two book
+    lists (Rule 17) and set the order of the catalog's books (*Catalog
+    browse*). <sup>f</sup>
+15. **"Editorial Masthead"** (Settings › Website › "Appearance" ›
+    "Editorial Masthead"; the roles' permission-level order). Another
+    order: Rule 28. <sup>u</sup>
+16. **The style sheet** (Settings › Website › "Appearance" › "Advanced";
+    none). Set: Rule 26. <sup>t</sup>
+17. **"Favicon"** (the same tab; none). Set: Rule 27. <sup>t</sup>
+18. **"Additional Content"** (the same tab; empty). Set: Rule 19.
+    <sup>m</sup>
+19. **"Cover Image Max Width", "Cover Image Max Height"** {OMP} (the same
+    tab; 106 and 100). Other sizes: every book's cover thumbnail is
+    remade at the new size when the tab is saved (*Catalog management*).
+    <sup>h</sup>
+20. **"Items per page"** (Settings › Website › "Setup" › "Lists"; 25).
+    Another number: Rule 29. <sup>v</sup>
+21. **"Page links"** (the same tab; 10). Another number: Rule 30.
+    <sup>v</sup>
+22. **"Date", "Date (Short)", "Time", "Date & Time", "Date & Time
+    (Short)"** (Settings › Website › "Setup" › "Date & Time"; the choices
+    marked in Fields). Another choice: Rules 31–33. <sup>j</sup>
+23. **The block plugins** (Settings › Website › "Plugins" › "Installed
+    Plugins"; enabled on a new journal: the blocks Rule 23 lists;
+    disabled: ""Developed By" Block", ""Make a Submission" Block"
+    {OJS OMP} and, on a journal and a preprint server, "Browse Block").
+    Enabled or disabled: Rules 23, 25.
+    *Plugins management* owns the list. <sup>s</sup>
+24. **"Consider role in masthead list"** (Settings › Users & Roles ›
+    "Roles", a role's "Edit"; ticked on the roles Rule 28 names and on
+    the Reviewer role, "External Reviewer" on a press, where "Internal
+    Reviewer" arrives unticked). Ticked or unticked: which
+    roles "Editorial
+    Masthead" lists (Rule 28). *Roles configuration* owns it. <sup>u</sup>
+25. **"Publishing Mode"** {OJS} (Settings › Distribution › "Access"; no
+    choice marked on a new journal). "OJS will not be used to publish the
+    journal's contents online.": no "Current Issue" on the home page
+    (Rule 14). *Subscriptions & open access control* owns it. <sup>o</sup>
+26. **"Forms"** (Settings › Website › "Setup" › "Languages"; the primary
+    language alone on a new journal). Each language added: a value per
+    language on the per-language fields (Rule 3). *Languages & locales*
+    owns it. <sup>y</sup>
+27. **The default formats** (the installation's configuration file; the
+    choices marked in Fields). They are the formats of a journal that
+    never saved "Date & Time", and of a group saved with an empty
+    "Custom" (Rule 33). No screen changes them. <sup>j</sup>
+
+## Cross-feature interactions
+
+- [Journal identity & about pages](U07-journal-identity-and-about-pages.md)
+  owns who opens the Settings pages, how a tab saves and what an unsaved
+  change does, the "Journal Summary" text, and the "Editorial Masthead"
+  and "Editorial History" pages; this spec owns the summary's place on the
+  home page and the order of the masthead's roles.
+- [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md)
+  owns the header, the footer and the listing pages' page links; this
+  spec owns the logo, the "Page Footer" text, the theme's colour and
+  fonts, the sidebar's list and the numbers "Lists" sets.
+- [Custom pages & blocks](U09-custom-pages-and-blocks.md) owns the
+  custom blocks and the pictures of the formatted-text boxes; this spec
+  owns where a block stands in the sidebar.
+- [Highlights](U11-highlights.md) and [Announcements](U12-announcements.md)
+  own the carousel and the announcements on the home page; this spec owns
+  the page around them.
+- [Search](U15-search.md) owns the Search page whose results page by
+  "Items per page" and "Page links".
+- [Submission wizard](U21-submission-wizard.md) owns the ""Make a
+  Submission" Block".
+- *Article landing page & reading* owns the article summaries of the
+  home page's lists and the "Downloads" section on the landing page;
+  *Monograph landing page* the same section on a book's page.
+- *Issues* owns the current issue's table of contents; *Categories* owns
+  the category pages; *Sections* owns a preprint server's search box and
+  category links on its home page.
+- *Catalog browse* and *Catalog management* own the books a press's home
+  page lists, the catalog's order and series links, and cover thumbnails.
+- *Hosted journals* owns the Settings Wizard and the site's list of
+  journals where the thumbnail shows; *Site settings* owns the site's own
+  appearance.
+- *Plugins management* owns enabling themes and block plugins; *Roles
+  configuration* owns "Consider role in masthead list" and the "Roles"
+  list; *Languages &
+  locales* owns the form languages; *Subscriptions & open access control*
+  owns "Publishing Mode"; *Users management* owns the "Users" list.
+
+## Canonical scenarios
+
+Every scenario changes a setting, so all of them run on scratch journals
+(scratch presses, scratch preprint servers) with a throwaway Journal
+Manager, the Site Administrator joining in scenario 2, and a signed-out
+visitor reads the public pages in a second browser; the accounts, their
+passwords and the tooling recipe are in the footnote. <sup>sc</sup>
+
+1. **A new journal's home page, its summary, its additional content and a style sheet**
+
+   Given: Journal Manager, on a scratch journal with nothing published
+   whose "Journal Summary" (Settings › Journal › "Masthead") reads "A
+   journal for testing.", a visitor, signed out, in a second browser,
+   and two files: "red-headings.css", a style sheet whose one rule
+   colours every heading red, and "picture.png", a PNG picture.
+
+   - **The home page, nothing set**: the visitor opens the journal's
+     address: the header, the footer and an empty page between them; on
+     a preprint server, a search box and the heading "Latest preprints"
+     with nothing under it (Rules 11, 12, 16).
+   - **The "Theme" tab as it opens**: open Settings › Website: the page
+     opens on "Appearance" › "Theme" (Rule 1), and "Theme" offers
+     "Default Theme" alone (Rule 4). On a journal the fields below it
+     read, in this order, "Typography", "Colour", "Journal Summary",
+     "Journal Content Organization", "Header Background Image" and "Usage
+     statistics display options"; a preprint server shows the same
+     without "Journal Content Organization"; a press shows "Typography",
+     "Press Summary", "Header Background Image", "Colour", "Show Series"
+     and "Usage statistics display options". "Noto Sans: A digital-native
+     font designed by Google for extensive language support." is chosen,
+     the colour box reads "#1E6292", "Show the journal summary on the
+     homepage." ("…the press summary…", "…the server summary…") and "Show
+     the homepage image as the header background." are unticked, "Do not
+     display submission usage statistics chart for reader." is chosen,
+     and on a press "Add list of links to all of the press's series on
+     the catalog page" is unticked (Fields, "Theme").
+   - **The summary**: tick "Show the journal summary on the homepage."
+     and press "Save": "Saved" shows beside the button. The visitor
+     reloads the home page: a section headed "About the Journal" ("About
+     the Press", "About the Server") holds "A journal for testing.", and
+     the page's skip links gain one to it (Rule 7).
+   - **"Additional Content"**: open "Advanced", type "Welcome text" in
+     "Additional Content" and press "Save". The visitor reloads: "Welcome
+     text" stands at the foot of the home page, after "About the
+     Journal"; the "About the Journal" page, opened from the header's
+     "About" menu, does not show it (Rules 12, 19).
+   - **The style sheet**: press "Upload File" under "Journal style sheet"
+     ("Press style sheet", "Server style sheet") and choose
+     "red-headings.css": the box shows "red-headings.css" and "Remove";
+     press "Save": "Saved", and the box still reads "red-headings.css".
+     Reload the page and open "Advanced": the box shows "styleSheet.css",
+     a link to the stored file, and "Remove" (Fields, "Advanced"). The
+     visitor reloads the home page: the heading "About the Journal" is
+     red. No heading on the Journal Manager's Dashboard turns red
+     (Rule 26).
+   - **Removed**: press "Remove" and "Save". The visitor reloads: "About
+     the Journal" is back in the theme's colour [A5](#a5) (Rule 26).
+   - **A file the box does not take**: drop "picture.png" on the empty
+     style sheet box: "You can't upload files of this type." shows in the
+     box and nothing is sent (Fields, the upload boxes).
+   - **Control**: before the summary box was ticked, the visitor's home
+     page showed "A journal for testing." nowhere (Rule 7).
+
+2. **The fonts, the header's colour and the favicon, from the journal and from the Settings Wizard**
+
+   Given: Journal Manager and the Site Administrator, on a scratch
+   journal, a visitor, signed out, in a second browser, and two files:
+   "icon.png", a PNG picture, and "photo.jpg", a JPEG picture.
+
+   - **Kept across side tabs**: on Settings › Website › "Appearance" ›
+     "Theme" choose "Lora/Open Sans: A complimentary pairing with serif
+     headings and sans-serif body text." under "Typography", open the
+     side tab "Setup" and come back to "Theme": the choice is still marked
+     (Rule 2).
+   - **"Typography"**: press "Save": "Saved". The visitor reloads the
+     home page: the journal's name in the header is in Lora and the text
+     in Open Sans; on a preprint server the heading "Latest preprints" is
+     in Lora too. The visitor opens "About the Journal" from the header's
+     "About" menu: its heading "About the Journal" is in Lora and the text
+     in Open Sans (Rule 5).
+   - **"Colour", light**: type "#FFFF00" in the colour box under
+     "Colour" and press "Save". The visitor reloads the home page, then
+     opens "About the Journal" from the header's "About" menu: on both,
+     the header (the band holding the journal's name and the primary
+     menu) is yellow and its text dark (Rule 6).
+   - **"Colour", dark**: type "#000080" and press "Save": the visitor's
+     reloaded header is navy blue (Rule 6).
+   - **A code the box cannot read**: type "red" in the colour box and
+     press "Save": "Saved" shows, and the visitor's reloaded header stays
+     navy blue (Rule 6).
+   - **A file the favicon box does not take**: open "Advanced" and drop
+     "photo.jpg" on "Favicon": "You can't upload files of this type."
+     shows in the box and nothing is sent. Reload the page and open
+     "Advanced" again: "Favicon" is empty (Fields, "Advanced"; Rule 2).
+   - **"Favicon"**: press "Upload File" under "Favicon", choose
+     "icon.png" and press "Save". The visitor reloads the home page: the
+     browser tab's icon is "icon.png"; the Journal Manager's browser tab
+     on the Dashboard shows it too (Rule 27).
+   - **The Site Administrator's wizard**: sign in as the Site
+     Administrator, open Administration › Hosted Journals and press the
+     arrow of the journal's row: it offers "Edit", "Remove" and "Settings
+     wizard". Choose "Settings wizard": the top tabs read "Journal
+     Settings" ("Setup" on a press, "Server Settings" on a preprint
+     server), "Plugins" and "Users", and the first holds the side tabs
+     "Journal" ("Press", "Server"), "Appearance", "Languages", "Search
+     Indexing" and "Restrict Bulk Emails" (Rule 34).
+   - **Unsaved in the wizard**: open "Appearance": it holds the fields of
+     the journal's "Theme" tab. Type "#1B5E20" in the colour box, open
+     "Journal" and come back: the box still reads "#1B5E20". Reload the
+     page: no question is asked; open "Appearance" again: the box no
+     longer reads "#1B5E20" (Rule 34).
+   - **Saved in the wizard**: type "#1B5E20" again and press "Save". The
+     visitor reloads: the header is dark green. The Journal Manager
+     reloads the "Theme" tab: the colour box reads "#1B5E20" (Rule 34).
+     On a journal with no issue the same save also stores "Include the
+     current issue's table of contents" [OJS4](#ojs4).
+   - **Control**: through every save, the Journal Manager's Dashboard
+     kept its own header colour and fonts (Rule 4).
+
+3. **The logo, the thumbnail, the homepage image and the page footer**
+
+   Given: Journal Manager, on a scratch journal, a visitor, signed out,
+   in a second browser, and four PNG pictures: "logo.png", 1600 × 160
+   pixels; "logo2.png", another picture; "thumb.png"; and "home.png", 300
+   × 100 pixels.
+
+   - **"Logo" uploaded**: open Settings › Website › "Appearance" ›
+     "Setup", press "Upload File" under "Logo" and choose "logo.png": a
+     small preview shows with "Remove", no "Restore Original", and an
+     "Alternate text" box beside it under the guidance "Describe this
+     image for visitors viewing the site in a text-only browser or with
+     assistive devices. Example: "Our editor speaking at the PKP
+     conference."" (Fields, the upload boxes).
+   - **"Logo" saved**: type "Journal logo" in "Alternate text" and press
+     "Save": "Saved". The visitor reloads the home page: the logo stands
+     in the header in place of the journal's name, 800 × 80 pixels, with
+     "Journal logo" as its description, and pressing it opens the home
+     page; the "About the Journal" page, from the header's "About" menu,
+     carries it too (Rule 20). The visitor notes the logo picture's own
+     address.
+   - **Replaced, then restored**: reload the page and open "Setup": the
+     "Logo" box shows its preview and "Journal logo", with no "Upload
+     File". Press "Remove": "Restore Original" and "Upload File" show.
+     Press "Upload File" and choose "logo2.png": it arrives with an empty
+     "Alternate text", and "Restore Original" still shows; press "Restore
+     Original": "logo.png" is back, with "Journal logo" in "Alternate
+     text" (Fields, the upload boxes).
+   - **Replaced from the keyboard**: reload the page and open "Setup".
+     Press Tab until the focus reaches the "Logo" box's "Upload File",
+     which a screen reader announces though the screen does not show it,
+     and press Enter: the file chooser opens. Choose "logo2.png": it
+     takes the place of "logo.png" with an empty "Alternate text", and
+     "Restore Original" shows; press "Restore Original": "logo.png" is
+     back, with "Journal logo" (Fields, the upload boxes).
+   - **The thumbnail**: press "Upload File" under "Journal thumbnail"
+     ("Press thumbnail", "Server thumbnail"), choose "thumb.png", type
+     "Thumb" in its "Alternate text" and press "Save". The visitor opens
+     the site's home page, the install's own address: beside the journal
+     in the list of journals stands "thumb.png", with "Thumb" as its
+     description (Rule 21).
+   - **"Homepage Image"**: upload "home.png" under "Homepage Image", type
+     "Our building" in its "Alternate text" and press "Save". The visitor
+     reloads the journal's home page: on a journal the picture is
+     stretched to the full width of the page's main column, with "Our
+     building" as its description; on a press and a preprint server it
+     shows at 300 × 100 pixels [A1](#a1) (Rule 18).
+   - **"Header Background Image"**: open "Theme", tick "Show the homepage
+     image as the header background." and press "Save". The visitor
+     reloads the home page, then opens "About the Journal": on both the
+     picture fills the header's background, and the home page no longer
+     shows it in its body (Rule 8). Untick the box and press "Save": the
+     visitor's reloaded home page shows the picture in its body again,
+     and the header's background no longer holds it (Rule 18).
+   - **"Page Footer"**: open the side tab "Setup", type "Footer line" in
+     "Page Footer"
+     and press "Save". The visitor reloads the home page, then "About the
+     Journal": "Footer line" stands at the foot of both, above the
+     application's logo (Rule 22).
+   - **"Logo" removed**: press "Remove" under "Logo": "Restore Original"
+     shows; press "Save". The visitor reloads the home page: the header
+     shows the journal's name again (Rule 20); the logo's address noted
+     before no longer opens the picture (Side effects).
+   - **Control**: before the first "Save", the uploaded "logo.png" had
+     not reached the visitor's header: an upload counts only once the tab
+     is saved (Fields, the upload boxes).
+
+4. **The sidebar: blocks placed, ordered, switched off and removed**
+
+   Given: Journal Manager, on a scratch journal with English as its one
+   language, and a visitor, signed out, on its home page in a second
+   browser.
+
+   - **The list as it opens**: open Settings › Website › "Appearance" ›
+     "Setup": "Sidebar" holds one box per block, none ticked: "Web Feed
+     Plugin", "Information Block", "Subscription Block" and "Language
+     Toggle Block" on a journal; the same with "Browse Block" in place of
+     "Subscription Block" on a press; "Web Feed Plugin" and "Language
+     Toggle Block" alone on a preprint server. There is no ""Make a
+     Submission" Block" (Rule 23).
+   - **A block plugin enabled**: open Settings › Website › "Plugins" ›
+     "Installed Plugins" and tick ""Developed By" Block". Reload the page
+     and open "Appearance" › "Setup": "Sidebar" now holds a box
+     ""Developed By" Block", unticked (Rule 23).
+   - **Placed**: tick "Web Feed Plugin", ""Developed By" Block" and
+     "Language Toggle Block" and press "Save". Reload the page: the three
+     ticked boxes stand first in "Sidebar", the unticked ones after them
+     (Rule 23). The visitor reloads the home page: beside the content, a
+     sidebar holds the "Web Feed Plugin" block and the ""Developed By"
+     Block" in the list's order, and nothing for "Language Toggle Block",
+     the journal having one language (Rule 24).
+   - **Dragged**: drag ""Developed By" Block" by its handle to the top of
+     the list and press "Save": the visitor's reloaded sidebar shows the
+     ""Developed By" Block" first (Rules 23, 24).
+   - **Moved by its arrow**: press the up arrow of "Web Feed Plugin",
+     whose text reads "Increase position of Web Feed Plugin", until the
+     row stands first, and press "Save": the visitor's reloaded sidebar
+     shows the "Web Feed Plugin" block first [A3](#a3) (Rules 23, 24).
+   - **Its plugin switched off**: on "Plugins" › "Installed Plugins",
+     untick "Web Feed Plugin" and confirm. The visitor reloads: its block
+     has left the sidebar. Reload Settings › Website and open "Appearance"
+     › "Setup": "Sidebar" no longer lists it; leave the tab unsaved (a
+     save there is refused now [A4](#a4)) (Rule 25).
+   - **Its plugin switched on again**: tick "Web Feed Plugin" on
+     "Plugins" › "Installed Plugins". Reload and open "Appearance" ›
+     "Setup": "Sidebar" lists "Web Feed Plugin" ticked and first again; the visitor's
+     reloaded sidebar shows its block first again (Rule 25).
+   - **None ticked**: untick every box in "Sidebar" and press "Save". The
+     visitor reloads the home page, then opens "About the Journal": no
+     page has a sidebar, and the content keeps its width and stands in
+     the middle of the page (Rule 24).
+   - **Control**: before the first "Save", the visitor's home page had no
+     sidebar (Rules 23, 24).
+
+5. **The order of the masthead's roles**
+
+   Given: Journal Manager, on a scratch journal whose "Editorial
+   Masthead" tab has never been saved and whose "Journal editor",
+   "Section editor" and "Editorial Board Member" roles ("Press editor",
+   "Series editor" and "Editorial Board Member" on a press; "Moderator"
+   and "Editorial Board Member" on a preprint server) each have a
+   current member and a former one, and a visitor, signed out, in a
+   second browser.
+
+   - **The list as it opens**: open Settings › Website › "Appearance" ›
+     "Editorial Masthead": under "Define the order of masthead roles for
+     public display." the list reads "Journal editor", "Section editor",
+     "Editorial Board Member" ("Press editor", "Series editor", "Editorial
+     Board Member"; "Moderator", "Editorial Board Member"), each row with
+     a drag handle and up and down arrows and no box to tick, and no
+     Reviewer role; below it, "Reviewers" with the note "Reviewers will
+     be displayed in a standardized format to maintain uniformity and
+     ensure easy discoverability in this section." (Fields, "Editorial
+     Masthead"; Rule 28).
+   - **A role ticked before the first save** {OJS OMP}: open Settings ›
+     Users & Roles › "Roles", press "Edit" on the "Production editor"
+     row, tick "Consider role in masthead list" and save the window.
+     Reload Settings › Website and open "Editorial Masthead": "Production
+     editor" is in the list, above "Section editor" ("Series editor"), at
+     the place of its permission level (Rule 28; Settings bullet 24).
+   - **Reordered**: press the up arrow of "Editorial Board Member" until
+     the row stands first, and press "Save": "Saved". The visitor opens
+     "Editorial Masthead" from the header's "About" menu: "Editorial Board
+     Member" is the first role heading, the others following in the
+     list's order; the visitor presses "Editorial History" in the line
+     "View Editorial History": that page's first role heading is
+     "Editorial Board Member" too (Rule 28).
+   - **A role ticked after the first save** {OJS OMP}: on Settings ›
+     Users & Roles › "Roles", tick "Consider role in masthead list" for
+     "Layout Editor" the same way. Reload Settings › Website and open
+     "Editorial Masthead": "Layout Editor" stands last in the list
+     (Rule 28; Settings bullet 24).
+   - **Control**: before the "Save", the visitor's "Editorial Masthead"
+     page listed "Editorial Board Member" as its last role heading
+     (Rule 28).
+
+6. **The "Lists" tab: refused numbers, then one entry a page**
+
+   Given: Journal Manager, on a scratch journal holding three articles
+   published outside any issue (a scratch press with nothing published;
+   a scratch preprint server with eleven preprints posted today), and a
+   visitor, signed out, in a second browser.
+
+   - **As it opens**: open Settings › Website › "Setup" › "Lists":
+     "Items per page" reads 25 and "Page links" 10 (Fields, "Lists").
+   - **"Latest preprints"** {OPS}: the visitor opens the home page: under
+     "Latest preprints" stand ten of the eleven preprints, with no page
+     links (Rule 16).
+   - **Refused**: empty "Items per page" and press "Save": "This field is
+     required." and nothing is sent. Type "0" and press "Save": "This
+     must be at least 1."; the same for "-1". Type "abc" and press
+     "Save": "This is not a valid integer."; the same for "2.5". Type "25"
+     back in "Items per page", type "0" in "Page links" and press "Save": "This must be at
+     least 1." (Fields, "Lists").
+   - **No upper limit**: type "100000" in both boxes and press "Save":
+     "Saved" (Fields, "Lists").
+   - **One a page**: type "1" in "Items per page" and "3" in "Page links"
+     and press "Save": "Saved"; reloaded, the tab reads 1 and 3 (Rule 2).
+   - **"Latest Publications"** {OJS}: the visitor reloads the home page:
+     under "Latest Publications" one article, "1 - 1 of 3 items", the
+     page numbers, ">" and ">>", and no "<<" or "<". The visitor presses
+     "2": "2 - 2 of 3 items", then "<<", "<", "1 2 3" with 2 in the
+     middle, ">" and ">>". The visitor presses "3": "3 - 3 of 3 items",
+     with no ">" or ">>" (Rules 13, 29, 30).
+   - **"Latest preprints" unchanged** {OPS}: the visitor reloads the home
+     page: "Latest preprints" still lists ten preprints, with no page
+     links: "Items per page" does not apply there (Rule 16).
+   - **Control**: Settings › Users & Roles › "Users" still lists every
+     user of the journal on one page (Rule 29).
+
+7. **Date formats, from the tab to the public pages**
+
+   Given: Journal Manager, on a scratch journal with announcements on,
+   "Display on Homepage" at 1 and one announcement, "Call for papers",
+   posted today, a published book {OMP}, and a visitor, signed out, in
+   a second browser. The dates below are written for 24 September 2026
+   at 3:05 in the afternoon; the tab and the pages show the tester's
+   own day and time in the same patterns.
+
+   - **The tab as it opens**: open Settings › Website › "Setup" › "Date &
+     Time": under "Date and Time Formats", five groups, each choice but
+     "Custom" written as today's date or time in its pattern. Chosen:
+     "September 24, 2026" under "Date", "2026-09-24" under "Date
+     (Short)", "03:05 PM" under "Time", "September 24, 2026 - 03:05 PM"
+     under "Date & Time" and "2026-09-24 03:05 PM" under "Date & Time
+     (Short)" (Fields, "Date & Time").
+   - **The combined choices follow**: under "Date (Short)" choose
+     "24.09.2026": the ready choice of "Date & Time (Short)" now reads
+     "24.09.2026 03:05 PM" and is still the chosen one. Choose
+     "2026-09-24" again: it reads "2026-09-24 03:05 PM" again. Choose
+     "24.09.2026" once more, then under "Date" choose "24 September
+     2026": the ready choice of "Date & Time" now reads "24 September
+     2026 - 03:05 PM" (Rule 32). Press "Save": "Saved".
+   - **The visitor's dates**: the visitor reloads the home page: the
+     announcement's posted date reads "24.09.2026" (Rule 31). {OMP} The
+     book's page gives its "Published" date as "24 September 2026", and
+     the catalog lists the book with the same date (Rule 31).
+   - **"Custom"**: under "Date (Short)" choose "Custom", type "d/m/Y" in
+     its box and press "Save". The visitor reloads the home page: the
+     announcement's date reads "24/09/2026" (Rule 33).
+   - **Control**: before the first "Save", the visitor's home page gave
+     the announcement's date as "2026-09-24" (Fields, "Date & Time";
+     Rule 31).
+
+8. **A journal in two languages**
+
+   Given: Journal Manager, working in English, on a scratch journal
+   whose primary language is English, with French ticked under "UI" and
+   "Forms", announcements on, "Display on Homepage" at 1 and one
+   announcement posted today, a visitor, signed out, in a second
+   browser, and "logo.png", a PNG picture.
+
+   - **A French footer alone**: open Settings › Website › "Appearance" ›
+     "Setup", press "French" at the top of the tab, type "Pied de page"
+     in the French "Page Footer" box, leave the English one empty and
+     press "Save". The visitor opens {journal address}/en, the home page
+     in English: its foot reads "Pied de page"; {journal address}/fr_CA,
+     the home page in French, reads the same (Rule 3).
+   - **Both languages**: type "English footer" in the English "Page
+     Footer" box and press "Save": the visitor's reloaded English page
+     reads "English footer", the French one still "Pied de page"
+     (Rule 3).
+   - **An English logo alone**: press "Upload File" under the English
+     "Logo", choose "logo.png", type "Journal logo" in "Alternate text",
+     leave the French "Logo" empty and press "Save". The visitor reloads
+     the French page: its header shows the logo, with "Journal logo" as
+     its description (Rule 3).
+   - **Dates per language**: open "Setup" › "Date & Time", press
+     "French", choose "24.09.2026" under the French "Date (Short)" and
+     press "Save". The visitor reloads both pages: the announcement's
+     posted date reads "24.09.2026" on the French one and "2026-09-24" on
+     the English one (Rule 3).
+   - **Control**: before the first "Save", the foot of the English page
+     held no footer text (Fields, "Setup": "Page Footer" empty on a new
+     journal).
+
+9. **A journal with no issue: its recent articles and its categories** {OJS}
+
+   Given: Journal Manager, on a scratch journal with no issue, two
+   articles published outside any issue and the categories "Arts" and
+   "Science", "Science" holding the subcategory "Physics", and a
+   visitor, signed out, in a second browser.
+
+   - **As it opens**: open Settings › Website › "Appearance" › "Theme":
+     under "Journal Content Organization" only "Include recent most
+     published articles" is ticked (Rule 10).
+   - **The home page**: the visitor opens it: "Latest Publications"
+     lists the two articles with "1 - 2 of 2 items" and no page links;
+     there is no row of categories and no "Current Issue" (Rules 12, 13,
+     15).
+   - **The categories**: tick "Include a listing of categories" and press
+     "Save". The visitor reloads the home page: above "Latest
+     Publications" stands a row of links, "Arts" and "Science", without
+     "Physics"; "Arts" opens that category's page (Rules 12, 15).
+   - **Recent articles off**: untick "Include recent most published
+     articles" and press "Save": the visitor's reloaded home page keeps
+     the row of categories and no longer shows "Latest Publications"
+     (Rule 10).
+   - **Control**: reloaded, the "Theme" tab has "Include a listing of
+     categories" ticked alone (Rule 2).
+
+10. **A journal with a current issue, then not published online** {OJS}
+
+    Given: Journal Manager, on a scratch journal with one published
+    issue, "Vol. 1 No. 1 (2026)", holding no article, and a visitor,
+    signed out, in a second browser.
+
+    - **As it opens**: open Settings › Website › "Appearance" › "Theme":
+      under "Journal Content Organization" only "Include the current
+      issue's table of contents" is ticked (Rule 10).
+    - **The home page**: the visitor opens it: the heading "Current
+      Issue", the issue's name "Vol. 1 No. 1 (2026)", no article under
+      it, then the link "View All Issues", which opens the archive
+      (Rule 14).
+    - **Not published online**: open Settings › Distribution › "Access",
+      choose "OJS will not be used to publish the journal's contents
+      online." under "Publishing Mode" and save the tab. The visitor
+      reloads the home page: "Current Issue" is gone (Rule 14; Settings
+      bullet 25).
+    - **Control**: the home page never showed "Latest Publications": the
+      journal has no article outside a published issue (Rule 13).
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Budget** — variants:
+  - a role newly considered for the masthead on a preprint server, before and after the tab's first save {OPS} (Rule 28; Settings bullet 24)
+- **Nothing new to test**:
+  - the Editor and the Production Editor on the same tabs: the same fields and saves as the Journal Manager in scenarios 1 to 10 (Actors row 1)
+- **Register carries it**:
+  - A1 (a press's and a preprint server's homepage image without its description; Rule 18; scenario 3 marks it)
+  - A2 (a logo saved without alternate text, the header's home link left without a name; Rule 20)
+  - A3 (the ordering arrows' names for a screen reader; Rules 23, 28; scenario 4 marks it)
+  - A4 ("Setup" refusing a save while a placed block's plugin is disabled; Rule 25; scenario 4 marks it)
+  - A5 (the removed style sheet's file still opening at its address; Rule 26; scenario 1 marks it)
+  - A6 (the French interface's raw codes on the "Theme" tab; Rule 35)
+  - A7 (a file refused through "Upload File" locking the box and the tab's "Save"; Fields, the upload boxes)
+  - A8 (the "3:05PM" time choice printed in lower case; Fields, "Date & Time")
+  - A9 (an empty "Custom" under "Date (Short)" leaving the editorial dates without the date; Rule 33)
+  - OJS2 (a first issue created on a journal that never saved "Theme", the home page switching by itself {OJS}; Rule 10)
+  - OJS3 (a published issue's articles absent from "Latest Publications", the list ordered by submission {OJS}; Rule 13)
+  - OJS4 (the Settings Wizard showing another organization for a journal with no issue {OJS}; Rule 34; scenario 2 marks it)
+  - OJS5 (every "Journal Content Organization" box unticked and saved {OJS}; Rule 10)
+  - OJS6 (the recent articles' titles as headings at the section's own level {OJS}; Rule 13)
+  - OJS7 (a journal's homepage image saved without "Alternate text" {OJS}; Rule 18)
+  - OMP2 (a press's category page longer than "Items per page" {OMP}; Rule 29)
+- **No seed**:
+  - another theme: a test install has "Default Theme" alone (Rule 4; Settings bullet 1)
+  - the installation's default formats changed: only its configuration file sets them (Settings bullet 27)
+- **Owned by another feature**:
+  - the Section Editor, the Assistant, the Author, the Reviewer and the Reader kept out of the Settings pages (Actors preamble; [Journal identity & about pages](U07-journal-identity-and-about-pages.md) scenario 2)
+  - a Site Administrator with no role in the journal on Settings › Website: the access-denied page on a press and a preprint server, the "Error" window on a journal (Actors preamble; [Journal identity & about pages](U07-journal-identity-and-about-pages.md#a1), [Reader comments & moderation](U14-reader-comments-and-moderation.md#a9))
+  - a signed-out visitor on a journal that requires visitors to sign in, or that is not enabled, getting the Login page (Actors row 3; [Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 22)
+  - a change left unsaved, gone without a question once the page is left (Rule 2; [Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 5)
+  - "Usage statistics display options" on a chart: the "Downloads" section of an article's, a book's and a preprint's page (Rule 9; Settings bullet 7; *Article landing page & reading*, *Monograph landing page*)
+  - the catalog fields of a press: "Show Series", "Featured Books", "New Releases", "Order of monographs" and the cover sizes {OMP} (Rule 17; Settings bullets 8, 14, 19; *Catalog browse*, *Catalog management*)
+  - "Items per page" on the listing pages (Rule 29; [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md) scenario 10)
+  - "Items per page" and "Page links" on the older editorial lists, and the "Users" list's own page length (Rules 29, 30; *Roles configuration*, *Users management*)
+  - "Date & Time (Short)" on a submission file's notes and a library file's "Date uploaded" (Rule 31; [Submission files](U36-submission-files.md), [Submission & Publisher Libraries](U39-submission-and-publisher-libraries.md))
+
+## Findings register
+
+Verdicts are the author's judgment (claude, 2026-09-24), unreviewed unless
+an entry notes otherwise; the team settles them on spec review.
+
+| ID | Finding (one line, symptom) | Bug? | Impact | Review |
+|----|-----------------------------|------|--------|--------|
+| [A1](#a1) | A press's and a preprint server's homepage image never carries its "Alternate text" | 🐞 | minor | — |
+| [A3](#a3) | A screen reader hears the up arrow on "Editorial Masthead" as "{role} Decrease position of {role}", and each "Sidebar" box's name carries both arrows' names | 🐞 | minor | — |
+| [A4](#a4) | "Setup" refuses every save while a placed block's plugin is disabled, though "Sidebar" no longer shows the block | 🐞 | user-visible | — |
+| [A5](#a5) | A removed style sheet stops loading on the pages, but its file stays public at its old address | 🐞 | latent | — |
+| [A6](#a6) | The French "Theme" tab shows raw codes in place of labels, on all three apps | 🐞 | minor | — |
+| [A7](#a7) | After a file refused through "Upload File", the box's "Upload File" and the tab's "Save" stay disabled | 🐞 | user-visible | — |
+| [A8](#a8) | The "Time" choice shown as "3:05PM" prints in lower case ("7:17pm") | 🐞 | minor | — |
+| [A9](#a9) | An empty "Custom" saved under "Date (Short)" leaves editorial dates showing the time without the date | 🐞 | user-visible | — |
+| [OJS5](#ojs5) | With every "Journal Content Organization" box unticked, "Save" shows "Saved" and the home page keeps its default part | 🐞 | minor | — |
+| [OJS6](#ojs6) | The article titles under "Latest Publications" are headings of the section's own level | 🐞 | minor | — |
+| [OMP2](#omp2) | A press's category page shows only its first page of books, with no way to the rest | 🐞 | user-visible | — |
+| [A2](#a2) | A logo saved without alternate text leaves the header's home link without a name | ❓ | minor | — |
+| [OJS2](#ojs2) | A journal's home page switches from its recent articles to an empty current-issue section when the first issue is created | ❓ | user-visible | — |
+| [OJS3](#ojs3) | "Include recent most published articles" lists only articles outside a published issue, by submission date | ❓ | minor | — |
+| [OJS4](#ojs4) | The Settings Wizard shows the current issue's table of contents ticked for a journal with no issue, and a save there stores it | ❓ | minor | — |
+| [OJS7](#ojs7) | A journal's homepage image saved without "Alternate text" has no text alternative at all | ❓ | minor | — |
+| [OJS1](#ojs1) | Only a journal has "Journal Content Organization" | ✅ | minor | — |
+| [OMP1](#omp1) | A press's appearance tabs carry the catalog's fields | ✅ | minor | — |
+| [OPS1](#ops1) | A preprint server's home page has a fixed order | ✅ | minor | — |
+
+### All apps
+
+<a id="a1"></a>
+**A1 — A press's and a preprint server's homepage image has no description** · 🐞 · minor.
+A manager who types an "Alternate text" for the "Homepage Image" expects
+it as the picture's description, as a journal's home page gives it. A
+press's and a preprint server's home pages show the picture with an empty
+description, whatever was typed, so a screen reader skips it. Since:
+2019-05 (the journal's page was corrected then, the others never) ·
+Basis: probe. <sup>f-a1</sup>
+
+<a id="a2"></a>
+**A2 — A logo without alternate text leaves the home link unnamed** · ❓ · minor.
+With "Alternate text" left empty, the header logo has no description at
+all, and the link it forms to the home page has no name a screen reader
+can read; the same header without a logo reads the journal's name.
+Question: should a logo without alternate text be described by the
+journal's name? Lean: yes; the name is what the logo stands for, and the
+field is easy to leave empty. Basis: probe. <sup>f-a2</sup>
+
+<a id="a3"></a>
+**A3 — The ordering arrows are misnamed to screen readers** · 🐞 · minor.
+On "Editorial Masthead" a screen reader announces each role's up arrow as
+"{role} Decrease position of {role}", although the arrow's own text reads
+"Increase position of {role}", and the down arrow as "Decrease position
+of {role}". Under "Sidebar" each block's box is announced with both
+"Increase position of {block}" and "Decrease position of {block}" in its
+name, so the box's own meaning is buried. A manager relying on a screen
+reader cannot tell which arrow moves a role up. Basis: probe.
+<sup>f-a3</sup>
+
+<a id="a4"></a>
+**A4 — "Setup" refuses to save over a placed block whose plugin is off** · 🐞 · user-visible.
+A manager who disables a block's plugin while the block is placed, then
+saves any change on "Setup" (a new "Page Footer", say), is refused under
+"Sidebar" with "The {name} block can not be found. Please make sure the
+plugin is installed and enabled.", although "Sidebar" no longer shows the
+block. The save goes through only once the "Sidebar" list is changed,
+which drops the block's place without a word. The same holds for a custom
+block ([Custom pages & blocks](U09-custom-pages-and-blocks.md#a15)).
+Basis: probe. <sup>f-a4</sup>
+
+<a id="a5"></a>
+**A5 — A removed style sheet's file stays public** · 🐞 · latent.
+A manager who presses "Remove" under "Journal style sheet" and saves
+expects the file to be gone. The public pages stop loading it, but the
+file stays in the journal's public files and still opens at its old
+address, while a removed logo or picture is deleted. Nothing on screen
+shows it; it matters when the file held something meant to be withdrawn.
+Basis: probe. <sup>f-a5</sup>
+
+<a id="a6"></a>
+**A6 — Raw codes on the French "Theme" tab** · 🐞 · minor.
+A manager working in French reads, in place of labels,
+"##manager.setup.journalContentOrganization##", its description and its
+three boxes on a journal; on a press the only entry of the "Thème" list
+("##plugins.themes.default.name##") and every label, description and
+choice of the default theme's fields ("##manager.setup.contextSummary##",
+typography, header image, colour, series listing, statistics); and
+"##plugins.themes.default.option.displayStats.label##" with its three
+choices on a preprint server. Basis: probe. <sup>f-a6</sup>
+
+<a id="a7"></a>
+**A7 — A refused file locks the upload box and the tab's "Save"** · 🐞 · user-visible.
+A manager who picks a ".pdf" for "Logo" with "Upload File" sees "You
+can't upload files of this type." in the box and expects to pick another
+file. The box keeps an empty frame with no "Remove", its "Upload File" is
+disabled, and so is the tab's "Save", with "Please correct one error. Go
+to Logo: You can't upload files of this type. Jump to next error" at the
+form's foot. Only a picture dragged onto the box turns both back on; a
+manager who uses the button alone has to leave the page, losing every
+other change on the tab. "Favicon" and the style sheet behave the same.
+Basis: probe. <sup>f-a7</sup>
+
+<a id="a8"></a>
+**A8 — The "3:05PM" time choice prints in lower case** · 🐞 · minor.
+The third "Time" choice on "Date & Time" reads "3:05PM". A manager who
+picks it and saves expects times written that way; they print in lower
+case instead: a library file uploaded at 7:17 in the evening reads
+"2026-09-24 7:17pm" under "Date uploaded". Basis: probe. <sup>f-a8</sup>
+
+<a id="a9"></a>
+**A9 — An empty "Custom" under "Date (Short)" strips the date from editorial dates** · 🐞 · user-visible.
+A manager who picks "Custom" under "Date (Short)", leaves its box empty
+and presses "Save" sees "Saved", and the public dates fall back to
+"2026-09-24" as Rule 33 says. But "Date & Time (Short)" is saved as the
+time alone: on the next load that group sits on "Custom" with "h:i A" in
+its box, and the editorial dates print with no date (a file's note reads
+"07:17 PM", a library file's "Date uploaded" "07:17 PM"). Choosing
+another "Date (Short)" does not bring the date back; the manager has to
+pick the group's ready choice and save again. Basis: probe.
+<sup>f-a9</sup>
+
+### OJS
+
+<a id="ojs1"></a>
+**OJS1 — Only a journal has "Journal Content Organization"** · ✅ · minor.
+A journal chooses which of the current issue, its recent articles and its
+categories its home page shows; a press's home page follows its catalog
+fields ([OMP1](#omp1)) and a preprint server's is fixed ([OPS1](#ops1)).
+The three home pages serve different publishing models. Basis: code.
+<sup>f-ojs1</sup>
+
+<a id="ojs2"></a>
+**OJS2 — The home page changes by itself when the first issue is created** · ❓ · user-visible.
+A journal that never saved "Theme" shows its published articles under
+"Latest Publications". As soon as its first issue is created, even one
+not yet published, the home page shows the current issue instead, which
+stays absent until an issue is published: the articles vanish from the
+home page with nobody having changed a setting. Question: should a
+journal keep the organization it shows until a manager changes it? Lean:
+yes; store the organization when the journal is created, or count only
+published issues. Basis: probe. <sup>f-ojs2</sup>
+
+<a id="ojs3"></a>
+**OJS3 — "Include recent most published articles" lists only articles outside a published issue** · ❓ · minor.
+The box promises the journal's most recent articles. The list holds only
+articles published with no issue or in an issue not yet published, the
+most recently submitted first, so a journal that publishes by issue sees
+it empty, and an article published early but submitted long ago sits at
+the bottom. Question: is the list meant for articles published ahead of
+an issue alone? Lean: yes, for continuous publishing; the box's wording
+should say so, and the list should run by publication date.
+Basis: probe. <sup>f-ojs3</sup>
+
+<a id="ojs4"></a>
+**OJS4 — The Settings Wizard shows another content organization** · ❓ · minor.
+For a journal with no issue, the journal's own "Theme" tab shows "Include
+recent most published articles" ticked, which is what its home page
+shows. The Site Administrator's Settings Wizard shows "Include the current
+issue's table of contents" ticked instead, and a save of the wizard's
+"Appearance" tab, made to change the colour say, stores that choice and
+empties the home page of its articles. Question: should the wizard show
+the journal's own organization? Lean: yes; the two screens edit the same
+settings. Basis: probe. <sup>f-ojs4</sup>
+
+<a id="ojs5"></a>
+**OJS5 — The home page cannot be set to show none of the three parts** · 🐞 · minor.
+A manager who unticks all three "Journal Content Organization" boxes and
+presses "Save" sees "Saved" and expects a home page without the current
+issue, the recent articles and the categories. The tab reopens with the
+journal's default ticked ("Include the current issue's table of
+contents" on a journal with an issue), and the home page shows "Current
+Issue". Basis: probe. <sup>f-ojs5</sup>
+
+<a id="ojs6"></a>
+**OJS6 — The recent articles are headings beside their section** · 🐞 · minor.
+Under "Latest Publications" each article's title is a heading of the
+same level as "Latest Publications" itself, so a screen reader's list of
+headings shows the articles beside the section instead of inside it; the
+current issue's articles sit one level below their heading, as expected.
+Basis: probe. <sup>f-ojs6</sup>
+
+<a id="ojs7"></a>
+**OJS7 — A journal's homepage image without alternate text has no text alternative** · ❓ · minor.
+With "Alternate text" left empty, a journal's homepage image carries no
+text alternative at all, so a screen reader may announce it by its file
+name; a press's and a server's always carry an empty one
+([A1](#a1)). Question: should an empty box mark the picture as
+decorative, so a screen reader skips it? Lean: yes; a file name tells a
+listener nothing. Basis: probe. <sup>f-ojs7</sup>
+
+### OMP
+
+<a id="omp1"></a>
+**OMP1 — A press's appearance tabs carry the catalog's fields** · ✅ · minor.
+A press's "Setup" adds "Featured Books", "New Releases" and "Order of
+monographs", its "Advanced" adds the cover image sizes, and its "Theme"
+adds "Show Series": the catalog is a press's home for its books, and a
+journal and a preprint server have none. Basis: code. <sup>f-omp1</sup>
+
+<a id="omp2"></a>
+**OMP2 — A press's category page has no way past its first page** · 🐞 · user-visible.
+A category holding more books than "Items per page" heads its page with
+the full count ("3 Titles" at "Items per page" 1) but shows only the
+first page's books, with no page numbers and no "Previous" or "Next", so
+a visitor cannot reach the rest. The catalog pages the same books with
+"Next", and a journal's and a preprint server's category pages carry page
+numbers. Basis: probe. <sup>f-omp2</sup>
+
+### OPS
+
+<a id="ops1"></a>
+**OPS1 — A preprint server's home page has a fixed order** · ✅ · minor.
+A preprint server's home page always lists its latest preprints under a
+search box and its category links, with the summary after them; only the
+summary can be switched off. Continuous posting has no issue to show.
+Basis: code. <sup>f-ops1</sup>
+
+---
+
+<a id="footnotes"></a>
+## Footnotes — mechanism & evidence
+
+<a id="fn-a"></a>
+**a — the screens and who reaches them.** `PKP\pages\management\ManagementHandler::website()`
+builds the Website page's forms and `lib/pkp/templates/management/website.tpl`
+mounts them; the page's guard is `CanAccessSettingsPolicy` in
+`ManagementHandler::authorize()` (the manager-level group with
+`permitSettings`, or the Site Administrator), described in the Journal
+identity spec's note on who opens the Settings pages. Each app's
+`APP\pages\management\SettingsHandler` extends `ManagementHandler` and
+overrides `workflow` and `distribution` only, so `website()` is the shared
+one. The three checkouts pin one pkp-lib (`76a315591b`) and one
+ui-library (`03d1cee2`) at ojs `d9b567efec`, omp `187f0f40d`, ops
+`61cd158ce3`. The site's own appearance is `AdminHandler::settings()`
+with the `siteTheme` and `siteAppearanceSetup` components, shown only on
+a site with more than one context (seed-facts, 2026-09-16). Public pages
+read the settings through `PKPTemplateManager::initialize()` and
+`lib/pkp/templates/frontend/components/{header,footer}.tpl`, which no app
+overrides. Code read 2026-09-24.
+
+<a id="fn-b"></a>
+**b — the Settings Wizard.** `AdminHandler::wizard()` (site
+administrator only) renders `lib/pkp/templates/admin/contextSettings.tpl`:
+top tab `setup` labelled `manager.setup` ("Journal Settings", OMP "Setup",
+OPS "Server Settings"), side tab `appearance` (`manager.website.appearance`)
+mounting `<theme-form>` with a `PKPThemeForm` built for the edited context,
+whose action is `api/v1/contexts/{id}/theme` under the edited context's
+path. The row action is `ContextGridRow`'s `wizard` link
+(`grid.action.wizard` "Settings wizard"). `PKPContextController::editTheme()`
+admits `ROLE_ID_SITE_ADMIN` or `ROLE_ID_MANAGER`. Code read 2026-09-24.
+
+<a id="fn-c"></a>
+**c — the tabs and their saves.** `website.tpl`: top tab `appearance`
+with side tabs `theme` (`<theme-form>`), `appearance-setup`,
+`appearance-masthead`, `advanced`; top tab `setup` with `lists`
+(`PKPListsForm`) and `dateTime` (`<date-time-form>`) among the others. Every
+form but the theme form sends `PUT api/v1/contexts/{id}` with its own
+fields (`Form.vue::submit()`, sent as POST with `X-Http-Method-Override:
+PUT`), and `PKPContextService::edit()` merges only
+the props received and fires the `Context::edit` hook; no mailable,
+notification or log entry is raised on this path. The theme form sends
+`PUT api/v1/contexts/{id}/theme`, which saves each option through
+`ThemePlugin::saveOption()` and clears the template and compiled-CSS
+caches (`clearTemplateCache()`, `clearCssCache()`). Unsaved changes: the
+Journal identity spec's note on saving a tab (live-probed there
+2026-09-23: kept across tabs, dropped on leaving, no dialog).
+Live-probed 2026-09-24 (Rule 2; Side effects bullet 1; all three apps,
+two runs): a "Theme" change, a "Page Footer" and an "Items per page"
+left unsaved each stayed in their boxes across the other side tabs and
+the top tab "Setup"; "Save" on "Date & Time" stored nothing of "Lists";
+a reload or the Dashboard dropped the unsaved changes with no question.
+Pressing the side menu's "Website" while Settings › Website is open
+loads nothing, so an unsaved change stays in its box. Mail catcher
+counts for every user of the scratch journal were 0 before and after
+seven to eleven saves, and the manager's Tasks panel held the same one
+task before and after.
+
+<a id="fn-d"></a>
+**d — the upload boxes.** `PKP\components\forms\FieldUpload` and
+`FieldUploadImage`, ui-library `FieldUpload.vue` / `FieldUploadImage.vue`:
+`common.upload.addFile` "Upload File", `form.dropzone.dictDefaultMessage`
+"Drop files here to upload", `common.remove` "Remove",
+`common.upload.restore` "Restore Original", `common.altText` "Alternate
+text", `common.altTextInstructions`. The refusal reads "You can't upload
+files of this type." on all three apps (live-probed 2026-09-24). An
+image box accepts `image/*` unless the field narrows it; the favicon box
+carries "Alternate text" too. On save, `PKPContextService::edit()`
+moves each temporary file into the journal's public files
+(`_saveFileParam()`: `public/journals|presses|contexts/<id>/`, stored as
+`name`, `uploadName`, `width`, `height`, `dateUploaded`, `altText`); a
+`null` value deletes the stored file (`PublicFileManager::removeContextFile()`).
+The thumbnails are saved the same way by each app's `ContextService`.
+Since 2026-09-24 the test installs' public files load (seed-facts: the
+relative `public_files_dir`). Live-probed 2026-09-24 (Side effects
+bullet 2; all three apps): a saved logo's address answered a signed-out
+browser and answered "not found" after "Remove" and "Save".
+
+<a id="fn-e"></a>
+**e — the theme's fields.** `DefaultThemePlugin::init()` in each app's
+`plugins/themes/default/`: `addOption()` for `typography` (radio, default
+`notoSans`), `baseColour` (`FieldColor`, `#1E6292`),
+`showDescriptionInJournalIndex` / `…PressIndex` / `…ServerIndex`
+(label `manager.setup.contextSummary`), OJS `journalContentOrganization`
+(`APP\journal\enums\JournalContentOption`, pkp-lib#9295, 2025-05/06),
+`useHomepageImageAsHeader`, `displayStats` (default `none`), and OMP
+`showCatalogSeriesListing`. Order: OJS typography, colour, summary,
+organization, header image, statistics; OMP typography, summary, header
+image, colour, series, statistics; OPS as OJS without the organization.
+`PKPThemeForm` sets each field's value from `getOptionValues()` (null
+when never saved) and `Field::getConfig()` shows `value ?? default`.
+Labels: each app's `plugins/themes/default/locale/en/locale.po` and the
+app's `manager.setup.contextSummary` ("Journal Summary", "Press Summary",
+"Server Summary"). Code read 2026-09-24.
+
+<a id="fn-f"></a>
+**f — "Setup".** `PKPAppearanceSetupForm`: `pageHeaderLogoImage`
+(`manager.setup.logo`), `homepageImage` (tooltip
+`manager.setup.homepageImage.description`), `pageFooter`
+(`FieldRichTextarea`, toolbar `bold italic superscript subscript | link |
+blockquote bullist numlist | image | code`, upload URL
+`api/v1/_uploadPublicFile`), `sidebar` (`FieldOptions`, `isOrderable`).
+Each app's `AppearanceSetupForm` inserts its thumbnail (`journalThumbnail`,
+`pressThumbnail`, `serverThumbnail`) after the logo; OMP's appends
+`displayFeaturedBooks`, `displayNewReleases` (booleans, no default in the
+schema) and `catalogSortOption` (radio of
+`Repo::submission()->getSortSelectOptions()`, nullable, no default). A
+field's `tooltip` renders as the icon beside its label. Code read
+2026-09-24.
+
+<a id="fn-h"></a>
+**h — "Advanced".** `PKPAppearanceAdvancedForm`: `styleSheet`
+(`FieldUpload`, `acceptedFiles` `.css`, `fileUrl` the public address),
+`favicon` (`FieldUploadImage`, `acceptedFiles`
+`image/x-icon,image/png,image/gif`), `additionalHomeContent` (same
+toolbar as the footer). OMP's `AppearanceAdvancedForm` adds
+`coverThumbnailsMaxWidth` / `…MaxHeight` (schema integers, defaults 106
+and 100, `min:1`), used when cover thumbnails are generated
+(`APP\publication\Repository`, `SeriesForm`, the category API). OJS and
+OPS subclasses are empty. Code read 2026-09-24.
+
+<a id="fn-i"></a>
+**i — "Lists".** `PKPListsForm`: `itemsPerPage`, `numPageLinks`
+(`FieldText`, `isRequired`, size small). Schema: integers, defaults 25
+and 10, `nullable`, `min:1`. `PKPBaseController::convertStringsToSchema()`
+turns a digits-only string into an integer and leaves anything else a
+string, so "abc" and "2.5" fail the `integer` rule (`validator.integer`
+"This is not a valid integer."), while "0" and "-1" fail `min`
+(`validator.min.numeric` "This must be at least {$min}.", live-probed
+2026-09-24 for "-1"); the schema sets no maximum; an emptied
+required box is refused in the browser (`validator.required`). Seen
+2026-09-23 on all three apps: "Items per page" 25 and "Page links" 10 on
+every context (seed-facts).
+
+<a id="fn-j"></a>
+**j — "Date & Time".** `PKPDateTimeForm`: group `descriptions`
+(`manager.setup.dateTime.descriptionTitle`, `…description` with its link
+"format characters" to the PHP manual's date-format characters);
+`dateFormatLong` presets `F j, Y`, `F j Y`, `j F Y`, `Y F j`;
+`dateFormatShort` `Y-m-d`, `d-m-Y`, `m/d/Y`, `d.m.Y`; `timeFormat` `H:i`,
+`h:i A`, `g:ia`; each plus a `Custom` input
+(`manager.setup.dateTime.custom`). `datetimeFormatLong` and
+`datetimeFormatShort` offer one preset per locale built on the server
+from the saved date and time (`{long} - {time}`, `{short} {time}`) plus
+`Custom`. `Context::getDateTimeFormats()` fills a locale with no saved
+value from the configuration file's `[general]` `date_format_long` "F j,
+Y", `date_format_short` "Y-m-d", `time_format` "h:i A",
+`datetime_format_long` "F j, Y - h:i A", `datetime_format_short` "Y-m-d
+h:i A" (each app's `config.TEMPLATE.inc.php`); a new context stores the
+five formats empty. ui-library `DateTimeForm.vue::mounted()` rewrites
+every preset's label with luxon's `DateTime.now()`, the browser's clock
+(pkp-lib#11079, 2025-03), so `g:ia` shows as "3:05PM" while PHP's `date()`
+prints "3:05pm" (A8); the French labels read "15:05", "03:05 p.m.",
+"3:05p.m.". `fieldChanged()` / `updateFields()` rewrite the combined
+preset's label and move the combined value when it equalled the old
+combination. An empty custom box saves `null` for that group and the
+getters fall back to the configuration file. Saved under "Date (Short)",
+the stored `datetimeFormatShort` is the time pattern alone (A9; why the
+combination drops the date was not traced).
+
+<a id="fn-k"></a>
+**k — the theme list.** `PKPThemeForm` fills the `themePluginPath`
+select from `PluginRegistry::loadCategory('themes', true)` (enabled theme
+plugins) and keeps each theme's option fields in `themeFields`;
+ui-library `ThemeForm.vue::changeTheme()` swaps the fields under "Theme"
+for the chosen theme's on a new choice, and "Save" switches the journal
+to it. That swap is known from the code alone: no test install has a second
+theme, and the Plugin Gallery that would install one answers a server
+error there (checked 2026-09-24). `PKPContextService::validate()`
+refuses a theme that is not installed and enabled
+(`manager.setup.theme.notFound`). The three checkouts ship
+`plugins/themes/default` alone; live-probed 2026-09-16 and 2026-09-24 on
+all three apps: the select offers "Default Theme" alone, under a plain
+sentence (not a link), and Plugins › "Installed Plugins" lists it as the
+only theme plugin. `PKPTemplateManager` picks the active theme from the
+context's `themePluginPath` for frontend pages; `DefaultThemePlugin::init()`
+registers the menu areas `primary` and `user`.
+
+<a id="fn-l"></a>
+**l — typography and colour.** `DefaultThemePlugin::init()` adds the font
+stylesheet for the chosen `typography` and LESS variables `@font` /
+`@font-heading`; a `baseColour` other than `#1E6292` sets `@bg-base`, and
+when `isColourDark()` is false (contrast 130 or more) also
+`@text-bg-base: rgba(0,0,0,0.84)`. `saveOption()` stores `null` for a
+value not matching `/^#[0-9a-fA-F]{1,6}$/` (pkp/pkp-lib#11974), and
+`init()` falls back to `#1E6292` for such a value; on screen that
+fallback is not reached, because the colour box sends the colour chosen
+before when the typed code is not one it can read (live-probed
+2026-09-24, "red" and "#12345"). The compiled
+stylesheet is served by `PKP\controllers\page\PageHandler::css()`
+(`$$$call$$$/page/page/css?name=stylesheet`), cached per context as
+`cache/{contextId}-stylesheet-{hash}.css` and cleared on every theme save.
+
+<a id="fn-m"></a>
+**m — the home page.** OJS `APP\pages\index\IndexHandler::index()` with
+`templates/frontend/pages/indexJournal.tpl`; OMP `IndexHandler::_displayPressIndexPage()`
+with `index.tpl`; OPS `IndexHandler::index()` with `indexServer.tpl`; each
+extends `PKPIndexHandler` (no ops of its own). Order in the templates:
+OJS highlights, `homepage_image`, `categoryHeader`, `homepage_about`
+(`about.aboutContext`), announcements, `latest_article.tpl`,
+`current_issue`, `additional_content`; OMP highlights, image,
+`homepage_about`, `monographList.tpl` for `catalog.featured` "Featured"
+(while `displayFeaturedBooks`) and `catalog.newReleases` "New Releases"
+(while `displayNewReleases`), announcements, additional content; OPS
+highlights, image, announcements, `archiveHeader.tpl`,
+`homepage_latest_preprints`, `homepage_about`, additional content. The
+Highlights spec's claim check confirmed the carousel's place and the
+parts below it (2026-09-16). `additionalHomeContent` is assigned by the
+index handlers alone.
+
+<a id="fn-n"></a>
+**n — "Latest Publications".** OJS `IndexHandler`, option
+`RECENT_PUBLISHED`: `Repo::submission()->getCollector()->filterByLatestPublished(true)`
+(OJS `APP\submission\Collector`: the current publication published, with
+a publication date, and either no issue or an unpublished one), no
+`orderBy()` call, so the collector's default `dateSubmitted DESC`; paged
+by a `LengthAwarePaginator` of `itemsPerPage`. `latest_article.tpl`:
+heading `submissions.published.latest` "Latest Publications",
+`{page_info}` (`navigation.items` "{$from} - {$to} of {$total} items",
+printed whenever there is a page) and `{page_links}`
+(`PKPTemplateManager::smartyPageLinks()`: `&lt;&lt;` `&lt;` before, the
+numbers from `page - floor(numPageLinks / 2)`, `&gt;` `&gt;&gt;` after,
+nothing on a single page). Code read 2026-09-24.
+
+<a id="fn-o"></a>
+**o — the organization, the current issue and the categories.**
+`JournalContentOption::default()`: `ISSUE_TOC` when any issue of the
+journal exists (`Repo::issue()` collector `exists()`, published or not),
+else `RECENT_PUBLISHED`, and `ISSUE_TOC` when no journal is in the
+request. `IndexHandler` reads `$activeTheme->getOption('journalContentOrganization')`
+and uses `default()` when it is not an array. `CATEGORY_LISTING`: the
+journal's categories, printed by `categoryHeader.tpl` for those without a
+parent, each linking `catalog/category/{path}`. `ISSUE_TOC`:
+`Repo::issue()->getCurrent()` and `publishingMode !=
+PUBLISHING_MODE_NONE` (`AccessForm`, `manager.distribution.publishingMode.none`),
+then `IssueHandler::setupIssueTemplate()`; labels `journal.currentIssue`
+"Current Issue", `journal.viewAllIssues` "View All Issues" (to
+`issue/archive`). Seen 2026-09-23: "Publishing Mode" shows no choice
+marked on a new journal (seed-facts).
+
+<a id="fn-p"></a>
+**p — "Latest preprints".** OPS `IndexHandler::index()`: published
+submissions of the server, `orderBy(ORDERBY_DATE_PUBLISHED)` descending,
+`limit(10)`, no paginator; the publication date carries no time, so
+preprints posted the same day tie and the database picks their order.
+`indexServer.tpl` prints the heading `index.latestPreprints` "Latest
+preprints" and a `<ul>` of `preprint_summary.tpl` unconditionally. The
+search box and category links come from `archiveHeader.tpl` (the
+Sections feature's archive header).
+
+<a id="fn-q"></a>
+**q — the homepage image.** OJS `indexJournal.tpl`: `<div
+class="homepage_image"><img … alt="{$homepageImage.altText}">` when set
+(the `alt` omitted when empty), the image styled to the column's width;
+OMP `index.tpl` and OPS `indexServer.tpl`: a bare `<img …
+alt="{$homepageImageAltText|escape}">`, a variable OMP's handler never
+assigns and OPS's reads from `homepageImageAltText`, a setting the
+context schema lacks (it stores the text as `homepageImage.altText`), so
+`alt` is always empty. All three skip the image while
+`useHomepageImageAsHeader` is on. `DefaultThemePlugin::init()` adds the
+inline style `.pkp_structure_head { background: center / cover no-repeat
+url("…"); }` on every page of the context when the option is on and the
+context has a localized `homepageImage`. Live-probed 2026-09-24 (Rules
+8, 18; all three apps): with the header option ticked, the header's
+background was the picture on the home, About and item pages and the
+home page body had none; unticked, the picture was back in the body;
+removed and saved with the option still ticked, the header was plain
+colour again. In a 1280-pixel window with an 860-pixel main column, a
+300 × 100 picture showed 860 × 287 on a journal and 300 × 100 on a press
+and a server; a 2000 × 400 picture 860 × 172 and 800 × 160.
+
+<a id="fn-r"></a>
+**r — logo, thumbnail, footer.** `header.tpl`: `{if
+$displayPageHeaderLogo}` an `<a class="is_img">` with the uploaded file,
+its `width` and `height`, and `alt` only when `altText != ''`; `{elseif
+$displayPageHeaderTitle}` the name as text (`PKPTemplateManager` assigns
+both from the context). The thumbnail: each app's `indexSite.tpl`, `alt`
+only when set. `footer.tpl`: `{if $pageFooter}` a `pkp_footer_content`
+block before `pkp_brand_footer`. Seen 2026-09-23 in passing on all three
+apps: a header logo uploaded without alternate text rendered with no
+`alt`.
+
+<a id="fn-s"></a>
+**s — the sidebar.** `PKPAppearanceSetupForm` offers
+`PluginRegistry::loadCategory('blocks', true)` (the enabled block plugins,
+the custom blocks included) by `getDisplayName()`. ui-library
+`FieldOptions.vue::mounted()` sorts the options by their index in the
+saved value, unsaved ones last; `Orderer.vue` gives the arrows
+`common.orderUp` "Increase position of {$itemTitle}" and
+`common.orderDown` "Decrease position of {$itemTitle}"; the watcher on
+`selectedValue` filters the value to the offered options only when the
+list changes. `PKPTemplateManager::displaySidebar()` prints the saved
+names in order, skipping names not among the enabled blocks; `footer.tpl`
+prints the `pkp_structure_sidebar` column only when that output is
+non-empty, and `header.tpl` adds `has_sidebar` from `hasSidebar`.
+`PKPContextService::validate()` refuses a saved name that is not an
+enabled block (`manager.setup.layout.sidebar.invalidBlock`, filled with
+the saved registry name, such as `languagetoggleblockplugin`). Enabled on
+a new context by each plugin's `settings.xml`: OJS `information`,
+`languageToggle`, `subscription`, OMP `browse`, `information`,
+`languageToggle`, OPS `languageToggle`; the generic `webFeed` true in all
+three; `developedBy` false. `makeSubmission` is not enabled on a new
+context: no `enabled` row exists for it on any context, `publicknowledge`
+included. Live-probed 2026-09-24 (Rules 23–25; all three apps): the
+"Sidebar" lists of new contexts as Rule 23 quotes them, on four scratch
+contexts per app.
+
+<a id="fn-t"></a>
+**t — style sheet and favicon.** `PKPTemplateManager::initialize()`: the
+context's `styleSheet` is added as `contextStylesheet` with
+`STYLE_SEQUENCE_LATE` and the default `contexts` (`frontend` only), its
+address carrying `?d={dateUploaded}` on OJS and OPS and `?v=3.6.0.0` on
+OMP; the favicon (`Context::getLocalizedFavicon()`, the current locale
+then the primary) as a `<link rel="icon">` header in the `frontend` and
+`backend` contexts. Code read 2026-09-24. Live-probed 2026-09-24 (Rule
+26; all three apps): a style sheet whose one rule colours every heading
+red was the last style sheet in the page head; the home page's headings
+turned red while the item page's "Published" ("Posted") and "Versions"
+labels kept the theme's grey; the Dashboard and Settings › Website did
+not load it.
+
+<a id="fn-u"></a>
+**u — "Editorial Masthead".** `PKPAppearanceMastheadForm`:
+`mastheadUserGroupIds` (`FieldOptions`, `isOrderable`, `allowOnlySorting`,
+the value every listed id) and the `FieldHTML` `reviewer`
+(`user.role.reviewers`, `manager.setup.editorialMasthead.order.reviewers.description`),
+added on every app. `Repo::userGroup()->getSortedMastheadUserGroups()`:
+the context's groups with `masthead` true, the reviewer role excluded,
+ordered by role id, then by the saved order with unsaved groups last;
+with no saved order, the role-id order alone, so a newly ticked group
+takes its level's place. `registry/userGroups.xml` sets `masthead="true"`
+on the editor, section editor, external reviewer and editorial board
+member groups (OJS, OMP) and on the section editor and editorial board
+member groups (OPS); OMP's internal reviewer group has none. The Journal
+identity spec live-probed the order's effect on 2026-09-23.
+
+<a id="fn-v"></a>
+**v — where "Lists" applies.** Each app's `TemplateManager` assigns the
+context's `itemsPerPage` and `numPageLinks` to the frontend.
+`{page_links}` (numbered) is used by OJS `latest_article.tpl`, each app's
+`frontend/pages/search.tpl` and the OJS and OPS `catalogCategory.tpl`;
+OMP's `catalogCategory.tpl` prints no page links; the listing pages'
+`pagination.tpl` prints "Previous" / "Next" only.
+`PKPHandler::getRangeInfo()` takes the context's `itemsPerPage` as the
+page size of every paged grid (`PagingFeature`, for example the Roles
+grid; `gridPaging.tpl` adds an "Items per page:" select); the Comments
+page's list uses it too (`userComment\Repository`). The "Users" list on
+Settings › Users & Roles is a Vue list that asks 25 a page
+(`count=25`), and the Dashboard's submission list 30. Code read
+2026-09-24; the listing pages were live-probed by the Navigation menus
+spec on 2026-09-23.
+
+<a id="fn-w"></a>
+**w — where the formats print.** `PKPTemplateManager` assigns the
+context's formats to the frontend and to the editorial page context.
+`dateFormatShort`: OJS `article_details.tpl`, `issue_toc.tpl` and the
+search results' `article_summary.tpl`; OPS `preprint_details.tpl`,
+`preprint_summary.tpl`; lib/pkp `announcement_full.tpl`,
+`announcement_summary.tpl`, `announcements_list.tpl`. `dateFormatLong`:
+OMP `monograph_full.tpl`, `monograph_summary.tpl`, `chapter.tpl`. The
+date-and-time formats: lib/pkp `controllers/informationCenter/note.tpl`
+and the library file forms print `datetimeFormatShort`;
+`workflow/reviewHistory.tpl` and `authorDashboard/submissionEmails.tpl`
+name the date-and-time formats too, but none of the screens driven on 2026-09-24
+printed "Date & Time" (the long one), and a review's history was not
+reached. The Announcements spec live-probed "Date (Short)" on
+announcement dates (2026-09-17).
+
+<a id="fn-x"></a>
+**x — the wizard's organization.** `DefaultThemePlugin::init()` computes
+the `journalContentOrganization` default with the request's context;
+the wizard runs at the site's address (`index/admin/wizard/{id}`), where
+the request has no journal, so `JournalContentOption::default()` returns
+`ISSUE_TOC`. `PKPThemeForm` shows `value ?? default`, and the theme
+form's save posts every field, so what the wizard shows is stored. The
+wizard's theme save goes to the edited context's theme endpoint, which
+admits a Site Administrator with no role in that context. Code read
+2026-09-24. Live-probed 2026-09-24 (Rule 34; OJS4; two runs): on a
+scratch journal with no issue the wizard ticked the current issue and
+the journal's own tab its recent articles; a wizard save with only
+"Colour" changed left the own tab on the current issue and the home
+page without its articles; with a published issue both screens ticked
+the current issue. On a press and a server the wizard's fields equalled
+the own tab's and its save reached the public header.
+
+<a id="fn-y"></a>
+**y — languages.** The logo, thumbnail, homepage image, favicon, footer
+and additional content are `isMultilingual`; the public pages read them
+with `getLocalizedData()`, which falls back to the primary locale and
+then to any locale holding a value (live-probed 2026-09-24 with a
+French-only footer), and the favicon with `getLocalizedFavicon()`. `PKPDateTimeForm`'s fields are
+multilingual, one choice per form locale, and `getLocalizedDateFormat…()`
+read the visitor's locale. A context without `supportedFormLocales` has
+the primary language alone under "Forms" (scenarios.md).
+
+<a id="fn-z"></a>
+**z — the statistics chart.** `displayStats` is read by OJS
+`article_details.tpl`, OMP `monograph_full.tpl` and OPS
+`preprint_details.tpl` (`!= 'none'`), which call
+`ThemePlugin::displayUsageStatsGraph()` and print
+`plugins.themes.default.displayStats.downloads` "Downloads" and
+`…noStats` "Download data is not yet available.". Code read 2026-09-24.
+
+<a id="fn-sc"></a>
+**sc — the scenarios' givens.** Where each scenario runs: every one on
+scratch contexts from `POST scenarios/context` (`pkpApi.createContext()`,
+`scenarios.md`), each with a throwaway manager in `users[]` (`roles:
+['manager']`, password the username twice); `admin` / `admin`
+(`docs/process/users.md`) is the Site Administrator, enrolled as a
+manager in every context the API creates. A scratch context arrives with
+English alone under "UI" and "Forms", no block placed, ""Developed By"
+Block" disabled, no issue and no category, "Publishing Mode" unmarked,
+and every appearance field at the install default (`seed-facts.md`). The
+visitor is a fresh signed-out browser context. Pictures, the style sheet
+and the favicon are test fixtures uploaded on screen; the "Date & Time"
+labels follow the browser's clock, so a test pins it or computes the
+expected strings from today. Recipes: 1 — `context.description` (the
+"Journal Summary"); the style sheet's one rule colours `h1`–`h6` red. 2
+— nothing seeded; the wizard is `admin`'s. 3 — nothing seeded; the
+site's home page lists every context of the install, so the test finds
+the scratch journal's row. 4 — nothing seeded: the plugin is ticked on
+screen. 5 — `users[]` with `editor`, `sectionEditor` and
+`editorialBoardMember` (OPS `sectionEditor` and `editorialBoardMember`),
+each current, and one more account per role with the role in
+`pastRoles[]`; "Production editor" and "Layout Editor" are
+`productionEditor` and `layoutEditor`, ticked on screen. 6 — OJS three
+`POST scenarios/submission` seeds with `published: true` and no `issue`;
+OPS eleven with `published: true`. 7 — `enableAnnouncements: true`,
+`numAnnouncementsHomepage: 1`, `announcements: [{title: 'Call for
+papers'}]`; OMP one submission with `published: true`. 8 —
+`context.supportedLocales` and `context.supportedFormLocales` `['en',
+'fr_CA']` and the announcement keys of 7; the French page is the
+journal's address with the `fr_CA` segment. 9 — two submissions with
+`published: true` and no `issue`; `categories: [{path: 'arts', title:
+'Arts'}, {path: 'science', title: 'Science', children: [{path:
+'physics', title: 'Physics'}]}]`. 10 — `issues: [{volume: 1, number: 1,
+year: 2026, published: true}]`.
+
+<a id="fn-f-a1"></a>
+**f-a1** — OJS `aa7d5a8648` (2019-04-21, "corrected alt text source for
+homepageImage") and `e7c66ecb3c` (2019-05-14) moved the journal's page to
+`$homepageImage.altText`; OMP `d9ffc0c1e` (2019-05-14) and OPS (renamed
+from the journal's template in `c8046900c3`, 2021-02-14) kept
+`$homepageImageAltText`, see note q. Live-probed 2026-09-24 on all three
+apps: typed "Home picture" (and "Our building"), the journal's picture
+read the typed text, the press's and the server's `alt=""`; the tab
+still held the text after a reload.
+
+<a id="fn-f-a2"></a>
+**f-a2** — Seen 2026-09-23 in passing on all three apps (twice): the
+header logo without alternate text had no `alt`; note r.
+
+<a id="fn-f-a3"></a>
+**f-a3** — `FieldOptions.vue` wraps the box, its label and the `Orderer`
+arrows in one `<label>`, so a box's accessible name takes both arrows'
+screen-reader texts ("{block} Increase position of {block} Decrease
+position of {block}"). Live-probed 2026-09-24 on all three apps: on
+"Editorial Masthead" (`allowOnlySorting`, no box) the up button
+`orderer__up`, whose own screen-reader text is "Increase position of
+{role}", sits inside `label.pkpFormField--options__option` and is
+announced "{role} Decrease position of {role}".
+
+<a id="fn-f-a4"></a>
+**f-a4** — Note s: the stored value keeps the disabled block's name, the
+list filters it only when changed, and the save's validation refuses it.
+Live-probed 2026-09-24 on all three apps with "Language Toggle Block"
+and with a custom block ("Custom Block Manager" disabled): a "Page
+Footer" save answered 400 with the message under "Sidebar" and "Please
+correct one error. Go to Sidebar: … Jump to next error" at the form's
+foot; the footer was not saved. The Custom pages & blocks spec drove the
+custom-block case the same day (its A15).
+
+<a id="fn-f-a5"></a>
+**f-a5** — `PKPContextService::_saveFileParam()` with a `null` value
+removes the stored file by `$isImage ? $setting['uploadName'] : $setting`;
+the style sheet is saved with `$isImage` false but stored as an object
+(`name`, `uploadName`, `dateUploaded`), so the path handed to
+`PKPPublicFileManager::removeContextFile()` ends in the array's string
+form and nothing is deleted. Live-probed 2026-09-24 on all three apps:
+after "Remove" and "Saved", the pages no longer linked the style sheet,
+and its old address (`/public/journals/<id>/styleSheet.css`, OMP
+`presses`, OPS `contexts`) still answered 200 with the file, signed out;
+a removed favicon's and logo's addresses answered 404.
+
+<a id="fn-f-a6"></a>
+**f-a6** — Seen 2026-09-24 on all three apps with the French interface.
+OJS `locale/fr_CA` lacks `manager.setup.journalContentOrganization` and
+its description and option keys; OMP's `plugins/themes/default/locale/fr_CA/locale.po`
+holds one entry and the app's `manager.setup.contextSummary` is empty in
+French; OPS's theme locale has empty `displayStats` strings. Code read
+2026-09-24.
+
+<a id="fn-f-a7"></a>
+**f-a7** — Live-probed 2026-09-24 on all three apps ("Logo", "Favicon",
+the style sheet): after a ".pdf" picked with "Upload File" the box kept
+an empty frame, its "Upload File" and the form's "Save" were disabled,
+and the foot line stayed; a picture dropped on the box cleared the
+error and enabled both. A file dropped rather than picked is refused
+the same way, with nothing sent.
+
+<a id="fn-f-a8"></a>
+**f-a8** — Note j: the label is luxon's rendering of `g:ia`, the pages
+PHP's. Live-probed 2026-09-24 on all three apps: the choice read
+"7:35PM" at that time; saved, a library file's "Date uploaded" read
+"2026-09-24 7:17pm" and a file's note "2026-09-24 7:17pm".
+
+<a id="fn-f-a9"></a>
+**f-a9** — Note j. Live-probed 2026-09-24 on all three apps, two runs:
+the save stored `datetimeFormatShort` as "h:i A" for the language
+saved; the tab then showed "2026-09-24" marked under "Date (Short)" and
+"Custom" with "h:i A" under "Date & Time (Short)"; a library file's "Date
+uploaded" read "07:17 PM" (all three) and a file's note "admin admin
+07:17 PM" (OJS, OMP).
+
+<a id="fn-f-ojs1"></a>
+**f-ojs1** — `journalContentOrganization` is added by OJS's
+`DefaultThemePlugin` alone; OMP and OPS index handlers read no such
+option (note m). Code read 2026-09-24.
+
+<a id="fn-f-ojs2"></a>
+**f-ojs2** — Note o: the default is computed on every request from
+whether any issue exists; nothing stores it when the journal is created
+(the theme's `settings.xml` holds `enabled` alone). Code read 2026-09-24.
+Live-probed 2026-09-24: a scratch journal with "Theme" never saved and
+one article published with no issue showed it under "Latest
+Publications"; after Issues › "Create Issue" › "Save" (not published)
+the home page was empty and "Theme" ticked the current issue; after
+"Publish Issue" it showed "Current Issue" with the issue and no
+articles, and still not the article.
+
+<a id="fn-f-ojs3"></a>
+**f-ojs3** — Note n. The label is OJS's
+`manager.setup.journalContentOrganization.option.recentPublished`
+"Include recent most published articles". Code read 2026-09-24.
+Live-probed 2026-09-24 (Rule 13): articles A, B, C published with no
+issue listed C, B, A; an article in the published issue was absent; an
+article submitted before them and published last sat at the bottom; an
+article published at once into an issue not yet published headed the
+list.
+
+<a id="fn-f-ojs4"></a>
+**f-ojs4** — Note x. Code read 2026-09-24; live-probed 2026-09-24, two
+runs (note x).
+
+<a id="fn-f-ojs5"></a>
+**f-ojs5** — Note o: `IndexHandler` uses `JournalContentOption::default()`
+whenever the stored option is not an array, and the tab sends an empty
+value when nothing is ticked. Live-probed 2026-09-24 on two scratch
+journals with an issue, two runs: "Saved", the tab reopened with
+"Include the current issue's table of contents" ticked, and the home
+page showed "Current Issue".
+
+<a id="fn-f-ojs6"></a>
+**f-ojs6** — `latest_article.tpl` passes `heading=$articleHeading`,
+which nothing assigns there, so `article_summary.tpl` falls back to `h2`.
+Live-probed 2026-09-24: "Latest Publications" a level-2 heading and each
+article title level 2; under "Current Issue", "Articles" level 3 and
+each article level 4.
+
+<a id="fn-f-ojs7"></a>
+**f-ojs7** — Note q: the journal's template omits `alt` when the text is
+empty. Live-probed 2026-09-24: a journal's homepage image saved with the
+box empty had no `alt` attribute.
+
+<a id="fn-f-omp1"></a>
+**f-omp1** — OMP `AppearanceSetupForm`, `AppearanceAdvancedForm` and
+`DefaultThemePlugin` (notes e, f, h); the catalog reads
+`catalogSortOption` (`CatalogListPanel`, `CatalogHandler`) and
+`showCatalogSeriesListing` (`catalog.tpl`). Code read 2026-09-24.
+
+<a id="fn-f-omp2"></a>
+**f-omp2** — Note v: OMP's `catalogCategory.tpl` prints no page links.
+Live-probed 2026-09-24, two runs: at "Items per page" 1 a press category
+holding three books showed "3 Titles" and one book with no page links,
+while the catalog showed one book with "Next"; on a journal and a
+server a category of two items read "1 - 1 of 2 items 1 2 > >>".
+
+<a id="fn-f-ops1"></a>
+**f-ops1** — OPS `IndexHandler::index()` and `indexServer.tpl` (notes m,
+p): no option but `showDescriptionInServerIndex` shapes the page. Code
+read 2026-09-24.
+
+<a id="fn-td1"></a>
+**td1** — Live-probed 2026-09-24 (Actors rows 1–2; Actors preamble; all
+three apps): as a scratch journal's manager one change on each of
+"Theme", "Setup", "Editorial Masthead", "Advanced", "Lists" and "Date &
+Time" showed "Saved"; the Editor and Production Editor (OJS, OMP) and
+`admin` saved "Lists" alike. `sectioneditor.ana`, `assistant.rita`,
+`reviewer.julia`, `author.alex` and `reader.rosa` had no "Settings" group
+and the typed address answered the access-denied page; signed out, the
+Login page. `admin` with the manager role ended on a scratch press or
+server got the access-denied page there; on a scratch journal the page
+loaded under the "Error" window, raised by a dashboard count request
+answering 401. Two runs.
+
+<a id="fn-td2"></a>
+**td2** — Live-probed 2026-09-24 (Actors row 2; Rule 34; all three apps,
+two runs): the manager, Editor, Production Editor and every lower role
+typing the wizard's or Hosted Journals' address got the access-denied
+page, and only `admin`'s side menu had "Administration". In the wizard
+"Colour" set to "#1B5E20" and saved showed "Saved", the journal's own
+"Theme" tab then read it, and the public header was that green on the
+next load; the same with `admin` holding no role in the journal.
+
+<a id="fn-td3"></a>
+**td3** — Live-probed 2026-09-24 (Fields, the upload boxes; all three
+apps): a ".pdf" on "Logo" and "Favicon" and a ".png" on the style sheet,
+each by the file chooser and by a drop, showed "You can't upload files of
+this type." and sent nothing. A logo uploaded to an empty box showed
+"Remove" and no "Restore Original"; on a box holding a saved logo,
+"Remove" or a new upload (set on the box's hidden file input) added
+"Restore Original", which brought back the saved logo with "Journal
+logo". A new homepage image put in place of one saved with "Our
+building" arrived with the box empty. An unsaved upload did not reach
+the visitor's header. Test run 2026-09-24 (Fields, the upload boxes;
+scenario 3): ui-library `FieldUploadImage.vue` wraps the dropzone and its
+"Upload File" in `<div :class="{'-screenReader': currentValue}">`, so a
+box holding a picture shows neither; a mouse click on the button landed
+on the preview (OMP). On the tab loaded again with a saved logo the
+button was enabled (OJS), and focus plus Enter opened the file chooser,
+the upload answering 200 with "Alternate text" empty and "Restore
+Original" shown (OMP, OPS); after "Remove" the button was visible and
+the upload went through (OJS). Seen once on OJS: right after a logo was
+uploaded and saved in the same visit, the hidden button was disabled.
+
+<a id="fn-td4"></a>
+**td4** — Live-probed 2026-09-24 {OMP}: on a new press "Featured Books"
+and "New Releases" were unticked, no "Order of monographs" choice was
+marked, and the cover sizes read 106 and 100; both boxes ticked and
+saved with no book featured or new, the home page gained no heading.
+"0" in a cover box was refused, "abc" too, and 1 × 1 and 5000 × 5000
+saved. On the catalog "Order Features" › "Save Order" turned "Featured"
+from M1, M2 to M2, M1, while "New Releases" kept M1, M2.
+
+<a id="fn-td5"></a>
+**td5** — Live-probed 2026-09-24: a new preprint server's "Editorial
+Masthead" shows the "Reviewers" heading and note, as a journal's and a
+press's do.
+
+<a id="fn-td6"></a>
+**td6** — Live-probed 2026-09-24 (Fields, "Lists"; all three apps):
+"Items per page" emptied, "This field is required." with nothing sent;
+"0" and "-1", "This must be at least 1."; "abc" and "2.5", "This is not a
+valid integer."; each with "Please correct one error. Go to Items per
+page: … Jump to next error" at the foot; "Page links" the same. 100000
+in both boxes saved.
+
+<a id="fn-td7"></a>
+**td7** — Live-probed 2026-09-24 (Fields, "Date & Time"; all three apps):
+with the browser's clock set to 24 September 2026 at 15:05 the choices
+read as Fields quotes them, the third "Time" choice "3:05PM"; a browser
+at UTC+14, while the server read 19:13 UTC on 24 September, showed
+"September 25, 2026" and "09:13 AM": the labels follow the manager's
+computer.
+
+<a id="fn-td8"></a>
+**td8** — Live-probed 2026-09-24 (Rule 2; all three apps, two runs):
+note c.
+
+<a id="fn-td9"></a>
+**td9** — Live-probed 2026-09-24 (Rule 3; all three apps, two runs): on
+a journal with English and French forms, an English-only logo, homepage
+image, favicon and "Additional Content" showed to the French visitor;
+a French-only "Page Footer" ("Pied de page") showed to both, and with
+"English footer" added each language read its own; a French "Date
+(Short)" of "24.09.2026" printed "Publié 24.09.2026" on the French
+item page against "2026-09-24" in English.
+
+<a id="fn-td10"></a>
+**td10** — Live-probed 2026-09-24 (Rule 4; all three apps): the "Theme"
+list offered "Default Theme" alone; after "#FFFF00" and "Lora/Open
+Sans" were saved the Dashboard's header and font were unchanged;
+Settings › Website › "Setup" › "Navigation", "Add Menu", offered the
+areas "None", "primary" and "user".
+
+<a id="fn-td11"></a>
+**td11** — Live-probed 2026-09-24 (Rules 5, 6; all three apps): "Lora/Open
+Sans" set headings in Lora and text in Open Sans; "Lato" both Lato;
+"Noto Serif/Noto Sans" headings Noto Serif, text Noto Sans. "#FFFF00"
+gave a yellow header with dark links, "#000080" a navy header with
+white links, on the home, item, list and About pages. "red" and
+"#12345" typed over "#000080" and saved: the tab reopened on "#000080"
+and the header stayed navy. Test run 2026-09-24 (Rule 5; scenario 2;
+all three apps): a new journal's and press's home page has no heading
+in its body, its one `h1` being the header's screen-reader copy of the
+name, in the text's font; with "Lora/Open Sans" saved, the header's name
+link (`.pkp_site_name a`) read Lora and the text Open Sans there, and
+the "About" page's heading read Lora; on OPS "Latest preprints" read
+Lora too.
+
+<a id="fn-td12"></a>
+**td12** — Live-probed 2026-09-24 (Rule 7; all three apps): ticked with
+a summary set, the home page gained "About the Journal" ("About the
+Press", "About the Server") holding the text, and the skip link to it;
+unticked, the section went.
+
+<a id="fn-td13"></a>
+**td13** — Live-probed 2026-09-24 (Rule 8; all three apps): note q.
+Ticked with no homepage image, the header kept its colour.
+
+<a id="fn-td14"></a>
+**td14** — Live-probed 2026-09-24 (Rule 9; all three apps, two runs):
+the bar and the line choice each added a "Downloads" heading and a
+chart to the article, book and preprint pages; with no downloads the
+chart was empty, and "Download data is not yet available." never
+showed (the test installs process no usage logs); "Do not display…"
+removed both.
+
+<a id="fn-td15"></a>
+**td15** — Live-probed 2026-09-24 (Rule 10; OJS): a scratch journal with
+no issue ticked "Include recent most published articles" alone; one
+with an unpublished issue, and the seeded journal, "Include the current
+issue's table of contents" alone.
+
+<a id="fn-td16"></a>
+**td16** — Live-probed 2026-09-24 (Rules 11, 12; all three apps): a
+scratch context with every part set showed them in the table's order;
+a new one with nothing set showed nothing between the header and the
+footer on a journal and a press, and the search box over an empty
+"Latest preprints" on a server. The journal's address with and without
+`/index` shows the same page, and the header's name leads there.
+
+<a id="fn-td17"></a>
+**td17** — Live-probed 2026-09-24 (Rule 13; OJS): note f-ojs3 for the
+entries; "1 - 3 of 3 items" at the defaults. At "Items per page" 1 and
+"Page links" 2: page 1 "1 - 1 of 4 items 1 2 > >>", page 2 "2 - 2 of 4
+items << < 1 2 > >>", the last "4 - 4 of 4 items << < 3 4". With no
+such article the section was absent.
+
+<a id="fn-td18"></a>
+**td18** — Live-probed 2026-09-24 (Rule 14; Settings bullet 25; OJS):
+"Current Issue", "Vol. 1 No. 1 (2026)", "Published: 2026-09-24", the
+table of contents and "View All Issues" to the archive; unticked, the
+section went. "Publishing Mode" set to "OJS will not be used to publish
+the journal's contents online." and saved removed the section and
+nothing else; set back to open access, it returned.
+
+<a id="fn-td19"></a>
+**td19** — Live-probed 2026-09-24 (Rule 15; OJS): the row read "K2 Arts",
+"K2 Science", without the subcategory "K2 Sub"; "K2 Arts" opened that
+category's page. With no category the row was absent.
+
+<a id="fn-td20"></a>
+**td20** — Live-probed 2026-09-24 (Rule 16; OPS): the heading over an
+empty list with nothing posted; with eleven preprints posted the same
+day, ten listed with no page links, at the default and at "Items per
+page" 1, in a different order and a different ten on two runs (note p),
+while the preprint list showed one with "Next" at 1.
+
+<a id="fn-td21"></a>
+**td21** — Live-probed 2026-09-24 (Rule 18; all three apps): the picture
+right under the carousel; its sizes and text alternatives in notes q and
+f-a1; saved with the box empty on a journal, no text alternative (OJS7).
+
+<a id="fn-td22"></a>
+**td22** — Live-probed 2026-09-24 (Rule 19; all three apps): "Welcome
+text" was the last part of the home page and on no other page read
+(About, the archive or catalog or preprint list, an item's page, the
+announcements page).
+
+<a id="fn-td23"></a>
+**td23** — Live-probed 2026-09-24 (Rule 20; A2; all three apps): a 300 ×
+80 logo with "Journal logo" replaced the name on the home and About
+pages at 300 × 80 and led to the home page; a 1600 × 160 logo showed at
+800 × 80. With the box emptied the logo had no text alternative and the
+link no name. "Remove" and "Save" brought the name back. A French
+visitor saw the English logo with "Journal logo" until a French one was
+saved.
+
+<a id="fn-td24"></a>
+**td24** — Live-probed 2026-09-24 (Rule 21; all three apps): the
+thumbnail showed as a linked picture above the journal's name on the
+site's home page, its text alternative "Thumb".
+
+<a id="fn-td25"></a>
+**td25** — Live-probed 2026-09-24 (Rule 22; all three apps): "Footer line"
+at the foot of the home and About pages, in a block above the
+application's logo.
+
+<a id="fn-td26"></a>
+**td26** — Live-probed 2026-09-24 (Rules 23, 24; all three apps): no box
+ticked on a new context; "Increase position of Language Toggle Block"
+moved that row up with nothing sent, and a drag by the handle moved a
+row to the top. On a journal with one language, "Language Toggle Block"
+and "Web Feed Plugin" ticked showed "Latest publications" alone; with
+two languages, "Language" then "Latest publications". Every box unticked
+and saved: no sidebar, the 860-pixel content column moved from the left
+edge to the middle. ""Developed By" Block" enabled later landed last
+among the unticked boxes, and a custom block named "k3-partners" titled
+"K3 Partners" read "k3-partners (Custom Block)" among the unticked
+boxes. "Browse Block" enabled on a journal and a server added its box
+and a "Browse" block.
+
+<a id="fn-td27"></a>
+**td27** — Live-probed 2026-09-24 (Rule 25; A4; all three apps): the
+placed "Language Toggle Block" left "Sidebar" and the pages at once when
+disabled, and came back ticked and first when enabled again; with a
+changed "Sidebar" list saved in between, it came back unticked and last.
+The refusal: note f-a4.
+
+<a id="fn-td28"></a>
+**td28** — Live-probed 2026-09-24 (Fields, "Advanced"; Rule 26; A5; all
+three apps): note t for the pages, f-a5 for the removal. The box read
+"k4-red-headings.css" and "Remove" before "Save", and "styleSheet.css"
+(a link to the stored file) when the tab was opened again. Test run
+2026-09-24 (Fields, "Advanced"; scenario 1): right after "Saved" the box
+still read "red-headings.css" with "Remove" and a disabled "Upload
+File", and no link, for 10 to 30 s (OJS two runs, OMP one); with the
+page loaded again it read "styleSheet.css" as a link ending
+`/styleSheet.css` (all three apps).
+
+<a id="fn-td29"></a>
+**td29** — Live-probed 2026-09-24 (Rule 27; all three apps): a ".png"
+favicon was the page icon on the home, item, Dashboard and Settings ›
+Website pages; a ".jpg" was refused in the box; with none, the pages
+carried no icon link. A French visitor got the English favicon until a
+French one was saved.
+
+<a id="fn-td30"></a>
+**td30** — Live-probed 2026-09-24 (Rule 28; all three apps): the
+second role's up arrow and "Save" reordered the tab and the headings of
+both public pages. "Production editor" ticked on a journal whose tab was
+never saved sat second ("Journal editor", "Production editor", "Section
+editor", "Editorial Board Member"; a press the same with "Press
+editor"); "Layout Editor" ticked after a save sat last. A move left
+unsaved survived a side-tab switch and was gone after a reload. The
+arrows' names: note f-a3.
+
+<a id="fn-td31"></a>
+**td31** — Live-probed 2026-09-24 (Rule 29; all three apps): at "Items
+per page" 1 the archive, catalog and preprint list, "Latest
+Publications", the Search page and a journal's and a server's category
+page showed one entry a page; the "Users" list showed all five users
+("Showing 1 to 5 of 5") and the "Roles" list one role ("1 - 1 of 18
+items 1 2 3 > >>").
+
+<a id="fn-td32"></a>
+**td32** — Live-probed 2026-09-24 (Rule 30; all three apps): with 13
+items at 1 a page, "Latest Publications" {OJS} and the Search page read
+"1 - 1 of 13 items 1 2 3 4 5 6 7 8 9 10 > >>" on page 1 and "7 - 7 of 13
+items << < 2 3 4 5 6 7 8 9 10 11 > >>" on page 7 with "Page links" 10,
+and "1 2 3 > >>" and "<< < 6 7 8 > >>" with 3; the archive, catalog and
+preprint list showed "Previous" and "Next" alone at either number.
+
+<a id="fn-td33"></a>
+**td33** — Live-probed 2026-09-24 (Rule 31; all three apps): with
+"24.09.2026" and "24 September 2026" saved, announcements printed
+"24.09.2026", an article "Published 24.09.2026" and its issue
+"Published: 24.09.2026", a preprint "Posted 24.09.2026", a book
+"Published 24 September 2026" and the catalog "24 September 2026". A
+file's note and a library file's "Date uploaded" read "2026-09-24 07:17
+PM" before, "24.09.2026 07:17 PM" after, and "24.09.2026 19:17" once
+"15:05" was saved under "Time".
+
+<a id="fn-td34"></a>
+**td34** — Live-probed 2026-09-24 (Rule 32; all three apps, two runs):
+"24-09-2026" under "Date (Short)" rewrote the ready "Date & Time (Short)"
+label, still marked; "2026-09-24" back rewrote it to "2026-09-24 07:31
+PM", and "Save" stored `Y-m-d h:i A`, marked after the reload, with and
+without a save in between; "15:05" under "Time" rewrote both combined
+labels and back restored them; a combined group on "Custom" stayed there with its ready
+label rewritten.
+
+<a id="fn-td35"></a>
+**td35** — Live-probed 2026-09-24 (Rule 33; all three apps, two runs):
+"d/m/Y" printed "24/09/2026" on announcements and item pages and
+"24/09/2026 19:17" in editorial dates; "Custom" emptied and saved printed
+"2026-09-24" again and the tab reopened with "2026-09-24" marked; the
+editorial dates: note f-a9.
+
+<a id="fn-td36"></a>
+**td36** — Live-probed 2026-09-24 (Rule 34; OJS4; all three apps, two
+runs): note x. A colour typed in the wizard stayed through its "Journal"
+("Press", "Server") tab and back, and was gone after a reload with no
+question.
+
+<a id="fn-td37"></a>
+**td37** — Live-probed 2026-09-24 (Rule 35; A6; all three apps, two runs):
+on OJS the organization field's five codes and nothing else; on OPS
+the statistics field's label and three choices; on OMP 23 codes, the
+field label "Thème" and its description translated. Note f-a6.
+
+## Reference — entry points & surfaces
+
+| Entry | Path | Atom |
+|-------|------|------|
+| "Theme" tab (theme list and the theme's fields, "Save") | Settings › Website › Appearance › Theme | AFFM-018 |
+| "Setup" tab (logo, thumbnail, homepage image, page footer, sidebar; OMP catalog fields) | Settings › Website › Appearance › Setup | AFFM-019 |
+| "Editorial Masthead" tab (role order) | Settings › Website › Appearance › Editorial Masthead | AFFM-020 |
+| "Advanced" tab (style sheet, favicon, additional content; OMP cover sizes) | Settings › Website › Appearance › Advanced | AFFM-021 |
+| "Lists" tab | Settings › Website › Setup › Lists | AFFM-041 |
+| "Date & Time" tab | Settings › Website › Setup › Date & Time | AFFM-043 |
+| Settings Wizard "Appearance" tab | Administration › Hosted Journals › "Settings wizard" | AFFM-198 |
+| "Latest Publications" on the journal's home page | the journal's home page (OJS) | AFFR-023 |
+| The home page's summary section, homepage image and additional content | the home page | AFFR-025 |
+| A preprint server's home composition ("Latest preprints"; the archive header is the Sections feature's) | the server's home page (OPS) | AFFR-027 |
+| Home page handlers | `index` of a journal, press or server | ROUTE-011 · ROUTE-038 · ROUTE-060 · ROUTE-077 |
+| Settings pages' `website` op | Settings › Website | ROUTE-017 · ROUTE-042 · ROUTE-063 · ROUTE-078 · VUE-022 |
+| The theme's compiled stylesheet (`css` op; the `tasks` op is the notifications feature's) | `$$$call$$$/page/page/css?name=stylesheet` | GRID-064 |
+| Default theme plugin | Settings › Website › Plugins (theme plugins) | PLUG-049 |
+| Theme read and save (sub-op cited here, owned by Hosted journals) | `api/v1/contexts/{id}/theme` (GET, PUT) | API-013 |
+
+## Reference — code anchors
+
+- `lib/pkp/pages/management/ManagementHandler.php` (`website()`),
+  `lib/pkp/templates/management/website.tpl`; each app's
+  `pages/management/SettingsHandler.php`.
+- `lib/pkp/classes/components/forms/context/PKPThemeForm.php`,
+  `PKPAppearanceSetupForm.php`, `PKPAppearanceMastheadForm.php`,
+  `PKPAppearanceAdvancedForm.php`, `PKPListsForm.php`,
+  `PKPDateTimeForm.php`; each app's
+  `classes/components/forms/context/AppearanceSetupForm.php` and
+  `AppearanceAdvancedForm.php`.
+- ui-library `src/components/Form/context/ThemeForm.vue`,
+  `DateTimeForm.vue`; `src/components/Form/fields/FieldOptions.vue`,
+  `FieldRadioInput.vue`, `FieldUpload.vue`, `FieldUploadImage.vue`,
+  `FieldColor.vue`; `src/components/Orderer/Orderer.vue`.
+- `lib/pkp/api/v1/contexts/PKPContextController.php` (`getTheme()`,
+  `editTheme()`); `lib/pkp/classes/services/PKPContextService.php`
+  (`validate()`, `edit()`, `_saveFileParam()`); each app's
+  `classes/services/ContextService.php` (thumbnails).
+- `lib/pkp/classes/plugins/ThemePlugin.php`; each app's
+  `plugins/themes/default/DefaultThemePlugin.php` and its locale;
+  OJS `classes/journal/enums/JournalContentOption.php`.
+- `lib/pkp/classes/template/PKPTemplateManager.php` (logo, favicon, style
+  sheet, formats, `displaySidebar()`, `smartyPageInfo()`,
+  `smartyPageLinks()`); `lib/pkp/controllers/page/PageHandler.php`
+  (`css()`); `lib/pkp/templates/frontend/components/header.tpl`,
+  `footer.tpl`.
+- `lib/pkp/pages/index/PKPIndexHandler.php`; each app's
+  `pages/index/IndexHandler.php` and home template (OJS
+  `indexJournal.tpl`, `latest_article.tpl`, `categoryHeader.tpl`; OMP
+  `index.tpl`; OPS `indexServer.tpl`); each app's `indexSite.tpl`
+  (thumbnails).
+- `lib/pkp/pages/admin/AdminHandler.php` (`wizard()`),
+  `lib/pkp/templates/admin/contextSettings.tpl`,
+  `lib/pkp/controllers/grid/admin/context/ContextGridRow.php`.
+- `lib/pkp/classes/userGroup/Repository.php`
+  (`getSortedMastheadUserGroups()`); each app's `registry/userGroups.xml`.
+- `lib/pkp/schemas/context.json` and each app's `schemas/context.json`
+  (the settings' types and defaults); each app's `config.TEMPLATE.inc.php`
+  (`[general]` date and time formats).
