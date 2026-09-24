@@ -1,0 +1,7 @@
+{
+  "rich": "<p>This <strong>rich</strong> abstract carries <em>italic</em> and <b>bold</b> runs, x<sup>2</sup> and H<sub>2</sub>O, Smith &amp; Jones, and a <a href=\"https://example.org/data?x=1&amp;y=2\">link with a query</a>.</p><ul><li>A first bullet</li><li>A second bullet with <i>italics</i></li></ul><ol><li>Step one</li><li>Step two</li></ol><p>A line<br>broken with a break.</p>",
+  "literal": "<p>Use the &lt;i&gt; tag to set species names in italics.</p>",
+  "literal2": "<p>Write &lt;i&gt;species names&lt;/i&gt; in italics and H&lt;sub&gt;2&lt;/sub&gt;O with a subscript; a &lt;br&gt; tag breaks the line and &lt;p&gt;text&lt;/p&gt; is a paragraph.</p>",
+  "plain": "<p>A plain abstract without any markup.</p>",
+  "das": "<p>The data supporting this study are openly available at <a href=\"https://doi.org/10.5555/rr14-data\">https://doi.org/10.5555/rr14-data</a> under CC BY 4.0 &amp; on request from the authors.</p>"
+}

@@ -50,8 +50,8 @@ exports.HighlightsTab = class HighlightsTab {
      * (only when another top tab is current) and the "Highlights" side
      * tab, and wait for the list panel. The side tab is reached by its
      * stable id (`#highlights-button`), so the same call works in the
-     * French interface, where its label is a raw key (register A7, never
-     * asserted).
+     * French interface, where it reads "En vedette" (scenario 4 asserts
+     * the label).
      */
     async goto(contextPath, {locale = 'en'} = {}) {
         await this.page.goto(websiteSettingsUrl(contextPath, locale));

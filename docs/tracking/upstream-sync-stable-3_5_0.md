@@ -10,10 +10,10 @@ and no CI follows this branch. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `769450f2d4` | 2026-09-21 | claude (daily maintenance session) |
-| omp | `318711b05` | 2026-09-21 | claude (daily maintenance session) |
-| ops | `cb9eec1add` | 2026-09-21 | claude (daily maintenance session) |
-| pkp-lib | `6acb1be2eb` (ojs, omp, ops) | 2026-09-21 | claude (daily maintenance session); pkp-lib `stable-3_5_0` at `fc38d0622c` (#13358, in no app pointer yet); ui-library `1a7a4750` (ojs, omp, ops) |
+| ojs | `40bf69fd13` | 2026-09-24 | claude (daily maintenance session) |
+| omp | `7f38b0441` | 2026-09-24 | claude (daily maintenance session) |
+| ops | `9db7481e43` | 2026-09-24 | claude (daily maintenance session) |
+| pkp-lib | `0714131c41` (ojs, omp, ops) | 2026-09-24 | claude (daily maintenance session); ui-library `1a7a4750` (ojs, omp, ops) |
 
 ## Read log
 
@@ -22,6 +22,11 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the
 regression verdict; what was filed)._
 
+- **2026-09-24 — ojs `769450f2d4..40bf69fd13` (2), omp `318711b05..7f38b0441` (1), ops `cb9eec1add..9db7481e43` (4), pkp-lib `6acb1be2eb..0714131c41` (26, all three apps), ui-library unchanged.**
+  - pkp-lib `fc38d0622c` (#13358) → `~main bf020ba77e` (read 2026-09-22): `git range-diff` shows one difference, 3.5's `Query::find()` where `main` has `EditorialTask::find()` in `SubmissionFilesCategoryGridDataProvider::loadData()`, the same `continue` shape; the class 3.5 names is the one its queries live in → no regression.
+  - pkp-lib Weblate commits (Serbian Latin, French Canada; 24, stable-only) and the merge `0714131c41` → locale files only, no English, no code (grepped `--stat` outside `locale/`: the one non-locale file is the #13358 provider above).
+  - ojs `f1e77a40e7` (`=main 7ae1d297e9`, the translations merge) and `40bf69fd13`, omp `7f38b04419`, ops `9db7481e43` (pointer bumps); ops `1e8205c5de`, `84819acb8f` (`~main 02021e81cc`, Weblate Serbian) and the merge `934933ae0f` → locale only.
+  - Carried over from `main`: today's #13369 OMP reach is not on the line (`git log --grep 13291` empty). Open stable-line rows (pkp-lib#13181) not re-run: the new tip carries no change to the email-change path.
 - **2026-09-23 — pulled; no range, baselines stay.** Tips unchanged since 2026-09-21: ojs `769450f2d4`, omp `318711b05`, ops `cb9eec1add`, lib/pkp `6acb1be2eb` on all three, ui-library `1a7a4750`; pkp-lib `stable-3_5_0` still one commit past the pointers at `fc38d0622c` (#13358, read on `main` 2026-09-22), in no pointer yet. Carried over from `main`: today's finding pkp-lib#13291 (the review API's competing-interests gap) is not on the line (`git log --grep 13291` empty). Open rows not re-run: no new tip.
 
 - **2026-09-22 — pulled; no range, baselines stay.** Tips unchanged since 2026-09-21: ojs `769450f2d4`, omp `318711b05`, ops `cb9eec1add`, lib/pkp `6acb1be2eb` on all three, ui-library `1a7a4750`; `node bin/line-range.js --line stable-3_5_0 --repo pkp-lib 6acb1be2eb` answers 0 commits. pkp-lib `stable-3_5_0` is one commit past the pointers at `fc38d0622c` (`=main bf020ba77e`, #13358: the files category grid's loop, read on `main` today in `upstream-sync.md`), in no app pointer yet; read when a pointer moves. The open rows (pkp-lib#13181 "3.5 shows it too") were not re-run: no new tip to run them at.

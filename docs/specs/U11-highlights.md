@@ -141,16 +141,18 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
     image and saving puts the new picture in the old one's place, and
     empties the "Alternate text" box on the way ⚠ [A9](#a9). A highlight's
     image is deleted with the highlight. <sup>g</sup>
-11. **Languages.** The panel's text fields are entered per language for
-    each language ticked under "Forms" on the journal's Languages settings;
-    the site's panel offers every language the site has. Only the primary
-    language is required. The list shows each highlight's title in the
-    language the panel is viewed in when it has one, otherwise in the
-    primary language; the slide follows the visitor's language the same
-    way, falling back to the primary language for any text not entered in
-    theirs. In the French interface the tab, the panel's heading and the
-    carousel's screen-reader heading show a raw key instead of
-    "Highlights" ⚠ [A7](#a7). <sup>d</sup> <sup>l</sup>
+11. **Languages.** The panel's text fields are entered in each language
+    ticked under "Forms" on the journal's Languages settings; the site's
+    panel offers every language the site has. Only the primary language is
+    required. The list shows each highlight's title in the language the
+    panel is viewed in when it has one, otherwise in the primary language;
+    the slide follows the visitor's language the same way, falling back to
+    the primary language for any text not entered in theirs. In the French
+    interface the Highlights side tab, the list's heading and the
+    carousel's screen-reader heading read "En vedette"; on a press and a
+    preprint server a screen reader hears the carousel's arrows by raw keys
+    ⚠ [A7](#a7).
+    <sup>d</sup> <sup>l</sup>
 12. **The site's tab exists only on a multi-journal site.** The Site
     Settings show their "Highlights" tab (under "Site Setup") only while
     the site hosts two or more journals; a site with exactly one journal
@@ -371,10 +373,10 @@ address are in its footnote.
      on" in "Button Label" and press "Save": the panel closes and "Second
      call" is the last row (Rules 5, 11).
    - **The list in French**: open the same tab with "/fr_CA" in place of
-     "/en" in its address: the side tab reads "##common.highlights##"
-     instead of "Highlights" ([A7](#a7)); the rows read "Call for papers"
-     and "Appel à contributions", the first in its primary-language title
-     because it has no French one (Rule 11).
+     "/en" in its address: the side tab reads "En vedette" instead of
+     "Highlights"; the rows read "Call for papers" and "Appel à
+     contributions", the first in its primary-language title because it
+     has no French one (Rule 11).
    - **The slides in French**: signed out, open the home page with
      "/fr_CA" in place of "/en" in its address: one slide reads "Call for
      papers" with the button "Read more", its primary-language text, and
@@ -417,8 +419,9 @@ Left out of the scenarios above, by reason:
   - A4 ("Edit Highlight" closed with its close control leaving the
     unsaved title on the row; Rule 6)
   - A6 (a dot pressed under the carousel; Rule 4; scenario 3 marks it)
-  - A7 (the tab, the panel's heading and the carousel's heading in the
-    French interface; Rule 11; scenario 4 marks it)
+  - A7 (a press's and a preprint server's carousel arrows, and the
+    fourth tab across the top of Settings › Website, named by raw keys in
+    the French interface; Rule 11)
   - A8 ("Save Order" on an empty list; Rule 9a)
   - A9 (the image replaced on an edit emptying "Alternate text"; Rule 10)
 - **No seed**:
@@ -453,7 +456,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | The list prints a formatted title's tags as text, while the slide and the delete dialog show the formatting | 🐞 | minor | — |
 | [A4](#a4) | "Edit Highlight" closed without "Save" leaves the row showing the unsaved title until the tab is reloaded | 🐞 | minor | — |
 | [A5](#a5) | The site's Highlights tab cannot save, order or list: "Save" does nothing, "Save Order" shows an error dialog, so no site highlight exists | 🐞 | user-visible | — |
-| [A7](#a7) | In the French interface the tab, the panel's heading and the carousel's heading read "##common.highlights##"; a press's and a server's arrows read raw keys too | 🐞 | minor | — |
+| [A7](#a7) | In the French interface a press's and a server's carousel arrows read raw keys, and the fourth top tab of Settings › Website reads "##navigation.content##" | 🐞 | minor | claim check (claude), 2026-09-24 — narrowed: the tab, the list's heading and the carousel's heading now read "En vedette" |
 | [A2](#a2) | "URL" accepts any text although its hint asks for a full web address, so a slide's button can point nowhere | ❓ | user-visible | — |
 | [A6](#a6) | The carousel's dots do nothing when pressed and have no name for a screen reader | ❓ | minor | — |
 | [A8](#a8) | "Save Order" on an empty list shows the generic "An unexpected error has occurred…" dialog | ❓ | minor | — |
@@ -519,14 +522,14 @@ Basis: probe. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — Raw keys in the French interface** · 🐞 · minor.
-In the French interface the manager's Highlights side tab, the panel's
-heading and the carousel's screen-reader heading read "##common.highlights##"
-on every app (the Setup page's fourth top tab reads
-"##navigation.content##"), and a press's and a preprint server's arrows
-read "##plugins.themes.default.prevSlide##" /
-"##plugins.themes.default.nextSlide##" where a journal's read "À la
-diapositive précédente" / "À la diapositive suivante". The highlight's own
-French text shows, and text not entered in French falls back to English.
+In the French interface a screen reader hears a press's and a preprint
+server's carousel arrows as "##plugins.themes.default.prevSlide##" /
+"##plugins.themes.default.nextSlide##", where a journal's are "À la
+diapositive précédente" / "À la diapositive suivante". On every app the
+fourth tab across the top of Settings › Website, the page whose "Setup"
+tab holds Highlights, reads "##navigation.content##". The Highlights
+side tab, the list's heading and the carousel's heading read "En
+vedette", and the highlight's own French text shows.
 Basis: probe. <sup>f-a7</sup>
 
 <a id="a8"></a>
@@ -1009,15 +1012,26 @@ unchanged; `aria-label` and `role` are empty on every dot; the current one
 carries `aria-current="true"`.
 
 <a id="fn-f-a7"></a>
-**f-a7 — A7 evidence.** `lib/pkp/locale/fr_CA/common.po` has no
-`common.highlights` and no `navigation.content` entry at the 2026-09-16
-tips, while `fr_CA/manager.po` translates the panel's buttons ("Classer",
-"Ajouter un clou", "Modifier", "Supprimer"); OMP's and OPS's default-theme
-`fr_CA` locale lack `plugins.themes.default.prevSlide|nextSlide`, which
-OJS's carries. Live-probed 2026-09-16, OJS, OMP and OPS: under `/fr_CA/`
-the side tab, the panel's heading and the carousel's `<h2>` read
-"##common.highlights##", the Setup page's fourth top tab
-"##navigation.content##", and the arrows' `aria-label` the raw theme keys
+**f-a7 — A7 evidence.** OMP's and OPS's default-theme `fr_CA` locale
+lack `plugins.themes.default.prevSlide|nextSlide`, which OJS's carries;
+`lib/pkp/locale/fr_CA/common.po` has no `navigation.content` entry.
+Live-probed 2026-09-16, OJS, OMP and OPS: under `/fr_CA/` the side tab,
+the panel's heading and the carousel's `<h2>` read
+"##common.highlights##", the fourth top tab "##navigation.content##",
+and the arrows' `aria-label` the raw theme keys on OMP and OPS. lib/pkp
+`25182919bf` (the `translations/stable-3_5_0` merge) added
+`common.highlights` "En vedette" and changed `manager.highlights.add`
+from "Ajouter un clou" to "Mettre en vedette". Live-probed 2026-09-24 at
+ojs `71bb244152`, omp `a36551804`, ops `07141ae4df` (lib/pkp
+`25182919bf`), OJS, OMP and OPS, on a scratch journal with English and
+French under "UI" and "Forms": under `/fr_CA/` the side tab and the
+panel's heading "En vedette", the header's buttons "Classer" and "Mettre
+en vedette", the add panel headed "Mettre en vedette" and the edit panel
+"Modifier la mise en vedette", the delete dialog still titled
+"Supprimer le clou"; the carousel's `<h2>` "En vedette", and the site's
+Site Setup tab "En vedette"; the fourth top tab still
+`##navigation.content##`; the arrows' `aria-label` "À la diapositive
+précédente" / "À la diapositive suivante" on OJS and the raw theme keys
 on OMP and OPS.
 
 <a id="fn-f-a8"></a>

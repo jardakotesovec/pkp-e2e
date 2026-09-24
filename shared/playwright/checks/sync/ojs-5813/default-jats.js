@@ -1,23 +1,27 @@
 // Kept verification probe for pkp/ojs#5813 (jatsTemplate c1c0e5379f..1065bb02ae: the abstract-to-JATS conversion
 // moved from xsl/htmlAbstractToJats.xsl into JatsHelper::htmlToJatsContent(), <history>, NISO ALI licence elements,
 // the data availability <sec> in <back>). Run:
-//   PROBE_FEATURE=sync PROBE_AGENT=rr14 node bin/probe.js ojs shared/playwright/checks/sync/ojs-5813/default-jats.js
+//   PROBE_FEATURE=sync PROBE_AGENT=<agent> node bin/probe.js ojs shared/playwright/checks/sync/ojs-5813/default-jats.js
+// Inputs: abstracts.json beside this script (rebuilt 2026-09-24 from the report's wording; the VM's scratch copy is
+// gone): `rich` an ordinary rich abstract (bold, italic, sup, sub, &, a link, lists, <br>), `literal` the unbalanced
+// control (only "<i>"), `literal2` the finding (tag names as text with matching close tags), `plain` a bare
+// abstract, `das` the data availability statement. Outputs: .reports/<PROBE_FEATURE>/<PROBE_AGENT>/, with the
+// records; the finding holds while after-literal2.xml's <abstract> splits into several <p> with <italic>.
 // One process on OJS, on a scratch journal (manager, author; dataAvailability and citations at "request"; the
 // OAI JATS format plugin on; CC BY 4.0 licence set through PUT contexts/{id}):
-//   seed     five submissions: rich (published), literal, plain, das (no references), dasrefs (references)   (seed)
+//   seed     six submissions: rich (published), literal, literal2, plain, das (no references), dasrefs (references)
 //   s1       manager: workflow › Publication › JATS XML of "rich", the tab's text and the download            (s1-*)
 //   api      GET submissions/{id}/publications/{pid}/jats for every submission → after-<key>.xml             (api-*)
 //   s5       OAI ListMetadataFormats, ListIdentifiers, GetRecord and ListRecords (jats) → oai-*.xml          (oai-*)
 //   pub      the public JATS download after PUT jats/visibility on "rich" → public-rich.xml                  (public-*)
-// No assertions: the session judges; validate.php beside the outputs runs the JATS 1.2 DTD over after-*.xml.
+// No assertions: the session judges (a JATS 1.2 DTD check over after-*.xml is not kept with the script).
 const fs = require('fs');
 const path = require('path');
-const {forEachApp, launch, signIn, screen, shot, record, idle, tag} = require('../../../probe');
+const {forEachApp, launch, signIn, screen, shot, record, idle, tag, outDir} = require('../../../probe');
 
 const log = (...a) => console.log('[5813]', ...a);
-const OUT = path.resolve(__dirname, '../../../../../.reports/sync/rr14');
-const INPUTS = JSON.parse(fs.readFileSync(path.join(OUT, 'abstracts.json'), 'utf8'));
-const save = (name, text) => { fs.writeFileSync(path.join(OUT, name), text); log('wrote', name, text.length, 'bytes'); };
+const INPUTS = JSON.parse(fs.readFileSync(path.join(__dirname, 'abstracts.json'), 'utf8'));
+const save = (name, text) => { fs.writeFileSync(path.join(outDir(), name), text); log('wrote', name, text.length, 'bytes'); };
 
 async function snap(page, name, extra = {}) {
     let s;
@@ -126,7 +130,7 @@ forEachApp(async (app) => {
                 page.waitForEvent('download', {timeout: 15000}),
                 dlg.getByRole('button', {name: /download/i}).or(dlg.getByRole('link', {name: /download/i})).first().click({timeout: 5000}),
             ]);
-            const p = path.join(OUT, 's1-download-rich.xml');
+            const p = path.join(outDir(), 's1-download-rich.xml');
             await download.saveAs(p);
             log('downloaded', download.suggestedFilename(), fs.statSync(p).size, 'bytes');
         } catch (e) {

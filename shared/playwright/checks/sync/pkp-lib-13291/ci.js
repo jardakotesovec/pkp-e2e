@@ -1,12 +1,16 @@
 // Regression re-check for pkp/pkp-lib#13291 (PR #13369, 5af3b39336), kept from the 2026-09-23 sync (rr15;
-// docs/tracking/ci-triage.md "Open regressions"). OJS only, scratch journals A (no competing-interests policy)
-// and B (with one):
+// docs/tracking/ci-triage.md "Open regressions"). Runs on OJS and OMP (OMP carries the same lib/pkp change through
+// its pointer 25182919bf); scratch contexts A (no competing-interests policy) and B (with one):
 //   s1   PUT …/reviewAssignments/{id}/review on A: "text" → 422 (holds), "" → 200 and competingInterestsDeclared true
-//        with a log entry (the gap); fixed when result-ojs.json .s1.putEmpty.status is 422 and .s1.after declared false
+//        with a log entry (the gap); fixed when result-<app>.json .s1.putEmpty.status is 422 and .s1.after declared false
 //   s2a/s2b  a competing-interests change on B leaves dateCompleted, step, the task notification and the round alone
+//            (OMP's reviewer form offers no recommendation select, so B2 is saved for later without one there)
 //   s3   the Activity Log and its "View changes" after the change
-//   PROBE_FEATURE=sync PROBE_AGENT=<agent> node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-13291/ci.js
-const {execSync} = require('child_process');
+//   PROBE_FEATURE=sync PROBE_AGENT=<agent> node bin/probe.js ojs|omp shared/playwright/checks/sync/pkp-lib-13291/ci.js
+// DB reads use the harness's test DB credentials (TEST_DB_USERNAME / TEST_DB_PASSWORD, default the OS user, as
+// bin/fetch-apps.js provisions them) and the app's own <app>_test database.
+const os = require('os');
+const {execFileSync} = require('child_process');
 const {request: pwRequest} = require('playwright');
 const {forEachApp, launch, signIn, signOut, screen, shot, record, idle, settled, note, tag} =
     require('../../../probe');
@@ -15,9 +19,37 @@ const log = (...a) => console.log(...a);
 const ASSOC_REVIEW_ASSIGNMENT = 517; // 0x205
 const NOTIF_REVIEW_ASSIGNMENT = 16777227; // 0x100000B
 
+const DB_USER = process.env.TEST_DB_USERNAME || os.userInfo().username;
+const DB_PASSWORD = process.env.TEST_DB_PASSWORD || DB_USER;
+let dbName = null; // `<app>_test`, set per app in forEachApp
+
 function sql(q) {
-    return execSync(`psql -h 127.0.0.1 -U e2e -d ojs_test -At -F '|' -c ${JSON.stringify(q)}`,
-        {env: {...process.env, PGPASSWORD: 'e2e'}}).toString().trim();
+    return execFileSync('psql', ['-h', '127.0.0.1', '-U', DB_USER, '-d', dbName, '-At', '-F', '|', '-c', q],
+        {env: {...process.env, PGPASSWORD: DB_PASSWORD}}).toString().trim();
+}
+
+// The app's own page objects for the Reviewers panel row, the Review Details window and the workflow frame.
+function pagesFor(app) {
+    if (app.name === 'omp') {
+        const {DecisionWorkflow} = require('../../../../../apps/omp/playwright/pages/ReviewStagePages.js');
+        const {reviewDetailsModal} = require('../../../../../apps/omp/playwright/pages/ReviewerAssignmentPages.js');
+        return {
+            WorkflowPage: DecisionWorkflow,
+            openReviewDetails: async (page, row) => {
+                await row.getByRole('button', {name: 'Read Review', exact: true}).click();
+                const modal = reviewDetailsModal(page);
+                await modal.waitFor({state: 'visible', timeout: 30_000});
+                return modal;
+            },
+            awaitReviewDetailsSettled: (modal) => require('@playwright/test').expect(
+                modal.getByRole('button', {name: 'Modify Review', exact: true})).toBeEnabled({timeout: 30_000}),
+            closeReviewDetails: async (page, modal) => {
+                await modal.getByRole('button', {name: 'Cancel', exact: true}).click();
+                await modal.waitFor({state: 'hidden', timeout: 30_000});
+            },
+        };
+    }
+    return require('../../../../../apps/ojs/playwright/pages/ReviewStagePages.js');
 }
 function dbState(raId, roundId) {
     return {
@@ -65,6 +97,7 @@ const raIdOf = (seed) => {
 };
 
 forEachApp(async (app) => {
+    dbName = `${app.name}_test`;
     await app.api.bootstrapProbe(app.contextPath);
     const A = tag('rr15a');
     const B = tag('rr15b');
@@ -109,7 +142,12 @@ forEachApp(async (app) => {
         await step3.click();
         const later = page.getByRole('button', {name: 'Save for Later', exact: true}).filter({visible: true});
         await later.waitFor({timeout: 30_000});
-        await page.locator('select[id="reviewerRecommendationId"]').selectOption({label: 'Accept Submission'});
+        if (app.name === 'omp') {
+            // OMP's step 3 renders no recommendation select (the template is OJS's own); record that it is absent.
+            out.b2RecommendationSelects = await page.locator('select[id="reviewerRecommendationId"]').count();
+        } else {
+            await page.locator('select[id="reviewerRecommendationId"]').selectOption({label: 'Accept Submission'});
+        }
         await later.click();
         await idle(page);
         await page.waitForTimeout(1500);
@@ -144,11 +182,11 @@ forEachApp(async (app) => {
 
         // Review Details window and Activity Log on A1, as the manager of A
         await signIn(page, `${A}mgr`, {contextPath: A});
-        const {WorkflowPage, openReviewDetails, awaitReviewDetailsSettled, closeReviewDetails} = require('../../../../../apps/ojs/playwright/pages/ReviewStagePages.js');
+        const {WorkflowPage, openReviewDetails, awaitReviewDetailsSettled, closeReviewDetails} = pagesFor(app);
         const wfA = new WorkflowPage(page, A);
         await wfA.gotoEditorial(a1.submissionId);
         await idle(page);
-        const rowA = wfA.panelRow('Reviewers', `Rev${A}`);
+        const rowA = wfA.reviewerRow(`Rev${A}`); // OJS: panelRow('Reviewers', …)
         await rowA.waitFor({timeout: 30_000});
         record('a1-reviewers', {row: await rowA.innerText()});
         const modalA = await openReviewDetails(page, rowA);

@@ -86,7 +86,7 @@ it is left by the back arrow at its top (Rule 11). The boxes after
 | "Content" and "Preview" (type "Custom Page") | no | The page's formatted text, per language, and a button that opens the unsaved page in a new browser tab. The page itself is *Custom pages & blocks*'s <sup>l</sup> |
 | "URL" (type "Remote URL") | yes, in the primary language | One box per form language, up to 255 characters. A box that does not hold a full web address ("https://…"; "pkp.sfu.ca" is not one): not saved, with no message (below the table); a box of another language may stay empty <sup>l</sup> |
 | "Select Series" / "Select Category" {OMP} (types "Series" and "Category") | yes | A list of the press's series, or of its top-level categories, under "Please select the series to which you would like this menu item to link." ("…the category…") <sup>l</sup> |
-| "Query Parameters" (every type but "Custom Page" and "Remote URL") | no | One box per form language, up to 1000 characters, under "Optional query string to append to the URL (e.g., tab=metrics). Do not include the leading '?' character."; the text is added to the item's link after a "?" <sup>l</sup> <sup>td3</sup> |
+| "Query Parameters" (every type but "Custom Page" and "Remote URL") | no | One box per form language under "Optional query string to append to the URL (e.g., tab=metrics). Do not include the leading '?' character."; each stops accepting characters after 1000. The item's link gets the text after a "?". In the French interface the label and that line are raw codes ⚠ [A24](#a24) <sup>l</sup> <sup>td3</sup> |
 
 Only an empty "Title" is refused with a message. Every other refusal
 above (no type, a "Path" with other characters or already used, a "URL"
@@ -298,10 +298,6 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       typed title in a language other than the primary one gives that
       language the installed title back. An item a manager created shows,
       in a language it has no title for, the primary language's title.
-    - 12b. **French "Editorial Masthead".** On French pages of a journal
-      with French under "Forms", the installed "Editorial Masthead" item
-      reads "##common.editorialMasthead##", in
-      the header's "About" list and in the tables ⚠ [A19](#a19).
 13. **Deleting an item.** "Remove" asks as for a menu (Rule 9); "OK"
     deletes the item, shows "Navigation menu item was successfully
     removed", and takes it out of every menu that held it. Items that
@@ -493,9 +489,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     <sup>g</sup>
     - "Change Language" with the journal's interface languages, the
       current one ticked, while it has more than one (*Languages &
-      locales*); with the interface in French this heading reads
-      "##common.changeLanguage##", the rest of the menu being French
-      ("Modifier le profil", "Se déconnecter") ⚠ [A20](#a20);
+      locales*);
     - while impersonating (the button then shows both users' initials),
       "You are currently logged in as {username}" with "Logout as
       {username}" ([Login & sessions](U01-login-and-sessions.md), Rule
@@ -538,7 +532,9 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     | "Administration" | Site Administrator | — | *Site settings* |
 
     The entry of the screen on show is highlighted, and a group holding
-    it is open.
+    it is open. In the French interface two labels are raw codes: the
+    "Content" group's on a journal and a press, and the "DOIs" entry's
+    on a press and a preprint server ⚠ [A23](#a23).
     - 30a. **A Site Administrator with Reader alone.** Once the Site
       Administrator's manager role in a journal has ended and they hold
       Reader alone there, each editorial page of that journal opens with
@@ -1154,10 +1150,10 @@ Left out of the scenarios above, by reason:
   - A16 (both panel texts in the menu window of a journal with no item; Rule 4)
   - A17 (the browser's leave question after a discarded change; Rule 6a)
   - A18 (the item window asking on a close with nothing typed, holding the page while open, and closing without asking after a refused "Save"; Rule 11a; scenario 5 marks it)
-  - A19 (the French "Editorial Masthead" item's raw code; Rule 12b)
-  - A20 (the French initials menu's language heading; Rule 28)
   - A21 (two journals of the same name hiding each other in the switcher; Rule 29)
   - A22 (the Site Administrator holding Reader alone: the manager's side menu and an "Error" window; Rule 30a)
+  - A23 (raw codes as the side menu's "Content" and "DOIs" labels in the French interface; Rule 30)
+  - A24 (raw codes in the item window's "Query Parameters", the menu window's drag handles and a press's "New Releases" type in the French interface; Fields)
   - OJS1 (no eye on "Subscriptions" and "My Subscriptions" {OJS}; Rule 7a)
   - OPS2 ("Posting Mode" not kept, so "Archives" stays {OPS}; Settings bullet 2)
   - OPS3 (the French "Developed By" heading's raw code {OPS}; Rule 21)
@@ -1204,10 +1200,10 @@ an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | With no item at all, the menu window says both panels are settled | 🐞 | minor | — |
 | [A17](#a17) | After a change is discarded with "Yes", leaving the page still asks about unsaved changes | 🐞 | minor | — |
 | [A18](#a18) | The item window asks before closing even when nothing was typed, and so does leaving the page; right after a refused "Save" it closes without asking | 🐞 | minor | — |
-| [A19](#a19) | In French, the "Editorial Masthead" item reads "##common.editorialMasthead##" | 🐞 | minor | — |
-| [A20](#a20) | In French, the initials menu's language heading reads "##common.changeLanguage##" | 🐞 | minor | — |
 | [A21](#a21) | Two journals with the same name hide each other in the journals switcher | 🐞 | minor | — |
 | [A22](#a22) | A Site Administrator holding Reader alone gets the manager's side menu and an "Error" window on every page | 🐞 | minor | — |
+| [A23](#a23) | In French, the side menu's "Content" group {OJS OMP} and "DOIs" entry {OMP OPS} read raw codes | 🐞 | minor | — |
+| [A24](#a24) | In French, the item window's "Query Parameters" box, the menu window's drag handles and a press's "New Releases" type read raw codes | 🐞 | minor | — |
 | [OJS1](#ojs1) | "Subscriptions" and "My Subscriptions" carry no eye icon, so their notices never show {OJS} | 🐞 | minor | — |
 | [OPS2](#ops2) | A preprint server's "Posting Mode" is not kept, so "Archives" never hides {OPS} | 🐞 | user-visible | — |
 | [OPS3](#ops3) | On a preprint server's French pages the "Developed By" heading reads a raw code {OPS} | 🐞 | minor | — |
@@ -1217,6 +1213,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | A menu titled like another in other letter case is saved as a second menu | ❓ | minor | — |
 | [A14](#a14) | The site's "Add item" offers types the site has no page for | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
+| [A19](#a19) | Retired: on French pages the installed "Editorial Masthead" item read "##common.editorialMasthead##"; it now reads "Entête" (Rule 12) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
+| [A20](#a20) | Retired: in French the initials menu's language heading read "##common.changeLanguage##"; it now reads "Changer la langue" (Rule 28) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
 
 ### All apps
 
@@ -1406,21 +1404,6 @@ closes the window at once, with no question, and what the manager typed
 is lost.
 Basis: probe, test run. <sup>f-a18</sup>
 
-<a id="a19"></a>
-**A19 — The French "Editorial Masthead" item reads a raw code** · 🐞 · minor.
-On a journal with French among its "Forms" languages, the installed
-"Editorial Masthead" item reads "##common.editorialMasthead##" on French
-pages, in the header's "About" list and in the Navigation tab's tables,
-where every other installed item is French.
-Basis: probe. <sup>f-a19</sup>
-
-<a id="a20"></a>
-**A20 — The French initials menu's language heading reads a raw code** · 🐞 · minor.
-With the interface in French, the initials menu heads the language list
-"##common.changeLanguage##" instead of a French heading; the entries
-below it ("Modifier le profil", "Se déconnecter") are French.
-Basis: probe. <sup>f-a20</sup>
-
 <a id="a21"></a>
 **A21 — Journals with the same name hide each other in the switcher** · 🐞 · minor.
 The journals switcher leaves out every journal with the current
@@ -1442,6 +1425,28 @@ should match what the pages allow; instead every page greets the
 administrator with an error. Where "Settings" then leads differs by app
 ([Journal identity & about pages](U07-journal-identity-and-about-pages.md#a1)).
 Basis: probe. <sup>f-a22</sup>
+
+<a id="a23"></a>
+**A23 — In French the side menu shows raw codes** · 🐞 · minor.
+With the interface in French, two side-menu labels are raw codes where
+a French word belongs: the "Content" group reads
+"##navigation.content##" on a journal and a press, and the "DOIs" entry
+reads "##doi.manager.displayName##" on a press and a preprint server (a
+journal's reads "DOIs"). A screen reader hears the same codes. A
+French-speaking manager has to guess what the group and the entry hold.
+Basis: probe. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — In French the Navigation tab's windows show raw codes** · 🐞 · minor.
+With the interface in French, the item window labels the "Query
+Parameters" box "##manager.navigationMenus.form.queryParams##", with
+"##manager.navigationMenus.form.queryParams.description##" as the line
+under it, and the menu window's drag handles show the hint
+"##common.dragToReorder##" when the pointer rests on them. On a press the
+item window's "Navigation Menu Type" list also offers
+"##navigation.navigationMenus.newRelease##" in place of "New Releases".
+The manager cannot tell what the box is for or which type that entry is.
+Basis: probe. <sup>f-a24</sup>
 
 ### OJS
 
@@ -1480,6 +1485,14 @@ On a preprint server's French pages a screen reader hears the "Developed
 By" block's heading as "##plugins.block.developedBy.blockTitle##"; a
 journal and a press read "Développé par".
 Basis: probe. <sup>f-ops3</sup>
+
+### Retired
+
+<a id="a19"></a>
+**A19 — The French "Editorial Masthead" item reads a raw code** · ✅ · retired. Fixed upstream by the French translations merge, verified 2026-09-24 on OJS, OMP and OPS: on French pages of a journal with French under "Forms", the installed item reads "Entête" in the header's "About" list, in the Navigation tab's tables and in the item window, and the page it opens is headed "Entête" (Rule 12). <sup>f-a19</sup>
+
+<a id="a20"></a>
+**A20 — The French initials menu's language heading reads a raw code** · ✅ · retired. Fixed upstream by the French translations merge, verified 2026-09-24 on OJS, OMP and OPS: with the interface in French the initials menu reads "Changer la langue", "English", "français" (ticked), "Modifier le profil", "Se déconnecter", for every role and for the Site Administrator (Rule 28). <sup>f-a20</sup>
 
 ---
 
@@ -1651,8 +1664,7 @@ site admins get `getManySummary([])` (every context), others
 on page `dashboard`, `manageIssues`, `management`, `payment` or `stats` the
 link keeps page, op and args, otherwise it points at the other context's
 `submissions` page. The filter compares names, so every context whose
-name equals the current one's is dropped (A21). `common.changeLanguage`
-has no `fr_CA` entry (A20). Seen on screen 2026-09-04 (the notifications
+name equals the current one's is dropped (A21). Seen on screen 2026-09-04 (the notifications
 spec, Actors row 1): the bell for every signed-in user on an editorial
 page, including one with no role in the journal. Live-probed 2026-09-23
 (Actors rows 6–7; Rules 27–29; all three apps): the dark bar on the
@@ -2032,7 +2044,9 @@ menus in their areas with the items Rule 2 lists, "About the Journal"
 its seven items and nothing else. French pages of the seeded journal
 (French under "UI" alone) showed every item in English; a scratch
 journal with French under "Forms" showed the installed French titles,
-"Editorial Masthead" as "##common.editorialMasthead##" (A19).
+"Editorial Masthead" then as "##common.editorialMasthead##" (A19), and
+as "Entête" once lib/pkp `25182919bf` arrived (live-probed 2026-09-24,
+all three apps).
 
 <a id="fn-td5"></a>
 **td5** — Live-probed 2026-09-23 (Rules 3, 10; all three apps): the
@@ -2537,14 +2551,43 @@ after a refused "Save", the box again after a changed "Title".
 
 <a id="fn-f-a19"></a>
 **f-a19** — The installed item's title key `common.editorialMasthead`
-(note n) has no `fr_CA` entry. Live-probed 2026-09-23 (td4, td11), all
-three apps.
+(note n) had no `fr_CA` entry: live-probed 2026-09-23 (td4, td11), all
+three apps, the raw code on French pages. lib/pkp `25182919bf` (the
+`translations/stable-3_5_0` merge) added `msgstr "Entête"` to
+`fr_CA/common.po`. Live-probed 2026-09-24 at ojs `71bb244152`, omp
+`a36551804`, ops `07141ae4df` (lib/pkp `25182919bf`), all three apps,
+on a scratch journal with English and French under "UI" and "Forms":
+"Entête" in the header's "À propos" list, in both Navigation tables
+and the Primary menu's row, nested under "À propos" in the menu window,
+and in the item window's French "Title" box, whose type line read "Lien
+vers la page affichant les membres actifs du personnel éditorial."; the
+page it opens titled "Entête", with the trail "Accueil / Entête"; the
+Appearance side tab "Entête". The rest of the "À propos" list: OJS "À
+propos de cette revue, Soumissions, Entête, Déclaration de
+confidentialité, Personne-ressource"; OMP "A propos de la presse,
+Soumissions, Entête, Déclaration de confidentialité, Coordonnées"; OPS
+"À propos du serveur, Soumissions, Entête, Déclaration de
+confidentialité, Personne-ressource". The seeded journal (French under
+"UI" alone) still showed every item in English, "Editorial Masthead"
+included.
 
 <a id="fn-f-a20"></a>
 **f-a20** — `TopNavActions.vue` heads the list with
-`t('common.changeLanguage')`, which has no `fr_CA` entry (note g).
-Live-probed 2026-09-23, all three apps, on a scratch journal with
-English and French under "UI".
+`t('common.changeLanguage')` (note g), which had no `fr_CA` entry:
+live-probed 2026-09-23, all three apps, on a scratch journal with
+English and French under "UI", the raw code. lib/pkp `25182919bf` (the
+`translations/stable-3_5_0` merge) added `msgstr "Changer la langue"`
+to `fr_CA/common.po`. Live-probed 2026-09-24 at ojs `71bb244152`, omp
+`a36551804`, ops `07141ae4df` (lib/pkp `25182919bf`), all three apps,
+on a scratch journal with English and French under "UI" and "Forms":
+the menu, named "Navigation de l'usager", read "Changer la langue",
+"English", "français" (ticked), "Modifier le profil", "Se déconnecter"
+for the Journal Manager (on the Profile page and on Settings ›
+Website), a Section Editor, an Assistant, an Author, a Reviewer (OJS,
+OMP; a preprint server installs no Reviewer) and a Reader, and for the
+Site Administrator there and on the site's Administration page. On a
+journal with English alone, "Edit Profile" and "Logout" with no
+language list.
 
 <a id="fn-f-a21"></a>
 **f-a21** — Note g (the switcher drops every context whose name equals
@@ -2558,6 +2601,31 @@ Roles ("Remove Role"), leaving Reader; the side menu's calls for the
 submission views answered 401. The journal's Navigation tab opened
 behind the window; a press's and a server's gave the access-denied page
 ([Journal identity & about pages](U07-journal-identity-and-about-pages.md#a1)).
+
+<a id="fn-f-a23"></a>
+**f-a23** — `navigation.content` (lib/pkp `common.po`) has no `fr_CA`
+entry; `doi.manager.displayName` reads `msgstr ""` in OMP's and OPS's
+`locale/fr_CA/manager.po` and "DOIs" in OJS's. Live-probed 2026-09-24
+at ojs `71bb244152`, omp `a36551804`, ops `07141ae4df` (lib/pkp
+`25182919bf`), all three apps, as the Journal Manager of a scratch
+journal with English and French under "UI" and "Forms", on Settings ›
+Website: the group's text and `aria-label` read
+`##navigation.content##` on OJS and OMP (OPS showed no "Content" group,
+public comments being off, OPS1); the DOIs entry's text and
+`aria-label` read `##doi.manager.displayName##` on OMP and OPS.
+
+<a id="fn-f-a24"></a>
+**f-a24** — `manager.navigationMenus.form.queryParams`, its
+`.description` and `common.dragToReorder` (English "Drag to reorder")
+have no `fr_CA` entry; OMP's `navigation.navigationMenus.newRelease`
+reads `msgstr ""` in its `fr_CA` locale. Live-probed 2026-09-24 at ojs
+`71bb244152`, omp `a36551804`, ops `07141ae4df` (lib/pkp
+`25182919bf`), all three apps, as the Journal Manager of a scratch
+journal with English and French under "UI" and "Forms": the "Entête"
+item's window showed the label and the line under it as the raw codes;
+the Primary menu window's handles carried the `title`
+`##common.dragToReorder##`; on OMP the type list's options included
+`##navigation.navigationMenus.newRelease##`.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`

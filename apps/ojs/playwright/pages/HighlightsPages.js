@@ -42,7 +42,7 @@ exports.HighlightsTab = class HighlightsTab {
     /**
      * Open Settings › Website in the given interface language, select the
      * outer "Setup" tab when it is not current, then the "Highlights" side
-     * tab (its raw key in French, A7), and wait for the panel.
+     * tab ("En vedette" in French), and wait for the panel.
      *
      * @param {{locale?: 'en' | 'fr_CA'}} options
      */
@@ -60,17 +60,15 @@ exports.HighlightsTab = class HighlightsTab {
     }
 
     /**
-     * The Setup side tab that opens the list. In French it read the raw key
-     * `##common.highlights##` (A7) until pkp-lib 25182919bf (2026-09-23)
-     * translated it "En vedette"; either label is accepted while the apps'
-     * lib/pkp pointers catch up.
+     * The Setup side tab that opens the list: "Highlights", or "En vedette"
+     * in French (scenario 4, Rule 11).
      */
     sideTab(locale = 'en') {
         return this.page
             .locator('#setup')
             .first()
             .getByRole('tab', locale === 'fr_CA'
-                ? {name: /^(##common\.highlights##|En vedette)$/}
+                ? {name: 'En vedette', exact: true}
                 : {name: 'Highlights', exact: true});
     }
 

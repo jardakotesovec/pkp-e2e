@@ -29,7 +29,7 @@
  *   reads the item window's question after a change was typed only.
  * - OPS1 ✅: S2 reads the manager's side menu without "Content", as the
  *   scenario states.
- * - A2–A10, A14, A16, A19–A22, OJS1, OPS2, OPS3: no scenario of this app
+ * - A2–A10, A14, A16, A21–A24, OJS1, OPS2, OPS3: no scenario of this app
  *   presses them (A14 is S8's, in the serial file).
  *
  * Seeding: scenario endpoints only. S1–S3 read the seeded server

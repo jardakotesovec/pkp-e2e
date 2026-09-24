@@ -14,9 +14,8 @@
  * formatting), A4 🐞 (S1 closes the "Edit Highlight" panel only with
  * "Save"), A5 🐞 (the site's Highlights tab and the site's carousel are
  * out of the suite: nothing seeds or asserts a site highlight), A7 🐞
- * (S4 reaches the Highlights side tab by its id, never by its French
- * label, and reads the French carousel's arrows by class, never by their
- * names), A2 ❓ (every "URL" typed is a full web address), A6 ❓ (S3 reads
+ * (S4 reads the French carousel's arrows by class, never by their names,
+ * and never reads Settings › Website's fourth top tab), A2 ❓ (every "URL" typed is a full web address), A6 ❓ (S3 reads
  * which dot is on and never presses one), A8 ❓ (S2 never enters ordering
  * mode on an empty list), A9 ❓ (S1 removes the picture on the edit and
  * never replaces it). The spec's Coverage section records everything
@@ -587,11 +586,11 @@ test.describe('Highlights (U11)', () => {
         await panel.save();
         await expect(tab.titles()).toHaveText([CFP.title, 'Second call']);
 
-        // The list in French: the rows read "Call for papers" (no French
-        // title, so its primary-language one) and "Appel à contributions"
-        // (Rule 11; the side tab's raw-key label, A7, is not asserted: the
-        // tab is reached by its id).
+        // The list in French: the side tab reads "En vedette" instead of
+        // "Highlights"; the rows read "Call for papers" (no French title, so
+        // its primary-language one) and "Appel à contributions" (Rule 11).
         await tab.goto(tag, {locale: FR});
+        await expect(tab.sideTab()).toHaveText('En vedette');
         await expect(tab.titles()).toHaveText([CFP.title, APPEL]);
 
         // The slides in French: signed out, one slide in its

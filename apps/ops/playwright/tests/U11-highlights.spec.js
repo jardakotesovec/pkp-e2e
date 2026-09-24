@@ -19,9 +19,8 @@
  * closes no panel without "Save"; S4's refused edit ends the test), A5 🐞
  * (the site's Highlights tab is never opened; no site highlight is seeded
  * or asserted), A6 ❓ (S3 reads which dot is on and presses none), A7 🐞
- * (S4 reaches the French tab through its raw key but asserts nothing about
- * the panel's or the carousel's heading, nor about the French arrows, which
- * read raw keys on a preprint server), A8 ❓, A9 ❓ (S1 replaces no image).
+ * (S4 reads neither the French carousel's arrows nor Settings › Website's
+ * fourth top tab), A8 ❓, A9 ❓ (S1 replaces no image).
  * The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch server
@@ -602,8 +601,9 @@ test.describe('highlights', () => {
         await expect(tab.rows()).toHaveCount(2);
         expect(await tab.rowTitles()).toEqual(['Call for papers', 'Second call']);
 
-        // The list in French: the side tab reads its raw key (A7); the rows
-        // read "Call for papers" and "Appel à contributions" (Rule 11).
+        // The list in French: the side tab reads "En vedette" instead of
+        // "Highlights" (goto opens it by that name); the rows read "Call for
+        // papers" and "Appel à contributions" (Rule 11).
         await tab.goto({locale: 'fr_CA'});
         await expect(tab.sideTab('en')).toHaveCount(0);
         await expect(tab.rows()).toHaveCount(2);
