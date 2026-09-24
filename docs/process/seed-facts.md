@@ -702,3 +702,23 @@ config-file settings.
   `GET emailTemplates?searchPhrase=` from the decision wizard's "Find
   Template" (the search box answers an "Error" window). Live-driven
   2026-09-20, all three apps (`.reports/U34/cc-K2.md` K2-9).
+- A Site Administrator can be left without a manager role in a scratch
+  context, in two forms only (a context keeps a user's last role): seed
+  `admin` in `users[]` with one more role, end the manager role on the
+  admin's own Users & Roles › Edit page ("Remove Role"), and sign in
+  again. With an assistant role left (Copyeditor; OPS Editorial Board
+  Member) the workflow opens and "Activity Log" offers "Notes" alone; with
+  Reader left the workflow answers "Error / The current role does not have
+  access to this operation." over an empty page. Workflow and Activity
+  Log, all three apps, 2026-09-23 (`.reports/U38/cc-K1.md` K1-8).
+- Every submission has Activity Log lines from its first save, so
+  "History" never reads "No Items": a draft begun on the start page shows
+  two "Submission metadata updated" lines, and a seeded submission with no
+  decision shows 8 lines (OJS, OMP) or 6 (OPS). Activity Log, all three
+  apps, 2026-09-23 (`.reports/U38/cc-K1.md` K1-4).
+- The PHP servers run in UTC (`time_zone = "UTC"` in
+  `config.test.inc.php`), so near local midnight a date picked as
+  "yesterday" can still be today on the server; a reviewer row offers
+  "Send Reminder" only once its response due date is before the server's
+  date. Reviewers panel, the reviewer row's "Edit" window, OJS, 2026-09-24
+  (`.reports/U38/cc-K2.md`).

@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **21 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **22 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -317,3 +317,19 @@ until their specs exist. Do not force-claim the defects themselves.
     `editorialTask/Repository::countOpenPerStage()` has no caller.
     Code-verified 2026-09-23 (checkouts as above). Resolves: maintainer
     confirmation as dead code.
+22. **Unreachable activity-log pieces** — attached to **U38** (claimed;
+    the activity-log spec's Reference table lists them). A note's
+    attached-file download link (AFFW-692): `note.tpl` renders
+    `$noteFileDownloadLink`, which no handler or form assigns, so no note
+    ever shows it. The submissions list item's "Activity Log & Notes"
+    button (`SubmissionsListItem.vue::openInfoCenter()`): every mount of
+    `SubmissionsListPanel` (the native, PubMed and ONIX export plugins)
+    replaces the item through its `item` slot, so the expanded item that
+    holds the button never renders; the workflow header's "Activity Log"
+    is the one door. API-018's `GET emails/{emailId}`
+    (`PKPEmailController::getEmail()`): no ui-library caller (the
+    author's "Notifications" list reads `emails/authorEmails` only).
+    Code-verified 2026-09-23 (U38 spec author; checkouts ojs
+    `802202cb3e`, lib/pkp `5af3b3933`, ui-library `2034439a`; omp
+    `7f9455d5a`; ops `15f0b6e0bd`). Resolves: maintainer confirmation as
+    dead code (removal candidates).

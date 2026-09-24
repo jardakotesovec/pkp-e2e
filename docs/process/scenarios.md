@@ -615,7 +615,10 @@ Keys:
   of `file` or `urlRemote` is named (a 400 otherwise). A seeded galley's file reads
   back only through the publication's "Preview" › galley link ›
   "Download" (its suggested file name); the Galleys page shows only
-  "<label> <language>" (U36 K5, 2026-09-23). `file` is a basename
+  "<label> <language>" (U36 K5, 2026-09-23). On OPS a seeded galley's file
+  is what gives a preprint its "More Information" window ("Information
+  Center: <label>", with "History" and "Notes"; U38 claim check,
+  2026-09-23). `file` is a basename
   under `apps/<app>/playwright/fixtures/files/` (`article.pdf` on OJS,
   `preprint.pdf` on OPS; `bin/mount.js` copies the folder into the
   checkout, so a new fixture needs a re-mount) and is stored as the
@@ -707,7 +710,10 @@ Facts tests rely on, all parity-checked against the UI path:
   the submitter; a bare stage assignment without the global author role
   does not trip author checks. A second `participants` entry for the same
   user rides on `build()`'s firstOr semantics ("Decision behaviour worth
-  knowing" below).
+  knowing" below). On a scratch context, such a user in `participants[]` as
+  `sectionEditor` with throwaway `externalReviewer`s in
+  `reviewRounds[].reviewers[]` reaches U38 Rule 9's state on OJS and OMP
+  (U38 claim check, 2026-09-23).
 - Seeded reviewer suggestions sit where the wizard's do: the editor's
   workflow lists them under "Reviewers Suggested by Author" on the
   Submission stage with no row action, and on a review round with a
@@ -798,7 +804,8 @@ These keys do not exist. They are ideas recorded from an earlier harness.
 - Submission: `contributors[]` (`givenName`, `familyName`, `email`, no
   account: the second "Authors" box of the author-response request, U30);
   `reviewRounds[].reviewers[].files[]` (a reviewer's uploaded file, the
-  "Attach Review Files" source, U30); `reviewRounds[].reviewers[].status:
+  "Attach Review Files" source, U30; U38 uploads it on screen at the
+  reviewer's step 3); `reviewRounds[].reviewers[].status:
   'cancelled'` (U30, the readiness question); `reviewRounds[].revisionsUploaded`
   (the author's "Upload" is refused on a round where revisions were not
   requested, U30); `reviewRounds[].reviewers[].status: 'complete'` (the
@@ -819,9 +826,10 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   them on the person's own Notifications tab until it exists.
 - Context: an option to skip `admin`'s manager enrolment in the new context
   (every `createContext` enrols the site administrator as a manager; the
-  "site admin with no manager role" state, sync rr3 2026-09-09, is
-  reachable only through the screens and only for a user who is not the
-  one signed in).
+  "site admin with no manager role" state is reachable only through the
+  screens: `admin` seeded in `users[]` with one more role ends its manager
+  role on its own Users & Roles › Edit page and signs in again, seed-facts,
+  U38 claim check 2026-09-23).
 - Context passthroughs: `notifyAllAuthors` (Settings › Workflow › Emails
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining

@@ -119,6 +119,11 @@ exports.ComposerPage = class ComposerPage {
         });
     }
 
+    /** The visible composer's "Subject:" box (the one email page's). */
+    subjectInput() {
+        return this.page.locator('input[name="subject"]:visible');
+    }
+
     /** The letter's text (placeholders shown as their values). */
     async letterText() {
         const id = await this.editorId();

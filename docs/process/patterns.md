@@ -515,7 +515,13 @@ session the server has just ended (after a password change or a sign-out
 elsewhere), so use a bounded wait there; and Playwright dismisses a browser
 `confirm()` or `alert()` by default, so a screen that may ask (a tab switch
 with unsaved changes, a refused upload) needs `page.on('dialog', …)` before
-the action, or the script silently takes the Cancel branch. The run record
+the action, or the script silently takes the Cancel branch. A page-leave
+probe on a legacy window blurs the box first: the form notices a change on
+blur, so `page.goto()` with the box still focused raises no "Leave site?".
+After a window drops a typed note without asking, a leftover page-leave
+question makes `signOut()` fail with `ERR_ABORTED` unless the dialog
+handler accepts `beforeunload` (U38 claim check, all three apps,
+2026-09-23). The run record
 carries the browser's console errors and warnings and uncaught page errors
 from `launch()` on; a script that needs every level (info, log) attaches
 its own `page.on('console')` listener.
