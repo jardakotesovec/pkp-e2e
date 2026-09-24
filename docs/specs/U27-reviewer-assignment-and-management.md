@@ -389,8 +389,9 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     Reminded" line carries the latest reminder's date (Rule 21).
     A review thanked, taken back and marked complete again, either in this
     window or by a review decision whose "Notify Reviewers" step thanks the
-    reviewer, still names the first thank and its date, not the newer step
-    ⚠ [A33](#a33).
+    reviewer, still names the first thank and its date: "Revert Decision"
+    takes back only the completion, and the thank, already sent, stands
+    ([A33](#a33), retired).
     <sup>i</sup>
 14b. **Modifying a review.** "Modify Review" first asks "Modify this
     review?" with the text "You are about to modify the review submitted by
@@ -523,7 +524,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     re-examined. The acknowledgement itself survives the revert: "Mark as
     Complete" on that "Review Viewed" row turns it "Reviewer Thanked"
     straight away, with "Revert Decision" alone and no second "Thank
-    Reviewer" ⚠ [A27](#a27). The review content is untouched and the revert
+    Reviewer": the thank already went out, and the revert takes back only
+    the completion ([A27](#a27), retired). The review content is untouched and the revert
     is logged. <sup>j</sup>
 17. <a id="unassign"></a> **Unassign vs Cancel.** While the request is
     unanswered, the entry reads "Unassign Reviewer", and removing them
@@ -571,7 +573,9 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     response erases the "Reviewer Reminded" line ⚠ [A15](#a15). After
     "Revert Decision" the list ends at "Review Submitted": the "Review
     Completed" and "Reviewer Thanked" lines are gone, although the
-    thank-you email went out ⚠ [A35](#a35). Marked complete again, the
+    thank-you email went out: History shows only the dates the
+    assignment currently tracks as reached, by design until a full event
+    log replaces it ([A35](#a35), retired). Marked complete again, the
     review lists the first "Reviewer Thanked" date again, followed by the
     new "Review Completed" one. In a language other than English an
     untranslated placeholder stands where the "Reviewer Reminded" label
@@ -1235,15 +1239,12 @@ Left out of the scenarios above, by reason:
   - A15 (the reviewer's response erasing the "Reviewer Reminded" milestone; Rules 13, 21)
   - A26 (the unassign notice arriving under the cancel notice's subject; Side effects)
   - OMP3 (the press's unassign notice printing "{$journalName}" literally; Side effects)
-  - A27 (a second "Mark as Complete" on a reverted, previously thanked review reading "Reviewer Thanked" at once; Rule 16)
   - A28 (a never-assigned reviewer dropping out of the search while "Reviews completed" is enabled; Rule 6)
   - A29 ("Modify Review" worded as an edit on a request with no review; Rule 14d)
   - A30 ("Modify Review" offered on a declined request and its save refused; Rule 14d)
   - A31 (an assistant-level participant offered "Modify Review" and refused on "Save Changes"; Actors row 5)
   - A32 (a Review Details window closed within a moment of opening, before the mark is saved, leaving the row "Review Submitted"; Rule 14a)
-  - A33 (a review thanked, taken back and marked complete again naming the first thank as its latest step; Rule 14a)
   - A34 (an untranslated placeholder for "Reviewer Reminded" in a language other than English; Rules 14c, 21)
-  - A35 ("History" dropping the "Reviewer Thanked" line after "Revert Decision"; Rule 21)
   - OMP4 (a press's "Mark as Complete" enabled on a request with no review; Rule 14c)
   - OMP5 (a press accepting an empty "Save Changes" as the reviewer's review; Rule 14d)
   - OMP6 (the review-form block saying "this journal" on a press; Rule 14b)
@@ -1295,21 +1296,21 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP4](#omp4) | {OMP} "Mark as Complete" is enabled on a request with no review; confirming records a completed review nobody wrote and leaves the reviewer on a first step that offers nothing | 🐞 | user-visible | — |
 | [OMP6](#omp6) | {OMP} The Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." on a press | 🐞 | minor | — |
 | [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | @blessie 2026-09-24 · risk accepted, not fixing |
-| [A33](#a33) | A review thanked, taken back and marked complete again names the first thank as its latest step in Review Details, while History lists a newer completion | 🐞 | minor | — |
 | [A34](#a34) | In a language other than English, History and Review Details show "##editor.review.reviewerReminded##" where the "Reviewer Reminded" label belongs | 🐞 | minor | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
 | [A23](#a23) | {OJS} The Review Details window shows the recommendation twice, under two different labels | ❓ | minor | — |
-| [A27](#a27) | A review thanked, reverted and marked complete again reads "Reviewer Thanked" at once, with no "Complete" step and no second "Thank Reviewer" | ❓ | minor | — |
 | [A28](#a28) | With the "Reviews completed" slider enabled, a name search for a reviewer never assigned answers "No items found." | ❓ | minor | — |
 | [A29](#a29) | On a request with no review, "Modify Review" still speaks of "the review submitted by {reviewer name}", and nothing says that "Save Changes" submits the review for the reviewer | ❓ | user-visible | — |
 | [OMP5](#omp5) | {OMP} "Save Changes" with nothing entered is accepted on an unanswered request and submits an empty review for the reviewer | ❓ | minor | — |
-| [A35](#a35) | After "Revert Decision", History drops the "Reviewer Thanked" line although the thank-you email went out | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 | [A24](#a24) | Retired: a modification save on a request with no review completes it because it submits the review on the reviewer's behalf, the behavior upstream designed (pkp/pkp-lib#13337); screens do reach it (Rule 14d) | ✅ | retired | upstream change + claim check (claude), 2026-09-17 — overturned by design |
 | [A25](#a25) | Retired: {OJS} opened from the dashboard popover, a submitted review's Review Details window omitted the recommendation; fixed upstream (pkp/ui-library#971) | ✅ | retired | re-verified live (claude), 2026-09-03 — fixed upstream |
 | [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
+| [A27](#a27) | Retired: a review thanked, reverted and marked complete again reads "Reviewer Thanked" at once, with no second "Thank Reviewer"; intended, the revert takes back only the completion and the thank already went out | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
+| [A33](#a33) | Retired: a review thanked, taken back and marked complete again names the first thank in Review Details, not the newer completion; intended, the thank stands after a revert | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
+| [A35](#a35) | Retired: after "Revert Decision", History drops the "Reviewer Thanked" line although the thank-you email went out; intended, History shows only the dates tracked today until an event log replaces it | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
 | [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor; fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
 | [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates; no review process, and the window is unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
 | [A11](#a11) | Retired: the change notice reported the pre-change deadlines; fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
@@ -1642,21 +1643,6 @@ for "{title}" has been removed", is never sent. The reviewer is told two
 different things in one message.
 Basis: test run. <sup>[f-a26](#fn-a26)</sup>
 
-<a id="a27"></a>
-**A27 — A re-completed review skips "Complete" once it was thanked** · ❓ ·
-minor.
-"Revert Decision" on a "Reviewer Thanked" row returns it to "Review
-Viewed", but the acknowledgement stays: pressing "Mark as Complete" again
-turns the row "Reviewer Thanked" at once, with "Revert Decision" alone.
-There is no "Complete" step and no "Thank Reviewer" button, so the reviewer
-cannot be thanked a second time from the row.
-Question: should the revert also withdraw the acknowledgement, so that a
-re-completed review can be thanked again? Lean: the status is honest, since
-the thank-you really went out and History lists its "Reviewer Thanked" date
-again once the review is complete, but a "Thank Reviewer" that is gone for
-good deserves a product look.
-Basis: test run. <sup>[f-a27](#fn-a27)</sup>
-
 <a id="a28"></a>
 **A28 — "Reviews completed" hides the never-assigned reviewers** · ❓ · minor.
 In "Locate a Reviewer", once the "Reviews completed" slider is enabled, at
@@ -1743,23 +1729,6 @@ Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; merged
 > before it closes the window, as scenario 9 of the submissions dashboard
 > does.
 
-<a id="a33"></a>
-**A33 — Review Details names an older thank as the latest step** · 🐞 · minor.
-The Review Details window's dated line is meant to name the review's
-latest step (Rule 14a). A review marked complete, thanked, taken back with
-"Revert Decision" and marked complete again reads "Reviewer Thanked:
-{date of the first thank}", while the row's History, on the same review,
-lists "Review Completed: {date of the second completion}" after that
-thank. The same happens when the second completion comes from a review
-decision whose "Notify Reviewers" step thanks the reviewer: the reviewer
-gets a second "Thank you for your review" email, and neither the window
-nor History shows its date. Expected: the window names the newer step, the
-second completion or the second thank, with its date. A reviewer the
-decision thanks for the first time reads correctly, "Reviewer Thanked:
-{date of the decision}". The row's own status on this path is A27.
-Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346 with
-pkp/ui-library#987; issue pkp/pkp-lib#13263) · Basis: probe. <sup>[f-a33](#fn-a33)</sup>
-
 <a id="a34"></a>
 **A34 — "Reviewer Reminded" is untranslated in other languages** · 🐞 · minor.
 With the interface in a language other than English, the reminder
@@ -1776,26 +1745,6 @@ translated shows a placeholder.
 Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346; issue
 pkp/pkp-lib#13263) · Basis: probe.
 <sup>[f-a34](#fn-a34)</sup>
-
-<a id="a35"></a>
-**A35 — History drops the thank after "Revert Decision"** · ❓ · minor.
-After "Revert Decision" on a thanked review, History ends at "Review
-Submitted": the "Review Completed" and "Reviewer Thanked" lines are gone,
-although the thank-you email went out and the thank is still on record
-(marked complete again, the review lists it once more, Rule 21). Before
-the relabelling of the review dates in History and Review Details
-(pkp/pkp-lib#13263, September 2026) History kept the thank's date in this
-state. The Review
-Details window agrees with History: a taken-back review reads "Review
-Submitted: …" there (Rule 14a).
-Question: should History, which that relabelling describes as showing
-every date the assignment tracks, keep the "Reviewer Thanked" line after a revert?
-Lean: intended, since both screens then agree that a taken-back review is
-not thanked and the line returns with the next completion; the team has
-not yet ruled.
-Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346; issue
-pkp/pkp-lib#13263) · Basis: probe.
-<sup>[f-a35](#fn-a35)</sup>
 
 ### OMP
 
@@ -1931,6 +1880,15 @@ Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="a25"></a>
 **A25 — The dashboard popover's window drops the recommendation** · ✅ · retired. Fixed upstream (pkp/ui-library#971, `d3e19fc4`), in all three apps' lib/ui-library and re-verified live on OJS, 2026-09-03. <sup>[f-a25](#fn-a25)</sup>
+
+<a id="a27"></a>
+**A27 — A re-completed review skips "Complete" once it was thanked** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: "Revert Decision" takes back "Mark as Complete" only, and the thank, already sent, stands, so a re-completed review reads "Reviewer Thanked" with no second "Thank Reviewer" (Rule 16). <sup>[f-a27](#fn-a27)</sup>
+
+<a id="a33"></a>
+**A33 — Review Details names an older thank as the latest step** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: the thank stands after "Revert Decision", so a review marked complete again names that first thank and its date in Review Details (Rule 14a). <sup>[f-a33](#fn-a33)</sup>
+
+<a id="a35"></a>
+**A35 — History drops the thank after "Revert Decision"** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: History shows only the dates the assignment currently tracks, and a proper event log is to replace it later, so the "Reviewer Thanked" line leaving it after "Revert Decision" stands (Rule 21). <sup>[f-a35](#fn-a35)</sup>
 
 ---
 
