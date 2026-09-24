@@ -152,6 +152,15 @@
  *   itself (ApiCall), then, for a started task, ::startTask ("Begin Task
  *   Upon Saving"). A past dateDue (the window refuses one, A10) is the one
  *   lifted rule: it stands for a due date passed since the save.
+ * - libraryFiles[] {name*, type*, description?, file?} — the submission's
+ *   Submission Library (U39): each the workflow header's "Library" ›
+ *   "Add a file" window, its upload and its "OK", acting as the editor
+ *   (admin), after everything but tasks[] (LibraryFileSeeder:
+ *   TemporaryFileManager::handleUpload, then the submissionDocuments
+ *   NewLibraryFileForm's execute). `type` is a label of the window's
+ *   "Type" list, `file` a fixture basename (default the app's PDF
+ *   fixture); the window has no "Public Access" box, so that key is a
+ *   400. A draft has no workflow, so the key needs submitted: true.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -457,6 +466,10 @@ abstract class PKPSubmissionScenarioBuilder
         $galleyPlans = $this->parseGalleys($context, $root, $locale);
         $filePlans = $this->parseFiles($context, $root, $submitter, $submitted, $participantPlans);
         $taskPlans = $this->parseTasks($root, $submitted, $tag);
+        $libraryFilePlans = LibraryFileSeeder::parse($root, false);
+        if ($libraryFilePlans !== [] && !$submitted) {
+            throw new SpecException('libraryFiles', 'A draft has no workflow and no "Library" button: libraryFiles needs submitted: true');
+        }
         $root->assertConsumed();
 
         if ($published && !$submitted) {
@@ -472,7 +485,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans);
         } finally {
             $restoreRouterContext();
         }
@@ -499,7 +512,8 @@ abstract class PKPSubmissionScenarioBuilder
         array $commentPlans = [],
         array $galleyPlans = [],
         array $filePlans = [],
-        array $taskPlans = []
+        array $taskPlans = [],
+        array $libraryFilePlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
@@ -507,6 +521,7 @@ abstract class PKPSubmissionScenarioBuilder
         $seededGalleys = [];
         $seededFiles = [];
         $seededTasks = [];
+        $seededLibraryFiles = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -804,6 +819,13 @@ abstract class PKPSubmissionScenarioBuilder
             Registry::set('user', $previousActingUser);
         }
 
+        // The workflow header's "Library" › "Submission Library" › "Add a
+        // file" › "OK", acting as the editor (admin), on the submission as
+        // built.
+        foreach ($libraryFilePlans as $plan) {
+            $seededLibraryFiles[] = LibraryFileSeeder::add($context, $plan, $submissionId, $editor);
+        }
+
         // Discussions and tasks, last: each is the stage panel's "Add" ›
         // "Save" by its creator on the submission as built.
         if ($taskPlans !== []) {
@@ -832,6 +854,7 @@ abstract class PKPSubmissionScenarioBuilder
             'galleys' => $seededGalleys,
             'files' => $seededFiles,
             'tasks' => $seededTasks,
+            'libraryFiles' => $seededLibraryFiles,
         ];
     }
 

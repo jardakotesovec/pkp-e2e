@@ -761,3 +761,22 @@ config-file settings.
   the application's name ("Open Journal Systems", "Open Monograph Press",
   "Open Preprint Systems") where the site's name would stand. All three
   apps, 2026-09-23 (U08 claim check K1, K4).
+- A stage whose panels an assigned participant's role may not open shows
+  "You don't currently have access to that stage of the workflow." in
+  place of the panels, the header's "Library" still offered; "The current
+  role does not have access to this operation." is the "Error" dialog an
+  unassigned Section editor gets on opening a workflow. Workflow, OJS and
+  OMP, 2026-09-24 (`.reports/U39/cc-K1.md`, `stage-le-copyediting`).
+- On OPS, `participants[]` accepts `editorialBoardMember`, but the assigned
+  Editorial Board Member (not a Site Administrator) cannot open the
+  preprint's workflow ("Error" / "The current role does not have access
+  to this operation."). Workflow, OPS, 2026-09-24 (`.reports/U39/cc-K1.md`,
+  `roles-eb-wf`).
+- The Roles list's stage columns are Submission, Review, Copyediting,
+  Production on a journal; Submission, Internal Review, External Review,
+  Copyediting, Production on a press; Production alone on a preprint
+  server. Submission is ticked by default for the Section (Series) editor,
+  Guest editor (OJS), Funding coordinator, Author and Translator (a press
+  also the Volume editor) and unticked for the assistants and a press's
+  Chapter Author. Settings › Users & Roles › Roles, all three apps,
+  2026-09-24 (`.reports/U39/cc-K2.md`, `stages-grid-before-*`).

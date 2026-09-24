@@ -251,6 +251,13 @@ touched.
   Owner"), and is started and completed. Distinct from the header's Tasks
   panel above, where each message also lands. The tasks-and-discussions
   spec owns the panel and its templates.
+- **Libraries (Publisher Library, Submission Library)** — the stores for
+  documents that are not the scholarly work (forms, agreements, marketing
+  material, reports). The **Publisher Library** belongs to the journal
+  (Settings › Workflow › "Publisher Library"; cross-app names: Part II);
+  each submission has its own **Submission Library**, the window the
+  workflow header's "Library" opens. Library files are not submission
+  files. The libraries spec owns both.
 - **Notifications (author's list)** — on the author's review stage, the list
   of emails editors sent about this submission (decision emails re-read
   here). Distinct from toast notices and from the header Tasks panel; specs
@@ -380,6 +387,7 @@ Terms not in this file mean the same thing in all three apps.
 | galley | publication format (+ ONIX metadata) | galley (unchanged) |
 | Archive (back issues) | — no back-issue archive. Counterpart feature: Catalog browse (own OMP spec; maintainer scope extension 2026-07-27) | Preprints archive listing |
 | Hosted Journals (site admin) | Hosted Presses | Hosted Servers |
+| Publisher Library (Settings › Workflow tab) | Press Library | Preprint Server Library |
 
 ### Roles (default user-group names)
 

@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **22 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **24 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -352,3 +352,17 @@ until their specs exist. Do not force-claim the defects themselves.
     Code-verified 2026-09-23 (U08 spec author; checkouts ojs `802202cb3e`,
     omp `7f9455d5a`, ops `15f0b6e0bd`). Resolves: maintainer confirmation
     as dead code (removal candidates).
+24. **Unreached library pieces** — attached to **U39** (claimed; the
+    libraries spec's Reference table lists them). GRID-030
+    `SelectableLibraryFileGridHandler` (a tick-box list of Publisher
+    Library files): no template, handler or ui-library code loads
+    `grid.files.SelectableLibraryFileGridHandler` (the email composer's
+    "Library Files" reads the `_library` API instead). The legacy author
+    dashboard's `submissionLibraryUrl`
+    (`PKPAuthorDashboardHandler::setupTemplate()`): the page's
+    `submission()` forwards to My Submissions before anything renders,
+    so no screen uses it; the workflow header's "Library" is the one
+    door. Code-verified 2026-09-24 (U39 spec author; checkouts ojs
+    `802202cb3e`, lib/pkp `5af3b3933`, ui-library `2034439a`; omp
+    `7f9455d5a`; ops `15f0b6e0bd`). Resolves: maintainer confirmation as
+    dead code (removal candidates).

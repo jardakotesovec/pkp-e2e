@@ -127,7 +127,16 @@
  *   (roles below sub-editor level) and permitMetadataEdit false on a
  *   manager-level role (the form forces it on); permitSettings true below
  *   manager level (the box is disabled there) and false on the Journal
- *   Manager (no "Settings" link; the lock-out guard). Applied before users[].
+ *   Manager (no "Settings" link; the lock-out guard). `stages` (U39) is
+ *   the same window's "Stage Assignment" boxes: a map of stage word
+ *   (ApiCall::STAGES, this app's own) to true (ticked) or false (unticked);
+ *   an unnamed box keeps its stored state. Refused: another app's word, a
+ *   box the window disables for the role (every box of a manager-level
+ *   role, whose box group the window hides; a reviewer's non-review boxes;
+ *   a reader's), a non-boolean, and a save leaving no box ticked (the
+ *   form's execute then keeps the stored stages). Applied before the
+ *   components, the task templates and users[], so a template's `roles`
+ *   sees the stages as the screen would after the role's "OK".
  * - components {<name>: false | {metadata?, dependent?, supplementary?,
  *   required?}} — Settings › Workflow › Submission › "Components" (U36),
  *   the component grid of every app: a name among the components every new
@@ -150,6 +159,16 @@
  *   `roles` "Limit access to specific roles", `type` "task" with
  *   `dueInterval` (P1W … P3M) the task information. Applied after the
  *   settings forms and components, before users[].
+ * - libraryFiles[] {name*, type*, description?, publicAccess?, file?} —
+ *   Settings › Workflow › "Publisher Library" ("Press Library",
+ *   "Preprint Server Library") (U39): each the tab's "Add a file" window,
+ *   its upload and its "OK", acting as the seeding admin
+ *   (LibraryFileSeeder: TemporaryFileManager::handleUpload, then the
+ *   settings NewLibraryFileForm's execute). `type` is a label of the
+ *   window's "Type" list ("Marketing", "Permissions", "Reports", "Other";
+ *   a press also "Contracts"), `publicAccess` the "Public Access" box,
+ *   `file` a fixture basename (default the app's PDF fixture). Applied
+ *   after the task templates, before users[].
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -186,6 +205,7 @@ use PKP\testing\ContextFactory;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
 use PKP\testing\UserSeeder;
+use PKP\workflow\WorkflowStageDAO;
 
 abstract class PKPContextScenarioBuilder
 {
@@ -292,6 +312,7 @@ abstract class PKPContextScenarioBuilder
         $rolePlans = $this->parseRoleOptions($root);
         $componentPlans = $this->parseComponents($root, $primaryLocale);
         $templatePlans = $this->parseTaskTemplates($root);
+        $libraryFilePlans = LibraryFileSeeder::parse($root, true);
         $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $overlayPlan = $this->parseOverlay($root);
@@ -358,6 +379,13 @@ abstract class PKPContextScenarioBuilder
             $context = $this->saveFormSettings($context, $formSettings, $specKeys);
         }
 
+        // The Roles tab's "Edit" › "OK" per role, before the components and
+        // the task templates: a template window offers the roles that work
+        // on its stage, which a role's "Stage Assignment" boxes decide.
+        foreach ($rolePlans as $plan) {
+            $this->applyRoleOptions($context, $plan);
+        }
+
         $components = [];
         foreach ($componentPlans as $plan) {
             $components[] = $this->applyComponent($context, $plan);
@@ -368,8 +396,14 @@ abstract class PKPContextScenarioBuilder
             $taskTemplates[] = $this->applyTaskTemplate($context, $plan);
         }
 
-        foreach ($rolePlans as $plan) {
-            $this->applyRoleOptions($context, $plan);
+        // Settings › Workflow › "Publisher Library" › "Add a file" › "OK",
+        // acting as the seeding admin (a manager of every scratch context).
+        $libraryFiles = [];
+        if ($libraryFilePlans !== []) {
+            $admin = Repo::user()->getByUsername('admin', true);
+            foreach ($libraryFilePlans as $plan) {
+                $libraryFiles[] = LibraryFileSeeder::add($context, $plan, null, $admin);
+            }
         }
 
         foreach ($reviewFormPlans as $plan) {
@@ -417,6 +451,7 @@ abstract class PKPContextScenarioBuilder
             'announcements' => $announcements,
             'components' => $components,
             'taskTemplates' => $taskTemplates,
+            'libraryFiles' => $libraryFiles,
         ] + $overlay;
     }
 
@@ -742,8 +777,10 @@ abstract class PKPContextScenarioBuilder
         if (array_is_list($raw)) {
             throw new SpecException('roles', 'roles must be a map of role key to {recommendOnly?, permitMetadataEdit?, permitSettings?, masthead?}');
         }
-        // Role key → role id, from the roles every new context gets.
+        // Role key → role id, and role key → installed stage ids, from the
+        // roles every new context gets.
         $roleIds = UserSeeder::registryRoleIds();
+        $installedStages = self::registryRoleStages();
         // UserGroupForm::getRecommendOnlyRoles() and the user-group
         // repository's NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES.
         $recommendOnlyRoles = [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR];
@@ -789,13 +826,85 @@ abstract class PKPContextScenarioBuilder
             if (($options['permitSettings'] ?? true) === false && $key === 'manager') {
                 throw new SpecException("roles.{$key}.permitSettings", 'The Journal Manager role cannot lose "Permit changes to Settings": its Roles row has no "Settings" link, and the form disables the box on the acting user\'s only settings role');
             }
+            $stages = $planSpec->has('stages')
+                ? $this->parseRoleStages($planSpec->get('stages'), $key, $roleIds[$key], $installedStages[$key] ?? [])
+                : null;
             $planSpec->assertConsumed();
-            if ($options === []) {
-                throw new SpecException("roles.{$key}", "roles.{$key} sets nothing; give one of " . implode(', ', self::ROLE_OPTIONS));
+            if ($options === [] && $stages === null) {
+                throw new SpecException("roles.{$key}", "roles.{$key} sets nothing; give one of " . implode(', ', [...self::ROLE_OPTIONS, 'stages']));
             }
-            $plans[] = ['key' => $key, 'options' => $options];
+            $plans[] = ['key' => $key, 'options' => $options, 'stages' => $stages];
         }
         return $plans;
+    }
+
+    /**
+     * Role key → the stage ids the installer gives the role in every new
+     * context (registry/userGroups.xml `stages`, the file
+     * PKPContextService::add installs). The `roles` plans are parsed before
+     * the context exists, so this is what the role's "Edit" window shows
+     * ticked when the key's save runs.
+     *
+     * @return array<string, int[]>
+     */
+    protected static function registryRoleStages(): array
+    {
+        $stages = [];
+        $xml = simplexml_load_file(Core::getBaseDir() . '/registry/userGroups.xml');
+        foreach ($xml->group as $group) {
+            $key = preg_replace('/^default\.groups\.name\./', '', (string) $group['name']);
+            $list = trim((string) $group['stages']);
+            $stages[$key] = $list === '' ? [] : array_map('intval', explode(',', $list));
+        }
+        return $stages;
+    }
+
+    /**
+     * `roles.<key>.stages` → the stage ids the role's "Edit" window posts
+     * ticked: the boxes the window renders (this app's workflow stages,
+     * UserGroupForm::initData's `stages`; none for the Done stage) as the
+     * installer ticked them, with each named box ticked (true) or
+     * unticked (false). The window disables the boxes of the role's
+     * forbidden stages (RoleDAO::getForbiddenStages; UserGroupFormHandler
+     * hides the box group when none is left, as for a manager-level role,
+     * whose save always stores every stage), so naming one is a 400; so is
+     * a result with no box ticked, since UserGroupForm::execute then
+     * re-saves nothing and the role keeps its stored stages. Parse phase.
+     *
+     * @param int[] $installed
+     *
+     * @return int[]
+     */
+    protected function parseRoleStages(mixed $raw, string $key, int $roleId, array $installed): array
+    {
+        $path = "roles.{$key}.stages";
+        if (!is_array($raw) || $raw === [] || array_is_list($raw)) {
+            throw new SpecException($path, "{$path} must be a non-empty map of stage word to boolean (the \"Stage Assignment\" box ticked or unticked), e.g. {submission: true}");
+        }
+        $roleDao = DAORegistry::getDAO('RoleDAO'); /** @var \PKP\security\RoleDAO $roleDao */
+        $formStages = array_keys(WorkflowStageDAO::getWorkflowStageTranslationKeys());
+        $forbidden = $roleDao->getForbiddenStages($roleId);
+        $ticked = array_values(array_intersect($installed, $formStages));
+        foreach ($raw as $word => $value) {
+            $word = (string) $word;
+            $stageId = ApiCall::stageId($word, "{$path}.{$word}");
+            if (!is_bool($value)) {
+                throw new SpecException("{$path}.{$word}", "{$path}.{$word} must be a boolean (the box ticked or unticked)");
+            }
+            if (in_array($stageId, $forbidden)) {
+                throw new SpecException("{$path}.{$word}", array_diff($formStages, $forbidden) === []
+                    ? "The Roles form shows no \"Stage Assignment\" boxes for \"{$key}\"" . (in_array($roleId, $roleDao->getAlwaysActiveStages()) ? ' (a manager-level role: its save always stores every stage)' : '')
+                    : "The Roles form disables the \"{$word}\" box for \"{$key}\"");
+            }
+            $ticked = $value
+                ? array_values(array_unique([...$ticked, $stageId]))
+                : array_values(array_diff($ticked, [$stageId]));
+        }
+        if ($ticked === []) {
+            throw new SpecException($path, "{$path} leaves no \"Stage Assignment\" box ticked; the Roles form's save then keeps the stored stages, so the key cannot mean it");
+        }
+        sort($ticked);
+        return $ticked;
     }
 
     /**
@@ -826,7 +935,9 @@ abstract class PKPContextScenarioBuilder
             // (initData's `stages`), so a stored stage the form has no box
             // for (the installer's Done stage, 6) is not posted and the
             // save drops it, as the screen's save does.
-            $form->setData('assignedStages', array_values(array_intersect(
+            // `stages` posts the boxes the key leaves ticked instead
+            // (parseRoleStages starts from the same narrowed set).
+            $form->setData('assignedStages', $plan['stages'] ?? array_values(array_intersect(
                 (array) $form->getData('assignedStages'),
                 array_keys((array) $form->getData('stages'))
             )));

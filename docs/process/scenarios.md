@@ -286,8 +286,9 @@ Keys:
   block placed. Not a list of strings: a 400.
 - `roles`: a map from a role key (the keys of `users[].roles`, e.g.
   `sectionEditor`) to `{recommendOnly?, permitMetadataEdit?,
-  permitSettings?, masthead?}` (booleans, at least one): the "Role
-  Options" boxes of Settings › Users & Roles › Roles, the role's
+  permitSettings?, masthead?, stages?}` (at least one; the first four are
+  booleans, `stages` a map, below):
+  the "Role Options" boxes of Settings › Users & Roles › Roles, the role's
   "Settings" › "Edit" window ("This role is only allowed to recommend a
   review decision and will require an authorised editor to record a final
   decision.", "Permit submission metadata edit.", "Consider role in
@@ -301,7 +302,8 @@ Keys:
   `1,3,4,5`, OPS Moderator `5,6` becomes `5`; U35 harness, 2026-09-22,
   three apps), and a manager-level role is saved with every workflow stage,
   as the form always saves it, so seed `roles.manager` only once a screen
-  that saves the Journal Manager role has been driven. The roles the key names are saved before `users[]`, so a
+  that saves the Journal Manager role has been driven. The roles the key
+  names are saved before `components`, `taskTemplates[]` and `users[]`, so a
   context seeded with it has no assignment the metadata change could
   rewrite; the rewrite of existing assignments is a screen action. With
   `recommendOnly: true` the "Assign" window pre-ticks "Assignment
@@ -330,6 +332,24 @@ Keys:
   window disables the box on the acting user's only settings role, which
   `manager` is for the seeding admin. OPS has no manager-level role but
   `manager`, so the key cannot remove the Settings pages there.
+  `stages` (U39): the same window's "Stage Assignment" boxes, a map from
+  a stage word (those of `taskTemplates[].stage`: `submission`,
+  `internalReview` on OMP only, `review`, `copyediting`, `production`,
+  the only one on OPS) to `true` (ticked) or `false` (unticked); a box
+  the map does not name keeps the state the installer gave it, so
+  `roles: {copyeditor: {stages: {submission: true}}}` saves a
+  journal's or a press's Copyeditor with Submission and Copyediting
+  (`1,4`, the Done stage dropped as above), which the Roles list then
+  shows ticked under both columns. Refusals follow the window: another
+  app's stage word, a box the window disables for the role (a
+  manager-level role shows no box, since its save always stores every
+  stage; a reviewer role only its review boxes; a reader none), a
+  non-boolean, an empty map, and a map that leaves no box ticked (the
+  form's save then keeps the stored stages rather than clearing them)
+  are 400s. Saved before `taskTemplates[]`, so a template's `roles`
+  offers the role on the stage it gained. The three apps alike (U39
+  harness, 2026-09-24: OJS and OMP Copyeditor with Submission, OPS
+  Editorial Board Member with Production).
 - `plugins`: a map from a plugin's lowercased class name (the Plugins
   grid's `plugin` id, e.g. `announcementfeedplugin`) to `{enabled,
   settings?}`. `enabled` (boolean, required) is the grid's "Enabled" box
@@ -404,6 +424,28 @@ Keys:
   for a later one: "Created by: system", no participants (so only
   manager-level people see it), a task due after the interval with an
   empty "Task Owner:", its first message the template's text.
+- `libraryFiles[]`: files of the context's Publisher Library (Settings ›
+  Workflow › "Publisher Library", "Press Library" on OMP, "Preprint
+  Server Library" on OPS), each `{name, type, description?,
+  publicAccess?, file?}`, added the way the tab's "Add a file" window
+  adds one (its upload, then "OK"), acting as `admin`. `name` (required,
+  localized, at most 255 characters, not empty in the primary locale) is
+  "Name"; `type` (required) a label of the "Type" list: `Marketing`,
+  `Permissions`, `Reports` or `Other`, and on OMP also `Contracts`
+  (another label is a 400 naming the app's list); `description`
+  (localized) the "Description" box, empty by default; `publicAccess`
+  (boolean, default false) the "Public Access" box; `file` a fixture
+  basename as for the submission's `files[]`, default the app's PDF
+  fixture (`article.pdf`, OPS `preprint.pdf`). The stored file is named
+  after the uploaded one with the type code (`article-PER.pdf`; `-1`, `-2`
+  after the code when the context already holds that name), and the
+  response's `libraryFiles` gives it as `fileName` with the file's `id`,
+  the number of the public address
+  (`<context>/libraryFiles/downloadPublic/<id>`). The rows, their settings
+  and the stored file are the screen's (U39 harness, 2026-09-24, three
+  apps driven). On OMP the type codes are the positions of the press's
+  own "Type" list (Contracts 0, Marketing 1, … Other 4), not lib/pkp's
+  `LibraryFile` constants; the screen stores the same.
 - `announcementTypes[]`: the "Announcement Types" tab's types, each
   `{name}` (localized, required in the primary locale), created the way the
   tab's "Add Announcement Type" window saves. `announcements[]`: the
@@ -436,9 +478,10 @@ Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
 `path`, the created `users` (id and username), `announcementTypes` (id and
 name), `announcements` (id and title), `components` (`id`, `name`,
-`action`: `added`, `edited` or `removed`, in the order seeded) and
+`action`: `added`, `edited` or `removed`, in the order seeded),
 `taskTemplates` (`id`, `title`, `stage`, `action`: `added` or `edited`),
-and on OJS `issues` (see `issues[]`).
+`libraryFiles` (`id`, `name`, `type`, `fileName`, `originalFileName`,
+`publicAccess`, in the order seeded) and on OJS `issues` (see `issues[]`).
 
 ## `POST scenarios/submission`
 
@@ -687,6 +730,27 @@ Keys:
   saved; the item's other dates are the seed's time, so its History says
   it was created after its due date. A draft (`submitted: false`) refuses
   the key. The three apps alike.
+- `libraryFiles[]`: files of the submission's Submission Library (the
+  workflow header's "Library"), each `{name, type, description?, file?}`,
+  the same values as the context's `libraryFiles[]`, added after
+  everything but `tasks[]` the way the "Submission Library" window's "Add
+  a file" adds one (its upload, then "OK"), acting as `admin`. The
+  window has no "Public Access" box, so `publicAccess` is a 400, and a
+  draft (`submitted: false`) refuses the key (no workflow, no "Library").
+  The response's `libraryFiles` has the same fields as the context's. The
+  rows, their settings and the stored file are the screen's, and the
+  window lists a seeded file as it lists a by-hand one (U39 harness,
+  2026-09-24, three apps driven). The key works on `publicknowledge`
+  submissions too: a Submission Library file belongs to its submission.
+  The stored name, though, is picked from the whole context's library
+  (both libraries, every submission), so on `publicknowledge`, where
+  other workers seed the same fixture, it is not predictable
+  (`article-MAR.pdf` or `article-MAR-3.pdf`), and a test that asserts
+  the downloaded name (U39 Rule 8a) seeds its submission in a scratch
+  context, or reads `fileName` from the response. Two workers seeding at
+  once can even get the same stored name (neither sees the other's
+  uncommitted row) and share one stored file, so a test that deletes a
+  library file seeds it in a scratch context.
 
 App-specific keys:
 
@@ -776,8 +840,9 @@ The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 the order seeded), `galleys[]` (`id`, `label`, `submissionFileId`, null
 for a remote galley), `files[]` (`submissionFileId`, `file`,
 `fileStage`, `reviewRoundId`, null on "Submission Files", and `uploader`;
-the root entries in order, then each round's) and `tasks[]` (`id`,
-`title`, `type`, `stage`, in the order seeded). `stageId`
+the root entries in order, then each round's), `tasks[]` (`id`,
+`title`, `type`, `stage`, in the order seeded) and `libraryFiles[]` (as
+the context's). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
@@ -790,7 +855,8 @@ view or assign a participant.
 Implementation: `shared/php/api/v1/_test/PKPTestController.php` and the
 builders in `shared/php/classes/testing/` (`PKPBootstrapSeeder`,
 `PKPContextScenarioBuilder`, `PKPSubmissionScenarioBuilder`, `Spec`,
-`UserSeeder`, `ContextFactory`, and `ApiCall`, which runs an app API
+`UserSeeder`, `ContextFactory`, `LibraryFileSeeder` (both `libraryFiles[]`
+keys), and `ApiCall`, which runs an app API
 controller's own action on the JSON body a screen sends, for the keys
 that save through one). Each app subclasses them under
 `apps/<app>/php/api/v1/_test/` and `apps/<app>/php/classes/testing/`. The

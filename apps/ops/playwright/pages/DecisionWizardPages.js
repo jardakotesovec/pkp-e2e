@@ -21,7 +21,9 @@
  *   source (a level-2 heading, a sentence, a button; on a preprint server
  *   "Upload File" and "Library Files" alone, register OPS1), the "Upload
  *   File" window with its file input and its own "Attach Files" button,
- *   and the chips under the message (Rule 6);
+ *   and the chips under the message (Rule 6); U39 (2026-09-24) added the
+ *   "Library Files" source window its "Attach Library Files" opens, with
+ *   its tick boxes and "Attach Selected";
  * - the toolbar's "Insert Content" and its side window listing the
  *   letter's values, each a row with the value, a description and an
  *   "Insert" button (Rule 5).
@@ -45,10 +47,13 @@ const {expect} = require('@playwright/test');
 const ATTACH_WINDOW = 'Attach Files';
 const UPLOAD_WINDOW = 'Upload File';
 const INSERT_WINDOW = 'Insert Content';
+/** The "Library Files" source's own window (U39 Rule 11; its button reads "Attach Library Files"). */
+const LIBRARY_FILES_WINDOW = 'Library Files';
 
 exports.ATTACH_WINDOW = ATTACH_WINDOW;
 exports.UPLOAD_WINDOW = UPLOAD_WINDOW;
 exports.INSERT_WINDOW = INSERT_WINDOW;
+exports.LIBRARY_FILES_WINDOW = LIBRARY_FILES_WINDOW;
 
 exports.ComposerPage = class ComposerPage {
     /**
@@ -215,6 +220,46 @@ exports.ComposerPage = class ComposerPage {
     /** A source's button in the window ("Upload File", "Attach Library Files", …). */
     attachSourceButton(label) {
         return this.attachWindow().getByRole('button', {name: label, exact: true});
+    }
+
+    /** A source window by its title ("Library Files", "Upload File"). */
+    sourceWindow(title) {
+        return this.page.getByRole('dialog', {name: title, exact: true});
+    }
+
+    /**
+     * Press a source's button ("Attach Library Files") and wait for its
+     * window, bounded by the window's "Back" (U39 Rule 11).
+     */
+    async openAttachSource(buttonLabel, windowTitle) {
+        await this.attachSourceButton(buttonLabel).click();
+        const win = this.sourceWindow(windowTitle);
+        await expect(win).toBeVisible({timeout: 30_000});
+        await expect(win.getByRole('button', {name: 'Back', exact: true}).last()).toBeVisible({timeout: 30_000});
+        return win;
+    }
+
+    /** A source window's "Attach Selected". */
+    attachSelectedButton(win) {
+        return win.getByRole('button', {name: 'Attach Selected', exact: true});
+    }
+
+    /** The tick box of the source window's row carrying `text`. */
+    sourceCheckbox(win, text) {
+        return win.locator('label').filter({hasText: text}).locator('input[type="checkbox"]');
+    }
+
+    /**
+     * Tick a source window's row and press "Attach Selected": both windows
+     * close and the chip named `fileName` shows under the message.
+     */
+    async attachSelected(win, rowText, fileName) {
+        await this.sourceCheckbox(win, rowText).check({force: true});
+        await expect(this.attachSelectedButton(win)).toBeEnabled({timeout: 30_000});
+        await this.attachSelectedButton(win).click();
+        await expect(win).toBeHidden({timeout: 30_000});
+        await expect(this.attachWindow()).toBeHidden({timeout: 30_000});
+        await expect(this.attachmentChip(fileName)).toBeVisible({timeout: 30_000});
     }
 
     /** Close the "Attach Files" window with its own "Close". */

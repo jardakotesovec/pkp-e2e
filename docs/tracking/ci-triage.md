@@ -395,7 +395,7 @@ trips.
   select listed "Author Original (AO)" with nothing checked for the whole
   wait. Green on the same Mac the day before on a reset database (the U32
   finals), so used-database state, not the galley key; the U33 final on a
-  reset database is the next read. **Sighted 2026-09-21 on the VM, OMP** (sync session, the OMP final at four workers on a reset database, `.reports/sync/final-run-omp.log`: U49 S4's first "Create New Version" dialog, "Publication Stage" `""` through the wait for "VoR" behind the hardened opener, the one red of 267 with the 14 serial tests skipped behind it; green alone in 10.2 s, `.reports/sync/s21-rerun-omp-u49s4.log`, the serial and solo projects green alone). The read of the dialog's fetch is still owed. **Sighted 2026-09-23 on the Mac, OPS** (U37 session, the OPS final on a reset database at auto workers, `.reports/U37/final-run-ops.log`): U49 S6's second dialog, "Publication Stage" with nothing checked for the wait for "Author Original (AO)"; red once more alone (`alone-ops-U49S6.log`), then green 3 of 3 alone with `--repeat-each 3` (`alone-ops-U49S6-rep.log`); the U37 harness's OPS U49 run on the same tree was green. **Sighted 2026-09-24 on the Mac, OPS** (U38 session, the OPS final on a reset database at auto workers, beside U40 S1, `.reports/U38/final-run-ops.log`): U49 S6 "minor and major numbering", a `toHaveText` read timing out at 10 s; green alone.
+  reset database is the next read. **Sighted 2026-09-21 on the VM, OMP** (sync session, the OMP final at four workers on a reset database, `.reports/sync/final-run-omp.log`: U49 S4's first "Create New Version" dialog, "Publication Stage" `""` through the wait for "VoR" behind the hardened opener, the one red of 267 with the 14 serial tests skipped behind it; green alone in 10.2 s, `.reports/sync/s21-rerun-omp-u49s4.log`, the serial and solo projects green alone). The read of the dialog's fetch is still owed. **Sighted 2026-09-23 on the Mac, OPS** (U37 session, the OPS final on a reset database at auto workers, `.reports/U37/final-run-ops.log`): U49 S6's second dialog, "Publication Stage" with nothing checked for the wait for "Author Original (AO)"; red once more alone (`alone-ops-U49S6.log`), then green 3 of 3 alone with `--repeat-each 3` (`alone-ops-U49S6-rep.log`); the U37 harness's OPS U49 run on the same tree was green. **Sighted 2026-09-24 on the Mac, OPS** (U38 session, the OPS final on a reset database at auto workers, beside U40 S1, `.reports/U38/final-run-ops.log`): U49 S6 "minor and major numbering", a `toHaveText` read timing out at 10 s; green alone. Sighted 2026-09-24 in the U39 session's OPS final on a reset database at auto workers (beside the Mac-only U40 S1), green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`).
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -592,7 +592,7 @@ trips.
   (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
   2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it), and in the U36 session's, 2026-09-23, beside U03 S5, red alone too (`.reports/U36/final-run-ops.log`, `alone-ops-U40S1.log`; serial and solo green alone), and in the U38 session's, 2026-09-24, beside U49 S6, red alone too (`.reports/U38/final-run-ops.log`; serial and solo green alone). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
-  push is CI's.
+  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`).
 - **Profile save response not seen in 30 s** (U03 S5, "cancel, and
   reject, an email change", OPS, once: 2026-09-23, the U36 session's OPS
   final on a reset database on the Mac at auto workers,
@@ -645,7 +645,7 @@ trips.
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run
-  reads N−1 on every app.
+  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`).
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7
