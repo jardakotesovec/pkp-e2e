@@ -10,9 +10,9 @@ The `stable-3_5_0` branch, read for regressions only, has its own file:
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
 | ojs | `71bb244152` | 2026-09-24 | claude (daily maintenance session) |
-| omp | `a36551804` | 2026-09-24 | claude (daily maintenance session) |
-| ops | `07141ae4df` | 2026-09-24 | claude (daily maintenance session) |
-| pkp-lib | `25182919bf` (ojs, omp, ops) | 2026-09-24 | claude (daily maintenance session); ui-library `1afd40a9` (ojs, omp, ops); ojs `plugins/generic/crossref` `96bfcaad44`, ops `plugins/generic/crossref` `b6b94dd5de`, ojs `plugins/generic/jatsTemplate` `1065bb02ae` |
+| omp | `187f0f40d` | 2026-09-24 | claude (merge of companion `i13263`) |
+| ops | `61cd158ce3` | 2026-09-24 | claude (merge of companion `i13263`) |
+| pkp-lib | `76a315591b` (ojs, omp, ops) | 2026-09-24 | claude (merge of companion `i13263`); ui-library `03d1cee2` (ojs, omp, ops); ojs `plugins/generic/crossref` `96bfcaad44`, ops `plugins/generic/crossref` `b6b94dd5de`, ojs `plugins/generic/jatsTemplate` `1065bb02ae` |
 
 ## Sync log
 
@@ -20,6 +20,10 @@ _Newest first; one entry per sync: the date and the range per repo, then
 one line per change reviewed (commit → no impact / spec and tests touched /
 finding filed, with a link)._
 
+- **2026-09-24 (merge of companion `i13263`) — pkp-lib `25182919bf..76a315591b` (1, #13346 squashed), ui-library `1afd40a9..03d1cee2` (1, #987 squashed); ojs `71bb244152..d9b567efec` (3), omp `a36551804..187f0f40d` (1), ops `07141ae4df..61cd158ce3` (1). ojs#5835 closed unmerged; each app's "Submodule updates" moved both pointers.**
+  - Merge confirmed: both squashes sit on the tips the review merged onto, and `git diff` from the review's local merge results (lib/pkp `d7772c0c90`, ui-library `9bc413b5`) to them is empty, so the merged code is what was reviewed.
+  - Companion rebased onto `main` (tracking files kept both sides); OMP's held-back History test edits restored now that OMP carries #13346 (`apps/omp` part of `a5552ab` reversed). Touched suites on reset databases at the merged tips: OJS U27+U28 35 passed, OMP U27+U28 36 passed, OPS U27 2 passed (`.reports/sync/i13263/merge-{ojs,omp,ops}.log`); companion row deleted.
+  - Baselines advanced for omp, ops, pkp-lib and ui-library (their ranges hold only the reviewed commits). ojs stays at `71bb244152`: its tip also carries #5825 (pkp-lib#12609 article numbers in the DataCite and Dublin Core exports, `7c3d13bdb6`) and a googleScholar bump (`68895b6e1e`), unreviewed, the daily sync's range.
 - **2026-09-24 (companion `i13263`, prepared before merge) — pkp/pkp-lib#13346 at `26a5efcb74` (on `5af3b39336`), pkp/ui-library#987 at `ad0fdd33` (on `2034439a`), pkp/ojs#5835 at `f4d74214b0` (submodule-only, on `802202cb3e`); no omp or ops PRs; issue pkp/pkp-lib#13263. Baselines not advanced: the PRs are open; the merge session rebases the companion and deletes its row.**
   - Refs: each PR is one commit behind its tip (lib/pkp `25182919bf`, a translations merge; ui-library `1afd40a9`, #853, reviewed and merged here as `optimize-table-reloads`; ojs `71bb244152`, pointer bumps), so all three apps ran at their tips with both submodules at a local merge of the PR head onto the tip (the merge result). OMP and OPS got the same submodule merges.
   - pkp-lib #13346 (`reviewHistory` dates relabelled "Request Sent", "Reviewer Reminded", "Request Accepted"/"Request Declined", "Review Submitted", "Review Completed" (new, `dateConsidered`), "Reviewer Thanked" (hidden while unconsidered); "Assigned" dropped; `reviewHistory.tpl` now "<strong>{Label}: </strong>{date}"; `editor.review.reviewerReminded` en only) and ui-library #987 (`ReviewDetailsInfo.vue` `latestActivity`: fixed priority Thanked > Completed > Submitted > Accepted/Declined > Reminded > Sent) → spec and tests touched: U27 Rules 13, 14a, 14c, 14d, 21, Side effects, S7, S9, A15 renamed, A27 lean, A29's declined "Confirmed:" half fixed, OMP4 softened; U28 Side effects "Accepting", S2, footnote f; tests OJS U27 S7/S9 and U28 S2 (the ojs PR's red shards 2 and 3, reproduced locally first). OMP's U27 S7/S9, U28 S2 and `openHistory` need the same edit once OMP's pointer carries #13346 (green at the merge result locally, red at OMP `main` on CI): held back in the commit "OMP History test edits held back", to be reverted by the sync that moves OMP's pointer. The Review Details dated line per state is a coverage change for U27's next revision (Coverage, Budget).
