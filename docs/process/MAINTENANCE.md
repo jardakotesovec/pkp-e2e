@@ -499,6 +499,10 @@ the answer; the spec and the test are the record.
   "Budget" rests on a number; CI runs each app as three shards
   (`run-app.yml`), so when a shard's Playwright step approaches 25
   minutes on CI, one more shard there is the next task, never a cut.
+  The shards are balanced by recorded per-test time (harness.md "CI"):
+  when an app's three Playwright steps on a green `main` run drift more
+  than two minutes apart, or a feature has added a spec's worth of tests,
+  run `npm run shard-timings` and commit `shared/playwright/timings/`.
 - **Leave the revision queue to the maintainer.**
   `docs/tracking/coverage-revision.md` lists the shipped specs awaiting
   RUNBOOK "Revising a shipped feature"; each is a session the maintainer

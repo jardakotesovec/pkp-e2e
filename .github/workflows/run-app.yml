@@ -12,9 +12,12 @@
 # the shared and app projects sharded (setup, one test, as their
 # dependency), then the serial project and then the solo project, each
 # sharded with `--no-deps` on the now-installed app, which keeps their
-# contract (after the parallel project; solo alone). The shard count lives
-# here alone (the job name, SHARDS and the matrix); the app hooks pick a
-# change up on their next run.
+# contract (after the parallel project; solo alone). Each pass is split by
+# recorded per-test time, not by count (shared/playwright/timed-shards.js
+# reads shared/playwright/timings/<app>.json; every shard uploads its fresh
+# times as timings-<app>-<n>, which `npm run shard-timings` folds back in).
+# The shard count lives here alone (the job name, SHARDS and the matrix);
+# the app hooks pick a change up on their next run.
 name: run-app
 
 on:
@@ -207,6 +210,18 @@ jobs:
           npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-serial --no-deps --pass-with-no-tests || rc=1
           npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-solo --no-deps --pass-with-no-tests || rc=1
           exit $rc
+
+      # Per-test durations of this shard (timed-shards.js), the input of
+      # `npm run shard-timings`; uploaded on red runs too.
+      - name: Upload test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: timings-${{ inputs.app }}-${{ matrix.shard }}
+          path: e2e/apps/${{ inputs.app }}/playwright/.timings/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Upload test artifacts on failure
         if: failure()

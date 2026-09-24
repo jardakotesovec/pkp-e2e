@@ -184,7 +184,9 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         outputDir: path.join(suiteDir, 'test-results'),
         workers,
         fullyParallel: true,
-        reporter: [['list']],
+        // timed-shards.js balances `--shard` by recorded per-test time and
+        // records this run's times (CI's shards; a CLI --reporter drops it).
+        reporter: [['list'], [require.resolve('./timed-shards.js')]],
         timeout: 60_000,
         expect: {timeout: 10_000},
         use: {

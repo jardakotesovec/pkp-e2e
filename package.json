@@ -17,6 +17,7 @@
     "probe-servers": "node bin/probe-servers.js",
     "fleet-prep": "node bin/fleet-prep.js",
     "test:final": "node bin/test-final.js",
+    "shard-timings": "node bin/shard-timings.js",
     "lint:probe-imports": "! git grep -l \"playwright/probe\" -- apps shared/playwright/tests shared/playwright/pages shared/playwright/support"
   },
   "devDependencies": {

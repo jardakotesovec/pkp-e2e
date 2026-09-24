@@ -345,6 +345,18 @@ processes before re-running.
   --no-deps`, then `--project=<app>-solo --no-deps`, both sharded and
   `--pass-with-no-tests`. The shard count is set in `run-app.yml` alone,
   and the app hooks follow it since they call that workflow at `main`.
+- Each pass is split by time, not by count: the reporter
+  `shared/playwright/timed-shards.js` packs the pass's tests longest-first
+  onto the least-loaded shard by their CI duration in
+  `shared/playwright/timings/<app>.json` (a test without one weighs the
+  pass's median), and every shard excludes the tests that are not its own
+  (a `timed shards:` line opens each pass in the log). Playwright's own
+  split cut equal counts in file order, so OJS ran 7.8 · 10.3 · 14.0 min
+  (2026-09-24). Every shard uploads its fresh durations as
+  `timings-<app>-<n>`; `npm run shard-timings [-- <run-id> ...]` (default:
+  the three latest green `main` runs) writes their median back into
+  `timings/`. `PKP_E2E_TIMED_SHARDS=0` restores Playwright's split. A
+  CLI `--reporter` drops the reporter, and with it both halves.
   Failure artifacts are per shard (`playwright-artifacts-<app>-<n>`) and
   include `.server-logs/`.
 - The latest run of `e2e-tests.yml` on an app repo's `main` is the
