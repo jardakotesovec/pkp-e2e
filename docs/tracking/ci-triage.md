@@ -366,7 +366,10 @@ trips.
   the three apps on reset databases, first run (OJS 16, OMP 14, OPS 13;
   `u49-<app>.log`). **Watch condition**: any red of this read behind the
   new opener; then read the error context's header for the contributors
-  line.
+  line. Held on the Mac the same day (U42 session): OPS S6 red alone five
+  times before the fix reached that tree, a reset database included, and
+  green alone after it on the same database
+  (`.reports/U42/alone-ops-U49S6-*.log`).
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -627,7 +630,7 @@ trips.
   `.reports/pr13359/v2-ojs-final.log`), the same line 647 read 0 for
   10 s; green alone 5 of 5 right after. The fix is the next daily
   session's (read the report job and the dialog's fetches in a retained
-  trace).
+  trace). Sighted 2026-09-24 in the U42 session's OJS final on a reset database at auto workers, green alone (`.reports/U42/alone-ojs-U14S5.log`).
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7
@@ -724,7 +727,15 @@ trips.
   visible after the unpublish (line 256), green alone 3 of 3, error lines
   in `.reports/pr13359/v2-ojs-serial-solo.log`.
   **Watch condition**: a red in a full run or on CI; keep the error
-  context, so a rerun passes `--output <elsewhere>`.
+  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`).
+- **"Add Reviewer" search never rendered** (U28 S11, OJS, once). In
+  the U42 session's OJS final on a reset database at auto workers on the
+  Mac (2026-09-24, `.reports/U42/final-run-ojs.log`), "read an earlier
+  round's review" waited 30 s in `addReviewer()` for the "Add Reviewer"
+  window's `.listPanel--selectReviewer` search box, which never appeared;
+  green alone right after (`.reports/U42/alone-ojs-U28S11.log`). First
+  sighting. **Watch condition**: a second sighting; then read the
+  window's list fetch in the trace (`pw-out-final-ojs/…U28…/trace.zip`).
 - **A success toast read only after the action's own waits** (U35 S2,
   OJS, CI, once). The nightly pkp-e2e run 35683638739 (2026-09-22, `main`
   at `66021a2`) red on OJS U35 S2 on the first attempt (37.3 s): after

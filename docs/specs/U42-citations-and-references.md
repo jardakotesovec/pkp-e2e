@@ -1,6 +1,6 @@
 ---
 name: citations-and-references
-status: draft
+status: verified
 ---
 
 # Citations & references
@@ -299,12 +299,12 @@ typed. Nothing asks first. The one exception is an author row added in
     - **On "Review".** The "Review" step's "Details" section lists the
       references one per line under "References", or "None provided".
     - **Required and empty.** When the journal requires references and the
-      box is empty, "Review" lists "References / None provided" with no
-      warning. "Submit" › "Submit" is refused: the step then shows "There
-      are one or more problems that need to be fixed before you can
-      submit. Please review the information below and make the requested
-      changes." and "This field is required." above "References", and the
-      submission cannot be completed until the box is filled.
+      box is empty, "Review" lists "References / None provided". When the
+      step's check has finished ("Checking your submission" shows while it
+      runs, [→ the Review step](U21-submission-wizard.md#review-step)),
+      "This field is required." shows above "References" and "Submit" is
+      grayed out. The submission cannot be completed until the box is
+      filled.
 17. **Identifiers from the wizard with lookup off.** With lookup off, a
     reference added through the workflow's "Add" keeps the DOI written in
     its text as its DOI, which shows as a link, and in the "DOI" box of
@@ -641,12 +641,10 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      submission." and save. Author: open the unfinished submission again
      and go on to its "Details" step: the References box is marked
      required. Leave it empty and press "Continue" on each step until
-     "Review": its "Details" section shows "None provided" under
-     "References", with no warning. Press "Submit" › "Submit": the
-     submission is refused, and the step shows "There are one or more
-     problems that need to be fixed before you can submit. Please review
-     the information below and make the requested changes." and "This
-     field is required." above "References" (Rule 16; Settings bullet 1).
+     "Review": once "Checking your submission" has gone, its "Details"
+     section shows "None provided" under "References", "This field is
+     required." stands above "References", and "Submit" is grayed out
+     (Rule 16; Settings bullet 1).
    - **The box filled**: open "Details" from the step rail, type "Gamma
      report 2022" in the References box, press "Continue" on each step
      until "Review", then "Submit" › "Submit": the submission completes.
@@ -1391,7 +1389,13 @@ structured value. The assigned Section Editor, Series Editor or Moderator
 got the same form with the same result. Deleting: the dialogs verbatim,
 "Cancel" keeping, "OK" removing and still removed after a reload; on an
 empty list "Delete all references" was offered and pressable, and "OK" left
-the list empty.
+the list empty. Test runs 2026-09-24, all three apps (scenario 1's "Edit"
+leg, lookup off): every "Save", the refused empty one (400) and the
+accepted one (200), wrote three PHP warnings to the server log,
+`Undefined array key "arxiv"`, then "doi" and "handle", because the
+lookup-off form sends only `rawCitation` and `edit()` reads the three keys
+without checking they were sent; the answers and the screen were
+unaffected (a latent code fault, no user impact).
 
 <a id="fn-g"></a>
 **g** — Search. `citationManagerStore.js` `citationsFiltered`: the phrase is
@@ -1523,9 +1527,15 @@ spaces / "  Gamma    report   2022  " saved by "Continue" gave the Review
 item and, after "Submit", the Journal Manager's rows "Beta trial 2021",
 "Alpha study 2020", "Beta trial 2021", "Gamma report 2022"; a later save
 replaced the list ("Rail one" became "Rail two" alone). At "Require…" with
-the box empty, "Review" showed no warning and "Submit" › "Submit" was
-refused (400 `{"citationsRaw":["This field is required."]}`) with the
-problems message and "This field is required." above "References"; filled,
+the box empty, the Review step's own check (`POST …/submit`) answered 400
+`{"citationsRaw":["This field is required."]}`; the wizard's `canSubmit`
+needs `isValid`, false while the check's errors stand
+(`SubmissionWizardPage.vue`). Test runs 2026-09-24, OJS and OPS (the OMP
+suite's scenario 4 asserts the same): once the check had answered, "This
+field is required." stood above "References" and the footer's "Submit"
+was disabled, so the confirmation never opened. The earlier probe's
+reading of no warning and a refused "Submit" › "Submit" came from a read
+and a press made while "Checking your submission" still showed. Filled,
 it submitted. Rule 17 on a scratch journal with lookup off: the wizard's
 "Alpha study https://doi.org/10.1234/abcd" and the Journal Manager's "Add"
 of "Beta trial https://doi.org/10.1234/efgh" both read as plain text; after
@@ -1947,7 +1957,8 @@ required check never fails. The warning is `review-details.tpl`'s
 client-side notice (note b). Live-probed 2026-09-24, all three apps: a
 draft carrying its main file, at "Require…" with no data citation, landed
 on "Submission complete" (the Review step's own check answered 200), while
-required references refused on the same screens (q19, note k).
+required references kept "Submit" grayed out on the same screens (q19,
+note k).
 
 <a id="fn-f-a10"></a>
 **f-a10 — A10 evidence.** `DataCitationManager` refreshes the wizard through
