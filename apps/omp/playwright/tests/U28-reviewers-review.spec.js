@@ -429,7 +429,7 @@ test.describe("Reviewer's review (U28)", () => {
         const editorRow = reviewerRow(modal, 'Julia Reviewer');
         await expect(editorRow).toContainText('Request Accepted');
         const history = await openHistory(anaPage, editorRow);
-        await expect(history).toContainText(/Request Accepted:\s*\d{4}-\d{2}-\d{2} \d{2}:\d{2} [AP]M/);
+        await expect(history).toContainText(/\d{4}-\d{2}-\d{2} \d{2}:\d{2} [AP]M\s+Confirm\b/);
         await closeLegacyWindow(anaPage, history);
         const log = await openActivityLog(anaPage);
         await expect(activityLogRow(log, 'has been accepted')).toBeVisible();
