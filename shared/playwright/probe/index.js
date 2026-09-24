@@ -186,6 +186,7 @@ function runRecord(app) {
             startedAt: new Date().toISOString(),
             responses: [],
             console: [],
+            dialogs: [],
             warnings: [],
             // Every response of 500 or more and every uncaught page error:
             // the app failing, a finding on its own (GLOSSARY "crash").
@@ -385,6 +386,20 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
             record.crashes.push({at: new Date().toISOString(), kind: 'script', text: String(error.message || error).slice(0, 300), url: page.url()});
         }
     });
+    // Browser dialogs: while the kit's is the page's only dialog listener it
+    // accepts a page-leave question (dismissing it cancels the navigation,
+    // and the next goto() or signOut() fails with ERR_ABORTED) and dismisses
+    // the rest, Playwright's own default; a script that adds its own listener
+    // decides alone. Every dialog goes into the run record.
+    page.on('dialog', (dialog) => {
+        if (keepRecord && record.dialogs.length < CONSOLE_CAP) {
+            record.dialogs.push({at: new Date().toISOString(), type: dialog.type(), message: dialog.message().slice(0, 300), url: page.url()});
+        }
+        if (page.listenerCount('dialog') > 1) {
+            return;
+        }
+        (dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss()).catch(() => {});
+    });
     console.log(`[probe] ${app.name}: ${app.baseURL} (key from ${app.keySource})`);
     return {
         browser,
@@ -511,13 +526,24 @@ async function shot(page, name) {
 }
 
 /**
- * Write <name>-<app>.json in the output dir. Returns the path.
+ * Write <name>-<app>.json in the output dir. Returns the path. `merge: true`
+ * folds an object into the file's existing object (top-level keys, the new
+ * ones winning), so a script run in phases, one process each, keeps the
+ * earlier phases' facts under one name.
  *
  * @param {string} name
  * @param {any} data
+ * @param {{merge?: boolean}} [options]
  */
-function record(name, data) {
+function record(name, data, {merge = false} = {}) {
     const file = path.join(outDir(), `${appSuffixed(name)}.json`);
+    const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+    if (merge && isObject(data) && fs.existsSync(file)) {
+        const earlier = JSON.parse(fs.readFileSync(file, 'utf8'));
+        if (isObject(earlier)) {
+            data = {...earlier, ...data};
+        }
+    }
     fs.writeFileSync(file, JSON.stringify(data, null, 2));
     return file;
 }

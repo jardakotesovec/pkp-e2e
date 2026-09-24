@@ -74,7 +74,10 @@ Each of these has bitten at least once.
    aria-hidden through that same slot after the window closes, so a
    dialog-scoped role read taken at once finds no row ("no row menu"):
    wait on the row locator itself or read through page-level role queries
-   (U35 ccK3, 2026-09-20).
+   (U35 ccK3, 2026-09-20). The same slot follows every window close, a
+   legacy window's and a confirmation's "Cancel" included: an opener
+   pressed again within it opens nothing, so wait it out the same way
+   before reopening (U38, U39 test authors).
 
 5. **The side-modal outer wrapper reports `visibility: hidden`** while it
    opens, and permanently on some wrappers. Anchor `toBeVisible()` on inner
@@ -464,7 +467,8 @@ animations off and a response listener that records URL, method, status and
 size (never a body) of every `/api/` call and every status ≥ 400 into
 `run-<app>-<HHMMSS>.json`, one record per process (HHMMSS from its start),
 which also carries the browser's console errors and warnings and uncaught
-page errors (`console`, capped at 200); `launch(app, {record: false})`
+page errors (`console`, capped at 200) and every browser dialog
+(`dialogs`: type and message); `launch(app, {record: false})`
 keeps the record empty for a check that must leave nothing behind. `screen(page)` is the screen as data: the aria snapshot of
 the main region (the body when the page has no `main`) and of every open
 dialog, plus the verbatim `innerText` of header and main, because aria
@@ -486,6 +490,9 @@ heading wait keyed on "Publication" burns its timeout on OPS (U40 K1,
 2026-09-09). `record(name, data)` writes JSON and
 `shot(page, name)` a PNG, both as `<name>-<app>` inside `forEachApp`, so a
 script on two apps never overwrites one app's snapshot with the other's;
+a script run in phases, one process each, writes its facts with
+`record(name, data, {merge: true})`, which folds the object into the
+file's earlier one instead of overwriting it (U07, U08, U38, sync);
 `loc(page, description, locator)` a row in
 `locators.md` (selector, match count, visibility) for the test author,
 appended under a dated heading when the process exits, so several
@@ -512,19 +519,28 @@ decides where the user lands), and any open session is signed out first.
 `screen()` waits for the page's outstanding requests before it records.
 Two kit gotchas every screen-driving agent meets: `idle(page)` hangs in a
 session the server has just ended (after a password change or a sign-out
-elsewhere), so use a bounded wait there; and Playwright dismisses a browser
-`confirm()` or `alert()` by default, so a screen that may ask (a tab switch
-with unsaved changes, a refused upload) needs `page.on('dialog', …)` before
-the action, or the script silently takes the Cancel branch. A page-leave
+elsewhere), so use a bounded wait there; and the kit dismisses a browser
+`confirm()` or `alert()`, as Playwright does, so a screen that may ask (a
+tab switch with unsaved changes, a refused upload) needs `page.on('dialog',
+…)` before the action, or the script silently takes the Cancel branch;
+the run record's `dialogs` shows what asked. The kit accepts a page-leave
+question (`beforeunload`) while its listener is the page's only one,
+because dismissing it cancels the navigation and the next `goto()` or
+`signOut()` fails with `ERR_ABORTED`; a script's own dialog listener
+decides alone, so it accepts `beforeunload` itself (U37, U38, U08 claim
+checks). A page-leave
 probe on a legacy window blurs the box first: the form notices a change on
 blur, so `page.goto()` with the box still focused raises no "Leave site?".
-After a window drops a typed note without asking, a leftover page-leave
-question makes `signOut()` fail with `ERR_ABORTED` unless the dialog
-handler accepts `beforeunload` (U38 claim check, all three apps,
-2026-09-23). The run record
+The run record
 carries the browser's console errors and warnings and uncaught page errors
 from `launch()` on; a script that needs every level (info, log) attaches
 its own `page.on('console')` listener.
+A probe run that outlasts the Bash tool's 600 s cap runs detached, `nohup
+node bin/probe.js omp k3.js > k3-omp.log 2>&1 & echo $! > k3-omp.pid`, and
+the wait polls that pid (`while kill -0 $(cat k3-omp.pid) 2>/dev/null; do
+sleep 30; done`), never `pgrep -f "<script>"`: the waiting shell's own
+command line carries the pattern, so the loop never ends (U07, U08, U38,
+U39).
 Two premises that cost a smoke run: a scratch context has no technical
 support contact, and the validation email's sender is that contact, so a
 registration on the +90 server 500s until a manager sets it (Settings ›

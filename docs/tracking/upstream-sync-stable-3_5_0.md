@@ -22,6 +22,7 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the
 regression verdict; what was filed)._
 
+- **2026-09-24 (daily session, VM) — pulled; no range, baselines stay.** Tips unchanged since the morning's read: ojs `40bf69fd13`, omp `7f38b0441`, ops `9db7481e43`, lib/pkp `0714131c41` on all three (pkp-lib `stable-3_5_0`'s tip), ui-library `1a7a4750`. Nothing carried over from `main` (no `main` range today).
 - **2026-09-24 — ojs `769450f2d4..40bf69fd13` (2), omp `318711b05..7f38b0441` (1), ops `cb9eec1add..9db7481e43` (4), pkp-lib `6acb1be2eb..0714131c41` (26, all three apps), ui-library unchanged.**
   - pkp-lib `fc38d0622c` (#13358) → `~main bf020ba77e` (read 2026-09-22): `git range-diff` shows one difference, 3.5's `Query::find()` where `main` has `EditorialTask::find()` in `SubmissionFilesCategoryGridDataProvider::loadData()`, the same `continue` shape; the class 3.5 names is the one its queries live in → no regression.
   - pkp-lib Weblate commits (Serbian Latin, French Canada; 24, stable-only) and the merge `0714131c41` → locale files only, no English, no code (grepped `--stat` outside `locale/`: the one non-locale file is the #13358 provider above).
