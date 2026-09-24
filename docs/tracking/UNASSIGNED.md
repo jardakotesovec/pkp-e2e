@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **24 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **25 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -366,3 +366,21 @@ until their specs exist. Do not force-claim the defects themselves.
     `802202cb3e`, lib/pkp `5af3b3933`, ui-library `2034439a`; omp
     `7f9455d5a`; ops `15f0b6e0bd`). Resolves: maintainer confirmation as
     dead code (removal candidates).
+25. **Unreached citation pieces** — attached to **U42** (claimed; the
+    citations spec's Reference table lists them).
+    `lib/ui-library/src/managers/CitationManager/CitationManagerMetadataLookup.vue`
+    (a per-submission lookup switch) is imported by no component and binds
+    `citationStore.formEnableLookup`, which the store never defines; the
+    locale strings it would go with
+    (`submission.citations.structured.enableModal.*`, `.disableModal.*`,
+    `.enableCitationsMetadataLookup`) and the "Add" result messages
+    (`submission.citations.structured.addRaw.*`) have no caller in
+    ui-library or lib/pkp. The legacy author dashboard's references form
+    (`PKPAuthorDashboardHandler::setupTemplate()`, `PKPCitationsForm` under
+    `components.citations`): the page's `submission()` forwards to My
+    Submissions before anything renders, so no screen shows it; the
+    workflow's "References" page and the wizard's References box are the
+    doors. Code-verified 2026-09-24 (U42 spec author; checkouts ojs
+    `71bb244152`, omp `a36551804`, ops `07141ae4df`, lib/pkp
+    `25182919bf`, ui-library `1afd40a9`). Resolves: maintainer
+    confirmation as dead code (removal candidates).

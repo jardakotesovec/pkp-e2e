@@ -161,6 +161,28 @@
  *   "Type" list, `file` a fixture basename (default the app's PDF
  *   fixture); the window has no "Public Access" box, so that key is a
  *   400. A draft has no workflow, so the key needs submitted: true.
+ * - citationsRaw (string, or a list of lines) — the wizard's "Details"
+ *   step References box (U42; PKPCitationsForm's FieldTextarea, saved
+ *   by the step's PUT submissions/{id}/publications/{id} with the rest of
+ *   the step): the same Repo::publication()->edit() that PUT runs
+ *   (PKPSubmissionController::editPublication), whose DAO update rebuilds
+ *   the version's citation rows from the text (Repo::citation()->
+ *   importCitations: one row per line, trimmed, doubled spaces shrunk,
+ *   blank lines skipped, and with the context's citationsMetadataLookup
+ *   on the lookup job chain queued per row), before the submit and as the
+ *   submitter. A list is joined with newlines, one line per entry.
+ * - dataCitations[] {title*, relationshipType*, identifierType?,
+ *   identifier?, repository?, year?, authors? [{givenName?, familyName?,
+ *   orcid?}], url?} — the Data Citations table's "Add Data Citation" ›
+ *   "Save" (U42; DataCitationEditForm), in the wizard's "Data" section or
+ *   on the workflow's "Data" page alike: the panel's body through
+ *   PKPDataCitationController::add itself (ApiCall: convertStringsToSchema,
+ *   Repo::dataCitation()->validate, DataCitation::create, whose saving hook
+ *   strips an identifier to its bare form), before the submit and in list
+ *   order. The panel posts every box, an empty one as null; its refusals
+ *   (a missing title or relationship type, a value outside the schema's
+ *   lists, an identifier invalid for its type, a year not four digits, a
+ *   bad address) are the seed's 400s.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -466,6 +488,8 @@ abstract class PKPSubmissionScenarioBuilder
         $galleyPlans = $this->parseGalleys($context, $root, $locale);
         $filePlans = $this->parseFiles($context, $root, $submitter, $submitted, $participantPlans);
         $taskPlans = $this->parseTasks($root, $submitted, $tag);
+        $citationsRaw = $this->parseCitationsRaw($root);
+        $dataCitationPlans = $this->parseDataCitations($root);
         $libraryFilePlans = LibraryFileSeeder::parse($root, false);
         if ($libraryFilePlans !== [] && !$submitted) {
             throw new SpecException('libraryFiles', 'A draft has no workflow and no "Library" button: libraryFiles needs submitted: true');
@@ -485,7 +509,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -513,7 +537,9 @@ abstract class PKPSubmissionScenarioBuilder
         array $galleyPlans = [],
         array $filePlans = [],
         array $taskPlans = [],
-        array $libraryFilePlans = []
+        array $libraryFilePlans = [],
+        ?string $citationsRaw = null,
+        array $dataCitationPlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
@@ -522,6 +548,7 @@ abstract class PKPSubmissionScenarioBuilder
         $seededFiles = [];
         $seededTasks = [];
         $seededLibraryFiles = [];
+        $seededDataCitations = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -586,6 +613,11 @@ abstract class PKPSubmissionScenarioBuilder
             if ($abstract !== null) {
                 $publicationEdits['abstract'] = $abstract;
             }
+            // The "Details" step's References box goes out in the same PUT
+            // as the title and abstract (U42).
+            if ($citationsRaw !== null) {
+                $publicationEdits['citationsRaw'] = $citationsRaw;
+            }
             // Re-fetch: editing through the pre-primaryContact object would
             // write its stale data back and erase primaryContactId (parity
             // spot-check defect 1).
@@ -607,6 +639,16 @@ abstract class PKPSubmissionScenarioBuilder
                     'id' => (int) $suggestion->getKey(),
                     'email' => $suggestion->email,
                 ];
+            }
+
+            // The wizard's "Data" section: "Add Data Citation" › "Save" per
+            // entry, in list order (U42).
+            if ($dataCitationPlans !== []) {
+                $seededDataCitations = $this->seedDataCitations(
+                    Repo::submission()->get($submissionId),
+                    Repo::publication()->get($publication->getId()),
+                    $dataCitationPlans
+                );
             }
 
             // The wizard's "Files" panel, as the submitter, before submit.
@@ -855,7 +897,116 @@ abstract class PKPSubmissionScenarioBuilder
             'files' => $seededFiles,
             'tasks' => $seededTasks,
             'libraryFiles' => $seededLibraryFiles,
+            'dataCitations' => $seededDataCitations,
         ];
+    }
+
+    /**
+     * Read citationsRaw (U42): the wizard's References box text, a string
+     * or a list of lines joined with newlines. Parse-phase: no writes.
+     */
+    protected function parseCitationsRaw(Spec $root): ?string
+    {
+        if (!$root->has('citationsRaw')) {
+            return null;
+        }
+        $value = $root->get('citationsRaw');
+        // A blank line in a list arrives as null (the request's
+        // ConvertEmptyStringsToNull middleware), so null is a blank line.
+        if (is_array($value) && array_is_list($value) && array_filter($value, fn ($line) => !is_string($line) && $line !== null) === []) {
+            return implode("\n", array_map(fn ($line) => (string) $line, $value));
+        }
+        if (!is_string($value)) {
+            throw new SpecException('citationsRaw', 'citationsRaw must be the References box text (a string, one reference per line) or a list of lines');
+        }
+        return $value;
+    }
+
+    /**
+     * Read dataCitations[] (U42): each entry the "Add Data Citation"
+     * panel's boxes, posted the way the panel posts them (every box, an
+     * empty one as null, the year as typed). The values themselves are
+     * judged by the controller's own validation at execute. Parse-phase:
+     * no writes.
+     *
+     * @return array<int, array{path: string, body: array}>
+     */
+    protected function parseDataCitations(Spec $root): array
+    {
+        $plans = [];
+        foreach ($root->childList('dataCitations') as $spec) {
+            $text = function (string $key, bool $required = false) use ($spec): ?string {
+                $value = $required ? $spec->require($key) : $spec->get($key);
+                if ($value !== null && (!is_string($value) || $value === '')) {
+                    throw new SpecException("{$spec->path}.{$key}", "{$spec->path}.{$key} must be a non-empty string");
+                }
+                return $value;
+            };
+            $body = [
+                'title' => $text('title', true),
+                'identifierType' => $text('identifierType'),
+                'identifier' => $text('identifier'),
+                'relationshipType' => $text('relationshipType', true),
+                'repository' => $text('repository'),
+                'year' => null,
+                'authors' => null,
+                'url' => $text('url'),
+            ];
+            if ($spec->has('year')) {
+                $year = $spec->get('year');
+                if (!is_int($year)) {
+                    throw new SpecException("{$spec->path}.year", "{$spec->path}.year must be a whole number (the \"Year\" box)");
+                }
+                $body['year'] = (string) $year;
+            }
+            $authorSpecs = $spec->childList('authors');
+            if ($authorSpecs !== []) {
+                $body['authors'] = [];
+                foreach ($authorSpecs as $authorSpec) {
+                    $row = [];
+                    foreach (['givenName', 'familyName', 'orcid'] as $key) {
+                        $value = $authorSpec->get($key);
+                        if ($value !== null && !is_string($value)) {
+                            throw new SpecException("{$authorSpec->path}.{$key}", "{$authorSpec->path}.{$key} must be a string");
+                        }
+                        $row[$key] = $value === '' ? null : $value;
+                    }
+                    $body['authors'][] = $row;
+                }
+            }
+            $plans[] = ['path' => $spec->path, 'body' => $body];
+        }
+        return $plans;
+    }
+
+    /**
+     * The "Add Data Citation" panel's "Save" per plan (U42): its body through
+     * PKPDataCitationController::add itself, the publication the policy
+     * would have authorized set directly (ApiCall). A refusal is the
+     * panel's own and becomes a 400 naming the entry.
+     *
+     * @return array<int, array{id: int, title: string}>
+     */
+    protected function seedDataCitations(\APP\submission\Submission $submission, \APP\publication\Publication $publication, array $plans): array
+    {
+        $controller = ApiCall::controller(
+            \PKP\API\v1\dataCitations\PKPDataCitationController::class,
+            [Application::ASSOC_TYPE_SUBMISSION => $submission, Application::ASSOC_TYPE_PUBLICATION => $publication]
+        );
+        $seeded = [];
+        foreach ($plans as $plan) {
+            $request = ApiCall::request(
+                \Illuminate\Http\Request::class,
+                'POST',
+                $plan['body'],
+                ['submissionId' => $submission->getId(), 'publicationId' => $publication->getId()],
+                $plan['path'],
+                'The "Add Data Citation" panel\'s "Save" would be refused'
+            );
+            $saved = ApiCall::answer($controller->add($request), $plan['path'], 'The "Add Data Citation" panel\'s "Save" was refused');
+            $seeded[] = ['id' => (int) $saved['id'], 'title' => (string) $saved['title']];
+        }
+        return $seeded;
     }
 
     /**

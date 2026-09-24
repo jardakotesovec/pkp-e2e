@@ -125,7 +125,9 @@ Keys:
   account instead of creating one: the one way to give the site
   administrator a non-manager role in a scratch context, after which
   their manager role can be ended on their own edit page (U14 claim
-  check K1, 2026-09-16). See `users.md` for the keys and
+  check K1, 2026-09-16); the screens never end a user's last role in a
+  context, so a site administrator with no role there is unreachable (U42
+  claim check, 2026-09-24). See `users.md` for the keys and
   their traps. A scratch context's reviewer is created here too: the seeded
   reviewers are not enrolled on a scratch context, so they are absent from
   its Add Reviewer search and refused the wizard.
@@ -223,9 +225,22 @@ Keys:
   `type`, `citations`, `fundingStatement`, `funders`, `dataAvailability`,
   `dataCitations`, `plainLanguageSummary`; an item the app's context
   schema lacks is a 400, and so is any other word. A fresh context has
-  `keywords` and `citations` at `request` and the rest off. An item at
+  `keywords`, `citations` and `funders` at `request` and the rest off. An item at
   `require` is a submit blocker: the wizard's "Details" step shows its
   field and "Review" reports it until it is filled.
+- `citationsMetadataLookup` (boolean): the same screen's "References
+  Metadata Lookup" box, "Enable references structuring and metadata
+  lookup", saved as that form saves (the screen posts the whole form,
+  `citationsMetadataLookup=true` among it; stored as `1` / `0`). A fresh
+  context has no row, which reads as off, so `publicknowledge` has lookup
+  off. The form posts the box whether or not "Enable references metadata"
+  is ticked, so the key does not read `metadata.citations` either. With
+  it on, every reference added afterwards, typed or seeded, queues the
+  lookup's job chain (one row in the `jobs` table per reference, first
+  job `ExtractPidsJob`); the test install runs no job runner, so the
+  chain never runs and the reference stays at processing status 0, not
+  processed. Applies to the three apps alike; a non-boolean is a 400 (U42
+  harness, 2026-09-24).
 - `submissionAcknowledgement`: who gets the "Submission Confirmation"
   email of Settings › Workflow › Emails, `allAuthors` (the default),
   `submittingAuthor` or `off`; with it `copySubmissionAckPrimaryContact`
@@ -751,6 +766,47 @@ Keys:
   once can even get the same stored name (neither sees the other's
   uncommitted row) and share one stored file, so a test that deletes a
   library file seeds it in a scratch context.
+- `citationsRaw`: the wizard's "Details" step "References" box, a string
+  (one reference per line, as typed) or a list of lines (joined with
+  newlines; a null or empty entry is a blank line). Saved the way the
+  step's save sends the box (its PUT to the publication, whose save
+  rebuilds the version's reference list from the text), before the submit
+  and as the submitter, so a draft carries it too. The rows are the
+  screen's: one reference per non-blank line in line order, ends trimmed
+  and inner runs of spaces shrunk to one, a repeated line kept as a
+  second reference (the wizard's rule, not the References page's "Add",
+  which drops a repeat); with lookup off no DOI is kept from the text
+  (the wizard path's own behavior, U42 A7), with lookup on each reference
+  queues the chain (`citationsMetadataLookup` above). The key does not
+  read the context's References setting: references seeded on a context
+  with `metadata.citations: 'off'` are the "switched off with references
+  kept" state. A string that is not
+  text is a 400. The three apps alike (U42 harness, 2026-09-24).
+- `dataCitations[]`: data citations on the current publication, each
+  `{title, relationshipType, identifierType?, identifier?, repository?,
+  year?, authors?, url?}`, added the way the Data Citations table's "Add
+  Data Citation" › "Save" adds one (the panel's body through the data
+  citations API's own add), in list order, before the submit and as the
+  submitter (the wizard's "Data" section and the workflow's "Data" page
+  post the same body). `title` (required) is "Title";
+  `relationshipType` (required) the "Relationship type" list's value,
+  `supporting`, `generated`, `analyzed` or `non-analyzed`;
+  `identifierType` the "Identifier type" list's label, `DOI`,
+  `Accession`, `PURL`, `ARK`, `URI`, `ARXIV`, `ECLI`, `Handle`, `ISSN`,
+  `ISBN`, `PMID`, `PMCID` or `UUID`, and `identifier` the "Identifier"
+  box (each needs the other); `repository` "Repository"; `year` a
+  whole number, "Year" (four digits); `authors[]` the "Creators" rows,
+  each `{givenName?, familyName?, orcid?}`; `url` "URL". The panel's
+  refusals are the seed's 400s (a missing title or relationship type,
+  another word for either list, an identifier invalid for its type, a
+  year not four digits, a malformed address), and an identifier typed as
+  an address is stored bare, as on screen (`https://doi.org/10.1234/xyz`
+  becomes `10.1234/xyz`). Every row has the order 0 a panel save gives
+  it, so the table lists them in the order seeded until someone saves an
+  order. The key does not read the context's Data Citations setting
+  (stored data citations outlive the setting being switched off). The
+  response lists `dataCitations` (`id`, `title`, in the order seeded).
+  The three apps alike (U42 harness, 2026-09-24).
 
 App-specific keys:
 
@@ -835,7 +891,7 @@ Facts tests rely on, all parity-checked against the UI path:
 
 The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `status`, `submissionProgress`, `reviewRounds[]` (`id`, `round`, `stageId`),
-`reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`),
+`reviewAssignments[]`, `reviewerSuggestions[]` (`id`, `email`), `dataCitations[]` (`id`, `title`),
 `userComments[]` (`id`, `user`, `approved`, `reports[]` of report ids, in
 the order seeded), `galleys[]` (`id`, `label`, `submissionFileId`, null
 for a remote galley), `files[]` (`submissionFileId`, `file`,

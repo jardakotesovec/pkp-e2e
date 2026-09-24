@@ -73,6 +73,12 @@
  *   Settings › Workflow › Submission › "Metadata" screen's items (U21), each
  *   one of the words off / enable / request / require (Context::METADATA_*);
  *   an item the app's context schema lacks is a 400.
+ * - citationsMetadataLookup (bool) — the same "Metadata" screen's "References
+ *   Metadata Lookup" box, "Enable references structuring and metadata
+ *   lookup" (U42; PKPMetadataSettingsForm's FieldOptions over the schema's
+ *   boolean, which the form posts whether or not the "References" item is
+ *   ticked). A fresh context has no row, which reads as off; on, a reference
+ *   added afterwards queues the lookup job chain (Repo::citation()).
  * - submissionAcknowledgement (off / submittingAuthor / allAuthors),
  *   copySubmissionAckPrimaryContact (bool), copySubmissionAckAddress
  *   (string, comma-separated) — Settings › Workflow › Emails "Submission
@@ -1210,7 +1216,8 @@ abstract class PKPContextScenarioBuilder
     /**
      * The optional submission-intake passthroughs → the context-settings
      * rows their Settings › Workflow forms save (U21): `copyrightNotice`
-     * (Submission › Author Guidelines), `metadata` (Submission › Metadata)
+     * (Submission › Author Guidelines), `metadata` and
+     * `citationsMetadataLookup` (U42) (Submission › Metadata)
      * and the Emails tab's `submissionAcknowledgement`,
      * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress` and, on
      * the preprint server only, `postedAcknowledgement` (U49); and the
@@ -1264,6 +1271,21 @@ abstract class PKPContextScenarioBuilder
                 $specKeys[$item] = "metadata.{$item}";
             }
             $spec->assertConsumed();
+        }
+
+        if ($root->has('citationsMetadataLookup')) {
+            // The Metadata screen's "References Metadata Lookup" box (a
+            // checkbox FieldOptions over the schema's boolean). The form
+            // posts "true" / "false" form-encoded with the rest of the
+            // screen, which the save's convertStringsToSchema turns back into
+            // the boolean; the stored row is 1 / 0. Shared by the three apps.
+            $hasProperty('citationsMetadataLookup') || throw new SpecException('citationsMetadataLookup', 'citationsMetadataLookup is not a setting of this app\'s context schema');
+            $value = $root->get('citationsMetadataLookup');
+            if (!is_bool($value)) {
+                throw new SpecException('citationsMetadataLookup', 'citationsMetadataLookup must be a boolean (true: "Enable references structuring and metadata lookup" ticked, false: unticked)');
+            }
+            $settings['citationsMetadataLookup'] = $value;
+            $specKeys['citationsMetadataLookup'] = 'citationsMetadataLookup';
         }
 
         if ($root->has('submissionAcknowledgement')) {

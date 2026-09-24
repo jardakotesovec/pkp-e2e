@@ -578,9 +578,11 @@ behind a line; that scratch is deleted after review.
   email notification to all authors of the submission." on a scratch
   journal; there is no passthrough key, so a probe flips it on the screen
   and a test cannot. Live-probed 2026-09-06, OJS (`.reports/U30/pC` P20).
-- A fresh context asks for keywords and references at "request" by install
-  default, so the seeded context's Details step shows an optional "Keywords"
-  field and a references box on OJS, OMP and OPS; a scratch context seeded
+- A fresh context asks for keywords, references and funders at "request" by
+  install default (the context schema's defaults; funders seen live by the
+  U42 claim check, 2026-09-24), so the seeded context's Details step shows an
+  optional "Keywords" field, a references box and a Funders section on OJS,
+  OMP and OPS; a scratch context seeded
   `metadata: {keywords: 'off'}` shows no "Keywords" field (U21 runs,
   2026-09-07).
 - A fresh scratch journal has no issues; "Schedule For Publication" › Review
@@ -780,3 +782,13 @@ config-file settings.
   also the Volume editor) and unticked for the assistants and a press's
   Chapter Author. Settings › Users & Roles › Roles, all three apps,
   2026-09-24 (`.reports/U39/cc-K2.md`, `stages-grid-before-*`).
+- The reference lookup never runs on a test install (no job runner, no
+  outbound connections): with "References Metadata Lookup" on, every
+  reference stays unprocessed, a reference structured by hand in "Edit"
+  too, so the References page's progress box reads "Processing references
+  - 0/{n}" and the page refreshes itself every 7 s while it shows (U42
+  claim check K2, 2026-09-24).
+- In the submission wizard, "Continue" saves the step at once; moving by
+  the step rail sends nothing, the wizard's own autosave comes about a
+  minute later, and "Submit" does not wait for it (U42 claim check K4,
+  2026-09-24; U42 A18).
