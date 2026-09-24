@@ -899,10 +899,10 @@ test.describe('Reviewer assignment & management (U27)', () => {
             subject: 'A reminder to please complete your review',
         });
 
-        // …and History lists the Reminder milestone (read BEFORE any
-        // response — its survival past one is open finding A15).
+        // …and History lists the Reviewer Reminded milestone (read BEFORE
+        // any response — its survival past one is open finding A15).
         const historyModal = await openHistory(page, overdueRow);
-        await expect(historyModal.getByText('Reminder').first()).toBeVisible();
+        await expect(historyModal.getByText('Reviewer Reminded:').first()).toBeVisible();
         await closeLegacyWindow(page, historyModal);
 
         // The overdue review: the accepted reviewer's row reads "Overdue"
@@ -1162,11 +1162,11 @@ test.describe('Reviewer assignment & management (U27)', () => {
             subject: 'Thank you for your review',
         });
         const historyModal = await openHistory(page, row);
-        for (const milestone of ['Assigned', 'Notified', 'Confirm', 'Completed', 'Acknowledged']) {
-            // Each milestone reads "{date and time} {milestone}" (the text
+        for (const milestone of ['Request Sent', 'Request Accepted', 'Review Submitted', 'Review Completed', 'Reviewer Thanked']) {
+            // Each milestone reads "{milestone}: {date and time}" (the text
             // sits directly in the window, so the window's own text is read).
             await expect(historyModal).toContainText(
-                new RegExp(`\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2} [AP]M\\s+${milestone}\\b`)
+                new RegExp(`${milestone}:\\s*\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2} [AP]M`)
             );
         }
         await closeLegacyWindow(page, historyModal);
