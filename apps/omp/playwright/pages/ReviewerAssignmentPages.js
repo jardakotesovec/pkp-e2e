@@ -600,12 +600,12 @@ async function openEditorialNotes(page, row) {
     return notesModal;
 }
 
-/** Open the row's "History" window and return it, settled on "Assigned". */
+/** Open the row's "History" window and return it, settled on "Request Sent:". */
 async function openHistory(page, row) {
     const menu = await openRowMenu(page, row);
     await menuEntry(menu, 'History').click();
     const historyModal = topModal(page);
-    await expect(historyModal.getByText('Assigned').first()).toBeVisible({
+    await expect(historyModal.getByText('Request Sent:').first()).toBeVisible({
         timeout: 20_000,
     });
     return historyModal;

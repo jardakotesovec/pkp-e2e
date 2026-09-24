@@ -598,6 +598,10 @@ trips.
   (2026-09-24, reset database, eight workers,
   `.reports/pr13359/merge-omp.log`, error context kept beside it: the
   reloaded panel still lists `article.pdf`); green alone right after.
+  Again 2026-09-24 in the PR review of pkp-lib#13263 (companion
+  `i13263`): OMP and OJS finals on reset databases at eight workers,
+  beside U14 S5 on both, green alone on both
+  (`.reports/i13263/final-run-{omp,ojs}.log`, `alone-{omp,ojs}-reds.log`).
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -631,6 +635,10 @@ trips.
   10 s; green alone 5 of 5 right after. The fix is the next daily
   session's (read the report job and the dialog's fetches in a retained
   trace). Sighted 2026-09-24 in the U42 session's OJS final on a reset database at auto workers, green alone (`.reports/U42/alone-ojs-U14S5.log`).
+  Again 2026-09-24 in the PR review of pkp-lib#13263 (companion
+  `i13263`): OMP and OJS finals on reset databases at eight workers,
+  beside U36 S9 on both, green alone on both
+  (`.reports/i13263/final-run-{omp,ojs}.log`, `alone-{omp,ojs}-reds.log`).
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7
@@ -791,3 +799,4 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
+| pkp/pkp-lib#13346 + pkp/ui-library#987 + pkp/ojs#5835 (submodule-only; no omp/ops PRs; issue pkp/pkp-lib#13263, review-date labels in History and Review Details) | `i13263` | ready | 2026-09-24 | Prepared before merge at the maintainer's request; the ojs PR's red shards 2 and 3 (U27 S7, S9, U28 S2) are the intended History relabelling, accommodated here (OJS and OMP U27/U28 tests, U27/U28 specs, A29 half fixed); findings U27 A33 (intention gap), A34 (fr raw key), A35 (❓ asked in the thread), report `docs/reports/2026-09-24-pkp-lib-13263.md`; kept checks `shared/playwright/checks/sync/pkp-lib-13346/`. Merge: rebase, run OJS and OMP U27/U28 (and the full suites if the tips moved), fast-forward, delete this row; the ojs PR's pointers predate ui-library #853 and a translations merge, so the developer should re-point them to the merge result before merging |

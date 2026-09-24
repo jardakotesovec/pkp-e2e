@@ -12,11 +12,11 @@
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
  * - A1 🐞, A2 🐞, A7 🐞, A8 🐞, A9 🐞, A12 🐞, A13 🐞, A14 🐞, A16 🐞,
- *   A18 🐞, A19 🐞, A21 🐞, A22 🐞, A26 🐞, A30 🐞, A31 🐞 (the refusals and races these
+ *   A15 🐞, A18 🐞, A19 🐞, A21 🐞, A22 🐞, A26 🐞, A30 🐞, A31 🐞, A33 🐞, A34 🐞 (the refusals and races these
  *   name are walked where a scenario passes through them — S5's inverted
  *   dates, S6's refused edit, the settle-then-rate in S9, S11's unassign
  *   notice read by recipient and title — and asserted neither way).
- * - A3 ❓, A4 ❓, A6 ❓, A15 ❓, A17 ❓, A23 ❓, A27 ❓, A29 ❓ (parked; S14
+ * - A3 ❓, A4 ❓, A6 ❓, A17 ❓, A23 ❓, A27 ❓, A29 ❓, A35 ❓ (parked; S14
  *   and S16 anchor the recommendation on the "Recommendation:" line only).
  * - Retired: A5, A10 (opening the window marks the row "Review Viewed" by
  *   design; S9 asserts it as contract), A11, A24 (an editor's "Modify
@@ -157,9 +157,11 @@ async function openTaskRows(page, sentence, title) {
     return {tasks, rows: tasks.row(sentence).filter({hasText: title})};
 }
 
-/** A review-history line ("{date} {label}") of the row's History window. */
+/** A review-history line ("{label}: {date}", the label in bold) of the row's History window. */
 function historyLine(historyModal, label) {
-    return historyModal.locator('.pkp_review_history > div').filter({hasText: label});
+    return historyModal
+        .locator('.pkp_review_history > div')
+        .filter({has: historyModal.page().locator('strong', {hasText: new RegExp(`^${label}:\\s*$`)})});
 }
 
 test.describe('reviewer-assignment', () => {
@@ -897,8 +899,8 @@ test.describe('reviewer-assignment', () => {
             .getByRole('dialog')
             .filter({has: managerPage.locator('.pkp_review_history')});
         await expect(historyModal.getByRole('heading', {name: 'History'})).toBeVisible({timeout: 30_000});
-        await expect(historyLine(historyModal, 'Assigned').locator('strong')).toHaveText(/^\d{4}-\d{2}-\d{2}/);
-        await expect(historyLine(historyModal, 'Reminder').locator('strong')).toHaveText(/^\d{4}-\d{2}-\d{2}/);
+        await expect(historyLine(historyModal, 'Request Sent')).toHaveText(/Request Sent:\s*\d{4}-\d{2}-\d{2}/);
+        await expect(historyLine(historyModal, 'Reviewer Reminded')).toHaveText(/Reviewer Reminded:\s*\d{4}-\d{2}-\d{2}/);
         await closeSideWindow(historyModal);
 
         // The overdue review: the accepted reviewer's row reads "Overdue" in
@@ -1131,14 +1133,14 @@ test.describe('reviewer-assignment', () => {
         await expect(row).toContainText('Reviewer Thanked');
         await pkpMail.find({to: `${reviewer}@mail.test`, subject: 'Thank you for your review'});
 
-        // The row's "History" lists the five dated milestones.
+        // The row's "History" lists the five dated milestones, each "{label}: {date}".
         await clickRowAction(managerPage, row, 'History');
         const historyModal = managerPage
             .getByRole('dialog')
             .filter({has: managerPage.locator('.pkp_review_history')});
         await expect(historyModal.getByRole('heading', {name: 'History'})).toBeVisible({timeout: 30_000});
-        for (const label of ['Assigned', 'Notified', 'Confirm', 'Completed', 'Acknowledged']) {
-            await expect(historyLine(historyModal, label).locator('strong')).toHaveText(/^\d{4}-\d{2}-\d{2}/);
+        for (const label of ['Request Sent', 'Request Accepted', 'Review Submitted', 'Review Completed', 'Reviewer Thanked']) {
+            await expect(historyLine(historyModal, label)).toHaveText(new RegExp(`${label}:\\s*\\d{4}-\\d{2}-\\d{2}`));
         }
         await closeSideWindow(historyModal);
 

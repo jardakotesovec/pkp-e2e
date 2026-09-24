@@ -369,8 +369,8 @@ give no access to any screen in this spec. <sup>l</sup>
   accepted review assignment for #{id} {authors} — "{title}"", sent under
   the reviewer's name with their address as reply-to. The submission's
   activity log records the acceptance, the editor's row turns "Request
-  Accepted" and its History gains the "Confirm" date
-  ([→ history](U27-reviewer-assignment-and-management.md#unassign)). What
+  Accepted" and its History gains the "Request Accepted" date
+  ([→ history](U27-reviewer-assignment-and-management.md#history)). What
   the acceptance does to an earlier reminder on the editor's row is
   [→ reminders](U27-reviewer-assignment-and-management.md#reminders).
   <sup>n</sup>
@@ -533,8 +533,8 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **The editor's side**: the Section Editor's mailbox holds "Review
      accepted: …", sent under the reviewer's name with the reviewer's
      address as reply-to. Section Editor: the Reviewers panel row reads
-     "Request Accepted", its History holds a "Confirm" date, and the
-     submission's activity log records the acceptance.
+     "Request Accepted", its History holds "Request Accepted: {date and
+     time}", and the submission's activity log records the acceptance.
    - **Control**: with step 2 reached, the wizard address with `?step=2`
      appended opens step 2, and with `?step=3` falls back to it.
 
@@ -1459,7 +1459,10 @@ journal's home page with nothing about the decline (finding A3), the
 "Declined" view held the row with an empty "Actions" cell, and "All
 assignments" did not; the editor's row read "Request Declined" with
 "Resend Review Request" added to its menu; the accepted row's History
-gained "Confirm". Live-probed 2026-09-05 on OJS and OMP (Rules 2, 10):
+gained "Confirm". Since pkp/pkp-lib#13346 (issue pkp/pkp-lib#13263;
+driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge) that line reads
+`Request Accepted: {date and time}`, and both suites asserted it green that
+day. Live-probed 2026-09-05 on OJS and OMP (Rules 2, 10):
 after the editor's "Resend Review Request" the row left "Declined" ("0
 Declined") and read "Please accept or decline this request by {date}"
 under "Action Required by me" with "Respond to request", and step 1

@@ -311,7 +311,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
 13. <a id="reminders"></a> **Reminders.** "Send Reminder" exists only while a
     row shows "Overdue". An editor cannot send the reminder form to an
     on-schedule reviewer; the free-form "Email Reviewer" window has no such
-    gate. Sending stamps a dated "Reminder" milestone into the row's History.
+    gate. Sending stamps a dated "Reviewer Reminded" milestone into the
+    row's History (Rule 21).
     The reviewer's subsequent response erases that line ⚠ [A15](#a15).
     Separately, the install sends automatic reminder emails around each
     deadline. Their day-offsets are configured in *Review setup & review
@@ -331,10 +332,11 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     guidance paragraph that still tells the editor they "may upload the file
     below", though the window offers no upload control ⚠ [A22](#a22). It
     shows the "Download Review Form" menu (Rule 15), and a summary block
-    with "Review Submitted: {date and time}" and {OJS} "Recommendation:
-    {label}". It shows the "Reviewer Comments": the review form answers, or
-    "For author and editor" and, separately, the editor-only comments,
-    headed "For editor" {OJS} / "For editor only" {OMP}. It shows the
+    with a dated line naming the most advanced step the assignment has
+    reached (at the end of this rule) and {OJS} "Recommendation: {label}". It shows the "Reviewer
+    Comments": the review form answers, or "For author and editor" and,
+    separately, the editor-only comments, headed "For editor" {OJS} /
+    "For editor only" {OMP}. It shows the
     "Reviewer Files" the reviewer attached, read-only. {OJS} It also shows a
     display-only "Reviewer Recommendation" group, so the recommendation
     appears twice, under two labels ⚠ [A23](#a23). Last comes a "Reviewer
@@ -364,7 +366,32 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     under the status {OJS}) and offers "Thank Reviewer" and "Revert
     Decision"; a review thanked before a revert turns "Reviewer Thanked"
     instead (Rule 16). In the still-open window "Mark as Complete" goes
-    disabled and "Modify Review" stays available. <sup>i</sup>
+    disabled and "Modify Review" stays available.
+
+    The dated line reads "{step}: {date and time}" and names the most
+    advanced step the assignment has reached, ranked in this fixed order
+    (a priority order, not the latest date):
+    - "Reviewer Thanked", once the review is thanked (Rule 16) and while it
+      is marked complete; "Revert Decision" hides it until the review is
+      marked complete again.
+    - "Review Completed", while the review is marked complete.
+    - "Review Submitted".
+    - "Request Accepted" or "Request Declined".
+    - "Reviewer Reminded", once a reminder was sent (Rule 13).
+    - "Request Sent".
+
+    So a submitted review reads "Review Submitted: …", a review marked
+    complete "Review Completed: …", a thanked one "Reviewer Thanked: …",
+    and one taken back with "Revert Decision" "Review Submitted: …" again.
+    A reviewer who accepted and was then reminded (scenario 7's overdue
+    review) reads "Request Accepted: …", because "Request Accepted" ranks
+    above "Reviewer Reminded". After a second reminder a "Reviewer
+    Reminded" line carries the latest reminder's date (Rule 21).
+    A review thanked, taken back and marked complete again, either in this
+    window or by a review decision whose "Notify Reviewers" step thanks the
+    reviewer, still names the first thank and its date, not the newer step
+    ⚠ [A33](#a33).
+    <sup>i</sup>
 14b. **Modifying a review.** "Modify Review" first asks "Modify this
     review?" with the text "You are about to modify the review submitted by
     {reviewer name}. All modifications will be recorded in the activity
@@ -417,9 +444,11 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     cancelled (Rule 3), so the window also opens on a request whose review
     is not submitted: unanswered, accepted or declined. Opening it changes
     nothing on the row. Where a submitted review shows "Review Submitted:
-    {date and time}", an unanswered request shows "Notified: {date and
-    time}" and an accepted one "Confirmed: {date and time}"; a declined
-    request reads "Confirmed: {date and time}" as well ⚠ [A29](#a29). "For
+    {date and time}", the dated line (Rule 14a) reads "Request Sent: {date
+    and time}" on an unanswered request, "Reviewer Reminded: {date and
+    time}" on an unanswered one that was sent a reminder, "Request
+    Accepted: {date and time}" on an accepted one and "Request Declined:
+    {date and time}" on a declined one. "For
     author and editor" and the editor-only block each read "-", "Reviewer
     Files" reads "No Items", {OJS} the "Reviewer Recommendation" group
     reads "Recommendation -", and a review form's questions show
@@ -458,9 +487,9 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     - The request counts as accepted on the reviewer's behalf, and an
       acceptance the reviewer had already given keeps its date. That was
       checked in the assignment's stored data only; on screen it would be
-      the "Confirm" line of the row's "History" (Rule 21). The reviewer is
-      no longer asked to accept or decline: their list shows the review as
-      submitted, and "View" opens it read-only on "4. Completion"
+      the "Request Accepted" line of the row's "History" (Rule 21). The
+      reviewer is no longer asked to accept or decline: their list shows
+      the review as submitted, and "View" opens it read-only on "4. Completion"
       ([→ after a submitted review](U28-reviewers-review.md#save-submit)).
     - No acceptance email goes out and no acceptance is logged (Side
       effects).
@@ -524,11 +553,30 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     reviewer click sends, with its From header set to the reviewer's own
     address. The entry exists only while the invitation is unanswered.
     <sup>k</sup>
-21. **History.** "History" opens a side modal titled "History" listing the
-    assignment's dated milestones: "Assigned", "Notified", "Reminder",
-    "Confirm" or "Declined", "Completed", "Acknowledged", each with its date
-    and time. Blank milestones are omitted, and the "Reminder" milestone is
-    erased by the reviewer's response ⚠ [A15](#a15). <sup>l</sup>
+21. <a id="history"></a> **History.** "History" opens a side modal titled
+    "History" listing the assignment's dated milestones, one line each,
+    "{milestone}: {date and time}" with the milestone in bold, oldest
+    first. The milestones are:
+    - "Request Sent"
+    - "Reviewer Reminded"
+    - "Request Accepted" or "Request Declined"
+    - "Review Submitted"
+    - "Review Completed", the moment the review was marked complete
+    - "Reviewer Thanked"
+
+    A milestone the assignment has not reached is left out. The assignment
+    keeps one reminder date, overwritten by each reminder, so a reviewer
+    reminded twice shows one "Reviewer Reminded" line carrying the latest
+    reminder's date. The reviewer's
+    response erases the "Reviewer Reminded" line ⚠ [A15](#a15). After
+    "Revert Decision" the list ends at "Review Submitted": the "Review
+    Completed" and "Reviewer Thanked" lines are gone, although the
+    thank-you email went out ⚠ [A35](#a35). Marked complete again, the
+    review lists the first "Reviewer Thanked" date again, followed by the
+    new "Review Completed" one. In a language other than English an
+    untranslated placeholder stands where the "Reviewer Reminded" label
+    belongs ⚠ [A34](#a34).
+    <sup>l</sup>
 22. **Editorial Notes.** "Editorial Notes" opens the notes editors keep
     about a reviewer. Its guidance text names the audience: "administrators,
     managers and all editors" (Fields). The notes belong to the person, not
@@ -574,14 +622,15 @@ under the prompt "Record the response on behalf of the reviewer". Submit
   that does not offer this email type ⚠ [A12](#a12). <sup>g</sup>
 - **Manual reminder** → the reminder email (subject "A reminder to please
   complete your review"), a "Notification sent." notice to the editor, a
-  "Reminder" date in History (erased once the reviewer responds
+  "Reviewer Reminded" date in History (erased once the reviewer responds
   ⚠ [A15](#a15)), and an activity-log entry. <sup>h</sup>
 - **Automatic reminders** → the overdue-response and overdue-review reminder
   emails go out from the journal's principal contact when the configured
   day-offsets are reached (the clocks are in *Review setup & review forms*).
-  Each send stamps the History "Reminder" date and the activity log. A
-  reviewer response resets the reminder bookkeeping. That is the same reset
-  that erases the History "Reminder" milestone ⚠ [A15](#a15). <sup>h</sup>
+  Each send stamps the History "Reviewer Reminded" date and the activity
+  log. A reviewer response resets the reminder bookkeeping. That is the
+  same reset that erases the History "Reviewer Reminded" milestone
+  ⚠ [A15](#a15). <sup>h</sup>
 - **Marking a review complete** (Rule 14a) → the completion is logged in
   the submission's activity log, and the review is deposited to the
   reviewer's ORCID record when one is authenticated (the deposit consent
@@ -605,7 +654,7 @@ under the prompt "Record the response on behalf of the reviewer". Submit
   email goes to the assigned editors, and the reviewer is sent nothing.
   <sup>i</sup>
 - **Thanking** → the acknowledgement email (unless skipped) and the
-  acknowledged date in History. <sup>j</sup>
+  "Reviewer Thanked" date in History. <sup>j</sup>
 - **Unassigning/cancelling** → the notice email (unless skipped). Both
   notices arrive under the subject "Your review for "{title}" has been
   cancelled"; the unassign notice's own subject, "Your reviewer assignment
@@ -848,9 +897,10 @@ are in the footnote. <sup>s</sup>
      "Editor's Request", "Response Due Date" and "Review Due Date". Press
      "Send Reminder": the notice "Notification sent." appears and the
      reviewer's mailbox holds "A reminder to please complete your review".
-   - **"History"**: open the row's "History": the "History" modal lists a
-     dated "Reminder" milestone. Check it before the reviewer responds,
-     because their response erases the line ⚠ [A15](#a15).
+   - **"History"**: open the row's "History": the "History" modal lists
+     "Request Sent: {date and time}" and "Reviewer Reminded: {date and
+     time}". Check it before the reviewer responds, because their response
+     erases the "Reviewer Reminded" line ⚠ [A15](#a15).
    - **The overdue review**: the accepted reviewer's row reads "Overdue" in
      red with "Review due: {date}", and its button reads "Send Reminder".
      Press it: this time the "Review Schedule" dates are "Editor's
@@ -909,8 +959,9 @@ are in the footnote. <sup>s</sup>
      the notice reads "Thank you email sent to reviewer.", the row reads
      "Reviewer Thanked", and the
      thank-you is in the reviewer's mailbox. The row's "History" lists
-     "Assigned", "Notified", "Confirm", "Completed" and "Acknowledged",
-     each dated.
+     "Request Sent", "Request Accepted", "Review Submitted", "Review
+     Completed" and "Reviewer Thanked", each followed by its date and
+     time.
    - **"Revert Decision"**: press it and confirm "Unconsider this Review":
      the row returns to "Review Viewed" with no notice. "Read Review" shows
      the comments unchanged, and the activity log records the revert.
@@ -1142,7 +1193,8 @@ Left out of the scenarios above, by reason:
 
 - **Budget** — states:
   - submitting a review for the reviewer: "Save Changes" in "Modify Review" on an unanswered, an accepted or a "Request Resent" row, with the row, its menu, the reviewer's side and the missing acceptance email after it, and {OJS} the save refused without a "Recommendation" (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
-  - the Review Details window on a request with no review: "Notified:" or "Confirmed:", the empty blocks, and "Mark as Complete" disabled beside its recommendation message {OJS} or, with a review form, its incomplete-review message (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
+  - the Review Details window on a request with no review: "Request Sent:", "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", the empty blocks, and "Mark as Complete" disabled beside its recommendation message {OJS} or, with a review form, its incomplete-review message (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
+  - the Review Details dated line past "Review Submitted:": "Review Completed:" on a review marked complete, "Reviewer Thanked:" on a thanked one, "Review Submitted:" again after "Revert Decision" (Rule 14a): scenario 9 walks these states on the row and reads "History" on the thanked one; a check of the window's line waits for the suite's next revision
   - "Save changes to this review?" before modifying a complete review whose assignment has "Publicly Show Reviewer Comments" ticked, and the sentence the same box adds to "Mark this review as complete?" (Rules 14a, 14b): an editor completes or modifies a publicly shown review in a rare week
   - "Send Review To ORCID" with "Send this review to the reviewer's ORCID?" for a reviewer with an authenticated iD (Rules 3, 23): met only on a journal with ORCID enabled and a reviewer who linked an iD
   - the one-click placeholder in the editor's preview and a fresh keyed link per reminder (Settings, Rule 13): one-click access is off by default, and an editor with it on reads past the placeholder and never compares two reminders' links
@@ -1180,20 +1232,23 @@ Left out of the scenarios above, by reason:
   - A21 (a rating star clicked too early not taking; Rule 14a)
   - A25 (the same window from the dashboard's review indicators, recommendation included; Rule 14a)
   - A12 (the change notice's unsubscribe page omitting the type; Side effects)
-  - A15 (the reviewer's response erasing the "Reminder" milestone; Rules 13, 21)
+  - A15 (the reviewer's response erasing the "Reviewer Reminded" milestone; Rules 13, 21)
   - A26 (the unassign notice arriving under the cancel notice's subject; Side effects)
   - OMP3 (the press's unassign notice printing "{$journalName}" literally; Side effects)
   - A27 (a second "Mark as Complete" on a reverted, previously thanked review reading "Reviewer Thanked" at once; Rule 16)
   - A28 (a never-assigned reviewer dropping out of the search while "Reviews completed" is enabled; Rule 6)
-  - A29 ("Modify Review" worded as an edit on a request with no review, and a declined request's "Confirmed:" line; Rules 14c, 14d)
+  - A29 ("Modify Review" worded as an edit on a request with no review; Rule 14d)
   - A30 ("Modify Review" offered on a declined request and its save refused; Rule 14d)
   - A31 (an assistant-level participant offered "Modify Review" and refused on "Save Changes"; Actors row 5)
   - A32 (a Review Details window closed within a moment of opening, before the mark is saved, leaving the row "Review Submitted"; Rule 14a)
+  - A33 (a review thanked, taken back and marked complete again naming the first thank as its latest step; Rule 14a)
+  - A34 (an untranslated placeholder for "Reviewer Reminded" in a language other than English; Rules 14c, 21)
+  - A35 ("History" dropping the "Reviewer Thanked" line after "Revert Decision"; Rule 21)
   - OMP4 (a press's "Mark as Complete" enabled on a request with no review; Rule 14c)
   - OMP5 (a press accepting an empty "Save Changes" as the reviewer's review; Rule 14d)
   - OMP6 (the review-form block saying "this journal" on a press; Rule 14b)
 - **No seed**:
-  - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reminder" and log stamps (Rule 13, Side effects, Settings)
+  - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reviewer Reminded" and log stamps (Rule 13, Side effects, Settings)
   - the "Reviewer Files" the reviewer attached, read-only in the Review Details window (Rule 14a)
   - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
   - the "Competing Interests" badge on a journal with a competing-interests policy (Rule 2): the seed records no reviewer's competing-interests declaration
@@ -1226,7 +1281,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | Submitting inverted due dates is refused with no message; the form just stays open | 🐞 | user-visible | — |
 | [A12](#a12) | The assignment-changed email's opt-out is offered nowhere; its own unsubscribe page omits the type | 🐞 | minor | — |
 | [A13](#a13) | Email Reviewer sends with an empty body despite the body being marked required | 🐞 | minor | — |
-| [A15](#a15) | The reviewer's response erases the dated "Reminder" milestone from the assignment's History | 🐞 | minor | claim check (claude), 2026-08-02 — settled |
+| [A15](#a15) | The reviewer's response erases the dated "Reviewer Reminded" milestone from the assignment's History | 🐞 | minor | claim check (claude), 2026-08-02 — settled |
 | [A16](#a16) | A due date typed in the wrong format looks accepted on screen, but the old value is silently submitted | 🐞 | user-visible | claim check (claude), 2026-08-02 — rescoped |
 | [A18](#a18) | Emptying the request letter makes the add fail silently, yet the assignment is created and the request email never goes out | 🐞 | user-visible | — |
 | [A19](#a19) | The template chooser renders on every add, as a one-option select even with zero alternate templates | 🐞 | minor | — |
@@ -1240,6 +1295,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP4](#omp4) | {OMP} "Mark as Complete" is enabled on a request with no review; confirming records a completed review nobody wrote and leaves the reviewer on a first step that offers nothing | 🐞 | user-visible | — |
 | [OMP6](#omp6) | {OMP} The Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." on a press | 🐞 | minor | — |
 | [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | @blessie 2026-09-24 · risk accepted, not fixing |
+| [A33](#a33) | A review thanked, taken back and marked complete again names the first thank as its latest step in Review Details, while History lists a newer completion | 🐞 | minor | — |
+| [A34](#a34) | In a language other than English, History and Review Details show "##editor.review.reviewerReminded##" where the "Reviewer Reminded" label belongs | 🐞 | minor | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1248,6 +1305,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A28](#a28) | With the "Reviews completed" slider enabled, a name search for a reviewer never assigned answers "No items found." | ❓ | minor | — |
 | [A29](#a29) | On a request with no review, "Modify Review" still speaks of "the review submitted by {reviewer name}", and nothing says that "Save Changes" submits the review for the reviewer | ❓ | user-visible | — |
 | [OMP5](#omp5) | {OMP} "Save Changes" with nothing entered is accepted on an unanswered request and submits an empty review for the reviewer | ❓ | minor | — |
+| [A35](#a35) | After "Revert Decision", History drops the "Reviewer Thanked" line although the thank-you email went out | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 | [A24](#a24) | Retired: a modification save on a request with no review completes it because it submits the review on the reviewer's behalf, the behavior upstream designed (pkp/pkp-lib#13337); screens do reach it (Rule 14d) | ✅ | retired | upstream change + claim check (claude), 2026-09-17 — overturned by design |
 | [A25](#a25) | Retired: {OJS} opened from the dashboard popover, a submitted review's Review Details window omitted the recommendation; fixed upstream (pkp/ui-library#971) | ✅ | retired | re-verified live (claude), 2026-09-03 — fixed upstream |
@@ -1442,15 +1500,15 @@ Re-checked: claim check (claude), 2026-08-02 — overturned (was a defect).
 <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
-**A15 — The reviewer's response erases the History "Reminder" line** · 🐞 ·
+**A15 — The reviewer's response erases the History "Reviewer Reminded" line** · 🐞 ·
 minor.
-Sending a reminder stamps a dated "Reminder" milestone into the assignment's
-History. Once the reviewer responds, the line is gone. The response resets
-the reminder bookkeeping, the same reset that re-arms the automatic
+Sending a reminder stamps a dated "Reviewer Reminded" milestone into the
+assignment's History. Once the reviewer responds, the line is gone. The
+response resets the reminder bookkeeping, the same reset that re-arms the automatic
 reminders (Side effects), and erases the dated History milestone with it.
 The mechanism is deliberate; the user-facing cost is the lost History line.
 Basis: live probe (the settling recipe run exactly: reminder, then History
-shows "Reminder"; an acceptance logged, then the milestone is gone).
+shows the reminder line; an acceptance logged, then the line is gone).
 Re-checked: claim check (claude), 2026-08-02 — settled from an open question
 to a defect; both prior conflicting observations are explained (one read
 History before the response, one after). <sup>[f-a15](#fn-a15)</sup>
@@ -1594,8 +1652,9 @@ There is no "Complete" step and no "Thank Reviewer" button, so the reviewer
 cannot be thanked a second time from the row.
 Question: should the revert also withdraw the acknowledgement, so that a
 re-completed review can be thanked again? Lean: the status is honest, since
-the thank-you really went out and History keeps its "Acknowledged" date,
-but a "Thank Reviewer" that is gone for good deserves a product look.
+the thank-you really went out and History lists its "Reviewer Thanked" date
+again once the review is complete, but a "Thank Reviewer" that is gone for
+good deserves a product look.
 Basis: test run. <sup>[f-a27](#fn-a27)</sup>
 
 <a id="a28"></a>
@@ -1621,9 +1680,6 @@ dialog still reads "You are about to modify the review submitted by
 …", although no review exists; {OJS} only the "Submitted recommendation:"
 line is missing. Nothing on either screen says that "Save Changes" will
 submit a review in the reviewer's name and end their request (Rule 14d).
-The view window words the states the same way: a declined request's date
-line reads "Confirmed: {date and time}", the word an accepted request gets
-(Rule 14c).
 Question: should the texts, and the button, say what they do when there is
 no review to modify? Lean: yes. Submitting for the reviewer is the designed
 behavior (pkp/pkp-lib#13337), but it reads as an edit, and an editor who
@@ -1687,6 +1743,60 @@ Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; merged
 > before it closes the window, as scenario 9 of the submissions dashboard
 > does.
 
+<a id="a33"></a>
+**A33 — Review Details names an older thank as the latest step** · 🐞 · minor.
+The Review Details window's dated line is meant to name the review's
+latest step (Rule 14a). A review marked complete, thanked, taken back with
+"Revert Decision" and marked complete again reads "Reviewer Thanked:
+{date of the first thank}", while the row's History, on the same review,
+lists "Review Completed: {date of the second completion}" after that
+thank. The same happens when the second completion comes from a review
+decision whose "Notify Reviewers" step thanks the reviewer: the reviewer
+gets a second "Thank you for your review" email, and neither the window
+nor History shows its date. Expected: the window names the newer step, the
+second completion or the second thank, with its date. A reviewer the
+decision thanks for the first time reads correctly, "Reviewer Thanked:
+{date of the decision}". The row's own status on this path is A27.
+Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346 with
+pkp/ui-library#987; issue pkp/pkp-lib#13263) · Basis: probe. <sup>[f-a33](#fn-a33)</sup>
+
+<a id="a34"></a>
+**A34 — "Reviewer Reminded" is untranslated in other languages** · 🐞 · minor.
+With the interface in a language other than English, the reminder
+milestone reads "##editor.review.reviewerReminded##" followed by its date
+and time, in History and in the Review Details window's dated line alike. In
+Français (Canada) History read "{date and time} Rappel" before the
+relabelling of the review dates in History and Review Details
+(pkp/pkp-lib#13263, September 2026), and every other label it introduced
+shows in French ("Demande envoyée",
+"Demande acceptée", "Évaluation soumise"). Expected: the label in the
+interface's language. The label is new and exists in English only, so the
+next translation update should close this; until then a screen that was
+translated shows a placeholder.
+Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346; issue
+pkp/pkp-lib#13263) · Basis: probe.
+<sup>[f-a34](#fn-a34)</sup>
+
+<a id="a35"></a>
+**A35 — History drops the thank after "Revert Decision"** · ❓ · minor.
+After "Revert Decision" on a thanked review, History ends at "Review
+Submitted": the "Review Completed" and "Reviewer Thanked" lines are gone,
+although the thank-you email went out and the thank is still on record
+(marked complete again, the review lists it once more, Rule 21). Before
+the relabelling of the review dates in History and Review Details
+(pkp/pkp-lib#13263, September 2026) History kept the thank's date in this
+state. The Review
+Details window agrees with History: a taken-back review reads "Review
+Submitted: …" there (Rule 14a).
+Question: should History, which that relabelling describes as showing
+every date the assignment tracks, keep the "Reviewer Thanked" line after a revert?
+Lean: intended, since both screens then agree that a taken-back review is
+not thanked and the line returns with the next completion; the team has
+not yet ruled.
+Since: 2026-09-24 (the review-date relabelling, pkp/pkp-lib#13346; issue
+pkp/pkp-lib#13263) · Basis: probe.
+<sup>[f-a35](#fn-a35)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1747,14 +1857,15 @@ Complete"; on a journal the missing recommendation keeps it disabled (Rule
 14c). Confirming shows "The review has been marked as complete.". An
 unanswered or accepted request's row turns "Complete" with "Thank Reviewer"
 and "Revert Decision", its menu swaps "Unassign Reviewer" for "Cancel
-Reviewer" and loses "Log Response", and the window reads "Review Submitted:
-{the moment of the click}" over two empty comment blocks. The reviewer finds
+Reviewer" and loses "Log Response", and the window's dated line (Rule 14a)
+carries the moment of the click over two empty comment blocks. The reviewer finds
 the request gone from "Action Required by me" and listed under "All
 assignments" and "Completed" as "Review submitted on {date}"; "View" opens
 step 1, "Request for Review", with a disabled "Save and continue" and steps
 2 to 4 disabled: no accept, no decline, no completion page. On a declined
 request the same notice shows and the row stays "Request Declined", while
-the window reads "Review Submitted: …" and the button goes disabled.
+the window's dated line takes the moment of the click and the button goes
+disabled.
 The window's guidance does invite completing a review that arrived
 elsewhere, so the completion itself may be meant. Leaving the reviewer on a
 first step that offers nothing is not: the upstream change that settles the
@@ -2125,7 +2236,7 @@ principal contact, with one-click link when enabled; stamps
 `dateReminded` + `reminderWasAutomatic`, email-logged and event-logged
 (`reviewerRemindedAuto`). A reviewer response resets both reminder fields
 (`ReviewerAction::confirmReview`), re-arming the automatic clock for the
-next phase — the reset that also erases the History "Reminder" line,
+next phase — the reset that also erases the History reminder line,
 observed live (finding A15, note f-a15). The automatic clocks themselves
 cannot run in this environment (`task_runner` off); their behavior stands
 on this code basis. Live-probed 2026-08-02 (OJS + OMP; claim check re-drove
@@ -2281,6 +2392,32 @@ reviewer. Mechanism: the acceptance email, its email-log entry and
 `SUBMISSION_LOG_REVIEW_ACCEPT` live in `ReviewerAction::confirmReview`,
 which `editReview` never calls. The kept acceptance date was read from the
 assignment's data, not from the row's "History".
+The dated line (Rules 14a, 14c), since pkp/ui-library#987 with
+pkp/pkp-lib#13346 (issue pkp/pkp-lib#13263): driven 2026-09-24 on OJS
+at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, one scratch submission with one reviewer per
+state. Invited: `Request Sent: 2026-09-24 06:10 AM`; made overdue by
+"Edit", then "Send Reminder": `Reviewer Reminded: 2026-09-24 06:10 AM`;
+declined: `Request Declined: 2026-09-24 06:10 AM`; accepted: `Request
+Accepted: …`; submitted: `Review Submitted: …`; marked complete: `Review
+Completed: …`; thanked with the email skipped: `Reviewer Thanked: …`;
+marked complete, then "Revert Decision": `Review Submitted: …`. The
+window's own fetch of the assignment carried `declined`, `considered`,
+`dateConsidered`, `dateAcknowledged`, `dateNotified` and `dateReminded`,
+and the line is drawn from it, not from the table's summary; no request
+answered 400 or above and no console error was logged. Mechanism:
+`ReviewDetailsInfo.vue` `latestActivity` takes the first non-empty entry
+in the fixed order of Rule 14a, the thank only while `considered` is not
+`REVIEW_ASSIGNMENT_UNCONSIDERED` (finding A33); before the change the
+order was submitted, confirmed, reminded, notified, assigned (note
+f-a29), so the "Notified:" / "Confirmed:" readings above are that
+earlier wording. OMP carries the same component (its suite green that
+day; the window's line not driven there). Two readings of Rule 14a follow
+from that order and the stored data, read from the code on 2026-09-24 and
+not driven: an accepted, then reminded reviewer reads "Request Accepted:
+…" (accepted ranks above reminded), and after a second reminder the
+"Reviewer Reminded" line carries the latest date, because the review
+assignment has one `date_reminded` column, set by each reminder, manual
+or automatic (note l).
 
 <a id="fn-j"></a>
 **j** — `ThankReviewerForm` (template `thankReviewerForm.tpl`, AFFW-645):
@@ -2380,9 +2517,16 @@ name — the earlier username reading came from throwaway accounts whose name
 equals their username (claim check 2026-08-02, seeded "Paul Reviewer");
 submit button "Send Email"), plain mailable from/reply-to the acting
 editor, email-logged. History: op `reviewHistory` → `workflow/reviewHistory.tpl`
-(AFFW-498/708) listing the dated milestones quoted in Rule 21 (label keys
-`common.assigned/notified/reminder/confirm|declined/completed/acknowledged`),
-sorted by date, blanks skipped. Gossip: op guarded by
+(AFFW-498/708) listing the dated milestones quoted in Rule 21, sorted by
+date, blanks skipped. Label keys until pkp/pkp-lib#13346:
+`common.assigned/notified/reminder/confirm|declined/completed/acknowledged`,
+shown "{date} {label}"; since it, `editor.review.*` keys
+(`editor.review.reviewerReminded`, `editor.review.reviewerThanked`, …)
+shown "{label}{semicolon} {date}", "Assigned" dropped, "Review Completed"
+reading `dateConsidered` and "Reviewer Thanked" `dateAcknowledged` only
+while `considered` is not `REVIEW_ASSIGNMENT_UNCONSIDERED` (finding A35).
+PHP's stable sort over an array built in lifecycle order keeps equal
+timestamps as Accepted, Submitted, Completed, Thanked. Gossip: op guarded by
 `Repo::user()->canCurrentUserGossip()` — viewer must hold manager, site
 admin or sub-editor in the context, target must hold a reviewer role, never
 self; assistants additionally lack the op in the role map (note a); form
@@ -2397,7 +2541,20 @@ verbatim "Assigned · Notified · Confirm · Completed · Acknowledged", dated
 shipped). The row-menu entry is labeled "Editorial Notes" — the internal
 name "gossip" never appears on screen; the window's guidance text is quoted
 in Fields, and a note written on one submission was read back verbatim from
-another (finding A4).
+another (finding A4). Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge (Rule 21):
+each line reads "{Label}: {date and time}" with the label bold, e.g.
+`Request Sent: 2026-09-24 06:10 AM`; per state, invited `Request Sent`;
+reminded `Request Sent`, `Reviewer Reminded`; declined `Request Sent`,
+`Request Declined`; accepted `Request Sent`, `Request Accepted`; submitted
+adds `Review Submitted`; marked complete adds `Review Completed`; thanked
+adds `Reviewer Thanked`; marked complete, then reverted, ends at `Review
+Submitted`. No "Assigned" line. Both suites asserted the scenario 7 and 9
+labels green the same day (OJS and OMP). A second reminder was read from
+the code on 2026-09-24, not driven with two reminders: the review
+assignment has one `date_reminded` column, which the manual reminder
+(`ReviewReminderForm`) and the automatic one (`jobs/email/ReviewReminder`)
+each set to the current date, so History's one "Reviewer Reminded" line
+carries the latest reminder's date.
 
 <a id="fn-m"></a>
 **m** — Add-reviewer side effects: task NOTIFICATION_TYPE_REVIEW_ASSIGNMENT
@@ -2725,7 +2882,10 @@ an acceptance logged on the same row → History read "Assigned / Notified /
 Confirm" — the Reminder milestone gone and the reminder stamp cleared.
 The two earlier conflicting observations are both explained: one read
 History before the response, one after. Mechanism: the response path resets
-both reminder fields (note h), erasing the line.
+both reminder fields (note h), erasing the line. Since pkp/pkp-lib#13346
+(driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge) the line reads
+`Reviewer Reminded: {date and time}`; the reset that erases it is
+untouched by that change (code-read, not re-driven after a response).
 
 <a id="fn-a16"></a>
 **f-a16** — Rescoped by the claim check, live-probed 2026-08-02 (OJS + OMP;
@@ -2905,7 +3065,11 @@ alone, no "Complete" state in between. Mechanism, note j: `unconsiderReview`
 resets only the considered flag, `dateAcknowledged` is never cleared, and
 `ReviewAssignment::getStatus()` ranks a set acknowledged date above a
 completed one, so the acknowledgement wins again on re-confirm. Neither
-suite asserts the path (the register carries it).
+suite asserts the path (the register carries it). Driven 2026-09-24 on OJS
+at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge: after the second "Mark as Complete" History listed
+`Reviewer Thanked: 2026-09-24 06:10 AM` and then `Review Completed:
+2026-09-24 06:12 AM`; between the revert and that completion it listed
+neither (findings A33, A35).
 
 <a id="fn-a28"></a>
 **f-a28** — Test run 2026-09-13 (scenario 2, one run per app). OMP: the
@@ -2940,7 +3104,12 @@ for a submitted review. The date line is `ReviewDetailsInfo.vue`'s latest
 activity, the first date set among submitted, confirmed, reminded,
 notified and assigned; a decline stamps `dateConfirmed` too, hence
 "Confirmed:". By the same code a reminded, unanswered request would read
-"Reminded:" (code-read, not driven).
+"Reminded:" (code-read, not driven). The date-line half was fixed by
+pkp/ui-library#987 with pkp/pkp-lib#13346 (issue pkp/pkp-lib#13263):
+driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, a declined request reads
+`Request Declined: 2026-09-24 06:10 AM` and a reminded, unanswered one
+`Reviewer Reminded: 2026-09-24 06:10 AM` (note i); the entry keeps the
+"Modify Review" wording half.
 
 <a id="fn-a30"></a>
 **f-a30** — Driven 2026-09-17 (OJS + OMP, every run): on a "Request
@@ -3015,6 +3184,73 @@ test, with no wait before "Cancel", repeated 16 times at `51f0c727`, went
 red twice; both traces show the list GET 14–25 ms before the mark's
 POST. A page reload shows "Review Viewed" and "View recommendation".
 
+<a id="fn-a33"></a>
+**f-a33** — Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, on a
+scratch journal. In the window: a submitted review marked complete,
+thanked with the email at 06:10, "Revert Decision" › "OK", then "Read
+Review" and "Mark as Complete" again at 06:12. The row read "Reviewer
+Thanked"; Review Details read `Reviewer Thanked: 2026-09-24 06:10 AM`
+(then `Recommendation: Accept Submission`); History read `Request Sent:
+2026-09-24 06:10 AM` / `Request Accepted: 2026-09-24 06:10 AM` / `Review
+Submitted: 2026-09-24 06:10 AM` / `Reviewer Thanked: 2026-09-24 06:10 AM`
+/ `Review Completed: 2026-09-24 06:12 AM`. The window's own fetch of the
+assignment: `considered` 2 (reconsidered), `dateConsidered` 06:12:41,
+`dateAcknowledged` 06:10:40. By a decision, on a second submission: a
+review thanked at 06:10:56 and reverted, then "Request Revisions" ›
+"Notify Authors" › "Notify Reviewers" (the reviewer ticked) › "Record
+Decision" at 06:12:51. The mail catcher held the reviewer's "Thank you
+for your review" at 06:10:56 and again at 06:12:51; `dateAcknowledged`
+stayed 06:10:56 while `dateConsidered` became 06:12:51; Review Details
+read `Reviewer Thanked: 2026-09-24 06:10 AM` and History ended `Reviewer
+Thanked: 2026-09-24 06:10 AM` / `Review Completed: 2026-09-24 06:12 AM`.
+Control, the same decision: a submitted review never thanked read
+`Reviewer Thanked: 2026-09-24 06:12 AM` in Review Details and `Review
+Completed: 2026-09-24 06:12 AM` then `Reviewer Thanked: 2026-09-24 06:12
+AM` in History. Before the change the window's line on a submitted review
+was always `Review Submitted: {submission date}`. Mechanism:
+`ReviewDetailsInfo.vue` `latestActivity` takes the first non-empty entry
+in a fixed order, the thank first, instead of the latest date;
+`ReviewAssignmentController::markReviewConsidered` sets `considered` to
+RECONSIDERED without touching `dateAcknowledged`, and
+`NotifyReviewers::sendReviewersEmail` stamps `dateAcknowledged` only
+`if (!getDateAcknowledged())`. OMP runs the same component and code paths
+(not driven there).
+
+<a id="fn-a34"></a>
+**f-a34** — Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, on two
+scratch journals with the interface switched to Français (Canada), for a
+reviewer sent a reminder and not answering. History: `Demande envoyée :
+2026-09-24 06:15 AM` / `##editor.review.reviewerReminded## : 2026-09-24
+06:15 AM`. Review Details: `##editor.review.reviewerReminded## :
+2026-09-24 06:15 a.m.`; `pkp.localeKeys['editor.review.reviewerReminded']`
+held that placeholder string. Every other new label rendered in French
+(`Demande acceptée`, `Évaluation soumise`, `Recommandation : Accepter la
+soumission`; `editor.review.reviewerThanked` = `Évaluateur-trice
+remercié-e`). Before the change the History line read "{date} Rappel"
+(`common.reminder`, fr_CA "Rappel"). Mechanism: `editor.review.reviewerReminded`
+exists only in `locale/en/editor.po` (1 of 71 locales) and the translator
+has no English fallback; the Vue side receives the same string. OMP uses
+the same keys (not driven there).
+
+<a id="fn-a35"></a>
+**f-a35** — Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, on two
+reviews of scratch submissions. Before "Revert Decision" on a thanked
+review History read `Request Sent: 2026-09-24 06:10 AM` / `Request
+Accepted: …` / `Review Submitted: …` / `Review Completed: 2026-09-24 06:10
+AM` / `Reviewer Thanked: 2026-09-24 06:10 AM`; after it `Request Sent:
+2026-09-24 06:10 AM` / `Request Accepted: 2026-09-24 06:10 AM` / `Review
+Submitted: 2026-09-24 06:10 AM` and nothing more, while the mail catcher
+held the reviewer's "Thank you for your review" (06:10:56) and the
+assignment still carried `dateAcknowledged`; Review Details read `Review
+Submitted: 2026-09-24 06:10 AM`. Mechanism: `PKPReviewerGridHandler::reviewHistory`
+passes the thank date as `getConsidered() == REVIEW_ASSIGNMENT_UNCONSIDERED
+? null : getDateAcknowledged()`, matching `latestActivity` (note i); the
+code before the change listed `common.acknowledged` in every state, so
+History read "{date} Acknowledged" here (code-read). The "Review Completed"
+line leaving is not new: `unconsiderReview` clears `dateConsidered`, which
+History did not show before. The question was put to the team on the
+change's review thread, 2026-09-24.
+
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
 by `ojs-main DashboardHandler`; the authoritative per-app switch is
@@ -3071,7 +3307,15 @@ whenever the assignment carries no `dateCompleted` (its own comment:
 "Editor completes the review."), without the guard on an existing
 `dateConfirmed` and without `step`; the button's guards are the
 recommendation ({OJS}) and the review form alone. The guidance the entry
-cites is `editor.review.readConfirmation` (finding A22).
+cites is `editor.review.readConfirmation` (finding A22). Since
+pkp/ui-library#987 with pkp/pkp-lib#13346 (issue pkp/pkp-lib#13263) the
+window's dated line follows Rule 14a's order, and the button also stamps
+the consideration date, so these windows would now read "Review
+Completed: …" (code-read 2026-09-24, not driven on OMP); the entry names
+only the moment, which both labels carry. The same code reading raises an
+unprobed side: History would now show "Request Accepted" and "Review
+Submitted" for the editor's click, where it read "Confirm" and
+"Completed" before.
 
 <a id="fn-omp5"></a>
 **f-omp5** — Driven 2026-09-17 (OMP, three runs): "Save Changes" pressed

@@ -197,9 +197,11 @@ async function openHistory(page, row) {
     return modal;
 }
 
-/** A review-history line ("{date} {label}") of the row's History window. */
+/** A review-history line ("{label}: {date}", the label in bold) of the row's History window. */
 function historyLine(historyModal, label) {
-    return historyModal.locator('.pkp_review_history > div').filter({hasText: label});
+    return historyModal
+        .locator('.pkp_review_history > div')
+        .filter({has: historyModal.page().locator('strong', {hasText: new RegExp(`^${label}:\\s*$`)})});
 }
 
 /** The submission's activity log holds a row with this text. */
@@ -390,7 +392,7 @@ test.describe('reviewer\'s review', () => {
         const editorRow = workflow.panelRow('Reviewers', REVIEWER_NAME);
         await expect(editorRow).toContainText('Request Accepted');
         const history = await openHistory(editorPage, editorRow);
-        await expect(historyLine(history, 'Confirm').locator('strong')).toHaveText(DATE);
+        await expect(historyLine(history, 'Request Accepted')).toHaveText(DATE);
         await closeSideWindow(history);
         await expectLogged(
             editorPage,
