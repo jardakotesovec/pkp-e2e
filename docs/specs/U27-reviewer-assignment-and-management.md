@@ -1239,7 +1239,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A31](#a31) | An assistant-level participant is offered "Modify Review", and "Save Changes" answers "The current role does not have access to this operation." | 🐞 | minor | — |
 | [OMP4](#omp4) | {OMP} "Mark as Complete" is enabled on a request with no review; confirming records a completed review nobody wrote and leaves the reviewer on a first step that offers nothing | 🐞 | user-visible | — |
 | [OMP6](#omp6) | {OMP} The Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." on a press | 🐞 | minor | — |
-| [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | — |
+| [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | @blessie 2026-09-24 · risk accepted, not fixing |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1679,6 +1679,13 @@ row to read "Review Viewed" and the popover to offer "View
 recommendation" once the mark is saved.
 Since: pkp/ui-library#853 (`cab09538`, narrowed at `51f0c727`; not yet
 merged; issue pkp/pkp-lib#13359) · Basis: probe. <sup>[f-a32](#fn-a32)</sup>
+
+> **Reviewed — @blessie, 2026-09-24**: confirmed 🐞, risk accepted.
+> Ruling: not worth fixing; a person rarely closes the window that fast,
+> and a reload shows the right state. A test that expects "Review Viewed"
+> or "View recommendation" waits for the mark as viewed to be saved
+> before it closes the window, as scenario 9 of the submissions dashboard
+> does.
 
 ### OMP
 
