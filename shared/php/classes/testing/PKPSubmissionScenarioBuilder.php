@@ -201,6 +201,30 @@
  *   (U47). The OMP overlay (APP\testing\SubmissionScenarioBuilder) owns
  *   it; this core refuses the key and runs the overlay's two steps: the
  *   format with its file before a publish, and its availability after.
+ * - subtitle, plainLanguageSummary, keywords / subjects / disciplines /
+ *   supportingAgencies, coverImage {file*, altText?}, categories (paths),
+ *   urlPath, OJS articleNumber — the version's own display values (U13),
+ *   typed on the workflow's publication pages by the editor after the
+ *   submit and before any publish: "Title & Abstract", "Metadata" and
+ *   "Publication Settings" (OPS "Preprint entry"), each a PUT
+ *   submissions/{id}/publications/{id}. The seed saves each page whose
+ *   fields it sets, in the shape that page posts them, through
+ *   PKPSubmissionController::editPublication itself (ApiCall:
+ *   convertStringsToSchema, Repo::publication()->validate — the URL Path
+ *   rules among them — then ->edit, which moves the cover image's
+ *   temporary file into the context's public files, and the
+ *   MetadataChanged event), acting as the editor (admin), whose cover
+ *   upload is the image box's POST temporaryFiles (handleUpload). The keys
+ *   do not read the context's Metadata items or its "Article Number"
+ *   setting, as the landing pages do not. OMP refuses them (its catalog
+ *   entry path is not parity-checked).
+ * - galleys[].urlPath and galleys[].genre (U13): the "Create New Galley"
+ *   window's "URL Path" (ArticleGalleyForm / PreprintGalleyForm's own
+ *   checks: the pattern, not a number, not a URL Path another galley of
+ *   the version has) and the upload wizard's component, one of those its
+ *   list offers (enabled, not dependent, so "Image" is refused). Neither
+ *   exists for a remotely hosted galley, whose window hides "URL Path" and
+ *   opens no wizard.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -288,6 +312,21 @@ abstract class PKPSubmissionScenarioBuilder
 
     /** OMP overrides to reject galleys (a press has publication formats, no "Galleys" page). */
     protected function assertGalleysSupported(Spec $root): void
+    {
+    }
+
+    /**
+     * The version's display values of the publication pages (U13): the
+     * keys, in the order they are read. `articleNumber` is read only when
+     * the app's publication schema has it (a journal).
+     */
+    public const PUBLICATION_PAGE_KEYS = ['subtitle', 'plainLanguageSummary', 'keywords', 'subjects', 'disciplines', 'supportingAgencies', 'coverImage', 'categories', 'urlPath', 'articleNumber'];
+
+    /** The "Metadata" page's term lists (FieldControlledVocab), by publication property. */
+    public const PUBLICATION_TERM_LISTS = ['keywords', 'subjects', 'disciplines', 'supportingAgencies'];
+
+    /** OMP overrides to refuse the publication-page keys (its catalog entry path is not parity-checked). */
+    protected function assertPublicationPagesSupported(string $specKey): void
     {
     }
 
@@ -537,6 +576,7 @@ abstract class PKPSubmissionScenarioBuilder
         $dataCitationPlans = $this->parseDataCitations($root);
         $mediaFilePlans = $this->parseMediaFiles($context, $root, $submitted, $locale);
         $formatPlans = $this->parsePublicationFormats($context, $root, $locale, $submitted);
+        $publicationPagesPlan = $this->parsePublicationPages($context, $root, $locale, $submitted);
         $libraryFilePlans = LibraryFileSeeder::parse($root, false);
         if ($libraryFilePlans !== [] && !$submitted) {
             throw new SpecException('libraryFiles', 'A draft has no workflow and no "Library" button: libraryFiles needs submitted: true');
@@ -556,7 +596,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans, $mediaFilePlans, $formatPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans, $mediaFilePlans, $formatPlans, $publicationPagesPlan);
         } finally {
             $restoreRouterContext();
         }
@@ -588,7 +628,8 @@ abstract class PKPSubmissionScenarioBuilder
         ?string $citationsRaw = null,
         array $dataCitationPlans = [],
         array $mediaFilePlans = [],
-        array $formatPlans = []
+        array $formatPlans = [],
+        ?array $publicationPagesPlan = null
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
@@ -859,6 +900,12 @@ abstract class PKPSubmissionScenarioBuilder
                 $roundIndex++;
             }
 
+            // The publication pages' display values (U13), typed by the
+            // editor before the galleys and the publish.
+            if ($publicationPagesPlan !== null) {
+                $this->seedPublicationPages($submissionId, $publicationPagesPlan, $editor);
+            }
+
             // Galleys on the current publication, added the way the "Galleys"
             // page adds them, before a publish: an editor builds the galleys
             // and then publishes, so a published seed carries them published.
@@ -1081,6 +1128,186 @@ abstract class PKPSubmissionScenarioBuilder
     }
 
     /**
+     * Read the publication-page keys (U13): the version's display values
+     * the editor types on "Title & Abstract" (subtitle, plainLanguageSummary),
+     * "Metadata" (the term lists, OJS articleNumber) and "Publication
+     * Settings" / "Preprint entry" (categories, coverImage, urlPath), each
+     * turned into the field the form posts: a one-line rich text as typed,
+     * the summary's rich text box as the paragraph it posts, a term list as
+     * `{locale: [{name}]}` chips, the categories as their ids, the cover as
+     * `{locale: {temporaryFileId, altText}}` once uploaded. The workflow's
+     * publication pages exist once the submission is submitted. The values
+     * themselves (the URL Path's pattern and uniqueness, the locales) are
+     * judged by the controller's own validation at execute. Parse-phase:
+     * no writes.
+     *
+     * @return ?array{specKey: string, body: array, coverImage: ?array{fixture: array, altText: string, locale: string}}
+     */
+    protected function parsePublicationPages(Context $context, Spec $root, string $locale, bool $submitted): ?array
+    {
+        $schema = app()->get('schema')->get(\PKP\services\PKPSchemaService::SCHEMA_PUBLICATION);
+        $keys = array_values(array_filter(
+            self::PUBLICATION_PAGE_KEYS,
+            fn (string $key) => $root->has($key) && ($key !== 'articleNumber' || isset($schema->properties->{$key}))
+        ));
+        if ($keys === []) {
+            return null;
+        }
+        $this->assertPublicationPagesSupported($keys[0]);
+        if (!$submitted) {
+            throw new SpecException($keys[0], "\"{$keys[0]}\" is typed on the workflow's publication pages, which a draft does not have: it needs submitted: true");
+        }
+        $localizedText = function (string $key) use ($root, $locale): array {
+            $value = $root->get($key);
+            $map = is_array($value) ? $value : [$locale => $value];
+            if ($map === [] || array_is_list($map)) {
+                throw new SpecException($key, "{$key} must be a string or a locale map of strings");
+            }
+            foreach ($map as $mapLocale => $text) {
+                if (!is_string($text) || trim($text) === '') {
+                    throw new SpecException("{$key}.{$mapLocale}", "{$key}.{$mapLocale} must be a non-empty string");
+                }
+            }
+            return $map;
+        };
+
+        $body = [];
+        if ($root->has('subtitle')) {
+            // "Subtitle" is a one-line rich text: it posts the text as typed.
+            $body['subtitle'] = $localizedText('subtitle');
+        }
+        if ($root->has('plainLanguageSummary')) {
+            // "Plain Language Summary" is a rich text box (TinyMCE), which
+            // posts typed text as a paragraph; markup given is kept.
+            $body['plainLanguageSummary'] = array_map(
+                fn (string $text) => str_starts_with(ltrim($text), '<') ? $text : "<p>{$text}</p>",
+                $localizedText('plainLanguageSummary')
+            );
+        }
+        foreach (self::PUBLICATION_TERM_LISTS as $key) {
+            if (!$root->has($key)) {
+                continue;
+            }
+            $value = $root->get($key);
+            $map = is_array($value) && !array_is_list($value) ? $value : [$locale => $value];
+            foreach ($map as $mapLocale => $terms) {
+                if (!is_array($terms) || !array_is_list($terms) || array_filter($terms, fn ($term) => !is_string($term) || trim($term) === '') !== []) {
+                    throw new SpecException("{$key}", "{$key} must be a list of terms (non-empty strings), or a locale map of such lists");
+                }
+                // One chip per term, posted as {name}.
+                $body[$key][$mapLocale] = array_map(fn (string $term) => ['name' => $term], $terms);
+            }
+        }
+        if ($root->has('articleNumber') && isset($schema->properties->articleNumber)) {
+            $value = $root->get('articleNumber');
+            if (!is_string($value) || trim($value) === '') {
+                throw new SpecException('articleNumber', 'articleNumber must be a non-empty string (the "Article Number" box)');
+            }
+            $body['articleNumber'] = $value;
+        }
+        if ($root->has('categories')) {
+            $paths = $root->get('categories');
+            if (!is_array($paths) || !array_is_list($paths) || array_filter($paths, fn ($path) => !is_string($path)) !== []) {
+                throw new SpecException('categories', 'categories must be a list of category paths');
+            }
+            $byPath = [];
+            foreach (Repo::category()->getCollector()->filterByContextIds([$context->getId()])->getMany() as $category) {
+                $byPath[$category->getPath()] = (int) $category->getId();
+            }
+            $ids = [];
+            foreach ($paths as $i => $path) {
+                $ids[] = $byPath[$path] ?? throw new SpecException("categories.{$i}", "No category \"{$path}\" in \"{$context->getPath()}\" (the \"Categories\" list offers: " . implode(', ', array_keys($byPath)) . ')');
+            }
+            if (count(array_unique($ids)) !== count($ids)) {
+                throw new SpecException('categories', 'categories names a category twice; the list selects each once');
+            }
+            $body['categoryIds'] = $ids;
+        }
+        if ($root->has('urlPath')) {
+            $value = $root->get('urlPath');
+            if (!is_string($value) || $value === '') {
+                throw new SpecException('urlPath', 'urlPath must be a non-empty string (the "URL Path" box)');
+            }
+            $body['urlPath'] = $value;
+        }
+        $coverImage = null;
+        if (($coverSpec = $root->child('coverImage')) !== null) {
+            $fixture = $this->resolveFixture((string) $coverSpec->require('file'), 'coverImage.file');
+            $mimeType = PKPString::mime_content_type($fixture['path'], pathinfo($fixture['file'], PATHINFO_EXTENSION));
+            if (!(new \APP\file\PublicFileManager())->getImageExtension($mimeType)) {
+                throw new SpecException('coverImage.file', "The \"Cover Image\" box takes an image; \"{$fixture['file']}\" is {$mimeType}");
+            }
+            $altText = $coverSpec->get('altText', '');
+            if (!is_string($altText)) {
+                throw new SpecException('coverImage.altText', 'coverImage.altText must be a string (the box under the image)');
+            }
+            $coverImage = ['fixture' => $fixture, 'altText' => $altText, 'locale' => $locale];
+        }
+        return ['specKey' => $keys[0], 'body' => $body, 'coverImage' => $coverImage];
+    }
+
+    /**
+     * The publication pages' "Save" (U13), acting as the editor on the
+     * current (unpublished) version, one page after the other as the
+     * editor goes down the side menu: "Title & Abstract", "Metadata",
+     * "Publication Settings" ("Preprint entry"), each page's fields in its
+     * own PUT (the handler logs one "metadata updated" line per save), a
+     * page whose fields the seed does not set left unsaved. The cover
+     * image is uploaded first (the image box's POST temporaryFiles). Each
+     * body goes through PKPSubmissionController::editPublication itself
+     * (ApiCall; the policies' submission and the editor's roles set
+     * directly). A refusal is the page's own and becomes a 400 naming the
+     * first key.
+     */
+    protected function seedPublicationPages(int $submissionId, array $plan, User $editor): void
+    {
+        $submission = Repo::submission()->get($submissionId);
+        $publicationId = (int) $submission->getData('currentPublicationId');
+        $body = $plan['body'];
+        if ($plan['coverImage'] !== null) {
+            $temporaryFile = LibraryFileSeeder::upload($plan['coverImage']['fixture'], $editor);
+            $body['coverImage'] = [$plan['coverImage']['locale'] => [
+                'temporaryFileId' => (int) $temporaryFile->getId(),
+                'altText' => $plan['coverImage']['altText'],
+            ]];
+        }
+        $pages = [
+            ['subtitle', 'plainLanguageSummary'],
+            array_merge(self::PUBLICATION_TERM_LISTS, ['articleNumber']),
+            ['categoryIds', 'coverImage', 'urlPath'],
+        ];
+        foreach ($pages as $fields) {
+            $pageBody = array_intersect_key($body, array_flip($fields));
+            if ($pageBody === []) {
+                continue;
+            }
+            $controller = ApiCall::controller(
+                \APP\API\v1\submissions\SubmissionController::class,
+                [
+                    Application::ASSOC_TYPE_SUBMISSION => Repo::submission()->get($submissionId),
+                    Application::ASSOC_TYPE_USER_ROLES => [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER],
+                ]
+            );
+            $request = ApiCall::request(
+                \Illuminate\Http\Request::class,
+                'PUT',
+                $pageBody,
+                ['submissionId' => $submissionId, 'publicationId' => $publicationId],
+                $plan['specKey'],
+                'The publication page\'s "Save" would be refused'
+            );
+            $response = $controller->editPublication($request);
+            if ($response->getStatusCode() >= 300) {
+                // Name the refused field by its spec key.
+                $errors = $response->getData(true);
+                $field = explode('.', (string) array_key_first((array) $errors))[0];
+                $specKey = ['categoryIds' => 'categories'][$field] ?? (array_key_exists($field, $body) ? $field : $plan['specKey']);
+                throw new SpecException($specKey, "The publication page's \"Save\" was refused (HTTP {$response->getStatusCode()}): " . json_encode($errors));
+            }
+        }
+    }
+
+    /**
      * Read galleys[] (U33): each entry a galley on the submission's current
      * publication, as the "Galleys" page's "Create New Galley" window and
      * the upload wizard it opens create one. Parse-phase: no writes. The
@@ -1090,7 +1317,7 @@ abstract class PKPSubmissionScenarioBuilder
      * of `file` (a basename under apps/<app>/playwright/fixtures/files/,
      * mounted at classes/testing/fixtures/) or `urlRemote`.
      *
-     * @return array<int, array{label: string, locale: string, file: ?string, path: ?string, urlRemote: ?string}>
+     * @return array<int, array{label: string, locale: string, file: ?string, path: ?string, urlRemote: ?string, urlPath: ?string, genreId: ?int}>
      */
     protected function parseGalleys(Context $context, Spec $root, string $submissionLocale): array
     {
@@ -1117,15 +1344,44 @@ abstract class PKPSubmissionScenarioBuilder
             $file = null;
             $path = null;
             $urlRemote = null;
+            $genreId = null;
             if ($hasFile) {
                 ['file' => $file, 'path' => $path] = $this->resolveFixture((string) $spec->get('file'), "{$spec->path}.file");
+                // The wizard's component (U13): one its list offers; absent,
+                // the first it lists, as before.
+                $genreId = $spec->has('genre') ? $this->resolveUploadGenreId($context, $spec) : null;
             } else {
                 $urlRemote = (string) $spec->get('urlRemote');
                 if (trim($urlRemote) === '') {
                     throw new SpecException("{$spec->path}.urlRemote", 'urlRemote must be a non-empty string');
                 }
+                foreach (['urlPath' => 'the window hides "URL Path" once "This galley will be available at a separate website." is ticked', 'genre' => 'a remotely hosted galley opens no upload wizard, so it has no component'] as $key => $why) {
+                    if ($spec->has($key)) {
+                        throw new SpecException("{$spec->path}.{$key}", "{$key} does not apply to a urlRemote galley: {$why}");
+                    }
+                }
             }
-            $plans[] = ['label' => $label, 'locale' => $locale, 'file' => $file, 'path' => $path, 'urlRemote' => $urlRemote];
+            // "URL Path" (U13), refused as the window refuses it
+            // (ArticleGalleyForm / PreprintGalleyForm: the pattern check,
+            // then validate()'s number and duplicate checks against the
+            // version's galleys, here the ones listed before it).
+            $urlPath = null;
+            if ($spec->has('urlPath')) {
+                $urlPath = $spec->get('urlPath');
+                if (!is_string($urlPath) || $urlPath === '') {
+                    throw new SpecException("{$spec->path}.urlPath", 'urlPath must be a non-empty string (the "URL Path" box)');
+                }
+                if (!preg_match('/^[a-zA-Z0-9]+([\\.\\-_][a-zA-Z0-9]+)*$/', $urlPath)) {
+                    throw new SpecException("{$spec->path}.urlPath", 'This may only contain letters, numbers, dashes, underscores and periods.');
+                }
+                if (ctype_digit($urlPath)) {
+                    throw new SpecException("{$spec->path}.urlPath", 'The URL path can not be a number.');
+                }
+                if (in_array($urlPath, array_column($plans, 'urlPath'), true)) {
+                    throw new SpecException("{$spec->path}.urlPath", 'The URL path has already been used and can not be used again.');
+                }
+            }
+            $plans[] = ['label' => $label, 'locale' => $locale, 'file' => $file, 'path' => $path, 'urlRemote' => $urlRemote, 'urlPath' => $urlPath, 'genreId' => $genreId];
         }
         return $plans;
     }
@@ -1157,7 +1413,7 @@ abstract class PKPSubmissionScenarioBuilder
                 'publicationId' => $publication->getId(),
                 'label' => $plan['label'],
                 'locale' => $plan['locale'],
-                'urlPath' => null,
+                'urlPath' => $plan['urlPath'],
                 'urlRemote' => $plan['urlRemote'],
             ]));
 
@@ -1184,7 +1440,7 @@ abstract class PKPSubmissionScenarioBuilder
                     SubmissionFile::SUBMISSION_FILE_PROOF,
                     Application::ASSOC_TYPE_REPRESENTATION,
                     $galleyId,
-                    $this->defaultGalleyGenreId($context)
+                    $plan['genreId'] ?? $this->defaultGalleyGenreId($context)
                 );
             }
 

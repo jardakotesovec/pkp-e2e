@@ -301,6 +301,17 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
     }
 
     /**
+     * The publication-page display values (U13) are built and parity-checked
+     * on a journal and a preprint server; a press keeps its cover, categories
+     * and URL Path on the "Catalog Entry" page, a path no parity drive has
+     * read, so the keys are refused, never dropped (PRINCIPLES D4).
+     */
+    protected function assertPublicationPagesSupported(string $specKey): void
+    {
+        throw new SpecException($specKey, "\"{$specKey}\" is not built for OMP yet: the press's publication pages (\"Catalog Entry\") have no parity check");
+    }
+
+    /**
      * OMP's ManageFileApiHandler::getUpdateNotifications adds the internal
      * review's "revisions pending" notice to the lib/pkp one (U36).
      */

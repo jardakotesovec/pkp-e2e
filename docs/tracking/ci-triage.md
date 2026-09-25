@@ -336,7 +336,7 @@ trips.
   first OJS final at four workers on a reset database,
   `.reports/U40/final-run-ojs-attempt1.log`: the same button detached and
   re-attached until the browser closed at the 180 s timeout, the one red
-  in 221 with the 13 serial tests skipped behind it).
+  in 221 with the 13 serial tests skipped behind it). Again 2026-09-25 (U13 session, VM, reset database at workers auto): one of two OJS reds in 380, red again alone right after on the same database (`.reports/U13/final-run-ojs.log`, `alone-ojs-reds.log`).
 - **"Create New Version" dialog's stage select empty under load** (U49
   S4/S6, OJS, OMP and OPS; sightings from 2026-09-15 to 2026-09-24 on
   the VM, the Mac and twice on CI: push run 35126077430 and, on
@@ -605,7 +605,7 @@ trips.
   Again 2026-09-24 in the U10 session's OJS final on a reset database at
   eight workers, beside U14 S5, and in its second OMP final, the only red
   of 350; green alone on both (`.reports/U10/final-run-ojs-attempt1.log`,
-  `final-run-omp-attempt2.log`, `alone-ojs-reds.log`, `alone-omp-reds-2.log`).
+  `final-run-omp-attempt2.log`, `alone-ojs-reds.log`, `alone-omp-reds-2.log`). Again 2026-09-25 (U13 session, VM): OMP, beside U14 S5 in the OMP final on a reset database, green alone (`.reports/U13/final-run-omp.log`, `alone-omp-reds.log`).
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -647,7 +647,7 @@ trips.
   OMP final (the only red of 350; the second OMP final's only red was
   U36 S9), reset databases at eight workers; green
   alone on both (`.reports/U10/final-run-{ojs,omp}-attempt1.log`,
-  `alone-{ojs,omp}-reds.log`).
+  `alone-{ojs,omp}-reds.log`). Again 2026-09-25 (U13 session, VM, reset databases at workers auto): red in all three finals, green alone on all three (`.reports/U13/final-run-{ojs,omp,ops}.log`, `alone-<app>-reds.log`).
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7
@@ -744,7 +744,7 @@ trips.
   visible after the unpublish (line 256), green alone 3 of 3, error lines
   in `.reports/pr13359/v2-ojs-serial-solo.log`.
   **Watch condition**: a red in a full run or on CI; keep the error
-  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`). Again 2026-09-25 (U47 session): U08 S8 red on OJS and OPS in the `<app>-solo` projects run alone after the finals ("Navigation menu item was successfully added" not found), green alone right after on both (`.reports/U47/alone-{ojs,ops}-serial-solo.log`, `alone2-{ojs,ops}-U08.log`).
+  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`). Again 2026-09-25 (U47 session): U08 S8 red on OJS and OPS in the `<app>-solo` projects run alone after the finals ("Navigation menu item was successfully added" not found), green alone right after on both (`.reports/U47/alone-{ojs,ops}-serial-solo.log`, `alone2-{ojs,ops}-U08.log`). Again 2026-09-25 (U13 session, VM): OJS U08 S8 red in the `ojs-solo` project run alone after the OJS final, green alone right after (`.reports/U13/serial-solo-ojs.log`, `alone-ojs-U08S8.log`).
 - **"Add Reviewer" search never rendered** (U28 S11, OJS, once). In
   the U42 session's OJS final on a reset database at auto workers on the
   Mac (2026-09-24, `.reports/U42/final-run-ojs.log`), "read an earlier
@@ -815,6 +815,16 @@ trips.
   yet is the unverified guess. **Watch condition**: a second sighting;
   then the read retries (`expect.poll`) and the error context says which
   of the two servers' lines was on screen.
+
+- **The Manager's task count after U42's discussion** (OPS U08 S2,
+  order-dependent). OPS U42 S1's control discussion leaves an unread
+  discussion task for `manager.maya` on `publicknowledge`, and OPS U08 S2
+  expects the Manager's Tasks count at 0: on a database where U42 ran
+  first, U08 S2 reads 1 (seen 2026-09-25 by the U13 harness agent's
+  regression run, `.reports/U13/harness/pw-ops-U08-2.log`; green in the
+  same day's OPS final on a reset database, where the order differs).
+  **Watch condition**: a red on CI or in a final; then make U08 S2 read a
+  scratch context or U42 S1 mark its discussion read.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

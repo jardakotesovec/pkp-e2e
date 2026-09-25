@@ -17,7 +17,10 @@ namespace APP\testing;
 use APP\facades\Repo;
 use PKP\context\Context;
 use PKP\core\Core;
+use PKP\core\PKPString;
+use APP\file\PublicFileManager;
 use PKP\plugins\Hook;
+use PKP\testing\LibraryFileSeeder;
 use PKP\testing\PKPBootstrapSeeder;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
@@ -147,7 +150,7 @@ class BootstrapSeeder extends PKPBootstrapSeeder
      *
      * @return array<int, array{volume: int, number: string, year: int, published: bool}>
      */
-    public static function parseIssues(Spec $root): array
+    public static function parseIssues(Spec $root, bool $withCover = false): array
     {
         $issues = [];
         foreach ($root->childList('issues') as $spec) {
@@ -166,11 +169,30 @@ class BootstrapSeeder extends PKPBootstrapSeeder
             if (!is_int($number) && !is_string($number)) {
                 throw new SpecException("{$spec->path}.number", 'number must be a string or a whole number');
             }
+            // `coverImage` {file*, altText?} (U13, the context scenario
+            // only): the "Create Issue" form's "Cover image" upload, and the
+            // alt text its "Edit" › "Issue Data" tab shows beside a stored
+            // cover (the create form has no alt-text box).
+            $coverImage = null;
+            if ($withCover && ($coverSpec = $spec->child('coverImage')) !== null) {
+                $fixture = LibraryFileSeeder::resolveFixture((string) $coverSpec->require('file'), "{$spec->path}.coverImage.file");
+                $mimeType = PKPString::mime_content_type($fixture['path'], pathinfo($fixture['file'], PATHINFO_EXTENSION));
+                if (!(new PublicFileManager())->getImageExtension($mimeType)) {
+                    // IssueForm::validate's refusal (editor.issues.invalidCoverImageFormat).
+                    throw new SpecException("{$spec->path}.coverImage.file", "The issue's cover image must be an image (gif, jpg, png, webp); \"{$fixture['file']}\" is {$mimeType}");
+                }
+                $altText = $coverSpec->get('altText');
+                if ($altText !== null && (!is_string($altText) || $altText === '')) {
+                    throw new SpecException("{$spec->path}.coverImage.altText", 'altText must be a non-empty string (the "Issue Data" tab\'s alt-text box)');
+                }
+                $coverImage = ['fixture' => $fixture, 'altText' => $altText];
+            }
             $issues[] = [
                 'volume' => $whole('volume'),
                 'number' => (string) $number,
                 'year' => $whole('year'),
                 'published' => $published,
+                'coverImage' => $coverImage,
             ];
         }
         return $issues;
@@ -225,8 +247,32 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 }
             }
             Repo::issue()->add($issue);
+            if (!empty($plan['coverImage'])) {
+                // The form's "Cover image" (U13): its upload box's
+                // upload-file (a temporary file of the acting manager, the
+                // seeding admin), then IssueForm::execute ~287-300: the file
+                // copied into the journal's public files as
+                // cover_issue_{id}_{locale}{ext} under the manager's
+                // interface language (the primary locale), set, saved.
+                $admin = Repo::user()->getByUsername('admin', true);
+                $temporaryFile = LibraryFileSeeder::upload($plan['coverImage']['fixture'], $admin);
+                $publicFileManager = new PublicFileManager();
+                $locale = $context->getPrimaryLocale();
+                $fileName = 'cover_issue_' . $issue->getId() . '_' . $locale . $publicFileManager->getImageExtension($temporaryFile->getFileType());
+                $publicFileManager->copyContextFile($context->getId(), $temporaryFile->getFilePath(), $fileName);
+                $issue->setCoverImage($fileName, $locale);
+                Repo::issue()->edit($issue, []);
+            }
             if ($asTheForm) {
                 // The form's closing save (IssueForm::execute ~306).
+                Repo::issue()->edit($issue, []);
+            }
+            if (!empty($plan['coverImage']['altText'])) {
+                // The issue's "Edit" › "Issue Data" › the alt-text box ›
+                // "Save": the same form's execute over unchanged fields,
+                // which sets the alt text under the manager's language.
+                $issue = Repo::issue()->get($issue->getId());
+                $issue->setCoverImageAltText($plan['coverImage']['altText'], $context->getPrimaryLocale());
                 Repo::issue()->edit($issue, []);
             }
 

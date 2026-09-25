@@ -101,6 +101,14 @@
  *   every fresh context (the schema default, stored as 0); on, a published
  *   item's landing page carries the comments blocks (OJS) and the
  *   moderators' side menu the Content › Comments entry (every app).
+ * - restrictSiteAccess (bool) — Settings › Users & Roles › "Site Access
+ *   Options" tab's "Users must be registered and log in to view the journal
+ *   site." box ("…press site." on OMP, "…server site." on OPS; U13;
+ *   PKPUserAccessForm, a lib/pkp form the three apps extend, so the key
+ *   applies to all of them).
+ *   A fresh context has no row, which reads as off; on, a signed-out visitor
+ *   is sent to Login (RestrictedSiteAccessPolicy). The screen's Save also
+ *   writes the form's other boxes; the key writes this row alone.
  * - enableAnnouncements (bool), announcementsIntroduction (localized),
  *   numAnnouncementsHomepage (int ≥ 0 or null) — Settings › Website › Setup ›
  *   "Announcements" tab's three fields (U12; PKPAnnouncementSettingsForm, a
@@ -194,6 +202,13 @@
  *   write; children are the row's "More Actions" › "Add"). Applied after
  *   the structures, before users[]; the response lists every category as
  *   {id, path, parentId}, depth first.
+ * - themeOptions {<option name>: value} — Settings › Website › Appearance ›
+ *   "Theme" (U13; PKPThemeForm, shared by the three apps): the options of
+ *   the context's theme (the default theme on every scratch context), e.g.
+ *   the default theme's displayStats none / bar / line. The tab's "Save"
+ *   posts every option of the theme as it shows them with the changed ones
+ *   replaced, through PKPContextController::editTheme itself (ApiCall), last
+ *   in the build.
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -203,6 +218,8 @@
  *   (BootstrapSeeder::parseIssues / ::addIssues): Issues › "Create Issue"
  *   with the "Title" box unticked, then "Publish Issue" with the email box
  *   unticked. Applied after users[]; the response lists the issues' ids.
+ *   An entry's coverImage {file*, altText?} (U13) is the form's "Cover
+ *   image" upload and the "Issue Data" tab's alt text (BootstrapSeeder).
  *   OMP and OPS read no overlay, so the key answers 400 there.
  */
 
@@ -346,6 +363,7 @@ abstract class PKPContextScenarioBuilder
         $announcementTypePlans = $this->parseAnnouncementTypes($root, $primaryLocale);
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $overlayPlan = $this->parseOverlay($root);
+        $themeOptionsPlan = $this->parseThemeOptions($root);
         $root->assertConsumed();
 
         if (Application::getContextDAO()->getByPath((string) $contextData['path'])) {
@@ -479,6 +497,13 @@ abstract class PKPContextScenarioBuilder
             $announcements[] = $this->addAnnouncement($context, $plan, $typeIds);
         }
 
+        // The "Theme" tab's "Save", last: a manager sets the theme's
+        // options on a journal that already has its issues (a default
+        // reads them).
+        if ($themeOptionsPlan !== null) {
+            $this->applyThemeOptions($context, $themeOptionsPlan);
+        }
+
         return [
             'tag' => $tag,
             'contextId' => $context->getId(),
@@ -491,6 +516,134 @@ abstract class PKPContextScenarioBuilder
             'libraryFiles' => $libraryFiles,
             'categories' => $categories,
         ] + $overlay;
+    }
+
+    /**
+     * The optional `themeOptions` map (U13) → the options of the context's
+     * theme (Settings › Website › Appearance › "Theme") to set, e.g.
+     * `{displayStats: 'bar'}`. A scratch context always has the install's
+     * theme, the default theme (the context schema's default), whose
+     * options the map names: each a key of the theme's own options
+     * (ThemePlugin::getOptionsConfig) and, for a list of choices
+     * (FieldOptions), one of its values (a radio) or a list of them (the
+     * boxes). Parse phase: the theme's option list is read, nothing is
+     * written. Returns [option name => value], or null without the key.
+     */
+    protected function parseThemeOptions(Spec $root): ?array
+    {
+        if (!$root->has('themeOptions')) {
+            return null;
+        }
+        $raw = $root->get('themeOptions');
+        if (!is_array($raw) || $raw === [] || array_is_list($raw)) {
+            throw new SpecException('themeOptions', 'themeOptions must be a map of theme option name to value, e.g. {"displayStats": "bar"}');
+        }
+        $theme = $this->themePlugin($this->defaultThemePluginPath(), 'themeOptions');
+        $options = $theme->getOptionsConfig();
+        $plan = [];
+        foreach ($raw as $name => $value) {
+            $option = $options[$name] ?? throw new SpecException("themeOptions.{$name}", "themeOptions.{$name} is not an option of the \"{$theme->getDisplayName()}\" (its options: " . implode(', ', array_keys($options)) . ')');
+            if ($option instanceof \PKP\components\forms\FieldOptions && is_bool($option->default)) {
+                // A single box stored as a boolean ("Show the journal
+                // summary on the homepage.").
+                if (!is_bool($value)) {
+                    throw new SpecException("themeOptions.{$name}", "themeOptions.{$name} is a single box: true (ticked) or false");
+                }
+            } elseif ($option instanceof \PKP\components\forms\FieldOptions) {
+                $allowed = array_column($option->options, 'value');
+                $values = $option->type === 'radio' ? [$value] : $value;
+                if (!is_array($values) || !array_is_list($values)) {
+                    throw new SpecException("themeOptions.{$name}", "themeOptions.{$name} is a list of boxes: give a list of their values (" . json_encode($allowed) . ')');
+                }
+                foreach ($values as $one) {
+                    if (!in_array($one, $allowed, true)) {
+                        throw new SpecException("themeOptions.{$name}", "themeOptions.{$name} must be " . ($option->type === 'radio' ? 'one of ' : 'a list of ') . json_encode($allowed));
+                    }
+                }
+            } elseif (!is_string($value)) {
+                throw new SpecException("themeOptions.{$name}", "themeOptions.{$name} must be a string (the box's text)");
+            }
+            $plan[(string) $name] = $value;
+        }
+        return $plan;
+    }
+
+    /** The theme a new context gets: the context schema's themePluginPath default. */
+    protected function defaultThemePluginPath(): string
+    {
+        $schema = app()->get('schema')->get('context'); /** @var \stdClass $schema */
+        return (string) ($schema->properties->themePluginPath->default ?? 'default');
+    }
+
+    /**
+     * The installed theme plugin of that directory, its options registered
+     * (a theme registers its options in init(), which the request's theme
+     * loading runs only for the active theme of a request's context; the
+     * Theme form runs it for every theme, PKPThemeForm::__construct).
+     */
+    protected function themePlugin(string $pluginPath, string $specKey): \PKP\plugins\ThemePlugin
+    {
+        foreach (PluginRegistry::loadCategory('themes', true) as $theme) {
+            if ($theme->getDirName() === $pluginPath) {
+                if ($theme->getOptionsConfig() === []) {
+                    $theme->init();
+                }
+                return $theme;
+            }
+        }
+        throw new SpecException($specKey, "No enabled theme \"{$pluginPath}\" is installed");
+    }
+
+    /**
+     * The "Theme" tab's "Save" (U13): the form posts the theme and every
+     * option of it, each as the form shows it (the stored value, else the
+     * option's default) and as a form-encoded post carries it (a box's
+     * true / false as "true" / "false", a list's values as strings), with
+     * the changed ones replaced; the body goes through
+     * PKPContextController::editTheme itself (ApiCall, the context forced
+     * on the router as the Settings page's request has it, the admin's
+     * roles set directly): the theme's validateOptions, saveOption per
+     * option, the template and CSS caches cleared. The options are
+     * registered again under the context first, since a default can
+     * depend on it (a journal's "Journal Content Organization" reads
+     * whether the journal has an issue), as the tab builds them.
+     */
+    protected function applyThemeOptions(Context $context, array $plan): void
+    {
+        $restore = ContextFactory::forceRequestContext($context);
+        try {
+            $theme = $this->themePlugin((string) $context->getData('themePluginPath'), 'themeOptions');
+            $theme->options = [];
+            $theme->init();
+            $stored = $theme->getOptionValues($context->getId());
+            $asPosted = function (mixed $value) use (&$asPosted): mixed {
+                return match (true) {
+                    is_bool($value) => $value ? 'true' : 'false',
+                    is_int($value), is_float($value) => (string) $value,
+                    is_array($value) => array_map($asPosted, $value),
+                    default => $value,
+                };
+            };
+            $body = ['themePluginPath' => $context->getData('themePluginPath')];
+            foreach ($theme->getOptionsConfig() as $name => $option) {
+                $body[$name] = $asPosted(array_key_exists($name, $plan) ? $plan[$name] : ($stored[$name] ?? $option->default));
+            }
+            $controller = ApiCall::controller(
+                \PKP\API\v1\contexts\PKPContextController::class,
+                [Application::ASSOC_TYPE_USER_ROLES => [Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER]]
+            );
+            $request = ApiCall::request(
+                \Illuminate\Http\Request::class,
+                'PUT',
+                $body,
+                ['contextId' => $context->getId()],
+                'themeOptions',
+                'The "Theme" tab\'s "Save" would be refused'
+            );
+            ApiCall::answer($controller->editTheme($request), 'themeOptions', 'The "Theme" tab\'s "Save" was refused');
+        } finally {
+            $restore();
+        }
     }
 
     /**
@@ -1282,8 +1435,9 @@ abstract class PKPContextScenarioBuilder
      * and the Emails tab's `submissionAcknowledgement`,
      * `copySubmissionAckPrimaryContact`, `copySubmissionAckAddress` and, on
      * the preprint server only, `postedAcknowledgement` (U49); and the
-     * Website › Content › Comments tab's `enablePublicComments` (U14). Only
-     * keys the app's context schema carries are accepted.
+     * Website › Content › Comments tab's `enablePublicComments` (U14); and
+     * the Users & Roles › Site Access Options tab's `restrictSiteAccess`
+     * (U13). Only keys the app's context schema carries are accepted.
      *
      * @return array{settings: array, specKeys: array}
      */
@@ -1435,6 +1589,25 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['enablePublicComments'] = $value;
             $specKeys['enablePublicComments'] = 'enablePublicComments';
+        }
+
+        if ($root->has('restrictSiteAccess')) {
+            // Users & Roles › "Site Access Options": the "Users must be
+            // registered and log in to view the journal site." box
+            // (PKPUserAccessForm: a checkbox FieldOptions over the schema's
+            // nullable boolean, no default, so a fresh context has no row).
+            // The form posts its whole body form-encoded ("true" / "false"
+            // for this box), which the save's convertStringsToSchema turns
+            // back into the boolean; the stored row is 1 / 0. The form's
+            // other boxes are not this key's; they stay as the context has
+            // them.
+            $hasProperty('restrictSiteAccess') || throw new SpecException('restrictSiteAccess', 'restrictSiteAccess is not a setting of this app\'s context schema');
+            $value = $root->get('restrictSiteAccess');
+            if (!is_bool($value)) {
+                throw new SpecException('restrictSiteAccess', 'restrictSiteAccess must be a boolean (true: the Site Access Options box "Users must be registered and log in to view the journal site." ticked; "…press site.", "…server site."; false: unticked)');
+            }
+            $settings['restrictSiteAccess'] = $value;
+            $specKeys['restrictSiteAccess'] = 'restrictSiteAccess';
         }
 
         // Settings › Website › Setup › "Announcements"

@@ -939,3 +939,54 @@ config-file settings.
   configuration file's defaults ("2026-09-24", "2026-09-24 07:17 PM").
   {OMP} "Cover Image Max Width" and "Height" are stored as 106 and 100.
   All three apps, 2026-09-24 (U10 claim check K4, `.reports/U10/ccK4/fresh-*`).
+- A visit to a context's `/fr_CA/…` address switches the visitor's session
+  to French, so later addresses without a language segment render French;
+  the app forwards a bare address to `/en/…`. OJS and OPS, 2026-09-25 (U13
+  claim check K1).
+- {OJS} On a journal with a published issue, Publication › "Publication
+  Settings" arrives with "Assign To Current/Back Issue" preselected, and
+  "Save" answers "This field is required." at "Issue" until an issue is
+  picked or "Don't Assign To An Issue" is ticked. Its "Publication Date"
+  backdates an unpublished first version ("Published 2026-09-01" after the
+  publish). 2026-09-25 (U13 claim check K1, `v-01`, `v-02`, `v-04`).
+- {OJS} A `published: true` seed whose `issue` names an unpublished issue
+  (a scheduled article) sits at the Submission stage, so its workflow
+  offers no "Preview"; a manager still opens the preview by its address.
+  2026-09-25 (U13 claim check K1, `l-manager-06-workflow-scheduled`,
+  `p-03-scheduled-manager`).
+- "PDF.JS PDF Viewer", "HTML Article Galley" and "eLife Lens Article
+  Viewer" arrive ticked on a new journal, "PDF.JS PDF Viewer" alone on a
+  new preprint server, "PDF.js PDF Viewer" and "HTML Monograph File" on a
+  press. Settings › Website › "Plugins", all three apps, 2026-09-25 (U13
+  claim check K2, `pl-01-plugins-fresh-manager-*`,
+  `omp-01-plugins-publicknowledge-omp`).
+- The components of a new journal and preprint server arrive with "These
+  are supplementary files…" ticked for Research Instrument, Research
+  Materials, Research Results, Transcripts, Data Analysis, Data Set, Source
+  Texts, Multimedia and Other; "These are dependent files…" for Multimedia,
+  Image and HTML Stylesheet; "These files support file variants…" for
+  Image. Settings › Workflow › Submission › "Components", OJS and OPS,
+  2026-09-25 (U13 claim check K2, `co-components-forms-*`).
+- A plugin that fails inside a page hook leaves its part out of a page that
+  still answers 200: the only trace is "Plugin … failed to handle the hook
+  …" in `apps/<app>/playwright/.server-logs/server-<port>[-probe].log`, and
+  the kit's run record lists no crash, so a plugin-rendered part that never
+  shows is read in the server log first. Seen for the Publication Facts
+  Label and "Recommend Articles by Author" on every article page (U13
+  findings). OJS, 2026-09-25 (U13 claim check K4-1, K4-6).
+- {OJS} A new journal's "Articles" section and the seeded sections arrive
+  with "Will not be peer-reviewed" and "Omit author names for section items
+  from issues' table of contents." unticked; a preprint server's section
+  form has no "Omit author names…" box. Settings › Journal › "Sections",
+  2026-09-25 (U13 claim check K4, K5, `k-01-pk-section-*`,
+  `s-02-section-form-*`).
+- {OJS} `publicknowledge`'s home page shows "Current Issue" alone, with no
+  "Latest Publications"; a scratch journal with a published issue seeded
+  `themeOptions: {journalContentOrganization: [1, 2, 3]}` shows the
+  categories, "Latest Publications" and "Current Issue". Home page,
+  2026-09-25 (U13 claim check K5, `k-02-pk-home-visitor-ojs`,
+  `r-v-01-home-ojs`).
+- A seeded submission's contributor has no Country, so the workflow's
+  Contributors › "Edit" refuses "Save" until one is picked (a Bio
+  Statement too needs it first). OJS and OPS, 2026-09-25 (U13 claim check
+  K5, `b-01-e-b-contributor-bio-typed`).

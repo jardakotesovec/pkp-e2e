@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **29 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **30 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -456,3 +456,15 @@ until their specs exist. Do not force-claim the defects themselves.
     ojs `71bb244152`, omp `a36551804`, ops `07141ae4df`, lib/pkp
     `25182919bf`, ui-library `1afd40a9`). Resolves: maintainer
     confirmation as dead code (removal candidates), or the OPS1 ruling.
+30. **Unmounted landing-page display components** — attached to **U13**
+    (AFFR-056, ROUTE-033; claimed). OJS `ArticleHandler::view()` builds an
+    `OpenReviewComponent` configuration, locale keys and icons for every
+    article page, but no template mounts an open-review display
+    (`PkpOpenReview*` in ui-library `src/frontend/components/` is mounted
+    by no OJS or OPS template, as API-030 above records for `PkpCite`
+    too); the page's "Downloads" chart is drawn by
+    `lib/pkp/js/usage-stats-chart.js`, and ui-library's
+    `PkpUsageChart.vue` is mounted nowhere. Code-verified 2026-09-24 (U13
+    spec author; checkouts ojs `d9b567efec`, ops `61cd158ce3`, lib/pkp
+    `76a315591b`, ui-library `03d1cee2d2`). Resolves: maintainer
+    confirmation as pre-release machinery or dead code.

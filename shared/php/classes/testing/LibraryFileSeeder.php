@@ -207,7 +207,10 @@ class LibraryFileSeeder
     /**
      * The upload area's request: TemporaryFileManager::handleUpload over
      * the `uploadedFile` field, the fixture standing in for PHP's upload
-     * (copied rather than moved, the one step a seed cannot take).
+     * (copied rather than moved, the one step a seed cannot take). Also the
+     * image boxes' upload (U13: a publication's "Cover Image", POST
+     * temporaryFiles; an issue's "Cover image", the issue grid's
+     * upload-file), which run the same handleUpload for the uploader.
      */
     public static function upload(array $fixture, User $uploader): \PKP\file\TemporaryFile
     {

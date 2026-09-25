@@ -50,10 +50,10 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
         return BootstrapSeeder::addSection($context, $plan, $sequence);
     }
 
-    /** `issues[]` (U08): the bootstrap payload's issues list, same shape. */
+    /** `issues[]` (U08): the bootstrap payload's issues list, same shape, plus `coverImage` (U13). */
     protected function parseOverlay(Spec $root): array
     {
-        return ['issues' => BootstrapSeeder::parseIssues($root)];
+        return ['issues' => BootstrapSeeder::parseIssues($root, withCover: true)];
     }
 
     /** The bootstrap's own issue path; the response lists the issues. */

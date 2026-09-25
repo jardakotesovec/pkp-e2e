@@ -29,7 +29,7 @@ dotted form (`specKey`). The builder code is therefore the authoritative list
 of accepted keys. The lists below are kept in step with it.
 
 Multilingual fields (`name`, section `title` and `abbrev`, publication
-`title`, `abstract`) accept a locale map such as `{"en": "…"}`. A bare
+`title`, `abstract`, `subtitle`, `plainLanguageSummary`) accept a locale map such as `{"en": "…"}`. A bare
 string is wrapped under the context's primary locale. Pass a locale map when
 the test needs a specific locale.
 
@@ -136,6 +136,17 @@ Keys:
   the submission scenario's `issue` key below (U08 harness, 2026-09-24).
   The response lists the created `issues` (`id`, `volume`, `number`,
   `year`, `published`); an issue's page is `issue/view/{id}`.
+  An entry's `coverImage`, `{file, altText?}` (U13 harness, 2026-09-24),
+  is the form's "Cover image": `file` an image fixture basename (as for
+  the submission's `files[]`, e.g. `profile-image-400.png`; anything but
+  an image is a 400, as the form refuses it), uploaded before "Save" and
+  stored as the form stores it, `cover_issue_{id}_{locale}.png` under the
+  journal's public files, set for the primary locale (the manager's
+  interface language). The create form has no alt-text box: `altText` is
+  the box the issue's "Edit" › "Issue Data" tab shows beside the stored
+  cover, saved there. The key is the context scenario's alone (the
+  bootstrap payload answers 400 on it). A published article with no cover
+  of its own shows its issue's cover on its page.
 - `users[]`: throwaway accounts. Each entry takes `username` and `roles`
   (both required, roles non-empty), `givenName`, `familyName`, `email`
   (default `<username>@mail.test`), `password` (default: the username
@@ -317,6 +328,23 @@ Keys:
   press's or preprint server's landing page has none) and every
   moderator's side menu the Content › Comments entry. A non-boolean is a
   400 (U14 harness, 2026-09-16).
+- `restrictSiteAccess` (boolean): the first box of Settings › Users &
+  Roles › the "Site Access Options" tab, "Users must be registered and
+  log in to view the journal site." ("…press site." on OMP, "…server
+  site." on OPS), saved as that form saves (one form-encoded POST to
+  `contexts/{id}` with `X-Http-Method-Override: PUT`, carrying every box
+  of the tab; stored as `1` / `0`). The form is lib/pkp's, so the key
+  applies to the three apps alike. A fresh context has no row, which reads
+  as unticked (seed-facts). The key writes the `restrictSiteAccess` row
+  alone and leaves the tab's other boxes as the context has them.
+  With it on, a signed-out visitor who opens the context's home page, a
+  published article's (preprint's) page or its galley's address
+  (`…/view/{id}/pdf`) lands on `{context}/login?source=…`; the context's
+  own Login page stays open, and a Reader who signs in there reads the
+  page and opens the galley. Seeding into such a context is unaffected
+  (the scenario endpoint is site-wide), so a `published` submission is
+  seeded after the key as on any context. A non-boolean is a 400 (U13
+  harness, 2026-09-25).
 - `enableAnnouncements` (boolean), `announcementsIntroduction` (localized
   text) and `numAnnouncementsHomepage` (a whole number of zero or more, or
   null for the box emptied): the three fields of Settings › Website › Setup
@@ -446,6 +474,29 @@ Keys:
   renders empty (its form arrives with no fields), while `urnCheckNo:
   false` shows the URN box. On OPS `urnpubidplugin` is a 400, since a
   preprint server has no URN plugin (U44 claim check K1, K2, 2026-09-24).
+- `themeOptions` (U13 harness, 2026-09-24, three apps): Settings ›
+  Website › Appearance › "Theme", a map from an option of the context's
+  theme (a scratch context always has the "Default Theme") to its value,
+  e.g. `{displayStats: 'bar'}` ("Usage statistics display options": `none`
+  "Do not display submission usage statistics chart for reader.", the
+  default, `bar` "Use bar type of the chart for usage statistics
+  display.", `line` "Use line type of the chart for usage statistics
+  display."). A choice list takes one of its values, a group of boxes a
+  list of them, a single box (`useHomepageImageAsHeader`, the summary box)
+  `true` or `false`, a text box a string; an option the theme lacks and
+  any other value are 400s naming the theme's options. Saved as the tab's
+  "Save" saves: the tab posts every option of the theme as it shows them,
+  the changed ones replaced (a box as `"true"` / `"false"`), so the
+  options the seed does not name are stored at their shown value too
+  (`typography notoSans`, `baseColour #1E6292`, …), as after a by-hand
+  save; applied last in the build. Parity fact: a journal's "Journal
+  Content Organization" shows (and so stores) "Include the current issue's
+  table of contents" once the journal has an issue and "Include recent
+  most published articles" before, so a seed with `issues[]` stores the
+  first, as a manager saving the tab after creating them would. A fresh
+  context has no row for any option: the tab shows the defaults
+  (`displayStats` none, no chart), so every chart scenario seeds
+  `themeOptions` on a scratch context.
 - `components`: Settings › Workflow › Submission › the "Components" tab
   (its list "Article Components", "Monograph Components" on a press,
   "Preprint Components" on a preprint server), a map from a component's
@@ -790,6 +841,24 @@ Keys:
   loose until an order is saved (U46 A7). No key makes a second version:
   a test uses the header's "Create New Version". OMP
   answers 400: a press has publication formats, not galleys.
+  Two more per-entry keys (U13 harness, 2026-09-24, OJS and OPS driven):
+  `urlPath`, the window's "URL Path", refused as the window refuses it
+  (letters, digits and single `.`, `-`, `_` between them; not a number;
+  not a URL Path a galley listed before it has), so the galley's link
+  reads `…/view/{article}/{urlPath}`; and `genre`, the upload wizard's
+  component, by the name its list shows ("Data Set", "Other", …), one of
+  those the list offers (enabled, not dependent: "Image", "HTML
+  Stylesheet" and "Multimedia" are 400s, the wizard never offers them);
+  without it the first the list offers ("Article Text", "Preprint
+  Text"). A galley of a supplementary component ("Research Instrument" to
+  "Source Texts", "Other") is listed under the landing page's "Additional
+  Files". A `urlRemote` galley takes neither (the window hides "URL Path"
+  once the remote box is ticked and opens no wizard): both are 400s there.
+  OJS has `article.xml` too, a small JATS article ("A JATS fixture
+  article", an abstract, one section, one reference) for an XML galley,
+  which the "eLife Lens Article Viewer" lays out on the journal's page;
+  a preprint server has no XML reader, so OPS has no XML fixture, and no
+  `notes.md` either (its text fixture is `not-an-image.txt`).
 
 - `tasks[]`: discussions and tasks on a stage's "Tasks & Discussions"
   panel, each `{title, creator, participants, type?, stage?, owner?,
@@ -966,6 +1035,44 @@ Keys:
   `file`). OJS and OPS answer 400: a journal and a preprint server have
   galleys (`galleys[]`).
 
+- The version's display values (U13 harness, 2026-09-24, OJS and OPS
+  driven), typed by the editor (`admin`) on the workflow's publication
+  pages after everything but the galleys and the publish, each page's
+  fields saved in that page's own "Save" (a PUT to the publication), in
+  the shape the page posts them:
+  - "Title & Abstract": `subtitle` (a string or a locale map; posted as
+    typed) and `plainLanguageSummary` (the same; typed text posted as a
+    paragraph, `<p>…</p>`, markup kept).
+  - "Metadata": the term lists `keywords`, `subjects`, `disciplines` and
+    `supportingAgencies` ("Supporting Agencies"), each a list of terms
+    under the submission's locale or a locale map of lists, one chip per
+    term (stored as the chips store them, in order); on OJS
+    `articleNumber` ("Article Number", a string).
+  - "Publication Settings" (OPS "Preprint entry"): `categories`, a list
+    of category paths of the context (seed them with the context's
+    `categories[]`), selected in that order; `coverImage` `{file,
+    altText?}`, "Cover Image" and its alt-text box under the submission's
+    locale (an image fixture, e.g. `profile-image-400.png`, uploaded as
+    the box uploads it and moved to the context's public files as
+    `submission_{id}_{publicationId}_coverImage_{locale}.png`); `urlPath`,
+    "URL Path".
+  Every refusal is the page's own, a 400 naming the key: a URL Path that
+  is a number, has other characters, or is another submission's; a locale
+  the submission's metadata languages lack; an unknown or repeated
+  category path; a cover that is not an image. The keys need
+  `submitted: true` (a draft has no publication pages) and do not read
+  the context's Metadata items or its "Article Number" setting, which
+  only decide what the pages offer: the landing page shows what is
+  stored, so a term list seeded on a context with the item off is the
+  "switched off, terms kept" state (seed `metadata` too for the offered
+  one). With `published: true` the values are the published version's.
+  A seeded version reads as a typed one on each page (the same chips,
+  categories, cover preview and alt text, URL Path) and in the rows,
+  which equal the screen's, the Activity Log's one "metadata updated"
+  line per page saved included. OMP answers 400 on every one of these
+  keys: a press keeps its cover, categories and URL Path on the
+  "Catalog Entry" page, which no parity drive has read.
+
 App-specific keys:
 
 - OJS: `section` (abbrev; defaults to the journal's first section) and
@@ -1122,10 +1229,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   Files": `files[]` seeds "Submission Files" and a round's "Files for
   Review" only, U36); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
-- Publication: `metadata.datePublished` (without it, publish stamps today);
-  `metadata.keywords` and the other term
-  lists per language (a published submission carrying terms, the source of
-  U40's suggestions; sync 2026-09-18, two agents took the on-screen detour).
+- Publication: `metadata.datePublished` (without it, publish stamps today).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - User: `users[].notifications`, the Profile › Notifications pairs
   (`{settingName: {enabled, email}}`); U35 S6 and S8, like U12 and U05, set
@@ -1142,17 +1246,30 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   submission-intake settings (the checklist and the privacy statement,
   U58), `submitWithCategories`, `publishingMode`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
-  `registrationAgency`, `doiCreationTime`), ISSNs, `licenseUrl` (copied
+  `registrationAgency`, `doiCreationTime`), ISSNs (the online ISSN
+  is typed on Masthead, U13), `licenseUrl` (copied
   into a publication when it is published, so it must be set before a
   `published` seed; sync rr14, 2026-09-22), OJS
-  `issues[].accessStatus` (and an issue's title, description or cover;
-  `issues[]` itself is built, U08), OJS `subscriptions[]` where
+  `issues[].accessStatus` (and an issue's title or description;
+  `issues[]` itself is built, U08, its cover too, U13), OJS `subscriptions[]` where
   `'expired'` seeds an active row with a past end date, and OJS `payments`
   (`enabled`, `currency`, `paymentPluginName`, `manualInstructions`,
   `publicationFee`; the instructions gate is in seed-facts, U34).
+- Context passthrough: `enableArticleNumber` (Settings › Workflow ›
+  Submission › "Metadata", "Enable article number metadata"): the
+  "Metadata" publication page offers "Article Number" only with it
+  ticked; the submission key `articleNumber` does not read it (U13).
 - Context: `country` (a scratch context has none, so the first Settings ›
   Journal › "Masthead" save and Hosted Journals › "Edit" ask for one before
-  anything else saves; U07 claim check 2026-09-23).
+  anything else saves; U07 claim check 2026-09-23, U13 claim check
+  2026-09-25).
+- Section: `sections[].hideAuthor` (OJS), the section form's "Omit author
+  names for section items from issues' table of contents."; it is ticked
+  on screen (U13 claim check K5, 2026-09-25).
+- Galley of a dependent component: `galleys[].genre` refuses "Image" and
+  "HTML Stylesheet" (400) as the galley upload wizard does not offer them,
+  so no galley of either is seeded or uploaded (U13 claim check K2,
+  2026-09-25).
 - Named scenario fixtures (`submission-draft`, `submission-in-review`,
   `submission-in-round-2`, `submission-published`) and a typed scenario
   client. Until a suite shows the need, tests call
