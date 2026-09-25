@@ -22,7 +22,7 @@
  * - OMP7 🐞, OMP8 🐞: S7 never reads the ISSN paragraph or the path help.
  * - OMP4 ❓: the press has no category, so the window has no "Categories".
  * - A6 🐞: S7 never types a title of spaces only.
- * - A1, A2, A3, A4, A5, A7, A8, OPS1–OPS6: the journal's and the preprint
+ * - A1, A2, A3, A4, A5, A7, A8, A9, A10, OPS1–OPS6: the journal's and the preprint
  *   server's, in those trees.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster

@@ -17,7 +17,8 @@
  *   where the link leads; no inactive section's line is read.
  * - A8 🐞: no test ticks "Disable Submissions".
  * - A2, A3 ❓: no test saves a "Word Count" or ticks the indexing box.
- * - A4, A5 ❓: no screen sends those requests.
+ * - A4 ❓, A5 ❓, A9 🐞, A10 🐞: the sections programming interface, which
+ *   no screen calls; a kept check drives it (checks/U17/K7).
  * - OMP1–OMP9, OPS1–OPS6: the press's and the preprint server's, in those
  *   trees.
  *

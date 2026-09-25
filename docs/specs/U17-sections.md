@@ -49,7 +49,7 @@ the sections treat them as they treat an Author. Readers need no account.
 | **Submit to a section** (the "Section" choice of "Make a Submission") | • everyone who may submit, while the section is active and not restricted to editors; a section restricted to editors only to the editorial roles; an inactive section to nobody. The rules are the [Submission wizard](U21-submission-wizard.md#section-closed)'s (Rules 3, 17 there); this spec owns the switches (Settings bullets 1–2) <sup>d</sup> |
 | **Read the sections' policies** (About › "Submissions"; Rule 12) {OJS OPS} | • any visitor, signed in or not: the policies of the sections open to authors<br>• the editorial roles: every section's policy, the inactive and editor-only ones included <sup>e</sup> |
 | **Browse posted preprints** {OPS} (the "Archives" page and a section's page; Rules 14–16) | • any visitor, signed in or not <sup>f</sup> |
-| **Read the journal's sections through the install's programming interface** {OJS} (Rule 17; no screen sends these requests, so this row is read from the code) | • a signed-in Site Administrator or manager-level role; any other role, and a visitor who is not signed in, is refused <sup>g</sup> |
+| **Read the journal's sections through the install's programming interface** {OJS} (Rule 17) | • a signed-in Site Administrator, or a manager-level role of that journal, whether or not the role has "Permit changes to Settings"<br>• refused: every other role, a manager of another journal, and a visitor who is not signed in <sup>g</sup> |
 
 ## Fields & validation
 
@@ -363,15 +363,26 @@ a journal. Fields in screen order: <sup>m</sup>
       owns the page; a section whose path holds a space or a slash has no
       page that opens [OPS3](#ops3).
 <a id="sections-interface"></a>
-17. **The programming interface** {OJS}. No screen of the apps sends a
-    request to this interface, so this rule is read from the code and
-    cannot be seen on any page. By the code, a journal answers the list of
+17. **The programming interface** {OJS}. A journal answers the list of
     its sections, and any one section, as data at an address of the
     install's programming interface (the address is in the footnote), to
-    the roles Actors names. By the code, the list fails with a server error
-    on two filters it advertises, a search phrase and a type ⚠ [A4](#a4).
-    A press and a preprint server have no such address in their code
-    ⚠ [A5](#a5). <sup>g</sup>
+    the roles Actors names. The apps' own screens never call it: it serves
+    programs outside them. <sup>g</sup>
+    - 17a. The list holds every section of the journal, inactive and
+      editor-only ones included and marked as such, in the section order,
+      with the journal's total count. It gives 30 sections at a time
+      unless the program asks for another number, and never more than 100;
+      the program reaches the rest by asking to skip the ones it has.
+    - 17b. The list fails with a server error on two filters it
+      advertises, a search phrase and a type ⚠ [A4](#a4).
+    - 17c. One section is asked for by its number. A number the journal
+      has no section under, and another journal's section, are refused
+      with a message code instead of a sentence ⚠ [A9](#a9). A section
+      asked for by a word instead of a number, and the list asked for by
+      the Site Administrator at the site's address, with no journal in it,
+      fail with a server error ⚠ [A10](#a10).
+    - 17d. A press and a preprint server have no such address: it answers
+      "The requested URL was not recognized." to everyone ⚠ [A5](#a5).
 
 ## Side effects
 
@@ -893,8 +904,9 @@ Left out of the scenarios above, by reason:
     its "×" asking first (Fields, the section window)
   - while ordering, "Create Section" and "Order" doing nothing, and the
     dragged order surviving a tab switch but not a reload (Rule 4b)
-  - {OJS} the sections read through the programming interface by a Journal
-    Manager (Actors row 6; Rule 17): no screen sends these requests
+  - {OJS} the sections read through the programming interface, by a
+    Journal Manager and by the roles it refuses, a page at a time (Actors
+    row 6; Rule 17a): the apps' own screens never call it
 - **Nothing new to test**:
   - the Editor, the Production Editor and the Site Administrator on the
     same tab (Actors row 1): scenario 1's Journal Manager meets the same
@@ -922,8 +934,10 @@ Left out of the scenarios above, by reason:
     Count"; Settings bullet 4)
   - A3 ("Will not be included in the indexing of the journal" ticked,
     with no effect; Settings bullet 8)
-  - A4 and A5 (the programming interface's two failing filters, and its
-    absence on a press and a preprint server; Rule 17)
+  - A4, A9, A10 and A5 (the programming interface's two failing filters,
+    its refusals given as message codes, its server errors on a section
+    asked for by a word and on the site's address, and its absence on a
+    press and a preprint server; Rules 17b–17d)
   - OMP6 (a new series' place in the table; Rule 2a)
   - OMP2 (the series path message; Fields, "Path"; scenario 7 passes it)
   - OMP5 (the series' activate and deactivate windows asking about a
@@ -1000,6 +1014,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A title of spaces only is refused with a notice that shows a raw code instead of a sentence | 🐞 | minor | — |
 | [A7](#a7) | Under an inactive section's policy, the editorial roles get a submission link to a section the start form does not offer | 🐞 | minor | — |
 | [A8](#a8) | With "Disable Submissions" ticked, the "Submissions" page keeps its per-section submission links | 🐞 | minor | — |
+| [A9](#a9) | The sections interface refuses an unknown section, or another journal's, with a message code instead of a sentence | 🐞 | latent | — |
+| [A10](#a10) | The sections interface fails with a server error on a section asked for by a word, and on the site's address | 🐞 | latent · crash: server | — |
 | [OMP2](#omp2) | The series path message says "only letters and numbers" while ".", "/", "_" and "-" are accepted | 🐞 | minor | — |
 | [OMP3](#omp3) | The series cover uploader offers SVG files, and "Save" then keeps nothing and says nothing | 🐞 | minor | — |
 | [OMP5](#omp5) | The series list's activate and deactivate windows ask about a "section" | 🐞 | minor | — |
@@ -1012,8 +1028,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS6](#ops6) | One preprint posted without an abstract makes the server's harvesting record lists fail | 🐞 | user-visible · crash: server | — |
 | [A2](#a2) | A negative "Word Count" is saved and then refuses every abstract in the section, at submission and on "Title & Abstract" | ❓ | user-visible | — |
 | [A3](#a3) | "Will not be included in the indexing of the journal" changes nothing anywhere | ❓ | minor | — |
-| [A4](#a4) | By the code, the sections interface fails with a server error on its search-phrase and type filters | ❓ | latent | — |
-| [A5](#a5) | By the code, a press and a preprint server have no sections interface | ❓ | latent | — |
+| [A4](#a4) | The sections interface fails with a server error on its search-phrase and type filters | ❓ | latent · crash: server | — |
+| [A5](#a5) | A press and a preprint server have no sections interface | ❓ | latent | — |
 | [OMP4](#omp4) | A series' "Categories" boxes feed only the list's column | ❓ | minor | — |
 | [OMP6](#omp6) | A new series has no fixed place in the press's list of series | ❓ | minor | — |
 | [OPS3](#ops3) | A section's URL path is not checked: a shared path shows only one section's page, a path with a space or slash no page | ❓ | minor | — |
@@ -1064,28 +1080,29 @@ or drop it from the window.
 Basis: probe, 2026-09-25. <sup>f-a3</sup>
 
 <a id="a4"></a>
-**A4 — The sections interface fails on two of its filters** · ❓ · latent.
-No screen sends requests to this interface, so this entry is read from
-the code and cannot be seen on any page. By the code, a program reading a
-journal's sections through the install's programming interface may ask
-for a search phrase or a list of types, as the interface accepts, and
-both fail with a server error instead of a list; the plain list and a
-single section work.
+**A4 — The sections interface fails on two of its filters** · ❓ · latent · crash: server.
+The apps' own screens never call this interface, so no user of them
+meets this. A program reading a journal's sections through the install's
+programming interface (Rule 17) may ask for a search phrase or a list of
+types, as the interface accepts. Either request fails: the app answers a
+server error instead of a list, for a Journal Manager, an Editor and the
+Site Administrator alike. The plain list and a single section work.
 Question: should the two filters be implemented or removed? Lean: 🐞
 latent; remove the two filters, since sections have no type.
-Basis: code, 2026-09-25. <sup>f-a4</sup>
+Basis: probe, 2026-09-25. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — No sections interface on a press or a preprint server** · ❓ · latent.
-No screen sends requests to this interface, so this entry is read from
-the code and cannot be seen on any page. By the code, a journal answers
-its sections at the programming interface's sections address, while a
-press and a preprint server have no such address although their apps
-carry the same interface code.
+The apps' own screens never call this interface, so no user of them
+meets this. A journal answers its sections at the programming
+interface's sections address (Rule 17). A program asking a press or a
+preprint server at the same address gets "The requested URL was not
+recognized.", signed in with any role or not, although their apps carry
+the same interface code.
 Question: should a press and a preprint server offer the sections
 interface too? Lean: ❓ for the team; offer it on both, since the code is
 shared and nothing app-specific stops it.
-Basis: code, 2026-09-25. <sup>f-a5</sup>
+Basis: probe, 2026-09-25. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — A title of spaces only answers a raw code** · 🐞 · minor.
@@ -1118,6 +1135,29 @@ policy. Pressing a section's name opens "Make a Submission" showing only
 workflow settings to allow submissions." The page invites a submission it
 has just said it does not accept.
 Basis: probe, 2026-09-25. <sup>f-a8</sup>
+
+<a id="a9"></a>
+**A9 — The sections interface's refusals have no text** · 🐞 · latent.
+The apps' own screens never call this interface, so no user of them
+meets this. A program asking a journal's sections interface for one
+section (Rule 17c) by a number the journal has no section under (0
+included) gets "##api.sections.404.sectionNotFound##", and for another
+journal's section "##api.sections.400.contextsNotMatched##", where a
+sentence saying what went wrong should be: neither message has any text
+in the install.
+Basis: probe, 2026-09-25. <sup>f-a9</sup>
+
+<a id="a10"></a>
+**A10 — The sections interface fails where it should refuse** · 🐞 · latent · crash: server.
+The apps' own screens never call this interface, so no user of them
+meets this. Two requests make the app fail with a server error where a
+refusal is due (Rule 17c). A section asked for by a word instead of a
+number ("abc") fails with "The route … could not be found.", where a
+number the journal has no section under is refused as not found ([A9](#a9)).
+The list asked for by the Site Administrator at the site's own address,
+with no journal in it, fails instead of saying that a journal is needed;
+a visitor there is refused as elsewhere.
+Basis: probe, 2026-09-25. <sup>f-a10</sup>
 
 ### OMP
 
@@ -1284,7 +1324,9 @@ Code read 2026-09-25 at the checkouts' tips: ojs `d9b567efec`, omp
 with a screen was driven on 2026-09-25 on OJS, OMP and OPS, on scratch
 journals, presses and preprint servers with throwaway accounts (the seeded
 `publicknowledge` only read), as the notes below record. Rule 17, Actors
-row 6, A4 and A5 have no screen and rest on the code alone.
+row 6, A4, A5, A9 and A10, which the apps' own screens never reach, were
+checked by requests typed into a signed-in browser, as each role
+(note g).
 
 <a id="fn-a"></a>
 **a** — Settings tab: `templates/management/context.tpl` in each app, `<tab id="sections">` labelled `section.sections` "Sections" (OJS, OPS) or `series.series` "Series" (OMP), loading `grid.settings.sections.SectionGridHandler` (OJS, OPS) or `grid.settings.series.SeriesGridHandler` (OMP) with `load_url_in_div`. Page heading `manager.setup`: "Journal Settings" (OJS), "Server Settings" (OPS). One section per article: `publications.section_id` (OJS, OPS), `publications.series_id` (OMP, nullable). Class chain (RUNBOOK rule 8): the grid handlers, rows, cell providers and forms are app classes (OJS and OPS near-identical forks, OMP its own `series` set), all on `PKP\controllers\grid\settings\SetupGridHandler` and `PKP\controllers\grid\settings\sections\form\PKPSectionForm`; the section object is `PKP\section\PKPSection` with an app `Section` subclass each, schema `lib/pkp/schemas/section.json` overlaid by each app's `schemas/section.json`.
@@ -1305,7 +1347,13 @@ row 6, A4 and A5 have no screen and rest on the code alone.
 **f** — OPS `pages/preprints/index.php` routes op `index` to `APP\pages\preprints\PreprintsHandler` and `section` to `SectionsHandler`; both authorize with `ContextRequiredPolicy` and `OpsServerMustPublishPolicy` (denies a visitor only when `publishingMode` is `PUBLISHING_MODE_NONE`, which a server never stores, per Navigation menus & site chrome OPS2). `PreprintsHandler::index()`: published submissions of the context, `ORDERBY_DATE_PUBLISHED` descending (the collector's default direction), `itemsPerPage` (schema default 25) or `items_per_page` from the config, page n at `preprints/index/{n}`, with no check that the page exists (OPS5); `templates/frontend/pages/preprints.tpl` headed `archive.archives` "Archives" / `archive.archivesPageNumber` "Archives - Page {$pageNumber}", includes `frontend/components/archiveHeader.tpl` (the `searchForm_archive.tpl` search box and a link per category with no parent to `preprints/category/{path}`). Its empty branch tests `empty($publishedSubmissions)`, which is never true for the collector's `LazyCollection`, so an empty server gets the list branch with an empty list and no page links (OPS1); were the test fixed, the key it prints, `archive.noSubmissions`, is defined in no locale file of OPS or its `lib/pkp` and would show raw. `indexServer.tpl` includes the same archive header above `index.latestPreprints`.
 
 <a id="fn-g"></a>
-**g** — No screen of the apps sends a request to this interface: in 20 recorded runs over the three apps on 2026-09-25 no screen requested the sections address, and no `lib/ui-library` source calls it, so Rule 17, Actors row 6, A4 and A5 are read from the code and were not driven. `lib/pkp/api/v1/sections/SectionController.php`, mounted by `ojs/api/v1/sections/index.php` only (OMP and OPS have no `api/v1/sections` directory): base `sections`, `GET /` (`section.getMany`) and `GET /{sectionId}`; middleware `has.user` and `roleAuthorizer([ROLE_ID_SITE_ADMIN, ROLE_ID_MANAGER])`. `getMany()` dispatches the query parameters `typeIds` to `filterByTypeIds()` and `searchPhrase` to `searchPhrase()`, neither of which `PKP\section\Collector` defines (A4). `get()` answers `api.sections.404.sectionNotFound` for an unknown id and `api.sections.400.contextsNotMatched` for another context's section. The address is `{journal}/api/v1/sections`.
+**g** — None of the apps' screens calls this interface: in 20 recorded runs over the three apps on 2026-09-25 no request went to the sections address, none went there during the probe's own visits below, and no `lib/ui-library` source calls it. `lib/pkp/api/v1/sections/SectionController.php`, mounted by `ojs/api/v1/sections/index.php` only (OMP and OPS have no `api/v1/sections` directory, while `lib/pkp/api/v1/sections/SectionController.php` is present in both checkouts): base `sections`, `GET /` (`section.getMany`) and `GET /{sectionId}` (`whereNumber`); middleware `has.user` and `roleAuthorizer([ROLE_ID_SITE_ADMIN, ROLE_ID_MANAGER])`, which does not look at `permitSettings`. `getMany()` starts from `DEFAULT_COUNT` 30 and caps `count` at `MAX_COUNT` 100, dispatches `typeIds` to `filterByTypeIds()` and `searchPhrase` to `searchPhrase()`, neither of which `PKP\section\Collector` defines (A4), and filters by `getRequest()->getContext()->getId()` (A10). `get()` answers `__('api.sections.404.sectionNotFound')` for an unknown id and `__('api.sections.400.contextsNotMatched')` for another context's section (A9). The address is `{journal}/api/v1/sections`; a trailing slash answers the same. Live-probed 2026-09-25 (Actors row 6; Rules 17, 17a–17d), two runs on fresh scratch data with the same result on every read, GET only, typed into a signed-in browser as each role and as a visitor:
+- OJS, the list and one section: 200 to `admin`, `manager.maya`, `editor.diana`, and on a scratch journal to its Journal manager, Journal editor and a Production editor whose role had "Permit changes to Settings" unticked (Settings sent that Production editor to "The current role does not have access to this operation."); 401 to `sectioneditor.ana`, `copyeditor.carla`, `assistant.rita`, `reviewer.julia`, `author.alex`, `reader.rosa`, the scratch Section editor, Guest editor, Funding coordinator, Copyeditor, Reviewer, Author and Reader, a visitor, another journal's manager on this journal's address and this journal's manager on the other's. A refused role reads `"error":"user.authorization.roleBasedAccessDenied"` with "The current role does not have access to this operation.", a visitor "You are not authorized to access the requested resource.".
+- OJS, the list: `{itemsMax, items}` in `seq` order, the same 16 fields per item as a single section; an inactive section (made so in the section window, its "Inactive" box ticked after a reload) and an editor-only one included with `isInactive` / `editorRestricted` true. On 102 sections as manager: the plain list gave the first 30 with `itemsMax` 102; `count=100`, `101` and `150` gave 100; `offset=30` gave 31–60; `count=100&offset=100` gave the last two. On 4 sections: `count=0` and `count=abc` gave `[]`; `count=-1` and `offset=-2` gave all four; `offset=99` gave `[]`; unknown parameters were ignored.
+- OJS, the filters (A4): `?searchPhrase=Beta`, an empty `?searchPhrase=`, `?typeIds=1`, `?typeIds=1,2` and `?typeIds[]=1&typeIds[]=2` answered 500, as manager, editor and admin, with `Call to undefined method PKP\section\Collector::searchPhrase()` / `::filterByTypeIds()`; a refused role and a visitor got 401 first; the same parameters on a single section were ignored (200).
+- OJS, one section: an unknown id and id 0 answered 404 `##api.sections.404.sectionNotFound##`, another journal's section 400 `##api.sections.400.contextsNotMatched##` (A9); `/sections/abc` 500 "The route {journal}/api/v1/sections/abc could not be found." (A10).
+- OJS, the site's address (A10): `index/api/v1/sections` answered the admin 500 "Call to a member function getId() on null" and a visitor 401; `index/api/v1/sections/1` answered the admin 400 `##api.sections.400.contextsNotMatched##`.
+- OMP and OPS (A5): the address and `/1` answered 404 `{"error":"api.404.endpointNotFound","errorMessage":"The requested URL was not recognized."}` on `publicknowledge` to every roster account (OMP: admin, maya, diana, ana, carla, rita, julia, alex, rosa; OPS: admin, maya, ana, rita, alex, rosa) and a visitor, and on a scratch press and server to the manager, an Author, the OPS Moderator, admin and a visitor, with `?searchPhrase=a` too, and at the site's address.
 
 <a id="fn-h"></a>
 **h** — OJS/OPS `SectionGridHandler::initialize()`: title `section.sections` "Sections"; grid action `addSection` `manager.sections.create` "Create Section" (an `AjaxModal` of the same title); columns `common.title` "Title", `user.role.editors` "Editors" (full names from `SubEditorsDAO::getBySubmissionGroupIds()`, joined by `common.commaListSeparator`, or `common.none` "None"), `common.inactive` "Inactive" (`controllers/grid/common/cell/selectStatusCell.tpl`, a checkbox whose click runs the cell action); rows sorted by `seq`. OMP `SeriesGridHandler::initialize()`: title `catalog.manage.series` "Series", action `grid.action.addSeries` "Add Series", columns "Title" (`getLocalizedTitle()` with the prefix), `grid.category.categories` "Categories" (`Repo::section()->getAssignedCategories()`), "Editors", "Inactive". Rows: `SectionGridRow` / `SeriesGridRow` add `grid.action.edit` "Edit" and `grid.action.delete` "Delete". `OrderGridItemsFeature` adds `grid.action.order` "Order" (finish controls `common.done` "Done" and `grid.action.cancelOrdering` "Cancel ordering"). Empty table `grid.noItems` "No Items".
@@ -1437,10 +1485,10 @@ each state the scenarios start from was reached on a scratch context.
 **f-a3** — fn k: `meta_indexed` has no reader outside the native import/export filters, and OPS's native export writes none. Live-probed 2026-09-25 (OJS, OPS): note td16.
 
 <a id="fn-f-a4"></a>
-**f-a4** — No screen sends this request (fn g), so the finding is read from the code and was not driven. `PKP\section\Collector` defines `filterByContextIds`, `filterByTitles`, `filterByAbbrevs`, `excludeEditorOnly`, `excludeInactive`, `withPublished`, `limit`, `offset`; calling an undefined method fails the request. Carried from `docs/tracking/UNASSIGNED.md` (dead-code note 3). Code read 2026-09-25.
+**f-a4** — fn g. `PKP\section\Collector` defines `filterByContextIds`, `filterByTitles`, `filterByAbbrevs`, `excludeEditorOnly`, `excludeInactive`, `withPublished`, `limit`, `offset`; calling an undefined method throws, and `APIHandler` turns the error into a 500 carrying its message. Carried from `docs/tracking/UNASSIGNED.md` (dead-code note 3). Live-probed 2026-09-25, two runs: note g, the filters.
 
 <a id="fn-f-a5"></a>
-**f-a5** — No screen sends this request (fn g), so the finding is read from the code and was not driven; `docs/tracking/UNASSIGNED.md` dead-code note 5 (the mount gap). Code read 2026-09-25.
+**f-a5** — fn g; `docs/tracking/UNASSIGNED.md` dead-code note 5 (the mount gap). Live-probed 2026-09-25, two runs: note g, OMP and OPS.
 
 <a id="fn-f-a6"></a>
 **f-a6** — fn i and m: `manager.setup.form.section.nameRequired` and `manager.setup.form.series.nameRequired` are defined in no `.po` file of the three apps or `lib/pkp`; the client-side required check does not trim, the server's `FormValidatorLocale` does, and its message goes to the page's notice, not to the field. Live-probed 2026-09-25 (all three apps): note td2.
@@ -1450,6 +1498,12 @@ each state the scenarios start from was reached on a scratch context.
 
 <a id="fn-f-a8"></a>
 **f-a8** — The per-section line prints for any signed-in reader (`{if $isUserLoggedIn}`, fn e), whatever the journal's `disableSubmissions`; the notice comes from the core template on that setting. The start form's message is the Submission wizard's A3. Live-probed 2026-09-25 (OJS and OPS, two runs): note td12.
+
+<a id="fn-f-a9"></a>
+**f-a9** — fn g: `SectionController::get()` passes `api.sections.404.sectionNotFound` and `api.sections.400.contextsNotMatched` to `__()`, and neither key is defined in any locale file of the OJS checkout or its `lib/pkp` (no `api.sections.*` msgid), so the translator returns the key between `##`. Live-probed 2026-09-25, two runs: note g, one section and the site's address.
+
+<a id="fn-f-a10"></a>
+**f-a10** — fn g. A word as the id misses the route's `whereNumber('sectionId')`; `APIHandler` maps only a `NotFoundHttpException` to 404 `api.404.endpointNotFound`, and this route miss arrives as another exception, so it answers 500 with the exception's message (handler-wide by the code; no other interface was driven). At the site's address `getRequest()->getContext()` is null and `getMany()` calls `getId()` on it. Live-probed 2026-09-25, two runs: note g, one section and the site's address; OMP and OPS answered 404 at the same site address.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — fn h, k, m, n, p: OMP's form, grid handler and `ContextService`; OMP's `submissions.tpl` override (fn e). Live-probed 2026-09-25: notes td9, td10, td11, td12.

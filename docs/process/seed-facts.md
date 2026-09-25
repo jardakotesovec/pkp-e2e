@@ -1095,3 +1095,6 @@ config-file settings.
   first whatever "Order of monographs" says. A book's page shows the
   series' full name and ISSNs under "Series" and links the series page.
   2026-09-25 (U17 claim check K6).
+- {OJS} `publicknowledge`'s sections have ids 1 "Articles" and 2
+  "Reviews" (the sections programming interface's list). 2026-09-25
+  (U17 claim check K7).
