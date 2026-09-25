@@ -172,7 +172,11 @@ behind a line; that scratch is deleted after review.
 - The site's "Enable institutional statistics" (Administration › Site
   Settings › Statistics) is unticked on a fresh install, so no side menu
   shows "Institutions"; the page still opens by address. All three apps,
-  2026-09-23 (U07 claim check K1, `inst-site-statistics-*`).
+  2026-09-23 (U07 claim check K1, `inst-site-statistics-*`). The exception
+  is an OJS journal whose payments are enabled: its managers' side menu
+  shows "Institutions" before "Payments" whatever the statistics boxes
+  (U08 Rule 30). OJS, 2026-09-25 (U51 claim check K3,
+  `by-35-mg-institutions`).
 - "Consider role in masthead list" (Settings › Users & Roles › Roles › a
   role's "Edit") arrives ticked on Journal editor, Section editor, Reviewer
   and Editorial Board Member (OJS); Press editor, Series editor, External
@@ -232,6 +236,10 @@ behind a line; that scratch is deleted after review.
   runs until a test drains the queue. No screen switches it. Effects seen:
   a republished article stays "No Results" until the queue ran, 2026-09-02
   (U15 Side effects); review reminders cannot fire, 2026-08-02 (U27).
+  Seeded published articles likewise reach the search index only when the
+  queued jobs run: the Search page answers "No Results" for a seeded title
+  until then. OJS, 2026-09-25 (U51 claim check K2, `sr-visitor-01-search`
+  vs `ro-visitor-19-search`).
 - Outbound HTTP is dead: `[proxy]` points at `127.0.0.1:9`, so every
   server-side external call fails fast (ORCID, reCAPTCHA, DOI registration,
   update checks); Mailpit and other `127.0.0.1` traffic are unaffected. No
@@ -790,6 +798,12 @@ config-file settings.
   "Payments" page. Live-driven 2026-09-20, OJS and OMP
   (`.reports/U34/cc-K4.md`; `pay-mgr-settings-payments-reloaded`,
   `pay-mgr-payment-types-labels`, `omppay-mgr-payments-url`).
+- {OJS} On a fresh journal the "Payments" page's "Subscription Policies"
+  tab has an empty contact, "Full expiry", its four lists at "Disabled"
+  and every box unticked; the payment boxes are greyed with the "Note: To
+  enable these options…" line. Settings › Users & Roles › Roles lists
+  "Subscription Manager" at permission level "Subscription Manager".
+  Live-driven 2026-09-25 (U51 claim check K1).
 - A scratch user's `givenName`/`familyName` are what the Participants panel
   and the Composer's "To" chips show; a discussion's "Created by" and the
   discussion window's "Message from" show the *username*. Workflow ›

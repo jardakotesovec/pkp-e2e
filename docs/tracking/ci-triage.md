@@ -93,7 +93,7 @@ trips.
   The U40 OMP file keeps traces on failure since 2026-09-15.
   **Baselines carry `70b0892042` since 2026-09-16** (sync); the U40 OMP
   `blur()` stays (a harmless commit), app-changes row 9 (c) is closed on
-  the tips, (a) and (b) stay open. Again 2026-09-25 (U50 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U50/final-run-omp.log`, `alone-omp-reds.log`).
+  the tips, (a) and (b) stay open. Again 2026-09-25 (U50 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U50/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U51 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U51/final-run-omp.log`, `alone-omp-reds.log`).
 - **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
   Required by me" row or count read exceeds its 10 s wait in full-suite
   runs and passes alone. Last incidents: S1 red in two consecutive local
@@ -567,7 +567,7 @@ trips.
   (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
   2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it), and in the U36 session's, 2026-09-23, beside U03 S5, red alone too (`.reports/U36/final-run-ops.log`, `alone-ops-U40S1.log`; serial and solo green alone), and in the U38 session's, 2026-09-24, beside U49 S6, red alone too (`.reports/U38/final-run-ops.log`; serial and solo green alone). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
-  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`). Again 2026-09-24 in the U44 session's OPS final on a reset database at auto workers, the only red of 215; serial and solo 13 green alone (`.reports/U44/final-run-ops.log`, `alone-ops-serial-solo.log`). Again 2026-09-25 in the U48 session's OPS final on a reset database at four workers, the only red of 243; serial and solo 13 green alone (`.reports/U48/final-run-ops.log`, `serial-solo-ops.log`). Again 2026-09-25 (U50 session): red in the OPS final and red alone, as before (`.reports/U50/final-run-ops.log`, `alone-ops-reds.log`).
+  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`). Again 2026-09-24 in the U44 session's OPS final on a reset database at auto workers, the only red of 215; serial and solo 13 green alone (`.reports/U44/final-run-ops.log`, `alone-ops-serial-solo.log`). Again 2026-09-25 in the U48 session's OPS final on a reset database at four workers, the only red of 243; serial and solo 13 green alone (`.reports/U48/final-run-ops.log`, `serial-solo-ops.log`). Again 2026-09-25 (U50 session): red in the OPS final and red alone, as before (`.reports/U50/final-run-ops.log`, `alone-ops-reds.log`). Again 2026-09-25 (U51 session): red in the OPS final and red alone, as before (`.reports/U51/final-run-ops.log`, `alone-ops-reds.log`).
 - **Profile save response not seen in 30 s** (U03 S5, "cancel, and
   reject, an email change", OPS, once: 2026-09-23, the U36 session's OPS
   final on a reset database on the Mac at auto workers,
@@ -606,7 +606,7 @@ trips.
   Again 2026-09-24 in the U10 session's OJS final on a reset database at
   eight workers, beside U14 S5, and in its second OMP final, the only red
   of 350; green alone on both (`.reports/U10/final-run-ojs-attempt1.log`,
-  `final-run-omp-attempt2.log`, `alone-ojs-reds.log`, `alone-omp-reds-2.log`). Again 2026-09-25 (U13 session, VM): OMP, beside U14 S5 in the OMP final on a reset database, green alone (`.reports/U13/final-run-omp.log`, `alone-omp-reds.log`). 2026-09-25: red in the same guard run beside U30 S4, green alone (`.reports/sync/s25/guard/ojs-reds-alone.log`).
+  `final-run-omp-attempt2.log`, `alone-ojs-reds.log`, `alone-omp-reds-2.log`). Again 2026-09-25 (U13 session, VM): OMP, beside U14 S5 in the OMP final on a reset database, green alone (`.reports/U13/final-run-omp.log`, `alone-omp-reds.log`). 2026-09-25: red in the same guard run beside U30 S4, green alone (`.reports/sync/s25/guard/ojs-reds-alone.log`). Again 2026-09-25 (U51 session, Mac, reset database, auto workers): OJS, beside U14 S5 in the OJS final, green alone (`.reports/U51/final-run-ojs.log`, `alone-ojs-reds.log`).
 - **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5,
   OJS, once: 2026-09-17, the VM's first U14 final at four workers,
   `.reports/U14/final-run-ojs-attempt1.log`). The send request answered
@@ -648,7 +648,7 @@ trips.
   OMP final (the only red of 350; the second OMP final's only red was
   U36 S9), reset databases at eight workers; green
   alone on both (`.reports/U10/final-run-{ojs,omp}-attempt1.log`,
-  `alone-{ojs,omp}-reds.log`). Again 2026-09-25 (U13 session, VM, reset databases at workers auto): red in all three finals, green alone on all three (`.reports/U13/final-run-{ojs,omp,ops}.log`, `alone-<app>-reds.log`). Again 2026-09-25 (U50 session, Mac, reset databases, auto workers): OJS and OMP finals, green alone on both (`.reports/U50/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`).
+  `alone-{ojs,omp}-reds.log`). Again 2026-09-25 (U13 session, VM, reset databases at workers auto): red in all three finals, green alone on all three (`.reports/U13/final-run-{ojs,omp,ops}.log`, `alone-<app>-reds.log`). Again 2026-09-25 (U50 session, Mac, reset databases, auto workers): OJS and OMP finals, green alone on both (`.reports/U50/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`). Again 2026-09-25 (U51 session, Mac, reset databases, auto workers): red in all three finals (OJS beside U36 S9 and U13 S3, OMP beside U40 S6, OPS beside U40 S1), green alone on all three (`.reports/U51/final-run-{ojs,omp,ops}.log`, `alone-{ojs,omp,ops}-reds.log`).
 - **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
   maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
   guidelines typed by the manager missing for the reviewer, S7
@@ -749,7 +749,7 @@ trips.
   visible after the unpublish (line 256), green alone 3 of 3, error lines
   in `.reports/pr13359/v2-ojs-serial-solo.log`.
   **Watch condition**: a red in a full run or on CI; keep the error
-  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`). Again 2026-09-25 (U47 session): U08 S8 red on OJS and OPS in the `<app>-solo` projects run alone after the finals ("Navigation menu item was successfully added" not found), green alone right after on both (`.reports/U47/alone-{ojs,ops}-serial-solo.log`, `alone2-{ojs,ops}-U08.log`). Again 2026-09-25 (U13 session, VM): OJS U08 S8 red in the `ojs-solo` project run alone after the OJS final, green alone right after (`.reports/U13/serial-solo-ojs.log`, `alone-ojs-U08S8.log`). Again 2026-09-25 (U50 session): OMP U08 S8 red in `omp-solo` run alone after the OMP final, green alone right after (`.reports/U50/alone-omp-serial-solo.log`, `alone2-omp-U08S8.log`).
+  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`). Again 2026-09-25 (U47 session): U08 S8 red on OJS and OPS in the `<app>-solo` projects run alone after the finals ("Navigation menu item was successfully added" not found), green alone right after on both (`.reports/U47/alone-{ojs,ops}-serial-solo.log`, `alone2-{ojs,ops}-U08.log`). Again 2026-09-25 (U13 session, VM): OJS U08 S8 red in the `ojs-solo` project run alone after the OJS final, green alone right after (`.reports/U13/serial-solo-ojs.log`, `alone-ojs-U08S8.log`). Again 2026-09-25 (U50 session): OMP U08 S8 red in `omp-solo` run alone after the OMP final, green alone right after (`.reports/U50/alone-omp-serial-solo.log`, `alone2-omp-U08S8.log`). Again 2026-09-25 (U51 session, Mac): OJS U08 S8 ("Navigation menu item was successfully updated" not visible in 10 s) and U15 S5 ("No Results" not visible in 10 s) red in `ojs-solo` run alone right after the OJS final, `ojs-serial` 21 green; the solo project green alone right after, 4 of 4; error contexts kept (`.reports/U51/alone-ojs-serial-solo.log`, `pw-alone-ojs-serial-solo/`, `alone2-ojs-solo.log`).
 - **"Add Reviewer" search never rendered** (U28 S11, OJS, once). In
   the U42 session's OJS final on a reset database at auto workers on the
   Mac (2026-09-24, `.reports/U42/final-run-ojs.log`), "read an earlier
@@ -809,7 +809,7 @@ trips.
   `omp-solo` run alone after the finals, the same "Announcement type
   added." notice not found at spec line 378, green alone right after
   (`.reports/U10/serial-solo-omp.log`, `alone-omp-U12S6.log`); the trace
-  read is the next daily session's. Again 2026-09-25 (U47 session, OJS `ojs-serial` run alone after the OJS final: "Announcement type removed." not found; the output is kept at `.reports/U47/alone-ojs-serial-solo/`). First sighting the same day of OMP U39 S2 "the Publisher Library on the Settings tab": the 180 s test timeout waiting on a "Press Library" row in the OMP final, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U50 session, Mac): U12 S6 red in the `<app>-serial` project run alone after the finals on all three apps ("Announcement type added." not found), green alone right after on all three (`.reports/U50/alone-{ojs,omp,ops}-serial-solo.log`, `alone2-{ojs,omp,ops}-U12S6.log`).
+  read is the next daily session's. Again 2026-09-25 (U47 session, OJS `ojs-serial` run alone after the OJS final: "Announcement type removed." not found; the output is kept at `.reports/U47/alone-ojs-serial-solo/`). First sighting the same day of OMP U39 S2 "the Publisher Library on the Settings tab": the 180 s test timeout waiting on a "Press Library" row in the OMP final, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U50 session, Mac): U12 S6 red in the `<app>-serial` project run alone after the finals on all three apps ("Announcement type added." not found), green alone right after on all three (`.reports/U50/alone-{ojs,omp,ops}-serial-solo.log`, `alone2-{ojs,omp,ops}-U12S6.log`). Again 2026-09-25 (U51 session, Mac): OPS U12 S6 red in `ops-serial` run alone after the OPS final ("Announcement type removed." not found), green alone right after (`.reports/U51/alone-ops-serial-solo.log`, `alone2-ops-U12S6.log`).
 - **U02 S6's consent line read on screen before anything is ticked**
   (OPS, once: 2026-09-24, push run 35987189615 at `1cd4325`, shard 1/3,
   green on the retry). `register.contextConsentLineOnScreen(name)` read
@@ -859,7 +859,7 @@ trips.
   (ojs `71bb244152`); U13 was built at the ojs tip `d9b567efec`, and CI
   (at the tips) reads every U13 test green. **Watch condition**: the
   next sync that moves the ojs baseline; red there means the helper's
-  later-version branch needs the details window too. Again 2026-09-25 (U50 session, same baselines): red in the OJS final and red alone (`.reports/U50/final-run-ojs.log`, `alone-ojs-reds.log`).
+  later-version branch needs the details window too. Again 2026-09-25 (U50 session, same baselines): red in the OJS final and red alone (`.reports/U50/final-run-ojs.log`, `alone-ojs-reds.log`). Again 2026-09-25 (U51 session): red in the OJS final and red alone (`.reports/U51/final-run-ojs.log`, `alone-ojs-reds.log`).
 
 - **An OPS preprint's keywords in another order** (U13 S1 `@smoke`,
   OPS, once). The U16 OPS final on a used database (2026-09-25,

@@ -11,7 +11,8 @@
  *
  * @brief OJS submission scenario overlays: `section` (abbrev; defaults to the
  * journal's first section), for published scenarios `issue`
- * ({volume, number, year} matching a seeded issue), and `jats` (U48: the
+ * ({volume, number, year} matching a seeded issue) with `accessStatus`
+ * (U51: the issue's "Open Access" box for the article), and `jats` (U48: the
  * "JATS XML" publication page's "Upload" and "Make available with
  * publication" box).
  */
@@ -55,6 +56,27 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
     protected function parsePublishOverlay(Context $context, Spec $root): array
     {
         $issueSpec = $root->child('issue');
+        // `accessStatus` (U51): the issue's "Table of Contents" tab's "Open
+        // Access" box for this article, `open` (ticked) or `issueDefault`
+        // (unticked, as every article arrives). The column is there only on
+        // a journal that requires subscriptions, in an issue whose "Access
+        // status" is "Subscription", and lists the articles in the issue,
+        // so the key needs `issue` and `published: true`.
+        $accessStatus = null;
+        if ($root->has('accessStatus')) {
+            $statuses = ['issueDefault' => \APP\submission\Submission::ARTICLE_ACCESS_ISSUE_DEFAULT, 'open' => \APP\submission\Submission::ARTICLE_ACCESS_OPEN];
+            $word = $root->get('accessStatus');
+            if (!is_string($word) || !isset($statuses[$word])) {
+                throw new SpecException('accessStatus', 'accessStatus must be open (the "Open Access" box ticked on the issue\'s "Table of Contents" tab) or issueDefault (unticked)');
+            }
+            if (!$issueSpec || !$root->get('published', false)) {
+                throw new SpecException('accessStatus', 'The "Open Access" box is on the "Table of Contents" tab of the article\'s issue: accessStatus needs issue and published: true');
+            }
+            if ((int) $context->getData('publishingMode') !== \APP\journal\Journal::PUBLISHING_MODE_SUBSCRIPTION) {
+                throw new SpecException('accessStatus', 'The "Open Access" column shows only on a journal that requires subscriptions');
+            }
+            $accessStatus = $statuses[$word];
+        }
         if (!$issueSpec) {
             return [];
         }
@@ -71,10 +93,29 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
                 ($number === null || (string) $issue->getData('number') === (string) $number) &&
                 ($year === null || (int) $issue->getData('year') === (int) $year)
             ) {
-                return ['issueId' => $issue->getId()];
+                if ($accessStatus !== null && (int) $issue->getData('accessStatus') !== \APP\issue\Issue::ISSUE_ACCESS_SUBSCRIPTION) {
+                    throw new SpecException('accessStatus', 'The "Open Access" column shows only in an issue whose "Access status" is "Subscription"');
+                }
+                return ['issueId' => $issue->getId(), 'accessStatus' => $accessStatus];
             }
         }
         throw new SpecException('issue', 'No issue matches the given volume/number/year in this context');
+    }
+
+    /**
+     * The "Open Access" box (U51), after the publish: the "Table of
+     * Contents" tab's toggle, TocGridHandler::setAccessStatus, whose whole
+     * write is Repo::publication()->edit of the current publication's
+     * accessStatus to the posted status.
+     */
+    protected function afterPublish(Context $context, int $submissionId, array $overlayPlan): void
+    {
+        if (($overlayPlan['accessStatus'] ?? null) === null) {
+            return;
+        }
+        $submission = Repo::submission()->get($submissionId);
+        $publication = $submission->getCurrentPublication();
+        Repo::publication()->edit($publication, ['accessStatus' => $overlayPlan['accessStatus']]);
     }
 
     protected function beforePublish(Context $context, PKPSubmission $submission, PKPPublication $publication, array $overlayPlan): void

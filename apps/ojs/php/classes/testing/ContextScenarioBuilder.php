@@ -11,7 +11,8 @@
  *
  * @brief OJS scratch-journal scenario (a fresh journal gets its default
  * "Articles" section from the Context::add hook; user section assignments
- * resolve by abbrev; the issues[] overlay, U08).
+ * resolve by abbrev; the issues[] overlay, U08; the subscription keys,
+ * U51).
  */
 
 namespace APP\testing;
@@ -55,18 +56,35 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
      * `issues[]` (U08): the bootstrap payload's issues list, same shape,
      * plus `coverImage` (U13), `datePublished` and `galleys[]` (U50); the
      * galleys' "Language" is checked against the new journal's form
-     * languages (primary first).
+     * languages (primary first); `accessStatus` / `openAccessDate` (U51)
+     * need the journal to require subscriptions. And the subscription keys
+     * (U51, SubscriptionSeeder): `payments`, the "Subscription Policies"
+     * passthroughs, `institutions[]`, `subscriptionTypes[]`,
+     * `subscriptions[]`.
      */
     protected function parseOverlay(Spec $root): array
     {
         $primaryLocale = (string) ($this->contextParams['primaryLocale'] ?? 'en');
         $formLocales = array_values(array_unique(array_merge([$primaryLocale], (array) ($this->contextParams['supportedFormLocales'] ?? []))));
-        return ['issues' => BootstrapSeeder::parseIssues($root, withCover: true, formLocales: $formLocales)];
+        $accessTab = ($this->formSettingsPlan['publishingMode'] ?? null) === \APP\journal\Journal::PUBLISHING_MODE_SUBSCRIPTION;
+        return [
+            'issues' => BootstrapSeeder::parseIssues($root, withCover: true, formLocales: $formLocales, accessTab: $accessTab),
+            'subscriptions' => SubscriptionSeeder::parse($root, $primaryLocale, array_merge(['admin'], array_column((array) $root->get('users', []), 'username'))),
+        ];
     }
 
-    /** The bootstrap's own issue path; the response lists the issues. */
+    /**
+     * The subscription screens first (settings, institutions, types, then
+     * subscriptions, after users[] so a subscriber exists), then the
+     * bootstrap's own issue path; the response lists what was created.
+     */
     protected function executeOverlay(Context $context, array $overlayPlan): array
     {
-        return ['issues' => BootstrapSeeder::addIssues($context, $overlayPlan['issues'] ?? [], asTheForm: true)];
+        $response = [];
+        if (!empty($overlayPlan['subscriptions'])) {
+            $response = SubscriptionSeeder::execute($context, $overlayPlan['subscriptions']);
+            $context = \APP\core\Application::getContextDAO()->getById($context->getId());
+        }
+        return $response + ['issues' => BootstrapSeeder::addIssues($context, $overlayPlan['issues'] ?? [], asTheForm: true)];
     }
 }

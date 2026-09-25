@@ -117,6 +117,9 @@
  *   "Access", "Publishing Mode" (U50; the OJS AccessForm's radio). Journal
  *   only: OMP and OPS answer 400. Saved before the issues[] overlay, so a
  *   seeded issue is born with the access status the mode gives it.
+ * - delayedOpenAccessDuration (0–60) — the same tab's "Delayed Open Access"
+ *   list (U51), with publishingMode subscription only; read when a seeded
+ *   issue is published.
  * - enableAnnouncements (bool), announcementsIntroduction (localized),
  *   numAnnouncementsHomepage (int ≥ 0 or null) — Settings › Website › Setup ›
  *   "Announcements" tab's three fields (U12; PKPAnnouncementSettingsForm, a
@@ -238,8 +241,12 @@
  *   image" upload and the "Issue Data" tab's alt text (BootstrapSeeder);
  *   its datePublished (U50) the form's "Date Published" box, and its
  *   galleys[] {label*, file*, locale?} (U50) the "Issue Galleys" tab's
- *   "Create Issue Galley" window (the grid's own IssueGalleyForm).
- *   OMP and OPS read no overlay, so the key answers 400 there.
+ *   "Create Issue Galley" window (the grid's own IssueGalleyForm); its
+ *   accessStatus / openAccessDate (U51) the issue's "Access" tab.
+ * - OJS subscription keys (U51, APP\testing\SubscriptionSeeder): payments,
+ *   the "Subscription Policies" fields, institutions[], subscriptionTypes[]
+ *   and subscriptions[], each the save of its screen, before issues[].
+ *   OMP and OPS read no overlay, so the keys answer 400 there.
  */
 
 namespace PKP\testing;
@@ -288,6 +295,15 @@ abstract class PKPContextScenarioBuilder
      * before anything is written (OJS issue galleys' "Language", U50).
      */
     protected array $contextParams = [];
+
+    /**
+     * The parsed settings passthroughs of the build in progress (setting
+     * name → value, as saveFormSettings will write them), set before the
+     * overlay's parse phase so an app overlay can refuse what the screens
+     * offer only under a setting (OJS: an issue's "Access" tab exists only
+     * on a journal that requires subscriptions, U51).
+     */
+    protected array $formSettingsPlan = [];
 
     public function __construct()
     {
@@ -382,6 +398,7 @@ abstract class PKPContextScenarioBuilder
         $primaryLocale = (string) $contextParams['primaryLocale'];
         $reviewSettings = $this->parseReviewSettings($root, $primaryLocale);
         $intakeSettings = $this->parseIntakeSettings($root, $primaryLocale);
+        $this->formSettingsPlan = $intakeSettings['settings'];
         $reviewFormPlans = $this->parseReviewForms($root, $primaryLocale);
         $pluginPlans = $this->parsePlugins($root);
         $rolePlans = $this->parseRoleOptions($root);
@@ -1684,6 +1701,27 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['publishingMode'] = $modes[$value];
             $specKeys['publishingMode'] = 'publishingMode';
+        }
+
+        if ($root->has('delayedOpenAccessDuration')) {
+            // The same tab's "Delayed Open Access" list (U51; the OJS
+            // AccessForm's FieldSelect over the journal schema's integer:
+            // 0 "Disabled", then 1 to 60 "{n} Months"), shown only while
+            // the subscription radio is selected, so the key needs
+            // `publishingMode: subscription` in the same request. The form
+            // posts the choice form-encoded with the radio and "OAI"; the
+            // key writes this row alone. Read by "Publish Issue" (the
+            // issues[] overlay's publish branch).
+            $hasProperty('delayedOpenAccessDuration') || throw new SpecException('delayedOpenAccessDuration', 'delayedOpenAccessDuration is not a setting of this app\'s context schema (the "Delayed Open Access" list exists on a journal only)');
+            $value = $root->get('delayedOpenAccessDuration');
+            if (!is_int($value) || $value < 0 || $value > 60) {
+                throw new SpecException('delayedOpenAccessDuration', 'delayedOpenAccessDuration must be a whole number of months from 0 ("Disabled") to 60, as the "Delayed Open Access" list offers');
+            }
+            if (($settings['publishingMode'] ?? null) !== \APP\journal\Journal::PUBLISHING_MODE_SUBSCRIPTION) {
+                throw new SpecException('delayedOpenAccessDuration', 'The "Delayed Open Access" list shows only while "Publishing Mode" requires subscriptions: give publishingMode: subscription in the same request');
+            }
+            $settings['delayedOpenAccessDuration'] = $value;
+            $specKeys['delayedOpenAccessDuration'] = 'delayedOpenAccessDuration';
         }
 
         // Settings › Website › Setup › "Announcements"

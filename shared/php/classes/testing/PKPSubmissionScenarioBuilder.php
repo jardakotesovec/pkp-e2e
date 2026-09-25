@@ -423,7 +423,15 @@ abstract class PKPSubmissionScenarioBuilder
     {
     }
 
-    /** Parse app publish-overlay keys (OJS: issue). */
+    /**
+     * App hook after publish (OJS: the issue's "Table of Contents" tab's
+     * "Open Access" box, U51), with the publish overlay's plan.
+     */
+    protected function afterPublish(Context $context, int $submissionId, array $overlayPlan): void
+    {
+    }
+
+    /** Parse app publish-overlay keys (OJS: issue, accessStatus). */
     protected function parsePublishOverlay(Context $context, Spec $root): array
     {
         return [];
@@ -997,6 +1005,7 @@ abstract class PKPSubmissionScenarioBuilder
                 $submission = Repo::submission()->get($submission->getId());
                 Repo::submission()->updateStatus($submission);
                 Repo::submission()->updateCurrentPublication($submission);
+                $this->afterPublish($context, $submissionId, $publishOverlayPlan);
             }
 
             // Each format's "Not Available" › OK, after the publish, as the

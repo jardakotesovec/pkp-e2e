@@ -182,6 +182,22 @@ Keys:
   journal that requires subscriptions the link reads "Requires
   Subscription PDF" (U50 harness, 2026-09-25). Like `coverImage`, both
   keys are the context scenario's alone (the bootstrap answers 400).
+  An entry's `accessStatus` (`open` "Open access" or `subscription`
+  "Subscription") and `openAccessDate` (`YYYY-MM-DD`, a past date
+  allowed, as the box allows it) are the issue's "Issue Management" ›
+  "Access" tab › "Save" (U51), run through the grid's own form after the
+  issue is created and published. The tab arrives with the issue's
+  stored status and date, and what the entry does not name is saved as
+  the tab shows it: `accessStatus: 'open'` on an issue published under
+  "Delayed Open Access" keeps its open access date, as on screen. Saved
+  after "Publish Issue", so the entry wins over "Delayed Open Access".
+  The tab exists only on a journal that requires subscriptions, so
+  either key without `publishingMode: subscription` in the same request
+  is a 400, and so is another word or date shape. With
+  `delayedOpenAccessDuration` set (below), a `published` entry is
+  published as "Publish Issue" publishes it: "Subscription" with the
+  open access date that many months from today (U51 harness,
+  2026-09-25).
 - `users[]`: throwaway accounts. Each entry takes `username` and `roles`
   (both required, roles non-empty), `givenName`, `familyName`, `email`
   (default `<username>@mail.test`), `password` (default: the username
@@ -410,6 +426,18 @@ Keys:
   `subscription` and `none`, "Open access" under `open`. Any other value
   (an integer included) is a 400; OMP and OPS answer 400 on the key
   (U50 harness, 2026-09-25).
+- `delayedOpenAccessDuration` (OJS only, a whole number 0–60): the same
+  tab's "Delayed Open Access" list, `0` "Disabled", `6` "6 Months", saved
+  as that form saves (the tab posts
+  `publishingMode=1&delayedOpenAccessDuration=6&enableOai=true`; the key
+  writes this row alone). The list shows only while the subscription
+  radio is selected, so the key needs `publishingMode: subscription` in
+  the same request (400 otherwise). It is saved before `issues[]`, and
+  every issue seeded `published` is then published the way "Publish
+  Issue" publishes it: "Subscription" with the open access date that
+  many months from today at midnight (`issues[]` above). A fresh journal
+  has no row, which reads as "Disabled". Out of range or not a whole
+  number: 400. OMP and OPS answer 400 (U51 harness, 2026-09-25).
 - `submitWithCategories` (boolean): the "Categories" radios of Settings ›
   Workflow › Submission › "Metadata", under "Should the submitting author
   be asked to select a category when they make a new submission?": `true`
@@ -712,6 +740,100 @@ Keys:
   seeds distinct titles it finds by search, or adds the newest by hand
   (U12 claim check K4, 2026-09-17).
 
+The subscription keys (OJS only; OMP and OPS answer 400 on each). Each
+is the save of the screen that makes the state, run through that
+screen's own code as `admin`, in this order after `users[]` and before
+`issues[]`: the two payment screens, "Subscription Policies", the
+institutions, the types, the subscriptions (U51 harness, 2026-09-25,
+driven against the screens with every row equal). A refusal that only
+the window itself can make (a malformed email or domain, a second
+subscription for one user, dates on a non-expiring type, a missing
+membership, an institution with neither IP range nor domain, an invalid
+currency or IP range) is a 400 with the window's own message, but it
+comes after the journal row exists, so the bare journal stays behind
+under the tag; every other refusal comes first and leaves nothing.
+
+- `payments`: `{enabled?, currency?, paymentPluginName?,
+  manualInstructions?}` is Settings › Distribution › "Payments" ›
+  "Save" (`enabled` the "Enable" box, default `true`; `currency` a code
+  of the "Currency" list, e.g. `USD`; `paymentPluginName`
+  `ManualPayment` "Manual Fee Payment" or `PaypalPayment`;
+  `manualInstructions` the "Manual Payment Instructions" box). The key
+  sends what the form sends, the PayPal boxes as they arrive (empty,
+  "Test Mode" unticked), so the PayPal plugin stores its empty settings
+  too, as after a by-hand save. `{publicationFee?, purchaseArticleFee?,
+  purchaseIssueFee?, membershipFee?}` (numbers of 0 or more) and
+  `restrictOnlyPdf` (boolean) are the "Payments" page › "Payment Types"
+  tab ("Article Processing Charge", "Purchase Article", "Purchase
+  Issue", "Association Membership", "Only Restrict Access to PDF version
+  of issues and articles"); that tab is saved only when one of them is
+  given, and it stores every fee box, the unnamed ones at 0. "Payments
+  set up" (the "Subscriptions" page, buying) is `{currency: 'USD',
+  paymentPluginName: 'ManualPayment', manualInstructions: '…'}`: the
+  manual method counts as set up only with instructions (seed-facts).
+- `subscriptionName`, `subscriptionEmail`, `subscriptionPhone`,
+  `subscriptionMailingAddress` (strings), `subscriptionAdditionalInformation`
+  (a string or a locale map, the rich text as stored, `<p>…</p>`),
+  `subscriptionExpiryPartial` (`true` "Partial expiry", `false` "Full
+  expiry") and the four "Subscription Expiry Reminders" lists
+  (`numMonthsBeforeSubscriptionExpiryReminder` and
+  `numMonthsAfterSubscriptionExpiryReminder` 0–12,
+  `numWeeksBeforeSubscriptionExpiryReminder` and
+  `numWeeksAfterSubscriptionExpiryReminder` 0–3; 0 is "Disabled"): the
+  "Payments" page › "Subscription Policies" tab › "Save", one save for
+  all given keys. The tab saves every field it shows, so the unnamed
+  ones are stored as they arrive (empty, "Full expiry", "Disabled", the
+  boxes unticked: `0` rows), as after a by-hand save. A malformed email
+  is the tab's own refusal ("Please enter a valid email.").
+  The tab's own "Save" refuses an empty contact "Name", "Email" or
+  "Mailing Address", but the keys can store one, so a script that later
+  saves the tab on screen seeds or types all three (U51 claim check K1,
+  2026-09-25).
+- `institutions[]`, each `{name, ipRanges?, ror?}`: Settings ›
+  "Institutions" › "Add Institution" › "Save" (the institutions API's
+  own add). `name` in the primary language; `ipRanges` a list, one line
+  of the "IP ranges" box each (`127.0.0.1`, `10.0.0.0/8`, `142.58.*.*`,
+  `142.58.103.1 - 142.58.103.4`); `ror` the "ROR" box. An invalid range
+  is the form's refusal ("Invalid IP range"). Names are unique in a seed,
+  since a subscription names its institution. The response lists
+  `institutions` (`id`, `name`).
+- `subscriptionTypes[]`, each `{name, cost, currency, duration?,
+  format?, institutional?, membership?, hidden?, description?}`: the
+  "Payments" page › "Subscription Types" › "Create New Subscription
+  Type" › "Save". `name` is "Name of Type" (primary language); `cost` a
+  number (stored with two decimals); `currency` a code; `duration` whole
+  months, absent for a non-expiring type ("Non-expiring"); `format`
+  `online` (the default, what the list arrives on), `print` or
+  `printOnline`; `institutional` the "Institutional" radio (default
+  "Individual"); `membership` "Subscriptions require membership
+  information…"; `hidden` "Do not make this subscription type publicly
+  available or visible on the website."; `description` the rich text.
+  Types join the list in the order given. The response lists
+  `subscriptionTypes` (`id`, `name`, `institutional`).
+- `subscriptions[]`, each `{user, type, status?, dateStart?, dateEnd?,
+  referenceNumber?, notes?}` plus `membership?` on an individual one,
+  or `institution`, `mailingAddress?` and `domain?` on an institutional
+  one: "Individual Subscriptions" (or, with `institution`, "Institutional
+  Subscriptions") › "Create New Subscription" › "Save", with the email
+  box unticked. `user` is `admin` or a username of `users[]` in the same
+  request (the window's "Locate a User" lists the journal's users only;
+  seed a throwaway reader, never a roster account); `type` and
+  `institution` name entries of this request's lists, and the type's
+  kind must match. `status` is `active` (the default),
+  `needsInformation`, `needsApproval`, `awaitingManualPayment`,
+  `awaitingOnlinePayment` or `other`. Dates are `YYYY-MM-DD`, their year no
+  more than ten from this year's, as the window requires; on an expiring type they
+  default to today and today plus the type's duration, and a
+  non-expiring type takes none. The end date is stored as the end of
+  that day (`23:59:59`). There is no "expired" word: an expired
+  subscription is `status: 'active'` with a past `dateEnd`, which the
+  window itself accepts. An institutional subscription on an "Online"
+  or "Print and Online" type needs a `domain` or IP ranges on its
+  institution. A `domain` must contain a dot: "localhost" is refused
+  ("Please enter a valid domain.") (U51 claim check K1, 2026-09-25).
+  The response lists `subscriptions` (`id`, `user`, `type`,
+  `institution`).
+
 Users are created here and nowhere else. The submission scenario resolves
 usernames but never creates them. The response returns `tag`, `contextId`,
 `path`, the created `users` (id and username), `announcementTypes` (id and
@@ -720,7 +842,8 @@ name), `announcements` (id and title), `components` (`id`, `name`,
 `taskTemplates` (`id`, `title`, `stage`, `action`: `added` or `edited`),
 `libraryFiles` (`id`, `name`, `type`, `fileName`, `originalFileName`,
 `publicAccess`, in the order seeded), `categories` (see `categories[]`)
-and on OJS `issues` (see `issues[]`).
+and on OJS `issues` (see `issues[]`) and, when seeded, `institutions`,
+`subscriptionTypes` and `subscriptions`.
 
 ## `POST scenarios/submission`
 
@@ -1228,6 +1351,15 @@ App-specific keys:
   Issue and Schedule Only"), not a published one; an article published at
   once into a future issue comes only from the workflow's "Assign To
   Future Issue and Publish Immediately" (U10 claim check K2, 2026-09-24).
+  When "Publish Issue" publishes that issue later, the article keeps
+  today as its own publication date, not the issue's "Date Published"
+  (U51 claim check K1, 2026-09-25).
+  `accessStatus` (U51): `open` is the article's "Open Access" box ticked
+  on its issue's "Table of Contents" tab after the publish
+  (`issueDefault`, unticked, is how every article arrives). The column
+  is there only on a journal that requires subscriptions, in an issue
+  whose "Access status" is "Subscription", so the key needs `issue`,
+  `published: true` and both of those, or it is a 400.
 - OMP: `series` (path) and `seriesPosition`, both optional; `workType`
   (`monograph`, the default, or `editedVolume`); and per review round
   `stage: internal | external` (default external).
@@ -1403,12 +1535,8 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   `registrationAgency`, `doiCreationTime`), ISSNs (the online ISSN
   is typed on Masthead, U13), `licenseUrl` (copied
   into a publication when it is published, so it must be set before a
-  `published` seed; sync rr14, 2026-09-22), OJS
-  `issues[].accessStatus` (and an issue's title or description;
-  `issues[]` itself is built, U08, its cover too, U13), OJS `subscriptions[]` where
-  `'expired'` seeds an active row with a past end date, and OJS `payments`
-  (`enabled`, `currency`, `paymentPluginName`, `manualInstructions`,
-  `publicationFee`; the instructions gate is in seed-facts, U34).
+  `published` seed; sync rr14, 2026-09-22), and an OJS issue's title or
+  description (`issues[]` itself is built, U08, its cover too, U13).
 - Context passthrough: `enableArticleNumber` (Settings › Workflow ›
   Submission › "Metadata", "Enable article number metadata"): the
   "Metadata" publication page offers "Article Number" only with it

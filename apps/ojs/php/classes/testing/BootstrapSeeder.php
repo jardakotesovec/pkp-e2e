@@ -14,6 +14,7 @@
 
 namespace APP\testing;
 
+use APP\controllers\grid\issues\form\IssueAccessForm;
 use APP\controllers\grid\issues\form\IssueGalleyForm;
 use APP\core\Application;
 use APP\facades\Repo;
@@ -25,6 +26,7 @@ use PKP\db\DAORegistry;
 use APP\file\PublicFileManager;
 use PKP\plugins\Hook;
 use PKP\testing\ContextFactory;
+use PKP\testing\FormPost;
 use PKP\testing\LibraryFileSeeder;
 use PKP\testing\PKPBootstrapSeeder;
 use PKP\testing\Spec;
@@ -177,13 +179,15 @@ class BootstrapSeeder extends PKPBootstrapSeeder
      * The `issues[]` list, shared by the bootstrap payload and the context
      * scenario (U08): {volume*, number*, year*, published?}; the context
      * scenario ($withCover) also reads coverImage (U13), datePublished and
-     * galleys[] (U50), the galleys' locale checked against $formLocales.
-     * Parse phase only; an unknown key in an entry is left unconsumed, so
-     * it 400s.
+     * galleys[] (U50), the galleys' locale checked against $formLocales,
+     * and accessStatus / openAccessDate (U51), the issue's "Access" tab,
+     * which exists only when $accessTab (the journal requires
+     * subscriptions). Parse phase only; an unknown key in an entry is left
+     * unconsumed, so it 400s.
      *
      * @return array<int, array{volume: int, number: string, year: int, published: bool}>
      */
-    public static function parseIssues(Spec $root, bool $withCover = false, ?array $formLocales = null): array
+    public static function parseIssues(Spec $root, bool $withCover = false, ?array $formLocales = null, bool $accessTab = false): array
     {
         $issues = [];
         foreach ($root->childList('issues') as $spec) {
@@ -254,6 +258,32 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                     ];
                 }
             }
+            // `accessStatus` / `openAccessDate` (U51, the context scenario
+            // only): the issue's "Access" tab, "Access status" (`open`
+            // "Open access", `subscription` "Subscription") and "Open access
+            // date" (YYYY-MM-DD, the date picker's posted value; a past date
+            // is accepted, as the box accepts it). The tab is offered only on
+            // a journal that requires subscriptions.
+            $access = null;
+            if ($withCover && ($spec->has('accessStatus') || $spec->has('openAccessDate'))) {
+                $key = $spec->has('accessStatus') ? 'accessStatus' : 'openAccessDate';
+                if (!$accessTab) {
+                    throw new SpecException("{$spec->path}.{$key}", 'The issue\'s "Access" tab shows only on a journal that requires subscriptions: give publishingMode: subscription in the same request');
+                }
+                $statuses = ['open' => \APP\issue\Issue::ISSUE_ACCESS_OPEN, 'subscription' => \APP\issue\Issue::ISSUE_ACCESS_SUBSCRIPTION];
+                $status = $spec->get('accessStatus');
+                if ($status !== null && (!is_string($status) || !isset($statuses[$status]))) {
+                    throw new SpecException("{$spec->path}.accessStatus", 'accessStatus must be open ("Open access") or subscription ("Subscription"), the "Access status" list');
+                }
+                $openAccessDate = $spec->get('openAccessDate');
+                if ($openAccessDate !== null) {
+                    $parsed = is_string($openAccessDate) ? \DateTime::createFromFormat('!Y-m-d', $openAccessDate) : false;
+                    if (!$parsed || $parsed->format('Y-m-d') !== $openAccessDate) {
+                        throw new SpecException("{$spec->path}.openAccessDate", 'openAccessDate must be a date as YYYY-MM-DD (the "Open access date" box)');
+                    }
+                }
+                $access = ['accessStatus' => $status === null ? null : $statuses[$status], 'openAccessDate' => $openAccessDate];
+            }
             $issues[] = [
                 'volume' => $whole('volume'),
                 'number' => (string) $number,
@@ -262,6 +292,7 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 'coverImage' => $coverImage,
                 'datePublished' => $datePublished,
                 'galleys' => $galleys,
+                'access' => $access,
             ];
         }
         return $issues;
@@ -359,20 +390,37 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 // IssueGridHandler::publishIssue (~544-633): DOI creation
                 // (internally a no-op unless the journal enables issue DOIs
                 // — a fresh journal enables publication DOIs only), published
-                // flag + datePublished, the publish hook, current-issue
-                // update, stale-DOI marking. The handler's delayed-open-access
-                // branch (subscription journals only), its scheduled-
-                // publication sweep (nothing is assigned to a new issue) and
-                // its notification batch (the dialog's email box, seeded
-                // unticked) don't apply here.
+                // flag + datePublished, the delayed-open-access branch (U51),
+                // the publish hook, current-issue update, stale-DOI marking.
+                // Its scheduled-publication sweep (nothing is assigned to a
+                // new issue) and its notification batch (the dialog's email
+                // box, seeded unticked) don't apply here.
                 Repo::issue()->createDoi($issue);
                 $issue->setData('published', true);
                 if (!$issue->getData('datePublished')) {
                     $issue->setData('datePublished', Core::getCurrentDate());
                 }
+                // IssueGridHandler::publishIssue ~581-596, verbatim: on a
+                // journal that requires subscriptions with "Delayed Open
+                // Access" set, the issue becomes "Subscription" with the
+                // open access date that many months from today.
+                if ($context->getData('publishingMode') == \APP\journal\Journal::PUBLISHING_MODE_SUBSCRIPTION && ($delayDuration = $context->getData('delayedOpenAccessDuration'))) {
+                    $delayYears = (int) floor($delayDuration / 12);
+                    $delayMonths = (int) fmod($delayDuration, 12);
+                    $curYear = date('Y');
+                    $curMonth = date('n');
+                    $curDay = date('j');
+                    $delayOpenAccessYear = $curYear + $delayYears + (int) floor(($curMonth + $delayMonths) / 12);
+                    $delayOpenAccessMonth = (int) fmod($curMonth + $delayMonths, 12);
+                    $issue->setAccessStatus(\APP\issue\Issue::ISSUE_ACCESS_SUBSCRIPTION);
+                    $issue->setOpenAccessDate(date('Y-m-d H:i:s', mktime(0, 0, 0, $delayOpenAccessMonth, $curDay, $delayOpenAccessYear)));
+                }
                 Hook::call('IssueGridHandler::publishIssue', [&$issue]);
                 Repo::issue()->updateCurrent($context->getId(), $issue);
                 Repo::doi()->issueUpdated($issue);
+            }
+            if (!empty($plan['access'])) {
+                self::saveIssueAccess($context, (int) $issue->getId(), $plan['access']);
             }
             $created[] = [
                 'id' => (int) $issue->getId(),
@@ -383,6 +431,29 @@ class BootstrapSeeder extends PKPBootstrapSeeder
             ] + ($galleys ? ['galleys' => $galleys] : []);
         }
         return $created;
+    }
+
+    /**
+     * The issue's "Access" tab › "Save" (U51), after the issue is created
+     * and published: IssueGridHandler::updateAccess, the grid's own
+     * IssueAccessForm run on the POST (FormPost). The tab arrives with the
+     * issue's stored status and date, so what the seed does not name is
+     * posted as the tab shows it. Saved after "Publish Issue", so it wins
+     * over "Delayed Open Access", as a manager editing the tab afterwards.
+     */
+    public static function saveIssueAccess(Context $context, int $issueId, array $plan): void
+    {
+        $restoreContext = ContextFactory::forceRequestContext($context);
+        try {
+            $issue = Repo::issue()->get($issueId);
+            $shownDate = $issue->getOpenAccessDate() ? substr((string) $issue->getOpenAccessDate(), 0, 10) : '';
+            FormPost::run(new IssueAccessForm($issue), [
+                'accessStatus' => (string) ($plan['accessStatus'] ?? $issue->getAccessStatus()),
+                'openAccessDate' => $plan['openAccessDate'] ?? $shownDate,
+            ], 'issues', 'The issue\'s "Access" tab would refuse this');
+        } finally {
+            $restoreContext();
+        }
     }
 
     /**
