@@ -94,6 +94,12 @@ class ApiCall
             $rules = $adjustRules($rules);
         }
         $validator = app()->get('validator')->make($request->all(), $rules, $request->messages(), $request->attributes());
+        // The request's own after-validation checks, as the router's
+        // FormRequest::getValidatorInstance() adds them (U47: the media
+        // requests check ownership and resolutions there).
+        if (method_exists($request, 'after')) {
+            $validator->after($request->after());
+        }
         if ($validator->fails()) {
             $messages = [];
             foreach ($validator->errors()->toArray() as $field => $fieldMessages) {
@@ -102,7 +108,39 @@ class ApiCall
             throw new SpecException($specPath, "{$refusal}: " . implode('; ', $messages));
         }
         $request->setValidator($validator);
+        $passed = new \ReflectionMethod($request, 'passedValidation');
+        try {
+            $passed->invoke($request);
+        } catch (\Illuminate\Http\Exceptions\HttpResponseException $e) {
+            throw new SpecException($specPath, "{$refusal}: " . $e->getResponse()->getContent());
+        }
         return $request;
+    }
+
+    /**
+     * Run $fn with $controller standing as the API controller of the
+     * running route (the seeding request's APIHandler), for the form
+     * requests that read the authorized objects through it
+     * (MediaFileValidationTrait::getBaseApiController(), U47). The _test
+     * controller is put back afterwards.
+     *
+     * @template T
+     *
+     * @param callable(): T $fn
+     *
+     * @return T
+     */
+    public static function asRouteController(PKPBaseController $controller, callable $fn): mixed
+    {
+        $handler = Application::get()->getRequest()->getRouter()->getHandler();
+        $property = new \ReflectionProperty(\PKP\handler\APIHandler::class, 'apiController');
+        $previous = $property->getValue($handler);
+        $property->setValue($handler, $controller);
+        try {
+            return $fn();
+        } finally {
+            $property->setValue($handler, $previous);
+        }
     }
 
     /**

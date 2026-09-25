@@ -183,6 +183,24 @@
  *   (a missing title or relationship type, a value outside the schema's
  *   lists, an identifier invalid for its type, a year not four digits, a
  *   bad address) are the seed's 400s.
+ * - mediaFiles[] {file*, genre?, resolution?, name?, pair?} — the current
+ *   publication's "Media" page (U47), all three apps, acting as the editor
+ *   (admin), after the galleys and before a publish: each card's
+ *   temporaryFiles upload, one "Upload Files" (MediaFilesController::add),
+ *   "Edit Metadata" › "Save" per `name` (::edit) and, with any `pair`, one
+ *   "Batch Link Media" › "Link Media" (::linkMany), each through the
+ *   action's own form request (ApiCall). `genre` a dependent component the
+ *   window lists (default "Image"), `resolution` web | high_resolution
+ *   (the latter for a "File Variants" component only), `pair` a label two
+ *   entries share, one of each resolution, of one component. A draft
+ *   refuses the key.
+ * - publicationFormats[] {name*, file?} — OMP only (a journal and a
+ *   preprint server have galleys, so the key is a 400 there; galleys[] is
+ *   their counterpart): a publication format on the current publication,
+ *   ready for readers, as the "Publication Formats" page builds one
+ *   (U47). The OMP overlay (APP\testing\SubmissionScenarioBuilder) owns
+ *   it; this core refuses the key and runs the overlay's two steps: the
+ *   format with its file before a publish, and its availability after.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -275,6 +293,33 @@ abstract class PKPSubmissionScenarioBuilder
 
     /** OPS overrides to reject submission files (no workflow file list on a preprint server). */
     protected function assertFilesSupported(string $specKey): void
+    {
+    }
+
+    /**
+     * Read publicationFormats[] (OMP overrides). A journal and a preprint
+     * server have galleys, not publication formats, so the key is refused,
+     * never dropped (PRINCIPLES D4). Parse-phase: no writes.
+     */
+    protected function parsePublicationFormats(Context $context, Spec $root, string $submissionLocale, bool $submitted): array
+    {
+        if ($root->has('publicationFormats')) {
+            throw new SpecException('publicationFormats', 'This app has galleys, not publication formats (no "Publication Formats" page exists): use galleys');
+        }
+        return [];
+    }
+
+    /**
+     * The OMP overlay's first step, before a publish: each format with its
+     * file, terms and approval. Returns the response entries.
+     */
+    protected function seedPublicationFormats(Context $context, int $submissionId, array $plans, User $editor): array
+    {
+        return [];
+    }
+
+    /** The OMP overlay's second step, after a publish: each seeded format made available. */
+    protected function makePublicationFormatsAvailable(Context $context, int $submissionId, array $seeded, User $editor): void
     {
     }
 
@@ -490,6 +535,8 @@ abstract class PKPSubmissionScenarioBuilder
         $taskPlans = $this->parseTasks($root, $submitted, $tag);
         $citationsRaw = $this->parseCitationsRaw($root);
         $dataCitationPlans = $this->parseDataCitations($root);
+        $mediaFilePlans = $this->parseMediaFiles($context, $root, $submitted, $locale);
+        $formatPlans = $this->parsePublicationFormats($context, $root, $locale, $submitted);
         $libraryFilePlans = LibraryFileSeeder::parse($root, false);
         if ($libraryFilePlans !== [] && !$submitted) {
             throw new SpecException('libraryFiles', 'A draft has no workflow and no "Library" button: libraryFiles needs submitted: true');
@@ -509,7 +556,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans, $mediaFilePlans, $formatPlans);
         } finally {
             $restoreRouterContext();
         }
@@ -539,7 +586,9 @@ abstract class PKPSubmissionScenarioBuilder
         array $taskPlans = [],
         array $libraryFilePlans = [],
         ?string $citationsRaw = null,
-        array $dataCitationPlans = []
+        array $dataCitationPlans = [],
+        array $mediaFilePlans = [],
+        array $formatPlans = []
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
@@ -549,6 +598,8 @@ abstract class PKPSubmissionScenarioBuilder
         $seededTasks = [];
         $seededLibraryFiles = [];
         $seededDataCitations = [];
+        $seededMediaFiles = [];
+        $seededFormats = [];
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -815,6 +866,18 @@ abstract class PKPSubmissionScenarioBuilder
                 $seededGalleys = $this->seedGalleys($context, $submissionId, $galleyPlans, $editor);
             }
 
+            // Media files on the current publication, added on its "Media"
+            // page before a publish, as the galleys are (U47).
+            if ($mediaFilePlans !== []) {
+                $seededMediaFiles = $this->seedMediaFiles($submissionId, $mediaFilePlans, $editor);
+            }
+
+            // Publication formats (OMP), built on the "Publication Formats"
+            // page after the media files and before a publish (U47).
+            if ($formatPlans !== []) {
+                $seededFormats = $this->seedPublicationFormats($context, $submissionId, $formatPlans, $editor);
+            }
+
             if ($published) {
                 $submission = Repo::submission()->get($submissionId);
                 $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
@@ -846,6 +909,12 @@ abstract class PKPSubmissionScenarioBuilder
                 $submission = Repo::submission()->get($submission->getId());
                 Repo::submission()->updateStatus($submission);
                 Repo::submission()->updateCurrentPublication($submission);
+            }
+
+            // Each format's "Not Available" › OK, after the publish, as the
+            // page is used (U47).
+            if ($seededFormats !== []) {
+                $this->makePublicationFormatsAvailable($context, $submissionId, $seededFormats, $editor);
             }
 
             if ($commentPlans !== []) {
@@ -898,6 +967,8 @@ abstract class PKPSubmissionScenarioBuilder
             'tasks' => $seededTasks,
             'libraryFiles' => $seededLibraryFiles,
             'dataCitations' => $seededDataCitations,
+            'mediaFiles' => $seededMediaFiles,
+            'publicationFormats' => $seededFormats,
         ];
     }
 
@@ -1491,6 +1562,256 @@ abstract class PKPSubmissionScenarioBuilder
             throw new SpecException('galleys', 'The context has no non-dependent genre for the upload wizard to offer');
         }
         return (int) $genre->getId();
+    }
+
+    /**
+     * Read mediaFiles[] (U47): media files on the current publication's
+     * "Media" page, each {file*, genre?, resolution?, name?, pair?}.
+     * Parse-phase: no writes. The page's refusals are the seed's:
+     * - the page is on the workflow, so a draft refuses the key;
+     * - `genre` is a name (any locale) of a component the "Upload Media
+     *   File" window's "What kind of media is this?" lists: every component
+     *   of the context marked as a dependent file (the page's genres API
+     *   list, GenreController::getMany → GenreDAO::getByContextId, filtered
+     *   on `dependent` by the page's store); absent, "Image" (the
+     *   installed IMAGE component), which the list must then offer;
+     * - `resolution` is `web` (the list's start, "Web resolution") or
+     *   `high_resolution` ("High resolution"), the latter only for a
+     *   component with "File Variants" ticked (the list is greyed out on
+     *   "Web resolution" for any other);
+     * - `name` is the "Edit Metadata" window's "Name of the file", a
+     *   non-empty string (the window refuses an empty one);
+     * - `pair` is a label shared by exactly two entries, one `web` and one
+     *   `high_resolution` of the same component: the "Batch Link Media"
+     *   window's row for the web file set to the other (the window pairs
+     *   only files of one component with "File Variants" ticked).
+     *
+     * @return array<int, array{path: string, fixture: array, genreId: int, genreName: string, resolution: string, name: ?string, pair: ?string, category: int}>
+     */
+    protected function parseMediaFiles(Context $context, Spec $root, bool $submitted, string $submissionLocale): array
+    {
+        if (!$root->has('mediaFiles')) {
+            return [];
+        }
+        if (!$submitted) {
+            throw new SpecException('mediaFiles', 'The "Media" page is on the workflow, which a draft does not have: mediaFiles needs submitted: true');
+        }
+        $genreDao = DAORegistry::getDAO('GenreDAO'); /** @var \PKP\submission\GenreDAO $genreDao */
+        $offered = [];
+        $genres = $genreDao->getByContextId($context->getId());
+        while ($genre = $genres->next()) {
+            if ($genre->getDependent()) {
+                $offered[] = $genre;
+            }
+        }
+        $offeredNames = implode(', ', array_map(fn ($g) => '"' . $g->getLocalizedName() . '"', $offered)) ?: '(none: no component is marked as a dependent file)';
+        $plans = [];
+        foreach ($root->childList('mediaFiles') as $spec) {
+            $fixture = $this->resolveFixture((string) $spec->require('file'), "{$spec->path}.file");
+            $genre = null;
+            if ($spec->has('genre')) {
+                $genreName = (string) $spec->get('genre');
+                foreach ($offered as $candidate) {
+                    if (in_array($genreName, (array) $candidate->getName(null), true)) {
+                        $genre = $candidate;
+                        break;
+                    }
+                }
+                if (!$genre) {
+                    throw new SpecException("{$spec->path}.genre", "\"What kind of media is this?\" offers no \"{$genreName}\" in \"{$context->getPath()}\": {$offeredNames}");
+                }
+            } else {
+                foreach ($offered as $candidate) {
+                    if ($candidate->getKey() === 'IMAGE') {
+                        $genre = $candidate;
+                        break;
+                    }
+                }
+                if (!$genre) {
+                    throw new SpecException("{$spec->path}.genre", "\"What kind of media is this?\" offers no \"Image\" (the default) in \"{$context->getPath()}\"; name one of: {$offeredNames}");
+                }
+            }
+            $resolution = $spec->get('resolution', \PKP\submissionFile\enums\MediaVariantType::WEB->value);
+            if (!is_string($resolution) || !\PKP\submissionFile\enums\MediaVariantType::tryFrom($resolution)) {
+                throw new SpecException("{$spec->path}.resolution", 'resolution is "web" ("Web resolution") or "high_resolution" ("High resolution")');
+            }
+            if ($resolution !== \PKP\submissionFile\enums\MediaVariantType::WEB->value && !$genre->getSupportsFileVariants()) {
+                throw new SpecException("{$spec->path}.resolution", "\"File resolution type\" is greyed out on \"Web resolution\" for \"{$genre->getLocalizedName()}\", whose \"File Variants\" box is unticked");
+            }
+            $name = null;
+            if ($spec->has('name')) {
+                $name = $spec->get('name');
+                if (!is_string($name) || trim($name) === '') {
+                    throw new SpecException("{$spec->path}.name", 'name must be a non-empty string ("Name of the file" is required)');
+                }
+            }
+            $pair = null;
+            if ($spec->has('pair')) {
+                $pair = $spec->get('pair');
+                if (!is_string($pair) || $pair === '') {
+                    throw new SpecException("{$spec->path}.pair", 'pair is a label shared by the two entries to link');
+                }
+            }
+            $plans[] = [
+                'path' => $spec->path,
+                'fixture' => $fixture,
+                'genreId' => (int) $genre->getId(),
+                'genreName' => (string) $genre->getLocalizedName(),
+                'supportsFileVariants' => $genre->getSupportsFileVariants(),
+                'category' => (int) $genre->getCategory(),
+                'resolution' => $resolution,
+                'name' => $name,
+                'pair' => $pair,
+            ];
+        }
+        $byPair = [];
+        foreach ($plans as $i => $plan) {
+            if ($plan['pair'] !== null) {
+                $byPair[$plan['pair']][] = $i;
+            }
+        }
+        foreach ($byPair as $label => $indexes) {
+            $members = array_map(fn ($i) => $plans[$i], $indexes);
+            $resolutions = array_column($members, 'resolution');
+            sort($resolutions);
+            if (count($indexes) !== 2 || $resolutions !== ['high_resolution', 'web']) {
+                throw new SpecException("{$members[0]['path']}.pair", "pair \"{$label}\" needs exactly two entries, one \"web\" and one \"high_resolution\" (a file has at most one counterpart, of the other resolution)");
+            }
+            if ($members[0]['genreId'] !== $members[1]['genreId']) {
+                throw new SpecException("{$members[0]['path']}.pair", "pair \"{$label}\" joins two components; \"Batch Link Media\" pairs files of one component only");
+            }
+        }
+        return $plans;
+    }
+
+    /**
+     * Seed the parsed media files the way the "Media" page adds them,
+     * acting as the editor (admin), through MediaFilesController's own
+     * actions and form requests (ApiCall; the controller standing as the
+     * route's API controller, which the requests read the authorized
+     * objects through):
+     * 1. each card's upload: POST temporaryFiles (TemporaryFileManager::
+     *    handleUpload, LibraryFileSeeder::upload), whose answer the window
+     *    keeps;
+     * 2. "Upload Files": one POST mediaFiles with every card, each the
+     *    upload's answer plus temporaryFileId, genreId and variantType
+     *    (AddMediaFiles, MediaFilesController::add: the file service's add,
+     *    Repo::submissionFile()->validate and ->add at SUBMISSION_FILE_MEDIA
+     *    on the publication, named after the uploaded file);
+     * 3. per `name`, the row's "Edit Metadata" › "Save": PUT
+     *    mediaFiles/{id} with the window's fields, the name and the
+     *    component's empty "File Metadata" fields (EditMediaFile,
+     *    MediaFilesController::edit);
+     * 4. with any `pair`, "Batch Link Media" › "Link Media": one POST
+     *    mediaFiles/link with a row per web-resolution file of a component
+     *    with "File Variants" ticked, the paired ones set to their
+     *    high-resolution counterpart and the rest to null, as the window
+     *    posts them (LinkManyMediaFiles, MediaFilesController::linkMany →
+     *    VariantGroup::link, which copies the shared details from the web
+     *    file).
+     *
+     * @return array<int, array{submissionFileId: int, file: string, name: string, genre: string, resolution: string, variantGroupId: ?int}>
+     */
+    protected function seedMediaFiles(int $submissionId, array $plans, User $editor): array
+    {
+        $previousActingUser = Registry::get('user');
+        Registry::set('user', $editor);
+        try {
+            $submission = Repo::submission()->get($submissionId);
+            $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
+            $routeParams = ['submissionId' => $submissionId, 'publicationId' => $publication->getId()];
+            $authorized = [Application::ASSOC_TYPE_SUBMISSION => $submission, Application::ASSOC_TYPE_PUBLICATION => $publication];
+            $controllerClass = \PKP\API\v1\submissions\MediaFilesController::class;
+
+            // 1 and 2: the cards' uploads, then "Upload Files".
+            $cards = [];
+            foreach ($plans as $plan) {
+                $temporaryFile = LibraryFileSeeder::upload($plan['fixture'], $editor);
+                $cards[] = [
+                    'id' => (int) $temporaryFile->getId(),
+                    'name' => (string) $temporaryFile->getData('originalFileName'),
+                    'mimetype' => (string) $temporaryFile->getData('filetype'),
+                    'documentType' => app()->get('file')->getDocumentType($temporaryFile->getData('filetype')),
+                    'temporaryFileId' => (int) $temporaryFile->getId(),
+                    'genreId' => $plan['genreId'],
+                    'variantType' => $plan['resolution'],
+                ];
+            }
+            $controller = ApiCall::controller($controllerClass, $authorized);
+            $added = ApiCall::asRouteController($controller, function () use ($controller, $cards, $routeParams) {
+                $request = ApiCall::request(\PKP\API\v1\submissions\formRequests\AddMediaFiles::class, 'POST', ['files' => $cards], $routeParams, 'mediaFiles', 'The "Upload Media File" window\'s "Upload Files" would be refused');
+                return ApiCall::answer($controller->add($request), 'mediaFiles', 'The "Upload Media File" window\'s "Upload Files" was refused');
+            });
+            $fileIds = array_map(fn (array $file) => (int) $file['id'], $added);
+
+            // 3: "Edit Metadata" › "Save" per named entry.
+            foreach ($plans as $i => $plan) {
+                if ($plan['name'] === null) {
+                    continue;
+                }
+                $submissionFile = Repo::submissionFile()->get($fileIds[$i]);
+                // The window posts its every field: "Name of the file", and
+                // the component's "File Metadata" fields, empty on a new file
+                // (Artwork: four plain boxes; Supplementary Content: eight,
+                // six of them multilingual).
+                $submissionLocale = $submission->getData('locale');
+                $body = ['name' => [$submissionLocale => $plan['name']]];
+                if ($plan['category'] === \PKP\submission\Genre::GENRE_CATEGORY_ARTWORK) {
+                    $body += ['caption' => '', 'credit' => '', 'copyrightOwner' => '', 'terms' => ''];
+                } elseif ($plan['category'] === \PKP\submission\Genre::GENRE_CATEGORY_SUPPLEMENTARY) {
+                    foreach (['description', 'creator', 'publisher', 'source', 'subject', 'sponsor'] as $field) {
+                        $body[$field] = [$submissionLocale => ''];
+                    }
+                    $body += ['dateCreated' => '', 'language' => ''];
+                }
+                $controller = ApiCall::controller($controllerClass, $authorized + [Application::ASSOC_TYPE_SUBMISSION_FILE => $submissionFile]);
+                ApiCall::asRouteController($controller, function () use ($controller, $body, $routeParams, $submissionFile, $plan) {
+                    $request = ApiCall::request(\PKP\API\v1\submissions\formRequests\EditMediaFile::class, 'PUT', $body, $routeParams + ['submissionFileId' => $submissionFile->getId()], "{$plan['path']}.name", 'The "Edit Metadata" window\'s "Save" would be refused');
+                    return ApiCall::answer($controller->edit($request), "{$plan['path']}.name", 'The "Edit Metadata" window\'s "Save" was refused');
+                });
+            }
+
+            // 4: "Batch Link Media" › "Link Media".
+            $pairs = [];
+            foreach ($plans as $i => $plan) {
+                if ($plan['pair'] !== null) {
+                    $pairs[$plan['pair']][$plan['resolution']] = $fileIds[$i];
+                }
+            }
+            if ($pairs !== []) {
+                $partnerOf = [];
+                foreach ($pairs as $pair) {
+                    $partnerOf[$pair['web']] = $pair['high_resolution'];
+                }
+                $links = [];
+                foreach ($plans as $i => $plan) {
+                    if ($plan['resolution'] === \PKP\submissionFile\enums\MediaVariantType::WEB->value && $plan['supportsFileVariants']) {
+                        $links[] = ['primarySubmissionFileId' => $fileIds[$i], 'secondarySubmissionFileId' => $partnerOf[$fileIds[$i]] ?? null];
+                    }
+                }
+                $controller = ApiCall::controller($controllerClass, $authorized);
+                ApiCall::asRouteController($controller, function () use ($controller, $links, $routeParams) {
+                    $request = ApiCall::request(\PKP\API\v1\submissions\formRequests\LinkManyMediaFiles::class, 'POST', ['links' => $links], $routeParams, 'mediaFiles', 'The "Batch Link Media" window\'s "Link Media" would be refused');
+                    return ApiCall::answer($controller->linkMany($request), 'mediaFiles', 'The "Batch Link Media" window\'s "Link Media" was refused');
+                });
+            }
+
+            $seeded = [];
+            foreach ($plans as $i => $plan) {
+                $submissionFile = Repo::submissionFile()->get($fileIds[$i]);
+                $seeded[] = [
+                    'submissionFileId' => $fileIds[$i],
+                    'file' => $plan['fixture']['file'],
+                    'name' => (string) $submissionFile->getData('name', $submission->getData('locale')),
+                    'genre' => $plan['genreName'],
+                    'resolution' => $plan['resolution'],
+                    'variantGroupId' => $submissionFile->getData('variantGroupId') ? (int) $submissionFile->getData('variantGroupId') : null,
+                ];
+            }
+            return $seeded;
+        } finally {
+            Registry::set('user', $previousActingUser);
+        }
     }
 
     /**

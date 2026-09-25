@@ -257,14 +257,19 @@ behind a line; that scratch is deleted after review.
 - Picture uploads beyond the file name: a pasted or dropped picture is
   stored as `mceclip<N>.png`, a name the sanitizing reduces to nothing as
   `.png`, and a picture uploaded in the image window and then cancelled is
-  stored anyway. The probe servers take uploads up to 2 MB
-  (`upload_max_filesize`) in requests up to 8 MB (`post_max_size`),
-  whatever a box's own "Max filesize" line says: over 2 MB an upload
-  answers 500 "Path cannot be empty" or 400 "One or more files could not
-  be uploaded.", over 8 MB 500 "The POST data is too large.". A
+  stored anyway. The servers' upload limits are the host php.ini's
+  (`php -S` sets none), whatever a box's own "Max filesize" line says. A
+  host on PHP's defaults takes uploads up to 2 MB (`upload_max_filesize`)
+  in requests up to 8 MB (`post_max_size`): over 2 MB an upload answers
+  500 "Path cannot be empty" or 400 "One or more files could not be
+  uploaded.", over 8 MB 500 "The POST data is too large." (U09 claim
+  check K5, K5b). The maintainer's Mac (Homebrew PHP 8.4) takes 100M and
+  100M: a 101 MB upload answers 500 on `POST temporaryFiles` and its card
+  reads "Invalid JSON response from server." (U47 claim check K1-2). A
   drive that must reach the 5000 KB picture allowance uploads pictures
-  under 2 MB (three 1000×650 random-pixel PNGs of about 1906 KB). All
-  three apps, 2026-09-24 (U09 claim check K5, K5b).
+  under 2 MB (three 1000×650 random-pixel PNGs of about 1906 KB); a drive
+  that must fail an upload checks `php -r 'echo ini_get("post_max_size");'`
+  first. All three apps, 2026-09-24.
 - "Static Pages Plugin" {OJS OMP} arrives unticked on a scratch journal
   (Settings › Website › "Plugins" › "Installed Plugins", "Generic
   Plugins"), so there is no "Static Pages" tab until a manager ticks it or
@@ -664,6 +669,16 @@ behind a line; that scratch is deleted after review.
   panel's "Edit Assignment" box for the submitter starts from it. Settings ›
   Users & Roles › Roles › Author › Edit, all three apps, 2026-09-09 (U40 K1,
   `.reports/U40/ccK1/roles-permit-metadata-edit-*.json`).
+  On the other roles it arrives ticked on Section editor, Series editor and
+  Moderator, ticked and greyed on Journal/Press editor and Production
+  editor, and unticked on Guest editor and every Assistant-level role.
+  Settings › Users & Roles › Roles › Edit, all three apps, 2026-09-24 (U47
+  claim check K3, `roles-0*-<app>`).
+- "HTML Article Galley" (a journal) and "HTML Monograph File" (a press)
+  arrive ticked on every scratch context; a preprint server's Plugins list
+  has no HTML galley plugin, and its HTML galley link downloads the file.
+  Settings › Website › "Plugins", all three apps, 2026-09-24 (U47 claim
+  check K2).
 
 A scratch context at the other end of a setting is seeded through the
 scenario API's passthrough keys (scenarios.md "Configuring a scratch

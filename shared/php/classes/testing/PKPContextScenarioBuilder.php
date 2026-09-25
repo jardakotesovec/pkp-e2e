@@ -154,7 +154,8 @@
  *   components, the task templates and users[], so a template's `roles`
  *   sees the stages as the screen would after the role's "OK".
  * - components {<name>: false | {metadata?, dependent?, supplementary?,
- *   required?}} — Settings › Workflow › Submission › "Components" (U36),
+ *   fileVariants?, required?}} — Settings › Workflow › Submission ›
+ *   "Components" (U36; fileVariants U47),
  *   the component grid of every app: a name among the components every new
  *   context gets (registry/genres.xml, named in the primary locale) with
  *   `false` is that row's "Delete" (GenreGridHandler::deleteGenre: the
@@ -162,8 +163,10 @@
  *   window's save; any other name is "Add Component"'s save. Both saves run
  *   the grid's own GenreForm (initData from the stored component, the
  *   window's fields as the spec sets them, execute). `metadata` is the
- *   "File Metadata" list (document / artwork / supplementary), the three
- *   booleans the "File Type" boxes and "Require with Submissions". Applied
+ *   "File Metadata" list (document / artwork / supplementary), the four
+ *   booleans the two "File Type" boxes, the "File Variants" box
+ *   (`fileVariants`, the form's supportsFileVariants) and "Require with
+ *   Submissions". Applied
  *   after the settings forms, before users[].
  * - taskTemplates[] {stage*, title*, type?, dueInterval?, roles?, include?,
  *   message?} — Settings › Workflow › "Tasks and Discussions" (U37): an
@@ -674,7 +677,7 @@ abstract class PKPContextScenarioBuilder
         }
         $raw = (array) $root->get('components');
         if (array_is_list($raw)) {
-            throw new SpecException('components', 'components must be a map of component name to false (delete) or {metadata?, dependent?, supplementary?, required?}');
+            throw new SpecException('components', 'components must be a map of component name to false (delete) or {metadata?, dependent?, supplementary?, fileVariants?, required?}');
         }
         $defaults = [];
         $xml = simplexml_load_file(Core::getBaseDir() . '/registry/genres.xml');
@@ -714,7 +717,9 @@ abstract class PKPContextScenarioBuilder
                 }
                 $fields['category'] = $categories[$metadata];
             }
-            foreach (['dependent', 'supplementary', 'required'] as $box) {
+            // Spec box → GenreForm field: the two "File Type" boxes, the
+            // "File Variants" box (U47) and "Require with Submissions".
+            foreach (['dependent' => 'dependent', 'supplementary' => 'supplementary', 'fileVariants' => 'supportsFileVariants', 'required' => 'required'] as $box => $formField) {
                 if (!$planSpec->has($box)) {
                     continue;
                 }
@@ -722,11 +727,11 @@ abstract class PKPContextScenarioBuilder
                 if (!is_bool($boxValue)) {
                     throw new SpecException("{$specKey}.{$box}", "{$specKey}.{$box} must be a boolean");
                 }
-                $fields[$box] = $boxValue;
+                $fields[$formField] = $boxValue;
             }
             $planSpec->assertConsumed();
             if ($key !== null && $fields === []) {
-                throw new SpecException($specKey, "{$specKey} changes nothing; give metadata, dependent, supplementary or required, or false to delete it");
+                throw new SpecException($specKey, "{$specKey} changes nothing; give metadata, dependent, supplementary, fileVariants or required, or false to delete it");
             }
             $plans[] = ['name' => $name, 'key' => $key, 'remove' => false, 'fields' => $fields];
         }

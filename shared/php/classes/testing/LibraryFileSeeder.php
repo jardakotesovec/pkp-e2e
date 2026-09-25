@@ -209,7 +209,7 @@ class LibraryFileSeeder
      * the `uploadedFile` field, the fixture standing in for PHP's upload
      * (copied rather than moved, the one step a seed cannot take).
      */
-    protected static function upload(array $fixture, User $uploader): \PKP\file\TemporaryFile
+    public static function upload(array $fixture, User $uploader): \PKP\file\TemporaryFile
     {
         $previousFiles = $_FILES;
         $_FILES['uploadedFile'] = [
@@ -235,7 +235,7 @@ class LibraryFileSeeder
             };
             $temporaryFile = $manager->handleUpload('uploadedFile', $uploader->getId());
             if (!$temporaryFile) {
-                throw new \RuntimeException("The library upload of fixture \"{$fixture['file']}\" failed");
+                throw new \RuntimeException("The upload of fixture \"{$fixture['file']}\" failed");
             }
             return $temporaryFile;
         } finally {

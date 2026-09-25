@@ -73,7 +73,7 @@ trips.
   desktop), both green in the second full run; U40 S4 (the edited abstract not
   found in 30 s) red on OMP in the first U03 revision final 2026-09-13, green
   alone in 5 s and in the second full run; U40 S4 red on OMP in the first
-  U06 revision final 2026-09-13, green alone in 5.1 s; U40 S6 (the "This field is required." message not shown in 10 s after the cleared title's "Confirm") red on OMP in the first U35 local final 2026-09-20 (4 workers), green alone in 13.5 s. Sighted 2026-09-23 on the Mac: red in 5 of 5 runs during the U37 harness step on a used OMP database, the file alone and `--repeat-each 3` included, and also with the builders at HEAD (`.reports/U37/harness/rerun-omp-U40-S6-baseline.log`); then red in the U37 OMP final on a reset database at auto workers, the only red of 291 (`.reports/U37/final-run-omp.log`), and green alone right after (`alone-omp-U40S6.log`). Unread whether used-database state or load drives it. **Watch condition**: a
+  U06 revision final 2026-09-13, green alone in 5.1 s; U40 S6 (the "This field is required." message not shown in 10 s after the cleared title's "Confirm") red on OMP in the first U35 local final 2026-09-20 (4 workers), green alone in 13.5 s. Sighted 2026-09-23 on the Mac: red in 5 of 5 runs during the U37 harness step on a used OMP database, the file alone and `--repeat-each 3` included, and also with the builders at HEAD (`.reports/U37/harness/rerun-omp-U40-S6-baseline.log`); then red in the U37 OMP final on a reset database at auto workers, the only red of 291 (`.reports/U37/final-run-omp.log`), and green alone right after (`alone-omp-U40S6.log`). Unread whether used-database state or load drives it. Again 2026-09-25 in the U47 session's third OMP final on a reset database at auto workers, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). **Watch condition**: a
   hardened test reds again with retries exhausted.
   **U40 S4 on OMP, mechanism found 2026-09-15** (a retained trace,
   `docs/reports/2026-09-15-flake-investigation.md`): `WorkflowPublicationForm`
@@ -631,7 +631,7 @@ trips.
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run
-  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`). Again 2026-09-24 in the U46 session's OMP and OPS finals on reset databases at auto workers, green alone on both (`.reports/U46/final-run-{omp,ops}.log`, `alone-{omp,ops}-reds.log`).
+  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`). Again 2026-09-24 in the U46 session's OMP and OPS finals on reset databases at auto workers, green alone on both (`.reports/U46/final-run-{omp,ops}.log`, `alone-{omp,ops}-reds.log`). Again 2026-09-25 in the U47 session's third final set on reset databases at auto workers: OMP U14 S5, and on OJS the same report-row read in U14 S12 "the article is unpublished, published again and deleted" (line 1202's task dialog); both green alone (`.reports/U47/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`).
   **Tripped 2026-09-23 on the VM**: OJS full run
   at eight workers on a reset database (companion
   `optimize-table-reloads`, lib/ui-library at `51f0c727`,
@@ -744,7 +744,7 @@ trips.
   visible after the unpublish (line 256), green alone 3 of 3, error lines
   in `.reports/pr13359/v2-ojs-serial-solo.log`.
   **Watch condition**: a red in a full run or on CI; keep the error
-  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`).
+  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`). Again 2026-09-25 (U47 session): U08 S8 red on OJS and OPS in the `<app>-solo` projects run alone after the finals ("Navigation menu item was successfully added" not found), green alone right after on both (`.reports/U47/alone-{ojs,ops}-serial-solo.log`, `alone2-{ojs,ops}-U08.log`).
 - **"Add Reviewer" search never rendered** (U28 S11, OJS, once). In
   the U42 session's OJS final on a reset database at auto workers on the
   Mac (2026-09-24, `.reports/U42/final-run-ojs.log`), "read an earlier
@@ -804,7 +804,7 @@ trips.
   `omp-solo` run alone after the finals, the same "Announcement type
   added." notice not found at spec line 378, green alone right after
   (`.reports/U10/serial-solo-omp.log`, `alone-omp-U12S6.log`); the trace
-  read is the next daily session's.
+  read is the next daily session's. Again 2026-09-25 (U47 session, OJS `ojs-serial` run alone after the OJS final: "Announcement type removed." not found; the output is kept at `.reports/U47/alone-ojs-serial-solo/`). First sighting the same day of OMP U39 S2 "the Publisher Library on the Settings tab": the 180 s test timeout waiting on a "Press Library" row in the OMP final, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`).
 - **U02 S6's consent line read on screen before anything is ticked**
   (OPS, once: 2026-09-24, push run 35987189615 at `1cd4325`, shard 1/3,
   green on the retry). `register.contextConsentLineOnScreen(name)` read

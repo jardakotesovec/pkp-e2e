@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **28 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **29 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -441,3 +441,18 @@ until their specs exist. Do not force-claim the defects themselves.
     2026-09-24 (U46 spec author; checkouts ojs `71bb244152`, ops
     `07141ae4df`, lib/pkp `25182919bf`, ui-library `1afd40a9`). Resolves:
     maintainer confirmation as dead code (removal candidates on OJS).
+29. **Unreached media-file pieces** — attached to **U47** (claimed; the
+    media-files spec's Reference table notes them). The
+    `variantGroupIds` and `variantTypes` query filters of
+    `MediaFilesController::getMany()` (API-041): the "Media" page fetches
+    the whole list and no screen passes either. The `canEdit` value
+    `workflowConfigEditorialOJS.js` passes to `MediaFileManager` (AFFW-420):
+    the component declares no such prop, so it falls through as an
+    attribute and nothing reads it (the root of the spec's A1). OPS
+    `PreprintHandler::download()`'s admission of a publication's media
+    file ids for a galley: OPS installs no HTML galley renderer, so no
+    page produces such an address (the spec's OPS1; pending the claim
+    check's drive). Code-verified 2026-09-24 (U47 spec author; checkouts
+    ojs `71bb244152`, omp `a36551804`, ops `07141ae4df`, lib/pkp
+    `25182919bf`, ui-library `1afd40a9`). Resolves: maintainer
+    confirmation as dead code (removal candidates), or the OPS1 ruling.

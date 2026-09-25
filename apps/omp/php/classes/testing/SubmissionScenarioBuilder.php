@@ -12,13 +12,24 @@
  * @brief OMP submission scenario overlays: `series` (path) + `seriesPosition`
  * on the publication (both optional — monographs need no series), and the
  * per-round `stage: internal|external` key on reviewRounds. `galleys` is
- * rejected: a press has publication formats, not galleys.
+ * rejected: a press has publication formats, not galleys; `publicationFormats`
+ * (U47) is their counterpart here.
  */
 
 namespace APP\testing;
 
+use APP\controllers\grid\catalogEntry\form\PublicationFormatForm;
+use APP\controllers\grid\catalogEntry\PublicationFormatGridHandler;
+use APP\controllers\grid\files\proof\form\ApprovedProofForm;
+use APP\core\Application;
+use APP\facades\Repo;
 use PKP\context\Context;
+use PKP\core\JSONMessage;
+use PKP\core\Registry;
 use PKP\notification\Notification;
+use PKP\security\authorization\AuthorizationDecisionManager;
+use PKP\submissionFile\SubmissionFile;
+use PKP\user\User;
 use PKP\testing\PKPSubmissionScenarioBuilder;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
@@ -64,6 +75,229 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
     protected function assertGalleysSupported(Spec $root): void
     {
         throw new SpecException('galleys', 'OMP has publication formats, not galleys — galleys cannot be seeded on this app (no "Galleys" page exists)');
+    }
+
+    /**
+     * Read publicationFormats[] (U47): each {name*, file?}, a publication
+     * format on the current publication, ready for readers. Parse-phase: no
+     * writes. The page's refusals are the seed's: the page is on the
+     * workflow, so a draft refuses the key; `name` is the "Add publication
+     * format" window's required "Name", a string (the submission's
+     * language) or a locale map over the languages the box offers (the
+     * press's submission metadata languages) that fills the submission's
+     * one; `file` a fixture basename, the format row's "Change File".
+     *
+     * @return array<int, array{path: string, name: array<string, string>, fixture: ?array}>
+     */
+    protected function parsePublicationFormats(Context $context, Spec $root, string $submissionLocale, bool $submitted): array
+    {
+        if (!$root->has('publicationFormats')) {
+            return [];
+        }
+        if (!$submitted) {
+            throw new SpecException('publicationFormats', 'The "Publication Formats" page is on the workflow, which a draft does not have: publicationFormats needs submitted: true');
+        }
+        $offeredLocales = array_unique(array_merge([$submissionLocale], (array) $context->getSupportedSubmissionMetadataLocales()));
+        $plans = [];
+        foreach ($root->childList('publicationFormats') as $spec) {
+            $name = $spec->require('name');
+            if (is_string($name)) {
+                $name = [$submissionLocale => $name];
+            }
+            if (!is_array($name) || array_is_list($name)) {
+                throw new SpecException("{$spec->path}.name", 'name is the "Name" box: a string or a locale map');
+            }
+            foreach ($name as $nameLocale => $value) {
+                if (!in_array($nameLocale, $offeredLocales, true)) {
+                    throw new SpecException("{$spec->path}.name", "The \"Name\" box offers no language \"{$nameLocale}\": " . implode(', ', $offeredLocales));
+                }
+                if (!is_string($value)) {
+                    throw new SpecException("{$spec->path}.name", 'Each "Name" value is a string');
+                }
+            }
+            if (trim((string) ($name[$submissionLocale] ?? '')) === '') {
+                throw new SpecException("{$spec->path}.name", "\"Name\" is required in the submission's language ({$submissionLocale})");
+            }
+            $plans[] = [
+                'path' => $spec->path,
+                'name' => $name,
+                'fixture' => $spec->has('file') ? $this->resolveFixture((string) $spec->get('file'), "{$spec->path}.file") : null,
+            ];
+        }
+        return $plans;
+    }
+
+    /**
+     * Build each parsed format the way the "Publication Formats" page does,
+     * acting as the editor (admin), before a publish:
+     * 1. "Add publication format", "Name" typed, the "Publication Format"
+     *    list left on its preselected "Digital (on physical carrier) (DA)",
+     *    every other box empty, "OK": the window's PublicationFormatForm::
+     *    execute (the format row, its "created" Activity Log line);
+     * 2. for a `file`, the format row's "Change File": the upload wizard at
+     *    the proof stage on the format, the component its list offers first
+     *    (uploadThroughWizard, as galleys[] uploads), then the file row's
+     *    "Set Terms", "Open Access", "Save": ApprovedProofForm::execute
+     *    (salesType openAccess, directSalesPrice 0). The file's own
+     *    "Awaiting Approval" is left as it is, as the reader chain leaves it;
+     * 3. the format row's "Awaiting Approval" › "OK": the grid's own
+     *    PublicationFormatGridHandler::setApproved (the public-identifier
+     *    assignment, isApproved, the Activity Log line, the tombstone).
+     *
+     * @return array<int, array{id: int, name: string, submissionFileId: ?int}>
+     */
+    protected function seedPublicationFormats(Context $context, int $submissionId, array $plans, User $editor): array
+    {
+        $previousActingUser = Registry::get('user');
+        Registry::set('user', $editor);
+        try {
+            $seeded = [];
+            foreach ($plans as $plan) {
+                $submission = Repo::submission()->get($submissionId);
+                $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
+
+                $form = new PublicationFormatForm($submission, null, $publication);
+                $form->setData('name', $plan['name']);
+                $form->setData('entryKey', 'DA');
+                $form->setData('isPhysicalFormat', null);
+                $form->setData('isbn10', '');
+                $form->setData('isbn13', '');
+                $form->setData('remoteURL', '');
+                $form->setData('urlPath', '');
+                $formatId = (int) $form->execute();
+
+                $submissionFileId = null;
+                if ($plan['fixture'] !== null) {
+                    $submissionFileId = $this->uploadThroughWizard(
+                        $context,
+                        $submissionId,
+                        $editor,
+                        $plan['fixture'],
+                        SubmissionFile::SUBMISSION_FILE_PROOF,
+                        Application::ASSOC_TYPE_REPRESENTATION,
+                        $formatId,
+                        $this->defaultGalleyGenreId($context)
+                    );
+                    $terms = new ApprovedProofForm($submission, Application::getRepresentationDAO()->getById($formatId), $submissionFileId);
+                    $terms->setData('salesType', 'openAccess');
+                    $terms->setData('price', '');
+                    $terms->execute();
+                }
+
+                // The "Format Approval" window as the link opens it, then its
+                // "OK" with the boxes it ticks (a public-identifier plugin's
+                // "Assign" box, ticked by default, where one is enabled).
+                // (The seeding request is an API call, whose template manager
+                // lacks the page's `currentContext`, which the plugins'
+                // window sections read.)
+                \APP\template\TemplateManager::getManager(Application::get()->getRequest())->assign('currentContext', $context);
+                $window = $this->runFormatGridAction($submission, $publication, $formatId, 'setApproved', ['newApprovedState' => '1'], $plan['path'], 'The format\'s "Awaiting Approval" window did not open');
+                $ticked = $this->tickedBoxes((string) $window->getContent());
+                $this->runFormatGridAction($submission, $publication, $formatId, 'setApproved', ['newApprovedState' => '1', 'confirmed' => '1'] + $ticked, $plan['path'], 'The format\'s "Awaiting Approval" › "OK" was refused');
+                $this->assertPubIdsAssigned($context, $formatId, $ticked, $plan['path']);
+
+                $seeded[] = [
+                    'id' => $formatId,
+                    'name' => (string) $plan['name'][$submission->getData('locale')],
+                    'submissionFileId' => $submissionFileId,
+                ];
+            }
+            return $seeded;
+        } finally {
+            Registry::set('user', $previousActingUser);
+        }
+    }
+
+    /**
+     * Each seeded format's "Not Available" › "OK", after the publish (or at
+     * the end of an unpublished build): the grid's own
+     * PublicationFormatGridHandler::setAvailable (isAvailable, the Activity
+     * Log line, the tombstone removed).
+     */
+    protected function makePublicationFormatsAvailable(Context $context, int $submissionId, array $seeded, User $editor): void
+    {
+        $previousActingUser = Registry::get('user');
+        Registry::set('user', $editor);
+        try {
+            $submission = Repo::submission()->get($submissionId);
+            foreach ($seeded as $i => $format) {
+                $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
+                $this->runFormatGridAction($submission, $publication, $format['id'], 'setAvailable', ['newAvailableState' => '1'], "publicationFormats.{$i}", 'The format\'s "Not Available" › "OK" was refused');
+            }
+        } finally {
+            Registry::set('user', $previousActingUser);
+        }
+    }
+
+    /**
+     * Run one action of the publication format grid on a format, the
+     * handler's own code, with the request variables the screen's link
+     * posts. The authorized objects its policies would have set are set
+     * directly; the variables stand in the running request for the call
+     * (none of them is a key of the seed's body, which the request reads
+     * first).
+     */
+    private function runFormatGridAction(\APP\submission\Submission $submission, \APP\publication\Publication $publication, int $formatId, string $action, array $vars, string $specPath, string $refusal): JSONMessage
+    {
+        $request = Application::get()->getRequest();
+        $format = Application::getRepresentationDAO()->getById($formatId);
+        $handler = new PublicationFormatGridHandler();
+        $manager = new AuthorizationDecisionManager();
+        $manager->_authorizedContext[Application::ASSOC_TYPE_SUBMISSION] = $submission;
+        $manager->_authorizedContext[Application::ASSOC_TYPE_PUBLICATION] = $publication;
+        $manager->_authorizedContext[Application::ASSOC_TYPE_REPRESENTATION] = $format;
+        $handler->_authorizationDecisionManager = $manager;
+        $handler->setSubmission($submission);
+        $handler->setPublication($publication);
+        $previousVars = $request->_requestVars;
+        $request->_requestVars = array_merge($request->getUserVars(), $vars, [
+            'representationId' => (string) $formatId,
+            'submissionId' => (string) $submission->getId(),
+            'publicationId' => (string) $publication->getId(),
+        ]);
+        try {
+            $answer = $handler->$action([], $request);
+        } finally {
+            $request->_requestVars = $previousVars;
+        }
+        if (!$answer instanceof JSONMessage || !$answer->getStatus()) {
+            throw new SpecException($specPath, $refusal);
+        }
+        return $answer;
+    }
+
+    /**
+     * Each public identifier the "Format Approval" window's ticked "Assign"
+     * boxes asked for must be stored. The seeding request is an API call on
+     * the site, so a public-identifier plugin can be registered there
+     * without the storage hooks a press page request gives it; a box the
+     * seed ticked but could not honour is a 400, never a silently missing
+     * identifier (PRINCIPLES D4).
+     */
+    private function assertPubIdsAssigned(Context $context, int $formatId, array $ticked, string $specPath): void
+    {
+        if ($ticked === []) {
+            return;
+        }
+        $format = Application::getRepresentationDAO()->getById($formatId);
+        foreach (\PKP\plugins\PluginRegistry::loadCategory('pubIds', true, $context->getId()) as $plugin) {
+            if (isset($ticked[$plugin->getAssignFormFieldName()]) && !$format->getStoredPubId($plugin->getPubIdType())) {
+                throw new SpecException($specPath, "The \"Format Approval\" window ticks \"{$plugin->getAssignFormFieldName()}\" ({$plugin->getDisplayName()} is enabled for publication formats in \"{$context->getPath()}\"), and the seed cannot store that identifier; build this format on screen");
+            }
+        }
+    }
+
+    /** The ticked checkboxes of a grid window's HTML, as its form posts them (name → value). */
+    private function tickedBoxes(string $html): array
+    {
+        $ticked = [];
+        preg_match_all('/<input\b[^>]*>/i', $html, $inputs);
+        foreach ($inputs[0] as $input) {
+            if (preg_match('/type="checkbox"/i', $input) && preg_match('/\schecked\b/i', $input) && !preg_match('/\sdisabled\b/i', $input) && preg_match('/name="([^"]+)"/', $input, $name)) {
+                $ticked[$name[1]] = preg_match('/value="([^"]*)"/', $input, $value) ? $value[1] : 'on';
+            }
+        }
+        return $ticked;
     }
 
     /**

@@ -461,12 +461,18 @@ Keys:
   "Save" with the name in the primary locale. `metadata` is the window's
   "File Metadata" list, `document`, `artwork` or `supplementary`
   ("Supplementary Content"); `dependent` and `supplementary` its two "File
-  Type" boxes; `required` its "Require with Submissions" (`true` is "Yes,
+  Type" boxes; `fileVariants` its "File Variants" box ("These files
+  support file variants types, such as 'web' or 'high resolution'
+  images."; ticked at install on "Image" alone, and `{Multimedia:
+  {fileVariants: true}}` is U47's Settings bullet 2 state, "HTML
+  Stylesheet" on a press, which has no Multimedia); `required` its
+  "Require with Submissions" (`true` is "Yes,
   require submitting authors to upload one or more of these files.").
   Unset, an edit keeps the stored value and an added component gets the
-  window's own start: Document, both boxes unticked, "No", an empty
+  window's own start: Document, every box unticked, "No", an empty
   "Key". Both saves run the grid's own form, so the rows are the
-  screen's (U36 harness, 2026-09-23, three apps). An unknown name with
+  screen's (U36 harness, 2026-09-23, three apps; `fileVariants` U47
+  harness, 2026-09-24, three apps). An unknown name with
   `false`, an edit that sets nothing, another word for `metadata` and a
   non-boolean box are 400s. Parity fact: "Add a Component" saves the new
   component at position 0, the first default's own position, so the list
@@ -878,6 +884,87 @@ Keys:
   (stored data citations outlive the setting being switched off). The
   response lists `dataCitations` (`id`, `title`, in the order seeded).
   The three apps alike (U42 harness, 2026-09-24).
+- `mediaFiles[]`: media files on the current publication's "Media" page,
+  each `{file, genre?, resolution?, name?, pair?}`, added the way the
+  page adds them, acting as `admin`, after the galleys and before a
+  publish (so a `published: true` seed carries them on the published
+  version): every entry is a card of one "Add Media File" › "Upload Media
+  File" window (its upload, then one "Upload Files" for all of them),
+  then each `name` is that row's "Edit Metadata" › "Save", then, if any
+  entry has a `pair`, one "Batch Link Media" › "Link Media". Each step
+  runs the media files API's own action on the body the window sends.
+  `file` (required) is a fixture basename, as for `galleys[]`
+  (`figure.png`, a 120×80 PNG, is the image `article.html` and
+  `preprint.html` name). `genre` is "What kind of media is this?", a
+  component name as the list shows it (every component marked as a
+  dependent file: "Multimedia", "Image", "HTML Stylesheet" on a new
+  journal or preprint server, "Image" and "HTML Stylesheet" on a new
+  press, or one a `components` seed ticked `dependent` on); it defaults
+  to "Image". `resolution` is "File resolution type", `web` (the
+  default, "Web resolution") or `high_resolution` ("High resolution"),
+  the latter only for a component with "File Variants" ticked.
+  `name` is "Name of the file" (default the fixture's own name, as the
+  upload names it): it is what an HTML galley's `src` or `href` has to
+  match for a reader to see the file. `pair` is a label two entries
+  share, one `web` and one `high_resolution` of the same component: the
+  two are linked as the web file's "Batch Link Media" row set to the
+  other links them, the shared details copied from the web file. The
+  window's refusals are the seed's 400s (a component the list does not
+  offer, a `high_resolution` it greys out, an empty name, a `pair` that
+  is not one file of each resolution in one component), and a draft
+  (`submitted: false`) refuses the key: the page is on the workflow.
+  The rows, the stored files, the Activity Log lines and the page's list
+  are the screen's, the uploader included, since the screen was driven
+  as `admin` (U47 harness, 2026-09-24, three apps driven; parity
+  ledger). All entries of one seed are one "Upload Files", so they share
+  their upload second, and the page's newest-first list shows them in
+  no fixed order among themselves (a pair stays together). The response
+  lists `mediaFiles` (`submissionFileId`, `file`, `name`, `genre`,
+  `resolution`, `variantGroupId`, null for a file with no counterpart,
+  in the order seeded). No key makes a second version: a test uses the
+  header's "Create New Version", which copies them (U47 Rule 9). A reader
+  fact for the published side: the HTML galley plugin serves a reader who
+  is not signed in a copy of the galley's page cached for 24 hours under
+  the galley's id, built at the first such view and dropped by nothing
+  (not by a media change, not by `reset:<app>`, which leaves
+  `checkouts/<app>/cache/` alone), so after a reset a new galley can
+  inherit an old install's cached page with the images unresolved; a
+  signed-in reader always gets a fresh page (U47 harness, 2026-09-24).
+- `publicationFormats[]` (OMP): publication formats on the current
+  publication, each `{name, file?}`, every one built through to the state
+  a reader sees, the way the "Publication Formats" page builds it, acting
+  as `admin`, after the media files and before a publish: "Add
+  publication format" with `name` in "Name" (the "Publication Format"
+  list left on its preselected "Digital (on physical carrier) (DA)", the
+  other boxes empty) and "OK"; for a `file`, the format row's "Change
+  File" upload (the proof stage, the component the wizard's list offers
+  first, "Appendix" on a new press, as for `galleys[]`), then the file
+  row's "Set Terms", "Open Access", "Save"; then the format row's
+  "Awaiting Approval" › "OK"; and, after the publish (at the end of the
+  build on an unpublished seed), its "Not Available" › "OK". So the format
+  reads "Approved" and "Available", and its file "Open Access", while the
+  file's own "Awaiting Approval" stays (the reader does not need it).
+  `name` is required, a string (the submission's language) or a locale
+  map over the press's submission languages that fills the submission's
+  one; `file` is a fixture basename, as for `galleys[]` (`article.html`
+  names `figure.png`, so with `mediaFiles: [{file: 'figure.png'}]` and
+  `published: true` the book page lists the format and its "HTML" link
+  opens the file with the image resolved, "HTML Monograph File" being on
+  in a new press). A draft (`submitted: false`) refuses the key. A press
+  with a public-identifier plugin (URN) enabled for publication formats
+  ticks an "Assign" box in the approval window that the seed cannot
+  honour, so that seed is a 400: build such a format on screen. A new
+  press can be such a press without anyone enabling URN: plugin settings
+  are cached for 24 hours per context id, and `reset:<app>` leaves
+  `checkouts/<app>/cache/` alone, so a scratch press whose id an earlier
+  install used can inherit that install's URN settings (seen on context
+  297, U47 harness pass 2). The
+  rows (the format, its file, the Activity Log lines, the notifications)
+  and the book page are the screen's (U47 harness pass 2, 2026-09-25,
+  parity ledger). The response lists `publicationFormats` (`id`, `name`
+  in the submission's language, `submissionFileId`, null with no
+  `file`). OJS and OPS answer 400: a journal and a preprint server have
+  galleys (`galleys[]`).
 
 App-specific keys:
 
@@ -897,15 +984,16 @@ App-specific keys:
   suggestions and its wizard has no such step, and `files`, because a
   preprint server shows no workflow file list.
 - OMP: `galleys` is rejected with a 400, because a press has publication
-  formats and no "Galleys" page.
+  formats and no "Galleys" page (`publicationFormats[]` above is the
+  press's counterpart; OJS and OPS reject that key the same way).
 
 Facts tests rely on, all parity-checked against the UI path:
 
 - A submitted seed carries the same notifications the real submit endpoint
   creates, and the submitter is the publication's primary contact.
 - Seeded submissions carry no files unless `files[]` or
-  `reviewRounds[].files[]` names them (a `galleys[].file` proof file
-  aside). A test whose behavior under test is the upload itself uploads
+  `reviewRounds[].files[]` names them (a `galleys[].file` or
+  `publicationFormats[].file` proof file and `mediaFiles[]` aside). A test whose behavior under test is the upload itself uploads
   through the panel under test. The wizard's required-genre check blocks a
   seeded draft's submit until a file of the required component is on it.
   Review-round files are also grant-based; see `patterns.md`: a reviewer
@@ -972,8 +1060,8 @@ the order seeded), `galleys[]` (`id`, `label`, `submissionFileId`, null
 for a remote galley), `files[]` (`submissionFileId`, `file`,
 `fileStage`, `reviewRoundId`, null on "Submission Files", and `uploader`;
 the root entries in order, then each round's), `tasks[]` (`id`,
-`title`, `type`, `stage`, in the order seeded) and `libraryFiles[]` (as
-the context's). `stageId`
+`title`, `type`, `stage`, in the order seeded), `libraryFiles[]` (as
+the context's), `mediaFiles[]` and `publicationFormats[]` (above). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
@@ -1035,8 +1123,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   Review" only, U36); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
 - Publication: `metadata.datePublished` (without it, publish stamps today);
-  `mediaFiles[]` (`variantType` of `web` or `high_resolution`, `file?`,
-  `name?`, `genre?`, `group?`); `metadata.keywords` and the other term
+  `metadata.keywords` and the other term
   lists per language (a published submission carrying terms, the source of
   U40's suggestions; sync 2026-09-18, two agents took the on-screen detour).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
