@@ -92,7 +92,7 @@ orchestrator.
 
 | What | Where |
 |---|---|
-| Product findings: bugs, divergences, open questions, API misbehavior the browser's own traffic showed with no security dimension | the spec's Findings register; nowhere else (not `app-changes.md`, not a PROGRESS note) |
+| Product findings: bugs, divergences, open questions, API misbehavior the browser's own traffic showed, or a direct check of an API no screen calls (the Frame's one exception), with no security dimension | the spec's Findings register; nowhere else (not `app-changes.md`, not a PROGRESS note) |
 | A potential security concern | `../e2e_ng/security.md`, private and outside every repo; verified by one targeted probe before the session report; rules and entry shape in `briefs/security-verify.md`. The fact of routing is always stated; the content never appears in a spec, test, `.reports/` file, PROGRESS note or commit |
 | A finding against an unmerged PR | the developer; the spec describes `main` (MAINTENANCE "A developer's PR fails the suite") |
 | What a probe saw on another feature's screen | `docs/tracking/incidentals.md`, one line, written by the orchestrator from the fold log and the merge |
