@@ -42,6 +42,7 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
             'wordCount' => $spec->get('wordCount'),
             'abstractsNotRequired' => (bool) $spec->get('abstractsNotRequired', false),
             'identifyType' => $spec->get('identifyType'),
+            'hideTitle' => BootstrapSeeder::parseHideTitle($spec),
         ];
     }
 
@@ -50,10 +51,17 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
         return BootstrapSeeder::addSection($context, $plan, $sequence);
     }
 
-    /** `issues[]` (U08): the bootstrap payload's issues list, same shape, plus `coverImage` (U13). */
+    /**
+     * `issues[]` (U08): the bootstrap payload's issues list, same shape,
+     * plus `coverImage` (U13), `datePublished` and `galleys[]` (U50); the
+     * galleys' "Language" is checked against the new journal's form
+     * languages (primary first).
+     */
     protected function parseOverlay(Spec $root): array
     {
-        return ['issues' => BootstrapSeeder::parseIssues($root, withCover: true)];
+        $primaryLocale = (string) ($this->contextParams['primaryLocale'] ?? 'en');
+        $formLocales = array_values(array_unique(array_merge([$primaryLocale], (array) ($this->contextParams['supportedFormLocales'] ?? []))));
+        return ['issues' => BootstrapSeeder::parseIssues($root, withCover: true, formLocales: $formLocales)];
     }
 
     /** The bootstrap's own issue path; the response lists the issues. */

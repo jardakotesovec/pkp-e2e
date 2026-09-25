@@ -49,7 +49,8 @@ Payload keys:
   renames the default section the app creates on context creation (OJS
   "Articles", OPS "Preprints") instead of adding a second one. OMP creates no
   default series. Section fields, OJS: `abbrev` (required), `title`,
-  `policy`, `wordCount`, `abstractsNotRequired`, `identifyType`. OPS: `abbrev`
+  `policy`, `wordCount`, `abstractsNotRequired`, `identifyType`,
+  `hideTitle` (U50, below). OPS: `abbrev`
   (required), `path`, `title`, `policy`, `wordCount`, `abstractsNotRequired`.
   OMP series: `path` (required), `title`, `description`.
 - `categories[]` with `path` (required), `title`, and nested `children[]`,
@@ -91,6 +92,16 @@ Keys:
 - `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
   entry renames the default section. OMP's context scenario does not accept
   a `series[]` list yet and answers 400 on the key.
+  An OJS entry's `hideTitle` (boolean) is the section form's "Omit the
+  title of this section from issues' table of contents." ticked (`true`)
+  or unticked, as its "Save" stores it (`hide_title` 1 / 0); without the
+  key the box is unticked. On the renamed default section it is saved
+  with the rename; the form's "Save" also re-saves the window's other
+  fields (the policy wrapped in `<p>`, the word count as 0), which the
+  key does not, and nothing on screen differs. With it on, an issue's
+  page lists the section's articles with no section heading. A
+  non-boolean is a 400; OPS answers 400 on the key, its section form has
+  no such box (U50 harness, 2026-09-25).
 - `categories[]` (the three apps): the bootstrap payload's shape and
   seeding code, each `{path, title?, children[]?}`, `children` a nested
   list of the same shape (subcategories, to any depth). Each category is
@@ -135,7 +146,8 @@ Keys:
   list order after `users[]`. A published submission lands in one through
   the submission scenario's `issue` key below (U08 harness, 2026-09-24).
   The response lists the created `issues` (`id`, `volume`, `number`,
-  `year`, `published`); an issue's page is `issue/view/{id}`.
+  `year`, `published`, and `galleys` (`id`, `label`, `locale`, `fileId`)
+  when the entry seeds any); an issue's page is `issue/view/{id}`.
   An entry's `coverImage`, `{file, altText?}` (U13 harness, 2026-09-24),
   is the form's "Cover image": `file` an image fixture basename (as for
   the submission's `files[]`, e.g. `profile-image-400.png`; anything but
@@ -147,6 +159,29 @@ Keys:
   cover, saved there. The key is the context scenario's alone (the
   bootstrap payload answers 400 on it). A published article with no cover
   of its own shows its issue's cover on its page.
+  An entry's `datePublished` (`YYYY-MM-DD`, U50) is the form's "Date
+  Published" box, typed before "Save" (stored as that day at midnight);
+  "Publish Issue" keeps it and stamps today only when the box is empty,
+  so issues seeded `published` carry the dates given (the last published
+  entry is still the current issue, whatever its date). An unpublished
+  entry may carry one too, as the box allows. Any other shape is a 400.
+  An entry's `galleys[]` (U50), each `{label, file, locale?}`, is the
+  issue's "Issue Management" › "Issue Galleys" › "Create Issue Galley" ›
+  "Save", run through the grid's own form as `admin`, after the issue is
+  created and before it is published: `file` a fixture basename as for
+  the submission's `galleys[]` (`article.pdf`), stored as the window's
+  upload stores it (the issue file `{issueId}-{fileId}-PB.pdf`, public);
+  `label` the required "Galley Label"; `locale` the "Language", default
+  the journal's primary language (what the list arrives on), and one of
+  its form languages (the window refuses any other). The "URL Path" box
+  is saved empty (''), as a window saved with it empty stores it; the key
+  has no `urlPath`. Galleys join the tab's list in the order given. A
+  missing label or file, another locale, a missing fixture and an
+  unknown entry key are 400s. The issue page's "Full Issue" link opens
+  `issue/view/{issueId}/{galleyId}`, the PDF reader for a PDF; on a
+  journal that requires subscriptions the link reads "Requires
+  Subscription PDF" (U50 harness, 2026-09-25). Like `coverImage`, both
+  keys are the context scenario's alone (the bootstrap answers 400).
 - `users[]`: throwaway accounts. Each entry takes `username` and `roles`
   (both required, roles non-empty), `givenName`, `familyName`, `email`
   (default `<username>@mail.test`), `password` (default: the username
@@ -360,6 +395,21 @@ Keys:
   context schema lacks (U48 harness, 2026-09-25), although their "Site
   Access Options" tab carries the same box under "View Monograph
   Content" and "View Preprint Content" (U48 claim check K2, 2026-09-25).
+- `publishingMode` (OJS only): the "Publishing Mode" radio of Settings ›
+  Distribution › "Access", one of `open` ("The journal will provide open
+  access to its contents."), `subscription` ("The journal will require
+  subscriptions to access some or all of its contents.") or `none` ("OJS
+  will not be used to publish the journal's contents online."), saved as
+  that form saves (stored as `0`, `1`, `2`). The tab's "Save" posts
+  `publishingMode=…&delayedOpenAccessDuration=&enableOai=true`; the
+  empty "Delayed Open Access" stores no row, and the key writes the mode
+  alone. A fresh journal has no row, which the app reads as open access,
+  and its tab opens with no radio selected. The mode is saved before
+  `issues[]`, so a seeded issue is born with the access status the
+  "Create Issue" form gives it under the mode: "Subscription" under
+  `subscription` and `none`, "Open access" under `open`. Any other value
+  (an integer included) is a 400; OMP and OPS answer 400 on the key
+  (U50 harness, 2026-09-25).
 - `enableAnnouncements` (boolean), `announcementsIntroduction` (localized
   text) and `numAnnouncementsHomepage` (a whole number of zero or more, or
   null for the box emptied): the three fields of Settings › Website › Setup
@@ -1290,7 +1340,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining
   submission-intake settings (the checklist and the privacy statement,
-  U58), `submitWithCategories`, `publishingMode`, DOI
+  U58), `submitWithCategories`, DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), ISSNs (the online ISSN
   is typed on Masthead, U13), `licenseUrl` (copied

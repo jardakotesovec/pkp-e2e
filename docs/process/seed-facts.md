@@ -1001,3 +1001,18 @@ config-file settings.
   three apps: "View Article Content" (OJS), "View Monograph Content"
   (OMP), "View Preprint Content" (OPS); unticked on a fresh context. All
   three apps, 2026-09-25 (U48 claim check K2, `ctl-03-access-{omp,ops}`).
+- {OJS} A `published: true` seeded article has no Production history:
+  when its issue is unpublished, the article goes back to the Submission
+  stage and its workflow header reads "Submission", where an article
+  published through the workflow reads "Scheduled"; both carry "Status:
+  Scheduled" under Publication Settings. 2026-09-25 (U50 claim check K2,
+  `u-wf-b`, `u2-wf-a`, `u2-wf-e`).
+- The signed-out site home (`index.php/index`) lists every enabled
+  context on one page with no page links, each with "View Journal" and
+  "Current Issue" (OJS), "View Press Website" alone (OMP) or "View
+  Server" alone (OPS). All three apps, 2026-09-25 (U50 claim check K3,
+  `m-04-site-home`, `ctl-site-home-*`).
+- {OJS} An issue's seeded `coverImage` is stored for the primary language
+  and shows on the other interface languages' issue pages too
+  (`/fr_CA/issue/view/{id}`). 2026-09-25 (U50 claim check K3,
+  `c-02-l-issue-fr`).

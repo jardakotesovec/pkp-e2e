@@ -113,6 +113,10 @@
  *   Options" › "View Article Content", "Users must be registered and log in
  *   to view open access content." (U48; the OJS UserAccessForm's box). The
  *   journal's context schema alone carries it: OMP and OPS answer 400.
+ * - publishingMode (open / subscription / none) — Settings › Distribution ›
+ *   "Access", "Publishing Mode" (U50; the OJS AccessForm's radio). Journal
+ *   only: OMP and OPS answer 400. Saved before the issues[] overlay, so a
+ *   seeded issue is born with the access status the mode gives it.
  * - enableAnnouncements (bool), announcementsIntroduction (localized),
  *   numAnnouncementsHomepage (int ≥ 0 or null) — Settings › Website › Setup ›
  *   "Announcements" tab's three fields (U12; PKPAnnouncementSettingsForm, a
@@ -223,7 +227,10 @@
  *   with the "Title" box unticked, then "Publish Issue" with the email box
  *   unticked. Applied after users[]; the response lists the issues' ids.
  *   An entry's coverImage {file*, altText?} (U13) is the form's "Cover
- *   image" upload and the "Issue Data" tab's alt text (BootstrapSeeder).
+ *   image" upload and the "Issue Data" tab's alt text (BootstrapSeeder);
+ *   its datePublished (U50) the form's "Date Published" box, and its
+ *   galleys[] {label*, file*, locale?} (U50) the "Issue Galleys" tab's
+ *   "Create Issue Galley" window (the grid's own IssueGalleyForm).
  *   OMP and OPS read no overlay, so the key answers 400 there.
  */
 
@@ -265,6 +272,14 @@ abstract class PKPContextScenarioBuilder
 
     protected ContextFactory $contextFactory;
     protected UserSeeder $userSeeder;
+
+    /**
+     * The parsed `context` params of the build in progress (primaryLocale,
+     * supportedFormLocales, …), set before the overlay's parse phase so an
+     * app overlay can refuse a value the new context's forms would refuse
+     * before anything is written (OJS issue galleys' "Language", U50).
+     */
+    protected array $contextParams = [];
 
     public function __construct()
     {
@@ -341,6 +356,7 @@ abstract class PKPContextScenarioBuilder
         // Parse phase — unknown keys 400 before any write.
         $contextParams = $this->contextFactory->parseParams($contextSpec);
         $contextSpec->assertConsumed();
+        $this->contextParams = $contextParams;
         $structurePlans = array_map(
             fn (Spec $spec) => $this->parseStructure($spec),
             $root->childList($this->structureKey())
@@ -1441,7 +1457,8 @@ abstract class PKPContextScenarioBuilder
      * the preprint server only, `postedAcknowledgement` (U49); and the
      * Website › Content › Comments tab's `enablePublicComments` (U14); and
      * the Users & Roles › Site Access Options tab's `restrictSiteAccess`
-     * (U13) and the journal's `restrictArticleAccess` (U48). Only keys
+     * (U13) and the journal's `restrictArticleAccess` (U48); and the
+     * journal's Distribution › "Access" `publishingMode` (U50). Only keys
      * the app's context schema carries are accepted.
      *
      * @return array{settings: array, specKeys: array}
@@ -1631,6 +1648,30 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['restrictArticleAccess'] = $value;
             $specKeys['restrictArticleAccess'] = 'restrictArticleAccess';
+        }
+
+        if ($root->has('publishingMode')) {
+            // Settings › Distribution › "Access", the "Publishing Mode"
+            // radio (U50; the OJS AccessForm's FieldOptions over the
+            // journal schema's integer, in:0,1,2, no default, so a fresh
+            // journal has no row and reads as open). The form posts the
+            // radio's value form-encoded, which the save's
+            // convertStringsToSchema turns back into the integer. The
+            // form's other fields ("Delayed Open Access", "OAI") are not
+            // this key's; they stay as the context has them. Only the
+            // journal's context schema carries it: OMP and OPS answer 400.
+            $hasProperty('publishingMode') || throw new SpecException('publishingMode', 'publishingMode is not a setting of this app\'s context schema (the "Publishing Mode" radio exists on a journal only)');
+            $modes = [
+                'open' => \APP\journal\Journal::PUBLISHING_MODE_OPEN,
+                'subscription' => \APP\journal\Journal::PUBLISHING_MODE_SUBSCRIPTION,
+                'none' => \APP\journal\Journal::PUBLISHING_MODE_NONE,
+            ];
+            $value = $root->get('publishingMode');
+            if (!is_string($value) || !array_key_exists($value, $modes)) {
+                throw new SpecException('publishingMode', 'publishingMode must be one of: open ("The journal will provide open access to its contents."), subscription ("The journal will require subscriptions…"), none ("OJS will not be used to publish the journal\'s contents online.")');
+            }
+            $settings['publishingMode'] = $modes[$value];
+            $specKeys['publishingMode'] = 'publishingMode';
         }
 
         // Settings › Website › Setup › "Announcements"

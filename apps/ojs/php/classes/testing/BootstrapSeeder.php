@@ -14,12 +14,17 @@
 
 namespace APP\testing;
 
+use APP\controllers\grid\issues\form\IssueGalleyForm;
+use APP\core\Application;
 use APP\facades\Repo;
 use PKP\context\Context;
 use PKP\core\Core;
 use PKP\core\PKPString;
+use PKP\core\Registry;
+use PKP\db\DAORegistry;
 use APP\file\PublicFileManager;
 use PKP\plugins\Hook;
+use PKP\testing\ContextFactory;
 use PKP\testing\LibraryFileSeeder;
 use PKP\testing\PKPBootstrapSeeder;
 use PKP\testing\Spec;
@@ -41,7 +46,26 @@ class BootstrapSeeder extends PKPBootstrapSeeder
             'wordCount' => $spec->get('wordCount'),
             'abstractsNotRequired' => (bool) $spec->get('abstractsNotRequired', false),
             'identifyType' => $spec->get('identifyType'),
+            'hideTitle' => self::parseHideTitle($spec),
         ];
+    }
+
+    /**
+     * A section's `hideTitle` (U50): the section form's "Omit the title of
+     * this section from issues' table of contents." box (SectionForm saves
+     * it as 1 / 0; the column defaults to 0, the box unticked). Null when
+     * the key is absent; a non-boolean is a 400.
+     */
+    public static function parseHideTitle(Spec $spec): ?bool
+    {
+        if (!$spec->has('hideTitle')) {
+            return null;
+        }
+        $value = $spec->get('hideTitle');
+        if (!is_bool($value)) {
+            throw new SpecException("{$spec->path}.hideTitle", 'hideTitle must be a boolean (true: the section form\'s "Omit the title of this section from issues\' table of contents." ticked)');
+        }
+        return $value;
     }
 
     protected function addStructure(Context $context, array $plan, int $sequence): int
@@ -81,6 +105,9 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 if (($plan['identifyType'] ?? null) !== null) {
                     $params['identifyType'] = $localize($plan['identifyType']);
                 }
+                if (($plan['hideTitle'] ?? null) !== null) {
+                    $params['hideTitle'] = $plan['hideTitle'];
+                }
                 $defaultSection = $existing->first();
                 Repo::section()->edit($defaultSection, $params);
                 return $defaultSection->getId();
@@ -112,6 +139,9 @@ class BootstrapSeeder extends PKPBootstrapSeeder
             foreach ($localize($plan['identifyType']) as $l => $value) {
                 $section->setData('identifyType', $value, $l);
             }
+        }
+        if (($plan['hideTitle'] ?? null) !== null) {
+            $section->setData('hideTitle', $plan['hideTitle']);
         }
         return Repo::section()->add($section);
     }
@@ -145,12 +175,15 @@ class BootstrapSeeder extends PKPBootstrapSeeder
 
     /**
      * The `issues[]` list, shared by the bootstrap payload and the context
-     * scenario (U08): {volume*, number*, year*, published?}. Parse phase
-     * only; an unknown key in an entry is left unconsumed, so it 400s.
+     * scenario (U08): {volume*, number*, year*, published?}; the context
+     * scenario ($withCover) also reads coverImage (U13), datePublished and
+     * galleys[] (U50), the galleys' locale checked against $formLocales.
+     * Parse phase only; an unknown key in an entry is left unconsumed, so
+     * it 400s.
      *
      * @return array<int, array{volume: int, number: string, year: int, published: bool}>
      */
-    public static function parseIssues(Spec $root, bool $withCover = false): array
+    public static function parseIssues(Spec $root, bool $withCover = false, ?array $formLocales = null): array
     {
         $issues = [];
         foreach ($root->childList('issues') as $spec) {
@@ -187,12 +220,48 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 }
                 $coverImage = ['fixture' => $fixture, 'altText' => $altText];
             }
+            // `datePublished` (U50, the context scenario only): the form's
+            // "Date Published" box, typed as its date picker fills it
+            // (YYYY-MM-DD; IssueForm::validate's date_format:Y-m-d). Kept by
+            // "Publish Issue", which stamps today only on an empty box.
+            $datePublished = null;
+            if ($withCover && $spec->has('datePublished')) {
+                $datePublished = $spec->get('datePublished');
+                $parsed = is_string($datePublished) ? \DateTime::createFromFormat('!Y-m-d', $datePublished) : false;
+                if (!$parsed || $parsed->format('Y-m-d') !== $datePublished) {
+                    throw new SpecException("{$spec->path}.datePublished", 'datePublished must be a date as YYYY-MM-DD (the "Date Published" box)');
+                }
+            }
+            // `galleys[]` (U50, the context scenario only): the "Issue
+            // Galleys" tab's "Create Issue Galley" window, each {label*,
+            // file*, locale?}; refused here as its form refuses them.
+            $galleys = [];
+            if ($withCover) {
+                $primaryLocale = $formLocales[0] ?? null;
+                foreach ($spec->childList('galleys') as $galleySpec) {
+                    $label = $galleySpec->require('label');
+                    if (!is_string($label) || trim($label) === '') {
+                        throw new SpecException("{$galleySpec->path}.label", 'label must be a non-empty string (the window\'s required "Galley Label")');
+                    }
+                    $locale = $galleySpec->get('locale');
+                    if ($locale !== null && (!is_string($locale) || !in_array($locale, (array) $formLocales, true))) {
+                        throw new SpecException("{$galleySpec->path}.locale", 'locale must be one of the journal\'s form languages (' . implode(', ', (array) $formLocales) . '); the window refuses any other "Language"');
+                    }
+                    $galleys[] = [
+                        'label' => $label,
+                        'locale' => $locale,
+                        'fixture' => LibraryFileSeeder::resolveFixture((string) $galleySpec->require('file'), "{$galleySpec->path}.file"),
+                    ];
+                }
+            }
             $issues[] = [
                 'volume' => $whole('volume'),
                 'number' => (string) $number,
                 'year' => $whole('year'),
                 'published' => $published,
                 'coverImage' => $coverImage,
+                'datePublished' => $datePublished,
+                'galleys' => $galleys,
             ];
         }
         return $issues;
@@ -238,6 +307,10 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 default => \APP\issue\Issue::ISSUE_ACCESS_OPEN,
             });
             $issue->setData('published', false);
+            if (!empty($plan['datePublished'])) {
+                // IssueForm::execute: setDatePublished from the typed box.
+                $issue->setData('datePublished', $plan['datePublished']);
+            }
             if ($asTheForm) {
                 // IssueForm::execute: setTitle / setDescription from the
                 // form's per-locale boxes, posted empty ("Title" unticked).
@@ -276,6 +349,11 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 Repo::issue()->edit($issue, []);
             }
 
+            $galleys = [];
+            foreach ($plan['galleys'] ?? [] as $galleyPlan) {
+                $galleys[] = self::addIssueGalley($context, $issue, $galleyPlan);
+            }
+
             if ($plan['published']) {
                 // The publish flow, mirrored from
                 // IssueGridHandler::publishIssue (~544-633): DOI creation
@@ -302,8 +380,52 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 'number' => $plan['number'],
                 'year' => $plan['year'],
                 'published' => $plan['published'],
-            ];
+            ] + ($galleys ? ['galleys' => $galleys] : []);
         }
         return $created;
+    }
+
+    /**
+     * One issue galley (U50): the issue's "Issue Galleys" tab › "Create
+     * Issue Galley", its upload area's request (IssueGalleyGridHandler::
+     * upload: TemporaryFileManager::handleUpload for the acting manager,
+     * the seeding admin) and "Save" (IssueGalleyGridHandler::update: the
+     * grid's own IssueGalleyForm, its data set as readInputData reads the
+     * POST, then execute(): IssueFileManager::fromTemporaryFile, the
+     * issue_galleys row at the end of the list, the form's execute hook).
+     * The form's refusals were the parse phase's; its POST and CSRF checks
+     * and the grid's refresh event are not run.
+     *
+     * @return array{id: int, label: string, locale: string, fileId: int}
+     */
+    public static function addIssueGalley(Context $context, \APP\issue\Issue $issue, array $plan): array
+    {
+        $admin = Repo::user()->getByUsername('admin', true);
+        $restoreContext = ContextFactory::forceRequestContext($context);
+        $previousActingUser = Registry::get('user');
+        Registry::set('user', $admin);
+        try {
+            $temporaryFile = LibraryFileSeeder::upload($plan['fixture'], $admin);
+            $request = Application::get()->getRequest();
+            $form = new IssueGalleyForm($request, $issue);
+            $form->setData('label', $plan['label']);
+            // The "Language" list arrives on the forms' language, the
+            // journal's primary locale for the seeding manager.
+            $form->setData('galleyLocale', $plan['locale'] ?? $context->getPrimaryLocale());
+            $form->setData('temporaryFileId', (string) $temporaryFile->getId());
+            $form->setData('urlPath', '');
+            $galleyId = (int) $form->execute();
+        } finally {
+            Registry::set('user', $previousActingUser);
+            $restoreContext();
+        }
+        $issueGalleyDao = DAORegistry::getDAO('IssueGalleyDAO'); /** @var \APP\issue\IssueGalleyDAO $issueGalleyDao */
+        $galley = $issueGalleyDao->getById($galleyId);
+        return [
+            'id' => $galleyId,
+            'label' => (string) $galley->getLabel(),
+            'locale' => (string) $galley->getLocale(),
+            'fileId' => (int) $galley->getFileId(),
+        ];
     }
 }
