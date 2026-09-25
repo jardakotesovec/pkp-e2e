@@ -111,7 +111,10 @@ class CategorySeeder
             'title' => $plan['title'],
             'sortOption' => Repo::submission()->getDefaultSortOption(),
         ];
-        $errors = Repo::category()->validate($category, $props, $context);
+        // stable-3_5_0 takes (object, props, allowedLocales, primaryLocale); main takes the context.
+        $errors = (new \ReflectionMethod(Repo::category(), 'validate'))->getNumberOfParameters() === 4
+            ? Repo::category()->validate($category, $props, $context->getData('supportedFormLocales'), $context->getData('primaryLocale'))
+            : Repo::category()->validate($category, $props, $context);
         if (!empty($errors)) {
             throw new SpecException($plan['specPath'], 'The "Add Category" window would refuse the entry: ' . json_encode($errors));
         }

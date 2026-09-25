@@ -14,7 +14,8 @@
 //   api      GET submissions/{id}/publications/{pid}/jats for every submission → after-<key>.xml             (api-*)
 //   s5       OAI ListMetadataFormats, ListIdentifiers, GetRecord and ListRecords (jats) → oai-*.xml          (oai-*)
 //   pub      the public JATS download after PUT jats/visibility on "rich" → public-rich.xml                  (public-*)
-// No assertions: the session judges (a JATS 1.2 DTD check over after-*.xml is not kept with the script).
+// On PKP_E2E_LINE=stable-3_5_0 "rich" stays unpublished (the line refuses the `published` seed key): s1, pub and
+// the OAI records then read nothing, the API reads stand. No assertions: the session judges (a JATS 1.2 DTD check over after-*.xml is not kept with the script).
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, screen, shot, record, idle, tag, outDir} = require('../../../probe');
@@ -86,7 +87,7 @@ forEachApp(async (app) => {
             if (key === 'das') continue;
             subs[key] = await app.api.createSubmission({
                 tag: `${scratch}${key}`, context: scratch, submitter: au,
-                title: `rr14 ${key} abstract`, abstract, submitted: true, published: key === 'rich',
+                title: `rr14 ${key} abstract`, abstract, submitted: true, published: key === 'rich' && !process.env.PKP_E2E_LINE, // 3.5 refuses the `published` seed key
             });
         }
         subs.dasrefs = await app.api.createSubmission({

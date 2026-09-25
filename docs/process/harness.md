@@ -318,7 +318,12 @@ A run longer than about four minutes outlives the prompt cache of the agent
 waiting on it, and whole-project runs are what `npm run test:final` is for.
 Selecting a serial spec by path alone runs its dependency projects
 (`setup`, `shared`, the app project) in full first; `--project=<app>-serial
---no-deps` on a warm install runs the spec alone.
+--no-deps` on a warm install runs the spec alone. A suite id as the
+filter (`U12`) also matches `tests/serial/U12-…` and so pulls in the
+whole chain: an app suite's regression run names `--project=<app>`; and
+`--no-deps` also drops the solo project's wait on the serial one, so a
+`@solo` test runs in its own `--project=<app>-solo --no-deps` command
+after the serial one's (U09 harness, U16 tops).
 
 `fleet-prep` and `test:final` run the apps one after another and leave
 `PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a

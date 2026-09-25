@@ -52,7 +52,10 @@ Each of these has bitten at least once.
    form. The page has one jQuery UI calendar (`#ui-datepicker-div`); opened
    from a second legacy window on the same page it sits under that window
    and the day click hangs its full timeout, so land the page afresh before
-   the second window's date. A closed Vue side modal (and a legacy one closed
+   the second window's date. `fill()` on a jQuery UI date box changes only
+   the visible text, not the field the form posts, so the date saves as
+   empty: type it from the keyboard (select all, Delete, the date, Tab)
+   (U13 PFL settings, U50 Issues forms). A closed Vue side modal (and a legacy one closed
    by its own "Cancel", U32 ccK3) leaves a hidden shell in the DOM until the
    next navigation, so `getByRole` on the table behind it returns nothing
    until then; and a Vue form's "Save" is disabled after a refused save
@@ -95,7 +98,12 @@ Each of these has bitten at least once.
    `getByRole('dialog', {name: /Add Reviewer/i})`. Read its text from the
    dialog (the kit's `screen().text.dialog`; `text.main` is the dashboard
    list behind it), and close an inner window with its own "Close" or
-   "Cancel", never Escape, which closes the workflow dialog too. On a
+   "Cancel", never Escape, which closes the workflow dialog too. The same
+   goes for any widget open inside it (a row's "More Actions" menu, an
+   editor toolbar's menu, a listbox): close a menu by pressing its own
+   button again; and Escape in a legacy side window (a TinyMCE menu, a
+   date box) closes the window through its "form has changed" confirm
+   (U42, U48, U09, U50 claim checks and test authors). On a
    legacy (FBV) form the bottom "Cancel" is an `<a>` link, not a button, so
    a `getByRole('button')` Cancel never matches; use `getByRole('link')`
    or `a:visible` (U31, 2026-09-06).
@@ -111,6 +119,12 @@ Each of these has bitten at least once.
     close the controls hangs the click. A listbuilder's "Add Item" renders
     its new row after the click returns, so `.last()` on the visible boxes
     fills the previous row, and a grid redraw swallows the next click on it.
+    A row's text and accessible name can open with its row control's
+    label (the Plugins and Components grids read "Settings <name> …") or
+    with padding, so match a row by a name it contains, never a
+    start-anchored one; the "No items" line is a `tbody.empty` that stays
+    in the DOM, hidden, once a row exists, so a row count or a sibling read
+    skips it (U09, U13, U46).
 11. **PkpButton accessible names include row context.** The Edit button in a
     mailables list is named `Edit Discussion (Production)`. Use a row-scoped
     regex.
@@ -543,6 +557,13 @@ The run record
 carries the browser's console errors and warnings and uncaught page errors
 from `launch()` on; a script that needs every level (info, log) attaches
 its own `page.on('console')` listener.
+A download is awaited on `page.waitForEvent('download')` alone, never
+raced against a `waitForURL` (the link's navigation aborts and settles the
+race first, with nothing), and settled by the response's
+`Content-Disposition: attachment`, never by a 200 or a popup (a refused
+download answers 200 with JSON); a re-download after a change is also
+read in a fresh `launch(app)`, because the browser revalidates by ETag and
+keeps the earlier file name (U13, U47, U48 claim checks).
 A probe run that outlasts the Bash tool's 600 s cap runs detached, `nohup
 node bin/probe.js omp k3.js > k3-omp.log 2>&1 & echo $! > k3-omp.pid`, and
 the wait polls that pid (`while kill -0 $(cat k3-omp.pid) 2>/dev/null; do

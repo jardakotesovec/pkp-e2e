@@ -1260,10 +1260,12 @@ abstract class PKPContextScenarioBuilder
     {
         $plugin = $plan['plugin']; /** @var Plugin $plugin */
         $plugin->updateSetting($context->getId(), 'enabled', $plan['enabled'], 'bool');
-        AuditLog::log($plan['enabled'] ? AuditEvent::PLUGIN_ENABLE : AuditEvent::PLUGIN_DISABLE, LogLevel::NOTICE, [
-            'pluginName' => $plugin->getName(),
-            'category' => $plugin->getCategory(),
-        ]);
+        if (class_exists(AuditLog::class)) { // not on stable-3_5_0
+            AuditLog::log($plan['enabled'] ? AuditEvent::PLUGIN_ENABLE : AuditEvent::PLUGIN_DISABLE, LogLevel::NOTICE, [
+                'pluginName' => $plugin->getName(),
+                'category' => $plugin->getCategory(),
+            ]);
+        }
         foreach ($plan['settings'] as $name => $value) {
             $plugin->updateSetting($context->getId(), $name, $value);
         }

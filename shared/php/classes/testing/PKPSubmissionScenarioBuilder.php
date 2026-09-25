@@ -493,7 +493,7 @@ abstract class PKPSubmissionScenarioBuilder
                     }
                 }
                 $recommendationId = null;
-                if ($status === 'completed' && Application::get()->hasCustomizableReviewerRecommendation()) {
+                if ($status === 'completed' && method_exists(Application::get(), 'hasCustomizableReviewerRecommendation') && Application::get()->hasCustomizableReviewerRecommendation()) { // the method is not on stable-3_5_0
                     $recommendationId = $this->resolveRecommendationId($context, (string) $reviewerSpec->get('recommendation', 'accept'), "{$reviewerSpec->path}.recommendation");
                 } elseif ($reviewerSpec->has('recommendation')) {
                     throw new SpecException("{$reviewerSpec->path}.recommendation", 'This app\'s reviewer wizard has no "Recommendation" field');

@@ -1099,10 +1099,11 @@ Keys:
   fact for the published side: the HTML galley plugin serves a reader who
   is not signed in a copy of the galley's page cached for 24 hours under
   the galley's id, built at the first such view and dropped by nothing
-  (not by a media change, not by `reset:<app>`, which leaves
-  `checkouts/<app>/cache/` alone), so after a reset a new galley can
-  inherit an old install's cached page with the images unresolved; a
-  signed-in reader always gets a fresh page (U47 harness, 2026-09-24).
+  but `reset:<app>` (not by a media change), which since 2026-09-24
+  clears the app's Laravel store under `checkouts/<app>/cache/` (before
+  that a new galley could inherit an old install's cached page with the
+  images unresolved); a signed-in reader always gets a fresh page (U47
+  harness, 2026-09-24).
 - `publicationFormats[]` (OMP): publication formats on the current
   publication, each `{name, file?}`, every one built through to the state
   a reader sees, the way the "Publication Formats" page builds it, acting
@@ -1128,10 +1129,10 @@ Keys:
   ticks an "Assign" box in the approval window that the seed cannot
   honour, so that seed is a 400: build such a format on screen. A new
   press can be such a press without anyone enabling URN: plugin settings
-  are cached for 24 hours per context id, and `reset:<app>` leaves
-  `checkouts/<app>/cache/` alone, so a scratch press whose id an earlier
-  install used can inherit that install's URN settings (seen on context
-  297, U47 harness pass 2). The
+  are cached for 24 hours per context id, so a scratch press whose id an
+  earlier install used could inherit that install's URN settings (seen on
+  context 297, U47 harness pass 2) until `reset:<app>` began clearing the
+  app's Laravel store under `checkouts/<app>/cache/` (2026-09-24). The
   rows (the format, its file, the Activity Log lines, the notifications)
   and the book page are the screen's (U47 harness pass 2, 2026-09-25,
   parity ledger). The response lists `publicationFormats` (`id`, `name`
@@ -1378,6 +1379,11 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   Review" only, U36); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
 - Publication: `metadata.datePublished` (without it, publish stamps today).
+- Submission: OJS `issue` without `published` (the Publication Settings
+  issue assignment of an unpublished article; the key applies only with
+  `published: true`, so an unpublished article in an issue, or one whose
+  Publication Settings must save on a journal with a published issue, is
+  assigned on screen; U44, U13, U16 claim checks).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
 - User: `users[].notifications`, the Profile › Notifications pairs
   (`{settingName: {enabled, email}}`); U35 S6 and S8, like U12 and U05, set
@@ -1407,6 +1413,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   Submission › "Metadata", "Enable article number metadata"): the
   "Metadata" publication page offers "Article Number" only with it
   ticked; the submission key `articleNumber` does not read it (U13).
+- Context: OMP `series[]` (the context scenario answers 400 on it, so a
+  scratch press has no series and its Browse block none to list; added by
+  hand under Settings › Press › "Series", U29, U16 claim checks).
 - Context: `country` (a scratch context has none, so the first Settings ›
   Journal › "Masthead" save and Hosted Journals › "Edit" ask for one before
   anything else saves; U07 claim check 2026-09-23, U13 claim check
