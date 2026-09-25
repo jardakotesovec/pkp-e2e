@@ -285,6 +285,12 @@ behind a line; that scratch is deleted after review.
   answers 500 and deletes nothing (U09 A14), so a scratch block stays for
   good; a block made on the site stays on the site until the next reset.
   Live 2026-09-24, three apps (U09 claim check K3).
+- The test installs sort a missing localized value last (PostgreSQL puts
+  NULL last in ascending order): a category with no name in the page's
+  language comes after every named one in the "Categories" tab, the
+  "Browse" block, the home row and the "Select Categories" window, in no
+  stable order. All three apps, 2026-09-25 (U16 claim check K2-1,
+  `.reports/U16/ccK2/fr-01-tab-french-*`, `v-o-01-home-fr_CA-*`).
 - On the fleets the sidebar Language block's links land on the site home
   (`index.php/index/<locale>`): its link carries the server name without
   the probe or worker server's port. A script that needs a page in another
@@ -386,10 +392,15 @@ behind a line; that scratch is deleted after review.
   rounds 1 and 2, and a discussion lists them under the reviewer as
   "Round 1 - {mode}, Round 2 - {mode}". Live-driven 2026-09-23, OJS and OMP
   (`.reports/U37/cc-K7.md`).
-- A scratch context never receives an automatic editor assignment: a
-  submission sent through the wizard into a section with a sub-editor gets
-  none, and the managers get "A new submission needs an editor to be
-  assigned". Only `publicknowledge`, the install's first context, gets
+- A scratch context never receives an automatic editor assignment, from a
+  section or a category: a submission sent through the wizard into a
+  section with a sub-editor gets none, and the managers get "A new
+  submission needs an editor to be assigned"; one sent with a category
+  whose "Editorial Assignments" tick a Journal editor and a Section editor
+  (Press editor, Series editor) gets neither, so its participants list the
+  author alone and the editor's "Assigned to me" reads 0 (OJS and OMP,
+  2026-09-25, U16 claim check K1-3, `.reports/U16/ccK1/aa-05-*`,
+  `aa-06-*`). Only `publicknowledge`, the install's first context, gets
   them. The "You have been assigned as an editor on a submission to
   {context}" email still goes out at the wizard's final "Submit" to every
   assignment already on the submission in a manager-level or Section/Series
@@ -410,6 +421,11 @@ behind a line; that scratch is deleted after review.
   only), so a reader-facing item page needs a scenario-published scratch
   submission. The public home page. Live-probed 2026-09-03 (`.reports/U03/pF`
   P30).
+- On a fleet used by earlier runs, `publicknowledge`'s "Engineering"
+  category page lists items other runs published (OJS and OPS: 2 Items on
+  2026-09-25), while the other seeded categories read "0 Items" ("0
+  Titles" on OMP); a read of the seeded category pages asserts no count.
+  All three apps, 2026-09-25 (U16 claim check K4).
 - "The site has one registration-open journal" stops holding as soon as any
   scratch context exists; a probe that needs the one-journal state runs
   first on a fresh fleet. Profile › Roles "Register with other journals"
@@ -820,8 +836,10 @@ config-file settings.
   is the heading alone. All three apps, 2026-09-23 (U08 claim check K1).
 - A scratch press has no series and no category, so the Navigation tab's
   "Add item" offers no "Series" or "Category" type there;
-  `publicknowledge` offers both. The context scenario has no key for
-  either. OMP, 2026-09-23 (U08 claim check K1, K4-16).
+  `publicknowledge` offers both. The context scenario seeds categories
+  through its `categories[]` key (U10 harness, 2026-09-24) and has no key
+  for series. OMP, 2026-09-23 (U08 claim check K1, K4-16; the key
+  corrected by the U16 harness, 2026-09-25).
 - Installed navigation item titles read French on `fr_CA` pages only on a
   context whose "Forms" languages include French; `publicknowledge`
   (French under "UI" only) and a scratch context without
@@ -927,9 +945,21 @@ config-file settings.
   a journal and a server, enabled on a press. A new context's "Sidebar"
   list reads "Web Feed Plugin", "Information Block", "Subscription Block",
   "Language Toggle Block" (OJS) and "Web Feed Plugin", "Information
-  Block", "Language Toggle Block", "Browse Block" (OMP); OPS as above.
-  All three apps, 2026-09-24 (U10 claim check K3,
-  `.reports/U10/ccK3/fresh-plugins-*`, `fresh-setup-*`).
+  Block", "Language Toggle Block", "Browse Block" (OMP); "Web Feed
+  Plugin" and "Language Toggle Block" alone (OPS). All three apps,
+  2026-09-24 (U10 claim check K3, `.reports/U10/ccK3/fresh-plugins-*`,
+  `fresh-setup-*`; the OPS list corrected by U16 claim check K5,
+  2026-09-25, `.reports/U16/ccK5/f-02-setup-sidebar-fresh-ops`).
+- {OMP} A new press's "Browse Block" "Settings" arrive with "New
+  releases", "Categories" and "Series" ticked; placed, the block of a
+  press with no category and no series shows "Browse" and "New Releases"
+  only. 2026-09-25 (U16 claim check K5, `o-02-settings-window-omp`,
+  `f-10-home-placed-empty-omp`).
+- {OJS OPS} While the "Browse" block is placed on a journal or preprint
+  server, its inline style also draws the breadcrumb's last step with a
+  grey bar, so a screenshot of any page with a breadcrumb differs with and
+  without the block. 2026-09-25 (U16 claim check K5, `f-04-about-before-*`,
+  `f-11-about-placed-*`).
 - The sidebar's "Language Toggle Block" prints nothing on a context with
   one interface language; a scratch context needs
   `context.supportedLocales: ['en', 'fr_CA']` for it to show. Public home,

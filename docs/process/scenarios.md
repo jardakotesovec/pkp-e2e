@@ -410,6 +410,33 @@ Keys:
   `subscription` and `none`, "Open access" under `open`. Any other value
   (an integer included) is a 400; OMP and OPS answer 400 on the key
   (U50 harness, 2026-09-25).
+- `submitWithCategories` (boolean): the "Categories" radios of Settings ›
+  Workflow › Submission › "Metadata", under "Should the submitting author
+  be asked to select a category when they make a new submission?": `true`
+  "Yes, add a categories field to the submission wizard.", `false` "No, do
+  not show authors this field." (the schema default), saved as that form
+  saves (stored as `1` / `0`). The screen's "Save" posts the whole
+  Metadata form (one form-encoded POST to `contexts/{id}`, PUT override,
+  `submitWithCategories=true` among every item), so it also stores a row
+  for each item at its shown value (`subjects 0`, `enablePublisherId []`,
+  …) where a fresh context has none; the key writes this row alone, and
+  nothing reads an absent item differently from its shown value. Every
+  fresh context carries the row at `0`, "No", so `publicknowledge` and a
+  scratch context without the key offer authors no category field. With
+  it on, the wizard's "For the Editors" step ("For Readers" on OPS)
+  offers the "Categories" picker ("Select Categories") while the context
+  has a category (seed `categories[]` in the same request), and its
+  "Review" step lists "Categories"; without it the step shows neither
+  (driven on seeded drafts, three apps). The key only sets the wizard's
+  field; the submission scenario's `categories` is the editor's placement
+  after the submit (below), so a submission that must arrive with a
+  category is submitted through the wizard on screen with the category
+  picked there. On a scratch context the category's "Editorial
+  Assignments" assign nobody at that submit (the positional user-group
+  fault, `app-changes.md` row 3; only `publicknowledge` gets automatic
+  assignments, `seed-facts.md`), so such a submission arrives with the
+  author alone. A non-boolean is a 400; the three apps alike (U16 harness,
+  2026-09-25; the caveat U16 claim check K1-3, K3).
 - `enableAnnouncements` (boolean), `announcementsIntroduction` (localized
   text) and `numAnnouncementsHomepage` (a whole number of zero or more, or
   null for the box emptied): the three fields of Settings › Website › Setup
@@ -424,6 +451,18 @@ Keys:
   of the three: announcements off, no introduction, no home page block.
   A non-boolean, a non-string text, a negative number or text in the
   number are 400s (U12 harness, 2026-09-17).
+- `itemsPerPage` (a whole number of 1 or more): the "Items per page" box of
+  Settings › Website › Setup › the "Lists" tab, saved as that form saves
+  (one form-encoded POST to `contexts/{id}`, PUT override, carrying both
+  boxes, `itemsPerPage=3&numPageLinks=10`; stored as the number). Every
+  fresh context carries the rows at 25 and 10 ("Page links"), so the key
+  changes the one row and leaves "Page links" as it is; `publicknowledge`
+  keeps 25. The box is required on screen, so null, 0 and anything but a
+  whole number are 400s. The OJS archive, the OMP catalog and the OPS
+  preprint lists follow it at once (seed-facts); a category page's
+  paging is the U16 spec's Rule 9. The seeded context's tab reads the
+  number back ("Items per page" 3, "Page links" 10). The three apps alike
+  (U16 harness, 2026-09-25).
 - `sidebar`: the "Sidebar" list of Settings › Website › Appearance ›
   "Setup", a list of block plugin names in the order the sidebar shows
   them, saved as that form saves (the same PUT; stored as a JSON list). The
@@ -1162,9 +1201,22 @@ Keys:
   A seeded version reads as a typed one on each page (the same chips,
   categories, cover preview and alt text, URL Path) and in the rows,
   which equal the screen's, the Activity Log's one "metadata updated"
-  line per page saved included. OMP answers 400 on every one of these
-  keys: a press keeps its cover, categories and URL Path on the
-  "Catalog Entry" page, which no parity drive has read.
+  line per page saved included. OMP takes `categories` alone (U16
+  harness, 2026-09-25): a press keeps its categories on the workflow's
+  "Catalog Entry" page, whose "Categories" field is the same picker, and
+  the seed saves it as that page's "Save" does (the same PUT to the
+  publication; the page posts its whole form, `seriesId`,
+  `updateType=new_version` and the other boxes as shown, and the stored
+  rows equal the seed's, its one "metadata updated" line included), so
+  the page reopens with one chip per category, a sub-category named by
+  its line of parents ("Parity Top > Parity Child"). OMP answers 400 on every
+  other key of this list (the cover and URL Path on the same page, the
+  "Title & Abstract" and "Metadata" values), which no parity drive has
+  read there. On all three apps the placement is typed after the submit,
+  so it is a category added after arrival, after the submit's editor
+  assignment has run. Right after a seed of two books `published` with
+  `categories`, the press's category page reads "0 Titles"; the U16
+  spec's Rule 8 puts the listing after the queued jobs have run.
 
 App-specific keys:
 
@@ -1340,7 +1392,7 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining
   submission-intake settings (the checklist and the privacy statement,
-  U58), `submitWithCategories`, DOI
+  U58), DOI
   settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
   `registrationAgency`, `doiCreationTime`), ISSNs (the online ISSN
   is typed on Masthead, U13), `licenseUrl` (copied

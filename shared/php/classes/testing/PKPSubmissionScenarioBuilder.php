@@ -216,8 +216,10 @@
  *   MetadataChanged event), acting as the editor (admin), whose cover
  *   upload is the image box's POST temporaryFiles (handleUpload). The keys
  *   do not read the context's Metadata items or its "Article Number"
- *   setting, as the landing pages do not. OMP refuses them (its catalog
- *   entry path is not parity-checked).
+ *   setting, as the landing pages do not. OMP takes `categories` alone
+ *   (U16), saved as the press's "Catalog Entry" page saves it (the same
+ *   PUT, its "Categories" field), and refuses the rest (not parity-checked
+ *   there).
  * - galleys[].urlPath and galleys[].genre (U13): the "Create New Galley"
  *   window's "URL Path" (ArticleGalleyForm / PreprintGalleyForm's own
  *   checks: the pattern, not a number, not a URL Path another galley of
@@ -331,7 +333,7 @@ abstract class PKPSubmissionScenarioBuilder
     /** The "Metadata" page's term lists (FieldControlledVocab), by publication property. */
     public const PUBLICATION_TERM_LISTS = ['keywords', 'subjects', 'disciplines', 'supportingAgencies'];
 
-    /** OMP overrides to refuse the publication-page keys (its catalog entry path is not parity-checked). */
+    /** OMP overrides to refuse the publication-page keys its "Catalog Entry" path has no parity check for (all but `categories`). */
     protected function assertPublicationPagesSupported(string $specKey): void
     {
     }
@@ -1193,7 +1195,9 @@ abstract class PKPSubmissionScenarioBuilder
         if ($keys === []) {
             return null;
         }
-        $this->assertPublicationPagesSupported($keys[0]);
+        foreach ($keys as $key) {
+            $this->assertPublicationPagesSupported($key);
+        }
         if (!$submitted) {
             throw new SpecException($keys[0], "\"{$keys[0]}\" is typed on the workflow's publication pages, which a draft does not have: it needs submitted: true");
         }

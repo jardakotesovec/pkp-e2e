@@ -13,7 +13,8 @@
  * on the publication (both optional — monographs need no series), and the
  * per-round `stage: internal|external` key on reviewRounds. `galleys` is
  * rejected: a press has publication formats, not galleys; `publicationFormats`
- * (U47) is their counterpart here.
+ * (U47) is their counterpart here. Of the publication-page keys (U13) only
+ * `categories` is taken, the "Catalog Entry" page's "Categories" (U16).
  */
 
 namespace APP\testing;
@@ -302,13 +303,19 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
 
     /**
      * The publication-page display values (U13) are built and parity-checked
-     * on a journal and a preprint server; a press keeps its cover, categories
-     * and URL Path on the "Catalog Entry" page, a path no parity drive has
-     * read, so the keys are refused, never dropped (PRINCIPLES D4).
+     * on a journal and a preprint server. A press keeps its categories, cover
+     * and URL Path on the "Catalog Entry" page; its "Categories" field is
+     * parity-checked (U16: the page's "Save" is the same PUT to the
+     * publication, the core's third page), so `categories` is accepted. The
+     * rest have no parity drive on a press and are refused, never dropped
+     * (PRINCIPLES D4).
      */
     protected function assertPublicationPagesSupported(string $specKey): void
     {
-        throw new SpecException($specKey, "\"{$specKey}\" is not built for OMP yet: the press's publication pages (\"Catalog Entry\") have no parity check");
+        if ($specKey === 'categories') {
+            return;
+        }
+        throw new SpecException($specKey, "\"{$specKey}\" is not built for OMP yet: the press's publication pages (\"Catalog Entry\" and its siblings) have no parity check for it; only \"categories\" is built");
     }
 
     /**

@@ -26,6 +26,12 @@ touched.
   section can set its own policies (abstract required, word limits, a default
   review form). Cross-app names: Part II (series; OPS has one
   "Preprints" section).
+- **Category** — a topic a journal offers its published work under,
+  across its sections: optional, arranged as a tree (top-level categories
+  with sub-categories to any depth; screens say "sub-categories" and, on
+  the reader's page, "Subcategories"), each with its own public page. An
+  article sits in exactly one section and in any number of categories.
+  Same word in all three apps.
 - **Issue** — a journal's published collection (volume/number/year); OJS
   only. Cross-app names: Part II (absence is not a synonym — OMP/OPS
   have no issues; OMP's counterpart concept is the catalog).

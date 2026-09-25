@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **30 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **32 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -484,3 +484,17 @@ until their specs exist. Do not force-claim the defects themselves.
     `03d1cee2`). Resolves: maintainer confirmation as dead code (removal
     candidates), or a ruling that the download op is an external
     interface.
+32. **Categories API form route with no method** — attached to **U16**
+    (API-010; claimed; the Categories spec's Reference tables note it).
+    `CategoryCategoryController::getGroupRoutes()` registers `GET
+    categories/categoryFormComponent` to `$this->getCategoryFormComponent(...)`,
+    a method no class in the chain defines (Laravel's `Controller::__call()`
+    lets the route register and would answer a server error when called);
+    no screen calls it, the tab gets its form from the page
+    (`ManagementHandler::context()`). Also: the category `fullSize` page
+    op (lib/pkp `PKPCatalogHandler`, OMP `CatalogHandler`) is linked from
+    no page in any app (the category page's picture sits in a `div`, the
+    Categories spec's A6). Code-verified
+    2026-09-25 (U16 spec author; checkouts lib/pkp `76a315591b`, omp
+    `187f0f40d`). Resolves: maintainer confirmation as dead code (removal
+    candidate), or the route's method restored.

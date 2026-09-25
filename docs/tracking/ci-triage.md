@@ -664,6 +664,10 @@ trips.
   (harness.md "Runtime model"), so a recurrence now costs one test. It was
   never pinned; if it recurs, add core-dump capture to CI before
   diagnosing.
+  Pinned on OMP 2026-09-25 (app-changes row 18): PHP 8.3's OPcache
+  inheritance-cache bug php-src GH-20469 (fixed in 8.4.23+), the first
+  category page in a process that loaded `APP\publication\Publication`
+  first; this OJS case may be the same bug, unproven.
 - **Site-level Tasks window disagreeing with the journal's under load**
   (U05 S7, OJS, once). The test reads the Tasks rows from the journal's
   editorial page and then from the site-level bell and compares the sorted
@@ -826,6 +830,10 @@ trips.
   same day's OPS final on a reset database, where the order differs).
   **Watch condition**: a red on CI or in a final; then make U08 S2 read a
   scratch context or U42 S1 mark its discussion read.
+  **Tripped** in the U16 OPS final on a used database (2026-09-25,
+  `.reports/U16/final-run-ops.log`, "manager.maya 15" left by the day's
+  runs), and in the U16 harness agent's regression run; the U16 rerun
+  went on a reset database. The fix above is still owed.
 
 - **OMP U10 S1's style-sheet buttons read before "Remove" renders** (U10
   S1 "a new press home page…", `@smoke`, OMP, once). In the U48
@@ -852,6 +860,22 @@ trips.
   (at the tips) reads every U13 test green. **Watch condition**: the
   next sync that moves the ojs baseline; red there means the helper's
   later-version branch needs the details window too. Again 2026-09-25 (U50 session, same baselines): red in the OJS final and red alone (`.reports/U50/final-run-ojs.log`, `alone-ojs-reds.log`).
+
+- **An OPS preprint's keywords in another order** (U13 S1 `@smoke`,
+  OPS, once). The U16 OPS final on a used database (2026-09-25,
+  `.reports/U16/final-run-ops.log`) read "Keywords: current, tide" where
+  the test expects "tide, current"; the keywords are seeded in that
+  order and the page lists what the database returns. **Watch
+  condition**: a second sighting; then the test compares the keyword set,
+  or the spec states the order.
+
+- **OMP masthead roles listed in another order** (U10 S5, OMP, once).
+  The U16 session's first OMP final on a used database (2026-09-25,
+  `.reports/U16/final-run-omp-attempt1.log`, spec line 792) read
+  "Production editor", "Press editor", "Series editor", "Editorial Board
+  Member" right after ticking "Production editor"; green in the second
+  final on a reset database. **Watch condition**: a second sighting; then
+  read which of the two rows the list sorts by.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

@@ -128,6 +128,14 @@
  *   save is (PKPContextService::validate refuses a block no enabled plugin of
  *   the context provides) after the context's block plugins are loaded the way
  *   a request inside the context loads them (loadBlockPlugins()).
+ * - submitWithCategories (bool) — Settings › Workflow › Submission ›
+ *   "Metadata", the "Categories" radios (U16; PKPMetadataSettingsForm):
+ *   true "Yes, add a categories field to the submission wizard.", false
+ *   "No, do not show authors this field." (the schema default). The key
+ *   writes this row alone.
+ * - itemsPerPage (int ≥ 1) — Settings › Website › Setup › "Lists", the
+ *   "Items per page" box (U16; PKPListsForm, shared by the three apps;
+ *   schema default 25). The key writes this row alone ("Page links" stays).
  * - plugins {<lowercased plugin class name>: {enabled*, settings?}} — the
  *   Settings › Website › Plugins grid's enable / disable for that context
  *   (U12; PluginGridHandler::enable: the plugin's `enabled` setting for the
@@ -431,7 +439,7 @@ abstract class PKPContextScenarioBuilder
 
         // The settings forms' save (Review "Setup" / "Reviewer Guidance",
         // Submission "Author Guidelines" / "Metadata", Emails, Website ›
-        // Setup "Announcements", Appearance "Sidebar"): PUT contexts/{id} →
+        // Setup "Announcements" and "Lists", Appearance "Sidebar"): PUT contexts/{id} →
         // PKPContextController::edit validates against the context schema
         // with the context's form locales, then PKPContextService::edit
         // writes.
@@ -1458,7 +1466,9 @@ abstract class PKPContextScenarioBuilder
      * Website › Content › Comments tab's `enablePublicComments` (U14); and
      * the Users & Roles › Site Access Options tab's `restrictSiteAccess`
      * (U13) and the journal's `restrictArticleAccess` (U48); and the
-     * journal's Distribution › "Access" `publishingMode` (U50). Only keys
+     * journal's Distribution › "Access" `publishingMode` (U50); and the
+     * Metadata screen's "Categories" radios `submitWithCategories` and the
+     * Website › Setup › Lists tab's `itemsPerPage` (U16). Only keys
      * the app's context schema carries are accepted.
      *
      * @return array{settings: array, specKeys: array}
@@ -1722,6 +1732,42 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['sidebar'] = array_values($value);
             $specKeys['sidebar'] = 'sidebar';
+        }
+
+        if ($root->has('submitWithCategories')) {
+            // Settings › Workflow › Submission › "Metadata", the "Categories"
+            // radio pair (U16; PKPMetadataSettingsForm's FieldOptions of type
+            // radio over the schema's boolean, default false): true "Yes, add
+            // a categories field to the submission wizard.", false "No, do
+            // not show authors this field.". The form posts its whole body
+            // form-encoded ("true" / "false" for the radio), which the save's
+            // convertStringsToSchema turns back into the boolean; the stored
+            // row is 1 / 0. The form's other items are not this key's; they
+            // stay as the context has them. Shared by the three apps.
+            $hasProperty('submitWithCategories') || throw new SpecException('submitWithCategories', 'submitWithCategories is not a setting of this app\'s context schema');
+            $value = $root->get('submitWithCategories');
+            if (!is_bool($value)) {
+                throw new SpecException('submitWithCategories', 'submitWithCategories must be a boolean (true: "Yes, add a categories field to the submission wizard.", false: "No, do not show authors this field.")');
+            }
+            $settings['submitWithCategories'] = $value;
+            $specKeys['submitWithCategories'] = 'submitWithCategories';
+        }
+
+        if ($root->has('itemsPerPage')) {
+            // Settings › Website › Setup › "Lists", the "Items per page" box
+            // (U16; PKPListsForm's required FieldText over the schema's
+            // integer, min:1, default 25). The form posts the box as typed
+            // with "Page links" beside it; convertStringsToSchema turns it
+            // into the integer. The form refuses an empty box (required), so
+            // null is refused here too; "Page links" is not this key's and
+            // stays as the context has it. Shared by the three apps.
+            $hasProperty('itemsPerPage') || throw new SpecException('itemsPerPage', 'itemsPerPage is not a setting of this app\'s context schema');
+            $value = $root->get('itemsPerPage');
+            if (!is_int($value) || $value < 1) {
+                throw new SpecException('itemsPerPage', 'itemsPerPage must be a whole number of 1 or more (the "Items per page" box; the form refuses it empty)');
+            }
+            $settings['itemsPerPage'] = $value;
+            $specKeys['itemsPerPage'] = 'itemsPerPage';
         }
 
         return ['settings' => $settings, 'specKeys' => $specKeys];
