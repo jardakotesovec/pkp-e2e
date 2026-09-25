@@ -64,7 +64,7 @@ forEachApp(async (app) => {
         await box.click();
         await page.keyboard.press('Control+A');
         await page.keyboard.press('Delete');
-        await page.keyboard.type('The <i>species</i> element in HTML');
+        await page.keyboard.type(process.env.RR16_TYPED || 'The <i>species</i> element in HTML'); // RR16_TYPED: the editor control for S2
         await shot(page, 's1-typed');
         await dlg.getByRole('button', {name: 'Save', exact: true}).first().click();
         await page.locator('[role="status"]:has-text("Saved")').first().waitFor({timeout: 20000}).catch((e) => log('no Saved status', e.message.slice(0, 100)));
