@@ -75,8 +75,12 @@ orchestrator.
     after review; the kept checks under `shared/playwright/checks/` are
     the exception). App checkouts are read-only: pkp push URLs are
     disabled by construction, app changes go through maintainer-reviewed
-    PRs, a bad push gets a follow-up commit, never a force-push. Gate:
-    the commit on `origin/main`.
+    PRs, a bad push gets a follow-up commit, never a force-push. Before
+    committing, `npm run check-models` must pass: it lists every agent of
+    the session that was stopped or served another model and blocks on any
+    but the security probe ("Model discipline"; for the probe, add
+    `(finished on <model>)` to its entry's `verified-by` line). Gate: the
+    commit on `origin/main`.
 11. **Report.** What was built, the register highlights, each suite's summed
     test time from its final-run log ("Budget"), anything low-confidence; if
     anything was routed to the private file, the verification probe
@@ -173,6 +177,12 @@ Test files cite these by number, so the numbers are stable.
   reword; record the gate reached in the PROGRESS note and stop for
   maintainer review. A technical stall is not a flag: respawn on a narrower
   slice, at most twice.
+- The one exception is the security verification probe: a stop there, or
+  the rest of its run served on another model, does not hold up the
+  feature. Its verdict stands with the model named on the entry's
+  `verified-by` line, and an entry it could not settle stays `unverified`
+  for the maintainer. It writes only to the private file and its own
+  folder, so nothing it produced reaches other work.
 - The orchestrator never probes, verifies or edits a spec inline (the
   `status:` flip excepted); agents that drive screens are always fresh, one
   or two at a time, cut for about 40 browser calls each (an agent still
