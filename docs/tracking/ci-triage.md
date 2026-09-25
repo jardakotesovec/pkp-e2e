@@ -23,6 +23,7 @@ the log only says where to look.
 
 | ID | Signature (what CI shows) | Apps | Canonical entry | Status | First seen / last confirmed |
 |----|---------------------------|------|-----------------|--------|-----------------------------|
+| U10 S4 | OJS shard 2/3, red on both attempts: the Settings › Website "Sidebar" list's unplaced blocks read "Language Toggle Block", "Information Block", "Subscription Block" where the test's deep-equal expects "Information Block", "Subscription Block", "Language Toggle Block"; green in every local final (VM and Mac, U10, U47, U13 sessions) | OJS | not traced: the order of blocks with no saved position looks environment-dependent on a fresh box; next, the U10 test asserts the placed order and reads the unplaced blocks as a set | open | push run 36068013323 (`801b4bd`) 2026-09-24 / nightly 36090820813 (`063ee66`) 2026-09-25, also push 36078787994 (`9242fb7`) |
 
 ## Open regressions — confirmed upstream regressions awaiting a fix
 
