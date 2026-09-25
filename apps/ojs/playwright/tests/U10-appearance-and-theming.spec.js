@@ -656,15 +656,13 @@ test.describe('appearance & theming', () => {
         await expect(home.sidebar).toHaveCount(0);
 
         // The list as it opens: one box per block, none ticked, no ""Make a
-        // Submission" Block" (Rule 23).
+        // Submission" Block" (Rule 23, which claims no order for unticked
+        // boxes; CI's fresh box lists them in another order).
         await settings.goto();
         let setup = await settings.open('appearance-setup');
-        expect(await setup.sidebar.read()).toEqual([
-            {label: WEB_FEED, checked: false},
-            {label: 'Information Block', checked: false},
-            {label: 'Subscription Block', checked: false},
-            {label: LANGUAGE, checked: false},
-        ]);
+        const opened = await setup.sidebar.read();
+        expect(opened.map((r) => r.label).sort()).toEqual([WEB_FEED, 'Information Block', 'Subscription Block', LANGUAGE].sort());
+        expect(opened.filter((r) => r.checked)).toEqual([]);
 
         // A block plugin enabled: its box joins the list, unticked (Rule 23).
         await plugins.goto();
