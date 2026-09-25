@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **32 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **33 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -40,6 +40,12 @@ if real, their specs' own probes will resurface them.)
 - Why parked: liveness unknown; claiming it in U17 or U21 would document a
   possibly-dead surface.
 - Resolves: Phase-1 liveness probe (is the block reachable in the current UI?).
+- Evidence (U17 spec author, code read 2026-09-25, ojs `d9b567efec`): no
+  template, handler, Vue component or JS file of OJS or its lib/pkp names
+  `sectionPolicy.tpl`; its only reference is its own header. The live
+  start form shows the section policy through `StartSubmission`'s
+  `FieldHTML` instead (the Sections spec, Rule 11). Dead-code candidate;
+  resolves on maintainer confirmation.
 
 ### AFFM-170 — OMP statisticsSettingsForm.tpl
 - What: OMP-only settings template that posts to an op no PHP handler declares.
@@ -128,19 +134,12 @@ until their specs exist. Do not force-claim the defects themselves.
    `pages/catalog/index.php`). The route map dispatches op `results` to a
    method that exists nowhere in the handler chain (probe-omp-catalog.md §7).
    Resolves: U68 spec-time register entry; dead-code candidate for removal.
-3. **SectionController `filterByTypeIds()` dispatch** — attached to **U17**
-   (API-034). The shared controller dispatches a collector method no section
-   collector defines (probe-omp-series.md). Resolves: U17 spec-time register
-   entry (latent error path); probe the endpoint with the filter param.
-4. **Missing OMP dashboard series filter** — attached to **U17/U21** (register
-   material at spec time, note only — RULINGS). OMP lacks the series filter
-   OJS/OPS get from the shared `addSectionFields()` (probe-omp-series.md).
-   Resolves: spec-time ❓ register entry — bug-vs-intended call for the team.
-5. **`api/v1/sections` mount gap** — attached to **U17** (API-034). Mounted by
-   OJS only; OMP and OPS both lack the mount — a mounting gap, not an OMP
-   divergence (probe-omp-series.md corrects the api sweep's "ojs-only"
-   framing). Resolves: spec-time register entry; maintainer call on whether
-   OMP/OPS should mount it.
+3. **SectionController `filterByTypeIds()` dispatch** — resolved 2026-09-25: the Sections spec's register
+   [A4](../specs/U17-sections.md#a4) carries it.
+4. **Missing OMP dashboard series filter** — resolved 2026-09-25: the Submissions dashboard's
+   register OMP1 carries it ([U23](../specs/U23-submissions-dashboard.md)); the Sections spec states it (Rule 3).
+5. **`api/v1/sections` mount gap** — resolved 2026-09-25: the Sections spec's register
+   [A5](../specs/U17-sections.md#a5) carries it.
 6. **OMP "Request Revisions" author email invites a response OMP cannot
    collect** — attached to **U30** (author response) / mail templates. The
    press email asks the author to "submit your response" but OMP mounts no
@@ -498,3 +497,14 @@ until their specs exist. Do not force-claim the defects themselves.
     2026-09-25 (U16 spec author; checkouts lib/pkp `76a315591b`, omp
     `187f0f40d`). Resolves: maintainer confirmation as dead code (removal
     candidate), or the route's method restored.
+33. **Unused series fields** — attached to **U17** (SET-038, AFFM-009;
+    claimed; the Sections spec's footnotes note them). OMP's
+    `schemas/section.json` carries `featured` and `reviewFormId` for a
+    series: `SeriesForm::readInputData()` reads `featured`, but no field
+    of `seriesForm.tpl` posts it, so every save stores it off, and nothing
+    in OMP reads `Section::getFeatured()`; no series field sets
+    `reviewFormId`, which `ReviewerForm::initData()` would read for a
+    press's default review form. Code-verified 2026-09-25 (U17 spec
+    author; checkouts omp `187f0f40d`, lib/pkp `76a315591b`). Resolves:
+    maintainer confirmation as dead code (removal candidates), or a field
+    added to the series window.

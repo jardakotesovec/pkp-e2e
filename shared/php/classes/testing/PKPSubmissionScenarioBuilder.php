@@ -216,10 +216,17 @@
  *   MetadataChanged event), acting as the editor (admin), whose cover
  *   upload is the image box's POST temporaryFiles (handleUpload). The keys
  *   do not read the context's Metadata items or its "Article Number"
- *   setting, as the landing pages do not. OMP takes `categories` alone
- *   (U16), saved as the press's "Catalog Entry" page saves it (the same
- *   PUT, its "Categories" field), and refuses the rest (not parity-checked
- *   there).
+ *   setting, as the landing pages do not. OMP takes `categories` (U16)
+ *   and `datePublished` (U17) alone, saved as the press's "Catalog Entry"
+ *   page saves them (the same PUT, its "Categories" and "Date Published"
+ *   fields), and refuses the rest (not parity-checked there).
+ * - datePublished "YYYY-MM-DD" (U17) — the date box of the same page
+ *   (OJS "Publication Date" on "Publication Settings", OPS "Date Posted"
+ *   on "Preprint entry", OMP "Date Published" on "Catalog Entry"), saved
+ *   in that page's PUT with its other fields. A later publish keeps it:
+ *   each app's Repository::setStatusOnPublish stamps today only on an
+ *   empty date, and on OMP and OPS a date after today schedules the
+ *   version instead of publishing it.
  * - galleys[].urlPath and galleys[].genre (U13): the "Create New Galley"
  *   window's "URL Path" (ArticleGalleyForm / PreprintGalleyForm's own
  *   checks: the pattern, not a number, not a URL Path another galley of
@@ -326,9 +333,10 @@ abstract class PKPSubmissionScenarioBuilder
     /**
      * The version's display values of the publication pages (U13): the
      * keys, in the order they are read. `articleNumber` is read only when
-     * the app's publication schema has it (a journal).
+     * the app's publication schema has it (a journal). `datePublished`
+     * (U17) is the same page's date box.
      */
-    public const PUBLICATION_PAGE_KEYS = ['subtitle', 'plainLanguageSummary', 'keywords', 'subjects', 'disciplines', 'supportingAgencies', 'coverImage', 'categories', 'urlPath', 'articleNumber'];
+    public const PUBLICATION_PAGE_KEYS = ['subtitle', 'plainLanguageSummary', 'keywords', 'subjects', 'disciplines', 'supportingAgencies', 'coverImage', 'categories', 'urlPath', 'articleNumber', 'datePublished'];
 
     /** The "Metadata" page's term lists (FieldControlledVocab), by publication property. */
     public const PUBLICATION_TERM_LISTS = ['keywords', 'subjects', 'disciplines', 'supportingAgencies'];
@@ -1283,6 +1291,18 @@ abstract class PKPSubmissionScenarioBuilder
             }
             $body['urlPath'] = $value;
         }
+        if ($root->has('datePublished')) {
+            // The page's date box (OJS "Publication Date", OMP "Date
+            // Published", OPS "Date Posted"): a text box the schema reads
+            // as date_format:Y-m-d. Kept by the publish, which stamps today
+            // only on an empty box (each app's setStatusOnPublish).
+            $value = $root->get('datePublished');
+            $parsed = is_string($value) ? \DateTime::createFromFormat('!Y-m-d', $value) : false;
+            if (!$parsed || $parsed->format('Y-m-d') !== $value) {
+                throw new SpecException('datePublished', 'datePublished must be a date as YYYY-MM-DD (the publication page\'s date box)');
+            }
+            $body['datePublished'] = $value;
+        }
         $coverImage = null;
         if (($coverSpec = $root->child('coverImage')) !== null) {
             $fixture = $this->resolveFixture((string) $coverSpec->require('file'), 'coverImage.file');
@@ -1327,7 +1347,7 @@ abstract class PKPSubmissionScenarioBuilder
         $pages = [
             ['subtitle', 'plainLanguageSummary'],
             array_merge(self::PUBLICATION_TERM_LISTS, ['articleNumber']),
-            ['categoryIds', 'coverImage', 'urlPath'],
+            ['categoryIds', 'coverImage', 'urlPath', 'datePublished'],
         ];
         foreach ($pages as $fields) {
             $pageBody = array_intersect_key($body, array_flip($fields));

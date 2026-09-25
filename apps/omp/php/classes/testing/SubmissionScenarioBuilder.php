@@ -306,16 +306,17 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
      * on a journal and a preprint server. A press keeps its categories, cover
      * and URL Path on the "Catalog Entry" page; its "Categories" field is
      * parity-checked (U16: the page's "Save" is the same PUT to the
-     * publication, the core's third page), so `categories` is accepted. The
-     * rest have no parity drive on a press and are refused, never dropped
-     * (PRINCIPLES D4).
+     * publication, the core's third page), so `categories` is accepted, and
+     * so is its "Date Published" box (U17, `datePublished`, the same PUT).
+     * The rest have no parity drive on a press and are refused, never
+     * dropped (PRINCIPLES D4).
      */
     protected function assertPublicationPagesSupported(string $specKey): void
     {
-        if ($specKey === 'categories') {
+        if (in_array($specKey, ['categories', 'datePublished'], true)) {
             return;
         }
-        throw new SpecException($specKey, "\"{$specKey}\" is not built for OMP yet: the press's publication pages (\"Catalog Entry\" and its siblings) have no parity check for it; only \"categories\" is built");
+        throw new SpecException($specKey, "\"{$specKey}\" is not built for OMP yet: the press's publication pages (\"Catalog Entry\" and its siblings) have no parity check for it; only \"categories\" and \"datePublished\" are built");
     }
 
     /**

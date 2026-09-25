@@ -1060,3 +1060,38 @@ config-file settings.
   and shows on the other interface languages' issue pages too
   (`/fr_CA/issue/view/{id}`). 2026-09-25 (U50 claim check K3,
   `c-02-l-issue-fr`).
+- {OPS} `publicknowledge`'s section `PRE` "Preprints" has the path "pre"
+  (its page is `preprints/section/pre`; `preprints/section/preprints`
+  answers "404 Not Found"), and keeps the install's default policy "Section
+  default policy" through the bootstrap's rename, so About › "Submissions"
+  shows a "Preprints" block. A scratch server made without `sections[]`
+  keeps the default section with path "preprints". {OJS} `REV` "Reviews"
+  has no policy, so the seeded journal's "Submissions" page shows only the
+  "Articles" block. 2026-09-25 (U17 claim check K1, K4, K5).
+- {OPS} `publicknowledge` is not empty on a fleet where the U13 suite has
+  run: "Archives" and the home page list the preprints it posted. An empty
+  "Archives" read needs a scratch server. 2026-09-25 (U17 claim check K5).
+- {OJS OMP} The Journal manager / Press manager role has no workflow stage
+  on Users & Roles › "Roles", so it is never offered under a section's or
+  series' "Editorial Assignments"; the Production editor starts at
+  Copyediting and Production. 2026-09-25 (U17 claim check K1).
+- A new section's "Word Count" box is empty, and every "Section Options"
+  box unticked, until its first "Save" stores 0; a section made by the
+  context scenario's `sections[]` opens the same way. A new series'
+  "Order of monographs" arrives on "Title (A-Z)". Settings › "Sections" /
+  "Series", 2026-09-25 (U17 claim check K1, K3).
+- {OMP} A press's series list has no fixed order until "Order" and "Done"
+  are used on Settings › Press › "Series": on the PostgreSQL test database
+  a new series may land first, in the middle or last, and a saved series
+  can move. 2026-09-25 (U17 claim check K2).
+- The reader's search, and a category's page on a press, list nothing a
+  scenario published until the background jobs have run (`runJobs()` in
+  `support/jobs.js`; from a probe script set `PKP_CONFIG_FILE`,
+  `TEST_API_KEY` and `PLAYWRIGHT_BASE_PORT` to the probe server's).
+  2026-09-25 (U17 claim check K3).
+- {OMP} A series' public page (`catalog/series/{path}`) shows the series'
+  cover image, but its heading and trail's last step are empty and its
+  description and ISSNs are absent (U17 OMP9); its books come newest
+  first whatever "Order of monographs" says. A book's page shows the
+  series' full name and ISSNs under "Series" and links the series page.
+  2026-09-25 (U17 claim check K6).

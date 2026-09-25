@@ -868,6 +868,8 @@ trips.
   order and the page lists what the database returns. **Watch
   condition**: a second sighting; then the test compares the keyword set,
   or the spec states the order.
+  **Tripped 2026-09-25**: the second sighting, the U17 session's second
+  OPS final on a used database (`.reports/U17/final-run-ops-attempt2.log`).
 
 - **OMP masthead roles listed in another order** (U10 S5, OMP, once).
   The U16 session's first OMP final on a used database (2026-09-25,
@@ -887,6 +889,23 @@ trips.
   control discussion opened by a scratch manager, or on a scratch server
   (U42's own header says `publicknowledge` and the roster are read-only);
   meanwhile a regression pass on a used OPS fleet runs U08 before U42.
+  Again 2026-09-25 in the U17 session's second OPS final on a used
+  database ("manager.maya 15", `.reports/U17/final-run-ops-attempt2.log`).
+
+- **OPS U09 S6's page body read before "Welcome."** (OPS, once). The
+  U17 session's third OPS final on a reset database (2026-09-25,
+  `.reports/U17/final-run-ops.log`, spec line 664) read the custom page's
+  body as "Our page" where it expects "Our page Welcome."; green alone
+  (`.reports/U17/alone-ops-U09S6.log`). **Watch condition**: a second
+  sighting; then the read waits for the body's second paragraph.
+
+- **OMP U08 S4's renamed item not last** (OMP, once). The U17 session's
+  first OMP final on a used database (2026-09-25,
+  `.reports/U17/final-run-omp-attempt1.log`, spec line 612) polled the
+  primary menu's last row for "PKP news" for 10 s; green alone
+  (`.reports/U17/alone-omp-U08S4.log`) and in the second OMP final.
+  **Watch condition**: a second sighting; then read whether the rename
+  reorders the rows.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

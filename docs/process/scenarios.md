@@ -856,7 +856,10 @@ Keys:
   `submitter` (required, an existing username).
 - `title` (default "Submission {tag}"), `abstract` (default "Seeded abstract
   for {tag}."; sections that require an abstract need one, and the default
-  satisfies them), `locale` (default: the context's primary locale).
+  satisfies them; an empty string is read as absent and gets the default,
+  so an abstract-less submission is made on screen by emptying the
+  abstract, U17 claim check K3), `locale` (default: the context's primary
+  locale).
 - `submitted` (default true). An explicit `false` produces a true
   wizard-resumable draft: no `dateSubmitted`, `submissionProgress` set, and
   the author keeps metadata editing rights. It appears in the author's
@@ -1311,11 +1314,15 @@ Keys:
     locale (an image fixture, e.g. `profile-image-400.png`, uploaded as
     the box uploads it and moved to the context's public files as
     `submission_{id}_{publicationId}_coverImage_{locale}.png`); `urlPath`,
-    "URL Path".
+    "URL Path"; `datePublished` (`YYYY-MM-DD`, U17), the page's date box
+    under "Publication Timing" (OJS "Publication Date", OPS "Date
+    Posted"; OMP "Date Published" on "Catalog Entry", below).
   Every refusal is the page's own, a 400 naming the key: a URL Path that
   is a number, has other characters, or is another submission's; a locale
   the submission's metadata languages lack; an unknown or repeated
-  category path; a cover that is not an image. The keys need
+  category path; a cover that is not an image; a date not written
+  `YYYY-MM-DD` or not in the calendar (`2024-3-5`, `2024-02-30`, a
+  number). The keys need
   `submitted: true` (a draft has no publication pages) and do not read
   the context's Metadata items or its "Article Number" setting, which
   only decide what the pages offer: the landing page shows what is
@@ -1325,15 +1332,16 @@ Keys:
   A seeded version reads as a typed one on each page (the same chips,
   categories, cover preview and alt text, URL Path) and in the rows,
   which equal the screen's, the Activity Log's one "metadata updated"
-  line per page saved included. OMP takes `categories` alone (U16
-  harness, 2026-09-25): a press keeps its categories on the workflow's
+  line per page saved included. OMP takes `categories` (U16
+  harness, 2026-09-25) and `datePublished` (U17) alone: a press keeps its categories on the workflow's
   "Catalog Entry" page, whose "Categories" field is the same picker, and
   the seed saves it as that page's "Save" does (the same PUT to the
   publication; the page posts its whole form, `seriesId`,
   `updateType=new_version` and the other boxes as shown, and the stored
   rows equal the seed's, its one "metadata updated" line included), so
   the page reopens with one chip per category, a sub-category named by
-  its line of parents ("Parity Top > Parity Child"). OMP answers 400 on every
+  its line of parents ("Parity Top > Parity Child"), and "Date
+  Published" is saved in the same PUT. OMP answers 400 on every
   other key of this list (the cover and URL Path on the same page, the
   "Title & Abstract" and "Metadata" values), which no parity drive has
   read there. On all three apps the placement is typed after the submit,
@@ -1341,6 +1349,26 @@ Keys:
   assignment has run. Right after a seed of two books `published` with
   `categories`, the press's category page reads "0 Titles"; the U16
   spec's Rule 8 puts the listing after the queued jobs have run.
+
+  `datePublished` is the publication date a published item carries
+  (U17 harness, 2026-09-25, three apps driven): without it a publish
+  stamps today; with it, `published: true` keeps the typed date, as the
+  screen's publish keeps a date saved on the page first (each app's
+  `setStatusOnPublish` stamps today only on an empty date). So a list
+  ordered by publication date (OPS "Archives", a section's page) is
+  seeded by giving each item its own day. The seeded version reads as the
+  typed one: the date box reopens with the date, the status reads
+  "Published" (OPS "Posted"), and the landing page shows it (OJS and OPS
+  "2024-03-05", OMP "March 5, 2024"; each with "2024-03-05 (Version of
+  Record 1.0)", OPS "(Author Original 1.0)"). Without `published` the
+  date sits on the unpublished version, as a saved but unpublished box
+  leaves it. The version's `copyrightYear` is the publish year, not the
+  date's (a scratch context's copyright-year basis), on the seed and the
+  screen alike. A date after today with `published: true` gives a
+  scheduled version on OMP and OPS (`status` 5; the app's own publish
+  schedules it, not driven on screen; the response's `stageId` stays
+  the stage before the publish, OMP 1, OPS 5); on OJS a seed without
+  `issue` publishes at once whatever the date.
 
 App-specific keys:
 
@@ -1510,7 +1538,6 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   Files": `files[]` seeds "Submission Files" and a round's "Files for
   Review" only, U36); `commentsForEditor`; `metrics` (OJS only: `views?`,
   `downloads?`, `months?`).
-- Publication: `metadata.datePublished` (without it, publish stamps today).
 - Submission: OJS `issue` without `published` (the Publication Settings
   issue assignment of an unpublished article; the key applies only with
   `published: true`, so an unpublished article in an issue, or one whose
