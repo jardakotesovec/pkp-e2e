@@ -1023,7 +1023,7 @@ unless its Basis line says otherwise.
 | [A14](#a14) | On the site-level profile every tab's "privacy statement" link opens a "404 Not Found" page | 🐞 | minor | — |
 | [A15](#a15) | "Please enter a valid URL." stays under "Homepage URL" after the corrected address is saved, beside the saved message | 🐞 | minor | — |
 | [A17](#a17) | After a Contact save the server refused, the typed values are still on screen, but pressing another tab drops them at once, with no question asked | 🐞 | user-visible | — |
-| [A18](#a18) | "confirm" and "reject" land an account with roles in more than one journal on the site-level profile, outside the journal where it asked for the email change | 🐞 | minor | — |
+| [A18](#a18) | "confirm" and "reject" land an account with roles in more than one journal on the site-level profile, outside the journal where it asked for the email change | 🐞 | minor | @jarda.kotesovec 2026-09-25 · risk accepted |
 | [OPS2](#ops2) | A preprint server sends the email-change message but its emails list has no "Change Email Address Invitation" row to edit | 🐞 | user-visible | — |
 | [A5](#a5) | The "role scheduled to begin" banner shows in any journal where the user has no role, even when the waiting role is elsewhere | ❓ | minor | — |
 | [A6](#a6) | A user can drop a Reader, Author or Reviewer role a manager gave them by unticking it; an Author is then locked out of My Submissions without warning | ❓ | user-visible | — |
@@ -1230,6 +1230,13 @@ journal's Contact tab, because the site-level profile forwards it there
 were working in. The landing moved with the upstream change of 2026-09-16
 (in OMP and OPS since 2026-09-18), the one that fixed [A3](#a3).
 Since: 2026-09-16 · Basis: probe, 2026-09-17 (OJS); 2026-09-18 (OMP, OPS). <sup>[f-a18](#fn-a18)</sup>
+
+> **Reviewed — @jarda.kotesovec, 2026-09-25**: confirmed 🐞, risk accepted.
+> Ruling: the landing stays as it is; @asmecher closed the upstream issue
+> (pkp/pkp-lib#13181, 2026-09-18) as "OK with the current behaviour", with
+> a separate issue if it is ever reconsidered. The "reject" link in the
+> shape mailed before the change, which ends in an error page, is not part
+> of this entry and stays tracked as an open regression.
 
 ### OMP
 
