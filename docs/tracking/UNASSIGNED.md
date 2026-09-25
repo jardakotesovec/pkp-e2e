@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **33 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **34 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -508,3 +508,20 @@ until their specs exist. Do not force-claim the defects themselves.
     author; checkouts omp `187f0f40d`, lib/pkp `76a315591b`). Resolves:
     maintainer confirmation as dead code (removal candidates), or a field
     added to the series window.
+34. **Unlinked users-list entry points** — attached to **U53** (VUE-051,
+    GRID-050; claimed; the Users management spec's Reference tables note
+    them). `ContextGridHandler::users()` (the Hosted Journals grid, site
+    administrator only) returns `management/accessUsers.tpl`, the Vue
+    users list, as a grid fragment; no row action of `ContextGridRow`
+    ("Edit", "Settings wizard", "Remove") and no template calls it, and the
+    administrator's per-journal users surface is the Settings wizard's
+    "Users" tab (the legacy `UserGridHandler` grid). The page operation
+    `management/access` (`ManagementHandler::access()`, granted to the site
+    administrator alone in each app's `SettingsHandler`) renders the same
+    Users & Roles page as `management/settings/access`, but no menu or link
+    points at it. Code-verified 2026-09-25 (U53 spec author; checkouts ojs
+    `71bb244152`, omp `187f0f40d2`, ops `61cd158ce3`, lib/pkp
+    `76a315591b`, ui-library `03d1cee2`). Resolves: maintainer
+    confirmation as dead code (removal candidates), or a ruling that the
+    direct `management/access` address is an intended administrator
+    entry.

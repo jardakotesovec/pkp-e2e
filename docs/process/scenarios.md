@@ -199,7 +199,7 @@ Keys:
   open access date that many months from today (U51 harness,
   2026-09-25).
 - `users[]`: throwaway accounts. Each entry takes `username` and `roles`
-  (both required, roles non-empty), `givenName`, `familyName`, `email`
+  (both required; roles empty only beside `pastRoles`, below), `givenName`, `familyName`, `email`
   (default `<username>@mail.test`), `password` (default: the username
   twice), `sections` or `series` (sub-editor assignments, by section abbrev
   or series path), and `orcid` plus `orcidIsVerified` for a pre-set ORCID
@@ -212,9 +212,10 @@ Keys:
   account instead of creating one: the one way to give the site
   administrator a non-manager role in a scratch context, after which
   their manager role can be ended on their own edit page (U14 claim
-  check K1, 2026-09-16); the screens never end a user's last role in a
-  context, so a site administrator with no role there is unreachable (U42
-  claim check, 2026-09-24). See `users.md` for the keys and
+  check K1, 2026-09-16); the screens never end a site administrator's
+  last role in a context ("Remove User" fails on their row, and the
+  "Edit" page keeps a last role), so a site administrator with no role
+  there is unreachable (U42 claim check, 2026-09-24). See `users.md` for the keys and
   their traps. A scratch context's reviewer is created here too: the seeded
   reviewers are not enrolled on a scratch context, so they are absent from
   its Add Reviewer search and refused the wizard.
@@ -248,11 +249,26 @@ Keys:
     does. An earlier start or end is a state no screen makes (the
     invitation moves a past start to today, and "Remove Role" ends now):
     the builder passes the start through the role service and writes the
-    end onto the ended row (D9). `roles` stays required and non-empty:
-    the screens refuse to remove a user's last role. The screen's
-    "Remove Role" emails the member; the seed does not.
+    end onto the ended row (D9). The screen's "Remove Role" emails the
+    member; the seed does not.
+    `roles: []` beside a non-empty `pastRoles` is the state the Users
+    list's "Remove User" › "OK" leaves: every role in the context ended
+    today, the account still listed with nothing under "Roles" and
+    "Start Date" and still counted in "Current Users (n)", its "Edit"
+    page listing each role with today as start and end and "User
+    Removed From Role", its menu without "Remove User", "Editorial
+    History" listing a masthead role "<year> – <year>" and "Editorial
+    Masthead" not (U53 harness, 2026-09-25, three apps). An account
+    ended here and holding a role in another context is the "outside
+    the manager's reach" user of U53 scenario 4: create this context
+    first, then name the account again with `roles` in the second (the
+    roles are added to the existing account). "Remove User" sends no
+    email (U53 A8) and the seed none either. `roles: []` without `pastRoles`
+    is a 400, and so are `sections`/`series` with it (no role to carry
+    the assignment).
   `affiliation` and `pastRoles` are 400s on an account that already
-  exists (the roster, `admin`): only a new account takes them.
+  exists (the roster, `admin`): only a new account takes them, so
+  `roles: []` does too.
   `disabled: true` disables the new account the way Settings › Users &
   Roles does (the row menu's "Disable User", the reason box left empty,
   "OK": `disabled` 1 and an empty reason, as on screen; U37 harness,

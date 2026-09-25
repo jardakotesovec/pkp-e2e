@@ -214,7 +214,17 @@ behind a line; that scratch is deleted after review.
   acting as `admin` (`shared/php/classes/testing/ContextFactory.php`).
   Settings › Users & Roles › Users of the scratch context. Seen
   2026-08-25 on all three apps (U21 note on the needs-editor mail: "every
-  Manager (including the auto-enrolled admin)").
+  Manager (including the auto-enrolled admin)"). That enrolment has no
+  start date: the Users list shows the "admin admin" row's role with an
+  empty "Start Date" and its "Edit" page reads "---", and the older user
+  lists (the "Merge user" window, Administration › Hosted Journals ›
+  "Settings wizard" › "Users") show an empty "Roles" cell on that row.
+  Publicknowledge, scratch contexts and journals made on Hosted Journals,
+  all three apps, 2026-09-25 (`.reports/U53/cc-K1.md` K1-5, `cc-K2.md`,
+  `cc-K3.md` K3-8).
+- Site Settings › "Site Setup" › "Bulk Emails" has no journal ticked, and
+  "Security" › "Minimum password length (characters)" reads 6, on all
+  three test installs. Live-read 2026-09-25 (`.reports/U53/cc-K3.md`).
 - A seeded submission carries files only where `files[]` (OJS, OMP:
   "Submission Files") or `reviewRounds[].files[]` (a round's "Files for
   Review") names them, a galley's file aside; OPS refuses both (400). A
@@ -830,7 +840,11 @@ config-file settings.
   administrator keeps the Settings Wizard, whose "Appearance" saves, while
   Settings › Website answers the access-denied page on a press and a
   server and opens under an "Error" window on a journal. All three apps,
-  2026-09-24 (U10 claim check K5, `.reports/U10/ccK5/x-*`).
+  2026-09-24 (U10 claim check K5, `.reports/U10/ccK5/x-*`). With Reader
+  left, Users & Roles opens by its address under the same "Error" window
+  (the side menu's submissions count answers 401); on a press and a
+  server only `…/management/access` opens it, `…/management/settings/access`
+  is refused. All three apps, 2026-09-25 (`.reports/U53/cc-K1.md` K1-3).
 - Every submission has Activity Log lines from its first save, so
   "History" never reads "No Items": a draft begun on the start page shows
   two "Submission metadata updated" lines, and a seeded submission with no

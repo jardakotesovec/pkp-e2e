@@ -3,7 +3,9 @@
 Everything about signing in: which user to log in as, what the passwords
 are, how login caching works, and what the seeded journal contains.
 
-Display names read "Firstname Role" (`admin` is "Site Admin"). Emails are
+Display names read "Firstname Role" (`admin` is "admin admin" on
+screens and as a mail sender; "Site Admin" is only a scratch context's
+default principal contact name). Emails are
 `<username>@mail.test`.
 
 **Three different role vocabularies appear in this work. Don't mix them.**

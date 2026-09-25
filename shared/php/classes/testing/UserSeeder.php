@@ -23,6 +23,12 @@
  * masthead" choice) and `pastRoles[]` (role periods that have ended, the
  * users list's "Edit" › "Remove Role", with an optional earlier start or
  * end date the screens cannot set: D9).
+ *
+ * U53: `roles: []` beside a non-empty `pastRoles` is the state the users
+ * list's "Remove User" › "OK" leaves (UserGridHandler::removeUser: every
+ * active role in the context ended now, the account still listed with no
+ * role). Each period is ended by the same `endAssignments` as "Remove
+ * Role"; the rows equal the handler's (parity ledger 2026-09-25).
  */
 
 namespace PKP\testing;
@@ -59,8 +65,8 @@ class UserSeeder
     {
         $username = (string) $spec->require('username');
         $roles = $spec->require('roles');
-        if (!is_array($roles) || $roles === []) {
-            throw new SpecException("{$spec->path}.roles", 'Each user needs a non-empty roles list');
+        if (!is_array($roles)) {
+            throw new SpecException("{$spec->path}.roles", 'roles must be a list of role keys');
         }
         // ORCID iD fixture state (U4): a connected iD is only reachable
         // through ORCID's own OAuth sign-in, which can never complete in the
@@ -76,6 +82,13 @@ class UserSeeder
             throw new SpecException("{$spec->path}.orcidIsVerified", 'orcidIsVerified requires an orcid value');
         }
         $pastRoles = $this->parsePastRoles($spec);
+        if ($roles === [] && $pastRoles === []) {
+            // `roles: []` is the state the Users list's "Remove User" leaves
+            // (every role in the context ended, the account still listed);
+            // with nothing ended either, the account would hold no row in the
+            // context at all, which no screen leaves (U53).
+            throw new SpecException("{$spec->path}.roles", 'Each user needs a non-empty roles list, or an empty one beside a non-empty pastRoles (every role here ended: "Remove User")');
+        }
         $masthead = $this->parseMasthead($spec, $roles, $pastRoles);
         $affiliation = $spec->get('affiliation');
         if ($affiliation !== null && !is_string($affiliation) && !(is_array($affiliation) && !array_is_list($affiliation))) {
