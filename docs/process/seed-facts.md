@@ -990,3 +990,14 @@ config-file settings.
   Contributors › "Edit" refuses "Save" until one is picked (a Bio
   Statement too needs it first). OJS and OPS, 2026-09-25 (U13 claim check
   K5, `b-01-e-b-contributor-bio-typed`).
+- Settings › Website › "Plugins" lists "JATS Template Plugin" ticked and
+  "JATS Metadata Format" unticked, on a new journal and on
+  `publicknowledge`; Statistics › "Articles" carries a "JATS" column; a
+  new submission's "JATS XML" page opens with "Make available with
+  publication" unticked. OJS, 2026-09-25 (U48 claim check K2,
+  `.reports/U48/ccK2/plug-*`, `link-12-p5-jatspage`).
+- Settings › Users & Roles › "Site Access Options" carries the box "Users
+  must be registered and log in to view open access content." on all
+  three apps: "View Article Content" (OJS), "View Monograph Content"
+  (OMP), "View Preprint Content" (OPS); unticked on a fresh context. All
+  three apps, 2026-09-25 (U48 claim check K2, `ctl-03-access-{omp,ops}`).

@@ -225,6 +225,12 @@
  *   list offers (enabled, not dependent, so "Image" is refused). Neither
  *   exists for a remotely hosted galley, whose window hides "URL Path" and
  *   opens no wizard.
+ * - jats {file?, makePublic?} — OJS only (the JATS API and the "JATS XML"
+ *   publication page exist on a journal alone, so the key is a 400 on a
+ *   press and a preprint server): the current publication's "JATS XML"
+ *   page (U48), acting as the editor (admin), after the media files and
+ *   before a publish. The OJS overlay (APP\testing\SubmissionScenarioBuilder)
+ *   owns it; this core refuses the key and runs the overlay's step.
  *
  * The workflow start stage comes from each app's submission schema default —
  * never hard-coded here (a hard-coded initial stage once made every seeded
@@ -360,6 +366,30 @@ abstract class PKPSubmissionScenarioBuilder
     /** The OMP overlay's second step, after a publish: each seeded format made available. */
     protected function makePublicationFormatsAvailable(Context $context, int $submissionId, array $seeded, User $editor): void
     {
+    }
+
+    /**
+     * Read `jats` (the OJS overlay overrides: the journal's "JATS XML"
+     * publication page, U48). A press and a preprint server have no such
+     * page (the JATS API is mounted by OJS alone), so the key is refused,
+     * never dropped (PRINCIPLES D4). Parse-phase: no writes.
+     */
+    protected function parseJats(Context $context, Spec $root, bool $submitted): ?array
+    {
+        if ($root->has('jats')) {
+            throw new SpecException('jats', 'This app has no "JATS XML" publication page (a journal alone has one)');
+        }
+        return null;
+    }
+
+    /**
+     * The OJS overlay's "JATS XML" page step on the current publication,
+     * after the media files and before a publish. Returns the response
+     * entry.
+     */
+    protected function seedJats(Context $context, int $submissionId, array $plan, User $editor): ?array
+    {
+        return null;
     }
 
     /**
@@ -577,6 +607,7 @@ abstract class PKPSubmissionScenarioBuilder
         $mediaFilePlans = $this->parseMediaFiles($context, $root, $submitted, $locale);
         $formatPlans = $this->parsePublicationFormats($context, $root, $locale, $submitted);
         $publicationPagesPlan = $this->parsePublicationPages($context, $root, $locale, $submitted);
+        $jatsPlan = $this->parseJats($context, $root, $submitted);
         $libraryFilePlans = LibraryFileSeeder::parse($root, false);
         if ($libraryFilePlans !== [] && !$submitted) {
             throw new SpecException('libraryFiles', 'A draft has no workflow and no "Library" button: libraryFiles needs submitted: true');
@@ -596,7 +627,7 @@ abstract class PKPSubmissionScenarioBuilder
         // submission's context for the duration of the build.
         $restoreRouterContext = ContextFactory::forceRequestContext($context);
         try {
-            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans, $mediaFilePlans, $formatPlans, $publicationPagesPlan);
+            return $this->execute($root, $context, $locale, $tag, $submitter, $title, $abstract, $submitted, $published, $submissionProps, $publicationProps, $decisionTypes, $roundPlans, $publishOverlayPlan, $authorPlan, $participantPlans, $suggestionPlans, $commentPlans, $galleyPlans, $filePlans, $taskPlans, $libraryFilePlans, $citationsRaw, $dataCitationPlans, $mediaFilePlans, $formatPlans, $publicationPagesPlan, $jatsPlan);
         } finally {
             $restoreRouterContext();
         }
@@ -629,7 +660,8 @@ abstract class PKPSubmissionScenarioBuilder
         array $dataCitationPlans = [],
         array $mediaFilePlans = [],
         array $formatPlans = [],
-        ?array $publicationPagesPlan = null
+        ?array $publicationPagesPlan = null,
+        ?array $jatsPlan = null
     ): array {
         $request = Application::get()->getRequest();
         $seededSuggestions = [];
@@ -641,6 +673,7 @@ abstract class PKPSubmissionScenarioBuilder
         $seededDataCitations = [];
         $seededMediaFiles = [];
         $seededFormats = [];
+        $seededJats = null;
 
         // Create + (maybe) submit as the submitter — wizard parity.
         $previousActingUser = Registry::get('user');
@@ -925,6 +958,12 @@ abstract class PKPSubmissionScenarioBuilder
                 $seededFormats = $this->seedPublicationFormats($context, $submissionId, $formatPlans, $editor);
             }
 
+            // The "JATS XML" page (OJS), after the media files and before a
+            // publish: a published version offers no "Upload" (U48).
+            if ($jatsPlan !== null) {
+                $seededJats = $this->seedJats($context, $submissionId, $jatsPlan, $editor);
+            }
+
             if ($published) {
                 $submission = Repo::submission()->get($submissionId);
                 $publication = Repo::publication()->get($submission->getData('currentPublicationId'));
@@ -1016,6 +1055,7 @@ abstract class PKPSubmissionScenarioBuilder
             'dataCitations' => $seededDataCitations,
             'mediaFiles' => $seededMediaFiles,
             'publicationFormats' => $seededFormats,
+            'jats' => $seededJats,
         ];
     }
 

@@ -567,7 +567,7 @@ trips.
   (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
   2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it), and in the U36 session's, 2026-09-23, beside U03 S5, red alone too (`.reports/U36/final-run-ops.log`, `alone-ops-U40S1.log`; serial and solo green alone), and in the U38 session's, 2026-09-24, beside U49 S6, red alone too (`.reports/U38/final-run-ops.log`; serial and solo green alone). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
-  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`). Again 2026-09-24 in the U44 session's OPS final on a reset database at auto workers, the only red of 215; serial and solo 13 green alone (`.reports/U44/final-run-ops.log`, `alone-ops-serial-solo.log`).
+  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`). Again 2026-09-24 in the U44 session's OPS final on a reset database at auto workers, the only red of 215; serial and solo 13 green alone (`.reports/U44/final-run-ops.log`, `alone-ops-serial-solo.log`). Again 2026-09-25 in the U48 session's OPS final on a reset database at four workers, the only red of 243; serial and solo 13 green alone (`.reports/U48/final-run-ops.log`, `serial-solo-ops.log`).
 - **Profile save response not seen in 30 s** (U03 S5, "cancel, and
   reject, an email change", OPS, once: 2026-09-23, the U36 session's OPS
   final on a reset database on the Mac at auto workers,
@@ -632,7 +632,7 @@ trips.
   projects are skipped on every such run, so a Mac full run's serial
   tests need a `--project=<app>-serial --no-deps` run of their own.
   Watch condition: a red on CI or the VM; until then a Mac full run
-  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`). Again 2026-09-24 in the U46 session's OMP and OPS finals on reset databases at auto workers, green alone on both (`.reports/U46/final-run-{omp,ops}.log`, `alone-{omp,ops}-reds.log`). Again 2026-09-25 in the U47 session's third final set on reset databases at auto workers: OMP U14 S5, and on OJS the same report-row read in U14 S12 "the article is unpublished, published again and deleted" (line 1202's task dialog); both green alone (`.reports/U47/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`).
+  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`). Again 2026-09-24 in the U46 session's OMP and OPS finals on reset databases at auto workers, green alone on both (`.reports/U46/final-run-{omp,ops}.log`, `alone-{omp,ops}-reds.log`). Again 2026-09-25 in the U47 session's third final set on reset databases at auto workers: OMP U14 S5, and on OJS the same report-row read in U14 S12 "the article is unpublished, published again and deleted" (line 1202's task dialog); both green alone (`.reports/U47/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`). Again 2026-09-25 on OPS in the U48 harness regression (the file alone, a reset database, auto workers), in a new shape: the click on the comment's pending-review row in the Tasks dialog hung to the 8-minute test timeout rather than the 10 s count read; green on re-run in 18 s (`.reports/U48/harness/pw-ops-U14{,-rerun}.log`).
   **Tripped 2026-09-23 on the VM**: OJS full run
   at eight workers on a reset database (companion
   `optimize-table-reloads`, lib/ui-library at `51f0c727`,
@@ -826,6 +826,32 @@ trips.
   same day's OPS final on a reset database, where the order differs).
   **Watch condition**: a red on CI or in a final; then make U08 S2 read a
   scratch context or U42 S1 mark its discussion read.
+
+- **OMP U10 S1's style-sheet buttons read before "Remove" renders** (U10
+  S1 "a new press home page…", `@smoke`, OMP, once). In the U48
+  session's OMP final on a reset database at four workers, 2026-09-25,
+  the only red of 359: right after choosing `red-headings.css` the box
+  already showed the name, but `styleSheet.buttonNames()` (a one-shot
+  `evaluate`, `AppearancePages.js`) read `["Upload File"]` without
+  "Remove" (spec line 293); green alone in 7.9 s, serial and solo 14
+  green alone (`.reports/U48/final-run-omp.log`, `alone-omp-U10S1.log`,
+  `serial-solo-omp.log`). A test-side race, not the app: the read does
+  not wait. Fix to make: the "Remove" read auto-waits (a role locator
+  with `toBeVisible`) instead of the one-shot list. Watch condition: a
+  second sighting, or the fix.
+
+- **OJS U13 S3 red at the baseline checkouts** ("an older version beside
+  the current one", local only). In the U48 session's rebase onto U13,
+  2026-09-25, the second version's "Publish" opened "Review Publishing
+  Details" (its "Issue Assignment" required) where `publishShownVersion`
+  expects the confirmation straight away; red in the file's run and
+  alone, and red alone with `origin/main`'s own builders mounted, so not
+  the U48 merge (`.reports/U48/rebase-ojs{,-u13s3}.log`,
+  `base-ojs-u13s3.log`). The checkouts sat at the upstream-sync baselines
+  (ojs `71bb244152`); U13 was built at the ojs tip `d9b567efec`, and CI
+  (at the tips) reads every U13 test green. **Watch condition**: the
+  next sync that moves the ojs baseline; red there means the helper's
+  later-version branch needs the details window too.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

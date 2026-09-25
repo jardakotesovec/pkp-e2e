@@ -109,6 +109,10 @@
  *   A fresh context has no row, which reads as off; on, a signed-out visitor
  *   is sent to Login (RestrictedSiteAccessPolicy). The screen's Save also
  *   writes the form's other boxes; the key writes this row alone.
+ * - restrictArticleAccess (bool) — Settings › Users & Roles › "Site Access
+ *   Options" › "View Article Content", "Users must be registered and log in
+ *   to view open access content." (U48; the OJS UserAccessForm's box). The
+ *   journal's context schema alone carries it: OMP and OPS answer 400.
  * - enableAnnouncements (bool), announcementsIntroduction (localized),
  *   numAnnouncementsHomepage (int ≥ 0 or null) — Settings › Website › Setup ›
  *   "Announcements" tab's three fields (U12; PKPAnnouncementSettingsForm, a
@@ -1437,7 +1441,8 @@ abstract class PKPContextScenarioBuilder
      * the preprint server only, `postedAcknowledgement` (U49); and the
      * Website › Content › Comments tab's `enablePublicComments` (U14); and
      * the Users & Roles › Site Access Options tab's `restrictSiteAccess`
-     * (U13). Only keys the app's context schema carries are accepted.
+     * (U13) and the journal's `restrictArticleAccess` (U48). Only keys
+     * the app's context schema carries are accepted.
      *
      * @return array{settings: array, specKeys: array}
      */
@@ -1608,6 +1613,24 @@ abstract class PKPContextScenarioBuilder
             }
             $settings['restrictSiteAccess'] = $value;
             $specKeys['restrictSiteAccess'] = 'restrictSiteAccess';
+        }
+        if ($root->has('restrictArticleAccess')) {
+            // Settings › Users & Roles › "Site Access Options", the "View
+            // Article Content" box "Users must be registered and log in to
+            // view open access content." (U48; the OJS UserAccessForm's
+            // FieldOptions over the schema's boolean, added to lib/pkp's
+            // PKPUserAccessForm). The form posts its boxes form-encoded
+            // ("true" / "false"), which the save's convertStringsToSchema
+            // turns back into the boolean; the stored row is 1 / 0. Only the
+            // journal's context schema carries it, so a press or preprint
+            // server answers 400.
+            $hasProperty('restrictArticleAccess') || throw new SpecException('restrictArticleAccess', 'restrictArticleAccess is not a setting of this app\'s context schema (the "View Article Content" box exists on a journal only)');
+            $value = $root->get('restrictArticleAccess');
+            if (!is_bool($value)) {
+                throw new SpecException('restrictArticleAccess', 'restrictArticleAccess must be a boolean (true: "Users must be registered and log in to view open access content." ticked, false: unticked)');
+            }
+            $settings['restrictArticleAccess'] = $value;
+            $specKeys['restrictArticleAccess'] = 'restrictArticleAccess';
         }
 
         // Settings › Website › Setup › "Announcements"

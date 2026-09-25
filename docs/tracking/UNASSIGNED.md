@@ -468,3 +468,19 @@ until their specs exist. Do not force-claim the defects themselves.
     spec author; checkouts ojs `d9b567efec`, ops `61cd158ce3`, lib/pkp
     `76a315591b`, ui-library `03d1cee2d2`). Resolves: maintainer
     confirmation as pre-release machinery or dead code.
+31. **Unreached JATS and Body Text pieces** — attached to **U48**
+    (claimed; the JATS & Body Text spec's Reference tables note them).
+    `PKPWorkflowHandler::getJatsPanel()` and
+    `PKP\components\PublicationSectionJats` (AFFW-403's legacy twin): OJS
+    `WorkflowHandler` still builds the panel's config into the page's
+    `components`, but no Vue component or template reads it; the page's
+    "JATS XML" is `WorkflowPublicationJats`. The Body Text API's `DELETE`
+    (API-009): no screen calls it (the page only reads and saves). The
+    "JATS Template Plugin"'s `jatsTemplate/download` page operation
+    (`JatsTemplateDownloadHandler`, PLUG-019; manager or subscription
+    manager, Production-ready files): no screen links it, it serves
+    API-key clients only. Code-verified 2026-09-25 (U48 spec author;
+    checkouts ojs `71bb244152`, lib/pkp `76a315591`, ui-library
+    `03d1cee2`). Resolves: maintainer confirmation as dead code (removal
+    candidates), or a ruling that the download op is an external
+    interface.

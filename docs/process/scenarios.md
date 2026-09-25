@@ -345,6 +345,21 @@ Keys:
   (the scenario endpoint is site-wide), so a `published` submission is
   seeded after the key as on any context. A non-boolean is a 400 (U13
   harness, 2026-09-25).
+- `restrictArticleAccess` (OJS only, boolean): the "View Article
+  Content" box of Settings › Users & Roles › the "Site Access Options"
+  tab, "Users must be registered and log in to view open access
+  content.", saved as that form saves (stored as `1` / `0`). The form's
+  "Save" posts all three of its fields
+  (`restrictSiteAccess=…&restrictArticleAccess=…&disableUserReg=…`, a
+  form-encoded POST to `contexts/{id}` with the PUT override) and so also
+  writes the other two rows at their shown values; the key writes this
+  row alone, and nothing reads an absent row differently from `0`. A
+  fresh journal has none of the three rows, so `publicknowledge` and a
+  scratch journal without the key have the box unticked. A non-boolean
+  is a 400; OMP and OPS answer 400 on the key, as on any key their
+  context schema lacks (U48 harness, 2026-09-25), although their "Site
+  Access Options" tab carries the same box under "View Monograph
+  Content" and "View Preprint Content" (U48 claim check K2, 2026-09-25).
 - `enableAnnouncements` (boolean), `announcementsIntroduction` (localized
   text) and `numAnnouncementsHomepage` (a whole number of zero or more, or
   null for the box emptied): the three fields of Settings › Website › Setup
@@ -1034,6 +1049,34 @@ Keys:
   in the submission's language, `submissionFileId`, null with no
   `file`). OJS and OPS answer 400: a journal and a preprint server have
   galleys (`galleys[]`).
+- `jats` (OJS): the current publication's "JATS XML" page, `{file?,
+  makePublic?}` (at least one), used the way the page is used, acting as
+  `admin`, after the media files and before a publish. `file` is a
+  fixture basename, as for `galleys[]` (`article.xml`, a small JATS
+  article titled "A JATS fixture article"), uploaded as the page's
+  "Upload" uploads it (the JATS API's own upload action on the file);
+  `makePublic` is the page's "Make available with publication" box,
+  `true` ticked and "Confirm"ed in "Enable JATS XML Download", `false`
+  unticked and confirmed (the API's own visibility action). The file is
+  what a screen upload leaves: a submission file at the JATS stage on
+  the publication, named after the fixture, with no component, one
+  revision, and the History's "uploaded" and "revised" lines. So the page
+  opens with the fixture's XML, "Last Modification at {date} by admin",
+  and "Upload", "More Information", "Delete" and "Download", the box as
+  seeded, exactly as after a by-hand upload by `admin` (U48 harness,
+  2026-09-25, parity ledger). With `published: true` the file and the
+  box are on the published version (the upload comes first, as on
+  screen); that page, seeded, still offers "Upload" and "Delete" beside
+  "Unpublish", because its guard compares the version's status with a
+  `STATUS_PUBLISHED` constant the workflow page does not define; a
+  version published through the screens shows the same, so it is not a
+  seed difference (U48 claim check, 2026-09-25, spec Rule 8). A draft (`submitted:
+  false`) refuses the key: the page is on the workflow. The response
+  lists `jats` (`submissionFileId`, null without `file`; `file`;
+  `makePublic`, the box as the build leaves it), null without the key.
+  No key makes a second version: a test uses the header's "Create New
+  Version", which copies the file and the box. OMP and OPS answer 400: a
+  press and a preprint server have no "JATS XML" page.
 
 - The version's display values (U13 harness, 2026-09-24, OJS and OPS
   driven), typed by the editor (`admin`) on the workflow's publication
@@ -1093,6 +1136,8 @@ App-specific keys:
 - OMP: `galleys` is rejected with a 400, because a press has publication
   formats and no "Galleys" page (`publicationFormats[]` above is the
   press's counterpart; OJS and OPS reject that key the same way).
+- OMP and OPS: `jats` is rejected with a 400, because only a journal has
+  the "JATS XML" page.
 
 Facts tests rely on, all parity-checked against the UI path:
 
@@ -1100,7 +1145,8 @@ Facts tests rely on, all parity-checked against the UI path:
   creates, and the submitter is the publication's primary contact.
 - Seeded submissions carry no files unless `files[]` or
   `reviewRounds[].files[]` names them (a `galleys[].file` or
-  `publicationFormats[].file` proof file and `mediaFiles[]` aside). A test whose behavior under test is the upload itself uploads
+  `publicationFormats[].file` proof file, `mediaFiles[]` and `jats.file`
+  aside). A test whose behavior under test is the upload itself uploads
   through the panel under test. The wizard's required-genre check blocks a
   seeded draft's submit until a file of the required component is on it.
   Review-round files are also grant-based; see `patterns.md`: a reviewer
@@ -1168,7 +1214,7 @@ for a remote galley), `files[]` (`submissionFileId`, `file`,
 `fileStage`, `reviewRoundId`, null on "Submission Files", and `uploader`;
 the root entries in order, then each round's), `tasks[]` (`id`,
 `title`, `type`, `stage`, in the order seeded), `libraryFiles[]` (as
-the context's), `mediaFiles[]` and `publicationFormats[]` (above). `stageId`
+the context's), `mediaFiles[]`, `publicationFormats[]` and `jats` (above). `stageId`
 is the submission's stored stage after the build, not the stage the screen
 names: on OPS `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`,
 the posted state), while an unposted preprint reads the Production stage's
