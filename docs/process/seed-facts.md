@@ -146,8 +146,9 @@ behind a line; that scratch is deleted after review.
   Settings › Journal › "Contact" refuses to save anything until the
   support "Name" and "Email address" are typed. All three apps, 2026-09-23
   (U07 claim check K3-4, `.reports/U07/ccK3`).
-- A scratch context from `POST scenarios/context` has no Country, and no
-  journal initials unless `context.acronym` is given; its principal contact
+- A scratch context from `POST scenarios/context` has no Country unless
+  `context.country` is given, and no journal initials unless
+  `context.acronym` is given; its principal contact
   is "Site Admin" <admin@mail.test>. Settings › Journal › "Masthead" refuses
   "Save" ("This field is required.") until both are filled. All three
   apps, 2026-09-23 (U07 claim check K1, K3;
@@ -446,6 +447,19 @@ behind a line; that scratch is deleted after review.
   on a used fleet its web feeds listed 18 (OJS), 28 (OMP) and 17 (OPS)
   items, so a "nothing published" read uses a new scratch context.
   2026-09-25 and 2026-09-26 (U18 claim check K1, K3).
+- A context with more than one UI language, and the site, answers
+  `{context}/oai` with a 302 to `{context}/en/oai`; a one-language scratch
+  context answers at `{context}/oai` itself. OJS: while any journal on the
+  install has DOIs on and "DOI Versioning" set to "Yes", every OJS OAI
+  Identify, list and record request answers 500 on the Postgres test
+  install, on every journal and the site-wide address (U19 register), so a
+  `doiVersioning: true` seed breaks every OJS OAI read until it is off
+  again. A context created under Hosted Journals › "Create Journal" starts
+  not enabled publicly; one seeded through `POST scenarios/context` is
+  enabled unless `enabled: false`. Administration › "System Information"
+  shows the install's OAI settings (`oai` 1, the repository identifier,
+  `oai_max_records` 100), read-only. Live-probed 2026-09-26 (U19 claim
+  check K1, K2, K4).
 - On a fleet used by earlier runs, `publicknowledge`'s "Engineering"
   category page lists items other runs published (OJS and OPS: 2 Items on
   2026-09-25), while the other seeded categories read "0 Items" ("0
@@ -1170,8 +1184,8 @@ config-file settings.
   its first Settings › Journal › "Masthead" save is refused for "Journal
   initials" ("Press Initials", "Server initials" are required too), and
   one with an acronym but no Country keeps "Save" grayed out ("Go to
-  Country: This field is required."); no scenario key sets a Country, so a
-  test picks one on the tab first. 2026-09-25 (U18 claim check K1);
+  Country: This field is required."); `context.country` seeds one (U19
+  harness, 2026-09-26), else a test picks one on the tab first. 2026-09-25 (U18 claim check K1);
   2026-09-26, all three apps (U18 test run, T-ojs-1).
 - {OJS} A new journal has "LOCKSS" and "CLOCKSS" unticked on Settings ›
   Distribution › "Archiving", and `{journal}/gateway/lockss|clockss` land

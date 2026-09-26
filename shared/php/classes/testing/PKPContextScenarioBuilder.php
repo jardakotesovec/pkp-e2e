@@ -16,8 +16,8 @@
  * Step-2 core schema: tag* (parallel-isolation key, also the default urlPath —
  * ≤32 chars, single alphanumeric token), context {path, name, acronym,
  * description, primaryLocale, supportedLocales, contactName, contactEmail,
- * enabled}, users[] (throwaway accounts, same shape as the bootstrap roster
- * entries). Setting passthroughs return per feature, each with a parity entry.
+ * country (U19), enabled}, users[] (throwaway accounts, same shape as the
+ * bootstrap roster entries). Setting passthroughs return per feature, each with a parity entry.
  *
  * Feature passthroughs so far (each with a parity-ledger entry):
  * - sections[] / series[] (the app's structure key; U21) — same shape and
@@ -139,6 +139,25 @@
  * - itemsPerPage (int ≥ 1) — Settings › Website › Setup › "Lists", the
  *   "Items per page" box (U16; PKPListsForm, shared by the three apps;
  *   schema default 25). The key writes this row alone ("Page links" stays).
+ * - enableOai (bool) — Settings › Distribution › "Access", the "Enable OAI"
+ *   radio (U19; the OJS and OPS AccessForm's FieldOptions over the schema's
+ *   boolean, default 1, which every new context stores): true "Enable",
+ *   false "Disable". Only the journal and preprint server schemas carry
+ *   it, so OMP answers 400. The key writes this row alone.
+ * - enableDois (bool), doiPrefix (string or null), doiVersioning (bool),
+ *   enabledDoiTypes (list), doiCreationTime (copyediting / publication /
+ *   never) — Settings › Distribution › "DOIs" › "Setup" (U19;
+ *   PKPDoiSetupSettingsForm and the app's DoiSetupSettingsForm): "DOIs"
+ *   "Allow Digital Object Identifiers (DOIs) to be assigned to work
+ *   published in this journal.", "Items with DOIs", "DOI Prefix",
+ *   "Automatic DOI Assignment", "DOI Versioning". Built on the journal
+ *   only for now (doiSettingsBuilt(); OMP and OPS answer 400). A new
+ *   journal stores DOIs on with no prefix, so a request naming any of the
+ *   keys with DOIs on must give doiPrefix, as the form's save refuses DOIs
+ *   on without one; with enableDois false the other four are refused (the
+ *   form hides them). Saved with the other form passthroughs, before the
+ *   issues[] overlay and any submission, so a later publish mints the
+ *   DOIs the settings call for.
  * - plugins {<lowercased plugin class name>: {enabled*, settings?}} — the
  *   Settings › Website › Plugins grid's enable / disable for that context
  *   (U12; PluginGridHandler::enable: the plugin's `enabled` setting for the
@@ -318,6 +337,9 @@ abstract class PKPContextScenarioBuilder
      */
     public const ROLE_OPTIONS = ['recommendOnly', 'permitMetadataEdit', 'permitSettings', 'masthead'];
 
+    /** The DOIs "Setup" form's passthrough keys (U19), in the form's order. */
+    public const DOI_SETTINGS = ['enableDois', 'enabledDoiTypes', 'doiPrefix', 'doiCreationTime', 'doiVersioning'];
+
     protected ContextFactory $contextFactory;
     protected UserSeeder $userSeeder;
 
@@ -393,6 +415,16 @@ abstract class PKPContextScenarioBuilder
     /** OPS overrides to refuse the review-setup keys (no review stage). */
     protected function assertReviewSupported(string $key): void
     {
+    }
+
+    /**
+     * Whether this app's overlay has built (and parity-driven) the DOI
+     * "Setup" passthroughs (U19: OJS only; OMP and OPS answer 400 until a
+     * DOI feature drives their forms).
+     */
+    protected function doiSettingsBuilt(): bool
+    {
+        return false;
     }
 
     public function build(array $data): array
@@ -1760,19 +1792,127 @@ abstract class PKPContextScenarioBuilder
      */
     protected function saveFormSettings(Context $context, array $settings, array $specKeys): Context
     {
-        $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
-        $errors = $contextService->validate(
-            EntityWriteInterface::VALIDATE_ACTION_EDIT,
-            $settings + ['id' => $context->getId()],
-            (array) $context->getSupportedFormLocales(),
-            $context->getPrimaryLocale()
-        );
-        if (!empty($errors)) {
-            // A multilingual error is keyed "field.locale".
-            $field = explode('.', (string) array_key_first($errors))[0];
-            throw new SpecException($specKeys[$field] ?? $field, 'The settings form would refuse this: ' . json_encode($errors));
+        // The DOI checks of PKPContextService::validate read the request's
+        // context (the form's PUT runs inside it); the builder's request is
+        // site-level, so the scratch context stands on the router for a
+        // save carrying a DOI key (U19).
+        $restore = array_intersect_key($settings, array_flip(self::DOI_SETTINGS)) !== []
+            ? ContextFactory::forceRequestContext($context)
+            : null;
+        try {
+            $contextService = app()->get('context'); /** @var \PKP\services\PKPContextService $contextService */
+            $errors = $contextService->validate(
+                EntityWriteInterface::VALIDATE_ACTION_EDIT,
+                $settings + ['id' => $context->getId()],
+                (array) $context->getSupportedFormLocales(),
+                $context->getPrimaryLocale()
+            );
+            if (!empty($errors)) {
+                // A multilingual error is keyed "field.locale".
+                $field = explode('.', (string) array_key_first($errors))[0];
+                throw new SpecException($specKeys[$field] ?? $field, 'The settings form would refuse this: ' . json_encode($errors));
+            }
+            return $contextService->edit($context, $settings, Application::get()->getRequest());
+        } finally {
+            if ($restore) {
+                $restore();
+            }
         }
-        return $contextService->edit($context, $settings, Application::get()->getRequest());
+    }
+
+    /**
+     * The optional DOI "Setup" passthroughs (U19) → settings rows, as
+     * Settings › Distribution › "DOIs" › "Setup" saves them (PUT
+     * contexts/{id}; the form posts its fields form-encoded and the save's
+     * convertStringsToSchema turns them back into the schema's types). The
+     * form's suffix fields are not these keys'; they stay as the context
+     * has them (a new context stores the "default" suffix). Parse phase.
+     *
+     * @return array{settings: array, specKeys: array}
+     */
+    protected function parseDoiSettings(Spec $root): array
+    {
+        $given = array_values(array_filter(self::DOI_SETTINGS, fn (string $key) => $root->has($key)));
+        if ($given === []) {
+            return ['settings' => [], 'specKeys' => []];
+        }
+        if (!$this->doiSettingsBuilt()) {
+            throw new SpecException($given[0], "{$given[0]} (the DOIs \"Setup\" form) is built on a journal only so far; no parity drive covers this app's form yet");
+        }
+        $settings = [];
+
+        if ($root->has('enableDois')) {
+            $value = $root->get('enableDois');
+            if (!is_bool($value)) {
+                throw new SpecException('enableDois', 'enableDois must be a boolean (true: "Allow Digital Object Identifiers (DOIs) to be assigned to work published in this journal." ticked, false: unticked)');
+            }
+            $settings['enableDois'] = $value;
+        }
+        if (($settings['enableDois'] ?? true) === false) {
+            foreach (array_diff($given, ['enableDois']) as $key) {
+                throw new SpecException($key, "{$key} shows on the DOIs form only while \"DOIs\" is ticked: drop it or give enableDois: true");
+            }
+        } elseif (!$root->has('doiPrefix') || $root->get('doiPrefix') === null) {
+            throw new SpecException('doiPrefix', 'doiPrefix is required: a new journal stores DOIs allowed with no prefix, and the DOIs form refuses a save with DOIs allowed and the "DOI Prefix" box empty');
+        }
+
+        if ($root->has('doiPrefix')) {
+            // The box as typed; emptied it posts null. The schema's own
+            // regex (10.xxxx) is checked here, before the context exists, as
+            // well as by the save's validation.
+            $value = $root->get('doiPrefix');
+            if (!is_string($value) && $value !== null) {
+                throw new SpecException('doiPrefix', 'doiPrefix must be a string such as "10.1234" (the "DOI Prefix" box) or null (emptied)');
+            }
+            $schema = app()->get('schema')->get('context'); /** @var \stdClass $schema */
+            foreach ((array) ($schema->properties->doiPrefix->validation ?? []) as $rule) {
+                if (is_string($value) && str_starts_with($rule, 'regex:') && !preg_match(substr($rule, 6), $value)) {
+                    throw new SpecException('doiPrefix', "The settings form would refuse this: the \"DOI Prefix\" box must match {$rule} (e.g. 10.1234)");
+                }
+            }
+            $settings['doiPrefix'] = $value;
+        }
+        if ($root->has('doiVersioning')) {
+            $value = $root->get('doiVersioning');
+            if (!is_bool($value)) {
+                throw new SpecException('doiVersioning', 'doiVersioning must be a boolean (true "Yes, assign a unique DOI to every version of an article.", false "No, all versions of an article should have the same DOI.")');
+            }
+            $settings['doiVersioning'] = $value;
+        }
+        if ($root->has('enabledDoiTypes')) {
+            // "Items with DOIs": the app form's own boxes (a registration
+            // agency narrows them; a scratch context has none).
+            $form = new \APP\components\forms\context\DoiSetupSettingsForm('', [], Application::getContextDAO()->newDataObject());
+            $offered = array_column($form->getField('enabledDoiTypes')->options, 'value');
+            $expected = 'enabledDoiTypes must be a list of the "Items with DOIs" boxes this app\'s DOIs form offers: ' . implode(', ', $offered);
+            $value = $root->get('enabledDoiTypes');
+            if (!is_array($value) || !array_is_list($value)) {
+                throw new SpecException('enabledDoiTypes', $expected);
+            }
+            foreach ($value as $i => $item) {
+                if (!is_string($item) || !in_array($item, $offered, true)) {
+                    throw new SpecException("enabledDoiTypes.{$i}", $expected);
+                }
+            }
+            if (count(array_unique($value)) !== count($value)) {
+                throw new SpecException('enabledDoiTypes', 'enabledDoiTypes names a box twice; the screen ticks each box once');
+            }
+            $settings['enabledDoiTypes'] = $value;
+        }
+        if ($root->has('doiCreationTime')) {
+            $times = [
+                'copyediting' => Repo::doi()::CREATION_TIME_COPYEDIT,
+                'publication' => Repo::doi()::CREATION_TIME_PUBLICATION,
+                'never' => Repo::doi()::CREATION_TIME_NEVER,
+            ];
+            $value = $root->get('doiCreationTime');
+            if (!is_string($value) || !array_key_exists($value, $times)) {
+                throw new SpecException('doiCreationTime', 'doiCreationTime must be one of: copyediting ("Upon reaching the copyediting stage"), publication ("Upon publication"), never ("Never")');
+            }
+            $settings['doiCreationTime'] = $times[$value];
+        }
+
+        return ['settings' => $settings, 'specKeys' => array_combine(array_keys($settings), array_keys($settings))];
     }
 
     /**
@@ -2112,7 +2252,25 @@ abstract class PKPContextScenarioBuilder
             $specKeys['itemsPerPage'] = 'itemsPerPage';
         }
 
-        return ['settings' => $settings, 'specKeys' => $specKeys];
+        if ($root->has('enableOai')) {
+            // Settings › Distribution › "Access", the "Enable OAI" radio
+            // (U19; the OJS and OPS AccessForm's FieldOptions over the
+            // schema's boolean, default 1, stored on every new context):
+            // "Enable" true, "Disable" false. The form posts its whole body
+            // form-encoded with "Publishing Mode"; the key writes this row
+            // alone. The press schema has no such field: OMP answers 400.
+            $hasProperty('enableOai') || throw new SpecException('enableOai', 'enableOai is not a setting of this app\'s context schema (the "Enable OAI" radio exists on a journal and a preprint server only)');
+            $value = $root->get('enableOai');
+            if (!is_bool($value)) {
+                throw new SpecException('enableOai', 'enableOai must be a boolean (true: "Enable OAI" at "Enable", false: at "Disable")');
+            }
+            $settings['enableOai'] = $value;
+            $specKeys['enableOai'] = 'enableOai';
+        }
+
+        $doi = $this->parseDoiSettings($root);
+
+        return ['settings' => $settings + $doi['settings'], 'specKeys' => $specKeys + $doi['specKeys']];
     }
 
     /**

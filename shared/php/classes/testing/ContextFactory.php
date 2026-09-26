@@ -39,7 +39,7 @@ class ContextFactory
     /**
      * @param Spec $spec context keys: path*, name, acronym, description,
      *   primaryLocale, supportedLocales, supportedSubmissionLocales,
-     *   supportedFormLocales, contactName, contactEmail, enabled
+     *   supportedFormLocales, contactName, contactEmail, country, enabled
      */
     public function parseParams(Spec $spec): array
     {
@@ -50,6 +50,19 @@ class ContextFactory
         $supportedSubmissionLocales = $spec->get('supportedSubmissionLocales');
         $supportedFormLocales = $spec->get('supportedFormLocales');
         $path = (string) $spec->require('path');
+        $prefix = $spec->path === '' ? '' : "{$spec->path}.";
+
+        // The "Country" list of Settings › Masthead and of the Hosted
+        // Journals (Presses, Servers) window (U19): its option value, the
+        // two-letter code (`CA`), stored as the context's `country` row as
+        // either form's save stores it. The schema's `country` rule refuses
+        // a code the list lacks (below); an empty value is refused here, as
+        // the Masthead form refuses an unpicked list. Without the key a
+        // context has no row, and both screens ask for one before a save.
+        $country = $spec->get('country');
+        if ($country !== null && (!is_string($country) || $country === '')) {
+            throw new SpecException("{$prefix}country", 'country must be a two-letter country code, the "Country" list\'s option value (e.g. "CA")');
+        }
 
         $params = array_filter([
             'urlPath' => $path,
@@ -60,6 +73,7 @@ class ContextFactory
             'supportedLocales' => $supportedLocales,
             'contactName' => (string) $spec->get('contactName', 'Site Admin'),
             'contactEmail' => (string) $spec->get('contactEmail', 'admin@mail.test'),
+            'country' => $country,
         ], fn ($value) => $value !== null);
         $params['enabled'] = (bool) $spec->get('enabled', true);
 
@@ -104,6 +118,9 @@ class ContextFactory
             $site->getSupportedLocales(),
             $primaryLocale
         );
+        if (isset($errors['country'])) {
+            throw new SpecException("{$prefix}country", 'country is not a code the "Country" list offers: ' . json_encode($errors['country']));
+        }
         if (!empty($errors)) {
             throw new SpecException(
                 $spec->path === '' ? 'context' : $spec->path,

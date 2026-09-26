@@ -56,6 +56,16 @@ touched.
   arrives holding it). Distinct from the journal's **principal contact**
   ("Invitations, accounts, ORCID" below) — the configured identity system
   emails are sent from.
+<a id="harvesting"></a>
+- **Harvesting (OAI-PMH)** — the standard interface through which indexing
+  services, library catalogues and aggregators (*harvesters*) collect a
+  journal's metadata: a *request* (one of six, such as "Identify" or
+  "ListRecords") sent to the journal's OAI address, answered with XML that
+  a browser shows as a page headed "OAI 2.0 Request Results". A *record*
+  describes one published item in one *metadata format* (Dublin Core,
+  MARC, JATS); a *set* is a group of records a harvester can ask for alone
+  (the journal, one section); a *deleted record* is the header left behind
+  when an item stops being published. The OAI-PMH spec owns the rules.
 
 ## Roles and access
 

@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **35 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **36 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -537,3 +537,16 @@ until their specs exist. Do not force-claim the defects themselves.
     2026-09-26 (U54 spec author; checkouts ojs `71bb244152`, omp
     `187f0f40d`, ops `61cd158ce3`, lib/pkp `76a315591b`). Resolves:
     maintainer confirmation as dead code (removal candidates).
+36. **OAI bearer-token read** — attached to **U19** (ROUTE-044,
+    ROUTE-079; claimed; the OAI-PMH spec's footnote b names the
+    handler). OJS and OPS `OAIHandler::validate()`, called from
+    `index()` after the access decision, decode an `Authorization:
+    Bearer` API key and store it with `setApiToken()` ("Permit the use
+    of the Authorization header and an API key for access to unpublished
+    content"), but every OAI records query serves published items only
+    and no screen or client of the app sends the header; a token that
+    fails to decode is not caught. OMP has no such code. Code-verified
+    2026-09-26 (U19 spec author; checkouts ojs `71bb244152`, omp
+    `187f0f40d`, ops `61cd158ce3`, lib/pkp `76a315591b`). Resolves:
+    maintainer confirmation as dead code (removal candidate), or a
+    ruling on what the token is meant to open.

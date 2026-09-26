@@ -34,6 +34,11 @@ Multilingual fields (`name`, section `title` and `abbrev`, publication
 `title`, `abstract`, `subtitle`, `plainLanguageSummary`) accept a locale map such as `{"en": "…"}`. A bare
 string is wrapped under the context's primary locale. Pass a locale map when
 the test needs a specific locale.
+One exception, OJS and OPS: a locale-map `abbrev` on the context
+scenario's first section (the one that renames the default section) is
+stored as the string "Array", so that section's OAI set reads
+`{path}:Array` until its window is saved on screen; pass `abbrev` there as
+a bare string (U19 claim check K3, 2026-09-26).
 
 ## `POST` / `GET bootstrap`
 
@@ -78,7 +83,8 @@ Keys:
 - `context`: `path` (defaults to the tag), `name` (defaults to "Scratch
   context {tag}"), `acronym`, `description`, `primaryLocale`,
   `supportedLocales`, `supportedSubmissionLocales`, `supportedFormLocales`,
-  `contactName`, `contactEmail`, `enabled`. `supportedSubmissionLocales`
+  `contactName`, `contactEmail`, `country`, `enabled`.
+  `supportedSubmissionLocales`
   mirrors the Languages settings grid's submission toggles and keeps the
   metadata locales in step, exactly as the grid does. A scratch context
   needs `supportedLocales` to include a locale before that locale's URL
@@ -94,6 +100,17 @@ Keys:
   "French" and "English" toggles and "Title in French" beside "Title". A
   context created without the key has the primary locale alone under
   "Forms", and its forms are single-language even with French under "UI".
+  `context.country` is the "Country" list of Settings › Journal (Press,
+  Server) › "Masthead" and of the Administration › Hosted Journals
+  (Presses, Servers) "Edit" window: the option value, a two-letter code
+  (`CA` for "Canada"), stored as the one `country` row either window's
+  "Save" stores. A code the list lacks (`XX`, lower-case `ca`, the name
+  "Canada") or a non-string is a 400 before the context exists; an empty
+  string reads as absent. Without the key a scratch context has no
+  country, and both windows refuse their first "Save" until one is
+  picked; with it both open on the seeded country. The Masthead also
+  requires "Journal initials" (`context.acronym`), which a scratch
+  context has only when given (U19 harness, 2026-09-26, three apps).
 - `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
   entry renames the default section. OMP's context scenario does not accept
   a `series[]` list yet and answers 400 on the key.
@@ -461,6 +478,45 @@ Keys:
   many months from today at midnight (`issues[]` above). A fresh journal
   has no row, which reads as "Disabled". Out of range or not a whole
   number: 400. OMP and OPS answer 400 (U51 harness, 2026-09-25).
+- `enableOai` (OJS, OPS; boolean): the "Enable OAI" radio of Settings ›
+  Distribution › "Access", `true` "Enable", `false` "Disable" (stored as
+  `1` / `0`). Every new journal and preprint server stores `1`
+  (`publicknowledge` included), so the key matters at `false`: the
+  repository then lists none of the context's records, while the tab
+  opens with "Disable" selected. The tab's "Save" posts
+  `publishingMode=&delayedOpenAccessDuration=&enableOai=false` (OPS
+  without the list); the empty fields store no row, so the screen and
+  the key both write this row alone. A non-boolean is a 400; OMP answers
+  400, a press has no such radio (U19 harness, 2026-09-26).
+- `enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
+  `doiCreationTime` (OJS only for now; U19): Settings › Distribution ›
+  "DOIs" › "Setup". `enableDois` (boolean) is the "DOIs" box "Allow
+  Digital Object Identifiers (DOIs) to be assigned to work published in
+  this journal."; `doiPrefix` the "DOI Prefix" box (`10.` then four to
+  seven digits; `null` is the emptied box); `enabledDoiTypes` the "Items
+  with DOIs" boxes, a list of `publication` ("Articles"), `issue`
+  ("Issues"), `representation` ("Article galleys, such as a published
+  PDF") and `peerReview` ("Peer Review"); `doiCreationTime` the
+  "Automatic DOI Assignment" list, `copyediting` ("Upon reaching the
+  copyediting stage"), `publication` ("Upon publication") or `never`;
+  `doiVersioning` (boolean) the "DOI Versioning" radios, `true` "Yes,
+  assign a unique DOI to every version of an article.", `false` "No, all
+  versions of an article should have the same DOI.". A new journal stores
+  DOIs on, "Articles" ticked, "Upon reaching the copyediting stage",
+  versioning "No" and no prefix, and the form refuses a save with DOIs on
+  and no prefix: so any of these keys with DOIs on needs `doiPrefix`
+  (400 otherwise), and with `enableDois: false` the other four are 400s
+  (the form hides them). The tab's "Save" posts every field, the suffix
+  patterns empty (`enableDois=true&enabledDoiTypes[]=publication&doiPrefix=10.1234&doiCreationTime=copyEditCreationTime&doiSuffixType=default&…&doiVersioning=true`),
+  which on a new journal writes exactly the rows the keys write. The
+  settings are saved before `issues[]` and before any submission, so an
+  article seeded `published` into such a journal carries a minted DOI
+  (`10.1234/` and an eight-character suffix, "Unregistered"). The row
+  "Per-version records" seeds `{doiPrefix: '10.1234', doiVersioning:
+  true}`; a later version then gets a DOI of its own when it is
+  published on screen. OMP and OPS answer 400 on every one of them until
+  a DOI feature drives their forms; the "Registration" tab
+  (`registrationAgency`) is not built (U19 harness, 2026-09-26).
 - `submitWithCategories` (boolean): the "Categories" radios of Settings ›
   Workflow › Submission › "Metadata", under "Should the submitting author
   be asked to select a category when they make a new submission?": `true`
@@ -709,6 +765,18 @@ Keys:
   renders empty (its form arrives with no fields), while `urnCheckNo:
   false` shows the URN box. On OPS `urnpubidplugin` is a 400, since a
   preprint server has no URN plugin (U44 claim check K1, K2, 2026-09-24).
+  The "JATS Metadata Format" plugin (OJS, `oaimetadataformatplugin_jats`,
+  listed under "OAI Metadata Format Plugins") is off on every fresh
+  journal, `publicknowledge` included (no row at all, not even a site
+  one). Its own enable writes the row of the journal the request is in,
+  so the grid's tick and the key both write the scratch journal's
+  `enabled` row (`1`, `bool`), and no site row. Its "Settings" window has
+  one box, "Ignore uploaded JATS XML documents", which "OK" posts as
+  `forceJatsTemplate=1` when ticked and stores as the string `'1'`: seed
+  it as `settings: {forceJatsTemplate: '1'}`, the string, so the row
+  matches the window's (a boolean would store the type `bool`). Unticked
+  is the fresh state (no row). OMP and OPS answer 400 on the name (U19
+  harness, 2026-09-26).
 - `themeOptions` (U13 harness, 2026-09-24, three apps): Settings ›
   Website › Appearance › "Theme", a map from an option of the context's
   theme (a scratch context always has the "Default Theme") to its value,
@@ -1660,9 +1728,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   "Notify All Authors", U30), `reviewerRecommendations[]` (Settings ›
   Workflow › Review "Reviewer Recommendations", U29), the remaining
   submission-intake settings (the checklist and the privacy statement,
-  U58), DOI
-  settings (`enableDois`, `doiPrefix`, `doiVersioning`, `enabledDoiTypes`,
-  `registrationAgency`, `doiCreationTime`), ISSNs (the online ISSN
+  U58), the DOI settings on a press and a preprint server (the journal's
+  are built, U19) and the DOIs "Registration" tab's
+  `registrationAgency`, ISSNs (the online ISSN
   is typed on Masthead, U13), `licenseUrl` (copied
   into a publication when it is published, so it must be set before a
   `published` seed; sync rr14, 2026-09-22), and an OJS issue's title or
@@ -1674,10 +1742,6 @@ These keys do not exist. They are ideas recorded from an earlier harness.
 - Context: OMP `series[]` (the context scenario answers 400 on it, so a
   scratch press has no series and its Browse block none to list; added by
   hand under Settings › Press › "Series", U29, U16 claim checks).
-- Context: `country` (a scratch context has none, so the first Settings ›
-  Journal › "Masthead" save and Hosted Journals › "Edit" ask for one before
-  anything else saves; U07 claim check 2026-09-23, U13 claim check
-  2026-09-25).
 - Section: `sections[].hideAuthor` (OJS), the section form's "Omit author
   names for section items from issues' table of contents."; it is ticked
   on screen (U13 claim check K5, 2026-09-25).
