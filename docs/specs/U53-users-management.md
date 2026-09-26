@@ -383,8 +383,8 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
 1. **"Bulk Emails"** (Administration › Site Settings › "Site Setup" ›
    "Bulk Emails"; by default no journal is ticked). A journal ticked there
    gains the "Notify" tab on its Users & Roles page (Rule 1); unticked, the
-   page has no such tab. What the tab does belongs to *Notify users (bulk
-   email)*. <sup>t</sup>
+   page has no such tab. What the tab does belongs to
+   [Notify users (bulk email)](U55-notify-users.md). <sup>t</sup>
 2. **"Minimum password length (characters)"** (Administration › Site
    Settings › "Site Setup" › "Security"; default 6). The shortest
    password the older grid's "Add User" and "Edit User" accept, and the
@@ -410,7 +410,7 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
   Options" tab is shared with
   [Registration & account validation](U02-registration-and-account-validation.md).
 - **[ORCID integration](U04-orcid-integration.md)**: the "ORCID" tab.
-- **Notify users (bulk email)** (spec not yet written): the "Notify" tab
+- **[Notify users (bulk email)](U55-notify-users.md)**: the "Notify" tab
   (Settings bullet 1).
 - **[Reader comments & moderation](U14-reader-comments-and-moderation.md)**:
   what "Remove User" and a merge do to a member's public comments.

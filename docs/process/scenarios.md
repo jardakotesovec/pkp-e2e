@@ -635,6 +635,37 @@ Keys:
   `users[]`; a template's `roles` cannot name a custom role, and neither
   can `participants[]` (400 "Unknown role key"; U54 ccK3). The
   response lists `customRoles` as `{key, id}`.
+- `bulkEmails` (boolean; the three apps; U55): `true` is the new
+  context's box ticked under Administration › Site Settings › "Site
+  Setup" › "Bulk Emails" and "Save", as the Site Administrator does it
+  (the site form's save, `PUT index/api/v1/site`, through the site
+  service's own validate and edit). The list is site-wide: the key adds
+  the new context's id and touches no other id, reading the list under
+  a lock so seeds in parallel keep each other's ids (eight at once over
+  two servers, U55 harness). `false` is a new context's own state and
+  writes nothing. With it on, the context's Settings › Users & Roles has
+  the "Notify" tab and its Settings Wizard's "Restrict Bulk Emails"
+  holds "Disable Roles". Facts a suite meets: every context seeded with
+  the key stays listed and ticked on the "Bulk Emails" tab until the
+  fleet is reset (the list names each scratch context, "Scratch context
+  {tag}"), and `publicknowledge` is never ticked. The screen's "Save"
+  posts the whole list as its page loaded it, so a Bulk Emails save
+  from a page opened before a parallel seed writes that seed's id out:
+  a test that saves the form belongs in the serial project (A9).
+- `disableBulkEmailRoles` (list of role keys; the three apps; U55): the
+  Settings Wizard's "Journal Settings" › "Restrict Bulk Emails" ›
+  "Disable Roles" boxes ticked and "Save" (`PUT contexts/{id}` with
+  `disableBulkEmailUserGroups`, the ids, through the context service's
+  validate, whose Site-Administrator-only check the seeding `admin`
+  passes, and edit). Keys are those of `users[].roles`, `customRoles[]`
+  keys included; stored ascending, as ticking the boxes top to bottom
+  posts them. A ticked role is not offered on the "Notify" tab's
+  "Roles" and stays offered everywhere else. Refusals (400, before the
+  context exists): the key without `bulkEmails: true` (the side tab
+  shows no boxes then), an empty list (omit the key: none ticked is a
+  new context's state), an unknown key, a key named twice. Both keys
+  are applied last in the build (U55 harness, 2026-09-26, three apps:
+  "Author", "Reader" and a custom role).
 - `plugins`: a map from a plugin's lowercased class name (the Plugins
   grid's `plugin` id, e.g. `announcementfeedplugin`) to `{enabled,
   settings?}`. `enabled` (boolean, required) is the grid's "Enabled" box

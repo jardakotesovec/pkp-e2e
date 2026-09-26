@@ -245,6 +245,21 @@
  *   posts every option of the theme as it shows them with the changed ones
  *   replaced, through PKPContextController::editTheme itself (ApiCall), last
  *   in the build.
+ * - bulkEmails (bool) — Administration › Site Settings › "Site Setup" ›
+ *   "Bulk Emails", the new context's box ticked and "Save" (U55;
+ *   PKPSiteBulkEmailsForm, PUT site → PKPSiteService::validate + ::edit
+ *   with the whole ticked list). The site-wide list is read under a row
+ *   lock on `site` and the context's id appended, so parallel seeds never
+ *   drop each other's ids; no other id is touched. false (the default of
+ *   a new context) writes nothing. Applied last in the build.
+ * - disableBulkEmailRoles (list of role keys) — the Settings Wizard's
+ *   "Journal Settings" › "Restrict Bulk Emails" › "Disable Roles" boxes
+ *   ticked and "Save" (U55; PKPRestrictBulkEmailsForm, PUT contexts/{id}
+ *   → PKPContextService::validate, whose site-admin check the seeding
+ *   admin passes, + ::edit). Keys are users[].roles keys, customRoles[]
+ *   keys included; stored as the roles' ids, ascending. Refused without
+ *   bulkEmails true (the side tab shows no boxes then), empty, or with a
+ *   key repeated. Applied after bulkEmails, last in the build.
  * All settings passthroughs (review included) are validated and written in
  * ONE PKPContextService::validate + ::edit, exactly as the settings forms'
  * PUT contexts/{id} save is (PKPContextController::edit).
@@ -433,6 +448,7 @@ abstract class PKPContextScenarioBuilder
         $announcementPlans = $this->parseAnnouncements($root, $primaryLocale, $announcementTypePlans);
         $overlayPlan = $this->parseOverlay($root);
         $themeOptionsPlan = $this->parseThemeOptions($root);
+        $bulkEmailsPlan = $this->parseBulkEmails($root, array_column($customRolePlans, 'key'));
         $root->assertConsumed();
 
         if (Application::getContextDAO()->getByPath((string) $contextData['path'])) {
@@ -582,6 +598,13 @@ abstract class PKPContextScenarioBuilder
             $this->applyThemeOptions($context, $themeOptionsPlan);
         }
 
+        // Site Settings › "Bulk Emails", then the Settings Wizard's
+        // "Restrict Bulk Emails" (U55), last: the site row lock the first
+        // takes is held to the commit, so it is held for as short as can be.
+        if ($bulkEmailsPlan !== null) {
+            $context = $this->applyBulkEmails($context, $bulkEmailsPlan);
+        }
+
         return [
             'tag' => $tag,
             'contextId' => $context->getId(),
@@ -595,6 +618,103 @@ abstract class PKPContextScenarioBuilder
             'categories' => $categories,
             'customRoles' => $customRoles,
         ] + $overlay;
+    }
+
+    /**
+     * The optional `bulkEmails` box and `disableBulkEmailRoles` list (U55)
+     * → a plan, or null when neither is given. `disableBulkEmailRoles`
+     * names role keys (the installed roles' keys, as users[].roles, or a
+     * customRoles[] key of this build) and needs `bulkEmails: true`: the
+     * wizard's "Restrict Bulk Emails" side tab offers "Disable Roles" only
+     * while the context is ticked under "Bulk Emails". An empty list is
+     * refused (omit the key: none ticked is the new context's state), as
+     * is a key named twice. Parse phase: no writes.
+     *
+     * @param string[] $customRoleKeys
+     *
+     * @return ?array{enable: bool, disableRoles: string[]}
+     */
+    protected function parseBulkEmails(Spec $root, array $customRoleKeys): ?array
+    {
+        if (!$root->has('bulkEmails') && !$root->has('disableBulkEmailRoles')) {
+            return null;
+        }
+        $enable = $root->get('bulkEmails', false);
+        if (!is_bool($enable)) {
+            throw new SpecException('bulkEmails', 'bulkEmails must be a boolean (true: the context ticked under Administration › Site Settings › "Bulk Emails"; false: unticked, a new context\'s state)');
+        }
+        $disable = [];
+        if ($root->has('disableBulkEmailRoles')) {
+            $value = $root->get('disableBulkEmailRoles');
+            if (!$enable) {
+                throw new SpecException('disableBulkEmailRoles', 'disableBulkEmailRoles needs bulkEmails: true (while the context is not ticked under "Bulk Emails", the Settings Wizard\'s "Restrict Bulk Emails" shows no "Disable Roles")');
+            }
+            if (!is_array($value) || !array_is_list($value) || $value === []) {
+                throw new SpecException('disableBulkEmailRoles', 'disableBulkEmailRoles must be a non-empty list of role keys (the "Disable Roles" boxes ticked; omit the key for none)');
+            }
+            $known = array_merge(array_keys(UserSeeder::registryRoleIds()), $customRoleKeys);
+            foreach ($value as $i => $key) {
+                if (!is_string($key) || !in_array($key, $known, true)) {
+                    sort($known);
+                    throw new SpecException("disableBulkEmailRoles.{$i}", 'Unknown role key "' . (is_scalar($key) ? $key : gettype($key)) . '". This app\'s keys: ' . implode(', ', $known));
+                }
+                if (in_array($key, $disable, true)) {
+                    throw new SpecException("disableBulkEmailRoles.{$i}", "\"{$key}\" is named twice (one box per role)");
+                }
+                $disable[] = $key;
+            }
+        }
+        return ['enable' => $enable, 'disableRoles' => $disable];
+    }
+
+    /**
+     * Site Settings › "Bulk Emails": the context's box ticked, "Save" (PUT
+     * site: PKPSiteController::edit → PKPSiteService::validate + ::edit
+     * with the list the form holds), then the Settings Wizard's "Restrict
+     * Bulk Emails" › "Disable Roles" ticked, "Save" (PUT contexts/{id}:
+     * PKPContextService::validate, the site-admin check included, +
+     * ::edit, through saveFormSettings). The screen posts the list the
+     * page loaded plus the new box; here the list is read afresh under a
+     * lock on the `site` row, which the service's own UPDATE would take
+     * only after the read, so two seeds in parallel cannot write each
+     * other's id out. The ids are sorted ascending, the order the boxes
+     * are listed in (a click order on screen).
+     *
+     * @param array{enable: bool, disableRoles: string[]} $plan
+     */
+    protected function applyBulkEmails(Context $context, array $plan): Context
+    {
+        if (!$plan['enable']) {
+            return $context;
+        }
+        DB::table('site')->lockForUpdate()->first();
+        $siteDao = DAORegistry::getDAO('SiteDAO'); /** @var \PKP\site\SiteDAO $siteDao */
+        $site = $siteDao->getSite();
+        $enabled = array_map('intval', (array) $site->getData('enableBulkEmails'));
+        if (!in_array((int) $context->getId(), $enabled, true)) {
+            $enabled[] = (int) $context->getId();
+        }
+        $siteService = app()->get('site'); /** @var \PKP\services\PKPSiteService $siteService */
+        $params = ['enableBulkEmails' => $enabled];
+        $errors = $siteService->validate($params, $site->getSupportedLocales(), $site->getPrimaryLocale());
+        if (!empty($errors)) {
+            throw new SpecException('bulkEmails', 'The "Bulk Emails" form would refuse this: ' . json_encode($errors));
+        }
+        $siteService->edit($site, $params, Application::get()->getRequest());
+
+        if ($plan['disableRoles'] === []) {
+            return $context;
+        }
+        $ids = array_map(
+            fn (string $key) => (int) $this->userSeeder->resolveUserGroup($context, $key, 'disableBulkEmailRoles')->id,
+            $plan['disableRoles']
+        );
+        sort($ids);
+        return $this->saveFormSettings(
+            $context,
+            ['disableBulkEmailUserGroups' => $ids],
+            ['disableBulkEmailUserGroups' => 'disableBulkEmailRoles']
+        );
     }
 
     /**

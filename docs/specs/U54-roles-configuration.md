@@ -437,8 +437,8 @@ level allows no stage ⚠ [A12](#a12). <sup>k</sup>
   **[Issues](U50-issues.md)**, **[Subscriptions & open access control](U51-subscriptions.md)**,
   and *Monograph landing page* (no spec yet): what the two sign-in boxes
   of "Site Access Options" change on the reader's pages.
-- **[ORCID integration](U04-orcid-integration.md)** and *Notify users
-  (bulk email)* (no spec yet): the page's "ORCID" tab and, while the Site
+- **[ORCID integration](U04-orcid-integration.md)** and
+  **[Notify users (bulk email)](U55-notify-users.md)**: the page's "ORCID" tab and, while the Site
   Administrator allows the journal bulk email (Administration › Site
   Settings › "Bulk Emails"), its "Notify" tab.
 
