@@ -789,9 +789,12 @@ trips.
   An app race that a person meets only when two managers add the same
   language at once; for the suite, a flake source whenever parallel tests
   seed French contexts. No spec holds it yet (U57 *Languages & locales*
-  is pending). **Watch condition**: a French-context seed or save red
-  with that 500 on CI; then serialize the harness's first French install
-  (bootstrap installs it once) before the parallel project.
+  is pending). Maintainer's call 2026-09-26: not a realistic problem for
+  a journal; handle it on the test side, and take it upstream only if it
+  keeps firing with no reasonable test-side fix. **Watch condition**: a
+  French-context seed or save red with that 500 on CI; then install French
+  once at bootstrap, before the parallel project, so later French
+  contexts never race the first install.
 
 - **Order asserted on lists the app does not order** (settled
   2026-09-26 as one class: OPS U13 S1/S10 keywords, OMP U10 S5 masthead,

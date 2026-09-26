@@ -48,11 +48,11 @@ page. Every row below assumes the journal has public comments switched on
 |--------|--------------------|
 | **Read the comments under an article** | • anyone, signed in or not, on a published article's landing page: the approved comments (Rule 6)<br>• the writer of a comment that is not approved, signed in: that comment as well, marked "Your comment will be visible when the editor approves it" (Rule 6); nobody else sees it, a moderator included <sup>e</sup> |
 | **Write a comment** | • any signed-in visitor, on the article's latest published version only (Rule 4)<br>• a visitor who is not signed in is offered "Log in to comment" instead, which leads through the Login page back to the comments (Rule 4b) <sup>f</sup> |
-| **Report a comment** | • any signed-in visitor, on another person's comment that is showing, through the comment's "…" menu (Rule 8); a moderator gets the same offer there and nothing more<br>• nobody on their own comment: its menu offers "Delete Comment" and no "Report" (Rule 7) <sup>g</sup> |
+| **Report a comment** | • any signed-in visitor, on another person's comment that is showing, through the comment's "…" menu (Rule 8); a moderator gets the same offer there and nothing more; a request made by hand, which no screen sends, also files a report on another journal's approved comment [A12](#a12)<br>• nobody on their own comment: its menu offers "Delete Comment" and no "Report" (Rule 7) <sup>g</sup> |
 | **Delete a comment from the landing page** | • the comment's own writer, signed in, through the comment's "…" menu (Rule 9); the menu on anyone else's comment offers no "Delete Comment", and a moderator deletes other people's comments on the Comments page only (Rule 14) <sup>h</sup> |
 | **Switch public comments on or off** | • a Journal Manager, an Editor whose role permits settings changes (the Roles screen's "Permit changes to Settings", ticked by default), and a Site Administrator working in the journal, on Settings › Website › Content › "Comments" (Rule 2) <sup>b</sup> |
 | **Open the Comments page** | • a Journal Manager and an Editor, whether or not their role permits settings changes: the Content › Comments menu entry while the setting is on (Rule 3), and the page's address at any time (Rule 2b)<br>• a Site Administrator holding no manager role in the journal: on a journal the page opens; on a press or a preprint server the menu entry is offered but the address answers the access-denied page ⚠ [OMP1](#omp1) ⚠ [OPS1](#ops1) (Rule 17)<br>• a Section Editor, an Assistant, an Author, a Reviewer or a Reader: no menu entry, and the address answers the access-denied page<br>• a visitor who is not signed in: the address answers the Login page <sup>i</sup> <sup>m</sup> |
-| **Approve, hide or delete a comment; view or delete a report** | • whoever can open the Comments page (the row above), on every comment of the journal, their own included (Rules 12 to 16) <sup>j</sup> |
+| **Approve, hide or delete a comment; view or delete a report** | • whoever can open the Comments page (the row above), on every comment of the journal, their own included (Rules 12 to 16)<br>• the screens offer this journal's comments only (Rule 10a), but a request made by hand, which no screen sends, lets a Journal Manager of this journal act on another journal's comment by its number ⚠ [A12](#a12) <sup>j</sup> |
 | **Receive the moderation tasks** | • every Journal Manager and Editor of the journal, in the Tasks panel (Side effects); a Site Administrator holding no manager role in the journal gets none <sup>l</sup> |
 
 ## Fields & validation
@@ -835,6 +835,7 @@ Left out of the scenarios above, by reason:
   - A8 (closing the report panel clearing both numbers from the address; Rule 15; scenario 3 marks it)
   - A9 (the Site Administrator with Reader as their only journal role, the "Error" dialog over the Comments page; Rule 17)
   - A11 (a comment's deletion taking the task of an unrelated report or comment that shares its number, in any journal; Side effects)
+  - A12 (moderating or reporting another journal's comment by requests made by hand; Actors rows 3 and 7)
   - OMP1 and OPS1 (the Site Administrator holding no manager role: the Comments page open on a journal, refused on a press and a preprint server; Rule 17)
 - **Owned by another feature**:
   - the Tasks panel's own controls on a comment task, Mark Read and Delete (Cross-feature interactions; *Notifications center & email preferences*, scenario 2)
@@ -858,6 +859,7 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | The unverified ORCID iD under a comment and in the comment panel links to a broken address | 🐞 | minor | — |
 | [A10](#a10) | A comment deleted with its submission or its writer's account leaves its moderation tasks behind, blank and dead | 🐞 | minor | — |
 | [A11](#a11) | Deleting a comment also removes the task about an unrelated report or comment that shares its number, in any journal | 🐞 | minor | — |
+| [A12](#a12) | A Journal Manager of one journal can read, approve, hide and delete another journal's comments by requests made by hand, and any signed-in account can report them | 🐞 | latent | — |
 | [A1](#a1) | A hidden comment reads to its writer exactly like one awaiting approval | ❓ | minor | — |
 | [A2](#a2) | Approving or hiding a comment leaves every moderator's "pending review" task in place | ❓ | minor | — |
 | [A3](#a3) | The report dialog neither refuses an empty reason with a message nor confirms a filed report, and the same person can report the same comment again | ❓ | minor | — |
@@ -1004,6 +1006,24 @@ lose the task that told them it was filed. Expected a deletion to clear
 only the tasks about the deleted comment and its own reports (Side
 effects); observed it also clears unrelated tasks that share a number.
 Since: 2026-03-04 (7 months) · Basis: probe. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — Another journal's comments can be moderated and reported by requests made by hand** · 🐞 · latent.
+The application finds a comment by its number alone, whichever journal a
+request is made in. A Journal Manager with no role in another journal,
+sending by hand the requests the Comments page sends but with that
+journal's comment number, reads the comment (an unapproved one included),
+approves or hides it, deletes it, and reads its reports with their
+reasons. Deleting such a report was not tried; the code finds a report
+the same way, so it would be carried out too. Any signed-in account, a
+plain Reader included, files a report on another journal's approved
+comment the same way, and the report's task goes to the moderators of
+the journal the request was made in. No screen sends these requests
+(Rule 10a). Expected each request refused as not this journal's, the
+other journal's comment untouched; observed each carried out.
+Moderation thus crosses the boundary between journals the rest of the
+application keeps.
+Basis: probe; code for deleting a report. <sup>f-a12</sup>
 
 ### OMP
 
@@ -1853,6 +1873,42 @@ comment's "pending review" row, and the database then held no task for
 that comment and no report of that number, deleted with its own comment.
 Written up for the team as
 `docs/reports/2026-09-26-pkp-lib-usercomment-delete-tasks.md`.
+
+<a id="fn-f-a12"></a>
+**f-a12 — A12.** `lib/pkp/api/v1/comments/UserCommentController.php`:
+`get()`, `delete()`, `setApproval()`, `getReports()` and `deleteReports()`
+load the comment with `UserComment::query()->find($commentId)`, the number
+alone, and `getReport()` / `deleteReport()` with
+`withCommentIds([$commentId])->withReportIds([$reportId])`; none compares
+the comment's `contextId` with the request's context, while the list
+routes `getMany()` and `getManyPublicComments()` scope with
+`withContextIds()` (footnotes e, i). The moderator routes check the manager
+role in the request's context only (`roleAuthorizer([SITE_ADMIN,
+MANAGER])`, `Repository::isModerator()`), so a manager of A passes and then
+names B's number; `submitReport()` sits in the signed-in group with no role
+check, and `notifyModerators()` raises the task for the request's context
+(footnote l). The controller is lib/pkp's, identical in the three apps at
+lib/pkp `1ad4a14bb2`; the by-number routes have been unscoped since the
+comments API was added. Live-probed 2026-09-26 under the one exception to
+screen-only driving (an API route no screen calls with another journal's
+number), on fresh scratch journals A and B of OJS, OMP and OPS, as A's
+Journal Manager holding no role in B, from a page of A with the page's
+CSRF token: `GET {A}/api/v1/comments/{B's id}` answered 200 with B's
+unapproved and approved comments; `PUT …/setApproval` with
+`{"approved": true}` answered 200 and approved B's pending comment;
+`GET …/reports` and `…/reports/{id}` answered 200 with B's reports and
+their reasons; `POST …/reports` filed a report on B's approved comment
+(B's report count 1 → 2, the task raised in A); `DELETE` answered 200 and
+B's comment was gone (a following `GET` answered 404). A plain Reader of
+A, `POST {A}/api/v1/comments/{B's approved id}/reports` with a note: 200,
+the report filed and the task raised in A (OJS; the controller identical
+in the three). Control: the same requests naming A's own comment answered
+200. No server error. Hiding (`{"approved": false}`) is the same request
+as the approval and was not sent on its own; `DELETE …/reports/{id}` on
+B's report was not driven. The maintainer ruled on 2026-09-26 that this is
+an ordinary finding (reader comments are unreleased 3.6; stable-3_5_0 has
+none). Written up for the team as
+`docs/reports/2026-09-26-pkp-lib-usercomment-delete-tasks.md`, issue (2).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`
