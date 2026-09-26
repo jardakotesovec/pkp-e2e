@@ -502,28 +502,106 @@ exports.PublicationScreen = class PublicationScreen {
             .getByRole('button', {name: /^(Schedule For Publication|Publish)$/});
     }
 
-    /**
-     * The "Review Publishing Details" side panel, opened by the publish
-     * button from a Publication page. The FIRST press is occasionally
-     * swallowed (nothing opens, no request fires — U49 spec fn-k), so the
-     * press is retried once when the panel has not appeared.
-     */
-    async openPublishPanel() {
-        const button = this.publishButton();
-        await expect(button).toBeVisible({timeout: 30_000});
-        await button.click();
-        const panel = this.page
+    /** The "Review Publishing Details" side panel (open or not). */
+    publishPanel() {
+        return this.page
             .locator('[data-cy="active-modal"]')
             .filter({hasText: 'Review Publishing Details'})
             .last();
-        const settled = panel.locator('select[name="versionStage"]');
+    }
+
+    /**
+     * The panel's "Issue Assignment" radio group. It is on screen in the
+     * same render as the version selects on a journal that has issues and
+     * never on one without, so a count taken once the version select shows
+     * decides which panel this is.
+     */
+    issueAssignmentGroup(panel) {
+        return panel.getByRole('group', {name: /^Issue Assignment/});
+    }
+
+    /**
+     * Press the publish button and wait for what it opens: the "Review
+     * Publishing Details" panel, returned settled (see
+     * `awaitPublishPanelSettled`), or `or`, a locator for what the button
+     * opens instead (the confirmation window, for a version whose panel was
+     * confirmed before), in which case null is returned. The FIRST press is
+     * occasionally swallowed (nothing opens, no request fires — U49 spec
+     * fn-k), so the press is retried once when nothing has appeared.
+     *
+     * @param {{or?: import('@playwright/test').Locator}} [options]
+     * @returns {Promise<import('@playwright/test').Locator | null>}
+     */
+    async pressPublish({or = null} = {}) {
+        const button = this.publishButton();
+        await expect(button).toBeVisible({timeout: 30_000});
+        // Armed before the press: the panel asks for it as it mounts. A
+        // panel without the issue group (or no panel) never asks, so the
+        // wait ends in null instead of a rejection nobody awaits.
+        const statusAnswer = this.page
+            .waitForResponse(
+                (r) => r.url().includes('/issueAssignmentStatus') && r.request().method() === 'GET',
+                {timeout: 60_000}
+            )
+            .catch(() => null);
+        const panel = this.publishPanel();
+        const stage = panel.locator('select[name="versionStage"]');
+        const opened = or ? stage.or(or).first() : stage;
+        await button.click();
         try {
-            await expect(settled).toBeVisible({timeout: 5_000});
+            await expect(opened).toBeVisible({timeout: 5_000});
         } catch {
             await button.click();
         }
-        await expect(settled).toBeVisible({timeout: 30_000});
+        await expect(opened).toBeVisible({timeout: 30_000});
+        if (or && !(await stage.isVisible())) {
+            return null;
+        }
+        await this.awaitPublishPanelSettled(panel, statusAnswer);
         return panel;
+    }
+
+    /**
+     * Wait until the open panel's "Issue Assignment" carries the value the
+     * panel preselects for it. The group is required and mounts empty; the
+     * panel fills it (and the hidden status the publish needs) only when
+     * its `issueAssignmentStatus` GET answers, so a "Confirm" pressed
+     * before that is refused in place ("This field is required." under the
+     * group, no request, no confirmation window; the U13 S3 flake,
+     * `.reports/flake-s26/u13s3/diagnosis.md`). Waits for that answer, then
+     * for the radios (their own options fetch) and, when the answer's
+     * assignment is among them, for it to be checked. A panel without the
+     * group (a journal with no issues) is settled as soon as it shows.
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {Promise<import('@playwright/test').Response | null>} statusAnswer
+     */
+    async awaitPublishPanelSettled(panel, statusAnswer) {
+        if ((await this.issueAssignmentGroup(panel).count()) === 0) {
+            return;
+        }
+        const response = await statusAnswer;
+        if (!response || !response.ok()) {
+            throw new Error(
+                `the publish panel's issueAssignmentStatus answered ${response ? response.status() : 'nothing'}`
+            );
+        }
+        const {assignmentType} = await response.json();
+        const radios = panel.locator('input[name="assignment"]');
+        await expect(radios.first()).toBeVisible({timeout: 30_000});
+        const preselected = panel.locator(`input[name="assignment"][value="${assignmentType}"]`);
+        if ((await preselected.count()) > 0) {
+            await expect(preselected).toBeChecked({timeout: 30_000});
+        }
+    }
+
+    /**
+     * The "Review Publishing Details" side panel, opened by the publish
+     * button from a Publication page and returned settled
+     * (`awaitPublishPanelSettled`).
+     */
+    async openPublishPanel() {
+        return this.pressPublish();
     }
 
     /**
@@ -560,8 +638,9 @@ exports.PublicationScreen = class PublicationScreen {
      * first. Ends on the workflow with "Status: Published".
      *
      * On a journal that has issues the panel carries a required "Issue
-     * Assignment" radio group (rendered after its own fetch); without
-     * issues the group never appears — hence the bounded conditional wait.
+     * Assignment" radio group (its preselection arrives by fetch, which
+     * `openPublishPanel` waits out); without issues the group never
+     * appears, so the no-issue choice is ticked only where it is.
      *
      * @param {{backIssueLabel?: RegExp, futureIssueLabel?: RegExp}} options
      *   backIssueLabel picks "Assign To Current/Back Issue" and that issue;
@@ -602,18 +681,11 @@ exports.PublicationScreen = class PublicationScreen {
             await this.awaitAssignmentPreselected(panel);
             await backRadio.check();
             await this.selectIssueOption(panel, backIssueLabel);
-        } else {
-            const dontAssign = panel.getByRole('radio', {
-                name: "Don't Assign To An Issue",
-            });
-            const hasAssignmentGroup = await dontAssign
-                .waitFor({state: 'visible', timeout: 5_000})
-                .then(() => true)
-                .catch(() => false);
-            if (hasAssignmentGroup) {
-                await this.awaitAssignmentPreselected(panel);
-                await dontAssign.check();
-            }
+        } else if ((await this.issueAssignmentGroup(panel).count()) > 0) {
+            // The panel came back settled, so the group's presence is
+            // known (it shows with the version selects) and its
+            // preselection is in: no timed guess at its radios.
+            await panel.getByRole('radio', {name: "Don't Assign To An Issue"}).check();
         }
         await panel.getByRole('button', {name: 'Confirm', exact: true}).click();
         const confirmDialog = this.page

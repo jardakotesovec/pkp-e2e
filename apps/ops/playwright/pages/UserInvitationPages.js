@@ -223,7 +223,24 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
      */
     async readDetailsStep() {
         await expect(this.stepHeading(/Enter details/)).toBeVisible();
-        return (await this.page.locator('main').innerText()).replace(/\s+/g, ' ').trim();
+        // Read settled, as `readBody()`: the text counts once two reads a
+        // beat apart agree, so a step still drawing its fields under the
+        // heading is not taken (.reports/flake-s26/fixC/diagnosis.md).
+        const read = async () => (await this.page.locator('main').innerText()).replace(/\s+/g, ' ').trim();
+        let last = null;
+        let text = '';
+        await expect
+            .poll(
+                async () => {
+                    text = await read();
+                    const same = text === last;
+                    last = text;
+                    return same;
+                },
+                {timeout: 30_000, intervals: [250]}
+            )
+            .toBe(true);
+        return text;
     }
 
     /**

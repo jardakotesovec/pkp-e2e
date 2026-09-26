@@ -162,6 +162,21 @@ exports.RegisterPage = class RegisterPage extends BasePage {
         return box !== null && box.x + box.width > 0;
     }
 
+    /**
+     * A server's consent line is (true) or is not (false) on screen, polled
+     * until it holds. The rule that parks the line off screen is in the
+     * theme's style sheet, which PHP serves (`…/page/page/css?name=stylesheet`)
+     * and which may still be loading when the form is already drawn: until
+     * it applies, every line sits on screen whatever is ticked
+     * (.reports/flake-s26/fixC/diagnosis.md).
+     *
+     * @param {string} name
+     * @param {boolean} onScreen
+     */
+    async expectConsentLineOnScreen(name, onScreen) {
+        await expect.poll(() => this.contextConsentLineOnScreen(name), {timeout: 30_000}).toBe(onScreen);
+    }
+
     /** Press "Register". Waits for nothing — the caller asserts the outcome. */
     async submit() {
         await this.registerButton.click();

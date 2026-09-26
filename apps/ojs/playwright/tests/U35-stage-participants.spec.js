@@ -54,6 +54,7 @@
  * runs in the parallel `ojs` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {TasksPanel, DISCUSSION_TASK} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
@@ -131,6 +132,18 @@ async function seedJournal(ojsApi, tag, accounts, {contact = false} = {}) {
 /** A participants[] entry for a seeded account. */
 const part = (person, role, extra = {}) => ({username: person.username, role, ...extra});
 
+/**
+ * Read the "Assign Participant" role list by permission level: `levels` in
+ * order, the roles of one level in no fixed order (Rule 3; footnote d: the
+ * options are ordered by role id alone, and several roles share one).
+ */
+async function expectRoleLevels(win, levels) {
+    const options = await win.roleOptions();
+    let at = 0;
+    const shown = levels.map((level) => unordered(options.slice(at, (at += level.length))));
+    expect({levels: shown, count: options.length}).toEqual({levels: levels.map(unordered), count: levels.flat().length});
+}
+
 /** Open a signed-in page for `person` (every actor goes through `asUser`, as U32 does). */
 async function pageFor(asUser, username) {
     return (await asUser(username)).newPage();
@@ -201,14 +214,7 @@ test.describe('stage participants', () => {
         let win = await panel.openAssign();
         await expect(win.title()).toHaveText('Assign Participant');
         await expect(win.locateHeading()).toBeVisible();
-        expect(await win.roleOptions()).toEqual([
-            ROLE.editor,
-            ROLE.sectionEditor,
-            'Guest editor',
-            'Funding coordinator',
-            ROLE.author,
-            'Translator',
-        ]);
+        await expectRoleLevels(win, [[ROLE.editor], [ROLE.sectionEditor, 'Guest editor'], ['Funding coordinator'], [ROLE.author, 'Translator']]);
         expect(await win.selectedRole()).toBe(ROLE.editor);
         // It opens on the first role's people; neither box shows.
         await win.expectPeople([p.ed.name]);
@@ -395,15 +401,11 @@ test.describe('stage participants', () => {
         const panel = new ParticipantsPanel(page, tag);
         await panel.goto(submissionId, {menuKey: STAGE_KEY.copyediting});
         const win = await panel.openAssign();
-        expect(await win.roleOptions()).toEqual([
-            ROLE.editor,
-            ROLE.productionEditor,
-            ROLE.sectionEditor,
-            'Guest editor',
-            ROLE.copyeditor,
-            'Marketing and sales coordinator',
-            ROLE.author,
-            'Translator',
+        await expectRoleLevels(win, [
+            [ROLE.editor, ROLE.productionEditor],
+            [ROLE.sectionEditor, 'Guest editor'],
+            [ROLE.copyeditor, 'Marketing and sales coordinator'],
+            [ROLE.author, 'Translator'],
         ]);
 
         // "Copyeditor": the people stay as they were until "Search".

@@ -197,9 +197,10 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
     the list shows the page by its title in the manager's interface
     language, or in the primary language when it has none there. No
     message appears at the top right, unless an earlier "Save" was
-    refused for its "Path" ⚠ [A11](#a11). The list shows the pages in the
-    order they were added; a page saved again through "Edit" moves to the
-    end, and stays there after a reload. <sup>f</sup> <sup>td10</sup>
+    refused for its "Path" ⚠ [A11](#a11). The list shows the pages in no
+    fixed order: usually the order they were added, with a page saved
+    again through "Edit" moved to the end, but neither is certain.
+    <sup>f</sup> <sup>td10</sup>
 11. **Refusals.** The refused paths are in the window's table (Fields).
     <sup>f</sup> <sup>td11</sup>
 12. **The page.** A static page opens at the journal's address followed by
@@ -761,18 +762,19 @@ the footnote. <sup>y</sup>
      tab reads "About us | {journal name}" (Rule 12).
    - **The "Path" link**: Journal Manager: press "about-us" in the list:
      the page opens in a new browser tab (Rule 12).
-   - **The order after an edit**: press "Add Static Page", type "fees" in
-     "Path", "Fees" in "Title" and "Our fees." in "Content", and press
-     "Save": the list reads "About us", then "Fees". Press the "Settings"
-     arrow at the left of "About us", then "Edit": a window headed "Edit"
-     opens; press "Save": the list reads "Fees", then "About us", and so
-     it stays after a reload (Rule 10).
+   - **A second page, and an edit**: press "Add Static Page", type "fees"
+     in "Path", "Fees" in "Title" and "Our fees." in "Content", and press
+     "Save": the list holds "About us" and "Fees", in any order. Press the
+     "Settings" arrow at the left of "About us", then "Edit": a window
+     headed "Edit" opens; press "Save": the window closes and the list
+     still holds "About us" and "Fees", each once, in any order, and so
+     after a reload (Rule 10).
    - **Left unsaved**: press "Add Static Page", type "x" in "Title" and
      press the back arrow at the window's top: the browser asks "The data
      on this form has changed. Do you wish to continue without saving?";
      press "Cancel": the window stays, "x" in "Title". Press the back
-     arrow again, then "OK": the window closes and the list still reads
-     "Fees", then "About us" (Rule 30).
+     arrow again, then "OK": the window closes and the list still holds
+     "About us" and "Fees" and no third page (Rule 30).
    - **Forty characters**: press "Add Static Page", type "Second" in
      "Title" and "abcdefghijabcdefghijabcdefghijabcdefghijk" (41
      characters) in "Path": the box holds
@@ -786,8 +788,8 @@ the footnote. <sup>y</sup>
      "This field is required." under "Title". Each time the window stays
      open with the message under the box, and the list is unchanged
      (Fields). Press the back arrow, and "OK" if the browser asks: the
-     window closes and the list still reads "Fees", then "About us"
-     (Rule 30).
+     window closes and the list still holds "About us" and "Fees" and no
+     third page (Rule 30).
    - **Deleted**: press the "Settings" arrow of "Fees", then "Delete": a
      window headed "Delete" reads "Are you sure you wish to delete this
      item? This action cannot be undone." with "OK" and "Cancel"; press
@@ -1233,8 +1235,11 @@ the custom page opened signed out.
 `…noneCreated` "No static pages have been created.", action
 `addStaticPage` "Add Static Page", columns `pageTitle` "Title" and `path`
 "Path"; data from `StaticPagesDAO::getByContextId()`, which has no ORDER
-BY, so the database's own order shows: on PostgreSQL the order rows were
-last written, which puts an edited page last); `StaticPageGridRow`
+BY, so the database's own order shows: on PostgreSQL the order the rows
+sit on disk, usually the order they were last written, which usually
+puts an edited page last, though a rewritten row may fill an earlier gap
+and parallel writes change the layout; re-read 2026-09-26, not seen out
+of that order on screen); `StaticPageGridRow`
 ("Edit" `grid.action.edit`, an `AjaxModal` titled "Edit"; "Delete"
 `grid.action.delete` through `RemoteActionConfirmationModal` with
 `common.confirmDelete` "Are you sure you wish to delete this item? This
@@ -1399,7 +1404,8 @@ Page" above) showed "About us" and "about-us", no notice; each row's
 "Settings" arrow revealed "Edit" and "Delete". "Fees" at "fees" and
 "Aardvark" at "aardvark" were listed after it in that order; "About us"
 saved again through "Edit" moved to the end and stayed there after a
-reload. In the French interface a page with an English title only was
+reload. That order is the database's, not one the list sets (note f).
+In the French interface a page with an English title only was
 listed by it. A save after a refused one showed the old refusal (note
 f-a11).
 

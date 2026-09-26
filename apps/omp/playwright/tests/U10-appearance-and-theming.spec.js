@@ -287,18 +287,18 @@ test.describe('appearance & theming', () => {
         expect(themeHeadingColour).not.toBe(RED);
         const dashboardBefore = await dashboardLook(page, tag);
         let tab = await openTab(website, 'advanced');
-        expect(await tab.styleSheet.uploadOffered()).toBe(true);
+        await tab.styleSheet.expectUploadOffered(true);
         expect(await tab.styleSheet.choose(FILES.css)).toBe(200);
         await expect(tab.styleSheet.field).toContainText('red-headings.css');
-        expect(await tab.styleSheet.buttonNames()).toContain('Remove');
+        await expect(tab.styleSheet.button('Remove')).toBeVisible({timeout: T});
         await tab.save();
         await expect(tab.styleSheet.field).toContainText('red-headings.css');
-        expect(await tab.styleSheet.buttonNames()).toContain('Remove');
+        await expect(tab.styleSheet.button('Remove')).toBeVisible({timeout: T});
         await expect(tab.styleSheet.field.getByRole('link', {name: 'styleSheet.css', exact: true})).toHaveCount(0);
         await website.reload();
         tab = await website.open('advanced');
         await expect(tab.styleSheet.field.getByRole('link', {name: 'styleSheet.css', exact: true})).toBeVisible({timeout: T});
-        expect(await tab.styleSheet.buttonNames()).toContain('Remove');
+        await expect(tab.styleSheet.button('Remove')).toBeVisible({timeout: T});
         await expect(tab.styleSheet.field).not.toContainText('red-headings.css');
 
         // The visitor's "About the Press" heading is red; no heading on the
@@ -315,7 +315,7 @@ test.describe('appearance & theming', () => {
         // (Rule 26; A5 not read).
         tab = await openTab(website, 'advanced');
         await tab.styleSheet.field.getByRole('button', {name: 'Remove', exact: true}).first().click();
-        await expect.poll(() => tab.styleSheet.uploadOffered()).toBe(true);
+        await tab.styleSheet.expectUploadOffered(true);
         await tab.save();
         await home.reload();
         await expect(home.aboutHeading).toHaveText(ABOUT_PRESS);
@@ -325,7 +325,7 @@ test.describe('appearance & theming', () => {
         // sheet box is refused in the box and nothing is sent (Fields, the
         // upload boxes); the accepted style sheet above sent its upload.
         tab = await openTab(website, 'advanced');
-        expect(await tab.styleSheet.uploadOffered()).toBe(true);
+        await tab.styleSheet.expectUploadOffered(true);
         expect(await tab.styleSheet.dropRefused(FILES.picture)).toBe(0);
         await expect(tab.styleSheet.refusal).toHaveText(WRONG_TYPE);
     });
@@ -399,11 +399,11 @@ test.describe('appearance & theming', () => {
         // A file the favicon box does not take: refused in the box, nothing
         // sent; reloaded, "Favicon" is empty (Fields, "Advanced"; Rule 2).
         let advanced = await website.open('advanced');
-        expect(await advanced.favicon().uploadOffered()).toBe(true);
+        await advanced.favicon().expectUploadOffered(true);
         expect(await advanced.favicon().dropRefused(FILES.photo)).toBe(0);
         advanced = await openTab(website, 'advanced');
         const favicon = advanced.favicon();
-        expect(await favicon.uploadOffered()).toBe(true);
+        await favicon.expectUploadOffered(true);
         await expect(favicon.thumbnail).toHaveCount(0);
         await expect(favicon.refusal).toHaveCount(0);
 
@@ -522,12 +522,12 @@ test.describe('appearance & theming', () => {
         await expect(logo.altText).toHaveValue('Journal logo');
         const savedPreview = await logo.thumbnail.getAttribute('src');
         expect(savedPreview).toBeTruthy();
-        expect(await logo.uploadOffered()).toBe(false);
-        expect(await logo.buttonNames()).not.toContain('Upload File');
-        expect(await logo.buttonNames()).toContain('Remove');
+        await logo.expectUploadOffered(false);
+        await expect(logo.button('Remove')).toBeVisible({timeout: T});
+        await expect(logo.button('Upload File')).toHaveCount(0);
         await logo.removeButton.click();
         await expect(logo.restoreButton).toBeVisible();
-        await expect.poll(() => logo.uploadOffered()).toBe(true);
+        await logo.expectUploadOffered(true);
         await expect(logo.thumbnail).toHaveCount(0);
         expect(await logo.choose(FILES.logo2)).toBe(200);
         await expect(logo.thumbnail).toBeVisible();
@@ -548,7 +548,7 @@ test.describe('appearance & theming', () => {
         logo = setup.logo();
         await expect(logo.altText).toHaveValue('Journal logo');
         await expect(logo.thumbnail).toHaveAttribute('src', savedPreview || '');
-        expect(await logo.uploadOffered()).toBe(false);
+        await logo.expectUploadOffered(false);
         expect(await logo.chooseByKeyboard(FILES.logo2)).toBe(200);
         await expect(logo.altText).toHaveValue('');
         await expect(logo.restoreButton).toBeVisible();
@@ -788,8 +788,13 @@ test.describe('appearance & theming', () => {
         // A role ticked before the first save: "Production editor" at the
         // place of its permission level, above "Series editor" (Rule 28).
         await roles.setRoleBox('Production editor', CONSIDER, true);
+        // "Press editor" and "Production editor" share a permission level, so
+        // the two come in either order between themselves (the list orders by
+        // level alone; fix list B, flake-s26).
         masthead = await openTab(website, 'appearance-masthead');
-        expect(await masthead.roles.labels()).toEqual(['Press editor', 'Production editor', 'Series editor', 'Editorial Board Member']);
+        const order = await masthead.roles.labels();
+        expect([...order.slice(0, 2)].sort()).toEqual(['Press editor', 'Production editor']);
+        expect(order.slice(2)).toEqual(['Series editor', 'Editorial Board Member']);
 
         // Reordered: "Editorial Board Member" first, "Saved"; the visitor's
         // masthead and history head with it, the others in the list's order
@@ -808,7 +813,7 @@ test.describe('appearance & theming', () => {
         // A role ticked after the first save: "Layout Editor" last (Rule 28).
         await roles.setRoleBox('Layout Editor', CONSIDER, true);
         masthead = await openTab(website, 'appearance-masthead');
-        expect(await masthead.roles.labels()).toEqual(['Editorial Board Member', 'Press editor', 'Production editor', 'Series editor', 'Layout Editor']);
+        expect(await masthead.roles.labels()).toEqual(['Editorial Board Member', ...order.slice(0, 3), 'Layout Editor']);
     });
 
     test('S6: the "Lists" tab: refused numbers, then one entry a page', async ({asUser, ompApi}, testInfo) => {

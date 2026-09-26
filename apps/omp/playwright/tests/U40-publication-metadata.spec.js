@@ -47,6 +47,7 @@
  */
 const {test, expect} = require('../support/fixtures.js');
 const {unpublishFromWorkflow: unpublishDialog} = require('../pages/PublicationPages.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {
     TasksPanel,
     DISCUSSION_TASK,
@@ -113,6 +114,10 @@ async function openPublicationPage(page, entry, {version = null} = {}) {
         ? page.getByRole('treeitem', {name: version, exact: true})
         : page;
     const link = scope.getByRole('link', {name: entry, exact: true});
+    // The menu draws in one pass once the submission is in: read the entry
+    // only then, or the "Publication" toggle below folds an open group shut
+    // (.reports/flake-s26/fixC/diagnosis.md).
+    await expect(link.or(page.getByRole('link', {name: 'Publication', exact: true})).first()).toBeVisible({timeout: 30_000});
     if (!(await link.isVisible())) {
         await page.getByRole('link', {name: 'Publication', exact: true}).click();
     }
@@ -309,10 +314,7 @@ function statusReadout(page) {
  * own POST …/version response.
  */
 async function createNewVersionFromWorkflow(page) {
-    const item = page.getByRole('link', {name: 'Create New Version', exact: true});
-    if (!(await item.isVisible())) {
-        await page.getByRole('link', {name: 'Publication', exact: true}).click();
-    }
+    const item = await new WorkflowPage(page, null).revealPublicationEntry('Create New Version');
     await item.click();
     const dialog = page.getByRole('dialog', {name: 'Create New Version'});
     await expect(dialog).toBeVisible({timeout: 30_000});

@@ -449,11 +449,39 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     }
 
     /**
+     * Make an entry of the publication group visible ("Create New Version",
+     * "Title & Abstract", …) and return it. The group header is a toggle,
+     * so it is pressed only when the entry is hidden, and that is read only
+     * once the menu has drawn (the entry or the header on screen): read
+     * before, the entry counts as hidden and the press folds an open group
+     * shut (.reports/flake-s26/fixC/diagnosis.md).
+     *
+     * @param {string} label
+     */
+    async revealPublicationEntry(label) {
+        const entry = this.menuLink(label).first();
+        const group = this.publicationGroup();
+        await expect(entry.or(group).first()).toBeVisible({timeout: 30_000});
+        if (!(await entry.isVisible())) {
+            await group.click();
+        }
+        await expect(entry).toBeVisible({timeout: 30_000});
+        return entry;
+    }
+
+    /**
      * The menu's entries in DOM order as `{label, level, striped, selected}`,
      * the level read from the PanelMenu indentation classes (1 = group,
      * 2 = stage / version node, 3 = round / page).
+     *
+     * Read once the menu has drawn its first entry: the menu is built from
+     * the submission the panel fetches after it opens, all its entries in
+     * one pass (`useWorkflowMenu`), so before that the read is `[]` and a
+     * list read then would fail, or an absence pass, falsely
+     * (.reports/flake-s26/fixC/diagnosis.md).
      */
     async menuEntries() {
+        await expect(this.menu().getByRole('link').first()).toBeVisible({timeout: 30_000});
         return this.menu().getByRole('link').evaluateAll((anchors) =>
             anchors.map((a) => {
                 const cls = a.className;

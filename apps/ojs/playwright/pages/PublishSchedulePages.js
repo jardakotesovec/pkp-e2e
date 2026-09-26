@@ -41,6 +41,7 @@
  * refused window close through the header's "Close".
  */
 const {expect} = require('@playwright/test');
+const {closeMenu: closeOpenMenu} = require('../../../../shared/playwright/support/menus.js');
 const {PublicationScreen} = require('./PublicationMetadataPages.js');
 const {uploadViaWizard} = require('./ReviewStagePages.js');
 const {WorkflowPage: WorkflowFrame} = require('../../../../shared/playwright/pages/WorkflowPage.js');
@@ -145,6 +146,17 @@ exports.PublishScreen = class PublishScreen extends PublicationScreen {
         return this.page.getByRole('listbox').last();
     }
 
+    /**
+     * Close the picker's open listbox without choosing: Escape on the
+     * listbox itself (a reka-ui `Select`, the top layer, so the panel and
+     * the workflow dialog under it stay), then wait until it is gone
+     * (.reports/flake-s26/esc/diagnosis.md H4).
+     */
+    async closeReviewRoundOptions() {
+        await this.reviewRoundListbox().press('Escape');
+        await expect(this.page.getByRole('listbox')).toHaveCount(0, {timeout: 30_000});
+    }
+
     /** The panel's "Cancel". */
     async cancelPanel(panel) {
         await panel.getByRole('button', {name: 'Cancel', exact: true}).click();
@@ -238,10 +250,9 @@ exports.PublishScreen = class PublishScreen extends PublicationScreen {
         return items;
     }
 
-    /** Close an open row menu without choosing (Escape). */
+    /** Close an open row menu without choosing (Escape on the menu itself, support/menus.js). */
     async closeMenu() {
-        await this.page.keyboard.press('Escape');
-        await expect(this.page.getByRole('menuitem')).toHaveCount(0, {timeout: 30_000});
+        await closeOpenMenu(this.page);
     }
 
     /** The "Send File to Text Editor" dialog. */
@@ -292,25 +303,11 @@ exports.PublishScreen = class PublishScreen extends PublicationScreen {
      * first press is absorbed the same way as in openPublishPanel.
      */
     async openPublishPanelExpectingIssueFields() {
-        const button = this.publishButton();
-        await expect(button).toBeVisible({timeout: 30_000});
-        const statusFetched = this.page.waitForResponse(
-            (r) => r.url().includes('issueAssignmentStatus') && r.ok(),
-            {timeout: 60_000}
-        );
-        await button.click();
-        const panel = this.page
-            .locator('[data-cy="active-modal"]')
-            .filter({hasText: 'Review Publishing Details'})
-            .last();
-        const settled = panel.locator('select[name="versionStage"]');
-        try {
-            await expect(settled).toBeVisible({timeout: 5_000});
-        } catch {
-            await button.click();
-        }
-        await expect(settled).toBeVisible({timeout: 30_000});
-        await statusFetched;
+        // openPublishPanel() waits for that status answer whenever the
+        // panel carries the group (PublicationScreen.awaitPublishPanelSettled);
+        // this one also insists that it does.
+        const panel = await this.openPublishPanel();
+        await expect(this.issueAssignmentGroup(panel)).toBeVisible();
         return panel;
     }
 

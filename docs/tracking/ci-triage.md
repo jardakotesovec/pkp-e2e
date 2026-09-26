@@ -23,8 +23,7 @@ the log only says where to look.
 
 | ID | Signature (what CI shows) | Apps | Canonical entry | Status | First seen / last confirmed |
 |----|---------------------------|------|-----------------|--------|-----------------------------|
-| U53 "Email" column | U53 S6 "merge a duplicate account" and S1 "find a user in the \"Users\" list" red on the VM in all three apps, final and alone: the users grid's columns read "Email address" where the test expects "Email". lib/pkp defines `user.email` twice (`locale/en/common.po` "Email address", `locale/en/user.po` "Email"), and `Locale.php` lists the folder with an unsorted `DirectoryIterator`, so the label follows the checkout's directory order (on the VM `user.po` is listed before `common.po`); green on the Mac and on CI | OJS OMP OPS (VM only so far) | U53 S1, S6 | open: the U53 suite should not depend on the duplicate's order (or the spec marks it as a finding); not changed by the U18 session that saw it | 2026-09-26 (U18 session, `.reports/U18/final-run-{ojs,omp,ops}.log`, `alone-ojs-U53.log`) |
-| pkp-lib#12798 | Every shard red on pkp-e2e push runs 36193647891 (`7838d1d`) and 36199967231 (`e096c06`): `POST …/_test/scenarios/submission failed: 500`, server log "Declaration of PKP\decision\types\MoveToDone::getLabel(?string $locale = null): string must be compatible with PKP\decision\DecisionType::getLabel(…, ?APP\submission\Submission $submission = null)" (pkp-lib `8240fbe6cc`, 2026-09-25 21:18Z). Fixed upstream by pkp-lib#13398 (`2fc5dd3a0a`, 00:31Z); pkp/ojs e2e 36205193903 at `3162c105bf` then red on U32 S7 alone: the "Move to Review" decision page's heading not found (30 s), likely the same PR's conditional decision label; pkp-e2e push run 36211491859 (`3fe0d2f`, app tips with the fix) red on U32 S7 (OJS, OMP) and U32 S9 "after an internal round only" (OMP), the same heading, OPS green | OJS OMP | U32 S7, S9 | open: the next daily session reproduces U32 S7 at the tips and settles label change vs regression; not driven by the U18 feature session that logged it | 2026-09-26 (U18 session, from CI logs only) |
+| pkp-lib#12798 | U32 S7 "'Move to Review' after a review round" (OJS, OMP) and S9 "after an internal round only" (OMP) red on both attempts on every CI run since the pointers moved (pkp/ojs 36205193903, pkp/omp 36205535810, pkp-e2e 36211491859 and every push since): `getByRole('heading', {level: 1, name: /Move to Review/})` not found. **Regression, confirmed 2026-09-26** on reset databases: the decision page's heading reads "Move to Submission" on every "Move to Review", after a review round too, while the button, the breadcrumb and the browser title read "Move to Review"; `lib/pkp/templates/decision/record.tpl` (lines 16, 20) calls `getLabel()` without the submission that pkp-lib#12959 (`8240fbe6cc`, with #13398 `1ad4a14bb2`) made the label depend on. The API's recorded-decision label also follows the current rounds (`checks/sync/pkp-lib-12798/decisions-label.js`). U32 A13 | OJS OMP | U32 S7, S9 | open: the tests assert the correct heading and stay red until the fix lands (report `docs/reports/2026-09-26-pkp-lib-12798.md`, thread + DMs to @beaug, @jarda.kotesovec 2026-09-26) | 2026-09-26 (U18 session, CI logs) / 2026-09-26 (daily session, reset databases, `.reports/sync/s26/pw-u32-omp/`, claim check `cc-U32-K4.md`) |
 
 ## Open regressions — confirmed upstream regressions awaiting a fix
 
@@ -96,13 +95,14 @@ trips.
   **Baselines carry `70b0892042` since 2026-09-16** (sync); the U40 OMP
   `blur()` stays (a harmless commit), app-changes row 9 (c) is closed on
   the tips, (a) and (b) stay open. Again 2026-09-25 (U50 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U50/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U51 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U51/final-run-omp.log`, `alone-omp-reds.log`).
-- **Reviewer dashboard list under load** (U28 S1 and S2, OMP). The "Action
-  Required by me" row or count read exceeds its 10 s wait in full-suite
-  runs and passes alone. Last incidents: S1 red in two consecutive local
-  final runs 2026-09-07 (U21 revision, load ~15 on 10 cores), green alone
-  and in the third full run; 2026-09-08 (U23 revision) S1 red in the first
-  local final run and S2 in the second, the same row read.
-  **Watch condition**: reds at CI's four workers.
+- **Reviewer dashboard list under load** (U28 S1/S2, OMP; the roster
+  reviewers' whole assignment list). **Fixed 2026-09-26** (`.reports/flake-s26/fixAD/diagnosis.md`):
+  `ReviewerPages` `goto`/`selectView`/`expectSettled` wait for the view's
+  own `_submissions/reviewerAssignments` answer and `viewCount` for the
+  number the separate count fetch fills in (held 3 s: red 3 of 3 before,
+  0 of 3 after). **Watch condition**: a U28 list red behind those waits;
+  then move the leg to a throwaway reviewer.
+
 - **Error dialog stacking over the Add Reviewer windows** (U31 S4, OMP and
   once OJS). The "Error" dialog's overlay intercepts the window's "Close"
   and the test runs to its five-minute timeout (seen first by the U31 test
@@ -290,56 +290,25 @@ trips.
   `55bc9d0`, the U32 push: OJS red on U28 S10 on both attempts, 1.7 min
   each, 254 passed and the 15 serial tests behind it did not run; OMP and
   OPS green). Read by the U33 session before its own push run 35474559640.
-- **Author Response table re-rendering on a used database** (U30 S4,
-  OJS). The editor's "Author Response" table on the co-author scenario
-  keeps re-rendering: the opener's reload waited 30 s for the table in a
-  full run at four workers (2026-09-12, companion `13274` at the ojs PR
-  ref `75df364d49`, `.reports/sync/pr13274-final-ojs.log`), and alone on
-  that used database the co-author row's "More Actions" button was
-  detached and re-attached for the whole 180 s test timeout, at the PR ref
-  and at the OJS tip `cea48a066b` alike; green in 15 s on a reset database
-  at both refs, twice in a row, and in the second full run (209 passed).
-  Same family as U01 S8: state accumulated by a full run. The ojs PR's own
-  CI run 34683529824 (21 min, red) fits it, its per-test detail being
-  unreachable without a token. **Watch condition**: a second full-run
-  incident, or a red on CI's fresh database; then read the table's own
-  fetches in a retained trace (`--trace retain-on-failure`) before the
-  opener re-presses. **Tripped 2026-09-13** (U05 revision session, the
-  second OJS final of the day on the database the first had used,
-  `.reports/U05/final-run-ojs-attempt2.log`: the "Author Response" table
-  not found for 30 s, one of two reds in 209). **Red again on a reset
-  database** the same day: the third OJS final, run right after
-  `fleet-prep --reset --apps ojs`, red on U30 S4 alone (208 passed,
-  `.reports/U05/final-run-ojs-attempt3.log`, this time the co-author
-  row's "More Actions" button re-attaching for the whole 180 s test
-  timeout, the second variant above), so the used-database reading no longer holds: it is a
-  four-worker full-run class on this VM: red in four of the seven OJS
-  finals of 2026-09-13 (attempts 2, 3, 6 and 7, both variants,
-  `.reports/U05/final-run-ojs-attempt{2,3,6,7}.log`), the one red of 209
-  in the last, and in the fourth OJS final of the U22 revision session
-  the same day (`.reports/U22/final-run-ojs-attempt4.log`, the table not
-  found for 30 s, one of two reds in 212), and in the first OJS final of
-  the U24 revision session the same day, on a reset database
-  (`.reports/U24/final-run-ojs-attempt1.log`: the co-author row's "More
-  Actions" button detached and re-attached until the browser closed, one
-  of two reds in 216; the second OJS final of that session red the same
-  way, `.reports/U24/final-run-ojs-attempt2.log`, and red alone on that
-  used database afterwards, the button re-attaching until the test
-  timeout, `.reports/U24/ojs-reds-alone.log`, while U28 S10 went green
-  alone beside it). Next step as above: a retained trace of the table's
-  fetches. Green in the sync session's OJS final at four workers
-  2026-09-14 (229 passed, run with `--trace retain-on-failure` for exactly
-  this class; no trace to read yet). **Red again 2026-09-15** (U25
-  revision session, the first OJS final at four workers on a reset
-  database, `.reports/U25/final-run-ojs-attempt1.log`: the co-author
-  row's "More Actions" button detached and re-attached for the whole
-  180 s test timeout, one of two reds in 216; red alone the same way on
-  that used database afterwards, `.reports/U25/rerun-ojs-u30s4.log`,
-  3.0 min). **Red again 2026-09-15 evening** (U40 revision session, the
-  first OJS final at four workers on a reset database,
-  `.reports/U40/final-run-ojs-attempt1.log`: the same button detached and
-  re-attached until the browser closed at the 180 s timeout, the one red
-  in 221 with the 13 serial tests skipped behind it). Again 2026-09-25 (U13 session, VM, reset database at workers auto): one of two OJS reds in 380, red again alone right after on the same database (`.reports/U13/final-run-ojs.log`, `alone-ojs-reds.log`). 2026-09-25: red in the daily guard run (OJS full suite at four workers on a database reset that morning, `.reports/sync/s25/guard/ojs.log`), green alone.
+- **A page-level Escape closing the workflow panel behind a "More
+  Actions" menu** (U30 S4, OJS; CI's second family, 15 first-attempt reds
+  in five weeks; most local OJS finals at four workers since 2026-09-12;
+  read before as "the Author Response table re-rendering"). **Mechanism
+  found and fixed 2026-09-26** (`.reports/flake-s26/u30/diagnosis.md`):
+  the test opened a row's "More Actions" and pressed Escape on the page;
+  headlessui moves focus into the menu two animation frames after the
+  click, so an Escape inside that window reaches the workflow panel's
+  reka dialog, which closes, and the row button never comes back (the
+  U01 S7 race of 2026-09-13, fixed then in one page object only). Held
+  with `requestAnimationFrame` delayed 150 ms: red 10 of 10 before, green
+  10 of 10 after; U30 35 of 35 at `--repeat-each 5`. `closeMenu(page)` in
+  the new `shared/playwright/support/menus.js` presses Escape on the menu
+  itself and waits for it to close; U30, OJS FundingPages and
+  PublishSchedulePages, OJS U04 S9, OPS U41 S4 and OMP U49 S18 use it;
+  `npm run lint:suite` flags every other page-level Escape. U30 S1/S3's
+  `gotoAuthor()` reds all predate the roster-rehash fix `cdf9458`. **Watch
+  condition**: a U30 red behind `closeMenu`.
+
 - **"Create New Version" dialog's stage select empty under load** (U49
   S4/S6, OJS, OMP and OPS; sightings from 2026-09-15 to 2026-09-24 on
   the VM, the Mac and twice on CI: push run 35126077430 and, on
@@ -632,50 +601,44 @@ trips.
   control, `UsersPage.sendEmail`); green in the second final the same day
   (255 of 255) and in the file's own runs. Watch condition: a second
   sighting; then the error context says whether the form re-rendered
-  with a refusal or the close never ran.
-- **Tasks dialog missing the report's task row** (U14 S5, the
-  moderators' tasks: OJS twice, OMP once and OPS once, 2026-09-17, the
-  U12 session's Mac full runs on reset databases at auto workers,
-  `.reports/U12/final-run-ojs-attempt{1,2}.log`,
-  `final-run-omp-attempt1.log`, `final-run-ops.log`). `expect(reportRow).toHaveCount(1)`
-  reads 0 for 10 s while the comment's own task row is there (OJS spec
-  line 647, OMP line 174); green alone on both apps the same day
-  (`.reports/U12/alone-ojs-u14s5-u28s14.log`,
-  `alone-omp-u01s6-u14s5.log`), green on the VM's finals and on CI
-  (35200505897) at the same tree. A load-shaped read on the Mac; unread
-  whether the report's job had not run yet or the dialog was read before
-  its second fetch. Sighted again 2026-09-23, the U36 session's OJS final
-  on a reset database at auto workers, the only red of 288, green alone
-  (`.reports/U36/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-23 in the U37 session's OJS final, the only red of 299, green alone (`.reports/U37/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U38 session's OJS and OMP finals on reset databases at auto workers (OJS beside U35 S2, OMP the only red of 306), green alone on both (`.reports/U38/final-run-{ojs,omp}.log`). Again 2026-09-24 in the U08 session's OJS final on a reset database on the VM at auto workers, beside U36 S9, green alone (`.reports/U08/final-run-ojs-attempt1.log`, `alone-ojs-reds.log`). Because the app project fails, the serial and solo
-  projects are skipped on every such run, so a Mac full run's serial
-  tests need a `--project=<app>-serial --no-deps` run of their own.
-  Watch condition: a red on CI or the VM; until then a Mac full run
-  reads N−1 on every app. Again 2026-09-24 in the U39 session's OJS final on a reset database at auto workers, the only red of 334, green alone; serial 13 and solo 2 green alone (`.reports/U39/final-run-ojs.log`, `alone-ojs-U14S5.log`). Again 2026-09-24 in the U44 session's OJS final on a reset database at auto workers, the only red of 344 (line 647), green alone; serial 13 and solo 3 green alone (`.reports/U44/final-run-ojs.log`, `alone-ojs-U14S5.log`, `alone-ojs-serial-solo.log`). Again 2026-09-24 in the U46 session's OMP and OPS finals on reset databases at auto workers, green alone on both (`.reports/U46/final-run-{omp,ops}.log`, `alone-{omp,ops}-reds.log`). Again 2026-09-25 in the U47 session's third final set on reset databases at auto workers: OMP U14 S5, and on OJS the same report-row read in U14 S12 "the article is unpublished, published again and deleted" (line 1202's task dialog); both green alone (`.reports/U47/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`). Again 2026-09-25 on OPS in the U48 harness regression (the file alone, a reset database, auto workers), in a new shape: the click on the comment's pending-review row in the Tasks dialog hung to the 8-minute test timeout rather than the 10 s count read; green on re-run in 18 s (`.reports/U48/harness/pw-ops-U14{,-rerun}.log`).
-  **Tripped 2026-09-23 on the VM**: OJS full run
-  at eight workers on a reset database (companion
-  `optimize-table-reloads`, lib/ui-library at `51f0c727`,
-  `.reports/pr13359/v2-ojs-final.log`), the same line 647 read 0 for
-  10 s; green alone 5 of 5 right after. The fix is the next daily
-  session's (read the report job and the dialog's fetches in a retained
-  trace). Sighted 2026-09-24 in the U42 session's OJS final on a reset database at auto workers, green alone (`.reports/U42/alone-ojs-U14S5.log`).
-  Again 2026-09-24 in the PR review of pkp-lib#13263 (companion
-  `i13263`): OMP and OJS finals on reset databases at eight workers,
-  beside U36 S9 on both, green alone on both
-  (`.reports/i13263/final-run-{omp,ojs}.log`, `alone-{omp,ojs}-reds.log`).
-  Again 2026-09-24 in the U10 session's OJS final (beside U36 S9) and
-  OMP final (the only red of 350; the second OMP final's only red was
-  U36 S9), reset databases at eight workers; green
-  alone on both (`.reports/U10/final-run-{ojs,omp}-attempt1.log`,
-  `alone-{ojs,omp}-reds.log`). Again 2026-09-25 (U13 session, VM, reset databases at workers auto): red in all three finals, green alone on all three (`.reports/U13/final-run-{ojs,omp,ops}.log`, `alone-<app>-reds.log`). Again 2026-09-25 (U50 session, Mac, reset databases, auto workers): OJS and OMP finals, green alone on both (`.reports/U50/final-run-{ojs,omp}.log`, `alone-{ojs,omp}-reds.log`). Again 2026-09-25 (U51 session, Mac, reset databases, auto workers): red in all three finals (OJS beside U36 S9 and U13 S3, OMP beside U40 S6, OPS beside U40 S1), green alone on all three (`.reports/U51/final-run-{ojs,omp,ops}.log`, `alone-{ojs,omp,ops}-reds.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): U14 S5 red in the OJS final (line 647, beside U05 S7, U13 S3 and U29 S9) and the OPS final (line 185, beside U40 S1), green alone on both (`.reports/U53/final-run-{ojs,ops}.log`, `alone-{ojs,ops}-reds.log`). Again 2026-09-26 (U54 session, Mac, reset databases, auto workers): red in the OJS and OPS finals, green alone on both (`.reports/U54/final-run-{ojs,ops}.log`, `alone-{ojs,ops}-reds.log`). Again 2026-09-26 (U55 session, Mac, reset databases, auto workers): red in all three finals (beside the U18 `rss.xmp` class; OPS also U40 S1), green alone on all three; serial and solo green alone (`.reports/U55/final-run-{ojs,omp,ops}.log`, `alone-<app>-{reds,serial,solo}.log`).
-- **Review-forms reads under load** (U29 S4, S7, S9, OJS; once each in the
-  maintainer's overnight 8-worker runs 2026-09-13/14, same report: S4 the
-  guidelines typed by the manager missing for the reviewer, S7
-  `ReviewFormsList.rowCounts()` on a half-drawn row, S9 green alone; the
-  `rowCounts()` cell wait sits on the unmerged `perf/test-side` branch).
-  S9 again 2026-09-15 in the maintainer's fourth local 8-worker run at the
-  merged tips (`.reports/flake-local/run4.log`: the reviewer's step-3
-  recommendation select read no options), green alone 2 of 2.
-  **Watch condition**: a red at four workers on the VM or on CI. Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): S9 red in the OJS final (spec line 759, the custom recommendation not the select's last option), green alone (`.reports/U53/final-run-ojs.log`, `alone-ojs-reds.log`).
+  with a refusal or the close never ran. **Tripped 2026-09-26**: red twice at OJS line 738 in the U14 diagnostician's repeated runs at four workers (`.reports/flake-s26/u14/`); the error-context read (re-rendered with a refusal, or the close never ran) is the next diagnosis.
+- **Tasks dialog missing the report's task row: an app defect, not a
+  race** (U14 S5, S12, S13 on OJS, OMP and OPS; 29 first-attempt reds on
+  CI in five weeks, red in nearly every local final since 2026-09-17,
+  always green alone). **Mechanism found 2026-09-26**
+  (`.reports/flake-s26/u14/diagnosis.md`): lib/pkp
+  `UserCommentController::delete()` deletes notifications with one
+  `whereIn(assoc_type)->whereIn(assoc_id)` over the comment's id and its
+  report ids, no journal condition, so deleting comment N removes the
+  report task of report N anywhere (pkp/pkp-lib#12407, `677b737d20`,
+  2026-03-04). A reset database lines comment and report numbers up, and
+  U14's parallel tests delete comments while others read report tasks.
+  Two-journal probe on all three apps: the task deleted 4 of 4, kept 3 of
+  3 without the collision; with the numbers far apart, 0 reds in 210 U14
+  tests. U14 register entry; report
+  `docs/reports/2026-09-26-pkp-lib-usercomment-delete-tasks.md` (thread +
+  DMs 2026-09-26); kept check `checks/U14/delete-tasks/collide.js`
+  (fixed when `MODE=collide` leaves A's task). The tests are right and
+  stay as they are. `TasksPanel.openTask()` now fails in 10 s on a
+  missing row instead of the 8-minute test timeout. Harness alternative,
+  not applied (maintainer's call, like app-changes row 18): at cold
+  bootstrap, insert and delete a block of placeholder reports through the
+  query builder so report numbers start above any comment number a run
+  reaches. Also from the code only: `deleteReports()` passes a list
+  inside a list to `withReportIds()` (no screen sends it). **Watch
+  condition**: the upstream fix lands; then the class should vanish.
+  A second read in S5 red twice in the diagnosis runs: OJS line 738, the
+  "Email" window still open 30 s after "Send Email" (its own entry, "Users & Roles \"Email\" dialog still open").
+
+- **Review-forms reads under load** (U29 S4, S7, S9, OJS). S9's
+  recommendation options were read before the step-3 tab's content
+  arrived: **fixed 2026-09-26** (`.reports/flake-s26/fixAD/diagnosis.md`), `continueToStep3` waits for
+  `#reviewStep3Form` (tab held 3 s: red 3 of 3 before, 0 of 5 after);
+  S7's `rowCounts` already waits for its cells (no red under a 2 s grid
+  hold). S9's order read (:738/:759, the recommendations list has no
+  ORDER BY) is fix list B's (`.reports/flake-s26/fixlist-B.md`).
+  **Watch condition**: a U29 red outside the order read.
+
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop
@@ -686,26 +649,6 @@ trips.
   inheritance-cache bug php-src GH-20469 (fixed in 8.4.23+), the first
   category page in a process that loaded `APP\publication\Publication`
   first; this OJS case may be the same bug, unproven.
-- **Site-level Tasks window disagreeing with the journal's under load**
-  (U05 S7, OJS, once). The test reads the Tasks rows from the journal's
-  editorial page and then from the site-level bell and compares the sorted
-  lists, retrying the pair of reads three times; with eight workers seeding
-  submissions the lists differed on all three attempts (a parallel U05 S3
-  "Control" submission's task present in the site read only). First OJS
-  final of the U32 session, 2026-09-19, workers auto on the Mac
-  (`.reports/U32/final-run-ojs-attempt1.log`); every other test green (254
-  of 255). **Tripped the same day**: the second auto-worker final showed the
-  same row again and U14 S5 (the moderators' task row not found in the
-  Tasks window within 10 s) beside it (`final-run-ojs-attempt2.log`); both
-  green alone (`rerun-alone-u05s7-u14s5.log`, 3 passed) and the third final
-  at `PLAYWRIGHT_WORKERS=4`, CI's setting, green 270 of 270
-  (`final-run-ojs.log`). Tripped again at `PLAYWRIGHT_WORKERS=4` in the second U35 local
-  final 2026-09-20 (a parallel U05 S11 title in the site read only,
-  `.reports/U35/final-run-ojs-attempt2.log`), green alone in 13 s
-  (`final-ojs-u05s7-alone.log`), so no longer eight-worker only. First OMP sighting 2026-09-24, the U44 session's OMP final on a reset database at auto workers, the only red of 334 (a parallel U05 S3 "Later" submission's task in the site read only), green alone in 11 s; serial and solo 14 green alone (`.reports/U44/final-run-omp.log`, `alone-omp-U05S7.log`, `alone-omp-serial-solo.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): OJS U05 S7, beside U13 S3, U14 S5 and U29 S9 in the OJS final, green alone (`.reports/U53/final-run-ojs.log`, `alone-ojs-reds.log`). Fix
-  to make: the U05 S7 read filters to the test's own submissions, or its
-  read pair retries longer; U14 S5's wait is bounded at 10 s.
-
 - **Manage Emails template window gone before its "Saved" read** (U34 S7,
   OJS and OMP, CI). The nightly pkp-e2e run 35558115088 (2026-09-21, `main`
   at `735bb76`, the same tree and the same app tips as the green push run
@@ -743,31 +686,6 @@ trips.
   agents on the fleets; green alone, `.reports/U42/harness/pw-ops-U21-S3.log`):
   the watch condition has tripped, the read above is due in the next
   maintenance session.
-- **U15 S5 red in the solo project behind a used database** (OJS, once,
-  2026-09-23 on the 8-core VM). The `ojs-serial` and `ojs-solo` projects
-  run alone (`--no-deps`, eight workers) right after an OJS full run on
-  the same database: the 14 serial and U04 S4 green, "S5: Unpublishing
-  removes, republishing restores" red; the solo project green alone right
-  after (2 of 2, `.reports/cold-start/ojs-serial-solo-and-u14s5.log`);
-  the failure's error context was overwritten by that rerun. **Second
-  sighting 2026-09-24 on the Mac** (U38 session, the `ojs-serial` and
-  `ojs-solo` projects alone at auto workers right after the OJS final on
-  the same database): 14 passed, S5 red with the search page's
-  `.cmp_notification` "No Results" not visible in 10 s; the solo project
-  green alone right after (2 of 2). The same run's console printed four
-  times `Call to a member function getData() on null` at
-  `lib/pkp/jobs/submissions/UpdateSubmissionSearchJob.php:59` (a queued
-  search-index job for a submission that no longer exists, run by the
-  serial drain); unverified whether it stops the drain before S5's
-  unindexing. The error context was lost again to the rerun; only the
-  console log is kept (`.reports/U38/u15s5-solo-red/serial-solo-ojs.log`).
-  Also 2026-09-23 on the VM, same shape (companion
-  `optimize-table-reloads`, OJS with lib/ui-library at `51f0c727`, the
-  serial and solo projects right after a full run): "No Results" not
-  visible after the unpublish (line 256), green alone 3 of 3, error lines
-  in `.reports/pr13359/v2-ojs-serial-solo.log`.
-  **Watch condition**: a red in a full run or on CI; keep the error
-  context, so a rerun passes `--output <elsewhere>`. A second solo test in the same shape 2026-09-24 on the Mac (U42 session): OPS U08 S8 "the site's own Navigation tab" red in the `ops-solo` project run alone right after the OPS final on the same database, green alone right after (`.reports/U42/alone-ops-serial-solo.log`, `alone-ops-U08S8.log`). Again 2026-09-25 (U47 session): U08 S8 red on OJS and OPS in the `<app>-solo` projects run alone after the finals ("Navigation menu item was successfully added" not found), green alone right after on both (`.reports/U47/alone-{ojs,ops}-serial-solo.log`, `alone2-{ojs,ops}-U08.log`). Again 2026-09-25 (U13 session, VM): OJS U08 S8 red in the `ojs-solo` project run alone after the OJS final, green alone right after (`.reports/U13/serial-solo-ojs.log`, `alone-ojs-U08S8.log`). Again 2026-09-25 (U50 session): OMP U08 S8 red in `omp-solo` run alone after the OMP final, green alone right after (`.reports/U50/alone-omp-serial-solo.log`, `alone2-omp-U08S8.log`). Again 2026-09-25 (U51 session, Mac): OJS U08 S8 ("Navigation menu item was successfully updated" not visible in 10 s) and U15 S5 ("No Results" not visible in 10 s) red in `ojs-solo` run alone right after the OJS final, `ojs-serial` 21 green; the solo project green alone right after, 4 of 4; error contexts kept (`.reports/U51/alone-ojs-serial-solo.log`, `pw-alone-ojs-serial-solo/`, `alone2-ojs-solo.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): OJS U08 S8 ("Navigation menu item was successfully updated" not visible) red in `ojs-solo` and OPS U15 S5 ("No Results" not visible in 30 s) red in `ops-solo`, each project run alone right after its final; each green alone right after (`.reports/U53/alone-{ojs,ops}-serial-solo.log`, `alone2-ojs-U08S8.log`, `alone2-ops-U15S5.log`). Again 2026-09-26 (U54 session): U08 S8 and U15 S5 red in the `ojs-solo` project run alone after the OJS final, the other 21 serial and solo tests green beside them; the solo project green alone right after (`.reports/U54/alone-ojs-serial-solo.log`, `alone-ojs-solo.log`).
 - **"Add Reviewer" search never rendered** (U28 S11, OJS, once). In
   the U42 session's OJS final on a reset database at auto workers on the
   Mac (2026-09-24, `.reports/U42/final-run-ojs.log`), "read an earlier
@@ -799,17 +717,6 @@ trips.
   condition**: a U35 toast read reds on CI; then arm it with
   `expectToastDuring` (or the toast never rose: read the save response's
   notification payload).
-- **The Assign window's role list in another order** (U35 S2, OJS,
-  once: 2026-09-24, the U38 session's OJS final on a reset database on
-  the Mac at auto workers, `.reports/U38/final-run-ojs.log`). Not the
-  toast entry above: S2's read of the role list found "Copyeditor" after
-  "Marketing and sales coordinator" instead of before it (error context
-  `.reports/U38/pw-out-final-ojs/U35-stage-participants-sta-12e99-itor-with-Request-Copyedit--ojs/error-context.md`);
-  green alone right after. Likely the same class as the predefined-message
-  list the U35 build (`ac20788`) found swapped, whose query orders by
-  nothing and whose assertions now compare the set. **Watch condition**:
-  a second sighting; then the assertion compares the set, or reads the
-  order from the app's query.
 - **Three first sightings in one Mac final set** (U46 session, 2026-09-24,
   reset databases at auto workers, each green alone right after). OJS
   U27 S11 "unassign before, cancel after, reinstate": the reviewer's row
@@ -822,112 +729,91 @@ trips.
   announcements" in the `ojs-serial` project run alone after the final:
   the "Announcement type added." notice not found
   (`alone-ojs-serial-solo.log`, `alone-ojs-U12S6.log`). **Watch
-  condition**: a second sighting of any; then read its trace. **Tripped
-  for U12 S6** 2026-09-24 in the U10 session: OMP `omp-serial` and
-  `omp-solo` run alone after the finals, the same "Announcement type
-  added." notice not found at spec line 378, green alone right after
-  (`.reports/U10/serial-solo-omp.log`, `alone-omp-U12S6.log`); the trace
-  read is the next daily session's. Again 2026-09-25 (U47 session, OJS `ojs-serial` run alone after the OJS final: "Announcement type removed." not found; the output is kept at `.reports/U47/alone-ojs-serial-solo/`). First sighting the same day of OMP U39 S2 "the Publisher Library on the Settings tab": the 180 s test timeout waiting on a "Press Library" row in the OMP final, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U50 session, Mac): U12 S6 red in the `<app>-serial` project run alone after the finals on all three apps ("Announcement type added." not found), green alone right after on all three (`.reports/U50/alone-{ojs,omp,ops}-serial-solo.log`, `alone2-{ojs,omp,ops}-U12S6.log`). Again 2026-09-25 (U51 session, Mac): OPS U12 S6 red in `ops-serial` run alone after the OPS final ("Announcement type removed." not found), green alone right after (`.reports/U51/alone-ops-serial-solo.log`, `alone2-ops-U12S6.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): OJS U12 S6 red in `ojs-serial` run alone after the OJS final ("Announcement type added." not found), green alone right after (`.reports/U53/alone-ojs-serial-solo.log`, `alone2-ojs-U12S6.log`).
+  condition**: a second sighting of any; then read its trace. The U12 S6 sightings in the `<app>-serial` projects run alone after the finals (U10, U47, U50, U51, U53 sessions) were the solo project running beside the serial one under a combined `--no-deps` command, now refused by the config (2026-09-26). First sighting the same day of OMP U39 S2 "the Publisher Library on the Settings tab": the 180 s test timeout waiting on a "Press Library" row in the OMP final, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U50 session, Mac): U12 S6 red in the `<app>-serial` project run alone after the finals on all three apps ("Announcement type added." not found), green alone right after on all three (`.reports/U50/alone-{ojs,omp,ops}-serial-solo.log`, `alone2-{ojs,omp,ops}-U12S6.log`). Again 2026-09-25 (U51 session, Mac): OPS U12 S6 red in `ops-serial` run alone after the OPS final ("Announcement type removed." not found), green alone right after (`.reports/U51/alone-ops-serial-solo.log`, `alone2-ops-U12S6.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): OJS U12 S6 red in `ojs-serial` run alone after the OJS final ("Announcement type added." not found), green alone right after (`.reports/U53/alone-ojs-serial-solo.log`, `alone2-ojs-U12S6.log`).
 - **U02 S6's consent line read on screen before anything is ticked**
-  (OPS, once: 2026-09-24, push run 35987189615 at `1cd4325`, shard 1/3,
-  green on the retry). `register.contextConsentLineOnScreen(name)` read
-  `true` for "expected false" right after `not.toHaveClass(/context_privacy_visible/)`
-  passed: the line had no visible class yet sat on screen. The on-screen
-  read is a one-shot `boundingBox()`, not a retrying assertion; a
-  stylesheet that places the hidden line off screen and had not applied
-  yet is the unverified guess. **Watch condition**: a second sighting;
-  then the read retries (`expect.poll`) and the error context says which
-  of the two servers' lines was on screen.
+  (OPS, CI once 2026-09-24). **Fixed 2026-09-26** (`.reports/flake-s26/fixC/diagnosis.md`): the one-shot
+  `boundingBox()` read raced the theme's style sheet; the page object's
+  `expectConsentLineOnScreen()` polls (style sheet held 3 s: red 4 of 4
+  before, green 4 of 4 after). **Watch condition**: a red of the polled
+  read.
 
-- **The Manager's task count after U42's discussion** (OPS U08 S2,
-  order-dependent). OPS U42 S1's control discussion leaves an unread
-  discussion task for `manager.maya` on `publicknowledge`, and OPS U08 S2
-  expects the Manager's Tasks count at 0: on a database where U42 ran
-  first, U08 S2 reads 1 (seen 2026-09-25 by the U13 harness agent's
-  regression run, `.reports/U13/harness/pw-ops-U08-2.log`; green in the
-  same day's OPS final on a reset database, where the order differs).
-  **Watch condition**: a red on CI or in a final; then make U08 S2 read a
-  scratch context or U42 S1 mark its discussion read.
-  **Tripped** in the U16 OPS final on a used database (2026-09-25,
-  `.reports/U16/final-run-ops.log`, "manager.maya 15" left by the day's
-  runs), and in the U16 harness agent's regression run; the U16 rerun
-  went on a reset database. The fix above is still owed.
+- **OPS U08 S2 reading manager.maya's Tasks count** (order-dependent:
+  OPS U40 S1, U41 S1/S3, U42 S1, U43 S1 and OMP U42 S1 opened their
+  mailbox-control discussions as maya on `publicknowledge`). **Fixed
+  2026-09-26** (`.reports/flake-s26/fixAD/diagnosis.md`): U08 S2 reads the count as any number, the controls
+  run on a scratch server or press of the test's own
+  (`PublicationPages.sendMailControl`, OPS). **Watch condition**: a
+  roster persona's task count asserted again.
 
-- **OMP U10 S1's style-sheet buttons read before "Remove" renders** (U10
-  S1 "a new press home page…", `@smoke`, OMP, once). In the U48
-  session's OMP final on a reset database at four workers, 2026-09-25,
-  the only red of 359: right after choosing `red-headings.css` the box
-  already showed the name, but `styleSheet.buttonNames()` (a one-shot
-  `evaluate`, `AppearancePages.js`) read `["Upload File"]` without
-  "Remove" (spec line 293); green alone in 7.9 s, serial and solo 14
-  green alone (`.reports/U48/final-run-omp.log`, `alone-omp-U10S1.log`,
-  `serial-solo-omp.log`). A test-side race, not the app: the read does
-  not wait. Fix to make: the "Remove" read auto-waits (a role locator
-  with `toBeVisible`) instead of the one-shot list. Watch condition: a
-  second sighting, or the fix.
+- **OMP U10 S1's style-sheet buttons read before "Remove" renders**
+  (OMP, 2026-09-25). **Fixed 2026-09-26** (`.reports/flake-s26/fixC/diagnosis.md`): `UploadBox` returns
+  auto-waiting button locators and `expectUploadOffered()` (the upload's
+  answer handled 1.5 s late: red 4 of 4 before, green 4 of 4 after), on
+  every U10 caller of the three apps. **Watch condition**: a red behind
+  the new readers.
 
-- **OJS U13 S3 red at the baseline checkouts** ("an older version beside
-  the current one", local only). In the U48 session's rebase onto U13,
-  2026-09-25, the second version's "Publish" opened "Review Publishing
-  Details" (its "Issue Assignment" required) where `publishShownVersion`
-  expects the confirmation straight away; red in the file's run and
-  alone, and red alone with `origin/main`'s own builders mounted, so not
-  the U48 merge (`.reports/U48/rebase-ojs{,-u13s3}.log`,
-  `base-ojs-u13s3.log`). The checkouts sat at the upstream-sync baselines
-  (ojs `71bb244152`); U13 was built at the ojs tip `d9b567efec`, and CI
-  (at the tips) reads every U13 test green. **Watch condition**: the
-  next sync that moves the ojs baseline; red there means the helper's
-  later-version branch needs the details window too. Again 2026-09-25 (U50 session, same baselines): red in the OJS final and red alone (`.reports/U50/final-run-ojs.log`, `alone-ojs-reds.log`). Again 2026-09-25 (U51 session): red in the OJS final and red alone (`.reports/U51/final-run-ojs.log`, `alone-ojs-reds.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): red in the OJS final and red alone (`.reports/U53/final-run-ojs.log`, `alone-ojs-reds.log`). Again 2026-09-26 (U54 session): red in the OJS final and red alone (`.reports/U54/final-run-ojs.log`, `alone-ojs-reds.log`).
+- **The OJS publish panel confirmed before its "Issue Assignment" is
+  filled** (U13 S3 "an older version beside the current one"; CI's top
+  first-attempt flake, 25 in about 40 OJS shard runs, always green on the
+  traced retry; red in and alone on the Mac at the older baselines).
+  **Mechanism found and fixed 2026-09-26** (`.reports/flake-s26/u13s3/diagnosis.md`):
+  a later version opens "Review Publishing Details" too (it starts
+  QUEUED), whose required "Issue Assignment" mounts empty and is filled
+  only when the panel's own `issueAssignmentStatus` GET answers; a
+  "Confirm" pressed before that is refused inside the page ("This field
+  is required.", no request) and the confirmation never opens. Held
+  deterministically by delaying that GET (red 7 of 7 before, green 8 of 8
+  after). `PublicationScreen.pressPublish()` / `awaitPublishPanelSettled()`
+  (OJS `PublicationMetadataPages.js`) now return the panel only with the
+  answer and its preselected radio in; `openPublishPanel()`, `publish()`,
+  `PublishSchedulePages.openPublishPanelExpectingIssueFields()` and the
+  U13, U18, U20 helpers go through it (OMP and OPS panels have no issue
+  field). **Watch condition**: a red at the confirmation wait behind the
+  settled panel.
 
-- **An OPS preprint's keywords in another order** (U13 S1 `@smoke`,
-  OPS, once). The U16 OPS final on a used database (2026-09-25,
-  `.reports/U16/final-run-ops.log`) read "Keywords: current, tide" where
-  the test expects "tide, current"; the keywords are seeded in that
-  order and the page lists what the database returns. **Watch
-  condition**: a second sighting; then the test compares the keyword set,
-  or the spec states the order.
-  **Tripped 2026-09-25**: the second sighting, the U17 session's second
-  OPS final on a used database (`.reports/U17/final-run-ops-attempt2.log`).
-  Third sighting 2026-09-26, in another test: U13 S10 (the serial
-  project's preprint summary on a list) read "current, tide" when run
-  alone with `--no-deps` after the U20 OPS final on a used database
-  (`.reports/U20/alone-ops-serial.log`); the fix is U13's for both tests.
+- **OPS U09 S6's custom page body missing "Welcome."** (OPS, once,
+  2026-09-25). The public page is server-rendered, so the saved text
+  lacked the words; not reproduced in 46 runs (CPU 6×, repeats).
+  Hardened 2026-09-26 (`.reports/flake-s26/fixC/diagnosis.md`): `RichTextBox.type()` waits for the editor's
+  focus and returns only when the editor holds the typed words.
+  **Watch condition**: a red at the typing step; then read its error
+  context.
 
-- **OMP masthead roles listed in another order** (U10 S5, OMP, once).
-  The U16 session's first OMP final on a used database (2026-09-25,
-  `.reports/U16/final-run-omp-attempt1.log`, spec line 792) read
-  "Production editor", "Press editor", "Series editor", "Editorial Board
-  Member" right after ticking "Production editor"; green in the second
-  final on a reset database. **Watch condition**: a second sighting; then
-  read which of the two rows the list sorts by.
+- **Two contexts adding French at the same moment: one save answers 500**
+  (found 2026-09-26 by the C fixer, 5 of 42 concurrent French
+  scratch-context seedings on OJS and OPS, `.reports/flake-s26/fixC/diagnosis.md`
+  block fixC-1): `Locale::installLocale()` →
+  `installEmailTemplateLocaleData()` deletes and re-inserts the site-wide
+  default email data with no transaction, so two concurrent installs of
+  one locale meet a unique violation on `email_templates_default_data`.
+  An app race that a person meets only when two managers add the same
+  language at once; for the suite, a flake source whenever parallel tests
+  seed French contexts. No spec holds it yet (U57 *Languages & locales*
+  is pending). **Watch condition**: a French-context seed or save red
+  with that 500 on CI; then serialize the harness's first French install
+  (bootstrap installs it once) before the parallel project.
 
-- **OPS U08 S2 after OPS U42 S1 on a reused fleet** (order-dependent,
-  not load). U42 S1's mailbox control has manager.maya open a discussion
-  on `publicknowledge`, whose NEW_QUERY task stays unread on maya, and
-  U08 S2 reads her user menu's Tasks number as "0": red ("manager.maya 1")
-  on any OPS fleet that ran U42 before U08 (the U13 harness regression
-  pass, 2026-09-25, friction fold). A full run on a reset database starts
-  U08 first and stays green, CI included. Fix, when it bites a final: the
-  control discussion opened by a scratch manager, or on a scratch server
-  (U42's own header says `publicknowledge` and the roster are read-only);
-  meanwhile a regression pass on a used OPS fleet runs U08 before U42.
-  Again 2026-09-25 in the U17 session's second OPS final on a used
-  database ("manager.maya 15", `.reports/U17/final-run-ops-attempt2.log`).
+- **Order asserted on lists the app does not order** (settled
+  2026-09-26 as one class: OPS U13 S1/S10 keywords, OMP U10 S5 masthead,
+  OMP U08 S4 "renamed item last", OJS U35 S2 role list, U05 S7's Tasks
+  pair, OJS U18 S5, U29 S9 and the unsighted sites of
+  `.reports/flake-s26/fixlist-B.md`). PostgreSQL returns unordered or tied
+  rows in storage order, which parallel writes change; a non-HOT update
+  moving one row flips each sighted read deterministically (red 4 of 4,
+  green 4 of 4 after, `.reports/flake-s26/fixB/diagnosis.md`). The tests
+  compare sets (`shared/playwright/support/order.js`); eleven specs that
+  claimed an order the query does not give were corrected (U08, U09,
+  U12, U13, U18, U28, U29, U35, U42, U54, U55; new U13 A11 🐞: keywords
+  lose the typed order on every save); galley seeds carry `seq`.
+  **Watch condition**: a position read on a list whose query has no
+  unique ORDER BY.
 
-- **OPS U09 S6's page body read before "Welcome."** (OPS, once). The
-  U17 session's third OPS final on a reset database (2026-09-25,
-  `.reports/U17/final-run-ops.log`, spec line 664) read the custom page's
-  body as "Our page" where it expects "Our page Welcome."; green alone
-  (`.reports/U17/alone-ops-U09S6.log`). **Watch condition**: a second
-  sighting; then the read waits for the body's second paragraph.
-
-- **OMP U08 S4's renamed item not last** (OMP, once). The U17 session's
-  first OMP final on a used database (2026-09-25,
-  `.reports/U17/final-run-omp-attempt1.log`, spec line 612) polled the
-  primary menu's last row for "PKP news" for 10 s; green alone
-  (`.reports/U17/alone-omp-U08S4.log`) and in the second OMP final.
-  **Watch condition**: a second sighting; then read whether the rename
-  reorders the rows.
+- **OMP U27 S9 and S16** (first sightings, the Escape sweep's runs
+  2026-09-26, `.reports/flake-s26/esc/diagnosis.md`): S9 red 2 of 8 at
+  HEAD under an animation-frame hold, lead: `openRowMenu()` returns
+  `getByRole('menu').last()`, which can be the first row's menu still
+  closing; S16 once in 95, the Review Details window showing "-" for both
+  reviewer comments. **Watch condition**: a sighting in a final or on CI.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

@@ -503,6 +503,12 @@ the answer; the spec and the test are the record.
   when an app's three Playwright steps on a green `main` run drift more
   than two minutes apart, or a feature has added a spec's worth of tests,
   run `npm run shard-timings` and commit `shared/playwright/timings/`.
+- **Keep the flake rate down.** A flake class whose watch condition trips
+  gets a diagnostician rendered from `briefs/flake-diagnosis.md`, one or two
+  at a time, ranked by `bin/ci-flake-tally/run.sh` (CI's first-attempt
+  reds) and the ci-triage sightings; the fix lands where the mechanism
+  lives (the app's register, the harness, a shared page object, then the
+  test), and a rule every later test must follow goes to `patterns.md`.
 - **Leave the revision queue to the maintainer.**
   `docs/tracking/coverage-revision.md` lists the shipped specs awaiting
   RUNBOOK "Revising a shipped feature"; each is a session the maintainer

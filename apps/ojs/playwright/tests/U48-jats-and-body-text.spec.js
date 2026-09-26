@@ -29,11 +29,13 @@
  *   scenarios' paths. OMP1: the press's, in that tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
- * are read-only. S2–S6 run on publicknowledge on their own scratch
- * submissions (`manager.maya`, submitter `author.alex`; S3's
+ * are read-only. S2, S3, S5 and S6 run on publicknowledge on their own
+ * scratch submissions (`manager.maya`, submitter `author.alex`; S3's
  * `layouteditor.leo` and `assistant.rita` as participants, S5's
- * `author.bea` and `reader.rosa`); S1, S7 and S8 run on scratch journals
- * with throwaway accounts (the username twice as password), as footnote v
+ * `author.bea` and `reader.rosa`); S1, S4, S7 and S8 run on scratch
+ * journals with throwaway accounts (the username twice as password; S4's
+ * "no toast" is read on a page of an account no other test signs in as,
+ * patterns.md parallel lesson 2), as footnote v
  * says: `abstract`, `citationsRaw`, `galleys[]`, `files[]`, `decisions`,
  * `participants[]`, `published`, `jats` (`file`, `makePublic`) and the
  * context's `plugins` (S7) and `restrictArticleAccess` (S8). No key makes
@@ -400,6 +402,7 @@ test.describe('JATS & Body Text', () => {
                 return [Math.round(box?.x ?? -1), Math.round(box?.y ?? -1), Math.round(box?.width ?? 0), Math.round(box?.height ?? 0)];
             }, {timeout: 30_000})
             .toEqual([0, 0, viewport?.width, viewport?.height]);
+        // lint-ok: escape Rule 18 claims the key; the fullscreen trap takes it in a document capture listener, before the workflow dialog
         await page.keyboard.press('Escape');
         await expect(body.fullscreenButton()).toHaveText(TEXT.fullscreen);
         await expect(body.root()).not.toHaveClass(/sciflow-body-text--fullscreen/);
@@ -566,20 +569,25 @@ test.describe('JATS & Body Text', () => {
     test('S4: the published "JATS XML" link', async ({asUser, ojsApi, browser, baseURL}, testInfo) => {
         test.setTimeout(240_000);
         const tag = makeTag('s4', testInfo);
+        // A throwaway Journal Manager on a scratch journal of the test's
+        // own: "no toast" is read on a page of the manager's account, and a
+        // notice another test left for a shared account shows on any page
+        // of it that loads (patterns.md parallel lesson 2).
+        const {manager, author} = await seedJournal(ojsApi, tag);
         const submission = await ojsApi.createSubmission({
             tag,
-            context: JOURNAL,
-            submitter: AUTHOR,
+            context: tag,
+            submitter: author,
             title: `Published ${tag}`,
             decisions: PRODUCTION,
             galleys: [{label: 'PDF', file: 'article.pdf'}],
             published: true,
         });
         const visitor = await visitorPage(browser, baseURL);
-        const {page, frame, jats} = await pageAs(asUser, MANAGER, JOURNAL);
+        const {page, frame, jats} = await pageAs(asUser, manager, tag);
 
         // No link while unticked: "PDF" alone (Rule 10).
-        await openArticle(visitor, JOURNAL, submission.submissionId);
+        await openArticle(visitor, tag, submission.submissionId);
         await expect(articleLinks(visitor)).toHaveText(['PDF']);
         await expect(jatsLink(visitor)).toHaveCount(0);
 
@@ -609,7 +617,7 @@ test.describe('JATS & Body Text', () => {
         // "submission-{n}-publication-{m}-jats.xml", the numbers of its
         // address, holding the XML the page shows (Actors row 7; Rules 9,
         // 10).
-        await openArticle(visitor, JOURNAL, submission.submissionId);
+        await openArticle(visitor, tag, submission.submissionId);
         await expect(articleLinks(visitor)).toHaveText(['PDF', TEXT.jatsLink]);
         const numbers = jatsLinkNumbers((await jatsLink(visitor).getAttribute('href')) || '');
         expect(numbers).toEqual({submissionId: submission.submissionId, publicationId: submission.publicationId});
@@ -624,7 +632,7 @@ test.describe('JATS & Body Text', () => {
         await expect(dialog).toContainText(TEXT.disableMessage);
         await jats.confirmVisibility(dialog);
         await expect(jats.makePublicBox()).not.toBeChecked();
-        await openArticle(visitor, JOURNAL, submission.submissionId);
+        await openArticle(visitor, tag, submission.submissionId);
 
         // Control: "PDF" stays throughout; only "JATS XML" comes and goes
         // (Rule 10).

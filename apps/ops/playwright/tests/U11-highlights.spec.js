@@ -267,7 +267,7 @@ test.describe('highlights', () => {
         // in place; signed out, the second slide is text-only (Fields;
         // Rules 6, 10).
         panel = await tab.openEdit('Annual conference');
-        expect(await panel.titleText()).toBe('Annual conference');
+        await panel.expectTitleText('Annual conference');
         await expect(panel.urlInput()).toHaveValue('https://example.org/conference');
         await expect(panel.buttonLabelInput()).toHaveValue('Register');
         await expect(panel.preview()).toBeVisible();
@@ -629,7 +629,7 @@ test.describe('highlights', () => {
         // complete this field in English." under "Title" (Fields "Title").
         await tab.goto({locale: 'en'});
         panel = await tab.openEdit('Second call');
-        expect(await panel.titleText()).toBe('Second call');
+        await panel.expectTitleText('Second call');
         await panel.typeTitle('');
         await panel.saveRefused('Please correct one error.');
         await expect(panel.fieldError(panel.titleField())).toHaveText('You must complete this field in English.');

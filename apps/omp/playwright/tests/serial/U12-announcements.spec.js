@@ -17,7 +17,12 @@
  * S4 additionally asserts "nothing has reached the mail catcher yet"
  * between its ticked add and its own drain, which no other test's drain
  * may race, so it carries `@solo` and runs alone in the `omp-solo` project
- * after the serial one (harness.md "Project chain").
+ * after the serial one (harness.md "Project chain"). S6 carries `@solo`
+ * too: its notices ("Announcement type added.") are the Site
+ * Administrator's, and a notice waits on the server until a page of the
+ * same account fetches it (lib/pkp NotificationHandler::fetchNotification
+ * takes and deletes them all), so another serial test's `admin` page could
+ * take it first (parallel lesson 2; flake-s26 fixAD).
  *
  * Not asserted here, by register ID: A9 🐞 (no edit ticks the email box),
  * A14 🐞 (the press's primary language is English, so the email's sentence
@@ -236,7 +241,7 @@ test.describe('Announcements (U12), queued email and the site', () => {
         await pkpMail.expectNone({to: getEmail('reader.rosa'), subject: CFP, afterControl: control});
     });
 
-    test("S6: the site's announcements", async ({asUser, ompApi, pkpMail, visitor}, testInfo) => {
+    test("S6: the site's announcements @solo", async ({asUser, ompApi, pkpMail, visitor}, testInfo) => {
         test.slow();
         test.setTimeout(420_000);
         const tag = makeTag('s6', testInfo);

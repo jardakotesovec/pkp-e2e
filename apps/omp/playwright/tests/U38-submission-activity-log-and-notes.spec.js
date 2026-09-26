@@ -67,6 +67,7 @@ const {
 } = require('../../../../shared/playwright/pages/ActivityLogPages.js');
 const {DecisionWizardPage, ComposerPage} = require('../pages/DecisionWizardPages.js');
 const {loginAsDialog, confirmLoginAsDialog, userNav} = require('../pages/LoginSessionsPages.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 
 const PRESS = 'publicknowledge';
 const SERIES = 'monographs';
@@ -201,6 +202,7 @@ test.describe('submission activity log & notes', () => {
         }
         const days = lines.map((l) => l.date);
         expect(days, 'newest first').toEqual([...days].sort().reverse());
+        // lint-ok: escape Rules 1-3 claim the key; the log is the top reka layer, which takes it whatever holds the focus
         await mg.page.keyboard.press('Escape');
         await log.expectClosed();
         await mg.frame.expectOpen(submissionId);
@@ -289,7 +291,9 @@ test.describe('submission activity log & notes', () => {
         // The line kept: "History" holds the same lines as when the Series
         // editor opened it, and none for the deletion (Rule 10c; Side effects).
         await se.log.selectTab('History');
-        expect(await se.log.historyLines()).toEqual(seenBySe);
+        // Compared as a multiset: lines logged in the same second have no
+        // fixed order among them (Rule 2; fix list B, flake-s26).
+        expect(unordered(await se.log.historyLines())).toEqual(unordered(seenBySe));
         await se.log.close();
 
         // Under "Login As": the administrator, acting as the Series editor
@@ -392,7 +396,7 @@ test.describe('submission activity log & notes', () => {
         await view.close();
         await log.selectTab('Notes');
         await log.selectTab('History');
-        expect(await log.historyLines()).toEqual(before);
+        expect(unordered(await log.historyLines())).toEqual(unordered(before));
         await log.close();
     });
 

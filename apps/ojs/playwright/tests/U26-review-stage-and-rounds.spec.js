@@ -151,13 +151,34 @@ test.describe('review stage & rounds', () => {
     test('S1: round 1 opens with the submission', {tag: '@smoke'}, async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s1', testInfo);
-        const {submissionId} = await seedInReview(ojsApi, tag, {decisions: [], reviewRounds: []});
+        // A throwaway Section Editor on a scratch journal of the test's own:
+        // "Review files updated." is a notice the server keeps for the
+        // account until a page of it fetches it, and any other page of the
+        // same account (a parallel test signed in as a roster editor) takes
+        // it first (patterns.md parallel lesson 2). A scratch journal's
+        // submit assigns no editor (footnote s): `participants[]` does.
+        const editor = `se${tag}`;
+        const author = `au${tag}`;
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: editor, roles: ['sectionEditor']},
+                {username: author, roles: ['author']},
+            ],
+        });
+        const {submissionId} = await seedInReview(ojsApi, tag, {
+            context: tag,
+            submitter: author,
+            decisions: [],
+            reviewRounds: [],
+            participants: [{username: editor, role: 'sectionEditor'}],
+        });
         const fileOne = inMemoryFile(`${tag}-one.txt`);
         const fileTwo = inMemoryFile(`${tag}-two.txt`);
         const fileThree = inMemoryFile(`${tag}-three.txt`);
 
-        const editorPage = await (await asUser('sectioneditor.ana')).newPage();
-        const workflow = new WorkflowPage(editorPage, JOURNAL);
+        const editorPage = await (await asUser(editor)).newPage();
+        const workflow = new WorkflowPage(editorPage, tag);
         await workflow.gotoEditorial(submissionId);
         await workflow.expectPageTitle('Submission');
 

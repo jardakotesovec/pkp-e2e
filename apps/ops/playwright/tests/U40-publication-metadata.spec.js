@@ -44,6 +44,7 @@ const {
     PublicationScreen,
     openWorkflow,
     openPublicationPage,
+    sendMailControl,
     statusReadout,
     postPreprint,
     unpostPreprint,
@@ -311,21 +312,10 @@ test.describe('Publication metadata (U40)', () => {
 
         // The mailbox: no email has arrived for the Author from the saves
         // (Side effects), bounded by a mail this test causes the same way:
-        // a discussion opened on the submission with the Moderator's box
-        // ticked and the Author's left unticked, whose copy reaches the
-        // Moderator (A8).
-        const discussion = `Control ${tag}`;
-        await openWorkflow(page, PK, submissionId);
-        await screen.openProductionStage();
-        await addDiscussion(page, {
-            name: discussion,
-            message: `Control message ${tag}.`,
-            participants: ['sectioneditor.ana'],
-        });
-        await pkpMail.expectNone({
-            to: mailOf(author),
-            afterControl: {to: mailOf('sectioneditor.ana'), subject: discussion},
-        });
+        // a discussion on a scratch server of the test's own, whose copy
+        // reaches its spare Author (A8; `sendMailControl`).
+        const afterControl = await sendMailControl({asUser, api: opsApi, tag});
+        await pkpMail.expectNone({to: mailOf(author), afterControl});
     });
 
     test('S2: the Metadata page follows the server\'s setup', async ({asUser, opsApi}, testInfo) => {

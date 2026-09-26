@@ -168,18 +168,19 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
 3. **The "Navigation" table.** It lists the journal's menus as Fields
    describes, in no fixed order. <sup>i</sup> <sup>td5</sup>
    - 3a. **The items cell.** The "Navigation Menu Items" column names
-     every item the menu holds, nested ones included, in an order of its
-     own that shows no nesting; the username item reads as the viewing
-     manager's own username. On a new journal:
-     - "Primary Navigation Menu": "Current, About the Journal,
-       Submissions, Archives, Announcements, Editorial Masthead, Privacy
-       Statement, About, Contact" (press: "Catalog, About the Press,
-       Submissions, Announcements, About, Editorial Masthead, Privacy
-       Statement, Contact"; server: "Announcements, About the Server,
-       Submissions, Archives, About, Editorial Masthead, Privacy
-       Statement, Contact").
-     - "User Navigation Menu": "Dashboard, Register, View Profile, Login,
-       {username}, Administration, Logout".
+     every item the menu holds, nested ones included, in no fixed order
+     and with nothing to show which item sits under which; the username
+     item reads as the viewing manager's own username. On a new journal
+     the cells name these items, separated by commas:
+     - "Primary Navigation Menu": "Current", "About the Journal",
+       "Submissions", "Archives", "Announcements", "Editorial Masthead",
+       "Privacy Statement", "About", "Contact" (press: "Catalog", "About
+       the Press", "Submissions", "Announcements", "About", "Editorial
+       Masthead", "Privacy Statement", "Contact"; server:
+       "Announcements", "About the Server", "Submissions", "Archives",
+       "About", "Editorial Masthead", "Privacy Statement", "Contact").
+     - "User Navigation Menu": "Dashboard", "Register", "View Profile",
+       "Login", {username}, "Administration", "Logout".
    - 3b. **Stale until reloaded.** After an item is saved with a new
      title, or removed (Rules 11, 13), each menu's cell keeps the old
      titles, a removed item and its former sub-items included, until the
@@ -265,8 +266,8 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
 10. **The "Navigation Menu Items" table.** It lists every item of the
     journal, each under the title the header would show the viewing
     manager (the username item under the manager's own username), in no
-    fixed order: an item saved from its "Edit" window moves to the end of
-    the table. <sup>i</sup> <sup>td5</sup>
+    fixed order. An item saved from its "Edit" window usually moves to
+    the end of the table, but not always. <sup>i</sup> <sup>td5</sup>
 11. **Adding and editing an item.** "Save" in the item window stores the
     item, closes the window, shows "Navigation menu item was successfully
     added" (or "Navigation menu item was successfully updated") and the
@@ -496,6 +497,9 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       13);
     - "Edit Profile" ([User profile](U03-user-profile.md));
     - "Logout", which reads "Logout as {username}" while impersonating.
+
+    Pressing the initials again closes the menu. The Escape key leaves
+    it open ⚠ [A25](#a25). <sup>td19</sup>
 29. **The journals switcher.** A sitemap icon, named "Journals" ("Presses",
     "Servers") to screen readers, opens the list of journals the user may
     switch to (Actors row 7), by name. A journal that carries the current
@@ -754,7 +758,8 @@ are in the footnote. <sup>y</sup>
      OMP", "Learning OPS") opens in a new tab [A1](#a1); press the
      initials: a menu opens with "Change Language" and the journal's two
      interface languages under it, the current one ticked, then "Edit
-     Profile" and "Logout" (Rules 27, 27a–27c, 28; Settings bullet 12).
+     Profile" and "Logout"; press the initials again: the menu closes
+     (Rules 27, 27a–27c, 28; Settings bullet 12).
    - **The Journal Manager's side menu**: it reads, top to bottom,
      "Editor Dashboard", whose first line is the box "Search
      submissions", "Start A New Submission", "DOIs", "Settings", "Content"
@@ -795,15 +800,17 @@ are in the footnote. <sup>y</sup>
      "Navigation": two tables, "Navigation" above "Navigation Menu Items".
      "Navigation", with "Add Menu" above it, lists "Primary Navigation
      Menu" and "User Navigation Menu", in either order. The primary menu's
-     "Navigation Menu Items" cell reads "Current, About the Journal,
-     Submissions, Archives, Announcements, Editorial Masthead, Privacy
-     Statement, About, Contact" (on a press "Catalog, About the Press,
-     Submissions, Announcements, About, Editorial Masthead, Privacy
-     Statement, Contact"; on a preprint server "Announcements, About the
-     Server, Submissions, Archives, About, Editorial Masthead, Privacy
-     Statement, Contact"); the user menu's reads "Dashboard, Register,
-     View Profile, Login, {username}, Administration, Logout", with the
-     Journal Manager's own username (Rules 2, 3, 3a).
+     "Navigation Menu Items" cell names, in any order, "Current", "About
+     the Journal", "Submissions", "Archives", "Announcements", "Editorial
+     Masthead", "Privacy Statement", "About" and "Contact" (on a press
+     "Catalog", "About the Press", "Submissions", "Announcements",
+     "About", "Editorial Masthead", "Privacy Statement" and "Contact"; on
+     a preprint server "Announcements", "About the Server",
+     "Submissions", "Archives", "About", "Editorial Masthead", "Privacy
+     Statement" and "Contact"); the user menu's names, in any order,
+     "Dashboard", "Register", "View Profile", "Login", the Journal
+     Manager's own username, "Administration" and "Logout" (Rules 2, 3,
+     3a).
    - **The items table**: "Navigation Menu Items", with "Add item" above
      it, lists seventeen items (sixteen on a press or a preprint server):
      every item the two menus hold, the username item under the Journal
@@ -885,8 +892,9 @@ are in the footnote. <sup>y</sup>
    - **Edited**: Journal Manager: press the "Settings" arrow of "Our news"
      in "Navigation Menu Items" and then "Edit": a window headed "Edit"
      opens; replace "Our news" with "PKP news" and press "Save":
-     "Navigation menu item was successfully updated" shows, and "PKP news"
-     is the last row of "Navigation Menu Items" (Rules 10, 11); the
+     "Navigation menu item was successfully updated" shows, and
+     "Navigation Menu Items" lists "PKP news" once and no longer "Our
+     news" (Rules 10, 11); the
      "Navigation" table's cell still names "Our news" until the page is
      reloaded [A15](#a15). The visitor reloads: the "Archives" list holds
      "PKP news" (Rule 11).
@@ -1154,6 +1162,7 @@ Left out of the scenarios above, by reason:
   - A22 (the Site Administrator holding Reader alone: the manager's side menu and an "Error" window; Rule 30a)
   - A23 (raw codes as the side menu's "Content" and "DOIs" labels in the French interface; Rule 30)
   - A24 (raw codes in the item window's "Query Parameters", the menu window's drag handles and a press's "New Releases" type in the French interface; Fields)
+  - A25 (the initials menu left open by the Escape key; Rule 28)
   - OJS1 (no eye on "Subscriptions" and "My Subscriptions" {OJS}; Rule 7a)
   - OPS2 ("Posting Mode" not kept, so "Archives" stays {OPS}; Settings bullet 2)
   - OPS3 (the French "Developed By" heading's raw code {OPS}; Rule 21)
@@ -1212,6 +1221,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | Items saved three levels deep never show in the header | ❓ | latent | — |
 | [A10](#a10) | A menu titled like another in other letter case is saved as a second menu | ❓ | minor | — |
 | [A14](#a14) | The site's "Add item" offers types the site has no page for | ❓ | minor | — |
+| [A25](#a25) | The editorial header's initials menu stays open when Escape is pressed | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
 | [A19](#a19) | Retired: on French pages the installed "Editorial Masthead" item read "##common.editorialMasthead##"; it now reads "Entête" (Rule 12) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
 | [A20](#a20) | Retired: in French the initials menu's language heading read "##common.changeLanguage##"; it now reads "Changer la langue" (Rule 28) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
@@ -1447,6 +1457,18 @@ item window's "Navigation Menu Type" list also offers
 "##navigation.navigationMenus.newRelease##" in place of "New Releases".
 The manager cannot tell what the box is for or which type that entry is.
 Basis: probe. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — The initials menu does not close on Escape** · ❓ · minor.
+In the editorial header, the menu the initials open (Rule 28) stays
+open when the Escape key is pressed; it closes only when the initials
+are pressed again or the focus moves off them. The public header's
+"About" list (Rule 16) and the menu window (Rule 6) both close on
+Escape.
+Question: should the initials menu close on Escape too? Lean: yes;
+Escape is the key a keyboard or screen-reader user reaches for to close
+a menu, and the other menus here answer it.
+Basis: test run. <sup>f-a25</sup>
 
 ### OJS
 
@@ -1758,7 +1780,10 @@ Menu" (`VueModal` `NavigationMenuManagerFormModal`).
 same modal with the menu; the items cell joins the titles of
 `NavigationMenuItemDAO::getByMenuId()` (every assignment of the menu,
 `ORDER BY seq`, parents and children together) after
-`transformNavMenuItemTitle()`. `NavigationMenusGridRow`: `edit`
+`transformNavMenuItemTitle()`; `seq` counts from 0 under each parent, so
+a top-level item and a sub-item at the same place tie and come in the
+order the database holds the rows (read 2026-09-26), which is why Rule
+3a gives no order. `NavigationMenusGridRow`: `edit`
 (`grid.action.edit` "Edit", the modal) and `remove` (`grid.action.remove`
 "Remove", `RemoteActionConfirmationModal` with `common.confirmDelete`,
 title `common.remove`, style negative, OK/Cancel from `ConfirmationModal`)
@@ -1778,7 +1803,11 @@ either. Live-probed 2026-09-23 (Rules 1, 3, 10; all three apps):
 both tables at both addresses, each row's "Settings" arrow revealing
 "Edit" and "Remove"; after every change on the scratch journals the
 seeded journal's tables read as before; an item saved from "Edit" moved
-to the end of the items table, and after menus were added the menus
+to the end of the items table (the query having no order, the saved row
+is written wherever the table has room, usually at its end; seen
+2026-09-25 in an OMP test run: after "Our news" was renamed "PKP news",
+the items table's last row read "Search" for the whole 10 s wait), and
+after menus were added the menus
 table read "primary navigation menu, Primary Navigation Menu, Footer
 links, User Navigation Menu". After "Contact" was renamed "Reach us", or
 "About" removed, the "Primary Navigation Menu" cell still read
@@ -2345,6 +2374,19 @@ the site was named); whether that text is a link was not recorded, and
 the test sites could not be unnamed again, since the form refuses an
 empty "Site Name".
 
+<a id="fn-td19"></a>
+**td19** — The initials menu is ui-library `Dropdown.vue` (inside
+`TopNavActions.vue`), byte-identical in the three checkouts: its button
+toggles the menu on click and closes it on `blur` (`closeOnBlur()`, after
+100 ms, once the focus is outside the component); it has no key handler,
+so Escape does nothing (A25). Test run 2026-09-26 (Rule 28; OJS,
+`manager.maya` on the Dashboard of `publicknowledge`, three repeats): the
+initials pressed, Escape pressed, the menu still shown 1 s later every
+time; the initials pressed again, the menu hidden every time. The same
+day scenarios 2 and 9, closing the menu by a second press on the
+initials, passed five times on each of OJS, OMP and OPS. On OMP and OPS
+Escape was not pressed; the claim rests on the shared component.
+
 <a id="fn-td16"></a>
 **td16** — Live-probed 2026-09-23 (Rule 29; A21; all three apps): the
 switcher as note g records.
@@ -2626,6 +2668,13 @@ item's window showed the label and the line under it as the raw codes;
 the Primary menu window's handles carried the `title`
 `##common.dragToReorder##`; on OMP the type list's options included
 `##navigation.navigationMenus.newRelease##`.
+
+<a id="fn-f-a25"></a>
+**f-a25** — Note td19: `Dropdown.vue` has no Escape handler; the
+focus half of the symptom is read from `closeOnBlur()`, not run. The
+header's "About" list closes on Escape (note q), the menu window too
+(note td7). Test run 2026-09-26, OJS: Escape left the menu shown three
+times out of three; OMP and OPS share the component.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`

@@ -328,8 +328,14 @@ page. Every row below assumes the journal has public comments switched on
 - **Deleting clears the tasks; approving and hiding do not.** Deleting a
   comment, by its writer or by a moderator, deletes every moderator's tasks
   about that comment and about its reports; deleting a report deletes the
-  tasks about that report. A comment that goes with its submission or with
-  its writer's account leaves its tasks behind [A10](#a10) (Rule 18).
+  tasks about that report. The comment's deletion also takes unrelated
+  tasks with it, in any journal of the site: the "requires review" rows
+  about the report numbered like the deleted comment, and the "pending
+  review" rows about a comment numbered like one of its reports, leave
+  every moderator's panel (the numbers are the ones the Comments page
+  writes into its address, Rules 12 and 15) ⚠ [A11](#a11). A comment
+  that goes with its submission or with its writer's account leaves its
+  tasks behind [A10](#a10) (Rule 18).
   Approving or hiding a comment leaves the
   "pending review" task in every moderator's panel until each deletes it
   by hand ⚠ [A2](#a2). <sup>l</sup>
@@ -828,6 +834,7 @@ Left out of the scenarios above, by reason:
   - A7 (the comment's "…" button without a name for a screen reader; Rule 7)
   - A8 (closing the report panel clearing both numbers from the address; Rule 15; scenario 3 marks it)
   - A9 (the Site Administrator with Reader as their only journal role, the "Error" dialog over the Comments page; Rule 17)
+  - A11 (a comment's deletion taking the task of an unrelated report or comment that shares its number, in any journal; Side effects)
   - OMP1 and OPS1 (the Site Administrator holding no manager role: the Comments page open on a journal, refused on a press and a preprint server; Rule 17)
 - **Owned by another feature**:
   - the Tasks panel's own controls on a comment task, Mark Read and Delete (Cross-feature interactions; *Notifications center & email preferences*, scenario 2)
@@ -850,6 +857,7 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 |----|------------------------------|------|--------|--------|
 | [A6](#a6) | The unverified ORCID iD under a comment and in the comment panel links to a broken address | 🐞 | minor | — |
 | [A10](#a10) | A comment deleted with its submission or its writer's account leaves its moderation tasks behind, blank and dead | 🐞 | minor | — |
+| [A11](#a11) | Deleting a comment also removes the task about an unrelated report or comment that shares its number, in any journal | 🐞 | minor | — |
 | [A1](#a1) | A hidden comment reads to its writer exactly like one awaiting approval | ❓ | minor | — |
 | [A2](#a2) | Approving or hiding a comment leaves every moderator's "pending review" task in place | ❓ | minor | — |
 | [A3](#a3) | The report dialog neither refuses an empty reason with a message nor confirms a filed report, and the same person can report the same comment again | ❓ | minor | — |
@@ -980,6 +988,22 @@ resource was not found."; pressing a report's opens the page with no
 panel. Expected the rows to go with the comment, as they do when the
 comment is deleted on its own; observed they stay, blank and dead.
 Basis: test run. <sup>f-a10</sup>
+
+<a id="a11"></a>
+**A11 — Deleting a comment removes unrelated tasks that share its number** · 🐞 · minor.
+Comments and reports are numbered separately across the whole site, so a
+comment and a report can carry the same number. When a comment is
+deleted, every moderator's "A report was submitted for a comment and
+requires review by a moderator." row about the report numbered like that
+comment leaves the Tasks panel too, whichever journal the report belongs
+to; so does the "A comment has been submitted and is pending review by a
+moderator." row about a comment numbered like one of the deleted
+comment's reports. No message appears. The report stays on its journal's
+"Reported" tab and in its comment's "Reports" table, but its moderators
+lose the task that told them it was filed. Expected a deletion to clear
+only the tasks about the deleted comment and its own reports (Side
+effects); observed it also clears unrelated tasks that share a number.
+Since: 2026-03-04 (7 months) · Basis: probe. <sup>f-a11</sup>
 
 ### OMP
 
@@ -1239,8 +1263,9 @@ titled `userComment.deleteComment` with `userComment.deleteCommentConfirmation`
 effect) and `common.cancel`; DELETE `comments/{id}` allows the owner or a
 moderator (`Repository::isModerator()`: manager role in the context or
 site admin), deletes the row (reports cascade by foreign key) and every
-`notifications` row with `assoc_type` `ASSOC_TYPE_COMMENT` for the comment
-or `ASSOC_TYPE_COMMENT_REPORT` for its reports; the store filters the
+`notifications` row whose `assoc_type` is `ASSOC_TYPE_COMMENT` or
+`ASSOC_TYPE_COMMENT_REPORT` and whose `assoc_id` is the comment's id or
+one of its reports' ids, in any context (A11); the store filters the
 comment out of the list without touching `commentsCountPerPublication`.
 Live-probed 2026-09-16 (Rule 9): the dialog's title, text (the comment in
 bold) and buttons as stated; "Cancel" kept the comment; "Delete" removed
@@ -1418,10 +1443,11 @@ characters plus "...") in the slot `task.tpl` prints under the message. URLs
 (`PKPNotificationManager::getNotificationUrl()`):
 `management/settings/userComments?commentId=N` and
 `…?reportId=R&commentId=N`, which the page's `onMounted` turns into the
-open panels. Deletion: `delete()` removes notifications of both assoc
-types for the comment and its report ids; `deleteReport()` and
-`deleteReports()` remove the report ones; `setApproval()` removes none
-(A2). Live-probed 2026-09-16 (Side effects, Rule 16, Actors rows 7 and 8,
+open panels. Deletion: `delete()` removes the notifications of either
+assoc type whose id is the comment's or one of its reports', every type
+paired with every id and in any context (footnote h, A11);
+`deleteReport()` removes the `ASSOC_TYPE_COMMENT_REPORT` ones of its
+report; `setApproval()` removes none (A2). Live-probed 2026-09-16 (Side effects, Rule 16, Actors rows 7 and 8,
 A2, A10): the Journal Manager's and the Editor's panels each gained the
 unread row with the comment's text under it (a 300-character comment and
 a 300-character reason cut to 200 characters plus "..."), the Section
@@ -1790,6 +1816,43 @@ pressable: a comment's opened the Comments page at "?commentId={n}" under
 "Error" / "The requested resource was not found.", a report's opened the
 page at "?reportId={r}&commentId=" with no panel; the rows stayed, marked
 read.
+
+<a id="fn-f-a11"></a>
+**f-a11 — A11.** `UserCommentController::delete()` collects the comment's
+report ids, deletes the comment, then runs one
+`Notification::whereIn('assoc_type', [ASSOC_TYPE_COMMENT, ASSOC_TYPE_COMMENT_REPORT])->whereIn('assoc_id', [commentId, …reportIds])->delete()`:
+every type is paired with every id and no context condition applies, so
+it also deletes (`ASSOC_TYPE_COMMENT_REPORT`, commentId), the tasks of
+the report whose id is the comment's, and (`ASSOC_TYPE_COMMENT`,
+reportId), the tasks of the comment whose id is one of the reports',
+across all contexts. `user_comments` and `user_comment_reports` are two
+id sequences that both start at 1 on a fresh install. The controller is
+lib/pkp's, byte-identical in the three apps at lib/pkp `1ad4a14bb2`; the
+landing page's "Delete Comment" sends the same request (footnote h), and
+that path was not driven for this entry. The delete came with
+pkp/pkp-lib#12401, lib/pkp `677b737d20` "Delete associated notifications
+when public comments or reports are deleted" (2026-03-04); before it a
+comment's deletion cleared no task at all. Live-probed 2026-09-26, OJS, OMP and
+OPS, scratch contexts only: journal B held one Reader's comment numbered
+c; reports filed in a third scratch journal brought the report numbering
+up to c−1; journal A held one comment with two reports, numbered c and
+c+1. A's Journal Manager's Tasks window listed two "A report was
+submitted for a comment and requires review by a moderator." rows and
+one "A comment has been submitted and is pending review by a moderator."
+row. B's Journal Manager, on B's Content › Comments, pressed the row's
+"…" › "Delete Comment" › "Delete" ("The comment has been deleted
+successfully."). A's Tasks window then listed one report row: report
+c's was gone, report c+1's and the comment's stayed, and A's "Reported"
+tab still listed the comment with both reports in its "Reports" table.
+Seen with c = 52 and c = 61 on OJS and c = 3 on OMP and OPS, the row gone
+each time; the control, B deleting a comment whose number no report of A
+carried, left all three rows on the three apps. The comment-side
+direction was seen on OJS on a freshly reset install, with several
+comments deleted in parallel: a moderator's Tasks window lacked a
+comment's "pending review" row, and the database then held no task for
+that comment and no report of that number, deleted with its own comment.
+Written up for the team as
+`docs/reports/2026-09-26-pkp-lib-usercomment-delete-tasks.md`.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`

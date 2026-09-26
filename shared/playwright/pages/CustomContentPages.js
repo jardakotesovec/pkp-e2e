@@ -134,12 +134,32 @@ class RichTextBox extends BasePage {
         }
     }
 
-    /** Click into the box, go to its end, and type. */
+    /** Wait until the editor holds the keyboard focus, so keys pressed next reach it. */
+    async expectFocused() {
+        const id = await this.id();
+        await this.page.waitForFunction((i) => !!(window.tinymce && window.tinymce.get(i) && window.tinymce.get(i).hasFocus()), id, {timeout: T});
+    }
+
+    /**
+     * Click into the box, go to its end, and type; returns once the editor
+     * holds the typed text. The page a visitor reads is drawn from what the
+     * save sent, so a text lost on the way in would only show later as a
+     * page without it (OPS U09 S6, .reports/flake-s26/fixC/diagnosis.md).
+     */
     async type(text) {
         await this.reveal();
         await (await this.body()).click();
+        await this.expectFocused();
         await this.page.keyboard.press('Control+End');
         await this.page.keyboard.type(text);
+        // The words before any "{$…}" variable (the tag plugin may show a
+        // variable as its own piece), spaces as the editor keeps them.
+        const words = text.split('{$')[0].trim();
+        if (words) {
+            await expect
+                .poll(async () => ((await this.text()) || '').replace(/\u00a0/g, ' '), {timeout: T, message: `the editor holds "${words}"`})
+                .toContain(words);
+        }
     }
 
     /** Replace the box's text by typing. */

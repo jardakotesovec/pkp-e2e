@@ -19,9 +19,10 @@ repo_of() { case $1 in pkp-e2e) echo "$THIS_REPO";; *) echo "pkp/$1";; esac; }
 for short in pkp-e2e ojs omp ops; do
     repo=$(repo_of $short)
     gh run list -R "$repo" --workflow e2e --limit "$LIMIT" --json databaseId,conclusion,headSha,headBranch,createdAt,displayTitle,event,status > "$CI_TALLY_DIR/runs-$short.json"
-    for id in $(python3 -c "import json,sys; [print(r['databaseId']) for r in json.load(open(sys.argv[1])) if r['status']=='completed' and r['conclusion'] in ('success','failure')]" "$CI_TALLY_DIR/runs-$short.json"); do
-        bin/ci-flake-tally/scrape.sh "$repo" "$id"
-    done
+    # One run's log is a multi-MB zip: fetch eight at a time (serially, 320
+    # runs took about two hours on 2026-09-26).
+    python3 -c "import json,sys; [print(r['databaseId']) for r in json.load(open(sys.argv[1])) if r['status']=='completed' and r['conclusion'] in ('success','failure')]" "$CI_TALLY_DIR/runs-$short.json" \
+        | xargs -P "${CI_TALLY_JOBS:-8}" -I{} bin/ci-flake-tally/scrape.sh "$repo" {}
     echo "$short: $(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))))" "$CI_TALLY_DIR/runs-$short.json") runs listed"
 done
 python3 bin/ci-flake-tally/analyze.py "$CI_TALLY_DIR"

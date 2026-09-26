@@ -466,7 +466,7 @@ test.describe('announcements', () => {
         // (Rule 6).
         panel = await list.openEdit('Workshop');
         await expect(panel.titleInput()).toHaveValue('Workshop');
-        expect(await panel.richText(panel.shortDescriptionField())).toBe('Registration open.');
+        await panel.expectRichText(panel.shortDescriptionField(), 'Registration open.');
         await expect(panel.expiryInput()).toHaveValue(tomorrow);
         await panel.titleInput().fill('Workshop 2027');
         await panel.save();

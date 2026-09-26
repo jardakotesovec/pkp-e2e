@@ -53,7 +53,7 @@ const {
     PublicationScreen,
     openWorkflow,
     activityLogCounts,
-    addDiscussion,
+    sendMailControl,
 } = require('../pages/PublicationPages.js');
 const {
     STEPS,
@@ -118,25 +118,6 @@ async function openDraftDetails(page, contextPath, submissionId, {localePrefix =
         await continueTo(page, STEPS.details);
     }
     await expect(currentRailStep(page)).toContainText(STEPS.details);
-}
-
-/**
- * The mailbox's positive control (A8): a discussion opened on the
- * submission's Production stage with the Moderator's box ticked and the
- * Author's left unticked, whose copy reaches the Moderator; the seeded
- * server's real submit assigned the section's Moderator, so the box is
- * there. Returns the `afterControl` for `pkpMail.expectNone`.
- */
-async function sendMailControl(page, contextPath, submissionId, tag) {
-    const discussion = `Control ${tag}`;
-    await openWorkflow(page, contextPath, submissionId);
-    await new PublicationScreen(page).openProductionStage();
-    await addDiscussion(page, {
-        name: discussion,
-        message: `Control message ${tag}.`,
-        participants: ['sectioneditor.ana'],
-    });
-    return {to: mailOf('sectioneditor.ana'), subject: discussion};
 }
 
 /**
@@ -351,7 +332,7 @@ test.describe('Funding (U43)', () => {
         // … and no email arrived in the mail catcher for the submitter from
         // these operations, bounded by a mail this test causes the same
         // way (A8).
-        const afterControl = await sendMailControl(page, PK, submissionId, tag);
+        const afterControl = await sendMailControl({asUser, api: opsApi, tag});
         await pkpMail.expectNone({to: mailOf(author), afterControl});
     });
 

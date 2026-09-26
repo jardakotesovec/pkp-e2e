@@ -299,17 +299,17 @@ test.describe('appearance & theming', () => {
         expect(themeHeadingColour).not.toBe(RED);
         const dashboardBefore = await dashboardLook(page, tag);
         let tab = await openTab(website, 'advanced');
-        expect(await tab.styleSheet.uploadOffered()).toBe(true);
+        await tab.styleSheet.expectUploadOffered(true);
         expect(await tab.styleSheet.choose(FILES.css)).toBe(200);
         await expect(tab.styleSheet.field).toContainText('red-headings.css');
-        expect(await tab.styleSheet.buttonNames()).toContain('Remove');
+        await expect(tab.styleSheet.button('Remove')).toBeVisible({timeout: T});
         await tab.save();
         await expect(tab.styleSheet.field).toContainText('red-headings.css');
-        expect(await tab.styleSheet.buttonNames()).toContain('Remove');
+        await expect(tab.styleSheet.button('Remove')).toBeVisible({timeout: T});
         await expect(tab.styleSheet.field.getByRole('link', {name: 'styleSheet.css', exact: true})).toHaveCount(0);
         tab = await openTab(website, 'advanced');
         await expect(tab.styleSheet.field.getByRole('link', {name: 'styleSheet.css', exact: true})).toBeVisible({timeout: T});
-        expect(await tab.styleSheet.buttonNames()).toContain('Remove');
+        await expect(tab.styleSheet.button('Remove')).toBeVisible({timeout: T});
         await expect(tab.styleSheet.field).not.toContainText('red-headings.css');
 
         // The visitor's "About the Server" heading is red; no heading on the
@@ -326,7 +326,7 @@ test.describe('appearance & theming', () => {
         // (Rule 26; A5 not read).
         tab = await openTab(website, 'advanced');
         await tab.styleSheet.field.getByRole('button', {name: 'Remove', exact: true}).first().click();
-        await expect.poll(() => tab.styleSheet.uploadOffered()).toBe(true);
+        await tab.styleSheet.expectUploadOffered(true);
         await tab.save();
         await home.reload();
         await expect(home.aboutHeading).toHaveText(ABOUT_SERVER);
@@ -336,7 +336,7 @@ test.describe('appearance & theming', () => {
         // sheet box is refused in the box and nothing is sent (Fields, the
         // upload boxes); the accepted style sheet above sent its upload.
         tab = await openTab(website, 'advanced');
-        expect(await tab.styleSheet.uploadOffered()).toBe(true);
+        await tab.styleSheet.expectUploadOffered(true);
         expect(await tab.styleSheet.dropRefused(FILES.picture)).toBe(0);
         await expect(tab.styleSheet.refusal).toHaveText(WRONG_TYPE);
     });
@@ -411,11 +411,11 @@ test.describe('appearance & theming', () => {
         // A file the favicon box does not take: refused in the box, nothing
         // sent; reloaded, "Favicon" is empty (Fields, "Advanced"; Rule 2).
         let advanced = await website.open('advanced');
-        expect(await advanced.favicon().uploadOffered()).toBe(true);
+        await advanced.favicon().expectUploadOffered(true);
         expect(await advanced.favicon().dropRefused(FILES.photo)).toBe(0);
         advanced = await openTab(website, 'advanced');
         const favicon = advanced.favicon();
-        expect(await favicon.uploadOffered()).toBe(true);
+        await favicon.expectUploadOffered(true);
         await expect(favicon.thumbnail).toHaveCount(0);
         await expect(favicon.refusal).toHaveCount(0);
 
@@ -533,10 +533,10 @@ test.describe('appearance & theming', () => {
         await expect(logo.altText).toHaveValue('Journal logo');
         const savedPreview = await logo.thumbnail.getAttribute('src');
         expect(savedPreview).toMatch(/pageHeaderLogoImage_en\.png/);
-        expect(await logo.uploadOffered()).toBe(false);
+        await logo.expectUploadOffered(false);
         await logo.removeButton.click();
         await expect(logo.restoreButton).toBeVisible();
-        await expect.poll(() => logo.uploadOffered()).toBe(true);
+        await logo.expectUploadOffered(true);
         await expect(logo.uploadButton).toBeVisible();
         expect(await logo.choose(FILES.logo2)).toBe(200);
         await expect(logo.altText).toHaveValue('');
@@ -554,7 +554,7 @@ test.describe('appearance & theming', () => {
         setup = await openTab(website, 'appearance-setup');
         logo = setup.logo();
         await expect(logo.altText).toHaveValue('Journal logo');
-        expect(await logo.uploadOffered()).toBe(false);
+        await logo.expectUploadOffered(false);
         expect(await logo.chooseByKeyboard(FILES.logo2)).toBe(200);
         await expect(logo.altText).toHaveValue('');
         await expect(logo.restoreButton).toBeVisible();

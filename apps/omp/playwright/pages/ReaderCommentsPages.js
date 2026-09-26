@@ -235,9 +235,13 @@ exports.EditorialSideMenu = class EditorialSideMenu extends BasePage {
     /**
      * The entries of a group as their names, read from the region the
      * header controls whether or not the group is open (its region is
-     * `display:none` while closed). `[]` when the group is absent.
+     * `display:none` while closed). `[]` when the group is absent, read
+     * once the menu has drawn its first group: the menu's groups all come
+     * in one pass when the page's app mounts, and before that every group
+     * reads as absent (.reports/flake-s26/fixC/diagnosis.md).
      */
     async groupEntries(name) {
+        await expect(this.nav.locator('[role="button"][aria-controls]').first()).toBeVisible({timeout: 30_000});
         const header = this.groupHeader(name);
         if ((await header.count()) === 0) {
             return [];

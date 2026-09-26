@@ -54,6 +54,7 @@ const {
     completeUploadWizard,
     assignParticipant,
     openTasksPanel,
+    closeTopModal,
     openReviewFilesDialog,
     showAllStageFiles,
     reviewFileCheckbox,
@@ -125,10 +126,30 @@ test.describe('Review stage & rounds (U26)', () => {
         const fileA = `msa-${tag}.txt`;
         const fileB = `msb-${tag}.txt`;
         const fileC = `msc-${tag}.txt`;
-        const seeded = await seedMonograph(ompApi, tag);
+        // A throwaway Series Editor on a scratch press of the test's own:
+        // "Review files updated." is a notice the server keeps for the
+        // account until a page of it fetches it, and any other page of the
+        // same account (a parallel test signed in as a roster persona) takes
+        // it first (patterns.md parallel lesson 2). A scratch press's
+        // submit assigns no editor (footnote s): `participants[]` does.
+        const editor = `se${tag}`;
+        const author = `au${tag}`;
+        await ompApi.createContext({
+            tag,
+            users: [
+                {username: editor, roles: ['sectionEditor']},
+                {username: author, roles: ['author']},
+            ],
+        });
+        const seeded = await ompApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: author,
+            participants: [{username: editor, role: 'sectionEditor'}],
+        });
 
-        const page = await (await asUser('manager.maya')).newPage();
-        const modal = await openEditorial(page, PK, seeded.submissionId);
+        const page = await (await asUser(editor)).newPage();
+        const modal = await openEditorial(page, tag, seeded.submissionId);
 
         // Two submission files for the wizard to choose from (the seed
         // carries none).
@@ -168,7 +189,7 @@ test.describe('Review stage & rounds (U26)', () => {
         });
 
         // The stage opens on Review Round 1 with the round furniture.
-        const modal2 = await openEditorial(page, PK, seeded.submissionId);
+        const modal2 = await openEditorial(page, tag, seeded.submissionId);
         await expect(
             modal2.getByRole('heading', {name: 'Workflow: External Review (Round 1)'})
         ).toBeVisible();
@@ -191,13 +212,19 @@ test.describe('Review stage & rounds (U26)', () => {
         await expect(reviewFileCheckbox(dialog, fileB)).toHaveCount(0);
         await showAllStageFiles(dialog, fileB);
         await reviewFileCheckbox(dialog, fileB).check();
+        const notice = page.getByText('Review files updated.').first();
         await confirmReviewFilesDialog(page, modal2, dialog, [fileA, fileB]);
+        await expect(notice).toBeVisible({timeout: 30_000});
 
         // Uploading from the dialog: the new file is listed too, and the
-        // files listed before are still there (nothing here deletes).
+        // files listed before are still there (nothing here deletes). The
+        // first notice is gone before the second confirm, so the second
+        // read is its own notice, not the lingering first one.
+        await expect(notice).toBeHidden({timeout: 30_000});
         dialog = await openReviewFilesDialog(page, modal2);
         await uploadReviewFileInDialog(page, dialog, fileC);
         await confirmReviewFilesDialog(page, modal2, dialog, [fileA, fileB, fileC]);
+        await expect(notice).toBeVisible({timeout: 30_000});
         await expect(reviewFileRow(fileA).first()).toBeVisible();
         await expect(reviewFileRow(fileB).first()).toBeVisible();
 
@@ -251,7 +278,7 @@ test.describe('Review stage & rounds (U26)', () => {
         await authorPage.goto(`/index.php/${PK}/en/dashboard/mySubmissions`);
         const tasks = await openTasksPanel(authorPage);
         await expect(tasks.getByText(`Submission ${tag}`)).toBeVisible();
-        await authorPage.keyboard.press('Escape');
+        await closeTopModal(authorPage);
 
         // …and their review stage offers the bottom "Upload revisions" button.
         const authorModal = await openAuthorView(authorPage, PK, seeded.submissionId);
@@ -309,7 +336,7 @@ test.describe('Review stage & rounds (U26)', () => {
         await authorPage.goto(`/index.php/${tag}/en/dashboard/mySubmissions`);
         const tasksBefore = await openTasksPanel(authorPage);
         await expect(tasksBefore.getByText(`Submission ${tag}`)).toBeVisible();
-        await authorPage.keyboard.press('Escape');
+        await closeTopModal(authorPage);
 
         // "Upload revisions", first step only: attach the file, then close
         // the window without finishing.
@@ -908,7 +935,7 @@ test.describe('Review stage & rounds (U26)', () => {
         });
         await expect(readModal.getByText(/Completed/).first()).toBeVisible();
         await expect(readModal.getByText(remark)).toBeVisible();
-        await authorPage.keyboard.press('Escape');
+        await closeTopModal(authorPage);
 
         // "Notifications": the decision letter as a subject line; it opens
         // read-only in a side panel.
@@ -924,7 +951,7 @@ test.describe('Review stage & rounds (U26)', () => {
             timeout: 20_000,
         });
         await expect(letterModal.getByRole('textbox')).toHaveCount(0);
-        await authorPage.keyboard.press('Escape');
+        await closeTopModal(authorPage);
 
         // Old addresses: the author-dashboard address lands on My
         // Submissions with the workflow open…

@@ -495,7 +495,7 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(register.checkedBoxes).toHaveCount(0);
         for (const name of [PK_NAME, scratchName]) {
             await expect(register.contextConsentLine(name)).not.toHaveClass(/context_privacy_visible/);
-            expect(await register.contextConsentLineOnScreen(name)).toBe(false);
+            await register.expectConsentLineOnScreen(name, false);
         }
         await expect(register.siteConsentBox).toHaveCount(0);
 
@@ -504,7 +504,7 @@ test.describe('registration & account validation (U2) — OPS', () => {
         for (const name of [PK_NAME, scratchName]) {
             await register.readerBox(name).check();
             await expect(register.contextConsentLine(name)).toHaveClass(/context_privacy_visible/);
-            expect(await register.contextConsentLineOnScreen(name)).toBe(true);
+            await register.expectConsentLineOnScreen(name, true);
             await expect(register.contextConsentLine(name)).toContainText(CONTEXT_CONSENT_LABEL);
             await register.contextConsentBox(name).check();
         }
@@ -545,7 +545,7 @@ test.describe('registration & account validation (U2) — OPS', () => {
         await expect(register2.checkedBoxes).toHaveCount(0);
         for (const name of [PK_NAME, scratchName]) {
             await expect(register2.contextConsentLine(name)).not.toHaveClass(/context_privacy_visible/);
-            expect(await register2.contextConsentLineOnScreen(name)).toBe(false);
+            await register2.expectConsentLineOnScreen(name, false);
         }
         await expect(register2.siteConsentBox).toHaveCount(0);
         await fillRegistrant(register2, secondR);

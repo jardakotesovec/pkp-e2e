@@ -807,7 +807,8 @@ test.describe('subscriptions', () => {
         await expect(win.statusSelect()).toBeVisible();
         await expect(win.dateBox('dateStart')).toBeVisible();
         await expect(win.dateBox('dateEnd')).toBeVisible();
-        expect((await win.institutionSelect().locator('option').allInnerTexts()).map(flat).filter(Boolean)).toEqual(['Harbour Library', 'Dock Library']);
+        // In either order: the institutions are read with no ORDER BY (fix list B).
+        expect((await win.institutionSelect().locator('option').allInnerTexts()).map(flat).filter(Boolean).sort()).toEqual(['Dock Library', 'Harbour Library']);
         await expect(win.mailingAddressBox()).toBeVisible();
         await expect(win.dialog).toContainText(/If a domain is entered here, IP ranges are optional\.\s*Valid values are domain names \(e\.g\. lib\.sfu\.ca\)\./);
         await expect(win.domainBox()).toHaveCount(1);

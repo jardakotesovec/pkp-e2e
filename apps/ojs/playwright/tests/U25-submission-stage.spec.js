@@ -199,7 +199,7 @@ test.describe('submission stage', () => {
         // (Rule 9); the action region's one button bounds the read.
         await workflow.selectSubmissionStage();
         await workflow.expectPanelHeadings(['Status', ...EDITORIAL_PANELS]);
-        expect(await workflow.actionButtonLabels()).toEqual([SHORTCUT]);
+        await workflow.expectDecisionButtons([SHORTCUT]);
         await expectOnwardAbsent(workflow);
     });
 
@@ -231,7 +231,7 @@ test.describe('submission stage', () => {
         await workflow.selectSubmissionStage();
         await workflow.expectStatusAboveFiles('The submission is currently in the Copyediting stage.');
         await workflow.expectPanelHeadings(['Status', ...EDITORIAL_PANELS]);
-        expect(await workflow.actionButtonLabels()).toEqual([SHORTCUT]);
+        await workflow.expectDecisionButtons([SHORTCUT]);
         await expectOnwardAbsent(workflow);
     });
 
@@ -436,7 +436,7 @@ test.describe('submission stage', () => {
         // The decision buttons: none (Actors row 2). The action region
         // holds exactly the shortcut, which is the positive control for the
         // absence read in the same region.
-        expect(await funding.workflow.actionButtonLabels()).toEqual([SHORTCUT]);
+        await funding.workflow.expectDecisionButtons([SHORTCUT]);
         await expectOnwardAbsent(funding.workflow);
 
         // "Schedule For Publication" for this role too: press it, the panel

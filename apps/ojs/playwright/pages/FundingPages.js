@@ -28,6 +28,7 @@
  * grant rows, the row menu, the wizard's sections and its require warning).
  */
 const {expect} = require('@playwright/test');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 
 /**
  * Answer the Funder field's browser-side registry query with an empty
@@ -340,10 +341,9 @@ exports.FundingScreen = class FundingScreen {
         return items;
     }
 
-    /** Close an open row menu without choosing (Escape). */
+    /** Close an open row menu without choosing (Escape on the menu itself, support/menus.js). */
     async closeRowMenu() {
-        await this.page.keyboard.press('Escape');
-        await expect(this.page.getByRole('menuitem')).toHaveCount(0, {timeout: 30_000});
+        await closeMenu(this.page);
     }
 
     // --- The wizard's Details step (Rule 10, 11).

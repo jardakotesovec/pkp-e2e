@@ -50,6 +50,7 @@
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
+const {closeMenu} = require('../support/menus.js');
 
 const T = 30_000;
 
@@ -174,22 +175,14 @@ class CategoriesTab extends BasePage {
     }
 
     /**
-     * Close an open row menu without choosing: Escape once the menu holds
-     * the focus; if the items stay (an Escape pressed before the focus
-     * landed, seen once at four workers on OPS), a press outside the menu,
-     * on the "Category Name" header, closes it.
+     * Close an open row menu without choosing: Escape pressed on the
+     * headlessui menu itself (`closeMenu()` of support/menus.js), so the key
+     * reaches the menu whatever the frame timing of its focus hand-off (an
+     * Escape sent to the page before the focus landed was seen once at four
+     * workers on OPS).
      */
     async closeMenu() {
-        await this.page
-            .waitForFunction(() => !!(document.activeElement && document.activeElement.closest('[role="menu"]')), null, {timeout: 5_000})
-            .catch(() => {});
-        await this.page.keyboard.press('Escape');
-        try {
-            await expect(this.menuItems()).toHaveCount(0, {timeout: 5_000});
-        } catch {
-            await this.columnHeader('Category Name').click();
-            await expect(this.menuItems()).toHaveCount(0, {timeout: T});
-        }
+        await closeMenu(this.page);
     }
 
     /** Choose an item of a row's menu ("Add", "Edit", "Delete Category"). */
@@ -581,10 +574,19 @@ class CategoryPicker extends BasePage {
         await this.typingBox().fill('');
     }
 
-    /** Empty the box and close its list. */
+    /**
+     * Empty the box and close its list. The Escape goes to the box itself:
+     * the emptying's input event has just opened the headlessui combobox,
+     * whose Escape then calls preventDefault(), so the workflow dialog around
+     * the field (a reka layer, which ignores a prevented Escape) stays open.
+     * An Escape reaching the page with the combobox closed would close the
+     * workflow instead (.reports/flake-s26/esc/diagnosis.md H2).
+     */
     async clearTyping() {
-        await this.typingBox().fill('');
-        await this.page.keyboard.press('Escape');
+        const box = this.typingBox();
+        await box.fill('');
+        await box.press('Escape');
+        await expect(this.options()).toHaveCount(0, {timeout: T});
     }
 
     /** Every chip's remove button ("Remove {line}"). */
@@ -655,8 +657,13 @@ class SelectCategoriesWindow extends BasePage {
         return this.row(name).locator('input[type=checkbox]').first();
     }
 
-    /** Every row as `{name, bold, checked, visible}`, top to bottom. */
+    /**
+     * Every row as `{name, bold, checked, visible}`, top to bottom, read
+     * once the window's table has drawn a row (a read taken before is
+     * `[]`, .reports/flake-s26/fixC/diagnosis.md).
+     */
     async read() {
+        await expect(this.rows().first()).toBeAttached({timeout: T});
         return this.rows().evaluateAll((trs) =>
             trs.map((tr) => {
                 const label = tr.querySelector('label') || tr.querySelector('td span');

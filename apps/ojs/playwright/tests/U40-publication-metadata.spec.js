@@ -1436,7 +1436,9 @@ test.describe('publication metadata', () => {
         await expect(tasks.row(`Author control ${tag}`)).toHaveCount(1, {timeout: 30_000});
         await expect(tasks.rowsOpening(/permission|reset/i)).toHaveCount(0);
         const rowsAfter = await tasks.rowTexts();
-        expect(rowsAfter.filter((row) => !row.includes(`Author control ${tag}`))).toEqual(rowsBefore);
+        // Compared sorted: the window orders by creation time to the second,
+        // and the seeds raised several of her tasks in one second (fix list B).
+        expect(rowsAfter.filter((row) => !row.includes(`Author control ${tag}`)).sort()).toEqual([...rowsBefore].sort());
     });
 
     test('S8: statements reach the reader', async ({asUser, ojsApi, page}, testInfo) => {

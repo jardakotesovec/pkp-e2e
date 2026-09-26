@@ -42,6 +42,7 @@ const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
@@ -108,10 +109,7 @@ async function openWorkflow(
  * can exist more than once — deep-link via openWorkflow's menuKey instead.
  */
 async function openPublicationPage(page, entry) {
-    const link = page.getByRole('link', {name: entry, exact: true}).first();
-    if (!(await link.isVisible())) {
-        await page.getByRole('link', {name: 'Publication', exact: true}).click();
-    }
+    const link = await new WorkflowPage(page, PK).revealPublicationEntry(entry);
     await link.click();
     await expect(
         page.getByRole('heading', {name: `Publication: ${entry}`})
@@ -224,12 +222,12 @@ async function saveDatePublished(page, value) {
     await savePublicationForm(page);
 }
 
-/** Open the Activity Log dialog and assert a line, then close it. */
+/** Open the Activity Log dialog and assert a line, then close it by its "Close" (patterns.md pitfall 7). */
 async function expectLogLine(page, text) {
     await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
     const log = page.getByRole('dialog', {name: /Activity Log/});
     await expect(log.getByText(text).first()).toBeVisible({timeout: 30_000});
-    await page.keyboard.press('Escape');
+    await log.getByRole('button', {name: 'Close', exact: true}).first().click();
     await expect(log).toHaveCount(0, {timeout: 30_000});
 }
 
@@ -252,10 +250,7 @@ function bookUrl(contextPath, submissionId) {
  * locator (title "Create New Version", Confirm/Cancel footer).
  */
 async function openCreateVersionDialog(page) {
-    const item = page.getByRole('link', {name: 'Create New Version', exact: true});
-    if (!(await item.isVisible())) {
-        await page.getByRole('link', {name: 'Publication', exact: true}).click();
-    }
+    const item = await new WorkflowPage(page, PK).revealPublicationEntry('Create New Version');
     // The dialog takes its stage from the loaded version at mount.
     await new WorkflowPage(page, PK).expectVersionLoaded();
     await item.click();
@@ -538,8 +533,8 @@ test.describe('Publish, schedule & versions (U49)', () => {
             modal.getByRole('button', {name: 'Publish', exact: true})
         ).toHaveCount(0);
 
-        // Close; the status is unchanged.
-        await managerPage.keyboard.press('Escape');
+        // Close (the window's own "Close"); the status is unchanged.
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await expectStatus(managerPage, 'Unscheduled');
 
@@ -555,7 +550,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expect(
             controlModal.getByRole('button', {name: 'Publish', exact: true})
         ).toBeVisible();
-        await managerPage.keyboard.press('Escape');
+        await controlModal.getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(controlModal).toHaveCount(0, {timeout: 30_000});
     });
 
@@ -1432,6 +1427,6 @@ test.describe('Publish, schedule & versions (U49)', () => {
         const pdfItems = await openFileRowMenu(managerPage, 'article.pdf');
         expect(await pdfItems.count()).toBeGreaterThan(0);
         await expect(pdfItems.filter({hasText: 'Send to Text Editor'})).toHaveCount(0);
-        await managerPage.keyboard.press('Escape');
+        await closeMenu(managerPage);
     });
 });

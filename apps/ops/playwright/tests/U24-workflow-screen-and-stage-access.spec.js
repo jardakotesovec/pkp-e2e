@@ -351,7 +351,7 @@ test.describe('workflow screen & stage access', () => {
         // The header offers "Library" and nothing else, and the bubble
         // reads "Production" (Rules 5, 6).
         await expect(workflow.headerButton('Library')).toBeVisible();
-        expect(await workflow.headerButtonLabels()).toEqual(['Library']);
+        await workflow.expectHeaderButtons(['Library']);
         await workflow.expectStage('Production');
 
         // No "Workflow" group at all; the panel lands on "Preprint: Title &
@@ -475,7 +475,7 @@ test.describe('workflow screen & stage access', () => {
         await author.workflow.gotoAuthor(submissionId);
         await author.workflow.expectStage('Published');
         await expect(author.workflow.headerButton('Library')).toBeVisible();
-        expect(await author.workflow.headerButtonLabels()).toEqual(['Library']);
+        await author.workflow.expectHeaderButtons(['Library']);
 
         // "Return to Workflow", then "Cancel" (Rule 18a): the dialog is
         // seen (its title and verbatim body anchor the page object's
@@ -513,7 +513,7 @@ test.describe('workflow screen & stage access', () => {
         await author.workflow.gotoAuthor(submissionId);
         await author.workflow.expectStage('Production');
         await expect(author.workflow.headerButton('Library')).toBeVisible();
-        expect(await author.workflow.headerButtonLabels()).toEqual(['Library']);
+        await author.workflow.expectHeaderButtons(['Library']);
 
         // "Return to Done", then "Cancel" (Rule 18b): the bubble still
         // reads "Production".
@@ -562,7 +562,7 @@ test.describe('workflow screen & stage access', () => {
         // reads "Library" alone.
         await author.workflow.gotoAuthor(submissionId);
         await author.workflow.expectStage('Production');
-        expect(await author.workflow.headerButtonLabels()).toEqual(['Library']);
+        await author.workflow.expectHeaderButtons(['Library']);
     });
 
     test('S10: the single-stage preprint workflow', async ({asUser, opsApi, appContext}, testInfo) => {

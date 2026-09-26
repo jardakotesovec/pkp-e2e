@@ -61,6 +61,7 @@ const {
 } = require('../pages/LoginSessionsPages.js');
 const wizard = require('../pages/SubmissionWizardPages.js');
 const {getPassword, getEmail} = require('../../../../shared/playwright/data/users.js');
+const {expectTextsInAnyOrder} = require('../../../../shared/playwright/support/order.js');
 
 const PRESS = 'publicknowledge';
 const REQUIRED = 'This field is required.';
@@ -812,7 +813,8 @@ test.describe('user profile', () => {
             await expect(profile.toast).toContainText(SAVED_MESSAGE);
             await profile.open('identity');
             await profile.open('roles');
-            await expect(profile.interestChips()).toHaveText([alpha, beta]);
+            // In either order: the interests are read with no ORDER BY (fix list B).
+            await expectTextsInAnyOrder(profile.interestChips(), [alpha, beta]);
 
             // The site-level Roles tab: the account holding a role in two
             // presses, the page stays at the site level and lists both

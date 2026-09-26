@@ -278,9 +278,14 @@ exports.TasksPanel = class TasksPanel extends BasePage {
 
     /**
      * Press the row's text: the task is marked read and the browser leaves
-     * for the submission (Rule 2c). The caller asserts the landing.
+     * for the submission (Rule 2c). The caller asserts the landing. The
+     * row's link is read first, so a row that has left the window fails
+     * here on its count instead of the click waiting out the test's whole
+     * timeout (U14 S5 on OPS hung 8 minutes on a report row the app had
+     * deleted, flake-s26 u14).
      */
     async openTask(row) {
+        await expect(this.link(row)).toBeVisible();
         await this.link(row).click();
     }
 

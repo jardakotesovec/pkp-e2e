@@ -1,7 +1,9 @@
 # Brief templates
 
 One file per role of the RUNBOOK loop, one for the maintenance loop's
-regression reader (`regression-read.md`, MAINTENANCE step 5), plus two
+regression reader (`regression-read.md`, MAINTENANCE step 5), one for a
+flake class's diagnostician (`flake-diagnosis.md`, MAINTENANCE "Standing
+duties"), plus two
 shared blocks the templates point at or take as a slot (`frame.md`,
 `digest-block.md`). The orchestrator
 renders a brief by copying the role's template and filling its slots. It

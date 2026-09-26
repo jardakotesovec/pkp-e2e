@@ -20,6 +20,14 @@
  *   link's path on its own origin;
  * - S6's Tasks silence is not re-read (S4 reads it once on a journal).
  *
+ * S6 carries `@solo` and runs alone in the `ojs-solo` project: its notices
+ * ("Announcement type added.", "…removed.") are the Site
+ * Administrator's, and a notice waits on the server until a page of the
+ * same account fetches it (lib/pkp NotificationHandler::fetchNotification
+ * takes and deletes them all), so another serial test's `admin` page
+ * could take it first (parallel lesson 2); S6 also changes site-wide
+ * state (flake-s26 fixAD).
+ *
  * Mailpit is shared across fleets and workers: every read is scoped by a
  * throwaway recipient (or `admin@mail.test` for the site administrator,
  * with the run's tag as the content marker), and every silence rides on a
@@ -119,7 +127,9 @@ async function restoreSite(site) {
         if (name === 'Site news') {
             await types.openRemove(name);
             await types.confirmDialog().getByRole('button', {name: 'OK', exact: true}).click();
-            await expect(types.toast('Announcement type removed.')).toBeVisible();
+            // The row's removal bounds the sweep, not the notice: it is
+            // the spec's read in S6, and a cleanup must not depend on it.
+            await expect(types.row(name)).toHaveCount(0);
         }
     }
     await site.openSideTab('settings');
@@ -259,7 +269,7 @@ test.describe('announcements (queued email; the site)', () => {
         expect(await pkpMail.count({to: 'reader.rosa@mail.test', contains: tag}), 'no mail to reader.rosa').toBe(0);
     });
 
-    test("S6: the site's announcements", async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
+    test("S6: the site's announcements @solo", async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
         test.setTimeout(300_000);
         const tag = makeTag('s6', testInfo);

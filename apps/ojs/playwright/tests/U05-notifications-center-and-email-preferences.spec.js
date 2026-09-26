@@ -875,7 +875,6 @@ test.describe('notifications center & email preferences', () => {
             {username: `${tag}mg`, roles: ['manager']},
             {username: `${tag}au`, roles: ['author']},
         ]);
-        await ojsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title});
 
         // The Journal Manager on the seeded journal: the four groups with
         // exactly the OJS rows, every "Enable…" ticked, every email box
@@ -903,22 +902,33 @@ test.describe('notifications center & email preferences', () => {
         await expect(adminPage).toHaveURL(/\/index\/(en\/)?user\/profile/);
         expect(await siteProfile.notificationTable()).toEqual(SITE_TAB);
 
+        // The scratch journal's submission, seeded right before the reads
+        // below: the window lists only `admin`'s 25 newest tasks, and
+        // parallel tests raise several a second, so a task raised at the
+        // start of the test can be off that page by now (fix list B).
+        await ojsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title});
+
         // The site-level bell: the same "Tasks" window with the same rows as
         // from a journal's editorial page (Rule 2d). The list moves while
         // parallel workers seed, so the pair of reads is repeated until it
         // agrees. The rows are compared sorted: the window orders by creation
         // time alone, so rows parallel workers raised in the same second come
         // back in no fixed order between two reads (ci-triage, 2026-09-15).
+        // The window shows the first 25 of `admin`'s thousands of tasks, so a
+        // row tied at the 25th place is on one read's page and not the
+        // other's: each read keeps this test's own rows (fix list B,
+        // flake-s26).
         const adminTasks = new TasksPanel(adminPage);
         const sorted = (rows) => [...rows].sort();
+        const ownRows = (rows) => sorted(rows.filter((row) => row.endsWith(` | ${title}`)));
         let journalRows = [];
         let siteRows = [];
         for (let attempt = 0; attempt < 3; attempt++) {
             await gotoEditorial(adminPage, JOURNAL);
-            journalRows = sorted(await readTaskRows(adminPage));
+            journalRows = ownRows(await readTaskRows(adminPage));
             await siteProfile.goto('notifications');
             await expect(adminTasks.bell()).toBeVisible({timeout: 30_000});
-            siteRows = sorted(await readTaskRows(adminPage));
+            siteRows = ownRows(await readTaskRows(adminPage));
             if (JSON.stringify(siteRows) === JSON.stringify(journalRows)) {
                 break;
             }
@@ -934,25 +944,35 @@ test.describe('notifications center & email preferences', () => {
         // keeps it in the page but does not show it (finding T-ojs-1 of this
         // revision's run, `.reports/U05/test-ojs-findings.md`), so its
         // visibility is neither asserted nor denied here.
+        // The entry is read between two reads of the bell and must fall in
+        // their range (equal to both when nothing moved): parallel tests
+        // raise and clear `admin`'s tasks several times a second (fix list
+        // B, flake-s26).
         const adminHeader = new ReaderHeader(adminPage);
-        let bellCount = -1;
-        let dashboardCount = -2;
-        for (let attempt = 0; attempt < 3; attempt++) {
+        const readBell = async () => {
             await siteProfile.goto('notifications');
             await expect(adminTasks.bell()).toBeVisible({timeout: 30_000});
-            bellCount = await adminTasks.count();
+            return adminTasks.count();
+        };
+        let range = [];
+        let dashboardCount = -2;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const before = await readBell();
             await gotoSiteHome(adminPage);
             await adminHeader.expectBareName('admin');
             await adminHeader.open();
             await expect(adminHeader.dashboardCount()).toHaveCount(1);
             dashboardCount = Number((await adminHeader.dashboardCount().textContent()).trim());
-            if (dashboardCount === bellCount) {
+            await expect(adminHeader.entry('Dashboard')).toHaveText(new RegExp(`^\\s*Dashboard\\s+${dashboardCount}\\s*$`));
+            const after = await readBell();
+            range = [Math.min(before, after), Math.max(before, after)];
+            if (dashboardCount >= range[0] && dashboardCount <= range[1]) {
                 break;
             }
         }
-        expect(bellCount).toBeGreaterThan(0);
-        expect(dashboardCount).toBe(bellCount);
-        await expect(adminHeader.entry('Dashboard')).toHaveText(new RegExp(`^\\s*Dashboard\\s+${dashboardCount}\\s*$`));
+        expect(range[0]).toBeGreaterThan(0);
+        expect(dashboardCount, `between the bell's ${range[0]} and ${range[1]}`).toBeGreaterThanOrEqual(range[0]);
+        expect(dashboardCount, `between the bell's ${range[0]} and ${range[1]}`).toBeLessThanOrEqual(range[1]);
     });
 
     test('S8: registration presets the email choice', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {

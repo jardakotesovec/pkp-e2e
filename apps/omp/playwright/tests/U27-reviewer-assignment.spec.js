@@ -41,6 +41,7 @@ const {
     openAuthorView,
     walkDecisionWizard,
     openTasksPanel,
+    closeTopModal,
     uploadRoundReviewFile,
     participantPanel,
     selectRound,
@@ -457,7 +458,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // (finding T-omp-1, .reports/U27/test-omp-findings.md). Control:
         // the Press Manager's menu on the first reviewer's row offers
         // "Editorial Notes", and on the manager-reviewer's row too.
-        await page.keyboard.press('Escape');
+        await closeTopModal(page);
         await expect(addModal.getByRole('searchbox')).toHaveCount(0);
         const modal2 = await openEditorial(page, tag, seeded.submissionId);
         const assignedRow = reviewerRow(modal2, `Assigned${tag} Reviewer`);
@@ -745,7 +746,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(
             tasks.getByText('Review assignment updated.').first()
         ).toBeVisible();
-        await revPage.keyboard.press('Escape');
+        await closeTopModal(revPage);
         await pkpMail.find({
             to: reviewerEmail,
             subject: 'Your review assignment has been changed',
@@ -1037,7 +1038,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await revPage.goto(`/index.php/${tag}/en/dashboard/reviewAssignments`);
         let tasks = await openTasksPanel(revPage);
         await expect(tasks.getByText('Review pending.').first()).toBeVisible();
-        await revPage.keyboard.press('Escape');
+        await closeTopModal(revPage);
         await completeReview(revPage, tag, seeded.submissionId, {
             comment: shared,
             privateComment: priv,
@@ -1139,7 +1140,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await revPage.goto(`/index.php/${tag}/en/dashboard/reviewAssignments`);
         tasks = await openTasksPanel(revPage);
         await expect(tasks.getByText('Review pending.')).toHaveCount(0);
-        await revPage.keyboard.press('Escape');
+        await closeTopModal(revPage);
         let log = await openActivityLog(page);
         await expect(activityLogRow(log, 'has confirmed a review')).toBeVisible();
         await log.getByRole('button', {name: 'Close', exact: true}).click();
@@ -1357,7 +1358,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await revPage.goto(`/index.php/${tag}/en/dashboard/reviewAssignments`);
         let tasks = await openTasksPanel(revPage);
         await expect(tasks.getByText('Review pending.').first()).toBeVisible();
-        await revPage.keyboard.press('Escape');
+        await closeTopModal(revPage);
 
         const page = await (await asUser(manager)).newPage();
         const modal = await openEditorial(page, tag, seeded.submissionId);
@@ -1870,7 +1871,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const addModal = await openAddReviewer(page, modal);
         await expect(addModal.getByText('Create New Reviewer', {exact: true})).toHaveCount(0);
         await expect(addModal.getByText('Enroll Existing User', {exact: true})).toHaveCount(0);
-        await page.keyboard.press('Escape');
+        await closeTopModal(page);
         await expect(addModal.getByRole('searchbox')).toHaveCount(0);
 
         // The row menu holds no "Editorial Notes" (its other entries are the
@@ -1890,7 +1891,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const mgrAdd = await openAddReviewer(mgrPage, mgrModal);
         await expect(mgrAdd.getByText('Create New Reviewer', {exact: true})).toBeVisible();
         await expect(mgrAdd.getByText('Enroll Existing User', {exact: true})).toBeVisible();
-        await mgrPage.keyboard.press('Escape');
+        await closeTopModal(mgrPage);
         await expect(mgrAdd.getByRole('searchbox')).toHaveCount(0);
         const mgrModal2 = await openEditorial(mgrPage, PK, seeded.submissionId);
         const mgrRow = reviewerRow(mgrModal2, 'Julia Reviewer');

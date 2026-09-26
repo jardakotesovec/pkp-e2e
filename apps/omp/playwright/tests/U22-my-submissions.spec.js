@@ -101,7 +101,7 @@ async function openFilters(page) {
 }
 
 async function closeFilters(page) {
-    await page.keyboard.press('Escape');
+    await filtersModal(page).getByRole('button', {name: 'Close', exact: true}).first().click();
     await expect(filtersModal(page)).toHaveCount(0, {timeout: 30_000});
 }
 

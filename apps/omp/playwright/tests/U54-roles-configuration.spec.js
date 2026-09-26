@@ -50,6 +50,7 @@
  * the parallel `omp` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {UsersListPage} = require('../../../../shared/playwright/pages/UsersManagementPages.js');
 const {TaskTemplatesTab} = require('../../../../shared/playwright/pages/TasksDiscussionsPages.js');
 const {RolesTab, SiteAccessTab} = require('../../../../shared/playwright/pages/RolesConfigurationPages.js');
@@ -205,11 +206,11 @@ test.describe('roles configuration', () => {
         await expect(roles.createLink).toBeVisible();
         expect(await roles.columns()).toEqual(COLUMNS);
 
-        // The rows: the nineteen roles of a press, in order, each with its
-        // level and, but for the first row (A2), its stages; the line
-        // (Rules 2, 4).
+        // The rows: the nineteen roles of a press, in no fixed order (A13),
+        // each with its level and, but for the manager row (A2), its stages;
+        // the line (Rules 2, 4).
         await expect(roles.rows()).toHaveCount(DEFAULT_ROLES.length);
-        expect(await roles.rowNames()).toEqual(DEFAULT_ROLES.map((r) => r.name));
+        expect(unordered(await roles.rowNames())).toEqual(unordered(DEFAULT_ROLES.map((r) => r.name)));
         for (const role of DEFAULT_ROLES) {
             await expect(roles.level(role.name), role.name).toHaveText(role.level);
             const states = await roles.boxStates(role.name);
@@ -229,7 +230,7 @@ test.describe('roles configuration', () => {
         await expect(roles.filterLabel('With permission level set to')).toBeVisible();
         await roles.chooseFilter('level', LEVEL.author);
         await expect(roles.rows()).toHaveCount(4);
-        expect(await roles.rowNames()).toEqual(['Author', 'Volume editor', 'Chapter Author', 'Translator']);
+        expect(unordered(await roles.rowNames())).toEqual(unordered(['Author', 'Volume editor', 'Chapter Author', 'Translator']));
         await roles.expectPagingLine('1 - 4 of 4 items');
 
         // The filter cleared by a reload (Rule 3b).
@@ -237,17 +238,16 @@ test.describe('roles configuration', () => {
         await expect(roles.rows()).toHaveCount(DEFAULT_ROLES.length);
         await roles.expectPagingLine('1 - 19 of 19 items');
 
-        // Ten per page (Rule 4).
+        // Ten per page: ten rows, then the other nine; which roles each
+        // page holds is not fixed (Rule 4, A13).
         await expect(roles.itemsPerPageBox).toBeVisible();
         expect(await roles.itemsPerPageOptions()).toEqual(['10', '25', '50', '75', '100']);
         await roles.chooseItemsPerPage('10');
         await expect(roles.rows()).toHaveCount(10);
-        expect(await roles.rowNames()).toEqual(DEFAULT_ROLES.slice(0, 10).map((r) => r.name));
         await roles.expectPagingLine('1 - 10 of 19 items');
         await expect(roles.pageLink('2')).toBeVisible();
         await roles.gotoListPage('2');
         await expect(roles.rows()).toHaveCount(9);
-        expect(await roles.rowNames()).toEqual(DEFAULT_ROLES.slice(10).map((r) => r.name));
         await roles.expectPagingLine('11 - 19 of 19 items');
         await roles.reload();
         await expect(roles.rows()).toHaveCount(DEFAULT_ROLES.length);

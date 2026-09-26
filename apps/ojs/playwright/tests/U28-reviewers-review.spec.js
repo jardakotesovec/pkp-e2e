@@ -32,6 +32,7 @@
  */
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {
     WorkflowPage,
     DecisionPage,
@@ -1510,13 +1511,16 @@ test.describe('reviewer\'s review', () => {
             reviewers: [{username: REVIEWER, status: 'accepted'}],
         });
 
-        // "Recommendation": preset to "Choose One", the six defaults in order.
+        // "Recommendation": preset to "Choose One"; after it the six
+        // defaults, in no fixed order (the options' query has none).
         const page = await (await asUser(REVIEWER)).newPage();
         const wizard = new ReviewWizardPage(page, JOURNAL);
         await wizard.goto(submissionId);
         await walkToStep3(wizard);
         await expect(wizard.recommendationSelect.locator('option:checked')).toHaveText('Choose One');
-        expect(await wizard.recommendationOptions()).toEqual(['Choose One', ...RECOMMENDATIONS]);
+        const options = await wizard.recommendationOptions();
+        expect(options[0]).toBe('Choose One');
+        expect(unordered(options.slice(1))).toEqual(unordered(RECOMMENDATIONS));
         await wizard.typeComments(`Please add a control group. ${tag}`);
         await wizard.chooseRecommendation('Revisions Required');
         await wizard.submitReview();

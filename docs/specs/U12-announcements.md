@@ -290,12 +290,12 @@ discards the changes. <sup>g</sup>
     plugin enabled and announcements off, a feed address lands on the
     journal's home page; with the plugin disabled it answers "404 Not
     Found". Each feed is titled "{journal name}: Announcements" and lists
-    the unexpired announcements oldest first, each with the
-    announcement's title, its posted date, its page's address and its
-    "Announcement" text; only the RSS 2.0 feed's dates are readable ⚠
-    [A15](#a15). With "Limit feed to" set the feeds carry only that many,
-    the oldest ones rather than the most recent ones the label promises ⚠
-    [A7](#a7). The plugin's block, "Announcement Feed Plugin", placed in
+    the unexpired announcements in no fixed order (usually the order they
+    were added), each with the announcement's title, its posted date, its
+    page's address and its "Announcement" text; only the RSS 2.0 feed's
+    dates are readable ⚠ [A15](#a15). With "Limit feed to" set the feeds
+    carry only the first that many they list without it, not the most
+    recent ones the label promises ⚠ [A7](#a7). The plugin's block, "Announcement Feed Plugin", placed in
     the sidebar (*Appearance & theming*, Settings › Website › Appearance ›
     Setup › Sidebar), shows a box headed "Announcements" with three logo
     links ("Atom logo", "RSS2 logo", "RSS1 logo") to the feeds. The
@@ -798,8 +798,8 @@ footnote.
      logo"; the Announcements page carries no box, no "Display feed
      links…" choice being saved ([A16](#a16)) (Rule 18).
    - **The feeds**: each link opens a feed titled "{journal name}:
-     Announcements" listing "Older notice" then "Newer notice", oldest
-     first, each with its title, its posted date, its page's address and
+     Announcements" listing "Older notice" and "Newer notice", in any
+     order, each with its title, its posted date, its page's address and
      its "Announcement" text; "Old news" is in none; the RSS 2.0 feed's
      dates are readable, the Atom and RSS 1.0 feeds' are not
      ([A15](#a15)) (Rules 8, 18).
@@ -909,7 +909,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | Removing an announcement type deletes every announcement of that type after a dialog that only asks about "this item" | 🐞 | user-visible | — |
 | [A2](#a2) | An image refused on "Save" (a ".jpeg" name, an upper-case extension) deletes the announcement being edited | 🐞 | user-visible | — |
 | [A3](#a3) | "Edit Announcement" prints the expiry date in the journal's short date format, which the save refuses unless that format is YYYY-MM-DD | 🐞 | user-visible | — |
-| [A7](#a7) | "Limit feed to {n} most recent announcements." keeps the {n} oldest announcements, not the most recent {OJS} | 🐞 | minor | — |
+| [A7](#a7) | "Limit feed to {n} most recent announcements." keeps the first {n} the unlimited feed lists, not the most recent {OJS} | 🐞 | minor | — |
 | [A9](#a9) | "Send an email about this to all registered users." is offered on "Edit Announcement" and does nothing there | 🐞 | minor | — |
 | [A11](#a11) | "Edit Announcement" closed without saving leaves the unsaved title on the row until a reload | 🐞 | minor | — |
 | [A12](#a12) | A deleted announcement's image file, and the file a refused or replaced image had, stay in the public files | 🐞 | minor | — |
@@ -981,9 +981,9 @@ should be on the way out. Basis: probe. <sup>f-a6</sup>
 <a id="a7"></a>
 **A7 — "Limit feed to" does not keep the most recent** {OJS} · 🐞 · minor.
 A manager who sets "Limit feed to 2 most recent announcements." expects
-the feeds to carry the two newest. The feeds carry the two oldest (the
-order they were stored, which is also the feeds' order), and the RSS 2.0
-feed's channel date is the older one's. Basis: probe. <sup>f-a7</sup>
+the feeds to carry the two newest. They carry the first two they list
+without the limit, usually the two added first, and the RSS 2.0 feed's
+channel date is the first one's. Basis: probe. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — The Announcements page works while announcements are off** · ❓ · minor.
@@ -1369,7 +1369,11 @@ pages, or `$displayPage == $requestedPage`; with no setting saved
 the home page and to nothing else. `AnnouncementFeedSettingsForm`:
 `displayPage` radios (`plugins.generic.announcementfeed.settings.{all,homepage,announcement}`),
 `recentItems` (`readInputData()` empties anything not a positive
-integer). Code read 2026-09-17.
+integer). Code read 2026-09-17. Re-read 2026-09-26
+(`AnnouncementFeedGatewayPlugin.php:133-138`): with no `orderBy` the
+database hands the rows back in the order they sit in storage, usually
+the order added, which an edit or a concurrent write can change; hence
+Rule 18's "no fixed order". No feed has been seen out of that order.
 Live-probed 2026-09-17 (Actors row 7; Fields, the feed window; Rules 2, 8,
 13, 18; Settings bullets 9–10; A5, A7, A15, A16), OJS, with OMP and OPS as
 the control: a scratch journal created with no plugin key lists
@@ -1385,8 +1389,8 @@ on and the block placed (`plugins` + `sidebar`, scenarios.md) the box
 "Announcements" carries "Atom logo", "RSS2 logo", "RSS1 logo" linking
 `gateway/plugin/AnnouncementFeedGatewayPlugin/{atom,rss2,rss}` (content
 types `application/atom+xml`, `application/rss+xml`, `application/rdf+xml`);
-each feed is titled "{journal}: Announcements" and lists the unexpired
-announcements oldest first with the title, `announcement/view/{id}` and the
+each feed is titled "{journal}: Announcements" and listed the unexpired
+announcements oldest first on that run, with the title, `announcement/view/{id}` and the
 "Announcement" text; the typed announcement's entry title is the plain
 title; the expired one is in none. Atom's `<updated>` and `<published>` read
 "%2026-%09-%17UTC%UTC%259" and RSS 1.0's `<dc:date>` "%2026-%09-%17"; RSS
@@ -1878,7 +1882,9 @@ the new `typeId`.
 `limit($recentItems)` to a query with no `orderBy` and takes
 `$announcements->first()->datePosted` as the feed's updated stamp. Code read 2026-09-17. Live-probed 2026-09-17 (A7), OJS: "Limit feed to 2"
 kept "Oldest call (edited)" and "Typed notice", the two oldest of four, in
-all three feeds; RSS 2.0's channel `pubDate` was the older's.
+all three feeds; RSS 2.0's channel `pubDate` was the older's. Re-read
+2026-09-26: the two kept are the first two in storage order, not the
+two oldest by date; on the probe the two coincided.
 
 <a id="fn-f-a8"></a>
 **f-a8 — A8 evidence.** `ManagementHandler::announcements()` and

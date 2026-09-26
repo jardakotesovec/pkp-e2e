@@ -177,8 +177,9 @@ test.describe('article landing page and reading', () => {
 
         // The main column: breadcrumb "Home / Preprints" with "Home" the one
         // link; the label line names the "Versions" entry; the title, the
-        // subtitle, "Keywords: tide, current" as plain text, "Abstract" and
-        // "Plain Language Summary" (Fields; Rules 6, 9).
+        // subtitle, "Keywords:" with "tide" and "current" in either order
+        // (A11) as plain text, "Abstract" and "Plain Language Summary"
+        // (Fields; Rules 6, 9).
         await landing.goto(tidal.submissionId);
         await expect(landing.breadcrumb()).toHaveText('Home / Preprints');
         await expect(landing.breadcrumbLinks()).toHaveText(['Home']);
@@ -189,7 +190,9 @@ test.describe('article landing page and reading', () => {
         await expect(landing.title()).toHaveText('Tidal Patterns in Coastal Waters');
         await expect(landing.subtitle()).toHaveText('A field study');
         await expect(landing.contributors().locator('.name')).toHaveText(['Alex Author']);
-        await expect(landing.keywords()).toHaveText('Keywords: tide, current');
+        // The keywords in either order: the page lists them as the database
+        // returns them, with no ORDER BY (fix list B, flake-s26).
+        await expect(landing.keywords()).toHaveText(/^\s*Keywords:\s*(tide,\s*current|current,\s*tide)\s*$/);
         await expect(landing.keywords().locator('a')).toHaveCount(0);
         await expect(landing.mainSection('Abstract')).toContainText(`Seeded abstract for ${tag}a.`);
         await expect(landing.mainSection('Plain Language Summary')).toContainText('How tides move along a coast.');

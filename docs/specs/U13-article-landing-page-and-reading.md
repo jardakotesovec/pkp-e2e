@@ -77,7 +77,7 @@ Top to bottom, the main column holds: <sup>c</sup>
 | **Title**, **subtitle** | — | The version's title as the page heading, its subtitle under it. <sup>c</sup> |
 | **Contributors** | — | The contributor list described in [Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 14. |
 | **"DOI:"** | — | The version's DOI as its full address ("https://doi.org/…"), a link. Which DOI an older version shows, and how a version gets one, is *DOIs*'. <sup>c</sup> |
-| **"Keywords:"** | — | The version's keywords in the interface language, joined by commas, as plain text. The label is a raw code on a preprint server's French page [OPS7](#ops7). <sup>c</sup> |
+| **"Keywords:"** | — | The version's keywords in the interface language, joined by commas, as plain text. They come in no fixed order, not always the order they were typed in ⚠ [A11](#a11). The label is a raw code on a preprint server's French page [OPS7](#ops7). <sup>c</sup> |
 | **"Abstract"** | — | The abstract, as formatted in the editor. <sup>c</sup> |
 | **"Plain Language Summary"** | — | The plain language summary, under its own heading. <sup>c</sup> |
 | **"Downloads"** | — | The chart of Rule 17, only when the theme is set to show one. |
@@ -189,7 +189,7 @@ Top to bottom: <sup>j</sup>
 | **Authors** | — | The author line described in [Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 15, left out in an issue's table of contents when the section omits author names {OJS} (Settings bullet 10). <sup>j</sup> |
 | **Pages** {OJS} | — | The version's pages, when set. <sup>j</sup> |
 | **"DOI:"** {OPS} | — | Meant to show the preprint's DOI as a link; never shows ⚠ [OPS6](#ops6). <sup>j</sup> |
-| **Keywords** {OPS} | — | The current version's keywords, one after another. <sup>j</sup> |
+| **Keywords** {OPS} | — | The current version's keywords, one after another, in no fixed order [A11](#a11). <sup>j</sup> |
 | **Details line** {OPS} | — | "Downloads: {count} - Submitted {date} - Posted {date}", then " - Versions: {count}" once more than one version is posted. <sup>j</sup> |
 | **Date** {OJS} | — | The publication date, on search results only. <sup>j</sup> |
 | **Galley links** | — | As on the landing page (Rule 10), except on search results and category pages, which leave them out (Rule 22). |
@@ -614,7 +614,8 @@ footnote. <sup>s</sup>
      above the title reads "Preprint / " followed by the date and the
      version name of the "Versions" entry in the side column. The page is
      headed "Tidal Patterns in Coastal Waters", with "A field study"
-     under it; below the contributors come "Keywords: tide, current" as
+     under it; below the contributors come "Keywords: tide, current" or
+     "Keywords: current, tide" (either order passes, [A11](#a11)) as
      plain text, "Abstract" with the abstract, and "Plain Language
      Summary" with "How tides move along a coast." (Fields, the landing
      page; Rules 6, 9).
@@ -975,7 +976,7 @@ footnote. <sup>s</sup>
     - **"Latest preprints"**: open the server's home page: "Tidal
       Patterns" is listed under "Latest preprints" with its cover image,
       the title with "A field study", the author line, the keywords
-      "tide" and "current", the line "Downloads: 0 - Submitted {today} -
+      "tide" and "current" in either order ([A11](#a11)), the line "Downloads: 0 - Submitted {today} -
       Posted {today}" and the galley link "PDF" ([OPS6](#ops6)). Press
       the title: the preprint's page opens (Fields, the article summary;
       Rule 22; Side effects).
@@ -1057,6 +1058,9 @@ Left out of the scenarios above, by reason:
   - OPS3 (a galley's number address answering "404 Not Found" on a
     preprint server; Rule 13)
   - A10 (an address in parentheses in a reference; Rule 18)
+  - A11 (keywords shown in another order than typed; Fields, the
+    landing page and the article summary; scenarios 1 and 10 accept
+    either order)
   - A1 and OPS7 (the version names on a French page, and the
     preprint's French keywords label; Rules 8, 9, 21)
   - A4 (a galley with no file, and the additional files, in a preprint
@@ -1124,6 +1128,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | The RIS file writes its dates with a stray "%" | 🐞 | minor | — |
 | [A9](#a9) | With no additional format ticked, "More Citation Formats" opens nothing and hides the downloads | 🐞 | minor | — |
 | [A10](#a10) | A reference's address in parentheses takes the ")" into its link | 🐞 | minor | — |
+| [A11](#a11) | Keywords are listed in no fixed order: the order typed is not kept | 🐞 | minor | — |
 | [OJS1](#ojs1) | Outside a published issue, other citation formats and the downloads fail for readers: a blank page signed out, "404 Not Found" signed in | 🐞 | user-visible · crash: server | — |
 | [OJS2](#ojs2) | The Publication Facts Label settings always warn "Funding Plugin Not Present" | 🐞 | minor | — |
 | [OJS3](#ojs3) | On a French page the Publication Facts panel would have no labels | 🐞 | minor | — |
@@ -1242,6 +1247,19 @@ In "References", an address written inside parentheses,
 and text end in ")", pointing to a file that does not exist. A trailing
 "." or "," is correctly left out of the link.
 Basis: probe, 2026-09-25. <sup>[f-a10](#fn-f-a10)</sup>
+
+<a id="a11"></a>
+**A11 — Keywords lose the order they were typed in** · 🐞 · minor.
+Keywords typed "tide" then "current" can show on the article's page as
+"Keywords: current, tide", and in a preprint server's lists as
+"current" then "tide". The app keeps no order for them. Any save of the
+publication, publishing and scheduling included, can store them in the
+order just shown, after which the typed order is kept nowhere. Four
+saves in a row on the publication's Metadata page kept the typed order,
+so an editor cannot tell when the order will turn. A reader sees the keywords in an order the editor did
+not choose. The keywords are typed as described in
+[Publication metadata](U40-publication-metadata.md), its Rule 7.
+Basis: probe, 2026-09-26. <sup>[f-a11](#fn-f-a11)</sup>
 
 ### OJS
 
@@ -2318,6 +2336,24 @@ Live-probed 2026-09-25, note q12, both apps.
 **f-a10** — Note m: the link pattern stops at spaces and square or
 angle brackets, not at a parenthesis. Live-probed 2026-09-25, note m,
 both apps.
+
+<a id="fn-f-a11"></a>
+**f-a11** — Note c: `PKP\publication\DAO::fromRow()` reads the keyword
+entries (with the subjects, disciplines and supporting agencies) with
+no `orderBy`; the `seq` that `controlledVocab\Repository::insertBySymbolic()`
+writes 1, 2, … is never read. The order returned follows the query plan
+(a hash on the entries gives the reverse of the rows' order on disk, a
+hash on the vocabularies the disk order) and the rows' place on disk.
+Every publication save (`DAO::update()` → `saveControlledVocab()`),
+publishing and scheduling included, deletes the entries and writes them
+again in the order just read. Seen on OPS test runs 2026-09-25 (twice)
+and 2026-09-26 (scenarios 1 and 10): keywords seeded "tide", "current"
+read "Keywords: current, tide"; in the OJS test database on 2026-09-26
+the same seed's keywords were stored "current" first after the seed's
+publish on four runs, in the typed order on later ones. Probed
+2026-09-26, OJS and OPS: moving one keyword's row on disk turned
+scenario 1's line to "current, tide" on four runs of four; four plain
+"Save"s on Publication › Metadata kept "alpha, beta, gamma".
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `CitationStyleLanguagePlugin::getTemplateData()` passes

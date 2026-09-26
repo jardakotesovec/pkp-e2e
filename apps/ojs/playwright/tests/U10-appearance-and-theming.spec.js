@@ -58,6 +58,7 @@ const {
     disablePlugin,
 } = require('../../../../shared/playwright/pages/AppearancePages.js');
 const {setPublishingMode} = require('../pages/SearchPages.js');
+const {nextServerSecond} = require('../../../../shared/playwright/support/order.js');
 
 const T = 30_000;
 
@@ -118,11 +119,20 @@ async function seedJournal(ojsApi, tag, extra = {}) {
     return {manager: `${tag}mg`, name: `Scratch context ${tag}`, answer};
 }
 
-/** Articles published outside any issue, by a throwaway author seeded as `${tag}au`. */
-async function seedArticles(ojsApi, tag, count) {
+/**
+ * Articles published outside any issue, by a throwaway author seeded as
+ * `${tag}au`. With `apart` (a request context on the app's server) each is
+ * seeded a server second after the one before: "Latest Publications" orders
+ * by the date submitted, stamped to the second, and a page of it read by
+ * OFFSET picks among tied articles as the database pleases (fix list B).
+ */
+async function seedArticles(ojsApi, tag, count, {apart} = {}) {
     const titles = [];
     for (let n = 1; n <= count; n++) {
         const title = `Article ${n} ${tag}`;
+        if (apart && n > 1) {
+            await nextServerSecond(apart);
+        }
         await ojsApi.createSubmission({tag: `${tag}a${n}`, context: tag, submitter: `${tag}au`, title, submitted: true, published: true});
         titles.push(title);
     }
@@ -527,12 +537,12 @@ test.describe('appearance & theming', () => {
         await settings.reload();
         setup = await settings.open('appearance-setup');
         await expect(logo.altText).toHaveValue('Journal logo');
-        expect(await logo.uploadOffered()).toBe(false);
+        await logo.expectUploadOffered(false);
         const savedPreview = await logo.thumbnail.getAttribute('src');
         expect(savedPreview).toMatch(/pageHeaderLogoImage_en\.png/);
         await logo.removeButton.click();
         await expect(logo.restoreButton).toBeVisible();
-        await expect.poll(() => logo.uploadOffered()).toBe(true);
+        await logo.expectUploadOffered(true);
         expect(await logo.choose(png('logo2.png', 400, 100, 2))).toBe(200);
         await expect(logo.altText).toHaveValue('');
         await expect(logo.restoreButton).toBeVisible();
@@ -552,7 +562,7 @@ test.describe('appearance & theming', () => {
         await expect(logo.thumbnail).toHaveAttribute('src', savedPreview);
         await expect(logo.altText).toHaveValue('Journal logo');
         await expect(logo.restoreButton).toHaveCount(0);
-        expect(await logo.uploadPresence()).toEqual({announced: true, onScreen: false});
+        await expect.poll(() => logo.uploadPresence(), {timeout: T}).toEqual({announced: true, onScreen: false});
         await expect(logo.control.getByRole('button', {name: 'Upload File', exact: true})).toHaveCount(1);
         await logo.tabToUpload();
         await expect(logo.control.getByRole('button', {name: 'Upload File', exact: true})).toBeFocused();
@@ -833,7 +843,7 @@ test.describe('appearance & theming', () => {
         test.slow();
         const tag = makeTag('s6', testInfo);
         const {manager} = await seedJournal(ojsApi, tag, {users: [{username: `${tag}au`, givenName: 'Ada', familyName: 'Author', roles: ['author']}]});
-        const titles = await seedArticles(ojsApi, tag, 3);
+        const titles = await seedArticles(ojsApi, tag, 3, {apart: visitor.request});
         const home = new PublicLook(visitor, tag);
         const page = await actorPage(asUser, manager);
         const settings = new WebsiteSettings(page, tag);

@@ -34,7 +34,8 @@
  *   "nothing is sent" claims), `metadataUpdatedLogCount` (the Activity
  *   Log's "Submission metadata updated" lines), `addDiscussion` (the
  *   discussions panel's form, the mail the suite causes as its Mailpit
- *   positive control), `licenseBlock` (the landing page's "License" block)
+ *   positive control; `sendMailControl` opens it on a scratch server of
+ *   its own, 2026-09-26), `licenseBlock` (the landing page's "License" block)
  *   and `expectPrecedes` (a DOM-order read for "in that order" claims).
  * - Added 2026-09-16 (U49's coverage revision): the preprint page's date
  *   line and "Versions" list (`preprintDateLine`, `preprintVersionsList`;
@@ -645,6 +646,45 @@ async function addDiscussion(page, {name, message, participants}) {
 }
 
 exports.addDiscussion = addDiscussion;
+
+/**
+ * The mailbox's positive control (PRINCIPLES A8) on state no other test
+ * reads: a scratch server of its own (`{tag}mc`) with a throwaway Preprint
+ * Server Manager and a spare Author; the manager opens a discussion on the
+ * spare's preprint with the spare's box ticked (`addDiscussion`), whose
+ * copy reaches the spare. Returns the `afterControl` for
+ * `pkpMail.expectNone`. The roster stays out of it on purpose: a
+ * discussion leaves every ticked participant, its creator included, an
+ * unread Tasks item (lib/pkp `EditorialTaskController` NEW_QUERY), and
+ * *Navigation menus & site chrome* S2 reads `manager.maya`'s Tasks number
+ * on the seeded server (flake-s26 fixAD).
+ *
+ * @param {{asUser: (username: string) => Promise<import('@playwright/test').BrowserContext>, api: any, tag: string}} options
+ *   `api`: the suite's `opsApi`; `tag`: the test's own seed tag
+ * @returns {Promise<{to: string, subject: string}>}
+ */
+async function sendMailControl({asUser, api, tag}) {
+    const control = `${tag}mc`;
+    const manager = `${control}mg`;
+    const spare = `${control}x`;
+    await api.createContext({
+        tag: control,
+        users: [
+            {username: manager, givenName: 'Mona', familyName: 'Manager', email: `${manager}@mail.test`, roles: ['manager']},
+            {username: spare, givenName: 'Xena', familyName: 'Spare', email: `${spare}@mail.test`, roles: ['author']},
+        ],
+    });
+    const {submissionId} = await api.createSubmission({tag: control, context: control, submitter: spare, title: `Preprint ${control}`});
+    const page = await (await asUser(manager)).newPage();
+    const discussion = `Control ${tag}`;
+    await openWorkflow(page, control, submissionId);
+    await new exports.PublicationScreen(page).openProductionStage();
+    await addDiscussion(page, {name: discussion, message: `Control message ${tag}.`, participants: [spare]});
+    await page.close();
+    return {to: `${spare}@mail.test`, subject: discussion};
+}
+
+exports.sendMailControl = sendMailControl;
 
 /**
  * The landing page's "License" block (`.item.copyright`, Rule 15): the

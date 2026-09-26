@@ -49,6 +49,7 @@
 const zlib = require('zlib');
 const {test: base, expect} = require('../support/fixtures.js');
 const {NavigationTab, PublicChrome, whole} = require('../../../../shared/playwright/pages/NavigationChromePages.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {
     CustomPageWindow,
     PluginsTab,
@@ -739,6 +740,8 @@ test.describe('custom pages & blocks', () => {
         const reader = new PublicContent(visitor);
         const topTabs = tab.topTabs();
         const expectList = (titles) => expect.poll(() => tab.titles(), {timeout: T}).toEqual(titles);
+        // The list has no fixed order (Rule 10): read two or more pages as a set.
+        const expectSet = (titles) => expect.poll(async () => unordered(await tab.titles()), {timeout: T}).toEqual(unordered(titles));
 
         // Control, before the plugin: Settings › Website has no "Static Pages"
         // tab, while its "Plugins" tab is there (Settings bullet 1).
@@ -817,8 +820,9 @@ test.describe('custom pages & blocks', () => {
         expect(new URL(opened.url()).pathname).toMatch(new RegExp(`/index\\.php/${tag}(/en)?/about-us$`));
         await opened.close();
 
-        // The order after an edit: added last; saved again through "Edit",
-        // moved to the end, and so after a reload (Rule 10).
+        // A second page, and an edit: the list holds both, in any order;
+        // saved again through "Edit", each still once, in any order, and so
+        // after a reload (Rule 10).
         win = await tab.addPage();
         await win.pathInput.fill('fees');
         await win.titleInput('en').fill('Fees');
@@ -826,15 +830,15 @@ test.describe('custom pages & blocks', () => {
         answer = await win.save();
         expect(answer.status).toBe(200);
         await expect(win.form).toBeHidden();
-        await expectList(['About us', 'Fees']);
+        await expectSet(['About us', 'Fees']);
         win = await tab.editPage('About us');
         await expect(win.heading).toHaveText('Edit');
         answer = await win.save();
         expect(answer.status).toBe(200);
         await expect(win.form).toBeHidden();
-        await expectList(['Fees', 'About us']);
+        await expectSet(['About us', 'Fees']);
         await tab.goto();
-        await expectList(['Fees', 'About us']);
+        await expectSet(['About us', 'Fees']);
 
         // Left unsaved: the back arrow asks; "Cancel" keeps the window with
         // "x"; "OK" closes it, nothing stored (Rule 30).
@@ -844,7 +848,7 @@ test.describe('custom pages & blocks', () => {
         await expect(win.form).toBeVisible();
         await expect(win.titleInput('en')).toHaveValue('x');
         expect(await win.close({accept: true})).toBe(CHANGED_QUESTION);
-        await expectList(['Fees', 'About us']);
+        await expectSet(['About us', 'Fees']);
 
         // Forty characters: the "Path" box stops at 40 (Fields).
         win = await tab.addPage();
@@ -873,10 +877,10 @@ test.describe('custom pages & blocks', () => {
         expect((await win.save({expectPost: false})).sent).toBe(false);
         await expect(await win.errorFor(win.titleInput('en'))).toHaveText(REQUIRED);
         await expect(win.form).toBeVisible();
-        await expectList(['Fees', 'About us']);
+        await expectSet(['About us', 'Fees']);
         await win.close({accept: true});
         await expect(win.form).toBeHidden();
-        await expectList(['Fees', 'About us']);
+        await expectSet(['About us', 'Fees']);
 
         // Deleted: "Delete" asks; "OK" takes the row; the page's address
         // answers a bare "404 Not Found" (Rule 14).

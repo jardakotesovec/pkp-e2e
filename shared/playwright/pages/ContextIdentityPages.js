@@ -472,19 +472,25 @@ class SettingsForm extends BasePage {
         this.jumpToErrorButton = this.form.getByRole('button', {name: 'Jump to next error'});
     }
 
-    /** Wait until the form shows and its rich-text boxes are initialized. */
+    /**
+     * Wait until the form shows and its rich-text boxes are initialized.
+     * A rich-text box's editor is created after its textarea is drawn, so
+     * the box counts as ready only once its editor exists and is
+     * initialized; a plain textarea (no rich-text field around it) has none
+     * (.reports/flake-s26/fixC/diagnosis.md).
+     */
     async ready() {
         await expect(this.form).toBeVisible({timeout: T});
         await this.page.waitForFunction(
             (selector) => {
                 const form = [...document.querySelectorAll('form')].find((f) => f.querySelector(selector));
                 if (!form) return false;
-                const areas = [...form.querySelectorAll('textarea[id]')];
+                const areas = [...form.querySelectorAll('.pkpFormField--richTextarea textarea[id]')];
                 if (!areas.length) return true;
                 if (!window.tinymce) return false;
                 return areas.every((a) => {
                     const ed = window.tinymce.get(a.id);
-                    return !ed || ed.initialized;
+                    return !!ed && ed.initialized;
                 });
             },
             this.anchor,
@@ -524,8 +530,20 @@ class SettingsForm extends BasePage {
         return this.form.locator(`iframe[id^="${idOrPrefix}"]`).first().contentFrame().locator('body');
     }
 
-    /** A rich-text box's content as the editor holds it (HTML). */
+    /**
+     * A rich-text box's content as the editor holds it (HTML), read once
+     * the box's editor exists and is initialized (before that there is no
+     * editor to read: null).
+     */
     async richContent(idOrPrefix) {
+        await this.page.waitForFunction(
+            (prefix) => {
+                const ed = ((window.tinymce && window.tinymce.get()) || []).find((e) => e.id === prefix || e.id.startsWith(`${prefix}-`));
+                return !!ed && ed.initialized;
+            },
+            idOrPrefix,
+            {timeout: T}
+        );
         return this.page.evaluate((prefix) => {
             const ed = (window.tinymce.get() || []).find((e) => e.id === prefix || e.id.startsWith(`${prefix}-`));
             return ed ? ed.getContent() : null;

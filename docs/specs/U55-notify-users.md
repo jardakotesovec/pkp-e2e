@@ -62,7 +62,7 @@ the journal is ticked under "Bulk Emails":
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Disable Roles", described "A journal manager will be unable to send bulk emails to any of the roles selected below. Use this setting to limit abuse of the email notification feature. For example, it may be safer to disable bulk emails to readers, authors, or other large user groups that have not consented to receive such emails." and "The bulk email feature can be disabled completely for this journal in Admin > Site Settings." On a press the description opens "A press manager will be unable…" and says "…for this press in Admin > Site Settings."; on a preprint server, "A server manager will be unable…" and "…for this server in Admin > Site Settings." | no | A box per role of the journal, in the order of the "Roles" tab, the roles it created included; none ticked on a new journal. A ticked role is off limits to the "Notify" tab (Rule 12). Saved with the "Save" under it, which shows "Saved" beside it <sup>h</sup> |
+| "Disable Roles", described "A journal manager will be unable to send bulk emails to any of the roles selected below. Use this setting to limit abuse of the email notification feature. For example, it may be safer to disable bulk emails to readers, authors, or other large user groups that have not consented to receive such emails." and "The bulk email feature can be disabled completely for this journal in Admin > Site Settings." On a press the description opens "A press manager will be unable…" and says "…for this press in Admin > Site Settings."; on a preprint server, "A server manager will be unable…" and "…for this server in Admin > Site Settings." | no | A box per role of the journal, the roles it created included, in no fixed order (it need not match the "Roles" tab's); none ticked on a new journal. A ticked role is off limits to the "Notify" tab (Rule 12). Saved with the "Save" under it, which shows "Saved" beside it <sup>h</sup> |
 
 ## Rules & state
 
@@ -331,8 +331,8 @@ the footnote. <sup>s</sup>
      preprint server), has the side tab "Restrict Bulk Emails". Open it:
      "Disable Roles", described "A journal manager will be unable to send
      bulk emails to any of the roles selected below. …" ("A press manager
-     will be unable…", "A server manager will be unable…"), has a box per
-     role of the journal in the order of the "Roles" tab, none ticked,
+     will be unable…", "A server manager will be unable…"), has a box for
+     every role the "Roles" tab lists, under the same name, none ticked,
      and "Save" under them (Rule 11; Fields, "Restrict Bulk Emails").
    - **"Author" ticked**: tick "Author" and press "Save": "Saved" shows
      beside it. Reload the page and open "Restrict Bulk Emails" again:
@@ -552,8 +552,8 @@ Actors row 2), all three apps: on a scratch journal with two created
 roles ("Nobody role", held by nobody, and "Custom manager") the tab read
 "Roles", "Subject", "Email", "Copy" and "Save", with no required mark (no
 mark on any label, and neither `required` nor `aria-required` on
-"Subject"); "Roles" offered one box per role in the "Roles" tab's order,
-the created ones included (OJS 20, OMP 21, OPS 7), none ticked; the
+"Subject"); "Roles" offered one box per role (on that run in the "Roles" tab's
+order; the list has no fixed order, note h), the created ones included (OJS 20, OMP 21, OPS 7), none ticked; the
 text box's buttons are named "Bold", "Italic", "Superscript",
 "Subscript" and "Insert/edit link" (it opens an "Insert/Edit Link"
 window), and the OJS test run of 2026-09-26 read the same five names; "Copy" showed the signed-in account's own address. On a journal
@@ -563,7 +563,7 @@ from the Journal Manager, the Editor (OJS, OMP) and the Site
 Administrator were each accepted and their emails arrived. With
 "Author" and "Reader" ticked, the one queued job carried three
 accounts, and the member holding both got one email. Code: `PKPNotifyUsersForm::__construct()` lists
-`UserGroup::withContextIds($contextId)` minus the context's
+`UserGroup::withContextIds($contextId)`, unsorted, minus the context's
 `disableBulkEmailUserGroups`; fields `userGroupIds` (`FieldOptions`,
 `user.roles` "Roles", `manager.setup.notifyUsers.description`), `subject`
 (`FieldText`, `email.subject` "Subject"), `body` (`FieldRichTextarea`,
@@ -669,9 +669,9 @@ offered "Edit", "Remove" and "Settings wizard", which opened
 "Setup" (OMP) or "Server Settings" (OPS), its side tabs "Journal"
 ("Press", "Server"), "Appearance", "Languages", "Search Indexing",
 "Restrict Bulk Emails" on a ticked and an unticked journal alike. Ticked:
-"Disable Roles" with the description quoted per app, one box per role in
-the "Roles" tab's order with a created role last (OJS 19, OMP 20, OPS
-6), none ticked, no required mark; "Save" (a `PUT` sent as `POST` with
+"Disable Roles" with the description quoted per app, one box per role,
+on that run in the "Roles" tab's order with a created role last (OJS
+19, OMP 20, OPS 6), none ticked, no required mark; "Save" (a `PUT` sent as `POST` with
 an override header) showed "Saved". Unticked: only the sentence, per
 app, with no box and no button. Both "Admin > Site Settings" links
 point to `index/admin/settings#setup/bulkEmails` and landed on Site
@@ -685,7 +685,8 @@ wizard landing also answered a server error on the hidden Plugin Gallery
 list (`plugin-gallery-grid/fetch-grid`, 500, the test installs have no
 outbound connection): the plugin gallery's failure, nothing on this
 side tab. Code: `AdminHandler::wizard()` builds
-`PKPRestrictBulkEmailsForm` (`FORM_RESTRICT_BULK_EMAILS`, `PUT
+`PKPRestrictBulkEmailsForm` from `UserGroup::withContextIds()->get()`
+with no order (`FORM_RESTRICT_BULK_EMAILS`, `PUT
 {journal}/api/v1/contexts/{id}`, field `disableBulkEmailUserGroups`,
 `admin.settings.disableBulkEmailRoles.label` "Disable Roles", each app's
 `admin.settings.disableBulkEmailRoles.description` with `siteSettingsUrl`
@@ -699,7 +700,12 @@ only; its side tabs were read by *Appearance & theming* (its Rule 34).
 `disableBulkEmailUserGroups` from anyone but a Site Administrator
 (`admin.settings.disableBulkEmailRoles.adminOnly`), and no Settings form
 of the journal carries the field. Nothing in the save sends mail or
-touches a role.
+touches a role. Code read 2026-09-26 (Fields, "Restrict Bulk Emails"):
+neither this list nor the "Roles" tab's (`UserGroupGridHandler::loadData()`,
+`UserGroup::withContextIds()` paged with no order) is sorted, so the
+database returns the roles in whatever order it holds them, which can
+differ between the two lists and between visits; the two were never seen
+to differ.
 
 <a id="fn-i"></a>
 **i** — Live-probed 2026-09-26 (Rule 12), all three apps: the Site

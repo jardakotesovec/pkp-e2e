@@ -199,6 +199,7 @@ jobs:
           node bin/with-app.js ${{ inputs.app }} shared/playwright/make-test-config.js > "$PKP_CONFIG_FILE"
 
       - name: Run Playwright suite
+        id: suite
         working-directory: e2e
         env:
           OJS_ROOT: ${{ github.workspace }}/app
@@ -206,9 +207,16 @@ jobs:
           OPS_ROOT: ${{ github.workspace }}/app
         run: |
           app=${{ inputs.app }}; shard=${{ matrix.shard }}/${{ env.SHARDS }}; rc=0
-          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=shared --project=$app || rc=1
-          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-serial --no-deps --pass-with-no-tests || rc=1
-          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-solo --no-deps --pass-with-no-tests || rc=1
+          # Each pass writes its own output folder: a run empties its output
+          # folder first, so with one folder the solo pass wiped the error
+          # contexts of the first two, flaky first attempts included (2026-09-26).
+          out=apps/$app/playwright/test-results
+          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=shared --project=$app --output=$out/app || rc=1
+          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-serial --no-deps --pass-with-no-tests --output=$out/serial || rc=1
+          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-solo --no-deps --pass-with-no-tests --output=$out/solo || rc=1
+          # A flaky test (red, then green on the retry) leaves its failed
+          # attempt's error-context.md; say so, so the artifact step uploads it.
+          if find $out -name error-context.md | grep -q .; then echo "attempt_failed=true" >> "$GITHUB_OUTPUT"; fi
           exit $rc
 
       # Per-test durations of this shard (timed-shards.js), the input of
@@ -223,8 +231,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
-      - name: Upload test artifacts on failure
-        if: failure()
+      # On a red job and on a green one with a flaky test: the failed
+      # attempts' error contexts and the worker servers' logs are the only
+      # evidence a CI flake leaves (ci-triage "Where to look").
+      - name: Upload test artifacts (red or flaky)
+        if: failure() || steps.suite.outputs.attempt_failed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts-${{ inputs.app }}-${{ matrix.shard }}

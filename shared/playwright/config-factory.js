@@ -130,7 +130,42 @@ function ensureValidationConfig(defaultConfigFile, port) {
     return variantFile;
 }
 
+/**
+ * `--no-deps` drops the solo project's wait on the serial one, so a command
+ * that selects the solo project beside any other runs the @solo tests next
+ * to the serial project's queue drains and site-level saves: exactly what
+ * @solo exists to avoid. Every "U08 S8 / U15 S5 red in <app>-solo after the
+ * final" sighting (ci-triage, 2026-09-23..26) was such a combined command
+ * ("Running 17 tests using 5 workers"). Refuse it at config time; the two
+ * projects run as two commands, serial first (harness.md "Running").
+ */
+function refuseSoloBesideOthersWithoutDeps(appName, argv = process.argv.slice(2)) {
+    if (!argv.includes('--no-deps')) {
+        return;
+    }
+    const selected = [];
+    argv.forEach((arg, i) => {
+        if (arg.startsWith('--project=')) {
+            selected.push(arg.slice('--project='.length));
+        } else if (arg === '--project' && argv[i + 1]) {
+            selected.push(argv[i + 1]);
+        }
+    });
+    const solo = `${appName}-solo`;
+    const matches = (pattern, name) =>
+        new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')}$`).test(name);
+    const selectsSolo = selected.length === 0 || selected.some((p) => matches(p, solo));
+    const selectsOther = selected.length === 0 || selected.some((p) => !matches(p, solo) || p.includes('*'));
+    if (selectsSolo && selectsOther) {
+        throw new Error(
+            `--no-deps with ${solo} beside another project runs the @solo tests concurrently with the others. ` +
+            `Run two commands: --project=${appName}-serial --no-deps, then --project=${solo} --no-deps.`,
+        );
+    }
+}
+
 function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
+    refuseSoloBesideOthersWithoutDeps(appName);
     loadEnv(appRoot);
     // The suite (tests, POMs, runtime state) lives in the pkp-e2e repo;
     // appRoot is the app checkout the fleet serves and installs into.
@@ -264,4 +299,4 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
     });
 }
 
-module.exports = {definePkpConfig, VALIDATION_PORT_OFFSET};
+module.exports = {definePkpConfig, VALIDATION_PORT_OFFSET, refuseSoloBesideOthersWithoutDeps};

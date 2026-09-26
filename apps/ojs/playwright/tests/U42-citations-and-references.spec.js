@@ -48,6 +48,7 @@
  * own API answer (A5). Everything runs in the parallel `ojs` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {ActivityLogWindow} = require('../../../../shared/playwright/pages/ActivityLogPages.js');
 const {
@@ -706,10 +707,16 @@ test.describe('citations and references', () => {
         await panel.save();
         await expect(doiLink).toBeVisible({timeout: 30_000});
         await expect(row.getByText('Alpha study', {exact: true})).toBeVisible();
-        if (!(await refs.rowSmallPrint('Alpha study').isVisible())) {
-            await row.getByRole('button', {name: 'Collapse'}).click();
-        }
-        await expect(refs.rowSmallPrint('Alpha study')).toHaveText('Alpha study 2020, revised', {timeout: 30_000});
+        // The list refetches after the save, and every 7 s while the edited
+        // reference is looked up again (citationManagerStore), so one read
+        // of the row's state can be stale: open it and read until the text
+        // holds (.reports/flake-s26/fixC/diagnosis.md).
+        await expect(async () => {
+            if (!(await refs.rowSmallPrint('Alpha study').isVisible())) {
+                await row.getByRole('button', {name: 'Collapse'}).click({timeout: 5_000});
+            }
+            await expect(refs.rowSmallPrint('Alpha study')).toHaveText('Alpha study 2020, revised', {timeout: 5_000});
+        }).toPass({timeout: 30_000});
 
         // Control: lookup switched off: no lookup heading or text, no
         // "Reprocess all references", no "Expand All", no progress box;
@@ -826,28 +833,39 @@ test.describe('citations and references', () => {
         await edit.save();
         await expect(data.row('Ocean temperature records, revised')).toBeVisible({timeout: 30_000});
 
-        // Ordering: two more, listed after the first in the order added;
-        // "Order" swaps the menus for arrows and reads "Save Order"; C moved
-        // up twice and saved; the menus are back; a reload keeps the order
-        // (Rule 23).
+        // Ordering: two more; the table lists the three in no fixed order
+        // until an order is saved (A8); "Order" swaps the menus for arrows
+        // and reads "Save Order"; the up arrow on C until it is first (none
+        // when it already is), each press moving it one place; saved: the
+        // menus are back, C first and the other two as they stood; a reload
+        // keeps that order (Rule 23).
         await data.add({title: 'Dataset B', relationshipType: 'supporting'});
         await data.add({title: 'Dataset C', relationshipType: 'supporting'});
-        await expect(data.rowCells()).toHaveText([/Ocean temperature records, revised$/, /Dataset B$/, /Dataset C$/], {
-            timeout: 30_000,
-        });
+        const titles = ['Ocean temperature records, revised', 'Dataset B', 'Dataset C'];
+        const shownTitles = async () =>
+            (await data.rowCells().allTextContents()).map((text) => titles.find((title) => text.trim().endsWith(title)) || text.trim());
+        const endsWith = (list) => list.map((title) => new RegExp(`${title}$`));
+        await expect(data.rowCells()).toHaveCount(3, {timeout: 30_000});
+        await expect.poll(async () => unordered(await shownTitles()), {timeout: 30_000}).toEqual(unordered(titles));
         await expect(data.menuButtons()).toHaveCount(3);
         await data.orderButton().click();
         await expect(data.saveOrderButton()).toBeVisible({timeout: 30_000});
         await expect(data.menuButtons()).toHaveCount(0);
         await expect(data.rowArrows('Dataset C')).toHaveCount(2);
-        await data.moveUp('Dataset C');
-        await expect(data.rowCells()).toHaveText([/Ocean temperature records, revised$/, /Dataset C$/, /Dataset B$/]);
-        await data.moveUp('Dataset C');
-        await expect(data.rowCells()).toHaveText([/Dataset C$/, /Ocean temperature records, revised$/, /Dataset B$/]);
+        const before = await shownTitles();
+        let order = [...before];
+        while (order[0] !== 'Dataset C') {
+            const at = order.indexOf('Dataset C');
+            order = [...order.slice(0, at - 1), 'Dataset C', order[at - 1], ...order.slice(at + 1)];
+            await data.moveUp('Dataset C');
+            await expect(data.rowCells()).toHaveText(endsWith(order));
+        }
+        const saved = ['Dataset C', ...before.filter((title) => title !== 'Dataset C')];
         await data.saveOrder();
         await expect(data.menuButtons()).toHaveCount(3, {timeout: 30_000});
+        await expect(data.rowCells()).toHaveText(endsWith(saved));
         data = await openData(mgr, submissionId);
-        await expect(data.rowCells()).toHaveText([/Dataset C$/, /Ocean temperature records, revised$/, /Dataset B$/], {
+        await expect(data.rowCells()).toHaveText(endsWith(saved), {
             timeout: 30_000,
         });
 

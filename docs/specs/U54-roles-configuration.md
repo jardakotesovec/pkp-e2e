@@ -68,9 +68,9 @@ links, and "Items per page:" beside it once there are more roles than
 the smallest number it offers (Rule 4). <sup>e</sup>
 
 <a id="default-roles"></a>
-**The roles of a new journal**, in the order the list normally shows them
-([A13](#a13)), with the stages ticked in the list and the options ticked
-in each role's window ("SR" "Allow user self-registration", "MH" "Consider role in
+**The roles of a new journal**, in the order the list usually shows them,
+though it keeps no fixed order ([A13](#a13)), with the stages ticked in
+the list and the options ticked in each role's window ("SR" "Allow user self-registration", "MH" "Consider role in
 masthead list", "ME" "Permit submission metadata edit.", "PS" "Permit
 changes to Settings"; "This role is only allowed to recommend…" is
 unticked on every role): <sup>c</sup>
@@ -166,13 +166,13 @@ level allows no stage ⚠ [A12](#a12). <sup>k</sup>
    switches to "Roles" and back, and is gone without a warning once the
    page is left, as on every Settings page. <sup>a</sup>
 2. **What is listed.** Every role of this journal, whatever its level,
-   and nothing from other journals. On a new journal the rows follow the
-   order of [the roles table](#default-roles), and a created role joins at
-   the end, but not every time: a new journal's rows can come in another
-   order, and a created role can be listed first ⚠ [A13](#a13). A role
-   whose window is saved with "OK" moves down the list: on a journal or a
-   press to the end, on a preprint server below the roles the server was
-   created with and above any created role. <sup>b</sup>
+   and nothing from other journals, in no fixed order ⚠ [A13](#a13). A
+   new journal usually lists its roles in the order of [the roles
+   table](#default-roles) and a created role at the end, but its rows can
+   come in another order and a created role can be listed first. A role
+   whose window is saved with "OK" usually moves down the list: on a
+   journal or a press to the end, on a preprint server below the roles the
+   server was created with and above any created role. <sup>b</sup>
 3. **Filters.**
    - 3a. "Search" at the top of the list shows two lists above the rows,
      and a second press hides them. "List roles assigned to" offers "All
@@ -196,8 +196,11 @@ level allows no stage ⚠ [A12](#a12). <sup>k</sup>
    "100"). It shows once the
    list holds more roles than the smallest of those numbers, so a new
    preprint server's five roles show no "Items per page:". Choosing "10"
-   shows the first ten rows, with page links to the rest; a reload of the
-   page returns the list to the journal's "Items per page". <sup>e</sup>
+   shows ten rows, with page links to the others; a reload of the page
+   returns the list to the journal's "Items per page". Since the list
+   keeps no fixed order, the second page need not hold the roles the first
+   left out: a role can show on both pages and another on neither
+   ([A13](#a13)). <sup>e</sup>
 5. **Row actions.** Each row's "Settings" arrow opens a line under it
    with "Edit" and "Remove". The first row of each page has no arrow and
    so neither action: on a new journal that is normally the manager
@@ -466,9 +469,8 @@ footnote. <sup>s</sup>
      table](#default-roles), each with its permission level and, but for
      the manager role's row [A2](#a2), its stages ticked as the table
      gives them; a press lists its nineteen roles and a preprint server its
-     five, as the paragraph under the table gives them. A journal and a
-     press list them in the table's order; a preprint server's five may
-     come in any order [A13](#a13). Under the rows the line
+     five, as the paragraph under the table gives them. The rows may come
+     in any order [A13](#a13). Under the rows the line
      reads "1 - 18 of 18 items" (a press "1 - 19 of 19 items", a preprint
      server "1 - 5 of 5 items") (Rules 2, 4).
    - **Greyed boxes**: every box of the "Journal manager", "Journal
@@ -491,10 +493,11 @@ footnote. <sup>s</sup>
      the roles are listed again, "1 - 18 of 18 items" (a press "1 - 19 of
      19 items", a preprint server "1 - 5 of 5 items") (Rule 3b).
    - **Ten per page** {OJS OMP}: beside the line, "Items per page:" offers
-     "10", "25", "50", "75" and "100". Choose "10": the list shows the
-     first ten rows, "1 - 10 of 18 items" (a press "1 - 10 of 19 items"),
-     with page links. Press the link to the second page: it shows the
-     rest, "11 - 18 of 18 items" (a press "11 - 19 of 19 items"). Reload
+     "10", "25", "50", "75" and "100". Choose "10": the list shows ten
+     rows, "1 - 10 of 18 items" (a press "1 - 10 of 19 items"), with page
+     links. Press the link to the second page: it shows eight rows, "11 -
+     18 of 18 items" (a press nine rows, "11 - 19 of 19 items"); which
+     roles each page holds is not fixed [A13](#a13). Reload
      the page: the list is back to every row on one page, "1 - 18 of 18
      items" (Rule 4).
    - **No "Items per page:"** {OPS}: a preprint server's five roles show
@@ -791,8 +794,8 @@ Left out of the scenarios above, by reason:
   - A12 ("Stage Assignment" hidden, or on screen with every box greyed;
     Fields, the role window)
   - A13 (a saved role moving down the list, a new journal's rows out of
-    the table's order, and where created roles land; Rule 2; scenario 1
-    passes it)
+    the table's order, where created roles land, and a second page
+    repeating or skipping a role; Rules 2, 4; scenario 1 passes it)
   - A14 (the "Users" tab opened without a reload after a rename; Side
     effects; scenario 4 passes it)
   - OMP1 and OPS3 (the French column heading and level name; Fields, the
@@ -853,7 +856,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A role anyone has ever held can never be removed | ❓ | minor | — |
 | [A7](#a7) | "Abbreviation" is required, and no screen but the role's own window shows it | ❓ | minor | — |
 | [A12](#a12) | "Stage Assignment" was seen both hidden and on screen with every box greyed in the same four window states | ❓ | minor | — |
-| [A13](#a13) | The "Roles" list keeps no fixed order: a saved role moves down, and a new journal's rows were twice listed out of order | ❓ | minor | — |
+| [A13](#a13) | The "Roles" list keeps no fixed order: a saved role moves down, a new journal's rows can come out of the table's order, and a paged list can show a role twice and another never | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers the "Reviewer" level for a new role | ❓ | minor | — |
 
 ### All apps
@@ -991,21 +994,25 @@ Basis: probe. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — The "Roles" list keeps no fixed order** · ❓ · minor.
-Saving a role's window moves its row down the list (Rule 2), so the
-order a manager has learned changes after any "OK". A new journal's own
-roles do not always come in the order of the roles table either. Once, a
-new preprint server with nothing saved on it listed "Author", "Reader",
-"Editorial Board Member", "Preprint Server manager" and "Moderator":
-"Author" had no "Edit" or "Remove" ([A1](#a1)), and the manager row had
-both. Once, on a journal, two roles made with "Create New Role" were
-listed above "Journal manager", the first of them without "Edit" or
-"Remove". Every other time a new journal listed its roles in the table's
-order and created roles at the end.
+The list keeps no fixed order, on a journal, a press and a preprint
+server alike. Saving a role's window usually moves its row down the list
+(Rule 2), so the order a manager has learned changes after any "OK". A
+new journal's own roles do not always come in the order of the roles
+table either. Once, a new preprint server with nothing saved on it listed
+"Author", "Reader", "Editorial Board Member", "Preprint Server manager"
+and "Moderator": "Author" had no "Edit" or "Remove" ([A1](#a1)), and the
+manager row had both. Once, on a journal, two roles made with "Create New
+Role" were listed above "Journal manager", the first of them without
+"Edit" or "Remove". Every other time a new journal listed its roles in
+the table's order and created roles at the end. With the list on more
+than one page (Rule 4), each page takes its rows from the list in
+whatever order it has when that page opens, so the second page can
+repeat a role the first showed and leave another role off both.
 Question: should the list keep a fixed order, the installed roles first
 in the table's order and created roles after them? Lean: yes, since rows
-that move after a save, and a first row that loses its actions, read as
-broken.
-Basis: probe; test run. <sup>f-a13</sup>
+that move after a save, a first row that loses its actions, and pages
+that can skip a role read as broken.
+Basis: probe; test run; code (the pages). <sup>f-a13</sup>
 
 <a id="a14"></a>
 **A14 — The "Users" tab keeps a renamed role's old name** · 🐞 · minor.
@@ -1125,7 +1132,8 @@ Review"; OPS Production alone. `loadData()` queries
 `UserGroup::withContextIds([$contextId])` with no `orderBy`, so the order
 is the database's (Postgres returns rows in the order they are stored:
 insertion order, the registry's, unless a new row took the space of an
-earlier deleted one, [f-a13](#fn-f-a13)). Live-probed 2026-09-26 (Fields, the "Roles" tab; Rule 2; all
+earlier deleted one or a saved row was rewritten elsewhere,
+[f-a13](#fn-f-a13)). Live-probed 2026-09-26 (Fields, the "Roles" tab; Rule 2; all
 three apps, new scratch contexts): "Search" and "Create New Role" at the
 list's top right; the rows in the order of the roles table and nothing
 from another context; a created role at the end, on the same page and
@@ -1692,7 +1700,13 @@ three apps. Settles it: each of the four read two seconds after the window
 opens or the level is chosen.
 
 <a id="fn-f-a13"></a>
-**f-a13** — `loadData()` sets no order ([b](#fn-b)). Live-probed
+**f-a13** — `loadData()` sets no order ([b](#fn-b)), on OJS, OMP and
+OPS alike (one lib/pkp handler), and each page is its own query,
+`UserGroup::withContextIds()` with `offset()->limit()` and no `orderBy`,
+so two page reads follow the rows' storage order at their own moment;
+PostgreSQL rewrites an updated row wherever it has room. Code read
+2026-09-26 (Rules 2, 4; scenario 1): a page repeating or skipping a role
+was not driven. Live-probed
 2026-09-26 (Rule 2; all three apps): a saved role moved down in every run.
 In the first OJS run of the role window's check, two created roles were
 listed above "Journal manager", the first with no arrow; in every later

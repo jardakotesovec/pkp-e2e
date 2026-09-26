@@ -935,7 +935,10 @@ test.describe('Reader comments & moderation (U14)', () => {
         await comments.openTab('All');
         await expect(comments.rows()).toHaveCount(1);
         await expect(comments.showingLine()).toHaveText(/Showing\s+26\s+to\s+26\s+of\s+26/);
-        expect((await comments.cells(comments.rows().first()))[1]).toBe(onPageTwo);
+        // Which comment the second page holds is not fixed: the 26 share a
+        // second, and each page's query picks among the tie (fn-s7; fix
+        // list B, flake-s26). It is one of the seeded comments.
+        expect(texts).toContain((await comments.cells(comments.rows().first()))[1]);
 
         // Control: "Hidden/Needs Approval" and "Reported" read "No Items" and carry no page links.
         for (const name of ['Hidden/Needs Approval', 'Reported']) {

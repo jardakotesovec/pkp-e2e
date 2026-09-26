@@ -364,23 +364,22 @@ and "Save" is greyed out until the boxes are filled: <sup>g</sup>
 
 <a id="recommendations"></a>
 17. **Reviewer recommendations {OJS}.** A journal starts with six entries,
-    all active and in this order: "Accept Submission", "Revisions
-    Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline
-    Submission", "See Comments". The active entries, in the table's order,
-    are the "Recommendation" list a reviewer picks from on the wizard's
-    step 3; an inactive entry is hidden there, except on a review that
-    already carries it. "Add Recommendation" opens the window of Fields;
-    saving closes it and the new entry appears in the table, active or not
-    as the last list said. The "Activate" tick asks "Are you sure you want
+    all active: "Accept Submission", "Revisions Required", "Resubmit for
+    Review", "Resubmit Elsewhere", "Decline Submission" and "See Comments".
+    The active entries are the "Recommendation" list a reviewer picks from
+    on the wizard's step 3; an inactive entry is hidden there, except on a
+    review that already carries it. "Add Recommendation" opens the window
+    of Fields; saving closes it and the new entry appears in the table,
+    active or not as the last list said. The "Activate" tick asks "Are you sure you want
     to activate the recommendation {title}" (window "Activate Reviewer
     Recommendation") or "Are you sure you want to deactivate the
     recommendation {title}" ("Deactivate Reviewer Recommendation"), with
-    "Yes" / "No". The table has no fixed order ⚠ [A7](#a7): on the test
-    installs a new entry has always appeared last, but an edited or ticked
-    entry sometimes stays where it is and sometimes drops to the bottom,
-    and the same steps give either on different runs; the reviewer's list
-    is the ticked rows in whatever order the table shows. Adding, editing
-    and the tick redraw the table with no notice. <sup>g</sup>
+    "Yes" / "No". Neither the table nor the reviewer's list has a fixed
+    order ⚠ [A7](#a7): a new entry usually shows last but not always, an
+    edited or ticked entry sometimes stays where it is and sometimes drops
+    to the bottom, and the same steps give either on different runs.
+    Adding, editing and the tick redraw the table with no notice.
+    <sup>g</sup>
 
 18. **A recommendation in use** (chosen on at least one submitted review)
     has no "More Actions" menu: it can be neither edited nor deleted, only
@@ -697,9 +696,10 @@ recipe are in the footnote. <sup>s0</sup>
    journal at the install defaults; a Reviewer with an accepted request on
    the journal's submission.
 
-   - **The starting entries**: the table lists "Accept Submission",
-     "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere",
-     "Decline Submission" and "See Comments", all ticked (Rule 17).
+   - **The starting entries**: the table lists six rows, in no fixed
+     order: "Accept Submission", "Revisions Required", "Resubmit for
+     Review", "Resubmit Elsewhere", "Decline Submission" and "See
+     Comments", all ticked (Rule 17).
    - **A refused entry**: press "Add Recommendation" and "Save" with the
      boxes empty: "This field is required." appears under "Review
      Recommendations" and under "Recommendation type", "Please correct 2
@@ -707,14 +707,15 @@ recipe are in the footnote. <sup>s0</sup>
      and "Save" is greyed out until the boxes are filled (Fields).
    - **The new entry**: type "Accept with minor changes" in "Review
      Recommendations", choose "Approved" under "Recommendation type", leave
-     "Active Upon Saving" and press "Save": the window closes and the row
-     appears last, ticked (Rule 17).
+     "Active Upon Saving" and press "Save": the window closes and the table
+     lists seven rows, "Accept with minor changes" among them, ticked
+     (which place it takes is not fixed [A7](#a7)) (Rule 17).
    - **Deactivate an entry**: untick "See Comments" and press "Yes" on "Are
      you sure you want to deactivate the recommendation See Comments": the
-     row is unticked (whether it stays put or drops to the bottom is not
-     fixed [A7](#a7)) (Rule 17).
+     row is unticked, and the table still lists the same seven rows
+     (Rule 17).
    - **The Reviewer's list**: Reviewer: open the request and go on to step
-     3: its "Recommendation" list ends with "Accept with minor changes" and
+     3: its "Recommendation" list offers "Accept with minor changes" and
      has no "See Comments" (Rule 17).
    - **Control**: the five starting entries left ticked are all on the
      Reviewer's list (Rule 17). <sup>s9</sup>
@@ -859,8 +860,8 @@ Left out of the scenarios above, by reason:
     Rule 14)
   - A6 (a deactivated recommendation reading "-" in the "Reviewer
     Recommendation" section; Rule 18; scenario 10 marks it)
-  - A7 (the "Reviewer Recommendations" table's order not fixed; Rule 17;
-    scenario 9 marks it)
+  - A7 (the "Reviewer Recommendations" table and the reviewer's list in
+    no fixed order; Rule 17; scenario 9 marks it)
   - A8 (a declined request counting in neither column; Rule 12)
   - A9 (the reviewer row's "Edit" window detaching a deactivated form;
     Rule 12a)
@@ -914,7 +915,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
 | [A4](#a4) | The address changes with the open tab, but a reload of Workflow Settings always lands on "Submission" › "Disable Submissions" | ❓ | minor | — |
 | [A6](#a6) | A recommendation deactivated after a reviewer chose it reads "-" in the "Reviewer Recommendation" section of the editor's "Read Review" window while the window's own "Recommendation:" line still names it | ❓ | user-visible | — |
-| [A7](#a7) | The "Reviewer Recommendations" table and the reviewer's list have no fixed order: an edited or ticked row sometimes stays put and sometimes drops to the bottom | ❓ | minor | — |
+| [A7](#a7) | The "Reviewer Recommendations" table and the reviewer's list have no fixed order: a new entry is not always last, and an edited or ticked row sometimes stays put and sometimes drops to the bottom | ❓ | minor | — |
 | [A8](#a8) | A form whose only requests were declined reads 0 / 0 and offers "Edit" and "Delete" like a fresh one; deleting it drops it from the declined request | ❓ | minor | — |
 | [OMP1](#omp1) | A press has no "Reviewer Recommendations" tab | ✅ | — | — |
 | [OMP2](#omp2) | A press words five strings differently and has a guideline box per review stage | ✅ | — | — |
@@ -987,12 +988,12 @@ and the window's own line show it. Basis: probe.
 <a id="a7"></a>
 **A7 — Recommendation order is not fixed** · ❓ · minor.
 The "Reviewer Recommendations" table and the reviewer's "Recommendation"
-list have no fixed order. A new entry has always appeared last, but after
-an edit or a tick the changed row sometimes stays where it is and
-sometimes drops to the bottom, and the same steps give either on different
-runs; there is no control to order the list. Question: should the table
-and the reviewer's list have a fixed order (creation order, or one the
-manager sets)? Lean: yes, and this is a defect, since a manager cannot
+list have no fixed order. A new entry usually shows last, but not always:
+the table has listed a just-saved entry first. After an edit or a tick
+the changed row sometimes stays where it is and sometimes drops to the
+bottom, and the same steps give either on different runs; there is no
+control to order the list. Question: should the table and the reviewer's
+list have a fixed order (creation order, or one the manager sets)? Lean: yes, and this is a defect, since a manager cannot
 rely on where a row will be after a tick. Basis: probe. <sup>f-a7</sup>
 
 <a id="a8"></a>
@@ -1601,7 +1602,10 @@ templates/reviewer/review/reviewerRecommendations.tpl`). Live-probed
 unticked (moved to the bottom in that run and in a second the same day;
 left in place, above the new entry, on the suite's first run and on a
 later 15-change drive, also 2026-09-06: finding A7), the reviewer's list
-ending with the new entry and without "See Comments" either way.
+ending with the new entry and without "See Comments" either way. A test
+run 2026-09-26 listed the new entry first in the table (footnote f-a7),
+so the scenario reads the table's rows and the reviewer's options as
+sets.
 
 <a id="fn-s10"></a>
 **s10** — Scenario 10 (OJS): the submitted review stores
@@ -1734,6 +1738,16 @@ GET, so the difference sits in the database's answer to an unordered query
 (a lean, not an observation: a rewritten row's physical place); which of
 the two a run gets is not something the tester can steer, so a test
 asserts the tick and the reviewer's list, never the row's position.
+Re-read 2026-09-26 (Rule 17; scenario 9): the table's query
+(`ReviewerRecommendationController::getMany()`) and the reviewer's
+(`Repository::getRecommendationOptions()`, `withContextId()->withActive()`
+plus the carried entry, then `get()`) still have no ordering, so the
+database decides both orders, a new row's place included; the six starting
+rows and a just-added one are therefore read as a set. Seen in a test run
+2026-09-26 on OJS (scenario 9, a scratch journal among three parallel
+runs): right after "Save" the table listed "Accept with minor changes"
+first, above the six starting rows. The reviewer's list has not been seen
+out of the table's order; its no-order reading is from the code.
 
 
 <a id="fn-f-a8"></a>

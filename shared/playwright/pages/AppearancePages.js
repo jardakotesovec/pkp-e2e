@@ -356,14 +356,33 @@ class UploadBox extends BasePage {
         return this.uploadButton.evaluate((b) => !b.disabled && !b.closest('.-screenReader'));
     }
 
-    /** The visible buttons of the box, by their words. */
-    async buttonNames() {
-        return this.field.evaluate((root) =>
-            [...root.querySelectorAll('button')]
-                .filter((b) => b.offsetParent !== null && !b.closest('.-screenReader'))
-                .map((b) => b.innerText.replace(/\s+/g, ' ').trim())
-                .filter(Boolean)
-        );
+    /**
+     * The box offers (true) or does not offer (false) "Upload File" to a
+     * sighted user, polled until it holds. A file chosen shows its name in
+     * the drop area at once, but the box turns into its preview ("Remove",
+     * "Upload File" moved to the screen-reader-only part) only when the page
+     * has handled the upload's answer, after `choose()` returns
+     * (.reports/flake-s26/fixC/diagnosis.md).
+     *
+     * @param {boolean} offered
+     */
+    async expectUploadOffered(offered) {
+        await expect.poll(() => this.uploadOffered(), {timeout: T}).toBe(offered);
+    }
+
+    /**
+     * A button of the box a sighted user sees, by its words ("Remove",
+     * "Upload File", "Restore Original"): visible and outside the box's
+     * screen-reader-only part. A locator, for `toBeVisible()` /
+     * `toHaveCount(0)`, which wait for the box to settle.
+     *
+     * @param {string} name
+     */
+    button(name) {
+        return this.field
+            .locator('button:not(.-screenReader button)')
+            .filter({visible: true})
+            .filter({hasText: new RegExp(`^\\s*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`)});
     }
 }
 

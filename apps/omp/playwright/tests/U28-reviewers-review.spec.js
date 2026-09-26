@@ -47,6 +47,7 @@ const {
     openEditorial,
     walkDecisionWizard,
     openTasksPanel,
+    closeTopModal,
     uploadRoundReviewFile,
 } = require('../pages/ReviewStagePages.js');
 const {
@@ -205,9 +206,9 @@ async function openFilters(page, list) {
     return modal;
 }
 
-/** Close the "Filters" window with Escape (the list page is no dialog). */
+/** Close the "Filters" window through its header "Close" (patterns.md pitfall 7). */
 async function closeFilters(page, modal) {
-    await page.keyboard.press('Escape');
+    await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
     await expect(modal).toHaveCount(0, {timeout: 30_000});
 }
 
@@ -671,7 +672,7 @@ test.describe("Reviewer's review (U28)", () => {
         await list.goto('actionRequired');
         let tasks = await openTasksPanel(page);
         await expect(taskRow(tasks, titleFor(tag))).toContainText('Review pending.');
-        await page.keyboard.press('Escape');
+        await closeTopModal(page);
 
         // Step 3 shows, in order: the "Review Files" list, "Review" with its
         // two boxes, "Upload" with "Reviewer Files" reading "No Files", the
@@ -745,7 +746,7 @@ test.describe("Reviewer's review (U28)", () => {
         await anaPage.goto(`/index.php/${PK}/dashboard/editorial`);
         const anaTasks = await openTasksPanel(anaPage);
         await expect(anaTasks.getByText(tag)).toHaveCount(0);
-        await anaPage.keyboard.press('Escape');
+        await closeTopModal(anaPage);
         const modal = await openEditorial(anaPage, PK, seeded.submissionId);
         await expect(reviewerRow(modal, 'Julia Reviewer')).toContainText('Review Submitted');
         const log = await openActivityLog(anaPage);

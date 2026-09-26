@@ -89,7 +89,7 @@ give no access to any screen in this spec. <sup>l</sup>
 | "For editor" {OJS} / "For editor only" {OMP} | no | Rich text, same condition. Never required |
 | The review form's questions | per question, marked "*" | Shown instead of the two text boxes when the assignment carries a review form: the form's title and description, then each question as the form defines it (a text box, a checkbox group, a radio group or a drop-down). A required question left unanswered stops "Submit Review" only after its confirmation: the step stays, no question is marked, and the box "Please fill in required fields." / "Some required fields are not filled in. Please complete them before submitting your review." appears under the buttons ({OMP}: the first sentence prints as a raw key ⚠ [OMP3](#omp3)). "Save for Later" saves whether or not a required question is answered, with "Your changes have been saved." as on a free-form review |
 | "Reviewer Files" (the list under "Upload") | no | The reviewer's own attachments: "Upload File" opens the shared upload wizard (*Submission files*; here three steps, "1. Upload File", "2. Review Details" and "3. Confirm", with no file-type question), and each row offers "Edit" and "Delete". Once the review is submitted, "Upload File" and "Delete" are gone and "Edit" stays |
-| "Recommendation" {OJS} | yes, on submit | Drop-down preset to "Choose One" listing the journal's active recommendations (the defaults, in order: "Accept Submission", "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline Submission", "See Comments"). "Submit Review" with "Choose One" is asked for confirmation first; after "OK" the step stays and "This field is required." appears under the list. It is the only check a free-form submit meets (row 1). "Save for Later" keeps whatever is chosen. A press has no such field [OMP1](#omp1) |
+| "Recommendation" {OJS} | yes, on submit | Drop-down preset to "Choose One" listing the journal's active recommendations (by default "Accept Submission", "Revisions Required", "Resubmit for Review", "Resubmit Elsewhere", "Decline Submission" and "See Comments"), in no fixed order [→ recommendation order](U29-review-setup-and-review-forms.md#a7). "Submit Review" with "Choose One" is asked for confirmation first; after "OK" the step stays and "This field is required." appears under the list. It is the only check a free-form submit meets (row 1). "Save for Later" keeps whatever is chosen. A press has no such field [OMP1](#omp1) |
 
 ## Rules & state
 
@@ -441,7 +441,7 @@ forms*. <sup>o</sup>
   forms*'.
 - **{OJS} Reviewer recommendations** (the journal's configurable set):
   the options of step 3's "Recommendation" list; a journal's own entries
-  lengthen it, an added entry appearing as its last option.
+  lengthen it, and an added entry takes no fixed place in it.
 - **Automatic reminders**: sent to the reviewer by *reviewer assignment &
   management*, clocked in *Review setup & review forms*; on this side they
   are only more emails.
@@ -889,10 +889,10 @@ App-specific:
     Given: Reviewer, on step 3 of an accepted request whose submission has
     an assigned Section Editor.
 
-    - **"Recommendation"**: the list is preset to "Choose One" and offers,
-      in order, "Accept Submission", "Revisions Required", "Resubmit for
+    - **"Recommendation"**: the list is preset to "Choose One" and, after
+      it, offers "Accept Submission", "Revisions Required", "Resubmit for
       Review", "Resubmit Elsewhere", "Decline Submission" and "See
-      Comments". Choose "Revisions Required", type "Please add a control
+      Comments", in no fixed order. Choose "Revisions Required", type "Please add a control
       group." into "For author and editor", press "Submit Review" and "OK".
     - **The editor's row**: Section Editor: the Reviewers panel row shows
       "Review Submitted" with "Revisions Required" under it.
@@ -1533,7 +1533,13 @@ expander offers "Edit" and "Delete"; the footer is the link "Go Back",
 then "Save for Later", then "Submit Review". The editor's "Review Details"
 window listed the uploaded file on some openings and "No Items" on others
 while its data request answered the same each time; that window belongs to
-*Reviewer assignment & management*.
+*Reviewer assignment & management*. Re-read 2026-09-26 (Fields step 3
+"Recommendation", Settings, scenario 16): `getRecommendationOptions()`
+reads the journal's active recommendations with no ordering, so the
+options after "Choose One" come in whatever order the database returns
+them; on the test installs this list has not been seen out of order (the
+order question is the review-setup feature's
+[A7](U29-review-setup-and-review-forms.md#a7)).
 
 <a id="fn-i"></a>
 **i** — Save vs submit: `ReviewerReviewStep3FormHandler.js` sets the hidden
@@ -1865,8 +1871,9 @@ accepting (2026-09-05), and step 3 lists the granted file as a download
 link. Live-probed 2026-09-05: after "Default Review Mode" was set to
 "Open", a newly seeded assignment's step 1 read "Review Type" / "Open";
 on OJS the "Reviewer Recommendations" sub-tab's "Add Recommendation"
-(textbox "Review Recommendations *", list "Recommendation type *") put
-the new entry last in step 3's "Recommendation" list.
+(textbox "Review Recommendations *", list "Recommendation type *") added
+the new entry to step 3's "Recommendation" list, where it showed last that
+day (the list has no fixed order, footnote h).
 
 <a id="fn-p"></a>
 **p** — OPS: no `pages/reviewer/` directory in `ops-main` (ROUTE-022 lists

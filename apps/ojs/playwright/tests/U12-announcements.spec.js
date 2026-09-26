@@ -50,6 +50,7 @@
 const fs = require('fs');
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {
     AnnouncementsSettingsTab,
     SideMenu,
@@ -453,7 +454,7 @@ test.describe('announcements', () => {
         // (Rule 6).
         panel = await list.openEdit('Workshop');
         await expect(panel.titleInput()).toHaveValue('Workshop');
-        expect(await panel.richText(panel.shortDescriptionField())).toBe('Registration open.');
+        await panel.expectRichText(panel.shortDescriptionField(), 'Registration open.');
         await expect(panel.expiryInput()).toHaveValue(tomorrow);
         await panel.titleInput().fill('Workshop 2027');
         await panel.save();
@@ -865,19 +866,22 @@ test.describe('announcements', () => {
         }
 
         // The feeds: each titled "{journal name}: Announcements", listing
-        // "Older notice" then "Newer notice", oldest first, with title,
-        // date, page address and "Announcement" text; "Old news" in none;
-        // the RSS 2.0 dates readable (Rules 8, 18).
+        // "Older notice" and "Newer notice", in any order (the feed's query
+        // has no order), each with its title, date, page address and
+        // "Announcement" text; "Old news" in none; the RSS 2.0 dates
+        // readable (Rules 8, 18).
         for (const type of ['atom', 'rss2', 'rss']) {
             const feed = await readFeed(visitor.request, hrefs[type]);
             expect(feed.status, `${type} answers`).toBe(200);
             expect(feed.contentType, `${type} is XML`).toMatch(/xml/);
             expect(feed.title, `${type}'s title`).toBe(`${journalName}: Announcements`);
-            expect(feed.entries.map((e) => e.title), `${type}'s entries`).toEqual(['Older notice', 'Newer notice']);
-            expect(feed.entries[0].link).toMatch(new RegExp(`/${tag}/announcement/view/${olderId}$`));
-            expect(feed.entries[1].link).toMatch(new RegExp(`/${tag}/announcement/view/${newerId}$`));
-            expect(feed.entries[0].description).toContain('Posted first.');
-            expect(feed.entries[1].description).toContain('Posted second.');
+            expect(unordered(feed.entries.map((e) => e.title)), `${type}'s entries`).toEqual(unordered(['Older notice', 'Newer notice']));
+            const older = feed.entries.find((e) => e.title === 'Older notice');
+            const newer = feed.entries.find((e) => e.title === 'Newer notice');
+            expect(older.link).toMatch(new RegExp(`/${tag}/announcement/view/${olderId}$`));
+            expect(newer.link).toMatch(new RegExp(`/${tag}/announcement/view/${newerId}$`));
+            expect(older.description).toContain('Posted first.');
+            expect(newer.description).toContain('Posted second.');
             for (const entry of feed.entries) {
                 expect(entry.date, `${type}'s "${entry.title}" carries a date`).not.toBe('');
             }

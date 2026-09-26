@@ -38,6 +38,7 @@ const {
     loginFormRegisterLink,
 } = require('../pages/RegistrationPages.js');
 const {waitForContextSettingsSave} = require('../pages/PublicationMetadataPages.js');
+const {expectTextsInAnyOrder} = require('../../../../shared/playwright/support/order.js');
 
 const JOURNAL = 'publicknowledge';
 const JOURNAL_NAME = 'Journal of Public Knowledge';
@@ -345,7 +346,8 @@ test.describe('registration & account validation', () => {
         await roles.goto();
         await expect(roles.roleBox('Reviewer')).toBeChecked();
         await expect(roles.roleBox('Reader')).not.toBeChecked();
-        await expect(roles.interestChips).toHaveText(['ethics', 'statistics']);
+        // In either order: the interests are read with no ORDER BY (fix list B).
+        await expectTextsInAnyOrder(roles.interestChips, ['ethics', 'statistics']);
     });
 
     test('S4: privacy consent is required when a statement exists', async ({page, context, browser, baseURL, ojsApi, asUser}, testInfo) => {

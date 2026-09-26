@@ -1523,6 +1523,22 @@ abstract class PKPSubmissionScenarioBuilder
                 'submissionFileId' => $submissionFileId,
             ];
         }
+
+        // "Order" › "Save Order" with the galleys in the plan's order: the
+        // grid's saveSequence (OrderGridItemsFeature::saveSequence, the op the
+        // Vue galley list's "Save Order" posts too) gives each galley the
+        // first one's sequence (0, as "Create New Galley" leaves every galley)
+        // plus its position, through setDataElementSequence's
+        // Repo::galley()->edit. Without it every galley sits at 0 and the list
+        // (ordered by seq alone) comes back in whatever order the database
+        // returns the tie, which a reload can change (fix list B, flake-s26).
+        if (count($seeded) > 1) {
+            foreach ($seeded as $position => $row) {
+                if ($position > 0) {
+                    Repo::galley()->edit(Repo::galley()->get($row['id']), ['seq' => $position]);
+                }
+            }
+        }
         return $seeded;
     }
 

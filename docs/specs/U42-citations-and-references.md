@@ -315,7 +315,7 @@ typed. Nothing asks first. The one exception is an author row added in
 ### Data citations
 
 18. **Where data citations live.** While the journal's Data Citations
-    setting is switched on, each version carries an ordered list of data
+    setting is switched on, each version carries a list of data
     citations, shown: <sup>c</sup> <sup>l</sup>
     - on the workflow's **"Data"** page (the Publication area's "Data"
       entry, headed "Publication: Data", on a preprint server "Preprint:
@@ -350,13 +350,16 @@ typed. Nothing asks first. The one exception is an author row added in
     this item? This action cannot be undone." with "OK" and "Cancel". OK
     removes the data citation from this version; Cancel leaves it.
     <sup>l</sup>
-23. **Ordering.** Until an order is saved, data citations are listed in the
-    order they were added. "Order" puts the table in ordering mode: each
-    row's "…" menu gives way to up and down arrows, which have no names
-    for a screen reader ⚠ [A19](#a19), and the button reads
-    **"Save Order"**. Pressing it saves the sequence and leaves ordering
-    mode. A data citation added after an order was saved appears first,
-    above every ordered row ⚠ [A8](#a8). <sup>m</sup> <sup>q18</sup>
+23. **Ordering.** Until an order is saved, the table keeps no order of
+    its own: data citations usually show in the order they were added,
+    but can come back in another order on a later visit ⚠ [A8](#a8).
+    "Order" puts the table in ordering mode: each row's "…" menu gives
+    way to up and down arrows, which have no names for a screen reader
+    ⚠ [A19](#a19), and the button reads **"Save Order"**. Pressing it
+    saves the order shown, which then holds across reloads, and leaves
+    ordering mode. A data citation added after an order was saved
+    appears first, above every ordered row ([A8](#a8)). <sup>m</sup>
+    <sup>q18</sup>
 24. **Data citations while submitting.** While the journal asks for or
     requires data citations, the "Details" step shows a **"Data"** section
     headed "Data" with "Information about the research data associated with
@@ -753,13 +756,14 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
    - **Ordering**: add two more data citations the same way, "Dataset B"
      and then "Dataset C", each with "Supporting data without specifying
      whether they were generated or analyzed (supporting)." as
-     "Relationship type" and nothing else: the table lists them after the
-     first, in the order added. Press "Order": each row's "…" menu gives
+     "Relationship type" and nothing else: the table lists "Ocean
+     temperature records, revised", "Dataset B" and "Dataset C", in no
+     fixed order ([A8](#a8)). Press "Order": each row's "…" menu gives
      way to up and down arrows ([A19](#a19)), and the button reads "Save
-     Order"; move "Dataset C" up twice and press "Save Order": the menus
-     come back and the table lists "Dataset C", "Ocean temperature
-     records, revised" and "Dataset B"; reload the page: the same order
-     (Rule 23).
+     Order"; press the up arrow on "Dataset C" until it is the first row
+     and press "Save Order": the menus come back and the table lists
+     "Dataset C" first, then the other two in the order they stood
+     before; reload the page: the same order (Rule 23).
    - **Delete**: choose "…" › "Delete" on "Dataset B": a confirmation
      headed "Delete" asks "Are you sure you wish to delete this item?
      This action cannot be undone."; press "Cancel": the row stays;
@@ -888,8 +892,8 @@ Left out of the scenarios above, by reason:
   - A6 (the progress box counting structured references only; Rule 13)
   - A7 (a DOI in a reference typed while submitting not kept with lookup
     off; Rule 17)
-  - A8 (a data citation added after a saved order listed first;
-    Rule 23)
+  - A8 (a new data citation with no place in the order: none before
+    an order is saved, first after one; Rule 23; scenario 6 passes it)
   - A9 (data citations at "Require…" warning on "Review" without
     stopping the submission; Rule 24)
   - A10 (the wizard's Data Citations table unchanged after a save on a
@@ -951,7 +955,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | The lookup text says "this Journal" on a press or a preprint server | 🐞 | minor | — |
 | [A6](#a6) | The lookup's progress box counts structured references only | 🐞 | minor | — |
 | [A7](#a7) | A DOI in a reference typed while submitting is not kept when lookup is off | 🐞 | latent | — |
-| [A8](#a8) | A data citation added after an order was saved jumps to the top and stays there | 🐞 | minor | — |
+| [A8](#a8) | A new data citation has no place in the order: none before an order is saved, the top after one | 🐞 | minor | — |
 | [A9](#a9) | "Require" for data citations warns but does not stop the submission | 🐞 | user-visible | — |
 | [A10](#a10) | On a press or a preprint server the wizard's Data Citations table ignores every save until a reload | 🐞 | minor | — |
 | [A12](#a12) | An arXiv ID typed with "arxiv:" or as an address loses its version; a data citation refuses a versioned one | 🐞 | minor | — |
@@ -1031,12 +1035,17 @@ yet.
 Basis: probe, 2026-09-24; code for the deposit. <sup>f-a7</sup>
 
 <a id="a8"></a>
-**A8 — A data citation added after an order was saved jumps to the top** · 🐞 · minor.
-After an editor saves an order on the Data Citations table, a data citation
-added later is expected at the end. It appears first, above every ordered
-row. Saving the order again keeps it there; only moving it with the arrows
-and saving puts it elsewhere.
-Basis: probe, 2026-09-24. <sup>f-a8</sup>
+**A8 — A new data citation has no place of its own in the order** · 🐞 · minor.
+An editor expects the Data Citations table to keep data citations in the
+order they were added until an order is saved, and a data citation added
+after that at the end. Before any order is saved, the app keeps no order:
+the table usually shows the order added, but nothing holds it, so the rows
+can come back in another order on a later visit. After an order is saved,
+a data citation added later appears first, above every ordered row. Saving
+the order again keeps it there; only moving it with the arrows and saving
+puts it elsewhere.
+Basis: probe, 2026-09-24; code for the order before a save, 2026-09-26.
+<sup>f-a8</sup>
 
 <a id="a9"></a>
 **A9 — "Require" for data citations does not stop the submission** · 🐞 · user-visible.
@@ -1608,7 +1617,15 @@ also after an edit of A to "Dataset A1" and a reload; "Order" swapped each
 row's menu for two icon-only buttons with no name and the button read "Save
 Order"; C moved up twice and saved read C, A1, B, also after a reload;
 "Dataset D" added then listed first, also after a reload and after saving
-the order again with no move.
+the order again with no move. Code read 2026-09-26 (Rule 23, the order
+before a save): every data citation added and not yet ordered holds `seq`
+0, so they tie and `orderBy('seq')` leaves them in the order PostgreSQL
+returns the rows, which is their order on disk: usually the order added,
+but a row an edit rewrote, or one written into space freed by a delete,
+can come back elsewhere. The probe's A, B, C order was that storage order,
+not one the app keeps. Several data citations added after a saved order
+tie at 0 the same way, above the ordered rows. After "Save Order" every
+row holds a distinct `seq`, so the saved order is fixed.
 
 <a id="fn-n"></a>
 **n** — Reviewer. `ReviewerViewMetadataLinkAction` passes
@@ -1947,7 +1964,9 @@ Crossref XML of an article whose references came both ways.
 
 <a id="fn-f-a8"></a>
 **f-a8 — A8 evidence.** Note m. The funders list shows the same behavior
-(*Funding*, A7). Live-probed 2026-09-24: note m.
+after a saved order (*Funding*, A7). Live-probed 2026-09-24 (the data
+citation added after a saved order): note m. Code read 2026-09-26 (the
+order before a save): note m; not yet seen out of order on screen.
 
 <a id="fn-f-a9"></a>
 **f-a9 — A9 evidence.** `Context::getRequiredMetadata()` includes

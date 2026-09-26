@@ -471,7 +471,9 @@ test.describe('Copyediting stage (U32)', () => {
         await expect(windowCancel(window)).toBeHidden({timeout: 20_000});
         await expect(page.getByRole('dialog')).toHaveCount(1);
         await expect(fileRows(modal, LISTS.draft)).toHaveCount(rowsBefore.length);
-        expect(await fileRows(modal, LISTS.draft).allInnerTexts()).toEqual(rowsBefore);
+        // Compared sorted: the files list by upload time to the second, so
+        // two uploaded in one second come back either way (fix list B).
+        await expect.poll(async () => (await fileRows(modal, LISTS.draft).allInnerTexts()).sort()).toEqual([...rowsBefore].sort());
         await expect(fileRow(modal, LISTS.draft, copyedited)).toHaveCount(0);
     });
 

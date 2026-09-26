@@ -127,19 +127,49 @@ exports.ReviewerAssignmentsPage = class ReviewerAssignmentsPage extends BasePage
         return this.contextUrl(this.contextPath, `/dashboard/reviewAssignments?currentViewId=${id}`);
     }
 
-    /** Open a view by address and wait for its rows (or "No Items"). */
+    /**
+     * Arm a wait for the list's own fetch (`GET …/_submissions/reviewerAssignments`),
+     * before the navigation or click that starts it.
+     */
+    waitForList() {
+        return this.page.waitForResponse(
+            (r) => /\/_submissions\/reviewerAssignments\b/.test(r.url()) && r.request().method() === 'GET',
+            {timeout: 30_000}
+        );
+    }
+
+    /** Open a view by address and wait for its own list to arrive and render. */
     async goto(view = 'actionRequired') {
+        const listed = this.waitForList();
         await this.page.goto(this.url(view));
+        await listed;
         await this.expectSettled();
     }
 
     /**
-     * The table has finished loading: the "Loading" row is gone and either a
-     * data cell or the empty-state text is on screen. Every presence and
-     * absence read is bounded by this.
+     * The table has finished loading: the page's list fetch has answered,
+     * the "Loading" row is gone and either a data cell or the empty-state
+     * text is on screen. Every presence and absence read is bounded by this.
+     * The fetch comes first because the table mounts showing "No Items"
+     * before its fetch starts (the store's fetch is debounced and the empty
+     * text reads "No Items" while nothing is loading yet, ui-library
+     * `dashboardPageStore.js`, `DashboardTable.vue`), so the text alone can
+     * settle on a list that has not been asked for; and a roster reviewer's
+     * whole list comes in that one answer (the endpoint ignores paging).
      */
     async expectSettled() {
         await expect(this.table).toBeVisible({timeout: 30_000});
+        await expect
+            .poll(
+                () =>
+                    this.page.evaluate(() =>
+                        performance
+                            .getEntriesByType('resource')
+                            .some((entry) => /\/_submissions\/reviewerAssignments\b/.test(entry.name))
+                    ),
+                {message: 'the list fetch answered', timeout: 30_000}
+            )
+            .toBe(true);
         await expect(this.table).not.toContainText('Loading', {timeout: 30_000});
         await expect(this.table.locator('tbody tr td').or(this.page.getByText('No Items')).first()).toBeVisible({
             timeout: 30_000,
@@ -163,17 +193,24 @@ exports.ReviewerAssignmentsPage = class ReviewerAssignmentsPage extends BasePage
             .getByRole('link');
     }
 
-    /** Select a sidebar view and wait for the list. */
+    /** Select a sidebar view and wait for that view's own list (the previous view's rows stay until it lands). */
     async selectView(view) {
+        const listed = this.waitForList();
         await this.viewLink(view).click();
         await this.page.waitForURL((url) => url.searchParams.get('currentViewId') === REVIEWER_VIEWS[view], {
             waitUntil: 'commit',
         });
+        await listed;
         await this.expectSettled();
     }
 
-    /** The count a sidebar view's link shows ("3 Declined" → 3). */
+    /**
+     * The count a sidebar view's link shows ("3 Declined" → 3). The counts
+     * arrive in their own fetch (`_submissions/viewsCount`) after the links
+     * render with "-" in their place, so the read waits for the number.
+     */
     async viewCount(view) {
+        await expect(this.viewLink(view)).toHaveText(/^\s*\d+\s/, {timeout: 30_000});
         const text = (await this.viewLink(view).innerText()).trim();
         const match = text.match(/^(\d+)\s/);
         return match ? Number(match[1]) : null;
@@ -491,9 +528,16 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
     // Step 2 — guidelines
     // ---------------------------------------------------------------------
 
+    /**
+     * "Continue to Step #3", then wait for step 3's own form: the tab is
+     * selected before its panel's content arrives (jQuery UI tabs load each
+     * step by AJAX), so a read of the step's fields right after the tab
+     * flips finds nothing (U29 S9 on CI).
+     */
     async continueToStep3() {
         await this.continueToStep3Button.click();
         await this.expectStep(3);
+        await expect(this.step3Form).toBeVisible({timeout: 30_000});
     }
 
     // ---------------------------------------------------------------------

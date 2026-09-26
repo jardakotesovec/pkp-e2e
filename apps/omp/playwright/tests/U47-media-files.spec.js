@@ -167,10 +167,7 @@ async function addDiscussion(page, {name, participantUsername, message}) {
  * returns the new version's id from the app's own POST …/version answer.
  */
 async function createNewVersion(page, frame) {
-    const item = frame.createNewVersionLink();
-    if (!(await item.isVisible())) {
-        await frame.publicationGroup().click();
-    }
+    const item = await frame.revealPublicationEntry('Create New Version');
     // The dialog takes its stage from the loaded version at mount.
     await frame.expectVersionLoaded();
     await item.click();

@@ -51,6 +51,7 @@
  */
 const {test, expect} = require('../support/fixtures.js');
 const {ContributorsScreen} = require('../pages/ContributorPages.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 const {stubRegistrySearch} = require('../pages/FundingPages.js');
 const {
     PublicationScreen,
@@ -59,7 +60,7 @@ const {
     createNewVersion,
     saveSettingsPanel,
     activityLogCounts,
-    addDiscussion,
+    sendMailControl,
 } = require('../pages/PublicationPages.js');
 const {
     STEPS,
@@ -109,25 +110,6 @@ async function openContributors(page, contextPath, submissionId, options = {}) {
     const screen = new ContributorsScreen(page);
     await screen.openFromWorkflow();
     return screen;
-}
-
-/**
- * The mailbox's positive control (A8): a discussion opened on the
- * submission's Production stage with the Moderator's box ticked and the
- * Author's left unticked, whose copy reaches the Moderator; the seeded
- * server's real submit assigned the section's Moderator, so the box is
- * there. Returns the `afterControl` for `pkpMail.expectNone`.
- */
-async function sendMailControl(page, contextPath, submissionId, tag) {
-    const discussion = `Control ${tag}`;
-    await openWorkflow(page, contextPath, submissionId);
-    await new PublicationScreen(page).openProductionStage();
-    await addDiscussion(page, {
-        name: discussion,
-        message: `Control message ${tag}.`,
-        participants: ['sectioneditor.ana'],
-    });
-    return {to: mailOf('sectioneditor.ana'), subject: discussion};
 }
 
 /**
@@ -438,7 +420,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         // The mailbox: no email arrived for the Author or for any of the
         // typed addresses from these saves (Side effects), bounded by a
         // mail this test causes the same way (A8).
-        const afterControl = await sendMailControl(page, PK, submissionId, tag);
+        const afterControl = await sendMailControl({asUser, api: opsApi, tag});
         for (const to of [mailOf(author), alanMail, orgMail, anonMail]) {
             await pkpMail.expectNone({to, afterControl});
         }
@@ -693,7 +675,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         // The mailbox: no email arrived for the Author or the moved contact
         // (Side effects), bounded by a mail this test causes the same way
         // (A8).
-        const afterControl = await sendMailControl(page, PK, submissionId, tag);
+        const afterControl = await sendMailControl({asUser, api: opsApi, tag});
         await pkpMail.expectNone({to: mailOf(author), afterControl});
         await pkpMail.expectNone({to: gretaMail, afterControl});
     });
@@ -749,7 +731,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(
             page.getByRole('menuitem', {name: 'Remove institution', exact: true})
         ).toBeVisible();
-        await page.keyboard.press('Escape');
+        await closeMenu(page);
 
         // "The per-language names": "Edit institution name" opens one name
         // box per language, "Type the institution name in {language}", with
@@ -1185,9 +1167,9 @@ test.describe('Contributors & affiliations (U41)', () => {
         // "Control": before any untick, "Publication Lists" and "Full" read
         // the same names and roles (Rule 7).
         await screen.openPreview();
+        await expect(screen.previewValue('Full')).toContainText('Alex Author (Author)', {timeout: 30_000});
+        await expect(screen.previewValue('Full')).toContainText('Greta Zeta (Author)');
         const before = await screen.previewValue('Full').innerText();
-        expect(before).toContain('Alex Author (Author)');
-        expect(before).toContain('Greta Zeta (Author)');
         await expect(screen.previewValue('Publication Lists')).toHaveText(before);
         await expect(screen.previewValue('Abbreviated')).toHaveText('Author et al.');
         await screen.closePreview();

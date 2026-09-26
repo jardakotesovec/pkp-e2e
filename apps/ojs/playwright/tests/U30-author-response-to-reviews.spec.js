@@ -210,7 +210,14 @@ async function openResponseWindow(page, opener, {editor = false, reposition = nu
     const window = new AuthorResponseWindow(page, {editor});
     await settleApi(page);
     await opener();
-    if (await window.modal().isVisible({timeout: 6_000}).catch(() => false)) {
+    // A bounded wait for the window, not `isVisible({timeout})`: Playwright
+    // ignores that option and reads once, right after the press, so the
+    // window still opening took the reload branch below.
+    const opened = await window
+        .modal()
+        .waitFor({state: 'visible', timeout: 6_000})
+        .then(() => true, () => false);
+    if (opened) {
         return window;
     }
     await expect(async () => {
@@ -633,14 +640,14 @@ test.describe('author response to reviews', () => {
         await table.openRowMenu(ALEX);
         await expect(table.menuItem('View')).toBeDisabled();
         await expect(table.menuItem('Delete')).toBeDisabled();
-        await managerPage.keyboard.press('Escape');
+        await table.closeRowMenu();
 
         // The co-author's row: its actions are enabled and "View" opens the
         // window naming the co-author.
         await table.openRowMenu(BEA);
         await expect(table.menuItem('View')).toBeEnabled();
         await expect(table.menuItem('Delete')).toBeEnabled();
-        await managerPage.keyboard.press('Escape');
+        await table.closeRowMenu();
         const editorView = await openEditorView(managerPage, table, BEA);
         await expect(editorView.intro()).toContainText(
             `The following response was submitted by the author, ${BEA}.`

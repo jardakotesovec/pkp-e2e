@@ -153,6 +153,27 @@ class NavigationTab extends BasePage {
     }
 
     /**
+     * The "Navigation Menu Items" cell's items, sorted. The cell lists them
+     * in no fixed order: the app orders the menu's assignments by `seq`,
+     * which restarts under each parent, so a top item ties with a child
+     * (`NavigationMenuItemDAO::getByMenuId()`; fix list B, flake-s26).
+     */
+    async menuItemsSet(title) {
+        return (await this.menuItemsCell(title)).split(', ').sort();
+    }
+
+    /**
+     * `menus()` as a comparison without order: the rows sorted by title and
+     * each items cell split and sorted (the menus grid has no ORDER BY, and
+     * the cells order as `menuItemsSet` says).
+     */
+    async menuSets() {
+        return (await this.menus())
+            .map((m) => ({title: m.title, items: m.items ? m.items.split(', ').sort() : []}))
+            .sort((a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
+    }
+
+    /**
      * The "Navigation" table as data, top to bottom: each row's title (read
      * as `rowTitles` reads it) and its "Navigation Menu Items" cell (read as
      * `menuItemsCell` reads it).
@@ -736,6 +757,17 @@ class EditorialChrome extends BasePage {
     async openUserMenu() {
         await this.initialsButton.click();
         await expect(this.userMenu).toBeVisible({timeout: T});
+    }
+
+    /**
+     * Close the open initials menu by pressing the initials again, and wait
+     * until it is gone. The menu (ui-library `Dropdown`) has no Escape
+     * handler: an Escape leaves it open until the button loses the focus
+     * (.reports/flake-s26/esc/diagnosis.md H3).
+     */
+    async closeUserMenu() {
+        await this.initialsButton.click();
+        await expect(this.userMenu).toBeHidden({timeout: T});
     }
 
     /** The initials menu's lines, top to bottom (headings and links), whitespace-collapsed. */

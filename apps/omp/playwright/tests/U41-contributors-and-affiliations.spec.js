@@ -58,6 +58,7 @@
  * hard-coded sleeps. Everything runs in the parallel `omp` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {
     ContributorsScreen,
     stubRegistrySearch,
@@ -302,10 +303,7 @@ async function expectNoMailAfterControl(page, pkpMail, {tag, contextPath, otherS
  * response. U40's shape.
  */
 async function createNewVersionFromWorkflow(page) {
-    const item = page.getByRole('link', {name: 'Create New Version', exact: true});
-    if (!(await item.isVisible())) {
-        await page.getByRole('link', {name: 'Publication', exact: true}).click();
-    }
+    const item = await new WorkflowPage(page, null).revealPublicationEntry('Create New Version');
     await item.click();
     const dialog = page.getByRole('dialog', {name: 'Create New Version'});
     await expect(dialog).toBeVisible({timeout: 30_000});

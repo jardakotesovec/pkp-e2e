@@ -686,6 +686,16 @@ const AnnouncementPanel = class AnnouncementPanel {
         return (await this.richBody(field)).innerText();
     }
 
+    /**
+     * A rich-text box shows exactly `text`, auto-waited: the panel opened
+     * for "Edit" fills its editors from the fetched announcement after they
+     * start, so a read right after the editor is editable can be empty
+     (.reports/flake-s26/fixC/diagnosis.md).
+     */
+    async expectRichText(field, text) {
+        await expect(await this.richBody(field)).toHaveText(text, {timeout: T});
+    }
+
     /** The language button at the top of a two-language panel ("French"). */
     localeButton(name) {
         return this.dialog.locator('.pkpFormLocales button').filter({hasText: name});

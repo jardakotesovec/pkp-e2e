@@ -548,6 +548,19 @@ async function openTasksPanel(page) {
 }
 
 /**
+ * Close the top side window (the Tasks panel, a window over the workflow)
+ * through its own header "Close", never Escape (patterns.md pitfall 7;
+ * .reports/flake-s26/esc/diagnosis.md H4), and wait until it is gone: one
+ * side-window header fewer than before.
+ */
+async function closeTopModal(page) {
+    const headers = page.locator('[data-cy="sidemodal-header"]');
+    const open = await headers.count();
+    await topModal(page).getByRole('button', {name: 'Close', exact: true}).first().click();
+    await expect(headers).toHaveCount(open - 1, {timeout: 20_000});
+}
+
+/**
  * Open the "Files for Review" panel's selection window ("Current Review
  * Files For Round N": the submission's workflow files with checkboxes, an
  * "Upload Review File" link, "OK" to confirm). Resolves the window.
@@ -585,17 +598,22 @@ function reviewFileCheckbox(dialog, fileName) {
 }
 
 /**
- * Confirm the review-files window with "OK" and wait for the "Review files
- * updated." notice; then wait until the round's "Files for Review" list
- * carries every name in `expectedFiles`. The notice is a server-side
- * trivial notification fetched by the page (parallel lesson 2), so the
- * list read is the durable bound.
+ * Confirm the review-files window with "OK", bounded by its save
+ * (`…/manage-review-files-grid/update-review-files` answering OK); then wait
+ * until the round's "Files for Review" list carries every name in
+ * `expectedFiles`. The "Review files updated." notice is the caller's read:
+ * it is a trivial notification the server keeps for the account until a
+ * page of it fetches it (patterns.md parallel lesson 2), so only a caller
+ * signed in as an account no other test uses can rely on it.
  */
 async function confirmReviewFilesDialog(page, modal, dialog, expectedFiles) {
+    const saved = page.waitForResponse(
+        (r) => /\/update-review-files\b/.test(r.url()) && r.request().method() === 'POST',
+        {timeout: 30_000}
+    );
     await dialog.getByRole('button', {name: 'OK', exact: true}).click();
-    await expect(page.getByText('Review files updated.').first()).toBeVisible({
-        timeout: 20_000,
-    });
+    const response = await saved;
+    expect(response.ok(), `review files save answered ${response.status()}`).toBe(true);
     for (const fileName of expectedFiles) {
         await expect(
             primaryRegion(modal).getByRole('row').filter({hasText: fileName}).first()
@@ -1159,6 +1177,7 @@ module.exports = {
     completeStandaloneUploadWizard,
     assignParticipant,
     openTasksPanel,
+    closeTopModal,
     openReviewFilesDialog,
     showAllStageFiles,
     reviewFileCheckbox,

@@ -83,7 +83,7 @@ with an asterisk: *" closes the form, though no field carries an asterisk.
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| The role list (an unlabelled drop-down, first under "Locate a User") | yes, preselected | The roles offered on this stage (the table below), the first one preselected. Choosing another role hides both boxes (Rule 4c) [A9](#a9); the list of people follows the new role only after "Search" (Rule 3) <sup>d</sup> |
+| The role list (an unlabelled drop-down, first under "Locate a User") | yes, preselected | The roles offered on this stage, by permission level (the table below). The first listed is preselected: always a role of the highest level offered, and on a stage whose highest level holds two roles either of them. Choosing another role hides both boxes (Rule 4c) [A9](#a9); the list of people follows the new role only after "Search" (Rule 3) <sup>d</sup> |
 | "Search User By Name" | no | Narrows the list of people on "Search" <sup>d</sup> |
 | "Search" | — | Reloads the list of people for the chosen role and name <sup>d</sup> |
 | The list of people: a choice button, "Name", "Assignments", "Affiliation", "Reviewing interests" | one person | Everyone holding the chosen role in the journal, minus those already assigned in that role (Rule 3). "Assignments" counts the journal's active submissions the person is assigned to or has a review request on that they have not declined; published submissions are not counted. Twenty rows show, with "20 of {total} items" and a "Load more" link under the list; "Load more" shows the rest, and scrolling loads nothing. "OK" with nobody chosen assigns nobody ⚠ [A4](#a4) <sup>d</sup> |
@@ -94,15 +94,21 @@ with an asterisk: *" closes the form, though no field carries an asterisk.
 | "Cancel", "OK" | — | Rule 6 <sup>d</sup> |
 
 **Roles offered by "Assign"**, install defaults: every role whose stage set
-includes the stage, in this order, no reviewer role ever (Rule 3). <sup>d</sup>
+includes the stage, no reviewer role ever (Rule 3). The list gives them by
+permission level, as the panel orders its rows (Rule 1): manager-level
+roles first, then Section and Guest Editors, then the assistant roles,
+then Author and the other author-level roles. Roles of one level come in
+no fixed order among themselves, and may show in another order the next
+time the window opens. Below, a semicolon separates two levels and a comma
+two roles of one level. <sup>d</sup>
 
 | Stage | Journal | Press | Preprint server |
 |-------|---------|-------|-----------------|
-| Submission | Journal editor, Section editor, Guest editor, Funding coordinator, Author, Translator | Press editor, Series editor, Funding coordinator, Author, Volume editor, Translator | — <sup>d</sup> |
+| Submission | Journal editor; Section editor, Guest editor; Funding coordinator; Author, Translator | Press editor; Series editor; Funding coordinator; Author, Volume editor, Translator | — <sup>d</sup> |
 | Internal Review | — | as Submission | — <sup>d</sup> |
-| Review (External Review) | Journal editor, Section editor, Guest editor, Funding coordinator, Translator, Author | as Submission | — <sup>d</sup> |
-| Copyediting | Journal editor, Production editor, Section editor, Guest editor, Copyeditor, Marketing and sales coordinator, Author, Translator | Press editor, Production editor, Series editor, Copyeditor, Marketing and sales coordinator, Author, Volume editor, Chapter Author, Translator | — <sup>d</sup> |
-| Production | Journal editor, Production editor, Section editor, Guest editor, Designer, Indexer, Layout Editor, Proofreader, Author, Translator | Press editor, Production editor, Series editor, Designer, Indexer, Layout Editor, Proofreader, Author, Volume editor, Chapter Author, Translator | Preprint Server manager, Moderator, Author [OPS1](#ops1) <sup>d</sup> |
+| Review (External Review) | as Submission | as Submission | — <sup>d</sup> |
+| Copyediting | Journal editor, Production editor; Section editor, Guest editor; Copyeditor, Marketing and sales coordinator; Author, Translator | Press editor, Production editor; Series editor; Copyeditor, Marketing and sales coordinator; Author, Volume editor, Chapter Author, Translator | — <sup>d</sup> |
+| Production | Journal editor, Production editor; Section editor, Guest editor; Designer, Indexer, Layout Editor, Proofreader; Author, Translator | Press editor, Production editor; Series editor; Designer, Indexer, Layout Editor, Proofreader; Author, Volume editor, Chapter Author, Translator | Preprint Server manager; Moderator; Author [OPS1](#ops1) <sup>d</sup> |
 
 **The "Edit Assignment" window** (Rule 8). <sup>h</sup>
 
@@ -160,13 +166,14 @@ includes the stage, in this order, no reviewer role ever (Rule 3). <sup>d</sup>
 <a id="assign-window"></a>
 3. **The "Assign Participant" window.** "Assign" opens a side panel titled
    "Assign Participant" (Fields). Its role list offers the roles whose
-   stage set includes this stage, never a reviewer role (the table in
-   Fields). The Journal Manager and Press Manager roles have no stage set
-   and so are never offered; a preprint server's manager role works on
+   stage set includes this stage, never a reviewer role, by permission
+   level and in no fixed order within a level (the table in Fields).
+   The Journal Manager and Press Manager roles have no stage set and so
+   are never offered; a preprint server's manager role works on
    Production and is offered there [OPS1](#ops1). The list of people shows
    everyone who holds the chosen role in the journal, the role started and
    not ended, except those already assigned to this submission in that
-   role (Rule 2). It opens on the first role's people. After choosing
+   role (Rule 2). It opens on the first listed role's people. After choosing
    another role, the list, and the person chosen in it, stay the previous
    role's until "Search" is pressed; "OK" then assigns nobody (Rule 6b).
    <sup>d</sup>
@@ -521,14 +528,14 @@ catcher and the tooling recipe are in the footnote. <sup>s</sup>
 
    - **The "Assign Participant" window**: on the "Participants" panel,
      which lists the Author's row, press "Assign": a side panel titled
-     "Assign Participant" opens; under "Locate a User" the role list offers,
-     in order, "Journal editor", "Section editor", "Guest editor", "Funding
-     coordinator", "Author" and "Translator", with "Journal editor"
-     preselected and no "Journal manager" and no reviewer role (on a
-     press: "Press
-     editor", "Series editor", "Funding coordinator", "Author", "Volume
-     editor", "Translator"); neither "Assignment privileges" nor
-     "Permissions" shows (Rules 3, 4; Fields).
+     "Assign Participant" opens; under "Locate a User" the role list offers
+     "Journal editor" first, then "Section editor" and "Guest editor" in
+     either order, then "Funding coordinator", then "Author" and
+     "Translator" in either order, with "Journal editor" preselected and no
+     "Journal manager" and no reviewer role (on a press: "Press editor",
+     then "Series editor", then "Funding coordinator", then "Author",
+     "Volume editor" and "Translator" in any order); neither "Assignment
+     privileges" nor "Permissions" shows (Rules 3, 4; Fields).
    - **Another role and "Search"**: choose "Section editor": the list of
      people stays as it was; press "Search": the list shows the two Section
      Editors (Rule 3).
@@ -597,12 +604,15 @@ catcher and the tooling recipe are in the footnote. <sup>s</sup>
    assigned to it.
 
    - **The role list at Copyediting**: on the Copyediting entry's
-     "Participants" panel press "Assign": the role list offers, in order,
-     "Journal editor", "Production editor", "Section editor", "Guest
-     editor", "Copyeditor", "Marketing and sales coordinator", "Author" and
-     "Translator" (on a press: "Press editor", "Production editor", "Series
-     editor", "Copyeditor", "Marketing and sales coordinator", "Author",
-     "Volume editor", "Chapter Author", "Translator") (Rule 3; Fields).
+     "Participants" panel press "Assign": the role list offers "Journal
+     editor" and "Production editor", then "Section editor" and "Guest
+     editor", then "Copyeditor" and "Marketing and sales coordinator", then
+     "Author" and "Translator", each pair in either order, one of the first
+     pair preselected (on a press: "Press editor" and "Production editor"
+     in either order, then "Series editor", then "Copyeditor" and
+     "Marketing and sales coordinator" in either order, then "Author",
+     "Volume editor", "Chapter Author" and "Translator" in any order)
+     (Rule 3; Fields).
    - **"Copyeditor" and "Search"**: choose "Copyeditor": the list of people
      stays as it was; press "Search": twenty rows
      show, with "20 of 21 items" and a "Load more" link under the list;
@@ -787,9 +797,10 @@ catcher and the tooling recipe are in the footnote. <sup>s</sup>
 7. **A role's options: recommend only, and no metadata permission**
 
    Given: Journal Manager, on a scratch journal whose roles keep their
-   install options, with two submissions that each have a Section Editor
-   assigned, and a third Section Editor and an Editor (a second Preprint
-   Server Manager on a preprint server) assigned to neither.
+   install options, on the Submission stage (Production on a preprint
+   server) of two submissions that each have a Section Editor assigned,
+   and a third Section Editor and an Editor (a second Preprint Server
+   Manager on a preprint server) assigned to neither.
 
    - **An assignment before the change**: on the first submission open the
      Section Editor's "Edit": "Assignment privileges" is unticked and
@@ -1218,7 +1229,7 @@ Basis: test run. <sup>[f-ops4](#fn-ops4)</sup>
 **c** — `stage_assignments` (`classes/migration/install/RolesAndUserGroupsMigration.php`) holds `submission_id`, `user_group_id`, `user_id`, `date_assigned`, `recommend_only`, `can_change_metadata`, unique on (submission, group, user), and no stage column; `StageAssignment::scopeWithStageIds()` reaches a stage through the group's `userGroupStages`. `Repo::stageAssignment()->build()` is `firstOr()` on (submission, user, group). `StageParticipantGridHandler::deleteParticipant()` deletes the one row, so every stage loses it; the dialog says so (`editor.submission.removeStageParticipant.description` "You are about to remove this participant from <strong>all</strong> stages."). Live-probed 2026-09-22 (Rule 2; all three apps): the Rule 2 part of note a; a person once assigned in a role gone from that role's list of people in "Assign", by name and in the full list, and still offered under their other role.
 
 <a id="fn-d"></a>
-**d** — The window: `ParticipantManager/useParticipantManagerActions.js::participantAssign()` opens the legacy `StageParticipantGridHandler` op `addParticipant` in a side modal titled `editor.submission.addStageParticipant` "Assign Participant"; `form/AddParticipantForm::fetch()` renders `templates/controllers/grid/users/stageParticipant/addParticipantForm.tpl`, which loads `UserSelectGridHandler` (title `editor.submission.findAndSelectUser` "Locate a User"). Its filter `templates/controllers/grid/users/userSelect/searchUserFilter.tpl` has the unlabelled select `filterUserGroupId` (options `Repo::userGroup()->getUserGroupsByStage()` without `ROLE_ID_REVIEWER`, the first preselected), the text box `manager.userSearch.searchByName` "Search User By Name" and the button `common.search` "Search". Columns: the radio `userSelectRadioButton.tpl`, `common.name` "Name", `common.assignments` "Assignments" (`UserSelectGridCellProvider::getCountUserAssignments()`: the context's `STATUS_QUEUED` submissions `assignedTo` the user), `user.affiliation` "Affiliation", `user.interests` "Reviewing interests"; `InfiniteScrollingFeature` with 20 items (on screen a "Load more" link, `a.pkp_linkaction_moreItems`). Rows: `user/Collector::filterExcludeSubmissionStage()`, users in the group whose group is in `user_group_stage` for the stage, whose membership is active (`date_start` passed, `date_end` not), and who have no `stage_assignments` row in that group on this submission. `js/controllers/grid/users/stageParticipant/form/AddParticipantFormHandler.js` copies the select into the form's `userGroupId` on change; the grid reloads only on the filter form's submit. The form's buttons are `{fbvFormButtons}` with their defaults `common.cancel` "Cancel" and `common.ok` "OK". The roles table is each app's `registry/userGroups.xml` `stages` attribute (OJS: Journal editor 1,3,4,5; Production editor 4,5; Section editor and Guest editor 1,3,4,5; Copyeditor 4; Designer, Indexer, Layout Editor, Proofreader 5; Funding coordinator 1,3; Marketing and sales coordinator 4; Author and Translator all; the manager group none. OMP adds stage 2 to Press editor, Series editor, Funding coordinator, Author, Volume editor, Translator; Chapter Author 4,5; no Guest editor. OPS: Preprint Server manager, Moderator, Author at 5), names from the app locale (`default.groups.name.*`). The closing prompt: `js/controllers/form/FormHandler.js::containerCloseHandler()` asks `confirm(form.dataHasChanged)` ("The data on this form has changed. Do you wish to continue without saving?") when it counts the form as changed, which "Assign Participant" always is and "Edit Assignment" is after a change; the footer's "Cancel" closes without it; `SiteHandler` binds `beforeunload`. Live-probed 2026-09-19 (Fields roles table, Copyediting and Production rows; Rules 3, 6; all three apps, while checking the Copyediting and Production stages): the role lists of those two rows exactly as tabled, with no Journal manager or Press manager and with Preprint Server manager on the preprint server; the list of people following a newly chosen role only after "Search"; "Cancel" after a person was chosen assigning nobody; leaving the window with an unsaved change raising the browser's leave prompt and saving nothing. Live-probed 2026-09-22 (Fields "Assign Participant"; the roles table; Rules 3, 6; all three apps): every stage's role list as tabled, the journal's Review stage listing Translator before Author; the asterisk note with no asterisk on any field; twenty rows with "20 of {total} items" and "Load more", scrolling loading nothing; "Assignments" counting open review requests as well as assignments and leaving out published submissions and declined requests; a role ended on the Users screen dropping the person from that role's list; "OK" after another role was chosen without "Search" assigning nobody (A4); "Cancel" never asking, the close control always asking, the browser's leave-page box on another address or a reload. Rule 3's "the role started" half was not driven: the Users screen sets no future start date.
+**d** — The window: `ParticipantManager/useParticipantManagerActions.js::participantAssign()` opens the legacy `StageParticipantGridHandler` op `addParticipant` in a side modal titled `editor.submission.addStageParticipant` "Assign Participant"; `form/AddParticipantForm::fetch()` renders `templates/controllers/grid/users/stageParticipant/addParticipantForm.tpl`, which loads `UserSelectGridHandler` (title `editor.submission.findAndSelectUser` "Locate a User"). Its filter `templates/controllers/grid/users/userSelect/searchUserFilter.tpl` has the unlabelled select `filterUserGroupId` (options `Repo::userGroup()->getUserGroupsByStage()` without `ROLE_ID_REVIEWER`, the first preselected; the query orders by `role_id` alone (`UserGroup::scopeOrderByRoleId()`), so the groups of one role (`ROLE_ID_MANAGER` 16, `ROLE_ID_SUB_EDITOR` 17, `ROLE_ID_ASSISTANT` 4097, `ROLE_ID_AUTHOR` 65536) come in whatever order the database returns them, which a group's row being rewritten changes), the text box `manager.userSearch.searchByName` "Search User By Name" and the button `common.search` "Search". Columns: the radio `userSelectRadioButton.tpl`, `common.name` "Name", `common.assignments` "Assignments" (`UserSelectGridCellProvider::getCountUserAssignments()`: the context's `STATUS_QUEUED` submissions `assignedTo` the user), `user.affiliation` "Affiliation", `user.interests` "Reviewing interests"; `InfiniteScrollingFeature` with 20 items (on screen a "Load more" link, `a.pkp_linkaction_moreItems`). Rows: `user/Collector::filterExcludeSubmissionStage()`, users in the group whose group is in `user_group_stage` for the stage, whose membership is active (`date_start` passed, `date_end` not), and who have no `stage_assignments` row in that group on this submission. `js/controllers/grid/users/stageParticipant/form/AddParticipantFormHandler.js` copies the select into the form's `userGroupId` on change; the grid reloads only on the filter form's submit. The form's buttons are `{fbvFormButtons}` with their defaults `common.cancel` "Cancel" and `common.ok` "OK". The roles table is each app's `registry/userGroups.xml` `stages` attribute (OJS: Journal editor 1,3,4,5; Production editor 4,5; Section editor and Guest editor 1,3,4,5; Copyeditor 4; Designer, Indexer, Layout Editor, Proofreader 5; Funding coordinator 1,3; Marketing and sales coordinator 4; Author and Translator all; the manager group none. OMP adds stage 2 to Press editor, Series editor, Funding coordinator, Author, Volume editor, Translator; Chapter Author 4,5; no Guest editor. OPS: Preprint Server manager, Moderator, Author at 5), names from the app locale (`default.groups.name.*`). The closing prompt: `js/controllers/form/FormHandler.js::containerCloseHandler()` asks `confirm(form.dataHasChanged)` ("The data on this form has changed. Do you wish to continue without saving?") when it counts the form as changed, which "Assign Participant" always is and "Edit Assignment" is after a change; the footer's "Cancel" closes without it; `SiteHandler` binds `beforeunload`. Live-probed 2026-09-19 (Fields roles table, Copyediting and Production rows; Rules 3, 6; all three apps, while checking the Copyediting and Production stages): the role lists of those two rows exactly as tabled, with no Journal manager or Press manager and with Preprint Server manager on the preprint server; the list of people following a newly chosen role only after "Search"; "Cancel" after a person was chosen assigning nobody; leaving the window with an unsaved change raising the browser's leave prompt and saving nothing. Live-probed 2026-09-22 (Fields "Assign Participant"; the roles table; Rules 3, 6; all three apps): every stage's role list as tabled, the journal's Review stage listing Translator before Author; the asterisk note with no asterisk on any field; twenty rows with "20 of {total} items" and "Load more", scrolling loading nothing; "Assignments" counting open review requests as well as assignments and leaving out published submissions and declined requests; a role ended on the Users screen dropping the person from that role's list; "OK" after another role was chosen without "Search" assigning nobody (A4); "Cancel" never asking, the close control always asking, the browser's leave-page box on another address or a reload. Rule 3's "the role started" half was not driven: the Users screen sets no future start date. Code read 2026-09-26 (Fields roles table and role list; Rule 3; scenarios 1, 2): the order within a level is not fixed; an OJS run of 2026-09-24 on a reset database showed the journal's Copyediting list with "Marketing and sales coordinator" before "Copyeditor", the reverse of what the 2026-09-19 and 2026-09-22 probes saw, and the 2026-09-22 probe's "Translator" before "Author" on the Review stage is the same tie.
 
 <a id="fn-e"></a>
 **e** — The boxes: `js/controllers/grid/users/stageParticipant/form/StageParticipantNotifyHandler.js`. `updateRecommendOnly()` shows `.recommendOnlyWrapper` when `userIdSelected` changes and the chosen group is in `possibleRecommendOnlyUserGroupIds` (`AddParticipantForm::initialize()`: every `ROLE_ID_MANAGER` and `ROLE_ID_SUB_EDITOR` group) and ticks it when the group is in `recommendOnlyUserGroupIds` (groups with `recommendOnly`); `updateSubmissionMetadataEditPermitOption()` shows `.submissionEditMetadataPermit` unless the group is in `notChangeMetadataEditPermissionRoles` (the `ROLE_ID_MANAGER` groups) and ticks it when the group has `permitMetadataEdit`; a change of `userGroupId` hides both, and on screen only the recommend-only box comes back unticked (A9). `AddParticipantForm::execute()` forces `canChangeMetadata` true for a `ROLE_ID_MANAGER` group. Labels: `stageParticipants.options` "Assignment privileges", `stageParticipants.recommendOnly`, `stageParticipants.submissionEditMetadataOptions` "Permissions", `stageParticipants.canChangeMetadata`. Defaults (`registry/userGroups.xml`): `permitMetadataEdit` on the manager, editor, production-editor and section-editor groups of OJS and OMP and on the manager, section-editor and author groups of OPS; `recommendOnly` on none. What the permission allows: `submission/maps/Schema` and [→ the edit gate](U40-publication-metadata.md#edit-gate). Live-probed 2026-09-09 (Rule 4b; all three apps, for the publication-metadata spec): the "Permissions" box unticked by default for a Copyeditor and for the journal's and press's Author, ticked for the preprint server's Author; ticking it let the person save. Live-probed 2026-09-22 (Rule 4 at both ends; all three apps): the boxes hidden until a person is chosen, shown and pre-ticked per role at install and on a scratch journal with the Role Options changed; a manager-level assignment made with no box carrying the permission.

@@ -275,7 +275,11 @@ to spot: seeding succeeds and the browser step dies.
 
 - `PKP_CONFIG_FILE`: absolute path to `config.test.inc.php`
 - `PLAYWRIGHT_BASE_PORT` / `PLAYWRIGHT_WORKERS`: worker 0's port, and the
-  worker count (unset = auto-detect, see above)
+  worker count (unset = auto-detect, see above). A second runner beside
+  the session's own takes a base that keeps its whole band clear, the
+  validation server at base + 90 included: 8300, 8400, 8500 do; a base
+  inside another fleet's band (8020, 8140) adopts or collides with that
+  fleet's probe, validation or worker servers (2026-09-26)
 - `PLAYWRIGHT_CPU_THROTTLE`: opt-in race amplifier for flake hunting
   (`shared/playwright/support/throttle.js`): every page of every context
   runs its main thread that many times slower (DevTools protocol, Chromium
@@ -323,7 +327,9 @@ filter (`U12`) also matches `tests/serial/U12-…` and so pulls in the
 whole chain: an app suite's regression run names `--project=<app>`; and
 `--no-deps` also drops the solo project's wait on the serial one, so a
 `@solo` test runs in its own `--project=<app>-solo --no-deps` command
-after the serial one's (U09 harness, U16 tops).
+after the serial one's (U09 harness, U16 tops); the config refuses a
+`--no-deps` command that selects the solo project beside any other,
+because every "red in `<app>-solo` after the final" sighting was one.
 
 `fleet-prep` and `test:final` run the apps one after another and leave
 `PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a
@@ -373,7 +379,9 @@ processes before re-running.
   `timings/`. `PKP_E2E_TIMED_SHARDS=0` restores Playwright's split. A
   CLI `--reporter` drops the reporter, and with it both halves.
   Failure artifacts are per shard (`playwright-artifacts-<app>-<n>`) and
-  include `.server-logs/`.
+  include `.server-logs/`; each pass writes `test-results/{app,serial,solo}/`,
+  and a green shard with a flaky test uploads them too, so a flake's failed
+  attempt leaves its `error-context.md` (since 2026-09-26).
 - The latest run of `e2e-tests.yml` on an app repo's `main` is the
   authoritative "is the app's tip red?" answer:
   `gh run list -R pkp/<app> --workflow e2e-tests.yml --branch main`, then

@@ -114,26 +114,18 @@ function expectToday(date) {
 }
 
 /**
- * Publish the version shown on the workflow's Publication page. A first
- * version opens "Review Publishing Details" (its version details filled,
- * "Don't Assign To An Issue" left to the caller's issue); a later version
- * goes straight to the confirmation (screen notes ccK1). The first press
- * is occasionally swallowed, so it is repeated once when nothing opened.
+ * Publish the version shown on the workflow's Publication page. A version
+ * not yet through "Review Publishing Details" opens it (a new version is
+ * one: it starts queued): its version details filled, its "Issue
+ * Assignment" left at the preselection the panel fetches (the version's
+ * issue), which the page object waits for before "Confirm"; a version
+ * whose panel was confirmed before goes straight to the confirmation. The
+ * page object repeats a swallowed first press.
  */
 async function publishShownVersion(page, pub) {
-    const button = pub.publishButton();
-    await expect(button).toBeVisible({timeout: 30_000});
-    const panel = page.locator('[data-cy="active-modal"]').filter({hasText: 'Review Publishing Details'}).last();
     const confirm = page.getByRole('dialog').filter({hasText: 'Are you sure you want to publish this?'});
-    const opened = panel.locator('select[name="versionStage"]').or(confirm).first();
-    await button.click();
-    try {
-        await expect(opened).toBeVisible({timeout: 8_000});
-    } catch {
-        await button.click();
-    }
-    await expect(opened).toBeVisible({timeout: 30_000});
-    if (!(await confirm.isVisible())) {
+    const panel = await pub.pressPublish({or: confirm});
+    if (panel) {
         await pub.fillVersionDetails(panel);
         await panel.getByRole('button', {name: 'Confirm', exact: true}).click();
     }
@@ -187,7 +179,9 @@ test.describe('article landing page and reading', () => {
         await expect(landing.subtitle()).toHaveText('A field study');
         await expect(landing.contributors()).toHaveCount(1);
         await expect(landing.contributors()).toContainText('Alex Author');
-        await expect(landing.keywords()).toHaveText('Keywords: tide, current');
+        // The keywords in either order: the page lists them as the database
+        // returns them, with no ORDER BY (fix list B, flake-s26).
+        await expect(landing.keywords()).toHaveText(/^\s*Keywords:\s*(tide,\s*current|current,\s*tide)\s*$/);
         await expect(landing.keywords().getByRole('link')).toHaveCount(0);
         await expect(landing.mainSection('Abstract')).toContainText(`Seeded abstract for ${tag}.`);
         await expect(landing.mainSection('Plain Language Summary')).toContainText('How tides move along a coast.');

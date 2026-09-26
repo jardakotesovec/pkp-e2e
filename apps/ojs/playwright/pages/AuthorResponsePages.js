@@ -33,6 +33,7 @@
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 
 /** Status-cell wordings (Rule 2). Read case-insensitively — the "Ready…" cell
  * is title-cased by CSS (innerText "Ready To Invite Author", DOM "Ready to
@@ -114,6 +115,15 @@ exports.AuthorResponseTable = class AuthorResponseTable extends BasePage {
     /** Open a row's "…" menu and press one of its items. */
     async openRowMenu(name) {
         await this.moreActions(name).click();
+    }
+
+    /**
+     * Close the open row menu without choosing. Escape on the menu itself:
+     * a page-level Escape in the two frames before headlessui focuses the
+     * menu closes the whole workflow panel (support/menus.js).
+     */
+    async closeRowMenu() {
+        await closeMenu(this.page);
     }
 
     /** The "Delete" confirm dialog (Rule 11), verified against its body. */

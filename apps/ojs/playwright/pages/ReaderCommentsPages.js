@@ -282,8 +282,14 @@ exports.ArticleCommentsPage = class ArticleCommentsPage extends BasePage {
         return this.page.getByRole('menuitem', {name, exact: true});
     }
 
+    /**
+     * Close the open comment menu (a reka-ui `DropdownMenu`) with Escape on
+     * the menu itself: its layer takes the key whatever holds the focus, and
+     * pressed there the key cannot reach anything else
+     * (.reports/flake-s26/esc/diagnosis.md H4).
+     */
     async closeMenu() {
-        await this.page.keyboard.press('Escape');
+        await this.page.getByRole('menu').press('Escape');
         await expect(this.page.getByRole('menuitem')).toHaveCount(0, {timeout: 30_000});
     }
 

@@ -43,6 +43,7 @@ const {
     loginFormRegisterLink,
     ACCESS_DENIED,
 } = require('../pages/RegistrationPages.js');
+const {expectTextsInAnyOrder} = require('../../../../shared/playwright/support/order.js');
 
 const PK = 'publicknowledge';
 const PK_NAME = 'Public Knowledge Press';
@@ -373,7 +374,8 @@ test.describe('Registration & account validation (U02)', () => {
         await expect(roles.currentContextBox('External Reviewer')).toBeChecked();
         await expect(roles.currentContextBox('Reader')).not.toBeChecked();
         await expect(roles.checkedBoxes).toHaveCount(1);
-        await expect(roles.interestChips).toHaveText(interests);
+        // In either order: the interests are read with no ORDER BY (fix list B).
+        await expectTextsInAnyOrder(roles.interestChips, interests);
     });
 
     test('S4: privacy consent is required when a statement exists', async ({ompApi, asUser, freshPage}, testInfo) => {

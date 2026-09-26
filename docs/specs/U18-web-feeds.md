@@ -115,8 +115,9 @@ leave question; a window closed or left this way saves nothing either.
    feeds answer at once. Its box is placed nowhere until a manager places
    it (Rule 11). <sup>a</sup> <sup>td1</sup>
 2. **Three formats, one list.** The Atom, RSS 2.0 and RSS 1.0 feeds carry
-   the same items in the same order; they differ only in the parts the
-   Fields tables list. <sup>c</sup> <sup>td2</sup>
+   the same items, in the same order wherever Rules 4 and 5a fix one; they
+   differ only in the parts the Fields tables list. <sup>c</sup>
+   <sup>td2</sup>
 3. **Published articles of this journal only.** A feed lists the
    journal's published articles (on a preprint server its posted
    preprints, on a press its published books). A submission still in the
@@ -141,9 +142,15 @@ leave question; a window closed or left this way saves nothing either.
      feeds. <sup>td2</sup>
 5. **The current issue** {OJS}. With "Display items in current published
    issue." chosen, a feed lists the published articles of the journal's
-   current issue, in the issue's order, however many there are; "Number
-   of publications to display" is not used. With no published issue it
-   lists nothing (Rule 6). <sup>f</sup> <sup>td4</sup>
+   current issue, however many there are; "Number of publications to
+   display" is not used. With no published issue it lists nothing (Rule
+   6). <sup>f</sup> <sup>td4</sup>
+   - 5a. Within a section, the feed keeps the order an editor gave the
+     articles with "Order" on the issue's "Table of Contents" ([→ the table
+     of contents](U50-issues.md#issue-toc)). Articles of different
+     sections, and articles nobody has ordered, come in no fixed order
+     against each other, which need not match the issue's page and can
+     change between loads. <sup>f</sup> <sup>td4</sup>
 6. **Nothing to list.** A journal with nothing published has an Atom and
    an RSS 1.0 feed with the journal's parts and no item. Its RSS 2.0
    address shows a blank page with no tab title instead of a feed: the
@@ -330,7 +337,7 @@ leave question; a window closed or left this way saves nothing either.
 - [Publish schedule & versions](U49-publish-schedule-and-versions.md)
   owns publishing, scheduling and unpublishing, which put an article in
   a feed and take it out (Rule 3); [Issues](U50-issues.md) owns which
-  issue is current (Rule 5).
+  issue is current and the order of its table of contents (Rules 5, 5a).
 - [Sections](U17-sections.md), [Categories](U16-categories.md) and
   [Publication metadata](U40-publication-metadata.md) own the section,
   categories, keywords, subjects and disciplines an item names (Rules 7,
@@ -535,9 +542,9 @@ footnote. <sup>s</sup>
      window, choose "Display items in current published issue.", empty
      "Number of publications to display" and press "OK": "Your changes
      have been saved." shows; reopened, the box reads 0 (Rule 16d). The
-     visitor reloads the three feeds: each lists "Alpha" and "Beta", in
-     the order the page of Vol. 1 No. 1 lists them, and no "Gamma" (Rule
-     5; Settings bullet 3).
+     visitor opens the page of Vol. 1 No. 1: it lists "Alpha" and "Beta".
+     The visitor reloads the three feeds: each lists the same two, in
+     either order, and no "Gamma" (Rules 5, 5a; Settings bullet 3).
    - **Control**: before "Include identifiers…" was ticked, "Gamma"'s
      summary carried no "Categories:" line (Rule 9). <sup>s</sup>
 
@@ -651,6 +658,9 @@ Left out of the scenarios above, by reason:
     site's row without "Settings" (Actors row 6; Rule 18)
   - {OMP} "Include identifiers…" ticked on a book outside a series with
     no terms, its summary opening with the empty line (Rule 9a)
+  - {OJS} the current-issue feed after the issue's articles were ordered
+    with "Order" on its "Table of Contents", listing each section's
+    articles in that order (Rule 5a)
 - **Nothing new to test**:
   - the Editor, the Production Editor and the Site Administrator in the
     journal (Actors rows 3–5): the same "Sidebar", "Installed Plugins"
@@ -833,7 +843,7 @@ preprint servers made for the check; the `td` notes record what was seen.
 **e** — Box: `WebFeedBlockPlugin extends BlockPlugin` with no `getContents()` override, so `PKPTemplateManager::displaySidebar()` prints `templates/block.tpl` wherever the context's `sidebar` lists `WebFeedBlockPlugin`: `div.block_web_feed`, heading `plugins.generic.webfeed.blockTitle` "Latest publications", three links `gateway/plugin/WebFeedGatewayPlugin/{atom,rss2,rss}` with images `lib/pkp/templates/images/{atom,rss20_logo,rss10_logo}.svg` and alt texts `plugins.generic.webfeed.{atom,rss2,rss1}.altText`. Discovery links: `setupTemplateLinks()` hooks `TemplateManager::display` for page requests with a context and adds three `<link rel="alternate">` headers with the contexts `frontend` (`all`), `frontend-index` and `frontend-issue` (`homepage`) or `frontend-issue` (`issue`), resolved by `PKPTemplateManager::getResourcesByContext()` against the requested page (`index` for the home page, `issue` for `issue/archive` and `issue/view`). Before the plugin left the OJS tree (pkp/pkp-lib#8770, 2023-03-14), `WebFeedBlockPlugin::getContents()` checked only that a current issue existed (since 2015), never `displayPage`. Live-probed 2026-09-25 (Actors rows 2–3; Rules 11, 12): notes td10, td11.
 
 <a id="fn-f"></a>
-**f** — `fetch()`: `Repo::submission()->getCollector() ->filterByContextIds([$context])->filterByStatus([STATUS_PUBLISHED]) ->limit($recentItems)->orderBy(ORDERBY_LAST_MODIFIED, DESC)`, where `$recentItems` is `abs((int) recentItems)` or `DEFAULT_RECENT_ITEMS` 30; on OJS with `displayItems === 'issue'`, `filterByIssueIds([current published issue ?? 0])`, no limit, `orderBy(ORDERBY_SEQUENCE, ASC)`, and `$latestDate` the issue's `datePublished`; otherwise `$latestDate` is the first submission's `lastModified`, null for an empty list. RSS 2.0 channel `<pubDate>` is `{capture}{$latestDate|strtotime}{/capture}` then `DATE_RSS|date:$latestDate`: with nothing listed the capture is the empty string and PHP's `date()` throws `TypeError` (checked with the CLI: `date(DATE_RSS, "")` → "must be of type ?int, string given"); Atom's `<updated>` gets the current time from Carbon for null. Scheduled OJS articles carry `STATUS_SCHEDULED` and are left out. Publishing, unpublishing and publishing again move the submission's `lastModified` on OJS and leave it where it was on OMP and OPS (A8). Live-probed 2026-09-25 (Rules 3–6): notes td2–td5.
+**f** — `fetch()`: `Repo::submission()->getCollector() ->filterByContextIds([$context])->filterByStatus([STATUS_PUBLISHED]) ->limit($recentItems)->orderBy(ORDERBY_LAST_MODIFIED, DESC)`, where `$recentItems` is `abs((int) recentItems)` or `DEFAULT_RECENT_ITEMS` 30; on OJS with `displayItems === 'issue'`, `filterByIssueIds([current published issue ?? 0])`, no limit, `orderBy(ORDERBY_SEQUENCE, ASC)` (`ORDER BY po.seq` alone, not by section), and `$latestDate` the issue's `datePublished`; the issue's "Table of Contents" "Order" writes each article's publication `seq` from 1 within its section (`OrderCategoryGridItemsFeature`, `TocGridHandler::setDataElementInCategorySequence()`), scheduling leaves it 0, so articles never ordered tie and PostgreSQL returns the tie in the rows' order on disk, which later writes change; the issue's page (`Repo::submission()->getInSections()`, published and scheduled, the same sort, grouped by section) is a different query and can break the tie otherwise (Rule 5a); otherwise `$latestDate` is the first submission's `lastModified`, null for an empty list. RSS 2.0 channel `<pubDate>` is `{capture}{$latestDate|strtotime}{/capture}` then `DATE_RSS|date:$latestDate`: with nothing listed the capture is the empty string and PHP's `date()` throws `TypeError` (checked with the CLI: `date(DATE_RSS, "")` → "must be of type ?int, string given"); Atom's `<updated>` gets the current time from Carbon for null. Scheduled OJS articles carry `STATUS_SCHEDULED` and are left out. Publishing, unpublishing and publishing again move the submission's `lastModified` on OJS and leave it where it was on OMP and OPS (A8). Live-probed 2026-09-25 (Rules 3–6): notes td2–td5.
 
 <a id="fn-g"></a>
 **g** — `WebFeedGatewayPlugin::getIdentifiers()`: `section.section` ("Section" on OJS and OPS, "Series" on OMP) with the section's title, `category.category` "Categories", `common.keywords` "Keywords", `common.subjects` "Subjects", `search.discipline` "Disciplines", each with the current publication's localized values; the templates print `{label}: {values joined by ", "}<br />` per identifier and one more `<br />` before the abstract. No ISBN, publication format or DOI is read. Label `plugins.generic.webfeed.settings.includeIdentifiers`. Keywords, subjects and disciplines arrive as vocabulary entries, not words (A7). Live-probed 2026-09-25 (Rule 9): note td8.
@@ -851,7 +861,7 @@ preprint servers made for the check; the `td` notes record what was seen.
 **td3** — Live-probed 2026-09-25 (Rule 4), all three apps: "Older" published with 2024-06-01 and then "Newer-dated" with 2024-01-01: "Newer-dated" came first in the three feeds; "Number of publications to display" set to 1 and "OK" left "Newer-dated" alone. With 31 published items at the default, each feed listed 30, the earliest-changed one left out.
 
 <a id="fn-td4"></a>
-**td4** — Live-probed 2026-09-25, two runs (Rule 5), OJS: with "Display items in current published issue." chosen, a published issue of three articles in two sections gave the three in the order of the issue's table of contents; with "Number of publications to display" at 1, both articles of the issue were listed and the articles outside it were not. With no published issue, Atom and RSS 1.0 had no item and RSS 2.0 answered 500 (A1). The windows of a press and a preprint server offer no such choice.
+**td4** — Live-probed 2026-09-25, two runs (Rule 5), OJS: with "Display items in current published issue." chosen, a published issue of three articles in two sections, none ordered with "Order", gave the three in the order the issue's table of contents showed them, which Rule 5a leaves to chance; with "Number of publications to display" at 1, both articles of the issue were listed and the articles outside it were not. With no published issue, Atom and RSS 1.0 had no item and RSS 2.0 answered 500 (A1). The windows of a press and a preprint server offer no such choice. Test run 2026-09-26 (Rule 5a; scenario 5), OJS: once, the page of Vol. 1 No. 1 listed "Alpha", "Beta" and the three feeds "Beta", "Alpha"; with the two articles' rows swapped on disk between the page's read and the feeds' read, the feeds listed them in the other order in 4 runs of 4, and the either-order read passed 4 of 4.
 
 <a id="fn-td5"></a>
 **td5** — Live-probed 2026-09-25, two runs per app, and again 2026-09-26 (Rule 6; A1), all three apps: on a new scratch context with nothing published, Atom and RSS 1.0 carried the context's parts and no item, and RSS 2.0 answered 500 with an empty body and an empty tab title. `publicknowledge` is not empty on a used test install: its feeds listed 18 (OJS), 28 (OMP) and 17 (OPS) items, the suites' published items.

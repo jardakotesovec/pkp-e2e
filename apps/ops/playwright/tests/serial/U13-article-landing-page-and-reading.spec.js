@@ -30,6 +30,7 @@
  */
 const {test, expect} = require('../../support/fixtures.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
+const {expectTextsInAnyOrder} = require('../../../../../shared/playwright/support/order.js');
 const {ArticleLandingPage, ArticleSummaries, addressPattern} = require('../../../../../shared/playwright/pages/ArticleLandingPages.js');
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
@@ -77,7 +78,9 @@ test.describe('article landing page and reading (serial)', () => {
             await expect(summaries.titleLink('Tidal Patterns')).toContainText('Tidal Patterns');
             await expect(summaries.subtitle('Tidal Patterns')).toHaveText('A field study');
             await expect(summaries.authors('Tidal Patterns')).toContainText('Ada Author');
-            await expect(summaries.keywords('Tidal Patterns')).toHaveText(['tide', 'current']);
+            // The keywords in either order: listed as the database returns
+            // them, with no ORDER BY (fix list B, flake-s26).
+            await expectTextsInAnyOrder(summaries.keywords('Tidal Patterns'), ['tide', 'current']);
             await expect(summaries.details('Tidal Patterns')).toHaveText(details);
             await expect(summaries.galleyLinks('Tidal Patterns')).toHaveText(['PDF']);
         }

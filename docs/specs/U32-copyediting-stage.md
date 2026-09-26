@@ -55,12 +55,12 @@ screen once it is open. <sup>a</sup> <sup>b</sup>
 | Action | Who may, and when |
 |--------|--------------------|
 | **See the stage's panels** ("Draft Files", "Copyediting Tasks & Discussions", "Copyedited Files", "Participants"; Rule 1) | • Site Administrator (holding a journal role); Journal Manager; Editor: every submission<br>• Assigned Production editor, Section Editor, Guest Editor, Copyeditor, Marketing and sales coordinator: their assigned submissions<br>• Author, and Translator, Volume editor and Chapter Author alike: their own submission, in the author view, which shows "Copyediting Tasks & Discussions" and "Copyedited Files" only (Rule 11) <sup>a</sup> |
-| **See the notice box** ("Assign a copyeditor using the Assign link in the Participants list." / "Awaiting Copyedits."; Rule 3) | • Assigned editors, on this stage, on a submission accepted from review, while the notice's condition holds; on a submission accepted without review no notice shows [A6](#a6). A Section Editor assigned through "Assign" after the acceptance, with participation limited to recommendations, read no notice while the Editor beside them read "Assign a copyeditor…" ⚠ [A11](#a11)<br>• A Journal Manager or Editor who is not assigned to the submission: no notice, although the panels show<br>• Copyeditor and the other assistants; Author: never <sup>d</sup> |
+| **See the notice box** ("Assign a copyeditor using the Assign link in the Participants list." / "Awaiting Copyedits."; Rule 3) | • Assigned editors, on this stage, on a submission accepted from review, while the notice's condition holds; on a submission accepted without review no notice shows [A6](#a6). A Section Editor whose participation is limited to recommendations reads the notice like the Editor beside them; one assigned through "Assign" after the acceptance read none ⚠ [A11](#a11)<br>• A Journal Manager or Editor who is not assigned to the submission: no notice, although the panels show<br>• Copyeditor and the other assistants; Author: never <sup>d</sup> |
 | **Add to and manage "Draft Files"** ("Upload/Select Files" above the list; "Update File Details", "More Information" and "Delete" in a row's menu; Rules 4–5) | • Site Administrator; Journal Manager; Editor: every submission<br>• Assigned Section Editor, Guest Editor, Copyeditor and the other assistants who reach the stage: their assigned submissions<br>• Author: never; the list is not shown in the author view (Rule 11) <sup>e</sup> |
 | **Add to and manage "Copyedited Files"** (the same controls; Rule 6) | • The same roles as the row above<br>• Author: reads the list only: no "Upload/Select Files", no row menu (Rule 11) <sup>f</sup> |
 | **"Send to Text Editor"** (a row-menu entry on both lists, for a Word, OpenDocument, RTF, LaTeX or Markdown file) | • Site Administrator; Journal Manager. It opens the window "Send File to Text Editor", which belongs to *Submission files* <sup>n</sup> |
 | **Record "Send To Production"** (Rule 8) | • [Deciding editors](GLOSSARY.md#roles-and-access), while Copyediting is the active stage<br>• Recommending editors: no decision buttons and no recommendation controls on this stage ⚠ [A5](#a5)<br>• Copyeditor and the other assistants; Author: never <sup>c</sup> |
-| **Record "Move to Review"** (Rule 9) | • The same deciding editors, at the same time; the button reads "Move to Review" whatever stage it leads to [A1](#a1) <sup>c</sup> |
+| **Record "Move to Review"** (Rule 9) | • The same deciding editors, at the same time; the button reads "Move to Review" whatever stage it leads to, and the decision page it opens names that stage (Rule 9) [A1](#a1) <sup>c</sup> |
 | **Assign a participant** ("Assign" on the Participants panel) | • Owned by *Stage participants*. On this stage the "Assign" form offers the roles whose stage set includes Copyediting, Copyeditor among them, but never Journal Manager, although that role holds every stage; its "Choose a predefined message" list reads "Discussion (Copyediting)" and "Request Copyedit", and the latter is what raises the Copyeditor's task and email (Side effects). "Cancel" after a user is chosen closes the form and assigns nobody <sup>j</sup> |
 | **Open or answer a discussion** ("Copyediting Tasks & Discussions") | • Owned by *Tasks & discussions*. The panel is shown to every role that opens the stage, the Author included (Rules 1, 11) <sup>a</sup> |
 
@@ -198,10 +198,16 @@ what the "Upload/Select Files" window lists, Rule 5). <sup>q</sup>
    Rule 3 are removed. <sup>g</sup>
 <a id="move-to-review"></a>
 9. **"Move to Review".** Pressing it opens the wizard with the "Notify
-   Authors" page alone. Recording the decision closes it on "Sent Back from
-   Copyediting" with "The submission, {title}, was sent back from the
-   copyediting stage. The author has been notified, unless you chose to skip
-   that email." <sup>h</sup>
+   Authors" page alone. The page names the stage the submission goes back
+   to (Rule 9a): the last item of the breadcrumb above it and the browser
+   tab's title read "Move to Review" when it goes back to review, "Move to
+   Submission" when it goes back to the Submission stage. The heading at
+   the top of the page reads "Move to Submission" on every submission, so
+   a submission going back to review gets that heading under a breadcrumb
+   reading "Move to Review" ⚠ [A13](#a13). Recording the decision closes the
+   wizard on "Sent Back from Copyediting" with "The submission, {title},
+   was sent back from the copyediting stage. The author has been notified,
+   unless you chose to skip that email." <sup>h</sup>
    - 9a. **Where it lands.** The submission goes back to where it came from:
      to the review stage, on its last round, when it has had a review round
      (on a press, to External Review if it ever had an external round,
@@ -211,7 +217,8 @@ what the "Upload/Select Files" window lists, Rule 5). <sup>q</sup>
      ("Waiting for reviewers to be assigned." when none is on the round);
      the return itself is not announced there. A submission that was
      accepted without review goes back to the Submission stage, although
-     the button and its email speak of review ⚠ [A1](#a1).
+     the button, the "Notify Authors" page's text and the author's email
+     speak of review ⚠ [A1](#a1).
    - 9b. **The files.** They are kept but hidden: until the submission is
      accepted again, its "Copyediting" entry shows "The Copyediting stage
      has not yet been initiated." above the Participants panel. The next
@@ -221,9 +228,11 @@ what the "Upload/Select Files" window lists, Rule 5). <sup>q</sup>
     Copyediting is the submission's active stage. Once the submission has
     moved on, its "Copyediting" entry shows the two file lists and a
     discussions panel under the status box "The submission is currently in
-    the Production stage.", with no buttons and no notice. That panel is
-    headed "Production Tasks & Discussions", not "Copyediting Tasks &
-    Discussions" as in Rule 1 ⚠ [A12](#a12). <sup>c</sup>
+    the Production stage.", with no buttons and no notice. When the entry
+    is reached by selecting "Copyediting" in the workflow menu, that panel
+    is headed "Production Tasks & Discussions"; reloading the page on the
+    entry heads it "Copyediting Tasks & Discussions", as in Rule 1
+    ⚠ [A12](#a12). <sup>c</sup>
 <a id="author-view"></a>
 11. **The author's view.** An Author opening their own submission at
     Copyediting sees the "Copyediting Tasks & Discussions" panel and, under
@@ -382,8 +391,12 @@ the footnote. <sup>s</sup>
      "Copyediting": the same four panels, with "Assign" on the
      "Participants" panel; no "Send To Production", no "Move to Review",
      and no "Recommend Revisions", "Recommend Accept" or "Recommend
-     Decline" control [A5](#a5) (Actors row 6). Whether the notice box
-     shows to them is open [A11](#a11) (Actors row 2).
+     Decline" control [A5](#a5) (Actors row 6). The notice box turns on
+     how they joined the submission (Actors row 2): on a journal, where
+     they were not assigned through "Assign", it reads "Assign a copyeditor
+     using the Assign link in the Participants list." as for the Editor; on
+     a press, where they were assigned through "Assign" after the
+     acceptance, none shows [A11](#a11).
    - **Control**: no status box sits above "Draft Files": the notice box
      takes that slot while the submission is active here (Rule 2).
 
@@ -510,7 +523,8 @@ the footnote. <sup>s</sup>
      workflow menu: the two file lists and a discussions panel, headed
      "Production Tasks & Discussions" [A12](#a12), show under the status
      box "The submission is currently in the Production stage.", with no
-     decision buttons and no notice (Rule 10).
+     decision buttons and no notice; reload the page: the panel between
+     the two lists is headed "Copyediting Tasks & Discussions" (Rule 10).
    - **The Author's mailbox**: holds the email "Next steps for publishing
      your submission" (Side effects).
    - **Control**: before the decision the same "Copyediting" entry offered
@@ -523,11 +537,13 @@ the footnote. <sup>s</sup>
    Round 1 at Copyediting, the round holding no reviewer, and one file in
    "Draft Files".
 
-   - **The wizard**: press "Move to Review": the wizard opens with the
-     "Notify Authors" page alone; record the decision: it closes on "Sent
-     Back from Copyediting" with "The submission, {title}, was sent back
-     from the copyediting stage. The author has been notified, unless you
-     chose to skip that email." (Rule 9).
+   - **The wizard**: press "Move to Review": the wizard opens on its one
+     page, "Notify Authors", headed "Move to Review" (not "Move to
+     Submission" [A13](#a13)), under a breadcrumb ending the same; record
+     the decision: it closes on "Sent Back from Copyediting" with "The
+     submission, {title}, was sent back from the copyediting stage. The
+     author has been notified, unless you chose to skip that email." (Rule
+     9).
    - **Where it lands**: the workflow shows the review stage on Round 1
      ("External Review" on a press [OMP1](#omp1)), its status box reading
      "Waiting for reviewers to be assigned." (Rule 9a).
@@ -564,14 +580,15 @@ App-specific:
 
    Given: Press Editor, with a monograph accepted from its Internal Review
    round at Copyediting, the round holding no reviewer, and a second
-   monograph that had an internal and then an external round before its
-   acceptance, also at Copyediting.
+   monograph accepted after an internal and then an external round, also
+   at Copyediting.
 
-   - **"Move to Review" on the first monograph**: press it and record the
-     decision: the workflow shows "Internal Review" on Round 1, its status
-     box reading "Waiting for reviewers to be assigned." [OMP1](#omp1)
-     (Rule 9a).
-   - **Control**: the second monograph, moved the same way, lands on
+   - **"Move to Review" on the first monograph**: press it: the decision
+     page is headed "Move to Review" (not "Move to Submission"
+     [A13](#a13)); record the decision: the workflow shows "Internal
+     Review" on Round 1, its status box reading "Waiting for reviewers to
+     be assigned." [OMP1](#omp1) (Rules 9, 9a).
+   - **Control**: the second monograph, moved alike, lands on
      "External Review" [OMP1](#omp1) (Rule 9a).
 
 10. **{OPS} No Copyediting stage on a preprint server**
@@ -613,12 +630,13 @@ Left out of the scenarios above, by reason:
   - A7 (no notice back after the last copyedited file is deleted; Rule 3c; scenario 4 marks it)
   - A8 (deleting a copyedited file took its "Draft Files" copy with it; Rule 5c)
   - A2 (the "Copyedited Files" window titled "Upload Review File"; Rule 5; scenario 4 marks it)
-  - A1 ("Move to Review" on a never-reviewed submission landing on the Submission stage; Rule 9a)
+  - A1 ("Move to Review" on a never-reviewed submission landing on the Submission stage, its page reading "Move to Submission" while the button and the email say review; Rules 9, 9a)
   - A4 (the Copyeditor's task not cleared by the copyedits; Side effects; scenario 3 marks it)
   - A9 (the message's discussion listed under the Copyeditor's name; Side effects; scenario 3 marks it)
   - A10 (a role's only stage unticked: "saved", still ticked; Settings bullet 1)
   - A11 (no notice for a recommending Section Editor assigned through "Assign" after the acceptance; Actors row 2; scenario 1 marks it)
-  - A12 (the "Copyediting" entry's discussions panel headed "Production Tasks & Discussions" after the move; Rule 10; scenario 6 marks it)
+  - A12 (the "Copyediting" entry's discussions panel headed "Production Tasks & Discussions" after the move when reached from the workflow menu; Rule 10; scenario 6 marks it)
+  - A13 (the decision page headed "Move to Submission" on a submission going back to review; Rule 9; scenarios 7 and 9 mark it)
 - **Owned by another feature**:
   - a Copyeditor assigned to a submission still in Review: the no-access box (Actors preamble; *Workflow screen & stage access*, scenario 3)
   - the author's "The Copyediting stage has not yet been initiated." before the stage is reached (Rule 11; *Workflow screen & stage access*, scenario 3)
@@ -642,14 +660,15 @@ entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A submission accepted without review never shows its editors the "Assign a copyeditor" notice | 🐞 | minor | — |
 | [A7](#a7) | Deleting the last copyedited file brings no notice back | 🐞 | minor | — |
 | [A9](#a9) | The discussion opened by the "Request Copyedit" message is listed as created by the Copyeditor | 🐞 | minor | — |
-| [A1](#a1) | "Move to Review" sends a submission accepted without review back to the Submission stage, and the author's email says review | ❓ | user-visible | claim check (claude), 2026-09-18 — holds |
+| [A13](#a13) | The page "Move to Review" opens is headed "Move to Submission", also on a submission going back to review | 🐞 | minor | — |
+| [A1](#a1) | "Move to Review" sends a submission accepted without review back to the Submission stage; the decision page says so, the button and the author's email still say review | ❓ | user-visible | claim check (claude), 2026-09-26 — reworded: the decision page now names the Submission stage |
 | [A3](#a3) | The "Assign a copyeditor" notice flips on a discussion, not on the assignment | ❓ | minor | claim check (claude), 2026-09-18 — holds |
 | [A4](#a4) | The Copyeditor's "You have been asked to review copyedits" task is never cleared by the copyedits | ❓ | minor | claim check (claude), 2026-09-18 — holds |
 | [A5](#a5) | A recommend-only editor is offered nothing at all on the Copyediting stage | ❓ | minor | claim check (claude), 2026-09-19 — holds |
 | [A8](#a8) | Deleting a copyedited file also removed the copy of it in "Draft Files" | ❓ | minor | — |
 | [A10](#a10) | A role's last stage cannot be unticked on the Roles form, which still says saved | ❓ | minor | — |
-| [A11](#a11) | A recommending Section Editor assigned through "Assign" after the acceptance reads no "Assign a copyeditor" notice | ❓ | minor | — |
-| [A12](#a12) | After "Send To Production" the "Copyediting" entry's discussions panel is headed "Production Tasks & Discussions" | ❓ | minor | — |
+| [A11](#a11) | A recommending Section Editor assigned through "Assign" after the acceptance reads no "Assign a copyeditor" notice | ❓ | minor | claim check (claude), 2026-09-26 — narrowed: the limit to recommendations is not the cause |
+| [A12](#a12) | After "Send To Production" the "Copyediting" entry, reached from the workflow menu, heads its discussions panel "Production Tasks & Discussions" | ❓ | minor | claim check (claude), 2026-09-26 — narrowed: a reload shows the Copyediting heading |
 | [OMP1](#omp1) | A press's "Move to Review" returns to External Review or, failing any external round, to Internal Review | ✅ | — | claim check (claude), 2026-09-18 — holds |
 | [OPS1](#ops1) | A preprint server has no Copyediting stage and no Copyeditor role | ✅ | — | claim check (claude), 2026-09-19 — holds |
 
@@ -660,15 +679,17 @@ entry notes otherwise; the team settles them on spec review.
 A deciding editor who accepted a submission with "Accept and Skip Review"
 and now presses "Move to Review" expects the submission in review. It goes
 back to the Submission stage instead, because there is no review round to
-return to, while the button, the wizard's own page ("their submission will
-undergo further editorial review") and the author's email ("Your submission
-has been moved to review", "It will undergo further review before it can be
-accepted") all say review. Nothing is lost: the Submission stage offers its
-decisions again.
-Question: should the button and its email follow the destination (a
-"Move to Submission" wording when no round exists), or should the decision
-open a review round? Lean: follow the destination in the wording; the
-mechanism is deliberate, the words are not.
+return to. The decision page the button opens says so: its heading, the
+last item of its breadcrumb and the browser tab read "Move to Submission".
+Everything else still says review: the button itself ("Move to Review"),
+the page's "Notify Authors" text ("their submission will undergo further
+editorial review") and the author's email ("Your submission has been moved
+to review", "It will undergo further review before it can be accepted").
+Nothing is lost: the Submission stage offers its decisions again.
+Question: should the button and the email follow the destination as the
+decision page does, or should the decision open a review round? Lean:
+follow the destination; the page has done so since 2026-09-25, and the
+button and the email were left behind.
 Basis: probe. <sup>[f-a1](#fn-a1)</sup>
 
 <a id="a2"></a>
@@ -790,30 +811,44 @@ the submission was accepted from review, with participation limited to
 recommendations, expects the notice their fellow editors read. They open the
 stage to the four panels and no notice, while the Editor already assigned
 reads "Assign a copyeditor using the Assign link in the Participants list."
-on the same submission. Seen once, on a press; a recommending Section Editor
-on a journal read the notice, but was not assigned through "Assign".
-Question: is the notice withheld because the editor was assigned through
-"Assign" once the submission sat at Copyediting, or because their
-participation is limited to recommendations? Lean: the assignment route,
-since an editor assigned through "Assign" to a submission accepted without
-review gets no notice either ([A6](#a6)); what settles it is a deciding
-Section Editor assigned through the same form at this stage reading, or not
-reading, the notice.
+on the same submission. Seen once, on a press. A Section Editor with the
+same limit who was not assigned through "Assign" reads the notice, on a
+journal and on a press, so the limit is not what withholds it.
+Question: should an editor assigned through "Assign" once the submission
+sits at Copyediting read the notice the other assigned editors read? Lean:
+yes, a defect of that route, since an editor assigned through "Assign" to a
+submission accepted without review gets no notice either ([A6](#a6)); what
+settles it is a deciding Section Editor assigned through the same form at
+this stage reading, or not reading, the notice.
 Basis: test run. <sup>[f-a11](#fn-a11)</sup>
 
 <a id="a12"></a>
-**A12 — The "Copyediting" entry's discussions panel takes the Production heading** · ❓ · minor.
+**A12 — The "Copyediting" entry's discussions panel takes the Production heading when reached from the menu** · ❓ · minor.
 An editor who selects "Copyediting" in the workflow menu after "Send To
 Production" expects the panel between the two file lists to read
 "Copyediting Tasks & Discussions", as it did while the submission sat here.
-It reads "Production Tasks & Discussions": the heading follows the
-submission's active stage, not the entry the editor opened. The lists and
-the status box are the Copyediting entry's.
-Question: is the panel shown there the Copyediting stage's discussions under
-the wrong heading, or the Production stage's discussions on the wrong entry?
-Lean: the heading alone is wrong; what settles it is a discussion added from
-that panel and which stage's entry lists it.
+It reads "Production Tasks & Discussions", the heading of the stage the
+submission is now in. Reloading the page on the same entry heads the panel
+"Copyediting Tasks & Discussions". The lists and the status box are the
+Copyediting entry's either way.
+Question: after the menu switch, is the panel the Copyediting stage's
+discussions under the wrong heading, or the Production stage's discussions
+left in place? Lean: the Production stage's panel left in place, since a
+reload brings the Copyediting heading; what settles it is a discussion
+added on each stage and which one the panel lists after the menu switch.
 Basis: test run. <sup>[f-a12](#fn-a12)</sup>
+
+<a id="a13"></a>
+**A13 — The page "Move to Review" opens is headed "Move to Submission"** · 🐞 · minor.
+A deciding editor who presses "Move to Review" on a submission that has had
+a review round expects the decision page to be headed "Move to Review", like
+the button, the last item of the breadcrumb above the heading and the
+browser tab. The heading reads "Move to Submission" on every submission,
+although recording the decision sends this one back to review. Nothing is
+lost, but the page contradicts the button at the moment the editor confirms
+the email to the authors. Until 2026-09-25 the heading read "Move to
+Review"; a regression, not a choice.
+Since: 2026-09-25 (1 day) · Basis: probe. <sup>[f-a13](#fn-a13)</sup>
 
 ### OMP
 
@@ -851,7 +886,13 @@ Code read 2026-09-18 at the checkouts' tips (`checkouts/ojs`, `checkouts/omp`,
 was then driven on running OJS and OMP installs, with OPS as the control, on
 2026-09-18 (the notice box, the file lists and window, the two decisions and
 their mails) and 2026-09-19 (the screen by role, the settings screens, the
-preprint server); each block below names what its drive covered.
+preprint server); each block below names what its drive covered. After
+pkp/pkp-lib#12798 (lib/pkp `8240fbe6cc`, PR #12959, and its follow-up
+`1ad4a14bb2`, PR #13398, both 2026-09-25, in all three apps; OMP's
+matching change `dfa8fce57`), the "Move to Review" decision, the notice
+box by role and the "Copyediting" entry after the move were driven again
+on OJS and OMP, with OPS as the control, on 2026-09-26 (notes h, f-a1,
+f-a11, f-a12, f-a13).
 
 <a id="fn-a"></a>
 **a** — The stage's panels: `lib/ui-library/src/pages/workflow/composables/useWorkflowConfig/workflowConfigEditorialOJS.js`, `WorkflowConfig[WORKFLOW_STAGE_ID_EDITING]`: `getPrimaryItems` pushes `WorkflowNotificationDisplay`, `FileManager` namespace `FINAL_DRAFT_FILES`, `DiscussionManager`, `FileManager` namespace `COPYEDITED_FILES`, in that order; `getSecondaryItems` pushes `ParticipantManager`. `useWorkflowConfigOMP.js` deep-merges `workflowConfigEditorialOMP.js` over the OJS config, and the OMP file defines no `WORKFLOW_STAGE_ID_EDITING` key of its own, so the press shows the OJS roster. Titles and descriptions from `useFileManagerConfig.js`: `FINAL_DRAFT_FILES` → `submission.finalDraft` "Draft Files" and `fileManager.draftFilesDescription`; `COPYEDITED_FILES` → `fileManager.copyeditedFiles` "Copyedited Files" and `fileManager.copyeditedFilesDescription`. The discussions heading is `getDiscussionTitleByStage()` in `managers/DiscussionManager/useDiscussionManagerHelpers.js` → `submission.queries.editorial` "Copyediting Tasks & Discussions". The `common.getPrimaryItems` guard shows `user.authorization.accessibleWorkflowStage` (the no-access box) when the stage is outside `permissions.accessibleStages`, which is U24's rule. Live-probed 2026-09-19 (Rule 1, Actors rows 1 and 9): the four panels in that order, both description lines verbatim and "Participants" on the right for every editorial account on OJS and OMP; "Copyediting Tasks & Discussions" with "Add" and "Copyedited Files" alone for the Author, Translator, Volume editor and Chapter Author; the no-access box for Layout Editor, Proofreader and Funding Coordinator.
@@ -875,7 +916,7 @@ preprint server); each block below names what its drive covered.
 **g** — `lib/pkp/classes/decision/types/SendToProduction.php`: `getStageId()` `WORKFLOW_STAGE_ID_EDITING`, `getNewStageId()` `WORKFLOW_STAGE_ID_PRODUCTION`; `getSteps()` adds an `Email` step (`editor.submission.decision.notifyAuthors` "Notify Authors", mailable `DecisionSendToProductionNotifyAuthor`, `toRoleIds` `[ROLE_ID_AUTHOR]`) only when the submission has author participants, then a `PromoteFiles` step (`editor.submission.selectFiles` "Select Files", `editor.submission.decision.promoteFiles.production` "Select files that should be sent to the production stage.", target `SUBMISSION_FILE_PRODUCTION_READY`) with `addFileList(__('submission.copyedited'), …SUBMISSION_FILE_COPYEDIT)` selected by default and `addFileList(__('submission.finalDraft'), …SUBMISSION_FILE_FINAL, false)` not selected. `getCompletedLabel()` `editor.submission.decision.sendToProduction.completed` "Sent to Production"; `getCompletedMessage()` `….completed.description`. The arrival at Copyediting is `Accept` (review) and `SkipExternalReview` (submission) with `getNewStageId()` `WORKFLOW_STAGE_ID_EDITING`; their `PromoteFiles` target is `SUBMISSION_FILE_FINAL`, which is why the ticked files land in "Draft Files"; `Accept` lists the round's `SUBMISSION_FILE_REVIEW_REVISION` files ("Revisions") and `SkipExternalReview` the `SUBMISSION_FILE_SUBMISSION` files. No app subclasses either decision type. Live-probed 2026-09-18 (Rule 8, Side effects) and 2026-09-19 (Rule 2): the two pages, "Skip this email" landing on "Select Files", "Copyedited" ticked and "Draft Files" clear, an empty pair still recording, the bubble "Production", the ticked files as new rows in "Production Ready Files" and the unticked draft absent, the closing window "Sent to Production" with its message and the one link "View Submission Summary" back to the workflow; the wizard's "Cancel" asking "Are you sure you want to cancel this decision?" ("Cancel Decision" / "Keep Working"), "Cancel Decision" returning to Copyediting with both buttons and an edited subject dropped (the dialog is *Editorial decision recording*'s); "Accept Submission" listing "Revisions" alone (OJS with a file in "Files for Review" only: no box, "Draft Files" "No Items"; OMP with a revision ticked: a new "Draft Files" row) and "Accept and Skip Review" listing "Submission Files".
 
 <a id="fn-h"></a>
-**h** — `lib/pkp/classes/decision/types/BackFromCopyediting.php`: `getLabel()` `editor.submission.decision.backFromCopyediting`, whose text "Move to Review" is lib/pkp's `locale/en/submission.po` with no app override; `getNewStageId()` returns `WORKFLOW_STAGE_ID_EXTERNAL_REVIEW` when `ReviewRoundDAO::submissionHasReviewRound()` finds an external round, else `WORKFLOW_STAGE_ID_INTERNAL_REVIEW` when it finds an internal one, else `WORKFLOW_STAGE_ID_SUBMISSION` (A1, OMP1); `runAdditionalActions()` sets the last review round's status to `REVIEW_ROUND_STATUS_RETURNED_TO_REVIEW`, a value that never reaches a screen (the round's status box is recomputed from its reviewers, *Review stage & rounds* Rules 5–6), and sends `DecisionBackFromCopyeditingNotifyAuthor`; `getSteps()` adds the "Notify Authors" `Email` step only. `getCompletedLabel()` "Sent Back from Copyediting". Files are never deleted by a decision; the Copyediting entry hides its lists while the stage is behind the active one and `Accept`'s `PromoteFiles` copies the newly ticked files into `SUBMISSION_FILE_FINAL` beside them. Live-probed 2026-09-18 (Rule 9, Side effects, A1, OMP1): the one-page wizard; a journal's submission landing on "Review (Round 1)" and a press's on External Review, a press with an internal round only on "Internal Review (Round 1)", a press with both on External Review; the round's box "Waiting for reviewers to be assigned." with no reviewers and "New reviews have been submitted." with a completed review, never a returned sentence; the round's decisions offered again; the never-reviewed submission landing on Submission with its decisions offered again; the closing window "Sent Back from Copyediting" with its message and "View Submission Summary"; while back in review the Copyediting entry reading "The Copyediting stage has not yet been initiated." with the Participants panel and no lists; after "Accept Submission" again both lists back with the earlier files, and a revision ticked on a third acceptance joining "Draft Files"; the log line under the assigned Section Editor's own name; the email sent, and none when skipped.
+**h** — `lib/pkp/classes/decision/types/BackFromCopyediting.php`: since pkp/pkp-lib#12798 (2026-09-25) `getLabel(?string $locale = null, ?Submission $submission = null)` matches `getNewStageId($submission, null)`: a review stage gives `editor.submission.decision.backFromCopyediting` "Move to Review", anything else, a call without the submission included, gives `editor.submission.decision.backFromCopyediting.toSubmission` "Move to Submission" (lib/pkp's `locale/en/submission.po`, no app override). `DecisionHandler` passes the submission for the browser title and the breadcrumb, and so do the submission's `availableEditorialDecisions`, the decision POST's answer and the email variable `{$decision}`; `templates/decision/record.tpl` builds the page heading from `{$decisionType->getLabel()}` without it (A13). The workflow button is the ui-library's fixed `t('editor.submission.decision.backFromCopyediting')` in `workflowConfigEditorialOJS.js` (note c), not the API's label, so it reads "Move to Review" on every submission (A1). `getNewStageId()` returns `WORKFLOW_STAGE_ID_EXTERNAL_REVIEW` when `ReviewRoundDAO::submissionHasReviewRound()` finds an external round, else `WORKFLOW_STAGE_ID_INTERNAL_REVIEW` when it finds an internal one, else `WORKFLOW_STAGE_ID_SUBMISSION` (A1, OMP1); `runAdditionalActions()` sets the last review round's status to `REVIEW_ROUND_STATUS_RETURNED_TO_REVIEW`, a value that never reaches a screen (the round's status box is recomputed from its reviewers, *Review stage & rounds* Rules 5–6), and sends `DecisionBackFromCopyeditingNotifyAuthor`; `getSteps()` adds the "Notify Authors" `Email` step only. `getCompletedLabel()` "Sent Back from Copyediting". Files are never deleted by a decision; the Copyediting entry hides its lists while the stage is behind the active one and `Accept`'s `PromoteFiles` copies the newly ticked files into `SUBMISSION_FILE_FINAL` beside them. Live-probed 2026-09-18 (Rule 9, Side effects, A1, OMP1): the one-page wizard; a journal's submission landing on "Review (Round 1)" and a press's on External Review, a press with an internal round only on "Internal Review (Round 1)", a press with both on External Review; the round's box "Waiting for reviewers to be assigned." with no reviewers and "New reviews have been submitted." with a completed review, never a returned sentence; the round's decisions offered again; the never-reviewed submission landing on Submission with its decisions offered again; the closing window "Sent Back from Copyediting" with its message and "View Submission Summary"; while back in review the Copyediting entry reading "The Copyediting stage has not yet been initiated." with the Participants panel and no lists; after "Accept Submission" again both lists back with the earlier files, and a revision ticked on a third acceptance joining "Draft Files"; the log line under the assigned Section Editor's own name; the email sent, and none when skipped. Live-probed 2026-09-26 on OJS and OMP, after pkp/pkp-lib#12798 (Rule 9, 9a, 9b; Actors row 7): the button read "Move to Review" for the manager, the Editor and the assigned Section Editor on every submission, reviewed or not, and a recommend-only Section Editor had none; the one-step page "1 Notify Authors"; the breadcrumb's last item and the browser title "Move to Review" after a review round (OMP: after an internal round only too) and "Move to Submission" on a never-reviewed submission, the heading "Move to Submission" on both (A13); the landings, the round boxes, the hidden Copyediting entry and the lists back after a new acceptance as above; the email "Your submission has been moved to review" on every path, none when skipped; the log line under the name of whoever pressed the button.
 
 <a id="fn-i"></a>
 **i** — `workflowConfigAuthorOJS.js` and `workflowConfigAuthorOMP.js` both define `[WORKFLOW_STAGE_ID_EDITING].getPrimaryItems` as `DiscussionManager` then `FileManager` namespace `COPYEDITED_FILES`; neither defines `getSecondaryItems` or `getActionItems` for the stage, and the author config has no `WorkflowNotificationDisplay` anywhere. The common `getPrimaryItems` stops at `WorkflowSubmissionStatus` while `hasNotSubmissionStartedStage()` holds (the "has not yet been initiated." box, U24 Rule 15a). The author's controls on the file list are note f's. Live-probed 2026-09-18 (Rule 11): the author's headings "Copyediting Tasks & Discussions" and "Copyedited Files" only, buttons "Library" and the panel's "Add", no "Notification" heading; before the stage, "Status" with "The Copyediting stage has not yet been initiated." and nothing else.
@@ -908,7 +949,7 @@ preprint server); each block below names what its drive covered.
 **s** — Seeding for the scenarios: the seeded journal `publicknowledge` and roster accounts (passwords = username doubled), scratch submissions through `POST scenarios/submission` with submitter `author.alex`. A submission at Copyediting after review: `decisions: ['sendExternalReview', 'accept']` with one `reviewRounds` entry (a completed `reviewer.julia`; on the press add `series: 'monographs'`); accepted without review: `decisions: ['skipExternalReview']`, which carries no notice for its editors (A6), so a notice scenario seeds `accept`; a press with an internal round only: `decisions: ['sendInternalReview', 'acceptFromInternal']` with one `reviewRounds` entry of `stage: 'internal'`. A Copyeditor: `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]`, which writes the assignment row without the "Assign" form's message, so on an `accept` seed the notice stays at "Assign a copyeditor…" (Rule 3a) until a discussion exists; the "Request Copyedit" path is driven on screen. Seeded submissions carry no files: a test uploads into "Draft Files" or "Copyedited Files" through "Upload/Select Files" › "Upload File" (a submission-stage file for the tick case comes from the Submission stage's "Submission Files" panel; a revision for the acceptance case is uploaded on the round). The notice box is read by its level-3 "Notification" heading. Mail reads are scoped by recipient in Mailpit at `http://127.0.0.1:8025`, so an email scenario runs on a scratch journal from `POST scenarios/context` with throwaway `roles: ['editor']`, `['copyeditor']` and `['author']` accounts. The roster holds no recommend-only assignment (the flag is set on screen through the Participants row's "Edit Assignment"). Editors: `editor.diana` (OJS, OMP), `manager.maya` for the unassigned-manager case; `sectioneditor.ana` is auto-assigned on a journal (section ART) but a monograph needs an explicit `participants` entry for a Series editor. Never decide on a shared roster submission. Per scenario: 1 an `accept` seed with `sectioneditor.omar` in `participants`, whose recommend-only flag the test sets on screen through the Participants row's "Edit Assignment" before the read, and `manager.maya` as the unassigned Journal Manager (on the press `sectioneditor.omar` is a Series editor of `monographs` and auto-assigned on submit, so the recommending editor is `sectioneditor.ravi`, assigned on screen through "Assign" with "Assignment privileges" ticked after the seed; the two routes are what A11 turns on); 2 a `sendExternalReview` seed, the test uploading one file through the round's "Files for Review" panel and one revision through its "Revisions Uploaded" panel before pressing "Accept Submission"; 4 an `accept` seed with `copyeditor.carla` in `participants`, the Copyeditor uploading through "Copyedited Files"; 5 an `accept` seed, the test uploading one copyedited file through "Copyedited Files" and one submission file through the Submission stage's "Submission Files" panel first; 8 an `accept` seed with one file uploaded by `editor.diana` through "Copyedited Files", read as `author.alex`; 9 `['sendInternalReview', 'acceptFromInternal']` for the first monograph and `['sendInternalReview', 'sendExternalReview', 'accept']` for the second; 10 a submitted preprint on the preprint server's `publicknowledge`, read as its manager. Scenarios 7 and 9 seed no `reviewRounds` entry, so the round the submission returns to has no reviewer and its box reads "Waiting for reviewers to be assigned.". Scenarios 3, 6 and 7 run on one scratch journal from `POST scenarios/context` with throwaway `users[]` of `roles: ['editor']`, `['copyeditor']` (two accounts, for scenario 3's control) and `['author']`; each of its submissions is seeded with the throwaway author as `submitter` and the throwaway editor in `participants` (nobody is auto-assigned on a scratch journal, and the notice shows only to an assigned editor); scenario 6's submission has one file uploaded through each list first, scenario 7's one through "Draft Files". Mailpit is read by recipient address; scenario 3's no-mail control is bounded by the first Copyeditor's email arriving. The recipe is the tooling's: no screen shows it.
 
 <a id="fn-a1"></a>
-**f-a1** — `BackFromCopyediting::getNewStageId()` (note h) falls through to `WORKFLOW_STAGE_ID_SUBMISSION` when `submissionHasReviewRound()` is false for both review stages; the label key `editor.submission.decision.backFromCopyediting` reads "Move to Review", and the mailable's body (`emails.editorDecisionBackFromCopyediting.body`) says "has been moved to the review stage. It will undergo further review before it can be accepted for publication." The class doc-comment states the three-way fall-through as designed, which is why the lean is on the wording. Live-probed 2026-09-18 on OJS and OMP: the never-reviewed submission landed on "WORKFLOW: SUBMISSION" with the bubble "Submission" and its decisions offered again; the wizard's page read "Send an email to the authors to let them know that copyediting is cancelled and their submission will undergo further editorial review."; the author's mail carried the subject and body quoted.
+**f-a1** — `BackFromCopyediting::getNewStageId()` (note h) falls through to `WORKFLOW_STAGE_ID_SUBMISSION` when `submissionHasReviewRound()` is false for both review stages. Issue pkp/pkp-lib#12798 asked for "move to" wording that follows the destination; its change (lib/pkp `8240fbe6cc` and `1ad4a14bb2`, 2026-09-25) made `getLabel()` return "Move to Submission" on this path (note h), which reaches the decision page's breadcrumb and title, the submission's `availableEditorialDecisions` ("30:Move to Submission" here, "30:Move to Review" on a reviewed submission), the decision POST's `label` and `{$decision}`, but not the ui-library's workflow button (a fixed key), the "Notify Authors" step's description `editor.submission.decision.backFromCopyediting.notifyAuthorsDescription` or the mailable, whose subject and body are unchanged. Before it, the label key `editor.submission.decision.backFromCopyediting` read "Move to Review" everywhere, and the mailable's body (`emails.editorDecisionBackFromCopyediting.body`) says "has been moved to the review stage. It will undergo further review before it can be accepted for publication." The class doc-comment states the three-way fall-through as designed, which is why the lean is on the wording. Live-probed 2026-09-18 on OJS and OMP: the never-reviewed submission landed on "WORKFLOW: SUBMISSION" with the bubble "Submission" and its decisions offered again; the wizard's page read "Send an email to the authors to let them know that copyediting is cancelled and their submission will undergo further editorial review."; the author's mail carried the subject and body quoted. Live-probed 2026-09-26 on OJS and OMP, after that change: the button "Move to Review"; the page's heading, breadcrumb and browser title "Move to Submission"; the same "Notify Authors" sentence; the recorded decision answered "Move to Submission"; the author's mail "Your submission has been moved to review" with the body quoted; the landing on "WORKFLOW: SUBMISSION" with the bubble "Submission" and its decisions offered. `{$decision}` typed into the email body rendered "Move to Submission" on a never-reviewed submission and "Move to Review" on a reviewed one; no default template uses it.
 
 <a id="fn-a2"></a>
 **f-a2** — `useFileManagerConfig.js` `COPYEDITED_FILES.uploadSelectTitleKey: tk('editor.submissionReview.uploadFile')` ("Upload Review File"), where `FINAL_DRAFT_FILES` uses `editor.submission.uploadSelectFiles` ("Upload/Select Files"); `fileSelectUpload()` passes the key straight to `openLegacyModal({title})`. Live-probed 2026-09-18 on OJS and OMP at every editorial level: the outer title "Upload Review File", the inner heading "Copyedited", the wizard "Upload Copyedited File"; uploads through it landed in the list.
@@ -938,10 +979,13 @@ preprint server); each block below names what its drive covered.
 **f-a10** — `lib/pkp/controllers/grid/settings/roles/form/UserGroupForm.php::execute()`: the stages are rewritten by `_assignStagesToUserGroup()` only inside `if ($assignedStages)`, so a form saved with every box clear leaves the stored stages untouched while the grid answers "Your changes have been saved."; `getAlwaysActiveStages()` (`ROLE_ID_MANAGER`) explains the manager row's missing "Edit". Live-probed 2026-09-19 on OJS and OMP: the Copyeditor role with Copyediting as its only stage, unticked and saved, twice; the same with Production as the only stage; the form reopened with the box ticked each time; unticking Copyediting while ticking Production saved.
 
 <a id="fn-a11"></a>
-**f-a11** — Test run 2026-09-19 on OMP (scenario 1, one run): `sectioneditor.ravi`, assigned as Series editor through the "Assign" form with "Assignment privileges" ticked after the `accept` seed had run, opened the monograph's Copyediting entry to the headings "Draft Files", "Copyediting Tasks & Discussions" and "Copyedited Files" with no "Notification" heading, while `editor.diana`, in the seed's `participants`, read "Assign a copyeditor using the Assign link in the Participants list." on the same monograph. The same day on OJS, `sectioneditor.omar`, in the seed's `participants` (a row the scenario API writes after its decisions have run, so also after the acceptance, without the "Assign" form) and flagged through the Participants row's "Edit Assignment", read the "Notification" heading; the route, not the timing, is what differs between the two reads. Note d's code path (`StageParticipantGridHandler::addParticipant()` calling `updateNotification()` for the pair) predicts a row for the added editor and note f-a6 records the same silence after "Assign" on the skip-review path; the observation stands on its own.
+**f-a11** — Test run 2026-09-19 on OMP (scenario 1, one run): `sectioneditor.ravi`, assigned as Series editor through the "Assign" form with "Assignment privileges" ticked after the `accept` seed had run, opened the monograph's Copyediting entry to the headings "Draft Files", "Copyediting Tasks & Discussions" and "Copyedited Files" with no "Notification" heading, while `editor.diana`, in the seed's `participants`, read "Assign a copyeditor using the Assign link in the Participants list." on the same monograph. The same day on OJS, `sectioneditor.omar`, in the seed's `participants` (a row the scenario API writes after its decisions have run, so also after the acceptance, without the "Assign" form) and flagged through the Participants row's "Edit Assignment", read the "Notification" heading; the route, not the timing, is what differs between the two reads. Note d's code path (`StageParticipantGridHandler::addParticipant()` calling `updateNotification()` for the pair) predicts a row for the added editor and note f-a6 records the same silence after "Assign" on the skip-review path; the observation stands on its own. Live-probed 2026-09-26 on OJS and OMP (Actors row 2, scenario 1; two runs each): a Section Editor in the seed's `participants` (on the press a Series editor added the same way), flagged through the Participants row's "Edit Assignment" ("This participant is only allowed to recommend an editorial decision…"), read "Assign a copyeditor using the Assign link in the Participants list." on the Copyediting entry, beside the Editor reading the same; so the recommend-only flag does not withhold the notice. The press's "Assign" route was not driven again.
 
 <a id="fn-a12"></a>
-**f-a12** — Test run 2026-09-19 on OMP (scenario 6, one run) and on OJS the same day: after "Send To Production", the "Copyediting" entry's main column read "Status" ("The submission is currently in the Production stage."), "Draft Files", "Production Tasks & Discussions", "Copyedited Files", with "Participants" on the right and no button; no discussion existed on either stage. Note a's `getDiscussionTitleByStage()` in `useDiscussionManagerHelpers.js` names the heading by a stage id; which id the entry passes after the move was not read.
+**f-a12** — Test run 2026-09-19 on OMP (scenario 6, one run) and on OJS the same day: after "Send To Production", the "Copyediting" entry's main column read "Status" ("The submission is currently in the Production stage."), "Draft Files", "Production Tasks & Discussions", "Copyedited Files", with "Participants" on the right and no button; no discussion existed on either stage. Note a's `getDiscussionTitleByStage()` in `useDiscussionManagerHelpers.js` names the heading by a stage id; which id the entry passes after the move was not read. Live-probed 2026-09-26 on OJS and OMP (Rule 10, scenario 6), on two submissions sent to production: selecting "Copyediting" in the workflow menu headed the panel "Production Tasks & Discussions"; reloading the same address (`workflowMenuKey=workflow_4`) headed it "Copyediting Tasks & Discussions", as did a fresh load of that address in a separate run; the "Status" box, the two lists, no button and no notice either way.
+
+<a id="fn-a13"></a>
+**f-a13** — pkp/pkp-lib#12798 (PR #12959, lib/pkp `8240fbe6cc`, and PR #13398, `1ad4a14bb2`, 2026-09-25; all three apps' pointers): `BackFromCopyediting::getLabel()` now takes the submission and answers "Move to Submission" when none is passed (note h). `DecisionHandler` passes it for the breadcrumb and the page title, but `lib/pkp/templates/decision/record.tpl` prints the `h1.app__pageHeading` from `{$decisionType->getLabel()}` with no argument, so the `match` falls to `….toSubmission`. Before the change `getLabel()` returned "Move to Review" unconditionally. Live-probed 2026-09-26 on OJS and OMP, in four separate runs, as the manager, the Editor and the assigned Section Editor: after a review round (with and without a completed review, email sent or skipped) and, on the press, after an internal round only and after internal and external rounds, the heading read "Move to Submission" while the breadcrumb's last item and the browser title read "Move to Review"; recording the decision landed on the review round each time. The same heading turned the suites' "Move to Review" scenarios 7 and 9 red on CI from the day of the change. Written up for the team as `docs/reports/2026-09-26-pkp-lib-12798.md`.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Note h: the external-then-internal-then-submission order of `BackFromCopyediting::getNewStageId()`; OMP's `Schema.php` uses the shared class unchanged, and OMP's `Application::getApplicationStages()` lists both review stages. Live-probed 2026-09-18 on OMP: an internal round only → "Internal Review (Round 1)"; internal then external → External Review, the internal entry reading "The submission is currently in the External Review stage."; an external round only → External Review; neither → Submission.
@@ -971,7 +1015,7 @@ preprint server); each block below names what its drive covered.
 - `lib/ui-library/src/managers/DiscussionManager/useDiscussionManagerHelpers.js` — the "Copyediting Tasks & Discussions" heading
 - `lib/ui-library/src/composables/useCurrentUser.js::hasCurrentUserAtLeastOneAssignedRoleInStage()` · `lib/pkp/classes/submission/maps/Schema.php` (`currentUserAssignedRoles`, `checkDecisionPermissions()`)
 - `classes/submission/maps/Schema.php::getAvailableEditorialDecisions()` (OJS, OMP, OPS) · `classes/decision/Repository.php::getDecisionTypesMadeByRecommendingUsers()` (OJS, OMP)
-- `lib/pkp/classes/decision/types/SendToProduction.php` · `BackFromCopyediting.php` · `Accept.php` · `SkipExternalReview.php` · `lib/pkp/classes/decision/steps/PromoteFiles.php` · `lib/pkp/classes/decision/Repository.php::getSubmissionNotificationTypes()` (A6)
+- `lib/pkp/classes/decision/types/SendToProduction.php` · `BackFromCopyediting.php` (`getLabel()` by destination, A1) · `Accept.php` · `SkipExternalReview.php` · `lib/pkp/pages/decision/DecisionHandler.php` · `lib/pkp/templates/decision/record.tpl` (the page heading, A13) · `lib/pkp/classes/decision/steps/PromoteFiles.php` · `lib/pkp/classes/decision/Repository.php::getSubmissionNotificationTypes()` (A6)
 - `lib/pkp/classes/mail/mailables/DecisionSendToProductionNotifyAuthor.php` · `DecisionBackFromCopyeditingNotifyAuthor.php`
 - `lib/pkp/classes/notification/managerDelegate/PKPEditingProductionStatusNotificationManager.php` · `EditorDecisionNotificationManager.php` · `lib/pkp/classes/notification/PKPNotificationManager.php` · `lib/pkp/pages/notification/NotificationHandler.php::fetchNotification()`
 - `lib/pkp/controllers/grid/files/final/{FinalDraftFilesGridHandler,ManageFinalDraftFilesGridHandler}.php` (GRID-019/020) · `lib/pkp/controllers/grid/files/copyedit/{CopyeditFilesGridHandler,ManageCopyeditFilesGridHandler}.php` (GRID-014/015) · `lib/pkp/controllers/grid/files/form/ManageSubmissionFilesForm.php` (`importFile()`, A8) · `lib/pkp/controllers/grid/files/SubmissionFilesCategoryGridDataProvider.php`
@@ -980,5 +1024,5 @@ preprint server); each block below names what its drive covered.
 - `lib/pkp/classes/editorialTask/Template.php` — the "Request Copyedit" task template (Settings › Workflow › Tasks and Discussions)
 - `registry/userGroups.xml` (OJS, OMP, OPS) — stage sets and permission levels · `lib/pkp/controllers/grid/settings/roles/form/UserGroupForm.php` (A10) · `lib/pkp/classes/security/RoleDAO.php::getAlwaysActiveStages()` · `ops/classes/core/Application.php::getApplicationStages()`
 - `lib/pkp/pages/authorDashboard/PKPAuthorDashboardHandler.php::submission()` · `lib/pkp/templates/controllers/tab/authorDashboard/editorial.tpl` (AFFW-705, never rendered)
-- Locale: `lib/pkp/locale/en/{submission,editor,notification,emails,manager}.po` (`editor.submission.decision.backFromCopyediting` "Move to Review" is `submission.po`, no app override)
+- Locale: `lib/pkp/locale/en/{submission,editor,notification,emails,manager}.po` (`editor.submission.decision.backFromCopyediting` "Move to Review" and `….backFromCopyediting.toSubmission` "Move to Submission" are `submission.po`, no app override)
 - App divergence points checked: no app subclass of the decision types, grid handlers or notification delegates; OMP's editorial and author configs add no editing-stage entry; OPS has no editing stage, no Copyeditor group and no editing decisions

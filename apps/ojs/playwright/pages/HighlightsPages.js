@@ -298,6 +298,16 @@ const HighlightPanel = class HighlightPanel {
         return (await this.richBody(this.titleField(locale))).innerText();
     }
 
+    /**
+     * The "Title" box shows exactly `text`, auto-waited: the panel opened
+     * for "Edit" fills its editors from the fetched highlight after they
+     * start, so a read right after the editor is editable can be empty
+     (.reports/flake-s26/fixC/diagnosis.md).
+     */
+    async expectTitleText(text, locale = 'en') {
+        await expect(await this.richBody(this.titleField(locale))).toHaveText(text, {timeout: T});
+    }
+
     /** The language button at the top of a two-language panel ("French"). */
     localeButton(name) {
         return this.dialog.locator('.pkpFormLocales button').filter({hasText: name});

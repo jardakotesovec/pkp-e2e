@@ -96,7 +96,8 @@ test.describe('notify users', () => {
         await restrict.open();
         await expect(restrict.legend()).toHaveText(/^\s*Disable Roles\s*$/);
         expect(await restrict.description()).toBe(DISABLE_DESCRIPTION);
-        expect(await restrict.boxLabels()).toEqual(allRoles);
+        // A box per role the "Roles" tab lists, in no fixed order (Fields).
+        expect(sorted(await restrict.boxLabels())).toEqual(sorted(allRoles));
         expect(await restrict.checkedLabels()).toEqual([]);
         await expect(restrict.saveButton).toBeVisible();
         const wizardSource = await ap.content();

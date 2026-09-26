@@ -89,6 +89,7 @@ const {disableMotion} = require('../../../../shared/playwright/support/motion.js
 const {wizardUrl, expectWizardOpen, completeAndSubmitDraft} = require('../pages/SubmissionWizardPages.js');
 const {RegisterPage, RegistrationCompletePage} = require('../pages/RegistrationPages.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 
 const SERVER = 'publicknowledge';
 const NEEDS_EDITOR_TASK = 'A new preprint has been submitted to which a moderator needs to be assigned.';
@@ -266,6 +267,31 @@ async function expectAgreeing(readFirst, readSecond, {label}) {
     }
     expect(second, label).toEqual(first);
     return first;
+}
+
+/**
+ * A number read between two reads of a moving count lies within them:
+ * parallel tests raise and clear `admin`'s tasks several times a second
+ * (S7), so the "Dashboard" entry is read between two reads of the bell and
+ * must fall in their range (equal to both when nothing moved). Three tries
+ * (fix list B, flake-s26: the pair of reads alone disagreed on all three
+ * tries in 2 of 5 runs at eight workers).
+ */
+async function expectBetweenReads(readCount, readOther, {label}) {
+    let range = [];
+    let other;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        const before = await readCount();
+        other = await readOther();
+        const after = await readCount();
+        range = [Math.min(before, after), Math.max(before, after)];
+        if (other >= range[0] && other <= range[1]) {
+            return other;
+        }
+    }
+    expect(other, `${label} (between ${range[0]} and ${range[1]})`).toBeGreaterThanOrEqual(range[0]);
+    expect(other, `${label} (between ${range[0]} and ${range[1]})`).toBeLessThanOrEqual(range[1]);
+    return other;
 }
 
 /**
@@ -928,7 +954,6 @@ test.describe('notifications center & email preferences', () => {
             {username: `${tag}mg`, roles: ['manager']},
             {username: `${tag}au`, roles: ['author']},
         ]);
-        await opsApi.createSubmission({tag, context: server.path, submitter: `${tag}au`, title});
 
         // The Preprint Server Manager on the seeded server: the four groups
         // with exactly the server's rows (no issue row: a server has no
@@ -960,17 +985,28 @@ test.describe('notifications center & email preferences', () => {
         await expect(adminPage).toHaveURL(/\/index\/(en\/)?user\/profile/);
         expect(tidyRows(await siteProfile.notificationTable())).toEqual(SITE_TAB);
 
+        // The scratch server's submission, seeded right before the reads
+        // below: the window lists only `admin`'s 25 newest tasks, and
+        // parallel tests raise several a second, so a task raised at the
+        // start of the test can be off that page by now (fix list B).
+        await opsApi.createSubmission({tag, context: server.path, submitter: `${tag}au`, title});
+
         // The site-level bell: the same "Tasks" window, with the same rows
         // as from a server's editorial page (Rule 2d); the scratch server's
-        // row is in both.
+        // row is in both. The window shows the first 25 of `admin`'s
+        // thousands of tasks, newest first to the second: parallel tests
+        // raise `admin` tasks between the two reads, and rows tied at the
+        // 25th place come back either way, so each read keeps this test's
+        // own rows, sorted (fix list B, flake-s26).
         const adminTasks = new TasksPanel(adminPage);
+        const ownRows = (rows) => unordered(rows.filter((row) => row.endsWith(` | ${title}`)));
         const readEditorialRows = async () => {
             await gotoEditorial(adminPage, server.path);
             await adminTasks.open();
             await expect(adminTasks.row(title)).toHaveCount(1);
             const rows = await adminTasks.rowTexts();
             await adminTasks.close();
-            return rows;
+            return ownRows(rows);
         };
         const readSiteRows = async () => {
             await siteProfile.goto('notifications');
@@ -979,7 +1015,7 @@ test.describe('notifications center & email preferences', () => {
             await expect(adminTasks.row(title)).toHaveCount(1);
             const rows = await adminTasks.rowTexts();
             await adminTasks.close();
-            return rows;
+            return ownRows(rows);
         };
         const rows = await expectAgreeing(readEditorialRows, readSiteRows, {label: 'the site-level window lists the same rows'});
         expect(rows.length).toBeGreaterThan(0);
@@ -1000,7 +1036,7 @@ test.describe('notifications center & email preferences', () => {
             expect(match, `the entry reads "${entry}"`).not.toBeNull();
             return Number(match[1]);
         };
-        const count = await expectAgreeing(readSiteBell, readDashboardEntry, {label: 'the "Dashboard" entry carries the bell\'s number'});
+        const count = await expectBetweenReads(readSiteBell, readDashboardEntry, {label: 'the "Dashboard" entry carries the bell\'s number'});
         expect(count).toBeGreaterThan(0);
     });
 

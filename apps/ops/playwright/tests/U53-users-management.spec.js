@@ -21,8 +21,10 @@
  * Every test seeds its own scratch preprint server with throwaway accounts
  * (the seeded roster and publicknowledge stay untouched); the Site
  * Administrator `admin` is enrolled as a manager of every scratch server and
- * is the signed-in actor of S7 and S8. Every actor is opened through
- * `asUser` (no default user: a multi-actor test sets none, patterns.md
+ * is the signed-in actor of S1 (S7 and S8, the Site Administrator's
+ * notices, run alone: `serial/U53-users-management.spec.js`). Every actor
+ * is opened through `asUser` (no default user: a multi-actor test sets
+ * none, patterns.md
  * "Fixture selection"); sign-ins the scenarios drive by hand run in fresh
  * anonymous contexts. Mailpit reads are scoped by the throwaway recipient
  * addresses, which carry the app and the test in the seed tag, and every "no
@@ -41,14 +43,15 @@ const {
     RemoveUserDialog,
     MergeUserWindow,
     HostedContextsPage,
-    UserDetailsWindow,
 } = require('../../../../shared/playwright/pages/UsersManagementPages.js');
 
 const LABELS = {hostedLabel: 'Hosted Servers'};
 const MANAGER_ROLE = 'Preprint Server manager';
-const REVIEWER = /Reviewer/; // no reviewer role on a preprint server ({OJS OMP} in S7, S8)
 const NO_ROLE_BOX = 'Include users with no roles in this server.';
-const GRID_COLUMNS = ['Given Name', 'Family Name', 'Username', 'Roles', 'Email'];
+// The last column is `user.email`, which lib/pkp defines twice (common.po
+// "Email address", user.po "Email"); the install's locale-file order picks
+// one (U41 A19), so either label is the column (ci-triage, 2026-09-26).
+const GRID_COLUMNS = ['Given Name', 'Family Name', 'Username', 'Roles', expect.stringMatching(/^Email( address)?$/)];
 const ORCID_ID = '0000-0003-1419-2405';
 const DISABLE_NOTE =
     "Please note that once a user is disabled, you won't be able to add them to any roles until the user is enabled again.";
@@ -56,18 +59,6 @@ const ENABLE_NOTE =
     "Once the user is enabled, they will regain access to the site, and you'll be able to invite them to roles as needed.";
 const REMOVE_SENTENCE =
     'Remove this user from this server? This action will unenroll the user from all roles within this server.';
-const NO_ROLE_REFUSAL = 'You need to select at least one role to be associated with this user.';
-const FORM_CHANGED = 'The data on this form has changed. Do you wish to continue without saving?';
-const MORE_DETAILS = [
-    'Homepage URL',
-    'Phone',
-    'Working Languages',
-    'Reviewing interests',
-    'Affiliation',
-    'Bio Statement (e.g., department and rank)',
-    'Mailing Address',
-    'Signature',
-];
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -519,10 +510,10 @@ test.describe('users management', () => {
         await expect(merge.grid.rows()).toHaveCount(0);
     });
 
-    // S1, S7 and S8 act as `admin`. A refused legacy form's message
-    // reaches the page as a notification that the next page of the same
-    // account fetches and clears (patterns.md parallel lesson 2), so the
-    // three run one after another in one worker, never beside each other.
+    // S1 acts as `admin` and reads no notice. S7 and S8 read the Site
+    // Administrator's notices, which the next `admin` page of ANY test
+    // fetches and clears (patterns.md parallel lesson 2), so they run alone
+    // in the solo project: `serial/U53-users-management.spec.js`.
     test.describe('the Site Administrator\'s steps', () => {
         test.describe.configure({mode: 'default'});
 
@@ -654,262 +645,6 @@ test.describe('users management', () => {
             await expect(grid.addUserLink()).toBeVisible();
             expect(await grid.pagingLine()).toMatch(/^Items per page: 10 25 50 75 100 /);
             await expect(grid.pageLinks().filter({hasText: /^\s*2\s*$/})).toBeVisible();
-        });
-
-        test('S7: the Site Administrator adds a user', async ({asUser, opsApi, pkpMail, browser, baseURL}, testInfo) => {
-            test.slow();
-            const tag = makeTag(7, testInfo);
-            const lena = `l${tag}`;
-            const contact = `contact${tag}@mail.test`;
-            const rosaEmail = `rosa-${tag}@mail.test`;
-            await opsApi.createContext({
-                tag,
-                context: {contactName: 'Pat Contact', contactEmail: contact},
-                users: [{username: lena, givenName: 'Lena', familyName: 'Ortiz', roles: ['author']}],
-            });
-            const ap = await signedIn(asUser, 'admin');
-            const questions = recordQuestions(ap);
-            const hosted = new HostedContextsPage(ap, LABELS);
-
-            // The "Users" tab (Rule 19).
-            await hosted.gotoFromAdministration();
-            await hosted.openSettingsWizard(tag);
-            let grid = await hosted.openWizardTab('Users');
-            await expect(grid.title('Current Users')).toBeVisible();
-            await expect(grid.rows()).toHaveCount(2);
-            await expect(grid.row('admin@mail.test')).toHaveCount(1);
-            await expect(grid.row(mail(lena))).toHaveCount(1);
-            // The spec's "Items per page: 10 25 50 75 100" in front shows only on a
-            // longer list (T-ops-1, T-ojs-1).
-            expect(await grid.pagingLine()).toBe('1 - 2 of 2 items');
-
-            // Nothing typed (Rule 21; Fields, "Add User").
-            const add = new UserDetailsWindow(ap, 'Add User');
-            await grid.addUserLink().click();
-            await add.expectOpen();
-            await expect(add.stepHeading('Step #1: Fill in User Details')).toBeVisible();
-            await expect(add.mustChangePassword).toBeChecked();
-            await expect(add.sendNotify).not.toBeChecked();
-            await add.suggest();
-            await expect(add.username).toHaveValue('');
-            await expect(add.notice(/\S/)).toHaveCount(0);
-            expect(questions).toEqual([]);
-            await add.pressOk();
-            await expect(await add.errorFor(add.givenName)).toHaveText('This field is required.');
-
-            // Values refused (Fields, "Add User").
-            await add.givenName.fill('Rosa');
-            await add.familyName.fill('Delgado');
-            await add.username.fill(lena);
-            await add.email.fill(mail(lena));
-            await add.password.fill('abc12');
-            await add.password2.fill('abc12');
-            await add.openMoreDetails();
-            for (const label of MORE_DETAILS) {
-                await expect(add.label(label).first()).toBeVisible();
-            }
-            // An address that is not one stops "OK" in the browser, and the
-            // server's refusals come at the next "OK" (T-ops-2, T-ojs-2).
-            const updates = [];
-            ap.on('request', (request) => {
-                if (request.method() === 'POST' && request.url().includes('update-user')) {
-                    updates.push(request.url());
-                }
-            });
-            await add.userUrl.fill('example');
-            await add.pressOk();
-            await expect(await add.errorFor(add.userUrl)).toHaveText('Please enter a valid URL.');
-            expect(updates, 'nothing sent').toEqual([]);
-            await add.userUrl.fill('');
-            await add.pressOk();
-            await expect(add.notice('The selected username is already in use by another user.').first()).toBeVisible();
-            await expect(add.notice('The selected email address is already in use by another user.').first()).toBeVisible();
-            await expect(add.notice('The password must be at least 6 characters.').first()).toBeVisible();
-            expect(updates).toHaveLength(1);
-            await expect(add.form).toBeVisible();
-            await expect(add.roleForm).toHaveCount(0);
-
-            // Passwords that differ (Fields, "Add User").
-            await add.username.fill('');
-            await add.suggest();
-            await expect(add.username).toHaveValue(/^rdelgado\d*$/);
-            const rosa = await add.username.inputValue();
-            await add.email.fill(rosaEmail);
-            await add.password.fill('abc123');
-            await add.password2.fill('abc124');
-            await add.pressOk();
-            await expect(add.notice('The passwords do not match.').first()).toBeVisible();
-
-            // "Generate Password" (Rule 23).
-            await add.generatePassword.check();
-            for (const box of [add.password, add.password2]) {
-                await expect(box).toHaveValue('********');
-                await expect(box).toBeDisabled();
-            }
-            await expect(add.sendNotify).toBeChecked();
-            await expect(add.sendNotify).toBeDisabled();
-
-            // Step 2 (Rules 21, 22; Fields "Appear on Masthead").
-            await add.pressOk();
-            await add.expectStep2('Rosa Delgado');
-            const mastheads = await add.mastheadBoxes();
-            expect(mastheads.length).toBeGreaterThan(0);
-            expect(mastheads.filter((box) => !box.checked)).toEqual([]);
-            const roleNames = await add.roleForm.locator('input[name="userGroupIds[]"]').evaluateAll((els) =>
-                els.map((e) => (e.closest('label') || document.querySelector(`label[for="${e.id}"]`) || {}).innerText.trim())
-            );
-            expect(roleNames).toEqual(mastheads.map((box) => box.label));
-            // {OJS OMP}: no reviewer role on a preprint server; Author is the control.
-            expect(roleNames).toContain('Author');
-            expect(roleNames.filter((name) => REVIEWER.test(name))).toEqual([]);
-            await add.pressSave();
-            await expect(add.notice(NO_ROLE_REFUSAL).first()).toBeVisible();
-            await expect(add.roleForm).toBeVisible();
-
-            // Saved (Rule 22).
-            await add.roleBox('Author').check();
-            await add.pressSave();
-            await expect(add.roleForm).toHaveCount(0);
-            await expect(grid.row(rosaEmail).first().locator('td').nth(3)).toHaveText('Author');
-
-            // Rosa's mailbox (Side effects).
-            const summary = await pkpMail.find({to: rosaEmail, subject: 'Server Registration'});
-            const message = await pkpMail.fullMessage(summary.ID);
-            expect(message.From).toEqual(expect.objectContaining({Name: 'admin admin', Address: 'admin@mail.test'}));
-            expect(message.ReplyTo.map((r) => r.Address)).toEqual([contact]);
-            expect(message.Text).toContain(`You have now been registered as a user with Scratch context ${tag}`);
-            const credentials = message.Text.match(/Username:\s*(\S+)\s+Password:\s*(\S+)/);
-            expect(credentials, 'username and password in the email').toBeTruthy();
-            expect(credentials[1]).toBe(rosa);
-            expect(await pkpMail.count({to: rosaEmail})).toBe(1);
-
-            // Rosa's first sign-in: a new password first (Rule 23).
-            const {context, page: rp} = await anonPage(browser, baseURL);
-            try {
-                const login = new LoginPage(rp);
-                await login.gotoContext(tag);
-                await login.submitCredentials(rosa, credentials[2]);
-                await rp.waitForURL(/\/login\/changePassword/, {waitUntil: 'commit'});
-                await expect(rp.getByRole('heading', {name: 'Change Password'})).toBeVisible();
-            } finally {
-                await context.close();
-            }
-
-            // "Cancel" and "Close" (Rule 21).
-            grid = await hosted.reloadWizardTab('Users');
-            await grid.addUserLink().click();
-            await add.expectOpen();
-            await add.givenName.fill('Tess');
-            await add.cancel();
-            expect(questions).toEqual([]);
-            await expect(async () => {
-                await grid.addUserLink().click();
-                await expect(add.form).toBeVisible({timeout: 2_000});
-            }).toPass({timeout: 30_000});
-            await add.expectOpen();
-            await expect(add.givenName).toHaveValue('');
-            await add.givenName.fill('Tess');
-            await add.givenName.blur();
-            await add.closeButton().click();
-            await expect.poll(() => questions).toEqual([FORM_CHANGED]);
-
-            // Control: the Users list lists Rosa, and no invitation (Rules 1, 22).
-            const list = new UsersListPage(ap, tag);
-            await list.goto();
-            await expect(list.rolesCell(list.row(rosaEmail))).toHaveText('Author');
-            await expect(list.invitationsTable).toBeVisible();
-            await expect(list.invitationRow(rosaEmail)).toHaveCount(0);
-        });
-
-        test('S8: the Site Administrator changes a user\'s roles on "Edit User"', async ({
-            asUser,
-            opsApi,
-            pkpMail,
-            browser,
-            baseURL,
-        }, testInfo) => {
-            test.slow();
-            const tag = makeTag(8, testInfo);
-            const lena = `l${tag}`;
-            // No Rui Tanaka: a preprint server has no reviewer role (fn-s).
-            await opsApi.createContext({
-                tag,
-                users: [{username: lena, givenName: 'Lena', familyName: 'Ortiz', roles: ['author']}],
-            });
-            const ap = await signedIn(asUser, 'admin');
-            const hosted = new HostedContextsPage(ap, LABELS);
-            await hosted.gotoFromAdministration();
-            await hosted.openSettingsWizard(tag);
-            let grid = await hosted.openWizardTab('Users');
-
-            // "Edit User" (Rule 24; Fields, "Edit User").
-            const edit = new UserDetailsWindow(ap, 'Edit User');
-            await grid.chooseAction(mail(lena), 'Edit User');
-            await edit.expectOpen();
-            await expect(edit.stepHeading('User Details')).toBeVisible();
-            await expect(edit.username).toHaveCount(0);
-            await expect(edit.form).toContainText(`Username ${lena}`);
-            await expect(edit.roleBox('Author')).toBeChecked();
-            await expect(edit.roleBox('Reader')).not.toBeChecked();
-            // {OJS OMP}: no reviewer role, so no reviewer masthead box; the
-            // Author box is the control, read the same way.
-            await expect(edit.mastheadBox('Author')).toBeAttached();
-            expect((await edit.mastheadBoxes()).filter((box) => REVIEWER.test(box.label))).toEqual([]);
-            // No "Editorial Notes"; the form's own "Signature" is the control.
-            await expect(edit.label('Signature').first()).toBeAttached();
-            await expect(edit.gossip).toHaveCount(0);
-            await expect(edit.form.getByText('Editorial Notes')).toHaveCount(0);
-
-            // Every role unticked (Rule 24).
-            await edit.roleBox('Author').uncheck();
-            await edit.pressOk();
-            await expect(edit.notice(NO_ROLE_REFUSAL).first()).toBeVisible();
-            await expect(edit.form).toBeVisible();
-
-            // Roles changed (Rule 24).
-            await edit.roleBox('Reader').check();
-            await edit.pressOk();
-            await expect(edit.form).toHaveCount(0);
-            await expect(ap.getByText('User edited.').first()).toBeVisible();
-            // The row as refreshed still lists the ended role (T-ops-3, T-ojs-3,
-            // unasserted), and so does a reload within the same second as the
-            // save: read after a reload, reloading until the second has passed.
-            await expect(async () => {
-                grid = await hosted.reloadWizardTab('Users');
-                await expect(grid.row(mail(lena)).first().locator('td').nth(3)).toHaveText('Reader', {timeout: 2_000});
-            }).toPass({timeout: 30_000});
-
-            // A reviewer's account {OJS OMP}: no reviewer role on a preprint server.
-
-            // Users & Roles (Rules 1, 24).
-            const list = new UsersListPage(ap, tag);
-            await list.goto();
-            const lenaRow = list.row(mail(lena));
-            await expect(list.rolesCell(lenaRow)).toHaveText('Reader');
-            await expect(list.invitationsTable).toBeVisible();
-            await expect(list.invitationRow(mail(lena))).toHaveCount(0);
-
-            // Lena's mailbox: nothing about either change (Rule 24; Side
-            // effects). The control is an email sent to her from her row.
-            const email = new EmailUserWindow(ap);
-            await list.chooseAction(lenaRow, 'Email');
-            await email.expectOpen();
-            await email.subject.fill(`Control ${tag}`);
-            await email.typeBody('Control message.');
-            await email.sendAndWait();
-            await email.expectClosed();
-            await pkpMail.find({to: mail(lena), subject: `Control ${tag}`});
-            expect(await pkpMail.count({to: mail(lena)})).toBe(1);
-
-            // Control: Lena signs in with her old password (Fields "Password").
-            const {context, page: lp} = await anonPage(browser, baseURL);
-            try {
-                const login = new LoginPage(lp);
-                await login.gotoContext(tag);
-                await login.signIn(lena, pw(lena));
-            } finally {
-                await context.close();
-            }
         });
     });
 });

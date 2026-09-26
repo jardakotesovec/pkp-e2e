@@ -391,7 +391,11 @@ test.describe('issues', () => {
         // "Order", then "Done": the lower "Articles" row dragged up (Rule 10).
         await issues.showTab('Back Issues');
         win = await issues.openManagement('Back Issues', name);
-        const before = (await win.tocOutline()).filter((l) => l === 'Tidal Patterns' || l === 'Coastal Winds');
+        // Read once both rows are in (the window's list loads after it opens).
+        let before = [];
+        await expect
+            .poll(async () => (before = (await win.tocOutline()).filter((l) => l === 'Tidal Patterns' || l === 'Coastal Winds')).length, {timeout: 30_000})
+            .toBe(2);
         const [upper, lower] = before;
         const ordering = win.tocOrdering();
         await ordering.start();

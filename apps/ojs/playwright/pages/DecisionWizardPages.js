@@ -748,20 +748,47 @@ exports.ComposerPage = class ComposerPage {
     /** The letter's text (placeholders shown as their values). */
     async letterText() {
         const id = await this.editorId();
-        return this.page.evaluate(
-            (i) => /** @type {any} */ (window).tinymce.get(i).getContent({format: 'text'}),
-            id
+        return this.settledLetterRead(() =>
+            this.page.evaluate((i) => /** @type {any} */ (window).tinymce.get(i).getContent({format: 'text'}), id)
         );
+    }
+
+    /**
+     * A letter read taken once it has settled: non-empty and the same across
+     * two reads a beat apart. The letter reaches the editor after the editor
+     * starts (the template's body is fetched, then set into it), so a single
+     * read can land on an empty or half-set letter
+     * (.reports/flake-s26/fixC/diagnosis.md).
+     *
+     * @param {() => Promise<string>} read
+     */
+    async settledLetterRead(read) {
+        let last = null;
+        let value = '';
+        await expect
+            .poll(
+                async () => {
+                    value = await read();
+                    const settled = value !== '' && value === last;
+                    last = value;
+                    return settled;
+                },
+                {timeout: 30_000, intervals: [250]}
+            )
+            .toBe(true);
+        return value;
     }
 
     /** The letter's first paragraph's text ("Dear Alex Author,"). */
     async firstParagraphText() {
         const id = await this.editorId();
-        return this.page.evaluate((i) => {
-            const body = /** @type {any} */ (window).tinymce.get(i).getBody();
-            const p = body.firstElementChild || body;
-            return (p.innerText || p.textContent || '').trim();
-        }, id);
+        return this.settledLetterRead(() =>
+            this.page.evaluate((i) => {
+                const body = /** @type {any} */ (window).tinymce.get(i).getBody();
+                const p = body.firstElementChild || body;
+                return (p.innerText || p.textContent || '').trim();
+            }, id)
+        );
     }
 
     /** Focus the letter with the cursor at the end of its first paragraph. */

@@ -778,8 +778,7 @@ test.describe('publish, schedule & versions', () => {
         await expect(options).toHaveCount(1);
         await expect(options.first()).toHaveText(/Round 1 — opened \d{4}-\d{2}-\d{2}/);
         await expect(options.first()).toBeDisabled();
-        await managerPage.keyboard.press('Escape');
-        await expect(pub.reviewRoundListbox()).toHaveCount(0, {timeout: 30_000});
+        await pub.closeReviewRoundOptions();
         await expect(picker).toHaveText('Select a review round');
         await panel.getByRole('button', {name: 'Confirm', exact: true}).click();
         const refusal = pub.refusalWindow();

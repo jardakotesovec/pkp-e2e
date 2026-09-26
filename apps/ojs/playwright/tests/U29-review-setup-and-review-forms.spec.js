@@ -36,6 +36,7 @@
  * request mail the test sends itself (A8). No hard-coded waits (A5).
  */
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {
     WorkflowPage,
     openAddReviewerModal,
@@ -713,8 +714,8 @@ test.describe('review setup & review forms', () => {
         const table = settings.recommendations;
         await settings.goto('Reviewer Recommendations');
 
-        // The six starting entries, all ticked.
-        expect(await table.titles()).toEqual(DEFAULT_RECOMMENDATIONS);
+        // The six starting entries, in no fixed order (A7), all ticked.
+        expect(unordered(await table.titles())).toEqual(unordered(DEFAULT_RECOMMENDATIONS));
         for (const title of DEFAULT_RECOMMENDATIONS) {
             await expect(table.tick(table.row(title))).toBeChecked();
         }
@@ -733,9 +734,10 @@ test.describe('review setup & review forms', () => {
         await expect(table.titleInput).toBeVisible();
         await expect(table.saveButton).toBeDisabled();
 
-        // The new entry: filled, "Save" enables and the row lands last, ticked.
+        // The new entry: filled, "Save" enables; the table lists seven rows,
+        // the new one among them (its place is not fixed, A7), ticked.
         await table.saveOpenWindow({title: custom, type: 'Approved'});
-        expect(await table.titles()).toEqual([...DEFAULT_RECOMMENDATIONS, custom]);
+        await expect.poll(async () => unordered(await table.titles())).toEqual(unordered([...DEFAULT_RECOMMENDATIONS, custom]));
         await expect(table.tick(table.row(custom))).toBeChecked();
 
         // Untick "See Comments" › "Yes": the row is unticked; the other rows
@@ -749,14 +751,14 @@ test.describe('review setup & review forms', () => {
             await expect(table.tick(table.row(title))).toBeChecked();
         }
 
-        // Reviewer: step 3's list ends with the new entry and has no "See
+        // Reviewer: step 3's list offers the new entry and has no "See
         // Comments"; control: the five entries left ticked are all there.
         const reviewerPage = await (await asUser(reviewer)).newPage();
         const wizard = new ReviewWizardPage(reviewerPage, tag);
         await wizard.goto(submissionId);
         await walkToStep3(wizard);
         const options = (await wizard.recommendationSelect.locator('option').allInnerTexts()).map((s) => s.trim());
-        expect(options[options.length - 1]).toBe(custom);
+        expect(options).toContain(custom);
         expect(options).not.toContain('See Comments');
         for (const title of DEFAULT_RECOMMENDATIONS.filter((t) => t !== 'See Comments')) {
             expect(options).toContain(title);

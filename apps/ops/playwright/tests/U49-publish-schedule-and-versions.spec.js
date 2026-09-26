@@ -463,7 +463,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
 
         // "Close": the version is neither posted nor scheduled — the
         // status is unchanged.
-        await managerPage.keyboard.press('Escape');
+        await dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(dialog).toHaveCount(0, {timeout: 30_000});
         await expectStatus(managerPage, 'Unposted');
         await expect(

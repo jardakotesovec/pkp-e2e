@@ -47,9 +47,11 @@
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1–S3 run on publicknowledge on their own scratch
- * preprints (a unique tag, M5); S1's submitter and the mailbox control's
- * recipient are throwaway accounts made on a scratch server of their own,
- * so the mailbox read is scoped to an address nobody else writes to (A8).
+ * preprints (a unique tag, M5); S1's submitter is a throwaway account
+ * made on a scratch server of its own, so the mailbox read is scoped to an
+ * address nobody else writes to (A8), and S1's mailbox control runs on a
+ * scratch server of its own (`sendMailControl`: a discussion on the seeded
+ * server would leave `manager.maya` a Tasks item other tests count).
  * S4–S8 run on scratch preprint servers with throwaway accounts, as
  * footnote s says: `metadata` and `citationsMetadataLookup` on the context,
  * `citationsRaw` and `dataCitations[]` on the submission, `galleys[]` for a
@@ -69,6 +71,7 @@
  * own API answer (A5). Everything runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {
     CITATIONS_TEXT: TEXT,
@@ -84,6 +87,7 @@ const {
     activityLogCounts,
     addDiscussion,
     createNewVersion,
+    sendMailControl,
 } = require('../pages/PublicationPages.js');
 const {
     STEPS,
@@ -268,14 +272,10 @@ test.describe('citations and references (U42) — OPS', () => {
         test.slow();
         test.setTimeout(360_000);
         const tag = makeTag('s1', testInfo);
-        // The submitter and the mailbox control's recipient are throwaway
-        // accounts from a scratch server of their own; both submit to the
-        // seeded server (footnote s, scenario 1).
-        const {author, spare} = await seedServer(opsApi, tag, {spare: true});
-        const [{submissionId}, control] = await Promise.all([
-            opsApi.createSubmission({tag, context: SERVER, submitter: author, title: `Preprint ${tag}`}),
-            opsApi.createSubmission({tag: `${tag}c`, context: SERVER, submitter: spare, title: `Preprint ${tag}c`}),
-        ]);
+        // The submitter is a throwaway account from a scratch server of its
+        // own, submitting to the seeded server (footnote s, scenario 1).
+        const {author} = await seedServer(opsApi, tag);
+        const {submissionId} = await opsApi.createSubmission({tag, context: SERVER, submitter: author, title: `Preprint ${tag}`});
 
         const manager = await pageAs(asUser, appContext, MANAGER, SERVER);
         const refs = await openReferences(manager, submissionId);
@@ -393,12 +393,8 @@ test.describe('citations and references (U42) — OPS', () => {
         expect(logAfterControl.rows).toBe(logBefore.rows + 1);
         // … and no email reached the submitter, read after the control
         // mail the test sends the same way (A8).
-        await expectNoMailToSubmitter(manager.page, pkpMail, SERVER, {
-            tag,
-            controlSubmissionId: control.submissionId,
-            author,
-            spare,
-        });
+        const afterControl = await sendMailControl({asUser, api: opsApi, tag});
+        await pkpMail.expectNone({to: mailOf(author), afterControl});
     });
 
     test('S2: type references while submitting', {tag: '@smoke'}, async ({asUser, opsApi, appContext}, testInfo) => {
@@ -708,10 +704,16 @@ test.describe('citations and references (U42) — OPS', () => {
         await panel.save();
         await expect(doiLink).toBeVisible({timeout: 30_000});
         await expect(row.getByText('Alpha study', {exact: true})).toBeVisible();
-        if (!(await refs.rowSmallPrint('Alpha study').isVisible())) {
-            await row.getByRole('button', {name: 'Collapse'}).click();
-        }
-        await expect(refs.rowSmallPrint('Alpha study')).toHaveText('Alpha study 2020, revised', {timeout: 30_000});
+        // The list refetches after the save, and every 7 s while the edited
+        // reference is looked up again (citationManagerStore), so one read
+        // of the row's state can be stale: open it and read until the text
+        // holds (.reports/flake-s26/fixC/diagnosis.md).
+        await expect(async () => {
+            if (!(await refs.rowSmallPrint('Alpha study').isVisible())) {
+                await row.getByRole('button', {name: 'Collapse'}).click({timeout: 5_000});
+            }
+            await expect(refs.rowSmallPrint('Alpha study')).toHaveText('Alpha study 2020, revised', {timeout: 5_000});
+        }).toPass({timeout: 30_000});
 
         // Control: lookup switched off: no lookup heading or text, no
         // "Reprocess all references", no "Expand All", no progress box;
@@ -831,28 +833,39 @@ test.describe('citations and references (U42) — OPS', () => {
         await edit.save();
         await expect(data.row('Ocean temperature records, revised')).toBeVisible({timeout: 30_000});
 
-        // Ordering: two more, listed after the first in the order added;
-        // "Order" swaps the menus for arrows and reads "Save Order"; C moved
-        // up twice and saved; the menus are back; a reload keeps the order
-        // (Rule 23).
+        // Ordering: two more; the table lists the three in no fixed order
+        // until an order is saved (A8); "Order" swaps the menus for arrows
+        // and reads "Save Order"; the up arrow on C until it is first (none
+        // when it already is), each press moving it one place; saved: the
+        // menus are back, C first and the other two as they stood; a reload
+        // keeps that order (Rule 23).
         await data.add({title: 'Dataset B', relationshipType: 'supporting'});
         await data.add({title: 'Dataset C', relationshipType: 'supporting'});
-        await expect(data.rowCells()).toHaveText([/Ocean temperature records, revised$/, /Dataset B$/, /Dataset C$/], {
-            timeout: 30_000,
-        });
+        const titles = ['Ocean temperature records, revised', 'Dataset B', 'Dataset C'];
+        const shownTitles = async () =>
+            (await data.rowCells().allTextContents()).map((text) => titles.find((title) => text.trim().endsWith(title)) || text.trim());
+        const endsWith = (list) => list.map((title) => new RegExp(`${title}$`));
+        await expect(data.rowCells()).toHaveCount(3, {timeout: 30_000});
+        await expect.poll(async () => unordered(await shownTitles()), {timeout: 30_000}).toEqual(unordered(titles));
         await expect(data.menuButtons()).toHaveCount(3);
         await data.orderButton().click();
         await expect(data.saveOrderButton()).toBeVisible({timeout: 30_000});
         await expect(data.menuButtons()).toHaveCount(0);
         await expect(data.rowArrows('Dataset C')).toHaveCount(2);
-        await data.moveUp('Dataset C');
-        await expect(data.rowCells()).toHaveText([/Ocean temperature records, revised$/, /Dataset C$/, /Dataset B$/]);
-        await data.moveUp('Dataset C');
-        await expect(data.rowCells()).toHaveText([/Dataset C$/, /Ocean temperature records, revised$/, /Dataset B$/]);
+        const before = await shownTitles();
+        let order = [...before];
+        while (order[0] !== 'Dataset C') {
+            const at = order.indexOf('Dataset C');
+            order = [...order.slice(0, at - 1), 'Dataset C', order[at - 1], ...order.slice(at + 1)];
+            await data.moveUp('Dataset C');
+            await expect(data.rowCells()).toHaveText(endsWith(order));
+        }
+        const saved = ['Dataset C', ...before.filter((title) => title !== 'Dataset C')];
         await data.saveOrder();
         await expect(data.menuButtons()).toHaveCount(3, {timeout: 30_000});
+        await expect(data.rowCells()).toHaveText(endsWith(saved));
         data = await openData(mgr, submissionId);
-        await expect(data.rowCells()).toHaveText([/Dataset C$/, /Ocean temperature records, revised$/, /Dataset B$/], {
+        await expect(data.rowCells()).toHaveText(endsWith(saved), {
             timeout: 30_000,
         });
 

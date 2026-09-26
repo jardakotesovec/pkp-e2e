@@ -209,9 +209,9 @@ exports.MySubmissionsPage = class MySubmissionsPage extends BasePage {
         return modal;
     }
 
-    /** Close the open Filters panel without applying (Escape). */
+    /** Close the open Filters panel without applying (its header "Close", patterns.md pitfall 7). */
     async closeFilters() {
-        await this.page.keyboard.press('Escape');
+        await this.filtersModal().getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(this.filtersModal()).toHaveCount(0, {timeout: 30_000});
     }
 

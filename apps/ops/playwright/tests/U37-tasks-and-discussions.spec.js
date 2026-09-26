@@ -427,6 +427,7 @@ test.describe('tasks and discussions', () => {
         await expect(add.root).toBeVisible();
         await expect(add.nameField()).toHaveValue(NAME_);
         await add.nameField().focus();
+        // lint-ok: escape Rule 11c claims the key; the focus is in the window's box and the window is the top layer
         await jm.page.keyboard.press('Escape');
         await warning.expectOpen(TEXT.warning);
         await warning.answer('Yes');

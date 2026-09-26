@@ -45,6 +45,11 @@ Each of these has bitten at least once.
    check K1, 2026-09-16).
 3. **Headlessui menus (More Actions).** Items are `role="menuitem"`, and the
    menu portals to the document root. Scope to `page`, not to the row.
+   Close one with `closeMenu(page)` (`shared/playwright/support/menus.js`),
+   never a page-level Escape: focus enters the menu two animation frames
+   after the click, and an Escape before that closes whatever encloses the
+   menu, the workflow panel included (U01 S7, U30 S4; `npm run lint:suite`
+   flags page-level Escapes).
 4. **Side modals.** Scope via `[data-cy="active-modal"]`. When modals stack,
    filter by a distinctive inner element, never `.first()` or `.last()`.
    A legacy side window's content loads by AJAX after the dialog opens and
@@ -193,6 +198,12 @@ slide. Durations are 0.01ms rather than 0 because presence helpers wait on
   because Vue dashboards fan out XHRs. `'commit'` fires on the URL change.
 - **API-triggered updates**: arm `page.waitForResponse(...)` before the click
   and await it after. Prefer this over toast assertions (parallel lesson 2).
+- **A form that fills a required field from its own fetch** refuses a
+  submit pressed before the answer, in the page and silently ("This field
+  is required.", no request); the page object that opens such a form
+  returns it settled, the fetch's `waitForResponse` armed before the press
+  and its value awaited (the OJS publish panel's "Issue Assignment",
+  `PublicationScreen.pressPublish()`; U13 S3).
 - **Legacy jQuery flows** (AjaxModal saves, Smarty grid refreshes, tab-handler
   clicks): call `waitForJQueryIdle(page)`. It lives in
   `shared/playwright/support/legacy.js`; the OJS and OPS trees re-export it
@@ -211,6 +222,13 @@ over.
 2. **`/notification/fetchNotification` drains ALL pending notifications for a
    user.** Two parallel tests running as the same user race for the toast
    queue. Assert on the save endpoint via `waitForResponse`, not on toasts.
+   The drain runs on every backend page load of that user, in every
+   context, and legacy form refusals are such notices too; so a legacy
+   notice (or its absence) is read only by a user no concurrent test signs
+   in as (a throwaway, a scratch context's own), or in an `@solo` test
+   when it must be `admin`. Nor does a test leave state on a roster
+   persona (a discussion opened as `manager.maya` on `publicknowledge`
+   raises her tasks for every later reader).
 3. **`searchPhrase=` OR-joins on whitespace.** Search by the tag alone, a
    single whitespace-free token. Never `'Published article {tag}'`.
 4. **Mailpit is shared across workers AND fleets.** The rules and the
@@ -281,6 +299,13 @@ over.
     or wrap the read in `await expect.poll(() => …)`; a plain
     `expect(await …)` is settled only on a server-rendered page after its
     navigation, a mail-catcher read after the drain, or an already-open panel.
+    The same holds for a page-object reader that returns a value
+    (`evaluate`, `allInnerTexts`, `boundingBox`, `count`): it waits inside
+    for the state it reads, or has an `expect…` twin that polls; and
+    `isVisible({timeout})` ignores its timeout (`npm run lint:suite`).
+    A list the app does not order (no ORDER BY, or ties on a non-unique
+    key) is compared as a set whatever the spec's wording, and a spec that
+    claims an order such a query does not give is a spec correction.
 15. **A file chooser opened from the keyboard needs interception already on.**
     `page.waitForEvent('filechooser')` switches Playwright's chooser
     interception on without waiting for the browser, and switches it off again

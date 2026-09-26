@@ -41,6 +41,7 @@ const {WorkflowPage, performReview} = require('../pages/ReviewStagePages.js');
 const {RegisterPage, RegistrationCompletePage, siteHeader} = require('../pages/RegistrationPages.js');
 const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 
 /** A seedable test iD (ORCID's own example iD, sandbox-hosted). */
 const TEST_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
@@ -425,7 +426,7 @@ test.describe('ORCID integration', () => {
         await expect(
             managerPage.getByRole('menuitem', {name: 'Send Review To ORCID'})
         ).toHaveCount(0);
-        await managerPage.keyboard.press('Escape');
+        await closeMenu(managerPage);
 
         // The verified-iD row offers the action; confirming closes the dialog
         // with no on-screen message either way — the deposit runs in the

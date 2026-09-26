@@ -272,12 +272,13 @@ class RolesTab extends BasePage {
      *
      * The first row of each page has no arrow (register A1), and the list
      * has no fixed order (A13): it is the database's storage order, in which
-     * a new context's roles can land anywhere (U54 T-ops-1). No screen
-     * action moves a role off the first row: the level and stage filters
-     * and every "Items per page" run the same unordered query with a
-     * narrower WHERE or an OFFSET, so they keep the rows' relative order,
-     * and a role first in the list is first in every filtered list and on
-     * page 1. A role that lands there fails here, naming A1, never skipped.
+     * a new context's roles can land anywhere (U54 T-ops-1). The level and
+     * stage filters and every "Items per page" run the same unordered query
+     * with a narrower WHERE or an OFFSET, so they usually keep the rows'
+     * relative order, but not always: a row rewritten between two reads
+     * (a saved role, or space a parallel test's write reuses) can move, and
+     * a page can then repeat or skip a role (U54 Rule 4). A role that lands
+     * first fails here, naming A1, never skipped.
      */
     async openRowActions(name) {
         const row = this.row(name);

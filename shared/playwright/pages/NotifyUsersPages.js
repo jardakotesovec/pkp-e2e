@@ -173,8 +173,9 @@ exports.NotifyTab = class NotifyTab extends BasePage {
         );
     }
 
-    /** The labels of the ticked role boxes. */
+    /** The labels of the ticked role boxes (read once the boxes are drawn, as `roleLabels`). */
     async checkedRoles() {
+        await expect(this.roleBoxes.first()).toBeAttached({timeout: T});
         return this.roleBoxes.evaluateAll((boxes) =>
             boxes
                 .filter((b) => b.checked)
@@ -385,8 +386,9 @@ exports.RestrictBulkEmailsTab = class RestrictBulkEmailsTab extends BasePage {
         );
     }
 
-    /** The labels of the ticked boxes. */
+    /** The labels of the ticked boxes (read once the boxes are drawn, as `boxLabels`). */
     async checkedLabels() {
+        await expect(this.boxes.first()).toBeAttached({timeout: T});
         return this.boxes.evaluateAll((boxes) =>
             boxes
                 .filter((b) => b.checked)

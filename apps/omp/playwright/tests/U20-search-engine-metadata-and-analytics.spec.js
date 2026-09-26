@@ -81,6 +81,7 @@ const {
     siteIndexPath,
     pathOf,
     readSitemap,
+    readSitemapPair,
     readSource,
     sourceOf,
     metaContents,
@@ -201,10 +202,7 @@ async function openWorkflow(page, contextPath, submissionId, {menuKey = null} = 
 
 /** Open a Publication page ("Title & Abstract") and wait for its heading. */
 async function openPublicationPage(page, entry) {
-    const link = page.getByRole('link', {name: entry, exact: true}).first();
-    if (!(await link.isVisible())) {
-        await page.getByRole('link', {name: 'Publication', exact: true}).click();
-    }
+    const link = await new WorkflowPage(page, null).revealPublicationEntry(entry);
     await link.click();
     await expect(page.getByRole('heading', {name: `Publication: ${entry}`})).toBeVisible({timeout: 30_000});
 }
@@ -239,10 +237,7 @@ async function unpublishShown(page) {
 
 /** "Create New Version" and its "Confirm"; returns the new publication's id. */
 async function createVersion(page, contextPath) {
-    const item = page.getByRole('link', {name: 'Create New Version', exact: true});
-    if (!(await item.isVisible())) {
-        await page.getByRole('link', {name: 'Publication', exact: true}).click();
-    }
+    const item = await new WorkflowPage(page, contextPath).revealPublicationEntry('Create New Version');
     await new WorkflowPage(page, contextPath).expectVersionLoaded();
     await item.click();
     const dialog = page.getByRole('dialog', {name: 'Create New Version'});
@@ -497,7 +492,10 @@ test.describe('Search-engine metadata & analytics', () => {
 
         // The English sitemap: every address carries "/en/" after the
         // press's address, none "/fr_CA/" (Rule 4; Settings bullet 14).
-        const english = await readSitemap(visitor, at(pk, '/en/sitemap'));
+        // Both languages are read as one snapshot, the French list the
+        // English one's addresses in French: parallel tests publish on the
+        // seeded press between two single reads (readSitemapPair).
+        const [english, french] = await readSitemapPair(visitor, pk);
         expect(english.status).toBe(200);
         expect(english.paths.length).toBeGreaterThan(3);
         for (const path of english.paths) {
@@ -506,7 +504,6 @@ test.describe('Search-engine metadata & analytics', () => {
         }
 
         // The French sitemap: every address carries "/fr_CA/", none "/en/" (Rule 4).
-        const french = await readSitemap(visitor, at(pk, '/fr_CA/sitemap'));
         expect(french.status).toBe(200);
         expect(french.paths.length).toBe(english.paths.length);
         for (const path of french.paths) {

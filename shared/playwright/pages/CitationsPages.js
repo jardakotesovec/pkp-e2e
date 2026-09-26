@@ -167,14 +167,21 @@ async function closeRowMenu(page, row) {
  * @param {import('@playwright/test').Locator[]} locators
  */
 async function expectTopToBottom(locators) {
-    let previous = -Infinity;
     for (const locator of locators) {
         await expect(locator).toBeVisible({timeout: 30_000});
-        const box = await locator.boundingBox();
-        expect(box, 'an element with a layout box').not.toBeNull();
-        expect(box.y).toBeGreaterThan(previous);
-        previous = box.y;
     }
+    // The whole read of the boxes repeats until the order holds: a list
+    // still drawing (a save's refetch) can move an element between two
+    // reads of one pass (.reports/flake-s26/fixC/diagnosis.md).
+    await expect(async () => {
+        let previous = -Infinity;
+        for (const locator of locators) {
+            const box = await locator.boundingBox({timeout: 2_000});
+            expect(box, 'an element with a layout box').not.toBeNull();
+            expect(box.y).toBeGreaterThan(previous);
+            previous = box.y;
+        }
+    }).toPass({timeout: 30_000});
 }
 exports.expectTopToBottom = expectTopToBottom;
 

@@ -601,8 +601,24 @@ class IssueForm extends BasePage {
         await body.pressSequentially(text);
     }
 
-    /** The editor's content as text. */
+    /**
+     * The editor's content as text, read once the editor exists and is
+     * initialized (a form just opened creates it after drawing the
+     * textarea; before that the read is null,
+     * .reports/flake-s26/fixC/diagnosis.md).
+     */
     async descriptionText() {
+        await expect
+            .poll(
+                () =>
+                    this.form.evaluate((form) => {
+                        const area = form.querySelector('textarea[name^="description"]');
+                        const editor = area && /** @type {any} */ (window).tinymce?.get(area.id);
+                        return Boolean(editor && editor.initialized);
+                    }),
+                {timeout: T}
+            )
+            .toBe(true);
         return this.form.evaluate((form) => {
             const area = form.querySelector('textarea[name^="description"]');
             const editor = area && /** @type {any} */ (window).tinymce?.get(area.id);

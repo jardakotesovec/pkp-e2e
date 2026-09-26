@@ -184,26 +184,17 @@ function feedPaths(tag) {
 /**
  * Publish the version shown on the workflow: the publish button, the
  * "Review Publishing Details" panel when it opens (its version selects
- * filled only when empty), then the window's "Publish". A press the page
- * swallows is pressed again (U49 fn-k).
+ * filled only when empty; the page object returns it once its "Issue
+ * Assignment" preselection is in; the U13 S3 flake), then the window's
+ * "Publish". The page object presses a swallowed press again (U49 fn-k).
  *
  * @param {PublishScreen} pub
  */
 async function publishShown(pub) {
-    const page = pub.page;
-    const button = pub.publishButton();
-    await expect(button).toBeVisible({timeout: 30_000});
-    const panel = page.locator('[data-cy="active-modal"]').filter({hasText: 'Review Publishing Details'}).last();
-    const stage = panel.locator('select[name="versionStage"]');
     const confirmation = pub.confirmationDialog(PUBLISH_QUESTION);
-    await button.click();
-    try {
-        await expect(stage.or(confirmation)).toBeVisible({timeout: 5_000});
-    } catch {
-        await button.click();
-    }
-    await expect(stage.or(confirmation)).toBeVisible({timeout: 30_000});
-    if (await stage.isVisible()) {
+    const panel = await pub.pressPublish({or: confirmation});
+    if (panel) {
+        const stage = panel.locator('select[name="versionStage"]');
         if (!(await stage.inputValue())) await stage.selectOption('VoR');
         const minor = panel.locator('select[name="versionIsMinor"]');
         if ((await minor.isVisible()) && !(await minor.inputValue())) await minor.selectOption('false');
@@ -609,9 +600,9 @@ test.describe('Web feeds', () => {
         await expectFeedTitles(visitor, tag, ['Gamma', 'Beta']);
 
         // "Display items in current published issue." {OJS} with the box
-        // emptied: saved, reopened as 0 (Rule 16d); the feeds list "Alpha"
-        // and "Beta" in the order the issue's page lists them, no "Gamma"
-        // (Rule 5; Settings bullet 3).
+        // emptied: saved, reopened as 0 (Rule 16d); the issue's page lists
+        // "Alpha" and "Beta", and the feeds list the same two in either
+        // order, no "Gamma" (Rules 5, 5a; Settings bullet 3).
         await plugins.goto();
         window = await plugins.openSettings();
         await window.labelled('radio', CURRENT_ISSUE).check();
@@ -626,7 +617,14 @@ test.describe('Web feeds', () => {
         await expect(pages.tocTitles()).toHaveCount(2);
         const toc = (await pages.tocTitles().allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
         expect([...toc].sort()).toEqual(['Alpha', 'Beta']);
-        await expectFeedTitles(visitor, tag, toc);
+        // Compared as a set: the two articles share the issue's order
+        // number (0, as scheduling leaves it), and the page and the feeds
+        // each list the tie as their own query returns it (Rule 5a; fix
+        // list B, flake-s26).
+        const feedTitles = await titlesOfAll(visitor, tag);
+        for (const type of FEED_TYPES) {
+            expect([...feedTitles[type]].sort(), `the ${type} feed's items`).toEqual([...toc].sort());
+        }
     });
 
     test('S6: The window\'s number box, "Cancel" and leaving unsaved', async ({asUser, ojsApi}, testInfo) => {

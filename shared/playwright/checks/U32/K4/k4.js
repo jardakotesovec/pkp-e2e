@@ -14,15 +14,25 @@
 // (se), a copyeditor (ce) and an author (au); submissions
 //   P1  at Copyediting through review, one draft + one copyedited file, ce assigned  → "Send To Production" by mgr
 //   P2  accepted without review, no copyeditor                                       → "Send To Production" with "Skip this email"; the recommend-only read
-//   R1  at Copyediting through review, files as P1                                   → "Move to Review" by se, then "Accept Submission" again by mgr
-//   R2  accepted without review                                                      → "Move to Review" by mgr (A1: the Submission stage)
-//   I1  (OMP) internal round only, accepted from it                                  → "Move to Review" (OMP1: Internal Review)
-//   I2  (OMP) internal then external round, accepted                                 → "Move to Review" (OMP1: External Review)
+//   R1  at Copyediting through review, files as P1                                   → the back decision by se, then "Accept Submission" again by mgr
+//   R2  accepted without review                                                      → the back decision by mgr (A1: the Submission stage)
+//   I1  (OMP) internal round only, accepted from it                                  → the back decision (OMP1: Internal Review)
+//   I2  (OMP) internal then external round, accepted                                 → the back decision (OMP1: External Review)
+//   S1  at Copyediting through review, an Editor (ed) and a recommend-only
+//       section editor (rc) assigned, mgr not assigned                               → scenario 1's three reads (s1 phase)
+// The back decision is pressed by whichever label the screen offers (BACK:
+// "Move to Review" or, since pkp/pkp-lib#12798, "Move to Submission" when the
+// submission never had a review round); each move records the label pressed,
+// the wizard page's h1, the breadcrumb's last item, the browser title, the
+// "Notify Authors" text, the labels the browser's own traffic carried (the
+// submission GET's availableEditorialDecisions, the decision POST's answer),
+// the author's email (subject and body; the first moves append "{$decision}"
+// to the body so the variable's value reaches the mail) and the landing.
 // OPS: a scratch server with one preprint; the workflow read as manager and
 // the typed "workflow_4" address (the cross-app control of the exclusivity claims).
 //
-//   PROBE_FEATURE=U32 PROBE_AGENT=ccK4 node bin/probe.js all shared/playwright/checks/U32/K4/k4.js
-//   PHASES=seed,files,roles,prod,skip,back,again,r3,omp,ops   (default all; later phases reuse k4-state-<app>.json)
+//   PROBE_FEATURE=U32 PROBE_AGENT=ccK4s26 node bin/probe.js all shared/playwright/checks/U32/K4/k4.js
+//   PHASES=seed,files,roles,s1,prod,skip,back,again,r3,a12,var,omp,ops   (default all; later phases reuse k4-state-<app>.json)
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir} =
@@ -31,7 +41,35 @@ const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idl
 const REPO = path.resolve(__dirname, '../../../../..');
 const PDF = path.join(REPO, 'apps/ojs/playwright/fixtures/files/article.pdf');
 const MD = path.join(REPO, 'apps/ojs/playwright/fixtures/files/notes.md');
-const ALL = ['seed', 'files', 'roles', 'prod', 'skip', 'back', 'again', 'r3', 'omp', 'ops']; // plus cefix on demand (CEFIX=<sub>)
+const ALL = ['seed', 'files', 'roles', 's1', 'prod', 'skip', 'back', 'again', 'r3', 'a12', 'var', 'omp', 'ops']; // plus cefix on demand (CEFIX=<sub>)
+// The Copyediting stage's back decision, by either label (pkp/pkp-lib#12798).
+const BACK = /^(Move to Review|Move to Submission)$/;
+const DECISION_TEXT = /Send To Production|Move to Review|Move to Submission|Accept|Decline|Send for Review|Send to|Request Revisions|Recommend|Schedule|Publish/i;
+const DECISION_BODY_MARK = 'K4 decision variable: {$decision}.';
+
+// The browser's own traffic, per page: the submission GET's decision labels and the decision POST's answer.
+function traffic(page) {
+    if (page.__k4) return page.__k4;
+    const t = page.__k4 = {subs: [], decisions: []};
+    page.on('response', async (r) => {
+        const url = r.url();
+        const m = url.match(/\/api\/v1\/submissions\/(\d+)(?:\?|$)/);
+        const d = url.match(/\/api\/v1\/submissions\/(\d+)\/decisions(?:\?|$)/);
+        if (!m && !d) return;
+        try {
+            const method = r.request().method();
+            const status = r.status();
+            const body = await r.json().catch(() => null);
+            if (m && method === 'GET' && body) {
+                t.subs.push({id: Number(m[1]), status, stageId: body.stageId, availableEditorialDecisions: body.availableEditorialDecisions || null, at: Date.now()});
+            } else if (d && method === 'POST') {
+                t.decisions.push({id: Number(d[1]), status, decision: body && body.decision, label: body && body.label, stageId: body && body.stageId, errors: body && !body.id ? body : undefined, at: Date.now()});
+            }
+        } catch (e) { /* the page moved on */ }
+    });
+    return t;
+}
+const lastSub = (page, id) => { const l = traffic(page).subs.filter((s) => s.id === Number(id)); return l[l.length - 1] || null; };
 const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ALL;
 const on = (p) => PHASES.includes(p);
 const log = (...a) => console.log(...a);
@@ -80,8 +118,14 @@ const decisionInfo = (page) => page.evaluate(() => {
         const l = i.id && document.querySelector(`label[for="${i.id}"]`);
         return (l ? l.innerText : (i.closest('label') || i.parentElement || {}).innerText || '').trim().replace(/\s+/g, ' ').slice(0, 160);
     };
+    const bc = [...document.querySelectorAll('.app__breadcrumbs li')].map((li) => li.innerText.replace(/\s+/g, ' ').trim());
     return {
         url: location.href,
+        title: document.title,
+        h1: (document.querySelector('h1.app__pageHeading') || document.querySelector('main h1') || {}).innerText?.replace(/\s+/g, ' ').trim() || null,
+        pageDescription: (document.querySelector('.app__pageDescription') || {}).innerText?.trim() || null,
+        breadcrumbs: bc,
+        breadcrumbLast: (document.querySelector('.app__breadcrumbs [aria-current="page"]') || {}).innerText?.replace(/\s+/g, ' ').trim() || null,
         steps: [...main.querySelectorAll('[role=tab], .pkpSteps__step, [class*="steps__step"]')].filter(vis).map((e) => ({text: e.innerText.trim().replace(/\s+/g, ' '), current: e.getAttribute('aria-selected') === 'true' || e.getAttribute('aria-current') != null || /current/.test(e.className)})).slice(0, 12),
         headings: [...main.querySelectorAll('h1,h2,h3,h4,legend')].filter(vis).map((e) => e.innerText.trim()).filter(Boolean).slice(0, 40),
         buttons: [...main.querySelectorAll('button, a.pkp_button, a[role=button]')].filter(vis).map((b) => ({text: (b.innerText || b.getAttribute('aria-label') || '').trim(), disabled: b.disabled || b.getAttribute('aria-disabled') === 'true'})).filter((b) => b.text).slice(0, 60),
@@ -131,15 +175,19 @@ forEachApp(async (app) => {
     const mail = (u) => `${u}@mail.test`;
 
     async function openWorkflow(page, url, label, extra) {
+        traffic(page);
+        const sid = (url.match(/workflowSubmissionId=(\d+)/) || [])[1];
         await page.goto(url); await idle(page);
         await page.locator('[role="dialog"]:visible').first().waitFor({timeout: 30000}).catch(() => {});
         await page.waitForFunction(() => !document.body.innerText.includes('Loading'), null, {timeout: 15000}).catch(() => {});
         await idle(page);
         const info = await wfInfo(page).catch((e) => ({error: String(e.message)}));
         const dialogs = await dialogTexts(page);
-        const s = await snap(page, label, {info, dialogs: dialogs.map((d) => ({name: d.name, buttons: d.buttons, text: d.text.slice(0, 1200)})), ...(extra || {})});
-        const decisionButtons = (info.buttons || []).filter((b) => /Send To Production|Move to Review|Accept|Decline|Send for Review|Send to|Request Revisions|Recommend|Schedule|Publish/i.test(b));
-        log(`[${label}]`, app.name, 'headings:', JSON.stringify((info.headings || []).slice(0, 6)), 'decision buttons:', JSON.stringify(decisionButtons), 'tables:', JSON.stringify((info.tables || []).map((t) => `${t.name}:${t.rows.length}`)), 'notices:', JSON.stringify((info.notices || []).slice(0, 6)));
+        const decisionButtons = (info.buttons || []).filter((b) => DECISION_TEXT.test(b));
+        const api = sid ? lastSub(page, sid) : null;
+        const apiLabels = api && api.availableEditorialDecisions ? api.availableEditorialDecisions.map((x) => `${x.id}:${x.label}`) : null;
+        const s = await snap(page, label, {info, decisionButtons, apiSubmission: api, apiLabels, dialogs: dialogs.map((d) => ({name: d.name, buttons: d.buttons, text: d.text.slice(0, 1200)})), ...(extra || {})});
+        log(`[${label}]`, app.name, 'headings:', JSON.stringify((info.headings || []).slice(0, 6)), 'decision buttons:', JSON.stringify(decisionButtons), 'api labels:', JSON.stringify(apiLabels), 'tables:', JSON.stringify((info.tables || []).map((t) => `${t.name}:${t.rows.length}`)), 'notices:', JSON.stringify((info.notices || []).slice(0, 6)));
         return {info, dialogs, s, decisionButtons};
     }
 
@@ -206,8 +254,14 @@ forEachApp(async (app) => {
 
     // Press a decision button and walk its wizard. opts: {cancelAfterEdit, skipEmail, tick: (info) => [labels to toggle]}
     async function runDecision(page, name, label, opts = {}) {
-        const btn = page.getByRole('button', {name, exact: true}).first();
-        await loc(page, `${label}: "${name}"`, btn);
+        const t = traffic(page);
+        const btn = name instanceof RegExp ? page.getByRole('button', {name}).first() : page.getByRole('button', {name, exact: true}).first();
+        const pressedLabel = (await btn.innerText().catch(() => '')).trim();
+        const offered = await page.getByRole('button', {name: name instanceof RegExp ? name : new RegExp(`^${name}$`)}).allInnerTexts().catch(() => []);
+        await loc(page, `${label}: "${pressedLabel || name}"`, btn);
+        record(`${label}-pressed`, {pressedLabel, offered: offered.map((x) => x.trim())});
+        log(`[${label}] pressing "${pressedLabel}"`, 'offered:', JSON.stringify(offered));
+        const decisionsBefore = t.decisions.length;
         await btn.click(); await idle(page);
         const pre = await dialogTexts(page);
         await page.waitForURL(/decision/, {timeout: 30000}).catch(() => {});
@@ -219,12 +273,24 @@ forEachApp(async (app) => {
             await page.locator('.composer__loadingTemplateMask').waitFor({state: 'hidden', timeout: 30000}).catch(() => {});
             await idle(page);
             const d = await decisionInfo(page);
-            const s = await snap(page, `${label}-page${n}`, {decision: d});
-            pages.push({n, url: d.url, steps: d.steps, headings: d.headings, buttons: d.buttons.map((b) => b.text), checkboxes: d.checkboxes, subject: d.subject});
-            log(`[${label} page ${n}]`, 'steps:', JSON.stringify(d.steps.map((x) => `${x.text}${x.current ? '*' : ''}`)), 'headings:', JSON.stringify(d.headings.slice(0, 5)), 'buttons:', JSON.stringify(d.buttons.map((b) => b.text)), 'boxes:', JSON.stringify(d.checkboxes.map((c) => `${c.label}${c.checked ? ' [x]' : ' [ ]'}`)));
+            const s = await snap(page, `${label}-page${n}`, {decision: d, pressedLabel});
+            pages.push({n, url: d.url, title: d.title, h1: d.h1, breadcrumbLast: d.breadcrumbLast, pageDescription: d.pageDescription, steps: d.steps, headings: d.headings, buttons: d.buttons.map((b) => b.text), checkboxes: d.checkboxes, subject: d.subject});
+            log(`[${label} page ${n}]`, 'h1:', JSON.stringify(d.h1), 'breadcrumb:', JSON.stringify(d.breadcrumbLast), 'title:', JSON.stringify(d.title), 'steps:', JSON.stringify(d.steps.map((x) => `${x.text}${x.current ? '*' : ''}`)), 'headings:', JSON.stringify(d.headings.slice(0, 5)), 'buttons:', JSON.stringify(d.buttons.map((b) => b.text)), 'boxes:', JSON.stringify(d.checkboxes.map((c) => `${c.label}${c.checked ? ' [x]' : ' [ ]'}`)));
             return {d, s};
         };
         let {d} = await readPage(1);
+        if (opts.showAll) {
+            // the sweep: the one-page wizard's "Show all steps" toggle
+            const sa = page.getByRole('button', {name: /Show all steps|Hide/}).first();
+            if (await sa.count()) {
+                const before = (await sa.innerText()).trim();
+                await loc(page, `${label}: "${before}"`, sa);
+                await sa.click(); await idle(page);
+                const after = await decisionInfo(page);
+                await snap(page, `${label}-show-all`, {decision: after, toggleBefore: before, toggleAfter: (await page.getByRole('button', {name: /Show all steps|Hide|Show/}).first().innerText().catch(() => '')).trim()});
+                log(`[${label} show all]`, before, '->', JSON.stringify(after.steps), JSON.stringify(after.buttons.map((x) => x.text)).slice(0, 300));
+            }
+        }
         if (opts.cancelAfterEdit) {
             const subj = page.locator('input[name="subject"], input[id*="subject"]').first();
             if (await subj.count()) { await subj.fill(`${d.subject || ''} edited-${label}`); }
@@ -239,14 +305,30 @@ forEachApp(async (app) => {
             const yes = conf.getByRole('button', {name: /^(OK|Yes|Leave|Confirm|Discard|Cancel Decision)/}).first();
             if (await conf.count() && await yes.count()) { await yes.click(); await idle(page); }
             await page.waitForTimeout(800); await idle(page);
-            await snap(page, `${label}-cancel-landed`, {url: page.url(), dialogs: await dialogTexts(page)});
+            await snap(page, `${label}-cancel-landed`, {url: page.url(), dialogs: await dialogTexts(page), browserDialogs: 'see run record dialogs'});
             log(`[${label} cancel landed]`, page.url());
-            return {cancelled: true, pages, preDialogs: pre};
+            return {cancelled: true, pressedLabel, pages, preDialogs: pre};
         }
         if (opts.skipEmail) {
             const skip = page.getByRole('button', {name: /Skip this email/i}).first();
             await loc(page, `${label}: "Skip this email"`, skip);
             if (await skip.count()) { await skip.click(); await idle(page); await page.waitForTimeout(500); ({d} = await readPage('1-skipped')); }
+        }
+        if (opts.appendBody) {
+            // type the mark at the end of the email body (TinyMCE, in its iframe), as a person would
+            try {
+                await page.waitForFunction(() => window.tinymce && window.tinymce.get().length && window.tinymce.get().every((e) => e.initialized), null, {timeout: 20000});
+                const edId = await page.evaluate(() => window.tinymce.get().map((e) => e.id).pop());
+                const frame = page.frameLocator(`#${edId}_ifr`);
+                await frame.locator('body').click();
+                await page.keyboard.press('Control+End');
+                await page.keyboard.press('Enter');
+                await page.keyboard.type(opts.appendBody);
+                await idle(page);
+                const bodyNow = await page.evaluate((id) => window.tinymce.get(id).getContent(), edId);
+                record(`${label}-body-typed`, {typed: opts.appendBody, bodyNow: bodyNow.slice(0, 3000)});
+                log(`[${label}] body typed`, flat(bodyNow, 200));
+            } catch (e) { record(`${label}-body-typed`, {error: String(e.message).slice(0, 300)}); log(`[${label}] body type FAILED`, String(e.message).slice(0, 200)); }
         }
         const cont = page.getByRole('button', {name: 'Continue', exact: true});
         const rec = page.getByRole('button', {name: 'Record Decision', exact: true});
@@ -268,7 +350,9 @@ forEachApp(async (app) => {
         const done = await decisionInfo(page);
         const doneDialogs = await dialogTexts(page);
         const links = await page.locator('[role="dialog"]:visible a, [role="dialog"]:visible button').evaluateAll((els) => els.filter((e) => e.offsetParent !== null).map((e) => ({tag: e.tagName, text: e.innerText.trim(), href: e.getAttribute('href')}))).catch(() => []);
-        const s = await snap(page, `${label}-recorded`, {decision: done, dialogs: doneDialogs, links});
+        const posted = t.decisions.slice(decisionsBefore);
+        const s = await snap(page, `${label}-recorded`, {decision: done, dialogs: doneDialogs, links, pressedLabel, decisionPosts: posted});
+        log(`[${label} POST]`, JSON.stringify(posted));
         log(`[${label} recorded]`, page.url(), 'dialogs:', JSON.stringify(doneDialogs.map((x) => ({name: x.name, text: flat(x.text, 300)}))), 'links:', JSON.stringify(links));
         // leave the completed page through the dialog's own link
         const dlg = page.locator('[role="dialog"]:visible').first();
@@ -284,7 +368,7 @@ forEachApp(async (app) => {
             await snap(page, `${label}-recorded-landed`, {landed, dialogs: (await dialogTexts(page)).map((x) => ({name: x.name, buttons: x.buttons, text: flat(x.text, 600)}))});
             log(`[${label} landed]`, JSON.stringify(landed));
         }
-        return {pages, done: {headings: done.headings, buttons: done.buttons, text: flat(done.text, 800)}, landed, preDialogs: pre};
+        return {pressedLabel, offered, pages, decisionPosts: posted, done: {headings: done.headings, buttons: done.buttons, text: flat(done.text, 800)}, landed, preDialogs: pre};
     }
 
     async function activityLog(page, name) {
@@ -358,6 +442,8 @@ forEachApp(async (app) => {
             {username: `${t}se`, roles: ['sectionEditor'], givenName: 'Sid', familyName: 'Section'},
             {username: `${t}ce`, roles: ['copyeditor'], givenName: 'Cora', familyName: 'Copyeditor'},
             {username: `${t}au`, roles: ['author'], givenName: 'Ava', familyName: 'Author'},
+            {username: `${t}ed`, roles: ['editor'], givenName: 'Edda', familyName: 'Editor'},
+            {username: `${t}rc`, roles: ['sectionEditor'], givenName: 'Rhea', familyName: 'Recommend'},
         ];
         const ctx = await app.api.createContext({tag: t, context: {name: `U32 K4 ${t}`, acronym: 'U32K4', contactName: 'K4 Contact', contactEmail: `${t}contact@mail.test`}, users});
         sc.tag = t; sc.contextPath = ctx.path || t; sc.contextId = ctx.contextId;
@@ -371,6 +457,7 @@ forEachApp(async (app) => {
             p2: {title: `K4 P2 skip email ${t}`, decisions: ['skipExternalReview'], participants: [se]},
             r1: {title: `K4 R1 back to review ${t}`, decisions: viaReview, participants: [se, ce]},
             r2: {title: `K4 R2 never reviewed ${t}`, decisions: ['skipExternalReview'], participants: [se]},
+            s1: {title: `K4 S1 scenario one ${t}`, decisions: viaReview, participants: [{username: u.ed, role: 'editor'}, {username: u.rc, role: 'sectionEditor'}]},
         };
         if (isOMP) {
             seeds.i1 = {title: `K4 I1 internal only ${t}`, decisions: ['sendInternalReview', 'acceptFromInternal'], participants: [se]};
@@ -475,6 +562,43 @@ forEachApp(async (app) => {
         } finally { await close(); }
     }
 
+    // ---- s1: scenario 1 — the assigned Editor (notice, buttons), the unassigned manager, the recommend-only section editor ----
+    if (on('s1') && S.s1 && S.s1.id) {
+        const {page, close} = await launch(app);
+        try {
+            await readAs(page, u.ed, S.s1.id, 's1-ed');
+            await sect('s1 recommendOnly', async () => {
+                await signInAs(page, u.mgr);
+                await openWorkflow(page, workflow(S.s1.id, 'workflow_4'), 's1-mgr');
+                const row = page.locator('[role="dialog"]:visible').first().locator('li, tr, div').filter({hasText: /Rhea Recommend/}).filter({has: page.locator('button')}).last();
+                const more = row.getByRole('button', {name: /More Actions|Options|Edit/}).first();
+                if (!(await more.count())) { record('s1-participants-row', {absent: true}); return; }
+                await loc(page, 'Participants: the recommending editor row menu', more);
+                await more.click(); await idle(page);
+                const items = await menuItems(page);
+                record('s1-participants-row-menu', {items});
+                const edit = page.getByRole('menuitem', {name: /^Edit/}).first();
+                if (await edit.count()) { await edit.click(); await idle(page); } else { await more.click(); return; }
+                const form = page.locator('[role="dialog"]:visible').last();
+                await form.waitFor({timeout: 30000});
+                await page.waitForFunction(() => { const d = [...document.querySelectorAll('[role=dialog]')].filter((e) => e.offsetParent !== null).pop(); return d && d.querySelector('input[name="recommendOnly"]'); }, null, {timeout: 20000}).catch(() => {});
+                await idle(page);
+                const box = form.locator('input[name="recommendOnly"]');
+                const present = await box.count();
+                record('s1-participants-edit-form', {dialog: (await dialogTexts(page)).slice(-1)[0], recommendOnlyPresent: present});
+                if (!present) return;
+                await box.check();
+                const ok = form.getByRole('button', {name: /^(OK|Save)$/}).last();
+                await ok.click(); await idle(page);
+                await page.waitForTimeout(800); await idle(page);
+                sc.s1RecommendOnly = true; save();
+                await openWorkflow(page, workflow(S.s1.id, 'workflow_4'), 's1-mgr-after-recommendonly');
+            });
+            await readAs(page, u.rc, S.s1.id, 's1-rc');
+            await signOut(page);
+        } finally { await close(); }
+    }
+
     // ---- prod: P1 "Send To Production" by mgr; the sweep's Cancel first ----
     if (on('prod') && S.p1 && S.p1.id) {
         const {page, close} = await launch(app);
@@ -538,7 +662,7 @@ forEachApp(async (app) => {
                 await sect('r1 move to review (se)', async () => {
                     await signInAs(page, u.se);
                     await openWorkflow(page, workflow(S.r1.id, 'workflow_4'), 'r1-se-before');
-                    const r = await runDecision(page, 'Move to Review', 'r1-mtr');
+                    const r = await runDecision(page, BACK, 'r1-mtr', {appendBody: DECISION_BODY_MARK});
                     record('r1-mtr-summary', r);
                     await openWorkflow(page, workflow(S.r1.id), 'r1-se-after-landing');
                     const rk = roundKey(S.r1.rounds, 3);
@@ -570,7 +694,9 @@ forEachApp(async (app) => {
                 await sect('r2 move to review (mgr, never reviewed)', async () => {
                     await signInAs(page, u.mgr);
                     await openWorkflow(page, workflow(S.r2.id, 'workflow_4'), 'r2-mgr-before');
-                    const r = await runDecision(page, 'Move to Review', 'r2-mtr');
+                    await sect('r2 cancel sweep', async () => { await runDecision(page, BACK, 'r2-mtr-cancel', {cancelAfterEdit: true}); });
+                    await openWorkflow(page, workflow(S.r2.id, 'workflow_4'), 'r2-mgr-after-cancel');
+                    const r = await runDecision(page, BACK, 'r2-mtr', {appendBody: DECISION_BODY_MARK});
                     record('r2-mtr-summary', r);
                     await openWorkflow(page, workflow(S.r2.id), 'r2-mgr-after-landing');
                     await openWorkflow(page, workflow(S.r2.id, 'workflow_1'), 'r2-mgr-after-workflow_1');
@@ -627,7 +753,7 @@ forEachApp(async (app) => {
                 await sect('again r1', async () => {
                     await signInAs(page, u.se);
                     await openWorkflow(page, workflow(S.r1.id, 'workflow_4'), 'r1b-se-copyediting-before');
-                    const r = await runDecision(page, 'Move to Review', 'r1b-mtr', {skipEmail: true});
+                    const r = await runDecision(page, BACK, 'r1b-mtr', {skipEmail: true, showAll: true});
                     record('r1b-mtr-summary', r);
                     await signInAs(page, u.mgr);
                     const rk = roundKey(S.r1.rounds, 3);
@@ -704,13 +830,70 @@ forEachApp(async (app) => {
                     await openWorkflow(page, wf2(c2.r3.id, rk), 'r3-mgr-round-confirmed');
                 });
                 await openWorkflow(page, wf2(c2.r3.id, 'workflow_4'), 'r3-mgr-copyediting-before');
-                const r = await runDecision(page, 'Move to Review', 'r3-mtr', {skipEmail: true});
+                const r = await runDecision(page, BACK, 'r3-mtr', {skipEmail: true});
                 record('r3-mtr-summary', r);
                 await openWorkflow(page, wf2(c2.r3.id), 'r3-mgr-after-landing');
                 await openWorkflow(page, wf2(c2.r3.id, rk), 'r3-mgr-after-round');
                 await signOut(page);
             } finally { await close(); }
         }
+    }
+
+    // ---- a12: after "Send To Production", the "Copyediting" entry reached by the menu (same page) and by its address (fresh load) ----
+    if (on('a12')) {
+        const {page, close} = await launch(app);
+        try {
+            await signInAs(page, u.mgr);
+            for (const k of ['p1', 'r2']) {
+                if (!S[k] || !S[k].id) continue;
+                await sect(`a12 ${k}`, async () => {
+                    await openWorkflow(page, workflow(S[k].id), `a12-${k}-landing`);
+                    const item = page.locator('[role="dialog"]:visible').first().getByRole('link', {name: 'Copyediting', exact: true}).or(page.locator('[role="dialog"]:visible').first().getByRole('button', {name: 'Copyediting', exact: true})).first();
+                    await loc(page, 'workflow menu: "Copyediting"', item);
+                    await item.click(); await idle(page);
+                    await page.waitForFunction(() => /WORKFLOW: COPYEDITING/i.test(document.body.innerText), null, {timeout: 15000}).catch(() => {});
+                    await idle(page);
+                    const viaMenu = await wfInfo(page);
+                    await snap(page, `a12-${k}-via-menu`, {info: viaMenu, url: page.url()});
+                    log(`[a12 ${k} via menu]`, page.url(), JSON.stringify(viaMenu.headings.slice(0, 8)));
+                    await page.reload(); await idle(page);
+                    await page.locator('[role="dialog"]:visible').first().waitFor({timeout: 30000}).catch(() => {});
+                    await page.waitForFunction(() => /WORKFLOW: COPYEDITING/i.test(document.body.innerText), null, {timeout: 15000}).catch(() => {});
+                    await idle(page);
+                    const reloaded = await wfInfo(page);
+                    await snap(page, `a12-${k}-reloaded`, {info: reloaded, url: page.url()});
+                    log(`[a12 ${k} reloaded]`, page.url(), JSON.stringify(reloaded.headings.slice(0, 8)));
+                });
+            }
+            await signOut(page);
+        } finally { await close(); }
+    }
+
+    // ---- var: the "{$decision}" email variable on the back decision, a reviewed (V1) and a never-reviewed (V2) submission ----
+    if (on('var')) {
+        const viaReview = isOMP ? ['skipInternalReview', 'accept'] : ['sendExternalReview', 'accept'];
+        for (const [k, decisions] of [['v1', viaReview], ['v2', ['skipExternalReview']]]) {
+            if (S[k] && S[k].id) continue;
+            const title = `K4 ${k.toUpperCase()} variable ${sc.tag}`;
+            const r = await app.api.createSubmission({tag: `${sc.tag}${k}`, context: sc.contextPath, submitter: u.au, title, decisions, participants: [{username: u.se, role: 'sectionEditor'}]});
+            S[k] = {id: r.submissionId, title, stageId: r.stageId, rounds: r.reviewRounds || []};
+            sc.subs = S; save();
+            log(`[seed ${k}]`, r.submissionId, 'stage', r.stageId, JSON.stringify(r.reviewRounds || []));
+        }
+        const {page, close} = await launch(app);
+        try {
+            await signInAs(page, u.mgr);
+            for (const k of ['v1', 'v2']) {
+                await sect(`${k} back with {$decision}`, async () => {
+                    await openWorkflow(page, workflow(S[k].id, 'workflow_4'), `${k}-mgr-before`);
+                    const r = await runDecision(page, BACK, `${k}-mtr`, {appendBody: DECISION_BODY_MARK});
+                    record(`${k}-mtr-summary`, r);
+                    await openWorkflow(page, workflow(S[k].id), `${k}-mgr-after-landing`);
+                });
+                await mailFind(app, mail(u.au), S[k].title, `${k}-author-mail`);
+            }
+            await signOut(page);
+        } finally { await close(); }
     }
 
     // ---- omp: I1 (internal only) and I2 (both rounds) "Move to Review" ----
@@ -722,7 +905,7 @@ forEachApp(async (app) => {
                 if (!S[k] || !S[k].id) continue;
                 await sect(`${k} move to review`, async () => {
                     await openWorkflow(page, workflow(S[k].id, 'workflow_4'), `${k}-mgr-before`);
-                    const r = await runDecision(page, 'Move to Review', `${k}-mtr`);
+                    const r = await runDecision(page, BACK, `${k}-mtr`, {appendBody: DECISION_BODY_MARK});
                     record(`${k}-mtr-summary`, r);
                     await openWorkflow(page, workflow(S[k].id), `${k}-mgr-after-landing`);
                     const ik = roundKey(S[k].rounds, 2); const ek = roundKey(S[k].rounds, 3);
