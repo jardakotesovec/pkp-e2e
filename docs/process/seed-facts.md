@@ -149,10 +149,14 @@ behind a line; that scratch is deleted after review.
 - A scratch context from `POST scenarios/context` has no Country, and no
   journal initials unless `context.acronym` is given; its principal contact
   is "Site Admin" <admin@mail.test>. Settings › Journal › "Masthead" refuses
-  "Save" ("This field is required.") until both are filled, and
-  Administration › Hosted Journals › "Edit" answers 400 on Country until one
-  is picked. All three apps, 2026-09-23 (U07 claim check K1, K3;
-  `.reports/U07/ccK1/saves-<app>.json`).
+  "Save" ("This field is required.") until both are filled. All three
+  apps, 2026-09-23 (U07 claim check K1, K3;
+  `.reports/U07/ccK1/saves-<app>.json`). Administration › Hosted Journals
+  › "Edit" refuses "Save" in the window ("Please correct one error.", "Go
+  to Journal initials: This field is required.") until the initials are
+  typed, then answers 400 "This is not a valid string. This is not a valid
+  country." until a Country is picked. All three apps, 2026-09-26 (U20
+  claim check K1, `.reports/U20/ccK1/n-02-hosted-saved-<app>`).
 - A journal created on Administration › Hosted Journals has the principal
   contact typed on the create form and no technical support contact; the
   form requires "Languages" and "Primary locale", and "Country" is optional.
@@ -965,6 +969,18 @@ config-file settings.
   Plugin" arrive ticked on `publicknowledge` and on every scratch context.
   Settings › Website › Plugins, all three apps, 2026-09-24 (U44 claim
   check K4, `.reports/U44/ccK4/pk-maya-plugins-*`).
+- "Google Analytics Plugin" arrives unticked on `publicknowledge`, on every
+  scratch context and on the site's own Plugins list, all three apps;
+  `plugins: {googleanalyticsplugin: {enabled: true, settings:
+  {googleAnalyticsSiteId}}}` seeds it ticked with its number. Settings ›
+  Website › Plugins and Administration › Site Settings › Plugins,
+  2026-09-26 (U20 claim check K4, `.reports/U20/ccK4/`).
+- A published version's workflow publication pages ("Title & Abstract",
+  "Metadata", "Publication Formats") stay editable under "Warning: This
+  version has been published. Editing it may impact the published
+  content."; on an unpublished version "Permissions & Disclosure"'s
+  "Copyright Holder" and "Copyright Year" are disabled while "License URL"
+  stays editable. All three apps, 2026-09-26 (U20 claim check K3).
 - A submission's number and its first publication's number differ on these
   installs (OJS 537/551, OMP 512/524 for new seeds), so a check that needs
   them equal never meets it on a first version. 2026-09-24 (U44 claim check

@@ -46,7 +46,10 @@ Payload keys:
 
 - `context` with `path` (required), `name`, `acronym`, `description`,
   `primaryLocale`, `supportedLocales`, `supportedSubmissionLocales`,
-  `contactName`, `contactEmail`, `enabled`.
+  `contactName`, `contactEmail`, `enabled`. An empty `contactName` is
+  not refused and is stored as "Site Admin", so a context without a
+  principal contact name cannot be seeded (U20 claim check K2,
+  2026-09-26, three apps).
 - `sections[]` (OJS, OPS) or `series[]` (OMP). The first declared section
   renames the default section the app creates on context creation (OJS
   "Articles", OPS "Preprints") instead of adding a second one. OMP creates no
@@ -691,6 +694,10 @@ Keys:
   the scratch context on the three apps (the grid's "Custom Block
   Manager" row ticked, its "Settings" link offering "Manage Custom
   Blocks", whose window opens on "No custom blocks have been created.").
+  The Google Analytics window's number is
+  `plugins: {googleanalyticsplugin: {enabled: true, settings:
+  {googleAnalyticsSiteId: "…"}}}`, read back in the window and in the
+  pages' script on all three apps (U20 claim check K4, 2026-09-26).
   The key seeds no block: `settings` on it is a 400, and blocks are added
   in that window. It is OFF on every fresh context, `publicknowledge`
   included (no `enabled` row). The Usage Event plugin stays refused as

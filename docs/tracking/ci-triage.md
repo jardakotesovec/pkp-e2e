@@ -888,6 +888,10 @@ trips.
   or the spec states the order.
   **Tripped 2026-09-25**: the second sighting, the U17 session's second
   OPS final on a used database (`.reports/U17/final-run-ops-attempt2.log`).
+  Third sighting 2026-09-26, in another test: U13 S10 (the serial
+  project's preprint summary on a list) read "current, tide" when run
+  alone with `--no-deps` after the U20 OPS final on a used database
+  (`.reports/U20/alone-ops-serial.log`); the fix is U13's for both tests.
 
 - **OMP masthead roles listed in another order** (U10 S5, OMP, once).
   The U16 session's first OMP final on a used database (2026-09-25,
