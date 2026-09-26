@@ -438,7 +438,10 @@ behind a line; that scratch is deleted after review.
   empty; OMP "No titles have been published yet."; OPS lists categories
   only), so a reader-facing item page needs a scenario-published scratch
   submission. The public home page. Live-probed 2026-09-03 (`.reports/U03/pF`
-  P30).
+  P30). That holds on a fresh fleet only: the suites publish into it, and
+  on a used fleet its web feeds listed 18 (OJS), 28 (OMP) and 17 (OPS)
+  items, so a "nothing published" read uses a new scratch context.
+  2026-09-25 and 2026-09-26 (U18 claim check K1, K3).
 - On a fleet used by earlier runs, `publicknowledge`'s "Engineering"
   category page lists items other runs published (OJS and OPS: 2 Items on
   2026-09-25), while the other seeded categories read "0 Items" ("0
@@ -1112,3 +1115,30 @@ config-file settings.
 - {OJS} `publicknowledge`'s sections have ids 1 "Articles" and 2
   "Reviews" (the sections programming interface's list). 2026-09-25
   (U17 claim check K7).
+- "Web Feed Plugin" arrives enabled on every new context, "Settings" in its
+  row, the window on "Display web feed links on homepage and issue pages
+  only." {OJS} / "…on homepage only." {OMP OPS}, 30 items, "Include
+  identifiers…" unticked and {OJS} "Display a fixed number of the most
+  recent publications."; its stored `displayItems` reads `1` (bool) until
+  the window's first "OK" rewrites it. The three feed addresses answer at
+  once (RSS 2.0 fails while nothing is listed, U18 A1). A `sidebar:
+  ['WebFeedBlockPlugin']` seed is refused unless the same request carries
+  `plugins: {webfeedplugin: {enabled: true}}`. Settings › Website ›
+  "Plugins", all three apps, 2026-09-25 (U18 claim check K1, K2).
+- A scratch context created without `context.acronym` has no initials, so
+  its first Settings › Journal › "Masthead" save is refused for "Journal
+  initials" ("Press Initials", "Server initials" are required too), and
+  one with an acronym but no Country keeps "Save" grayed out ("Go to
+  Country: This field is required."); no scenario key sets a Country, so a
+  test picks one on the tab first. 2026-09-25 (U18 claim check K1);
+  2026-09-26, all three apps (U18 test run, T-ojs-1).
+- {OJS} A new journal has "LOCKSS" and "CLOCKSS" unticked on Settings ›
+  Distribution › "Archiving", and `{journal}/gateway/lockss|clockss` land
+  on the home page; OMP and OPS answer "404 Not Found" there. 2026-09-26
+  (U18 claim check K3).
+- The site's own "Web Feed Plugin" (Administration › "Site Settings" ›
+  "Plugins") arrives unticked, the site's "Sidebar" offers only "Language
+  Toggle Block", and the site's feed address answers "404 Not Found". The
+  site's plugin settings are stored with context NULL, not 0; the install
+  stores no row for either until a save. Three apps, 2026-09-26 (U18 claim
+  check K3).

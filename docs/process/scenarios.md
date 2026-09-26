@@ -15,7 +15,9 @@ and for `bin/mount.js`, which copies the PHP code into the app checkouts.
 
 Every mutating request runs inside one database transaction and under a
 mail fake. A failed build rolls back, so it never leaves half-created
-state. Mail sent while seeding is dropped, but each mailable is still built
+state, with one exception seen: a `scenarios/context` request refused on
+`sidebar` (a 400) left its context behind on all three apps, path taken
+(U18 claim check K1, K3, 2026-09-26), so a retry takes a new path. Mail sent while seeding is dropped, but each mailable is still built
 the way the app's mailer builds it before sending, so the `email_log` rows
 the app writes next to a send carry the compiled subject and body, as they
 do after a real send. Only mail sent by the test's own
@@ -518,7 +520,9 @@ Keys:
   the context, and the builder refuses the rest the way the save does
   (a 400 naming `sidebar` with the form's own message), so on OJS the feed
   block needs `plugins: {announcementfeedplugin: {enabled: true}}` in the
-  same request. Applies to the three apps alike; a fresh context has no
+  same request. The Web Feed block (`WebFeedBlockPlugin`) likewise needs
+  `plugins: {webfeedplugin: {enabled: true}}` alongside, although the
+  plugin arrives enabled (U18 claim check K1, K3). Applies to the three apps alike; a fresh context has no
   block placed. Not a list of strings: a 400.
 - `roles`: a map from a role key (the keys of `users[].roles`, e.g.
   `sectionEditor`) to `{recommendOnly?, permitMetadataEdit?,
