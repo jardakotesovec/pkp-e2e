@@ -180,6 +180,23 @@
  *   form's execute then keeps the stored stages). Applied before the
  *   components, the task templates and users[], so a template's `roles`
  *   sees the stages as the screen would after the role's "OK".
+ * - customRoles[] {key*, level*, name*, abbrev*, stages?} — Settings › Users
+ *   & Roles › Roles › "Create New Role" › "Save" (U54): the grid's own
+ *   UserGroupForm on the window's POST (FormPost: readInputData, validate,
+ *   execute — the role row with isDefault off, its name and abbreviation,
+ *   its stages, the audit-log line), acting as the seeding admin. `level`
+ *   is the "Permission level" (a word of Application::getRoleNames(true):
+ *   manager, subEditor, assistant, author, reviewer, reader, OJS
+ *   subscriptionManager), `stages` the "Stage Assignment" boxes ticked (the
+ *   app's stage words; the boxes the window disables for the level are
+ *   400s), the "Role Options" boxes left as the window leaves them after
+ *   the level is chosen ("Permit submission metadata edit." ticked, which
+ *   a level change does not untick, greyed on the manager level; the rest
+ *   unticked).
+ *   `key` is the name users[].roles, pastRoles[].role and masthead give
+ *   the role (UserSeeder::declareCustomRoles); it cannot be a default
+ *   role's key. Created after the `roles` edits, before the components,
+ *   task templates and users[]; the response lists {key, id}.
  * - components {<name>: false | {metadata?, dependent?, supplementary?,
  *   fileVariants?, required?}} — Settings › Workflow › Submission ›
  *   "Components" (U36; fileVariants U47),
@@ -273,6 +290,7 @@ use PKP\testing\ContextFactory;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
 use PKP\testing\UserSeeder;
+use PKP\userGroup\UserGroup;
 use PKP\workflow\WorkflowStageDAO;
 
 abstract class PKPContextScenarioBuilder
@@ -390,10 +408,6 @@ abstract class PKPContextScenarioBuilder
             (string) $contextParams['primaryLocale'],
             $contextParams['supportedFormLocales'] ?? [(string) $contextParams['primaryLocale']]
         );
-        $userPlans = array_map(
-            fn (Spec $spec) => $this->userSeeder->parse($spec, $this->structureKey()),
-            $root->childList('users')
-        );
         $orcidSettings = $this->parseOrcidSettings($root);
         $primaryLocale = (string) $contextParams['primaryLocale'];
         $reviewSettings = $this->parseReviewSettings($root, $primaryLocale);
@@ -402,6 +416,16 @@ abstract class PKPContextScenarioBuilder
         $reviewFormPlans = $this->parseReviewForms($root, $primaryLocale);
         $pluginPlans = $this->parsePlugins($root);
         $rolePlans = $this->parseRoleOptions($root);
+        $customRolePlans = $this->parseCustomRoles(
+            $root,
+            $primaryLocale,
+            $contextParams['supportedFormLocales'] ?? [$primaryLocale]
+        );
+        // users[] after customRoles[], whose keys it may name (U54).
+        $userPlans = array_map(
+            fn (Spec $spec) => $this->userSeeder->parse($spec, $this->structureKey()),
+            $root->childList('users')
+        );
         $componentPlans = $this->parseComponents($root, $primaryLocale);
         $templatePlans = $this->parseTaskTemplates($root);
         $libraryFilePlans = LibraryFileSeeder::parse($root, true);
@@ -477,6 +501,15 @@ abstract class PKPContextScenarioBuilder
         // on its stage, which a role's "Stage Assignment" boxes decide.
         foreach ($rolePlans as $plan) {
             $this->applyRoleOptions($context, $plan);
+        }
+
+        // Roles › "Create New Role" › "Save" per entry, before users[]
+        // names them (U54).
+        $customRoles = [];
+        foreach ($customRolePlans as $plan) {
+            $id = $this->addCustomRole($context, $plan);
+            $this->userSeeder->customRoleCreated($plan['key'], $id);
+            $customRoles[] = ['key' => $plan['key'], 'id' => $id];
         }
 
         $components = [];
@@ -560,6 +593,7 @@ abstract class PKPContextScenarioBuilder
             'taskTemplates' => $taskTemplates,
             'libraryFiles' => $libraryFiles,
             'categories' => $categories,
+            'customRoles' => $customRoles,
         ] + $overlay;
     }
 
@@ -1074,6 +1108,154 @@ abstract class PKPContextScenarioBuilder
             $plans[] = ['key' => $key, 'options' => $options, 'stages' => $stages];
         }
         return $plans;
+    }
+
+    /**
+     * The optional `customRoles[]` list (U54) → one plan per entry: the
+     * POST the "Create New Role" window sends ("Permission level" `roleId`,
+     * "Role Name" `name` and "Abbreviation" `abbrev` per form language,
+     * the ticked "Stage Assignment" boxes `assignedStages`, and
+     * "Permit submission metadata edit." `on` as the window leaves it
+     * after a level is chosen; the other "Role Options" boxes unticked,
+     * which the browser does not post, and on the manager level the greyed
+     * metadata box, which a disabled input does not post either). Refused here, before the
+     * context exists, what the window refuses or does not offer: an empty
+     * name or abbreviation in the primary language (the form's
+     * FormValidatorLocale), a language the context's forms lack, a level
+     * the list does not carry, a stage box the level disables (the level's
+     * RoleDAO::getForbiddenStages, the window's updateStageOptions), a key
+     * a default role already has or an entry repeats. The keys are
+     * declared to the user seeder, which users[] (parsed after) names.
+     * Parse phase: no writes.
+     *
+     * @param string[] $formLocales
+     *
+     * @return array<int, array{key: string, path: string, vars: array<string, mixed>}>
+     */
+    protected function parseCustomRoles(Spec $root, string $primaryLocale, array $formLocales): array
+    {
+        $levels = [];
+        foreach (Application::getRoleNames(true) as $roleId => $localeKey) {
+            $levels[preg_replace('/^user\.role\./', '', (string) $localeKey)] = (int) $roleId;
+        }
+        $defaultKeys = UserSeeder::registryRoleIds();
+        $roleDao = DAORegistry::getDAO('RoleDAO'); /** @var \PKP\security\RoleDAO $roleDao */
+        $formStages = array_keys(WorkflowStageDAO::getWorkflowStageTranslationKeys());
+
+        $plans = [];
+        $declared = [];
+        foreach ($root->childList('customRoles') as $spec) {
+            $path = $spec->path;
+            $key = $spec->require('key');
+            if (!is_string($key) || !preg_match('/^[A-Za-z][A-Za-z0-9]{0,31}$/', $key)) {
+                throw new SpecException("{$path}.key", 'key must be a letter followed by letters or digits (at most 32): the name users[].roles gives the role');
+            }
+            if (isset($defaultKeys[$key])) {
+                throw new SpecException("{$path}.key", "\"{$key}\" is a role every new context already has; a custom role needs a key of its own");
+            }
+            if (isset($declared[$key])) {
+                throw new SpecException("{$path}.key", "\"{$key}\" is used by two customRoles entries");
+            }
+            $level = $spec->require('level');
+            if (!is_string($level) || !isset($levels[$level])) {
+                throw new SpecException("{$path}.level", 'level must be one of this app\'s "Permission level" entries: ' . implode(', ', array_keys($levels)));
+            }
+            $roleId = $levels[$level];
+            $texts = [];
+            foreach (['name' => 'Role Name', 'abbrev' => 'Abbreviation'] as $field => $label) {
+                $value = $spec->require($field);
+                $map = is_string($value) ? [$primaryLocale => $value] : $value;
+                if (!is_array($map) || array_is_list($map)) {
+                    throw new SpecException("{$path}.{$field}", "{$field} must be a string or a locale map (\"{$label}\")");
+                }
+                foreach ($map as $locale => $text) {
+                    if (!in_array((string) $locale, $formLocales, true)) {
+                        throw new SpecException("{$path}.{$field}.{$locale}", "The window has no \"{$label}\" box in {$locale}: the context's form languages are " . implode(', ', $formLocales));
+                    }
+                    if (!is_string($text)) {
+                        throw new SpecException("{$path}.{$field}.{$locale}", "{$field}.{$locale} must be a string");
+                    }
+                }
+                if (trim((string) ($map[$primaryLocale] ?? '')) === '') {
+                    throw new SpecException("{$path}.{$field}", "The window refuses an empty \"{$label}\" in the primary language ({$primaryLocale})");
+                }
+                $texts[$field] = $map;
+            }
+            $stageIds = [];
+            if ($spec->has('stages')) {
+                $words = $spec->get('stages');
+                if (!is_array($words) || !array_is_list($words)) {
+                    throw new SpecException("{$path}.stages", 'stages must be a list of stage words (the "Stage Assignment" boxes ticked)');
+                }
+                $open = array_values(array_diff($formStages, $roleDao->getForbiddenStages($roleId)));
+                foreach ($words as $i => $word) {
+                    $stageId = ApiCall::stageId((string) $word, "{$path}.stages.{$i}");
+                    if ($open === []) {
+                        throw new SpecException("{$path}.stages", "The window hides \"Stage Assignment\" for the {$level} level" . (in_array($roleId, $roleDao->getAlwaysActiveStages()) ? ' (its save stores every stage)' : ''));
+                    }
+                    if (!in_array($stageId, $open, true)) {
+                        throw new SpecException("{$path}.stages.{$i}", "The window disables the \"{$word}\" box for the {$level} level");
+                    }
+                    $stageIds[] = $stageId;
+                }
+                $stageIds = array_values(array_unique($stageIds));
+            }
+            $vars = [
+                'roleId' => (string) $roleId,
+                'name' => $texts['name'],
+                'abbrev' => $texts['abbrev'],
+            ];
+            if ($stageIds !== []) {
+                $vars['assignedStages'] = array_map('strval', $stageIds);
+            }
+            // "Permit submission metadata edit." arrives ticked (and greyed)
+            // on the first level, and choosing another level enables the box
+            // but leaves it ticked (UserGroupFormHandler's
+            // updatePermitMetadataEdit removes the `checked` attribute, not
+            // the property the load set), so the window posts it `on` for
+            // every level it leaves the box open on (U54 harness,
+            // 2026-09-26, the three apps' POST recorded). On the manager
+            // level the box is disabled and not posted; the save forces it.
+            if (!in_array($roleId, Repo::userGroup()::NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES, true)) {
+                $vars['permitMetadataEdit'] = 'on';
+            }
+            $declared[$key] = $roleId;
+            $plans[] = ['key' => $key, 'path' => $path, 'vars' => $vars];
+        }
+        $this->userSeeder->declareCustomRoles($declared);
+        return $plans;
+    }
+
+    /**
+     * One "Create New Role" › "Save" (UserGroupGridHandler::updateUserGroup
+     * with no userGroupId → UserGroupForm::readInputData, validate,
+     * execute), the router pointed at the scratch context as the grid's
+     * request is. Not run: the handler's trivial toast and its grid
+     * refresh event. Returns the new role's id (the form returns none: the
+     * one role of the context that was not there before).
+     */
+    protected function addCustomRole(Context $context, array $plan): int
+    {
+        $before = UserGroup::withContextIds([$context->getId()])->pluck('user_group_id')->all();
+        $restore = ContextFactory::forceRequestContext($context);
+        try {
+            FormPost::run(
+                new UserGroupForm($context->getId(), null),
+                $plan['vars'],
+                $plan['path'],
+                'The "Create New Role" window would refuse this'
+            );
+        } finally {
+            $restore();
+        }
+        $created = array_values(array_diff(
+            UserGroup::withContextIds([$context->getId()])->pluck('user_group_id')->all(),
+            $before
+        ));
+        if (count($created) !== 1) {
+            throw new \RuntimeException("{$plan['path']}: expected one new role, found " . count($created));
+        }
+        return (int) $created[0];
     }
 
     /**

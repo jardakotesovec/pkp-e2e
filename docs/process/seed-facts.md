@@ -777,11 +777,31 @@ config-file settings.
   editor still reads the "Assign a user to create galleys…" notice after
   publication. Production entry, OJS and OMP, 2026-09-19 (U33 ccK2).
 - The Roles grid (Settings › Users & Roles › Roles) has one live box per
-  stage column and row, ticked or unticked with one click; the boxes are
-  greyed on the manager-level rows, on the Reviewer row outside the Review
-  column and on the Reader row. The Journal/Press Manager row shows every
-  stage box empty on OJS and OMP and ticked on OPS. All three apps,
-  2026-09-19 (U33 ccK3).
+  stage column and row: one click saves the change and shows its notice,
+  but the box keeps its old look until the page is reloaded (a second
+  click without a reload repeats the change: after a tick it fails with a
+  500 and greys the box). The boxes are greyed on the manager-level rows,
+  on the Reviewer row outside the Review column and on the Reader row; on
+  OJS all four boxes of "Subscription Manager" are live, on OMP "Internal
+  Reviewer" and "External Reviewer" each have both review boxes live. The
+  Journal/Press Manager row shows every stage box empty on OJS and OMP and
+  ticked on OPS. The list's filters sit behind the header's "Search" link
+  and fold away after each choice. All three apps, 2026-09-19 (U33 ccK3),
+  corrected 2026-09-26 (U54 ccK1, ccK2).
+- The Roles list shows 25 rows per page on a new context (18 installed
+  roles on a journal, 19 on a press, 5 on a preprint server), so a
+  `customRoles[]` seed of more than 7 (journal) or 6 (press) roles puts the
+  last ones on page 2. Saving a role's window (its "Edit" › "OK", or the
+  `roles` scenario key) moves that role's row down the list (journal and
+  press: to the end); the list has no fixed order otherwise. A role created
+  at the manager level ("Create New Role" on "Journal Manager", or
+  `customRoles[]` level `manager`) arrives with "Permit changes to
+  Settings" unticked: its members get the access-denied page on Settings
+  until a manager ticks the box. Read settled, the role window's "Stage
+  Assignment" is hidden on the manager level, on Reader and on OPS's
+  Reviewer (a read inside its 600 ms hide animation shows it greyed). All
+  three apps, 2026-09-26 (U54 ccK1 `k1-12-after-copyeditor-edit`,
+  `facts.cmps`; ccK2; ccK3).
 - The manager role's Roles row ("Journal manager", "Press manager",
   "Preprint Server manager") has no "Edit"; every other role's stages are
   the "Stage Assignment" boxes of its "Edit" form, and a role's last
@@ -793,6 +813,11 @@ config-file settings.
   grid refreshes only when the search form is submitted after the group is
   chosen. Workflow › Participants › Assign, OJS and OMP, 2026-09-19 (U32
   ccK1, `s1-mgr-assign-form-*`, `s2-mgr-assign-deciding-assign-form-*`).
+  On OPS "Preprint Server manager" is offered at Production (2026-09-26,
+  U54 ccK2 `k2-21-manager-workflow_*`).
+- On a press, a seeded publication format's file cannot be downloaded: its
+  file view page opens but `catalog/download/…` answers 500, signed out or
+  signed in. OMP, 2026-09-26 (U54 claim check K4, K4-6; K1 K1-13).
 - A reviewer seeded `reviewRounds[].reviewers[].status: 'completed'` is a
   submitted review ("Review Submitted"), not an editor-confirmed one: the
   "Minimum Confirmed Reviews Required" count of Settings › Workflow › Review

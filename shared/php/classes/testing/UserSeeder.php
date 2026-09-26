@@ -29,6 +29,12 @@
  * active role in the context ended now, the account still listed with no
  * role). Each period is ended by the same `endAssignments` as "Remove
  * Role"; the rows equal the handler's (parity ledger 2026-09-25).
+ *
+ * U54: a role the context scenario's `customRoles[]` creates ("Create New
+ * Role", no nameLocaleKey) is named in `roles`, `pastRoles` and `masthead`
+ * by the entry's own `key`: declareCustomRoles() registers the keys and
+ * their levels before users[] is parsed, customRoleCreated() the new
+ * role's id before users[] is seeded.
  */
 
 namespace PKP\testing;
@@ -55,6 +61,35 @@ class UserSeeder
      */
     public function __construct(protected bool $appHash = false)
     {
+    }
+
+    /**
+     * Custom role key → ['roleId' => the level's role id, 'id' => the
+     * created role's id, once customRoleCreated() has run] (U54).
+     *
+     * @var array<string, array{roleId: int, id: ?int}>
+     */
+    protected array $customRoles = [];
+
+    /**
+     * Register the context scenario's `customRoles[]` keys (key → role id
+     * of the level) before users[] is parsed, so `masthead` can refuse a
+     * choice the role's level does not offer.
+     *
+     * @param array<string, int> $keyToRoleId
+     */
+    public function declareCustomRoles(array $keyToRoleId): void
+    {
+        $this->customRoles = [];
+        foreach ($keyToRoleId as $key => $roleId) {
+            $this->customRoles[(string) $key] = ['roleId' => (int) $roleId, 'id' => null];
+        }
+    }
+
+    /** The created role behind a declared custom key (U54). */
+    public function customRoleCreated(string $key, int $userGroupId): void
+    {
+        $this->customRoles[$key]['id'] = $userGroupId;
     }
 
     /**
@@ -88,6 +123,24 @@ class UserSeeder
             // with nothing ended either, the account would hold no row in the
             // context at all, which no screen leaves (U53).
             throw new SpecException("{$spec->path}.roles", 'Each user needs a non-empty roles list, or an empty one beside a non-empty pastRoles (every role here ended: "Remove User")');
+        }
+        // Each role key is one a new context has (registry/userGroups.xml)
+        // or a `customRoles[]` key of the same build, refused here, before
+        // the context exists (D4), rather than when the role is resolved.
+        $known = self::registryRoleIds() + $this->customRoles;
+        foreach ($roles as $i => $roleKey) {
+            if (!is_string($roleKey) || !isset($known[$roleKey])) {
+                $keys = array_keys($known);
+                sort($keys);
+                throw new SpecException("{$spec->path}.roles.{$i}", 'Unknown role key "' . (is_scalar($roleKey) ? $roleKey : gettype($roleKey)) . '". This app\'s keys: ' . implode(', ', $keys));
+            }
+        }
+        foreach ($pastRoles as $pastPlan) {
+            if (!isset($known[$pastPlan['role']])) {
+                $keys = array_keys($known);
+                sort($keys);
+                throw new SpecException("{$pastPlan['specPath']}.role", "Unknown role key \"{$pastPlan['role']}\". This app's keys: " . implode(', ', $keys));
+            }
         }
         $masthead = $this->parseMasthead($spec, $roles, $pastRoles);
         $affiliation = $spec->get('affiliation');
@@ -207,7 +260,7 @@ class UserSeeder
             throw new SpecException("{$spec->path}.masthead", 'masthead must be a map of role key to true ("Appear on the masthead") or false ("Does not appear on the masthead")');
         }
         $entryKeys = array_merge(array_map('strval', $roles), array_column($pastRoles, 'role'));
-        $roleIds = self::registryRoleIds();
+        $roleIds = self::registryRoleIds() + array_map(fn (array $role) => $role['roleId'], $this->customRoles);
         $choices = [];
         foreach ($raw as $key => $value) {
             $key = (string) $key;
@@ -453,6 +506,14 @@ class UserSeeder
      */
     public function resolveUserGroup(Context $context, string $roleKey, string $specKey): UserGroup
     {
+        // A role `customRoles[]` created in this build, by its entry's key.
+        $customId = $this->customRoles[$roleKey]['id'] ?? null;
+        if ($customId !== null) {
+            $custom = UserGroup::findById($customId, $context->getId());
+            if ($custom) {
+                return $custom;
+            }
+        }
         $groups = UserGroup::withContextIds([$context->getId()])->get();
         foreach ($groups as $group) {
             if ($group->nameLocaleKey === "default.groups.name.{$roleKey}") {
@@ -462,6 +523,7 @@ class UserSeeder
         $available = $groups
             ->map(fn (UserGroup $group) => preg_replace('/^default\.groups\.name\./', '', (string) $group->nameLocaleKey))
             ->filter()
+            ->merge(array_keys(array_filter($this->customRoles, fn (array $role) => $role['id'] !== null)))
             ->unique()
             ->sort()
             ->values()

@@ -404,7 +404,7 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
 - **[Journal identity & about pages](U07-journal-identity-and-about-pages.md#settings-access)**:
   who opens the Settings pages, Users & Roles among them; the masthead
   pages after a disable or a removal.
-- **Roles configuration** (spec not yet written): the "Roles" tab, the
+- **[Roles configuration](U54-roles-configuration.md)**: the "Roles" tab, the
   roles a journal has, their names and permission levels, which the
   "Roles" column and the older grid's boxes list. The "Site Access
   Options" tab is shared with

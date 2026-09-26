@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **34 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **35 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -525,3 +525,15 @@ until their specs exist. Do not force-claim the defects themselves.
     confirmation as dead code (removal candidates), or a ruling that the
     direct `management/access` address is an intended administrator
     entry.
+35. **Unreachable roles-list pieces** — attached to **U54** (GRID-048,
+    AFFM-109; claimed; the Roles configuration spec's Reference tables
+    note them). `UserGroupGridHandler` grants and routes `fetchCategory`,
+    but the roles list is not a category grid (no `GridCategoryRow`, no
+    category data), so nothing calls it. In `UserGroupForm`,
+    `settings.roles.roleIdRequired` ("You need to define a role permission
+    level.") guards a select that always carries a value, and the
+    template's hidden `settings.roles.stageIdRequired` label ("You need to
+    define a stage to assign to.") belongs to no validator. Code-verified
+    2026-09-26 (U54 spec author; checkouts ojs `71bb244152`, omp
+    `187f0f40d`, ops `61cd158ce3`, lib/pkp `76a315591b`). Resolves:
+    maintainer confirmation as dead code (removal candidates).

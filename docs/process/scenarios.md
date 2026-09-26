@@ -208,8 +208,10 @@ Keys:
   iD, stored the way the submission key `author` below stores it
   (`orcidIsVerified: true` carries the sign-in completion's live
   permission, `false` the iD alone). Role keys are the app's default
-  user-group keys. An unknown key fails
-  with a 400 that lists the app's whole set. An entry naming an account
+  user-group keys, plus the `key` of each `customRoles[]` entry of the
+  same request (below). An unknown key in `roles` or `pastRoles` fails
+  with a 400 that lists the app's whole set, before the context is
+  created. An entry naming an account
   that already exists (`admin`, a roster user) adds the roles to that
   account instead of creating one: the one way to give the site
   administrator a non-manager role in a scratch context, after which
@@ -590,6 +592,49 @@ Keys:
   offers the role on the stage it gained. The three apps alike (U39
   harness, 2026-09-24: OJS and OMP Copyeditor with Submission, OPS
   Editorial Board Member with Production).
+- `customRoles[]` (the three apps; U54): roles the context is not
+  created with, each `{key, level, name, abbrev, stages?}`, made the way
+  Settings › Users & Roles › "Roles" › "Create New Role" › "OK" makes
+  one: the window's own form run on the POST it sends, as `admin`.
+  `level` is the "Permission level": `manager` (Journal Manager, Press
+  Manager, Manager), `subEditor` (Section Editor, Series Editor,
+  Moderator), `assistant`, `author`, `reviewer`, `reader`, and on a
+  journal `subscriptionManager`. `name` and `abbrev` are "Role Name" and
+  "Abbreviation" (a string, under the primary language, or a locale
+  map over the context's form languages). `stages` is a list of the
+  "Stage Assignment" boxes ticked, by the stage words of `roles` above;
+  without it no box is ticked, which the window allows. The "Role
+  Options" boxes are left as the window leaves them once a level is
+  chosen: "Permit submission metadata edit." ticked (a level change
+  enables the box but does not untick it, so the window posts it on
+  every level; greyed on `manager`, whose save forces it), every other
+  box unticked (stored with the masthead and self-registration off).
+  `key` is the name the same request's `users[].roles`,
+  `pastRoles[].role` and `masthead` give the role; it is the request's
+  own word, not stored anywhere. The role is listed on "Roles" with its
+  name, level and ticked boxes, at no fixed place (the list has no fixed
+  order and pages at 25, so on a press it can land on page 2; U54 ccK3),
+  and "Invite to a role"
+  lists it after the installed roles. A member named in `roles` holds
+  it from today with "Appear on the masthead", as an accepted
+  invitation leaves it; one named in `pastRoles` held it and has had it
+  ended, as the "Edit" page's "Remove Role" leaves it. Either way the
+  role's "Remove" › "OK" answers "Can't remove {name} role. Currently
+  {n} user(s) is/are assigned to it." and the role stays; a custom role
+  nobody was named in is removed ("{name} role removed.", its row gone
+  from the database). U54 harness, 2026-09-26, three apps: an Assistant
+  role with Copyediting (OPS Production), an Author role with none, an
+  unheld Reviewer role. Refusals (400, before the
+  context exists): a missing or empty `key`, `level`, `name` or
+  `abbrev`, another level word, a `key` an installed role has or two
+  entries share, a language the context's forms lack, `stages` on
+  `manager` or `reader` (the window hides the boxes) or on `reviewer`
+  on a preprint server, a box the level disables (a reviewer role's
+  non-review stages), and any other entry key (the key sets no "Role
+  Options" box). Created after `roles`, before `taskTemplates[]` and
+  `users[]`; a template's `roles` cannot name a custom role, and neither
+  can `participants[]` (400 "Unknown role key"; U54 ccK3). The
+  response lists `customRoles` as `{key, id}`.
 - `plugins`: a map from a plugin's lowercased class name (the Plugins
   grid's `plugin` id, e.g. `announcementfeedplugin`) to `{enabled,
   settings?}`. `enabled` (boolean, required) is the grid's "Enabled" box
