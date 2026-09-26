@@ -6,7 +6,7 @@ confirmed dead (it stays here with its evidence) or ruled out of scope.
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **18 parked atoms** + **36 noted dead-code/defect
+dead-code additions. **18 parked atoms** + **37 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
@@ -550,3 +550,20 @@ until their specs exist. Do not force-claim the defects themselves.
     `187f0f40d`, ops `61cd158ce3`, lib/pkp `76a315591b`). Resolves:
     maintainer confirmation as dead code (removal candidate), or a
     ruling on what the token is meant to open.
+37. **Unreachable email-setup pieces** — attached to **U56** (AFFM-085,
+    AFFM-124; claimed; the Emails management spec's notes b and k name
+    them). `PKPEmailSetupForm::addCopySubmissionAckPrimaryContactField()`
+    falls back to a sentence ("No primary contact has been defined for
+    this journal…", `…copySubmissionAckPrimaryContact.disabled.description`,
+    which OPS's locale lacks) when the context has no contact email, but
+    every screen that sets the contact (Settings › Journal › "Contact",
+    the Hosted Journals create form) requires one. `Mailable::$canDisable`
+    / `canDisable()` is set on eleven mailables and read by nothing; the
+    switching-off the setup form does goes through
+    `Repository::isMailableEnabled()` instead. `ManageEmailsPage`'s
+    `closeMailableModal()` and `closeTemplateModal()` are wired to no
+    event since the side windows moved to `useModal`. Code-verified
+    2026-09-26 (U56 spec author; checkouts ojs `d9b567efec`, omp
+    `187f0f40d`, ops `61cd158ce3`, lib/pkp `76a315591b`, ui-library
+    `03d1cee2`). Resolves: maintainer confirmation as dead code (removal
+    candidates).

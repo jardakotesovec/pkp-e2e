@@ -158,6 +158,21 @@ behind a line; that scratch is deleted after review.
   typed, then answers 400 "This is not a valid string. This is not a valid
   country." until a Country is picked. All three apps, 2026-09-26 (U20
   claim check K1, `.reports/U20/ccK1/n-02-hosted-saved-<app>`).
+- {OMP} "Notify Primary Contact" (Settings › Workflow › "Emails") arrives
+  with neither choice selected on `publicknowledge` and on every scratch
+  press; a journal and a preprint server arrive at "No". Live-probed
+  2026-09-26 (U56 claim check K1, `.reports/U56/ccK1/t-01-arrival-omp`).
+- The default email "Signature" (Settings › Workflow › "Emails") links the
+  context's name to the address of the server it was created on:
+  `publicknowledge` to the installer ports (8000/8100/8200), a scratch
+  context to the server its `POST scenarios/context` went through. All
+  three apps, 2026-09-26 (U56 claim check K1, `.reports/U56/ccK1`).
+- {OMP} A fresh press (`publicknowledge` and scratch) lists "User Role
+  Masthead Visibility Update Notification" on "Manage Emails" but has no
+  template for it (`registry/emailTemplates.xml` lacks it): its "Edit"
+  answers 404 and leaves the page behind a spinner until a reload. OJS has
+  the template; OPS does not list the email. 2026-09-26 (U56 claim check
+  K1-8, K2-6, `.reports/U56/ccK2`).
 - A journal created on Administration › Hosted Journals has the principal
   contact typed on the create form and no technical support contact; the
   form requires "Languages" and "Primary locale", and "Country" is optional.

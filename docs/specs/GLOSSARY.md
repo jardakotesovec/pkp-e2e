@@ -274,6 +274,13 @@ touched.
   each submission has its own **Submission Library**, the window the
   workflow header's "Library" opens. Library files are not submission
   files. The libraries spec owns both.
+- **Email, email template** — an *email* is one kind of message the
+  journal sends ("Review Request", "Submission Confirmation"), a row of
+  Settings › Workflow › Emails › "Manage Emails"; its *templates* are the
+  saved texts (name, subject, body with "{$…}" placeholders) it can be
+  sent with, one of them its default. Some emails take several templates
+  that a sender picks from, the rest one. The Emails management spec owns
+  both screens; each email's sending belongs to the feature that sends it.
 - **Notifications (author's list)** — on the author's review stage, the list
   of emails editors sent about this submission (decision emails re-read
   here). Distinct from toast notices and from the header Tasks panel; specs
