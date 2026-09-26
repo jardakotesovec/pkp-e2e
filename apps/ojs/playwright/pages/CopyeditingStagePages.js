@@ -333,7 +333,17 @@ exports.CopyeditingStagePage = class CopyeditingStagePage extends BasePage {
     async openDecision(label) {
         await this.decisionButton(label).click();
         const decision = new DecisionPage(this.page);
-        await decision.expectOpen(label);
+        if (label === 'Move to Review') {
+            // U32 A13 (pkp-lib#12798): the page's heading reads "Move to
+            // Submission" whatever the destination, until record.tpl passes
+            // the submission; the breadcrumb names the destination. Accepted
+            // for now by the maintainer (2026-09-26, ci-triage row).
+            await decision.expectOpen(/^Move to (Review|Submission)(:|$)/);
+            await expect(this.page.getByRole('navigation', {name: 'You are here:'}).getByRole('listitem').last())
+                .toHaveText('Move to Review', {timeout: 30_000});
+        } else {
+            await decision.expectOpen(label);
+        }
         await decision.awaitComposerLoaded();
         return decision;
     }

@@ -529,9 +529,11 @@ exports.DecisionPage = class DecisionPage {
      * single-step ones (templates/decision/record.tpl).
      */
     async expectOpen(title) {
-        const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = title instanceof RegExp
+            ? title
+            : new RegExp(`^${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(:|$)`);
         await expect(
-            this.page.getByRole('heading', {name: new RegExp(`^${escaped}(:|$)`), level: 1})
+            this.page.getByRole('heading', {name: pattern, level: 1})
         ).toBeVisible({timeout: 30_000});
     }
 

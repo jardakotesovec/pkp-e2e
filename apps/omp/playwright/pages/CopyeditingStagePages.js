@@ -477,7 +477,12 @@ async function recordAndExpectCompletion(page, {title, message}) {
  */
 async function startMoveToReview(page, modal) {
     await decisionButton(modal, COPYEDITING_DECISIONS.moveToReview).click();
-    await expect(page.getByRole('heading', {level: 1, name: /Move to Review/})).toBeVisible({timeout: 15_000});
+    // U32 A13 (pkp-lib#12798): the heading reads "Move to Submission" whatever
+    // the destination, until record.tpl passes the submission; the breadcrumb
+    // names the destination. Accepted for now (maintainer, 2026-09-26).
+    await expect(page.getByRole('heading', {level: 1, name: /^Move to (Review|Submission)/})).toBeVisible({timeout: 15_000});
+    await expect(page.getByRole('navigation', {name: 'You are here:'}).getByRole('listitem').last())
+        .toHaveText('Move to Review', {timeout: 15_000});
     await awaitComposerReady(page);
 }
 

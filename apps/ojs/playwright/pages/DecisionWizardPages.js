@@ -132,7 +132,8 @@ exports.DecisionWizardPage = class DecisionWizardPage {
      * one-page one (record.tpl).
      */
     async expectOpen(title) {
-        await expect(this.heading()).toHaveText(new RegExp(`^${escape(title)}(:|$)`), {timeout: 30_000});
+        const pattern = title instanceof RegExp ? title : new RegExp(`^${escape(title)}(:|$)`);
+        await expect(this.heading()).toHaveText(pattern, {timeout: 30_000});
     }
 
     /** The h1 reads exactly this ("Accept Submission: Notify Authors", or "Decline Submission" alone). */
