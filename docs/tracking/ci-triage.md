@@ -938,3 +938,4 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
+| pkp/ojs#5802 (+ pkp-lib#13290, ui-library#979; issue pkp/pkp-lib#12897) | `i12897_ast` | ready | 2026-09-28 | Specs and tests for DOCX-only "Send to Text Editor" and the replacing import; the OJS check goes green once #5802 carries its submodule bumps; OMP/OPS build fix pending in ui-library; OMP's two test files ride along (OMP gets #979 with its next pointer bump) |
