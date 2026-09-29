@@ -1,6 +1,6 @@
 // PR review of pkp-lib#13414 (issue #13412): the Users XML import's role dates and periods (OJS OMP).
 // Each case below is one bullet of the issue's "Proposed solution"; the 13390 kept check covers the two reported cases.
-//   PROBE_FEATURE=sync PROBE_AGENT=pr13412 ONLY=ojs,omp node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13412/role-periods.js
+//   PROBE_FEATURE=sync PROBE_AGENT=pr13412 ONLY=ojs,omp node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13414/role-periods.js
 // Seeds its own scratch context per app (manager only); publicknowledge untouched.
 const fs = require('fs');
 const path = require('path');

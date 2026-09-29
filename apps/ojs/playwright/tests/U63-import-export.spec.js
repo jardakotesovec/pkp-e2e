@@ -23,7 +23,7 @@
  *   says; nothing reads whether the box holds it back.
  * - OJS9: S9 does not await DOAJ's answer; the queued deposit is never
  *   drained here.
- * - A1, A4–A7, A9, A11–A18, OJS1–OJS3, OJS5–OJS7: not on these scenarios'
+ * - A1, A4–A7, A9, A11–A16, A19–A21, OJS1–OJS3, OJS5–OJS7: not on these scenarios'
  *   paths. OMP1–OMP3: the press's.
  *
  * Seeding (footnote sc): S2 reads `publicknowledge` with the roster; every
@@ -717,6 +717,7 @@ test.describe('Import & export', () => {
         const a = `${tag}a`;
         const b = `${tag}b`;
         const manager = `${tag}mg`;
+        const managerB = `${tag}mgb`;
         const moss = `${tag}moss`;
         const fern = `${tag}fern`;
         await ojsApi.createContext({
@@ -724,7 +725,10 @@ test.describe('Import & export', () => {
             context: contact(a),
             users: [user(manager, 'Mona', 'Manager', ['manager']), user(moss, 'Moss', 'Copyeditor', ['copyeditor']), user(fern, 'Fern', 'Author', ['author'])],
         });
-        await ojsApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
+        // B has a manager of its own: an account holding the same role in both
+        // would meet Rule 24's overlap line whenever the two were seeded in
+        // different seconds (each role starts when it is seeded).
+        await ojsApi.createContext({tag: b, context: contact(b), users: [user(managerB, 'Bea', 'Manager', ['manager'])]});
         // Every account signs in once through the login form (footnote sc).
         for (const who of [moss, fern]) {
             const once = await signInByForm(browser, baseURL, a, who);
@@ -799,7 +803,8 @@ test.describe('Import & export', () => {
         fs.writeFileSync(allFile, all.text);
 
         // B's import: every account of the file imported (Rules 22, 28).
-        const usersB = new UsersXmlPage(page, b);
+        const pageB = await signInByForm(browser, baseURL, b, managerB);
+        const usersB = new UsersXmlPage(pageB, b);
         await usersB.goto();
         await usersB.upload(allFile);
         const results = await usersB.pressImport();
@@ -815,7 +820,7 @@ test.describe('Import & export', () => {
 
         // B's users: moss Copyeditor, fern Author (Rules 23, 28); their
         // masthead choice and start dates (Rules 24a, 24b) left unread.
-        const listB = new UsersListPage(page, b);
+        const listB = new UsersListPage(pageB, b);
         await listB.goto();
         expect(await listB.cellLines(listB.rolesCell(listB.row(mailOf(moss))))).toEqual(['Copyeditor']);
         expect(await listB.cellLines(listB.rolesCell(listB.row(mailOf(fern))))).toEqual(['Author']);
@@ -825,8 +830,8 @@ test.describe('Import & export', () => {
         await expect(mossB).not.toHaveURL(/\/login/);
         await mossB.context().close();
 
-        // Control: no email to moss or fern (Rule 28).
-        await expectNoMailBesidesControl(browser, baseURL, pkpMail, b, manager, [moss, fern]);
+        // Control: no email to moss, fern or A's manager (Rule 28).
+        await expectNoMailBesidesControl(browser, baseURL, pkpMail, b, managerB, [moss, fern, manager]);
     });
 
     test('S7: PubMed: the NLM title and the lists', async ({asUser, ojsApi}, testInfo) => {
