@@ -1040,3 +1040,4 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
+| pkp-lib#13377 (no app PRs; issue pkp/pkp-lib#13277) | `13277-main` | ready | 2026-09-29 | Native XML carries the plain language summary, data availability and funding statements: U63 Rule 20, footnote h and a Planned item folded; tests untouched; kept check `checks/sync/pkp-lib-13377/roundtrip.js`. At the merge: rebase, push, `node bin/ci.js watch`, fast-forward on green, delete this row |
