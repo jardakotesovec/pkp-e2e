@@ -279,8 +279,12 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     [OMP2](#omp2). <sup>j</sup> <sup>td12</sup>
 20. **What the file carries.** Each submission's versions with their
     metadata, contributors, galleys (publication formats on a press)
-    and files, so that Rule 10 can rebuild it elsewhere. Which
-    identifiers travel is described in
+    and files, so that Rule 10 can rebuild it elsewhere. A version's
+    plain language summary, data availability statement and funding
+    statement travel with it, each in every language it is filled in,
+    and an import gives them back as they were; a file that carries one
+    of them is refused by an installation without them in its format.
+    Which identifiers travel is described in
     [Identifiers](U44-identifiers.md), and the references in
     [Citations & references](U42-citations-and-references.md).
     <sup>h</sup>
@@ -1682,7 +1686,19 @@ downloaded a file with a new name. A published submission with a second
 version exported both `<publication>` versions, and a fresh journal
 showed both after import. The export list and Dashboard read the same
 after every export. Ticks stay after an export, so a second export also
-carries them.
+carries them. The three statements of Rule 20: `PKPPublicationNativeXmlFilter::addMetadata()`
+writes `plainLanguageSummary`, `dataAvailability` and `fundingStatement` as localized nodes after
+`<abstract>` (empty values skipped), `NativeXmlPKPPublicationFilter::_getLocalizedPublicationFields()`
+reads them back, and `pkp-native.xsd` declares them optional in that order (pkp/pkp-lib#13377,
+issue #13277). Driven 2026-09-29 on OJS, OMP and OPS at the PR head `ffe3438962`, before its merge,
+on pkp-lib `fab29cfeca` (kept check `checks/sync/pkp-lib-13377/roundtrip.js`): a submission with the
+three statements in rich text (a paragraph, bold, a link, "&") and a control without them exported
+from one scratch context, the file valid against the app's `native.xsd`, imported into another; the
+copy's three fields read the same through the API and the control's stay empty. At `fab29cfeca`
+alone (OJS, the same check) the file held none of the three and the copy read them empty, and the
+PR's file was refused: "The process failed. Check below for errors/warnings." with "Line 9 Column 0:
+Element '{http://pkp.sfu.ca}plainLanguageSummary': This element is not expected." (the schema
+check of every app's file against the old `pkp-native.xsd` fails the same way).
 
 <a id="fn-i"></a>
 **i** — OJS only: `exportIssues-tab` loads
