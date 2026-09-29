@@ -247,13 +247,17 @@ record what each role is offered once the list is on screen. <sup>b</sup>
      1 can be swapped there for another file with the upload box's
      "Change File" (Rule 5a). "Cancel" after such a swap, here or in a
      galley's "Change File" {OJS OPS}, puts back the file as it was
-     before the wizard opened, not the file picked first ⚠ [A23](#a23).
-     <sup>s</sup>
+     before the wizard opened, not the file picked first. <sup>s</sup>
    - 9c. **One file revised in two windows.** When the same person has
      the upload wizard open on the same file in two browser windows,
      each with a revision uploaded, "Cancel" in each window closes it,
      and once both are cancelled the file is as it was before either
      opened ⚠ [A24](#a24). <sup>s</sup>
+   - 9d. **Another window's revision meanwhile.** "Cancel" takes back
+     only the uploads made in its own window: a revision of the same file
+     uploaded meanwhile in another window, by the same person or by
+     someone else, completed or not, stays the file, and the window
+     closes ⚠ [A26](#a26). <sup>s</sup>
 <a id="file-details"></a>
 10. **"Update File Details".** The row menu's "Update File Details" opens
     a window titled "Edit a file" with the fields of step 2 (Fields) and
@@ -964,9 +968,9 @@ Left out of the scenarios above, by reason:
   - A20 (the reviewer's "Review Files" search keeping every file; Rule 16)
   - A21 (a file of exactly the upload limit failing on the server; Rule 17b)
   - A22 (the Activity Log recording a new file's upload as a "Revision"; Side effects)
-  - A23 ("Cancel" after a second pick on step 1 leaving the first pick as the file; Rule 9b)
-  - A24 (one file revised in two windows: one "Cancel" doing nothing, the file keeping a cancelled upload; Rule 9c)
+  - A24 (one file revised in two windows: "Cancel" in the window that uploaded first doing nothing, the file keeping the upload cancelled there; Rule 9c)
   - A25 ("Cancel upload" pressed after the whole file has been sent keeping the file; Rule 17a)
+  - A26 (a second pick, then "Cancel", after another window revised the same file: doing nothing and keeping the cancelled upload, or taking the other window's upload away; Rule 9d)
 - **Owned by another feature**:
   - a Production editor's lists: every stage's while not assigned, Copyediting and Production only once assigned (Actors preamble; *Workflow screen & stage access*, and *Stage participants*, whose A8 records the assigned case)
   - the Author's revision upload through "Upload revisions" (Actors row 2; *Review stage & rounds*, scenario 4)
@@ -999,9 +1003,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A19](#a19) | In "Upload/Select Files", another stage's files refuse their "More Information", "Edit" and "Delete" | 🐞 | minor | — |
 | [A20](#a20) | The reviewer's "Review Files" search keeps every file | 🐞 | minor | — |
 | [A21](#a21) | A file of exactly the upload limit ends with "Invalid JSON response from server." instead of being refused | 🐞 | minor · crash: server | — |
-| [A23](#a23) | Revising a file, a second pick on step 1 and then "Cancel" leave the first pick as the file instead of the original | 🐞 | minor | — |
-| [A24](#a24) | One file revised in two windows: the first window's "Cancel" does nothing, and the file keeps the upload cancelled there | 🐞 | minor | — |
+| [A24](#a24) | One file revised in two windows: "Cancel" in the window that uploaded first does nothing when pressed first, and the file keeps the upload cancelled there | 🐞 | minor | — |
 | [A25](#a25) | "Cancel upload" pressed after the whole file has been sent removes the row, but the file is stored and back after a reload | 🐞 | user-visible | — |
+| [A26](#a26) | A second pick, then "Cancel", after another window revised the same file: "Cancel" does nothing and the cancelled upload stays, or the other window's upload is taken away | 🐞 | minor | — |
 | [A6](#a6) | Every file row's menu button is named "More Actions" alone, so a screen reader cannot tell the rows apart | ❓ | minor | — |
 | [A8](#a8) | The revise list names files only, so two files with the same name read the same | ❓ | minor | — |
 | [A13](#a13) | Deleting a file also deletes every copy made from it on other lists | ❓ | user-visible | — |
@@ -1011,6 +1015,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | The Activity Log records a new file's upload as a "Revision" | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server has no workflow file lists; its files are its galleys' files | ✅ | — | — |
 | [A1](#a1) | Retired: "Cancel" after revising a file that was renamed left the window open and the new file in place; it now restores the old file (Rule 9) | ✅ | retired | upstream change + claim check (claude), 2026-09-27 — fixed upstream |
+| [A23](#a23) | Retired: a second pick on step 1 and then "Cancel" left the first pick as the file; it now puts back the original (Rule 9b) | ✅ | retired | upstream change at its PR head + kept check (claude), 2026-09-29 — fixed upstream |
 
 ### All apps
 
@@ -1222,34 +1227,21 @@ Question: should the log word a first upload as an upload? Lean: yes;
 the file's "History" already does.
 Basis: probe. <sup>[f-a22](#fn-a22)</sup>
 
-<a id="a23"></a>
-**A23 — A second pick on step 1, then "Cancel", leaves the first pick as the file** · 🐞 · minor.
-Revising a file in the upload wizard, a person uploads a file on step 1,
-swaps it there for another with "Change File", then presses "Cancel".
-They expect the file as it was before the wizard opened (Rule 9b). The
-window closes, but the list shows the first pick's name, and the
-Activity Log & Notes window keeps its line "A file revision "{file
-name}" was uploaded for submission {number} by {username}." naming who
-cancelled, with a working "Download" behind its arrow; nothing says the
-original was not restored. The same happens in any galley's "Change
-File". A regression: "Cancel" restored the original until the September
-2026 change that made it restore a renamed file too ([A1](#a1)).
-Since: 2026-09-27 · Basis: probe. <sup>[f-a23](#fn-a23)</sup>
-
 <a id="a24"></a>
-**A24 — One file revised in two windows: one "Cancel" does nothing, and a cancelled upload stays** · 🐞 · minor.
+**A24 — One file revised in two windows: the first window's "Cancel", pressed first, does nothing** · 🐞 · minor.
 The same person opens the upload wizard on the same file in two browser
 windows: the first uploads a revision, the second then uploads another
 revision of the same file. Each "Cancel" is expected to close its window
 and, once both are cancelled, leave the file as it was before either
-opened. Instead, "Cancel" in the first window does nothing and shows no
-message, and the window stays open, whichever window is cancelled first.
-Either way the list ends up showing the first window's revision, and
-the Activity Log & Notes window and the file's "History" both keep its
-line "A file revision "{file name}" was uploaded…", with a working
-"Download" behind its arrow. A regression: both cancels restored
-the original until the September 2026 change that made "Cancel" restore
-a renamed file too ([A1](#a1)).
+opened. Pressed first, "Cancel" in the first window does nothing and
+shows no message, and the window stays open; "Cancel" in the second
+window then closes it and leaves the first window's revision as the
+file, with its line "A file revision "{file name}" was uploaded…" in the
+Activity Log & Notes window and a working "Download" behind its arrow.
+Cancelled the other way round, the second window first, both close and
+the file is back as it was. A regression: the first window's "Cancel"
+restored the original until the September 2026 change that made
+"Cancel" restore a renamed file too ([A1](#a1)).
 Since: 2026-09-27 · Basis: probe. <sup>[f-a24](#fn-a24)</sup>
 
 <a id="a25"></a>
@@ -1263,6 +1255,27 @@ goes in with the submission. Nothing says so when the row goes. An answer
 slowed by the link or the server holds that window open; so does limiting
 only the browser's download speed.
 Basis: probe. <sup>[f-a25](#fn-a25)</sup>
+
+<a id="a26"></a>
+**A26 — A second pick, then "Cancel", after another window revised the same file** · 🐞 · minor.
+A person revising a file in the upload wizard swaps the upload on step
+1 for another with "Change File", then presses "Cancel", while another
+window (their own, or another user's) has meanwhile uploaded a revision
+of the same file. They expect their own uploads taken back and the
+other window's revision left as the file (Rule 9d). When the other
+window has completed its revision with "Complete", "Cancel" does nothing
+and shows no message, the window stays open, and a second press closes
+it without restoring anything: the file is the upload just cancelled,
+under its name, with its line in the Activity Log & Notes window. When
+the other window, the same person's, is still open on step 1, "Cancel"
+closes and puts back the file as it was before either window opened:
+the other window's upload is gone although nobody cancelled it, and
+that window's own "Cancel" then does nothing. Before the late-September
+2026 change that fixed [A23](#a23), "Cancel" put back the other
+window's revision in each case; before September 2026 it put back
+the file as it was before its own window opened, dropping a completed
+revision from the other window.
+Since: 2026-09-29 · Basis: probe. <sup>[f-a26](#fn-a26)</sup>
 
 ### OPS
 
@@ -1280,6 +1293,9 @@ Basis: probe. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="a1"></a>
 **A1 — "Cancel" after a revision does not restore a file that was renamed** · ✅ · retired. Fixed upstream on 2026-09-27, verified that day on OJS and OMP: "Cancel" after a revision, at any step, puts back a file renamed by anyone since its last upload under the name it had when the wizard opened (Rule 9). <sup>[f-a1](#fn-a1)</sup>
+
+<a id="a23"></a>
+**A23 — A second pick on step 1, then "Cancel", leaves the first pick as the file** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13411), verified 2026-09-29 at its head before the merge, on OJS and OMP and on a galley's "Change File" on OJS and OPS: after a second pick on step 1, "Cancel" puts back the file as it was before the wizard opened, and the Activity Log & Notes window keeps no line of either pick (Rule 9b). <sup>[f-a23](#fn-a23)</sup>
 
 ---
 
@@ -1756,23 +1772,33 @@ fetching that version (OJS fileId 166 "article-rev.pdf" and 84 "article.pdf").
 
 <a id="fn-s"></a>
 **s** — Since pkp/pkp-lib#13288 (issue #13286, merge `f38c4a4a10`,
-2026-09-27): `FileUploadWizardHandler::uploadFile()` keeps the replaced
-file's `fileId`, `name` and `uploaderUserId` in the session under
-`revisionUploadOriginalFile.<submissionFileId>`, one key per submission
-file, which every revision upload writes anew.
+2026-09-27) and pkp/pkp-lib#13411 (the same issue; read and driven at its
+head `7263f86190`, before its merge, 2026-09-29):
+`FileUploadWizardHandler::uploadFile()` keeps the replaced file's
+`fileId`, `name` and `uploaderUserId` in the session under
+`revisionUploadOriginalFile.<submissionFileId>.<replaced fileId>`, one key
+per replaced file, so a second pick adds a key instead of overwriting the
+first; `finishFileSubmission()` (step 3) marks the key of the file's
+second-newest revision `confirmed`, and nothing clears a key but a cancel.
 `PKPManageFileApiHandler::cancelFileUpload()` accepts only the file the
 submission file currently points at and newest among its revisions,
-restores the revision just below it (`$revisions->get(1)`) with the stored
-name and uploader through `edit(…, log: false)`, deletes every log entry
-carrying the cancelled `fileId` (`deleteRevisionLogEntries()`), then the
-uploaded file, and removes the key; with no key, or for another file, it
-answers `status:false` and changes nothing. The `originalFile` the wizard
-still posts (note p) is no longer read. Before the change it restored the
-posted `originalFile` once `findMatchedLogEntry()` (removed) found a log
-entry with the original uploader's username, name and file id, which a
-rename since the last upload defeated (A1, f-a1). The one key per file and
-the restore to the revision just below are what A23 and A24 run into.
-Live-probed 2026-09-27 (Rules 7, 9): note d5.
+reads the `originalFile` the wizard posts (note p: the file replaced by
+the window's first pick), and walks the revisions from the one just below
+the cancelled file down to that original: each needs its key in this
+session, and none past the first may be `confirmed`. It then restores the
+original's `fileId` with the stored name and uploader through `edit(…,
+log: false)`, and for every revision above it deletes its log entries
+(`deleteRevisionLogEntries()`) and the file, and forgets the walked keys;
+an original no longer among the revisions, a missing key or a confirmed
+one answers `status:false` and changes nothing. Before #13288 it restored
+the posted `originalFile` once `findMatchedLogEntry()` (removed) found a
+log entry with the original uploader's username, name and file id, which
+a rename since the last upload defeated (A1, f-a1); from #13288 to #13411
+one key per file, overwritten by every upload, and the restore of the
+revision just below brought A23 and A24. The walk across revisions another
+window uploaded is what A26 runs into; the refusal of a cancelled file
+that is no longer the current one is A24's. Live-probed 2026-09-27 (Rules
+7, 9): note d5.
 
 <a id="fn-aa"></a>
 **aa** — A pointer only: this spec makes no screen claim of its own about an
@@ -2318,7 +2344,17 @@ steps restored fileId 1 "article.pdf". Kept check
 `shared/playwright/checks/sync/pkp-lib-13288/cancel-picks.js` (`MODE=s1`,
 `MODE=s1g` for a galley). Written up for the team in
 `docs/reports/2026-09-27-pkp-lib-13288.md` (Finding 1; a temporary report,
-deleted once addressed; git history keeps it).
+deleted once addressed; git history keeps it). Fixed by pkp/pkp-lib#13411
+(issue #13286; note s): the second upload adds a key for the first pick
+instead of overwriting the original's, and the cancel restores the posted
+original. Driven 2026-09-29 at its head `7263f86190`, before its merge
+(ojs `9d9f116f38`, omp `480045c32`, ops `5da5bc48ad` with lib/pkp at the
+PR head, freshly reset databases), with the kept check: `MODE=s1` on OJS
+and OMP restored fileId 1 "article.pdf" by the Author (`status:true`), the
+Activity Log keeping only the original's lines and its "Download"
+answering 200; `MODE=s1g` restored OJS's galley file fileId 4
+"article.pdf" and OPS's fileId 1 "preprint.pdf"
+(`.reports/sync/pr13411-{ojs,omp,ops}/`). Retired 2026-09-29.
 
 <a id="fn-a24"></a>
 **f-a24** — Introduced by pkp/pkp-lib#13288 (issue #13286, merge
@@ -2344,7 +2380,19 @@ Not driven on a galley or on a preprint server. Kept check
 `shared/playwright/checks/sync/pkp-lib-13288/cancel-picks.js` (`MODE=s2`).
 Written up for the team in `docs/reports/2026-09-27-pkp-lib-13288.md`
 (Finding 2; a temporary report, deleted once addressed; git history keeps
-it).
+it). Narrowed 2026-09-29 by pkp/pkp-lib#13411 (note s), driven at its head
+`7263f86190` before its merge, freshly reset databases: the second window
+cancelled first (`MODE=s2`) now closes both, `status:true` twice, and
+restores "article.pdf" on OJS and OMP. The first window cancelled first
+(`MODE=s2r`, added to the kept check that day) is unchanged from `main`
+(`fab29cfeca`, the same run there): A answers `status:false` and stays
+open (its upload is no longer the current file), B then `status:true`,
+and the list reads "rev-a.pdf" (OJS fileId 11, OMP fileId 8) with its
+revision line and a "Download" answering 200. Before #13288 (lib/pkp
+`aa077419e3`, OJS, the same database) A's cancel answered `status:true`
+and restored "article.pdf", and B's then answered `status:false` with the
+window left open, the file staying "article.pdf"
+(`.reports/sync/{pr13411-ojs,pr13411-omp,bm,bp}/result-s2r-*.json`).
 
 <a id="fn-a25"></a>
 **f-a25** — Note k. The row's "Cancel upload" (`FileUploader.vue`
@@ -2368,6 +2416,39 @@ of 6). Under an emulated upload throttle the bar fills before the request
 has left the browser, so there a full bar does not mean the file was sent.
 Scenario 9 presses mid-upload; no test drives the window after the last
 byte.
+
+<a id="fn-a26"></a>
+**f-a26** — Introduced by pkp/pkp-lib#13411 (issue #13286; note s), found
+by its regression read before the merge, 2026-09-29. The cancel walks the
+revisions from the one below the cancelled upload down to the posted
+original and needs a key for each in this session, none past the first
+`confirmed`: another window's completed revision marks the key below it
+`confirmed` in the same person's session (`finishFileSubmission()`), and
+another user's upload writes its key into that user's session, so the walk
+refuses (`JSONMessage(false)`); another window of the same person still on
+step 1 leaves an unconfirmed key, so the walk passes it and deletes that
+window's upload with the rest. Live-probed 2026-09-29 on OJS at the PR
+head `7263f86190` (a scratch journal, Editors; window A revised
+"article.pdf" with "rev-a.pdf", window B revised it with "rev-b.pdf", then
+A picked "rev-c.pdf" and pressed "Cancel"): B completed ("Complete"), the
+same person: A `status:false`, window open, a second press closing it
+with no request, the list reading fileId 24 "rev-c.pdf"; B completed by
+another Editor: the same, fileId 28 "rev-c.pdf"; B still on step 1: A
+`status:true`, the list back to fileId 17 "article.pdf", then B's cancel
+`status:false` with its window open. The same steps on the same database
+with lib/pkp at `main` `fab29cfeca`: A's cancel `status:true` in all three,
+the list reading B's "rev-b.pdf" (B's cancel on step 1 then refused); at
+`aa077419e3` (before #13288): `status:true`, the list back to
+"article.pdf" in all three, dropping B's completed revision (with B on
+step 1, B's cancel then answered `status:true` and left "rev-a.pdf"). Not
+driven on OMP or OPS (the same lib/pkp code). Kept check
+`shared/playwright/checks/sync/pkp-lib-13411/tabs.js` (`MODE=s1` B on
+step 1, `s2` B completed, `s3` B another Editor), runs in
+`.reports/sync/{rr13411,bm,bp}/`; `MODE=s2` held again from the kept
+location on OJS (`.reports/sync/kp/`: `status:false`, fileId 62
+"rev-c.pdf"). Written
+up for the team in `docs/reports/2026-09-29-pkp-lib-13411.md` (a temporary
+report, deleted once addressed; git history keeps it).
 
 <a id="fn-ops1"></a>
 **f-ops1** — Note a (the OPS workflow and wizard configs). Live-probed

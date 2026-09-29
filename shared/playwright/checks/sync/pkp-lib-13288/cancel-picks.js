@@ -6,6 +6,8 @@
 //   MODE=s1g  the same through a galley's "Change File" (OJS, OPS)
 //   MODE=s2   the same editor revises the file in two tabs (A: rev-a.pdf, then B: rev-b.pdf
 //             as a revision of it), "Cancel" in B, then "Cancel" in A
+//   MODE=s2r  the same two tabs, "Cancel" in A first, then "Cancel" in B (U36 A24's other
+//             order; added 2026-09-29 for the PR review of pkp-lib#13411)
 //   PROBE_FEATURE=sync PROBE_AGENT=<agent> MODE=s1|s1g|s2 node bin/probe.js ojs|omp|ops shared/playwright/checks/sync/pkp-lib-13288/cancel-picks.js
 // Verdict from result-<MODE>-<app>.json:
 //   fixed  → s1: afterCancel.items[0] is the original fileId, "article.pdf";
@@ -129,10 +131,17 @@ forEachApp(async (app) => {
             result.pickB = await pickRevision(pageB, 'rev-a');
             result.uploadB = await uploadPick(pageB, two);
             result.afterBoth = await filesViaApi(app, T, sid, page);
-            result.cancelB = await cancelWizard(pageB);
-            result.afterCancelB = await filesViaApi(app, T, sid, page);
-            result.cancelA = await cancelWizard(page);
-            await shot(page, 'tabA-after-cancel');
+            if (MODE === 's2r') {
+                result.cancelA = await cancelWizard(page);
+                result.afterCancelA = await filesViaApi(app, T, sid, page);
+                await shot(page, 'tabA-after-cancel');
+                result.cancelB = await cancelWizard(pageB);
+            } else {
+                result.cancelB = await cancelWizard(pageB);
+                result.afterCancelB = await filesViaApi(app, T, sid, page);
+                result.cancelA = await cancelWizard(page);
+                await shot(page, 'tabA-after-cancel');
+            }
             await pageB.close();
         }
         await page.goto(wf); await idle(page);
