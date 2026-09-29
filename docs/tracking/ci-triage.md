@@ -1172,3 +1172,4 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
+| pkp/ojs#5872 (submodule-only) with pkp/pkp-lib#13414, issue pkp/pkp-lib#13412; no omp or ops PRs | `13412` | ready | 2026-09-29 | U63 A17, A18 retired, A19–A21 new (report `docs/reports/2026-09-29-pkp-lib-13414.md`); Rules 22c, 24 rewritten; U63 S6 gives B its own manager (OJS, OMP; red at the PR head without it); kept checks `checks/sync/pkp-lib-13414/`. CI dispatch 36596210710 (all three apps with pkp-lib pull/13414/head) green on nine shards. At the merge: rebase, push, `node bin/ci.js watch`, fast-forward, delete this row; the #13390 row already reads as after the merge (stable-3_5_0 only), and its report `docs/reports/2026-09-29-pkp-lib-13390.md` goes once the 3.5 twin #13413 lands. |
