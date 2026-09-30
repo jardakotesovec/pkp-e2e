@@ -314,14 +314,14 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
 22c. **A role's dates.** A role's start and end dates may be written
     the ways dates usually are (such as `2024-01-05`,
     `2024-01-05 09:30:00`, `2024-01-05T09:30:00`, `2024-1-5`,
-    `2024-01-05 09:30` or `5.1.2024`, read day first); an empty date
-    counts as none (Rule 24b). A role whose date is anything else (such
-    as "soon", "tomorrow", `0000-00-00 00:00:00`, or a day the month
-    lacks, such as 2027-02-30) is not given, with the line "The role
-    "{role}" of the user "{username}" has not been imported because
-    "{date}" is not a valid date."; so is a fixed date written with its
-    weekday name (`Fri, 05 Jan 2024 09:30:00 +0000`, `Friday, January
-    5, 2024`) or as an ISO week date (`2024-W01-5`) ⚠ [A22](#a22). A
+    `2024-01-05 09:30`, `5.1.2024`, read day first, `Fri, 05 Jan 2024
+    09:30:00 +0000`, `Friday, January 5, 2024` or the ISO week date
+    `2024-W01-5`); an empty date counts as none (Rule 24b). A role whose
+    date is anything else (such as "soon", "tomorrow", `0000-00-00
+    00:00:00`, a day the month lacks, such as 2027-02-30, or a weekday
+    name the date does not fall on, such as `Mon, 05 Jan 2024`) is not
+    given, with the line "The role "{role}" of the user "{username}" has
+    not been imported because "{date}" is not a valid date.". A
     role whose start date is not
     before its end date, the day of the import standing in for a start
     date the file does not give while the end date is still to come, is
@@ -1134,8 +1134,6 @@ Left out of the scenarios above, by reason:
   - A16 (a new account imported on a server whose PHP is older than 8.4,
     and a password stored that PHP's default way kept; Rule 25; scenario
     6 marks the line for existing accounts)
-  - A22 (a fixed date with its weekday name, or an ISO week date; Rule
-    22c)
   - OJS1 (the DOAJ list's issue window heading; Rule 36)
   - OJS2 (the "DOAJ Export Plugin" row kept on the Plugins list while
     "DOAJ Plugin" is off; Rule 3)
@@ -1187,7 +1185,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A13](#a13) | A users file the import cannot read ends in an empty "Results" tab: the server fails | 🐞 | minor · crash: server | — |
 | [A15](#a15) | For an existing account, the results say a new password was sent, but nothing is sent and nothing changes | 🐞 | minor | — |
 | [A16](#a16) | On a server whose PHP is older than 8.4, a users import treats every password stored the installation's own way as stored another way | 🐞 | user-visible | — |
-| [A22](#a22) | A users file's role date written with its weekday name or as an ISO week date is refused and the role dropped | 🐞 | minor | — |
 | [OJS1](#ojs1) | The DOAJ list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | minor | — |
 | [OJS2](#ojs2) | With "DOAJ Plugin" off, the Plugins list still offers "DOAJ Export Plugin" and its "Import/Export Data" | 🐞 | minor | — |
 | [OJS3](#ojs3) | Once "NLM Title Abbreviation" is saved empty, the PubMed file's journal title is empty | 🐞 | minor | — |
@@ -1208,6 +1205,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A19](#a19) | Retired: a users file's role date may be written the ways dates usually are | ✅ | retired | PR review round 2 (claude), 2026-09-30 — fixed upstream |
 | [A20](#a20) | Retired: a users file with no role dates takes a role that ends later as already held | ✅ | retired | PR review round 2 (claude), 2026-09-30 — fixed upstream |
 | [A21](#a21) | Retired: the journal's own export of an ended role with no start date imports back silently | ✅ | retired | PR review round 2 (claude), 2026-09-30 — fixed upstream |
+| [A22](#a22) | Retired: a users file's role date written with its weekday name or as an ISO week date imports | ✅ | retired | PR review round 3 (claude), 2026-09-30 — fixed upstream |
 
 ### All apps
 
@@ -1347,17 +1345,6 @@ account keeps its password and gets no email ([A15](#a15)). With PHP
 Basis: test run, 2026-09-27 (the results line); probe, 2026-09-29
 (what happens to the passwords); OJS and OMP. <sup>f-a16</sup>
 
-<a id="a22"></a>
-**A22 — A fixed date with its weekday name, or an ISO week date, is refused** · 🐞 · minor.
-A users file giving a role's start date as `Fri, 05 Jan 2024 09:30:00
-+0000` (the form email headers and many tools write), `Fri, 05 Jan 2024
-09:30:00 GMT`, `Friday, January 5, 2024` or `2024-W01-5` should import
-the role from 2024-01-05, as it did before. Instead the "Results" tab
-reads "The role "Section editor" of the user "…" has not been imported
-because "…" is not a valid date.", and the user is created without the
-role. {OJS OMP}
-Since: pkp/pkp-lib#13414, before its merge · Basis: probe. <sup>f-a22</sup>
-
 ### OJS
 
 <a id="ojs1"></a>
@@ -1485,6 +1472,9 @@ Basis: probe. <sup>f-omp3</sup>
 
 <a id="a21"></a>
 **A21 — The journal's own export of an ended older role is refused when imported back** · ✅ · retired. Fixed in pkp/pkp-lib#13414's second round; seen fixed 2026-09-30 at the PR head, before its merge: the ended role with no start date is found already held (Rules 22c, 24). <sup>f-a21</sup>
+
+<a id="a22"></a>
+**A22 — A fixed date with its weekday name, or an ISO week date, is refused** · ✅ · retired. Fixed in pkp/pkp-lib#13414's third round; seen fixed 2026-09-30 at the PR head, before its merge: the four dates import as 2024-01-05, and a weekday the date does not fall on is refused (Rule 22c). <sup>f-a22</sup>
 
 ---
 
@@ -1785,12 +1775,14 @@ localized `name` array, with the file's `<date_start>`, `<date_end>`
 and `<masthead>` (read at lib/pkp `fab29cfeca`, 2026-09-29). A reviewer
 group gets `$masthead = true` whatever the file says;
 `$dateStart ??= Core::getCurrentDate()` fills in a missing start date.
-At the pkp/pkp-lib#13414 second-round head `ed27614ef0` (read and driven
+At the pkp/pkp-lib#13414 third-round head `2e377d27fc` (read and driven
 2026-09-30, before its merge): `parseRoleDate()` trims each date, returns
 null for an empty one, and refuses (`false`) a text whose `date_parse()`
-has errors or warnings (a roll-over such as 2027-02-30, a zero date),
-lacks a year, month or day, or is relative ("tomorrow"); otherwise
-`Carbon::parse()->toDateTimeString()`. A refusal gives
+has errors or warnings (a roll-over such as 2027-02-30, a zero date) or
+lacks a year, month or day (a relative date such as "tomorrow"), or
+names a weekday (`relative.weekday`) other than that of its year, month
+and day; otherwise `Carbon::parse()->toDateTimeString()`, so a relative
+part beside a full date moves it (`2024-01-05 +1 day` is 2024-01-06). A refusal gives
 `plugins.importexport.user.error.invalidRoleDate` with the text and
 `continue`. `$startsOnImport` (no start, and no end or an end still to
 come) sets the start to now; `$dateStart >= $dateEnd` then gives
@@ -1804,7 +1796,9 @@ open; otherwise the same start, null included, and the same end);
 otherwise `.roleOverlap`. The first round (`ddfcf362ca`, 2026-09-29)
 accepted only `Y-m-d H:i:s` or `Y-m-d` (A19), counted an existing row
 covering today only when open (A20), and defaulted a missing start to
-today before the period check (A21).
+today before the period check (A21). The second (`ed27614ef0`,
+2026-09-30) also refused any `relative` data, a weekday name and an ISO
+week date included (A22).
 Before it the role was skipped when, for an entry with no `<date_end>`,
 a `withActive()` row existed, or, for an entry with one, a `withEnded()`
 row; a row that starts later, or ends later, was neither, so it was
@@ -2576,8 +2570,9 @@ forms and the Unix timestamp `1704447000` each read the invalid-date line,
 and the users had no role. At `main` `3dc90c81a6` on OJS, all five
 imported with 2024-01-05. The timestamp stays out of this entry, since
 reading digits as a timestamp also made `2024` a 1970 date on `main`.
-Written up in `docs/reports/2026-09-30-pkp-lib-13414.md` (a temporary
-report, deleted once acted on).
+Reported to the team in the second round's report (acted on, deleted
+2026-09-30).
+Seen fixed 2026-09-30 at the third-round head `2e377d27fc` (`fixed-dates.js`, OJS and OMP): the four forms imported as `2024-01-05 09:30:00`, `2024-01-05 09:30:00`, `2024-01-05 00:00:00` and `2024-01-05 00:00:00`, `Sun, 07 Jan 2024` as `2024-01-07 00:00:00`; `Mon, 05 Jan 2024 09:30:00 +0000` (a Friday) and the timestamp read the invalid-date line, with no role.
 
 <a id="fn-f-a18"></a>
 **f-a18** — Note l. lib/pkp `85f6b3c074` (pkp/pkp-lib#13390, merged
