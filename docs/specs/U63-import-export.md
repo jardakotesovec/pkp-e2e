@@ -311,23 +311,26 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     file under "Import" in order to continue."; each press adds another.
     A file that is up but not imported is dropped on leaving the page,
     as in Rule 8. <sup>k</sup>
-22c. **A role's dates.** A role's start and end dates are read as
-    "YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS"; an empty date counts as none
-    (Rule 24b). A role whose date is anything else (such as "soon", or
-    a day the month lacks, such as 2027-02-30) is not given, with the
-    line "The role "{role}" of the user "{username}" has not been
-    imported because its start or end date is not a valid date
-    (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)."; so is a date other tools
-    write, such as `2024-01-05T09:30:00`, `2024-1-5` or
-    `2024-01-05 09:30` ⚠ [A19](#a19). A role whose start date is
-    not before its end date, the day of the import standing in for a
-    start date the file does not give (so a past end date with no start
-    date), is not given, with the line "The role "{role}" of the user
+22c. **A role's dates.** A role's start and end dates may be written
+    the ways dates usually are (such as `2024-01-05`,
+    `2024-01-05 09:30:00`, `2024-01-05T09:30:00`, `2024-1-5`,
+    `2024-01-05 09:30` or `5.1.2024`, read day first); an empty date
+    counts as none (Rule 24b). A role whose date is anything else (such
+    as "soon", "tomorrow", `0000-00-00 00:00:00`, or a day the month
+    lacks, such as 2027-02-30) is not given, with the line "The role
+    "{role}" of the user "{username}" has not been imported because
+    "{date}" is not a valid date."; so is a fixed date written with its
+    weekday name (`Fri, 05 Jan 2024 09:30:00 +0000`, `Friday, January
+    5, 2024`) or as an ISO week date (`2024-W01-5`) ⚠ [A22](#a22). A
+    role whose start date is not
+    before its end date, the day of the import standing in for a start
+    date the file does not give while the end date is still to come, is
+    not given, with the line "The role "{role}" of the user
     "{username}" has not been imported because its start date is not
-    before its end date. A missing start date means the day of the
-    import."; the journal's own export of an older role that has no
-    start date and has ended reads so when imported back ⚠ [A21](#a21).
-    Either way the user's account is still imported with its
+    before its end date.". A role the file gives an end date already
+    past and no start date is given as an ended term with no start
+    date, as the journal's own export writes an older role that has
+    ended. Either way the user's account is still imported with its
     other roles, and so are the users after it in the file (Rule 22).
     <sup>l</sup>
 23. <a id="users-matching"></a> **Which accounts.** Each user in the
@@ -345,11 +348,10 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     journal lacks is passed over silently. A role is given once for
     each period, however often the file is imported: when the user
     already holds the same role from the same start date to the same
-    end date (for a role the file gives no start date, a period that
-    has begun and lasts at least to the file's end date), nothing is
-    added and nothing is said; a file with no dates at all is reported
-    as overlapping a role the user holds until a later end date
-    ⚠ [A20](#a20). When the user holds the same role over a
+    end date (for a role the file gives no start date and an end date
+    still to come, or none, a period that has begun and lasts at least
+    to the file's end date, whatever its own end), nothing is added and
+    nothing is said. When the user holds the same role over a
     period that overlaps the file's in any other way, the role is not
     given, with the line "The role "{role}" of the user "{username}"
     has not been imported because the user already holds this role in
@@ -1132,10 +1134,8 @@ Left out of the scenarios above, by reason:
   - A16 (a new account imported on a server whose PHP is older than 8.4,
     and a password stored that PHP's default way kept; Rule 25; scenario
     6 marks the line for existing accounts)
-  - A19 (a role date written another common way; Rule 22c)
-  - A20 (a file with no role dates for a role ending later; Rule 24)
-  - A21 (the export of an ended role with no start date imported back;
-    Rule 22c)
+  - A22 (a fixed date with its weekday name, or an ISO week date; Rule
+    22c)
   - OJS1 (the DOAJ list's issue window heading; Rule 36)
   - OJS2 (the "DOAJ Export Plugin" row kept on the Plugins list while
     "DOAJ Plugin" is off; Rule 3)
@@ -1187,9 +1187,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A13](#a13) | A users file the import cannot read ends in an empty "Results" tab: the server fails | 🐞 | minor · crash: server | — |
 | [A15](#a15) | For an existing account, the results say a new password was sent, but nothing is sent and nothing changes | 🐞 | minor | — |
 | [A16](#a16) | On a server whose PHP is older than 8.4, a users import treats every password stored the installation's own way as stored another way | 🐞 | user-visible | — |
-| [A19](#a19) | A users file's role date written another common way (ISO with "T", no leading zeros, no seconds) is refused and the role dropped | 🐞 | minor | — |
-| [A20](#a20) | A users file with no role dates is reported as overlapping a role the user holds until a later end date | 🐞 | minor | — |
-| [A21](#a21) | The journal's own export of an ended role with no start date is refused as a reversed period when imported back | 🐞 | minor | — |
+| [A22](#a22) | A users file's role date written with its weekday name or as an ISO week date is refused and the role dropped | 🐞 | minor | — |
 | [OJS1](#ojs1) | The DOAJ list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | minor | — |
 | [OJS2](#ojs2) | With "DOAJ Plugin" off, the Plugins list still offers "DOAJ Export Plugin" and its "Import/Export Data" | 🐞 | minor | — |
 | [OJS3](#ojs3) | Once "NLM Title Abbreviation" is saved empty, the PubMed file's journal title is empty | 🐞 | minor | — |
@@ -1207,6 +1205,9 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | Retired: a users import keeps each role's start date | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
 | [A17](#a17) | Retired: importing a users file again gives a later-dated role once | ✅ | retired | PR review (claude), 2026-09-29 — fixed upstream |
 | [A18](#a18) | Retired: an empty role date counts as none, an unreadable one is refused with a line | ✅ | retired | PR review (claude), 2026-09-29 — fixed upstream |
+| [A19](#a19) | Retired: a users file's role date may be written the ways dates usually are | ✅ | retired | PR review round 2 (claude), 2026-09-30 — fixed upstream |
+| [A20](#a20) | Retired: a users file with no role dates takes a role that ends later as already held | ✅ | retired | PR review round 2 (claude), 2026-09-30 — fixed upstream |
+| [A21](#a21) | Retired: the journal's own export of an ended role with no start date imports back silently | ✅ | retired | PR review round 2 (claude), 2026-09-30 — fixed upstream |
 
 ### All apps
 
@@ -1346,41 +1347,16 @@ account keeps its password and gets no email ([A15](#a15)). With PHP
 Basis: test run, 2026-09-27 (the results line); probe, 2026-09-29
 (what happens to the passwords); OJS and OMP. <sup>f-a16</sup>
 
-<a id="a19"></a>
-**A19 — A role date written another common way is refused** · 🐞 · minor.
-A users file made by another tool, giving a role's start date as
-`2024-01-05T09:30:00`, `2024-1-5` or `2024-01-05 09:30`, should import
-the role from that date, as it did before. Instead the "Results" tab
+<a id="a22"></a>
+**A22 — A fixed date with its weekday name, or an ISO week date, is refused** · 🐞 · minor.
+A users file giving a role's start date as `Fri, 05 Jan 2024 09:30:00
++0000` (the form email headers and many tools write), `Fri, 05 Jan 2024
+09:30:00 GMT`, `Friday, January 5, 2024` or `2024-W01-5` should import
+the role from 2024-01-05, as it did before. Instead the "Results" tab
 reads "The role "Section editor" of the user "…" has not been imported
-because its start or end date is not a valid date (YYYY-MM-DD or
-YYYY-MM-DD HH:MM:SS).", and the user is created without the role. On
-OJS's command-line import nothing is printed and the role is simply
-missing. {OJS OMP}
-Since: pkp/pkp-lib#13414, before its merge · Basis: probe. <sup>f-a19</sup>
-
-<a id="a20"></a>
-**A20 — A file with no role dates is reported as overlapping a role that ends later** · 🐞 · minor.
-A users file giving a user a role with no start or end date, for a user
-who already holds that role until a later end date (an editor appointed
-to the end of 2027, say), should be taken as already imported, as the
-change meant to do. Instead the "Results" tab reads "The role "Section
-editor" of the user "…" has not been imported because the user already
-holds this role in an overlapping period." in place of the success
-sentence, although nothing needed changing. The same file for a role with
-no end date imports silently. {OJS OMP}
-Since: pkp/pkp-lib#13414, before its merge · Basis: probe. <sup>f-a20</sup>
-
-<a id="a21"></a>
-**A21 — The journal's own export of an ended older role is refused when imported back** · 🐞 · minor.
-On an installation upgraded from a release that stored no role start
-dates, a role that has since been ended is exported with its end date
-alone. Imported back into the same journal, the file should find the
-role already there. Instead the "Results" tab reads "The role "Section
-editor" of the user "…" has not been imported because its start date is
-not before its end date. A missing start date means the day of the
-import.". Into another journal, that past term is not carried over.
-{OJS OMP}
-Since: pkp/pkp-lib#13414, before its merge · Basis: probe. <sup>f-a21</sup>
+because "…" is not a valid date.", and the user is created without the
+role. {OJS OMP}
+Since: pkp/pkp-lib#13414, before its merge · Basis: probe. <sup>f-a22</sup>
 
 ### OJS
 
@@ -1500,6 +1476,15 @@ Basis: probe. <sup>f-omp3</sup>
 
 <a id="a18"></a>
 **A18 — An empty or unreadable role date stops a users import part-way** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13414); seen fixed 2026-09-29 at the PR head, before its merge: an empty date counts as none, an unreadable one is refused with a line and the import goes on (Rule 22c). <sup>f-a18</sup>
+
+<a id="a19"></a>
+**A19 — A role date written another common way is refused** · ✅ · retired. Fixed in pkp/pkp-lib#13414's second round; seen fixed 2026-09-30 at the PR head, before its merge: the dates of Rule 22c import (Rule 22c). <sup>f-a19</sup>
+
+<a id="a20"></a>
+**A20 — A file with no role dates is reported as overlapping a role that ends later** · ✅ · retired. Fixed in pkp/pkp-lib#13414's second round; seen fixed 2026-09-30 at the PR head, before its merge: nothing added, nothing said (Rule 24). <sup>f-a20</sup>
+
+<a id="a21"></a>
+**A21 — The journal's own export of an ended older role is refused when imported back** · ✅ · retired. Fixed in pkp/pkp-lib#13414's second round; seen fixed 2026-09-30 at the PR head, before its merge: the ended role with no start date is found already held (Rules 22c, 24). <sup>f-a21</sup>
 
 ---
 
@@ -1800,17 +1785,26 @@ localized `name` array, with the file's `<date_start>`, `<date_end>`
 and `<masthead>` (read at lib/pkp `fab29cfeca`, 2026-09-29). A reviewer
 group gets `$masthead = true` whatever the file says;
 `$dateStart ??= Core::getCurrentDate()` fills in a missing start date.
-At the pkp/pkp-lib#13414 head `ddfcf362ca` (read and driven 2026-09-29,
-before its merge): `getRoleDate()` trims each date, returns null for an
-empty one and accepts only `Y-m-d H:i:s` or `Y-m-d` that format back to
-the same text (no roll-over), else
-`plugins.importexport.user.error.invalidRoleDate` and `continue`;
-`$dateStart >= $dateEnd` (after the default) gives `.invalidRolePeriod`.
+At the pkp/pkp-lib#13414 second-round head `ed27614ef0` (read and driven
+2026-09-30, before its merge): `parseRoleDate()` trims each date, returns
+null for an empty one, and refuses (`false`) a text whose `date_parse()`
+has errors or warnings (a roll-over such as 2027-02-30, a zero date),
+lacks a year, month or day, or is relative ("tomorrow"); otherwise
+`Carbon::parse()->toDateTimeString()`. A refusal gives
+`plugins.importexport.user.error.invalidRoleDate` with the text and
+`continue`. `$startsOnImport` (no start, and no end or an end still to
+come) sets the start to now; `$dateStart >= $dateEnd` then gives
+`.invalidRolePeriod`; no start with a past end keeps the start null.
 The existing rows of the same group overlapping the period (`date_end`
-null or after the start, and, with an end, `date_start` null or before
-it) decide: none → the row is inserted; one with the same start and end
-(with no start in the file: started by now and ending no earlier than
-the file's end, or open) → skipped silently; otherwise `.roleOverlap`.
+null or after the start, when there is one, and, with an end,
+`date_start` null or before it) decide: none → the row is inserted; one
+counting as already imported → skipped silently (starting on import:
+started by now and, when the file gives an end, ending no earlier or
+open; otherwise the same start, null included, and the same end);
+otherwise `.roleOverlap`. The first round (`ddfcf362ca`, 2026-09-29)
+accepted only `Y-m-d H:i:s` or `Y-m-d` (A19), counted an existing row
+covering today only when open (A20), and defaulted a missing start to
+today before the period check (A21).
 Before it the role was skipped when, for an entry with no `<date_end>`,
 a `withActive()` row existed, or, for an entry with one, a `withEnded()`
 row; a row that starts later, or ends later, was neither, so it was
@@ -1877,6 +1871,13 @@ starting 2027-06-01 refused with the overlap line; a current role then
 2020-01-01 to 2021-01-01, twice, two rows, no line; a file with no
 start date re-imported with the stored start moved two days back, one
 row, no line; `<date_end></date_end>` with a 2020 start, no end.
+Driven again 2026-09-30 at the second-round head `ed27614ef0` (the same
+kept scripts, OJS and OMP): all of the above as written now, the
+invalid-date line quoting the value ("…because "soon" is not a valid
+date."), the period line without its last sentence; an end of
+2020-01-01 with no start given with no start date, and the file again:
+one row, no line; "tomorrow" and `0000-00-00 00:00:00` refused;
+`5.1.2024` read as 2024-01-05.
 
 <a id="fn-m"></a>
 **m** — `ExportableUsersGridHandler` (lib/pkp
@@ -2537,9 +2538,9 @@ with no role; on OJS's `tools/importExport.php … import` the exit was 0,
 with no output and no role (OMP's command-line Users import throws
 `BadMethodCallException`, as before). At `main` `8b79730431` on OJS:
 imported as `2024-01-05 09:30:00`, `2024-01-05 00:00:00` and
-`2024-01-05 09:30:00`, on the screen and the command line. Written up in
-`docs/reports/2026-09-29-pkp-lib-13414.md` (Finding 1; a temporary
-report, deleted once acted on).
+`2024-01-05 09:30:00`, on the screen and the command line. Reported to the team in the first round's report (Finding 1;
+acted on, deleted 2026-09-30).
+Seen fixed 2026-09-30 at the second-round head `ed27614ef0` (`import-shapes.js`, OJS and OMP): the three spellings imported as `2024-01-05 09:30:00`, `2024-01-05 00:00:00` and `2024-01-05 09:30:00`, on the screen and on OJS's command line (silent as before, exit 0).
 
 <a id="fn-f-a20"></a>
 **f-a20** — Note l. With no `<date_start>`, `$alreadyImported` needs
@@ -2549,7 +2550,8 @@ Driven 2026-09-29 on OJS and OMP at the PR head, before its merge
 (rr13414 S2, the same kept script): a row from `2020-01-01` to
 `2027-12-31`, then a file with no dates, read the overlap line, with the
 one row unchanged. At `main` `8b79730431` on OJS it read the success
-sentence. Report Finding 2.
+sentence. First-round report, Finding 2.
+Seen fixed 2026-09-30 at the second-round head `ed27614ef0` (same script, OJS and OMP): the success sentence, one row.
 
 <a id="fn-f-a21"></a>
 **f-a21** — Note l. `$dateStart ??= Core::getCurrentDate()` runs before
@@ -2560,7 +2562,22 @@ Driven 2026-09-29 on OJS and OMP at the PR head, before its merge
 `date_end` `2026-01-01`, exported (`<date_end>` alone), and imported into
 the same journal, read the period line, with the rows unchanged;
 control, both dates NULL: no line. At `main` `8b79730431` on OJS: only
-the password lines of A15. Report Finding 3.
+the password lines of A15. First-round report, Finding 3.
+Seen fixed 2026-09-30 at the second-round head `ed27614ef0` (same script, OJS and OMP): only the password lines of A15, rows unchanged.
+
+<a id="fn-f-a22"></a>
+**f-a22** — Note l. `parseRoleDate()` refuses any `date_parse()` result
+with `relative` data, and `date_parse()` records a weekday name
+(`relative.weekday`) and an ISO week date (`relative.day`) there beside a
+full year, month and day. Driven 2026-09-30 on OJS and OMP at the
+second-round head `ed27614ef0`, before its merge (regression reader
+rr13414b, S1; kept `checks/sync/pkp-lib-13414/fixed-dates.js`): the four
+forms and the Unix timestamp `1704447000` each read the invalid-date line,
+and the users had no role. At `main` `3dc90c81a6` on OJS, all five
+imported with 2024-01-05. The timestamp stays out of this entry, since
+reading digits as a timestamp also made `2024` a 1970 date on `main`.
+Written up in `docs/reports/2026-09-30-pkp-lib-13414.md` (a temporary
+report, deleted once acted on).
 
 <a id="fn-f-a18"></a>
 **f-a18** — Note l. lib/pkp `85f6b3c074` (pkp/pkp-lib#13390, merged
