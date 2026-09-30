@@ -75,6 +75,9 @@ forEachApp(async (app) => {
         fact('c1-db', uug(u('pe')));
         fact('c2-import', await importFile(file('c2-past-end-no-start', [userXml({username: u('pn'), roles: [{ref: SE, end: '2020-01-01 00:00:00'}]})]), 'c2-past-end-no-start'));
         fact('c2-db', uug(u('pn')));
+        // C2b (round 2): the same file again, as an export of an ended role with no start date re-imported
+        fact('c2b-import', await importFile(file('c2-past-end-no-start', [userXml({username: u('pn'), roles: [{ref: SE, end: '2020-01-01 00:00:00'}]})]), 'c2b-past-end-no-start-again'));
+        fact('c2b-db', uug(u('pn')));
         fact('c3-import', await importFile(file('c3-equal', [userXml({username: u('eq'), roles: [{ref: SE, start: '2027-01-01', end: '2027-01-01 00:00:00'}]})]), 'c3-equal'));
         fact('c3-db', uug(u('eq')));
         // D: a date-only start, then the same start written with a time: one row, nothing reported
@@ -100,6 +103,13 @@ forEachApp(async (app) => {
         // H: an empty <date_end> with a past start: imported with no end
         fact('h-import', await importFile(file('h-empty-end', [userXml({username: u('ee'), roles: [{ref: SE, start: '2020-01-01 00:00:00', end: ''}]})]), 'h-empty-end'));
         fact('h-db', uug(u('ee')));
+        // K-M (round 2, date_parse): a relative date, a zero date, a day-first date with dots
+        fact('k-import', await importFile(file('k-relative', [userXml({username: u('rl'), roles: [{ref: SE, start: 'tomorrow'}]})]), 'k-relative'));
+        fact('k-db', uug(u('rl')));
+        fact('l-import', await importFile(file('l-zero', [userXml({username: u('zd'), roles: [{ref: SE, start: '0000-00-00 00:00:00'}]})]), 'l-zero'));
+        fact('l-db', uug(u('zd')));
+        fact('m-import', await importFile(file('m-dots', [userXml({username: u('dt'), roles: [{ref: SE, start: '5.1.2024'}]})]), 'm-dots'));
+        fact('m-db', uug(u('dt')));
         await signOut(page).catch(() => {});
     } finally {
         record('pr13412-facts', facts);
