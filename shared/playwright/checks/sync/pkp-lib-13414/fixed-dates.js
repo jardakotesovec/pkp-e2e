@@ -85,8 +85,9 @@ forEachApp(async (app) => {
     try {
         await signIn(page, `${t}m`, {contextPath: ctx});
 
-        // S1: fixed dates with a weekday name, an ISO week date, a Unix timestamp
-        const s1 = {a: 'Fri, 05 Jan 2024 09:30:00 +0000', b: 'Fri, 05 Jan 2024 09:30:00 GMT', c: 'Friday, January 5, 2024', d: '2024-W01-5', e: '1704447000'};
+        // S1: fixed dates with a weekday name, an ISO week date, a Unix timestamp;
+        // round 3 (2e377d27fc): a Sunday, and a weekday that contradicts its date (f, refused by the issue)
+        const s1 = {a: 'Fri, 05 Jan 2024 09:30:00 +0000', b: 'Fri, 05 Jan 2024 09:30:00 GMT', c: 'Friday, January 5, 2024', d: '2024-W01-5', e: '1704447000', f: 'Mon, 05 Jan 2024 09:30:00 +0000', h: 'Sun, 07 Jan 2024'};
         fact('s1-import', await importFile(file('s1', Object.entries(s1).map(([k, v]) => userXml({username: u(k), roles: [{ref: SE, start: v}]}))), 's1'));
         for (const k of Object.keys(s1)) fact(`s1-db-${k}`, {value: s1[k], exists: sql(`select count(*) from users where username = '${u(k)}'`), rows: uug(u(k))});
         fact('s1-cast-before', execFileSync('php', ['-r', `require 'lib/pkp/lib/vendor/autoload.php'; date_default_timezone_set('UTC'); class M extends \\Illuminate\\Database\\Eloquent\\Model { protected $casts=['d'=>'datetime']; public function getDateFormat(){return 'Y-m-d H:i:s';} } foreach (${JSON.stringify(Object.values(s1)).replace(/"/g, "'")} as $v) { echo $v, ' => ', (new M)->fromDateTime($v), '; '; }`], {cwd: app.root, encoding: 'utf8'}).trim());
