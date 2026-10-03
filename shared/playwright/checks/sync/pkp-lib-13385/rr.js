@@ -1,5 +1,6 @@
 // Regression read of pkp/pkp-lib#13385 (issue #12593 "Handle missing email template or key"), kept from the
-// PR review rounds of 2026-09-28 (.reports/sync/rr12593/suspicions.md) and 2026-10-02 (.reports/pr12593r2/).
+// PR review rounds of 2026-09-28 (.reports/sync/rr12593/suspicions.md), 2026-10-02 (.reports/pr12593r2/) and
+// 2026-10-03 (.reports/pr12593r3/, .reports/sync/r3/).
 // The PR changes the stage Participants panel's "Assign" / "Notify" message:
 // PKPStageParticipantNotifyForm::sendMessage() (a blank template, or one the SENDER may not use (round 2;
 // round 1 checked the recipient) → the stage's DISCUSSION_NOTIFICATION_* template, then promote() with no null
@@ -10,11 +11,13 @@
 // (migrate-ir.php, migration.js). Spec: docs/specs/U35-stage-participants.md Rule 5, A3, A5, A10, OMP1.
 //
 //   PROBE_FEATURE=sync PROBE_AGENT=<agent> RR_REF=after node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13385/rr.js
-//   RR_LEGS=s1,s2,s3,s4,s5,s6,s7,s8 narrows (s2 OMP only; s5, s7 OJS only). RR_REF labels the outputs
+//   RR_LEGS=s1,s2,s3,s4,s5,s6,s7,s8 narrows (s2 OMP only; s7 OJS only). RR_REF labels the outputs
 //   (result-<ref>-<app>.json); every run seeds fresh scratch contexts.
 // Refs, round 2: after = ojs b84f8e2e44 with lib/pkp at the PR head 2af7ddfcb2 merged onto its pointer
 //   ddd8ab243a; omp at the PR head e50a757bdc (lib/pkp 2af7ddfcb2); ops c8af945bb7 with lib/pkp 2af7ddfcb2
 //   (its pointer 3dc90c81a6 lies below the PR base). Round 1 (head cf72cc78d8): see the 2026-09-28 sync-log entry.
+// Refs, round 3: after3 = ojs ff004d0973 with lib/pkp at the PR head 62077d1f6f merged onto its pointer
+//   987776cd04; omp at the PR head ecd65eebb0 (lib/pkp 62077d1f6f); ops c8af945bb7 with lib/pkp 62077d1f6f.
 // Verdicts, from result-<ref>-<app>.json (round 2 expectations):
 //   s1 (A3 fixed): notifyBlank/assignBlank status 200 and a mail with subject "Discussion (Submission)"
 //      ("Discussion (Production)" on OPS); tasks' created_by is the manager (A5 fixed); before: 500, no mail.
@@ -22,7 +25,8 @@
 //      choosing it fills "Please enter your message."; a restricted template sent to a non-holder keeps its name.
 //   s3 (blank entry empties the message; ruled intended 2026-09-28).
 //   s4 (A10 fixed): choose → message filled; every recipient → subject = the template's name.
-//   s5 (default deleted): still 500 ("promote() on null"), no mail.
+//   s5 (default deleted, every app): round 2 500 ("promote() on null"); round 3 still 500 (the anonymous
+//      fallback Mailable has no allowUnsubscribe()), no mail, but a discussion per attempt.
 //   s6 (sender check): the Section editor's EditorOnly send to the Author keeps its name.
 //   s8 (A17): chosen, set back to blank, typed, "Notify": 200, sent as the stage's "Discussion (…)".
 //   s7 (letter): "Request Copyedit" limited to Copyeditor sent to the Author keeps its subject, fills
@@ -381,7 +385,7 @@ forEachApp(async (app) => {
         } finally { await close(); }
     });
 
-    if (want('s5') && isOJS) await sect('s5', async () => {
+    if (want('s5')) await sect('s5', async () => {
         const sc = await seedContext('rr93b', false);
         const H = helpers(sc);
         const t = sc.t;
@@ -392,7 +396,7 @@ forEachApp(async (app) => {
             await H.openWf(page, sc.S.id, L.stage);
             const n = await H.notify(page, 's5-notify-blank-nodefault', {k: 'au', message: `RR nodefault notify ${t}`});
             const a = await H.assign(page, 's5-assign-blank-nodefault', {role: L.se, k: 'sea', message: `RR nodefault assign ${t}`});
-            put('s5', {seedB: {ctx: sc.ctx, S: sc.S}, del, notifyBlank: n, assignBlank: a, remaining: db(`select t.key, t.stage_id from edit_task_templates t join journals j on j.journal_id=t.context_id where j.path='${sc.ctx}' order by 2,1`), mails: {au: await H.mail('au', `RR nodefault notify ${t}`, 4000), sea: await H.mail('sea', `RR nodefault assign ${t}`, 3000)}, tasks: H.tasks(sc.S.id)});
+            put('s5', {seedB: {ctx: sc.ctx, S: sc.S}, del, notifyBlank: n, assignBlank: a, remaining: db(`select t.key, t.stage_id from edit_task_templates t join ${isOMP ? 'presses' : isOPS ? 'servers' : 'journals'} j on j.${isOMP ? 'press_id' : isOPS ? 'server_id' : 'journal_id'}=t.context_id where j.path='${sc.ctx}' order by 2,1`), mails: {au: await H.mail('au', `RR nodefault notify ${t}`, 4000), sea: await H.mail('sea', `RR nodefault assign ${t}`, 3000)}, tasks: H.tasks(sc.S.id)});
             await signOut(page);
         } finally { await close(); }
     });

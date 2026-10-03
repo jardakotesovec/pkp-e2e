@@ -212,15 +212,16 @@ levels and a comma two roles of one level. <sup>d</sup>
      under the stage's "Discussion (…)" name, as if that were chosen.
      Where a manager has deleted the stage's "Discussion (…)" under
      Settings, a message typed with the list on its blank entry is not
-     sent: "OK" leaves the window open as filled, with no reason given, yet
-     the person is assigned. The row appears once the page is opened
-     again, and the Activity Log gets no line for it ⚠ [A3](#a3).
+     emailed: "OK" leaves the window open as filled, with no reason given,
+     yet the person is assigned and a "Discussion (…)" discussion with the
+     message opens. The row appears once the page is opened again, and the
+     Activity Log gets no line for it ⚠ [A3](#a3).
      <sup>g</sup> <sup>td4</sup>
    - 5c. On a press's Internal Review the list offers "Discussion
-     (Review)" and no "Assign Editor" ⚠ [OMP1](#omp1). On a press upgraded
-     from 3.5, choosing that "Discussion (Review)" fills "Message" with
-     "This email is sent when a discussion is created or replied to in the
-     review stage." ⚠ [OMP2](#omp2). <sup>[f-omp1](#fn-omp1)</sup>
+     (Review)" and no "Assign Editor" ⚠ [OMP1](#omp1). Choosing that
+     "Discussion (Review)" fills "Message" with "Please enter your
+     message.", on a press upgraded from 3.5 too ([OMP2](#omp2) retired).
+     <sup>[f-omp1](#fn-omp1)</sup>
    - 5d. On a preprint server choosing "Assign Editor" leaves "Message" as
      it was ⚠ [OPS2](#ops2). <sup>[f-ops2](#fn-ops2)</sup>
 
@@ -322,8 +323,9 @@ levels and a comma two roles of one level. <sup>d</sup>
       after a predefined message (which empties "Message"), "Notify" with
       a message typed sends it under the stage's "Discussion (…)" name and
       closes the window as in 11a. On a stage whose "Discussion (…)" a
-      manager deleted, it leaves the window open as filled; nothing is
-      sent and nothing on screen says why [A3](#a3). <sup>g</sup>
+      manager deleted, it leaves the window open as filled and nothing on
+      screen says why; the discussion opens, but no email goes out
+      [A3](#a3). <sup>g</sup>
       <sup>td4</sup>
     - 11c. While the list "Choose a predefined message…" has not been
       touched, the window's close control ("<") closes the window at
@@ -1011,7 +1013,7 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (a Section Editor's or Guest Editor's "OK" on "Edit Assignment" saving nothing; Rule 8e)
   - A2 ("Remove" offered on the rows "Edit" is not, a Section Editor's own row and its "Error" window included; Actors row "Remove"; Rule 10)
-  - A3 (a message typed with the list on its blank entry not sent on a stage whose "Discussion (…)" was deleted; Rules 5b, 11b)
+  - A3 (a message typed with the list on its blank entry not emailed, the window failing, on a stage whose "Discussion (…)" was deleted; Rules 5b, 11b)
   - A4 ("OK" with nobody chosen, or with a person listed under the previous role, assigning nobody; Rule 6b)
   - A6 ("Assign Editor" giving no task of its own; Side effects; scenario 1 marks it)
   - A7 ("Edit" logged as a new assignment; Side effects "On Edit")
@@ -1024,7 +1026,6 @@ Left out of the scenarios above, by reason:
   - A16 (the "Do not send me an email…" box on "Discussion added." ignored; Side effects)
   - OJS1 (the automatic email naming "Send to Review"; Rule 12b; scenario 8 marks it)
   - OMP1 (no "Assign Editor" on a press's Internal Review; Rule 5c)
-  - OMP2 (an upgraded press's Internal Review "Discussion (Review)" text; Rule 5c): an upgrade the suites do not run
   - OPS2 ("Assign Editor" leaving "Message" as it was on a preprint server; Rule 5d)
   - OPS3 (no automatic assignment email on a preprint server; Rule 12a; scenario 8 notes it)
   - OPS4 (a preprint server's notice after "Assign", "Edit" or "Notify" landing in the stage's "Notification" box; Rules 6a, 8d, 11; scenarios 3, 6 and 9 mark it)
@@ -1050,7 +1051,7 @@ entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | A Section Editor's "OK" on a participant's "Edit Assignment" saves nothing and shows the form again | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [A3](#a3) | On a stage whose "Discussion (…)" template was deleted, a message typed in "Assign" or "Notify" with no predefined message chosen is not sent | 🐞 | medium · crash: server | PR review (claude), 2026-10-02 — narrowed before merge |
+| [A3](#a3) | On a stage whose "Discussion (…)" template was deleted, a message typed in "Assign" or "Notify" with no predefined message chosen is not emailed and the window fails | 🐞 | medium · crash: server | PR review (claude), 2026-10-03 — re-verified before merge |
 | [A4](#a4) | "OK" on "Assign Participant" with nobody chosen, or with a person from the previous role's list, assigns nobody and gives no reason | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A6](#a6) | The "Assign Editor" message gives the new editor no "You have been assigned as an editor" task | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A7](#a7) | Changing a participant's assignment with "Edit" adds a "was assigned to this submission" line to the Activity Log | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1062,7 +1063,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | A message sent with "Notify" is emailed to a participant who opted out of emails for new discussions | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS1](#ojs1) | A journal's "Editor Assigned" email tells the editor to select "Send to Review"; the button reads "Send for Review" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP1](#omp1) | A press's Internal Review offers no "Assign Editor" message in "Assign" and "Notify" | 🐞 | low | PR review (claude), 2026-10-02 — narrowed before merge |
-| [OMP2](#omp2) | On a press upgraded from 3.5, Internal Review's "Discussion (Review)" fills "Message" with a sentence about emails | 🐞 | low | PR review (claude), 2026-10-02 — new before merge |
 | [OPS2](#ops2) | On a preprint server, choosing the predefined message "Assign Editor" leaves "Message" unfilled | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server never emails its moderators that a new preprint was assigned to them | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | On a preprint server, "Notification sent to users." shows in a box in the Production stage instead of at the top right | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1073,6 +1073,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | Retired: a message sent from "Notify" or "Assign" opened a discussion listed as created by its recipient; fixed in pkp/pkp-lib#13385 before its merge | ✅ | retired | PR review (claude), 2026-10-02 — fixed before merge |
 | [A10](#a10) | Retired: a template added in Settings, or limited to some roles, filled nothing and could not be sent; fixed in pkp/pkp-lib#13385 before its merge | ✅ | retired | PR review (claude), 2026-10-02 — fixed before merge |
 | [A17](#a17) | Retired: "Notify" after the list was set back to blank had never been pressed; at the PR head it sends as with a list never touched | ✅ | retired | PR review (claude), 2026-10-02 — settled before merge |
+| [OMP2](#omp2) | Retired: on a press upgraded from 3.5, Internal Review's "Discussion (Review)" filled "Message" with a sentence about emails; fixed in pkp/omp#2487 before its merge | ✅ | retired | PR review (claude), 2026-10-03 — fixed before merge |
 
 ### All apps
 
@@ -1103,20 +1104,22 @@ the rows a person may not change should not be removable by them either.
 Basis: probe. <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
-**A3 — On a stage whose "Discussion (…)" template was deleted, a message typed in "Assign" or "Notify" with no predefined message chosen is not sent** · 🐞 · medium · crash: server.
+**A3 — On a stage whose "Discussion (…)" template was deleted, a message typed in "Assign" or "Notify" with no predefined message chosen is not emailed and the window fails** · 🐞 · medium · crash: server.
 A message typed with the list "Choose a predefined message to use, or
 fill out the form below." on its blank entry goes out under the stage's
 "Discussion (…)" name. A manager can delete that template under
 Settings › Workflow › "Tasks and Discussions", and on that stage the
 same message fails on the server. The window stays open with the typed
-text in it and shows no error. No email goes out and no discussion
-opens. On "Assign" the person is assigned all the same, and their row
-shows once the page is opened again.
+text in it and shows no error. A "Discussion (…)" discussion with the
+message opens and the recipient gets its task, but no email goes out;
+pressing the button again opens a second one. On "Assign" the person is
+assigned all the same, and their row shows once the page is opened
+again.
 The message goes out when a predefined message is chosen first and its
 text replaced, or from the stage's discussions panel. Every stage of a
 fresh journal, press and preprint server has its "Discussion (…)", so
 only a deleted one shows this.
-Basis: probe, 2026-10-02, before the merge. <sup>[f-a3](#fn-a3)</sup>
+Basis: probe, 2026-10-03, before the merge. <sup>[f-a3](#fn-a3)</sup>
 
 <a id="a4"></a>
 **A4 — "OK" on "Assign Participant" with nobody chosen, or with a person from the previous role's list, assigns nobody and gives no reason** · 🐞 · medium.
@@ -1340,19 +1343,6 @@ An editor assigning someone on Internal Review can still pick
 left blank.
 Basis: probe, 2026-10-02, before the merge. <sup>[f-omp1](#fn-omp1)</sup>
 
-<a id="omp2"></a>
-**OMP2 — On a press upgraded from 3.5, Internal Review's "Discussion (Review)" fills "Message" with a sentence about emails** · 🐞 · low.
-On a press that existed before the upgrade from 3.5, choosing
-"Discussion (Review)" on Internal Review, in "Assign Participant",
-"Notify" or the stage's "Add" window, fills "Message" with "This email
-is sent when a discussion is created or replied to in the review
-stage." instead of "Please enter your message.". The Settings screen
-shows that sentence as the template's text.
-A new press, and every other stage's "Discussion (…)" on an upgraded
-press, read "Please enter your message.". The sender sees the sentence
-and replaces it, or a manager edits the template once under Settings.
-Basis: upgrade migration driven and code, 2026-10-02, before the merge. <sup>[f-omp2](#fn-omp2)</sup>
-
 ### OPS
 
 <a id="ops1"></a>
@@ -1428,6 +1418,9 @@ Basis: test run, 2026-10-01. <sup>[f-ops4](#fn-ops4)</sup>
 <a id="a17"></a>
 **A17 — "Notify" after the list is set back to blank was never seen** · ✅ · retired. Settled at pkp/pkp-lib#13385's head `2af7ddfcb2` before its merge, 2026-10-02: setting the list back empties "Message", and a message typed then goes out as with a list never touched (Rule 11b). <sup>[f-a17](#fn-a17)</sup>
 
+
+<a id="omp2"></a>
+**OMP2 — On a press upgraded from 3.5, Internal Review's "Discussion (Review)" fills "Message" with a sentence about emails** · ✅ · retired. Fixed in pkp/omp#2487 at `ecd65eebb0` before its merge, 2026-10-03: the upgrade migration writes "Please enter your message.", as a new press has (Rule 5c). <sup>[f-omp2](#fn-omp2)</sup>
 ---
 
 <a id="footnotes"></a>
@@ -1534,7 +1527,7 @@ Issue report: [pkp-e2e#311](https://github.com/jardakotesovec/pkp-e2e/issues/311
 **f-a2** — Live-probed 2026-09-22 (all three apps): note td10. `useParticipantManagerConfig.js::getItemActions()` pushes "Remove" on the "Assign" condition alone, while "Edit" also needs `canCurrentUserEditParticipant()` (note b); `StageParticipantGridHandler::deleteParticipant()` checks only the CSRF token and that the assignment belongs to the submission, with no counterpart of `Validation::canEditParticipant()`. What a recommending editor sees with no deciding editor assigned is *[Review stage & rounds](U26-review-stage-and-rounds.md#recommendations)*'.
 
 <a id="fn-a3"></a>
-**f-a3** — Live-probed 2026-09-22 (all three apps, two scratch journals each; a press's Internal Review too): note td4. With the list blank, `PKPStageParticipantNotifyForm::sendMessage()` runs `Template::withContextId()->find('')`, which the Postgres test database refuses ("invalid input syntax for type bigint"), so both requests answer a server error; on "Assign" the person is assigned all the same, and neither the log line nor a notice follows. Introduced with pkp/pkp-lib#12593 (lib/pkp `b3b882bec`, 2026-06-01). A MySQL install may read the empty id as no template and return early, and would then show "Notification sent to users." with nothing sent (not driven). The list's own wording (`stageParticipants.notify.chooseMessage` "Choose a predefined message to use, or fill out the form below.") presents the message box as an alternative to the list. Live-probed 2026-09-29 (Fields "Notify"; all three apps, two runs each, as Journal Manager): a predefined message chosen in "Notify" and the list set back to its blank entry, the text kept and nothing shown, while the request it posts (`StageParticipantGridHandler::fetchTemplateBody()` with an empty `template`) answered a server error with an empty body, the only one of each run. The handler runs `Template::with('userGroups')->withContextId()->find('')`, the same empty-id lookup as `sendMessage()`. The "Assign" window's list posts the same request (not driven). At pkp/pkp-lib#13385's head `2af7ddfcb2` (with pkp/omp#2487's head `e50a757bdc` on OMP), before their merge, read and live-probed 2026-10-02 on all three apps (`checks/sync/pkp-lib-13385/rr.js`, `.reports/sync/r2/result-after2-<app>.json`): the blank list sends under the stage's "Discussion (…)" on every stage of a fresh install, a press's Internal Review included (note g); on a journal whose "Discussion (Submission)" the manager deleted under Settings › Workflow › "Tasks and Discussions", "Notify" and "OK" on "Assign" with the list blank both answered 500, the window open as filled, no email, no discussion (leg s5, OJS; server log "Call to a member function promote() on null" at `PKPStageParticipantNotifyForm.php:194`), since the fallback finds no template. The lookup and the null are shared code; OMP and OPS were read, not driven, for this case. Reported with the round-1 PR review (`docs/reports/2026-09-28-pkp-lib-13385.md`, Finding 1).
+**f-a3** — Live-probed 2026-09-22 (all three apps, two scratch journals each; a press's Internal Review too): note td4. With the list blank, `PKPStageParticipantNotifyForm::sendMessage()` runs `Template::withContextId()->find('')`, which the Postgres test database refuses ("invalid input syntax for type bigint"), so both requests answer a server error; on "Assign" the person is assigned all the same, and neither the log line nor a notice follows. Introduced with pkp/pkp-lib#12593 (lib/pkp `b3b882bec`, 2026-06-01). A MySQL install may read the empty id as no template and return early, and would then show "Notification sent to users." with nothing sent (not driven). The list's own wording (`stageParticipants.notify.chooseMessage` "Choose a predefined message to use, or fill out the form below.") presents the message box as an alternative to the list. Live-probed 2026-09-29 (Fields "Notify"; all three apps, two runs each, as Journal Manager): a predefined message chosen in "Notify" and the list set back to its blank entry, the text kept and nothing shown, while the request it posts (`StageParticipantGridHandler::fetchTemplateBody()` with an empty `template`) answered a server error with an empty body, the only one of each run. The handler runs `Template::with('userGroups')->withContextId()->find('')`, the same empty-id lookup as `sendMessage()`. The "Assign" window's list posts the same request (not driven). At pkp/pkp-lib#13385's head `2af7ddfcb2` (with pkp/omp#2487's head `e50a757bdc` on OMP), before their merge, read and live-probed 2026-10-02 on all three apps (`checks/sync/pkp-lib-13385/rr.js`, `.reports/sync/r2/result-after2-<app>.json`): the blank list sends under the stage's "Discussion (…)" on every stage of a fresh install, a press's Internal Review included (note g); on a journal whose "Discussion (Submission)" the manager deleted under Settings › Workflow › "Tasks and Discussions", "Notify" and "OK" on "Assign" with the list blank both answered 500, the window open as filled, no email, no discussion (leg s5, OJS; server log "Call to a member function promote() on null" at `PKPStageParticipantNotifyForm.php:194`), since the fallback finds no template. The lookup and the null are shared code; OMP and OPS were read, not driven, for this case. Reported with the round-1 PR review (`docs/reports/2026-09-28-pkp-lib-13385.md`, Finding 1). At the PR heads `62077d1f6f` and `ecd65eebb0`, before their merge, read and live-probed 2026-10-03 on all three apps (`.reports/sync/r3/result-after3-<app>.json`, leg s5 now on every app): with no template found, `sendMessage()` builds an anonymous `Mailable` with the `Sender` and `Recipient` traits and titles the discussion from `Repository::getDiscussionTitles()`; the discussion and its head note are created, then `$mailable->allowUnsubscribe($notification)` (the `Unsubscribe` trait, through `Discussion`, which only `TemplateVariables` carries) throws, so both requests answered 500 (server log "Uncaught BadMethodCallException: Call to undefined method PKP\mail\Mailable@anonymous"), the window open as filled, no email, a "Discussion (Submission)" ("Discussion (Production)" on OPS) discussion per press with the typed text and a new-discussion notification for the recipient. Building the fallback as `new TemplateVariables($query, …)` from the discussion just created sent both, with the discussion footer (tried on OJS, `.reports/sync/r3/result-fix3-ojs.json`). Reported in the round-3 PR review (`docs/reports/2026-09-28-pkp-lib-13385.md`, Finding 1).
 Issue report: [pkp-e2e#307](https://github.com/jardakotesovec/pkp-e2e/issues/307) ([docs/issues/U35-A3-OMP1-typed-participant-message-not-sent.md](../issues/U35-A3-OMP1-typed-participant-message-not-sent.md)).
 
 <a id="fn-a4"></a>
@@ -1601,7 +1594,7 @@ Issue report: [pkp-e2e#308](https://github.com/jardakotesovec/pkp-e2e/issues/308
 Issue report (a typed message not sent, this stage included): [pkp-e2e#307](https://github.com/jardakotesovec/pkp-e2e/issues/307) ([docs/issues/U35-A3-OMP1-typed-participant-message-not-sent.md](../issues/U35-A3-OMP1-typed-participant-message-not-sent.md)).
 
 <a id="fn-omp2"></a>
-**f-omp2** — pkp/omp#2487 (head `e50a757bdc`, before its merge) installs the template on new presses from `registry/taskTemplates.xml` with the text `emails.discussion.body`, and on existing presses with `APP\migration\upgrade\v3_6_0\I12593_DiscussionInternalReviewTemplate`, which writes `description` from `mailable.discussionReview.description`, the mailable's admin description, in each of the site's locales. pkp-lib's `I12593_EmailToTaskTemplates` gave the other stages' "Discussion (…)" the 3.5 email text, `emails.discussion.body`. `fetchTemplateBody()` and the "Add" window fill "Message" from `description` (note f). Driven 2026-10-02 on OMP (`checks/sync/pkp-lib-13385/migrate-ir.php`, `.reports/pr12593r2/migrate-ir.json`; in a rolled-back transaction, every Internal Review row deleted as on a press upgraded from 3.5, then the migration's `up()`): one row per press, title "Discussion (Review)" / "Discussion (évaluation)", description "This email is sent when a discussion is created or replied to in the review stage." / "Ce courriel est envoyé lorsqu'une discussion ou un message sont ajoutés à l'étape de l'évaluation.", while a fresh install's row and the External Review row read "Please enter your message." / "Prière de saisir votre message.". The window filling with it was read in the code, not driven on an upgraded press. Reported: `docs/reports/2026-09-28-pkp-lib-13385.md` (round 2, Finding 3).
+**f-omp2** — pkp/omp#2487 (head `e50a757bdc`, before its merge) installs the template on new presses from `registry/taskTemplates.xml` with the text `emails.discussion.body`, and on existing presses with `APP\migration\upgrade\v3_6_0\I12593_DiscussionInternalReviewTemplate`, which writes `description` from `mailable.discussionReview.description`, the mailable's admin description, in each of the site's locales. pkp-lib's `I12593_EmailToTaskTemplates` gave the other stages' "Discussion (…)" the 3.5 email text, `emails.discussion.body`. `fetchTemplateBody()` and the "Add" window fill "Message" from `description` (note f). Driven 2026-10-02 on OMP (`checks/sync/pkp-lib-13385/migrate-ir.php`, `.reports/pr12593r2/migrate-ir.json`; in a rolled-back transaction, every Internal Review row deleted as on a press upgraded from 3.5, then the migration's `up()`): one row per press, title "Discussion (Review)" / "Discussion (évaluation)", description "This email is sent when a discussion is created or replied to in the review stage." / "Ce courriel est envoyé lorsqu'une discussion ou un message sont ajoutés à l'étape de l'évaluation.", while a fresh install's row and the External Review row read "Please enter your message." / "Prière de saisir votre message.". The window filling with it was read in the code, not driven on an upgraded press. Reported: `docs/reports/2026-09-28-pkp-lib-13385.md` (round 2, Finding 3). At the PR head `ecd65eebb0` (2026-10-03, `e125b898c9`), the migration takes `emails.discussion.body`: the same driver read "Please enter your message." / "Prière de saisir votre message." for the upgraded row (`.reports/pr12593r3/migrate-ir.json`).
 
 <a id="fn-ops1"></a>
 **f-ops1** — OPS `registry/userGroups.xml` gives the manager group `stages="5,6"`, OJS and OMP none. Live-probed 2026-09-19 (all three apps, the Production stage's "Assign"): the preprint server's role list "Preprint Server manager, Moderator, Author", the journal's and press's without their manager role; seen before on 2026-09-04 (OPS, the notifications probes). Live-probed 2026-09-19 (the Roles screen): the manager row's stage boxes ticked on OPS only (note m). Live-probed 2026-09-22 (all three apps, every stage's "Assign" and the Roles screen): as on 2026-09-19.
