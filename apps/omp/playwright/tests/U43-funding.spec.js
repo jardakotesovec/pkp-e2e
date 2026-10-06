@@ -486,9 +486,9 @@ test.describe('Funding (U43)', () => {
         await uploadWizardFile(authorPage, `ms-${tag}.txt`);
         await continueTo(authorPage, STEPS.details);
 
-        // The Details step, press marker: the Funders section is not the
-        // step's last — Chapters follow it (visible section headings, in
-        // DOM order) (Rule 10). Control: before the add, the section's
+        // The Details step, press marker: the funders section, headed
+        // "Funding" (pkp-lib#13375), is not the step's last — Chapters
+        // follow it (visible section headings, in DOM order) (Rule 10). Control: before the add, the section's
         // table reads "No funders have been added." (Rules 3, 10).
         const wizardFunding = new FundingScreen(authorPage);
         await expect(wizardFunding.table()).toBeVisible({timeout: 30_000});
@@ -497,8 +497,8 @@ test.describe('Funding (U43)', () => {
         const headings = (await authorPage.locator('h2:visible').allTextContents()).map(
             (t) => t.trim()
         );
-        expect(headings.indexOf('Funders')).toBeGreaterThan(-1);
-        expect(headings.indexOf('Chapters')).toBeGreaterThan(headings.indexOf('Funders'));
+        expect(headings.indexOf('Funding')).toBeGreaterThan(-1);
+        expect(headings.indexOf('Chapters')).toBeGreaterThan(headings.indexOf('Funding'));
 
         // Scenario 1's typed-name funder recorded through the same panel
         // as the workflow. The section's table does not refresh on a press

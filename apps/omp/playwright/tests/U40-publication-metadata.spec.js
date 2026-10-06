@@ -1556,8 +1556,17 @@ test.describe('Publication metadata (U40)', () => {
         await dataBody.fill(dataStatement);
         await savePublicationForm(managerPage);
 
-        // The Metadata page carries the Funding Statement field.
+        // The Funding Statement sits on "Funding", below the funders list,
+        // and no longer on "Metadata" (pkp-lib#13375).
         await openPublicationPage(managerPage, 'Metadata');
+        await expect(
+            saveButton(managerPage).or(managerPage.getByText('No metadata fields are currently enabled.'))
+        ).toBeVisible({timeout: 30_000});
+        await expect(field(managerPage, /^Funding Statement/)).toHaveCount(0);
+        await openPublicationPage(managerPage, 'Funding');
+        await expect(managerPage.getByRole('table', {name: 'Funders', exact: true})).toBeVisible({
+            timeout: 30_000,
+        });
         const fundingBody = richBody(managerPage, /^Funding Statement/);
         await fundingBody.click();
         await fundingBody.fill(fundingStatement);
@@ -1592,6 +1601,16 @@ test.describe('Publication metadata (U40)', () => {
 
         await page.goto(bookUrl(tag, submissionId));
         await expect(page.locator('.item.dataAvailability')).toContainText(dataStatement);
+
+        // Funders switched off, the statement on: "Funding" stays and
+        // carries the statement alone, without the funders list.
+        await openMetadataSettings(managerPage, tag);
+        await form.getByRole('checkbox', {name: 'Enable funder metadata'}).uncheck();
+        await saveSettingsForm(managerPage, form);
+        await openWorkflow(managerPage, tag, submissionId);
+        await openPublicationPage(managerPage, 'Funding');
+        await expect(field(managerPage, /^Funding Statement/)).toHaveCount(1, {timeout: 30_000});
+        await expect(managerPage.getByRole('table', {name: 'Funders', exact: true})).toHaveCount(0);
     });
 
     test('S10: an Edited Volume carries a Default Chapter License URL', async ({asUser, ompApi}, testInfo) => {

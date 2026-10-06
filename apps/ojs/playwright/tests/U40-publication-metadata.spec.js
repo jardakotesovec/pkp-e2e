@@ -1496,9 +1496,21 @@ test.describe('publication metadata', () => {
             `<p>Data statement ${tag}.</p>`
         );
         await pub.save();
+        // The Funding Statement sits on "Funding", below the funders list,
+        // and no longer on "Metadata" (pkp-lib#13375).
         await pub.openEntry('Metadata');
+        await expect(
+            managerPage
+                .getByRole('button', {name: 'Save', exact: true})
+                .or(managerPage.getByText('No metadata fields are currently enabled.'))
+        ).toBeVisible({timeout: 30_000});
+        await expect(managerPage.locator('#metadata-fundingStatement-control-en')).toHaveCount(0);
+        await pub.openEntry('Funding');
+        await expect(managerPage.getByRole('table', {name: 'Funders', exact: true})).toBeVisible({
+            timeout: 30_000,
+        });
         await pub.setRichText(
-            'metadata-fundingStatement-control-en',
+            'fundingStatement-fundingStatement-control-en',
             `<p>Funding statement ${tag}.</p>`
         );
         await pub.save();
@@ -1536,6 +1548,18 @@ test.describe('publication metadata', () => {
             `Data statement ${tag}.`,
             {timeout: 30_000}
         );
+
+        // Funders switched off, the statement on: "Funding" stays and
+        // carries the statement alone, without the funders list.
+        await openMetadataSettings(managerPage, tag);
+        await managerPage.getByRole('checkbox', {name: 'Enable funder metadata'}).uncheck();
+        await saveMetadataSettings(managerPage);
+        await pub.gotoWorkflow(submissionId);
+        await pub.openEntry('Funding');
+        await expect(managerPage.locator('#fundingStatement-fundingStatement-control-en')).toHaveCount(1, {
+            timeout: 30_000,
+        });
+        await expect(managerPage.getByRole('table', {name: 'Funders', exact: true})).toHaveCount(0);
     });
 
     test('S9: copyright year from the issue\'s publication date', async ({asUser, ojsApi, page}, testInfo) => {

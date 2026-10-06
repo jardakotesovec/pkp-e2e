@@ -359,14 +359,15 @@ test.describe('Funding (U43)', () => {
         await addGalleyFile(authorPage);
         await continueTo(authorPage, STEPS.details);
 
-        // "The Details step": its last section is "Funders" (Rule 10);
+        // "The Details step": its last section is the funders one, headed
+        // "Funding" (Rule 10; pkp-lib#13375);
         // "Control": before the add, the section's table reads "No funders
         // have been added." (Rules 3, 10).
         const wizardFunding = new FundingScreen(authorPage);
         await expect(wizardFunding.wizardFundersSection()).toBeVisible({timeout: 30_000});
         await expect(
             wizardFunding.wizardStepSections().last().getByRole('heading', {level: 2})
-        ).toHaveText('Funders');
+        ).toHaveText('Funding');
         await expect(wizardFunding.table()).toContainText(NO_FUNDERS);
 
         // The typed-name funder recorded there. The section's table does
@@ -561,7 +562,7 @@ test.describe('Funding (U43)', () => {
         await expect(wizard.wizardFundersSection()).toBeVisible({timeout: 30_000});
         await expect(
             wizard.wizardStepSections().last().getByRole('heading', {level: 2})
-        ).toHaveText('Funders');
+        ).toHaveText('Funding');
 
         // "The setting off": "Enable funder metadata" unticked and saved:
         // the workflow's Preprint area offers no "Funding" entry — bounded

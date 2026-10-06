@@ -1426,7 +1426,7 @@ test.describe('Publication metadata (U40)', () => {
         await saveSettingsPanel(managerPage, panel);
 
         // The statements: "Data are held by the authors." on "Data", the
-        // Funding Statement on "Metadata", each saved (Rule 16; Fields).
+        // Funding Statement on "Funding", each saved (Rule 16; Fields).
         await openWorkflow(managerPage, tag, submissionId);
         await screen.openPage('Data');
         await screen.fillRichText(
@@ -1436,9 +1436,21 @@ test.describe('Publication metadata (U40)', () => {
             `Data are held by the authors ${tag}.`
         );
         await screen.save();
+        // The field sits below the funders list on "Funding" and no longer
+        // on "Metadata" (pkp-lib#13375).
         await screen.openPage('Metadata');
+        await expect(
+            managerPage
+                .getByRole('button', {name: 'Save', exact: true})
+                .or(managerPage.getByText('No metadata fields are currently enabled.'))
+        ).toBeVisible({timeout: 30_000});
+        await expect(screen.input('metadata', 'fundingStatement', 'en')).toHaveCount(0);
+        await screen.openPage('Funding');
+        await expect(managerPage.getByRole('table', {name: 'Funders', exact: true})).toBeVisible({
+            timeout: 30_000,
+        });
         await screen.fillRichText(
-            'metadata',
+            'fundingStatement',
             'fundingStatement',
             'en',
             `Funded by the Example Society ${tag}.`
@@ -1471,6 +1483,18 @@ test.describe('Publication metadata (U40)', () => {
         await expect(dataBlock).toBeVisible({timeout: 30_000});
         await expect(dataBlock).toContainText(`Data are held by the authors ${tag}.`);
         await expect(fundingBlock).toBeVisible();
+
+        // Funders switched off, the statement on: "Funding" stays and
+        // carries the statement alone, without the funders list.
+        panel = await openMetadataSettings(managerPage, tag);
+        await panel.getByRole('checkbox', {name: 'Enable funder metadata'}).uncheck();
+        await saveSettingsPanel(managerPage, panel);
+        await openWorkflow(managerPage, tag, submissionId);
+        await screen.openPage('Funding');
+        await expect(screen.input('fundingStatement', 'fundingStatement', 'en')).toHaveCount(1, {
+            timeout: 30_000,
+        });
+        await expect(managerPage.getByRole('table', {name: 'Funders', exact: true})).toHaveCount(0);
     });
 
     test('S11: the license the author chose is already there', async ({asUser, opsApi, page}, testInfo) => {

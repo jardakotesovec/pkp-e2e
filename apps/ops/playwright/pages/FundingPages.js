@@ -381,10 +381,11 @@ exports.FundingScreen = class FundingScreen {
         return this.page.locator('.pkpStep:not([hidden]) .panelSection');
     }
 
-    /** The Details step's "Funders" section (Rule 10). */
+    /** The Details step's funders section (Rule 10), the one holding the
+     * funders table (headed "Funding" since pkp-lib#13375). */
     wizardFundersSection() {
         return this.wizardStepSections().filter({
-            has: this.page.getByRole('heading', {name: 'Funders', level: 2}),
+            has: this.page.getByRole('table', {name: 'Funders', exact: true}),
         });
     }
 

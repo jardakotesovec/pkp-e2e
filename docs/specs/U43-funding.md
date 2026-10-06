@@ -70,9 +70,12 @@ one error." and the Save button stays disabled until the field is corrected.
    this same list.
 2. **Availability follows one journal setting.** The Funders setting on the
    workflow settings' Metadata screen has three levels. Switched off: there
-   is no "Funding" entry in the workflow and no wizard section, so nothing
+   is no funders list in the workflow and no wizard section, so nothing
    new can be recorded, but funders recorded before the switch-off stay
-   visible to readers on the published page (Rule 9). Enabled: the
+   visible to readers on the published page (Rule 9). The "Funding" entry
+   itself goes too, unless the journal enables the Funding Statement, which
+   then keeps it with the statement alone (*[Publication
+   metadata](U40-publication-metadata.md)* Rule 16). Enabled: the
    workflow's "Funding" entry appears, but authors are not asked during
    submission. Ask or require: the wizard's Details step additionally shows
    the Funders section. A new journal starts at "ask". <sup>c</sup>
@@ -85,7 +88,9 @@ one error." and the Save button stays disabled until the field is corrected.
    metadata.", and a table whose one visible column is **"Funder Name"**. A
    second column header, "More Actions", exists for screen readers only. An
    empty list reads "No funders have been added." Above the table sit
-   **"Order"** and **"Add Funder"**. <sup>a</sup>
+   **"Order"** and **"Add Funder"**. When the journal enables the Funding
+   Statement, its field follows the list on the same screen; the field is
+   *[Publication metadata](U40-publication-metadata.md)*'s. <sup>a</sup>
 4. **The row.** Each row shows the funder's name. A registry-backed funder
    also carries the ROR mark (the registry's logo) beside it. Grants are not
    shown in the table; they appear in the edit panel and on the landing
@@ -119,7 +124,10 @@ one error." and the Save button stays disabled until the field is corrected.
    as a working link. On a press the landing page is the catalog's book
    page; on a preprint server, the preprint's page. <sup>f</sup>
 10. **The wizard's Funders section.** While the journal asks for or requires
-    funder metadata, the wizard's Details step gains a "Funders" section. It
+    funder metadata, the wizard's Details step gains a section headed
+    "Funding" that holds the funders list. When the journal also asks for
+    the Funding Statement, the statement's field follows it in the same
+    section run, under the one "Funding" heading. It
     is the step's last section on a journal or preprint server; on a press,
     Chapters follow it. It holds the same list and add/edit panel as the
     workflow, always editable by the submitting author. On a press or
@@ -206,10 +214,12 @@ the submission."): <sup>c</sup>
   the published-state policy this feature's editing rides on, including
   that publishing warns rather than locks (Actors & permissions). It also
   owns the Funding Statement and Data Availability Statement fields and
-  their landing-page display.
+  their landing-page display. The Funding Statement field sits on this
+  feature's "Funding" screen, below the funders list (Rule 3).
 - *[Submission wizard](U21-submission-wizard.md)* owns the wizard shell
   (steps, Review, submit). This spec owns the Funders section it mounts
-  (Rules 10–11).
+  (Rules 10–11); the Funding Statement field that may follow it under the
+  same "Funding" heading is *Publication metadata*'s.
 - [Article landing page & reading](U13-article-landing-page-and-reading.md)
   (the press counterpart is the OMP catalog's book page) owns the landing
   screen. The Funders block on it is described here (Rule 9) as this feature's
@@ -296,7 +306,7 @@ and the mail catcher's address are in its footnote.
 
    - **The Details step**: start a submission and walk to the Details
      step: its last section (on a press, the section before Chapters) is
-     "Funders"; press "Add Funder" and record scenario 1's typed-name
+     headed "Funding" and holds the funders list; press "Add Funder" and record scenario 1's typed-name
      funder (type "Test Foundation", pick the typed text, Save): the section's table shows the row; on a
      press or preprint server it still reads "No funders have been
      added." until you reload the page, after which the row is there
@@ -754,7 +764,14 @@ client-side claim. The "Funding" menu entry is pushed by all six navigation
 builders (author + editorial × 3 apps, `useWorkflowNavigationConfig*.js`)
 under the same guard `publicationSettings.supportsFunders`, which
 `PKPDashboardHandler::index()` sets from the context's `funders` setting;
-app dashboard handlers do not override it (chain check clean). Read-only
+app dashboard handlers do not override it (chain check clean). Since
+pkp/pkp-lib#13375 (pkp-lib#13446 with ui-library#1005, driven at the PR
+head `5034b4aa64`, before its merge, 2026-10-06) the guard is
+`supportsFunders || supportsFundingStatement` in all six builders, and the
+`funding` block pushes `FunderManager` only under `supportsFunders` and
+then a `WorkflowPublicationForm` `fundingStatement` under
+`supportsFundingStatement` (*Publication metadata* fn-f); U40 scenario 8
+drove the screen with both on and with funders off on all three apps. Read-only
 presentation: the top buttons receive `isDisabled` when `canEdit` is false
 (`PkpButton` prop via fall-through) and `FunderManagerCellActions.vue`
 hides the row menu (`v-show="canEditPublication"`). Table strings:
@@ -779,8 +796,14 @@ page title follows it; OPS nav group "Preprint", sr-only column header
 <a id="fn-b"></a>
 **b — the wizard section and the require warning.**
 `PKPSubmissionHandler::getDetailsStep()` appends section id `funders`
-(type `SECTION_TYPE_FUNDERS`, name `submission.funders`) when the
-context's `funders` setting is `request` or `require`; `wizard.tpl` mounts
+(type `SECTION_TYPE_FUNDERS`) when the context's `funders` setting is
+`request` or `require`, and since pkp/pkp-lib#13375 (at the PR head
+`5034b4aa64`, before its merge) a `fundingStatement` form section when
+that setting is `request` or `require`; the first of the two takes the
+name `submission.funding` ("Funding", formerly `submission.funders`
+"Funders"), the second none. Driven 2026-10-06 at the PR head on OMP and
+OPS (U43 scenario 2: the funders section headed "Funding", Chapters after
+it on OMP, last on OPS); `wizard.tpl` mounts
 `<funder-manager>` for that type with no `canEdit` prop (defaults to
 editable). Subclass chains: OJS and OPS do not override `getDetailsStep()`;
 OMP's override calls the parent and only appends its chapters section —

@@ -93,7 +93,6 @@ item's help text.
 |------------------|-----------|-------|
 | **Keywords**, **Subjects**, **Disciplines**, **Supporting Agencies** | No | Term lists, multilingual. Type a term and press Enter (or pick a suggestion) to add it as a chip with its own "Remove {term}" button. Suggestions are terms already on a published version in this journal for that item and language (Rule 7b). Any typed term is accepted. |
 | **Coverage**, **Rights**, **Source**, **Type** | No | Plain text, multilingual. |
-| **Funding Statement** | No | Rich text, multilingual. Shown to readers under "Funding Statement" (Rule 15). The structured funders list is a separate page; see *[Funding](U43-funding.md)*. |
 | **Publisher ID** | No | Plain text, single value. Present when the journal enables publisher IDs for publications (see *Identifiers*). |
 | **Article Number** {OJS} | No | Plain text. Present when the journal enables article numbers. |
 
@@ -102,6 +101,12 @@ item's help text.
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | **Data Availability Statement** | No | Rich text, multilingual. Present when the journal has enabled the statement. The page itself ("Data") exists when either the statement or data citations are enabled. Its data-citations part belongs to *Citations & references*. |
+
+**Funding page** <sup>f</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| **Funding Statement** | No | Rich text, multilingual, with the description "A short statement describing funding details." under its label. Present when the journal has enabled the statement, below the funders list. Shown to readers under "Funding Statement" (Rule 15). The page itself ("Funding") exists when either the statement or funders are enabled. Its funders list belongs to *[Funding](U43-funding.md)*. |
 
 **Permissions & Disclosure page**. Each field arrives locked with the value
 the journal will apply automatically, and an **"Override"** link that unlocks
@@ -383,12 +388,16 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
     The display of keywords, abstract and plain language summary on the
     same page belongs to *Article landing page & reading* (press:
     *Catalog book page*). <sup>l</sup>
-16. **The Data page.** With the data availability statement enabled, the
-    "Data" page carries the **Data Availability Statement** field. When
-    data citations are enabled, it also carries the data-citations list
-    owned by *Citations & references*. Disabling the statement removes
-    the field but keeps the stored text, which readers continue to see
-    (Rule 15). <sup>f</sup>
+16. **The Data and Funding pages.** With the data availability statement
+    enabled, the "Data" page carries the **Data Availability Statement**
+    field. When data citations are enabled, it also carries the
+    data-citations list owned by *Citations & references*. With the
+    funding statement enabled, the **Funding Statement** field sits on
+    the "Funding" page, below the funders list owned by
+    *[Funding](U43-funding.md)*, and not on "Metadata". The "Funding"
+    entry then shows even with funders switched off, carrying the
+    statement alone. Disabling a statement removes its field but keeps
+    the stored text, which readers continue to see (Rule 15). <sup>f</sup>
 
 ## Side effects
 
@@ -418,7 +427,7 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
   features' sections (Competing Interests, References and its metadata
   lookup, Funders and grant-ID validation, Data Citations, Categories).
   The "Enable {item} metadata" box makes the field appear on the Metadata,
-  Data or Title & Abstract page (Rules 6, 16). The radio under it ("Do not
+  Data, Funding or Title & Abstract page (Rules 6, 16). The radio under it ("Do not
   request… / Ask the author… / Require the author…") governs the wizard
   only, with one exception: Plain Language Summary (listed first on the
   screen), whose "Require" is enforced on every publication save
@@ -814,8 +823,9 @@ catcher's address are in its footnote.
      Availability Statement" and "Funding Statement": the submission's
      Publication area gains a "Data" entry (Rules 6, 16; Settings).
    - **The statements**: on "Data" type "Data are held by the authors." as
-     Data Availability Statement and Save; on "Metadata" type "Funded by
-     the Example Society." as Funding Statement and Save (Rule 16;
+     Data Availability Statement and Save; "Metadata" carries no Funding
+     Statement field; on "Funding", below the funders list, type "Funded
+     by the Example Society." as Funding Statement and Save (Rule 16;
      Fields).
    - **The reader's page**: publish: the landing page shows a "Data
      Availability Statement" block and a "Funding Statement" block with
@@ -824,6 +834,9 @@ catcher's address are in its footnote.
      in Settings: the "Data" entry disappears from the workflow (data
      citations off), and the published page still shows the statement
      (Rules 15, 16).
+   - **Funders off**: untick "Enable funder metadata" in Settings: the
+     "Funding" entry stays and carries the Funding Statement field alone,
+     with no funders list (Rule 16).
    - **Control**: with both fields empty, scenario 5's published page
      showed neither heading (Rule 15). <sup>s8</sup>
 
@@ -1739,8 +1752,7 @@ added only when `enabled()` — `keywords`/`subjects`/`disciplines`/
 `supportingAgencies` (`FieldControlledVocab`, symbolic
 `CONTROLLED_VOCAB_SUBMISSION_{KEYWORD,SUBJECT,DISCIPLINE,AGENCY}`;
 context key `agencies` for the last), `coverage`/`rights`/`source`/`type`
-(`FieldText` with tooltips), `fundingStatement` (`FieldRichTextarea`),
-`pub-id::publisher-id` (when `enablePublisherId` contains `publication`),
+(`FieldText` with tooltips), `pub-id::publisher-id` (when `enablePublisherId` contains `publication`),
 `articleNumber` (when `enableArticleNumber` — a setting only OJS's
 `MetadataSettingsForm` adds). `noFieldsMessage` literal in the workflow
 config: "No metadata fields are currently enabled.". Suggestions:
@@ -1763,7 +1775,8 @@ with every item disabled the page showed "No metadata fields are
 currently enabled." with no form and no Save; with everything enabled
 the labels ran Keywords, Subjects, Disciplines, Supporting Agencies,
 Coverage, Rights, Source, Type, Funding Statement, Publisher ID (OJS
-adds Article Number); every item — Keywords through Article Number —
+adds Article Number; the Funding Statement left this page with
+pkp/pkp-lib#13375, fn-f); every item — Keywords through Article Number —
 carries a hover tooltip with its help text (Coverage: "Coverage will
 typically indicate a work's spatial location (a place name or geographic
 coordinates), temporal period (a period label, date, or date range) or
@@ -1800,7 +1813,7 @@ the change, that day: their lookup was the pre-change one, retired
 A10's (f-a10).
 
 <a id="fn-f"></a>
-**f — Data page.** `PKPDataAvailabilityForm`: one `FieldRichTextarea`
+**f — Data and Funding pages.** `PKPDataAvailabilityForm`: one `FieldRichTextarea`
 `dataAvailability` (label `submission.dataAvailability`, "Data
 Availability Statement"; description
 `manager.setup.metadata.dataAvailability.description`) added only when
@@ -1819,6 +1832,22 @@ readers may access it." and a Save; the statement persisted; unticking
 the setting removed the entry. With data citations on and the statement
 off the entry was back, the page showing only the Data Citations list
 ("No data citations have been added."), no statement field, no Save.
+Funding page: `PKPFundingStatementForm` (form id `fundingStatement`),
+one `FieldRichTextarea` `fundingStatement` (label
+`submission.fundingStatement`, description
+`manager.setup.metadata.fundingStatement.description`) when the
+context's `fundingStatement` setting is truthy, fetched from
+`_components/fundingStatement`; the workflow config renders it as a
+`WorkflowPublicationForm` after `FunderManager`, each under its own
+guard (`supportsFunders`, `supportsFundingStatement`), and the
+"Funding" entry is pushed for either. Driven on all three apps at the
+PR head `5034b4aa64` (pkp-lib#13446, with ui-library#1005 on ui-library
+`a36dc7fe78`), before its merge, 2026-10-06 (scenario 8): the Metadata
+page carried no Funding Statement field; "Funding" showed the Funders
+table and below it the statement, which saved and reached the landing
+page; with funders unticked the entry stayed, showing the statement and
+no Funders table. Before the change the field was `PKPMetadataForm`'s,
+on "Metadata" (fn-e).
 
 <a id="fn-g"></a>
 **g — Permissions & Disclosure.** `PKPPublicationLicenseForm`:
