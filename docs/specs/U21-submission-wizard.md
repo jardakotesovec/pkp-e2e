@@ -168,7 +168,8 @@ itself enforces before submission is Rule 13.
    - *Details*: title and abstract. The title arrives pre-filled from the
      start form. Keywords, a plain language summary, a references box,
      data citations, a data availability statement, and a Funders list
-     appear only when the journal's setup asks for them. On a press this
+     and a funding statement (under one "Funding" heading) appear only
+     when the journal's setup asks for them. On a press this
      step also lists the book's Chapters [OMP1](#omp1).
    - *Contributors*: the contributors panel (see *Contributors &
      affiliations*). A submitter who chose "Author" is already listed
@@ -1826,7 +1827,15 @@ contributors, editors, reviewerSuggestions (only when
 limit/requirement passed by the OJS/OPS handlers; a press passes no section
 args), `PKPCitationsForm` when `citations` request/require, data sections
 (`dataCitations` manager section, `PKPDataAvailabilityForm`) under one
-"Data" heading, `funders` section when enabled. For the Editors
+"Data" heading, `funders` section and `PKPFundingStatementForm` under one
+"Funding" heading. The funding statement came over from `ForTheEditors`
+with pkp/pkp-lib#13375; at the PR head `5034b4aa64` (pkp-lib#13446 with
+ui-library#1005), before its merge, a regression read drove it on OJS on
+2026-10-06: the statement at require, left empty, put "This field is
+required." over the Review step's "Details" panel line and inline on
+the Details field, "Submit" disabled; typed in Details, it autosaved,
+showed on the Review panel and was stored with the submission; "For the
+Editors" then held the comments box alone. For the Editors
 (`getEditorsStep()`): `ForTheEditors` form (metadata fields become
 required when their setting is `METADATA_REQUIRE`; `categoryIds` when
 `submitWithCategories` + categories exist) + `CommentsForTheEditors`
