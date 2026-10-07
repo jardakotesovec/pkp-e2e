@@ -293,9 +293,10 @@ class PluginsList extends BasePage {
     }
 
     /**
-     * The list as data: each category's heading, its rows (id, name, box
-     * ticked, box pressable, arrow) and whether "No Items" shows. Read
-     * through `expect.poll`: the grid redraws after every search.
+     * The list as data: each category's heading, the number after it and
+     * whether it is bold, its rows (id, name, box ticked, box pressable,
+     * arrow) and whether "No Items" shows. Read through `expect.poll`: the
+     * grid redraws after every search.
      */
     async read() {
         return this.grid.evaluate((grid) => {
@@ -307,6 +308,8 @@ class PluginsList extends BasePage {
                 const placeholder = next && next.classList.contains('category_placeholder') ? next : null;
                 return {
                     heading: text(rows[0] && rows[0].querySelector('.label')),
+                    count: (/^\((\d+)\)$/.exec(text(rows[0] && rows[0].querySelector('.category_items_number')) || '') || [])[1] ?? null,
+                    bold: !!rows[0] && Number(getComputedStyle(rows[0].querySelector('.label') || rows[0]).fontWeight) >= 600,
                     empty: placeholder && shown(placeholder) ? text(placeholder) : null,
                     rows: rows.slice(1).map((tr) => {
                         const box = tr.querySelector('input[type=checkbox]');

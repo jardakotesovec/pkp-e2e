@@ -179,8 +179,8 @@ test.describe('plugins management', () => {
         await expect(list.headerLinks).toHaveText([SEARCH]);
         await expect(list.columns).toHaveText(COLUMNS);
 
-        // The headings, in order, with no count; "No Items" under "Gateway
-        // Plugins" alone; no "Usage event" under "Generic Plugins" (Rules 4, 6).
+        // The headings, in order; "No Items" under "Gateway Plugins" alone;
+        // no "Usage event" under "Generic Plugins" (Rules 4, 6).
         await expect(list.headings).toHaveText(HEADINGS);
         const landing = await list.outline();
         expect(landing.filter((c) => c.empty !== null).map((c) => [c.heading, c.empty])).toEqual(
@@ -191,8 +191,10 @@ test.describe('plugins management', () => {
 
         // Boxes that cannot be pressed: "TinyMCE Plugin", every "Metadata
         // Plugins" and "Import/Export Plugins" row; a pressable one as the
-        // control (Rule 10).
+        // control (Rule 10). Each heading bold, followed by the number of
+        // its rows, "(0)" over "No Items" (Rule 4).
         const rows = await list.read();
+        expect(rows.map((c) => [c.heading, c.count, c.bold])).toEqual(rows.map((c) => [c.heading, String(c.rows.length), true]));
         await expect(list.box(TINYMCE.id)).toBeChecked();
         await expect(list.box(TINYMCE.id)).toBeDisabled();
         for (const heading of ['Metadata Plugins', 'Import/Export Plugins']) {
@@ -210,8 +212,8 @@ test.describe('plugins management', () => {
         await list.closeArrow(WEB_FEED.id);
 
         // Searching by text: the filter above the list; only "feed" rows,
-        // every heading kept, "No Items" under the emptied ones, the filter
-        // hidden again (Rule 7; Fields).
+        // every heading kept, its number counting the rows left, "No Items"
+        // under the emptied ones, the filter hidden again (Rule 7; Fields).
         await expect(list.filterForm).toBeHidden();
         await list.openFilter();
         await expect(list.categorySelect.locator('option:checked')).toHaveText('All Categories');
@@ -229,6 +231,8 @@ test.describe('plugins management', () => {
         await list.search({text: 'feed'});
         await expect.poll(async () => sorted(await list.outline()), {timeout: T}).toEqual(feedOnly);
         expect(feedOnly.find((c) => c.heading === 'Generic Plugins').names).toContain(WEB_FEED.name);
+        const counted = await list.read();
+        expect(counted.map((c) => [c.heading, c.count])).toEqual(counted.map((c) => [c.heading, String(c.rows.length)]));
         await expect(list.filterForm).toBeHidden();
 
         // Capitals and Enter: the same rows (Rule 7).

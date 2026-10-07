@@ -53,7 +53,7 @@ every other plugin is switched on per journal.
 | filter | hidden until "Search" at the list's top right is pressed: a drop-down reading "All Categories" (or one category's name), a text box and a "Search" button; after each search it is hidden again (Rule 7) |
 | "Plugins" | the list's title; at its right "Search", which opens the filter, and for the Site Administrator "Upload A New Plugin" (Rule 15) |
 | "Name", "Description", "Enabled" | the column headings |
-| category headings | one per category, in the app's order below, with no count (Rule 4) |
+| category headings | one per category, in the app's order below, in bold, each followed by the number of plugins listed under it in brackets (Rule 4) |
 | plugin rows | the plugin's name, its description, and a box in "Enabled"; an arrow at the start of a row that has links (Rule 13) |
 
 The category headings, in list order: <sup>c</sup> <sup>td2</sup>
@@ -126,11 +126,12 @@ None of these is shown for a plugin with no compatible version.
 **The installed plugins list**
 
 4. **What it lists.** Every plugin installed on the server, under its
-   category heading (Fields). A category with no plugin keeps its
-   heading, with "No Items" under it: "Gateway Plugins" on every app,
-   and on a preprint server also "Payment Plugins", "Public Identifier
-   Plugins" and "Report Plugins". The site's list is the same.
-   <sup>c</sup> <sup>td2</sup>
+   category heading (Fields), which shows in bold and ends with the
+   number of plugins listed under it, as "Generic Plugins (21)". A
+   category with no plugin keeps its heading, "(0)", with "No Items"
+   under it: "Gateway Plugins" on every app, and on a preprint server
+   also "Payment Plugins", "Public Identifier Plugins" and "Report
+   Plugins". The site's list is the same. <sup>c</sup> <sup>td2</sup>
 5. **Installed for all, switched on per journal.** A plugin is installed
    once for the whole installation, so every journal's list and the
    site's list name the same plugins; whether it is on is kept
@@ -149,7 +150,8 @@ None of these is shown for a plugin with no compatible version.
 7. **Searching.** "Search" at the list's top right opens the filter
    (Fields). Text typed in the box and "Search" (or Enter) leave only the
    plugins whose name contains the text, in any case, and keep every
-   heading, with "No Items" under those left empty. A category chosen in
+   heading, its number now counting the plugins left, with "No Items"
+   under those left empty. A category chosen in
    the drop-down and "Search" leave that heading alone; with text typed
    too, it reads "No Items" when none of its plugins matches. "All
    Categories" with an empty box lists everything again. <sup>e</sup>
@@ -419,10 +421,11 @@ one at a time and put back what they changed. <sup>sc</sup>
      "Theme Plugins" (on a press "Metadata Plugins", "Public Identifier
      Plugins", "Block Plugins", "Generic Plugins", "Gateway Plugins",
      "Theme Plugins", "Import/Export Plugins", "OAI Metadata Format
-     Plugins", "Payment Plugins", "Report Plugins" [OMP2](#omp2)), none
-     followed by a number. "Gateway Plugins" reads "No Items", and on a
-     preprint server so do "Payment Plugins", "Public Identifier
-     Plugins" and "Report Plugins". "Generic Plugins" has no "Usage
+     Plugins", "Payment Plugins", "Report Plugins" [OMP2](#omp2)), each
+     in bold and followed by the number of rows under it in brackets.
+     "Gateway Plugins" reads "(0)" and "No Items", and on a preprint
+     server so do "Payment Plugins", "Public Identifier Plugins" and
+     "Report Plugins". "Generic Plugins" has no "Usage
      event" row (Rules 4, 6; Actors row 4).
    - **Boxes that cannot be pressed**: the "TinyMCE Plugin" row and
      every row under "Metadata Plugins" and "Import/Export Plugins" show
@@ -434,8 +437,9 @@ one at a time and put back what they changed. <sup>sc</sup>
      drop-down reading "All Categories", a text box and a "Search"
      button show above the list. Type feed in the box and press
      "Search": only rows whose name contains "feed" remain, "Web Feed
-     Plugin" among them; every heading stays, with "No Items" under
-     those left empty, and the filter is hidden again (Rule 7; Fields).
+     Plugin" among them; every heading stays, its number counting the
+     rows left, with "No Items" under those left empty, and the filter
+     is hidden again (Rule 7; Fields).
    - **Capitals and Enter**: press "Search", clear the box, type FEED
      and press Enter: the same rows remain (Rule 7).
    - **Searching by category**: press "Search", clear the box, choose
@@ -1003,8 +1007,19 @@ Columns `common.name` "Name", `common.description` "Description"
 no app ships a plugin under `plugins/gateways`; seed-facts records the
 OPS "Public Identifier Plugins" heading with no rows (2026-09-24).
 Live-probed 2026-09-27 (Rules 4, 5; three apps, journal and site
-lists): no heading carries a count on screen; the empty headings as
-Rule 4 lists them. The Site Administrator's journal list and the
+lists): the empty headings as Rule 4 lists them. The heading row's
+bold label and number come from `grid.tpl` (`pkp_grid_category` on a
+`CategoryGridHandler`) and `gridRow.tpl` (`category` on a
+`GridCategoryRow`; `category_items_number` "({n})" after the cell where
+the column has `showTotalItemsNumber`, which `PluginGridHandler` sets on
+"Name"; `getCategoryItemsCount()` counts the category's rows after the
+filter). pkp/pkp-lib#11601 dropped the class aliases those `is_a()`
+checks name, so on `main` up to pkp/pkp-lib#13453 (#11718) the headings
+showed in plain weight with no number; seen 2026-10-07 at the PR head
+`2fa1087437`, before its merge, on the three apps: bold and numbered,
+the number matching the rows under each heading on the landing list
+and after a "feed" search, and at `3bcc0a0cb2` plain and unnumbered
+(`checks/sync/pkp-lib-13453/headings.js`). The Site Administrator's journal list and the
 site's list name the same plugins, id by id (OJS 46, OPS 17; OMP's site
 list adds "Usage event", OMP1).
 
@@ -1426,7 +1441,7 @@ the Site Administrator's header added "Upload A New Plugin".
 <a id="fn-td2"></a>
 **td2** — Live-probed 2026-09-27, three apps, as the Journal Manager
 and on the site's list: the headings in the orders of the Fields
-table, none followed by a number; "No Items" under "Gateway Plugins"
+table; "No Items" under "Gateway Plugins"
 everywhere and, on a preprint server, under "Payment Plugins",
 "Public Identifier Plugins" and "Report Plugins".
 
