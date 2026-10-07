@@ -3389,6 +3389,7 @@ to handle the hook IssueHandler::view::galley" / "TypeError:
 PKP\template\PKPTemplateManager::smartyPathToViewName(): Argument #1
 ($template) must be of type string, null given". The page shows no
 error, so the run record listed no crash.
+Issue report: [pkp-e2e#940](https://github.com/jardakotesovec/pkp-e2e/issues/940) ([docs/issues/U13-OJS15-issue-xml-galley-downloads-not-lens.md](../issues/U13-OJS15-issue-xml-galley-downloads-not-lens.md)).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Note f: `preprint_details.tpl` shows the outdated notice
