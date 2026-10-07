@@ -1328,3 +1328,4 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
+| pkp/pkp-lib#13467 + pkp/ojs#5905 (issue pkp/pkp-lib#13466, from pkp-e2e#720; the OJS PR is the pointer bump, OMP and OPS have none) | `i13466-main` | ready | 2026-10-07 | A press's "Modify Review" save with the comment box left empty no longer submits the review; U27 A40 and OMP5 retired, the A40 report and walk deleted, no test edits. At the merge: rebase, CI, fast-forward, close pkp-e2e#720. CI 37680450303 at the merge result (apps at their tips, pkp-lib at the PR head): U27 green; red only U03 S4 ×3 (K-12780) and U66 S2 ×3 (tip drift from ui-library 7503fab4, fixed on `main` 392d5c24). |
