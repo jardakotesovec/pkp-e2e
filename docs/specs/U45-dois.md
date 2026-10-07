@@ -577,9 +577,9 @@ links under the list. <sup>g</sup>
       ⚠ [OJS4](#ojs4). On a journal the DOIs of the reviews whose
       round was opened on a published version turn "Submitted" too, and
       the deposit sends those of them Rule 7c lets go; the kept
-      DOI of a review no longer shown publicly (Rule 7b) turns
-      "Submitted" as well, though the deposit does not send it
-      ⚠ [OJS6](#ojs6). A ticked
+      DOI of a review no longer shown publicly (Rule 7b) keeps its
+      status, and the deposit leaves the review out
+      [OJS6](#ojs6). A ticked
       published work that has no DOI gets the same notice, yet stays
       "Needs DOI" and nothing is sent ⚠ [A15](#a15). A ticked unpublished
       item makes the whole action fail: nothing is marked, the window
@@ -1948,6 +1948,7 @@ throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - A review taken out of public view whose DOI reads "Registered" or "Submitted": "Deposit DOIs" and the "Mark DOIs …" actions on its work leave that DOI's status, and the deposit leaves the review out (OJS6 retired; Rules 7b, 29)
   - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick)
   - the guard for A19 (Rule 35; issue report
     `docs/issues/U45-A19-agency-choice-unticks-every-doi-kind.md`): a
@@ -2121,7 +2122,6 @@ Left out of the scenarios above, by reason:
   - OJS5 ("Deposit All" marking "Submitted" a galley DOI whose article DOI is "Registered" or missing, and "Automatic Deposit" alike; Rules 29, 41)
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
-  - OJS6 ("Deposit DOIs" marking a hidden review's kept DOI "Submitted"; Rules 7b, 29)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
@@ -2168,7 +2168,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
 | [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
-| [OJS6](#ojs6) | "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it | 🐞 | minor | — |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -2189,6 +2188,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | ✅ | retired | — |
 | [A27](#a27) | The DOIs page no longer lists a declined submission that carries a DOI | ✅ | retired | — |
 | [A28](#a28) | On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency | ✅ | retired | — |
+| [OJS6](#ojs6) | "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it | ✅ | retired | — |
 | [OMP4](#omp4) | With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version | ✅ | retired | — |
 | [OMP5](#omp5) | "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published | ✅ | retired | — |
 | [OPS4](#ops4) | On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's | ✅ | retired | issues (claude), 2026-10-01 — re-verified |
@@ -2631,21 +2631,6 @@ is ever sent. With "Automatic Deposit" on, the scheduled deposit does
 the same without anyone pressing.
 Basis: probe, 2026-10-06. <sup>f-ojs5</sup>
 
-<a id="ojs6"></a>
-**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · 🐞 · minor.
-A journal deposits with Crossref and gives peer reviews DOIs. A
-published article's review has a DOI reading "Registered" or
-"Submitted", and an editor then unticks the review's "Public
-Visibility": the DOI stays, as Rule 7b intends, and the review's row
-leaves the DOIs page. A manager ticks the work and confirms "Deposit
-DOIs": the article's DOI and the hidden review's DOI both turn
-"Submitted", but the deposit leaves the review out (Rule 7c), since a
-review not shown publicly is never sent. Nothing on the DOIs page shows
-the change, and a successful deposit of the work would mark the
-review's DOI "Registered" for metadata nothing sent. Expected: the
-review's DOI keeps its status while the deposit leaves the review out.
-Basis: probe, 2026-10-07, at the round-6 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
-
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
 Unticking a review's "Public Visibility", or "Revert Decision" on its
@@ -2776,6 +2761,9 @@ Basis: probe, 2026-09-26. <sup>f-ops5</sup>
 
 <a id="a28"></a>
 **A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed 2026-10-07 at the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903` `fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`, with `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`), before their merge; this page describes the fixed behavior: "Mark DOIs Registered" and "Deposit DOIs" reach the DOIs of a work's published versions only, and a new version's DOIs read "Unregistered" once it is published (Rules 26, 29; on a press its file DOIs too since [OMP5](#omp5) was fixed). <sup>f-a28</sup>
+
+<a id="ojs6"></a>
+**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · ✅ · retired. Fixed 2026-10-07 at the round-7 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `ed4299ffcb`), before their merge; this page describes the fixed behavior: the per-work actions take only the reviews shown publicly, so a hidden review's kept DOI keeps its status and the deposit leaves the review out (Rules 7b, 29). <sup>f-ojs6</sup>
 
 <a id="omp4"></a>
 **OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · ✅ · retired. Fixed 2026-10-07 at the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge; this page describes the fixed behavior: on a press, as on a journal and a preprint server, "Mark DOIs Unregistered" and "Mark DOIs Needs Sync" reach every version's DOIs and "Mark DOIs Registered" every published version's (Rules 27, 28, 52). <sup>f-omp4</sup>
@@ -5035,7 +5023,7 @@ review list empty in both versioning modes. On Crossref's success
 `updateDepositStatus()` would mark the same set "Registered" (code; no
 agency credentials). The same day (note q46) a "Submitted" review DOI
 likewise kept its status through the untick. Regression report
-`docs/reports/2026-10-07-pkp-lib-13460.md` (rewritten for round 6).
+`docs/reports/2026-10-07-pkp-lib-13460.md` (rewritten for round 6). At the round-7 PR heads (`pkp/pkp-lib#13460` `ed4299ffcb`, one commit on the round-6 head `b2f5134085`: `getCompletedReviewAssignments()` also takes `filterByIsPubliclyVisible(true)`; `pkp/ojs#5903` `f954c71984`, `pkp/omp#2495` `6ca2dbbb6b`, `pkp/ops#1435` `da9f9161a1`, pointers), before their merge, the kept check `shared/playwright/checks/sync/pkp-lib-13460/review-nonpublic-deposit.js` passes (2026-10-07, `.reports/sync/pr13460r7/`): the hidden review's "Registered" DOI keeps its status through "Deposit DOIs"; the entry is retired. The same lookup feeds "Mark DOIs Unregistered", "Mark DOIs Needs Sync", the stale marking at publication and the decline's removal, so none of them reaches a hidden review's kept DOI either, until the review is public again (code).
 
 <a id="fn-f-ojs7"></a>
 **f-ojs7** — At the round-6 PR heads (note q46), before their merge:
