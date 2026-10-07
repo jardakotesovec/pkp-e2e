@@ -1,0 +1,169 @@
+--- a/lib/pkp/classes/core/PKPAuthManager.php
++++ b/lib/pkp/classes/core/PKPAuthManager.php
+@@ -14,11 +14,7 @@
+ 
+ namespace PKP\core;
+ 
+-use APP\facades\Repo;
+-use APP\core\Application;
+ use InvalidArgumentException;
+-use PKP\core\PKPSessionGuard;
+-use PKP\core\PKPUserProvider;
+ 
+ class PKPAuthManager extends \Illuminate\Auth\AuthManager
+ {
+@@ -35,15 +31,6 @@
+     public function __construct($app)
+     {
+         $this->app = $app;
+-
+-        $this->userResolver = function ($guard = null) {
+-
+-            if ($userId = Application::get()->getRequest()->getSessionGuard()->getUserId()) {
+-                return Repo::user()->get($userId);
+-            }
+-
+-            return null;
+-        };
+     }
+ 
+     /**
+--- a/lib/pkp/classes/core/PKPRequest.php
++++ b/lib/pkp/classes/core/PKPRequest.php
+@@ -20,12 +20,12 @@
+ use APP\facades\Repo;
+ use APP\file\PublicFileManager;
+ use Illuminate\Contracts\Session\Session;
++use Illuminate\Support\Facades\Auth;
+ use PKP\config\Config;
+ use PKP\context\Context;
+ use PKP\db\DAORegistry;
+ use PKP\handler\APIHandler;
+ use PKP\plugins\Hook;
+-use PKP\security\Validation;
+ use PKP\site\Site;
+ use PKP\site\SiteDAO;
+ use PKP\user\User;
+@@ -585,10 +585,8 @@
+             return $user = $apiUser;
+         }
+ 
+-        // Attempts to retrieve a logged user
+-        if (Validation::isLoggedIn()) {
+-            $user = Repo::user()->get($this->getSessionGuard()->getUserId(), true);
+-        }
++        // Fall back on Laravel authorization.
++        $user = Auth::user();
+ 
+         return $user;
+     }
+--- a/lib/pkp/classes/core/PKPUserProvider.php
++++ b/lib/pkp/classes/core/PKPUserProvider.php
+@@ -14,15 +14,14 @@
+ 
+ namespace PKP\core;
+ 
+-use PKP\user\User;
+-use APP\core\Application;
+ use APP\facades\Repo;
+-use PKP\security\Validation;
+-use PKP\validation\ValidatorFactory;
++use Illuminate\Contracts\Auth\Authenticatable as UserContract;
+ use Illuminate\Contracts\Auth\UserProvider;
+-use Illuminate\Database\ConnectionInterface;
+ use Illuminate\Contracts\Hashing\Hasher as HasherContract;
+-use Illuminate\Contracts\Auth\Authenticatable as UserContract;
++use Illuminate\Database\ConnectionInterface;
++use PKP\security\Validation;
++use PKP\user\User;
++use PKP\validation\ValidatorFactory;
+ 
+ class PKPUserProvider implements UserProvider
+ {
+@@ -52,22 +51,19 @@
+ 
+     /**
+      * Retrieve a user by their unique identifier.
++     *
+      * @return \Illuminate\Contracts\Auth\Authenticatable|null
+      */
+     public function retrieveById($id)
+     {
+-        // If the request has already been initialized with the user object, use it.
+-        if (($user = Application::get()->getRequest()->getUser()) && $user->getId() == $id) {
+-            return $user;
+-        }
+-
+-        return Repo::user()->get($id, true);
++        return Repo::user()->get((int) $id, true);
+     }
+ 
+     /**
+      * Retrieve a user by their unique identifier and "remember me" token.
+      *
+      * @param  string   $token
++     *
+      * @return \Illuminate\Contracts\Auth\Authenticatable|null
+      */
+     public function retrieveByToken($id, $token)
+@@ -97,6 +93,7 @@
+      *
+      * @param  \Illuminate\Contracts\Auth\Authenticatable|\PKP\user\User  $user
+      * @param  string  $token
++     *
+      */
+     public function updateRememberToken(UserContract $user, $token)
+     {
+@@ -148,6 +145,8 @@
+ 
+     /**
+      * Rehash the user's password if required and supported.
++     *
++     * @param  \Illuminate\Contracts\Auth\Authenticatable|\PKP\user\User  $user
+      */
+     public function rehashPasswordIfRequired(UserContract $user, #[\SensitiveParameter] array $credentials, bool $force = false)
+     {
+@@ -163,6 +162,7 @@
+ 
+     /**
+      * Create a new instance of the \PKP\user\User
++     *
+      */
+     public function createUserInstance(): User
+     {
+@@ -171,6 +171,7 @@
+ 
+     /**
+      * Gets the hasher implementation.
++     *
+      */
+     public function getHasher(): HasherContract
+     {
+--- a/lib/pkp/classes/core/PKPSessionGuard.php
++++ b/lib/pkp/classes/core/PKPSessionGuard.php
+@@ -143,6 +143,25 @@
+     }
+ 
+     /**
++     * @copydoc \Illuminate\Auth\SessionGuard::userFromRecaller($recaller)
++     *
++     * Overridden so that a user signed back in from the "remember me" cookie,
++     * once the session itself has lapsed, gets the same session data as a
++     * password sign-in (Validation::registerUserSession()): getUserId() and
++     * Validation::isLoggedIn() read it.
++     */
++    protected function userFromRecaller($recaller)
++    {
++        $user = parent::userFromRecaller($recaller);
++
++        if ($user) {
++            $this->setUserDataToSession($user);
++        }
++
++        return $user;
++    }
++
++    /**
+      * Set the user data to session
+      */
+     public function setUserDataToSession(AuthenticatableContract|User $user): self

@@ -43,6 +43,24 @@ function lapseSessions(app, days = 8) {
     return sql(app, `UPDATE sessions SET last_activity = last_activity - ${days * 86400}; SELECT count(*) FROM sessions`);
 }
 
+/**
+ * The idle limit passing, as the walk stands in for it: every session row aged (lapseSessions) and,
+ * with `gone`, the session cookie taken out of the browser too. A browser left unused past the idle
+ * limit has dropped that cookie by itself (it expires `session_lifetime` after the last response,
+ * the moment the row lapses) and comes back with the remember cookie alone; without `gone` the
+ * browser still sends the cookie of the lapsed row.
+ */
+async function idleLimitPasses(page, app, gone) {
+    const sessions = lapseSessions(app);
+    if (!gone) return {sessions, sessionCookie: 'kept'};
+    const context = page.context();
+    const all = await context.cookies();
+    const drop = all.filter((c) => /SID$/.test(c.name));
+    await context.clearCookies();
+    await context.addCookies(all.filter((c) => !/SID$/.test(c.name)));
+    return {sessions, sessionCookie: `removed ${drop.map((c) => c.name).join(', ') || '(none found)'}`, left: (await context.cookies()).map((c) => c.name)};
+}
+
 /** The page's path and query, without the host. */
 const path = (page) => page.url().replace(/^https?:\/\/[^/]+/, '');
 
@@ -110,4 +128,4 @@ async function homeHeader(page, app) {
     return {landed: path(page), header: flat(await page.locator('header').first().innerText().catch(() => null), 400)};
 }
 
-module.exports = {CONFIRM, flat, loc, path, signInWithBox, lapseSessions, usersRow, loginAsOnRow, typeAddress, homeHeader};
+module.exports = {CONFIRM, flat, loc, path, signInWithBox, lapseSessions, idleLimitPasses, usersRow, loginAsOnRow, typeAddress, homeHeader};

@@ -724,10 +724,10 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | The password boxes stop accepting input at 32 characters, so longer passwords cannot be typed | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [A2](#a2) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
+| [A2](#a2) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A4](#a4) | While signed in as another user, "Login As" is still offered, and using it strands the operator in that account | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | Signed out, the Dashboard address the monthly reminder email links to gives an empty error page | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
-| [A8](#a8) | Kept logged in past the idle limit, users look signed out on the public site and "Login As" gives a blank page | 🐞 | medium · crash: server | issues (claude), 2026-10-04 — re-verified |
+| [A8](#a8) | Latent today: a user signed back in by "Keep me logged in" looks signed out on the public site, and "Login As" gives a blank page | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A10](#a10) | The Site Administrator's "Edit User" never shows "Change Password" ticked, and saving it removes the flag | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A12](#a12) | After a disabled account is refused, the browser's next correct sign-in lands back on the Login page with no message; after that account's second refusal, the next correct one reads "Invalid username/email or password" | 🐞 | minor | — |
@@ -761,21 +761,29 @@ Basis: probe, 2026-10-03. <sup>[f-a1](#fn-a1)</sup>
 > safe, meaningful step up from 32).
 
 <a id="a2"></a>
-**A2 — "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it** · 🐞 · medium.
+**A2 — "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it** · 🐞 · low.
 The Login page shows "Keep me logged in" already ticked, though the
-label offers it as a choice, so every user who does not notice the box
-and untick it is kept signed in. The same fault ticks the box again
-when the page shows the form after a wrong password: a user who
-unticked it, mistyped the password and signed in on the next try is
-kept signed in anyway, without being told.
+label offers it as a choice. It ticks the box again when the page shows
+the form after a wrong password: a user who unticked it, mistyped the
+password and signed in on the next try signs in with the box ticked,
+without being told.
 
-Unticked, a sign-in ends after a week without a visit. Kept signed in,
-the browser stays signed in to the account for 30 days from the sign-in,
-visited or not; 30 is the default of a setting in the installation's
-configuration. On a shared computer the account stays open to the next
-person who uses that browser.
-Since: 2015-08-07 (pkp/pkp-lib#658) · Basis: probe, 2026-10-04. <sup>[f-a2](#fn-a2)</sup>
-Report: refresh owed — while A14 stands (pkp/pkp-lib `3407fc5bc0`, #12780, `main` 2026-10-06), a ticked box no longer keeps the browser signed in past the session, so the report's account of what the always-ticked box costs (30 days signed in) does not hold on `main` (2026-10-07)
+What the tick costs depends on the version. On 3.4 and 3.3 it decides
+whether a sign-in ends when the browser closes or lasts 30 days without
+a visit, so the ticked box keeps every user who leaves it alone signed
+in on that browser, a shared computer included. On 3.5, in every
+release so far and on the branch, and on `main`, the box keeps no one
+signed in: ticked or not, a sign-in ends after a week without a visit.
+All that is left there is the "Keep me logged in" cookie, stored in the
+browser against the user's choice.
+
+That changes when "Keep me logged in" is made to work on 3.5 and
+`main`; the comment that reopened `pkp/pkp-lib#12780` on 7 October 2026
+reports that it no longer does. A ticked sign-in then lets the browser
+back into the account without the password for up to 30 days (the
+default), however long the browser stood unused.
+The cookie that no longer signs users back in is [A14](#a14).
+Since: 2015-08-07 (pkp/pkp-lib#658) · Basis: probe, 2026-10-07. <sup>[f-a2](#fn-a2)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 — unintended
 > behaviour (the malformed attribute), and persistent sessions should be
@@ -871,29 +879,30 @@ Since: 2025-01-14 (pkp/pkp-lib#10782) · Basis: probe, 2026-10-07. <sup>[f-a7](#
 > as it already does for every other route.
 
 <a id="a8"></a>
-**A8 — Kept logged in past the idle limit, users look signed out on the public site and "Login As" gives a blank page** · 🐞 · medium · crash: server.
-A user who signed in with "Keep me logged in" and comes back after the
-idle limit (seven days without a visit, by default) is still signed
-in to the dashboard and the other editorial pages. But the journal's
-public pages offer "Register" and "Login" as if they were signed out,
-and the Login page shows its form instead of taking them to the
-dashboard. For a manager it goes further: "Login As" on a user fails on
-the server, and the browser shows a blank page.
+**A8 — Latent today: a user signed back in by "Keep me logged in" looks signed out on the public site, and "Login As" gives a blank page** · 🐞 · low.
+Nothing to schedule now: no user meets this today. The fix travels with
+the change that makes "Keep me logged in" sign users back in again (the
+comment that reopened `pkp/pkp-lib#12780` reports that it no longer
+does), and it must not be merged alone. Alone, it makes a return after
+the idle limit worse: the first page shows the user signed in, the page's own requests
+are refused (status 401) behind two alerts, and the next page is signed
+out.
 
-Signing in again, on that Login page or after signing out, clears both.
-Until then nothing tells the user why the site treats them as signed
-out, or why "Login As" shows nothing.
+Today a user who signed in with the box ticked and comes back after the
+idle limit (seven days without a visit, by default) is signed out on
+every page, and signs in again. From 21 July to 6 October 2026 the
+cookie signed that user back in, but only in part. The dashboard and
+the other editorial pages opened signed in, while the journal's public
+pages offered "Register" and "Login" and the Login page showed its
+form. For a manager "Login As" on a user failed on the server, and the
+browser showed a blank page. That half-signed-in state is the fault,
+and it returns when the cookie signs users back in the same way.
 
 "Keep me logged in" is ticked when the Login page opens, so every user
-who signs in the default way and is away a week meets this. The public
-pages and "Login As" fail for one reason, so this report covers and
-rates both, and its fix clears both.
-
-While [A14](#a14) stands, the same user comes back signed out on every
-page, so this half-signed-in state does not show. A repair of A14 that
-signs the user back in on the editorial pages alone brings it back.
-Since: 2024-04-17 (pkp/pkp-lib#9596) · Basis: probe, 2026-10-04. <sup>[f-a8](#fn-a8)</sup>
-Report: refresh owed — pkp/pkp-lib `3407fc5bc0` (#12780, on `main` 2026-10-06; on 3.5 as `edc3d36c74`) stopped reading the "Keep me logged in" cookie, so past the idle limit the user is signed out on every page, all three apps (A14): the half-signed-in state does not show on `main` while A14 stands; the report's steps and its "Login As" part are owed a walk on `main` (2026-10-07)
+who signs in the default way and stays away a week would meet it. No
+release has shown it.
+What keeps it out of reach today is [A14](#a14).
+Since: 2024-04-17 (pkp/pkp-lib#9596) · Basis: probe, 2026-10-07. <sup>[f-a8](#fn-a8)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 (filed on
 > review). Ruling: a session whose user cannot be resolved is treated like
