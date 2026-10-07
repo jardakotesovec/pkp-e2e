@@ -213,7 +213,7 @@ links under the list. <sup>g</sup>
      version was published, gets its DOIs on its publication. Until the
      new version itself is published, "Mark DOIs Registered" and
      "Deposit DOIs" on the work leave the DOIs it got at its creation
-     "Unregistered" (Rules 26, 29; a press's file DOIs aside, Rule 52).
+     "Unregistered" (Rules 26, 29).
      <sup>q41</sup> <sup>q44</sup>
    - **"Upon publication"**: when the version is published (posted), or,
      on a journal, when the article is scheduled into a future issue.
@@ -298,7 +298,13 @@ links under the list. <sup>g</sup>
    Reviewers" email, after which the reviewer's row reads "Reviewer
    Thanked". The review's DOI is made at the automatic moment even
    before that; under "Immediately…" it is made when the review comes
-   to count as read (Rule 5a). No reader page shows a review's DOI. <sup>j</sup> <sup>q15</sup>
+   to count as read (Rule 5a). A review's DOI is exported and deposited
+   with its work (Rule 29) only once the review counts as read and the
+   version its review round was opened on (the version under review at
+   the time) is published; under "DOI Versioning" "No" the work's
+   current version must also be published with its DOI. Until then
+   "Deposit DOIs" and "Deposit All" send the work without the review.
+   No reader page shows a review's DOI. <sup>j</sup> <sup>q15</sup> <sup>q45</sup>
 8. **Issue DOIs** {OJS}. With "Issues" ticked, publishing an issue
    ("Publish Issue", [→ publishing an issue](U50-issues.md#publish-issue))
    gives it a DOI when it has none, whatever "Automatic DOI Assignment"
@@ -484,8 +490,7 @@ links under the list. <sup>g</sup>
     version of each ticked published item as registered by hand
     ("Registered", with no agency). A version not yet published keeps
     its DOIs' status, so they read "Unregistered" when it is published
-    and a deposit sends them (Rule 29); on a press its file DOIs are
-    marked all the same (Rule 52 [OMP5](#omp5)).
+    and a deposit sends them (Rule 29).
     When any ticked item is not published, nothing at all is marked and
     the window "DOI Updates Failed" lists, per unpublished item, "Failed
     to mark the DOI registered for {title}. The submission must be
@@ -494,8 +499,7 @@ links under the list. <sup>g</sup>
     registered". <sup>p</sup> <sup>q44</sup>
 27. **"Mark DOIs Unregistered".** Sets every DOI of each ticked item,
     those of all its versions, published or not, back to
-    "Unregistered"; on a press it leaves an earlier version's own,
-    chapter and format DOIs (Rule 52 [OMP4](#omp4)). Success: "Items
+    "Unregistered" (on a press, Rule 52). Success: "Items
     successfully marked unregistered". <sup>p</sup> <sup>q44</sup>
 28. **"Mark DOIs Needs Sync".** Its window reads "You are about to mark
     DOI metadata records for {count} item(s) as needing to be synced. The
@@ -506,7 +510,7 @@ links under the list. <sup>g</sup>
     has a DOI reading "Submitted" or "Registered", it sets
     those of its DOIs that read "Submitted" or "Registered", in all its
     versions, to "Needs Sync", and the others keep their status (on a
-    press, Rule 52 [OMP4](#omp4)); when any ticked item is not such, nothing is marked and
+    press, Rule 52); when any ticked item is not such, nothing is marked and
     "DOI Updates Failed" lists "Failed to mark the DOI needs sync for
     {title}. The DOI cannot be marked needs sync because they have not
     yet been registered or submitted." Success: "Items successfully
@@ -518,7 +522,8 @@ links under the list. <sup>g</sup>
       export these records?". Confirmed, it is meant to download the
       ticked items' metadata in the agency's format (one file; a journal
       whose "Peer Review" kind the agency accepts gets a second file for
-      the reviews) and show "Items successfully exported". The install
+      the reviews Rule 7 lets go) and show "Items successfully
+      exported". The install
       checks that file against the agency's published format, which it
       fetches from the agency's site; an install that cannot reach that
       site downloads nothing and shows no message, as on the test
@@ -555,7 +560,12 @@ links under the list. <sup>g</sup>
       Administration › "Failed Jobs", where test-install deposits land
       [A18](#a18), gains nothing for its work. "Automatic Deposit"
       (Rule 41), never run on test installs, does the same
-      ⚠ [OJS5](#ojs5). With nothing left to deposit it
+      ⚠ [OJS5](#ojs5). A review's DOI on a published work {OJS}, "Public
+      Visibility" ticked, turns "Submitted" too, but before the review
+      counts as read it is not sent (Rule 7). Its "Peer Review {number}"
+      row, which shows once the review counts as read, then reads
+      "Submitted" for a DOI nothing sent, and later presses of "Deposit
+      All" skip it ⚠ [OJS6](#ojs6). With nothing left to deposit it
       still shows "Items successfully submitted for deposit" and changes
       nothing.
 30. **The agency panel.** With an agency configured, an item's expanded
@@ -848,16 +858,11 @@ differs. <sup>z1</sup>
       DOI never counts.
 52. **Marks and statuses.** The Mark actions (Rules 26–28) set a
     book's own, chapter and format DOIs for the ticked kinds, and with
-    "Files" ticked its file DOIs: <sup>z9</sup> <sup>q44</sup>
-    - **"Mark DOIs Registered"**: those of every published version;
-      the file DOIs of every version, one not yet published included
-      ⚠ [OMP5](#omp5).
-    - **"Mark DOIs Unregistered"** and **"Mark DOIs Needs Sync"**: those
-      of the current version (the newest published one, while a newer
-      version is unpublished), and the file DOIs of every version. Under
-      "DOI Versioning" "Yes" an earlier version's own, chapter and format
-      DOIs that "Mark DOIs Registered" marked therefore keep "Registered"
-      ⚠ [OMP4](#omp4).
+    "Files" ticked the DOIs of its formats' files. They reach the same
+    versions as on a journal: "Mark DOIs Registered" those of every
+    published version, while a version not yet published keeps its
+    DOIs' status, its files' included; "Mark DOIs Unregistered" and
+    "Mark DOIs Needs Sync" those of every version. <sup>z9</sup> <sup>q44</sup>
 
     Unpublishing a version whose chapter and format
     DOIs read "Registered" turns them "Needs Sync" with the book's, and
@@ -1588,6 +1593,11 @@ throwaway accounts. <sup>sc</sup>
       2.0: in "View all" its "Article" row keeps the DOI it got at its
       creation, still "Unregistered"; the article's page shows it, and
       1.0's page keeps 1.0's DOI (Rules 12, 26, 43).
+    - **Unmarked, every version** {OMP}: in "View all" every row of
+      1.0's block still reads "Registered"; close the window, tick the
+      book and run "Mark DOIs Unregistered": "Items successfully marked
+      unregistered"; in "View all" every row of 1.0's block and of 2.0's
+      reads "Unregistered" (Rules 27, 52).
     - **A minor version**: press "Create New Version" and choose "Minor
       Revision": the expanded view still reads "There are 2 versions.";
       "View all" holds 1.0's block and the new minor version's, 2.1,
@@ -1596,10 +1606,11 @@ throwaway accounts. <sup>sc</sup>
       window, replace the DOI in 2.1's block with "10.1234/e2e-v2" and
       press "Save": 2.0's page shows "https://doi.org/10.1234/e2e-v2", and
       1.0's page keeps its own DOI (Rules 12, 20, 43).
-    - **A press's chapter and format** {OMP}: in "View all" 2.0's block
-      had "Tides" and "Format / PDF" rows with DOIs of their own from its
-      creation, different from those rows in 1.0's block, and kept them
-      through its publish; 2.1's block holds the DOIs 2.0's block
+    - **A press's chapter and format** {OMP}: at the steps "A major
+      version" and "The major version published", note that 2.0's block
+      in "View all" held "Tides" and "Format / PDF" rows with DOIs of
+      their own, different from those rows in 1.0's block, and the same
+      ones both times; now 2.1's block holds the DOIs 2.0's block
       showed. Press "Edit" at the foot of the window, replace "Tides"'
       DOI in 2.1's block with "10.1234/e2e-c4" and press "Save": the
       table of contents on 2.0's page shows "10.1234/e2e-c4" in "Tides"'
@@ -1940,8 +1951,17 @@ Left out of the scenarios above, by reason:
   - "Mark DOIs Registered", "Mark DOIs Needs Sync" and "Mark DOIs
     Unregistered" on a work with two published major versions under "DOI
     Versioning" "Yes", every block of the "View all" window changing
-    {OJS OPS}, and on a press "Mark DOIs Registered" changing every
-    published version's block {OMP} (Rules 20, 26–28, 52)
+    {OJS OPS}, and on a press "Mark DOIs Registered" and "Mark DOIs Needs
+    Sync" changing every published version's block, chapter and format
+    rows included {OMP} (Rules 20, 26–28, 52; OMP4 retired)
+  - a press with "Files" ticked and "DOI Versioning" "Yes": "Mark DOIs
+    Registered" on a book whose new major version is not yet published
+    leaving that version's file row ("PDF / article.pdf") "Unregistered",
+    and still so once it is published {OMP} (Rules 26, 52; OMP5 retired)
+  - a journal with Crossref configured and "Peer Review" ticked: "Deposit
+    All" on a published work whose public review counts as read turning
+    that review's "Peer Review {number}" row "Submitted" with the
+    "Article" row {OJS} (Rules 7, 29)
   - "Deposit DOIs" on a work whose new major version is not yet
     published: the published versions' DOIs reading "Submitted", the new
     version's "Unregistered", and "Deposit All" sending them once it is
@@ -2026,8 +2046,7 @@ Left out of the scenarios above, by reason:
   - OJS5 ("Deposit All" marking "Submitted" a galley DOI whose article DOI is "Registered" or missing, and "Automatic Deposit" alike; Rules 29, 41)
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
-  - OMP4 ("Mark DOIs Unregistered" and "Mark DOIs Needs Sync" on a press under "DOI Versioning" "Yes" leaving an earlier version's DOIs that "Mark DOIs Registered" marked; Rules 27, 28, 52)
-  - OMP5 ("Mark DOIs Registered" marking the file DOIs of a press's version not yet published; Rules 26, 52)
+  - OJS6 ("Deposit All" marking "Submitted" a public review's DOI that does not yet count as read, which no deposit then sends; Rules 7, 29)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
@@ -2074,10 +2093,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
 | [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
+| [OJS6](#ojs6) | "Deposit All" marks a public review's DOI "Submitted" before the review counts as read, and the review is never sent | 🐞 | user-visible | — |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
-| [OMP4](#omp4) | With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version | 🐞 | user-visible | — |
-| [OMP5](#omp5) | "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published | 🐞 | minor | — |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A preprint server's Crossref "Username" help reads "see the advise above" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A1](#a1) | A new journal arrives in a DOI state its own Setup tab refuses to save | ❓ | minor | — |
@@ -2095,6 +2113,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | ✅ | retired | — |
 | [A27](#a27) | The DOIs page no longer lists a declined submission that carries a DOI | ✅ | retired | — |
 | [A28](#a28) | On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency | ✅ | retired | — |
+| [OMP4](#omp4) | With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version | ✅ | retired | — |
+| [OMP5](#omp5) | "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published | ✅ | retired | — |
 | [OPS4](#ops4) | On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's | ✅ | retired | issues (claude), 2026-10-01 — re-verified |
 
 ### All apps
@@ -2334,6 +2354,7 @@ Versioning" is "Yes" by default on a preprint server and "No" on a
 journal and a press. A new version gets its DOI on publication unless
 "Automatic DOI Assignment" is "Never".
 Basis: probe, 2026-10-01. <sup>f-a17</sup>
+Report: refresh owed — `pkp/omp#2495` (round-4 PR head `fded668417`, unmerged) makes OMP `getDoisForSubmission()` collect every version's DOIs, so the Cause's OMP paragraph ("reads the current publication only … a press still marks nothing") and the Reach bullet on a press's Mark actions no longer hold; the symptom and the `publish()` comparison are unchanged; the Summary's last sentence ("A new version gets its DOI on publication unless …") no longer holds either, since a major version made at Copyediting, Production or Done gets its DOI at its creation (Rule 5, round-2 heads) (2026-10-07)
 
 <a id="a18"></a>
 **A18 — A DOI deposit that cannot connect to Crossref or DataCite reads "Submitted" for good, with no error** · 🐞 · high · crash: server.
@@ -2534,6 +2555,24 @@ is ever sent. With "Automatic Deposit" on, the scheduled deposit does
 the same without anyone pressing.
 Basis: probe, 2026-10-06. <sup>f-ojs5</sup>
 
+<a id="ojs6"></a>
+**OJS6 — "Deposit All" marks a public review's DOI "Submitted" before the review counts as read, and the review is never sent** · 🐞 · user-visible.
+A journal deposits with Crossref and gives peer reviews DOIs. A work is
+published, and one of its reviews, "Public Visibility" ticked, already
+carries a DOI but does not count as read yet: nobody has pressed "Mark
+as Complete" on it or sent the "Notify Reviewers" email. A manager
+presses "Deposit All" and sees "Items successfully submitted for
+deposit". The review's DOI is set to "Submitted", but the deposit leaves
+the review out (Rule 7), and nothing sets the status back. Once an
+editor presses "Mark as Complete", the work's expanded view on the DOIs
+page shows "Peer Review {number}" reading "Submitted" for a DOI nothing
+sent, and later presses of "Deposit All" skip it, as they skip every
+"Submitted" DOI. Expected: the DOI keeps "Unregistered" while the review
+is left out, so the first "Deposit All" after "Mark as Complete" sends
+it. Only "Deposit DOIs" on the work sends it then. "Automatic Deposit"
+does the same as "Deposit All".
+Basis: probe, 2026-10-07, at the round-4 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -2583,45 +2622,6 @@ asks for one?
 Lean: no, a minor 🐞; the badge asks for a DOI the same view says the
 chapter cannot have.
 Basis: probe, 2026-09-29. <sup>f-omp3</sup>
-
-<a id="omp4"></a>
-**OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · 🐞 · user-visible.
-A press has "DOI Versioning" set to "Yes" and a book published as 1.0
-and again as 2.0, made with "Major Revision". On the DOIs page a Press
-Manager ticks the book and confirms "Mark DOIs Registered": in the
-"View all" window every row of 1.0's block and of 2.0's reads
-"Registered". The manager then confirms "Mark DOIs Unregistered": 2.0's
-"Monograph", chapter and "Format / PDF" rows read "Unregistered" again,
-while 1.0's keep "Registered". Run in its place, right after "Mark
-DOIs Registered", "Mark DOIs Needs Sync" likewise turns only 2.0's
-rows "Needs Sync", and 1.0's keep "Registered". Expected: "Mark DOIs Unregistered" and
-"Mark DOIs Needs Sync" reach the same DOIs as "Mark DOIs Registered",
-as on a journal and a preprint server, where all three change every
-version's. The DOIs page offers no other way to set a status by hand,
-so a press that marked a book registered by mistake cannot set an
-earlier version's DOIs back to "Unregistered". File DOIs are the
-exception: every Mark action reaches every version's
-([OMP5](#omp5)).
-Basis: probe, 2026-10-07, at the round-3 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-omp4</sup>
-
-<a id="omp5"></a>
-**OMP5 — "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published** · 🐞 · minor.
-A press has "Files" ticked under "Items with DOIs" and "DOI Versioning"
-"Yes". A Press Manager makes a new version of a published book with
-"Create New Version" › "Major Revision"; the version, not yet
-published, gets DOIs of its own at once (Rule 5), its file's included.
-The manager then ticks the book on the DOIs page and confirms "Mark
-DOIs Registered": in "View all" the "… Unpublished" block's
-"Monograph" and "Format / PDF" rows keep "Unregistered", but its file
-row ("PDF / article.pdf") reads "Registered", though nothing about
-that version was registered. Expected: every DOI of a version not yet
-published keeps its status, as on a journal and a preprint server
-(Rule 26). The file DOI still reads "Registered" once the version is
-published. "Mark DOIs Needs Sync" turns it "Needs Sync" in the same
-way, and "Mark DOIs Unregistered" sets it back. A press registers its
-DOIs outside the application, so nothing is sent wrong: only the
-status the page shows is false.
-Basis: probe, 2026-10-07, at the round-3 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-omp5</sup>
 
 ### OPS
 
@@ -2679,7 +2679,13 @@ Basis: probe, 2026-09-26. <sup>f-ops5</sup>
 **A27 — The DOIs page no longer lists a declined submission that carries a DOI** · ✅ · retired. Fixed 2026-10-07 at the same PR heads, before their merge; this page describes the fixed behavior: the page lists a declined work that carries a DOI, and "In Copyediting, Production, Published or with DOIs" lists it and a work moved back to Review with its DOI (Rules 15, 22). <sup>f-a27</sup>
 
 <a id="a28"></a>
-**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed 2026-10-07 at the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903` `fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`, with `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`), before their merge; this page describes the fixed behavior: "Mark DOIs Registered" and "Deposit DOIs" reach the DOIs of a work's published versions only, and a new version's DOIs read "Unregistered" once it is published (Rules 26, 29; a press's file DOIs aside, [OMP5](#omp5)). <sup>f-a28</sup>
+**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed 2026-10-07 at the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903` `fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`, with `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`), before their merge; this page describes the fixed behavior: "Mark DOIs Registered" and "Deposit DOIs" reach the DOIs of a work's published versions only, and a new version's DOIs read "Unregistered" once it is published (Rules 26, 29; on a press its file DOIs too since [OMP5](#omp5) was fixed). <sup>f-a28</sup>
+
+<a id="omp4"></a>
+**OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · ✅ · retired. Fixed 2026-10-07 at the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge; this page describes the fixed behavior: on a press, as on a journal and a preprint server, "Mark DOIs Unregistered" and "Mark DOIs Needs Sync" reach every version's DOIs and "Mark DOIs Registered" every published version's (Rules 27, 28, 52). <sup>f-omp4</sup>
+
+<a id="omp5"></a>
+**OMP5 — "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published** · ✅ · retired. Fixed 2026-10-07 at the same round-4 PR heads, before their merge; this page describes the fixed behavior: a press's version not yet published keeps its file DOIs' status through "Mark DOIs Registered" (Rules 26, 52). <sup>f-omp5</sup>
 
 <a id="ops4"></a>
 **OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed by `pkp/ops#1435` (with `pkp/pkp-lib#13460`), checked 2026-10-07 at the PR heads before their merge; this page describes the fixed behavior: a preprint's "Minor Revision" keeps its galleys' DOIs, as on a journal and a press (Rule 12). <sup>f-ops4</sup>
@@ -3131,6 +3137,16 @@ no server log line. Facts: `.reports/sync/acc3/r3reach-<app>.json`,
 run the same day at these heads, all three apps: a new major version's
 DOIs made at its creation stayed "Unregistered" through "Mark DOIs
 Registered" and after its publication, and the deposit query took them.
+At the round-4 PR heads (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge, the
+same drive on all three apps (2026-10-07; script
+`.reports/sync/acc4/scripts/r4reach.js`, facts
+`.reports/sync/acc4/r4reach-<app>.json`, every request 200, no server
+log line): "Mark DOIs Registered" turned 1.0's and 2.0's DOIs
+"Registered" and left 3.0's "Unregistered", on OMP the monograph,
+format and file DOIs alike; "Mark DOIs Needs Sync" turned 1.0's and
+2.0's "Needs Sync" and 3.0's kept "Unregistered"; "Mark DOIs
+Unregistered" set every DOI "Unregistered", read in "View all" and in
+the database.
 
 <a id="fn-m"></a>
 **m** — `components/ListPanel/doi/DoiListItem.vue`: tick box, title link
@@ -3424,6 +3440,33 @@ the row appeared only after "Mark as Complete". The rows read "Peer
 Review 186" … "192" (the review assignments' IDs), under the work's
 current version. The published article's page (visitor) carries no
 review DOI.
+
+<a id="fn-q45"></a>
+**q45** — At the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`),
+before their merge: lib/pkp
+`reviewAssignment\DAO::getExportableDOIsPeerReviewIds()`, the list behind
+"Export DOIs"' second file (`PKPDoiController::getPeerReviewExports()`)
+and behind the reviews `DepositSubmission` hands to `DepositPeerReview`
+(which checks it again before sending), takes a completed, publicly
+visible review with a DOI only when `date_considered` or
+`date_acknowledged` is set (the review counts as read, as
+`filterByIsConfirmedByEditor()` on the DOIs page) and the publication of
+its review round (`review_rounds.publication_id`) is published, with a
+DOI under "Yes"; under "No" the current publication must also be
+published with a DOI. At round 3 and the tips it had no confirmation
+condition and, under "No", checked the current publication only. A
+round is linked at its creation to the newest unpublished version
+(`DecisionType::createReviewRound()`). Live-probed 2026-10-07 at these
+heads, OJS (script `.reports/sync/acc4/scripts/s1.js`, facts
+`.reports/sync/acc4/s1-ojs.json`, after the regression reader rr5's
+`.reports/sync/rr5/s1-ojs.json`): on a Crossref journal a published work
+whose public review was completed and never marked complete showed only
+"Article: Unregistered" in its expanded view, and a twin marked complete
+"Article" and "Peer Review 8: Unregistered". rr5's read-only call of the
+list on the fleet (`.reports/sync/rr5/s1-exportable.txt`) gave no review
+for two unconfirmed reviews and both once they were confirmed, in
+either versioning mode. "Export DOIs" answers 400 on the test installs
+(Rule 29), so the files themselves were not read.
 
 <a id="fn-i"></a>
 **i** — `ojs/classes/controllers/grid/issues/IssueGridHandler.php`
@@ -4106,22 +4149,30 @@ OPS a work with its own DOI and its galley DOI cleared is under "Needs
 DOI".
 
 <a id="fn-z9"></a>
-**z9** — `PKPDoiController::markSubmissionsUnregistered()` and
-`markSubmissionsStale()` act on OMP
-`doi\Repository::getDoisForSubmission()`: the current publication's
-own, chapter and format DOIs for the ticked kinds, and, while "Files"
-is ticked, the file DOIs of every proof file of the submission
-(`filterBySubmissionIds()` with `SUBMISSION_FILE_PROOF`, any version).
-At the round-3 PR heads (`pkp/pkp-lib#13460` `68d984c2c9`,
-`pkp/omp#2495` `e4cab0c9e9`), before their merge,
-`markSubmissionsRegistered()` acts on lib/pkp
-`doi\Repository::getPublishedDoisForSubmission()`: OMP
-`getDoisForPublication()` of each of `getPublishedPublications()`, whose
-file branch is the same submission-wide query (note q44); at the tips
-it took `getDoisForSubmission()` too. `publication\Repository::publish()` and
+**z9** — At the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/omp#2495`
+`fded668417`, with `pkp/pkp-lib#13460` `278e44e24a`), before their
+merge: OMP `doi\Repository::getDoisForSubmission()` collects
+`getDoisForPublication()` over every publication of the submission, as
+OJS and OPS do. `getDoisForPublication()` takes the version's own,
+chapter and format DOIs for the ticked kinds and, while "Files" is
+ticked, the DOIs of the proof files attached to that version's own
+formats (`filterByAssoc(ASSOC_TYPE_PUBLICATION_FORMAT, …)` with the
+version's format ids; none for a version without formats).
+`PKPDoiController::markSubmissionsUnregistered()` and
+`markSubmissionsStale()` act on `getDoisForSubmission()`,
+`markSubmissionsRegistered()` on lib/pkp
+`getPublishedDoisForSubmission()` (note q44). Earlier shapes: at the
+tips `getDoisForSubmission()` read the current publication and every
+proof file of the submission (OMP4's first cause); at the round-3 heads
+the file branch of `getDoisForPublication()` took every proof file of
+the submission (OMP5's cause). The same round-4 change gives file DOIs,
+in OMP `publication\Repository::createDois()` and
+`submission\Repository::createDois()`, only to the files of the
+version's own formats. `publication\Repository::publish()` and
 `unpublish()` mark `getDoisForPublication()` (or, for a new major
-version, `getDoisForSubmission()`) "Needs Sync", from "Submitted" or
-"Registered" only (`DAO::markStale()`).
+version, `getDoisForSubmission()`, a branch that never runs,
+[A17](#a17)) "Needs Sync", from "Submitted" or "Registered" only
+(`DAO::markStale()`).
 
 <a id="fn-q34"></a>
 **q34** — Live-probed 2026-09-29 (Rules 32, 52), OMP, two runs, the four
@@ -4721,6 +4772,38 @@ registered; both read "Submitted" with nothing queued, and a second
 (`WALK=galleyall`, `WALK=galleylater`). Issue report:
 [pkp-e2e#931](https://github.com/jardakotesovec/pkp-e2e/issues/931) ([docs/issues/U45-OJS5-deposit-all-marks-galley-doi-submitted-unsent.md](../issues/U45-OJS5-deposit-all-marks-galley-doi-submitted-unsent.md)).
 
+<a id="fn-f-ojs6"></a>
+**f-ojs6** — At the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`),
+before their merge: "Deposit All" (`Repository::depositAll()`, also the
+scheduled `DepositDois` task) marks "Submitted" what OJS
+`doi\DAO::getAllDepositableSubmissionIds()` lists, whose peer-review
+branch takes a public review's DOI once its round's publication is
+published, with no confirmation condition; the jobs then send only the
+reviews of `getExportableDOIsPeerReviewIds()` (note q45). The Crossref
+plugin's `updateDepositStatus()` for the work marks
+`getPublishedDoisForSubmission()`, whose OJS
+`getCompletedReviewAssignments()` leaves out the reviews of a published
+submission, so no answer resets the review's status (code; no agency
+credentials). "Deposit All" takes only DOIs "Unregistered", "Error" or
+"Needs Sync"; "Deposit DOIs" on the work dispatches the review once it
+counts as read (code). At round 3 and the tips the deposit list had no
+confirmation condition, so the same review was sent and its own status
+update followed (code). The same shape through "Deposit DOIs" on a work
+whose current version is a published "Published Manuscript Under
+Review" is read, not driven. Live-probed 2026-10-07 at these heads, OJS,
+twice: by the regression reader rr5 (`.reports/sync/rr5/suspicions.md`
+S1, `.reports/sync/rr5/s1-ojs.json`) and again
+(`.reports/sync/acc4/scripts/s1.js`, `.reports/sync/acc4/s1-ojs.json`):
+a scratch journal with Crossref ("Publisher", an ISSN and the depositor
+fields saved), "Articles" and "Peer Review" ticked and reviews public by
+default; two published works, each review completed and public with a
+DOI made at the move to Copyediting, neither marked complete; one then
+marked complete on screen as the control. "Deposit All" on screen (200):
+both review DOIs stored "Submitted" (status 2), one `DepositSubmission`
+job queued for the other work. "Mark as Complete" on that work's review:
+its expanded view read "Article: Submitted" and "Peer Review 7:
+Submitted". Regression report `docs/reports/2026-10-07-pkp-lib-13460.md`.
+
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
 `getAllowedDoiTypes()` lists publication, chapter and representation, not
@@ -4801,6 +4884,22 @@ Again the same day (note q44, with an unpublished 3.0 beside them):
 "Registered" and "Mark DOIs Unregistered" after it too. At the tips and
 in round 2 the mark and the unmark took the same set, so nothing stayed
 behind. Regression report `docs/reports/2026-10-07-pkp-lib-13460.md`.
+At the round-4 PR heads (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge, OMP
+`getDoisForSubmission()` reads every version (note z9), so "Mark DOIs
+Unregistered" and "Mark DOIs Needs Sync" reach what "Mark DOIs
+Registered" marks. Live-probed 2026-10-07 (note q44; facts
+`.reports/sync/acc4/r4reach-omp.json`), a scratch press on "Yes" with
+"Monographs", "Publication Formats" and "Files" ticked, 1.0 and 2.0
+published and 3.0 unpublished: after "Mark DOIs Registered" every row
+of 1.0's and 2.0's blocks in "View all" read "Registered", after "Mark
+DOIs Needs Sync" "Needs Sync", after "Mark DOIs Unregistered"
+"Unregistered", with 3.0's rows "Unregistered" throughout. The kept
+check `omp-file-and-unmark.js` (its finding 2) passed the same day at
+these heads. OMP4 had no issue report of its own; the report for
+[A17](#a17) names its cause and carries the refresh (A17's Report
+line). The entry's first shape dates from `main`, so its retirement
+reaches `main` with this page when the PRs merge; the regression report
+and the kept check are dealt with then.
 
 <a id="fn-f-omp5"></a>
 **f-omp5** — At the round-3 PR heads of `pkp/pkp-lib#13447`
@@ -4831,6 +4930,16 @@ DOIs Unregistered". No server log line. At round 2 the same set was
 marked (OMP `getDoisForSubmission()` ran the same file query; code);
 at the tips a new version had no DOI before its publication under this
 timing. Regression report `docs/reports/2026-10-07-pkp-lib-13460.md`.
+At the round-4 PR heads (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge, the file
+branch of `getDoisForPublication()` takes only the files of the
+version's own formats (note z9). Live-probed 2026-10-07 (note q44): the
+unpublished 3.0's file DOI `10.1234/df3b0w45` kept "Unregistered"
+through "Mark DOIs Registered", while 1.0's and 2.0's file DOIs turned
+"Registered". The kept check `omp-file-and-unmark.js` (its finding 1)
+passed the same day at these heads: 2.0's file DOI made at "Create New
+Version" stayed "Unregistered" through the mark and after 2.0's
+publication. No issue report; the regression report and the kept check
+are dealt with when the PRs merge.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `ops/locale/en/manager.po`

@@ -43,11 +43,11 @@
  *   declined book carrying a DOI on the page); their paths are Planned
  *   items. A28 is retired: S11 marks the book registered while its major
  *   version is unpublished, its chapter and format rows included.
- * - OMP4 🐞, OMP5 🐞: S11 runs only "Mark DOIs Registered", with one
- *   published version and no "Files" kind; "Mark DOIs Unregistered" and
- *   "Mark DOIs Needs Sync" on two published versions, and an unpublished
- *   version's file DOI, are not asserted.
- *   OJS1–OJS3, OPS1–OPS3, OPS5: the journal's and the preprint server's
+ * - OMP4 and OMP5 are retired: S11 now runs "Mark DOIs Unregistered" with
+ *   1.0 and 2.0 published, every row of both blocks read back; "Mark DOIs
+ *   Needs Sync" on two published versions and an unpublished version's
+ *   file DOI ("Files" is not ticked in S11) are Planned items.
+ *   OJS1–OJS6, OPS1–OPS3, OPS5: the journal's and the preprint server's
  *   (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
@@ -1383,6 +1383,29 @@ test.describe('DOIs', () => {
         await dois.closeVersionsWindow();
         await expectBookDoi(reader, tag, axolotl.submissionId, AXOLOTL, doi2);
         await expectBookDoi(reader, tag, axolotl.submissionId, AXOLOTL, doi1, {version: axolotl.publicationId});
+
+        // Unmarked, every version: with 1.0 and 2.0 published, "Mark DOIs
+        // Unregistered" sets every row of 1.0's block, "Registered" until
+        // then, back to "Unregistered", and 2.0's rows read the same
+        // (Rules 27, 52).
+        await dois.goto();
+        await dois.expand(row, axolotl.submissionId);
+        await dois.openVersionsWindow(row);
+        for (const type of [MONOGRAPH, TIDES, FORMAT_PDF]) {
+            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 1.0'), type)).toHaveText(/^\s*Registered\s*$/);
+        }
+        await dois.closeVersionsWindow();
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Unregistered', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedUnregistered);
+        await dois.expand(row, axolotl.submissionId);
+        await dois.openVersionsWindow(row);
+        for (const version of ['Version of Record 1.0', 'Version of Record 2.0']) {
+            for (const type of [MONOGRAPH, TIDES, FORMAT_PDF]) {
+                await expect(dois.versionDoiBadge(dois.versionBlock(version), type)).toHaveText(/^\s*Unregistered\s*$/);
+            }
+        }
+        await dois.closeVersionsWindow();
 
         // A minor version: still "There are 2 versions."; the window holds
         // 1.0's block and 2.1's, "Unpublished", with 2.0's DOI (Rules 12, 20).
