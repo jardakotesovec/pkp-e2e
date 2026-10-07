@@ -3357,6 +3357,7 @@ page. Controls: `…/version/{v1}/pdf` and `…/version/{v1}/{Print
 number}` opened the older version's reader under "This is an outdated
 version published on 2026-10-05. Read the most recent version."; the
 server answered "404 Not Found" to every such address (note q10).
+Issue report: [pkp-e2e#939](https://github.com/jardakotesovec/pkp-e2e/issues/939) ([docs/issues/U13-OJS14-older-version-galley-id-link-opens-current.md](../issues/U13-OJS14-older-version-galley-id-link-opens-current.md)).
 
 <a id="fn-f-ojs15"></a>
 **f-ojs15** — Note o: `LensGalleyPlugin::issueCallback()`, hooked on
