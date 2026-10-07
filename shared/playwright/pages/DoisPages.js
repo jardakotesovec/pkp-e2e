@@ -79,6 +79,11 @@ const DOIS_TEXT = {
     patternRequired: 'A DOI suffix pattern is required.',
     patternHelpOpening: 'Enter a custom suffix pattern for each publication type.',
     patternNotSupported: 'Custom pattern not supported',
+    immediately: 'Immediately, when an item is created (only with the default DOI suffix)',
+    immediateRefused:
+        'Immediate DOI assignment is only possible with the default DOI suffix. Please choose the default suffix or a different time for automatic DOI assignment.',
+    workflowFilterGroup: 'Workflow',
+    workflowFilter: 'In Copyediting, Production or Published',
     noAgency: 'No Registration Agency Enabled',
     noAgencyHelp:
         'DOIs can be automatically minted and deposited with a registration agency. To use this feature, locate and install a plugin from the appropriate registration agency.',
@@ -614,6 +619,18 @@ class DoisPage extends BasePage {
 
     filtersHeading() {
         return this.panel().getByRole('heading', {name: 'Filters', level: 3});
+    }
+
+    /** The headings of the "Filters" column's groups, top to bottom ("Status", "Registration", …). */
+    filterGroupHeadings() {
+        return this.panel().locator('.listPanel__sidebar .listPanel__block h4');
+    }
+
+    /** A group of the "Filters" column by its heading ("Workflow", …). */
+    filterGroup(heading) {
+        return this.panel()
+            .locator('.listPanel__sidebar .listPanel__block')
+            .filter({has: this.page.getByRole('heading', {name: heading, exact: true, level: 4})});
     }
 
     /** A filter's button by its name ("Needs DOI", "Unregistered", …). */

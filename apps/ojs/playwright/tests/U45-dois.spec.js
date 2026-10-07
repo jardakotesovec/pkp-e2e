@@ -24,8 +24,12 @@
  * - A14 🐞: S9 reads the "Mark DOIs Needs Sync" question up to "…previously
  *   submitted DOIs."; its "stale" sentence is not asserted.
  * - OJS3 🐞: S14 reads the ISSN publish warning as listed, never its count.
- * - A2, A7, A9–A12, A15–A20, OJS1, OJS2: not on these scenarios' paths.
- *   OMP1, OPS1–OPS5: the press's and the preprint server's.
+ * - A27 🐞: S3 lists only works that are not declined; a declined work
+ *   carrying a DOI, and one moved back to Review that "In Copyediting,
+ *   Production or Published" leaves out, are not seeded.
+ * - A2, A7, A9–A12, A15–A20, A25, A26, OJS1, OJS2: not on these
+ *   scenarios' paths ("Immediately…" is only refused, in S8). OMP1,
+ *   OPS1–OPS3, OPS5: the press's and the preprint server's (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch journal with
@@ -97,6 +101,7 @@ const KINDS = ['Articles', 'Issues', GALLEYS, 'Peer Review'];
 const CROSSREF_KINDS = ['Articles', 'Issues', 'Peer Review'];
 const DATACITE_KINDS = ['Articles', 'Issues', GALLEYS];
 const ENABLE_SENTENCE = 'Allow Digital Object Identifiers (DOIs) to be assigned to work published in this journal.';
+const IMMEDIATELY = TEXT.immediately;
 const COPYEDIT = 'Upon reaching the copyediting stage';
 const PUBLICATION = 'Upon publication';
 const NEVER = 'Never';
@@ -388,7 +393,7 @@ test.describe('DOIs', () => {
         expect(await settings.kinds()).toEqual(KINDS.map((label, i) => ({label, checked: i === 0})));
         await expect(settings.prefixBox()).toHaveValue('');
         expect(await settings.creationTimeShown()).toBe(COPYEDIT);
-        expect(await settings.creationTimeOptions()).toEqual([COPYEDIT, PUBLICATION, NEVER]);
+        expect(await settings.creationTimeOptions()).toEqual([IMMEDIATELY, COPYEDIT, PUBLICATION, NEVER]);
         await expect(settings.formatRadio('Default - Automatically generates a unique eight-character suffix')).toBeChecked();
         await expect(settings.formatRadio('None')).not.toBeChecked();
         await expect(settings.versioningRadio('No')).toBeChecked();
@@ -447,17 +452,17 @@ test.describe('DOIs', () => {
         });
         const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, {published: true, issue: {volume: 1, number: 1, year: 2025}});
         const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, {decisions: ['skipExternalReview']});
-        await seedWork(ojsApi, tag, 'co', mary, CORAL);
+        const coral = await seedWork(ojsApi, tag, 'co', mary, CORAL);
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
         const listed = () => dois.rowNames();
         const both = [new RegExp(`— ${TARDIGRADE}$`), new RegExp(`— ${AXOLOTL}$`)];
+        const all = [...both, new RegExp(`— ${CORAL}$`)];
         const expectListed = async (patterns) => {
             await expect(dois.rowLink(dois.rows())).toHaveCount(patterns.length);
             const names = await listed();
             expect(names.length).toBe(patterns.length);
             for (const pattern of patterns) expect(names.some((n) => pattern.test(n)), String(pattern)).toBe(true);
-            expect(names.some((n) => n.endsWith(CORAL)), 'Coral spawning is never listed').toBe(false);
         };
 
         // The page: headed "DOIs", one tab "Articles"; the list "Article
@@ -475,9 +480,9 @@ test.describe('DOIs', () => {
         await expect(dois.depositAllButton()).toHaveCount(0);
         await expect(dois.filtersHeading()).toBeVisible();
 
-        // Which works are listed: the published one and the one at
-        // Copyediting, not the one at the Submission stage (Rule 15).
-        await expectListed(both);
+        // Which works are listed: the published one, the one at
+        // Copyediting and the one at the Submission stage (Rule 15).
+        await expectListed(all);
 
         // A published work's row (Rules 16, 17, 31).
         const axRow = dois.row(axolotl.submissionId);
@@ -512,30 +517,30 @@ test.describe('DOIs', () => {
             if (phrase) phrases.push(phrase);
         });
         await dois.searchBox().fill('Axolotl');
-        await expectListed(both);
+        await expectListed(all);
         await dois.search('Axolotl');
         expect(phrases, 'only the Enter sent the phrase').toEqual(['Axolotl']);
         await expectListed([new RegExp(`— ${AXOLOTL}$`)]);
         await expect(dois.clearSearchButton()).toBeVisible();
         await dois.clearSearch();
         await expect(dois.searchBox()).toHaveValue('');
-        await expectListed(both);
+        await expectListed(all);
         await dois.search('Anning');
-        await expectListed([new RegExp(`— ${TARDIGRADE}$`)]);
+        await expectListed([new RegExp(`— ${TARDIGRADE}$`), new RegExp(`— ${CORAL}$`)]);
         await dois.clearSearch();
-        await expectListed(both);
+        await expectListed(all);
 
         // "Status" filters (Rule 22).
         await dois.pressFilter('Needs DOI');
         await expect(dois.clearFilterButton('Needs DOI')).toBeVisible();
-        await expectListed([new RegExp(`— ${TARDIGRADE}$`)]);
+        await expectListed([new RegExp(`— ${TARDIGRADE}$`), new RegExp(`— ${CORAL}$`)]);
         await dois.pressFilter('DOI Assigned');
         await expect(dois.clearFilterButton('DOI Assigned')).toBeVisible();
         await expect(dois.clearFilterButton('Needs DOI')).toHaveCount(0);
         await expectListed([new RegExp(`— ${AXOLOTL}$`)]);
         await dois.clearFilter('DOI Assigned');
         await expect(dois.clearFilterButton('DOI Assigned')).toHaveCount(0);
-        await expectListed(both);
+        await expectListed(all);
 
         // "Registration" filters (Rule 22).
         await dois.pressFilter('Unregistered');
@@ -543,7 +548,19 @@ test.describe('DOIs', () => {
         await expectListed([new RegExp(`— ${AXOLOTL}$`)]);
         await dois.pressFilter('Unregistered');
         await expect(dois.clearFilterButton('Unregistered')).toHaveCount(0);
+        await expectListed(all);
+
+        // "Workflow": the group's one filter keeps the published work and
+        // the one at Copyediting, not the one at the Submission stage;
+        // pressed again, all three are back (Fields, "Filters"; Rule 22).
+        await expect(dois.filterGroupHeadings()).toHaveText(['Status', 'Registration', TEXT.workflowFilterGroup]);
+        await expect(dois.filterGroup(TEXT.workflowFilterGroup).getByRole('button')).toHaveText([TEXT.workflowFilter]);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.clearFilterButton(TEXT.workflowFilter)).toBeVisible();
         await expectListed(both);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.clearFilterButton(TEXT.workflowFilter)).toHaveCount(0);
+        await expectListed(all);
 
         // The "Issues" box: "2025" suggests the issue; chosen, it keeps its
         // article (Fields, "Filters").
@@ -551,6 +568,15 @@ test.describe('DOIs', () => {
         await expect(suggestions).toHaveText([ISSUE_1]);
         await dois.chooseIssueSuggestion(ISSUE_1);
         await expectListed([new RegExp(`— ${AXOLOTL}$`)]);
+
+        // Control: the work at the Submission stage reads "Unpublished";
+        // its "Article" row is empty and reads "Needs DOI" (Rules 15, 16, 31).
+        await dois.goto();
+        const coRow = dois.row(coral.submissionId);
+        await expect(dois.rowBadge(coRow)).toHaveText('Unpublished');
+        await dois.expand(coRow, coral.submissionId);
+        await expect(dois.doiBox(coRow, ARTICLE)).toHaveValue('');
+        await expect(dois.doiBadge(coRow, ARTICLE)).toHaveText('Needs DOI');
     });
 
     test('S4: DOIs made at the move to Copyediting', async ({asUser, ojsApi}, testInfo) => {
@@ -561,11 +587,19 @@ test.describe('DOIs', () => {
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
 
-        // Control: before the decision the DOIs page does not list the work
-        // (Rule 15): the settled list shows its empty line.
+        // Control: before the decision the list holds the work, its
+        // "Article" row empty and "Needs DOI", and "DOI Assigned" leaves it
+        // out, the filter's settled list showing its empty line (Rules 5,
+        // 15, 22).
         await dois.goto();
+        const before = dois.row(tardigrade.submissionId);
+        await expect(dois.rowLink(before)).toHaveText(new RegExp(`— ${TARDIGRADE}\\s*$`));
+        await dois.expand(before, tardigrade.submissionId);
+        await expect(dois.doiBox(before, ARTICLE)).toHaveValue('');
+        await expect(dois.doiBadge(before, ARTICLE)).toHaveText('Needs DOI');
+        await dois.pressFilter('DOI Assigned');
         await expect(dois.emptyLine()).toBeVisible();
-        await expect(dois.row(tardigrade.submissionId)).toHaveCount(0);
+        await expect(before).toHaveCount(0);
         const logBefore = await activityLines(page, tag, tardigrade.submissionId);
 
         // The decision: "Accept and Skip Review" (Rule 5).
@@ -927,6 +961,23 @@ test.describe('DOIs', () => {
         const coRow = dois.row(coral.submissionId);
         await dois.expand(coRow, coral.submissionId);
         await expect(dois.doiBox(coRow, ARTICLE)).toHaveValue('');
+
+        // "Immediately…" refused with a pattern: the message under the
+        // list and "Save" greyed; "Default" alone leaves it greyed; the
+        // list chosen again, the save passes (Fields).
+        await settings.goto('Setup');
+        await expect(settings.formatRadio('Custom pattern')).toBeChecked();
+        await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+        await settings.saveRefused(settings.setup, settings.creationTimeSelect(), TEXT.immediateRefused);
+        await expect(settings.setup.getByRole('button', {name: 'Save', exact: true})).toBeDisabled();
+        await settings.formatRadio('Default').check();
+        await expect(settings.setup.getByRole('button', {name: 'Save', exact: true})).toBeDisabled();
+        await settings.creationTimeSelect().selectOption({label: NEVER});
+        await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+        await settings.save(settings.setup);
+        await settings.goto('Setup');
+        expect(await settings.creationTimeShown()).toBe(IMMEDIATELY);
+        await expect(settings.formatRadio('Default')).toBeChecked();
     });
 
     test('S9: mark statuses by hand; "Needs Sync" after unpublishing', async ({asUser, ojsApi}, testInfo) => {
@@ -1421,11 +1472,19 @@ test.describe('DOIs', () => {
         const wizard = new DecisionWizardPage(page);
         const peerReview = /^Peer Review \d+$/;
 
-        // Control: before either decision, the DOIs page lists neither work
-        // (Rule 15): its settled list shows the empty line.
+        // Control: before either decision, the DOIs page lists both works,
+        // "Unpublished", each with the "Article" row only, empty and "Needs
+        // DOI" (Rules 7, 15).
         await dois.goto();
-        await expect(dois.emptyLine()).toBeVisible();
-        await expect(dois.rows()).toHaveCount(0);
+        await expect(dois.rows()).toHaveCount(2);
+        for (const work of [axolotl, tardigrade]) {
+            const before = dois.row(work.submissionId);
+            await expect(dois.rowBadge(before)).toHaveText('Unpublished');
+            await dois.expand(before, work.submissionId);
+            expect(await dois.doiTypes(before)).toEqual([ARTICLE]);
+            await expect(dois.doiBox(before, ARTICLE)).toHaveValue('');
+            await expect(dois.doiBadge(before, ARTICLE)).toHaveText('Needs DOI');
+        }
 
         // Accept with the reviewers notified: "Reviewer Thanked"; an
         // "Article" row and a "Peer Review {number}" row, each with its own

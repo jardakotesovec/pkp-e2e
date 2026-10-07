@@ -35,8 +35,10 @@
  *   submitted DOIs."; its "stale" sentence is not asserted.
  * - OPS5 ❓: S4's draft is read through the "DOI Assigned" filter before
  *   its "Submit", never as listed or unlisted.
- * - OPS2 ❓, OPS3 🐞, OPS4 🐞, A2, A7, A9–A12, A15–A20: not on these
- *   scenarios' paths. OJS1–OJS3, OMP1: the journal's and the press's.
+ * - OPS2 ❓, OPS3 🐞, A2, A7, A9–A12, A15–A20, A25, A26: not on these
+ *   scenarios' paths ("Immediately…" is only refused, in S8). OPS4 is
+ *   retired (a minor version's galleys keep their DOIs); its guard is a
+ *   Planned item. OJS1–OJS3, OMP1, A27: the journal's and the press's.
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch preprint server
@@ -93,6 +95,7 @@ const CORAL = 'Coral spawning';
 const MOSS = 'Moss regrowth';
 const GALLEYS = 'Preprint galleys, such as a published PDF';
 const KINDS = ['Preprints', GALLEYS];
+const IMMEDIATELY = TEXT.immediately;
 const PRODUCTION = 'Upon reaching the production stage';
 const PUBLICATION = 'Upon publication';
 const NEVER = 'Never';
@@ -323,7 +326,7 @@ test.describe('DOIs', () => {
         expect(await settings.kinds()).toEqual(KINDS.map((label, i) => ({label, checked: i === 0})));
         await expect(settings.prefixBox()).toHaveValue('');
         expect(await settings.creationTimeShown()).toBe(PRODUCTION);
-        expect(await settings.creationTimeOptions()).toEqual([PRODUCTION, PUBLICATION, NEVER]);
+        expect(await settings.creationTimeOptions()).toEqual([IMMEDIATELY, PRODUCTION, PUBLICATION, NEVER]);
         await expect(settings.formatRadio('Default - Automatically generates a unique eight-character suffix')).toBeChecked();
         await expect(settings.formatRadio('None')).not.toBeChecked();
         await expect(settings.versioningRadio('Yes')).toBeChecked();
@@ -807,6 +810,23 @@ test.describe('DOIs', () => {
         await expect(dois.rowActions(axRow)).toContainText(String(axolotl.submissionId));
         await dois.expand(axRow, axolotl.submissionId);
         await expect(dois.doiBox(axRow, PREPRINT)).toHaveValue(`${PREFIX}/jpk.${axolotl.submissionId}`);
+
+        // "Immediately…" refused with a pattern: the message under the
+        // list and "Save" greyed; "Default" alone leaves it greyed; the
+        // list chosen again, the save passes (Fields).
+        await settings.goto('Setup');
+        await expect(settings.formatRadio('Custom pattern')).toBeChecked();
+        await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+        await settings.saveRefused(settings.setup, settings.creationTimeSelect(), TEXT.immediateRefused);
+        await expect(settings.setup.getByRole('button', {name: 'Save', exact: true})).toBeDisabled();
+        await settings.formatRadio('Default').check();
+        await expect(settings.setup.getByRole('button', {name: 'Save', exact: true})).toBeDisabled();
+        await settings.creationTimeSelect().selectOption({label: NEVER});
+        await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+        await settings.save(settings.setup);
+        await settings.goto('Setup');
+        expect(await settings.creationTimeShown()).toBe(IMMEDIATELY);
+        await expect(settings.formatRadio('Default')).toBeChecked();
     });
 
     test('S9: mark statuses by hand; "Needs Sync" after unposting', async ({asUser, opsApi}, testInfo) => {
