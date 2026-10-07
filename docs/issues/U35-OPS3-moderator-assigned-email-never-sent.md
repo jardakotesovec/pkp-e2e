@@ -182,7 +182,7 @@ Reach:
     Ramiro Vaca as "Preprint Server manager").
   - `CategoryForm` and `StartSubmission::addUserGroups()`, whose comments
     say they leave OPS out on purpose.
-  - `LibraryFileHandler` (line 99), `submissionFile\Repository` (lines 614
+  - `FileApiHandler::downloadLibraryFile()` (line 177), `submissionFile\Repository` (lines 614
     to 617) and `SubmissionFileStageAccessPolicy` (lines 93 to 95) name
     the stage too; whether a preprint server reaches them was not
     checked.

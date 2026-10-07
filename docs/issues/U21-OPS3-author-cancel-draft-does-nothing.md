@@ -174,8 +174,8 @@ Reach:
 - Other Submission-stage filters on user groups that OPS can no longer
   satisfy, not driven: `SubEditorsDAO::assignEditors()` (line 254, the
   "editor assigned" email to the editors assigned to a new submission)
-  and `LibraryFileHandler` (line 99, `assignedTo($submissionId,
-  WORKFLOW_STAGE_ID_SUBMISSION)`). `StartSubmission::addUserGroups()`,
+  and `FileApiHandler::downloadLibraryFile()` (line 177,
+  `assignedTo($submissionId, WORKFLOW_STAGE_ID_SUBMISSION)`). `StartSubmission::addUserGroups()`,
   `CategoryForm` and OPS's own `SubmissionHandler::getSubmitUserGroups()`
   already handle OPS (code).
 
@@ -301,7 +301,7 @@ callers.
   describes the same fault and cause on OPS 3.5 and `main`. Searches of
   pkp/pkp-lib, pkp/ops and pkp/ui-library on 2026-10-01 and 2026-10-04
   found no PR for it; the issue is still open.
-- Not driven: the `SubEditorsDAO` and `LibraryFileHandler` filters (code
+- Not driven: the `SubEditorsDAO` and `FileApiHandler` filters (code
   only); an install upgraded from 3.4 (the migration was read, not run);
   whether the draft shows in the manager's "All Active" view (the search
   was used).

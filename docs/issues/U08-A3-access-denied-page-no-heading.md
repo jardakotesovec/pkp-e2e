@@ -139,8 +139,8 @@ Reach:
   the other messages reach the same method, checked in the code.
 - Not every refusal: a few handlers answer a bare "403 Forbidden"
   themselves and never reach this page (OJS `ArticleHandler`, line
-  592, for a file download; pkp-lib `LibraryFileHandler`, lines 65 and
-  116).
+  592, for a file download; pkp-lib `LibraryFileHandler`, line 52, and
+  `FileApiHandler::downloadLibraryFile()`, lines 159 and 195).
 - A separate matter, not part of this fault: an address whose issue or
   book does not exist also gives a signed-in user this page rather than
   a "not found" page; the book side has its own report,

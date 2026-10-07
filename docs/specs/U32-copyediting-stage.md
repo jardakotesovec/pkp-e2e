@@ -803,10 +803,13 @@ Copyedits.") to come back, since the list is empty again. No notice shows:
 not on the same page, not when the workflow is opened again, not later.
 Adding a copyedited file removes the notice as intended; only the removal is
 one-sided. The notice shows only on that submission's Copyediting page, where
-the empty list still tells the editor where the work stands. The same fault
-keeps the author's revisions task from coming back after the only revised
-file is deleted (*Review stage & rounds* [A9](U26-review-stage-and-rounds.md#a9)).
-Basis: probe, 2026-10-04. <sup>[f-a7](#fn-a7)</sup>
+the empty list still tells the editor where the work stands. This is so
+while the submission is in Copyediting; once it has moved to Production
+no copyediting notice is shown at all. The same fault keeps the author's
+revisions task from coming back after the only revised file is deleted
+(*Review stage & rounds* [A9](U26-review-stage-and-rounds.md#a9)); one fix
+closes both.
+Basis: probe, 2026-10-04; the Production half by the code, 2026-10-07. <sup>[f-a7](#fn-a7)</sup>
 
 <a id="a8"></a>
 **A8 — Deleting a copyedited file removed its copy in "Draft Files"** · ❓ · minor.

@@ -860,13 +860,15 @@ author, the round's status and the author's My Submissions row correctly
 return to their revisions-requested state. The revisions task, however,
 never comes back: the Tasks panel shows no task where the decision had put
 one ("Revision required." on a journal, "Revisions to consider in External
-Review." on a press). The author's row still reads "Revision requested"
-with "Submit revisions", so what is missing is the prompt, not the path.
-The same fault keeps the editors' copyediting notice from coming back
-(*Copyediting stage* [A7](U32-copyediting-stage.md#a7)).
+Review." on a press). A press's Internal Review is not part of this: a
+revisions request there gives the author no task in the first place
+(*Internal Review stage* [OMP1](U71-internal-review-stage.md#omp1)). The
+author's row still reads "Revision requested" with "Submit revisions", so
+what is missing is the prompt, not the path. The same fault keeps the
+editors' copyediting notice from coming back while a submission is in
+Copyediting (*Copyediting stage* [A7](U32-copyediting-stage.md#a7)).
 Basis: probe, 2026-10-07 (OJS and OMP, one and two authors on the stage;
 both deleter roles 2026-10-04; the claim check 2026-07-31). <sup>[f-a9](#fn-a9)</sup>
-Report: refresh owed — the claim check of 2026-10-07 found that on a press the task the decision put, and the delete leaves missing, is "Revisions to consider in External Review."; the report's Summary names only the journal's "Revision required." (2026-10-07)
 
 <a id="a10"></a>
 **A10 — The review round's "Revisions Uploaded" list says revisions were requested on rounds where none were** · 🐞 · low.

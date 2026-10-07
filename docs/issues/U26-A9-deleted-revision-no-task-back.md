@@ -2,17 +2,22 @@
 
 - **Severity** low
 - **Effort** small
-- **Kind** regression
+- **Kind** regression (the revisions task; the copyediting notice is a defect, its start not traced)
 - **Affects**
   - main: OJS, OMP
   - 3.5: OJS, OMP
   - 3.4: OJS, OMP (code)
   - 3.3: OJS, OMP (code; the copyediting notice only)
 - **Introduced** `pkp/pkp-lib#8685` for `pkp/pkp-lib#8670` · [a68a22461a](https://github.com/pkp/pkp-lib/commit/a68a22461a39b3ac8b6665f357131de6ca2fa662) · 2023-02-22 · Nate Wright (NateWr), the revisions task; the copyediting notice: not traced; present since at least [5f383f87c3](https://github.com/pkp/pkp-lib/commit/5f383f87c30496e3de612aeb1bb2f4f5f80f4629) (2020-10-19)
-- **Upstream** none found (2026-10-04)
+- **Upstream** none found (2026-10-07)
 - **Tracked in** spec U26 [A9](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U26-review-stage-and-rounds.md#a9), spec U32 [A7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U32-copyediting-stage.md#a7)
-- **Checked** 2026-10-04, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-07, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-07: the Summary names the task a press author loses and
+leaves a press's Internal Review out, the copyediting half is narrowed
+to submissions still in Copyediting, and Kind says which half is the
+regression.
 
 ## Summary
 
@@ -20,9 +25,13 @@ When the only revised file on a round is deleted, by the editor or by
 the author, the round's status and the author's My Submissions row
 correctly return to their revisions-requested state. The revisions
 task, however, never comes back: the Tasks panel shows no task where
-the decision had put "Revision required."
+the decision had put one ("Revision required." on a journal,
+"Revisions to consider in External Review." on a press). A press's
+Internal Review is not part of this: a revisions request there gives
+the author no task in the first place, which is a separate report.
 
-The same happens on Copyediting. An editor who deletes the only file in
+The same happens while a submission is in Copyediting, from the same
+cause and closed by the same fix. An editor who deletes the only file in
 "Copyedited Files" expects the notice they read before that file was
 added ("Assign a copyeditor…" or "Awaiting Copyedits.") to come back,
 since the list is empty again. No notice shows: not on the same page,
@@ -39,7 +48,9 @@ list.
   assigned or copyedits are awaited. Nobody is told either is missing.
 - **Who**: an author whose only revised file on a round is deleted, by
   themselves (a wrong file uploaded) or by an editor; and every editor
-  assigned to a submission whose last copyedited file is deleted.
+  assigned to a submission in Copyediting whose last copyedited file is
+  deleted. Once the submission is in Production no notice is due, and
+  none is missing.
   Journals and presses alike, no setting involved; both are uncommon
   steps. The copyediting notice is not a task: it is stored at the
   normal level and shown only in the box above the lists on that
@@ -174,10 +185,15 @@ recomputes once the row is gone:
   the submission's API map in `classes/submission/maps/Schema.php`,
   line 764).
 - **The copyediting notice.** `PKPEditingProductionStatusNotificationManager::updateNotification()`
-  deletes both notices while `SUBMISSION_FILE_COPYEDIT` files exist on
-  the submission, and builds one of them only when there are none. The
-  count still includes the file being deleted, so both notices are
-  deleted and none comes back.
+  acts for the editors assigned to the submission's current stage, and
+  by that stage. While the submission is in Copyediting
+  (`WORKFLOW_STAGE_ID_EDITING`), it deletes both notices while
+  `SUBMISSION_FILE_COPYEDIT` files exist on the submission, and builds
+  one of them only when there are none. The count still includes the
+  file being deleted, so both notices are deleted and none comes back.
+  Once the submission is in Production, the method deletes both
+  notices whatever the count, so no notice is due there and the fault
+  does not show.
 
 The two halves have different histories. In 3.3 the same method (then
 `PKPSubmissionFileService::delete()`) removed the file's round link
@@ -245,9 +261,22 @@ fix and stays away without it.
 
 What the fix touches:
 
-- The task that comes back is the pending-revisions task, so a journal
-  author reads "Revisions to consider in Review." where the decision's
-  own task read "Revision required.".
+- The task that comes back is the pending-revisions task
+  (`NOTIFICATION_TYPE_PENDING_EXTERNAL_REVISIONS`). A journal author
+  reads "Revisions to consider in Review." where the task they held
+  before the upload, the decision's own
+  (`NOTIFICATION_TYPE_EDITOR_DECISION_PENDING_REVISIONS`), read
+  "Revision required.".
+- A press author holds the pending-revisions task from the decision
+  on: the request that records the decision builds the decision's own
+  task, deletes it and builds this one in its place (Evidence, "the
+  press's wording"). So they read "Revisions to consider in External
+  Review." before the upload, hold no task after it and none after the
+  delete, and with the fix read "Revisions to consider in External
+  Review." again after the delete.
+- The copyediting notice comes back only while the submission is in
+  Copyediting. In Production the delegate deletes both notices
+  whatever the file count, with the fix in or out (code).
 - Deleting a whole submission deletes its files one by one through this
   method first; a task built on the way is removed by the submission's
   own clean-up at the end of `Submission\DAO::deleteById()`
@@ -257,7 +286,10 @@ What the fix touches:
 - Two limits of the task code stay as they are, out of scope here
   (code): `PendingRevisionsNotificationManager::updateNotification()`
   acts only on `current($userIds)`, so on a submission with several
-  author accounts only the first gets the task back; and
+  author accounts only the first gets the task back (the same limit
+  is spec U26
+  [A14](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U26-review-stage-and-rounds.md#a14));
+  and
   `Notification\Repository::build()` looks for an existing
   notification by user, level and submission but not by type, so an
   author who already holds another task-level notification on the
@@ -278,8 +310,11 @@ What the fix touches:
 
 **What goes with it**
 
-- No data repair: an author or editor already in this state gets the
-  task or notice back with the next file change.
+- No data repair: the fix rebuilds nothing that is already missing.
+  An author already in this state stays without the task until their
+  next upload, and an editor without the notice until the next
+  copyedited file; after that upload none is due. With the fix, a
+  later delete of the last file brings the task or notice back.
 - Backport: the diff applies as written to `stable-3_5_0` (35 lines up).
   `stable-3_4_0` has the same order but other context lines
   (`NoteDAO`, `StageAssignmentDAO`, `Services::get('file')`), so the
@@ -287,8 +322,9 @@ What the fix touches:
 - Guards, one per symptom: an e2e step in the review-round scenario
   that deletes the only revised file and reads the author's Tasks panel
   (a Planned item in spec U26), and one in the copyediting scenario
-  that deletes the last copyedited file and reads the editors' notice
-  (a Planned item in spec U32).
+  that deletes the last copyedited file while the submission is still
+  in Copyediting and reads the editors' notice (a Planned item in spec
+  U32).
 
 Small: one block moved within one method and one case added, with two
 test steps.
@@ -311,22 +347,38 @@ test steps.
 - Copyediting walked from the "Assign a copyeditor…" state only; spec
   U32's own check (2026-09-18, note f-a7) saw the "Awaiting Copyedits."
   state lose its notice the same way, on OJS and OMP.
-- Walked on `main`: OJS ff004d0973 (lib/pkp 987776cd04, ui-library
-  64d67363), OMP 3b0ecf794 (lib/pkp 3dc90c81a6, ui-library 280f98c5).
-  Walked on `stable-3_5_0`: OJS c1cee76b95 (lib/pkp 771474347e), OMP
-  9c5e24246 (lib/pkp cf3f984335), ui-library d4e01883; the same screens
-  and the same Observed, both groups of steps. Dataset: pkp/datasets 566bb1f (2026-10-03),
-  PostgreSQL. No request failed and no page script failed in any walk.
+- Walked on `main` (2026-10-07): OJS 3265fdc673, OMP 0c6a3ebed1 (both
+  lib/pkp f8285b0b8f, ui-library 7503fab4). Walked on `stable-3_5_0`:
+  OJS 6d2a42555d, OMP 5861ebee10 (both lib/pkp 6910ca6d8e, ui-library
+  10a96e33); the same screens and the same Observed, both groups of
+  steps, the press's task reading "Revisions to consider in External
+  Review." on both branches. Dataset: pkp/datasets a130b9a
+  (2026-10-07), PostgreSQL. No request failed and no page script failed
+  in any walk.
 - Stored records: before the upload `lkumiega` holds one task of type
   `0x1000010` (`NOTIFICATION_TYPE_EDITOR_DECISION_PENDING_REVISIONS`) on
   submission 13 and `mpower` one of type `0x1000016`
   (`NOTIFICATION_TYPE_PENDING_EXTERNAL_REVISIONS`) on submission 16;
   after the upload and after the delete, none. With the fix, after the
   delete each holds one of type `0x1000016`.
-- Fix trial on `main`, the diff applied to OJS and OMP (the file is the
+- Code reads, the press's wording: after a decision
+  `PKP\decision\Repository` updates the decision's own task type and
+  then the types `getReviewNotificationTypes()` names. A journal names
+  the external type only, whose delegate finds the decision's "Revision
+  required." task and builds nothing. A press names the internal type
+  first: with no internal revisions request, that delegate's removal
+  branch deletes the decision's task, and the external delegate then
+  builds its own, "Revisions to consider in External Review." (spec U26
+  [OMP3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U26-review-stage-and-rounds.md#omp3)).
+- Fix trial on `main`, 2026-10-04 (lib/pkp 987776cd04 on OJS,
+  3dc90c81a6 on OMP), the diff applied to OJS and OMP (the file is the
   same in both checkouts' lib/pkp), each check run with the fix in and
-  out; the Copyediting steps were tried on OJS only. OPS has no review
-  rounds or Copyediting stage and was not walked.
+  out; the Copyediting steps were tried on OJS only. Not tried again on
+  2026-10-07: `Repository::delete()`, both delegates and
+  `revisionsUploadedSinceDecision()` have no commit on `main` since
+  (`git log`), and `patch --dry-run` of the diff succeeds on today's
+  tips. OPS has no review rounds or Copyediting stage and was not
+  walked.
 - Code reads. 3.5: `delete()` and both delegates as on `main`; `patch
   --dry-run` of the diff succeeds.
 - Code reads. 3.4 (pkp-lib `stable-3_4_0` 767353f4fe, OJS d68934d0d1,
@@ -356,9 +408,27 @@ test steps.
   required" deleted, "copyedited file deleted notification", and by
   `PendingRevisionsNotificationManager`,
   `revisionsUploadedSinceDecision` and "submission file delete
-  updateNotification". `pkp/pkp-lib#1682` (tasks created when requesting
-  revisions, 2016) is closed and about another fault.
+  updateNotification"; on 2026-10-07 again, with "Revisions to
+  consider" and "Awaiting Copyedits" added. Read and about other
+  things: `pkp/pkp-lib#1682` (tasks created when requesting revisions,
+  2016, closed), `pkp/pkp-lib#2665` and `pkp/pkp-lib#4976` (open
+  requests for a clearer confirmation after a revision upload),
+  `pkp/pkp-lib#10466` (a server error when requesting revisions,
+  closed).
+- Code reads, the stage the copyediting notice depends on:
+  `PKPEditingProductionStatusNotificationManager::updateNotification()`
+  reads the editors assigned to the submission's current stage (line
+  90) and switches on that stage: `WORKFLOW_STAGE_ID_PRODUCTION` (line
+  118) removes both copyediting notices, `WORKFLOW_STAGE_ID_EDITING`
+  (line 160) is the branch the Cause describes; the same on 3.5.
+- Code reads, a press's Internal Review: the internal delegate asks
+  `getActivePendingRevisionsDecision()` for `Decision::PENDING_REVISIONS`
+  on the Internal Review stage, which that method answers with null
+  (`PKP\decision\Repository`, lines 325 to 331), so the
+  removal branch always runs and no internal revisions task is built.
+  That missing task was walked for pkp-e2e #555, not here.
 - Not driven on screen: the editor-side deletion (the same request and
   method; the spec's own check saw it on both apps), the REST API's
-  delete, a press's Internal Review, the fix on a press's Copyediting
-  and the backport (code only).
+  delete, a press's Internal Review, a last copyedited file deleted in
+  Production, the fix on a press's Copyediting and the backport (code
+  only).
