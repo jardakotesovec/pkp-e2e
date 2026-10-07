@@ -89,9 +89,9 @@ nothing typed into its own fields clears, so Save stays disabled
 | **ORCID iD** | No | Person only. Present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
 | **Competing Interests** | Yes, when shown | Rich text, multilingual. Present only when the journal requires competing-interest statements (Settings that modify behavior). Guidance: "Please disclose any competing interests this author may have with the research subject." Saving it empty is stopped as a missing required field (the refusal described above this table). On a preprint server the field's label renders as raw code-like text instead of the plain "Competing Interests" ⚠ [OPS2](#ops2). <sup>j</sup> |
 | **Bio Statement (e.g., department and rank)** | No | Rich text, multilingual. |
-| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution on the list. While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}"). A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. That total may follow the publication's own language set rather than the journal's ⚠ [A17](#a17). A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." under the field and "Please correct one error." at the form's foot. The foot's error list, which only a screen reader reads, names that refusal "Go to Affiliations: [object Object]" ⚠ [A7](#a7). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why. There are three distinct messages (rate-limited, unavailable or deprecated), each dismissed with "OK", and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
+| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution at the end of the list. The list keeps the order of adding and has no control to change it; the reader's page does not always follow it ⚠ [A26](#a26). While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}"). A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. That total may follow the publication's own language set rather than the journal's ⚠ [A17](#a17). A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." under the field and "Please correct one error." at the form's foot. The foot's error list, which only a screen reader reads, names that refusal "Go to Affiliations: [object Object]" ⚠ [A7](#a7). A refused "Edit" saves nothing. A refused "Add Contributor" has already added the contributor, without the institution, so the corrected save adds the same contributor a second time ⚠ [A24](#a24). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why. There are three distinct messages (rate-limited, unavailable or deprecated), each dismissed with "OK", and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
 | **Contributor Roles** | Yes | One checkbox per role the journal defines (Rule 11). At least one must be ticked; a save with none is stopped as a missing required field (the refusal described above this table). When the journal has exactly one role, the field disappears. Every contributor save from the form then fails, leaving role-less contributors behind ⚠ [A14](#a14). <sup>c</sup> |
-| **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." The standard CRediT taxonomy list, with a degree per picked role. Shown to readers on the landing page (Rule 14). |
+| **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." A table with one row per role, empty ("No Items") until "Add Another Role" is pressed. Each row has a "Select a new role (required)" drop-down of the standard CRediT taxonomy, a "Degree" drop-down ("Lead", "Equal", "Supporting") and "Remove Role". A new row arrives on the list's first role, "Conceptualization", with "Degree" empty, even beside another "Conceptualization" row; what "Save" does in either state was not seen. Every row's list grays out a role any row shows. From the second row on, the drop-downs are not tied to their labels: a click on a label lands in the first row ⚠ [A25](#a25). Shown on the landing page (Rule 14). <sup>c</sup> |
 | **Publication Lists** | No | One checkbox, ticked by default: "Include this contributor when identifying authors in lists of publications." (Rule 8, and its limits in practice, ⚠ [A3](#a3)). |
 
 **The "Add Role" / "Edit Role" panel** (the Contributor Roles settings
@@ -131,7 +131,11 @@ screen, Rule 12): <sup>e</sup>
 4. **Add and edit.** "Add Contributor" opens the side panel described in
    Fields & validation. "Edit" opens the same panel prefilled. Saving
    closes the panel, updates the row in place, and refreshes the preview
-   formats (Rule 7). <sup>c</sup>
+   formats (Rule 7). "Close" at the panel's top, or the Escape key, shuts
+   the panel at once, with no question and no notice, and saves nothing:
+   after a reload the list shows the contributors as they were before
+   the panel opened. The one exception is the contributor a refused "Add
+   Contributor" has already added ([A24](#a24)). <sup>c</sup>
 5. **Delete.** "Delete" opens a confirmation titled "Delete Contributor":
    "Are you sure you want to remove {name} as a contributor? This action
    can not be undone." Its "Delete Contributor" button removes the
@@ -252,7 +256,10 @@ screen, Rule 12): <sup>e</sup>
     (##submission.submit.creditRoles.degrees.lead##)"; why a missing
     translation shows as a code is
     [Languages & locales](U57-languages-and-locales.md#a4).
-    <sup>f-a23</sup> A registry-backed affiliation's ROR mark links to its registry record,
+    <sup>f-a23</sup> A contributor's several affiliations are joined by
+    commas, each printed with a space before it ("First Univ , Second
+    Univ") ⚠ [A27](#a27), and not always in the order the contributor's
+    "Edit" lists them ([A26](#a26)). A registry-backed affiliation's ROR mark links to its registry record,
     but assistive technology cannot name that link ⚠ [A9](#a9). The ORCID
     iD shows a verified or unauthenticated icon; see
     *[ORCID integration](U04-orcid-integration.md)*. Contributors with a
@@ -564,7 +571,9 @@ footnote.
      affiliation name in the submission primary locale." under the
      field and "Please correct one error." at the foot, whose error list
      a screen reader reads as "Go to Affiliations: [object Object]"
-     ([A7](#a7)); type "Probe Institute" back into the box (Fields).
+     ([A7](#a7)); type "Probe Institute" back into the box (Fields). In
+     "Add Contributor" the same refusal still adds the contributor
+     ([A24](#a24)).
    - **A registry-backed institution**: type "Simon Fraser University",
      pick the suggestion that shows its country and the ROR mark, and
      press "Add": the entry's row links to the registry record and
@@ -820,6 +829,15 @@ Left out of the scenarios above, by reason:
   - a CRediT role's degree on a French landing page reading in French,
     once the degree words gain their French translation (Rule 14; A23,
     retired)
+  - "Close" and the Escape key shutting the contributor panel at once,
+    with no question, and a reload showing nothing saved (Rule 4)
+  - an "Edit" refused for a hand-entered institution's missing name
+    saving nothing: after "Close" and a reload, the contributor as
+    before (Fields "Affiliations")
+  - the CRediT table's "Add Another Role": a new row on
+    "Conceptualization" with no degree picked, and a role a row shows
+    grayed out in every row's list (Fields "CRediT roles and the degrees
+    of contribution")
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
@@ -862,6 +880,14 @@ Left out of the scenarios above, by reason:
     only; Rule 11)
   - A22 (a role name closed without saving shown on the row and in the
     reopened "Edit Role", and stored by the role's next "Save"; Rule 12)
+  - A24 (a refused "Add Contributor" still adding the contributor, and
+    the corrected save adding a second one; Fields; scenario 4 names it)
+  - A25 (a later CRediT row's labels tied to the first row's drop-downs;
+    Fields)
+  - A26 (a contributor's affiliations printed in another order than
+    "Edit" lists them, so no test reads their order; Rule 14; Fields)
+  - A27 (several affiliations printed with a space before each comma;
+    Rule 14)
   - OPS2 (the Competing Interests label rendering raw on a preprint
     server; Fields)
 - **No seed**:
@@ -911,11 +937,15 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | On a journal with one contributor role, adding or editing any contributor fails with an error | 🐞 | medium · crash: server | issues (claude), 2026-10-03 — re-verified |
 | [A20](#a20) | "Add Contributor" never saves when a "Forms" language is not a metadata language | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A22](#a22) | A role name changed in "Edit Role" and closed without saving shows on the row, and the role's next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
+| [A24](#a24) | An "Add Contributor" refused for an institution's missing name still adds the contributor, so the corrected save lists the same person twice | 🐞 | user-visible | — |
 | [A7](#a7) | A refused affiliation reads "Go to Affiliations: [object Object]" to screen-reader users of the contributor form | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | On an article, book or preprint page, screen readers announce the ROR logo beside an affiliation or funder as an unnamed link | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | The typed affiliation's per-language name boxes are announced wrongly by a screen reader | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A12](#a12) | The button that deletes a contributor role is labelled with a warning question, not the action | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS2](#ops2) | On a preprint server, the contributor form labels "Competing Interests" with raw link markup | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A25](#a25) | In the CRediT table, a later row's labels are tied to the first row's drop-downs: a click on one lands in the first row, and a screen reader gets the later rows unnamed | 🐞 | minor | — |
+| [A26](#a26) | On the landing page a contributor's affiliations can print in another order than "Edit" lists them | 🐞 | minor | — |
+| [A27](#a27) | On the landing page several affiliations print with a space before each comma ("First Univ , Second Univ") | 🐞 | minor | — |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
 | [A16](#a16) | The auto-created contributor can arrive without a Country — every later edit is then refused until one is supplied | ❓ | user-visible | — |
 | [A4](#a4) | The organization contributor's "ROR ID" box accepts any text without a shape check | ❓ | minor | — |
@@ -1048,6 +1078,7 @@ its message ("Go to Given Name: This field is required.").
 Sighted users are not affected: the foot shows "Please correct one
 error." and the reason is printed under the field.
 Basis: probe, 2026-10-03. <sup>f-a7</sup>
+Report: refresh owed — the claim check of 2026-10-07 saw "Go to Affiliations: [object Object]" on screen in "Add Contributor" and in the submission wizard, on the three apps (footnote f-a24); the report's Reach has both as "(code)" (2026-10-07)
 
 <a id="a8"></a>
 **A8 — Institution text typed but never picked is dropped without a word** · ❓ · minor.
@@ -1268,6 +1299,75 @@ Only a reload before reopening puts the stored names back. The same as
 [Highlights A4](U11-highlights.md#a4).
 Since: 2025-11-11 (10½ months) · Basis: probe, 2026-10-03. <sup>f-a22</sup>
 
+<a id="a24"></a>
+**A24 — A refused "Add Contributor" still adds the contributor, so the corrected save adds a second one** · 🐞 · user-visible.
+"Add Contributor" is refused when an institution entered by hand has
+no name in the submission's language (its name box emptied under "Edit
+institution name"). The panel stays open with "Please provide
+affiliation name in the submission primary locale." under the field,
+and the page says "The form was not saved because 1 error(s) were
+encountered. Please correct these errors and try again." Yet the
+contributor is already
+saved on the version, without the institution, and the list behind the
+panel does not show it.
+
+Typing the name back and pressing "Save" adds the contributor a second
+time: the list then shows the same person on two rows, and only the
+second row's "Edit" lists the institution. Leaving by "Close" instead
+keeps the contributor the refusal saved, who appears in the list after a
+reload. An editor in the workflow and an author on the submission
+wizard's "Contributors" step get it alike. A refused "Edit" saves
+nothing. A failed add on a one-role journal leaves a contributor behind
+the same way ([A14](#a14)).
+Basis: probe, 2026-10-07. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — Only the first CRediT row's drop-downs are tied to their labels** · 🐞 · minor.
+In a contributor's "CRediT roles and the degrees of contribution"
+table, each row shows its own "Select a new role (required)" and
+"Degree" labels, but every row's labels are tied to the first row's two
+drop-downs. With two or more rows, a click on a later row's label puts
+the cursor in the first row's drop-down, and a pick then made from the
+keyboard changes the first row: its "Conceptualization" became "Writing
+– Review & Editing" while the row whose label was clicked stayed as it
+was. A screen reader is given the first row's drop-downs with their
+labels doubled ("Degree Degree") and every later row's with no name. It
+shows in "Add Contributor" and "Edit" in the workflow and in the
+submission wizard's "Add Contributor". The table is in no released
+version yet. The typed affiliation's name boxes carry the same defect
+([A10](#a10)).
+Basis: probe, 2026-10-07. <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — A contributor's affiliations can print in another order than "Edit" lists them** · 🐞 · minor.
+A contributor's affiliations join the form's list in the order they are
+added, and "Edit" on the contributor lists them that way on every
+read. The published item's landing page does not always follow: once
+the item has two or more contributors, a contributor's second
+affiliation can print before the first ("University of Ljubljana ,
+First Univ" where "Edit" lists "First Univ" first). While the item had
+one contributor the page printed them as added. Adding a second
+contributor, with the first one's affiliations untouched, was enough to
+turn the printed order round. A second affiliation picked from the
+registry and one entered by hand behave alike, and the form has no
+control to set the order.
+
+The turn is not predictable: on one install the same steps turned the
+order round in one run and left it as added in the next. What decides
+it is not settled. The likely cause is that nothing fixes the order in
+which the page reads the list, so it can differ between installs and
+between loads.
+Basis: probe + code reading, 2026-10-07. <sup>f-a26</sup>
+
+<a id="a27"></a>
+**A27 — Several affiliations print with a space before each comma** · 🐞 · minor.
+On a published item's landing page (the article, book and preprint
+pages alike), a contributor's affiliations are joined as "First Univ ,
+Second Univ", with a space before the comma, where "First Univ, Second
+Univ" is expected. After an affiliation picked from the registry, the
+ROR mark sits between the name and that comma.
+Basis: probe, 2026-10-07. <sup>f-a27</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1475,7 +1575,26 @@ submission and "omp-garbage-ror" on an OMP one — A4's cross-type half);
 client-side a typed value survives the switch untouched (live-probed
 2026-08-28), so the guidance's "will not be saved" is a save-time
 discard with that one gap. Author records are keyed per publication
-(`author.json` requires `publicationId`).
+(`author.json` requires `publicationId`). The CRediT table and the way
+out of the panel, live-probed 2026-10-07 (Fields "CRediT roles and the
+degrees of contribution"; Rule 4; OJS, OMP and OPS on `main`, two runs
+each, on scratch contexts: the Journal Manager's "Add Contributor" and
+"Edit" in the workflow and the Author's "Add Contributor" on the
+wizard's step; kept script `shared/playwright/checks/U41/I07b/i07b.js`,
+phase `l12`): the field (`FieldCreditRoles`, `#contributor-creditRoles`)
+opened as a table headed "Role" / "Degree" reading "No Items", with
+"Add Another Role" under it; each press added a row reading
+"Conceptualization" with an empty "Degree" (options "Lead", "Equal",
+"Supporting") and a "Remove Role" button, the second press too while
+row 1 still read "Conceptualization"; with row 2 moved to
+"Investigation", both rows' lists showed "Conceptualization" and
+"Investigation" disabled. Not driven: a "Save" with two rows on one role
+or with a "Degree" left empty. With the two rows added and nothing
+saved, "Close" (the panel header's button; both "Add Contributor"
+panels) and the Escape key (the workflow's "Edit") shut the panel with
+no browser dialog and no notice, and no CRediT role was stored. "Close"
+after a refused save asked nothing either, and a refused "Edit" left by
+it showed the old name after a reload (f-a24).
 
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
@@ -1541,7 +1660,11 @@ both locales) and no `ror`, where the same steps at `b48c22ca06` stored
 the `ror` and no name. A language change inside the wizard asks for the
 copied name in the new language like any typed institution, by design:
 [Submission wizard](U21-submission-wizard.md) A13. The profile/masthead field itself is `user.json`'s plain multilingual
-`affiliation` string, separate machinery.
+`affiliation` string, separate machinery. The list's order, live-probed
+2026-10-07 (OJS, OMP and OPS, two runs each): a second institution,
+picked from the registry or entered by hand, joined at the end of the
+form's list, the save sent the two in that order, and the table offers
+no ordering control; what the reader's page prints is f-a26.
 
 <a id="fn-e"></a>
 **e — contributor roles.** Records: `contributor_roles` per context,
@@ -2310,6 +2433,129 @@ exists in any language but `en` in the three apps' lib/pkp `main` (OJS
 through `__()` in `classes/author/creditRole/Repository.php`. Retired
 under the team's 2026-10-02 ruling on texts new on `main` and awaiting
 their translations.
+
+<a id="fn-f-a24"></a>
+**f-a24 — A24 evidence.** Live-probed 2026-10-07 (Fields "Affiliations";
+Rule 4; scenario 4; OJS, OMP and OPS on `main`, two runs each, on
+scratch contexts; kept script
+`shared/playwright/checks/U41/I07b/i07b.js`, phase `l42`). As the
+Journal Manager in the workflow, on a context with English and French
+(Canada) as submission languages and on one with English alone: "Add
+Contributor", a Person, a hand-entered institution added, "Edit
+institution name", the English box emptied (the row then read "The
+primary language English is required", "0 of 2 languages completed"),
+"Save": `POST …/publications/{id}/contributors` answered 400
+`{"affiliations":[{"name":{"en":["Please provide affiliation name in the
+submission primary locale."]}}]}`; the panel stayed open with the
+message under the field, the foot "Please correct one error." with
+"Jump to next error" (and A7's button), "Save" disabled and the page
+notice as quoted; the version's stored contributors went from 1 to 2,
+the new one with no affiliation, while the list behind the panel still
+showed one row. With the name typed back, "Save" answered 200, the panel
+closed, the stored count read 3, and the list, on the same page and
+after a reload, showed the new name on two rows, each with "Author",
+"Set Primary Contact", "Edit" and "Delete"; "Edit" on the first showed
+no institution, on the second the institution. As the Author on a
+draft's wizard step "Contributors": the same refusal and the same
+stored contributor; left by "Close" with no second "Save", the panel
+shut at once with no question and no notice, the step's list showed one
+row, and after a reload two, the second the refused contributor without
+the institution. Control, the workflow's "Edit" on a saved contributor
+with Given Name changed and the institution's English name emptied:
+`PUT …/contributors/{id}` answered 400 with the same message and
+notice, the stored count did not change, and after "Close" and a reload
+the name read as before. No response of 500 or more and no page error
+in any run. Mechanism (code read at lib/pkp `f8285b0b8f`):
+`PKPSubmissionController::addContributor()` calls
+`Repo::author()->add($author)` and only then runs
+`Repo::affiliation()->validate()` on each affiliation, answering 400 on
+an error, with no transaction around the two; `editContributor()`
+validates the affiliations before `Repo::author()->edit()`. A14's
+role-less contributors come from the same early insert (f-a14).
+`stable-3_5_0` not driven.
+
+<a id="fn-f-a25"></a>
+**f-a25 — A25 evidence.** Live-probed 2026-10-07 (Fields "CRediT roles
+and the degrees of contribution"; OJS, OMP and OPS on `main`, two runs
+each; the Journal Manager's "Add Contributor" and "Edit" in the
+workflow and the Author's "Add Contributor" on the wizard's step: 18
+reads, all alike; kept script
+`shared/playwright/checks/U41/I07b/i07b.js`, phase `l12`). With two
+rows, both "Role" selects carried the id `-role-control` and both
+"Degree" selects `-degree-control`; each row's two labels ("Select a
+new role (required) * Required", "Degree") pointed at those ids, so at
+row 1's selects. A mouse click on row 2's "Select a new role
+(required)" put the focus in row 1's role select, one on row 2's
+"Degree" in row 1's degree select; after the click on row 2's role
+label the End key changed row 1 from "Conceptualization" to "Writing –
+Review & Editing" and left row 2 ("Investigation", "Supporting") as it
+was. Chromium's accessibility tree named row 1's selects "Select a new
+role (required) Required Select a new role (required) Required" and
+"Degree Degree" and gave row 2's no name; no screen reader was run.
+Control: the form's "Country" select has the id
+`contributor-country-control`, on one element, named "Country
+Required". Mechanism: `FieldCreditRoles.vue` (lib/ui-library
+`src/components/Form/fields/`, at `7503fab4`) mounts each row's two
+`FieldSelect`s (`name="role"`, `name="degree"`) with a label and no
+per-row `formId`, so every row gets the same ids, as A10's name boxes
+do (f-a10); A10's issue report names this component in its Reach, read
+in the code and left out of its fix. `main` only: `stable-3_5_0` has no
+CRediT roles (f-a23).
+
+<a id="fn-f-a26"></a>
+**f-a26 — A26 evidence.** Live-probed 2026-10-07 (Rule 14; Fields
+"Affiliations"; OJS, OMP and OPS on `main`, runs r1 and r2; kept script
+`shared/playwright/checks/U41/I07b/i07b.js`, phase `l43`; the published
+page read signed out). On a published scratch item, the Journal
+Manager's "Edit" on its one contributor (under the published-version
+warning) saved one hand-entered affiliation, then a second: in one
+variant "University of Ljubljana" picked from the registry's
+suggestions, in the other a second hand-entered one. For the registry
+pick the institution's record was put, by SQL, into the install's registry copy
+for the run and taken out after it, so "Add" raised no error and the
+page printed the name with its ROR mark (Rule 16). In the form the new
+one joined at the end, and the save sent the two in that order. With
+one contributor on the item, the form (on the same page and after a
+reload), the published page and the publication as the workflow page
+fetched it showed them as added, also after each of three "Edit" ›
+"Save" with nothing changed (every run, both variants). Then a second
+contributor was added ("Add Contributor", a plain Person) and nothing
+else touched: the published page read "University of Ljubljana , First
+Univ …" and "Second Univ … , First Univ …", the new one first, on OMP
+and OPS in both runs and on OJS in r1; on OJS in r2 it stayed as added
+under the same steps. "Edit" on the first contributor listed them as
+added in every run. Seen in one run only (r2): the second affiliation
+added on an item that already had two contributors printed new one
+first from the save on, and after three unchanged saves, on OMP and
+OPS, and as added on OJS. Database reads beside the screens: the stored
+affiliation ids and places kept the order added throughout; the
+affiliations query run by hand returned them as added while the item
+had one contributor and new one first once it had two, on the three
+apps in both runs, so on OJS in r2 it did not predict the page.
+Mechanism (code read): `PKP\affiliation\Collector::getQueryBuilder()`
+names no order, so the database's plan decides; "Edit" reads its
+contributor on its own (`GET …/contributors/{id}`), the workflow and
+published pages read the whole list. Not settled: what turns the
+order, and whether one install's page changes between loads; the `l43`
+phase run twice more on OJS, or one published page read before and
+after `ANALYZE author_affiliations`, would settle it. `stable-3_5_0`
+not driven: its `Collector` has no ordering either, and its article
+template prints the list the same way (code read). The contributors'
+own order had the same kind of fault until 2026-09-03 (A15, retired).
+
+<a id="fn-f-a27"></a>
+**f-a27 — A27 evidence.** Live-probed 2026-10-07 (Rule 14; the OJS
+article page, the OMP book page and the OPS preprint page on `main`,
+two runs each, signed out, both variants of f-a26's walk): a
+contributor's two affiliations read "First Univ … , Second Univ …" and,
+with the registry-backed one first, "University of Ljubljana [ROR mark]
+, First Univ …". Mechanism: the affiliations loop in OJS
+`article_details.tpl`, OPS `preprint_details.tpl` and OMP
+`components/authors.tpl` prints `common.commaListSeparator` (", ") on a
+template line of its own between the entries, outside any `{strip}`, so
+the line break before it shows as a space; the contributor-role loop
+under it wraps the same separator in `{strip}`. `stable-3_5_0`'s
+article template has the same loop (code read, not driven).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP

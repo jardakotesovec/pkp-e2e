@@ -637,7 +637,9 @@ fleet's server log (harness.md "Server output"): `const log =
 serverLog(app), from = log.mark();` before a request, `log.since(from)`
 after it for the error, exception and 5xx lines written since, the
 crash line REPORT.md's Observed asks for, and the "Plugin … failed to
-handle the hook" line of a plugin failure the page swallowed; the log is
+handle the hook" line of a plugin failure the page swallowed (the
+exception's own text sits on the line under it, which `since()` leaves
+out when it names no error: read the file for that line); the log is
 the fleet's, so a line is pinned on a request by its time and address.
 `usageLog(app, {contextId})` reads the fleet's usage event log the same
 way (`mark()`, then `since(from)` for the parsed visit lines of that

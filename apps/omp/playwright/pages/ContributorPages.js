@@ -399,9 +399,9 @@ exports.ContributorsScreen = class ContributorsScreen {
         await dialog.getByRole('button', {name: 'Add Another Role', exact: true}).click();
         const selects = this.creditRolesTable(dialog).locator('tbody tr select');
         await expect(selects).toHaveCount(rowsBefore + 2, {timeout: 30_000});
-        // A new row arrives set to the first role not yet taken (its own
-        // option then reads disabled), so the role is picked only when the
-        // row does not already hold it.
+        // A new row always arrives set to "Conceptualization" (its own
+        // option then reads disabled; spec U41 Fields "CRediT roles"), so
+        // the role is picked only when the row does not already hold it.
         const roleSelect = selects.nth(rowsBefore);
         const current = (await roleSelect.locator('option:checked').textContent()) || '';
         if (current.trim() !== role) {
