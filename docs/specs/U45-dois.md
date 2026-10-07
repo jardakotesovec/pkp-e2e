@@ -490,7 +490,11 @@ links under the list. <sup>g</sup>
     version of each ticked published item as registered by hand
     ("Registered", with no agency). A version not yet published keeps
     its DOIs' status, so they read "Unregistered" when it is published
-    and a deposit sends them (Rule 29).
+    and a deposit sends them (Rule 29). On a journal, when the work's
+    current version is a published "Published Manuscript Under Review",
+    its reviews' DOIs are marked too, including a review that does not
+    count as read yet, whose "Peer Review {number}" row reads
+    "Registered" once it does (Rule 7) ⚠ [OJS6](#ojs6).
     When any ticked item is not published, nothing at all is marked and
     the window "DOI Updates Failed" lists, per unpublished item, "Failed
     to mark the DOI registered for {title}. The submission must be
@@ -541,7 +545,12 @@ links under the list. <sup>g</sup>
       then read "Submitted" at once, while a version not yet published
       keeps its DOIs' status <sup>q44</sup>; on the "Issues" tab the
       issues are sent too, but their DOIs keep their status
-      ⚠ [OJS4](#ojs4). A ticked
+      ⚠ [OJS4](#ojs4). On a journal, when the work's current version is
+      a published "Published Manuscript Under Review", its reviews' DOIs
+      turn "Submitted" too, while the deposit sends only the reviews
+      that count as read (Rule 7): a review not yet read is not sent,
+      and its "Peer Review {number}" row reads "Submitted" once it counts
+      as read ⚠ [OJS6](#ojs6). A ticked
       published work that has no DOI gets the same notice, yet stays
       "Needs DOI" and nothing is sent ⚠ [A15](#a15). A ticked unpublished
       item makes the whole action fail: nothing is marked, the window
@@ -560,12 +569,11 @@ links under the list. <sup>g</sup>
       Administration › "Failed Jobs", where test-install deposits land
       [A18](#a18), gains nothing for its work. "Automatic Deposit"
       (Rule 41), never run on test installs, does the same
-      ⚠ [OJS5](#ojs5). A review's DOI on a published work {OJS}, "Public
-      Visibility" ticked, turns "Submitted" too, but before the review
-      counts as read it is not sent (Rule 7). Its "Peer Review {number}"
-      row, which shows once the review counts as read, then reads
-      "Submitted" for a DOI nothing sent, and later presses of "Deposit
-      All" skip it ⚠ [OJS6](#ojs6). With nothing left to deposit it
+      ⚠ [OJS5](#ojs5). A review's DOI {OJS} is taken only once the
+      review counts as read (Rule 7), and then also when its article's
+      DOI already reads "Registered", which keeps that status; before
+      that the review's DOI keeps "Unregistered". With nothing left to
+      deposit it
       still shows "Items successfully submitted for deposit" and changes
       nothing.
 30. **The agency panel.** With an agency configured, an item's expanded
@@ -1958,10 +1966,15 @@ Left out of the scenarios above, by reason:
     Registered" on a book whose new major version is not yet published
     leaving that version's file row ("PDF / article.pdf") "Unregistered",
     and still so once it is published {OMP} (Rules 26, 52; OMP5 retired)
-  - a journal with Crossref configured and "Peer Review" ticked: "Deposit
-    All" on a published work whose public review counts as read turning
-    that review's "Peer Review {number}" row "Submitted" with the
-    "Article" row {OJS} (Rules 7, 29)
+  - a journal with Crossref configured and "Peer Review" ticked, a work
+    published as a version of record with a public review that does not
+    count as read: "Deposit All" turning the "Article" row "Submitted"
+    and leaving the review's DOI as it was, its "Peer Review {number}"
+    row reading "Unregistered" after "Mark as Complete"; on a second such
+    work whose "Article" row was marked "Registered" by "Mark DOIs
+    Registered", "Deposit All" after "Mark as Complete" turning the
+    review's row "Submitted" and the "Article" row staying "Registered"
+    {OJS} (Rules 7, 26, 29)
   - "Deposit DOIs" on a work whose new major version is not yet
     published: the published versions' DOIs reading "Submitted", the new
     version's "Unregistered", and "Deposit All" sending them once it is
@@ -2046,7 +2059,7 @@ Left out of the scenarios above, by reason:
   - OJS5 ("Deposit All" marking "Submitted" a galley DOI whose article DOI is "Registered" or missing, and "Automatic Deposit" alike; Rules 29, 41)
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
-  - OJS6 ("Deposit All" marking "Submitted" a public review's DOI that does not yet count as read, which no deposit then sends; Rules 7, 29)
+  - OJS6 ("Deposit DOIs" and "Mark DOIs Registered" on a work whose current version is a published "Published Manuscript Under Review" marking a review's DOI that does not yet count as read, which "Deposit All" then never sends; Rules 7, 26, 29)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
@@ -2093,7 +2106,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
 | [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
-| [OJS6](#ojs6) | "Deposit All" marks a public review's DOI "Submitted" before the review counts as read, and the review is never sent | 🐞 | user-visible | — |
+| [OJS6](#ojs6) | "Deposit DOIs" on a work published as a "Published Manuscript Under Review" marks a review's DOI "Submitted" before the review counts as read, and "Deposit All" never sends the review | 🐞 | user-visible | — |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -2556,22 +2569,26 @@ the same without anyone pressing.
 Basis: probe, 2026-10-06. <sup>f-ojs5</sup>
 
 <a id="ojs6"></a>
-**OJS6 — "Deposit All" marks a public review's DOI "Submitted" before the review counts as read, and the review is never sent** · 🐞 · user-visible.
-A journal deposits with Crossref and gives peer reviews DOIs. A work is
-published, and one of its reviews, "Public Visibility" ticked, already
+**OJS6 — "Deposit DOIs" on a work published as a "Published Manuscript Under Review" marks a review's DOI "Submitted" before the review counts as read, and "Deposit All" never sends the review** · 🐞 · user-visible.
+A journal deposits with Crossref and gives peer reviews DOIs. A work at
+the Review stage has its version published as "Published Manuscript
+Under Review", and one of its reviews, "Public Visibility" ticked,
 carries a DOI but does not count as read yet: nobody has pressed "Mark
-as Complete" on it or sent the "Notify Reviewers" email. A manager
-presses "Deposit All" and sees "Items successfully submitted for
-deposit". The review's DOI is set to "Submitted", but the deposit leaves
-the review out (Rule 7), and nothing sets the status back. Once an
-editor presses "Mark as Complete", the work's expanded view on the DOIs
-page shows "Peer Review {number}" reading "Submitted" for a DOI nothing
-sent, and later presses of "Deposit All" skip it, as they skip every
-"Submitted" DOI. Expected: the DOI keeps "Unregistered" while the review
-is left out, so the first "Deposit All" after "Mark as Complete" sends
-it. Only "Deposit DOIs" on the work sends it then. "Automatic Deposit"
-does the same as "Deposit All".
-Basis: probe, 2026-10-07, at the round-4 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
+as Complete" on it or sent the "Notify Reviewers" email. A manager ticks
+the work on the DOIs page and confirms "Deposit DOIs": "Items
+successfully submitted for deposit". The review's DOI is set to
+"Submitted", but the deposit leaves the review out (Rule 7), and nothing
+sets the status back. Once an editor presses "Mark as Complete", the
+work's expanded view shows "Peer Review {number}" reading "Submitted"
+for a DOI nothing sent, and "Deposit All" skips it, as it skips every
+"Submitted" DOI; only another "Deposit DOIs" on the work sends it.
+Expected: the DOI keeps "Unregistered" while the review is left out, so
+"Deposit All" after "Mark as Complete" sends it. "Mark DOIs Registered"
+on such a work likewise marks the unread review's DOI "Registered"; that
+part is older than the PR the Basis line names. On a work published as
+a version of record both actions leave its reviews' DOIs as they were,
+and "Deposit All" never marks an unread review's DOI (Rule 29).
+Basis: probe, 2026-10-07, at the round-5 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
 
 ### OMP
 
@@ -4773,36 +4790,63 @@ registered; both read "Submitted" with nothing queued, and a second
 [pkp-e2e#931](https://github.com/jardakotesovec/pkp-e2e/issues/931) ([docs/issues/U45-OJS5-deposit-all-marks-galley-doi-submitted-unsent.md](../issues/U45-OJS5-deposit-all-marks-galley-doi-submitted-unsent.md)).
 
 <a id="fn-f-ojs6"></a>
-**f-ojs6** — At the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`),
-before their merge: "Deposit All" (`Repository::depositAll()`, also the
-scheduled `DepositDois` task) marks "Submitted" what OJS
-`doi\DAO::getAllDepositableSubmissionIds()` lists, whose peer-review
-branch takes a public review's DOI once its round's publication is
-published, with no confirmation condition; the jobs then send only the
-reviews of `getExportableDOIsPeerReviewIds()` (note q45). The Crossref
-plugin's `updateDepositStatus()` for the work marks
-`getPublishedDoisForSubmission()`, whose OJS
-`getCompletedReviewAssignments()` leaves out the reviews of a published
-submission, so no answer resets the review's status (code; no agency
-credentials). "Deposit All" takes only DOIs "Unregistered", "Error" or
-"Needs Sync"; "Deposit DOIs" on the work dispatches the review once it
-counts as read (code). At round 3 and the tips the deposit list had no
-confirmation condition, so the same review was sent and its own status
-update followed (code). The same shape through "Deposit DOIs" on a work
-whose current version is a published "Published Manuscript Under
-Review" is read, not driven. Live-probed 2026-10-07 at these heads, OJS,
-twice: by the regression reader rr5 (`.reports/sync/rr5/suspicions.md`
-S1, `.reports/sync/rr5/s1-ojs.json`) and again
-(`.reports/sync/acc4/scripts/s1.js`, `.reports/sync/acc4/s1-ojs.json`):
-a scratch journal with Crossref ("Publisher", an ISSN and the depositor
-fields saved), "Articles" and "Peer Review" ticked and reviews public by
-default; two published works, each review completed and public with a
-DOI made at the move to Copyediting, neither marked complete; one then
-marked complete on screen as the control. "Deposit All" on screen (200):
-both review DOIs stored "Submitted" (status 2), one `DepositSubmission`
-job queued for the other work. "Mark as Complete" on that work's review:
-its expanded view read "Article: Submitted" and "Peer Review 7:
-Submitted". Regression report `docs/reports/2026-10-07-pkp-lib-13460.md`.
+**f-ojs6** — At the round-5 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `6331e43478`, `pkp/ojs#5903` `11377fcee3`, `pkp/omp#2495` `b631d4568a`, `pkp/ops#1435` `f9bc84db30`; `pkp/crossref-ojs#113` `f358a32628` unchanged),
+before their merge. The per-work "Deposit DOIs"
+(`PKPDoiController::depositSubmissions()`) and "Mark DOIs Registered"
+(`markSubmissionsRegistered()`) mark `getPublishedDoisForSubmission()`,
+whose OJS `getDoisForPublication()` takes the reviews of
+`getCompletedReviewAssignments()`: completed, with no confirmation or
+visibility condition, and only while the submission's status is not
+Published. A work whose current version is a published "Published
+Manuscript Under Review" keeps the status Queued (only a published
+version of record makes it Published), so its completed reviews' DOIs
+are marked; the `DepositSubmission` job hands `DepositPeerReview` only
+the reviews of `getExportableDOIsPeerReviewIds()` (note q45), and the
+Crossref plugin's `updateDepositStatus()` for the work would mark the
+same DOI set "Registered" on the agency's success (code; no agency
+credentials on the test installs). "Deposit All" takes only DOIs
+"Unregistered", "Error" or "Needs Sync". At the tips the deposit list had
+no confirmation condition, so the same review was sent and its own status
+update followed; "Mark DOIs Registered" used the same review lookup
+there (code). A non-public review gets no DOI, so it carries one only if
+"Public Visibility" was unticked after it got one; these actions then
+mark it as well, as at the tips (code, not driven). Live-probed
+2026-10-07 at these heads, OJS, PostgreSQL, twice: by the regression
+reader rr6 (`.reports/sync/rr6/suspicions.md` S1, script
+`.reports/sync/rr6/scripts/s1.js`, facts `.reports/sync/rr6/s1-ojs.json`,
+`.reports/sync/rr6/s1-dois-A-after-confirm-ojs.png`) and again
+(`.reports/sync/acc5/scripts/s1.js`, `.reports/sync/acc5/s1-ojs.json`, the same script on a fresh scratch
+journal): Crossref with depositor fields and no credentials, "Articles"
+and "Peer Review" ticked, "Upon reaching the copyediting stage", reviews
+public by default. Works A and B at Review with one completed public
+review no editor confirmed, each version set to "Published Manuscript
+Under Review" 1.0 and published (both 200; status Queued, stage 3; the
+publish gave the article and the review their DOIs, "Unregistered"). A's
+expanded view: "Article: Unregistered" alone. "Deposit DOIs" on A (200):
+the article's and the review's DOIs "Submitted", one `DepositSubmission`
+job queued, the job's review list empty in both versioning modes. "Mark
+as Complete" on A's review: the expanded view "Article: Submitted",
+"Peer Review 9: Submitted", the job's review list now holding it;
+"Deposit All" (200) took nothing for A and both DOIs stayed "Submitted".
+"Mark DOIs Registered" on B (200): the unconfirmed review's DOI
+"Registered". Control C, published as a version of record: "Deposit
+DOIs" marked the article only, its unconfirmed review's DOI stayed
+"Unregistered". rr6's S2 control journal: a work whose article DOI read
+"Registered" after "Mark DOIs Registered" (its two review DOIs left
+"Unregistered"), both reviews then marked complete: "Deposit All" queued
+one `DepositSubmission` job for the work, both review DOIs "Submitted",
+the article "Registered", the job's review list holding both.
+At round 4 "Deposit All" also marked an unconfirmed public review's DOI
+"Submitted" (`doi\DAO::getAllDepositableSubmissionIds()` had no
+confirmation condition); round 5 adds it and gives a review's DOI row its
+work id, so a confirmed review outstanding on its own queues its work
+(`depositAll()` queues each work once). Kept check
+`shared/playwright/checks/sync/pkp-lib-13460/review-deposit-all.js`:
+PASS at the round-5 heads (an unconfirmed review's DOI stays
+"Unregistered" through "Deposit All"; after "Mark as Complete" the job's
+list holds it; neighbour: a confirmed review whose article reads
+"Registered" turns "Submitted" with one job for its work). Regression
+report `docs/reports/2026-10-07-pkp-lib-13460.md`.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
