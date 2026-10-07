@@ -3178,6 +3178,7 @@ walked). By the code, 25 of the 70 other languages have no text for it
 (12 lack the entry, 8 hold it empty, 5 have no `submission.po`); A1's
 proposed fix leaves them out. Live-probed 2026-10-05, note q5, two runs:
 OJS, OPS and the press's book page alike.
+Issue report: [pkp-e2e#941](https://github.com/jardakotesovec/pkp-e2e/issues/941) ([docs/issues/U13-A15-japanese-versions-entries-raw-key.md](../issues/U13-A15-japanese-versions-entries-raw-key.md)).
 
 <a id="fn-f-a16"></a>
 **f-a16** — Note b: on `main`, `Repo::submission()->canPreview()`
