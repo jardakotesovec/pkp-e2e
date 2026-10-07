@@ -1380,7 +1380,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [A10](#a10) | A reference's web address written in parentheses becomes a link that includes the closing ")" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | Keywords on an article, book or preprint page can appear in another order than the editor typed | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A13](#a13) | The PDF or HTML reader opened from a new version's preview calls that version outdated | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A15](#a15) | In Japanese, Spanish (Mexico) and other languages whose translation lacks the entry, every "Versions" entry reads "##submission.versionIdentity##", with no date or version name | 🐞 | minor | — |
+| [A15](#a15) | In Japanese, every "Versions" entry reads a raw translation key, with no date or version name | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A16](#a16) | Section editors and assistants not assigned to a submission open its article or book landing page before acceptance | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [OJS1](#ojs1) | Readers get no other citation format or citation download on an article published outside a published issue | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | Publication Facts Label settings always warn "Funding Plugin Not Present", for a plugin that no longer exists | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1647,19 +1647,30 @@ old file's name, and nothing chose it.
 Basis: probe, 2026-10-01. <sup>[f-a14](#fn-f-a14)</sup>
 
 <a id="a15"></a>
-**A15 — In Japanese, Spanish (Mexico) and other languages whose translation lacks the entry, every "Versions" entry reads "##submission.versionIdentity##", with no date or version name** · 🐞 · minor.
-On an article, book or preprint page shown in Japanese or Spanish
-(Mexico), every entry of the "Versions" list reads
-"##submission.versionIdentity##", where the English page reads
-"2026-10-05 (Version of Record 1.1)" and "2026-10-05 (Version of Record
-1.0)". A preprint's label line above the title shows the same key where
-the English page reads "2026-10-05 (Author Original 1.1)". The links
-still open their versions, but a reader cannot tell the versions apart
-by date or by number. These languages' translations have no text for
-the entry: Japanese holds it empty, Spanish (Mexico) lacks it. The
-whole entry is therefore the key, and [A1](#a1)'s key, which French
-(Canada) shows inside the entry, never appears there.
-Basis: probe, 2026-10-05. <sup>[f-a15](#fn-f-a15)</sup>
+**A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · 🐞 · low.
+On an article, book or preprint page shown in Japanese, every entry of
+the "Versions" list reads "##submission.versionIdentity##", where the
+English page reads "2026-10-07 (Version of Record 1.0)". On `main` a
+preprint's line above its title shows the same key. The Japanese page
+is otherwise largely translated, and releases up to 3.5.0-4 showed the
+date and the version there.
+
+The links still open their versions, but a reader cannot tell the
+versions apart by date or by number without switching the page to
+another language.
+
+The entry is one of 68 Japanese texts that release 3.5.0-5 emptied
+because they read the same as the English text: 57 shared by the three
+apps and 11 of OJS, "OK", "URL" and "DOI" among them. This report covers
+the "Versions" entry alone; the other 67 are not looked at here.
+
+24 more languages have no text for the entry, Spanish (Mexico) and both
+Chinese scripts among them. They never had it, and none of them has the
+list's heading either: their translations hold from none to 42% of the
+shared texts, so there the entry is one raw key among many. In Spanish
+(Mexico), seen on screen, the heading reads "##submission.versions##".
+The key French (Canada) shows inside the entry is another text ([A1](#a1)).
+Basis: probe, 2026-10-07. <sup>[f-a15](#fn-f-a15)</sup>
 
 <a id="a16"></a>
 **A16 — Section editors and assistants not assigned to a submission open its article or book landing page before acceptance** · 🐞 · medium.
