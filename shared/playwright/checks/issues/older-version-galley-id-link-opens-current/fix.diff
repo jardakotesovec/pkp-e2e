@@ -1,0 +1,15 @@
+--- a/pages/article/ArticleHandler.php
++++ b/pages/article/ArticleHandler.php
+@@ -164,7 +164,11 @@
+                     // In some cases, a URL to a galley may use the ID when it should use
+                     // the urlPath. Redirect to the galley's correct URL.
+                 } elseif (ctype_digit($galleyId) && $galley->getId() == $galleyId) {
+-                    $request->redirect(null, $request->getRequestedPage(), $request->getRequestedOp(), [$submission->getBestId(), $galley->getBestGalleyId()]);
++                    // Keep the version the URL names, and whatever follows the galley (a file ID).
++                    $redirectArgs = $subPath === 'version'
++                        ? [$submission->getBestId(), 'version', $this->publication->getId(), $galley->getBestGalleyId()]
++                        : [$submission->getBestId(), $galley->getBestGalleyId()];
++                    $request->redirect(null, $request->getRequestedPage(), $request->getRequestedOp(), [...$redirectArgs, ...$args]);
+                 }
+             }
+             // Redirect to the most recent version of the submission if the request

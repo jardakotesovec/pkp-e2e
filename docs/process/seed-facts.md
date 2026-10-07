@@ -1317,7 +1317,11 @@ config-file settings.
   reference stays unprocessed, a reference structured by hand in "Edit"
   too, so the References page's progress box reads "Processing references
   - 0/{n}" and the page refreshes itself every 7 s while it shows (U42
-  claim check K2, 2026-09-24).
+  claim check K2, 2026-09-24). A job-runner pass (`drainJobs`) does run
+  the lookup's first step, which reads the identifiers from the text (a
+  DOI link on the row; a hand-filled reference with a DOI in its text
+  becomes structured), and parks the service steps for retry (U42 claim
+  check I07b, 2026-10-07).
 - In the submission wizard every step change ("Continue", the step rail,
   "Back") saves the step's changed forms within a second, before "Review"
   lists them, and "Save for Later" saves first too; while the author stays

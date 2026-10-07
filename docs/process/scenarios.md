@@ -436,8 +436,9 @@ Keys:
   it on, every reference added afterwards, typed or seeded, queues the
   lookup's job chain (one row in the `jobs` table per reference, first
   job `ExtractPidsJob`); the test install runs no job runner, so the
-  chain never runs and the reference stays at processing status 0, not
-  processed. Applies to the three apps alike; a non-boolean is a 400 (U42
+  chain never runs and the reference stays at processing status −2,
+  queued (0 is a reference added while the lookup was off; since
+  pkp/pkp-lib#13308, U42 claim check 2026-10-07). Applies to the three apps alike; a non-boolean is a 400 (U42
   harness, 2026-09-24).
 - `enablePublisherId`: the same screen's "Publisher ID" boxes, a list of
   the values of the boxes to tick, saved as that form saves (the screen
