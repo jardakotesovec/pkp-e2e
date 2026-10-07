@@ -1302,4 +1302,3 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
-| pkp/pkp-lib#13446 + pkp/ui-library#1005 + pkp/ojs#5895, pkp/omp#2491, pkp/ops#1431 (issue pkp/pkp-lib#13375; the app PRs are submodule bumps) | `13375-main` | ready | 2026-10-06 | Funding Statement moves from "Metadata" to "Funding"; U40 S8 (three apps), OMP and OPS U43 (wizard heading "Funding") edited. At the merge: rebase, CI, fast-forward only once all three apps' pointer bumps are in (OMP's and OPS's edited U40 S8 and U43 S2 red at the old pointers). CI 37469640605 at the PR refs: nine shards green. |
