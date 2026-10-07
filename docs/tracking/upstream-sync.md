@@ -20,6 +20,8 @@ _Suspicions another session met and handed over, one line each; the
 upstream session works them (MAINTENANCE upstream session step 3) and
 deletes each once it is a report, a register entry or dismissed._
 
+- 2026-10-07, housekeeping (the U01 A8 and A2 refresh, reporter rc): two walked facts bear on `docs/reports/2026-10-07-pkp-lib-12780.md`, on OJS, OMP and OPS, `main` and 3.5. (1) The report says the "Keep me logged in" cookie is never read and the browser still sends it; the first page opened after the session lapses removes the `remember_web_…` cookie from the browser and signs no one in (`checks/issues/login-as-after-idle-limit-server-error/walk.js`, read modes `dash` and `cookie`). (2) With the cookie read put back (the three files of `3407fc5bc0` as before it, `trial-cookie-read.diff` beside that walk), being signed back in removes the cookie too, so it bridges one lapsed session, not every lapse in its 30 days. Also: `pkp/pkp-lib#12780` was reopened on 2026-10-07 and the report still says closed.
+
 ## Sync log
 
 _Newest first; one entry per sync: the date and the range per repo, then

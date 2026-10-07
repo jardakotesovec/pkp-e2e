@@ -18,7 +18,9 @@
  * tab chain again without asserting where the reload landed), A6 ❓ (S10
  * asserts only the scenario's own sentence: the "-" in the section and the
  * title on the line), A7 ❓ (S9 never asserts the toggled row's position),
- * A8 ❓ (no declined request is seeded), OMP1–OMP3 ✅/🐞 (press-only, in the
+ * A8 ❓ (no declined request is seeded), A14 ❓ (no test reads the "More
+ * Actions" menu of a recommendation a reviewer has only saved for later),
+ * OMP1–OMP3 ✅/🐞 (press-only, in the
  * OMP tree). The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. S1–S10 and S13 run on their own scratch
