@@ -1,4 +1,4 @@
-// Helpers of the U27 OMP4 and A40 issue walks (walk.js here, and ../press-competing-interests-save-submits-review/walk.js).
+// Helpers of the U27 OMP4 issue walk (walk.js here). The A40 walk that shared them was deleted at the PR review of pkp/pkp-lib#13466 (git keeps it).
 // Requiring this file runs nothing. Every helper drives the screens a person uses: the workflow's
 // "Reviewers" panel, its "Review Details" window ("Mark as Complete", "Modify Review") and the
 // "Modify Review" window over it, the row's "History", the reviewer's "My Assignments as Reviewer"

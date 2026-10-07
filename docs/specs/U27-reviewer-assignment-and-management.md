@@ -531,7 +531,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     says that the save submits anything ⚠ [A29](#a29); {OJS} the "Submitted
     recommendation:" line is absent and the "Recommendation" select opens
     empty. On an unanswered, accepted or "Request Resent" row, "Save
-    Changes" does this:
+    Changes" with a comment in "For author and editor" ({OJS}: or a
+    "Recommendation", which the save requires) does this:
     - The row turns "Review Submitted" ({OJS}: with the recommendation
       picked) with "Read Review", and its menu becomes an answered
       request's (Rule 3).
@@ -554,11 +555,14 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     summary "Please correct one error. Go to Recommendation: This field is
     required."; nothing is saved, and "Save Changes" stays disabled until
     the select changes. On a press, a request without a review form (Rule
-    14b) requires nothing: the window can be saved as it opens,
-    submitting a review with no content ⚠ [OMP5](#omp5). A save that
-    records only the competing-interests answer (Rule 14b) submits the
-    review too: on a press with no content, on a journal once a
-    "Recommendation" is picked ⚠ [A40](#a40). A "Request
+    14b) requires nothing, and a save with "For author and editor" left
+    empty submits nothing: saved as it opens, or after a comment typed
+    and deleted again, the window closes and the row and the reviewer's
+    request stay as they were; with only the competing-interests answer
+    recorded (Rule 14b), the answer is stored and the row gains the
+    "Competing Interests" badge, still "Request Sent" or "Request
+    Accepted", the reviewer still asked to respond or to review.
+    <sup>[f-a40](#fn-a40)</sup> <sup>[f-omp5](#fn-omp5)</sup> A "Request
     Declined" row offers the button, the dialog and the window too, but
     the save is refused with "This review not editable because it was
     declined." ⚠ [A30](#a30); once the request is re-sent (Rule 19) it
@@ -1343,10 +1347,11 @@ Left out of the scenarios above, by reason:
     `docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md`):
     on a press, "Mark as Complete" on an unanswered request with no review
     stays blocked with its message, and the request stays open
-  - the guard for A40 (issue report
-    `docs/issues/U27-A40-press-competing-interests-save-submits-review.md`):
-    on a press, "Save Changes" with only a competing-interests declaration
-    on an unanswered request keeps the row "Request Sent"
+  - the guard for retired A40 and OMP5 (pkp/pkp-lib#13467): on a press,
+    "Save Changes" with only a competing-interests declaration, or with
+    nothing entered, on an unanswered request keeps the row "Request
+    Sent" (Rule 14d): needs a press with a "Competing Interests" policy,
+    which no scenario sets
   - the guard for A13 (issue report
     `docs/issues/U27-A13-email-reviewer-sends-empty-body.md`):
     "Email Reviewer" sent with a Subject and an empty Body is refused with
@@ -1403,12 +1408,10 @@ Left out of the scenarios above, by reason:
   - A31 (an assistant-level participant offered "Modify Review" and refused on "Save Changes"; Actors row 5)
   - A32 (a Review Details window closed within a moment of opening, before the mark is saved, leaving the row "Review Submitted"; Rule 14a)
   - OMP4 (a press's "Mark as Complete" enabled on a request with no review; Rule 14c)
-  - OMP5 (a press accepting an empty "Save Changes" as the reviewer's review; Rule 14d)
   - OMP6 (the review-form block saying "this journal" on a press; Rule 14b)
   - A36 (a reviewer assigned today reading "Yesterday" in the reviewer search; Rule 5)
   - A37 (the resend's activity-log line printing "{$submissionid}"; Side effects)
   - A39 ("View changes" reading "Competing Interests declared: YES" for an answer of no competing interests; Side effects)
-  - A40 (the competing-interests answer recorded alone on a request with no review, submitting the review; Rule 14d)
   - A43 ("Thank Reviewer" and "Unassign Reviewer" closing unasked after a change to the message alone; Fields)
   - A44 (the resend email naming the request's old response date; Side effects)
   - A45 (the inverted-date notice speaking of "adding the reviewer" in the "Edit" and "Resend Review Request" windows, and misspelling "response"; Fields)
@@ -1465,7 +1468,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A36](#a36) | "Add Reviewer" list says "Yesterday" for a reviewer who was sent a request today | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A37](#a37) | After "Resend Review Request", the activity log prints "{$submissionid}" where the submission's number belongs | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A39](#a39) | The activity log's "View changes" reads "Competing Interests declared: YES" for a reviewer who declared none | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A40](#a40) | On a press, recording a reviewer's competing interests in "Modify Review" submits an empty review for them | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A43](#a43) | "Thank Reviewer" and "Unassign Reviewer" close without asking after a change to the message alone, and the change is lost | 🐞 | medium | — |
 | [A44](#a44) | The resend email names the request's old response date, not the one picked in the window | 🐞 | user-visible | — |
 | [A45](#a45) | The inverted-date notice says "adding the reviewer" in the "Edit" and "Resend Review Request" windows too, and misspells "response" as "responde" | 🐞 | minor | — |
@@ -1480,7 +1482,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A38](#a38) | Whether a request only sent, a completed review or {OMP} a request on the other review stage keeps a cancelled or unassigned reviewer in the submission's discussions is unsettled | ❓ | minor | — |
 | [A41](#a41) | Which activity-log rows a review submitted for the reviewer with no comment leaves is unsettled | ❓ | minor | — |
 | [A42](#a42) | What the Review Details window shows on a "Request Resent" row, its dated line included, is unsettled | ❓ | minor | — |
-| [OMP5](#omp5) | {OMP} "Save Changes" with nothing entered is accepted on an unanswered request and submits an empty review for the reviewer | ❓ | minor | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
 | [A8](#a8) | Retired: inverted due dates are refused with a notice at the top right, not silently; the earlier probe missed the notice | ✅ | retired | claim check (claude), 2026-10-05 — overturned |
 | [A24](#a24) | Retired: a modification save on a request with no review completes it because it submits the review on the reviewer's behalf, the behavior upstream designed (pkp/pkp-lib#13337); screens do reach it (Rule 14d) | ✅ | retired | upstream change + claim check (claude), 2026-09-17 — overturned by design |
@@ -1497,6 +1498,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A3](#a3) | Retired: a role-less Site Administrator is refused at the workflow screen; the earlier full-surface observation was of the seeded admin's silent Journal Manager enrollment | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
 | [A9](#a9) | Retired: the Resend window presets each date from its own interval; the earlier collapse was a same-interval coincidence | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
 | [A14](#a14) | Retired: the enroll "required" message appears only on an empty submit and clears on pick, which is ordinary validation | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
+| [A40](#a40) | Retired: on a press, recording a reviewer's competing interests in "Modify Review" submitted an empty review for them; fixed by pkp/pkp-lib#13467 | ✅ | retired | PR review (claude), 2026-10-07 — fixed at pkp/pkp-lib#13467's head |
+| [OMP5](#omp5) | Retired: {OMP} "Save Changes" with nothing entered on an unanswered request submitted an empty review; since pkp/pkp-lib#13467 it submits nothing | ✅ | retired | PR review (claude), 2026-10-07 — fixed at pkp/pkp-lib#13467's head |
 
 ### All apps
 
@@ -1996,33 +1999,12 @@ pkp/pkp-lib#13291, 2026-09-23), on screen since pkp/ui-library#993
 > by hand in the activity log, which reads "Competing Interests Declared:
 > YES" whatever the answer is changed to.
 
-<a id="a40"></a>
-**A40 — On a press, recording a reviewer's competing interests in "Modify Review" submits an empty review for them** · 🐞 · medium.
-On a press with a "Competing Interests" policy, an editor opens "Modify
-Review" on a request whose reviewer has not answered yet, or has
-accepted but not submitted, records only the reviewer's
-competing-interests declaration and presses "Save Changes". The save
-submits the review on the reviewer's behalf: the row turns "Review
-Submitted" with "Read Review", and both comment blocks read "-". Nothing
-on screen says the save will submit anything. The reviewer's request is
-closed: their list shows "Review submitted on {date}" and "View" opens
-the read-only "4. Completion" page. The empty review then counts as
-received for the round and is listed, with no comments, in the decision
-emails to the author. Since: pkp/ui-library#993 with pkp/pkp-lib#13394
-(issue pkp/pkp-lib#13282, 2026-09-29) · Basis: probe, 2026-10-03.
-<sup>[f-a40](#fn-a40)</sup>
-
-> **Reviewed — @beaug, 2026-09-30**: confirmed 🐞 on OMP. Ruling: a
-> valid defect of OMP; a press's "Modify Review" has no validation in place
-> of the journal's required "Recommendation", so the save submits
-> whatever was entered.
-
 <a id="a41"></a>
 **A41 — The log rows of a review submitted with no comment** · ❓ · minor.
 Which activity-log rows a save leaves when it submits the review for the
 reviewer with no comment typed (Rule 14d) has not been seen on screen:
-{OJS} a "Recommendation" alone, a press save with nothing entered
-([OMP5](#omp5)), or the competing-interests answer alone ([A40](#a40)).
+{OJS} a "Recommendation" alone. A press's save with no comment submits
+nothing since pkp/pkp-lib#13467 (retired [A40](#a40) and [OMP5](#omp5)).
 Question: should such a save leave a "…Comments." row? Lean: no; the log
 should name only what the editor entered.
 Basis: judgment. <sup>[f-a41](#fn-a41)</sup>
@@ -2174,23 +2156,6 @@ cannot reopen the request or send the same reviewer a new one in this
 round. Since: 2026-08-29 (the modify-reviews rework opened the window on
 every row) · Basis: probe, 2026-10-03. <sup>[f-omp4](#fn-omp4)</sup>
 
-<a id="omp5"></a>
-**OMP5 — A press accepts an empty save as the reviewer's review** · ❓ ·
-minor.
-On a press "Modify Review" on an unanswered request can be saved exactly as
-it opens, nothing typed: the window closes, the row turns "Review
-Submitted" with "Read Review", and the view window reads "Review Submitted:
-{the moment of the save}", "Last modified by {user full name}" and "-" in
-both comment blocks. The reviewer's request is closed by a review with no
-content. On a journal the required "Recommendation" happens to stop the
-same save (Rule 14d). A save that records only the competing-interests
-answer closes the request the same way ([A40](#a40)).
-Question: should a save with no content be refused where no review exists?
-Lean: yes. A press requires nothing unless a review form is attached, and
-the reviewer's own empty submit is already recorded as a defect
-([→ an empty review can be submitted](U28-reviewers-review.md#a7)).
-Basis: probe. <sup>[f-omp5](#fn-omp5)</sup>
-
 <a id="omp6"></a>
 **OMP6 — On a press, the Review Details windows introduce a review form with "The questions this journal asks reviewers to answer."** · 🐞 · low.
 On a press, when a reviewer's request carries a review form, the
@@ -2249,6 +2214,12 @@ Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="a35"></a>
 **A35 — History drops the thank after "Revert Decision"** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: History shows only the dates the assignment currently tracks, and a proper event log is to replace it later, so the "Reviewer Thanked" line leaving it after "Revert Decision" stands (Rule 21). <sup>[f-a35](#fn-a35)</sup>
+
+<a id="a40"></a>
+**A40 — On a press, recording a reviewer's competing interests in "Modify Review" submitted an empty review for them** · ✅ · retired. Fixed by pkp/pkp-lib#13467 (for pkp/pkp-lib#13466), verified 2026-10-07 at the PR's head before its merge: the declaration is stored and the request stays open, "Request Sent" or "Request Accepted" (Rule 14d). Confirmed a defect by @beaug on 2026-09-30. <sup>[f-a40](#fn-a40)</sup>
+
+<a id="omp5"></a>
+**OMP5 — A press accepted an empty save as the reviewer's review** · ✅ · retired. Settled by the same fix (pkp/pkp-lib#13467), verified 2026-10-07 at the PR's head: a press's save with nothing entered closes the window and submits nothing, so no empty review closes the request (Rule 14d). <sup>[f-omp5](#fn-omp5)</sup>
 
 ---
 
@@ -3516,7 +3487,8 @@ on the reviewer's behalf, a reviewer who already accepted keeps the
 original acceptance date, no acceptance email goes to the editor, and a
 change to an already submitted review affects none of this. Retired
 2026-09-17 as the designed behavior, which Rule 14d now states (evidence in
-note i); what the screens leave open is findings A29, A30, OMP4 and OMP5.
+note i); what the screens leave open is findings A29, A30, OMP4 and OMP5
+(OMP5 retired 2026-10-07 by pkp/pkp-lib#13467).
 
 <a id="fn-a25"></a>
 **f-a25** — Reported by the PKP team (2026-08-31); live-probed the same day
@@ -3858,14 +3830,36 @@ request, "This field is required." showed under the empty
 "Recommendation", and the row stayed "Request Accepted". The journal's
 save with a recommendation picked was not driven with the answer; it is
 the save of Rule 14d.
-Issue report: [pkp-e2e#720](https://github.com/jardakotesovec/pkp-e2e/issues/720) ([docs/issues/U27-A40-press-competing-interests-save-submits-review.md](../issues/U27-A40-press-competing-interests-save-submits-review.md)).
+Fixed by pkp/pkp-lib#13467 (`editReview()` compares the box with
+`$oldComments ?? ''`, so an empty box against no stored comment is not an
+edit; the issue report's proposed fix), with pkp/ojs#5905 the pointer
+bump: walked 2026-10-07 at the PR head `b08afde8b5`, before its merge, on
+the default dataset (the issue report's steps and neighbours,
+`.reports/sync-13466/`). OMP: Al Zacharia's declaration-only save on
+submission 2 answered 200, the row stayed "Request Sent" with the
+"Competing Interests" badge, "Review Details" showed the declaration, and
+his list still read "Respond to request"; Julie Janssen's accepted request
+on submission 17 stayed "Request Accepted" with the badge; a comment typed
+on Gonzalo Favio's request still submitted the review; emptying Paul
+Hudson's submitted comment on submission 12 still cleared it; a comment
+typed and deleted on Jhon Doe's request on submission 18 left it "Request
+Sent". OJS: the declaration-only save still asked for the
+"Recommendation"; a comment with a recommendation still submitted, and
+emptying a submitted comment still cleared it. Control at the tip
+`f8285b0b8f` on a fresh reset: the declaration-only and the typed-and-deleted
+saves each turned the row "Review Submitted", and Al Zacharia's list read
+"Review submitted on 2026-10-07".
+Issue report: pkp-e2e#720, closed at the merge (the report and its walk deleted; git keeps them).
 
 <a id="fn-a41"></a>
 **f-a41** — Not driven. The saves whose rows were read (note i,
 2026-09-17) all entered a comment. The empty press save (note f-omp5) and
 the answer-only save (note f-a40) were not followed to the log, and the
 kept activity-log reads of 2026-09-29 mix several reviewers' saves on one
-submission, with rows that do not name the reviewer.
+submission, with rows that do not name the reviewer. By the code, since
+pkp/pkp-lib#13467 an empty box against no stored comment writes no comment
+row and no "…Comments." line, so the journal's recommendation-alone save
+should leave none; not driven.
 
 <a id="fn-a42"></a>
 **f-a42** — Code-read, not driven, 2026-09-29: the resend
@@ -4041,6 +4035,12 @@ window "Last modified by {name}", "Review Submitted: …" and "-" in both
 blocks; the assignment read both dates = the save's second and `step` 4.
 OJS control: the same press sent no request, "This field is required."
 under the empty "Recommendation".
+Settled by pkp/pkp-lib#13467 (note f-a40): driven 2026-10-07 on OMP
+submission 17, Paul Hudson's unanswered request, "Save Changes" in the
+just-opened window: at the PR head `b08afde8b5` the save sent
+`{"comments":""}`, answered 200, the window closed and the row stayed
+"Request Sent", with no comment row stored; at the tip `f8285b0b8f` the
+same save turned it "Review Submitted" with both dates set and `step` 4.
 
 <a id="fn-omp6"></a>
 **f-omp6** — Seen 2026-09-05 in the view window of a form-based review on a
