@@ -982,6 +982,14 @@ class DoisPage extends BasePage {
         return block.locator('tbody tr').filter({has: this.page.locator('td label', {hasText: whole(type)})}).locator('input[type="text"]');
     }
 
+    /** A block's status badge by its row type. */
+    versionDoiBadge(block, type) {
+        return block
+            .locator('tbody tr')
+            .filter({has: this.page.locator('td label', {hasText: whole(type)})})
+            .locator('.doiListItem__itemMetadata--badge');
+    }
+
     /** The window's "Edit" / "Save". */
     versionsEditButton() {
         return this.versionsWindow().locator('.doiListItem__versionContainer--actionsBar').getByRole('button', {name: /^(Edit|Save)$/});

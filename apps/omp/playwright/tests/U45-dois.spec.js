@@ -41,8 +41,13 @@
  *   press paths ("Immediately…" is only refused, in S8). A25–A27 are
  *   retired (a decline and "Revert Decline" under "Immediately…", a
  *   declined book carrying a DOI on the page); their paths are Planned
- *   items.
- *   OJS1–OJS3, OPS1–OPS3, OPS5, A28: the journal's and the preprint server's
+ *   items. A28 is retired: S11 marks the book registered while its major
+ *   version is unpublished, its chapter and format rows included.
+ * - OMP4 🐞, OMP5 🐞: S11 runs only "Mark DOIs Registered", with one
+ *   published version and no "Files" kind; "Mark DOIs Unregistered" and
+ *   "Mark DOIs Needs Sync" on two published versions, and an unpublished
+ *   version's file DOI, are not asserted.
+ *   OJS1–OJS3, OPS1–OPS3, OPS5: the journal's and the preprint server's
  *   (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
@@ -1348,8 +1353,23 @@ test.describe('DOIs', () => {
         await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), FORMAT_PDF)).toHaveValue(format1);
         await dois.closeVersionsWindow();
 
+        // Marked registered before its publication: 1.0's rows read
+        // "Registered", 2.0's keep "Unregistered", its chapter and format
+        // rows included (Rules 20, 26, 52).
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Registered', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedRegistered);
+        await dois.expand(row, axolotl.submissionId);
+        await dois.openVersionsWindow(row);
+        for (const type of [MONOGRAPH, TIDES, FORMAT_PDF]) {
+            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 1.0'), type)).toHaveText(/^\s*Registered\s*$/);
+            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 2.0'), type)).toHaveText(/^\s*Unregistered\s*$/);
+        }
+        await dois.closeVersionsWindow();
+
         // The major version published: it keeps the DOIs it got at its
-        // creation; its page shows its own, 1.0's page keeps 1.0's (Rules 12, 43).
+        // creation, still "Unregistered"; its page shows its own, 1.0's page
+        // keeps 1.0's (Rules 12, 26, 43).
         await openVersion(page, tag, axolotl.submissionId, majorId);
         await publishOpenVersion(page);
         await dois.goto();
@@ -1357,6 +1377,7 @@ test.describe('DOIs', () => {
         await dois.openVersionsWindow(row);
         const block2 = dois.versionBlock('Version of Record 2.0');
         await expect(dois.versionDoiBox(block2, MONOGRAPH)).toHaveValue(doi2);
+        await expect(dois.versionDoiBadge(block2, MONOGRAPH)).toHaveText(/^\s*Unregistered\s*$/);
         await expect(dois.versionDoiBox(block2, TIDES)).toHaveValue(tides2);
         await expect(dois.versionDoiBox(block2, FORMAT_PDF)).toHaveValue(format2);
         await dois.closeVersionsWindow();

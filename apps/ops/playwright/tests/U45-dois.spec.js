@@ -36,11 +36,12 @@
  * - OPS5 ❓: S4's draft is read through the "DOI Assigned" filter before
  *   its "Submit", never as listed or unlisted.
  * - OPS2 ❓, OPS3 🐞, A2, A7, A9–A12, A15–A20: not on these scenarios'
- *   paths ("Immediately…" is only refused, in S8). A28 🐞: S11 makes a
- *   major version with DOIs at its creation but never marks it. OPS4, A25, A26 are
- *   retired (a minor version's galleys keep their DOIs; a decline and
- *   "Revert Decline" under "Immediately…"); their paths are Planned
- *   items. OJS1–OJS3, OMP1: the journal's and the press's (A27 retired).
+ *   paths ("Immediately…" is only refused, in S8). OPS4, A25, A26, A28
+ *   are retired (a minor version's galleys keep their DOIs; a decline and
+ *   "Revert Decline" under "Immediately…"; S11 now marks the preprint
+ *   registered while its major version is unposted); the other paths are
+ *   Planned items. OJS1–OJS3, OMP1, OMP4, OMP5: the journal's and the
+ *   press's (A27 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch preprint server
@@ -996,14 +997,27 @@ test.describe('DOIs', () => {
         expect(doi2).not.toBe(doi1);
         await dois.closeVersionsWindow();
 
-        // The major version posted: it keeps the DOI it got at its creation;
-        // its page shows it, 1.0's page keeps 1.0's (Rules 12, 43).
+        // Marked registered before its posting: 1.0's DOI reads "Registered",
+        // 2.0's keeps "Unregistered" (Rules 20, 26).
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Registered', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedRegistered);
+        await dois.expand(row, axolotl.submissionId);
+        await dois.openVersionsWindow(row);
+        await expect(dois.versionDoiBadge(dois.versionBlock('Author Original 1.0'), PREPRINT)).toHaveText(/^\s*Registered\s*$/);
+        await expect(dois.versionDoiBadge(dois.versionBlock('Author Original 2.0'), PREPRINT)).toHaveText(/^\s*Unregistered\s*$/);
+        await dois.closeVersionsWindow();
+
+        // The major version posted: it keeps the DOI it got at its creation,
+        // still "Unregistered"; its page shows it, 1.0's page keeps 1.0's
+        // (Rules 12, 26, 43).
         await postVersion(page, tag, axolotl.submissionId, majorId);
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
         await dois.openVersionsWindow(row);
         const block2 = dois.versionBlock('Author Original 2.0');
         await expect(dois.versionDoiBox(block2, PREPRINT)).toHaveValue(doi2);
+        await expect(dois.versionDoiBadge(block2, PREPRINT)).toHaveText(/^\s*Unregistered\s*$/);
         await dois.closeVersionsWindow();
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi2);
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});

@@ -192,8 +192,20 @@ test.describe('DOIs (serial)', () => {
             expect(doi2).not.toBe(doi1);
             await dois.closeVersionsWindow();
 
+            // Marked registered before its publication: 1.0's DOI reads
+            // "Registered", 2.0's keeps "Unregistered" (Rules 20, 26).
+            await dois.goto();
+            await dois.runBulk('Mark DOIs Registered', [axolotl.submissionId]);
+            await dois.expectNotice('Items successfully marked registered');
+            await dois.expand(row, axolotl.submissionId);
+            await dois.openVersionsWindow(row);
+            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 1.0'), ARTICLE)).toHaveText(/^\s*Registered\s*$/);
+            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 2.0'), ARTICLE)).toHaveText(/^\s*Unregistered\s*$/);
+            await dois.closeVersionsWindow();
+
             // The major version published: it keeps the DOI it got at its
-            // creation; its page shows it, 1.0's page keeps 1.0's (Rules 12, 43).
+            // creation, still "Unregistered"; its page shows it, 1.0's page
+            // keeps 1.0's (Rules 12, 26, 43).
             await screen.gotoVersionPage(axolotl.submissionId, majorId, 'titleAbstract', 'Title & Abstract');
             await publishOpenVersion(page, tag);
             await dois.goto();
@@ -201,6 +213,7 @@ test.describe('DOIs (serial)', () => {
             await dois.openVersionsWindow(row);
             const block2 = dois.versionBlock('Version of Record 2.0');
             await expect(dois.versionDoiBox(block2, ARTICLE)).toHaveValue(doi2);
+            await expect(dois.versionDoiBadge(block2, ARTICLE)).toHaveText(/^\s*Unregistered\s*$/);
             await dois.closeVersionsWindow();
             await expectReaderDoi(reader, tag, axolotl.submissionId, doi2);
             await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});
