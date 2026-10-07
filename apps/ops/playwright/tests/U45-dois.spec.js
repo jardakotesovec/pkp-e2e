@@ -35,10 +35,12 @@
  *   submitted DOIs."; its "stale" sentence is not asserted.
  * - OPS5 ❓: S4's draft is read through the "DOI Assigned" filter before
  *   its "Submit", never as listed or unlisted.
- * - OPS2 ❓, OPS3 🐞, A2, A7, A9–A12, A15–A20, A25, A26: not on these
- *   scenarios' paths ("Immediately…" is only refused, in S8). OPS4 is
- *   retired (a minor version's galleys keep their DOIs); its guard is a
- *   Planned item. OJS1–OJS3, OMP1, A27: the journal's and the press's.
+ * - OPS2 ❓, OPS3 🐞, A2, A7, A9–A12, A15–A20: not on these scenarios'
+ *   paths ("Immediately…" is only refused, in S8). A28 🐞: S11 makes a
+ *   major version with DOIs at its creation but never marks it. OPS4, A25, A26 are
+ *   retired (a minor version's galleys keep their DOIs; a decline and
+ *   "Revert Decline" under "Immediately…"); their paths are Planned
+ *   items. OJS1–OJS3, OMP1: the journal's and the press's (A27 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch preprint server
@@ -469,7 +471,8 @@ test.describe('DOIs', () => {
         await expectListed(all);
 
         // "Publication Status": "Unpublished" drops the posted preprint;
-        // lifted, then "Posted" keeps it alone (Fields, "Filters").
+        // lifted, then "Posted" keeps it alone; lifted, all three are back
+        // (Fields, "Filters").
         await dois.pressFilter('Unpublished');
         await expect(dois.clearFilterButton('Unpublished')).toBeVisible();
         await expectListed([TA, CO]);
@@ -479,6 +482,9 @@ test.describe('DOIs', () => {
         await dois.pressFilter('Posted');
         await expect(dois.clearFilterButton('Posted')).toBeVisible();
         await expectListed([AX]);
+        await dois.pressFilter('Posted');
+        await expect(dois.clearFilterButton('Posted')).toHaveCount(0);
+        await expectListed(all);
 
         // No "Issues" box: the journal's alone (Fields, "Filters"), read
         // beside the column's own "Posted" filter.
@@ -972,8 +978,8 @@ test.describe('DOIs', () => {
         await expect(dois.versionsBar(row)).toHaveCount(0);
 
         // A major version: "There are 2 versions." with "View all"; the
-        // window's blocks, the new one "Unpublished" without a DOI
-        // (Rules 12, 20).
+        // window's blocks, the new one "Unpublished" and already holding a
+        // DOI of its own, the posted preprint being at Done (Rules 5, 12, 20).
         await openPublicationPage(page, tag, axolotl.submissionId, axolotl.publicationId);
         const majorId = await createVersion(page, tag, 'Major Revision');
         await dois.goto();
@@ -986,18 +992,18 @@ test.describe('DOIs', () => {
             /^\s*Author Original 2\.0 Unpublished\s*$/,
         ]);
         await expect(dois.versionDoiBox(dois.versionBlock('Author Original 1.0'), PREPRINT)).toHaveValue(doi1);
-        await expect(dois.versionDoiBox(dois.versionBlock('Author Original 2.0'), PREPRINT)).toHaveValue('');
+        const doi2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Author Original 2.0'), PREPRINT));
+        expect(doi2).not.toBe(doi1);
         await dois.closeVersionsWindow();
 
-        // The major version posted: a DOI of its own; its page shows it,
-        // 1.0's page keeps 1.0's (Rules 12, 43).
+        // The major version posted: it keeps the DOI it got at its creation;
+        // its page shows it, 1.0's page keeps 1.0's (Rules 12, 43).
         await postVersion(page, tag, axolotl.submissionId, majorId);
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
         await dois.openVersionsWindow(row);
         const block2 = dois.versionBlock('Author Original 2.0');
-        const doi2 = await doiValue(dois.versionDoiBox(block2, PREPRINT));
-        expect(doi2).not.toBe(doi1);
+        await expect(dois.versionDoiBox(block2, PREPRINT)).toHaveValue(doi2);
         await dois.closeVersionsWindow();
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi2);
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});

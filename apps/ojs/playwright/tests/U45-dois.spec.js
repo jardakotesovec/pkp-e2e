@@ -24,11 +24,11 @@
  * - A14 🐞: S9 reads the "Mark DOIs Needs Sync" question up to "…previously
  *   submitted DOIs."; its "stale" sentence is not asserted.
  * - OJS3 🐞: S14 reads the ISSN publish warning as listed, never its count.
- * - A27 🐞: S3 lists only works that are not declined; a declined work
- *   carrying a DOI, and one moved back to Review that "In Copyediting,
- *   Production or Published" leaves out, are not seeded.
- * - A2, A7, A9–A12, A15–A20, A25, A26, OJS1, OJS2: not on these
- *   scenarios' paths ("Immediately…" is only refused, in S8). OMP1,
+ * - A2, A7, A9–A12, A15–A20, OJS1, OJS2: not on these scenarios' paths
+ *   ("Immediately…" is only refused, in S8). A28 🐞: serial S11 makes a
+ *   major version with DOIs at its creation but never marks it. A25–A27 are retired (a
+ *   decline and "Revert Decline" under "Immediately…", a declined work
+ *   carrying a DOI on the page); their paths are Planned items. OMP1,
  *   OPS1–OPS3, OPS5: the press's and the preprint server's (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never

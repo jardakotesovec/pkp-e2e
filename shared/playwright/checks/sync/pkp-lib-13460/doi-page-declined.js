@@ -1,7 +1,7 @@
 // PR review of pkp/pkp-lib#13460 (pkp/ojs#5903, pkp/omp#2495; issue pkp/pkp-lib#13447), report
 // docs/reports/2026-10-07-pkp-lib-13460.md finding 3: the DOIs page no longer lists a declined
 // submission that carries a DOI, under the default "Upon reaching the copyediting stage"; and the new
-// filter "In Copyediting, Production or Published" leaves out a submission back at Review that carries
+// filter "In Copyediting, Production or Published" ("In Copyediting, Production, Published or with DOIs" from round 2) leaves out a submission back at Review that carries
 // a DOI, which the page listed before the change.
 //
 // OJS and OMP (the apps with the filter). Seeds its own scratch context (DOIs on for every kind,
@@ -43,7 +43,7 @@ forEachApp(async (app) => {
         const s = await screen(page);
         out.listed = Object.fromEntries(Object.keys(seeds).map((k) => [k, s.aria.main.includes(`F3 ${k} ${t}`)]));
         await shot(page, 'doi-page-declined');
-        out.filterOffered = await page.getByRole('button', {name: 'In Copyediting, Production or Published', exact: true}).count();
+        out.filterOffered = await page.getByRole('button', {name: /^In Copyediting, Production(,| or) Published/}).count();
         const api = (q) => page.evaluate(async (u) => {
             const r = await fetch(u, {headers: {'X-Csrf-Token': pkp.currentUser.csrfToken}});
             const j = await r.json().catch(() => null);

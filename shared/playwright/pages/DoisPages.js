@@ -83,7 +83,7 @@ const DOIS_TEXT = {
     immediateRefused:
         'Immediate DOI assignment is only possible with the default DOI suffix. Please choose the default suffix or a different time for automatic DOI assignment.',
     workflowFilterGroup: 'Workflow',
-    workflowFilter: 'In Copyediting, Production or Published',
+    workflowFilter: 'In Copyediting, Production, Published or with DOIs',
     noAgency: 'No Registration Agency Enabled',
     noAgencyHelp:
         'DOIs can be automatically minted and deposited with a registration agency. To use this feature, locate and install a plugin from the appropriate registration agency.',

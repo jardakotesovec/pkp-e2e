@@ -138,7 +138,7 @@ links under the list. <sup>g</sup>
 | **Search** | — | Narrows the list to the phrase once Enter is pressed; typing alone changes nothing (Rule 21). A "Clear search phrase" button, shown once a phrase is set, empties it. <sup>o</sup> |
 | **Bulk Actions** | — | A menu: "Select All" / "Select None", "Expand all" / "Collapse all", then "Take action on {count} selected item(s)." over the actions of Rule 24. <sup>p</sup> |
 | **Deposit All** | — | A button, shown only with an agency configured (Rule 36). Rule 29. <sup>p</sup> |
-| **Filters** | — | Headed "Filters", with a round button showing only a "?" icon beside the heading that opens the "DOI Statuses" window (Rule 22); a screen reader announces it as "button" with no name ⚠ [A8](#a8). Groups: "Status" ("Needs DOI", "DOI Assigned"); "Registration" ("Unregistered", "Submitted", "Registered", "Has Error", "Needs Sync"); "Publication Status", on a press ("Published", "Unpublished") and on a preprint server ("Posted", "Unpublished"); "Workflow", on a journal's "Articles" tab and on a press ("In Copyediting, Production or Published", Rule 15); on a journal's "Articles" tab an "Issues" box that suggests an issue once its year ("2025") or its full name from the start ("Vol. 1 No. 1") is typed ("Vol" or "1" suggests nothing); choosing one keeps that issue's articles. <sup>o</sup> <sup>q8</sup> <sup>q40</sup> |
+| **Filters** | — | Headed "Filters", with a round button showing only a "?" icon beside the heading that opens the "DOI Statuses" window (Rule 22); a screen reader announces it as "button" with no name ⚠ [A8](#a8). Groups: "Status" ("Needs DOI", "DOI Assigned"); "Registration" ("Unregistered", "Submitted", "Registered", "Has Error", "Needs Sync"); "Publication Status", on a press ("Published", "Unpublished") and on a preprint server ("Posted", "Unpublished"); "Workflow", on a journal's "Articles" tab and on a press ("In Copyediting, Production, Published or with DOIs", Rule 22); on a journal's "Articles" tab an "Issues" box that suggests an issue once its year ("2025") or its full name from the start ("Vol. 1 No. 1") is typed ("Vol" or "1" suggests nothing); choosing one keeps that issue's articles. <sup>o</sup> <sup>q8</sup> <sup>q40</sup> |
 | **An item's row** | — | A tick box with no name for a screen reader [A8](#a8), the item's name as a link that opens its public page in a new tab (Rule 16), its number, a status badge (Rule 31) and an expand button. <sup>m</sup> |
 | **An item's expanded view** | — | The version's name, a table "Type", "DOIs", "Status", "Actions" with one row per DOI the item carries (Rule 17), "Edit" / "Save" (Rule 18), and with an agency configured the agency panel (Rule 30). On a press, under the table, the note of Rule 47 while a chapter cannot carry a DOI. <sup>m</sup> <sup>q29</sup> |
 | **A DOI box** | No | Greyed text until "Edit" is pressed. A DOI must begin with digits, a dot and more digits, then "/" (for example "10.1234/abc"), and may hold only letters, digits and `-._;()/`; it must be unused by any other item on the install (Rule 18). <sup>n</sup> <sup>q9</sup> |
@@ -205,12 +205,15 @@ links under the list. <sup>g</sup>
      formats and the chapters, Rule 48 <sup>q30</sup>). On a preprint server the choice reads "Upon
      reaching the production stage" and acts at the preprint's final
      "Submit". A new version ("Create New Version") gets the DOIs it
-     lacks at once when the submission's stage is Copyediting or
-     Production at that moment (Rules 11, 12 say which it shares with
-     its source); the stage alone decides, whatever was published
-     before. At any other stage, and once the version of record is
-     published or the preprint posted, which takes the work past
-     Production, the new version gets them on its publication.
+     lacks at once when the submission is at Copyediting, Production or
+     Done at that moment, Done being where a published version of
+     record or a posted preprint puts it (Rules 11, 12 say which DOIs it
+     shares with its source). A new version made at the Submission or
+     Review stage, even after a "Published Manuscript Under Review"
+     version was published, gets its DOIs on its publication. On a
+     journal and a preprint server, DOIs a new version got at its
+     creation are marked by "Mark DOIs Registered" on the published work
+     before the version itself is published (Rule 26, [A28](#a28)).
      <sup>q41</sup>
    - **"Upon publication"**: when the version is published (posted), or,
      on a journal, when the article is scheduled into a future issue.
@@ -241,14 +244,19 @@ links under the list. <sup>g</sup>
     An unfinished draft nobody has submitted gets none (a preprint
     server lists it, its row "Needs DOI", Rule 15).
 5b. **Declining under "Immediately…".** Recording "Decline Submission"
-    (the button reads so at Review too) deletes every DOI of the
-    submission that reads "Unregistered", in every version, a published
-    one's included ⚠ [A25](#a25); a DOI that reads "Submitted" or
-    "Registered" stays. On a journal and a press the declined work
-    leaves the DOIs page (Rule 15); a published version's page loses its
-    "DOI:" line with the deleted DOI. "Revert Decline" brings the work
-    back to the list, and the DOIs the decline deleted are not made
-    again: those rows read "Needs DOI" ⚠ [A26](#a26). <sup>q43</sup>
+    (the button reads so at Review too) on a work none of whose versions
+    is published deletes every DOI of the submission that reads
+    "Unregistered", in every version; a DOI in any other status
+    ("Submitted", "Registered", "Needs Sync", "Error") stays. Once a version is published, a "Published
+    Manuscript Under Review" version included, the decline deletes none
+    of the work's DOIs, and the published page keeps its "DOI:" line. On
+    a journal and a press a declined work left with no DOI leaves the
+    DOIs page (Rule 15). "Revert Decline" gives the work's current
+    version new DOIs at once for the ticked kinds, its own and its
+    galleys' (on a press its chapters with their page, formats and
+    files), as the final "Submit" did (Rule 5a); its older versions get
+    none back. The DOIs page's "Needs DOI" filter then no longer lists
+    the work. <sup>q43</sup>
 6. **What a made DOI looks like.** The prefix, "/", then a suffix chosen
    by "DOI Format": <sup>h</sup>
    - **a. "Default"**: eight characters, lower-case letters and digits,
@@ -325,8 +333,8 @@ links under the list. <sup>g</sup>
     made with "Major Revision" does not take its source's DOI, nor its
     galleys theirs: it gets its own by Rules 5 and 25 (at once under
     "Immediately…", and under "Upon reaching the copyediting stage"
-    while the submission is in Copyediting or Production; otherwise on
-    publication at the latest, unless "Never"). A version made with
+    while the submission is at Copyediting, Production or Done; otherwise
+    on publication at the latest, unless "Never"). A version made with
     "Minor Revision" keeps its source's DOI, its galleys too: a family of
     versions whose names differ only after the dot ("Version of Record
     2.0", "2.1") shares them. Changing a DOI on the DOIs page then
@@ -347,11 +355,14 @@ links under the list. <sup>g</sup>
     "Monographs" ("Monograph DOIs"), and a preprint server one,
     "Preprints" ("Preprint DOIs"), while any kind is ticked. <sup>g</sup>
 15. **Which works are listed.** On the "Articles" tab (journal) and
-    "Monographs" tab (press): every submitted submission at any stage,
-    the Submission and Review stages included, except a declined one;
-    an unfinished draft nobody has submitted is not listed either. A
-    declined submission is left out even when it carries a DOI
-    ⚠ [A27](#a27). The "Workflow" filter narrows the list (Rule 22).
+    "Monographs" tab (press): every submitted submission that is not
+    declined, at any stage, the Submission and Review stages included;
+    and, declined or not, every one at Copyediting or Production, with a
+    published version, or carrying a DOI of a ticked kind (on a press a
+    file's DOI does not count, [OMP1](#omp1)). So a declined submission
+    is left out only while it has neither a DOI nor a published
+    version, and an unfinished draft nobody has submitted is never
+    listed. The "Workflow" filter keeps the second group alone (Rule 22).
     On a preprint server every preprint is listed, an
     unfinished draft nobody has submitted included (badge "Unpublished",
     its row "Needs DOI") ⚠ [OPS5](#ops5). The "Issues" tab lists every
@@ -430,12 +441,15 @@ links under the list. <sup>g</sup>
     with a DOI in that status. After "Unregistered" and then another
     "Registration" filter, that filter's "Clear filter: {name}" leaves no
     filter chosen, yet every unpublished work stays out of the list until
-    the page is reloaded ⚠ [A12](#a12). "In Copyediting, Production or
-    Published" (group "Workflow", on a journal's "Articles" tab and on a
-    press) keeps the works at Copyediting or Production and those with a
-    published version; a work moved back from Copyediting to Review
-    keeps the DOI it got there, yet this filter leaves it out [A27](#a27).
-    The info button beside
+    the page is reloaded ⚠ [A12](#a12). "In Copyediting, Production,
+    Published or with DOIs" (group "Workflow", on a journal's "Articles"
+    tab and on a press) keeps the works at Copyediting or Production,
+    those with a published version and those carrying a DOI, declined
+    ones included (Rule 15); a work at the Submission or Review stage
+    with neither a DOI nor a published version leaves the list. Its
+    button to lift it reads "Clear
+    filter: In Copyediting, Production, Published or with DOIs". The
+    info button beside
     "Filters" opens the side window "DOI Statuses", a table "Status" /
     "Description" with one line per status (Rule 31) and "DOI Assigned:
     All items assigned a DOI.". <sup>o</sup> <sup>q8</sup> <sup>q40</sup>
@@ -468,7 +482,9 @@ links under the list. <sup>g</sup>
     generated."; the others still get theirs. <sup>p</sup> <sup>h</sup>
 26. **"Mark DOIs Registered".** Records every DOI of each ticked
     published item, those of all its versions [OMP4](#omp4), as
-    registered by hand ("Registered", with no agency).
+    registered by hand ("Registered", with no agency); on a journal and
+    a preprint server that includes a new version not yet published,
+    whose DOIs then never reach the agency ⚠ [A28](#a28).
     When any ticked item is not published, nothing at all is marked and
     the window "DOI Updates Failed" lists, per unpublished item, "Failed
     to mark the DOI registered for {title}. The submission must be
@@ -872,7 +888,9 @@ differs. <sup>z1</sup>
   the manager's computer (Rule 29 [A13](#a13)). <sup>p</sup>
 - **Statuses change on other features' actions**: publishing and
   unpublishing versions and issues (Rule 32); under "Immediately, when
-  an item is created", a decline deletes the work's unregistered DOIs
+  an item is created", a decline of a work with no published version
+  deletes its unregistered DOIs, and "Revert Decline" gives its current
+  version new ones
   (Rule 5b). <sup>r</sup>
 - **Activity Log, no mail.** No DOI action sends an email or a
   notification. <sup>r</sup> A DOI given to a work that had none adds
@@ -935,8 +953,10 @@ differs. <sup>z1</sup>
    copyediting stage", "…production stage" on a preprint server).
    "Immediately, when an item is created", "Upon publication" and
    "Never" move or stop the automatic moment (Rule 5); "Immediately…"
-   also deletes a declined submission's unregistered DOIs (Rule 5b) and
-   saves only with "DOI Format" "Default" (Fields). <sup>h</sup>
+   also deletes the unregistered DOIs of a work declined before any of
+   its versions is published, and gives the current version new ones on
+   "Revert Decline"
+   (Rule 5b); it saves only with "DOI Format" "Default" (Fields). <sup>h</sup>
 
 5. **"DOI Format"** (same tab; "Default"). "None" and "Custom pattern"
    change what a made DOI looks like (Rule 6); "Custom pattern" shows the
@@ -1014,8 +1034,10 @@ differs. <sup>z1</sup>
   or when the galley is added under "Immediately…" (Rule 5a).
 - **[Editorial decision recording](U34-editorial-decision-recording.md)**:
   the decision into Copyediting makes DOIs (Rule 5); under
-  "Immediately…" "Decline Submission" deletes unregistered ones and
-  "Revert Decline" makes none (Rule 5b).
+  "Immediately…" "Decline Submission" deletes unregistered ones while
+  no version is published, and "Revert Decline" gives the current
+  version new ones
+  (Rule 5b).
 - **[Identifiers](U44-identifiers.md)**: publisher IDs and URNs, a
   separate feature; the "%x" pattern symbol reads the Publisher ID
   (Rule 6c).
@@ -1171,12 +1193,13 @@ throwaway accounts. <sup>sc</sup>
    - **"Publication Status"** (press, preprint server): press
      "Unpublished": "Axolotl limb memory" leaves the list; press it again
      and press "Published" ("Posted"): only "Axolotl limb memory" is
-     listed (Fields, "Filters").
+     listed; press it again: all three are back (Fields, "Filters").
    - **"Workflow"** (journal, press): the "Filters" column has the group
-     "Workflow" with "In Copyediting, Production or Published"; press
-     it: "Axolotl limb memory" and "Tardigrade desiccation" are listed
-     and "Coral spawning" is not; press it again: all three are back
-     (Fields, "Filters"; Rule 22).
+     "Workflow" with "In Copyediting, Production, Published or with
+     DOIs"; press it: "Axolotl limb memory" and "Tardigrade desiccation"
+     are listed and "Coral spawning" is not, and "Clear filter: In
+     Copyediting, Production, Published or with DOIs" shows; press the
+     filter again: all three are back (Fields, "Filters"; Rule 22).
    - **The "Issues" box** {OJS}: type "2025" in "Issues": it suggests
      "Vol. 1 No. 1 (2025)"; choose it: only "Axolotl limb memory" is
      listed (Fields, "Filters").
@@ -1525,8 +1548,10 @@ throwaway accounts. <sup>sc</sup>
 11. **A DOI per major version ("DOI Versioning" "Yes")**
 
     Given: a Journal Manager, on a scratch journal with the prefix
-    "10.1234" and "DOI Versioning" "Yes" (a preprint server's default),
-    holding "Axolotl limb memory", published with its DOI as version 1.0;
+    "10.1234", "Automatic DOI Assignment" as installed ("Upon reaching
+    the copyediting stage", "…production stage") and "DOI Versioning"
+    "Yes" (a preprint server's default), holding "Axolotl limb memory",
+    published with its DOI as version 1.0, which puts it at Done;
     on a press "Chapters" and "Publication Formats" are ticked too and
     the book carries the chapter "Tides", its "Chapter Page" ticked, and
     a publication format "PDF", both with their DOIs.
@@ -1538,11 +1563,12 @@ throwaway accounts. <sup>sc</sup>
       with a "View all" button; press it: a side window "DOIs for all
       versions" holds a block headed "{version} ({date published})" for
       1.0, with its DOI, and one headed "{version} Unpublished" for the
-      new version, whose "Article" row has no DOI (Rules 12, 20).
-    - **The major version published**: close the window and publish the
-      new version, 2.0: in "View all" its "Article" row now holds a DOI of
-      its own, different from 1.0's; the article's page shows it, and
-      1.0's page keeps 1.0's DOI (Rules 12, 43).
+      new version, 2.0, whose "Article" row already holds a DOI of its
+      own, different from 1.0's (Rules 5, 12, 20).
+    - **The major version published**: close the window and publish
+      2.0: in "View all" its "Article" row keeps the DOI it got at its
+      creation; the article's page shows it, and 1.0's page keeps 1.0's
+      DOI (Rules 12, 43).
     - **A minor version**: press "Create New Version" and choose "Minor
       Revision": the expanded view still reads "There are 2 versions.";
       "View all" holds 1.0's block and the new minor version's, 2.1,
@@ -1552,9 +1578,9 @@ throwaway accounts. <sup>sc</sup>
       press "Save": 2.0's page shows "https://doi.org/10.1234/e2e-v2", and
       1.0's page keeps its own DOI (Rules 12, 20, 43).
     - **A press's chapter and format** {OMP}: in "View all" 2.0's block
-      had "Tides" and "Format / PDF" rows without a DOI before 2.0 was
-      published, and after its publish DOIs of their own, different from
-      those rows in 1.0's block; 2.1's block holds the DOIs 2.0's block
+      had "Tides" and "Format / PDF" rows with DOIs of their own from its
+      creation, different from those rows in 1.0's block, and kept them
+      through its publish; 2.1's block holds the DOIs 2.0's block
       showed. Press "Edit" at the foot of the window, replace "Tides"'
       DOI in 2.1's block with "10.1234/e2e-c4" and press "Save": the
       table of contents on 2.0's page shows "10.1234/e2e-c4" in "Tides"'
@@ -1912,12 +1938,24 @@ Left out of the scenarios above, by reason:
   - "Immediately…": a completed review, publicly shown, getting its
     "Peer Review {number}" row and DOI at "Mark as Complete" {OJS}
     (Rules 5a, 7)
-  - "Immediately…": a published version whose DOI was marked
-    "Registered" keeping its "DOI:" line through "Decline Submission"
-    (Rule 5b)
+  - "Immediately…" and "Decline Submission": a work with no published
+    version losing its "Unregistered" DOIs while one marked "Registered"
+    stays, and a work whose "Published Manuscript Under Review" version
+    is published keeping every DOI and its page's "DOI:" line (Rule 5b;
+    A25 retired)
+  - "Immediately…": "Revert Decline" giving the declined work's current
+    version new DOIs, the work no longer listed by "Needs DOI" (Rule 5b;
+    A26 retired)
+  - a declined submission carrying a DOI listed on the DOIs page and by
+    "In Copyediting, Production, Published or with DOIs", one moved back
+    from Copyediting to Review with its DOI listed by that filter, and a
+    declined one with no DOI listed by neither {OJS OMP} (Rules 15, 22;
+    A27 retired)
   - "Upon reaching the copyediting stage": a new version made while the
-    submission is in Copyediting or Production getting the DOIs it lacks
-    at once (Rules 5, 12)
+    submission is at Copyediting or Production getting the DOIs it lacks
+    at once, and one made at Review after a "Published Manuscript Under
+    Review" version was published getting none until its publication
+    (Rules 5, 12)
 - **Rarely met**:
   - a press with "Chapters" or "Publication Formats" ticked and "Monographs" not: the same books listed, each with only those kinds' rows, the badge read from the first row {OMP} (Rule 46)
 - **Nothing new to test**:
@@ -1963,6 +2001,7 @@ Left out of the scenarios above, by reason:
   - A15 ("Deposit DOIs" on a published work without a DOI, and on one whose article DOI was cleared while its galley kept one; Rule 29)
   - OJS5 ("Deposit All" marking "Submitted" a galley DOI whose article DOI is "Registered" or missing, and "Automatic Deposit" alike; Rules 29, 41)
   - A24 (a formatted title's codes in a row's name; Rule 16)
+  - A28 (an unpublished new version's DOIs marked "Registered" with its work's, and never deposited once it is published {OJS OPS}; Rules 5, 26, 29)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - OMP4 (the Mark actions on a press under "DOI Versioning" "Yes" leaving an earlier version's DOIs; Rule 52)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
@@ -1975,9 +2014,6 @@ Left out of the scenarios above, by reason:
   - OPS3 (a preprint server's "Username" help; Fields, the Crossref block)
   - A21 (the server log's warning on a "Registration" tab "Save" without an agency; Fields, the Registration tab; scenarios 12 and 19 pass it)
   - A23 (a journal's or a preprint server's galley given its DOI alone at a publish; Side effects)
-  - A25 (a decline under "Immediately…" deleting a published version's DOI; Rule 5b)
-  - A26 ("Revert Decline" under "Immediately…" leaving the work without a DOI; Rule 5b)
-  - A27 (a declined submission carrying a DOI left off the DOIs page, and a work moved back to Review with a DOI left out by "In Copyediting, Production or Published"; Rules 15, 22)
 - **No seed**:
   - the "Export DOIs" download and "Items successfully exported": the test installs cannot reach the agency's site (Rule 29; Side effects)
   - a deposit the agency answers with an error: "Error", "View Error" and the "Registration Error Message" window (Rules 17, 33)
@@ -2010,9 +2046,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A21](#a21) | "Save" on the DOI "Registration" tab with no agency plugin enabled logs a PHP "Undefined array key" warning | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A22](#a22) | The DOIs page's "Bulk Actions" menu stays open over the list when an action is confirmed at once | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A24](#a24) | A title with an italic word or "&" shows its formatting codes in the DOIs page's rows | 🐞 | minor | — |
-| [A25](#a25) | Under "Immediately", declining a submission deletes the DOI its published version shows | 🐞 | user-visible | — |
-| [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | 🐞 | user-visible | — |
-| [A27](#a27) | The DOIs page no longer lists a declined submission that carries a DOI | 🐞 | user-visible | — |
+| [A28](#a28) | On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency | 🐞 | user-visible | — |
 | [OJS2](#ojs2) | On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it | 🐞 | high · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
@@ -2033,6 +2067,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP3](#omp3) | A chapter that cannot have a DOI reads "Needs DOI" | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers "Automatic Deposit" but nothing runs it | ❓ | user-visible | — |
 | [OPS5](#ops5) | A preprint server's DOIs page lists drafts nobody has submitted | ❓ | minor | — |
+| [A25](#a25) | Under "Immediately", declining a submission deletes the DOI its published version shows | ✅ | retired | — |
+| [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | ✅ | retired | — |
+| [A27](#a27) | The DOIs page no longer lists a declined submission that carries a DOI | ✅ | retired | — |
 | [OPS4](#ops4) | On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's | ✅ | retired | issues (claude), 2026-10-01 — re-verified |
 
 ### All apps
@@ -2395,47 +2432,29 @@ and the "DOI Updates Failed" window prints it plain ("Failed to mark
 the DOI registered for Narwhal tusk acoustics & echoes. …").
 Basis: probe, 2026-10-05. <sup>f-a24</sup>
 
-<a id="a25"></a>
-**A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · 🐞 · user-visible.
-A journal or a press has "Automatic DOI Assignment" set to "Immediately,
-when an item is created". While the submission is still at Review, an
-editor publishes its version with "Published Manuscript Under Review"
-as its "Publication Stage" ([Publish, schedule &
-versions](U49-publish-schedule-and-versions.md), Fields), and later
-records "Decline Submission". The decline deletes that published
-version's DOI, and its galleys', while they read "Unregistered". The
-version stays published, but its page no longer shows the "DOI:" line,
-and nothing on screen says so. Readers may already cite that DOI, and
-the editor expects the published page to keep it. The declined
-submission is not on the DOIs page ([A27](#a27)), so there is no screen
-where the loss shows or can be undone. A DOI already deposited
-("Submitted" or "Registered") stays.
-Basis: probe, 2026-10-07. <sup>f-a25</sup>
-
-<a id="a26"></a>
-**A26 — Under "Immediately", "Revert Decline" does not give the work its DOIs back** · 🐞 · user-visible.
-Under "Automatic DOI Assignment" "Immediately, when an item is created",
-a decline deletes the submission's unregistered DOIs (Rule 5b). The
-change means "Revert Decline" to assign them again. After "Revert
-Decline" the work has no DOI on a journal, a press and a preprint
-server, and the DOIs page's "Needs DOI" filter lists it (journal,
-press), although every other submitted work under this setting has its
-DOI from the start.
-Basis: probe, 2026-10-07. <sup>f-a26</sup>
-
-<a id="a27"></a>
-**A27 — The DOIs page no longer lists a declined submission that carries a DOI** · 🐞 · user-visible.
-On a journal and a press the DOIs page leaves out every declined
-submission, under any "Automatic DOI Assignment", also one that carries
-a DOI. Under the default "Upon reaching the copyediting stage" a
-submission gets its DOI on its acceptance into Copyediting; moved back
-to Review and declined, it keeps that DOI. The page listed it before the
-change, and it is the only screen where that DOI can be seen, changed,
-cleared, marked or deposited. Now no filter lists it. The new filter "In
-Copyediting, Production or Published", meant to give back the page's
-former list, also leaves out a work moved back to Review that carries a
-DOI, which that list held.
-Basis: probe, 2026-10-07. <sup>f-a27</sup>
+<a id="a28"></a>
+**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · 🐞 · user-visible.
+A journal or a preprint server has "DOI Versioning" "Yes" and
+"Automatic DOI Assignment" at its default, "Upon reaching the
+copyediting stage" ("…production stage"; both are a new preprint
+server's defaults). A manager makes a new version of a published work
+with "Create New Version" › "Major Revision": the version, not yet
+published, gets DOIs of its own at once (Rule 5). The manager then
+ticks the work on the DOIs page and runs "Mark DOIs Registered": the
+new version's DOIs turn "Registered" too, and "View all" shows its
+"… Unpublished" block reading "Registered", though nothing about that
+version was registered. Expected: only the published version's DOIs
+are marked, by this action and by a deposit alike. Once the new version is published its DOIs still read
+"Registered", so "Deposit All" never sends them and their "Edit" is
+greyed (Rule 19): the page says the version's DOI is registered while
+the agency has never heard of it, and a reader's link to it does not
+resolve. A "Deposit DOIs" with Crossref, which sends only the published
+versions, is written to mark the same unpublished DOIs "Submitted" and
+then "Registered" (read in the code, not driven). The same happens
+under "Immediately…", where every new version gets its DOIs at
+creation. A press is not affected: its marks reach the current
+version's DOIs only ([OMP4](#omp4)).
+Basis: probe, 2026-10-07, at the PR heads of `pkp/pkp-lib#13447` round 2 before their merge (OJS, OPS). <sup>f-a28</sup>
 
 ### OJS
 
@@ -2530,7 +2549,7 @@ that kind, which the press must accept or delete row by row. Publishing
 a book still gives its files DOIs by themselves, unless "Automatic DOI
 Assignment" is "Never".
 Basis: probe, 2026-10-01. <sup>f-omp1</sup>
-Report: refresh owed — `pkp/omp#2495` (PR head `e1464b9228`, unmerged) rewrites `addOnDoiPageFilterToQuery()`: every submitted book not declined is listed, the stage-or-published test only under the new "Workflow" filter, so the Cause's sentence on its first clause and the fix's last bullet change; the empty list with "Files" alone stays (2026-10-07)
+Report: refresh owed — `pkp/omp#2495` (round-2 PR head `c9e1c8a521`, unmerged) rewrites `addOnDoiPageFilterToQuery()`: every submitted book not declined is listed, besides the former list (Copyediting or Production, published, or a publication, chapter or format DOI; never a file's), which the new "Workflow" filter shows alone, so the Cause's sentence on its first clause and the fix's last bullet change; the empty list with "Files" alone stays (2026-10-07)
 
 <a id="omp2"></a>
 **OMP2 — A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure** · 🐞 · medium · crash: server.
@@ -2622,6 +2641,15 @@ leave drafts out.
 Basis: probe, 2026-09-26. <sup>f-ops5</sup>
 
 ### Retired
+
+<a id="a25"></a>
+**A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · ✅ · retired. Fixed 2026-10-07 at the PR heads of `pkp/pkp-lib#13447` round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`), before their merge; this page describes the fixed behavior: once a version is published, a "Published Manuscript Under Review" one included, a decline keeps every DOI of the work, and the published page its "DOI:" line (Rule 5b). <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — Under "Immediately", "Revert Decline" does not give the work its DOIs back** · ✅ · retired. Fixed 2026-10-07 at the same PR heads, before their merge; this page describes the fixed behavior: "Revert Decline" gives the current version new DOIs on a journal, a press and a preprint server (Rule 5b). <sup>f-a26</sup>
+
+<a id="a27"></a>
+**A27 — The DOIs page no longer lists a declined submission that carries a DOI** · ✅ · retired. Fixed 2026-10-07 at the same PR heads, before their merge; this page describes the fixed behavior: the page lists a declined work that carries a DOI, and "In Copyediting, Production, Published or with DOIs" lists it and a work moved back to Review with its DOI (Rules 15, 22). <sup>f-a27</sup>
 
 <a id="ops4"></a>
 **OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed by `pkp/ops#1435` (with `pkp/pkp-lib#13460`), checked 2026-10-07 at the PR heads before their merge; this page describes the fixed behavior: a preprint's "Minor Revision" keeps its galleys' DOIs, as on a journal and a press (Rule 12). <sup>f-ops4</sup>
@@ -3141,7 +3169,12 @@ same test (`areDoisEnabled()`, not `neverCreationTime`); `AssignDOIs`
 also handles `SubmissionSubmitted` (`handleSubmitted()`, immediate
 only), the new event `PublicationVersioned` (`handleVersioned()`, note
 q41) and, under immediate, declines (`handleDecline()`, note q43); OPS's
-`AssignDOIsOnSubmission` is unchanged. `createDois()` (each
+`AssignDOIsOnSubmission` is unchanged. At the round-2 heads each app's
+`dbscripts/xml/upgrade.xml` runs `clearDataCache` before
+`addPluginVersions`, so the cached event listeners no longer name the
+deleted `VersionDois`; the developer's summary on `pkp/pkp-lib#13447`
+asks an install updated without the upgrade to run `php
+lib/pkp/tools/events.php clear`. `createDois()` (each
 app's `classes/publication/Repository.php`): each enabled kind with an
 empty `doiId`; peer reviews from `getCompletedReviewAssignments()` that
 are publicly visible (`mintDoi()`); exceptions collected, never shown by
@@ -3189,7 +3222,9 @@ when `Repo::doi()->assignOnCreation()` or
 `assignOnVersionCreation()` holds, the latter being
 `copyEditCreationTime` with the submission's `stageId` Copyediting or
 Production. A version of record's publication moves the submission to
-the stage `WORKFLOW_STAGE_ID_DONE` ("Done"), outside that test. The
+the stage `WORKFLOW_STAGE_ID_DONE` ("Done"), outside that test (at the
+round-2 head `1aa1973c66`, before its merge, inside it:
+`assignOnVersionCreation()` lists Copyediting, Production and Done). The
 workflow offers "Create New Version" whenever the user may publish
 (ui-library `useWorkflowNavigationConfig*` `permissions.canPublish`).
 Live-probed 2026-10-07, OJS, a scratch journal on "Upon reaching the
@@ -3201,7 +3236,22 @@ Copyediting; a new version of record ("Major Revision", through the
 version API the "Create New Version" window calls) had a DOI of its own
 and its galley copy one too, at once. A published book (OMP) and a
 posted preprint (OPS), both at "Done", made a major version without
-DOIs until its publication (the same day's regression read).
+DOIs until its publication (the same day's regression read). Round 2,
+live-probed 2026-10-07 at the round-2 heads (pkp-lib `1aa1973c66`, ojs
+`0375b98bde`, omp `c9e1c8a521`, ops `db0f597851`), all three apps,
+scratch contexts on the installed "Upon reaching the copyediting
+stage" ("…production stage") and "DOI Versioning" "Yes" (the journal
+set back to "No" after the walk), a work seeded `published` (stage 6,
+Done; OJS and OPS with a galley "PDF", OMP with "Tides" and its page
+and a format "PDF"): "Create New Version" › "Major Revision" on screen
+gave version 2.0 its own DOI at once (OJS `10.1234/2nz2dy35` beside
+1.0's `10.1234/x5jx5m87`), and its galley (OJS, OPS) or its chapter and
+format (OMP) theirs; the DOIs page's "View all" read "Version of Record
+2.0 Unpublished" ("Author Original 2.0 Unpublished") with those DOIs in
+its rows. OJS, a work at Review whose version was published as PMUR
+1.0 through the publication API: a major version made on screen had no
+DOI, the submission still at Review. No server log line. Facts:
+`.reports/sync/acc2/r2-walk-<app>.json`.
 
 <a id="fn-q42"></a>
 **q42** — At the same PR heads, before their merge:
@@ -3235,11 +3285,18 @@ format at once, and a "Minor Revision" of that shared them.
 <a id="fn-q43"></a>
 **q43** — At the same PR heads, before their merge:
 `AssignDOIs::handleDecline()` deletes only `Doi::STATUS_UNREGISTERED`
-records ("Submitted" and "Registered" stay: code); the revert branch
+records (every other status, "Submitted", "Registered", "Needs Sync" and "Error", stays: code); the revert branch
 never runs (note f-a26). Live-probed 2026-10-07: "Decline Submission"
 at the Submission stage deleted a submitted work's DOI on all three
 apps, and a published "Published Manuscript Under Review" version's on
-a journal and a press (notes f-a25, f-a26).
+a journal and a press (notes f-a25, f-a26). At the round-2 heads
+(pkp-lib `1aa1973c66`, ojs `0375b98bde`, omp `c9e1c8a521`, ops
+`db0f597851`), before their merge: nothing is deleted once
+`getPublishedPublications()` is not empty, and a `RevertDecline` or
+`RevertInitialDecline` decision runs `Repo::submission()->createDois()` (each
+app's: the current publication and its galleys, or its chapters,
+formats and files). The kept checks of notes f-a25 and f-a26 passed
+there, 2026-10-07.
 
 <a id="fn-q13"></a>
 **q13** — Live-probed 2026-09-26 (Rule 6b; A2), all three apps: under
@@ -3360,7 +3417,9 @@ cleared. At the PR heads of `pkp/pkp-lib#13460` with `pkp/ojs#5903` and
 `pkp/omp#2495`, before their merge, OJS's and OMP's query is the one of
 note f-a27 (every submitted submission not declined; the stage and
 published test only under the "Workflow" filter, and no DOI clause);
-OPS's is unchanged.
+OPS's is unchanged. At the round-2 heads (ojs `0375b98bde`, omp
+`c9e1c8a521`) the main-era clause comes back beside the not-declined
+one, and alone under the filter (note f-a27, round 2).
 
 <a id="fn-q17"></a>
 **q17** — Live-probed 2026-09-26 (Rule 15; OPS5), all three apps: on a
@@ -3393,7 +3452,20 @@ group. The suites at the same heads, 2026-10-07: scenario 3's three works
 listed and the filter keeping the published one and the one at
 Copyediting (OJS, OMP); scenario 17's two works at Review, each with a
 submitted review not yet read, listed "Unpublished" with the "Article"
-row only, empty and "Needs DOI" (OJS).
+row only, empty and "Needs DOI" (OJS). At the round-2 heads (pkp-lib
+`1aa1973c66`, ojs `0375b98bde`, omp `c9e1c8a521`), before their merge:
+`manager.dois.filters.inEditingOrPublished` reads "In Copyediting,
+Production, Published or with DOIs" (each app's `locale/en/manager.po`)
+and the query is the one of note f-a27, round 2. Live-probed
+2026-10-07, OJS and OMP, the scratch contexts of note q41 holding a
+published work, a declined work with a DOI (accepted, moved back to
+Review, declined), one moved back to Review with its DOI, one at Review
+without, one declined at Review without (and on OJS one at Review whose
+PMUR version is published): the page listed every one but the declined
+one without a DOI; the "Workflow" group's one button, "In Copyediting,
+Production, Published or with DOIs", kept all but the two without a
+DOI or a published version, and showed "Clear filter: In Copyediting,
+Production, Published or with DOIs", which brought the list back.
 
 <a id="fn-q18"></a>
 **q18** — Live-probed 2026-09-26 (Rule 21; A11), all three apps, two runs
@@ -4390,6 +4462,14 @@ the move to Copyediting; code). A preprint server not driven: a posted
 preprint counts as published and takes no decline (code). Kept check
 `shared/playwright/checks/sync/pkp-lib-13460/decline-published.js`;
 regression report `docs/reports/2026-10-07-pkp-lib-13460.md`, Finding 1.
+At the PR heads of round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`), before their merge: `handleDecline()` returns
+before deleting anything when `$submission->getPublishedPublications()`
+is not empty. Kept check `decline-published.js` re-run 2026-10-07, OJS
+(`.reports/sync/pr13460r2/decline-published-ojs.json`): the PMUR
+version published (`3|PMUR`), "Decline Submission" recorded on screen
+(submission status 4, stage Review), the version's DOI `10.1234/qgzp0j41`
+and the galley's `10.1234/81zz0m18` kept, the public page still showing
+`https://doi.org/10.1234/qgzp0j41`, no server log line: PASS.
 
 <a id="fn-f-a26"></a>
 **f-a26** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`), before
@@ -4407,6 +4487,15 @@ no DOI, no server log line; on a journal and a press "Needs DOI" listed
 the work. Kept check
 `shared/playwright/checks/sync/pkp-lib-13460/revert-decline.js`;
 regression report `docs/reports/2026-10-07-pkp-lib-13460.md`, Finding 2.
+At the PR heads of round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`), before their merge: the revert branch tests the
+decision type (`RevertInitialDecline` or `RevertDecline`) and runs
+`Repo::submission()->createDois()` on the event's submission. Kept check
+`revert-decline.js` re-run 2026-10-07, all three apps
+(`.reports/sync/pr13460r2/revert-decline-<app>.json`): the DOI made at
+submit (OJS `10.1234/av3y0r43`) deleted by the decline, "Revert Decline"
+recorded on screen, status back to queued and a new DOI on the version
+(OJS `10.1234/pjmvy037`, OMP `10.1234/qtyn1h70`, OPS `10.1234/t5evv065`),
+"Needs DOI" not listing the work, no server log line: PASS.
 
 <a id="fn-f-a27"></a>
 **f-a27** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`) with
@@ -4426,6 +4515,55 @@ with `inEditingOrPublished=1` neither was. The tips' query lists both
 (code, and the same SQL run on the press). Kept check
 `shared/playwright/checks/sync/pkp-lib-13460/doi-page-declined.js`;
 regression report `docs/reports/2026-10-07-pkp-lib-13460.md`, Finding 3.
+At the PR heads of round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`), before their merge: OJS and OMP
+`addOnDoiPageFilterToQuery()` keep `submission_progress = ''` and then,
+without the filter, `status != STATUS_DECLINED` or the clause
+`addInEditingPublishedOrWithDoisToQuery()` (`stage_id` in Copyediting or
+Production, or a publication that is published or whose publication,
+galley, review or author response (OJS), chapter or format (OMP) DOI is
+set, for the enabled kinds); with `inEditingOrPublished` that clause
+alone. Kept check `doi-page-declined.js` re-run 2026-10-07, OJS and OMP
+(`.reports/sync/pr13460r2/doi-page-declined-<app>.json`): the declined
+work with a DOI, the one back at Review with a DOI and the one at Review
+without listed; the filter's request returning the first two: PASS.
+
+<a id="fn-f-a28"></a>
+**f-a28** — At the PR heads of round 2 (`pkp/pkp-lib#13460`
+`1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`,
+`pkp/ops#1435` `db0f597851`), before their merge:
+`Repo::doi()->assignOnVersionCreation()` takes the stage Done, so
+`AssignDOIs::handleVersioned()` mints a new major version's DOIs at
+`version()` (note q41); `PKPDoiController::markSubmissionsRegistered()`
+marks every id of `Repo::doi()->getDoisForSubmission()`, which on OJS
+and OPS walks every publication of the submission and on OMP takes the
+current publication only (OMP4's cause). `depositSubmissions` marks the
+same set "Submitted", and `CrossrefExportPlugin::updateDepositStatus()`
+(OJS line 423, OPS lines 472 and 500) marks it "Registered" after a
+deposit whose XML holds published versions only
+(`getLatestMinorPublicationsForDoiDeposit()`; OPS `STATUS_PUBLISHED`);
+the automatic deposit's job ends in the same update (code, not driven:
+no agency credentials). The deposit query
+(`getAllDepositableSubmissionIds()`) takes the current published version
+with a DOI "Unregistered", "Error" or "Needs Sync". At the tips such a
+version got its DOI at its publication (`VersionDois`), and at the
+round-1 heads too (Done outside the test), so a mark never reached it;
+under "Immediately" round 1 already minted at `version()`. Live-probed
+2026-10-07 by the regression reader rr3 (`.reports/sync/rr3/suspicions.md`
+S1; script `.reports/sync/rr3/scripts/s12.js`; facts
+`.reports/sync/rr3/s12-<app>.json`, `s1-after-mark-<app>.json`,
+`s1-after-publish-<app>.json`, `s12.log`), scratch contexts on
+"copyediting" ("production") and "Yes", a work seeded `published`
+(stage Done) with a galley (OMP a format): "Create New Version" ›
+"Major Revision" on screen gave 2.0 new DOIs (OJS article
+`10.1234/5wr0yx87`, galley `10.1234/t7r28c05`; OPS preprint
+`10.1234/9ade6643`, galley `10.1234/v1vcwa45`), "Unregistered"; "Mark
+DOIs Registered" on the DOIs page (200): "View all"'s "… 2.0
+Unpublished" block read "Registered" on both rows (stored status 3);
+2.0 published (posted) on screen: still "Registered", and the deposit
+query found nothing for the work. OMP: 2.0's DOIs stayed "Unregistered"
+through the mark and after the publish. Control under "No": 2.0 shared
+1.0's DOIs, nothing new minted. No server log line, no crash. Regression
+report `docs/reports/2026-10-07-pkp-lib-13460.md`.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `IssueGridHandler::publishIssue()` calls
@@ -4617,7 +4755,7 @@ a journal and a press listed no draft.
 - Vue: `lib/ui-library/src/components/Container/DoiPage{OJS,OMP,OPS}.vue`; `components/ListPanel/doi/` (`DoiListPanel.vue`, `DoiListPanel{OJS,OMP,OPS}.vue`, `DoiListItem.vue`, `DoiItemVersionModal.vue`, `DoiStatusInfoModal.vue`, `DoiFailedActionDialogBody.vue`, `DoiItemViewErrorDialogBody.vue`, `DoiItemViewRegisteredMessageDialogBody.vue`, `useDoi.js`); app `registry/uiLocaleKeysBackend.json`
 - API: `lib/pkp/api/v1/dois/PKPDoiController.php`, `ojs|omp/api/v1/dois/DoiController.php`, `lib/pkp/api/v1/_dois/PKPBackendDoiController.php`, `ojs|omp|ops/api/v1/_dois/BackendDoiController.php`; `lib/pkp/api/v1/submissions/PKPSubmissionController.php` (`onDoiPage`, `hasDois`, `doiStatus`; `inEditingOrPublished` at the PR head `246e5387f6` of `pkp/pkp-lib#13460`, before its merge)
 - Model: `lib/pkp/classes/doi/` (`Doi.php`, `Repository.php`, `DAO.php`, `Collector.php`, `DoiGenerator.php`, `RegistrationAgencySettings.php`, `exceptions/DoiException.php`), `ojs|omp|ops/classes/doi/Repository.php`, `DAO.php`; `lib/pkp/schemas/doi.json`; `lib/pkp/classes/submission/Collector.php` and app copies (`filterByInEditingOrPublished()` at that PR head, `addOnDoiPageFilterToQuery()`, `addHasDoisFilterToQuery()`, `addDoiStatusFilterToQuery()`, `addFilterByAssociatedDoiIdsToQuery()`, `getAllowedDoiTypes()`)
-- Creation and versions: `lib/pkp/classes/observers/listeners/AssignDOIs.php`, `VersionDois.php` (deleted at the PR head `246e5387f6` of `pkp/pkp-lib#13460`, before its merge: `AssignDOIs::handlePublished()`, with `handleSubmitted()`, `handleVersioned()` and `handleDecline()` beside it), `lib/pkp/classes/observers/events/PublicationVersioned.php` (new at that head, fired by each app's `classes/publication/Repository.php` `version()`), `ops/classes/observers/listeners/AssignDOIsOnSubmission.php`; immediate assignment at that head: `lib/pkp/classes/doi/Repository.php` (`CREATION_TIME_IMMEDIATE`, `assignOnCreation()`, `assignOnVersionCreation()`), `lib/pkp/classes/galley/Repository.php` (`assignDoiOnCreation()`), `lib/pkp/classes/submission/reviewAssignment/Repository.php` (`canHaveDoi()`, `assignDoiOnCreation()`), `ojs/controllers/grid/issues/form/IssueForm.php`, OMP `classes/publication/Repository.php` (`createDoisOnCreation()`), `classes/submissionFile/Repository.php` (`add()`), `controllers/grid/catalogEntry/form/PublicationFormatForm.php`, `controllers/grid/users/chapter/form/ChapterForm.php`; `lib/pkp/classes/publication/Repository.php` (`version()`, `publish()`, `unpublish()`, `getMinorVersionsDoi()`, `getReviewDoiItemsGroupedByPublication()`), app `classes/publication/Repository.php` (`createDois()`, `version()`), `ojs/classes/issue/Repository.php` (`createDoi()`), `ojs/classes/controllers/grid/issues/IssueGridHandler.php` (`publishIssue()`, `unpublishIssue()`), `ojs/classes/plugins/PubIdPlugin.php` (`generateCustomPattern()`, `suffixHasIssuePattern()`)
+- Creation and versions: `lib/pkp/classes/observers/listeners/AssignDOIs.php`, `VersionDois.php` (deleted at the PR head `246e5387f6` of `pkp/pkp-lib#13460`, before its merge: `AssignDOIs::handlePublished()`, with `handleSubmitted()`, `handleVersioned()` and `handleDecline()` beside it), `lib/pkp/classes/observers/events/PublicationVersioned.php` (new at that head, fired by each app's `classes/publication/Repository.php` `version()`), `ops/classes/observers/listeners/AssignDOIsOnSubmission.php`; `ojs|omp|ops/dbscripts/xml/upgrade.xml` (`clearDataCache` at the round-2 heads, note h), `lib/pkp/tools/events.php` (`clear`); immediate assignment at that head: `lib/pkp/classes/doi/Repository.php` (`CREATION_TIME_IMMEDIATE`, `assignOnCreation()`, `assignOnVersionCreation()`), `lib/pkp/classes/galley/Repository.php` (`assignDoiOnCreation()`), `lib/pkp/classes/submission/reviewAssignment/Repository.php` (`canHaveDoi()`, `assignDoiOnCreation()`), `ojs/controllers/grid/issues/form/IssueForm.php`, OMP `classes/publication/Repository.php` (`createDoisOnCreation()`), `classes/submissionFile/Repository.php` (`add()`), `controllers/grid/catalogEntry/form/PublicationFormatForm.php`, `controllers/grid/users/chapter/form/ChapterForm.php`; `lib/pkp/classes/publication/Repository.php` (`version()`, `publish()`, `unpublish()`, `getMinorVersionsDoi()`, `getReviewDoiItemsGroupedByPublication()`), app `classes/publication/Repository.php` (`createDois()`, `version()`), `ojs/classes/issue/Repository.php` (`createDoi()`), `ojs/classes/controllers/grid/issues/IssueGridHandler.php` (`publishIssue()`, `unpublishIssue()`), `ojs/classes/plugins/PubIdPlugin.php` (`generateCustomPattern()`, `suffixHasIssuePattern()`)
 - Jobs and tasks: `lib/pkp/jobs/doi/DepositSubmission.php`, `DepositPeerReview.php`, `DepositContext.php`, `ojs/jobs/doi/DepositIssue.php`, `lib/pkp/classes/task/DepositDois.php`, `ojs/classes/scheduler/Scheduler.php`
 - Agencies: `ojs/plugins/generic/crossref/` (`CrossrefPlugin.php`, `CrossrefExportPlugin.php`, `classes/CrossrefSettings.php`, `templates/crossmarkButton.blade`, `templates/index.tpl`, `resources/js/components/CrossrefCrossmarkButton.vue`, `CrossrefCitationDoiCheckTask.php`), `ops/plugins/generic/crossref/` (same names, no Crossmark), `ojs/plugins/generic/datacite/` (`DatacitePlugin.php`, `DataciteExportPlugin.php`, `classes/DataciteSettings.php`, `templates/index.tpl`); `ojs/classes/plugins/DOIPubIdExportPlugin.php`, `PubObjectsExportPlugin.php`; `lib/pkp/classes/plugins/IPKPDoiRegistrationAgency.php`
 - Reader: `ojs/pages/article/ArticleHandler.php`, `ops/pages/preprint/PreprintHandler.php`, `omp/pages/catalog/CatalogBookHandler.php`; `templates/frontend/objects/article_details.tpl` and the OPS and OMP counterparts; OMP `templates/frontend/objects/monograph_full.tpl`, `chapter.tpl`

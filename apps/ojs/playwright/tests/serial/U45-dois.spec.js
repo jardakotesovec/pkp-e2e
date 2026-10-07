@@ -172,8 +172,9 @@ test.describe('DOIs (serial)', () => {
             await expect(dois.versionsBar(row)).toHaveCount(0);
 
             // A major version: "There are 2 versions." with "View all"; the
-            // window's blocks, the new one "Unpublished" without a DOI
-            // (Rules 12, 20).
+            // window's blocks, the new one "Unpublished" and already holding
+            // a DOI of its own, the published work being at Done (Rules 5,
+            // 12, 20).
             await screen.gotoVersionPage(axolotl.submissionId, axolotl.publicationId, 'titleAbstract', 'Title & Abstract');
             const majorId = await createVersion(page, tag, 'false');
             await dois.goto();
@@ -186,20 +187,20 @@ test.describe('DOIs (serial)', () => {
                 /^\s*Version of Record 2\.0 Unpublished\s*$/,
             ]);
             await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), ARTICLE)).toHaveValue(doi1);
-            await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), ARTICLE)).toHaveValue('');
+            await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), ARTICLE)).toHaveValue(MADE);
+            const doi2 = await dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), ARTICLE).inputValue();
+            expect(doi2).not.toBe(doi1);
             await dois.closeVersionsWindow();
 
-            // The major version published: a DOI of its own; its page shows
-            // it, 1.0's page keeps 1.0's (Rules 12, 43).
+            // The major version published: it keeps the DOI it got at its
+            // creation; its page shows it, 1.0's page keeps 1.0's (Rules 12, 43).
             await screen.gotoVersionPage(axolotl.submissionId, majorId, 'titleAbstract', 'Title & Abstract');
             await publishOpenVersion(page, tag);
             await dois.goto();
             await dois.expand(row, axolotl.submissionId);
             await dois.openVersionsWindow(row);
             const block2 = dois.versionBlock('Version of Record 2.0');
-            await expect(dois.versionDoiBox(block2, ARTICLE)).toHaveValue(MADE);
-            const doi2 = await dois.versionDoiBox(block2, ARTICLE).inputValue();
-            expect(doi2).not.toBe(doi1);
+            await expect(dois.versionDoiBox(block2, ARTICLE)).toHaveValue(doi2);
             await dois.closeVersionsWindow();
             await expectReaderDoi(reader, tag, axolotl.submissionId, doi2);
             await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});

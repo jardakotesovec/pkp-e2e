@@ -37,12 +37,12 @@
  *   log's warning is not a screen.
  * - A22 🐞: `DoisPage.chooseBulkAction` waits the "Bulk Actions" menu out
  *   before answering a window; the menu left open is not asserted.
- * - A27 🐞: S3 lists only books that are not declined; a declined book
- *   carrying a DOI, and one moved back to Review that "In Copyediting,
- *   Production or Published" leaves out, are not seeded.
- * - OMP2 🐞, A1, A2, A4–A7, A9–A13, A15–A20, A25, A26: not on these
- *   scenarios' press paths ("Immediately…" is only refused, in S8).
- *   OJS1–OJS3, OPS1–OPS3, OPS5: the journal's and the preprint server's
+ * - OMP2 🐞, A1, A2, A4–A7, A9–A13, A15–A20: not on these scenarios'
+ *   press paths ("Immediately…" is only refused, in S8). A25–A27 are
+ *   retired (a decline and "Revert Decline" under "Immediately…", a
+ *   declined book carrying a DOI on the page); their paths are Planned
+ *   items.
+ *   OJS1–OJS3, OPS1–OPS3, OPS5, A28: the journal's and the preprint server's
  *   (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
@@ -1322,8 +1322,8 @@ test.describe('DOIs', () => {
         await expect(dois.versionsBar(row)).toHaveCount(0);
 
         // A major version: "There are 2 versions." with "View all"; the
-        // window's blocks, the new one "Unpublished" without a DOI
-        // (Rules 12, 20).
+        // window's blocks, the new one "Unpublished" and already holding
+        // DOIs of its own, the published book being at Done (Rules 5, 12, 20).
         let frame = await openVersion(page, tag, axolotl.submissionId, axolotl.publicationId);
         const majorId = await createVersion(page, frame, 'Major Revision');
         await dois.goto();
@@ -1336,31 +1336,29 @@ test.describe('DOIs', () => {
             /^\s*Version of Record 2\.0 Unpublished\s*$/,
         ]);
         await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), MONOGRAPH)).toHaveValue(doi1);
-        await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), MONOGRAPH)).toHaveValue('');
-        // A press's chapter and format: 2.0's rows without a DOI before its
-        // publish, while 1.0's keep theirs (Rule 50).
-        await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), TIDES)).toHaveValue('');
-        await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), FORMAT_PDF)).toHaveValue('');
+        const doi2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), MONOGRAPH));
+        expect(doi2).not.toBe(doi1);
+        // A press's chapter and format: 2.0's rows hold DOIs of their own from
+        // its creation, different from 1.0's, which keep theirs (Rule 50).
+        const tides2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), TIDES));
+        const format2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), FORMAT_PDF));
+        expect(tides2).not.toBe(tides1);
+        expect(format2).not.toBe(format1);
         await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), TIDES)).toHaveValue(tides1);
         await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), FORMAT_PDF)).toHaveValue(format1);
         await dois.closeVersionsWindow();
 
-        // The major version published: a DOI of its own; its page shows it,
-        // 1.0's page keeps 1.0's (Rules 12, 43).
+        // The major version published: it keeps the DOIs it got at its
+        // creation; its page shows its own, 1.0's page keeps 1.0's (Rules 12, 43).
         await openVersion(page, tag, axolotl.submissionId, majorId);
         await publishOpenVersion(page);
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
         await dois.openVersionsWindow(row);
         const block2 = dois.versionBlock('Version of Record 2.0');
-        const doi2 = await doiValue(dois.versionDoiBox(block2, MONOGRAPH));
-        expect(doi2).not.toBe(doi1);
-        // After 2.0's publish its chapter and format carry DOIs of their own,
-        // different from 1.0's (Rule 50).
-        const tides2 = await doiValue(dois.versionDoiBox(block2, TIDES));
-        const format2 = await doiValue(dois.versionDoiBox(block2, FORMAT_PDF));
-        expect(tides2).not.toBe(tides1);
-        expect(format2).not.toBe(format1);
+        await expect(dois.versionDoiBox(block2, MONOGRAPH)).toHaveValue(doi2);
+        await expect(dois.versionDoiBox(block2, TIDES)).toHaveValue(tides2);
+        await expect(dois.versionDoiBox(block2, FORMAT_PDF)).toHaveValue(format2);
         await dois.closeVersionsWindow();
         await expectBookDoi(reader, tag, axolotl.submissionId, AXOLOTL, doi2);
         await expectBookDoi(reader, tag, axolotl.submissionId, AXOLOTL, doi1, {version: axolotl.publicationId});
