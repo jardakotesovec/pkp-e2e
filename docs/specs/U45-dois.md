@@ -322,7 +322,7 @@ links under the list. <sup>g</sup>
     ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md),
     Rule 16). Its row then leaves the DOIs page, and:
     - a DOI reading "Unregistered" is deleted, so a review that
-      qualifies again starts without one (Rule 7a) ⚠ [OJS7](#ojs7);
+      qualifies again starts without one (Rule 7a) [OJS7](#ojs7);
     - a DOI reading "Submitted" or "Registered" stays with its status,
       and the row shows it again once the review qualifies again.
 
@@ -1948,6 +1948,7 @@ throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick)
   - the guard for A19 (Rule 35; issue report
     `docs/issues/U45-A19-agency-choice-unticks-every-doi-kind.md`): a
     journal and a preprint server with the galley kind ticked before a
@@ -2121,7 +2122,6 @@ Left out of the scenarios above, by reason:
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - OJS6 ("Deposit DOIs" marking a hidden review's kept DOI "Submitted"; Rules 7b, 29)
-  - OJS7 (a review qualifying again after losing its "Unregistered" DOI: a new DOI under "Immediately…", "Needs DOI" under the other settings; Rules 7a, 7b; scenario 17 stops at the untick)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
@@ -2181,10 +2181,10 @@ an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | A "Needs Sync" item's agency panel says its metadata "has not been submitted" | ❓ | minor | — |
 | [A23](#a23) | A journal's or a preprint server's galley given its DOI alone at a publish: its Activity Log line untried | ❓ | minor | — |
 | [OJS1](#ojs1) | "Never" does not stop an issue's DOI at "Publish Issue" | ❓ | minor | — |
-| [OJS7](#ojs7) | A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings | ❓ | minor | — |
 | [OMP3](#omp3) | A chapter that cannot have a DOI reads "Needs DOI" | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers "Automatic Deposit" but nothing runs it | ❓ | user-visible | — |
 | [OPS5](#ops5) | A preprint server's DOIs page lists drafts nobody has submitted | ❓ | minor | — |
+| [OJS7](#ojs7) | A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings; intended | ✅ | minor | @bozana 2026-10-07 · ruled intended |
 | [A25](#a25) | Under "Immediately", declining a submission deletes the DOI its published version shows | ✅ | retired | — |
 | [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | ✅ | retired | — |
 | [A27](#a27) | The DOIs page no longer lists a declined submission that carries a DOI | ✅ | retired | — |
@@ -2647,7 +2647,7 @@ review's DOI keeps its status while the deposit leaves the review out.
 Basis: probe, 2026-10-07, at the round-6 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
 
 <a id="ojs7"></a>
-**OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ❓ · minor.
+**OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
 Unticking a review's "Public Visibility", or "Revert Decision" on its
 "Complete" row, deletes its "Unregistered" DOI (Rule 7b), as the team
 intends. When the editor then ticks the box again or presses "Mark as
@@ -2660,14 +2660,14 @@ under "Never", until "Assign DOIs". The review's earlier DOI may already have
 been shown in the journal's public review data, and a journal without a
 registration agency that registers DOIs by hand never moves them out of
 "Unregistered".
-Question: when a review qualifies again after losing its "Unregistered"
-DOI, should it get the same DOI back, a new one, or none until "Assign
-DOIs"? Lean: ✅ as built: an "Unregistered" DOI was never sent to an
-agency, and a new DOI at the setting's own moment matches "Revert
-Decline" (Rule 5b) and the stated limitation of Rule 7a; a journal that
-registers by hand should mark its DOIs "Registered" (Rule 26), which
-keeps them.
 Basis: probe, 2026-10-07, at the round-6 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs7</sup>
+
+> **Reviewed — @bozana, 2026-10-07**: ✅ intended (was ❓). Ruling:
+> minting a fresh DOI is fine. Only an "Unregistered" DOI is removed,
+> one that never reached the agency and does not resolve, so no working
+> link changes; a DOI that was sent keeps its place on the review. Under
+> the copyediting timing the review reads "Needs DOI" until "Assign DOIs"
+> or the next publication, the known limitation of Rule 7a.
 
 ### OMP
 
