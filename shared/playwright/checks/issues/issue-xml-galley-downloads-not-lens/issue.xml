@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns:xlink="http://www.w3.org/1999/xlink" article-type="research-article">
+  <front>
+    <journal-meta>
+      <journal-title-group><journal-title>Journal of Public Knowledge</journal-title></journal-title-group>
+      <publisher><publisher-name>Public Knowledge Project</publisher-name></publisher>
+    </journal-meta>
+    <article-meta>
+      <title-group>
+        <article-title>The whole issue in one file</article-title>
+      </title-group>
+      <abstract><p>Every article of the issue, as one JATS file.</p></abstract>
+    </article-meta>
+  </front>
+  <body>
+    <sec id="s1">
+      <title>First article</title>
+      <p>The text of the first article.</p>
+    </sec>
+  </body>
+</article>

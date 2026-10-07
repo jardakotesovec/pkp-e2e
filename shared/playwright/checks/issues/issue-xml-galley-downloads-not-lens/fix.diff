@@ -1,0 +1,11 @@
+--- a/plugins/generic/lensGalley/templates/issueGalley.tpl
++++ b/plugins/generic/lensGalley/templates/issueGalley.tpl
+@@ -11,7 +11,7 @@
+ 
+ <div class="page">
+ 	{capture assign="xmlUrl"}{url op="download" path=$issue->getBestIssueId($currentJournal)|to_array:$galley->getBestGalleyId($currentJournal) escape=false}{/capture}
+-	{include file=$displayTemplateResource xmlUrl=$xmlUrl}
++	{include file=$displayTemplatePath xmlUrl=$xmlUrl}
+ </div>
+ 
+ {include file="frontend/components/footer.tpl"}

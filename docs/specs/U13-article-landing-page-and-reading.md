@@ -1394,7 +1394,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [OJS10](#ojs10) | With "Recommend Similar Articles" on, article pages never show "Similar Articles" | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OJS12](#ojs12) | A review marked "Publicly Show Reviewer Comments" never shows on the published article's page | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OJS14](#ojs14) | A saved link to an older version's galley opens the current version, unannounced, once that galley gets a URL Path | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
-| [OJS15](#ojs15) | With "eLife Lens Article Viewer" on, an issue's XML galley downloads instead of opening in the Lens reader | 🐞 | minor · crash: server | — |
+| [OJS15](#ojs15) | With "eLife Lens Article Viewer" on, an issue's XML galley never opens in the Lens reader | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [OPS1](#ops1) | Previewing a new version adds "This is an outdated version published on {the preview day or its saved date}." | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
 | [OPS2](#ops2) | A preprint with a URL Path loses the galley or version part of its ID address; its HTML and other non-PDF downloads answer "404 Not Found" | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A galley's ID address answers "404 Not Found" once the galley has a URL Path | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
@@ -1917,16 +1917,26 @@ and a press forwards no addresses.
 Basis: probe, 2026-10-07. <sup>[f-ojs14](#fn-f-ojs14)</sup>
 
 <a id="ojs15"></a>
-**OJS15 — With "eLife Lens Article Viewer" on, an issue's XML galley downloads instead of opening in the Lens reader** · 🐞 · minor · crash: server.
+**OJS15 — With "eLife Lens Article Viewer" on, an issue's XML galley never opens in the Lens reader** · 🐞 · low · crash: server.
 With "eLife Lens Article Viewer" on, an article's XML galley opens in
-the Lens reader, but an issue's XML galley does not: its "Full Issue"
-link on the issue's page downloads the file ("article.xml") and the
-browser stays on the issue's page, as with the plugin off. The app fails
-on the server as the plugin prepares the issue galley's Lens page: the
-error is caught and logged, and the file is sent instead. The reader
-still gets the file, but never the Lens view the plugin is meant to give
-it. The issue's PDF galley opens the PDF reader as usual.
-Basis: probe, 2026-10-05. <sup>[f-ojs15](#fn-f-ojs15)</sup>
+the Lens reader, but an issue's XML galley does not: the app fails on
+the server as the plugin prepares the issue galley's Lens page. The
+error is caught and logged, and the file is sent instead: the galley's
+link under "Full Issue" on the issue's page downloads it and the browser
+stays on the issue's page, as with the plugin off.
+
+The reader gets an XML file to save in place of a page to read. On 3.4
+and 3.3 nothing catches the error, so the reader gets a server error and
+no file (read in the code, not walked). A journal gets round it by
+publishing the full issue as a PDF galley, or on 3.4 and 3.3 by turning
+the plugin off.
+
+It concerns journals that publish a full issue as an XML galley; the
+plugin is on by default when a journal is created. The Lens reader
+showed an issue's XML galley from 2015 until a change to the plugin in
+2018 (read in the code, not run), and shows one again with the one-line
+fix below (walked).
+Basis: probe, 2026-10-07. <sup>[f-ojs15](#fn-f-ojs15)</sup>
 
 ### OPS
 
