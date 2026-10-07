@@ -94,10 +94,18 @@ that fails validation keeps the panel open with the error on the field and
 | **Volume** · **Issue** · **Pages** · **First Page** · **Last Page** | No | Free text. <sup>f</sup> |
 
 **The data citation panel** ("Add Data Citation", "Edit Data Citation") is
-the same form for adding and editing. A save that fails validation keeps
-the panel open, as above. The read-only **"View Data Citation"** panel shows
-the same fields as text; its only button is the panel's "Close".
-<sup>l</sup> <sup>q16</sup>
+the same form for adding and editing. A refused save keeps the panel
+open, as above. With both required boxes filled, a save refused for a
+wrong "Year", "URL" or ORCID iD also shows, at the page's top right, the
+notice "The form was not saved because {n} error(s) were encountered.
+Please correct these errors and try again.", {n} counting the refused
+fields. A save with nothing filled shows none. Not seen: a wrong value
+beside an empty required box, and a refused "Identifier type" or
+"Identifier". Each message stands under its box but is not tied to it,
+so a screen reader that lands on a refused box reads it as invalid
+without the reason ⚠ [A24](#a24). The read-only
+**"View Data Citation"** panel shows the same fields as text; its only
+button is the panel's "Close". <sup>l</sup> <sup>q16</sup> <sup>q24</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -107,7 +115,7 @@ the same fields as text; its only button is the panel's "Close".
 | **Relationship type** | Yes | Four choices: "Supporting data without specifying whether they were generated or analyzed (supporting).", "Supporting data that were generated for the study (generated).", "Supporting data that were analyzed but not generated for the study (analyzed).", "Referenced data that were neither generated nor analyzed for the study (non-analyzed)." It arrives with nothing chosen. <sup>l</sup> |
 | **Repository** | No | Free text: where the dataset is held, or its publisher. <sup>l</sup> |
 | **Year** | No | A four-digit year. "202" or "20245" is refused with "This must be 4 digits long."; a value with letters ("20a4") gets "This is not a valid integer." and "This must be 4 digits long." together. <sup>l</sup> |
-| **Creators** | No | The same Given Name / Family Name / ORCID iD table as a reference's authors, but here an ORCID iD is accepted only as the full address ("https://orcid.org/0000-0002-1825-0097"). Anything else, the bare iD included, is refused with "The ORCID iD you specified is invalid. Please include the full URI (e.g. "https://orcid.org/0000-0002-1825-0097")." <sup>l</sup> |
+| **Creators** | No | The same Given Name / Family Name / ORCID iD table as a reference's authors, but here an ORCID iD is accepted only as the full address ("https://orcid.org/0000-0002-1825-0097"). Anything else, the bare iD included, is refused with "The ORCID iD you specified is invalid. Please include the full URI (e.g. "https://orcid.org/0000-0002-1825-0097")." under the ORCID iD box of each refused row ([A24](#a24)). The table counts as one field: with two rows refused and nothing else wrong, the foot reads "Please correct one error." and the notice counts "1 error(s)". Typing in any creator box clears the message from every row, and the next "Save" brings it back under a row that is still invalid. <sup>l</sup> <sup>q24</sup> |
 | **URL** | No | Must be a web address, or "This is not a valid URL." <sup>l</sup> |
 
 **Typing that is not added or saved is dropped without a question.** Lines
@@ -284,6 +292,22 @@ typed. Nothing asks first. The one exception is an author row added in
     any lookup ran. Saving does not start a lookup, and editing only the
     "Edit Raw Citation" text leaves the structured details as they were.
     <sup>f</sup> <sup>q11</sup>
+    - 14a. **A save while the lookup is under way.** Saving does not end
+      a lookup either. The reference stays counted as unfinished in the
+      progress box (Rule 13), nothing on its row or in the panel says a
+      lookup is still to come, and Rule 11's remaining steps still run
+      on it. Step 1 runs with the site's background jobs
+      ([System administration & jobs](U61-system-administration.md),
+      Rule 14): a live site runs them by itself, within seconds of the
+      add where they keep up; a test install only when asked (the
+      scenarios' footnote says how). Step 1 replaces a DOI typed and
+      saved before it with the DOI written in the reference's text: the
+      row's link and the "DOI" box of "Edit" then show the text's DOI,
+      and nothing says so ⚠ [A25](#a25). A DOI typed after step 1, or
+      on a reference whose text holds no DOI, stays, and step 1 changes
+      no typed title, author, date or volume. Whether the services'
+      answers in steps 2 and 3 replace such details has not been seen
+      ⚠ [A26](#a26). <sup>q25</sup>
 15. **Reprocessing.** An unstructured row's menu adds **"Reprocess"**. It
     asks "Are you sure you want to reprocess this citation?" with "OK" and
     "Cancel"; OK sends the reference through the chain of Rule 11 again.
@@ -291,8 +315,10 @@ typed. Nothing asks first. The one exception is an author row added in
     will reprocess all references currently listed. You'll need to re-enter
     your manual changes again if you continue." with "OK" and "Cancel"; OK
     sends every reference of the version through the chain, structured ones
-    included, and the services' answers may overwrite details edited by
-    hand. <sup>j</sup> <sup>q13</sup>
+    included. Step 1, once run (Rule 14a), puts the DOI written in a
+    reference's text back over one typed by hand; a DOI typed on a
+    reference whose text holds none stays. The services' answers may
+    overwrite other details edited by hand. <sup>j</sup> <sup>q13</sup> <sup>q25</sup>
 
 ### References while submitting
 
@@ -921,6 +947,16 @@ Left out of the scenarios above, by reason:
     (Rule 16): the references kept as they are, not deleted and added
     again
   - the guard for A6 (retired; pkp-e2e#883): with "References Metadata Lookup" on, "Add" of new references shows "Processing references - 0/n" counting every reference added, and switching the lookup on over existing references shows no box
+  - a refused data citation save's page notice "The form was not saved
+    because {n} error(s) were encountered…" and its count, none for an
+    empty required box; two creator rows refused counted as one error,
+    and their messages cleared together by typing in one
+    ([Fields & validation](#fields), the data citation panel and
+    "Creators")
+  - the DOI written in a reference's text put back over one typed by
+    hand after "Reprocess all references" › "OK", once the lookup's
+    first step has run (Rule 14a), and a DOI typed on a reference whose
+    text holds none kept (Rule 15)
 - **Rarely met**:
   - "Data Citations" at "Do not request data citation metadata from the
     author during submission.": the "Data" page without the wizard's
@@ -974,15 +1010,22 @@ Left out of the scenarios above, by reason:
     Rule 27; scenario 3 passes it)
   - A21 (the References page's texts and windows read raw codes in
     French; Rule 3)
+  - A24 (a refused box's message not tied to the box for a screen
+    reader; [Fields & validation](#fields))
+  - A25 (a DOI typed before the lookup's first step replaced by the
+    text's DOI; Rule 14a)
+  - A26 (whether the services' answers replace details typed while the
+    lookup was under way; Rule 14a)
 - **No seed**:
   - a reference structured by the services: its identifier links,
     title, details and the "Wikidata" and "OpenAlex" badges (Rules 11,
-    12); no lookup runs on a test install
+    12); no service answers on a test install
   - "No structured information found" on a row whose lookup finished
     (Rule 12)
   - "All {total} references successfully processed" (Rule 13)
-  - the services' answers overwriting details edited by hand after
-    "Reprocess all references" (Rule 15)
+  - the services' answers overwriting details edited by hand, after
+    "Reprocess all references" (Rule 15) or typed while the lookup was
+    under way (Rule 14a; A26)
   - the lookup's requests to Crossref, OpenAlex and ORCID, their
     retries and the failed mark (Side effects bullet 2)
 - **Owned by another feature**:
@@ -1026,8 +1069,11 @@ entry notes otherwise; the team settles them on spec review.
 | [A20](#a20) | On a press or a preprint server, a book or preprint with no references shows an empty "References" heading | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A21](#a21) | In French the References page's help text, table, "Delete all references" and its two windows show raw codes such as "##submission.citations.structured##" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A22](#a22) | A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
+| [A24](#a24) | A screen reader hears that a refused box of the data citation panel is invalid, but not why | 🐞 | minor | — |
+| [A25](#a25) | A DOI typed in "Edit citation" before the lookup has started is replaced by the DOI in the reference's text, without a word | 🐞 | minor | — |
 | [A11](#a11) | Readers never see data citations, though the editors' table says they appear alongside the references | ❓ | user-visible | — |
 | [A17](#a17) | "Edit" accepts a repeated reference that "Add" drops | ❓ | minor | — |
+| [A26](#a26) | Whether a lookup that finishes after an editor filled a reference in by hand replaces what was typed has not been seen | ❓ | user-visible | — |
 | [A5](#a5) | A reference whose lookup failed for good looks exactly like one still waiting | ✅ | retired | — |
 | [A6](#a6) | References page: the lookup's progress box counts only structured references and says "All 2 done" over five | ✅ | retired | — |
 | [A7](#a7) | A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off | ✅ | retired | — |
@@ -1297,6 +1343,58 @@ once an editor has ticked the author's permission to change the
 publication. The editors, managers and assistants who press the icon
 are the ones sent to the author's page.
 Since: 2025-09-16 · Basis: probe, 2026-10-05. <sup>f-a22</sup>
+
+<a id="a24"></a>
+**A24 — A screen reader hears that a refused box of the data citation panel is invalid, but not why** · 🐞 · minor.
+When "Add Data Citation" or "Edit Data Citation" refuses a save, the
+reason shows under each refused box: "This field is required." under
+"Title" and "Relationship type", the messages of "Year" and "URL", and
+the ORCID iD message under a creator row's box. A screen reader user who
+moves to such a box is expected to hear the reason with it. The message
+is not tied to the box: the box is announced as invalid and nothing
+more, so the user has to search the panel for the reason, and a creator
+row's box has no name either ([A14](#a14)). Nothing is saved wrongly.
+The same was seen on Settings › Journal › "Contact", with "Name" and
+"Email address" under "Technical Support Contact" emptied and refused.
+The other forms of the editorial screens are built from the same boxes
+(read in the code, not walked).
+Basis: probe, 2026-10-07. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — A DOI typed in "Edit citation" before the lookup has started is replaced by the DOI in the reference's text** · 🐞 · minor.
+With metadata lookup on, an editor adds a reference whose text holds a
+DOI, opens "Edit" on it, types another DOI and saves: the row shows the
+typed DOI as a link, and the editor expects it to stay, as a saved
+change does. When the lookup's first step then runs on the reference
+(Rule 11), it puts the DOI written in the text back: the row's link and
+the "DOI" box of "Edit" show the text's DOI again, and no message says
+so. A DOI typed after that step has run stays, as does one typed on a
+reference whose text holds no DOI, and the typed title and author stay
+either way. The reach is the time a new reference waits for its lookup
+to start: seconds on an install whose background jobs keep up, longer
+when they are behind. "Reprocess all references" replaces a typed DOI
+the same way, but its question warns that manual changes will have to
+be entered again (Rule 15); "Edit" warns of nothing.
+Basis: probe, 2026-10-07. <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — Whether a lookup that finishes after a hand edit replaces what the editor typed** · ❓ · user-visible.
+An editor may fill a reference in by hand in "Edit citation" (title,
+authors, date, volume, issue, pages, source) while its lookup is still
+under way, and saving does not end the lookup (Rule 14a). As read in the
+code, when OpenAlex then answers for the reference's DOI the lookup
+sets every detail it takes from the answer (title, authors, date, type,
+volume, issue, pages, source) and empties those the answer lacks,
+without checking what was typed, and nothing on the page says so. No
+service answers on a test install, so this has not been seen on screen;
+the one step that needs no service does replace a typed DOI
+([A25](#a25)). The page warns of such a loss only before "Reprocess all
+references" (Rule 15).
+Question: should a lookup that is still under way change a reference an
+editor has since edited by hand? Lean: no; saving "Edit citation" should
+end the waiting lookup, or the lookup should fill only what is empty,
+because the typed details would otherwise be replaced without a word.
+Basis: code, 2026-10-07. <sup>f-a26</sup>
 
 ### Retired
 
@@ -1595,9 +1693,11 @@ OpenAlexJob, OrcidJob, IsProcessedJob])` with the context's
 when the citation has a DOI; it queries `works/?query.bibliographic=` and
 accepts a first hit scoring 100 or more. `OpenAlexJob` returns at once
 without a DOI. `OrcidJob` prepends one `OrcidAuthorJob` per author with an
-iD. `IsProcessedJob` sets `PROCESSED`. `CitationProcessingStatus`: FAILED -1,
-NOT_PROCESSED 0, PID_EXTRACTED 1, CROSSREF 2, OPEN_ALEX 3, ORCID 4,
-PROCESSED 5. `Citation::isStructured()`: one of doi/arxiv/handle/url/urn,
+iD. `IsProcessedJob` sets `PROCESSED`. `CitationProcessingStatus`: QUEUED -2,
+FAILED -1, NOT_PROCESSED 0 (no lookup asked for), PID_EXTRACTED 1,
+CROSSREF 2, OPEN_ALEX 3, ORCID 4, PROCESSED 5; `reprocessCitation()`
+stores QUEUED before it dispatches the chain (since `pkp/pkp-lib#13308`).
+`Citation::isStructured()`: one of doi/arxiv/handle/url/urn,
 and title, and authors. Retries (`CitationLookupJob`): statuses 408, 500,
 502, 504 prepend a copy delayed `5 × 2^n` minutes, at most
 `MAX_SERVICE_RETRIES` 8, then `fail()`, whose `failed()` stores FAILED and
@@ -1610,9 +1710,11 @@ regression read of that day saw three references complete end to end on
 OJS with outbound HTTP available, and with the dead-port proxy saw the 504
 path park a reference behind a Crossref step delayed 5 minutes, with
 neither data nor badge on its row. Test installs run no job runner and have
-outbound HTTP dead (seed-facts), so a lookup never completes there: the
-chain's steps 1–5, the requests, their pacing and retries, and the failed
-mark are unreachable on a test install and rest on the code above.
+outbound HTTP dead (seed-facts), so a lookup never completes there: no
+step runs by itself, and with the job runner run by hand only step 1
+does (the 2026-10-07 probe below). The chain's steps 2–5, the requests,
+their pacing and retries, and the failed mark are unreachable on a test
+install and rest on the code above.
 Live-probed 2026-09-24 (Rule 11), all three apps: a reference added
 through "Add" with a DOI and an arXiv ID in its text showed its text alone,
 with no identifier link, after the Add and after a reload. Structured by
@@ -1620,6 +1722,25 @@ hand: a web address, a title and one named author made a row structured
 (title, expander, no "Reprocess"); a DOI and a title with no author row did
 not, nor five identifiers with no title; an author row with empty names
 did (A13).
+Live-probed 2026-10-07 (Rules 11–13, the job runner run once from the
+test kit after the page's own work), all three apps, two runs each, at
+ojs `3265fdc673`, omp `0c6a3ebed`, ops `8ae6c68e04` (lib/pkp
+`f8285b0b8f`, ui-library `7503fab4`), on a scratch context with lookup
+on, six references added in one "Add": the box read "Processing
+references - 0/6" at once and at every later read, and the page fetched
+the publication twice in each 16 s watch. Each reference was stored at
+-2 (QUEUED) with `ExtractPidsJob` queued and the four other jobs chained
+behind it. After one runner pass each stood at 1: a reference with a DOI
+in its text showed that DOI as a link to doi.org above its text and kept
+"Reprocess", one without showed its text alone, and one whose title and
+author had been typed by hand before the pass became structured when the
+DOI arrived from its text (DOI link, the typed title, an expander, no
+"Reprocess"; expanded: "Lovelace Ada", "Publication Date: 1843-01-01",
+"Volume: 3" and the text in small print). With no service reachable the
+OpenAlex step (for a reference without a DOI, the Crossref step) was put
+back to wait, a first retry due in just under five minutes; which
+reference sat at which step differed between runs, that each still had a
+step queued did not.
 
 <a id="fn-i"></a>
 **i** — Row display. `CitationManagerCellCitation.vue`, lookup on: links for
@@ -1673,7 +1794,8 @@ successfully processed".
 <a id="fn-j"></a>
 **j** — Reprocess. Row: dialog `…structured.reprocessDialog.title`, empty
 message, "OK" / "Cancel" → POST `…/citations/{id}/reprocessCitation`
-(status reset to NOT_PROCESSED, chain dispatched). All: dialog
+(`Repository::reprocessCitation()` stores QUEUED and dispatches the
+chain, note h). All: dialog
 `…structured.reprocessAllCitations.title|confirm` → POST
 `…/reprocessCitationsByPublicationId`, which resets and chains every
 citation of the publication, structured or not. The Crossref and OpenAlex
@@ -1685,7 +1807,20 @@ reprocess this citation?" over an empty message, with "OK" and "Cancel";
 row as it was. "Reprocess all references" asked verbatim; "OK" sent the
 request (200) and the hand-structured rows kept every stored value. The
 services' answers overwriting hand edits are unreachable on a test install,
-where no lookup runs.
+where no service answers.
+Live-probed 2026-10-07 (Rule 15), all three apps, two runs each, on the
+six references of note q25: "Reprocess all references" asked verbatim
+with "OK" and "Cancel"; "OK" sent one request (200), raised no notice,
+and stored -2 (QUEUED) on all six references, the four structured ones
+included, with the list and "Processing references - 0/6" unchanged.
+After one job-runner pass the DOI typed by hand on a reference whose
+text holds another was the text's DOI again (row link and stored value),
+the DOI typed on a reference with none in its text stayed, and every
+typed title, author, date and volume stayed, no service having answered.
+A reprocess leaves the steps of an earlier, unfinished lookup queued: the
+`jobs` table held two chains per reference after "Reprocess all
+references" on a list still waiting (a queue read; nothing on the page
+shows it, and whether a service is then asked twice was not seen).
 
 <a id="fn-k"></a>
 **k** — The wizard's save. `PKPCitationsForm` PUTs `citationsRaw` to the
@@ -2034,6 +2169,67 @@ p; the "Data" page's line reads verbatim "Add formal data citations,
 ensuring datasets are properly credited and appear alongside other
 references in the publication.".
 
+<a id="fn-q24"></a>
+**q24** — Live-probed 2026-10-07 (the data citation panel; "Creators";
+A24), all three apps, two runs each, at ojs `3265fdc673`, omp
+`0c6a3ebed`, ops `8ae6c68e04` (lib/pkp `f8285b0b8f`, ui-library
+`7503fab4`), on a scratch context with data citations at "Do not
+request…", as its Journal (Press, Server) Manager; no response of 500
+or more and no page error. "Add Data Citation" saved with nothing
+filled: no request, "This field is required." under "Title" and
+"Relationship type", the foot "Please correct 2 errors.", no notice.
+With both filled, "Year" "20a4", "URL" "example" and, in the second of
+two creator rows, ORCID iD "0000-0002-1825-0097": "Save" answered 400;
+"This is not a valid integer." and "This must be 4 digits long." under
+"Year", "This is not a valid URL." under "URL", the ORCID iD message
+under the second row's box only, the foot "Please correct 3 errors."
+and, top right, "The form was not saved because 3 error(s) were
+encountered. Please correct these errors and try again." (`form.errors`).
+"123" then typed in the first row's ORCID iD box: no message under
+either row, and "Save" grayed out until "Year" and "URL" were changed
+too. Saved with both rows still invalid: 400, the message under each
+row's box, the foot "Please correct one error." and the notice "The
+form was not saved because 1 error(s) were encountered. Please correct
+these errors and try again.". "Edit Data Citation" with "not-an-orcid" typed over a saved
+iD: 400, the same message under that row, the same foot and notice;
+left by "Close": no question, no request, and the saved creators after a
+reload. Every refused box ("Title", "Relationship type", "Year", "URL",
+a creator's ORCID iD) carried `aria-invalid="true"` and no
+`aria-describedby`; with the cursor in it Chromium's accessibility tree
+gave it as invalid with no description (a creator's box also with no
+name, A14). The same for "Name" and "Email address" under "Technical
+Support Contact" on Settings › Journal (Press, Server) › "Contact",
+emptied and refused in the browser with "This field is required.".
+
+<a id="fn-q25"></a>
+**q25** — Live-probed 2026-10-07 (Rules 14a, 15; A25, A26), all three apps,
+two runs each, at the tips of note q24, on a scratch context with lookup
+on, as its Journal (Press, Server) Manager, six references added in one
+"Add" (four with a DOI in their text), the install's job runner run from
+the test kit between the edits; no response of 500 or more and no page
+error. Each "Save" of "Edit citation" sent one request (PUT
+`…/citations/{id}`, 200), no reprocess request and raised no notice; the
+stored status and the queued step were the same before and after (-2
+with `ExtractPidsJob` queued for a save before any pass, 1 with
+`CrossrefJob` queued for a save after one), and the box read "Processing
+references - 0/6" before and after, on the same page and after a reload.
+A title, an author, a date and a volume typed on a reference whose DOI
+stood only in its text left the row as it was (text alone, "Reprocess"
+kept) until the pass; a DOI, a title and an author typed on one made it
+structured at once. Before any pass, DOI "10.5678/…hand3" typed with a
+title and an author on a reference whose text holds
+"https://doi.org/10.1234/…three": the row showed the link
+"10.5678/…hand3" on the same page and after a reload; after one runner
+pass the row's link and the "DOI" box of "Edit" read "10.1234/…three",
+the title and author as typed, with no notice. A DOI typed after the
+pass, on a reference whose DOI had already been read from its text,
+stayed through the next pass, as did a DOI typed before any pass on a
+reference with no DOI in its text. "Edit citation" left by
+"Close" with "Title" changed: no question, no request, the row
+unchanged. "Reprocess all references": note j. Kept check
+`shared/playwright/checks/U42/I07b/i07b.js` (phases `l11`, `l13`,
+`forms`).
+
 <a id="fn-s"></a>
 **s** — Scenario seeding. The seeded journal (`publicknowledge`) keeps the
 install defaults (fn c): references asked for, lookup and data citations
@@ -2046,7 +2242,11 @@ data citations. Live-probed 2026-09-24: all three keys seeded scratch
 contexts and submissions on the three apps. A test install runs no job
 runner and has no outbound connections, so with lookup on every reference
 stays unprocessed, one structured by hand in "Edit" too (scenario 5's
-"0/1"; seed-facts "Install defaults"). Mail is read in the mail catcher
+"0/1"; seed-facts "Install defaults"). Running the site's background
+jobs when asked (Rule 14a) is `runJobs()`
+(`shared/playwright/support/jobs.js`, the app's
+`php lib/pkp/tools/jobs.php run`), so a test that does it belongs in the
+serial project; one pass runs the lookup's step 1 alone (note h). Mail is read in the mail catcher
 (Mailpit, `http://127.0.0.1:8025`), scoped by the scenario's own
 addresses; a test install queues the app's email as jobs that never run,
 so the "Nothing else happens" bullets rest on the submission's Activity
@@ -2413,6 +2613,56 @@ set to 5 the new version read "Processing references - 0/3" (its copies'
 own lookups under way), and with the copies set to 5 too, "All 3
 references successfully processed" and no fetch in 22 s (facts
 `version-facts-pr-r4-ojs`).
+
+<a id="fn-f-a24"></a>
+**f-a24 — A24 evidence.** ui-library
+`components/Form/fields/FieldBase.vue` `describedByIds()` adds the
+message's id to the box's `aria-describedby` only when `this.error` is
+set, a prop no caller passes, while `FieldText.vue` draws the message
+from `errors`. The line dates from the forms' first version (2018) and
+reads the same in the `stable-3_5_0`, `stable-3_4_0` and `stable-3_3_0`
+checkouts (code read, not walked there). Each message is an
+`aria-live="polite"` region, so a screen reader may read it once when it
+appears; it is not offered again with the box. The fix proposed for A14
+(a per-row form id and a label on each creator box) does not touch
+`describedByIds()` (read in its `fix.diff`). Live-probed 2026-10-07:
+note q24, read from Chromium's accessibility tree; a screen reader
+itself was not run. Kept check `shared/playwright/checks/U42/I07b/i07b.js` (phases
+`l13`, `forms`).
+
+<a id="fn-f-a25"></a>
+**f-a25 — A25 evidence.** `ExtractPidsJob::handle()` returns early only
+when the citation is gone or its status is PID_EXTRACTED or more;
+`ExtractPidsHelper::execute()` then sets `doi`, `arxiv`, `handle`, `url`
+and `urn` to whatever it finds in the raw text, each only when the text
+holds one, without reading what the citation already carries.
+`PKPCitationController::edit()` leaves `processingStatus` as it was, so
+a reference saved by hand before the step still stands at QUEUED (-2).
+Live-probed 2026-10-07: note q25 (the step run by one job-runner pass
+from the test kit). By the code an arXiv ID, a handle, a web address or
+a URN typed by hand gives way to the text's the same way; only the DOI
+was driven.
+
+<a id="fn-f-a26"></a>
+**f-a26 — A26 evidence.** Code read 2026-10-07 at lib/pkp `f8285b0b8f`:
+`OpenAlexJob::handle()` returns early only when the citation is gone,
+its status is OPEN_ALEX (3) or more, or it has no DOI;
+`externalServices/openAlex/Inbound::getWork()` then calls `setData()`
+for every key of `Mapping::getWork()` with whatever the answer holds,
+empty values included: `title`, `date`, `type`, `volume`, `issue`,
+`firstPage`, `lastPage`, `sourceName`, `sourceIssn`, `sourceHost`,
+`sourceType`, `authors`, `wikidata`, `openAlex`. `CrossrefJob::handle()`
+runs only on a citation without a DOI, and its mapping sets `doi` alone,
+on a match; OpenAlex follows. No step checks whether a detail was typed
+by hand. Live-probed 2026-10-07 (the state before the answer), all three
+apps, two runs each: note q25; after a hand save the stored status was
+-2 or 1, below OPEN_ALEX, and after the runner pass the OpenAlex step
+sat queued for retry on references carrying a title and an author typed
+by hand (in five of the six runs by the second read; in the sixth still
+behind the Crossref step). No service answers on a test install, so no
+screen there shows the answer's effect and the claim is read from the
+code; the same walk on an install where OpenAlex answers, reading the
+hand-filled reference after the runner, would settle it.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** Note p. Live-probed 2026-09-24: f-a20, where
