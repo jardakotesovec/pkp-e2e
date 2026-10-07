@@ -9,13 +9,20 @@
   - 3.4: OJS, OMP (code)
   - 3.3: OJS, OMP (code)
 - **Introduced** not traced; present since at least [669d0aba9b](https://github.com/pkp/pkp-lib/commit/669d0aba9b7caaffe6df4acebaa9580394ed4e14) (2013-03-11). On a preprint server since `pkp/ops#858` for `pkp/pkp-lib#10874`, which moved OPS's roles off stage 1 · [012e900283](https://github.com/pkp/ops/commit/012e9002836356a50769792eb1368b36e98aacaf) · 2025-02-03 · Vitalii Bezsheiko (Vitaliy-1)
-- **Upstream** none found (2026-10-03). `pkp/pkp-lib#13432` (open, "Ensure
-  consistent library file policy checks") reworks the same method and keeps
-  this check: merged and reverted on 2026-10-02 on `main` and
-  `stable-3_5_0`, live on `stable-3_4_0`
+- **Upstream** none found (2026-10-07): no pkp issue or PR reports this
+  fault. `pkp/pkp-lib#13432` (open; commits titled "Ensure consistent
+  library file policy checks") is other work on the same method, which
+  left this check as it was (Cause); the fix proposed here fits its
+  theme and could go in under it
 - **Tracked in** spec U39 [A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U39-submission-and-publisher-libraries.md#a1)
-- **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-07, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-07: the method that holds the check moved to another
+class on `main` and `stable-3_5_0` (Cause), so the Cause, the fix and the
+backport notes name its new place. The recommended fix now asks the same
+method as the window's own access rule, in place of the one-line change
+first proposed, so that the download and the window cannot disagree.
 
 ## Summary
 
@@ -31,8 +38,10 @@ a press also the Chapter Author.
 No preprint server role can be given the Submission stage: the box is not
 there. So on a preprint server the Moderator and the preprint's own Author
 are refused every Submission Library file, and only the Preprint Server
-manager can read them. A Moderator's "Download" under "Library Files" on a
-decision email opens a new tab reading "403 Forbidden".
+manager can read them. This began with 3.5, on new and upgraded servers
+alike; on 3.4 both could download. A Moderator's "Download" under
+"Library Files" on a decision email opens a new tab reading "403
+Forbidden".
 
 Nothing is lost. The file has to reach these people some other way, such
 as a discussion.
@@ -65,7 +74,8 @@ authors.
 
 Preconditions:
 
-- The default dataset, OJS, OMP or OPS `main`. Nothing else is needed. The
+- The default dataset, OJS, OMP or OPS, `main` or `stable-3_5_0`. Nothing
+  else is needed. The
   steps use one submission in Production, with the people already assigned
   to it:
   - OJS: submission 5, "Genetic transformation of forest trees". Maria
@@ -138,11 +148,10 @@ on OMP the author `bbeaty`, take steps 5 and 6 and the file downloads.
 Both download links, the file's name in the list
 (`DownloadLibraryFileLinkAction`) and "Download" in the email's "Library
 Files" (`PKPLibraryController::fileToResponse()`), go to
-`FileApiHandler::downloadLibraryFile()`, which hands over to
-`PKP\pages\libraryFiles\LibraryFileHandler::downloadLibraryFile()`
-(lib/pkp `pages/libraryFiles/LibraryFileHandler.php`). For a file that
-belongs to a submission, that method lets through a manager or site
-administrator, and otherwise only a user returned by this query (line 99):
+`FileApiHandler::downloadLibraryFile()` (lib/pkp
+`controllers/api/file/FileApiHandler.php`). For a file that belongs to a
+submission, that method lets through a manager or site administrator, and
+otherwise only a user returned by this query (line 177):
 
 ```php
 $assignedUsers = Repo::user()->getCollector()
@@ -158,7 +167,10 @@ only; the Layout Editor, Proofreader, Designer and Indexer on Production
 (and the Done state); OMP's Chapter Author on Copyediting and Production
 (`registry/userGroups.xml`). On OPS the manager, Moderator and Author
 groups have `stages="5,6"` (Production and Done) since `pkp/ops#858`
-removed stage 1, which a preprint server does not have.
+removed stage 1, which a preprint server does not have. The same PR's
+upgrade migration, `I10874_UserGroupStagesRemoveSubmission` (1228378516),
+deletes every stage 1 row of `user_group_stage`, so a server upgraded
+from 3.4 is hit like a new install.
 
 The window itself follows another rule. `DocumentLibraryHandler` (the
 "Library" window) and `SubmissionDocumentsFilesGridDataProvider` (its
@@ -166,10 +178,14 @@ list, "Add a file", "Edit", "Delete") authorize through
 `SubmissionAccessPolicy`, which admits anyone assigned to the submission
 in any stage.
 
-The check came with the Submission Library's download in 2013 (669d0aba9b)
-and was moved, unchanged in meaning, into `LibraryFileHandler` in 2018
-(`pkp/pkp-lib#520`, 56773e14d6). On a preprint server the Moderator and the
-Author passed it on 3.4 and earlier, and are refused since 3.5.
+The check has been in pkp-lib since at least 2013 (669d0aba9b). It was
+moved, unchanged in meaning, into `LibraryFileHandler` in 2018
+(`pkp/pkp-lib#520`, 56773e14d6) and back into `FileApiHandler` on `main`
+and `stable-3_5_0` on 2026-10-06 (`pkp/pkp-lib#13432`, e60013c77f and
+0ed26dd8a7). On `stable-3_4_0` and `stable-3_3_0` it is still in
+`LibraryFileHandler::downloadLibraryFile()`, which `FileApiHandler` calls.
+On a preprint server the Moderator and the Author passed it on 3.4 and
+earlier, and are refused since 3.5.
 
 The two preprint-server reports that name this line in their reach
 ([U35 OPS3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U35-OPS3-moderator-assigned-email-never-sent.md),
@@ -189,29 +205,43 @@ Reach:
 
 ## Proposed fix
 
-Proposed: ask for an assignment on the submission in any stage, close to
-the rule the window's own `SubmissionAccessPolicy` applies.
+Proposed: allow the download when the submission's workflow is open to
+the person in any stage, by asking the method the window's own
+`SubmissionAccessPolicy` asks, `Repo::user()->getAccessibleWorkflowStages()`.
 [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/submission-library-file-403-for-participants/fix.diff),
 one diff for all three apps:
 
 ```diff
--                // Check for specific assignments.
-+                // Anyone assigned to the submission, in any stage, as for the
-+                // Submission Library list itself (SubmissionAccessPolicy).
-                 $assignedUsers = Repo::user()->getCollector()
--                    ->assignedTo($libraryFile->getSubmissionId(), WORKFLOW_STAGE_ID_SUBMISSION)
-+                    ->assignedTo($libraryFile->getSubmissionId())
-                     ->getMany();
+--- a/lib/pkp/controllers/api/file/FileApiHandler.php
++++ b/lib/pkp/controllers/api/file/FileApiHandler.php
+-            // Check for specific assignments.
+-            $assignedUsers = Repo::user()->getCollector()
+-                ->assignedTo($libraryFile->getSubmissionId(), WORKFLOW_STAGE_ID_SUBMISSION)
+-                ->getMany();
+-
+-            $user = $request->getUser();
+-            foreach ($assignedUsers as $assignedUser) {
+-                if ($assignedUser->getId() == $user->getId()) {
+-                    $allowedAccess = true;
+-                    break;
+-                }
++            // Anyone the submission's workflow is open to, in any stage: the
++            // rule of the Submission Library list itself (SubmissionAccessPolicy).
++            $submission = Repo::submission()->get((int) $libraryFile->getSubmissionId(), $context->getId());
++            if ($submission && Repo::user()->getAccessibleWorkflowStages($request->getUser()->getId(), $context->getId(), $submission, $userRoles)) {
++                $allowedAccess = true;
+             }
 ```
 
 The method's comment says what it guards: "ensure that the current user
-has access to that submission". An assignment in any stage is that access,
-and it is what lets the same people add, edit and delete these files
-today. Reviewers have no stage assignment and stay refused, as do people
-removed from the submission. One difference from the policy remains: the
-policy ignores an assignment in a role the user no longer holds in the
-journal (`Repo::user()->getAccessibleWorkflowStages()`), and
-`assignedTo()` does not, as today's check does not either.
+has access to that submission". The policy that opens the window decides
+that access through `UserAccessibleWorkflowStageRequiredPolicy` and
+`SubmissionAuthorPolicy`, and both admit a person for whom
+`getAccessibleWorkflowStages()`, given the person's roles in the journal,
+returns any stage. The download now asks the same question, so it follows
+the window's rule and reaches no further than the window does (code).
+Reviewers have no stage assignment and stay refused, as do people removed
+from the submission.
 
 Tried on OJS, OMP and OPS `main`. With the fix, every press in steps 4 to
 10 downloads the file and the page stays. Removing a person from the
@@ -222,40 +252,47 @@ Publisher Library files under "View Document Library" still downloaded.
 
 **Alternatives**
 
+- Drop the stage argument of `assignedTo()`, one line, which this report
+  proposed first: it gave the same downloads in the same walk, but it
+  keeps a second rule beside the policy's, and `assignedTo()` checks less
+  than the policy does. The fix above asks the policy's own method
+  instead.
 - The application's first stage, as `pkp/pkp-lib#10883` did elsewhere:
   this fixes the preprint server only, and journal and press assistants
   stay refused files the window lets them add, edit and delete.
 - Authorize the download with `SubmissionAccessPolicy` in
   `FileApiHandler::authorize()` when a `submissionId` is sent, and have
-  `LibraryFileHandler` check that the file belongs to that submission. That
-  leaves one rule in one place, but it is a larger change to a handler
-  that other file downloads share. It is the better choice if the team
-  wants no second rule here.
-- Allow when `Repo::user()->getAccessibleWorkflowStages()` returns any
-  stage for the user, which matches the policy exactly, the revoked-role
-  case included; a few more lines, and the submission has to be loaded.
+  `downloadLibraryFile()` check that the file belongs to that submission
+  and refuse a submission's file requested without a `submissionId`
+  (`authorize()` then adds only `ContextAccessPolicy`). That leaves one
+  rule in one place, but it is a larger change to a handler that other
+  file downloads share. It is the better choice if the team wants the
+  policy itself here.
 - Tick the Submission stage for these roles in `registry/userGroups.xml`:
   this would list assistants as Submission-stage participants, and is not
   possible on OPS.
 
 **What goes with it**
 
-- No stored data is wrong and no API changes. More people can download,
-  but only people who can already open the window and edit its files.
-- Backport: the diff applies as written to `stable-3_5_0`. On
-  `stable-3_4_0`, `pkp/pkp-lib#13432` (034fd831b2) moved the block one
-  indent level out, so the same two lines change at line 103 with four
-  spaces less indent. On 3.3 the same change drops the stage argument of
-  `UserStageAssignmentDAO::getUsersBySubmissionAndStageId()`, which
-  accepts none.
-- `pkp/pkp-lib#13432` aims at consistent policy checks in this method and
-  touches these lines, so the change fits there when it returns to `main`
-  and `stable-3_5_0`; on `stable-3_4_0` it would be a follow-up.
+- No stored data is wrong and no API changes. More people can download:
+  those the window already opens for, and lets add, edit and delete
+  these files.
+- Backport: the diff applies as written to `stable-3_5_0` (the same
+  lines, from 169). On `stable-3_4_0` the check is still in
+  `LibraryFileHandler::downloadLibraryFile()`
+  (`pages/libraryFiles/LibraryFileHandler.php`, from line 101), where the
+  same lines change; `Repo::submission()->get()` and
+  `Repo::user()->getAccessibleWorkflowStages()` have the same signatures
+  there, and `$userRoles` is set only when the method has a calling
+  handler, so it needs a default of `[]`. On 3.3 the method is
+  `Services::get('user')->getAccessibleWorkflowStages()` and the check is
+  at line 82 of `LibraryFileHandler.inc.php` (3.4 and 3.3 by code, not
+  tried).
 - The guard: an e2e check in spec U39 that an assigned Copyeditor and, on
   OPS, the Moderator and the Author download a Submission Library file.
 
-Small: one line in one pkp-lib method, tried on the three apps, and an e2e
-check.
+Small: a few lines in one pkp-lib method, calling the method the policy
+already calls, tried on the three apps, and an e2e check.
 
 ## Evidence
 
@@ -263,47 +300,59 @@ check.
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/submission-library-file-403-for-participants/walk.js),
   with its helpers in
   [lib.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/submission-library-file-403-for-participants/lib.js).
-  `neighbour` as its argument runs the removal check alone. It runs from
-  a pkp-e2e checkout against installs freshly loaded from the default
-  dataset:
+  `neighbour` as its argument runs only the fix trial's second check (a
+  person removed under "Participants" loses the download, and a Publisher
+  Library file still downloads). It runs from a pkp-e2e checkout against
+  installs freshly loaded from the default dataset:
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/submission-library-file-403-for-participants/walk.js [neighbour]`.
   The fix was tried by applying fix.diff to the three apps and running the
-  same command, with and without `neighbour`.
+  same command, with and without `neighbour`. The one-line alternative
+  was tried the same way earlier on 2026-10-07.
 - Walked on OJS, OMP and OPS `main` and `stable-3_5_0`, on PostgreSQL;
-  nothing here depends on the database. Datasets: pkp/datasets e8dafbc
-  (2026-10-02).
-- Tips: `main` OJS ff004d0973 (lib/pkp 987776cd04, ui-library 64d67363),
-  OMP 3b0ecf794 and OPS c8af945bb7 (lib/pkp 3dc90c81a6, ui-library
-  280f98c5); `stable-3_5_0` OJS c1cee76b95 (lib/pkp 771474347e), OMP
-  9c5e24246 and OPS 38b61882d3 (lib/pkp cf3f984335); `stable-3_4_0` OJS
+  nothing here depends on the database. Datasets: pkp/datasets a130b9a
+  (2026-10-07).
+- Tips: `main` OJS 3265fdc673, OMP 0c6a3ebed1 and OPS 8ae6c68e04 (lib/pkp
+  f8285b0b8f, ui-library 7503fab4); `stable-3_5_0` OJS 6d2a42555d, OMP
+  5861ebee10 and OPS 6a8f83586c (lib/pkp 6910ca6d8e); `stable-3_4_0` OJS
   d68934d0d1, OMP 0aec65441, OPS acd8ae704b (lib/pkp 767353f4fe);
   `stable-3_3_0` OJS ac77c9fb35, OMP 8e72fc883, OPS c5532e2161 (lib/pkp
   ac3fa73402).
 - Code reads:
-  - `main`: `LibraryFileHandler::downloadLibraryFile()`,
-    `FileApiHandler::authorize()` and `downloadLibraryFile()`,
+  - `main`: `FileApiHandler::authorize()` and `downloadLibraryFile()`,
     `Collector::assignedTo()` and `buildSubmissionAssignmentsFilter()`,
-    `DocumentLibraryHandler::authorize()`,
+    `DocumentLibraryHandler` (its roles and `authorize()`),
     `SubmissionDocumentsFilesGridDataProvider::getAuthorizationPolicy()`,
-    `PKPLibraryController` (the email's "Download" address), the three
-    apps' `registry/userGroups.xml`, and a search of lib/pkp and the apps
-    for `assignedTo(` with `WORKFLOW_STAGE_ID_SUBMISSION`.
-  - Introduced: `git blame` on line 99 gives bf20528ed1, the revert of
-    c530748391 (`pkp/pkp-lib#13432`); b08f469765 (`pkp/pkp-lib#7127`) and
-    858b24f31f (`pkp/pkp-lib#8092`) only rewrote the call. 669d0aba9b is
-    Jason Nugent's `PKPFileApiHandler::downloadLibraryFile()`. OPS
-    012e900283 changed the groups from `stages="1,5"` to `stages="5"`.
-  - `pkp/pkp-lib#13432` per branch, from GitHub's commit lists for the
-    file: `main` c530748391 reverted by bf20528ed1, `stable-3_5_0`
-    3f26cd7b1e reverted by 5af94e3ff6, `stable-3_4_0` 034fd831b2 not
-    reverted; the issue is open.
-  - 3.5 (walked): the same method and line in both lib/pkp tips; OJS
-    copyeditor `stages="4"`, layoutEditor `"5"`; OPS manager, sectionEditor
-    and author `stages="5"`.
+    `SubmissionAccessPolicy`, `UserAccessibleWorkflowStageRequiredPolicy`,
+    `SubmissionAuthorPolicy` and
+    `Repo::user()->getAccessibleWorkflowStages()`, `PKPLibraryController`
+    (the email's "Download" address), the three apps'
+    `registry/userGroups.xml`, OPS's
+    `I10874_UserGroupStagesRemoveSubmission` and its line in
+    `dbscripts/xml/upgrade.xml` (on `main` and `stable-3_5_0`), and a
+    search of lib/pkp and the apps for `assignedTo(` with
+    `WORKFLOW_STAGE_ID_SUBMISSION`.
+  - Introduced: `git blame` on line 177 gives the move (e60013c77f);
+    before it, b08f469765 (`pkp/pkp-lib#7127`) and 858b24f31f
+    (`pkp/pkp-lib#8092`) only rewrote the call. 669d0aba9b ("introduce
+    base PKP file api handler class", Jason Nugent) is the oldest commit
+    read that holds the check. OPS 012e900283 changed the groups from
+    `stages="1,5"` to `stages="5"`; 1228378516 is the migration, in the
+    same PR.
+  - `pkp/pkp-lib#13432`: its issue text was read against this fault and
+    is about something else. Its commits per branch, from each branch's
+    log for the two files: `main` e60013c77f and `stable-3_5_0`
+    0ed26dd8a7, each after an earlier merge and its revert on 2026-10-02
+    (c530748391 and bf20528ed1; 3f26cd7b1e and 5af94e3ff6);
+    `stable-3_4_0` 034fd831b2 (2026-10-02).
+  - 3.5 (walked): the same method in `FileApiHandler`, the query at line
+    171, in the lib/pkp tip, and the same
+    `getAccessibleWorkflowStages()`; OJS copyeditor `stages="4"`, layoutEditor
+    `"5"`; OPS manager, sectionEditor and author `stages="5"`.
   - 3.4 (code): lib/pkp `origin/stable-3_4_0` has the same query at line
-    103. OJS and OMP give the Copyeditor and Marketing `stages="4"` and the
-    Layout Editor, Proofreader, Designer and Indexer `"5"` (OMP Chapter
-    Author `"4,5"`), so they are refused. OPS gives its three groups
+    103 of `pages/libraryFiles/LibraryFileHandler.php`. OJS and OMP give the
+    Copyeditor and Marketing `stages="4"` and the Layout Editor,
+    Proofreader, Designer and Indexer `"5"` (OMP Chapter Author `"4,5"`),
+    so they are refused. OPS gives its three groups
     `stages="1,5"`, so its Moderator and Author pass. The Submission
     Library grid admits `ROLE_ID_ASSISTANT`, and the workflow page shows
     "Library" to everyone (OJS `templates/workflow/workflow.tpl`).
@@ -311,13 +360,17 @@ check.
     `LibraryFileHandler.inc.php` calls
     `getUsersBySubmissionAndStageId(…, WORKFLOW_STAGE_ID_SUBMISSION)`; the
     stage sets and the grid's roles are as on 3.4.
-- Upstream searches (2026-10-03): pkp/pkp-lib, pkp/ojs, pkp/omp, pkp/ops
+- Upstream searches (2026-10-07): pkp/pkp-lib, pkp/ojs, pkp/omp, pkp/ops
   and pkp/ui-library, by symptom words ("submission library 403", "library
-  file forbidden") and by `LibraryFileHandler` and `downloadLibraryFile`.
+  file forbidden", "submission library download") and by
+  `downloadLibraryFile` and `assignedTo` with `WORKFLOW_STAGE_ID_SUBMISSION`.
 - Not driven: the Proofreader, Designer, Indexer, Marketing and sales
   coordinator and OMP's Chapter Author (refused by the same stage sets,
   read in the code); attaching a library file to an email. Ticking
   "Submission" was not driven here; spec U39's own probe (footnote d,
   2026-09-24) drove it on OJS and OMP, and the assigned Copyeditor then
   downloaded.
-- Unverified: MySQL; 3.4 and 3.3 rest on the code read.
+- Unverified: MySQL; 3.4 and 3.3 rest on the code read, the backport
+  lines included. That the download and the window agree beyond the
+  roles of the Steps rests on the code read (both ask
+  `getAccessibleWorkflowStages()`).

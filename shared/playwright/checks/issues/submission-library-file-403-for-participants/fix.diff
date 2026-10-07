@@ -1,15 +1,25 @@
---- a/lib/pkp/pages/libraryFiles/LibraryFileHandler.php
-+++ b/lib/pkp/pages/libraryFiles/LibraryFileHandler.php
-@@ -94,9 +94,10 @@
-                     }
-                 }
+--- a/lib/pkp/controllers/api/file/FileApiHandler.php
++++ b/lib/pkp/controllers/api/file/FileApiHandler.php
+@@ -172,17 +172,11 @@
+                 $allowedAccess = true;
+             }
  
--                // Check for specific assignments.
-+                // Anyone assigned to the submission, in any stage, as for the
-+                // Submission Library list itself (SubmissionAccessPolicy).
-                 $assignedUsers = Repo::user()->getCollector()
--                    ->assignedTo($libraryFile->getSubmissionId(), WORKFLOW_STAGE_ID_SUBMISSION)
-+                    ->assignedTo($libraryFile->getSubmissionId())
-                     ->getMany();
- 
-                 $user = $request->getUser();
+-            // Check for specific assignments.
+-            $assignedUsers = Repo::user()->getCollector()
+-                ->assignedTo($libraryFile->getSubmissionId(), WORKFLOW_STAGE_ID_SUBMISSION)
+-                ->getMany();
+-
+-            $user = $request->getUser();
+-            foreach ($assignedUsers as $assignedUser) {
+-                if ($assignedUser->getId() == $user->getId()) {
+-                    $allowedAccess = true;
+-                    break;
+-                }
++            // Anyone the submission's workflow is open to, in any stage: the
++            // rule of the Submission Library list itself (SubmissionAccessPolicy).
++            $submission = Repo::submission()->get((int) $libraryFile->getSubmissionId(), $context->getId());
++            if ($submission && Repo::user()->getAccessibleWorkflowStages($request->getUser()->getId(), $context->getId(), $submission, $userRoles)) {
++                $allowedAccess = true;
+             }
+         } else {
+             // This is a context library file; access policies already ensured sufficient access.

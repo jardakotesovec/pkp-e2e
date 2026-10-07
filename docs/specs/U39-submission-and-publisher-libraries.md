@@ -598,9 +598,9 @@ entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
-| [A1](#a1) | Assistants, and a preprint's moderator and author, get a bare "403 Forbidden" page for Submission Library files | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
+| [A1](#a1) | Assistants, and a preprint's moderator and author, get a bare "403 Forbidden" page for Submission Library files | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [A3](#a3) | "Description" in the library's "Add a file" and "Edit" windows is starred as required, yet saves empty | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A4](#a4) | Library files download under a mangled name when the uploaded name repeats its extension or is long | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A4](#a4) | Library files download under a mangled name when the uploaded name repeats its extension or is long | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A5](#a5) | With strict mode on, deleting a Submission Library file, dashboard search and the reviewer's file list stop working | 🐞 | low · crash: server | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | A second file's name pressed, or a save, within two seconds of a download makes the page's script fail | 🐞 | low · crash: script | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | After an "OK" without a file, closing "Add a file" drops what was typed without asking | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -628,13 +628,14 @@ a press also the Chapter Author.
 No preprint server role can be given the Submission stage: the box is not
 there. So on a preprint server the Moderator and the preprint's own Author
 are refused every Submission Library file, and only the Preprint Server
-manager can read them. A Moderator's "Download" under "Library Files" on a
-decision email opens a new tab reading "403 Forbidden".
+manager can read them. This began with 3.5, on new and upgraded servers
+alike; on 3.4 both could download. A Moderator's "Download" under
+"Library Files" on a decision email opens a new tab reading "403
+Forbidden".
 
 Nothing is lost. The file has to reach these people some other way, such
 as a discussion.
-Basis: probe, 2026-10-03. <sup>[f-a1](#fn-a1)</sup>
-Report: refresh owed — pkp/pkp-lib `e60013c77f` (#13432, on `main` 2026-10-07) moved `LibraryFileHandler::downloadLibraryFile()` into `FileApiHandler::downloadLibraryFile()` with the same stage-1 assignment check; the report's Cause, its line number and its fix name the old method (2026-10-07)
+Basis: probe, 2026-10-07. <sup>[f-a1](#fn-a1)</sup>
 
 <a id="a3"></a>
 **A3 — "Description" in the library's "Add a file" and "Edit" windows is starred as required, yet saves empty** · 🐞 · low.
@@ -660,20 +661,19 @@ extension, as intended: "contract.pdf" added as "Marketing" downloads as
 "contract-MAR.pdf". But when the extension's letters also appear earlier
 in the name, in the same case, the name is cut one character before
 that first appearance: "notes-pdf-draft.pdf" downloads as
-"notes-MAR.pdf". A name that starts with its extension loses only its
-last character: "pdf-guide.pdf" downloads as "pdf-guide.pd-MAR.pdf".
+"notes-MAR.pdf". When the name starts with those letters, it keeps
+everything but its last letter instead: "pdf-guide.pdf" downloads as
+"pdf-guide.pd-MAR.pdf".
 
-Uploaded names are kept to 127 characters. A name of 124 characters or
-more keeps a piece of its extension before the type code: a PDF named
-with 126 characters downloads ending in ".pd-MAR.pdf", and one of 127
-or more in ".pdf-MAR.pdf", the extension twice.
+Uploaded names are cut to at most 127 characters, the extension
+included. A name of 124 characters or more, whatever its extension,
+keeps a piece of that extension before the type code: a PDF named with
+126 characters downloads ending in ".pd-MAR.pdf", and one of 127 or more
+in ".pdf-MAR.pdf", the extension twice.
 
-The type code is intended; the cut and the extra extension are the
-fault. Only the name is wrong, and the person who saves the file can
-rename it. A library file attached to a workflow email goes out under
-the same wrong name.
-Basis: probe, 2026-10-03. <sup>[f-a4](#fn-a4)</sup>
-Report: refresh owed — pkp/pkp-lib `e60013c77f` (#13432, on `main` 2026-10-07) moved `LibraryFileHandler::downloadLibraryFile()` into `FileApiHandler::downloadLibraryFile()` (its download code unchanged); the report's Cause names the old method (2026-10-07)
+Only the name is wrong: the file is complete and still ends in its
+extension, and the person who saves it can rename it.
+Basis: probe, 2026-10-07. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
 **A5 — With strict mode on, deleting a Submission Library file, dashboard search and the reviewer's file list stop working** · 🐞 · low · crash: server.
