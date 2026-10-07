@@ -24,14 +24,17 @@
  * - A14 🐞: S9 reads the "Mark DOIs Needs Sync" question up to "…previously
  *   submitted DOIs."; its "stale" sentence is not asserted.
  * - OJS3 🐞: S14 reads the ISSN publish warning as listed, never its count.
+ * - OJS7 ❓: S17 unticks "Public Visibility" and reads the review's row
+ *   gone; ticking it again (a new DOI, or "Needs DOI") is not asserted.
  * - A2, A7, A9–A12, A15–A20, OJS1, OJS2, OJS6: not on these scenarios'
  *   paths ("Immediately…" is only refused, in S8; S17's journal has no
  *   agency, so its review DOIs are never deposited). A25–A28 are retired
  *   (a decline and "Revert Decline" under "Immediately…", a declined work
  *   carrying a DOI on the page; serial S11 now marks the work registered
  *   while its major version is unpublished); the other paths are Planned
- *   items. OMP1–OMP3, OPS1–OPS3, OPS5: the press's and the preprint
- *   server's (OMP4, OMP5 and OPS4 retired).
+ *   items.
+ *   OMP1–OMP3, OPS1–OPS3, OPS5: the press's and the preprint server's
+ *   (OMP4, OMP5 and OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch journal with
@@ -83,6 +86,9 @@ const {
     openReviewDetails,
     markReviewComplete,
     closeReviewDetails,
+    openEditReview,
+    publicVisibilityCheckbox,
+    saveEditReview,
 } = require('../pages/ReviewStagePages.js');
 const {DecisionWizardPage} = require('../pages/DecisionWizardPages.js');
 
@@ -1532,7 +1538,8 @@ test.describe('DOIs', () => {
         await dois.expand(taRow, tardigrade.submissionId);
         expect(await dois.doiTypes(taRow)).toEqual([ARTICLE]);
 
-        // "Mark as Complete": the "Peer Review {number}" row with its DOI (Rule 7).
+        // "Mark as Complete" after the move: the "Peer Review {number}" row,
+        // empty and "Needs DOI" (Rule 7).
         await workflow.gotoEditorial(tardigrade.submissionId);
         await workflow.frame.selectRound(1);
         const modal = await openReviewDetails(page, workflow.reviewerRow('Rhea Reviewer'));
@@ -1542,8 +1549,34 @@ test.describe('DOIs', () => {
         await dois.expand(taRow, tardigrade.submissionId);
         const taTypes = await dois.doiTypes(taRow);
         expect(taTypes.length).toBe(2);
+        expect(taTypes[0]).toBe(ARTICLE);
         expect(taTypes[1]).toMatch(peerReview);
-        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue(new RegExp(`^${PREFIX.replace('.', '\\.')}/.+`));
+        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue('');
+        await expect(dois.doiBadge(taRow, taTypes[1])).toHaveText('Needs DOI');
+
+        // "Assign DOIs" on the work: the row holds a DOI of its own,
+        // "Unregistered" (Rules 7, 25).
+        await dois.runBulk('Assign DOIs', [tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.assigned);
+        await dois.expand(taRow, tardigrade.submissionId);
+        const taArticleDoi = await doiValue(dois.doiBox(taRow, ARTICLE), new RegExp(`^${PREFIX.replace('.', '\\.')}/.+`));
+        const taReviewDoi = await doiValue(dois.doiBox(taRow, taTypes[1]), new RegExp(`^${PREFIX.replace('.', '\\.')}/.+`));
+        expect(taReviewDoi).not.toBe(taArticleDoi);
+        await expect(dois.doiBadge(taRow, taTypes[1])).toHaveText('Unregistered');
+
+        // "Public Visibility" unticked in the row's "Edit" window: the
+        // expanded view has the "Article" row only, the article's DOI
+        // unchanged (Rule 7b). Ticking it again is OJS7's question.
+        await workflow.gotoEditorial(tardigrade.submissionId);
+        await workflow.frame.selectRound(1);
+        const edit = await openEditReview(page, workflow.reviewerRow('Rhea Reviewer'));
+        await expect(publicVisibilityCheckbox(edit)).toBeChecked();
+        await publicVisibilityCheckbox(edit).uncheck();
+        await saveEditReview(page, edit);
+        await dois.goto();
+        await dois.expand(taRow, tardigrade.submissionId);
+        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE]);
+        await expect(dois.doiBox(taRow, ARTICLE)).toHaveValue(taArticleDoi);
     });
 
     test('S18: issue DOIs, and an article scheduled under "Upon publication"', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {

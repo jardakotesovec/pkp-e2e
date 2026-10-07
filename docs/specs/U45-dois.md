@@ -182,7 +182,7 @@ links under the list. <sup>g</sup>
    |-----|-------|-----------|
    | "Articles" ("Monographs", "Preprints") | each version of the work | the "Articles" tab ("Monographs", "Preprints") |
    | "Article galleys, such as a published PDF" ("Preprint galleys…") {OJS OPS} | each galley of each version | the same tab, as rows of the work |
-   | "Peer Review" {OJS} | each completed review shown publicly (Rule 7) | the "Articles" tab |
+   | "Peer Review" {OJS} | each submitted review that counts as read and is shown publicly (Rule 7) | the "Articles" tab |
    | "Issues" {OJS} | each issue | the "Issues" tab |
    | "Files" {OMP} | each file of each publication format | the "Monographs" tab ⚠ [OMP1](#omp1) |
    | "Chapters" {OMP} | each chapter of each version that has its own page (Rule 47) | the "Monographs" tab, as rows of the book (Rule 45) <sup>q28</sup> |
@@ -238,8 +238,9 @@ links under the list. <sup>g</sup>
       "DOI Versioning" "No" and for a "Minor Revision" under "Yes"
       (Rules 11, 12); a "Major Revision" gets DOIs of its own at once;
     - an issue {OJS}, when "Create Issue" saves it (Rule 8);
-    - a peer review {OJS}, once it counts as read while its "Public
-      Visibility" box is ticked (Rule 7).
+    - a peer review {OJS}, the moment it comes to count as read with its
+      "Public Visibility" box ticked, or the moment that box is ticked on
+      a review that already counts as read (Rules 7, 7b).
 
     An unfinished draft nobody has submitted gets none (a preprint
     server lists it, its row "Needs DOI", Rule 15).
@@ -283,28 +284,58 @@ links under the list. <sup>g</sup>
      "10.1234/jpk.%p", "k2.%x" on an item without a Publisher ID gives
      "10.1234/k2.%x" ⚠ [A9](#a9). A peer review takes no pattern and is
      treated as under "None" [A2](#a2). <sup>q14</sup>
-7. **Peer-review DOIs** {OJS}. With "Peer Review" ticked, a review gets a
-   DOI at the version's automatic moment (Rule 5) or by "Assign DOIs"
-   once the reviewer has submitted it and its "Public Visibility" box
-   ("Publicly Show Reviewer Comments") is ticked
+7. **Peer-review DOIs** {OJS}. With "Peer Review" ticked, a review can
+   have a DOI only while three things hold: the reviewer has submitted
+   it, it counts as read, and its "Public Visibility" box ("Publicly
+   Show Reviewer Comments") is ticked
    ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md),
    Fields; the journal default in
    [Review setup & review forms](U29-review-setup-and-review-forms.md),
-   Rule 4). The DOIs page lists it as "Peer Review {number}" under the
-   article's current version, the number being one the install gives
-   the review request ("Peer Review 186"), not a count of the article's
-   reviews. The row shows once the review counts as read: an editor
-   pressed "Mark as Complete" on it, or a decision sent the "Notify
-   Reviewers" email, after which the reviewer's row reads "Reviewer
-   Thanked". The review's DOI is made at the automatic moment even
-   before that; under "Immediately…" it is made when the review comes
-   to count as read (Rule 5a). A review's DOI is exported and deposited
-   with its work (Rule 29) only once the review counts as read and the
-   version its review round was opened on (the version under review at
-   the time) is published; under "DOI Versioning" "No" the work's
-   current version must also be published with its DOI. Until then
-   "Deposit DOIs" and "Deposit All" send the work without the review.
-   No reader page shows a review's DOI. <sup>j</sup> <sup>q15</sup> <sup>q45</sup>
+   Rule 4). It counts as read once an editor presses "Mark as Complete"
+   on it, or once a decision sends the "Notify Reviewers" email, after
+   which the reviewer's row reads "Reviewer Thanked". From then on the
+   DOIs page lists it as "Peer Review {number}" under the article's
+   current version, empty and reading "Needs DOI" until it gets its
+   DOI. The number is one the install gives the review request ("Peer
+   Review 186"), not a count of the article's reviews. A review that
+   does not count as read has no row and no DOI. <sup>j</sup> <sup>q15</sup> <sup>q46</sup>
+
+7a. **When a review gets its DOI** {OJS}. A review that meets Rule 7's
+    three conditions ("qualifies" below) gets its DOI:
+    - under "Upon reaching the copyediting stage": with its version
+      when a decision moves the work into Copyediting or Production, if
+      it counts as read by then (the "Notify Reviewers" email of that
+      same decision is enough); a review that comes to count as read
+      after the move gets its DOI when the version is published;
+    - under "Upon publication": when the version is published;
+    - under "Immediately…": the moment it qualifies (Rule 5a);
+    - under any choice: by "Assign DOIs" (Rule 25), whether the work is
+      published or not. A review that comes to count as read after its
+      version is published gets its DOI this way only, except under
+      "Immediately…". <sup>q46</sup>
+
+7b. **A review that stops qualifying** {OJS}. Two actions take a
+    review out of Rule 7's conditions, under every "Automatic DOI
+    Assignment" choice:
+    unticking its "Public Visibility" box in the reviewer row's "Edit"
+    window, and "Revert Decision" on a review row reading "Complete"
+    ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md),
+    Rule 16). Its row then leaves the DOIs page, and:
+    - a DOI reading "Unregistered" is deleted, so a review that
+      qualifies again starts without one (Rule 7a) ⚠ [OJS7](#ojs7);
+    - a DOI reading "Submitted" or "Registered" stays with its status,
+      and the row shows it again once the review qualifies again.
+
+    "Revert Decision" on a row reading "Reviewer Thanked" changes
+    nothing here: the review still counts as read. <sup>q46</sup>
+
+7c. **Exporting and depositing a review's DOI** {OJS}. A review's DOI is
+    exported and deposited with its work (Rule 29) only once the
+    version its review round was opened on (the version under review at
+    the time) is published; under "DOI Versioning" "No" the work's
+    current version must also be published with its DOI. Until then
+    "Deposit DOIs" and "Deposit All" send the work without the review.
+    No reader page shows a review's DOI. <sup>q45</sup>
 8. **Issue DOIs** {OJS}. With "Issues" ticked, publishing an issue
    ("Publish Issue", [→ publishing an issue](U50-issues.md#publish-issue))
    gives it a DOI when it has none, whatever "Automatic DOI Assignment"
@@ -490,11 +521,9 @@ links under the list. <sup>g</sup>
     version of each ticked published item as registered by hand
     ("Registered", with no agency). A version not yet published keeps
     its DOIs' status, so they read "Unregistered" when it is published
-    and a deposit sends them (Rule 29). On a journal, when the work's
-    current version is a published "Published Manuscript Under Review",
-    its reviews' DOIs are marked too, including a review that does not
-    count as read yet, whose "Peer Review {number}" row reads
-    "Registered" once it does (Rule 7) ⚠ [OJS6](#ojs6).
+    and a deposit sends them (Rule 29). On a journal the DOIs of the
+    reviews whose round was opened on a published version are marked
+    too (Rule 7c).
     When any ticked item is not published, nothing at all is marked and
     the window "DOI Updates Failed" lists, per unpublished item, "Failed
     to mark the DOI registered for {title}. The submission must be
@@ -545,12 +574,12 @@ links under the list. <sup>g</sup>
       then read "Submitted" at once, while a version not yet published
       keeps its DOIs' status <sup>q44</sup>; on the "Issues" tab the
       issues are sent too, but their DOIs keep their status
-      ⚠ [OJS4](#ojs4). On a journal, when the work's current version is
-      a published "Published Manuscript Under Review", its reviews' DOIs
-      turn "Submitted" too, while the deposit sends only the reviews
-      that count as read (Rule 7): a review not yet read is not sent,
-      and its "Peer Review {number}" row reads "Submitted" once it counts
-      as read ⚠ [OJS6](#ojs6). A ticked
+      ⚠ [OJS4](#ojs4). On a journal the DOIs of the reviews whose
+      round was opened on a published version turn "Submitted" too, and
+      the deposit sends those of them Rule 7c lets go; the kept
+      DOI of a review no longer shown publicly (Rule 7b) turns
+      "Submitted" as well, though the deposit does not send it
+      ⚠ [OJS6](#ojs6). A ticked
       published work that has no DOI gets the same notice, yet stays
       "Needs DOI" and nothing is sent ⚠ [A15](#a15). A ticked unpublished
       item makes the whole action fail: nothing is marked, the window
@@ -569,10 +598,9 @@ links under the list. <sup>g</sup>
       Administration › "Failed Jobs", where test-install deposits land
       [A18](#a18), gains nothing for its work. "Automatic Deposit"
       (Rule 41), never run on test installs, does the same
-      ⚠ [OJS5](#ojs5). A review's DOI {OJS} is taken only once the
-      review counts as read (Rule 7), and then also when its article's
-      DOI already reads "Registered", which keeps that status; before
-      that the review's DOI keeps "Unregistered". With nothing left to
+      ⚠ [OJS5](#ojs5). A review's DOI {OJS} is taken while the review
+      counts as read (Rule 7) and Rule 7c lets it go, also when its
+      article's DOI already reads "Registered", which keeps that status. With nothing left to
       deposit it
       still shows "Items successfully submitted for deposit" and changes
       nothing.
@@ -918,7 +946,9 @@ differs. <sup>z1</sup>
   an item is created", a decline of a work with no published version
   deletes its unregistered DOIs, and "Revert Decline" gives its current
   version new ones
-  (Rule 5b). <sup>r</sup>
+  (Rule 5b); a review's "Mark as Complete" or "Notify Reviewers" email,
+  its "Public Visibility" box and "Revert Decision" give or delete its
+  DOI (Rules 7a, 7b). <sup>r</sup>
 - **Activity Log, no mail.** No DOI action sends an email or a
   notification. <sup>r</sup> A DOI given to a work that had none adds
   one "Submission metadata updated" to the work's Activity Log, under
@@ -1022,7 +1052,9 @@ differs. <sup>z1</sup>
 
 12. **"Publicly Show Reviewer Comments"** {OJS} (a review's "Public
     Visibility" box, its default on Settings › Workflow › Review;
-    unticked). Ticked: the review can carry a DOI (Rule 7).
+    unticked). Ticked: the review can carry a DOI once it counts as
+    read (Rule 7); unticked later, it loses an "Unregistered" one
+    (Rule 7b).
     [Review setup & review forms](U29-review-setup-and-review-forms.md)
     owns the default. <sup>j</sup>
 
@@ -1081,7 +1113,8 @@ differs. <sup>z1</sup>
   by itself add (Side effects).
 - **[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)**
   and **[Review setup & review forms](U29-review-setup-and-review-forms.md)**:
-  a review's "Public Visibility" and "Mark as Complete" (Rule 7).
+  a review's "Public Visibility", "Mark as Complete" and "Revert
+  Decision" (Rules 7–7b).
 - **[Chapters & work type](U72-chapters-work-type.md)**: the chapters
   and their "Chapter Page" box, which decides whether a chapter can carry
   a DOI (Rule 47); that spec keeps the box ticked once the chapter has a
@@ -1840,15 +1873,25 @@ throwaway accounts. <sup>sc</sup>
       the reviewer's row reads "Reviewer Thanked". On "DOIs" the work's
       expanded view has an "Article" row and, under the current version, a
       "Peer Review {number}" row, each with a DOI of its own beginning
-      "10.1234/" and reading "Unregistered" (Rule 7).
+      "10.1234/" and reading "Unregistered" (Rules 7, 7a).
     - **Accept without the email**: on "Tardigrade desiccation" record
       "Accept Submission" and skip its "Notify Reviewers" email: the
       work's expanded view has the "Article" row only (Rule 7).
     - **"Mark as Complete"**: open that review's "Read Review" and press
       "Mark as Complete"
       ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md)):
-      the expanded view now has a "Peer Review {number}" row with its DOI
-      (Rule 7).
+      the expanded view now has a "Peer Review {number}" row, empty and
+      reading "Needs DOI", since the work moved into Copyediting before
+      the review counted as read (Rules 7, 7a). <sup>q47</sup>
+    - **"Assign DOIs"**: tick "Tardigrade desiccation", choose "Bulk
+      Actions" › "Assign DOIs" and confirm: the "Peer Review {number}"
+      row holds a DOI of its own beginning "10.1234/", reading
+      "Unregistered" (Rules 7a, 25).
+    - **"Public Visibility" unticked**: on the work's "Review Round 1",
+      choose "Edit" in the reviewer row's "More Actions" menu, untick
+      "Publicly Show Reviewer Comments" and press "OK":
+      the work's expanded view has the "Article" row only, its DOI
+      unchanged (Rule 7b).
     - **Control**: before either decision, the DOIs page listed both
       works, "Unpublished", each expanded view holding the "Article" row
       only, empty and reading "Needs DOI" (Rules 7, 15). <sup>sc</sup>
@@ -1968,13 +2011,31 @@ Left out of the scenarios above, by reason:
     and still so once it is published {OMP} (Rules 26, 52; OMP5 retired)
   - a journal with Crossref configured and "Peer Review" ticked, a work
     published as a version of record with a public review that does not
-    count as read: "Deposit All" turning the "Article" row "Submitted"
-    and leaving the review's DOI as it was, its "Peer Review {number}"
-    row reading "Unregistered" after "Mark as Complete"; on a second such
-    work whose "Article" row was marked "Registered" by "Mark DOIs
-    Registered", "Deposit All" after "Mark as Complete" turning the
+    count as read: no "Peer Review {number}" row, "Deposit All" turning
+    the "Article" row "Submitted", and after "Mark as Complete" the
+    review's row reading "Needs DOI"; on a second such work whose
+    "Article" row was marked "Registered" by "Mark DOIs Registered",
+    "Mark as Complete" and "Assign DOIs", then "Deposit All" turning the
     review's row "Submitted" and the "Article" row staying "Registered"
-    {OJS} (Rules 7, 26, 29)
+    {OJS} (Rules 7, 7a, 26, 29)
+  - a work at Review whose version is published as a "Published
+    Manuscript Under Review", with a public review that does not count as
+    read: no "Peer Review {number}" row, "Deposit DOIs" turning the
+    "Article" row "Submitted" and "Mark DOIs Registered" on a twin turning
+    it "Registered", and after "Mark as Complete" the review's row
+    reading "Needs DOI" {OJS} (Rules 7, 26, 29)
+  - "Upon reaching the copyediting stage": a review that comes to count
+    as read after the move getting its DOI when the version is
+    published {OJS} (Rule 7a)
+  - a published work's review that comes to count as read: "Assign
+    DOIs" giving it its DOI, then "Mark DOIs Registered" (or "Deposit
+    DOIs") turning its row "Registered" ("Submitted") with the "Article"
+    row {OJS} (Rules 7a, 26, 29)
+  - "Revert Decision" on a "Complete" review deleting its "Unregistered"
+    DOI, the row leaving the DOIs page, and on a "Reviewer Thanked" one
+    changing nothing; a "Registered" or "Submitted" review DOI kept
+    through "Public Visibility" unticked, its row hidden and shown again
+    with that status once the box is ticked {OJS} (Rule 7b)
   - "Deposit DOIs" on a work whose new major version is not yet
     published: the published versions' DOIs reading "Submitted", the new
     version's "Unregistered", and "Deposit All" sending them once it is
@@ -2059,7 +2120,8 @@ Left out of the scenarios above, by reason:
   - OJS5 ("Deposit All" marking "Submitted" a galley DOI whose article DOI is "Registered" or missing, and "Automatic Deposit" alike; Rules 29, 41)
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
-  - OJS6 ("Deposit DOIs" and "Mark DOIs Registered" on a work whose current version is a published "Published Manuscript Under Review" marking a review's DOI that does not yet count as read, which "Deposit All" then never sends; Rules 7, 26, 29)
+  - OJS6 ("Deposit DOIs" marking a hidden review's kept DOI "Submitted"; Rules 7b, 29)
+  - OJS7 (a review qualifying again after losing its "Unregistered" DOI: a new DOI under "Immediately…", "Needs DOI" under the other settings; Rules 7a, 7b; scenario 17 stops at the untick)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
@@ -2106,7 +2168,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
 | [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
-| [OJS6](#ojs6) | "Deposit DOIs" on a work published as a "Published Manuscript Under Review" marks a review's DOI "Submitted" before the review counts as read, and "Deposit All" never sends the review | 🐞 | user-visible | — |
+| [OJS6](#ojs6) | "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it | 🐞 | minor | — |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -2119,6 +2181,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | A "Needs Sync" item's agency panel says its metadata "has not been submitted" | ❓ | minor | — |
 | [A23](#a23) | A journal's or a preprint server's galley given its DOI alone at a publish: its Activity Log line untried | ❓ | minor | — |
 | [OJS1](#ojs1) | "Never" does not stop an issue's DOI at "Publish Issue" | ❓ | minor | — |
+| [OJS7](#ojs7) | A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings | ❓ | minor | — |
 | [OMP3](#omp3) | A chapter that cannot have a DOI reads "Needs DOI" | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers "Automatic Deposit" but nothing runs it | ❓ | user-visible | — |
 | [OPS5](#ops5) | A preprint server's DOIs page lists drafts nobody has submitted | ❓ | minor | — |
@@ -2155,10 +2218,10 @@ work "{prefix}/" with nothing after the slash, the same value for every
 work; the DOIs page reports "Items successfully assigned new DOIs", and
 the work's public page, its citation tags, "How to cite" and OAI-PMH
 carry that DOI. On a journal with "Peer Review" ticked, every publicly
-shown completed review gets the same bare value, under "None" and under
-"Custom pattern". One cause with [A9](#a9).
+shown review that counts as read gets the same bare value, under "None"
+and under "Custom pattern". One cause with [A9](#a9).
 Basis: probe, 2026-10-01. <sup>f-a2</sup>
-Report: refresh owed — `pkp/pkp-lib#13460` (PR head `246e5387f6`, unmerged) deletes `VersionDois`, whose publish-time minting moves to `AssignDOIs::handlePublished()` with the same test, and adds the "Immediately…" paths, which refuse "None" and "Custom pattern"; the Reach's list of automatic paths changes (2026-10-07)
+Report: refresh owed — `pkp/pkp-lib#13460` (PR head `246e5387f6`, unmerged) deletes `VersionDois`, whose publish-time minting moves to `AssignDOIs::handlePublished()` with the same test, and adds the "Immediately…" paths, which refuse "None" and "Custom pattern"; the Reach's list of automatic paths changes; a review now gets a DOI only once it counts as read (Rule 7) (2026-10-07)
 
 <a id="a3"></a>
 **A3 — A DOI refused on the DOIs page gets only "Some DOI(s) could not be updated", never the reason** · 🐞 · low.
@@ -2569,26 +2632,42 @@ the same without anyone pressing.
 Basis: probe, 2026-10-06. <sup>f-ojs5</sup>
 
 <a id="ojs6"></a>
-**OJS6 — "Deposit DOIs" on a work published as a "Published Manuscript Under Review" marks a review's DOI "Submitted" before the review counts as read, and "Deposit All" never sends the review** · 🐞 · user-visible.
-A journal deposits with Crossref and gives peer reviews DOIs. A work at
-the Review stage has its version published as "Published Manuscript
-Under Review", and one of its reviews, "Public Visibility" ticked,
-carries a DOI but does not count as read yet: nobody has pressed "Mark
-as Complete" on it or sent the "Notify Reviewers" email. A manager ticks
-the work on the DOIs page and confirms "Deposit DOIs": "Items
-successfully submitted for deposit". The review's DOI is set to
-"Submitted", but the deposit leaves the review out (Rule 7), and nothing
-sets the status back. Once an editor presses "Mark as Complete", the
-work's expanded view shows "Peer Review {number}" reading "Submitted"
-for a DOI nothing sent, and "Deposit All" skips it, as it skips every
-"Submitted" DOI; only another "Deposit DOIs" on the work sends it.
-Expected: the DOI keeps "Unregistered" while the review is left out, so
-"Deposit All" after "Mark as Complete" sends it. "Mark DOIs Registered"
-on such a work likewise marks the unread review's DOI "Registered"; that
-part is older than the PR the Basis line names. On a work published as
-a version of record both actions leave its reviews' DOIs as they were,
-and "Deposit All" never marks an unread review's DOI (Rule 29).
-Basis: probe, 2026-10-07, at the round-5 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
+**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · 🐞 · minor.
+A journal deposits with Crossref and gives peer reviews DOIs. A
+published article's review has a DOI reading "Registered" or
+"Submitted", and an editor then unticks the review's "Public
+Visibility": the DOI stays, as Rule 7b intends, and the review's row
+leaves the DOIs page. A manager ticks the work and confirms "Deposit
+DOIs": the article's DOI and the hidden review's DOI both turn
+"Submitted", but the deposit leaves the review out (Rule 7c), since a
+review not shown publicly is never sent. Nothing on the DOIs page shows
+the change, and a successful deposit of the work would mark the
+review's DOI "Registered" for metadata nothing sent. Expected: the
+review's DOI keeps its status while the deposit leaves the review out.
+Basis: probe, 2026-10-07, at the round-6 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs6</sup>
+
+<a id="ojs7"></a>
+**OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ❓ · minor.
+Unticking a review's "Public Visibility", or "Revert Decision" on its
+"Complete" row, deletes its "Unregistered" DOI (Rule 7b), as the team
+intends. When the editor then ticks the box again or presses "Mark as
+Complete" again, the review qualifies again (Rule 7): under
+"Immediately…" it gets a different DOI at once. Under the other
+choices its row reads "Needs DOI": under "Upon reaching the copyediting
+stage" and "Upon publication" until its version is published or a
+manager presses "Assign DOIs", and on an article already published, as
+under "Never", until "Assign DOIs". The review's earlier DOI may already have
+been shown in the journal's public review data, and a journal without a
+registration agency that registers DOIs by hand never moves them out of
+"Unregistered".
+Question: when a review qualifies again after losing its "Unregistered"
+DOI, should it get the same DOI back, a new one, or none until "Assign
+DOIs"? Lean: ✅ as built: an "Unregistered" DOI was never sent to an
+agency, and a new DOI at the setting's own moment matches "Revert
+Decline" (Rule 5b) and the stated limitation of Rule 7a; a journal that
+registers by hand should mark its DOIs "Registered" (Rule 26), which
+keeps them.
+Basis: probe, 2026-10-07, at the round-6 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs7</sup>
 
 ### OMP
 
@@ -3434,8 +3513,9 @@ under "Default" an eight-character suffix. The Masthead label reads
 `filterByIsPubliclyVisible(true)` on the version's review rounds) →
 `reviewDoiItems` in the publication map; `DoiListPanelOJS.vue`
 `peerReview` rows, labelled "Peer Review {$identifier}" with the review
-assignment's ID. Minting: `createDois()` over completed, publicly
-visible assignments. Edit: `PUT api/v1/_dois/peerReviews/{id}` refuses a
+assignment's ID. Minting: `createDois()` over publicly visible
+assignments of `getCompletedReviewAssignments()` (confirmed by the editor
+since round 6 of `pkp/pkp-lib#13447`, note q46). Edit: `PUT api/v1/_dois/peerReviews/{id}` refuses a
 review that is not publicly visible (422
 `api.dois.reviews.422.cannotAssignDoi`). Author-response DOIs: the kind is
 commented out of `DoiSetupSettingsForm` (OJS), so they are never offered.
@@ -3456,7 +3536,8 @@ Thanked" and listed "Peer Review 188" at once; with the email skipped
 the row appeared only after "Mark as Complete". The rows read "Peer
 Review 186" … "192" (the review assignments' IDs), under the work's
 current version. The published article's page (visitor) carries no
-review DOI.
+review DOI. At the round-6 PR heads of `pkp/pkp-lib#13447` a review no
+longer gets its DOI before it counts as read (note q46).
 
 <a id="fn-q45"></a>
 **q45** — At the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`),
@@ -3484,6 +3565,79 @@ list on the fleet (`.reports/sync/rr5/s1-exportable.txt`) gave no review
 for two unconfirmed reviews and both once they were confirmed, in
 either versioning mode. "Export DOIs" answers 400 on the test installs
 (Rule 29), so the files themselves were not read.
+
+<a id="fn-q46"></a>
+**q46** — At the round-6 PR heads of `pkp/pkp-lib#13447`
+(`pkp/pkp-lib#13460` `b2f5134085`, `pkp/ojs#5903` `54d1a14f59`,
+`pkp/omp#2495` `a6fb65ca9a`, `pkp/ops#1435` `78bd7986bf`, pointer bumps),
+before their merge. Two lib/pkp changes: `ff1fa6cb0c` (the #13447
+commit) gives `reviewAssignment\Repository::edit()` a second branch, so an
+edit that turns `canHaveDoi()` false (`date_considered` or
+`date_acknowledged` set, and `is_review_publicly_visible`) runs
+`removeUnregisteredDoi()`, which deletes the review's DOI only while its
+status is Unregistered, whatever `doiCreationTime` says ("Deposited DOIs
+can not be withdrawn"); and the #13450 commit (identical to
+`pkp/pkp-lib#13451` `399960535f`) has
+`publication\Repository::getCompletedReviewAssignments()` take
+`filterByIsConfirmedByEditor(true)` instead of `filterByCompleted(true)`,
+which left out every review of a submission with status Published. That
+list feeds `createDois()` (the automatic moments and "Assign DOIs"), OJS
+`doi\Repository::getDoisForPublication()` and so
+`getPublishedDoisForSubmission()` (per-work "Deposit DOIs", "Mark DOIs
+Registered", Crossref's `updateDepositStatus()`) and
+`getDoisForSubmission()` ("Mark DOIs Unregistered", "Mark DOIs Needs
+Sync"). `createDois()` keeps its own public-visibility test; the mark
+and deposit lists have none, so a review whose "Submitted" or
+"Registered" DOI outlived an untick is still marked with its work (note
+f-ojs6). "Revert Decision" (`unconsiderReview()`) clears
+`date_considered` only, so a review confirmed by the "Notify Reviewers"
+email (`date_acknowledged`) still counts as read after it. The team's
+message in the review thread, 2026-10-07: the per-work path takes only
+reviews confirmed by the editor; a review's unregistered DOI is removed
+when it stops being confirmed and publicly visible, under every setting;
+under "Upon reaching the copyediting stage" a review confirmed after the
+move gets its DOI at publication, not at confirmation, a known
+limitation. Live-probed 2026-10-07 at these heads, OJS, scratch journals
+with "Articles" and "Peer Review" ticked and reviews public by default,
+each work seeded with one submitted review no editor had confirmed. On
+"Upon reaching the copyediting stage" (with Crossref configured and a
+published issue): before any confirmation no work had a review DOI and
+no "Peer Review" row, a seeded published version of record included;
+"Accept Submission" with the "Notify Reviewers" email gave the article
+and the review their DOIs ("Peer Review 14: Unregistered"); with the
+email skipped the article alone, then "Mark as Complete" listed "Peer
+Review 15" empty and "Needs DOI", "Assign DOIs" (200) gave it
+`10.1234/y6ax1h36`, and "Revert Decision" deleted that DOI (the `dois`
+row gone) and took the row off the page; a third work, its review
+marked complete after the move, got its review DOI `10.1234/yry53c41`
+when its version was published into the issue (publication API, 200).
+Published versions of record: "Mark as Complete" listed the review
+"Needs DOI"; "Assign DOIs" gave it a DOI; "Mark DOIs Registered" turned
+the article's and the review's rows "Registered"; "Deposit DOIs" on a
+twin turned both "Submitted"; unticking "Publicly Show Reviewer
+Comments" in the row's "Edit" window kept those DOIs and their status
+and took the row off the page, and ticking it again showed it with the
+same DOI and status; on a third twin the untick deleted the
+"Unregistered" review DOI, and ticking again showed the row empty and
+"Needs DOI". "Revert Decision" on a "Reviewer Thanked" review kept its
+row and DOI. On a journal switched to "Immediately…" on screen: "Mark as
+Complete" gave the review `10.1234/b5k6vq86` at once; the untick
+deleted it and took the row away; ticking again gave a new one,
+`10.1234/2k33x443`; "Revert Decision" deleted that; "Accept Submission"
+with the "Notify Reviewers" email gave a second work's review its DOI.
+"Upon publication" was not driven: a publish under it runs the same
+`createDois()` as the publish above. No server log line.
+
+<a id="fn-q47"></a>
+**q47** — Until round 5 of `pkp/pkp-lib#13447` a submitted, publicly
+shown review got its DOI at the move to Copyediting even before it
+counted as read, and this step read the review's row with that DOI. On
+CI at the round-5 PR heads the step failed four times (runs
+37658658257, 37661959907: the review's DOI box empty), while it passed
+on the VM and on CI at the round-4 heads (run 37665228246); round 6
+replaces the behavior it asserted (note q46), so the cause was not
+pursued. The suite at the round-6 heads reads the row empty and "Needs
+DOI", then the DOI after "Assign DOIs".
 
 <a id="fn-i"></a>
 **i** — `ojs/classes/controllers/grid/issues/IssueGridHandler.php`
@@ -4847,6 +5001,68 @@ PASS at the round-5 heads (an unconfirmed review's DOI stays
 list holds it; neighbour: a confirmed review whose article reads
 "Registered" turns "Submitted" with one job for its work). Regression
 report `docs/reports/2026-10-07-pkp-lib-13460.md`.
+At the round-6 PR heads (`pkp/pkp-lib#13460` `b2f5134085`, `pkp/ojs#5903`
+`54d1a14f59`, `pkp/omp#2495` `a6fb65ca9a`, `pkp/ops#1435` `78bd7986bf`),
+before their merge, round 6 fixed the entry as round 5 had it: a review
+gets a DOI only once it counts as read, and
+`getCompletedReviewAssignments()` takes the reviews confirmed by the
+editor (`filterByIsConfirmedByEditor(true)`, `pkp/pkp-lib#13451`; note
+q46), so the per-work set holds no unread review's DOI. Kept check
+`review-deposit-work.js` re-run 2026-10-07 at these heads: PASS (A's
+unconfirmed review had no DOI and no row; "Deposit DOIs" turned the
+article alone "Submitted" and the job's review list was empty; after
+"Mark as Complete" the row read "Peer Review 1: Needs DOI"; "Mark DOIs
+Registered" on B turned the article alone "Registered"; control C, a
+version of record, the same); `review-deposit-all.js` PASS the same day.
+What remains is this entry as now written: that lookup has no
+visibility condition and OJS `getDoisForPublication()` adds none, while
+the job's `getExportableDOIsPeerReviewIds()` requires
+`is_review_publicly_visible`; at round 5 and the tips the lookup's
+`filterByCompleted(true)` left out every review of a submission with
+status Published, so "Deposit DOIs" left such a DOI alone. Live-probed
+2026-10-07 at these heads by the regression reader rr7
+(`.reports/sync/rr7/suspicions.md` S2, script `.reports/sync/rr7/scripts/s1.js`,
+facts `.reports/sync/rr7/s1-ojs.json`), OJS, PostgreSQL: a scratch
+journal on "Upon publication" with Crossref (depositor, no credentials),
+a work whose review an editor confirmed at Review, published as a
+version of record through the publication API (200, 200): the review's
+DOI `10.1234/8e82mc83` made at the publish; "Mark DOIs Registered"
+(200) turned the article and the review "Registered"; "Edit" ›
+"Public Visibility" unticked: the DOI kept "Registered", the review's
+row gone from the DOIs page ("Article: Registered" alone); "Deposit
+DOIs" (200): the article's and the review's DOIs "Submitted", the job's
+review list empty in both versioning modes. On Crossref's success
+`updateDepositStatus()` would mark the same set "Registered" (code; no
+agency credentials). The same day (note q46) a "Submitted" review DOI
+likewise kept its status through the untick. Regression report
+`docs/reports/2026-10-07-pkp-lib-13460.md` (rewritten for round 6).
+
+<a id="fn-f-ojs7"></a>
+**f-ojs7** — At the round-6 PR heads (note q46), before their merge:
+`reviewAssignment\Repository::edit()` deletes an Unregistered review DOI
+when the review stops satisfying `canHaveDoi()`, and gives one back only
+through `assignDoiOnCreation()`, which mints a new DOI and runs under
+"Immediately…" alone; otherwise only `createDois()` (the stage move, a
+publish, "Assign DOIs") gives one. At round 5 `edit()` had no removal
+branch, so the DOI stayed through these edits (code). The public review
+data is `GET /index.php/{journal}/api/v1/peerReviews/open/submissions/{id}`,
+read without a session (`reviews[].doi`). Live-probed 2026-10-07 by the
+regression reader rr7 (`.reports/sync/rr7/suspicions.md` S1, facts
+`.reports/sync/rr7/s1-ojs.json`, `E-dois-after-reconfirm-ojs.png`),
+published versions of record: under "Immediately…" a review confirmed
+after publication showed `10.1234/tg14d743` in that data; "Revert
+Decision" deleted it and the review left the data; "Mark as Complete"
+again gave `10.1234/9y2zb432`; a second review unticked and ticked
+again went from `10.1234/6hkypn27` to `10.1234/g1cr8j91`. Under "Upon
+reaching the copyediting stage" a review given `10.1234/xaydxj66` by
+"Assign DOIs", reverted and marked complete again, had none, listed in
+the data with `doi: null` and on the DOIs page as "Peer Review 10: Needs
+DOI". A "Registered" review DOI came back unchanged
+(`10.1234/yw8hfh35`). Again the same day (note q46): under "Upon
+reaching the copyediting stage" an untick and a tick left the row empty
+and "Needs DOI"; under "Immediately…" the tick gave `10.1234/2k33x443`
+for the deleted `10.1234/b5k6vq86`. The team's stated intention covers
+the removal, not the way back (note q46).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
