@@ -248,7 +248,8 @@ node bin/try-fix.js status [ojs] [omp] [ops]    # exits 1 while a named app (def
   `PKP_E2E_LINE=<line>` in front tries it on a stable line's checkouts.
 - Every fleet of the slot, campaign and dataset alike, serves the patched
   code while it is applied: one fix at a time, and only while nothing
-  else in the slot needs the unpatched code. PHP is read fresh on each
+  else in the slot needs the unpatched code (`bin/app-lock.sh`, the
+  slot's lock on the app checkouts: MAINTENANCE "Issue reports" step 3). PHP is read fresh on each
   request (`php -S`, no CLI opcache), so no server restart is needed.
   A fix to install-time data (a `registry/` file: email or task
   templates) does not show on a loaded dataset: replay its install step
@@ -429,7 +430,9 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   `../pkp-e2e-sec` of every slot, is one clone they share (its
   `security_policy.md` is the rule for anything security-shaped). The
   SessionStart hook pulls it when it is clean and says so; a session
-  pulls with `--rebase` before writing there and pushes before it ends;
+  pulls with `--rebase` before writing there and pushes before it ends,
+  staging its own paths by name (never `git add -A`: another slot's file
+  may sit in the tree, not yet verified; 2026-10-07);
   a slot is freed only when this clone is clean too. If the hook reports it
   missing, clone it there (the VM's GitHub token reaches it).
 - **Kept checks** name their database `dbName(app.name)` (`bin/apps.js`) or

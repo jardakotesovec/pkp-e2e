@@ -326,7 +326,15 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
    slot (U35, U45, U50, U51, U54 issues sessions, 2026-10-01). A claim
    checker driving the slot's own fleets beside reporters takes the same
    lock for each run on `main`, since a fix applied mid-run serves its
-   pages too (U03, U39 claim checks, 2026-10-07). A refresh
+   pages too (U03, U39 claim checks, 2026-10-07). On the VM that lock
+   is `bin/app-lock.sh <shared|exclusive> <apps> -- <command>`: a walk
+   or a drive takes it `shared`, any number at once since only a fix
+   changes the code, and a fix trial takes it `exclusive` as one command
+   (apply, walks, revert), naming only the apps it patches; requests are
+   served in the order asked and the lock goes when the command ends.
+   A trial on three apps holds every other run for its ten minutes or
+   more, so a checker's script takes its rows in few runs (2026-10-07).
+   A refresh
    goes to its reporter with the brief's `{{refresh}}` slot naming the
    report and what changed; it is accepted like a written report, and
    the role reads look at the parts it changed. The agent returns an
