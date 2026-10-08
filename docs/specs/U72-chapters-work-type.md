@@ -809,7 +809,7 @@ them on spec review.
 | [A2](#a2) | The work-type control and "Publication Dates" are offered to the assistant roles, and their choice is refused | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A3](#a3) | A book's new version leaves its chapters' files behind, and a proof made from one is linked nowhere | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A5](#a5) | The "Edit" of the wizard's Review panel "Chapters" does nothing | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A7](#a7) | Chapter authors dragged into a new order snap back on "Done" when they are among the book's first contributors | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
+| [A7](#a7) | "Done" on a book's chapter list loses the author order of some chapters, dragged or not | 🐞 | medium | issues (claude), 2026-10-08 — re-verified |
 | [A8](#a8) | Chapter window promises an automatic license above a chapter's own License URL and on a published book | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A book in a press's second language cannot get a chapter titled in that language alone | 🐞 | medium | — |
 | [A11](#a11) | In the wizard, "Order" pressed while the chapter list is being ordered opens the first step, "Upload Files" | 🐞 | minor | — |
@@ -899,22 +899,34 @@ Expected: "Edit" opens the Details step.
 Basis: probe, 2026-10-03. <sup>f-a5</sup>
 
 <a id="a7"></a>
-**A7 — Chapter authors dragged into a new order snap back on "Done" when they are among the book's first contributors** · 🐞 · medium.
-On a book's "Chapters" page, a press editor presses "Order", drags one of
-a chapter's authors above another and presses "Done". In some chapters
-the list redraws with the authors in their old order, and a reload shows
-the same. No message is shown.
-The save leaves an author at their old place when they end up n-th in
-the chapter while being (n + 1)-th on the book's Contributors list: for
-example, second in the chapter and third on the Contributors list. Each
-author is saved or left on their own, so with two authors the drag is
-undone, and with three or more the chapter can end up in a mix of the
-old and new order. Only authors near the top of the Contributors list
-can meet this, so in an edited volume whose contributors are listed
-chapter by chapter it is the first chapter or two. Dragging again gives
-the same result; "Edit Chapter" can set the order instead.
-Basis: probe, 2026-10-04. <sup>f-a7</sup>
-Report: refresh owed — the claim check of 2026-10-08 (OMP main, the wizard's list, three runs; kept check `i08.js`, its path and the record in footnote td20) showed two things the entry and the report do not say. First, the list does not always redraw in the old order: with an author left at their old place by "Done", it showed the dragged order, at once and after a reload, in two runs and the old order in the third (Rule 8b says both). Second, not settled: in one of 45 "Done"s that moved only a chapter, the two authors of another chapter read in the same order right after "Done" and in the opposite order after a reload, and the next "Done" saved that order; a second sighting, or the fix walked with the same moves, settles it (2026-10-08)
+**A7 — "Done" on a book's chapter list loses the author order of some chapters, dragged or not** · 🐞 · medium.
+On a book's "Chapters" page, a press editor presses "Order", drags a
+chapter or a chapter's author, and presses "Done". "Done" saves the
+authors of every chapter of the book, but skips an author who is n-th in
+their chapter while being (n + 1)-th on the book's Contributors list:
+second in the chapter and third on the list, say. No message is shown.
+
+A skipped author keeps the number already stored for them. One who was
+first, in a chapter no "Done" has saved yet, stays first: a drag that
+moved them down is undone, and the list redraws in the old order. Any
+other ends on the same stored number as another author of the chapter,
+unless that number already is their new place, and the database decides
+which of the two is listed first. The list can then show a dragged order
+that was not saved, and a chapter nobody dragged can change its author
+order.
+
+That change was seen on screen three ways: after the way round below,
+where "Done" with nothing dragged put the old order back; once in 45
+"Done"s that only moved a chapter, in the submission wizard; and in the
+default dataset once its contributors table was grown to 5,000 rows. On
+the default dataset as loaded, the authors sharing a number stayed in
+order.
+
+On `main` any book can meet this. On 3.5 and 3.4 a book's contributors
+all hold the same number until one is deleted or the Contributors list
+is reordered, and only then can the book meet it. "Edit Chapter" sets a
+chapter's author order, but only until the next "Done" on the book.
+Basis: probe, 2026-10-08. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — Chapter window promises an automatic license above a chapter's own License URL and on a published book** · 🐞 · low.

@@ -70,6 +70,65 @@ function stored(app, subId) {
     ).split('\n');
 }
 
+/** The id of the book's chapter with this title (the current version's). */
+function chapterId(app, subId, title) {
+    return Number(
+        sql(
+            app,
+            `select c.chapter_id from submissions s join submission_chapters c on c.publication_id = s.current_publication_id
+               join submission_chapter_settings cs on cs.chapter_id = c.chapter_id and cs.setting_name = 'title'
+             where s.submission_id = ${subId} and cs.setting_value = '${title.replace(/'/g, "''")}' limit 1`
+        )
+    );
+}
+
+/**
+ * How the database answers the chapter list's query for one chapter (Chapter::getAuthors():
+ * APP\author\Collector with filterByChapterId() and filterByPublicationIds(), the joins below,
+ * ordered by the link's seq alone). All reads:
+ *   returned   `author_id:seq` in the order the query returns them, under the plan the database picks;
+ *   noSeqScan  the same under another plan (`set local enable_seqscan = off` inside a
+ *              transaction), to show whether the order of two authors at one seq is the plan's;
+ *   plan       the scans and joins of the plan the database picks;
+ *   analyzed   when the two tables' statistics were last gathered.
+ */
+function chapterAuthorQuery(app, chapterId) {
+    const publicationId = sql(app, `select publication_id from submission_chapters where chapter_id = ${chapterId}`);
+    const from = `from authors a join publications p on a.publication_id = p.publication_id
+        join submissions s on p.submission_id = s.submission_id
+        join submission_chapter_authors sca on a.author_id = sca.author_id and sca.chapter_id = ${chapterId}
+        where a.publication_id in (${publicationId})
+        order by sca.seq`;
+    const rows = (text) => text.split('\n').filter((l) => /^\d+:/.test(l)).join(',');
+    const plan = sql(app, `explain (costs off) select a.*, s.locale as submission_locale ${from}`)
+        .split('\n')
+        .map((l) => l.replace(/^[\s>-]+/, '').trim())
+        .filter((l) => /Scan|Join|Loop/.test(l));
+    return {
+        returned: rows(sql(app, `select a.author_id || ':' || sca.seq ${from}`)),
+        noSeqScan: rows(sql(app, `begin; set local enable_seqscan = off; select a.author_id || ':' || sca.seq ${from}; commit`)),
+        plan: plan.join(' < '),
+        analyzed: sql(app, `select string_agg(relname || ' ' || coalesce(to_char(greatest(last_analyze, last_autoanalyze), 'HH24:MI:SS'), 'never'), ', ' order by relname) from pg_stat_user_tables where relname in ('authors', 'submission_chapter_authors')`),
+    };
+}
+
+/**
+ * Grow the `authors` table by SQL, then gather its statistics as autovacuum would: `rows` more
+ * contributors on submission 1's first version, a book no walk opens. Nothing a screen stores
+ * is changed; the table's size is, and with it the plan the database picks for the chapter
+ * list's query. A diagnostic, never a step: the walk that uses it says so.
+ */
+function padAuthors(app, rows) {
+    const publicationId = sql(app, 'select min(publication_id) from publications where submission_id = 1');
+    sql(
+        app,
+        `insert into authors (email, include_in_browse, publication_id, seq, contributor_type)
+           select 'pad' || g || '@mailinator.com', 0, ${publicationId}, 1000 + g, 'PERSON' from generate_series(1, ${rows}) g;
+         analyze authors; analyze submission_chapter_authors`
+    );
+    return {rows, authors: Number(sql(app, 'select count(*) from authors'))};
+}
+
 /** Collect the `data` the browser posts with "Done" (save-sequence), decoded. */
 function watchSaveSequence(page) {
     const posts = [];
@@ -130,4 +189,4 @@ async function dragChapterAbove(list, title, aboveTitle) {
     return {during: during.map((x) => x.rows)};
 }
 
-module.exports = {sleep, snap, openChapters, blocks, chapterOrder, authorOrder, stored, watchSaveSequence, done, dragAuthor, dragChapterAbove};
+module.exports = {sleep, snap, openChapters, blocks, chapterOrder, authorOrder, stored, chapterId, chapterAuthorQuery, padAuthors, watchSaveSequence, done, dragAuthor, dragChapterAbove};
