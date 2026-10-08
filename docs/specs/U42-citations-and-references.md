@@ -191,9 +191,10 @@ typed. Nothing asks first. The one exception is an author row added in
    case; typing alone changes nothing. Emptying the box and pressing Enter
    again, or pressing the box's "Clear search phrase" (×), shows every
    row. The words are matched against everything the page knows about the
-   reference, not only what the row shows: a word such as "citations" or
-   "http" keeps every row, even where the row's text has neither
-   ⚠ [A3](#a3). <sup>g</sup> <sup>q8</sup>
+   reference, not only what the row shows: on a journal whose metadata
+   lookup has never been switched on, "false" or "0" keeps every row,
+   even where the row's text has neither ⚠ [A3](#a3). <sup>g</sup>
+   <sup>q8</sup>
 9. **Read-only presentation.** For a viewer who may not edit the
    publication (Actors & permissions), the page renders the same list with
    the Add button, "Delete all references" and (with lookup on) "Reprocess
@@ -1098,17 +1099,18 @@ Basis: probe, 2026-10-04. <sup>f-a2</sup>
 <a id="a3"></a>
 **A3 — "Search references here" keeps references whose text does not contain the typed word** · 🐞 · low.
 Typing a word into "Search references here" is expected to keep the rows
-that show it. The search also looks in data no row displays: a web
-address stored with each reference, its numbers, and a yes/no value
-saying whether the reference's details (authors, title, DOI) have been
-filled in. So "citations" or "http" keep every row, "false" keeps every
-reference whose details are not filled in, and a digit such as "0" keeps
-rows that show no digit at all. Nothing is changed or lost: the search
+that show it. The search also looks in data no row displays: numbers
+stored with the reference (among them a 0 while no metadata lookup has
+run for it), and a yes/no value saying whether the reference is
+structured (Rule 11). So on a journal whose metadata lookup has never
+been switched on, "false" keeps every row and so does "0", also the rows
+that show no digit at all. Nothing is changed or lost: the search
 keeps rows it should have hidden, and clearing it shows the whole list
 again. A search for a word or a year a reference's text holds still
 keeps the right rows; the extra rows come with words and digits the
 stored data also holds.
 Basis: probe, 2026-10-04. <sup>f-a3</sup>
+Report: refresh owed — `pkp/pkp-lib#13475` (issue `pkp/pkp-lib#13455`) removes the web address stored with each reference, so the report's steps 4 and 5 ("citations", "http") keep no row and its Summary and Cause name a value that is gone; "false" and "0" still keep all five rows (walked at the PR head `cf7e3e494c`, all three apps) (2026-10-08)
 
 <a id="a4"></a>
 **A4 — On a press or a preprint server, the References page says metadata lookup "is enabled for this Journal"** · 🐞 · low.
@@ -1625,13 +1627,26 @@ accepted one (200), wrote three PHP warnings to the server log,
 lookup-off form sends only `rawCitation` and `edit()` reads the three keys
 without checking they were sent; the answers and the screen were
 unaffected (a latent code fault, no user impact).
+At the PR head of `pkp/pkp-lib#13475` (`cf7e3e494c`, issue
+`pkp/pkp-lib#13455`), before its merge (2026-10-08, all three apps, PKP's
+default dataset, `checks/sync/pkp-lib-13475/walk.js`): `edit()` reduces
+only the keys that arrive with a value, and the lookup-off "Save" (200,
+`rawCitation` alone sent) wrote no warning, against the three at the PR's
+base; "https://doi.org/10.1234/pr13475", "https://hdl.handle.net/20.1000/100"
+and "arxiv:2101.12345" were stored bare and a cleared "DOI" stored empty,
+as at the base. `citation.json` marks `processingStatus` and
+`isStructured` `writeDisabledInApi`: a PUT carrying either answered 400
+`{"processingStatus":["The processingStatus property can not be
+modified."]}` (the same for `isStructured`) and stored nothing, where the
+base answered 200 and stored `processingStatus` 5, which the progress box
+then counted ("Processing references - 1/2"); neither form sends the two.
 
 <a id="fn-g"></a>
 **g** — Search. `citationManagerStore.js` `citationsFiltered`: the phrase is
 lowercased and split on spaces; a citation stays when every word occurs in
 `JSON.stringify(Object.values(citation))`. The citation objects are the
 publication's `citations`, mapped by `citation/maps/Schema::map()` with every
-schema property: `_href` (the API address of the citation), `id`,
+schema property: `id`,
 `publicationId`, `seq`, `processingStatus`, `isStructured`,
 `rawCitationWithLinks` (addresses wrapped in `<a href='…' target='_blank'>`)
 and every structured field, whether or not the row shows it. Live-probed
@@ -1640,7 +1655,13 @@ seven until Enter, then "Beta trial 2021" alone; "BETA" the same; "alpha
 2020" both Alpha rows, "alpha 2021" none; a box emptied by keys kept the
 filter until Enter, and the "Clear search phrase" (×), shown once a phrase
 is entered, restored every row at once; "publication", a word only in the
-field names, kept none.
+field names, kept none. Until `pkp/pkp-lib#13475` the mapped properties
+held `_href` too, an address of the form `…/api/v1/citations/{id}` that
+no route answers (404 `api.404.endpointNotFound` at the PR's base; the
+citations sit under `…/submissions/{id}/publications/{id}/citations`);
+the PR removes it from `citation.json` and the map (2026-10-08, at the
+PR head `cf7e3e494c` before its merge: no `_href` in the list, the single
+reference or a save's answer, all three apps).
 
 <a id="fn-h"></a>
 **h** — Lookup. `citation/Repository::importCitations()` and
@@ -1651,7 +1672,20 @@ OpenAlexJob, OrcidJob, IsProcessedJob])` with the context's
 `Handle`, `Url`, `Urn::extractFromString()`. `CrossrefJob` returns at once
 when the citation has a DOI; it queries `works/?query.bibliographic=` and
 accepts a first hit scoring 100 or more. `OpenAlexJob` returns at once
-without a DOI. `OrcidJob` prepends one `OrcidAuthorJob` per author with an
+without a DOI; its `Inbound::getAuthor()` splits an author's display name
+at ", " (family, given) or else at the last space (given, family), and a
+name of one word is the given name since `pkp/pkp-lib#13475` (issue
+`pkp/pkp-lib#13455`; at the PR's base it was stored as neither, an author
+row with both boxes empty and nothing on the references row). Driven
+2026-10-08 at the PR head `cf7e3e494c` before its merge, all three apps,
+through the two `Inbound` classes pointed at a local stand-in for the
+services (`checks/sync/pkp-lib-13475/lookups.php`, its result stored the
+way `OpenAlexJob` stores it): "Plato" and "UNESCO" showed on the row and
+in the given name boxes of "Author Information", "World Health
+Organization" as given "World Health", family "Organization" (the same
+at the base); an OpenAlex work with no `authorships` and a Crossref hit
+with no `author` raised no warning (one `foreach()` warning each at the
+base) and gave the same result as there. `OrcidJob` prepends one `OrcidAuthorJob` per author with an
 iD. `IsProcessedJob` sets `PROCESSED`. `CitationProcessingStatus`: QUEUED -2,
 FAILED -1, NOT_PROCESSED 0 (no lookup asked for), PID_EXTRACTED 1,
 CROSSREF 2, OPEN_ALEX 3, ORCID 4, PROCESSED 5; `reprocessCitation()`
@@ -2051,7 +2085,12 @@ revised" saved closed the panel and updated the row.
 **q8** — Live-probed 2026-09-24 (Rule 8; A3), all three apps, seven rows of
 which "Epsilon note" and "Zeta final piece" hold no digit: "citations",
 "http", "false" and "0" each kept all seven rows after Enter; "true" kept
-none, no row being structured with lookup off.
+none, no row being structured with lookup off. At the PR head of
+`pkp/pkp-lib#13475` (`cf7e3e494c`), before its merge (2026-10-08, all
+three apps, PKP's default dataset, the A3 report's walk, five rows):
+"citations" and "http" kept no row ("The citations list is empty, please
+add citations above."), `_href` being gone; "false" and "0" kept all
+five.
 
 <a id="fn-q9"></a>
 **q9** — Live-probed 2026-09-24 (Actors rows 2 and 5; A1), all three apps,
