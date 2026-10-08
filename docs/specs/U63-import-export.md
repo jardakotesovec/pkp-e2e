@@ -554,11 +554,20 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     key saved and the automatic-deposit box ticked, the installation
     sends DOAJ every published article of the journal that has no
     status yet or reads "Needs Sync"; with "DOI Versioning", every
-    such version the "Publications" tab lists (Rule 45). Nothing else
-    goes: another journal's "Needs Sync" articles and versions keep
-    their status and are left to that journal's own deposit; an article
-    unpublished after its deposit is not sent, and neither is a version
-    a later minor version replaced. <sup>f-a5</sup>
+    such version the "Publications" tab lists (Rule 45). Each one then
+    reads "Submitted" and is sent in the background as Rule 42 says:
+    until it is sent, Administration › "View Jobs" lists one deposit
+    for each. Nothing else gets a deposit there:
+    - another journal's "Needs Sync" articles and versions, which go on
+      reading "Needs Sync" on that journal's own list;
+    - an unpublished article, whatever it read before (unpublishing one
+      that reads "Marked registered" is the case to try); while
+      unpublished it has no row on "Articles";
+    - with "DOI Versioning", a version a later minor version replaced,
+      which "Publications" no longer lists (Rule 45): of an article
+      with 1.0 and 1.1 published, only 1.1 gets a deposit.
+
+    <sup>f-a5</sup>
 44. **Needs Sync.** Publishing a new version of an article that reads
     "Registered" or "Marked registered" turns its status to "Needs
     Sync", so that it is sent again. <sup>t</sup> <sup>td21</sup>
@@ -1150,9 +1159,10 @@ Left out of the scenarios above, by reason:
     added, the export list unchanged {OJS OPS}
   - the daily DOAJ deposit keeping to its journal (retired A5; Rule
     43): two journals, one with automatic deposit on, the other holding
-    a "Needs Sync" article: the article stays "Needs Sync" and no
-    deposit is queued for it, while the depositing journal's own
-    "Needs Sync" and "Not Deposited" articles read "Submitted" {OJS}
+    a "Needs Sync" article: the article stays "Needs Sync" and
+    Administration › "View Jobs" lists no deposit for it, while the
+    depositing journal's own "Needs Sync" and "Not Deposited" articles
+    read "Submitted" {OJS}
   - the guard A13's issue report names, once fixed: a users file with
     an element the format does not know, imported: the "Results" tab
     reads "Validation errors:" with the reason {OJS OMP}
