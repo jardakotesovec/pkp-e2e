@@ -18,7 +18,7 @@
  * - OJS3: S7 reads the dates of "Marsh survey"'s two decisions and that
  *   each decision cell is filled, never a decision's name.
  * - OJS4: S8 gives the institutional contact a country first.
- * - A1–A4, A7, A8, A10–A13, OJS1, OJS2: not on these scenarios' paths
+ * - A1–A4, A7, A8, A10–A12, OJS1, OJS2: not on these scenarios' paths
  *   (A3's open half, drafts started within a range, is never met: S6's
  *   only draft is started today). OMP and OPS IDs are the press's and the
  *   server's.

@@ -1460,7 +1460,7 @@ publié."). The Preprint menu entries, page headings and status line
 around these codes are
 [Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s
 finding, and why a missing French text shows as a code at all is
-[Languages & locales](U57-languages-and-locales.md#a4)'.
+[Languages & locales](U57-languages-and-locales.md), its Rule 21a.
 Basis: probe, 2026-10-03. <sup>f-ops3</sup>
 
 ### Retired
@@ -3065,7 +3065,7 @@ carries `publication.editDisabled`,
 `submission.copyrightHolder.description` and
 `publication.copyrightYearBasis.submissionDescription` with an empty
 `msgstr`, overriding the French texts a journal and a press read, and
-the client prints the key in place of the text (U57 A4). Live-probed
+the client prints the key in place of the text (U57 Rule 21a). Live-probed
 2026-09-30 (Rules 8, 9; Fields "Permissions & Disclosure"; OJS, OMP,
 OPS, two runs; scratch contexts with UI languages English and French
 (Canada); the context's manager and the Author; a submission in

@@ -66,7 +66,7 @@ The first three are each one form with "Save" at its foot (Rule 2). <sup>a</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Disable Submissions": a heading and one box with the same label. Help: "Prevent users from submitting new articles to the journal. Submissions can be disabled for individual journal sections on the journal sections settings page." ("…new articles to the press. … for individual press series on the press series settings page." ⚠ [OMP1](#omp1); "…new preprints to the server. … for individual server sections on the server sections settings page."), the words "journal sections" ("press series", "server sections") a link. With the interface in French (Canada), a press shows a raw code in place of the help ⚠ [A14](#a14) | no | Unticked on a new journal. Effect: Rules 4–6 |
+| "Disable Submissions": a heading and one box with the same label. Help: "Prevent users from submitting new articles to the journal. Submissions can be disabled for individual journal sections on the journal sections settings page." ("…new articles to the press. … for individual press series on the press series settings page." ⚠ [OMP1](#omp1); "…new preprints to the server. … for individual server sections on the server sections settings page."), the words "journal sections" ("press series", "server sections") a link | no | Unticked on a new journal. Effect: Rules 4–6 |
 
 **"Author Guidance" tab.** Every box is a formatted-text box with no
 length limit, empty allowed. "Where it shows" names the screen that
@@ -884,7 +884,6 @@ Left out of the scenarios above, by reason:
   - A7 (the "For Reviewer Suggestion" help; Fields)
   - A8 (the "Key" help; Fields)
   - A9 (a preprint server's component names in French; Fields)
-  - A14 (a press's "Disable Submissions" help in French; Fields)
   - OMP1 (a press's "Disable Submissions" help and "Copyright notice"
     label; Fields; scenario 3 names it)
   - OMP2 (a press's "Edit" beside "Copyright Notice"; Rule 25; scenario 3
@@ -954,7 +953,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | In French (Canada) a preprint server's "Components" list names seven components by internal text codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A component name of only spaces is refused with a raw text key | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A refused component delete leaves its confirmation window spinning | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A14](#a14) | In French (Canada), a press's "Disable Submissions" help reads a raw code | 🐞 | minor | — |
 | [A15](#a15) | A press on the dimmed page beside the "Add a Component" window closes it without the question "Close" asks, and the "Name" just typed is lost | 🐞 | minor | — |
 | [OJS1](#ojs1) | LOCKSS and CLOCKSS pages show the "Copyright" row only when an unrelated Copyright Notice is set | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [OMP1](#omp1) | A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -969,6 +967,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server's guidance has a "For Readers" box and no "For Reviewer Suggestion" box | ✅ | — | — |
 | [OPS2](#ops2) | "Author Screening" appears only with a screening plugin, and none is installed | ✅ | — | — |
 | [A13](#a13) | Retired: over an open window a notice's "×" did nothing, or closed the submission's workflow along with the notice; it now removes the notice alone (Rule 16) | ✅ | retired | PR review merge (claude), 2026-10-06 — fixed upstream (pkp/pkp-lib#13188) |
+| [A14](#a14) | Retired: in French (Canada), a press's "Disable Submissions" help reads a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1117,17 +1116,6 @@ with "OK" and "Cancel" disabled). Escape closes it, and on main so
 does "Cancel". The row stays, as it should.
 Basis: probe, 2026-10-02. <sup>f-a12</sup>
 
-<a id="a14"></a>
-**A14 — In French (Canada), a press's "Disable Submissions" help reads a raw code** · 🐞 · minor.
-A press manager working in French (Canada) opens Settings › Workflow,
-which opens on the "Disable Submissions" panel. Where the English panel
-shows the help under the box (Fields; [OMP1](#omp1)), the French panel
-shows "##manager.setup.disableSubmissions.description##" in its place.
-Every press manager working in French (Canada) meets it, since the page
-opens on this panel. The press's French (Canada) translation leaves the
-text empty.
-Basis: probe, 2026-10-04. <sup>f-a14</sup>
-
 <a id="a15"></a>
 **A15 — A press beside the "Add a Component" window closes it without the question "Close" asks** · 🐞 · minor.
 A manager who types a "Name" in the "Add a Component" window and presses
@@ -1240,6 +1228,9 @@ Basis: code. <sup>f-ops2</sup>
 
 <a id="a13"></a>
 **A13 — Over an open window, a notice's "×" does nothing, or closes the submission's workflow along with the notice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13188: ui-library#999 on `stable-3_5_0`, cherry-picked to `main` as `a36dc7fe78`, 2026-10-06), verified 2026-10-06 on OJS, OMP and OPS `main`: the refused key's notice goes at a press on its "×" and the "Add a Component" window stays open (Rule 16); in a submission's workflow the notice's "×" no longer closes the workflow. <sup>[f-a13](#fn-f-a13)</sup>
+
+<a id="a14"></a>
+**A14 — In French (Canada), a press's "Disable Submissions" help reads a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a14</sup>
 
 ---
 

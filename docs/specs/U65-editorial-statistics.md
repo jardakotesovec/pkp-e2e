@@ -199,11 +199,9 @@ ships it; its text can be changed on Settings › Workflow › "Emails" ›
 "{month}" is the previous month's name in the journal's primary
 language ("August"), "{year}" its year. On a journal whose primary
 language is French (Canada) the whole email is in French, subject
-"Activité éditoriale pour août 2026"; on a press or preprint server in
-French only the month's name and the footer are, the rest staying in
-English ⚠ [A13](#a13). On a French journal, press or preprint server
-the links' addresses carry the English language code "en" ⚠
-[A10](#a10).
+"Activité éditoriale pour août 2026". On a French journal, press or
+preprint server the links' addresses carry the English language code
+"en" ⚠ [A10](#a10).
 
 ## Rules & state
 
@@ -1041,7 +1039,7 @@ Left out of the scenarios above, by reason:
   - A8 (a report address naming no report; Rule 19)
   - A9 (the attachment's installation-wide stage counts; Rule 26;
     scenario 3 marks it)
-  - A10 and A13 (a journal, press or preprint server whose primary
+  - A10 (a journal, press or preprint server whose primary
     language is French; Fields)
   - A11 ("Login to the the press"; Fields; scenario 3 marks it)
   - A12 (a decision recorded by an editor not assigned to the
@@ -1095,11 +1093,11 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | "Journal Manager" on "Users" also counts Editors and Production Editors | ❓ | minor | — |
 | [A10](#a10) | A French journal's monthly email links to the English pages | ❓ | minor | — |
 | [A12](#a12) | "Articles Report" and "Monograph Report" leave out decisions by editors not assigned to the submission | ❓ | minor | — |
-| [A13](#a13) | A French press's or preprint server's monthly email is in English but for the month and the footer | ❓ | minor | — |
 | [OPS3](#ops3) | A preprint server's "Reports" offers no report | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's "Editorial Activity" has no active submissions chart | ✅ | minor | — |
 | [OPS2](#ops2) | A preprint server's "Trends" has four rows, "Submissions Declined" counting every declined preprint | ✅ | minor | — |
 | [OMP5](#omp5) | Retired: A French press's monthly attachment names External Review by a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A13](#a13) | Retired: a French press's or preprint server's monthly email is in English but for the month and the footer | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1292,22 +1290,6 @@ Question: should the report list every decision, with who recorded it?
 Lean: yes; the report is the only list of a journal's decisions, and
 managers decide without being assigned.
 Basis: probe. <sup>f-a12</sup>
-
-<a id="a13"></a>
-**A13 — A French press's or preprint server's monthly email is in English** · ❓ · minor.
-On a press or preprint server whose primary language is French
-(Canada), the monthly email is in English but for the month's name and
-the footer: subject "Editorial activity for août, 2026" ("Preprint
-Server activity for août, 2026"), opening "Your press health report for
-août, 2026…" ("Your preprint health report…"), footer "Ceci est un
-message automatique de la revue" and "Se désabonner". A French
-journal's email is wholly French: "Activité éditoriale pour août 2026",
-"Le rapport d'activité éditoriale de votre revue pour août 2026 est
-maintenant disponible."
-Question: should a press and a preprint server send the email in their
-primary language, as a journal does? Lean: yes, a defect: the mixed
-email reads as broken.
-Basis: probe. <sup>f-a13</sup>
 
 <a id="a14"></a>
 **A14 — Saving Profile › "Notifications" while it hides the statistics row stops that editor's monthly statistics email** · 🐞 · medium.
@@ -1556,6 +1538,9 @@ Basis: probe, 2026-10-02. <sup>f-ops4</sup>
 
 <a id="omp5"></a>
 **OMP5 — A French press's attachment names External Review by a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-omp5</sup>
+
+<a id="a13"></a>
+**A13 — A French press's or preprint server's monthly email is in English** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a13</sup>
 
 ---
 

@@ -267,7 +267,7 @@ the account's roles, never on which dashboard page it opens from:
    - 9f. **In review, with recommending editors on board** {OJS OMP},
      checked before 9e. Instead of 9e's "Assign Reviewers" and
      all-confirmed lines, a deciding editor reads "Recommending Editors
-     are tasked to advise the next steps for this submission" ⚠ [A13](#a13),
+     are tasked to advise the next steps for this submission",
      then "An editorial recommendation has been received" / "All editorial
      recommendations have been received, and a decision is required." as
      recommendations land. A recommending editor who has recorded theirs
@@ -832,7 +832,6 @@ Left out of the scenarios above, by reason:
   - A8 (the opt-out labelled "Weekly email of outstanding tasks")
   - A9 (a Site Administrator without Journal Manager in the journal)
   - A10 (the pager's "Next" announced as plain "Next")
-  - A13 (the recommending editors' line in French; Rule 9f)
   - A14 (a recommending editor's row before recording; Rule 9f)
   - A15 (no sort state told to a screen reader; Rule 5)
   - A16 (paging repeats and skips submissions sharing one date and time; Rule 5)
@@ -878,11 +877,11 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | The profile's opt-out for the monthly outstanding-tasks email is labelled "Weekly email of outstanding tasks" | ❓ | minor | — |
 | [A9](#a9) | A Site Administrator without Journal Manager in the journal is let in but listed by their journal role: with Reader only, an "Error" dialog over an empty list | ❓ | minor | — |
 | [A11](#a11) | Two values chosen in one filter field: one chip or two? | ❓ | minor | — |
-| [A13](#a13) | In French the recommending editors' line may read a raw code; never seen on screen | ❓ | minor | — |
 | [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
 | [A12](#a12) | Retired: in French a screen reader hears raw codes for the "…" button above the list and for "Loaded", and an accepted reviewer's indicator and a press's "Assigned To Editor" filter field show one | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A13](#a13) | Retired: in French the recommending editors' line may read a raw code; never seen on screen | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1028,16 +1027,6 @@ Question: one chip per value, each X dropping its own? Lean: yes; a chip
 names one value ("Section: Shut") and its X removes it.
 Basis: code. <sup>a11</sup>
 
-<a id="a13"></a>
-**A13 — The recommending editors' line may read a code in French** · ❓ · minor.
-With the interface in French, the line a deciding editor reads while
-recommending editors are still to advise (Rule 9f; English "Recommending
-Editors are tasked…") has no French text, so it likely shows a raw
-code. Unseen: no seed puts recommending editors on a round.
-Question: does the line read "##dashboard.recommendOnly.pendingRecommendations##"
-on a French dashboard? Lean: yes.
-Basis: code. <sup>a13</sup>
-
 <a id="a14"></a>
 **A14 — A recommending editor's row before they record** · ❓ · minor.
 Before a recommending editor records theirs, their row (Rule 9f) was
@@ -1119,6 +1108,9 @@ Basis: probe + code. <sup>omp1</sup>
 
 <a id="a12"></a>
 **A12 — In French the dashboard shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a12</sup>
+
+<a id="a13"></a>
+**A13 — The recommending editors' line may read a code in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a13</sup>
 
 ---
 

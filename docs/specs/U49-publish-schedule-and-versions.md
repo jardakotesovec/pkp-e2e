@@ -1328,7 +1328,7 @@ arrived with main's new pages and wait for their translations, which
 the team does not count as a defect (2026-10-02). The pages' menu entry and heading
 are [Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s
 finding, and why a missing French text shows as a code at all is
-[Languages & locales](U57-languages-and-locales.md#a4)'.
+[Languages & locales](U57-languages-and-locales.md), its Rule 21a.
 Since: 2026-09-30 · Basis: probe, 2026-10-02. <sup>[f-a10](#fn-a10)</sup>
 
 ### OJS

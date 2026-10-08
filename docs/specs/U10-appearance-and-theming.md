@@ -2449,8 +2449,7 @@ default `Y-m-d h:i A`: both read "2026-10-05 04:38 AM".
 **f-a19** — Note j. Live-probed 2026-10-05 on all three apps, two
 runs, on the default `h:i A` with French (Canada) a form and interface
 language: a discussion message read "2026-10-05 04:38 a.m." (its head
-reads "##discussion.messageFrom##",
-[Tasks & discussions](U37-tasks-and-discussions.md#a15)), a
+reads "##discussion.messageFrom##", a text French lacks), a
 library file's "Date de téléversement" "2026-10-05 04:38 AM"; the tab's
 French "Time" choices "04:40", "04:40 a.m.", "4:40a.m." and "Date &
 Time (Short)" "2026-10-05 04:40 a.m.". The A8 issue report names the

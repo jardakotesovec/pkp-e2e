@@ -386,8 +386,9 @@ both read "中文" ⚠ [A9](#a9). <sup>n</sup>
     its Rule 4). <sup>p</sup>
     - 21a. A text the language's translation lacks shows as its internal
       name between two pairs of hash signs, such as
-      "##discussion.description##", not in the primary language
-      ⚠ [A4](#a4). <sup>p</sup>
+      "##discussion.description##". It does not fall back to the primary
+      language or to English: that is the product's design, which
+      leaves an English stand-in to a plugin. <sup>p</sup>
     - 21b. In a language written from right to left the pages run from
       right to left. <sup>q</sup>
 
@@ -913,7 +914,6 @@ Left out of the scenarios above, by reason:
     Actors row 5)
   - A3 (the block's links landing on the site's home on a site
     with a port; Rule 19; scenario 8 passes it)
-  - A4 (a missing translation shown as its internal name; Rule 21a)
   - A5 (the "Forms" tick's script failures; Rule 10b; scenario 5 passes
     it)
   - A6 (two managers ticking the same language at the same moment;
@@ -972,13 +972,13 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | On a one-language site, typing in "Create Journal" makes the page's script fail at every keystroke | 🐞 | low · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A8](#a8) | A press's or preprint server's French (Canada) guidelines, checklist, privacy statement, role and component names show internal text codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A2](#a2) | "Reload defaults" is offered to the Site Administrator alone | ❓ | minor | — |
-| [A4](#a4) | A text missing from a translation shows as its internal name, not in the primary language | ❓ | user-visible | — |
 | [A9](#a9) | Two scripts of one language carry the same name, so a reader cannot tell their links apart | ❓ | minor | — |
 | [A10](#a10) | With German the site's primary, the site's home once named a press in French | ❓ | minor | — |
 | [A11](#a11) | A browser that lists only "en-US" opened a French-primary journal in French, not English | ❓ | minor | — |
 | [A12](#a12) | "Change Language" on "Site Settings" names the languages in the language being read, not each in its own | ❓ | minor | — |
 | [A13](#a13) | A form language that is not an interface language gets empty email template boxes, not the default texts | ❓ | minor | — |
 | [OMP1](#omp1) | A press's site "Languages" list prints its own asterisk before "Marked locales may be incomplete." | ✅ | — | — |
+| [A4](#a4) | Retired: a text missing from a translation shows as its internal name, not in the primary language | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1032,19 +1032,6 @@ itself by another name than the public address and its list of allowed
 hosts is empty; the installer always fills that list. "Change Language"
 on the editorial screens is not affected.
 Basis: probe, 2026-10-01. <sup>[f-a3](#fn-a3)</sup>
-
-<a id="a4"></a>
-**A4 — Missing translations show internal names** · ❓ · user-visible.
-Where a language's translation lacks a text, the screen shows the text's
-internal name between hash signs ("##discussion.description##",
-"##common.yetToBegin##") instead of the text in the primary language. A
-reader of the French interface meets such names on the discussions panel
-([Tasks & discussions](U37-tasks-and-discussions.md#a15)) and the "Users"
-list of Users & Roles, among others.
-Question: should a missing text fall back to the primary language? Lean:
-yes for readers; the internal names have always been shown and help
-translators find gaps, but a reader cannot act on them.
-Basis: probe. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
 **A5 — After a manager ticks a language under "Forms", "Date & Time" shows no choices for it** · 🐞 · low · crash: script.
@@ -1204,6 +1191,11 @@ read "Marked locales may be incomplete."; the asterisks beside the
 languages are the same. A wording difference in the press's own text.
 Basis: probe. <sup>[f-omp1](#fn-omp1)</sup>
 
+### Retired
+
+<a id="a4"></a>
+**A4 — Missing translations show internal names** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a4](#fn-a4)</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -1263,7 +1255,7 @@ OJS, OMP and OPS unless its note names fewer apps.
 **o** — `lib/ui-library/src/components/TopNavActions/TopNavActions.vue`: when `getSupportedLocalesList()` has more than one entry, the menu opens with `common.changeLanguage` "Change Language" and one link per locale, the `Complete` icon beside `currentLocale`; each link is `user/setLocale/{code}?source=` followed by the page's own address, not encoded. The list is `pkp.context.supportedLocales`, which `PKPTemplateManager` fills with the journal's `getSupportedLocaleNames(LANGUAGE_LOCALE_ONLY)`, or the site's on the site's pages, named there in the interface language. [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md) Rule 28 lists the menu. The Website Settings page turns `#setup/languages` into `#languages` on a reload, and `…/website#languages` opens on "Appearance". Live-probed 2026-09-27 (Fields; Rule 20; Actors row 6): for the Journal Manager, the Section Editor, an assistant, the Reviewer, the Author and the Site Administrator on a journal, the menu opened with "Change Language" ("Changer la langue"), "English", "français", the tick beside the language being read; on Site Settings "English", "French" in English and "anglais", "français" in French (the French reading on OMP and OPS); choosing reopened the same Dashboard view, the same workflow, Profile and Site Settings in the chosen language; from Settings › Website › "Setup" › "Languages" the page reopened on "Appearance" › "Theme"; a one-language journal's menu opened with "Edit Profile"; a Reader signed in onto the public home, was refused the Dashboard's "My Submissions", and found "Change Language" in Profile's menu. Test runs 2026-09-27 (Fields; Rules 20, 20a; A12): on Administration (`index/en/admin`) the menu read "Change Language", "English" (ticked), "français", and after "français" was chosen (`index/fr_CA/admin`) "Changer la langue", "English", "français" (ticked), on the three apps; "Hosted Journals" the same, Site Settings "English", "French" (three apps), in French "anglais", "français" (OPS). On OPS, three runs and a by-hand read: the menu's link carries the page's address with its fragment; chosen after "Setup" was pressed (`…/website#setup`) the page reopened on "Configuration" › "Langues", after "Languages" was pressed (`…/website#languages`) or before any fragment on "Apparence" › "Thème". The mechanism is the shared Website page, so OJS and OMP read alike (not driven with "#setup" there).
 
 <a id="fn-p"></a>
-**p** — Application texts come from the language's translation files through `Locale::translate()`; the editorial screens load theirs from `api/v1/_i18n/ui.js?hash=…` (`PKP\API\v1\_i18n\I18nController`, public, cached a year, the hash changing with the language's texts). A key missing from the language's bundle returns `'##' . $key . '##'`; no fallback to another language is tried (a missing-key handler is set only while email texts are installed). Live-probed 2026-09-27 (Rules 21, 21a): the public menus in French ("Numéro courant", "Archives", "À propos" on OJS; "Catalogue", "À propos" on OMP; "Archives", "À propos" on OPS) and the About headings in French; the seeded journal's Journal Manager in French saw "Assignées à moi (0)" and the side menu "Tableau de bord éditorial", "Résultats de recherche", "Assignées à moi"; the "Users" search read "##userAccess.search##" in French, the workflow "##discussion.description##", "##common.yetToBegin##", "##common.closed##", with no English stand-in; German's "Tasks and Discussions" tab read "##taskTemplates.title##" and an Arabic OPS home "##index.latestPreprints##". Also seen in French: [Tasks & discussions](U37-tasks-and-discussions.md#a15), the "Users" tab of Users & Roles and Site Settings.
+**p** — Application texts come from the language's translation files through `Locale::translate()`; the editorial screens load theirs from `api/v1/_i18n/ui.js?hash=…` (`PKP\API\v1\_i18n\I18nController`, public, cached a year, the hash changing with the language's texts). A key missing from the language's bundle returns `'##' . $key . '##'`; no fallback to another language is tried (a missing-key handler is set only while email texts are installed). That is PKP's stated design: `pkp/pkp-lib#784` added the `Locale::translate` hook so that a plugin ("Default Translation") can supply the English text. Live-probed 2026-09-27 (Rules 21, 21a): the public menus in French ("Numéro courant", "Archives", "À propos" on OJS; "Catalogue", "À propos" on OMP; "Archives", "À propos" on OPS) and the About headings in French; the seeded journal's Journal Manager in French saw "Assignées à moi (0)" and the side menu "Tableau de bord éditorial", "Résultats de recherche", "Assignées à moi"; the "Users" search read "##userAccess.search##" in French, the workflow "##discussion.description##", "##common.yetToBegin##", "##common.closed##", with no English stand-in; German's "Tasks and Discussions" tab read "##taskTemplates.title##" and an Arabic OPS home "##index.latestPreprints##". Also seen in French: the Tasks & Discussions panels, the "Users" tab of Users & Roles and Site Settings.
 
 <a id="fn-q"></a>
 **q** — `PKPTemplateManager` assigns `currentLocaleLangDir` from `LocaleMetadata::isRightToLeft()`, and the editorial pages receive the journal's right-to-left languages as `rtlLocales`. Live-probed 2026-09-27 (Rule 21b): with Arabic installed and ticked under "UI" on a scratch journal, the journal's `/ar` home had `lang="ar"` and a right-to-left body, the sidebar at the left and the main column at the right (the reverse in English), and the editorial Settings page in Arabic ran right to left too; `<html>` carries no `dir`, the direction comes from the body's style. Arabic was removed after.
@@ -1289,7 +1281,7 @@ Issue report: [pkp-e2e#361](https://github.com/jardakotesovec/pkp-e2e/issues/361
 Issue report: [pkp-e2e#362](https://github.com/jardakotesovec/pkp-e2e/issues/362) ([docs/issues/U57-A3-language-block-loses-page-on-port.md](../issues/U57-A3-language-block-loses-page-on-port.md)).
 
 <a id="fn-a4"></a>
-**f-a4** — `Locale::translate()` (note p). The `##…##` form of a missing text is PKP's long-standing one. Seen: [Tasks & discussions](U37-tasks-and-discussions.md#a15), the "Users" tab of Users & Roles and Site Settings, all in the French interface; live-probed 2026-09-27 (note p).
+**f-a4** — `Locale::translate()` (note p). The `##…##` form of a missing text is PKP's long-standing one. Seen: the Tasks & Discussions panels, the "Users" tab of Users & Roles and Site Settings, all in the French interface; live-probed 2026-09-27 (note p).
 
 <a id="fn-a5"></a>
 **f-a5** — Seen 2026-09-24 (U09 claim check K1, K1-6, three apps): each tick saved and five errors "TypeError: Cannot read properties of undefined (reading 'filter') at Proxy.isInputSelected" were logged. Live-probed 2026-09-27 (three apps): five per tick on Settings › Website, also for a tick without "UI" and a re-tick; none for the same tick in the Settings wizard. Test runs 2026-09-27 (OPS): five per tick again, logged while the "Privacy Statement" tab of Rule 10b showed its empty French box. The cause is in note i.

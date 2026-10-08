@@ -1378,7 +1378,7 @@ a preprint server's codes on the pages below this frame are their
 features' ([Publication metadata](U40-publication-metadata.md#ops3) OPS3,
 [Publish, schedule & versions](U49-publish-schedule-and-versions.md#a10) A10),
 and why a missing French text shows as a code at all is
-[Languages & locales](U57-languages-and-locales.md#a4)'.
+[Languages & locales](U57-languages-and-locales.md), its Rule 21a.
 
 Where each part is reported: the staged version names with
 [Article landing page & reading A1](U13-article-landing-page-and-reading.md#a1),

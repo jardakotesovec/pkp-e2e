@@ -10,7 +10,7 @@
  * Spec: docs/specs/U57-languages-and-locales.md
  *
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
- * contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞, A4 ❓, A5 🐞,
+ * contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞, A5 🐞,
  * A6 🐞, A7 🐞, A8 🐞, A9 ❓, A10 ❓, A11 ❓, A12 ❓, A13 ❓ (the serial file's
  * scenario 1), and U07 OPS3 🐞. Where a test passes
  * through one it leaves the finding's own claim unasserted either way: S5

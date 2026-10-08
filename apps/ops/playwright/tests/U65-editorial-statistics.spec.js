@@ -23,7 +23,7 @@
  * - OPS4: S3 never reads the figure after "Accepted submissions this
  *   month:".
  * - A14: S4 leaves the Moderator's Notifications tab without saving.
- * - A1–A5, A7, A8, A10, A12, A13: not on these scenarios' paths. OJS and
+ * - A1–A5, A7, A8, A10, A12: not on these scenarios' paths. OJS and
  *   OMP IDs are the journal's and the press's. OPS3 (❓) is read as S9
  *   states the page today (no link, "No Items").
  *

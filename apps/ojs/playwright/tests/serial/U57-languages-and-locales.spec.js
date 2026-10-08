@@ -23,7 +23,7 @@
  * 🐞, A10 ❓ (S3's first visitor reads the site's home in German; the
  * journals' names on it are not read), A12 ❓ (the menu's names on "Site
  * Settings" are not read), A13 ❓ (S1 does not read the German template
- * boxes of a form-only German as empty, only that its own text is gone), A2, A3, A4, A5, A8, A9, A11 (the
+ * boxes of a form-only German as empty, only that its own text is gone), A2, A3, A5, A8, A9, A11 (the
  * parallel file's scenarios). The spec's Coverage section records
  * everything else left out.
  *

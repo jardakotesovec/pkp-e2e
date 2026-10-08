@@ -1051,8 +1051,7 @@ actives" and on arrival; the list-level ellipsis button's accessible name
 submission declined at the Submission stage "Rejetée", the columns "ID
 Trier / Soumissions / Étape / Activité éditoriale / Actions", the heading
 "Soumissions actives (6)". Neither `dashboard.reviewUpdateCounts` nor
-`common.moreActions` exists in pkp-lib's `fr_CA` locale files (U57 A4's
-fallback).
+`common.moreActions` exists in pkp-lib's `fr_CA` locale files (U57 Rule 21a).
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's filter form

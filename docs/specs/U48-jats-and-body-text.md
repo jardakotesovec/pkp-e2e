@@ -87,9 +87,7 @@ sit on the heading's right, left to right: <sup>a</sup> <sup>f</sup>
 | "Document Outline" (a fold-out section) | — | The text's headings (levels 1 to 3), each a button bearing the heading's text; "No headings yet." when there are none (Rule 19) |
 
 Nothing on either page is required, and neither page has a form-level
-"Save" other than the Body Text's own. With the interface in French, the
-tick box, its two confirmation windows and some of the "Body Text"
-panel's labels show raw codes ⚠ [A21](#a21).
+"Save" other than the Body Text's own.
 
 ## Rules & state
 
@@ -746,8 +744,6 @@ Left out of the scenarios above, by reason:
     message; Rule 20b)
   - A20 (a warning in the server's log on each JATS "Upload"; Rule 3;
     scenario 1 uploads without reading the log)
-  - A21 (the tick box, its two windows and labels of the "Body Text"
-    panel read as raw codes in French; Fields)
   - OMP1 (a press's confirmed "Send to Text Editor" leading nowhere;
     Purpose)
 - **No seed**:
@@ -793,7 +789,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | On "Body Text", pressing a closed side section closes the open one and leaves the pressed one closed | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A18](#a18) | A file sent to the Body Text editor that cannot be converted ends the import with no message | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | Each JATS "Upload" leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A21](#a21) | In French the tick box, its two windows and labels of the "Body Text" panel show raw codes | 🐞 | minor | issues (claude), 2026-10-02 — no report: unreleased 3.6 texts |
 | [A22](#a22) | On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
 | [OMP1](#omp1) | A press's editor is offered "Send to Text Editor" on a file, and confirming it imports nothing | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | A published version's Body Text stays editable | ❓ | minor | — |
@@ -801,6 +796,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The saved Body Text reaches no reader and not the JATS XML | ❓ | user-visible | — |
 | [A10](#a10) | "Upload" on "JATS XML" accepts a text file or a PDF as the article's JATS XML | ❓ | minor | — |
 | [A19](#a19) | Signed in for the "JATS XML" download, the visitor is left on the Login page | ❓ | minor | — |
+| [A21](#a21) | Retired: in French the tick box, its two windows and labels of the "Body Text" panel show raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1075,47 +1071,6 @@ file was stored. Adding a media file warns through the same step ([Media
 files](U47-media-files.md#a6)).
 Basis: test run, 2026-10-02. <sup>f-a20</sup>
 
-<a id="a21"></a>
-**A21 — In French the tick box and the "Body Text" panel show raw codes** · 🐞 · minor.
-With the interface in French (Canada), the two pages show raw codes where
-French words belong, on every version, published ones included:
-- "JATS XML": the box "Make available with publication" reads
-  "##publication.jats.makePublic##". Ticking it opens a window titled
-  "##publication.jats.enableVisibilityTitle##" whose only sentence is
-  "##publication.jats.enableVisibilityMessage##"; unticking it opens
-  "##publication.jats.disableVisibilityTitle##" with
-  "##publication.jats.disableVisibilityMessage##". Both windows offer
-  "Confirmer" and "Annuler", so a French-speaking editor makes the
-  article's JATS XML public, or withdraws it, from a window they cannot
-  read. "Confirmer" and "Annuler" work as in English (Rule 9).
-- "Body Text": the panel's heading "Document Edit" reads
-  "##publication.bodyText.documentPanel##", the hint under "References"
-  "##publication.bodyText.references.dragHint##", and the "Selected
-  Element" and "Document Outline" sections
-  "##publication.bodyText.selectedElement##" and
-  "##publication.bodyText.outline##". A screen reader hears the panel
-  and the editor named by the codes too
-  ("##publication.bodyText.documentPanel##",
-  "##publication.bodyText##").
-
-Expected: French words, as the rest of both pages shows ("XML JATS",
-"Téléverser", "Information détaillée", "Supprimer", "Télécharger", the
-line "Dernière modification le {date} par {username}", the delete window
-"Confirmer la suppression du XML JATS" with "Supprimer le fichier JATS";
-"Enregistrer", "Modifications non sauvegardées", "Plein écran",
-"Références"); the English screens show none of these codes. The side
-menu's "Body Text" entry and the "Publication: Body Text" heading read
-codes too, and why a missing French text shows as a code at all is
-[Languages & locales](U57-languages-and-locales.md#a4)'.
-Every code here came to `main` with its page, none is on
-`stable-3_5_0`, and no language has them yet: the box and its windows
-with pkp-lib 5f5066e1f6 (2026-02-13, `pkp/pkp-lib#10405`), the "Body
-Text" panel with pkp-lib 4f5c499736 (2026-05-25, `pkp/pkp-lib#12787`).
-They are unreleased 3.6 texts waiting for Weblate, which so far
-translates `stable-3_5_0` only; no report (issues session ruling,
-2026-10-02).
-Basis: probe, 2026-09-30. <sup>f-a21</sup>
-
 <a id="a22"></a>
 **A22 — On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse** · 🐞 · high.
 Each article version has a "JATS XML" page in the editorial workflow
@@ -1149,6 +1104,11 @@ action should not be offered on a press. The action is the journal's
 import of a file into the version's "Body Text" page, which works on OJS
 and stays there.
 Basis: probe, 2026-10-02. <sup>f-omp1</sup>
+
+### Retired
+
+<a id="a21"></a>
+**A21 — In French the tick box and the "Body Text" panel show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a21</sup>
 
 ---
 

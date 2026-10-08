@@ -255,7 +255,7 @@ screen, Rule 12): <sup>e</sup>
     "Conceptualisation
     (##submission.submit.creditRoles.degrees.lead##)"; why a missing
     translation shows as a code is
-    [Languages & locales](U57-languages-and-locales.md#a4).
+    [Languages & locales](U57-languages-and-locales.md), its Rule 21a.
     <sup>f-a23</sup> A contributor's several affiliations are joined by
     commas, each printed with a space before it ("First Univ , Second
     Univ") ⚠ [A27](#a27), and not always in the order the contributor's

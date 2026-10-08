@@ -586,10 +586,9 @@ one-line description under its heading (Rule 6). <sup>m</sup>
     <sup>td13</sup>
 <a id="languages"></a>
 24. **Languages.** The panel's texts follow the interface language. With
-    the interface in French, every panel, its windows and the "Add"
-    window show raw keys such as "##discussion.description##",
-    "##common.yetToBegin##" and "##common.closed##" where the French text
-    should be ⚠ [A15](#a15). <sup>ad</sup>
+    the interface in French, the "Add" window's template search box
+    reads "Trouver un modèle de courriel" ("find an email template"),
+    though its templates are not email templates ⚠ [A15](#a15). <sup>ad</sup>
 <a id="template-screen"></a>
 25. **The template screen.** Settings › Workflow › the "Tasks and
     Discussions" tab shows a table "Tasks and Discussions Templates" with
@@ -786,7 +785,9 @@ one-line description under its heading (Rule 6). <sup>m</sup>
   spec's. <sup>aj</sup>
 - **Submission activity log & notes**: the email and file lines of Side
   effects. <sup>aj</sup>
-- **Languages & locales**: the fallback behind Rule 24. <sup>aj</sup>
+- **Languages & locales**: a text French lacks shows on these panels as
+  its internal name between hash signs, as on every screen
+  (*[Languages & locales](U57-languages-and-locales.md)*, its Rule 21a). <sup>aj</sup>
 
 ## Canonical scenarios
 
@@ -1406,7 +1407,7 @@ Left out of the scenarios above, by reason:
   - A8 (an Author's edit of a first message carrying an upload; Rule 15d)
   - A9 (an edit of a discussion a Participants message opened, and the Author or assistant it was sent to saving it at any time; Rules 15c, 15e)
   - A13 (a closed task that cannot be reopened; Rule 17c; scenario 4 marks it)
-  - A15 (the panel in French; Rule 24)
+  - A15 (the "Add" window's template search box in French; Rule 24)
   - A16 (a task due today reading "Overdue"; Rule 2d)
   - A17 (a closed task past its due date still reading overdue; Rule 2e)
   - A18 (an auto-added item's empty "Activity" and History; Rule 4; scenario 9 marks it)
@@ -1455,6 +1456,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | An Author cannot save an edit of their discussion once its first message has an uploaded file | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Editing a discussion that "Notify" or "Assign" opened adds a copy of its message instead of changing it | 🐞 | medium | issues (claude), 2026-10-06 — re-verified |
 | [A10](#a10) | A task's "Due Date" before today is refused with a message about a start date | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A15](#a15) | In French the "Add" window's template search box reads "Trouver un modèle de courriel" ("find an email template") | 🐞 | minor | — |
 | [A16](#a16) | A task due today already reads "Overdue" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | A closed task past its due date still reads "This task is overdue. Remind the task owner…" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A21](#a21) | A refused task or discussion window tells screen-reader users "Go to undefined" for the empty message box | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1472,7 +1474,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A12](#a12) | An hour after writing it, an Author or assistant can change nothing in their own discussion | ❓ | user-visible | — |
 | [A13](#a13) | A closed task cannot be reopened | ❓ | minor | — |
 | [A14](#a14) | A reviewer of an "Anonymous Reviewer/Disclosed Author" review is offered the Author and refused on "Save" | ❓ | minor | — |
-| [A15](#a15) | With the interface in French every panel and window shows raw keys | ❓ | minor | — |
 | [A18](#a18) | An item another screen or an auto-added template opened has an empty "Activity" and no History | ❓ | minor | — |
 | [A19](#a19) | The role line under a manager-level participant depends on who looks | ❓ | minor | — |
 | [A20](#a20) | A discussion left with one participant after a removal cannot be saved from "Edit" | ❓ | minor | — |
@@ -1650,21 +1651,16 @@ right (it keeps the reviewer hidden from the Author), the offer is not.
 Basis: probe. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
-**A15 — Raw keys in French** · ❓ · minor.
-With the interface in French, every Tasks & Discussions panel (the
-editorial ones and the Reviewer's), its windows and the "Add" window
-show raw keys such as "##discussion.description##",
-"##common.yetToBegin##", "##common.closed##", "##task.owner##" and
-"##submission.event.task.created##" in place of text, on a journal, a
-press and a preprint server. A preprint server's panel heading is raw
-too ("##submission.queries.production##"), where a journal and a press
-read "Discussions sur la production". The "Add" window's template search
-box reads "Trouver un modèle de courriel" ("find an email template"),
-though these templates are not email templates.
-Question: should a text the translation lacks fall back to English?
-Lean: yes; that fallback is *Languages & locales*' to settle, the
-missing French texts and the search box's wording a translation gap.
-Basis: probe. <sup>[f-a15](#fn-a15)</sup>
+**A15 — In French the "Add" window's template search box asks for an email template** · 🐞 · minor.
+With the interface in French (Canada), the "Add" window's template
+search box, "Find Template" in English, reads "Trouver un modèle de
+courriel" ("find an email template"). The templates it searches are
+task and discussion templates, not email templates, so the label names
+the wrong thing; the search itself works as in English (Rule 10a). The
+same French text is right where it was first used, on the template
+search of an email's composer. The window's templates are new on
+`main`, so no release shows it yet.
+Basis: probe + code. <sup>[f-a15](#fn-a15)</sup>
 
 <a id="a16"></a>
 **A16 — A task due today is already overdue** · 🐞 · low.
@@ -2187,7 +2183,7 @@ Issue report: [pkp-e2e#425](https://github.com/jardakotesovec/pkp-e2e/issues/425
 **f-a14** — `getParticipants()` drops Author assignments only for a reviewer with a `SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS` assignment; `EditTask`'s anonymity closure refuses an Author alongside a reviewer of either anonymous method (note o). Live-probed 2026-09-23 on OJS and OMP (td1).
 
 <a id="fn-a15"></a>
-**f-a15** — Note ad. Live-probed 2026-09-23 on all three apps: the editorial panels, the windows and the "Add" window, besides the Reviewer's panel.
+**f-a15** — Note ad. Live-probed 2026-09-23 on all three apps, in French (Canada): the "Add" window's template search box read "Trouver un modèle de courriel". lib/pkp `locale/en/common.po` holds `common.findTemplate` as "Find Template"; `locale/fr_CA/common.po` and `locale/fr/common.po` both hold "Trouver un modèle de courriel" (read 2026-10-08, lib/pkp `3bcc0a0cb2`), so French (France) reads the same (code, not opened). One key has two uses. The email composer's template search reads it in `templates/decision/record.tpl` and ui-library's `RequestReviewRoundAuthorResponse.vue` and `UserInvitationEmailComposerStep.vue` (through `Composer.vue`), where the French is right; those were read in the code, not opened in French. `DiscussionManagerTemplates.vue` reads it for this window's task and discussion templates (ui-library `bc9a03b9`, 2025-07-30, `pkp/pkp-lib#11291`; the file is not on `stable-3_5_0`), where the French is wrong. The raw keys the same probes read on the panels and windows (note ad) are texts French lacks, and no finding.
 
 <a id="fn-a16"></a>
 **f-a16** — Note l: the overdue test compares now with the due date's midnight. Live-probed 2026-09-23 on all three apps: a task due 2026-09-23 (seeded, and one saved on screen with that date) read "Overdue" with the overdue line that day.
