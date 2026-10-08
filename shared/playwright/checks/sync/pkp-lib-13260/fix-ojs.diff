@@ -20,6 +20,30 @@ index ff1d87e482..0490f3eade 100644
                          ->orderBy(IssueCollector::ORDERBY_DATE_PUBLISHED)
                          ->limit(10)
                          ->getMany();
+diff --git a/pages/index/IndexHandler.php b/pages/index/IndexHandler.php
+index 3ad51123e0..b8b819b4a9 100644
+--- a/pages/index/IndexHandler.php
++++ b/pages/index/IndexHandler.php
+@@ -140,10 +140,15 @@ class IndexHandler extends PKPIndexHandler
+ 
+         // Load homepage blocks late so that they can re-use
+         // data already passed to the template
+-        $homepageBlocks = $templateMgr->homepageBlocks->load($journal);
+-        $templateMgr->assign([
+-            'homepageBlocks' => $homepageBlocks,
+-        ]);
++        $usesHomepageBlocks = false;
++        for ($theme = $templateMgr->getActiveTheme($request, $journal); $theme; $theme = $theme->parent ?? null) {
++            $usesHomepageBlocks = $usesHomepageBlocks || $theme instanceof \PKP\plugins\interfaces\HasHomepageBlocks;
++        }
++        if ($usesHomepageBlocks) {
++            $templateMgr->assign([
++                'homepageBlocks' => $templateMgr->homepageBlocks->load($journal),
++            ]);
++        }
+ 
+         $templateMgr->display($template);
+ 
 diff --git a/templates/frontend/objects/article_details.tpl b/templates/frontend/objects/article_details.tpl
 index 65ee80f788..869cef14f3 100755
 --- a/templates/frontend/objects/article_details.tpl

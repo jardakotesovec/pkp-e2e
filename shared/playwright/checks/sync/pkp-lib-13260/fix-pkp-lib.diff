@@ -11,8 +11,21 @@ index 35705a385b..cfe4924c4a 100644
              'associatedAuthors' => array_map(fn (Author $author) => [
                  'id' => $author->getId(),
                  'fullName' => $author->getFullName(),
+diff --git a/classes/security/Validation.php b/classes/security/Validation.php
+index b21844a6f8..7e360d68c6 100644
+--- a/classes/security/Validation.php
++++ b/classes/security/Validation.php
+@@ -166,7 +166,7 @@ class Validation
+             $args['source'] = $_SERVER['REQUEST_URI'];
+         }
+         if ($messageLocaleKey !== null) {
+-            $args['loginMessage'] = __($messageLocaleKey);
++            $args['loginMessage'] = $messageLocaleKey;
+         }
+ 
+         $request = Application::get()->getRequest();
 diff --git a/classes/template/PKPTemplateManager.php b/classes/template/PKPTemplateManager.php
-index 7355605b7e..f7b202a2db 100644
+index 7355605b7e..d3d0c39656 100644
 --- a/classes/template/PKPTemplateManager.php
 +++ b/classes/template/PKPTemplateManager.php
 @@ -226,7 +226,7 @@ class PKPTemplateManager extends Smarty
@@ -24,6 +37,31 @@ index 7355605b7e..f7b202a2db 100644
          ]);
  
          // Assign date and time format
+@@ -1819,6 +1819,7 @@ class PKPTemplateManager extends Smarty
+     ) {
+         $this->assign([
+             'title' => $title,
++            'pageTitleTranslated' => $title,
+             'message' => $message,
+             'type' => $type,
+             'backLink' => $backLink,
+diff --git a/pages/login/LoginHandler.php b/pages/login/LoginHandler.php
+index aa8d914fc2..0dcc3a1261 100644
+--- a/pages/login/LoginHandler.php
++++ b/pages/login/LoginHandler.php
+@@ -71,9 +71,11 @@ class LoginHandler extends Handler
+             $request->redirectSSL();
+         }
+ 
++        // The message is a locale key (the same sanity check as PKPUserHandler::authorizationDenied())
++        $loginMessageKey = $request->getUserVar('loginMessage');
+         $templateMgr = TemplateManager::getManager($request);
+         $templateMgr->assign([
+-            'loginMessage' => $request->getUserVar('loginMessage'),
++            'loginMessage' => is_string($loginMessageKey) && preg_match('/^[a-zA-Z0-9.]+$/', $loginMessageKey) ? __($loginMessageKey) : null,
+             'username' => $request->getSession()->get('email') ?? $request->getSession()->get('username'),
+             'remember' => $request->getUserVar('remember'),
+             'source' => $request->getUserVar('source'),
 diff --git a/pages/user/PKPUserHandler.php b/pages/user/PKPUserHandler.php
 index 4db714a8c4..0e7eee63b6 100644
 --- a/pages/user/PKPUserHandler.php
