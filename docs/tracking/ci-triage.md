@@ -1292,6 +1292,17 @@ trips.
   first-tab press on the tab's own panel being shown, as `selectTab`
   reads do.
 
+- **OMP U73 S2's count read, once** (OMP, pkp/omp run 37590116923 on the
+  PR branch `13308` at `d0b7921`, 2026-10-07, shard 2/3, green on its
+  retry). `U73-publication-formats-proof-terms.spec.js:147` "S2: A
+  format's catalog data" failed its first attempt on a `toHaveCount`
+  after 47 s; the run's failed-step log carries the error's first line
+  only and the job log is no longer served, so the failing line is not
+  known; found by the CI tally of 2026-10-08, no earlier sighting on any
+  app or ref. **Watch condition**: a second sighting; then read the
+  failing line from that run's artifact (`gh run download`) before a
+  diagnosis.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull
