@@ -25,9 +25,33 @@ index b21844a6f8..7e360d68c6 100644
  
          $request = Application::get()->getRequest();
 diff --git a/classes/template/PKPTemplateManager.php b/classes/template/PKPTemplateManager.php
-index 7355605b7e..d3d0c39656 100644
+index 7355605b7e..ee51cf1ae1 100644
 --- a/classes/template/PKPTemplateManager.php
 +++ b/classes/template/PKPTemplateManager.php
+@@ -152,10 +152,10 @@ class PKPTemplateManager extends Smarty
+     private bool $isVueRuntimeIncluded = false;
+ 
+     /** @var MetadataBlocksRegistry Register and load metadata blocks for the reader facing UI */
+-    public MetadataBlocksRegistry $metadataBlocks;
++    public \PKP\view\MetadataBlocksRegistry $metadataBlocks;
+ 
+     /** @var HomepageBlocksRegistry Register and load metadata blocks for the reader facing UI */
+-    public HomepageBlocksRegistry $homepageBlocks;
++    public \PKP\view\HomepageBlocksRegistry $homepageBlocks;
+ 
+     /**
+      * Constructor.
+@@ -192,8 +192,8 @@ class PKPTemplateManager extends Smarty
+         // for unified template resolution and hook firing
+         $this->template_class = \PKP\core\blade\SmartyTemplate::class;
+ 
+-        $this->metadataBlocks = new MetadataBlocksRegistry();
+-        $this->homepageBlocks = new HomepageBlocksRegistry();
++        $this->metadataBlocks = class_exists(MetadataBlocksRegistry::class) ? new MetadataBlocksRegistry() : new \PKP\view\MetadataBlocksRegistry();
++        $this->homepageBlocks = class_exists(HomepageBlocksRegistry::class) ? new HomepageBlocksRegistry() : new \PKP\view\HomepageBlocksRegistry();
+     }
+ 
+     /**
 @@ -226,7 +226,7 @@ class PKPTemplateManager extends Smarty
              'currentLocale' => $locale,
              'currentLocaleLangDir' => Locale::getMetadata($locale)?->isRightToLeft() ? 'rtl' : 'ltr',
@@ -45,6 +69,20 @@ index 7355605b7e..d3d0c39656 100644
              'message' => $message,
              'type' => $type,
              'backLink' => $backLink,
+diff --git a/pages/index/PKPIndexHandler.php b/pages/index/PKPIndexHandler.php
+index 4899db9c3f..9bc379db63 100644
+--- a/pages/index/PKPIndexHandler.php
++++ b/pages/index/PKPIndexHandler.php
+@@ -50,7 +50,8 @@ class PKPIndexHandler extends Handler
+         }
+         $templateMgr->assign([
+             'announcements' => $announcements,
+-            'numAnnouncementsHomepage' => $numAnnouncementsHomepage,
++            // No number without announcements: templates test `$numAnnouncementsHomepage && $announcements|@count`
++            'numAnnouncementsHomepage' => $announcements ? $numAnnouncementsHomepage : null,
+         ]);
+     }
+ 
 diff --git a/pages/login/LoginHandler.php b/pages/login/LoginHandler.php
 index aa8d914fc2..0dcc3a1261 100644
 --- a/pages/login/LoginHandler.php
