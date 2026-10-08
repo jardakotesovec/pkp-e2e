@@ -26,10 +26,12 @@ const LOGGED_IN_AS = 'You are currently logged in as';
 
 /**
  * The top-right user menu (initials button + its dropdown). While
- * impersonating, the button carries both usernames and the dropdown reads
- * "You are currently logged in as {username}" with "Logout as {username}"
- * links (two: one in that sentence, one in the entry list) and no plain
- * "Logout" (Rules 6, 13).
+ * impersonating, the button carries both usernames and two initials badges
+ * (the impersonator's own, muted, with the impersonated account's overlaid
+ * in a warning color), and the dropdown reads "You are currently logged in
+ * as {username}" with "Logout as {username}" links (two: one in that
+ * sentence, one in the entry list after "Edit Profile", where "Logout"
+ * stood) and no plain "Logout" (Rules 6, 13).
  */
 exports.UserMenu = class UserMenu extends BasePage {
     constructor(page) {
@@ -38,11 +40,22 @@ exports.UserMenu = class UserMenu extends BasePage {
         this.button = this.root.getByRole('button').first();
         this.logoutLink = this.root.getByRole('link', {name: 'Logout', exact: true});
         this.loggedInAsLine = this.root.getByText(LOGGED_IN_AS);
+        // The initials badges on the button: one outside an impersonation,
+        // two during one (the button holds no other block element).
+        this.initials = this.button.locator('div');
+        // The menu's own entries, under the language list when the site
+        // has more than one language: "Edit Profile", then the way out.
+        this.entries = this.root.locator('nav ul').last().getByRole('listitem');
     }
 
     /** "Logout as {username}" (the first of the two identical links). */
     logoutAsLink(username) {
         return this.root.getByRole('link', {name: `Logout as ${username}`}).first();
+    }
+
+    /** The second "Logout as {username}": the entry after "Edit Profile". */
+    logoutAsEntry(username) {
+        return this.entries.getByRole('link', {name: `Logout as ${username}`});
     }
 
     async open() {
@@ -75,10 +88,17 @@ exports.UserMenu = class UserMenu extends BasePage {
         await this.page.waitForURL(/\/login/, {waitUntil: 'commit', timeout: 15_000});
     }
 
-    /** Press "Logout as {username}" and wait to land away from /login (Rule 15). */
-    async logoutAs(username) {
+    /**
+     * Press "Logout as {username}" and wait to land away from /login
+     * (Rule 15): the link in the "You are currently logged in as" sentence,
+     * or with `entry` the one after "Edit Profile".
+     *
+     * @param {string} username
+     * @param {{entry?: boolean}} [options]
+     */
+    async logoutAs(username, {entry = false} = {}) {
         await this.open();
-        await this.logoutAsLink(username).click();
+        await (entry ? this.logoutAsEntry(username) : this.logoutAsLink(username)).click();
         await this.page.waitForURL((url) => !url.pathname.includes('/login'), {
             waitUntil: 'commit',
             timeout: 30_000,
@@ -107,6 +127,94 @@ exports.UserMenu = class UserMenu extends BasePage {
         await expect(this.logoutAsLink(username)).toBeVisible();
         await expect(this.logoutLink).toHaveCount(0);
         await this.close();
+    }
+
+    /**
+     * The menu's own entries, in order, read with the menu open (a full
+     * match per entry). Leaves the menu closed.
+     *
+     * @param {string[]} labels e.g. ['Edit Profile', 'Logout']
+     */
+    async expectEntries(labels) {
+        await this.open();
+        await expect(this.entries).toHaveText(labels);
+        await this.close();
+    }
+
+    /**
+     * While impersonating, the menu shows "Logout as {username}" twice: in
+     * the "You are currently logged in as" sentence, and as the entry after
+     * "Edit Profile", where "Logout" stood; both are the same link
+     * (Rule 13). Leaves the menu closed.
+     */
+    async expectLogoutAsTwice(username) {
+        const name = `Logout as ${username}`;
+        await this.open();
+        await expect(this.entries).toHaveText(['Edit Profile', name]);
+        await expect(this.root.getByRole('link', {name})).toHaveCount(2);
+        const inSentence = this.loggedInAsLine.getByRole('link', {name});
+        await expect(inSentence).toBeVisible();
+        const address = await inSentence.getAttribute('href');
+        expect(address, 'the address behind "Logout as"').toBeTruthy();
+        await expect(this.logoutAsEntry(username)).toBeVisible();
+        await expect(this.logoutAsEntry(username)).toHaveAttribute('href', /** @type {string} */ (address));
+        await this.close();
+    }
+
+    /**
+     * Outside an impersonation the top bar shows one initials badge, in the
+     * menu's ordinary color. Returns that text color as the browser
+     * computed it: the control the muted read is compared with.
+     *
+     * @param {string} initials e.g. 'AA'
+     */
+    async expectOwnInitials(initials) {
+        await expect(this.initials).toHaveText([initials]);
+        await expect(this.initials.first()).toHaveClass(/(^|\s)text-primary(\s|$)/);
+        return this.initials.first().evaluate((el) => getComputedStyle(el).color);
+    }
+
+    /**
+     * While impersonating, the top bar shows the impersonator's own
+     * initials, muted, with the impersonated account's overlaid in a
+     * warning color (Rule 13): two badges in that order; the first no
+     * longer in the ordinary color (`ownColor`, read by
+     * `expectOwnInitials` before the impersonation) but in the disabled
+     * one; the second on the warning background, positioned over the
+     * first.
+     *
+     * @param {{own: string, target: string, ownColor: string}} facts
+     */
+    async expectImpersonationInitials({own, target, ownColor}) {
+        await expect(this.initials).toHaveText([own, target]);
+        const base = this.initials.first();
+        const overlay = this.initials.nth(1);
+        await expect(base).toHaveClass(/(^|\s)text-disabled(\s|$)/);
+        await expect(base).not.toHaveClass(/(^|\s)text-primary(\s|$)/);
+        await expect(overlay).toHaveClass(/(^|\s)bg-negative(\s|$)/);
+        await expect(overlay).toHaveCSS('position', 'absolute');
+        const paint = (el) => {
+            const style = getComputedStyle(el);
+            const box = el.getBoundingClientRect();
+            return {
+                color: style.color,
+                background: style.backgroundColor,
+                left: box.left,
+                right: box.right,
+                top: box.top,
+                bottom: box.bottom,
+            };
+        };
+        const muted = await base.evaluate(paint);
+        const warning = await overlay.evaluate(paint);
+        expect(muted.color, "the impersonator's initials are no longer in the ordinary color").not.toBe(ownColor);
+        expect(warning.background, "the overlaid badge's background differs from the muted badge's").not.toBe(
+            muted.background
+        );
+        expect(
+            warning.left < muted.right && warning.right > muted.left && warning.top < muted.bottom && warning.bottom > muted.top,
+            'the second badge lies over the first'
+        ).toBe(true);
     }
 };
 
@@ -204,6 +312,7 @@ exports.LostPasswordPage = class LostPasswordPage extends BasePage {
         );
         this.form = page.locator('form#lostPasswordForm');
         this.emailInput = page.locator('input#email');
+        this.emailBox = this.form.getByLabel("Registered user's email");
         this.submitButton = this.form.locator('button[type="submit"]');
         this.confirmation = page.getByText(
             'A confirmation has been sent to your email address if a matching account was found. Please follow the instructions in the email to reset your password.'
@@ -218,6 +327,18 @@ exports.LostPasswordPage = class LostPasswordPage extends BasePage {
         await this.forgotLink.click();
         await expect(this.heading).toBeVisible();
         await expect(this.instruction).toBeVisible();
+    }
+
+    /**
+     * The lost-password page is on screen: its address, heading and
+     * instruction, and the form asking for "Registered user's email".
+     */
+    async expectForm() {
+        await expect(this.page).toHaveURL(/\/login\/lostPassword/);
+        await expect(this.heading).toBeVisible();
+        await expect(this.instruction).toBeVisible();
+        await expect(this.form).toBeVisible();
+        await expect(this.emailBox).toBeVisible();
     }
 
     /** Type an address and submit; the generic answer with its Login link. */
@@ -261,9 +382,24 @@ exports.ResetPasswordPage = class ResetPasswordPage extends BasePage {
         await expect(this.loginLink).toBeVisible();
     }
 
+    /**
+     * The form's browser tab: "Reset Password | {journal name}" (Fields).
+     *
+     * @param {string} contextName the server's name
+     */
+    async expectTab(contextName) {
+        await expect(this.page).toHaveTitle(`Reset Password | ${contextName}`);
+    }
+
     async expectDeadLink() {
         await expect(this.deadLink).toBeVisible();
         await expect(this.deadLinkBack).toBeVisible();
+        await expect(this.passwordInput).toHaveCount(0);
+    }
+
+    /** Press the refused link's "Reset Password" link (Rule 10). */
+    async followDeadLinkBack() {
+        await this.deadLinkBack.click();
     }
 };
 

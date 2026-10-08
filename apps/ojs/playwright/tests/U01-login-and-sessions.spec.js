@@ -8,12 +8,8 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 ✅ (retired), A4 🐞, A5 ❓, A6 ❓, A7 🐞, A8 🐞. Where a test passes
- * through one (S1 unticks the pre-ticked box, S6 walks a screen that sets
- * the forced-change flag, S4/S5 open the reset page, S2 opens a
- * dashboard address signed out) it asserts the effect the spec states and
- * leaves the finding's own claim unasserted either way. The spec's Coverage
- * section records everything else left out.
+ * A2 🐞, A4 🐞, A5 ❓, A7 🐞, A8 🐞, A9 ❓, A10 🐞, A11 🐞, A12 🐞, A13 🐞,
+ * A14 🐞. The spec's Coverage section records everything else left out.
  *
  * Session hygiene: every sign-in, sign-out, forced-change and impersonation
  * flow runs in a FRESH browser context with a fresh UI login — never through
@@ -25,6 +21,9 @@
  * carrying app + test in the local part; nobody@mail.test holds no account
  * on any install, so its silence is read as a count after the account's own
  * email arrived (PRINCIPLES A8). Waits are event-based — no hard-coded sleeps.
+ * The two accounts S6 flags are reviewers the test itself creates on its
+ * scratch journal; S7's badge colors are read as the browser paints them,
+ * against the administrator's own-session badge read the same way.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
@@ -34,12 +33,16 @@ const {
     waitForJQueryIdle,
 } = require('../pages/ReviewStagePages.js');
 const {UsersRolesPage} = require('../pages/UserInvitationPages.js');
+const {ReviewerAssignmentsPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {
     UserMenu,
+    SiteUserMenu,
     LoginAsDialog,
     UsersRolesMenu,
     LostPasswordPage,
     ResetPasswordPage,
+    ChangePasswordPage,
+    CreateReviewerWindow,
     LoginAsRefusalPage,
     anonContext,
     freshLogin,
@@ -49,6 +52,11 @@ const {
 const JOURNAL = 'publicknowledge';
 const GENERIC_ERROR = 'Invalid username/email or password. Please try again.';
 const NOBODY = 'nobody@mail.test';
+const SEEDED_JOURNAL_NAME = 'Journal of Public Knowledge';
+const RESET_SUBJECT = 'Password Reset Confirmation';
+/** S7's two accounts as the user menu's button shows them. */
+const ADMIN = {initials: 'AA', username: 'admin'};
+const BEA = {initials: 'BA', username: 'author.bea'};
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -61,9 +69,11 @@ const EDITORIAL = `/index.php/${JOURNAL}/dashboard/editorial`;
 /**
  * Drive the lost-password flow for `email` on the given journal and return
  * the emailed reset link and the message summary (Rules 7–8). Starts from
- * the journal's Login page.
+ * the journal's Login page. `nth` is which request of the test this is for
+ * that address: an earlier request's message stays in the mailbox, so the
+ * newest is read only once the mailbox holds that many.
  */
-async function requestResetLink(page, pkpMail, contextPath, email) {
+async function requestResetLink(page, pkpMail, contextPath, email, {nth = 1} = {}) {
     const loginPage = new LoginPage(page);
     const lost = new LostPasswordPage(page);
     await loginPage.gotoContext(contextPath);
@@ -71,13 +81,33 @@ async function requestResetLink(page, pkpMail, contextPath, email) {
     await lost.request(email);
 
     // One "Password Reset Confirmation" email with the single link (Rule 8).
-    const summary = await pkpMail.find({to: email, subject: 'Password Reset Confirmation'});
+    await expect
+        .poll(() => pkpMail.count({to: email, subject: RESET_SUBJECT}), {
+            message: `"${RESET_SUBJECT}" number ${nth} for ${email}`,
+            timeout: 20_000,
+        })
+        .toBe(nth);
+    const summary = await pkpMail.find({to: email, subject: RESET_SUBJECT});
     const full = await pkpMail.fullMessage(summary.ID);
     const match = (full.HTML || full.Text).match(
         /https?:\/\/[^\s<>"']+\/login\/resetPassword\/[^\s<>"']+/
     );
     expect(match, 'reset link present in the email').toBeTruthy();
     return {link: match[0].replace(/&amp;/g, '&'), summary};
+}
+
+/**
+ * The username and generated password a "Create New Reviewer" registration
+ * email delivers (Rule 11a), read from the reviewer's own throwaway mailbox.
+ */
+async function emailedCredentials(pkpMail, email) {
+    const summary = await pkpMail.find({to: email, subject: 'Registration as Reviewer'});
+    const full = await pkpMail.fullMessage(summary.ID);
+    const credentials = (full.HTML || '').match(
+        /Username:\s*([^<\s]+)\s*<br\s*\/?>\s*Password:\s*([^<\s]+)/i
+    );
+    expect(credentials, `emailed username and password for ${email}`).toBeTruthy();
+    return {username: credentials[1], password: credentials[2]};
 }
 
 test.describe('login & sessions', () => {
@@ -161,9 +191,9 @@ test.describe('login & sessions', () => {
             // screen, reads the Editor's account (Side effects). Users &
             // Roles is the users-management screen a Journal Manager has;
             // its "Current Users" table shows Name, Email, Roles, Start Date
-            // and Affiliation, and no last-login column or label (finding
-            // T-ojs-1 in .reports/U01/test-ojs-findings.md), so the Editor's
-            // row is read and the last-login date is asserted neither way.
+            // and Affiliation, and no last-login column, so the Editor's
+            // row is read under the six column headers, none of them a
+            // last-login date (A9 ❓ asks whether one should be).
             const managerContext = await asUser('manager.maya');
             const managerPage = await managerContext.newPage();
             const usersRoles = new UsersRolesPage(managerPage, JOURNAL);
@@ -190,13 +220,10 @@ test.describe('login & sessions', () => {
             await page.goto(EDITORIAL);
             await userMenu.logout();
             await loginPage.expectForm();
-            await page.goto('/index.php/index');
-            await page.getByRole('navigation').getByRole('link', {name: 'Login', exact: true}).click();
-            await page.waitForURL(/\/index\/en\/login/, {waitUntil: 'commit', timeout: 15_000});
-            await loginPage.expectForm();
+            await loginPage.openFromSiteHome();
             await loginPage.signIn('editor.diana', getPassword('editor.diana'));
             await page.waitForURL(/\/index\/en\/index$/, {waitUntil: 'commit', timeout: 15_000});
-            await expect(page.getByText('Journal of Public Knowledge').first()).toBeVisible();
+            await expect(page.getByText(SEEDED_JOURNAL_NAME).first()).toBeVisible();
             await expect(page.getByText(`Scratch context ${tag}`)).toBeVisible();
             expect(page.url()).not.toMatch(/\/dashboard/);
 
@@ -332,10 +359,14 @@ test.describe('login & sessions', () => {
             expect(summary.From.Address).toBe('admin@mail.test');
             expect(await pkpMail.count({to: NOBODY})).toBe(0);
 
-            // "Reset Password": save a new password; still signed out
+            // "Reset Password": the form opens, its browser tab reading
+            // "Reset Password | {journal name}" (Fields), the journal being
+            // the scratch one; save a new password; still signed out
             // (Rule 9).
             await page.goto(resetLink);
             const reset = new ResetPasswordPage(page);
+            await reset.expectForm();
+            await expect(page).toHaveTitle(`Reset Password | Scratch context ${tag}`);
             await reset.setPassword(newPassword);
             await loginPage.gotoContext(tag);
             await loginPage.expectForm();
@@ -412,10 +443,19 @@ test.describe('login & sessions', () => {
         await expect(reset.passwordInput).toHaveCount(0);
 
         // The link after the change: "Logout", then the used link answers
-        // the dead-link page with a "Reset Password" link back (Rule 10).
+        // the dead-link page with a "Reset Password" link back (Rule 10),
+        // and no form to set a password on.
         await userMenu.logout();
         await page.goto(resetLink);
         await reset.expectDeadLink();
+        await expect(reset.passwordInput).toHaveCount(0);
+
+        // Pressed, the link opens the lost-password page, asking for
+        // "Registered user's email" (Rule 10).
+        const lost = new LostPasswordPage(page);
+        await reset.deadLinkBack.click();
+        await lost.expectForm();
+        await expect(reset.deadLink).toHaveCount(0);
 
         // A mangled code answers the same.
         const mangled = new URL(resetLink);
@@ -423,14 +463,11 @@ test.describe('login & sessions', () => {
         mangled.searchParams.set('confirm', `deadbeef${confirm.slice(8)}`);
         await page.goto(mangled.toString());
         await reset.expectDeadLink();
-
-        // The back link really leads to the lost-password form.
-        await reset.deadLinkBack.click();
-        await expect(new LostPasswordPage(page).form).toBeVisible();
+        await expect(reset.passwordInput).toHaveCount(0);
 
         // Control: a fresh request's link opens the "Reset Password" form
         // (Rule 9); the refusal is the stale link's own.
-        const fresh = await requestResetLink(page, pkpMail, tag, email);
+        const fresh = await requestResetLink(page, pkpMail, tag, email, {nth: 2});
         expect(fresh.link).not.toBe(resetLink);
         await page.goto(fresh.link);
         await reset.expectForm();
@@ -442,12 +479,15 @@ test.describe('login & sessions', () => {
         const tag = makeTag('s6', testInfo);
         const editor = `edi${tag}`;
         const author = `au${tag}`;
-        const reviewerUsername = `rev${tag}`;
-        const reviewerEmail = `${reviewerUsername}@mail.test`;
-        const newPassword = `Changed${tag}`;
-        // Scratch journal: the flagged account is a throwaway (never flag a
-        // roster account) and the registration email lands in a throwaway
-        // mailbox.
+        // The body's nova and orin, Changed1 and Changed2, tagged per run.
+        const nova = {givenName: 'Nova', familyName: 'Tester', username: `nova${tag}`, email: `nova${tag}@mail.test`};
+        const orin = {givenName: 'Orin', familyName: 'Tester', username: `orin${tag}`, email: `orin${tag}@mail.test`};
+        const changed1 = `Changed1${tag}`;
+        const changed2 = `Changed2${tag}`;
+        // Scratch journal: the flagged accounts are throwaways (never flag
+        // a roster account) and the registration emails land in throwaway
+        // mailboxes. Beside the seeded journal it makes the site
+        // multi-journal, which the site-level landing needs (Rule 3).
         await ojsApi.createContext({
             tag,
             users: [
@@ -463,93 +503,118 @@ test.describe('login & sessions', () => {
             decisions: ['sendExternalReview'],
         });
 
-        // The editor creates the reviewer through Add Reviewer → "Create New
-        // Reviewer" (the one screen-driven path that sets the flag, Rule 11).
+        // "Create New Reviewer": the editor creates the two reviewers, one
+        // after the other, through Add Reviewer → "Create New Reviewer"
+        // (the one screen-driven path that sets the flag, Rule 11a).
         const editorCtx = await freshLogin(browser, baseURL, editor);
         try {
             const workflow = new WorkflowPage(editorCtx.page, tag);
             await workflow.gotoEditorial(submissionId);
-            await editorCtx.page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
-            const modal = editorCtx.page
-                .getByRole('dialog')
-                .filter({has: editorCtx.page.locator('.listPanel--selectReviewer')});
-            await expect(modal.getByRole('link', {name: 'Create New Reviewer'})).toBeVisible({
-                timeout: 30_000,
-            });
-            await modal.getByRole('link', {name: 'Create New Reviewer'}).click();
-            // The AJAX reload swaps the search panel for the create form, so
-            // the dialog is re-resolved by the form it now carries.
-            const createModal = editorCtx.page
-                .getByRole('dialog')
-                .filter({has: editorCtx.page.locator('form#createReviewerForm')});
-            const form = createModal.locator('form#createReviewerForm');
-            await expect(form.locator('input[name="username"]')).toBeVisible({timeout: 30_000});
-            await form.locator('input[name="givenName[en]"]').fill('Nova');
-            await form.locator('input[name="familyName[en]"]').fill('Tester');
-            await form.locator('input[name="username"]').fill(reviewerUsername);
-            await form.locator('input[name="email"]').fill(reviewerEmail);
-            await form.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
-            await expect(createModal).toHaveCount(0, {timeout: 30_000});
-            await waitForJQueryIdle(editorCtx.page);
-            await expect(workflow.panelRow('Reviewers', 'Nova Tester')).toBeVisible();
+            const createWindow = new CreateReviewerWindow(editorCtx.page);
+            for (const reviewer of [nova, orin]) {
+                await createWindow.create(reviewer);
+                await waitForJQueryIdle(editorCtx.page);
+                await expect(
+                    workflow.panelRow('Reviewers', `${reviewer.givenName} ${reviewer.familyName}`)
+                ).toBeVisible({timeout: 30_000});
+            }
         } finally {
             await editorCtx.context.close();
         }
 
-        // The registration email delivers the username and a generated
-        // password.
-        const summary = await pkpMail.find({to: reviewerEmail, subject: 'Registration as Reviewer'});
-        const full = await pkpMail.fullMessage(summary.ID);
-        const credentials = (full.HTML || '').match(
-            /Username:\s*([^<\s]+)\s*<br\s*\/?>\s*Password:\s*([^<\s]+)/i
-        );
-        expect(credentials, 'emailed username and password').toBeTruthy();
-        expect(credentials[1]).toBe(reviewerUsername);
-        const emailedPassword = credentials[2];
+        // The registration email: each reviewer's delivers a username and
+        // a generated password.
+        const novaMail = await emailedCredentials(pkpMail, nova.email);
+        expect(novaMail.username).toBe(nova.username);
+        const orinMail = await emailedCredentials(pkpMail, orin.email);
+        expect(orinMail.username).toBe(orin.username);
+        expect(orinMail.password, 'each reviewer gets a password of their own').not.toBe(novaMail.password);
 
-        // Signing in diverts to "Change Password" instead of landing anywhere.
+        // Signing in with them: on the journal's Login page nova's sign-in
+        // diverts to "Change Password" instead of landing anywhere; the
+        // username arrives prefilled and no signed-in screen shows.
         const loginPage = new LoginPage(page);
+        const change = new ChangePasswordPage(page);
+        const userMenu = new UserMenu(page);
         await loginPage.gotoContext(tag);
-        await loginPage.submitCredentials(reviewerUsername, emailedPassword);
-        await page.waitForURL(/\/login\/changePassword/, {waitUntil: 'commit', timeout: 15_000});
-        await expect(page.getByRole('heading', {name: 'Change Password'})).toBeVisible();
-        await expect(
-            page.getByText('You must choose a new password before you can log in to this site.')
-        ).toBeVisible();
-        // The username arrives prefilled.
-        await expect(page.locator('form#loginChangePassword input[name="username"]')).toHaveValue(
-            reviewerUsername
+        await loginPage.submitCredentials(novaMail.username, novaMail.password);
+        await change.expectForm(nova.username);
+        expect(new URL(page.url()).pathname).toContain(`/${tag}/`);
+        await expect(userMenu.root).toHaveCount(0);
+
+        // "Change Password": the emailed password as the current one,
+        // Changed1 twice, "OK": signed in, on the Dashboard's "Action
+        // Required by me" view, the landing a reviewer's role earns
+        // (Rules 3, 11), holding the one review request.
+        await change.change(novaMail.password, changed1);
+        await page.waitForURL(
+            (url) =>
+                url.pathname.includes(`/${tag}/`) &&
+                url.pathname.endsWith('/dashboard/reviewAssignments') &&
+                url.searchParams.get('currentViewId') === 'reviewer-action-required',
+            {waitUntil: 'commit', timeout: 15_000}
         );
+        const reviewerDashboard = new ReviewerAssignmentsPage(page, tag);
+        await expect(reviewerDashboard.heading()).toHaveText(/^\s*Action Required by me \(1\)\s*$/, {
+            timeout: 30_000,
+        });
+        await expect(userMenu.root).toBeVisible();
+        await expect(userMenu.button).toContainText(nova.username);
+        await expect(change.form).toHaveCount(0);
 
-        // Emailed password as the current one, a new one twice, "OK" — signed
-        // in and sent home (a reviewer's home is their review dashboard).
-        await page.locator('form#loginChangePassword input[name="oldPassword"]').fill(emailedPassword);
-        await page.locator('form#loginChangePassword input[name="password"]').fill(newPassword);
-        await page.locator('form#loginChangePassword input[name="password2"]').fill(newPassword);
-        await page.locator('form#loginChangePassword').getByRole('button', {name: 'OK', exact: true}).click();
-        await page.waitForURL(/\/dashboard/, {waitUntil: 'commit', timeout: 15_000});
-        await expect(new UserMenu(page).root).toBeVisible();
+        // The site-level Login page, the second reviewer: "Logout", the
+        // site's own homepage, "Login" at its top right; orin's emailed
+        // username and password: "Change Password" appears there too,
+        // outside any journal.
+        await userMenu.logout();
+        await loginPage.expectForm();
+        await loginPage.openFromSiteHome();
+        await loginPage.submitCredentials(orinMail.username, orinMail.password);
+        await change.expectForm(orin.username);
+        expect(new URL(page.url()).pathname).toMatch(/\/index\.php\/index\//);
+        await expect(userMenu.root).toHaveCount(0);
 
-        // Control: signing in again with the new password is normal — the
-        // Dashboard, no "Change Password" form.
-        const secondCtx = await anonContext(browser, baseURL);
-        try {
-            const secondPage = await secondCtx.newPage();
-            const secondLogin = new LoginPage(secondPage);
-            await secondLogin.gotoContext(tag);
-            await secondLogin.signIn(reviewerUsername, newPassword);
-            await secondPage.waitForURL(/\/dashboard/, {waitUntil: 'commit', timeout: 15_000});
-            await expect(new UserMenu(secondPage).root).toBeVisible();
-            await expect(secondPage.getByRole('heading', {name: 'Change Password'})).toHaveCount(0);
-        } finally {
-            await secondCtx.close();
-        }
+        // The emailed password, Changed2 twice, "OK": signed in, on the
+        // site home page, not the Dashboard (Rule 11): the page lists the
+        // site's journals and carries the reader-facing user menu.
+        const siteMenu = new SiteUserMenu(page);
+        await change.change(orinMail.password, changed2);
+        await page.waitForURL(/\/index\/en\/index$/, {waitUntil: 'commit', timeout: 15_000});
+        await expect(page.getByRole('heading', {name: 'Journals', exact: true})).toBeVisible();
+        await expect(page.getByText(SEEDED_JOURNAL_NAME).first()).toBeVisible();
+        await expect(page.getByText(`Scratch context ${tag}`)).toBeVisible();
+        await expect(siteMenu.toggle(orin.username)).toBeVisible();
+        await expect(change.form).toHaveCount(0);
+        await expect(userMenu.root).toHaveCount(0);
+        expect(page.url()).not.toMatch(/\/dashboard/);
+
+        // Control: "Logout" in the user menu, and on the journal's Login
+        // page nova with Changed1: the sign-in is normal: the Dashboard,
+        // no "Change Password" form.
+        await siteMenu.logout(orin.username);
+        await loginPage.expectForm();
+        await loginPage.gotoContext(tag);
+        await loginPage.signIn(nova.username, changed1);
+        await page.waitForURL(
+            (url) => url.pathname.includes(`/${tag}/`) && url.pathname.includes('/dashboard/'),
+            {waitUntil: 'commit', timeout: 15_000}
+        );
+        await expect(reviewerDashboard.heading()).toHaveText(/^\s*Action Required by me \(1\)\s*$/, {
+            timeout: 30_000,
+        });
+        await expect(userMenu.root).toBeVisible();
+        await expect(userMenu.button).toContainText(nova.username);
+        await expect(change.heading).toHaveCount(0);
+        await expect(change.form).toHaveCount(0);
     });
 
     test('S7: administrator impersonates a user and returns', {tag: '@smoke'}, async ({browser, baseURL}) => {
         test.slow();
         // Fresh admin session: signInAs migrates the session, which would
-        // destroy the cached admin storage state for parallel tests.
+        // destroy the cached admin storage state for parallel tests. The
+        // Author is author.bea, whose initials ("BA") differ from the
+        // administrator's ("AA"), so the top bar's two badges are told
+        // apart by what they print (author.alex prints "AA" too).
         const {context, page} = await freshLogin(browser, baseURL, 'admin');
         try {
             const userMenu = new UserMenu(page);
@@ -563,6 +628,11 @@ test.describe('login & sessions', () => {
             await page.goto(EDITORIAL);
             const signOutAddress = await userMenu.captureLogoutHref();
             expect(signOutAddress).toMatch(/\/login\/signOut$/);
+            // The administrator's own session, read now as the reference
+            // for the impersonation's top bar and menu: one initials
+            // badge, and the entries "Edit Profile", "Logout".
+            const ownBadge = await userMenu.expectOwnBadge(ADMIN);
+            await userMenu.expectOwnEntries();
 
             // The administrator's own row offers no "Login As" (Rule 14);
             // its menu does open ("Edit" is the positive control).
@@ -577,8 +647,8 @@ test.describe('login & sessions', () => {
 
             // "Login As" on an Author's row: the confirmation dialog warns
             // about attribution, with OK and Cancel (Rule 12).
-            await usersMenu.search('Alex');
-            const row = usersRoles.userRow('author.alex@mail.test');
+            await usersMenu.search('Bea');
+            const row = usersRoles.userRow('author.bea@mail.test');
             await expect(row).toBeVisible();
             await usersRoles.rowAction(row, 'Login As');
             await dialog.expectOpen();
@@ -591,37 +661,45 @@ test.describe('login & sessions', () => {
             await userMenu.expectOwnSession();
 
             // OK: the browser is now the Author's session: their My
-            // Submissions; the top bar carries both identities and the
-            // menu offers only "Logout as" — no plain Logout (Rules 6, 13).
+            // Submissions. The top bar shows the administrator's initials,
+            // muted, with the Author's overlaid in a warning color. The
+            // menu reads "You are currently logged in as author.bea" with
+            // a "Logout as author.bea" link, shows the same link a second
+            // time after "Edit Profile", where "Logout" stood (Rule 13),
+            // and offers no plain Logout (Rule 6).
             await usersRoles.rowAction(row, 'Login As');
             await dialog.expectOpen();
             const loginAsAddress = await dialog.ok();
             expect(loginAsAddress).toMatch(/\/login\/signInAsUser\/\d+$/);
             await page.waitForURL(/\/dashboard\/mySubmissions/, {waitUntil: 'commit', timeout: 30_000});
             await expect(userMenu.root).toBeVisible();
-            await expect(userMenu.button).toContainText('author.alex');
-            await expect(userMenu.button).toContainText('admin');
-            await userMenu.expectImpersonating('author.alex');
+            await userMenu.expectImpersonationBadges(ADMIN, BEA, ownBadge);
+            await userMenu.expectImpersonating('author.bea');
+            await userMenu.expectLogoutAsTwice('author.bea');
 
-            // "Logout as author.alex" restores the administrator, no password
-            // asked (Rule 15).
-            await userMenu.logoutAs('author.alex');
+            // "Logout as author.bea" restores the administrator, no password
+            // asked (Rule 15): no Login form on the way, one badge again in
+            // its own-session colors, "Logout" back in its place.
+            await userMenu.logoutAs('author.bea');
+            await expect(page.locator('form#login')).toHaveCount(0);
             await page.goto(EDITORIAL);
             await expect(userMenu.root).toBeVisible();
-            await expect(userMenu.button).not.toContainText('author.alex');
+            await expect(userMenu.button).not.toContainText('author.bea');
+            expect(await userMenu.expectOwnBadge(ADMIN)).toEqual(ownBadge);
             await userMenu.expectOwnSession();
+            await userMenu.expectOwnEntries();
 
             // Control: impersonate the Author again the same way and type
             // the copied sign-out address instead: the Login page, the
             // browser signed out of both identities; Users & Roles then
             // shows the Login page too (Rules 4, 15).
             await usersRoles.goto();
-            await usersMenu.search('Alex');
+            await usersMenu.search('Bea');
             await usersRoles.rowAction(row, 'Login As');
             await dialog.expectOpen();
             await dialog.ok();
             await page.waitForURL(/\/dashboard\/mySubmissions/, {waitUntil: 'commit', timeout: 30_000});
-            await expect(userMenu.button).toContainText('author.alex');
+            await expect(userMenu.button).toContainText('author.bea');
             await page.goto(signOutAddress);
             const loginPage = new LoginPage(page);
             await loginPage.expectForm();
@@ -719,7 +797,9 @@ test.describe('login & sessions', () => {
 
             // Impersonating the Author instead lands on the author's own My
             // Submissions view, which shows no Participants panel — the way
-            // back is the user menu's "Logout as" entry.
+            // back is the user menu's "Logout as author.alex" entry; chosen,
+            // the Editor is back in their own session, on the same
+            // submission, with no password asked (Rule 15).
             await workflow.participantMoreActions('Alex Author').first().click();
             await participants.getByRole('menuitem', {name: 'Login As'}).click();
             await dialog.expectOpen();
@@ -732,13 +812,20 @@ test.describe('login & sessions', () => {
             );
             await workflow.expectOpen();
             await expect(page.locator('[data-cy="participant-manager"]')).toHaveCount(0);
+            await userMenu.expectImpersonating('author.alex');
 
-            await userMenu.logoutAs('author.alex');
+            await userMenu.logoutAs('author.alex', {entry: true});
             await page.waitForURL(
-                (url) => url.search.includes(`workflowSubmissionId=${submissionId}`),
+                (url) =>
+                    url.pathname.includes('/dashboard/editorial') &&
+                    url.search.includes(`workflowSubmissionId=${submissionId}`),
                 {waitUntil: 'commit', timeout: 30_000}
             );
+            await expect(page.locator('form#login')).toHaveCount(0);
             await workflow.expectOpen();
+            await expect(participants).toBeVisible();
+            await expect(userMenu.button).toContainText('editor.diana');
+            await expect(userMenu.button).not.toContainText('author.alex');
             await userMenu.expectOwnSession();
         } finally {
             await context.close();

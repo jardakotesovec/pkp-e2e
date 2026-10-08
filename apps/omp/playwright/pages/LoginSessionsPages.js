@@ -8,9 +8,10 @@
  * "Current Users" table (a Vue `<user-access-manager>`: search box, rows,
  * the per-row "More Actions" menu), the "Login As" page dialog, the
  * `login/signInAsUser/{id}` address and the two refusal pages it answers
- * with, the cookie filter that plays a browser restart (spec fn-s), and the
+ * with, the cookie filter that plays a browser restart (spec fn-s), the
  * user menu's impersonation reads and "Logout as {username}" (shared with
- * U03's S11).
+ * U03's S11), the top bar's initials (Rule 13), the Login page's own
+ * region, the lost-password page's box and the public pages' user menu.
  *
  * Function exports, the shape of `ReviewStagePages.js`; every function
  * takes the page (or a locator) it works on.
@@ -21,6 +22,16 @@ const MSG = {
     accessDenied: 'The current role does not have access to this operation.',
     noAdminRights: 'Sorry, you do not have administrative rights over this user.',
     noAdminRightsCause: 'The user is active in presses you do not manage',
+    /** The refusal's opening sentence whole, its listed causes and its closing line. */
+    noAdminRightsLead:
+        'Sorry, you do not have administrative rights over this user. This may be because:',
+    noAdminRightsCauses: [
+        'The user is a site administrator',
+        'The user is active in presses you do not manage',
+    ],
+    noAdminRightsRemedy: 'This task must be performed by a site administrator.',
+    lostPasswordInstruction:
+        'Enter your account email address below and an email will be sent with instructions on how to reset your password.',
     confirmLoginAs:
         'Log in as this user? All actions you perform will be attributed to this user.',
 };
@@ -39,8 +50,39 @@ const signInAsUserUrl = (contextPath, userId) =>
 /** The Login page's "Keep me logged in" box. */
 const keepMeLoggedIn = (page) => page.getByLabel('Keep me logged in');
 
+/**
+ * The Login page's own region (the theme's `.page_login`: breadcrumb,
+ * heading, any sentence above the form, the form), for reading whether a
+ * held address added anything to the plain form (Rule 4).
+ */
+const loginPageBody = (page) => page.locator('.page_login');
+
+/** The lost-password page's one box, by its label. */
+const lostPasswordEmail = (page) => page.getByLabel("Registered user's email");
+
+/** The forced "Change Password" form (Rule 11). */
+const changePasswordForm = (page) => page.locator('form#loginChangePassword');
+
+/**
+ * The public pages' user menu (the theme's, top right of the site and press
+ * home pages): the signed-in username, a drop-down under it.
+ */
+const publicUserMenu = (page) => page.locator('#navigationUser');
+
+/** Press "Logout" in the public pages' user menu: the Login page, signed out. */
+async function logoutFromPublicMenu(page, username) {
+    const menu = publicUserMenu(page);
+    await menu.getByRole('link', {name: new RegExp(`^${username}`)}).first().click();
+    await menu.getByRole('link', {name: 'Logout', exact: true}).click();
+    await page.waitForURL(/\/login/, {timeout: 15_000});
+    await expect(page.locator('form#login')).toBeVisible();
+}
+
 /** The "Current Users" table of Users & Roles. */
 const usersTable = (page) => page.getByRole('table', {name: /Current Users/});
+
+/** The "Current Users" table's column headers, in order. */
+const usersColumnHeaders = (page) => usersTable(page).getByRole('columnheader');
 
 /**
  * Search the "Current Users" list (Enter commits) and wait for the list's
@@ -86,6 +128,10 @@ const accessDeniedMessage = (page) => page.getByText(MSG.accessDenied);
 const noAdminRightsMessage = (page) => page.getByText(MSG.noAdminRights);
 const noAdminRightsCause = (page) => page.getByText(MSG.noAdminRightsCause);
 const usersListLink = (page) => page.getByRole('link', {name: 'All Enrolled Users'});
+/** The refusal's opening sentence, its list of possible causes and its closing line. */
+const noAdminRightsLead = (page) => page.getByText(MSG.noAdminRightsLead);
+const noAdminRightsCauses = (page) => page.locator('.page_error .description li');
+const noAdminRightsRemedy = (page) => page.getByText(MSG.noAdminRightsRemedy);
 
 /**
  * The cookies a browser restart keeps: those carrying an expiry date. A
@@ -102,6 +148,44 @@ async function persistentCookies(context) {
  * one is the interactive one.
  */
 const userNav = (page) => page.locator('[data-cy="app-user-nav"]').last();
+
+/**
+ * The initials in the top bar's user button (`InitialsAvatar`): one, the
+ * account's own; while impersonating two, the impersonator's own first and
+ * the impersonated account's laid over it (Rule 13).
+ */
+const userNavAvatars = (page) => userNav(page).locator('> button > div');
+
+/**
+ * What tells the two initials apart while impersonating: the base one's
+ * muted text (`text-disabled`) and the overlaid one's warning background
+ * (`bg-negative`), the design system's own tokens.
+ */
+const AVATAR = {muted: /(^|\s)text-disabled(\s|$)/, warning: /(^|\s)bg-negative(\s|$)/};
+
+/** The computed text and background colours of an avatar, and its box. */
+async function avatarLook(avatar) {
+    return avatar.evaluate((el) => {
+        const style = getComputedStyle(el);
+        const box = el.getBoundingClientRect();
+        return {
+            color: style.color,
+            background: style.backgroundColor,
+            position: style.position,
+            left: box.left,
+            right: box.right,
+            top: box.top,
+            bottom: box.bottom,
+        };
+    });
+}
+
+/**
+ * The entries of the open user menu's own list (after the language list
+ * and the impersonation line): "Edit Profile", then "Logout" or, while
+ * impersonating, "Logout as {username}".
+ */
+const userMenuEntries = (nav) => nav.locator('ul').last().getByRole('link');
 
 /** Open the user menu and return its nav element. */
 async function openUserMenu(page) {
@@ -182,7 +266,13 @@ module.exports = {
     usersScreenUrl,
     signInAsUserUrl,
     keepMeLoggedIn,
+    loginPageBody,
+    lostPasswordEmail,
+    changePasswordForm,
+    publicUserMenu,
+    logoutFromPublicMenu,
     usersTable,
+    usersColumnHeaders,
     searchUsers,
     userRow,
     openUserRowMenu,
@@ -192,8 +282,15 @@ module.exports = {
     noAdminRightsMessage,
     noAdminRightsCause,
     usersListLink,
+    noAdminRightsLead,
+    noAdminRightsCauses,
+    noAdminRightsRemedy,
     persistentCookies,
     userNav,
+    userNavAvatars,
+    AVATAR,
+    avatarLook,
+    userMenuEntries,
     openUserMenu,
     closeUserMenu,
     expectOwnSession,

@@ -8,17 +8,12 @@
  * press, Press Manager, Series Editor — glossary substitution).
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1 (the sign-in helper lifts the 32-char
- * maxlength; the cap itself is unasserted), A2 (the pre-ticked "Keep me
- * logged in" box: S1 unticks it without asserting its arrival state), A3
- * (retired: the reset form's browser-tab title, fixed upstream, a Planned
- * item; the page heading is asserted), A4, A5 (S6 drives a screen-driven path that sets the
- * forced-change flag, Create New Reviewer), A6, A7 (S2's control reads a
- * dashboard address that is not the bare "dashboard" one), A8.
+ * of everything else left out): A1, A2, A4, A5, A7, A8, A10, A11, A12,
+ * A13, A14.
  *
  * Seeding: scenario endpoints only. Scratch submissions ride the read-only
  * `publicknowledge` press; S1 adds a scratch press with no users so the
- * site hosts a second press; S4, S5 and S8 use scratch presses with
+ * site hosts a second press; S4, S5, S6 and S8 use scratch presses with
  * throwaway users because a roster password must never change and every
  * mail assertion needs a unique throwaway recipient naming app + test
  * (Mailpit is one shared instance across the three fleets — never cleared).
@@ -38,6 +33,12 @@ const {
     usersScreenUrl,
     signInAsUserUrl,
     keepMeLoggedIn,
+    loginPageBody,
+    lostPasswordEmail,
+    changePasswordForm,
+    publicUserMenu,
+    logoutFromPublicMenu,
+    usersColumnHeaders,
     searchUsers,
     userRow,
     openUserRowMenu,
@@ -47,7 +48,14 @@ const {
     noAdminRightsMessage,
     noAdminRightsCause,
     usersListLink,
+    noAdminRightsLead,
+    noAdminRightsCauses,
+    noAdminRightsRemedy,
     persistentCookies,
+    userNavAvatars,
+    AVATAR,
+    avatarLook,
+    userMenuEntries,
 } = require('../pages/LoginSessionsPages.js');
 
 const PK = 'publicknowledge';
@@ -223,6 +231,9 @@ async function seedMonograph(ompApi, tag, extra = {}) {
     });
 }
 
+/** A scratch press's name when the seed gives none (scenarios.md). */
+const scratchPressName = (tag) => `Scratch context ${tag}`;
+
 /**
  * Scratch press with one throwaway author whose mailbox is per-test, and a
  * throwaway reader to be "another account" (the Login As address of S4).
@@ -251,7 +262,14 @@ async function seedResetActor(ompApi, tag) {
         ],
     });
     const readerId = created.users.find((user) => user.username === readerUsername).id;
-    return {contextPath: tag, username, email, password: username + username, readerId};
+    return {
+        contextPath: tag,
+        pressName: scratchPressName(tag),
+        username,
+        email,
+        password: username + username,
+        readerId,
+    };
 }
 
 /**
@@ -297,13 +315,16 @@ async function requestResetLink(page, pkpMail, {contextPath, email}) {
     return (await readResetLink(pkpMail, email)).link;
 }
 
-/** Complete the set-a-new-password form the emailed link opens. */
-async function completeReset(page, link, newPassword) {
+/**
+ * Complete the set-a-new-password form the emailed link opens; its browser
+ * tab reads "Reset Password | {press name}" (Fields).
+ */
+async function completeReset(page, link, newPassword, pressName) {
     await page.goto(link);
-    // Page heading (the browser-tab title, fixed upstream since A3, is a Planned item, unasserted yet).
     await expect(
         page.getByRole('heading', {name: 'Reset Password'})
     ).toBeVisible();
+    await expect(page).toHaveTitle(`Reset Password | ${pressName}`);
     await expect(
         page.getByText(/The password must be at least \d+ characters/)
     ).toBeVisible();
@@ -336,6 +357,76 @@ async function expectImpersonating(page, username) {
     await expect(nav.getByRole('link', {name: `Logout as ${username}`}).first()).toBeVisible();
     await expect(logoutLink(nav)).toHaveCount(0);
     return nav;
+}
+
+/**
+ * "Create New Reviewer" from the review stage's "Add Reviewer" window, on
+ * the open workflow `modal`: the new reviewer's row joins the Reviewers
+ * table and the window is gone before the next step.
+ */
+async function createNewReviewer(page, modal, {givenName, username, email}) {
+    const reviewers = modal.locator('[data-cy="reviewer-manager"]');
+    await reviewers.getByRole('button', {name: 'Add Reviewer'}).click();
+    const addModal = page.locator('[data-cy="active-modal"]').last();
+    await addModal.getByRole('link', {name: 'Create New Reviewer'}).click();
+    const form = addModal.locator('form#createReviewerForm');
+    await expect(form).toBeVisible({timeout: 20_000});
+    // On an external round only one reviewer group is eligible, so the
+    // form carries the group as a hidden field — nothing to pick.
+    await form.locator('input[name^="givenName"]').first().fill(givenName);
+    await form.locator('input[name="username"]').fill(username);
+    await form.locator('input[name="email"]').fill(email);
+    // The message body loads by AJAX — submitting before it arrives fails
+    // server-side (locator pitfall "AJAX-loaded email templates").
+    await expect(
+        addModal.frameLocator('iframe[id^="personalMessage"]').locator('body')
+    ).toContainText(/\w/, {timeout: 20_000});
+    await form.getByRole('button', {name: 'Add Reviewer'}).click();
+    await expect(reviewers.getByText(givenName).first()).toBeVisible({timeout: 30_000});
+    await expect(page.locator('form#createReviewerForm')).toHaveCount(0);
+}
+
+/** The username and generated password of a created reviewer's registration email. */
+async function readReviewerCredentials(pkpMail, email) {
+    const summary = await pkpMail.find({to: email, subject: 'Registration as Reviewer'});
+    const full = await pkpMail.fullMessage(summary.ID);
+    return {
+        username: (full.Text.match(/Username: (\S+)/) || [])[1],
+        password: (full.Text.match(/Password: (\S+)/) || [])[1],
+    };
+}
+
+/**
+ * The "Change Password" form a flagged account's sign-in diverts to: its
+ * heading, its explanation and the username prefilled.
+ */
+async function expectForcedChange(page, username) {
+    await expect(page.getByRole('heading', {name: 'Change Password'})).toBeVisible();
+    await expect(page.getByText(MSG.mustChange)).toBeVisible();
+    const form = changePasswordForm(page);
+    await expect(form.locator('input[name="username"]')).toHaveValue(username);
+    return form;
+}
+
+/** Fill the "Change Password" form and press "OK". */
+async function submitForcedChange(form, currentPassword, newPassword) {
+    await form.locator('input[name="oldPassword"]').fill(currentPassword);
+    const newPasswordInput = form.locator('input[name="password"]').first();
+    await newPasswordInput.evaluate((el) => el.removeAttribute('maxlength'));
+    await newPasswordInput.fill(newPassword);
+    await form.locator('input[name="password2"]').fill(newPassword);
+    await form.getByRole('button', {name: 'OK'}).click();
+}
+
+/** A reviewer's Dashboard landing: the "Action Required by me" view. */
+async function expectActionRequiredByMe(page) {
+    await page.waitForURL(/\/dashboard\/reviewAssignments/, {
+        timeout: 20_000,
+        waitUntil: 'commit',
+    });
+    await expect(
+        page.getByRole('heading', {name: /^Action Required by me/})
+    ).toBeVisible({timeout: 20_000});
 }
 
 test.describe('Login & sessions (U1)', () => {
@@ -410,13 +501,11 @@ test.describe('Login & sessions (U1)', () => {
         ).toBeVisible({timeout: 20_000});
         await expect(restarted.locator('form#login')).toHaveCount(0);
 
-        // The last-login date: Press Manager, the users-management screen
-        // (Users & Roles › Users) with the Editor's row settled by the
-        // list's own response. The screen offers Name, Email, Roles, Start
-        // Date, Affiliation and More Actions, and no last-login date on the
-        // row or its Edit page: T-omp-1 (.reports/U01/test-omp-findings.md).
-        // The row read stays; the date is not asserted against a column the
-        // screen does not have.
+        // The Editor's row on Users & Roles: Press Manager, the "Current
+        // Users" table searched by the Editor's name (the row settled by
+        // the list's own response): the row, its "Roles" cell naming the
+        // Editor's role, under six columns, none of them a last-login date
+        // (Side effects).
         const managerPage = await freshPage(MANAGER);
         await managerPage.goto(usersScreenUrl(PK));
         await searchUsers(managerPage, 'Diana');
@@ -424,6 +513,14 @@ test.describe('Login & sessions (U1)', () => {
         await expect(editorRow).toBeVisible();
         await expect(editorRow).toContainText('Diana Editor');
         await expect(editorRow).toContainText('Press editor');
+        await expect(usersColumnHeaders(managerPage)).toHaveText([
+            'Name',
+            'Email',
+            'Roles',
+            'Start Date',
+            'Affiliation',
+            'More Actions',
+        ]);
 
         // The site-level Login page: sign out, the site's own homepage,
         // "Login" at its top right, the same form; sign in: the site home
@@ -499,6 +596,25 @@ test.describe('Login & sessions (U1)', () => {
         await expect(page).toHaveURL(/\/login/);
         await expect(page.locator('form#login')).toBeVisible();
 
+        // Control: it is the plain form; nothing on it names the submission
+        // being held (Rule 4). The Login page opened by its own address in
+        // another signed-out browser is the measure: the held page reads
+        // the same, word for word, and carries neither the title nor the
+        // submission's number.
+        const plainPage = await freshPage();
+        await plainPage.goto(loginUrl(PK));
+        await expect(plainPage.locator('form#login')).toBeVisible();
+        const plainText = await loginPageBody(plainPage).innerText();
+        expect(plainText).toContain('Username or Email');
+        await expect(page.getByRole('heading', {name: 'Login'})).toBeVisible();
+        await expect(loginPageBody(page)).toHaveText(plainText, {useInnerText: true});
+        await expect(loginPageBody(page)).not.toContainText(`Submission ${tag}`, {
+            useInnerText: true,
+        });
+        await expect(loginPageBody(page)).not.toContainText(String(seeded.submissionId), {
+            useInnerText: true,
+        });
+
         // Signing in continues straight to the held submission, not to the
         // dashboard's default view.
         await submitLoginForm(page, 'editor.diana', 'editor.dianaeditor.diana');
@@ -544,7 +660,7 @@ test.describe('Login & sessions (U1)', () => {
         });
 
         // "Reset Password": the new password saved; still signed out.
-        await completeReset(page, link, newPassword);
+        await completeReset(page, link, newPassword, actor.pressName);
         await page.goto(mySubmissionsUrl(actor.contextPath));
         await expectLoginPage(page);
 
@@ -590,7 +706,7 @@ test.describe('Login & sessions (U1)', () => {
         const link = await requestResetLink(page, pkpMail, actor);
 
         // Use the link once (password change), then sign in — either kills it.
-        await completeReset(page, link, newPassword);
+        await completeReset(page, link, newPassword, actor.pressName);
         await signIn(page, {
             username: actor.username,
             password: newPassword,
@@ -608,9 +724,19 @@ test.describe('Login & sessions (U1)', () => {
         await logoutFromMenu(page);
         await page.goto(link);
         await expect(page.getByText(MSG.staleLink)).toBeVisible();
-        await expect(
-            page.getByRole('link', {name: 'Reset Password'})
-        ).toBeVisible();
+        await expect(page.locator('input[name="password"]')).toHaveCount(0);
+        const wayBack = page.getByRole('link', {name: 'Reset Password'});
+        await expect(wayBack).toBeVisible();
+
+        // Press it: the lost-password page, asking for "Registered user's
+        // email" (Rule 10); the refusal sentence is gone.
+        await wayBack.click();
+        await expect(page).toHaveURL(/\/login\/lostPassword$/);
+        await expect(page.getByRole('heading', {name: 'Reset Password'})).toBeVisible();
+        await expect(page.getByText(SESSION_MSG.lostPasswordInstruction)).toBeVisible();
+        await expect(lostPasswordEmail(page)).toBeVisible();
+        await expect(lostPasswordEmail(page)).toHaveValue('');
+        await expect(page.getByText(MSG.staleLink)).toHaveCount(0);
 
         // A link with a mangled code answers the same.
         const mangled = link.replace(/confirm=[0-9a-f]{8}/, 'confirm=deadbeef');
@@ -631,101 +757,130 @@ test.describe('Login & sessions (U1)', () => {
         await expect(page.getByText(MSG.staleLink)).toHaveCount(0);
     });
 
-    test('S6: forced password change at first sign-in', async ({ompApi, pkpMail, asUser, freshPage}, testInfo) => {
+    test('S6: forced password change at first sign-in', async ({ompApi, pkpMail, freshPage}, testInfo) => {
+        // A scratch press with a throwaway Editor and Author and a
+        // submission in review; the seeded press beside it makes the site
+        // multi-press (spec fn-s). "nova" and "orin", their addresses and
+        // Changed1 / Changed2 are tagged per run.
         const tag = makeTag(testInfo, 'u1s6');
-        const reviewerUsername = `rev${tag}`;
-        const reviewerEmail = `${tag}@mail.test`;
-        const newPassword = `revpw${tag}`;
-        const seeded = await seedMonograph(ompApi, tag, {
-            decisions: ['skipInternalReview'],
-            reviewRounds: [{stage: 'external'}],
+        const editor = {username: `ed${tag}`, password: `ed${tag}ed${tag}`, contextPath: tag};
+        const authorUsername = `au${tag}`;
+        const nova = {
+            givenName: `Nova${tag}`,
+            username: `nova${tag}`,
+            email: `nova${tag}@mail.test`,
+            newPassword: `Changed1${tag}`,
+        };
+        const orin = {
+            givenName: `Orin${tag}`,
+            username: `orin${tag}`,
+            email: `orin${tag}@mail.test`,
+            newPassword: `Changed2${tag}`,
+        };
+        await ompApi.createContext({
+            tag,
+            users: [
+                {username: editor.username, roles: ['editor'], givenName: `Ed${tag}`, familyName: 'Editor'},
+                {username: authorUsername, roles: ['author'], givenName: `Au${tag}`, familyName: 'Author'},
+            ],
+        });
+        const seeded = await ompApi.createSubmission({
+            tag: `${tag}s`,
+            context: tag,
+            submitter: authorUsername,
+            decisions: ['sendExternalReview'],
         });
 
-        // Editor: Add Reviewer → Create New Reviewer with a throwaway email.
-        const editorPage = await (await asUser('manager.maya')).newPage();
+        // "Create New Reviewer": the Editor creates nova, then orin the
+        // same way, each with a throwaway address.
+        const editorPage = await freshPage(editor);
         await editorPage.goto(
-            `/index.php/${PK}/en/dashboard/editorial?workflowSubmissionId=${seeded.submissionId}`
+            `/index.php/${tag}/en/dashboard/editorial?workflowSubmissionId=${seeded.submissionId}`
         );
         const modal = await awaitWorkflow(editorPage);
-        await modal
-            .locator('[data-cy="reviewer-manager"]')
-            .getByRole('button', {name: 'Add Reviewer'})
-            .click();
-        const addModal = editorPage.locator('[data-cy="active-modal"]').last();
-        await addModal.getByRole('link', {name: 'Create New Reviewer'}).click();
-        const form = addModal.locator('form#createReviewerForm');
-        await expect(form).toBeVisible({timeout: 20_000});
-        // On an external round only one reviewer group is eligible, so the
-        // form carries the group as a hidden field — nothing to pick.
-        await form.locator('input[name^="givenName"]').first().fill(`Rev${tag}`);
-        await form.locator('input[name="username"]').fill(reviewerUsername);
-        await form.locator('input[name="email"]').fill(reviewerEmail);
-        // The message body loads by AJAX — submitting before it arrives fails
-        // server-side (locator pitfall "AJAX-loaded email templates").
-        await expect(
-            addModal
-                .frameLocator('iframe[id^="personalMessage"]')
-                .locator('body')
-        ).toContainText(/\w/, {timeout: 20_000});
-        await form.getByRole('button', {name: 'Add Reviewer'}).click();
-        await expect(
-            modal.locator('[data-cy="reviewer-manager"]').getByText(`Rev${tag}`).first()
-        ).toBeVisible({timeout: 30_000});
+        await createNewReviewer(editorPage, modal, nova);
+        await createNewReviewer(editorPage, modal, orin);
 
-        // The registration email delivers a username and generated password.
-        const summary = await pkpMail.find({
-            to: reviewerEmail,
-            subject: 'Registration as Reviewer',
-        });
-        const full = await pkpMail.fullMessage(summary.ID);
-        const username = (full.Text.match(/Username: (\S+)/) || [])[1];
-        const generatedPassword = (full.Text.match(/Password: (\S+)/) || [])[1];
-        expect(username).toBe(reviewerUsername);
-        expect(generatedPassword).toBeTruthy();
+        // The registration email: each delivers a username and a generated
+        // password.
+        const novaMail = await readReviewerCredentials(pkpMail, nova.email);
+        expect(novaMail.username).toBe(nova.username);
+        expect(novaMail.password).toBeTruthy();
+        const orinMail = await readReviewerCredentials(pkpMail, orin.email);
+        expect(orinMail.username).toBe(orin.username);
+        expect(orinMail.password).toBeTruthy();
+        expect(orinMail.password).not.toBe(novaMail.password);
 
-        // Signing in with them diverts to "Change Password" instead of landing.
+        // Signing in with them, on the press's Login page, with nova's:
+        // "Change Password" instead of landing anywhere.
         const reviewerPage = await freshPage();
-        await reviewerPage.goto(loginUrl(PK));
-        await submitLoginForm(reviewerPage, reviewerUsername, generatedPassword);
+        await reviewerPage.goto(loginUrl(tag));
+        await submitLoginForm(reviewerPage, novaMail.username, novaMail.password);
         await reviewerPage.waitForURL(/\/login\/changePassword\//, {timeout: 15_000});
-        await expect(
-            reviewerPage.getByRole('heading', {name: 'Change Password'})
-        ).toBeVisible();
-        await expect(reviewerPage.getByText(MSG.mustChange)).toBeVisible();
-        const changeForm = reviewerPage.locator('form#loginChangePassword');
-        await expect(changeForm.locator('input[name="username"]')).toHaveValue(
-            reviewerUsername
-        );
+        await expect(reviewerPage).toHaveURL(new RegExp(`/index\\.php/${tag}/`));
+        const changeForm = await expectForcedChange(reviewerPage, nova.username);
 
-        // A wrong current password errors verbatim.
-        await changeForm.locator('input[name="oldPassword"]').fill('not-the-password');
-        const newPasswordInput = changeForm.locator('input[name="password"]').first();
-        await newPasswordInput.evaluate((el) => el.removeAttribute('maxlength'));
-        await newPasswordInput.fill(newPassword);
-        await changeForm.locator('input[name="password2"]').fill(newPassword);
-        await changeForm.getByRole('button', {name: 'OK'}).click();
+        // A wrong current password errors verbatim (Fields).
+        await submitForcedChange(changeForm, 'not-the-password', nova.newPassword);
         await expect(reviewerPage.getByText(MSG.wrongCurrent)).toBeVisible();
 
-        // The emailed password as current + a new one signs the reviewer in
-        // and lands them home (the reviewer dashboard).
-        await changeForm.locator('input[name="oldPassword"]').fill(generatedPassword);
-        await changeForm.locator('input[name="password"]').first().fill(newPassword);
-        await changeForm.locator('input[name="password2"]').fill(newPassword);
-        await changeForm.getByRole('button', {name: 'OK'}).click();
-        await reviewerPage.waitForURL(/\/dashboard\/reviewAssignments/, {
+        // "Change Password": the emailed password as current and a new one:
+        // signed in, on the Dashboard's "Action Required by me" view, the
+        // landing the reviewer role earns (Rules 3, 11).
+        await submitForcedChange(changeForm, novaMail.password, nova.newPassword);
+        await expectActionRequiredByMe(reviewerPage);
+        await expectOwnSession(reviewerPage);
+
+        // The site-level Login page, the second reviewer: "Logout" in the
+        // user menu, the site's own homepage, "Login" at its top right;
+        // orin's emailed username and password: "Change Password" there too.
+        await logoutFromMenu(reviewerPage);
+        await reviewerPage.goto(siteHomeUrl());
+        await reviewerPage.getByRole('link', {name: 'Login', exact: true}).first().click();
+        await expect(reviewerPage).toHaveURL(new RegExp(`${siteLoginUrl()}$`));
+        await expect(reviewerPage.locator('form#login')).toBeVisible();
+        await submitLoginForm(reviewerPage, orinMail.username, orinMail.password);
+        await reviewerPage.waitForURL(/\/index\.php\/index\/en\/login\/changePassword\//, {
+            timeout: 15_000,
+        });
+        const siteChangeForm = await expectForcedChange(reviewerPage, orin.username);
+
+        // The emailed password and Changed2, "OK": signed in, on the site
+        // home page (the press list), not the Dashboard (Rule 11). The
+        // public user menu naming orin is the signed-in read.
+        await submitForcedChange(siteChangeForm, orinMail.password, orin.newPassword);
+        await reviewerPage.waitForURL((url) => !url.pathname.includes('/login'), {
             timeout: 20_000,
             waitUntil: 'commit',
         });
+        await expect(reviewerPage).toHaveURL(/\/index\.php\/index\/en(\/index)?$/);
+        await expect(reviewerPage.getByText(scratchPressName(tag))).toBeVisible();
+        await expect(reviewerPage.getByText('Public Knowledge Press')).toBeVisible();
+        await expect(
+            publicUserMenu(reviewerPage).getByRole('link', {name: new RegExp(`^${orin.username}`)})
+        ).toBeVisible();
+        await expect(changePasswordForm(reviewerPage)).toHaveCount(0);
+        await expect(reviewerPage).not.toHaveURL(/dashboard/);
 
-        // Signing in again with the new password is normal — no divert.
-        const secondPage = await freshPage({
-            username: reviewerUsername,
-            password: newPassword,
-        });
-        await expect(secondPage).toHaveURL(/\/dashboard\/reviewAssignments/);
+        // Control: "Logout" in the user menu, then on the press's Login
+        // page nova with Changed1: a normal sign-in, the Dashboard with no
+        // "Change Password" form.
+        await logoutFromPublicMenu(reviewerPage, orin.username);
+        await reviewerPage.goto(loginUrl(tag));
+        await submitLoginForm(reviewerPage, nova.username, nova.newPassword);
+        await expectActionRequiredByMe(reviewerPage);
+        await expect(reviewerPage).not.toHaveURL(/changePassword/);
+        await expect(changePasswordForm(reviewerPage)).toHaveCount(0);
+        await expect(reviewerPage.getByRole('heading', {name: 'Change Password'})).toHaveCount(0);
+        await expectOwnSession(reviewerPage);
     });
 
     test('S7: administrator impersonates a user and returns', async ({freshPage}) => {
+        // The Author is Bea Author: her initials, "BA", differ from the
+        // administrator's ("AA", the installer's "admin admin"; Alex
+        // Author's are "AA" too), so the top bar's two sets of initials
+        // can be told apart.
+        const AUTHOR = {username: 'author.bea', name: 'Bea Author', given: 'Bea', initials: 'BA'};
         // Fresh sign-in: impersonation migrates the session it runs in.
         const page = await freshPage(ADMIN);
 
@@ -734,7 +889,16 @@ test.describe('Login & sessions (U1)', () => {
         const navBefore = await openUserMenu(page);
         const signOutAddress = await logoutLink(navBefore).getAttribute('href');
         expect(signOutAddress).toMatch(/\/login\/signOut$/);
+        // The menu's own list ends "Edit Profile", "Logout"; the top bar
+        // shows one set of initials, the administrator's, not muted (the
+        // controls for the reads taken while impersonating).
+        await expect(userMenuEntries(navBefore)).toHaveText(['Edit Profile', 'Logout']);
         await closeUserMenu(page);
+        await expect(userNavAvatars(page)).toHaveCount(1);
+        await expect(userNavAvatars(page).first()).not.toHaveClass(AVATAR.muted);
+        const ownInitials = (await userNavAvatars(page).first().innerText()).trim();
+        expect(ownInitials).toMatch(/^\S{1,3}$/);
+        const ownLook = await avatarLook(userNavAvatars(page).first());
 
         // The administrator's own row on Users & Roles offers no "Login As";
         // "Edit" is the positive control (the menu rendered).
@@ -749,8 +913,8 @@ test.describe('Login & sessions (U1)', () => {
 
         // "Login As" on an Author's row: the dialog warns, verbatim, with OK
         // and Cancel.
-        await searchUsers(page, 'Alex');
-        const row = userRow(page, 'Alex Author');
+        await searchUsers(page, AUTHOR.given);
+        const row = userRow(page, AUTHOR.name);
         await expect(row).toBeVisible();
         await (await openUserRowMenu(page, row)).filter({hasText: 'Login As'}).click();
         const dialog = await expectLoginAsDialog(page);
@@ -774,32 +938,71 @@ test.describe('Login & sessions (U1)', () => {
             page.getByRole('link', {name: 'My Submissions as Author'})
         ).toBeVisible({timeout: 20_000});
         await expect(page.getByRole('heading', {name: /Active submissions/})).toBeVisible();
-        // The top bar: the administrator's initials with the Author's over
-        // them (the button names both accounts; the warning color itself is
-        // unasserted).
-        await expect(userNav(page).locator('> button')).toHaveAccessibleName(/admin.*author\.alex/);
-        const nav = await expectImpersonating(page, 'author.alex');
+        // The top bar: the administrator's initials, muted, with the
+        // Author's overlaid in a warning color (Rule 13). The button names
+        // both accounts, the administrator first; the first initials are
+        // the ones read before, now in the muted text color; the second
+        // sit over them on the warning background.
+        await expect(userNav(page).locator('> button')).toHaveAccessibleName(/admin.*author\.bea/);
+        const avatars = userNavAvatars(page);
+        await expect(avatars).toHaveCount(2);
+        await expect(avatars.nth(0)).toHaveText(ownInitials);
+        await expect(avatars.nth(0)).toHaveClass(AVATAR.muted);
+        await expect(avatars.nth(0)).not.toHaveClass(AVATAR.warning);
+        await expect(avatars.nth(1)).toHaveText(AUTHOR.initials);
+        expect(AUTHOR.initials).not.toBe(ownInitials);
+        await expect(avatars.nth(1)).toHaveClass(AVATAR.warning);
+        await expect(avatars.nth(1)).not.toHaveClass(AVATAR.muted);
+        const mutedLook = await avatarLook(avatars.nth(0));
+        const overlaidLook = await avatarLook(avatars.nth(1));
+        expect(mutedLook.color, 'the administrator\'s initials changed color: muted').not.toBe(ownLook.color);
+        expect(mutedLook.background).toBe(ownLook.background);
+        expect(overlaidLook.background, 'the Author\'s initials stand on another color').not.toBe(mutedLook.background);
+        expect(overlaidLook.position).toBe('absolute');
+        expect(
+            overlaidLook.left < mutedLook.right && overlaidLook.right > mutedLook.left &&
+                overlaidLook.top < mutedLook.bottom && overlaidLook.bottom > mutedLook.top,
+            'the Author\'s initials overlap the administrator\'s'
+        ).toBe(true);
+
+        // The user menu: "You are currently logged in as {author}" with a
+        // "Logout as {author}" link, the same link a second time after
+        // "Edit Profile", where "Logout" stood, and no plain "Logout".
+        const nav = await expectImpersonating(page, AUTHOR.username);
+        const logoutAsLinks = nav.getByRole('link', {name: `Logout as ${AUTHOR.username}`});
+        await expect(logoutAsLinks).toHaveCount(2);
+        await expect(userMenuEntries(nav)).toHaveText(['Edit Profile', `Logout as ${AUTHOR.username}`]);
+        const firstExit = await logoutAsLinks.nth(0).getAttribute('href');
+        expect(firstExit).toMatch(/\/login\/signOutAsUser$/);
+        await expect(logoutAsLinks.nth(1)).toHaveAttribute('href', firstExit);
 
         // "Logout as {author}" restores the administrator, no password asked.
-        await nav.getByRole('link', {name: 'Logout as author.alex'}).first().click();
+        await nav.getByRole('link', {name: `Logout as ${AUTHOR.username}`}).first().click();
         await page.waitForURL(/\/dashboard\/editorial/, {
             timeout: 20_000,
             waitUntil: 'commit',
         });
+        await expect(page.locator('form#login')).toHaveCount(0);
         await expectOwnSession(page);
+        // The top bar is the administrator's own again: one set of
+        // initials, in the color read before impersonating.
+        await expect(userNavAvatars(page)).toHaveCount(1);
+        await expect(userNavAvatars(page).first()).toHaveText(ownInitials);
+        await expect(userNavAvatars(page).first()).not.toHaveClass(AVATAR.muted);
+        expect((await avatarLook(userNavAvatars(page).first())).color).toBe(ownLook.color);
 
         // Control: impersonate the Author again and type the copied sign-out
         // address instead: the Login page, signed out of both identities;
         // Users & Roles then shows the Login page too (Rules 4, 15).
         await page.goto(usersScreenUrl(PK));
-        await searchUsers(page, 'Alex');
-        await (await openUserRowMenu(page, userRow(page, 'Alex Author'))).filter({hasText: 'Login As'}).click();
+        await searchUsers(page, AUTHOR.given);
+        await (await openUserRowMenu(page, userRow(page, AUTHOR.name))).filter({hasText: 'Login As'}).click();
         await confirmLoginAsDialog(page);
         await page.waitForURL(/\/dashboard\/mySubmissions/, {
             timeout: 20_000,
             waitUntil: 'commit',
         });
-        await expectImpersonating(page, 'author.alex');
+        await expectImpersonating(page, AUTHOR.username);
         await closeUserMenu(page);
         await page.goto(signOutAddress);
         await expectLoginPage(page);
@@ -814,7 +1017,7 @@ test.describe('Login & sessions (U1)', () => {
         const seeded = await seedMonograph(ompApi, tag, {
             decisions: ['skipInternalReview'],
             reviewRounds: [
-                {stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'invited'}]},
+                {stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'accepted'}]},
             ],
         });
         const editorialPath = `/index.php/${PK}/en/dashboard/editorial?workflowSubmissionId=${seeded.submissionId}`;
@@ -919,16 +1122,25 @@ test.describe('Login & sessions (U1)', () => {
         );
         modal = await awaitWorkflow(page); // positive control: the view renders
         await expect(modal.locator('[data-cy="participant-manager"]')).toHaveCount(0);
-        const authorNav = await openUserMenu(page);
+        const authorNav = await expectImpersonating(page, 'author.alex');
         await authorNav
             .getByRole('link', {name: 'Logout as author.alex'})
             .first()
             .click();
+        // The Editor is back in their own session, on the same submission,
+        // with no password asked (Rule 15): the editor's view of it, the
+        // Participants panel there again, the user menu the Editor's own.
         await page.waitForURL(
             new RegExp(`dashboard/editorial\\?workflowSubmissionId=${seeded.submissionId}`),
             {timeout: 20_000, waitUntil: 'commit'}
         );
-        await awaitWorkflow(page);
+        modal = await awaitWorkflow(page);
+        await expect(modal.getByText(`Submission ${tag}`).first()).toBeVisible();
+        await expect(modal.locator('[data-cy="participant-manager"]')).toBeVisible();
+        await expect(page.locator('form#login')).toHaveCount(0);
+        await expect(userNav(page).locator('> button')).toHaveAccessibleName(/editor\.diana/);
+        await expect(userNav(page).locator('> button')).not.toHaveAccessibleName(/author\.alex/);
+        await expectOwnSession(page);
 
         // Press Manager, a hand-built address to an out-of-reach user: Login
         // As on the Author's row of Users & Roles, the visited address copied
@@ -955,8 +1167,17 @@ test.describe('Login & sessions (U1)', () => {
         expect(outOfReachAddress).not.toBe(copiedAddress);
         await managerPage.goto(outOfReachAddress);
         await expect(noAdminRightsMessage(managerPage)).toBeVisible();
+        // The possible causes, listed: the opening sentence, the two
+        // causes, and who can do it instead.
+        await expect(noAdminRightsLead(managerPage)).toBeVisible();
+        await expect(noAdminRightsCauses(managerPage)).toHaveText(SESSION_MSG.noAdminRightsCauses);
         await expect(noAdminRightsCause(managerPage)).toBeVisible();
+        await expect(noAdminRightsRemedy(managerPage)).toBeVisible();
         await expect(usersListLink(managerPage)).toBeVisible();
+        await expect(usersListLink(managerPage)).toHaveAttribute(
+            'href',
+            new RegExp(`/index\\.php/${PK}/(en/)?management/settings/access$`)
+        );
         await expect(managerPage).not.toHaveURL(/dashboard/);
 
         // Control: the copied number, the Author's own, impersonates the

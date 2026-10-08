@@ -385,8 +385,8 @@ Login, the site's name stands in for the journal's), but after a refused
 
 Scenarios 1 to 3, 7 and 8 use ready accounts on the seeded journal (1 on a
 site that also hosts a scratch journal, 8 on a scratch submission);
-scenarios 4 to 6 act on a throwaway account of a scratch journal, because
-each changes its password. Scenarios 2 and 4 keep the same account signed
+scenarios 4 to 6 act on throwaway accounts of a scratch journal, because
+each changes a password. Scenarios 2 and 4 keep the same account signed
 in in a second browser. The ready accounts and their passwords and the
 tooling recipe are in the footnote. <sup>s</sup>
 
@@ -469,11 +469,12 @@ tooling recipe are in the footnote. <sup>s</sup>
      same answer; the email "Password Reset Confirmation" arrives in the
      account's mailbox, sent from the site's contact address, and nothing
      arrives for nobody@mail.test (Rule 7).
-   - **"Reset Password"**: open the email and follow its link: on "Reset
-     Password", type Recovered1 in "New password" and "Repeat new
-     password" and save: the page answers "Password has been updated
-     successfully. Please login with updated password." with a "Login"
-     link, and you are still signed out.
+   - **"Reset Password"**: open the email and follow its link: the "Reset
+     Password" form opens, its browser tab reading "Reset Password |
+     {journal name}" (Fields). Type Recovered1 in "New password" and
+     "Repeat new password" and save: the page answers "Password has been
+     updated successfully. Please login with updated password." with a
+     "Login" link, and you are still signed out.
    - **The second browser**: in the second browser, open My Submissions:
      the Login page shows instead; that session ended when the new
      password was saved (Rule 9).
@@ -500,7 +501,9 @@ tooling recipe are in the footnote. <sup>s</sup>
      open the emailed link again, the password having been changed and the
      account signed in since: the page answers "Sorry, the link you clicked
      on has expired or is not valid. Please try resetting your password
-     again." with a "Reset Password" link back to the lost-password form.
+     again." with a "Reset Password" link back to the lost-password form;
+     press it: the lost-password page opens, asking for "Registered
+     user's email" (Rule 10).
    - **A mangled code**: open the link with its code mangled: the same
      answer.
    - **Control**: a link from a fresh "Forgot your password?" request for
@@ -509,23 +512,34 @@ tooling recipe are in the footnote. <sup>s</sup>
 
 6. **Forced password change at first sign-in** {OJS OMP}
 
-   Given: Editor, on a scratch journal with a submission in review.
-   <sup>s</sup>
+   Given: Editor, on a scratch journal with a submission in review, on a
+   site that also hosts the seeded journal. <sup>s</sup>
 
    - **"Create New Reviewer"**: on the submission's review stage, in the
      "Add Reviewer" window choose "Create New Reviewer" and create a
      reviewer with the throwaway address nova.reviewer@mail.test and the
-     username nova.
-   - **The registration email**: the registration email delivers a
-     username and a generated password.
-   - **Signing in with them**: on the Login page sign in with them:
-     instead of landing anywhere, the "Change Password" form appears.
+     username nova. Create a second the same way, with
+     orin.reviewer@mail.test and the username orin.
+   - **The registration email**: each reviewer's registration email
+     delivers a username and a generated password.
+   - **Signing in with them**: on the journal's Login page sign in with
+     nova's: instead of landing anywhere, the "Change Password" form
+     appears.
    - **"Change Password"**: type the emailed password in "Current
      password" and Changed1 in "New password" and "Repeat new password",
-     then press "OK": the reviewer is signed in and lands on the Dashboard,
-     the landing their reviewer role earns (Rule 3).
-   - **Control**: signing in again with Changed1 is normal: the browser
-     lands on the Dashboard with no "Change Password" form.
+     then press "OK": the reviewer is signed in and lands on the
+     Dashboard's "Action Required by me" view, the landing their reviewer
+     role earns (Rules 3, 11).
+   - **The site-level Login page, the second reviewer**: press "Logout"
+     in the user menu, open the site's own homepage and press "Login" at
+     its top right; sign in with orin's emailed username and password:
+     the "Change Password" form appears there too. Type the emailed
+     password in "Current password" and Changed2 in "New password" and
+     "Repeat new password", then press "OK": the reviewer is signed in
+     and lands on the site home page, not the Dashboard (Rule 11).
+   - **Control**: press "Logout" in the user menu, and on the journal's
+     Login page sign in as nova with Changed1: the sign-in is normal; the
+     browser lands on the Dashboard with no "Change Password" form.
 
    A preprint server has no review stage and so no "Create New Reviewer":
    no OPS analogue. There the Site Administrator's "Add User" and "Edit
@@ -550,10 +564,11 @@ tooling recipe are in the footnote. <sup>s</sup>
      currently logged in as" line (Rule 13).
    - **OK**: choose "Login As" again and press OK: the browser is now that
      Author's session: their name, their My Submissions. The top bar shows
-     the administrator's initials with the Author's overlaid in a warning
-     color, and the user menu reads "You are currently logged in as
-     {author}"; it offers no plain "Logout", only "Logout as {author}"
-     (Rule 6).
+     the administrator's initials, muted, with the Author's overlaid in a
+     warning color. The user menu reads "You are currently logged in as
+     {author}" with a "Logout as {author}" link, and shows the same link
+     a second time after "Edit Profile", where "Logout" stood (Rule 13);
+     it offers no plain "Logout", only "Logout as {author}" (Rule 6).
    - **"Logout as {author}"**: choose "Logout as {author}": the
      administrator is back in their own session, with no password asked.
    - **Control**: impersonate the Author again the same way and type the
@@ -581,7 +596,8 @@ tooling recipe are in the footnote. <sup>s</sup>
    - **The Author's row**: impersonating the submission's Author instead
      lands on the author's own My Submissions view, which shows no
      Participants panel. The way back is then the user menu's "Logout as
-     {author}" entry.
+     {author}" entry; choose it: the Editor is back in their own session,
+     on the same submission, with no password asked (Rule 15).
    - **The Reviewers table** {OJS OMP}: on the submission's review stage,
      the Reviewer's row menu in the Reviewers table offers "Login As"; a
      preprint server has no Reviewers table.
@@ -625,9 +641,6 @@ Left out of the scenarios above, by reason:
     guard the issue report
     (`docs/issues/U01-A11-refused-password-form-tab-loses-name.md`)
     proposes, once fixed
-  - scenario 4, "Reset Password": the browser tab of the
-    set-a-new-password form reading "Reset Password | {journal name}"
-    (Fields; [A3](#a3) retired); no suite asserts the tab
   - after a "Login As", no row of Users & Roles, the Participants panel
     or the Reviewers table offering "Login As", and "Logout as" bringing
     back the operator's own account ([A4](#a4)): the guard the issue
@@ -653,36 +666,6 @@ Left out of the scenarios above, by reason:
     flag ([A10](#a10)): the guard the issue report
     (`docs/issues/U01-A10-edit-user-hides-clears-change-password.md`)
     proposes, once fixed
-  - a flagged account signing in at the site-level Login page, diverted
-    to "Change Password", and on completing it landing on the site home
-    page (Rule 11)
-  - while impersonating, the user menu's second "Logout as {username}"
-    after "Edit Profile" (Rule 13): scenario 7's "OK" reads the first one
-    only
-  - scenario 7, "OK": the administrator's initials muted and the
-    Author's overlaid in a warning color (Rule 13); no suite asserts the
-    colors (OJS, OMP, OPS)
-  - scenario 3, "Control": nothing on the Login page naming the held
-    submission (Rule 4); the OMP suite does not assert it
-  - scenario 1, "The Editor's row on Users & Roles": the six column
-    headers, none of them a last-login date ([A9](#a9)); the OMP suite
-    asserts the row only
-  - scenario 5, "The link after the change": the "Reset Password" link
-    followed back to the lost-password form (Rule 10); the OMP suite
-    sees the link but does not press it
-  - scenario 5, "The link after the change", on OPS: the scenario's
-    given (signed in with the new password after scenario 4) and
-    "Logout" before the link is opened again; the OPS suite kills the
-    link by a sign-in alone, with no password change, and opens it in a
-    second, signed-out browser
-  - scenario 6, "Change Password": landing on "Action Required by me"
-    (Rule 11); the OJS suite accepts any Dashboard view
-  - scenario 8, "Journal Manager, a hand-built address to an
-    out-of-reach user": the refusal listing the possible causes
-    (Rule 14); the OMP suite reads only one of them
-  - scenario 8, "The Author's row": "Logout as {author}" bringing back
-    the Editor's own session (Rule 15); the OMP suite checks the address
-    and the workflow only
 - **Rarely met**:
   - a forced change ending the account's other sessions, and flagging alone leaving them signed in (Rule 11): it needs the Site Administrator's "Edit User" (Rule 11a) on an account already signed in elsewhere
 - **Nothing new to test**:
@@ -706,6 +689,7 @@ Left out of the scenarios above, by reason:
   - a session ending at browser close (Settings, `session_expire_on_close`)
   - forced https for login or the site (Settings, `force_login_ssl`, `force_ssl`)
   - the idle session lifetime (Settings, `session_lifetime`)
+  - on a preprint server, a flagged account signing in at the site-level Login page and, on completing "Change Password", landing on the site home page (Rule 11): what is missing is a way to seed a flagged account; a preprint server has no "Create New Reviewer" to flag one, as scenario 6 does (Rule 11a)
 - **Owned by another feature**:
   - the sentence above the Login form for a galley that needs a subscription (Rule 4a; *[Subscriptions](U51-subscriptions.md)*, scenario 1)
   - the Site Administrator's "Add User" flagging a new account, whose first sign-in diverts to "Change Password" (Rule 11a; *[Users management](U53-users-management.md)*, scenario 7)
@@ -1469,15 +1453,27 @@ by the throwaway address; nobody@mail.test holds no account on the test
 installs (every account's address is `<username>@mail.test`) and its
 silence is read after the account's own email arrived; scenario 4's
 second browser is a second browser context signed in as the throwaway
-before the reset is saved; scenario 5's fresh link is a second
-lost-password request for the same address. Scenario 6 a scratch reviewer
-created via Create New Reviewer on a scratch submission in review (`POST
+before the reset is saved, and the tab it reads on "Reset Password" is
+the page's title, the journal's name being the scratch journal's;
+scenario 5's fresh link is a second
+lost-password request for the same address. Scenario 6 two scratch
+reviewers created via Create New Reviewer, one after the other, on a
+scratch submission in review (`POST
 scenarios/context` with a throwaway `editor` and `author`, `POST
-scenarios/submission` with `decisions: ['sendExternalReview']`); the
-generated password is read from the test mail catcher; the body's `nova`
-and nova.reviewer@mail.test stand for a username and address the suites
-tag per run (never flag a shared roster account: cached sign-ins of other
-tests would break). Scenario 7 `admin` impersonating `author.alex`; the
+scenarios/submission` with `decisions: ['sendExternalReview']`); each
+generated password is read from the test mail catcher; the body's `nova`,
+`orin` and their @mail.test addresses stand for usernames and addresses
+the suites tag per run, as Changed1 and Changed2 stand for passwords
+tagged per run (never flag a shared roster account: cached sign-ins of
+other tests would break); the second reviewer signs in at `index/login`,
+the scratch journal beside `publicknowledge` being what makes the site
+multi-journal; no `users[]` key flags an account, so OPS, which has no
+Create New Reviewer, runs no site-level forced change (Coverage, "No
+seed"). Scenario 7 `admin` impersonating `author.bea` (Bea Author,
+initials "BA"), not `author.alex`: `admin` and Alex Author both print
+"AA", and the top bar's two sets of initials must differ to be read
+apart. Test run 2026-10-08 (OJS, OMP, OPS): the top bar showed the
+administrator's "AA" muted with "BA" overlaid in the warning color. The
 sign-out address is the href behind the user menu's "Logout" entry
 (`login/signOut`), captured before the first Login As; the
 administrator's own row is found by searching Users & Roles for `admin`.

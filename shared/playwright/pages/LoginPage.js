@@ -36,6 +36,19 @@ exports.LoginPage = class LoginPage extends BasePage {
         await this.page.goto(this.contextUrl(contextPath, '/login'));
     }
 
+    /**
+     * The site-level Login page the way a visitor reaches it (Rule 1 of
+     * U01): the site's own homepage, then "Login" at its top right. The
+     * same form, outside any context; signing in here lands on the site
+     * home page of a multi-context site (Rule 3).
+     */
+    async openFromSiteHome() {
+        await this.page.goto(this.siteUrl(''));
+        await this.page.getByRole('navigation').getByRole('link', {name: 'Login', exact: true}).click();
+        await this.page.waitForURL(/\/index\/[a-z]{2}(_[A-Z]{2})?\/login/, {waitUntil: 'commit', timeout: 15_000});
+        await this.expectForm();
+    }
+
     /** The form is on screen (the signed-out answer to a private address). */
     async expectForm() {
         await expect(this.form).toBeVisible();
