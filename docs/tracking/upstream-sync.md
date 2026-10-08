@@ -9,10 +9,10 @@ The `stable-3_5_0` branch, read for regressions only, has its own file:
 
 | Repo | Last-reviewed commit | Date | Reviewed by |
 |------|----------------------|------|-------------|
-| ojs | `49515c6e3e` | 2026-10-08 | claude (daily maintenance session) |
-| omp | `084a19cc6` | 2026-10-08 | claude (daily maintenance session) |
-| ops | `3a40dc2773` | 2026-10-08 | claude (daily maintenance session) |
-| pkp-lib | `151e6e9d69` (`main`; ojs at it, omp and ops at `63cf1497b4`) | 2026-10-08 | claude (daily maintenance session); ui-library `7f5e51ca` (`main`; ojs, omp and ops at `ea5061b0`, 2026-10-08); ojs `plugins/generic/crossref` `ca7022ab7e`, ops `plugins/generic/crossref` `014bd29678`, ojs `plugins/generic/jatsTemplate` `c564b8f4b9`, ojs and ops `plugins/generic/googleScholar` `9227975c93`, ojs, omp and ops `plugins/generic/citationStyleLanguage` `d8301405ed` (all 2026-10-08, tree-equal merges), ojs and ops `plugins/generic/pdfJsViewer` `1d992590f0` (2026-10-05) |
+| ojs | `ae8dbb47d7` | 2026-10-08 | claude (merge of companion `13455`) |
+| omp | `042e72e5cf` | 2026-10-08 | claude (merge of companion `13455`) |
+| ops | `d3da9aea1e` | 2026-10-08 | claude (merge of companion `13455`) |
+| pkp-lib | `cf7e3e494c` (ojs, omp and ops at it; `main` is `2ac457888e`, its merge, which also holds `d320cfe91d`, read 2026-10-08 and owed at the pointer bumps) | 2026-10-08 | claude (merge of companion `13455`); ui-library `7f5e51ca` (`main`; ojs, omp and ops at `ea5061b0`, 2026-10-08); ojs `plugins/generic/crossref` `ca7022ab7e`, ops `plugins/generic/crossref` `014bd29678`, ojs `plugins/generic/jatsTemplate` `c564b8f4b9`, ojs and ops `plugins/generic/googleScholar` `9227975c93`, ojs, omp and ops `plugins/generic/citationStyleLanguage` `d8301405ed` (all 2026-10-08, tree-equal merges), ojs and ops `plugins/generic/pdfJsViewer` `1d992590f0` (2026-10-05) |
 
 ## Leads
 
@@ -27,6 +27,11 @@ _Newest first; one entry per sync: the date and the range per repo, then
 one line per change reviewed (commit → no impact / spec and tests touched /
 finding filed, with a link)._
 
+- **2026-10-08 (merge of companion `13455`, VM s2) — pkp/pkp-lib#13455 merged 2026-10-08 16:39 UTC: pkp-lib `2ac457888e` (merge of #13475, head `cf7e3e494c`, on `d320cfe91d`), ojs `ae8dbb47d7` (merge of #5912 on `4c17db175e`), omp `042e72e5cf` (merge of #2497), ops `d3da9aea1e` (merge of #1437).**
+  - Confirmed: each merge's second parent is the reviewed head; pkp-lib's merge delta has the patch id of `151e6e9d69..cf7e3e494c`; `git diff` of the reviewed heads against the omp and ops tips empty, against the ojs tip one file (below). All three `lib/pkp` pointers at `cf7e3e494c`, ui-library at `ea5061b0`.
+  - ojs `4c17db175e` (#5914, for pkp/pkp-lib#10669) → no impact: `docs/dev/swagger-source.json` alone, "Author Original" → "Author's Original" in three API descriptions.
+  - Companion rebased onto `main` (two tracking-file conflicts, both sides kept) and its whole suites run on CI at the merged tips: 37810843328, red on U03 S4 alone in each app (K-12780, red on `main` since pkp-lib#12780), every other test green, no flaky test. Fast-forwarded; the companion row and the remote branch deleted. U42 A3 now carries `Report: refresh owed` on `main` (pkp-e2e#879), for housekeeping.
+  - Baselines advanced: ojs, omp and ops to their tips; pkp-lib to `cf7e3e494c`, the three apps' pointer. pkp-lib `main` also holds `d320cfe91d` (#13478), read in the entry below and owed at the pointer bumps, as that entry says.
 - **2026-10-08 (VM s1, asked in the channel: "do any of the e2e tests need to be adjusted?") — pkp/pkp-lib#13478, merged 2026-10-08 15:45 UTC as pkp-lib `d320cfe91d` (squash, on `151e6e9d69`; issue pkp/pkp-lib#10669), ahead of every app's pointer.**
   - pkp-lib `d320cfe91d`: one English text, `publication.versionStage.authorOriginal` "Author Original" → "Author's Original" (the JAV term). The name reaches the workflow's version nodes, "Create New Version" ("Publication Stage", "Version Source"), the publish and post windows, the reader pages' "Versions" lists and the DOI pages on all three apps; every OPS version carries it. No code reads the text; no regression read (a locale line).
   - Tests, on `main` before the pointers: the suites read which of the two names the checkout words and assert that one exactly (`shared/playwright/support/version-stage.js`; OJS U49, OMP U49, OPS U13, U40, U42, U45, U49); `WorkflowPage`'s version-node pattern, OJS `PublishSchedulePages`, OMP `PublicationFormatPages` and thirteen kept checks take either name (three checks now pick the stage by its value, `AO`). No spec edit: the specs describe the apps' tips, which still read "Author Original".
