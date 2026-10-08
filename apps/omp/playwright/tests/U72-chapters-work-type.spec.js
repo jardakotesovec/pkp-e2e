@@ -28,6 +28,10 @@
  *   one "Done" and the next ordering.
  * - A8 🐞: S8 reads "Harbours"' own address, not the sentence above it.
  * - A9 ❓: no chapter is added to a published Edited Volume.
+ * - A11 🐞: no test presses "Order" again while the wizard's list is being
+ *   ordered.
+ * - A12 🐞: no test drags a chapter, with or without authors.
+ * - A13 🐞: no test reads the wizard's Review panel after an "Order".
  *
  * Seeding: scenario endpoints only; the seeded press and roster are
  * read-only (PRINCIPLES A1, A7). S2, S4–S6, S10 and S11 seed scratch books
@@ -363,7 +367,7 @@ test.describe('Chapters & work type (U72)', () => {
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
         await expect(list.titleCells()).toHaveText([exactly('Tides'), exactly('Harbours')]);
 
-        // ── "Cancel ordering" (Rule 8b) ───────────────────────────────────
+        // ── "Cancel ordering" (Rule 8c) ───────────────────────────────────
         await list.startOrdering();
         await list.dragAuthorAbove('Tides', 'Ada Lovel', 'Ben Barrow');
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ada Lovel'), exactly('Ben Barrow')]);

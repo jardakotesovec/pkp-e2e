@@ -65,7 +65,8 @@ above a single chapter with no author it still does not show. One row
 per chapter, in the book's chapter order, showing the chapter's title
 (without its subtitle); for whoever may change the list the title is a
 link that opens the chapter window, and an arrow before
-the title opens a line with the row's "Delete". Under each chapter, one
+the title opens a line with the row's "Delete" (neither works while the
+list is being ordered, Rule 8). Under each chapter, one
 row per chapter author with three columns: "Name", "Email" and "Role"
 (the contributor's roles as the Contributors list names them, joined by
 commas, such as "Author, Volume editor"). A list with no chapters reads
@@ -178,18 +179,37 @@ wizard on Review ⚠ [A5](#a5). <sup>h</sup>
    deleting its chapter (Rule 9), offers it to every chapter again.
    <sup>k</sup> <sup>td8</sup> <sup>td9</sup>
 8. **Ordering.** "Order" shows a handle on each chapter and on each
-   chapter author, and the buttons "Done" and "Cancel ordering". <sup>l</sup>
+   chapter author, and the buttons "Done" and "Cancel ordering". While
+   those two buttons show, the list is being ordered: the chapter titles
+   are greyed and open no window, and the arrows before them are hidden.
+   "Add Chapter" and "Order" above the list look as before. "Add
+   Chapter" does nothing when pressed. "Order" pressed again does
+   nothing on the Chapters page; in the wizard it opens the wizard's
+   first step, "Upload Files" ⚠ [A11](#a11). <sup>l</sup> <sup>td20</sup>
    - 8a. Dragging a chapter moves it among the chapters, its author rows
      with it, and "Done" saves the new order, which the list still
      shows after a reload. A list no one has reordered reads in the
      order the chapters were added in. The chapter order is the book's
-     table-of-contents order. <sup>l</sup> <sup>td11</sup>
+     table-of-contents order. A dragged chapter that has no authors
+     leaves its "No Items" line where the chapter was, until "Done" or
+     "Cancel ordering" ⚠ [A12](#a12). <sup>l</sup> <sup>td11</sup> <sup>td20</sup>
    - 8b. Dragging an author moves them among that chapter's authors, and
      "Done" saves the new order. An author who ends up n-th in the
-     chapter while being (n + 1)-th on the version's "Contributors" list
-     (second in the chapter and third on the list, say) keeps their old
-     place ⚠ [A7](#a7). "Cancel ordering" puts the list back as it was.
-     <sup>l</sup> <sup>td11</sup>
+     chapter while (n + 1)-th on the version's "Contributors" list
+     (second in the chapter, third on the list, say) is left at their
+     old place by "Done" ⚠ [A7](#a7): the chapter's authors read, after
+     a reload too, in their old order or, at other times, in the
+     dragged order, which the list does not tell from a saved one.
+     After a "Done" that moved only chapters, another chapter's authors
+     may change places after a reload [A7](#a7). <sup>l</sup> <sup>td11</sup> <sup>td20</sup>
+   - 8c. Only "Done" saves a drag, and it shows no notice. "Cancel
+     ordering" puts the chapters and their authors back as they were.
+     Leaving before "Done" asks nothing and keeps nothing: once another
+     page of the workflow has been opened and then the Chapters page
+     again, or the wizard has been left and opened again, the list shows
+     the order last saved, the drag gone. Inside the wizard, going to
+     another step and back with no reload finds the list still being
+     ordered, the drag in place. <sup>l</sup> <sup>td20</sup>
 9. **Deleting a chapter.** The arrow before a chapter's title, then
    "Delete", opens a window headed "Delete", "Are you sure you wish to
    delete this item? This action cannot be undone.", with "OK" and
@@ -261,18 +281,22 @@ wizard on Review ⚠ [A5](#a5). <sup>h</sup>
     neither holds them nor offers them under "Files" ⚠ [A3](#a3).
     <sup>q</sup> <sup>td15</sup>
 16. **The wizard's Review step.** The Review panel "Chapters" lists the
-    chapters as the Details step left them, each title followed by its
-    subtitle, and follows additions, edits and deletions made in the same
-    wizard at once. A new order of a chapter's authors saved with "Order"
-    shows in the panel only after the wizard is reloaded. The wizard asks
-    for no chapter: an Edited Volume, or a Monograph, can be submitted
-    with an empty list, and the panel then shows only its heading and
-    "Edit". <sup>h</sup> <sup>td11</sup> <sup>td18</sup>
+    chapters of the Details step, each title followed by its subtitle,
+    and follows additions, edits and deletions made in the same wizard
+    at once. A new order saved with "Order", of the chapters or of a
+    chapter's authors, shows in the panel only after the wizard is
+    reloaded ⚠ [A13](#a13): until then the panel lists the chapters,
+    and each chapter's authors, in the order the page loaded with, and
+    a chapter added in the meantime joins at the panel's end. The
+    wizard asks for no chapter: an Edited Volume, or a Monograph, can be
+    submitted with an empty list, and the panel then shows only its
+    heading and "Edit". <sup>h</sup> <sup>td11</sup> <sup>td18</sup> <sup>td20</sup>
 
 ## Side effects
 
 - A chapter's "Save" shows "Your changes have been saved." to the person
-  who saved (Rule 5a). Nothing else is sent: no email, no Tasks entry, no
+  who saved (Rule 5a); the "Done" that saves a new order shows no notice
+  (Rule 8c). Nothing else is sent: no email, no Tasks entry, no
   notice to other people, for adding, editing, ordering or deleting a
   chapter, changing the work type or saving "Publication Dates".
   <sup>r</sup> <sup>td17</sup>
@@ -439,7 +463,7 @@ footnote. <sup>s</sup>
      then "Harbours" (Rules 8a, 8b).
    - **"Cancel ordering"**: press "Order", drag Ada Lovel above Ben Barrow
      and press "Cancel ordering": the rows read Ben Barrow, then Ada Lovel
-     again (Rule 8b).
+     again (Rule 8c).
    - **A contributor deleted**: on the version's "Contributors" page
      ("Publication" › the version › "Contributors") delete Ada Lovel (the
      list: [Contributors &
@@ -708,7 +732,14 @@ Left out of the scenarios above, by reason:
     saved without a date reopens with an empty "Date Published"
   - the guard for A6 (retired): after "Order", a chapter dragged above
     another moves with its author rows and keeps its new place after
-    "Done" and a reload (Rule 8a)
+    "Done" and a reload (Rule 8a); the order of the authors inside a
+    chapter is no part of it (Rule 8b)
+  - the list while it is being ordered: the greyed titles that open no
+    window, the hidden arrows, "Add Chapter" and, on the Chapters page,
+    "Order" doing nothing when pressed (Rule 8)
+  - "Done" showing no notice, "Cancel ordering" after a chapter is
+    dragged, and a drag left without "Done" gone once the Chapters page
+    or the wizard is opened again (Rule 8c)
   - the guard for A7 (issue report
     `docs/issues/U72-A7-chapter-author-order-change-lost.md`): a
     chapter's authors dragged into a place the save used to skip keep
@@ -730,8 +761,6 @@ Left out of the scenarios above, by reason:
     panel showing only its heading and "Edit" (Rule 16)
   - a switch between "Edit Metadata" and "Identifiers" with a change
     typed, which asks the same question as the close arrow (Rule 5b)
-  - a chapter's new author order, which the Review panel shows only after
-    the wizard is reloaded (Rule 16)
   - an unsaved "Publication Dates" choice, dropped without a prompt when
     another page of the workflow opens (Fields, the "Publication Dates"
     page)
@@ -750,6 +779,12 @@ Left out of the scenarios above, by reason:
   - A9 (a chapter added after an Edited Volume is published; Rule 12b)
   - A10 (a French book's chapter titled in French alone on a press whose
     primary language is English; Fields, Title)
+  - A11 (the wizard's "Order" pressed while the list is being ordered;
+    Rule 8)
+  - A12 (the "No Items" line of a dragged chapter that has no authors;
+    Rule 8a)
+  - A13 (a new order of the chapters, or of a chapter's authors, in the
+    wizard's Review panel before a reload; Rule 16)
 - **Owned by another feature**:
   - the chapter window's "Identifiers" tab and who is offered it (Actors
     row 5; *[Identifiers](U44-identifiers.md)*)
@@ -764,8 +799,9 @@ Left out of the scenarios above, by reason:
 
 ## Findings register
 
-Verdicts are the author's judgment (claude, 2026-09-28), unreviewed unless
-an entry notes otherwise; the team settles them on spec review.
+Verdicts are the author's judgment (claude, 2026-09-28; A11 to A13
+2026-10-08), unreviewed unless an entry notes otherwise; the team settles
+them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
@@ -776,6 +812,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Chapter authors dragged into a new order snap back on "Done" when they are among the book's first contributors | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A8](#a8) | Chapter window promises an automatic license above a chapter's own License URL and on a published book | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A book in a press's second language cannot get a chapter titled in that language alone | 🐞 | medium | — |
+| [A11](#a11) | In the wizard, "Order" pressed while the chapter list is being ordered opens the first step, "Upload Files" | 🐞 | minor | — |
+| [A12](#a12) | While ordering, a dragged chapter with no authors leaves its "No Items" line under another chapter | 🐞 | minor | — |
+| [A13](#a13) | The wizard's Review panel "Chapters" keeps the old order after "Order" until the wizard is reloaded | 🐞 | minor | — |
 | [A1](#a1) | The assistant roles may change a published version's chapters, though not an unpublished one's | ❓ | minor | — |
 | [A9](#a9) | A chapter added to a published Edited Volume may stay without a license | ❓ | minor | — |
 | [A6](#a6) | "Order" could not move a chapter: a dragged chapter stayed where it was | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453), walked on main |
@@ -875,6 +914,7 @@ can meet this, so in an edited volume whose contributors are listed
 chapter by chapter it is the first chapter or two. Dragging again gives
 the same result; "Edit Chapter" can set the order instead.
 Basis: probe, 2026-10-04. <sup>f-a7</sup>
+Report: refresh owed — the claim check of 2026-10-08 (OMP main, the wizard's list, three runs; kept check `i08.js`, its path and the record in footnote td20) showed two things the entry and the report do not say. First, the list does not always redraw in the old order: with an author left at their old place by "Done", it showed the dragged order, at once and after a reload, in two runs and the old order in the third (Rule 8b says both). Second, not settled: in one of 45 "Done"s that moved only a chapter, the two authors of another chapter read in the same order right after "Done" and in the opposite order after a reload, and the next "Done" saved that order; a second sighting, or the fix walked with the same moves, settles it (2026-10-08)
 
 <a id="a8"></a>
 **A8 — Chapter window promises an automatic license above a chapter's own License URL and on a published book** · 🐞 · low.
@@ -914,6 +954,42 @@ format's name is refused the same way
 ([→ Publication formats & proof terms](U73-publication-formats-proof-terms.md#a15)).
 Expected: the title is required in the book's language only.
 Since: 2023-01-20 (pkp/pkp-lib#8554) · Basis: probe, 2026-10-04. <sup>f-a10</sup>
+
+<a id="a11"></a>
+**A11 — In the wizard, "Order" pressed while the chapter list is being ordered opens the first step** · 🐞 · minor.
+On the wizard's Details step, while the "Chapters" list is being ordered
+("Done" and "Cancel ordering" show), "Order" still stands above the list
+and looks as before. Pressed, it takes the Author to the wizard's first
+step, "Upload Files". Nothing is saved or lost: back on the Details step
+the list is still being ordered, a drag made before the press included.
+On the workflow's Chapters page the same press does nothing. Expected:
+the press does nothing in the wizard either, or "Order" is greyed while
+the list is being ordered.
+Basis: probe, 2026-10-08. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — While ordering, a dragged chapter with no authors leaves its "No Items" line behind** · 🐞 · minor.
+After "Order", on the Chapters page or in the wizard, a chapter that has
+no authors is dragged to another place. Its "No Items" line stays where
+the chapter was, under the authors of the chapter that stood before it,
+as if it were that chapter's; the moved chapter has nothing under it.
+"Done" or "Cancel ordering" shows the line under its own chapter again,
+and the saved order is right. Expected: the line moves with its chapter.
+Basis: probe, 2026-10-08. <sup>f-a12</sup>
+
+<a id="a13"></a>
+**A13 — The wizard's Review panel "Chapters" keeps the old order after "Order"** · 🐞 · minor.
+On the wizard's Details step the Author moves a chapter, or one of a
+chapter's authors, with "Order" and "Done", then opens the Review step.
+The panel "Chapters" still lists the chapters, and each chapter's
+authors, in the order the page loaded with; a chapter added after the
+move is listed last in that old order. The Details step shows the saved
+order, and the book is submitted with it, so nothing is lost, but the
+last screen before "Submit" shows the Author a table of contents that is
+not the saved one. Reloading the wizard puts the panel right. Expected:
+the panel shows the saved order at once, as it does an added, edited or
+deleted chapter.
+Basis: probe, 2026-10-08. <sup>f-a13</sup>
 
 ### Retired
 
@@ -1277,7 +1353,8 @@ authors' full names joined by `common.commaListSeparator`); ui-library
 such event. The panel's "Edit" calls `openStep('')`: the template reads
 `$step.id`, which is empty in the hook that renders it, so no step
 opens. OMP has no `validateSubmit` override touching chapters
-(*Submission wizard*, note l there). Live-probed 2026-09-28: note td18.
+(*Submission wizard*, note l there). Live-probed 2026-09-28: note td18;
+2026-10-08, the panel after "Order": note td20.
 
 <a id="fn-i"></a>
 **i** — `workType` is read by OMP `ChapterForm::initData()` (the chapter
@@ -1351,8 +1428,9 @@ makes the chapters sortable as `tbody.orderable` and each chapter's
 author rows as `tr.orderable` (`setupSortablePlugin()`), and takes
 `orderable` off the chapter rows, which it finds as `tr.category`
 (`addOrderingClassToRows()`), so a press on a chapter row drags the
-whole chapter with its author rows. Live-probed 2026-10-08: note td11;
-the fault that kept a chapter from moving until 2026-10-07: note f-a6.
+whole chapter with its author rows. Live-probed 2026-10-08: notes td11
+and td20; the fault that kept a chapter from moving until 2026-10-07:
+note f-a6.
 
 <a id="fn-td11"></a>
 **td11** — Live-probed 2026-09-28 (Rule 8; Rule 16; A6, A7). "Order"
@@ -1396,7 +1474,105 @@ and the other five chapters kept theirs; "Done" (`saveSequence`, 200,
 after it as before, and so did a reload; the stored chapter order
 (`submission_chapters.seq`) became 1 for "Introduction" and 2 for
 "Preface". The wizard's list, which the same two templates draw (note
-f-a6), was not walked after the fix.
+f-a6), was walked the same day in three runs, each on a scratch press
+of its own, as the submitting Author on a draft Edited Volume's Details
+step: "Estuaries", the last of three chapters, dragged by its title
+above "Tides" travelled with its two author rows, Ada Lovel and Cy
+Marsh, and "Done" left the list reading "Estuaries", "Tides",
+"Harbours" at once and after a reload; the same chapter dragged by its
+handle below "Harbours" held the same way, and so did "Beta", the
+second of a draft Monograph's two chapters, dragged above "Alpha" (two
+runs). The rest of that walk: note td20.
+
+<a id="fn-td20"></a>
+**td20** — Live-probed 2026-10-08 (Rules 8, 8a, 8b, 8c, 16; A7, A11,
+A12, A13) on OMP `main` (omp `084a19cc6`, lib/pkp `63cf1497b4`), three
+runs, each on a scratch press of its own, as the submitting Author in
+the wizard and as the Press manager on the Chapters page (kept script
+`shared/playwright/checks/U72/I08/i08.js`). Each fact below was seen in
+every run that drove it, the count in brackets; no request answered an
+error and no page error showed in any run.
+While ordering (both lists, three runs): after "Order", one handle per
+chapter and per author row (seven on three chapters with four author
+rows, nine on four chapters with five), with "Done" and "Cancel
+ordering" under the list; each title stayed a link marked `disabled`,
+greyed, and a press on it opened no window; the arrows were gone;
+"Add Chapter" and "Order" stood above the list as before, both marked
+`disabled` with `href="#"`. "Add Chapter" pressed opened no window
+within six seconds and the list stayed as it was (pressed while the
+list was not being ordered, it opened "Add Chapter"). "Order" pressed
+again on the Chapters page changed nothing and sent no request. In the
+wizard (two runs, with and without a drag pending) the same press moved
+the rail to "1 Upload Files", the address now ending `#files` where it
+had ended `#details`; back on "2 Details" the list was still being
+ordered, the pending drag in place.
+Moves on the Chapters page (three runs): "Deltas", the last of four,
+dragged by its handle above "Tides" read "Deltas", "Tides", "Harbours",
+"Estuaries" after "Done" and after the page was opened again by its
+address, each chapter with its author rows; the first chapter dragged by
+its title below the last, and the third dragged above the second, held
+the same way. On a published version, under "Warning: This version has
+been published. Editing it may impact the published content.",
+"Estuaries" dragged above "Tides" held too, and a signed-out reader's
+book page, opened in a fresh browser, listed "Estuaries", "Tides",
+"Harbours" under "Chapters" where it had listed "Tides", "Harbours",
+"Estuaries" before (two runs). The Author's plain-text list of the
+workflow book read the manager's saved order (two runs).
+A list never reordered (the wizard, two runs): "Zeta", "Alpha" and
+"Mid", added in that order, read so on the Details step, in the Review
+panel and after a reload, "Order" showing from the second chapter on.
+The "No Items" line (three runs): on the Chapters page "Estuaries",
+which had no authors, dragged above "Harbours" left the list reading
+"Tides", Alma Author, Ben Barrow, "Estuaries", "Harbours", Ada Lovel,
+"No Items", "Deltas" until "Done", after which "No Items" stood under
+"Estuaries" again; in the wizard "Harbours", with no authors, dragged
+to the top left "No Items" at the bottom, under the authors of "Tides".
+"Done", "Cancel ordering" and leaving: each "Done" sent one
+`chapter-grid/save-sequence` request, answered 200 with
+`{"status":true,…,"events":[{"name":"dataChanged"}]}`, and no notice
+followed. "Cancel ordering" after a chapter drag (both lists, three
+runs) and after an author drag (both lists, two runs) put the list back
+at once and sent no request, and a reload showed the same. With a drag
+pending on the Chapters page, the side menu's "Title & Abstract" opened
+with no question, and "Chapters" opened again read the saved order with
+no "Done" or "Cancel ordering" (three runs). In the wizard the rail's
+"Review" and back found the list still being ordered with the drag in
+place; My Submissions, opened by its address, raised no "Leave site?",
+and the wizard opened again showed the saved order (three runs).
+The Review panel (the wizard, three runs): after "Estuaries" above
+"Tides" and "Done" the Details step read "Estuaries", "Tides",
+"Harbours" while the panel, reached by the rail with no reload, still
+read "Tides: A Study", "Harbours", "Estuaries: Mouths"; after the
+browser's reload it read "Estuaries: Mouths", "Tides: A Study",
+"Harbours". The second move, and the Monograph's "Beta" above "Alpha",
+gave the same. After "Mid" was dragged above "Zeta" and saved, a fourth
+chapter, "Last", joined the Details list at its end ("Mid", "Zeta",
+"Alpha", "Last"), and the panel read "Zeta", "Alpha", "Mid", "Last"
+until a reload (two runs). After Ben Barrow was dragged above Alma
+Author under "Tides" and saved, the Details step read Ben Barrow, Alma
+Author and the panel "Alma Author, Ben Barrow" until the reload (two
+runs). A subtitle edit ("Harbours: Ports"), an added chapter ("Deltas:
+Fans" over "Ada Lovel") and a deletion showed in the panel with no
+reload (three runs).
+A7 (the wizard): "Tides" holds Alma Author and Ben Barrow, first and
+third on the Contributors list. Alma Author dragged above Ben Barrow
+leaves Ben second in the chapter while third on the list, so the save
+skips him: after that "Done" both were stored at place 1
+(`submission_chapter_authors.seq`). In two runs the list then read Alma
+Author, Ben Barrow, the dragged order, at once and after a reload; in
+the third it read Ben Barrow, Alma Author, the old order, at once and
+after a reload, twice. Every "Done", whatever was dragged, re-stores
+each chapter's authors by the same rule: the first "Done" of each run,
+which moved only a chapter, already left the two at place 1. Once, in
+one run, after such a chapter-only "Done" ("Estuaries" above "Tides"),
+"Tides" read Alma Author, Ben Barrow right after "Done" and Ben Barrow,
+Alma Author after the reload, on the Details step and in the Review
+panel, and the next chapter-only "Done" stored that order. The other 44
+chapter-only "Done"s on a chapter in that state showed no change, ten
+fresh books of three moves each among them. The list reads a chapter's
+authors ordered by that stored place alone (OMP
+`classes/author/Collector.php`, `orderBy('sca.seq')`), so which of two
+authors at one place comes first is the database's choice.
 
 <a id="fn-m"></a>
 **m** — `ChapterGridCategoryRow::initialize()`: `RemoteActionConfirmationModal`
@@ -1693,13 +1869,18 @@ Fixed by pkp/pkp-lib#13453 (for pkp/pkp-lib#11718; pkp-lib
 `PKP\controllers\grid\GridCategoryRow` in full. Live-probed 2026-10-08
 on OMP `main` (omp `084a19cc6`, lib/pkp `63cf1497b4`): note td11; every
 chapter row carried the class `category` again, before and after
-"Order".
+"Order", on the Chapters page and, in the wizard's walk of that day, on
+the Details step's list.
 Issue: [pkp-e2e#415](https://github.com/jardakotesovec/pkp-e2e/issues/415), closed as completed 2026-10-07.
 
 <a id="fn-f-a7"></a>
 **f-a7** — Note l (`setDataElementInCategorySequence()`). Live-probed
 2026-09-28: note td11, two books; walked 2026-10-04 on OMP `main` and
-3.5: note td11.
+3.5: note td11. Live-probed 2026-10-08 in the wizard, three runs: note
+td20 (the skipped author stored at the same place as the other, the
+list showing the dragged order in two runs and the old one in the
+third; one sighting of two authors changing places after a "Done" that
+moved only a chapter).
 Issue report: [pkp-e2e#854](https://github.com/jardakotesovec/pkp-e2e/issues/854) ([docs/issues/U72-A7-chapter-author-order-change-lost.md](../issues/U72-A7-chapter-author-order-change-lost.md)).
 
 <a id="fn-f-a8"></a>
@@ -1729,6 +1910,35 @@ came with pkp/pkp-lib#8554 (7f4ef28995, 2023-01-20). The refusal in
 the code, not walked.
 Issue report: [pkp-e2e#806](https://github.com/jardakotesovec/pkp-e2e/issues/806) ([docs/issues/U73-A15-format-name-required-primary-language.md](../issues/U73-A15-format-name-required-primary-language.md)).
 
+<a id="fn-f-a11"></a>
+**f-a11** — Live-probed 2026-10-08 on OMP `main`, two runs, with and
+without a drag pending: note td20. While the list is being ordered the
+"Order" link is `a[disabled][href="#"]`; the press changed the wizard's
+address from `…#details` to `…#files` and the rail to "1 Upload Files",
+sent no request, and "2 Details" opened again showed the list still
+being ordered. "Add Chapter" and the chapter titles carry the same two
+attributes and stay on the step when pressed; what makes the wizard
+follow the "Order" press alone was not read. On the Chapters page the
+press did nothing (two runs). Not driven on 3.5.
+
+<a id="fn-f-a12"></a>
+**f-a12** — lib/pkp `templates/controllers/grid/gridBodyPartWithCategory.tpl`
+draws each chapter as one `tbody.category_grid_body` (the chapter row
+and its author rows) followed by a second `tbody.empty.category_placeholder`
+holding the "No Items" line, shown when the chapter has no author rows;
+the ordering script (note l) makes only the first sortable, so the
+placeholder stays behind until the list is drawn again. Live-probed
+2026-10-08 on OMP `main`, three runs, on the Chapters page and in the
+wizard: note td20.
+
+<a id="fn-f-a13"></a>
+**f-a13** — Note h: the panel changes only on the three chapter events,
+and `saveSequence` sends none, so the panel keeps the page state it
+loaded with, to which an added chapter is pushed last. Live-probed
+2026-09-28 (a chapter's authors): notes td11 and td18. Live-probed
+2026-10-08 (the chapters, the authors, a chapter added after a move),
+three runs: note td20.
+
 ## Reference — entry points & surfaces
 
 | Entry | Path | Atom |
@@ -1752,6 +1962,7 @@ Issue report: [pkp-e2e#806](https://github.com/jardakotesovec/pkp-e2e/issues/806
   `classes/controllers/grid/feature/OrderCategoryGridItemsFeature.php`,
   `OrderItemsFeature.php`, `templates/controllers/grid/feature/gridOrderFinishControls.tpl`,
   `templates/controllers/grid/grid.tpl`, `templates/controllers/grid/gridRow.tpl`,
+  `templates/controllers/grid/gridBodyPartWithCategory.tpl`,
   `js/classes/features/OrderCategoryGridItemsFeature.js`,
   `classes/linkAction/request/RemoteActionConfirmationModal.php`.
 - Chapter form: OMP `controllers/grid/users/chapter/form/ChapterForm.php`,
@@ -1759,6 +1970,7 @@ Issue report: [pkp-e2e#806](https://github.com/jardakotesovec/pkp-e2e/issues/806
   `templates/controllers/grid/users/chapter/form/chapterForm.tpl`.
 - Model: OMP `classes/monograph/Chapter.php`, `classes/monograph/ChapterDAO.php`,
   `classes/author/Repository.php` (`addToChapter()`, `removeChapterAuthors()`),
+  `classes/author/Collector.php` (`filterByChapterId()`, the chapter authors' order),
   `classes/publication/Repository.php` (`version()`, `addChapterLicense()`),
   `classes/migration/install/OMPMigration.php` (`submission_chapters`,
   `submission_chapter_authors`), `schemas/submission.json` (`workType`,
