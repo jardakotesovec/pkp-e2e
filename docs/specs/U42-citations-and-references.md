@@ -83,7 +83,7 @@ that fails validation keeps the panel open with the error on the field and
 | **DOI** | No | Help text "e.g. 10.1000/182, doi:10.1000/182, https://doi.org/10.1000/182". Any of the three forms is accepted and kept as the bare DOI. Anything else is refused with "This is not formatted correctly." <sup>f</sup> |
 | **URL** | No | Must be a web address, or "This is not a valid URL." <sup>f</sup> |
 | **URN** | No | Free text. <sup>f</sup> |
-| **Arxiv** | No | Help text "e.g. 1234.123456v2, arxiv:1234.123456v2, https://arxiv.org/abs/1234.123456v2". A bare ID is kept as typed ("2101.12345v2"). Typed as "arxiv:2101.12345v2" or "https://arxiv.org/abs/2101.12345v2", it is stored as "2101.12345", without its version ⚠ [A12](#a12). Anything else: "This is not formatted correctly." <sup>f</sup> |
+| **Arxiv** | No | Help text "e.g. 1234.123456v2, arxiv:1234.123456v2, https://arxiv.org/abs/1234.123456v2". Any of the three forms is accepted and kept as the bare ID, with its version when it has one: "2101.12345v2", "arxiv:2101.12345v2" and "https://arxiv.org/abs/2101.12345v2" are each stored as "2101.12345v2". Anything else: "This is not formatted correctly." <sup>f</sup> |
 | **Handle** | No | Help text "e.g. 20.1000/100, handle:20.1000/100, https://hdl.handle.net/20.1000/100". Kept as the bare handle. Anything else: "This is not formatted correctly." <sup>f</sup> |
 | **Title** | No | The cited work's title. <sup>f</sup> |
 | **Author Information** | No | A small table with the columns **Given Name**, **Family Name** and **ORCID iD**, an "Add" button for a new row and a "Delete" per row. The boxes have no names for a screen reader ⚠ [A14](#a14). A row added and left empty is saved as an author with no name [A13](#a13). The ORCID iD box takes any text and keeps it as typed, and the expanded row links the author's ORCID icon to it ⚠ [A22](#a22). <sup>f</sup> |
@@ -117,7 +117,7 @@ button is the panel's "Close". <sup>l</sup> <sup>q16</sup> <sup>q24</sup>
 |------------------|-----------|-------|
 | **Title** | Yes | The dataset's title. Empty: "This field is required." <sup>l</sup> |
 | **Identifier type** | No | A list: DOI, Accession, PURL, ARK, URI, ARXIV, ECLI, Handle, ISSN, ISBN, PMID, PMCID, UUID. It arrives with nothing chosen and has no empty entry. A type without an identifier is refused with "This field is required when identifier type is present.", an identifier without a type with "This field is required when identifier is present.". So once an identifier is saved it cannot be removed: clearing it on "Edit Data Citation" is refused, and the type cannot be set back to nothing ⚠ [A15](#a15). <sup>l</sup> |
-| **Identifier** | No | Checked against the chosen type: an identifier that is not valid for it is refused with ""{identifier}" is not a valid {type} identifier." A valid identifier typed as a full address or with a prefix ("https://doi.org/…", "doi:…") is stored bare (Rule 21). Of type "ARXIV", "https://arxiv.org/abs/1234.12345v2" is saved as "1234.12345", and a bare ID with a version is refused (""3456.34567v4" is not a valid ARXIV identifier.") while "4567.45678" is accepted [A12](#a12). <sup>l</sup> |
+| **Identifier** | No | Checked against the chosen type: an identifier that is not valid for it is refused with ""{identifier}" is not a valid {type} identifier." A valid identifier typed as a full address or with a prefix ("https://doi.org/…", "doi:…") is stored bare (Rule 21). Of type "ARXIV" an ID keeps its version: "https://arxiv.org/abs/1234.12345v2" is saved as "1234.12345v2", and the bare "3456.34567v4" is saved as typed. <sup>l</sup> |
 | **Relationship type** | Yes | Four choices: "Supporting data without specifying whether they were generated or analyzed (supporting).", "Supporting data that were generated for the study (generated).", "Supporting data that were analyzed but not generated for the study (analyzed).", "Referenced data that were neither generated nor analyzed for the study (non-analyzed)." It arrives with nothing chosen. <sup>l</sup> |
 | **Repository** | No | Free text: where the dataset is held, or its publisher. <sup>l</sup> |
 | **Year** | No | A four-digit year. "202" or "20245" is refused with "This must be 4 digits long."; a value with letters ("20a4") gets "This is not a valid integer." and "This must be 4 digits long." together. <sup>l</sup> |
@@ -231,8 +231,13 @@ typed. Nothing asks first. The one exception is an author row added in
     is on (through "Add", the wizard's box, or a reprocess) is handed to a
     chain of background steps, which run after the page has answered:
     <sup>h</sup>
-    1. identifiers written into the text are picked out: a DOI, an arXiv
-       ID, a handle, a web address, a URN;
+    1. identifiers written into the text are picked out: a DOI (after
+       "doi:", or as a doi.org or dx.doi.org address), an arXiv ID with its
+       version, a handle, a web address, a URN. Each ends at the next
+       space, without the comma, full stop, semicolon, colon or closing
+       bracket that follows it in the sentence: "(doi:10.1234/bravo)."
+       gives "10.1234/bravo", and "hdl:10419/12345. Accessed 2020-01-01."
+       gives "10419/12345"; <sup>f-a12</sup>
     2. a reference with no DOI is looked up by its text in Crossref, which
        may supply the DOI and the bibliographic details;
     3. a reference with a DOI is looked up in OpenAlex, which may supply
@@ -946,6 +951,14 @@ Left out of the scenarios above, by reason:
   - a wizard box saved again unchanged, one of its lines spaces only
     (Rule 16): the references kept as they are, not deleted and added
     again
+  - an arXiv ID entered with its version ([Fields & validation](#fields);
+    A12 retired): "Edit citation" keeps it in each of the three forms, the
+    lookup picks it out of a reference's text with it, and a data citation
+    of type "ARXIV" saves it, typed bare or as its address
+  - identifiers read out of a reference's text (Rule 11, step 1): a DOI
+    followed by a comma or a closing bracket, a dx.doi.org address, a
+    handle followed by a sentence and a URN followed by a comma, each
+    shown whole and alone in its "Edit citation" box
   - the guard for A6 (retired; pkp-e2e#883): with "References Metadata Lookup" on, "Add" of new references shows "Processing references - 0/n" counting every reference added, and switching the lookup on over existing references shows no box
   - a refused data citation save's page notice "The form was not saved
     because {n} error(s) were encountered…" and its count, none for an
@@ -998,7 +1011,6 @@ Left out of the scenarios above, by reason:
   - A10 (the wizard's Data Citations table unchanged after a save on a
     press or a preprint server; Rule 24; scenario 7 passes it)
   - A11 (no data citations on the landing page; Rule 27)
-  - A12 (an arXiv ID losing its version; [Fields & validation](#fields))
   - A13 (a blank author row saved and making a reference structured;
     Rule 11)
   - A14 (the author boxes with no names for a screen reader;
@@ -1062,7 +1074,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | A data citation added after the Data Citations table was ordered appears first, not last | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | An author can submit with no data citations when the journal requires them | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | On a press or preprint server, the submission wizard's data citations and funders still read empty after a save | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
-| [A12](#a12) | An arXiv ID entered for a reference or a data citation loses its version, or is refused with it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | "Edit citation" keeps an author row added or deleted before "Close", and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A14](#a14) | A screen reader hears no name for the author boxes in "Edit citation" and the data citation panel | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A15](#a15) | Editing a data citation, its identifier cannot be removed and a cleared Repository, Year or URL is kept | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1079,6 +1090,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | References page: the lookup's progress box counts only structured references and says "All 2 done" over five | ✅ | retired | — |
 | [A7](#a7) | A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off | ✅ | retired | — |
 | [A23](#a23) | A new version taken while its references are being looked up shows "Processing references - 0/n" for good | ✅ | retired | — |
+| [A12](#a12) | Retired: an arXiv ID entered for a reference or a data citation lost its version, or was refused with it; fixed by pkp/pkp-lib#13479 | ✅ | retired | PR review (claude), 2026-10-08 — fixed at pkp/pkp-lib#13479's head |
 | [A1](#a1) | A Site Administrator with no role in the journal is offered the References controls, but every change is refused | ✅ | retired | — |
 | [A18](#a18) | A References change carried to "Review" by the step rail is lost on "Submit" | ✅ | retired | — |
 | [OMP1](#omp1) | A book with no references shows an empty "References" heading | ✅ | retired | — |
@@ -1192,25 +1204,6 @@ Question: should the landing page show a version's data citations? Lean:
 yes, in or next to the "References" block; otherwise the table's line
 should stop promising it.
 Basis: probe, 2026-09-24. <sup>f-a11</sup>
-
-<a id="a12"></a>
-**A12 — An arXiv ID entered for a reference or a data citation loses its version, or is refused with it** · 🐞 · medium.
-A reference's "Edit citation" panel has an "Arxiv" box whose help text
-offers an ID in three forms: bare, after "arxiv:", and as its
-https://arxiv.org/abs/ address. Typed bare, "2101.12345v2" is kept as
-typed. Typed as "arxiv:2101.12345v2" or
-"https://arxiv.org/abs/2101.12345v2", it is saved as "2101.12345",
-without a word. When a reference's text holds "arXiv:2101.12345v2", the
-metadata lookup fills "Arxiv" with "2101.12345" from it. A data citation
-of type "ARXIV" saves "https://arxiv.org/abs/2101.12345v2" as
-"2101.12345" and refuses the bare "2101.12345v2" as not a valid ARXIV
-identifier, while the unversioned "2101.12345" is accepted. Either way
-the record loses which version of the paper or dataset the work cites.
-The reference half needs metadata lookup on, since with it off "Edit
-citation" holds only the reference's text. The data citation half needs
-data citations on. Both settings sit in Settings › Workflow and are off
-by default.
-Basis: probe, 2026-10-04. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — "Edit citation" keeps an author row added or deleted before "Close", and the next "Save" stores it** · 🐞 · medium.
@@ -1391,6 +1384,9 @@ Basis: probe, 2026-10-07. <sup>f-a27</sup>
 
 <a id="a7"></a>
 **A7 — A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`), merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`), walked on the apps' `main` the same day: `importCitations()` stores the DOI found in a wizard reference's text with lookup off, as "Add" does (Rule 17). <sup>f-a7</sup>
+
+<a id="a12"></a>
+**A12 — An arXiv ID entered for a reference or a data citation loses its version, or is refused with it** · ✅ · retired. Fixed by `pkp/pkp-lib#13479` (for `pkp/pkp-lib#13477`, the team's copy of the issue report), verified 2026-10-08 at the PR's head before its merge: "Edit citation", the lookup's reading of a reference's text and a data citation of type "ARXIV" all keep the version ([Fields & validation](#fields)). <sup>f-a12</sup>
 
 <a id="a23"></a>
 **A23 — A new version taken while its references are being looked up shows "Processing references - 0/n" for good** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`), found at the PR heads and fixed before the merge, merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`): `copyCitations()` queues a lookup of its own for a copy taken mid-lookup (Rule 26). <sup>f-a23</sup>
@@ -2470,9 +2466,9 @@ citations), note l (the table's description) and note r (the exports).
 Live-probed 2026-09-24: q23 and note r.
 
 <a id="fn-f-a12"></a>
-**f-a12 — A12 evidence.** `PKP\pid\Arxiv`: the extraction pattern stops
-at the ID's digits (no `v{n}` suffix) and the validation pattern
-`^(?:\d+\.\d+|[a-z.-]+\/\d+)$` refuses one;
+**f-a12 — A12 evidence.** Until `pkp/pkp-lib#13479`, `PKP\pid\Arxiv`'s
+extraction pattern stopped at the ID's digits (no `v{n}` suffix) and its
+validation pattern `^(?:\d+\.\d+|[a-z.-]+\/\d+)$` refused one;
 `PKPCitationController::edit()` extracts `arxiv` with it only for the
 prefixed and address forms (a bare ID matches nothing and is kept as
 typed), and the data citation's `PidResolver` maps "ARXIV" to the same
@@ -2483,7 +2479,34 @@ class. Live-probed
 "https://arxiv.org/abs/1234.12345v2" saved as "1234.12345",
 "arxiv:2345.23456v3" as "2345.23456", "3456.34567v4" refused and
 "4567.45678" accepted.
-Issue report: [pkp-e2e#866](https://github.com/jardakotesovec/pkp-e2e/issues/866) ([docs/issues/U42-A12-arxiv-id-loses-version.md](../issues/U42-A12-arxiv-id-loses-version.md)).
+At the PR head of `pkp/pkp-lib#13479` (pkp-lib `09f4461da9` on
+`2ac457888e`, for `pkp/pkp-lib#13477`, the team's copy of the issue
+report with four more points in its first comment; 2026-10-08, before
+its merge, all three apps on the default dataset, ojs `ade5f4cc56`
+(`pkp/ojs#5915`), omp `042e72e5cf`, ops `d3da9aea1e`): both `Arxiv`
+patterns end in an optional lower-case `(?-i:v\d+)?`. The issue
+report's walk (`checks/sync/pkp-lib-13479/arxiv-version.js`): the lookup
+filled "Arxiv" with "2101.12345v2", the three typed forms each read back
+"2101.12345v2", and of type "ARXIV" the address saved as "1234.12345v2"
+and "3456.34567v4" as typed; its `neighbour` mode gave the base's
+results but for "hep-th/9901001v1", refused before and saved now ("xyz",
+"3456.34567vx", "3456.34567V4" and "not-an-arxiv-id" still refused).
+Rule 11, step 1 (`checks/sync/pkp-lib-13479/walk.js`, lookup on, the
+"Edit citation" boxes read once the first job had run):
+"doi:10.1234/alpha, 2020" gave DOI "10.1234/alpha" (base: "10.1234/alpha,"),
+"(doi:10.1234/bravo)." gave "10.1234/bravo" (base: "10.1234/bravo)"),
+"https://dx.doi.org/10.1234/charlie" gave DOI "10.1234/charlie" and no
+URL (base: no DOI, the address as URL), "hdl:10419/12345. Accessed
+2020-01-01." gave Handle "10419/12345" (base: "10419/12345. Accessed
+2020-01-01"), "urn:nbn:de:101:1-2019072802401757702913, 2019." the URN
+without its comma, and "doi:10.1000/jdoi.2020.5" the DOI whole (base:
+"10.1000/j.2020.5", `BasePid::removePrefix()` then removing every prefix
+wherever it stood). The same runs at the base `2ac457888e` are the
+"base" values (`.reports/pr13479/{before,after}-*/`); the PR's
+`PidExtractionTest` and `DataCitationIdentifierValidationTest` pass at
+the head (26 and 13 tests) and fail against the base's classes (20 of
+26, and `testArxivValidation`).
+Issue report: [pkp-e2e#866](https://github.com/jardakotesovec/pkp-e2e/issues/866); the report, its `fix.diff` and its place under `checks/issues/` deleted with the retirement (git keeps them), the issue to be closed when the PR merges.
 
 <a id="fn-f-a13"></a>
 **f-a13 — A13 evidence.** Note h (`Citation::isStructured()` tests that

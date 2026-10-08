@@ -1,4 +1,5 @@
-// Helpers for the U42 A12 walk (arXiv IDs losing their version): the workflow's Publication pages
+// Helpers for the U42 references and data-citation walks (first written for A12, arXiv IDs losing their
+// version; now checks/sync/pkp-lib-13479/ and the A4 walk require it): the workflow's Publication pages
 // "References" and "Data", the "Edit citation" panel, the data citation panel and Settings › Workflow ›
 // "Metadata". Requiring this file runs nothing.
 const {idle} = require('../../../probe');
