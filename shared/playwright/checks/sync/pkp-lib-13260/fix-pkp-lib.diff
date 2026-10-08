@@ -1,0 +1,52 @@
+diff --git a/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php b/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php
+index 35705a385b..cfe4924c4a 100644
+--- a/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php
++++ b/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php
+@@ -36,7 +36,7 @@ class ReviewRoundAuthorResponseResource extends JsonResource
+         return [
+             'id' => $response->id,
+             'reviewRoundId' => $response->reviewRoundId,
+-            'response' => $response->getLocalizedData('authorResponse'),
++            'response' => $response->authorResponse,
+             'associatedAuthors' => array_map(fn (Author $author) => [
+                 'id' => $author->getId(),
+                 'fullName' => $author->getFullName(),
+diff --git a/classes/template/PKPTemplateManager.php b/classes/template/PKPTemplateManager.php
+index 7355605b7e..f7b202a2db 100644
+--- a/classes/template/PKPTemplateManager.php
++++ b/classes/template/PKPTemplateManager.php
+@@ -226,7 +226,7 @@ class PKPTemplateManager extends Smarty
+             'currentLocale' => $locale,
+             'currentLocaleLangDir' => Locale::getMetadata($locale)?->isRightToLeft() ? 'rtl' : 'ltr',
+             'applicationName' => __($application->getNameKey()),
+-            'site' => $request->getSite(),
++            'site' => Application::isInstalled() ? $request->getSite() : null,
+         ]);
+ 
+         // Assign date and time format
+diff --git a/pages/user/PKPUserHandler.php b/pages/user/PKPUserHandler.php
+index 4db714a8c4..0e7eee63b6 100644
+--- a/pages/user/PKPUserHandler.php
++++ b/pages/user/PKPUserHandler.php
+@@ -53,7 +53,7 @@ class PKPUserHandler extends Handler
+         $templateMgr = TemplateManager::getManager($request);
+         $templateMgr->displaySystemMessage(
+             title: __('common.error'),
+-            message: $authorizationMessage,
++            message: __($authorizationMessage),
+         );
+     }
+ }
+diff --git a/templates/frontend/pages/system-message.tpl b/templates/frontend/pages/system-message.tpl
+index 7e358b6c2c..90fc290fc6 100644
+--- a/templates/frontend/pages/system-message.tpl
++++ b/templates/frontend/pages/system-message.tpl
+@@ -13,7 +13,7 @@
+ <div class="page page_{if $type}{$type}{else}message{/if}">
+ 	{include file="frontend/components/breadcrumbs.tpl" currentTitle=$title}
+ 	<h1>
+-		{$pageTitle}
++		{$title}
+ 	</h1>
+ 	<div class="description">
+     {$message|strip_unsafe_html}

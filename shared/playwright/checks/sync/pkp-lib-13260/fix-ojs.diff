@@ -1,0 +1,35 @@
+diff --git a/classes/view/HomepageBlocksRegistry.php b/classes/view/HomepageBlocksRegistry.php
+index ff1d87e482..0490f3eade 100644
+--- a/classes/view/HomepageBlocksRegistry.php
++++ b/classes/view/HomepageBlocksRegistry.php
+@@ -128,7 +128,7 @@ class HomepageBlocksRegistry extends \PKP\view\HomepageBlocksRegistry
+                     $count = Repo::submission()
+                         ->getCollector()
+                         ->filterByStatus([Submission::STATUS_PUBLISHED])
+-                        ->filterByContextIds([$context ? $context->getId() : '*'])
++                        ->filterByContextIds([$context ? $context->getId() : Application::SITE_CONTEXT_ID_ALL])
+                         ->getCount();
+ 
+                     // Round to nearest round number based on how
+@@ -182,7 +182,7 @@ class HomepageBlocksRegistry extends \PKP\view\HomepageBlocksRegistry
+                     $issues = Repo::issue()
+                         ->getCollector()
+                         ->filterByPublished(true)
+-                        ->filterByContextIds([$context?->getId() ?? '*'])
++                        ->filterByContextIds([$context?->getId() ?? Application::SITE_CONTEXT_ID_ALL])
+                         ->orderBy(IssueCollector::ORDERBY_DATE_PUBLISHED)
+                         ->limit(10)
+                         ->getMany();
+diff --git a/templates/frontend/objects/article_details.tpl b/templates/frontend/objects/article_details.tpl
+index 65ee80f788..869cef14f3 100755
+--- a/templates/frontend/objects/article_details.tpl
++++ b/templates/frontend/objects/article_details.tpl
+@@ -341,7 +341,7 @@
+ 			{/if}
+ 
+ 			{* JATS XML Link *}
+-			{if isset($jatsDownloadUrl)}
++			{if $jatsDownloadUrl}
+ 				<div class="item jats">
+ 					<span class="value jats_link">
+ 						<a class="obj_galley_link xml" href="{$jatsDownloadUrl|escape}">
