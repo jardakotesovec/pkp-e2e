@@ -1328,3 +1328,4 @@ verdict yet) · `ready` (pushed, green at the PR ref, developer told) ·
 
 | App PR | Branch | State | Since | Note (one line) |
 |--------|--------|-------|-------|-----------------|
+| pkp/ojs#5907 (issue pkp/pkp-lib#13469, from pkp-e2e#264; OJS alone, no pkp-lib, OMP or OPS PR) | `13469` | ready | 2026-10-08 | The daily DOAJ deposit keeps to its own journal's published articles and versions; U63 A5 retired, its report, walk and `fix.diff` deleted (the shared `lib.js` stays), no test edits; kept check `checks/sync/ojs-5907/replaced-minor.js`. At the merge: `git range-diff` against the reviewed head `cedaf1be16`, rebase, CI, fast-forward, close pkp-e2e#264 with a comment naming pkp/ojs#5907. CI 37722259518 at the PR head (OJS alone): red only U03 S4 (K-12780), as on the PR's own check 37719712317. |
