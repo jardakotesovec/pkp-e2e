@@ -27,9 +27,12 @@
  * - OJS7 ✅ (ruled intended): S17 unticks "Public Visibility" and reads
  *   the review's row gone; ticking it again (a new DOI, or "Needs DOI")
  *   is a Planned item.
- * - A2, A7, A9–A12, A15–A20, OJS1, OJS2: not on these scenarios'
- *   paths ("Immediately…" is only refused, in S8; S17's journal has no
- *   agency, so its review DOIs are never deposited). A25–A28 are retired
+ * - A2, A7, A9–A12, A15–A20, OJS1, OJS2, OJS5, OJS8: not on these
+ *   scenarios' paths ("Immediately…" is only refused, in S8; S17's
+ *   journal has no agency, so its review DOIs are never deposited; S13
+ *   presses "Deposit All" on a Crossref journal under "DOI Versioning"
+ *   "No" with one version per work, and S16's DataCite journal has no
+ *   galley kind and no second version). A25–A28 are retired
  *   (a decline and "Revert Decline" under "Immediately…", a declined work
  *   carrying a DOI on the page; serial S11 now marks the work registered
  *   while its major version is unpublished), and so is OJS6 (a hidden

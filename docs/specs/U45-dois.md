@@ -137,7 +137,7 @@ links under the list. <sup>g</sup>
 |------------------|-----------|-------|
 | **Search** | — | Narrows the list to the phrase once Enter is pressed; typing alone changes nothing (Rule 21). A "Clear search phrase" button, shown once a phrase is set, empties it. <sup>o</sup> |
 | **Bulk Actions** | — | A menu: "Select All" / "Select None", "Expand all" / "Collapse all", then "Take action on {count} selected item(s)." over the actions of Rule 24. <sup>p</sup> |
-| **Deposit All** | — | A button, shown only with an agency configured (Rule 36). Rule 29. <sup>p</sup> |
+| **Deposit All** | — | A button, shown only with an agency configured (Rule 36). Rules 29, 29a. <sup>p</sup> |
 | **Filters** | — | Headed "Filters", with a round button showing only a "?" icon beside the heading that opens the "DOI Statuses" window (Rule 22); a screen reader announces it as "button" with no name ⚠ [A8](#a8). Groups: "Status" ("Needs DOI", "DOI Assigned"); "Registration" ("Unregistered", "Submitted", "Registered", "Has Error", "Needs Sync"); "Publication Status", on a press ("Published", "Unpublished") and on a preprint server ("Posted", "Unpublished"); "Workflow", on a journal's "Articles" tab and on a press ("In Copyediting, Production, Published or with DOIs", Rule 22); on a journal's "Articles" tab an "Issues" box that suggests an issue once its year ("2025") or its full name from the start ("Vol. 1 No. 1") is typed ("Vol" or "1" suggests nothing); choosing one keeps that issue's articles. <sup>o</sup> <sup>q8</sup> <sup>q40</sup> |
 | **An item's row** | — | A tick box with no name for a screen reader [A8](#a8), the item's name as a link that opens its public page in a new tab (Rule 16), its number, a status badge (Rule 31) and an expand button. <sup>m</sup> |
 | **An item's expanded view** | — | The version's name, a table "Type", "DOIs", "Status", "Actions" with one row per DOI the item carries (Rule 17), "Edit" / "Save" (Rule 18), and with an agency configured the agency panel (Rule 30). On a press, under the table, the note of Rule 47 while a chapter cannot carry a DOI. <sup>m</sup> <sup>q29</sup> |
@@ -365,6 +365,8 @@ links under the list. <sup>g</sup>
     unpublished goes to the published version only (the one the DOIs
     page shows, Rule 17): once the newer version is published, its page
     shows no DOI while the older version's page shows it ⚠ [A10](#a10).
+    "Deposit All" takes these shared DOIs once a version is published
+    (Rule 29a).
     <sup>k</sup>
 12. **"DOI Versioning" "Yes": a DOI per major version.** A new version
     made with "Major Revision" does not take its source's DOI, nor its
@@ -375,7 +377,9 @@ links under the list. <sup>g</sup>
     "Minor Revision" keeps its source's DOI, its galleys too: a family of
     versions whose names differ only after the dot ("Version of Record
     2.0", "2.1") shares them. Changing a DOI on the DOIs page then
-    changes it for that family only; the others keep theirs.
+    changes it for that family only; the others keep theirs. "Deposit
+    All" takes the DOIs of every family with a published version
+    (Rule 29a).
     While any journal of the install is set to "Yes", every journal's
     OAI requests fail ([→ OAI-PMH, A22](U19-oai-pmh.md#a22)). <sup>k</sup> <sup>q16</sup>
 13. **Switching versioning later.** A change of "DOI Versioning" affects
@@ -579,7 +583,8 @@ links under the list. <sup>g</sup>
       the deposit sends those of them Rule 7c lets go; the kept
       DOI of a review no longer shown publicly (Rule 7b) keeps its
       status, and the deposit leaves the review out
-      [OJS6](#ojs6). A ticked
+      [OJS6](#ojs6). With DataCite under "DOI Versioning" "Yes" only
+      the current version is sent [OJS8](#ojs8). A ticked
       published work that has no DOI gets the same notice, yet stays
       "Needs DOI" and nothing is sent ⚠ [A15](#a15). A ticked unpublished
       item makes the whole action fail: nothing is marked, the window
@@ -587,23 +592,45 @@ links under the list. <sup>g</sup>
     - **"Deposit All"** opens "Deposit all DOIs": "You are about to
       schedule all outstanding DOI metadata records to be deposited with
       {agency}. Only published items with a DOI will be deposited…",
-      with "Deposit all DOIs" and "Cancel". It sends every published
-      item whose DOI reads "Unregistered", "Error" or "Needs Sync" (on a
-      journal the published issues too), sets those to "Submitted" and
-      shows the same success notice. With DataCite, the agency that
-      takes galley DOIs (Rule 35), a galley DOI is sent only with its
-      article's DOI. When that DOI reads "Registered" (as when galley
-      DOIs are turned on after the articles were registered) or is
-      missing, the galley DOI still turns "Submitted", yet
-      Administration › "Failed Jobs", where test-install deposits land
-      [A18](#a18), gains nothing for its work. "Automatic Deposit"
-      (Rule 41), never run on test installs, does the same
-      ⚠ [OJS5](#ojs5). A review's DOI {OJS} is taken while the review
-      counts as read (Rule 7) and Rule 7c lets it go, also when its
-      article's DOI already reads "Registered", which keeps that status. With nothing left to
-      deposit it
-      still shows "Items successfully submitted for deposit" and changes
-      nothing.
+      with "Deposit all DOIs" and "Cancel". Confirmed, it sets the DOIs
+      Rule 29a names to "Submitted", sends each work that carries one
+      of them to the agency in the background (on a journal the
+      published issues too) and shows the same success notice. With
+      nothing left to deposit it still shows "Items successfully
+      submitted for deposit" and changes nothing.
+
+29a. **What "Deposit All" takes.** The DOIs of the ticked kinds that
+    read "Unregistered", "Error" or "Needs Sync"; a DOI reading
+    "Submitted" or "Registered" keeps its status. "DOI Versioning"
+    decides whose DOIs: <sup>q48</sup>
+    - **"No"**: those of each work's newest published version. A newer
+      version not yet published shares them (Rule 11), so its DOIs read
+      "Submitted" too. A DOI that only an earlier version carries, one
+      it got while the journal was on "Yes", keeps its status; the DOIs
+      page shows that status only in "View all" (Rule 20), once "Yes"
+      is saved again.
+    - **"Yes"**: those of every major version that is published. With
+      1.0 and 2.0 published, both blocks of "View all" (Rule 20) turn
+      "Submitted"; a DOI that 1.0 and a published 1.1 share turns
+      "Submitted"; a major version not yet published keeps
+      "Unregistered" (Rule 26). With DataCite the deposit is given the
+      current version only: an earlier major version's DOIs turn
+      "Submitted" all the same and are never sent ⚠ [OJS8](#ojs8).
+    - **A galley's DOI** {OJS}, on a DataCite journal (the agency that
+      takes them, Rule 35), is taken whatever its article's DOI reads.
+      When the article's DOI already reads "Registered", as after galley
+      DOIs are turned on for articles registered earlier, the galley's
+      row turns "Submitted" and the article's keeps "Registered". On a
+      journal with the galley kind ticked and "Articles" not, the
+      galleys' rows turn "Submitted". With "Articles" ticked, a work
+      whose "Article" row has no DOI while its galley's has one gets the
+      galley's row "Submitted", but its deposit fails on the server and
+      the galley's DOI is never sent ⚠ [OJS5](#ojs5).
+    - **A review's DOI** {OJS} is taken while the review counts as read
+      (Rule 7) and Rule 7c lets it go, also when its article's DOI
+      already reads "Registered", which keeps that status.
+
+    "Automatic Deposit" (Rule 41) takes the same DOIs.
 30. **The agency panel.** With an agency configured, an item's expanded
     view ends with a box naming the agency, a sentence and buttons:
     <sup>m</sup> <sup>q20</sup>
@@ -740,8 +767,10 @@ links under the list. <sup>g</sup>
     effects). <sup>d</sup>
 41. **"Automatic Deposit".** Ticked, the box promises deposits "at
     scheduled intervals". A journal's install runs that deposit once a
-    day. A preprint server offers the box, but its install schedules no
-    deposit ⚠ [OPS2](#ops2). <sup>v</sup>
+    day, on the DOIs "Deposit All" takes (Rule 29a). The test installs
+    run no scheduled task, so there the daily deposit never happens and
+    no scenario waits for it. A preprint server offers the box, but its
+    install schedules no deposit ⚠ [OPS2](#ops2). <sup>v</sup>
 
 <a id="crossmark"></a>
 42. **The Crossmark button** {OJS}. While the "Crossref Manager Plugin"
@@ -1021,7 +1050,8 @@ differs. <sup>z1</sup>
 
 6. **"DOI Versioning"** (same tab; "No" on a journal and press, "Yes" on
    a preprint server). The other end changes what a new version starts
-   with (Rules 11, 12) and adds "View all" (Rule 20); "Yes" also shows
+   with (Rules 11, 12) and which versions' DOIs "Deposit All" takes
+   (Rule 29a), and adds "View all" (Rule 20); "Yes" also shows
    Crossref's "Update Policy DOI" {OJS} (Rule 38). <sup>k</sup>
 
 7. **"Registration Agency"** (Settings › Distribution › "DOIs" ›
@@ -1747,12 +1777,12 @@ throwaway accounts. <sup>sc</sup>
       records to be deposited with Crossref. Only published items with a
       DOI will be deposited…", with "Deposit all DOIs" and "Cancel";
       press "Deposit all DOIs": "Items successfully submitted for
-      deposit", and "Coral spawning" reads "Submitted" (Rule 29).
+      deposit", and "Coral spawning" reads "Submitted" (Rules 29, 29a).
     - **No mail**: no email about the deposits has reached the mail
       catcher (Side effects).
     - **Control**: after "Deposit All", "Tardigrade desiccation" still
       reads "Registered" and "Moss regrowth" "Unpublished" (Rules 16,
-      29). <sup>sc</sup>
+      29a). <sup>sc</sup>
 
 14. **Crossref's requirements on a journal** {OJS}
 
@@ -2044,6 +2074,17 @@ Left out of the scenarios above, by reason:
     published {OJS OPS} (Rules 26, 29; A28 retired)
   - an article whose own DOI was cleared while its galley keeps one,
     its badge reading "Unregistered" {OJS} (Rule 31)
+  - a DataCite journal with the galley kind ticked: "Deposit All"
+    turning "Submitted" the "PDF" row of a work whose "Article" row was
+    marked "Registered" before galley DOIs were turned on, the "Article"
+    row keeping "Registered"; and on a journal with the galley kind
+    ticked and "Articles" not, the "PDF" row turning "Submitted" {OJS}
+    (Rule 29a; OJS5 narrowed to the work without an article DOI)
+  - "DOI Versioning" "Yes" with Crossref configured: "Deposit All" on a
+    work with 1.0 and 2.0 published turning both blocks of "View all"
+    "Submitted", on a work with 1.0 and a minor 1.1 published turning
+    their shared DOI "Submitted", and leaving "Registered" a 1.0 marked
+    so before its 2.0 was published {OJS OPS} (Rule 29a)
   - "Immediately, when an item is created": the final "Submit" giving
     the version its DOI (a journal's and a preprint server's galleys,
     a press's chapters with their page, formats and files theirs), a
@@ -2078,6 +2119,7 @@ Left out of the scenarios above, by reason:
     (Rules 5, 12)
 - **Rarely met**:
   - a press with "Chapters" or "Publication Formats" ticked and "Monographs" not: the same books listed, each with only those kinds' rows, the badge read from the first row {OMP} (Rule 46)
+  - a journal switched from "DOI Versioning" "Yes" to "No" with 1.0 and 2.0 published on DOIs of their own: "Deposit All" turning 2.0's DOI "Submitted" and leaving 1.0's "Unregistered", as "View all" shows once "Yes" is saved again (Rule 29a)
 - **Nothing new to test**:
   - the Site Administrator on the DOIs page: the Journal Manager's page of scenarios 1 and 3 (Actors row 2)
   - another manager-level press role or the Site Administrator on a book's chapter and format rows: the Press Manager's rows of scenarios 4, 5 and 7 (Actors rows 2–3)
@@ -2119,7 +2161,8 @@ Left out of the scenarios above, by reason:
   - OJS1 ("Never" not stopping an issue's DOI at "Publish Issue"; Rule 8)
   - OJS2 (a DataCite issue export or deposit; Rule 29)
   - A15 ("Deposit DOIs" on a published work without a DOI, and on one whose article DOI was cleared while its galley kept one; Rule 29)
-  - OJS5 ("Deposit All" marking "Submitted" a galley DOI whose article DOI is "Registered" or missing, and "Automatic Deposit" alike; Rules 29, 41)
+  - OJS5 ("Deposit All" on a DataCite journal marking "Submitted" the galley DOI of a work whose article has none, its deposit failing; Rules 29a, 41)
+  - OJS8 ("Deposit All" and "Deposit DOIs" on a DataCite journal under "DOI Versioning" "Yes" marking an earlier major version's DOIs "Submitted"; Rules 29, 29a)
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
@@ -2167,7 +2210,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS2](#ojs2) | On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it | 🐞 | high · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
-| [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
+| [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" when its article has no DOI, and the deposit then fails without sending it | 🐞 | medium · crash: server | PR review (claude), 2026-10-08 — narrowed |
+| [OJS8](#ojs8) | With DataCite and "DOI Versioning" "Yes", a deposit is given only the current version, yet "Deposit All" and "Deposit DOIs" mark every published major version's DOIs "Submitted" | 🐞 | user-visible | @bozana 2026-10-08 · tracked upstream |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -2400,6 +2444,7 @@ works whose DOI was cleared. On 3.5 the same notice shows, and the work's
 record is sent to the agency with an empty DOI, which cannot register
 anything; the work stays "Needs DOI".
 Basis: probe, 2026-10-06. <sup>f-a15</sup>
+Report: refresh owed — `pkp/pkp-lib#13460` `d19b2ed294` with `pkp/ojs#5903` `99f5b3dfc8` and `pkp/ops#1435` `5dfa560a8f` (round-8 PR heads, unmerged; `pkp/pkp-lib#13253`) make `getExportableDOIsSubmissionIds()` accept a published version that has only a galley's DOI (`whereHasDoi()`), so the Cause's `whereNotNull('p.doi_id')` sentence and the Proposed fix's intersection no longer refuse such a work: on DataCite the job for a work whose article DOI was cleared now reaches the plugin and fails there ("DataCite export: no DOI assigned to the object being deposited."), where it failed with `invalid.job.payload`; "Deposit All" now queues that same failing job ([OJS5](#ojs5)), so the Cause's last sentence on "Deposit All" changes; a work with no DOI at all fails as before (2026-10-08)
 
 <a id="a16"></a>
 **A16 — A "Needs Sync" item's agency panel says its metadata "has not been submitted"** · ❓ · minor.
@@ -2613,23 +2658,20 @@ deposit does ([OJS2](#ojs2)).
 Basis: probe, 2026-10-05. <sup>f-ojs4</sup>
 
 <a id="ojs5"></a>
-**OJS5 — "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing** · 🐞 · high.
-A journal deposits its DOIs with DataCite, galley DOIs included. A
-manager presses "Deposit All" on the DOIs page and sees "Items
-successfully submitted for deposit". A galley DOI reading "Unregistered",
-"Error" or "Needs Sync" is marked "Submitted", but it is sent only when
-the article's own DOI is sent in the same deposit. When the article DOI
-is already "Registered", or the article has none, nothing is sent,
-nothing records a failure, and later presses skip the galley DOI.
-The galley DOI therefore never resolves, while the page shows it as on
-its way.
-Three kinds of journal meet it: one that turns galley DOIs on after its
-articles were registered, whose first press leaves every new galley DOI
-unsent; one that cleared an article's DOI and kept its galley's; and one
-that assigns galley DOIs but no article DOIs, none of whose galley DOIs
-is ever sent. With "Automatic Deposit" on, the scheduled deposit does
-the same without anyone pressing.
-Basis: probe, 2026-10-06. <sup>f-ojs5</sup>
+**OJS5 — "Deposit All" marks a galley DOI "Submitted" when its article has no DOI, and the deposit then fails without sending it** · 🐞 · medium · crash: server.
+A journal deposits its DOIs with DataCite, with "Articles" and galley
+DOIs both ticked. A published article has no DOI of its own, because it
+was cleared on the DOIs page or never given, while its galley has one.
+A manager presses "Deposit All" and sees "Items successfully submitted
+for deposit"; the galley's row turns "Submitted". The work's deposit is
+expected to send the galley's DOI. Instead it fails on the server
+before the galley is reached. The galley's DOI stays "Submitted", is
+never sent, and later presses skip it; only Administration › "Failed
+Jobs" lists the failure. "Deposit DOIs" on the same work ends the same
+way ([A15](#a15)), and with "Automatic Deposit" on, the scheduled
+deposit does it without anyone pressing.
+Basis: probe, 2026-10-08, at the round-8 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs5</sup>
+Report: refresh owed — `pkp/pkp-lib#13460` `d19b2ed294` with `pkp/ojs#5903` `99f5b3dfc8` (round-8 PR heads, unmerged; `pkp/pkp-lib#13253`) give a galley DOI's row its work in `getAllDepositableSubmissionIds()` and let `getExportableDOIsSubmissionIds()` accept a version with only a galley's DOI, so two of the report's three cases are fixed (galley DOIs turned on after the articles were registered; galley DOIs with "Articles" unticked: a deposit is queued and reaches DataCite's address). What remains is the cleared or missing article DOI with "Articles" ticked: a `DepositSubmission` job is now queued and fails in `DataciteExportPlugin::depositXML()` ("no DOI assigned to the object being deposited"), where nothing was queued. The title, Summary, severity (high, now medium with a crash), Steps (the turned-on-later path goes), Cause and Proposed fix all change; the same failed job as [A15](#a15)'s DataCite case, so the refresh may join the two (2026-10-08)
 
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
@@ -2653,6 +2695,32 @@ Basis: probe, 2026-10-07, at the round-6 PR heads of `pkp/pkp-lib#13447` before 
 > link changes; a DOI that was sent keeps its place on the review. Under
 > the copyediting timing the review reads "Needs DOI" until "Assign DOIs"
 > or the next publication, the known limitation of Rule 7a.
+
+<a id="ojs8"></a>
+**OJS8 — With DataCite and "DOI Versioning" "Yes", a deposit is given only the current version, yet "Deposit All" and "Deposit DOIs" mark every published major version's DOIs "Submitted"** · 🐞 · user-visible.
+A journal deposits with DataCite and has "DOI Versioning" on "Yes". An
+article has 1.0 and 2.0 published, each with its own article and galley
+DOIs, and 1.0's still read "Unregistered" ("Error" and "Needs Sync"
+count the same). A manager presses "Deposit All", or ticks the work and
+runs "Deposit DOIs": in "View all" every row of both versions turns
+"Submitted", and one deposit is queued for the work. Expected: 1.0's
+DOIs are sent too, as on a Crossref journal, or keep "Unregistered".
+Instead the deposit is given the current version only, 2.0's article
+and galleys: 1.0's DOIs are never sent, no error is recorded, and
+"Deposit All" skips them from then on because they read "Submitted".
+Once DataCite has answered, 2.0's rows read "Registered" and 1.0's stay
+"Submitted". The test installs reach no agency, so there every row
+stays "Submitted" (Rule 33) and the DOIs page looks the same as on a
+Crossref journal. "Deposit All" marks 1.0's rows since it follows "DOI
+Versioning" (Rule 29a); before, it left them "Unregistered".
+"Automatic Deposit" marks the same DOIs.
+Basis: probe, 2026-10-08, at the round-8 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs8</sup>
+Report: none — DataCite with a DOI per version is not implemented yet and is tracked upstream in `pkp/pkp-lib#11591` (@bozana, 2026-10-08)
+
+> **Reviewed — @bozana, 2026-10-08**: confirmed 🐞. Ruling: "DataCite
+> and DOI Versioning is still to be implemented", tracked upstream in
+> pkp/pkp-lib#11591 (open, milestone 3.6; pkp/ojs#5866). No fix comes
+> before it, and the statuses above stand until then.
 
 ### OMP
 
@@ -3138,7 +3206,7 @@ peer reviews when the agency and the context both allow `peerReview`),
 `depositSubmissions()` (published only; dispatches `DepositSubmission`,
 `markSubmitted()`), `depositAllDois()` → `Repository::depositAll()`
 (`DAO::getAllDepositableSubmissionIds()`: statuses unregistered, error,
-stale); OJS `api/v1/dois/DoiController.php` the issue twins
+stale; the versions it takes at the round-8 heads: note q48); OJS `api/v1/dois/DoiController.php` the issue twins
 (`ISSUE_NOT_PUBLISHED`). Empty selection: the ids array is empty →
 `api.dois.404.noPubObjectIncluded`. Live-probed 2026-09-26 (Rules 24–29),
 all three apps (export and deposit OJS Crossref and DataCite, OPS
@@ -3231,6 +3299,59 @@ format and file DOIs alike; "Mark DOIs Needs Sync" turned 1.0's and
 2.0's "Needs Sync" and 3.0's kept "Unregistered"; "Mark DOIs
 Unregistered" set every DOI "Unregistered", read in "View all" and in
 the database.
+
+<a id="fn-q48"></a>
+**q48** — At the round-8 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `d19b2ed294`, one commit for `pkp/pkp-lib#13253` on the unchanged round-7 commits; `pkp/ojs#5903` `99f5b3dfc8`, head `62771e9d2a`; `pkp/omp#2495` `87f777567`, head `7b367d745`; `pkp/ops#1435` `5dfa560a8f`, head `b3acc2dc19`; `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748` unchanged),
+before their merge: each app's `doi\DAO::getAllDepositableSubmissionIds()`
+restricts its publication, galley, chapter, format and file subqueries
+through lib/pkp `doi\DAO::whereDepositablePublication()`: without "DOI
+Versioning" the submission's current publication, with it the latest
+published minor of each version stage and major version (for a child
+object without asking for the publication's own DOI). A row's work id is
+`COALESCE(p.submission_id, gp.submission_id, dra.submission_id)` on OJS
+(OPS without the review join; OMP over chapters, formats and proof
+files), under `distinct()`. `Repository::depositAll()` is unchanged: one
+`DepositSubmission` job per distinct work id, and `markSubmitted()` on
+every listed DOI. `publication\DAO::getExportableDOIsSubmissionIds()`,
+which the "Export DOIs" validation and `DepositSubmission::handle()`
+check, takes `whereHasDoi()`: on OJS and OPS a publication's DOI or one
+of its galleys', on OMP a chapter's, a format's or a format's proof
+file's too, whatever kinds are ticked. At round 7 and the tips the list
+took the current publication in both modes, a galley's row had no work
+id (OJS5 as it was), and only a publication's own DOI made a work
+exportable. Live-probed 2026-10-08 at these heads, OJS and OPS,
+PostgreSQL, scratch contexts with Crossref (depositor fields, no
+credentials) and "Articles" ("Preprints") alone; versions made and
+published through the publication API as the signed-in manager;
+"Deposit All" pressed on screen (200, "Items successfully submitted for
+deposit"); statuses read in the expanded view, in "View all" and in the
+database; `DepositSubmission` jobs counted in `jobs` and never run
+(script `.reports/sync/acc8/scripts/v8.js`, facts
+`.reports/sync/acc8/v8-yes-ojs.json`, `v8-no-switch-dc-dg-ojs.json`,
+`v8-yes-no-switch-ops.json`). "Yes": 1.0 and 2.0 published, both
+"Unregistered": both blocks "Submitted", one job; 1.0 and 1.1 published
+on one DOI: "Submitted", one job (no "View all": one family); 1.0 marked
+"Registered", then 2.0 published: 1.0 "Registered" before and after
+(A17), 2.0 "Submitted", one job; 1.0 published and 2.0 unpublished: 1.0
+"Submitted", "… 2.0 Unpublished" "Unregistered", one job. A second
+"Deposit All" answered 200 with the notice and queued nothing. "No": 1.0
+and a second version published on one DOI: "Submitted", one job; the
+second version left unpublished: the same. "Yes", then "No" saved on
+screen, with 1.0 and 2.0 published on DOIs of their own: 2.0's
+"Submitted" and 1.0's "Unregistered" (read in "View all" once "Yes" was
+saved again), one job. The regression reader rr8 the same day
+(`.reports/sync/rr8/suspicions.md` S3, S4; `.reports/sync/rr8/s3-r2-ojs.json`,
+`s3-r2-ops.json`, `s4-r2-omp.json`): OJS and OPS Crossref with 1.0, 2.0
+and 2.1 published and 3.0 unpublished, the context's `DepositContext`
+job run by hand (the "Automatic Deposit" path): each DOI listed once
+with its work id, 1.0, 2.0 and 2.1 "Submitted", 3.0 "Unregistered", one
+job, the Crossref XML (built read-only, validation off) carrying the
+same DOIs; no SQL error in either mode in any of the three apps; on a
+press no screen reaches the queries (no agency). The galley cases on
+DataCite: note f-ojs5; DataCite under "Yes": note f-ojs8; a work the
+export accepts on a leftover galley DOI: note f-a15. What an agency is sent rests
+here on the statuses, the queued jobs and the code: the test installs
+hold no agency credentials.
 
 <a id="fn-m"></a>
 **m** — `components/ListPanel/doi/DoiListItem.vue`: tick box, title link
@@ -3927,6 +4048,12 @@ a reload (OJS, OPS). The test installs run no scheduled task
 (`task_runner = Off`), so what the task deposits was not seen.
 Live-probed 2026-09-26 (Rule 41): "Enable automatic depositing" with its
 help, saved ticked and read back after a reload on OJS and OPS.
+At the round-8 PR heads of `pkp/pkp-lib#13447` (note q48), before their
+merge, `depositAll()` takes the versions Rule 29a names; the regression
+reader rr8 ran `DepositContext::handle()` by hand for a scratch context
+on OJS and OPS (2026-10-08, `.reports/sync/rr8/suspicions.md` S3): the
+DOIs "Deposit All" takes read "Submitted", one job per work. The
+schedulers are unchanged: OJS's alone names `DepositDois` (OPS2 stands).
 
 <a id="fn-t"></a>
 **t** — OJS `CrossrefPlugin`: hooks registered only while the plugin is
@@ -4641,6 +4768,38 @@ picks the galley DOI by its status, and `Repository::depositAll()`
 marks every DOI it returns "Submitted" but queues a
 `DepositSubmission` only for a row that names its work, which this one
 did not (the issue report's Cause names the same query).
+At the round-8 PR heads of `pkp/pkp-lib#13447` (note q48), before their
+merge, the kept walk re-run 2026-10-08 on the default dataset (dataset
+fleets, pkp/datasets `a130b9a`, `job_runner` On; facts
+`.reports/issues-acc8/acc8/`): `WALK=nodoi`, OJS and OPS Crossref: the
+same notice, "Needs DOI" and `invalid.job.payload`, since
+`whereHasDoi()` leaves a work with no DOI out as before. `WALK=galley`,
+OJS DataCite, "Deposit DOIs" on the work whose "Article" DOI was
+emptied: the "PDF" row "Submitted" on every later load, and the job now
+fails with "DataCite export: no DOI assigned to the object being
+deposited." (`DataciteExportPlugin::depositXML()`) where it failed with
+`invalid.job.payload`: the list accepts the work on its galley's DOI, and
+`DatacitePlugin::depositSubmissions()` puts the work itself first
+whenever "Articles" is ticked. "Deposit All" now queues the same job
+([f-ojs5](#fn-f-ojs5)). A leftover: `whereHasDoi()` asks neither which
+kinds are ticked nor what the agency takes, so on a Crossref journal a
+published work whose "Article" DOI was emptied while a galley keeps a
+DOI it got before Crossref was chosen (Rule 35) passes the list too.
+The regression reader rr8 the same day (`.reports/sync/rr8/suspicions.md`
+S2, facts `.reports/sync/rr8/s2-ojs.json`; kept check
+`shared/playwright/checks/sync/pkp-lib-13460/export-galley-only.js`, run
+again 2026-10-08), OJS: "Export DOIs" on that work answered 500
+("…IssueCrossrefXmlFilter::createDOIDataNode(): Argument #2 ($doi) must
+be of type string, null given, called in …/ArticleCrossrefXmlFilter.php
+on line 273"; server log `[500]: POST …/api/v1/dois/submissions/export`)
+where a work with no DOI at all still answered the 400 of
+[A13](#a13), and where round 7's condition refused this one as well;
+the window closed with no message in both, so the page shows nothing
+new. By the code a "Deposit DOIs" job for that work fails in the same
+filter (not run). The team's answer (@bozana, 2026-10-08, the review's
+Mattermost thread): "Crossref does not allow assigning DOIs to
+galleys", so the state exists only as that leftover and no entry is
+kept for it.
 Issue report: [pkp-e2e#223](https://github.com/jardakotesovec/pkp-e2e/issues/223) ([docs/issues/U45-A15-deposit-without-doi-reports-success.md](../issues/U45-A15-deposit-without-doi-reports-success.md)).
 
 <a id="fn-f-a16"></a>
@@ -4650,7 +4809,10 @@ registered, "Needs Sync" included. Live-probed 2026-09-26 (q20).
 
 <a id="fn-f-a17"></a>
 **f-a17** — Live-probed 2026-09-26 (q21, which gives the cause), all
-three apps, one run each.
+three apps, one run each. Still shows at the round-8 PR heads of
+`pkp/pkp-lib#13447` (2026-10-08, OJS and OPS, note q48): a 1.0 marked
+"Registered" read "Registered" after its 2.0 was published, and
+"Deposit All" then left it so.
 Issue report: [pkp-e2e#229](https://github.com/jardakotesovec/pkp-e2e/issues/229) ([docs/issues/U45-A17-major-version-earlier-doi-stays-registered.md](../issues/U45-A17-major-version-earlier-doi-stays-registered.md)).
 
 <a id="fn-f-a18"></a>
@@ -4928,7 +5090,45 @@ article DOI, and galley DOIs turned on after the articles were marked
 registered; both read "Submitted" with nothing queued, and a second
 "Deposit All" changed nothing. Kept script:
 `shared/playwright/checks/issues/deposit-without-doi-reports-success/walk.js`
-(`WALK=galleyall`, `WALK=galleylater`). Issue report:
+(`WALK=galleyall`, `WALK=galleylater`).
+At the round-8 PR heads of `pkp/pkp-lib#13447` (note q48), before their
+merge, a galley DOI's row carries its work and
+`getExportableDOIsSubmissionIds()` accepts a version with only a
+galley's DOI, so two of the entry's three cases are fixed and the entry
+is rewritten to the third. Kept walk re-run 2026-10-08 on the default
+dataset (OJS dataset fleet, pkp/datasets `a130b9a`, `job_runner` On;
+facts `.reports/issues-acc8/acc8/`), DataCite. `WALK=galleylater`
+(galley DOIs turned on after the article was marked registered):
+"Deposit All" 200, "PDF" "Submitted", "Article" "Registered", one
+`DepositSubmission` queued, which failed only at connection (`cURL error
+7 … https://mds.datacite.org/metadata`), as every test-install deposit
+does ([A18](#a18)): fixed. A copy of the walk with "Articles" unticked
+(`.reports/sync/acc8/scripts/walk-galleyonly.js`): the "PDF" row alone,
+"Submitted", one job, the same connection failure, which with no article
+among the objects is the galley's own deposit: fixed. `WALK=galleyall`
+(the "Article" DOI emptied, the "PDF" keeping its DOI): "Deposit All"
+200 with the notice, "PDF" "Submitted", one `DepositSubmission` queued,
+which failed with "DataCite export: no DOI assigned to the object being
+deposited." (`DataciteExportPlugin::depositXML()`;
+`DatacitePlugin::depositSubmissions()` puts the work itself first
+whenever "Articles" is ticked, then the current publication's galleys
+that carry a DOI); "Failed Jobs" listed one failed job; a second
+"Deposit All" queued nothing and the row stayed "Submitted". The same
+three shapes on scratch DataCite journals of the campaign fleet
+(`.reports/sync/acc8/scripts/v8.js` part `dg`, facts
+`.reports/sync/acc8/v8-no-switch-dc-dg-ojs.json`; jobs counted, not
+run): the same rows, one job per work, each galley DOI listed with its
+work id (`.reports/sync/acc8/scripts/lists.php`, read-only); on the
+journal with the galley kind alone, "Mark DOIs Unregistered" and then
+"Deposit DOIs" on the work turned the "PDF" row "Submitted" again and
+queued a second job, and "Export DOIs" answered the test installs'
+standing 400 ("An XML validation error occurred…"). The regression
+reader rr8 read the same job path (`.reports/sync/rr8/suspicions.md`
+S2). That DataCite's deposit holds the galley rests on the plugin's
+code and on which failure the job met: no agency credentials. The issue
+report below still describes `main` and all three cases; it, its kept
+script and its issue stay until the entry's refresh after the merge.
+Issue report:
 [pkp-e2e#931](https://github.com/jardakotesovec/pkp-e2e/issues/931) ([docs/issues/U45-OJS5-deposit-all-marks-galley-doi-submitted-unsent.md](../issues/U45-OJS5-deposit-all-marks-galley-doi-submitted-unsent.md)).
 
 <a id="fn-f-ojs6"></a>
@@ -5051,6 +5251,50 @@ reaching the copyediting stage" an untick and a tick left the row empty
 and "Needs DOI"; under "Immediately…" the tick gave `10.1234/2k33x443`
 for the deleted `10.1234/b5k6vq86`. The team's stated intention covers
 the removal, not the way back (note q46).
+
+<a id="fn-f-ojs8"></a>
+**f-ojs8** — At the round-8 PR heads of `pkp/pkp-lib#13447` (note q48),
+before their merge. OJS's in-tree DataCite plugin never reads "DOI
+Versioning": `DatacitePlugin::depositSubmissions()` collects the work
+(with "Articles" ticked) and the galleys with a DOI of
+`getCurrentPublication()` only, and `DataciteXmlFilter`, `depositXML()`
+and `updateDepositStatus()` read the current publication. Crossref's
+`ArticleCrossrefXmlFilter::process()` sends
+`getLatestMinorPublicationsForDoiDeposit()`, the rule the new query
+writes. Until round 8 `getAllDepositableSubmissionIds()` listed the
+current publication only, so "Deposit All" marked the DOIs DataCite is
+handed; per-work "Deposit DOIs" marked every published version's DOIs
+already (`getPublishedDoisForSubmission()`, note q44). Live-probed
+2026-10-08 by the regression reader rr8
+(`.reports/sync/rr8/suspicions.md` S1b, script
+`.reports/sync/rr8/scripts/s1s3.js`, facts
+`.reports/sync/rr8/s1b-r2-ojs.json`, `s1b-after-deposit-all-r2-ojs.png`),
+OJS, PostgreSQL, a scratch journal with DataCite, "Articles" and
+"Article galleys", "Yes": 1.0 article `10.1234/py3pm867` and PDF
+`10.1234/ww674t42`, 2.0 article `10.1234/0nt0y863` and PDF
+`10.1234/k2bk9e84`, all "Unregistered". The list held all four with the
+work's id; round 7's query, rebuilt from the commit's removed lines on
+the same rows, 2.0's two. "Deposit All" 200: all four "Submitted" in
+"View all", one `DepositSubmission` job; the plugin's list for that job
+is 2.0's article and galley, and the DataCite XML built for the work
+(read-only, validation off) carries `10.1234/0nt0y863` alone. A second
+"Deposit All" listed nothing. Again the same day on another scratch
+journal (`.reports/sync/acc8/scripts/v8.js` part `dc`, facts
+`.reports/sync/acc8/v8-no-switch-dc-dg-ojs.json`): the same four rows
+"Submitted", one job, the current version 2.0. Kept check
+`shared/playwright/checks/sync/pkp-lib-13460/deposit-all-datacite-versions.js`
+(with `deposit-lists.php`, read-only), run 2026-10-08 at these heads:
+the same on work W, and on a second work V per-work "Deposit DOIs"
+(200) turned 1.0's and 2.0's article and PDF DOIs "Submitted" with one
+job handed 2.0's two objects. The jobs were not run (no agency
+credentials): what is sent, and what DataCite's answer would mark,
+rest on the plugin's code and the XML it builds. A 1.0 whose DOIs read
+"Registered" when 2.0 is published keeps them so ([A17](#a17)) and is
+not taken (rr8 S1). The team's answer (@bozana, 2026-10-08, the
+review's Mattermost thread): "DataCite and DOI Versioning is still to be
+implemented, see https://github.com/pkp/pkp-lib/issues/11591"; that
+issue, "[Implementation] Consider different DOIs for different versions
+in DataCite", was open with milestone 3.6 that day.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
@@ -5263,7 +5507,7 @@ a journal and a press listed no draft.
 - DOIs page: `lib/pkp/pages/dois/PKPDoisHandler.php`, `ojs|omp|ops/pages/dois/DoisHandler.php`, `ojs|omp|ops/templates/management/dois.tpl`, `lib/pkp/classes/security/authorization/DoisEnabledPolicy.php`, `lib/pkp/classes/components/listPanels/PKPDoiListPanel.php`, app `classes/components/listPanels/DoiListPanel.php`
 - Vue: `lib/ui-library/src/components/Container/DoiPage{OJS,OMP,OPS}.vue`; `components/ListPanel/doi/` (`DoiListPanel.vue`, `DoiListPanel{OJS,OMP,OPS}.vue`, `DoiListItem.vue`, `DoiItemVersionModal.vue`, `DoiStatusInfoModal.vue`, `DoiFailedActionDialogBody.vue`, `DoiItemViewErrorDialogBody.vue`, `DoiItemViewRegisteredMessageDialogBody.vue`, `useDoi.js`); app `registry/uiLocaleKeysBackend.json`
 - API: `lib/pkp/api/v1/dois/PKPDoiController.php`, `ojs|omp/api/v1/dois/DoiController.php`, `lib/pkp/api/v1/_dois/PKPBackendDoiController.php`, `ojs|omp|ops/api/v1/_dois/BackendDoiController.php`; `lib/pkp/api/v1/submissions/PKPSubmissionController.php` (`onDoiPage`, `hasDois`, `doiStatus`; `inEditingOrPublished` at the PR head `246e5387f6` of `pkp/pkp-lib#13460`, before its merge)
-- Model: `lib/pkp/classes/doi/` (`Doi.php`, `Repository.php` (`getDoisForSubmission()`, `getDoisForPublication()`, and `getPublishedDoisForSubmission()`, which the deposit and the mark-registered paths take at the round-3 head `68d984c2c9` of `pkp/pkp-lib#13460`, before its merge), `DAO.php`, `Collector.php`, `DoiGenerator.php`, `RegistrationAgencySettings.php`, `exceptions/DoiException.php`), `ojs|omp|ops/classes/doi/Repository.php`, `DAO.php`; `lib/pkp/schemas/doi.json`; `lib/pkp/classes/submission/Collector.php` and app copies (`filterByInEditingOrPublished()` at that PR head, `addOnDoiPageFilterToQuery()`, `addHasDoisFilterToQuery()`, `addDoiStatusFilterToQuery()`, `addFilterByAssociatedDoiIdsToQuery()`, `getAllowedDoiTypes()`)
+- Model: `lib/pkp/classes/doi/` (`Doi.php`, `Repository.php` (`getDoisForSubmission()`, `getDoisForPublication()`, and `getPublishedDoisForSubmission()`, which the deposit and the mark-registered paths take at the round-3 head `68d984c2c9` of `pkp/pkp-lib#13460`, before its merge), `DAO.php` (`whereDepositablePublication()`, which each app's `getAllDepositableSubmissionIds()` takes at the round-8 head `d19b2ed294` of `pkp/pkp-lib#13460`, before its merge), `Collector.php`, `DoiGenerator.php`, `RegistrationAgencySettings.php`, `exceptions/DoiException.php`), `ojs|omp|ops/classes/doi/Repository.php`, `DAO.php`; `lib/pkp/classes/publication/DAO.php` (`getExportableDOIsSubmissionIds()`, `whereHasDoi()` at that round-8 head) and `ojs|omp|ops/classes/publication/DAO.php` (`whereHasDoi()`); `lib/pkp/schemas/doi.json`; `lib/pkp/classes/submission/Collector.php` and app copies (`filterByInEditingOrPublished()` at that PR head, `addOnDoiPageFilterToQuery()`, `addHasDoisFilterToQuery()`, `addDoiStatusFilterToQuery()`, `addFilterByAssociatedDoiIdsToQuery()`, `getAllowedDoiTypes()`)
 - Creation and versions: `lib/pkp/classes/observers/listeners/AssignDOIs.php`, `VersionDois.php` (deleted at the PR head `246e5387f6` of `pkp/pkp-lib#13460`, before its merge: `AssignDOIs::handlePublished()`, with `handleSubmitted()`, `handleVersioned()` and `handleDecline()` beside it), `lib/pkp/classes/observers/events/PublicationVersioned.php` (new at that head, fired by each app's `classes/publication/Repository.php` `version()`), `ops/classes/observers/listeners/AssignDOIsOnSubmission.php`; `ojs|omp|ops/dbscripts/xml/upgrade.xml` (`clearDataCache` at the round-2 heads, note h), `lib/pkp/tools/events.php` (`clear`); immediate assignment at that head: `lib/pkp/classes/doi/Repository.php` (`CREATION_TIME_IMMEDIATE`, `assignOnCreation()`, `assignOnVersionCreation()`), `lib/pkp/classes/galley/Repository.php` (`assignDoiOnCreation()`), `lib/pkp/classes/submission/reviewAssignment/Repository.php` (`canHaveDoi()`, `assignDoiOnCreation()`), `ojs/controllers/grid/issues/form/IssueForm.php`, OMP `classes/publication/Repository.php` (`createDoisOnCreation()`), `classes/submissionFile/Repository.php` (`add()`), `controllers/grid/catalogEntry/form/PublicationFormatForm.php`, `controllers/grid/users/chapter/form/ChapterForm.php`; `lib/pkp/classes/publication/Repository.php` (`version()`, `publish()`, `unpublish()`, `getMinorVersionsDoi()`, `getReviewDoiItemsGroupedByPublication()`), app `classes/publication/Repository.php` (`createDois()`, `version()`), `ojs/classes/issue/Repository.php` (`createDoi()`), `ojs/classes/controllers/grid/issues/IssueGridHandler.php` (`publishIssue()`, `unpublishIssue()`), `ojs/classes/plugins/PubIdPlugin.php` (`generateCustomPattern()`, `suffixHasIssuePattern()`)
 - Jobs and tasks: `lib/pkp/jobs/doi/DepositSubmission.php`, `DepositPeerReview.php`, `DepositContext.php`, `ojs/jobs/doi/DepositIssue.php`, `lib/pkp/classes/task/DepositDois.php`, `ojs/classes/scheduler/Scheduler.php`
 - Agencies: `ojs/plugins/generic/crossref/` (`CrossrefPlugin.php`, `CrossrefExportPlugin.php`, `classes/CrossrefSettings.php`, `templates/crossmarkButton.blade`, `templates/index.tpl`, `resources/js/components/CrossrefCrossmarkButton.vue`, `CrossrefCitationDoiCheckTask.php`), `ops/plugins/generic/crossref/` (same names, no Crossmark), `ojs/plugins/generic/datacite/` (`DatacitePlugin.php`, `DataciteExportPlugin.php`, `classes/DataciteSettings.php`, `templates/index.tpl`); `ojs/classes/plugins/DOIPubIdExportPlugin.php` (`markRegistered()`), `PubObjectsExportPlugin.php`; the Crossref plugins' `CrossrefExportPlugin.php` `updateDepositStatus()` (OJS, OPS) and `markRegistered()` (OPS), on the published versions' DOIs at `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`, before their merge; `lib/pkp/classes/plugins/IPKPDoiRegistrationAgency.php`

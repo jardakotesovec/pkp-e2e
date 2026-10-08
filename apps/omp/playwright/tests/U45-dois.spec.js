@@ -47,7 +47,7 @@
  *   1.0 and 2.0 published, every row of both blocks read back; "Mark DOIs
  *   Needs Sync" on two published versions and an unpublished version's
  *   file DOI ("Files" is not ticked in S11) are Planned items.
- *   OJS1–OJS7, OPS1–OPS3, OPS5: the journal's and the preprint server's
+ *   OJS1–OJS8, OPS1–OPS3, OPS5: the journal's and the preprint server's
  *   (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never

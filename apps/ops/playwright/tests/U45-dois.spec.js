@@ -40,7 +40,7 @@
  *   are retired (a minor version's galleys keep their DOIs; a decline and
  *   "Revert Decline" under "Immediately…"; S11 now marks the preprint
  *   registered while its major version is unposted); the other paths are
- *   Planned items. OJS1–OJS7, OMP1–OMP3: the journal's and the press's
+ *   Planned items. OJS1–OJS8, OMP1–OMP3: the journal's and the press's
  *   (A27, OMP4 and OMP5 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
