@@ -817,7 +817,7 @@ Left out of the scenarios above, by reason:
   - the panel's own "Clear Filters", "Close" and unapplied changes (Rules 8b, 8c)
   - the "Loaded" a screen reader hears once the list has loaded (Rule 5)
   - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included
-  - the guard for the retired A4 and A6 and for the day count (pkp/pkp-lib#13472, Rule 10): the popover of a request the editor cancelled reads "Review request cancelled by editor" and offers "Reinstate Reviewer" alone, which puts the reviewer back; that of an accepted review past its deadline says "The review was due on {date}"; a response due tomorrow reads 1 day; to be asserted once all three apps' builds include the change, and it needs a cancelled reviewer and an overdue review, which no scenario sets
+  - the guard for the retired A4 and A6 and for the day count (pkp/pkp-lib#13472, Rule 10): the popover of a request the editor cancelled reads "Review request cancelled by editor" and offers "Reinstate Reviewer" alone, which puts the reviewer back; that of an accepted review past its deadline says "The review was due on {date}"; a response due tomorrow reads 1 day; it needs a cancelled reviewer and an overdue review, which no scenario sets
   - the guard for the retired A5 (Rule 5): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`; to be asserted once all three apps' builds include the fix (Rule 5 says how a build without it behaves)
   - a number in the search box listing the submission with that ID and those whose titles hold its digits, in either box (Rules 6, 7)
   - the "Clear Filters" beside the chips dropping the filters and keeping the search chip (Rule 8b)
@@ -1073,10 +1073,10 @@ Basis: probe + code. <sup>omp1</sup>
 ### Retired
 
 <a id="a4"></a>
-**A4 — Cancelled-by-editor popover blames the reviewer** · ✅ · retired. Fixed by pkp/pkp-lib#13473 and pkp/ui-library#1012 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PRs' heads before their merge: the popover reads "Review request cancelled by editor" and "The editor cancelled this review request on {date}.", and offers "Reinstate Reviewer" alone (Rule 10). <sup>a4</sup>
+**A4 — Cancelled-by-editor popover blames the reviewer** · ✅ · retired. Fixed by pkp/pkp-lib#13473 and pkp/ui-library#1012 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PRs' heads and again on the merged code (pkp-lib `6d004d2d01`, ui-library `38814ea1`, merged that day): the popover reads "Review request cancelled by editor" and "The editor cancelled this review request on {date}.", and offers "Reinstate Reviewer" alone (Rule 10). <sup>a4</sup>
 
 <a id="a6"></a>
-**A6 — The overdue-review popover talks about a response** · ✅ · retired. Fixed by pkp/pkp-lib#13473 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PR's head before its merge: the popover reads "This reviewer has not completed their review. The review was due on {date}." (Rule 10). <sup>a6</sup>
+**A6 — The overdue-review popover talks about a response** · ✅ · retired. Fixed by pkp/pkp-lib#13473 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PR's head and again on the merged code (pkp-lib `6d004d2d01`, merged that day): the popover reads "This reviewer has not completed their review. The review was due on {date}." (Rule 10). <sup>a6</sup>
 
 <a id="a5"></a>
 **A5 — Submissions dashboard: a sort switched off stays in the address and comes back on reload** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12736, ui-library `7f5e51ca`, 2026-10-08), verified 2026-10-08 on OJS, OMP and OPS built with that change: the third click on "ID" takes the sort out of the address, and a reload shows the default order (Rule 5); the same on My Submissions and, on a journal and a press, on the reviewer's list. <sup>a5</sup>
@@ -1892,8 +1892,15 @@ the reviewer opened the review. Control at the PRs' bases (pkp-lib
 popover and the panel on the cancelled request, and the reviewer got
 "The current user is not assigned as a reviewer for the requested
 document."
-Issue report: pkp-e2e#905, to be closed at the merge (the report and its
-walk deleted; git keeps them).
+Merged 2026-10-08 18:36 UTC by rebase, `git range-diff` `=` on both:
+pkp-lib `feaedea71f` and `6d004d2d01`, ui-library `8f5e2310`, `b1b5b29e`
+and `38814ea1`. The same drive on OJS and OMP with `lib/pkp` and
+`lib/ui-library` checked out at `6d004d2d01` and `38814ea1` read the
+same. The three apps' pointers took both commits the same evening
+("Update submodules": ojs `49ebfba763`, omp `dd10616a47`, ops
+`0c692f6ae1`).
+Issue report: pkp-e2e#905, closed at the merge (the report and its walk
+deleted; git keeps them).
 
 <a id="fn-a5"></a>
 **a5 — A5 evidence.** Live-probed 2026-08-26 (OJS, manager, 31-row view;
@@ -1944,9 +1951,10 @@ same drive as fn-a4, on OJS and OMP: with the review due date 7 days,
 1 day and 0 days back the popover read "This reviewer has not completed
 their review. The review was due on {that date}."; at the PR's base it
 read "A response was due on {that date}." The response-overdue popover
-reads "A response was due on {date}" at both.
-Issue report: pkp-e2e#905, to be closed at the merge (the report and its
-walk deleted; git keeps them).
+reads "A response was due on {date}" at both. Merged 2026-10-08 and
+walked again on the merged code (fn-a4).
+Issue report: pkp-e2e#905, closed at the merge (the report and its walk
+deleted; git keeps them).
 
 <a id="fn-a7"></a>
 **a7 — A7 evidence.** Live-probed 2026-08-26 (OJS + OMP, manager vs
