@@ -1303,6 +1303,21 @@ trips.
   failing line from that run's artifact (`gh run download`) before a
   diagnosis.
 
+- **The reader-side user menu pressed before the theme's script bound
+  it, fixed 2026-10-08** (OMP U01 S6, once, pkp-e2e push run 37724191553
+  on `main` 82277a16, shard 3/3, green on its retry; the test's first CI
+  run after the U01 revision). `logoutFromPublicMenu`
+  (`apps/omp/playwright/pages/LoginSessionsPages.js:76`, from
+  `U01-login-and-sessions.spec.js:868`) pressed the signed-in name on the
+  site home page and waited 180 s for the menu's "Logout": the name is a
+  plain link until the default theme's `js/main.js` sets
+  `data-toggle="dropdown"` on document ready, so the early press followed
+  the link and no menu opened. Fix: the press waits for that attribute,
+  in OMP's helper and OJS's `SiteUserMenu.logout` (the same shape);
+  patterns.md "UI realities" carries the rule. Green 3 of 3 on OMP and on
+  OJS (`--repeat-each 3`). **Watch condition**: any sighting at those
+  lines again.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull

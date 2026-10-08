@@ -254,8 +254,15 @@ exports.SiteUserMenu = class SiteUserMenu extends BasePage {
         return this.root.getByRole('link', {name: username, exact: true});
     }
 
-    /** Open the menu and press "Logout"; lands on the Login page (Rule 6). */
+    /**
+     * Open the menu and press "Logout"; lands on the Login page (Rule 6).
+     * The name is a plain link until the theme's script turns it into a
+     * drop-down (`data-toggle="dropdown"`, default theme `js/main.js`); a
+     * press before that follows the link and the menu never opens (seen on
+     * the OMP suite, CI 37724191553), so the press waits for the marker.
+     */
     async logout(username) {
+        await expect(this.toggle(username)).toHaveAttribute('data-toggle', 'dropdown');
         await this.toggle(username).click();
         await expect(this.logoutLink).toBeVisible();
         await this.logoutLink.click();

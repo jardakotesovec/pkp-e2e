@@ -69,10 +69,18 @@ const changePasswordForm = (page) => page.locator('form#loginChangePassword');
  */
 const publicUserMenu = (page) => page.locator('#navigationUser');
 
-/** Press "Logout" in the public pages' user menu: the Login page, signed out. */
+/**
+ * Press "Logout" in the public pages' user menu: the Login page, signed out.
+ * The name is a plain link until the theme's script turns it into a
+ * drop-down (`data-toggle="dropdown"`, default theme `js/main.js`); a press
+ * before that follows the link and the menu never opens (CI 37724191553),
+ * so the press waits for the marker.
+ */
 async function logoutFromPublicMenu(page, username) {
     const menu = publicUserMenu(page);
-    await menu.getByRole('link', {name: new RegExp(`^${username}`)}).first().click();
+    const name = menu.getByRole('link', {name: new RegExp(`^${username}`)}).first();
+    await expect(name).toHaveAttribute('data-toggle', 'dropdown');
+    await name.click();
     await menu.getByRole('link', {name: 'Logout', exact: true}).click();
     await page.waitForURL(/\/login/, {timeout: 15_000});
     await expect(page.locator('form#login')).toBeVisible();

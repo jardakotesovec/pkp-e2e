@@ -540,6 +540,14 @@ no cleanup fixture.
 - **Server-rendered TinyMCE values never reach the backing textarea.** There
   is deliberately no helper. Read the editor directly:
   `page.evaluate((id) => window.tinymce?.get(id)?.getContent(), fieldId)`.
+- **The reader-side menus are plain links until the theme's script runs.**
+  The default theme's `js/main.js` turns the user menu's name and the
+  primary menu's parents into drop-downs on document ready
+  (`data-toggle="dropdown"`); a press before that follows the link's own
+  address and the menu never opens. Locate the toggle by that attribute,
+  or wait for it before the press (`NotificationsPages` and
+  `ContextIdentityPages` do the first, the U01 `logoutFromPublicMenu` and
+  `SiteUserMenu.logout` the second; OMP U01 S6, CI 37724191553, 2026-10-08).
 - **The wizard Steps rail collapses when it overflows.** Non-current pills are
   clipped to 1px, and `force: true` clicks are silent no-ops. Use
   `SubmissionWizardPage.gotoStep()`/`expectStep()`

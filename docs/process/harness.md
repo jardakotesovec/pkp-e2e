@@ -766,7 +766,13 @@ after the serial one's (U09 harness, U16 tops); the config refuses a
 because every "red in `<app>-solo` after the final" sighting was one.
 
 `fleet-prep` and `test:final` run the apps one after another and leave
-`PLAYWRIGHT_WORKERS` to the environment. Probe servers may stay up during a
+`PLAYWRIGHT_WORKERS` to the environment. A slot has one database and one
+probe server per app, whatever `--feature` names (dataset fleets apart),
+so a `--reset` there or `reset:<app>` drops the data under every agent
+driving that app: prepare every fleet a session needs before its first
+agent starts, and never reset an app another agent is on (a probe in
+flight answers 500 "database … does not exist"; 2026-10-07, 2026-10-08).
+Probe servers may stay up during a
 run; nothing else may listen on a worker port, because the run adopts a
 server it finds there (`reuseExistingServer`).
 
