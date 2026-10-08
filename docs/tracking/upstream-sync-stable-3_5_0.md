@@ -10,10 +10,10 @@ and no CI follows this branch. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `b8f5e9a951` | 2026-10-07 | claude (daily maintenance session) |
-| omp | `7d6b00060a` | 2026-10-07 | claude (daily maintenance session) |
-| ops | `acc0de0586` | 2026-10-07 | claude (daily maintenance session) |
-| pkp-lib | `6d7f1540b6` (ojs, omp, ops) | 2026-10-07 | claude (daily maintenance session); ui-library `98ac898651` (ojs, omp, ops; 2026-10-06, the pkp/pkp-lib#13188 PR review merge); ojs `plugins/generic/jatsTemplate` `5d4ea3db73` (2026-09-30); `plugins/generic/citationStyleLanguage` `41ddd1b265` (ojs, omp, ops, 2026-10-01) |
+| ojs | `0c91dcce4e` | 2026-10-08 | claude (daily maintenance session) |
+| omp | `b4a9bc4447` | 2026-10-08 | claude (daily maintenance session) |
+| ops | `06fb5874df` | 2026-10-08 | claude (daily maintenance session) |
+| pkp-lib | `32fcca27bb` (ojs; omp and ops at `08de256986`) | 2026-10-08 | claude (daily maintenance session); ui-library `10a96e33f8` (ojs, omp, ops; 2026-10-08); ojs `plugins/generic/jatsTemplate` `f529e34b50` (2026-10-08, tree equal to `5d4ea3db73`); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
 
@@ -22,6 +22,16 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the
 regression verdict; what was filed)._
 
+- **2026-10-08 (daily session, VM s1) — ojs `b8f5e9a951..0c91dcce4e` (36), omp `7d6b00060a..b4a9bc4447` (4), ops `acc0de0586..06fb5874df` (2), pkp-lib `6d7f1540b6..32fcca27bb` (49; ojs at `32fcca27bb`, omp and ops at `08de256986`, one commit before it), ui-library `98ac898651..10a96e33f8` (3, all three), citationStyleLanguage `41ddd1b265..0150021249` (omp and ops; ojs held it already). `main` first: synced today. Read in full; baselines advanced. One regression carried over from `main`.**
+  - pkp-lib `32fcca27bb` (`=main 151e6e9d69`, #13438; `git range-diff` `=`, and `=` the rebased PR head `6f7fbc13ce` of pkp-lib#13439) → **3.5 shows `main`'s regression** of today: the same steps on a freshly reset OJS dataset fleet, at the pointer and one commit before it (lib/pkp `08de256986`, then set back): `.reports/sync-3_5-ds/k13438/walk-{after,before}-ojs.json`. 3.5's callers are `main`'s (the one store in ui-library). OMP and OPS on the line have not taken the commit. The write-up is held out of the repo (the `main` entry of the same day in `upstream-sync.md`).
+  - pkp-lib `60f16cbdd3` (stable-only, #13440) → `git range-diff` `=` the commit the three pointers already held, `6d7f1540b6` (read 2026-10-07, PR review 2026-10-06): the branch took it by rebase. No regression.
+  - pkp-lib `7637f93fdc`, `d9fa8be9c7`, `6910ca6d8e` + ui-library `10a96e33f8` + ojs `495e09e09f` (#9347; `main` has them as `f8285b0b8f`, ui-library `7503fab4`, ojs `75a2a81d18`, read today) → the same template and label edits (`aria-hidden="true"` on the asterisk and the visible language label, `common.requiredField` from `<abbr>` to `<span>`); `git range-diff` of the ui-library twin differs only where 3.5's `FormFieldLabel.vue` has no `requireWhen`. `6910ca6d8e` marks two translations fuzzy (az, tr). No regression: no style or script on the line selects `abbr.required` or the `aria-hidden` class.
+  - ui-library `79ce6e3b16` (`~main 79d20a20`, #13461) → the same one line (the Copyedited Files window's title key), in 3.5's `useFileManagerConfig.js`; no regression.
+  - ui-library `2675de6d1e` (stable-only by subject, #9357: `:aria-invalid="!!errors?.length"` on eight field components) → `main` already reads so (`FieldOptions.vue`, `FieldTextarea.vue`); the attribute is now "true" or "false" where it was a count; no caller reads it. No regression.
+  - citationStyleLanguage `0150021249` → the merge of #168, tree equal to the head `41ddd1b265` reviewed 2026-09-30. ojs `plugins/generic/jatsTemplate` stands at `f529e34b50`, the merge of #122 whose tree equals the baseline's `5d4ea3db73` (`git diff` empty); the baseline now names it.
+  - pkp-lib (43), ojs (31) and omp (1): "Translated using Weblate" commits (fr, fr_CA, lt, uk, cs, da, bg, sv, sl) and their merges `08de256986`, `e802fac9bf`, `8d761baba1` → locale files only.
+  - ojs `6d2a42555d`, `0919dac411`, `0c91dcce4e`, omp `5861ebee10`, `b4a9bc4447`, ops `6a8f83586c`, `06fb5874df` (pointer bumps) → nothing of their own.
+  - Open rows on the line: #12780 walked again for the report's two corrections (OJS, `walk.js` `cookie gone`, plain and with the cookie read put back by `trial-cookie-read.diff`: `.reports/sync/s1008/trial-cookie-35.log`; the trial taken out, `try-fix status` clean). #13414, #13370, #13181, ojs#5813 not re-run: the range does not move their code.
 - **2026-10-07 (daily session, VM s0) — ojs `500d9a936e..b8f5e9a951` (6), omp `fd3cdebc4d..7d6b00060a` (1), ops `08540bf2e5..acc0de0586` (1), pkp-lib `771474347e..6d7f1540b6` (3, all three pointers); ui-library and the plugins unchanged. `main` first: synced today. Read in full; baselines advanced.**
   - pkp-lib `edc3d36c74` (`=main 3407fc5bc0`, #12780) → **3.5 shows `main`'s regression**: "Keep me logged in" not read once the session ends; driven on OJS before (lib/pkp `771474347e`: profile and dashboard signed in) and after (pointer `6d7f1540b6`: Login page), `.reports/sync-3_5/k12780-{before,after}/`; the report and the ci-triage row name stable-3_5_0. No 3.5.0 release read the cookie (`3_5_0-3`..`-5`).
   - pkp-lib `0ed26dd8a7` (`=main e60013c77f`, #13432) → `git range-diff` `=` the PR head `936313b76f` reviewed 2026-10-06 (entry below): no regression.

@@ -13,3 +13,4 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-10-08 · sync · regression reader rr13438 · a suspicion needed a second site administrator and no scenario key or screen makes one (users.md says so for the key): the reads of users.md and scenarios.md, then a `user_user_groups` row through the kit's `sql()` with its own cleanup on two installs · a seed option for a site-administrator user (or a line in scenarios.md naming the `sql()` insert and the delete that follows it)

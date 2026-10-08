@@ -11,7 +11,7 @@
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
  * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓.
- * - A4 🐞, A5 🐞, A6 🐞.
+ * - A4 🐞, A6 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
  * are read-only. Tests that assert counts or sidebar badges isolate on
@@ -693,7 +693,8 @@ test.describe('submissions dashboard', () => {
         await expect(dash.dataRows()).toHaveCount(30);
 
         // First click on "ID": descending, recorded in the address (Rules
-        // 4–5). Never a third click — the un-sort state is register A5.
+        // 4–5). The third, switch-off click is a Planned item (the fix,
+        // ui-library 7f5e51ca, is not in the apps' pointers yet).
         const idHeader = dash.sortButton('ID');
         await idHeader.click();
         await expect(page).toHaveURL(/sortColumn=id/);

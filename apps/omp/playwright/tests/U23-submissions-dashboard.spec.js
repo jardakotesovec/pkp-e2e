@@ -13,7 +13,7 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
  * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓, OMP1 ❓.
- * - A4 🐞, A5 🐞, A6 🐞.
+ * - A4 🐞, A6 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (S6 and S16 ride publicknowledge, S6 with its own tagged
@@ -767,7 +767,8 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
 
         // First click on "ID": descending — the address records the sort
         // and the highest ID rises to the top (Rules 4–5). (The third,
-        // switch-off click is never made — register 🐞 A5.)
+        // switch-off click is a Planned item: the fix, ui-library 7f5e51ca,
+        // is not in the apps' pointers yet.)
         await dash.sortButton('ID').click();
         await expect(page).toHaveURL(/sortColumn=id/);
         await expect(page).toHaveURL(/sortDirection=descending/);

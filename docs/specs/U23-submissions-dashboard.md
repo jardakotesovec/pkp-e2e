@@ -125,11 +125,10 @@ the account's roles, never on which dashboard page it opens from:
    applies uniformly to views, search and counts. <sup>c</sup>
 4. **Addresses.** The page's address records the current state: the view,
    the search phrase, any filters, the sort, and an open workflow panel. So
-   the page can be bookmarked, shared or reloaded as it was, with three
+   the page can be bookmarked, shared or reloaded as it was, with two
    exceptions: <sup>e</sup>
    - the pager's current page is never recorded (page 2 cannot be
      bookmarked);
-   - a switched-off sort is mis-recorded ⚠ [A5](#a5);
    - an address that names no view, or a view the account's sidebar does
      not offer (a Journal Manager's "Needs editor" opened by a Section
      Editor), opens the landing view, "Assigned to me", and drops the
@@ -152,8 +151,13 @@ the account's roles, never on which dashboard page it opens from:
    exception is a preprint server, which has no "Incomplete" label: there
    it reads "Production" {OPS}. A sortable header cycles through three
    states as it is clicked: descending, ascending, then unsorted. The
-   address follows for the first two; switching the sort off leaves the
-   old sort in the address ⚠ [A5](#a5). A screen reader is never told
+   address records the sort while it is on, descending or ascending. The
+   third click, which switches the sort off, takes it out of the address
+   and leaves the view and a search phrase there, so a reload then shows
+   the default order. That is the behavior since a fix of 2026-10-08;
+   an app built before it keeps the switched-off sort in the address,
+   and a reload sorts the list by that column again. <sup>a5</sup> A
+   screen reader is never told
    which of these states a header is in ⚠ [A15](#a15). The list pages at
    30 rows; paging a view whose submissions share a submission date and
    time repeats some and skips others {OJS OMP} ⚠ [A16](#a16). Under
@@ -812,7 +816,7 @@ Left out of the scenarios above, by reason:
   - the "Loaded" a screen reader hears once the list has loaded (Rule 5)
   - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included
   - the guard for A4 and A6 (issue report `docs/issues/U23-A4-A6-review-popover-cancelled-overdue-wording.md`): the dashboard popover of a reviewer the editor cancelled names the editor, and that of an accepted review past its deadline speaks of the review deadline
-  - the guard for A5 (issue report `docs/issues/U23-A5-dashboard-unsort-keeps-sort-in-address.md`): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`
+  - the guard for the retired A5 (Rule 5): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`; to be asserted once all three apps' builds include the fix (Rule 5 says how a build without it behaves)
   - a number in the search box listing the submission with that ID and those whose titles hold its digits, in either box (Rules 6, 7)
   - the "Clear Filters" beside the chips dropping the filters and keeping the search chip (Rule 8b)
   - a phrase typed without Enter staying in the box on the next view, over its full list with no chip (Rule 6)
@@ -826,7 +830,6 @@ Left out of the scenarios above, by reason:
   - A2 ("Complete submission" landing the editor in the author's wizard)
   - A3 (the conflict notice saying "Journal Manager" whoever is looking)
   - A4 (an editor-cancelled request read as "Reviewer cancelled review request")
-  - A5 (a switched-off sort left in the address)
   - A6 (the overdue-review popover's wording)
   - A7 (no indicator for declined and cancelled reviewers)
   - A8 (the opt-out labelled "Weekly email of outstanding tasks")
@@ -864,7 +867,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A4](#a4) | The popover over an editor-cancelled review request blames the reviewer: "Reviewer cancelled review request" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A5](#a5) | Submissions dashboard: a sort switched off stays in the address and comes back on reload | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A6](#a6) | The overdue-review popover describes the missed review as a "response" and dates it with the review deadline | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | Paged lists: a screen reader announces the pager's "Next" as plain "Next", unlike its "Go to …" neighbours | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A15](#a15) | A sorted column header never tells a screen reader that the list is sorted by it, or in which direction | 🐞 | minor | — |
@@ -880,6 +882,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
+| [A5](#a5) | Retired: a sort switched off stayed in the address and came back on reload; the third click now takes it out of the address, and a reload shows the default order (Rule 5) | ✅ | retired | upstream sync (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#12736) |
 | [A12](#a12) | Retired: in French a screen reader hears raw codes for the "…" button above the list and for "Loaded", and an accepted reviewer's indicator and a press's "Assigned To Editor" filter field show one | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A13](#a13) | Retired: in French the recommending editors' line may read a raw code; never seen on screen | ✅ | retired | Jarda 2026-10-08 · overturned |
 
@@ -934,20 +937,6 @@ as the Reviewers panel's own status ("Request Cancelled") does. Rationale
 for 🐞: the neighboring declined status has its own, correct headline, so
 the two states were meant to read differently.
 Basis: probe + code, 2026-10-04. <sup>a4</sup>
-
-<a id="a5"></a>
-**A5 — Submissions dashboard: a sort switched off stays in the address and comes back on reload** · 🐞 · low.
-Clicking a sortable column header ("ID", or "Days", which the address
-names `lastActivity`) on the submissions dashboard cycles it through
-descending, ascending and off. The page's address records the first two,
-but the third click leaves the address on "ascending" while the rows go
-back to their default order. Reloading the page, or opening the address
-from a bookmark or a shared link, sorts the list again by the column the
-person had switched off. Nothing is lost: one more click after the
-reload puts the list back in its default order, though the address again
-keeps the sort. The same happens on an author's My Submissions and on a
-reviewer's list of assignments, which use the same table.
-Basis: probe, 2026-10-04. <sup>a5</sup>
 
 <a id="a6"></a>
 **A6 — The overdue-review popover talks about a response** · 🐞 · low.
@@ -1105,6 +1094,9 @@ Worth a ruling since the shared machinery supports it.
 Basis: probe + code. <sup>omp1</sup>
 
 ### Retired
+
+<a id="a5"></a>
+**A5 — Submissions dashboard: a sort switched off stays in the address and comes back on reload** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12736, ui-library `7f5e51ca`, 2026-10-08), verified 2026-10-08 on OJS, OMP and OPS built with that change: the third click on "ID" takes the sort out of the address, and a reload shows the default order (Rule 5); the same on My Submissions and, on a journal and a press, on the reviewer's list. <sup>a5</sup>
 
 <a id="a12"></a>
 **A12 — In French the dashboard shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a12</sup>
@@ -1884,11 +1876,34 @@ Issue report: [pkp-e2e#905](https://github.com/jardakotesovec/pkp-e2e/issues/905
 <a id="fn-a5"></a>
 **a5 — A5 evidence.** Live-probed 2026-08-26 (OJS, manager, 31-row view;
 reproduced twice in separate runs): the third click on a sorted header
-fires the list request with no ordering parameter and the rows revert,
-while the address keeps `sortColumn`/`sortDirection` unchanged; reloading
+fired the list request with no ordering parameter and the rows reverted,
+while the address kept `sortColumn`/`sortDirection` unchanged; reloading
 that address re-applied the sort. The list client is shared across the
-apps (pin evidence in fn-a), so the behavior is not marked per-app.
-Issue report: [pkp-e2e#906](https://github.com/jardakotesovec/pkp-e2e/issues/906) ([docs/issues/U23-A5-dashboard-unsort-keeps-sort-in-address.md](../issues/U23-A5-dashboard-unsort-keeps-sort-in-address.md)).
+apps (pin evidence in fn-a), so the behavior was not marked per-app.
+Retired 2026-10-08: ui-library `7f5e51ca` ("Remove the sort from the
+dashboard URL when the sort is switched off", pkp/pkp-lib#12736, merged
+into ui-library `main` that day) drops both parameters when the sort is
+switched off. Walked 2026-10-08 on OJS, OMP and OPS (ojs `49515c6e3e`,
+omp `084a19cc65`, ops `3a40dc2773`, `lib/ui-library` checked out at that
+commit and the bundle rebuilt; PKP's default test dataset, freshly
+loaded; one run per walk per app; the kept script
+`shared/playwright/checks/issues/dashboard-unsort-keeps-sort-in-address/walk.js`).
+As `dbarnes` on "Active submissions": the first click on "ID" put
+`sortColumn=id&sortDirection=descending` in the address, the second
+`ascending`; after the third the query was `currentViewId=active` alone,
+the list request carried no ordering and the rows stood in the default
+order (OJS 20, 19, 16 …; OMP 18, 17, 16 …), and a reload changed none of
+it. On OPS that view held one preprint, so the rows could not change
+order; the address and the requests read the same. On My Submissions
+(`ccorino`; on OMP `afinkel`) and on the reviewer's list (`jjanssen`,
+OJS and OMP) the address held `currentViewId` alone after the third
+click and after a reload. A click on "Days" put `lastActivity` in the
+address and a click on "ID" after it `id`, and a reload kept that sort;
+with the phrase "the" searched, two more clicks on "ID" gave ascending
+and then `currentViewId=active&searchPhrase=the`, the sort alone gone.
+On that day the three apps' own `lib/ui-library` pointers stood at
+`ea5061b0`, one commit before the fix, so an app built from its own
+`main` still showed the old behavior.
 
 <a id="fn-a6"></a>
 **a6 — A6 evidence.** Live-probed 2026-08-26 (OJS + OMP, same string on
@@ -2028,7 +2043,11 @@ had no `aria-sort` on arrival, after the first, second and third click
 on "ID" and after a reload, with the fix for A5 in and out. "Days" was
 not clicked; it carries the same binding. My Submissions and the
 reviewer's list use the same table (code; their headers were not read).
-The sort icon's look in each state was not recorded.
+The sort icon's look in each state was not recorded. Read again
+2026-10-08 with the merged fix for A5 built in (the walk of fn-a5, all
+three apps): no header carried `aria-sort` at any step, this time also
+after a click on "Days", and on the headers of My Submissions and (OJS
+and OMP) of the reviewer's list.
 
 <a id="fn-a16"></a>
 **a16 — A16 evidence.** The dashboard asks `api/v1/_submissions` for

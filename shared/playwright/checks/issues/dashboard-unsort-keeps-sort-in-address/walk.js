@@ -1,3 +1,8 @@
+// U23 A5, retired 2026-10-08 (fixed upstream: pkp/pkp-lib#12736, ui-library 7f5e51ca; the issue report
+// and its fix.diff are deleted, pkp-e2e#906 closed). The walk stays for what it records beside the
+// address: every header's aria-sort, which footnote a15 of the U23 spec cites (A15), and it is the
+// check to run once the apps' lib/ui-library pointers carry 7f5e51ca (step 5 must leave the address
+// without sortColumn and sortDirection). What the report said:
 // Issue report on U23 A5 (a third click on a sorted column header switches the sort off, but the
 // page's address keeps `sortColumn`/`sortDirection`, so a reload or a shared address brings the sort
 // back): the report's Steps to reproduce, walked on PKP's default test dataset (a dataset fleet,
@@ -20,7 +25,6 @@
 // Run (main):   PROBE_FEATURE=issues-u23r2 PROBE_AGENT=u23r2 node bin/probe.js all shared/playwright/checks/issues/dashboard-unsort-keeps-sort-in-address/walk.js [reach|neighbour]
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-u23r2-3_5 --dataset 2 --reset
 //               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-u23r2-3_5 PROBE_AGENT=u23r2 node bin/probe.js all shared/playwright/checks/issues/dashboard-unsort-keeps-sort-in-address/walk.js
-// The fix:      node bin/try-fix.js apply shared/playwright/checks/issues/dashboard-unsort-keeps-sort-in-address/fix.diff <app>
 // Facts: .reports/<feature>/u23r2/a5-<mode>-<app>.json (PROBE_RUN adds its tag)
 const {forEachApp, launch, signIn, screen, record, idle} = require('../../../probe');
 

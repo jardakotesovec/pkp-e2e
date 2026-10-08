@@ -16,7 +16,7 @@
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
  * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓, OMP1 ❓.
- * - A4 🐞, A5 🐞, A6 🐞.
+ * - A4 🐞, A6 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. Tests that assert counts or sidebar badges isolate on
