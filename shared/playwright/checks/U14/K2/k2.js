@@ -99,7 +99,7 @@ async function readBlocks(page) {
             const id = el.getAttribute('aria-labelledby');
             return id ? (document.getElementById(id)?.innerText || '').trim() : null;
         });
-        if (name && !/^Version|^Author Original|^Published Manuscript|^Unassigned/.test(name)) continue;
+        if (name && !/^Version|^Author(?:'s)? Original|^Published Manuscript|^Unassigned/.test(name)) continue;
         const r = {
             name,
             visible: await region.isVisible(),

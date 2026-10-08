@@ -240,7 +240,7 @@ forEachApp(async (app) => {
                 if (await pubLink.count()) { await pubLink.first().click(); await idle(page); }
             }
             if (!(await metaLink.first().isVisible().catch(() => false))) {
-                const nodes = nav.getByRole('link', {name: /^(Unassigned version|Version of Record|Author Original)\b/});
+                const nodes = nav.getByRole('link', {name: /^(Unassigned version|Version of Record|Author(?:'s)? Original)\b/});
                 if (await nodes.count()) { await nodes.last().click(); await idle(page); }
             }
             record('m3-workflow-nav-links', await nav.getByRole('link').evaluateAll((as) => as.map((a) => ({text: a.innerText.trim().slice(0, 60), visible: a.offsetParent !== null}))));

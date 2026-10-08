@@ -772,7 +772,7 @@ forEachApp(async (app) => {
             }
             out.menuAfter = await menuEntries(page);
             out.nav = await wf(page).locator('nav').first().ariaSnapshot().catch(() => null);
-            const labels = out.menuAfter.filter((n) => /version|Version of Record|Author Original|Author Accepted|\d+\.\d+$/i.test(n) && !/Create New Version/.test(n));
+            const labels = out.menuAfter.filter((n) => /version|Version of Record|Author(?:'s)? Original|Author Accepted|\d+\.\d+$/i.test(n) && !/Create New Version/.test(n));
             out.labels = labels;
             const perVersion = async (label) => {
                 const item = wf(page).getByRole('treeitem', {name: label, exact: true});

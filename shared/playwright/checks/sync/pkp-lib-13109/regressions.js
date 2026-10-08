@@ -35,7 +35,7 @@ async function openTitleAbstract(page) {
         if (await pub.count()) { await pub.click(); await idle(page); }
     }
     if ((await ta.count()) === 0) {
-        const nodes = wfDialog(page).getByRole('navigation').getByRole('link', {name: /^(Unassigned version|Version of Record|Author Original)\b/});
+        const nodes = wfDialog(page).getByRole('navigation').getByRole('link', {name: /^(Unassigned version|Version of Record|Author(?:'s)? Original)\b/});
         if (await nodes.count()) { await nodes.last().click(); await idle(page); }
     }
     await ta.first().waitFor({state: 'visible', timeout: 30_000});

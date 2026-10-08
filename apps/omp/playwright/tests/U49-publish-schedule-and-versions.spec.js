@@ -40,6 +40,7 @@
  */
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
@@ -936,7 +937,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
             managerPage.getByRole('link', {name: 'Version of Record 1.0', exact: true})
         ).toBeVisible({timeout: 30_000});
         await expect(
-            managerPage.getByRole('link', {name: /^(Version of Record|Author Original) (1\.1|2\.0)$/})
+            managerPage.getByRole('link', {name: new RegExp(`^(Version of Record|${AO}) (1\\.1|2\\.0)$`)})
         ).toHaveCount(0);
 
         // Same stage as an existing version: "Minor Revision" is selectable
@@ -959,7 +960,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         dialog = await openCreateVersionDialog(managerPage);
         await dialog
             .getByLabel('Publication Stage')
-            .selectOption({label: 'Author Original (AO)'});
+            .selectOption({label: `${AO} (AO)`});
         await expect(
             dialog
                 .getByLabel('Revision Significance')
@@ -967,7 +968,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         ).toBeDisabled();
         await confirmCreateVersion(managerPage, dialog);
         await expect(
-            managerPage.getByRole('link', {name: 'Author Original 1.0', exact: true})
+            managerPage.getByRole('link', {name: `${AO} 1.0`, exact: true})
         ).toBeVisible({timeout: 30_000});
 
         // A major version in a stage that has versions: keeping "Version

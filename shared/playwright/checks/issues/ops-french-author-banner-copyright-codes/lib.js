@@ -22,7 +22,7 @@ async function pressMenu(page, label) {
     await nav(page).getByRole('link').first().waitFor({timeout: T});
     for (let i = 0; i < 4; i++) {
         if (await target.last().isVisible().catch(() => false)) break;
-        const groups = nav(page).getByRole('link').filter({hasText: /^\s*(##[^#]+##.*|Publication|Prépublication|Preprint|Unassigned version|Author Original.*|Version of Record.*|Version.*|Toutes les versions|All Versions)\s*$/});
+        const groups = nav(page).getByRole('link').filter({hasText: /^\s*(##[^#]+##.*|Publication|Prépublication|Preprint|Unassigned version|Author(?:'s)? Original.*|Version of Record.*|Version.*|Toutes les versions|All Versions)\s*$/});
         const n = await groups.count();
         if (!n) break;
         await groups.nth(n - 1 - (i % n)).click();

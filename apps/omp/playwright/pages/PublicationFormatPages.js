@@ -241,7 +241,7 @@ class PublicationFormatsPage {
                 const out = [];
                 for (const a of all.slice(start + 1)) {
                     const label = (a.textContent || '').trim();
-                    if (/^(Unassigned version|Version of Record|Author Original)\b/.test(label) || label === 'Create New Version') break;
+                    if (/^(Unassigned version|Version of Record|Author(?:'s)? Original)\b/.test(label) || label === 'Create New Version') break;
                     if (a.getClientRects().length) out.push(label);
                 }
                 return out;

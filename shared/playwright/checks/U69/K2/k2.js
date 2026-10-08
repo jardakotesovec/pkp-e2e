@@ -197,7 +197,7 @@ async function createVersion(page, stageLabel = null) {
     const dlg = page.getByRole('dialog', {name: 'Create New Version'});
     await dlg.getByLabel('Publication Stage').waitFor({timeout: T});
     const info = {text: flat(await dlg.innerText(), 400), stageOptions: await dlg.getByLabel('Publication Stage').locator('option').allInnerTexts()};
-    if (stageLabel) await dlg.getByLabel('Publication Stage').selectOption({label: stageLabel});
+    if (stageLabel) await dlg.getByLabel('Publication Stage').selectOption(stageLabel);
     const created = page.waitForResponse((r) => /\/publications\/\d+\/version/.test(r.url()) && r.request().method() === 'POST', {timeout: T});
     await dlg.getByRole('button', {name: 'Confirm', exact: true}).click();
     const resp = await created;
@@ -459,11 +459,11 @@ forEachApp(async (app) => {
             await step('none-ao-screen', async (out) => {
                 await as(`${P}mg`, P);
                 await openWorkflow(page, app, P, S.a.id);
-                const v = await createVersion(page, 'Author Original (AO)');
+                const v = await createVersion(page, 'AO');
                 S.aoPub = v.id;
                 out.version = v;
                 await openWorkflow(page, app, P, S.a.id, `publication_${v.id}_titleAbstract`);
-                out.aoPublish = await publishOnScreen(page, /Author Original/);
+                out.aoPublish = await publishOnScreen(page, /Author(?:'s)? Original/);
                 await openWorkflow(page, app, P, S.a.id, `publication_${S.a.pub}_titleAbstract`);
                 out.vorUnpublish = await unpublishOnScreen(page);
                 await sleep(1500);
@@ -565,10 +565,10 @@ forEachApp(async (app) => {
                 note(`ccK2 [omp] ${RUN} ao2: press ${P}, book ${JSON.stringify(S)}`);
                 await as(`${P}mg`, P);
                 await openWorkflow(page, app, P, S.a.id);
-                const v = await createVersion(page, 'Author Original (AO)');
+                const v = await createVersion(page, 'AO');
                 S.ao = v.id;
                 await openWorkflow(page, app, P, S.a.id, `publication_${v.id}_titleAbstract`);
-                out.aoPublish = (await publishOnScreen(page, /Author Original/)).status;
+                out.aoPublish = (await publishOnScreen(page, /Author(?:'s)? Original/)).status;
                 await openWorkflow(page, app, P, S.a.id, `publication_${S.a.pub}_titleAbstract`);
                 out.vorUnpublish = (await unpublishOnScreen(page)).status;
                 for (const [k, pub] of [['aoPage', v.id], ['vorPage', S.a.pub]]) {

@@ -47,6 +47,7 @@
  */
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {
     createIssue,
     publishIssue,
@@ -743,7 +744,7 @@ test.describe('publish, schedule & versions', () => {
         ).toBeDisabled();
         await expect(second.locator('select[name="versionIsMinor"]')).toHaveValue('false');
         await pub.confirmVersionDialog(second);
-        await expect(pub.versionMenuItem('Author Original 1.0')).toBeVisible({
+        await expect(pub.versionMenuItem(`${AO} 1.0`)).toBeVisible({
             timeout: 30_000,
         });
 

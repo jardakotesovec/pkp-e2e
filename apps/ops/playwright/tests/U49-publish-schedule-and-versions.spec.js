@@ -46,6 +46,7 @@
  * parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {
     PublicationScreen,
     openWorkflow,
@@ -259,10 +260,10 @@ async function createNewVersionViaDialog(page, mutate) {
  * bounded by the 1.0 entry read the same way). */
 async function expectOneVersionListed(page) {
     await expect(
-        page.getByRole('link', {name: 'Author Original 1.0', exact: true})
+        page.getByRole('link', {name: `${AO} 1.0`, exact: true})
     ).toBeVisible({timeout: 30_000});
     await expect(
-        page.getByRole('link', {name: /^Author Original \d+\.\d+$/})
+        page.getByRole('link', {name: new RegExp(`^${AO} \\d+\\.\\d+$`)})
     ).toHaveCount(1);
 }
 
@@ -393,7 +394,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         );
         await expect(dialog).toContainText('Post the preprint');
         await expect(dialog).toContainText('All requirements have been met.');
-        await expect(dialog).toContainText('Author Original 1.0');
+        await expect(dialog).toContainText(`${AO} 1.0`);
         await confirmPostWindow(managerPage, dialog);
 
         // "Published": "Status: Posted", the offered control flips to
@@ -559,7 +560,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
             timeout: 30_000,
         });
         await expect(preprintDateLine(page)).toContainText('Posted');
-        await expect(preprintVersionsList(page)).toContainText('(Author Original 1.0)');
+        await expect(preprintVersionsList(page)).toContainText(`(${AO} 1.0)`);
         await expect(preprintDateLine(page)).not.toContainText('Updated on');
 
         // "Create New Version": the dialog arrives pre-answered on a
@@ -568,10 +569,10 @@ test.describe('Publish, schedule & versions (U49)', () => {
         const newPublication = await createNewVersionViaDialog(managerPage, async (dialog) => {
             await expect(
                 dialog.locator('#version-versionSource-control option:checked')
-            ).toHaveText('Author Original 1.0');
+            ).toHaveText(`${AO} 1.0`);
             await expect(
                 dialog.locator('#version-versionStage-control option:checked')
-            ).toHaveText('Author Original (AO)');
+            ).toHaveText(`${AO} (AO)`);
             await expect(
                 dialog.locator('#version-versionIsMinor-control option:checked')
             ).toHaveText('Minor Revision');
@@ -581,7 +582,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         // "Status: Unpublished" (a queued NON-current version — fn-g) and
         // the copied content.
         await expect(
-            managerPage.getByRole('link', {name: 'Author Original 1.1', exact: true})
+            managerPage.getByRole('link', {name: `${AO} 1.1`, exact: true})
         ).toBeVisible({timeout: 30_000});
         const screen = new PublicationScreen(managerPage);
         await openMenuKey(
@@ -607,8 +608,8 @@ test.describe('Publish, schedule & versions (U49)', () => {
             timeout: 30_000,
         });
         await expect(page.getByText(`${title} vNext`)).toHaveCount(0);
-        await expect(preprintVersionsList(page)).toContainText('(Author Original 1.0)');
-        await expect(preprintVersionsList(page)).not.toContainText('(Author Original 1.1)');
+        await expect(preprintVersionsList(page)).toContainText(`(${AO} 1.0)`);
+        await expect(preprintVersionsList(page)).not.toContainText(`(${AO} 1.1)`);
 
         // "The emails and notices": the submitting Author and the
         // stage-assigned Moderator get the "A new version was created…"
@@ -737,7 +738,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
             'Are you sure you want to post this?'
         );
         await expect(dialog).toContainText(
-            'The publication version is "Author Original 1.1"'
+            `The publication version is "${AO} 1.1"`
         );
         await confirmPostWindow(managerPage, dialog);
         await expect(
@@ -753,8 +754,8 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expect(
             page.getByRole('heading', {name: `${title} v2`})
         ).toBeVisible({timeout: 30_000});
-        await expect(preprintVersionsList(page)).toContainText('(Author Original 1.1)');
-        await expect(preprintVersionsList(page)).toContainText('(Author Original 1.0)');
+        await expect(preprintVersionsList(page)).toContainText(`(${AO} 1.1)`);
+        await expect(preprintVersionsList(page)).toContainText(`(${AO} 1.0)`);
         await expectActivityLogLines(managerPage, 'A new version was posted.');
 
         // "The notice without the email": the Author's Tasks hold the new
@@ -795,8 +796,8 @@ test.describe('Publish, schedule & versions (U49)', () => {
             timeout: 30_000,
         });
         await expect(page.getByText(`${title} v2`)).toHaveCount(0);
-        await expect(preprintVersionsList(page)).toContainText('(Author Original 1.0)');
-        await expect(preprintVersionsList(page)).not.toContainText('(Author Original 1.1)');
+        await expect(preprintVersionsList(page)).toContainText(`(${AO} 1.0)`);
+        await expect(preprintVersionsList(page)).not.toContainText(`(${AO} 1.1)`);
     });
 
     test('S6: minor and major numbering', async ({asUser, opsApi}, testInfo) => {
@@ -824,7 +825,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         // Confirm yields "… 1.1".
         await createNewVersionViaDialog(managerPage, async (dialog) => {
             const stageOptions = dialog.locator('#version-versionStage-control option');
-            await expect(stageOptions.filter({hasText: 'Author Original (AO)'})).toHaveCount(1);
+            await expect(stageOptions.filter({hasText: `${AO} (AO)`})).toHaveCount(1);
             await expect(stageOptions.filter({hasText: 'Version of Record'})).toHaveCount(0);
             const minorOption = dialog
                 .locator('#version-versionIsMinor-control option')
@@ -835,7 +836,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
             ).toHaveText('Minor Revision');
         });
         await expect(
-            managerPage.getByRole('link', {name: 'Author Original 1.1', exact: true})
+            managerPage.getByRole('link', {name: `${AO} 1.1`, exact: true})
         ).toBeVisible({timeout: 30_000});
 
         // "A major version in a stage that has versions": keeping "Author
@@ -844,13 +845,13 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await createNewVersionViaDialog(managerPage, async (dialog) => {
             await expect(
                 dialog.locator('#version-versionStage-control option:checked')
-            ).toHaveText('Author Original (AO)');
+            ).toHaveText(`${AO} (AO)`);
             await dialog
                 .locator('#version-versionIsMinor-control')
                 .selectOption({label: 'Major Revision'});
         });
         await expect(
-            managerPage.getByRole('link', {name: 'Author Original 2.0', exact: true})
+            managerPage.getByRole('link', {name: `${AO} 2.0`, exact: true})
         ).toBeVisible({timeout: 30_000});
     });
 
@@ -877,10 +878,10 @@ test.describe('Publish, schedule & versions (U49)', () => {
         const authorPage = await (await asUser('author.alex')).newPage();
         await openWorkflow(authorPage, PK, submissionId, {author: true});
         await expect(
-            authorPage.getByRole('link', {name: 'Author Original 1.0', exact: true})
+            authorPage.getByRole('link', {name: `${AO} 1.0`, exact: true})
         ).toBeVisible({timeout: 30_000});
         await expect(
-            authorPage.getByRole('link', {name: 'Author Original 1.1', exact: true})
+            authorPage.getByRole('link', {name: `${AO} 1.1`, exact: true})
         ).toBeVisible();
 
         await openMenuKey(
@@ -1207,7 +1208,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         );
         await expect(dialog).toContainText('Post the preprint');
         await expect(dialog).toContainText('All requirements have been met.');
-        await expect(dialog).toContainText('Author Original 1.0');
+        await expect(dialog).toContainText(`${AO} 1.0`);
         await expect(dialog).toContainText('Related Publication');
         await expect(dialog).toContainText(
             "This preprint's relations have not been entered."

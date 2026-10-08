@@ -491,7 +491,7 @@ forEachApp(async (app) => {
                 const dlg = page.getByRole('dialog', {name: 'Create New Version'});
                 await dlg.getByLabel('Publication Stage').waitFor({timeout: T});
                 out.stageOptions = await dlg.getByLabel('Publication Stage').locator('option').allInnerTexts();
-                await dlg.getByLabel('Publication Stage').selectOption({label: 'Author Original (AO)'});
+                await dlg.getByLabel('Publication Stage').selectOption('AO');
                 const created = page.waitForResponse((r) => /\/publications\/\d+\/version/.test(r.url()) && r.request().method() === 'POST', {timeout: T});
                 await dlg.getByRole('button', {name: 'Confirm', exact: true}).click();
                 const newId = (await (await created).json()).id;

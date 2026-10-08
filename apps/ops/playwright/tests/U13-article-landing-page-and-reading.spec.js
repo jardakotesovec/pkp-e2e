@@ -77,6 +77,7 @@
  * runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {recordBrowserDialogs} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
 const {
@@ -185,7 +186,7 @@ test.describe('article landing page and reading', () => {
         await expect(landing.breadcrumbLinks()).toHaveText(['Home']);
         await expect(landing.versionEntries()).toHaveCount(1);
         const entry = await textOf(landing.versionEntries().first());
-        expect(entry).toMatch(/^\d{4}-\d{2}-\d{2} \(Author Original 1\.0\)$/);
+        expect(entry).toMatch(new RegExp(`^\\d{4}-\\d{2}-\\d{2} \\(${AO} 1\\.0\\)$`));
         await expect(landing.labelLineParts()).toHaveText(['Preprint', '/', entry]);
         await expect(landing.title()).toHaveText('Tidal Patterns in Coastal Waters');
         await expect(landing.subtitle()).toHaveText('A field study');
@@ -405,10 +406,10 @@ test.describe('article landing page and reading', () => {
         await expect(landing.title()).toHaveText('Tidal Patterns Revised');
         await expect(landing.publishedValue()).toHaveText(`${day} — Updated on ${day}`);
         await expect(landing.versionEntries()).toHaveCount(2);
-        const olderName = `${day} (Author Original 1.0)`;
+        const olderName = `${day} (${AO} 1.0)`;
         await expect(landing.versionEntries().nth(1)).toHaveText(olderName);
         const currentName = await textOf(landing.versionEntries().first());
-        expect(currentName).toMatch(new RegExp(`^${day} \\(Author Original 1\\.\\d+\\)$`));
+        expect(currentName).toMatch(new RegExp(`^${day} \\(${AO} 1\\.\\d+\\)$`));
         expect(currentName).not.toBe(olderName);
         await expect(landing.versionEntries().first().locator('a')).toHaveCount(0);
         await expect(landing.versionLink(olderName)).toHaveCount(1);

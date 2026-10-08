@@ -73,6 +73,7 @@
  * own API answer. Everything runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {
@@ -110,8 +111,8 @@ const SERVER = 'publicknowledge';
 /** A preprint server enrols no editor: the Preprint Server Manager takes the Journal Manager's part. */
 const MANAGER = 'manager.maya';
 const AUTHOR = 'author.alex';
-const VERSION_1 = 'Author Original 1.0';
-const VERSION_2 = 'Author Original 1.1';
+const VERSION_1 = `${AO} 1.0`;
+const VERSION_2 = `${AO} 1.1`;
 /** A draft's file: its galley (OPS has no workflow file list, screen notes ccK3). */
 const DRAFT_FILE = {galleys: [{label: 'PDF', file: 'preprint.pdf'}]};
 

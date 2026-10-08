@@ -207,7 +207,7 @@ forEachApp(async (app) => {
                 await item.click();
                 const dlg = page.getByRole('dialog', {name: 'Create New Version'});
                 await dlg.getByLabel('Publication Stage').waitFor({timeout: T});
-                await dlg.getByLabel('Publication Stage').selectOption({label: 'Author Original (AO)'});
+                await dlg.getByLabel('Publication Stage').selectOption('AO');
                 const created = page.waitForResponse((r) => /\/publications\/\d+\/version/.test(r.url()) && r.request().method() === 'POST', {timeout: T});
                 await dlg.getByRole('button', {name: 'Confirm', exact: true}).click();
                 const cr = await created;
@@ -234,7 +234,7 @@ forEachApp(async (app) => {
                 fact('A2.vorUnpublish', (await un).status());
                 await idle(page);
                 await snap('a2-nonfinal-workflow');
-                fact('A2.versionLinks', await page.getByRole('link', {name: /^(Version of Record|Author Original|Unassigned)/}).allInnerTexts());
+                fact('A2.versionLinks', await page.getByRole('link', {name: /^(Version of Record|Author(?:'s)? Original|Unassigned)/}).allInnerTexts());
             });
             await guard('A membership after non-final', async () => {
                 await openCatalog(P1);

@@ -63,6 +63,7 @@
  * own answer (A5).
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {ActivityLogWindow} = require('../../../../shared/playwright/pages/ActivityLogPages.js');
 const {ArticleLandingPage} = require('../../../../shared/playwright/pages/ArticleLandingPages.js');
@@ -407,7 +408,7 @@ test.describe('DOIs', () => {
         await expect(dois.rowActions(axRow)).toContainText(String(axolotl.submissionId));
         await expect(dois.rowBadge(axRow)).toHaveText('Unregistered');
         await dois.expand(axRow, axolotl.submissionId);
-        await expect(dois.versionName(axRow)).toHaveText(/^\s*Author Original 1\.0\s*$/);
+        await expect(dois.versionName(axRow)).toHaveText(new RegExp(`^\\s*${AO} 1\\.0\\s*$`));
         await expect(dois.columnHeaders(axRow)).toHaveText(TEXT.columns);
         expect(await dois.doiTypes(axRow)).toEqual([PREPRINT]);
         await expect(dois.doiBox(axRow, PREPRINT)).toHaveValue(STARTS_WITH_PREFIX);
@@ -907,7 +908,7 @@ test.describe('DOIs', () => {
         const newPublicationId = await createVersion(page, tag);
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
-        await expect(dois.versionName(row)).toHaveText(/^\s*Author Original 1\.0\s*$/);
+        await expect(dois.versionName(row)).toHaveText(new RegExp(`^\\s*${AO} 1\\.0\\s*$`));
         await expect(dois.doiBox(row, PREPRINT)).toHaveValue(firstDoi);
         await expect(dois.versionsBar(row)).toHaveCount(0);
 
@@ -962,11 +963,11 @@ test.describe('DOIs', () => {
         await expect(dois.viewAllButton(row)).toBeVisible();
         await dois.openVersionsWindow(row);
         await expect(dois.versionHeadings()).toHaveText([
-            /^\s*Author Original 1\.0 \(.+\)\s*$/,
-            /^\s*Author Original 2\.0 Unpublished\s*$/,
+            new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
+            new RegExp(`^\\s*${AO} 2\\.0 Unpublished\\s*$`),
         ]);
-        await expect(dois.versionDoiBox(dois.versionBlock('Author Original 1.0'), PREPRINT)).toHaveValue(doi1);
-        await expect(dois.versionDoiBox(dois.versionBlock('Author Original 2.0'), PREPRINT)).toHaveValue('');
+        await expect(dois.versionDoiBox(dois.versionBlock(`${AO} 1.0`), PREPRINT)).toHaveValue(doi1);
+        await expect(dois.versionDoiBox(dois.versionBlock(`${AO} 2.0`), PREPRINT)).toHaveValue('');
         await dois.closeVersionsWindow();
 
         // The major version posted: a DOI of its own; its page shows it,
@@ -975,7 +976,7 @@ test.describe('DOIs', () => {
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
         await dois.openVersionsWindow(row);
-        const block2 = dois.versionBlock('Author Original 2.0');
+        const block2 = dois.versionBlock(`${AO} 2.0`);
         const doi2 = await doiValue(dois.versionDoiBox(block2, PREPRINT));
         expect(doi2).not.toBe(doi1);
         await dois.closeVersionsWindow();
@@ -991,10 +992,10 @@ test.describe('DOIs', () => {
         await expect(dois.versionsBar(row)).toContainText(TEXT.versionsLine(2));
         await dois.openVersionsWindow(row);
         await expect(dois.versionHeadings()).toHaveText([
-            /^\s*Author Original 1\.0 \(.+\)\s*$/,
-            /^\s*Author Original 2\.1 Unpublished\s*$/,
+            new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
+            new RegExp(`^\\s*${AO} 2\\.1 Unpublished\\s*$`),
         ]);
-        const block21 = dois.versionBlock('Author Original 2.1');
+        const block21 = dois.versionBlock(`${AO} 2.1`);
         await expect(dois.versionDoiBox(block21, PREPRINT)).toHaveValue(doi2);
 
         // One "Edit" for the window: 2.1's DOI changed; 2.0's page shows it,

@@ -91,7 +91,7 @@ exports.PublishScreen = class PublishScreen extends PublicationScreen {
     /** Every version node of the side menu (one per version, any stage). */
     versionMenuItems() {
         return this.page.getByRole('treeitem', {
-            name: /^(Version of Record|Author Original|Published Manuscript Under Review|Unassigned version)/,
+            name: /^(Version of Record|Author(?:'s)? Original|Published Manuscript Under Review|Unassigned version)/,
         });
     }
 
