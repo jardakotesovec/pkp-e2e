@@ -298,7 +298,8 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
    dispatch: a missing translation is no finding (TEMPLATE "Findings
    register"), so an entry that is only one is retired, not reported;
    only a raw key in English, or one the code reads wrongly, goes to a
-   reporter. Group those
+   reporter. The same holds for an entry that is only a singular or
+   plural beside the wrong number ("1 days"). Group those
    that point at one fault (the same action failing on two screens, one
    wrong value showing in several places), and follow an entry's link to
    the same fault in another spec: that entry joins the unit. A twin is not always linked, so the other specs'
