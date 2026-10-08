@@ -2829,6 +2829,9 @@ submission 1. The same two queries serve the daily tasks of pkp/zenodo,
 pkp/scopus and pkp/pubmedCentral (`getAllDepositableArticles()`,
 `getAllDepositablePublications()`; a GitHub code search, not driven),
 which no checkout here holds.
+Merged 2026-10-08 as ojs `49515c6e3e`, its tree equal to the reviewed
+head; the walk and the replaced-minor drive repeated on the merged
+`main` the same day, with the same results as at the PR head.
 Issue report: pkp-e2e#264, closed at the merge (the report and its walk deleted; git keeps them).
 
 <a id="fn-f-a6"></a>
