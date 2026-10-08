@@ -19,7 +19,7 @@
  * spec's Coverage section is the record of everything else left out):
  * - A5: S9 never opens the Series editor's "Counter R5" while the press is
  *   restricted.
- * - A1–A4, A6–A11, OMP1, OMP4: not on these scenarios' paths. OJS1–OJS6 and
+ * - A1–A4, A7–A11, OMP1, OMP4: not on these scenarios' paths. OJS1–OJS6 and
  *   OPS1: the journal's and the server's.
  *
  * Seeding (footnote sc): S1 and S2 read `publicknowledge` with the roster

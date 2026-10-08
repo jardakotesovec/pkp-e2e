@@ -170,12 +170,6 @@ the account's roles, never on which dashboard page it opens from:
    nothing of it shows on screen.
    The author's and reviewer's lists reuse this table with their own
    columns (theirs have no "Days"). <sup>f</sup>
-
-   With the interface in French, a few of the page's texts read raw codes
-   where French words belong: what a screen reader hears for the "…"
-   button above the list (Rule 12) and for "Loaded", an accepted
-   reviewer's indicator (Rule 10) and, on a press, the Filters panel's
-   "Assigned To Editor" field (Rule 8) ⚠ [A12](#a12).
 <a id="search"></a>
 6. **Search within a view.** The search box above the list ("Search
    submissions, ID, authors, keywords, etc.") narrows the *current view*
@@ -838,7 +832,6 @@ Left out of the scenarios above, by reason:
   - A8 (the opt-out labelled "Weekly email of outstanding tasks")
   - A9 (a Site Administrator without Journal Manager in the journal)
   - A10 (the pager's "Next" announced as plain "Next")
-  - A12 (raw codes in French; Rule 5)
   - A13 (the recommending editors' line in French; Rule 9f)
   - A14 (a recommending editor's row before recording; Rule 9f)
   - A15 (no sort state told to a screen reader; Rule 5)
@@ -875,7 +868,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A5](#a5) | Submissions dashboard: a sort switched off stays in the address and comes back on reload | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A6](#a6) | The overdue-review popover describes the missed review as a "response" and dates it with the review deadline | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | Paged lists: a screen reader announces the pager's "Next" as plain "Next", unlike its "Go to …" neighbours | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A12](#a12) | In French a screen reader hears raw codes for the "…" button above the list and for "Loaded", and an accepted reviewer's indicator and a press's "Assigned To Editor" filter field show one | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A15](#a15) | A sorted column header never tells a screen reader that the list is sorted by it, or in which direction | 🐞 | minor | — |
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
@@ -890,6 +882,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
+| [A12](#a12) | Retired: in French a screen reader hears raw codes for the "…" button above the list and for "Loaded", and an accepted reviewer's indicator and a press's "Assigned To Editor" filter field show one | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1035,55 +1028,12 @@ Question: one chip per value, each X dropping its own? Lean: yes; a chip
 names one value ("Section: Shut") and its X removes it.
 Basis: code. <sup>a11</sup>
 
-<a id="a12"></a>
-**A12 — In French the dashboard shows raw codes** · 🐞 · low.
-With the interface in French (Canada), a few of the dashboard's texts
-read raw codes where French words belong:
-- the "…" button above the list and the menu it opens are named
-  "##common.moreActions##" (English "More Actions"), which is what a
-  screen reader hears. Its entry and the selection mode read French:
-  "Supprimer les soumissions incomplètes", "Annuler", and the
-  confirmation window "Confirmez la suppression des soumissions
-  incomplètes". A Section Editor has no such button (Rule 12);
-- each time the list reloads (on choosing a view, a search, a filter,
-  a sort or a page), a screen reader hears "##common.loaded##" (English
-  "Loaded"), for the Journal Manager and the Section Editor alike;
-- a journal and a press: the indicator of a reviewer who has accepted
-  is named "##dashboard.reviewAssignment.statusAccepted.title##" for a
-  screen reader in the Editorial Activity cell, beside the days count,
-  and the popover it opens shows the code as its headline (English
-  "Ongoing review - request accepted"), for the Journal Manager.
-  The popover's sentence and buttons read French
-  ("L'évaluateur-trice a accepté la demande d'évaluation…", "Modifier la
-  date d'échéance", "Voir les détails", "Retirer l'évaluateur-trice"), and
-  a completed review reads French throughout ("Évaluation complétée le
-  {date}");
-- a press: the Filters panel's "Assigned To Editor" field is labelled
-  "##editor.submissions.assignedTo##"; the rest of the panel reads
-  French. A journal's reads "Assignée au,à la rédacteur-trice", a
-  preprint server's "Assigné au modérateur".
-
-A French-speaking editor cannot tell from the indicator where an accepted
-review stands, and a screen-reader user hears codes for the list's
-actions and its load notice. The English page shows none of these codes.
-The side menu's codes around the list, such as the "Search submissions"
-box's placeholder, are
-[Navigation menus & site chrome A23](U08-navigation-menus-and-site-chrome.md#a23)'s
-finding, the workflow panel's are
-[Workflow screen & stage access A11](U24-workflow-screen-and-stage-access.md#a11)'s,
-the Author's own list shows the same "…" code
-([→ My Submissions](U22-my-submissions.md)), and why a missing French
-text shows as a code at all is the question
-[Languages & locales A4](U57-languages-and-locales.md#a4) asks.
-Basis: probe + code, 2026-10-04. <sup>a12</sup>
-
 <a id="a13"></a>
 **A13 — The recommending editors' line may read a code in French** · ❓ · minor.
 With the interface in French, the line a deciding editor reads while
 recommending editors are still to advise (Rule 9f; English "Recommending
 Editors are tasked…") has no French text, so it likely shows a raw
-code, as an accepted reviewer's indicator does ([A12](#a12)). Unseen: no
-seed puts recommending editors on a round.
+code. Unseen: no seed puts recommending editors on a round.
 Question: does the line read "##dashboard.recommendOnly.pendingRecommendations##"
 on a French dashboard? Lean: yes.
 Basis: code. <sup>a13</sup>
@@ -1164,6 +1114,11 @@ Question: is the missing series filter a product choice? Lean: intended. A
 series, unlike a section, is an optional shelf not every submission has.
 Worth a ruling since the shared machinery supports it.
 Basis: probe + code. <sup>omp1</sup>
+
+### Retired
+
+<a id="a12"></a>
+**A12 — In French the dashboard shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a12</sup>
 
 ---
 
@@ -2048,9 +2003,6 @@ recommendation on OJS only (Rule 10). OMP's Filters label read the code
 in both runs. No response of 500 or more and no page error. The
 indicator's French "Afficher plus de details" lacks the accent on
 "détails", a translation typo rather than a code.
-Issue report: [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)), for `common.moreActions` and `common.loaded`.
-Issue report: [pkp-e2e#900](https://github.com/jardakotesovec/pkp-e2e/issues/900) ([docs/issues/U22-A6-my-submissions-french-review-counter-raw-key.md](../issues/U22-A6-my-submissions-french-review-counter-raw-key.md)), for the accepted reviewer's indicator.
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)), for a press's "Assigned To Editor" field.
 
 <a id="fn-a13"></a>
 **a13 — A13 evidence.** `useDashboardConfigEditorialActivity.js` shows

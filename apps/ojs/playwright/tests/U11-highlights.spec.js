@@ -12,10 +12,9 @@
  * a full web address), A3 🐞 (no title carries formatting), A4 🐞 (S1
  * closes no panel without "Save"; S4's refused edit ends the test), A5 🐞
  * (the site's Highlights tab is never opened; no site highlight is seeded
- * or asserted), A6 ❓ (S3 reads which dot is on and presses none), A7 🐞
- * (S4 never reads Settings › Website's fourth top tab; a journal's French
- * arrows are translated), A8 ❓, A9 ❓ (S1 replaces no image). The spec's
- * Coverage section records everything else left out.
+ * or asserted), A6 ❓ (S3 reads which dot is on and presses none), A8 ❓,
+ * A9 ❓ (S1 replaces no image). The spec's Coverage section records
+ * everything else left out.
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch journal
  * with throwaway accounts (footnotes s1–s4); there is no highlight seed key,

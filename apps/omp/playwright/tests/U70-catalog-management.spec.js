@@ -25,7 +25,7 @@
  *   its order.
  * - A8, A9 🐞: every "Add Entry" › "Save" follows a clicked suggestion and
  *   its tag; no book is chosen twice.
- * - A4, A5, A6, A7, A10, A12 🐞 and A1 ❓: no test reaches those states.
+ * - A4, A5, A6, A10, A12 🐞 and A1 ❓: no test reaches those states.
  *
  * Seeding: scenario endpoints only. S1–S6 each build a scratch press with
  * throwaway accounts (the username twice as password) as footnote s says;

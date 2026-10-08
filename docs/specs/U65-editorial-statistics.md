@@ -484,8 +484,7 @@ the links' addresses carry the English language code "en" ⚠
     <sup>td14</sup>
     - "Active Submissions", "Total", then one line per stage with its
       count; these counts cover every journal of the installation, not
-      this one ⚠ [A9](#a9); on a press whose primary language is French
-      the External Review line is named by a raw code ⚠ [OMP5](#omp5);
+      this one ⚠ [A9](#a9);
     - "Trends", "{month}, {year}", "Total", then one line per "Trends"
       row with the month's figure and the all-time figure; rates are
       written as fractions ("0.5") and totals carry no yearly average;
@@ -1042,8 +1041,8 @@ Left out of the scenarios above, by reason:
   - A8 (a report address naming no report; Rule 19)
   - A9 (the attachment's installation-wide stage counts; Rule 26;
     scenario 3 marks it)
-  - A10, A13 and OMP5 (a journal, press or preprint server whose
-    primary language is French; Fields; Rule 26)
+  - A10 and A13 (a journal, press or preprint server whose primary
+    language is French; Fields)
   - A11 ("Login to the the press"; Fields; scenario 3 marks it)
   - A12 (a decision recorded by an editor not assigned to the
     submission; Rule 20b)
@@ -1089,7 +1088,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP2](#omp2) | A press's "Days to First Editorial Decision" help text says "authors submitting to your journal" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | "Monograph Report" of one press carries empty author and decision columns sized by another press's books | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP4](#omp4) | "Monograph Report" names a reverted Internal Review decline "Decline Submission" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [OMP5](#omp5) | A French press's monthly attachment names External Review by a raw code | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OMP6](#omp6) | "Monograph Report" leaves "Editor Decision" empty for the "Move to Done" that publishing records | 🐞 | medium | — |
 | [OPS4](#ops4) | A preprint server's monthly statistics email reads "Accepted submissions this month:" with no number | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | Whether drafts started within the range count in "Submissions In Progress" is unseen; drafts started today never do | ❓ | minor | — |
@@ -1101,6 +1099,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OPS3](#ops3) | A preprint server's "Reports" offers no report | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's "Editorial Activity" has no active submissions chart | ✅ | minor | — |
 | [OPS2](#ops2) | A preprint server's "Trends" has four rows, "Submissions Declined" counting every declined preprint | ✅ | minor | — |
+| [OMP5](#omp5) | Retired: A French press's monthly attachment names External Review by a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1492,20 +1491,6 @@ External Review or at submission is named correctly. Expected: "Revert
 Decline".
 Basis: probe, 2026-10-02. <sup>f-omp4</sup>
 
-<a id="omp5"></a>
-**OMP5 — A French press's attachment names External Review by a raw code** · 🐞 · medium.
-On a press whose primary language is French (Canada), the "Soumissions
-actives" block of the monthly "editorial-report.csv" names the External
-Review stage "##workflow.review.externalReview##", while "Évaluation
-interne" and the other stages read in French: OMP's French (Canada)
-text for the stage's name is empty, so the file falls back to the code.
-A journal and a preprint server in French name every stage. The same
-missing texts show codes on the press's catalog, book and chapter pages
-and its Roles list ([Monograph landing page](U69-monograph-landing-page.md)'s
-[A15](U69-monograph-landing-page.md#a15)). Expected: the stage's French
-name.
-Basis: probe, 2026-10-03. <sup>f-omp5</sup>
-
 <a id="omp6"></a>
 **OMP6 — "Monograph Report" leaves "Editor Decision" empty for the "Move to Done" that publishing records** · 🐞 · medium.
 Publishing a book records a "Move to Done" decision. In the press's
@@ -1566,6 +1551,11 @@ The proposed fix also reaches existing servers: their upgrade removes
 the line from the template they already store, unless a manager has
 reworded it. Expected: the line left out of the preprint server's email.
 Basis: probe, 2026-10-02. <sup>f-ops4</sup>
+
+### Retired
+
+<a id="omp5"></a>
+**OMP5 — A French press's attachment names External Review by a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-omp5</sup>
 
 ---
 
@@ -2323,7 +2313,6 @@ Live-probed 2026-09-28, a press whose primary language is French
 lines read "Évaluation interne",0 and
 "##workflow.review.externalReview##",3; a French journal's and preprint
 server's attachments name every stage.
-Issue report: [docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md), filed as [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) (joined with U69 A15).
 
 <a id="fn-f-omp6"></a>
 **f-omp6** — fn o (`getDecisionMessage()`): OMP's list names every

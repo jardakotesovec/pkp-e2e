@@ -363,9 +363,8 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
 **Other languages**
 
 25. **The list in French.** Opened in the French interface, the
-    "Users" tab prints several labels as raw codes ⚠ [A11](#a11); the
-    paging line is French ("Résultats 1 à 25 de {n}", page buttons "Page
-    précédente 1 2 Page suivante"). <sup>td13</sup>
+    "Users" tab's paging line is French ("Résultats 1 à 25 de {n}", page
+    buttons "Page précédente 1 2 Page suivante"). <sup>td13</sup>
     On a preprint server the "Roles" column also prints the manager and
     Moderator roles as "##default.groups.name.manager##" and
     "##default.groups.name.sectionEditor##" ⚠ [OPS1](#ops1). <sup>u</sup> <sup>td14</sup>
@@ -798,10 +797,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U53-A19-remove-user-upcoming-role-error.md`): a manager
     uses "Remove User" on a user who holds a current role and a role
     starting on a later date: both roles end in one go, with no error
-  - the guard for A11 (issue report
-    `docs/issues/U53-A11-users-tab-french-raw-keys.md`): in the French
-    (Canada) interface, the "Users" tab and the first page of "Invite to a
-    role" show no "##" code
   - the guard for A4 (issue report
     `docs/issues/U53-A4-user-search-example-journal-role.md`): on a press
     and a preprint server, searching the users box's own example lists at
@@ -839,7 +834,7 @@ Left out of the scenarios above, by reason:
     18)
   - A10 (the older grid's "Disable User" and "Remove" on the
     administrator's own row; Rule 20)
-  - A11 and OPS1 (the list in the French interface; Rule 25)
+  - OPS1 (the list in the French interface; Rule 25)
   - A12 (the ORCID and disabled icons unnamed to a screen reader; Fields
     "Name")
   - A13 (the Site Administrator's empty "Roles" cell in the "Merge user"
@@ -900,7 +895,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | Users & Roles: the "Disable User" window names roles the user no longer holds | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Users & Roles: the reason typed when enabling a user is shown to them when disabled again | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Merging a section editor's account silently drops them from their sections instead of moving them | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [A11](#a11) | In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | Users & Roles: the ORCID and "disabled" icons after a user's name have no name for screen readers | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | The "Merge user" window and the older grid show nothing under "Roles" for the Site Administrator | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
@@ -914,6 +908,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | The Site Administrator's older grid offers "Disable User" and "Remove" on the administrator's own row | ❓ | latent | — |
 | [A18](#a18) | "Roles" leaves out a role that ends on a future date, which "Editorial Masthead" lists, and shows a role that starts on a future date as if held | ❓ | minor | — |
 | [A20](#a20) | A user whose only role ends on a future date cannot be removed from the list or the roles page before that date | ❓ | user-visible | — |
+| [A11](#a11) | Retired: In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1040,43 +1035,6 @@ administrator out at their next sign-in.
 Question: should the older grid hide both on the administrator's own row,
 as the list does? Lean: yes.
 Basis: probe. <sup>f-a10</sup>
-
-<a id="a11"></a>
-**A11 — In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels** · 🐞 · low.
-A manager working in French (Canada) who opens Settings › Users & Roles
-sees codes where the "Users" tab's labels should be: the search box
-reads "##userAccess.search##", the Invitations table is headed
-"##invitation.header## (0)" with the button
-"##invitation.inviteToRole.btn##", two of its columns and the users
-list's "Start Date" column are codes, and the window that disables a
-user is titled "##user.disabledModal.title##". The button opens the role
-invitation pages, where every heading, step, field and button but
-"Annuler" is a code.
-
-In French (Canada), a screen reader also names the lists' hidden "More
-Actions" column headings "##common.moreActions##", and outside the
-"Users" tab each row's "…" menu too. Managers hear it on the "Users"
-tab's two tables and the "Categories" tab; editors on a publication's
-"Media", "References" and "Funding" pages and a journal review round's
-"Author Response" table; anyone on "My Submissions", and managers and
-site administrators on the editorial "Submissions" list, on the "…"
-button above the list. On the editorial "Submissions" list, everyone who
-uses it hears "##common.loaded##" where English says "Loaded", each time
-the list reloads on choosing a view, searching, filtering, sorting or
-paging.
-
-The rest of the tab is French, and its buttons and menus still work, so
-a manager can get through by switching the interface to English.
-
-The fix covers French (Canada) only: its missing texts, entered on PKP's
-Weblate by the French (Canada) translators or a developer, or committed
-as the tried diff, with no code change. Every journal, press and
-preprint server that offers French (Canada) shows these codes. The same
-five tab texts are also missing in 49 other languages, the "More
-Actions" name in 36 and the "Loaded" notice in 38; French (France) is
-not among them, as it has all of them. Those languages are for their
-translators and are not counted in this report's effort.
-Basis: probe, 2026-10-02 and 2026-10-04. <sup>f-a11</sup>
 
 <a id="a12"></a>
 **A12 — Users & Roles: the ORCID and "disabled" icons after a user's name have no name for screen readers** · 🐞 · low.
@@ -1217,6 +1175,11 @@ In the French interface of a preprint server the "Roles" column prints
 "##default.groups.name.sectionEditor##" for the manager and Moderator
 roles, where a journal and a press print French role names.
 Basis: probe, 2026-10-01. <sup>f-ops1</sup>
+
+### Retired
+
+<a id="a11"></a>
+**A11 — In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a11</sup>
 
 ---
 
@@ -2039,7 +2002,6 @@ guards every action but "Edit" and "Email" with not-own-row.
 
 <a id="fn-f-a11"></a>
 **f-a11** — Live-probed 2026-09-25: note td13. Mechanism: note u.
-Issue report: [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)).
 
 <a id="fn-f-a12"></a>
 **f-a12** — Live-probed 2026-09-25, all three apps: in the list's

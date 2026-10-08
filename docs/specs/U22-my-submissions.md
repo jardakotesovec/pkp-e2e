@@ -157,8 +157,7 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
      reviewer and the review type. Other review types never show a
      reviewer here
      ([→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review)).
-     With the interface in French, the counter shows a raw code instead
-     of the counts ⚠ [A6](#a6). <sup>h</sup>
+     <sup>h</sup>
    - 7c. **Copyediting** {OJS OMP}: "Copyedited Files Uploaded: {count}",
      counting the workflow's "Copyedited Files" list, shown even at 0.
    - 7d. **Scheduled into an issue** {OJS}: "To be published in issue
@@ -176,9 +175,8 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    and the stage features
    ([submission stage](U25-submission-stage.md#author-view),
    [review stage](U26-review-stage-and-rounds.md#author-view)). <sup>e</sup>
-9. **Deleting drafts.** "More Actions" (the "…" button above the list;
-   in French a screen reader hears a raw code as its name [A6](#a6)) offers
-   **"Delete Incomplete Submissions"**. It is grayed out while the current
+9. **Deleting drafts.** "More Actions" (the "…" button above the list)
+   offers **"Delete Incomplete Submissions"**. It is grayed out while the current
    page of the list has no draft rows. Choosing it puts the list in
    selection mode: a checkbox appears on each draft row (only drafts;
    submitted rows get none), with **"Delete Incomplete Submissions"** and
@@ -429,12 +427,6 @@ App-specific:
 
 Left out of the scenarios above, by reason:
 
-- **Planned**:
-  - the guard for A6 (Rules 7b, 9; issue report
-    `docs/issues/U22-A6-my-submissions-french-review-counter-raw-key.md`):
-    the author's list read with the interface in French (Canada), a
-    submission in review showing the counter in French with its numbers
-    and no `##` code on the list, the "…" button's name included
 - **Rarely met**:
   - a change someone else makes showing on the list only after a workflow
     panel closes or the page reloads, and not after pressing the open
@@ -464,8 +456,6 @@ Left out of the scenarios above, by reason:
     or Site Administrator who also authors; Rule 5)
   - A5 (an old link to a draft opening the workflow panel the list never
     offers; Rule 3)
-  - A6 (in French, the review counter and the "…" button's name reading
-    raw codes; Rules 7b, 9)
   - OMP1 (no series filter on a press; Rule 5; scenario 3 marks it)
 - **Owned by another feature**:
   - "Start A New Submission" beside the menu group (Rule 1; *Submission
@@ -497,7 +487,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [OPS2](#ops2) | A preprint server author is offered draft deletion, but confirming always fails with a permission error | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
-| [A6](#a6) | In French a submission under review reads a raw code in place of "Review update {completed}/{total}", and the "…" button above the list is named by a raw code | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | The author sees the review progress count ("Review update 1/2") for their submission under review | ❓ | user-visible | — |
 | [A2](#a2) | A declined submission's row keeps showing the review progress counter | ❓ | minor | — |
 | [A3](#a3) | On a press or preprint server, nothing was found that feeds the "Scheduled for publication" view | ❓ | minor | — |
@@ -505,6 +494,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A4](#a4) | A Journal Manager or Site Administrator who also authors gets the editors' assignment filter on their personal list | ❓ | minor | — |
 | [A5](#a5) | An old author-dashboard link to a still-incomplete draft opens the draft's workflow panel, a screen the list never offers for a draft | ❓ | minor | — |
 | [OMP1](#omp1) | A press author cannot filter the list by series, even when the press has several | ❓ | minor | — |
+| [A6](#a6) | Retired: in French a submission under review reads a raw code in place of "Review update {completed}/{total}", and the "…" button above the list is named by a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -571,33 +561,6 @@ submission that was never submitted? Lean: oversight, harmless. Only the
 draft's own author can reach it.
 Basis: probe. <sup>a5</sup>
 
-<a id="a6"></a>
-**A6 — In French the review counter and the "…" button show raw codes** · 🐞 · low.
-With the interface in French (Canada), a submission under review reads
-"##dashboard.reviewUpdateCounts##" in its Editorial Activity cell {OJS
-OMP}, where English reads "Review update 1/1" or "Review update 0/1"
-(Rule 7b), so the author loses the completed and total review counts;
-a submission waiting for the author's revisions shows its own French
-text instead. On every app a screen reader hears the "…" button above
-the list (English "More Actions", Rule 9), which everyone on the list
-gets, as "##common.moreActions##". Two faults, both French (Canada)
-texts never translated: the counter's text is released with 3.5 and
-missing in 43 of 70 languages; the button's name is shared with the other
-lists' "…" menus. Expected: French
-words, as the rest of the list shows: the views ("Soumissions actives",
-"Révisions demandées", "Soumissions incomplètes", "Publiées",
-"Refusées"), the Stage bubbles ("Incomplète", "Rejetée"), "Révision
-requise" with "Soumettre les révisions", "Compléter la soumission" and
-"Afficher". The English list shows none of these codes. The header's help
-icon is [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md#a1)'s
-finding, the workflow panel "Afficher" opens is
-[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s,
-the editorial list's own codes are
-[Submissions dashboard](U23-submissions-dashboard.md#a12)'s, and why a
-missing French text shows as a code at all is
-[Languages & locales](U57-languages-and-locales.md#a4)'.
-Basis: probe, 2026-10-04. <sup>a6</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -641,6 +604,11 @@ list's own check accepts one on any stage, so the screen offers what the
 server refuses. The wizard's "Cancel" fails on the same check, silently
 ([Submission wizard](U21-submission-wizard.md#ops3)).
 Basis: probe, 2026-10-04. <sup>ops2</sup>
+
+### Retired
+
+<a id="a6"></a>
+**A6 — In French the review counter and the "…" button show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a6</sup>
 
 ---
 
@@ -1085,7 +1053,6 @@ Trier / Soumissions / Étape / Activité éditoriale / Actions", the heading
 "Soumissions actives (6)". Neither `dashboard.reviewUpdateCounts` nor
 `common.moreActions` exists in pkp-lib's `fr_CA` locale files (U57 A4's
 fallback).
-Issue reports: the review counter, [pkp-e2e#900](https://github.com/jardakotesovec/pkp-e2e/issues/900) ([docs/issues/U22-A6-my-submissions-french-review-counter-raw-key.md](../issues/U22-A6-my-submissions-french-review-counter-raw-key.md)); the "…" button's name, [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)).
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's filter form

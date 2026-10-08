@@ -61,7 +61,7 @@ language (Rule 3). <sup>c</sup>
 
 **The upload boxes.** "Logo", the thumbnail, "Homepage Image", "Favicon"
 and the style sheet are upload boxes: "Upload File", or a file dropped on
-"Drop files here to upload" (in the French interface: Rule 35a). A
+"Drop files here to upload" (in the French interface: Rule 35). A
 picture then shows as a small preview with an "Alternate text" box
 beside it and the guidance "Describe this image for
 visitors viewing the site in a text-only browser or with assistive
@@ -473,7 +473,7 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     the public "Editorial Masthead" and "Editorial History" pages
     ([Journal identity & about pages](U07-journal-identity-and-about-pages.md),
     Rule 14a). The arrows' names for a screen reader: [A3](#a3). The
-    list in the French interface: Rule 35b.
+    list in the French interface: Rule 36.
     <sup>u</sup> <sup>td30</sup>
 
 28a. **The list with the box unticked.** With "Present a masthead based
@@ -564,28 +564,7 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
 
 **Other languages of the interface**
 
-35. **French: raw codes.** In the French interface some labels show as
-    raw codes, words between "##" marks ⚠ [A6](#a6):
-    - on a press's "Theme": the only entry of the "Thème" list and every
-      label, description and choice of the default theme's fields,
-      "Press Summary" included;
-    - on a press's "Setup": the thumbnail's label and help, the "Browse
-      Block" box of "Sidebar", "Featured Books" and "New Releases" with
-      their boxes, and "Order of monographs" with its description and
-      its two "Series position" choices (the title and date choices are
-      in French);
-    - on a press's "Advanced": "Cover Image Max Width", "Cover Image Max
-      Height" and the note under each;
-    - on a preprint server's "Theme": "Usage statistics display options"
-      and its three choices.
-
-    A journal's "Theme" shows the "Journal Content Organization" field,
-    its description and its three boxes as codes too: they are texts no
-    released version has yet, untranslated in every language, so these
-    codes are expected, not a defect. A journal's and a preprint
-    server's "Setup" and "Advanced" show no raw code. <sup>td37</sup>
-
-35a. **French: the upload boxes.** In the French interface the drop area
+35. **French: the upload boxes.** In the French interface the drop area
     of every upload box on "Setup" ("Logo", the thumbnail, "Homepage
     Image") and "Advanced" (the style sheet, "Favicon") reads the English
     "Drop files here to upload", beside the French button "Téléverser un
@@ -593,7 +572,7 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     can't upload files of this type.", and the "Remove file" link on the
     refused file's frame is English too. <sup>td38</sup>
 
-35b. **French: "Entête".** In the French interface the side tab
+36. **French: "Entête".** In the French interface the side tab
     "Editorial Masthead" reads "Entête", and the order list's description
     reads "Définir l’ordre des rôles sur la page de l'équipe éditoriale de
     la revue." ("the journal's editorial team page") on a press and a
@@ -1185,7 +1164,6 @@ Left out of the scenarios above, by reason:
   - the names a screen reader hears for the "Editorial Masthead" arrows ("Increase position of {role}" for an up arrow) and for each "Sidebar" box (the block's name alone) (A3; the guard its issue report names)
   - a placed block's plugin turned off, then a "Page Footer" saved on "Setup" without a refusal (A4; the guard its issue report names)
   - a style sheet removed and saved, its old address answering "404 Not Found" (A5; the guard its issue report names)
-  - the French (Canada) "Apparence" tabs of a press and a preprint server showing no "##" code {OMP OPS} (A6; the guard its issue report names)
   - a ".pdf" picked for "Logo" with "Upload File" and refused, then "Upload File" and the tab's "Save" enabled again (A7; the guard its issue report names)
   - a press's French (Canada) "Entête" description naming no journal ("la revue") {OMP} (A11; the guard its issue report names)
   - a French upload box's drop area reading the French text (A12; the guard its issue report names)
@@ -1205,13 +1183,12 @@ Left out of the scenarios above, by reason:
   - A3 (the ordering arrows' names for a screen reader; Rules 23, 28; scenario 4 marks it)
   - A4 ("Setup" refusing a save while a placed block's plugin is disabled; Rule 25; scenario 4 marks it)
   - A5 (the removed style sheet's file still opening at its address; Rule 26; scenario 1 marks it)
-  - A6 (the French interface's raw codes on a press's and a preprint server's "Theme" tab, and on a press's "Setup" and "Advanced"; Rule 35)
   - A7 (a file refused through "Upload File" locking the box and the tab's "Save"; Fields, the upload boxes)
   - A8 (the "3:05PM" time choice printed in lower case; Fields, "Date & Time")
   - A9 (an empty "Custom" under "Date (Short)" leaving the editorial dates without the date; Rule 33)
   - A10 (a browser that opened the journal before keeping the old header colour after a "Colour" save; Rule 6a)
-  - A11 (the French "Entête" description naming a journal on a press and a preprint server; Rule 35b)
-  - A12 (the French upload boxes' drop area, refusal and "Remove file" in English; Rule 35a)
+  - A11 (the French "Entête" description naming a journal on a press and a preprint server; Rule 36)
+  - A12 (the French upload boxes' drop area, refusal and "Remove file" in English; Rule 35)
   - A13 (the default French date in the English word order {OMP}; Rule 3a)
   - A14 (roles of the same level changing places on "Editorial Masthead" before its first save; Rule 28)
   - A15 (the refused file's hidden "Remove file" leaving "Save" disabled; Fields, the upload boxes)
@@ -1240,7 +1217,7 @@ Left out of the scenarios above, by reason:
   - "Items per page" on the listing pages (Rule 29; [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md) scenario 10)
   - "Items per page" and "Page links" on the older editorial lists, and the "Users" list's own page length (Rules 29, 30; *Roles configuration*, *Users management*)
   - "Date & Time (Short)" on a submission file's notes and a library file's "Date uploaded" (Rule 31; [Submission files](U36-submission-files.md), [Submission & Publisher Libraries](U39-submission-and-publisher-libraries.md))
-  - the Moderator role's raw code in a preprint server's French "Entête" list {OPS} (Rule 35b; [Journal identity & about pages](U07-journal-identity-and-about-pages.md#ops4))
+  - the Moderator role's raw code in a preprint server's French "Entête" list {OPS} (Rule 36; [Journal identity & about pages](U07-journal-identity-and-about-pages.md#ops4))
   - the public "Editorial Masthead" and "Editorial History" with "Present a masthead based on user enrollments" unticked, and "Peer Reviewers in Previous Year" with "Enable listing of reviewers on the masthead" ticked (Rule 28a; Settings bullets 15a, 15b; [Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rules 14f and 15, scenario 9)
 
 ## Findings register
@@ -1255,7 +1232,6 @@ otherwise; the team settles them on spec review.
 | [A3](#a3) | Screen readers misname the masthead's up arrows and every Sidebar box; clicking a role's name moves it | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | "Setup" refuses every save while a placed block's plugin is disabled, though "Sidebar" no longer shows the block | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A5](#a5) | A removed journal or site style sheet stops loading but stays online at its old address | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
-| [A6](#a6) | In French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | After a settings upload box refuses a file, its "Upload File" and the tab's "Save" stay disabled | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A8](#a8) | The "3:05PM" time choice prints most times as "3:05pm", some as "3:05PM" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | After a manager saves an empty "Custom" short date, editorial dates show only the time | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1278,6 +1254,7 @@ otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | "Include recent most published articles" lists only articles outside a published issue, by submission date | ❓ | minor | — |
 | [OJS4](#ojs4) | The Settings Wizard shows the current issue's table of contents ticked for a journal with no issue, and a save there stores it | ❓ | minor | — |
 | [OJS7](#ojs7) | A journal's homepage image saved without "Alternate text" has no text alternative at all | ❓ | minor | — |
+| [A6](#a6) | Retired: in French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [OJS1](#ojs1) | Only a journal has "Journal Content Organization" | ✅ | minor | — |
 | [OMP1](#omp1) | A press's appearance tabs carry the catalog's fields | ✅ | minor | — |
 | [OPS1](#ops1) | A preprint server's home page has a fixed order | ✅ | minor | — |
@@ -1363,36 +1340,6 @@ The thumbnail of a journal, press or server is left behind too, by a
 separate fault tracked as [A20](#a20) and outside this report. A
 removed "Logo", "Homepage Image" or "Favicon", and the site's "Logo",
 are deleted as they should be. Basis: probe, 2026-10-06. <sup>f-a5</sup>
-
-<a id="a6"></a>
-**A6 — In French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes** · 🐞 · low.
-A press manager who uses the interface in French (Canada) and opens
-Settings › Website › "Apparence" reads codes (untranslated keys, such as
-"##plugins.themes.default.name##" for the theme's name) in place of 36
-labels, descriptions and choices: every field of the theme on "Thème",
-the press thumbnail, "Featured Books", "New Releases" and "Order of
-monographs" on "Configuration", and the two cover image sizes on
-"Configuration avancée". A preprint server's "Thème" shows the download
-chart's field and its three choices as codes.
-
-When the press or server turns that chart on, a French (Canada) reader
-of a book's or a preprint's page sees a code as the chart's heading, and
-the months read "##plugins.themes.default.displayStats.monthInitials##
-2026" for January and "undefined 2026" for every other month. The
-download counts show, but not which month they belong to. On the home
-page, a screen reader names the highlights carousel's two arrows by codes
-too. The settings save and work.
-
-It happens on a press or preprint server that offers French (Canada);
-the chart is off until the manager picks one of its two chart types. A
-journal is not affected: its theme texts are translated, and the codes
-its "Thème" shows are texts new on `main` that await translation in
-every language. French (France) has nearly all the press's texts, but on
-a preprint server 9 of the other 16 languages lack the chart's texts
-too, French (France), Spanish and Portuguese among them. No code
-changes: PKP's French (Canada) translators, or a PKP developer with an
-account, enter the missing texts on PKP's translation platform. Basis:
-probe, 2026-10-04. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — After a settings upload box refuses a file, its "Upload File" and the tab's "Save" stay disabled** · 🐞 · medium.
@@ -1734,6 +1681,11 @@ A preprint server's home page always lists its latest preprints under a
 search box and its category links, with the summary after them; only the
 summary can be switched off. Continuous posting has no issue to show.
 Basis: code. <sup>f-ops1</sup>
+
+### Retired
+
+<a id="a6"></a>
+**A6 — In French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a6</sup>
 
 ---
 
@@ -2290,7 +2242,7 @@ them yet, so under the team's 2026-10-02 ruling on main-only texts they
 await translation and are not part of A6 (read 2026-10-03). OMP's `plugins/themes/default/locale/fr_CA/locale.po`
 holds one entry and the app's `manager.setup.contextSummary` is empty in
 French; OPS's theme locale has empty `displayStats` strings. Code read
-2026-09-24. Live-probed 2026-09-28 (Rule 35; OMP, two runs, OJS and OPS
+2026-09-24. Live-probed 2026-09-28 (OMP, two runs, OJS and OPS
 the controls): a press's French "Setup" showed
 "##manager.setup.pressThumbnail##",
 "##manager.setup.pressThumbnail.description##",
@@ -2315,8 +2267,10 @@ languages, Greek, Kyrgyz and Vietnamese lack all 42 texts the French
 (Canada) fix holds and 19 others lack some (French (France) three);
 of OPS's 17, Catalan, Croatian, French (France), Indonesian, Kyrgyz,
 Norwegian Bokmål, Portuguese, Spanish and Turkish lack all nine chart
-texts.
-Issue report: [pkp-e2e#777](https://github.com/jardakotesovec/pkp-e2e/issues/777) ([docs/issues/U10-A6-french-appearance-settings-raw-keys.md](../issues/U10-A6-french-appearance-settings-raw-keys.md)).
+texts. The "Theme" tab, live-probed 2026-09-24 and 2026-09-28 (all three
+apps, two runs each): on OJS the organization field's five codes and
+nothing else; on OPS the statistics field's label and three choices; on
+OMP 23 codes, the field label "Thème" and its description translated.
 
 <a id="fn-f-a7"></a>
 **f-a7** — Live-probed 2026-09-24 on all three apps ("Logo", "Favicon",
@@ -2375,7 +2329,7 @@ settings spec's A9.
 **f-a11** — lib/pkp `locale/fr_CA/manager.po`
 `manager.setup.editorialMasthead.order.description` is one shared text,
 with no press or server version in OMP's or OPS's locale. Live-probed
-2026-09-28 (Rule 35b; all three apps, two runs): the French "Entête"
+2026-09-28 (Rule 36; all three apps, two runs): the French "Entête"
 description read the same on a journal, a press and a server; the
 English "Define the order of masthead roles for public display." on all
 three. The list read "Rédacteur-trice", "Rédacteur-trice de rubrique",
@@ -2392,7 +2346,7 @@ Issue report: [pkp-e2e#781](https://github.com/jardakotesovec/pkp-e2e/issues/781
 "Déposer des fichiers à téléverser ici."), while the drop-zone library
 reads `dictDefaultMessage`, so its own English default shows; code read
 2026-09-28, not traced further, and by that reading every language is
-affected (only French driven). Live-probed 2026-09-28 (Rule 35a; all
+affected (only French driven). Live-probed 2026-09-28 (Rule 35; all
 three apps, two runs): "Logo", the thumbnail and "Homepage Image" on
 "Setup" and the style sheet and "Favicon" on "Advanced" each read "Drop
 files here to upload" beside "Téléverser un fichier".
@@ -2942,26 +2896,18 @@ runs): note x. A colour typed in the wizard stayed through its "Journal"
 ("Press", "Server") tab and back, and was gone after a reload with no
 question.
 
-<a id="fn-td37"></a>
-**td37** — Live-probed 2026-09-24 (Rule 35; A6; all three apps, two runs):
-on OJS the organization field's five codes and nothing else; on OPS
-the statistics field's label and three choices; on OMP 23 codes, the
-field label "Thème" and its description translated. Note f-a6.
-Live-probed 2026-09-28 (Rule 35; all three apps, two runs): the "Theme"
-codes as before; a press's "Setup" and "Advanced" codes in note f-a6.
-
 <a id="fn-td38"></a>
-**td38** — Live-probed 2026-09-28 (Rules 35a, 35b; all three apps, two
+**td38** — Live-probed 2026-09-28 (Rules 35, 36; all three apps, two
 runs, English and French interface on scratch contexts): the upload
 boxes in note f-a12, the "Entête" tab in note f-a11. The preprint
 server's Moderator code also labels its arrows ("Avancer la position de
-##default.groups.name.sectionEditor##"). Re-probed 2026-09-29 (Rule 35b;
+##default.groups.name.sectionEditor##"). Re-probed 2026-09-29 (Rule 36;
 all three apps, two runs): as before; the "Évaluateurs-trices" group
 (OJS, OMP) now holds the reviewers box, and a preprint server's tab has
 no such group. The labels pkp/pkp-lib#13370 added (the enrollment group,
 its description and box, the reviewers box) read as raw codes in French
 and the "Évaluateurs-trices" note keeps its older wording, pending
-their translation. Walked 2026-10-03 (Rule 35a; all three apps, `main`
+their translation. Walked 2026-10-03 (Rule 35; all three apps, `main`
 and 3.5, French (Canada)): a ".pdf" picked for "Logo" with "Téléverser
 un fichier" was refused with "You can't upload files of this type.",
 and the refused file's frame carried the link "Remove file". By the

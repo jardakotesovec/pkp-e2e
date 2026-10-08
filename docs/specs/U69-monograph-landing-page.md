@@ -548,27 +548,12 @@ link, not a button. A journal's page puts the instructions under
       Downloads of a supplementary component's file, such as "Appendix",
       are not charted ([Usage statistics](U64-usage-statistics.md), its
       Rule 1).
-21. **The pages in French.** With French as the interface language, raw
-    codes stand in place of several labels ⚠ [A15](#a15): <sup>o</sup> <sup>td20</sup>
-    - on the book's and the chapter's page: "Published"
-      ("##catalog.published##"), "Forthcoming", "Categories", every
-      "DOI:", "Online ISSN", "Print ISSN", "Plain Language Summary"
-      ("##submission.plainLanguageSummary##"), the chart's "Downloads"
-      ("##plugins.themes.default.displayStats.downloads##"), the format
-      details' screen-reader heading
-      ("##monograph.publicationFormatDetails##"), and the chapter page's
-      "Volume" and "Pages";
+21. **The pages in French.** With French (Canada) as the interface
+    language, two texts read wrong ⚠ [A15](#a15): <sup>o</sup> <sup>td20</sup>
     - in "Versions": each version's name, as "{date}
       (##publication.versionStage.display##)" with the date in the
       press's short format ("2026-09-28
-      (##publication.versionStage.display##)"); on a chapter page, the
-      chapter's first version adds "##submission.chapterCreated##" with
-      no space, and a version without the chapter reads
-      "##submission.withoutChapter##" alone, with no date or version
-      name;
-    - on a file's view page: the browser tab
-      ("##catalog.viewableFile.title##") and the return arrow's name
-      ("##catalog.viewableFile.return##");
+      (##publication.versionStage.display##)");
     - a priced file's link reads "25.00 Achat (25.00 USD)", without the
       format's name.
     - 21a. **What is translated.** "Synopsis", "Versions", "Séries",
@@ -1136,9 +1121,9 @@ Left out of the scenarios above, by reason:
     that names no book answering "404 Not Found", signed out and
     signed in
   - the guard for A15 (issue report
-    `docs/issues/U69-A15-omp-french-book-page-raw-keys.md`): a book's and a
-    chapter's page in French (Canada) showing no raw code, an edited
-    volume's editors named
+    `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`):
+    a priced file's link naming its format on a book's page in French
+    (Canada)
   - the guard for A7 and A8 (issue report
     `docs/issues/U69-A7-A8-priced-file-link-price-twice-or-missing.md`):
     a priced file's link naming its price once, in a format with one
@@ -1293,7 +1278,7 @@ an entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A8](#a8) | In a format with several files, a file for sale shows no price | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A15](#a15) | In French (Canada), a press's catalog, book and chapter pages and Roles list show codes, even for editors' names | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
+| [A15](#a15) | In French (Canada), a book's purchase link drops the format's name, and the "Format Availability" window is titled "Approbation du format" | 🐞 | low | issues (claude), 2026-10-08 — narrowed to the two wrong texts, locale files re-read |
 | [A16](#a16) | A book's earlier URL Path shows a server error page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | An older version's chapter page of a book shows a blank server error page to every reader | 🐞 | medium · crash: server | issues (claude), 2026-10-06 — re-verified |
 | [A1](#a1) | On a press, a book address that names no book opens the Login page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1490,38 +1475,28 @@ Lean: yes, a defect; the chapter did not exist in that year.
 Basis: probe, 2026-09-28. <sup>f-a14</sup>
 
 <a id="a15"></a>
-**A15 — In French (Canada), a press's catalog, book and chapter pages and Roles list show codes, even for editors' names** · 🐞 · medium.
-On a press shown in French (Canada), readers and staff meet raw codes
-where the English pages show labels: the Steps show 48 texts as codes
-and 3 more in the wrong words. A book's page heads its date
-"##catalog.published##" instead of "Published", and on an edited volume
-the code takes the place of each editor's name: the page lists
-"##submission.editorName##" where the English page lists "Sarah Carter
-(ed)" and "Peter Fortna (ed)". The catalog pages and the "Browse" block
-show codes for their counts and headings, and each book's French OAI-PMH
-record gives its type as "##rt.metadata.pkp.dctype##" where the English
-record says "Book". The staff meet the same on the "Rôles" list, in the
-workflow, on the "Submissions" list (an internal review's stage and the
-"Assigned To Editor" filter), in the monthly statistics email, and on
-the Catalog, Catalog Entry and Publication Formats pages, where the
-External Review stage reads "##workflow.review.externalReview##" and a
-column heading "##grid.catalogEntry.availability##".
+**A15 — In French (Canada), a book's purchase link drops the format's name, and the "Format Availability" window is titled "Approbation du format"** · 🐞 · low.
+On a press shown in French (Canada), two texts say something other than
+their English. A reader who opens a book with a file for sale sees the
+purchase link without the format's name: "25.00 Achat (25.00 USD)",
+where the English page reads "25.00 Purchase PDF (25.00 USD)". An
+editor who presses a format's availability link on the book's
+"Publication Formats" page gets a window titled "Approbation du format"
+("Format Approval"), where English titles it "Format Availability".
 
-The rest of each page shows as usual and every link works. A French
-reader of an edited volume cannot see who edited it, and the press
-cannot change these texts from its settings. The fix changes no code: a
-developer enters or corrects 73 French (Canada) texts, all of them OMP's
-own, on PKP's translation platform. The Steps show 51 of them (48 codes
-and 3 wrong texts); the other 22 sit in the same files and belong to
-states, windows and settings no Step opens (the Browse block's name and
-settings, a series' ISSN labels, among others).
+Nothing is lost and both tasks get done: the link still opens the
+purchase, and the window's own sentence says that the format will be
+available to readers. For a format with a single file the link is the
+only place the book's page names the format, so the French reader is
+not told which format the price buys. The press cannot change either
+text from its settings.
 
-A press shows these codes when "Français (Canada)" is among the
-languages it offers. "Français" (France) has these texts, except a
-priced file's format name and the review rounds' names, which it lacks
-too.
+A press shows both when "Français (Canada)" is among the languages it
+offers; the link also needs payments turned on and a file priced for
+direct sale. "Français" (France) has the same purchase link, and the
+right window title.
 Every version name reads "{date} (##publication.versionStage.display##)", as on an article's page ([→ Article landing page & reading, A1](U13-article-landing-page-and-reading.md#a1)), whose report covers it.
-Basis: probe, 2026-10-02 and 2026-10-04. <sup>f-a15</sup>
+Basis: probe, 2026-10-01 and 2026-10-04; code, 2026-10-08. <sup>f-a15</sup>
 
 <a id="a16"></a>
 **A16 — A book's earlier URL Path shows a server error page** · 🐞 · medium · crash: server.
@@ -1769,7 +1744,7 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td23** — Live-probed 2026-09-28 (Rule 9): one version: "Versions" with "2024-03-05 (Version of Record 1.0)" in plain text; two: newest first, the shown one plain, the current one linking to the book's address, the older to `…/version/{id}`; a third, unpublished version and a second one unpublished again were not listed; "28-09-2026 (Version of Record 1.1)" after a short-format change.
 
 <a id="fn-i"></a>
-**i** — Table of contents: `monograph_full.tpl` `.item.chapters` over `ChapterDAO::getByPublicationId()` (the chapter list's `seq`); the title link when `isPageEnabled()`, to `catalog/book/{bestId}/chapter/{sourceChapterId}` or `…/version/{pid}/chapter/{sourceChapterId}`; the authors line when `$authorString != $chapter->getAuthorNamesAsString()`, where `$authorString` is `Publication::getAuthorString()` ("{name} ({roles})" joined by "; ") and the chapter's is the bare names joined by ", ", so the two never match; the chapter's DOI `doiObject` (or a sibling version's); chapter files `pluck_files by="chapter"`, then per `$publicationFormats` `by="publicationFormat"`, the link through `downloadLink.tpl`. Side column: `CatalogBookHandler::book()` keeps formats with `getIsAvailable()` (remote ones also in `remotePublicationFormats`) and files whose `directSalesPrice` is not null in an available format (`availableFiles`); `publicationFormats.tpl` prints a remote format (`urlRemote`, `target="_blank"`, not on a chapter page), a single file as `pub_format_single`, several as the format's name then per file `span.name` and a `downloadLink.tpl` with `useFilename=true`. `downloadLink.tpl`: with `useFilename` the file's name alone; otherwise, when `getDirectSalesPrice()` and `$currency`, the bare price followed by `payment.directSales.purchase` "Purchase {$format} ({$amount} {$currency})" (OMP `locale/en/locale.po`), else the format's name; the address `catalog/view/{bookBestId}/{formatBestId}/{fileBestId}` or with `version/{pid}` when the publication is not the current one. Incidental (U73 claim check K3, 2026-09-28): "25.00 Purchase PDF (25.00 USD)"; a two-file format listed "replacement.pdf", "article.pdf" where a one-file format read "PDF". Live-probed 2026-09-28: see td10, td11; the side column listed a press's formats in the Publication Formats page's order, and after a format was set "Not Available", or its approval revoked, the page and the side column both moved it last. Only the seeded chapter order was read; a new order dragged on the Chapters page was not reached. Walked 2026-10-01 on OMP `main` (issue report `docs/issues/U69-A15-omp-french-book-page-raw-keys.md`, Evidence, seen in passing): on the default dataset's book 14, after a second version was published, its two files under "PDF" changed places from one run of the same steps to the next (cause not traced; seen on the side column, the table of contents' order not read).
+**i** — Table of contents: `monograph_full.tpl` `.item.chapters` over `ChapterDAO::getByPublicationId()` (the chapter list's `seq`); the title link when `isPageEnabled()`, to `catalog/book/{bestId}/chapter/{sourceChapterId}` or `…/version/{pid}/chapter/{sourceChapterId}`; the authors line when `$authorString != $chapter->getAuthorNamesAsString()`, where `$authorString` is `Publication::getAuthorString()` ("{name} ({roles})" joined by "; ") and the chapter's is the bare names joined by ", ", so the two never match; the chapter's DOI `doiObject` (or a sibling version's); chapter files `pluck_files by="chapter"`, then per `$publicationFormats` `by="publicationFormat"`, the link through `downloadLink.tpl`. Side column: `CatalogBookHandler::book()` keeps formats with `getIsAvailable()` (remote ones also in `remotePublicationFormats`) and files whose `directSalesPrice` is not null in an available format (`availableFiles`); `publicationFormats.tpl` prints a remote format (`urlRemote`, `target="_blank"`, not on a chapter page), a single file as `pub_format_single`, several as the format's name then per file `span.name` and a `downloadLink.tpl` with `useFilename=true`. `downloadLink.tpl`: with `useFilename` the file's name alone; otherwise, when `getDirectSalesPrice()` and `$currency`, the bare price followed by `payment.directSales.purchase` "Purchase {$format} ({$amount} {$currency})" (OMP `locale/en/locale.po`), else the format's name; the address `catalog/view/{bookBestId}/{formatBestId}/{fileBestId}` or with `version/{pid}` when the publication is not the current one. Incidental (U73 claim check K3, 2026-09-28): "25.00 Purchase PDF (25.00 USD)"; a two-file format listed "replacement.pdf", "article.pdf" where a one-file format read "PDF". Live-probed 2026-09-28: see td10, td11; the side column listed a press's formats in the Publication Formats page's order, and after a format was set "Not Available", or its approval revoked, the page and the side column both moved it last. Only the seeded chapter order was read; a new order dragged on the Chapters page was not reached. Walked 2026-10-01 on OMP `main` (issue report `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`, Evidence, seen in passing): on the default dataset's book 14, after a second version was published, its two files under "PDF" changed places from one run of the same steps to the next (cause not traced; seen on the side column, the table of contents' order not read).
 
 <a id="fn-td10"></a>
 **td10** — Live-probed 2026-09-28 (Rule 10; A6): "Tides" (page ticked, subtitle "Low and high") a link to `…/chapter/{n}`, "Harbours" and "Coda" plain text; a single-author book showed its author under each chapter with authors, a two-contributor book's chapter credited to both "Ada Author, Lee Second", a chapter with no authors no name; each chapter's file links under the chapter only, none in the side column; the chapter's DOI "DOI: https://doi.org/10.1234/…" as a link.
@@ -1823,7 +1798,7 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **o** — OMP `locale/fr_CA`: empty `msgstr` for `submission.plainLanguageSummary`, `plugins.themes.default.displayStats.downloads`, `catalog.published`, `catalog.forthcoming`, `catalog.categories`, `catalog.manage.series.onlineIssn`, `catalog.manage.series.printIssn`, `catalog.viewableFile.title`, `catalog.viewableFile.return`, `doi.readerDisplayName`, `chapter.volume`, `chapter.pages`, `submission.chapterCreated`, `submission.withoutChapter`, `submission.editorName`, `submission.authorListSeparator`, `monograph.publicationFormatDetails`; `payment.directSales.purchase` reads "Achat ({$amount} {$currency})" with no format. Translated: `submission.synopsis` "Synopsis", `series.series` "Séries", lib/pkp's `submission.versions`, `common.keywords`, `submission.outdatedVersion`, `submission.viewingPreview`. Incidental (U10 claim check K1, 2026-09-24): "24.09.2026 (##publication.versionStage.display##)" and "##catalog.published##" on a press's book page, under a short date format other than the default. Live-probed 2026-09-28: see td20.
 
 <a id="fn-td20"></a>
-**td20** — Live-probed 2026-09-28 (Rule 21; A15): a new press offers no language choice in its header; the French pages were opened with "fr_CA" in the address. The raw codes Rule 21 lists; "2026-09-28 (##publication.versionStage.display##)##submission.chapterCreated##" and "##submission.withoutChapter##" alone; "25.00 Achat (25.00 USD)"; "Ceci est une version obsolète publiée le 2024-03-05. Consulter la version la plus récente." and "Ceci est un aperçu et n'a pas été publié. Afficher la soumission" translated; the English pages showed no raw code. The French file view page failed as in English (A9, before its fix of 2026-10-05). The OJS and OPS French item pages read "2026-09-28 (##publication.versionStage.display##)" too.
+**td20** — Live-probed 2026-09-28 (Rule 21; A15): a new press offers no language choice in its header; the French pages were opened with "fr_CA" in the address. Raw codes where OMP's French (Canada) lacks a text (note o); "2026-09-28 (##publication.versionStage.display##)##submission.chapterCreated##" and "##submission.withoutChapter##" alone; "25.00 Achat (25.00 USD)"; "Ceci est une version obsolète publiée le 2024-03-05. Consulter la version la plus récente." and "Ceci est un aperçu et n'a pas été publié. Afficher la soumission" translated; the English pages showed no raw code. The French file view page failed as in English (A9, before its fix of 2026-10-05). The OJS and OPS French item pages read "2026-09-28 (##publication.versionStage.display##)" too.
 
 <a id="fn-t"></a>
 **t** — Lib/pkp's `OpenReviewComponent` (the public-review display's data) is used by no OMP handler or template: `CatalogBookHandler::book()` prepares no review data and `monograph_full.tpl` mounts no review display (code read on checkout omp `3b0ecf794`, lib/pkp `3dc90c81a6`, 2026-10-05). Live-probed 2026-10-05 (Rule 22; Settings bullet 16; A26), OMP `main`, two runs, on a scratch press with "Default Review Mode" "Open" and "Publicly Show Reviewer Comments" off: Settings › Workflow › Review › "Setup" offered "Publicly Show Reviewer Comments" with the box "Make reviewer comments publicly visible with published content". Two books in External Review, each with one submitted Open review whose "For author and editor" comment carried a unique word. On the first, the reviewer row's "More Actions" › "Edit" offered "Publicly Show Reviewer Comments" unticked, to the Press manager and to the book's assigned Series editor; ticked and saved (`is_review_publicly_visible` true), it reopened ticked. "Read Review" › "Mark as Complete" read "Mark this review as complete? This review will be made publicly visible alongside the article. You can still modify this review after marking it as complete. You will have the opportunity to thank the reviewer in the next step."; confirmed, "The review has been marked as complete." and the row "Complete". The second book's review, left unticked, got the dialog without the "publicly visible" sentence. Both were accepted and published as a Version of Record. Each book's page, read by a visitor (twice, the second after a reload), and the first also by the press's Reader and the Press manager, held its title, "Authors", "Synopsis", "References", "Published", "Versions" and the copyright line: neither review's comment in the text or the page's source, no reviewer name ("Rhea Openreviewer"), no review heading, no request for review data, no failed request; the catalog page showed neither comment. Other end: a second press with "Publicly Show Reviewer Comments" on, its book seeded published with a submitted Open review whose box was ticked (not marked complete): no review on the book's page. No server error, page error or console error in either run.
@@ -1973,8 +1948,8 @@ Issue report: [pkp-e2e#296](https://github.com/jardakotesovec/pkp-e2e/issues/296
 **f-a14** — Note m: `getCitation()` sets the CSL `original-date` from `$submission->getOriginalPublication()` whenever its date differs from the shown version's, for a chapter as for the book, and the APA style prints it as "Original work published {year}". Live-probed 2026-09-28 (td18).
 
 <a id="fn-f-a15"></a>
-**f-a15** — Note o. Seen 2026-09-24 (U10 claim check K1): the version names and "Published". Live-probed 2026-09-28 (td20): every label Rule 21 lists.
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)).
+**f-a15** — Note o. Seen 2026-09-24 (U10 claim check K1): the version names and "Published". Live-probed 2026-09-28 (td20): the priced link and the version names. The window's title is [Publication formats, proof & terms A25](U73-publication-formats-proof-terms.md#a25)'s.
+Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md](../issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md)).
 Issue report (the version names): [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)).
 
 <a id="fn-f-a16"></a>

@@ -302,11 +302,7 @@ bottom, then "Save": <sup>q</sup>
    & reports*); which roles see the group is
    [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md)'s.
    On a press and a preprint server the entries carry the app's own
-   names (Fields). Each page has its own address. In the French
-   interface of a press and a preprint server, several of these pages'
-   labels and the site's "Statistiques" tab show raw codes, and on a
-   journal the "JATS" column heading reads "##stats.jats##" ⚠
-   [A6](#a6). <sup>b</sup> <sup>v</sup> <sup>td8</sup>
+   names (Fields). Each page has its own address. <sup>b</sup>
 7. <a id="date-range"></a>**The date range.** Every page opens on "Last 30
    days": from 31 days ago to yesterday. The calendar button (Fields) lists
    "Last 30 days", "Last 90 days", "Last 12 months" and "All dates";
@@ -1174,7 +1170,6 @@ Left out of the scenarios above, by reason:
   - Tab on Statistics › "Journal" stops on the "About journal statistics" icon and its text shows while it holds the focus (the guard for A7, once fixed)
   - on Site Settings › "Statistics", a refused Platform ID left in the box, "Platform" unticked, "Save" answers "Saved" (the guard for A10, once fixed)
   - "Download" in "Report Settings" of a "Counter R5" report: the saved "counterReport.tsv" is tab-separated, its first line split on a tab giving "Report_Name" (the guard for A11, once fixed)
-  - a French (Canada) reading of a press's and a preprint server's statistics pages, both "Télécharger le rapport" windows and the site's "Statistiques" tab: no "##" code (the guard for A6, once fixed) {OMP OPS}
   - a "Start Date" before the earliest possible date in a "Counter R5" report's "Report Settings": the refusal under the box names the plain date, no "##" (the guard for A3, once fixed)
   - with an article page visited and no file opened, the "Journal Article Requests (IR_A1)" file's "Metric_Type" column holds only the types its "Metric_Types" line names (the guard for OJS5, once fixed) {OJS}
   - a "COUNTER Reports" year link's XML file names its report "JR1" (and "AR1") in its "Name" attribute (the guard for OJS6, once fixed) {OJS}
@@ -1205,7 +1200,6 @@ Left out of the scenarios above, by reason:
   - A4 (the journal's "Do not collect any geographical data"; Rule 28)
   - A5 (the Section Editor's "Counter R5" while the journal's COUNTER
     statistics are restricted; Actors row 3; scenario 9 marks it)
-  - A6 (the French interface; Rule 6)
   - A7 (the information icons from the keyboard; Fields)
   - A8 (a search phrase with double quotes in the spreadsheets; Fields)
   - A9 (the byte-order mark; Fields)
@@ -1258,7 +1252,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | A "Counter R5" report date outside the possible range is refused with a raw locale key around the date | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | A journal's "Do not collect any geographical data" is not kept: the journal keeps collecting at the site's level | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A Section Editor's "Counter R5" opens an "Error" window over an empty list while the COUNTER statistics are restricted | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A6](#a6) | In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A7](#a7) | Information icons show their text on mouse hover only: Tab skips them on the Statistics pages and in settings forms | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Statistics downloads: a double quote in the search phrase or a filter's name breaks that line of the file | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | Site administrator cannot save Site Settings › "Statistics" after unticking "Platform" over a mistyped Platform ID | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1279,6 +1272,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP2](#omp2) | A press offers "Filters" only while it has a series, and names abstract views "Catalog Entries" | ✅ | minor | — |
 | [OPS1](#ops1) | A preprint server offers "Filters" only with two or more sections | ✅ | minor | — |
 | [OMP3](#omp3) | Retired: a book's PDF or "Appendix" file failed to open, so its visit was never counted; both now open and count (Rule 1) | ✅ | retired | upstream sync (claude), 2026-10-05 — fixed upstream (omp `8c807c919`, pkp/pkp-lib#13444) |
+| [A6](#a6) | Retired: In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1364,34 +1358,6 @@ setting for the whole site. The setting's own text gives restricted
 reports to admin and manager roles only, so the refusal is intended;
 the fault is that the menu still offers the page.
 Basis: probe, 2026-10-02. <sup>f-a5</sup>
-
-<a id="a6"></a>
-**A6 — In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes** · 🐞 · low.
-A manager or editor of a press or a preprint server who reads the
-interface in French (Canada) and opens Statistics sees codes
-(untranslated keys, such as "##stats.publicationStats##") in place of
-about twenty labels. On the "Monographs" ("Preprints" on a preprint
-server) page they replace the browser tab's title, a chart button, the
-table's title and its count line, and on a press also the heading and
-the side menu's entry. On the "Press" ("Server") page they replace the
-browser tab's title. In the window that "Télécharger le rapport" opens
-on either page, they replace the description and the first button. A
-Site Administrator sees three more on Administration › Site Settings ›
-"Statistiques", in place of the descriptions of three settings.
-
-No code is at fault: OMP's and OPS's own French (Canada) translation
-files lack these texts, which a journal has. The fix is 39 texts
-entered on PKP's translation platform. The usage figures, the downloads
-and the settings work, and the same screens in English show every text.
-
-Only a user whose interface language is French (Canada) sees the codes,
-so it takes a press, a server or a site that offers French (Canada) as
-an interface language; a user reading the same press in English sees
-none. Other languages of OMP and OPS lack some of the same texts and
-are left to their translators.
-
-A journal's pages are translated except the "JATS" column heading of "Articles", which reads "##stats.jats##": a text new on `main` that no language but English has yet, which the report leaves out.
-Basis: probe, 2026-10-03. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — Information icons show their text on mouse hover only: Tab skips them on the Statistics pages and in settings forms** · 🐞 · low.
@@ -1645,6 +1611,9 @@ Basis: probe, 2026-09-27. <sup>f-ops1</sup>
 
 <a id="omp3"></a>
 **OMP3 — A book's PDF or "Appendix" file is never counted** · ✅ · retired. Fixed upstream by omp `8c807c919` (pkp/pkp-lib#13444), verified 2026-10-05 on OMP: from the book page a book's PDF opens in its viewer and downloads, its "Appendix" file downloads, and each visit is counted, the PDF under "File Views" and "PDF" on "Monographs" and the "Appendix" file as a "Supplementary File" in "Download Files" (Rule 1). <sup>f-omp3</sup>
+
+<a id="a6"></a>
+**A6 — In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a6</sup> <sup>v</sup> <sup>td8</sup>
 
 ---
 
@@ -2503,7 +2472,6 @@ Issue report: [docs/issues/U64-A5-section-editor-counter-r5-error-while-restrict
 
 <a id="fn-f-a6"></a>
 **f-a6** — fn-v. Live-probed 2026-09-27: td8.
-Issue report: [docs/issues/U64-A6-french-statistics-pages-raw-keys.md](../issues/U64-A6-french-statistics-pages-raw-keys.md), filed as [pkp-e2e#625](https://github.com/jardakotesovec/pkp-e2e/issues/625).
 
 <a id="fn-f-a7"></a>
 **f-a7** — Live-probed 2026-09-27, three apps: the icons (`.tooltipButton`)

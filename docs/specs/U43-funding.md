@@ -157,11 +157,9 @@ one error." and the Save button stays disabled until the field is corrected.
     l'ordre"), the row menu, the delete confirmation, the panel's "Add",
     "Save" and "Close" buttons and the "Delete" under the chosen funder
     read French, and a funder named through the French panel saves and is
-    listed at once and after a reload. The list's heading, explanation,
-    "Add Funder" button, column heading and empty-list line, and the
-    panel's title and field texts, read raw codes ⚠ [A14](#a14). The
-    Author's own list reads the same "Trier" and codes, grayed out where
-    they may not edit (Rule 8). <sup>i</sup>
+    listed at once and after a reload. The Author's own list reads the
+    same "Trier", grayed out where they may not edit (Rule 8).
+    <sup>i</sup>
 
 ## Side effects
 
@@ -467,7 +465,6 @@ Left out of the scenarios above, by reason:
   - A10 (a registry name for a funder the copy lacks on a connected
     install, and in the wizard and on the published page; Fields)
   - A12 (a save with only a non-primary language filled accepted; Fields)
-  - A14 (raw codes on the list and the panel in French; Rule 14)
   - A15 (a grant deleted or added in "Edit Funder" and left with "Close"
     kept, and stored by the next "Save"; Fields)
 - **No seed**:
@@ -511,7 +508,6 @@ are the source; badges, Impact and Basis:
 | [A3](#a3) | A registry funder picked while the server cannot reach the registry errors and saves nameless until the install's registry copy gains it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | On a press or preprint server the wizard's funders table and Review step still read empty after a successful save | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A5](#a5) | Ordering arrows and the typed-name boxes are broken for assistive technology | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A14](#a14) | In French the funders list and the "Add Funder" / "Edit Funder" panel show raw codes for their headings, explanations and field labels | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A15](#a15) | A grant deleted or added in "Edit Funder" and left with "Close" is kept, and the next "Save" stores it, so a deleted grant is lost | 🐞 | medium | — |
 | [A1](#a1) | "Require the author to add funder metadata" warns on the Review step without blocking the submission | ❓ | user-visible | — |
 | [A2](#a2) | Every publication version shows and edits the same funders list, though the screen presents funding per version | ❓ | minor | — |
@@ -523,6 +519,7 @@ are the source; badges, Impact and Basis:
 | [A11](#a11) | The grant-number rejection message has never been seen on screen | ❓ | latent | — |
 | [A12](#a12) | The primary-language funder name is marked required, yet a save with any one language filled is accepted | ❓ | minor | — |
 | [A13](#a13) | A saved funder never appears in the Funders table, so it cannot be edited, deleted or reordered, though the published page shows the funding (regression, pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (ui-library `f88b7e6a`), suites green on all three apps |
+| [A14](#a14) | Retired: in French the funders list and the "Add Funder" / "Edit Funder" panel show raw codes for their headings, explanations and field labels | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's funders | ✅ | user-visible | — |
 
 ### All apps
@@ -680,43 +677,6 @@ any-one-language rule is what the save enforces and what the list renders
 from.
 Basis: probe. <sup>f-a12</sup>
 
-<a id="a14"></a>
-**A14 — In French the funders list and its panel show raw codes** · 🐞 · low.
-With the interface in French (Canada), the funders list and the "Add
-Funder" / "Edit Funder" panel read raw codes where French words belong,
-on a journal, a press and a preprint server:
-- the list, the Author's too: the heading "Funders" reads
-  "##submission.funders##", as does the table's name for a screen reader; the explanation
-  "##submission.funders.description##"; the "Add Funder" button
-  "##submission.funders.action.addFunder##"; the "Funder Name" column
-  "##submission.funders.column.name##"; an empty list
-  "##submission.funders.emptyFunders##" instead of "No funders have been
-  added."; and a screen reader hears the "More Actions" column header and
-  each row's "…" button as "##common.moreActions##";
-- the panel: its title "##submission.funders.addFunder.title##" or
-  "##submission.funders.editFunder.title##"; the "Funder" field
-  "##submission.funders.funder##", its guidance
-  "##submission.funders.funder.description##" and the search box's label
-  "##submission.funders.funder.searchPhraseLabel##"; once the typed text
-  is picked, the name box "##submission.funders.funder.typeTranslationNameInLanguageLabel##"
-  instead of "Type the funder name in {language}"; "Funder Grants"
-  "##submission.funders.funder.grants.label.name##", also the grant
-  table's name for a screen reader, and its explanation
-  "##submission.funders.funder.grants.label.description##"; the grant
-  columns "##submission.funders.funder.grant.doi##",
-  "##submission.funders.funder.grant.number##" and
-  "##submission.funders.funder.grant.name##".
-
-Expected: French words, as the same screens' "Trier", row menu, delete
-confirmation and panel buttons show (Rule 14); in English none of these
-codes appears. A French-speaking manager or author has to guess what the
-panel's fields ask for, though a funder still saves. The side-menu entry
-"Funding" and the page heading are
-[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s
-codes, and why a missing French text shows as a code at all is
-[Languages & locales](U57-languages-and-locales.md#a4)'.
-Basis: probe, 2026-10-04. <sup>f-a14</sup>
-
 <a id="a15"></a>
 **A15 — A grant change left with "Close" in "Edit Funder" is kept and saved** · 🐞 · medium.
 On the workflow's "Funding" page, a user deletes a funder's grant row in
@@ -745,6 +705,9 @@ Basis: probe. <sup>f-ops1</sup>
 
 <a id="a13"></a>
 **A13 — A saved funder never appears in the Funders table** · ✅ · retired. Fixed upstream (ui-library `f88b7e6a`, pkp/pkp-lib#13003 follow-up), 2026-09-03. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — In French the funders list and its panel show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a14</sup>
 
 ---
 
@@ -1245,7 +1208,7 @@ Funder" panel before and after the typed text was picked and in the
 header and as each row's "…" button name. The English control read
 "Funders", "Add Funder", "Funder Name", "No funders have been added."
 and the panel's English labels.
-Re-walked 2026-10-04 on main, all three apps (3.5 has no funders list). The list's hidden "More Actions" column header and each row's "…" button name, `common.moreActions`, a released text French (Canada) never received, joined [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)), low; the rest (`submission.funders*`, which came with `pkp/pkp-lib#12392`) are main-only texts with no report under the 2026-10-02 ruling on main-only locale keys.
+Re-walked 2026-10-04 on main, all three apps (3.5 has no funders list). The list's hidden "More Actions" column header and each row's "…" button name, `common.moreActions`, is a released text French (Canada) never received; the rest (`submission.funders*`, which came with `pkp/pkp-lib#12392`) are main-only texts.
 
 <a id="fn-f-a15"></a>
 **f-a15 — A15 evidence.** Live-probed 2026-10-04 on main, OJS, OMP and OPS

@@ -118,9 +118,7 @@ Reach:
   either. Other languages show pkp-lib's translation on OMP and OPS;
   they were not checked one by one.
 - Not this fault: French (Canada) has no text for this key at all, so
-  the box shows a code there (spec U53
-  [A11](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U53-users-management.md#a11),
-  reported apart).
+  the box shows a code there, a gap left to its translators.
 
 ## Proposed fix
 

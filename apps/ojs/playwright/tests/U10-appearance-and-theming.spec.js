@@ -15,9 +15,9 @@
  * - A5 🐞: S1 never opens the removed style sheet's address.
  * - A7 🐞: every refused file is dropped on its box, and neither "Upload
  *   File" nor "Save" is pressed on that box's tab afterwards.
- * - A6, A8, A9, OJS5, OJS6 🐞: no test reaches those states (no French
- *   interface, no "3:05PM" time, no empty "Custom", never all three
- *   organization boxes unticked, no heading levels read).
+ * - A8, A9, OJS5, OJS6 🐞: no test reaches those states (no "3:05PM"
+ *   time, no empty "Custom", never all three organization boxes
+ *   unticked, no heading levels read).
  * - A1 🐞 {OMP OPS}: not a journal's.
  * - A2, OJS7 ❓: S3 always types an "Alternate text".
  * - OJS2 ❓: no issue is created on a journal that never saved "Theme".

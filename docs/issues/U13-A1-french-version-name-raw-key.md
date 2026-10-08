@@ -344,8 +344,9 @@ English locale entry removed, tried, with no data to repair.
   251. Field 780 was not walked: the dataset has no article with two
   published major versions.
 - The chapter page: a press's chapter page was read in the walk of
-  [`omp-french-book-page-raw-keys/walk.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/omp-french-book-page-raw-keys/walk.js)
-  (the other French codes of a book's pages, spec U69 A15). Its
+  [`omp-french-purchase-link-and-availability-title-wrong/walk.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/omp-french-purchase-link-and-availability-title-wrong/walk.js)
+  (the walk of spec U69 A15's report, which also reads a book's and a
+  chapter's French pages). Its
   "Versions" list read "2026-10-01
   (##publication.versionStage.display##)" on both versions of book 14,
   without this fix.

@@ -61,8 +61,6 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
 | Unauthenticated iD | The iD as a link, the hollow ORCID icon, and the note "This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly." plus "Delete" <sup>e</sup> |
 | Verified iD | The iD as a link with the solid ORCID icon, plus "Delete" (confirmation before removal) <sup>e</sup> |
 
-What the field shows in the French interface: Rule 17a.
-
 ## Rules & state
 
 1. **Per-journal switch.** ORCID is off until a Journal Manager enables it on
@@ -199,27 +197,7 @@ What the field shows in the French interface: Rule 17a.
     ("français" or "French" in "Change Language", the one installed), the
     journal's tab on Settings → Users & Roles and the site's side tab on
     Administration › Site Settings are named "Plugiciel de profil ORCID"
-    ("ORCID Profile Plugin") instead of "ORCID". On the site's tab the box
-    reads "##orcid.manager.siteWide.enabled##" and its explanation
-    "##orcid.manager.siteWide.description##": raw codes, a text's
-    internal name between "##" marks where its translation is missing.
-    The three fields the box reveals are in French ("API ORCID",
-    "Identifiant ORCID du client", "Clé secrète du client"), as is the
-    journal's whole tab. <sup>n</sup>
-
-    17a. **The French interface: the contributor's ORCID iD field.**
-    ⚠ [A12](#a12) On the contributor form of the workflow's Contributors
-    list, the field's label "Identifiant ORCID" and its help text are
-    French. Everything else it shows is a raw code; the buttons work as
-    in English (Rules 8, 8a): <sup>n</sup>
-
-    | Where | English | French |
-    |-------|---------|--------|
-    | The request button | "Request verification" | "##orcid.field.verification.request##" |
-    | Its question window: title, question | "Request ORCID verification", "Would you like to send an email to this author requesting they verify their ORCID?" | "##orcid.field.authorEmailModal.title##", "##orcid.field.authorEmailModal.message##", with "Oui" and "Non" |
-    | After the request, and after the form is reopened: the disabled button, the link | "ORCID Verification has been requested!", "Resend Verification Email" | "##orcid.field.verification.requested##", "##orcid.field.verification.resendRequest##" |
-    | An unauthenticated iD's note | "This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly." | "##orcid.field.unverified.shouldRequest##", above the iD, "(non authentifié)" and "Supprimer" |
-    | "Delete"'s question window: title, question | "Delete ORCID", "Are you sure you want to remove this ORCID?" | "##orcid.field.deleteOrcidModal.title##", "##orcid.field.deleteOrcidModal.message##", with "Oui" and "Non" |
+    ("ORCID Profile Plugin") instead of "ORCID". <sup>n</sup>
 
 ## Side effects
 
@@ -508,7 +486,6 @@ Left out of the scenarios above, by reason:
   - the guard for A4 (issue report `docs/issues/U04-A4-what-is-orcid-link-opens-sign-in.md`): Scenario 2 presses "What is ORCID?" on the profile Identity tab and the registration page and expects the "What is ORCID?" page.
   - the guard for A2 (issue report `docs/issues/U04-A2-orcid-denied-page-raw-placeholder.md`): a contributor who denies access at ORCID lands on the "ORCID Authorization" page and reads "You denied access to your ORCID record.", no raw key.
   - the guard for A11 (issue report `docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md`): in French (Canada), both ORCID tabs (the site's and the journal's) read "ORCID".
-  - the guard for A12 (issue report `docs/issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md`): in French (Canada), the site's ORCID switch and every state of the contributor's ORCID iD field show no untranslated text key (A11's switch too).
   - the guard for A5's refusal (issue report `docs/issues/U04-A5-assistant-orcid-controls-refused.md`): an Assistant whose assignment has the "Permissions" box presses "Request verification" (the email arrives) and "Delete" (the iD is gone), and one without the box is offered no "Edit".
   - the guard for A14 (issue report `docs/issues/U04-A14-orcid-reauthorization-link-blank-page.md`): once fixed, a contributor verified under the public API follows "Requesting updated ORCID record access" after the journal moved to the member API and lands on the "ORCID Authorization" page, not a blank page.
   - the guard for A15 (issue report `docs/issues/U04-A15-orcid-pages-tab-no-page-name.md`): once fixed, the "What is ORCID?" and "ORCID Authorization" pages' browser tab reads "What is ORCID? | {journal name}" and "ORCID Authorization | {journal name}".
@@ -533,8 +510,7 @@ Left out of the scenarios above, by reason:
   - A6 (the toggle's label misdescribing when it fires; Rule 13)
   - OPS2 (the preprint server's Emails screen lacking the three ORCID rows; Rule 14)
   - OPS3 (the legacy ORCID Profile plugin on preprint servers; Rule 16)
-  - A11 (the French interface: both ORCID tabs named after the old plugin, the site switch in raw codes; Rule 17)
-  - A12 (the French interface: the contributor's ORCID iD field in raw codes; Rule 17a)
+  - A11 (the French interface: both ORCID tabs named after the old plugin; Rule 17)
   - A13 (no "Delete" for the owner's unauthenticated iD on the Identity tab; Actors row 4, Rule 6c; scenario 3 marks it)
   - A14 (the re-authorization email's link failing with a server error; Rule 11)
   - A15 (the public ORCID pages' browser tab showing no page name; Rule 10)
@@ -578,8 +554,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A4](#a4) | "What is ORCID?" beside the ORCID button opens ORCID's sign-in instead of the explanation page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An Assistant's contributor-ORCID controls are refused by the server yet report success | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A8](#a8) | A press's or preprint server's ORCID verification failure page says to contact "the journal manager" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A11](#a11) | In French, the site's ORCID switch shows raw codes, and both ORCID tabs are named "Plugiciel de profil ORCID" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A12](#a12) | In French, the contributor's ORCID iD field shows raw codes for its button, questions and notes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A11](#a11) | In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | A contributor following the "Requesting updated ORCID record access" link gets a blank page and can never allow deposits | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [A15](#a15) | The "What is ORCID?" and "ORCID Authorization" pages' browser tab shows only "\| {journal name}" | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [OPS2](#ops2) | The ORCID request emails have no rows on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -590,6 +565,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A13](#a13) | A user whose own iD is unauthenticated is offered no "Delete" on the profile's Identity tab | ❓ | minor | — |
 | [OPS1](#ops1) | The author-email toggle exists on a preprint server that can never trigger it | ❓ | latent | — |
 | [A10](#a10) | Deleting a contributor's unauthenticated iD fails: the confirm never completes and the iD stays (regression, pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (pkp-lib `ecd12271ed` + `d9e9b3fc7c`), suites green on all three apps |
+| [A12](#a12) | Retired: in French, the contributor's ORCID iD field shows raw codes for its button, questions and notes | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [OMP1](#omp1) | A press requests and verifies iDs but deposits no works | ✅ | user-visible | — |
 | [OPS3](#ops3) | A preprint server additionally bundles the legacy ORCID Profile plugin | ✅ | invisible | — |
 
@@ -714,29 +690,23 @@ journal.
 Basis: code. <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a11"></a>
-**A11 — French: the site's ORCID switch is unlabelled, and both ORCID tabs carry the old plugin's name** · 🐞 · low.
-A Site Administrator working in French (Canada) expects the site's ORCID
-tab in French, as the journal's tab is. Instead the one box that turns
-ORCID on for every journal reads "##orcid.manager.siteWide.enabled##",
-explained by "##orcid.manager.siteWide.description##": untranslated text
-keys, so nothing on the tab says what the box does (Rule 17). Both ORCID
-tabs, the site's and the journal's, are named "Plugiciel de profil
-ORCID" ("ORCID Profile Plugin"), the name of the retired plugin (Rule
-16), where English says "ORCID"; the same old name shows in 31 other
-interface languages, whose translations were not marked for review when
-the English text changed.
+**A11 — In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin** · 🐞 · low.
+A site administrator or manager working in French (Canada), German,
+Spanish, Italian, Portuguese (Portugal and Brazil), Russian or one of 25
+other languages finds the two ORCID settings tabs named after the ORCID
+Profile plugin, as if the settings belonged to a plugin, though the
+built-in ORCID feature replaced it in 3.5. The tabs are the site's,
+under Administration › Site Settings, and each journal's, press's or
+preprint server's, under Settings › Users & Roles. French (Canada) reads
+"Plugiciel de profil ORCID", German "ORCID-Plugin", Spanish "Módulo de
+perfil ORCID"; English and French (France) read "ORCID". Evidence lists
+every language.
+The English text changed to "ORCID" when the feature was built in, but
+the translations were not marked for review. The fix is a developer's,
+not the translators': setting "ORCID" in each affected language's file
+in pkp-lib, one pull request on each of `stable-3_5_0` and `main`.
+(Rules 16, 17)
 Basis: probe, 2026-10-03. <sup>[f-a11](#fn-a11)</sup>
-
-<a id="a12"></a>
-**A12 — French: the contributor's ORCID iD field shows raw codes** · 🐞 · low.
-A Journal Manager working in French (Canada) expects the contributor's
-ORCID iD field in French. Its label and help text are, but the button
-that asks the author to verify their iD and its question, the button's
-"requested" state and its resend link, an unverified iD's warning and
-the question "Supprimer" asks all show untranslated text keys (Rule 17a).
-The buttons still work ("Oui" sends the email or removes the iD), but
-the manager cannot read what they confirm.
-Basis: probe, 2026-10-03. <sup>[f-a12](#fn-a12)</sup>
 
 <a id="a13"></a>
 **A13 — An unauthenticated iD cannot be removed from its owner's profile** · ❓ · minor.
@@ -840,6 +810,9 @@ Basis: probe + code (bundled files + migration helper).
 
 <a id="a10"></a>
 **A10 — Deleting a contributor's iD fails outright** · ✅ · retired. Fixed upstream (pkp-lib `ecd12271ed` + `d9e9b3fc7c`, pkp/pkp-lib#13003 follow-ups), 2026-09-03. <sup>[f-a10](#fn-a10)</sup>
+
+<a id="a12"></a>
+**A12 — French: the contributor's ORCID iD field shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a12](#fn-a12)</sup>
 
 ---
 
@@ -1143,7 +1116,7 @@ itself is the Emails-management feature's territory.
 reviewer-list display: see note h.
 
 <a id="fn-n"></a>
-**n** — French interface (Rules 17, 17a): live-probed 2026-09-28 (OJS,
+**n** — French interface (Rule 17): live-probed 2026-09-28 (OJS,
 OMP, OPS identical; two runs each, the interface switched to `fr_CA`
 under "UI" and "Forms"): Administration › Site Settings (French address
 `index/fr_CA/admin/settings`) › "Réglage du site" › "Plugiciel de profil
@@ -1154,7 +1127,9 @@ secrète du client", each "Obligatoire"; Settings › Users & Roles read
 profil ORCID", its form in French with no raw code ("Activer la
 fonctionnalité ORCID", "Ville", "Paramètres des courriels", "Journal des
 enregistrements ORCID"). On the workflow's Contributors › "Modifier",
-every code of the Rule 17a table; "Oui" posted the request
+untranslated text keys on the contributor's ORCID iD field (its request
+button and question window, the requested state and resend link, an
+unauthenticated iD's note, "Delete"'s question window); "Oui" posted the request
 (`orcid/requestAuthorVerification`, 200) and the removal
 (`orcid/deleteForAuthor`, 200), the field then showing the requested
 state or the raw request button again, the same after the form was
@@ -1370,21 +1345,19 @@ those tips are green (pkp/omp run 33629780688, pkp/ops run 33629815586, both
 2026-09-02). Scenario 5 (suite S5) passes on all three apps again.
 
 <a id="fn-a11"></a>
-**f-a11** — Note n (the tabs, the raw codes, the locale cause). Seen
+**f-a11** — Note n (the tabs, the locale cause). Seen
 identically on OJS, OMP and OPS in two runs, 2026-09-28; the English
 interface is the control (note b). The run records list a server error on
 every Site Settings load, from the Plugin Gallery's list
 ([Plugins management A1](U62-plugins-management.md#a1)); the ORCID tab
 itself failed nothing, so the entry carries no crash word.
 Issue report: [pkp-e2e#739](https://github.com/jardakotesovec/pkp-e2e/issues/739) ([docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md](../issues/U04-A11-orcid-tabs-named-after-old-plugin.md)).
-Issue report: [pkp-e2e#740](https://github.com/jardakotesovec/pkp-e2e/issues/740) ([docs/issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md](../issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md)).
 
 <a id="fn-a12"></a>
 **f-a12** — Note n (every code, the two requests answering 200, the
 locale cause). Seen identically on OJS, OMP and OPS in two runs,
 2026-09-28, with no failure behind either request; the English field on
 the same journals is the control.
-Issue report: [pkp-e2e#740](https://github.com/jardakotesovec/pkp-e2e/issues/740) ([docs/issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md](../issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md)).
 
 <a id="fn-a13"></a>
 **f-a13** — Note d: `identityForm.tpl` renders `#deleteOrcidButton` and its

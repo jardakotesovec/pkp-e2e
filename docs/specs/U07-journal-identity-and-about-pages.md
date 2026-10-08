@@ -103,10 +103,6 @@ to bottom: <sup>g</sup>
 | "Journal Summary" ("Press Summary", "Server Summary"), in the group "Description" | no | Formatted text per language under "Offer a brief description of your journal to provide insight into its content and purpose.", with bold, italic, superscript, subscript and a link only. Empty by default. Where it shows: Rule 8 <sup>g</sup> |
 | "About the Journal" ("About the Press", "About the Server") | no | A tall formatted-text box per language under "Include any information about your journal which may be of interest to readers, authors or reviewers. …", with the same controls as "Editorial History". Empty by default. It is the whole body of the "About the Journal" page (Rule 13) <sup>g</sup> |
 
-A manager working in French sees a journal's tab in French throughout,
-and a press's or a preprint server's with raw text keys in place of some
-group headings, labels and help lines ⚠ [A12](#a12). <sup>g</sup>
-
 **The "Contact" tab** (Settings › Journal › "Contact"): <sup>h</sup>
 
 | Field (UI label) | Required? | Rules |
@@ -1048,7 +1044,6 @@ Left out of the scenarios above, by reason:
   - a Site Administrator with no manager role in a press and a preprint server opening each Settings page from the side menu, as on a journal {OMP OPS} (A1; the guard its issue report names)
   - a reload on a Settings side tab under a later top tab (Website › "Setup" › "Privacy Statement") keeping that side tab (A7; the guard its issue report names)
   - a new journal's and press's "Information For Readers" "Privacy Statement" link opening the "Privacy Statement" page {OJS OMP} (A9; the guard its issue report names)
-  - the French (Canada) "Bloc générique" (Masthead) tab of a press and a preprint server showing no "##" code {OMP OPS} (A12; the guard its issue report names)
   - the site-level "About Open Monograph Press" page of a site with two presses opening "This site uses" {OMP} (OMP2; Rule 20; the guard its issue report names)
   - the masthead not based on enrollments, "Present a masthead based on user enrollments" unticked: the masthead showing under its heading only the "Editorial History" text (and a manager's "Edit" link), or nothing with that text empty, the "Editorial History" address opening the masthead, the other two groups leaving the tab, and, ticked again, both pages listing as before in the saved role order (Rule 14f; Rules 16, 21; Settings bullet 4a)
   - "Enable listing of reviewers on the masthead" at its default: no "Peer Reviewers in Previous Year" although reviews were completed last year {OJS OMP} (Rule 15; Settings bullet 4c)
@@ -1076,7 +1071,6 @@ Left out of the scenarios above, by reason:
   - A9 (the default "For Readers" text's "Privacy Statement" link opening the "Submissions" page; Fields)
   - A10 (a reviewer whose submitted review was cancelled still listed under "Peer Reviewers in Previous Year"; Rule 15)
   - A11 (Hosted Journals "Edit" refused on a journal whose "Country" was never set; Settings bullet 8)
-  - A12 (a press's and a preprint server's French Masthead tab showing raw text keys; Fields)
   - A13 (the invitation and the role-change email promising a masthead listing the journal does not show; Settings bullet 3)
   - OMP1 (Settings › Press headed "Setup"; Rule 1; scenario 2 marks it)
   - OPS2 ("Sponsoring organization" used nowhere; Fields; Rule 10)
@@ -1111,7 +1105,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Reloading or bookmarking a Settings or Site Settings side tab opens the page's first tab | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | The default "For Readers" text's "Privacy Statement" link opens the Submissions page, not the Privacy Statement page {OJS OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | Hosted Journals "Edit" refuses to save a journal whose "Country" was never set | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A12](#a12) | In French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes {OMP OPS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A13](#a13) | With the masthead not based on enrollments, invitations and masthead changes still promise "Your name will appear in the {journal}'s masthead"; reviewers are promised it while the journal lists none | 🐞 | minor | — |
 | [OMP2](#omp2) | On a site hosting several presses, the site's "About Open Monograph Press" page says "This press uses" {OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | A preprint server's French "Privacy Statement" default is the raw text "##default.contextSettings.privacyStatement##" {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
@@ -1124,6 +1117,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP1](#omp1) | The press's Settings › Press page is headed "Setup", not "Press Settings" {OMP} | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server's "Sponsoring organization" is saved and used nowhere {OPS} | ❓ | latent | — |
 | [OPS1](#ops1) | A preprint server has no "Information" tab, Information pages or Information block {OPS} | ✅ | minor | — |
+| [A12](#a12) | Retired: in French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes {OMP OPS} | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A4](#a4) | Retired: a disabled member made "Editorial Masthead" and "Editorial History" fail with a server error; the member now stays listed and both pages open (Rule 14e) | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
 | [A5](#a5) | Retired: "Remove User" reached "Editorial History" only after an unrelated change, and a later start date was not known to list; both now show at the next load (Rule 14e) | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream, settled |
 
@@ -1245,28 +1239,6 @@ publicly on the site", until a country is picked. "Create Journal"
 refuses an empty "Country" the same way. *Hosted journals* owns the
 form ([A1](U59-hosted-journals.md#a1)). Basis: probe, 2026-10-02. <sup>f-a11</sup>
 
-<a id="a12"></a>
-**A12 — In French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes** {OMP OPS} · 🐞 · low.
-A press manager who uses the interface in French (Canada) and opens the
-press's settings finds codes on the first tab, "Bloc générique"
-(Masthead): the first two group headings read
-"##manager.setup.identity##" and "##manager.settings.publisher.identity##",
-the publisher code type field's label is a code, and so are the help
-line under "Pays" and both fields of "Description" with their help
-lines. In that field's list, four discontinued code types read "GKD"
-followed by a code where English reads "(Discontinued)". On a preprint
-server the "Sponsoring organization" label and the help lines under
-"Pays" and "Résumé du serveur" are codes. Only the names and help lines
-are missing; the fields and their choices are as in English.
-
-These are translations, not code: the French (Canada) texts are empty
-or missing in OMP's and OPS's locale files, and are entered on PKP's
-Weblate. Every press and preprint server that offers French (Canada)
-shows the codes, including the press and server in PKP's default test
-data. Other languages that lack the same texts show codes too, since a
-missing text never falls back to English.
-Basis: probe, 2026-10-03. <sup>f-a12</sup>
-
 <a id="a13"></a>
 **A13 — Invitations and masthead changes promise a listing the masthead does not give** · 🐞 · minor.
 With "Present a masthead based on user enrollments" unticked (Settings
@@ -1364,6 +1336,9 @@ Basis: probe, 2026-10-01.
 
 <a id="a5"></a>
 **A5 — Removed and future members wait for an unrelated change** · ✅ · retired. Fixed upstream for "Remove User" (pkp/pkp-lib#13387, 2026-09-24) and settled for start dates, verified 2026-09-29 on OJS, OMP and OPS: a member removed with "Remove User" is on "Editorial History" at the next load, and a member with a later start date is listed from that date on, with no other change (Rule 14e). <sup>f-a5</sup>
+
+<a id="a12"></a>
+**A12 — In French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes** {OMP OPS} · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a12</sup>
 
 ---
 
@@ -1714,7 +1689,8 @@ Journal" has its initials (that form requires them) and no country unless
 one was chosen there (that form offers it as optional).
 Live-probed 2026-09-29 (Masthead tab in French at
 `…/fr_CA/management/settings/context`; all three apps, two runs; English
-the control): the raw keys A12 lists on OMP and OPS (note f-a12); OJS's
+the control): raw keys in place of some group headings, labels and help
+lines on OMP and OPS (note f-a12); OJS's
 tab French throughout; no raw key on any app in English. OMP's and OPS's `locale/fr_CA/manager.po` carry
 those keys (`manager.setup.identity`, `manager.setup.selectCountry`, …)
 with an empty text, and an untranslated text is written as "##key##".
@@ -2515,13 +2491,12 @@ Issue report: [pkp-e2e#496](https://github.com/jardakotesovec/pkp-e2e/issues/496
 <a id="fn-f-a12"></a>
 **f-a12** — Note g. Live-probed 2026-09-29 (all three apps, two runs): on
 a scratch press and server with French screens and forms and on
-`publicknowledge` with French screens, the keys listed above showed on the
+`publicknowledge` with French screens, the untranslated keys showed on the
 "Bloc générique" tab for the scratch manager, a second account with the
 Editor role (on OPS a second manager), `manager.maya` and `admin`; the
 "Publisher Code Type" list's four entries only inside the list. The contact tab
 ("Coordonnées", "Personne-ressource") and the sections tab ("Rubriques",
 "Séries", "Série(s)") showed no raw key.
-Issue report: [pkp-e2e#786](https://github.com/jardakotesovec/pkp-e2e/issues/786) ([docs/issues/U07-A12-french-masthead-settings-raw-keys.md](../issues/U07-A12-french-masthead-settings-raw-keys.md)).
 
 <a id="fn-f-a13"></a>
 **f-a13** — pkp/pkp-lib#13370 (`fab29cfeca`, 2026-09-28; note ad) left

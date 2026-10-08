@@ -286,15 +286,10 @@ Top to bottom: <sup>j</sup>
    article's address and each older one to its own address (Rule 2). A
    version not yet published, or unpublished since, is not listed. On a French page the version
    name reads "##publication.versionStage.display##" ⚠ [A1](#a1).
-   In a language whose translation has no text for the entry, Japanese
-   and Spanish (Mexico) among them, every entry reads
-   "##submission.versionIdentity##" instead, with no date and no
-   version name ⚠ [A15](#a15).
    <sup>g</sup> <sup>q5</sup>
 9. **The label line** {OPS}. Above the title, "Preprint / {date} ({version
    name})" names the shown version, its date and its name as in the
-   "Versions" list ([A1](#a1) in French; "##submission.versionIdentity##"
-   in Japanese and Spanish (Mexico), [A15](#a15)). <sup>g</sup>
+   "Versions" list ([A1](#a1) in French). <sup>g</sup>
 10. **The galley links.** The side column lists the shown version's
     galleys, in the order of the "Galleys" page
     ([→ Galleys, ordering](U46-galleys.md#order)), in two lists: first
@@ -1299,9 +1294,8 @@ Left out of the scenarios above, by reason:
   - A11 (keywords shown in another order than typed; Fields, the
     landing page and the article summary; scenarios 1 and 10 accept
     either order)
-  - A1, A15 and OPS7 (the version names on a French page and in a
-    language with no text for the entry, and the preprint's French
-    keywords label; Rules 8, 9, 21)
+  - A1 and OPS7 (the version names on a French page, and the
+    preprint's French keywords label; Rules 8, 9, 21)
   - A4 (a galley with no file, and the additional files, in a preprint
     server's lists and in a journal's "Latest Publications" without the
     current issue; Rule 22)
@@ -1380,7 +1374,6 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [A10](#a10) | A reference's web address written in parentheses becomes a link that includes the closing ")" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | Keywords on an article, book or preprint page can appear in another order than the editor typed | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A13](#a13) | The PDF or HTML reader opened from a new version's preview calls that version outdated | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A15](#a15) | In Japanese, every "Versions" entry reads a raw translation key, with no date or version name | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A16](#a16) | Section editors and assistants not assigned to a submission open its article or book landing page before acceptance | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [OJS1](#ojs1) | Readers get no other citation format or citation download on an article published outside a published issue | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | Publication Facts Label settings always warn "Funding Plugin Not Present", for a plugin that no longer exists | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1409,6 +1402,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [OJS11](#ojs11) | The IEEE citation shown first opens with the number "[1]" | ❓ | minor | — |
 | [OJS13](#ojs13) | "Similar Articles" would leave out an article that shares only some of the keywords | ❓ | latent | — |
 | [OPS4](#ops4) | A preprint server has no HTML or XML reader: those galleys download | ✅ | — | — |
+| [A15](#a15) | Retired: in Japanese, every "Versions" entry reads a raw translation key, with no date or version name | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1430,7 +1424,7 @@ French. The release before listed them by number in French ("2026-09-30
 French (Canada) was walked. By the code, every language but English
 shows the key, except a language with no text for the whole entry:
 there, as walked in Japanese and Spanish (Mexico), the entry reads
-"##submission.versionIdentity##" instead ([A15](#a15)). The text behind
+"##submission.versionIdentity##" instead. The text behind
 the key is only the pattern "stage major.minor", which holds no word.
 New texts are offered to translators once the release branch opens, so
 this one would reach them before the release, and each language shows
@@ -1645,32 +1639,6 @@ Question: is "ABNT" meant to follow the 2002 edition? Lean: no (🐞); a
 refresh of every style file swapped in a different style that shared the
 old file's name, and nothing chose it.
 Basis: probe, 2026-10-01. <sup>[f-a14](#fn-f-a14)</sup>
-
-<a id="a15"></a>
-**A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · 🐞 · low.
-On an article, book or preprint page shown in Japanese, every entry of
-the "Versions" list reads "##submission.versionIdentity##", where the
-English page reads "2026-10-07 (Version of Record 1.0)". On `main` a
-preprint's line above its title shows the same key. The Japanese page
-is otherwise largely translated, and releases up to 3.5.0-4 showed the
-date and the version there.
-
-The links still open their versions, but a reader cannot tell the
-versions apart by date or by number without switching the page to
-another language.
-
-The entry is one of 68 Japanese texts that release 3.5.0-5 emptied
-because they read the same as the English text: 57 shared by the three
-apps and 11 of OJS, "OK", "URL" and "DOI" among them. This report covers
-the "Versions" entry alone; the other 67 are not looked at here.
-
-24 more languages have no text for the entry, Spanish (Mexico) and both
-Chinese scripts among them. They never had it, and none of them has the
-list's heading either: their translations hold from none to 42% of the
-shared texts, so there the entry is one raw key among many. In Spanish
-(Mexico), seen on screen, the heading reads "##submission.versions##".
-The key French (Canada) shows inside the entry is another text ([A1](#a1)).
-Basis: probe, 2026-10-07. <sup>[f-a15](#fn-f-a15)</sup>
 
 <a id="a16"></a>
 **A16 — Section editors and assistants not assigned to a submission open its article or book landing page before acceptance** · 🐞 · medium.
@@ -2060,6 +2028,11 @@ row of the author line, about an eighth of a square cover's height.
 The title and the rest of the cover still open the page, so readers get
 there with a second click.
 Basis: probe, 2026-10-01. <sup>[f-ops9](#fn-f-ops9)</sup>
+
+### Retired
+
+<a id="a15"></a>
+**A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a15](#fn-f-a15)</sup>
 
 ---
 
@@ -3178,7 +3151,6 @@ walked). By the code, 25 of the 70 other languages have no text for it
 (12 lack the entry, 8 hold it empty, 5 have no `submission.po`); A1's
 proposed fix leaves them out. Live-probed 2026-10-05, note q5, two runs:
 OJS, OPS and the press's book page alike.
-Issue report: [pkp-e2e#941](https://github.com/jardakotesovec/pkp-e2e/issues/941) ([docs/issues/U13-A15-japanese-versions-entries-raw-key.md](../issues/U13-A15-japanese-versions-entries-raw-key.md)).
 
 <a id="fn-f-a16"></a>
 **f-a16** — Note b: on `main`, `Repo::submission()->canPreview()`

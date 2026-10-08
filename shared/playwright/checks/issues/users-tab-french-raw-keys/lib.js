@@ -1,4 +1,5 @@
-// Helpers for the Settings > Users & Roles > "Users" tab walks (U53 A11, A4).
+// Helpers for the Settings > Users & Roles > "Users" tab walk of U53 A4
+// (../user-search-example-journal-role/walk.js).
 // Requiring this file runs nothing.
 const {idle} = require('../../../probe');
 

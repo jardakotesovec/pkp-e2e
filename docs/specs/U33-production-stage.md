@@ -149,11 +149,7 @@ the forms they open belong to the features Purpose names. <sup>q</sup>
      details, using the links just above.", and it stays so after
      "Unpublish", although the monograph is back at Production
      ⚠ [OMP2](#omp2). A press has no galley notices [OMP1](#omp1).
-     With the interface in French the heading reads "En attente
-     d'approbation." or "Gestion du catalogue", but the paragraph under it
-     is a raw code, the text's internal name between hash signs, such as
-     "##notification.type.visitCatalog##" ⚠ [OMP3](#omp3).
-     <sup>t3</sup> <sup>[f-omp3](#fn-omp3)</sup>
+     <sup>t3</sup>
    - 3e. **{OPS} No notice box ever** [OPS1](#ops1).
 <a id="production-ready-files"></a>
 4. **"Production Ready Files".** The list holds the files the Layout Editor
@@ -435,9 +431,6 @@ the forms they open belong to the features Purpose names. <sup>q</sup>
   boxes (Settings). <sup>q</sup>
 - **Catalog management**: the "Marketing and Publication" pages a press's
   "Catalog Management" notice points at (Rule 3d). <sup>q</sup>
-- **[Languages & locales](U57-languages-and-locales.md#a4)**: why a text
-  the French translation lacks shows as a raw code (Rule 3d, OMP3).
-  <sup>q</sup>
 
 ## Canonical scenarios
 
@@ -756,11 +749,6 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the press's notice box in French: the heading "En attente
-    d'approbation." on a monograph never published, "Gestion du
-    catalogue" once it is published, each over a French paragraph and
-    no `##` code (Rule 3d; the guard for OMP3, issue report
-    `docs/issues/U69-A15-omp-french-book-page-raw-keys.md`)
   - the guard for OMP2 (issue report
     `docs/issues/U70-A6-unpublished-book-notice-still-approved.md`): the
     Production stage reads "Awaiting approval." after "Unpublish"
@@ -811,7 +799,6 @@ entry notes otherwise; the team settles them on spec review.
 |----|-----------------------------|------|--------|--------|
 | [OPS2](#ops2) | "Revert Decline" on a preprint says it is active "in the submission stage", and its email speaks of a review the preprint never had | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [OMP2](#omp2) | On a press, an unpublished book's Production stage still says the monograph has been approved | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [OMP3](#omp3) | In French the press's Production notice keeps its French heading, but its paragraph is a raw code | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | A recommend-only editor is offered "Upload", "Schedule For Publication" and "Assign" on Production, and no decision or recommendation | ❓ | minor | — |
 | [A2](#a2) | The "You have been asked to review layouts" task is never cleared, not by "Galleys Complete" | ❓ | minor | — |
 | [A3](#a3) | "Move To Copyediting" raises no "Assign a copyeditor…" notice on the Copyediting stage it returns to | ❓ | minor | — |
@@ -821,6 +808,7 @@ entry notes otherwise; the team settles them on spec review.
 | [OPS3](#ops3) | "Post the preprint" stays offered on a declined preprint | ❓ | minor | — |
 | [OMP1](#omp1) | A press heads every Production view with "Awaiting approval." until the monograph is published, the author's included | ✅ | — | — |
 | [OPS1](#ops1) | A preprint server's Production stage has no "Production Ready Files" list and no notice box | ✅ | — | — |
+| [OMP3](#omp3) | Retired: in French the press's Production notice keeps its French heading, but its paragraph is a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -943,39 +931,6 @@ condition in one shared class; the fault has been there since 3.2.
 The same fault is [Catalog management, its A6](U70-catalog-management.md#a6).
 Basis: probe, 2026-10-03. <sup>[f-omp2](#fn-omp2)</sup>
 
-<a id="omp3"></a>
-**OMP3 — In French the press's Production notice is a heading over a raw code** · 🐞 · medium.
-With the interface in French (Canada), the notice box of Rule 3d keeps
-its French heading, but the paragraph under it is a raw code, the text's
-internal name between hash signs:
-- on a monograph never published, "En attente d'approbation." above
-  "##notification.type.formatNeedsApprovedSubmission##" (English "The
-  monograph will not be listed in the catalog until it has been
-  published. To add this book to the catalog, click on the Publication
-  tab.");
-- once it is published, "Gestion du catalogue" above
-  "##notification.type.visitCatalog##" (English "The monograph has been
-  approved. Please visit Marketing and Publication to manage its catalog
-  details, using the links just above.").
-
-Every role that sees the box reads it so, the Author included, and after
-"Unpublish" the box still reads "Gestion du catalogue" with the code, as
-[OMP2](#omp2) says it does in English. A French-speaking editor or author
-learns the monograph's state but not what to do about it. A journal's
-galley notice reads French ("Assigner un-e utilisateur-trice à la
-création des épreuves en utilisant le lien « Assigner » dans la liste
-des participants."). The workflow screen's own codes around the box are
-[Workflow screen & stage access, its A11](U24-workflow-screen-and-stage-access.md#a11),
-and why a missing French text shows as a code at all is
-[Languages & locales, its A4](U57-languages-and-locales.md#a4).
-Expected: a French paragraph under the French heading; the English
-screen shows no code. Both paragraphs read in French (Canada) up to OMP
-3.1.2; their entries have been empty since 3.2.0. One of several French
-(Canada) texts the press lacks, with its book and chapter pages
-([→ Monograph landing page, A15](U69-monograph-landing-page.md#a15)),
-whose report covers it.
-Basis: probe, 2026-10-04. <sup>[f-omp3](#fn-omp3)</sup>
-
 ### OPS
 
 <a id="ops1"></a>
@@ -1028,6 +983,11 @@ stage](U25-submission-stage.md)*, its A1).
 Question: should the shortcut be hidden while the preprint stands
 declined? Lean: yes; a declined preprint is not meant to be posted.
 Basis: probe. <sup>[f-ops3](#fn-ops3)</sup>
+
+### Retired
+
+<a id="omp3"></a>
+**OMP3 — In French the press's Production notice is a heading over a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-omp3](#fn-omp3)</sup>
 
 ---
 
@@ -1190,7 +1150,6 @@ the French galley notice, the unassigned manager and the Author no box
 response of 500 or more and no script error. Evidence:
 `.reports/U24/ccI30frb/prod-*`, kept script
 `shared/playwright/checks/U24/I30/frb.js`.
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)) (its Steps 51 to 58, walked on main and 3.5 from the default dataset), shared with [Monograph landing page A15](U69-monograph-landing-page.md#a15); the report's severity, medium, comes from the editors' names on the book page.
 
 <a id="fn-ops1"></a>
 **f-ops1** — Notes a, d and m: `workflowConfigEditorialOPS.js` mounts no `FileManager` at Production and `WorkflowNotificationDisplay.vue` returns `null` options on OPS; `PublicationConfig.galleys` mounts `GalleyManager`. Live-probed 2026-09-19 (notes m, t15): the entry with one table, "Production Tasks & Discussions", "Participants", no notice heading, for the manager and the assigned Moderator; the "Galleys" page under "Preprint" offering "Add galley"; the journal and press entries with "Production Ready Files" beside the discussions as the control.

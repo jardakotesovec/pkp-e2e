@@ -1,4 +1,4 @@
-// Helpers for walk.js (U69 A15). Requiring this file runs nothing.
+// Helpers for walk.js and formats.js (U69 A15, U73 A25). Requiring this file runs nothing.
 const {screen, record, idle, rawKeys} = require('../../../probe');
 
 const flat = (s, n = 400) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));

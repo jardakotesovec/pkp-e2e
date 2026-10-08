@@ -19,7 +19,7 @@
  * Administrator's page (`putSite`, spec footnote s). Scenario 7's ticked
  * press stays ticked until the fleet is reset (footnote s).
  *
- * Not asserted here, by register ID: A2, A3, A4, A5, A6, A7, A8, OMP1
+ * Not asserted here, by register ID: A3, A4, A5, A6, A7, A8, OMP1
  * (every one carried by the register alone, the spec's Coverage section);
  * A9 is passed by scenario 8, whose visitor opens the site only after the
  * save.

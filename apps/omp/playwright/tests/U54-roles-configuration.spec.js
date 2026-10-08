@@ -34,8 +34,7 @@
  * - A13 🐞: every row is found by name; S1 reads the order of a new press's
  *   roles only.
  * - A8 🐞, A10 🐞, A7 ❓, A12 ❓: no scenario reaches them here.
- * - OMP1 🐞 (the French "External Review" heading): no scenario runs in
- *   French. OPS1, OPS2, OPS3: another app's territory.
+ * - OPS1, OPS2, OPS3: another app's territory.
  * - S8 never opens the format's file itself: its download answers 500 on
  *   this build (seed-facts, incidentals U69); the scenario reads where
  *   "PDF" sends a signed-out visitor, and the book page.

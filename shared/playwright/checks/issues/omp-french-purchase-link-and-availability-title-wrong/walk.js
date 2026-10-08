@@ -1,9 +1,10 @@
-// Issue report docs/issues/U69-A15-omp-french-book-page-raw-keys.md (U69 A15):
-// a press shown in French (Canada) shows raw codes in place of labels on a
-// book's and a chapter's page, and a priced file's link drops the format's
-// name. Takes the report's Steps on PKP's default test dataset (OMP), then
-// the same pages in English (the control, and the neighbour check with the
-// fix in and out):
+// Issue report docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md
+// (U69 A15): on a press shown in French (Canada) a priced file's link drops the
+// format's name. The report's Steps 1 to 3 are this walk's 10 to 12; its other
+// steps read a book's and a chapter's French pages (the chapter page's
+// "Versions" list is evidence of docs/issues/U13-A1-french-version-name-raw-key.md).
+// Walked on PKP's default test dataset (OMP), each page in French and then in
+// English (the control, and the neighbour check with the fix in and out):
 //   1-4.   a visitor opens the French catalogue, "From Bricks to Brains: …"
 //          (book 14), its "Chapter 1: Mind Control—Internal or External?"
 //          page, and the first file link of the book's page
@@ -20,7 +21,7 @@
 // Reset the dataset fleet first; the walk changes books 14 and 5 and the
 // press's payment settings. FIX=1 only tags the records of a run with the
 // fix in. STEP=13 takes step 13 alone (it changes nothing).
-// Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js omp shared/playwright/checks/issues/omp-french-book-page-raw-keys/walk.js
+// Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js omp shared/playwright/checks/issues/omp-french-purchase-link-and-availability-title-wrong/walk.js
 //      (PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 in front for 3.5)
 const path = require('path');
 const {forEachApp, launch, signIn, signOut, screen, record, idle, note} = require('../../../probe');

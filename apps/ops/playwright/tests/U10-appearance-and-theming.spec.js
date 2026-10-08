@@ -22,9 +22,8 @@
  *   name a screen reader hears.
  * - A4 🐞: S4 never saves "Setup" while a placed block's plugin is off.
  * - A5 🐞: S1 never opens the removed style sheet's address.
- * - A6, A7, A8, A9 🐞: no test opens the French interface's "Theme" tab,
- *   refuses a file through "Upload File", picks the "3:05PM" time or saves
- *   an empty "Custom".
+ * - A7, A8, A9 🐞: no test refuses a file through "Upload File", picks
+ *   the "3:05PM" time or saves an empty "Custom".
  * - A2 ❓: every logo is saved with its "Alternate text".
  *
  * Seeding: scenario endpoints only (footnote sc). Every scenario runs on its

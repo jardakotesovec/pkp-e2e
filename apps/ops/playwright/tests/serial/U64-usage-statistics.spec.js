@@ -29,7 +29,7 @@
  * - A4: S7 never saves the server's "Do not collect any geographical data".
  * - A10: S10 empties the Platform ID before unticking "Platform".
  * - A11: S8 reads "counterReport.tsv" as the comma-separated file it is.
- * - A1, A2, A5–A9: not on these scenarios' paths. OJS1–OJS6: the
+ * - A1, A2, A5, A7–A9: not on these scenarios' paths. OJS1–OJS6: the
  *   journal's. OMP1, OMP2, OMP4: the press's. OPS1: the parallel suite's.
  *
  * Seeding (footnote sc): scratch servers from `POST scenarios/context`

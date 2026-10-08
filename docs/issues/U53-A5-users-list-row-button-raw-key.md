@@ -141,10 +141,8 @@ same with the fix as without.
 - French (Canada), the dataset's second language, has no
   `common.moreActions` in pkp-lib's `fr_CA` locale, so there the button
   reads "##common.moreActions##" with the fix in, as the column's hidden
-  heading already does without it. That gap is the French translation's,
-  and its fix adds the text (spec U53
-  [A11](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U53-users-management.md#a11),
-  [its report](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U53-A11-users-tab-french-raw-keys.md)).
+  heading already does without it. That gap is the French (Canada)
+  translation's, and is left to its translators on Weblate.
 - Storybook's `public/globals.js` entry for the old key can go.
 - Backport: the file is the same on `stable-3_5_0`, so the diff applies
   there as written.

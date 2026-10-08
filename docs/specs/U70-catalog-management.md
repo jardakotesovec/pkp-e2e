@@ -53,16 +53,7 @@ signed-out visitor who types the page's address gets the Login page.
 ## Fields & validation
 
 **The Catalog page.** Headed "Catalog", with one tab, "All Monographs",
-holding a list headed "Monographs". In French (Canada) the following
-show raw keys, text such as "##catalog.manage.featured##" in place of
-the words ⚠ [A7](#a7):
-
-- the tab, the list's heading and the column headings;
-- each row's "View Entry", and what a screen reader hears for each of
-  its two boxes;
-- "Order Features" and, while ordering, "Save Order" and the notice;
-- the "Categories" heading in the "Filters" column, and the label of
-  the "Add Entry" panel's search box.
+holding a list headed "Monographs".
 
 Above the list, left to right: <sup>f</sup>
 
@@ -101,10 +92,7 @@ is left. <sup>g</sup>
 **The "Catalog Entry" page.** Workflow › "Publication" › the version ›
 "Catalog Entry", headed "Publication: Catalog Entry". Five groups, top to
 bottom, and a sixth, "Identity", once the book has been published;
-"Save" at the foot. In French the group headings, most of the
-descriptions and the "Update Type" and "Summary of Changes" fields show
-raw keys, text such as "##publication.placement##" in place of the words
-⚠ [A15](#a15). <sup>h</sup>
+"Save" at the foot. <sup>h</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -742,9 +730,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U70-A14-catalog-ordering-arrows-name-undefined.md`):
     after "Order Features", each arrow's name for a screen reader carries
     the book's title
-  - the guard for A7 (issue report
-    `docs/issues/U69-A15-omp-french-book-page-raw-keys.md`): the Catalog
-    page in French (Canada) shows no `##` code
   - a scheduled book's Production stage shows the "Catalog
     Management" notice, not "Awaiting approval." (Rule 14)
   - the "Identity" group's content on a published book, "Press
@@ -785,7 +770,6 @@ Left out of the scenarios above, by reason:
     on; Rule 12b; Settings bullet 6)
   - A6 (the notice after "Unpublish"; Rule 14; scenario 2 passes the
     unpublish)
-  - A7 (the Catalog page in French; Fields, the Catalog page)
   - A8 ("Add Entry" › "Save" with a word typed and nothing chosen; Rule
     12a)
   - A9 (one book chosen twice in "Add Entry"; Fields, the "Add Entry"
@@ -798,8 +782,6 @@ Left out of the scenarios above, by reason:
   - A13 (the last featured book's down arrow, and the up arrow of a
     book featured after the page was loaded; Rule 10b)
   - A14 (the ordering arrows' names for a screen reader; Rule 10a)
-  - A15 (the Catalog Entry page in French; Fields, the "Catalog Entry"
-    page)
 - **Owned by another feature**:
   - an assistant with Production access who may not edit the
     publication: the Catalog Entry page with "Save" greyed out (Actors
@@ -839,7 +821,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | Catalog page: pressing "Featured in category" for a book's second category unfeatures it in the first | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | Catalog "Add Entry" refuses a book with only "Please correct these errors" and never says why | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A6](#a6) | On a press, an unpublished book's Production stage still says the monograph has been approved | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A7](#a7) | In French (Canada) the Catalog page shows raw keys for its tab, headings, buttons, ordering notice and "View Entry" | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A8](#a8) | Catalog "Add Entry": "Save" with a word typed publishes the first suggested book, chosen or not | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | Catalog "Add Entry" still offers a book already chosen, and "Save" publishes it twice | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | A category's public page ignores "Featured in category" and shows no "New Releases" | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -847,8 +828,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A12](#a12) | Catalog ordering: an open "Filters" column still switches the list and can hide "Save Order" and "Cancel" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A13](#a13) | Catalog "Order Features": arrow presses that should move a featured book sometimes do nothing | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | While ordering featured books, screen readers hear "Increase position of undefined" on every arrow | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A15](#a15) | In French the Catalog Entry page shows raw keys for its group headings, descriptions and "Update Type" list; all but "Series Position"'s description await their translations | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A1](#a1) | A Series editor opens the Catalog page by its address, then every action on it is refused | ❓ | minor | — |
+| [A7](#a7) | Retired: In French (Canada) the Catalog page shows raw keys for its tab, headings, buttons, ordering notice and "View Entry" | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A15](#a15) | Retired: In French the Catalog Entry page shows raw keys for its group headings, descriptions and "Update Type" list | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -948,31 +930,6 @@ click on the Publication tab."
 The wrong notice stays until the book is published again. The fix is one
 condition in one shared class; the fault has been there since 3.2.
 Basis: probe, 2026-10-03. <sup>f-a6</sup>
-
-<a id="a7"></a>
-**A7 — The Catalog page shows raw keys in French** · 🐞 · medium.
-With French (Canada) as the interface language, the Catalog page
-(Content › "Catalogue") reads "##navigation.catalog.allMonographs##" for
-its tab, "##submission.list.monographs##" for the list's heading,
-"##catalog.manage.featured##" and "##catalog.manage.feature.newRelease##"
-for the column headings (with a series as the filter,
-"##catalog.manage.seriesFeatured##" and
-"##catalog.manage.feature.seriesNewRelease##"), and
-"##submission.list.viewEntry##" beside "Voir la soumission" on each row.
-"Order Features" reads "##submission.list.orderFeatures##"; while
-ordering, "Save Order" reads "##submission.list.saveFeatureOrder##" and
-the notice "##submission.list.orderingFeatures##". The "Filtres" column
-heads its first group "##catalog.categories##", and the "Add Entry"
-panel's search box is labelled "##catalog.manage.findSubmissions##". A
-screen reader hears each box by a code, such as
-"##catalog.manage.isNotFeatured##", "##catalog.manage.isFeatured##" and
-"##catalog.manage.isNotNewRelease##". "Rechercher", "Filtres", "Annuler"
-and "Nouvelle entrée de catalogue" are translated. Expected: French
-throughout. One of several French (Canada) texts the press lacks, with
-its book and chapter pages
-([→ Monograph landing page, A15](U69-monograph-landing-page.md#a15)),
-whose report covers it.
-Basis: probe, 2026-10-03. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — Catalog "Add Entry": "Save" with a word typed publishes the first suggested book, chosen or not** · 🐞 · medium.
@@ -1091,55 +1048,13 @@ The arrows named the book in OMP 3.1 and lost it in 3.2, when book
 titles moved to the publication (a code reading; 3.1 was not walked).
 Basis: probe, 2026-10-03. <sup>f-a14</sup>
 
-<a id="a15"></a>
-**A15 — The Catalog Entry page shows raw keys in French** · 🐞 · low.
-With French (Canada) as the interface language, the Catalog Entry page (listed
-under the version as "Catalogue", headed "Publication : Catalogue") reads
-raw keys where French words belong:
-- the five group headings: "##publication.placement##",
-  "##publication.publicationTiming##",
-  "##publication.versionAndUpdates##", "##publication.display##" and
-  "##publication.access##";
-- the descriptions under "Séries" ("##publication.series.description##"),
-  "Position dans cette série (ex: livre 2 ou Volume 2)"
-  ("##submission.submit.seriesPosition.description##"), "Date de
-  publication" ("##publication.datePublished.description##") and
-  "Illustration de couverture" ("##publication.coverImage.description##");
-- "Update Type": its label "##publication.updateType.label##", its
-  description "##publication.updateType.description##", and all twelve
-  kinds of its list: "##publication.updateType.addendum##",
-  "##publication.updateType.clarification##",
-  "##publication.updateType.correction##",
-  "##publication.updateType.corrigendum##",
-  "##publication.updateType.erratum##",
-  "##publication.updateType.expressionOfConcern##",
-  "##publication.updateType.newEdition##",
-  "##publication.updateType.newVersion##" (chosen at first),
-  "##publication.updateType.partialRetraction##",
-  "##publication.updateType.removal##",
-  "##publication.updateType.retraction##" and
-  "##publication.updateType.withdrawal##";
-- "Summary of Changes": its label "##submission.form.summaryOfChanges##"
-  and its description "##publication.summaryOfChanges.description##".
+### Retired
 
-The field labels, "URL Path"'s description, "Insert Content" ("Insérer le
-contenu") and "Save" ("Enregistrer") are French. A French-speaking Press manager fills the page
-without its group names or most of its guidance, and picks the kind of
-update from twelve keys. Expected: French throughout; the English page
-shows none of these keys. Of these texts only "Series Position"'s
-description shipped in a released version, and its French (Canada) is
-empty there too: it is one of several French (Canada) texts the press
-lacks, with its book and chapter pages
-([→ Monograph landing page, A15](U69-monograph-landing-page.md#a15)),
-whose report covers it. The rest arrived with main's new Catalog Entry
-page and wait for their translations, which the team does not count as
-a defect (2026-10-02). The keys of the workflow screen around the page
-are [Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s,
-why a missing French text shows as a key at all is
-[Languages & locales](U57-languages-and-locales.md#a4)', and a journal's
-"Publication Settings" and a preprint server's "Preprint entry" pages are
-recorded in [Publish, schedule & versions](U49-publish-schedule-and-versions.md#a10)'s A10.
-Basis: probe, 2026-10-03. <sup>f-a15</sup>
+<a id="a7"></a>
+**A7 — The Catalog page shows raw keys in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
+
+<a id="a15"></a>
+**A15 — The Catalog Entry page shows raw keys in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a15</sup>
 
 ---
 
@@ -1767,7 +1682,6 @@ Walked 2026-10-03 on main and 3.5, as Press manager in French (Canada)
 "##catalog.manage.findSubmissions##"; the boxes' screen-reader names
 "##catalog.manage.isNotFeatured##", "##catalog.manage.isFeatured##"
 (after a press) and "##catalog.manage.isNotNewRelease##".
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)) (its Steps 34 to 39, walked on main and 3.5), shared with [Monograph landing page A15](U69-monograph-landing-page.md#a15).
 
 <a id="fn-f-a8"></a>
 **f-a8** — Note g. Live-probed 2026-09-27, OMP, two runs, as Press
@@ -1850,7 +1764,6 @@ utilisant l'URL au lieu de l'identifiant.", "Insérer le contenu" and
 (the navigation spec's A1). The frame's keys on the same screen (the
 side menu's, the header's, the version names) are the workflow screen
 spec's A11 and the navigation spec's A23.
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)), for "Series Position"'s description alone (its Step 40, walked on main and 3.5), shared with [Monograph landing page A15](U69-monograph-landing-page.md#a15); that report's severity, medium, comes from the editors' names on the book page, and the entry's impact, low, is its own part's. No report for the other keys: they are main-only texts, none in 3.5's English files, under the 2026-10-02 ruling on main-only locale keys.
 
 ## Reference — entry points & surfaces
 

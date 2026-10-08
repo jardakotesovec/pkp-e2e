@@ -22,7 +22,7 @@
  *   header (S2 reads the Series editor's landing on the Dashboard only).
  * - A3 🐞: S9 reads the access-denied page's sentence and address only,
  *   never its heading or its trail's last step.
- * - A4, A7, A8, A10, A16, A21, A22, A23, A24 🐞: no test reaches
+ * - A4, A7, A8, A10, A16, A21, A22 🐞: no test reaches
  *   those states (the site's menu window is S8's, which opens none).
  * - A5, A9, A10 ❓: not driven.
  * - A11 ✅ (retired 2026-10-07: the refusal notices are a Planned assertion), A12 🐞: S5 reads each refused save through the window staying
@@ -36,7 +36,7 @@
  *   save or removal and a reload.
  * - A18 🐞: S5's back arrow is pressed with a browser-dialog handler that
  *   answers "OK" if the box comes; nothing asserts that it does.
- * - OJS1, OPS1, OPS2, OPS3, OPS4: another app's territory.
+ * - OJS1, OPS1, OPS2, OPS4: another app's territory.
  *
  * Seeding: scenario endpoints only. S1–S3 read the seeded press
  * `publicknowledge` with roster accounts and change nothing there

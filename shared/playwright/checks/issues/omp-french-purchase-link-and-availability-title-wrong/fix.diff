@@ -1,0 +1,31 @@
+--- a/locale/fr_CA/locale.po
++++ b/locale/fr_CA/locale.po
+@@ -238,7 +238,7 @@
+ msgstr ""
+ 
+ msgid "grid.catalogEntry.availableRepresentation.title"
+-msgstr "Approbation du format"
++msgstr "Disponibilité du format"
+ 
+ msgid "grid.catalogEntry.availableRepresentation.message"
+ msgstr ""
+@@ -1539,7 +1539,7 @@
+ msgstr "Il faut indiquer un prix numérique valide."
+ 
+ msgid "payment.directSales.purchase"
+-msgstr "Achat ({$amount} {$currency})"
++msgstr "Achat {$format} ({$amount} {$currency})"
+ 
+ msgid "payment.directSales.download"
+ msgstr "Télécharger"
+--- a/locale/fr/locale.po
++++ b/locale/fr/locale.po
+@@ -1587,7 +1587,7 @@
+ msgstr "Un prix numérique valide est requis."
+ 
+ msgid "payment.directSales.purchase"
+-msgstr "Achat ({$amount} {$currency})"
++msgstr "Achat {$format} ({$amount} {$currency})"
+ 
+ msgid "payment.directSales.download"
+ msgstr "Télécharger {$format}"

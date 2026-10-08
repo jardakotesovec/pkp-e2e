@@ -1,5 +1,4 @@
-// Helpers of walk.js (issue reports docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md and
-// docs/issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md).
+// Helpers of walk.js (issue report docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md).
 // Requiring this file runs nothing. Every helper drives the screens a person uses.
 const {idle, screen, rawKeys, sql} = require('../../../probe');
 

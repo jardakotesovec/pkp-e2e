@@ -1,5 +1,4 @@
-// Issue reports docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md (U04 A11, MODE=tabs) and
-// docs/issues/U04-A11-A12-french-orcid-switch-and-field-raw-keys.md (U04 A11, A12):
+// Issue report docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md (U04 A11, MODE=tabs):
 // the report's Steps to reproduce, walked through the screens on PKP's default test dataset (a
 // dataset fleet, harness.md "Dataset fleets"). The second journal, the ORCID settings and the
 // imported copy are made on screen; the kit builds nothing.
@@ -23,8 +22,8 @@
 // English, answering "No" at 11. Nothing else.
 //
 // Reset first:  npm run fleet-prep -- --feature issues-u04r5 --dataset 5 --reset
-// The tab-name report: MODE=tabs in front, fix-tab-name.diff its fix; the raw-key report: no
-// MODE, fix.diff its suggested wording.
+// The tab-name report: MODE=tabs in front, fix-tab-name.diff its fix. Without MODE the walk goes
+// on to the French ORCID field (steps 4 to 14), which no report covers.
 // Run (main):   PROBE_FEATURE=issues-u04r5 PROBE_AGENT=u04r5 node bin/probe.js all shared/playwright/checks/issues/orcid-french-raw-keys-old-plugin-name/walk.js
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-u04r5-3_5 --dataset 5 --reset
 //               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-u04r5-3_5 PROBE_AGENT=u04r5 node bin/probe.js all shared/playwright/checks/issues/orcid-french-raw-keys-old-plugin-name/walk.js

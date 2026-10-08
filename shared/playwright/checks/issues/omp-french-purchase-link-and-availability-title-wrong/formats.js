@@ -1,7 +1,8 @@
-// Issue report docs/issues/U69-A15-omp-french-book-page-raw-keys.md (its fix.diff), the part
-// from spec U73 A25: in French (Canada) a book's "Publication Formats" list and its format window
-// ("Add publication format", a format's "Edit") show codes for OMP texts that have no French
-// (Canada) text. Takes that group of the report's Steps on PKP's default test dataset (OMP):
+// Issue report docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md (its
+// fix.diff), the part from spec U73 A25: in French (Canada) the window that makes a book's format
+// available is titled "Approbation du format" ("Format Approval"). The report's Steps 4 to 6 are
+// this walk's 41, 42 and 47; steps 43 to 46 read the rest of the "Publication Formats" page, where
+// OMP texts without a French (Canada) text show as codes. On PKP's default test dataset (OMP):
 //   41. dbarnes signs in; the initials menu > "Change Language" > "français"
 //   42. submission 4 > "Publication" > "Formats de publication": the column headings
 //   43. "Ajouter un format de publication": the remote box's label, the ISBN heading and the
@@ -12,11 +13,11 @@
 //   47. the row's link under "Availability": the "Format Availability" window's title and text; "Annuler"
 // Nothing is saved. NB=1 runs the neighbour check alone: the same steps in English, which the
 // fix must leave as they are.
-// Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js omp shared/playwright/checks/issues/omp-french-publication-formats-raw-keys/walk.js
+// Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js omp shared/playwright/checks/issues/omp-french-purchase-link-and-availability-title-wrong/formats.js
 //      (PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 in front for 3.5; PROBE_RUN=fix|nb-in|nb-out for the fix trial)
 const {forEachApp, launch, signIn, screen, record, idle, rawKeys} = require('../../../probe');
 const {changeLanguage} = require('../custom-block-stuck-with-unusable-name/lib');
-const {flat} = require('../omp-french-book-page-raw-keys/lib');
+const {flat} = require('./lib');
 
 const T = 30_000;
 const BOOK = {id: 4, publicationId: 4};
@@ -24,7 +25,7 @@ const FORMAT = 'PDF';
 
 forEachApp(async (app) => {
     if (app.name !== 'omp') return;
-    if (!app.dataset) throw new Error('walk.js runs on a dataset fleet (fleet-prep --dataset n --reset)');
+    if (!app.dataset) throw new Error('formats.js runs on a dataset fleet (fleet-prep --dataset n --reset)');
     const nb = !!process.env.NB;
     const lang = nb ? 'en' : 'fr_CA';
     const L = nb

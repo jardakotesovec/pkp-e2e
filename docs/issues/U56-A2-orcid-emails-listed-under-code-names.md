@@ -143,9 +143,8 @@ The two places on screen read the name differently:
   locale string reaches this box only on new installs.
 
 Other languages: 17 translations copy the code names (`fr_CA` and `es`
-among them), 49 have no string, so the key shows between hash signs (as
-spec U56 A11 records for French), and four (`ar`, `bg`, `de`, `mk`)
-have names of their own.
+among them), 49 have no string, so the key shows between hash signs,
+and four (`ar`, `bg`, `de`, `mk`) have names of their own.
 
 ## Proposed fix
 

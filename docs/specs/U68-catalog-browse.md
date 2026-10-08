@@ -286,13 +286,9 @@ the series as links under it (Rule 12). <sup>h</sup>
 **In French**
 
 15. **The press's pages in French.** With French as the interface
-    language, the catalog page, a series' page, the "New Releases" page
-    and the home page's lists show raw text codes in place of the count,
-    "All Books", "New Releases", "Featured" and the empty-list messages
-    ⚠ [A8](#a8). While placed, the "Browse" block shows codes in place of
-    its heading "Browse" and its lines "Categories" and "Series"
-    [A8](#a8). "Catalogue" in the trail and heading, "Séries", the page
-    links and the block's "Nouveautés" are translated. <sup>td12</sup>
+    language, "Catalogue" in the trail and heading, "Séries", the page
+    links and the "Browse" block's "Nouveautés" read in French.
+    <sup>td12</sup>
 
 ## Side effects
 
@@ -646,7 +642,6 @@ Left out of the scenarios above, by reason:
     bullet 1)
   - A7 (a press's category page, its featured books not set apart and
     no "New Releases"; Rule 14)
-  - A8 (the press's pages and the "Browse" block in French; Rule 15)
   - A10 (a page number typed past the last page; Rules 5, 7)
 - **No seed**:
   - a book whose only published version is an "Author Original": off
@@ -686,13 +681,13 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | A series' page shows no name, description or ISSN, and ignores the series' order | 🐞 | user-visible | — |
 | [A4](#a4) | A series' picture does not lead to its full size | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | A press's category page never lists its new releases and never sets its featured books apart | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [A8](#a8) | In French the catalog pages and the "Browse" block show raw text codes | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | A reader on an old link to a press's catalog search gets "404 Not Found", not the Search page | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | With every series inactive, the "Browse" block shows the line "Series" with nothing under it | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A5](#a5) | The "Browse" block and the catalog's "Series:" links disagree about inactive and empty series | ❓ | minor | — |
 | [A6](#a6) | "Series position" orders compare the positions as text | ❓ | minor | — |
 | [A10](#a10) | A page typed past the last one shows the full count above "No titles have been published yet." | ❓ | minor | — |
 | [A12](#a12) | A deleted series' menu item stays on the Navigation tab, its window showing another series | ❓ | minor | — |
+| [A8](#a8) | Retired: In French the catalog pages and the "Browse" block show raw text codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -793,19 +788,6 @@ The page's order of books is recorded in [Catalog
 management](U70-catalog-management.md#a10) (its A10).
 Since: 2018-12-17 (eight years) · Basis: probe, 2026-10-03; its start, commit. <sup>f-a7</sup>
 
-<a id="a8"></a>
-**A8 — The catalog pages and the "Browse" block in French show raw text codes** · 🐞 · medium.
-With French as the interface language, the count reads
-"##catalog.browseTitles##", and "All Books", "New Releases", "Featured",
-"No titles have been published yet." and "No new releases are available
-at this time." are replaced by codes of the same kind. The placed
-"Browse" block reads "##plugins.block.browse##",
-"##plugins.block.browse.category##" and "##plugins.block.browse.series##"
-in place of "Browse", "Categories" and "Series". "Catalogue", "Séries",
-the page links and the block's "Nouveautés" are translated.
-Expected: French throughout.
-Basis: probe, 2026-10-02. <sup>f-a8</sup>
-
 <a id="a9"></a>
 **A9 — A reader on an old link to a press's catalog search gets "404 Not Found", not the Search page** · 🐞 · low.
 A press's search box once sent readers to the press's address followed
@@ -851,6 +833,11 @@ stay there marked as pointing at a deleted series?
 Lean: 🐞; either way, the window should not offer another series as the
 item's own.
 Basis: probe, 2026-09-27. <sup>f-a12</sup>
+
+### Retired
+
+<a id="a8"></a>
+**A8 — The catalog pages and the "Browse" block in French show raw text codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a8</sup>
 
 ---
 
@@ -1347,7 +1334,7 @@ file does), hence the block's codes. The Categories spec saw
 "##catalog.browseTitles##" and "##catalog.category.heading##" on a press's
 category page in French (2026-09-25, its A15). Live-probed 2026-09-27
 (note td12). The empty strings and the expectation are read from the code.
-Re-walked 2026-10-02 on main and stable-3_5_0 (codes on both; 3.4 and 3.3 the same empty entries by code). Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)), shared with [Categories A15](U16-categories.md#a15).
+Re-walked 2026-10-02 on main and stable-3_5_0 (codes on both; 3.4 and 3.3 the same empty entries by code).
 
 <a id="fn-f-a9"></a>
 **f-a9** — OMP `4d4f2c519` "Clean up old code" (2026-01-14) removed

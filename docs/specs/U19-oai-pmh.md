@@ -168,7 +168,7 @@ language, each marked with its language. <sup>f</sup>
 | Publisher | the journal's "Publisher" (Settings › Journal › "Masthead"), else the journal's name in each of its languages | the press's "Press Publisher Name", else its name | the server's name in each of its languages <sup>f</sup> <sup>q13</sup> |
 | Other Contributor | never shown ⚠ [A6](#a6) | never shown | never shown <sup>f</sup> <sup>q13</sup> |
 | Date | the version's publication date, "YYYY-MM-DD" | the same | the same <sup>f</sup> <sup>q13</sup> |
-| Resource Type | "info:eu-repo/semantics/article"; the section's "Identify items published in this section as a(n)", or "Peer-reviewed Article" for a section never saved in its window ⚠ [A7](#a7); the version's "Type" when set; "info:eu-repo/semantics/publishedVersion" | "Book", in the language of the request [A13](#a13), and the version's "Type" when set | "info:eu-repo/semantics/preprint" and "info:eu-repo/semantics/draft" ⚠ [OPS3](#ops3) <sup>f</sup> <sup>q13</sup> |
+| Resource Type | "info:eu-repo/semantics/article"; the section's "Identify items published in this section as a(n)", or "Peer-reviewed Article" for a section never saved in its window ⚠ [A7](#a7); the version's "Type" when set; "info:eu-repo/semantics/publishedVersion" | "Book", in the language of the request, and the version's "Type" when set | "info:eu-repo/semantics/preprint" and "info:eu-repo/semantics/draft" ⚠ [OPS3](#ops3) <sup>f</sup> <sup>q13</sup> |
 | Format | each galley's file type, such as "application/pdf" | the format's "Publication Format" entry with its code, such as "Digital (on physical carrier) (DA)" | each galley's file type <sup>f</sup> <sup>q13</sup> |
 | Resource Identifier | the article page's address (not on a journal that does not publish online, Rule 11a); the version's DOI when it has one; a "Publisher ID" is not written | the book page's address; the format's identifiers and DOI | the preprint page's address; the version's DOI <sup>f</sup> <sup>q13</sup> |
 | Source | per language, "{journal name}; {issue}; {pages}", the issue as "Vol. 1 No. 2 (2026)" and, when the version has no "Pages", its "Article Number" ⚠ [A8](#a8); then the online and print ISSN, and the issue's DOI | "{press name}; " per language [A8](#a8) | none <sup>f</sup> <sup>q13</sup> |
@@ -449,8 +449,8 @@ message. <sup>m</sup>
     11). The language the request is read in (the address's language
     segment, such as `…/fr_CA/oai`) decides "Repository Name", the set
     names and the type words ("Peer-reviewed Article" on a journal,
-    "Book" on a press). Read in French, a book's "Resource Type" and an
-    article's MARC 251 and 780 {OJS} carry untranslated keys ⚠
+    "Book" on a press). Read in French, an article's MARC 251 and 780
+    {OJS} carry an untranslated key in place of the version's name ⚠
     [A13](#a13). A section whose "Abbreviation" differs in that
     language gets that language's set identifier ⚠ [A21](#a21).
     <sup>u</sup> <sup>q19</sup>
@@ -1126,12 +1126,10 @@ footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A13 (issue reports
-    `docs/issues/U13-A1-french-version-name-raw-key.md` and
-    `docs/issues/U69-A15-omp-french-book-page-raw-keys.md`): records read
-    at `…/fr_CA/oai` carrying French words in a book's "Resource Type"
-    and in an article's MARC field 251, no "##…##" key {OJS OMP} (Rule
-    19; once fixed)
+  - the guard for A13 (issue report
+    `docs/issues/U13-A1-french-version-name-raw-key.md`): records read
+    at `…/fr_CA/oai` carrying the version's name in an article's MARC
+    field 251, no "##…##" key {OJS} (Rule 19; once fixed)
   - the guard for OPS1 (issue report
     `docs/issues/U19-OPS1-preprint-server-oai-until-fails.md`):
     ListIdentifiers and ListRecords asked with `until` on a preprint server
@@ -1329,8 +1327,8 @@ Left out of the scenarios above, by reason:
     21a)
   - A11 {OJS} (an article in no issue unpublished with "DRIVER" enabled;
     Rule 23a)
-  - A13, A21 (records read in French with untranslated keys; a section's
-    French set identifier; Rule 19)
+  - A13, A21 (a journal's MARC records read in French with an
+    untranslated key; a section's French set identifier; Rule 19)
   - A16, A17 (an argument given twice; a malformed identifier on a press
     and a preprint server; the table "Errors")
   - A18 {OMP OPS} (a datestamp that stays put after an edit or a second
@@ -1382,7 +1380,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | On a subscription journal, the OAI-PMH record list in JATS is refused whole when it holds one article that needs a subscription {OJS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | An article in no issue, once unpublished, has no deleted record in the journal's `driver` OAI set {OJS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | A journal's MARC records in OAI-PMH do not follow the schemas they name, and software reading them misses the journal, the issue date, the ISSN or the affiliations {OJS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [A13](#a13) | Records read in French carry untranslated keys {OJS OMP} | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A13](#a13) | A journal's MARC records read in French carry an untranslated key in place of the version's name {OJS} | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A15](#a15) | A journal's MARC records in OAI-PMH write the publication date in field 008 with "%" signs ("%26%09%30 %2026") {OJS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | An OAI-PMH request that gives an argument twice gets a server error instead of the refusal message | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A17](#a17) | OAI-PMH GetRecord answers a malformed identifier with a record, not "Identifier is not in a valid format" {OMP OPS} | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1603,12 +1601,13 @@ on. The same records in Dublin Core are not affected.
 Basis: probe, 2026-10-01. <sup>f-a12</sup>
 
 <a id="a13"></a>
-**A13 — Records read in French carry untranslated keys** {OJS OMP} · 🐞 · low.
-A harvester reading `…/fr_CA/oai` expects French words. A book's
-"Resource Type" reads "##rt.metadata.pkp.dctype##" instead of the French
-for "Book", and an article's MARC 251 and 780 read
-"##publication.versionStage.display##" instead of its version, such as
-"Version of Record 2.0".
+**A13 — A journal's MARC records read in French carry an untranslated key for the version** {OJS} · 🐞 · low.
+A harvester reading a journal's `…/fr_CA/oai` gets an article's MARC 251
+and 780 as "##publication.versionStage.display##" instead of its
+version, such as "Version of Record 2.0". The version's name is built
+from a text that holds only a pattern and no word, so every language but
+English loses it
+([→ Article landing page & reading A1](U13-article-landing-page-and-reading.md#a1)).
 Basis: probe, 2026-10-01. <sup>f-a13</sup>
 
 <a id="a14"></a>
@@ -2143,7 +2142,7 @@ Issue report: [pkp-e2e#305](https://github.com/jardakotesovec/pkp-e2e/issues/305
 
 <a id="fn-f-a13"></a>
 **f-a13** — Live-probed 2026-09-26: note q19; OJS `oai_marc` and `marcxml` read at `…/fr_CA/oai` wrote 251 and 780 `$i` "##publication.versionStage.display##" where the English read "Version of Record 2.0" and "Version of Record 1.1". The `##…##` form is how the app prints a key it has no text for in that language. Code: notes f, g, u.
-Issue reports: the MARC version fields, [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)); a book's "Resource Type", [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)).
+Issue report: [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)).
 
 <a id="fn-f-a14"></a>
 **f-a14** — Live-probed 2026-09-26, OJS and OPS: an article with the galleys "PDF" (en) and "PDF FR" (fr_CA) read "Language" "en" and "fr_CA", and its French values `xml:lang="fr-CA"`. Code: note f (`dc:language` the galleys' stored `locale`; `xml:lang` turns `_` into `-`).

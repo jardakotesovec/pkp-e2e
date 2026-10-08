@@ -24,7 +24,7 @@
  * - A2 🐞, A3 🐞, A20 🐞: S5 gives whole days only, all in the calendar.
  * - A4 🐞: no last part's "Resume" is read.
  * - A5 🐞: no ListMetadataFormats with an identifier is opened in the browser.
- * - A8 🐞, A13 🐞: no "Source" is read; nothing is read in French.
+ * - A8 🐞: no "Source" is read.
  * - A16 🐞, A17: no argument is given twice; S4's malformed identifier is
  *   "foo".
  * - A18 🐞: S3 never reads the datestamp of the record published again.

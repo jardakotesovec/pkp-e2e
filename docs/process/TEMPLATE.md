@@ -497,7 +497,15 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
 
 <!-- The single home for everything as-built that deviates, diverges, or
      needs a product ruling. There is no separate Known-deviations or
-     Open-questions section, and no external bug list. Structure:
+     Open-questions section, and no external bug list.
+
+     NOT A FINDING: a missing translation. A text a language other than
+     English lacks (the screen shows `##key##`, or English in its place)
+     is the translators' work on Weblate: no entry, no issue report. A
+     translation that is there and says something wrong is a finding, and
+     so is a raw key in English or a key the code reads wrongly.
+
+     Structure:
 
      Preamble, one sentence: "Verdicts are the author's judgment (claude,
      <date>), unreviewed unless an entry notes otherwise; the team settles

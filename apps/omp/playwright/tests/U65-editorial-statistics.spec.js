@@ -30,7 +30,7 @@
  *   opening sentence, never its "your journal" ending.
  * - OMP3 🐞: S7 reads "Monograph Report"'s author columns to "(Author 2)"
  *   and no further.
- * - A1, A2, A4, A7, A8, A10, A12, A13, OMP1, OMP4, OMP5: not on these
+ * - A1, A2, A4, A7, A8, A10, A12, A13, OMP1, OMP4: not on these
  *   scenarios' paths. OJS1–OJS4 and OPS1–OPS4: the journal's and the
  *   preprint server's.
  *

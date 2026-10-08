@@ -13,9 +13,8 @@
  * (S2 never presses ordering mode's "Cancel"), A3 🐞 (no title carries
  * formatting), A4 🐞 (S1 closes the "Edit Highlight" panel only with
  * "Save"), A5 🐞 (the site's Highlights tab and the site's carousel are
- * out of the suite: nothing seeds or asserts a site highlight), A7 🐞
- * (S4 reads the French carousel's arrows by class, never by their names,
- * and never reads Settings › Website's fourth top tab), A2 ❓ (every "URL" typed is a full web address), A6 ❓ (S3 reads
+ * out of the suite: nothing seeds or asserts a site highlight), A2 ❓
+ * (every "URL" typed is a full web address), A6 ❓ (S3 reads
  * which dot is on and never presses one), A8 ❓ (S2 never enters ordering
  * mode on an empty list), A9 ❓ (S1 removes the picture on the edit and
  * never replaces it). The spec's Coverage section records everything

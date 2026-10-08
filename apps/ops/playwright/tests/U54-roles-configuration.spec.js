@@ -43,7 +43,6 @@
  *   whether "Reviewer" is among them, and never chooses it.
  * - OPS1 🐞: S7 never ticks the open access box; it reads it unticked only.
  * - OPS3 🐞, A8 🐞, A10 🐞, A7 ❓, A12 ❓: no scenario reaches them here.
- * - OMP1: another app's territory.
  *
  * Every test seeds its own scratch preprint server with throwaway accounts
  * (footnote s); publicknowledge and the seeded roster stay untouched (A1,

@@ -232,7 +232,7 @@ and without it.
     their file name there. After the fix each would read "Achat (25.00
     USD)" with no name, so they could not be told apart; in the side
     column the name still stands as text before the link.
-    [U69-A15-omp-french-book-page-raw-keys.md](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U69-A15-omp-french-book-page-raw-keys.md)
+    [U69-A15-omp-french-purchase-link-and-availability-title-wrong.md](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md)
     proposes "Achat {$format} (…)" for the two French files. `ca`,
     `el` and `it` need the same placeholder, and this diff does not
     touch them: whether they are edited with this fix or through the

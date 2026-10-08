@@ -86,7 +86,7 @@ it is left by the back arrow at its top (Rule 11). The boxes after
 | "Content" and "Preview" (type "Custom Page") | no | The page's formatted text, per language, and a button that opens the unsaved page in a new browser tab. The page itself is *Custom pages & blocks*'s <sup>l</sup> |
 | "URL" (type "Remote URL") | yes, in the primary language | One box per form language, up to 255 characters. A box that does not hold a full web address ("https://…"; "pkp.sfu.ca" is not one): not saved, with "A URL must be provided" at the top right (below the table); a box of another language may stay empty <sup>l</sup> |
 | "Select Series" / "Select Category" {OMP} (types "Series" and "Category") | yes | A list of the press's series, or of its top-level categories, under "Please select the series to which you would like this menu item to link." ("…the category…") <sup>l</sup> |
-| "Query Parameters" (every type but "Custom Page" and "Remote URL") | no | One box per form language under "Optional query string to append to the URL (e.g., tab=metrics). Do not include the leading '?' character."; each stops accepting characters after 1000. The item's link gets the text after a "?". In the French interface the label and that line are raw codes ⚠ [A24](#a24) <sup>l</sup> <sup>td3</sup> |
+| "Query Parameters" (every type but "Custom Page" and "Remote URL") | no | One box per form language under "Optional query string to append to the URL (e.g., tab=metrics). Do not include the leading '?' character."; each stops accepting characters after 1000. The item's link gets the text after a "?" <sup>l</sup> <sup>td3</sup> |
 
 An empty "Title" is refused in the window before anything is sent, with
 "This field is required." under the box. Every other refusal above (no
@@ -408,8 +408,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     15), every public page's sidebar holds a link "Open Journal Systems"
     ("Open Monograph Press", "Open Preprint Systems") to PKP's page about
     the application. Its heading, "Developed By", is read to screen
-    readers only; on a preprint server's French pages it reads
-    "##plugins.block.developedBy.blockTitle##" ⚠ [OPS3](#ops3). <sup>s</sup>
+    readers only. <sup>s</sup>
 22. **Skip links.** The first press of the Tab key on a public page
     shows "Skip to main content"; each further press shows the next, in
     this order: <sup>t</sup>
@@ -590,12 +589,6 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       "Statistics", "Tools" and "Administration" ⚠ [A22](#a22). Where
       "Settings" then leads is
       [→ settings access](U07-journal-identity-and-about-pages.md#settings-access).
-    - 30b. **French.** In the French interface four of the side menu's
-      texts are raw codes ⚠ [A23](#a23):
-      - the "Content" group's label, on a journal and a press;
-      - the "DOIs" entry's label, on a press and a preprint server;
-      - the placeholder of the "Search submissions" box, on all three;
-      - the "Statistics" group's "Monographs" entry {OMP}.
 31. **Notices while a page is left.** The top-right area where notices
     appear ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md))
     shows nothing while an editorial page is being left for another.
@@ -1209,10 +1202,7 @@ Left out of the scenarios above, by reason:
   - the top-right notices scenario 5 states for "No type", "Not a web address", "A path with other characters" and "A path already used": the suite does not assert them yet (Fields)
   - the menu window after a change discarded with "Yes": Settings › "Workflow" in the side menu, pressed a second later, asks nothing (Rule 6a)
   - the journals switcher on a site with two journals of one name: each offers the other (Rule 29; the guard [A21](#a21)'s issue report proposes)
-  - the side menu's "DOIs" entry and the DOIs page in French (Canada) on a press and a preprint server: French labels, no raw key (the guard [A23](#a23)'s issue report proposes)
   - on a journal, the menu's "Edit" window: "Subscriptions" and "My Subscriptions" carry the crossed-out eye and open their notices (Rule 7a; the guard [OJS1](#ojs1)'s issue report proposes)
-  - a press's item window in French (Canada): the press's own types, their descriptions and the series and category lists read French (the guard [A24](#a24)'s issue report proposes)
-  - a preprint server's French (Canada) pages with the "Developed By" block placed: its heading reads "Développé par" (the guard [OPS3](#ops3)'s issue report proposes)
   - a preprint server's settings address typed with the site's path: the refusal names the missing server in words a user understands, as a journal's and a press's do (Rule 26c; the guard [OPS4](#ops4)'s issue report proposes)
 - **Rarely met**:
   - "Publishing Mode" set to "OJS will not be used to publish the journal's contents online." {OJS}: "Current Issue" and "Archives" leaving the header (Settings bullet 2; item types table)
@@ -1253,12 +1243,9 @@ Left out of the scenarios above, by reason:
   - A18 (the item window asking on a close with nothing typed, holding the page while open, and closing without asking after a refused "Save"; Rule 11a; scenario 5 marks it)
   - A21 (two journals of the same name hiding each other in the switcher; Rule 29)
   - A22 (the Site Administrator holding Reader alone: the manager's side menu and an "Error" window; Rule 30a)
-  - A23 (raw codes in the French side menu: the "Content" and "DOIs" labels, the "Search submissions" placeholder, a press's "Monographs" statistics entry; Rule 30b)
-  - A24 (raw codes in the item window's "Query Parameters", the menu window's drag handles and a press's "New Releases" type in the French interface; Fields)
   - A25 (the initials menu left open by the Escape key; Rule 28)
   - OJS1 (no eye on "Subscriptions" and "My Subscriptions" {OJS}; Rule 7a)
   - OPS2 ("Posting Mode" not kept, so "Archives" stays {OPS}; Settings bullet 2)
-  - OPS3 (the French "Developed By" heading's raw code {OPS}; Rule 21)
   - OPS4 ("No server in context!" on a settings address opened at the site's level {OPS}; Rule 26c)
 - **No seed**:
   - the site's only menu removed with "OK" (Rule 1b): no screen can give the site a menu back (A4), so the test install would stay without one
@@ -1305,12 +1292,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | The item window asks before closing even when nothing was typed, and so does leaving the page; right after a refused "Save" it closes without asking | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A21](#a21) | The journals switcher in the editorial header leaves out every journal with exactly the current journal's name | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A22](#a22) | A Site Administrator holding only Reader in a journal gets an "Error" window on every editorial page | 🐞 | low · crash: script | issues (claude), 2026-10-03 — re-verified |
-| [A23](#a23) | In French, the side menu's "Content" group {OJS OMP}, "DOIs" entry {OMP OPS}, "Search submissions" box and a press's "Monographs" entry {OMP} read raw codes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A24](#a24) | In French, the item window's "Query Parameters" box, the menu window's drag handles and a press's "New Releases" type read raw codes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A26](#a26) | A role kept out of Settings can still add, rename and rearrange the journal's navigation menus | 🐞 | user-visible | — |
 | [OJS1](#ojs1) | Menu window marks "Subscriptions" and "My Subscriptions" items with no eye, so their notices never show {OJS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS2](#ops2) | A preprint server's "Posting Mode" says "Saved" but keeps nothing, so the server goes on posting {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [OPS3](#ops3) | {OPS} On a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS4](#ops4) | {OPS} A server's settings address typed with the site's path refuses with "No server in context!", which says nothing a user understands | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | The "About" item's notice promises a condition the header never applies | ❓ | minor | — |
 | [A8](#a8) | A menu can only be arranged with a mouse | ❓ | user-visible | — |
@@ -1323,6 +1307,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | Retired: leaving the page after "Yes" discarded a menu change was thought to still ask about unsaved changes; it asks nothing (Rule 6a) | ✅ | retired | claim check (claude), 2026-10-07 — overturned |
 | [A19](#a19) | Retired: on French pages the installed "Editorial Masthead" item read "##common.editorialMasthead##"; it now reads "Entête" (Rule 12) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
 | [A20](#a20) | Retired: in French the initials menu's language heading read "##common.changeLanguage##"; it now reads "Changer la langue" (Rule 28) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
+| [A23](#a23) | Retired: in French, the side menu's "Content" group {OJS OMP}, "DOIs" entry {OMP OPS}, "Search submissions" box and a press's "Monographs" entry {OMP} read raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A24](#a24) | Retired: in French, the item window's "Query Parameters" box, the menu window's drag handles and a press's "New Releases" type read raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [OPS3](#ops3) | Retired: {OPS} on a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1588,58 +1575,6 @@ another role there, so in practice this is an administrator left with
 Reader alone.
 Basis: probe, 2026-10-03. <sup>f-a22</sup>
 
-<a id="a23"></a>
-**A23 — In French the side menu shows raw codes** · 🐞 · low.
-With the interface in French (Canada), four of the side menu's texts are
-raw codes where French words belong:
-- on a press and a preprint server, a manager or the Site Administrator
-  sees "##doi.manager.displayName##" where the "DOIs" entry should be;
-  the page it opens shows the same key as its heading and in the browser
-  tab, and heads its list "##doi.manager.submissionDois##" instead of
-  "Monograph DOIs" ("Preprint DOIs"). A journal shows "DOIs" and "DOIs
-  de l'article". The entry still opens the page and the page works. In
-  French (France) a preprint server lacks the same two texts, a press
-  has them;
-- on a press, the "Statistics" group's "Monographs" entry reads
-  "##common.publications##", beside French "Presse" and "Activité
-  éditoriale" (the statistics pages' own codes,
-  [Usage statistics](U64-usage-statistics.md#a6), one report);
-- the "Content" group reads "##navigation.content##" on a journal and a
-  press, and the "Search submissions" box at the top of "Editor
-  Dashboard" shows the placeholder "##editor.submission.searchGlobal##"
-  on all three. Both texts are new on `main` (2025-08-28, 2026-07-23)
-  and no language has them yet, the usual state before a release; 3.5
-  has neither the texts nor those screens. Kept as a note, not reported.
-
-A screen reader hears the same codes. A French-speaking manager or Site
-Administrator has to guess what the entries are for.
-Basis: probe, 2026-10-03. <sup>f-a23</sup>
-
-<a id="a24"></a>
-**A24 — In French the Navigation tab's windows show raw codes** · 🐞 · low.
-With the interface in French (Canada):
-- a press manager who adds or edits a menu item sees codes in eleven
-  places of the item window. The type list names three of the press's
-  own types as codes: "##navigation.navigationMenus.newRelease##" for
-  "New Releases", "##navigation.navigationMenus.series.generic##" for
-  "Series" and "##navigation.navigationMenus.category.generic##" for
-  "Category". Choosing any of the press's four own types (these three
-  and "Catalogue") shows a code as the line that describes the type, and
-  choosing "Series" or "Category" also shows the list of the press's
-  series or categories, whose label and help line are codes. The series
-  and category types are listed only while the press has series or
-  top-level categories;
-- on all three apps the item window labels the "Query Parameters" box
-  "##manager.navigationMenus.form.queryParams##", with
-  "##manager.navigationMenus.form.queryParams.description##" under it,
-  and the menu window's drag handles show the hint
-  "##common.dragToReorder##". These texts are new on `main` (2026) and
-  no language has them yet, the usual state before a release. Kept as a
-  note, not reported.
-
-The manager cannot tell what the box is for or which type an entry is.
-Basis: probe, 2026-10-03. <sup>f-a24</sup>
-
 <a id="a25"></a>
 **A25 — The initials menu does not close on Escape** · ❓ · minor.
 In the editorial header, the menu the initials open (Rule 28) stays
@@ -1708,24 +1643,6 @@ default. If the choice were kept, the server's existing code would hide
 its PDF; the sentence a refused Reader should see exists in no language.
 Basis: probe, 2026-10-01. <sup>f-ops2</sup>
 
-<a id="ops3"></a>
-**OPS3 — On a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key** · 🐞 · low.
-A visitor who uses a screen reader on a preprint server's pages in
-French (Canada) hears the "Developed By" block's heading as
-"##plugins.block.developedBy.blockTitle##" instead of "Développé par".
-The heading is hidden on screen, so sighted visitors see nothing wrong.
-A journal's and a press's French pages read "Développé par".
-
-Nothing is lost: the block's link, "Open Preprint Systems", reads and
-works as in English.
-
-The block is off until a manager turns it on and places it in the
-sidebar; on a server that does, every public page in French (Canada)
-reads the key. The same heading also has no text in 10 more of a
-preprint server's languages, and in 3 each on a journal and a press;
-those are outside this report's fix.
-Basis: probe, 2026-10-03. <sup>f-ops3</sup>
-
 <a id="ops4"></a>
 **OPS4 — A server's settings address typed with the site's path refuses with "No server in context!", which says nothing a user understands** · 🐞 · low.
 A preprint server's settings page has a **site-level address** when the
@@ -1759,6 +1676,15 @@ Basis: probe, 2026-10-03. <sup>f-ops4</sup>
 
 <a id="a20"></a>
 **A20 — The French initials menu's language heading reads a raw code** · ✅ · retired. Fixed upstream by the French translations merge, verified 2026-09-24 on OJS, OMP and OPS: with the interface in French the initials menu reads "Changer la langue", "English", "français" (ticked), "Modifier le profil", "Se déconnecter", for every role and for the Site Administrator (Rule 28). <sup>f-a20</sup>
+
+<a id="a23"></a>
+**A23 — In French the side menu shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — In French the Navigation tab's windows show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a24</sup>
+
+<a id="ops3"></a>
+**OPS3 — On a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-ops3</sup>
 
 ---
 
@@ -3046,8 +2972,6 @@ Section Editor on all three apps, its row named "Résultats de recherche"
 entry read `##common.publications##` to the same three, the other
 entries in French. The Author's, Reader's and Reviewer's menus showed no
 code.
-Issue report: [docs/issues/U08-A23-french-dois-label-raw-key.md](../issues/U08-A23-french-dois-label-raw-key.md), filed as [pkp-e2e#654](https://github.com/jardakotesovec/pkp-e2e/issues/654).
-The "Monographs" entry joined [docs/issues/U64-A6-french-statistics-pages-raw-keys.md](../issues/U64-A6-french-statistics-pages-raw-keys.md), filed as [pkp-e2e#625](https://github.com/jardakotesovec/pkp-e2e/issues/625).
 
 <a id="fn-f-a24"></a>
 **f-a24** — `manager.navigationMenus.form.queryParams`, its
@@ -3061,7 +2985,6 @@ item's window showed the label and the line under it as the raw codes;
 the Primary menu window's handles carried the `title`
 `##common.dragToReorder##`; on OMP the type list's options included
 `##navigation.navigationMenus.newRelease##`.
-Issue report: [docs/issues/U08-A24-press-menu-item-types-french-raw-keys.md](../issues/U08-A24-press-menu-item-types-french-raw-keys.md), filed as [pkp-e2e#659](https://github.com/jardakotesovec/pkp-e2e/issues/659).
 
 <a id="fn-f-a25"></a>
 **f-a25** — Note td19: `Dropdown.vue` has no Escape handler; the
@@ -3127,7 +3050,6 @@ Issue report: [pkp-e2e#380](https://github.com/jardakotesovec/pkp-e2e/issues/380
 <a id="fn-f-ops3"></a>
 **f-ops3** — Note s. Live-probed 2026-09-23 (Rule 21), OPS, with OJS and
 OMP the control.
-Issue report: [docs/issues/U08-OPS3-ops-french-developed-by-heading-raw-key.md](../issues/U08-OPS3-ops-french-developed-by-heading-raw-key.md), filed as [pkp-e2e#660](https://github.com/jardakotesovec/pkp-e2e/issues/660).
 
 <a id="fn-f-ops4"></a>
 **f-ops4** — Note td21. OPS `locale/en/locale.po`

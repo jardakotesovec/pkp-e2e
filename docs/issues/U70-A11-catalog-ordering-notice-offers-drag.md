@@ -120,8 +120,7 @@ Reach:
   promise, French (France, `fr`) among them: "Glissez-déposez ou cliquez
   sur les boutons haut et bas…". French (Canada, `fr_CA`), `ckb`, `el`
   and `vi` leave them empty, on `main` and 3.5; in French (Canada) the
-  notice shows as a code, which the report on OMP's French (Canada)
-  codes covers (pkp-e2e#291).
+  notice shows as a code, a gap left to its translators.
 - The ui-library story `CatalogListPanel.stories.js` mocks the two keys
   with the same English text.
 - OMP's `catalog.manage.homepageDescription`, `categoryDescription` and

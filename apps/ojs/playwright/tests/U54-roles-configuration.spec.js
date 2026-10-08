@@ -31,7 +31,7 @@
  * - A13 🐞: every row is found by name; S1 reads the order of a new
  *   journal's roles only.
  * - A8 🐞, A10 🐞, A7 ❓, A12 ❓: no scenario reaches them here.
- * - OMP1, OPS1, OPS2, OPS3: other apps' territory.
+ * - OPS1, OPS2, OPS3: another app's territory.
  *
  * Every test seeds its own scratch journal with throwaway accounts (footnote
  * s); publicknowledge and the seeded roster stay untouched (A1, A7). The

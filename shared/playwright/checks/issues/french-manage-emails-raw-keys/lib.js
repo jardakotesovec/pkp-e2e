@@ -1,4 +1,5 @@
-// Helpers for the "Manage Emails" walk in French (U56 A11). Requiring this file runs nothing.
+// Helpers that open "Manage Emails" and read its list, used by
+// ../preprint-revert-decline-names-submission-stage/lib.js. Requiring this file runs nothing.
 const {idle} = require('../../../probe');
 
 const T = 30_000;

@@ -1,7 +1,8 @@
 // Spec U19 A13: a journal's and a press's OAI-PMH records read in French (Canada) carry raw
-// translation keys. The walk of two issue reports the entry joined:
+// translation keys. The walk of the issue report the entry joined:
 //   docs/issues/U13-A1-french-version-name-raw-key.md (the journal: MARC fields 251 and 780)
-//   docs/issues/U69-A15-omp-french-book-page-raw-keys.md (the press: Dublin Core "Resource Type")
+// The press part reads a text OMP's French (Canada) lacks (Dublin Core "Resource Type"), which
+// no report covers.
 // Walked on PKP's default test dataset (a dataset fleet, harness.md "Dataset fleets"). The OAI
 // address is public: every read is signed out, in the browser (what the page shows) and as a
 // harvester (the XML as sent). The kit builds nothing and the walk changes nothing.

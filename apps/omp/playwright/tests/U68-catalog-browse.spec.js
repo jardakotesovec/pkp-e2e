@@ -23,10 +23,10 @@
  * - A5 ❓: every seeded series is active; the "Series:" line and the block
  *   are read as sets of names, never in an order (every seeded series is
  *   stored at order 0).
- * - A4, A6, A7, A8, A9, A10, A11 🐞/❓ and A12 ❓: no test reaches those
+ * - A4, A6, A7, A9, A10, A11 🐞/❓ and A12 ❓: no test reaches those
  *   states (no series picture, no "Series position" order, no category
- *   page, no French, no "catalog/results", no page past the last, no
- *   inactive series, no menu item of the press's own).
+ *   page, no "catalog/results", no page past the last, no inactive
+ *   series, no menu item of the press's own).
  *
  * Seeding: scenario endpoints only, as footnote s says. S1–S6 each build a
  * scratch press (two in S5) through `createContext` with throwaway

@@ -21,7 +21,7 @@
  *   where it leads; nothing reads its accessible name.
  * - A2 🐞: no test presses a Section Editor's "Dashboard" in the public
  *   header (S2 reads the Section Editor's landing on the Dashboard only).
- * - A3, A4, A7, A8, A10, A16, A21, A22, A23, A24 🐞: no test reaches
+ * - A3, A4, A7, A8, A10, A16, A21, A22 🐞: no test reaches
  *   those states (the site's menu window is S8's, which opens none).
  * - A5, A9 ❓: not driven.
  * - A11 ✅ (retired 2026-10-07: the refusal notices are a Planned assertion), A12 🐞: S5 reads each refused save through the window staying
@@ -36,7 +36,7 @@
  * - A18 🐞: S5's back arrow is pressed with a listener that answers "OK"
  *   if the browser asks; nothing asserts that it does.
  * - OJS1 🐞: no test turns payments on.
- * - OPS1, OPS2, OPS3: another app's territory.
+ * - OPS1, OPS2: another app's territory.
  *
  * Seeding: scenario endpoints only. S1–S3 read the seeded journal
  * `publicknowledge` with roster accounts and change nothing there

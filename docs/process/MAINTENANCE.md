@@ -294,11 +294,11 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
    locale keys, class or symptom a report in `docs/issues/` or an
    `incidentals.md` line already covers or rules on goes to its reporter
    with that pointer ("check against <report>"), so the unit starts
-   there (U13 A1, U47 A7). An entry of raw locale codes is sorted before
-   dispatch: a key that `stable-3_5_0`'s `locale/en` files lack came with
-   an unreleased page and waits for the translators, so it gets no report
-   (the maintainer's ruling in the U47 issues session, 2026-10-02), and
-   only the released keys go to a reporter (U08, U33, U49 issue walks). Group those
+   there (U13 A1). An entry of raw locale codes is sorted before
+   dispatch: a missing translation is no finding (TEMPLATE "Findings
+   register"), so an entry that is only one is retired, not reported;
+   only a raw key in English, or one the code reads wrongly, goes to a
+   reporter. Group those
    that point at one fault (the same action failing on two screens, one
    wrong value showing in several places), and follow an entry's link to
    the same fault in another spec: that entry joins the unit. A twin is not always linked, so the other specs'

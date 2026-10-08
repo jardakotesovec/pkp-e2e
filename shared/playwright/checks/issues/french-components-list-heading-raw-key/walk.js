@@ -1,9 +1,8 @@
-// Issue report docs/issues/U58-A9-french-components-list-heading-raw-key.md (U58 A9): in French (Canada)
-// a press's and a preprint server's Settings › Workflow › "Submission" › Components list is headed by a
-// code; on a preprint server seven components are also named by codes (the part that joins
-// docs/issues/U57-A8-french-default-texts-stored-as-codes.md).
+// Issue report docs/issues/U57-A8-french-default-texts-stored-as-codes.md (U57 A8), its Steps 13 to 16:
+// in French (Canada), on a preprint server's Settings › Workflow › "Submission" › Components list seven
+// components are named by codes.
 //
-// Takes the report's Steps through the screens on a dataset fleet freshly reset to PKP's default
+// Takes those Steps through the screens on a dataset fleet freshly reset to PKP's default
 // test dataset, as the dataset's manager `rvaca` on `publicknowledge`, all three apps (the journal
 // is the control):
 //   1. rvaca signs in
@@ -16,13 +15,12 @@
 //
 // Modes (MODE=):
 //   walk (default)  the Steps above, in French.
-//   nb              what the heading fix must leave alone: steps 1 and 3 in English (no step 2).
+//   nb              the control: steps 1 and 3 in English (no step 2).
 //
 // Reset first:  npm run fleet-prep -- --feature <feature> --dataset <n> --reset
 // Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/french-components-list-heading-raw-key/walk.js
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 in front of both, the 3.5 fleet's feature, PROBE_RUN=r35.
-// Fix trials:   PROBE_RUN=fix (walk) and nb-in / nb-out (MODE=nb) with fix-omp.diff / fix-ops.diff in
-//               or out; PROBE_RUN=fix57 (walk) with the U57 A8 report's fix.diff applied.
+// Fix trial:    PROBE_RUN=fix57 (walk) with the U57 A8 report's fix.diff applied.
 // Records each screen and the facts (facts-<mode>); asserts nothing.
 const {forEachApp, launch, signIn, screen, shot, record, idle, rawKeys, sql} = require('../../../probe');
 const {changeLanguage} = require('../custom-block-stuck-with-unusable-name/lib');

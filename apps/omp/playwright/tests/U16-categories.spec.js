@@ -26,7 +26,7 @@
  * - A9 🐞: S1 asserts that "my arts" is refused with a message under
  *   "Path", never the message's words.
  * - A11 🐞: S1 presses the arrows with the pointer only.
- * - A12, A15, A16, A17, A19 🐞, A3, A4, A5, A14 ❓: no test reaches those
+ * - A12, A16, A17, A19 🐞, A3, A4, A5, A14 ❓: no test reaches those
  *   states or reads those parts.
  * - A2, A6, A7, A8, A13 🐞: no test sets another order, follows or reads
  *   the picture, types a "/" path, or submits with an editor ticked.

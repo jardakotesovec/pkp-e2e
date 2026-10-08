@@ -60,7 +60,7 @@ which manager-level role is signed in. <sup>a</sup>
 |------------------|-----------|-------|
 | "Role Name" | — | The role's name in the language the page is shown in. In French a preprint server's "Preprint Server manager" and "Moderator" rows show as codes, as the "Users" list does ([Users management OPS1](U53-users-management.md#ops1)) <sup>b</sup> <sup>w</sup> |
 | "Permission level" | — | "Journal Manager", "Section Editor", "Assistant", "Author", "Reviewer", "Reader", and on a journal "Subscription Manager"; a press reads "Press Manager" and "Series Editor" for the first two, a preprint server "Manager" and "Moderator". In the French interface a preprint server's Moderator row reads "Éditeur-trice de série" (Series Editor) ⚠ [OPS3](#ops3) <sup>b</sup> <sup>w</sup> |
-| One column per stage | — | A journal: "Submission", "Review", "Copyediting", "Production". A press: "Submission", "Internal Review", "External Review", "Copyediting", "Production". A preprint server: "Production" alone. One box per row: ticked when the role works in that stage (Rules 6–8). A screen reader announces each box only as "checkbox" ⚠ [A8](#a8). In the French interface a press heads its External Review column "##workflow.review.externalReview##" ⚠ [OMP1](#omp1) <sup>b</sup> <sup>g</sup> <sup>w</sup> |
+| One column per stage | — | A journal: "Submission", "Review", "Copyediting", "Production". A press: "Submission", "Internal Review", "External Review", "Copyediting", "Production". A preprint server: "Production" alone. One box per row: ticked when the role works in that stage (Rules 6–8). A screen reader announces each box only as "checkbox" ⚠ [A8](#a8). <sup>b</sup> <sup>g</sup> <sup>w</sup> |
 | The "Settings" arrow at the start of the row | — | Opens a line under the row with "Edit" and "Remove" (Rule 5 [A1](#a1)) <sup>f</sup> |
 
 Under the rows the list reads "{from} - {to} of {total} items" with page
@@ -861,8 +861,7 @@ Left out of the scenarios above, by reason:
     repeating or skipping a role; Rules 2, 4; scenario 1 passes it)
   - A14 (the "Users" tab opened without a reload after a rename; Side
     effects; scenario 4 passes it)
-  - OMP1 and OPS3 (the French column heading and level name; Fields, the
-    "Roles" tab)
+  - OPS3 (the French level name; Fields, the "Roles" tab)
   - OPS1 (the open access sign-in box not kept on a preprint server;
     Rule 23)
   - OPS2 (the "Reviewer" level on a preprint server: in the window and
@@ -917,13 +916,13 @@ an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | "OK" in an Editor's own role window takes the Settings pages away from every holder of the role | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | Roles list: a saved role jumps to the end, and its pages can repeat one role and skip another | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | Users & Roles: after a role is renamed, the "Users" tab shows its old name until a reload | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [OMP1](#omp1) | In French a press's "Roles" list heads its External Review column with a code | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | A preprint server's "View Preprint Content" sign-in box says "Saved" but keeps nothing, so files stay open | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server in French names its Moderator permission level "Éditeur-trice de série" (Series Editor) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | A role anyone has ever held can never be removed | ❓ | minor | — |
 | [A7](#a7) | "Abbreviation" is required, and no screen but the role's own window shows it | ❓ | minor | — |
 | [A12](#a12) | "Stage Assignment" was seen both hidden and on screen with every box greyed in the same four window states | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers the "Reviewer" level for a new role | ❓ | minor | — |
+| [OMP1](#omp1) | Retired: In French a press's "Roles" list heads its External Review column with a code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1162,21 +1161,6 @@ Roles" line of a member's "Disable User" window.
 A reload shows the new name.
 Basis: test run; probe, 2026-10-02. <sup>f-a14</sup>
 
-### OMP
-
-<a id="omp1"></a>
-**OMP1 — A code heads the External Review column in French** · 🐞 · medium.
-On a press shown in French (Canada), the "Rôles" list heads its External
-Review column "##workflow.review.externalReview##", while the other
-columns read "Soumission", "Évaluation interne", "Révision" and
-"Production"; the same code names the stage's box in the window that
-creates a role and the stage in a submission's workflow menu. A journal's
-list prints a French name for every column. One of several French
-(Canada) texts the press lacks, with its book and chapter pages
-([→ Monograph landing page, A15](U69-monograph-landing-page.md#a15)),
-whose report covers it.
-Basis: probe, 2026-10-02. <sup>f-omp1</sup>
-
 ### OPS
 
 <a id="ops1"></a>
@@ -1234,6 +1218,11 @@ The Spanish interface reads "Editor de series" for the same reason.
 These are the only two languages affected. The fix is a translation
 fix, with no code change.
 Basis: probe, 2026-10-02. <sup>f-ops3</sup>
+
+### Retired
+
+<a id="omp1"></a>
+**OMP1 — A code heads the External Review column in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-omp1</sup>
 
 ---
 
@@ -1957,7 +1946,6 @@ key ([b](#fn-b)). Live-probed 2026-09-26 (Fields; all three apps, French
 as a UI language): the press's columns read "Soumission", "Évaluation
 interne", "##workflow.review.externalReview##", "Révision", "Production";
 OJS printed French headings throughout.
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — OPS `UserAccessForm` posts `restrictPreprintAccess`, but

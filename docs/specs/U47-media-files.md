@@ -284,25 +284,6 @@ and the buttons "Yes" and "No" (Rule 6). <sup>k</sup> <sup>q7</sup>
     are the same whichever stage the submission is on; media files can
     be added while the article is still in Review, by whoever Actors
     offers them to. <sup>b</sup> <sup>q23</sup>
-11. **The page in French.** With the interface in French, parts of the
-    page and its windows read raw codes where French words belong
-    ⚠ [A7](#a7):
-    - on the page: the table's title and line, "Batch Link Media", "Add
-      Media File" and the "More Actions" column heading;
-    - in "Upload Media File": the title, the line and "Click to upload
-      files";
-    - in "Batch Link Media": every text but the file names and "Cancel";
-    - the row menu's "Manually Link Media", and every text of its window
-      but the file name and "Cancel";
-    - in "Edit Metadata": "Name of the file" and its help;
-    - in the delete dialog: the title and the text.
-
-    The other column headings, the row menu's other entries, the other
-    fields of "Edit Metadata" and the "Cancel" and "OK" buttons read
-    French. The side menu's "Media" and the page heading are the
-    workflow screen's
-    ([→ Workflow screen & stage access A11](U24-workflow-screen-and-stage-access.md#a11)).
-    <sup>f-a7</sup>
 
 ## Side effects
 
@@ -415,8 +396,6 @@ and the buttons "Yes" and "No" (Rule 6). <sup>k</sup> <sup>q7</sup>
   the Activity Log that holds the lines of Side effects.
 - **[Submission intake configuration](U58-submission-intake-configuration.md)**:
   the "Components" list whose boxes Settings bullets 1 to 3 describe.
-- **[Languages & locales](U57-languages-and-locales.md#a4)**: why a text
-  the French translation lacks shows as a raw code (Rule 11).
 - **[JATS & Body Text](U48-jats-and-body-text.md)**: the "Body Text" page of a
   journal's side menu, and the images added there.
 - **[Article landing page & reading](U13-article-landing-page-and-reading.md)**:
@@ -853,8 +832,6 @@ Left out of the scenarios above, by reason:
     the list until a reload; Rule 6a; scenario 3 reloads before
     reopening the window)
   - A6 (the warning each added file leaves in the server's log; Rule 2)
-  - A7 (raw codes on the page, its windows and the delete dialog with
-    the interface in French; Rule 11)
   - OJS1 (a reader who is not signed in sees a media change up to a day
     late; Side effects)
   - OPS1 (a preprint server's HTML galley link downloads the file, so
@@ -884,13 +861,13 @@ an entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | A file over the request limit fails with a server error; its card gives no size limit | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A name typed in "Edit Metadata" and left with "Yes" shows in the list, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | Each media file added leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A7](#a7) | In French the "Media" page, its windows and the delete dialog show raw codes such as "##publication.mediaFiles.add##" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Outside Production, a copyeditor allowed to edit a version can change its media files, which no screen offers them | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [OMP2](#omp2) | On a press, the Copyeditor is offered the "Media" page, and pressing a file name shows a raw refusal | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | The "ID" column shows a pair's number for linked files and another kind of number for the rest | ❓ | minor | — |
 | [OJS1](#ojs1) | A reader who is not signed in sees a media change on an HTML galley up to a day late | ❓ | user-visible | — |
 | [OPS1](#ops1) | A preprint server offers the "Media" page, but no reader page shows its files | ❓ | user-visible | — |
 | [OMP1](#omp1) | Retired: with "HTML Monograph File" off, a book's HTML file opened as a blank page; the book page's link now downloads it, as a journal's does (Settings bullet 6) | ✅ | retired | upstream change + claim check (claude), 2026-10-05 — fixed upstream |
+| [A7](#a7) | Retired: in French the "Media" page, its windows and the delete dialog show raw codes such as "##publication.mediaFiles.add##" | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 <a id="a1"></a>
@@ -984,30 +961,6 @@ warns through the same step ([JATS XML & body
 text](U48-jats-and-body-text.md#a20)).
 Basis: test run, 2026-10-02. <sup>f-a6</sup>
 
-<a id="a7"></a>
-**A7 — In French the "Media" page and its windows show raw codes** · 🐞 · low.
-With the interface in French, the "Media" page and the windows it opens
-read raw codes where French words belong, on a journal, a press and a
-preprint server: the table's title and line, "Batch Link Media", "Add
-Media File", "Upload Media File", "Manually Link Media", "Name of the
-file" in "Edit Metadata" and the delete dialog read
-"##publication.mediaFiles.…##", "##common.selectedFile##" or
-"##common.clickToUploadFiles##", and a screen reader names the "More
-Actions" column and each row's "…" button "##common.moreActions##". The
-English screen shows none of these codes.
-Only "More Actions" is a released text that French (Canada) never
-received: that one is the issue report's, with the users list where it
-shows the same way. The page's other codes came to `main` with the page
-in pkp-lib 1a5a8b1d7e (2026-05-06, `pkp/pkp-lib#12262`) and no language
-has them yet, as with every pkp-lib text on `main` and not on
-`stable-3_5_0`: unreleased 3.6 texts waiting for Weblate, which so far
-translates `stable-3_5_0` only; no report (issues session ruling,
-2026-10-02). The side menu's "Media" and the page heading are [Workflow
-screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s,
-and why a missing French text shows as a code at all is [Languages &
-locales](U57-languages-and-locales.md#a4)'.
-Basis: probe, 2026-10-02. <sup>f-a7</sup>
-
 <a id="a8"></a>
 **A8 — Outside Production, a copyeditor allowed to edit a version can change its media files, which no screen offers them** · 🐞 · low.
 A version's media files (the images and style sheets its HTML galley
@@ -1078,6 +1031,9 @@ Basis: probe, 2026-09-24 (the download); code (the download address).
 
 <a id="omp1"></a>
 **OMP1 — With "HTML Monograph File" off, a book's HTML file opens as a blank page** · ✅ · retired. Fixed by omp `8c807c919` (pkp/pkp-lib#13444), 2026-10-05: with the plugin off, the book page's link to an HTML file downloads the file, with no error, for a reader who is not signed in, a signed-in Reader and the Press Manager alike (Settings bullet 6). <sup>f-omp1</sup>
+
+<a id="a7"></a>
+**A7 — In French the "Media" page and its windows show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
 
 ---
 
@@ -1827,7 +1783,7 @@ the warning the "PHP Warning: foreach() …" line right before it.
 Issue report: [pkp-e2e#494](https://github.com/jardakotesovec/pkp-e2e/issues/494) ([docs/issues/U47-A6-media-jats-upload-server-log-warning.md](../issues/U47-A6-media-jats-upload-server-log-warning.md)).
 
 <a id="fn-f-a7"></a>
-**f-a7** — Rule 11. Live-probed 2026-09-30 at ojs `7ce98ec09e`, omp
+**f-a7** — A7. Live-probed 2026-09-30 at ojs `7ce98ec09e`, omp
 `3b0ecf794`, ops `c8af945bb7` (lib/pkp `3dc90c81a6`, ui-library
 `280f98c5`), two runs per app, each on its own scratch journal, press or
 preprint server with English and French (Canada) as interface
@@ -1845,7 +1801,6 @@ showed none of them. The row's "…" button's accessible name also reads
 a `fr_CA` entry; the English `publication.mediaFiles.confirmDelete`
 carries the file name. The "More Information" window's History line
 with an empty file name is *Submission activity log & notes*' finding.
-Issue report: [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)).
 
 <a id="fn-f-a8"></a>
 **f-a8** — Notes b and c. On `main`, lib/pkp

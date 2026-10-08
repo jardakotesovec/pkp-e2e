@@ -56,10 +56,7 @@ the category's "Editorial Assignments", comma-separated). Each row ends in
 a "More Actions" button (three dots) whose menu reads "Add", "Edit" and
 "Delete Category", and, when the category has sub-categories, an arrow
 that opens and closes them (Rule 3). A journal with no category shows "No
-Items" in the table. With the screens switched to French, the tab, its
-delete dialog and the "Select Categories" window show raw codes such as
-"##GRID.CATEGORY.CATEGORYNAME##" in place of many of their words
-⚠ [A15](#a15). <sup>c</sup>
+Items" in the table. <sup>c</sup>
 
 **The category window** ("Add Category" from the button or from a row's
 "Add"; "Edit Category" from a row's "Edit"). It opens from the right and
@@ -892,8 +889,6 @@ Left out of the scenarios above, by reason:
     press but the install's first, where nobody is assigned; Rule 18a)
   - A14 (a category added on the Publication Settings page after the
     submission arrived, or its ticks changed later; Rule 18b)
-  - A15 (the tab, the delete dialog and the "Select Categories" window
-    opened in French; Fields, the tab)
   - A16 (the window's "Close" or Escape with an unsaved change; Fields,
     the category window)
   - A17 (a file that is not a picture put in "Cover Image"; Fields)
@@ -961,7 +956,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | On the Categories tab, keyboard users cannot open a category's sub-categories, and the arrows are misnamed | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A screen reader announces the "Select Categories" window's arrow column as "##common.expand##" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | A category's "Editorial Assignments" assign nobody on any journal or press but the install's first | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | In French, the tab, the delete dialog, the "Select Categories" window and a press's category page show raw codes | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A16](#a16) | A name changed and closed without saving comes back in the same category's next "Edit" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | A file that is not a picture, put in any image upload box, leaves a broken preview and a request for "[object Event]" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A18](#a18) | The box where a manager types a category's name to delete it has no name for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -980,6 +974,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | A category added after a submission arrives brings no editors | ❓ | minor | — |
 | [A21](#a21) | The "Path" help ends in the word "path", never in a saved category's own path | ❓ | minor | — |
 | [OMP5](#omp5) | A press's first category page opened after its catalog page, its search results or a settings save failed to load | ✅ | retired | housekeeping (claude), 2026-10-07 — fixed upstream (pkp/pkp-lib#12915), walked on main |
+| [A15](#a15) | Retired: in French, the tab, the delete dialog, the "Select Categories" window and a press's category page show raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1142,27 +1137,6 @@ Question: should a category added later bring its editors? Lean: no; the
 assignment happens on arrival, like a section's, and an editor who adds a
 category can assign its editors by hand.
 Basis: code. <sup>f-a14</sup>
-
-<a id="a15"></a>
-**A15 — Raw codes on the French category screens** · 🐞 · low.
-Opened in French (Settings › Journal › "Catégories"), the tab heads its
-columns "##GRID.CATEGORY.CATEGORYNAME##" and
-"##MANAGER.CATEGORY.ASSIGNEDTO##", every arrow is named
-"##manager.category.expandSubcategories##", and the row menu reads
-"Ajouter", "Modifier" and "##manager.category.deleteCategory##". The
-delete dialog is headed "##manager.category.delete.confirmationTitle##",
-its text, the instruction to type the name included, is
-"##manager.category.delete.message.body##", and its button reads
-"##manager.category.confirmDelete##" beside "Annuler". The picker's
-button and window read "##manager.selectCategories##". A press's category
-page in French shows "##catalog.browseTitles##" and
-"##catalog.category.heading##" where the count and "All Books" stand; a
-journal's and a preprint server's page are translated.
-On `main` the tab, dialog and window texts are new with the new
-category screen and await their French; 3.5's older table is French
-throughout. The press page's codes, and the tab's "More Actions"
-("##common.moreActions##") that 3.5 lacks too, are reported.
-Basis: probe, 2026-10-02. <sup>f-a15</sup>
 
 <a id="a16"></a>
 **A16 — An unsaved name comes back in the next "Edit"** · 🐞 · medium.
@@ -1342,6 +1316,9 @@ Basis: probe, 2026-10-02. <sup>f-ops1</sup>
 
 <a id="omp5"></a>
 **OMP5 — A press's category page fails after its catalog or a settings save** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12915, merged 2026-10-05), verified 2026-10-07 on OMP: a press's first category page opened after its catalog page or its search results now opens at once (Rule 9). <sup>f-omp5</sup>
+
+<a id="a15"></a>
+**A15 — Raw codes on the French category screens** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a15</sup>
 
 ---
 
@@ -2157,7 +2134,7 @@ headers upper-cased by style), `##manager.category.expandSubcategories##`,
 `##manager.category.delete.message.body##`,
 `##manager.category.confirmDelete##`, `##manager.selectCategories##` and
 `##list.collapse##`: keys with no fr_CA text.
-Re-walked 2026-10-02 on main and stable-3_5_0, all three apps. Split three ways: the press category page's `catalog.browseTitles` and `catalog.category.heading` joined [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)), whose severity, medium, comes from the editors' names on the book page; the tab's `common.moreActions` joined [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)), low; the rest (`grid.category.categoryName`, `manager.category.*`, `manager.selectCategories`, `list.collapse`) are main-only texts with no report under the 2026-10-02 ruling on main-only locale keys. The entry's impact, low, is its own part's.
+Re-walked 2026-10-02 on main and stable-3_5_0, all three apps: the press category page's `catalog.browseTitles` and `catalog.category.heading` and the tab's `common.moreActions` are released texts French (Canada) lacks on 3.5 too; the rest (`grid.category.categoryName`, `manager.category.*`, `manager.selectCategories`, `list.collapse`) are main-only texts.
 
 <a id="fn-f-a16"></a>
 **f-a16** — Live-probed 2026-09-25, all three apps: "Science" renamed

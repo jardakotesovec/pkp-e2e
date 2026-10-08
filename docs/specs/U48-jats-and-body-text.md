@@ -1104,9 +1104,8 @@ line "Dernière modification le {date} par {username}", the delete window
 "Confirmer la suppression du XML JATS" with "Supprimer le fichier JATS";
 "Enregistrer", "Modifications non sauvegardées", "Plein écran",
 "Références"); the English screens show none of these codes. The side
-menu's "Body Text" entry and the "Publication: Body Text" heading are
-[Workflow screen & stage access A11](U24-workflow-screen-and-stage-access.md#a11)'s
-finding, and why a missing French text shows as a code at all is
+menu's "Body Text" entry and the "Publication: Body Text" heading read
+codes too, and why a missing French text shows as a code at all is
 [Languages & locales](U57-languages-and-locales.md#a4)'.
 Every code here came to `main` with its page, none is on
 `stable-3_5_0`, and no language has them yet: the box and its windows

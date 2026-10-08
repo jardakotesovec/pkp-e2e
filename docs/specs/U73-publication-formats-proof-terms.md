@@ -103,11 +103,9 @@ A format file's row:
 | **Complete** | — | "Awaiting Approval" or "Approved", a link that opens "Approve Proof" or "Revoke Proof Approval" (Rule 13). <sup>h</sup> |
 | **Availability** | — | The file's terms, a link that opens "Set Terms for Downloading" (Rule 15): "Set Terms" until terms are saved, then "Open Access", "Direct Sales" or "Not Available". <sup>h</sup> |
 
-**In French.** With the interface in French (Canada), the page and the
-"Add publication format" window below read French, except the list's
-"Availability" column heading and four texts of the window, which show
-raw codes: the text's internal name between hash signs, such as
-"##grid.catalogEntry.availability##" ⚠ [A25](#a25). <sup>f-a25</sup>
+**In French.** With the interface in French (Canada), the "Format
+Availability" window (Rule 14) is titled "Approbation du format"
+("Format Approval") ⚠ [A25](#a25). <sup>f-a25</sup>
 
 <a id="format-window"></a>
 **The format window.** "Add publication format" opens a window headed
@@ -1025,9 +1023,9 @@ Left out of the scenarios above, by reason:
     "Direct Sales" at "0" and at "0.00" is refused in "Set Terms for
     Downloading", the window staying on "Direct Sales"
   - the guard for A25 (issue report
-    `docs/issues/U69-A15-omp-french-book-page-raw-keys.md`): in French
-    (Canada), the Publication Formats list and "Add publication format"
-    show no "##" code
+    `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`):
+    in French (Canada), the window a format's availability link opens
+    is titled for availability ("Disponibilité du format")
   - a format file's "Edit a file" closed with its close arrow after the
     name is changed: no question, the row keeping the old name after a
     reload, and "Edit" reopening on it (Rule 11): likely a bullet in
@@ -1087,8 +1085,8 @@ Left out of the scenarios above, by reason:
     in its window; Rules 18b, 19b; scenario 2 passes the refused date)
   - A24 (a refused "URL Path" comes back as a notice on the next save;
     Rule 6; scenario 8 passes it)
-  - A25 (the French "Availability" column heading and four texts of
-    "Add publication format"; Fields, "In French")
+  - A25 (the French title of the "Format Availability" window; Fields,
+    "In French")
 - **Owned by another feature**:
   - the "Identifiers" tabs and who is offered them (Actors row 7;
     *[Identifiers](U44-identifiers.md)*)
@@ -1133,7 +1131,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A20](#a20) | A book file on "Direct Sales" at a zero price is free at "0" and out of readers' reach at "0.00" | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A23](#a23) | A date of the wrong length, or a code value of spaces, is refused with no message in its window | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A24](#a24) | A refused "URL Path" comes back as a notice when the format is next saved, once per refusal | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A25](#a25) | In French the list's "Availability" column heading and four texts of "Add publication format" read raw codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
+| [A25](#a25) | In French (Canada) the "Format Availability" window is titled "Approbation du format" ("Format Approval") | 🐞 | low | issues (claude), 2026-10-08 — narrowed to the wrong title, locale files re-read |
 | [A5](#a5) | "URL Path" accepts a number, or a path another format already uses, and a reader link then answers "404 Not Found" | ❓ | minor | — |
 | [A8](#a8) | The price box's two checks disagree: "10.5" is pressable and refused, "1,500.00" accepted but not pressable | ❓ | minor | — |
 | [A10](#a10) | "Approve Proof" says a file becomes ready to be published, but approval changes nothing readers get | ❓ | minor | — |
@@ -1481,39 +1479,20 @@ and a save that succeeds shows no error.
 Basis: test run, 2026-10-04. <sup>f-a24</sup>
 
 <a id="a25"></a>
-**A25 — In French the "Availability" heading and four texts of "Add publication format" read raw codes** · 🐞 · medium.
-With the interface in French (Canada), the Publication Formats page and its "Add
-publication format" window read French ("Formats de publication",
-"Ajouter un format de publication", "Nom", "Terminer", "Modifier le
-fichier", "Sélectionner les fichiers"; in the window "Détails du
-format", "Format de publication", "Format physique", "Chemin d'accès
-URL", "Annuler", "OK"), except for raw codes:
-- the list's "Availability" column heading reads
-  "##grid.catalogEntry.availability##" for the Press manager; the
-  Author's list, which has only "Name", shows no code;
-- in the window, the box "This format will be available at a separate
-  website" reads "##grid.catalogEntry.remotelyHostedContent##", the
-  heading "ISBN" "##grid.catalogEntry.isbn##", and the lines under the
-  two "ISBN" boxes "##grid.catalogEntry.isbn13.description##" and
-  "##grid.catalogEntry.isbn10.description##".
-
-A French-speaking Press manager cannot tell what the column holds, what
-the box does or which "ISBN" box takes which code. The English screen
-shows none of these codes. The five "Publication Format" kinds
-("Digital (on physical carrier) (DA)" …) read in English in both
-languages; they are the book trade's names, not codes. The workflow
-screen's own codes around the page are
-[Workflow screen & stage access, its A11](U24-workflow-screen-and-stage-access.md#a11),
-and why a missing French text shows as a code at all is
-[Languages & locales, its A4](U57-languages-and-locales.md#a4).
-The same page shows more in the walk of 2026-10-04: a format neither
-approved nor available reads "##submission.incomplete##" and
-"##grid.catalogEntry.isNotAvailable##", the remote box's address label
-"##grid.catalogEntry.remoteURL##", the "Format Approval" window's title
-and text are codes, and the "Format Availability" window is titled
-"Approbation du format" ("Format Approval").
-Expected: French words, as the rest of the page shows.
-Basis: probe, 2026-10-04. <sup>f-a25</sup>
+**A25 — In French (Canada) the "Format Availability" window is titled "Approbation du format"** · 🐞 · low.
+With the interface in French (Canada), an editor who presses a format's
+availability link gets a window titled "Approbation du format"
+("Format Approval"), where English titles it "Format Availability"
+(Rule 14). "Format Approval" is the English title of the neighbouring
+window, which approves the format's catalog data (Rule 12). Nothing is
+lost: the window's own sentence says that the format will be available
+to readers. The same title heads the window that takes availability
+back. "Français" (France) titles the window
+"Disponibilité du format". The report also covers a priced file's link,
+which drops the format's name in French (Canada)
+([Monograph landing page, its A15](U69-monograph-landing-page.md#a15)).
+Expected: a French title that says availability.
+Basis: probe, 2026-10-04; code, 2026-10-08. <sup>f-a25</sup>
 
 ---
 
@@ -2615,26 +2594,25 @@ arrives the same way. Evidence: `.reports/U73/tomp/`.
 Issue report: [pkp-e2e#367](https://github.com/jardakotesovec/pkp-e2e/issues/367) ([docs/issues/U09-A11-static-page-refusal-repeated-after-save.md](../issues/U09-A11-static-page-refusal-repeated-after-save.md)).
 
 <a id="fn-f-a25"></a>
-**f-a25** — Notes d, e. OMP `locale/fr_CA/locale.po` leaves
-`grid.catalogEntry.availability`, `grid.catalogEntry.remotelyHostedContent`,
-`grid.catalogEntry.isbn`, `grid.catalogEntry.isbn13.description` and
-`grid.catalogEntry.isbn10.description` empty (`msgstr ""`), and
-`grid.catalogEntry.remoteURL` ("URL of remotely-hosted content") too;
-that box shows only with the remote box ticked, which the probe did not
-do, and the window's hidden copy of its label held the code. The format's own "Edit" window uses the same form
-(`formatForm.tpl`) and was not read in French. The kinds come from the
-ONIX code lists, which ship under `locale/en` only. Code read on the omp
-checkout `3b0ecf794`. Live-probed 2026-09-30, two runs, on a scratch
+**f-a25** — Notes d, e. OMP's `locale/fr_CA/locale.po` holds "Approbation
+du format" for `grid.catalogEntry.availableRepresentation.title`, the
+text of 2013, when the window's English title was also "Format
+Approval"; the English became "Format Availability" in 2015 (omp
+`b9affacac`) and `locale/fr/locale.po` reads "Disponibilité du format".
+`PublicationFormatGridCellProvider::getCellActions()` titles the window
+with it whether the format is made available or taken back (code; only
+making it available was opened). Walked 2026-10-04 on `main` and
+`stable-3_5_0`, on PKP's default dataset, as `dbarnes` on submission 4's
+format "PDF": the window read "Approbation du format" over "Ce format
+sera accessible aux lecteurs. …", and was cancelled. The same entries
+stand on `stable-3_4_0` and `stable-3_3_0` (code, 2026-10-08). The
+page's other French (Canada) texts that show as raw codes (the
+"Availability" column heading, the format window's remote box and ISBN
+lines, the "Format Approval" window) are texts the language lacks, and
+no finding; they were live-probed 2026-09-30, two runs, on a scratch
 press with English and French (Canada) as interface languages, every
-French read paired with the same read in English: as the Press manager,
-the page of a book in Production with no format, of one holding the
-format "PDF" ("Complétée", "Disponible") and of the same book published,
-and "Add publication format" on the second; as the Author, the second
-and third pages. The French list's heading row read "Nom", "Terminer",
-"##grid.catalogEntry.availability##"; the window read the four codes in
-both runs; the English reads showed no code on the page or in the
-window beyond the help icon's (Navigation menus & site chrome).
-Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)).
+French read paired with the same read in English.
+Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md](../issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md)).
 
 ## Reference — entry points & surfaces
 

@@ -118,10 +118,10 @@ effect" names the feature that describes the item's field (Rule 12). <sup>e</sup
 Components" on a press, "Preprint Components" on a preprint server) with
 one column of names (its heading, "Name", is read out by screen readers
 only) and above it, left to right, the buttons "Order", "Add a Component"
-and "Restore Defaults". With the interface in French, a press's and a
-preprint server's list shows raw text keys in place of its heading and
-of some names ⚠ [A9](#a9). Each row opens, from the arrow at its start
-(a screen reader hears "Settings"), the links "Edit" and "Delete". A new
+and "Restore Defaults". With the interface in French, a preprint
+server's list shows raw text keys in place of seven of its names ⚠
+[A9](#a9). Each row opens, from the arrow at its start (a screen reader
+hears "Settings"), the links "Edit" and "Delete". A new
 journal's list, in order: "Article Text", "Research Instrument", "Research
 Materials", "Research Results", "Transcripts", "Data Analysis", "Data Set",
 "Source Texts", "Multimedia", "Image", "HTML Stylesheet", "Other"; a
@@ -844,9 +844,6 @@ Left out of the scenarios above, by reason:
   - a component's "Name" of one space refused with a sentence in the
     notice, not a raw code ([A10](#a10)): the guard the issue report
     proposes
-  - a press's and a preprint server's "Soumission" tab in French
-    (Canada) showing no `##` code in its side tabs or its components
-    list ([A9](#a9)): the guard the issue report proposes
   - "Edit" beside each section of the "Submissions" page opening the
     side tab that holds that section's box, on the three apps
     ([OMP2](#omp2)): the guard the issue report proposes
@@ -886,8 +883,7 @@ Left out of the scenarios above, by reason:
     Fields)
   - A7 (the "For Reviewer Suggestion" help; Fields)
   - A8 (the "Key" help; Fields)
-  - A9 (a press's and a preprint server's "Components" list in French;
-    Fields)
+  - A9 (a preprint server's component names in French; Fields)
   - A14 (a press's "Disable Submissions" help in French; Fields)
   - OMP1 (a press's "Disable Submissions" help and "Copyright notice"
     label; Fields; scenario 3 names it)
@@ -955,7 +951,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A2](#a2) | A component the manager deleted is still offered as a media type on the "Media" page | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | The help under "For Reviewer Suggestion" in Author Guidance asks about contributors, not suggested reviewers | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A8](#a8) | The "Key" help in the "Add a Component" window misspells "identifier" and calls the component a "genre" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A9](#a9) | A press's or preprint server's "Components" settings tab and list show internal text codes in French (Canada) | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
+| [A9](#a9) | In French (Canada) a preprint server's "Components" list names seven components by internal text codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A component name of only spaces is refused with a raw text key | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A refused component delete leaves its confirmation window spinning | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | In French (Canada), a press's "Disable Submissions" help reads a raw code | 🐞 | minor | — |
@@ -1075,21 +1071,17 @@ platform.
 Basis: probe, 2026-10-04. <sup>f-a8</sup>
 
 <a id="a9"></a>
-**A9 — A press's or preprint server's "Components" settings tab and list show internal text codes in French (Canada)** · 🐞 · low.
-A press or preprint server manager working in French (Canada) opens
-Settings › Workflow › "Soumission". The side tab that manages file
-components is labelled with the internal text code
-"##grid.genres.title.short##", and the list it opens is headed
-"##grid.genres.title##", where a journal reads "Éléments" and "Éléments
-de l'article".
-Nothing is lost: the list works as in English. The cause is two French
-(Canada) texts missing from the press's and the server's translations;
-no code needs to change.
-Every press and preprint server that offers French (Canada) shows the
-two codes. So do presses in nine other languages that lack the same
-texts, and preprint servers in nine others, French (France) among them.
-A preprint server's seven French component names, stored as codes, are
-another fault, recorded under
+**A9 — In French (Canada) a preprint server's "Components" list names seven components by internal text codes** · 🐞 · medium.
+A preprint server manager working in French (Canada) opens Settings ›
+Workflow › "Soumission" and its list of file components. Seven of the
+components are named by internal text codes
+("##default.genres.researchInstrument##" and six more), and so is each
+one in its "Modifier" (Edit) window. The codes are saved as the
+components' French names when the server is created with French or
+French is added, and "Restaurer les valeurs par défaut" (Restore
+Defaults) saves them again; a manager can replace each one on screen.
+It is one symptom of the default texts stored as codes, recorded with
+the others under
 [Languages & locales](U57-languages-and-locales.md#a8).
 Basis: probe, 2026-10-04. <sup>f-a9</sup>
 
@@ -1133,8 +1125,7 @@ shows the help under the box (Fields; [OMP1](#omp1)), the French panel
 shows "##manager.setup.disableSubmissions.description##" in its place.
 Every press manager working in French (Canada) meets it, since the page
 opens on this panel. The press's French (Canada) translation leaves the
-text empty, the same kind of gap as the components tab's in
-[A9](#a9).
+text empty.
 Basis: probe, 2026-10-04. <sup>f-a14</sup>
 
 <a id="a15"></a>
@@ -1858,15 +1849,14 @@ Issue report: [pkp-e2e#827](https://github.com/jardakotesovec/pkp-e2e/issues/827
 Issue report: [pkp-e2e#830](https://github.com/jardakotesovec/pkp-e2e/issues/830) ([docs/issues/U58-A8-component-key-help-misspelled-genre.md](../issues/U58-A8-component-key-help-misspelled-genre.md)).
 
 <a id="fn-f-a9"></a>
-**f-a9** — `grid.genres.title` has an empty `msgstr` in OMP's and OPS's
-`locale/fr_CA/manager.po` (OJS: "Éléments de l'article"); OPS
-`locale/fr_CA/default.po` leaves `default.genres.researchInstrument` and
+**f-a9** — OPS `locale/fr_CA/default.po` leaves
+`default.genres.researchInstrument` and
 the other six empty, and `GenreDAO::installDefaults()` writes the
 untranslated key as the French name. Live-probed 2026-09-27, two runs
 per app, OJS the control: the list in French, and on a preprint server
 with English and French form languages the seven names in the list, in
 each "Edit" window and after "Restore Defaults".
-Issue report: [pkp-e2e#819](https://github.com/jardakotesovec/pkp-e2e/issues/819) ([docs/issues/U58-A9-french-components-list-heading-raw-key.md](../issues/U58-A9-french-components-list-heading-raw-key.md)); the component names: [pkp-e2e#360](https://github.com/jardakotesovec/pkp-e2e/issues/360) ([docs/issues/U57-A8-french-default-texts-stored-as-codes.md](../issues/U57-A8-french-default-texts-stored-as-codes.md)).
+Issue report: [pkp-e2e#360](https://github.com/jardakotesovec/pkp-e2e/issues/360) ([docs/issues/U57-A8-french-default-texts-stored-as-codes.md](../issues/U57-A8-french-default-texts-stored-as-codes.md)).
 
 <a id="fn-f-a10"></a>
 **f-a10** — Note f: the box's own check accepts spaces, and the server's
@@ -1906,7 +1896,7 @@ Retired 2026-10-06: at ui-library `a36dc7fe78` (ojs `d7cf416029`, omp `a0e6d0a8b
 **f-a14** — Note c: OMP `locale/fr_CA/manager.po` holds
 `manager.setup.disableSubmissions.description` with an empty `msgstr`;
 `LocaleFile::loadArray()` drops an empty text and `Locale::translate()`
-falls back to no other language, as for A9. Live-probed 2026-10-04, OMP
+falls back to no other language. Live-probed 2026-10-04, OMP
 `main`, PKP's default test dataset, the manager `rvaca` with the
 interface in French (Canada): the help read
 `##manager.setup.disableSubmissions.description##` (kept script

@@ -257,10 +257,11 @@ from the menu belongs to its own feature.
    Review (Round N)" or "Workflow: External Review (Round N)" on a press).
    The author's view on a journal or press shows the same group; on a
    preprint server the author's view has no "Workflow" group at all
-   [OPS1](#ops1). With the interface in French (Canada), several labels
-   (menu entries, version names, headings, header buttons and status
-   lines) read raw codes such as "##publication.media##" ⚠ [A11](#a11).
-   <sup>g</sup>
+   [OPS1](#ops1). With the interface in French (Canada), a version with
+   a publication stage is named by the raw code
+   "##publication.versionStage.display##" in the menu, and a preprint
+   server's "Preprint" heading, status line and "Post" and "Unpost"
+   buttons read raw codes too ⚠ [A11](#a11). <sup>g</sup>
 8. **Review rounds in the menu.** A review stage that has rounds lists them
    under its entry as "Review Round 1", "Review Round 2", …, one per round,
    in order; the current round of the active review stage carries the
@@ -510,9 +511,8 @@ from the menu belongs to its own feature.
       log gains "{editor} returned this submission to the Done stage.".
       Unpublishing the version removes the button at once, and publishing
       again sends the submission straight back to Done without it.
-    Neither dialog sends email. Both refresh the panel afterwards. With
-    the interface in French (Canada), both buttons and dialogs read raw
-    codes [A11](#a11). <sup>m</sup>
+    Neither dialog sends email. Both refresh the panel afterwards.
+    <sup>m</sup>
 <a id="delete-dialog"></a>
 19. **The "Delete" dialog.** Wherever a stage offers a "Delete" button (the
     stage features say where), pressing it opens a dialog titled "Delete"
@@ -1123,8 +1123,9 @@ Left out of the scenarios above, by reason:
     Rule 3)
   - A9 (an old-shape address to a deleted submission showing a bare "404
     Not Found"; Rule 19)
-  - A11 (raw codes in the menu, headings, header, status lines and the
-    two return dialogs with the interface in French; Rules 7, 18)
+  - A11 (raw codes for the version names and, on a preprint server, the
+    "Preprint" heading, the status line and the "Post" and "Unpost"
+    buttons with the interface in French; Rule 7)
   - OMP3 (a press keeping "Identifiers" after the plugin is turned off;
     Settings)
   - OPS2 (a preprint declined at Production landing on "Title &
@@ -1175,7 +1176,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A5](#a5) | A workflow stage address typed without a submission number, or with an unknown one, shows a blank page | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | Pressing "Review" in the workflow's side menu opens a page with no round: wrong status, no reviewers, "Add Reviewer" refused | 🐞 | medium · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Any dead link, reader pages and old workflow links alike, shows a bare "404 Not Found" page | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A11](#a11) | In French the workflow screen's menu, headings, header, status lines and return dialogs show raw codes such as "##publication.media##" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A11](#a11) | In French the workflow screen names a staged version by a raw code, and a preprint server's "Preprint" heading, status line and "Post" and "Unpost" buttons show raw codes | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | On a press, disabling the URN plugin leaves URNs on public book pages and an empty "Identifiers" workflow page | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server labels an unfinished submission "Production", not "Incomplete", in the lists and the workflow header | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A1](#a1) | A bookmarked stage address opens the workflow at its usual landing entry, not at the stage the address names | ❓ | minor | — |
@@ -1350,41 +1351,15 @@ The blank page is [A5](#a5)'s finding.
 Basis: probe, 2026-10-02. <sup>[f-a9](#fn-a9)</sup>
 
 <a id="a11"></a>
-**A11 — In French the workflow screen shows raw codes** · 🐞 · low.
+**A11 — In French the workflow screen shows raw codes for version names and a preprint server's headings, status and buttons** · 🐞 · low.
 With the interface in French (Canada), parts of the workflow screen read
 raw codes where French words belong, for the Journal Manager and the
 Author alike:
-- every app: in the side menu "Media" reads "##publication.media##" and
-  "Funding" "##submission.funding##", and their pages' headings repeat the
-  code ("Publication : ##publication.media##"); a version with no stage
-  reads "##publication.versionStage.unassignedVersion##" (English
-  "Unassigned version ({date})"), and a version with a publication
-  stage "##publication.versionStage.display##", published or not
-  (English "Version of Record 1.0", "Author Original 1.0"). A version
-  "Create New Version" makes with a stage reads the stage code too, so the new
-  version and the published one cannot be told apart; one made with no
-  stage reads the unassigned code again, so two such versions read
-  alike;
-- every app: "Return to Workflow" and "Return to Done" (Rule 18) read
-  "##editor.submission.decision.returnToWorkflow##" and
-  "##editor.submission.decision.returnToDone##", and each dialog carries
-  that code as its title and
-  "##editor.submission.decision.returnToWorkflow.description##" or
-  "##editor.submission.decision.returnToDone.description##" as its only
-  sentence above "Confirmer" and "Annuler", so a French-speaking editor
-  confirms a move they cannot read;
-- a journal: "Body Text" and "Publication Settings" read
-  "##publication.bodyText##" and "##publication.publicationSettings##";
-- a press: the "External Review" entry, its heading and the status
-  sentences that name it read "##workflow.review.externalReview##"
-  ("L'étape ##workflow.review.externalReview## n'a pas encore
-  commencé."); an Internal Review round's bubble and heading read
-  "##submission.stage.internalReviewWithRound##", while an External
-  Review round reads a journal's "Évaluation (Cycle 1)", so the two
-  stages' rounds are not named apart; the "Monograph" control reads
-  "##common.publication##" and its menu
-  "##submission.workflowType.editedVolume.label##" and
-  "##common.publication##";
+- every app: in the side menu a version with a publication stage reads
+  "##publication.versionStage.display##", published or not (English
+  "Version of Record 1.0", "Author Original 1.0"). A version "Create
+  New Version" makes with a stage reads the same code, so the new
+  version and the published one cannot be told apart;
 - a preprint server: the "Preprint" group heading and every page heading
   read "##submission.publication##" ("##submission.publication## : Titre
   et résumé"), the Author's "Production Tasks & Discussions" page
@@ -1397,35 +1372,19 @@ Expected: French words, as the rest of the frame shows ("Flux des
 travaux", "Soumission", "Révision", "Fermer"); the English screen shows
 none of these codes. The help icon's code
 is [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md#a1)'s
-finding, the editorial side menu's codes behind the panel are its
-[A23](U08-navigation-menus-and-site-chrome.md#a23), the same version
-name on the article's public page is
+finding, the same version name on the article's public page is
 [Article landing page & reading](U13-article-landing-page-and-reading.md#a1)'s,
-the pages' and windows' own codes below this frame are their features'
-([Publication metadata](U40-publication-metadata.md#ops3) OPS3,
-[Citations & references](U42-citations-and-references.md#a21) A21,
-[Funding](U43-funding.md#a14) A14,
-[Media files](U47-media-files.md#a7) A7,
-[JATS & Body Text](U48-jats-and-body-text.md#a21) A21,
-[Publish, schedule & versions](U49-publish-schedule-and-versions.md#a10) A10,
-[Catalog management](U70-catalog-management.md#a15) A15,
-[Publication formats & proof terms](U73-publication-formats-proof-terms.md#a25) A25),
+a preprint server's codes on the pages below this frame are their
+features' ([Publication metadata](U40-publication-metadata.md#ops3) OPS3,
+[Publish, schedule & versions](U49-publish-schedule-and-versions.md#a10) A10),
 and why a missing French text shows as a code at all is
 [Languages & locales](U57-languages-and-locales.md#a4)'.
 
 Where each part is reported: the staged version names with
-[Article landing page & reading A1](U13-article-landing-page-and-reading.md#a1);
+[Article landing page & reading A1](U13-article-landing-page-and-reading.md#a1),
+whose name is built from a text that holds only a pattern and no word;
 a preprint server's part with
-[Publish, schedule & versions A10](U49-publish-schedule-and-versions.md#a10);
-a press's part (the "External Review" entry, the two rounds' names, the
-"Monograph" control and its menu) with
-[Monograph landing page A15](U69-monograph-landing-page.md#a15): OMP's
-French files never received those texts, and French (France) lacks the
-rounds' names too. The rest get no report: "Media", "Funding", the
-unassigned version, "Return to Workflow" and "Return to Done" with
-their dialogs, and a journal's "Body Text" and "Publication Settings"
-are unreleased 3.6 texts that no language has yet, waiting for Weblate
-(issues session ruling, 2026-10-02).
+[Publish, schedule & versions A10](U49-publish-schedule-and-versions.md#a10).
 Basis: probe, 2026-10-02. <sup>[f-a11](#fn-a11)</sup>
 
 ### OMP
@@ -1658,7 +1617,7 @@ Issue report: [docs/issues/U24-A9-not-found-page-bare.md](../issues/U24-A9-not-f
 <a id="fn-a11"></a>
 **f-a11** — Live-probed 2026-09-29 (Rules 4–10, 15, 17, 18a, 18b, 19; OJS, OMP, OPS, two runs; scratch contexts with UI languages English and French (Canada); the context's manager and the Author; submissions queued at Submission, in Review Round 1 (a press also with Internal then External Review round 1), in Copyediting, queued at Production, declined, published, and published with a second version made on screen; every stage, round and page read at `/fr_CA/dashboard/editorial?workflowSubmissionId=N` and the Author's `/fr_CA/dashboard/mySubmissions?…`, paired entry by entry with the same walk in English): the codes of A11 and no other in the frame; in English only `##common.help##` (U08 A1). English control: "Media", "Funding", "Unassigned version (2026-09-29)", "Version of Record 1.0" / "1.1" (OPS "Author Original 1.0" / "1.1"), OJS "Body Text", "Publication Settings", OMP "External Review", "Internal Review (Round 1)", "Monograph" / "Edited Volume", OPS "Preprint", "Production Tasks & Discussions", "Status: Unposted" / "Status: Posted", "Preview" "Post", "Unpost"; "Return to Workflow" / "Return this submission to the workflow stage it occupied before it was moved to Done." and "Return to Done" / "Return this submission to the Done stage.", "Confirm" / "Cancel". OJS and OMP read French in the publication control regions ("Statut : Non planifié-e" / "Publié-e"; OJS "Aperçu", "Programmer la publication"; OMP "Prévisualiser", "Publier"; both "Dépublier"). In French "Return to Workflow" was cancelled (nothing changed) and then confirmed: the submission returned (bubble "Soumission" on OJS and OMP, whose seed was published from Submission; "Production" on OPS) and the header offered the "Return to Done" code, whose dialog was read and cancelled. The "Delete" dialog read French ("Supprimer" / "Êtes-vous certain-e de vouloir supprimer définitivement cette soumission ?", "Confirmer", "Annuler"; Rule 19). Live-probed again 2026-09-30 (OJS, OMP, OPS, two runs, the same accounts; submissions in Production never published, one of them given a funder, references, a media file, a JATS file on a journal and a publication format on a press, and the same published): on the References, Funding, Media, JATS XML, Body Text, Publication Settings, Catalog Entry, Preprint Entry, Publication Formats and Permissions & Disclosure pages the frame showed the codes of A11 and no other. "Create New Version" confirmed in French on the never-published submission with a stage chosen (OJS, OMP "Author Original (AO)" with "Major Revision"; OPS "Author Original (AO)") gave a new, still unpublished version whose menu entry read `##publication.versionStage.display##` (English "Author Original 1.0"; stored stage AO 1.0, status queued) under the first version's `##publication.versionStage.unassignedVersion##`; the same window confirmed untouched on a never-staged submission gave a second entry reading `##publication.versionStage.unassignedVersion##`, two identical entries (English two "Unassigned version (2026-09-30)"). Mechanism (read, not driven): each key is missing from the app's `fr_CA` locale files (`publication.media`, `publication.versionStage.*`, `submission.funding`, `publication.bodyText`, `publication.publicationSettings`, `submission.stage.internalReviewWithRound`, `editor.submission.decision.returnTo*`) or present with an empty `msgstr` (OMP `common.publication`, `workflow.review.externalReview`, `submission.workflowType.editedVolume.label`; OPS `submission.publication`, `submission.queries.production`, `publication.publish`, `publication.unpublish`, `publication.status.unscheduled`, `publication.status.published`), and the client prints the key in place of the text (U57 note p). No request failed and no script error was logged beyond A6's.
 Issue report: [pkp-e2e#548](https://github.com/jardakotesovec/pkp-e2e/issues/548) ([docs/issues/U49-A10-ops-french-date-posted-raw-key.md](../issues/U49-A10-ops-french-date-posted-raw-key.md)).
-Issue report (a press's part): [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-book-page-raw-keys.md](../issues/U69-A15-omp-french-book-page-raw-keys.md)); the staged version names: [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)). No report for the 3.6-only texts, each English-only on `main` and absent from `stable-3_5_0` (read in the code 2026-10-02): `publication.media` (pkp-lib 1a5a8b1d7e, 2026-05-06), `submission.funding` (pkp-lib d50c812aaf, 2026-07-06), `publication.versionStage.unassignedVersion` (pkp-lib 958592a159, 2025-05-30), `editor.submission.decision.returnToWorkflow`, `returnToDone` and their `.description` texts (pkp-lib d52aa4c84b, 2026-06-09), `publication.bodyText` (pkp-lib 21585b09ab, 2025-12-10), `publication.publicationSettings` (ojs eb14c0b9d3, 2026-05-28).
+Issue report (the staged version names): [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)). The other codes the two probes read are texts French (Canada) lacks, which the entry leaves out: a press's "External Review", round names and "Monograph" control, and the texts new on `main` and absent from `stable-3_5_0` (read in the code 2026-10-02): `publication.media` (pkp-lib 1a5a8b1d7e, 2026-05-06), `submission.funding` (pkp-lib d50c812aaf, 2026-07-06), `publication.versionStage.unassignedVersion` (pkp-lib 958592a159, 2025-05-30), `editor.submission.decision.returnToWorkflow`, `returnToDone` and their `.description` texts (pkp-lib d52aa4c84b, 2026-06-09), `publication.bodyText` (pkp-lib 21585b09ab, 2025-12-10), `publication.publicationSettings` (ojs eb14c0b9d3, 2026-05-28).
 
 <a id="fn-omp2"></a>
 **f-omp2** — Note h: `useWorkflowNavigationConfigOMP.js::getPublicationItemsEditorial()` pushes `media` before the settings-gated pages and outside the `permissions.canAccessProduction` block; `…OJS.js` and `…OPS.js` push it inside that block. Live-probed 2026-09-02: `assistant.rita` as Funding Coordinator on a monograph in External Review Round 1 saw "Title & Abstract", "Contributors", "Chapters", "Metadata", "Publication Formats", "Media", "References", "Funding" and no "Catalog Entry" or "Permissions & Disclosure"; the same role on a journal article in Review Round 1 saw "Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML" and no "Media".

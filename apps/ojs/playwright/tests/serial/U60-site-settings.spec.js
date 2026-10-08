@@ -17,7 +17,7 @@
  * Administrator's page (`putSite`, spec footnote s). Scenario 7's ticked
  * journal stays ticked until the fleet is reset (footnote s).
  *
- * Not asserted here, by register ID: A2, A3, A4, A5, A7, A8 (every one
+ * Not asserted here, by register ID: A3, A4, A5, A7, A8 (every one
  * carried by the register alone, the spec's Coverage section); A6 is
  * passed by scenario 11, which reads the pages' link to the removed sheet,
  * never the file; A9 by scenario 8, whose visitor opens the site only after

@@ -19,7 +19,7 @@
  * - A11 🐞: S1 presses the arrows with the pointer only.
  * - A18 🐞: the delete dialog's box is typed in (serial S2), never read for
  *   its name.
- * - A12, A15, A16, A17, A19, A20 🐞, A3, A4, A5, A14 ❓: no test reaches
+ * - A12, A16, A17, A19, A20 🐞, A3, A4, A5, A14 ❓: no test reaches
  *   those states or reads those parts.
  * - A2, A6, A7, A8, A10, A13 🐞: no test sets another order, follows the
  *   picture, reads its alternate text, types a "/" path, places the block

@@ -1,6 +1,6 @@
 # Issue assignments (draft)
 
-A working table for trying assignment strategies on the 724 open issues in [jardakotesovec/pkp-e2e](https://github.com/jardakotesovec/pkp-e2e/issues). On GitHub only the issues Jarda Kotěšovec and Kaitlin Newson introduced (their Own) carry an assignee so far (Kaitlin's since 2026-10-07): the inherited ones wait for the balancing to settle, and the other developers cannot be assigned there until they are collaborators on the repository. Generated 2026-10-06 from the issue bodies and the app checkouts' git history.
+A working table for trying assignment strategies on the 711 open issues in [jardakotesovec/pkp-e2e](https://github.com/jardakotesovec/pkp-e2e/issues). On GitHub only the issues Jarda Kotěšovec and Kaitlin Newson introduced (their Own) carry an assignee so far (Kaitlin's since 2026-10-07): the inherited ones wait for the balancing to settle, and the other developers cannot be assigned there until they are collaborators on the repository. Generated 2026-10-06 from the issue bodies and the app checkouts' git history; on 2026-10-08 the 13 issues that reported only a missing translation were taken out, #291 follows its narrowed report, and the counts were recomputed from the rows.
 
 **Step 1: own bugs.** The issue's **Introduced** bullet names the author of the change (REPORT.md "Introduced"). When it names a team developer, they take the issue ("Own"); when it names more than one, the first named.
 
@@ -17,21 +17,21 @@ A working table for trying assignment strategies on the 724 open issues in [jard
 
 | Outcome | Issues |
 |---|---|
-| Own: introduced by a team developer | 432 (60%) |
-| Inherited from someone outside the team | 232 (32%) |
-| Inherited, never traced (older than readable history, or no single change) | 60 (8%) |
+| Own: introduced by a team developer | 431 (61%) |
+| Inherited from someone outside the team | 229 (32%) |
+| Inherited, never traced (older than readable history, or no single change) | 51 (7%) |
 | No team history on that code: unassigned | 0 (0%) |
 
-26 own issues name more than one team developer. Of the 292 inherited, the area basis is 229 file, 43 folder, 16 parent folder, 4 file, any year; 69 went to someone other than their top scorer to balance the load, and 5 stay with Alec as the only one with history on that code.
+26 own issues name more than one team developer. Of the 280 inherited, the area basis is 217 file, 43 folder, 16 parent folder, 4 file, any year; 61 went to someone other than their top scorer to balance the load, and 5 stay with Alec as the only one with history on that code.
 
 ## Distribution over the team
 
 | Developer | GitHub | Own | Inherited | Inherited (untraced) | Total | critical | high | medium | low |
 |---|---|---|---|---|---|---|---|---|---|
-| Alec Smecher | asmecher | 130 | 4 | 1 | **135** |  | 3 | 53 | 79 |
-| Jarda Kotěšovec | jardakotesovec | 40 | 60 | 19 | **119** |  | 1 | 24 | 94 |
-| Bozana Bokan | bozana | 64 | 30 | 7 | **101** |  | 3 | 44 | 54 |
-| Taslan Graham | taslangraham | 29 | 29 | 11 | **69** |  | 3 | 24 | 42 |
+| Alec Smecher | asmecher | 131 | 4 | 1 | **136** |  | 3 | 53 | 80 |
+| Jarda Kotěšovec | jardakotesovec | 39 | 58 | 11 | **108** |  | 1 | 24 | 83 |
+| Bozana Bokan | bozana | 63 | 29 | 7 | **99** |  | 3 | 43 | 53 |
+| Taslan Graham | taslangraham | 29 | 29 | 10 | **68** |  | 3 | 24 | 41 |
 | Vitalii Bezsheiko | Vitaliy-1 | 37 | 27 | 5 | **69** |  | 4 | 25 | 40 |
 | Kaitlin Newson | kaitlinnewson | 9 | 46 | 11 | **66** |  | 1 | 31 | 34 |
 | Blesilda Ramirez | blesildaramirez | 22 | 25 | 4 | **51** |  | 2 | 9 | 40 |
@@ -39,7 +39,7 @@ A working table for trying assignment strategies on the 724 open issues in [jard
 | Dimitris Efstathiou | defstat | 31 | 0 | 0 | **31** |  |  | 10 | 21 |
 | Jussi Nygård | ajnyga | 28 | 0 | 0 | **28** |  | 1 | 15 | 12 |
 | Jonas Raoni Soares da Silva | jonasraoni | 12 | 0 | 0 | **12** |  |  | 4 | 8 |
-| **Total** | | 432 | 232 | 60 | **724** |  | 24 | 249 | 451 |
+| **Total** | | 431 | 229 | 51 | **711** |  | 24 | 248 | 439 |
 
 ## Who inherits from whom
 
@@ -47,7 +47,7 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 
 | Introduced by | Issues | jardakotesovec | kaitlinnewson | taslangraham | bozana | Vitaliy-1 | blesildaramirez | ewhanson | asmecher | — |
 |---|---|---|---|---|---|---|---|---|---|---|
-| NateWr | 121 | 34 | 18 | 15 | 22 | 13 | 13 | 4 | 2 |  |
+| NateWr | 118 | 32 | 18 | 15 | 21 | 13 | 13 | 4 | 2 |  |
 | touhidurabir | 41 | 14 | 6 | 6 | 3 | 5 | 1 | 5 | 1 |  |
 | jnugent | 12 | 1 | 10 |  |  | 1 |  |  |  |  |
 | Hafsa-Naeem | 9 |  | 2 | 4 |  | 3 |  |  |  |  |
@@ -69,7 +69,7 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | jalperin | 1 |  |  | 1 |  |  |  |  |  |  |
 | asanchez75 | 1 |  | 1 |  |  |  |  |  |  |  |
 | mylonelycomputer | 1 |  | 1 |  |  |  |  |  |  |  |
-| not traced | 60 | 19 | 11 | 11 | 7 | 5 | 4 | 2 | 1 |  |
+| not traced | 51 | 11 | 11 | 10 | 7 | 5 | 4 | 2 | 1 |  |
 
 ## Issues
 
@@ -167,7 +167,7 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#288](https://github.com/jardakotesovec/pkp-e2e/issues/288) | On a press, the return arrow of a book's HTML view page is announced as the code "##monograph.return##" | low | defect | asmecher | asmecher |  |  |
 | [#289](https://github.com/jardakotesovec/pkp-e2e/issues/289) | A book file for sale shows its price twice, or no price in a format with several files | low | regression | asmecher, NateWr | asmecher |  |  |
 | [#290](https://github.com/jardakotesovec/pkp-e2e/issues/290) | OAI-PMH GetRecord answers a malformed identifier with a record, not "Identifier is not in a valid format" | low | defect | — |  | kaitlinnewson | file: `classes/oai/omp/PressOAI.php +1` — kaitlinnewson 100% |
-| [#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) | In French (Canada), a press's catalog, book and chapter pages and Roles list show codes, even for editors' names | medium | defect | NateWr |  | bozana | file: `lib/pkp/classes/i18n/translation/LocaleFile.php +20` — bozana 44%, jardakotesovec 15%, kaitlinnewson 12% |
+| [#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) | In French (Canada), a book's purchase link drops the format's name, and the "Format Availability" window is titled "Approbation du format" | low | defect | NateWr, asmecher | asmecher |  |  |
 | [#292](https://github.com/jardakotesovec/pkp-e2e/issues/292) | On a press, a book address that names no book opens the Login page instead of "404 Not Found" | low | intention gap | asmecher | asmecher |  |  |
 | [#293](https://github.com/jardakotesovec/pkp-e2e/issues/293) | A book's table of contents repeats the book's authors under every chapter | low | defect | asmecher, jyhein | asmecher |  |  |
 | [#294](https://github.com/jardakotesovec/pkp-e2e/issues/294) | A press that unticks "Enable" on its Payments tab still sells its priced files | low | defect | asmecher | asmecher |  |  |
@@ -256,7 +256,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#381](https://github.com/jardakotesovec/pkp-e2e/issues/381) | "Check for updates" opens an empty page when the server cannot reach PKP's website | low | defect | asmecher | asmecher |  |  |
 | [#382](https://github.com/jardakotesovec/pkp-e2e/issues/382) | "Requeue All Failed Jobs" fails with a database error when no failed job has stored data | low | defect | touhidurabir |  | asmecher | parent folder: `lib/pkp/classes/job/repositories/FailedJob.php` — only asmecher on the team |
 | [#383](https://github.com/jardakotesovec/pkp-e2e/issues/383) | Failed Jobs: after a refused "Requeue All Failed Jobs", loading circles keep turning until the page is reloaded | low | defect | touhidurabir |  | blesildaramirez | file: `lib/ui-library/src/pages/jobs/FailedJobsPage.vue +1` — blesildaramirez 71%, jardakotesovec 29% |
-| [#384](https://github.com/jardakotesovec/pkp-e2e/issues/384) | On a press or preprint server in French (Canada), Administration shows a code under "Gestion du site" | low | defect | NateWr |  | jardakotesovec | file: `lib/pkp/templates/admin/index.tpl +2` — bozana 55%, jardakotesovec 27%, taslangraham 18% (balanced) |
 | [#385](https://github.com/jardakotesovec/pkp-e2e/issues/385) | A journal restricting only PDFs shows its HTML galleys unlocked, then refuses them to readers without a subscription | medium | defect | — |  | taslangraham | file: `pages/article/ArticleHandler.php +1` — bozana 32%, taslangraham 24%, jardakotesovec 22% (balanced) |
 | [#386](https://github.com/jardakotesovec/pkp-e2e/issues/386) | A reader pressing a locked "Full Issue" is asked to pay an issue fee of no amount when only a membership fee is set | low | defect | — |  | kaitlinnewson | file: `pages/issue/IssueHandler.php` — kaitlinnewson 52%, bozana 31%, Vitaliy-1 17% |
 | [#387](https://github.com/jardakotesovec/pkp-e2e/issues/387) | The sidebar "Subscription" block tells a reader a subscription awaiting payment has expired, and an inactive one is running | low | defect | asmecher | asmecher |  |  |
@@ -329,7 +328,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#454](https://github.com/jardakotesovec/pkp-e2e/issues/454) | Users & Roles: the reason typed when enabling a user is shown to them when disabled again | low | defect | — |  | bozana | folder: `lib/pkp/controllers/grid/settings/user/form/UserDisableForm.php +1` — bozana 97%, Vitaliy-1 3% |
 | [#455](https://github.com/jardakotesovec/pkp-e2e/issues/455) | Users & Roles offers a manager "Disable User" and "Remove User" on accounts they may not change, then refuses | low | defect | — |  | taslangraham | file: `lib/pkp/schemas/user.json +6` — taslangraham 39%, bozana 32%, Vitaliy-1 10% |
 | [#456](https://github.com/jardakotesovec/pkp-e2e/issues/456) | "Remove User" keeps a role that starts on a later date, and removing the user again fails | medium | defect | bozana | bozana |  |  |
-| [#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) | In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/i18n/Locale.php +1` — bozana 67%, jardakotesovec 33% (balanced) |
 | [#458](https://github.com/jardakotesovec/pkp-e2e/issues/458) | On a press or preprint server, the users search box suggests searching for "Journal editor", which finds nobody | low | defect | taslangraham | taslangraham |  |  |
 | [#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) | Users & Roles: screen readers announce every user row's "…" button as "##userAccess.management.options##" | low | defect | ipula |  | blesildaramirez | folder: `lib/ui-library/src/managers/UserAccessManager/UserAccessManagerCellActions.vue` — blesildaramirez 59%, bozana 23%, jardakotesovec 19% |
 | [#460](https://github.com/jardakotesovec/pkp-e2e/issues/460) | URN settings: a refused "URN Prefix" shows "&lt;NID&gt;" codes under the box and in a notice | low | defect | bozana | bozana |  |  |
@@ -496,7 +494,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#622](https://github.com/jardakotesovec/pkp-e2e/issues/622) | A galley's "Edit" window is headed "Upload a File Ready for Publication", though it uploads nothing | low | regression | jardakotesovec | jardakotesovec |  |  |
 | [#623](https://github.com/jardakotesovec/pkp-e2e/issues/623) | An editor saving a galley at a separate website is asked for a file and offered "Change File" | low | regression | jardakotesovec | jardakotesovec |  |  |
 | [#624](https://github.com/jardakotesovec/pkp-e2e/issues/624) | A galley's separate-website box keeps an address typed without "https://", and readers' link lands on "404 Not Found" | medium | defect | bozana | bozana |  |  |
-| [#625](https://github.com/jardakotesovec/pkp-e2e/issues/625) | In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/i18n/translation/LocaleFile.php +11` — jardakotesovec 38%, bozana 29%, blesildaramirez 23% |
 | [#626](https://github.com/jardakotesovec/pkp-e2e/issues/626) | A "Counter R5" report date outside the possible range is refused with a raw locale key around the date | low | regression | touhidurabir |  | Vitaliy-1 | folder: `lib/pkp/classes/core/ValidationServiceProvider.php` — Vitaliy-1 34%, jardakotesovec 24%, bozana 22% |
 | [#627](https://github.com/jardakotesovec/pkp-e2e/issues/627) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | low | defect | bozana | bozana |  |  |
 | [#628](https://github.com/jardakotesovec/pkp-e2e/issues/628) | "COUNTER Reports": the downloaded XML file names its report by a cut-off code path instead of "JR1" or "AR1" | low | regression | asmecher | asmecher |  |  |
@@ -525,13 +522,10 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#651](https://github.com/jardakotesovec/pkp-e2e/issues/651) | After a refused "Save" in a menu item window, closing it or leaving the page drops the typed entries without asking | low | defect | jnugent |  | jardakotesovec | parent folder: `lib/pkp/js/controllers/form/AjaxFormHandler.js` — jardakotesovec 69%, blesildaramirez 26%, Vitaliy-1 2% |
 | [#652](https://github.com/jardakotesovec/pkp-e2e/issues/652) | The journals switcher in the editorial header leaves out every journal with exactly the current journal's name | low | defect | NateWr |  | jardakotesovec | file: `lib/pkp/classes/template/PKPTemplateManager.php +1` — jardakotesovec 49%, blesildaramirez 32%, bozana 9% |
 | [#653](https://github.com/jardakotesovec/pkp-e2e/issues/653) | A press's "Days to First Editorial Decision" help text says "authors submitting to your journal" | low | defect | NateWr |  | jardakotesovec | file: `lib/pkp/pages/stats/PKPStatsHandler.php +1` — bozana 80%, jardakotesovec 20% (balanced) |
-| [#654](https://github.com/jardakotesovec/pkp-e2e/issues/654) | In French (Canada), a press's and a preprint server's "DOIs" menu entry and page show an untranslated text key | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/i18n/translation/LocaleFile.php +5` — jardakotesovec 41%, blesildaramirez 23%, bozana 21% |
 | [#655](https://github.com/jardakotesovec/pkp-e2e/issues/655) | Menu window marks "Subscriptions" and "My Subscriptions" items with no eye, so their notices never show | low | regression | blesildaramirez | blesildaramirez |  |  |
 | [#656](https://github.com/jardakotesovec/pkp-e2e/issues/656) | "Articles Report" leaves "Editor Decision" empty for skipped reviews, new rounds, reverted declines and stage moves | medium | defect | ewhanson | ewhanson |  |  |
 | [#657](https://github.com/jardakotesovec/pkp-e2e/issues/657) | "Monograph Report" of one press carries empty author and decision columns sized by another press's books | low | defect | jonasraoni | jonasraoni |  |  |
 | [#658](https://github.com/jardakotesovec/pkp-e2e/issues/658) | "Monograph Report" names a reverted Internal Review decline "Decline Submission" | low | defect | jonasraoni | jonasraoni |  |  |
-| [#659](https://github.com/jardakotesovec/pkp-e2e/issues/659) | In French (Canada), a press's menu item window shows codes for three item types and their series and category lists | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/i18n/translation/LocaleFile.php +3` — bozana 68%, jardakotesovec 27%, Vitaliy-1 5% (balanced) |
-| [#660](https://github.com/jardakotesovec/pkp-e2e/issues/660) | On a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/i18n/translation/LocaleFile.php +2` — bozana 71%, jardakotesovec 29% (balanced) |
 | [#661](https://github.com/jardakotesovec/pkp-e2e/issues/661) | A server's settings address typed with the site's path refuses with "No server in context!", which says nothing a user understands | low | defect | ajnyga | ajnyga |  |  |
 | [#662](https://github.com/jardakotesovec/pkp-e2e/issues/662) | A preprint server's monthly statistics email reads "Accepted submissions this month:" with no number | low | defect | NateWr |  | kaitlinnewson | folder: `classes/migration/upgrade/v3_5_0/I13128_FixEmailUrlLinks.php` — bozana 57%, kaitlinnewson 22%, Vitaliy-1 21% (balanced) |
 | [#663](https://github.com/jardakotesovec/pkp-e2e/issues/663) | Search engines get the home page's "Description" cut at its first double quote mark | medium | regression | asmecher, NateWr | asmecher |  |  |
@@ -610,7 +604,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#737](https://github.com/jardakotesovec/pkp-e2e/issues/737) | A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##" | low | defect | ewhanson | ewhanson |  |  |
 | [#738](https://github.com/jardakotesovec/pkp-e2e/issues/738) | A press's or preprint server's ORCID verification failure page says to contact "the journal manager" | low | defect | ewhanson | ewhanson |  |  |
 | [#739](https://github.com/jardakotesovec/pkp-e2e/issues/739) | In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin | low | defect | ewhanson | ewhanson |  |  |
-| [#740](https://github.com/jardakotesovec/pkp-e2e/issues/740) | In French (Canada), the site's ORCID switch and the contributor's ORCID iD field show untranslated text keys | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/i18n/Locale.php +5` — jardakotesovec 34%, bozana 21%, taslangraham 19% |
 | [#741](https://github.com/jardakotesovec/pkp-e2e/issues/741) | Catalog page: a series or category filter set to an ascending "Order of monographs" lists its books in reverse | low | regression | NateWr |  | kaitlinnewson | file: `classes/components/listPanels/CatalogListPanel.php` — kaitlinnewson 59%, jardakotesovec 41% |
 | [#742](https://github.com/jardakotesovec/pkp-e2e/issues/742) | Catalog page: once a filter is removed, the whole catalog is listed newest first, not in the press's order | low | defect | NateWr |  | jardakotesovec | file: `classes/components/listPanels/CatalogListPanel.php +2` — jardakotesovec 60%, kaitlinnewson 40% |
 | [#743](https://github.com/jardakotesovec/pkp-e2e/issues/743) | A published book's Production stage says "using the links just above" with no links there, and shows it to the Author | low | regression | jardakotesovec | jardakotesovec |  |  |
@@ -647,7 +640,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#774](https://github.com/jardakotesovec/pkp-e2e/issues/774) | A press's category page shows only its first page of books, with no way to the rest | medium | regression | asmecher | asmecher |  |  |
 | [#775](https://github.com/jardakotesovec/pkp-e2e/issues/775) | A press's and a preprint server's homepage image never carries the "Alternate text" the manager typed | low | regression | mylonelycomputer |  | kaitlinnewson | file: `templates/frontend/pages/index.tpl +2` — bozana 46%, kaitlinnewson 29%, Vitaliy-1 25% (balanced) |
 | [#776](https://github.com/jardakotesovec/pkp-e2e/issues/776) | Screen readers misname the masthead's up arrows and every Sidebar box; clicking a role's name moves it | low | defect | NateWr, bozana | bozana |  |  |
-| [#777](https://github.com/jardakotesovec/pkp-e2e/issues/777) | In French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes | low | defect | bozana | bozana |  |  |
 | [#778](https://github.com/jardakotesovec/pkp-e2e/issues/778) | In French, the settings upload boxes say "Drop files here to upload" and show their refusal in English | low | regression | NateWr |  | blesildaramirez | file: `lib/ui-library/src/components/FileUploader/dropzoneDefaults.js +3` — blesildaramirez 42%, jardakotesovec 32%, kaitlinnewson 26% |
 | [#779](https://github.com/jardakotesovec/pkp-e2e/issues/779) | The "3:05PM" time choice prints most times as "3:05pm", some as "3:05PM" | low | regression | jardakotesovec | jardakotesovec |  |  |
 | [#780](https://github.com/jardakotesovec/pkp-e2e/issues/780) | A removed journal or site style sheet stops loading but stays online at its old address | low | defect | NateWr |  | taslangraham | file: `lib/pkp/classes/services/PKPContextService.php +1` — taslangraham 48%, bozana 27%, kaitlinnewson 13% |
@@ -656,7 +648,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#783](https://github.com/jardakotesovec/pkp-e2e/issues/783) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | low | defect | touhidurabir |  | kaitlinnewson | folder: `templates/frontend/objects/latest_article.tpl` — bozana 32%, kaitlinnewson 27%, jardakotesovec 21% (balanced) |
 | [#784](https://github.com/jardakotesovec/pkp-e2e/issues/784) | Reloading or bookmarking a Settings or Site Settings side tab opens the page's first tab | low | regression | jardakotesovec | jardakotesovec |  |  |
 | [#785](https://github.com/jardakotesovec/pkp-e2e/issues/785) | A Site Administrator without a manager role in a press or preprint server is offered "Settings" and refused every page of it | medium | intention gap | asmecher | asmecher |  |  |
-| [#786](https://github.com/jardakotesovec/pkp-e2e/issues/786) | In French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes | low | defect | — |  | jardakotesovec | file: `lib/pkp/classes/components/forms/context/PKPMastheadForm.php +4` — bozana 65%, jardakotesovec 22%, blesildaramirez 7% (balanced) |
 | [#787](https://github.com/jardakotesovec/pkp-e2e/issues/787) | The default "For Readers" text's "Privacy Statement" link opens the Submissions page, not the Privacy Statement page | low | defect | NateWr |  | Vitaliy-1 | file: `lib/pkp/classes/services/PKPSchemaService.php +6` — bozana 54%, Vitaliy-1 24%, taslangraham 14% (balanced) |
 | [#788](https://github.com/jardakotesovec/pkp-e2e/issues/788) | On a site hosting several presses, the site's "About Open Monograph Press" page says "This press uses" | low | regression | jonasraoni | jonasraoni |  |  |
 | [#789](https://github.com/jardakotesovec/pkp-e2e/issues/789) | An email change asked for on the site-wide Profile page sends a message signed "Kind regards, Array" | low | defect | defstat | defstat |  |  |
@@ -689,7 +680,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#816](https://github.com/jardakotesovec/pkp-e2e/issues/816) | Author who uploads revisions first can no longer respond to the reviewers, as the decision email asks | medium | intention gap | taslangraham | taslangraham |  |  |
 | [#817](https://github.com/jardakotesovec/pkp-e2e/issues/817) | Press author's "Submit Author Response" email button opens a review round with nothing to respond in | medium | defect | taslangraham | taslangraham |  |  |
 | [#818](https://github.com/jardakotesovec/pkp-e2e/issues/818) | A component the manager deleted is still offered as a media type on the "Media" page | low | defect | blesildaramirez | blesildaramirez |  |  |
-| [#819](https://github.com/jardakotesovec/pkp-e2e/issues/819) | A press's or preprint server's "Components" settings tab and list show internal text codes in French (Canada) | low | defect | — |  | jardakotesovec | file: `lib/pkp/templates/management/workflow.tpl +4` — bozana 53%, jardakotesovec 21%, blesildaramirez 16% (balanced) |
 | [#820](https://github.com/jardakotesovec/pkp-e2e/issues/820) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | medium | defect | NateWr |  | jardakotesovec | folder: `lib/pkp/templates/frontend/pages/userLogin.tpl` — bozana 54%, jardakotesovec 25%, taslangraham 17% (balanced) |
 | [#821](https://github.com/jardakotesovec/pkp-e2e/issues/821) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | low | defect | NateWr, touhidurabir |  | taslangraham | file: `lib/pkp/pages/login/LoginHandler.php` — taslangraham 42%, kaitlinnewson 34%, jardakotesovec 24% |
 | [#822](https://github.com/jardakotesovec/pkp-e2e/issues/822) | LOCKSS and CLOCKSS pages show the "Copyright" row only when an unrelated Copyright Notice is set | low | regression | jmacgreg |  | jardakotesovec | parent folder: `templates/gateway/clockss.tpl +1` — jardakotesovec 39%, blesildaramirez 28%, bozana 12% |
@@ -744,7 +734,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#872](https://github.com/jardakotesovec/pkp-e2e/issues/872) | A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off | medium | intention gap | bozana | bozana |  |  |
 | [#873](https://github.com/jardakotesovec/pkp-e2e/issues/873) | On a press or preprint server, the submission wizard's data citations and funders still read empty after a save | medium | defect | ajnyga | ajnyga |  |  |
 | [#874](https://github.com/jardakotesovec/pkp-e2e/issues/874) | A screen reader hears no name for the author boxes in "Edit citation" and the data citation panel | low | defect | GaziYucel |  | jardakotesovec | file: `lib/ui-library/src/components/Form/fields/FieldAuthors.vue` — jardakotesovec 100% |
-| [#875](https://github.com/jardakotesovec/pkp-e2e/issues/875) | In French (Canada), "Manage Emails" shows codes instead of some emails' names and descriptions | low | defect | — |  | taslangraham | file: `lib/pkp/classes/mail/Repository.php +5` — Vitaliy-1 37%, taslangraham 23%, blesildaramirez 15% (balanced) |
 | [#876](https://github.com/jardakotesovec/pkp-e2e/issues/876) | A data citation added after the Data Citations table was ordered appears first, not last | low | defect | ajnyga | ajnyga |  |  |
 | [#877](https://github.com/jardakotesovec/pkp-e2e/issues/877) | On a press, "Notify Primary Contact" opens with neither "Yes" nor "No" selected | low | defect | henriqueramos |  | Vitaliy-1 | file: `schemas/context.json +2` — bozana 31%, Vitaliy-1 21%, ewhanson 20% (balanced) |
 | [#878](https://github.com/jardakotesovec/pkp-e2e/issues/878) | Pasting a reference already in the list drops it silently, and the References page still says "Saved" | low | defect | bozana, jardakotesovec | bozana |  |  |
@@ -753,7 +742,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#881](https://github.com/jardakotesovec/pkp-e2e/issues/881) | Editing a data citation, its identifier cannot be removed and a cleared Repository, Year or URL is kept | medium | defect | ajnyga, Vitaliy-1 | ajnyga |  |  |
 | [#882](https://github.com/jardakotesovec/pkp-e2e/issues/882) | A press's or preprint server's French submission confirmation thanks the author for choosing "notre revue" | low | regression | NateWr |  | Vitaliy-1 | file: `lib/pkp/locale/fr_CA/emails.po +3` — Vitaliy-1 46%, bozana 40%, blesildaramirez 15% |
 | [#883](https://github.com/jardakotesovec/pkp-e2e/issues/883) | References page: the lookup's progress box counts only structured references and says "All 2 done" over five | low | regression | kaitlinnewson | kaitlinnewson |  |  |
-| [#884](https://github.com/jardakotesovec/pkp-e2e/issues/884) | French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes | low | defect | NateWr |  | jardakotesovec | file: `lib/pkp/templates/admin/settings.tpl +3` — bozana 66%, jardakotesovec 27%, kaitlinnewson 7% (balanced) |
 | [#885](https://github.com/jardakotesovec/pkp-e2e/issues/885) | Site Settings saves, and 3.5's daily scheduled tasks, log a PHP warning when no journal redirect is set | low | regression | jonasraoni | jonasraoni |  |  |
 | [#886](https://github.com/jardakotesovec/pkp-e2e/issues/886) | A site save sent outside Site Settings stores an empty contact email, and password resets then fail | low | regression | NateWr |  | bozana | file: `lib/pkp/classes/services/PKPSiteService.php` — bozana 100% |
 | [#887](https://github.com/jardakotesovec/pkp-e2e/issues/887) | Site Settings: going back to "Appearance" › "Setup" opens "Site Setup" instead | low | defect | NateWr |  | kaitlinnewson | file: `lib/pkp/templates/admin/settings.tpl` — kaitlinnewson 100% |
@@ -769,7 +757,6 @@ Rows: who introduced the inherited issues (the first person the bullet names). C
 | [#897](https://github.com/jardakotesovec/pkp-e2e/issues/897) | The Highlights settings list shows a title's bold word as `<b>…</b>` and "&" as `&amp;` | low | defect | NateWr |  | blesildaramirez | file: `lib/ui-library/src/components/ListPanel/highlights/HighlightsListPanel.vue` — blesildaramirez 100% |
 | [#898](https://github.com/jardakotesovec/pkp-e2e/issues/898) | Highlights list: "Cancel" in ordering mode keeps the moved rows, and the next "Save Order" saves them | low | defect | NateWr |  | blesildaramirez | file: `lib/ui-library/src/components/ListPanel/highlights/HighlightsListPanel.vue` — blesildaramirez 100% |
 | [#899](https://github.com/jardakotesovec/pkp-e2e/issues/899) | The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error | medium | regression | taslangraham | taslangraham |  |  |
-| [#900](https://github.com/jardakotesovec/pkp-e2e/issues/900) | In French (Canada), "My Submissions" shows a code for the review counter and the editorial list for an accepted review | low | defect | jardakotesovec | jardakotesovec |  |  |
 | [#901](https://github.com/jardakotesovec/pkp-e2e/issues/901) | Paged lists: a screen reader announces the pager's "Next" as plain "Next", unlike its "Go to …" neighbours | low | defect | NateWr |  | blesildaramirez | folder: `lib/ui-library/src/components/Pagination/Pagination.vue` — blesildaramirez 100% |
 | [#902](https://github.com/jardakotesovec/pkp-e2e/issues/902) | Comments page: the link to an unverified ORCID iD in the comment and report panels opens a wrong address | low | defect | taslangraham | taslangraham |  |  |
 | [#903](https://github.com/jardakotesovec/pkp-e2e/issues/903) | On the editorial Comments page, the browser tab shows only the journal's name, not "Comments" | low | defect | taslangraham | taslangraham |  |  |

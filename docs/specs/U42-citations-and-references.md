@@ -157,10 +157,6 @@ typed. Nothing asks first. The one exception is an author row added in
      is also headed "Structured References". An empty table reads "The
      citations list is empty, please add citations above." The title and
      the line are the same whether or not lookup is on.
-
-   With the interface in French, the "Add" box's help text, "Delete all
-   references", the table's texts and the windows the page opens read
-   raw codes where French words belong ⚠ [A21](#a21).
 4. **The row.** Each row shows the reference's text and a "More Actions"
    ("…") menu with **"Edit"** and **"Delete"** (with lookup on, also
    "Reprocess", Rule 15). References are listed in the order they were
@@ -1008,8 +1004,6 @@ Left out of the scenarios above, by reason:
     scenario 6 passes them)
   - A20 (the empty "References" heading on a book or a preprint page;
     Rule 27; scenario 3 passes it)
-  - A21 (the References page's texts and windows read raw codes in
-    French; Rule 3)
   - A24 (a refused box's message not tied to the box for a screen
     reader; [Fields & validation](#fields))
   - A25 (a DOI typed before the lookup's first step replaced by the
@@ -1067,7 +1061,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | The row expander is always named "Collapse" and ignores the keyboard; rows with nothing to expand carry an invisible one | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A19](#a19) | The ordering arrows on the Data Citations table have no names for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | On a press or a preprint server, a book or preprint with no references shows an empty "References" heading | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A21](#a21) | In French the References page's help text, table, "Delete all references" and its two windows show raw codes such as "##submission.citations.structured##" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A22](#a22) | A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A24](#a24) | A screen reader hears that a refused box of the data citation panel is invalid, but not why | 🐞 | minor | — |
 | [A25](#a25) | A DOI typed in "Edit citation" before the lookup has started is replaced by the DOI in the reference's text, without a word | 🐞 | minor | — |
@@ -1081,6 +1074,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | A Site Administrator with no role in the journal is offered the References controls, but every change is refused | ✅ | retired | — |
 | [A18](#a18) | A References change carried to "Review" by the step rail is lost on "Submit" | ✅ | retired | — |
 | [OMP1](#omp1) | A book with no references shows an empty "References" heading | ✅ | retired | — |
+| [A21](#a21) | Retired: in French the References page's help text, table, "Delete all references" and its two windows show raw codes such as "##submission.citations.structured##" | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1289,44 +1283,6 @@ the book's or preprint's page, and a screen reader announces a heading
 with no content.
 Basis: probe, 2026-10-04. <sup>f-a20</sup>
 
-<a id="a21"></a>
-**A21 — In French the References page shows raw codes** · 🐞 · low.
-With the interface in French (Canada), the side menu's "Références"
-entry, a journal's and a press's heading "Publication : Références",
-the "Add" box's label "Références" and "* Obligatoire", the "Ajouter"
-button and the row menu's "Modifier" and "Supprimer" read French, but
-the page's other texts read raw codes where French words belong, for the
-Journal Manager and the Author alike, on a journal, a press and a
-preprint server:
-- the "Add" box's help text reads
-  "##submission.citations.structured.description##", and the "Delete all
-  references" link "##submission.citations.structured.deleteAllLink##";
-- the "Structured References" table's title and column heading read
-  "##submission.citations.structured##", the line under the title
-  "##submission.citations.structured.descriptionTable##", the search box
-  and its placeholder "##submission.citations.structured.search.placeholder##",
-  and an empty table "##submission.citations.structured.emptyCitations##";
-- "Edit citation" is titled
-  "##submission.citations.structured.editModal.title##" and its box
-  labelled "##submission.citations.structured.label.rawCitation##", above
-  French "Enregistrer" and "Fermer";
-- "Delete all references" asks
-  "##submission.citations.structured.deleteAllDialog.title##" /
-  "##submission.citations.structured.deleteAllDialog.confirm##" above
-  "OK" and "Annuler", so a French-speaking Journal Manager confirms
-  emptying the list without being told what it does.
-
-A screen reader also hears "##common.moreActions##" as the name of each
-row's "…" menu and "##list.collapse##" for the row's invisible "Collapse"
-button ([A16](#a16)). Adding a reference still works: "Enregistré" shows
-and the new row stays after a reload. The English page shows none of
-these codes. The workflow screen's own codes, such as a preprint
-server's heading "##submission.publication## : Références", are
-[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11)'s
-finding, and why a missing French text shows as a code at all is the
-question [Languages & locales](U57-languages-and-locales.md#a4) asks.
-Basis: probe, 2026-10-04. <sup>f-a21</sup>
-
 <a id="a22"></a>
 **A22 — A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it** · 🐞 · medium.
 On a submission's "References" page, "Edit citation" has an "ORCID iD"
@@ -1418,6 +1374,9 @@ Basis: code, 2026-10-07. <sup>f-a26</sup>
 
 <a id="omp1"></a>
 **OMP1 — A book with no references shows an empty "References" heading** · ✅ · retired. Widened 2026-09-24: the preprint page shows the same empty heading, so the finding moved to [A20](#a20). <sup>f-omp1</sup>
+
+<a id="a21"></a>
+**A21 — In French the References page shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a21</sup>
 
 ---
 
@@ -2533,7 +2492,7 @@ more sit only in attributes or hidden controls
 showed "Enregistré" and the new row, listed again after a reload; "Edit
 citation" and the "Delete all references" dialog were closed with
 "Fermer" and "Annuler". No request failed and no script error showed.
-Re-walked 2026-10-04 on main, all three apps (3.5 has no structured References page). The row menu's `common.moreActions`, a released text French (Canada) never received, joined [pkp-e2e#457](https://github.com/jardakotesovec/pkp-e2e/issues/457) ([docs/issues/U53-A11-users-tab-french-raw-keys.md](../issues/U53-A11-users-tab-french-raw-keys.md)), low; the rest (`submission.citations.structured*`, `list.collapse`) are main-only texts with no report under the 2026-10-02 ruling on main-only locale keys.
+Re-walked 2026-10-04 on main, all three apps (3.5 has no structured References page). The row menu's `common.moreActions` is a released text French (Canada) never received; the rest (`submission.citations.structured*`, `list.collapse`) are main-only texts.
 
 <a id="fn-f-a22"></a>
 **f-a22 — A22 evidence.** lib/pkp `schemas/citation.json:43-45` declares

@@ -343,20 +343,12 @@ with the line beside "Save" that Rule 4a quotes.
 
 **Other languages**
 
-23. **French.** In the French (Canada) interface these show raw codes
-    ⚠ [A2](#a2): <sup>td17</sup>
-    - on a press, the side tab "Information", which reads
-      "##manager.setup.information##";
-    - on a press and a preprint server, the description of "Courriels en
-      lot" ("Bulk Emails"), which reads
-      "##admin.settings.enableBulkEmails.description##".
-
-    The "Site Setup" side tab "Security" shows raw codes too: the tab
-    reads "##admin.security##", and every group, label and description
-    of its form is a code except "Longueur minimum du mot de passe
-    (nombre de caractères)". The tab is new in the version under
-    development (3.5 has none), and its French texts are left to the
-    translators. <sup>td17</sup>
+23. **French.** In the French (Canada) interface the "Site Setup" side
+    tab "Security" shows raw codes: the tab reads "##admin.security##",
+    and every group, label and description of its form is a code except
+    "Longueur minimum du mot de passe (nombre de caractères)". The tab
+    is new in the version under development (3.5 has none), and its
+    French texts are left to the translators. <sup>td17</sup>
 
 ## Side effects
 
@@ -844,7 +836,6 @@ Left out of the scenarios above, by reason:
     [Journal identity & about pages](U07-journal-identity-and-about-pages.md),
     Rule 5)
 - **Register carries it**:
-  - A2 (a press's and a preprint server's raw codes in French; Rule 23)
   - A3 (the server-log warning on most saves; Side effects)
   - A5 (the journal-only theme fields changing nothing on the site;
     Rule 17a)
@@ -891,7 +882,6 @@ an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A2](#a2) | French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | Site Settings saves, and 3.5's daily scheduled tasks, log a PHP warning when no journal redirect is set | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | A site save sent outside Site Settings stores an empty contact email, and password resets then fail | 🐞 | low · crash: server | issues (claude), 2026-10-04 — re-verified |
 | [A6](#a6) | A removed journal or site style sheet stops loading but stays online at its old address | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
@@ -905,6 +895,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A saved "Theme" change does not reach a browser that already opened the site | ❓ | user-visible | — |
 | [A10](#a10) | The reduced page and the site's address count journals differently | ❓ | latent | — |
 | [OPS1](#ops1) | A preprint server offers "Reviewer statistics" with no reviewers to count | ❓ | minor | — |
+| [A2](#a2) | Retired: French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -921,22 +912,6 @@ redirect" and "Reviewer statistics" cannot be changed before it.
 Question: should a fresh installation start with a Site Name? Lean: yes,
 the application's name, as the principal contact name already does.
 Basis: probe. <sup>f-a1</sup>
-
-<a id="a2"></a>
-**A2 — French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes** · 🐞 · low.
-A Site Administrator who reads Administration › "Paramètres du site" in
-French (Canada) finds two codes where French text belongs: on a press,
-the "Information" side tab is labelled "##manager.setup.information##";
-on a press and on a preprint server, the "Courriels en lot" tab shows
-"##admin.settings.enableBulkEmails.description##" instead of its
-description. A journal shows that description in French: what allowing
-  bulk email means, a warning about anti-spam laws, and a link to the
-  hosted journals.
-The "Information" tab shows only on a site hosting two or more presses;
-the "Courriels en lot" tab shows on every site. By the code, other
-languages lack the same texts, French (France) on a preprint server
-among them.
-Basis: probe, 2026-10-04. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — Site Settings saves, and 3.5's daily scheduled tasks, log a PHP warning when no journal redirect is set** · 🐞 · low.
@@ -1117,6 +1092,11 @@ A preprint server has no reviewers, yet its "Settings" tab offers
 Question: should a preprint server offer the box? Lean: no, hide it where
 there is no review.
 Basis: code. <sup>f-ops1</sup>
+
+### Retired
+
+<a id="a2"></a>
+**A2 — French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a2</sup>
 
 ---
 
@@ -1706,11 +1686,10 @@ lot" description is French. The other side tabs read "Paramètres",
 "Information" (OJS, OPS), "Langues", "Menus de navigation", "En vedette",
 "Courriels en lot", "Statistiques" and "Plugiciel de profil ORCID".
 Walked 2026-10-04 (Rule 23; OMP and OPS, `main` and `stable-3_5_0`;
-the A2 issue report, f-a2): on 3.5 the side tabs start "Paramètres |
+f-a2): on 3.5 the side tabs start "Paramètres |
 ##manager.setup.information## | Langues", with no "Security" tab. That
 tab came with pkp-lib ffd4ae1e49 (`pkp/pkp-lib#12162`, 2026-01-12), so
-its codes are unreleased texts waiting for Weblate and get no report
-(issues session ruling, 2026-10-02); A2 covers the rest.
+its codes are unreleased texts waiting for Weblate.
 
 <a id="fn-f-a1"></a>
 **f-a1** — `PKPInstall::createData()` inserts the site with no `title`
@@ -1734,9 +1713,8 @@ OMP's and OPS's `locale/fr_CA/admin.po` an empty
 `admin.settings.security.*` keys: the "Security" tab, outside this
 entry, td17.)
 Walked 2026-10-04 (OMP and OPS, `main` and `stable-3_5_0`; OJS the
-journal control; the issue report below): both codes on a press, the
+journal control): both codes on a press, the
 description's on a preprint server, the French description on a journal.
-Issue report: [pkp-e2e#884](https://github.com/jardakotesovec/pkp-e2e/issues/884) ([docs/issues/U60-A2-press-server-french-site-settings-raw-keys.md](../issues/U60-A2-press-server-french-site-settings-raw-keys.md)).
 
 <a id="fn-f-a3"></a>
 **f-a3** — Seen 2026-09-26 in the Notify users test runs (OJS, OMP,
