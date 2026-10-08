@@ -1604,6 +1604,13 @@ config-file settings.
   context scenario's `sections[]` opens the same way. A new series'
   "Order of monographs" arrives on "Title (A-Z)". Settings › "Sections" /
   "Series", 2026-09-25 (U17 claim check K1, K3).
+- {OJS} A journal seeded with `sections[]` stores its sections at places
+  0, 2, 3 (`publicknowledge` 0, 2); a reorder on Settings › Journal ›
+  "Sections" leaves 0, 1, 2. With the gap, every "Done" in an issue's
+  "Order" stores a section order for the issue even when no section moved,
+  so a drive that reads what an issue keeps reorders the journal's sections
+  on screen and back first. An issue's "Table of Contents", 2026-10-08
+  (U50 claim check I08).
 - {OMP} A press's series list has no fixed order until "Order" and "Done"
   are used on Settings › Press › "Series": on the PostgreSQL test database
   a new series may land first, in the middle or last, and a saved series

@@ -253,25 +253,44 @@ page reads "View {issue name}" ⚠ [A7](#a7). <sup>v</sup>
    Assign To An Issue" stays on the tab and in "Items", under the newer
    version's title [A17](#a17). A version keeps its place in the issue
    even once unpublished (Rule 12). <sup>m</sup> <sup>f-a17</sup>
-10. **"Order".** "Order" lets the articles be dragged into place within
-    their section, below its heading; "Done" keeps the new order, on the
-    tab and on the issue's page, and "Cancel ordering" drops it. Until
-    someone orders them, a section's articles come in no fixed order.
-    <sup>m</sup> <sup>td7</sup>
-10a. **Sections in "Order".** The sections are meant to be dragged too,
-    into an order that is this issue's own and leaves the journal's
-    section order and other issues alone. On the tab, though, a section
-    heading drags as one more row of its own section, below its articles
-    ⚠ [A20](#a20) but never above another section, so no section can be
-    moved ⚠ [A9](#a9). <sup>m</sup> <sup>td7</sup>
+10. **"Order".** "Order" puts a move icon on every row, section heading
+    and article alike, and adds "Done" and "Cancel ordering" under the
+    list. An article is dragged into place within its section, below
+    its heading. "Done" keeps the new order, on the tab and on the
+    issue's page, and shows no message. "Cancel ordering" drops the
+    drag. Leaving before "Done" drops it too and asks nothing: after
+    pressing another tab of the window or the window's "Close", or
+    opening another address, the tab next shows the list as it was,
+    out of "Order". Until "Done" is pressed once on an issue, a
+    section's articles come in no fixed order, and the tab or the
+    page, loaded again later, can show another ⚠ [A22](#a22).
+    <sup>m</sup> <sup>td7</sup> <sup>td18</sup>
+10a. **Sections in "Order".** A section's heading drags the whole
+    section, its articles with it, above or below another section.
+    "Done" keeps the new section order on the tab and on the issue's
+    page, a future issue's preview included (Rule 22), and "Cancel
+    ordering" puts the sections back. The order is this issue's own:
+    the journal's section order (Settings › Journal › "Sections") and
+    the other issues stay as they were. A heading released inside its
+    own section leaves the list as it was. Only the sections a "Done"
+    found in a new position (first, second, third and so on) are kept
+    in place for the issue; the others go on following the journal's
+    order, so reordering the journal's sections later can change this
+    issue's section order too ⚠ [A21](#a21). <sup>m</sup>
+    <sup>td18</sup>
 10b. **An article stays in its section.** In "Order" an article cannot
     be dragged out of its section. Dragged toward another section, it
     is still under its own heading when dropped, and "Done" keeps it
     there, on the tab and on the issue's page. Dragged to the top of
-    its own section, it is saved first, and the section's other
-    articles keep their order. To move an article to another section,
-    change its "Section" on the article's Publication Settings.
-    <sup>m</sup> <sup>td7</sup> <sup>f-a10</sup>
+    its own section, or dropped above that section's heading, it is
+    saved first, and the section's other articles keep their order. To
+    move an article to another section, change its "Section" on the
+    article's Publication Settings and press "Save"; a scheduled or
+    published article allows it too. From the next load the tab and
+    the issue's page list it under the new section, in no set place
+    among that section's articles, and a section left with no article
+    leaves both. <sup>m</sup> <sup>td7</sup> <sup>td18</sup>
+    <sup>f-a10</sup>
 11. **"Submission".** Opens the article's workflow. <sup>m</sup>
 12. **"Remove".** Asks "Are you sure you wish to remove this article from
     the issue? The article will be available for scheduling in another
@@ -393,13 +412,14 @@ page reads "View {issue name}" ⚠ [A7](#a7). <sup>v</sup>
     own workflow drops out; one whose newer version is not yet published
     stays, shown as its published version; one whose newer version was
     published outside the issue stays too (Rule 23a). Sections come in
-    the journal's section order, or in the issue's own where one was
-    saved (Rule 10a), each headed by its title unless the section omits
-    it (Settings bullet 4), and a section with no article to show is
-    left out. How each article is shown, and which galleys its summary
-    carries, is
+    the order of the issue's "Table of Contents" tab: the journal's
+    section order until a section order is saved for the issue, then
+    the issue's own (Rule 10a, with its limit [A21](#a21)). Each is
+    headed by its title unless the section omits it (Settings bullet
+    4), and a section with no article to show is left out. How each
+    article is shown, and which galleys its summary carries, is
     [Article landing page & reading](U13-article-landing-page-and-reading.md),
-    its Rule 22. <sup>w</sup>
+    its Rule 22. <sup>w</sup> <sup>td18</sup>
 23a. **An article whose newer version is outside the issue.** When an
     article's newer version was published with "Don't Assign To An
     Issue", the issue's page lists the article under that version's
@@ -1081,8 +1101,22 @@ Left out of the scenarios above, by reason:
     Issues" listing No. 2 before No. 10 of one volume and year
   - in the table of contents' "Order", an article dragged toward
     another section still under its own heading after "Done", and one
-    dragged to the top of its own section saved first with the others
-    in their order (Rule 10b; [A10](#a10) retired)
+    dragged to the top of its own section, or dropped above that
+    section's heading, saved first with the others in their order
+    (Rule 10b; [A10](#a10) retired)
+  - in the table of contents' "Order", a section dragged by its heading
+    above another section and kept after "Done" on the tab and on the
+    issue's page, with the journal's "Sections" list and another issue's
+    table of contents unchanged; a heading released inside its own
+    section leaving the list as it was (Rule 10a; [A9](#a9) and
+    [A20](#a20) retired)
+  - "Done" in "Order" showing no message; then a drag left unsaved by
+    pressing "Issue Data", and "Table of Contents" showing the order
+    "Done" saved, no question asked (Rule 10; [A22](#a22))
+  - an article's "Section" changed on its Publication Settings, then
+    the issue's "Table of Contents" and page listing it under the new
+    section, and a section left with no article gone from both (Rule
+    10b)
   - the guard for A16 (issue report
     `docs/issues/U09-A19-static-page-content-change-lost-on-close.md`,
     pkp-e2e#375): text typed only in "Description" on "Issue Data",
@@ -1109,8 +1143,6 @@ Left out of the scenarios above, by reason:
   - A7 (an archive cover with no alternate text read as nothing; Fields,
     the archive's issue summary)
   - A8 ("Future Issues" comparing numbers as text; Rule 1)
-  - A9 and A20 (a section heading dragged in the table of contents'
-    "Order"; Rule 10a)
   - A11 (an interface-only language refused for an issue galley; Rule
     14a)
   - A12 (a deleted issue's articles still reading "Published" in their
@@ -1130,6 +1162,10 @@ Left out of the scenarios above, by reason:
     and leaving it in the issue; Rule 12a)
   - A19 (a saved "Issue Data" dropping its issue below another back
     issue published earlier the same day; Rule 6)
+  - A21 (an issue's saved section order changing after the journal's
+    sections are reordered; Rules 10a, 23)
+  - A22 (a section's never-ordered articles changing order between
+    loads; Rule 10)
 - **No seed**:
   - "Delayed Open Access" set to a number of months, and the "Access
     status" and "Open access date" "Publish Issue" then sets (Settings
@@ -1159,7 +1195,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-25; A17, A18 2026-09-28;
-A19, A20 2026-10-05), unreviewed unless an entry notes otherwise; the team
+A19, A20 2026-10-05; A21, A22 2026-10-08), unreviewed unless an entry notes otherwise; the team
 settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -1170,7 +1206,6 @@ settles them on spec review.
 | [A5](#a5) | A "Volume" of 99999 leaves "Create Issue" open with nothing shown | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | "Year" accepts letters: "20a6" is saved as 20 without a message | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | "Future Issues" lists "No. 10" before "No. 2" of the same volume and year | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A9](#a9) | No section can be moved in the table of contents' "Order": a heading drags as a row of its own section | 🐞 | minor | housekeeping fold (claude), 2026-10-05 — was ❓ |
 | [A11](#a11) | An issue galley in an interface-only language is refused as if no language were chosen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | After "Delete" on an issue, its offline articles still read "Published" and History records no unpublishing | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | A journal's "Archives" lists its issues in no set order until a manager orders "Back Issues" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -1179,11 +1214,14 @@ settles them on spec review.
 | [A17](#a17) | An article whose newer version was published with "Don't Assign To An Issue" stays listed in the issue, under the newer title, linking to a page that names no issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A18](#a18) | On such an article, "Remove" leaves it in the issue and unpublishes its earlier version, the one the issue published | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A19](#a19) | Saving "Issue Data" drops the time of day from Date Published, so the issue falls below another published earlier that day on "Back Issues" | 🐞 | minor | — |
+| [A21](#a21) | After the journal's sections are reordered, an issue with a saved section order shows an order that is neither its saved one nor the journal's | 🐞 | user-visible | — |
 | [A3](#a3) | "Delete" takes an issue's published articles offline behind a generic confirmation | ❓ | user-visible | — |
 | [A7](#a7) | On "Archives", a cover with no alternate text is a link with no name | ❓ | minor | — |
 | [A15](#a15) | On a journal that does not publish online, "Publish Issue" still offers its email, ticked, and sends nothing | ❓ | user-visible | — |
-| [A20](#a20) | What "Done" saves after a section heading is dropped below its articles | ❓ | minor | — |
+| [A22](#a22) | Until the first "Done" in an issue's "Order", a section's articles can change order between loads, on the published issue's page too | ❓ | user-visible | — |
+| [A9](#a9) | Retired: no section could be moved in an issue's "Order", where a heading dragged as a row of its own section; a heading now drags its whole section above or below another, and "Done" keeps that order (Rule 10a) | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453) |
 | [A10](#a10) | Retired: in an issue's "Order", an article dropped past a section heading jumped back into its section or reordered it; it now stays under its own heading and is saved where it was dropped (Rule 10b) | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453) |
+| [A20](#a20) | Retired: what "Done" saves after a section heading is dropped below its articles; a heading can no longer be dropped there (Rule 10a) | ✅ | retired | housekeeping (claude), 2026-10-08 — no longer arises since pkp/pkp-lib#13453 |
 
 ### All apps
 
@@ -1286,20 +1324,6 @@ Manager planning issues ahead expects No. 2 before No. 10. It shows when
 one volume and year has both No. 2 and No. 10 unpublished, for example
 on a journal that sets up a year of monthly issues ahead.
 Basis: probe, 2026-10-02. <sup>f-a8</sup>
-
-<a id="a9"></a>
-**A9 — No section can be moved in the table of contents' "Order"** · 🐞 · minor.
-Sections are expected to be draggable in "Order", into an order of the
-issue's own (Rule 10a). A section heading drags only as one more row
-among its own section's articles, never above another section, and
-"Done" leaves the section order as it was on the tab and on the issue's
-page, which follows a section order nobody can set. One cause with
-[A10](#a10), which is fixed and retired; no section heading has been
-dragged since that fix.
-Re-checked: housekeeping fold (claude), 2026-10-05 — 🐞 (was ❓): the
-cause found for A10 explains the heading's drag, so it is not a
-shortcoming of the automated drags.
-Basis: probe, 2026-09-25. <sup>f-a9</sup>
 
 <a id="a11"></a>
 **A11 — An issue galley in an interface-only language is refused as if no language were chosen** · 🐞 · medium.
@@ -1419,18 +1443,51 @@ where a Journal Manager who only corrected a description expects the
 list to stay as it was.
 Basis: probe, 2026-10-02. <sup>f-a19</sup>
 
-<a id="a20"></a>
-**A20 — What "Done" saves after a section heading is dropped below its articles** · ❓ · minor.
-A section heading dropped below its section's articles in "Order" (Rule
-10a) was only ever cancelled, so what "Done" saves is unknown.
-Question: what should it save? Lean: the heading back on top and the
-articles' order unchanged, as a heading is no article. Basis: probe,
-2026-09-25. <sup>f-a20</sup>
+<a id="a21"></a>
+**A21 — An issue's saved section order changes when the journal's sections are reordered** · 🐞 · user-visible.
+A Journal Manager who orders an issue's sections in "Order" on its
+"Table of Contents" tab expects that order to stay the issue's own
+(Rule 10a). But "Done" keeps in place only the sections it found in a
+new position (first, second, third and so on); a section still in the
+position it had goes on following the journal's section order. When
+someone later reorders the journal's sections on Settings › Journal ›
+"Sections", such an issue shows a section order that is neither the
+one saved for it nor the journal's new one, on its tab and on its
+page, a published issue's page included, though nobody touched the
+issue. With the journal's order Articles, Reviews, Essays, "Vol. 1
+No. 4 (2026)" was saved as Articles, Essays, Reviews. Once the
+journal's order became Reviews, Essays, Articles, the issue read
+Essays, Reviews, Articles on one scratch journal and Essays, Articles,
+Reviews on another after the same steps. An issue never ordered took
+the journal's new order, as expected, and an issue in which every
+section had changed position kept its saved order.
+Basis: probe, 2026-10-08. <sup>f-a21</sup>
+
+<a id="a22"></a>
+**A22 — A section's never-ordered articles can change order between loads** · ❓ · user-visible.
+Until "Done" is pressed once in an issue's "Order" (Rule 10), a
+section's articles keep no fixed order. The "Table of Contents" tab
+and the issue's page, a published issue's included, agree at each
+load. Loaded again after "Done" was pressed in another issue's
+"Order" and the journal's "Sections" list was reordered (Rule 10a),
+with nothing saved on the issue itself, both showed another order.
+What triggers the change is not known. One "Done", even one that
+saves the list as it stood, fixes the order. Question: should an
+issue list a section's articles in one fixed order, such as the
+order they were scheduled in, before anyone orders them? Lean: yes;
+a published table of contents should not reshuffle for readers.
+Basis: probe, 2026-10-08. <sup>f-a22</sup>
 
 ### Retired
 
+<a id="a9"></a>
+**A9 — No section can be moved in the table of contents' "Order"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13453, merged 2026-10-07), verified 2026-10-08 on OJS: in the "Table of Contents" tab's "Order", a section's heading drags the whole section above or below another section, and "Done" keeps the new section order on the tab and on the issue's page (Rule 10a). <sup>f-a9</sup>
+
 <a id="a10"></a>
 **A10 — In an issue's "Order", an article dropped past a section heading jumps back and reorders its section** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13453, merged 2026-10-07), verified 2026-10-08 on OJS: in the "Table of Contents" tab's "Order", an article dragged toward another section stays under its own heading, and one dragged to the top of its section is saved first with the section's other articles in their order (Rule 10b). <sup>f-a10</sup>
+
+<a id="a20"></a>
+**A20 — What "Done" saves after a section heading is dropped below its articles** · ✅ · retired. The question no longer arises: since the upstream fix (pkp/pkp-lib#13453, merged 2026-10-07) a heading cannot be dropped below its own section's articles. Verified 2026-10-08 on OJS: released anywhere inside its own section, a heading leaves the list as it was, and "Done" saves that list (Rule 10a). <sup>f-a20</sup>
 
 ---
 
@@ -1441,8 +1498,8 @@ Code read 2026-09-25 at the checkouts' tips (ojs `71bb244152`, lib/pkp
 `76a315591`, omp `187f0f40d`, ops `61cd158ce3`). The body was
 live-probed on 2026-09-25 on OJS, with OMP and OPS read for the absence
 and the exclusivity controls (notes td1–td17, each naming the rules it
-settled, and the f-a notes); a claim still read only in the code says so
-where it is made.
+settled, and the f-a notes); td18 is a later drive, dated in the note. A
+claim still read only in the code says so where it is made.
 
 <a id="fn-a"></a>
 **a** — Page: OJS `pages/manageIssues/ManageIssuesHandler.php` (`index`, roles `ROLE_ID_MANAGER`, `ROLE_ID_SITE_ADMIN`, `PKPSiteAccessPolicy`) renders `templates/manageIssues/issues.tpl`: heading `editor.navigation.issues` "Issues", `<tabs>` `future` (`editor.navigation.futureIssues` "Future Issues") and `back` (`editor.navigation.issueArchive` "Back Issues"), each a `load_url_in_div` of `grid.issues.FutureIssueGridHandler` / `BackIssueGridHandler`. The edit window: `IssueGridHandler::editIssue()` → `templates/controllers/grid/issues/issue.tpl` (`#editIssueTabs`: `issue.toc` "Table of Contents", `editor.issues.issueData` "Issue Data", `editor.issues.galleys` "Issue Galleys", `editor.issues.identifiers` under `{if $enableIdentifiers}`, `editor.issues.access` "Access" under `publishingMode == PUBLISHING_MODE_SUBSCRIPTION`); `enableIdentifiers` is set when `enablePublisherId` holds `issue` or any `pubIds` plugin is registered. Article placement: `Repo::publication()` `issueId` via the workflow (U49). Side menu entry: U08 Rule on the "Content" group.
@@ -1556,7 +1613,7 @@ where it is made.
 **td6** — Live-probed 2026-09-25 (Rule 8): "123", another issue's path, and "a b", "a..b", "-ab", "é1" each gave their message under the box and in a passing notice; "spring-2026" saved, and both `issue/view/spring-2026` and the numbered address opened the issue. The row's "Preview" kept the numbered address.
 
 <a id="fn-td7"></a>
-**td7** — Live-probed 2026-09-25 (Rules 10, 10a, 10b; A9, A10): within a section, an article dropped below the section's heading kept its place after "Done" on the tab and on the issue's page, and "Cancel ordering" dropped a drag. Never-ordered articles came in the same order on the tab and on the page, in one issue in the order they were created, in another the reverse. The journal's section list was unchanged. Section drags: f-a9; an article dragged toward another section or to the top of its own, before and after the fix merged 2026-10-07: f-a10.
+**td7** — Live-probed 2026-09-25 (Rules 10, 10b; A10): within a section, an article dropped below the section's heading kept its place after "Done" on the tab and on the issue's page, and "Cancel ordering" dropped a drag. Never-ordered articles came in the same order on the tab and on the page at each read; that the order differs between reads: f-a22. The journal's section list was unchanged. Section drags: f-a9 as seen that day, td18 since the fix merged 2026-10-07; an article dragged toward another section or to the top of its own, before and after that fix: f-a10, td18.
 
 <a id="fn-td8"></a>
 **td8** — Live-probed 2026-09-25 (Rule 12): "OK" took the row off at once and the issue's "Items" dropped by one; the article's page answered "404 Not Found" while the issue's other articles stayed; the emptied section's heading left the tab; the workflow read "Status: Unscheduled" with "Schedule For Publication", which opened on "Assign To Current/Back Issue" with the same issue chosen. The version still carries the issue in the install's data (note n: `issueId` kept).
@@ -1587,6 +1644,13 @@ where it is made.
 
 <a id="fn-td17"></a>
 **td17** — Live-probed 2026-09-25 (Settings bullet 3): with the box ticked, the issue's page opened signed out; its "PDF" went to the Login page, and signing in there as a Reader landed on the PDF reader. Unticked (the default, as on the seeded journal), a signed-out visitor opened the "PDF". OMP's box sits under "View Monograph Content" and OPS's under "View Preprint Content", unticked.
+
+<a id="fn-td18"></a>
+**td18** — Live-probed 2026-10-08 (Rules 10, 10a, 10b, 23; A9 and A20 retired; A21, A22), OJS `main` (ojs `a7f55c18f6`, lib/pkp `151e6e9d69`, which holds `3a5a039743`, the merge of `pkp/pkp-lib#13453`), PostgreSQL. Two runs, each on a scratch journal of its own with the sections "Articles" (three articles an issue), "Reviews" (two) and "Essays" (one), six published issues and one future issue, as the journal's Journal Manager unless said; every fact below was seen in both. A drag: the mouse pressed on the row, moved in steps, released on the target.
+Sections (Rule 10a): pressed, a heading lifted its whole section (the section's `tbody`), the articles in their order. "Reviews" (second) dropped above the "Articles" heading read Reviews, Articles, Essays; then the first heading dropped below the last row of the list read Articles, Essays, Reviews; on the future issue, "Essays" (last) dropped above "Articles" read Essays, Articles, Reviews; as the journal's Editor, "Essays" dropped onto "Reviews" read Articles, Essays, Reviews. After each "Done" (`save-sequence` 200) the tab, the tab after a fresh load and the issue's page (the future issue's "Preview" page) read the order as dropped, while Settings › Journal › "Sections" and another issue's tab and page read as before. A heading released on its own first article or its own last article (the first section, the middle one, and the last one with the pointer below the end of the list) left the list unchanged, and "Done" posted and saved it heading first. "Cancel ordering" after a section drag put the list back.
+Articles (Rules 10, 10b): the last article of "Articles" dragged below the "Reviews" heading, the first of "Reviews" dragged above the last of "Articles" and the one article of "Essays" dragged above the last of "Reviews" were each under their own heading at the drop, after "Done", after a fresh load and on the issue's page, and each one's "Section" on Publication Settings was unchanged. The last article of a section dragged above the first, and an article dropped above its own section's heading (also at the top of the list), were first in their section after "Done", the others in their order. "Section" changed from "Reviews" to "Essays" on Publication Settings, for a scheduled article of the future issue and for a published article of a published issue ("Save" 200 both times): on the next load the tab and the issue's page listed the article under "Essays" (on the published issue, never ordered, first in one run and last in the other), and "Reviews", left with no article on the published issue, was on neither.
+"Order" itself (Rule 10): every row, heading and article, carried a move icon; "Done" and "Cancel ordering" stood under the list and "Order" stayed above it. None of the 15 "Done" presses on the tab in a run raised a notice or a browser question. With a section drag not saved, pressing "Issue Data", the window's "Close" and opening another address each raised no question; the tab came back out of "Order" with the list as it was, and nothing was stored. Neither run recorded a response of 400 or more or a page error.
+Not driven: `stable-3_5_0`; "Cancel ordering" after an article drag (scenario 3 presses it). The saved section order after the journal's sections are reordered: f-a21. Never-ordered articles between reads: f-a22.
 
 <a id="fn-f-a1"></a>
 **f-a1** — Incidental of 2026-09-04 (U05 test author, OJS): on Issues › Future Issues › "Create Issue" the "Title" box arrived ticked, "Save" with an empty title re-rendered the form with no visible error line and the grid stayed "No Items". Mechanism: `IssueForm::initData()` ticks `showTitle` for a new issue; its `FormValidatorCustom` is registered on the field `showTitle` (the check box) with `editor.issues.titleRequired`. The scenario API seeds its issues with the box unticked for this reason (scenarios.md `issues[]`). Live-probed 2026-09-25 (td4): the notice "Title is required for the issue." showed at the window's top right from about 0.2 s to 4.5 s after "Save" and was gone at 6 s; nothing on the form was marked; the list still read "No Items" 16 s later.
@@ -1619,11 +1683,11 @@ Issue report: [pkp-e2e#409](https://github.com/jardakotesovec/pkp-e2e/issues/409
 Issue report: [pkp-e2e#414](https://github.com/jardakotesovec/pkp-e2e/issues/414) ([docs/issues/U50-A8-future-issues-number-as-text.md](../issues/U50-A8-future-issues-number-as-text.md)).
 
 <a id="fn-f-a9"></a>
-**f-a9** — Live-probed 2026-09-25 (Rules 10a, 23), OJS, two drives: a mouse drag of a section heading above another section, several shapes, three attempts each; the article rows moved, the section headings did not (one heading moved below its own article, then "Cancel ordering"), and a "Done" the server accepted (save-sequence 200) left the order unchanged on the tab and on the issue's page. Each section is its own sortable block on the page. The grid offers section ordering (`ORDER_CATEGORY_GRID_CATEGORIES_AND_ROWS`, note m) and the issue's page reads the saved order (note w), so the custom-order half of Rule 23 is code-read only. Cause, from the A10 issue report (pkp-e2e#415, since closed; OJS `main` walked 2026-10-02, OMP 2026-10-04): from pkp-lib 1810f38f34 (`pkp/pkp-lib#11601`, the class aliases removed) `gridRow.tpl`'s `is_a($row, 'GridCategoryRow')` was false, so a heading row lost its `category` class and stayed `orderable`; pressing it dragged the heading as a row of its own section's `tbody` (the heading that moved below its own article above), and the sections' own sortable never got the press. OMP's "Chapters" list, ordered the same way, showed the same on `main` (a chapter moved only among its own authors) and moved chapters on 3.5. Section drags on OJS 3.5 were not driven. `pkp/pkp-lib#13453` (merged 2026-10-07 as `3a5a039743`) names the class in full in the template again (f-a10); no section heading was dragged on OJS after it, so Rule 10a and A9 read as last seen, on 2026-09-25.
+**f-a9** — Live-probed 2026-09-25 (Rules 10a, 23), OJS, two drives: a mouse drag of a section heading above another section, several shapes, three attempts each; the article rows moved, the section headings did not (one heading moved below its own article, then "Cancel ordering"), and a "Done" the server accepted (save-sequence 200) left the order unchanged on the tab and on the issue's page. Each section is its own sortable block on the page. The grid offers section ordering (`ORDER_CATEGORY_GRID_CATEGORIES_AND_ROWS`, note m) and the issue's page reads the saved order (note w); that half of Rule 23 was code-read only until 2026-10-08 (td18, f-a21). Cause, from the A10 issue report (pkp-e2e#415, since closed; OJS `main` walked 2026-10-02, OMP 2026-10-04): from pkp-lib 1810f38f34 (`pkp/pkp-lib#11601`, the class aliases removed) `gridRow.tpl`'s `is_a($row, 'GridCategoryRow')` was false, so a heading row lost its `category` class and stayed `orderable`; pressing it dragged the heading as a row of its own section's `tbody` (the heading that moved below its own article above), and the sections' own sortable never got the press. OMP's "Chapters" list, ordered the same way, showed the same on `main` (a chapter moved only among its own authors) and moved chapters on 3.5. Section drags on OJS 3.5 were not driven. `pkp/pkp-lib#13453` (merged 2026-10-07 as `3a5a039743`) names the class in full in the template again (f-a10). Retired 2026-10-08: on OJS `main` with that fix a heading drags its whole section above or below another and "Done" keeps the order on the tab and on the issue's page (td18). The entry was ❓ from 2026-09-25 and 🐞 from 2026-10-05, when the cause found for A10 explained the heading's drag; it had no issue report.
 
 <a id="fn-f-a10"></a>
 **f-a10** — Live-probed 2026-09-25 (td7; Rule 10b), OJS: an article dragged under another section showed there and "Done" was accepted; on reopening the tab it was back under its own section, and the "Section" on its Publication Settings was unchanged. Note m's `setDataElementInCategorySequence()` would change the `sectionId`; the drop did not reach it. Walked again 2026-10-02 on OJS `main` (PKP's default test dataset, issue "Vol. 1 No. 2 (2014)"): "Hansen & Pinto: Reason Reclaimed", dragged up past the "Reviews" heading, showed as the last article of "Articles"; "Done" answered 200 and the list redrew at once with it back under "Reviews". "Investigating…", dropped above the "Articles" heading, was saved first, and "The Signalling Theory Dividends" moved from last to second: the save gives each article its place in the posted list with the heading's id counted as a row (`_saveRowsInCategoriesSequence()`), and that article's id equals the section's. An article dropped below the heading was saved as dropped. No server or script error. Cause: f-a9.
-Fixed upstream: `pkp/pkp-lib#13453` (for `pkp/pkp-lib#11718`), merged 2026-10-07 as `3a5a039743`: `grid.tpl` and `gridRow.tpl` name `PKP\controllers\grid\CategoryGridHandler` and `PKP\controllers\grid\GridCategoryRow` in full. Live-probed 2026-10-08 (Rule 10b; A10 retired) on OJS `main` (ojs `a7f55c18f6`, lib/pkp `151e6e9d69`), PKP's default test dataset freshly loaded, issue "Vol. 1 No. 2 (2014)". "Hansen & Pinto: Reason Reclaimed", the one article of "Reviews", dragged up toward "Articles", was still under "Reviews" when dropped; "Done" answered 200 with the heading posted first (`["2","9"]`), and the reopened tab, the issue's page and the article's "Section" on its Publication Settings read "Reviews". Four rounds of drags inside "Articles", then holding four articles: the last article dragged to the top was listed and saved first ("Investigating…", "Antimicrobial…", "Genetic transformation…", "The Signalling Theory Dividends"), and so was "The Signalling Theory Dividends", whose id equals the section's, in the next round; after every "Done" the reopened tab and the stored `publications.seq` equalled the list as it stood on screen after the drop, and no other article of the section moved. Not driven: an article of a section holding two or more dragged toward another section; a section heading's drag (f-a9).
+Fixed upstream: `pkp/pkp-lib#13453` (for `pkp/pkp-lib#11718`), merged 2026-10-07 as `3a5a039743`: `grid.tpl` and `gridRow.tpl` name `PKP\controllers\grid\CategoryGridHandler` and `PKP\controllers\grid\GridCategoryRow` in full. Live-probed 2026-10-08 (Rule 10b; A10 retired) on OJS `main` (ojs `a7f55c18f6`, lib/pkp `151e6e9d69`), PKP's default test dataset freshly loaded, issue "Vol. 1 No. 2 (2014)". "Hansen & Pinto: Reason Reclaimed", the one article of "Reviews", dragged up toward "Articles", was still under "Reviews" when dropped; "Done" answered 200 with the heading posted first (`["2","9"]`), and the reopened tab, the issue's page and the article's "Section" on its Publication Settings read "Reviews". Four rounds of drags inside "Articles", then holding four articles: the last article dragged to the top was listed and saved first ("Investigating…", "Antimicrobial…", "Genetic transformation…", "The Signalling Theory Dividends"), and so was "The Signalling Theory Dividends", whose id equals the section's, in the next round; after every "Done" the reopened tab and the stored `publications.seq` equalled the list as it stood on screen after the drop, and no other article of the section moved. That walk left two shapes undriven, an article of a section holding two or more dragged toward another section and a section heading's drag; both were driven the same day (td18).
 Issue report: [pkp-e2e#415](https://github.com/jardakotesovec/pkp-e2e/issues/415), closed 2026-10-07 with the fix; the report and its kept scripts deleted (git keeps them).
 
 <a id="fn-f-a11"></a>
@@ -1661,7 +1725,13 @@ Issue report: [pkp-e2e#410](https://github.com/jardakotesovec/pkp-e2e/issues/410
 **f-a19** — Walked 2026-10-02 (Rule 6; A19), OJS `main`, PKP's default test dataset on PostgreSQL, where "Vol. 2 No. 1 (2015)" carries a Date Published on the same day as "Vol. 1 No. 2 (2014)", a few minutes later, while walking the steps of the A13 issue report: with both published and "Vol. 3 No. 1 (2016)" the current issue, "Save" with nothing changed on the 2015 issue's "Issue Data" moved it below the 2014 issue on "Back Issues". `IssueForm::execute()` stores the form's `datePublished`, a date without a time (the date picker's `Y-m-d`, note l), in place of the stored date and time; `IssueGridHandler::publishIssue()` fills an empty date with `Core::getCurrentDate()`, date and time; "Back Issues" sorts by `date_published` after the current issue (note u). Code read 2026-10-05: `stable-3_5_0`'s `IssueForm` is the same; not driven there.
 
 <a id="fn-f-a20"></a>
-**f-a20** — Live-probed 2026-09-25 (Rule 10a; A20), OJS: the section heading that moved below its own article in the f-a9 drive was dropped with "Cancel ordering"; no walk has pressed "Done" on such a drop, those of the A10 issue report (pkp-e2e#415, since closed) included: it listed the heading drag as code-read, and the walk of its fix on 2026-10-08 (f-a10) dragged no heading. The lean's outcome is code-read from the save f-a10 describes: `_saveRowsInCategoriesSequence()` unsets key 0 of the posted list (here the section's first article, saved at 0) and gives the other articles their keys, so their order holds, except that a first article whose id equals the section's is found at the heading's key and saved last. Not driven.
+**f-a20** — Live-probed 2026-09-25 (Rule 10a; A20), OJS: the section heading that moved below its own article in the f-a9 drive was dropped with "Cancel ordering"; no walk has pressed "Done" on such a drop, those of the A10 issue report (pkp-e2e#415, since closed) included: it listed the heading drag as code-read, and the walk of its fix on 2026-10-08 (f-a10) dragged no heading. The lean's outcome is code-read from the save f-a10 describes: `_saveRowsInCategoriesSequence()` unsets key 0 of the posted list (here the section's first article, saved at 0) and gives the other articles their keys, so their order holds, except that a first article whose id equals the section's is found at the heading's key and saved last. Retired 2026-10-08 (td18): on OJS `main` with the fix a pressed heading lifts its whole section and cannot be dropped below its own articles, so the drop the question asks about is never made. In all 30 "Done" posts on the tab in the two runs each section's list opened with the section's own id, then its articles, so no first article sat at the key the save drops. The entry had no issue report.
+
+<a id="fn-f-a21"></a>
+**f-a21** — Live-probed 2026-10-08 (Rules 10a, 23; A21), the drive of td18, both runs, OJS `main` on PostgreSQL. The journal's section order was Articles, Reviews, Essays (stored places 0, 1, 2). Then Settings › Journal › "Sections" was reordered on screen to Reviews, Essays, Articles ("Done" there 200) and every issue's tab and page were read again; the two agreed at every read. "Vol. 1 No. 1 (2026)" (places stored for it: Articles 0, Essays 1, Reviews 2, every section having changed position over two "Done"s) and "Vol. 2 No. 1 (2027)" (Essays 0, Articles 1, Reviews 2) read as before. "Vol. 1 No. 2 (2026)" and "Vol. 1 No. 3 (2026)" ("Done" pressed with no section moved, nothing stored) and "Vol. 1 No. 6 (2026)" (never ordered) read Reviews, Essays, Articles, the journal's new order. "Vol. 1 No. 4 (2026)", saved by the journal's Editor as Articles, Essays, Reviews (stored: Essays 1, Reviews 2; nothing for "Articles", which had stayed first), read Essays, Reviews, Articles in one run and Essays, Articles, Reviews in the other: "Articles" now took the journal's place 2, the same number as the stored place of "Reviews". Code read 2026-10-08: `OrderCategoryGridItemsFeature::saveSequence()` calls `setDataElementSequence()` (note m) only for a section whose new place number differs from the one `getDataElementSequence()` returns (the issue's stored place, or the journal's when none is stored), and `section/DAO::getByIssueId()` orders by `COALESCE(custom_section_orders.seq, sections.seq)` (note w) with no tie-breaker. On a journal whose own stored places have a gap (a scratch journal seeded with three sections stores 0, 2, 3 until its "Sections" list is reordered on screen), "Order" and "Done" with nothing dragged stored places for the second and third sections of "Vol. 1 No. 7 (2026)". `stable-3_5_0` carries the same two pieces of code and never had the heading fault of f-a9, so it may show the same; not driven there.
+
+<a id="fn-f-a22"></a>
+**f-a22** — Live-probed 2026-10-08 (Rule 10; A22), the drive of td18, OJS `main` on PostgreSQL; not driven on MySQL. A never-ordered issue's "Articles" section read differently at two reads between which only other issues' orders and the journal's "Sections" list were saved: "Vol. 1 No. 4 (2026)" in one run (second, first, third article as seeded, then first, third, second), "Vol. 1 No. 1 (2026)" in the other (first, second, third, then second, third, first), and "Vol. 1 No. 3 (2026)" in both. The tab and the issue's page agreed at each read. After one "Done" on the issue (with a section dragged, or after a drag that left the list as it stood) every later load of the tab and the page gave the same order. Never-ordered articles share `seq` 0 and `ORDERBY_SEQUENCE` has no tie-breaker (note m); what decides the order among them was not established. The current-issue web feeds show the same looseness ([Web feeds](U18-web-feeds.md), its Rule 5).
 
 ## Reference — entry points & surfaces
 

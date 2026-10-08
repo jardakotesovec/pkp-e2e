@@ -25,7 +25,7 @@
  *   nothing about the articles.
  * - A15 ❓: S9 presses "OK" in "Publish Issue" without reading the box's
  *   arrival state.
- * - A2, A5, A6, A7, A8, A9, A11, A13, A14: not on these scenarios'
+ * - A2, A5, A6, A7, A8, A11, A13, A14, A21, A22: not on these scenarios'
  *   paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
