@@ -14,3 +14,4 @@ security-shaped, no credentials).
 
 ## Entries
 2026-10-08 · sync · regression reader rr13438 · a suspicion needed a second site administrator and no scenario key or screen makes one (users.md says so for the key): the reads of users.md and scenarios.md, then a `user_user_groups` row through the kit's `sql()` with its own cleanup on two installs · a seed option for a site-administrator user (or a line in scenarios.md naming the `sql()` insert and the delete that follows it)
+2026-10-08 · sync · upstream session · two companions whose PRs merged on 2026-09-29 and 2026-09-30 (`13277-main`, `13412`) were never fast-forwarded: a companion's ci-triage row is committed on the companion alone, so `main`'s table read empty and the daily step 5 found nothing; today's two were found only by listing the remote branches · step 5 of the daily session lists `git branch -r` and checks each PR's state, or the row is also added on `main` when the companion is pushed
