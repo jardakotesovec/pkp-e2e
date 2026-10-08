@@ -664,7 +664,12 @@ Everything per app travels in the bag, never in `process.env`, so one
 process holds all three apps. The exception is `PKP_APP_ROOT` and
 `PKP_SUITE_DIR`, which `withApp` exports for the app while `fn` runs
 because `base-test.js` reads them: a suite page object is required inside
-`fn`, never at the top of the script (U21 tops, 2026-09-07).
+`fn`, never at the top of the script (U21 tops, 2026-09-07). A check that
+walks the submission wizard takes its steps, rail and Review panels from
+the app's `SubmissionWizardPage(s).js` this way instead of writing them
+again, and a helper worth keeping goes into a page object, not into an
+issue walk's `lib.js`, which is deleted with its report (2026-10-06 sync,
+U72 claim check I08).
 
 The run record (`run-<app>-<HHMMSS>.json`) keeps every `/api/` and legacy
 `$$$call$$$` request (a legacy save answers 200 even when it refuses),
