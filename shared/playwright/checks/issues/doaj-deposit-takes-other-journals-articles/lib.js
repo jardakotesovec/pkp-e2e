@@ -1,4 +1,5 @@
-// Helpers of walk.js (issue report docs/issues/U63-A5-doaj-deposit-takes-other-journals-articles.md).
+// Helpers the DOAJ walks share. They were written for the walk of U63 A5 (pkp-e2e#264, retired with
+// pkp/ojs#5907; the walk is deleted), and the other walks' and checks/sync/ojs-5907's scripts require them.
 // Requiring this file runs nothing. Every helper drives the screens a person uses, except
 // runTask(), the cron command an administrator runs (the daily task has no screen), and
 // dbJobs(), a read of the queue tables kept for Evidence only.
@@ -230,6 +231,11 @@ function storedStatus(app, sid) {
     };
 }
 
+/** Evidence only: a submission's versions, as id:stage major.minor:status. */
+function versions(app, sid) {
+    return sql(app, `select publication_id || ':' || version_stage || ' ' || version_major || '.' || version_minor || ':' || status from publications where submission_id = ${sid} order by publication_id`).split('\n').filter(Boolean);
+}
+
 /** "Unpublish" in the header of the version page the workflow shows, confirmed. */
 async function unpublishShown(page) {
     await controls(page).getByRole('button', {name: 'Unpublish', exact: true}).click({timeout: T});
@@ -338,4 +344,4 @@ async function walkUnpublished({app, page, t, fact, snap, statusOf, SID}) {
     fact('queue at the end', dbJobs(app));
 }
 
-module.exports = {T, sleep, flat, rel, storedStatus, unpublishShown, walkUnpublished, createJournal, openDoaj, readSettings, saveSettings, readList, markRegistered, unpublish, publish, versioningYes, runTask, readJobsPage, readJobDetails, dbJobs};
+module.exports = {T, sleep, flat, rel, storedStatus, versions, openWorkflow, unpublishShown, walkUnpublished, createJournal, openDoaj, readSettings, saveSettings, readList, markRegistered, unpublish, publish, versioningYes, runTask, readJobsPage, readJobDetails, dbJobs};

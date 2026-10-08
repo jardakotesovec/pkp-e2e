@@ -553,14 +553,12 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     hand <sup>s</sup>), for a journal with "DOAJ Plugin" ticked, an API
     key saved and the automatic-deposit box ticked, the installation
     sends DOAJ every published article of the journal that has no
-    status yet or reads "Needs Sync". Other "Needs Sync" items are
-    taken along ⚠ [A5](#a5):
-    - other journals' articles, from a journal without "DOI
-      Versioning", and other journals' versions, from a journal with
-      it;
-    - with "DOI Versioning", a version a later minor version replaced,
-      which no screen shows (Rule 45); its deposit is seen only among
-      the installation's queued jobs.
+    status yet or reads "Needs Sync"; with "DOI Versioning", every
+    such version the "Publications" tab lists (Rule 45). Nothing else
+    goes: another journal's "Needs Sync" articles and versions keep
+    their status and are left to that journal's own deposit; an article
+    unpublished after its deposit is not sent, and neither is a version
+    a later minor version replaced. <sup>f-a5</sup>
 44. **Needs Sync.** Publishing a new version of an article that reads
     "Registered" or "Marked registered" turns its status to "Needs
     Sync", so that it is sent again. <sup>t</sup> <sup>td21</sup>
@@ -614,8 +612,8 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
 5. **"DOI Versioning"** {OJS} (Settings › Distribution › "DOIs",
    [DOIs](U45-dois.md); "No" on a new journal). "No": the DOAJ tab
    "Articles"; "Yes": "Publications" (Rules 34, 45), each with its own
-   statuses, and the daily deposit takes along the "Needs Sync" items
-   of journals with the same choice (Rule 43). <sup>q</sup>
+   statuses; the daily deposit sends the articles or the versions
+   accordingly (Rule 43). <sup>q</sup>
 6. **"NLM Title Abbreviation"** {OJS} (the PubMed Settings tab; empty).
    Never saved or saved empty: the PubMed file names the journal by its
    name; saved: by the abbreviation (Rule 30). <sup>n</sup>
@@ -1150,10 +1148,11 @@ Left out of the scenarios above, by reason:
     preprint) naming a section the journal (server) lacks, imported:
     the import refused whole with "Unknown section …", no submission
     added, the export list unchanged {OJS OPS}
-  - the guard A5's issue report names, once fixed: the daily DOAJ
-    deposit with two journals, one with automatic deposit on, the other
-    holding a "Needs Sync" article: the article stays "Needs Sync" and
-    no deposit is queued for it {OJS}
+  - the daily DOAJ deposit keeping to its journal (retired A5; Rule
+    43): two journals, one with automatic deposit on, the other holding
+    a "Needs Sync" article: the article stays "Needs Sync" and no
+    deposit is queued for it, while the depositing journal's own
+    "Needs Sync" and "Not Deposited" articles read "Submitted" {OJS}
   - the guard A13's issue report names, once fixed: a users file with
     an element the format does not know, imported: the "Results" tab
     reads "Validation errors:" with the reason {OJS OMP}
@@ -1243,8 +1242,6 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (an address naming a tool the installation lacks; Rule 5)
   - A4 (a short or empty plain password; Rule 25)
-  - A5 (the daily deposit taking other journals' "Needs Sync" articles,
-    and a replaced version; Rule 43)
   - A6 ("Upload File" from the keyboard; Rule 8)
   - A7 (a second "Import" press, and an earlier results tab chosen
     again; Rule 9)
@@ -1312,7 +1309,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | An address naming a tool the installation lacks prints the Import/Export list as raw code text | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A4](#a4) | A users import says a user with a short or empty password "has not been imported", yet creates the account | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [A5](#a5) | The daily DOAJ deposit sends other journals' "Needs Sync" articles and unpublished versions to DOAJ | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
 | [A6](#a6) | "Upload File" cannot be reached with the keyboard: no revision, galley or import upload without a mouse | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
 | [A7](#a7) | Going back to a Native XML "Import Results" tab imports the file again, duplicating every item | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
 | [A8](#a8) | Importing a file the app itself exported lists "Errors occured:" under the success text | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
@@ -1348,6 +1344,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | Retired: importing a users file again no longer gives a later-dated role again | ✅ | retired | upstream change + claim check (claude), 2026-10-01 — fixed upstream |
 | [A18](#a18) | Retired: an empty or unreadable role date no longer stops a users import part-way | ✅ | retired | upstream change + claim check (claude), 2026-10-01 — fixed upstream |
 | [OJS3](#ojs3) | Retired: PubMed files lost the journal's title once the PubMed tool's Settings were saved with no NLM abbreviation | ✅ | retired | PR review (claude), 2026-10-06 — fixed at pkp/ojs#5897's head |
+| [A5](#a5) | Retired: the daily DOAJ deposit sent other journals' "Needs Sync" articles and unpublished versions to DOAJ | ✅ | retired | PR review (claude), 2026-10-08 — fixed at pkp/ojs#5907's head |
 
 ### All apps
 
@@ -1367,33 +1364,6 @@ imported."; the account is nevertheless created, with its roles, and no
 password signs in to it until someone resets it. The manager is told the
 opposite of what happened. {OJS OMP}
 Basis: probe, 2026-10-01. <sup>f-a4</sup>
-
-<a id="a5"></a>
-**A5 — The daily DOAJ deposit sends other journals' "Needs Sync" articles and unpublished versions to DOAJ** · 🐞 · high.
-On an installation that hosts several journals, the daily automatic DOAJ
-deposit of one journal also takes the articles of other journals whose
-DOAJ status reads "Needs Sync". It sends them to DOAJ with its own API
-key and with a link built on its own address, where the site shows "not
-found". The article's own journal sent nothing, yet its DOAJ list now
-reads "Submitted".
-The deposit also sends what is not published, on a single-journal
-installation too. An article that was deposited and then unpublished
-goes to DOAJ, its link showing readers "not found" (with "DOI
-Versioning" on, only when it already read "Needs Sync"). When it has a
-new version that nobody published, the deposit carries that draft's
-title and metadata.
-Nobody is told, and the article's journal has no setting that stops
-another journal from taking it. Even when the article's journal
-deposits automatically itself, a journal listed before it on "Hosted
-Journals" takes the article first. Journals take each other's items
-only when "DOI Versioning" is set the same way in both: articles
-between journals that have it off, versions between journals that have
-it on. A journal that has it on also sends its own versions that a
-later minor version replaced. An article reads "Needs Sync" once it has
-been deposited to DOAJ (or marked as deposited) and its current version
-is then published again or replaced by a newly published version; with
-"DOI Versioning" off, unpublishing it does so too. {OJS}
-Since: 2025-10-07 · Basis: probe, 2026-10-06. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — "Upload File" cannot be reached with the keyboard: no revision, galley or import upload without a mouse** · 🐞 · high.
@@ -1811,6 +1781,9 @@ Since: 2025-11-20 · Basis: probe, 2026-10-01. <sup>f-omp4</sup>
 
 <a id="ojs3"></a>
 **OJS3 — PubMed files lost the journal's title once the PubMed tool's Settings were saved with no NLM abbreviation** · ✅ · retired. Fixed by pkp/ojs#5897 (for pkp/pkp-lib#13449), verified 2026-10-06 at the PR's head before its merge: a box saved empty, cleared or as it opens, names the journal by its name, and a saved abbreviation still wins (Rule 30). <sup>f-ojs3</sup>
+
+<a id="a5"></a>
+**A5 — The daily DOAJ deposit sent other journals' "Needs Sync" articles and unpublished versions to DOAJ** · ✅ · retired. Fixed by pkp/ojs#5907 (for pkp/pkp-lib#13469), verified 2026-10-08 at the PR's head before its merge: a journal's daily deposit sends only its own published articles (versions) that read "Not Deposited" or "Needs Sync" (Rule 43). <sup>f-a5</sup>
 
 ---
 
@@ -2819,7 +2792,34 @@ Sync": one job, in N1's name; X2 before N2, both depositing, N2's
 article "Needs Sync": one job, in X2's name with X2's link, none from
 N2, and N2's list read "Submitted". Journals are taken in `ORDER BY
 seq`. Both versioning journals were set back to "No" afterwards.
-Issue report: [pkp-e2e#264](https://github.com/jardakotesovec/pkp-e2e/issues/264) ([docs/issues/U63-A5-doaj-deposit-takes-other-journals-articles.md](../issues/U63-A5-doaj-deposit-takes-other-journals-articles.md)).
+Fixed by pkp/ojs#5907 (for pkp/pkp-lib#13469, the issue filed from
+pkp-e2e#264): both `getExportable()` methods wrap the two status
+conditions in a nested `where(fn …)`, the issue report's proposed fix,
+with a `DatabaseTestCase` of both queries
+(`tests/classes/plugins/DepositableExportableTest.php`). Walked
+2026-10-08 at the PR head `cedaf1be16`, before its merge, on the
+default dataset (the issue report's walk, four ways, each on a fresh
+load; `.reports/sync-13469/after-*/`): the second journal's task run
+left `publicknowledge`'s submission 17 "Needs Sync" with no job queued,
+on "Articles" and, both journals on "DOI Versioning" "Yes", on
+"Publications"; on the one-journal path (17 unpublished after "Mark
+registered", a retitled draft version unpublished) one `DOAJRegister`
+was queued, for submission 1 ("Not Deposited"), and 17's stored status
+stayed `stale`; the control (`publicknowledge` depositing its own
+"Needs Sync" 17 and "Not Deposited" 1) queued the same two jobs in its
+own name. A replaced minor version
+(`checks/sync/ojs-5907/replaced-minor.js`, one journal with "DOI
+Versioning" "Yes", 1.0 "Needs Sync" and a minor 1.1 published): jobs
+for 1.1 and submission 1 only, 1.0's stored status left `stale`, on no
+screen. Control at the PR's base, the `main` tip `a7f55c18f6`, the same
+day and loads: the second journal queued a job for 17 on its own path
+(the link 404) and 17 read "Submitted", both ways; the one-journal path
+queued jobs for 17 and 1; the replaced-minor drive queued 1.0, 1.1 and
+submission 1. The same two queries serve the daily tasks of pkp/zenodo,
+pkp/scopus and pkp/pubmedCentral (`getAllDepositableArticles()`,
+`getAllDepositablePublications()`; a GitHub code search, not driven),
+which no checkout here holds.
+Issue report: pkp-e2e#264, closed at the merge (the report and its walk deleted; git keeps them).
 
 <a id="fn-f-a6"></a>
 **f-a6** — Live-probed 2026-09-27, three apps (note e): the "Upload
