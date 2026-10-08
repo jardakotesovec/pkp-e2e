@@ -938,7 +938,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A20](#a20) | "Add Contributor" never saves when a "Forms" language is not a metadata language | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A22](#a22) | A role name changed in "Edit Role" and closed without saving shows on the row, and the role's next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A24](#a24) | An "Add Contributor" refused for an institution's missing name still adds the contributor, so the corrected save lists the same person twice | 🐞 | user-visible | — |
-| [A7](#a7) | A refused affiliation reads "Go to Affiliations: [object Object]" to screen-reader users of the contributor form | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A7](#a7) | A refused affiliation reads "Go to Affiliations: [object Object]" to screen-reader users of the contributor form | 🐞 | low | issues (claude), 2026-10-08 — re-verified |
 | [A9](#a9) | On an article, book or preprint page, screen readers announce the ROR logo beside an affiliation or funder as an unnamed link | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | The typed affiliation's per-language name boxes are announced wrongly by a screen reader | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A12](#a12) | The button that deletes a contributor role is labelled with a warning question, not the action | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1075,10 +1075,16 @@ screen reader reads at the form's foot says "Go to Affiliations:
 [object Object]" instead of the reason. Every other field's entry reads
 its message ("Go to Given Name: This field is required.").
 
-Sighted users are not affected: the foot shows "Please correct one
-error." and the reason is printed under the field.
-Basis: probe, 2026-10-03. <sup>f-a7</sup>
-Report: refresh owed — the claim check of 2026-10-07 saw "Go to Affiliations: [object Object]" on screen in "Add Contributor" and in the submission wizard, on the three apps (footnote f-a24); the report's Reach has both as "(code)" (2026-10-07)
+Sighted users are not affected: the list is not drawn on screen, the
+foot shows "Please correct one error." and the reason is printed under
+the institution's name box.
+
+Any journal can meet this, with one language or several: the name box
+only has to be emptied. The list says the same when the institution
+holds a name in a language the journal has since stopped taking for
+submission metadata. That save is refused with no reason shown to
+anyone, so "[object Object]" is all a screen reader is told.
+Basis: probe, 2026-10-08. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — Institution text typed but never picked is dropped without a word** · ❓ · minor.

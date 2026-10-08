@@ -83,4 +83,73 @@ async function focusFacts(page, dlg) {
     });
 }
 
-module.exports = {T, flat, sleep, CASES, rowAction, pressSave, errorBox, fieldText, focusFacts};
+/** The wizard path: the dataset author who starts a submission per app, and the section the start asks for. */
+const WIZARD = {
+    ojs: {author: 'dsokoloff', section: 'Articles'},
+    omp: {author: 'aclark', section: null},
+    ops: {author: 'ccorino', section: 'Preprints'},
+};
+
+/** The contributor the `add` and `wizard` paths type in, and the institution they enter by hand. */
+const NEW = {given: 'Lea', family: 'u41ir1', email: 'lea.u41ir1@mailinator.com', country: 'Canada', institution: 'Probe Institute u41ir1'};
+
+/**
+ * "Add Contributor" on the contributors list the page shows (the workflow's or the wizard step's):
+ * "Person" when the form asks for the kind, the names, email and country, "Author" (a box on
+ * `main`, a choice on 3.5). The form is left open, unsaved; returns its dialog.
+ */
+async function openAddContributor(page, who) {
+    await page.getByRole('button', {name: 'Add Contributor', exact: true}).last().click();
+    const dlg = page.getByRole('dialog', {name: 'Add Contributor'});
+    await dlg.waitFor({timeout: T});
+    await dlg.locator('input[name="email"]').waitFor({timeout: T});
+    await idle(page);
+    const person = dlg.getByRole('radio', {name: 'Person', exact: true});
+    if (await person.count()) await person.check();
+    await dlg.locator('input[name^="givenName"]').first().fill(who.given);
+    await dlg.locator('input[name^="familyName"]').first().fill(who.family);
+    await dlg.locator('input[name="email"]').fill(who.email);
+    await dlg.locator('select[name="country"]').selectOption({label: who.country});
+    const box = dlg.getByRole('checkbox', {name: 'Author', exact: true});
+    const radio = dlg.getByRole('radio', {name: 'Author', exact: true});
+    if (await box.count()) await box.first().check();
+    else if (await radio.count()) await radio.first().check();
+    return dlg;
+}
+
+/**
+ * Under "Affiliations": the name typed into the search box, the typed text itself chosen among the
+ * suggestions (the entry without a ROR mark), "Add". Returns the suggestions offered.
+ */
+async function addTypedInstitution(page, dlg, name) {
+    const f = dlg.locator('.pkpFormField--affiliations');
+    const search = f.locator('input.pkpAutosuggest__input');
+    await search.click();
+    await search.pressSequentially(name, {delay: 20});
+    const options = f.locator('li.autosuggest__results-item');
+    const own = options.filter({hasText: name}).filter({hasNot: page.locator('a[href^="https://ror.org/"]')}).first();
+    await own.waitFor({timeout: T});
+    const offered = (await options.allInnerTexts()).map((x) => flat(x, 100)).slice(0, 6);
+    await own.click();
+    const add = f.getByRole('button', {name: 'Add', exact: true});
+    await add.waitFor({timeout: T});
+    await add.click();
+    await f.locator('tbody tr').filter({hasText: name}).first().waitFor({timeout: T});
+    await idle(page);
+    return offered;
+}
+
+/** A "Submission Languages" row of Settings > Website > Setup > Languages: its "Submissions" and "Metadata" boxes. */
+async function submissionLanguageRow(tab, code) {
+    if (!(await tab.submission.row(code).count())) return {present: false};
+    const read = (col) => tab.submission.cell(code, col).isChecked().catch(() => null);
+    return {present: true, default: await read('defaultSubmissionLocale'), submissions: await read('submissionLocale'), metadata: await read('submissionMetadataLocale')};
+}
+
+/** Press a box of the "Submission Languages" list; the answer's status and any alert the page raised. */
+async function pressBox(tab, code, column) {
+    const {response, alerts} = await tab.pressSubmission(code, column);
+    return {status: response ? response.status() : null, alerts};
+}
+
+module.exports = {T, flat, sleep, CASES, WIZARD, NEW, rowAction, pressSave, errorBox, fieldText, focusFacts, openAddContributor, addTypedInstitution, submissionLanguageRow, pressBox};
