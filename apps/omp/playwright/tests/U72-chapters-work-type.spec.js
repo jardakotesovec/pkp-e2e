@@ -20,8 +20,9 @@
  * - A3 🐞: S10 reads nothing of the copied chapter's "Files".
  * - A4 🐞: S6 reads "Date Published" only after a date is typed.
  * - A5 🐞: S3 never presses the Review panel's "Edit".
- * - A6 🐞: no test drags a chapter; S2 reads that the chapters keep their
- *   order across an author drag.
+ * - A6 ✅ retired (fixed upstream, pkp/pkp-lib#13453): no test drags a
+ *   chapter yet (a Planned item, Rule 8a); S2 reads that the chapters keep
+ *   their order across an author drag.
  * - A7 🐞: S2's drag never leaves an author n-th in the chapter while
  *   (n + 1)-th on Contributors (Rule 8b), and it reloads the page between
  *   one "Done" and the next ordering.

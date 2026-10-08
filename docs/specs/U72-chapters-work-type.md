@@ -179,10 +179,10 @@ wizard on Review ⚠ [A5](#a5). <sup>h</sup>
    <sup>k</sup> <sup>td8</sup> <sup>td9</sup>
 8. **Ordering.** "Order" shows a handle on each chapter and on each
    chapter author, and the buttons "Done" and "Cancel ordering". <sup>l</sup>
-   - 8a. Dragging a chapter does not move it: the chapter row drags only
-     within its own block, in among that chapter's authors, and "Done"
-     leaves the chapter order as it was ⚠ [A6](#a6). The chapter order
-     is the order the chapters were added in, and it is the book's
+   - 8a. Dragging a chapter moves it among the chapters, its author rows
+     with it, and "Done" saves the new order, which the list still
+     shows after a reload. A list no one has reordered reads in the
+     order the chapters were added in. The chapter order is the book's
      table-of-contents order. <sup>l</sup> <sup>td11</sup>
    - 8b. Dragging an author moves them among that chapter's authors, and
      "Done" saves the new order. An author who ends up n-th in the
@@ -264,10 +264,10 @@ wizard on Review ⚠ [A5](#a5). <sup>h</sup>
     chapters as the Details step left them, each title followed by its
     subtitle, and follows additions, edits and deletions made in the same
     wizard at once. A new order of a chapter's authors saved with "Order"
-    shows in the panel only after the wizard is reloaded (a chapter itself
-    cannot be moved, Rule 8a). The wizard asks for no chapter: an Edited
-    Volume, or a Monograph, can be submitted with an empty list, and the
-    panel then shows only its heading and "Edit". <sup>h</sup> <sup>td11</sup> <sup>td18</sup>
+    shows in the panel only after the wizard is reloaded. The wizard asks
+    for no chapter: an Edited Volume, or a Monograph, can be submitted
+    with an empty list, and the panel then shows only its heading and
+    "Edit". <sup>h</sup> <sup>td11</sup> <sup>td18</sup>
 
 ## Side effects
 
@@ -706,10 +706,9 @@ Left out of the scenarios above, by reason:
   - the guard for A4 (issue report
     `docs/issues/U50-A4-refused-save-date-published-today.md`): a chapter
     saved without a date reopens with an empty "Date Published"
-  - the guard for A6 (issue report
-    `docs/issues/U50-A10-toc-article-dropped-other-section-snaps-back.md`):
-    a chapter dragged above another with "Order" keeps its new place
-    after "Done" and a reload
+  - the guard for A6 (retired): after "Order", a chapter dragged above
+    another moves with its author rows and keeps its new place after
+    "Done" and a reload (Rule 8a)
   - the guard for A7 (issue report
     `docs/issues/U72-A7-chapter-author-order-change-lost.md`): a
     chapter's authors dragged into a place the save used to skip keep
@@ -770,7 +769,6 @@ an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
-| [A6](#a6) | "Order" cannot move a chapter: a dragged chapter stays where it was | 🐞 | high | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | A chapter saved without a date shows today's date in "Date Published", which "Save" does not store | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A2](#a2) | The work-type control and "Publication Dates" are offered to the assistant roles, and their choice is refused | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A3](#a3) | A book's new version leaves its chapters' files behind, and a proof made from one is linked nowhere | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -780,6 +778,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | A book in a press's second language cannot get a chapter titled in that language alone | 🐞 | medium | — |
 | [A1](#a1) | The assistant roles may change a published version's chapters, though not an unpublished one's | ❓ | minor | — |
 | [A9](#a9) | A chapter added to a published Edited Volume may stay without a license | ❓ | minor | — |
+| [A6](#a6) | "Order" could not move a chapter: a dragged chapter stayed where it was | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453), walked on main |
 
 ### All apps
 
@@ -860,20 +859,6 @@ same way ([→ Preprint relations](U75-preprint-relations.md#a11)).
 Expected: "Edit" opens the Details step.
 Basis: probe, 2026-10-03. <sup>f-a5</sup>
 
-<a id="a6"></a>
-**A6 — A chapter cannot be moved with "Order"** · 🐞 · high.
-After "Order", dragging a chapter row above another does not move it: the
-row drags only within its own block, in among that chapter's authors, and
-"Done" leaves the chapter order as it was, on the page and after a
-reload. The same holds in the wizard. The chapter order is the book's
-table of contents, and the only way to change it is to delete chapters
-and add them again, which loses their files, date, license, identifiers
-and chapter page, on a published book too. The same fault misplaces
-articles in an issue's table of contents ([→ Issues](U50-issues.md#a10)).
-Expected: dragging a chapter moves it in the list, and "Done" keeps the
-new order.
-Basis: probe, 2026-10-04. <sup>f-a6</sup>
-
 <a id="a7"></a>
 **A7 — Chapter authors dragged into a new order snap back on "Done" when they are among the book's first contributors** · 🐞 · medium.
 On a book's "Chapters" page, a press editor presses "Order", drags one of
@@ -929,6 +914,11 @@ format's name is refused the same way
 ([→ Publication formats & proof terms](U73-publication-formats-proof-terms.md#a15)).
 Expected: the title is required in the book's language only.
 Since: 2023-01-20 (pkp/pkp-lib#8554) · Basis: probe, 2026-10-04. <sup>f-a10</sup>
+
+### Retired
+
+<a id="a6"></a>
+**A6 — A chapter could not be moved with "Order"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13453, for pkp/pkp-lib#11718, merged 2026-10-07), verified 2026-10-08 on OMP: after "Order", a chapter dragged above another moves with its author rows, and "Done" keeps the new order on the page and after a reload (Rule 8a). <sup>f-a6</sup>
 
 ---
 
@@ -1356,18 +1346,20 @@ for those `canAdminister()` allows: the grid action `grid.action.order`
 `setDataElementSequence()` (chapter `seq`) and
 `setDataElementInCategorySequence()` (removes and re-adds the author
 link with the new `seq`), both guarded by `canAdminister()`. In the
-page, a press on a chapter row starts the drag of that chapter's own
-author sortable (items `tr.orderable`), not of the chapter list's
-(items `tbody.orderable`). Live-probed 2026-09-28: note td11.
+page, lib/pkp `js/classes/features/OrderCategoryGridItemsFeature.js`
+makes the chapters sortable as `tbody.orderable` and each chapter's
+author rows as `tr.orderable` (`setupSortablePlugin()`), and takes
+`orderable` off the chapter rows, which it finds as `tr.category`
+(`addOrderingClassToRows()`), so a press on a chapter row drags the
+whole chapter with its author rows. Live-probed 2026-10-08: note td11;
+the fault that kept a chapter from moving until 2026-10-07: note f-a6.
 
 <a id="fn-td11"></a>
 **td11** — Live-probed 2026-09-28 (Rule 8; Rule 16; A6, A7). "Order"
 showed a handle on every chapter and author row with "Done" and "Cancel
-ordering", and chapter titles stopped being links. In six runs on five
-books, the wizard among them, a chapter dragged above another never
-moved, and "Done" left the order unchanged; dragging a chapter title
-only moved it in among its own authors. Of two authors, the second
-dragged above the first with "Done" read in the new order, on the page
+ordering", and chapter titles stopped being links. Until 2026-10-07 a
+chapter dragged above another did not move (note f-a6). Of two authors,
+the second dragged above the first with "Done" read in the new order, on the page
 and after a reload; after that "Done", the same drag and "Done" in the
 same visit showed the old order at once and after a reload, on two
 books, while with three authors the drag held. Walked again 2026-10-04
@@ -1392,6 +1384,19 @@ and after a reload. In the wizard, a chapter's authors reordered with
 "Done" read in the new order on the Details step while the Review panel
 kept the old order until a reload. A reader's table of contents follows
 the stored chapter order.
+Live-probed 2026-10-08 (Rule 8a) on OMP `main` (omp `084a19cc6`,
+lib/pkp `63cf1497b4`) after pkp/pkp-lib#13453, PKP's default dataset
+freshly reset, as `dbarnes` on the Chapters page of "Open Development: Networked
+Innovations in International Development" (submission 17), one run:
+after "Order", "Introduction" dragged by its title above "Preface"
+travelled with its two author rows, Matthew Smith and Katherine Reilly,
+and the other five chapters kept theirs; "Done" (`saveSequence`, 200,
+`{"status":true,…}`) left the list reading "Introduction", "Preface",
+"The Emergence of Open Development in a Network Society" and the three
+after it as before, and so did a reload; the stored chapter order
+(`submission_chapters.seq`) became 1 for "Introduction" and 2 for
+"Preface". The wizard's list, which the same two templates draw (note
+f-a6), was not walked after the fix.
 
 <a id="fn-m"></a>
 **m** — `ChapterGridCategoryRow::initialize()`: `RemoteActionConfirmationModal`
@@ -1670,9 +1675,26 @@ pause.
 Issue report: [pkp-e2e#675](https://github.com/jardakotesovec/pkp-e2e/issues/675) ([docs/issues/U75-A11-review-panel-edit-stays-on-review.md](../issues/U75-A11-review-panel-edit-stays-on-review.md)).
 
 <a id="fn-f-a6"></a>
-**f-a6** — Note l: the drag a chapter row starts belongs to that
-chapter's author rows. Live-probed 2026-09-28: note td11, six runs.
-Issue report: [pkp-e2e#415](https://github.com/jardakotesovec/pkp-e2e/issues/415) ([docs/issues/U50-A10-toc-article-dropped-other-section-snaps-back.md](../issues/U50-A10-toc-article-dropped-other-section-snaps-back.md)).
+**f-a6** — Before the fix: lib/pkp
+`templates/controllers/grid/gridRow.tpl` told a chapter row from an
+author row with `is_a($row, 'GridCategoryRow')`, a short class name
+that stopped resolving when pkp/pkp-lib#11601 (`1810f38f34`,
+2025-07-07) removed the class aliases. The chapter row lost its
+`category` class, so the ordering script (note l) left it `orderable`
+among its own author rows, and a press on it started those rows' drag.
+Live-probed 2026-09-28, six runs on five books, the wizard among them:
+a chapter dragged above another never moved, and "Done" left the order
+unchanged; dragging a chapter title only moved it in among its own
+authors. Walked 2026-10-04 on OMP `main` with the default dataset, the
+same; on 3.5, where the short names still resolved, the chapter moved.
+Fixed by pkp/pkp-lib#13453 (for pkp/pkp-lib#11718; pkp-lib
+`3a5a039743`, merged 2026-10-07): `grid.tpl` and `gridRow.tpl` name
+`PKP\controllers\grid\CategoryGridHandler` and
+`PKP\controllers\grid\GridCategoryRow` in full. Live-probed 2026-10-08
+on OMP `main` (omp `084a19cc6`, lib/pkp `63cf1497b4`): note td11; every
+chapter row carried the class `category` again, before and after
+"Order".
+Issue: [pkp-e2e#415](https://github.com/jardakotesovec/pkp-e2e/issues/415), closed as completed 2026-10-07.
 
 <a id="fn-f-a7"></a>
 **f-a7** — Note l (`setDataElementInCategorySequence()`). Live-probed
@@ -1729,6 +1751,8 @@ Issue report: [pkp-e2e#806](https://github.com/jardakotesovec/pkp-e2e/issues/806
   `classes/controllers/grid/CategoryGridHandler.php`,
   `classes/controllers/grid/feature/OrderCategoryGridItemsFeature.php`,
   `OrderItemsFeature.php`, `templates/controllers/grid/feature/gridOrderFinishControls.tpl`,
+  `templates/controllers/grid/grid.tpl`, `templates/controllers/grid/gridRow.tpl`,
+  `js/classes/features/OrderCategoryGridItemsFeature.js`,
   `classes/linkAction/request/RemoteActionConfirmationModal.php`.
 - Chapter form: OMP `controllers/grid/users/chapter/form/ChapterForm.php`,
   `templates/controllers/grid/users/chapter/editChapter.tpl`,

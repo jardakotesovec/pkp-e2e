@@ -1,5 +1,5 @@
-// Helpers for the U72 chapter-list walks (A7 here, A6 in
-// ../toc-article-dropped-other-section-snaps-back/chapters.js). Requiring this file runs nothing.
+// Helpers for the U72 chapter-list walks (A7 here; A6's walk went with its report when
+// pkp-e2e#415 closed). Requiring this file runs nothing.
 // The "Chapters" list of OMP is a legacy category grid: a chapter is a `tbody.category_grid_body`,
 // its first `tr` the chapter row, then one `tr` per chapter author.
 const path = require('path');
