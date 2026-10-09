@@ -1,4 +1,6 @@
-// Kept walk for docs/issues/U42-A12-arxiv-id-loses-version.md (spec U42, register A12).
+// Kept walk for the PR review of pkp/pkp-lib#13479 (issue pkp/pkp-lib#13477): the arXiv version, the steps of the
+// issue report this repo filed as pkp-e2e#866 (spec U42, register A12, retired by the fix; the walk was
+// checks/issues/arxiv-id-loses-version/walk.js until then).
 // On PKP's default test dataset (a dataset fleet), as dbarnes, through the screens only:
 //   Setup: Settings › Workflow › "Metadata": "Enable references structuring and metadata lookup" and
 //   "Enable data citation metadata" ("Ask the author…") ticked and saved.
@@ -6,16 +8,17 @@
 //   "Edit citation" "Arxiv" box read, then typed as "arxiv:2101.12345v2", "https://arxiv.org/abs/2101.12345v2"
 //   and "2101.12345v2", each saved and read back on a reopened panel.
 //   Adding a data citation: › Data: ARXIV "https://arxiv.org/abs/1234.12345v2" saved and its row read;
-//   ARXIV "3456.34567v4" (refused on main), then "4567.45678" in the same panel (the control).
-// WALK_MODE=neighbour runs only the neighbour check for the fix trial (fix in and out): what the fix must leave
-// alone — a malformed "Arxiv" value still refused, an unversioned prefixed ID still stored bare, malformed
-// ARXIV identifiers still refused in a data citation, an old-style ID and a DOI unchanged — plus an old-style
-// versioned ID ("hep-th/9901001v1"), which the fix also lets through; an uppercase "V4" stays refused, and type
-// "URI" with the versioned arXiv address (a way round) is kept whole.
+//   ARXIV "3456.34567v4" (refused before the fix), then "4567.45678" in the same panel when it was refused.
+// Fixed when every read holds the version ("2101.12345v2", "1234.12345v2") and "3456.34567v4" saves.
+// WALK_MODE=neighbour runs only the neighbour check: what the fix must leave alone — a malformed "Arxiv" value
+// still refused, an unversioned prefixed ID still stored bare, malformed ARXIV identifiers still refused in a
+// data citation, an old-style ID and a DOI unchanged — plus an old-style versioned ID ("hep-th/9901001v1"),
+// which the fix also lets through; an uppercase "V4" stays refused, and type "URI" with the versioned arXiv
+// address is kept whole.
 // Run (reset the fleet first: npm run fleet-prep -- --feature <feature> --dataset <n> --reset):
-//   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/arxiv-id-loses-version/walk.js
+//   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13479/arxiv-version.js
 const {forEachApp, launch, signIn, signOut, screen, shot, record, note, serverLog} = require('../../../probe');
-const K = require('./lib.js');
+const K = require('../../issues/arxiv-id-loses-version/lib.js');
 
 const MODE = process.env.WALK_MODE || 'steps';
 const SUBMISSION = {ojs: 4, omp: 3, ops: 1};
