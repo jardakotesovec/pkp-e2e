@@ -2283,6 +2283,7 @@ Issue report: [pkp-e2e#430](https://github.com/jardakotesovec/pkp-e2e/issues/430
 
 <a id="fn-a33"></a>
 **f-a33** — Live-probed 2026-10-02 (note td22). The event-log `Collector` returns a task's entries ordered by `date_logged` alone; `TaskResource::toArray()` then calls `sortBy(['dateLogged' => 'desc', 'id' => 'desc'])` (c69d929b26, `pkp/pkp-lib#12451`, merged 2026-03-15), which Laravel's `sortByMany()` reads as the values to sort on, so it sorts nothing and lines of one second keep the database's order. Checked in PHP against the bundled Laravel, 2026-10-02: that array leaves a collection as it is, where `[['dateLogged', 'desc'], ['id', 'desc']]` sorts it. Note y saw the same on 2026-09-23 (events of one second in different orders between apps).
+Issue report: [pkp-e2e#948](https://github.com/jardakotesovec/pkp-e2e/issues/948) ([docs/issues/U37-A33-history-same-second-order.md](../issues/U37-A33-history-same-second-order.md)).
 
 <a id="fn-a34"></a>
 **f-a34** — Live-probed 2026-10-02 (note td21). `EditTask::rules()` (lib/pkp `api/v1/submissions/tasks/formRequests/EditTask.php`) checks `dateDue` with `after_or_equal:today` on every edit, and `saveWorkItem()` sends `dateDue` with every "Save" (note v), so an unchanged past date is refused. A press and a preprint server read in the code only: the same lib/pkp rule. The wording of the refusal is A10's.
