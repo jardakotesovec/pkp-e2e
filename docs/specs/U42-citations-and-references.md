@@ -1402,7 +1402,7 @@ Basis: probe, 2026-10-07. <sup>f-a27</sup>
 **OMP1 — A book with no references shows an empty "References" heading** · ✅ · retired. Widened 2026-09-24: the preprint page showed the same empty heading, so the finding moved to [A20](#a20), retired in its turn. <sup>f-omp1</sup>
 
 <a id="a20"></a>
-**A20 — On a press or a preprint server, a book or preprint with no references shows an empty "References" heading** · ✅ · retired. Fixed by pkp/omp#2502 and pkp/ops#1443 (for pkp/pkp-lib#13189), walked 2026-10-09 at the press PR's head before its merge and on the preprint server's `main`, where its half merged the same day: a book or a preprint with no references has no "References" block, and one with a reference shows the block as before (Rule 27). <sup>f-a20</sup>
+**A20 — On a press or a preprint server, a book or preprint with no references shows an empty "References" heading** · ✅ · retired. Fixed on a press by pkp/omp#2502 and on a preprint server by pkp/ops#1443 (both for pkp/pkp-lib#13189), checked on both 2026-10-09: a book's page and a preprint's page with no references now have no "References" block, as an article's page has none, and one with a reference shows the block as before (Rule 27). <sup>f-a20</sup>
 
 <a id="a21"></a>
 **A21 — In French the References page shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a21</sup>
