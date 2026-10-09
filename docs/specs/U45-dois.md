@@ -1820,6 +1820,11 @@ Left out of the scenarios above, by reason:
     with the queue held, a published issue ticked on the "Issues" tab
     reading "Submitted" right after "Deposit DOIs" is confirmed, an
     unticked article beside it still "Unregistered" {OJS}
+  - the guard for OMP4 (issue report
+    `docs/issues/U45-OMP4-press-mark-dois-current-version-only.md`):
+    scenario 11's press with "DOI Versioning" "Yes" and a book published
+    as 1.0 and 2.0, "Mark DOIs Registered" setting both versions' rows
+    "Registered" in "View all" {OMP}
   - "Mark DOIs Registered", "Mark DOIs Needs Sync" and "Mark DOIs
     Unregistered" on a work with two published major versions under "DOI
     Versioning" "Yes", every block of the "View all" window changing
@@ -1919,7 +1924,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
-| [OMP4](#omp4) | With "DOI Versioning" "Yes", the "Mark DOIs …" actions on a press change only the current version's DOIs | 🐞 | user-visible | — |
+| [OMP4](#omp4) | With "DOI Versioning" "Yes", the "Mark DOIs …" actions on a press change only the current version's DOIs | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A preprint server's Crossref "Username" help reads "see the advise above" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -2438,17 +2443,28 @@ chapter cannot have.
 Basis: probe, 2026-09-29. <sup>f-omp3</sup>
 
 <a id="omp4"></a>
-**OMP4 — With "DOI Versioning" "Yes", the "Mark DOIs …" actions on a press change only the current version's DOIs** · 🐞 · user-visible.
-A press has "DOI Versioning" set to "Yes" and a book published as 1.0
-and again as 2.0, made with "Major Revision". On the DOIs page a Press
-Manager ticks the book and confirms "Mark DOIs Registered". In the
-"View all" window, 2.0's "Monograph", chapter and "Format / PDF" rows
-read "Registered", while 1.0's keep "Unregistered". "Mark DOIs Needs
-Sync" and "Mark DOIs Unregistered" act the same way. A journal and a
-preprint server change every version's DOIs. The DOIs page offers no
-other way to set a status by hand, so a press cannot record there that
-an earlier version's DOIs were registered elsewhere, or undo that mark.
-Basis: probe, 2026-10-05. <sup>f-omp4</sup>
+**OMP4 — With "DOI Versioning" "Yes", the "Mark DOIs …" actions on a press change only the current version's DOIs** · 🐞 · low.
+On a press with "DOI Versioning" set to "Yes", a Press Manager ticks a
+book on the DOIs page and confirms "Mark DOIs Registered". The page
+answers "Items successfully marked registered", but only the newest
+published version's DOIs change. For a book published as 1.0 and again
+as 2.0, made with "Major Revision", the "View all" window shows 2.0's
+"Monograph", chapter and "Format / PDF" rows as "Registered" and 1.0's
+still as "Unregistered". "Mark DOIs Unregistered" and "Mark DOIs Needs
+Sync" skip the earlier versions the same way. A journal and a preprint
+server reach every version's DOIs.
+
+OMP comes with no registration agency plugin, so on a press without
+one added "Mark DOIs Registered" is the only way a DOI comes to read
+"Registered". A status set while a version is the newest one stays, so
+marking each version before the next is published works. After that
+the DOIs page cannot change it: a press cannot record there that an
+earlier version's DOIs were registered later, or take back a status it
+set.
+
+"DOI Versioning" is "No" by default on a press, and under "No" the
+versions of a book share their DOIs, so the actions reach them all.
+Basis: probe, 2026-10-09. <sup>f-omp4</sup>
 
 ### OPS
 

@@ -1,0 +1,13 @@
+--- a/classes/doi/Repository.php
++++ b/classes/doi/Repository.php
+@@ -116,8 +116,8 @@
+         $doiIds = Collection::make();
+ 
+         $submission = Repo::submission()->get($submissionId);
+-        /** @var Publication[] $publications */
+-        $publications = [$submission->getCurrentPublication()];
++        /** @var \Illuminate\Support\LazyCollection<Publication> $publications */
++        $publications = $submission->getData('publications');
+ 
+         /** @var PressDAO $contextDao */
+         $contextDao = Application::getContextDAO();
