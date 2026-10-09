@@ -9,40 +9,56 @@
   - 3.4: none (code; one free-text References box, no search)
   - 3.3: none (code; one free-text References box, no search)
 - **Introduced** `pkp/ui-library#716` for `pkp/pkp-lib#10692` · [c2f8e07d](https://github.com/pkp/ui-library/commit/c2f8e07d19caa0f6b2385d1ca48fc716d85d07c0) · 2025-09-16 · Božana Bokan (bozana), commits by GaziYucel; widened to numbers and yes/no values by `pkp/ui-library#733` for `pkp/pkp-lib#11902` · [8cecf866](https://github.com/pkp/ui-library/commit/8cecf8665a8ba750401808dd4f22d67abfac6b4e) · 2025-10-24
-- **Upstream** none found (2026-10-04)
+- **Upstream** none found (2026-10-09)
 - **Tracked in** spec U42 [A3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U42-citations-and-references.md#a3)
-- **Checked** 2026-10-04, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-09, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-09: `pkp/pkp-lib#13475` (for `pkp/pkp-lib#13455`, merged
+2026-10-08) removed each reference record's own API address (`_href`)
+from what the server sends, and so from what the search reads. That
+address held "citations" and "http", so both words used to keep every
+reference; for references like the five of the Steps they now keep
+none, which is right. The search still reads the record's other hidden
+values.
 
 ## Summary
 
-Typing a word into "Search references here" is expected to keep the
-rows that show it. The search also looks in data no row displays: a web
-address stored with each reference, its numbers, and a yes/no value
-saying whether the reference's details (authors, title, DOI) have been
-filled in. So "citations" or "http" keep every row, "false" keeps every
-reference whose details are not filled in, and a digit such as "0"
-keeps rows that show no digit at all.
+"Search references here", on a submission's "References" page, keeps
+references whose row does not show the typed text. It also matches
+values stored with each reference that no row displays: the reference's
+record number, its position in the list, its publication's record
+number, its lookup status (0 when no metadata lookup was requested for
+it), and a yes/no value saying whether its details (authors, title,
+DOI) have been filled in.
 
-Nothing is changed or lost: the search keeps rows it should have
-hidden, and clearing it shows the whole list again. A search for a word
-or a year a reference's text holds still keeps the right rows; the
-extra rows come with words and digits the stored data also holds.
+So a number typed to find a volume or a page also keeps the references
+whose hidden numbers contain it: "5" keeps the fifth reference of a
+list where no row shows a 5, and "0" keeps every reference. Words go
+right, apart from a few: "false" and "null" keep every reference.
+Nothing is changed or lost, and clearing the search shows the whole
+list again.
+
+That is with "Enable references structuring and metadata lookup" off,
+as it is on a new journal, press or server. With it on, more is stored
+out of sight, so more searches keep extra rows: a word held only by a
+reference's "Publisher or Host" kept its row, and "true" kept the one
+reference whose details were filled in.
 
 ## Impact
 
-- **Lost** Nothing; some searches keep rows without the typed word, or
-  keep the whole list.
+- **Lost** Nothing.
 - **Who** Anyone who opens a submission's "References" page and
-  searches it: the editors who may change the list, and authors and
-  others who see the page read-only, where the search works too. In the
-  walk, "epsilon" and "2021" kept only the right row, while "0" kept two
-  extra rows out of five.
-- **Way round** Reading the rows that are kept; the rows that do hold
-  the word are always among them.
+  searches it for a number: the editors who may change the list, and
+  authors and others who see the page read-only, where the search works
+  too. A short number is some reference's position in any long list; a
+  year matches a hidden number only once the site's record numbers
+  reach the thousands (read in the code, not walked).
+- **Way round** Reading the rows that are kept; the references whose
+  text holds the typed word are always among them.
 
-Low: a list filter that keeps too many rows, with the right rows always
-among them.
+Low: no reference is lost from a result; the search adds rows, on
+number searches and a few words.
 
 ## Steps to reproduce
 
@@ -53,10 +69,12 @@ Preconditions:
   › Metadata, "References"), so the workflow offers "References". No
   submission has a reference.
 - "Enable references structuring and metadata lookup", under
-  "References Metadata Lookup" on the same page, is off, as it is by
-  default. With it on, the install processes each reference after
-  "Add" and stores its status and any identifiers it finds, so step 7's
-  result differs (not walked).
+  "References Metadata Lookup" on the same page, is off, as it is in
+  the dataset and on a new journal, press or server. The install then
+  stores a reference's text and, when the text holds one, its DOI. With
+  the setting on it also runs a lookup for each reference after "Add",
+  and the lookup status is no longer 0, so step 5 no longer keeps every
+  row (read in the code).
 
 Steps:
 
@@ -75,19 +93,17 @@ Steps:
    Zeta final piece
    ```
 
-4. Type `citations` into "Search references here" and press Enter.
-5. Press the box's "Clear search phrase" (×), type `http` and press
-   Enter.
-6. The same with `false`.
-7. The same with `0`.
+4. Type `false` into "Search references here" and press Enter.
+5. Press the box's "Clear search phrase" (×), type `0` and press Enter.
+6. The same with `5`.
 
-**Expected.** Steps 4 to 6 keep no row, since no reference holds those
-words. Step 7 keeps the three references with a year, not "Epsilon
-note" or "Zeta final piece".
+**Expected.** Steps 4 and 6 keep no row, since no reference shows
+"false" or a 5. Step 5 keeps the three references with a year, not
+"Epsilon note" or "Zeta final piece".
 
-**Observed.** Each of the four searches keeps all five rows: "Alpha
-study 2020", "Beta trial 2021", "Gamma report 2022", "Epsilon note",
-"Zeta final piece".
+**Observed.** Steps 4 and 5 keep all five rows: "Alpha study 2020",
+"Beta trial 2021", "Gamma report 2022", "Epsilon note", "Zeta final
+piece". Step 6 keeps "Zeta final piece", the fifth reference.
 
 Control: `epsilon` keeps "Epsilon note" alone, `ZETA piece` keeps "Zeta
 final piece" alone, and `2021` keeps "Beta trial 2021" alone.
@@ -97,60 +113,91 @@ final piece" alone, and `2021` keeps "Beta trial 2021" alone.
 The table lists `citationsFiltered` from the ui-library's
 `citationManagerStore.js`
 (`lib/ui-library/src/managers/CitationManager/citationManagerStore.js`,
-lines 202 to 222). For each reference it takes every value of the
+lines 250 to 270). For each reference it takes every value of the
 reference's record as the REST API sends it (the keys dropped), turns
 them into one JSON string with `JSON.stringify()`, and keeps the row
 when that string contains each typed word.
 
-The record holds much more than the row shows (`lib/pkp/schemas/citation.json`):
+The record holds more than the row shows (`lib/pkp/schemas/citation.json`,
+mapped by `PKP\citation\maps\Schema::mapByProperties()`):
 
-- `_href`, the reference's own API address, which holds "http",
-  "citations", "api", the context's path and the host;
-- the authors' `orcid`, `openAlex` and `wikidata` addresses, which also
-  match "http" (each author carries every author field, filled in
-  empty, from `Schema::getCitationAuthorDataModel()`);
-- `id`, `publicationId`, `seq` and `processingStatus` (0 until lookup
-  has run, so "0" matches every reference on a journal without lookup);
-- `isStructured` (`false` until a reference's details are filled in);
-- `rawCitationWithLinks`, the text with its links as HTML (`href`,
-  `target`, `_blank`);
-- fields the row never shows: `sourceIssn`, `sourceHost`, `sourceType`,
-  `type`; and the reference's `openAlex` and `wikidata` addresses, which
-  a row with lookup on shows only as badges named "OpenAlex" and
-  "Wikidata".
+- `id`, `seq` (the position in the list, from 1) and `publicationId`. A
+  typed number that one of them contains keeps the row: step 6's "5" is
+  the fifth reference's `seq` and, on a fresh dataset, its `id`.
+- `processingStatus`: 0 when no lookup was requested
+  (`CitationProcessingStatus::NOT_PROCESSED`), which is every reference
+  added with lookup off, so "0" keeps them all. With lookup on it is -2
+  (queued), -1 (failed) or 1 to 5 (5 is processed).
+- `isStructured`: `false` until the reference has an identifier, a
+  title and an author (`Citation::isStructured()`).
+- Most fields that are not filled in, sent as `null`, which
+  `JSON.stringify()` writes as that word (`date` is sent as `''` and
+  `authors` as `[]`).
+- With lookup on, words and addresses the row does not show as text:
+  `type` and `sourceType` (such as "journal-article" and "journal"),
+  `sourceHost` and `sourceIssn`; each author's `orcid` (shown as an
+  icon), `openAlex` and `wikidata` (not shown); and the reference's own
+  `openAlex` and `wikidata` addresses (shown as badges named "OpenAlex"
+  and "Wikidata"). The addresses match "http".
+- `rawCitationWithLinks`: the reference's text again, with
+  `<a href='…' target='_blank'>` around an http, https or ftp address
+  when the text holds one (`Citation::getRawCitationWithLinks()`).
 
-JSON's own punctuation is in the string too, so typing `"` or `,`
-keeps every row.
+JSON's punctuation is in the string too: `"` keeps all five rows of the
+Steps, as `null` does.
 
 The row itself shows less, and what it shows depends on the lookup
-setting (`CitationManagerCellCitation.vue`): with lookup off, the
-reference's text alone; with lookup on, its DOI, URL, arXiv ID, handle
-and URN, and for a reference whose details are filled in, its title and,
-expanded, its authors, source, date, volume, issue, pages and text.
+setting (`CitationManagerCellCitation.vue`). With lookup off it shows
+the reference's text alone. With lookup on it shows the DOI, URL, arXiv
+ID, handle and URN; then, for a reference whose details are filled in,
+its title and, expanded, its authors, source, date, volume, issue, pages
+and text; for any other reference its text; and a badge, "No structured
+information found" or "Metadata lookup failed", where one applies.
 
 The first version of the search
 ([c2f8e07d](https://github.com/pkp/ui-library/commit/c2f8e07d19caa0f6b2385d1ca48fc716d85d07c0))
-already searched every text value of the record, the address included;
+looked for the whole phrase in every text value of the record, shown or
+not.
 [8cecf866](https://github.com/pkp/ui-library/commit/8cecf8665a8ba750401808dd4f22d67abfac6b4e)
-replaced it with the JSON string, adding the numbers, the yes/no value
-and the punctuation, while making the search match each word rather
-than the whole phrase.
+replaced that with the JSON string. The search now matches each typed
+word on its own, and the numbers, the yes/no value, `null` and the
+punctuation came in with `JSON.stringify()`.
 
-Reach: only the References table filters this way (checked in the
-code). The components that filter in the browser name the fields they
-search (`ManageEmailsPage.vue`: a mailable's `name` and `description`;
-`InsertContent.vue`: an item's `key`, `value` and `description`), and
-the other managers' stores send the phrase to the server.
+Nothing on record asks for the search to read values no row shows.
+8cecf866 is part of `pkp/ui-library#733` for `pkp/pkp-lib#11902`, whose
+list is identifier validation, dropdowns for type and source type, the
+lookup setting moved to the journal, and "reprocess all"; the search is
+not on it, nor in the commit message. `pkp/pkp-lib#10692`, the
+feature's issue, names it only as a line of its test list ("Test Search
+citations field"). The filter's own comment, "remove all keys from
+object and search in values only", gives its aim: keep field names out
+of the match. Hence Kind: defect.
+
+Reach:
+
+- Only the References table filters this way (checked in the code). The
+  components that filter in the browser name the fields they search
+  (`ManageEmailsPage.vue`: a mailable's `name` and `description`;
+  `InsertContent.vue`: an item's `key`, `value` and `description`), and
+  the other managers' stores send the phrase to the server.
+- With lookup on (walked on OMP): a reference given a URL, a title, an
+  author and a "Publisher or Host" in "Edit citation" was kept by a
+  word only its "Publisher or Host" (`sourceHost`) held, and by "true".
+- With lookup on (code): "5" matches every reference whose lookup has
+  completed (status 5), and a word such as "journal" or "book" every
+  reference whose stored `type` or `sourceType` holds it.
 
 ## Proposed fix
 
 Search the text the row shows, expanded or not, following the row's
 mode: with lookup off the reference's text alone; with lookup on also
 its identifiers, and for a reference whose details are filled in, the
-details the row displays. A reference whose details were filled in
-while lookup was on then no longer matches on its hidden title or DOI
-once lookup is off, because its row no longer shows them. Each typed
-word must still appear, as today: the components named above match the
+details the row displays. Once lookup is switched off, a reference
+that got a title or a DOI while it was on matches on its text alone,
+because its row shows nothing else. A DOI stored with lookup off is
+always in the text (`Repository::importCitations()` takes it from
+there), so not reading `doi` then loses nothing. Each typed word must
+still appear, as today: the components named above match the
 whole phrase, but per-word matching is the page's shipped behaviour and
 lets an editor search an author with a year. The diff is
 [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/reference-search-keeps-rows-without-word/fix.diff):
@@ -187,23 +234,21 @@ lets an editor search an author with a year. The diff is
 +		}
 ```
 
-Tried on `main` for OMP with lookup off (an earlier version searching
-the same fields in both modes, on OJS, OMP and OPS, gave the same
-result): steps 4 to 6 keep no row and step 7 keeps the three references
-with a year. The control searches keep the same single rows with the
-fix as without it, and clearing the search shows all five. With lookup on (OMP, the fix
-applied), a reference given a URL, a title, an author and a "Publisher
-or Host" in "Edit citation" was found by a word of its title, its
-author's family name and its own text, and not by the word only its
-"Publisher or Host" held.
+Tried on `main` on 2026-10-09, on OJS, OMP and OPS with lookup off:
+steps 4 and 6 keep no row and step 5 keeps the three references with a
+year. The control words keep the same single rows as without the fix,
+and clearing the search shows all five. With lookup on (OMP), the
+reference edited as in the Cause's "Reach" is found by a word of its
+title, its author's family name and its own text, and no longer by the
+word only its "Publisher or Host" holds, nor by "true".
 
 **Alternatives**
 
 - Search the same fields whatever the setting: a reference's hidden
   title or DOI would still match with lookup off, the fault this report
   is about.
-- Leave out only the address and the ids: the yes/no value, the
-  processing status and the fields no row shows would still match.
+- Leave out only the ids: the yes/no value, the processing status, the
+  empty fields and the fields no row shows would still match.
 - Search the row's rendered text in the page: it would miss what a
   structured reference shows only when expanded.
 
@@ -211,13 +256,15 @@ author's family name and its own text, and not by the word only its
 
 - The date matches as stored (`2020-01-05`), while the row shows it
   formatted; a year matches either way.
+- The row shows the pages only when both the first and the last are
+  set; the fix matches either.
 - With the fix, a search that keeps no row shows the empty list's line,
   "The citations list is empty, please add citations above.", as any
   search without a match does today. It reads as if the list had no
   reference; a line such as "No reference matches the search" would
   suit, a wording change apart from this fix.
-- A guard: a Planned e2e item in the spec, or a ui-library unit test of
-  the store's filter.
+- A guard: a ui-library unit test of the store's filter, or an
+  end-to-end test of the search in pkp-e2e (planned in its spec U42).
 
 Small: one function in one ui-library store, following the
 named-fields pattern of the components that filter in the browser,
@@ -229,26 +276,61 @@ tried as written.
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/reference-search-keeps-rows-without-word/walk.js)
   (helpers in `../pasted-repeat-reference-dropped-saved/lib.js`) takes
   the Steps on PKP's default test dataset, freshly loaded:
-  `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/reference-search-keeps-rows-without-word/walk.js`;
-  `MODE=nb` runs the control searches alone.
-- Walked on `main`, PostgreSQL, pkp/datasets 566bb1f (2026-10-03), at
-  OJS ff004d0973 (lib/pkp 987776cd04, ui-library 64d67363), OMP
-  3b0ecf794 and OPS c8af945bb7 (lib/pkp 3dc90c81a6, ui-library
-  280f98c5). `citationManagerStore.js` is the same in the three
-  checkouts. No server error or script error was logged during the
-  walks.
-- With metadata lookup on, the unpatched search was not walked; the
-  lookup-on fields of the Cause are read from `citation.json` and
-  `CitationManagerCellCitation.vue`. The fix's lookup-on branch was
-  walked once on OMP with `MODE=lookup` (a manager ticks "Enable
-  references structuring and metadata lookup", then the edit and the
-  four searches).
-- 3.5 (code): `stable-3_5_0` at OJS c1cee76b95, lib/pkp 771474347e,
-  ui-library d4e01883: one "References" box (`PKPCitationsForm`, field
-  `citationsRaw`) and no `CitationManager` in ui-library, so no list and
-  no search.
-- 3.4 and 3.3 (code): `upstream/stable-3_4_0` (OJS d68934d0d1, lib/pkp
-  767353f4fe, ui-library ee684b34) and `stable-3_3_0` (OJS ac77c9fb35,
-  lib/pkp ac3fa73402, ui-library 96959f9e): the same free-text box and
+  `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/reference-search-keeps-rows-without-word/walk.js`.
+  After the Steps the same walk types `citations`, `http`, `null`, `"`
+  and the three control words. `MODE=nb` runs the control words alone.
+  `MODE=lookup` is the lookup-on walk: `rvaca` ticks "Enable references
+  structuring and metadata lookup"; `dbarnes` adds "Delta paper 2023"
+  and "Epsilon note", gives the first a URL, a title, an author and a
+  "Publisher or Host" in "Edit citation", and searches a word of the
+  title, the author's family name, `delta`, the word only "Publisher or
+  Host" holds, and `true`.
+- Walked on `main` on 2026-10-09, PostgreSQL, pkp/datasets 1a196c3
+  (2026-10-08), at OJS 6d5b793c4e (lib/pkp d1bc3a9ecc), OMP 57a9235110
+  and OPS fd78a0bcd8 (lib/pkp 27938abd4c), ui-library 38814ea1 on the
+  three. `citationManagerStore.js`, `citation.json`, `maps/Schema.php`
+  and `CitationManagerCellCitation.vue` are the same in the three
+  checkouts. On each app: `false`, `0`, `null` and `"` kept all five
+  rows; `5` kept "Zeta final piece"; `citations` and `http` kept none
+  ("The citations list is empty, please add citations above."); the
+  control words kept one row each. No server error or script error was
+  logged.
+- Lookup on, without the fix, walked on OMP alone: every one of the
+  five searches kept the edited reference's row, "Epsilon note" never.
+  What a lookup itself stores (the status after it has run, `type`,
+  `sourceType`, the addresses) was not walked: those bullets of the
+  Cause are read from `citation.json`, `CitationProcessingStatus` and
+  `CitationManagerCellCitation.vue`.
+- The lookup setting's default: `citationsMetadataLookup` has no
+  default in `lib/pkp/schemas/context.json` and nothing sets it when a
+  journal, press or server is created (a search of the app and
+  `lib/pkp` for the name); the dataset has it off on the three apps.
+- That a year can match a record number (Impact, "Who") follows from
+  the code read and was not walked: the dataset's record numbers are
+  too small.
+- The fix, tried on 2026-10-09 at the same commits:
+  `node bin/try-fix.js apply shared/playwright/checks/issues/reference-search-keeps-rows-without-word/fix.diff ojs omp ops`,
+  the kept script on the three apps, `MODE=lookup` on OMP, then
+  `revert`. With the fix `null` and `"` kept no row either. The control
+  words ride in the same walk, with the fix and without it.
+- What `pkp/pkp-lib#13475` changed: pkp-lib
+  [cf7e3e494c](https://github.com/pkp/pkp-lib/commit/cf7e3e494c3002803c14d55536f4a1337c398963)
+  removed `_href` from `schemas/citation.json` and
+  `classes/citation/maps/Schema.php`, and made `isStructured` and
+  `processingStatus` read-only in the API; both are still sent.
+- What the search was meant to read: the bodies of `pkp/pkp-lib#11902`
+  and `pkp/ui-library#733`, the comments of `pkp/pkp-lib#11902`,
+  `pkp/ui-library#733` and `pkp/pkp-lib#10692`, and the message of
+  8cecf866 were read for "search" and "filter" on 2026-10-09.
+- 3.5 (code): `stable-3_5_0` at OJS c6e2c3a879 (lib/pkp d702d012dd),
+  OMP ddc6abf5a9 and OPS dc8a938ab0 (lib/pkp 8094f06bf5), ui-library
+  2576e00a: one "References" box (`PKPCitationsForm`, field
+  `citationsRaw`), no `schemas/citation.json` and no `CitationManager`
+  in ui-library, so no list and no search to walk.
+- 3.4 and 3.3 (code): `upstream/stable-3_4_0` (OJS 4dc0c17acf, lib/pkp
+  8bf0ab5072, ui-library ee684b34) and `stable-3_3_0` (OJS a752a1ce8e,
+  lib/pkp 8c5b3f7f5c, ui-library 96959f9e): the same free-text box and
   no `CitationManager`.
-- Trackers searched on 2026-10-04: `pkp/pkp-lib` and `pkp/ui-library`.
+- Trackers searched on 2026-10-09: `pkp/pkp-lib`, `pkp/ui-library` and
+  `pkp/ojs`. `pkp/pkp-lib#13455` lists the removal of `_href` and does
+  not mention the search.

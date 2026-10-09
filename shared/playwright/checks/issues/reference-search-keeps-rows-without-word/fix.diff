@@ -1,6 +1,6 @@
 --- a/lib/ui-library/src/managers/CitationManager/citationManagerStore.js
 +++ b/lib/ui-library/src/managers/CitationManager/citationManagerStore.js
-@@ -207,19 +207,49 @@
+@@ -255,19 +255,49 @@
  
  			return searchWords.length > 0
  				? data.filter((citation) => {
@@ -23,8 +23,8 @@
 +		 * The text a reference's row shows, expanded or not
 +		 * (CitationManagerCellCitation): the raw text alone while lookup is
 +		 * off; with lookup on also the identifiers and, for a structured
-+		 * reference, its details. Not the whole record, which also holds the
-+		 * API address, ids, flags and fields no row displays.
++		 * reference, its details. Not the whole record, which also holds
++		 * ids, the lookup status, flags and fields no row displays.
 +		 */
 +		function getSearchableText(citation) {
 +			const values = [citation.rawCitation];

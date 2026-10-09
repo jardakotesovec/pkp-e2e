@@ -933,7 +933,7 @@ Left out of the scenarios above, by reason:
   - the guard for A20 (issue report `docs/issues/U42-A20-book-preprint-empty-references-heading.md`): a published book on a press and a posted preprint with no references show no "References" section; with one reference they show it
   - the guard for A10 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a data citation added in the submission wizard's "Data" section shows in its table and on "Review" at once, without a reload
   - the guard for A2 (issue report `docs/issues/U42-A2-pasted-repeat-reference-dropped-saved.md`): "Add" with a paste that repeats a listed reference keeps the repeated line in the box and says it was skipped, while the new lines are added
-  - the guard for A3 (issue report `docs/issues/U42-A3-reference-search-keeps-rows-without-word.md`): "Search references here" with a word no row shows (such as "http" or "citations") keeps no row, and a word a row shows keeps that row
+  - the guard for A3 (issue report `docs/issues/U42-A3-reference-search-keeps-rows-without-word.md`): "Search references here" with a word or a digit no row shows (such as "false", or "5" on a list of five references without a 5) keeps no row, and a word a row shows keeps that row
   - the guard for A15 (issue report `docs/issues/U42-A15-data-citation-identifier-cannot-be-removed.md`): on "Edit Data Citation", choosing the empty "Identifier type" and clearing "Identifier" removes the identifier, and a cleared "Repository", "Year" or "URL" is gone on the next "Edit"
   - a reference whose lookup failed for good (Rules 12, 13; A5
     retired): its row's "Metadata lookup failed" badge, the box counting
@@ -1062,7 +1062,7 @@ entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A2](#a2) | Pasting a reference already in the list drops it silently, and the References page still says "Saved" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A3](#a3) | "Search references here" keeps references whose text does not contain the typed word | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
+| [A3](#a3) | "Search references here" keeps references whose text does not contain the typed word | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A4](#a4) | On a press or a preprint server, the References page says metadata lookup "is enabled for this Journal" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A8](#a8) | A data citation added after the Data Citations table was ordered appears first, not last | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | An author can submit with no data citations when the journal requires them | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1111,19 +1111,27 @@ Basis: probe, 2026-10-04. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — "Search references here" keeps references whose text does not contain the typed word** · 🐞 · low.
-Typing a word into "Search references here" is expected to keep the rows
-that show it. The search also looks in data no row displays: numbers
-stored with the reference (among them a 0 while no metadata lookup has
-run for it), and a yes/no value saying whether the reference is
-structured (Rule 11). So on a journal whose metadata lookup has never
-been switched on, "false" keeps every row and so does "0", also the rows
-that show no digit at all. Nothing is changed or lost: the search
-keeps rows it should have hidden, and clearing it shows the whole list
-again. A search for a word or a year a reference's text holds still
-keeps the right rows; the extra rows come with words and digits the
-stored data also holds.
-Basis: probe, 2026-10-04. <sup>f-a3</sup>
-Report: refresh owed — `pkp/pkp-lib#13475` (issue `pkp/pkp-lib#13455`) removes the web address stored with each reference, so the report's steps 4 and 5 ("citations", "http") keep no row and its Summary and Cause name a value that is gone; "false" and "0" still keep all five rows (walked at the PR head `cf7e3e494c`, all three apps) (2026-10-08)
+"Search references here", on a submission's "References" page, keeps
+references whose row does not show the typed text. It also matches
+values stored with each reference that no row displays: the reference's
+record number, its position in the list, its publication's record
+number, its lookup status (0 when no metadata lookup was requested for
+it), and a yes/no value saying whether its details (authors, title,
+DOI) have been filled in.
+
+So a number typed to find a volume or a page also keeps the references
+whose hidden numbers contain it: "5" keeps the fifth reference of a
+list where no row shows a 5, and "0" keeps every reference. Words go
+right, apart from a few: "false" and "null" keep every reference.
+Nothing is changed or lost, and clearing the search shows the whole
+list again.
+
+That is with "Enable references structuring and metadata lookup" off,
+as it is on a new journal, press or server. With it on, more is stored
+out of sight, so more searches keep extra rows: a word held only by a
+reference's "Publisher or Host" kept its row, and "true" kept the one
+reference whose details were filled in.
+Basis: probe, 2026-10-09. <sup>f-a3</sup>
 
 <a id="a4"></a>
 **A4 — On a press or a preprint server, the References page says metadata lookup "is enabled for this Journal"** · 🐞 · low.
