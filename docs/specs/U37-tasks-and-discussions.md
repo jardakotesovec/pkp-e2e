@@ -1386,6 +1386,7 @@ Left out of the scenarios above, by reason:
   - the guard for A10 (issue report `docs/issues/U37-A10-past-due-date-speaks-of-start-date.md`): a past "Due Date" typed into the box is refused with a message that names the due date (Rule 2d)
   - the guard for A2 (issue report `docs/issues/U37-A2-discussion-window-placeholder-subtitle.md`): the "Add" and "Edit" windows hold no placeholder line under the title (Rule 10)
   - the guard for A21 (issue report `docs/issues/U37-A21-error-list-calls-message-box-undefined.md`): a "Save" refused with the message box empty lists "Go to Message: This field is required." in the "Add", "Edit" and template windows (Rule 11a)
+  - the guard for A34 (issue report `docs/issues/U37-A34-overdue-task-edit-refused.md`): a task past its due date renamed in "Edit" saves with its due date kept and no "Due date changed" line in its History (the seed makes a past-due task by taking the string `after_or_equal:today` out of the add request's rules in the scenario builder, which a fix that wraps the rule would no longer match)
   - the guard for A29 (issue report `docs/issues/U37-A29-add-window-file-missing-from-history.md`): a file attached in the "Add" window shows "{file name} uploaded by …" with "Download" in the History (Rule 18)
   - the guard for OMP1 (issue report `docs/issues/U37-OMP1-external-reviewer-listed-as-internal.md`): on a press, each reviewer in a discussion's "Participants" reads the reviewer role of the stage they review ("External Reviewer" on External Review) in the editor's and the reviewer's windows (Rule 20)
   - the guard for A31 (issue report `docs/issues/U37-A31-auto-added-item-letter-placeholders.md`): an auto-added discussion's letter, and one a manager adds without taking part, closes with no "{$signature}" or "{$senderName}" left as typed (Rules 10d, 9)
@@ -1467,7 +1468,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A31](#a31) | A discussion's letter keeps "{$signature}" when its writer is not a participant: auto-added, or a manager stays out | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A32](#a32) | A screen reader hears a task row's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, under one shared name | 🐞 | minor | — |
 | [A33](#a33) | A History lists events saved in the same second in no set order | 🐞 | minor | — |
-| [A34](#a34) | An overdue task's "Edit" refuses every "Save", even a rename, until its due date is moved | 🐞 | user-visible | — |
+| [A34](#a34) | An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later | 🐞 | medium | issues (claude), 2026-10-09 — re-verified |
 | [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OMP1](#omp1) | A press's discussion window lists an External Review reviewer as "Internal Reviewer" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | A preprint server's "Assign Editor" template has no text, and choosing it leaves the message box showing text "Save" ignores | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
@@ -1855,17 +1856,26 @@ file, can read in either order.
 Basis: probe, 2026-10-02. <sup>[f-a33](#fn-a33)</sup>
 
 <a id="a34"></a>
-**A34 — An overdue task cannot be edited until its due date is moved** · 🐞 · user-visible.
-Once a task's due date has passed, its "Edit" window shows that date
-under "Due Date", and every "Save" that leaves it there is refused with
-"Start date should be greater than or equal to today" under "Due Date"
-and "Please correct one error.", even when only "Name" was changed.
-Whoever manages the task expects to rename it, add a participant or
-rewrite its message without touching the deadline; instead they must
-first move the due date to today or later. The check should apply only
-to a due date that was changed. Seen on a journal; a press and a
-preprint server were not tried.
-Basis: probe, 2026-10-02. <sup>[f-a34](#fn-a34)</sup>
+**A34 — An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later** · 🐞 · medium.
+Once a task's due date has passed, its "Edit" window in a stage's "Tasks
+& Discussions" refuses every "Save" that leaves the date as it is. The
+window stays open with "Start date should be greater than or equal to
+today" under "Due Date", even when only "Name" was changed or a
+participant was added. A task has no start date: the message is about
+the due date.
+
+Whoever edits the task expects to rename it, give it an owner or add a
+person without touching the deadline. The way round is to set "Due
+Date" to today or later in the same window. That takes the "Overdue"
+marking off the task; the missed date stays in the task's History, and
+nothing else follows a task's due date.
+
+The screens require a due date on every task, so every open task that
+runs late is affected. That includes a task added automatically from a
+template, which has no owner until someone edits it. On such a task an
+edit that is accepted also records "Due date changed" in the History,
+with the same date twice.
+Basis: probe, 2026-10-09. <sup>[f-a34](#fn-a34)</sup>
 
 <a id="a35"></a>
 **A35 — A Copyeditor is offered "Workflow Files" with no stage to choose** · ❓ · minor.
