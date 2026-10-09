@@ -1468,7 +1468,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A32](#a32) | A screen reader hears a task row's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, under one shared name | 🐞 | minor | — |
 | [A33](#a33) | A History lists events saved in the same second in no set order | 🐞 | minor | — |
 | [A34](#a34) | An overdue task's "Edit" refuses every "Save", even a rename, until its due date is moved | 🐞 | user-visible | — |
-| [A36](#a36) | A manager-level person taken off an item while its window is open is told "An unexpected error has occurred" when replying | 🐞 | minor | — |
+| [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OMP1](#omp1) | A press's discussion window lists an External Review reviewer as "Internal Reviewer" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | A preprint server's "Assign Editor" template has no text, and choosing it leaves the message box showing text "Save" ignores | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | An hour after writing it, an Author or assistant can change nothing in their own discussion | ❓ | user-visible | — |
@@ -1883,17 +1883,28 @@ source is offered but can never be used, and nothing says why.
 Basis: probe, 2026-10-05. <sup>[f-a35](#fn-a35)</sup>
 
 <a id="a36"></a>
-**A36 — A manager-level person taken off an item while its window is open is told "An unexpected error has occurred"** · 🐞 · minor.
-A manager-level person has a discussion's window open while someone
-else's "Edit" unticks them as a participant. Their "Add New Message" ›
-"Save" then opens "Error" with "An unexpected error has occurred. Please
-reload the page and try again.", and the message is not saved. A Section
-Editor taken off the same way is told why: "You do not have permission
-to modify this discussion." (Rule 13d). The manager-level person is told
-the application failed, when it refused a reply from someone no longer a
-participant; after a reload the window reads "To add a new message,
-please assign yourself as a participant.".
-Basis: probe, 2026-10-05. <sup>[f-a36](#fn-a36)</sup>
+**A36 — A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason** · 🐞 · low.
+A manager-level user (a Journal Manager or Journal Editor, or the same
+level on a press or a preprint server) has a discussion's window open.
+Someone else opens the discussion's "Edit", unticks them as a
+participant and saves. Their "Add New Message" › "Save" in the window
+still open then shows "Error" with "An unexpected error has occurred.
+Please reload the page and try again.". The reply is not saved, which is
+right, since only participants may reply; they are not told that.
+
+The server does not fail. It refuses the reply, in a form the page
+cannot show, and writes one error line to its log for each try. "OK"
+closes "Error" and the typed reply is still in its box, so it can be
+copied before the reload. After a reload the window says what to do: "To
+add a new message, please assign yourself as a participant.".
+
+It happens only in a window opened before the untick, for as long as
+that window stays open; a window opened afterwards has that line in
+place of the button. A Section Editor or a Copyeditor taken off the same
+way is told why: "You do not have permission to modify this
+discussion.". On 3.5 the same reply is saved, because a reply there
+makes its writer a participant again.
+Basis: probe, 2026-10-09. <sup>[f-a36](#fn-a36)</sup>
 
 ### OMP
 
