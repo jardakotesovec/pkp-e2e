@@ -4245,6 +4245,7 @@ left "Unregistered", so the "Needs Sync" and "Unregistered" reads agree
 with the code reading rather than prove it alone. Controls, same
 runs: OJS ("Article", "PDF") and OPS ("Preprint", "PDF") changed both
 versions' blocks for all three actions.
+Issue report: [pkp-e2e#944](https://github.com/jardakotesovec/pkp-e2e/issues/944) ([docs/issues/U45-OMP4-press-mark-dois-current-version-only.md](../issues/U45-OMP4-press-mark-dois-current-version-only.md)).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `ops/locale/en/manager.po`
