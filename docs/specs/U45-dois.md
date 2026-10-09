@@ -1815,6 +1815,11 @@ Left out of the scenarios above, by reason:
     whose "Title" was saved with an italic word and an "&" listed on the
     DOIs page with the title as its workflow page shows it, the word in
     italics and no tag or entity printed
+  - the guard for OJS4 (issue report
+    `docs/issues/U45-OJS4-issue-deposit-dois-stays-unregistered.md`):
+    with the queue held, a published issue ticked on the "Issues" tab
+    reading "Submitted" right after "Deposit DOIs" is confirmed, an
+    unticked article beside it still "Unregistered" {OJS}
   - "Mark DOIs Registered", "Mark DOIs Needs Sync" and "Mark DOIs
     Unregistered" on a work with two published major versions under "DOI
     Versioning" "Yes", every block of the "View all" window changing
@@ -1910,7 +1915,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A24](#a24) | The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OJS2](#ojs2) | On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it | 🐞 | high · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
+| [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OJS5](#ojs5) | "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing | 🐞 | high | issues (claude), 2026-10-06 — re-verified |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -2335,20 +2340,34 @@ warnings at publishing are new on `main` and in no release.
 Basis: probe, 2026-10-01. <sup>f-ojs3</sup>
 
 <a id="ojs4"></a>
-**OJS4 — "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered"** · 🐞 · minor · crash: server.
-On a journal with Crossref or DataCite configured, a Journal Manager
-ticks published issues on the DOIs page's "Issues" tab and confirms
-"Deposit DOIs" ("…for 2 item(s) to Crossref…"). The page shows "Items
-successfully submitted for deposit" and the deposit goes ahead in the
-background, but each issue still reads "Unregistered": right after, after
-a reload and after the deposit has run. Its agency panel still reads
-"The metadata for this item has not been submitted to {agency}." with
-"Deposit DOI(s)". The manager expects "Submitted", as articles get from
-the same action, so the page shows no sign that the issues were sent.
-"Deposit All" marks the same issues "Submitted". With DataCite the
-deposit itself then fails on the server, as every DataCite issue
-deposit does ([OJS2](#ojs2)).
-Basis: probe, 2026-10-05. <sup>f-ojs4</sup>
+**OJS4 — "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered"** · 🐞 · low.
+On a journal with Crossref or DataCite configured and "Issues" ticked
+under "Items with DOIs", a Journal Manager ticks a published issue on
+the DOIs page's "Issues" tab and confirms "Deposit DOIs". The page shows
+"Items successfully submitted for deposit" and the issue's deposit is
+queued, but the issue still reads "Unregistered". Expanded, it still
+reads "The metadata for this item has not been submitted to {agency}."
+over a "Deposit DOI(s)" button. The manager expects "Submitted", which
+an article gets from the same action and an issue gets from "Deposit
+All".
+
+The deposit is not lost: it runs from the queue, and the agency's answer
+then sets "Registered" or "Error". Until it has run, the page says the
+issue was not sent. A second "Deposit DOIs", the issue's own "Deposit
+DOI(s)" or "Deposit All" each queues one more deposit of the same issue,
+which sends the agency the same record again.
+
+It shows where a worker or a cron job runs the queue, until the next
+run. On the default setting, where queued jobs run at the end of page
+loads, the deposit is tried within a page load, and "Unregistered" stays
+only when that try cannot connect to the agency. There "Unregistered" is
+the true status and "Deposit All" takes the issue again, while an
+article in the same case is left "Submitted" for good, a fault of its
+own
+([A18](#a18)).
+Marking the issue "Submitted" would leave it stuck the same way, so this
+fix belongs with or after that one.
+Basis: probe, 2026-10-09. <sup>f-ojs4</sup>
 
 <a id="ojs5"></a>
 **OJS5 — "Deposit All" marks a galley DOI "Submitted" without sending it when the article DOI is registered or missing** · 🐞 · high.
