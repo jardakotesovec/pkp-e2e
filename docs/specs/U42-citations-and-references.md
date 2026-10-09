@@ -1093,7 +1093,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | References page: the lookup's progress box counts only structured references and says "All 2 done" over five | ✅ | retired | — |
 | [A7](#a7) | A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off | ✅ | retired | — |
 | [A23](#a23) | A new version taken while its references are being looked up shows "Processing references - 0/n" for good | ✅ | retired | — |
-| [A12](#a12) | Retired: an arXiv ID entered for a reference or a data citation lost its version, or was refused with it; fixed by pkp/pkp-lib#13479 | ✅ | retired | PR review (claude), 2026-10-08 — fixed at pkp/pkp-lib#13479's head |
+| [A12](#a12) | Retired: an arXiv ID entered for a reference or a data citation lost its version, or was refused with it; fixed by pkp/pkp-lib#13479 | ✅ | retired | PR review (claude), 2026-10-09 — fixed by pkp/pkp-lib#13479, merged |
 | [A1](#a1) | A Site Administrator with no role in the journal is offered the References controls, but every change is refused | ✅ | retired | — |
 | [A18](#a18) | A References change carried to "Review" by the step rail is lost on "Submit" | ✅ | retired | — |
 | [OMP1](#omp1) | A book with no references shows an empty "References" heading | ✅ | retired | — |
@@ -1389,7 +1389,7 @@ Basis: probe, 2026-10-07. <sup>f-a27</sup>
 **A7 — A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`), merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`), walked on the apps' `main` the same day: `importCitations()` stores the DOI found in a wizard reference's text with lookup off, as "Add" does (Rule 17). <sup>f-a7</sup>
 
 <a id="a12"></a>
-**A12 — An arXiv ID entered for a reference or a data citation loses its version, or is refused with it** · ✅ · retired. Fixed by `pkp/pkp-lib#13479` (for `pkp/pkp-lib#13477`, the team's copy of the issue report), verified 2026-10-08 at the PR's head before its merge: "Edit citation", the lookup's reading of a reference's text and a data citation of type "ARXIV" all keep the version ([Fields & validation](#fields)). <sup>f-a12</sup>
+**A12 — An arXiv ID entered for a reference or a data citation loses its version, or is refused with it** · ✅ · retired. Fixed by `pkp/pkp-lib#13479` (for `pkp/pkp-lib#13477`, the team's copy of the issue report), merged 2026-10-09 (pkp-lib `7cc6c81615`; no app's pointer carries it yet), reviewed at the PR's head before the merge and walked at the merge the same day: "Edit citation", the lookup's reading of a reference's text and a data citation of type "ARXIV" all keep the version ([Fields & validation](#fields)). <sup>f-a12</sup>
 
 <a id="a23"></a>
 **A23 — A new version taken while its references are being looked up shows "Processing references - 0/n" for good** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`), found at the PR heads and fixed before the merge, merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`): `copyCitations()` queues a lookup of its own for a copy taken mid-lookup (Rule 26). <sup>f-a23</sup>
@@ -2536,7 +2536,16 @@ proposed; the same base and app tips, ojs `25a11bbe9e`):
 and "Http://example.org/sentence" as the references' URLs, as written,
 on the three apps, and `walk.js` reads every case as the PR intends
 (`.reports/pr13479/r3-*/`, `caps/`).
-Issue report: [pkp-e2e#866](https://github.com/jardakotesovec/pkp-e2e/issues/866); the report, its `fix.diff` and its place under `checks/issues/` deleted with the retirement (git keeps them), the issue to be closed when the PR merges.
+Merged 2026-10-09 16:36 UTC as pkp-lib `7cc6c81615`, a merge of the
+reviewed head `f8c4d3176e` on its base (`git diff` of the two trees
+empty). On the apps' tips with `lib/pkp` at the merge (ojs `0be39c5ce4`,
+omp `77ca57587a`, ops `dafd9b3263`; the default dataset, the same four
+kept walks, `.reports/pr13479/merged-*/`): the lookup and the three
+typed forms read "2101.12345v2", of type "ARXIV" the address saved as
+"1234.12345v2" and "3456.34567v4" as typed; `walk.js` 21 cases changed
+as intended and 7 unchanged per app; the "URI" and "PURL" addresses and
+the two capital-scheme addresses kept as written.
+Issue report: [pkp-e2e#866](https://github.com/jardakotesovec/pkp-e2e/issues/866), closed 2026-10-09 with the fix; the report, its `fix.diff` and its place under `checks/issues/` deleted (git keeps them).
 
 <a id="fn-f-a13"></a>
 **f-a13 — A13 evidence.** Note h (`Citation::isStructured()` tests that
