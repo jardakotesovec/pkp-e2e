@@ -156,7 +156,12 @@ No suite is meant to run on any of the three lines.
   the Author group), so a Native XML export and an ORCID work deposit of a
   seeded submission fail on it until its role is set in the Contributors
   window (U63, U04 claim checks). A scenario key that reaches another
-  `main`-only class answers 500 naming it. The suites' page objects follow
+  `main`-only class answers 500 naming it; the submission scenario's
+  `published` key is one (400 unless the submission stands in Copyediting
+  or Production, then 500 on `updateCurrentPublication()`): a 3.5 drive
+  seeds `decisions: ['skipExternalReview', 'sendToProduction']` and
+  publishes on screen, as `checks/U63/I09/doaj35.js` `publish35` does
+  (U63, U17 claim checks, 2026-10-09). The suites' page objects follow
   `main`'s screens, and those the issue walks keep meeting differ on 3.5:
   the submission wizard opens on "Details", then "Upload Files"; "Create
   New Version" is a button in the publication page's header, confirmed
