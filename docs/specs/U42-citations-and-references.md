@@ -2014,12 +2014,12 @@ same condition; until then it tested `$publication->getData('citationsRaw')`
 without the `(string)` cast, so its condition held for a preprint with no
 references. `ArticleHandler` and `PreprintHandler` assign the publication's
 `citations` without reading the context's `citations` setting. OMP
-`monograph_full.tpl`, at the head of pkp/omp#2502 (`52cf201a96`, read
-2026-10-09 before its merge): `{if count($citations) || (string)
-$publication->getData('citationsRaw')}`, and `{if count($citations)}` around
-the list; before the PR both tested `$citations`, the lazy collection
-`CatalogBookHandler` assigns, which a template condition treats as true even
-when it holds nothing. No template in
+`monograph_full.tpl`, since omp `77ca57587a` (pkp/omp#2502, merged
+2026-10-09; read that day at the PR head `52cf201a96`, before its merge):
+`{if count($citations) || (string) $publication->getData('citationsRaw')}`,
+and `{if count($citations)}` around the list; until then both tested
+`$citations`, the lazy collection `CatalogBookHandler` assigns, which a
+template condition treats as true even when it holds nothing. No template in
 any app's `templates/` or default theme renders `dataCitations` (grep
 2026-09-24). Live-probed 2026-09-24 (Actors row 8; Rule 27), all three
 apps, signed out, two runs on OMP and OPS: a published item with "Zulu
@@ -2204,7 +2204,7 @@ ensuring datasets are properly credited and appear alongside other
 references in the publication.". Live-probed 2026-10-09 (Rule 27's
 sentence on a version with no references; scenario 3's control; A20
 retired), OMP at the PR head `52cf201a96` of pkp/omp#2502, before its
-merge, and OPS at `dafd9b3263`: note f-a20.
+merge that day as omp `77ca57587a`, and OPS at `dafd9b3263`: note f-a20.
 
 <a id="fn-q24"></a>
 **q24** — Live-probed 2026-10-07 (the data citation panel; "Creators";
@@ -2559,28 +2559,38 @@ before and after).
 Live-probed 2026-09-24, OMP and OPS, two runs each: an item with no
 references showed the heading "References" over an empty block, with the
 References setting on and off; OJS showed no heading.
-Fixed by pkp/omp#2502 (two lines of `monograph_full.tpl`, open on
-2026-10-09) and pkp/ops#1443 (one line of `preprint_details.tpl`, commit
-`26031aac38`, merged 2026-10-09 as ops `dafd9b3263`), both for
-pkp/pkp-lib#13189 and both the change the issue report proposed.
+Fixed by pkp/omp#2502 (two lines of `monograph_full.tpl`, merged
+2026-10-09 as omp `77ca57587a`) and pkp/ops#1443 (one line of
+`preprint_details.tpl`, commit `26031aac38`, merged 2026-10-09 as ops
+`dafd9b3263`), both for pkp/pkp-lib#13189 and both the change the issue
+report proposed.
 Live-probed 2026-10-09 on PKP's default test dataset (pkp/datasets
 `1a196c3`), signed out, each side on a newly loaded dataset, with no
 response of 500 or more and no page error. Before (omp `c07d91ced2`, ops
 `6614af8281`, the commit under the merge): the book page `catalog/book/5`
 and the preprint page `preprint/view/2`, neither item with a reference,
 showed the heading "References" over an empty block; the article page
-`article/view/17` showed none. After, at the PR head `52cf201a96` of pkp/omp#2502 before its
-merge (merged locally into omp `c07d91ced2`) and at ops `dafd9b3263`: no
-"References" block on any of the three pages. The neighbour, on both
+`article/view/17` showed none. After, at the PR head `52cf201a96` of
+pkp/omp#2502 before its merge (merged locally into omp `c07d91ced2`, the
+same two parents and the same files as the merge `77ca57587a` made later
+that day) and at ops `dafd9b3263`: no "References" block on any of the
+three pages. The neighbour, on both
 sides alike: book 14 and preprint 3, given the one reference "Ridge, A.
 (2021). Tide tables u42r9." in a new version that `dbarnes` published
-(posted), showed "References" over that one paragraph. The 3.5 twins
-(pkp/omp#2501, pkp/ops#1442) were not walked. Kept check
+(posted), showed "References" over that one paragraph. Walked again
+2026-10-09 after the merges, each on a newly loaded default dataset. On
+`main` at the merged tips (omp `77ca57587a`, ops `dafd9b3263`, ojs
+`7fe6502315`): no "References" block on book 5, preprint 2 or article 17.
+On `stable-3_5_0` at its tips, with the 3.5 twins merged (omp `486cbf9eb0`
+with pkp/omp#2501, ops `399c4ebca3` with pkp/ops#1442): no "References"
+block on book 5 or preprint 2, and the neighbour, book 14 and preprint 3
+given the one reference in a new version, showed "References" over it;
+OJS 3.5 was not run. Kept check
 `shared/playwright/checks/sync/omp-2502/walk.js` (`NB=1` for the
 neighbour).
 Issue report: [pkp-e2e#871](https://github.com/jardakotesovec/pkp-e2e/issues/871), whose
 file and kept script were deleted with the fix (git history keeps them);
-the issue closes when pkp/omp#2502 merges.
+the issue was closed 2026-10-09, at the merge of pkp/omp#2502.
 
 <a id="fn-f-a21"></a>
 **f-a21 — A21 evidence.** None of lib/pkp's `submission.citations.structured*`
