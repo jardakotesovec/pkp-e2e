@@ -89,7 +89,7 @@ nothing typed into its own fields clears, so Save stays disabled
 | **ORCID iD** | No | Person only. Present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
 | **Competing Interests** | Yes, when shown | Rich text, multilingual. Present only when the journal requires competing-interest statements (Settings that modify behavior). Guidance: "Please disclose any competing interests this author may have with the research subject." Saving it empty is stopped as a missing required field (the refusal described above this table). On a preprint server the field's label renders as raw code-like text instead of the plain "Competing Interests" ⚠ [OPS2](#ops2). <sup>j</sup> |
 | **Bio Statement (e.g., department and rank)** | No | Rich text, multilingual. |
-| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution at the end of the list. The list keeps the order of adding and has no control to change it; the reader's page does not always follow it ⚠ [A26](#a26). While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}"). A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. That total may follow the publication's own language set rather than the journal's ⚠ [A17](#a17). A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." under the field and "Please correct one error." at the form's foot. The foot's error list, which only a screen reader reads, names that refusal "Go to Affiliations: [object Object]" ⚠ [A7](#a7). A refused "Edit" saves nothing. A refused "Add Contributor" has already added the contributor, without the institution, so the corrected save adds the same contributor a second time ⚠ [A24](#a24). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why. There are three distinct messages (rate-limited, unavailable or deprecated), each dismissed with "OK", and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
+| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution at the end of the list. The list keeps the order of adding and has no control to change it; the reader's page does not always follow it ⚠ [A26](#a26). While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}"). A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. That total may follow the publication's own language set rather than the journal's ⚠ [A17](#a17). A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." under the field and "Please correct one error." at the form's foot. The foot's error list, which only a screen reader reads, names that refusal "Go to Affiliations: [object Object]" ⚠ [A7](#a7). A refused "Edit" saves nothing. A refused "Add Contributor" has already added the contributor, without the institution, so the corrected save adds the same contributor a second time ⚠ [A24](#a24). A typed entry's name saved in a language that is later unticked under "Metadata" (Settings that modify behavior) loses its box. On a submission with no other text in that language, "Save" in that contributor's "Edit" is then refused, even with nothing changed, and no field shows a reason ⚠ [A28](#a28). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why. There are three distinct messages (rate-limited, unavailable or deprecated), each dismissed with "OK", and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
 | **Contributor Roles** | Yes | One checkbox per role the journal defines (Rule 11). At least one must be ticked; a save with none is stopped as a missing required field (the refusal described above this table). When the journal has exactly one role, the field disappears. Every contributor save from the form then fails, leaving role-less contributors behind ⚠ [A14](#a14). <sup>c</sup> |
 | **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." A table with one row per role, empty ("No Items") until "Add Another Role" is pressed. Each row has a "Select a new role (required)" drop-down of the standard CRediT taxonomy, a "Degree" drop-down ("Lead", "Equal", "Supporting") and "Remove Role". A new row arrives on the list's first role, "Conceptualization", with "Degree" empty, even beside another "Conceptualization" row; what "Save" does in either state was not seen. Every row's list grays out a role any row shows. From the second row on, the drop-downs are not tied to their labels: a click on a label lands in the first row ⚠ [A25](#a25). Shown on the landing page (Rule 14). <sup>c</sup> |
 | **Publication Lists** | No | One checkbox, ticked by default: "Include this contributor when identifying authors in lists of publications." (Rule 8, and its limits in practice, ⚠ [A3](#a3)). |
@@ -360,6 +360,14 @@ screen, Rule 12): <sup>e</sup>
   into the field the refusal names, switch back and save ([A20](#a20)).
   Ticking the language under "Submissions" in "Submission Languages", which ticks
   "Metadata" too, ends the refusal.
+- **A language unticked under "Metadata" after institutions were named
+  in it.** A language ticked under "Metadata" in the same "Submission
+  Languages" table can be unticked there later
+  ([Languages & locales](U57-languages-and-locales.md#submission-languages)).
+  A hand-entered institution already named in that language then shows
+  name boxes for the remaining languages only, and on a submission with
+  no other text in that language its contributor can no longer be saved
+  from "Edit" (Fields "Affiliations"; [A28](#a28)). <sup>f-a28</sup>
 - **ORCID enablement** decides whether the form carries the ORCID iD
   field. The setting belongs to *[ORCID integration](U04-orcid-integration.md)*.
 - Nothing gates the rest. The Contributors entry, the affiliations field
@@ -391,8 +399,8 @@ screen, Rule 12): <sup>e</sup>
   the public ROR registry, the suggestion rows and the install's record
   cache; Rule 16).
 - *[Languages & locales](U57-languages-and-locales.md)* owns the
-  journal's "Languages" tab. The one combination of its ticks that
-  changes this feature is under Settings that modify behavior.
+  journal's "Languages" tab. The two combinations of its ticks that
+  change this feature are under Settings that modify behavior.
 - *[Institutions](U66-institutions.md)*: the manager-maintained institution list
   for subscriptions and statistics is a separate record set. Only the
   registry lookup above is shared.
@@ -888,6 +896,9 @@ Left out of the scenarios above, by reason:
     "Edit" lists them, so no test reads their order; Rule 14; Fields)
   - A27 (several affiliations printed with a space before each comma;
     Rule 14)
+  - A28 (a contributor's "Edit" refused, with no reason shown, once a
+    language an institution is named in is unticked under "Metadata";
+    Fields; Settings)
   - OPS2 (the Competing Interests label rendering raw on a preprint
     server; Fields)
 - **No seed**:
@@ -938,6 +949,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A20](#a20) | "Add Contributor" never saves when a "Forms" language is not a metadata language | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A22](#a22) | A role name changed in "Edit Role" and closed without saving shows on the row, and the role's next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A24](#a24) | An "Add Contributor" refused for an institution's missing name still adds the contributor, so the corrected save lists the same person twice | 🐞 | user-visible | — |
+| [A28](#a28) | A contributor whose hand-entered institution is named in a language since unticked under "Metadata" cannot be saved, and the form shows no reason | 🐞 | user-visible | — |
 | [A7](#a7) | A refused affiliation reads "Go to Affiliations: [object Object]" to screen-reader users of the contributor form | 🐞 | low | issues (claude), 2026-10-08 — re-verified |
 | [A9](#a9) | On an article, book or preprint page, screen readers announce the ROR logo beside an affiliation or funder as an unnamed link | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | The typed affiliation's per-language name boxes are announced wrongly by a screen reader | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1373,6 +1385,28 @@ Second Univ", with a space before the comma, where "First Univ, Second
 Univ" is expected. After an affiliation picked from the registry, the
 ROR mark sits between the name and that comma.
 Basis: probe, 2026-10-07. <sup>f-a27</sup>
+
+<a id="a28"></a>
+**A28 — A contributor cannot be saved once a language an institution is named in is unticked under "Metadata", and the form shows no reason** · 🐞 · user-visible.
+A hand-entered institution can be named in each of the journal's
+metadata languages. When one of those languages is later unticked under
+"Metadata" (Settings › Website › "Setup" › "Languages", "Submission
+Languages"), the contributor's "Edit" window shows the institution with
+name boxes for the remaining languages only, and its row reads "All
+translations available". "Save" in that window is then refused, even
+with nothing changed. The page says "The form was not saved because 1
+error(s) were encountered. Please correct these errors and try again."
+and the form's foot "Please correct one error.", but no message appears
+under "Affiliations" or under any other field. The save is refused for
+the name in the unticked language, which the window no longer shows, so
+there is nothing on the form to correct or clear. The expected outcome
+is a save that goes through, or a form that names what to correct.
+
+This was seen in the workflow's "Edit", on submissions with no other
+text in the unticked language. A submission that holds some, such as a
+title, was not tried, and neither was any way round. A screen reader is
+told only "Go to Affiliations: [object Object]" ([A7](#a7)).
+Basis: probe + code reading, 2026-10-08. <sup>f-a28</sup>
 
 ### OMP
 
@@ -2159,7 +2193,9 @@ and OPS (kept script
 PKP's default test dataset): the error list is not drawn on screen; the
 accessibility tree held, under the visible "Please correct one error.",
 one button "Go to Affiliations: [object Object]", beside "Jump to next
-error", while the field showed the message.
+error", while the field showed the message. The second way to the same
+button, an institution named in a language since unticked under
+"Metadata" (walked 2026-10-08), is f-a28.
 Issue report: [pkp-e2e#759](https://github.com/jardakotesovec/pkp-e2e/issues/759) ([docs/issues/U41-A7-affiliation-error-list-object-object.md](../issues/U41-A7-affiliation-error-list-object-object.md)).
 
 <a id="fn-f-a8"></a>
@@ -2562,6 +2598,48 @@ template line of its own between the entries, outside any `{strip}`, so
 the line break before it shows as a space; the contributor-role loop
 under it wraps the same separator in `{strip}`. `stable-3_5_0`'s
 article template has the same loop (code read, not driven).
+
+<a id="fn-f-a28"></a>
+**f-a28 — A28 evidence.** Live-probed 2026-10-08 (Fields
+"Affiliations"; Settings that modify behavior), the walk of A7's issue
+report (its second Steps), on `main` and `stable-3_5_0`, OJS, OMP and OPS, as
+`dbarnes` on PKP's default test dataset, each on a fresh load (kept
+script
+`shared/playwright/checks/issues/affiliation-error-list-object-object/walk.js`,
+mode `dropped`). "Edit" on a contributor holding one hand-entered
+institution named in English alone (OJS submission 7, "University
+College Cork"; OMP submission 1, "University of Calgary"; OPS
+submission 1, "University of Bologna"), "Edit institution name",
+"u41ir1 nom" typed into "Type the institution name in French (Canada)",
+"Save": saved. Then, on Settings › Website › "Setup" › "Languages",
+"Metadata" unticked on the "French (Canada)/français (Canada)" row of
+"Submission Languages" ("Submissions" unticking with it). The
+contributor's "Edit" again: the institution's row read "All translations
+available" and "Edit institution name" showed the one box "Type the
+institution name in English"; "Save" with nothing changed answered 400
+`{"affiliations":[{"name":{"fr_CA":["This language is not accepted."]}}]}`.
+The form stayed open with the page notice as quoted, the foot's "Please
+correct one error." and "Jump to next error" (and A7's button), and no
+message under any field; the stored names read `en` and `fr_CA` before
+and after the refused save. Mechanism (code
+read, the report's Cause): `FieldAffiliations.vue` draws a name box only
+for the form's languages
+(`v-if="supportedLocales.includes(affiliationNameLocale)"`) but sends
+each row's `name` whole (`...affiliation.name`);
+`affiliation/maps/Schema.php` hands it every stored name of an
+institution without a ROR (`getAffiliationName(null, $locales)` returns
+`getData('name', null)`); `Affiliation\Repository::validate()` allows
+only
+`$submission->getPublicationLanguages($context->getSupportedSubmissionMetadataLocales())`,
+the journal's metadata languages and those the publications' and
+authors' own fields hold, not those of affiliation names. So by the
+code a submission holding a title or a contributor's name in the
+unticked language keeps it allowed and saves: not walked. Not walked
+either: any way round (removing the institution and adding it again,
+ticking the language again), the submission wizard's step, a second
+"Save", and whether "Save" is disabled after the refusal. A7's report
+names this refusal as a fault of its own that its fix does not cover
+(counted there it would rate medium); no issue report covers it yet.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP
