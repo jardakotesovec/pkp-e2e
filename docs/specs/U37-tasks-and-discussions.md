@@ -1467,7 +1467,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A29](#a29) | A file attached to the first message in the "Add" window never shows in the discussion's History | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A31](#a31) | A discussion's letter keeps "{$signature}" when its writer is not a participant: auto-added, or a manager stays out | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A32](#a32) | A screen reader hears a task row's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, under one shared name | 🐞 | minor | — |
-| [A33](#a33) | A History lists events saved in the same second in no set order | 🐞 | minor | — |
+| [A33](#a33) | A task's or discussion's History lists the lines one save writes within a second oldest first | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A34](#a34) | An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later | 🐞 | medium | issues (claude), 2026-10-09 — re-verified |
 | [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OMP1](#omp1) | A press's discussion window lists an External Review reviewer as "Internal Reviewer" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1804,6 +1804,7 @@ removed by …", so it shows the file leaving but never arriving. The file
 itself stays under the first message, where it can still be opened.
 Discussions and tasks already started this way keep the gap after a fix.
 Basis: probe, 2026-10-02. <sup>[f-a29](#fn-a29)</sup>
+Report: refresh owed — the report's Evidence says the pair form `[['dateLogged', 'desc'], ['id', 'desc']]` would sort the History; on the event log's entries it sorts nothing, as the A33 report (`docs/issues/U37-A33-history-same-second-order.md`, `sortcheck.php` beside its walk) shows: the sentence is to be corrected, and its fix checked for resting on it (2026-10-09)
 
 <a id="a30"></a>
 **A30 — A task loses its owner silently** · ❓ · minor.
@@ -1843,17 +1844,31 @@ A screen-reader user can tick the wrong box.
 Basis: probe, 2026-10-02. <sup>[f-a32](#fn-a32)</sup>
 
 <a id="a33"></a>
-**A33 — The History does not order events saved in the same second** · 🐞 · minor.
-A task's or discussion's History lists its events newest first, but
-events saved within the same second keep whatever order the application
-fetches them in, which differs from one install to another. After a
-reply with a file, a journal listed "{username} ({roles}) posted a
-response on {date}" above "{file name} uploaded by {username} on
-{date}", and a preprint server listed it below. The History is meant to
-put such events in the order they were saved, latest first, and that
-order never takes effect. Lines from one save, such as a reply and its
-file, can read in either order.
-Basis: probe, 2026-10-02. <sup>[f-a33](#fn-a33)</sup>
+**A33 — A task's or discussion's History lists the lines one save writes within a second oldest first** · 🐞 · low.
+A task's or discussion's History (its row's "More Actions" › "History")
+lists its events newest first. Two lines that one save writes within
+the same second are the exception: the line saved first stands on top.
+On PostgreSQL it did so in every History read, also when the same
+History was opened again. Nothing in the application sets that order;
+the database's answer does.
+
+An "Edit" that adds a participant and a file saves the participant's
+line, then the file's, within one second each time it was tried (nine
+edits). The History lists "… added by …" above "{file name} uploaded
+by …".
+
+A reply with a file saves the reply's line, then the file's. When both
+fall within one second, as in five replies of ten, the History lists
+"{username} ({roles}) posted a response …" above "{file name} uploaded
+by …". When the file's line falls in the next second, it stands on
+top, as it should.
+
+The row's "Activity" column takes the top of the same list. After that
+edit it names "… added by …" as the item's latest change, beside the
+latest reply, where the file was saved last. Both lines come from one
+save, so nobody is led to a wrong action: the cost is a log that reads
+one save against the order of the rest.
+Basis: probe, 2026-10-09. <sup>[f-a33](#fn-a33)</sup>
 
 <a id="a34"></a>
 **A34 — An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later** · 🐞 · medium.
