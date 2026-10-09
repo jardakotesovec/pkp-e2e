@@ -371,14 +371,15 @@ record what each role is offered once the list is on screen. <sup>b</sup>
     panel. A finished file is stored at once, as its own row: its name (a
     link that downloads it), "Edit" and "Remove". <sup>k</sup>
     - 17a. **While a file uploads** its row shows its name, a progress bar
-      and "Cancel upload" (a screen reader hears "Uploading {percent}%
-      complete"). "Cancel upload" removes the row at once without asking.
-      Pressed while the file is on its way, it keeps nothing. The button
-      stays until the server answers; pressed once the whole file has been
-      sent (its bar full, its name not yet a link), it keeps the file, back
-      on the panel after a reload ⚠ [A25](#a25). Going to another address
-      mid-upload asks nothing; the reopened draft's panel lacks the file.
-      <sup>k</sup>
+      and "Cancel upload". "Cancel upload" removes the row at once without
+      asking. Pressed before the whole file has reached the server, it
+      keeps nothing. The button stays until the server answers; pressed
+      after the whole file has reached the server and before that answer,
+      it keeps the file, back on the panel after a reload
+      ⚠ [A25](#a25). The bar does not tell the two apart: on a fast
+      connection a 1.9 MiB file is kept by a press made while its bar is
+      still empty. Going to another address mid-upload asks nothing; the
+      reopened draft's panel lacks the file. <sup>k</sup> <sup>d22</sup>
     - 17b. **The upload limit.** A file larger than the install allows is
       refused in its row with "File is too big ({size}MiB). Max filesize:
       {limit}MiB.", for example "File is too big (101MiB). Max filesize:
@@ -386,6 +387,20 @@ record what each role is offered once the list is on screen. <sup>b</sup>
       limit is not refused there: it starts uploading and ends with
       "Invalid JSON response from server." in its row, and nothing is
       stored ⚠ [A21](#a21). <sup>k</sup>
+    - 17c. **The screen-reader status.** The panel gives screen readers
+      an upload's progress as a status, "Uploading {percent}% complete",
+      shown nowhere on screen: its text is read in the browser's
+      accessibility inspector. There is none until the first upload or
+      the first "Cancel upload". From then on it reads "Uploading 100%
+      complete" until the page is reloaded ⚠ [A29](#a29):
+      - after "Cancel upload" has removed an uploading row;
+      - after "Cancel upload" has cleared a file refused for its size
+        (Rule 17b), of which nothing was uploaded;
+      - after every stored file has been removed and the panel is empty
+        again.
+
+      The refusal for size is not in the status: while its row shows,
+      the status says nothing. <sup>d22</sup>
 18. **Choosing the component in the panel** {OJS OMP}. A new row reads
     "What kind of file is this?" followed by one link per main-work
     component ("Article Text" on a journal; "Book Manuscript" and "Chapter
@@ -405,6 +420,18 @@ record what each role is offered once the list is on screen. <sup>b</sup>
       1; [→ what must be complete to submit](U21-submission-wizard.md#submit-gates)).
       After the submit the files are the "Submission Files" list.
       <sup>k</sup> <sup>d8</sup>
+    - 18b. **A "Remove" or a component choice the server refuses.** The
+      server refuses a file's "Remove" when the file was already removed
+      in another browser tab, or when the Author has signed out in
+      another tab. After "Yes" the "Remove" window then stays open, a
+      spinner turns beside "No" and never stops, and nothing says that
+      the file was not removed or why ⚠ [A28](#a28). Each further "Yes"
+      is refused the same way; "No" closes the window and leaves the row
+      on the panel. A component link pressed on a file already removed in
+      another tab shows its spinner briefly, then the row asks "What kind
+      of file is this?" again, with no message [A28](#a28). Where the
+      file was removed in another tab, a reload shows the panel without
+      it. <sup>d22</sup>
 
 ## Side effects
 
@@ -841,11 +868,12 @@ tooling recipe are in the footnote. <sup>s0</sup>
      editorial team may need to evaluate your submission."; the panel
      reads "Upload any files the editorial team will need to evaluate your
      submission." with an "Upload File" link (Rule 17; Settings bullet 4).
-   - **"Cancel upload"**: press "Add File" and pick "article.pdf" in the
-     computer's file picker: while it uploads, its row shows "article.pdf",
-     a progress bar and "Cancel upload"; press "Cancel upload": the row is
-     gone at once, nothing asks, and after a reload of the page the panel
-     is still empty (Rule 17a).
+   - **"Cancel upload"**: with the browser's upload slowed so the file
+     cannot reach the server before the reload (otherwise the press may
+     keep it [A25](#a25)), press "Add File" and pick "article.pdf" in the
+     computer's file picker: its row shows "article.pdf", a progress bar
+     and "Cancel upload"; press it: the row is gone at once, nothing
+     asks, and after a reload the panel is still empty (Rule 17a).
    - **A finished file**: press "Upload File" and pick "article.pdf"
      again: once it has uploaded, its row shows the name as a link, "Edit"
      and "Remove", and "What kind of file is this?" followed by "Article
@@ -932,6 +960,7 @@ Left out of the scenarios above, by reason:
   - the "Files" panel's "Other" on a file with no component, then "Save" with no radio button chosen: a message under "What kind of file is this?" and no server error ([A11](#a11)): the guard the issue report proposes
   - "Add Note" with the box empty on a file's "Notes": refused, no note listed and no "Posted new note." line in "History" ([A10](#a10)): the guard the issue report proposes
   - "Cancel upload" pressed on the full bar with the server's answer held back: no file stored, the panel empty after a reload ([A25](#a25)): the guard the issue report proposes
+  - the "Files" panel's screen-reader status: none before the first upload, and "Uploading 100% complete" once a file has uploaded (Rule 17c): likely an assertion in scenario 9's "A finished file" bullet
   - "Change File" on step 1 of a new file's upload, then "Complete": the list gains the second file alone ([A14](#a14)): the guard the issue report proposes
   - in "Upload/Select Files" with "Show files from all accessible workflow stages." ticked, another stage's row: "More Information" loads and the file name downloads ([A19](#a19)): the guard the issue report proposes
   - "Show events from prior versions" ticked on a file in "Files for Review": the original file's rows are added ([A4](#a4)): the guard the issue report proposes
@@ -977,9 +1006,11 @@ Left out of the scenarios above, by reason:
   - A22 (the Activity Log recording a new file's upload as a "Revision"; Side effects)
   - A23 ("Cancel" after a second pick on step 1 leaving the first pick as the file; Rule 9b)
   - A24 (one file revised in two windows: one "Cancel" doing nothing, the file keeping a cancelled upload; Rule 9c)
-  - A25 ("Cancel upload" pressed after the whole file has been sent keeping the file; Rule 17a)
+  - A25 ("Cancel upload" pressed after the whole file has been sent keeping the file; Rule 17a; scenario 9 marks it)
   - A26 ("Upload File" in the upload wizard out of reach of the Tab key; Fields)
   - A27 (a refused "History" tab adding a second alert that reads only "undefined"; Actors row 4; scenario 6 marks it)
+  - A28 (a "Remove" or a component choice the server refuses saying nothing, the "Remove" window left open with its spinner; Rule 18b)
+  - A29 (the "Files" panel's screen-reader status reading "Uploading 100% complete" after "Cancel upload" and on an emptied panel; Rule 17c)
 - **Owned by another feature**:
   - a Production editor's lists: every stage's while not assigned, Copyediting and Production only once assigned (Actors preamble; *Workflow screen & stage access*, and *Stage participants*, whose A8 records the assigned case)
   - the Author's revision upload through "Upload revisions" (Actors row 2; *Review stage & rounds*, scenario 4)
@@ -1017,6 +1048,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A25](#a25) | "Cancel upload" in the submission wizard, pressed once the file has been sent, keeps the file | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A26](#a26) | "Upload File" in the upload wizard cannot be reached with the keyboard, so no file can be chosen without a mouse | 🐞 | high | — |
 | [A27](#a27) | A refused "History" tab in "More Information" shows a second alert that reads only "undefined" | 🐞 | minor | — |
+| [A28](#a28) | Submission wizard: a file's "Remove" the server refuses leaves the "Remove" window open with a spinner and no message; a refused component choice says nothing either | 🐞 | minor | — |
+| [A29](#a29) | Submission wizard: the "Files" panel's screen-reader status keeps reading "Uploading 100% complete" after "Cancel upload" and on an emptied panel | 🐞 | minor | — |
 | [A6](#a6) | Every file row's menu button is named "More Actions" alone, so a screen reader cannot tell the rows apart | ❓ | minor | — |
 | [A8](#a8) | The revise list names files only, so two files with the same name read the same | ❓ | minor | — |
 | [A13](#a13) | Deleting a file also deletes every copy made from it on other lists | ❓ | user-visible | — |
@@ -1447,6 +1480,43 @@ file in "Upload/Select Files" ([A19](#a19)). A preprint server's
 default roles meet neither case.
 Basis: probe, 2026-10-02. <sup>[f-a27](#fn-a27)</sup>
 
+<a id="a28"></a>
+**A28 — Submission wizard: a "Remove" or a component choice the server refuses shows no message** · 🐞 · minor.
+In the submission wizard's "Files" panel, an Author presses "Remove" ›
+"Yes" on a file the server will not remove: one already removed in
+another browser tab, or any file once they have signed out in another
+tab. A message that the file was not removed, and why, is expected.
+Instead the "Remove" window stays open with "Yes" and "No", a spinner
+turns beside "No" without end, and the row stays on the panel; each
+further "Yes" does the same, and only "No" closes the window.
+
+A component link ("Article Text"; "Book Manuscript" on a press) pressed
+on a file already removed in another tab is as silent: its spinner shows
+briefly, and the row asks "What kind of file is this?" again. On the same
+row, "Edit" with a component chosen and "Save" does show "An unexpected
+error has occurred. Please reload the page and try again." and keeps
+"Edit {file name}" open.
+
+Nothing is lost, and a reload shows the panel without a file removed
+elsewhere. A preprint server has no such panel.
+Basis: probe, 2026-10-09. <sup>[f-a28](#fn-a28)</sup>
+
+<a id="a29"></a>
+**A29 — Submission wizard: the "Files" panel's screen-reader status keeps reading "Uploading 100% complete"** · 🐞 · minor.
+The submission wizard's "Files" panel gives screen readers an upload's
+progress as a status, "Uploading {percent}% complete" (Rule 17c). Once
+the status is there it reads "Uploading 100% complete" until the page is
+reloaded, where a status that is empty, or says the upload was cancelled,
+is expected. It reads so after "Cancel upload" has removed an uploading
+row. It first appears, reading so, when "Cancel upload" clears a file
+refused for its size, of which nothing was uploaded. It still reads so
+after every stored file has been removed and the panel is empty again.
+
+A screen reader user who cancels an upload finds a status saying it is
+complete. A file's refusal for its size is in the row's text only,
+never in the status. A preprint server has no such panel.
+Basis: probe, 2026-10-09. <sup>[f-a29](#fn-a29)</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -1756,6 +1826,56 @@ the panel closed stored nothing; the "Remove" window, "No" keeping the row,
 (101MiB). Max filesize: 100MiB.", 99 MiB stored, 100 MiB ended with "Invalid
 JSON response from server." (A21). OPS: the "Upload Files" step holds a galley
 table with "Add File" and "No Items", no panel.
+
+<a id="fn-d22"></a>
+**d22** — Live-probed 2026-10-09 (Rules 17a, 17c, 18b; OJS and OMP `main`,
+scratch journals and presses, each one's own throwaway Author on a draft; two
+runs per app, the refused "Remove" and component link four; the fleets' upload
+limit 2 MiB). Kept check `shared/playwright/checks/U36/I09/i09.js`.
+Rule 17a: with no throttle, "Cancel upload" pressed as soon as the row of a
+1.9 MiB "partway.pdf" offered it, the bar at 0 and never read at 100: the row
+went 50–60 ms after it appeared, the upload's request ended aborted in the
+browser, and after a reload the panel listed "partway.pdf" with "Edit",
+"Remove" and "What kind of file is this?" (OJS 2 of 2, OMP 2 of 2); with the
+upload held to 64 bytes/s the cancelled file was not on the panel after the
+reload.
+Rule 17c: the status is the uploader's own `role="status"` element
+(`FileUploader.vue`, class `-screenReader`; its text the panel's
+`submission.upload.percentComplete`, note k), read as text; a screen reader
+was not run. No such element before any upload and after every reload. It read
+"Uploading 100% complete" at once, 1 s and 5 s after "Cancel upload" removed
+the row, pressed with the bar at 100 and the answer held back (what the server
+sends held to 125 bytes/s) and pressed with the upload itself held to 64
+bytes/s on a panel that had uploaded nothing; the same after "Cancel upload"
+cleared "File is too big (300MiB). Max filesize: 2MiB." on a panel that had
+uploaded nothing (no status while the row showed, no request sent); the same
+5 s after an upload left alone became a stored row; and the same after
+"Remove" › "Yes" on every stored row, beside "Upload any files the editorial
+team will need to evaluate your submission.". Read every 5 ms, the status
+went from absent straight to "Uploading 100% complete" (files up to 1.9 MiB;
+a slower upload was not driven), so no other percentage was seen.
+Rule 18b: tab A held the "Upload Files" step with "article.pdf" and
+"notes.md"; tab B opened the same draft and removed both ("Remove" › "Yes",
+each `DELETE …/submissions/{id}/files/{fileId}` answering 200). In tab A,
+"Remove" › "Yes" on "article.pdf" answered 401 ("The current user is not
+authorized to access the specified submission file."): the "Remove" window
+still open with "Yes", "No" and one spinner at once and 2 s on, both rows
+still listed, no notice, no browser dialog, no page error; a second "Yes" the
+same; "No" closed the window with no request. The component link on
+"notes.md" ("Article Text"; OMP "Book Manuscript"): the `PUT` answered 401,
+the row showed a spinner and a second status "Saving" at 300 ms, both gone 2 s
+on, the row asking "What kind of file is this?" as before, no notice. "Edit" ›
+a radio › "Save" on that row: the `PUT` answered 401, the notice "An
+unexpected error has occurred. Please reload the page and try again." showed
+and "Edit notes.md" stayed open. A reload showed the empty panel. The ended
+session: a second draft with one stored row, the session ended in tab B (the
+sign-out address, tab B on "Login"), then "Remove" › "Yes" in tab A answered
+403 ("The form could not be submitted. You may have been logged out. Please
+reload the page and try again."), none of it on screen: the window, "Yes",
+"No" and the spinner 3 s and 5 s on, the row still listed. A component link
+after an ended session was not driven. OPS (read only, two runs): the "Upload
+Files" step holds the galley table with "Add File" and "No Items", no "Cancel
+upload", and no upload status.
 
 <a id="fn-d8"></a>
 **d8** — Live-probed 2026-09-23 (Rule 18a; Settings bullet 1; OJS and OMP):
@@ -2577,7 +2697,10 @@ kept so until after the reload), nothing was stored (OJS 10 of 10, OMP 6
 of 6). Under an emulated upload throttle the bar fills before the request
 has left the browser, so there a full bar does not mean the file was sent.
 Scenario 9 presses mid-upload; no test drives the window after the last
-byte.
+byte. Live-probed 2026-10-09 (note d22; OJS and OMP, two runs each): the
+unthrottled press held on OMP too and for a 1.9 MiB file, pressed with its
+bar at 0 (OJS 2 of 2, OMP 2 of 2), so a file can be kept before its bar
+moves.
 Issue report: [pkp-e2e#530](https://github.com/jardakotesovec/pkp-e2e/issues/530) ([docs/issues/U36-A25-cancel-upload-after-sent-keeps-file.md](../issues/U36-A25-cancel-upload-after-sent-keeps-file.md)).
 
 <a id="fn-a26"></a>
@@ -2607,6 +2730,31 @@ the editor's "More Information" on another stage's file in "Upload/Select
 Files" (A19's walk), each time the refusal's alert and then "undefined".
 The same two alerts follow every refused load of this kind in the code;
 only these two were driven.
+
+<a id="fn-a28"></a>
+**f-a28** — Notes k and d22. `SubmissionFilesListPanel.vue` `remove()` and
+`SubmissionFilesListItem.vue` `setGenre()` both pass `error:
+this.ajaxErrorCallback` to their request, and neither component includes the
+`ajaxError` mixin that defines it (the panel's mixins are `dialog` alone, the
+row has none), so a refused request has no handler: `remove()` closes its
+window only in `success`, and `setGenre()` clears its spinner in `complete`.
+The edit panel (`SubmissionFilesEditModal.vue`) is a form and shows its own
+notice. Live-probed 2026-10-09 (OJS and OMP `main`, four runs each): note
+d22; the refusals answered 401 (the file removed in another tab) and 403 (the
+session ended), with no response of 500 or more and no page error. 3.5 was not
+driven. The fix proposed for A25 adds the mixin to the panel and not to the
+row; whether the "Remove" window then closes was not tried.
+
+<a id="fn-a29"></a>
+**f-a29** — Notes k and d22. `FileUploader.vue` shows `status` in a
+`role="status"` element whenever it is not empty, and
+`dropzoneTotalUploadProgress()` is the only place that sets it; nothing
+clears it when an upload ends, is cancelled or is refused. Dropzone's
+`updateTotalUploadProgress()` reports 100 when no file is uploading, and it
+runs when a row is removed too, which is what the status then reads.
+Live-probed 2026-10-09 (OJS and OMP `main`, two runs each): note d22.
+A screen reader was not run: the texts are the status element's, which is
+what a reader is given. 3.5 was not driven.
 
 <a id="fn-ops1"></a>
 **f-ops1** — Note a (the OPS workflow and wizard configs). Live-probed
