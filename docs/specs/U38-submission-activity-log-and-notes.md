@@ -57,7 +57,7 @@ preprint server an Editorial Board Member). <sup>c</sup>
 |--------|--------------------|
 | **Open "Activity Log & Notes"** (the header's "Activity Log"; Rule 1) | • The editorial readers<br>• A Site Administrator whose journal roles are all assistant roles: yes ([A4](#a4))<br>• Assistant roles (Copyeditor, Layout Editor, Proofreader, Funding Coordinator and the others), Author, Reviewer, Reader: never; their header has no "Activity Log"<br>• A Site Administrator whose only journal role is Reader: never; the submission does not open for them (an "Error" window reading "The current role does not have access to this operation." over an empty workflow screen with no header buttons) <sup>b</sup> <sup>c</sup> |
 | **Read "History"**, with its "Download" and "View Email" (Rules 2–9) | • Every editorial reader. One who is also an author of the submission reads it with the reviewers of anonymous reviews hidden (Rule 9)<br>• A Site Administrator whose journal roles are all assistant roles: no; the window shows the "Notes" tab alone ⚠ [A4](#a4) <sup>c</sup> |
-| **"View changes"** {OJS OMP} (a review line's action; Rule 5) | • The editorial readers, except one who is also an author of the submission (Rule 9), and only for the review lines on that submission's own "History" ⚠ [A11](#a11). The window it opens is [→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#read-review)'s <sup>f</sup> |
+| **"View changes"** {OJS OMP} (a review line's action; Rule 5) | • The editorial readers, except one who is also an author of the submission (Rule 9), and only for the review lines on that submission's own "History" (Rule 5a). The window it opens is [→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#read-review)'s <sup>f</sup> |
 | **Add a note** ("Notes"; Rule 10a) | • Everyone the window opens for, the Site Administrator with assistant roles included <sup>d</sup> |
 | **Delete a note** ("Notes"; Rule 10c) | • Every editorial reader, on any note, whoever wrote it<br>• A Site Administrator whose journal roles are all assistant roles: no "Delete" on any note, their own included ([A4](#a4)) <sup>d</sup> |
 
@@ -155,6 +155,13 @@ preprint server an Editorial Board Member). <sup>c</sup>
    upload or revision line (Rule 6a), "View Email" on an email line
    (Rule 7), "View changes" on a review-change line (Actors row 3).
    Other lines have no arrow. <sup>f</sup>
+   - 5a. **Another submission's change** {OJS OMP}. The address of a
+     "View changes" link names the submission and the change, each by
+     its number. When one of that submission's editorial readers opens
+     it in the browser's address bar with the number of a change made
+     on another submission in place of its own, the tab shows a line of
+     raw text holding "The requested resource was not found." and
+     nothing of that review. <sup>td14</sup>
 
 <a id="file-lines"></a>
 6. **File lines.** Each change to a submission file adds a line naming
@@ -507,11 +514,7 @@ footnote. <sup>s0</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A11 {OJS OMP} (issue report
-    `docs/issues/U38-A11-activity-log-view-changes-reads-any-review.md`): an
-    editor of one submission asking "View changes" for an edited review of
-    another submission is refused, while the submission's own editor still
-    reads it
+  - the guard for the retired A11 {OJS OMP} (Rule 5a; Actors row 3): a Section Editor opens the "View changes" address of one of their own submissions with the number of a change made on a submission they are not assigned to, and the tab shows a line of raw text holding "The requested resource was not found." and nothing of that review; an editor of the submission the change was made on still presses "View changes" on its line, and the window titled "View Review" opens with the review's old and new comments
   - "Add Note" with the box empty in "Activity Log & Notes": refused, no note listed and no "Posted new note." line in "History" ([A2](#a2)): the guard the issue report proposes
   - a "Notify" message, an "Assign" message and a discussion's email: their "History" lines name the editor who sent them under "User" (Rule 4c; [A1](#a1)): the guard the issue report proposes
   - a Reviewer's "Submit Review": the "Review complete" lines with nothing under "User" (Rule 4c; [A5](#a5)): the guard the issue report proposes
@@ -559,11 +562,11 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Activity Log file lines show an empty file name when read in a language other than the submission's | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | After closing drops a typed note, the next page change asks "Leave site?" with nothing typed | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | After a switch to "History" discarded a typed note, "Close" asks again whether to continue without saving | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A11](#a11) | A submission's activity log "View changes" opens any edited review on the site by its number, not only the submission's own | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [OMP1](#omp1) | A press's activity log prints "{$formatName}" instead of the format's name when a publication format is created or deleted | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | A Site Administrator whose journal roles are all assistant roles gets "Notes" alone | ❓ | latent | — |
 | [A8](#a8) | An "Open" review's assignment line reads "Anonymous Reviewer" for an editor who is also the author | ❓ | minor | — |
 | [A6](#a6) | Retired: a cancelled revision left two revision lines on "History", and the first one's "Download" opened a blank page; it now leaves no line (Rule 6c) | ✅ | retired | upstream change + claim check (claude), 2026-09-27 — fixed upstream |
+| [A11](#a11) | Retired: a submission's activity log "View changes" opened any edited review on the site by its number; it now answers only for a change made on the submission itself (Rule 5a) | ✅ | retired | upstream sync (claude), 2026-10-09 — fixed upstream (pkp/pkp-lib#13465) |
 
 ### All apps
 
@@ -691,25 +694,6 @@ rightly asks nothing. A user asked twice cannot tell whether the text
 was kept.
 Basis: probe, 2026-10-04. <sup>[f-a10](#fn-a10)</sup>
 
-<a id="a11"></a>
-**A11 — A submission's activity log "View changes" opens any edited review on the site by its number, not only the submission's own** {OJS OMP} · 🐞 · medium.
-When an editor edits a submitted review in the "Modify Review" window,
-the submission's "Activity Log" records the change. Its "View changes"
-link opens a window with the review's old and new values. The link's
-address names the submission and the change by number, and only the
-submission is checked. A Section Editor who pastes that address into the
-browser with one of their own submissions and another change's number is
-shown that change, from any submission. The reply shows as raw text in
-the browser tab.
-The reader sees the old and new comments, recommendation, review-form
-answers and competing interests. The window names neither the reviewer
-nor the submission; the reader tells the submission from what the review
-discusses. The change numbers run in one sequence across the site, so a
-reader can step through them. On a site hosting several journals, a
-manager or Section Editor of one journal reads the other journals' edited
-reviews the same way.
-Since: 2026-08-20 · Basis: probe, 2026-10-07. <sup>[f-a11](#fn-a11)</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -740,6 +724,9 @@ Basis: probe, 2026-10-04. <sup>[f-omp1](#fn-omp1)</sup>
 
 <a id="a6"></a>
 **A6 — A cancelled revision leaves lines behind, and a broken "Download"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13288, 2026-09-27), verified 2026-09-27 on OJS and OMP, and on OPS through a galley's "Change File": a revision cancelled with "Cancel", at any step, leaves no line of it, metadata line included, on either "History", and no "Download" is left for the cancelled version (Rule 6c). <sup>[f-a6](#fn-a6)</sup>
+
+<a id="a11"></a>
+**A11 — A submission's activity log "View changes" opens any edited review on the site by its number, not only the submission's own** {OJS OMP} · ✅ · retired. Fixed upstream (pkp/pkp-lib#13465, 2026-10-08), verified 2026-10-09 on OJS and OMP: a Section Editor who opens the "View changes" address of one of their own submissions with the number of a change made on another submission is shown "The requested resource was not found." and nothing of that review; an editor of the submission the change was made on still presses "View changes" on its line, and the window titled "View Review" opens with the review's old and new values (Rule 5a). <sup>[f-a11](#fn-a11)</sup>
 
 ---
 
@@ -1261,6 +1248,14 @@ opened "History" and the box was empty back on "Notes", and "Close" from
 there asked nothing; "Close" pressed on "History" straight after the
 switch asked again: f-a10.
 
+<a id="fn-td14"></a>
+**td14** — Note f: `ReviewChangeLinkAction`'s address is
+`…/grid/event-log/submission-review-event-log-grid/view-review-change?submissionId={n}&logEntryId={n}`,
+and since pkp/pkp-lib#13465 `viewReviewChange()` answers
+`api.404.resourceNotFound` "The requested resource was not found."
+unless the entry's stored `submissionId` is the request's submission.
+Live-probed 2026-10-09 (Rule 5a), OJS and OMP: f-a11.
+
 <a id="fn-s0"></a>
 **s0** — Accounts: `docs/process/users.md` (the seeded roster; `admin`/`admin`, every other account its username twice; throwaway accounts likewise). Where each scenario runs: 1–3 on the seeded journal, press or preprint server `publicknowledge`, each on a scratch submission from `POST scenarios/submission` with submitter `author.alex`; 4 on two scratch contexts from `POST scenarios/context`. On `publicknowledge` the Journal Manager is `manager.maya`, the Section Editor `sectioneditor.ana` (a Moderator on the preprint server), assigned automatically through the submission's section (`ART`, the press's series `monographs`, `PRE`), the Site Administrator `admin`, the Author `author.alex`. No seed key writes a submission's note or its "Login As", so every note and every step in a scenario's body is driven on screen. Recipes: 1 — no decisions; the Site Administrator's "Login As" is the Section Editor's Participants row's "Login As" (note h), left again through "Logout as {username}"; 2 — no decisions (OJS and OMP on the Submission stage, OPS on Production), the decline recorded on screen, since a seeded decision acts as `admin` (scenarios.md); 3 — `files: [{file: 'article.pdf'}]` (the submitter's file, uploaded through the wizard's "Files" panel before the submit), the revision with the fixture `notes.md`; OPS refuses `files`; 4 — a scratch context at the install's "Default Review Mode" ("Anonymous Reviewer/Anonymous Author", seed-facts) with a throwaway user holding `author` and `sectionEditor` and two throwaway `externalReviewer`s, the submission seeded with that user as `submitter` and in `participants[]` as `sectionEditor`, `decisions: ['sendExternalReview']` and `reviewRounds: [{reviewers: [{username: <the first>, status: 'accepted'}, {username: <the second>, status: 'declined'}]}]`; the "Open" part the same on a second scratch context created with `review: {defaultReviewMode: 'open'}`; the control's Journal Manager is `admin`, whom the tooling enrols as a manager of every context it creates (seed-facts "Users"). The reviewer's own file (Rule 9) is the reviewer's step-3 upload on screen; no seed key writes it. Live-probed 2026-09-24, OJS and OMP: the author-and-editor recipe reaches Rule 9's state.
 
@@ -1361,32 +1356,33 @@ opened again before "Close": no question.
 Issue report: [pkp-e2e#892](https://github.com/jardakotesovec/pkp-e2e/issues/892) ([docs/issues/U38-A3-A9-A10-activity-log-close-drops-typed-note.md](../issues/U38-A3-A9-A10-activity-log-close-drops-typed-note.md)), with A3 and A9.
 
 <a id="fn-a11"></a>
-**f-a11** — Note f. `SubmissionReviewEventLogGridHandler::viewReviewChange()`
-(`lib/pkp/controllers/grid/eventLog/SubmissionReviewEventLogGridHandler.php:46`
-on `main`) loads `Repo::eventLog()->get((int) $args['logEntryId'])`, by
-primary key only, and never checks that the entry belongs to the
-request's `submissionId`; the role and workflow checks (managers, site
+**f-a11** — Note f. The fault, as the entry read until its retirement: a
+Section Editor who put another change's number into the "View changes"
+address of one of their own submissions was shown that change (the old
+and new comments, recommendation, review-form answers or competing
+interests of a review of any submission on the site, as raw text in the
+tab; neither the reviewer nor the submission named), and on a site
+hosting several journals a manager or Section Editor of one journal read
+the other journals' edited reviews the same way.
+`SubmissionReviewEventLogGridHandler::viewReviewChange()` loaded
+`Repo::eventLog()->get((int) $args['logEntryId'])`, by primary key only,
+and never checked that the entry belonged to the request's
+`submissionId`; the role and workflow checks (managers, site
 administrators, sub-editors) cover only that `submissionId`. The grid's
-own list, `SubmissionEventLogGridHandler::getReviewChangeEntries()`, is
+own list, `SubmissionEventLogGridHandler::getReviewChangeEntries()`, was
 scoped correctly, and `EventLogGridRow` hides the action from an assigned
-author, but the endpoint checks neither. Entries carry `assocType` review
+author, but the endpoint checked neither. Entries carry `assocType` review
 assignment (517) or submission review comment (1048595), so the
-`assocType`/`assocId` check the "View Email" fix uses would refuse every
-legitimate "View changes" too. Introduced by pkp/pkp-lib#13192 (Taslan
-A. Graham, `30a2572a7a`, 2026-08-20); the entries come from
+`assocType`/`assocId` check the "View Email" fix uses would have refused
+every legitimate "View changes" too. Introduced by pkp/pkp-lib#13192
+(Taslan A. Graham, `30a2572a7a`, 2026-08-20); the entries come from
 pkp/pkp-lib#13117's review edit (`b5c86a8cb7`, 2026-08-18), and
 pkp/pkp-lib#13291 (`5af3b39336`, 2026-09-22) added the
 competing-interests type. pkp/pkp-lib#13434's `main` port (`461f9a9a45`)
-fixed `viewEmail()` only; `viewReviewChange()` is unchanged. Proposed
-fix: serve only an entry that `getReviewChangeEntries($this->getSubmission())`
-lists, refuse when `_isCurrentUserAssignedAuthor`, and answer
-`api.404.resourceNotFound` otherwise (which also replaces the server
-error an unknown id gets now); patched into OJS `main` and probed: the
-submission's own editors still read their entries, the other users were
-refused. 3.5, 3.4 and 3.3 do not have it: the handler and the
-review-edit API do not exist there. Live-probed 2026-09-30, OJS `main`:
-`dbarnes` edited review 15 (submission 10, double-anonymous) through
-`PUT …/reviewAssignments/15/review` (comments and recommendation,
+fixed `viewEmail()` only. 3.5, 3.4 and 3.3 never had it: the handler and
+the review-edit API do not exist there. Live-probed 2026-09-30, OJS
+`main`: `dbarnes` edited review 15 (submission 10, double-anonymous)
+through `PUT …/reviewAssignments/15/review` (comments and recommendation,
 `event_log` 347 and 348); `minoue` (Section Editor on 2, 9 and 19) with
 `view-review-change?submissionId=19&logEntryId=347|348` read both; a
 Journal Manager of a scratch second journal, with a submission of that
@@ -1395,14 +1391,66 @@ journal, read both; `minoue` on submission 10 and `svogt` (Assistant),
 and `dbuskins` on 10 read their own. OMP `main`: `minoue` (Series Editor
 on 6 only) read entry 641 of submission 16. Seen again 2026-10-02 on OJS
 `main` (`minoue` with submission 2 read submission 1's comment-edit
-entry). Code only: review form and competing-interest entries, the
-author-editor case, OPS (no reviews).
-Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
-Re-verified end to end 2026-10-07 on OJS and OMP `main` (maintainer's
-request): a plain address-bar edit of the "View changes" address shows
-another change as raw text; the recommendation entry (OJS) leaks the same
-way; an unknown entry number answers 500, closed by the same fix.
-Issue report: [pkp-e2e#925](https://github.com/jardakotesovec/pkp-e2e/issues/925) ([docs/issues/U38-A11-activity-log-view-changes-reads-any-review.md](../issues/U38-A11-activity-log-view-changes-reads-any-review.md)).
+entry). Re-verified end to end 2026-10-07 on OJS and OMP `main`
+(maintainer's request): a plain address-bar edit of the "View changes"
+address showed another change as raw text; the recommendation entry
+(OJS) the same way; an entry number that names no line answered a server
+error (500, `formatReviewChange(): Argument #1 ($logEntry) must be of
+type PKP\log\event\EventLogEntry, null given`).
+Retired 2026-10-09: pkp/pkp-lib#13465 (for pkp/pkp-lib#13192, reopened
+for this; PR head `1ee037aee5`, on pkp-lib `main` since 2026-10-08 as
+`15f9f72323`, the same patch). `ReviewAssignmentController::editReview()`
+stores the submission's number (`submissionId`) with each of the four
+review-change entries it writes, and `viewReviewChange()` answers
+`JSONMessage(false, __('api.404.resourceNotFound'))` when the entry is
+missing or its stored `submissionId` is not the request's submission;
+the list of lines does not read `submissionId` and is unchanged.
+Live-probed 2026-10-09 on OJS and OMP, PKP's default test dataset
+freshly loaded, one run per app, the kept scripts
+`shared/playwright/checks/issues/activity-log-view-changes-reads-any-review/walk.js`
+and `address.js`: OJS at ojs `7fe6502315`, whose `lib/pkp` pointer holds
+the PR head; OMP at omp `77ca57587a` with `lib/pkp` checked out at
+`15f9f72323`, since OMP's own pointer (`03b9a78d8f`) had not taken the
+commit that day and a shared fix counts as landed once it is on pkp-lib
+`main`. `dbarnes` changed a review in "Modify Review" and saved (OJS:
+Aisla McCrae's on submission 10, comment and recommendation, entries 347
+and 348; OMP: Adela Gallego's on submission 16, the comment, entry 641;
+the press's window has no recommendation). `minoue` with
+`view-review-change?submissionId=19&logEntryId=347` (OMP
+`submissionId=6&logEntryId=641`), by the link's request in the session
+and typed into the address bar: status 200, the tab
+`{"status":false,"content":"The requested resource was not found.","elementId":"0","events":[]}`;
+on OJS entry 348, the recommendation, the same. The three controls
+answered as before the change, "The current role does not have access to
+this operation.": `minoue` with the edited submission's own number (10;
+OMP 16), and `svogt` (Copyeditor) and an author (`zwoods`, of submission 19;
+OMP `mpower`, of submission 16) with `minoue`'s address. `dbarnes` on the submission's own
+"History": the line "The following was modified in this review:
+Comments. Select "View changes" to see a detailed summary of all
+modifications.", its "View changes" opening "View Review" with "Updated
+Comments" over "Previous Comments" (OJS also "Updated Reviewer
+Recommendation" over "Previous Reviewer Recommendation"). The entry
+number 99999999, which names no line, answered the same "The requested
+resource was not found." with status 200 and nothing in the server log.
+The same walk on OMP at its own pointer, without the change, still
+showed the other submission's change.
+A review-change line written by a `main` build from before the change
+carries no `submissionId`: it keeps its "View changes" link, and the
+"View Review" window it opens holds only "The requested resource was not
+found.", for the submission's own editors too (seen 2026-10-09 on OMP: a
+line written at `03b9a78d8f`, read at `15f9f72323`). Upstream chose this
+knowingly: the PR's review asked for no migration, the lines being new
+for 3.6. No release has edited-review lines, so only an install that
+tracked `main` between 2026-08-20 and the change holds such a line.
+Not driven on 2026-10-09: the review-form and competing-interests lines
+(their write sites carry the same added `submissionId`), the read from
+another journal (the dataset holds one journal per app; submission
+numbers run across the site and the entry must name the request's own
+submission), an editor who is also an author of the submission asking by
+the address for one of its own lines (the list offers them no link, Rule
+9; `viewReviewChange()` does not read `_isCurrentUserAssignedAuthor`),
+and OPS (no reviews).
+Issue report: [pkp-e2e#925](https://github.com/jardakotesovec/pkp-e2e/issues/925) (filed as "- **Security** unreleased", REPORT.md), closed 2026-10-09 with the fix; the report and its tried fix deleted (git keeps them), its walk kept under `shared/playwright/checks/issues/activity-log-view-changes-reads-any-review/`.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Note o. Live-probed 2026-09-23 (the submission-files claim

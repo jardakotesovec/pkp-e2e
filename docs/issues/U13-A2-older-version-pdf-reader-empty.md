@@ -76,7 +76,7 @@ Both apps, signed out:
 4. Open the article page (`/index.php/publicknowledge/article/view/mwandenga`)
    or the preprint page (`/index.php/publicknowledge/preprint/view/3`).
 5. Under "Versions", press the older version: "{date} (Version of
-   Record 1.0)" on the journal, "{date} (Author Original 1.0)" on the
+   Record 1.0)" on the journal, "{date} (Author's Original 1.0)" on the
    server ("{date} (1)" on 3.5). The page shows "This is an outdated
    version published on {date}. Read the most recent version."
 6. Press "PDF".

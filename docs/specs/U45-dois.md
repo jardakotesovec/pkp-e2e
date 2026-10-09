@@ -2930,7 +2930,7 @@ Live-probed 2026-09-26 (Fields, an item's row and expanded view; Rules
 Axolotl limb memory" as a link opening the version's public page in a
 new tab (for an unpublished work too, the manager seeing its preview),
 the submission ID, the badge, the expander "Show more details about
-{id}"; the expanded view "Version of Record 1.0" (a preprint "Author
+{id}"; the expanded view "Version of Record 1.0" (a preprint "Author's
 Original 1.0"; an unpublished first version "Unassigned version
 ({date})") over "Type" / "DOIs" / "Status" / "Actions", rows "Article",
 "PDF", a press's "PDF / article.pdf", an issue's "Issue"; "Edit" greyed
@@ -3135,7 +3135,7 @@ DOI" in the "View all" window. Editing the newest block's work DOI in
 "View all" changed 2.0 and 2.1 and left 1.0. With 1.0 and an unpublished
 2.0 the view read "There are 2 versions."; with 1.0, 2.0 and 2.1 still
 "There are 2 versions.", the window holding "Version of Record 1.0
-({date})" and "Version of Record 2.1 Unpublished" (a preprint "Author
+({date})" and "Version of Record 2.1 Unpublished" (a preprint "Author's
 Original …") as links opening in a new tab, and one "Edit" beside
 "Close". While a journal of the install was on "Yes", `publicknowledge`'s
 OAI answered a server error, and again 200 once it was set back to "No";

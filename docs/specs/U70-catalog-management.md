@@ -111,7 +111,7 @@ bottom, and a sixth, "Identity", once the book has been published;
    books: those with a published version whose Publication Stage is
    "Version of Record" ([Publish, schedule & versions](U49-publish-schedule-and-versions.md),
    its Rule 8). A scheduled book, an unpublished one and a book whose only
-   published version has another stage ("Author Original") are not
+   published version has another stage ("Author's Original") are not
    listed. The list shows 30 books at a time, with page links under it
    once there are more. With no book to show it reads "No items found."
    <sup>f</sup> <sup>td4</sup>
@@ -1396,7 +1396,7 @@ had then.
 manager: a press with no published book read "No items found."; of a
 published, a scheduled (2030-01-01) and an unpublished book in
 Production, only the published one was listed; a book whose only
-published version became "Author Original 1.0" left the list; 30 books
+published version became "Author's Original 1.0" left the list; 30 books
 gave 30 rows and no page links, 31 gave 30 rows and "Previous 1 2 Next",
 with the 31st on page 2.
 

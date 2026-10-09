@@ -9,7 +9,7 @@
  * tab with its list "Preprint DOIs", the row type "Preprint", the kinds
  * "Preprints" and "Preprint galleys, such as a published PDF", "Upon
  * reaching the production stage" (acting at the preprint's final
- * "Submit"), the versions "Author Original {n}". A preprint server has no
+ * "Submit"), the versions "Author's Original {n}". A preprint server has no
  * manager-level role but the Preprint Server Manager, so the Editor
  * bullets of S1 and S2 are the journal's and the press's; S3 has no
  * "Issues" box (read absent beside the "Publication Status" filters).

@@ -619,7 +619,7 @@ test.describe('Publication metadata (U40)', () => {
         await expect(authorScreen.saveButton()).toBeDisabled();
 
         // A new version: "Create New Version", confirmed: the menu gains
-        // "Author Original 1.1". The Author's Title & Abstract on it shows
+        // "Author's Original 1.1". The Author's Title & Abstract on it shows
         // no banner and Save is offered; the unsaved-edit drop holds on
         // this editable page too (Rules 9, 10). The posted version, read
         // the same way by address, keeps its banner and disabled Save —

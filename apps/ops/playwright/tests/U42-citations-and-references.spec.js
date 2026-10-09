@@ -7,7 +7,7 @@
  * server's own words: the Publication area is the "Preprint" group and its
  * pages are headed "Preprint: References" / "Preprint: Data"; the Preprint
  * Server Manager takes the Journal Manager's part; the published item is a
- * posted preprint, read on its preprint page; versions read "Author
+ * posted preprint, read on its preprint page; versions read "Author's
  * Original 1.0" / "1.1"; a draft's file is its galley (`preprint.pdf`), and
  * the wizard's steps are "Upload Files", "Details", "Contributors", "For
  * Readers" (whose required relation status is answered on the way) and

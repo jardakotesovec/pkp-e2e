@@ -102,7 +102,7 @@ Version of Record 1.0 (2026-09-30)   Article   10.1234/s8p4ak15   Registered
 Version of Record 2.0 (2026-10-01)   Article   10.1234/a17zsv96   Unregistered
 ```
 
-OMP ("Monograph") and OPS ("Preprint", "Author Original 1.0" and
+OMP ("Monograph") and OPS ("Preprint", "Author's Original 1.0" and
 "2.0") read the same: the first DOI "Registered", the second
 "Unregistered".
 

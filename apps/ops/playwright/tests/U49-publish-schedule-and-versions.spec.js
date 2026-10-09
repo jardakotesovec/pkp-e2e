@@ -255,7 +255,7 @@ async function createNewVersionViaDialog(page, mutate) {
     return publication;
 }
 
-/** Assert the side menu lists exactly the one version "Author Original 1.0"
+/** Assert the side menu lists exactly the one version "Author's Original 1.0"
  * (the Control every version scenario opens on: the 1.1 entry's absence is
  * bounded by the 1.0 entry read the same way). */
 async function expectOneVersionListed(page) {
@@ -385,7 +385,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expectStatus(managerPage, 'Unposted');
 
         // "The confirmation window": "Post" opens it directly (Rule 2); it
-        // states "All requirements have been met." and names "Author
+        // states "All requirements have been met." and names "Author's
         // Original 1.0" (Rule 4). The requirement-shaped stage sentence is
         // A7's — only the version name is asserted. Confirm.
         const dialog = await openPostWindow(
@@ -578,7 +578,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
             ).toHaveText('Minor Revision');
         });
 
-        // The menu gains "Author Original 1.1"; its pages open with
+        // The menu gains "Author's Original 1.1"; its pages open with
         // "Status: Unpublished" (a queued NON-current version — fn-g) and
         // the copied content.
         await expect(
@@ -663,7 +663,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         });
 
         // "Control" (S1's state, caused here so the mailbox holds its
-        // positive): the manager posts "Author Original 1.0"; the Author,
+        // positive): the manager posts "Author's Original 1.0"; the Author,
         // with the email left on, receives both the "Publication
         // Published" email and the task notice (Side effects).
         const managerPage = await (await asUser(`${tag}mg`)).newPage();
@@ -788,7 +788,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
         ).toBe(1);
 
         // "Unpublish the new version": "Unpost" on it and confirm: the
-        // reader page stays live serving "Author Original 1.0", its
+        // reader page stays live serving "Author's Original 1.0", its
         // "Versions" list one entry shorter (Rule 9a).
         await unpostPreprint(managerPage);
         await gotoReaderPage(page, tag, submissionId);
@@ -819,7 +819,7 @@ test.describe('Publish, schedule & versions (U49)', () => {
 
         // "A minor version in the same stage": a preprint server knows a
         // single stage (Rule 12): the dialog's Publication Stage offers
-        // only "Author Original (AO)" — the AO option's presence bounds the
+        // only "Author's Original (AO)" — the AO option's presence bounds the
         // Version-of-Record absence. With an AO version existing, "Minor
         // Revision" is selectable (and preselected — fn-i); an untouched
         // Confirm yields "… 1.1".
@@ -839,9 +839,9 @@ test.describe('Publish, schedule & versions (U49)', () => {
             managerPage.getByRole('link', {name: `${AO} 1.1`, exact: true})
         ).toBeVisible({timeout: 30_000});
 
-        // "A major version in a stage that has versions": keeping "Author
+        // "A major version in a stage that has versions": keeping "Author's
         // Original" and choosing "Major Revision" yields the stage's next
-        // whole number, "Author Original 2.0" (Rule 12).
+        // whole number, "Author's Original 2.0" (Rule 12).
         await createNewVersionViaDialog(managerPage, async (dialog) => {
             await expect(
                 dialog.locator('#version-versionStage-control option:checked')

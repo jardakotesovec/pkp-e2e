@@ -96,7 +96,7 @@ All three, signed out:
    (`/index.php/publicknowledge/catalog/book/14`).
 7. Under "Versions", press the newest of the older versions: "2026-09-30
    (Version of Record 1.0)" on the journal and the press, "2026-09-30
-   (Author Original 2.0)" on the server. [3.5: "2026-09-30 (1)",
+   (Author's Original 2.0)" on the server. [3.5: "2026-09-30 (1)",
    "2026-09-30 (2)" on the server.] The page shows "This is an outdated
    version published on 2026-09-30. Read the most recent version."
 8. Read the page's heading and the browser tab.

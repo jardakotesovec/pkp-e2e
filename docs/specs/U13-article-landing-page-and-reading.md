@@ -231,7 +231,7 @@ Top to bottom: <sup>j</sup>
    been published. View submission". It looks as it will once published,
    except that it has no "Published" ("Posted") line and no "Versions"
    list. On a preprint server the label line names the preview day and
-   the version's name as it stands ("Preprint / 2026-09-25 (Author
+   the version's name as it stands ("Preprint / 2026-09-25 (Author's
    Original 1.2)"). "View submission" opens the submission's workflow on
    its current stage for those whose workflow offers "Preview"; the
    submission's Author gets the access-denied page instead ("The current
@@ -275,12 +275,12 @@ Top to bottom: <sup>j</sup>
      2024-03-01 — Updated on 2026-09-28" ("Posted 2024-03-03 — Updated
      on 2026-09-28" for a preprint first posted 2024-03-03). Yet
      "Versions" lists only "2026-09-28 (Version of Record 1.1)"
-     ("2026-09-28 (Author Original 1.1)"), and the first
+     ("2026-09-28 (Author's Original 1.1)"), and the first
      version's own address answers the "404 Not Found" page
      ⚠ [A12](#a12). <sup>g</sup>
 8. **The "Versions" list.** Every published version, the newest first,
    each as "{date} ({version name})": "2026-09-24 (Version of Record
-   1.0)", on a preprint server "2026-09-24 (Author Original 1.0)". The
+   1.0)", on a preprint server "2026-09-24 (Author's Original 1.0)". The
    version shown is plain text; the current version links to the
    article's address and each older one to its own address (Rule 2). A
    version not yet published, or unpublished since, is not listed. On a French page the version
@@ -717,7 +717,7 @@ footnote. <sup>s</sup>
    - **The side column**: top to bottom it shows the cover image, the
      galley link "PDF", "Published" ("Posted" on a preprint server) over
      a date, and "Versions" with one entry, "{that date} (Version of
-     Record 1.0)" ("Author Original 1.0" on a preprint server), as plain
+     Record 1.0)" ("Author's Original 1.0" on a preprint server), as plain
      text; on a journal then "Issue" with "Vol. 1 No. 2 (2014)" as a link
      and "Section" with "Articles" as plain text; then "Categories" with
      "Engineering" as a link ("Applied Science > Engineering" on a
@@ -810,7 +810,7 @@ footnote. <sup>s</sup>
      page is headed "Tidal Patterns Revised", and under "Published"
      ("Posted") reads "{today} — Updated on {today}". "Versions" lists
      two entries, the newest first: the current version's as plain
-     text, then "{today} (Version of Record 1.0)" ("Author Original 1.0"
+     text, then "{today} (Version of Record 1.0)" ("Author's Original 1.0"
      on a preprint server) as a link. On a preprint server the label
      line above the title reads "Preprint / " followed by the date and
      name of the current version's entry. The "APA" citation under "How
@@ -1404,8 +1404,8 @@ On an article, book or preprint page shown in French, the "Versions"
 list names every version with a raw translation key,
 "##publication.versionStage.display##": two versions posted the same day
 read "2026-09-30 (##publication.versionStage.display##)" twice. The
-English page reads "2026-09-30 (Author Original 2.0)" and "2026-09-30
-(Author Original 1.0)". A preprint's line above its title shows the same
+English page reads "2026-09-30 (Author's Original 2.0)" and "2026-09-30
+(Author's Original 1.0)". A preprint's line above its title shows the same
 key, and so does the editor's workflow: its "Publication" menu lists
 one entry per version, and the "Create New Version" window's list of
 versions to copy from offers each under the same key.
@@ -2329,7 +2329,7 @@ opened `…/view/probe-path/version/{id}` with the outdated notice on the
 journal, and "404 Not Found" at `…/view/probe-path/{id}` on the server.
 The versions' own addresses carried the ids of the "Versions" links
 (`…/article/view/60/version/68` for "Version of Record 1.0", `…/preprint/view/43/version/45`
-for "Author Original 1.0"); the current version's own such address
+for "Author's Original 1.0"); the current version's own such address
 opened the plain page with no notice. `/version/999999`, and another
 article's version id, answered a blank server error page on the journal
 and "404 Not Found" on the server. The field reads "URL Path" on both,
@@ -2364,7 +2364,7 @@ access to this operation.". On the server, a new version previewed after
 "Create New Version" on a posted preprint showed that notice and under it
 "This is an outdated version published on 2026-09-25. Read the most
 recent version.", the day of the preview, and the label line "Preprint /
-2026-09-25 (Author Original 1.2)"; the journal showed the preview notice
+2026-09-25 (Author's Original 1.2)"; the journal showed the preview notice
 alone. A scheduled article seeded as published sits at the Submission
 stage, whose workflow offers no "Preview"; the manager still opened its
 preview by the address.
@@ -2397,7 +2397,7 @@ Live-probed 2026-09-25 (Rules 7–9), OJS and OPS: one version read
 "Published 2026-09-01"; two read "Published 2026-09-01 — Updated on
 2026-09-24" ("Posted 2026-09-01 — Updated on 2026-09-25" on the server).
 "Versions" listed "2026-09-24 (Version of Record 1.1)" then "2026-09-01
-(Version of Record 1.0)" ("Author Original …" on the server), the shown
+(Version of Record 1.0)" ("Author's Original …" on the server), the shown
 one plain, the current one linked to the plain address and the older to
 its own; a draft third version created 2026-09-25 was not listed, but
 the current page's line then read "Published 2026-09-25 — Updated on
@@ -2405,8 +2405,8 @@ the current page's line then read "Published 2026-09-25 — Updated on
 2026-09-01" ("Posted 2026-09-25 — Updated on 2026-09-25" and "Posted
 2026-09-25 — Updated on 2026-09-01" on the server; the versions spec's
 A6). The label line read
-"Preprint / 2026-09-25 (Author Original 1.1)" on the current page and
-"Preprint / 2026-09-01 (Author Original 1.0)" on the older one.
+"Preprint / 2026-09-25 (Author's Original 1.1)" on the current page and
+"Preprint / 2026-09-01 (Author's Original 1.0)" on the older one.
 Live-probed 2026-09-28 (Rules 3, 7, 7b, 8; A12), OJS and OPS, two runs
 on scratch contexts, signed out: a first version seeded published on
 2024-03-01 (OJS, in an issue) or 2024-03-03 (OJS and OPS), then a
@@ -2415,7 +2415,7 @@ Assign To An Issue", once keeping the issue). Before, one version read
 "Published 2024-03-01" ("Posted 2024-03-03"); with both published the
 line read "Published 2024-03-01 — Updated on 2026-09-28" and "Versions"
 listed "2026-09-28 (Version of Record 1.1)" and "2024-03-01 (Version of
-Record 1.0)" ("Author Original …" on the server), the first version's
+Record 1.0)" ("Author's Original …" on the server), the first version's
 own address answering 200 under the older-version notice. The first
 version was then unpublished, on OJS by the issue's "Table of Contents"
 › "Remove" (answered `status:true`) and by its own "Unpublish", on OPS
@@ -2425,7 +2425,7 @@ by "Unpost" (200 each; the version's controls then read "Preview",
 still picked it: the line read "Published 2024-03-01 — Updated on
 2026-09-28" ("…2024-03-03…" for the article first published that day,
 OPS "Posted 2024-03-03 — Updated on 2026-09-28") at once and after a reload, "Versions" listed only
-"2026-09-28 (Version of Record 1.1)" ("Author Original 1.1"), and
+"2026-09-28 (Version of Record 1.1)" ("Author's Original 1.1"), and
 `article/view/{id}/version/{v1}` (`preprint/view/{id}/version/{v1}`)
 answered 404. No request failed.
 
@@ -2447,7 +2447,7 @@ Spanish (Mexico) installed by the Site Administrator under
 Administration › Site Settings › "Languages" › "Install Locale" (listed
 with "*" beside French (Canada)) and removed afterwards: English read
 "2026-10-05 (Version of Record 1.1)" plain and "2026-10-05 (Version of
-Record 1.0)" linked ("Author Original …" on the server); French
+Record 1.0)" linked ("Author's Original …" on the server); French
 (Canada) read "2026-10-05 (##publication.versionStage.display##)" on
 all three, the server's label line "Prépublication / 2026-10-05
 (##publication.versionStage.display##)", the older notice "Ceci est une

@@ -45,7 +45,7 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 | **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator: on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles: while assigned to the submission's current stage. An assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author: on their own submission, in the author view <sup>a</sup> |
 | **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1) <sup>a</sup> |
 | **Save changes on any of these pages** | • Journal Manager, Editor: always, published versions included (Rule 8)<br>• Site Administrator: only through their journal roles; holding the manager role, they save as a Journal Manager. One whose manager role was ended (Users & Roles › Edit, "Remove Role"), left with an assistant role and not a participant, finds Save disabled on Title & Abstract, Metadata and Data (Rule 10) ⚠ [A18](#a18)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND the version they are on is neither published nor scheduled (Rule 9). While another version is published, the Author saves on the unpublished one. A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
-| **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article whose only version was published as "Author Original" or "Published Manuscript Under Review" is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission (their Confirm is untried [A19](#a19)). The Site Administrator left with an assistant role (the row above) is offered it; Confirm fails (Rule 13c) [A19](#a19). The Author is never offered it, in any app <sup>i</sup> |
+| **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article whose only version was published as "Author's Original" or "Published Manuscript Under Review" is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission (their Confirm is untried [A19](#a19)). The Site Administrator left with an assistant role (the row above) is offered it; Confirm fails (Rule 13c) [A19](#a19). The Author is never offered it, in any app <sup>i</sup> |
 | **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License <sup>m</sup> |
 | **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator: Tools › Permissions (Rule 14) <sup>k</sup> |
 | **Read the license, data availability and funding statement blocks** | • any reader: on a published item's landing page (Rule 15) <sup>l</sup> |
@@ -295,7 +295,7 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
       Published as "Version of Record" ("Status: Published"), into a
       published issue, with "Assign To Future Issue and Publish
       Immediately" or with "Don't Assign To An Issue", an article counts
-      as published. Published as "Author Original" or "Published
+      as published. Published as "Author's Original" or "Published
       Manuscript Under Review", its only version keeps the readout and
       button beside "Status: Published", and every Confirm is refused
       (13c) ⚠ [OJS1](#ojs1). Scheduled with "Assign To Future Issue and
@@ -740,7 +740,7 @@ catcher's address are in its footnote.
    the first language, its section requiring abstracts on a journal or
    preprint server; the submission's Author; for the controls, a
    published submission and one with two versions; on a journal, an
-   article whose only version was published as "Author Original",
+   article whose only version was published as "Author's Original",
    assigned to no issue.
 
    - **The readout and the button**: any Publication page reads "Current
@@ -770,8 +770,8 @@ catcher's address are in its footnote.
      two versions, there is neither readout nor "Change" on any
      Publication page, while the stage screens keep the readout
      ([A6](#a6)) (Rule 13a).
-   - **An article published as Author Original** (journal only): the
-     article whose only version was published as "Author Original"
+   - **An article published as Author's Original** (journal only): the
+     article whose only version was published as "Author's Original"
      still shows "Change" beside "Status: Published", and confirming a
      change there ends in the toast "You can not change language of this
      submission…" with the panel still open ([OJS1](#ojs1)) (Rules 13a,
@@ -1038,7 +1038,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A19](#a19) | Assistants allowed to edit the publication's metadata, and administrators with only an assistant role, get a language "Change" that fails | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A21](#a21) | Through a new version of a published item, the permitted Author changes the published version's funders and can take its review round | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A22](#a22) | Change Submission Language: on a slow link, a title typed before the Title box has finished loading is lost | 🐞 | minor | — |
-| [OJS1](#ojs1) | An article published as "Author Original" or "Published Manuscript Under Review" keeps "Change", and every language change on it is refused | 🐞 | minor | claim check (claude), 2026-10-07 — trigger corrected |
+| [OJS1](#ojs1) | An article published as "Author's Original" or "Published Manuscript Under Review" keeps "Change", and every language change on it is refused | 🐞 | minor | claim check (claude), 2026-10-07 — trigger corrected |
 | [OMP5](#omp5) | Book page: with press License Terms and no book license, a "License" link reloads the page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | In French a preprint server shows the Author's "posted" banner and the Copyright Holder and Copyright Year descriptions as raw codes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A3](#a3) | Reset permissions rewrites every submission, unpublished and declined included, and logs one "metadata updated" line per version | ❓ | user-visible | — |
@@ -1332,7 +1332,7 @@ Basis: probe, 2026-10-07. <sup>f-a22</sup>
 
 <a id="ojs1"></a>
 **OJS1 — "Change" stays on an article published as a version other than the Version of Record** · 🐞 · minor.
-A journal article whose only version was published as "Author
+A journal article whose only version was published as "Author's
 Original" or "Published Manuscript Under Review" (the "Publication
 Stage" list's other two values) keeps "Current Submission Language:
 {language}" with its "Change" button on every Publication page, beside
@@ -2090,7 +2090,7 @@ be posted?") the Author's Save was enabled on both versions, answered
 200 and persisted, with no re-tick; with the box unticked both versions
 were read-only with no banner (control). New version of a published
 item ("Create New Version"; "Version of Record 1.1" on OJS and OMP,
-"Author Original 1.1" on OPS): the Author's page read "Status:
+"Author's Original 1.1" on OPS): the Author's page read "Status:
 Unpublished", no banner, Save enabled, the save refused 401 (fn-f-a16);
 re-driven 2026-09-14 at the tips carrying pkp/pkp-lib#13312 (OJS, OMP,
 OPS): the same save answered 200, the footer read "Saved" and the edit
@@ -2330,7 +2330,7 @@ For the abstract leg the submission's section must require abstracts
 does any press). The Author of the control is the submission's
 throwaway submitter. Live-probed 2026-08-28 on all three apps (fn-i). The
 OJS-only leg: an article published with the "Publication Stage"
-"Author Original" and "Don't Assign To An Issue" in the "Schedule For
+"Author's Original" and "Don't Assign To An Issue" in the "Schedule For
 Publication" panel (live 2026-10-07, f-ojs1; until then the leg was an
 article published into an unpublished future issue, which no longer
 keeps the button); a seeded published item with no issue is the hiding
@@ -2707,7 +2707,7 @@ while another is published. Live-probed 2026-09-09 (Rule 9, scenario 3;
 OJS, OMP and OPS, scratch contexts; the Author the submitter with the
 "Edit Assignment" box ticked, version 1.0 published and 1.1 created by
 the manager): the Author's Title & Abstract on "Version of Record 1.1"
-("Author Original 1.1" on OPS) read "Status: Unpublished", no banner,
+("Author's Original 1.1" on OPS) read "Status: Unpublished", no banner,
 Save enabled; the tunnelled `PUT submissions/{id}/publications/{newId}`
 (`X-Http-Method-Override: PUT`) answered 401 Unauthorized,
 `application/json`, body verbatim
@@ -2756,7 +2756,7 @@ and OPS, scratch contexts; phases seed, tick, publish, version; outputs
 `.reports/U40/s14-k1/`, log `.reports/sync/s14-k1-0914.log`): the
 submitting Author with "Allow this person to make changes to the
 publication…" ticked (already ticked on OPS) opened the new version's
-Title & Abstract ("Version of Record 1.1"; "Author Original 1.1" on
+Title & Abstract ("Version of Record 1.1"; "Author's Original 1.1" on
 OPS) with "Status: Unpublished", no banner and Save enabled; the save
 answered 200 with the footer "Saved" and the edit was there after a
 reload (`au-v2 persisted: true` on all three apps; the Metadata page
@@ -2910,7 +2910,7 @@ keys pressed before the editor was initialized were lost. Kept script
 `Repository::getStatusByPublications()`, which counts a submission
 published (or scheduled) only through a publication of the final
 version stage (`VersionStage::finalVersionStage()`: Version of Record
-on a journal or press, Author Original on a preprint server). The
+on a journal or press, Author's Original on a preprint server). The
 client guard `submission.status !== STATUS_PUBLISHED &&
 publications.length < 2` (`workflowConfigEditorialOJS.js`
 `getPrimaryControlsLeft`, fn-i) therefore keeps the readout and button
@@ -2918,7 +2918,7 @@ for an article published under another stage, while
 `PKPSubmissionController::changeLocale()` refuses on the publication's
 own `STATUS_PUBLISHED`. Live 2026-10-07, two runs and more (OJS `main`,
 scratch journal with English and French (Canada), Journal Manager):
-"Author Original 1.0" or "Published Manuscript Under Review 1.0"
+"Author's Original 1.0" or "Published Manuscript Under Review 1.0"
 published alone ("This will be published immediately without any issue
 association. …") stored publication status 3 and submission status 1,
 and Title & Abstract, Contributors and Metadata showed "Current
@@ -2938,7 +2938,7 @@ offers no stage choice at the first publish (the window reads "The
 publication must have a version stage assigned before it can be
 published. The stage version that will be assigned to the publication
 is "Version of Record 1.0"") and the published book shows neither; on
-OPS Author Original is the final stage, and after "Post" neither
+OPS Author's Original is the final stage, and after "Post" neither
 shows. History: live-probed 2026-08-28, an article published into an
 unpublished future issue kept the button and was refused the same way;
 then OJS `Repository::updateStatus()` derived the submission status

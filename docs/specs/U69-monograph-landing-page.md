@@ -238,8 +238,8 @@ link, not a button. A journal's page puts the instructions under
    Record of it is published. Until then its address answers the "404 Not
    Found" page to a visitor and to a Reader, and so does the address of
    any of its versions. A scheduled book answers the same until its date.
-   A book whose only published version is an "Author Original" (a version
-   added with "Create New Version" and the "Publication Stage" "Author
+   A book whose only published version is an "Author's Original" (a version
+   added with "Create New Version" and the "Publication Stage" "Author's
    Original (AO)") answers the same to a visitor and a Reader, as the
    catalog leaves it out
    too ([Catalog browse](U68-catalog-browse.md), its Rule 3), while the
@@ -1202,7 +1202,7 @@ Left out of the scenarios above, by reason:
     Reader is (Actors row 4; Rule 14; scenario 4)
 - **Register carries it**:
   - A1 (an address that names no book; Rule 3a)
-  - A2 (a book published only as an "Author Original"; Rule 3)
+  - A2 (a book published only as an "Author's Original"; Rule 3)
   - A3 (a version address that names no version; Rule 4)
   - A4 (a new version's preview under both notices, dated today or
     with the version's saved date; Rule 5b)
@@ -1307,7 +1307,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A27](#a27) | A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A24](#a24) | On a preview, every file link of the book opens "404 Not Found" | 🐞 | minor | — |
 | [A11](#a11) | A buyer who pays by hand never gets the file | ❓ | user-visible | — |
-| [A2](#a2) | A book published only as an Author Original has no page | ❓ | minor | — |
+| [A2](#a2) | A book published only as an Author's Original has no page | ❓ | minor | — |
 | [A21](#a21) | On a preview, "How to Cite" works only for the roles assigned to the book | ❓ | minor | — |
 | [A22](#a22) | "APA" prints a series position as a number of volumes | ❓ | minor | — |
 | [A14](#a14) | A chapter new in a later version is cited as older than it is | ❓ | minor | — |
@@ -1334,16 +1334,16 @@ preprint address that names nothing.
 Basis: probe, 2026-10-01. <sup>f-a1</sup>
 
 <a id="a2"></a>
-**A2 — A book published only as an Author Original has no page** · ❓ · minor.
-A book whose only published version is an "Author Original" answers "404
+**A2 — A book published only as an Author's Original has no page** · ❓ · minor.
+A book whose only published version is an "Author's Original" answers "404
 Not Found" to readers, and the catalog leaves it out, although the
 workflow shows that version "Status: Published". The Press manager and
 the Site Administrator who type the book's address get its page as if
 published, with no preview notice, "Published {Version of Record date} —
-Updated on {Author Original date}" and "Versions" "{date} (Author
+Updated on {Author's Original date}" and "Versions" "{date} (Author's
 Original 1.0)"; the workflow, which shows the Version of Record "Status:
 Unpublished", offers them neither "View" nor "Preview".
-Question: should a published Author Original make the book public on a
+Question: should a published Author's Original make the book public on a
 press? Lean: intended; only a Version of Record puts a book in the catalog,
 but the workflow could say so.
 Basis: probe, 2026-09-28. <sup>f-a2</sup>
@@ -1722,13 +1722,13 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td26** — Live-probed 2026-10-05 (Fields, the HTML view page; A25; two runs): on a scratch press, the Press manager uploaded two HTML files into one "HTML" format of an unpublished book ("Change File", "Set Terms" "Open Access") and published it; the book's page listed both for a visitor, a Reader and the Press manager. The file holding only a link `omp://press` opened under the tab "HTML view of the file …" with its frame reading "Press link Visit the press.", the link's address the press's home page, followed inside the frame to the press's home page. `HtmlGalleyHelper::handleOmpUrl()` rewrites `omp://press` and `omp://monograph/{id}` links; the second fails (f-a25).
 
 <a id="fn-g"></a>
-**g** — `CatalogBookHandler::book()`: `version/{publicationId}` picks that publication from the submission's publications into the typed property `public Publication $publication` (no default), so an id matching none leaves it uninitialized and the following `!$this->publication` throws "must not be accessed before initialization" (a server error); an unpublished publication without `canPreview()` throws not found; a non-numeric first argument that is not the version's `urlPath` and has no sub-path is meant to redirect to the current `urlPath` (or id), but passes a string path to `PKPRequest::redirect()`, which takes `?array $path` since lib/pkp bee9547b49 (2024-06-26), so the redirect throws a TypeError, a server error (A16); a numeric one is never redirected. The URL Path resolves through `Repo::submission()->getByUrlPath()`. An unknown number or path fails `OmpPublishedSubmissionRequiredPolicy` with `user.authorization.invalidPublishedSubmission` "An invalid published submission was specified." (OMP `locale/en/locale.po`), and `PKPPageRouter::handleAuthorizationFailure()` sends a signed-out user to Login and a signed-in one to `user/authorizationDenied`. Submission status: `Repo::submission()->getStatusByPublications()` returns published only for a published publication whose `versionStage` is the final stage (Version of Record); the current publication is the last published one in version order (`getCurrentPublicationIdByPublications()`). Notices: `submission.viewingPreview` (link `dashboard/editorial?workflowSubmissionId={id}`) when the shown publication is not published, and `submission.outdatedVersion` whenever it is not the current publication, with `datePublished|date_format:$dateFormatShort`. Incidentals: the URL Path (U70 claim check K5, 2026-09-27: `catalog/book/{path}` opens, catalog links use the path, `catalog/book/{id}` still opens); the Author Original only (U68 claim check K2, 2026-09-27: the book's page answered 404); the unknown number (U16 claim check K4, 2026-09-25: `catalog/book/999999` landed a visitor on Login). Live-probed 2026-09-28: see td2–td8.
+**g** — `CatalogBookHandler::book()`: `version/{publicationId}` picks that publication from the submission's publications into the typed property `public Publication $publication` (no default), so an id matching none leaves it uninitialized and the following `!$this->publication` throws "must not be accessed before initialization" (a server error); an unpublished publication without `canPreview()` throws not found; a non-numeric first argument that is not the version's `urlPath` and has no sub-path is meant to redirect to the current `urlPath` (or id), but passes a string path to `PKPRequest::redirect()`, which takes `?array $path` since lib/pkp bee9547b49 (2024-06-26), so the redirect throws a TypeError, a server error (A16); a numeric one is never redirected. The URL Path resolves through `Repo::submission()->getByUrlPath()`. An unknown number or path fails `OmpPublishedSubmissionRequiredPolicy` with `user.authorization.invalidPublishedSubmission` "An invalid published submission was specified." (OMP `locale/en/locale.po`), and `PKPPageRouter::handleAuthorizationFailure()` sends a signed-out user to Login and a signed-in one to `user/authorizationDenied`. Submission status: `Repo::submission()->getStatusByPublications()` returns published only for a published publication whose `versionStage` is the final stage (Version of Record); the current publication is the last published one in version order (`getCurrentPublicationIdByPublications()`). Notices: `submission.viewingPreview` (link `dashboard/editorial?workflowSubmissionId={id}`) when the shown publication is not published, and `submission.outdatedVersion` whenever it is not the current publication, with `datePublished|date_format:$dateFormatShort`. Incidentals: the URL Path (U70 claim check K5, 2026-09-27: `catalog/book/{path}` opens, catalog links use the path, `catalog/book/{id}` still opens); the Author's Original only (U68 claim check K2, 2026-09-27: the book's page answered 404); the unknown number (U16 claim check K4, 2026-09-25: `catalog/book/999999` landed a visitor on Login). Live-probed 2026-09-28: see td2–td8.
 
 <a id="fn-td2"></a>
 **td2** — Live-probed 2026-09-28 (Rules 1, 2; A16): every link that leads to the book (the catalog, series and category pages, "New Releases", both home-page lists, a search result, "View Entry") used its URL Path "harbour"; the workflow's "View" and "Preview" opened the page in the same tab. `…/catalog/book/{number}` opened the page and kept the address. After a new version saved "harbour-2" and was published, `…/catalog/book/harbour` answered 500 with a blank page to a visitor, while `…/harbour/version/{id}` still opened; while "harbour-2" sat on the unpublished version, `…/catalog/book/harbour-2` answered the same to a visitor and the Press manager. The chapter page's cover and "Volume" linked `…/catalog/book/{number}`.
 
 <a id="fn-td3"></a>
-**td3** — Live-probed 2026-09-28 (Rule 3; A2): "404 Not Found" for a visitor and a Reader at an unpublished book in Production and its version address, a book scheduled for 2031-01-10 and its version address, and a book whose only published version is "Author Original 1.0" (made on screen) at its book address and both version addresses; the catalog listed none of them. The Press manager and the Site Administrator got the Author Original book's page with no notice.
+**td3** — Live-probed 2026-09-28 (Rule 3; A2): "404 Not Found" for a visitor and a Reader at an unpublished book in Production and its version address, a book scheduled for 2031-01-10 and its version address, and a book whose only published version is "Author's Original 1.0" (made on screen) at its book address and both version addresses; the catalog listed none of them. The Press manager and the Site Administrator got the Author's Original book's page with no notice.
 
 <a id="fn-td4"></a>
 **td4** — Live-probed 2026-09-28 (Rule 3a; A1): signed out, `catalog/book/999999`, `…/no-such-path`, `…/0` and `…/999999/version/1` landed on Login; the seeded Reader got `user/authorizationDenied` reading "An invalid published submission was specified.", with no heading and the tab "| Public Knowledge Press". OJS `article/view/999999` and OPS `preprint/view/999999` answered "404 Not Found" to both.
@@ -1907,7 +1907,7 @@ made on screen with "Create New Version".
 Issue report: [pkp-e2e#292](https://github.com/jardakotesovec/pkp-e2e/issues/292) ([docs/issues/U69-A1-unknown-book-address-asks-sign-in.md](../issues/U69-A1-unknown-book-address-asks-sign-in.md)).
 
 <a id="fn-f-a2"></a>
-**f-a2** — Note g (`getStatusByPublications()` needs a published Version of Record); `canPreview()` lets the Press manager and the Site Administrator in, and the shown publication is published, so no preview notice prints. Live-probed 2026-09-28 (td3): the book's page answered 404 to a visitor and a Reader and opened as published for the Press manager and the Site Administrator; the workflow showed the Author Original "Status: Published", the Version of Record "Status: Unpublished", and neither "View" nor "Preview". The catalog's leaving it out is Catalog browse's Rule 3.
+**f-a2** — Note g (`getStatusByPublications()` needs a published Version of Record); `canPreview()` lets the Press manager and the Site Administrator in, and the shown publication is published, so no preview notice prints. Live-probed 2026-09-28 (td3): the book's page answered 404 to a visitor and a Reader and opened as published for the Press manager and the Site Administrator; the workflow showed the Author's Original "Status: Published", the Version of Record "Status: Unpublished", and neither "View" nor "Preview". The catalog's leaving it out is Catalog browse's Rule 3.
 
 <a id="fn-f-a3"></a>
 **f-a3** — Note g: the uninitialized typed property `CatalogBookHandler::$publication` when `version/{id}` matches no publication of the submission; the log reads "Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization" (`CatalogBookHandler.php` line 122). The typed property dates from omp `29fa88508` (2025-03-20). Live-probed 2026-09-28 (td6): 500 for every id tried and every role.

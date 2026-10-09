@@ -71,7 +71,7 @@ Steps:
 3. In the side menu press "Create New Version". The window arrives with
    the published version, its stage and "Minor Revision" chosen; press
    "Confirm". The menu gains "Version of Record 1.1"
-   ("Author Original 1.1" on OPS).
+   ("Author's Original 1.1" on OPS).
 4. Under the new version open "Publication Settings" ("Catalog Entry" on
    OMP, "Preprint entry" on OPS). The "Summary of Changes (Amendment
    Notice)" box reads "This will appear publicly as the version
@@ -80,7 +80,7 @@ Steps:
 5. In "Update Type" choose "Correction", type "Figure 2 corrected." into
    "Summary of Changes (Amendment Notice)" and press "Save".
 6. Press "Publish" ("Post" on OPS) and confirm with "Publish" ("Post")
-   in the window naming "Version of Record 1.1" ("Author Original 1.1").
+   in the window naming "Version of Record 1.1" ("Author's Original 1.1").
    (On OJS the save in step 5 marked the version ready to publish, so
    "Review Publishing Details" does not open first.)
 7. Sign out and open the reader page:

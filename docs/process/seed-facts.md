@@ -1417,20 +1417,20 @@ config-file settings.
 - {OMP} A book's first "Publish" (Production, on a publication page such
   as Catalog Entry; the stage view has no "Publish") confirms "…will be
   assigned … "Version of Record 1.0"" and offers no stage to choose. A
-  book whose only published version is "Author Original" comes from
-  "Create New Version" › "Publication Stage" "Author Original (AO)", that
+  book whose only published version is "Author's Original" comes from
+  "Create New Version" › "Publication Stage" "Author's Original (AO)", that
   version's "Publish", and "Unpublish" on the Version of Record.
   2026-09-27 (U68 claim check K2-3, `.reports/U68/ccK2/facts-omp.json`
   "ao-screen").
 - {OMP} The catalog's series links ("Show Series") list only series that
   hold a published book, a series whose only published version is
-  "Author Original" included, and show only while at least two series
+  "Author's Original" included, and show only while at least two series
   hold one. A scratch press has no series (see above): one is
   seeded through the context scenario's `series[]` or added on Settings ›
   Press › Series › "Add Series", and a book goes into it through
   `POST scenarios/submission` `series: <path>`. Catalog page,
   2026-09-24 (U10 claim check K1-8, `.reports/U10/ccK1/68-series2-omp.json`);
-  the "Author Original" case and the two-series condition 2026-09-27 (U68
+  the "Author's Original" case and the two-series condition 2026-09-27 (U68
   claim check K2-2, K4-7).
 - No routine task processes the usage log on a fleet, so every Statistics
   page, CSV download and item page's "Downloads" chart is empty unless a

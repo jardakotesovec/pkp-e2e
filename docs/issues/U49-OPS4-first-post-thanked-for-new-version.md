@@ -56,7 +56,7 @@ created beforehand.
   cashmere production", is in Production and has never been posted; its
   one contributor is Carlo Corino (`ccorino@mailinator.com`).
 - Preprint 2, "The Facets Of Job Satisfaction: A Nine-Nation Comparative
-  Study Of Construct Equivalence", is posted (version "Author Original
+  Study Of Construct Equivalence", is posted (version "Author's Original
   1.0"); its contributors are Catherine Kwantes
   (`ckwantes@mailinator.com`) and Urho Kekkonen.
 - Settings › Workflow › Emails › "Preprint Posted" has "Send an email
@@ -70,7 +70,7 @@ First post:
 3. In the "Preprint" menu open "Title & Abstract" and press "Post". The
    "Post the preprint" window reads "All requirements have been met. Are
    you sure you want to post this? … The stage version that will be
-   assigned to the publication is "Author Original 1.0"". Press "Post".
+   assigned to the publication is "Author's Original 1.0"". Press "Post".
 4. Read the email that arrives at `ccorino@mailinator.com`.
 
 A later version (the control):
@@ -79,7 +79,7 @@ A later version (the control):
    (`…/dashboard/editorial?workflowSubmissionId=2`).
 6. In the "Preprint" menu press "Create New Version", choose "Minor
    Revision" under "Revision Significance" and press "Confirm".
-7. Under the new version ("Author Original 1.1") open "Title & Abstract",
+7. Under the new version ("Author's Original 1.1") open "Title & Abstract",
    press "Post", and "Post" again in the window.
 8. Read the email that arrives at `ckwantes@mailinator.com`.
 
@@ -179,7 +179,7 @@ Acknowledgement", as it does without the fix.
 **Alternatives**
 
 - Test `versionMajor == 1 && versionMinor == 0`. It gives the same answer
-  on a preprint server today, which has one version stage ("Author
+  on a preprint server today, which has one version stage ("Author's
   Original"), but it would call a first "1.0" of another stage a first
   post if OPS gains stages; the publication count needs no such
   assumption.

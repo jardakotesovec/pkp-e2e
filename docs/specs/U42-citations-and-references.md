@@ -1994,7 +1994,7 @@ from each row's data, sequence included. U49's footnote on version creation
 records the same copy. Live-probed 2026-09-24 (Rules 1, 26), all three
 apps: with lookup on and version 1.0 published with three references (one
 structured by hand) and one data citation, "Create New Version" gave a 1.1
-("Version of Record" on OJS and OMP, "Author Original" on OPS) with the
+("Version of Record" on OJS and OMP, "Author's Original" on OPS) with the
 same three rows, the structured one keeping its DOI link, title and
 expander and the box "Processing references - 0/1", and the same data
 citation; deleting a reference and adding another on 1.1 left 1.0's lists

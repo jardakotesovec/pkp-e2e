@@ -53,7 +53,7 @@ Preconditions:
   in Isfahan, Iran", is published in one version, "Version of Record
   1.0", with a "PDF" galley. On the preprint server, submission 2, "The
   Facets Of Job Satisfaction: A Nine-Nation Comparative Study Of
-  Construct Equivalence", is posted in one version, "Author Original
+  Construct Equivalence", is posted in one version, "Author's Original
   1.0", with a "PDF" galley.
 - A small HTML file to upload as the journal's HTML galley, here
   `u13a13-article.html`. The dataset has no HTML galley.
@@ -78,7 +78,7 @@ Journal (OJS):
 
 Preprint server (OPS): steps 1 to 3, 5 and 6 as `dbarnes` (Preprint
 Server manager) on submission 2, under "Preprint". The new version is
-"Author Original 1.1", and "Preview" opens
+"Author's Original 1.1", and "Preview" opens
 `…/en/preprint/view/2/version/21`.
 
 [3.5: "Create New Version" is a button above the publication's pages.

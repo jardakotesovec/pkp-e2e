@@ -20,8 +20,8 @@ On an article, book or preprint page shown in French, the "Versions"
 list names every version with a raw translation key,
 "##publication.versionStage.display##": two versions posted the same day
 read "2026-09-30 (##publication.versionStage.display##)" twice. The
-English page reads "2026-09-30 (Author Original 2.0)" and "2026-09-30
-(Author Original 1.0)". A preprint's line above its title shows the same
+English page reads "2026-09-30 (Author's Original 2.0)" and "2026-09-30
+(Author's Original 1.0)". A preprint's line above its title shows the same
 key, and so does the editor's workflow: its "Publication" menu lists
 one entry per version, and the "Create New Version" window's list of
 versions to copy from offers each under the same key.
@@ -91,8 +91,8 @@ Editor, journal (OJS):
    version (the submission has versions 1.0 and 1.1).
 
 **Expected.** Each entry names its version with its stage and number,
-as the English page does: "2026-09-30 (Author Original 2.0)" and
-"2026-09-30 (Author Original 1.0)" on the preprint, "2026-09-30 (Version
+as the English page does: "2026-09-30 (Author's Original 2.0)" and
+"2026-09-30 (Author's Original 1.0)" on the preprint, "2026-09-30 (Version
 of Record 1.0)" on the article and the book, "Version of Record 1.0" and
 "Version of Record 1.1" in the editor's menu, with the stage name in
 French once it is translated.

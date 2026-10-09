@@ -141,8 +141,8 @@ the series as links under it (Rule 12). <sup>h</sup>
    Catalog page of [Catalog management](U70-catalog-management.md) lists
    with no filter (its Rule 1), so neither a scheduled book nor an
    unpublished one. Nor is a book whose only published version is an
-   "Author Original" (a version added on the book's workflow with "Create
-   New Version" and the "Publication Stage" "Author Original (AO)"); the
+   "Author's Original" (a version added on the book's workflow with "Create
+   New Version" and the "Publication Stage" "Author's Original (AO)"); the
    count leaves it out too. Each book shows as its book summary. With no published book the
    count reads "0 Titles", and "All Books" and "No titles have been
    published yet." stand in place of the list. <sup>d</sup> <sup>td2</sup>
@@ -172,7 +172,7 @@ the series as links under it (Rule 12). <sup>h</sup>
    inactive one holding a book is listed [A5](#a5). <sup>d</sup>
    <sup>td4</sup>
    - 6a. Any published version counts as a published book here. A series
-     whose only book has only its "Author Original" published stays
+     whose only book has only its "Author's Original" published stays
      listed, although the catalog leaves that book out (Rule 3) and the
      series' page reads "0 Titles" and "No titles have been published
      yet." [A5](#a5). <sup>td2</sup>
@@ -644,7 +644,7 @@ Left out of the scenarios above, by reason:
     no "New Releases"; Rule 14)
   - A10 (a page number typed past the last page; Rules 5, 7)
 - **No seed**:
-  - a book whose only published version is an "Author Original": off
+  - a book whose only published version is an "Author's Original": off
     the catalog, its series still among the "Series:" links (Rules 3,
     6a; A5)
   - a series with a "Cover Image": its picture above the list (Rule 9)
@@ -745,7 +745,7 @@ book (whose page then reads "0 Titles"), and leaves out an inactive one.
 The catalog's "Series:" links list only the series holding a published
 book, an inactive one included, and an inactive series' page opens like
 any other. Any published version counts there: a series whose only book
-has only its "Author Original" published stays among the links while its
+has only its "Author's Original" published stays among the links while its
 page reads "0 Titles". A reader therefore meets a different set of series
 in each place.
 Question: should an inactive series still be offered to readers, and
@@ -1073,8 +1073,8 @@ published on screen, one seeded with a publication date in 2031
 the catalog listed the two published books, "2 Titles", as did the
 Catalog page; the press's manager and Reader saw the same. On a press a
 book's first "Publish" assigns "Version of Record 1.0" with no stage to
-choose; an "Author Original"-only book comes from "Create New Version" ›
-"Publication Stage" "Author Original (AO)", that version's "Publish",
+choose; an "Author's Original"-only book comes from "Create New Version" ›
+"Publication Stage" "Author's Original (AO)", that version's "Publish",
 then "Unpublish" on the Version of Record. Such a book left the catalog
 and the Catalog page and was not counted. A press with no published book
 showed "Home / Catalog", "Catalog", "0 Titles", "All Books", "No titles
@@ -1294,7 +1294,7 @@ every series with the inactive ones skipped in the template. Live-probed
 no book ("0 Titles") and dropped a series once its inactive box was saved;
 the catalog's "Series:" kept the inactive one and never listed the empty
 one; the inactive series' page opened as before. A series whose only book
-had only its "Author Original" published stayed on "Series:" while its
+had only its "Author's Original" published stayed on "Series:" while its
 page read "0 Titles" (two runs; the collector's `withPublished(true)`
 counts any published publication).
 

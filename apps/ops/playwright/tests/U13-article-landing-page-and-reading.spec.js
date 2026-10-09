@@ -8,7 +8,7 @@
  * category page reads the search index, which a queued job fills; S9 is
  * the journal's, in the OJS tree), in the preprint server's own words: the
  * preprint's page `preprint/view/{number}`, "Posted" for "Published", the
- * label line "Preprint / {date} ({version})", the version names "Author
+ * label line "Preprint / {date} ({version})", the version names "Author's
  * Original 1.0" / "1.1", the Preprint Server Manager, the fixtures
  * "preprint.pdf", "preprint.html" and "not-an-image.txt", the server named
  * "Coastal Preprints", "Latest preprints" on the home page.
@@ -390,7 +390,7 @@ test.describe('article landing page and reading', () => {
 
         // The current version's page: headed "Tidal Patterns Revised", the
         // date line "{today} — Updated on {today}", two "Versions" entries
-        // (the current one plain text, then "{today} (Author Original 1.0)"
+        // (the current one plain text, then "{today} (Author's Original 1.0)"
         // as a link), the label line naming the current entry, and the APA
         // citation of the revised title (Rules 7, 8, 9, 15). Its "(Original
         // work published {year})" is not asserted: the app adds it only when

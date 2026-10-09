@@ -57,7 +57,7 @@ Preconditions:
   DOI at all instead of a new one), and no DOIs yet.
 - The dataset's posted preprint "The Facets Of Job Satisfaction: A
   Nine-Nation Comparative Study Of Construct Equivalence" (submission
-  2; one version, "Author Original 1.0", with the galley "PDF"). No
+  2; one version, "Author's Original 1.0", with the galley "PDF"). No
   other data is needed.
 
 1. Sign in as `dbarnes`.
@@ -71,12 +71,12 @@ Preconditions:
    "Preprint" and "PDF" rows.
 5. Open submission 2's workflow and choose "Create New Version" in the
    side menu. Leave "Revision Significance" on "Minor Revision", as the
-   window offers it, and press "Confirm". The workflow opens "Author
+   window offers it, and press "Confirm". The workflow opens "Author's
    Original 1.1".
 6. Press "Post", then "Post" in the window ("All requirements have been
    met. Are you sure you want to post this?").
 7. Open "DOIs" and expand "The Facets Of Job Satisfaction …" (it now
-   shows "Author Original 1.1").
+   shows "Author's Original 1.1").
 8. Press "Edit", type the DOI noted for "PDF" at step 4 into the "PDF"
    row and press "Save".
 
