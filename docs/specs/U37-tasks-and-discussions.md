@@ -2271,6 +2271,7 @@ Issue report: [pkp-e2e#430](https://github.com/jardakotesovec/pkp-e2e/issues/430
 
 <a id="fn-a34"></a>
 **f-a34** — Live-probed 2026-10-02 (note td21). `EditTask::rules()` (lib/pkp `api/v1/submissions/tasks/formRequests/EditTask.php`) checks `dateDue` with `after_or_equal:today` on every edit, and `saveWorkItem()` sends `dateDue` with every "Save" (note v), so an unchanged past date is refused. A press and a preprint server read in the code only: the same lib/pkp rule. The wording of the refusal is A10's.
+Issue report: [pkp-e2e#947](https://github.com/jardakotesovec/pkp-e2e/issues/947) ([docs/issues/U37-A34-overdue-task-edit-refused.md](../issues/U37-A34-overdue-task-edit-refused.md)).
 
 <a id="fn-a35"></a>
 **f-a35** — Note g. Read in the code: `getPermittedNamespacesForStage()` (`useFileManagerConfig.js`) keeps a stage's file list only when the user holds a role on that stage and `getManagerConfig()`, which reads the submission's current stage, permits them an action on it; on screen, the Copyediting lists permitted the Copyeditor none once the submission was at Production. Live-probed 2026-10-05 on OJS and OMP, two runs: the Copyeditor on the Copyediting stage of a submission at Production found every option of "Select submission stage" disabled, in the "Add" window and in the reply box of a discussion they had saved; on a submission still at Copyediting, "Copyediting" enabled with "Copyedited Files" and "Draft Files"; the Journal Manager and the Section Editor (Series Editor) had every stage enabled on both.
