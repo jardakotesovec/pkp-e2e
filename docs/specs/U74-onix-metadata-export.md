@@ -2519,6 +2519,7 @@ report step 3, with "Representative added."); its row fetch answered 500 with
 listed it; the next one (id 2) was listed without a reload. Upstream
 pkp/pkp-lib#8968 (a new representative not listed, closed in 2023 with
 a change to `CategoryGridHandler`) concerns the same page.
+Issue report: [pkp-e2e#945](https://github.com/jardakotesovec/pkp-e2e/issues/945) ([docs/issues/U74-A20-first-representative-not-listed.md](../issues/U74-A20-first-representative-not-listed.md)).
 
 ## Reference — entry points & surfaces
 
