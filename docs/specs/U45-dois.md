@@ -4093,6 +4093,7 @@ link (`.listPanel__itemTitle a`, its HTML `Okapi &lt;i&gt;forest&lt;/i&gt;
 census &amp;amp; tapir`); a plain title read as typed. The work's
 page's `h1` rendered the italic word and the "&"; the "DOI Updates
 Failed" line printed the unpublished title plain.
+Issue report: [pkp-e2e#942](https://github.com/jardakotesovec/pkp-e2e/issues/942) ([docs/issues/U45-A24-doi-row-title-formatting-codes.md](../issues/U45-A24-doi-row-title-formatting-codes.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `IssueGridHandler::publishIssue()` calls
