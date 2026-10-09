@@ -1,4 +1,4 @@
-// Helpers for walk.js (U42 A20). Requiring this file runs nothing.
+// Helpers for walk.js (U42 A20, retired). Requiring this file runs nothing.
 const rel = (u) => (u == null ? u : String(u).replace(/^https?:\/\/[^/]+/, ''));
 
 /**

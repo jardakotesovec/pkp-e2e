@@ -252,8 +252,7 @@ Top to bottom: <sup>j</sup>
    a title, one contributor and an abstract shows the breadcrumb, the
    title, the contributor, "Abstract", "Published" and "Versions", on a
    journal also "Section" (and "Issue", with the issue's cover, when it is
-   in an issue that has one), and no other heading. The preprint page's
-   "References" heading is the exception (Rule 18).
+   in an issue that has one), and no other heading.
    <sup>c</sup> <sup>q6</sup>
 7. **The date line.** Under "Published" ("Posted"): the first
    version's page, its date; a later version's, "{first date} —
@@ -433,9 +432,8 @@ Top to bottom: <sup>j</sup>
     each web address in a reference turned into a link that opens in a
     new tab. It shows each reference's own text, never the structured
     details, and appears whenever the version has references, even after
-    the journal switched the References setting off. On a preprint server
-    a preprint with no references shows the heading with nothing under it
-    ([→ Citations & references, A20](U42-citations-and-references.md#a20)).
+    the journal switched the References setting off. A version with no
+    references shows no "References" heading.
     A trailing "." or "," is left out of a link, but an address written
     inside parentheses takes the closing ")" into its link ⚠ [A10](#a10).
     How references are
@@ -630,8 +628,7 @@ notice above the title; that notice belongs to *Preprint relations*
   "Data Availability Statement" and "Funding Statement" blocks (its Rule
   15); this spec shows the keywords, abstract and plain language summary.
 - **[Citations & references](U42-citations-and-references.md)**: captures
-  the references the "References" block shows (Rule 18); its A20 is the
-  preprint page's empty heading.
+  the references the "References" block shows (Rule 18).
 - **[Funding](U43-funding.md)**: the "Funders" block (its Rule 9).
 - **[Identifiers](U44-identifiers.md)**: a journal's "URN" block (its
   Rule 21).
@@ -734,8 +731,7 @@ footnote. <sup>s</sup>
      shows the breadcrumb ("Home / Archives / Articles" on a journal, the
      issue left out), the title, the contributor, "Abstract", "Published"
      ("Posted") and "Versions", on a journal also "Section", and no other
-     heading; a preprint server also shows the "References" heading
-     (Rule 6; Fields, "Breadcrumb").
+     heading (Rule 6; Fields, "Breadcrumb").
    - **Control**: "Harbour Notes" shows no "Keywords:", no "Plain Language
      Summary", no "Categories" and no cover image, all of which "Tidal
      Patterns in Coastal Waters" shows (Rule 6). <sup>s</sup>
@@ -1342,10 +1338,6 @@ Left out of the scenarios above, by reason:
     its A6)
   - the issue's "Remove" unpublishing an article's first version {OJS}
     (Rule 7b; [Issues](U50-issues.md#a18), its A18)
-  - the empty "References" heading on a preprint page with no
-    references (Rule 18;
-    [Citations & references](U42-citations-and-references.md#a20), its
-    A20)
   - which articles a journal's "Latest Publications" holds {OJS}
     (Rule 22; [Appearance & theming](U10-appearance-and-theming.md),
     scenario 9)
@@ -2157,8 +2149,9 @@ holds `preprint.subject` with an empty translation (OPS7). Abstract: OJS
 `getLocalizedTitle()`, linked to `catalog/category/{path}`; OPS builds
 "{parent} > {title}" in `PreprintHandler::view()`, linked to
 `preprints/category/{path}` under `category.categories` "Categories" (app
-key). Every part is wrapped in an `{if}` on its data, the "References"
-part on OPS excepted (note m). Localized texts come from
+key). Every part is wrapped in an `{if}` on its data; OPS's "References"
+condition held for every preprint until ops `dafd9b3263`, merged
+2026-10-09 (note m). Localized texts come from
 `getLocalizedData()`, which reads the visitor's locale first.
 Live-probed 2026-09-25 (Fields, the landing page; Rules 6, 14, 21), OJS
 and OPS: the breadcrumb read "Home / Archives / Vol. 1 No. 2 (2014) /
@@ -2180,6 +2173,9 @@ label was French ("Accueil", "Mots-clés :", "Résumé", "Publié",
 for screen readers), the article's French title, abstract, keyword and
 category names shown, English where the version had no French; the
 preprint page's keywords label read "##preprint.subject## :".
+Walked 2026-10-09 (Rule 6; scenario 1), OPS at `dafd9b3263`: a preprint
+with no references showed no "References" heading, where the 2026-09-25
+probe above read one (note m has the walk).
 
 <a id="fn-q6"></a>
 **q6** — Live-probed 2026-09-25 (Fields, the side column; Rule 6), OJS
@@ -2669,11 +2665,15 @@ Each page opening wrote one usage event and each PDF reader opening and
 them, the chart stayed empty and the server's home read "Downloads: 0".
 
 <a id="fn-m"></a>
-**m** — References: OJS `{if count($parsedCitations) || (string)
-$publication->getData('citationsRaw')}`; OPS drops the `(string)` cast and
-tests the value `PublicationDAO::fromRow()` sets, an object that is always
-true, hence the empty heading ([Citations & references](U42-citations-and-references.md),
-its A20). Each citation prints `Citation::getRawCitationWithLinks()`,
+**m** — References: OJS `article_details.tpl` and OPS
+`preprint_details.tpl` both test `{if count($parsedCitations) || (string)
+$publication->getData('citationsRaw')}`. Until ops `dafd9b3263`
+(pkp/ops#1443, commit `26031aac38`, merged 2026-10-09, for
+pkp/pkp-lib#13189) OPS's condition had no `(string)` cast and tested the
+value `PublicationDAO::fromRow()` sets, an object that is always true,
+hence the empty heading the 2026-09-25 probe below read
+([Citations & references](U42-citations-and-references.md), its A20,
+the entry this change answers). Each citation prints `Citation::getRawCitationWithLinks()`,
 whose pattern links an address up to the next space or bracket and trims
 only a trailing "." or "," (A10), and calls
 `Templates::Article::Details::Reference`
@@ -2689,6 +2689,17 @@ linked with its ")". A context with the References box unticked on its
 Metadata settings still showed an article's references. An article with
 none showed no heading on the journal and an empty "References" heading
 on the server.
+Walked 2026-10-09 (Rules 6, 18; scenario 1), OJS and OPS on PKP's
+default dataset, each side on a newly loaded copy. At ops `6614af8281`,
+the commit under the merge, the preprint "The Facets Of Job Satisfaction:
+A Nine-Nation Comparative Study Of Construct Equivalence", which has no
+references, showed the heading "References" with nothing under it; at ops
+`dafd9b3263` its page showed no "References" heading. The journal's
+article "Antimicrobial, heavy metal resistance and plasmid profile of
+coliforms isolated from nosocomial infections in a hospital in Isfahan,
+Iran", which has none either, showed no heading on either side. A preprint
+given the one reference "Ridge, A. (2021). Tide tables u42r9." in a new
+posted version showed "References" over that reference on both sides.
 
 <a id="fn-k"></a>
 **k** — Publication Facts Label: `plugins/generic/pflPlugin/PflPlugin.php`

@@ -93,7 +93,7 @@ placed, the sidebar; the two view pages carry none of these, only their
 own bar. The book's page and the chapter page have no trail ("Home / …")
 above the title; the payment page has "Home / Manual Fee Payment". A part
 appears only when the version has something to put in it (Rule 7),
-except the "References" heading and the copyright line. <sup>d</sup>
+except the copyright line. <sup>d</sup>
 
 <a id="book-page"></a>
 **The book's page.** The browser tab reads "{title} | {press name}", or
@@ -115,7 +115,7 @@ Top to bottom, the main column holds: <sup>d</sup>
 | **Table of contents** | — | The chapters of Rule 10, with no visible heading (a screen reader reads "Chapters"). |
 | **"Downloads"** | — | The chart of Rule 20, only when the theme is set to show one. |
 | **"Author Biography"** / **"Author Biographies"** | — | Described in [Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 14. |
-| **"References"** | — | The version's references, as on an article's page ([→ the "References" block](U13-article-landing-page-and-reading.md#references)); a book with no references shows the heading with nothing under it ([→ Citations & references, A20](U42-citations-and-references.md#a20)). |
+| **"References"** | — | The version's references, as on an article's page ([→ the "References" block](U13-article-landing-page-and-reading.md#references)); a book with no references has no "References" heading (Rule 7). |
 
 The side column, top to bottom: <sup>d</sup>
 
@@ -298,12 +298,12 @@ link, not a button. A journal's page puts the instructions under
    the current version's title [A5](#a5). <sup>g</sup> <sup>td8</sup>
 7. **Empty parts are left out.** Every part of the page's tables appears
    only when the version has something to put in it, except the
-   "References" heading and the copyright line. A book with a title, one
-   contributor, an abstract and no chapter, format, series or category
-   shows the title, the contributor, "Synopsis", the "References" heading
-   with nothing under it, the cover (the default picture), "Published"
-   and "Versions" and the copyright line "Copyright (c) {year} {press
-   name}", and no other heading. <sup>d</sup> <sup>td24</sup>
+   copyright line. A book with a title, one contributor, an abstract and
+   no chapter, format, series, category or references shows the title,
+   the contributor, "Synopsis", the cover (the default picture),
+   "Published" and "Versions" and the copyright line "Copyright (c)
+   {year} {press name}", and no other heading. <sup>d</sup>
+   <sup>td24</sup>
 8. **The date line.** Under "Published": the first version's page, its
    date; a later version's, "{first version's date} — Updated on {this
    version's date}", both in the press's long date format ([Appearance &
@@ -773,8 +773,8 @@ tooling recipe are in the footnote. <sup>s</sup>
    "Shorelines", subtitle "Essays on the Coast", URL Path "shorelines",
    by Ada Quill and Lee Marsh, with an abstract, the keywords alpha and
    beta gamma, a plain language summary, the series "Monographs", the
-   category "History", the date 2024-03-05, no chapter, and three
-   approved, available formats: "PDF" holding article.pdf on "Open
+   category "History", the date 2024-03-05, no chapter, no references,
+   and three approved, available formats: "PDF" holding article.pdf on "Open
    Access", "Online" at the remote address https://example.org/shorelines,
    and the physical "Paperback", with no file, the "ISBN-13 (15)" code
    978-951-98548-9-2, a "Publication date (01)" of 20240305 in the "Date
@@ -788,11 +788,12 @@ tooling recipe are in the footnote. <sup>s</sup>
    - **The main column**: top to bottom, with no notice above them: the
      heading "Shorelines" with "Essays on the Coast"; Ada Quill and Lee
      Marsh; "Keywords:" followed by alpha and beta gamma joined by a
-     comma, in either order; "Synopsis" over the abstract; "Plain
-     Language Summary" over the summary; and the "References" heading
-     with nothing under it. There is no "Downloads" chart, the press
-     being on "Do not display submission usage statistics chart for
-     reader." (Fields, the book's page; Rule 7; Settings bullet 5).
+     comma, in either order; "Synopsis" over the abstract; and "Plain
+     Language Summary" over the summary, the last heading of the
+     column. There is no "References" heading, the book having no
+     references, and no "Downloads" chart, the press being on "Do not
+     display submission usage statistics chart for reader." (Fields,
+     the book's page; Rule 7; Settings bullet 5).
    - **The side column**: top to bottom: the press's default book
      picture, not a link; the links "PDF" and "Online", in either order,
      and none for "Paperback", which holds no file; "Published" with
@@ -818,10 +819,9 @@ tooling recipe are in the footnote. <sup>s</sup>
      address stays as typed (Rule 2).
    - **Control**: a second published book of the press, "Bare", with
      only a title, the contributor Ada Quill and an abstract, shows the
-     title, Ada Quill, "Synopsis", the "References" heading with nothing
-     under it, the default book picture, "Published", "Versions" and the
-     copyright line "Copyright (c) {year} {press name}", and no other
-     heading (Rule 7). <sup>s</sup>
+     title, Ada Quill, "Synopsis", the default book picture,
+     "Published", "Versions" and the copyright line "Copyright (c)
+     {year} {press name}", and no other heading (Rule 7). <sup>s</sup>
 
 2. **The table of contents, a chapter's page and the "Downloads" chart**
 
@@ -1701,10 +1701,10 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td5** — Live-probed 2026-09-28 (Actors row 2; Rule 5): on scratch presses with an unpublished book in Production, the book's page opened under the preview notice for the Press manager, Press editor, Production editor, an assigned and an unassigned Series editor, an assigned and an unassigned Copyeditor, the other seven assistant roles (unassigned), the book's Author and the Site Administrator. A visitor, a Reader, an External and an Internal Reviewer, and another Author, a Volume editor, a Chapter Author and a Translator not on the book got "404 Not Found"; a submission its author never finished answered "404 Not Found" to every role. The workflow offered "Preview" to the Press manager and the assigned Series editor, and the book's Author neither "Preview" nor "View". The book's chapter page opened for every previewing role without a notice, reading "Published March 5, 2024" (A17).
 
 <a id="fn-d"></a>
-**d** — `monograph_full.tpl`: title `getLocalizedFullTitle(null, 'html')`; `authors.tpl`; `.item.doi` (`doi.readerDisplayName` "DOI:"); `.item.keywords` (`common.keywords` through `semicolon` "{$label}: ", joined by `common.commaListSeparator`); `.item.abstract` (`submission.synopsis` "Synopsis", OMP `locale/en/submission.po`; always rendered); plain language summary; `.item.chapters` (heading `pkp_screen_reader` `submission.chapters`); hook `Templates::Catalog::Book::Main`; the chart; `.item.author_bios`; `.item.references` when `citations` or `citationsRaw` (the empty heading: note of U42's A20). Side column: `.item.cover` (`getLocalizedCoverImageThumbnailUrl()`, falling back to `templates/images/book-default_t.png`; `alt` from the cover's `altText`); `.item.files` (`submission.downloads`, screen reader only); `.item.date_published` with `.sub_item.versions`; `.item.series` (`series.series`, `catalog.manage.series.onlineIssn` / `printIssn`) linking `catalog/series/{path}`; `.item.categories` (`catalog.categories`) linking `catalog/category/{path}`; data availability, funding statement, funders, copyright (`submission.copyrightStatement`), license; `.item.publication_format` blocks; hook `Templates::Catalog::Book::Details`. `book.tpl` sets `pageTitle` from `getCurrentPublication()->getLocalizedFullTitle()` (book) or the chapter's full title; `headerHead.tpl` appends " | {context name}". No template of the page includes `breadcrumbs.tpl`. Live-probed 2026-09-28 (Fields intro, the book's page): tabs "K2 Minimal Book | {press name}" and, with a subtitle, "K2 Full Book: A Subtitle | {press name}"; the two columns side by side at 1280 px; the parts in the tables' order; the view pages without header, footer or sidebar, the payment page with them and the trail "Home / Manual Fee Payment". Keywords typed "alpha", "beta gamma" (stored in that order) read "alpha, beta gamma" in three runs and "beta gamma, alpha" in one. A format with no code, date, identifier or physical box got no details block. Settings bullet 14: a format's Publisher ID "pid-k3", saved and read back, appeared nowhere in the book page's HTML; a contributor unticked from "Include this contributor when identifying authors in lists of publications." on a new version was still listed under "Authors", while the catalog's line named only the other author; an Edited Volume's new version credited its volume editor "(ed)"; a press license saved on screen showed on a book published after it and not on one published before; a 400 × 400 cover showed as a 100 × 100 copy.
+**d** — `monograph_full.tpl`: title `getLocalizedFullTitle(null, 'html')`; `authors.tpl`; `.item.doi` (`doi.readerDisplayName` "DOI:"); `.item.keywords` (`common.keywords` through `semicolon` "{$label}: ", joined by `common.commaListSeparator`); `.item.abstract` (`submission.synopsis` "Synopsis", OMP `locale/en/submission.po`; always rendered); plain language summary; `.item.chapters` (heading `pkp_screen_reader` `submission.chapters`); hook `Templates::Catalog::Book::Main`; the chart; `.item.author_bios`; `.item.references` when `count($citations)` or `citationsRaw` (pkp/omp#2502, head `52cf201a96`, not merged on 2026-10-09: before it the template tested `$citations`, which a version with no references also passed, and printed the heading over an empty `.value`; the re-read is in td24). Side column: `.item.cover` (`getLocalizedCoverImageThumbnailUrl()`, falling back to `templates/images/book-default_t.png`; `alt` from the cover's `altText`); `.item.files` (`submission.downloads`, screen reader only); `.item.date_published` with `.sub_item.versions`; `.item.series` (`series.series`, `catalog.manage.series.onlineIssn` / `printIssn`) linking `catalog/series/{path}`; `.item.categories` (`catalog.categories`) linking `catalog/category/{path}`; data availability, funding statement, funders, copyright (`submission.copyrightStatement`), license; `.item.publication_format` blocks; hook `Templates::Catalog::Book::Details`. `book.tpl` sets `pageTitle` from `getCurrentPublication()->getLocalizedFullTitle()` (book) or the chapter's full title; `headerHead.tpl` appends " | {context name}". No template of the page includes `breadcrumbs.tpl`. Live-probed 2026-09-28 (Fields intro, the book's page): tabs "K2 Minimal Book | {press name}" and, with a subtitle, "K2 Full Book: A Subtitle | {press name}"; the two columns side by side at 1280 px; the parts in the tables' order; the view pages without header, footer or sidebar, the payment page with them and the trail "Home / Manual Fee Payment". Keywords typed "alpha", "beta gamma" (stored in that order) read "alpha, beta gamma" in three runs and "beta gamma, alpha" in one. A format with no code, date, identifier or physical box got no details block. Settings bullet 14: a format's Publisher ID "pid-k3", saved and read back, appeared nowhere in the book page's HTML; a contributor unticked from "Include this contributor when identifying authors in lists of publications." on a new version was still listed under "Authors", while the catalog's line named only the other author; an Edited Volume's new version credited its volume editor "(ed)"; a press license saved on screen showed on a book published after it and not on one published before; a 400 × 400 cover showed as a 100 × 100 copy.
 
 <a id="fn-td24"></a>
-**td24** — Live-probed 2026-09-28 (Rule 7; Fields, Cover): the bare book showed the screen-reader "Authors" heading, "Synopsis", an empty "References", the default book picture (not a link, empty alternate text), "Published", "Versions" and "Copyright (c) 2024 {press name}", and no other heading. A cover saved with "Alternate text" showed its small copy with that text, not a link.
+**td24** — Live-probed 2026-09-28 (Rule 7; Fields, Cover): the bare book showed the screen-reader "Authors" heading, "Synopsis", an empty "References", the default book picture (not a link, empty alternate text), "Published", "Versions" and "Copyright (c) 2024 {press name}", and no other heading. A cover saved with "Alternate text" showed its small copy with that text, not a link. Re-read 2026-10-09 at the PR head `52cf201a96` of pkp/omp#2502 (issue pkp/pkp-lib#13189), before its merge, merged locally into omp `c07d91ced2` (Rule 7; Fields, "References"; scenario 1): a published book with no references ("Bomb Canada and Other Unkind Remarks in the American Media", book 5 of PKP's default dataset) had no "References" block on its page, where the same book on `c07d91ced2` without the change showed the "References" heading with nothing under it; a book given one reference in a new version ("Ridge, A. (2021). Tide tables u42r9.") showed "References" over that reference, with the change and without it. The "empty "References"" of the 2026-09-28 read is that earlier state.
 
 <a id="fn-e"></a>
 **e** — `chapter.tpl`: notice as note l; title `$chapter->getLocalizedFullTitle()`; `authors.tpl` with `$chapterAuthors` (the edited-volume swap needs `!$isChapterRequest`); DOI from `$chapterDoiObject` (the chapter's, or a sibling version's per `CatalogBookHandler`); abstract only when set; hook `Templates::Catalog::Chapter::Main`; bios of the chapter authors; side: cover wrapped in a link to `catalog/book/{id}` (current) or `…/{bestId}/version/{pid}`; the chapter's files through `publicationFormats.tpl` with `$isChapterRequest` (remote formats skipped); `.item.monograph` with `chapter.volume` "Volume" and `chapter.pages` "Pages" (OMP `locale/en/submission.po`); date and versions (note l); series, categories, copyright; license from the chapter's `licenseUrl` or the publication's, the CC badge from `getCCLicenseBadge()` of the chapter's URL when set; hook `Templates::Catalog::Chapter::Details`. Live-probed 2026-09-28 (Fields, the chapter page): tab "Tides: Low and high | {press name}"; the parts in the tables' order; an Edited Volume's chapter listed its own authors; "Pages 1-20"; the chapter's own "License URL" as a Creative Commons badge, an unknown one as a link reading "License"; the cover and "Volume" linked `…/catalog/book/{number}` (older version `…/version/{id}`), a number even with a URL Path saved. On a book with no cover the cover link had no name for a screen reader, seen in one run; what it reads with a cover is not settled.

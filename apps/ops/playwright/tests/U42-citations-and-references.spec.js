@@ -43,8 +43,8 @@
  *   and only with the mouse; the zero-size ones are never touched.
  * - A18 ✅ (retired 2026-09-29: every step change saves): every References
  *   change is still carried by "Continue"; the step rail only goes back.
- * - A20 🐞: S3's control reads the reference-less preprint's page for the
- *   absence of any reference text, never for its "References" heading.
+ * - A20 ✅ (retired 2026-10-09 by pkp/ops#1443): S3's control reads that the
+ *   preprint with no references has no "References" block.
  * - A8, A11, A12, A15: not on these scenarios' OPS paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
@@ -495,12 +495,11 @@ test.describe('citations and references (U42) — OPS', () => {
         await expect(link).toHaveAttribute('target', '_blank');
         await expect(landing.paragraphs.nth(0).getByRole('link')).toHaveCount(0);
 
-        // Control: the preprint with no references shows no reference text,
-        // read once its page has rendered its title (Rule 27; its
-        // "References" heading is A20's, never asserted).
+        // Control: the preprint with no references has no "References"
+        // block, read once its page has rendered its title (Rule 27).
         await page.goto(preprintUrl(SERVER, noRefs.submissionId));
         await expect(page.getByRole('heading', {name: `Preprint ${tag}c`})).toBeVisible({timeout: 30_000});
-        await expect(landingReferences(page).paragraphs).toHaveCount(0);
+        await expect(landingReferences(page).block).toHaveCount(0);
         await expect(page.getByText('Zulu report 2019')).toHaveCount(0);
     });
 

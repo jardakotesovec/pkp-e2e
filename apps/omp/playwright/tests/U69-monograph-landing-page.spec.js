@@ -232,13 +232,13 @@ test.describe('Monograph landing page (U69)', () => {
         // (Fields, the book's page; Rule 7; Settings bullet 5).
         await expect(book.title()).toHaveText('Shorelines: Essays on the Coast');
         await expect(book.notices()).toHaveCount(0);
-        await book.expectMainOutline(['authors', TEXT.keywords, TEXT.synopsis, TEXT.plainLanguageSummary, TEXT.references]);
+        await book.expectMainOutline(['authors', TEXT.keywords, TEXT.synopsis, TEXT.plainLanguageSummary]);
         await expect(book.contributorNames()).toHaveText(['Ada Quill', 'Lee Marsh']);
         await expect(book.keywordsLabel()).toHaveText(TEXT.keywords);
         await expect(book.keywordsValue()).toHaveText(/^\s*(alpha,\s+beta gamma|beta gamma,\s+alpha)\s*$/);
         await expect(book.partValue(TEXT.synopsis)).toHaveText('Essays on the shore.');
         await expect(book.partValue(TEXT.plainLanguageSummary)).toHaveText('A book about the coast.');
-        await expect(book.part(TEXT.references)).toHaveText(TEXT.references);
+        await expect(book.part(TEXT.references)).toHaveCount(0);
         await expect(book.downloadsChart()).toHaveCount(0);
 
         // The side column, top to bottom; no "How to Cite", the plugin off
@@ -292,19 +292,19 @@ test.describe('Monograph landing page (U69)', () => {
         await expect(book.title()).toHaveText('Shorelines: Essays on the Coast');
 
         // Control: "Bare" shows only its title, Ada Quill, "Synopsis", the
-        // empty "References", the default picture, the date line, "Versions"
-        // and the copyright line, and no other heading (Rule 7).
+        // default picture, the date line, "Versions" and the copyright line,
+        // and no other heading (Rule 7).
         await book.goto(bare.submissionId);
         await expect(book.title()).toHaveText('Bare');
         await expect(book.notices()).toHaveCount(0);
-        await book.expectMainOutline(['authors', TEXT.synopsis, TEXT.references]);
+        await book.expectMainOutline(['authors', TEXT.synopsis]);
         await expect(book.contributorNames()).toHaveText(['Ada Quill']);
         await expect(book.partValue(TEXT.synopsis)).toHaveText('A bare book.');
-        await expect(book.part(TEXT.references)).toHaveText(TEXT.references);
+        await expect(book.part(TEXT.references)).toHaveCount(0);
         await book.expectSideOutline(['cover', 'date_published', 'copyright']);
         await expect(book.cover()).toHaveAttribute('src', DEFAULT_COVER);
         await expect(book.copyrightLine()).toHaveText(new RegExp(`^\\s*Copyright \\(c\\) \\d{4} ${escapeRe(press.name)}\\s*$`));
-        await expect.poll(() => book.visiblePartHeadings(), {timeout: 30_000}).toEqual([TEXT.synopsis, TEXT.references, TEXT.published, TEXT.versions]);
+        await expect.poll(() => book.visiblePartHeadings(), {timeout: 30_000}).toEqual([TEXT.synopsis, TEXT.published, TEXT.versions]);
     });
 
     test("S2: The table of contents, a chapter's page and the \"Downloads\" chart", async ({page, ompApi}, testInfo) => {

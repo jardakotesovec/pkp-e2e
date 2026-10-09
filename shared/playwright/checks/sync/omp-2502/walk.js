@@ -1,6 +1,7 @@
-// Issue report docs/issues/U42-A20-book-preprint-empty-references-heading.md (U42 A20): on a
-// press's book page and a preprint server's preprint page, an item with no references shows the
-// heading "References" with nothing under it; an article page shows no heading.
+// PR review of pkp/omp#2502 and pkp/ops#1443 (pkp/pkp-lib#13189; U42 A20, retired by them): on a
+// press's book page and a preprint server's preprint page, an item with no references showed the
+// heading "References" with nothing under it; with the fix it shows no "References" block, as an
+// article page does. The walk came from A20's issue report (pkp-e2e#871).
 // Takes the report's Steps on PKP's default test dataset (whose published items hold no
 // references), signed out, and changes nothing:
 //   OJS (the control): /index.php/publicknowledge/article/view/17
@@ -8,10 +9,13 @@
 //   OPS:               /index.php/publicknowledge/preprint/view/2
 // NB=1 runs the neighbour check alone (OMP and OPS): dbarnes creates a new version of OMP 14 /
 // OPS 3, adds one reference on its "References" page and publishes (posts) it; signed out, the
-// page must show "References" with that reference, with a fix in and out. It changes the dataset.
+// page must show "References" with that reference, with the fix in and out. It changes the dataset.
 // Run (reset the dataset fleet first for NB=1):
-//   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/book-preprint-empty-references-heading/walk.js
-//   (PKP_E2E_LINE=stable-3_5_0 in front for 3.5; NB=1 ... omp|ops for the neighbour)
+//   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/sync/omp-2502/walk.js
+//   (NB=1 ... omp|ops for the neighbour)
+// 2026-10-09, each side on a fresh load: OMP c07d91ced2 and OPS 6614af8281 show the empty heading
+// (verdict emptyHeadingShown true); OMP c07d91ced2 with pkp/omp#2502 (52cf201a96) merged in and
+// OPS dafd9b3263 show no block (false); NB=1 shows the heading and the reference on both sides.
 const {forEachApp, launch, signIn, signOut, screen, shot, record, idle} = require('../../../probe');
 const {readHeading} = require('./lib');
 
@@ -32,8 +36,8 @@ forEachApp(async (app) => {
         {
             const {page, close} = await launch(app);
             try {
-                const {workflowFrame, createNewVersion, publishShownVersion} = require('../older-version-tab-current-title/lib');
-                const {addReferences} = require('../reference-link-takes-closing-parenthesis/lib');
+                const {workflowFrame, createNewVersion, publishShownVersion} = require('../../issues/older-version-tab-current-title/lib');
+                const {addReferences} = require('../../issues/reference-link-takes-closing-parenthesis/lib');
                 await signIn(page, 'dbarnes');
                 const frame = workflowFrame(page, app);
                 await frame.gotoEditorial(sid);

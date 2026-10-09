@@ -456,11 +456,10 @@ typed. Nothing asks first. The one exception is an author row added in
     setting off. It shows each reference's own text, never the structured
     details. Readers never see data citations on the landing page, though
     the editors' table promises they "appear alongside other references in
-    the publication" ⚠ [A11](#a11). On a press or a preprint server, the
-    page shows the "References" heading even for an item with no
-    references ⚠ [A20](#a20). The page itself belongs to *Article landing
-    page & reading* (on a press, *Monograph landing page*). <sup>p</sup>
-    <sup>q23</sup>
+    the publication" ⚠ [A11](#a11). The page of a version with no
+    references has no "References" block: no heading and no empty
+    section. The page itself belongs to *Article landing page & reading*
+    (on a press, *Monograph landing page*). <sup>p</sup> <sup>q23</sup>
 
 ## Side effects
 
@@ -671,9 +670,8 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      paragraph each, in list order (Rule 27).
    - **The linked address**: "https://example.org/alpha" is a link, and
      it opens in a new tab (Rule 27).
-   - **Control**: the second item's page shows no reference text; on a
-     journal it has no "References" block at all ([A20](#a20) records
-     what a press or a preprint server shows instead) (Rule 27).
+   - **Control**: the second item's page has no "References" block at
+     all: no "References" heading and no reference text (Rule 27).
      <sup>s</sup>
 
 4. **The journal's References setting**
@@ -930,7 +928,6 @@ Left out of the scenarios above, by reason:
     direction and the citation
   - the guard for A4 (issue report `docs/issues/U42-A4-press-server-lookup-text-says-journal.md`): with "References Metadata Lookup" on, the References page of a press and of a preprint server describes the lookup without calling the context a journal
   - the guard for A9 (issue report `docs/issues/U42-A9-submits-without-required-data-citations.md`): with data citations at "Require the author to add data citation metadata…", an author's submission with no data citation is held back on "Review" (the problems banner, "Submit" disabled), and one with a data citation goes in
-  - the guard for A20 (issue report `docs/issues/U42-A20-book-preprint-empty-references-heading.md`): a published book on a press and a posted preprint with no references show no "References" section; with one reference they show it
   - the guard for A10 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a data citation added in the submission wizard's "Data" section shows in its table and on "Review" at once, without a reload
   - the guard for A2 (issue report `docs/issues/U42-A2-pasted-repeat-reference-dropped-saved.md`): "Add" with a paste that repeats a listed reference keeps the repeated line in the box and says it was skipped, while the new lines are added
   - the guard for A3 (issue report `docs/issues/U42-A3-reference-search-keeps-rows-without-word.md`): "Search references here" with a word or a digit no row shows (such as "false", or "5" on a list of five references without a 5) keeps no row, and a word a row shows keeps that row
@@ -1013,8 +1010,6 @@ Left out of the scenarios above, by reason:
   - A17 ("Edit" saving the text of another reference; Rule 6)
   - A19 (the ordering arrows with no names for a screen reader; Rule 23;
     scenario 6 passes them)
-  - A20 (the empty "References" heading on a book or a preprint page;
-    Rule 27; scenario 3 passes it)
   - A24 (a refused box's message not tied to the box for a screen
     reader; [Fields & validation](#fields))
   - A25 (a DOI typed before the lookup's first step replaced by the
@@ -1073,7 +1068,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | Editing a data citation, its identifier cannot be removed and a cleared Repository, Year or URL is kept | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A16](#a16) | The row expander is always named "Collapse" and ignores the keyboard; rows with nothing to expand carry an invisible one | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A19](#a19) | The ordering arrows on the Data Citations table have no names for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A20](#a20) | On a press or a preprint server, a book or preprint with no references shows an empty "References" heading | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A22](#a22) | A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A24](#a24) | A screen reader hears that a refused box of the data citation panel is invalid, but not why | 🐞 | minor | — |
 | [A25](#a25) | A DOI typed in "Edit citation" before the lookup has started is replaced by the DOI in the reference's text, without a word | 🐞 | minor | — |
@@ -1088,6 +1082,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | A Site Administrator with no role in the journal is offered the References controls, but every change is refused | ✅ | retired | — |
 | [A18](#a18) | A References change carried to "Review" by the step rail is lost on "Submit" | ✅ | retired | — |
 | [OMP1](#omp1) | A book with no references shows an empty "References" heading | ✅ | retired | — |
+| [A20](#a20) | On a press or a preprint server, a book or preprint with no references shows an empty "References" heading | ✅ | retired | — |
 | [A21](#a21) | Retired: in French the References page's help text, table, "Delete all references" and its two windows show raw codes such as "##submission.citations.structured##" | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
@@ -1296,16 +1291,6 @@ are icon-only buttons with no name; a screen reader announces only
 "button".
 Basis: probe, 2026-10-02. <sup>f-a19</sup>
 
-<a id="a20"></a>
-**A20 — On a press or a preprint server, a book or preprint with no references shows an empty "References" heading** · 🐞 · low.
-An item's page is expected to show "References" only when the item has
-references, as an article page does. On a press and on a preprint server
-every published item's page carries the "References" heading, with
-nothing under it when the item has none. Readers see an empty section on
-the book's or preprint's page, and a screen reader announces a heading
-with no content.
-Basis: probe, 2026-10-04. <sup>f-a20</sup>
-
 <a id="a22"></a>
 **A22 — A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it** · 🐞 · medium.
 On a submission's "References" page, "Edit citation" has an "ORCID iD"
@@ -1414,7 +1399,10 @@ Basis: probe, 2026-10-07. <sup>f-a27</sup>
 **A18 — A References change carried to "Review" by the step rail is lost on "Submit"** · ✅ · retired. Overturned 2026-09-29: re-checked on all three apps, the step rail saves the step on the move, so the change is listed on "Review" and submitted with "Submit" › "Submit" (Rule 16). <sup>f-a18</sup>
 
 <a id="omp1"></a>
-**OMP1 — A book with no references shows an empty "References" heading** · ✅ · retired. Widened 2026-09-24: the preprint page shows the same empty heading, so the finding moved to [A20](#a20). <sup>f-omp1</sup>
+**OMP1 — A book with no references shows an empty "References" heading** · ✅ · retired. Widened 2026-09-24: the preprint page showed the same empty heading, so the finding moved to [A20](#a20), retired in its turn. <sup>f-omp1</sup>
+
+<a id="a20"></a>
+**A20 — On a press or a preprint server, a book or preprint with no references shows an empty "References" heading** · ✅ · retired. Fixed by pkp/omp#2502 and pkp/ops#1443 (for pkp/pkp-lib#13189), walked 2026-10-09 at the press PR's head before its merge and on the preprint server's `main`, where its half merged the same day: a book or a preprint with no references has no "References" block, and one with a reference shows the block as before (Rule 27). <sup>f-a20</sup>
 
 <a id="a21"></a>
 **A21 — In French the References page shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a21</sup>
@@ -2020,13 +2008,18 @@ $publication->getData('citationsRaw')}` → section `item references`, heading
 `submission.citations` "References", each citation as
 `getRawCitationWithLinks()` (http, https and ftp addresses wrapped in a link
 with `target='_blank'`) plus the `Templates::Article|Preprint::Details::Reference`
-hook. OPS `preprint_details.tpl` has the same block but tests
-`$publication->getData('citationsRaw')` without the `(string)` cast, so its
-condition holds for a preprint with no references. `ArticleHandler` and
-`PreprintHandler` assign the publication's `citations` without reading the
-context's `citations` setting. OMP `monograph_full.tpl`: `{if $citations ||
-…}`, with `CatalogBookHandler` assigning the lazy collection itself, which a
-template condition treats as true even when it holds nothing. No template in
+hook. OPS `preprint_details.tpl` has the same block and, since ops
+`dafd9b3263` (pkp/ops#1443, commit `26031aac38`, merged 2026-10-09), the
+same condition; until then it tested `$publication->getData('citationsRaw')`
+without the `(string)` cast, so its condition held for a preprint with no
+references. `ArticleHandler` and `PreprintHandler` assign the publication's
+`citations` without reading the context's `citations` setting. OMP
+`monograph_full.tpl`, at the head of pkp/omp#2502 (`52cf201a96`, read
+2026-10-09 before its merge): `{if count($citations) || (string)
+$publication->getData('citationsRaw')}`, and `{if count($citations)}` around
+the list; before the PR both tested `$citations`, the lazy collection
+`CatalogBookHandler` assigns, which a template condition treats as true even
+when it holds nothing. No template in
 any app's `templates/` or default theme renders `dataCitations` (grep
 2026-09-24). Live-probed 2026-09-24 (Actors row 8; Rule 27), all three
 apps, signed out, two runs on OMP and OPS: a published item with "Zulu
@@ -2038,7 +2031,11 @@ ftp addresses as links opening in a new tab, "doi:10.1234/k4delta" as
 text, no structured detail, and no data citation text or markup anywhere;
 with "Enable references metadata" unticked and saved the block stayed; an
 item with no references showed no heading on OJS and an empty "References"
-heading on OMP and OPS.
+heading on OMP and OPS. Live-probed 2026-10-09 with the two template
+changes in (Actors row 8; Rule 27's sentence on a version with no
+references; note f-a20): no "References" block on any of the three apps
+for an item with no references, and the block over the one reference of
+an item that has one.
 
 <a id="fn-r"></a>
 **r** — Side effects. No activity-log, mail or notification call in
@@ -2204,7 +2201,10 @@ once.
 **q23** — Live-probed 2026-09-24 (Actors row 8; Rule 27; A11, A20): note
 p; the "Data" page's line reads verbatim "Add formal data citations,
 ensuring datasets are properly credited and appear alongside other
-references in the publication.".
+references in the publication.". Live-probed 2026-10-09 (Rule 27's
+sentence on a version with no references; scenario 3's control; A20
+retired), OMP at the PR head `52cf201a96` of pkp/omp#2502, before its
+merge, and OPS at `dafd9b3263`: note f-a20.
 
 <a id="fn-q24"></a>
 **q24** — Live-probed 2026-10-07 (the data citation panel; "Creators";
@@ -2310,7 +2310,8 @@ Files", and "Continue" reaches "Details"; `manager.maya` reads the rows.
 Scenario 3: two scratch submissions with `published: true`, the first
 with `citationsRaw: ['Zulu report 2019', 'Alpha study 2020
 https://example.org/alpha']`; read signed out (the article page, the
-catalog book page, the preprint page).
+catalog book page, the preprint page). Note f-a20 has the control's read
+on a book page and a preprint page (2026-10-09).
 Scenario 4: a scratch context with no `metadata` key (references at
 `request`), a throwaway manager and author in `users[]`; one published
 submission with `citationsRaw: 'Alpha study 2020'` and one draft of the
@@ -2553,11 +2554,33 @@ unnamed buttons, each holding an image, per row in ordering mode.
 Issue report: [pkp-e2e#619](https://github.com/jardakotesovec/pkp-e2e/issues/619) ([docs/issues/U46-A5-ordering-arrows-unnamed.md](../issues/U46-A5-ordering-arrows-unnamed.md)).
 
 <a id="fn-f-a20"></a>
-**f-a20 — A20 evidence.** Note p (the OMP and OPS template conditions).
+**f-a20 — A20 evidence.** Note p (the OMP and OPS template conditions,
+before and after).
 Live-probed 2026-09-24, OMP and OPS, two runs each: an item with no
 references showed the heading "References" over an empty block, with the
 References setting on and off; OJS showed no heading.
-Issue report: [pkp-e2e#871](https://github.com/jardakotesovec/pkp-e2e/issues/871) ([docs/issues/U42-A20-book-preprint-empty-references-heading.md](../issues/U42-A20-book-preprint-empty-references-heading.md)).
+Fixed by pkp/omp#2502 (two lines of `monograph_full.tpl`, open on
+2026-10-09) and pkp/ops#1443 (one line of `preprint_details.tpl`, commit
+`26031aac38`, merged 2026-10-09 as ops `dafd9b3263`), both for
+pkp/pkp-lib#13189 and both the change the issue report proposed.
+Live-probed 2026-10-09 on PKP's default test dataset (pkp/datasets
+`1a196c3`), signed out, each side on a newly loaded dataset, with no
+response of 500 or more and no page error. Before (omp `c07d91ced2`, ops
+`6614af8281`, the commit under the merge): the book page `catalog/book/5`
+and the preprint page `preprint/view/2`, neither item with a reference,
+showed the heading "References" over an empty block; the article page
+`article/view/17` showed none. After, at the PR head `52cf201a96` of pkp/omp#2502 before its
+merge (merged locally into omp `c07d91ced2`) and at ops `dafd9b3263`: no
+"References" block on any of the three pages. The neighbour, on both
+sides alike: book 14 and preprint 3, given the one reference "Ridge, A.
+(2021). Tide tables u42r9." in a new version that `dbarnes` published
+(posted), showed "References" over that one paragraph. The 3.5 twins
+(pkp/omp#2501, pkp/ops#1442) were not walked. Kept check
+`shared/playwright/checks/sync/omp-2502/walk.js` (`NB=1` for the
+neighbour).
+Issue report: [pkp-e2e#871](https://github.com/jardakotesovec/pkp-e2e/issues/871), whose
+file and kept script were deleted with the fix (git history keeps them);
+the issue closes when pkp/omp#2502 merges.
 
 <a id="fn-f-a21"></a>
 **f-a21 — A21 evidence.** None of lib/pkp's `submission.citations.structured*`

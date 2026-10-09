@@ -37,8 +37,6 @@
  * - OPS7 🐞, OPS8 🐞: S8 reads the French keyword's value, never its label,
  *   and never opens the French PDF reader.
  * - OPS9 🐞: summaries are opened by their title (S3, and S10's file).
- * - U42 A20 🐞 (the preprint page's empty "References" heading, which Rule
- *   6 names): S1's heading read on "Harbour Notes" leaves "References" out.
  * - U46 A7 🐞 (seeded galleys share one position): S2 reads the main list's
  *   links as a set, never in an order.
  * - A4, A13, A14, OJS1–OJS13: not on a preprint server's paths here (no file-less
@@ -237,9 +235,7 @@ test.describe('article landing page and reading', () => {
         await expect(landing.mainSection('Abstract')).toContainText(`Seeded abstract for ${tag}b.`);
         await expect(landing.publishedLine().locator('.label')).toHaveText('Posted');
         await expect(landing.versionEntries()).toHaveCount(1);
-        await expect
-            .poll(async () => (await landing.visibleHeadings()).filter((h) => h !== 'References'))
-            .toEqual(['Harbour Notes', 'Abstract', 'Posted', 'Versions']);
+        await expect.poll(() => landing.visibleHeadings()).toEqual(['Harbour Notes', 'Abstract', 'Posted', 'Versions']);
 
         // Control: "Harbour Notes" has no "Keywords:", no "Plain Language
         // Summary", no "Categories" and no cover, all of which the first
