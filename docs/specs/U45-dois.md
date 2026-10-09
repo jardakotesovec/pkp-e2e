@@ -5422,7 +5422,14 @@ written on `main` on 2026-10-09, while the PRs were open
 ([pkp-e2e#944](https://github.com/jardakotesovec/pkp-e2e/issues/944));
 the companion deletes it and keeps its walk
 (`checks/issues/press-mark-dois-current-version-only/walk.js`), and
-the issue closes when the PRs merge. The entry's first shape dates from `main`, so its retirement
+the issue closes when the PRs merge. That walk on the default dataset
+at the round-9 PR heads (`pkp/pkp-lib#13460` `58c7f454ff`,
+`pkp/omp#2495` `b0ab0a5fb6`), 2026-10-09: on book 14 with three
+published major versions, "Mark DOIs Registered", "Mark DOIs
+Unregistered" and "Mark DOIs Needs Sync" each changed the "Monograph",
+chapter and "Format / PDF" rows of every version in "View all", as on
+the journal and the preprint server beside it
+(`.reports/sync/pr13460r9/omp4-walk.log`). The entry's first shape dates from `main`, so its retirement
 reaches `main` with this page when the PRs merge; the regression report
 and the kept check are dealt with then.
 
