@@ -117,7 +117,7 @@ button is the panel's "Close". <sup>l</sup> <sup>q16</sup> <sup>q24</sup>
 |------------------|-----------|-------|
 | **Title** | Yes | The dataset's title. Empty: "This field is required." <sup>l</sup> |
 | **Identifier type** | No | A list: DOI, Accession, PURL, ARK, URI, ARXIV, ECLI, Handle, ISSN, ISBN, PMID, PMCID, UUID. It arrives with nothing chosen and has no empty entry. A type without an identifier is refused with "This field is required when identifier type is present.", an identifier without a type with "This field is required when identifier is present.". So once an identifier is saved it cannot be removed: clearing it on "Edit Data Citation" is refused, and the type cannot be set back to nothing ⚠ [A15](#a15). <sup>l</sup> |
-| **Identifier** | No | Checked against the chosen type: an identifier that is not valid for it is refused with ""{identifier}" is not a valid {type} identifier." A valid identifier typed as a full address or with a prefix ("https://doi.org/…", "doi:…") is stored bare (Rule 21). Of type "ARXIV" an ID keeps its version: "https://arxiv.org/abs/1234.12345v2" is saved as "1234.12345v2", and the bare "3456.34567v4" is saved as typed. <sup>l</sup> |
+| **Identifier** | No | Checked against the chosen type: an identifier that is not valid for it is refused with ""{identifier}" is not a valid {type} identifier." A valid identifier typed as a full address or with a prefix ("https://doi.org/…", "doi:…") is stored bare (Rule 21). Of type "ARXIV" an ID keeps its version: "https://arxiv.org/abs/1234.12345v2" is saved as "1234.12345v2", and the bare "3456.34567v4" is saved as typed. Of type "URI" or "PURL" an address is saved as typed, with "http://" and a closing "/" when it has them. <sup>l</sup> <sup>f-a12</sup> |
 | **Relationship type** | Yes | Four choices: "Supporting data without specifying whether they were generated or analyzed (supporting).", "Supporting data that were generated for the study (generated).", "Supporting data that were analyzed but not generated for the study (analyzed).", "Referenced data that were neither generated nor analyzed for the study (non-analyzed)." It arrives with nothing chosen. <sup>l</sup> |
 | **Repository** | No | Free text: where the dataset is held, or its publisher. <sup>l</sup> |
 | **Year** | No | A four-digit year. "202" or "20245" is refused with "This must be 4 digits long."; a value with letters ("20a4") gets "This is not a valid integer." and "This must be 4 digits long." together. <sup>l</sup> |
@@ -237,7 +237,8 @@ typed. Nothing asks first. The one exception is an author row added in
        space, without the comma, full stop, semicolon, colon or closing
        bracket that follows it in the sentence: "(doi:10.1234/bravo)."
        gives "10.1234/bravo", and "hdl:10419/12345. Accessed 2020-01-01."
-       gives "10419/12345"; <sup>f-a12</sup>
+       gives "10419/12345". A web address is kept as written, with
+       "http://" and a closing "/" when it has them; <sup>f-a12</sup>
     2. a reference with no DOI is looked up by its text in Crossref, which
        may supply the DOI and the bibliographic details;
     3. a reference with a DOI is looked up in OpenAlex, which may supply
@@ -958,7 +959,9 @@ Left out of the scenarios above, by reason:
   - identifiers read out of a reference's text (Rule 11, step 1): a DOI
     followed by a comma or a closing bracket, a dx.doi.org address, a
     handle followed by a sentence and a URN followed by a comma, each
-    shown whole and alone in its "Edit citation" box
+    shown whole and alone in its "Edit citation" box; a web address
+    written with "http://" or a closing "/" shown as written, there and
+    as a "URI" or "PURL" data citation
   - the guard for A6 (retired; pkp-e2e#883): with "References Metadata Lookup" on, "Add" of new references shows "Processing references - 0/n" counting every reference added, and switching the lookup on over existing references shows no box
   - a refused data citation save's page notice "The form was not saved
     because {n} error(s) were encountered…" and its count, none for an
@@ -2506,6 +2509,26 @@ wherever it stood). The same runs at the base `2ac457888e` are the
 `PidExtractionTest` and `DataCitationIdentifierValidationTest` pass at
 the head (26 and 13 tests) and fail against the base's classes (20 of
 26, and `testArxivValidation`).
+Round 2 (2026-10-09; pkp-lib `50fb7ad3b2`, a second commit on `4b378844aa`,
+the first rebased unchanged onto `15f9f72323`; ojs `90fcedeac8`
+(`pkp/ojs#5915`), omp `77ca57587a`, ops `dafd9b3263`; all three apps,
+the base `15f9f72323` first): `BasePid::removePrefix()` uses the
+"https://" form only to match a prefix, `ExtractPidsHelper::execute()`
+no longer rewrites "http://" in the reference's text, and `Url` trims
+spaces only. `walk.js`, thirteen references and eleven data citations:
+"http://example.org/data" in a reference's text read back as URL
+"http://example.org/data" (base: "https://example.org/data"),
+"https://example.org/set/" with its "/" (base: without), "See
+http://example.org/report." without the full stop, and
+"http://doi.org/10.1234/juliet" and "http://hdl.handle.net/10419/777" as
+DOI and Handle with no URL, on both sides; of type "URI"
+"http://example.org/data" and of type "PURL"
+"http://purl.org/dc/terms/title" and "http://purl.org/dc/elements/1.1/"
+saved as typed (round 1: "https://…"; base: the last without its "/").
+`arxiv-version.js` and `http-address.js` read as the PR intends
+(`.reports/pr13479/r2-*/`). A reference's address written "HTTP://…" or
+"Http://…" gives no URL at this head (base: the address with
+"https://"): reported, `checks/sync/pkp-lib-13479/caps-url.js`.
 Issue report: [pkp-e2e#866](https://github.com/jardakotesovec/pkp-e2e/issues/866); the report, its `fix.diff` and its place under `checks/issues/` deleted with the retirement (git keeps them), the issue to be closed when the PR merges.
 
 <a id="fn-f-a13"></a>

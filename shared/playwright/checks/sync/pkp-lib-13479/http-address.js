@@ -1,5 +1,6 @@
-// Kept walk for docs/reports/2026-10-08-pkp-lib-13479.md (PR review of pkp/pkp-lib#13479): a data citation of
-// type "URI" or "PURL" typed with an http:// address. The report's steps as written, on PKP's default test
+// Kept walk for round 1's finding of the PR review of pkp/pkp-lib#13479 (its report, deleted once acted on:
+// the second commit 50fb7ad3b2 fixed it): a data citation of type "URI" or "PURL" typed with an http://
+// address. The finding's steps as written, on PKP's default test
 // dataset (a dataset fleet), as dbarnes, through the screens only:
 //   Setup: Settings › Workflow › "Metadata": "Enable data citation metadata" ("Ask the author…"), "Save".
 //   OJS 4, OMP 3, OPS 1 › Data: "Add Data Citation" twice ("URI" http://example.org/data, "PURL"

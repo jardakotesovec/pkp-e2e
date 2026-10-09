@@ -4,14 +4,16 @@
 // issue report's own walk, run with this one.
 // On PKP's default test dataset (a dataset fleet), as dbarnes, through the screens only:
 //   Setup: Settings › Workflow › "Metadata": metadata lookup and data citations ("Ask the author…") on.
-//   References (OJS 4, OMP 3, OPS 1): eight references added in one "Add", each with an identifier in its text
+//   References (OJS 4, OMP 3, OPS 1): thirteen references added in one "Add", each with an identifier in its text
 //   (a comma or a bracket after a DOI, a dx.doi.org address, a handle followed by a sentence, a URN followed by
-//   a comma, an http address, a versioned arXiv ID, a DOI holding "doi"); once the lookup's first job has run,
-//   each row's "Edit citation" boxes are read.
-//   "Edit citation" typed by hand, on a ninth reference: "DOI" and "Handle" typed in four forms, saved, reread.
-//   Data: nine data citations added, the type and identifier of each in CASES below; each row read.
-// Read as fixed (the issue's intention) when REF_EXPECT and the "fixed" column of CASES hold; the regression
-// this review found is CASES' "uri http" and "purl http": an http:// address must be saved as typed.
+//   a comma, an http address, a versioned arXiv ID, a DOI holding "doi", and since round 2 http:// forms of a
+//   DOI and a handle, an address ending in "/" and one ending a sentence); once the lookup's first job has
+//   run, each row's "Edit citation" boxes are read.
+//   "Edit citation" typed by hand, on one more reference: "DOI" and "Handle" typed in four forms, saved, reread.
+//   Data: eleven data citations added, the type and identifier of each in CASES below; each row read.
+// Reads as the PR intends when every case is "fixed" or "unchanged" (REFS' and TYPED's last column, CASES'
+// "should"). Round 1 (head 09f4461da9) read "other" for "uri http" and "purl http", saved with https://; round 2
+// (50fb7ad3b2) keeps an address as written, in a data citation and in a reference's "URL".
 // Run (reset the fleet first: npm run fleet-prep -- --feature <feature> --dataset <n> --reset):
 //   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13479/walk.js
 const {forEachApp, launch, signIn, signOut, screen, shot, record, note, serverLog, idle} = require('../../../probe');
@@ -20,16 +22,24 @@ const K = require('../../issues/arxiv-id-loses-version/lib.js');
 const SUBMISSION = {ojs: 4, omp: 3, ops: 1};
 const BOXES = ['DOI', 'URL', 'URN', 'Arxiv', 'Handle'];
 
-// [row text, the box the issue is about, its value before the change, its value as the issue intends]
+// [row text, the box the issue is about, its value before the change, its value as the PR intends,
+//  other boxes' values at the PR head (recorded as alsoOk)]
 const REFS = [
     ['Alpha A. Comma after. doi:10.1234/alpha, 2020', 'DOI', '10.1234/alpha,', '10.1234/alpha'],
     ['Bravo B. In brackets (doi:10.1234/bravo).', 'DOI', '10.1234/bravo)', '10.1234/bravo'],
-    ['Charlie C. Old resolver. https://dx.doi.org/10.1234/charlie', 'DOI', '', '10.1234/charlie'],
+    ['Charlie C. Old resolver. https://dx.doi.org/10.1234/charlie', 'DOI', '', '10.1234/charlie', {URL: ''}],
     ['Delta D. Handle then date. hdl:10419/12345. Accessed 2020-01-01.', 'Handle', '10419/12345. Accessed 2020-01-01', '10419/12345'],
     ['Echo E. Thesis. urn:nbn:de:101:1-2019072802401757702913, 2019.', 'URN', 'urn:nbn:de:101:1-2019072802401757702913,', 'urn:nbn:de:101:1-2019072802401757702913'],
-    ['Foxtrot F. Plain address. http://example.org/data', 'URL', 'https://example.org/data', 'https://example.org/data'],
+    ['Foxtrot F. Plain address. http://example.org/data', 'URL', 'https://example.org/data', 'http://example.org/data'],
     ['Golf G. Versioned. arXiv:2101.12345v2 [cs.CL].', 'Arxiv', '2101.12345', '2101.12345v2'],
     ['Hotel H. Prefix inside. doi:10.1000/jdoi.2020.5', 'DOI', '10.1000/j.2020.5', '10.1000/jdoi.2020.5'],
+    ['Juliet J. Old scheme. http://doi.org/10.1234/juliet', 'DOI', '10.1234/juliet', '10.1234/juliet', {URL: ''}],
+    ['Kilo K. Old handle. http://hdl.handle.net/10419/777', 'Handle', '10419/777', '10419/777', {URL: ''}],
+    ['Lima L. Slash kept. https://example.org/set/', 'URL', 'https://example.org/set', 'https://example.org/set/'],
+    ['Mike M. Full stop. See http://example.org/report.', 'URL', 'https://example.org/report', 'http://example.org/report'],
+    // capitals in the scheme: read as "other" at 50fb7ad3b2 (no URL at all; Url's pattern is case-sensitive and
+    // the lookup no longer rewrites the text)
+    ['Oscar O. Capitals. HTTP://example.org/caps', 'URL', 'https://example.org/caps', 'HTTP://example.org/caps'],
 ];
 const HAND = 'India I. Typed by hand, 2019.';
 // [box, typed, stored before the change, stored as the issue intends]
@@ -49,7 +59,10 @@ const CASES = [
     ['pr13479 uri secure', 'URI', 'https://example.org/data2', 'https://example.org/data2', 'https://example.org/data2'],
     ['pr13479 uri http', 'URI', 'http://example.org/data', 'http://example.org/data', 'http://example.org/data'],
     ['pr13479 purl http', 'PURL', 'http://purl.org/dc/terms/title', 'http://purl.org/dc/terms/title', 'http://purl.org/dc/terms/title'],
-    ['pr13479 handle space', 'Handle', 'handle:20.1000/abc def', '20.1000/abc def', '20.1000/abc def'],
+    // cut at the space: ruled intended by the PR's author (2026-10-09); typed bare it is kept whole
+    ['pr13479 handle space', 'Handle', 'handle:20.1000/abc def', '20.1000/abc def', '20.1000/abc'],
+    ['pr13479 purl slash', 'PURL', 'http://purl.org/dc/elements/1.1/', 'http://purl.org/dc/elements/1.1', 'http://purl.org/dc/elements/1.1/'],
+    ['pr13479 uri stop', 'URI', 'https://example.org/data3.', 'https://example.org/data3', 'https://example.org/data3'],
 ];
 
 async function readBoxes(page) {
@@ -102,11 +115,11 @@ forEachApp(async (app) => {
     await step('references', async () => ({heading: await openRefs()}));
     await step('add', async () => K.addReference(page, [...REFS.map((r) => r[0]), HAND].join('\n')));
     // Every page load runs waiting jobs (job_runner = On); a few loads let the first job of each reference run.
-    for (let i = 0; i < 4; i++) { await K.sleep(1500); await openRefs(); }
+    for (let i = 0; i < 6; i++) { await K.sleep(1500); await openRefs(); }
     await snap('references-added');
     await step('rows', async () => {
         const out = [];
-        for (const [text, box, before, fixed] of REFS) {
+        for (const [text, box, before, fixed, also] of REFS) {
             const rowText = text.slice(0, 22);
             const row = {text, box, before, fixed};
             try {
@@ -114,6 +127,7 @@ forEachApp(async (app) => {
                 row.boxes = await readBoxes(page);
                 row.read = row.boxes[box];
                 row.is = row.read === fixed ? (fixed === before ? 'unchanged' : 'fixed') : row.read === before ? 'as before' : 'other';
+                if (also) row.alsoOk = Object.entries(also).every(([k, v]) => row.boxes[k] === v);
                 await K.closeEditCitation(page);
             } catch (e) {
                 row.threw = K.flat(e.message, 200);
