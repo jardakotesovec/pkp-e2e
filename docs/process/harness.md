@@ -170,7 +170,10 @@ No suite is meant to run on any of the three lines.
   publication"); a version is numbered in `publications.version`
   (`version_stage`, `version_major`, `version_minor` on `main`); the
   publication pages' menu keys are seed-facts.md's (U13, U19, U21, U45,
-  U50, U52, U69 issue walks, 2026-10-01).
+  U50, U52, U69 issue walks, 2026-10-01); the 3.5 "Discussions" grid has
+  no page object, and its helpers (add, open, reply, edit participants)
+  sit in the `lib.js` of the U37 A3, A8, A9 and A36 walks under
+  `checks/issues/`, to be taken from there, not written a fifth time.
 - **3.4 and 3.3: no `_test` API, no seed.** The overlays are written for
   `main`'s Laravel-routed API, which 3.4 (Slim handlers) and 3.3
   (`import()`, `.inc.php`, no `Repo`) do not have, so `mount` copies only

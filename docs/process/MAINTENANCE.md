@@ -309,7 +309,9 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
 3. **Report each unit** through one agent rendered from
    `briefs/issue-report.md`, one or two at a time, each on dataset fleets
    of its own, since a walk changes the dataset (harness.md "Dataset
-   fleets"): before dispatch, `npm run fleet-prep -- --feature
+   fleets"), and under an agent id no earlier session of the slot used,
+   since `.reports/issues/<agent>/` keeps an earlier unit's steps, logs
+   and trial scripts: before dispatch, `npm run fleet-prep -- --feature
    issues-<agent> --dataset <n> --reset` for `main` and
    `PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature
    issues-<agent>-3_5 --dataset <n> --reset` for 3.5, a different `<n>`
