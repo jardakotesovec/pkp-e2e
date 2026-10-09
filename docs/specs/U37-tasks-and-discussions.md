@@ -2239,6 +2239,7 @@ Issue report: [pkp-e2e#425](https://github.com/jardakotesovec/pkp-e2e/issues/425
 
 <a id="fn-a15"></a>
 **f-a15** — Note ad. Live-probed 2026-09-23 on all three apps, in French (Canada): the "Add" window's template search box read "Trouver un modèle de courriel". lib/pkp `locale/en/common.po` holds `common.findTemplate` as "Find Template"; `locale/fr_CA/common.po` and `locale/fr/common.po` both hold "Trouver un modèle de courriel" (read 2026-10-08, lib/pkp `3bcc0a0cb2`), so French (France) reads the same (code, not opened). One key has two uses. The email composer's template search reads it in `templates/decision/record.tpl` and ui-library's `RequestReviewRoundAuthorResponse.vue` and `UserInvitationEmailComposerStep.vue` (through `Composer.vue`), where the French is right; those were read in the code, not opened in French. `DiscussionManagerTemplates.vue` reads it for this window's task and discussion templates (ui-library `bc9a03b9`, 2025-07-30, `pkp/pkp-lib#11291`; the file is not on `stable-3_5_0`), where the French is wrong. The raw keys the same probes read on the panels and windows (note ad) are texts French lacks, and no finding.
+Issue report: [pkp-e2e#950](https://github.com/jardakotesovec/pkp-e2e/issues/950) ([docs/issues/U37-A15-add-window-template-search-french-email-template.md](../issues/U37-A15-add-window-template-search-french-email-template.md)).
 
 <a id="fn-a16"></a>
 **f-a16** — Note l: the overdue test compares now with the due date's midnight. Live-probed 2026-09-23 on all three apps: a task due 2026-09-23 (seeded, and one saved on screen with that date) read "Overdue" with the overdue line that day.
@@ -2299,6 +2300,7 @@ Issue report: [pkp-e2e#430](https://github.com/jardakotesovec/pkp-e2e/issues/430
 
 <a id="fn-a32"></a>
 **f-a32** — Live-probed 2026-10-02 (note td20). ui-library `DiscussionManagerCellStarted.vue` and `DiscussionManagerCellClosed.vue` label their input with `labelIds` = `discussion_name_{id} {tableId}_{index}`: the first id is the row's name link, the second matches no element on the page, so both inputs take the item's name. `TaskTemplateManagerCellAutoAdd.vue` gives every row's box the same `aria-label`, `taskTemplates.templateAutoAdd` (lib/pkp `locale/en/submission.po`). The same cells are A26's.
+Issue report: [pkp-e2e#949](https://github.com/jardakotesovec/pkp-e2e/issues/949) ([docs/issues/U37-A32-task-boxes-screen-reader-shared-names.md](../issues/U37-A32-task-boxes-screen-reader-shared-names.md)).
 
 <a id="fn-a33"></a>
 **f-a33** — Live-probed 2026-10-02 (note td22). The event-log `Collector` returns a task's entries ordered by `date_logged` alone; `TaskResource::toArray()` then calls `sortBy(['dateLogged' => 'desc', 'id' => 'desc'])` (c69d929b26, `pkp/pkp-lib#12451`, merged 2026-03-15), which Laravel's `sortByMany()` reads as the values to sort on, so it sorts nothing and lines of one second keep the database's order. Checked in PHP against the bundled Laravel, 2026-10-02: that array leaves a collection as it is, where `[['dateLogged', 'desc'], ['id', 'desc']]` sorts it. Note y saw the same on 2026-09-23 (events of one second in different orders between apps).
