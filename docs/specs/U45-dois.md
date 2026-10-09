@@ -4152,6 +4152,7 @@ at connection ([A18](#a18)); with DataCite each `DepositIssue` failed on
 the server with `DataciteXmlFilter::createFundingReferencesNode():
 Argument #2 ($publication) must be of type APP\publication\Publication,
 null given` (the [OJS2](#ojs2) error).
+Issue report: [pkp-e2e#943](https://github.com/jardakotesovec/pkp-e2e/issues/943) ([docs/issues/U45-OJS4-issue-deposit-dois-stays-unregistered.md](../issues/U45-OJS4-issue-deposit-dois-stays-unregistered.md)).
 
 <a id="fn-f-ojs5"></a>
 **f-ojs5** — Split from [A15](#a15) on 2026-10-06, when the issue
