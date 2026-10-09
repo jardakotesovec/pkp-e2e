@@ -327,7 +327,16 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   3.5, 3.4, 3.3; OJS, OMP, OPS) matched its checkout: no upgrade.
   `PKP_E2E_DATASET_BRANCH=stable-3_5_0` loads another branch's dataset
   (pkp's own `loaddb.sh <branch>`), which exercised the upgrade: 3.5.0.5
-  to 3.6.0.0 on OJS `main` in 2 s.
+  to 3.6.0.0 on OJS `main` in 2 s. Before an upgrade from a dataset older
+  than 3.4 the reset removes the dataset's own usage event log from the
+  fleet's files (`dropStaleUsageLogs()`, said in the output): the 3.4
+  pre-flight check stops the upgrade on any
+  `usageStats/usageEventLogs/usage_events_<date>.log` dated before
+  yesterday, and the dump carries the log of the day pkp's CI built it.
+  With `PKP_E2E_DATASET_BRANCH=stable-3_3_0`, 3.3.0.23 upgrades to
+  3.6.0.0 on `main` and to 3.5.0.5 on 3.5 in about 3 s per app
+  (2026-10-09, the PR review of pkp/pkp-lib#13481, whose kept check
+  reloads the dump and upgrades it once per case).
 - **The kit on a dataset fleet.** `bin/probe.js` reads
   `.reports/<PROBE_FEATURE>/fleet.json`: a dataset fleet's sets
   `PKP_E2E_DATASET` (and `PKP_E2E_LINE`, which may be left out), so the

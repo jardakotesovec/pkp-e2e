@@ -338,6 +338,26 @@ function schemaDiff(fleet) {
     };
 }
 
+/**
+ * The 3.4 pre-flight check (PreflightCheckMigration, run on an upgrade from
+ * 3.3 or older) refuses to go on while the files dir holds a usage event log
+ * dated before yesterday, "must be processed or removed": a dataset's
+ * files carry the log of the day pkp's CI built it. Removes those from the
+ * fleet's copy and returns their names.
+ */
+function dropStaleUsageLogs(fleet) {
+    const dir = path.join(fleet.filesDir, 'usageStats', 'usageEventLogs');
+    if (!fs.existsSync(dir)) return [];
+    const day = new Date(Date.now() - 24 * 3600 * 1000);
+    const yesterday = `${day.getFullYear()}${String(day.getMonth() + 1).padStart(2, '0')}${String(day.getDate()).padStart(2, '0')}`;
+    const stale = fs.readdirSync(dir).filter((file) => {
+        const date = (file.match(/^usage_events_(\d{8})\.log$/) || [])[1];
+        return date && date < yesterday;
+    });
+    for (const file of stale) fs.rmSync(path.join(dir, file));
+    return stale;
+}
+
 function runUpgrade(fleet) {
     const result = spawnSync('php', ['tools/upgrade.php', 'upgrade'], {
         cwd: fleet.root,
@@ -451,6 +471,10 @@ async function resetDataset(name, n, {log = console.log} = {}) {
     };
     if (compareVersions(db, code) < 0) {
         log(`dataset: the dataset's schema is ${db}, the checkout is ${code}: running the app's upgrade (php tools/upgrade.php upgrade)`);
+        if (compareVersions(db, '3.4.0.0') < 0) {
+            const stale = dropStaleUsageLogs(fleet);
+            if (stale.length) log(`dataset: removed ${stale.join(', ')} from the fleet's files (the 3.4 pre-flight check refuses usage event logs dated before yesterday)`);
+        }
         const upgrade = runUpgrade(fleet);
         entry.upgradeLog = path.relative(REPO_ROOT, upgrade.log);
         if (upgrade.code !== 0) {
@@ -495,6 +519,7 @@ module.exports = {
     datasetFleet,
     resetDataset,
     loadDump,
+    dropStaleUsageLogs,
     dropDatabase,
     campaignCredentials,
     contextTables,
