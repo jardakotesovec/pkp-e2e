@@ -137,6 +137,11 @@ wish to delete this item? This action cannot be undone." and the buttons
    - is already the path of another galley of the same version: "The URL
      path has already been used and can not be used again." A galley of
      another version, or of another article, may use the same path.
+
+   Nothing shows at the top right while the window is open. Each refused
+   "Save" shows its reason there later, as a red notice: after the next
+   "Save" that succeeds, or, if the window is closed without one, on the
+   next page that loads ⚠ [A8](#a8). <sup>g</sup>
 6. **Editing a galley.** The row menu's "Edit" opens the galley's window,
    headed "Upload a File Ready for Publication" although nothing is
    uploaded there ⚠ [A1](#a1). Its tabs are "Edit Metadata" (Fields) and,
@@ -144,14 +149,18 @@ wish to delete this item? This action cannot be undone." and the buttons
    2), "Identifiers", whose contents are
    *[Identifiers](U44-identifiers.md)*'. "Save" stores the tab's fields,
    closes the window, and the row shows the new label and language at
-   once, with no notice. <sup>h</sup>
+   once. The save shows no notice of its own; a "URL Path" refused
+   before it shows its reason as a red notice now (Rule 5, [A8](#a8)).
+   <sup>h</sup>
    - 6a. **Leaving with unsaved changes.** After a field is changed,
      moving to the other tab or pressing the window's header "Close"
      first asks "The data on this form has changed. Do you wish to
      continue without saving?". "OK" drops the change and switches the
      tab or closes the window; "Cancel" stays where it was. "Create New Galley"'s header "Close"
      asks the same. The form's own "Cancel" closes without asking and
-     stores nothing. <sup>h</sup>
+     stores nothing. After a refused "Save" (Rule 5), the "Edit"
+     window's header "Close" closes it at once, without asking, although
+     the box still holds the refused path. <sup>h</sup>
 7. **The read-only window.** On a preprint server, "View" opens the same
    window headed "View Galley", with every field greyed out, "Save"
    greyed out and no "Cancel"; its "Identifiers" tab is read-only as
@@ -224,8 +233,11 @@ wish to delete this item? This action cannot be undone." and the buttons
   heading, is *Article landing page & reading*'s. <sup>p</sup> <sup>q17</sup>
 - **Files deleted.** Deleting a galley deletes its file and the file's
   dependent files (Rule 9). <sup>k</sup>
-- **No email, no notice.** Adding, editing, ordering or deleting a galley
-  sends no email and shows no notice. <sup>o</sup> <sup>q18</sup>
+- **No email, no notice of its own.** Adding, editing, ordering or
+  deleting a galley sends no email and shows no notice of its own. An
+  add or an edit saved after a refused "URL Path" shows that refusal's
+  message as a red notice (Rule 5, [A8](#a8)). <sup>o</sup>
+  <sup>q18</sup>
 - **Activity Log.** A galley's upload writes the same lines as any file
   upload, into the submission's Activity Log and into the file's "More
   Information" history
@@ -386,7 +398,9 @@ accounts, passwords, mail catcher's address and tooling recipe. <sup>s</sup>
      numbers, dashes, underscores and periods."; "pdf" shows "The URL
      path has already been used and can not be used again."; each time
      the window stays open. Type "pdf_v1.x" and press "Save": the window
-     closes (Rule 5).
+     closes (Rule 5). The red notices that show at the top right as the
+     window closes, one for each refusal, are [A8](#a8), neither a pass
+     nor a fail here.
    - **Ordering mode**: press "Order": it now reads "Save Order", each
      row's "…" button gives way to an up arrow and a down arrow, there is
      no "Cancel", and "Add galley" stays below the list. The first row's
@@ -622,6 +636,12 @@ Left out of the scenarios above, by reason:
     galley's window with "This galley will be available at a separate
     website." ticked and "www.example.org" in the address refuses the
     address, and a full "https://" address saves
+  - the guard for A8 (issue report
+    `docs/issues/U09-A11-static-page-refusal-repeated-after-save.md`):
+    after two refused "URL Path" values in a galley's "Edit" window, the
+    save of a good one shows no notice at the top right
+  - after a refused "Save" in a galley's "Edit" window, the header
+    "Close" closes the window without asking (Rule 6a)
 - **Nothing new to test**:
   - a new galley's place in the list, before and after a saved order
     (Rule 8d)
@@ -647,6 +667,9 @@ Left out of the scenarios above, by reason:
   - A1 (the "Edit" window headed as an upload; Rule 6)
   - A7 (an edit moving a galley to the end of the list before any order
     is saved; Rule 8e)
+  - A8 (a refused "URL Path" coming back as a red notice at the next
+    save, or on the next page when the window is closed instead; Rule 5;
+    scenario 2 passes it)
   - A5 (the ordering arrows unnamed for screen readers; Rule 8a)
   - A4 (a new version's copy sharing the published galley's file;
     Rule 11)
@@ -679,6 +702,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The ordering arrows have no names for screen readers | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | A galley's separate-website box keeps an address typed without "https://", and readers' link lands on "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Until an order is saved, editing a galley moves it to the end of the list | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
+| [A8](#a8) | A good "Save" in the galley window shows an earlier refused "URL Path" as a red notice | 🐞 | low | — |
 | [OJS1](#ojs1) | Deleting a published galley that a new version copied fails with an error | 🐞 | high · crash: server · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [OPS2](#ops2) | Before posting, a Moderator without "Permissions" cannot edit, add or reorder the galleys the page offers | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint's Author is offered "Change File" on every galley and refused on files others uploaded | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -767,6 +791,25 @@ Alpha1 once Alpha's label is changed. The same looseness puts a new
 galley at the end of the list or at the top (Rule 8d). Once an order is
 saved, an edit keeps the galley's place.
 Basis: probe, 2026-10-02. <sup>f-a7</sup>
+
+<a id="a8"></a>
+**A8 — A good "Save" in the galley window shows an earlier refused "URL Path" as a red notice** · 🐞 · low.
+A "Save" in a galley's "Edit" window that is refused for its "URL Path"
+shows the reason under the box, as it should, and nothing at the top
+right. Once the editor corrects the path and saves, the window closes
+and the galley is saved, but a red notice at the top right now repeats
+the earlier refusal ("The URL path can not be a number."), as if this
+save had failed. Each refused "Save" leaves a notice of its own, and all
+of them show together after the good save. If the editor leaves the
+window after a refusal instead, with "Cancel" or the header "Close", the
+notice shows once on the next page that loads, such as the dashboard.
+"Create New Galley" does the same, its notice showing over the upload
+wizard that opens. Nothing is stored wrong. Expected: the reason shows
+when the "Save" is refused, and a save that succeeds shows no error. The
+fault and its fix are the static page window's
+([→ Custom pages & blocks, A11](U09-custom-pages-and-blocks.md#a11)).
+Basis: probe, 2026-10-09. <sup>f-a8</sup>
+Report: refresh owed — the galley window was walked on `main` (OJS, OPS) on 2026-10-09, where the report has it "by code": its Affects, Summary, Reach and Evidence say so, and "Tracked in" gains this entry (2026-10-09)
 
 ### OJS
 
@@ -994,9 +1037,19 @@ another galley of the same publication →
 can not be used again."; the regex `^[a-zA-Z0-9]+([.\-_][a-zA-Z0-9]+)*$`
 → `validator.alpha_dash_period` "This may only contain letters, numbers,
 dashes, underscores and periods.". A refused save re-renders the form
-with the field error in place of the box's help line; no "Errors
-occurred processing this form" notice shows (live-probed 2026-09-24,
-note q10).
+with the field error in place of the box's help line; no notice shows
+while the window is open (live-probed 2026-09-24, note q10). The
+refusal is also stored for the user as a form-error notification
+(`Form::validate()`), which the page fetches and shows as a red notice
+at the next successful save or page load, because
+`AjaxFormHandler.handleResponse()` fires `notifyUser` from the form it
+has just replaced and `articleGalleyForm.tpl` / `preprintGalleyForm.tpl`
+has no in-place message box (note f-a8). Live-probed 2026-10-09 (Rule
+5), OJS and OPS, two runs each: "123", "a/b" and a path another galley
+of the version had were each refused with the message under the box and
+no notice and no notification request while the window stayed open;
+after a refusal, "Cancel" and a reload, the reopened "URL Path" was
+empty.
 
 <a id="fn-h"></a>
 **h** — Editing: `galleyEdit()` opens the legacy `editGalley` operation
@@ -1013,7 +1066,15 @@ question as a tab switch, in "Edit" and in "Create New Galley"; "OK"
 closed the window with nothing sent and the old label kept. The form's
 "Cancel" closed without asking and sent nothing. Rule 6's "Save"
 showed the new label ("PDF2") and language ("French (Canada)") at once,
-with no notice 3 seconds later.
+with no notice 3 seconds later; no "Save" had been refused before it
+(after one, note f-a8). Live-probed 2026-10-09 (Rule 6's "Save"; Rule
+6a's last sentence), OJS and OPS: an "Edit" saved with the path "ctl1" and no refusal before it
+showed no notice, at the save and after a reload (two runs each). After
+"123" was refused in "Edit", the header "Close" closed the window with
+no question, the box still reading "123" (OJS three runs, OPS two);
+control, two runs each: a path typed and not saved, the header "Close"
+asked the question and "OK" closed the window. A field changed
+again after the refusal, then "Close", was not driven.
 
 <a id="fn-i"></a>
 **i** — `galleyView()` opens the same `editGalley` operation titled
@@ -1402,6 +1463,38 @@ Issue report: [pkp-e2e#624](https://github.com/jardakotesovec/pkp-e2e/issues/624
 saved, so the database's own order decides the list. Live-probed
 2026-09-24 (note q12) on OJS and OPS, the same on both.
 Issue report: [pkp-e2e#617](https://github.com/jardakotesovec/pkp-e2e/issues/617) ([docs/issues/U46-A7-galley-format-moves-in-list-when-saved.md](../issues/U46-A7-galley-format-moves-in-list-when-saved.md)).
+
+<a id="fn-f-a8"></a>
+**f-a8** — Note g: `ArticleGalleyGridHandler::updateGalley()` /
+`PreprintGalleyGridHandler::updateGalley()` answer a refusal with the
+form drawn again, and the stored form-error notification waits until
+the page's next notification request (the mechanism is *Custom pages &
+blocks*' note f-a11). Live-probed 2026-10-09 (Rules 5, 6; Side
+effects), OJS and OPS, two runs each (OJS a third), on scratch contexts
+with scratch users, kept script
+`shared/playwright/checks/U46/I09/i09.js`. In "Edit": "123" refused,
+then "pdf2" saved, showed one red notice "The URL path can not be a
+number." at the top right as the window closed, none after a reload,
+and the reopened window held "pdf2"; "a/b" and a used path refused,
+then "html2" saved, showed the letters message and the duplicate message
+as two notices at once. "123" refused, then "Cancel": no notice until
+the page was reloaded, which showed it once, and the dashboard opened
+after it showed none. "123" refused, then the header "Close": no
+notice until the dashboard was opened, which showed it once, and none
+after its reload. "Create New Galley": "123" refused, then "new1" saved,
+showed the notice with the upload wizard open, and none after the
+wizard's "Cancel" and a reload. The same refusal and good save showed
+the notice for the Journal Manager, an assigned Section Editor and an
+assigned Layout Editor (OJS) and for the Preprint Server Manager, an
+assigned Moderator and the Author of an unposted preprint (OPS). No
+notification request was sent at a refusal; the request after the good
+save, or the page load, returned one `notifyFormError` notification per
+refusal, titled "Errors occurred processing this form" (the notice
+shows its text alone). No request failed. OMP control: a monograph's
+Publication menu listed "Publication Formats" and no "Galleys".
+Not driven: whether "Save Order" or a confirmed "Delete" after a
+refusal and "Cancel" also shows the waiting notice; `stable-3_5_0`.
+Issue report: [pkp-e2e#367](https://github.com/jardakotesovec/pkp-e2e/issues/367) ([docs/issues/U09-A11-static-page-refusal-repeated-after-save.md](../issues/U09-A11-static-page-refusal-repeated-after-save.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Live-probed 2026-09-24 (note q15), twice on OJS: the
