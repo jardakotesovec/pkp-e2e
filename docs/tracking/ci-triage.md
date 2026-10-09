@@ -1333,6 +1333,19 @@ trips.
   carries no more, the trace was not read. No earlier sighting at that
   line on any app. **Watch condition**: a second sighting; then read the
   trace for whether the press reached the form or the save was refused.
+- **OJS U30 S3's "Submit Response" still disabled after the answer is
+  typed** (OJS, once, pkp-e2e push run 37723842236 on `main` 0a3ac1a3,
+  2026-10-08, shard 2/3, green on its retry; found by the CI tally of
+  2026-10-09). `authorSubmitResponse`
+  (`U30-author-response-to-reviews.spec.js:270`, from `:498`, "S3: the
+  editor edits, deletes, and the author answers again"): after the body
+  was typed (`pressSequentially`) and the author's box ticked, the
+  window's "Submit Response" stayed disabled for the 10 s of
+  `toBeEnabled`. Not the Escape class above (no menu is open at that
+  line); the trace was not read. No earlier sighting at that line on any
+  app. **Watch condition**: a second sighting; then read the trace for
+  whether the typed text reached the box before the tick.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull
