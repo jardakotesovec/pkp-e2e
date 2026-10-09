@@ -629,7 +629,11 @@ files dir it must carry:
   PKP wires `[proxy]` into Guzzle and Laravel HTTP, so every server-side
   outbound HTTP call fails fast. Tests never reach real external services,
   and a hung outbound call cannot stall a single-threaded worker server.
-  SMTP to Mailpit and other 127.0.0.1 traffic are unaffected. Do not remove
+  SMTP to Mailpit is unaffected; an HTTP call from the app's code to a
+  stand-in on 127.0.0.1 goes to the dead proxy like any other (`no_proxy`
+  in the environment is not read), so a PHP driver that needs one points
+  `Config::getData()['proxy']` at its own stub in its process, as
+  `checks/sync/pkp-lib-13475/lookups.php` does. Do not remove
   it, and re-add it by hand on new machines. There is no OS-level firewall
   and no DTD mirror.
 - `[database] persistent = On` (the generator writes it since 2026-09-14;

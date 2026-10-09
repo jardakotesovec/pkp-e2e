@@ -840,7 +840,9 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    is the PR's. Traces kept on failure (`--trace retain-on-failure`) save
    a second reproduction.
 7. **Record and report.** Companion row `ready` in ci-triage with what
-   the merge session must do; a dated sync-log entry with one line per
+   the merge session must do, committed on `main` too, since the daily
+   session reads `main`'s table and a row on the branch alone is never
+   seen; a dated sync-log entry with one line per
    change, the run lines and the CI run ids, and "baselines not advanced"
    stated; commit and push the companion; the thread gets the verdict
    (green at the PR ref, needs a rebase, or a regression with the report)
