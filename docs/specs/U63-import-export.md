@@ -172,12 +172,21 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
 8. **Choosing the file.** "Upload File" opens the computer's file
    picker, or a file is dropped on the box. The file goes up at once:
    its name shows in the box and the button reads "Change File". The
-   box takes any file; it is read only when "Import" is pressed. The
+   box takes a file of any kind, up to the size of Rule 8a; it is read
+   only when "Import" is pressed. The
    Tab key skips "Upload File" and the box and goes straight to
    "Import", so a keyboard user cannot choose a file ⚠ [A6](#a6). A
    file that is up but not imported stays while another tab is open;
    leaving the page asks nothing, and on return the box is empty and
    nothing was imported. <sup>e</sup>
+8a. **A file over the upload limit.** The server sets the largest file
+    it takes in an upload: 2 MB on PHP's default settings, which the
+    test installs keep. A larger file does not go up: under "Upload XML
+    file to import" the box reads "File size error.", which names
+    neither the limit nor the file's size, and the button still reads
+    "Upload File". "Import" pressed then does what Rule 13 says for no
+    file: no results tab, no message, nothing imported
+    ⚠ [A25](#a25). <sup>e</sup>
 9. **Results in a tab.** "Import" adds a tab named "Import Results"
    ("Results" on a press) and opens it; it shows the outcome of Rules 10
    and 11. The file stays in the box, so each press of "Import" adds one
@@ -200,6 +209,10 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     or server, "The author '{name}' does not have any contributor
     role. Defaults to AUTHOR." for every contributor, whose role then
     reads "Author". Everything is still imported ⚠ [A8](#a8).
+    On a press, the press's own exported file also lists, under
+    "Warnings encountered:" and "Publication", one line "Unknown
+    element sequence" for each book that belongs to a series; the
+    books are imported, each still in its series ⚠ [OMP5](#omp5).
     <sup>f</sup>
 11. **A failed import keeps nothing.** When the file does not match the
     format, or the import stops on an error part-way, the tab reads "The
@@ -275,6 +288,16 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     downloads the file, an .xml file holding the ticked submissions.
     Pressed with nothing ticked, the results tab opens empty, with no
     text and no button ⚠ [A12](#a12). <sup>h</sup> <sup>td10</sup>
+16a. **Files the export leaves out.** When a ticked submission has
+    files in a review round (its
+    ["Files for Review"](U26-review-stage-and-rounds.md#review-files)
+    and a reviewer's uploads) or a discussion, the results tab also
+    lists, under "Warnings encountered:" and "Submission", one line for
+    each: "The submission file {number} was skipped because it is
+    attached to a record that will not be imported, such as a review
+    assignment or discussion.", naming the file by its number alone.
+    The exported file still downloads, without those files.
+    <sup>h</sup>
 17. **One download.** Each export's file downloads once: a second press
     of the same "Download Exported File" downloads nothing and opens a
     blank white page (the browser's Back returns to the tool). Choosing
@@ -296,7 +319,8 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     [OMP2](#omp2). <sup>j</sup> <sup>td12</sup>
 20. **What the file carries.** Each submission's versions with their
     metadata, contributors, galleys (publication formats on a press)
-    and files, so that Rule 10 can rebuild it elsewhere. A title's
+    and files, apart from the files of Rule 16a, so that Rule 10 can
+    rebuild it elsewhere. A title's
     prefix comes back doubled: the imported copy of a submission whose
     "Prefix" (Publication › "Title & Abstract") is "The" is titled "The
     The …" ⚠ [A20](#a20). Which identifiers travel is described in
@@ -563,6 +587,10 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     - an unpublished article, whatever it read before (unpublishing one
       that reads "Marked registered" is the case to try); while
       unpublished it has no row on "Articles";
+    - an article that reads "Failed": it goes on reading "Failed", day
+      after day, until it is ticked and "Register" is pressed, which
+      returns with "Articles submitted successfully" and the row
+      "Submitted" (Rule 42) ⚠ [OJS11](#ojs11); <sup>f-ojs11</sup>
     - with "DOI Versioning", a version a later minor version replaced,
       which "Publications" no longer lists (Rule 45): of an article
       with 1.0 and 1.1 published, only 1.1 gets a deposit.
@@ -570,7 +598,12 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     <sup>f-a5</sup>
 44. **Needs Sync.** Publishing a new version of an article that reads
     "Registered" or "Marked registered" turns its status to "Needs
-    Sync", so that it is sent again. <sup>t</sup> <sup>td21</sup>
+    Sync", so that it is sent again. Unpublishing such an article does
+    the same, but nothing shows it yet: while the article is
+    unpublished it has no row on "Articles" (Rule 43), whichever status
+    the filter is set to, "Needs Sync" included. Published again, its
+    row reads "Needs Sync", and the next daily deposit sends it.
+    <sup>t</sup> <sup>td21</sup> <sup>x</sup>
 45. **The Publications list.** With "DOI Versioning" "Yes", the
     "Publications" tab lists, for each article, the latest published
     version of each major version: once 1.1 is published, the row's
@@ -597,9 +630,11 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
 - **Exports change nothing** in the journal; each makes a file
   (Rules 16, 18, 27, 31, 32, 40). <sup>h</sup>
 - **DOAJ statuses** change on "Mark registered" and "Register" and on
-  publishing (Rules 41–44). <sup>s</sup>
+  publishing and unpublishing (Rules 41–44). <sup>s</sup>
 - **DOAJ receives the articles' metadata** that "Register" and the daily
-  deposit send (Rules 42, 43). <sup>x</sup>
+  deposit send (Rules 42, 43). Unpublishing an article sends DOAJ
+  nothing, and the tool offers nothing that removes an article there
+  ⚠ [OJS12](#ojs12). <sup>x</sup>
 
 ## Settings that modify behavior
 
@@ -1219,6 +1254,15 @@ Left out of the scenarios above, by reason:
   - a Native XML file with a contributor that has no Country: the
     success text, then "The author {name} does not have a country."
     (Rule 12)
+  - a submission with one file under "Files for Review", exported:
+    under the success text, "Warnings encountered:", "Submission" and
+    the "…was skipped…" line for that file, and the exported file
+    still downloading (Rule 16a) {OJS OMP}
+  - an article that reads "Marked registered", unpublished and
+    published again: in scenario 8, no row for it on "Articles" while
+    it is unpublished, with the status filter on "Any Status" and on
+    "Needs Sync"; published again, its row reading "Needs Sync"
+    (Rule 44) {OJS}
 - **Nothing new to test**:
   - "Import" pressed with no file up, and with a file that is not XML
     (Rule 13)
@@ -1278,6 +1322,8 @@ Left out of the scenarios above, by reason:
   - A23 (a users file first imported on a 3.5.0 release, imported again
     after the update; Rule 24), a state only an old release's import
     leaves
+  - A25 (a file over the server's upload limit chosen on "Import";
+    Rule 8a)
   - OJS1 (the DOAJ list's issue window heading; Rule 36)
   - OJS2 (the "DOAJ Export Plugin" row kept on the Plugins list while
     "DOAJ Plugin" is off; Rule 3)
@@ -1292,9 +1338,15 @@ Left out of the scenarios above, by reason:
   - OJS9 (a deposit that cannot reach DOAJ staying "Submitted"; Rule 42;
     scenario 9 marks it)
   - OJS10 (the order of the "Export Issues" list; Rule 18)
+  - OJS11 (an article that reads "Failed", left out of the daily
+    deposit; Rule 43)
+  - OJS12 (an unpublished article that DOAJ still lists; Side effects
+    bullet 5)
   - OMP1 (the press's "Tab Delimited Content Import Plugin" link; Rule
     6; scenario 1 marks it)
   - OMP4 (the same tool run from the server's command line; Rule 6)
+  - OMP5 (a press's own file with books in a series, imported; Rule
+    10a)
 - **No seed**:
   - the PubMed file downloading, and the journal title it carries: the
     journal's name before "NLM Title Abbreviation" is saved and after it
@@ -1334,6 +1386,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A21](#a21) | A users import stops at the first user without a registration date, silently leaving the rest out | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A23](#a23) | A users file first imported on a 3.5.0 release and imported again after the update gives each ended role a second time | 🐞 | minor | — |
 | [A24](#a24) | Paging the export list, the dashboard or a preprint server's archive repeats some submissions and skips others | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
+| [A25](#a25) | A Native XML file over the server's upload limit is refused with "File size error." alone, and "Import" then does nothing | 🐞 | minor | — |
 | [OJS1](#ojs1) | DOAJ export list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | With "DOAJ Plugin" switched off, the Plugins list still shows its export tool as on | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Where NLM's site cannot be reached, every PubMed export fails with a "Validation errors:" page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1344,9 +1397,12 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OJS10](#ojs10) | A journal manager's "Export Issues" list shows the issues in no set order | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP1](#omp1) | Pressing "Tab Delimited Content Import Plugin" on a press's Tools page opens a blank page | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | A press's command-line CSV import stops with a fatal error, imports nothing and leaves an empty submission | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
+| [OMP5](#omp5) | Importing a press's own exported file lists "Unknown element sequence" for every book in a series | 🐞 | minor | — |
 | [A14](#a14) | "Export Users" with no row ticked ends on a blank page: the server fails | ❓ | minor · crash: server | — |
 | [A22](#a22) | "Export Users" leaves out an account whose only role starts on a later date | ❓ | minor | — |
 | [OJS8](#ojs8) | DOAJ "Register" checks nothing, "Validate XML before the export and registration." ticked or not | ❓ | minor | — |
+| [OJS11](#ojs11) | The daily DOAJ deposit never sends an article that reads "Failed" again | ❓ | minor | — |
+| [OJS12](#ojs12) | Unpublishing an article sends DOAJ nothing, and the DOAJ tool has nothing that removes an article there | ❓ | minor | — |
 | [OMP2](#omp2) | A press's Native XML export reminds the manager to fill in the press's ONIX details | ✅ | minor | — |
 | [OMP3](#omp3) | A press's import creates a series the file names but the press lacks | ✅ | minor | — |
 | [A2](#a2) | Retired: a users import keeps each role's masthead choice, and an export writes it | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
@@ -1612,6 +1668,22 @@ A manager who exports one page at a time gets files that leave some
 submissions out.
 Basis: probe, 2026-10-04. <sup>f-a24</sup>
 
+<a id="a25"></a>
+**A25 — A file over the upload limit is refused with "File size error." alone** · 🐞 · minor.
+A manager who chooses a file larger than the server's upload limit on
+the Native XML Plugin's "Import" tab should be told what the limit is.
+Instead the box reads "File size error.", with neither the limit nor
+the file's size, the button still reads "Upload File", and "Import"
+pressed then does nothing: no results tab and no message. The tool's
+own export passes PHP's default 2 MB (Rule 8a) long before a journal
+is large: a press's 100 books came to 9.6 MB and a journal's 100
+articles to 2.7 MB, both refused; eighteen books (already 1.7 MB)
+still went up. So the tool can refuse a file it has just made, and
+nothing on the page says why or what to do. The way round is to export
+fewer submissions per file, or to have the administrator raise the
+server's upload limit.
+Basis: probe, 2026-10-09. <sup>f-a25</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -1731,6 +1803,35 @@ after page once the journal has more than 25 issues. Seen on PostgreSQL;
 MySQL was not checked.
 Since: 2021-08-30 · Basis: probe, 2026-10-01. <sup>f-ojs10</sup>
 
+<a id="ojs11"></a>
+**OJS11 — The daily deposit never sends a "Failed" article again** · ❓ · minor.
+A journal that deposits automatically has an article DOAJ refused, its
+row reading "Failed". The daily deposit sends only articles that read
+"Not Deposited" or "Needs Sync", so this one stays "Failed", day after
+day, until someone opens the tool, ticks it and presses "Register".
+Question: should the daily deposit send a "Failed" article again? Lean:
+🐞 minor, an oversight: the Settings tab promises that deposits are
+automatic, and the developers' own note on the daily deposit says it
+takes failed articles too. Against it: a record DOAJ refuses for what
+it holds would be refused again every day until someone edits it.
+Basis: probe, 2026-10-09. <sup>f-ojs11</sup>
+
+<a id="ojs12"></a>
+**OJS12 — Unpublishing an article tells DOAJ nothing** · ❓ · minor.
+When a journal unpublishes an article that DOAJ lists, nothing is sent
+to DOAJ, and the tool offers "Register", "Export" and "Mark registered"
+but nothing that removes an article there. The article only turns to
+"Needs Sync", which shows once it is published again (Rule 44). DOAJ
+goes on listing an article the journal has withdrawn until someone
+removes it at DOAJ by hand.
+Question: should unpublishing an article ask DOAJ to remove its record?
+Lean: a gap, minor. For an article registered through the tool the app
+could ask: it keeps DOAJ's number for the record, and already sends a
+removal request just before it registers again an article whose DOI or
+address has changed. For an article that is only "Marked registered"
+it holds no such number and could do nothing.
+Basis: probe, 2026-10-09. <sup>f-ojs12</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1774,6 +1875,18 @@ delete it, and the monographs can be entered another way. Only the
 development line has the fault; no release does. Every file fails at its
 first row that names an author.
 Since: 2025-11-20 · Basis: probe, 2026-10-01. <sup>f-omp4</sup>
+
+<a id="omp5"></a>
+**OMP5 — A press's own exported file is imported with "Unknown element sequence" warnings** · 🐞 · minor.
+Importing a file the press itself exported should read as a plain
+success. Instead the success text is followed by "Warnings
+encountered:", "Publication" and one line "Unknown element sequence"
+for each book that belongs to a series. Nothing is lost: the books are
+imported, each still in its series. But the lines name no book and
+nothing the manager could correct, and the manager cannot tell them
+from a real warning. Every press whose books belong to series gets
+them at each import of its own files.
+Basis: probe, 2026-10-09. <sup>f-omp5</sup>
 
 ### Retired
 
@@ -1924,7 +2037,9 @@ tab order's first stop is the "Import" button, the "Upload File" button
 carries `tabindex="-1"` (A6); leaving the page with a file up shows no
 browser question and the box is empty on return. OJS and OPS also print
 "Required fields are marked with an asterisk: *" under the form, with
-no field marked.
+no field marked. Live-probed 2026-10-09 (Rules 8, 8a), three apps: a
+file over the server's upload limit is refused in the box and never
+sent (note f-a25); the files of 2026-09-27 were all far under it.
 
 <a id="fn-f"></a>
 **f** — `PKPNativeImportExportPlugin::display()`: `importBounce` (empty
@@ -1985,7 +2100,17 @@ publication's `id` as required but missing
 roles, and `958592a159`, pkp/pkp-lib#10669, publication versions). The
 guide: "The Native XML format changes with each major version."
 (https://docs.pkp.sfu.ca/admin-guide/en/data-import-and-export, read
-2026-10-01).
+2026-10-01). Live-probed 2026-10-09 (Rules 9, 10, 10a), OMP and OJS
+main, the default dataset as `rvaca`, one run per app, each import
+from a freshly opened tool page: the press's own file of its 18 books
+imported five times and a file of ten books once, the journal's own
+file of its 20 articles four times and a file of ten once; each added
+one tab ("Results", "Import Results") with the success text, the
+heading "Submission" and one line per item, and exactly that many
+submissions. Every journal import listed "Errors occured:",
+"Publication" and the issue-identification line for each article in
+no issue (A8); every press import listed the series warning of note
+f-omp5.
 
 <a id="fn-g"></a>
 **g** — The export list is `APP\components\listPanels\SubmissionsListPanel`
@@ -2044,7 +2169,26 @@ downloaded a file with a new name. A published submission with a second
 version exported both `<publication>` versions, and a fresh journal
 showed both after import. The export list and Dashboard read the same
 after every export. Ticks stay after an export, so a second export also
-carries them.
+carries them. The files left out (Rule 16a):
+`SubmissionNativeXmlFilter` (lib/pkp, the three apps) skips a file
+whose stage is a discussion's (`SUBMISSION_FILE_QUERY`), a note's
+(`SUBMISSION_FILE_NOTE`) or a review round's
+(`SUBMISSION_FILE_REVIEW_FILE`, `…_REVIEW_ATTACHMENT`,
+`…_REVIEW_REVISION`, `…_INTERNAL_REVIEW_FILE`,
+`…_INTERNAL_REVIEW_REVISION`) and adds the warning
+`plugins.importexport.native.error.submissionFileSkipped` with the
+file's id; `resultsExport.tpl` prints warnings through
+`innerResults.tpl` (note f). Live-probed 2026-10-09 (Rule 16a), OJS,
+OMP and OPS main, the default dataset as `rvaca`, one run per app:
+every export of the drive listed the lines under "Download Exported
+File", on OJS (three exports; 18 lines for the dataset's 20 articles,
+"The submission file 45 was skipped…") and on OMP (three exports; 61
+lines for its 18 books), and each file downloaded.
+OPS's export of its 19 preprints read only the success text and the
+button: its dataset holds no such file. Which of a submission's files
+each number stood for was not read on screen. The scratch submissions
+of 2026-09-27 carried no such files, so those exports showed no
+warning.
 
 <a id="fn-i"></a>
 **i** — OJS only: `exportIssues-tab` loads
@@ -2458,7 +2602,22 @@ versioning the rules follow minor and major versions.
 current version. Live-probed 2026-09-27 (Rule 44), OJS: a "Marked
 registered" article given a published version 1.1 read "Needs Sync";
 a "Not Deposited" article given a published 1.1 stayed "Not
-Deposited".
+Deposited". Live-probed 2026-10-09 (Rule 44, the unpublish), OJS main,
+two runs, each on a scratch journal with a key saved and the
+automatic-deposit box ticked, the daily task run by hand (note s): a
+"Marked registered" article, unpublished, had no row on "Articles"
+under "Any Status" or any other choice of the status list ("Needs
+Sync" read "No Items"), while its stored status was already `stale`;
+two runs of the task queued nothing for it. Published again, its row
+read "Needs Sync"; the next run of the task queued one deposit for it
+and the row read "Submitted" (the deposit failed at connection, as
+OJS9 says). A "Not Deposited" article, unpublished, had no row either
+and no stored status. OJS stable-3_5_0, two runs: the unpublished
+article is off the list too, and its stored status stays
+`markedRegistered`; the status list there reads "Any Status", "Not
+Deposited", "Marked registered", "Registered", with no "Needs Sync".
+An article that reads "Registered": note x. Kept scripts:
+`shared/playwright/checks/U63/I09/doaj.js`, `doaj35.js`.
 
 <a id="fn-u"></a>
 **u** — `DOAJExportPlugin::registerObject()` catches only Guzzle's
@@ -2507,7 +2666,18 @@ streams `pubmed-{date}-articles|issues-{contextId}.xml`. DOAJ:
 an error status `error` with DOAJ's body, kept as the message the
 "Failed" link's window shows (`getStatusActions()`,
 `verb=statusMessage`); the deposit is a POST of the article's JSON to
-DOAJ's API with the journal's key.
+DOAJ's API with the journal's key. The "Failed" row was read on screen
+2026-10-09 (OJS main, two runs) from the stored state a refused
+deposit leaves, written into a scratch journal's database
+(`doaj::status` = `error` with a `doaj_failedMsg`); DOAJ's own answer
+is still unseen. The row's "Status" read "Failed", a link; pressed, it
+opened a window headed "Error" holding the stored message as plain
+text (`{"error": "…"} (400 Bad Request)`), with "Close" and nothing
+else; the status list's "Error" choice listed the row. Rule 44 for an
+article that reads "Registered", and what DOAJ is or is not sent when
+such an article is unpublished (OJS12): `handlePublicationPublishing()`
+and `handlePublicationUnpublishing()` take `registered` exactly as
+they take `markedRegistered`, which was driven (note t).
 
 <a id="fn-sc"></a>
 **sc** — Scenarios. Scenarios 1 to 4 run on OJS, OMP and OPS, 5 and 6
@@ -3133,6 +3303,34 @@ The A11 issue report names this a separate fault and leaves it out
 ([docs/issues/U63-A11-export-list-selection-stops-at-page.md](../issues/U63-A11-export-list-selection-stops-at-page.md), Evidence).
 Issue report: [pkp-e2e#919](https://github.com/jardakotesovec/pkp-e2e/issues/919) ([docs/issues/U63-A24-export-list-repeats-submissions-across-pages.md](../issues/U63-A24-export-list-repeats-submissions-across-pages.md)).
 
+<a id="fn-f-a25"></a>
+**f-a25** — The page hands PHP's `upload_max_filesize`
+(`UPLOAD_MAX_FILESIZE`, `PKPTemplateManager`) to the upload box as its
+`max_file_size` (lib/pkp `js/controllers/UploaderHandler.js`); the
+upload library refuses a larger file in the browser with its own words,
+"File size error.", shown in the box's `.pkpUploaderError`, and sends
+no upload request, so the form's `temporaryFileId` stays empty and
+"Import" posts `importBounce`, which answers 200 with `status: false`
+(note f). Live-probed 2026-10-09, OJS, OMP and OPS main, the default
+dataset as `rvaca`, PHP at `upload_max_filesize=2M` and
+`post_max_size=8M` (its defaults), one run per app, every file chosen
+on a freshly opened tool page. Refused, eight times: plain-text files
+of 3.0 MB and of 9.0 MB on the three apps, the press's own export of
+100 books (9.58 MB; "Select All" on a list of 118, "Export
+Submissions") and the journal's of 100 articles (2.68 MB); each time
+the box read "File size error." with "Upload File", "Import" added no
+tab, no notice and no window, the count of submissions did not change,
+and the server log held nothing. Taken, each with its name and "Change
+File": plain text of 1.0 MB (then the failed import of Rule 13), the
+press's files of ten books (1.02 MB) and of its 18 books (1.71 MB),
+the journal's of ten articles (0.25 MB) and of its 20 (0.53 MB), all
+imported. Whether a file of 100 submissions that stays under the limit
+imports was not driven; 18 books with their files took 29 s to import
+on an install whose requests end at 120 s. The same box serves the
+Users XML Plugin's "File" (Rule 22) and the other screens' "Upload
+File" boxes: read in the code, driven only here. Kept script:
+`shared/playwright/checks/U63/I09/native.js`.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`
 `issue`: `AjaxModal(…BackIssueGridHandler/editIssue…,
@@ -3237,6 +3435,44 @@ creation nor any column's order ("Vol. 21 No. 3 (2005)", "Vol. 28 No.
 same, `loadData()` identical there.
 Issue report: [pkp-e2e#271](https://github.com/jardakotesovec/pkp-e2e/issues/271) ([docs/issues/U63-OJS10-export-issues-list-no-order.md](../issues/U63-OJS10-export-issues-list-no-order.md)).
 
+<a id="fn-f-ojs11"></a>
+**f-ojs11** — `DOAJInfoSender` deposits `getAllDepositableArticles()`
+(`getAllDepositablePublications()` with DOI versioning; ojs
+`classes/plugins/PubObjectsExportPlugin.php`), whose docblocks read
+"those not yet registered, stale, or with status error", while
+`getExportable()` with `EXPORT_STATUS_DEPOSITABLE` takes only no
+status and `stale` (note f-a5), before pkp/ojs#5907 and after it. The
+Settings tab's promise is the tick box's label (Fields). Live-probed
+2026-10-09, OJS main (`6d5b793c4e`), two runs, each on a scratch
+journal with a key saved and the automatic-deposit box ticked, the
+fleet's only depositing journal, the task run by hand (note s) with
+the queued jobs and stored statuses read beside the "Articles" list.
+The "Failed" article is the stored state of note x, written into the
+database, since no test install reaches DOAJ. Two runs of the task,
+standing for two days: nothing queued for it either time, and its row
+read "Failed" after each, while the journal's "Not Deposited" article
+got its deposit on the first. Then the row ticked and "Register"
+pressed: "Articles submitted successfully", the row "Submitted", one
+deposit queued, which failed at connection (OJS9). Kept script:
+`shared/playwright/checks/U63/I09/doaj.js`.
+
+<a id="fn-f-ojs12"></a>
+**f-ojs12** — `handlePublicationUnpublishing()`
+(`PubObjectsExportGenericPlugin`, note t) only marks the status;
+`DOAJExportPlugin::depositXML()` dispatches `jobs/DOAJDelete` only
+when the article's stored DOAJ id comes with a DOI or URL that differs
+from the one being deposited (note s), and `getExportActions()` offers
+`deposit`, `export` and `markRegistered` (note r). Live-probed
+2026-10-09, OJS main (`6d5b793c4e`), two runs, the drive of note t:
+under the list "Register", "Export" and "Mark registered" and nothing
+else, a row linking only its title and its issue; after the "Marked
+registered" article was unpublished, the only DOAJ job that ran was
+the day's own deposit of another article. For an article that reads
+"Registered", the one whose DOAJ id the app holds: note x. OJS
+stable-3_5_0, two runs: the same three
+buttons, and its DOAJ plugin has no removal request at all (code). The
+question was left out of the retired A5's issue report.
+
 <a id="fn-f-omp1"></a>
 **f-omp1** — Note v. Seen 2026-09-27 on OMP (Plugins management claim
 check): the "Import/Export Plugins" row of the CSV tool has no link for
@@ -3282,6 +3518,25 @@ without publishing its version ("Status: Unscheduled"), and on main
 moves a submission to; 3.5 counts it. The report leaves this to the
 same change (its "What goes with it").
 Issue report: [pkp-e2e#279](https://github.com/jardakotesovec/pkp-e2e/issues/279) ([docs/issues/U63-OMP4-command-line-csv-import-empty-submission.md](../issues/U63-OMP4-command-line-csv-import-empty-submission.md)).
+
+<a id="fn-f-omp5"></a>
+**f-omp5** — OMP's export writes a `<sequence>` element inside each
+book's `<series>` block (`omp/plugins/importexport/native/filter/PublicationNativeXmlFilter.php`,
+the series' own place among the press's series), and the import's
+series reader, `NativeXmlPublicationFilter::parseSeries()`, does not
+know it: its default branch adds the warning
+`plugins.importexport.common.error.unknownElement` ("Unknown element
+{$param}"). Live-probed 2026-10-09, OMP main (`57a9235110`), the
+default dataset as `rvaca`, one run, seven imports, each from a
+freshly opened tool page (note f): the press's file of its 18 books,
+six of them in a series, five times, each "Results" tab ending
+"Warnings encountered:", "Publication" and six lines "Unknown element
+sequence"; a file of ten books, two lines. Every book was imported,
+and the copies kept their series (32 of the 100 copies, read in the
+database). Each such import also wrote "PHP Warning: Undefined
+property: stdClass::$section_id" to the server log
+(`omp/classes/section/DAO.php`, `getByPath()`), with nothing seen on
+screen. OJS and OPS have no series. Kept script: `shared/playwright/checks/U63/I09/native.js`.
 
 ## Reference — entry points & surfaces
 
