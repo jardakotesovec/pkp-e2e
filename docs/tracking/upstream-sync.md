@@ -20,6 +20,8 @@ _Suspicions another session met and handed over, one line each; the
 upstream session works them (MAINTENANCE upstream session step 3) and
 deletes each once it is a report, a register entry or dismissed._
 
+- 2026-10-09 (housekeeping, U44 claim check I09): on OMP `main` a publication format's "Edit" window and "Edit a file" close without the "unsaved changes" question when a URN suffix was typed on their "Identifiers" tab, and the browser's leave-page box follows on the next reload; on `stable-3_5_0` both windows ask. A change between 3.5 and `main`, not traced to a commit: `.reports/U44/cc-I09.md` "For other specs" (snapshots `p00-format-suffix-close-*`, `p00-file-suffix-close-*`, runs r1, r2, r35a, r35b), kept script `shared/playwright/checks/U44/I09/i09.js`.
+
 
 ## Sync log
 
