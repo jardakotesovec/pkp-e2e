@@ -101,7 +101,7 @@ The window's fields, in screen order: <sup>i</sup>
 | "Section archive Description" {OPS} | No | Formatted text, per language as the title. Effect: Rule 16. <sup>i</sup> <sup>td1</sup> |
 | "Section Policy" | No | Formatted text, per language as the title. Effect: Settings bullet 3. <sup>i</sup> <sup>td1</sup> |
 | "Word Count", with the help "Limit abstract word counts for this section (0 for no limit)" | No | A number of words. The box takes up to 80 characters and saves any text: what is not a whole number is saved as 0, no limit, without a message, and a negative number is saved as typed ⚠ [A2](#a2). The box is empty (no limit) on a new section and on a new journal's first section; a "Save" with it empty stores 0, and it reads 0 from then on. Effect: Settings bullet 4. <sup>i</sup> <sup>td3</sup> |
-| "Review Form" {OJS} | No | A list whose first entry is "None / Free Form Review", followed by the journal's active review forms; the field is absent while the journal has no active review form. Effect: Settings bullet 6. <sup>j</sup> |
+| "Review Form" {OJS} | No | A list whose first entry is "None / Free Form Review", followed by the journal's active review forms; the field is absent while the journal has no active review form. A form made inactive (the "Active" box of its row on Settings › Workflow › "Review" › "Review Forms") leaves the list. The "Edit" window of a section that had that form chosen then shows "None / Free Form Review" chosen, and the section's next "Save", even with nothing changed, drops its form: the form does not come back when it is made active again ⚠ [A11](#a11). Effect: Settings bullet 6. <sup>j</sup> |
 | "Section Options": tick boxes "Mark this section as inactive and do not allow new submissions to be made to it.", "Will not be peer-reviewed" {OJS}, "Do not require abstracts", "Will not be included in the indexing of the journal" ("…of the server" {OPS}), "Items can only be submitted by Editors and Section Editors." ("Items can only be submitted by Managers and Moderators." {OPS}), "Omit the title of this section from issues' table of contents." {OJS}, "Omit author names for section items from issues' table of contents." {OJS} | No | All unticked on a new section and on a new journal's first section. Ticking the inactive box on the journal's last active section is refused (Rule 6). Effects: Settings bullets 1, 2, 5, 7–10. <sup>i</sup> <sup>k</sup> |
 | "Identify items published in this section as a(n)" ("Identify items posted in this section as a(n)" {OPS}), with the help "(For example, "Peer-reviewed Article", "Non-refereed Book Review", "Invited Commentary", etc.)" ("(For example etc.)" ⚠ [OPS2](#ops2)) | No | Per language as the title. Effect: Settings bullet 11. <sup>i</sup> |
 | "Editorial Assignments", with "Select the editorial users who should be assigned automatically to all new submissions to this section." | No | One tick box "Assign {name} as {role}" per user and per role that user holds, for every role of the manager, Section Editor or assistant level that works on the first stage of the workflow, as the role's stages are ticked on Users & Roles › "Roles": on a journal the Submission stage, on a preprint server its one stage. By default a journal offers the Journal editor, Section editor, Guest editor and Funding coordinator roles; the Journal manager's role has no stage ticked and the Production editor's works from Copyediting on, so neither is offered. A preprint server offers the Preprint Server manager and Moderator roles. A user holding two such roles has two boxes. With nobody in an offered role, the heading and its sentence show with no box under them. Effect: Rule 8. <sup>l</sup> <sup>td4</sup> |
@@ -113,7 +113,7 @@ a journal. Fields in screen order: <sup>m</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Cover Image" | No | An uploader. Once saved with an image, the window shows the image with a "Delete" link, which asks, under the heading "Confirm", "Are you sure you wish to delete this item? This action cannot be undone." and on "OK" removes it at once. The uploader offers JPG, PNG and SVG files; with an SVG uploaded, "Save" keeps nothing and shows no message ⚠ [OMP3](#omp3). <sup>m</sup> <sup>td5</sup> |
+| "Cover Image" | No | An uploader. Once saved with an image, the window shows the image with a "Delete" link, which asks, under the heading "Confirm", "Are you sure you wish to delete this item? This action cannot be undone." and on "OK" removes it at once. The uploader offers JPG, PNG and SVG files; with an SVG uploaded, "Save" keeps nothing and shows no message ⚠ [OMP3](#omp3). A PNG whose picture data is damaged uploads like any picture, and "Save" then never answers: the window stays open with "Save" greyed out, the series' other changes are saved, and a cover the series already had turns into a broken picture ⚠ [OMP10](#omp10). <sup>m</sup> <sup>td5</sup> |
 | "Prefix", with the help "Examples: A, The" | No | Per language. Shown before the title wherever the series is named. <sup>m</sup> |
 | "Title" | Yes | Per language; the press's primary language required. Empty: "This field is required."; spaces only: a notice with a raw code [A6](#a6). <sup>m</sup> <sup>td2</sup> |
 | "Subtitle" | No | Per language, at most 255 characters. <sup>m</sup> |
@@ -123,7 +123,7 @@ a journal. Fields in screen order: <sup>m</sup>
 | "Order of monographs", with "Choose how to order books in this series." | No | The list "Title (A-Z)", "Title (Z-A)", "Publication date (oldest first)", "Publication date (newest first)", "Series position (lowest first)", "Series position (highest first)". A new series arrives on "Title (A-Z)" and keeps it unless it is changed. Effect: Settings bullet 15. <sup>m</sup> <sup>td5</sup> |
 | "Editorial Assignments", with "Select the editorial users who should be assigned automatically to all new submissions to this series." | No | As on a journal. By default a press offers the Press editor, Series editor and Funding coordinator roles; the Press manager's role has no stage ticked and is not offered. Effect: Rule 8. <sup>l</sup> <sup>td4</sup> |
 | "Categories" | No | One tick box per category of the press, a sub-category named by its line of parents ("Social Sciences > Anthropology"). The boxes stand in the alphabetical order of each category's own name, so a sub-category can come before its parent ("Social Sciences > Anthropology" before "Applied Science" and "Social Sciences"). Absent while the press has no category. Effect: the table's "Categories" column only ⚠ [OMP4](#omp4). <sup>m</sup> <sup>td1</sup> |
-| "Path", with "The series's URL will be: {address}" | Yes | At most 32 characters. Letters, digits, ".", "/", "_" and "-" are accepted; anything else is refused with "The series path must consist of only letters and numbers." ⚠ [OMP2](#omp2); an empty box gets "This field is required." under it; a path another series of the press has: "The series path already exists. Please enter a unique path." The help's address always ends in the word "Path", never in the path typed or saved ⚠ [OMP8](#omp8). <sup>m</sup> <sup>td6</sup> |
+| "Path", with "The series's URL will be: {address}" | Yes | At most 32 characters. Letters, digits, ".", "/", "_" and "-" are accepted; anything else is refused with "The series path must consist of only letters and numbers." ⚠ [OMP2](#omp2); an empty box gets "This field is required." under it; a path another series of the press has: "The series path already exists. Please enter a unique path." A path holding "/" is saved as typed, but the series then has no page of its own (Rule 10c). The help's address always ends in the word "Path", never in the path typed or saved ⚠ [OMP8](#omp8). <sup>m</sup> <sup>td6</sup> <sup>td17</sup> |
 
 ## Rules & state
 
@@ -263,13 +263,24 @@ a journal. Fields in screen order: <sup>m</sup>
       reaches that page from the series' name, a link under the heading
       "Series" on the page of any of its books. After the path is
       changed, the page answers at the new address, and the old address
-      opens the Catalog with no message. <sup>td5</sup>
+      opens the Catalog with no message. None of this holds for a path
+      with "/" in it (Rule 10c). <sup>td5</sup>
     - 10b. The page lists the series' published books ("3 Titles") and
       shows the series' cover image. The series' name, description and
       ISSNs are meant to show there too, and its "Order of monographs" to
       order the books. Today the heading is empty, neither the
       description nor the ISSNs show, and the books come newest first
       whatever the order says ⚠ [OMP9](#omp9). <sup>td5</sup>
+    - 10c. A series whose path holds "/" has no page of its own. Its
+      address, and with it the "Series" link on its books' pages, opens
+      the page of the series whose path is the part before the first
+      "/": with the path "history/maps", a reader gets the books of the
+      series whose path is "history", and nothing says so. When no
+      series has that first part, the address opens the Catalog with no
+      message. With a number after the "/" ("history/2"), it opens that
+      page of the other series' list of books. A category's path with
+      "/" fails the same way
+      ⚠ [→ Categories A8](U16-categories.md#a8). <sup>td17</sup>
 <a id="policy-display"></a>
 11. **Where a section's policy shows.** A section's "Section Policy" is
     shown under the "Section" choice of "Make a Submission" once the
@@ -455,8 +466,11 @@ on Settings › Journal › "Sections", a row's "Edit" (Settings › Press ›
    carries no "Description" (*[OAI-PMH](U19-oai-pmh.md)*). <sup>k</sup> <sup>f-ops6</sup>
 6. **"Review Form"** {OJS}. Default "None / Free Form Review". A form
    chosen is preselected in Add Reviewer for submissions in the section
-   ([→ review forms](U29-review-setup-and-review-forms.md#forms)). A press
-   has no such field. <sup>j</sup>
+   ([→ review forms](U29-review-setup-and-review-forms.md#forms)). While
+   the chosen form is inactive, Add Reviewer does not preselect it. Once
+   the form is active again it is preselected as before, unless the
+   section was saved in between [A11](#a11). A press has no such field.
+   <sup>j</sup>
 7. **"Will not be peer-reviewed"** {OJS}. Default unticked. Ticked: meant
    to keep the Publication Facts Label off the section's articles; the
    label never shows on any article at present
@@ -939,6 +953,10 @@ Left out of the scenarios above, by reason:
     of 25, as walked), paged with "Next" to the end: each preprint on
     exactly one page (Rule 14d, [OPS7](#ops7)): the guard the issue
     report proposes
+  - {OJS} a section's default review form made inactive, Add Reviewer
+    then not preselecting it for the section's submissions, and
+    preselecting it again once it is active, the section not saved in
+    between (Settings bullet 6)
 - **Rarely met**:
   - {OJS} "Omit author names for section items from issues' table of
     contents." ticked, the issue's table of contents without the section's
@@ -982,6 +1000,8 @@ Left out of the scenarios above, by reason:
     section links kept; Rules 12d, 13b)
   - A2 (a negative "Word Count" saved, and text saved as 0; Fields, "Word
     Count"; Settings bullet 4)
+  - A11 (a section saved while its default review form is inactive
+    losing the default; Fields, "Review Form"; Settings bullet 6)
   - A3 ("Will not be included in the indexing of the journal" ticked,
     with no effect; Settings bullet 8)
   - A4, A9, A10 and A5 (the programming interface's two failing filters,
@@ -993,6 +1013,8 @@ Left out of the scenarios above, by reason:
   - OMP5 (the series' activate and deactivate windows asking about a
     "section"; Rule 5; scenario 7 passes it)
   - OMP3 (an SVG cover dropped without a message; Fields, "Cover Image")
+  - OMP10 (a damaged PNG as a series' cover, "Save" never answering;
+    Fields, "Cover Image")
   - OMP7 (the ISSN paragraph's "which identifying"; Fields, "ISSN")
   - OMP8 (the path help ending in "Path"; Fields, "Path")
   - OMP4 (a series' "Categories" boxes feeding only the table's column;
@@ -1049,6 +1071,9 @@ Left out of the scenarios above, by reason:
     the Catalog once the path is changed, its cover on that page, and its
     name and ISSNs under "Series" on its books' pages (Rules 10, 10a, 10b;
     Settings bullet 15; *Catalog browse*)
+  - {OMP} a series' "Path" holding "/", its address and its books'
+    "Series" link opening another series' page or the Catalog (Rule 10c;
+    *[Categories](U16-categories.md)*, its A8)
   - {OPS} the trail and page links of "Archives" and a section's page, and
     "Items per page" at another value (Rules 14b, 16a; Settings bullet 17;
     *[Navigation menus & site
@@ -1067,12 +1092,14 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | With "Disable Submissions" ticked, the "Submissions" page keeps its per-section submission links | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | The REST API's sections endpoint refuses a missing or another journal's section with a raw message code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | The sections interface fails with a server error on a section asked for by a word, and on the site's address | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
+| [A11](#a11) | A section saved while its default review form is inactive loses the default, with "Your changes have been saved." and no word about it | 🐞 | minor | — |
 | [OMP2](#omp2) | The series path message says "only letters and numbers" while ".", "/", "_" and "-" are accepted | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | A series "Save" with an SVG cover chosen saves nothing, not even the other changes, and shows no message | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP5](#omp5) | A press manager deactivating or reactivating a series is asked about a "section" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP7](#omp7) | The ISSN help in a press's series window reads "which identifying" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP8](#omp8) | The help under a series' "Path" shows an address ending in the word "Path", never the series' own | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP9](#omp9) | A series' public page shows no name, description or ISSN, and lists the books newest first whatever the series' order | 🐞 | user-visible | — |
+| [OMP10](#omp10) | A series "Save" with a damaged PNG as its cover never answers; the other changes are saved, and a cover the series had turns into a broken picture | 🐞 | minor · crash: server | — |
 | [OPS1](#ops1) | A preprint server with nothing posted shows a blank "Archives" page, with no message | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS2](#ops2) | Preprint server sections: the "Identify items posted in this section as a(n)" box has no examples and no effect | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS5](#ops5) | A typed "Archives" page number past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1222,6 +1249,25 @@ where the other endpoints that need a journal answer "The requested
 resource was not found."; other roles there are refused by role.
 Basis: probe, 2026-10-02. <sup>f-a10</sup>
 
+<a id="a11"></a>
+**A11 — A section saved while its default review form is inactive loses the default** · 🐞 · minor.
+A journal makes a review form inactive while a section has it as its
+"Review Form". The section's "Edit" window then lists the other active
+forms with "None / Free Form Review" chosen (it has no "Review Form"
+field at all when the journal has no other active form), and nothing
+says the section has a default that is not shown. "Save", even with
+nothing changed, answers "Your changes have been saved." and the default
+is gone. When the form is made active again, the section's "Edit" still
+reads "None / Free Form Review" and Add Reviewer preselects no form for
+the section's submissions, where a section not saved in between gets its
+form back in both places. A save that changed nothing should change
+nothing. Only the preselection is lost: the form can be chosen again in
+the section's window, and by hand in Add Reviewer. A reviewer's "Edit"
+window drops an inactive form from a review request in the same way
+(*[Review setup & review forms](U29-review-setup-and-review-forms.md#a9)*
+A9).
+Basis: probe, 2026-10-09. <sup>f-a11</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1330,6 +1376,22 @@ newest first whatever the series' "Order of monographs" says. The page is
 broke in an August 2026 change to how a press loads its series: a
 regression, not a choice.
 Since: 2026-08-26 (one month) · Basis: probe, 2026-09-25; its start, commit. <sup>f-omp9</sup>
+
+<a id="omp10"></a>
+**OMP10 — A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved** · 🐞 · minor · crash: server.
+A manager editing a series picks, as its "Cover Image", a PNG whose
+picture data is damaged. It uploads like any picture and is listed by
+its name. "Save" then never answers: the application fails on the
+server, and the window stays open with "Save" greyed out and the
+progress wheel turning beside "Cancel", with no message anywhere;
+"Cancel" closes it. The save has stopped halfway. The window's other
+changes are stored (a subtitle typed in the same save is there after a
+reload), and a cover the series already had turns into a broken picture,
+in the window's "Current Image" and on the series' public page, until a
+sound picture is uploaded and saved. A series with no cover stays
+without one. The manager should get either the cover or a message that
+the picture cannot be read, with nothing half saved.
+Basis: probe, 2026-10-09. <sup>f-omp10</sup>
 
 ### OPS
 
@@ -1494,6 +1556,9 @@ checked by requests typed into a signed-in browser, as each role
 <a id="fn-td6"></a>
 **td6** — Live-probed 2026-09-25 (Fields "ISSN", "Path"; OMP2, OMP7, OMP8), OMP: "1234" gave "Please enter a valid ISSN.", "0378-5955" in both boxes "Online and print ISSN must not be the same.", both as notices; each ISSN box kept 16 of 17 characters; the link "ISSN International Centre" went to https://www.issn.org, and the paragraph read "…an eight-digit number which identifying periodical publications…". "Path" kept 32 of 33 characters; "new-series.v2" and "a_b/c.D-1" saved as typed; "new series" gave the notice "The series path must consist of only letters and numbers."; a path in use "The series path already exists. Please enter a unique path."; an empty box "This field is required." under it, with nothing sent. The help read "The series's URL will be: http://…/index.php/{press}/en/catalog/series/Path" while "typed-path" was typed and on the saved "new-series.v2".
 
+<a id="fn-td17"></a>
+**td17** — OMP `CatalogHandler::series()` reads the first part of the address after `catalog/series/` as the path (`$args[0]`) and the second as a page number (`(int) $args[1]`), and redirects to `catalog` when `Repo::section()->getByPath()` finds no series; the book page prints the link through the router, which encodes the "/" (`catalog/series/u17b%2Fdeep`), and the address is read the same way. Live-probed 2026-10-09 (Fields "Path"; Rules 10a, 10c), OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`), two runs, signed out and as Press Manager, the same for both. On scratch presses with the series "I09 Base" (path `u17b`), "I09 Slashed" and "I09 Lone", one published book in each: "Edit" saved "u17b/deep" as the path of "I09 Slashed" and "u17x/lone" as that of "I09 Lone", and "Add Series" a fourth series, "I09 Paged", with "u17b/2" (each with "Your changes have been saved.", the path reopening as typed after a reload). `catalog/series/u17b/deep` showed "1 Titles" and "I09 Base Book", as `catalog/series/u17b` did; `catalog/series/u17x/lone` opened the page headed "Catalog" with no message, as an address no series has did; `catalog/series/u17b/2` showed "1 Titles" above "No titles have been published yet.". On the page of "I09 Slashed Book" the line "Series I09 Slashed" linked `catalog/series/u17b%2Fdeep`, which showed "I09 Base Book"; "I09 Lone Book" linked `catalog/series/u17x%2Flone`, which landed on "Catalog"; the control, "I09 Base Book" › "I09 Base", opened `catalog/series/u17b` with its own book. On the default dataset, as `rvaca` and then signed out: a series added with the path "psy/u17i09r1" opened the page of "Psychology" (path `psy`; "1 Titles", "From Bricks to Brains: The Embodied Cognitive Science of LEGO Robots"), one added with "u17i09r1/nowhere" the Catalog. The series page's heading is empty on `main` (OMP9), so the pages were told apart by their books. No series with "/" in its path opened at any address; no request failed and no page script failed. `stable-3_5_0` (omp `ddc6abf5a9`), four runs on scratch presses, the addresses only (no book could be published there, so the book pages' link was not driven): the same, `catalog/series/u17b/deep` headed "I09 Base". Kept script: `shared/playwright/checks/U17/I09/i09.js` (row L17).
+
 <a id="fn-n"></a>
 **n** — New context: OJS `ContextService::afterAddContext()` creates `section.default.title` "Articles", `section.default.abbrev` "ART", `section.default.policy` "Section default policy"; OPS the same with "Preprints", "PRE" and `section.default.path` "preprints"; OMP's `ContextService` creates no series. The seed renames the first section (`scenarios.md`, bootstrap `sections[]`). Live-probed 2026-09-25 (Rule 1), all three apps: a new journal listed "Articles" ("ART", "Section default policy"), a new server "Preprints" ("PRE", path "preprints", the same policy), a new press "No Items"; inactive rows stayed listed.
 
@@ -1612,6 +1677,9 @@ Issue report: [pkp-e2e#482](https://github.com/jardakotesovec/pkp-e2e/issues/482
 Issue report for the site's address: [pkp-e2e#479](https://github.com/jardakotesovec/pkp-e2e/issues/479) ([docs/issues/U17-A10-sections-interface-site-address-server-error.md](../issues/U17-A10-sections-interface-site-address-server-error.md)).
 Issue report for the word as id, joined to the API-wide unknown-route fault: [pkp-e2e#373](https://github.com/jardakotesovec/pkp-e2e/issues/373) ([docs/issues/U09-A18-picture-over-request-limit-server-error.md](../issues/U09-A18-picture-over-request-limit-server-error.md)).
 
+<a id="fn-f-a11"></a>
+**f-a11** — fn j: OJS `SectionForm::fetch()` offers the journal's active forms only (`ReviewFormDAO::getActiveByAssocId()`), so the window of a section whose stored form is inactive posts `reviewFormId` empty, or not at all when the select is not rendered, and `SectionForm::execute()` stores what was posted (`setReviewFormId(null)`); `ReviewerForm::initData()` preselects the section's stored form, which Add Reviewer's own list of active forms leaves out while the form is inactive. Live-probed 2026-10-09 (Fields "Review Form"; Settings bullet 6), OJS `main` (ojs `6d5b793c4e`, lib/pkp `d1bc3a9ecc`) and `stable-3_5_0` (ojs `c6e2c3a879`), two runs on each, the same in all four, on scratch journals as the journal's manager: one journal with the active forms "I09 Form A" and "I09 Form B", one with "I09 Form A" alone, each with the sections "Articles" and "Reviews", both set to "I09 Form A", and a submission at Review in each section. Baseline: "Articles" › "Edit" reopened on "I09 Form A", and Add Reviewer, "Select Reviewer" on Rex Reviewer, arrived on it. "I09 Form A" unticked under "Active" ("Are you sure you wish to deactivate this review form? It will no longer be available for new review assignments.", "OK"): "Articles" › "Edit" listed "None / Free Form Review" (chosen) and "I09 Form B" in the first journal and had no "Review Form" field in the second; "Save" with nothing changed answered 200, closed the window and showed "Your changes have been saved."; Add Reviewer arrived on "None / Free Form Review" for both sections' submissions (in the second journal its window had no "Review Form" list). The form ticked "Active" again ("Are you sure you wish to activate this review form? Once it's assigned to a review you will no longer be able to deactivate it.", "OK"): "Articles" › "Edit" read "None / Free Form Review" with "I09 Form A" back in the list, and Add Reviewer arrived on "None / Free Form Review" for its submission, "I09 Form A" offered; "Reviews", never saved in between, read "I09 Form A" in both places. `sections.review_form_id` of "Articles" was empty from the unchanged "Save" on; that of "Reviews" kept the form's id throughout. No request failed and no page script failed. Kept script: `shared/playwright/checks/U17/I09/i09.js` (row L37).
+
 <a id="fn-f-omp1"></a>
 **f-omp1** — fn h, k, m, n, p: OMP's form, grid handler and `ContextService`; OMP's `submissions.tpl` override (fn e). Live-probed 2026-09-25: notes td9, td10, td11, td12.
 
@@ -1643,6 +1711,9 @@ Issue report: [pkp-e2e#487](https://github.com/jardakotesovec/pkp-e2e/issues/487
 
 <a id="fn-f-omp9"></a>
 **f-omp9** — OMP `classes/section/DAO.php` `getByPath()` builds the series from `$row->section_id`, a column the series table does not have (its key is `series_id`), so the page gets a series with no data; the probe server logged `PHP Warning: Undefined property: stdClass::$section_id in …/classes/section/DAO.php on line 71` on each such page. The line came with omp `4c2b5d77b` "pkp/pkp-lib#13003 Port batch loading to OMP" (2026-08-26), which changed `fromRow($row)` to `fromRow($row, [$row->section_id], (object) [])`. The cover survives because `image` is a column of the `series` table (`primaryTableColumns`); the title, prefix, subtitle, description, ISSNs and `sortOption` are rows of `series_settings` and are lost, and with no sort option `CatalogHandler::series()` falls back to `ORDERBY_DATE_PUBLISHED` descending. Live-probed 2026-09-25 on the seeded press (read only) and on scratch presses, four chunks: an empty `h1` and last trail step, no description or ISSN; "1 Titles" and the book for a series holding a published book, "0 Titles" and "No titles have been published yet." for one without (the seeded "Monographs" and "Textbooks" as much as a new series). With every field of a series set (note td5): the cover showed, 100×100, from `catalog/thumbnail?type=series&id={id}` (200, image/png), its text alternative a single space and its `.cover` wrapper a `div` carrying an `href` rather than a link; the tab title read "| {press name}" ("| Public Knowledge Press" on the seeded press); each of the six orders saved and reopened as saved, and after each the page listed the books by publication date, newest first; the same page for visitor, Reader and Press Manager. The series window's unique-path check (`SeriesForm`, through `Repo::section()->getByPath()`) goes through the same line: test run 2026-09-25 (Fields "Path"; scenario 7, "A path in use"), seen in two runs, a "Save" with "monographs" in "Path" while another series had it showed "The series path already exists. Please enter a unique path." and logged the same warning on its `update-series` request, which answered 200; the saves with a path no series had logged nothing. A "Save" of a series with its own unchanged path logged it too (two processes, 2026-09-25), so any save whose path finds a series logs it. The screen's refusal is right, so the warning makes no entry of its own. Written up for the team in `docs/reports/2026-09-25-omp-series-page-blank.md` (a temporary report, deleted once addressed; git history keeps it).
+
+<a id="fn-f-omp10"></a>
+**f-omp10** — fn m: OMP `SeriesForm::validate()` accepts the file on `getimagesize()`, which reads only the picture's header; `SeriesForm::execute()` then stores the series' other fields (`Repo::section()->edit()`), deletes the old cover's two files (`ContextFileManager::deleteByPath()`), and fails where it builds the thumbnail: `imagecreatefrompng()` returns false on the damaged data and `imagecopyresampled()` throws, before the new files are written and before `setImage()`, so the stored cover record still names the deleted files. Live-probed 2026-10-09 (Fields "Cover Image"), OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`; the default dataset, as `rvaca`, three runs) and `stable-3_5_0` (omp `ddc6abf5a9`; scratch presses, as the press's manager, two runs), the same in all five, on series each run added itself, with a 2×3 PNG of 73 bytes whose IDAT checksum has its last byte flipped. "Upload File" took it (200, the box reading the file's name with "Change File"). On a series with no cover, with "Subtitle" typed in the same save: `POST {press}/$$$call$$$/grid/settings/series/series-grid/update-series?seriesId={id}` answered 500 with an empty body; the window stayed open with `button.submitFormButton` disabled and `.pkp_spinner.is_visible` beside "Cancel", no text under any box, no notice, no browser dialog; "Cancel" closed it with no question; after a reload "Edit" showed the subtitle and no cover. On a series whose sound PNG cover had been saved first (the control: the window closed, the reopened one showed the picture under "Current Image" with "Delete"): the same 500 and the same stuck window; after a reload "Edit" showed the new subtitle and a picture of no width under "Current Image", `catalog/thumbnail?type=series&id={id}` answering 200 with an empty body of type text/html where it had answered a 97-byte image/png, and the series' public page showed the same broken cover. A "Save" of that series with a subtitle and no file then answered 200 with "Your changes have been saved."; a sound PNG uploaded and saved brought the cover back (image/png, 97 bytes; four runs). The server logged at each damaged save `imagecreatefrompng(): gd-png: fatal libpng error: IDAT: CRC error`, `imagecreatefrompng(): "…" is not a valid PNG file`, then `PHP Fatal error: Uncaught TypeError: imagecopyresampled(): Argument #2 ($src_image) must be of type GdImage, false given` in `SeriesForm.php`. The test installs' PHP runs with `zend.assertions = -1`, so the `assert($image)` between the two calls is not compiled; where assertions run, the save fails one step earlier (a 3.5 install on 2026-10-02 answered the same 500 and logged `Uncaught AssertionError: assert($image)`). Not driven: "Delete" on the broken picture; the "Add Series" window; a damaged JPG. Kept script: `shared/playwright/checks/U17/I09/i09.js` (row L18).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — fn f. Live-probed 2026-09-25 on a scratch server, three runs: note td13. The seeded server is not empty once other suites have posted to it.
