@@ -1390,6 +1390,8 @@ Left out of the scenarios above, by reason:
   - the guard for A29 (issue report `docs/issues/U37-A29-add-window-file-missing-from-history.md`): a file attached in the "Add" window shows "{file name} uploaded by …" with "Download" in the History (Rule 18)
   - the guard for OMP1 (issue report `docs/issues/U37-OMP1-external-reviewer-listed-as-internal.md`): on a press, each reviewer in a discussion's "Participants" reads the reviewer role of the stage they review ("External Reviewer" on External Review) in the editor's and the reviewer's windows (Rule 20)
   - the guard for A31 (issue report `docs/issues/U37-A31-auto-added-item-letter-placeholders.md`): an auto-added discussion's letter, and one a manager adds without taking part, closes with no "{$signature}" or "{$senderName}" left as typed (Rules 10d, 9)
+  - the guard for A32 (issue report `docs/issues/U37-A32-task-boxes-screen-reader-shared-names.md`): a task row's "Started" and "Closed" boxes, read by role and name, carry different names, and a template's "Auto-add at stage" box names its template
+  - the guard for A15 (issue report `docs/issues/U37-A15-add-window-template-search-french-email-template.md`): in French (Canada) the "Add" window's template search box reads without "de courriel"
   - the guard for A26 (issue report `docs/issues/U37-A26-no-answer-box-screen-reader-opposite-state.md`): after "No" in a row box's question, the box reads to a screen reader as it looks (Rule 16)
   - the guard for A25 (issue report `docs/issues/U37-A25-converted-task-not-begun.md`): a discussion turned into a task through "Add Task Details" or "Edit" is saved begun, under "In progress" (Rule 15b)
   - the guard for A28 (issue report `docs/issues/U37-A28-converted-task-history-says-task-created.md`): a converted discussion's History keeps "Discussion created by …" as its oldest line (Rule 18)
@@ -1457,7 +1459,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | An Author cannot save an edit of their discussion once its first message has an uploaded file | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Editing a discussion that "Notify" or "Assign" opened adds a copy of its message instead of changing it | 🐞 | medium | issues (claude), 2026-10-06 — re-verified |
 | [A10](#a10) | A task's "Due Date" before today is refused with a message about a start date | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | In French the "Add" window's template search box reads "Trouver un modèle de courriel" ("find an email template") | 🐞 | minor | — |
+| [A15](#a15) | In French, the template search for a new task or discussion is labelled "find an email template" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A16](#a16) | A task due today already reads "Overdue" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | A closed task past its due date still reads "This task is overdue. Remind the task owner…" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A21](#a21) | A refused task or discussion window tells screen-reader users "Go to undefined" for the empty message box | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1466,7 +1468,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A28](#a28) | A discussion turned into a task reads "Task created by …" in its History | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A29](#a29) | A file attached to the first message in the "Add" window never shows in the discussion's History | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A31](#a31) | A discussion's letter keeps "{$signature}" when its writer is not a participant: auto-added, or a manager stays out | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A32](#a32) | A screen reader hears a task row's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, under one shared name | 🐞 | minor | — |
+| [A32](#a32) | A task's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, have names a screen reader cannot tell apart | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A33](#a33) | A task's or discussion's History lists the lines one save writes within a second oldest first | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A34](#a34) | An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later | 🐞 | medium | issues (claude), 2026-10-09 — re-verified |
 | [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
@@ -1652,15 +1654,24 @@ right (it keeps the reviewer hidden from the Author), the offer is not.
 Basis: probe. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
-**A15 — In French the "Add" window's template search box asks for an email template** · 🐞 · minor.
-With the interface in French (Canada), the "Add" window's template
-search box, "Find Template" in English, reads "Trouver un modèle de
-courriel" ("find an email template"). The templates it searches are
-task and discussion templates, not email templates, so the label names
-the wrong thing; the search itself works as in English (Rule 10a). The
-same French text is right where it was first used, on the template
-search of an email's composer. The window's templates are new on
-`main`, so no release shows it yet.
+**A15 — In French, the template search for a new task or discussion is labelled "find an email template"** · 🐞 · low.
+With the interface in French (Canada), the window that "Add" opens in a
+stage's Tasks & Discussions panel has a search box over its templates
+that reads "Trouver un modèle de courriel" ("find an email template").
+In English it reads "Find Template". The templates it searches are task
+and discussion templates, not email templates, so the label names the
+wrong thing. The "Edit" window of a task or discussion draws the same
+box.
+
+The search itself works as in English. The same French text is right
+where it was first used, on the template search of an email's composer.
+
+French (`fr`) has the same words in its translation file. The 39 other
+languages that translate the text keep it neutral.
+
+The fix is a new French translation of one text, with no code change:
+work for the French translators on Weblate, or a two-line change to
+the two French files on `main` and `stable-3_5_0`.
 Basis: probe + code. <sup>[f-a15](#fn-a15)</sup>
 
 <a id="a16"></a>
@@ -1832,16 +1843,24 @@ on "Save".
 Basis: probe, 2026-10-02. <sup>[f-a31](#fn-a31)</sup>
 
 <a id="a32"></a>
-**A32 — A screen reader hears the panel's boxes under shared names** · 🐞 · minor.
-A screen-reader user on a task's row hears its "Started" box and its
-"Closed" box under the same name, the task's own; only the column the
-box sits in tells which is which. On Settings › Workflow › "Tasks and
-Discussions", every template's "Auto-add at stage" box is heard as
-"Automatically add this task and discussion when a submission reaches a
-specific stage", naming neither the template nor the stage. Each box's
-name should say what it does and which task or template it belongs to.
-A screen-reader user can tick the wrong box.
-Basis: probe, 2026-10-02. <sup>[f-a32](#fn-a32)</sup>
+**A32 — A task's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, have names a screen reader cannot tell apart** · 🐞 · low.
+A screen-reader user who moves with the Tab key through a task's row in
+a stage's Tasks & Discussions panel reaches two boxes with the same
+name, the task's own: a task "Check proofs" has two boxes named "Check
+proofs". Only the column the box sits in, "Started" or "Closed", tells
+which is which.
+
+On Settings › Workflow › "Tasks and Discussions", every template's
+"Auto-add at stage" box is named "Automatically add this task and
+discussion when a submission reaches a specific stage", which names
+neither the template nor the stage. Every stage's "Add template" button
+on that screen is named "Add template" alone.
+
+Each control's name should say what it does and which task, template or
+stage it belongs to. A manager can switch "Auto-add at stage" on for
+the wrong template, because the question that follows names the stage
+but not the template.
+Basis: probe, 2026-10-09. <sup>[f-a32](#fn-a32)</sup>
 
 <a id="a33"></a>
 **A33 — A task's or discussion's History lists the lines one save writes within a second oldest first** · 🐞 · low.
