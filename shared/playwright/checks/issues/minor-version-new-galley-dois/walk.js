@@ -1,4 +1,4 @@
-// Issue report docs/issues/U45-OPS4-minor-version-new-galley-dois.md (U45 OPS4):
+// Kept walk of the deleted issue report for U45 OPS4 (pkp-e2e#220; fixed by pkp/ops#1435 with pkp/pkp-lib#13460):
 // on a preprint server with "DOI Versioning" "Yes", a version made with
 // "Minor Revision" keeps the preprint's DOI but its galley starts without one
 // and gets a new DOI when the version is posted. Takes the report's Steps on

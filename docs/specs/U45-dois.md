@@ -2275,7 +2275,7 @@ carry that DOI. On a journal with "Peer Review" ticked, every publicly
 shown review that counts as read gets the same bare value, under "None"
 and under "Custom pattern". One cause with [A9](#a9).
 Basis: probe, 2026-10-01. <sup>f-a2</sup>
-Report: refresh owed — `pkp/pkp-lib#13460` (PR head `246e5387f6`, unmerged) deletes `VersionDois`, whose publish-time minting moves to `AssignDOIs::handlePublished()` with the same test, and adds the "Immediately…" paths, which refuse "None" and "Custom pattern"; the Reach's list of automatic paths changes; a review now gets a DOI only once it counts as read (Rule 7) (2026-10-07)
+Report: refresh owed — `pkp/pkp-lib#13460` (PR head `246e5387f6`, merged 2026-10-09) deletes `VersionDois`, whose publish-time minting moves to `AssignDOIs::handlePublished()` with the same test, and adds the "Immediately…" paths, which refuse "None" and "Custom pattern"; the Reach's list of automatic paths changes; a review now gets a DOI only once it counts as read (Rule 7) (2026-10-07)
 
 <a id="a3"></a>
 **A3 — A DOI refused on the DOIs page gets only "Some DOI(s) could not be updated", never the reason** · 🐞 · low.
@@ -2454,7 +2454,7 @@ works whose DOI was cleared. On 3.5 the same notice shows, and the work's
 record is sent to the agency with an empty DOI, which cannot register
 anything; the work stays "Needs DOI".
 Basis: probe, 2026-10-06. <sup>f-a15</sup>
-Report: refresh owed — `pkp/pkp-lib#13460` `d19b2ed294` with `pkp/ojs#5903` `99f5b3dfc8` and `pkp/ops#1435` `5dfa560a8f` (round-8 PR heads, unmerged; `pkp/pkp-lib#13253`) make `getExportableDOIsSubmissionIds()` accept a published version that has only a galley's DOI (`whereHasDoi()`), so the Cause's `whereNotNull('p.doi_id')` sentence and the Proposed fix's intersection no longer refuse such a work: on DataCite the job for a work whose article DOI was cleared now reaches the plugin and fails there ("DataCite export: no DOI assigned to the object being deposited."), where it failed with `invalid.job.payload`; "Deposit All" now queues that same failing job ([OJS5](#ojs5)), so the Cause's last sentence on "Deposit All" changes; a work with no DOI at all fails as before (2026-10-08)
+Report: refresh owed — `pkp/pkp-lib#13460` `d19b2ed294` with `pkp/ojs#5903` `99f5b3dfc8` and `pkp/ops#1435` `5dfa560a8f` (round-8 PR heads, merged 2026-10-09; `pkp/pkp-lib#13253`) make `getExportableDOIsSubmissionIds()` accept a published version that has only a galley's DOI (`whereHasDoi()`), so the Cause's `whereNotNull('p.doi_id')` sentence and the Proposed fix's intersection no longer refuse such a work: on DataCite the job for a work whose article DOI was cleared now reaches the plugin and fails there ("DataCite export: no DOI assigned to the object being deposited."), where it failed with `invalid.job.payload`; "Deposit All" now queues that same failing job ([OJS5](#ojs5)), so the Cause's last sentence on "Deposit All" changes; a work with no DOI at all fails as before (2026-10-08)
 
 <a id="a16"></a>
 **A16 — A "Needs Sync" item's agency panel says its metadata "has not been submitted"** · ❓ · minor.
@@ -2485,7 +2485,7 @@ Versioning" is "Yes" by default on a preprint server and "No" on a
 journal and a press. A new version gets its DOI on publication unless
 "Automatic DOI Assignment" is "Never".
 Basis: probe, 2026-10-01. <sup>f-a17</sup>
-Report: refresh owed — `pkp/omp#2495` (round-4 PR head `fded668417`, unmerged) makes OMP `getDoisForSubmission()` collect every version's DOIs, so the Cause's OMP paragraph ("reads the current publication only … a press still marks nothing") and the Reach bullet on a press's Mark actions no longer hold; the symptom and the `publish()` comparison are unchanged; the Summary's last sentence ("A new version gets its DOI on publication unless …") no longer holds either, since a major version made at Copyediting, Production or Done gets its DOI at its creation (Rule 5, round-2 heads) (2026-10-07)
+Report: refresh owed — `pkp/omp#2495` (round-4 PR head `fded668417`, merged 2026-10-09) makes OMP `getDoisForSubmission()` collect every version's DOIs, so the Cause's OMP paragraph ("reads the current publication only … a press still marks nothing") and the Reach bullet on a press's Mark actions no longer hold; the symptom and the `publish()` comparison are unchanged; the Summary's last sentence ("A new version gets its DOI on publication unless …") no longer holds either, since a major version made at Copyediting, Production or Done gets its DOI at its creation (Rule 5, round-2 heads) (2026-10-07)
 
 <a id="a18"></a>
 **A18 — A DOI deposit that cannot connect to Crossref or DataCite reads "Submitted" for good, with no error** · 🐞 · high · crash: server.
@@ -2698,7 +2698,7 @@ Jobs" lists the failure. "Deposit DOIs" on the same work ends the same
 way ([A15](#a15)), and with "Automatic Deposit" on, the scheduled
 deposit does it without anyone pressing.
 Basis: probe, 2026-10-08, at the round-8 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs5</sup>
-Report: refresh owed — `pkp/pkp-lib#13460` `d19b2ed294` with `pkp/ojs#5903` `99f5b3dfc8` (round-8 PR heads, unmerged; `pkp/pkp-lib#13253`) give a galley DOI's row its work in `getAllDepositableSubmissionIds()` and let `getExportableDOIsSubmissionIds()` accept a version with only a galley's DOI, so two of the report's three cases are fixed (galley DOIs turned on after the articles were registered; galley DOIs with "Articles" unticked: a deposit is queued and reaches DataCite's address). What remains is the cleared or missing article DOI with "Articles" ticked: a `DepositSubmission` job is now queued and fails in `DataciteExportPlugin::depositXML()` ("no DOI assigned to the object being deposited"), where nothing was queued. The title, Summary, severity (high, now medium with a crash), Steps (the turned-on-later path goes), Cause and Proposed fix all change; the same failed job as [A15](#a15)'s DataCite case, so the refresh may join the two (2026-10-08)
+Report: refresh owed — `pkp/pkp-lib#13460` `d19b2ed294` with `pkp/ojs#5903` `99f5b3dfc8` (round-8 PR heads, merged 2026-10-09; `pkp/pkp-lib#13253`) give a galley DOI's row its work in `getAllDepositableSubmissionIds()` and let `getExportableDOIsSubmissionIds()` accept a version with only a galley's DOI, so two of the report's three cases are fixed (galley DOIs turned on after the articles were registered; galley DOIs with "Articles" unticked: a deposit is queued and reaches DataCite's address). What remains is the cleared or missing article DOI with "Articles" ticked: a `DepositSubmission` job is now queued and fails in `DataciteExportPlugin::depositXML()` ("no DOI assigned to the object being deposited"), where nothing was queued. The title, Summary, severity (high, now medium with a crash), Steps (the turned-on-later path goes), Cause and Proposed fix all change; the same failed job as [A15](#a15)'s DataCite case, so the refresh may join the two (2026-10-08)
 
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
@@ -2765,7 +2765,7 @@ that kind, which the press must accept or delete row by row. Publishing
 a book still gives its files DOIs by themselves, unless "Automatic DOI
 Assignment" is "Never".
 Basis: probe, 2026-10-01. <sup>f-omp1</sup>
-Report: refresh owed — `pkp/omp#2495` (round-2 PR head `c9e1c8a521`, unmerged) rewrites `addOnDoiPageFilterToQuery()`: every submitted book not declined is listed, besides the former list (Copyediting or Production, published, or a publication, chapter or format DOI; never a file's), which the new "Workflow" filter shows alone, so the Cause's sentence on its first clause and the fix's last bullet change; the empty list with "Files" alone stays (2026-10-07)
+Report: refresh owed — `pkp/omp#2495` (round-2 PR head `c9e1c8a521`, merged 2026-10-09) rewrites `addOnDoiPageFilterToQuery()`: every submitted book not declined is listed, besides the former list (Copyediting or Production, published, or a publication, chapter or format DOI; never a file's), which the new "Workflow" filter shows alone, so the Cause's sentence on its first clause and the fix's last bullet change; the empty list with "Files" alone stays (2026-10-07)
 
 <a id="omp2"></a>
 **OMP2 — A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure** · 🐞 · medium · crash: server.
@@ -2846,28 +2846,28 @@ Basis: probe, 2026-09-26. <sup>f-ops5</sup>
 ### Retired
 
 <a id="a25"></a>
-**A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · ✅ · retired. Fixed 2026-10-07 at the PR heads of `pkp/pkp-lib#13447` round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`), before their merge; this page describes the fixed behavior: once a version is published, a "Published Manuscript Under Review" one included, a decline keeps every DOI of the work, and the published page its "DOI:" line (Rule 5b). <sup>f-a25</sup>
+**A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · ✅ · retired. Fixed 2026-10-07 at the PR heads of `pkp/pkp-lib#13447` round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`); merged 2026-10-09; this page describes the fixed behavior: once a version is published, a "Published Manuscript Under Review" one included, a decline keeps every DOI of the work, and the published page its "DOI:" line (Rule 5b). <sup>f-a25</sup>
 
 <a id="a26"></a>
-**A26 — Under "Immediately", "Revert Decline" does not give the work its DOIs back** · ✅ · retired. Fixed 2026-10-07 at the same PR heads, before their merge; this page describes the fixed behavior: "Revert Decline" gives the current version new DOIs on a journal, a press and a preprint server (Rule 5b). <sup>f-a26</sup>
+**A26 — Under "Immediately", "Revert Decline" does not give the work its DOIs back** · ✅ · retired. Fixed 2026-10-07 at the same PR heads; merged 2026-10-09; this page describes the fixed behavior: "Revert Decline" gives the current version new DOIs on a journal, a press and a preprint server (Rule 5b). <sup>f-a26</sup>
 
 <a id="a27"></a>
-**A27 — The DOIs page no longer lists a declined submission that carries a DOI** · ✅ · retired. Fixed 2026-10-07 at the same PR heads, before their merge; this page describes the fixed behavior: the page lists a declined work that carries a DOI, and "In Copyediting, Production, Published or with DOIs" lists it and a work moved back to Review with its DOI (Rules 15, 22). <sup>f-a27</sup>
+**A27 — The DOIs page no longer lists a declined submission that carries a DOI** · ✅ · retired. Fixed 2026-10-07 at the same PR heads; merged 2026-10-09; this page describes the fixed behavior: the page lists a declined work that carries a DOI, and "In Copyediting, Production, Published or with DOIs" lists it and a work moved back to Review with its DOI (Rules 15, 22). <sup>f-a27</sup>
 
 <a id="a28"></a>
-**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed 2026-10-07 at the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903` `fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`, with `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`), before their merge; this page describes the fixed behavior: "Mark DOIs Registered" and "Deposit DOIs" reach the DOIs of a work's published versions only, and a new version's DOIs read "Unregistered" once it is published (Rules 26, 29; on a press its file DOIs too since [OMP5](#omp5) was fixed). <sup>f-a28</sup>
+**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed 2026-10-07 at the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903` `fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`, with `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`); merged 2026-10-09; this page describes the fixed behavior: "Mark DOIs Registered" and "Deposit DOIs" reach the DOIs of a work's published versions only, and a new version's DOIs read "Unregistered" once it is published (Rules 26, 29; on a press its file DOIs too since [OMP5](#omp5) was fixed). <sup>f-a28</sup>
 
 <a id="ojs6"></a>
-**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · ✅ · retired. Fixed 2026-10-07 at the round-7 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `ed4299ffcb`), before their merge; this page describes the fixed behavior: the per-work actions take only the reviews shown publicly, so a hidden review's kept DOI keeps its status and the deposit leaves the review out (Rules 7b, 29). <sup>f-ojs6</sup>
+**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · ✅ · retired. Fixed 2026-10-07 at the round-7 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `ed4299ffcb`); merged 2026-10-09; this page describes the fixed behavior: the per-work actions take only the reviews shown publicly, so a hidden review's kept DOI keeps its status and the deposit leaves the review out (Rules 7b, 29). <sup>f-ojs6</sup>
 
 <a id="omp4"></a>
-**OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · ✅ · retired. Fixed 2026-10-07 at the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge; this page describes the fixed behavior: on a press, as on a journal and a preprint server, "Mark DOIs Unregistered" and "Mark DOIs Needs Sync" reach every version's DOIs and "Mark DOIs Registered" every published version's (Rules 27, 28, 52). <sup>f-omp4</sup>
+**OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · ✅ · retired. Fixed 2026-10-07 at the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`); merged 2026-10-09; this page describes the fixed behavior: on a press, as on a journal and a preprint server, "Mark DOIs Unregistered" and "Mark DOIs Needs Sync" reach every version's DOIs and "Mark DOIs Registered" every published version's (Rules 27, 28, 52). <sup>f-omp4</sup>
 
 <a id="omp5"></a>
-**OMP5 — "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published** · ✅ · retired. Fixed 2026-10-07 at the same round-4 PR heads, before their merge; this page describes the fixed behavior: a press's version not yet published keeps its file DOIs' status through "Mark DOIs Registered" (Rules 26, 52). <sup>f-omp5</sup>
+**OMP5 — "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published** · ✅ · retired. Fixed 2026-10-07 at the same round-4 PR heads; merged 2026-10-09; this page describes the fixed behavior: a press's version not yet published keeps its file DOIs' status through "Mark DOIs Registered" (Rules 26, 52). <sup>f-omp5</sup>
 
 <a id="ops4"></a>
-**OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed by `pkp/ops#1435` (with `pkp/pkp-lib#13460`), checked 2026-10-07 at the PR heads before their merge; this page describes the fixed behavior: a preprint's "Minor Revision" keeps its galleys' DOIs, as on a journal and a press (Rule 12). <sup>f-ops4</sup>
+**OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed by `pkp/ops#1435` (with `pkp/pkp-lib#13460`), checked 2026-10-07 at the PR heads and again on `main` after the merge of 2026-10-09; this page describes the fixed behavior: a preprint's "Minor Revision" keeps its galleys' DOIs, as on a journal and a press (Rule 12). <sup>f-ops4</sup>
 
 ---
 
@@ -5420,9 +5420,11 @@ these heads. The report for [A17](#a17) names its cause and carries
 the refresh (A17's Report line). An issue report of its own was
 written on `main` on 2026-10-09, while the PRs were open
 ([pkp-e2e#944](https://github.com/jardakotesovec/pkp-e2e/issues/944));
-the companion deletes it and keeps its walk
+it is deleted and its walk kept
 (`checks/issues/press-mark-dois-current-version-only/walk.js`), and
-the issue closes when the PRs merge. That walk on the default dataset
+the issue was closed at the merge of 2026-10-09 (omp `eb4c30aa3c`,
+pkp-lib `51dc842b93`), the walk repeated at the merged tips with the
+same result. That walk on the default dataset
 at the round-9 PR heads (`pkp/pkp-lib#13460` `58c7f454ff`,
 `pkp/omp#2495` `b0ab0a5fb6`), 2026-10-09: on book 14 with three
 published major versions, "Mark DOIs Registered", "Mark DOIs
@@ -5508,7 +5510,15 @@ carried 1.0's galley DOI; a major version 2.0 made from 1.1, with no
 DOI on the work or the galley until its publication (a posted preprint
 stands past Production, note q41); two DOI records throughout, no
 server error.
-Issue report: [pkp-e2e#220](https://github.com/jardakotesovec/pkp-e2e/issues/220) ([docs/issues/U45-OPS4-minor-version-new-galley-dois.md](../issues/U45-OPS4-minor-version-new-galley-dois.md)).
+Merged 2026-10-09 as ops `8d04ca333c` (with pkp-lib `51dc842b93`), the
+merge of the reviewed head. The report's walk on the default dataset
+at the merged tips the same day
+(`checks/issues/minor-version-new-galley-dois/walk.js`): preprint 2's
+minor version 1.1 kept the preprint's DOI and its galley's, as article
+17 and book 14 did. The issue report is deleted with its fix diff, the
+walk kept (other walks use its helpers);
+[pkp-e2e#220](https://github.com/jardakotesovec/pkp-e2e/issues/220)
+closed.
 
 <a id="fn-f-ops5"></a>
 **f-ops5** — See l for the listing rule. Live-probed 2026-09-26 (q17):
