@@ -1,0 +1,128 @@
+diff --git a/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php b/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php
+index 35705a385b..cfe4924c4a 100644
+--- a/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php
++++ b/api/v1/reviews/resources/ReviewRoundAuthorResponseResource.php
+@@ -36,7 +36,7 @@ class ReviewRoundAuthorResponseResource extends JsonResource
+         return [
+             'id' => $response->id,
+             'reviewRoundId' => $response->reviewRoundId,
+-            'response' => $response->getLocalizedData('authorResponse'),
++            'response' => $response->authorResponse,
+             'associatedAuthors' => array_map(fn (Author $author) => [
+                 'id' => $author->getId(),
+                 'fullName' => $author->getFullName(),
+diff --git a/classes/security/Validation.php b/classes/security/Validation.php
+index b21844a6f8..7e360d68c6 100644
+--- a/classes/security/Validation.php
++++ b/classes/security/Validation.php
+@@ -166,7 +166,7 @@ class Validation
+             $args['source'] = $_SERVER['REQUEST_URI'];
+         }
+         if ($messageLocaleKey !== null) {
+-            $args['loginMessage'] = __($messageLocaleKey);
++            $args['loginMessage'] = $messageLocaleKey;
+         }
+ 
+         $request = Application::get()->getRequest();
+diff --git a/classes/template/PKPTemplateManager.php b/classes/template/PKPTemplateManager.php
+index 7355605b7e..ee51cf1ae1 100644
+--- a/classes/template/PKPTemplateManager.php
++++ b/classes/template/PKPTemplateManager.php
+@@ -152,10 +152,10 @@ class PKPTemplateManager extends Smarty
+     private bool $isVueRuntimeIncluded = false;
+ 
+     /** @var MetadataBlocksRegistry Register and load metadata blocks for the reader facing UI */
+-    public MetadataBlocksRegistry $metadataBlocks;
++    public \PKP\view\MetadataBlocksRegistry $metadataBlocks;
+ 
+     /** @var HomepageBlocksRegistry Register and load metadata blocks for the reader facing UI */
+-    public HomepageBlocksRegistry $homepageBlocks;
++    public \PKP\view\HomepageBlocksRegistry $homepageBlocks;
+ 
+     /**
+      * Constructor.
+@@ -192,8 +192,8 @@ class PKPTemplateManager extends Smarty
+         // for unified template resolution and hook firing
+         $this->template_class = \PKP\core\blade\SmartyTemplate::class;
+ 
+-        $this->metadataBlocks = new MetadataBlocksRegistry();
+-        $this->homepageBlocks = new HomepageBlocksRegistry();
++        $this->metadataBlocks = class_exists(MetadataBlocksRegistry::class) ? new MetadataBlocksRegistry() : new \PKP\view\MetadataBlocksRegistry();
++        $this->homepageBlocks = class_exists(HomepageBlocksRegistry::class) ? new HomepageBlocksRegistry() : new \PKP\view\HomepageBlocksRegistry();
+     }
+ 
+     /**
+@@ -226,7 +226,7 @@ class PKPTemplateManager extends Smarty
+             'currentLocale' => $locale,
+             'currentLocaleLangDir' => Locale::getMetadata($locale)?->isRightToLeft() ? 'rtl' : 'ltr',
+             'applicationName' => __($application->getNameKey()),
+-            'site' => $request->getSite(),
++            'site' => Application::isInstalled() ? $request->getSite() : null,
+         ]);
+ 
+         // Assign date and time format
+@@ -1819,6 +1819,7 @@ class PKPTemplateManager extends Smarty
+     ) {
+         $this->assign([
+             'title' => $title,
++            'pageTitleTranslated' => $title,
+             'message' => $message,
+             'type' => $type,
+             'backLink' => $backLink,
+diff --git a/pages/index/PKPIndexHandler.php b/pages/index/PKPIndexHandler.php
+index 4899db9c3f..9bc379db63 100644
+--- a/pages/index/PKPIndexHandler.php
++++ b/pages/index/PKPIndexHandler.php
+@@ -50,7 +50,8 @@ class PKPIndexHandler extends Handler
+         }
+         $templateMgr->assign([
+             'announcements' => $announcements,
+-            'numAnnouncementsHomepage' => $numAnnouncementsHomepage,
++            // No number without announcements: templates test `$numAnnouncementsHomepage && $announcements|@count`
++            'numAnnouncementsHomepage' => $announcements ? $numAnnouncementsHomepage : null,
+         ]);
+     }
+ 
+diff --git a/pages/login/LoginHandler.php b/pages/login/LoginHandler.php
+index aa8d914fc2..0dcc3a1261 100644
+--- a/pages/login/LoginHandler.php
++++ b/pages/login/LoginHandler.php
+@@ -71,9 +71,11 @@ class LoginHandler extends Handler
+             $request->redirectSSL();
+         }
+ 
++        // The message is a locale key (the same sanity check as PKPUserHandler::authorizationDenied())
++        $loginMessageKey = $request->getUserVar('loginMessage');
+         $templateMgr = TemplateManager::getManager($request);
+         $templateMgr->assign([
+-            'loginMessage' => $request->getUserVar('loginMessage'),
++            'loginMessage' => is_string($loginMessageKey) && preg_match('/^[a-zA-Z0-9.]+$/', $loginMessageKey) ? __($loginMessageKey) : null,
+             'username' => $request->getSession()->get('email') ?? $request->getSession()->get('username'),
+             'remember' => $request->getUserVar('remember'),
+             'source' => $request->getUserVar('source'),
+diff --git a/pages/user/PKPUserHandler.php b/pages/user/PKPUserHandler.php
+index 4db714a8c4..0e7eee63b6 100644
+--- a/pages/user/PKPUserHandler.php
++++ b/pages/user/PKPUserHandler.php
+@@ -53,7 +53,7 @@ class PKPUserHandler extends Handler
+         $templateMgr = TemplateManager::getManager($request);
+         $templateMgr->displaySystemMessage(
+             title: __('common.error'),
+-            message: $authorizationMessage,
++            message: __($authorizationMessage),
+         );
+     }
+ }
+diff --git a/templates/frontend/pages/system-message.tpl b/templates/frontend/pages/system-message.tpl
+index 7e358b6c2c..90fc290fc6 100644
+--- a/templates/frontend/pages/system-message.tpl
++++ b/templates/frontend/pages/system-message.tpl
+@@ -13,7 +13,7 @@
+ <div class="page page_{if $type}{$type}{else}message{/if}">
+ 	{include file="frontend/components/breadcrumbs.tpl" currentTitle=$title}
+ 	<h1>
+-		{$pageTitle}
++		{$title}
+ 	</h1>
+ 	<div class="description">
+     {$message|strip_unsafe_html}

@@ -1,0 +1,44 @@
+--- a/lib/pkp/api/v1/submissions/tasks/EditorialTaskController.php
++++ b/lib/pkp/api/v1/submissions/tasks/EditorialTaskController.php
+@@ -386,6 +386,11 @@
+ 
+         $validated = $illuminateRequest->validated();
+ 
++        // A repeated due date leaves the stored value, which may carry a time of day, as it is
++        if ($illuminateRequest->keepsDueDate()) {
++            unset($validated['dateDue']);
++        }
++
+         if (!$editTask->update($validated)) {
+             return response()->json([
+                 'error' => __('api.409.resourceActionConflict'),
+--- a/lib/pkp/api/v1/submissions/tasks/formRequests/EditTask.php
++++ b/lib/pkp/api/v1/submissions/tasks/formRequests/EditTask.php
+@@ -72,7 +72,8 @@
+                 Rule::requiredIf(fn () => $this->input('type') == EditorialTaskType::TASK->value),
+                 Rule::prohibitedIf(fn () => $this->input('type') == EditorialTaskType::DISCUSSION->value),
+                 Rule::date()->format('Y-m-d'),
+-                'after_or_equal:today',
++                // A due date the edit repeats may already have passed; only a new date must be today or later
++                Rule::when(fn () => !$this->keepsDueDate(), ['after_or_equal:today']),
+             ],
+             EditorialTask::ATTRIBUTE_HEADNOTE => [
+                 'sometimes',
+@@ -316,6 +317,17 @@
+     }
+ 
+     /**
++     * Whether the request repeats the due date the task already has.
++     * The API gives and takes the date as a day; the stored value may carry a time of day.
++     */
++    public function keepsDueDate(): bool
++    {
++        return $this->task?->type == EditorialTaskType::TASK->value
++            && $this->task->dateDue
++            && $this->input('dateDue') === $this->task->dateDue->format('Y-m-d');
++    }
++
++    /**
+      * Get the submission for the validation purpose.
+      */
+     protected function setSubmission(): Submission

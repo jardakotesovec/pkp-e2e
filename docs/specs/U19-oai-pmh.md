@@ -465,7 +465,7 @@ message. <sup>m</sup>
     DOI to every version of an article." lists, beside the article's record, one record for each
     earlier published major version, identified as
     "oai:{repository identifier}:article/{ID}/version/{stage}/{number}",
-    `{stage}` "VoR" (Version of Record), "AO" (Author Original) or
+    `{stage}` "VoR" (Version of Record), "AO" (Author's Original) or
     "PMUR" (Published Manuscript Under Review); the latest minor version
     of that major stands for it. The current version keeps the plain
     identifier. <sup>r</sup> <sup>q20</sup>

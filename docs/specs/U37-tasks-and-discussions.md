@@ -1386,9 +1386,12 @@ Left out of the scenarios above, by reason:
   - the guard for A10 (issue report `docs/issues/U37-A10-past-due-date-speaks-of-start-date.md`): a past "Due Date" typed into the box is refused with a message that names the due date (Rule 2d)
   - the guard for A2 (issue report `docs/issues/U37-A2-discussion-window-placeholder-subtitle.md`): the "Add" and "Edit" windows hold no placeholder line under the title (Rule 10)
   - the guard for A21 (issue report `docs/issues/U37-A21-error-list-calls-message-box-undefined.md`): a "Save" refused with the message box empty lists "Go to Message: This field is required." in the "Add", "Edit" and template windows (Rule 11a)
+  - the guard for A34 (issue report `docs/issues/U37-A34-overdue-task-edit-refused.md`): a task past its due date renamed in "Edit" saves with its due date kept and no "Due date changed" line in its History (the seed makes a past-due task by taking the string `after_or_equal:today` out of the add request's rules in the scenario builder, which a fix that wraps the rule would no longer match)
   - the guard for A29 (issue report `docs/issues/U37-A29-add-window-file-missing-from-history.md`): a file attached in the "Add" window shows "{file name} uploaded by …" with "Download" in the History (Rule 18)
   - the guard for OMP1 (issue report `docs/issues/U37-OMP1-external-reviewer-listed-as-internal.md`): on a press, each reviewer in a discussion's "Participants" reads the reviewer role of the stage they review ("External Reviewer" on External Review) in the editor's and the reviewer's windows (Rule 20)
   - the guard for A31 (issue report `docs/issues/U37-A31-auto-added-item-letter-placeholders.md`): an auto-added discussion's letter, and one a manager adds without taking part, closes with no "{$signature}" or "{$senderName}" left as typed (Rules 10d, 9)
+  - the guard for A32 (issue report `docs/issues/U37-A32-task-boxes-screen-reader-shared-names.md`): a task row's "Started" and "Closed" boxes, read by role and name, carry different names, and a template's "Auto-add at stage" box names its template
+  - the guard for A15 (issue report `docs/issues/U37-A15-add-window-template-search-french-email-template.md`): in French (Canada) the "Add" window's template search box reads without "de courriel"
   - the guard for A26 (issue report `docs/issues/U37-A26-no-answer-box-screen-reader-opposite-state.md`): after "No" in a row box's question, the box reads to a screen reader as it looks (Rule 16)
   - the guard for A25 (issue report `docs/issues/U37-A25-converted-task-not-begun.md`): a discussion turned into a task through "Add Task Details" or "Edit" is saved begun, under "In progress" (Rule 15b)
   - the guard for A28 (issue report `docs/issues/U37-A28-converted-task-history-says-task-created.md`): a converted discussion's History keeps "Discussion created by …" as its oldest line (Rule 18)
@@ -1456,7 +1459,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | An Author cannot save an edit of their discussion once its first message has an uploaded file | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Editing a discussion that "Notify" or "Assign" opened adds a copy of its message instead of changing it | 🐞 | medium | issues (claude), 2026-10-06 — re-verified |
 | [A10](#a10) | A task's "Due Date" before today is refused with a message about a start date | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | In French the "Add" window's template search box reads "Trouver un modèle de courriel" ("find an email template") | 🐞 | minor | — |
+| [A15](#a15) | In French, the template search for a new task or discussion is labelled "find an email template" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A16](#a16) | A task due today already reads "Overdue" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | A closed task past its due date still reads "This task is overdue. Remind the task owner…" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A21](#a21) | A refused task or discussion window tells screen-reader users "Go to undefined" for the empty message box | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1465,10 +1468,10 @@ an entry notes otherwise; the team settles them on spec review.
 | [A28](#a28) | A discussion turned into a task reads "Task created by …" in its History | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A29](#a29) | A file attached to the first message in the "Add" window never shows in the discussion's History | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A31](#a31) | A discussion's letter keeps "{$signature}" when its writer is not a participant: auto-added, or a manager stays out | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A32](#a32) | A screen reader hears a task row's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, under one shared name | 🐞 | minor | — |
-| [A33](#a33) | A History lists events saved in the same second in no set order | 🐞 | minor | — |
-| [A34](#a34) | An overdue task's "Edit" refuses every "Save", even a rename, until its due date is moved | 🐞 | user-visible | — |
-| [A36](#a36) | A manager-level person taken off an item while its window is open is told "An unexpected error has occurred" when replying | 🐞 | minor | — |
+| [A32](#a32) | A task's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, have names a screen reader cannot tell apart | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
+| [A33](#a33) | A task's or discussion's History lists the lines one save writes within a second oldest first | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
+| [A34](#a34) | An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later | 🐞 | medium | issues (claude), 2026-10-09 — re-verified |
+| [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OMP1](#omp1) | A press's discussion window lists an External Review reviewer as "Internal Reviewer" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | A preprint server's "Assign Editor" template has no text, and choosing it leaves the message box showing text "Save" ignores | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | An hour after writing it, an Author or assistant can change nothing in their own discussion | ❓ | user-visible | — |
@@ -1651,15 +1654,24 @@ right (it keeps the reviewer hidden from the Author), the offer is not.
 Basis: probe. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
-**A15 — In French the "Add" window's template search box asks for an email template** · 🐞 · minor.
-With the interface in French (Canada), the "Add" window's template
-search box, "Find Template" in English, reads "Trouver un modèle de
-courriel" ("find an email template"). The templates it searches are
-task and discussion templates, not email templates, so the label names
-the wrong thing; the search itself works as in English (Rule 10a). The
-same French text is right where it was first used, on the template
-search of an email's composer. The window's templates are new on
-`main`, so no release shows it yet.
+**A15 — In French, the template search for a new task or discussion is labelled "find an email template"** · 🐞 · low.
+With the interface in French (Canada), the window that "Add" opens in a
+stage's Tasks & Discussions panel has a search box over its templates
+that reads "Trouver un modèle de courriel" ("find an email template").
+In English it reads "Find Template". The templates it searches are task
+and discussion templates, not email templates, so the label names the
+wrong thing. The "Edit" window of a task or discussion draws the same
+box.
+
+The search itself works as in English. The same French text is right
+where it was first used, on the template search of an email's composer.
+
+French (`fr`) has the same words in its translation file. The 39 other
+languages that translate the text keep it neutral.
+
+The fix is a new French translation of one text, with no code change:
+work for the French translators on Weblate, or a two-line change to
+the two French files on `main` and `stable-3_5_0`.
 Basis: probe + code. <sup>[f-a15](#fn-a15)</sup>
 
 <a id="a16"></a>
@@ -1803,6 +1815,7 @@ removed by …", so it shows the file leaving but never arriving. The file
 itself stays under the first message, where it can still be opened.
 Discussions and tasks already started this way keep the gap after a fix.
 Basis: probe, 2026-10-02. <sup>[f-a29](#fn-a29)</sup>
+Report: refresh owed — the report's Evidence says the pair form `[['dateLogged', 'desc'], ['id', 'desc']]` would sort the History; on the event log's entries it sorts nothing, as the A33 report (`docs/issues/U37-A33-history-same-second-order.md`, `sortcheck.php` beside its walk) shows: the sentence is to be corrected, and its fix checked for resting on it (2026-10-09)
 
 <a id="a30"></a>
 **A30 — A task loses its owner silently** · ❓ · minor.
@@ -1830,42 +1843,73 @@ on "Save".
 Basis: probe, 2026-10-02. <sup>[f-a31](#fn-a31)</sup>
 
 <a id="a32"></a>
-**A32 — A screen reader hears the panel's boxes under shared names** · 🐞 · minor.
-A screen-reader user on a task's row hears its "Started" box and its
-"Closed" box under the same name, the task's own; only the column the
-box sits in tells which is which. On Settings › Workflow › "Tasks and
-Discussions", every template's "Auto-add at stage" box is heard as
-"Automatically add this task and discussion when a submission reaches a
-specific stage", naming neither the template nor the stage. Each box's
-name should say what it does and which task or template it belongs to.
-A screen-reader user can tick the wrong box.
-Basis: probe, 2026-10-02. <sup>[f-a32](#fn-a32)</sup>
+**A32 — A task's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, have names a screen reader cannot tell apart** · 🐞 · low.
+A screen-reader user who moves with the Tab key through a task's row in
+a stage's Tasks & Discussions panel reaches two boxes with the same
+name, the task's own: a task "Check proofs" has two boxes named "Check
+proofs". Only the column the box sits in, "Started" or "Closed", tells
+which is which.
+
+On Settings › Workflow › "Tasks and Discussions", every template's
+"Auto-add at stage" box is named "Automatically add this task and
+discussion when a submission reaches a specific stage", which names
+neither the template nor the stage. Every stage's "Add template" button
+on that screen is named "Add template" alone.
+
+Each control's name should say what it does and which task, template or
+stage it belongs to. A manager can switch "Auto-add at stage" on for
+the wrong template, because the question that follows names the stage
+but not the template.
+Basis: probe, 2026-10-09. <sup>[f-a32](#fn-a32)</sup>
 
 <a id="a33"></a>
-**A33 — The History does not order events saved in the same second** · 🐞 · minor.
-A task's or discussion's History lists its events newest first, but
-events saved within the same second keep whatever order the application
-fetches them in, which differs from one install to another. After a
-reply with a file, a journal listed "{username} ({roles}) posted a
-response on {date}" above "{file name} uploaded by {username} on
-{date}", and a preprint server listed it below. The History is meant to
-put such events in the order they were saved, latest first, and that
-order never takes effect. Lines from one save, such as a reply and its
-file, can read in either order.
-Basis: probe, 2026-10-02. <sup>[f-a33](#fn-a33)</sup>
+**A33 — A task's or discussion's History lists the lines one save writes within a second oldest first** · 🐞 · low.
+A task's or discussion's History (its row's "More Actions" › "History")
+lists its events newest first. Two lines that one save writes within
+the same second are the exception: the line saved first stands on top.
+On PostgreSQL it did so in every History read, also when the same
+History was opened again. Nothing in the application sets that order;
+the database's answer does.
+
+An "Edit" that adds a participant and a file saves the participant's
+line, then the file's, within one second each time it was tried (nine
+edits). The History lists "… added by …" above "{file name} uploaded
+by …".
+
+A reply with a file saves the reply's line, then the file's. When both
+fall within one second, as in five replies of ten, the History lists
+"{username} ({roles}) posted a response …" above "{file name} uploaded
+by …". When the file's line falls in the next second, it stands on
+top, as it should.
+
+The row's "Activity" column takes the top of the same list. After that
+edit it names "… added by …" as the item's latest change, beside the
+latest reply, where the file was saved last. Both lines come from one
+save, so nobody is led to a wrong action: the cost is a log that reads
+one save against the order of the rest.
+Basis: probe, 2026-10-09. <sup>[f-a33](#fn-a33)</sup>
 
 <a id="a34"></a>
-**A34 — An overdue task cannot be edited until its due date is moved** · 🐞 · user-visible.
-Once a task's due date has passed, its "Edit" window shows that date
-under "Due Date", and every "Save" that leaves it there is refused with
-"Start date should be greater than or equal to today" under "Due Date"
-and "Please correct one error.", even when only "Name" was changed.
-Whoever manages the task expects to rename it, add a participant or
-rewrite its message without touching the deadline; instead they must
-first move the due date to today or later. The check should apply only
-to a due date that was changed. Seen on a journal; a press and a
-preprint server were not tried.
-Basis: probe, 2026-10-02. <sup>[f-a34](#fn-a34)</sup>
+**A34 — An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later** · 🐞 · medium.
+Once a task's due date has passed, its "Edit" window in a stage's "Tasks
+& Discussions" refuses every "Save" that leaves the date as it is. The
+window stays open with "Start date should be greater than or equal to
+today" under "Due Date", even when only "Name" was changed or a
+participant was added. A task has no start date: the message is about
+the due date.
+
+Whoever edits the task expects to rename it, give it an owner or add a
+person without touching the deadline. The way round is to set "Due
+Date" to today or later in the same window. That takes the "Overdue"
+marking off the task; the missed date stays in the task's History, and
+nothing else follows a task's due date.
+
+The screens require a due date on every task, so every open task that
+runs late is affected. That includes a task added automatically from a
+template, which has no owner until someone edits it. On such a task an
+edit that is accepted also records "Due date changed" in the History,
+with the same date twice.
+Basis: probe, 2026-10-09. <sup>[f-a34](#fn-a34)</sup>
 
 <a id="a35"></a>
 **A35 — A Copyeditor is offered "Workflow Files" with no stage to choose** · ❓ · minor.
@@ -1883,17 +1927,28 @@ source is offered but can never be used, and nothing says why.
 Basis: probe, 2026-10-05. <sup>[f-a35](#fn-a35)</sup>
 
 <a id="a36"></a>
-**A36 — A manager-level person taken off an item while its window is open is told "An unexpected error has occurred"** · 🐞 · minor.
-A manager-level person has a discussion's window open while someone
-else's "Edit" unticks them as a participant. Their "Add New Message" ›
-"Save" then opens "Error" with "An unexpected error has occurred. Please
-reload the page and try again.", and the message is not saved. A Section
-Editor taken off the same way is told why: "You do not have permission
-to modify this discussion." (Rule 13d). The manager-level person is told
-the application failed, when it refused a reply from someone no longer a
-participant; after a reload the window reads "To add a new message,
-please assign yourself as a participant.".
-Basis: probe, 2026-10-05. <sup>[f-a36](#fn-a36)</sup>
+**A36 — A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason** · 🐞 · low.
+A manager-level user (a Journal Manager or Journal Editor, or the same
+level on a press or a preprint server) has a discussion's window open.
+Someone else opens the discussion's "Edit", unticks them as a
+participant and saves. Their "Add New Message" › "Save" in the window
+still open then shows "Error" with "An unexpected error has occurred.
+Please reload the page and try again.". The reply is not saved, which is
+right, since only participants may reply; they are not told that.
+
+The server does not fail. It refuses the reply, in a form the page
+cannot show, and writes one error line to its log for each try. "OK"
+closes "Error" and the typed reply is still in its box, so it can be
+copied before the reload. After a reload the window says what to do: "To
+add a new message, please assign yourself as a participant.".
+
+It happens only in a window opened before the untick, for as long as
+that window stays open; a window opened afterwards has that line in
+place of the button. A Section Editor or a Copyeditor taken off the same
+way is told why: "You do not have permission to modify this
+discussion.". On 3.5 the same reply is saved, because a reply there
+makes its writer a participant again.
+Basis: probe, 2026-10-09. <sup>[f-a36](#fn-a36)</sup>
 
 ### OMP
 
@@ -2184,6 +2239,7 @@ Issue report: [pkp-e2e#425](https://github.com/jardakotesovec/pkp-e2e/issues/425
 
 <a id="fn-a15"></a>
 **f-a15** — Note ad. Live-probed 2026-09-23 on all three apps, in French (Canada): the "Add" window's template search box read "Trouver un modèle de courriel". lib/pkp `locale/en/common.po` holds `common.findTemplate` as "Find Template"; `locale/fr_CA/common.po` and `locale/fr/common.po` both hold "Trouver un modèle de courriel" (read 2026-10-08, lib/pkp `3bcc0a0cb2`), so French (France) reads the same (code, not opened). One key has two uses. The email composer's template search reads it in `templates/decision/record.tpl` and ui-library's `RequestReviewRoundAuthorResponse.vue` and `UserInvitationEmailComposerStep.vue` (through `Composer.vue`), where the French is right; those were read in the code, not opened in French. `DiscussionManagerTemplates.vue` reads it for this window's task and discussion templates (ui-library `bc9a03b9`, 2025-07-30, `pkp/pkp-lib#11291`; the file is not on `stable-3_5_0`), where the French is wrong. The raw keys the same probes read on the panels and windows (note ad) are texts French lacks, and no finding.
+Issue report: [pkp-e2e#950](https://github.com/jardakotesovec/pkp-e2e/issues/950) ([docs/issues/U37-A15-add-window-template-search-french-email-template.md](../issues/U37-A15-add-window-template-search-french-email-template.md)).
 
 <a id="fn-a16"></a>
 **f-a16** — Note l: the overdue test compares now with the due date's midnight. Live-probed 2026-09-23 on all three apps: a task due 2026-09-23 (seeded, and one saved on screen with that date) read "Overdue" with the overdue line that day.
@@ -2244,18 +2300,22 @@ Issue report: [pkp-e2e#430](https://github.com/jardakotesovec/pkp-e2e/issues/430
 
 <a id="fn-a32"></a>
 **f-a32** — Live-probed 2026-10-02 (note td20). ui-library `DiscussionManagerCellStarted.vue` and `DiscussionManagerCellClosed.vue` label their input with `labelIds` = `discussion_name_{id} {tableId}_{index}`: the first id is the row's name link, the second matches no element on the page, so both inputs take the item's name. `TaskTemplateManagerCellAutoAdd.vue` gives every row's box the same `aria-label`, `taskTemplates.templateAutoAdd` (lib/pkp `locale/en/submission.po`). The same cells are A26's.
+Issue report: [pkp-e2e#949](https://github.com/jardakotesovec/pkp-e2e/issues/949) ([docs/issues/U37-A32-task-boxes-screen-reader-shared-names.md](../issues/U37-A32-task-boxes-screen-reader-shared-names.md)).
 
 <a id="fn-a33"></a>
 **f-a33** — Live-probed 2026-10-02 (note td22). The event-log `Collector` returns a task's entries ordered by `date_logged` alone; `TaskResource::toArray()` then calls `sortBy(['dateLogged' => 'desc', 'id' => 'desc'])` (c69d929b26, `pkp/pkp-lib#12451`, merged 2026-03-15), which Laravel's `sortByMany()` reads as the values to sort on, so it sorts nothing and lines of one second keep the database's order. Checked in PHP against the bundled Laravel, 2026-10-02: that array leaves a collection as it is, where `[['dateLogged', 'desc'], ['id', 'desc']]` sorts it. Note y saw the same on 2026-09-23 (events of one second in different orders between apps).
+Issue report: [pkp-e2e#948](https://github.com/jardakotesovec/pkp-e2e/issues/948) ([docs/issues/U37-A33-history-same-second-order.md](../issues/U37-A33-history-same-second-order.md)).
 
 <a id="fn-a34"></a>
 **f-a34** — Live-probed 2026-10-02 (note td21). `EditTask::rules()` (lib/pkp `api/v1/submissions/tasks/formRequests/EditTask.php`) checks `dateDue` with `after_or_equal:today` on every edit, and `saveWorkItem()` sends `dateDue` with every "Save" (note v), so an unchanged past date is refused. A press and a preprint server read in the code only: the same lib/pkp rule. The wording of the refusal is A10's.
+Issue report: [pkp-e2e#947](https://github.com/jardakotesovec/pkp-e2e/issues/947) ([docs/issues/U37-A34-overdue-task-edit-refused.md](../issues/U37-A34-overdue-task-edit-refused.md)).
 
 <a id="fn-a35"></a>
 **f-a35** — Note g. Read in the code: `getPermittedNamespacesForStage()` (`useFileManagerConfig.js`) keeps a stage's file list only when the user holds a role on that stage and `getManagerConfig()`, which reads the submission's current stage, permits them an action on it; on screen, the Copyediting lists permitted the Copyeditor none once the submission was at Production. Live-probed 2026-10-05 on OJS and OMP, two runs: the Copyeditor on the Copyediting stage of a submission at Production found every option of "Select submission stage" disabled, in the "Add" window and in the reply box of a discussion they had saved; on a submission still at Copyediting, "Copyediting" enabled with "Copyedited Files" and "Draft Files"; the Journal Manager and the Section Editor (Series Editor) had every stage enabled on both.
 
 <a id="fn-a36"></a>
 **f-a36** — Note td23. `AddNote::rules()` (lib/pkp `api/v1/submissions/tasks/formRequests/AddNote.php`) checks `userId`, the signed-in user, with `Rule::exists('edit_task_participants', 'user_id')` for the task, so a manager-level user, whom the access policy admits without being a participant, is refused with 422 `{"userId":["The selected user id is invalid."]}`, a field the reply box has no place for, and the page shows its generic error.
+Issue report: [pkp-e2e#946](https://github.com/jardakotesovec/pkp-e2e/issues/946) ([docs/issues/U37-A36-taken-off-manager-reply-unexpected-error.md](../issues/U37-A36-taken-off-manager-reply-unexpected-error.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Note n: the reviewer group is the first of the press's two reviewer groups the database returns. Live-probed 2026-09-23 on OMP, two fresh presses: "External Reviewer" in one run's manager window, "Internal Reviewer" in others, the manager's, the Author's and the reviewer's windows differing; OJS prints "Reviewer".

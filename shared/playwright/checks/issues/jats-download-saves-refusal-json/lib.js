@@ -43,7 +43,7 @@ async function chooseJats(page) {
     await idle(page);
     let link = dlg.getByRole('link', {name: 'JATS XML', exact: true}).first();
     if (!(await link.isVisible().catch(() => false))) {
-        const nodes = dlg.getByRole('link', {name: /^(Unassigned version|Version of Record|Author Original|All Versions)\b/});
+        const nodes = dlg.getByRole('link', {name: /^(Unassigned version|Version of Record|Author(?:'s)? Original|All Versions)\b/});
         if (await nodes.count()) { await nodes.last().click(); await idle(page); }
         link = dlg.getByRole('link', {name: 'JATS XML', exact: true}).first();
     }

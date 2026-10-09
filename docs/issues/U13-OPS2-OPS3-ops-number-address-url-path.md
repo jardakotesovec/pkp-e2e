@@ -59,7 +59,7 @@ Preconditions:
 - PKP's default test dataset for OPS `main`, freshly loaded. Submission
   3, "Computer Skill Requirements for New and Existing Teachers:
   Implications for Policy and Practice", is posted in two versions,
-  "Author Original 1.0" (version ID 3, galley "PDF" ID 3) and "Author
+  "Author's Original 1.0" (version ID 3, galley "PDF" ID 3) and "Author's
   Original 2.0" (version ID 4, galley "PDF" ID 4). It has no URL Path.
 - Steps 2 to 5 add what the dataset lacks: a URL Path on the preprint and
   on its "PDF" galley, and a galley that is not a PDF (the dataset's
@@ -68,7 +68,7 @@ Preconditions:
 1. Sign in as `dbarnes` (Preprint Server manager).
 2. Open submission 3's workflow,
    `/index.php/publicknowledge/en/dashboard/editorial?workflowSubmissionId=3`.
-   It opens on "Author Original 2.0".
+   It opens on "Author's Original 2.0".
 3. Under "Preprint", open "Preprint entry", type `u13ir2-path` in "URL
    Path" and press "Save".
 4. Open "Galleys". On "PDF", choose "More Actions" › "Edit", type
@@ -81,14 +81,14 @@ Preconditions:
    `…/en/preprint/view/u13ir2-path`, the preprint's page, as expected.
 7. Press the galley link "HTML" (`…/en/preprint/view/u13ir2-path/21`).
 8. Open `/index.php/publicknowledge/preprint/view/3/version/3`, the ID
-   address of "Author Original 1.0".
+   address of "Author's Original 1.0".
 9. Open `/index.php/publicknowledge/preprint/view/3/4`, the ID address
    of the "PDF" galley.
 10. Open `/index.php/publicknowledge/preprint/view/u13ir2-path/4`, the
     "PDF" galley's ID after the preprint's URL Path.
 
 **Expected:** step 7 downloads the HTML file. Step 8 lands on
-`…/en/preprint/view/u13ir2-path/version/3`, "Author Original 1.0" under
+`…/en/preprint/view/u13ir2-path/version/3`, "Author's Original 1.0" under
 "This is an outdated version …". Steps 9 and 10 land on
 `…/en/preprint/view/u13ir2-path/u13ir2-pdf`, the PDF reader.
 
@@ -101,7 +101,7 @@ Preconditions:
   404 …/en/preprint/download/u13ir2-path
   ```
 - Step 8 is forwarded to `…/en/preprint/view/u13ir2-path/3` and from
-  there to `…/en/preprint/view/u13ir2-path`: the page of "Author
+  there to `…/en/preprint/view/u13ir2-path`: the page of "Author's
   Original 2.0", with no outdated-version notice.
 - Step 9 lands on `…/en/preprint/view/u13ir2-path`, the preprint's page,
   not the PDF reader.

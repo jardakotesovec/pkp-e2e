@@ -1,0 +1,27 @@
+--- a/lib/pkp/api/v1/submissions/tasks/resources/TaskResource.php
++++ b/lib/pkp/api/v1/submissions/tasks/resources/TaskResource.php
+@@ -59,11 +59,8 @@
+             'fileGenres' => $fileGenres,
+         ]));
+ 
+-        $activities = $activities->filter(fn (EventLogEntry $activity) => $activity->getAssocId() == $this->id)
+-            ->sortBy([
+-                'dateLogged' => 'desc',
+-                'id' => 'desc'
+-            ]);
++        // Already newest first, and of one second the latest saved first: the event log Collector's order
++        $activities = $activities->filter(fn (EventLogEntry $activity) => $activity->getAssocId() == $this->id);
+         $latestActivities = [];
+         // always add an overdue at the start of the list
+         if ($dateDue = $this->dateDue) {
+--- a/lib/pkp/classes/log/event/Collector.php
++++ b/lib/pkp/classes/log/event/Collector.php
+@@ -114,6 +114,8 @@
+                 return $q->where('event_type', $this->eventType);
+             })
+             ->orderBy('date_logged', 'desc')
++            // date_logged holds whole seconds: of the entries of one second, the latest saved first
++            ->orderBy('e.log_id', 'desc')
+             ->when(!is_null($this->count), function (Builder $q) {
+                 return $q->limit($this->count);
+             })

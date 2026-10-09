@@ -93,7 +93,7 @@ placed, the sidebar; the two view pages carry none of these, only their
 own bar. The book's page and the chapter page have no trail ("Home / …")
 above the title; the payment page has "Home / Manual Fee Payment". A part
 appears only when the version has something to put in it (Rule 7),
-except the "References" heading and the copyright line. <sup>d</sup>
+except the copyright line. <sup>d</sup>
 
 <a id="book-page"></a>
 **The book's page.** The browser tab reads "{title} | {press name}", or
@@ -115,7 +115,7 @@ Top to bottom, the main column holds: <sup>d</sup>
 | **Table of contents** | — | The chapters of Rule 10, with no visible heading (a screen reader reads "Chapters"). |
 | **"Downloads"** | — | The chart of Rule 20, only when the theme is set to show one. |
 | **"Author Biography"** / **"Author Biographies"** | — | Described in [Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 14. |
-| **"References"** | — | The version's references, as on an article's page ([→ the "References" block](U13-article-landing-page-and-reading.md#references)); a book with no references shows the heading with nothing under it ([→ Citations & references, A20](U42-citations-and-references.md#a20)). |
+| **"References"** | — | The version's references, as on an article's page ([→ the "References" block](U13-article-landing-page-and-reading.md#references)); a book with no references has no "References" heading (Rule 7). |
 
 The side column, top to bottom: <sup>d</sup>
 
@@ -238,8 +238,8 @@ link, not a button. A journal's page puts the instructions under
    Record of it is published. Until then its address answers the "404 Not
    Found" page to a visitor and to a Reader, and so does the address of
    any of its versions. A scheduled book answers the same until its date.
-   A book whose only published version is an "Author Original" (a version
-   added with "Create New Version" and the "Publication Stage" "Author
+   A book whose only published version is an "Author's Original" (a version
+   added with "Create New Version" and the "Publication Stage" "Author's
    Original (AO)") answers the same to a visitor and a Reader, as the
    catalog leaves it out
    too ([Catalog browse](U68-catalog-browse.md), its Rule 3), while the
@@ -298,12 +298,12 @@ link, not a button. A journal's page puts the instructions under
    the current version's title [A5](#a5). <sup>g</sup> <sup>td8</sup>
 7. **Empty parts are left out.** Every part of the page's tables appears
    only when the version has something to put in it, except the
-   "References" heading and the copyright line. A book with a title, one
-   contributor, an abstract and no chapter, format, series or category
-   shows the title, the contributor, "Synopsis", the "References" heading
-   with nothing under it, the cover (the default picture), "Published"
-   and "Versions" and the copyright line "Copyright (c) {year} {press
-   name}", and no other heading. <sup>d</sup> <sup>td24</sup>
+   copyright line. A book with a title, one contributor, an abstract and
+   no chapter, format, series, category or references shows the title,
+   the contributor, "Synopsis", the cover (the default picture),
+   "Published" and "Versions" and the copyright line "Copyright (c)
+   {year} {press name}", and no other heading. <sup>d</sup>
+   <sup>td24</sup>
 8. **The date line.** Under "Published": the first version's page, its
    date; a later version's, "{first version's date} — Updated on {this
    version's date}", both in the press's long date format ([Appearance &
@@ -328,8 +328,13 @@ link, not a button. A journal's page puts the instructions under
 **Contents, formats and files**
 
 10. **The table of contents.** The shown version's chapters, in the
-    order they were added on its Chapters page ([Chapters & work
-    type](U72-chapters-work-type.md)), each with: <sup>i</sup> <sup>td10</sup>
+    order of its Chapters page: the order they were added in, until
+    another is saved there with "Order" and "Done" ([Chapters & work
+    type](U72-chapters-work-type.md), its Rule 8a). An order saved on a
+    published version shows the next time the book's page opens, with
+    nothing published again: a page that listed "Tides", "Harbours",
+    "Estuaries" lists "Estuaries", "Tides", "Harbours" once "Estuaries"
+    is moved above "Tides". Each chapter is listed with: <sup>i</sup> <sup>td10</sup>
     - its title and subtitle, a link to its chapter page when the
       chapter has one (Rule 15), plain text otherwise; on an older
       version's page it opens that version's chapter page only where Rule
@@ -768,8 +773,8 @@ tooling recipe are in the footnote. <sup>s</sup>
    "Shorelines", subtitle "Essays on the Coast", URL Path "shorelines",
    by Ada Quill and Lee Marsh, with an abstract, the keywords alpha and
    beta gamma, a plain language summary, the series "Monographs", the
-   category "History", the date 2024-03-05, no chapter, and three
-   approved, available formats: "PDF" holding article.pdf on "Open
+   category "History", the date 2024-03-05, no chapter, no references,
+   and three approved, available formats: "PDF" holding article.pdf on "Open
    Access", "Online" at the remote address https://example.org/shorelines,
    and the physical "Paperback", with no file, the "ISBN-13 (15)" code
    978-951-98548-9-2, a "Publication date (01)" of 20240305 in the "Date
@@ -783,11 +788,12 @@ tooling recipe are in the footnote. <sup>s</sup>
    - **The main column**: top to bottom, with no notice above them: the
      heading "Shorelines" with "Essays on the Coast"; Ada Quill and Lee
      Marsh; "Keywords:" followed by alpha and beta gamma joined by a
-     comma, in either order; "Synopsis" over the abstract; "Plain
-     Language Summary" over the summary; and the "References" heading
-     with nothing under it. There is no "Downloads" chart, the press
-     being on "Do not display submission usage statistics chart for
-     reader." (Fields, the book's page; Rule 7; Settings bullet 5).
+     comma, in either order; "Synopsis" over the abstract; and "Plain
+     Language Summary" over the summary, the last heading of the
+     column. There is no "References" heading, the book having no
+     references, and no "Downloads" chart, the press being on "Do not
+     display submission usage statistics chart for reader." (Fields,
+     the book's page; Rule 7; Settings bullet 5).
    - **The side column**: top to bottom: the press's default book
      picture, not a link; the links "PDF" and "Online", in either order,
      and none for "Paperback", which holds no file; "Published" with
@@ -813,10 +819,9 @@ tooling recipe are in the footnote. <sup>s</sup>
      address stays as typed (Rule 2).
    - **Control**: a second published book of the press, "Bare", with
      only a title, the contributor Ada Quill and an abstract, shows the
-     title, Ada Quill, "Synopsis", the "References" heading with nothing
-     under it, the default book picture, "Published", "Versions" and the
-     copyright line "Copyright (c) {year} {press name}", and no other
-     heading (Rule 7). <sup>s</sup>
+     title, Ada Quill, "Synopsis", the default book picture,
+     "Published", "Versions" and the copyright line "Copyright (c)
+     {year} {press name}", and no other heading (Rule 7). <sup>s</sup>
 
 2. **The table of contents, a chapter's page and the "Downloads" chart**
 
@@ -1167,6 +1172,10 @@ Left out of the scenarios above, by reason:
     payment page)
   - an HTML file linking the press with "omp://press", the link opening
     the press's home page (Fields, the HTML view page)
+  - a published book's table of contents listing its chapters in a new
+    order, after the last chapter is moved above the first with
+    "Order" and "Done" on the published version's Chapters page
+    (Rule 10)
 - **Nothing new to test**:
   - an unassigned Series editor or assistant role opening the preview
     (Actors row 2)
@@ -1193,7 +1202,7 @@ Left out of the scenarios above, by reason:
     Reader is (Actors row 4; Rule 14; scenario 4)
 - **Register carries it**:
   - A1 (an address that names no book; Rule 3a)
-  - A2 (a book published only as an "Author Original"; Rule 3)
+  - A2 (a book published only as an "Author's Original"; Rule 3)
   - A3 (a version address that names no version; Rule 4)
   - A4 (a new version's preview under both notices, dated today or
     with the version's saved date; Rule 5b)
@@ -1232,7 +1241,6 @@ Left out of the scenarios above, by reason:
   - A26 (a review made public, missing from the published book's page;
     Rule 22; Settings bullet 16)
 - **No seed**:
-  - chapters dragged into a new order on the Chapters page (Rule 10)
   - a purchase completed through PayPal (Rule 14)
 - **Owned by another feature**:
   - the Settings pages and the plugin switches (Actors row 7;
@@ -1299,7 +1307,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A27](#a27) | A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A24](#a24) | On a preview, every file link of the book opens "404 Not Found" | 🐞 | minor | — |
 | [A11](#a11) | A buyer who pays by hand never gets the file | ❓ | user-visible | — |
-| [A2](#a2) | A book published only as an Author Original has no page | ❓ | minor | — |
+| [A2](#a2) | A book published only as an Author's Original has no page | ❓ | minor | — |
 | [A21](#a21) | On a preview, "How to Cite" works only for the roles assigned to the book | ❓ | minor | — |
 | [A22](#a22) | "APA" prints a series position as a number of volumes | ❓ | minor | — |
 | [A14](#a14) | A chapter new in a later version is cited as older than it is | ❓ | minor | — |
@@ -1326,16 +1334,16 @@ preprint address that names nothing.
 Basis: probe, 2026-10-01. <sup>f-a1</sup>
 
 <a id="a2"></a>
-**A2 — A book published only as an Author Original has no page** · ❓ · minor.
-A book whose only published version is an "Author Original" answers "404
+**A2 — A book published only as an Author's Original has no page** · ❓ · minor.
+A book whose only published version is an "Author's Original" answers "404
 Not Found" to readers, and the catalog leaves it out, although the
 workflow shows that version "Status: Published". The Press manager and
 the Site Administrator who type the book's address get its page as if
 published, with no preview notice, "Published {Version of Record date} —
-Updated on {Author Original date}" and "Versions" "{date} (Author
+Updated on {Author's Original date}" and "Versions" "{date} (Author's
 Original 1.0)"; the workflow, which shows the Version of Record "Status:
 Unpublished", offers them neither "View" nor "Preview".
-Question: should a published Author Original make the book public on a
+Question: should a published Author's Original make the book public on a
 press? Lean: intended; only a Version of Record puts a book in the catalog,
 but the workflow could say so.
 Basis: probe, 2026-09-28. <sup>f-a2</sup>
@@ -1693,10 +1701,10 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td5** — Live-probed 2026-09-28 (Actors row 2; Rule 5): on scratch presses with an unpublished book in Production, the book's page opened under the preview notice for the Press manager, Press editor, Production editor, an assigned and an unassigned Series editor, an assigned and an unassigned Copyeditor, the other seven assistant roles (unassigned), the book's Author and the Site Administrator. A visitor, a Reader, an External and an Internal Reviewer, and another Author, a Volume editor, a Chapter Author and a Translator not on the book got "404 Not Found"; a submission its author never finished answered "404 Not Found" to every role. The workflow offered "Preview" to the Press manager and the assigned Series editor, and the book's Author neither "Preview" nor "View". The book's chapter page opened for every previewing role without a notice, reading "Published March 5, 2024" (A17).
 
 <a id="fn-d"></a>
-**d** — `monograph_full.tpl`: title `getLocalizedFullTitle(null, 'html')`; `authors.tpl`; `.item.doi` (`doi.readerDisplayName` "DOI:"); `.item.keywords` (`common.keywords` through `semicolon` "{$label}: ", joined by `common.commaListSeparator`); `.item.abstract` (`submission.synopsis` "Synopsis", OMP `locale/en/submission.po`; always rendered); plain language summary; `.item.chapters` (heading `pkp_screen_reader` `submission.chapters`); hook `Templates::Catalog::Book::Main`; the chart; `.item.author_bios`; `.item.references` when `citations` or `citationsRaw` (the empty heading: note of U42's A20). Side column: `.item.cover` (`getLocalizedCoverImageThumbnailUrl()`, falling back to `templates/images/book-default_t.png`; `alt` from the cover's `altText`); `.item.files` (`submission.downloads`, screen reader only); `.item.date_published` with `.sub_item.versions`; `.item.series` (`series.series`, `catalog.manage.series.onlineIssn` / `printIssn`) linking `catalog/series/{path}`; `.item.categories` (`catalog.categories`) linking `catalog/category/{path}`; data availability, funding statement, funders, copyright (`submission.copyrightStatement`), license; `.item.publication_format` blocks; hook `Templates::Catalog::Book::Details`. `book.tpl` sets `pageTitle` from `getCurrentPublication()->getLocalizedFullTitle()` (book) or the chapter's full title; `headerHead.tpl` appends " | {context name}". No template of the page includes `breadcrumbs.tpl`. Live-probed 2026-09-28 (Fields intro, the book's page): tabs "K2 Minimal Book | {press name}" and, with a subtitle, "K2 Full Book: A Subtitle | {press name}"; the two columns side by side at 1280 px; the parts in the tables' order; the view pages without header, footer or sidebar, the payment page with them and the trail "Home / Manual Fee Payment". Keywords typed "alpha", "beta gamma" (stored in that order) read "alpha, beta gamma" in three runs and "beta gamma, alpha" in one. A format with no code, date, identifier or physical box got no details block. Settings bullet 14: a format's Publisher ID "pid-k3", saved and read back, appeared nowhere in the book page's HTML; a contributor unticked from "Include this contributor when identifying authors in lists of publications." on a new version was still listed under "Authors", while the catalog's line named only the other author; an Edited Volume's new version credited its volume editor "(ed)"; a press license saved on screen showed on a book published after it and not on one published before; a 400 × 400 cover showed as a 100 × 100 copy.
+**d** — `monograph_full.tpl`: title `getLocalizedFullTitle(null, 'html')`; `authors.tpl`; `.item.doi` (`doi.readerDisplayName` "DOI:"); `.item.keywords` (`common.keywords` through `semicolon` "{$label}: ", joined by `common.commaListSeparator`); `.item.abstract` (`submission.synopsis` "Synopsis", OMP `locale/en/submission.po`; always rendered); plain language summary; `.item.chapters` (heading `pkp_screen_reader` `submission.chapters`); hook `Templates::Catalog::Book::Main`; the chart; `.item.author_bios`; `.item.references` when `count($citations)` or `citationsRaw` (pkp/omp#2502, read 2026-10-09 at its head `52cf201a96` before its merge, and merged that day as omp `77ca57587a`: before it the template tested `$citations`, which a version with no references also passed, and printed the heading over an empty `.value`; the re-read is in td24). Side column: `.item.cover` (`getLocalizedCoverImageThumbnailUrl()`, falling back to `templates/images/book-default_t.png`; `alt` from the cover's `altText`); `.item.files` (`submission.downloads`, screen reader only); `.item.date_published` with `.sub_item.versions`; `.item.series` (`series.series`, `catalog.manage.series.onlineIssn` / `printIssn`) linking `catalog/series/{path}`; `.item.categories` (`catalog.categories`) linking `catalog/category/{path}`; data availability, funding statement, funders, copyright (`submission.copyrightStatement`), license; `.item.publication_format` blocks; hook `Templates::Catalog::Book::Details`. `book.tpl` sets `pageTitle` from `getCurrentPublication()->getLocalizedFullTitle()` (book) or the chapter's full title; `headerHead.tpl` appends " | {context name}". No template of the page includes `breadcrumbs.tpl`. Live-probed 2026-09-28 (Fields intro, the book's page): tabs "K2 Minimal Book | {press name}" and, with a subtitle, "K2 Full Book: A Subtitle | {press name}"; the two columns side by side at 1280 px; the parts in the tables' order; the view pages without header, footer or sidebar, the payment page with them and the trail "Home / Manual Fee Payment". Keywords typed "alpha", "beta gamma" (stored in that order) read "alpha, beta gamma" in three runs and "beta gamma, alpha" in one. A format with no code, date, identifier or physical box got no details block. Settings bullet 14: a format's Publisher ID "pid-k3", saved and read back, appeared nowhere in the book page's HTML; a contributor unticked from "Include this contributor when identifying authors in lists of publications." on a new version was still listed under "Authors", while the catalog's line named only the other author; an Edited Volume's new version credited its volume editor "(ed)"; a press license saved on screen showed on a book published after it and not on one published before; a 400 × 400 cover showed as a 100 × 100 copy.
 
 <a id="fn-td24"></a>
-**td24** — Live-probed 2026-09-28 (Rule 7; Fields, Cover): the bare book showed the screen-reader "Authors" heading, "Synopsis", an empty "References", the default book picture (not a link, empty alternate text), "Published", "Versions" and "Copyright (c) 2024 {press name}", and no other heading. A cover saved with "Alternate text" showed its small copy with that text, not a link.
+**td24** — Live-probed 2026-09-28 (Rule 7; Fields, Cover): the bare book showed the screen-reader "Authors" heading, "Synopsis", an empty "References", the default book picture (not a link, empty alternate text), "Published", "Versions" and "Copyright (c) 2024 {press name}", and no other heading. A cover saved with "Alternate text" showed its small copy with that text, not a link. Re-read 2026-10-09 at the PR head `52cf201a96` of pkp/omp#2502 (issue pkp/pkp-lib#13189), before its merge, merged locally into omp `c07d91ced2`; the PR merged that day as omp `77ca57587a`, whose tree is the one read (Rule 7; Fields, "References"; scenario 1): a published book with no references ("Bomb Canada and Other Unkind Remarks in the American Media", book 5 of PKP's default dataset) had no "References" block on its page, where the same book on `c07d91ced2` without the change showed the "References" heading with nothing under it; a book given one reference in a new version ("Ridge, A. (2021). Tide tables u42r9.") showed "References" over that reference, with the change and without it. The "empty "References"" of the 2026-09-28 read is that earlier state.
 
 <a id="fn-e"></a>
 **e** — `chapter.tpl`: notice as note l; title `$chapter->getLocalizedFullTitle()`; `authors.tpl` with `$chapterAuthors` (the edited-volume swap needs `!$isChapterRequest`); DOI from `$chapterDoiObject` (the chapter's, or a sibling version's per `CatalogBookHandler`); abstract only when set; hook `Templates::Catalog::Chapter::Main`; bios of the chapter authors; side: cover wrapped in a link to `catalog/book/{id}` (current) or `…/{bestId}/version/{pid}`; the chapter's files through `publicationFormats.tpl` with `$isChapterRequest` (remote formats skipped); `.item.monograph` with `chapter.volume` "Volume" and `chapter.pages` "Pages" (OMP `locale/en/submission.po`); date and versions (note l); series, categories, copyright; license from the chapter's `licenseUrl` or the publication's, the CC badge from `getCCLicenseBadge()` of the chapter's URL when set; hook `Templates::Catalog::Chapter::Details`. Live-probed 2026-09-28 (Fields, the chapter page): tab "Tides: Low and high | {press name}"; the parts in the tables' order; an Edited Volume's chapter listed its own authors; "Pages 1-20"; the chapter's own "License URL" as a Creative Commons badge, an unknown one as a link reading "License"; the cover and "Volume" linked `…/catalog/book/{number}` (older version `…/version/{id}`), a number even with a URL Path saved. On a book with no cover the cover link had no name for a screen reader, seen in one run; what it reads with a cover is not settled.
@@ -1714,13 +1722,13 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td26** — Live-probed 2026-10-05 (Fields, the HTML view page; A25; two runs): on a scratch press, the Press manager uploaded two HTML files into one "HTML" format of an unpublished book ("Change File", "Set Terms" "Open Access") and published it; the book's page listed both for a visitor, a Reader and the Press manager. The file holding only a link `omp://press` opened under the tab "HTML view of the file …" with its frame reading "Press link Visit the press.", the link's address the press's home page, followed inside the frame to the press's home page. `HtmlGalleyHelper::handleOmpUrl()` rewrites `omp://press` and `omp://monograph/{id}` links; the second fails (f-a25).
 
 <a id="fn-g"></a>
-**g** — `CatalogBookHandler::book()`: `version/{publicationId}` picks that publication from the submission's publications into the typed property `public Publication $publication` (no default), so an id matching none leaves it uninitialized and the following `!$this->publication` throws "must not be accessed before initialization" (a server error); an unpublished publication without `canPreview()` throws not found; a non-numeric first argument that is not the version's `urlPath` and has no sub-path is meant to redirect to the current `urlPath` (or id), but passes a string path to `PKPRequest::redirect()`, which takes `?array $path` since lib/pkp bee9547b49 (2024-06-26), so the redirect throws a TypeError, a server error (A16); a numeric one is never redirected. The URL Path resolves through `Repo::submission()->getByUrlPath()`. An unknown number or path fails `OmpPublishedSubmissionRequiredPolicy` with `user.authorization.invalidPublishedSubmission` "An invalid published submission was specified." (OMP `locale/en/locale.po`), and `PKPPageRouter::handleAuthorizationFailure()` sends a signed-out user to Login and a signed-in one to `user/authorizationDenied`. Submission status: `Repo::submission()->getStatusByPublications()` returns published only for a published publication whose `versionStage` is the final stage (Version of Record); the current publication is the last published one in version order (`getCurrentPublicationIdByPublications()`). Notices: `submission.viewingPreview` (link `dashboard/editorial?workflowSubmissionId={id}`) when the shown publication is not published, and `submission.outdatedVersion` whenever it is not the current publication, with `datePublished|date_format:$dateFormatShort`. Incidentals: the URL Path (U70 claim check K5, 2026-09-27: `catalog/book/{path}` opens, catalog links use the path, `catalog/book/{id}` still opens); the Author Original only (U68 claim check K2, 2026-09-27: the book's page answered 404); the unknown number (U16 claim check K4, 2026-09-25: `catalog/book/999999` landed a visitor on Login). Live-probed 2026-09-28: see td2–td8.
+**g** — `CatalogBookHandler::book()`: `version/{publicationId}` picks that publication from the submission's publications into the typed property `public Publication $publication` (no default), so an id matching none leaves it uninitialized and the following `!$this->publication` throws "must not be accessed before initialization" (a server error); an unpublished publication without `canPreview()` throws not found; a non-numeric first argument that is not the version's `urlPath` and has no sub-path is meant to redirect to the current `urlPath` (or id), but passes a string path to `PKPRequest::redirect()`, which takes `?array $path` since lib/pkp bee9547b49 (2024-06-26), so the redirect throws a TypeError, a server error (A16); a numeric one is never redirected. The URL Path resolves through `Repo::submission()->getByUrlPath()`. An unknown number or path fails `OmpPublishedSubmissionRequiredPolicy` with `user.authorization.invalidPublishedSubmission` "An invalid published submission was specified." (OMP `locale/en/locale.po`), and `PKPPageRouter::handleAuthorizationFailure()` sends a signed-out user to Login and a signed-in one to `user/authorizationDenied`. Submission status: `Repo::submission()->getStatusByPublications()` returns published only for a published publication whose `versionStage` is the final stage (Version of Record); the current publication is the last published one in version order (`getCurrentPublicationIdByPublications()`). Notices: `submission.viewingPreview` (link `dashboard/editorial?workflowSubmissionId={id}`) when the shown publication is not published, and `submission.outdatedVersion` whenever it is not the current publication, with `datePublished|date_format:$dateFormatShort`. Incidentals: the URL Path (U70 claim check K5, 2026-09-27: `catalog/book/{path}` opens, catalog links use the path, `catalog/book/{id}` still opens); the Author's Original only (U68 claim check K2, 2026-09-27: the book's page answered 404); the unknown number (U16 claim check K4, 2026-09-25: `catalog/book/999999` landed a visitor on Login). Live-probed 2026-09-28: see td2–td8.
 
 <a id="fn-td2"></a>
 **td2** — Live-probed 2026-09-28 (Rules 1, 2; A16): every link that leads to the book (the catalog, series and category pages, "New Releases", both home-page lists, a search result, "View Entry") used its URL Path "harbour"; the workflow's "View" and "Preview" opened the page in the same tab. `…/catalog/book/{number}` opened the page and kept the address. After a new version saved "harbour-2" and was published, `…/catalog/book/harbour` answered 500 with a blank page to a visitor, while `…/harbour/version/{id}` still opened; while "harbour-2" sat on the unpublished version, `…/catalog/book/harbour-2` answered the same to a visitor and the Press manager. The chapter page's cover and "Volume" linked `…/catalog/book/{number}`.
 
 <a id="fn-td3"></a>
-**td3** — Live-probed 2026-09-28 (Rule 3; A2): "404 Not Found" for a visitor and a Reader at an unpublished book in Production and its version address, a book scheduled for 2031-01-10 and its version address, and a book whose only published version is "Author Original 1.0" (made on screen) at its book address and both version addresses; the catalog listed none of them. The Press manager and the Site Administrator got the Author Original book's page with no notice.
+**td3** — Live-probed 2026-09-28 (Rule 3; A2): "404 Not Found" for a visitor and a Reader at an unpublished book in Production and its version address, a book scheduled for 2031-01-10 and its version address, and a book whose only published version is "Author's Original 1.0" (made on screen) at its book address and both version addresses; the catalog listed none of them. The Press manager and the Site Administrator got the Author's Original book's page with no notice.
 
 <a id="fn-td4"></a>
 **td4** — Live-probed 2026-09-28 (Rule 3a; A1): signed out, `catalog/book/999999`, `…/no-such-path`, `…/0` and `…/999999/version/1` landed on Login; the seeded Reader got `user/authorizationDenied` reading "An invalid published submission was specified.", with no heading and the tab "| Public Knowledge Press". OJS `article/view/999999` and OPS `preprint/view/999999` answered "404 Not Found" to both.
@@ -1744,7 +1752,7 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td23** — Live-probed 2026-09-28 (Rule 9): one version: "Versions" with "2024-03-05 (Version of Record 1.0)" in plain text; two: newest first, the shown one plain, the current one linking to the book's address, the older to `…/version/{id}`; a third, unpublished version and a second one unpublished again were not listed; "28-09-2026 (Version of Record 1.1)" after a short-format change.
 
 <a id="fn-i"></a>
-**i** — Table of contents: `monograph_full.tpl` `.item.chapters` over `ChapterDAO::getByPublicationId()` (the chapter list's `seq`); the title link when `isPageEnabled()`, to `catalog/book/{bestId}/chapter/{sourceChapterId}` or `…/version/{pid}/chapter/{sourceChapterId}`; the authors line when `$authorString != $chapter->getAuthorNamesAsString()`, where `$authorString` is `Publication::getAuthorString()` ("{name} ({roles})" joined by "; ") and the chapter's is the bare names joined by ", ", so the two never match; the chapter's DOI `doiObject` (or a sibling version's); chapter files `pluck_files by="chapter"`, then per `$publicationFormats` `by="publicationFormat"`, the link through `downloadLink.tpl`. Side column: `CatalogBookHandler::book()` keeps formats with `getIsAvailable()` (remote ones also in `remotePublicationFormats`) and files whose `directSalesPrice` is not null in an available format (`availableFiles`); `publicationFormats.tpl` prints a remote format (`urlRemote`, `target="_blank"`, not on a chapter page), a single file as `pub_format_single`, several as the format's name then per file `span.name` and a `downloadLink.tpl` with `useFilename=true`. `downloadLink.tpl`: with `useFilename` the file's name alone; otherwise, when `getDirectSalesPrice()` and `$currency`, the bare price followed by `payment.directSales.purchase` "Purchase {$format} ({$amount} {$currency})" (OMP `locale/en/locale.po`), else the format's name; the address `catalog/view/{bookBestId}/{formatBestId}/{fileBestId}` or with `version/{pid}` when the publication is not the current one. Incidental (U73 claim check K3, 2026-09-28): "25.00 Purchase PDF (25.00 USD)"; a two-file format listed "replacement.pdf", "article.pdf" where a one-file format read "PDF". Live-probed 2026-09-28: see td10, td11; the side column listed a press's formats in the Publication Formats page's order, and after a format was set "Not Available", or its approval revoked, the page and the side column both moved it last. Only the seeded chapter order was read; a new order dragged on the Chapters page was not reached. Walked 2026-10-01 on OMP `main` (issue report `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`, Evidence, seen in passing): on the default dataset's book 14, after a second version was published, its two files under "PDF" changed places from one run of the same steps to the next (cause not traced; seen on the side column, the table of contents' order not read).
+**i** — Table of contents: `monograph_full.tpl` `.item.chapters` over `ChapterDAO::getByPublicationId()` (the chapter list's `seq`); the title link when `isPageEnabled()`, to `catalog/book/{bestId}/chapter/{sourceChapterId}` or `…/version/{pid}/chapter/{sourceChapterId}`; the authors line when `$authorString != $chapter->getAuthorNamesAsString()`, where `$authorString` is `Publication::getAuthorString()` ("{name} ({roles})" joined by "; ") and the chapter's is the bare names joined by ", ", so the two never match; the chapter's DOI `doiObject` (or a sibling version's); chapter files `pluck_files by="chapter"`, then per `$publicationFormats` `by="publicationFormat"`, the link through `downloadLink.tpl`. Side column: `CatalogBookHandler::book()` keeps formats with `getIsAvailable()` (remote ones also in `remotePublicationFormats`) and files whose `directSalesPrice` is not null in an available format (`availableFiles`); `publicationFormats.tpl` prints a remote format (`urlRemote`, `target="_blank"`, not on a chapter page), a single file as `pub_format_single`, several as the format's name then per file `span.name` and a `downloadLink.tpl` with `useFilename=true`. `downloadLink.tpl`: with `useFilename` the file's name alone; otherwise, when `getDirectSalesPrice()` and `$currency`, the bare price followed by `payment.directSales.purchase` "Purchase {$format} ({$amount} {$currency})" (OMP `locale/en/locale.po`), else the format's name; the address `catalog/view/{bookBestId}/{formatBestId}/{fileBestId}` or with `version/{pid}` when the publication is not the current one. Incidental (U73 claim check K3, 2026-09-28): "25.00 Purchase PDF (25.00 USD)"; a two-file format listed "replacement.pdf", "article.pdf" where a one-file format read "PDF". Live-probed 2026-09-28: see td10, td11; the side column listed a press's formats in the Publication Formats page's order, and after a format was set "Not Available", or its approval revoked, the page and the side column both moved it last. Walked 2026-10-09 on OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`; Rule 10), two runs, each on a scratch press of its own, first seen 2026-10-08: a published Monograph's page, signed out, listed "Tides", "Harbours", "Estuaries", the order they were added in; the Press manager opened the published version's Chapters page (under "Warning: This version has been published. Editing it may impact the published content."), pressed "Order", dragged "Estuaries" above "Tides" and pressed "Done" (the chapters' `seq` then 1 "Estuaries", 2 "Tides", 3 "Harbours"); the page, opened again signed out with the version neither unpublished nor published again, listed "Estuaries", "Tides", "Harbours", "Tides" and "Harbours" each still followed by its author. Until pkp/pkp-lib#13453 (merged 2026-10-07) "Order" could not move a chapter ([Chapters & work type](U72-chapters-work-type.md), its retired A6), so only the order the chapters were added in could be read before. Walked 2026-10-01 on OMP `main` (issue report `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`, Evidence, seen in passing): on the default dataset's book 14, after a second version was published, its two files under "PDF" changed places from one run of the same steps to the next (cause not traced; seen on the side column, the table of contents' order not read).
 
 <a id="fn-td10"></a>
 **td10** — Live-probed 2026-09-28 (Rule 10; A6): "Tides" (page ticked, subtitle "Low and high") a link to `…/chapter/{n}`, "Harbours" and "Coda" plain text; a single-author book showed its author under each chapter with authors, a two-contributor book's chapter credited to both "Ada Author, Lee Second", a chapter with no authors no name; each chapter's file links under the chapter only, none in the side column; the chapter's DOI "DOI: https://doi.org/10.1234/…" as a link.
@@ -1899,7 +1907,7 @@ made on screen with "Create New Version".
 Issue report: [pkp-e2e#292](https://github.com/jardakotesovec/pkp-e2e/issues/292) ([docs/issues/U69-A1-unknown-book-address-asks-sign-in.md](../issues/U69-A1-unknown-book-address-asks-sign-in.md)).
 
 <a id="fn-f-a2"></a>
-**f-a2** — Note g (`getStatusByPublications()` needs a published Version of Record); `canPreview()` lets the Press manager and the Site Administrator in, and the shown publication is published, so no preview notice prints. Live-probed 2026-09-28 (td3): the book's page answered 404 to a visitor and a Reader and opened as published for the Press manager and the Site Administrator; the workflow showed the Author Original "Status: Published", the Version of Record "Status: Unpublished", and neither "View" nor "Preview". The catalog's leaving it out is Catalog browse's Rule 3.
+**f-a2** — Note g (`getStatusByPublications()` needs a published Version of Record); `canPreview()` lets the Press manager and the Site Administrator in, and the shown publication is published, so no preview notice prints. Live-probed 2026-09-28 (td3): the book's page answered 404 to a visitor and a Reader and opened as published for the Press manager and the Site Administrator; the workflow showed the Author's Original "Status: Published", the Version of Record "Status: Unpublished", and neither "View" nor "Preview". The catalog's leaving it out is Catalog browse's Rule 3.
 
 <a id="fn-f-a3"></a>
 **f-a3** — Note g: the uninitialized typed property `CatalogBookHandler::$publication` when `version/{id}` matches no publication of the submission; the log reads "Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization" (`CatalogBookHandler.php` line 122). The typed property dates from omp `29fa88508` (2025-03-20). Live-probed 2026-09-28 (td6): 500 for every id tried and every role.

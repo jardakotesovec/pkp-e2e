@@ -1,8 +1,14 @@
+// U38 A11, retired 2026-10-09 (fixed upstream: pkp/pkp-lib#13465 for pkp/pkp-lib#13192, pkp-lib
+// 15f9f72323; the issue report and its fix.diff are deleted, pkp-e2e#925 closed). The walk stays as
+// the check that showed the fix (step 3 and the unknown number now answer "The requested resource
+// was not found."; a line logged before the fix answers that to its own editor too, so load the
+// dataset fleet afresh before a run) and as the way to make an edited review for a follow-up.
+// What the report said:
 // U38 A11 issue walk: the submission Activity Log's "View changes" opens any edited review by its
 // log-entry number, not only those on this submission's own history. A Section/Series editor
 // assigned to one submission reads the edited review of another; the submission-access check guards
 // the request's submissionId, which viewReviewChange() ignores (it loads the logEntryId by primary
-// key). Issue report: docs/issues/U38-A11-activity-log-view-changes-reads-any-review.md.
+// key).
 // On PKP's default test dataset (a dataset fleet, harness.md "Dataset fleets"), journal/press
 // `publicknowledge`. The kit builds nothing: the edited review is made on screen. A preprint server
 // has no review stage: not walked. Helpers: lib.js and ../modify-review-offered-then-refused/lib.js.

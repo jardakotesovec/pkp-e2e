@@ -109,6 +109,7 @@ windows are the galley row's "Edit" on the Galleys page (a window headed
 | **Publisher ID** | No | Present while publisher IDs are on for that kind of item (Rule 2). Refused, with the reason at the top of the tab, when it is only digits, contains "/", on a press's file looks like "12-34", or when another item of the same kind in the journal already has it (Rule 4). An issue's and a press file's value is never kept (Rules 6, 15). <sup>e</sup> |
 | **URN** area | — | Present while the URN plugin is on for that kind of item; its states are Rule 12. <sup>e</sup> |
 | **Save** | — | Saves both. With a typed URN suffix, the first "Save" keeps the suffix and shows the URN as a preview with the ticked box "Assign the URN to this galley" (chapter, issue…); a second "Save" with the box ticked assigns it (Rules 12, 13). The window closes on success, with no notice. <sup>e</sup> <sup>q23</sup> |
+| **Close** (the window's header) | — | With a "Publisher ID" or a "URN Suffix" typed on the tab and not saved, the header "Close" of a galley's or a chapter's window closes it at once, asking nothing, and the box is empty when the tab is opened again; a press's publication format and file windows close the same way ⚠ [A17](#a17). On a galley's and a chapter's tab a switch to "Edit Metadata" first asks "The data on this form has changed. Do you wish to continue without saving?"; the question and its answers are the windows' own (*[Galleys](U46-galleys.md)*, Rule 6a; *[Chapters & work type](U72-chapters-work-type.md)*, Rule 5b). <sup>q26</sup> |
 
 **The issue galley form** {OJS} (Issues › "Edit" › "Issue Galleys") <sup>f</sup>
 
@@ -197,7 +198,10 @@ windows are the galley row's "Edit" on the Galleys page (a window headed
      issue number, "%Y" year, "%a" the article ID, "%g" the galley ID,
      "%f" the file ID, "%p" page number, and "%x" "Custom Identifier",
      which takes the item's publisher ID (a saved "%j.%x" gives
-     "…jpk.pid77"). A press's list differs and is shown there.
+     "…jpk.pid77"). A press's list differs and is shown there; the
+     example under it, "press%ppub%r", holds "%r", which is not in the
+     list, and a pattern typed from the example leaves "%r" in the URN
+     ⚠ [OMP8](#omp8).
    - **Individual suffix**: typed item by item (Rules 10, 12).
 9. **The article's URN, pattern shape.** On the "Identifiers" page the
    URN box is greyed. While it is empty and every piece the pattern
@@ -221,7 +225,9 @@ windows are the galley row's "Edit" on the Galleys page (a window headed
     carries is refused with "The given URN suffix is already in use for
     another published item. Please enter a unique URN suffix for each
     item." <sup>q18</sup> The article's own stored URN, saved again,
-    draws the same refusal ⚠ [A4](#a4). A URN that differs from another
+    draws the same refusal ⚠ [A4](#a4). A URN that a galley or an issue
+    of the journal carries (on a press a chapter, a publication format
+    or a file) is accepted ⚠ [A16](#a16). A URN that differs from another
     only in case passes: with "urn:nbn:de:0000-e2e2" on one article,
     another article saves "urn:nbn:de:0000-E2E2" ⚠ [A12](#a12). An empty
     box is accepted and removes the URN. The page's error summary is the
@@ -250,16 +256,35 @@ windows are the galley row's "Edit" on the Galleys page (a window headed
       saved yet the area reads "The URN cannot be assigned because the
       custom suffix is missing."; once a suffix is saved, the preview
       sentence and the ticked box of the first state are added under the
-      box. A suffix another item of the same kind already uses is
-      refused: the tab shows "Errors occurred processing this form" and
-      "The given URN suffix is already in use for another published
-      item. Please enter a unique URN suffix for each item." (even when
-      that item is not published), keeps the typed suffix and stays
-      open; nothing is saved. <sup>q23</sup>
+      box. Which suffixes "Save" refuses is Rule 12a. <sup>q23</sup>
     - **Stored**: the URN, "The URN is assigned to this {item}." and a
       "Clear" link.
     {item} is "galley", "issue" (press: "chapter", "publication
     format", "file").
+
+12a. **A suffix another item already has.** On a tab whose URN area
+    holds a "URN Suffix" box (Rule 12, third state), what "Save" does
+    with a suffix that makes a URN another item of the journal already
+    has depends on which item that is: <sup>q23</sup>
+    - **Another item of the same kind, its URN assigned** (a galley's
+      against another galley's, an issue's against another issue's; a
+      press's chapters, formats and files likewise): refused, whether
+      or not that item is published. The tab shows "Errors occurred
+      processing this form" and "The given URN suffix is already in use
+      for another published item. Please enter a unique URN suffix for
+      each item.", keeps the typed suffix and stays open; nothing is
+      saved.
+    - **Another item of the same kind, the suffix saved and its URN not
+      yet assigned**: accepted. Both tabs then show the same URN as a
+      preview with the ticked box; the first of the two saved with the
+      box ticked gets the URN, and the other's next "Save" is refused
+      with the same message, its tab still showing the preview and the
+      box.
+    - **An item of another kind** (on a galley's tab the article's or an
+      issue's URN; on a press among the monograph, a chapter, a format
+      and a file): accepted, and the URN can be assigned
+      [A16](#a16).
+
 13. **Saving the tab assigns the URN.** "Save" with the box ticked
     stores the URN shown. The box arrives ticked, so a "Save" made for
     another reason, a publisher ID change for one, assigns the URN too.
@@ -661,7 +686,7 @@ are in the footnote. <sup>s</sup>
      "Save": the tab shows "Errors occurred processing this form" with
      "The given URN suffix is already in use for another published item.
      Please enter a unique URN suffix for each item.", keeps "g1" and
-     stays open (Rule 12).
+     stays open (Rule 12a).
    - **Control**: on the second submission's "Identifiers" page replace
      the refused URN with "urn:nbn:de:0000-xyz" and press "Save"; reload:
      the box holds "urn:nbn:de:0000-xyz" (Rules 10, 11). <sup>s</sup>
@@ -878,6 +903,14 @@ Left out of the scenarios above, by reason:
     `docs/issues/U44-OMP4-press-publish-window-urn-table.md`): a press
     with only "Monographs" ticked seeing the URN sentence, not the
     one-row table, in the "Publish" window
+  - a URN suffix another galley has saved without its URN being
+    assigned, accepted on a second galley's "Identifiers" tab; the first
+    of the two saved with the box ticked getting the URN and the other's
+    next "Save" refused (Rule 12a)
+  - a switch from a galley's "Identifiers" tab to "Edit Metadata" with
+    a Publisher ID typed and not saved, asking "The data on this form
+    has changed. Do you wish to continue without saving?" (Fields, the
+    "Identifiers" tab)
 - **Rarely met**:
   - a Site Administrator without a manager role in the journal: Settings
     reached on a journal only, and there the "URN" row without "Settings"
@@ -905,6 +938,13 @@ Left out of the scenarios above, by reason:
   - A6 (the check digit of "Add Check Number" and "Assign" differing
     from the app's own; Rule 10; scenario 4 passes it)
   - A12 (a URN differing from another only in case accepted; Rule 11)
+  - A16 (a URN another kind of item already carries accepted on the
+    "Identifiers" page and on a tab; Rules 11, 12a)
+  - A17 (the header "Close" on a galley's or a chapter's "Identifiers"
+    tab dropping a typed value without asking; Fields, the
+    "Identifiers" tab)
+  - OMP8 (a press's pattern example holding "%r", which nothing fills;
+    Rule 8)
   - A8, A10 and A11 (the settings window's raw text code, written-out
     angle brackets and failing page script; Fields, the URN plugin's
     settings window; scenario 2 passes A10)
@@ -961,6 +1001,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A13](#a13) | "Add Check Number" on an item's "Identifiers" tab writes "NaN" into an empty URN suffix box | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | A galley's or chapter's "Identifiers" tab keeps showing a URN after "Clear" has removed it | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A15](#a15) | "Add Check Number" on an item's "Identifiers" tab adds "NaN" to a suffix holding a character such as "~" | 🐞 | minor | — |
+| [A16](#a16) | A URN another kind of item already carries is accepted: an article, its galley and an issue can share one URN | 🐞 | minor | — |
+| [A17](#a17) | The header "Close" on a galley's or chapter's "Identifiers" tab drops a typed value without asking | 🐞 | minor | — |
 | [OJS1](#ojs1) | A new issue galley with a Publisher ID is not saved: "Save" stays greyed with no message | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | An issue's Publisher ID is never kept | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP1](#omp1) | A press cannot save URN settings with only "Chapters" or "Files" ticked | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -969,6 +1011,7 @@ entry notes otherwise; the team settles them on spec review.
 | [OMP5](#omp5) | A press file's Publisher ID is never kept | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP6](#omp6) | A press file's URN leaves out its format number, and file patterns leave "%f" unfilled | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP7](#omp7) | With the URN plugin switched off, a press's book page still shows format URNs | 🐞 | medium | — |
+| [OMP8](#omp8) | A press's example of an own URN pattern holds "%r", which is not a placeholder and stays in the URN | 🐞 | minor | — |
 | [A3](#a3) | An article's Publisher ID accepts values the tabs refuse, a duplicate included | ❓ | minor | — |
 | [A12](#a12) | A URN that differs from another only in case is accepted as new | ❓ | minor | — |
 | [OJS2](#ojs2) | The JATS XML's publisher ID is the article's number, not the typed Publisher ID | ❓ | minor | — |
@@ -1190,6 +1233,40 @@ refuse or skip the others, is for the team to settle; [A13](#a13)'s empty
 box is a separate case.
 Basis: probe, 2026-10-02. <sup>f-a15</sup>
 
+<a id="a16"></a>
+**A16 — A URN is checked for duplicates only within its own kind of item** · 🐞 · minor.
+The URN settings window and every "Identifiers" tab say "A URN suffix
+can take any form, but must be unique among all publishing objects with
+the same URN prefix assigned:". Yet an editor can type, on an article's
+"Identifiers" page, the URN that one of its galleys, another article's
+galley or an issue already carries, and "Save" stores it. The other way
+round, a galley's or an issue's "Identifiers" tab takes the suffix of an
+article's URN and assigns it. On a press a monograph, a chapter, a
+publication format and a file can all end up with one and the same URN.
+Only two items of the same kind are refused, with "The given URN suffix
+is already in use for another published item. Please enter a unique URN
+suffix for each item." (Rules 11, 12a). It needs the URN plugin with
+"Enter an individual URN suffix…" chosen and URNs on for two kinds of
+item.
+Basis: probe, 2026-10-09. <sup>f-a16</sup>
+
+<a id="a17"></a>
+**A17 — Closing a galley's or chapter's window from the "Identifiers" tab drops a typed value without asking** · 🐞 · minor.
+An editor types a URN suffix or a Publisher ID on the "Identifiers" tab
+of a galley's window (journal, preprint server) or of "Edit Chapter"
+(press) and, without saving, presses the window's header "Close". The
+window closes at once, and the typed value is gone: when the tab is
+opened again, the box is empty. Elsewhere in the same window the change
+is protected: a switch to "Edit Metadata" asks "The data on this form
+has changed. Do you wish to continue without saving?", and so does
+"Close" after a change on "Edit Metadata" (the galley's label, the
+chapter's title). After the silent close the page still counts the
+change as unsaved: opening another address or reloading raises the
+browser's own leave-page box, although no window is open. A press's
+publication format window and "Edit a file" close the same way; an
+issue's window asks the question.
+Basis: probe, 2026-10-09. <sup>f-a17</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -1311,6 +1388,22 @@ stored URN on its book page, and keeps listing an "Identifiers" page
 with no "URN" box; a journal hides both. The full entry is the workflow screen's
 ([→ Workflow screen & stage access, OMP3](U24-workflow-screen-and-stage-access.md#omp3)).
 Basis: probe, 2026-10-02. <sup>f-omp7</sup>
+
+<a id="omp8"></a>
+**OMP8 — A press's example of an own URN pattern holds "%r", which is not a placeholder** · 🐞 · minor.
+In a press's URN settings window, the choice "Use the pattern entered
+below to generate URN suffixes." names its placeholders, "%p for press
+initials, %m for the monograph id, %c for the chapter id, %f for the
+publication format id, %s for the file id and %x for "Custom
+Identifier"", and then reads "For example, press%ppub%r would create the
+URN suffix "pressESPpub100"." The list has no "%r", and nothing fills
+it: with "press%ppub%r" saved as the pattern for monographs, "Assign" on
+a monograph's "Identifiers" page fills the box with
+"urn:nbn:de:0000-presspkppub%r" on a press whose initials are PKP. The
+"%r" stays as typed, and the initials come in lower case where the
+example shows capitals. A manager who copies the example gets URNs that
+end in "%r".
+Basis: probe, 2026-10-09. <sup>f-omp8</sup>
 
 ### Retired
 
@@ -1890,6 +1983,17 @@ and the ticked box were there; "Save" again stored
 `urn:nbn:de:0000-g1`. "g1" on a second galley was refused with the
 "already in use" message and nothing was saved. "Add Check Number" on
 an empty box wrote "NaN", on "g1" gave "g16" (OMP "c9" gave "c95").
+Live-probed 2026-10-09 (Rule 12a), OJS and OMP, `main` and
+`stable-3_5_0`, two runs per app and line, as the manager of a scratch
+journal and press: with the other item's URN assigned, the same suffix
+was refused on a second galley and a second issue (OJS) and on a second
+chapter, publication format and file (OMP), the typed suffix kept, the
+window open and the reopened tab's box empty. With a galley's (OMP: a
+chapter's) suffix saved and its URN not yet assigned, the same suffix
+on a second galley (chapter) was accepted, the window closing; the
+second item's next "Save" assigned the URN, and the first item, its tab
+still showing the preview and the ticked box, was refused at its next
+"Save" with the "already in use" message.
 
 <a id="fn-q24"></a>
 **q24** — Live-probed 2026-09-24 (Side effects, JATS XML; OJS2): for an article
@@ -1904,6 +2008,23 @@ titled "Delete" with "OK" and "Cancel"; "Cancel" kept the URN; "OK"
 removed it. The OJS issue's tab then showed the preview at once, while
 the OJS galley's and the OMP chapter's tab kept the old URN until
 reopened. The format and file tabs were not driven for "Clear".
+
+<a id="fn-q26"></a>
+**q26** — Live-probed 2026-10-09 (Fields, the tab's "Close"; A17), all
+three apps, `main` and `stable-3_5_0`, two runs or more per app and
+line, as the manager of a scratch journal, press and preprint server,
+on the galley "PDF" (OJS, OPS) and "Edit Chapter" (OMP) of an
+unpublished submission: with a URN suffix (OJS, OMP) or a Publisher ID
+(OJS, OPS) typed on "Identifiers", the header "Close" raised no
+question and the reopened tab's box was empty; a switch to "Edit
+Metadata" raised the question quoted, and so did "Close" after a
+changed galley label or chapter title. After the silent close, with the
+page read again 2 seconds later, opening the page by its address and a
+reload each raised the browser's leave-page box (`beforeunload`). On
+OMP `main` the format's "Edit" and "Edit a file" closed the same way
+with a URN suffix typed; the OJS issue window asked on "Close", as on
+2026-09-24 (note f). Not driven that day: a tab switch in the format's
+and the file's window, and "Close" from their first tabs.
 
 <a id="fn-f-a1"></a>
 **f-a1** — Retired. Live-probed 2026-09-24 (note q4): every tab shows
@@ -2026,6 +2147,42 @@ whose "Add Check Number" calls the same `getCheckNumber()` (note f-a6).
 The A13 report leaves this case out of its fix until the team rules on
 the characters a suffix may hold: [pkp-e2e#462](https://github.com/jardakotesovec/pkp-e2e/issues/462) ([docs/issues/U44-A13-check-number-empty-urn-suffix-nan.md](../issues/U44-A13-check-number-empty-urn-suffix-nan.md)).
 
+<a id="fn-f-a16"></a>
+**f-a16** — The page's check (`validatePublicationUrn()`, note c) and
+the tabs' save both call `PKPPubIdPlugin::checkDuplicate()`, which asks
+only the DAO of the object's own kind since pkp-lib `3fdd61a86a`
+(`pkp/pkp-lib#10826`, 2025-01-20). Live-probed 2026-10-09 (Rules 11,
+12a), OJS and OMP, `main` and `stable-3_5_0`, two runs per app and
+line, as the manager of a scratch journal and press with individual
+suffixes, the prefix `urn:nbn:de:0000-` and no check number, each
+item's URN assigned and read back before the other kind was tried. OJS:
+an article's page stored the URN of its own galley, of another
+article's galley and of an issue ("Saved", the box holding it after a
+reload); a galley's tab assigned the suffix of its own article's URN,
+of another article's and of an issue's; an issue's tab assigned a
+suffix an article and its galley carried. OMP: a monograph's page
+stored its chapter's URN and another monograph's format's and file's;
+a chapter's, a format's and a file's tab each assigned its monograph's
+URN; a format's tab assigned a chapter's, a file's a format's, a
+chapter's a file's. Controls in the same runs: the same URN on a
+second article or monograph, and the same suffix on a second item of
+the kind, were refused (notes q18, q23). At the end of a run one URN
+was held by an article, its galley and an issue (OJS), or by a
+monograph, a chapter and a format (OMP). Not walked: 3.4. Read in the
+code only, `stable-3_4_0`'s `checkDuplicate()` asks every kind, which
+would make this a change that came with 3.5; one walk of the
+galley-then-article steps on a 3.4 install settles it. The A4 issue
+report names this fault as out of its scope
+([docs/issues/U44-A4-article-own-urn-refused-as-in-use.md](../issues/U44-A4-article-own-urn-refused-as-in-use.md)).
+
+<a id="fn-f-a17"></a>
+**f-a17** — Live-probed 2026-10-09 (note q26). On `stable-3_5_0` the
+galley's and the chapter's window close the same silent way; the
+format's "Edit" and "Edit a file" ask the question there (two runs) and
+close without it on `main` (two runs), so for those two windows the
+silent close came after 3.5. The leave-page box followed each silent
+close in a second pair of runs on each line as well.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `IssueGalleyForm::validate()` calls
 `JournalDAO::anyPubIdExists(…, ASSOC_TYPE_ISSUE_GALLEY, $this->_issueGalley
@@ -2105,6 +2262,21 @@ which `CatalogBookHandler` hands to `monograph_full.tpl`, still holds
 the URN plugin; the same list keeps the workflow's "Identifiers" page
 listed (note q13). Issue report, tracked by the workflow screen's spec:
 [pkp-e2e#576](https://github.com/jardakotesovec/pkp-e2e/issues/576) ([docs/issues/U24-OMP3-press-identifiers-page-stays-after-plugin-off.md](../issues/U24-OMP3-press-identifiers-page-stays-after-plugin-off.md)).
+
+<a id="fn-f-omp8"></a>
+**f-omp8** — OMP `plugins/pubIds/urn/locale/en/locale.po`,
+`plugins.pubIds.urn.manager.settings.urnSuffixPattern.example`. Live-probed
+2026-10-09 (Rule 8), OMP `main` and `stable-3_5_0`, two runs each, as
+the manager of a scratch press with the initials PKP and the prefix
+`urn:nbn:de:0000-`: the settings window read as quoted; with
+"press%ppub%r" saved "for monographs", the monograph's "Identifiers"
+page offered "Assign", which filled the box with
+`urn:nbn:de:0000-presspkppub%r`. The page error the settings window
+raised in these runs once "Use the pattern entered below…" was chosen
+is A11's (note f-a11), not a second fault. A journal's example reads
+"For example, vol%viss%ipp%p could create the URN suffix
+"vol3iss2pp230"." (read in the OJS locale file, with placeholders its
+list names; not driven).
 
 ## Reference — entry points & surfaces
 

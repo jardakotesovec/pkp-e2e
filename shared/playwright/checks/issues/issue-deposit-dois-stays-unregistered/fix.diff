@@ -1,0 +1,11 @@
+--- a/api/v1/dois/DoiController.php
++++ b/api/v1/dois/DoiController.php
+@@ -157,7 +157,7 @@
+         $doisToUpdate = [];
+         foreach ($requestIds as $issueId) {
+             dispatch(new DepositIssue($issueId, $context, $agency));
+-            array_merge($doisToUpdate, Repo::doi()->getDoisForIssue($issueId));
++            $doisToUpdate = array_merge($doisToUpdate, Repo::doi()->getDoisForIssue($issueId));
+         }
+         Repo::doi()->markSubmitted($doisToUpdate);
+ 

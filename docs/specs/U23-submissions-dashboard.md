@@ -288,7 +288,9 @@ the account's roles, never on which dashboard page it opens from:
     them, the cell carries one small round indicator per reviewer on the
     current round, declined and cancelled ones included. For requests and
     ongoing reviews it is a countdown ring with the days left (or overdue),
-    colored to flag overdue ones. Once there is an outcome (submitted,
+    colored to flag overdue ones. The days are calendar days in the site's
+    time zone: a date due tomorrow reads 1 at any hour of today, whatever
+    the browser's time zone. Once there is an outcome (submitted,
     confirmed, declined, cancelled) it is an icon. Clicking one opens a
     popover with the reviewer's name, the review type, a status sentence,
     and up to three buttons: <sup>k</sup>
@@ -298,11 +300,11 @@ the account's roles, never on which dashboard page it opens from:
     | "Awaiting Response from the reviewer" (first request or resent) | "Edit Due Date" · "View details" · "Unassign" |
     | "Review Request overdue by {days} days" | "Edit Due Date" · "View details" · "Unassign" |
     | "Ongoing review - request accepted" | "Edit Due Date" · "View details" · "Cancel Reviewer" |
-    | "Review overdue by {days} days" (described as a missed *response* and dated with the review deadline ⚠ [A6](#a6)) | "Edit Due Date" · "View details" · "Cancel Reviewer" |
+    | "Review overdue by {days} days" | "Edit Due Date" · "View details" · "Cancel Reviewer" |
     | "Review completed on {date}" | "View unread recommendation" (then "View recommendation" once read; a review window closed within a moment of opening, before its mark as read is saved, can leave "View unread recommendation" until a page reload ⚠ [→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#a32)) |
     | "Review was confirmed by editor" | "View recommendation" |
     | "Review Request declined on {date}" | "Resend Review Request" · "View details" · "Cancel Reviewer" |
-    | "Reviewer cancelled review request" (shown when the *editor* cancelled ⚠ [A4](#a4)) | "Resend Review Request" · "View details" |
+    | "Review request cancelled by editor" | "Reinstate Reviewer" (it opens the window the Reviewers panel's "Reinstate Reviewer" opens) |
 
     On a journal the completed-review popover also names the reviewer's
     recommendation. A press shows the completed sentence without one.
@@ -815,7 +817,7 @@ Left out of the scenarios above, by reason:
   - the panel's own "Clear Filters", "Close" and unapplied changes (Rules 8b, 8c)
   - the "Loaded" a screen reader hears once the list has loaded (Rule 5)
   - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included
-  - the guard for A4 and A6 (issue report `docs/issues/U23-A4-A6-review-popover-cancelled-overdue-wording.md`): the dashboard popover of a reviewer the editor cancelled names the editor, and that of an accepted review past its deadline speaks of the review deadline
+  - the guard for the retired A4 and A6 and for the day count (pkp/pkp-lib#13472, Rule 10): the popover of a request the editor cancelled reads "Review request cancelled by editor" and offers "Reinstate Reviewer" alone, which puts the reviewer back; that of an accepted review past its deadline says "The review was due on {date}"; a response due tomorrow reads 1 day; it needs a cancelled reviewer and an overdue review, which no scenario sets
   - the guard for the retired A5 (Rule 5): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`; to be asserted once all three apps' builds include the fix (Rule 5 says how a build without it behaves)
   - a number in the search box listing the submission with that ID and those whose titles hold its digits, in either box (Rules 6, 7)
   - the "Clear Filters" beside the chips dropping the filters and keeping the search chip (Rule 8b)
@@ -829,8 +831,6 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A2 ("Complete submission" landing the editor in the author's wizard)
   - A3 (the conflict notice saying "Journal Manager" whoever is looking)
-  - A4 (an editor-cancelled request read as "Reviewer cancelled review request")
-  - A6 (the overdue-review popover's wording)
   - A7 (no indicator for declined and cancelled reviewers)
   - A8 (the opt-out labelled "Weekly email of outstanding tasks")
   - A9 (a Site Administrator without Journal Manager in the journal)
@@ -866,8 +866,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A4](#a4) | The popover over an editor-cancelled review request blames the reviewer: "Reviewer cancelled review request" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A6](#a6) | The overdue-review popover describes the missed review as a "response" and dates it with the review deadline | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | Paged lists: a screen reader announces the pager's "Next" as plain "Next", unlike its "Go to …" neighbours | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A15](#a15) | A sorted column header never tells a screen reader that the list is sorted by it, or in which direction | 🐞 | minor | — |
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
@@ -882,6 +880,8 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
+| [A4](#a4) | Retired: the popover over an editor-cancelled review request blamed the reviewer ("Reviewer cancelled review request") and offered "Resend Review Request" and "View details"; fixed by pkp/pkp-lib#13473 and pkp/ui-library#1012 (Rule 10) | ✅ | retired | PR review (claude), 2026-10-08 — fixed at the PRs' heads |
+| [A6](#a6) | Retired: the overdue-review popover called the missed review a "response"; fixed by pkp/pkp-lib#13473 (Rule 10) | ✅ | retired | PR review (claude), 2026-10-08 — fixed at the PR's head |
 | [A5](#a5) | Retired: a sort switched off stayed in the address and came back on reload; the third click now takes it out of the address, and a reload shows the default order (Rule 5) | ✅ | retired | upstream sync (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#12736) |
 | [A12](#a12) | Retired: in French a screen reader hears raw codes for the "…" button above the list and for "Loaded", and an accepted reviewer's indicator and a press's "Assigned To Editor" filter field show one | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A13](#a13) | Retired: in French the recommending editors' line may read a raw code; never seen on screen | ✅ | retired | Jarda 2026-10-08 · overturned |
@@ -925,29 +925,6 @@ Question: should the notice name the viewer's actual role, or drop the role
 mention? Lean: a wording oversight. It is a single shared sentence with no
 app-level rewording; harmless, but it reads wrong outside OJS.
 Basis: probe + code. <sup>a3</sup>
-
-<a id="a4"></a>
-**A4 — Cancelled-by-editor popover blames the reviewer** · 🐞 · low.
-When an editor cancels a review request ("Cancel Reviewer"), the reviewer's
-indicator popover is headlined "Reviewer cancelled review request",
-although the reviewer did nothing. Its description repeats the
-misattribution: "Reviewer has cancelled the review request on {date}."
-Expected: wording that attributes the cancellation to the editorial side,
-as the Reviewers panel's own status ("Request Cancelled") does. Rationale
-for 🐞: the neighboring declined status has its own, correct headline, so
-the two states were meant to read differently.
-Basis: probe + code, 2026-10-04. <sup>a4</sup>
-
-<a id="a6"></a>
-**A6 — The overdue-review popover talks about a response** · 🐞 · low.
-Once an accepted review runs overdue, the indicator popover's headline says
-"Review overdue by {days} days", but its description reads "This reviewer
-has not completed their review. A response was due on {date}." It calls the
-missed review a "response", and the date it shows is the review due date
-under that wrong name. Expected: the description speaks of the review and
-its deadline, as the headline does. The response-overdue state has this
-same sentence, where it is correct.
-Basis: probe, 2026-10-04. <sup>a6</sup>
 
 <a id="a7"></a>
 **A7 — Declined and cancelled reviewers vanish for assistants** · ❓ · minor.
@@ -1094,6 +1071,12 @@ Worth a ruling since the shared machinery supports it.
 Basis: probe + code. <sup>omp1</sup>
 
 ### Retired
+
+<a id="a4"></a>
+**A4 — Cancelled-by-editor popover blames the reviewer** · ✅ · retired. Fixed by pkp/pkp-lib#13473 and pkp/ui-library#1012 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PRs' heads and again on the merged code (pkp-lib `6d004d2d01`, ui-library `38814ea1`, merged that day): the popover reads "Review request cancelled by editor" and "The editor cancelled this review request on {date}.", and offers "Reinstate Reviewer" alone (Rule 10). <sup>a4</sup>
+
+<a id="a6"></a>
+**A6 — The overdue-review popover talks about a response** · ✅ · retired. Fixed by pkp/pkp-lib#13473 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PR's head and again on the merged code (pkp-lib `6d004d2d01`, merged that day): the popover reads "This reviewer has not completed their review. The review was due on {date}." (Rule 10). <sup>a6</sup>
 
 <a id="a5"></a>
 **A5 — Submissions dashboard: a sort switched off stays in the address and comes back on reload** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12736, ui-library `7f5e51ca`, 2026-10-08), verified 2026-10-08 on OJS, OMP and OPS built with that change: the third click on "ID" takes the sort out of the address, and a reload shows the default order (Rule 5); the same on My Submissions and, on a journal and a press, on the reviewer's list. <sup>a5</sup>
@@ -1496,8 +1479,8 @@ two overdue statuses, negative for declined/cancelled, success for
 received/viewed/complete/thanked), popover title/description keys
 (`dashboard.reviewAssignment.status*`), and the three button slots
 mapped to Reviewer-manager actions (resend request, edit due date, review
-details, cancel, unassign; "View recommendation" / "View unread
-recommendation" open review details). Titles quoted verbatim in the
+details, cancel, unassign, and reinstate on a cancelled request; "View
+recommendation" / "View unread recommendation" open review details). Titles quoted verbatim in the
 Rule 10 table; "Unassign" is the popover's label
 (`dashboard.reviewAssignment.action.unassignReviewer`) for the same act
 the Reviewers panel calls "Unassign Reviewer". The recommendation line in
@@ -1534,6 +1517,26 @@ recommendation"). At `51f0c727` scenario 9's earlier test, with no wait
 before "Cancel", went red twice in 16 repeats, the list GET 14–25 ms
 before the mark;
 *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md#a32)*.
+The days on the ring and in the sentences: until pkp/ui-library#1012
+`getDays()` took `calculateDaysBetweenDates(new Date(), {the due date})`,
+whole 24-hour periods from this moment to the start of the due date, one
+short as soon as the day had begun; the PR passes `{ignoreTime: true}`,
+which takes both sides as days of `pkp.context.timeZone` before
+subtracting. Driven 2026-10-08 on OJS and OMP at the PRs' heads
+(ui-library `e5880958`, pkp-lib `09f80a196f`), before the merge, on
+PKP's default test dataset freshly loaded (the kept check
+`shared/playwright/checks/sync/pkp-lib-13473/popovers.js`): a response
+due 10 days, 1 day and 0 days ahead read 10, 1 and 0 on the ring and in
+"Awaiting response in {days} days", the same from browsers set to
+UTC+14 and UTC-11; a review due 7 and 1 days ahead read 7 and 1; the
+overdue counts (1, 3 and 7 days back) read as at the bases. Control at
+the bases (ui-library `7f5e51ca`, pkp-lib `151e6e9d69`): 9, 0 and 0, and
+6 and 0. With the fleet's `time_zone` set to "Pacific/Kiritimati" (the
+site a day ahead of the machine), OJS: a response due on the site's
+tomorrow read 1 at the heads and 0 at the bases, one due on the site's
+today 0 at both, one due on the site's yesterday "overdue by 1 days" at
+both. The dashboard's "Days" column calls the function without the
+option and is unchanged.
 
 <a id="fn-l"></a>
 **l — open in place.** `dashboardPageStore.js::openWorkflowModal()`: side
@@ -1871,7 +1874,33 @@ the reviewer took no action at any point — the popover read "Reviewer
 cancelled review request" / "Reviewer has cancelled the review request on
 {date}." on both apps, with "Resend Review Request" and "View details" as
 the buttons.
-Issue report: [pkp-e2e#905](https://github.com/jardakotesovec/pkp-e2e/issues/905) ([docs/issues/U23-A4-A6-review-popover-cancelled-overdue-wording.md](../issues/U23-A4-A6-review-popover-cancelled-overdue-wording.md)).
+Retired 2026-10-08 at the heads of pkp/pkp-lib#13473 (`09f80a196f`) and
+pkp/ui-library#1012 (`e5880958`), before their merge (issue
+pkp/pkp-lib#13472, filed from pkp-e2e#905): the two English texts name
+the editor, and the cancelled status offers "Reinstate Reviewer" in the
+text slot with no primary button. Driven on OJS and OMP, PKP's default
+test dataset freshly loaded, the kept check
+`shared/playwright/checks/sync/pkp-lib-13473/popovers.js`: after the
+editor's "Cancel Reviewer" the popover read "Review request cancelled by
+editor" / "The editor cancelled this review request on 2026-10-08." with
+"Reinstate Reviewer" alone; pressed, it opened the "Reinstate Reviewer"
+window, and once sent ("Reviewer reinstated.") the popover read "Ongoing
+review - request accepted", the Reviewers panel "Request Accepted", and
+the reviewer opened the review. Control at the PRs' bases (pkp-lib
+`151e6e9d69`, ui-library `7f5e51ca`), same dataset: the old texts with
+"Resend Review Request" and "View details"; the resend, sent, left the
+popover and the panel on the cancelled request, and the reviewer got
+"The current user is not assigned as a reviewer for the requested
+document."
+Merged 2026-10-08 18:36 UTC by rebase, `git range-diff` `=` on both:
+pkp-lib `feaedea71f` and `6d004d2d01`, ui-library `8f5e2310`, `b1b5b29e`
+and `38814ea1`. The same drive on OJS and OMP with `lib/pkp` and
+`lib/ui-library` checked out at `6d004d2d01` and `38814ea1` read the
+same. The three apps' pointers took both commits the same evening
+("Update submodules": ojs `49ebfba763`, omp `dd10616a47`, ops
+`0c692f6ae1`).
+Issue report: pkp-e2e#905, closed at the merge (the report and its walk
+deleted; git keeps them).
 
 <a id="fn-a5"></a>
 **a5 — A5 evidence.** Live-probed 2026-08-26 (OJS, manager, 31-row view;
@@ -1916,7 +1945,16 @@ the review request. A response was due on {date}") is correct in its own
 context; the review-overdue state reuses the response sentence where a
 review sentence is needed (popover description keys per status in
 `ConfigPerStatus` — fn-k).
-Issue report: [pkp-e2e#905](https://github.com/jardakotesovec/pkp-e2e/issues/905) ([docs/issues/U23-A4-A6-review-popover-cancelled-overdue-wording.md](../issues/U23-A4-A6-review-popover-cancelled-overdue-wording.md)).
+Retired 2026-10-08 at the head of pkp/pkp-lib#13473 (`09f80a196f`),
+before its merge (issue pkp/pkp-lib#13472, filed from pkp-e2e#905). The
+same drive as fn-a4, on OJS and OMP: with the review due date 7 days,
+1 day and 0 days back the popover read "This reviewer has not completed
+their review. The review was due on {that date}."; at the PR's base it
+read "A response was due on {that date}." The response-overdue popover
+reads "A response was due on {date}" at both. Merged 2026-10-08 and
+walked again on the merged code (fn-a4).
+Issue report: pkp-e2e#905, closed at the merge (the report and its walk
+deleted; git keeps them).
 
 <a id="fn-a7"></a>
 **a7 — A7 evidence.** Live-probed 2026-08-26 (OJS + OMP, manager vs

@@ -8,7 +8,7 @@
  * category page reads the search index, which a queued job fills; S9 is
  * the journal's, in the OJS tree), in the preprint server's own words: the
  * preprint's page `preprint/view/{number}`, "Posted" for "Published", the
- * label line "Preprint / {date} ({version})", the version names "Author
+ * label line "Preprint / {date} ({version})", the version names "Author's
  * Original 1.0" / "1.1", the Preprint Server Manager, the fixtures
  * "preprint.pdf", "preprint.html" and "not-an-image.txt", the server named
  * "Coastal Preprints", "Latest preprints" on the home page.
@@ -37,8 +37,6 @@
  * - OPS7 🐞, OPS8 🐞: S8 reads the French keyword's value, never its label,
  *   and never opens the French PDF reader.
  * - OPS9 🐞: summaries are opened by their title (S3, and S10's file).
- * - U42 A20 🐞 (the preprint page's empty "References" heading, which Rule
- *   6 names): S1's heading read on "Harbour Notes" leaves "References" out.
  * - U46 A7 🐞 (seeded galleys share one position): S2 reads the main list's
  *   links as a set, never in an order.
  * - A4, A13, A14, OJS1–OJS13: not on a preprint server's paths here (no file-less
@@ -77,6 +75,7 @@
  * runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {recordBrowserDialogs} = require('../../../../shared/playwright/pages/SubmissionFilesPages.js');
 const {
@@ -185,7 +184,7 @@ test.describe('article landing page and reading', () => {
         await expect(landing.breadcrumbLinks()).toHaveText(['Home']);
         await expect(landing.versionEntries()).toHaveCount(1);
         const entry = await textOf(landing.versionEntries().first());
-        expect(entry).toMatch(/^\d{4}-\d{2}-\d{2} \(Author Original 1\.0\)$/);
+        expect(entry).toMatch(new RegExp(`^\\d{4}-\\d{2}-\\d{2} \\(${AO} 1\\.0\\)$`));
         await expect(landing.labelLineParts()).toHaveText(['Preprint', '/', entry]);
         await expect(landing.title()).toHaveText('Tidal Patterns in Coastal Waters');
         await expect(landing.subtitle()).toHaveText('A field study');
@@ -236,9 +235,7 @@ test.describe('article landing page and reading', () => {
         await expect(landing.mainSection('Abstract')).toContainText(`Seeded abstract for ${tag}b.`);
         await expect(landing.publishedLine().locator('.label')).toHaveText('Posted');
         await expect(landing.versionEntries()).toHaveCount(1);
-        await expect
-            .poll(async () => (await landing.visibleHeadings()).filter((h) => h !== 'References'))
-            .toEqual(['Harbour Notes', 'Abstract', 'Posted', 'Versions']);
+        await expect.poll(() => landing.visibleHeadings()).toEqual(['Harbour Notes', 'Abstract', 'Posted', 'Versions']);
 
         // Control: "Harbour Notes" has no "Keywords:", no "Plain Language
         // Summary", no "Categories" and no cover, all of which the first
@@ -393,7 +390,7 @@ test.describe('article landing page and reading', () => {
 
         // The current version's page: headed "Tidal Patterns Revised", the
         // date line "{today} — Updated on {today}", two "Versions" entries
-        // (the current one plain text, then "{today} (Author Original 1.0)"
+        // (the current one plain text, then "{today} (Author's Original 1.0)"
         // as a link), the label line naming the current entry, and the APA
         // citation of the revised title (Rules 7, 8, 9, 15). Its "(Original
         // work published {year})" is not asserted: the app adds it only when
@@ -405,10 +402,10 @@ test.describe('article landing page and reading', () => {
         await expect(landing.title()).toHaveText('Tidal Patterns Revised');
         await expect(landing.publishedValue()).toHaveText(`${day} — Updated on ${day}`);
         await expect(landing.versionEntries()).toHaveCount(2);
-        const olderName = `${day} (Author Original 1.0)`;
+        const olderName = `${day} (${AO} 1.0)`;
         await expect(landing.versionEntries().nth(1)).toHaveText(olderName);
         const currentName = await textOf(landing.versionEntries().first());
-        expect(currentName).toMatch(new RegExp(`^${day} \\(Author Original 1\\.\\d+\\)$`));
+        expect(currentName).toMatch(new RegExp(`^${day} \\(${AO} 1\\.\\d+\\)$`));
         expect(currentName).not.toBe(olderName);
         await expect(landing.versionEntries().first().locator('a')).toHaveCount(0);
         await expect(landing.versionLink(olderName)).toHaveCount(1);

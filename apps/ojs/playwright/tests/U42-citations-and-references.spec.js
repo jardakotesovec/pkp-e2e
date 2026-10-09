@@ -26,7 +26,7 @@
  *   and only with the mouse; the zero-size ones are never touched.
  * - A18 ✅ (retired 2026-09-29: every step change saves): every References
  *   change is still carried by "Continue"; the step rail only goes back.
- * - A4, A10, A20 (press / preprint server), A8, A11, A12, A15: not on
+ * - A4, A10 (press / preprint server), A8, A11, A12, A15: not on
  *   these scenarios' OJS paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster

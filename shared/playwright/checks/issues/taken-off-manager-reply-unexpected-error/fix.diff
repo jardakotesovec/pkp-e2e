@@ -1,0 +1,30 @@
+--- a/lib/pkp/api/v1/submissions/tasks/formRequests/AddNote.php
++++ b/lib/pkp/api/v1/submissions/tasks/formRequests/AddNote.php
+@@ -52,13 +52,9 @@
+         $currentUser = Application::get()->getRequest()?->getUser();
+ 
+         return [
+-            'userId' => [
+-                'required',
+-                'numeric',
+-                Rule::exists('edit_task_participants', 'user_id')->where(function (Builder $query) {
+-                    $query->where('edit_task_id', $this->route('taskId'));
+-                }),
+-            ],
++            // The signed-in user, set in prepareForValidation(). Whether they may reply (participants only)
++            // is the controller's check, which answers with a message the page can show.
++            'userId' => ['required', 'numeric'],
+             'assocType' => ['required', Rule::in([PKPApplication::ASSOC_TYPE_QUERY])],
+             'assocId' => [
+                 'required',
+--- a/lib/pkp/api/v1/submissions/tasks/EditorialTaskController.php
++++ b/lib/pkp/api/v1/submissions/tasks/EditorialTaskController.php
+@@ -735,7 +735,7 @@
+         $participantIds = $task->participants->pluck('userId')->toArray();
+ 
+         if (!in_array($currentUser->getId(), $participantIds)) {
+-            return response()->json(['error' => __('api.403.forbidden')], Response::HTTP_FORBIDDEN);
++            return response()->json(['error' => __('discussion.noAccessToAddMessage')], Response::HTTP_FORBIDDEN);
+         }
+ 
+         $validated = $illuminateRequest->validated();

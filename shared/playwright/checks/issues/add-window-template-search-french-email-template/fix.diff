@@ -1,0 +1,22 @@
+--- a/lib/pkp/locale/fr_CA/common.po
++++ b/lib/pkp/locale/fr_CA/common.po
+@@ -477,7 +477,7 @@
+ msgstr "Enlever le filtre : {$filterTitle}"
+ 
+ msgid "common.findTemplate"
+-msgstr "Trouver un modèle de courriel"
++msgstr "Trouver un modèle"
+ 
+ msgid "common.formatting"
+ msgstr "Mise en forme"
+--- a/lib/pkp/locale/fr/common.po
++++ b/lib/pkp/locale/fr/common.po
+@@ -480,7 +480,7 @@
+ msgstr "Supprimer le filtre : {$filterTitle}"
+ 
+ msgid "common.findTemplate"
+-msgstr "Trouver un modèle de courriel"
++msgstr "Trouver un modèle"
+ 
+ msgid "common.formatting"
+ msgstr "Mise en forme"

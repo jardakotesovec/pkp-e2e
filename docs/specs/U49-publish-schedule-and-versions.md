@@ -17,7 +17,7 @@ issue is published. On a press the **Publish** button makes the catalog
 entry public. On a preprint server the **Post** button posts the preprint.
 The same feature owns the way back (**Unpublish** / **Unschedule**) and the
 version machinery: creating a new version of a published work, the version
-stages and numbering ("Author Original", "Version of Record 2.1"), the
+stages and numbering ("Author's Original", "Version of Record 2.1"), the
 version list in the workflow's side menu, and the status readout
 ("Status: Published") that every role sees.
 
@@ -64,7 +64,7 @@ on the way to publishing, when the version still needs its details
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| Publication Stage | Yes | Select: Author Original · Published Manuscript Under Review · Version of Record. |
+| Publication Stage | Yes | Select: Author's Original · Published Manuscript Under Review · Version of Record. |
 | Revision Significance | Yes | Major Revision / Minor Revision. "Minor Revision" can be selected only when a version of the chosen stage already exists (Rule 12). |
 | Update Type | No | Select, "New Version" preselected. The other choices name the reason for the version (Correction, Erratum, Retraction, …). |
 | Summary of Changes (Amendment Notice) | No | Rich text, multilingual. The screen describes it as the public amendment notice, but no reader page shows it (Rule 13) ⚠ [A5](#a5). An "Insert Content" button on the submission-language box offers the change summaries authors saved with their review revisions (Rule 14). |
@@ -245,7 +245,7 @@ In French most of its headings and descriptions are raw codes
    (today if the field was empty; a filled date is kept, even a past one),
    fills the empty copyright/license fields from the journal's defaults,
    and assigns a Publication Stage if none was chosen: "Version of Record"
-   on a journal or press, "Author Original" on a preprint server, numbered
+   on a journal or press, "Author's Original" on a preprint server, numbered
    as the next major version. It leaves the Author's assignment permission
    "Allow this person to make changes to the publication…" as it was: the
    Author's publication pages are read-only while the version is published
@@ -256,7 +256,7 @@ In French most of its headings and descriptions are raw codes
    published lists (see [My Submissions](U22-my-submissions.md) and
    [Submissions dashboard](U23-submissions-dashboard.md)) only when the
    published version's stage is the final one ⚠ [A3](#a3): "Version of
-   Record" on a journal or press, "Author Original" on a preprint server.
+   Record" on a journal or press, "Author's Original" on a preprint server.
    On a press the catalog page waits for that final stage too, so
    publishing a non-final version leaves it down ⚠ [A3](#a3). Scheduling
    performs none of the fills; they run when the item actually goes live.
@@ -316,8 +316,8 @@ In French most of its headings and descriptions are raw codes
     dialog's stage select arriving on a stage offers no blank choice).
     Two made the same day share one name ⚠ [A9](#a9). <sup>i</sup>
 12. **Version stages and numbering.** A journal and press know three
-    stages: Author Original, Published Manuscript Under Review, Version of
-    Record. A preprint server knows only Author Original. Numbering is per
+    stages: Author's Original, Published Manuscript Under Review, Version of
+    Record. A preprint server knows only Author's Original. Numbering is per
     stage: a major revision starts the stage's next whole number ("2.0"),
     a minor one increments behind the dot ("1.1"). "Minor Revision" is
     offered only when the chosen stage already has a version. Switching
@@ -415,7 +415,7 @@ In French most of its headings and descriptions are raw codes
   even when a press's chapters and formats get their DOIs with it.
   <sup>aa</sup>
 - **Workflow closes on the final version.** Publishing a Version of Record
-  (Author Original on a preprint server) also records the submission's
+  (Author's Original on a preprint server) also records the submission's
   workflow as finished. Unpublishing the last one reopens it. The activity
   log shows the move: "{user} moved this submission to the Done stage." /
   "{user} returned this submission to the workflow." <sup>ab</sup>
@@ -507,7 +507,7 @@ each scenario's seeding are in its footnote.
      publish button ("Publish" / "Post") opens it directly (Rule 2). It
      states "All publication requirements have been met." ("All
      requirements have been met." on a preprint server) and names the
-     version to be assigned, "Version of Record 1.0" ("Author Original
+     version to be assigned, "Version of Record 1.0" ("Author's Original
      1.0" on a preprint server); on a press or preprint server a
      requirement-shaped stage sentence sits under the all-met line
      ([A7](#a7)) (Rule 4). Confirm.
@@ -582,7 +582,7 @@ each scenario's seeding are in its footnote.
      dialog asks which version to copy metadata from, the Publication
      Stage and the Revision Significance; the published version's stage
      and "Minor Revision" arrive preselected; Confirm unchanged: the menu
-     gains "Version of Record 1.1" ("Author Original 1.1" on a preprint
+     gains "Version of Record 1.1" ("Author's Original 1.1" on a preprint
      server), and its pages open with "Status: Unpublished" and the
      copied content (Rules 11, 11a).
    - **The reader page**: Reader: the page still serves the OLD version
@@ -609,7 +609,7 @@ each scenario's seeding are in its footnote.
 
    Given: Journal Manager and the submitting Author, on a published
    scratch submission to which "Create New Version" has added an
-   unpublished "Version of Record 1.1" ("Author Original 1.1" on a
+   unpublished "Version of Record 1.1" ("Author's Original 1.1" on a
    preprint server), as in scenario 4; on a journal, the submission sits
    on a scratch journal with no issues created, so the details saved
    below leave the details panel to open (Rule 3a).
@@ -630,7 +630,7 @@ each scenario's seeding are in its footnote.
    - **Publish**: Journal Manager: press the publish button (a journal
      opens "Review Publishing Details" with "Version of Record" and the
      saved "Correction" in place and no issue fields; Confirm); the window
-     names "Version of Record 1.1" ("Author Original 1.1"); Confirm: the
+     names "Version of Record 1.1" ("Author's Original 1.1"); Confirm: the
      head reads "Status: Published" ("Posted"); the reader
      page now serves the new version and its "Versions" list
      gains the new entry; the saved summary appears nowhere on the page
@@ -641,7 +641,7 @@ each scenario's seeding are in its footnote.
      "Publication Published" email arrives for them (Side effects).
    - **Unpublish the new version**: press "Unpublish" ("Unpost") on it
      and confirm: the reader page stays live, its "Versions" list reading
-     only "{date} (Version of Record 1.0)" ("Author Original 1.0")
+     only "{date} (Version of Record 1.0)" ("Author's Original 1.0")
      (Rule 9a).
    - **Control**: scenario 1's Author, with the email left on, received
      both the email and the notice (Side effects). <sup>s5</sup>
@@ -649,7 +649,7 @@ each scenario's seeding are in its footnote.
 6. **Minor and major numbering**
 
    Given: Journal Manager, on the seeded journal, with a scratch
-   submission whose one "Version of Record 1.0" ("Author Original 1.0" on
+   submission whose one "Version of Record 1.0" ("Author's Original 1.0" on
    a preprint server) is published; on a journal the submission has been
    through a review round, and a second scratch submission, taken through
    a review round of its own, waits unpublished.
@@ -657,16 +657,16 @@ each scenario's seeding are in its footnote.
    - **A minor version in the same stage**: side menu › "Create New
      Version", keeping the copied version's stage: "Minor Revision" is
      selectable and preselected; Confirm: the menu gains "Version of
-     Record 1.1" ("Author Original 1.1") (Rule 12).
+     Record 1.1" ("Author's Original 1.1") (Rule 12).
    - **A first version in another stage** {OJS OMP}: create another,
-     choosing "Author Original" as Publication Stage: "Minor Revision" is
-     greyed, and Confirm yields "Author Original 1.0" (Rule 12). While
+     choosing "Author's Original" as Publication Stage: "Minor Revision" is
+     greyed, and Confirm yields "Author's Original 1.0" (Rule 12). While
      switching stages, watch the Revision Significance re-select itself
      ⚠ [A4](#a4).
    - **A major version in a stage that has versions**: create another,
-     keeping "Version of Record" ("Author Original" on a preprint server)
+     keeping "Version of Record" ("Author's Original" on a preprint server)
      and choosing "Major Revision": Confirm yields "Version of Record
-     2.0" ("Author Original 2.0") (Rule 12).
+     2.0" ("Author's Original 2.0") (Rule 12).
    - **The review round cleared** {OJS}: create another, choosing
      "Published Manuscript Under Review": Confirm yields "Published
      Manuscript Under Review 1.0"; on it press the publish button
@@ -874,7 +874,7 @@ each scenario's seeding are in its footnote.
     not send an email.", with a submitted preprint.
 
     - **"Post"**: press it: the "Post the preprint" window shows the
-      requirements met, the version to be assigned ("Author Original
+      requirements met, the version to be assigned ("Author's Original
       1.0") and a "Related Publication" line (on a fresh preprint: "This
       preprint's relations have not been entered."); Confirm: the head
       reads "Status: Posted" and the preprint page is live (Rules 4, 8).
@@ -1181,15 +1181,15 @@ button, every app; the wider server roster is a code reading).
 **A3 — Only a final-stage version counts for the submission** · ❓ ·
 user-visible.
 The submission's own standing follows its FINAL version stage only. With
-just an "Author Original" version published, a journal's article page is
+just an "Author's Original" version published, a journal's article page is
 live while the dashboards still list the submission as active or queued.
 It joins the "Published" views only once a "Version of Record" is
 published. The publish button follows the same rollup: with the article
 live it still reads "Schedule For Publication", not "Publish". On a press
-BOTH halves wait. With only an "Author Original" version published, the
+BOTH halves wait. With only an "Author's Original" version published, the
 workflow reads "Status: Published" while the public catalog page stays
 down. The author is still emailed "Publication Published" with a link to
-a page the public cannot open. On a preprint server Author Original IS
+a page the public cannot open. On a preprint server Author's Original IS
 the final stage, so any post counts at once. Question: is a live article
 on a submission the lists call unpublished intended? Lean: intended as a
 versioning-model design (the lists track the version of record), but the
@@ -1291,7 +1291,7 @@ codes where French words belong:
   version with a stage reads "##publication.versionStage.display##" and
   each without one "##publication.versionStage.unassignedVersion##", so
   "Version of Record 1.0" and "Version of Record 1.1" (a preprint
-  server's "Author Original 1.0" and "1.1") cannot be told apart;
+  server's "Author's Original 1.0" and "1.1") cannot be told apart;
   "Confirmer" still creates the version;
 - a journal's "Publication Settings" page and a preprint server's
   "Preprint Entry" page: the group headings read
@@ -1672,9 +1672,9 @@ footnote's Confirm without an issue; the second panel was walked
 `versionIsMinor`; footer `common.confirm`/`common.cancel`; submit `POST
 …/publications/{sourceId}/version`. Preselection live-probed 2026-08-29
 (OJS, OMP, OPS, stage-assigned sources): the stage select opened on the
-copied version's stage ("Version of Record (VoR)" / OPS's sole "Author
+copied version's stage ("Version of Record (VoR)" / OPS's sole "Author's
 Original (AO)") and significance on "Minor Revision"; untouched Confirm
-produced "Version of Record 1.1" / "Author Original 1.1". The field was
+produced "Version of Record 1.1" / "Author's Original 1.1". The field was
 never observed empty on a stage-assigned source. Live-probed 2026-09-28
 (OJS and OMP, two runs each): from a staged source the stage select
 offered no blank option, so no stage-less version could be made from it;
@@ -1926,7 +1926,7 @@ own address answered "404 Not Found" (the date line and "Versions" as
 Article landing page Rule 7b records). Pressing 1.0's publish button
 then (cancelled) opened the panel on OJS with 1.0's own "Major
 Revision" and its issue kept (Rule 10), and the window directly on OMP
-and OPS, naming "Version of Record 1.0" / "Author Original 1.0".
+and OPS, naming "Version of Record 1.0" / "Author's Original 1.0".
 
 <a id="fn-r"></a>
 **r** — `Repository::version()`: clone with `datePublished = null`,
@@ -1949,7 +1949,13 @@ unassigned label `publication.versionStage.unassignedVersion`. Minor
 availability: `allowMinorVersion = some publication already in the
 chosen stage`; the auto-reselect quirk (A4) is
 `updateMinorOptionAvailability()` passing the availability itself as
-the field's new value on every stage change.
+the field's new value on every stage change. The AO stage's name is the
+English text of `publication.versionStage.authorOriginal`: until pkp-lib
+`d320cfe91d` (pkp/pkp-lib#13478, 2026-10-08, for pkp/pkp-lib#10669) it
+read "Author Original", so the notes dated before that day saw that
+name, though this page writes them with the present one; `stable-3_5_0`
+has no publication stages (no `versionStage` in its code, read
+2026-10-09) and shows neither name.
 
 <a id="fn-t"></a>
 **t** — `updateType` (12 values, default New Version) and
@@ -2123,7 +2129,7 @@ Live-probed 2026-08-29: the activity log read "Mira Manager moved this
 submission to the Done stage." after a final-stage publish and
 "…returned this submission to the workflow." after unpublishing it;
 the same pair observed on a preprint server around a post/unpost cycle
-(Author Original being the final stage there).
+(Author's Original being the final stage there).
 
 <a id="fn-ac"></a>
 **ac** — Listeners on the publish event: `VersionDois` (DOI creation),
@@ -2184,17 +2190,17 @@ publication whose `versionStage === finalVersionStage()` (VoR; OPS AO)
 to move the submission to published/scheduled; `currentPublicationId`
 (the reader-facing version) has no such filter — hence a live page on a
 "queued" submission. Live-probed 2026-08-29 (scratch journal): with only
-"Author Original 1.0" published the article page returned 200 while the
+"Author's Original 1.0" published the article page returned 200 while the
 editor dashboard kept the submission under "Assigned to me" / "Active
 submissions" (Published count unmoved) and the author's My Submissions
 read "Published 0"; the top-right button still read "Schedule For
 Publication". Publishing a "Version of Record 1.0" moved it to
-"Published" on both dashboards. OPS control: a first post (Author
+"Published" on both dashboards. OPS control: a first post (Author's
 Original being final there) flipped both dashboards at once. OMP: the
 public catalog page is gated on the SUBMISSION's published status
 (`CatalogBookHandler`), unlike OJS's article page which serves any
 published publication — live-probed 2026-08-29 (scratch press): with
-only "Author Original 1.0" published the strip read "Status:
+only "Author's Original 1.0" published the strip read "Status:
 Published" while the anonymous catalog page returned 404, and the
 author's "Publication Published" email was delivered regardless.
 
@@ -2203,7 +2209,7 @@ author's "Publication Published" email was delivered regardless.
 `currentValue` to the availability boolean on every stage change and
 clears its error. Live-probed 2026-08-29 (OJS create dialog; the shared
 dialog also exercised on OMP and OPS): with "Version of Record" chosen
-and "Major Revision" picked, switching to the empty "Author Original"
+and "Major Revision" picked, switching to the empty "Author's Original"
 stage kept Major and greyed Minor; switching back to "Version of
 Record" re-selected "Minor Revision" by itself, discarding the Major
 pick. The same auto-switch fires in the journal's publishing panel.
@@ -2242,7 +2248,7 @@ requirements have been met. Are you sure you want to make this catalog
 entry public?" / "The publication must have a version stage assigned
 before it can be published." / "The stage version that will be assigned
 to the publication is "Version of Record 1.0"", Publish button present
-and working; OPS identical in shape ("Author Original 1.0", button
+and working; OPS identical in shape ("Author's Original 1.0", button
 "Post"). Republishing the now-staged version collapsed the two
 sentences to "The publication version is "Version of Record 1.0"".
 Strings: `publication.required.versionStage[.assignment|.alreadyAssignment]`.
@@ -2305,10 +2311,10 @@ only (fn-s).
 entry page; OJS, OMP, OPS, two runs; scratch contexts with UI languages
 English and French (Canada), each read paired with the same read in
 English; the context's Journal Manager at `/fr_CA/dashboard/editorial`):
-the dialog opened on a published "Version of Record 1.0" (OPS "Author
+the dialog opened on a published "Version of Record 1.0" (OPS "Author's
 Original 1.0") and on a never-staged, unpublished item, read before and
 after an untouched "Confirmer". It made "Version of Record 1.1" (OPS
-"Author Original 1.1") from the first and a second stage-less version
+"Author's Original 1.1") from the first and a second stage-less version
 from the second, so the source list held two entries each reading the
 same code (`versionSource` options). Entry pages read on an unpublished
 production item and on a published one: OJS "Publication Settings" on a
@@ -2599,7 +2605,7 @@ published (fn-q).
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** A submission with one "Version of Record"
-(journal/press) or "Author Original" (preprint server) version
+(journal/press) or "Author's Original" (preprint server) version
 published; create versions choosing same-stage and new-stage options.
 OPS has a single stage — its leg covers only the minor/major numbering.
 OJS: the submission is seeded through a review round (`decisions:

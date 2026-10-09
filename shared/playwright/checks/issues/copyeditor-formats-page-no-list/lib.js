@@ -8,7 +8,7 @@ const flat = (s, n = 600) => (s == null ? s : String(s).replace(/\s+/g, ' ').tri
 
 const workflow = (page) => page.getByRole('dialog').filter({has: page.locator('[data-cy="sidemodal-header"]')}).first();
 const nav = (page) => workflow(page).getByRole('navigation').first();
-const VERSION = /^(Unassigned version|Version of Record|Author Original|All Versions)\b/;
+const VERSION = /^(Unassigned version|Version of Record|Author(?:'s)? Original|All Versions)\b/;
 const GRID = /publication-format-grid\/fetch-grid/;
 
 /** The side menu's visible entries, in order (a closed group's entries have no text). */

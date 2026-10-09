@@ -414,13 +414,30 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
       Its close control and Escape after a change to "Block Name" ask the
       same question as the static page window. A change made only in
       "Content" raises no question here either: the close control closes
-      the window and the text is lost [A19](#a19). <sup>g</sup>
-      <sup>td17</sup> <sup>f-a19</sup>
-    - 30b. **Leaving the page.** Going to another address while either
-      window holds a change to "Path", "Title" or "Block Name" raises the
-      browser's own "Leave site?" question. A change made only in the
-      static page window's "Content" raises none: the new page opens at
-      once and the text is lost [A19](#a19). <sup>f</sup> <sup>g</sup>
+      the window and the text is lost [A19](#a19). A press on the page
+      beside the window, which is shaded while the window is open, acts
+      as the close control does in both cases. It closes the block
+      window alone: the "Custom Block Manager" window under it stays
+      open until a second press. <sup>g</sup> <sup>td17</sup>
+      <sup>f-a19</sup>
+    - 30b. **Leaving the page.** Opening another address in the browser
+      raises the browser's own "Leave site?" question when either window
+      holds a change to "Path", "Title" or "Block Name" whose box has
+      since been left (a press elsewhere in the window), or when "Show
+      Name" has been ticked. A change made only in "Content", in either
+      window, raises none: the new page opens at once and the text is
+      lost [A19](#a19). Asked or not, leaving stores nothing: no page or
+      block is added, and a saved block opened again with "Edit" reads as
+      it was saved. <sup>f</sup> <sup>g</sup> <sup>td17</sup>
+      <sup>f-a19</sup>
+    - 30c. **Other ways off the page, from the block window.** With the
+      block window open no link of the page behind it can be followed:
+      the page is shaded, and a press there closes the window
+      (Rule 30a). A reload, and "Edit Profile" in the initials button's
+      menu at the window's top, leave the page as another address does:
+      with the "Leave site?" question after a change to "Block Name"
+      whose box has since been left, and at once, the text lost, after a
+      change made only in "Content" [A19](#a19). <sup>g</sup>
       <sup>td17</sup> <sup>f-a19</sup>
 
 ## Side effects
@@ -840,6 +857,8 @@ Left out of the scenarios above, by reason:
   - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names)
   - a custom block named with "&", and one named only in the primary language by a manager working in another, each opened with "Edit" and placed under "Sidebar" (A4, A13; the guard their issue report names)
   - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the sidebar and "Sidebar" (A14; the guard its issue report names)
+  - a press on the shaded page beside the block window after a "Block Name" change: the question "The data on this form has changed. Do you wish to continue without saving?", "Cancel" keeping the window and the name, "OK" closing it with the "Custom Block Manager" window still open (Rule 30a)
+  - a reload, and "Edit Profile" at the block window's top, after a "Block Name" change, its box left: the "Leave site?" question (Rule 30c)
 - **Rarely met**:
   - "Static Pages Plugin" unticked with pages stored: every page answering "404 Not Found" and the tab gone, then the pages back when it is ticked again {OJS OMP} (Settings bullet 1; Rule 15)
   - "Custom Block Manager" unticked with a block placed: the block leaving the public pages and "Sidebar", then back at its place when it is ticked again (Settings bullet 2; Rule 25)
@@ -854,7 +873,7 @@ Left out of the scenarios above, by reason:
   - the static page window's line on a journal with more than one language under "UI", its address carrying "/en/" {OJS OMP} (Fields)
   - an item at "search" taking the header's "Search", "search/search" still opening the Search page (Rules 6, 6a)
   - the block window's close control and Escape asking after a "Block Name" change (Rule 30a)
-  - the browser's "Leave site?" question when another address is opened with a changed "Path", "Title" or "Block Name" (Rule 30b)
+  - the browser's "Leave site?" question when another address is opened with a changed "Path", "Title" or "Block Name", or with "Show Name" ticked (Rule 30b)
   - a pasted or dropped picture stored as "mceclip{n}.png" (Rule 29c)
   - the Editor and the Production Editor on the Settings pages: the same items, plugins, static pages, blocks and "Sidebar" as the Journal Manager in scenarios 1 to 7 (Actors rows 1, 5, 6, 7)
 - **Register carries it**:
@@ -876,7 +895,7 @@ Left out of the scenarios above, by reason:
   - A16 (a ".pdf" or ".svg" chosen in the picture window ignored with no message; Rule 29)
   - A17 (a refused pasted or dropped picture kept in the text, embedded; Rule 29c)
   - A18 (a picture over the server's upload limit getting a server error, never the size message; Rule 29)
-  - A19 (a change only in "Content" lost without a question, in the static page window {OJS OMP} on its back arrow and on leaving the page, and in the block window on its close control; Rules 30, 30a, 30b)
+  - A19 (a change only in "Content" lost without a question, in the static page window {OJS OMP} on its back arrow and on leaving the page, and in the block window on its close control, on a press beside it and on leaving the page; Rules 30, 30a, 30b, 30c)
   - A20 (the first language's "Content" box left under a "Loading..." spinner when the second language's box loads last; Fields)
 - **No seed**:
   - another picture allowance: only the installation's configuration file sets it (Settings bullet 7; Rule 29a)
@@ -1218,6 +1237,7 @@ stray click loses its text too. The lost text cannot be brought back;
 the only way round is to press "Save for Later", "Save" or send before
 leaving.
 Basis: probe, 2026-10-02. <sup>f-a19</sup>
+Report: refresh owed — the custom block window was walked on `main` (OJS, OMP, OPS) on 2026-10-09 where the report has it closed by its close control only: a "Content"-only change is lost without a question on another address, on a reload, on "Edit Profile" at the window's top and on a press beside the window, which its Steps (13–16), Reach and "Not driven" do not say yet (2026-10-09)
 
 <a id="a20"></a>
 **A20 — With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good** · 🐞 · medium · crash: script.
@@ -1890,6 +1910,38 @@ with nothing stored after a change to "Block Name", after a change in
 and Escape after a "Block Name" change asked the question. Going to
 another address with either window changed raised the browser's "Leave
 site?".
+Walked 2026-10-09 (Rules 30a, 30b, 30c; OJS, OMP, OPS on `main`, two
+runs each, on scratch journals as their manager and, for another
+address, as the Site Administrator; the static page window OJS, OMP).
+With "Add Block" open, "Block Name" typed and the window's heading
+pressed: another address, a reload and the window's own initials button
+› "Edit Profile" each raised the browser's page-leave question (a
+`beforeunload` dialog, with no words of the application's); answered to
+stay, the window kept the name; answered to leave, the new page opened
+and the list held no new row. The same on "Edit" of a saved block with
+its name changed, which read as saved afterwards, and with both boxes
+changed. "Show Name" ticked and nothing else changed, then another
+address: the question too (not driven against the close control or
+Escape, nor on "Edit"). Untouched "Add Block" and "Edit" windows left
+without a question. In the static page window, "x" in "Title" alone or
+in "Path" alone, the heading pressed, then another address: the
+question, and the list stayed empty after leaving. With the block
+window open, none of the 11 to 13 links of the page behind could be
+pressed: each lay under the shade (`div.DialogOverlay`) or under a
+window's panel. A press where a side-menu link shows beside the windows
+closed the block window: after a "Block Name" change behind the confirm
+"The data on this form has changed. Do you wish to continue without
+saving?" ("Cancel" kept the window and the name, "OK" closed it), after
+a "Content"-only change at once (note f-a19); a second press closed the
+"Custom Block Manager" window and a third followed the link, neither
+with a question, and nothing was stored. The initials menu's "Logout"
+was not pressed; the help link beside it opens a new browser tab. With
+the caret still in "Block Name", a reload or a navigation started by
+the script raised no question: a text box sends the `change` event that
+`FormHandler` listens for only when it loses the focus. The browser's
+address bar and reload key are out of the script's reach, so what a
+person gets with the caret still in the box was not seen, and Rule 30b
+claims the question only for a box that has been left.
 
 <a id="fn-k"></a>
 **k** — No `NotificationManager`, mail or event-log call in
@@ -2184,9 +2236,23 @@ closed, nothing stored; text in "Content" alone, then another address
 typed: no "Leave site?", the new page opened; "x" in "Title" instead:
 the question, and "Cancel" kept "x". In the block window (OJS, OMP,
 OPS), text in "Content" alone, then the close control: no question, the
-window closed. The static page window likewise on 3.5 (OJS, OMP). The
-block window with another address after a "Content"-only change: read
-in the code, not driven.
+window closed. The static page window likewise on 3.5 (OJS, OMP).
+Walked 2026-10-09 (Rules 30a, 30b, 30c; OJS, OMP, OPS on `main`, two
+runs each, on scratch journals as their manager and, for another
+address, as the Site Administrator): text typed in "Content" alone on
+"Add Block", then another address (with the window's heading pressed
+first, with "Block Name" pressed first, and with the caret still in
+"Content"), a reload, or the window's own initials button › "Edit
+Profile": no "Leave site?" each time, the new page opened and the list
+held no new row. Text added to a saved block's "Content" on "Edit",
+then another address or "Edit Profile": no question, and the block
+opened again read its saved "Block Name" and "Content". A press on the
+shaded page beside the window after a "Content"-only change, on "Add
+Block" and on "Edit": the window closed at once, the text gone. In the
+same runs "Block Name" typed instead raised the question each time
+(note td17). The static page window's "Content"-only change, then
+another address, was seen again the same day (OJS, OMP): no question,
+the list empty afterwards.
 Issue report: [pkp-e2e#375](https://github.com/jardakotesovec/pkp-e2e/issues/375) ([docs/issues/U09-A19-static-page-content-change-lost-on-close.md](../issues/U09-A19-static-page-content-change-lost-on-close.md)).
 
 <a id="fn-f-a20"></a>

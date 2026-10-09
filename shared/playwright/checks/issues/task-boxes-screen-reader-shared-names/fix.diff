@@ -1,0 +1,94 @@
+--- a/lib/ui-library/src/components/Table/TableColumn.vue
++++ b/lib/ui-library/src/components/Table/TableColumn.vue
+@@ -1,5 +1,7 @@
+ <template>
+ 	<th
++		:id="columnId"
++		ref="columnRef"
+ 		scope="col"
+ 		:aria-sort="props.allowsSorting ? tableContext.sortDirection : undefined"
+ 		class="border-b border-t border-light px-2 py-4 text-start text-base-normal uppercase text-heading first:border-s first:ps-3 last:border-e last:pe-3"
+@@ -27,7 +29,7 @@
+ </template>
+ 
+ <script setup>
+-import {defineProps, inject, onMounted, onUnmounted} from 'vue';
++import {defineProps, inject, onMounted, onUnmounted, ref} from 'vue';
+ import Icon from '@/components/Icon/Icon.vue';
+ 
+ const props = defineProps({
+@@ -41,7 +43,13 @@
+ 
+ const tableContext = inject('tableContext');
+ 
++// The header's own id, `{tableId}_{column index}`, so that a control in a cell
++// can name its column through aria-labelledby (see TableCellSelect).
++const columnRef = ref(null);
++const columnId = ref(undefined);
++
+ onMounted(() => {
++	columnId.value = `${tableContext.tableId}_${columnRef.value.cellIndex}`;
+ 	tableContext.columnsCount.value++;
+ });
+ 
+--- a/lib/ui-library/src/components/Table/TableRowGroup.vue
++++ b/lib/ui-library/src/components/Table/TableRowGroup.vue
+@@ -1,5 +1,6 @@
+ <template>
+ 	<th
++		:id="groupId"
+ 		:colspan="tableContext.columnsCount.value"
+ 		scope="rowgroup"
+ 		class="whitespace-nowrap border-b border-light bg-tertiary p-2 text-start text-lg-medium text-secondary first:border-s first:ps-3 last:border-e last:pe-3"
+@@ -17,4 +18,6 @@
+ <script setup>
+ import {inject} from 'vue';
+ const tableContext = inject('tableContext');
++// Provided by TableRowGroupWrapper; names the group for the controls in its heading.
++const groupId = inject('groupId', null);
+ </script>
+--- a/lib/ui-library/src/managers/TaskTemplateManager/TaskTemplateManager.vue
++++ b/lib/ui-library/src/managers/TaskTemplateManager/TaskTemplateManager.vue
+@@ -40,7 +40,9 @@
+ 					>
+ 						<TableRow>
+ 							<TableRowGroup>
+-								<span class="text-lg-bold">{{ stage.name }}</span>
++								<span :id="`template_stage_${stage.key}`" class="text-lg-bold">
++									{{ stage.name }}
++								</span>
+ 								<template #action="{groupId}">
+ 									<PkpButton
+ 										:is-link="true"
+--- a/lib/ui-library/src/managers/TaskTemplateManager/TaskTemplateManagerCellAutoAdd.vue
++++ b/lib/ui-library/src/managers/TaskTemplateManager/TaskTemplateManagerCellAutoAdd.vue
+@@ -1,7 +1,7 @@
+ <template>
+ 	<TableCellSelect
+ 		:checked="!!taskTemplate?.include"
+-		:aria-label="t('taskTemplates.templateAutoAdd')"
++		:labelled-by="labelIds"
+ 		:confirm-title="t('taskTemplates.confirmAutoAdd')"
+ 		:confirm-message="confirmMsg"
+ 		@change="taskTemplateManagerStore.templateUpdateAutoAdd({taskTemplate})"
+@@ -9,11 +9,12 @@
+ </template>
+ 
+ <script setup>
+-import {computed} from 'vue';
++import {inject, computed} from 'vue';
+ import {t} from '@/utils/i18n';
+ import {useTaskTemplateManagerStore} from './taskTemplateManagerStore';
+ import TableCellSelect from '@/components/Table/TableCellSelect.vue';
+ 
++const tableContext = inject('tableContext');
+ const taskTemplateManagerStore = useTaskTemplateManagerStore();
+ 
+ const props = defineProps({
+@@ -31,4 +32,6 @@
+ 				stage: props.stage.name,
+ 			}),
+ );
++
++const labelIds = `template_name_${props.taskTemplate.id} ${tableContext.tableId}_${props.index} template_stage_${props.stage.key}`;
+ </script>

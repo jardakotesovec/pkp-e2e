@@ -1,0 +1,28 @@
+diff --git a/classes/template/PKPTemplateManager.php b/classes/template/PKPTemplateManager.php
+index 7355605b7e..335541e570 100644
+--- a/classes/template/PKPTemplateManager.php
++++ b/classes/template/PKPTemplateManager.php
+@@ -152,10 +152,10 @@ class PKPTemplateManager extends Smarty
+     private bool $isVueRuntimeIncluded = false;
+ 
+     /** @var MetadataBlocksRegistry Register and load metadata blocks for the reader facing UI */
+-    public MetadataBlocksRegistry $metadataBlocks;
++    public \PKP\view\MetadataBlocksRegistry $metadataBlocks;
+ 
+     /** @var HomepageBlocksRegistry Register and load metadata blocks for the reader facing UI */
+-    public HomepageBlocksRegistry $homepageBlocks;
++    public \PKP\view\HomepageBlocksRegistry $homepageBlocks;
+ 
+     /**
+      * Constructor.
+@@ -192,8 +192,8 @@ class PKPTemplateManager extends Smarty
+         // for unified template resolution and hook firing
+         $this->template_class = \PKP\core\blade\SmartyTemplate::class;
+ 
+-        $this->metadataBlocks = new MetadataBlocksRegistry();
+-        $this->homepageBlocks = new HomepageBlocksRegistry();
++        $this->metadataBlocks = class_exists(MetadataBlocksRegistry::class) ? new MetadataBlocksRegistry() : new \PKP\view\MetadataBlocksRegistry();
++        $this->homepageBlocks = class_exists(HomepageBlocksRegistry::class) ? new HomepageBlocksRegistry() : new \PKP\view\HomepageBlocksRegistry();
+     }
+ 
+     /**

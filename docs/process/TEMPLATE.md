@@ -505,6 +505,11 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      translation that is there and says something wrong is a finding, and
      so is a raw key in English or a key the code reads wrongly.
 
+     NOT A FINDING: a count beside the wrong singular or plural ("1 days",
+     "1 submissions"). The applications have no proper plural support for
+     their texts yet, so a text reads the same for every number: no entry,
+     no issue report. A wrong number is a finding.
+
      Structure:
 
      Preamble, one sentence: "Verdicts are the author's judgment (claude,

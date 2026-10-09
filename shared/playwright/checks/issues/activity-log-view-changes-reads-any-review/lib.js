@@ -1,6 +1,6 @@
 // Helpers of walk.js here (U38 A11: the Activity Log's "View changes" serves any edited review by
-// its log-entry number, whatever submission or journal it belongs to;
-// docs/issues/U38-A11-activity-log-view-changes-reads-any-review.md).
+// its log-entry number, whatever submission or journal it belongs to; retired 2026-10-09, fixed by
+// pkp/pkp-lib#13465, walk.js's header).
 // Requiring this file runs nothing. The screen helpers drive the workflow's "Reviewers" table, the
 // "Review Details" and stacked "Modify Review" windows, and the header's "Activity Log", reusing the
 // U27 A30/A31 walk's helpers. probeViewReviewChange() issues the grid request the "View changes"

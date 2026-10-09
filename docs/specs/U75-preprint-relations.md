@@ -1022,7 +1022,7 @@ Production stage page; the panel opened under the button. A save was
 one request carrying `relationStatus` and `vorDoi`, the hidden box
 included; "Saved" showed and was gone 6 seconds later, the panel open
 with the saved values; on a posted preprint the signed-out page showed
-the new notice at once, the versions still read "Author Original 1.0"
+the new notice at once, the versions still read "Author's Original 1.0"
 and the Activity Log gained no posting line. An unsaved choice and
 address stayed when the panel was closed and opened again and on
 "Contributors", with no question or mark, and were gone after going to
@@ -1077,7 +1077,7 @@ available yet."; "not published elsewhere", "This preprint has not been
 published elsewhere."; never answered, and "not entered" saved, "This
 preprint's relations have not been entered.". Each preprint read
 "Status: Unposted" after "Close". A second version's window named
-"Author Original 1.1" and read that version's own relation.
+"Author's Original 1.1" and read that version's own relation.
 
 <a id="fn-j"></a>
 **j** — `PreprintCrossrefXmlFilter::createDocument()` writes one

@@ -156,7 +156,12 @@ No suite is meant to run on any of the three lines.
   the Author group), so a Native XML export and an ORCID work deposit of a
   seeded submission fail on it until its role is set in the Contributors
   window (U63, U04 claim checks). A scenario key that reaches another
-  `main`-only class answers 500 naming it. The suites' page objects follow
+  `main`-only class answers 500 naming it; the submission scenario's
+  `published` key is one (400 unless the submission stands in Copyediting
+  or Production, then 500 on `updateCurrentPublication()`): a 3.5 drive
+  seeds `decisions: ['skipExternalReview', 'sendToProduction']` and
+  publishes on screen, as `checks/U63/I09/doaj35.js` `publish35` does
+  (U63, U17 claim checks, 2026-10-09). The suites' page objects follow
   `main`'s screens, and those the issue walks keep meeting differ on 3.5:
   the submission wizard opens on "Details", then "Upload Files"; "Create
   New Version" is a button in the publication page's header, confirmed
@@ -165,7 +170,10 @@ No suite is meant to run on any of the three lines.
   publication"); a version is numbered in `publications.version`
   (`version_stage`, `version_major`, `version_minor` on `main`); the
   publication pages' menu keys are seed-facts.md's (U13, U19, U21, U45,
-  U50, U52, U69 issue walks, 2026-10-01).
+  U50, U52, U69 issue walks, 2026-10-01); the 3.5 "Discussions" grid has
+  no page object, and its helpers (add, open, reply, edit participants)
+  sit in the `lib.js` of the U37 A3, A8, A9 and A36 walks under
+  `checks/issues/`, to be taken from there, not written a fifth time.
 - **3.4 and 3.3: no `_test` API, no seed.** The overlays are written for
   `main`'s Laravel-routed API, which 3.4 (Slim handlers) and 3.3
   (`import()`, `.inc.php`, no `Repo`) do not have, so `mount` copies only
@@ -327,7 +335,16 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   3.5, 3.4, 3.3; OJS, OMP, OPS) matched its checkout: no upgrade.
   `PKP_E2E_DATASET_BRANCH=stable-3_5_0` loads another branch's dataset
   (pkp's own `loaddb.sh <branch>`), which exercised the upgrade: 3.5.0.5
-  to 3.6.0.0 on OJS `main` in 2 s.
+  to 3.6.0.0 on OJS `main` in 2 s. Before an upgrade from a dataset older
+  than 3.4 the reset removes the dataset's own usage event log from the
+  fleet's files (`dropStaleUsageLogs()`, said in the output): the 3.4
+  pre-flight check stops the upgrade on any
+  `usageStats/usageEventLogs/usage_events_<date>.log` dated before
+  yesterday, and the dump carries the log of the day pkp's CI built it.
+  With `PKP_E2E_DATASET_BRANCH=stable-3_3_0`, 3.3.0.23 upgrades to
+  3.6.0.0 on `main` and to 3.5.0.5 on 3.5 in about 3 s per app
+  (2026-10-09, the PR review of pkp/pkp-lib#13481, whose kept check
+  reloads the dump and upgrades it once per case).
 - **The kit on a dataset fleet.** `bin/probe.js` reads
   `.reports/<PROBE_FEATURE>/fleet.json`: a dataset fleet's sets
   `PKP_E2E_DATASET` (and `PKP_E2E_LINE`, which may be left out), so the
@@ -620,7 +637,11 @@ files dir it must carry:
   PKP wires `[proxy]` into Guzzle and Laravel HTTP, so every server-side
   outbound HTTP call fails fast. Tests never reach real external services,
   and a hung outbound call cannot stall a single-threaded worker server.
-  SMTP to Mailpit and other 127.0.0.1 traffic are unaffected. Do not remove
+  SMTP to Mailpit is unaffected; an HTTP call from the app's code to a
+  stand-in on 127.0.0.1 goes to the dead proxy like any other (`no_proxy`
+  in the environment is not read), so a PHP driver that needs one points
+  `Config::getData()['proxy']` at its own stub in its process, as
+  `checks/sync/pkp-lib-13475/lookups.php` does. Do not remove
   it, and re-add it by hand on new machines. There is no OS-level firewall
   and no DTD mirror.
 - `[database] persistent = On` (the generator writes it since 2026-09-14;

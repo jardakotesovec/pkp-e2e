@@ -144,7 +144,7 @@ The Search page goes by the publication's status instead (`DatabaseEngine`,
 The same commit also made `getStatusByPublications()` count only a
 published Version of Record. This is a second trigger that needs no
 "Return to Workflow": an OMP book whose only published version is
-another stage (an Author Original, say) stays queued, and its page is a
+another stage (an Author's Original, say) stays queued, and its page is a
 404 for visitors. This was read in the code, not walked.
 
 Reach (every other reader of `submissions.status` as "published"):

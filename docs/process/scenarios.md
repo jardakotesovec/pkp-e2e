@@ -2142,7 +2142,7 @@ Keys:
   typed one: the date box reopens with the date, the status reads
   "Published" (OPS "Posted"), and the landing page shows it (OJS and OPS
   "2024-03-05", OMP "March 5, 2024"; each with "2024-03-05 (Version of
-  Record 1.0)", OPS "(Author Original 1.0)"). Without `published` the
+  Record 1.0)", OPS "(Author's Original 1.0)"). Without `published` the
   date sits on the unpublished version, as a saved but unpublished box
   leaves it. The version's `copyrightYear` is the publish year, not the
   date's (a scratch context's copyright-year basis), on the seed and the

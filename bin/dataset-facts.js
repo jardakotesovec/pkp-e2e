@@ -88,10 +88,16 @@ function readFacts(name, line) {
         const groupTable = name === 'omp' ? 'series' : 'sections';
         const groupSettings = name === 'omp' ? 'series_settings' : 'section_settings';
         const groupId = name === 'omp' ? 'series_id' : 'section_id';
+        // A series has a public page at its path, which a walk needs to open it; a section has none.
+        const groupPath = name === 'omp' && hasColumn('series', 'path') ? `coalesce(g.path, '')` : `''`;
         context.groups = q(`SELECT (SELECT setting_value FROM ${groupSettings} t WHERE t.${groupId} = g.${groupId} AND t.setting_name = 'title' ${preferEn}),
-                (SELECT setting_value FROM ${groupSettings} t WHERE t.${groupId} = g.${groupId} AND t.setting_name = 'abbrev' ${preferEn})
+                (SELECT setting_value FROM ${groupSettings} t WHERE t.${groupId} = g.${groupId} AND t.setting_name = 'abbrev' ${preferEn}),
+                ${groupPath}
             FROM ${groupTable} g WHERE g.${c.id} = ${contextId} ORDER BY g.seq, g.${groupId}`)
-            .map(([title, abbrev]) => (abbrev ? `${cell(title)} (${cell(abbrev)})` : cell(title)));
+            .map(([title, abbrev, path]) => {
+                const notes = [abbrev && cell(abbrev), path && `path \`${cell(path)}\``].filter(Boolean);
+                return notes.length ? `${cell(title)} (${notes.join(', ')})` : cell(title);
+            });
         context.groupLabel = name === 'omp' ? 'series' : 'sections';
         context.issues = name !== 'ojs' ? [] : q(`SELECT i.issue_id, coalesce(i.volume::text, ''), coalesce(i.number, ''), coalesce(i.year::text, ''), i.published,
                 (i.issue_id = (SELECT current_issue_id FROM journals WHERE journal_id = ${contextId}))::int
@@ -115,7 +121,9 @@ function readFacts(name, line) {
         }));
         const reviewState = `CASE WHEN ra.cancelled = 1 THEN 'cancelled' WHEN ra.declined = 1 THEN 'declined'
             WHEN ra.date_completed IS NOT NULL THEN 'completed' WHEN ra.date_confirmed IS NOT NULL THEN 'accepted' ELSE 'not responded' END`;
-        const people = (roles) => `(SELECT string_agg(DISTINCT u.username, ', ') FROM stage_assignments sa
+        // An assistant is offered only on the stages of the role it was assigned in, so that column names the role.
+        const groupName = `coalesce((SELECT setting_value FROM user_group_settings gs WHERE gs.user_group_id = ug.user_group_id AND gs.setting_name = 'name' ${preferEn}), 'role ' || ug.role_id)`;
+        const people = (roles, withRole = false) => `(SELECT string_agg(DISTINCT u.username${withRole ? ` || ' (' || ${groupName} || ')'` : ''}, ', ') FROM stage_assignments sa
             JOIN users u ON u.user_id = sa.user_id JOIN user_groups ug ON ug.user_group_id = sa.user_group_id
             WHERE sa.submission_id = s.submission_id AND ug.role_id IN (${roles}))`;
         const submissions = q(`
@@ -123,7 +131,7 @@ function readFacts(name, line) {
                 (SELECT setting_value FROM publication_settings ps WHERE ps.publication_id = s.current_publication_id
                     AND ps.setting_name = 'title' AND ps.setting_value <> '' ORDER BY (ps.locale = s.locale) DESC, ps.locale LIMIT 1),
                 (SELECT count(*) FROM publications p WHERE p.submission_id = s.submission_id),
-                coalesce(${people('16, 17')}, ''), coalesce(${people('65536')}, ''), coalesce(${people('4097')}, ''),
+                coalesce(${people('16, 17')}, ''), coalesce(${people('65536')}, ''), coalesce(${people('4097', true)}, ''),
                 coalesce((SELECT string_agg(u.username || ' r' || ra.round || ' ' || ${reviewState}, ', ' ORDER BY ra.round, ra.review_id)
                     FROM review_assignments ra JOIN users u ON u.user_id = ra.reviewer_id WHERE ra.submission_id = s.submission_id), ''),
                 coalesce((SELECT rr.round || ' ' || rr.status FROM review_rounds rr WHERE rr.submission_id = s.submission_id

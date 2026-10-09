@@ -1983,7 +1983,7 @@ but those apps have no comment box, so the fault shows there only on
 comments and reports the tooling makes, as it made them for the
 2026-09-16 read; the issue report's reach is OJS. The profile's own display
 of an iD is *[ORCID integration](U04-orcid-integration.md)*'s.
-Issue report: [pkp-e2e#902](https://github.com/jardakotesovec/pkp-e2e/issues/902) ([docs/issues/U14-A6-comment-panel-unverified-orcid-link-broken.md](../issues/U14-A6-comment-panel-unverified-orcid-link-broken.md)).
+Issue report: [pkp-e2e#902](https://github.com/jardakotesovec/pkp-e2e/issues/902) ([docs/issues/U14-A6-comment-panel-unverified-orcid-link-broken.md](../issues/U14-A6-comment-panel-unverified-orcid-link-broken.md)); the team's copy is `pkp/pkp-lib#13468` (open, 2026-10-09).
 
 <a id="fn-f-a7"></a>
 **f-a7 — A7.** `PkpCommentsMessageActions` renders `PkpDropdownMenu` with

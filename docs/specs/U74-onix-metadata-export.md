@@ -1102,7 +1102,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | "Export Submissions" with no book ticked opens an empty results tab | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A18](#a18) | The returns and availability the "Metadata" tab shows can differ from what the product carries, and an import loses both | 🐞 | medium | issues (claude), 2026-10-06 — re-verified |
 | [A19](#a19) | A Native XML import adds the exporting press as a supplier and changes the suppliers' websites | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [A20](#a20) | On an install with no representative yet, the first one added is not listed until the page is reloaded | 🐞 | minor · crash: server | — |
+| [A20](#a20) | A book's "Representatives" table does not redraw the first representative ever added on the install | 🐞 | low · crash: both | issues (claude), 2026-10-09 — re-verified |
 | [A3](#a3) | A saved audience list cannot be emptied again | ❓ | minor | — |
 | [A10](#a10) | A representative's ID, and an agent's phone and email, reach no file | ❓ | minor | — |
 | [A1](#a1) | On a freshly installed press, the ONIX 3.0 tool's "Export Submissions" ended in "The process failed" for every book | ✅ | retired | PR review (claude), 2026-10-05 — fixed by pkp/omp#2372, merged 2026-10-05 |
@@ -1288,6 +1288,7 @@ itself stays on the page.
 The table redrew the whole list after each save until a 2012 change made
 it redraw one row in one group, which missed this case.
 Basis: probe, 2026-10-03. <sup>f-a13</sup>
+Report: refresh owed — the report's Kind reads "regression" on OMP `7218a8698` (2012), which the A20 report found already in OMP's first tag (`omp-0_9_9-0`): no release redrew the row right, so the kind is to be checked against REPORT.md (a header fact; no walk) (2026-10-09)
 
 <a id="a14"></a>
 **A14 — A refused representative delete leaves its dialog open** · 🐞 · low.
@@ -1366,14 +1367,25 @@ come back as they were.
 Basis: probe, 2026-10-03. <sup>f-a19</sup>
 
 <a id="a20"></a>
-**A20 — On an install with no representative yet, the first one added is not listed until the page is reloaded** · 🐞 · minor · crash: server.
-On an install where no book has a representative yet, the first one
-added on a book's "Marketing" › "Representatives" page, agent or
-supplier, is saved at "OK" (an agent with "Representative added."),
-yet neither "Agents" nor "Suppliers" lists it; a reload lists it under its
-group. Every representative added after it is listed at once.
-Expected: the first one is listed at once too, like the rest.
-Basis: probe, 2026-10-03. <sup>f-a20</sup>
+**A20 — A book's "Representatives" table does not redraw the first representative ever added on the install** · 🐞 · low · crash: both.
+On an install where no representative was ever added, an editor adds
+one on a book's "Marketing" › "Representatives" page. "Representative
+added." appears, but the table's request for the new row fails on the
+server: neither "Agents" nor "Suppliers" lists it, and no error shows.
+The editor expects it listed at once, like every representative added
+after it.
+
+The representative is saved, and a reload lists it. The table misses
+that representative's later changes the same way: after its "Edit" the
+row keeps the old name and role, and after its "Delete" the row stays,
+each until a reload. An editor who adds it again instead of reloading
+stores it twice.
+
+Only the one representative stored first on the install is affected,
+agent or supplier, whichever book it belongs to. Once it is deleted
+the fault is over on that install for good: an emptied list does not
+bring it back.
+Basis: probe, 2026-10-09. <sup>f-a20</sup>
 
 ### Retired
 
@@ -2507,6 +2519,7 @@ report step 3, with "Representative added."); its row fetch answered 500 with
 listed it; the next one (id 2) was listed without a reload. Upstream
 pkp/pkp-lib#8968 (a new representative not listed, closed in 2023 with
 a change to `CategoryGridHandler`) concerns the same page.
+Issue report: [pkp-e2e#945](https://github.com/jardakotesovec/pkp-e2e/issues/945) ([docs/issues/U74-A20-first-representative-not-listed.md](../issues/U74-A20-first-representative-not-listed.md)).
 
 ## Reference — entry points & surfaces
 

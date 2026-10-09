@@ -80,13 +80,13 @@ Changing the new version's file:
    [submission 2, `…?workflowSubmissionId=2`].
 4. In the side menu, press "Create New Version", keep "Minor Revision"
    and press "Confirm". The menu gains "Version of Record 1.1"
-   ["Author Original 1.1"]. [3.5: the version page's "Create New
+   ["Author's Original 1.1"]. [3.5: the version page's "Create New
    Version" button, then "Yes".]
 5. Under "Version of Record 1.1", open "Galleys".
 6. On the "PDF" row, open "More Actions" › "Change File", choose
    `replacement.pdf`, then "Continue", "Continue" and "Complete".
 7. In the reader's window, repeat step 1.
-8. Back as `dbarnes`, under "Version of Record 1.0" ["Author Original
+8. Back as `dbarnes`, under "Version of Record 1.0" ["Author's Original
    1.0"], open "Galleys" and press the "PDF" row's label. [3.5: pick
    version 1 in "All Versions", then "Galleys".]
 

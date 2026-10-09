@@ -101,7 +101,7 @@ OPS  Posted     2026-10-02 — Updated on 2024-12-31
 ```
 
 The page otherwise still shows version 1.0, and its "Versions" list
-holds "2024-12-31 (Version of Record 1.0)" ("Author Original 1.0" on
+holds "2024-12-31 (Version of Record 1.0)" ("Author's Original 1.0" on
 OPS) alone.
 
 ## Cause

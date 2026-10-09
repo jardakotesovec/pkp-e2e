@@ -9,7 +9,9 @@
   - 3.4: none (code; no reader comments)
   - 3.3: none (code; no reader comments)
 - **Introduced** `pkp/ui-library#664` for `pkp/pkp-lib#11576` · [463f5fbf0](https://github.com/pkp/ui-library/commit/463f5fbf09962bdd6ea22a6c2142b7970645764f) · 2025-08-28 · Taslan A. Graham (taslangraham)
-- **Upstream** none found (2026-10-04)
+- **Upstream** `pkp/pkp-lib#13468` (open; fix in PRs `pkp/pkp-lib#13476`,
+  `pkp/ui-library#1014` and `pkp/ojs#5913`, not yet in main), the team's
+  copy of this issue
 - **Tracked in** spec U14 [A6](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U14-reader-comments-and-moderation.md#a6)
 - **Checked** 2026-10-04, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

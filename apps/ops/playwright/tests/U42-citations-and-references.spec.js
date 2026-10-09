@@ -7,7 +7,7 @@
  * server's own words: the Publication area is the "Preprint" group and its
  * pages are headed "Preprint: References" / "Preprint: Data"; the Preprint
  * Server Manager takes the Journal Manager's part; the published item is a
- * posted preprint, read on its preprint page; versions read "Author
+ * posted preprint, read on its preprint page; versions read "Author's
  * Original 1.0" / "1.1"; a draft's file is its galley (`preprint.pdf`), and
  * the wizard's steps are "Upload Files", "Details", "Contributors", "For
  * Readers" (whose required relation status is answered on the way) and
@@ -43,8 +43,8 @@
  *   and only with the mouse; the zero-size ones are never touched.
  * - A18 ✅ (retired 2026-09-29: every step change saves): every References
  *   change is still carried by "Continue"; the step rail only goes back.
- * - A20 🐞: S3's control reads the reference-less preprint's page for the
- *   absence of any reference text, never for its "References" heading.
+ * - A20 ✅ (retired 2026-10-09 by pkp/ops#1443): S3's control reads that the
+ *   preprint with no references has no "References" block.
  * - A8, A11, A12, A15: not on these scenarios' OPS paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
@@ -73,6 +73,7 @@
  * own API answer. Everything runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {unordered} = require('../../../../shared/playwright/support/order.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {
@@ -110,8 +111,8 @@ const SERVER = 'publicknowledge';
 /** A preprint server enrols no editor: the Preprint Server Manager takes the Journal Manager's part. */
 const MANAGER = 'manager.maya';
 const AUTHOR = 'author.alex';
-const VERSION_1 = 'Author Original 1.0';
-const VERSION_2 = 'Author Original 1.1';
+const VERSION_1 = `${AO} 1.0`;
+const VERSION_2 = `${AO} 1.1`;
 /** A draft's file: its galley (OPS has no workflow file list, screen notes ccK3). */
 const DRAFT_FILE = {galleys: [{label: 'PDF', file: 'preprint.pdf'}]};
 
@@ -494,12 +495,11 @@ test.describe('citations and references (U42) — OPS', () => {
         await expect(link).toHaveAttribute('target', '_blank');
         await expect(landing.paragraphs.nth(0).getByRole('link')).toHaveCount(0);
 
-        // Control: the preprint with no references shows no reference text,
-        // read once its page has rendered its title (Rule 27; its
-        // "References" heading is A20's, never asserted).
+        // Control: the preprint with no references has no "References"
+        // block, read once its page has rendered its title (Rule 27).
         await page.goto(preprintUrl(SERVER, noRefs.submissionId));
         await expect(page.getByRole('heading', {name: `Preprint ${tag}c`})).toBeVisible({timeout: 30_000});
-        await expect(landingReferences(page).paragraphs).toHaveCount(0);
+        await expect(landingReferences(page).block).toHaveCount(0);
         await expect(page.getByText('Zulu report 2019')).toHaveCount(0);
     });
 

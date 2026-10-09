@@ -7,8 +7,7 @@
  * words: the Press Manager, a monograph, the catalog's book page. The press
  * markers ride inside the common tests: the lookup text is read by its
  * opening words only (S5, A4), the wizard's Data Citations table is read
- * after a reload (S7, A10), and a book with no references is read for its
- * reference text only (S3, A20).
+ * after a reload (S7, A10).
  * Spec: docs/specs/U42-citations-and-references.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -35,8 +34,9 @@
  *   and only with the mouse; the zero-size ones are never touched.
  * - A18 ✅ (retired 2026-09-29: every step change saves): every References
  *   change is still carried by "Continue"; the step rail only goes back.
- * - A20 🐞: S3's control reads that the book with no references shows no
- *   reference text; nothing reads its "References" heading either way.
+ * - A20 ✅ (retired 2026-10-09 at the PR head of pkp/omp#2502): S3's
+ *   control reads that the book with no references has no "References"
+ *   block.
  * - A8, A11, A12, A15: not on these scenarios' OMP paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
@@ -612,12 +612,11 @@ test.describe('citations and references', () => {
         await expect(link).toHaveAttribute('target', '_blank');
         await expect(landing.paragraphs.nth(0).getByRole('link')).toHaveCount(0);
 
-        // Control: the book with no references shows no reference text,
-        // read the way the paragraphs above were, once its page has
-        // rendered its title (Rule 27; its heading is A20's, file header).
+        // Control: the book with no references has no "References" block,
+        // read once its page has rendered its title (Rule 27).
         await page.goto(bookUrl(PRESS, noRefs.submissionId));
         await expect(page.getByRole('heading', {name: `Submission ${tag}c`})).toBeVisible({timeout: 30_000});
-        await expect(landingReferences(page).paragraphs).toHaveCount(0);
+        await expect(landingReferences(page).block).toHaveCount(0);
         await expect(page.getByText('Zulu report 2019')).toHaveCount(0);
     });
 

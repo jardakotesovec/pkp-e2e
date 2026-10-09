@@ -13,7 +13,6 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
  * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓, OMP1 ❓.
- * - A4 🐞, A6 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (S6 and S16 ride publicknowledge, S6 with its own tagged

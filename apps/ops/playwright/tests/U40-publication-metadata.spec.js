@@ -40,6 +40,7 @@
  * Everything runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {
     PublicationScreen,
     openWorkflow,
@@ -618,7 +619,7 @@ test.describe('Publication metadata (U40)', () => {
         await expect(authorScreen.saveButton()).toBeDisabled();
 
         // A new version: "Create New Version", confirmed: the menu gains
-        // "Author Original 1.1". The Author's Title & Abstract on it shows
+        // "Author's Original 1.1". The Author's Title & Abstract on it shows
         // no banner and Save is offered; the unsaved-edit drop holds on
         // this editable page too (Rules 9, 10). The posted version, read
         // the same way by address, keeps its banner and disabled Save —
@@ -626,7 +627,7 @@ test.describe('Publication metadata (U40)', () => {
         await openWorkflow(managerPage, PK, submissionId);
         const newPublication = await createNewVersion(managerPage);
         await expect(
-            managerPage.getByRole('link', {name: 'Author Original 1.1', exact: true})
+            managerPage.getByRole('link', {name: `${AO} 1.1`, exact: true})
         ).toBeVisible({timeout: 30_000});
 
         await openPublicationPage(authorPage, PK, submissionId, publicationId, {author: true});

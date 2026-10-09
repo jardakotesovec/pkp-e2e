@@ -54,7 +54,12 @@ Traps:
   such as canPublish and settings access. For a non-manager editorial role,
   use `sectionEditor`.
 - **The site administrator has no scenario key.** The installer's `admin` is
-  the only administrator; every suite depends on it.
+  the only administrator; every suite depends on it. A walk that needs a
+  second one, or any role no key grants, inserts a `user_user_groups` row
+  through the kit's `sql()` and deletes it afterwards, with `date_start`
+  back-dated (`now() - interval '1 day'`): the app compares it with its
+  own clock in whole seconds, so a role dated the same second is not yet
+  in force for the next request.
 - **Screens show the app's own label.** `sectionEditor` appears as "Section
   editor" in OJS, "Series editor" in OMP and "Moderator" in OPS.
 

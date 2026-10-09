@@ -97,7 +97,7 @@ const DIALOGS = {
 };
 
 /** Version-node labels are Publish, schedule & versions' (U49); match any shape. */
-const VERSION_NODE_PATTERN = /^(Unassigned version|Version of Record|Author Original)\b/;
+const VERSION_NODE_PATTERN = /^(Unassigned version|Version of Record|Author(?:'s)? Original)\b/;
 
 exports.WorkflowPage = class WorkflowPage extends BasePage {
     /**

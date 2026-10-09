@@ -56,7 +56,7 @@ Preconditions:
 - PKP's default test dataset for `main`, freshly loaded. On the preprint
   server, submission 2, "The Facets Of Job Satisfaction: A Nine-Nation
   Comparative Study Of Construct Equivalence", is posted in one version,
-  "Author Original 1.0". On the press, submission 14, "From Bricks to
+  "Author's Original 1.0". On the press, submission 14, "From Bricks to
   Brains: The Embodied Cognitive Science of LEGO Robots", is published in
   one version, "Version of Record 1.0".
 
@@ -66,20 +66,20 @@ Preprint server (OPS):
 2. Open submission 2's workflow,
    `/index.php/publicknowledge/en/dashboard/editorial?workflowSubmissionId=2`.
 3. Under "Preprint" in the menu, press "Create New Version". In the
-   "Create New Version" window keep what it offers ("Author Original
-   1.0", "Author Original (AO)", "Minor Revision") and press "Confirm". The menu now lists
-   "Author Original 1.1", "Status: Unpublished".
+   "Create New Version" window keep what it offers ("Author's Original
+   1.0", "Author's Original (AO)", "Minor Revision") and press "Confirm". The menu now lists
+   "Author's Original 1.1", "Status: Unpublished".
    [3.5: "Create New Version" is a button above the publication's pages;
    it asks "Are you sure you want to create a new version?", answered
    "Yes", and the new version shows as "Version: 2".]
-4. Under "Author Original 1.1", open "Title & Abstract" and press
+4. Under "Author's Original 1.1", open "Title & Abstract" and press
    "Preview". The browser opens `…/en/preprint/view/2/version/21`.
 
    [3.5: "Title & Abstract" is listed once, for the version "All
    Versions" picks, which is now the new one; "Preview" sits in the
    row of "Status: Unpublished", "Version: 2" and "All Versions", beside
    "Post".]
-5. Back in the workflow, under "Author Original 1.1", open "Preprint
+5. Back in the workflow, under "Author's Original 1.1", open "Preprint
    entry", type `2025-01-15` into "Date Posted" and press "Save".
    [3.5: "Preprint entry" is listed once, as "Title & Abstract" is.]
 6. Press "Preview" on that page.

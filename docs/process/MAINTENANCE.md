@@ -298,7 +298,8 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
    dispatch: a missing translation is no finding (TEMPLATE "Findings
    register"), so an entry that is only one is retired, not reported;
    only a raw key in English, or one the code reads wrongly, goes to a
-   reporter. Group those
+   reporter. The same holds for an entry that is only a singular or
+   plural beside the wrong number ("1 days"). Group those
    that point at one fault (the same action failing on two screens, one
    wrong value showing in several places), and follow an entry's link to
    the same fault in another spec: that entry joins the unit. A twin is not always linked, so the other specs'
@@ -308,7 +309,9 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
 3. **Report each unit** through one agent rendered from
    `briefs/issue-report.md`, one or two at a time, each on dataset fleets
    of its own, since a walk changes the dataset (harness.md "Dataset
-   fleets"): before dispatch, `npm run fleet-prep -- --feature
+   fleets"), and under an agent id no earlier session of the slot used,
+   since `.reports/issues/<agent>/` keeps an earlier unit's steps, logs
+   and trial scripts: before dispatch, `npm run fleet-prep -- --feature
    issues-<agent> --dataset <n> --reset` for `main` and
    `PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature
    issues-<agent>-3_5 --dataset <n> --reset` for 3.5, a different `<n>`
@@ -331,9 +334,15 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
    or a drive takes it `shared`, any number at once since only a fix
    changes the code, and a fix trial takes it `exclusive` as one command
    (apply, walks, revert), naming only the apps it patches; requests are
-   served in the order asked and the lock goes when the command ends.
-   A trial on three apps holds every other run for its ten minutes or
-   more, so a checker's script takes its rows in few runs (2026-10-07).
+   served in the order asked, app by app (a request waits only behind
+   earlier ones for an app it names), and the lock goes when the command
+   ends. A trial on three apps holds every other run for its ten minutes
+   or more, so a checker's script takes its rows in few runs
+   (2026-10-07); and a shared run is kept to minutes and to the apps it
+   drives, one app per lock call, since a trial waiting behind it holds
+   every later request for its apps (a half-hour walk over three apps
+   kept reporters' two-minute walks waiting 20 to 28 minutes,
+   2026-10-09).
    A refresh
    goes to its reporter with the brief's `{{refresh}}` slot naming the
    report and what changed; it is accepted like a written report, and
@@ -839,7 +848,9 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    is the PR's. Traces kept on failure (`--trace retain-on-failure`) save
    a second reproduction.
 7. **Record and report.** Companion row `ready` in ci-triage with what
-   the merge session must do; a dated sync-log entry with one line per
+   the merge session must do, committed on `main` too, since the daily
+   session reads `main`'s table and a row on the branch alone is never
+   seen; a dated sync-log entry with one line per
    change, the run lines and the CI run ids, and "baselines not advanced"
    stated; commit and push the companion; the thread gets the verdict
    (green at the PR ref, needs a rebase, or a regression with the report)

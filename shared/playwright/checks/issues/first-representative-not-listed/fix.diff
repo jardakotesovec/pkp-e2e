@@ -1,0 +1,14 @@
+--- a/lib/pkp/classes/controllers/grid/CategoryGridHandler.php
++++ b/lib/pkp/classes/controllers/grid/CategoryGridHandler.php
+@@ -328,8 +328,10 @@
+      */
+     protected function getRowDataElement($request, &$rowId)
+     {
+-        $rowData = parent::getRowDataElement($request, $rowId);
+         $rowCategoryId = $request->getUserVar('rowCategoryId');
++        // A row requested with its category is looked up inside that category alone:
++        // its id may also be a category's key, and a category's data is not a row's.
++        $rowData = is_null($rowCategoryId) ? parent::getRowDataElement($request, $rowId) : null;
+ 
+         if (is_null($rowData) && !is_null($rowCategoryId)) {
+             // Try to get row data inside category.

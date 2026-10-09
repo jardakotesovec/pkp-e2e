@@ -77,7 +77,7 @@ then "Save". <sup>d</sup> <sup>td4</sup>
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Publishing Mode" | No | Three choices: "The journal will provide open access to its contents.", "The journal will require subscriptions to access some or all of its contents." and "OJS will not be used to publish the journal's contents online." A new journal arrives with none selected ⚠ [A1](#a1) (Rules 1–4) |
-| "Delayed Open Access" | No | Shown only while the second "Publishing Mode" choice is selected. A list: "Disabled", then "1 Months" ⚠ [A15](#a15) to "60 Months" (Rule 6). Until someone saves a choice in it, the box shows empty instead of "Disabled", and "Save" with it untouched keeps it empty ⚠ [A17](#a17); the journal behaves as "Disabled" |
+| "Delayed Open Access" | No | Shown only while the second "Publishing Mode" choice is selected. A list: "Disabled", then "1 Months" ⚠ [A15](#a15) to "60 Months" (Rule 6). Until someone saves a choice in it, the box shows empty instead of "Disabled", and "Save" with it untouched keeps it empty ⚠ [A17](#a17); the journal behaves as "Disabled". With the interface in Uzbek (Latin), the 60 entries after the first all read "{$ x} oy", braces and all, whatever their count ⚠ [A31](#a31) |
 | "Enable OAI" | No | "Enable" or "Disable"; described in *OAI-PMH* |
 
 **The "Payments" page** (side menu › "Payments", or the journal's
@@ -156,7 +156,7 @@ journal's tab arrives with every text box empty, every list on
 | "Subscription Manager": "Name", "Email", "Phone", "Mailing Address" | "Name", "Email" and "Mailing Address" | Under "These contact details will be listed on the subscription page for customers with enquiries related to subscriptions.". "Save" with one of the three empty shows "This field is required." under it and saves nothing; an "Email" the browser rejects, such as "sub@", shows "Please enter a valid email address." under the box (Rules 24, 26) |
 | "Subscription Information" | No | Formatted text, one per form language, shown on the "Subscriptions" and "My Subscriptions" pages (Rule 26) |
 | "Subscription Expiry" | — | "Full expiry" ("Readers are denied access to all subscription content upon subscription expiry.") or "Partial expiry" ("Readers are denied access to recently published subscription content, but retain access to subscription content published prior to the subscription expiry date.") (Rule 23) |
-| "Subscription Expiry Reminders" | — | Four lists, in screen order: "Notify subscribers by email before subscription expiry." ("Disabled", "1 Months" to "12 Months"), the same label again ("Disabled", "1 Weeks" to "3 Weeks"), "Notify subscribers by email after subscription expiry" (months) and "Notify subscribers by email after subscription expiry." (weeks) [A15](#a15) (Side effects) |
+| "Subscription Expiry Reminders" | — | Four lists, in screen order: "Notify subscribers by email before subscription expiry." ("Disabled", "1 Months" to "12 Months"), the same label again ("Disabled", "1 Weeks" to "3 Weeks"), "Notify subscribers by email after subscription expiry" (months) and "Notify subscribers by email after subscription expiry." (weeks) [A15](#a15). In Uzbek (Latin) every month entry reads "{$ x} oy" and every week entry "{$ x} hafta" [A31](#a31) (Side effects) |
 | "Online Payment Notifications" | — | Four boxes, "Notify Subscription Manager by email upon online purchase of an Individual subscription.", "… online purchase of an Institutional subscription (recommended).", "… online renewal of an Individual subscription.", "… online renewal of an Institutional subscription."; greyed, with a note beginning "Note: To enable these options…", while payments are not set up (Side effects) |
 | "Open Access Options For Subscription Journals" | — | The box "Registered readers will have the option of receiving the table of contents by email when an issue becomes open access." (Side effects) |
 
@@ -280,8 +280,11 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
     is saved, an article galley's label is followed by "({currency}
     {fee})", and a "Full Issue" galley's by the "Purchase Issue" fee the
     same way, even while payments are off and nothing can be bought
-    ⚠ [A19](#a19). With "Only Restrict Access to PDF version of issues and
-    articles" ticked (Settings bullet 6), only PDF galleys show the lock;
+    ⚠ [A19](#a19). Read in Uzbek (Latin), the label is followed by
+    "({$ currency} {$ price})", braces and all, in place of the currency
+    and the fee [A31](#a31). With "Only Restrict Access to PDF version
+    of issues and articles" ticked (Settings bullet 6), only PDF galleys
+    show the lock;
     the others show none, yet open only while a "Purchase Article" (for
     an issue galley, "Purchase Issue") or "Association Membership" fee is
     set, and are otherwise refused as Rule 12 says ⚠ [A14](#a14).
@@ -484,7 +487,8 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
     - "Inactive" for any other status but "Active", and for those three
       too while payments are not set up;
     - "Non-expiring", "Expires: {date}" or "Expired: {date}" for an
-      active one.
+      active one. Read in Uzbek (Latin), the last two both read
+      "Muddati: {$ date}", braces and all, with no date [A31](#a31).
 28. **Buying an individual subscription.** "Purchase New Subscription"
     opens "Purchase Individual Subscription" for a signed-in reader who
     has no individual subscription to the journal (with one, its address
@@ -556,9 +560,11 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
       "Accessed from: {address}";
     - otherwise, for a signed-in reader with an individual subscription:
       the type's name, the membership in brackets when there is one,
-      then "Non-expiring", "Expires: {date}" or "Expired: {date}". A
-      subscription awaiting payment reads its status ("Awaiting Manual
-      Payment") only on "My Subscriptions"; on every other page it reads
+      then "Non-expiring", "Expires: {date}" or "Expired: {date}" (read
+      in Uzbek (Latin), "Muddati: {$ date}" for both, as on "My
+      Subscriptions" [A31](#a31)). A subscription awaiting payment
+      reads its status ("Awaiting Manual Payment") only on "My
+      Subscriptions"; on every other page it reads
       its dates, so a fresh purchase reads "Expired: {today}"
       ⚠ [A13](#a13). A subscription set to "Needs Information", "Needs
       Approval" or "Other, See Notes" reads "Expires: {date}" on every
@@ -734,6 +740,10 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
   [Users management](U53-users-management.md): the "Site Access Options" box,
   and giving someone the Subscription Manager role.
 - [OAI-PMH](U19-oai-pmh.md): "Enable OAI" on the "Access" tab.
+- *[Languages & locales](U57-languages-and-locales.md)*: installing a
+  language, offering it on a journal and choosing it for the interface,
+  which is how a user comes to read these screens in Uzbek (Latin)
+  [A31](#a31).
 - *Login & sessions*: the Login page the refusals of Rule 12 lead to, and
   where the Subscription Manager lands after signing in (Actors).
 
@@ -1493,6 +1503,9 @@ Left out of the scenarios above, by reason:
     the window does not send; Rule 19; scenario 6 passes it)
   - A29 (the open-access email sent twice on the first day of some
     months; Side effects; scenario 12 passes it)
+  - A31 (the month and week lists, the fee on a locked link and a
+    subscription's end date read in Uzbek (Latin); Fields, the "Access"
+    tab and the "Subscription Policies" tab; Rules 10, 27, 33)
   - OPS1 (a preprint server's "Posting Mode" not kept; Purpose;
     scenario 16 passes it)
 - **No seed**:
@@ -1550,6 +1563,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A28](#a28) | After a refused "Save", a subscription's empty date boxes show today's date, but the form does not submit it | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A29](#a29) | Readers get the "Free to read" email twice for an issue opening on 1 March, May, July, October or December | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A30](#a30) | An article published with no issue opens its galleys to everyone, past the subscription and "registered readers" restrictions | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
+| [A31](#a31) | Read in Uzbek (Latin), the month and week lists, the fee on a locked galley link and a subscription's end date show "{$ x}", "{$ price}" or "{$ date}" where the number, the price or the date belongs | 🐞 | minor | — |
 | [OPS1](#ops1) | A preprint server's "Posting Mode" says "Saved" but keeps nothing, so the server goes on posting {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A1](#a1) | "Publishing Mode" shows no choice on a new journal, which publishes as open access | ❓ | minor | — |
 | [A5](#a5) | Without payments set up, a signed-in reader pressing a locked galley lands on the home page with no word | ❓ | user-visible | — |
@@ -1931,6 +1945,31 @@ exists only in an issue's table of contents, so an article with no issue
 has no access setting at all and is served as open.
 Since: 2025-06-10 · Basis: probe, 2026-10-05. <sup>f-a30</sup>
 
+<a id="a31"></a>
+**A31 — Read in Uzbek (Latin), counts, the fee and the end date are missing from five texts** · 🐞 · minor.
+A user who reads these screens in Uzbek (Latin) should see the same
+counts, prices and dates as one who reads them in English. Instead five
+texts show a marker, braces and all, where the value belongs. In
+"Delayed Open Access" on Settings › Distribution › "Access", the 60
+entries that English reads as "1 Months" to "60 Months" all read
+"{$ x} oy"; in the four "Subscription Expiry Reminders" lists on the
+"Payments" page's "Subscription Policies" tab, every month entry reads
+"{$ x} oy" and every week entry "{$ x} hafta". A Journal Manager can
+choose three months only by counting down the list, and the saved
+choice reads "{$ x} oy" as well; the choice itself is stored and works,
+and the same journal read in English shows "3 Months". On the reader's
+side, a locked galley link that English ends with "(USD 10)" ends with
+"({$ currency} {$ price})", on the article's page and the issue's page,
+so a visitor sees no price. "My Subscriptions" and the "Subscription"
+block read "Muddati: {$ date}" where English reads
+"Expires: 2026-12-31" or "Expired: 2025-12-31", the same line for a
+subscription that runs and one that has ended, so a subscriber sees no
+end date.
+Uzbek (Latin) is the language with the code "uz_Latn", which the lists
+of installed languages name "Uzbek/o‘zbek" ([Languages &
+locales](U57-languages-and-locales.md#a9)).
+Basis: probe, 2026-10-09. <sup>f-a31</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -2237,6 +2276,9 @@ Issue report: [pkp-e2e#406](https://github.com/jardakotesovec/pkp-e2e/issues/406
 <a id="fn-f-a30"></a>
 **f-a30** — OJS main `pages/article/ArticleHandler.php:622-626`, in `userCanViewGalley()`: after `canPreview()`, a published publication with no issue hits `if (!$issue) { return true; }`, before the `restrictArticleAccess` login check and the subscription and purchase chain of note e. `IssueAction::subscriptionRequired()` is defined per issue only, and `view()` likewise leaves `subscriptionRequired` false with no issue, so `hasAccess` draws the link unlocked. The per-article `accessStatus` toggle lives only in `TocGridHandler`. Introduced by ojs `234fdf6586` (Touhidur Rahman, 2025-06-10, pkp/pkp-lib#9295 "replace setting continuousPublication with first class column published"), which replaced `if ($issue && $issue->getPublished() && …STATUS_PUBLISHED)`, whose else-branch refused, with the early return; publishing with no issue came with `ada320fd81` (2025-05-12, the same pkp-lib#9295), and pkp/dev-team#310 (Alec Smecher, 2026-07-23) moved the condition to the publication's status without touching the return. Live-probed 2026-09-30, OJS main (ojs `9d9f116f38`, lib/pkp `fab29cfeca`), on the seeded journal: an article published with "Don't Assign To An Issue" and a PDF galley, against an article with a PDF galley in a published issue. With "Users must be registered…" ticked, signed out: the control's `article/download` and `article/view` led to Login, the issueless PDF was served. With subscription mode and the control's issue on "Subscription": signed out, Login against served; a Reader without a subscription, `about/subscriptions` against served; the landing page drew the issueless galley link without `restricted`. The Journal Manager opened both (preview). Not driven: a valid subscriber, domain/IP subscriptions, purchases and membership. Proposed fix: drop the early return; with no issue, derive `subscriptionRequired` from `publishingMode == PUBLISHING_MODE_SUBSCRIPTION`, pass `$issue?->getId()` to `subscribedDomain()` and `subscribedUser()` (both already handle a null issue), skip the issue purchase, and use the same rule in `view()` for `hasAccess`; and give issueless articles a way to be made open access (the article `accessStatus`, for instance in the publish form), since otherwise every issueless article of a subscription journal becomes subscription-only; whether they default to open or restricted is an upstream decision. Patched live 2026-09-30 and reverted: this closed both restrictions and left an open journal's galleys open; copying only the login check into the no-issue branch left the subscription bypass. 3.5 (`ArticleHandler.php:550`), 3.4 (`:539`) and 3.3 (`ArticleHandler.inc.php:471`) enter the reader checks only on `$issue && $issue->getPublished()` and redirect otherwise, and publishing there requires an issue, so none of them has the fault. Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
 Issue report: [pkp-e2e#924](https://github.com/jardakotesovec/pkp-e2e/issues/924) ([docs/issues/U51-A30-article-without-issue-galleys-open-to-all.md](../issues/U51-A30-article-without-issue-galleys-open-to-all.md)).
+
+<a id="fn-f-a31"></a>
+**f-a31** — OJS `locale/uz_Latn/manager.po` writes `manager.subscriptionPolicies.xMonths` as "{$ x} oy" and `.xWeeks` as "{$ x} hafta"; OJS `locale/uz_Latn/locale.po` writes `reader.purchasePrice` as "({$ currency} {$ price})" and both `user.subscriptions.expires` and `user.subscriptions.expired` as "Muddati: {$ date}": each placeholder has a space after the `$`. lib/pkp `classes/i18n/translation/LocaleBundle.php::_format()` replaces only the exact `{$x}`, `{$currency}`, `{$price}`, `{$date}`, so the text prints as the file has it. The English strings and their callers: notes d and f-a15 (`AccessForm`, `SubscriptionPolicyForm`), l (`galley_link.tpl`), f (`userSubscriptions.tpl`) and k (the block's `block.tpl`). Live-probed 2026-10-09 (Fields, the "Access" tab and the "Subscription Policies" tab; Rules 10, 27, 33), OJS main (ojs `6d5b793c4e`, lib/pkp `d1bc3a9ecc`), two runs of each walk, each run on freshly loaded data and its own scratch journal, after the Site Administrator installed "Uzbek (Latin)/o‘zbek (lotin) (uz_Latn)" from the site's "Install Locale" window and the journal ticked it under "UI"; the interface was switched from the user menu (page language `uz-Latn`). The lists: "Delayed Open Access", labelled "Kechiktirilgan ochiq kirish", held 61 entries in two texts, "##common.disabled##" once and "{$ x} oy" 60 times, for the scratch Journal Manager and for the Site Administrator; the two month lists under "Obuna muddati tugashi haqida eslatmalar" read "##common.disabled##" and "{$ x} oy" twelve times, the two week lists "##common.disabled##" and "{$ x} hafta" three times, for the Journal Manager and for a scratch Subscription Manager. The fourth "Delayed Open Access" entry saved stored 3 and read "{$ x} oy" right after the save and after a reload, and "3 Months" in English; the third month entry and the second week entry saved on "Subscription Policies" stored 2 and 1, read "{$ x} oy" and "{$ x} hafta" after a reload, and "2 Months" and "1 Weeks" in English. The English controls on the same journals read 61, 13 and 4 different entries. The reader's side, on a scratch journal requiring subscriptions with payments set up, a "Purchase Article" fee of 10 USD, one subscriber running to 2026-12-31 and one ended on 2025-12-31: the galley link read "Requires Subscription or Fee PDF (USD 10)" in English and ended "({$ currency} {$ price})" in Uzbek (Latin), signed out on the article's page and the issue's page and as the ended subscriber on the article's page; "My Subscriptions" and the sidebar block read "Expires: 2026-12-31" and "Expired: 2025-12-31" in English and "Muddati: {$ date}" for both subscribers in Uzbek (Latin). The two Uzbek (Latin) strings are the same words, so with the date filled in the two lines would still read alike. A text the language lacks shows as its key (each list's first entry, "##common.disabled##") or in English, which is no finding. Not driven: `stable-3_5_0`, whose files (ojs `c6e2c3a879`) write the same five strings, the language not being installed on that line's install; a "Full Issue" galley's fee; a non-expiring subscription and an institutional row. Read in the files, not seen: no other language's `manager.po` writes the two list strings with a space (`uz` leaves them untranslated), and the OJS Uzbek (Latin) files write the placeholder this way in dozens of other strings, on other features' screens.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-23 by the Navigation menus claim check (its OPS2): "Saved" shown, the next load with neither choice marked, "Archives" still in the header; the Search claim check saw every role still reach the Search page. Live-probed 2026-09-25 (td1) on a scratch server: "OPS will not be used…" and "The server will provide open access…" each saved with "Saved" and came back unselected; with the second saved, the visitor and the Reader still saw "Archives", the preprint page and its PDF. OPS `schemas/context.json` has no `publishingMode`, so the context API drops the value (note b); OPS `OpsServerMustPublishPolicy` and the archive header still read it.

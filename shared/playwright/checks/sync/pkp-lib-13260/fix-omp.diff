@@ -1,0 +1,13 @@
+diff --git a/pages/submission/SubmissionHandler.php b/pages/submission/SubmissionHandler.php
+index 088d54eef..f0b34fbec 100644
+--- a/pages/submission/SubmissionHandler.php
++++ b/pages/submission/SubmissionHandler.php
+@@ -51,7 +51,7 @@ class SubmissionHandler extends PKPSubmissionHandler
+         $userGroups = $this->getSubmitUserGroups($context, $request->getUser());
+         if (!$userGroups->count()) {
+             $this->showErrorPage(
+-                'submission.wizard.notAllowed',
++                __('submission.wizard.notAllowed'),
+                 __('submission.wizard.notAllowed.description', [
+                     'email' => $context->getData('contactEmail'),
+                     'name' => $context->getData('contactName'),

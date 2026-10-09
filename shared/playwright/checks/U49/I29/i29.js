@@ -139,7 +139,7 @@ forEachApp(async (app) => {
         left: flat(await page.locator('[data-cy="workflow-controls-left"]').innerText().catch(() => null), 200),
         right: (await controls().getByRole('button').allInnerTexts().catch(() => [])).map((x) => flat(x, 60)),
         rightLinks: (await controls().getByRole('link').allInnerTexts().catch(() => [])).map((x) => flat(x, 60)),
-        menu: (await page.getByRole('treeitem').allInnerTexts().catch(() => [])).map((x) => flat(x, 80)).filter((x) => /Version|version|Author Original|Manuscript/.test(x)),
+        menu: (await page.getByRole('treeitem').allInnerTexts().catch(() => [])).map((x) => flat(x, 80)).filter((x) => /Version|version|Author(?:'s)? Original|Manuscript/.test(x)),
     });
     const COLS = `publication_id, status, version_stage, version_major, version_minor, ${isOJS ? 'issue_id' : 'null'}, date_published`;
     const dbPubs = (sid) => sql(`select ${COLS} from publications where submission_id=${sid} order by publication_id`).split('\n');
