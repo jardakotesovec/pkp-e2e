@@ -1,6 +1,7 @@
-// Kept walk for docs/reports/2026-10-09-pkp-lib-13479.md (PR review of pkp/pkp-lib#13479, round 2): a
-// reference whose web address is written with a capital scheme. The report's steps as written, on PKP's
-// default test dataset (a dataset fleet), as dbarnes, through the screens only:
+// Kept walk for round 2's finding of the PR review of pkp/pkp-lib#13479 (its report, deleted once acted on:
+// round 3's head f8c4d3176e fixed it): a reference whose web address is written with a capital scheme. The
+// finding's steps as written, on PKP's default test dataset (a dataset fleet), as dbarnes, through the
+// screens only:
 //   Setup: Settings › Workflow › "Metadata": "Enable references structuring and metadata lookup", "Save".
 //   OJS 4, OMP 3, OPS 1 › References: three references added in one "Add" ("…HTTP://example.org/caps",
 //   "…Http://example.org/sentence" and the control "…http://example.org/plain"); the page reloaded so the

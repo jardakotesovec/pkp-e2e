@@ -13,7 +13,8 @@
 //   Data: eleven data citations added, the type and identifier of each in CASES below; each row read.
 // Reads as the PR intends when every case is "fixed" or "unchanged" (REFS' and TYPED's last column, CASES'
 // "should"). Round 1 (head 09f4461da9) read "other" for "uri http" and "purl http", saved with https://; round 2
-// (50fb7ad3b2) keeps an address as written, in a data citation and in a reference's "URL".
+// (50fb7ad3b2) keeps an address as written, in a data citation and in a reference's "URL"; round 3 (f8c4d3176e)
+// reads every case "fixed" or "unchanged".
 // Run (reset the fleet first: npm run fleet-prep -- --feature <feature> --dataset <n> --reset):
 //   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13479/walk.js
 const {forEachApp, launch, signIn, signOut, screen, shot, record, note, serverLog, idle} = require('../../../probe');
@@ -37,8 +38,8 @@ const REFS = [
     ['Kilo K. Old handle. http://hdl.handle.net/10419/777', 'Handle', '10419/777', '10419/777', {URL: ''}],
     ['Lima L. Slash kept. https://example.org/set/', 'URL', 'https://example.org/set', 'https://example.org/set/'],
     ['Mike M. Full stop. See http://example.org/report.', 'URL', 'https://example.org/report', 'http://example.org/report'],
-    // capitals in the scheme: read as "other" at 50fb7ad3b2 (no URL at all; Url's pattern is case-sensitive and
-    // the lookup no longer rewrites the text)
+    // capitals in the scheme: read as "other" at 50fb7ad3b2 (no URL at all; Url's pattern was case-sensitive and
+    // the lookup no longer rewrites the text), "fixed" since f8c4d3176e (round 3, the pattern's i flag)
     ['Oscar O. Capitals. HTTP://example.org/caps', 'URL', 'https://example.org/caps', 'HTTP://example.org/caps'],
 ];
 const HAND = 'India I. Typed by hand, 2019.';

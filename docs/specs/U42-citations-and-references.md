@@ -2527,8 +2527,15 @@ DOI and Handle with no URL, on both sides; of type "URI"
 saved as typed (round 1: "https://…"; base: the last without its "/").
 `arxiv-version.js` and `http-address.js` read as the PR intends
 (`.reports/pr13479/r2-*/`). A reference's address written "HTTP://…" or
-"Http://…" gives no URL at this head (base: the address with
-"https://"): reported, `checks/sync/pkp-lib-13479/caps-url.js`.
+"Http://…" gave no URL at that head (base: the address with
+"https://"); reported the same day.
+Round 3 (2026-10-09; pkp-lib `f8c4d3176e`, the second commit amended:
+`Url`'s extraction pattern takes the `i` flag, the fix the report
+proposed; the same base and app tips, ojs `25a11bbe9e`):
+`checks/sync/pkp-lib-13479/caps-url.js` reads "HTTP://example.org/caps"
+and "Http://example.org/sentence" as the references' URLs, as written,
+on the three apps, and `walk.js` reads every case as the PR intends
+(`.reports/pr13479/r3-*/`, `caps/`).
 Issue report: [pkp-e2e#866](https://github.com/jardakotesovec/pkp-e2e/issues/866); the report, its `fix.diff` and its place under `checks/issues/` deleted with the retirement (git keeps them), the issue to be closed when the PR merges.
 
 <a id="fn-f-a13"></a>
