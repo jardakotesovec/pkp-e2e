@@ -1600,12 +1600,32 @@ home" via `PKPPageRouter::getHomeUrl()`, which starts from
 anonymous-reachable caller; every other caller runs just after sign-in.
 Fix per ruling: guard `getHomeUrl()` (no user → the login redirect), so
 variant resolution stays post-login.
+Which form of the address fails as typed depends on how many languages
+the journal has; the two probes below read one kind each.
 Live-probed 2026-10-06 (Rule 4; OJS, OMP, OPS; two runs each; scratch
-journals, signed out): `{journal}/dashboard` answered 500 with an empty
-page; `{journal}/en/dashboard` 302 to `{journal}/dashboard`, then 500;
-with a final slash, `{journal}/en/dashboard/` 302 to `{journal}/dashboard/`,
-then 500 (`GET /index.php/{journal}/dashboard/` in the run's server
-errors). `dashboard/editorial` gave the Login page as before.
+journals, which have one language; signed out): `{journal}/dashboard`
+answered 500 with an empty page; `{journal}/en/dashboard` 302 to
+`{journal}/dashboard`, then 500; with a final slash,
+`{journal}/en/dashboard/` 302 to `{journal}/dashboard/`, then 500
+(`GET /index.php/{journal}/dashboard/` in the run's server errors).
+`dashboard/editorial` gave the Login page as before.
+Walked 2026-10-07 (Rule 4; OJS, OMP, OPS on `main`; the default dataset,
+whose journal has two languages, en and fr_CA; signed out; kept script
+`shared/playwright/checks/issues/dashboard-address-signed-out-server-error/walk.js`):
+`{journal}/en/dashboard`, `{journal}/en/dashboard/` and
+`{journal}/en/dashboard/index` answered 500 as typed, with no redirect
+(`[500]: GET /index.php/publicknowledge/en/dashboard` in the server
+log); `{journal}/dashboard` 302 to `{journal}/en/dashboard`, then 500;
+`{journal}/en/dashboard/editorial` gave the Login page. On
+`stable-3_5_0` the same walk read the same 500 on each app, the address
+with a final slash included.
+The redirect is `PKPPageRouter::_setLocale()`, which runs before the
+dashboard's handler: on a one-language journal it sends an address with
+a language to the same path without one, and on a journal with more
+than one it sends an address without a language to the same path with
+one ([Languages & locales](U57-languages-and-locales.md#fn-m), note m,
+probed there on the public pages). A scratch journal given a second
+language was not driven at these addresses.
 Issue report: [pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825) ([docs/issues/U01-A7-dashboard-address-signed-out-server-error.md](../issues/U01-A7-dashboard-address-signed-out-server-error.md)).
 
 <a id="fn-a8"></a>
