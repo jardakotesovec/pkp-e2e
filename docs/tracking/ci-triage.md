@@ -1357,6 +1357,20 @@ trips.
   app. **Watch condition**: a second sighting; then read the trace for
   whether the typed text reached the box before the tick.
 
+- **Docker Hub pull limit: a job dead at "Initialize containers".** Not a
+  test red. The job ends in its first 30 seconds, its failed steps
+  "Initialize containers" and "php -S deaths", its log `docker pull
+  postgres:16` answered "toomanyrequests: You have reached your
+  unauthenticated pull rate limit" three times; no test ran. The response
+  is `gh run rerun <id> --failed` on pkp-e2e once the whole run has
+  ended (on the pkp app repos the team re-runs), never an investigation.
+  First seen 2026-10-09 from about 20:50 UTC: six of nine jobs of
+  37989905679 and all seven of its re-run, all nine of `main`'s push run
+  37992544935, and one job each of pkp/ojs 37989599624, pkp/omp
+  37989611913 and pkp/ops 37989616213. Watch condition: a second day, or
+  a whole run lost again, makes the friction line of 2026-10-09 (service
+  images from a registry without the limit) a harness change.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull
