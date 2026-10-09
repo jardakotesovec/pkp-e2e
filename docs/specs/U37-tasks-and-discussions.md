@@ -2267,6 +2267,7 @@ Issue report: [pkp-e2e#430](https://github.com/jardakotesovec/pkp-e2e/issues/430
 
 <a id="fn-a36"></a>
 **f-a36** — Note td23. `AddNote::rules()` (lib/pkp `api/v1/submissions/tasks/formRequests/AddNote.php`) checks `userId`, the signed-in user, with `Rule::exists('edit_task_participants', 'user_id')` for the task, so a manager-level user, whom the access policy admits without being a participant, is refused with 422 `{"userId":["The selected user id is invalid."]}`, a field the reply box has no place for, and the page shows its generic error.
+Issue report: [pkp-e2e#946](https://github.com/jardakotesovec/pkp-e2e/issues/946) ([docs/issues/U37-A36-taken-off-manager-reply-unexpected-error.md](../issues/U37-A36-taken-off-manager-reply-unexpected-error.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Note n: the reviewer group is the first of the press's two reviewer groups the database returns. Live-probed 2026-09-23 on OMP, two fresh presses: "External Reviewer" in one run's manager window, "Internal Reviewer" in others, the manager's, the Author's and the reviewer's windows differing; OJS prints "Reviewer".
