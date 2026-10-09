@@ -1,0 +1,62 @@
+--- a/lib/ui-library/src/components/ListPanel/doi/DoiListItem.vue
++++ b/lib/ui-library/src/components/ListPanel/doi/DoiListItem.vue
+@@ -28,7 +28,11 @@
+ 							target="_blank"
+ 							rel="noopener noreferrer"
+ 						>
+-							{{ item.title }}
++							<template v-if="item.type === 'submission'">
++								{{ item.authors }} —
++								<span v-strip-unsafe-html="item.title"></span>
++							</template>
++							<template v-else>{{ item.title }}</template>
+ 						</a>
+ 					</span>
+ 				</div>
+@@ -309,7 +313,8 @@
+ 		 * @typedef {Object} DoiListItemData
+ 		 * @property {Number} id - Top-level publication object ID
+ 		 * @property {string} type - Top-level item type
+-		 * @property {string} title - Display title
++		 * @property {string} title - Display title: a submission's as HTML, an issue's as text
++		 * @property {string} authors - A submission's short author string, as text
+ 		 * @property {string} urlPublished - URL for item
+ 		 * @property {boolean} isPublished - Whether item published
+ 		 * @property {PublicationVersionInfo} versions - Info on publication version
+--- a/lib/ui-library/src/components/ListPanel/doi/DoiListPanel.vue
++++ b/lib/ui-library/src/components/ListPanel/doi/DoiListPanel.vue
+@@ -346,6 +346,7 @@
+ 					id: item.id,
+ 					type: this.itemType,
+ 					title: this.getItemTitle(item),
++					authors: this.getItemAuthors(item),
+ 					versionString: this.getItemVersionString(item),
+ 					urlPublished: this.getUrlPublished(item),
+ 					isPublished: this.getIsPublished(item),
+@@ -876,13 +877,21 @@
+ 		 * Gets title to be used in mapped object. Assumes original object is submission.
+ 		 *
+ 		 * @param {Object} item Item being mapped
+-		 * @returns {String} Title of the publication (used in DoiListItem)
++		 * @returns {String} Title of the publication, as HTML (used in DoiListItem)
+ 		 */
+ 		getItemTitleBase(item) {
+-			const currentPublication = this.getCurrentPublication(item);
+-			const authorString = currentPublication.authorsStringShort;
+-			const title = this.localize(currentPublication.fullTitle);
+-			return `${authorString} — ${title}`;
++			return this.localize(this.getCurrentPublication(item).fullTitle);
++		},
++		/**
++		 * Gets the short author string to be used in mapped object. Empty unless the original object is a submission.
++		 *
++		 * @param {Object} item Item being mapped
++		 * @returns {String} Short author string of the publication, as text (used in DoiListItem)
++		 */
++		getItemAuthors(item) {
++			return this.itemType === 'submission'
++				? this.getCurrentPublication(item).authorsStringShort
++				: '';
+ 		},
+ 		/**
+ 		 * Gets version string to be used in mapped object. Extended in app-specific component.

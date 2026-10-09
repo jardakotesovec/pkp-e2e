@@ -1810,6 +1810,11 @@ Left out of the scenarios above, by reason:
     `docs/issues/U45-A22-bulk-actions-menu-stays-open.md`): after "Assign
     DOIs" confirmed at once, the "Bulk Actions" menu closed and the first
     row's expand button pressable
+  - the guard for A24 (Rule 16; issue report
+    `docs/issues/U45-A24-doi-row-title-formatting-codes.md`): a work
+    whose "Title" was saved with an italic word and an "&" listed on the
+    DOIs page with the title as its workflow page shows it, the word in
+    italics and no tag or entity printed
   - "Mark DOIs Registered", "Mark DOIs Needs Sync" and "Mark DOIs
     Unregistered" on a work with two published major versions under "DOI
     Versioning" "Yes", every block of the "View all" window changing
@@ -1902,7 +1907,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A20](#a20) | The Crossref and DataCite pages under Tools open with an empty heading and an unnamed browser tab | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A21](#a21) | "Save" on the DOI "Registration" tab with no agency plugin enabled logs a PHP "Undefined array key" warning | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A22](#a22) | The DOIs page's "Bulk Actions" menu stays open over the list when an action is confirmed at once | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A24](#a24) | A title with an italic word or "&" shows its formatting codes in the DOIs page's rows | 🐞 | minor | — |
+| [A24](#a24) | The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OJS2](#ojs2) | On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it | 🐞 | high · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab reports success but leaves the issues' DOIs "Unregistered" | 🐞 | minor · crash: server | — |
@@ -2271,18 +2276,21 @@ press a chapter's or format's DOI made alone at a publish adds none.
 Basis: judgment, 2026-09-29. <sup>r</sup> <sup>q37</sup>
 
 <a id="a24"></a>
-**A24 — A title with an italic word or "&" shows its formatting codes in the DOIs page's rows** · 🐞 · minor.
-A work whose title has an italic word or an "&", such as "Okapi
-*forest* census & tapir", is listed on the DOIs page as `Lovelace —
-Okapi <i>forest</i> census &amp; tapir`: the row's name prints the
-title's formatting codes as text, where the manager expects the title
-as the work's own page shows it. A title with an "&" alone reads
-`Heron &amp; egret wading`. It shows for published and unpublished
-works alike, on a journal, a press and a preprint server. Only the
-DOIs page's rows show it: the work's page shows the title formatted,
-and the "DOI Updates Failed" window prints it plain ("Failed to mark
-the DOI registered for Narwhal tusk acoustics & echoes. …").
-Basis: probe, 2026-10-05. <sup>f-a24</sup>
+**A24 — The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;`** · 🐞 · low.
+A manager who opens the DOIs page finds some works listed with their
+title's HTML tags and entities printed as text. A title saved as
+"hkrb forest trees & *shrubs*" reads
+`Diouf — hkrb forest trees &amp; <i>shrubs</i>`, where the manager
+expects the title as the heading of the work's workflow page shows it.
+
+A row shows it when the work's "Title" holds a formatted word, an "&",
+a "<" or a ">", when its "Subtitle" holds an "&", or when its "Prefix"
+holds an apostrophe: the prefix "L'" reads `L&#039;`. An apostrophe or
+a quotation mark in the "Title" itself reads right.
+
+Nothing is lost: the row is only harder to read, and the workflow page
+shows the title right.
+Basis: probe, 2026-10-09. <sup>f-a24</sup>
 
 ### OJS
 
