@@ -332,9 +332,15 @@ a classifier stop is reported, the attempt is never re-sent (RUNBOOK
    or a drive takes it `shared`, any number at once since only a fix
    changes the code, and a fix trial takes it `exclusive` as one command
    (apply, walks, revert), naming only the apps it patches; requests are
-   served in the order asked and the lock goes when the command ends.
-   A trial on three apps holds every other run for its ten minutes or
-   more, so a checker's script takes its rows in few runs (2026-10-07).
+   served in the order asked, app by app (a request waits only behind
+   earlier ones for an app it names), and the lock goes when the command
+   ends. A trial on three apps holds every other run for its ten minutes
+   or more, so a checker's script takes its rows in few runs
+   (2026-10-07); and a shared run is kept to minutes and to the apps it
+   drives, one app per lock call, since a trial waiting behind it holds
+   every later request for its apps (a half-hour walk over three apps
+   kept reporters' two-minute walks waiting 20 to 28 minutes,
+   2026-10-09).
    A refresh
    goes to its reporter with the brief's `{{refresh}}` slot naming the
    report and what changed; it is accepted like a written report, and
