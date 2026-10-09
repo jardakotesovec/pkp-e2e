@@ -103,7 +103,13 @@ fields. A save with nothing filled shows none. Not seen: a wrong value
 beside an empty required box, and a refused "Identifier type" or
 "Identifier". Each message stands under its box but is not tied to it,
 so a screen reader that lands on a refused box reads it as invalid
-without the reason ⚠ [A24](#a24). The read-only
+without the reason ⚠ [A24](#a24). After a refused save the foot also
+holds a "Jump to next error" button beside "Please correct {n} errors."
+and, for a screen reader only, one button per refused field, "Go to
+{field}: {message}" ("Go to Year: This is not a valid integer."). Pressed
+with Enter from the keyboard on "Add Data Citation", "Jump to next
+error" and each "Go to" button leave the cursor on the pressed button;
+no refused box gets it ⚠ [A27](#a27). The read-only
 **"View Data Citation"** panel shows the same fields as text; its only
 button is the panel's "Close". <sup>l</sup> <sup>q16</sup> <sup>q24</sup>
 
@@ -954,6 +960,10 @@ Left out of the scenarios above, by reason:
     hand after "Reprocess all references" › "OK", once the lookup's
     first step has run (Rule 14a), and a DOI typed on a reference whose
     text holds none kept (Rule 15)
+  - a refused data citation save's foot: "Jump to next error" beside
+    "Please correct {n} errors." and, for a screen reader, one "Go to
+    {field}: {message}" button per refused field
+    ([Fields & validation](#fields), the data citation panel)
 - **Rarely met**:
   - "Data Citations" at "Do not request data citation metadata from the
     author during submission.": the "Data" page without the wizard's
@@ -1011,6 +1021,8 @@ Left out of the scenarios above, by reason:
     text's DOI; Rule 14a)
   - A26 (whether the services' answers replace details typed while the
     lookup was under way; Rule 14a)
+  - A27 (the foot's "Jump to next error" and "Go to" buttons leaving
+    the cursor on the pressed button; [Fields & validation](#fields))
 - **No seed**:
   - a reference structured by the services: its identifier links,
     title, details and the "Wikidata" and "OpenAlex" badges (Rules 11,
@@ -1068,6 +1080,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | Readers never see data citations, though the editors' table says they appear alongside the references | ❓ | user-visible | — |
 | [A17](#a17) | "Edit" accepts a repeated reference that "Add" drops | ❓ | minor | — |
 | [A26](#a26) | Whether a lookup that finishes after an editor filled a reference in by hand replaces what was typed has not been seen | ❓ | user-visible | — |
+| [A27](#a27) | On a refused data citation panel, "Jump to next error" and the screen reader's "Go to {field}" buttons leave the cursor on the button | ❓ | minor | — |
 | [A5](#a5) | A reference whose lookup failed for good looks exactly like one still waiting | ✅ | retired | — |
 | [A6](#a6) | References page: the lookup's progress box counts only structured references and says "All 2 done" over five | ✅ | retired | — |
 | [A7](#a7) | A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off | ✅ | retired | — |
@@ -1353,6 +1366,24 @@ editor has since edited by hand? Lean: no; saving "Edit citation" should
 end the waiting lookup, or the lookup should fill only what is empty,
 because the typed details would otherwise be replaced without a word.
 Basis: code, 2026-10-07. <sup>f-a26</sup>
+
+<a id="a27"></a>
+**A27 — "Jump to next error" and the "Go to {field}" buttons leave the cursor on the button** · ❓ · minor.
+When "Add Data Citation" refuses a save, its foot offers "Jump to next
+error" beside "Save" and, to a screen reader alone, one "Go to {field}:
+{message}" button per refused field. A keyboard or screen reader user
+who presses one with Enter expects to land in a refused box. The cursor
+stays on the pressed button ("Go to Creators: …", "Go to Year: This is
+not a valid integer." and "Jump to next error" alike), so the user
+still has to find the box. Whether the panel scrolled to the box was
+not measured. Nothing is saved wrongly. The foot is the shared form's,
+so the other panels and
+settings forms that show "Please correct {n} errors." carry the same
+buttons (read in the code, not walked here). The full entry, its
+question and its lean are
+*[Institutions](U66-institutions.md#a11)*'s A11, where the same was
+seen on "Add Institution".
+Basis: probe, 2026-10-07. <sup>f-a27</sup>
 
 ### Retired
 
@@ -2198,6 +2229,14 @@ gave it as invalid with no description (a creator's box also with no
 name, A14). The same for "Name" and "Email address" under "Technical
 Support Contact" on Settings › Journal (Press, Server) › "Contact",
 emptied and refused in the browser with "This field is required.".
+The foot of the refused "Add Data Citation" (`.pkpFormErrors`) read, on
+the empty save, "Please correct 2 errors.", "Go to Title: This field is
+required.", "Go to Relationship type: This field is required.", "Jump
+to next error", "Save", and on the three refused values "Please correct
+3 errors.", "Go to URL: This is not a valid URL.", "Go to Year: This is
+not a valid integer.", "Go to Creators: The ORCID iD you specified is
+invalid. …", "Jump to next error", "Save"; the "Go to" buttons pressed
+from the keyboard: note f-a27.
 
 <a id="fn-q25"></a>
 **q25** — Live-probed 2026-10-07 (Rules 14a, 15; A25, A26), all three apps,
@@ -2661,6 +2700,30 @@ behind the Crossref step). No service answers on a test install, so no
 screen there shows the answer's effect and the claim is read from the
 code; the same walk on an install where OpenAlex answers, reading the
 hand-filled reference after the runner, would settle it.
+
+<a id="fn-f-a27"></a>
+**f-a27 — A27 evidence.** ui-library `components/Form/FormErrors.vue`
+draws the "Go to" buttons (`form.errorA11y` "Go to {$fieldLabel}:
+{$errorMessage}") in a list shown to screen readers alone
+(`ul.-screenReader`) and "Jump to next error" (`form.errorGoTo`) after
+the count; `showError()` and `showNextError()` emit `showField`, and
+`Form.vue` `showField()` scrolls the last `pkp-modal-scroll-container`
+to the field and sets no focus. Read again 2026-10-09 at ui-library
+`38814ea1` (the three apps' pointer): unchanged. `showField()` in the
+`stable-3_5_0`, `stable-3_4_0` and `stable-3_3_0` checkouts scrolls and
+sets no focus either, and `FormErrors.vue` there draws the same list
+and button (code read, not walked there). Live-probed 2026-10-07, all
+three apps, two runs each, at the tips of note q24, in the "Add Data
+Citation" panel refused for "Year" "20a4", "URL" "example" and a
+creator's ORCID iD "0000-0002-1825-0097" (note q24 quotes the foot):
+"Go to Creators: …", "Go to Year: This is not a valid integer." and
+"Jump to next error" were each given the focus and pressed with Enter;
+0.6 s later the focused element was the pressed button, six of six. The
+Creators table was in view before and after each press, so whether the
+panel scrolled was not measured, and a screen reader itself was not
+run. Kept check
+`shared/playwright/checks/U42/I07b/i07b.js` (phase `l13`). *Institutions*
+note f-a11 has the same read on "Add Institution" (2026-09-28).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** Note p. Live-probed 2026-09-24: f-a20, where
