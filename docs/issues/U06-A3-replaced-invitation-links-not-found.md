@@ -65,7 +65,7 @@ Editing:
 4. In the "Invitations" table, open the menu ("Invitation management
    options") on that person's row and choose "Edit". The dialog "Edit
    Invitation" says "If you edit the existing invitation or add a new
-   role, the current invitation will be canceled and, a new one will be
+   role, the current invitation will be canceled and a new one will be
    sent. Are you sure you want to proceed?" Press "Edit Invitation".
 5. The wizard opens prefilled. Replace the prefilled role with "Layout
    Editor" (OPS: "Editorial Board Member"), then press "Save And

@@ -69,7 +69,7 @@ Accept wizard (new invitee):
 |------------------|-----------|-------|
 | Username | yes | Must not be taken <sup>o</sup> |
 | Password | yes | At least six characters, the minimum the field states on screen <sup>o</sup> |
-| Privacy consent ("Yes, I agree to have my data collected…") | yes | Unchecked blocks the step with "Please confirm that you have read and agree privacy statement". The label links to the journal's Privacy Statement <sup>o</sup> |
+| Privacy consent ("Yes, I agree to have my data collected…") | yes | Unchecked blocks the step with "Please confirm that you have read and agree to the privacy statement". The label links to the journal's Privacy Statement <sup>o</sup> |
 | Given Name / Family Name / Country / Affiliation | given name, country | Collected on the "Enter details" step, which arrives holding the given and family name the manager entered. A name the manager entered only in another of the journal's form languages sits in that language's boxes, behind the button named for it ("French"), and Given Name arrives empty. Editable again from the review step via its Edit button <sup>k</sup> |
 
 ## Rules & state
@@ -140,7 +140,7 @@ Accept wizard (new invitee):
     expired invitations leave the list. <sup>p</sup>
 12. **Editing means replacing.** "Edit Invitation" warns "If you edit the
     existing invitation or add a new role, the current invitation will be
-    canceled and, a new one will be sent." The wizard reopens prefilled.
+    canceled and a new one will be sent." The wizard reopens prefilled.
     Sending composes a fresh invitation whose email supersedes the old one,
     and the old links stop working ⚠ [A3](#a3). <sup>q</sup>
 13. The user row's Edit action opens the same wizard for an existing member,
@@ -1381,7 +1381,10 @@ file, not here); `EmailMustNotExistRule` at finalize —
 `changeInvitationUserIdUsingUserEmail()` first converts an email invitation
 into an existing-user invitation when the address has since registered;
 privacy consent enforced client-side
-(`acceptInvitation.privacyStatement.validation`), auto-satisfied for existing
+(`acceptInvitation.privacyStatement.validation`, which read "…read and agree
+privacy statement" until pkp/pkp-lib#13497 for issue pkp/pkp-lib#12874; the
+new text read at the PR head `09a0ab6629`, 2026-10-10, before its merge, on
+the three apps), auto-satisfied for existing
 users; `givenName` (primary locale) + `userCountry` required at
 finalize/refine; existing-user invitations prohibit personal-detail overrides
 (`ProhibitedIncludingNull`).
@@ -1406,7 +1409,9 @@ starts with no invitation id even in edit mode, so the first advance
 2026-07-31 (live probe): cancel and replacement flows verbatim; the
 cancel confirmation's confirm button reads "Cancel Invitation" beside the
 dismiss button "Cancel". Each pass through the edit wizard mints a fresh
-draft (see f-a2).
+draft (see f-a2). The Edit dialog's sentence read "canceled and, a new one"
+until pkp/pkp-lib#13497 (issue pkp/pkp-lib#12874; read without the comma at
+the PR head `09a0ab6629`, 2026-10-10, before its merge, on the three apps).
 
 <a id="fn-r"></a>
 **r** — Removal email "You have been removed from a role"; masthead email

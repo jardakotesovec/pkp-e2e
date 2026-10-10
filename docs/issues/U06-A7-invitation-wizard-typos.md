@@ -60,8 +60,8 @@ Steps:
    Back".
 6. In the empty role row choose "Author", today as "Start Date" and
    "Does not appear on the masthead", then press "Save And Continue".
-7. Read the paragraph under the heading "STEP 3 - Modify email shared
-   with the user". Nothing needs to be sent.
+7. Read the paragraph under the heading that starts "STEP 3 - Modify
+   email". Nothing needs to be sent.
 
 **Expected.** Correct English. For the search page, pkp-lib's own text:
 "If the user does not exist, you can invite them to take on roles. If
