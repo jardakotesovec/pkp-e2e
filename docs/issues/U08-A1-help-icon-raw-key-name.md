@@ -130,9 +130,10 @@ Reach:
   `userAccess.management.options`
   ([U53 A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U53-A5-users-list-row-button-raw-key.md)),
   `manager.category.delete.message`
-  ([U16 A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U16-A18-delete-category-box-unnamed.md)),
-  `invitation.wizard.completeSteps` and `invitation.wizard.errors`
-  ([U06 A7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U06-A7-invitation-steps-raw-labels.md)).
+  ([U16 A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U16-A18-delete-category-box-unnamed.md)).
+  Two more, `invitation.wizard.completeSteps` and
+  `invitation.wizard.errors`, got their texts with the pull requests of
+  pkp/pkp-lib#12874.
 
 ## Proposed fix
 

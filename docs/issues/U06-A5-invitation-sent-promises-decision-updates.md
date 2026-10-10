@@ -9,7 +9,7 @@
   - 3.4: none (code; no "Invite to a role")
   - 3.3: none (code; no "Invite to a role")
 - **Introduced** `pkp/pkp-lib#10558` for `pkp/pkp-lib#9658` · [e8bdca4673](https://github.com/pkp/pkp-lib/commit/e8bdca46737fb77d39a7a041cec5f7526dd07835) · 2024-10-24 · Ipula Indeewara (ipula)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#12874` (its pull requests reword the sentence and keep the promise)
 - **Tracked in** spec U06 [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U06-user-invitations.md#a5)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
@@ -17,9 +17,9 @@
 ## Summary
 
 When someone sends an invitation with "Invite to a role" on Users &
-Roles, the "Invitation Sent" dialog says: "You can be updated about the
-user's decision on the Users & Roles page, your OJS notifications and/or
-your email" (a press and a preprint server name OMP and OPS). When the
+Roles, the "Invitation Sent" dialog says: "You can see the user's
+response on the Users & Roles page, in your OJS notifications, or in
+your email." (a press and a preprint server name OMP and OPS). When the
 person accepts or declines, nothing tells the inviter. No notification
 arrives and no email is sent. The invitation's row just leaves the
 "Invitations" table.
@@ -97,7 +97,7 @@ Roles would show both answers.
 
 ```
 Invitation Sent
-ccorino@mailinator.com has been invited to new role in OJS. You can be updated about the user's decision on the Users & Roles page, your OJS notifications and/or your email
+ccorino@mailinator.com has been invited to a new role in OJS. You can see the user's response on the Users & Roles page, in your OJS notifications, or in your email.
 [View All Users]
 ```
 
@@ -175,7 +175,7 @@ Here is OJS's (OMP's and OPS's differ only in the acronym):
  msgstr "You can invite them to take up a role in OJS"
  
  msgid "userInvitation.modal.message"
--msgstr "{$email} has been invited to new role in OJS. You can be updated about the user's decision on the Users & Roles page, your OJS notifications and/or your email"
+-msgstr "{$email} has been invited to a new role in OJS. You can see the user's response on the Users & Roles page, in your OJS notifications, or in your email."
 +msgstr "{$email} has been invited to a new role in OJS. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer."
  
  msgid "userInvitation.roleTable.journalMasthead"
@@ -183,8 +183,17 @@ Here is OJS's (OMP's and OPS's differ only in the acronym):
 ```
 
 It keeps the purpose of the original copy, which is to confirm that the
-invitation went out and say where to follow it, and it fixes "to new
-role".
+invitation went out and say where to follow it.
+
+The sentence was reworded once already, by the pull requests of
+pkp/pkp-lib#12874 (pkp/ojs#5923, pkp/omp#2505, pkp/ops#1446; on
+`stable-3_5_0` pkp/ojs#5922, pkp/omp#2504, pkp/ops#1445): until then it
+read "…has been invited to new role in OJS. You can be updated about
+the user's decision on the Users & Roles page, your OJS notifications
+and/or your email". The new wording still names notifications and
+email, so the walk's result is the same: reread on 2026-10-10 at those
+pull requests' heads on `main`, OJS, OMP and OPS, and the diffs above
+are against them.
 
 Tried on `main`, OJS, OMP and OPS: at step 4 the dialog showed the new
 sentence, and the rest of the walk was unchanged. As a control, a second
@@ -211,7 +220,8 @@ and the row gone from "Invitations" after the acceptance.
 
 - Translations, a choice for the team. Keeping the key, as the diffs
   do, leaves the 20 OJS translations promising the updates until
-  translators update them through Weblate. A new key instead makes those
+  translators update them through Weblate (the pull requests of
+  pkp/pkp-lib#12874 mark them for review). A new key instead makes those
   languages show the English sentence until they are translated.
 - 3.5: the three diffs apply as written to `stable-3_5_0` (`patch
   --dry-run` on each app's `locale/en/invitation.po`).

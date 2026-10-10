@@ -3,9 +3,10 @@
 // reads every screen text the change touches, and whatever shows as an untranslated "##key##", so
 // the same script run at the PR's base and at its head says what a person sees differently.
 //
-//   1. As `rvaca`: Settings > Users & Roles > "Invite to a role" for dbuskins@mailinator.com (a
-//      member), a new Author role, "Save And Continue": the heading of step 3; "Invite user to the
-//      role".
+//   1. As `rvaca`: Settings > Users & Roles > "Invite to a role": step 1's description; a search for
+//      dbuskins@mailinator.com (a member); "Cancel" and its question, "Go Back"; a new Author role,
+//      "Save And Continue": the heading of step 3; "Invite user to the role": what "Invitation
+//      Sent" says.
 //   2. The invitation's row menu > "Edit": the question it asks. Dismissed.
 //   3. "Invite to a role" again for an address nobody holds, given name "Nova", Author: sent.
 //   4. The invitations API, for an added role without its user group: the refusal's text.
@@ -37,6 +38,7 @@ async function read(page) {
     return {
         ...intro,
         steps: await page.locator('.pkpSteps ol li').evaluateAll((list) => list.map((li) => li.textContent.replace(/\s+/g, ' ').trim())),
+        stepsListName: await H.listAccessibleName(page),
         buttons: [...new Set(buttons)],
         codesOnScreen: codes(main),
         codesInAccessibleNames: codes(await page.locator('main, body').first().ariaSnapshot().catch(() => '')),
@@ -44,14 +46,16 @@ async function read(page) {
     };
 }
 
-/** "Invite user to the role" on step 3, then "View All Users". */
+/** "Invite user to the role" on step 3, then "View All Users". Returns what "Invitation Sent" says. */
 async function send(page) {
     await page.getByRole('button', {name: 'Invite user to the role'}).click();
     const sent = page.getByRole('dialog').filter({hasText: 'Invitation Sent'});
     await sent.waitFor({timeout: T});
+    const text = flat(await sent.innerText());
     await sent.getByRole('button', {name: 'View All Users'}).click();
     await page.waitForURL(/management\/settings\/access/, {timeout: T}).catch(() => {});
     await idle(page);
+    return text;
 }
 
 forEachApp(async (app) => {
@@ -69,12 +73,16 @@ forEachApp(async (app) => {
         // 1. a member, to step 3
         await H.usersAndRoles(page, app);
         await H.openInviteWizard(page);
+        facts.sendStep1 = await read(page);
         await H.searchUser(page, H.PERSON.email);
+        facts.cancelQuestion = await H.pressCancel(page);
+        await page.getByRole('dialog').getByRole('button', {name: 'Go Back'}).click().catch(() => {});
+        await page.getByRole('dialog').waitFor({state: 'detached', timeout: 10_000}).catch(() => {});
         await H.fillNewRole(page, {role: 'Author', masthead: 'Does not appear on the masthead'});
         await H.toCompose(page);
         facts.sendStep3 = await read(page);
         record('01-send-step-3', await screen(page));
-        await send(page);
+        facts.sentDialog = (await send(page)).replace(H.PERSON.email, '{email}');
 
         // 2. the row's "Edit"
         const row = page.getByRole('table', {name: /Invitations \(/}).getByRole('row').filter({hasText: H.PERSON.email}).first();
@@ -133,6 +141,7 @@ forEachApp(async (app) => {
         await v.getByRole('button', {name: 'Save and continue'}).click();
         await v.getByLabel(/^Country of affiliation/).waitFor({timeout: T});
         facts.acceptDetails = await read(v);
+        facts.givenNameHelp = (await v.locator('main, body').first().innerText()).split('\n').map((l) => l.trim()).filter((l) => /forename/.test(l)).slice(0, 1);
         await v.getByLabel(/^Country of affiliation/).selectOption({index: 1});
         await v.getByRole('button', {name: 'Save and continue'}).click();
         await v.getByRole('button', {name: /^Accept And Continue/}).waitFor({timeout: T});

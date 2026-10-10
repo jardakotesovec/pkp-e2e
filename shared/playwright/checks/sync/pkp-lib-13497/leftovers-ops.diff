@@ -1,0 +1,26 @@
+--- a/locale/en/invitation.po
++++ b/locale/en/invitation.po
+@@ -20,7 +20,7 @@
+ msgstr "You've been assigned a new role in OPS"
+ 
+ msgid "acceptInvitation.verifyOrcid.stepDescription"
+-msgstr "You can choose to verify your ORCID iD or skip it. If you chose to skip it now, you can verify your ORCID iD from your profile section in OPS later"
++msgstr "You can choose to verify your ORCID iD or skip it. If you choose to skip it now, you can verify your ORCID iD from your profile section in OPS later"
+ 
+ #, fuzzy
+ msgid "invitation.orcid.acceptInvitation.message"
+@@ -36,7 +36,7 @@
+ msgstr "You can invite them to take up a role in OPS"
+ 
+ msgid "userInvitation.modal.message"
+-msgstr "{$email} has been invited to a new role in OPS. You can see the user's response on the Users & Roles page, in your OPS notifications, or in your email."
++msgstr "{$email} has been invited to a new role in OPS. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer."
+ 
+ msgid "userInvitation.roleTable.journalMasthead"
+ msgstr "Server Masthead"
+@@ -51,4 +51,4 @@
+ msgstr "Search for the user by email address, username or ORCID iD. Enter at least one of these to get started. If the user does not exist, you can invite them to take on roles and become part of your server. If the user already exists in the system, you can view their information and invite them to take on additional roles."
+ 
+ msgid "userInvitation.sendMail.stepDescription"
+-msgstr "Send the user an email to let them know about the invitation, next steps, server GDPR polices and ORCID verification"
++msgstr "Send the user an email to let them know about the invitation, next steps, server GDPR policies and ORCID verification"

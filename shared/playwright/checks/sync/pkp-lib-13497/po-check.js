@@ -8,38 +8,49 @@
 //      app and its plugins (a hit is a text that would turn into "##key##");
 //   3. every invitation key the code names (`invitation.`, `userInvitation.`, `acceptInvitation.`,
 //      `reviewerInvitation.`): is it defined in English, in pkp-lib or in the app, on each side;
-//   4. every `{name}` without its `$` left in any language's invitation.po, the fault the issue names.
+//   4. every `{name}` without its `$` left in any language's invitation.po, the fault the issue names;
+//   5. given the app's own two commits too: the same per-file read of the app's .po files.
+// A translation the range marks "#, fuzzy" (its English changed) is counted per file.
 //
-// Run:  node shared/playwright/checks/sync/pkp-lib-13497/po-check.js <app root> <base> <head> [out.json]
+// Run:  node shared/playwright/checks/sync/pkp-lib-13497/po-check.js <app root> <base> <head> [out.json] [app base] [app head]
 //       (base and head are commits of <app root>/lib/pkp; nothing is checked out)
 const {execFileSync} = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const [appRoot, base, head, outFile] = process.argv.slice(2);
+const [appRoot, base, head, outFile, appBase, appHead] = process.argv.slice(2);
 if (!appRoot || !base || !head) {
     console.error('usage: po-check.js <app root> <base> <head> [out.json]');
     process.exit(2);
 }
 const lib = path.join(appRoot, 'lib', 'pkp');
 const git = (...args) => execFileSync('git', ['-C', lib, ...args], {encoding: 'utf8', maxBuffer: 256 << 20});
-const show = (rev, file) => {
+const gitApp = (...args) => execFileSync('git', ['-C', appRoot, ...args], {encoding: 'utf8', maxBuffer: 256 << 20});
+const showWith = (g) => (rev, file) => {
     try {
-        return git('show', `${rev}:${file}`);
+        return g('show', `${rev}:${file}`);
     } catch {
         return null;
     }
 };
+const show = showWith(git);
 
-/** A .po file as {entries: key -> text, all: key -> [every definition's text]}. */
+/** A .po file as {entries: key -> text, all: key -> [every definition's text], fuzzy: keys marked "#, fuzzy"}. */
 function parse(text) {
     const all = {};
+    const fuzzy = new Set();
     let id = null;
     let str = null;
     let mode = null;
+    let flagged = false;
+    let pending = false;
     const flush = () => {
-        if (id) (all[id] = all[id] || []).push(str || '');
+        if (id) {
+            (all[id] = all[id] || []).push(str || '');
+            if (flagged) fuzzy.add(id);
+        }
         id = str = mode = null;
+        flagged = false;
     };
     for (const raw of (text || '').split('\n')) {
         const line = raw.trim();
@@ -47,13 +58,19 @@ function parse(text) {
             flush();
             continue;
         }
-        if (line.startsWith('#')) continue;
+        if (line.startsWith('#')) {
+            // the flag stands above the entry it marks
+            if (/^#,.*\bfuzzy\b/.test(line)) pending = true;
+            continue;
+        }
         let m = line.match(/^(msgid|msgstr)\s+"(.*)"$/);
         if (m) {
             if (m[1] === 'msgid') {
                 flush();
                 id = m[2];
                 mode = 'id';
+                flagged = pending;
+                pending = false;
             } else {
                 str = m[2];
                 mode = 'str';
@@ -68,7 +85,7 @@ function parse(text) {
     const entries = {};
     // the loader keeps the last definition of a key
     for (const [k, v] of Object.entries(all)) entries[k] = v[v.length - 1];
-    return {entries, all};
+    return {entries, all, fuzzy};
 }
 
 const mergeBase = git('merge-base', base, head).trim();
@@ -77,9 +94,9 @@ const out = {appRoot, base: git('rev-parse', base).trim(), head: git('rev-parse'
 // 1. the .po files of the range
 const files = git('diff', '--name-only', `${mergeBase}..${head}`, '--', '*.po').split('\n').filter(Boolean);
 const removedEnglish = new Set();
-for (const file of files) {
-    const b = parse(show(mergeBase, file));
-    const h = parse(show(head, file));
+function readFile(shower, from, to, file) {
+    const b = parse(shower(from, file));
+    const h = parse(shower(to, file));
     const dupes = (side) =>
         Object.entries(side.all)
             .filter(([, v]) => v.length > 1)
@@ -90,8 +107,21 @@ for (const file of files) {
         .filter((k) => k in h.entries && b.entries[k] !== h.entries[k])
         .sort()
         .map((key) => ({key, base: b.entries[key], head: h.entries[key]}));
-    out.files[file] = {removed, added, reworded, doubledAtBase: dupes(b), doubledAtHead: dupes(h)};
-    if (file.startsWith('locale/en/')) removed.forEach((k) => removedEnglish.add(k));
+    const markedFuzzy = [...h.fuzzy].filter((k) => !b.fuzzy.has(k)).sort();
+    return {removed, added, reworded, markedFuzzy, doubledAtBase: dupes(b), doubledAtHead: dupes(h)};
+}
+for (const file of files) {
+    out.files[file] = readFile(show, mergeBase, head, file);
+    if (file.startsWith('locale/en/')) out.files[file].removed.forEach((k) => removedEnglish.add(k));
+}
+// 5. the app's own .po files between its two commits
+out.appFiles = {};
+if (appBase && appHead) {
+    out.appBase = gitApp('rev-parse', appBase).trim();
+    out.appHead = gitApp('rev-parse', appHead).trim();
+    for (const file of gitApp('diff', '--name-only', `${appBase}..${appHead}`, '--', '*.po').split('\n').filter(Boolean)) {
+        out.appFiles[file] = readFile(showWith(gitApp), appBase, appHead, file);
+    }
 }
 
 // the working trees are read for the uses; they must sit at one of the two commits
@@ -194,12 +224,24 @@ for (const [f, r] of en) {
     for (const w of r.reworded) console.log(`   ~ ${w.key}\n       base: ${w.base}\n       head: ${w.head}`);
 }
 const other = Object.entries(out.files).filter(([f]) => !f.startsWith('locale/en/'));
-const shape = {};
-for (const [f, r] of other) {
-    const sig = `removed ${r.removed.length}, added ${r.added.length}, reworded ${r.reworded.map((w) => w.key).join(' ') || 'none'}, twice at base ${r.doubledAtBase.length} / head ${r.doubledAtHead.length}`;
-    (shape[sig] = shape[sig] || []).push(f.split('/')[1]);
+const short = (k) => k.split('.').slice(-3).join('.');
+const groups = (list, label) => {
+    const shape = {};
+    for (const [f, r] of list) {
+        const sig = `removed ${r.removed.length}, added ${r.added.length}, reworded ${r.reworded.map((w) => short(w.key)).join(' ') || 'none'}, marked fuzzy ${r.markedFuzzy.map(short).join(' ') || 'none'}, twice at base ${r.doubledAtBase.length} / head ${r.doubledAtHead.length}`;
+        (shape[sig] = shape[sig] || []).push(f.split('/').slice(-2, -1)[0]);
+    }
+    for (const [sig, langs] of Object.entries(shape)) console.log(`${label} [${langs.join(' ')}]: ${sig}`);
+};
+groups(other, 'translations');
+if (appBase && appHead) {
+    console.log(`the app's own files, ${out.appBase.slice(0, 10)} -> ${out.appHead.slice(0, 10)}:`);
+    for (const [f, r] of Object.entries(out.appFiles).filter(([f]) => f.includes('/en/'))) {
+        console.log(`${f}: removed ${r.removed.length}, added ${r.added.length}, reworded ${r.reworded.length}`);
+        for (const w of r.reworded) console.log(`   ~ ${w.key}\n       base: ${w.base}\n       head: ${w.head}`);
+    }
+    groups(Object.entries(out.appFiles).filter(([f]) => !f.includes('/en/')), 'app translations');
 }
-for (const [sig, langs] of Object.entries(shape)) console.log(`translations [${langs.join(' ')}]: ${sig}`);
 console.log('removed from English, and who still names them:');
 for (const [k, v] of Object.entries(out.removedEnglishKeys)) console.log(`   ${k}: ${v.length ? v.join(', ') : 'nobody'}`);
 for (const side of ['base', 'head']) {
