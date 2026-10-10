@@ -1,0 +1,55 @@
+--- a/lib/pkp/locale/en/invitation.po
++++ b/lib/pkp/locale/en/invitation.po
+@@ -254,7 +254,7 @@
+ msgstr "Privacy Statement"
+ 
+ msgid "acceptInvitation.userDetailsForm.givenName.description"
+-msgstr "Also known as a forename or the first name, it is tha part of a personal name that identifies a person."
++msgstr "Also known as a forename or the first name, it is the part of a personal name that identifies a person."
+ 
+ msgid "acceptInvitation.userDetailsForm.familyName.description"
+ msgstr "A surname, family name, or last name is the mostly hereditary portion of one's personal name that indicates one's family."
+@@ -286,6 +286,12 @@
+ msgid "invitation.wizard.viewPageTitleDescription"
+ msgstr "You are viewing {$name}'s user details"
+ 
++msgid "invitation.wizard.completeSteps"
++msgstr "Complete the following steps for this role invitation"
++
++msgid "invitation.wizard.errors"
++msgstr "There are one or more problems that need to be fixed before you can continue. Please review the information below and make the requested changes."
++
+ msgid "invitation.cancelInvite.actionName"
+ msgstr "Cancel Invite"
+ 
+@@ -305,7 +311,7 @@
+ msgstr "Invitation management options"
+ 
+ msgid "userInvitation.cancel.message"
+-msgstr "Are you sure want to cancel this invitation?"
++msgstr "Are you sure you want to cancel this invitation?"
+ 
+ msgid "userInvitation.cancel.goBack"
+ msgstr "Go Back"
+--- a/lib/pkp/locale/da/invitation.po
++++ b/lib/pkp/locale/da/invitation.po
+@@ -128,7 +128,7 @@
+ 
+ msgid "invitation.userRoleAssignment.validation.error.user.emailMustNotExist"
+ msgstr ""
+-"Når en invitation har en tilknyttet e-mail ({email}), må denne e-mail-"
++"Når en invitation har en tilknyttet e-mail ({$email}), må denne e-mail-"
+ "adresse ikke være i brug af en anden bruger."
+ 
+ msgid "invitation.userRoleAssignment.validation.error.givenName.mandatory"
+--- a/lib/pkp/locale/tr/invitation.po
++++ b/lib/pkp/locale/tr/invitation.po
+@@ -67,7 +67,7 @@
+ 
+ msgid "invitation.userRoleAssignment.validation.error.userRoles.unexpectedProperties"
+ msgstr ""
+-"{attribute} indeksindeki ögede beklenmedik özellikler bulundu: {properties}."
++"{$attribute} indeksindeki ögede beklenmedik özellikler bulundu: {$properties}."
+ 
+ msgid "invitation.reviewerAccess.validation.error.reviewAssignmentId.notExisting"
+ msgstr ""
