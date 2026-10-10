@@ -188,7 +188,7 @@ Accept wizard (new invitee):
 15. Wizard navigation (send side). "Back" returns one step, and returning to
     the search step clears everything entered. "Cancel" asks for confirmation
     only when something was changed: a "Cancel Invitation" dialog asks "Are
-    you sure want to cancel this invitation?" ⚠ [A7](#a7), and its "Cancel
+    you sure you want to cancel this invitation?", and its "Cancel
     Invite" returns to Users & Roles. Leaving the wizard any other way
     (following a link, typing another address) asks nothing, and the
     Invitations table gains no row. The final button reads "Invite user to
@@ -669,8 +669,9 @@ Left out of the scenarios above, by reason:
     editor role's line keeps "will appear"
   - the guards for A7 (issue reports
     `docs/issues/U06-A7-invitation-steps-raw-labels.md` and
-    `docs/issues/U06-A7-accept-page-hidden-steps-button.md`): no list or
-    button on the send and accept wizards carries "##" in its name, and on
+    `docs/issues/U06-A7-accept-page-hidden-steps-button.md`): the list of
+    steps on the send and accept wizards is named "Complete the steps for
+    this invitation", no list or button there carries "##" in its name, and on
     an existing user's one-step accept page Tab reaches no element inside
     the clipped steps row or an `aria-hidden` block
   - on a journal whose primary language is not the site's, with the
@@ -834,9 +835,9 @@ Basis: probe, issue report walk, 2026-10-02. <sup>[f-a4](#fn-a4)</sup>
 <a id="a5"></a>
 **A5 — "Invitation Sent" promises the inviter news of the person's decision, but nothing ever tells them** · 🐞 · low.
 When someone sends an invitation with "Invite to a role" on Users & Roles,
-the "Invitation Sent" dialog says: "You can be updated about the user's
-decision on the Users & Roles page, your OJS notifications and/or your
-email" (a press and a preprint server name OMP and OPS). When the person
+the "Invitation Sent" dialog says: "You can see the user's response on the
+Users & Roles page, in your OJS notifications, or in your email." (a press
+and a preprint server name OMP and OPS). When the person
 accepts or declines, nothing tells the inviter. No notification arrives and
 no email is sent. The invitation's row just leaves the "Invitations" table.
 Nothing is lost, and an accepted invitation grants its roles correctly. The
@@ -849,10 +850,9 @@ Basis: probe, issue report walk, 2026-10-02. <sup>[f-a5](#fn-a5)</sup>
 **A7 — Small copy defects across these screens and emails** · 🐞 · low.
 The invitation email offers roles "as a Author", and a submission's Activity
 Log reads "was assigned to this submission as a Author.": a fixed "a" stands
-before every role name, also one starting with a vowel. The search step
-reads "Enter at least one details…" and "…invite to take a additional
-roles", the send wizard's cancel confirmation asks "Are you sure want to
-cancel this invitation?", and its email step mentions "GDPR polices". On OMP
+before every role name, also one starting with a vowel. The send wizard's
+email step mentions "GDPR polices", and with ORCID switched on the accept
+page's first step says "If you chose to skip it now". On OMP
 and OPS, the masthead confirmation reads "This will update whether this user
 appears on the journal masthead for the selected role." under a column named
 "Press Masthead" or "Server Masthead", and the "Invitation Unavailable" page
@@ -861,14 +861,13 @@ where the role is "Press manager" or "Preprint Server manager".
 "##common.help##" shows in the header of every management page ([Navigation
 menus & site chrome A1](U08-navigation-menus-and-site-chrome.md#a1)); a
 screen reader hears "##userAccess.management.options##" for each Current
-Users row's menu button on Users & Roles and
-"##invitation.wizard.completeSteps##" for the list of steps in both wizards.
+Users row's menu button on Users & Roles.
 On an existing user's one-step accept page ("Review & create account"), and
 on one-step editorial decision pages such as "Decline Submission", Tab stops
 on two buttons nobody can see, with no focus outline: the step's own button,
 clipped to nothing, and a "show all steps" toggle whose only text is the
 untranslated "{$current}/{$total} steps"; Enter on either changes nothing.
-Basis: probe, issue report walks, 2026-10-02. <sup>[f-a7](#fn-a7)</sup>
+Basis: probe, issue report walks, 2026-10-02; PR review, 2026-10-10. <sup>[f-a7](#fn-a7)</sup>
 
 <a id="a8"></a>
 **A8 — Role invitation wizard: a screen reader hears no field names in role rows after the first** · 🐞 · low.
@@ -1196,8 +1195,10 @@ all three apps by claim check (an earlier live probe the same day had read
 the pre-click wizard anchor, not the post-click page). Claim check
 2026-09-27 (Rule 15), all three apps: "Cancel" on "Enter details" opened
 the "Cancel Invitation" dialog, "Are you sure want to cancel this
-invitation?" with the buttons "Cancel Invite" and "Go Back" (finding A7),
-and "Cancel Invite" returned to Users & Roles; leaving the wizard by
+invitation?" with the buttons "Cancel Invite" and "Go Back" (the wording
+then; "Are you sure you want to cancel this invitation?" since
+pkp/pkp-lib#13497, read at the PR head `9f9a224862`, 2026-10-10, before its
+merge, on the three apps), and "Cancel Invite" returned to Users & Roles; leaving the wizard by
 opening another address raised no browser question, and the Invitations
 table held the same rows afterwards.
 
@@ -1383,7 +1384,7 @@ into an existing-user invitation when the address has since registered;
 privacy consent enforced client-side
 (`acceptInvitation.privacyStatement.validation`, which read "…read and agree
 privacy statement" until pkp/pkp-lib#13497 for issue pkp/pkp-lib#12874; the
-new text read at the PR head `09a0ab6629`, 2026-10-10, before its merge, on
+new text read at the PR head `9f9a224862`, 2026-10-10, before its merge, on
 the three apps), auto-satisfied for existing
 users; `givenName` (primary locale) + `userCountry` required at
 finalize/refine; existing-user invitations prohibit personal-detail overrides
@@ -1411,7 +1412,7 @@ cancel confirmation's confirm button reads "Cancel Invitation" beside the
 dismiss button "Cancel". Each pass through the edit wizard mints a fresh
 draft (see f-a2). The Edit dialog's sentence read "canceled and, a new one"
 until pkp/pkp-lib#13497 (issue pkp/pkp-lib#12874; read without the comma at
-the PR head `09a0ab6629`, 2026-10-10, before its merge, on the three apps).
+the PR head `9f9a224862`, 2026-10-10, before its merge, on the three apps).
 
 <a id="fn-r"></a>
 **r** — Removal email "You have been removed from a role"; masthead email
@@ -1569,7 +1570,14 @@ Issue report: [pkp-e2e#514](https://github.com/jardakotesovec/pkp-e2e/issues/514
 
 <a id="fn-a5"></a>
 **f-a5** — Success-dialog copy: app locale key `userInvitation.modal.message`.
-No accept/decline code path produces a notification or email to the inviter
+Until the app PRs of pkp/pkp-lib#12874 (pkp/ojs#5923, pkp/omp#2505,
+pkp/ops#1446) it read "{email} has been invited to new role in OJS. You can
+be updated about the user's decision on the Users & Roles page, your OJS
+notifications and/or your email"; the reworded sentence keeps the promise
+(read at the PR heads `674754d5d3`, `5d8a4f104c`, `debb068213`, 2026-10-10,
+before their merge, with the issue report's walk: "Tasks" unchanged and the
+inviter's mailbox empty after an acceptance and a decline, on the three
+apps). No accept/decline code path produces a notification or email to the inviter
 (notes m, n). Live-confirmed 2026-07-31 (live probe, accept and decline
 cases): bell/Tasks panel "No Items", inviter mailbox empty after both accept
 and decline; positive control — an invitation sent afterwards delivered
@@ -1632,7 +1640,22 @@ Review & create account"); it has no accessible name, a pointer press at
 its place lands on the step content, and Enter on it changed nothing.
 Present before and after "Accept And Continue". A newcomer's three-step
 wizard (1280 and 380 px) and the send wizard have no such text.
-Issue reports, one per cause: the wording slips ([pkp-e2e#540](https://github.com/jardakotesovec/pkp-e2e/issues/540), [docs/issues/U06-A7-invitation-wizard-typos.md](../issues/U06-A7-invitation-wizard-typos.md)); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the steps list's raw names ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" is U08 A1's.
+Fixed by the pull requests of pkp/pkp-lib#12874 (pkp/pkp-lib#13497 with
+pkp/ojs#5923, pkp/omp#2505 and pkp/ops#1446; read at the PR heads
+`9f9a224862`, `674754d5d3`, `5d8a4f104c`, `debb068213`, 2026-10-10, before
+their merge, on the three apps, `checks/sync/pkp-lib-13497/`): the search
+step's grammar (it now reads "Enter at least one of these to get started.
+… If the user already exists in the system, you can view their information
+and invite them to take on additional roles."), the cancel question, the
+given-name help's "it is tha part" on the accept page, and the list of
+steps, which both wizards now name "Complete the steps for this
+invitation" (the key `invitation.wizard.completeSteps` had no text in any
+file). Left of that group: "GDPR polices" and, seen with ORCID on for the
+first time, "If you chose to skip it now" on the accept page's ORCID step
+(both in each app's own `locale/en/invitation.po`); and the collapsed
+toggle's text, because both pages pass `common.showingSteps` where
+`common.showAllSteps` is meant (ui-library).
+Issue reports, one per cause: the wording slips ([pkp-e2e#540](https://github.com/jardakotesovec/pkp-e2e/issues/540), [docs/issues/U06-A7-invitation-wizard-typos.md](../issues/U06-A7-invitation-wizard-typos.md)); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the toggle's wrong text, once also the steps list's raw name ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" is U08 A1's.
 
 <a id="fn-a8"></a>
 **f-a8** — Every added row in `UserInvitationUserGroupsTable.vue` renders
