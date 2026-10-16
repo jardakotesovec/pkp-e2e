@@ -1,10 +1,11 @@
-# Playwright e2e suites for OJS/OMP/OPS. All mechanics live in the reusable
-# run-app.yml (also called by the thin hook workflows in the app repos);
-# this file is just the three-app matrix and its triggers.
-#
-# The apps are pkp upstream main (the once-needed reduced e2e_ng_2 branches
-# were retired 2026-08-27 — their two one-liners, Config.php PKP_CONFIG_FILE
-# and the OPS wordCount cast, are merged upstream).
+# THE `ore` BRANCH of pkp-e2e: the OJS suite for pkp/ojs `ore`, the branch
+# the ORE project runs in production until 3.6 is released (cut from main
+# at 2853af70, the commit that reviewed the tips `ore` was branched from on
+# 2026-10-13; MAINTENANCE "The ore branch" on main). OJS only: OMP and OPS
+# have no `ore`. This branch moves by cherry-picks that mirror the team's.
+# All mechanics live in the reusable run-app.yml; the nightly for this
+# branch is a job in main's e2e.yml (a schedule fires on the default branch
+# alone).
 name: e2e
 
 on:
@@ -18,9 +19,7 @@ on:
       - '**/*.md'
       - 'shared/playwright/checks/**'
   pull_request:
-    branches: ['main']
-  schedule:
-    - cron: '17 3 * * *' # nightly against the app branches below
+    branches: ['ore']
   # Dispatch can pin any app to an exact repo/ref (e.g. a PR's merge sha) and,
   # via --ref, run the suite from any pkp-e2e branch — the fix-verification
   # combo: `gh workflow run e2e.yml --ref <fix-branch> -f ojs_ref=<sha>`.
@@ -33,23 +32,7 @@ on:
       ojs_ref:
         description: OJS git ref (branch or sha)
         type: string
-        default: main
-      omp_repo:
-        description: owner/name of the OMP repo to test
-        type: string
-        default: pkp/omp
-      omp_ref:
-        description: OMP git ref (branch or sha)
-        type: string
-        default: main
-      ops_repo:
-        description: owner/name of the OPS repo to test
-        type: string
-        default: pkp/ops
-      ops_ref:
-        description: OPS git ref (branch or sha)
-        type: string
-        default: main
+        default: ore
       pkp_lib_ref:
         description: pin every app's lib/pkp to this pkp/pkp-lib commit (full sha or pull/<n>/head)
         type: string
@@ -59,9 +42,9 @@ on:
         type: string
         default: ''
       apps:
-        description: the apps to run, comma-separated (a PR on one app need not run the other two)
+        description: the apps to run (this branch runs OJS alone; OMP and OPS have no `ore`)
         type: string
-        default: 'ojs,omp,ops'
+        default: 'ojs'
       php_ini_values:
         description: extra php.ini values for setup-php, comma-separated, after the job's opcache.jit=disable (e.g. opcache.jit=1235 for a run with the JIT)
         type: string
@@ -77,37 +60,12 @@ concurrency:
 
 jobs:
   ojs:
-    # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
-    if: (github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e') && contains(format(',{0},', inputs.apps || 'ojs,omp,ops'), ',ojs,')
+    if: contains(format(',{0},', inputs.apps || 'ojs'), ',ojs,')
     uses: ./.github/workflows/run-app.yml
     with:
       app: ojs
       app_repo: ${{ inputs.ojs_repo || 'pkp/ojs' }}
-      app_ref: ${{ inputs.ojs_ref || 'main' }}
-      e2e_ref: ${{ github.sha }}
-      pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
-      ui_library_ref: ${{ inputs.ui_library_ref || '' }}
-      php_ini_values: ${{ inputs.php_ini_values || '' }}
-  omp:
-    # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
-    if: (github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e') && contains(format(',{0},', inputs.apps || 'ojs,omp,ops'), ',omp,')
-    uses: ./.github/workflows/run-app.yml
-    with:
-      app: omp
-      app_repo: ${{ inputs.omp_repo || 'pkp/omp' }}
-      app_ref: ${{ inputs.omp_ref || 'main' }}
-      e2e_ref: ${{ github.sha }}
-      pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
-      ui_library_ref: ${{ inputs.ui_library_ref || '' }}
-      php_ini_values: ${{ inputs.php_ini_values || '' }}
-  ops:
-    # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
-    if: (github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e') && contains(format(',{0},', inputs.apps || 'ojs,omp,ops'), ',ops,')
-    uses: ./.github/workflows/run-app.yml
-    with:
-      app: ops
-      app_repo: ${{ inputs.ops_repo || 'pkp/ops' }}
-      app_ref: ${{ inputs.ops_ref || 'main' }}
+      app_ref: ${{ inputs.ojs_ref || 'ore' }}
       e2e_ref: ${{ github.sha }}
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
