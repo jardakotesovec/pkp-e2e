@@ -260,13 +260,16 @@ test.describe('Reader comments & moderation (U14)', () => {
         expect(await menu.contentEntries()).toEqual(['Catalog']);
 
         // The page by address: it opens, but every comments request is refused
-        // while the setting is off, so it reads "No Items" under "All" and
-        // "Approved" (the scenario's own sentence; A4).
+        // while the setting is off: an "Error" dialog on the load and on each
+        // tab, and "No Items" under "All" and "Approved" (the scenario's own
+        // sentence; A4).
         await comments.goto();
-        await expect(comments.noItems()).toBeVisible();
+        await comments.dismissRefusal();
+        await comments.expectNoItems();
         await expect(comments.row(text)).toHaveCount(0);
         await comments.openTab('Approved');
-        await expect(comments.noItems()).toBeVisible();
+        await comments.dismissRefusal();
+        await comments.expectNoItems();
 
         // Switching on again: the same reload; Content › Comments is back.
         await settings.goto();
@@ -301,7 +304,7 @@ test.describe('Reader comments & moderation (U14)', () => {
 
         // Control: the fresh press's tab shows the box unticked, its side
         // menu offers no Content › Comments, and its Comments page, opened
-        // by address, reads "No Items" under every tab.
+        // by address, shows the "Error" dialog and reads "No Items" under every tab.
         const freshPage = await (await asUser(freshPeople.manager.username)).newPage();
         const freshSettings = new CommentsSettingsTab(freshPage, freshTag);
         await freshSettings.goto();
@@ -311,9 +314,13 @@ test.describe('Reader comments & moderation (U14)', () => {
         expect(await new EditorialSideMenu(freshPage).contentEntries()).toEqual(['Catalog']);
         const freshComments = new CommentsPage(freshPage, freshTag);
         await freshComments.goto();
+        await freshComments.dismissRefusal();
         expect(await freshComments.tabLabels()).toEqual(ALL_TABS);
         for (const name of ALL_TABS) {
-            await freshComments.openTab(name);
+            if (name !== ALL_TABS[0]) {
+                await freshComments.openTab(name);
+                await freshComments.dismissRefusal();
+            }
             await freshComments.expectNoItems();
         }
         // The submission exists on the first press: the row read above was a real one.
