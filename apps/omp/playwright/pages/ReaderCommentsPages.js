@@ -343,6 +343,18 @@ exports.CommentsPage = class CommentsPage extends BasePage {
      * (bounded, a revisited tab may serve what it holds) and the "Loading"
      * row gives way to the rows or "No Items".
      */
+    /** The "Error" dialog each comments request raises while public comments are off (Rule 2b). */
+    refusal() {
+        return this.page.getByRole('dialog').filter({hasText: 'You are not authorized to access the requested resource.'});
+    }
+
+    /** Wait for that dialog, press "OK", and wait for it to go. */
+    async dismissRefusal() {
+        await expect(this.refusal()).toBeVisible({timeout: 30_000});
+        await this.refusal().getByRole('button', {name: 'OK'}).click();
+        await expect(this.refusal()).toHaveCount(0);
+    }
+
     async openTab(name) {
         const fetched = this.page
             .waitForResponse((r) => r.request().method() === 'GET' && /\/api\/v1\/comments\?/.test(r.url()), {

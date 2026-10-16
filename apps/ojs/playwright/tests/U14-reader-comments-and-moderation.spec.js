@@ -226,13 +226,16 @@ test.describe('reader comments & moderation', () => {
         await expect(page.getByText('Comments on this publication')).toHaveCount(0);
 
         // The page by address: it still opens, but every comments request is
-        // refused while the setting is off, so it reads "No Items" (A4's sentence).
+        // refused while the setting is off: an "Error" dialog on the load and on
+        // each tab, and "No Items" behind it (A4's sentence).
         await comments.goto();
         await expect(comments.heading()).toBeVisible();
+        await comments.dismissRefusal();
         await comments.expectTab('All');
         await expect(comments.noItems()).toBeVisible();
         await expect(comments.row(commentText)).toHaveCount(0);
         await comments.openTab('Approved');
+        await comments.dismissRefusal();
         await expect(comments.noItems()).toBeVisible();
 
         // Switching on again: the same reload; the menu entry and the blocks back.
@@ -264,15 +267,20 @@ test.describe('reader comments & moderation', () => {
         expect(dialogs).toEqual([]);
 
         // Control: the fresh journal: box unticked, no Content › Comments,
-        // "No Items" under every tab of the page opened by address.
+        // the "Error" dialog and "No Items" under every tab of the page opened
+        // by address.
         const freshSettings = new CommentsSettingsTab(manager, freshTag);
         await freshSettings.goto();
         await expect(freshSettings.box()).not.toBeChecked();
         expect(await menu.contentEntries()).toEqual(['Issues']);
         const freshComments = new CommentsPage(manager, freshTag);
         await freshComments.goto();
+        await freshComments.dismissRefusal();
         for (const tab of TABS) {
-            await freshComments.openTab(tab);
+            if (tab !== 'All') {
+                await freshComments.openTab(tab);
+                await freshComments.dismissRefusal();
+            }
             await expect(freshComments.noItems()).toBeVisible();
             await expect(freshComments.rows()).toHaveCount(1);
         }
