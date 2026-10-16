@@ -14,7 +14,7 @@
  * (S5 asserts the "pending review" row staying after "Hide Comment", the
  * scenario's sentence), A3 ❓ (S9 asserts the dialog staying open on an
  * empty reason and "Report" offered again; no second report is filed),
- * A4 ❓ (S1 asserts the page opening by address with the comment listed),
+ * A4 ❓ (S1 asserts the page opening by address and reading "No Items"),
  * A5 ❓ (S1 asserts the reload onto Appearance › Theme and no "Saved"),
  * A6 🐞 (the comment panel's unverified iD link is never opened; S2's iD
  * is verified), A15 ❓ (the landing page's hollow icon is not read),
@@ -225,13 +225,15 @@ test.describe('reader comments & moderation', () => {
         await expect(landing.sidebarBlock()).toHaveCount(0);
         await expect(page.getByText('Comments on this publication')).toHaveCount(0);
 
-        // The page by address: still opens and lists the comment (A4's sentence).
+        // The page by address: it still opens, but every comments request is
+        // refused while the setting is off, so it reads "No Items" (A4's sentence).
         await comments.goto();
         await expect(comments.heading()).toBeVisible();
         await comments.expectTab('All');
-        await expect(comments.row(commentText)).toHaveCount(1);
+        await expect(comments.noItems()).toBeVisible();
+        await expect(comments.row(commentText)).toHaveCount(0);
         await comments.openTab('Approved');
-        await expect(comments.row(commentText)).toHaveCount(1);
+        await expect(comments.noItems()).toBeVisible();
 
         // Switching on again: the same reload; the menu entry and the blocks back.
         await settings.goto();
