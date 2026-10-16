@@ -25,7 +25,7 @@
  * the register entry beyond it: S1 waits for the Comments tab's reload
  * onto Appearance › Theme and asserts nothing about a "Saved" status (A5);
  * S1 opens the Comments page by address with the setting off and reads
- * the kept comment (A4); S3 reads the address after the report panel's
+ * "No Items" (A4); S3 reads the address after the report panel's
  * "Close" with neither number (A8); S5 reads the "pending review" row
  * still in each moderator's panel after "Hide Comment" (A2). The spec's
  * Coverage section records everything else left out.
@@ -259,13 +259,14 @@ test.describe('Reader comments & moderation (U14)', () => {
         await openDashboard(page, tag);
         expect(await menu.contentEntries()).toEqual(['Catalog']);
 
-        // The page by address: it opens and still lists the comment under
-        // "All" and "Approved" (the scenario's own sentence; A4).
+        // The page by address: it opens, but every comments request is refused
+        // while the setting is off, so it reads "No Items" under "All" and
+        // "Approved" (the scenario's own sentence; A4).
         await comments.goto();
-        await expect(comments.row(text)).toHaveCount(1);
-        await expect(comments.status(comments.row(text))).toHaveText('Approved');
+        await expect(comments.noItems()).toBeVisible();
+        await expect(comments.row(text)).toHaveCount(0);
         await comments.openTab('Approved');
-        await expect(comments.row(text)).toHaveCount(1);
+        await expect(comments.noItems()).toBeVisible();
 
         // Switching on again: the same reload; Content › Comments is back.
         await settings.goto();
@@ -276,6 +277,10 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(settings.box()).toBeChecked();
         await openDashboard(page, tag);
         expect(await menu.contentEntries()).toEqual(['Comments', 'Catalog']);
+        // The comment was kept while the setting was off: the page lists it again.
+        await comments.goto();
+        await expect(comments.row(text)).toHaveCount(1);
+        await expect(comments.status(comments.row(text))).toHaveText('Approved');
 
         // An unsaved tick: untick, open "Appearance" and come back: still
         // unticked and nothing was asked; leave the page and return: ticked.
