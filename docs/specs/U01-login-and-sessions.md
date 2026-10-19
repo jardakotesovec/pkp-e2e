@@ -108,12 +108,10 @@ Login, the site's name stands in for the journal's), but after a refused
    for more information." When staff recorded a reason, it reads "Your
    account has been disabled for the following reason: {reason}". With a
    wrong password, a disabled account gets the generic sentence. After a
-   disabled account's refusal, the next sign-in in the same browser, by
-   any account and with the correct password, lands back on the Login
-   page with no message and "Username or Email" empty; the try after that
-   lands where Rule 3 says ⚠ [A12](#a12). Opening the Login page afresh in
-   between does not help. After a wrong-password or unknown-username
-   refusal, the next correct sign-in lands at once. <sup>a</sup>
+   refusal, the next correct sign-in in the same browser lands at once
+   where Rule 3 says: after a wrong password, after an unknown username,
+   and after a disabled account's refusal when another account signs in
+   next. <sup>a</sup>
 3. **Landing after sign-in.** An interrupted destination wins (Rule 4).
    Otherwise, a user holding a role beyond Reader **in the journal signed
    into** lands on that journal's Dashboard. A user with no such role there
@@ -672,6 +670,12 @@ Left out of the scenarios above, by reason:
     flag ([A10](#a10)): the guard the issue report
     (`docs/issues/U01-A10-edit-user-hides-clears-change-password.md`)
     proposes, once fixed
+  - a disabled account refused on the journal's and the site-level Login
+    page with "Your account has been disabled. Please contact the
+    administrator for more information.", and with the reason when staff
+    typed one; then another account's correct password in the same
+    browser landing where Rule 3 says, not back on the Login page
+    (Rule 2; [A12](#a12))
 - **Rarely met**:
   - a forced change ending the account's other sessions, and flagging alone leaving them signed in (Rule 11): it needs the Site Administrator's "Edit User" (Rule 11a) on an account already signed in elsewhere
 - **Nothing new to test**:
@@ -681,9 +685,7 @@ Left out of the scenarios above, by reason:
   - a held address the user's roles do not allow ending on the access-denied page after sign-in (Rule 4): the page scenario 4 reads (Rule 17)
 - **Register carries it**:
   - A5 (no journal-level users screen offering the forced-change flag; Rule 11a)
-  - A12 (the next correct sign-in after a disabled account's refusal landing back on the Login page; Rule 2)
 - **No seed**:
-  - a disabled account refused, with or without a reason (Rule 2)
   - the Site Administrator passing Confirm Access (Actors row "Pass the Confirm Access gate"): what is missing is a per-context way to set the re-authentication window; the configuration file's `password_timeout` is run-global
   - Confirm Access's window lapse, no replay, and the direct address going home (Rule 16): the same missing window setting
   - other Site Administrators never offered Login As (Rule 14): what is missing is a second site administrator
@@ -1012,8 +1014,9 @@ Author disabled with no reason, another through Settings › Users & Roles
 › the row's "Disable User" with a typed reason): both messages verbatim
 on the journal's and the site-level Login pages, the refused form keeping
 the typed username; a disabled account's wrong password answers the
-generic `user.login.loginError`. The next sign-in in the same browser:
-finding A12 (note f-a12).
+generic `user.login.loginError`. The next correct sign-in in the same
+browser after a disabled account's refusal: note f-a12 (finding A12,
+retired 2026-10-19).
 
 <a id="fn-b"></a>
 **b** — Landing: `LoginHandler::_redirectAfterLogin()` — with a context and
@@ -1718,6 +1721,21 @@ seventh, an OJS repeat on the same context, bounced that attempt to
 `login?source=…login%2FsignIn` with no message instead, the next try
 getting in. No server error and no page error in any run. Cause not
 traced.
+Retired: fixed by pkp/pkp-lib#12780's second commit, lib/pkp
+`3407fc5bc0` on `main` (2026-10-06), which reverts the July fallback
+`a6d68f9547` (`PKPRequest::getUser()` falling back on `Auth::user()`)
+that left the refused account in the session; the 3.5 twin
+`edc3d36c74` is in stable-3_5_0's lib/pkp (code read, not walked).
+Walked 2026-10-19 on OJS, OMP and OPS `main` (lib/pkp `042726ebf6`),
+each on PKP's default dataset freshly reset: the five-step sequence
+(the disabled account, `dbarnes`, the disabled account, `dbarnes`
+twice) on the journal's Login page and the site-level one: every
+correct `dbarnes` sign-in landed at once (the Dashboard, or the journal
+home page from the site-level Login), with no return to the Login page
+and no `user.login.loginError`; the setups above (a fresh browser, the
+Login address with and without the locale segment) re-driven once on
+OJS, the same (the issues session's kept walk,
+`shared/playwright/checks/U01/H19/walk.js`).
 
 <a id="fn-a13"></a>
 **f-a13** — `AdminHandler::authorize()` (`lib/pkp/pages/admin/AdminHandler.php:111`
