@@ -20,8 +20,10 @@
 //
 // Facts go to facts-references-ojs.json (each <ref> on one line); no assertions. At the plugin's base 06e35f8 a
 // <mixed-citation> holds the text alone, and the URN and five data-citation types get a pub-id-type the DTD
-// refuses; at the PR head 1849b22 (2026-10-20) each identifier the text holds is a <pub-id>, a web address an
-// <ext-link>, and the Mike reference's DOI is marked inside the Wiley address (U48 A24).
+// refuses; at the first PR head 1849b22 (2026-10-20) each identifier the text holds is a <pub-id>, a web address an
+// <ext-link>, Golf's hand-set DOI is left out and the Mike reference's DOI is marked inside the Wiley address; at
+// the second head 9d789ad Golf's DOI is added after the text and Mike's is marked after "doi:", the Wiley address
+// kept as a link.
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, idle, record, shot, outDir} = require('../../../probe');
