@@ -562,7 +562,11 @@ No site highlight can be created, so the list keeps reading "No items
 found." and the site's home page shows no carousel.
 The tab is offered only on a site that hosts two or more journals
 (presses on OMP, preprint servers on OPS).
-Basis: probe, 2026-10-04. <sup>f-a5</sup>
+On pkp-lib `main`, pkp/pkp-lib#13521 (merged 2026-10-20) fixes it: with
+it in `lib/pkp`, the site highlight saves and orders, and the carousel
+shows, in OJS, OMP and OPS (walked 2026-10-20). OJS's pointer has it;
+OMP's and OPS's take it with their next bump; 3.5 still fails.
+Basis: probe, 2026-10-04; 2026-10-20. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — The carousel's dots are not buttons** · ❓ · minor.

@@ -1,11 +1,11 @@
-// Helpers of walk.js (issue report docs/issues/U01-A13-admin-changes-skip-confirm-access.md):
+// Helpers of issue-walk.js and the PR review checks beside it (U01 A13, retired 2026-10-20 with pkp/pkp-lib#13521):
 // the Confirm Access gate of Administration, Hosted Journals' "Create …" and "Remove", and
 // Site Settings' "Minimum password length" save, driven through the screens. Requiring this
 // file runs nothing. Page objects are required inside the functions, after forEachApp has set
 // the app's environment.
 const {idle} = require('../../../probe');
-const {setConfigValue} = require('../search-config-settings-do-nothing/lib.js');
-const {WORDS} = require('../section-editors-not-assigned-second-journal/lib.js');
+const {setConfigValue} = require('../../issues/search-config-settings-do-nothing/lib.js');
+const {WORDS} = require('../../issues/section-editors-not-assigned-second-journal/lib.js');
 
 const T = 30_000;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

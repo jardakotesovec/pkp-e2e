@@ -8,7 +8,7 @@
 const path = require('path');
 const R = path.resolve(__dirname, '../../..');
 const {forEachApp, launch, signIn, record, serverLog} = require(path.join(R, 'probe'));
-const L = require(path.join(R, 'checks/issues/admin-changes-skip-confirm-access/lib.js'));
+const L = require(path.join(R, 'checks/sync/pkp-lib-13521/lib.js'));
 
 const SETTINGS = '/index.php/index/en/admin/settings';
 const API = '/index.php/index/api/v1';
