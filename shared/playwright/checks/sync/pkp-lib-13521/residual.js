@@ -8,6 +8,11 @@
 //   3. from the same page, as the grid's "Remove" sends it: delete the last site menu item; and the
 //      menus grid's fetch, for comparison (gated at the head)
 //   4. Site Settings again (Confirm Access, the password): the items grid's ids
+//   Round 2 (head f37a174626 gates both): step 3 also sends the site Plugin Gallery's "Install"
+//   (`plugin-gallery-grid/install-plugin`, rowId 0; the VM cannot reach the gallery feed, so a
+//   request let through stops there with a 500 and installs nothing) and, for comparison, the
+//   journal's own Plugin Gallery "Install" (outside Administration, so outside the gate); step 4
+//   sends the site one again inside the new period.
 //   Reset first: npm run fleet-prep -- --feature pr13520 --dataset 1 --reset
 //   PROBE_FEATURE=pr13520 PROBE_AGENT=<base|head> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13521/residual.js
 // Facts: .reports/pr13520/<agent>/residual-<app>.json
@@ -64,8 +69,14 @@ forEachApp(async (app) => {
             delete: await send(page, app.url(`${GRID}/navigation-menu-items-grid/delete-navigation-menu-item?navigationMenuItemId=${victim}`), 'POST', {}),
         };
         delete facts.expired.delete.content;
+        const galleryInstall = (base) => send(page, app.url(`${base}/$$$call$$$/grid/plugins/plugin-gallery-grid/install-plugin?rowId=0`), 'POST', {});
+        facts.expired.siteGalleryInstall = await galleryInstall('/index.php/index');
+        facts.expired.journalGalleryInstall = await galleryInstall(`/index.php/${app.contextPath}`);
+        for (const k of ['siteGalleryInstall', 'journalGalleryInstall']) facts.expired[k].content = L.flat(facts.expired[k].content, 200);
         facts.reopen = await openSettings(page, app);
         facts.after = await itemIds(page, app);
+        facts.reconfirmed = {siteGalleryInstall: await galleryInstall('/index.php/index')};
+        facts.reconfirmed.siteGalleryInstall.content = L.flat(facts.reconfirmed.siteGalleryInstall.content, 200);
         facts.deleted = !facts.after.ids.includes(victim);
     } finally {
         record('residual', facts);
