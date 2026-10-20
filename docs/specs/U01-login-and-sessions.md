@@ -263,10 +263,14 @@ Login, the site's name stands in for the journal's), but after a refused
     after the administrator has been away from it longer than the window.
     After the window lapsed, a press of one of the buttons that reload an
     Administration page, such as "Delete Template Cache", also lands on
-    Confirm Access. The changes the screens save in place do not: adding or
-    deleting a journal, saving Site Settings, its Languages and Plugins, and
-    retrying or deleting failed jobs all go through without the password
-    ⚠ [A13](#a13). The page button's action is **not** replayed: after
+    Confirm Access. The changes the screens save in place are refused too:
+    adding or deleting a journal, saving Site Settings, its Languages,
+    Plugins, Navigation and Highlights, the site's announcements, and
+    retrying or deleting failed jobs answer "Your access to Administration
+    has expired. Reload the page and confirm your password to continue."
+    and change nothing; reloading the page brings the form (retired
+    [A13](#a13)). A request made with an API key alone is not asked, by
+    design. The page button's action is **not** replayed: after
     confirming, a notice says "Your last action was not completed. Please
     try again." Opening the Confirm Access
     address directly, with nothing to continue to, never shows the form.
@@ -622,11 +626,11 @@ tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A13 (issue report
-    `docs/issues/U01-A13-admin-changes-skip-confirm-access.md`): with
-    re-authentication on and the confirmation period run out, a Site
-    Settings save, a journal's removal and its creation from an
-    Administration page left open are refused and change nothing
+  - the guard for A13, retired (Rule 16): with re-authentication on and
+    the confirmation period run out, a Site Settings save, a journal's
+    removal and its creation from an Administration page left open are
+    refused with "Your access to Administration has expired…" and change
+    nothing
   - a 40-character password chosen while accepting a role invitation,
     then the Login page's "Password" box taking all 40 and signing in
     ([A1](#a1)): the guard the issue report
@@ -716,13 +720,13 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | Latent today: a user signed back in by "Keep me logged in" looks signed out on the public site, and "Login As" gives a blank page | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A10](#a10) | The Site Administrator's "Edit User" never shows "Change Password" ticked, and saving it removes the flag | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A12](#a12) | After a disabled account is refused, the browser's next correct sign-in lands back on the Login page with no message; after that account's second refusal, the next correct one reads "Invalid username/email or password" | 🐞 | minor | — |
-| [A13](#a13) | With "Confirm Access" on, an Administration page left open still deletes journals and saves site settings without the password | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A14](#a14) | "Keep me logged in" keeps no one signed in once the session ends: back after the idle limit, the user meets the Login page | 🐞 | minor | — |
 | [A5](#a5) | No journal-level users screen offers the "must change password" box, so a Journal Manager cannot require a forced change on an existing account; only the Site Administrator's Hosted Journals list offers it | ❓ | user-visible | Jarda 2026-08-25 · to triage |
 | [A9](#a9) | The last-login date is recorded on every sign-in, but no users screen shows it, so a manager cannot see when an account last signed in | ❓ | minor | — |
 | [A3](#a3) | Retired: the set-a-new-password page's browser tab showed a raw internal code; it now reads "Reset Password \| {journal name}" (Fields) | ✅ | retired | issues (claude), 2026-10-04 — fixed upstream (pkp/pkp-lib#13132) |
 | [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down; the concealment is intended | ✅ | latent | Jarda 2026-08-25 |
+| [A13](#a13) | Retired: with "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password; such changes are now refused once the period has run out (Rule 16) | ✅ | retired | PR review (claude), 2026-10-20 — fixed upstream (pkp/pkp-lib#13521) |
+| [A12](#a12) | Retired: after a disabled account was refused, the browser's next correct sign-in landed back on the Login page with no message; it now lands at once (Rule 2) | ✅ | retired | issues (claude), 2026-10-19 — fixed upstream (pkp/pkp-lib#12780) |
 
 ### All apps
 
@@ -942,43 +946,6 @@ A screen-reader user hears only the journal's name as the page's title,
 and on "Reset Password" finds no heading to move to.
 Since: 2020-05-13 (pkp/pkp-lib#5866) · Basis: probe, 2026-10-04. <sup>[f-a11](#fn-a11)</sup>
 
-<a id="a12"></a>
-**A12 — After a disabled account is refused, the next correct sign-in in that browser fails** · 🐞 · minor.
-In one browser, on a journal's Login page, each account with its correct
-password:
-1. A disabled account signs in: refused with its message (Rule 2).
-2. An enabled account signs in: back on the Login page with no message and
-   "Username or Email" empty, instead of landing where Rule 3 says.
-3. The disabled account again: the same refusal.
-4. The enabled account again: refused with "Invalid username/email or
-   password. Please try again."
-5. The enabled account again: it lands.
-
-Without step 3, step 4 lands. Steps 1 and 2 go the same on the site-level
-Login page. The user is given no reason and may well conclude that their
-own password is wrong. After a wrong-password or unknown-username refusal,
-the next correct sign-in lands at once.
-Basis: probe. <sup>[f-a12](#fn-a12)</sup>
-
-<a id="a13"></a>
-**A13 — With "Confirm Access" on, an Administration page left open still deletes journals and saves site settings without the password** · 🐞 · medium.
-An installation can make the Site Administrator re-enter the password
-("Confirm Access") before working in Administration; the password then
-holds for a set number of minutes, the confirmation period. When that
-period has run out, opening any Administration page asks again. But the
-changes made on a page that is already open do not ask. On an
-Administration page left open in a browser tab past the confirmation
-period, anyone at that browser can still create and delete journals in
-Hosted Journals, save Site Settings (the site's password rules
-included), manage Languages and Plugins, and retry or delete failed
-jobs, without the password.
-So someone at an administrator's unattended browser can delete a journal
-with all its contents, or weaken the site's password rules, without
-knowing the password. Nothing on screen or in the logs says the
-password was skipped.
-The setting, `password_timeout`, is off by default.
-Since: 2026-04-09 (pkp/pkp-lib#12338) · Basis: probe, 2026-10-05. <sup>[f-a13](#fn-a13)</sup>
-
 <a id="a14"></a>
 **A14 — "Keep me logged in" no longer keeps anyone signed in once the session ends** · 🐞 · minor.
 A user who signs in with "Keep me logged in" ticked, as the Login page
@@ -1003,6 +970,12 @@ Since: 2026-10-06 (pkp/pkp-lib#12780) · Basis: probe, 2026-10-07. <sup>[f-a14](
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Fix: resolve the
 > tab title to the translated "Reset Password" string. Already reported as
 > pkp/pkp-lib#13132.
+
+<a id="a12"></a>
+**A12 — After a disabled account was refused, the next correct sign-in in that browser failed** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-06), verified 2026-10-19 on OJS, OMP and OPS: right after a disabled account's refusal, another account's correct sign-in in the same browser lands at once where Rule 3 says; it used to land back on the Login page with no message (Rule 2). <sup>[f-a12](#fn-a12)</sup>
+
+<a id="a13"></a>
+**A13 — With "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13521](https://github.com/pkp/pkp-lib/pull/13521), for pkp/pkp-lib#13520, merged 2026-10-20), verified 2026-10-20 on OJS, OMP and OPS with the merged pkp-lib in `lib/pkp`: past the confirmation period, the Security "Save", a journal's removal and its creation from an Administration page left open are refused with "Your access to Administration has expired…" and change nothing, as are the other Administration requests (Rule 16). <sup>[f-a13](#fn-a13)</sup>
 
 ---
 
@@ -1349,9 +1322,21 @@ lead to `login/signOutAsUser`.
 **k** — Gate: `[security] password_timeout` (minutes; commented out/0 =
 off) → `Validation::isReauthenticationRequired()`;
 `ReauthenticationRequiredPolicy` is attached to **every** Administration
-page op except the confirm pair (in `AdminHandler::authorize()` only; the
-API and grid requests the screens send carry none, see
-[f-a13](#fn-a13)), and redirects to `admin/confirmAccess` with the
+page op except the confirm pair (`AdminHandler::authorize()`), and since
+pkp/pkp-lib#13521 (merged 2026-10-20, [f-a13](#fn-a13)) also, after the
+role policies, to the API controllers and grids Administration's screens
+call: `PKPSiteController`, `PKPContextController` (`add`, `delete`, any
+site-level request), `PKPJobController`, the site-level
+`PKPAnnouncementController`, `HighlightsController` and
+`PKPNavigationMenuController`, and `ContextGridHandler`,
+`AdminLanguageGridHandler`, `AdminPluginGridHandler`, the site-level
+`NavigationMenusGridHandler`, `NavigationMenuItemsGridHandler` and
+`AnnouncementTypeGridHandler`, and `PluginGalleryGridHandler` without a
+context. A non-page request is refused with `user.confirmAccess.required`
+(403 through `APIRouter::handleAuthorizationFailure()` on the API,
+`"status":false` on a grid); an API request with no session user (an API
+key alone) is let through. A page request redirects to
+`admin/confirmAccess` with the
 interrupted address as `source` (POST-ish requests flagged
 `isActionRequest`). Window: `PKPSessionGuard::isElevatedSessionActive()` —
 a session timestamp younger than the window, refreshed on each
@@ -1768,7 +1753,25 @@ live, then reverted). Gated requests would then also extend the window.
 3.5, 3.4 and 3.3 do not have it: none has `password_timeout` or the policy.
 Security-shaped and unreleased: its issue report carries
 "- **Security** unreleased" (REPORT.md).
-Issue report: [pkp-e2e#928](https://github.com/jardakotesovec/pkp-e2e/issues/928) ([docs/issues/U01-A13-admin-changes-skip-confirm-access.md](../issues/U01-A13-admin-changes-skip-confirm-access.md)).
+Retired 2026-10-20: pkp/pkp-lib#13521 (merged as `58c2998847`, its tree
+the reviewed head's; for pkp/pkp-lib#13520) adds the policy to the
+handlers above and to the site-level highlights, announcements and
+navigation menu APIs and their grids, the site Plugin Gallery and the
+site's Navigation Menu items grid, after their role policies (footnote
+k). Walked on PKP's default dataset in OJS, OMP and OPS with
+`password_timeout = 1`, `lib/pkp` at `45f674d77b` (the base) and at
+`58c2998847`, the apps at their tips: the issue walk and the 13
+Administration requests of the PR review go through past the period at
+the base and are refused at the merge, and go through inside the period,
+after re-confirming and with the gate off; a Journal Manager's refusals
+read the same at both
+(`checks/sync/pkp-lib-13521/`, the PR review's report
+`docs/reports/2026-10-14-pkp-lib-13521.md`, deleted at this merge). At
+the merge OJS's `lib/pkp` points at the PR's round-2 head `f37a174626`
+(the gate without the navigation menu API's), OMP's and OPS's at
+`042726ebf6` (no gate); they take the merge with their next pointer
+bump.
+Issue report: [pkp-e2e-sec#6](https://github.com/jardakotesovec/pkp-e2e-sec/issues/6) (closed 2026-10-20, fixed by `pkp/pkp-lib#13521`).
 
 <a id="fn-a14"></a>
 **f-a14** — pkp-lib `3407fc5bc0` ("Fix an issue with disabled accounts

@@ -5,17 +5,28 @@
 - **Kind** regression
 - **Crash** server
 - **Affects**
-  - main: OJS, OMP, OPS
+  - main: OMP, OPS until their `lib/pkp` takes `pkp/pkp-lib#13521` (merged 2026-10-20; OJS's pointer has its change)
   - 3.5: OJS, OMP, OPS
   - 3.4: none (code; the older API has no such middleware)
   - 3.3: none (code; no highlights)
 - **Introduced** `pkp/pkp-lib#10267` for `pkp/pkp-lib#10266` · [6f727bb567](https://github.com/pkp/pkp-lib/commit/6f727bb567c1b68d6efc5748b3ac6264389edce0) · 2024-08-02 · Taslan Graham (taslangraham)
-- **Upstream** none found (2026-10-04)
+- **Upstream** `pkp/pkp-lib#13521` (for `pkp/pkp-lib#13520`, the Confirm Access fix) fixes it on `main`, merged 2026-10-20, by its `HasRoles` change; nothing yet for 3.5
 - **Tracked in** spec U11 [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U11-highlights.md#a5)
-- **Checked** 2026-10-04, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-04, each branch's tip; 2026-10-20, `main` with pkp-lib `58c2998847` in `lib/pkp` (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 ## Summary
+
+**Update 2026-10-20.** `pkp/pkp-lib#13521`, merged on pkp-lib `main` as
+`58c2998847`, changes the line the Cause names
+(`$context?->getId()` in `HasRoles`). With it in `lib/pkp`, the Steps
+end as Expected in OJS, OMP and OPS: the site highlight saves, the
+panel closes, "Save Order" saves, and the site's home page shows the
+carousel. The neighbour checks (a journal's own highlights, the
+refusals for a Journal Manager and a Section Editor) read as before.
+OJS's `lib/pkp` pointer already carries the change. OMP's and OPS's
+take it with their next bump. 3.5 still fails as below, and the same
+change (or the Proposed fix) is what it needs.
 
 The application fails on the server when the Site Administrator saves
 or orders the site's own highlights under Site Settings › "Site Setup"
@@ -285,6 +296,12 @@ Small: one line in one shared middleware, and a unit test.
 
 ## Evidence
 
+- 2026-10-20, `main` with the fix: the kit's walk and its `neighbour`
+  mode on freshly loaded default datasets, OJS `3109a59114`, OMP
+  `5777025be`, OPS `f048e747b4`, each with `lib/pkp` at `58c2998847`
+  (pkp/pkp-lib#13521's merge). Steps 4, 6 and 7 as Expected in all
+  three; the neighbour mode as before (OJS's sections list at the
+  site's address still 500, spec U17 A10, a separate fault).
 - The script saved in pkp-e2e walks the Steps, the control and the
   typed list address:
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/site-highlights-cannot-be-saved/walk.js)

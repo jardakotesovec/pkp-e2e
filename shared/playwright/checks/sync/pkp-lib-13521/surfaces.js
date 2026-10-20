@@ -1,7 +1,7 @@
-// PR review of pkp/pkp-lib#13521 (issue pkp/pkp-lib#13520, pkp-e2e#928, U01 A13): the in-page
-// requests of Administration that the issue walk (checks/issues/admin-changes-skip-confirm-access/
-// walk.js) does not press, sent from an open Administration page the way its grids and forms send
-// them, on PKP's default dataset with `[security] password_timeout = 1`.
+// PR review of pkp/pkp-lib#13521 (issue pkp/pkp-lib#13520, pkp-e2e-sec#6, U01 A13): the in-page
+// requests of Administration that the issue walk (issue-walk.js, beside this file) does not
+// press, sent from an open Administration page the way its grids and forms send them, on PKP's
+// default dataset with `[security] password_timeout = 1`.
 //   gate on, admin:
 //     1. sign in, Site Settings (Confirm Access, the password), the requests below: "in window"
 //     2. two minutes untouched (twice the window), the same requests from the same page: "expired"
@@ -17,7 +17,7 @@
 //   PROBE_FEATURE=pr13520 PROBE_AGENT=<base|head> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13521/surfaces.js
 // Facts: .reports/pr13520/<agent>/surfaces-<app>.json
 const {forEachApp, launch, signIn, record, serverLog} = require('../../../probe');
-const L = require('../../issues/admin-changes-skip-confirm-access/lib.js');
+const L = require('./lib.js');
 
 const SETTINGS = '/index.php/index/en/admin/settings';
 const API = '/index.php/index/api/v1';

@@ -6,7 +6,7 @@
 //   PROBE_FEATURE=pr13520 PROBE_AGENT=<base|head> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13521/manager.js
 // Facts: .reports/pr13520/<agent>/manager-<app>.json
 const {forEachApp, launch, signIn, record} = require('../../../probe');
-const L = require('../../issues/admin-changes-skip-confirm-access/lib.js');
+const L = require('./lib.js');
 
 const ADDRESSES = [
     '/index.php/index/api/v1/announcements',

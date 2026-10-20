@@ -1,4 +1,4 @@
-// U01 A13 walk (issue report docs/issues/U01-A13-admin-changes-skip-confirm-access.md).
+// U01 A13 walk (retired 2026-10-20, fixed by pkp/pkp-lib#13521; its issue report pkp-e2e-sec#6 is closed).
 // On PKP's default test dataset, with `[security] password_timeout = 1` written into the install's
 // config (what the administrator sets in config.inc.php; every reset rewrites the config, so the
 // script sets it itself and puts the file back at the end).
@@ -22,7 +22,7 @@
 //        "Create" sxx6c, back, "Remove" it: both go through
 // Every step records its result or its error and goes on.
 //   Reset first: npm run fleet-prep -- --feature <feature> --dataset <n> --reset
-//   PROBE_FEATURE=<feature> PROBE_AGENT=<id> [PROBE_RUN=<run>] node bin/probe.js all shared/playwright/checks/issues/admin-changes-skip-confirm-access/walk.js [nb]
+//   PROBE_FEATURE=<feature> PROBE_AGENT=<id> [PROBE_RUN=<run>] node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13521/issue-walk.js [nb]
 // Facts: .reports/<feature>/<id>/a13-<mode>[-<run>]-<app>.json
 const {forEachApp, launch, signIn, record, screen, serverLog} = require('../../../probe');
 const L = require('./lib.js');

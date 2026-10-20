@@ -16,7 +16,7 @@
 //   PROBE_FEATURE=<feature> PROBE_AGENT=<base|head> node bin/probe.js all shared/playwright/checks/sync/pkp-lib-13521/navmenu-api.js
 // Facts: .reports/<feature>/<agent>/navmenu-<app>.json
 const {forEachApp, launch, signIn, record} = require('../../../probe');
-const L = require('../../issues/admin-changes-skip-confirm-access/lib.js');
+const L = require('./lib.js');
 
 const SETTINGS = '/index.php/index/en/admin/settings';
 const API = '/index.php/index/api/v1/navigationMenus';
