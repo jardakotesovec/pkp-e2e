@@ -17,7 +17,8 @@ to their OMP and OPS names.
 
 Tracking files hold what is open; resolved items are deleted and live on
 in git history. The parity ledger and app-changes are the exception: they
-record changes still in effect.
+record changes still in effect; so is regression-metrics, the weekly count's
+history.
 
 - `docs/tracking/PROGRESS.md`: one row per feature with its status, test
   counts and a short note; the banner names the mode.
@@ -39,6 +40,10 @@ record changes still in effect.
   produce the state a real user would.
 - `docs/tracking/incidentals.md`: what a session saw in passing on another
   feature's screens, kept until that spec absorbs it.
+- `docs/tracking/regression-metrics.md`: the weekly count of the
+  reports in `docs/reports/`, regressions apart (open, closed, new), with
+  where each closed regression went; rows are kept as the history
+  (`npm run regressions`).
 - `docs/tracking/friction.md`: what made an agent's task harder than it
   needed to be, appended by the agents that drive screens; rows are
   deleted once acted on.

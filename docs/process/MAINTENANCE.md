@@ -77,7 +77,23 @@ The scheduled prompt only points here; this section is the day's order.
    what the ore branch received and whether its suite is green,
    how many security suspicions were read, reproduced and routed (counts
    only), with the day's regression report (sync loop step 5) attached as a file
-   when there is one.
+   when there is one. On Mondays the summary also carries the weekly
+   regression count ("Weekly regression count" below).
+
+**Weekly regression count.** The maintainer reports to the team each week
+how many regressions are open and how many closed, and a report deleted
+from `docs/reports/` once acted on otherwise leaves no count behind. So the
+Monday daily session runs `npm run regressions -- --write`, which counts the
+last complete week (Monday to Sunday) from git and writes its row into
+`docs/tracking/regression-metrics.md`, the one tracking file whose rows are
+kept, and commits it with the day's work. The summary gives the line as
+"Regressions, week <dates>: <n> open, <n> closed, <n> new (all reports:
+<open> / <closed> / <new>)", then each closed regression's report with what
+the deleting commit says took it (the fix that landed, or the ruling that
+retired it). The count is of the `.md` write-ups in `docs/reports/`; a
+report counts as a regression by its REPORT.md "Kind". `npm run regressions
+-- --week today` gives the current week so far when the maintainer asks
+mid-week.
 
 A ping about a developer's failing PR during the day follows "A
 developer's PR fails the suite".
