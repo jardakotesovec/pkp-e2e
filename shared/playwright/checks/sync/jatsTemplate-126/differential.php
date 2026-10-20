@@ -8,7 +8,8 @@
 // brackets and trailing punctuation, links typed as HTML). Each goes through ExtractPidsHelper as the app's
 // import does; a tenth also gets a DOI set by hand. Unstructured ones become <mixed-citation>, structured ones
 // <element-citation>; a data citation per identifier type is added. Reads, per reference:
-//   text      the reference's text is the same at both commits
+//   text      the reference's text is the same at both commits, apart from identifiers a commit adds after it
+//             (a trailing " " and <pub-id>, read as "added after the text")
 //   markup    the elements other than ext-link and pub-id are the same, in the same order
 //   links     every link of the base is at the head an ext-link or a pub-id with the same address
 //   tagged    at the head, each identifier the reference holds is a <pub-id> of its type, or why not
@@ -176,7 +177,22 @@ for ($i = 0; $i < $refsB->length; $i++) {
         $counts['changed']++;
     }
     $what = $i < count($lines) ? $lines[$i] : 'data ' . $i;
-    if ($kind === 'mixed' && $b->textContent !== $h->textContent) {
+    // identifiers a commit adds after the text: trailing " " + <pub-id> pairs, set aside from the text read
+    $added = [];
+    $hText = $h->textContent;
+    if ($kind === 'mixed') {
+        $mc = $h->firstChild->cloneNode(true);
+        // an identifier tagged in place at the end of the text looks the same, so strip only while the text differs
+        while ($mc->textContent !== $b->textContent
+            && $mc->lastChild instanceof DOMElement && $mc->lastChild->nodeName === 'pub-id'
+            && $mc->lastChild->previousSibling instanceof DOMText && $mc->lastChild->previousSibling->nodeValue === ' ') {
+            $added[] = $mc->lastChild;
+            $mc->removeChild($mc->lastChild);
+            $mc->removeChild($mc->lastChild);
+        }
+        $hText = $mc->textContent;
+    }
+    if ($kind === 'mixed' && $b->textContent !== $hText) {
         $counts['text']++;
         $fails[] = ['read' => 'text', 'line' => $what, 'base' => $bx, 'head' => $hx];
     }
@@ -203,7 +219,18 @@ for ($i = 0; $i < $refsB->length; $i++) {
                     $hit = $p;
                 }
             }
-            if ($hit) {
+            $isAdded = false;
+            foreach ($added as $a) {
+                if (strcasecmp($a->textContent, $id) === 0 && $a->getAttribute('pub-id-type') === $jatsType) {
+                    $isAdded = true;
+                }
+            }
+            if ($hit && $isAdded) {
+                $why = stripos($b->textContent, $id) === false ? 'added after the text' : 'added after the text, though the text holds it';
+                if (stripos($b->textContent, $id) !== false) {
+                    $samples["$type added, though in the text"][] = $hx;
+                }
+            } elseif ($hit) {
                 $why = 'tagged' . ($hit->hasAttribute('xlink:href') ? ', with the link' : '');
                 $next = $hit->nextSibling;
                 if ($next && preg_match('~^[A-Za-z0-9/_-]|^\.[A-Za-z0-9]~', $next->textContent)) {
