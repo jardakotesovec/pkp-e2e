@@ -279,3 +279,24 @@ Small: three lines in one ui-library component, and a unit test.
 - Unverified: the "Review Publishing Details" panel's box (the same
   component, not walked); "Insert" then "Save" on OMP's "Catalog Entry"
   (walked on OJS only).
+- Update 2026-10-21, the fix PRs before their merge (PR review, asked in
+  the channel): `pkp/ui-library#1025` (head `4c9a1cc015` on `main`
+  `9cfb898731`) and `#1026` (head `6ed12e947a` on `ore` `ce61763eca`),
+  each the Proposed fix with a one-line comment (`git range-diff`: the
+  two branches' commits all `=`, and the two bases' ui-library trees are
+  the same); `pkp/ojs#5965` and `#5966` bump `lib/ui-library` to those
+  heads. No OMP PR: OMP gets the fix at its next `lib/ui-library` bump
+  (its pointer `99abe25290` is behind `9cfb898731`). `WALK=request` and
+  `WALK=nb` on PKP's default dataset, base then head, each on a fresh
+  load: `main`, OJS `7da002190b` and OMP `6b83f32eb` with
+  `lib/ui-library` at the base reproduce the alert on both; at the
+  head the stored summary still carries the handler, the panel lists
+  "Fixed figure 2." and nothing runs, "Insert" gives the same box, and
+  the bold summary is listed and inserted with its bold. `ore`, OJS at
+  its tip `9d43392056` (`lib/pkp` `7015a86fb7`, past the PR's base):
+  the same at `ce61763eca` (alert) and `6ed12e947a` (none, the
+  neighbour too). No unit test was added beside the component.
+  `usePkpCiteStore.js` `copyToClipboard()` is unchanged; read in the
+  code only: the CSL plugin escapes names, pages and dates, and titles
+  are held to `allowed_title_html` tags, so no author-reachable active
+  markup was found in the citation (not walked).
