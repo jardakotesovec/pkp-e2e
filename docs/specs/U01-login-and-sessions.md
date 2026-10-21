@@ -2098,7 +2098,7 @@ only line was `NOTICE User password reset by an administrator`
 was the Login page with no line for it. Control: B's own "Logout" wrote
 `INFO User logged out` (`session_logout`). No server error beyond the
 known Plugin Gallery list behind the test configuration's dead proxy.
-Issue report: [docs/issues/U01-A17-password-change-logout-audited-as-ip-change.md](../issues/U01-A17-password-change-logout-audited-as-ip-change.md).
+Issue report: [pkp-e2e#1031](https://github.com/jardakotesovec/pkp-e2e/issues/1031) ([docs/issues/U01-A17-password-change-logout-audited-as-ip-change.md](../issues/U01-A17-password-change-logout-audited-as-ip-change.md)).
 
 ## Reference — entry points & surfaces
 
