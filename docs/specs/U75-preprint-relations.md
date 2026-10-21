@@ -712,6 +712,7 @@ the window asks for, "Review" reads "This preprint has not been
 published elsewhere." and "Submit" completes the submission with no
 relation at all.
 Basis: probe, 2026-10-03. <sup>f-a7</sup>
+Report: refresh owed — pkp/pkp-lib#13585 (merged as `1f415a07ca`, 2026-10-21; in the apps once their `lib/pkp` pointers pass it) changed `PKP\publication\Repository::validate()` and `ValidatorFactory::required()`: a required plain language summary no longer refuses saves that leave it out, and in the wizard it no longer refuses any save while the submission is in progress; the report's Reach lists a required summary left empty on "Details" among the saves that get the same generic window, which no longer happens (2026-10-21)
 
 <a id="a8"></a>
 **A8 — A preprint author can submit without answering the "Relation status" question marked required** · 🐞 · low.

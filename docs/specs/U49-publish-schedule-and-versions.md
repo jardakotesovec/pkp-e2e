@@ -2841,14 +2841,14 @@ Retired 2026-10-21: pkp/pkp-lib#13585 checks a required summary only
 when a save sends it empty. Driven on PKP's default dataset at the PR
 head `93b094ea77` (in OJS `9647ed7204`'s `lib/pkp`) and its base
 `2ea65a9662`, before its merge, by the issue walk
-`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js`
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js` (deleted at the merge)
 as `dbarnes`: submission 5, "Version of Record (VoR)", "Major
 Revision", "Assign To Current/Back Issue", "Vol. 1 No. 2 (2014)",
 "Confirm": at the head the panel's `PUT` answered 200, the confirmation
 window opened and "Publish" gave "Status: Published", the version
 holding no summary; at the base the `PUT` answered 400
 `plainLanguageSummary` and no confirmation opened.
-Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323) ([docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md](../issues/U21-A20-plain-summary-required-refuses-other-saves.md)).
+Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323), closed 2026-10-21 at the merge of pkp/pkp-lib#13585 (`1f415a07ca`); the report and its kept walks deleted then, in git history.
 
 <a id="fn-ojs2"></a>
 **f-ojs2** — `getIssueAssignmentStatus()` returns the default
@@ -2947,7 +2947,7 @@ not hold marks nothing. Walked 2026-10-02 (PKP's default dataset,
 `dbarnes`, OJS `main`, plain language summary required; f-ojs1): each
 refused Confirm opened a second panel with "Publication Stage" and
 "Revision Significance" empty, and one "Cancel" closed both. Kept walk:
-`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/publish-confirm.js`.
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/publish-confirm.js` (deleted at the merge).
 The in-place refusals (an empty stage, significance or issue) are
 client-side and send no request (fn-h, fn-o). Walked again 2026-10-15
 (issue reporter, OJS `main`): "Cancel" hides both panels but closes only

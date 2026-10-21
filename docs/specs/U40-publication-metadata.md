@@ -2440,7 +2440,7 @@ for an absent prop on a new object. Driven on PKP's default dataset at
 the PR head `93b094ea77` (in `lib/pkp` of OJS `9647ed7204`, OMP
 `56388590e`, OPS `ea14c78745`) and its base `2ea65a9662`, before its
 merge, on the three apps, by the issue walk
-`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js`
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js` (deleted at the merge)
 and `shared/playwright/checks/sync/pkp-lib-13585/api-edges.js`
 (base in brackets): Metadata and Permissions & Disclosure "Saved",
 200, before and after a summary was stored [400
@@ -2454,7 +2454,7 @@ summary sent as `{"en": ""}` 400 "You must complete this field in
 English." (two submission languages) [400 "This field is required."];
 the summary sent for `fr_CA` alone 200, the English one kept [400];
 `POST …/publications` without the summary 400, with it 200 [the same].
-Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323) ([docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md](../issues/U21-A20-plain-summary-required-refuses-other-saves.md)).
+Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323), closed 2026-10-21 at the merge of pkp/pkp-lib#13585 (`1f415a07ca`); the report and its kept walks deleted then, in git history.
 
 <a id="fn-f-a2"></a>
 **f-a2 — A2 evidence.** `Repo::submission()->resetPermissions()` calls

@@ -1,5 +1,6 @@
-// Helpers for the plain-language-summary walk (docs/issues/U21-A20-…): the Metadata setting, the workflow's
-// Publication pages and the submission wizard on PKP's default test dataset. Requiring this file runs nothing.
+// Helpers first written for the U21 A20 walk (pkp-e2e#323; the report and its walk deleted when pkp/pkp-lib#13585
+// merged): the Metadata setting, the workflow's Publication pages and the submission wizard on PKP's default test
+// dataset. Kept because other issue checks require it. Requiring this file runs nothing.
 const path = require('path');
 const {idle, screen, record, shot} = require('../../../probe');
 

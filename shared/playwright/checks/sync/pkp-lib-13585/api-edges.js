@@ -1,6 +1,6 @@
 // PR review check — pkp/pkp-lib#13585 "Fix required plain language summary blocking publication saves" (issue
-// pkp/pkp-lib#13584, report docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md). The issue's walk
-// (checks/issues/plain-summary-required-refuses-other-saves/walk.js) drives the screens; this check drives the API
+// pkp/pkp-lib#13584, pkp-e2e#323, merged as 1f415a07ca). The issue's walk (deleted at the merge, in git history)
+// drove the screens; this check drives the API
 // routes into Repo::publication()->validate() that no screen reaches with every body, on PKP's default test dataset
 // as the manager `dbarnes`, with the context's plain language summary set to "require" through PUT contexts/<id>:
 //

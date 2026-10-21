@@ -1362,6 +1362,7 @@ of a submission still in progress is refused. Editing the summary after
 submission is not affected: the editors' form refuses a long summary and
 names the field.
 Basis: probe, 2026-10-01. <sup>[fn-a16](#fn-a16)</sup>
+Report: refresh owed — pkp/pkp-lib#13585 (merged as `1f415a07ca`, 2026-10-21; in the apps once their `lib/pkp` pointers pass it) changed `PKP\publication\Repository::validate()` and `ValidatorFactory::required()`: a required plain language summary no longer refuses saves that leave it out, and in the wizard it no longer refuses any save while the submission is in progress; the report's Reach names A20's report as a separate fault on the same save path, now retired (pkp-e2e#323) (2026-10-21)
 
 <a id="a17"></a>
 **A17 — "Needs an editor" goes out for a submission that already has one** · ❓ · minor.
@@ -1414,6 +1415,7 @@ presses, `main` and 3.5: any save of a submission made as "Chapter
 Author". ([A16](#a16), [→ Preprint relations
 A7](U75-preprint-relations.md#a7), [OMP4](#omp4).)
 Basis: probe, 2026-10-19. <sup>[fn-a19](#fn-a19)</sup>
+Report: refresh owed — pkp/pkp-lib#13585 (merged as `1f415a07ca`, 2026-10-21; in the apps once their `lib/pkp` pointers pass it) changed `PKP\publication\Repository::validate()` and `ValidatorFactory::required()`: a required plain language summary no longer refuses saves that leave it out, and in the wizard it no longer refuses any save while the submission is in progress; the report's Preconditions use "Require" as the way to get a refused save on all three apps and its Impact names A20's refusal, so the Steps need another refused save on each app once the pointers carry the fix (2026-10-21)
 
 <a id="a21"></a>
 **A21 — "Submit As" preselects another role for an editor who is also an author once their editorial role is saved** · 🐞 · low.
@@ -2656,7 +2658,7 @@ while the submission is in progress `validateSubmit()` alone requires
 it. Driven on PKP's default dataset at the PR head `93b094ea77` (in
 `lib/pkp` of OJS `9647ed7204`, OMP `56388590e`, OPS `ea14c78745`) and
 its base `2ea65a9662`, before its merge, with the issue walk
-`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js`
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js` (deleted at the merge)
 on the three apps: at the head the start page's title, a "Details" save
 with the summary empty and the "References" box answered 200, and the
 title and both reference lines read back after a reload; "Review"
@@ -2665,7 +2667,7 @@ disabled until the summary was typed, as at the base; an author's way
 through with the summary typed reached "Submission complete". At the
 base the same saves answered 400 (`plainLanguageSummary`), "Review"
 read "Title / None provided" and "References" came back empty.
-Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323) ([docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md](../issues/U21-A20-plain-summary-required-refuses-other-saves.md)).
+Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323), closed 2026-10-21 at the merge of pkp/pkp-lib#13585 (`1f415a07ca`); the report and its kept walks deleted then, in git history.
 
 <a id="fn-a21"></a>
 **fn-a21** — A21. `PKPSubmissionHandler::getSubmitUserGroups()` (and
