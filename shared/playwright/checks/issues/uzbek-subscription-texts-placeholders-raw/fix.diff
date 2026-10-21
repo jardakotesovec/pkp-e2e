@@ -1,0 +1,83 @@
+--- a/locale/uz_Latn/manager.po
++++ b/locale/uz_Latn/manager.po
+@@ -1297,10 +1297,10 @@
+ "saqlab qolishadi."
+ 
+ msgid "manager.subscriptionPolicies.xMonths"
+-msgstr "{$ x} oy"
++msgstr "{$x} oy"
+ 
+ msgid "manager.subscriptionPolicies.xWeeks"
+-msgstr "{$ x} hafta"
++msgstr "{$x} hafta"
+ 
+ msgid "manager.subscriptionPolicies.expiryReminderAfterMonths"
+ msgstr ""
+--- a/locale/uz_Latn/locale.po
++++ b/locale/uz_Latn/locale.po
+@@ -721,7 +721,7 @@
+ msgstr "Obuna yoki to'lov talab qilinadi"
+ 
+ msgid "reader.purchasePrice"
+-msgstr "({$ currency} {$ price})"
++msgstr "({$currency} {$price})"
+ 
+ msgid "comments.commentsOnArticle"
+ msgstr "Ushbu maqolaga sharhlar"
+@@ -1465,10 +1465,10 @@
+ msgstr "Institutsional obunani sotib oling"
+ 
+ msgid "user.subscriptions.expires"
+-msgstr "Muddati: {$ date}"
++msgstr "Muddati: {$date}"
+ 
+ msgid "user.subscriptions.expired"
+-msgstr "Muddati: {$ date}"
++msgstr "Muddati: {$date}"
+ 
+ msgid "user.subscriptions.viewSubscriptionTypes"
+ msgstr "Mavjud obuna turlarini ko'rish"
+--- a/locale/ar/locale.po
++++ b/locale/ar/locale.po
+@@ -716,7 +716,7 @@
+ msgstr "الوصول عبر الاشتراك أو تسديد الرسوم"
+ 
+ msgid "reader.purchasePrice"
+-msgstr "({$العملة} {$السعر})"
++msgstr "({$currency} {$price})"
+ 
+ msgid "comments.commentsOnArticle"
+ msgstr "التعليقات عن هذا المؤلَّف"
+--- a/locale/mn/locale.po
++++ b/locale/mn/locale.po
+@@ -2110,7 +2110,7 @@
+ msgstr "Захиалга эсвэл Төлбөр шаардлагатай"
+ 
+ msgid "reader.purchasePrice"
+-msgstr "({$валют} {$үнэ})"
++msgstr "({$currency} {$price})"
+ 
+ msgid "search.results.orderBy"
+ msgstr "Үр дүнг эрэмбэлэх"
+--- a/locale/ro/locale.po
++++ b/locale/ro/locale.po
+@@ -721,7 +721,7 @@
+ msgstr "Necesită abonare sau plată"
+ 
+ msgid "reader.purchasePrice"
+-msgstr "({$valuta} {$preț})"
++msgstr "({$currency} {$price})"
+ 
+ msgid "comments.commentsOnArticle"
+ msgstr "Comentarii pentru acest articol"
+--- a/locale/an/locale.po
++++ b/locale/an/locale.po
+@@ -1532,7 +1532,7 @@
+ msgstr "Mercar una subscripción institucional"
+ 
+ msgid "user.subscriptions.expires"
+-msgstr "Expira lo {$da-te}"
++msgstr "Expira lo {$date}"
+ 
+ msgid "user.subscriptions.expired"
+ msgstr "Ha veniu lo {$date}"

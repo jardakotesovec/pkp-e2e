@@ -1563,7 +1563,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A28](#a28) | After a refused "Save", a subscription's empty date boxes show today's date, but the form does not submit it | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A29](#a29) | Readers get the "Free to read" email twice for an issue opening on 1 March, May, July, October or December | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A30](#a30) | An article published with no issue opens its galleys to everyone, past the subscription and "registered readers" restrictions | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
-| [A31](#a31) | Read in Uzbek (Latin), the month and week lists, the fee on a locked galley link and a subscription's end date show "{$ x}", "{$ price}" or "{$ date}" where the number, the price or the date belongs | 🐞 | minor | — |
+| [A31](#a31) | In Uzbek (Latin), subscription screens print "{$ x}", "{$ price}" and "{$ date}" instead of the values | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | A preprint server's "Posting Mode" says "Saved" but keeps nothing, so the server goes on posting {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A1](#a1) | "Publishing Mode" shows no choice on a new journal, which publishes as open access | ❓ | minor | — |
 | [A5](#a5) | Without payments set up, a signed-in reader pressing a locked galley lands on the home page with no word | ❓ | user-visible | — |
@@ -1946,29 +1946,27 @@ has no access setting at all and is served as open.
 Since: 2025-06-10 · Basis: probe, 2026-10-05. <sup>f-a30</sup>
 
 <a id="a31"></a>
-**A31 — Read in Uzbek (Latin), counts, the fee and the end date are missing from five texts** · 🐞 · minor.
-A user who reads these screens in Uzbek (Latin) should see the same
-counts, prices and dates as one who reads them in English. Instead five
-texts show a marker, braces and all, where the value belongs. In
-"Delayed Open Access" on Settings › Distribution › "Access", the 60
-entries that English reads as "1 Months" to "60 Months" all read
-"{$ x} oy"; in the four "Subscription Expiry Reminders" lists on the
-"Payments" page's "Subscription Policies" tab, every month entry reads
-"{$ x} oy" and every week entry "{$ x} hafta". A Journal Manager can
-choose three months only by counting down the list, and the saved
-choice reads "{$ x} oy" as well; the choice itself is stored and works,
-and the same journal read in English shows "3 Months". On the reader's
-side, a locked galley link that English ends with "(USD 10)" ends with
-"({$ currency} {$ price})", on the article's page and the issue's page,
-so a visitor sees no price. "My Subscriptions" and the "Subscription"
-block read "Muddati: {$ date}" where English reads
-"Expires: 2026-12-31" or "Expired: 2025-12-31", the same line for a
-subscription that runs and one that has ended, so a subscriber sees no
-end date.
-Uzbek (Latin) is the language with the code "uz_Latn", which the lists
-of installed languages name "Uzbek/o‘zbek" ([Languages &
-locales](U57-languages-and-locales.md#a9)).
-Basis: probe, 2026-10-09. <sup>f-a31</sup>
+**A31 — In Uzbek (Latin), subscription screens print "{$ x}", "{$ price}" and "{$ date}" instead of the values** · 🐞 · low.
+A journal read in Uzbek (Latin) shows a marker, braces and all, where
+four texts should show the month count, the week count, the fee or the
+end date, in nine places on screen. The "Delayed Open Access" list on
+Settings › Distribution › "Access" and the four reminder lists on the
+"Subscription Policies" tab of the "Subscriptions" page read "{$ x} oy"
+and "{$ x} hafta" for every entry, so a Journal Manager can tell three
+months from twelve only by counting down the list. A locked "PDF" link,
+on the issue's page and the article's, ends with "({$ currency} {$
+price})" instead of the fee, and "My Subscriptions" and the
+"Subscription" block read "Muddati: {$ date}" instead of the end date.
+The payment page a signed-in reader reaches from the locked link states
+the fee as a number, so nobody pays without seeing it. The same pages in
+English show "3 Months", "(USD 10)" and "Expires: 2026-12-31". The same
+mistake hides the fee on the locked link in Arabic, Mongolian and
+Romanian, and the end date of a running subscription in Aragonese. In
+each, the translation writes the value's placeholder differently from
+the one the page fills in (with a space, a hyphen, or the name itself
+translated), so it prints raw. The fix is a corrected text in OJS's
+translation files.
+Basis: probe, 2026-10-21. <sup>f-a31</sup>
 
 ### OPS
 
@@ -2279,6 +2277,7 @@ Issue report: [pkp-e2e-sec#4](https://github.com/jardakotesovec/pkp-e2e-sec/issu
 
 <a id="fn-f-a31"></a>
 **f-a31** — OJS `locale/uz_Latn/manager.po` writes `manager.subscriptionPolicies.xMonths` as "{$ x} oy" and `.xWeeks` as "{$ x} hafta"; OJS `locale/uz_Latn/locale.po` writes `reader.purchasePrice` as "({$ currency} {$ price})" and both `user.subscriptions.expires` and `user.subscriptions.expired` as "Muddati: {$ date}": each placeholder has a space after the `$`. lib/pkp `classes/i18n/translation/LocaleBundle.php::_format()` replaces only the exact `{$x}`, `{$currency}`, `{$price}`, `{$date}`, so the text prints as the file has it. The English strings and their callers: notes d and f-a15 (`AccessForm`, `SubscriptionPolicyForm`), l (`galley_link.tpl`), f (`userSubscriptions.tpl`) and k (the block's `block.tpl`). Live-probed 2026-10-09 (Fields, the "Access" tab and the "Subscription Policies" tab; Rules 10, 27, 33), OJS main (ojs `6d5b793c4e`, lib/pkp `d1bc3a9ecc`), two runs of each walk, each run on freshly loaded data and its own scratch journal, after the Site Administrator installed "Uzbek (Latin)/o‘zbek (lotin) (uz_Latn)" from the site's "Install Locale" window and the journal ticked it under "UI"; the interface was switched from the user menu (page language `uz-Latn`). The lists: "Delayed Open Access", labelled "Kechiktirilgan ochiq kirish", held 61 entries in two texts, "##common.disabled##" once and "{$ x} oy" 60 times, for the scratch Journal Manager and for the Site Administrator; the two month lists under "Obuna muddati tugashi haqida eslatmalar" read "##common.disabled##" and "{$ x} oy" twelve times, the two week lists "##common.disabled##" and "{$ x} hafta" three times, for the Journal Manager and for a scratch Subscription Manager. The fourth "Delayed Open Access" entry saved stored 3 and read "{$ x} oy" right after the save and after a reload, and "3 Months" in English; the third month entry and the second week entry saved on "Subscription Policies" stored 2 and 1, read "{$ x} oy" and "{$ x} hafta" after a reload, and "2 Months" and "1 Weeks" in English. The English controls on the same journals read 61, 13 and 4 different entries. The reader's side, on a scratch journal requiring subscriptions with payments set up, a "Purchase Article" fee of 10 USD, one subscriber running to 2026-12-31 and one ended on 2025-12-31: the galley link read "Requires Subscription or Fee PDF (USD 10)" in English and ended "({$ currency} {$ price})" in Uzbek (Latin), signed out on the article's page and the issue's page and as the ended subscriber on the article's page; "My Subscriptions" and the sidebar block read "Expires: 2026-12-31" and "Expired: 2025-12-31" in English and "Muddati: {$ date}" for both subscribers in Uzbek (Latin). The two Uzbek (Latin) strings are the same words, so with the date filled in the two lines would still read alike. A text the language lacks shows as its key (each list's first entry, "##common.disabled##") or in English, which is no finding. Not driven: `stable-3_5_0`, whose files (ojs `c6e2c3a879`) write the same five strings, the language not being installed on that line's install; a "Full Issue" galley's fee; a non-expiring subscription and an institutional row. Read in the files, not seen: no other language's `manager.po` writes the two list strings with a space (`uz` leaves them untranslated), and the OJS Uzbek (Latin) files write the placeholder this way in dozens of other strings, on other features' screens.
+Issue report: [docs/issues/U51-A31-uzbek-subscription-texts-placeholders-raw.md](../issues/U51-A31-uzbek-subscription-texts-placeholders-raw.md).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-23 by the Navigation menus claim check (its OPS2): "Saved" shown, the next load with neither choice marked, "Archives" still in the header; the Search claim check saw every role still reach the Search page. Live-probed 2026-09-25 (td1) on a scratch server: "OPS will not be used…" and "The server will provide open access…" each saved with "Saved" and came back unselected; with the second saved, the visitor and the Reader still saw "Archives", the preprint page and its PDF. OPS `schemas/context.json` has no `publishingMode`, so the context API drops the value (note b); OPS `OpsServerMustPublishPolicy` and the archive header still read it.
