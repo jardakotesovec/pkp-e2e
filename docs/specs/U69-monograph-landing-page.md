@@ -1602,8 +1602,9 @@ choosing another format leaves it unchanged and a download opens the
 "404 Not Found" page. The Press manager and the roles assigned to the
 book get the other format and the file.
 Question: should everyone who may preview a book use its citation
-formats? Lean: yes, a defect; the block is offered to them, as on an
-article's page ([→ Article landing page & reading, OJS1](U13-article-landing-page-and-reading.md#ojs1)).
+formats? Lean: yes, a defect; the block is offered to them. The same
+refusal on a journal's published articles outside a published issue was
+a defect, since fixed ([→ Article landing page & reading, OJS1](U13-article-landing-page-and-reading.md#ojs1)).
 Basis: probe, 2026-09-28. <sup>f-a21</sup>
 
 <a id="a22"></a>
