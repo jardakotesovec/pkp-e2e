@@ -1,0 +1,13 @@
+--- a/lib/pkp/pages/stats/PKPStatsHandler.php
++++ b/lib/pkp/pages/stats/PKPStatsHandler.php
+@@ -175,7 +175,9 @@ public function editorial($args, $request)
+                         'label' => __('stats.dateRange.last90Days'),
+                     ],
+                     [
+-                        'dateStart' => date('Y-m-d', strtotime(date('Y') . '-01-01')),
++                        // The year of the range's last day (yesterday), so that on 1 January
++                        // the range does not start after it ends
++                        'dateStart' => date('Y-01-01', strtotime('yesterday')),
+                         'dateEnd' => $dateEnd,
+                         'label' => __('stats.dateRange.thisYear'),
+                     ],
