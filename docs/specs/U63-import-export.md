@@ -3602,7 +3602,7 @@ screen, opened by address, read "Published". `stable-3_5_0` (lib/pkp
 (4)" (OJS, OMP) and "Published (19)" (OPS), the copies included. No
 upstream issue found. Kept script:
 `shared/playwright/checks/U63/H19/h19.js`.
-Issue report: [docs/issues/U63-A26-imported-published-submission-off-dashboard-lists.md](../issues/U63-A26-imported-published-submission-off-dashboard-lists.md).
+Issue report: [pkp-e2e#1037](https://github.com/jardakotesovec/pkp-e2e/issues/1037) ([docs/issues/U63-A26-imported-published-submission-off-dashboard-lists.md](../issues/U63-A26-imported-published-submission-off-dashboard-lists.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`

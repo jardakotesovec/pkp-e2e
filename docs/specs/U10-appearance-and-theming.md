@@ -601,7 +601,12 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
   open to anyone at their address. "Remove" and "Save" delete a "Logo",
   "Homepage Image" or "Favicon" file. They keep the style sheet's file
   ([A5](#a5)) and the thumbnail's ⚠ [A20](#a20), which still open at
-  their old address. <sup>d</sup>
+  their old address. A new "Logo", thumbnail or "Homepage Image" saved
+  in place of one already there takes the old file's place at the same
+  address when both have the same file type (a PNG for a PNG). One of
+  another file type (a JPEG for a PNG) gets an address of its own, and
+  the old file stays, still opening at its old address ⚠ [A22](#a22).
+  <sup>d</sup>
 
 ## Settings that modify behavior
 
@@ -1185,6 +1190,7 @@ Left out of the scenarios above, by reason:
   - a chapter's page printing the book's "Date" {OMP} (Rule 31)
   - "Present a masthead based on user enrollments" unticked: the list and "Reviewers" leaving the tab before any save; saved, the box still unticked after a reload; ticked again and saved, the list back in its saved order, a role moved just before the box was unticked included (Fields, "Editorial Masthead"; Rule 28a; Settings bullet 15a)
   - "Enable listing of reviewers on the masthead" ticked and saved, still ticked after a reload {OJS OMP} (Fields, "Editorial Masthead"; Settings bullet 15b)
+  - a saved "Logo" PNG removed and replaced by another PNG in one save: the logo's old address then opens the new picture (Side effects bullet 2)
 - **Nothing new to test**:
   - a role newly considered for the masthead on a preprint server, before and after the tab's first save {OPS} (Rule 28; Settings bullet 24)
   - the Editor and the Production Editor on the same tabs: the same fields and saves as the Journal Manager in scenarios 1 to 10 (Actors row 1)
@@ -1208,6 +1214,7 @@ Left out of the scenarios above, by reason:
   - A18 (a "Custom" pattern with "S", the ordinal ending missing from a discussion's messages; Rule 33a)
   - A19 (the French time written "a.m." on a discussion's messages and "AM" on a library file; Rule 3c)
   - A20 (a removed thumbnail's file still opening at its address; Side effects)
+  - A22 (a logo, thumbnail or homepage image replaced by one of another file type, the old file still opening at its address; Side effects)
   - OJS2 (a first issue created on a journal that never saved "Theme", the home page switching by itself {OJS}; Rule 10)
   - OJS3 (a published issue's articles absent from "Latest Publications", the list ordered by submission {OJS}; Rule 13)
   - OJS4 (the Settings Wizard showing another organization for a journal with no issue {OJS}; Rule 34; scenario 2 marks it)
@@ -1234,7 +1241,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-24; A10–A12
-2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14), unreviewed unless an entry notes
+2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21), unreviewed unless an entry notes
 otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -1253,6 +1260,7 @@ otherwise; the team settles them on spec review.
 | [A17](#a17) | Screen readers hear "&quot;" or "&#039;" in the Sidebar arrows of a block named with a quote or apostrophe | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A18](#a18) | A "Custom" date pattern with "S" prints "17 Oct" on discussion messages and workflow file lists, "17th Oct" elsewhere | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A20](#a20) | A removed journal, press or server thumbnail stays online, or comes back when another language has one | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
+| [A22](#a22) | A logo, thumbnail or homepage image replaced by a picture of another file type stays online at its old address | 🐞 | minor | — |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | A press's category page shows only its first page of books, with no way to the rest | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1614,6 +1622,21 @@ is still the journal's thumbnail in that language. (As with a removed
 style sheet: [A5](#a5).)
 Basis: probe, 2026-10-19. <sup>f-a20</sup>
 
+<a id="a22"></a>
+**A22 — A logo, thumbnail or homepage image replaced by a picture of another file type stays online at its old address** · 🐞 · minor.
+A manager on Settings › Website › Appearance › "Setup" replaces the
+"Logo", the "Journal thumbnail" or the "Homepage Image" with a picture
+of another file type: "Remove", then "Upload File" with a JPEG where a
+PNG was, and "Save": "Saved". The manager expects the old picture to be
+gone. The box shows the new picture, and so does the public pages'
+header for a logo, but the old file stays in the journal's public files and still opens at its old
+address, for anyone, signed in or not. Nothing on screen shows that it
+is still there, and no screen can delete it; as with a removed style
+sheet ([A5](#a5)), it matters when the picture was meant to be
+withdrawn. A replacement of the same file type takes the old file's
+place, so nothing is left behind. Basis: probe, 2026-10-21.
+<sup>f-a22</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -1824,7 +1847,11 @@ bullet 2; all three apps): a saved logo's address answered a signed-out
 browser and answered "not found" after "Remove" and "Save". Live-probed
 2026-10-05 (Side effects bullet 2; all three apps, two runs): the same
 for the logo, while a thumbnail removed in the same save still opened
-(note f-a20).
+(note f-a20). Live-probed 2026-10-21 (Side effects bullet 2; all three
+apps, `main` and 3.5, two runs each): a logo, thumbnail or homepage
+image replaced by one of the same file type was overwritten under its
+old name; one replaced by another type stayed beside the new file
+(note f-a22).
 
 <a id="fn-e"></a>
 **e — the theme's fields.** `DefaultThemePlugin::init()` in each app's
@@ -2597,6 +2624,35 @@ BMP "Homepage Image" the same, the box empty after the reload;
 `contexts/{id}`) a BMP logo and a BMP thumbnail answered the same 400
 and the earlier PNG stayed. Evidence: `.reports/r13512/s1019/`,
 `.reports/r13512-3_5/s1019/`.
+
+<a id="fn-f-a22"></a>
+**f-a22** — `PKPContextService::_saveFileParam()` deletes the stored
+file only for a `null` value. An upload goes to `moveTemporaryFile()`,
+which names the new file `<setting>_<locale><extension>` after the new
+file's own type and never removes the stored one; "Remove" and "Upload
+File" in one save send the new temporary file, not a `null`, so the
+"Remove" does not delete the logo's or homepage image's old file either.
+The thumbnail, saved through each app's
+`ContextService::afterEditContext()`, goes the same way. Code read
+2026-10-21, `main` and `stable-3_5_0` alike. Live-probed 2026-10-21 on
+OJS, OMP and OPS, `main` and `stable-3_5_0`, two runs each, on PKP's
+default dataset as `rvaca` (Side effects bullet 2): a PNG uploaded
+under "Logo", the thumbnail and "Homepage Image" and saved, stored as
+`/public/journals/<id>/{pageHeaderLogoImage,journalThumbnail,homepageImage}_en.png`
+(OMP `/public/presses/<id>/` and `pressThumbnail`, OPS
+`/public/contexts/<id>/` and `serverThumbnail`), each answering 200
+`image/png` signed out; "Remove" and another PNG under all three in one
+save ("Saved"): the same three names, each file now holding the new
+picture, still three files; "Remove" and a JPEG under all three, "Save"
+(200, "Saved"): after a reload the boxes and the visitor's header
+showed `…_en.jpg`, the folder held the three `.jpg` and the three
+`.png` (untouched since the PNG save), and each old `.png` address
+still answered 200 `image/png` signed out. No server error, dialog or
+notice. Not driven: "Favicon" (by the code the same
+`_saveFileParam()` path) and the site's "Logo"
+(`PKPSiteService::_saveFileParam()`). The A20 issue report names the
+logo and thumbnail case under its Reach as a separate fault its fix
+does not reach; the homepage image is a third box with it.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `journalContentOrganization` is added by OJS's
