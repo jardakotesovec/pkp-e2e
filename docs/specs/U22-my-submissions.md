@@ -510,7 +510,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 |----|------------------------------|------|--------|--------|
 | [OPS2](#ops2) | A preprint server author is offered draft deletion, but confirming always fails with a permission error | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | An account whose only roles are two Reader-level roles, or only Subscription Manager, lands on an access-denied page after every sign-in | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A8](#a8) | Deleting an unpublished submission through the REST API fails with a server error, though the submission is deleted | 🐞 | minor · crash: server | — |
+| [A8](#a8) | Deleting an unpublished submission through the REST API answers a server error, though it is deleted | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A1](#a1) | The author sees the review progress count ("Review update 1/2") for their submission under review | ❓ | user-visible | — |
 | [A2](#a2) | A declined submission's row keeps showing the review progress counter | ❓ | minor | — |
 | [A3](#a3) | On a press or preprint server, nothing was found that feeds the "Scheduled for publication" view | ❓ | minor | — |
@@ -602,21 +602,18 @@ role.
 Basis: probe, 2026-10-15. <sup>a7</sup>
 
 <a id="a8"></a>
-**A8 — Deleting an unpublished submission through the REST API fails with a server error, though the submission is deleted** · 🐞 · minor · crash: server.
-No screen sends this request, `DELETE {context}/api/v1/submissions/{id}`:
-a program sends it by hand ([footnote a8](#fn-a8) gives it as sent).
-Sent from the Site Administrator's signed-in browser (the only way it
-was tried), the delete of a draft, or of a submitted submission never
-published, gets the server error "Call to a member function getData() on
-null" instead of the deleted submission's record. The submission is
-deleted all the same: a deleted draft no longer shows on its author's My
-Submissions. Deleting a published submission the same way answers
-normally. So the program is told the delete failed when it worked. The
-same request sent by the submission's author is refused by role, and
-nothing is deleted. My Submissions' delete (Rule 9) and the workflow's
-"Delete" ([→ the "Delete" dialog](U24-workflow-screen-and-stage-access.md#delete-dialog))
-send other requests and are not affected.
-Since: 2025-05-30 · Basis: probe, 2026-10-19. <sup>a8</sup>
+**A8 — Deleting an unpublished submission through the REST API answers a server error, though it is deleted** · 🐞 · low · crash: server.
+The REST API request that deletes a submission, `DELETE
+{context}/api/v1/submissions/{id}`, answers HTTP 500 with the error
+"Call to a member function getData() on null" when the submission has
+never been published, drafts included. The submission is deleted all the
+same, so a client is told the delete failed when it worked. A published
+submission deleted the same way answers 200, but the record it returns
+lists each contributor without their role. Both come from one fault and
+one fix, and this report covers both. Only programs that send the HTTP
+request meet it. No screen sends it, and a plugin that deletes a
+submission in PHP is not affected.
+Since: 2025-05-30 · Basis: probe, 2026-10-21. <sup>a8</sup>
 
 ### OMP
 
@@ -1199,6 +1196,7 @@ to this operation." with the draft untouched, on both lines. On
 on all three apps. A Journal Manager's or Section Editor's request, and
 an API key as `Authorization: Bearer <key>` (*[User profile](U03-user-profile.md#fn-h)*), were
 not driven.
+Issue report: [docs/issues/U22-A8-api-submission-delete-server-error.md](../issues/U22-A8-api-submission-delete-server-error.md).
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's filter form

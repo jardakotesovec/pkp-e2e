@@ -1,0 +1,21 @@
+--- a/lib/pkp/api/v1/submissions/PKPSubmissionController.php
++++ b/lib/pkp/api/v1/submissions/PKPSubmissionController.php
+@@ -977,11 +977,16 @@
+         $genres = $genreDao->getByContextId($submission->getData('contextId'))->toAssociativeArray();
+         $userRoles = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES);
+ 
+-        $submissionProps = Repo::submission()->getSchemaMap()->map($submission, $userGroups, $genres, $userRoles);
++        // Encode the record before the delete: the map's publications are a lazy collection that
++        // reads the submission, its versions and its contributors' roles when it is encoded.
++        $response = response()->json(
++            Repo::submission()->getSchemaMap()->map($submission, $userGroups, $genres, $userRoles),
++            Response::HTTP_OK
++        );
+ 
+         Repo::submission()->delete($submission);
+ 
+-        return response()->json($submissionProps, Response::HTTP_OK);
++        return $response;
+     }
+ 
+     /**
