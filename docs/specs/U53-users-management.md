@@ -2207,7 +2207,7 @@ refusal is `UserGridHandler::mergeUsers()` answering 200
 acting Site Administrator `ADMINISTRATION_FULL` over the old account
 (note i), and the page shows nothing for that answer. Seen on `main`
 only.
-Issue report: [docs/issues/U53-A21-merge-second-site-admin-hangs.md](../issues/U53-A21-merge-second-site-admin-hangs.md).
+Issue report: [pkp-e2e#1052](https://github.com/jardakotesovec/pkp-e2e/issues/1052) ([docs/issues/U53-A21-merge-second-site-admin-hangs.md](../issues/U53-A21-merge-second-site-admin-hangs.md)).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Seen 2026-09-04 (user-profile claim check K2), OPS French
