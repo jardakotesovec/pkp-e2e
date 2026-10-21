@@ -2098,6 +2098,7 @@ The sort icon's look in each state was not recorded. Read again
 three apps): no header carried `aria-sort` at any step, this time also
 after a click on "Days", and on the headers of My Submissions and (OJS
 and OMP) of the reviewer's list.
+Issue report: [pkp-e2e#1051](https://github.com/jardakotesovec/pkp-e2e/issues/1051) ([docs/issues/U23-A15-dashboard-sorted-header-not-announced.md](../issues/U23-A15-dashboard-sorted-header-not-announced.md)).
 
 <a id="fn-a16"></a>
 **a16 — A16 evidence.** The dashboard asks `api/v1/_submissions` for
