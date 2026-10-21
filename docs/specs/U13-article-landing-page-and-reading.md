@@ -3207,7 +3207,8 @@ swallows the failed fetch. On OPS a posted preprint's formats and
 downloads work for every role. Live-probed 2026-09-25, note q11.
 Fixed by pkp/citationStyleLanguage#169 (pkp/pkp-lib#13595), driven
 before its merge on PKP's default dataset (2026-10-21; the issue walk
-`walk.js` and its neighbour, and `checks/sync/citationStyleLanguage-169/`).
+`walk.js` and its neighbour, since deleted, and
+`checks/sync/citationStyleLanguage-169/`).
 Round 1, at the head 0f1553f: `isUnpublished()` still tested the issue
 when one was passed, so the article published with no issue was fixed
 but the one in the unpublished "Vol. 2 No. 1 (2015)" still answered 404
@@ -3225,7 +3226,7 @@ instead of the server error; the Reader's 404 and the manager's 200 are
 unchanged. OJS's `ArticleHandler` gates the page on the publication's
 status alone, and unpublishing an issue puts its articles back to
 Scheduled, so the citation now follows the page.
-Issue report: [pkp-e2e#205](https://github.com/jardakotesovec/pkp-e2e/issues/205) ([docs/issues/U13-OJS1-citation-formats-fail-outside-published-issue.md](../issues/U13-OJS1-citation-formats-fail-outside-published-issue.md)).
+Issue report: [pkp-e2e#205](https://github.com/jardakotesovec/pkp-e2e/issues/205), closed 2026-10-21 at the merge of pkp/citationStyleLanguage#169 (`f849f00`, its tree the reviewed head `c46ac76`; in OJS, OMP and OPS `main` through pkp/ojs#5968, pkp/omp#2519 and pkp/ops#1458, and in `ore` through pkp/ojs#5967); the report and its kept walk deleted then, in git history.
 
 <a id="fn-f-ojs2"></a>
 **f-ojs2** — `PflSettingsForm::fetch()` assigns `fundingPluginPresent`
