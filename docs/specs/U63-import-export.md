@@ -1217,6 +1217,11 @@ journal to another) with throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - a Native XML file over the server's upload limit chosen on
+    "Import", the box naming the file's size and the limit
+    ([A25](#a25)): the guard the issue report
+    (`docs/issues/U63-A25-import-over-upload-limit-file-size-error.md`)
+    proposes, once fixed
   - a press's export of a book in a series on the "Export" tab,
     imported again on "Import", reading as a plain success with no
     "Unknown element sequence" line {OMP} ([OMP5](#omp5)): the guard the
@@ -1481,7 +1486,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A21](#a21) | A users import stops at the first user without a registration date, silently leaving the rest out | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A23](#a23) | A users file first imported on a 3.5.0 release and imported again after the update gives each ended role a second time | 🐞 | minor | — |
 | [A24](#a24) | Paging the export list, the dashboard or a preprint server's archive repeats some submissions and skips others | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
-| [A25](#a25) | A Native XML file over the server's upload limit is refused with "File size error." alone, and "Import" then does nothing | 🐞 | minor | — |
+| [A25](#a25) | Native XML import: a file over the upload limit is refused with "File size error." and no limit named | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A26](#a26) | On the development line, a published submission imported with the Native XML Plugin is on neither the Dashboard's "Published" nor "Active submissions" | 🐞 | minor | — |
 | [OJS1](#ojs1) | DOAJ export list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | With "DOAJ Plugin" switched off, the Plugins list still shows its export tool as on | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1766,20 +1771,23 @@ submissions out.
 Basis: probe, 2026-10-04. <sup>f-a24</sup>
 
 <a id="a25"></a>
-**A25 — A file over the upload limit is refused with "File size error." alone** · 🐞 · minor.
-A manager who chooses a file larger than the server's upload limit on
-the Native XML Plugin's "Import" tab should be told what the limit is.
-Instead the box reads "File size error.", with neither the limit nor
-the file's size, the button still reads "Upload File", and "Import"
-pressed then does nothing: no results tab and no message. The tool's
-own export passes PHP's default 2 MB (Rule 8a) long before a journal
-is large: a press's 100 books came to 9.6 MB and a journal's 100
-articles to 2.7 MB, both refused; eighteen books (already 1.7 MB)
-still went up. So the tool can refuse a file it has just made, and
-nothing on the page says why or what to do. The way round is to export
-fewer submissions per file, or to have the administrator raise the
-server's upload limit.
-Basis: probe, 2026-10-09. <sup>f-a25</sup>
+**A25 — Native XML import: a file over the upload limit is refused with "File size error." and no limit named** · 🐞 · low.
+A manager chooses a file on the Native XML Plugin's "Import" tab that is
+larger than the server's upload limit, and expects to be told what the
+limit is. Instead, the box says only "File size error.", giving neither
+the limit nor the file's size. Its button still reads "Upload File", as
+before any file was chosen. Pressing "Import" then does nothing: no
+results tab and no message. The tool's own exports pass the limit early.
+With PHP's default of 2 MB, a press's export of its 18 books is 1.7 MB,
+and the same press with 36 books exports 3.4 MB, which the box refuses.
+So the tool can refuse a file it has just made, and nothing on the page
+says why or what to do. The same bare message appears in every upload
+box with "Drag and drop a file here to begin upload" and an "Upload
+File" button: the Users XML Plugin's import, the "Upload File" window of
+the workflow's file lists, the publisher library, plugin upload and the
+profile picture. The settings forms' image boxes and the submission
+wizard's file list do name the file's size and the limit.
+Basis: probe, 2026-10-21. <sup>f-a25</sup>
 
 <a id="a26"></a>
 **A26 — An imported published submission is on neither of the Dashboard's lists** · 🐞 · minor.
@@ -3570,6 +3578,7 @@ on an install whose requests end at 120 s. The same box serves the
 Users XML Plugin's "File" (Rule 22) and the other screens' "Upload
 File" boxes: read in the code, driven only here. Kept script:
 `shared/playwright/checks/U63/I09/native.js`.
+Issue report: [docs/issues/U63-A25-import-over-upload-limit-file-size-error.md](../issues/U63-A25-import-over-upload-limit-file-size-error.md).
 
 <a id="fn-f-a26"></a>
 **f-a26** — On export, `SubmissionNativeXmlFilter` (lib/pkp

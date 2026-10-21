@@ -1,0 +1,78 @@
+--- a/lib/pkp/js/controllers/UploaderHandler.js
++++ b/lib/pkp/js/controllers/UploaderHandler.js
+@@ -200,12 +200,31 @@
+ 	 * Handle error revents from plupload
+ 	 * @param {Object} caller The original context in which the callback was called.
+ 	 * @param {Object} pluploader The pluploader object.
+-	 * @param {{message: string}} err An object describing an error condition
++	 * @param {{code: number, message: string, file: Object}} err An object
++	 *  describing an error condition
+ 	 *
+ 	 */
+ 	$.pkp.controllers.UploaderHandler.prototype.
+ 			handleError = function(caller, pluploader, err) {
+-		this.showError(err.message);
++		var maxSize, message = err.message,
++				tooBig = pkp.localeKeys['form.dropzone.dictFileTooBig'];
++
++		// plupload refuses a file over max_file_size with its bare
++		// "File size error.": name the file's size and the limit, in the
++		// words of the ui-library's upload boxes. (An empty file gets the
++		// same error code; it keeps plupload's message.)
++		if (err.code === plupload.FILE_SIZE_ERROR && err.file && tooBig) {
++			maxSize = plupload.parseSize(
++					pluploader.getOption('filters').max_file_size);
++			if (maxSize && err.file.size > maxSize) {
++				message = tooBig
++						.replace('{{filesize}}',
++								String(Math.round(err.file.size / 1024 / 10.24) / 100))
++						.replace('{{maxFilesize}}',
++								String(Math.round(maxSize / 1024 / 10.24) / 100));
++			}
++		}
++		this.showError(message);
+ 	};
+ 
+ 
+--- a/lib/pkp/tools/closure-externs.js
++++ b/lib/pkp/tools/closure-externs.js
+@@ -269,6 +269,21 @@
+  */
+ plupload.Uploader.prototype.bind = function(eventName, f) {};
+ 
++/**
++ * @param {string} option
++ * @return {*}
++ */
++plupload.Uploader.prototype.getOption = function(option) {};
++
++/** @type {number} */
++plupload.FILE_SIZE_ERROR = 0;
++
++/**
++ * @param {string|number} size
++ * @return {number}
++ */
++plupload.parseSize = function(size) {};
++
+ $.pkp.app = {
+ 	baseUrl: '',
+ 	tinyMceContentCSS: '',
+@@ -303,6 +318,7 @@
+  * @type {Object}
+  */
+ var pkp = {
++	localeKeys: {},
+ 	currentUser: {
+ 		id: 0,
+ 		csrfToken: '',
+--- a/vite.config.js
++++ b/vite.config.js
+@@ -23,6 +23,7 @@
+ 					'common.commaListSeparator',
+ 					// use directly via pkp.localeKeys
+ 					'form.dataHasChanged',
++					'form.dropzone.dictFileTooBig',
+ 				],
+ 			}),
+ 			Vue({
