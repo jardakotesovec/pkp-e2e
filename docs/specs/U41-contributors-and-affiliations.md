@@ -1017,9 +1017,9 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A26](#a26) | On an article, book or preprint page with several contributors, a contributor's affiliations print in reverse order | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
-| [A30](#a30) | A program that edits a contributor without resending the affiliations removes all of them | 🐞 | latent | — |
-| [A31](#a31) | On `main`, a program that edits a contributor without naming its type erases its names, email, country and affiliations | 🐞 | latent | — |
-| [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | latent · crash: server | — |
+| [A30](#a30) | A program that changes one field of a contributor through the REST API silently removes all their affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
+| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases their name, email, country and affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
+| [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
 | [A16](#a16) | The auto-created contributor can arrive without a Country — every later edit is then refused until one is supplied | ❓ | user-visible | — |
 | [A4](#a4) | The organization contributor's "ROR ID" box accepts any text without a shape check | ❓ | minor | — |
@@ -1498,38 +1498,36 @@ The rest of the change, a new given name for one, is lost.
 Basis: probe + code reading, 2026-10-15. <sup>f-a29</sup>
 
 <a id="a30"></a>
-**A30 — A program that edits a contributor without resending the affiliations removes all of them** · 🐞 · latent.
-A program that changes one field of a contributor through the install's
-programming interface (its given name, say) and does not resend the
-affiliations expects them kept, as the edit keeps every other field it
-leaves out (Rule 4a). The edit reports success, yet every affiliation
-the contributor had is gone. After a reload, the contributor's "Edit"
-shows no institution under "Affiliations", only the empty search box,
-and a later read through the interface lists none. The same change sent
-with the affiliations as read keeps them. It holds on `main` and in
-version 3.5. The form always resends the list, so only a program meets
-it, and it loses the institutions without a word.
-Basis: probe, 2026-10-19. <sup>f-a30</sup>
+**A30 — A program that changes one field of a contributor through the REST API silently removes all their affiliations** · 🐞 · medium.
+The REST API's contributor edit (`PUT …/contributors/{id}`) removes
+every affiliation of the contributor when the request does not include
+the affiliations, and answers success. Every other field the request
+leaves out is kept, so a program that corrects one field, such as a
+given name, expects the institutions to stay. The loss is silent and can
+only be undone by adding each institution again. It hits programs
+written for 3.4, where the same edit kept the affiliation, and programs
+that follow the API's own schema, which marks the affiliations as read-
+only. On a published version the institutions disappear from the public
+page too.
+Basis: probe, 2026-10-21. <sup>f-a30</sup>
 
 <a id="a31"></a>
-**A31 — On `main`, a program that edits a contributor without naming its type erases the contributor's names, email, country and affiliations** · 🐞 · latent.
-A program that changes one field of a contributor through the install's
-programming interface without naming the contributor type ("Person",
-"Organization or group" or "Anonymous") expects the rest kept, as when
-it names the type. The edit reports success, yet the contributor is
-emptied. The given and family names, the email, the country and every
-affiliation are blank, even when the edit resends the affiliations, and
-the new given name it sent is not kept either. The Contributors list
-then shows the contributor's row with no name, only its badges, and
-its "Edit" shows empty "Given Name", "Family Name" and "Email" boxes and
-no institution. The contributor's identity is lost behind a success
-answer, and only the next person to open the list can notice. Version
-3.5 has no contributor types: there the same edit keeps the names, email
-and country, and loses only the affiliations ([A30](#a30)).
-Basis: probe + code reading, 2026-10-19. <sup>f-a31</sup>
+**A31 — A program that edits a contributor through the REST API without the contributor type erases their name, email, country and affiliations** · 🐞 · medium.
+The REST API's contributor edit (`PUT …/contributors/{id}`) empties the
+contributor when the request does not name the contributor type
+("Person", "Organization or group" or "Anonymous"), and answers success.
+The given and family names, the email, the country and every affiliation
+are blanked, even when the request resends the affiliations, and the new
+value it sent is not kept either. The Contributors list then shows a row
+with no name, and on a published item the public page lists an author
+without a name. Every script written for 3.5, which has no contributor
+types, sends exactly such edits, so after an upgrade it erases each
+contributor it touches. The old values are gone; they can only be typed
+in again.
+Basis: probe, 2026-10-21. <sup>f-a31</sup>
 
 <a id="a32"></a>
-**A32 — A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved** · 🐞 · latent · crash: server.
+**A32 — A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved** · 🐞 · low · crash: server.
 A program that reads a contributor through the install's programming
 interface and sends the record back unchanged expects it saved as it
 was. On `main` the edit fails with a server error: the read lists the
@@ -1543,7 +1541,7 @@ field, and on a press for the volume-editor field too, with the same
 message for each. Nothing is changed in any of these cases. Sent
 without those empty fields, and on `main` with the roles as numbers,
 the record saves and nothing is lost.
-Basis: probe, 2026-10-19. <sup>f-a32</sup>
+Basis: probe, 2026-10-21. <sup>f-a32</sup>
 
 ### OMP
 
@@ -2950,6 +2948,7 @@ must be of type array|object, null given` in
 issue report's "A neighbouring gap" bullet records the loss on OJS
 together with A31's
 ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)).
+Issue report: [docs/issues/U41-A30-api-contributor-edit-drops-affiliations.md](../issues/U41-A30-api-contributor-edit-drops-affiliations.md).
 
 <a id="fn-f-a31"></a>
 **f-a31 — A31 evidence.** Live-probed 2026-10-19 (fn o): on `main`,
@@ -2973,6 +2972,7 @@ gap" bullet names this wipe (walked on OJS)
 ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)).
 The dataset fleets' contributors left without affiliations on `main`
 most likely came from such edits.
+Issue report: [docs/issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md](../issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md).
 
 <a id="fn-f-a32"></a>
 **f-a32 — A32 evidence.** Live-probed 2026-10-19 (fn o), two runs per
@@ -2991,6 +2991,8 @@ affiliation kept with its id. `stable-3_5_0`: the body as read answered
 `"isVolumeEditor":["This field must be true or false."]` on OMP; without
 those keys, 200 and nothing lost. One server error per `main` run, none
 on 3.5.
+Issue report: [docs/issues/U41-A32-api-contributor-roles-as-read-server-error.md](../issues/U41-A32-api-contributor-roles-as-read-server-error.md).
+Issue report: [docs/issues/U41-A32-api-contributor-read-empty-flags-refused.md](../issues/U41-A32-api-contributor-read-empty-flags-refused.md).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP

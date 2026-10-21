@@ -1,0 +1,34 @@
+--- a/lib/pkp/api/v1/submissions/PKPSubmissionController.php
++++ b/lib/pkp/api/v1/submissions/PKPSubmissionController.php
+@@ -1752,8 +1752,14 @@
+         }
+ 
+         if (isset($params['contributorRoles']) && is_array($params['contributorRoles'])) {
++            // Take each role by its id, also when it is sent as the API's own read lists it ({id, name, ...}).
++            // Anything that is not an integer id matches no role, and an empty list is refused by validate().
++            $roleIds = array_filter(
++                array_map(fn ($role) => filter_var(is_array($role) ? ($role['id'] ?? null) : $role, FILTER_VALIDATE_INT), $params['contributorRoles']),
++                fn ($id) => $id !== false
++            );
+             $params['contributorRoles'] = ContributorRole::withContextId($submissionContext->getId())
+-                ->withRoleIds($params['contributorRoles'])
++                ->withRoleIds(array_values($roleIds))
+                 ->get()->all();
+         }
+ 
+@@ -1906,8 +1912,14 @@
+         }
+ 
+         if (isset($params['contributorRoles']) && is_array($params['contributorRoles'])) {
++            // Take each role by its id, also when it is sent as the API's own read lists it ({id, name, ...}).
++            // Anything that is not an integer id matches no role, and an empty list is refused by validate().
++            $roleIds = array_filter(
++                array_map(fn ($role) => filter_var(is_array($role) ? ($role['id'] ?? null) : $role, FILTER_VALIDATE_INT), $params['contributorRoles']),
++                fn ($id) => $id !== false
++            );
+             $params['contributorRoles'] = ContributorRole::withContextId($submissionContext->getId())
+-                ->withRoleIds($params['contributorRoles'])
++                ->withRoleIds(array_values($roleIds))
+                 ->get()->all();
+         }
+ 

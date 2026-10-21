@@ -1,0 +1,15 @@
+--- a/lib/pkp/api/v1/submissions/PKPSubmissionController.php
++++ b/lib/pkp/api/v1/submissions/PKPSubmissionController.php
+@@ -1937,7 +1937,11 @@
+             return response()->json($newAffiliationErrors, Response::HTTP_BAD_REQUEST);
+         }
+ 
+-        $author->setAffiliations($affiliations);
++        // A request that leaves out the affiliations keeps them, as it keeps every other field it leaves out
++        // (an empty list, or the null that removeIrrelevantContributorTypeData() sets, still removes them all)
++        if (array_key_exists('affiliations', $params)) {
++            $author->setAffiliations($affiliations);
++        }
+         // remove affiliations parameters because we have already set them properly for the author
+         // so that they are not considered once again when editing the author below
+         unset($params['affiliations']);

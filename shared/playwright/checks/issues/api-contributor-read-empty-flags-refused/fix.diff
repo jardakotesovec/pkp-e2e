@@ -1,0 +1,14 @@
+--- a/lib/pkp/schemas/author.json
++++ b/lib/pkp/schemas/author.json
+@@ -242,7 +242,10 @@
+ 		},
+ 		"orcidVerificationRequested": {
+ 			"type": "boolean",
+-			"apiSummary": false
++			"apiSummary": false,
++			"validation": [
++				"nullable"
++			]
+ 		},
+ 		"orcidDisplayValue": {
+ 			"type": "string",
