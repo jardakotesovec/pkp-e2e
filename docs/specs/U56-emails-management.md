@@ -1870,7 +1870,7 @@ Live-probed 2026-10-04 on `main`, all three apps, on `publicknowledge`
 in French (Canada), each row's shown text and screen-reader name read:
 every row's button showed "Edit" while its screen-reader name read
 "Modifier …".
-Issue report: [docs/issues/U56-A12-french-manage-emails-edit-button-english.md](../issues/U56-A12-french-manage-emails-edit-button-english.md).
+Issue report: [pkp-e2e#1046](https://github.com/jardakotesovec/pkp-e2e/issues/1046) ([docs/issues/U56-A12-french-manage-emails-edit-button-english.md](../issues/U56-A12-french-manage-emails-edit-button-english.md)).
 
 <a id="fn-f-a13"></a>
 **f-a13** — Live-probed 2026-10-13 on `main` and `stable-3_5_0`, all
@@ -1950,7 +1950,7 @@ press or preprint server with Norwegian (Bokmål) is expected to print
 the code the same way. On `main` "Install Locale" offered no
 Norwegian (Bokmål) on 2026-10-13, all three apps, so it cannot be
 added there.
-Issue report: [docs/issues/U56-OMP3-press-french-editorial-reminder-journal-placeholder.md](../issues/U56-OMP3-press-french-editorial-reminder-journal-placeholder.md).
+Issue report: [pkp-e2e#1047](https://github.com/jardakotesovec/pkp-e2e/issues/1047) ([docs/issues/U56-OMP3-press-french-editorial-reminder-journal-placeholder.md](../issues/U56-OMP3-press-french-editorial-reminder-journal-placeholder.md)).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `ContextEmailVariable::descriptions()` uses
