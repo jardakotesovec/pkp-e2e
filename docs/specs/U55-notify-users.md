@@ -929,7 +929,7 @@ runs per app) posted
 email; ticked posted `copy=true` and sent both, the window again "1
 users". Every send answered 200 `{"totalBulkJobs":1}` with the "queued"
 line.
-Issue report: [docs/issues/U55-A5-notify-copy-unticked-still-sent.md](../issues/U55-A5-notify-copy-unticked-still-sent.md).
+Issue report: [pkp-e2e#1058](https://github.com/jardakotesovec/pkp-e2e/issues/1058) ([docs/issues/U55-A5-notify-copy-unticked-still-sent.md](../issues/U55-A5-notify-copy-unticked-still-sent.md)).
 
 ## Reference — entry points & surfaces
 
