@@ -379,9 +379,8 @@ In French most of its headings and descriptions are raw codes
     "Review (Round {n}) • {date} • {file}" ("External Review (Round {n})
     • …" on a press). Choosing one appends its text after whatever the box
     already holds. With none saved it reads "No saved summaries found for
-    this submission's review revisions." A saved summary holding HTML
-    markup that carries a script runs that script in the editor's browser
-    when the panel opens ⚠ [A11](#a11). A preprint server has no review,
+    this submission's review revisions." A saved summary is listed as its
+    text, and markup in it runs nothing. A preprint server has no review,
     so it has no such button. <sup>u</sup>
 15. **A journal with no issues {OJS}.** With not a single issue created,
     the publish flow shows no issue fields at all and publishes
@@ -1113,8 +1112,6 @@ Left out of the scenarios above, by reason:
   - A9 (same-day unassigned versions sharing one name; Rules 11a, 16)
   - A10 (in French the version dialog and the entry page reading raw
     codes; Fields)
-  - A11 (a revision summary saved with markup running as script when
-    "Insert Content" opens; Rule 14)
   - A12 (a version created through the programming interface with a
     cover image the app refuses; Rule 11b)
   - A13 (a cover picture whose file name's ending does not match its
@@ -1201,7 +1198,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A5](#a5) | Readers never see a new version's Summary of Changes, though the editor is told it appears publicly | 🐞 | high | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | Creating a new version, still unpublished, makes the reader page say "Published {today} — Updated on {real date}" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | In French the "Create New Version" dialog and the Publication Settings / Preprint Entry page show raw codes; the versions to copy from cannot be told apart | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A11](#a11) | An author's revision summary can carry a script that runs in the editor's browser when "Insert Content" opens | 🐞 | high | issues (claude), 2026-10-15 — re-verified |
 | [A12](#a12) | A version created through the programming interface with a cover image the app refuses is reported as failed, yet created without the cover | 🐞 | minor | — |
 | [A14](#a14) | A version created by program with a stage the app does not know fails with a server error instead of a refusal | 🐞 | latent · crash: server | — |
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
@@ -1227,6 +1223,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OPS3](#ops3) | An author granted posting by a plugin still finds no Post control on the workflow | ❓ | latent | — |
 | [OPS5](#ops5) | The preprint server's "Post" vocabulary stops short: header pill, email and task notice still say "published" | ❓ | minor | — |
 | [A8](#a8) | Retired: after a publish, post or schedule the Publication area kept the unpublished state until a page reload; fixed in pkp/ui-library#853 before its merge, never on `main` | ✅ | retired | re-probe at the PR head (claude), 2026-09-23 — fixed before merge |
+| [A11](#a11) | Retired: an author's revision summary could carry a script that ran in the editor's browser when "Insert Content" opened; the panel now reads the summary without running it | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/ui-library#1025 |
 | [OJS1](#ojs1) | Retired: with a plain language summary required, the panel's Confirm was refused without naming the summary and publishing was unreachable; it now reaches publishing | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
 
 ### All apps
@@ -1417,29 +1414,6 @@ are [Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#a11
 finding, and why a missing French text shows as a code at all is
 [Languages & locales](U57-languages-and-locales.md), its Rule 21a.
 Since: 2026-09-30 · Basis: probe, 2026-10-02. <sup>[f-a10](#fn-a10)</sup>
-
-<a id="a11"></a>
-**A11 — An author's revision summary can carry a script that runs in the editor's browser when "Insert Content" opens** · 🐞 · high.
-An author asked for revisions uploads a revised file and writes a
-"Summary of Changes (Amendment Notice)" for it. Later a Journal or Press
-Manager or Editor presses "Insert Content" on a version's own Summary of
-Changes box to reuse that text. They expect the panel to list each saved
-summary as text. Instead, a summary holding markup that carries a script
-(an image tag with an error handler, for one) runs that script in their
-browser, under their sign-in, the moment the panel opens.
-
-Nothing on screen gives it away: the panel lists the summary's text as
-usual, or "No saved summaries found for this submission's review
-revisions." when the summary holds nothing else. The script can do
-whatever the editor's account can do.
-
-Typing or pasting markup into the author's box is not enough: the box
-strips it. But the server stores whatever summary the box's save request
-carries, so the author can send that request again from their own
-signed-in browser with the markup added.
-Security: unreleased.
-Since: 2026-05-28 · Basis: probe, 2026-10-15 (a journal; a press by the
-code). <sup>[f-a11](#fn-a11)</sup>
 
 <a id="a12"></a>
 **A12 — A version created by program with a refused cover image is reported as failed, yet created** · 🐞 · minor.
@@ -1704,6 +1678,9 @@ fixed, this wrong link reaches authors on `main` too.
 Basis: probe, 2026-10-15. <sup>[f-ops6](#fn-ops6)</sup>
 
 ### Retired
+
+<a id="a11"></a>
+**A11 — An author's revision summary could carry a script that ran in the editor's browser when "Insert Content" opened** · ✅ · retired. Fixed by pkp/ui-library#1025 (`main`) and #1026 (`ore`), merged 2026-10-21: the panel parses each summary in a document of its own, so nothing in it runs. Never in a release. <sup>[f-a11](#fn-a11)</sup>
 
 <a id="ojs1"></a>
 **OJS1 — A required plain language summary blocked Confirm without naming itself** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21: the "Review Publishing Details" panel's Confirm reaches the confirmation window and publishing on a journal that requires the summary. <sup>[f-ojs1](#fn-ojs1)</sup>
@@ -2632,7 +2609,14 @@ Proposed fix: parse inertly (`DOMParser`, or the `textContent` of a
 `InsertSummaryOfChanges` component, so no release carries it.
 Security-shaped and unreleased: its issue report carries "- **Security**
 unreleased" (REPORT.md).
-Issue report: [pkp-e2e-sec#13](https://github.com/jardakotesovec/pkp-e2e-sec/issues/13) ([docs/issues/U49-A11-revision-summary-markup-runs-on-insert-content.md](../issues/U49-A11-revision-summary-markup-runs-on-insert-content.md)).
+Issue report: [pkp-e2e-sec#13](https://github.com/jardakotesovec/pkp-e2e-sec/issues/13), closed.
+Retired 2026-10-21: pkp/ui-library#1025 (squash `e47a48879a`) and #1026
+(`5ddd525f9f`, `ore`) make `htmlToPlainText()` parse through
+`DOMParser`; reviewed before the merge at the heads `4c9a1cc015` and
+`6ed12e947a` (the merged trees the same), the issue walk at each base
+reproducing the script and at each head running nothing, on OJS and OMP
+`main` and OJS `ore`, and again at the apps' tips after the merge (OJS,
+OMP and OPS `main` point at `e47a48879a`, OJS `ore` at `5ddd525f9f`).
 
 <a id="fn-a12"></a>
 **f-a12** — `PKP\publication\Repository::add()` (lib/pkp

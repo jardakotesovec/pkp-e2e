@@ -1,5 +1,6 @@
-// Helpers of walk.js (U49 A11: a review revision's "Summary of Changes" holding markup runs as script
-// when the editor opens "Insert Content"; docs/issues/U49-A11-revision-summary-markup-runs-on-insert-content.md).
+// Helpers of the retired U49 A11 walk (a review revision's "Summary of Changes" holding markup ran as script
+// when the editor opened "Insert Content"; fixed by pkp/ui-library#1025, pkp-e2e-sec#13 closed), kept for
+// ../edit-a-file-close-drops-name-unasked/walk.js.
 // Requiring this file runs nothing. Reused: the author's workflow opener and "Upload revisions" button of
 // ../author-revisions-upload-offered-then-refused/lib.js, the upload wizard's helpers of
 // ../change-file-keeps-first-upload/lib.js, the small file of ../author-update-file-details-offered-then-refused/lib.js.
