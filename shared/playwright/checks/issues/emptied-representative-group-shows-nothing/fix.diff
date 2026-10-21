@@ -1,0 +1,13 @@
+--- a/lib/pkp/js/controllers/grid/CategoryGridHandler.js
++++ b/lib/pkp/js/controllers/grid/CategoryGridHandler.js
+@@ -242,6 +242,10 @@
+ 			function($element) {
+ 		if ($element.hasClass('category_grid_body')) {
+ 			return this.getCategories();
++		} else if ($element.hasClass('gridRow')) {
++			// The row's category body also holds the category's own row:
++			// count the data rows only.
++			return this.getRowsInCategory($element.parents('tbody:first'));
+ 		} else {
+ 			return /** @type {jQueryObject} */ (
+ 					this.parent('getElementsByType', $element));

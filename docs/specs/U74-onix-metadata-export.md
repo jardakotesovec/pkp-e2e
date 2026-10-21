@@ -972,6 +972,15 @@ footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - a book's last agent deleted on "Representatives", "No Items" read
+    under "Agents" before any reload ([A21](#a21)): the guard the issue
+    report (`docs/issues/U74-A21-emptied-representative-group-shows-nothing.md`)
+    proposes, once fixed
+  - a digital format with an approved file of known size, its `Extent`
+    in the ONIX 3.0 export reading the size in megabytes to three
+    decimals ([A22](#a22)): the guard the issue report
+    (`docs/issues/U74-A22-onix-digital-format-file-size-wrong.md`)
+    proposes, once fixed
   - the guard A16's issue report names, once fixed: "Export
     Submissions" pressed with no book ticked: the alert "No objects
     selected.", no results tab opened and no request failing
@@ -1120,8 +1129,8 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | The returns and availability the "Metadata" tab shows can differ from what the product carries, and an import loses both | 🐞 | medium | issues (claude), 2026-10-06 — re-verified |
 | [A19](#a19) | A Native XML import adds the exporting press as a supplier and changes the suppliers' websites | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A20](#a20) | A book's "Representatives" table does not redraw the first representative ever added on the install | 🐞 | low · crash: both | issues (claude), 2026-10-09 — re-verified |
-| [A21](#a21) | A book's "Representatives" group emptied by "Delete" shows nothing under its heading until a reload | 🐞 | minor | — |
-| [A22](#a22) | A digital format's file size in the book's ONIX product reads whole megabytes followed by ".3" | 🐞 | minor | — |
+| [A21](#a21) | A book's "Representatives" group emptied by "Delete" shows nothing under its heading until a reload | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A22](#a22) | A digital format's file size in the book's ONIX product reads whole megabytes followed by ".3" | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A3](#a3) | A saved audience list cannot be emptied again | ❓ | minor | — |
 | [A10](#a10) | A representative's ID, and an agent's phone and email, reach no file | ❓ | minor | — |
 | [A1](#a1) | On a freshly installed press, the ONIX 3.0 tool's "Export Submissions" ended in "The process failed" for every book | ✅ | retired | PR review (claude), 2026-10-05 — fixed by pkp/omp#2372, merged 2026-10-05 |
@@ -1406,30 +1415,32 @@ bring it back.
 Basis: probe, 2026-10-09. <sup>f-a20</sup>
 
 <a id="a21"></a>
-**A21 — A book's "Representatives" group emptied by "Delete" shows nothing under its heading until a reload** · 🐞 · minor.
+**A21 — A book's "Representatives" group emptied by "Delete" shows nothing under its heading until a reload** · 🐞 · low.
 An editor deletes the last agent, or the last supplier, on a book's
-"Marketing" › "Representatives" page. "Representative removed."
-appears and the row goes, but nothing shows under the group's heading
-where "No Items" should be; the line comes back only after a reload.
-The same happens when the table's very last representative is deleted:
-both headings stand with nothing under either. Adding a representative
-to a group that reads "No Items" hides the line at once, as expected.
-Basis: probe, 2026-10-13. <sup>f-a21</sup>
+"Marketing" › "Representatives" page. "Representative removed." appears
+and the row goes, but nothing shows under the group's heading where "No
+Items" should be; the line comes back only after a reload. The
+representative is deleted, and the other group keeps its rows or its "No
+Items" line.
+Basis: probe, 2026-10-21. <sup>f-a21</sup>
 
 <a id="a22"></a>
-**A22 — A digital format's file size in the book's ONIX product reads whole megabytes followed by ".3"** · 🐞 · minor.
-A press exports a book with Tools › "ONIX 3.0 Monograph Export
-Plugin". Each digital format's product states a file size: the whole
-megabytes of the format's approved files, followed by ".3". An e-book of
-3.8 MB is announced to the trade as 3.3 MB, one of 1.9 MB as 1.3 MB,
-and a format hosted at another website, or one with no files, as
-0.3 MB. Nothing on screen shows the figure, and the press cannot
-correct it: the format's "Metadata" tab never shows its "File Size in
-Mbytes" box
-([Publication formats & proof terms, its A6](U73-publication-formats-proof-terms.md#a6)).
-Expected: the files' size in megabytes to three decimals (3.8 MB as
-"3.800"), and no file size for a format with no files.
-Since: 2012-06-22, a date read from the code's history · Basis: probe, 2026-10-13. <sup>f-a22</sup>
+**A22 — A digital format's file size in the book's ONIX product reads whole megabytes followed by ".3"** · 🐞 · medium.
+A press exports a book with Tools › "ONIX 3.0 Monograph Export Plugin".
+Each digital format's product states a file size: the size of the
+format's files approved with "Approve Proof", cut down to whole
+megabytes, followed by ".3". An e-book of 3.8 MB is announced to the
+trade as 3.3 MB, one of 1.9 MB as 1.3 MB, and a format hosted at another
+website, or one with no files, as 0.3 MB. Nothing on screen shows the
+figure, and the press cannot correct it: the format's "Metadata" tab
+never shows its "File Size in Mbytes" box ([a separate fault](https://gi
+thub.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U73-publication-
+formats-proof-terms.md#a6)). A book moved to another press or install
+with the Native XML plugin keeps the wrong figure as its own stored file
+size. The expected figure is the files' size in megabytes to three
+decimals (3.8 MB as "3.800"), and no file size for a format with no
+files.
+Since: 2012-06-22, a date read from the code's history · Basis: probe, 2026-10-21. <sup>f-a22</sup>
 
 ### Retired
 
@@ -2593,6 +2604,7 @@ supplier deleted first from a table holding one supplier and one agent,
 and after the table's last row (both groups blank). The delete answered
 200 and the row fetch 200 with `elementNotFound`; no server error and
 no page error.
+Issue report: [docs/issues/U74-A21-emptied-representative-group-shows-nothing.md](../issues/U74-A21-emptied-representative-group-shows-nothing.md).
 
 <a id="fn-f-a22"></a>
 **f-a22** — Notes k and o. OMP
@@ -2615,6 +2627,7 @@ new digital format with no files read `ExtentValue` 0.3; another book's
 digital format with one approved 1,992,294-byte file read 1.3, and with
 a second such file 3.3. The "Metadata" tab of both digital formats
 listed the physical groups and no file-size box.
+Issue report: [docs/issues/U74-A22-onix-digital-format-file-size-wrong.md](../issues/U74-A22-onix-digital-format-file-size-wrong.md).
 
 ## Reference — entry points & surfaces
 
