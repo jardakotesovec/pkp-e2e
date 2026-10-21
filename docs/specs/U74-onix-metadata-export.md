@@ -2604,7 +2604,7 @@ supplier deleted first from a table holding one supplier and one agent,
 and after the table's last row (both groups blank). The delete answered
 200 and the row fetch 200 with `elementNotFound`; no server error and
 no page error.
-Issue report: [docs/issues/U74-A21-emptied-representative-group-shows-nothing.md](../issues/U74-A21-emptied-representative-group-shows-nothing.md).
+Issue report: [pkp-e2e#1038](https://github.com/jardakotesovec/pkp-e2e/issues/1038) ([docs/issues/U74-A21-emptied-representative-group-shows-nothing.md](../issues/U74-A21-emptied-representative-group-shows-nothing.md)).
 
 <a id="fn-f-a22"></a>
 **f-a22** — Notes k and o. OMP
@@ -2627,7 +2627,7 @@ new digital format with no files read `ExtentValue` 0.3; another book's
 digital format with one approved 1,992,294-byte file read 1.3, and with
 a second such file 3.3. The "Metadata" tab of both digital formats
 listed the physical groups and no file-size box.
-Issue report: [docs/issues/U74-A22-onix-digital-format-file-size-wrong.md](../issues/U74-A22-onix-digital-format-file-size-wrong.md).
+Issue report: [pkp-e2e#1039](https://github.com/jardakotesovec/pkp-e2e/issues/1039) ([docs/issues/U74-A22-onix-digital-format-file-size-wrong.md](../issues/U74-A22-onix-digital-format-file-size-wrong.md)).
 
 ## Reference — entry points & surfaces
 
