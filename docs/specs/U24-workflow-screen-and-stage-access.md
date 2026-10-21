@@ -1104,6 +1104,12 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - a manager assigned to a submission only as its author, opening the
+    editorial dashboard's address for it, sent to their own view of the
+    submission under My Submissions ([A12](#a12), [A13](#a13),
+    [OPS6](#ops6)): the guard the issue report
+    (`docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md`)
+    proposes, once fixed
   - a preprint server draft's header bubble and list rows reading "Incomplete" ([OPS3](#ops3); Rule 5) {OPS}: the guard the issue report proposes, once fixed
   - a press that enables the URN plugin, disables it and reads the version's pages (no "Identifiers") and the public book page (no URN) ([OMP3](#omp3)) {OMP}: the guard the issue report proposes, once fixed
   - an older workflow address (`…/workflow/access/<id>`) to a deleted submission, and a reader address that names nothing, answering "404 Not Found" inside the site's own header and menus with status 404 ([A9](#a9); Rules 2a, 3): the guard the issue report proposes, once fixed
@@ -1721,11 +1727,11 @@ Issue report (the staged version names): [pkp-e2e#228](https://github.com/jardak
 
 <a id="fn-a12"></a>
 **f-a12** — The editorial stage config's review-round "Files for Review" panel requests `GET api/v1/{context}/submissions/{id}/files?fileStages=4&reviewRoundIds={round}`; `PKPSubmissionFileController::getMany()` narrows the allowed file stages to `Repo::submissionFile()->getAssignedFileStages()` for the reader's stage assignments, which for an Author excludes review files (4), and answers 403 `api.submissionFiles.403.unauthorizedFileStageId` "You are not allowed to access these files.", shown through `useFetch` as the "Error" dialog (note c). Live-probed 2026-10-19 (Rule 20; OJS `ccorino` on submission 2, Review Round 1; OMP `afinkel` on submission 2, External Review Round 1; two runs each, as note r): the dialog on landing, on a reload, and before every press of "Review" / "External Review" and "Review Round 1", none on the other stages; the request answered 403 `{"error":"You are not allowed to access these files."}` (a refusal, no server error); after "OK" the panel stayed, "Files for Review" reading "No Items" where `dbarnes` saw the round's file (OJS file 14, OMP file 15 "chapter1.pdf"). OPS has no review stage and showed no dialog.
-Issue report: [docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md).
+Issue report: [pkp-e2e#1041](https://github.com/jardakotesovec/pkp-e2e/issues/1041) ([docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md)).
 
 <a id="fn-a13"></a>
 **f-a13** — `Schema::getAvailableEditorialDecisions()` → `checkDecisionPermissions()` (`lib/pkp/classes/submission/maps/Schema.php`) looks for the user's manager or sub-editor stage assignments on the stage and, finding none, falls back to the user's manager-level group, so the decision buttons render; `DecisionAllowedPolicy` (`classes/security/authorization/internal/`) finds the user's Author stage assignment on the stage, skips it as not editorial, and denies with `editor.submission.workflowDecision.disallowedDecision`. Live-probed 2026-10-19 (Rule 20; OJS, OMP, as note r, two runs each): on "Review Round 1" / "External Review" round 1 the buttons "Request Revisions", "Accept Submission", "Create New Review Round", "Cancel Review Round", "Decline Submission", and "Schedule For Publication" on OJS's "Submission" and "Production" entries; "Request Revisions" opened its window ("Require New Review Round", "Next") as it did for `dbarnes`; "Next" went to `user/authorizationDenied?message=editor.submission.workflowDecision.disallowedDecision`, "You do not have permission to record this decision on this submission.". Not pressed: the other decision buttons, "Add Reviewer", "Upload", "Request Response" and OJS's "Editor Recommendation".
-Issue report: [docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md).
+Issue report: [pkp-e2e#1041](https://github.com/jardakotesovec/pkp-e2e/issues/1041) ([docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md)).
 
 <a id="fn-omp2"></a>
 **f-omp2** — Note h: `useWorkflowNavigationConfigOMP.js::getPublicationItemsEditorial()` pushes `media` before the settings-gated pages and outside the `permissions.canAccessProduction` block; `…OJS.js` and `…OPS.js` push it inside that block. Live-probed 2026-09-02: `assistant.rita` as Funding Coordinator on a monograph in External Review Round 1 saw "Title & Abstract", "Contributors", "Chapters", "Metadata", "Publication Formats", "Media", "References", "Funding" and no "Catalog Entry" or "Permissions & Disclosure"; the same role on a journal article in Review Round 1 saw "Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML" and no "Media".
@@ -1749,7 +1755,7 @@ Issue report: [docs/issues/U24-OPS3-preprint-draft-labelled-production.md](../is
 
 <a id="fn-ops6"></a>
 **f-ops6** — On OPS the "Post the preprint" action moves the panel to the preprint's "Title & Abstract" page (`workflowMenuKey=publication_{id}_titleAbstract`), where posting starts; for this reader the editorial publication items are not built (`canAccessPublication` false, notes h and r), so the move has no page to land on and nothing happens. The decision buttons render through the manager fallback of note f-a13. Live-probed 2026-10-19 (Rule 20; OPS `main`, `ccorino` given "Preprint Server manager", preprint 1 in Production, assigned as its Author, with the moderators `dbuskins` and `sberardo`; two runs, as note r): "Post the preprint" and "Decline Submission" on "Production"; pressing "Post the preprint" opened no window and no notice and left `workflowMenuKey=workflow_5`; control `dbarnes` (Preprint Server manager, not an author of it): the same press went to `workflowMenuKey=publication_1_titleAbstract`, "Preprint: Title & Abstract". "Decline Submission" was not pressed. No request failed and no page error was logged.
-Issue report: [docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md).
+Issue report: [pkp-e2e#1041](https://github.com/jardakotesovec/pkp-e2e/issues/1041) ([docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md)).
 
 ## Reference — entry points & surfaces
 
