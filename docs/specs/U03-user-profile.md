@@ -1221,7 +1221,7 @@ unless its Basis line says otherwise.
 | [A24](#a24) | The Profile page's Contact tab sometimes logs a script error on opening or saving; the save still works | 🐞 | low · crash: script | issues (claude), 2026-10-15 — re-verified |
 | [A25](#a25) | After a password change, a page left open in another browser drops its next save or tab press instead of going to the Login page | 🐞 | medium · crash: script | issues (claude), 2026-10-15 — re-verified |
 | [A26](#a26) | A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##" | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A27](#a27) | An API request with a key not in the form of one is refused with "… because of the following error: {$error}", no reason in place of "{$error}" | 🐞 | minor | — |
+| [A27](#a27) | An API request with a malformed key is refused with "{$error}" where the reason should be | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS2](#ops2) | A preprint server sends the email-change message but its emails list has no "Change Email Address Invitation" row to edit | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | On a preprint server, saving the Profile's Roles tab erases the account's reviewing interests | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A5](#a5) | The "role scheduled to begin" banner shows in any journal where the user has no role, even when the waiting role is elsewhere, and gives the earliest waiting date on the site | ❓ | minor | claim check (claude), 2026-10-14 — widened |
@@ -1633,18 +1633,14 @@ this code.
 Since: 2012-05-07 (14 years) · Basis: probe, 2026-10-15. <sup>[f-a26](#fn-a26)</sup>
 
 <a id="a27"></a>
-**A27 — An API request with a key not in the form of one is refused with an unfilled "{$error}"** · 🐞 · minor.
-An application that sends the journal's API a request with a key that
-is not in the form of one (only the key's first two dot-separated
-parts, or a made-up string) is refused, as it should be. The refusal
-reads "The apiToken could not be decoded because of the following
-error: {$error}": "{$error}" stays as it is, where the reason should
-be. Nothing is lost and no screen shows it; only the application's
-developer sees it, and it does not say what is wrong with the key. The
-key with the first character of its last part changed gets its own
-message, "The API token could not be validated. …", and a deleted key
-"You are not authorized to access the requested resource." (*Side effects*).
-Since: 2023-10-13 (3 years) · Basis: probe, 2026-10-19. <sup>[f-a27](#fn-a27)</sup>
+**A27 — An API request with a malformed key is refused with "{$error}" where the reason should be** · 🐞 · low.
+An application that sends the REST API a key that cannot be decoded (a
+made-up string, or a real key cut off after its second dot-separated
+part) gets a 400 answer reading "The apiToken could not be decoded
+because of the following error: {$error}". "{$error}" stays as it is,
+where the reason should be, so the developer is not told what is wrong
+with the key.
+Since: 2023-10-13 (3 years) · Basis: probe, 2026-10-21. <sup>[f-a27](#fn-a27)</sup>
 
 ### OMP
 
@@ -3225,6 +3221,7 @@ requests a run); no server log line and no 5xx. The same runs: the
 valid key 200, the key with its signature's first character changed
 400 `api.400.invalidApiToken` (also for the deleted key so changed: the
 signature is checked before the key is looked up), the deleted key 401.
+Issue report: [docs/issues/U03-A27-api-token-undecodable-error-unfilled.md](../issues/U03-A27-api-token-undecodable-error-unfilled.md).
 
 <a id="fn-omp1"></a>
 **f-omp1** — `omp/registry/userGroups.xml`: `permitSelfRegistration="true"`

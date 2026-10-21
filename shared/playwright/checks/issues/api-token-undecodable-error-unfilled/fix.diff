@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/middleware/DecodeApiTokenWithValidation.php
++++ b/lib/pkp/classes/middleware/DecodeApiTokenWithValidation.php
+@@ -124,7 +124,7 @@
+                 ]);
+ 
+                 return response()->json([
+-                    'error' => __('api.400.tokenCouldNotBeDecoded'),
++                    'error' => __('api.400.tokenCouldNotBeDecoded', ['error' => $exception->getMessage()]),
+                 ], Response::HTTP_BAD_REQUEST);
+             }
+ 

@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/middleware/DecodeApiTokenWithValidation.php
++++ b/lib/pkp/classes/middleware/DecodeApiTokenWithValidation.php
+@@ -114,7 +114,7 @@
+ 
+             if($exception instanceof DomainException || $exception instanceof UnexpectedValueException) {
+                 return response()->json([
+-                    'error' => __('api.400.tokenCouldNotBeDecoded'),
++                    'error' => __('api.400.tokenCouldNotBeDecoded', ['error' => $exception->getMessage()]),
+                 ], Response::HTTP_BAD_REQUEST);
+             }
+ 
