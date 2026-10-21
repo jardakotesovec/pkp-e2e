@@ -2283,7 +2283,7 @@ end: OJS `IssueHandler::archive()` (pkp/pkp-lib#10596) and OPS
 does not (U17 OPS5), nor OMP's catalog and series pages (U68 A10, an open
 question there). No issue report covers the category page: U17 OPS5's
 report names it as not read.
-Issue report: [docs/issues/U16-A23-category-page-past-last-not-404.md](../issues/U16-A23-category-page-past-last-not-404.md).
+Issue report: [pkp-e2e#1049](https://github.com/jardakotesovec/pkp-e2e/issues/1049) ([docs/issues/U16-A23-category-page-past-last-not-404.md](../issues/U16-A23-category-page-past-last-not-404.md)).
 
 <a id="fn-f-a24"></a>
 **f-a24** — Note d. lib/pkp `Category\Repository::validate()` accepts the
