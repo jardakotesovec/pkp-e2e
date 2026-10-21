@@ -1109,7 +1109,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | The default "For Readers" text's "Privacy Statement" link opens the Submissions page, not the Privacy Statement page {OJS OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | Hosted Journals "Edit" refuses to save a journal whose "Country" was never set | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | With the masthead not based on enrollments, invitations and masthead changes still promise "Your name will appear in the {journal}'s masthead"; reviewers are promised it while the journal lists none | 🐞 | minor | — |
-| [A14](#a14) | In Russian on a press, Czech on a preprint server, and Hindi and Uzbek (Latin) on a journal, the page about the software shows "{$ompVersion, …", "{$ojsVersion}" or "{$ ojsVersion}" instead of the version | 🐞 | minor | — |
+| [A14](#a14) | In six languages the page about the software shows a raw "{$…Version}" placeholder or a dead contact link | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP2](#omp2) | On a site hosting several presses, the site's "About Open Monograph Press" page says "This press uses" {OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | A preprint server's French "Privacy Statement" default is the raw text "##default.contextSettings.privacyStatement##" {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | A preprint server's French "Editorial Masthead" heads the Moderators "##default.groups.name.sectionEditor##" {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
@@ -1262,31 +1262,22 @@ protect them. The older promise for roles the masthead never lists:
 Since: 2026-09-28 · Basis: probe + code reading. <sup>f-a13</sup>
 
 <a id="a14"></a>
-**A14 — In Russian on a press, Czech on a preprint server, and Hindi and Uzbek (Latin) on a journal, the page about the software shows "{$ompVersion, …", "{$ojsVersion}" or "{$ ojsVersion}" instead of the version** · 🐞 · minor.
-A visitor who opens the page about the software (Rule 20) in another
-language expects the version number, as English gives it ("Open Journal
-Systems 3.6.0.0"). Four translations write the placeholder wrongly, so
-the page prints its raw text instead:
-
-- **Russian, on a press**: "{$ompVersion, которая является …" (the
-  closing brace left out), on the site's page and each press's page.
-- **Hindi, on a journal**: "{$ ojsVersion}" on the site's page; a
-  journal's own page shows the version. In both Hindi paragraphs the
-  link to PKP's website runs on to the end of the paragraph, so the
-  licence and everything after it is link text; on the site's page a
-  stray "<" shows inside that link text, and the journal's page has no
-  link to "Contact".
-- **Uzbek (Latin), on a journal**: "{$ ojsVersion}" on the site's page
-  and each journal's page.
-- **Czech, on a preprint server**: "Tento web používá Open Preprint
-  Systems {$ojsVersion}, což je …" on the site's page, and "Tento server
-  používá Open Preprint Systems {$ojsVersion}, což je …" on each
-  server's page. The server page's link "Kontaktujte přímo server" still
-  opens its "Kontakt" page.
-
-A journal in Russian, and a journal and a press in Czech, show the
-version. Each fix is one or two translated texts.
-Basis: probe, 2026-10-13 and 2026-10-15. <sup>f-a14</sup>
+**A14 — In six languages the page about the software shows a raw "{$…Version}" placeholder or a dead contact link** · 🐞 · low.
+A visitor who opens the page about the software (the PKP logo in the
+footer) in one of six languages finds a translation error where the page
+should name the version or link to a contact page: - OJS, Hindi: the
+site-wide page prints "{$ ojsVersion}". - OJS, Uzbek (Latin): the site-
+wide page and each journal's own page print "{$ ojsVersion}". - OMP,
+Russian: the site-wide page and each press's own page print
+"{$ompVersion, которая …". - OPS, Czech: the site-wide page and each
+server's own page print "{$ojsVersion}". - OJS, Kazakh, and OPS,
+Turkish: the last sentence of the site-wide page links to
+"{$contactUrl}", which opens "404 Not Found". English and the other
+languages show the version ("Open Journal Systems 3.6.0.0") and working
+links. No error or notice tells anyone, and no task depends on the page.
+The code is right. The fix is a corrected text in each app's locale
+files, made on Weblate or as a commit to the `.po` files.
+Basis: probe, 2026-10-21. <sup>f-a14</sup>
 
 ### OMP
 
@@ -2618,6 +2609,7 @@ log. Mechanism: OPS `locale/cs/locale.po` `about.aboutOPSSite` and
 (2023-05-02). Read in the code: stable-3_4_0 carries the same text and
 template; OPS stable-3_3_0 ships no Czech interface (only plugin
 `cs_CZ` files).
+Issue report: [docs/issues/U07-A14-software-page-version-placeholder-raw.md](../issues/U07-A14-software-page-version-placeholder-raw.md).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `locale/en/locale.po` `manager.setup` "Setup" (OJS

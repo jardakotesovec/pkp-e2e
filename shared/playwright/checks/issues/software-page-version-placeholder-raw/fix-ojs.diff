@@ -1,0 +1,55 @@
+--- a/locale/hi/locale.po
++++ b/locale/hi/locale.po
+@@ -1931,9 +1931,9 @@
+ #, fuzzy
+ msgid "about.aboutOJSSite"
+ msgstr ""
+-"यह साइट ओपन जर्नल सिस्टम {$ ojsVersion} का उपयोग करती है, जो ओपन सोर्स जर्नल "
++"यह साइट ओपन जर्नल सिस्टम {$ojsVersion} का उपयोग करती है, जो ओपन सोर्स जर्नल "
+ "प्रबंधन और प्रकाशन सॉफ्टवेयर विकसित, समर्थित और स्वतंत्र रूप से <a href=\"http://pkp."
+-"sfu.ca/\"> सार्वजनिक ज्ञान परियोजना <द्वारा वितरित किया जाता है जीएनयू जनरल पब्लिक "
++"sfu.ca/\"> सार्वजनिक ज्ञान परियोजना द्वारा वितरित किया जाता है जीएनयू जनरल पब्लिक "
+ "लाइसेंस के तहत ।</a>"
+ 
+ msgid "help.ojsHelp"
+--- a/locale/uz_Latn/locale.po
++++ b/locale/uz_Latn/locale.po
+@@ -1777,7 +1777,7 @@
+ "Bu jurnalda GNU General Public License litsenziyasi ostida \"Public "
+ "Knowledge Project\" tomonidan ishlab chiqilgan, qo'llab -quvvatlanadigan va "
+ "erkin tarqatiladigan ochiq manbali jurnallarni boshqarish va nashr qilish "
+-"dasturi bo'lgan Open Journal Systems {$ ojsVersion} ishlatiladi. <a href="
++"dasturi bo'lgan Open Journal Systems {$ojsVersion} ishlatiladi. <a href="
+ "\"http://pkp.sfu.ca/\"> dasturiy ta'minot haqida ko'proq ma'lumot olish "
+ "uchun </a> PKP veb -saytiga tashrif buyuring. Iltimos, <a href="
+ "\"{$contactUrl}\"> jurnal bilan bog'laning </a> jurnalga oid savollar va "
+@@ -1788,7 +1788,7 @@
+ "Bu saytda GNU General Public License litsenziyasi ostida \"Public Knowledge "
+ "Project\" tomonidan ishlab chiqilgan, qo'llab -quvvatlanadigan va erkin "
+ "tarqatiladigan ochiq manbali jurnallarni boshqarish va nashr qilish dasturi "
+-"bo'lgan ochiq jurnal tizimlari {$ ojsVersion} ishlatiladi. <a href=\"http://"
++"bo'lgan ochiq jurnal tizimlari {$ojsVersion} ishlatiladi. <a href=\"http://"
+ "pkp.sfu.ca/\"> dasturiy ta'minot haqida ko'proq ma'lumot olish uchun </a> "
+ "PKP veb -saytiga tashrif buyuring. Iltimos, jurnalga oid savollar va "
+ "jurnallarga yuborish bilan bevosita saytga murojaat qiling."
+--- a/locale/kk/locale.po
++++ b/locale/kk/locale.po
+@@ -1762,6 +1762,7 @@
+ "сұрақтарыңыз болса және осы журналға материалдарды жіберсеңіз, <a href="
+ "\"{$contactUrl}\">осы журналға тікелей хабарласуыңызды сұраймыз</a>."
+ 
++#, fuzzy
+ msgid "about.aboutOJSSite"
+ msgstr ""
+ "Бұл журналда ашық журналдарды басқару мен жариялауға арналған Open Journal "
+@@ -1769,8 +1770,8 @@
+ "GNU General Public License лицензиясы бойынша Public Knowledge Project "
+ "көмегімен таратылады. Бұл бағдарлама туралы <a href=\"http://pkp.sfu.ca/\"> "
+ "қосымша ақпарат алу үшін</a> PKP веб-сайтына кіріңіз. Егер журналға қатысты "
+-"сұрақтарыңыз болса және осы журналға материалдарды жіберсеңіз, <a href="
+-"\"{$contactUrl}\">осы журналға тікелей хабарласуыңызды сұраймыз</a>."
++"сұрақтарыңыз болса және осы журналға материалдарды жіберсеңіз, осы "
++"журналға тікелей хабарласуыңызды сұраймыз."
+ 
+ msgid "help.ojsHelp"
+ msgstr "Open Journal Systems бойынша көмек"

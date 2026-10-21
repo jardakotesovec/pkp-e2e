@@ -208,4 +208,5 @@ Small: one line in one English locale file, and the fuzzy flags.
   `pkp/pkp-lib#7349` (OMP not showing its version) are other faults.
 - Seen on the way, a separate fault (in the code, not walked): the Russian
   site string reads `{$ompVersion, которая` with no closing brace, so the
-  placeholder is not filled.
+  placeholder is not filled. Written up in
+  [U07-A14-software-page-version-placeholder-raw.md](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U07-A14-software-page-version-placeholder-raw.md).

@@ -1,0 +1,39 @@
+--- a/locale/cs/locale.po
++++ b/locale/cs/locale.po
+@@ -436,7 +436,7 @@
+ 
+ msgid "about.aboutOPSServer"
+ msgstr ""
+-"Tento server používá Open Preprint Systems {$ojsVersion}, což je open source "
++"Tento server používá Open Preprint Systems {$opsVersion}, což je open source "
+ "preprintový server pro správu a publikování preprintů vyvinutý, podporovaný "
+ "a volně šířený v rámci projektu Public Knowledge Project pod GNU General "
+ "Public licencí. Navštivte webové stránky <a href=\"https://pkp.sfu.ca/\""
+@@ -468,7 +468,7 @@
+ 
+ msgid "about.aboutOPSSite"
+ msgstr ""
+-"Tento web používá Open Preprint Systems {$ojsVersion}, což je open source "
++"Tento web používá Open Preprint Systems {$opsVersion}, což je open source "
+ "preprintový server pro správu a publikování preprintů vyvinutý, podporovaný "
+ "a volně šířený v rámci projektu Public Knowledge Project pod GNU General "
+ "Public licencí. Navštivte webové stránky <a href=\"https://pkp.sfu.ca/\""
+--- a/locale/tr/locale.po
++++ b/locale/tr/locale.po
+@@ -275,6 +275,7 @@
+ "Lütfen sunucu ve ön baskıların gönderilmesi ile ilgili sorularınız için "
+ "doğrudan <a href=\"{$contactUrl}\">sunucuyla</a> iletişime geçin."
+ 
++#, fuzzy
+ msgid "about.aboutOPSSite"
+ msgstr ""
+ "Bu sunucu, GNU Genel Kamu Lisansı altında Public Knowledge Project "
+@@ -283,7 +284,7 @@
+ "{$opsVersion} sürümünü kullanır. Yazılım hakkında daha fazla bilgi edinmek "
+ "için <a href=\"http://pkp.sfu.ca/\">PKP'nin web sitesini</a> ziyaret edin. "
+ "Lütfen sunucu ve ön baskıların gönderilmesi ile ilgili sorularınız için "
+-"doğrudan <a href=\"{$contactUrl}\">sunucuyla</a> iletişime geçin."
++"doğrudan sunucuyla iletişime geçin."
+ 
+ msgid "help.goToEditPage"
+ msgstr "{$sectionTitle} Düzenle"
