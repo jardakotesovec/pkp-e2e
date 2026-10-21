@@ -1196,7 +1196,7 @@ to this operation." with the draft untouched, on both lines. On
 on all three apps. A Journal Manager's or Section Editor's request, and
 an API key as `Authorization: Bearer <key>` (*[User profile](U03-user-profile.md#fn-h)*), were
 not driven.
-Issue report: [docs/issues/U22-A8-api-submission-delete-server-error.md](../issues/U22-A8-api-submission-delete-server-error.md).
+Issue report: [pkp-e2e#1036](https://github.com/jardakotesovec/pkp-e2e/issues/1036) ([docs/issues/U22-A8-api-submission-delete-server-error.md](../issues/U22-A8-api-submission-delete-server-error.md)).
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's filter form
