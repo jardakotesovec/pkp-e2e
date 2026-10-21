@@ -922,10 +922,10 @@ an entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | Manage Emails: "Add Template" opens an empty window titled "Edit Template" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A5](#a5) | On "Manage Emails", "Remove" on a template a manager created names it by its subject, not its row's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A press's or preprint server's French submission confirmation thanks the author for choosing "notre revue" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A12](#a12) | In French (Canada), every row's button on "Manage Emails" reads "Edit" in English | 🐞 | minor | — |
+| [A12](#a12) | In any language but English, every email's button on "Manage Emails" reads "Edit" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP1](#omp1) | On a press, "Edit" on the masthead email leaves the page stuck behind a spinner | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP2](#omp2) | On a press, "Notify Primary Contact" opens with neither "Yes" nor "No" selected | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [OMP3](#omp3) | On a press, the French "Editorial Reminder" prints "{$journalName}" where the press's name belongs | 🐞 | minor | — |
+| [OMP3](#omp3) | A press's French "Editorial Reminder" prints "{$journalName}" where the press's name belongs | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | Preprint server emails: "Insert Content" describes the server's initials with a raw code | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | Two filters of one block narrow the list instead of widening it | ❓ | minor | — |
 | [A6](#a6) | An edited one-template email can only be restored by "Reset All" | ❓ | user-visible | — |
@@ -1081,13 +1081,15 @@ it, unless an upgrade step rewrites the stored copy.
 Basis: probe, 2026-10-04. <sup>f-a10</sup>
 
 <a id="a12"></a>
-**A12 — In French (Canada), every row's button on "Manage Emails" reads "Edit" in English** · 🐞 · minor.
+**A12 — In any language but English, every email's button on "Manage Emails" reads "Edit"** · 🐞 · low.
 A manager who works in French (Canada) opens "Gérer les courriels" and
 finds every email's button labelled "Edit", in English, beside the
-French names and descriptions; it should read "Modifier". A screen
-reader already names the same button in French, "Modifier {email
-name}". The button still opens the email as it does in English.
-Basis: probe, 2026-10-04. <sup>f-a12</sup>
+French names and descriptions; it should read "Modifier". It is the only
+English word on the page. The word is written into the page's template
+rather than looked up in the language files, so every interface language
+other than English shows "Edit" there too; French (Canada) is the
+language walked.
+Basis: probe, 2026-10-21. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — A journal's installed signature keeps linking to the address the journal was created at** · ❓ · minor.
@@ -1138,22 +1140,21 @@ to fill in the rest.
 Basis: probe, 2026-10-04. <sup>f-omp2</sup>
 
 <a id="omp3"></a>
-**OMP3 — On a press, the French "Editorial Reminder" prints "{$journalName}" where the press's name belongs** · 🐞 · minor.
-On a press with French (Canada) as a form language, "Edit" on "Editorial
-Reminder" in "Manage Emails" opens "Edit Template" with a French body
-that reads "… soumissions dans {$journalName}. Des actions sont …"; the
-English body reads "{$contextName}" there. The reminder a Press Manager
-assigned to a submission receives in French then reads "Vous êtes
-présentement assigné-e à {number} soumissions dans {$journalName}",
-the code printed as it stands and linked to the press's home page. Its
-subject, "Tâches éditoriales en attente pour {press name}", names the
-press. A journal's French reminder names the journal in the same
-sentence; a preprint server has no "Editorial Reminder".
-The French text is copied into the press's templates when French is
-added, so a corrected translation does not reach a press that already
-has French until a manager edits the body or an upgrade step rewrites
-the stored copy.
-Basis: probe, 2026-10-13. <sup>f-omp3</sup>
+**OMP3 — A press's French "Editorial Reminder" prints "{$journalName}" where the press's name belongs** · 🐞 · low.
+On a press that offers French (Canada), "Edit" on "Editorial Reminder"
+in "Manage Emails" opens "Edit Template" with a French body that reads
+"… soumissions dans {$journalName}. Des actions sont …"; the English
+body reads "{$contextName}" there. The reminder a press editor receives
+in French then reads, for example, "Vous êtes présentement assigné-e à 4
+soumissions dans {$journalName}": the placeholder text is printed as it
+stands, as the link to the press's home page. A journal's French
+reminder names the journal in the same sentence. French (France) is not
+affected. The wrong text is stored in the install's default templates
+when French (Canada) is installed, so correcting the translation alone
+does not reach presses that already have it: the fix needs an upgrade
+step that rewrites the stored text. Until then a manager can correct the
+French body by hand.
+Basis: probe, 2026-10-21. <sup>f-omp3</sup>
 
 ### OPS
 
@@ -1869,6 +1870,7 @@ Live-probed 2026-10-04 on `main`, all three apps, on `publicknowledge`
 in French (Canada), each row's shown text and screen-reader name read:
 every row's button showed "Edit" while its screen-reader name read
 "Modifier …".
+Issue report: [docs/issues/U56-A12-french-manage-emails-edit-button-english.md](../issues/U56-A12-french-manage-emails-edit-button-english.md).
 
 <a id="fn-f-a13"></a>
 **f-a13** — Live-probed 2026-10-13 on `main` and `stable-3_5_0`, all
@@ -1948,6 +1950,7 @@ press or preprint server with Norwegian (Bokmål) is expected to print
 the code the same way. On `main` "Install Locale" offered no
 Norwegian (Bokmål) on 2026-10-13, all three apps, so it cannot be
 added there.
+Issue report: [docs/issues/U56-OMP3-press-french-editorial-reminder-journal-placeholder.md](../issues/U56-OMP3-press-french-editorial-reminder-journal-placeholder.md).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `ContextEmailVariable::descriptions()` uses

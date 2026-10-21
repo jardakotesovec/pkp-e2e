@@ -1,0 +1,127 @@
+--- a/lib/pkp/locale/fr_CA/emails.po
++++ b/lib/pkp/locale/fr_CA/emails.po
+@@ -267,7 +267,7 @@
+ msgstr ""
+ "<p>{$recipientName}, </p><p>Vous êtes présentement assigné-e à "
+ "{$numberOfSubmissions} soumissions dans <a href=\"{$contextUrl}\""
+-">{$journalName}</a>. Des actions sont <b>attendues de votre part pour ces "
++">{$contextName}</a>. Des actions sont <b>attendues de votre part pour ces "
+ "soumissions</b>.</p>{$outstandingTasks}<p>Vous pouvez consulter toutes vos "
+ "soumissions dans votre <a href=\"{$submissionsUrl}\">tableau de bord des "
+ "soumissions</a>.</p><p>Si vous avez des questions, contactez {$contactName} "
+--- a/lib/pkp/locale/nb_NO/emails.po
++++ b/lib/pkp/locale/nb_NO/emails.po
+@@ -46,7 +46,7 @@
+ msgstr ""
+ "<p>{$recipientName}:</p>\n"
+ "<p>Takk for at du har fullført vurderingen av manuskriptet "
+-"«{$submissionTitle}» for {$journalName}. Vi setter stor pris på at du bidrar "
++"«{$submissionTitle}» for {$contextName}. Vi setter stor pris på at du bidrar "
+ "til å sikre den faglige kvaliteten på artiklene vi publiserer.</p>\n"
+ "<p>Med vennlig hilsen,</p>\n"
+ "<p>{$signature}</p>"
+@@ -58,7 +58,7 @@
+ msgstr ""
+ "<p>Kjære {$recipientName},</p>\n"
+ "<p>Takk for at du fullførte din vurdering av innsendelsen, {$submissionTitle}"
+-", for {$journalName}. Vi setter stor pris på din tid og ekspertise i å bidra "
++", for {$contextName}. Vi setter stor pris på din tid og ekspertise i å bidra "
+ "til kvaliteten på det arbeidet vi publiserer. Vi har delt dine kommentarer "
+ "med forfatterne, sammen med kommentarene fra våre andre fagfeller og "
+ "redaktørens beslutning.</p>\n"
+@@ -69,17 +69,17 @@
+ "kom til en beslutning. Av og til kan redaktørens beslutning avvike fra "
+ "anbefalingen gitt av en eller flere fagfeller. Vi er takknemlige for våre "
+ "fagfellers ekspertise og forslag.</p>\n"
+-"<p>Det har vært en glede å samarbeide med deg som fagfelle for {$journalName}"
++"<p>Det har vært en glede å samarbeide med deg som fagfelle for {$contextName}"
+ ", og vi håper å få muligheten til å arbeide med deg igjen i fremtiden.</p>\n"
+ "<p>Med vennlig hilsen,</p> \n"
+-"<p>{$journalSignature}</p>"
++"<p>{$contextSignature}</p>"
+ 
+ msgid "emails.decision.notifyOtherAuthors.subject"
+ msgstr "En oppdatering angående din innlevering"
+ 
+ msgid "emails.decision.notifyOtherAuthors.body"
+ msgstr ""
+-"<p>Følgende e-post ble sendt til {$submittingAuthorName} fra {$journalName} "
++"<p>Følgende e-post ble sendt til {$submittingAuthorName} fra {$contextName} "
+ "angående {$submissionTitle}.</p>\n"
+ "<p>Du mottar en kopi fordi du er blitt oppgitt som forfatter av denne "
+ "innleveringen. Instruksjonene i e-posten er tiltenkt korresponderende "
+@@ -95,7 +95,7 @@
+ msgstr ""
+ "<p>{$recipientName}:</p>\n"
+ "<p>Vi har tatt en beslutning angående innleveringen din, «{$submissionTitle}»"
+-", som du sendte inn til {$journalName}. </p>\n"
++", som du sendte inn til {$contextName}. </p>\n"
+ "<p>Vår beslutning er: Sendes til fagfellevurdering</p>\n"
+ "<p>Innleveringens URL: {$submissionUrl}</p>"
+ 
+@@ -119,7 +119,7 @@
+ msgstr ""
+ "<p>{$authors}:</p>\n"
+ "<p>Vi har tatt en beslutning angående innleveringen din, «{$submissionTitle}»"
+-", som du sendte inn til {$journalName}.</p>\n"
++", som du sendte inn til {$contextName}.</p>\n"
+ "<p>Vår beslutning er: Omarbeiding kreves</p>"
+ 
+ msgid "emails.editorDecisionResubmit.subject"
+@@ -132,7 +132,7 @@
+ msgstr ""
+ "<p>{$authors}:</p>\n"
+ "<p>Vi har tatt en beslutning angående innleveringen din «{$submissionTitle}»"
+-", som du sendte inn til {$journalName}.</p>\n"
++", som du sendte inn til {$contextName}.</p>\n"
+ "<p>Vår beslutning er: Lever inn til ny fagfellevurdering</p>"
+ 
+ msgid "emails.editorDecisionDecline.subject"
+@@ -168,7 +168,7 @@
+ msgstr ""
+ "<p>{$recipientName}:\n"
+ "<p>Takk for at du har sagt deg villig til å bidra til arbeidet vårt. "
+-"Innleveringen «{$submissionTitle}»; for {$journalName} er klar for "
++"Innleveringen «{$submissionTitle}»; for {$contextName} er klar for "
+ "redigering. Du finner innleveringen på tidsskriftets nettsted, sammen med "
+ "vår «Instruks for språkvask.</p>\n"
+ "<p>1. Klikk på innleveringens URL under</p>\n"
+@@ -177,7 +177,7 @@
+ "<p>3. Lagre de språkvaskede filene og last dem opp.</p>\n"
+ "<p>4. Informer redaktøren at alle filene har blitt bearbeidet og at "
+ "produksjonen kan starte.</p>\n"
+-"<p>{$journalName} URL: <a href=\"{$submissionUrl}\">{$submissionUrl}</a></p>\n"
++"<p>{$contextName} URL: <a href=\"{$submissionUrl}\">{$submissionUrl}</a></p>\n"
+ "<p>Brukernavn: {$recipientUsername}</p>"
+ 
+ msgid "emails.editorDecisionNewReviewRound.subject"
+@@ -244,7 +244,7 @@
+ "annet tidsskrift.</p><p>Med vennlig hilsen,</p>{$signature}"
+ 
+ msgid "emails.editorialReminder.subject"
+-msgstr "Utestående redaksjonelle oppgaver for {$journalName}"
++msgstr "Utestående redaksjonelle oppgaver for {$contextName}"
+ 
+ msgid "emails.editorialReminder.body"
+ msgstr ""
+--- a/lib/pkp/classes/migration/upgrade/v3_5_0/I10962_UpdateEmailTemplateVariables.php
++++ b/lib/pkp/classes/migration/upgrade/v3_5_0/I10962_UpdateEmailTemplateVariables.php
+@@ -38,12 +38,18 @@
+                 'journalSignature'=> 'contextSignature',
+             ],
+             'omp' => [ // OMP
++                // Translations copied from a journal's text
++                'journalName' => 'contextName',
++                'journalSignature' => 'contextSignature',
+                 'pressAcronym' => 'contextAcronym',
+                 'pressName' => 'contextName',
+                 'pressUrl' => 'contextUrl',
+                 'pressSignature' => 'contextSignature',
+             ],
+             'ops' => [ // OPS
++                // Translations copied from a journal's text
++                'journalName' => 'contextName',
++                'journalSignature' => 'contextSignature',
+                 'serverAcronym' => 'contextAcronym',
+                 'serverName' => 'contextName',
+                 'serverUrl'  => 'contextUrl',
