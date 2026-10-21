@@ -471,15 +471,15 @@ typed. Nothing asks first. The one exception is an author row added in
     references has no "References" block: no heading and no empty
     section. The page itself belongs to *Article landing page & reading*
     (on a press, *Monograph landing page*). <sup>p</sup> <sup>q23</sup>
-    - 27a. **Where an address's link leads.** A full stop or a comma
-      right after an address stays out of its link. Otherwise the link
-      leads to the address as shown, with two exceptions: <sup>q26</sup>
-      - an address with an apostrophe links only to its part before the
-        apostrophe: "https://example.org/kilo's-page" shows whole, but
-        its link opens "https://example.org/kilo" ([A29](#a29));
-        <sup>q26</sup>
-      - a closing bracket right after an address is taken into its link:
-        "(https://doi.org/10.1234/f8)." links to
+    - 27a. **Where an address's link leads.** Read in the code, the
+      link runs to the next space or square or angle bracket, less a
+      full stop or comma at its end: a semicolon, colon, closing bracket
+      or double quote mark after an address goes into it
+      <sup>p</sup>. The drive showed: <sup>q26</sup>
+      - an apostrophe in an address cuts its link there:
+        "https://example.org/kilo's-page" shows whole but opens
+        "https://example.org/kilo" ([A29](#a29)); <sup>q26</sup>
+      - "(https://doi.org/10.1234/f8)." links to
         "https://doi.org/10.1234/f8)", the bracket included
         ⚠ [A30](#a30). <sup>p</sup> <sup>q26</sup>
 
