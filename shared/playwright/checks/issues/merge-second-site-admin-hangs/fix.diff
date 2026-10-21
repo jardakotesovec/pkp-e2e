@@ -1,0 +1,98 @@
+--- a/lib/pkp/classes/user/Repository.php
++++ b/lib/pkp/classes/user/Repository.php
+@@ -457,6 +457,32 @@
+     }
+ 
+     /**
++     * build a permission map for a site administrator over a set of users:
++     * every user but another site administrator, whom no one may administer
++     * (Validation::getAdministrationLevel())
++     */
++    public function permissionMapForSiteAdmin(array $userIds): array
++    {
++        $userIds = array_values(array_unique(array_map('intval', $userIds)));
++        if (empty($userIds)) {
++            return [];
++        }
++
++        $siteAdminIds = UserUserGroup::query()
++            ->withUserIds($userIds)
++            ->withActive()
++            ->whereHas('userGroup', fn ($q) => $q->withRoleIds([Role::ROLE_ID_SITE_ADMIN]))
++            ->pluck('user_id')
++            ->all();
++
++        $map = array_fill_keys($userIds, true);
++        foreach ($siteAdminIds as $id) {
++            $map[(int)$id] = false;
++        }
++        return $map;
++    }
++
++    /**
+      * build a permission map for a manager over a set of users
+      */
+     public function permissionMapForManager(int $managerUserId, array $userIds): array
+--- a/lib/pkp/classes/user/maps/Schema.php
++++ b/lib/pkp/classes/user/maps/Schema.php
+@@ -133,7 +133,7 @@
+         if (empty($userIds)) {
+             $options['permissionMap'] = [];
+         } elseif ($isSiteAdmin) {
+-            $options['permissionMap'] = array_fill_keys($userIds, true);
++            $options['permissionMap'] = Repo::user()->permissionMapForSiteAdmin($userIds);
+         } elseif ($currentUserId !== null) {
+             $options['permissionMap'] = Repo::user()->permissionMapForManager((int)$currentUserId, $userIds);
+         } else {
+@@ -273,18 +273,16 @@
+             return false;
+         }
+ 
+-        $isSiteAdmin = (bool) ($auxiliaryData['isSiteAdmin'] ?? Validation::isSiteAdmin());
+-        if ($isSiteAdmin) {
+-            return true;
+-        }
+-
+-        // use only the batched map
++        // the batched map, when the users were mapped as a collection
+         $permissionMap = $auxiliaryData['permissionMap'] ?? null;
+-        if ($permissionMap === null) {
+-            return false;
++        if ($permissionMap !== null) {
++            return (bool) ($permissionMap[(int) $userToLoginAs->getId()] ?? false);
+         }
+ 
+-        return (bool) ($permissionMap[(int) $userToLoginAs->getId()] ?? false);
++        // a single user mapped without it: a site administrator may act on anyone but another site administrator
++        $isSiteAdmin = (bool) ($auxiliaryData['isSiteAdmin'] ?? Validation::isSiteAdmin());
++        return $isSiteAdmin
++            && Validation::getAdministrationLevel((int) $userToLoginAs->getId(), (int) $currentUserId) === Validation::ADMINISTRATION_FULL;
+     }
+ 
+     /**
+@@ -297,17 +295,16 @@
+             return false;
+         }
+ 
+-        $isSiteAdmin = (bool) ($auxiliaryData['isSiteAdmin'] ?? Validation::isSiteAdmin());
+-        if ($isSiteAdmin) {
+-            return true;
+-        }
+-
+-        // use only the batched map
++        // the batched map, when the users were mapped as a collection
+         $permissionMap = $auxiliaryData['permissionMap'] ?? null;
+-        if ($permissionMap === null) {
+-            return false;
++        if ($permissionMap !== null) {
++            return (bool) ($permissionMap[(int) $userToMerge->getId()] ?? false);
+         }
+-        return (bool) ($permissionMap[(int) $userToMerge->getId()] ?? false);
++
++        // a single user mapped without it: a site administrator may act on anyone but another site administrator
++        $isSiteAdmin = (bool) ($auxiliaryData['isSiteAdmin'] ?? Validation::isSiteAdmin());
++        return $isSiteAdmin
++            && Validation::getAdministrationLevel((int) $userToMerge->getId(), (int) $currentUserId) === Validation::ADMINISTRATION_FULL;
+     }
+ }
+ 

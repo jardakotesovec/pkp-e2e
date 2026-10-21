@@ -936,7 +936,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | On "Add User", unticking "Generate Password" leaves "Notify User" greyed out, so no welcome email can be chosen | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | After "Edit User" ends a role, the grid's row still lists it until the page is reloaded | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A19](#a19) | "Remove User" keeps a role that starts on a later date, and removing the user again fails | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [A21](#a21) | "Merge user" on a second Site Administrator's row leaves the "Confirm" dialog spinning with no message, and nothing is merged | 🐞 | minor | — |
+| [A21](#a21) | Site Administrator's "Merge user" on another Site Administrator hangs on "Confirm" with no message | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | On a French preprint server the "Roles" column prints raw codes for two roles | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A3](#a3) | A user removed from the journal stays in the list with no role | ❓ | minor | — |
 | [A8](#a8) | "Remove User" tells the user nothing, where "Remove Role" emails them | ❓ | minor | — |
@@ -1202,17 +1202,24 @@ already treats it.
 Basis: probe. <sup>f-a20</sup>
 
 <a id="a21"></a>
-**A21 — Merging a second Site Administrator's account hangs with no message** · 🐞 · minor.
-On an install with a second Site Administrator, on Settings › Users &
-Roles › "Users" of a journal where that account holds a role, the Site
-Administrator's "…" menu on its row offers "Merge user", and the "Merge
-user" window opens. After "Merge into this User" on another row and "OK" in
-the "Confirm" dialog, the dialog stays open with "OK", "Cancel" and a
-spinner that keeps turning; no message appears, the window stays open,
-and after a reload the account is still there, unmerged. The Site
-Administrator expects either the merge or a message saying it cannot be
-done, or no "Merge user" on that row.
-Basis: probe, 2026-10-13. <sup>f-a21</sup>
+**A21 — Site Administrator's "Merge user" on another Site Administrator hangs on "Confirm" with no message** · 🐞 · low.
+On an install with two Site Administrators, one of them opens Settings ›
+Users & Roles › "Users" of a journal where the other holds a role. The
+"…" menu on the other administrator's row offers "Merge user", and the
+"Merge user" window opens. After "Merge into this User" on another row
+and "OK" in the "Confirm" dialog, that dialog stays open with "OK",
+"Cancel" and a spinner that keeps turning. No message appears, the
+"Merge user" window stays open behind it, and after a reload the account
+is still there, unmerged. The administrator expects either the merge or
+a message saying it cannot be done, or no "Merge user" on that row. No
+one may merge a Site Administrator's account, and the app refuses it.
+The same row also offers "Login As", which ends on a page saying "Sorry,
+you do not have administrative rights over this user." Both offers come
+from the same wrong permission flags and go with one fix. Merging
+ordinary accounts is not affected and still works. It needs a second
+Site Administrator. Released 3.5 sites meet it from 3.5.0-2 on (3.5.0-2
+to 3.5.0-5); 3.5.0-1 offered neither action on that row.
+Basis: probe, 2026-10-21. <sup>f-a21</sup>
 
 ### OPS
 
@@ -2200,6 +2207,7 @@ refusal is `UserGridHandler::mergeUsers()` answering 200
 acting Site Administrator `ADMINISTRATION_FULL` over the old account
 (note i), and the page shows nothing for that answer. Seen on `main`
 only.
+Issue report: [docs/issues/U53-A21-merge-second-site-admin-hangs.md](../issues/U53-A21-merge-second-site-admin-hangs.md).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Seen 2026-09-04 (user-profile claim check K2), OPS French
