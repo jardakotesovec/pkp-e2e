@@ -1054,7 +1054,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | The Activity Log's "User" column names the participant who was assigned or removed, not the editor who did it | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A15](#a15) | The Submission stage's "Assign Editor" message ends "This is an automated message from…" instead of the editor's signature | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | A message sent with "Notify" is emailed to a participant who opted out of emails for new discussions | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A18](#a18) | After "OK" assigned nobody for a person from the previous role's list and "Cancel" closed "Assign Participant", reloading the page raises the browser's leave-page box though no window is open | 🐞 | minor | — |
+| [A18](#a18) | After "Cancel" closes "Assign Participant", reloading or leaving the page raises the browser's leave-page box | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OJS1](#ojs1) | A journal's "Editor Assigned" email tells the editor to select "Send to Review"; the button reads "Send for Review" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP1](#omp1) | A press's Internal Review offers no "Assign Editor" message in "Assign Participant" and "Notify" | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
 | [OPS2](#ops2) | On a preprint server, choosing the predefined message "Assign Editor" leaves "Message" unfilled | 🐞 | low · crash: server | issues (claude), 2026-10-06 — re-verified |
@@ -1287,22 +1287,18 @@ read in the code and not tried on screen.
 Basis: probe, 2026-10-01. <sup>[f-a16](#fn-a16)</sup>
 
 <a id="a18"></a>
-**A18 — After "OK" assigned nobody and "Cancel" closed "Assign Participant", reloading the page raises the browser's leave-page box** · 🐞 · minor.
-In "Assign Participant", an editor chooses a person, chooses another
-role without pressing "Search" and presses "OK": the window shows its
-form again and nobody is assigned (the second case of [A4](#a4)). The
-editor presses "Cancel", and the window closes without a question. A
-reload of the page is then expected to ask nothing, since no window is
-open and nothing is unsaved. Instead the browser raises its leave-page
-box, as it does while the window is open (Rule 6c).
-Nothing is lost: answered to leave, the box lets the page reload, and
-the panel lists the same participants as before. The box does not come
-when "Cancel" closes a window in which "OK" was never pressed, with a
-person chosen or not, nor when "OK" was pressed with nobody chosen, nor
-after an "OK" that assigned someone.
-It was seen as a Journal Manager and on a reload; leaving for another
-address was not tried.
-Basis: probe, 2026-10-09. <sup>[f-a18](#fn-a18)</sup>
+**A18 — After "Cancel" closes "Assign Participant", reloading or leaving the page raises the browser's leave-page box** · 🐞 · low.
+In the "Assign Participant" window, an editor picks a role in the role
+list and closes the window with "Cancel" without pressing "Search" after
+that choice. The next time the editor leaves the page (a reload, a link,
+the browser's back button, closing the tab), the browser asks whether to
+leave, as if a form with unsaved changes were still open. No window is
+open and nothing is unsaved. The question comes once. When the editor
+chooses to leave, the page goes on as asked, and the "Participants"
+panel is unchanged. The same happens when "OK" was pressed first and
+refused: the editor picked a person, then a role that person does not
+hold, and "OK" showed the window's form again before "Cancel" closed it.
+Basis: probe, 2026-10-21. <sup>[f-a18](#fn-a18)</sup>
 
 ### OJS
 
@@ -1582,6 +1578,7 @@ Issue report: [pkp-e2e#336](https://github.com/jardakotesovec/pkp-e2e/issues/336
 
 <a id="fn-a18"></a>
 **f-a18** — Live-probed 2026-10-09 (Rule 6c; all three apps, as the Journal / Press / Preprint Server Manager of a scratch context, on the Submission stage's panel, Production on the preprint server; four runs on OJS, three each on OMP and OPS; kept check `shared/playwright/checks/U46/I09/i09.js`, phase `assign`): "Section editor" ("Series editor", "Moderator") chosen in the role list, "Search", a person chosen, "Author" chosen in the role list with no "Search", "OK" (the form shown again on the first role, nobody assigned, no notice: A4's second case), "Cancel" (the window closed, no dialog), then `page.reload()`: a `beforeunload` dialog in every run, with no text of the application's own; accepted, the page reloaded and the panel's rows were as before. Controls, each ending in a reload that raised no dialog: "OK" with nobody chosen on an untouched window, then "Cancel" (the same runs); "OK" with nobody chosen, then a person chosen under a searched role and "OK", which assigned (the same runs, and once per run as the assigned Section editor / Series editor / Moderator); the same role, "Search" and person, then "Cancel" with no "OK" (two runs per app); the role and "Search" alone, then "Cancel" (two runs per app). No response of 400 or more and no page error in any run. Not driven: another address in place of the reload; the sequence as an assigned Section Editor; "OK" with nobody chosen after the role list or "Search" was used; a second "Assign" opened before the reload. The cause is a lean from a code read, not verified: `js/controllers/SiteHandler.js` lists a form as changed on `formChanged` (`registerUnsavedFormElement_()`), drops it on `unregisterChangedForm` (`unregisterUnsavedFormElement_()`), and its `beforeunload` handler asks while one is listed; a refused save has `AjaxFormHandler.handleResponse()` put a redrawn form in place of the posted one, and "Cancel" (`FormHandler::cancelForm()` › `unregisterForm()`) releases the form it is pressed in, so a form listed before the redraw would stay listed with no window left to release it. Why "OK" with nobody chosen leaves none listed was not traced. The galley window (*Galleys*) does not share it: a refused "Save", "Cancel" and a reload raised no dialog in the same probe.
+Issue report: [docs/issues/U35-A18-assign-participant-cancel-reload-leave-box.md](../issues/U35-A18-assign-participant-cancel-reload-leave-box.md).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — OJS `locale/en/emails.po` `emails.editorAssign.body`: "…please forward the submission to the review stage by selecting \"Send to Review\" and then assign reviewers by clicking \"Add Reviewer\"."; the decision's label is lib/pkp `editor.submission.decision.sendExternalReview` "Send for Review" (no OJS override). OMP's app body names "Send to Internal Review", OMP's `editor.submission.decision.sendInternalReview` label. Live-probed 2026-09-22 (journal and press): the received email and Settings › Workflow › Emails › "Editor Assigned (Auto)" say "Send to Review"; the Submission stage's button reads "Send for Review" for the Editor and the Section Editor; the press's email and button both read "Send to Internal Review".

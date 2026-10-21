@@ -1,0 +1,15 @@
+--- a/lib/pkp/templates/controllers/grid/users/userSelect/searchUserFilter.tpl
++++ b/lib/pkp/templates/controllers/grid/users/userSelect/searchUserFilter.tpl
+@@ -11,7 +11,11 @@
+ {assign var="formId" value="searchUserFilter-"|concat:$filterData.gridId}
+ <script type="text/javascript">
+ 	// Attach the form handler to the form.
+-	$('#{$formId}').pkpHandler('$.pkp.controllers.grid.users.stageParticipant.form.AddParticipantFormHandler');
++	$('#{$formId}').pkpHandler('$.pkp.controllers.grid.users.stageParticipant.form.AddParticipantFormHandler',
++		{ldelim}
++			trackFormChanges: false
++		{rdelim}
++	);
+ </script>
+ <form class="pkp_form filter" id="{$formId}" action="{url op="fetchGrid"}" method="post">
+ 	{csrf}
