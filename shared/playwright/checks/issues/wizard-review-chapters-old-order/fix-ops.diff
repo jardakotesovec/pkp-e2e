@@ -1,0 +1,63 @@
+--- a/controllers/grid/preprintGalleys/PreprintGalleyGridHandler.php
++++ b/controllers/grid/preprintGalleys/PreprintGalleyGridHandler.php
+@@ -196,6 +196,33 @@
+         Repo::galley()->edit($galley, ['seq' => $newSequence]);
+     }
+ 
++    /**
++     * @copydoc GridHandler::saveSequence()
++     *
++     * Also announces the galleys in their stored order, as "Save" and "Delete" announce
++     * the galley they changed, so that a view built from the galleys (the submission
++     * wizard's Review step) can follow a new order.
++     */
++    public function saveSequence($args, $request)
++    {
++        $json = parent::saveSequence($args, $request);
++        /** @var GenreDAO $genreDao */
++        $genreDao = DAORegistry::getDAO('GenreDAO');
++        $genres = $genreDao->getByContextId($request->getContext()->getId())->toAssociativeArray();
++        $galleys = Repo::galley()
++            ->getCollector()
++            ->filterByPublicationIds([$this->getPublication()->getId()])
++            ->getMany();
++        $json->setGlobalEvent('galleys:ordered', [
++            'galleys' => Repo::galley()
++                ->getSchemaMap($this->getSubmission(), $this->getPublication(), $genres)
++                ->mapMany($galleys)
++                ->values()
++                ->all(),
++        ]);
++        return $json;
++    }
++
+     //
+     // Overridden methods from GridHandler
+     //
+--- a/lib/ui-library/src/components/Container/SubmissionWizardPageOPS.vue
++++ b/lib/ui-library/src/components/Container/SubmissionWizardPageOPS.vue
+@@ -12,12 +12,14 @@
+ 		pkp.eventBus.$on('galley:added', this.addGalley);
+ 		pkp.eventBus.$on('galley:edited', this.editGalley);
+ 		pkp.eventBus.$on('galley:deleted', this.deleteGalley);
++		pkp.eventBus.$on('galleys:ordered', this.setGalleys);
+ 		pkp.eventBus.$on('submissionFile:added', this.setSubmissionFile);
+ 		pkp.eventBus.$on('submissionFile:edited', this.setSubmissionFile);
+ 	},
+ 	unmounted() {
+ 		pkp.eventBus.$off('galley:added');
+ 		pkp.eventBus.$off('galley:edited');
++		pkp.eventBus.$off('galleys:ordered');
+ 		pkp.eventBus.$off('submissionFile:added');
+ 		pkp.eventBus.$off('submissionFile:edited');
+ 	},
+@@ -30,6 +32,9 @@
+ 				return g.id === galley.id ? galley : g;
+ 			});
+ 		},
++		setGalleys(data) {
++			this.galleys = data.galleys;
++		},
+ 		deleteGalley(data) {
+ 			this.galleys = this.galleys.filter((g) => g.id !== data.id);
+ 		},

@@ -187,4 +187,29 @@ async function openChapters(page, app, subId) {
     return list;
 }
 
-module.exports = {ROOT, omp, sleep, snap, currentStep, continueUntil, addContributor, blocks, detailsList, done, startOrder, dragAuthor, dragChapterAbove, toStep, reviewChapters, stored, openChapters};
+/** OPS: the PDF fixture the OPS suite uploads as a galley. */
+const OPS_PDF = path.join(ROOT, 'apps/ops/playwright/fixtures/files/preprint.pdf');
+
+/** Evidence only: a preprint's latest version (id, status). */
+function latestPublication(app, subId) {
+    const [id, status] = sql(app, `select publication_id, status from publications where submission_id = ${subId} order by publication_id desc limit 1`).split('|');
+    return {id: Number(id), status: Number(status)};
+}
+
+/** Evidence only: a version's galleys as stored, label and seq. */
+function galleySeq(app, pubId) {
+    return sql(app, `select g.label || ':' || g.seq from publication_galleys g where g.publication_id = ${pubId} order by g.seq, g.galley_id`).split('\n');
+}
+
+/** OPS: a preprint version's workflow "Galleys" page (main's GalleyManager), loaded. */
+async function openGalleys(page, app, subId, pubId) {
+    const {WorkflowPage} = require(path.join(ROOT, 'shared/playwright/pages/WorkflowPage.js'));
+    const {GalleyManager} = require(path.join(ROOT, 'shared/playwright/pages/GalleysPages.js'));
+    const frame = new WorkflowPage(page, app.contextPath, {labels: {publicationGroup: 'Preprint'}});
+    const g = new GalleyManager(page, frame);
+    await g.open(subId, pubId);
+    await idle(page);
+    return g;
+}
+
+module.exports = {ROOT, omp, sleep, OPS_PDF, latestPublication, galleySeq, openGalleys, snap, currentStep, continueUntil, addContributor, blocks, detailsList, done, startOrder, dragAuthor, dragChapterAbove, toStep, reviewChapters, stored, openChapters};

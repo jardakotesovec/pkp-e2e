@@ -1120,7 +1120,7 @@ are the source; badges, Impact and Basis:
 | [OPS7](#ops7) | A signed-in user who may not submit to a preprint server reads a raw translation key instead of the reason | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS8](#ops8) | A further galley on a reloaded draft gets stuck in its upload window and shows no file until a reload | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [OPS9](#ops9) | The Review step's "Files" panel says "No files have been uploaded" for galleys the draft already had when the page loaded | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
-| [OPS11](#ops11) | After "Order" on a preprint's "Upload Files", the Review step's "Files" panel lists the galleys in their old order | 🐞 | minor | — |
+| [OPS11](#ops11) | After "Order" on a preprint's "Upload Files", the Review step's "Files" panel lists the galleys in their old order | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A1](#a1) | Closing submissions does not stop drafts already started; they can still be filled and submitted | ❓ | latent | — |
 | [A2](#a2) | The save-for-later confirmation email goes to whoever pressed the button, not to the submitting author | ❓ | latent | — |
 | [A3](#a3) | The submissions-closed notice shown to would-be authors ends with an instruction meant for managers | ❓ | minor | — |
@@ -1513,6 +1513,7 @@ author-role group the database returns first; on PostgreSQL, the only
 database tried, a role saved again moves to the end of its table. A
 preprint server has a single author-role group, so it is not affected.
 Basis: probe, 2026-10-19. <sup>[fn-a23](#fn-a23)</sup>
+Report: paused — written 2026-10-21, held until a related item is settled before it is published (2026-10-21)
 
 ### OMP
 
@@ -1700,7 +1701,7 @@ press send it for the same event.
 Basis: probe. <sup>[fn-ops10](#fn-ops10)</sup>
 
 <a id="ops11"></a>
-**OPS11 — After "Order" on "Upload Files", the Review step lists the galleys in their old order** · 🐞 · minor.
+**OPS11 — After "Order" on "Upload Files", the Review step lists the galleys in their old order** · 🐞 · low.
 On a preprint server an author starts a new submission and, without
 reloading, uploads two galleys on "Upload Files", presses "Order",
 drags the second above the first, presses "Done" and goes on to
@@ -2949,6 +2950,7 @@ lines. After a reload and "Continue" to "Review": `main` "No files have
 been uploaded for this submission." (OPS9), 3.5 "Poster Preprint
 Text", "PDF Preprint Text". "Order", "Cancel ordering" with no drag left
 "Poster", "PDF". No page error and no server error in any run.
+Issue report: [pkp-e2e#1019](https://github.com/jardakotesovec/pkp-e2e/issues/1019) ([docs/issues/U72-A13-wizard-review-chapters-old-order.md](../issues/U72-A13-wizard-review-chapters-old-order.md)), joined 2026-10-21.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding. Use the seeded context (`publicknowledge`) and

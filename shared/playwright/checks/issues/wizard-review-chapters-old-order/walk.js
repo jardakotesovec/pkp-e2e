@@ -20,20 +20,26 @@
 // Development", "Order", the last chapter dragged above the first, "Done", the list read at once
 // and after a reload (the new order kept, no request failing, no page error).
 // `galleys` (OPS; the same shape on a preprint server's galleys, the Cause's reach): as `ccorino`, "New
-// Submission", English, title "Galleys h19s"; on "Upload Files" "Add File" "PDF" (a PDF uploaded as
+// Submission", English, title "Galleys h21o"; on "Upload Files" "Add File" "PDF" (a PDF uploaded as
 // "Preprint Text"), then "Add File" "Poster" the same way; "Review": the "Files" panel; "Upload Files":
 // "Order", "Poster" dragged above "PDF", "Done"; "Review": the panel; reload, "Review": the panel.
+// `galleys-nb` (OPS; the galleys' neighbour, the fix in and out): the workflow's "Galleys" page, whose
+// "Save Order" posts the same save-sequence but where no Review panel listens: as `dbarnes`, preprint 1
+// "The influence of lactation on the quantity and quality of cashmere production" (not posted),
+// "Add galley" "Poster" (a PDF as "Preprint Text"), "Order", "Poster" up, "Save Order", the list read
+// at once and after a reload.
+// Reset first for OPS: npm run fleet-prep -- --feature <feature> --dataset <n> --apps ops --reset
 // Reset first: npm run fleet-prep -- --feature <feature> --dataset <n> --apps omp --reset
-// Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js omp shared/playwright/checks/issues/wizard-review-chapters-old-order/walk.js [neighbour]
+// Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js <omp|ops> shared/playwright/checks/issues/wizard-review-chapters-old-order/walk.js [neighbour | galleys | galleys-nb]
 //      (PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 in front for 3.5; PROBE_RUN=fix / nb-in / nb-out for a fix trial)
 const {forEachApp, launch, signIn, record, idle} = require('../../../probe');
 const L = require('./lib');
 
-const MODE = ['neighbour', 'galleys'].find((m) => process.argv.includes(m)) || 'steps';
+const MODE = ['neighbour', 'galleys-nb', 'galleys'].find((m) => process.argv.includes(m)) || 'steps';
 const TITLE = 'Tides and Harbours h19s';
 
 forEachApp(async (app) => {
-    if (app.name !== (MODE === 'galleys' ? 'ops' : 'omp')) return; // chapters are a press's, galleys a preprint server's
+    if (app.name !== (MODE.startsWith('galleys') ? 'ops' : 'omp')) return; // chapters are a press's, galleys a preprint server's
     if (!app.dataset) throw new Error('walk.js runs on a dataset fleet');
     const facts = {line: app.line || 'main', mode: MODE};
     const fact = (k, v) => {
@@ -67,7 +73,20 @@ forEachApp(async (app) => {
             await idle(page).catch(() => {});
             await page.goto(app.url(`/index.php/${app.contextPath}/en/submission`));
             await idle(page);
-            await W.beginSubmission(page, {title: 'Galleys h19s', language: 'English'});
+            // The page object's beginSubmission() ends by checking the wizard opens on "Upload Files";
+            // 3.5's opens on "Details" ("Details", "Upload Files", …): the same start, then "Continue".
+            await W.fillStartTitle(page, 'Galleys h21o');
+            await page.getByRole('radio', {name: 'English', exact: true}).check();
+            for (const re of [/meets all of these requirements/, /agree to have my data collected/]) {
+                const box = page.getByRole('checkbox', {name: re});
+                if (await box.count()) await box.check();
+            }
+            await page.getByRole('button', {name: 'Begin Submission'}).click();
+            await page.waitForURL(/[?&]id=\d+/, {waitUntil: 'commit', timeout: 30_000});
+            await W.expectWizardOpen(page);
+            await idle(page);
+            fact('g.firstStep', await L.currentStep(page));
+            await L.continueUntil(page, 'Upload Files');
             fact('submissionId', Number(new URL(page.url()).searchParams.get('id')));
             await W.addGalleyFile(page, {label: 'PDF'});
             await L.sleep(800);
@@ -114,6 +133,30 @@ forEachApp(async (app) => {
                 fact('g.reviewAfterReload', await filesPanel());
                 await L.snap(page, 'g-review-after-reload');
             }
+        } else if (MODE === 'galleys-nb') {
+            await signIn(page, 'dbarnes', {contextPath: app.contextPath});
+            await idle(page).catch(() => {});
+            const pub = L.latestPublication(app, 1);
+            fact('gnb.publication', pub);
+            const g = await L.openGalleys(page, app, 1, pub.id);
+            fact('gnb.before', await g.labels());
+            await g.addGalley({label: 'Poster', component: 'Preprint Text', file: L.OPS_PDF, name: 'preprint.pdf'});
+            await idle(page);
+            fact('gnb.afterAdd', await g.labels());
+            await g.startOrdering();
+            await g.arrange(['Poster', 'PDF']);
+            const r = await g.saveOrder();
+            fact('gnb.saved', {status: r.status(), body: ((await r.text().catch(() => '')) || '').slice(0, 300)});
+            await idle(page);
+            await L.sleep(800);
+            fact('gnb.atOnce', await g.labels());
+            await L.snap(page, 'gnb-galleys-after-save');
+            await g.reload();
+            await idle(page);
+            fact('gnb.afterReload', await g.labels());
+            fact('gnb.stored', L.galleySeq(app, pub.id));
+            await L.snap(page, 'gnb-galleys-after-reload');
+            fact('gnb.kept', JSON.stringify(facts['gnb.afterReload']) === JSON.stringify(['Poster', 'PDF']));
         } else if (MODE === 'neighbour') {
             await signIn(page, 'dbarnes', {contextPath: app.contextPath});
             await idle(page).catch(() => {});
