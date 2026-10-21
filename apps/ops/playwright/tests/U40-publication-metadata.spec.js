@@ -17,8 +17,9 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section records everything else left out): A1, A2, A3,
- * A13 and A15 (🐞: the "Require" level, the 1970 year and the reset's reach
+ * spec's Coverage section records everything else left out): A1 (✅
+ * retired by pkp/pkp-lib#13585; the "Require" level is a Planned item),
+ * A2, A3, A13 and A15 (🐞: the 1970 year and the reset's reach
  * into unposted items, the greyed button after Cancel, the panel acting
  * before its loading settles are never asserted either way); A5 (no
  * scheduling on a preprint server); A8, A11, A14 and OPS2 (only the
@@ -449,7 +450,7 @@ test.describe('Publication metadata (U40)', () => {
         );
 
         // Plain Language Summary: enabled at "Ask the author…" (never
-        // "Require" — A1): "Title & Abstract" shows "Plain Language
+        // "Require": A1 retired, a Planned item): "Title & Abstract" shows "Plain Language
         // Summary" after Abstract (Rule 5; Fields; Settings). Publisher ID:
         // "Enable for Preprints" under "Publisher ID": the "Metadata" page
         // also shows "Publisher ID" (Fields; Settings); a preprint server

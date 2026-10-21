@@ -30,7 +30,7 @@
  * A5 and A6 (the summary's reader-side presence and the date line after a
  * draft are not asserted either way); A7 (the window's stage sentence);
  * A2, A3, A4 (S8 asserts what the screens offer; the rest has no OPS
- * surface); OJS1, OJS2, OJS3, OMP1 (no OPS surface).
+ * surface); OJS2, OJS3, OMP1 (no OPS surface).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only — PK tests mutate only their own seeded submissions; every

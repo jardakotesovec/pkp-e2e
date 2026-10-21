@@ -277,10 +277,6 @@ itself enforces before submission is Rule 13.
     whether sent by the timer or by "Continue", in these cases:
     - a plain language summary longer than the section's word limit
       (Rule 13) ⚠ [A16](#a16);
-    - with the plain language summary set to "require" (*Settings that
-      modify behavior*, "Metadata asked of authors"), some saves of
-      other fields, even once the summary is typed: which, step by step,
-      in ⚠ [A20](#a20);
     - on a preprint server, a "DOI of the published preprint" typed
       without its web address
       [→ Preprint relations A7](U75-preprint-relations.md#a7);
@@ -536,8 +532,9 @@ them live are the subject of *Submission intake configuration*.
   sets to "ask" or "require" during submission adds its field to the
   Details or For the Editors step (Rule 7). Setting it to "require" makes
   it a submit blocker (Rule 13). Setting the plain language summary
-  (Settings › Workflow › Submission › "Metadata") to "require" also makes
-  the server refuse wizard saves of other fields (Rule 9b) [A20](#a20).
+  (Settings › Workflow › Submission › "Metadata") to "require" blocks only
+  the submit: the start page's title and every step's save go through
+  while the summary is still empty [A20](#a20).
   The install default asks for keywords and references without
   requiring them, so a fresh journal's Details step
   already shows a "Keywords" field, not marked required, and a references
@@ -1021,7 +1018,7 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names)
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names)
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names)
-  - a journal that requires the plain language summary: the start page's title, a "Details" save before the summary is typed and the "References" box all saved, and "Submit" disabled until the summary is typed (A20; the guard its issue report names)
+  - a journal that requires the plain language summary: the start page's title, a "Details" save before the summary is typed and the "References" box all saved, and "Submit" disabled until the summary is typed (Settings, "Metadata asked of authors"; A20, retired)
   - the Review step after a language change asking for the new language's title, contributor names and typed institution names, the affiliation copied from the author's profile included, with "Submit" disabled until they are typed (Rule 11): likely bullets in scenario 5, which changes the language and reaches Review
   - the timer's minute counted from the last save, not from the end of typing: scenario 3's "Saving" coming as the footer reaches "Last saved 1 minute ago", and a step with no change sending nothing (Rule 9): the suites move the page's clock on a minute after the typing, which cannot tell the two readings apart
   - leaving the start screen with a title typed, for My Submissions, asking nothing (Rule 4): likely a bullet after scenario 1's "The start screen"
@@ -1052,7 +1049,6 @@ Left out of the scenarios above, by reason:
   - A17 (the "needs an editor" alert with an editor already on the submission)
   - A18 (a change typed more than a minute after the last save, saved cut after its first letters)
   - A19 (the wizard hung on "Saving" after any save the server refuses, and the reload's "Unsaved Changes" after it)
-  - A20 (a required plain language summary refusing saves of other fields)
   - A21 (the order of the "Submit As" roles, and so the role preselected)
   - A22 (the start screen's "Title" box at phone width)
   - A23 (a user with no submitting role starting a submission after the Author role was edited, and "OK" with nothing changed leaving "Author" in place)
@@ -1109,7 +1105,6 @@ are the source; badges, Impact and Basis:
 | [A16](#a16) | In the submission wizard, a plain language summary over the word limit is refused with an unexplained "Error" | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A18](#a18) | Submission wizard saves a field cut off mid-typing when the author starts typing after a quiet minute | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | After the server refuses one save, the submission wizard hangs on "Saving" and the author cannot submit | 🐞 | medium · crash: script | issues (claude), 2026-10-19 — re-verified |
-| [A20](#a20) | Requiring a plain language summary makes the submission wizard refuse saves of other fields, and hang | 🐞 | high · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A21](#a21) | "Submit As" preselects another role for an editor who is also an author once their editorial role is saved | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A22](#a22) | On a phone, "Make a Submission" squeezes the "Title" box to nothing, so no submission can be started | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
@@ -1132,6 +1127,7 @@ are the source; badges, Impact and Basis:
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
 | [OPS10](#ops10) | A Moderator already on a preprint is not emailed when it is submitted | ❓ | minor | — |
 | [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all; "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | ✅ | retired | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
+| [A20](#a20) | Retired: requiring a plain language summary made the submission wizard refuse saves of other fields, and hang; they now save, and the summary blocks only "Submit" | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
 | [A13](#a13) | Changing the submission language inside the wizard leaves every language-bound value, the copied contributor affiliation and given name included, to be filled for the new language before submitting | ✅ | — | @jarda.kotesovec 2026-09-12 · intended |
 | [OMP1](#omp1) | A press submits by work type (Monograph / Edited Volume), with no section at intake and an optional Series later | ✅ | — | — |
 | [OMP3](#omp3) | A press lists the "Submit As" roles in a changing order, so the preselected role changes between visits | ✅ | retired | issues (claude), 2026-10-01 — not seen again; the order is A21 on every app |
@@ -1411,44 +1407,13 @@ change, and offers what was typed after it in an "Unsaved Changes"
 dialog. "Yes" sends it again; when it holds a form the server still
 refuses, the wizard hangs again. A lost connection or a server failure
 is retried and recovers; only a refusal hangs. Today the server refuses
-a wizard save in four cases: - `main` only: the journal, press or server
-requires the plain language summary, and a form without the summary is
-saved: "References", a field on "For the Editors", on a preprint server
-"Relation status", and "Details" while its summary box is empty; -
-`main` only, journals and preprint servers: the summary is longer than
+a wizard save in three cases: - `main` only, journals and preprint servers: the summary is longer than
 the section's abstract word limit; - preprint servers, `main`, 3.5 and
 3.4: "DOI of the published preprint" is typed without its web address; -
 presses, `main` and 3.5: any save of a submission made as "Chapter
-Author". ([A20](#a20), [A16](#a16), [→ Preprint relations
+Author". ([A16](#a16), [→ Preprint relations
 A7](U75-preprint-relations.md#a7), [OMP4](#omp4).)
 Basis: probe, 2026-10-19. <sup>[fn-a19](#fn-a19)</sup>
-
-<a id="a20"></a>
-**A20 — Requiring a plain language summary makes the submission wizard refuse saves of other fields, and hang** · 🐞 · high · crash: script.
-With Settings › Workflow › Submission › "Metadata" set to require the
-plain language summary, the title typed on the start page is lost
-without any message, and the server refuses these wizard saves, after
-which the wizard hangs [A19](#a19):
-- On "Details", a change saved while the summary's box is still empty
-  (a new Title, say). Once the summary is typed, the "Details" save
-  goes through, but text typed in the step's "References" box is
-  still refused.
-- On "For the Editors", a metadata field the journal asks for there
-  ("Coverage", for one). "Review" lists "Coverage" as "None provided",
-  and after a reload the field is empty.
-- On a preprint server, every answer to the required "Relation status"
-  on "For Readers", also one ticked after the hang that "Unsaved
-  Changes" offers after a reload (Rule 9c), so it cannot be saved while
-  the setting is on.
-
-An author who types the title again, the abstract and the summary on
-"Details" before its first save, and leaves "References" empty, can
-still submit, but without references and, on a preprint server,
-without a relation status. With the summary only asked for, the same
-saves go through and the text survives a reload. The same requirement refuses the Publication pages'
-saves after submission
-([→ Publication metadata A1](U40-publication-metadata.md#a1)).
-Basis: probe, 2026-10-01. <sup>[fn-a20](#fn-a20)</sup>
 
 <a id="a21"></a>
 **A21 — "Submit As" preselects another role for an editor who is also an author once their editorial role is saved** · 🐞 · low.
@@ -1718,6 +1683,9 @@ Basis: probe, 2026-10-21. <sup>[fn-ops11](#fn-ops11)</sup>
 
 <a id="a11"></a>
 **A11 — No profile affiliation, no submission: the wizard's start 500s** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13265), 2026-09-03. <sup>[fn-a11](#fn-a11)</sup>
+
+<a id="a20"></a>
+**A20 — Requiring a plain language summary made the submission wizard refuse saves of other fields** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21: the start page's title, "Details" and "References" save while the summary is empty, and the summary blocks only "Submit". <sup>[fn-a20](#fn-a20)</sup>
 
 <a id="omp3"></a>
 **OMP3 — "Submit As" lists its roles in a changing order** · ✅ · retired. Not seen again on 2026-10-01: a press kept one order across visits; the order no app fixes is [A21](#a21). <sup>[fn-omp3](#fn-omp3)</sup>
@@ -2638,7 +2606,7 @@ runs per app on all three (the Author of a seeded draft on scratch
 contexts; kept script `shared/playwright/checks/U21/I01/i01.js`), 36
 refused saves: a step's `PUT …/publications/{id}` answered 400 by a
 Playwright route on a Title change (fault injection, three apps), the
-server's 400 `plainLanguageSummary: This field is required.` (A20,
+server's 400 `plainLanguageSummary: This field is required.` (A20 before pkp/pkp-lib#13585,
 three apps) and OPS's 400 "This is not a valid URL." for a bare DOI.
 Every one: the step advanced; the "Error" dialog; the footer
 "Reconnecting", then "Saving" 4.1–5.3 s after the 400, at the page error
@@ -2659,7 +2627,7 @@ buttons enabled, and the Title kept after a reload.
 Issue report: [pkp-e2e#322](https://github.com/jardakotesovec/pkp-e2e/issues/322) ([docs/issues/U21-A19-wizard-refused-save-hangs-saving.md](../issues/U21-A19-wizard-refused-save-hangs-saving.md)).
 
 <a id="fn-a20"></a>
-**fn-a20** — A20. pkp-lib `PKPPublication\Repository::validate()`
+**fn-a20** — A20 (retired). pkp-lib `PKPPublication\Repository::validate()`
 checks a required `plainLanguageSummary` against what each save sends,
 not against what the publication holds (as for the Publication pages,
 *Publication metadata* A1); the wizard's other step forms never send the
@@ -2681,6 +2649,22 @@ nothing stored. OPS, an answer ticked after the hang, offered by
 error again; ticked again on "For Readers" after a plain reload: the
 same. Controls, the summary at ask: the same drives answered 200 and
 the text read back after a reload.
+Retired 2026-10-21: pkp/pkp-lib#13585 drops the closure and adds the
+summary to `ValidatorFactory::required()`'s list once the submission is
+submitted, so an edit is refused only when it empties the summary, and
+while the submission is in progress `validateSubmit()` alone requires
+it. Driven on PKP's default dataset at the PR head `93b094ea77` (in
+`lib/pkp` of OJS `9647ed7204`, OMP `56388590e`, OPS `ea14c78745`) and
+its base `2ea65a9662`, before its merge, with the issue walk
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js`
+on the three apps: at the head the start page's title, a "Details" save
+with the summary empty and the "References" box answered 200, and the
+title and both reference lines read back after a reload; "Review"
+listed "Plain Language Summary" "This field is required." with "Submit"
+disabled until the summary was typed, as at the base; an author's way
+through with the summary typed reached "Submission complete". At the
+base the same saves answered 400 (`plainLanguageSummary`), "Review"
+read "Title / None provided" and "References" came back empty.
 Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323) ([docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md](../issues/U21-A20-plain-summary-required-refuses-other-saves.md)).
 
 <a id="fn-a21"></a>

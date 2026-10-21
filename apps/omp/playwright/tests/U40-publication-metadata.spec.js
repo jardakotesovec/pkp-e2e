@@ -19,8 +19,8 @@
  * Spec: docs/specs/U40-publication-metadata.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞 (journal/preprint-only; the press's year is asserted as the
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ✅
+ * retired (pkp/pkp-lib#13585; "Require" is a Planned item), A2 🐞 (journal/preprint-only; the press's year is asserted as the
  * scenario's own sentence), A13 🐞 (S7's Cancel asserts only that nothing
  * was reset and reloads before pressing again), OJS1 🐞 (journal-only),
  * OMP5 🐞 (S5 asserts the scenario's sentence, never where the link
@@ -38,7 +38,7 @@
  * press settings, rewrites every submission in the press, or reads a
  * mailbox (S1's mailbox silence needs a throwaway submitter, footnote s1,
  * so S1 runs on a scratch press). publicknowledge and the 18 seeded users
- * are never changed (A1, A7). Every absence is a settled read paired with a
+ * are never changed (A7; A1 until pkp/pkp-lib#13585). Every absence is a settled read paired with a
  * positive control taken the same way; a mailbox silence is bounded by a
  * discussion email the test itself sends to a second throwaway account
  * (A8, `pkpMail.expectNone`). Waits are event-based (publication/context

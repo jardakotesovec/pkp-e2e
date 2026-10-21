@@ -276,8 +276,10 @@ shows only while its text is not empty. <sup>j</sup>
     the wizard, "Require …" also makes it a submit blocker
     ([Submission wizard](U21-submission-wizard.md#submit-gates), Rules 7
     and 13). The one exception is "Plain Language Summary", whose
-    "Require …" also holds on every later save of the publication
-    ([Publication metadata](U40-publication-metadata.md#a1)). This spec
+    "Require …" also holds after submission: a later save of the
+    publication that empties the summary is refused, one that leaves it
+    out goes through ([Publication metadata](U40-publication-metadata.md#a1),
+    Rule 5). This spec
     owns only the tab. <sup>e</sup>
 
 **Components**

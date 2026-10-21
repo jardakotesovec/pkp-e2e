@@ -11,9 +11,9 @@
  * Spec: docs/specs/U40-publication-metadata.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (no test sets Plain Language Summary to "Require"; S2 enables it at
- * "Ask"), A2 🐞 / A3 ❓ (S7 and S9 assert only the scenarios' own
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ✅
+ * retired (pkp/pkp-lib#13585; no test sets Plain Language Summary to
+ * "Require" yet, a Planned item; S2 enables it at "Ask"), A2 🐞 / A3 ❓ (S7 and S9 assert only the scenarios' own
  * sentences after the reset: the published item's rewrite and, on the
  * issue basis, the unpublished item's current year; the 1970 year and the
  * per-version log lines are not asserted), A5 ❓ (S3 reaches "Scheduled"
@@ -522,7 +522,7 @@ test.describe('publication metadata', () => {
             {timeout: 30_000}
         );
 
-        // Plain Language Summary at "Ask" (never "Require", A1), and the
+        // Plain Language Summary at "Ask" (never "Require": A1 retired, a Planned item), and the
         // Publisher ID for publications plus the Article Number, on the
         // same settings screen. The Publisher ID box reads "Enable for
         // Publications" on this journal (the spec's "Enable for Articles"

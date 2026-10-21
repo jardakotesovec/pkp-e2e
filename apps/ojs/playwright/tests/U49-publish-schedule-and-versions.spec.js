@@ -18,8 +18,8 @@
  * a stage with no versions; the silent re-select is not), A5 🐞 (S5 saves
  * and publishes a summary; its reader-side rendering is asserted neither
  * way), A6 🐞 (S4 reads the date line before the draft only), A7 ❓
- * (press and preprint server only), OJS1 🐞 (no test requires a plain
- * language summary), OJS2 🐞 (S11 and S12 schedule on a journal with a
+ * (press and preprint server only), OJS1 ✅ retired (pkp/pkp-lib#13585; a
+ * journal requiring the summary is a Planned item), OJS2 🐞 (S11 and S12 schedule on a journal with a
  * published back issue, or through the Publication-Settings-first route;
  * no test picks "Schedule Only" as a first pick on a published-issue-less
  * journal), OJS3 🐞 (S4 asserts only what a signed-out reader gets at the

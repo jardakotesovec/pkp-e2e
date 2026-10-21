@@ -81,7 +81,7 @@ errors and try again." <sup>c</sup> <sup>d</sup>
 | **Title** | Yes | One-line rich text, multilingual. Required in the submission language once the submission has been submitted. Saving it empty is refused with "This field is required." |
 | **Subtitle** | No | One-line rich text, multilingual. |
 | **Abstract** | Journal/preprint server: yes unless the submission's section is set to "Do not require abstracts" [OMP2](#omp2) | Rich text, multilingual. When the section sets an abstract word count, the field shows "Word Count: {n}/{limit}". Over the limit, the counter gains a red error mark and Save is refused with "The abstract is too long. It should be {limit} words or less. It is currently {n} words long." An empty required abstract is refused with "This field is required." [A7](#a7). A press has no per-section abstract policy: the field is optional with no limit [OMP2](#omp2). |
-| **Plain Language Summary** | Only when the journal *requires* it | Rich text, multilingual, shown after Abstract. Present only when the journal has enabled plain language summaries (Settings that modify behavior). Shares the abstract's word limit. In the submission wizard a summary over that limit leaves the wizard stuck on "Saving" ([Submission wizard](U21-submission-wizard.md#a16)). When the journal requires it, every OTHER Publication page's Save is refused for this field, and storing the summary here does not lift the refusal ⚠ [A1](#a1). |
+| **Plain Language Summary** | Only when the journal *requires* it | Rich text, multilingual, shown after Abstract. Present only when the journal has enabled plain language summaries (Settings that modify behavior). Shares the abstract's word limit. In the submission wizard a summary over that limit leaves the wizard stuck on "Saving" ([Submission wizard](U21-submission-wizard.md#a16)). When the journal requires it, a save here that empties it is refused once the submission is submitted; the other Publication pages save without it [A1](#a1). |
 
 **Metadata page**. Only the items the journal has enabled appear, in the
 settings screen's order. With none enabled the page reads "No metadata
@@ -193,8 +193,8 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
    An empty required one is refused before the save is even sent (Fields
    & validation) [A7](#a7). The Plain Language Summary field follows Rule
    6's enablement. When the journal requires the summary, the Title &
-   Abstract page refuses an empty summary like any required field, and
-   every other Publication page refuses to save at all ⚠ [A1](#a1).
+   Abstract page refuses an empty summary like any required field, while
+   every other Publication page saves without it [A1](#a1).
    <sup>d</sup>
 6. **The Metadata page mirrors the journal's metadata setup.** Each item
    on Settings › Workflow › Submission › "Metadata" has an "Enable {item} metadata"
@@ -430,8 +430,9 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
   Data, Funding or Title & Abstract page (Rules 6, 16). The radio under it ("Do not
   request… / Ask the author… / Require the author…") governs the wizard
   only, with one exception: Plain Language Summary (listed first on the
-  screen), whose "Require" is enforced on every publication save
-  ⚠ [A1](#a1). The same screen also holds "Publisher ID" in every app
+  screen), whose "Require" also holds after submission: a save that
+  empties the summary is refused, and saves that leave it out go through
+  [A1](#a1). The same screen also holds "Publisher ID" in every app
   (per-app checkboxes enable it for publications and the app's other
   objects, which produces the Publisher ID field) and, journal only,
   "Article Number". How the tab itself handles its boxes, their choices
@@ -469,9 +470,9 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
   [A9](#a9)) plus keywords. Its "For the Editors" step is the Metadata
   page's asked and required items. On a preprint server its License
   section sets the License URL of Rule 11 before posting. With the
-  summary required, the wizard's own saves are hit by the same refusal
-  as this feature's pages (A1). What the author then sees is the wizard's
-  to describe.
+  summary required, the wizard's saves go through while the summary is
+  still empty, and the summary blocks only the submit; that is the
+  wizard's to describe.
 - *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)*:
   owns which roles reach the workflow screen, its stages and the Publication
   area ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)).
@@ -484,9 +485,8 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
   scheduling, unpublishing and versions, including the "Review Publishing
   Details" panel a journal shows before scheduling. This spec owns the
   edit locks those states impose (Rules 8–9), the permission-field fill
-  that publishing performs (Rule 12), the language-change restriction
-  (Rule 13), and the record of how a required plain language summary
-  reaches that panel (A1). One of that feature's findings shapes this
+  that publishing performs (Rule 12) and the language-change restriction
+  (Rule 13). One of that feature's findings shapes this
   spec's scheduled-state checks: on a journal, the panel's "Assign To
   Future Issue and Schedule Only" choice can publish the article at once.
   The dependable way to a scheduled article is to save that choice first
@@ -939,10 +939,9 @@ Left out of the scenarios above, by reason:
   - Tools › Permissions: Cancel in the reset confirm box leaves the button usable, and pressing it again asks again (A13; the guard its issue report names)
   - a press with License Terms and no license: a book page without its own License URL shows the "License" heading and the terms, with no link in the block (OMP5; the guard its issue report names)
   - a journal that requires the plain language summary: the
-    Metadata and Permissions & Disclosure pages saved after the summary
-    is stored, the journal's "Review Publishing Details" Confirm
-    reaching scheduling, and an emptied summary on Title & Abstract
-    still refused (A1; the guard its issue report names)
+    Metadata and Permissions & Disclosure pages saved before and after
+    the summary is stored, and an emptied summary on Title & Abstract
+    still refused (Rule 5; A1, retired)
   - term suggestions: a term on another submission's published version
     offered below the typed text, and a term on a submission not
     published, or in another journal, not offered (Rule 7b): likely a
@@ -970,8 +969,6 @@ Left out of the scenarios above, by reason:
   - Copyright Holder "Journal" chosen on Settings › Distribution › License
     (Rule 12): the journal's name scenario 5 reads with no holder chosen
 - **Register carries it**:
-  - A1 (every other Publication page refused while the plain language
-    summary is required; Rule 5; Settings)
   - A5 (a merely scheduled article still offering "Change" and
     accepting the change; Rule 13a)
   - A12 ("Custom copyright statement" accepted with an empty statement;
@@ -1031,7 +1028,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A1](#a1) | With Plain Language Summary required, no Publication page but Title & Abstract can be saved, even after the summary is stored, and a journal's pre-scheduling panel is refused silently | 🐞 | high · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A2](#a2) | Reset Permissions stamps Copyright Year 1970 on every unpublished article or preprint, and publishing keeps it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A15](#a15) | Change Submission Language: a language picked while the panel loads saves the old title as the new one | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A13](#a13) | After Cancel in the "Reset Article Permissions" confirm box, the button stays greyed until the page is reloaded | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1057,6 +1053,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A4](#a4) | Retired: publishing leaves the Author's edit permission as it was, and the Author saves at once after an unpublish | ✅ | retired | re-probe (claude), 2026-09-09 — fixed upstream |
 | [A16](#a16) | Retired: on a new version of a published item the permitted Author's Save goes through and the edit is there after a reload | ✅ | retired | re-probe (claude), 2026-09-14 — fixed upstream |
 | [A10](#a10) | Retired: term suggestions follow Rule 7b in all three apps | ✅ | retired | upstream sync (claude), 2026-09-18 — settled to a defect, OMP and OPS; retired upstream sync (claude), 2026-09-21 |
+| [A1](#a1) | Retired: with Plain Language Summary required, every Publication page saves without the summary and a journal's pre-scheduling panel goes through; only an emptied summary is refused | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
 | [A7](#a7) | Retired: an over-limit abstract is refused on Save with its own message, an empty required one before the save is sent | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [A9](#a9) | Retired: the wizard's Details step does show Plain Language Summary at "Ask" and at "Require" | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [OMP1](#omp1) | The book page prints the copyright line outside the License block | ✅ | minor | — |
@@ -1065,29 +1062,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OPS1](#ops1) | The submitting author edits their own preprint until it is posted | ✅ | user-visible | — |
 
 ### All apps
-
-<a id="a1"></a>
-**A1 — Requiring a plain language summary blocks every other save** · 🐞 · high · crash: script.
-With Settings › Workflow › Submission › "Metadata" set to "Require the author to provide
-a plain language summary…", pressing Save on the Metadata, Data, Identifiers or
-Permissions & Disclosure page is refused with "Please correct one error.
-Go to plainLanguageSummary: This field is required. Jump to next error".
-None of those pages carries the summary field. The message shows a raw
-field name, and no field on the page is marked. Storing the summary on
-Title & Abstract changes nothing: those pages can never be saved from the
-screen while the setting is on, and the entry page next to them
-(Publication Settings / Catalog Entry / Preprint entry) is refused the same
-way. The requirement is checked against what each save sends rather than
-against what the version holds. Publishing does not enforce it: a press
-publishes and a preprint server posts without a summary, while on a
-journal the "Review Publishing Details" panel's Confirm is refused with
-no message and scheduling is never reached (see *Publish, schedule &
-versions*). The submission wizard is hit too. At "Require", the start
-form's title is dropped without a message, and an empty summary on
-Details produces "Error An unexpected error has occurred. Please reload
-the page and try again." while the wizard moves on. That leg is recorded
-in *[Submission wizard](U21-submission-wizard.md)*.
-Since: live-probed 2026-08-28 · Basis: probe, 2026-10-01. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — Reset Permissions stamps Copyright Year 1970 on every unpublished article or preprint, and publishing keeps it** · 🐞 · medium.
@@ -1169,8 +1143,8 @@ The draft read the wizard as never showing the field. On the screen, the
 Details step shows "Plain Language Summary" at "Ask the author…" and
 marks it required at "Require the author…". The Review step lists "Plain
 Language Summary None provided" when it was left empty. The setting's
-options work as promised. What goes wrong at "Require" is A1's wizard
-leg.
+options work as promised. At "Require" the server once refused the
+wizard's other saves (A1, retired).
 Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
 question). <sup>f-a9</sup>
 
@@ -1475,6 +1449,9 @@ Basis: probe, 2026-10-03. <sup>f-ops3</sup>
 <a id="a16"></a>
 **A16 — The Author's Save on a new version of a published item is offered and refused** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13312), verified 2026-09-14 on all three apps: the permitted Author's save on the new version goes through while the other version is published, the footer reads "Saved" and the edit is there after a reload (Rule 9). <sup>f-a16</sup>
 
+<a id="a1"></a>
+**A1 — Requiring a plain language summary blocked every other save** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21 on all three apps: the Metadata, Permissions & Disclosure and entry pages save without the summary, a journal's "Review Publishing Details" Confirm goes through, and only a save that empties the summary is refused (Rule 5). <sup>f-a1</sup>
+
 <a id="a10"></a>
 **A10 — Term suggestions did not follow the rule on the press and the preprint server** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12163): the suggestions follow Rule 7b on OJS since 2026-09-18 and on OMP and OPS since 2026-09-21. <sup>f-a10</sup>
 
@@ -1714,8 +1691,11 @@ not override, so the base defaults (limit 0, not required) apply
 {$count}/{$limit}") with an error icon when over. Server-side:
 `Repo::publication()->validate()` requires `title[primaryLocale]` when
 `submissionProgress` is empty (falling back to the stored title), and
-`plainLanguageSummary[primaryLocale]` whenever the context is at
-`METADATA_REQUIRE` — evaluated on `$props` (the request body) only (A1).
+`plainLanguageSummary[primaryLocale]` at `METADATA_REQUIRE` once the
+submission is submitted, as a required prop through
+`ValidatorFactory::required()` since pkp/pkp-lib#13585: refused only
+when a save sends it empty (A1, retired; before, evaluated on `$props`,
+the request body, so every form without the field was refused).
 Live-probed 2026-08-28 on all three apps (manager): field labels Prefix
 ("Examples: A, The"), Title (required), Subtitle, Abstract (required on
 OJS/OPS, plain on OMP); the Title/Subtitle toolbar is hidden until the
@@ -2276,7 +2256,8 @@ positive control the same way (scenarios.md "Mailpit").
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** Scratch journal (the metadata settings are
 mutated) with one scratch submission. Set Plain Language Summary to off
-first, or every Metadata save is refused (A1); the summary bullet
+first (a required summary refused every Metadata save until
+pkp/pkp-lib#13585, A1, retired); the summary bullet
 enables it at "Ask", never "Require". The word-limit and no-abstract
 bullets (OJS, OPS) seed the journal's `sections[]` with `wordCount: 50`
 on the first section and `abstractsNotRequired: true` on a second, with
@@ -2417,7 +2398,7 @@ with "Change" once the permission was ticked; the permission-off readout
 state was not separately captured).
 
 <a id="fn-f-a1"></a>
-**f-a1 — A1 evidence.** `PKP\publication\Repository::validate()`: the
+**f-a1 — A1 evidence (retired).** `PKP\publication\Repository::validate()`: the
 closure "validate the requirement of Plain language summary" adds
 `validator.required` on `plainLanguageSummary.{primaryLocale}` whenever
 `$context->getData('plainLanguageSummary') === METADATA_REQUIRE` and
@@ -2451,6 +2432,28 @@ Continue answered 400 and the dialog "Error An unexpected error has
 occurred. Please reload the page and try again." appeared while the
 rail moved to Contributors; with the summary filled, Details saved and
 the Review step flagged the lost Title "This field is required."
+Retired 2026-10-21: pkp/pkp-lib#13585 drops the closure and adds
+`plainLanguageSummary` to the props `ValidatorFactory::required()`
+checks once the submission is submitted (an edit is refused only when
+it sends the summary empty; a new version must carry it), with a guard
+for an absent prop on a new object. Driven on PKP's default dataset at
+the PR head `93b094ea77` (in `lib/pkp` of OJS `9647ed7204`, OMP
+`56388590e`, OPS `ea14c78745`) and its base `2ea65a9662`, before its
+merge, on the three apps, by the issue walk
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js`
+and `shared/playwright/checks/sync/pkp-lib-13585/api-edges.js`
+(base in brackets): Metadata and Permissions & Disclosure "Saved",
+200, before and after a summary was stored [400
+`plainLanguageSummary`]; OJS "Review Publishing Details" Confirm 200,
+the confirmation opened and "Publish" gave "Status: Published" [400, no
+confirmation]; Title & Abstract with the summary emptied still refused
+in the browser ("Go to Plain Language Summary: This field is
+required."). API as the manager: `PUT …/publications/{id}` without the
+summary 200 [400]; `PUT …/publications/{id}/version` 200 [400]; the
+summary sent as `{"en": ""}` 400 "You must complete this field in
+English." (two submission languages) [400 "This field is required."];
+the summary sent for `fr_CA` alone 200, the English one kept [400];
+`POST …/publications` without the summary 400, with it 200 [the same].
 Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323) ([docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md](../issues/U21-A20-plain-summary-required-refuses-other-saves.md)).
 
 <a id="fn-f-a2"></a>

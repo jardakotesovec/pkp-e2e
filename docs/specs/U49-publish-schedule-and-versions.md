@@ -157,8 +157,8 @@ In French most of its headings and descriptions are raw codes
    the panel, with "This field is required." under the empty field
    (Fields). A Confirm refused with the passing notice "The form was
    not saved because 1 error(s) were encountered. Please correct these
-   errors and try again.", such as a required summary's (Rule 4),
-   marks nothing in the panel. On a version with no Publication Stage
+   errors and try again." (a server-side refusal of a field the panel
+   does not hold) marks nothing in the panel. On a version with no Publication Stage
    yet it opens a second panel over the first, "Publication Stage" and
    "Revision Significance" empty, and one "Cancel" closes both
    ⚠ [OJS5](#ojs5). <sup>h</sup>
@@ -179,10 +179,9 @@ In French most of its headings and descriptions are raw codes
    have a version stage assigned before it can be published." instead: a
    sentence phrased as an unmet requirement right under the all-met line,
    though it blocks nothing ⚠ [A7](#a7). On a journal whose settings
-   *require* a plain language summary, the panel's Confirm is refused,
-   even with a summary saved, and nothing names it (Rule 3c)
-   ⚠ [OJS1](#ojs1); only a version skipping the panel (Rule 3) reaches
-   the window ⚠ [OJS6](#ojs6).
+   *require* a plain language summary, the panel's Confirm reaches the
+   window like any other [OJS1](#ojs1), and nothing at publishing checks
+   the summary, so a version without one publishes ⚠ [OJS6](#ojs6).
    Confirming closes the window, and the Publication area shows the new
    state at once: the head's status and, in place of the publish
    button, "Unpublish" ("Unpost") or "Unschedule" (Rules 6, 8, 9).
@@ -503,8 +502,7 @@ In French most of its headings and descriptions are raw codes
 - [Publication metadata](U40-publication-metadata.md): owns the metadata
   pages, the edit locks that published/scheduled states impose, and the
   copyright fill's field-level story (its Rule 12). This spec owns the
-  publishing acts that trigger them. Its plain-language-summary finding
-  surfaces here as the panel's refused Confirm ⚠ [OJS1](#ojs1).
+  publishing acts that trigger them.
 - [Submission stage](U25-submission-stage.md#schedule): the journal's
   Submission-stage "Schedule For Publication" shortcut that lands here.
 - *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)*:
@@ -1064,6 +1062,10 @@ Left out of the scenarios above, by reason:
     publishing", still offers "Publish" ("Post"), and confirming
     publishes it, in every app; a submission without an iD on the same
     journal shows no list (Rule 4; Settings)
+  - a journal that requires the plain language summary: "Review
+    Publishing Details" Confirm reaching the confirmation window and
+    "Publish" publishing a version without a summary {OJS} (Rule 4;
+    OJS1, retired)
 - **Rarely met**:
   - two contributors holding the same verified iD, warned about with
     "Duplicate ORCiDs for contributors detected.", and two sharing one
@@ -1123,8 +1125,6 @@ Left out of the scenarios above, by reason:
     picture under two languages; Rule 11d)
   - A16 (a version created through the programming interface with a
     cover image the app accepts; Rule 11b)
-  - OJS1 (a required plain language summary refusing the panel's Confirm
-    without naming the summary; Rule 4)
   - OJS2's second half (where only future issues exist, a Publication
     Settings save for another field recording "Don't Assign To An
     Issue"; Fields)
@@ -1206,7 +1206,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A version created by program with a stage the app does not know fails with a server error instead of a refusal | 🐞 | latent · crash: server | — |
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
 | [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
-| [OJS1](#ojs1) | With a plain language summary required, the panel's Confirm is refused without naming the summary and publishing is unreachable | 🐞 | high | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
@@ -1221,13 +1220,14 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A7](#a7) | The press's and preprint server's confirmation shows a requirement-shaped stage sentence under "All … requirements have been met" | ❓ | minor | — |
 | [A9](#a9) | Unassigned versions made the same day carry identical names in every version list | ❓ | minor | — |
 | [A13](#a13) | A real picture whose file name has the wrong ending (a PNG named "cover.jpg") is now refused as a cover image | ❓ | user-visible | — |
-| [OJS6](#ojs6) | With a summary required, a version with saved details skips the refused panel and would publish without one | ❓ | latent | — |
+| [OJS6](#ojs6) | With a summary required, a journal publishes a version without one | ❓ | latent | — |
 | [OJS7](#ojs7) | A title typed with markup may run as script in the editor's browser when Crossref's publish warning names it | ❓ | user-visible | — |
 | [OMP1](#omp1) | The press's publish confirmation promises to make the entry public while a future date schedules it instead | ❓ | minor | — |
 | [OPS2](#ops2) | The posted acknowledgement is sent even when the post only scheduled the preprint | ❓ | minor | — |
 | [OPS3](#ops3) | An author granted posting by a plugin still finds no Post control on the workflow | ❓ | latent | — |
 | [OPS5](#ops5) | The preprint server's "Post" vocabulary stops short: header pill, email and task notice still say "published" | ❓ | minor | — |
 | [A8](#a8) | Retired: after a publish, post or schedule the Publication area kept the unpublished state until a page reload; fixed in pkp/ui-library#853 before its merge, never on `main` | ✅ | retired | re-probe at the PR head (claude), 2026-09-23 — fixed before merge |
+| [OJS1](#ojs1) | Retired: with a plain language summary required, the panel's Confirm was refused without naming the summary and publishing was unreachable; it now reaches publishing | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
 
 ### All apps
 
@@ -1516,18 +1516,6 @@ Since: 2026-10-20 (pkp/pkp-lib#13560; on 3.5 the same day) · Basis: probe, 2026
 
 ### OJS
 
-<a id="ojs1"></a>
-**OJS1 — A required plain language summary blocks Confirm without naming itself** · 🐞 · high.
-On a journal that requires a plain language summary, the "Review
-Publishing Details" panel's Confirm is refused for every version, one
-that already holds a summary included, so publishing and scheduling
-are never reached from it ([OJS6](#ojs6)). Nothing names the summary
-(Rule 3c, [OJS5](#ojs5)). The requirement's
-save-blocking side is [Publication metadata](U40-publication-metadata.md#a1)'s finding,
-with the same cause; a press and preprint server publish without a
-summary. Since: 2026-08-28 · Basis: probe, 2026-10-02.
-<sup>[f-ojs1](#fn-ojs1)</sup>
-
 <a id="ojs2"></a>
 **OJS2 — Editor's "Schedule Only" publishes the article at once when the journal has no published issue** · 🐞 · medium.
 On a journal with no published issue, only one or more future issues, an
@@ -1586,19 +1574,21 @@ reason for the refusal shown. A passing notice counts "1 error(s)" and
 names nothing, and a "Confirm" in the copy is refused again and adds a
 third panel.
 
-Today a journal meets it when it requires a plain language summary:
-that requirement refuses every save from this panel, a separate fault
-([pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323)).
+A journal met it when it required a plain language summary, which
+refused every save from this panel until pkp/pkp-lib#13585
+([OJS1](#ojs1), retired); any other server refusal of the panel's save
+opens the same copy (code).
 Basis: probe, 2026-10-15. <sup>[f-ojs5](#fn-ojs5)</sup>
 
 <a id="ojs6"></a>
-**OJS6 — With a plain language summary required, a version that skips the panel would publish without one** · ❓ · latent.
-On a journal that requires a plain language summary, a version whose
-issue choice and stage are already saved skips the refused panel
-([OJS1](#ojs1)) for the confirmation window (Rule 3), where nothing
-checks the summary. Question: should publishing require it too? Lean:
+**OJS6 — With a plain language summary required, a journal publishes a version without one** · ❓ · latent.
+On a journal that requires a plain language summary, a version without
+one is scheduled or published, through "Review Publishing Details" or
+skipping it (Rule 3), since nothing at publishing checks the summary
+([OJS1](#ojs1), retired, refused the panel's save until
+pkp/pkp-lib#13585). Question: should publishing require it too? Lean:
 no; the setting asks for it "before accepting their submission", and a
-press and preprint server publish without one. Basis: code, 2026-10-05. <sup>[f-ojs6](#fn-ojs6)</sup>
+press and preprint server publish without one. Basis: probe, 2026-10-21. <sup>[f-ojs6](#fn-ojs6)</sup>
 
 <a id="ojs7"></a>
 **OJS7 — A title typed with markup may run as script in the editor's browser when Crossref's publish warning names it** · ❓ · user-visible.
@@ -1714,6 +1704,9 @@ fixed, this wrong link reaches authors on `main` too.
 Basis: probe, 2026-10-15. <sup>[f-ops6](#fn-ops6)</sup>
 
 ### Retired
+
+<a id="ojs1"></a>
+**OJS1 — A required plain language summary blocked Confirm without naming itself** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21: the "Review Publishing Details" panel's Confirm reaches the confirmation window and publishing on a journal that requires the summary. <sup>[f-ojs1](#fn-ojs1)</sup>
 
 <a id="a8"></a>
 **A8 — The workflow still shows "unpublished" after publishing** · ✅ · retired. Fixed in pkp/ui-library#853 at `51f0c727` before its merge, 2026-09-23; never on `main`. <sup>[f-a8](#fn-a8)</sup>
@@ -2035,9 +2028,9 @@ can be published.", then "The stage version that will be assigned to
 the publication is "{version}"") was recorded on OMP and OPS first
 publishes of stage-less versions, and collapsed to "The publication
 version is "{version}"" on republish (fn-a7).
-OJS1: with `plainLanguageSummary` required the panel's own save is
-refused before the modal is ever reached (see the metadata spec's A1
-evidence, live-probed 2026-08-28).
+OJS1 (retired): until pkp/pkp-lib#13585, with `plainLanguageSummary`
+required the panel's own save was refused before the modal was ever
+reached (see the metadata spec's A1 evidence, live-probed 2026-08-28).
 
 <a id="fn-m"></a>
 **m** — `IssueAssignment` enum: NO_ISSUE/FUTURE_ISSUES_PUBLISHED →
@@ -2831,7 +2824,7 @@ OPS: `$publication->setData('coverImage', $value)` before that
 Report `docs/reports/2026-10-21-pkp-lib-13561.md`.
 
 <a id="fn-ojs1"></a>
-**f-ojs1** — Live 2026-08-28 (metadata spec, register A1): with
+**f-ojs1** — OJS1 (retired). Live 2026-08-28 (metadata spec, register A1): with
 "Require the author to provide a plain language summary…" on, the
 panel's Confirm was refused with no message in the panel on a
 summary-less version; OMP published and OPS posted under the same
@@ -2844,6 +2837,17 @@ encountered. Please correct these errors and try again.", no field
 marked, and the second panel of f-ojs5. The
 requirement is checked against what each save sends; the panel's save
 does not carry the summary field.
+Retired 2026-10-21: pkp/pkp-lib#13585 checks a required summary only
+when a save sends it empty. Driven on PKP's default dataset at the PR
+head `93b094ea77` (in OJS `9647ed7204`'s `lib/pkp`) and its base
+`2ea65a9662`, before its merge, by the issue walk
+`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js`
+as `dbarnes`: submission 5, "Version of Record (VoR)", "Major
+Revision", "Assign To Current/Back Issue", "Vol. 1 No. 2 (2014)",
+"Confirm": at the head the panel's `PUT` answered 200, the confirmation
+window opened and "Publish" gave "Status: Published", the version
+holding no summary; at the base the `PUT` answered 400
+`plainLanguageSummary` and no confirmation opened.
 Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323) ([docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md](../issues/U21-A20-plain-summary-required-refuses-other-saves.md)).
 
 <a id="fn-ojs2"></a>
@@ -2957,8 +2961,11 @@ Issue report: [pkp-e2e#985](https://github.com/jardakotesovec/pkp-e2e/issues/985
 **f-ojs6** — Code read 2026-10-05 (OJS `main`, lib/pkp `987776cd04`):
 `validatePublish()` (pkp-lib and OJS publication `Repository`) checks
 no `plainLanguageSummary`; only `validate()`, run on each save, does
-(f-ojs1). The publish button skips the panel by the version's stored
-stage and status (fn-h), so that path sends no save. Not walked. The
+(f-ojs1; since pkp/pkp-lib#13585 only when a save sends it empty). The
+publish button skips the panel by the version's stored stage and status
+(fn-h), so that path sends no save. Walked 2026-10-21 through the panel
+at pkp/pkp-lib#13585's head (f-ojs1): a version without a summary
+published on a journal that requires one. The
 setting's text: "Require the author to provide a plain language summary
 before accepting their submission."; pkp-e2e#323's Fix notes call a
 check at publishing a product decision.
