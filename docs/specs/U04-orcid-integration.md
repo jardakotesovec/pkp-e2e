@@ -191,9 +191,12 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
     configured, publishing an article adds it as a "work" to the ORCID record
     of every contributor holding a verified iD with a live deposit
     permission. "Live" means not expired and not revoked. No screen shows
-    liveness; the deposit simply skips the others. Publication is the
-    trigger, and nothing is deposited before it. A contributor verified under
-    the public API holds no deposit permission. For them the deposit pauses
+    liveness; the deposit simply skips the others. Publishing is the
+    trigger, and so is scheduling a journal article into an issue not yet
+    published ("Schedule For Publication"): the work is sent as soon as
+    the article is scheduled, not when its issue is published. Nothing is
+    deposited before either. A contributor verified under the public API
+    holds no deposit permission. For them the deposit pauses
     and the journal emails a request to re-authorize with the wider
     permission (Rule 14). ⚠ [A14](#a14) that email's link, back from
     ORCID, ends on a blank page because the app fails, so the deposit
@@ -337,7 +340,8 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
 - **Emails management**: the stored ORCID email templates are edited on the
   Emails settings screen (feature spec to come: *Emails management*). This
   spec owns the ORCID-specific gaps ⚠ [OPS2](#ops2) ⚠ [A7](#a7).
-- **Publishing**: publication is the deposit trigger (Rule 11). A
+- **Publishing**: publishing, or scheduling a journal article into a
+  future issue, is the deposit trigger (Rule 11). A
   contributor's unauthenticated iD, or the same iD on two contributors,
   does not stop the publication: the final publish window lists
   "Unauthenticated ORCiDs for contributors detected." or "Duplicate
@@ -639,8 +643,8 @@ Left out of the scenarios above, by reason:
   - the emailed link being single-use, a used link answering "An ORCID iD was already stored for this submission." (Actors row 7, Rule 9): the same sign-in
   - the success landing returning to the front page after ten seconds (Rule 9): the same sign-in
   - the landing after an emailed authorization on a member-API journal adding "The submission will be added to your ORCID record during publication." for an article not yet published, and no deposit line on a public-API journal (Side effects): the same sign-in
-  - publishing on the member API sending a work to each contributor with a verified iD and a live permission, and none for the others (Rule 11): the deposit shows only in the background job queue, which the screens do not show, and its arrival needs a stand-in for ORCID's service that the suites lack
-  - works updated in place on later publishes (Rule 11): the same deposit, and no key stores a work as already deposited
+  - publishing on the member API, or scheduling a journal article into a future issue, sending a work to each contributor with a verified iD and a live permission, and none for the others (Rule 11): the deposit shows only in the background job queue, which the screens do not show, and its arrival needs a stand-in for ORCID's service that the suites lack
+  - works updated in place on later publishes (Rule 11): the same deposit. The app does remember a deposited work (the identifier ORCID's first answer gives it is stored with the contributor, and the next deposit updates that work); what the suites lack is the stand-in for ORCID's work service
   - presses sending no works on publication, OMP1 (Rule 11): the same job queue
   - publishing sending the article's completed reviews (Rule 12): the same job queue
   - a review deposit skipped without a City (Settings; Rule 12): the same job queue
@@ -1490,7 +1494,30 @@ stored put-code (tried `…/work/<put-code>`, the update in place), none
 for an expired token (a `RevokeOrcidToken` instead) nor for an
 unauthenticated iD; the public-scope contributor's job queued
 "Requesting updated ORCID record access" (finding A14). OMP, the same
-seeds: nothing queued (OMP1). Publishing with an
+seeds: nothing queued (OMP1). Rule 11's trigger and the stored
+put-code, live-probed 2026-10-21 (OJS and OPS on `main` and
+`stable-3_5_0`, Member Sandbox, on PKP's default test dataset; a
+contributor's verified iD and member-scope token set in the database as
+`VerifyIdentityWithOrcid::saveIdentityData()` stores them; ORCID's work
+service answered by a local stand-in, the kept check
+`shared/playwright/checks/U04/H21/deposits.js` with `work-stub.js`;
+two runs per case): publishing into the published "Vol. 1 No. 2
+(2014)" (OJS) or posting (OPS) queued one `DepositOrcidSubmission`,
+which sent one `POST …/v3.0/<iD>/work`; on its 201 the put-code ORCID's
+answer returns was stored as the author's `orcidWorkPutCode`.
+Scheduling an OJS article into the unpublished "Vol. 2 No. 1 (2015)":
+the confirm window read "This will be published when Vol. 2 No. 1
+(2015) is published. Are you sure you want to schedule this for
+publication?" with "Schedule For Publication", the publication was
+stored scheduled (status 5), and the same single `POST …/work` went out
+at once, the put-code stored, while the issue stayed unpublished (main
+and 3.5). Sending on schedule is deliberate: the listener's
+published-or-scheduled condition carries over the 3.4 ORCID Profile
+plugin's `handlePublicationStatusChange()`. On `stable-3_5_0` the
+search-index jobs a publish queues build the work again
+(pkp/pkp-lib#10744) and send it as an update (`PUT …/work/<put-code>`),
+so no second work appears; `main` dropped that path with its search
+rewrite (pkp/pkp-lib#8920). Publishing with an
 unauthenticated or duplicate iD (Cross-feature interactions): live-probed
 2026-10-09 at the PR head `e29a720de0`, before its merge
 (pkp/pkp-lib#13493, issue pkp/pkp-lib#13283; OJS, OMP and OPS, on PKP's
