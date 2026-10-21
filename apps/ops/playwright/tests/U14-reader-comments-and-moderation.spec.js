@@ -31,7 +31,7 @@
  * nothing of the register entry beyond it: S1 waits for the Comments
  * tab's reload onto Appearance › Theme and asserts nothing about a
  * "Saved" status (A5); S1 opens the Comments page by address with the
- * setting off and reads "No Items" (A4); S3 reads the address
+ * setting off and reads the refusal (A4); S3 reads the address
  * after the report panel's "Close" with neither number (A8); S5 reads
  * the "pending review" row still in the manager's panel after "Hide
  * Comment" (A2). The spec's Coverage section records everything else
@@ -273,17 +273,9 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(menu.groupHeader('Content')).toHaveCount(0);
         expect(await menu.contentEntries()).toEqual([]);
 
-        // The page by address: it opens, but every comments request is refused
-        // while the setting is off: an "Error" dialog on the load and on each
-        // tab, and "No Items" under "All" and "Approved" (the scenario's own
-        // sentence; A4).
-        await comments.goto();
-        await comments.dismissRefusal();
-        await comments.expectNoItems();
-        await expect(comments.row(text)).toHaveCount(0);
-        await comments.openTab('Approved');
-        await comments.dismissRefusal();
-        await comments.expectNoItems();
+        // The page by address: refused while the setting is off, onto the
+        // access-denied page (the scenario's own sentence; A4).
+        await comments.gotoRefused();
 
         // Switching on again: the same reload; the "Content" group is back
         // with "Comments" as its only entry.
@@ -321,7 +313,7 @@ test.describe('Reader comments & moderation (U14)', () => {
         // Control: the fresh server's tab shows the box unticked, its side
         // menu offers no Content › Comments (no "Content" group at all,
         // beside "Statistics"), and its Comments page, opened by address,
-        // shows the "Error" dialog and reads "No Items" under every tab.
+        // is refused as well.
         const freshPage = await (await asUser(freshPeople.manager.username)).newPage();
         const freshSettings = new CommentsSettingsTab(freshPage, freshTag);
         await freshSettings.goto();
@@ -333,16 +325,7 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(freshMenu.groupHeader('Content')).toHaveCount(0);
         expect(await freshMenu.contentEntries()).toEqual([]);
         const freshComments = new CommentsPage(freshPage, freshTag);
-        await freshComments.goto();
-        await freshComments.dismissRefusal();
-        expect(await freshComments.tabLabels()).toEqual(ALL_TABS);
-        for (const name of ALL_TABS) {
-            if (name !== ALL_TABS[0]) {
-                await freshComments.openTab(name);
-                await freshComments.dismissRefusal();
-            }
-            await freshComments.expectNoItems();
-        }
+        await freshComments.gotoRefused();
         // The submission exists on the first server: the row read above was a real one.
         expect(submissionId).toBeGreaterThan(0);
     });
