@@ -28,6 +28,10 @@ const {execFileSync} = require('child_process');
  * @returns {string} the worker's stdout
  */
 function runJobs({appRoot = process.env.PKP_APP_ROOT, timeoutMs = 180_000} = {}) {
+    if (process.env.PROBE_AGENT) {
+        // bin/probe.js sets PROBE_AGENT; outside a suite run worker 0 is down
+        throw new Error('runJobs: called from a probe; use the kit\'s drainJobs(app) (patterns.md "Probe kit")');
+    }
     if (!appRoot) {
         throw new Error('runJobs: appRoot missing (PKP_APP_ROOT unset — run through the app playwright.config.js)');
     }

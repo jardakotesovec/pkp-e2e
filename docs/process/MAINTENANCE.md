@@ -266,7 +266,10 @@ is left, the next morning picks up from the files.
      oldest "Swept" date (none counts as oldest). Its kept checks
      (`shared/playwright/checks/<feature>/`) run twice, under `PROBE_RUN`
      r1 and r2 (a fact one run shows is undetermined), on reset
-     databases at the tips; one fresh checker (`briefs/claim-check.md`, `{{rerun}}` naming
+     databases at the tips, each run's summary read for dead phases, since
+     a kept check exits 0 when a phase dies (a fix there comes first: the
+     U05 sweep's checks still called `support/jobs.js` and slot 0's
+     Mailpit, 2026-10-20); one fresh checker (`briefs/claim-check.md`, `{{rerun}}` naming
      the outputs and the suites) judges the snapshots against the spec
      lines each chunk owns, drives what the checks no longer reach, and
      reads each suite against the scenarios for a bullet no test asserts.
