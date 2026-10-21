@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/services/PKPNavigationMenuService.php
++++ b/lib/pkp/classes/services/PKPNavigationMenuService.php
+@@ -654,7 +654,7 @@
+                 if ($localizedTitle = $nmi->getTitle($supportedFormLocale)) {
+                     $nmi->setTitle($localizedTitle, $supportedFormLocale);
+                 } elseif ($nmi->getTitleLocaleKey() === '{$loggedInUsername}') {
+-                    $nmi->setTitle($nmi->getTitleLocaleKey(), Locale::getLocale());
++                    $nmi->setTitle($nmi->getTitleLocaleKey(), $supportedFormLocale);
+                 } else {
+                     $nmi->setTitle(__($nmi->getTitleLocaleKey(), [], $supportedFormLocale), $supportedFormLocale);
+                 }

@@ -924,7 +924,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A2](#a2) | Unticking boxes on an email's Unsubscribe page switches back on emails the person had turned off | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | A Section Editor or a Guest Editor never sees their unread count on the public pages, beside their name or in the narrow-window menu, while the other roles do | 🐞 | low | issues (claude), 2026-10-20 — re-verified |
 | [OPS2](#ops2) | On a preprint server, the Notifications tab's new-preprint row has a stray space before the comma | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A15](#a15) | On a journal with French under "Forms", no name on the public pages carries the unread count, and a window 992 px or wider shows it nowhere | 🐞 | minor | — |
+| [A15](#a15) | On a journal, press or server with a "Forms" language other than the page's language, the signed-in name on the public pages loses its task count | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A16](#a16) | A discussion email's "#{submission number} {authors}" link tells the submission's own Author "The current role does not have access to this operation." | 🐞 | user-visible | — |
 | [A4](#a4) | The site-level profile's Notifications tab offers choices that no event honours | ❓ | latent | — |
 | [A5](#a5) | A mail program's own "Unsubscribe" button, offered because of the emails' headers, is probably refused | ❓ | latent | — |
@@ -1184,20 +1184,21 @@ Basis: test run (the desktop-width read), probe, 2026-10-13 (the narrow
 window). <sup>[f-a13](#fn-a13)</sup>
 
 <a id="a15"></a>
-**A15 — With French under "Forms", the unread count leaves the name on the journal's public pages** · 🐞 · minor.
-On a journal whose "Forms" languages include French, a signed-in Journal
-Manager, Editor, Reviewer, Author or holder of an assistant-level role
-sees no number of unread tasks beside their name on the journal's public
-pages, where Rule 4a puts it. In a window 992 px or wider the number
-shows nowhere on those pages, while the bell on the editorial pages
-counts the tasks; a narrower window still shows it after "Dashboard".
-Unticking French under "Forms" brings the number back beside the name on
-the next page, and ticking it again takes it away. On such a journal the
-editors, reviewers and authors lose the one sign of new tasks the public
-pages give. The cause is not traced; the browser's page inspector finds
-no number beside the name, so it is missing from the page, not hidden
-by its styling.
-Basis: probe, 2026-10-13. <sup>[f-a15](#fn-a15)</sup>
+**A15 — On a journal, press or server with a "Forms" language other than the page's language, the signed-in name on the public pages loses its task count** · 🐞 · low.
+On the public pages of a journal, press or preprint server, a signed-in
+user's name in the header normally carries their number of unread tasks
+("dbarnes 2"). The number goes missing whenever one of the "Forms"
+languages differs from the language the page is read in. The "Forms"
+languages are ticked in Settings › Website › "Setup" › "Languages", the
+same place in all three apps. That covers every journal with two "Forms"
+languages, whichever language the page is read in. It also covers a
+journal whose only "Forms" language is English when a user reads its
+pages in French. The users who lose the number are the ones who normally
+have it: managers and editors, the assistant-level roles, Reviewers and
+Authors. In a desktop-width window the public pages then show the number
+nowhere. The "Tasks" button on the editorial pages still counts the
+tasks.
+Basis: probe, 2026-10-21. <sup>[f-a15](#fn-a15)</sup>
 
 <a id="a16"></a>
 **A16 — A discussion email's "#{submission number} {authors}" link tells the submission's own Author "The current role does not have access to this operation."** · 🐞 · user-visible.
@@ -2206,6 +2207,7 @@ to the count. Not traced: `dashboardMenuItem.tpl`, the
 default theme's `head.less` and `getDisplayStatus()`'s title and role
 code are unchanged from `stable-3_5_0`, which therefore likely behaves
 the same (code read, not driven); a 3.5 drive settles it.
+Issue report: [docs/issues/U05-A15-unread-count-gone-with-french-forms.md](../issues/U05-A15-unread-count-gone-with-french-forms.md).
 
 <a id="fn-a16"></a>
 **f-a16** — The discussion footer's "#{number} {authors}" link

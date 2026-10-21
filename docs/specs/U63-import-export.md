@@ -3802,7 +3802,7 @@ database). Each such import also wrote "PHP Warning: Undefined
 property: stdClass::$section_id" to the server log
 (`omp/classes/section/DAO.php`, `getByPath()`), with nothing seen on
 screen. OJS and OPS have no series. Kept script: `shared/playwright/checks/U63/I09/native.js`.
-Issue report: [docs/issues/U63-OMP5-native-import-series-unknown-element-sequence.md](../issues/U63-OMP5-native-import-series-unknown-element-sequence.md).
+Issue report: [pkp-e2e#1032](https://github.com/jardakotesovec/pkp-e2e/issues/1032) ([docs/issues/U63-OMP5-native-import-series-unknown-element-sequence.md](../issues/U63-OMP5-native-import-series-unknown-element-sequence.md)).
 
 <a id="fn-f-omp6"></a>
 **f-omp6** — Note y. The import's `NativeXmlPublicationFilter::parsePublicationFormat()`
@@ -3853,7 +3853,7 @@ file imported from the command line failed the same way, and on the
 pkp/pkp-lib#12956 (open, reported on 3.4) names the import and the
 same two lines; the export half has no upstream issue found. Kept
 script: `shared/playwright/checks/U63/H19/h19.js`.
-Issue report: [docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md](../issues/U63-OMP6-command-line-native-import-export-formats-fail.md).
+Issue report: [pkp-e2e#1033](https://github.com/jardakotesovec/pkp-e2e/issues/1033) ([docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md](../issues/U63-OMP6-command-line-native-import-export-formats-fail.md)).
 
 ## Reference — entry points & surfaces
 
