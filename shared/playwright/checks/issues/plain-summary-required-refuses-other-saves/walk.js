@@ -250,7 +250,7 @@ forEachApp(async (app) => {
             for (const [name, fn] of [['publication', publicationGroup], ['publish', publishGroup], ['wizard', wizardGroup], ['submit', submitGroup]]) {
                 if (!GROUPS.includes(name)) continue;
                 try { await fn(app, page, writes, f); } catch (e) { f[`${name}Error`] = L.flat(e.stack || e.message, 800); await L.snap(page, `walk-${name}-error`).catch(() => {}); }
-                log(app.name, name, JSON.stringify(f[name] || f[`${name}Error`]).slice(0, 1500));
+                log(app.name, name, String(JSON.stringify(f[name] || f[`${name}Error`] || null)).slice(0, 1500));
             }
         }
     } finally {
