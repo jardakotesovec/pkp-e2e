@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/publication/Repository.php
++++ b/lib/pkp/classes/publication/Repository.php
+@@ -392,6 +392,8 @@
+                 $value[$localeKey] = $this->_saveFileParam($publication, $submission, $publication->getData('coverImage', $localeKey), 'coverImage', $this->request->getUser(), $localeKey, true);
+             }
+ 
++            // The inserted row still holds the request's temporary file: let edit() keep the moved file
++            $publication->setData('coverImage', $value);
+             $this->edit($publication, ['coverImage' => $value]);
+         }
+ 

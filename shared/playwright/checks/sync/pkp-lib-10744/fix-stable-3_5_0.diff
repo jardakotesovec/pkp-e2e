@@ -1,0 +1,39 @@
+--- a/plugins/generic/citationStyleLanguage/CitationStyleLanguagePlugin.php
++++ b/plugins/generic/citationStyleLanguage/CitationStyleLanguagePlugin.php
+@@ -437,7 +437,8 @@
+     public function getCitation(PKPRequest $request, Submission $submission, string $citationStyle = 'apa', ?Issue $issue = null, ?Publication $publication = null, ?Chapter $chapter = null): string
+     {
+         $publication ??= $submission->getCurrentPublication();
+-        $context = $request->getContext();
++        // A queued job run by the CLI worker has a request without a context: use the submission's
++        $context = $request->getContext() ?? Application::getContextDAO()->getById($submission->getData('contextId'));
+         if (!$chapter) {
+             $chapter = $this->application === 'omp' ? $this->getChapter($request, $publication) : null;
+         }
+@@ -479,7 +480,7 @@
+             }
+             $citationData->abstract = PKPString::html2text($publication->getLocalizedData('abstract'));
+             $citationData = $this->setArticleAuthors($citationData, $publication, $context);
+-            $citationData->URL = $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, null, $this->getPublicationTypeUrlPath(), 'view', [$publication->getData('urlPath') ?? $submission->getId()], urlLocaleForPage: '');
++            $citationData->URL = $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, $context->getPath(), $this->getPublicationTypeUrlPath(), 'view', [$publication->getData('urlPath') ?? $submission->getId()], urlLocaleForPage: '');
+             if ($publication->getDoi()) {
+                 $citationData->DOI = $publication->getDoi();
+             }
+@@ -497,7 +498,7 @@
+             $citationData->abstract = PKPString::html2text($publication->getLocalizedData('abstract'));
+             $citationData->serialNumber = $this->getSerialNumber($publication);
+             $citationData = $this->setBookAuthors($citationData, $publication, $context);
+-            $citationData->URL = $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, null, $this->getPublicationTypeUrlPath(), 'book', [$publication->getData('urlPath') ?? $submission->getId()], urlLocaleForPage: '');
++            $citationData->URL = $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, $context->getPath(), $this->getPublicationTypeUrlPath(), 'book', [$publication->getData('urlPath') ?? $submission->getId()], urlLocaleForPage: '');
+             if ($publication->getDoi()) {
+                 $citationData->DOI = $publication->getDoi();
+             }
+@@ -515,7 +516,7 @@
+             $citationData->abstract = htmlspecialchars(strip_tags($chapter->getLocalizedData('abstract')));
+             $citationData->serialNumber = $this->getSerialNumber($publication);
+             $citationData = $this->setBookChapterAuthors($citationData, $publication, $context, $chapter);
+-            $citationData->URL = $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, null, $this->getPublicationTypeUrlPath(), 'book', [$publication->getData('urlPath') ?? $submission->getId(), 'chapter', $chapter->getSourceChapterId()], urlLocaleForPage: '');
++            $citationData->URL = $request->getDispatcher()->url($request, PKPApplication::ROUTE_PAGE, $context->getPath(), $this->getPublicationTypeUrlPath(), 'book', [$publication->getData('urlPath') ?? $submission->getId(), 'chapter', $chapter->getSourceChapterId()], urlLocaleForPage: '');
+ 
+             if ($chapter->getDoi()) {
+                 $citationData->DOI = $chapter->getDoi();

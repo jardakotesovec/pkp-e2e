@@ -1261,7 +1261,7 @@ pkp-e2e's test runs it came up once on its own, in a full suite run on
 a loaded machine. Run 35 times per app without anything holding the
 second box back, the same tests passed every time.
 Basis: probe, 2026-10-01. <sup>f-a20</sup>
-Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp-lib#13490` (`689e7ec1a5`; 3.5 `pkp/pkp-lib#13491`, `4045d9241e`); the entry retires when the apps' `js/pkp.min.js` carries the guard and `checks/sync/pkp-lib-13490/stuck-editors.js` reads fixed at the tips with `enable_minified = On` (ci-triage Flake watch, "U09 S6's formatted box stuck") (2026-10-14)
+Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp-lib#13490` (`689e7ec1a5`; 3.5 `pkp/pkp-lib#13491`, `4045d9241e`); the entry retires when the apps' `js/pkp.min.js` carries the guard and `checks/sync/pkp-lib-13490/stuck-editors.js` reads fixed at the tips with `enable_minified = On` (ci-triage Flake watch, the row on scenario 6's formatted box getting stuck) (2026-10-14)
 
 ---
 

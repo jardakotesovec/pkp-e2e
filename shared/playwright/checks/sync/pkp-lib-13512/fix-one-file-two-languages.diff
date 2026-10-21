@@ -1,0 +1,24 @@
+--- a/lib/pkp/classes/validation/ValidatorFactory.php
++++ b/lib/pkp/classes/validation/ValidatorFactory.php
+@@ -284,15 +284,20 @@
+                     continue;
+                 }
+                 if (in_array($uploadProp, $multilingualUploadProps)) {
++                    // One temporary file is moved into place once: it can stand for one language only
++                    $seenTemporaryFileIds = [];
+                     foreach ($allowedLocales as $localeKey) {
+                         if (!isset($props[$uploadProp][$localeKey])
+                         || !isset($props[$uploadProp][$localeKey]['temporaryFileId'])
+                         || $validator->errors()->get($uploadProp . '.' . $localeKey)) {
+                             continue;
+                         }
+-                        if (!$temporaryFileManager->getFile($props[$uploadProp][$localeKey]['temporaryFileId'], $userId)) {
++                        $temporaryFileId = (int) $props[$uploadProp][$localeKey]['temporaryFileId'];
++                        if (in_array($temporaryFileId, $seenTemporaryFileIds)
++                            || !$temporaryFileManager->getFile($temporaryFileId, $userId)) {
+                             $validator->errors()->add($uploadProp . '.' . $localeKey, __('common.noTemporaryFile'));
+                         }
++                        $seenTemporaryFileIds[] = $temporaryFileId;
+                     }
+                 } else {
+                     if (!isset($props[$uploadProp]['temporaryFileId'])) {

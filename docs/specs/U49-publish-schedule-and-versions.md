@@ -338,7 +338,10 @@ In French most of its headings and descriptions are raw codes
     with it; no screen does ("Create New Version" sends none). A cover
     the app refuses should refuse the whole request, with no version
     created. Instead the program is told the request failed, yet the
-    version is created, without the cover ⚠ [A12](#a12).
+    version is created, without the cover ⚠ [A12](#a12). A cover the
+    app accepts should be stored with the new version; instead the
+    program is told the request succeeded and the version is created
+    without it ⚠ [A16](#a16).
 11c. **A stage sent by program.** A program creating a version this way
     names its stage by a code, not the dialog's words
     <sup>[f-a14](#fn-a14)</sup>, while "Create New Version" offers only
@@ -1118,6 +1121,8 @@ Left out of the scenarios above, by reason:
     stage the app does not have; Rule 11c)
   - A15 (a cover image sent through the programming interface with one
     picture under two languages; Rule 11d)
+  - A16 (a version created through the programming interface with a
+    cover image the app accepts; Rule 11b)
   - OJS1 (a required plain language summary refusing the panel's Confirm
     without naming the summary; Rule 4)
   - OJS2's second half (where only future issues exist, a Publication
@@ -1200,6 +1205,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | A version created through the programming interface with a cover image the app refuses is reported as failed, yet created without the cover | 🐞 | minor | — |
 | [A14](#a14) | A version created by program with a stage the app does not know fails with a server error instead of a refusal | 🐞 | latent · crash: server | — |
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
+| [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
 | [OJS1](#ojs1) | With a plain language summary required, the panel's Confirm is refused without naming the summary and publishing is unreachable | 🐞 | high | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1493,6 +1499,20 @@ in its public files folder. Sent with a new version
 [A12](#a12), and the new version's cover names a picture that does not
 exist. No screen sends one picture under two languages.
 Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-21. <sup>[f-a15](#fn-a15)</sup>
+
+<a id="a16"></a>
+**A16 — A version created by program with an accepted cover image is created without the cover** · 🐞 · minor.
+A program that creates a new version through the install's programming
+interface (Rule 11b) and sends with it a cover image the app accepts (a
+PNG named ".png") expects the version to carry that cover. The request
+answers as a success and the version is created, but without a cover;
+the picture is left in the journal's public files folder with nothing
+pointing to it. Saving the cover on the version afterwards works, and
+"Create New Version" keeps copying the current version's cover. Until
+2026-10-20 the version was created with its cover. That is `main` once
+an app's shared library takes the change (OJS's does not yet, OMP's and
+OPS's neither), and 3.5 since 2026-10-20.
+Since: 2026-10-20 (pkp/pkp-lib#13560; on 3.5 the same day) · Basis: probe, 2026-10-21. <sup>[f-a16](#fn-a16)</sup>
 
 ### OJS
 
@@ -2769,7 +2789,46 @@ Controls: the PNG under en only, 200 and stored (OMP also writes its
 only with a file in hand, for example refuse a `temporaryFileId` named
 twice in `validate()`, or check for a missing file before the exception
 and raise one that takes none. Kept check
-`shared/playwright/checks/U49/H21/h21.js` (phase `cover`).
+`shared/playwright/checks/U49/H21/h21.js` (phase `cover`). 2026-10-21
+(daily sync): finding 4 of `docs/reports/2026-10-19-pkp-lib-13512.md`;
+before control on OPS with lib/pkp `6ff76591a9` (the parent of
+`07bc43fe67`): the `PUT` answered 200 and stored the English cover,
+the French one dropped without a word; the `POST` 200, versions 1 → 2.
+Still 500 at pkp-lib `main` `7269eaf6f0` (OJS) and on OJS 3.5
+(`68512b5fda`). Fix tried on OPS: `temporaryFilesExist()` refusing a
+`temporaryFileId` named under a second language
+(`checks/sync/pkp-lib-13512/fix-one-file-two-languages.diff`): 400
+under `coverImage.fr_CA`, no file left, no version added.
+
+<a id="fn-a16"></a>
+**f-a16** — pkp-lib `7269eaf6f0` ("pkp/pkp-lib#13561 Improve hygeine
+of file upload validation", for pkp/pkp-lib#13560, Alec Smecher,
+2026-10-20; on `stable-3_5_0` as `aeacc41746` + `68512b5fda`, on
+`stable-3_4_0` as `85f47442cf`) rewrote `_saveFileParam()`'s branch for
+a value with no `temporaryFileId`: it now returns the cover stored on
+the publication (alt text from the request), or null when that has no
+`uploadName`, instead of the value passed in.
+`PKP\publication\Repository::add()` inserts the publication with the
+request's `{temporaryFileId, altText}`, moves the file through
+`_saveFileParam()`, then saves the moved value with
+`edit($publication, ['coverImage' => $value])`, whose second
+`_saveFileParam()` reads the inserted row's cover, finds no
+`uploadName`, and stores null. "Create New Version" copies a cover
+that already has an `uploadName`, so it is kept. Live-probed 2026-10-21
+on PKP's default dataset, as `rvaca`, from the browser's console on a
+settings page (`checks/sync/pkp-lib-13561/cover-on-add.js`: a PNG drawn
+on a canvas uploaded to `temporaryFiles`, then `POST
+{context}/api/v1/submissions/{id}/publications` copying the current
+version's title, abstract and section, with the cover `{en:
+{temporaryFileId, altText: 'Cover'}}`): OJS `main` with lib/pkp at
+`7269eaf6f0` (submission 4) and OPS with lib/pkp pinned there
+(submission 1): 200 `{"en":null,"fr_CA":null}`, no stored cover, the
+moved `submission_<s>_<p>_coverImage_en.png` left in the public
+folder; OJS `stable-3_5_0` (`68512b5fda`): the same. Before, OMP and
+OPS at lib/pkp `042726ebf6`: 200 with the cover stored. Fix tried on
+OPS: `$publication->setData('coverImage', $value)` before that
+`edit()` (`checks/sync/pkp-lib-13561/fix.diff`): the cover stored.
+Report `docs/reports/2026-10-21-pkp-lib-13561.md`.
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — Live 2026-08-28 (metadata spec, register A1): with
