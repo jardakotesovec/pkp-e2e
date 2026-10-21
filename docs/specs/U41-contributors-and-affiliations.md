@@ -2948,7 +2948,7 @@ must be of type array|object, null given` in
 issue report's "A neighbouring gap" bullet records the loss on OJS
 together with A31's
 ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)).
-Issue report: [docs/issues/U41-A30-api-contributor-edit-drops-affiliations.md](../issues/U41-A30-api-contributor-edit-drops-affiliations.md).
+Issue report: [pkp-e2e#1042](https://github.com/jardakotesovec/pkp-e2e/issues/1042) ([docs/issues/U41-A30-api-contributor-edit-drops-affiliations.md](../issues/U41-A30-api-contributor-edit-drops-affiliations.md)).
 
 <a id="fn-f-a31"></a>
 **f-a31 — A31 evidence.** Live-probed 2026-10-19 (fn o): on `main`,
@@ -2972,7 +2972,7 @@ gap" bullet names this wipe (walked on OJS)
 ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)).
 The dataset fleets' contributors left without affiliations on `main`
 most likely came from such edits.
-Issue report: [docs/issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md](../issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md).
+Issue report: [pkp-e2e#1043](https://github.com/jardakotesovec/pkp-e2e/issues/1043) ([docs/issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md](../issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md)).
 
 <a id="fn-f-a32"></a>
 **f-a32 — A32 evidence.** Live-probed 2026-10-19 (fn o), two runs per
@@ -2991,8 +2991,8 @@ affiliation kept with its id. `stable-3_5_0`: the body as read answered
 `"isVolumeEditor":["This field must be true or false."]` on OMP; without
 those keys, 200 and nothing lost. One server error per `main` run, none
 on 3.5.
-Issue report: [docs/issues/U41-A32-api-contributor-roles-as-read-server-error.md](../issues/U41-A32-api-contributor-roles-as-read-server-error.md).
-Issue report: [docs/issues/U41-A32-api-contributor-read-empty-flags-refused.md](../issues/U41-A32-api-contributor-read-empty-flags-refused.md).
+Issue report: [pkp-e2e#1044](https://github.com/jardakotesovec/pkp-e2e/issues/1044) ([docs/issues/U41-A32-api-contributor-roles-as-read-server-error.md](../issues/U41-A32-api-contributor-roles-as-read-server-error.md)).
+Issue report: [pkp-e2e#1045](https://github.com/jardakotesovec/pkp-e2e/issues/1045) ([docs/issues/U41-A32-api-contributor-read-empty-flags-refused.md](../issues/U41-A32-api-contributor-read-empty-flags-refused.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP
