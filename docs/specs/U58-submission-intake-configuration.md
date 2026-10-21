@@ -1924,7 +1924,7 @@ the close with nothing left to clear it: no question at the press, one
 `f8285b0b8f` and ui-library `7503fab4`; the order of the two events was
 read, not traced in the browser, and the same read says the press asks
 once the box has been left.
-Issue report: [docs/issues/U58-A15-component-window-outside-press-loses-name.md](../issues/U58-A15-component-window-outside-press-loses-name.md).
+Issue report: [pkp-e2e#1056](https://github.com/jardakotesovec/pkp-e2e/issues/1056) ([docs/issues/U58-A15-component-window-outside-press-loses-name.md](../issues/U58-A15-component-window-outside-press-loses-name.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `templates/gateway/lockss.tpl` and `clockss.tpl` test
