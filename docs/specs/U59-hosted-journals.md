@@ -1078,7 +1078,7 @@ press is refused the same way. A preprint server is too, and there the
 message shows as the raw code "##admin.contexts.form.pathRequired##" for
 these paths and for "0", while an empty "Path" is refused in words
 ("This field is required."). That raw code is a missing message,
-reported apart in U59 OPS1's report
+reported apart under [OPS1](#ops1)
 ([pkp-e2e#503](https://github.com/jardakotesovec/pkp-e2e/issues/503)).
 Basis: probe, 2026-10-21. <sup>f-a11</sup>
 
