@@ -1903,7 +1903,7 @@ is required." and OPS "##admin.contexts.form.pathRequired##" under
 "Path"; with "Path" left empty the browser refused the save with "This
 field is required." and sent nothing. OMP was read in the code only:
 the check is lib/pkp's, and OMP defines the key with OJS's sentence.
-Issue report: [docs/issues/U59-A11-journal-path-zeros-refused-as-empty.md](../issues/U59-A11-journal-path-zeros-refused-as-empty.md).
+Issue report: [pkp-e2e#1057](https://github.com/jardakotesovec/pkp-e2e/issues/1057) ([docs/issues/U59-A11-journal-path-zeros-refused-as-empty.md](../issues/U59-A11-journal-path-zeros-refused-as-empty.md)).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `PKPContextService::validate()` adds
