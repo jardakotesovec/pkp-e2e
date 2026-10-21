@@ -339,6 +339,22 @@ In French most of its headings and descriptions are raw codes
     the app refuses should refuse the whole request, with no version
     created. Instead the program is told the request failed, yet the
     version is created, without the cover ⚠ [A12](#a12).
+11c. **A stage sent by program.** A program creating a version this way
+    names its stage by a code, not the dialog's words
+    <sup>[f-a14](#fn-a14)</sup>, while "Create New Version" offers only
+    the app's own stages (Rule 12). A code the app does not have should
+    be refused with a message naming the allowed ones; instead the
+    program gets a server error, and no version is created
+    ⚠ [A14](#a14). On a preprint server that includes the codes of
+    "Published Manuscript Under Review" and "Version of Record".
+11d. **One cover picture under two languages.** A cover image is saved
+    per language of the submission. A program that names one uploaded
+    picture under two languages, whether saving a version's cover or
+    creating a version (Rule 11b), gets a server error, not a refusal. No screen
+    sends one picture twice. The failed request leaves the English copy,
+    on an English and French journal, unused in the journal's public
+    files folder <sup>[f-a15](#fn-a15)</sup>, and a new version is
+    created all the same ⚠ [A15](#a15).
 12. **Version stages and numbering.** A journal and press know three
     stages: Author's Original, Published Manuscript Under Review, Version of
     Record. A preprint server knows only Author's Original. Numbering is per
@@ -1098,6 +1114,10 @@ Left out of the scenarios above, by reason:
     cover image the app refuses; Rule 11b)
   - A13 (a cover picture whose file name's ending does not match its
     kind; Fields, the Publication Settings page)
+  - A14 (a version created through the programming interface with a
+    stage the app does not have; Rule 11c)
+  - A15 (a cover image sent through the programming interface with one
+    picture under two languages; Rule 11d)
   - OJS1 (a required plain language summary refusing the panel's Confirm
     without naming the summary; Rule 4)
   - OJS2's second half (where only future issues exist, a Publication
@@ -1178,6 +1198,8 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A10](#a10) | In French the "Create New Version" dialog and the Publication Settings / Preprint Entry page show raw codes; the versions to copy from cannot be told apart | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | An author's revision summary can carry a script that runs in the editor's browser when "Insert Content" opens | 🐞 | high | issues (claude), 2026-10-15 — re-verified |
 | [A12](#a12) | A version created through the programming interface with a cover image the app refuses is reported as failed, yet created without the cover | 🐞 | minor | — |
+| [A14](#a14) | A version created by program with a stage the app does not know fails with a server error instead of a refusal | 🐞 | latent · crash: server | — |
+| [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
 | [OJS1](#ojs1) | With a plain language summary required, the panel's Confirm is refused without naming the summary and publishing is unreachable | 🐞 | high | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1446,6 +1468,31 @@ intended? Lean: yes, as a cheap guard against disguised files; the
 message should then say what to do ("The file's name does not match
 its type. Rename it to .png and upload it again.").
 Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-19. <sup>[f-a13](#fn-a13)</sup>
+
+<a id="a14"></a>
+**A14 — A version created by program with a stage the app does not know fails with a server error instead of a refusal** · 🐞 · latent · crash: server.
+A program that creates a version through the install's programming
+interface (Rule 11c) and names a stage the app does not have expects a
+message saying which stages are allowed. Instead the request fails with
+a server error. On a preprint server that happens for the codes of
+"Published Manuscript Under Review" and "Version of Record", the stages
+of a journal and a press; in every app for any other code. No
+version is created, so nothing is lost, and the screens' "Create New
+Version" offers only the app's own stages.
+Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-21. <sup>[f-a14](#fn-a14)</sup>
+
+<a id="a15"></a>
+**A15 — A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture** · 🐞 · latent · crash: server.
+A program that saves a version's "Cover Image" through the programming
+interface and names the same uploaded picture under two languages
+(Rule 11d) expects it to be saved under both, or refused. Instead the
+request fails with a server error. The version's cover stays as it was,
+but the English copy, on an English and French journal, stays unused
+in its public files folder. Sent with a new version
+(Rule 11b), the error comes after the version is created, as in
+[A12](#a12), and the new version's cover names a picture that does not
+exist. No screen sends one picture under two languages.
+Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-21. <sup>[f-a15](#fn-a15)</sup>
 
 ### OJS
 
@@ -2590,10 +2637,12 @@ but nothing removes the inserted row, and the rest of `add()` (the
 `Publication::add` hook, `Repo::submission()->updateStatus()`,
 `updateCurrentPublication()`) never runs for it. `addPublication()` is
 the only caller that passes a new cover to `add()`; "Create New
-Version" calls `POST …/publications/{id}/version`, which takes none,
-and editing a version (`PUT …/publications/{id}`) moves the files
-before it writes, so a refused cover leaves the version as it was
-(walked). Live-probed 2026-10-19 on PKP's default dataset
+Version" calls `POST …/publications/{id}/version`, which takes none.
+Editing a version (`PUT …/publications/{id}`) moves the files before
+it writes, so a refused cover leaves the version's stored cover as it
+was (walked), though a file moved before the refusal stays in the
+context's public folder (one file named under two languages, A15's
+note). Live-probed 2026-10-19 on PKP's default dataset
 (pkp/datasets `eaf024c`, PostgreSQL), freshly loaded, as `rvaca`, OJS,
 OMP and OPS `main` (lib/pkp `042726ebf6`) and `stable-3_5_0`
 (`092ec34b0f`), from the browser's console on a settings page: a text
@@ -2647,6 +2696,80 @@ with lib/pkp `6ff76591a9..042726ebf6` reversed: `cover.jpg` stored as a
 for the team in `docs/reports/2026-10-19-pkp-lib-13512.md` (the
 closing question; a temporary report, deleted once acted on; git
 history keeps it).
+
+<a id="fn-a14"></a>
+**f-a14** — The request carries the stage in `versionStage` as `AO`
+(Author's Original), `PMUR` (Published Manuscript Under Review) or
+`VoR` (Version of Record), or `null` for none.
+`schemas/publication.json` gives `versionStage` only
+`"validation": ["nullable"]`, and
+`PKPSubmissionController::addPublication()` validates through the
+schema alone (`Repo::publication()->validate()`). The controller's own
+`validateVersionStage()` (`Rule::in(VersionStage::cases())`) guards only
+`POST …/publications/{id}/version` and an edit sent with
+`versionIsMinor`; `versionPublication()`, which "Create New Version"
+uses, maps an unknown stage to none through `VersionStage::tryFrom()`.
+Each app's install migration makes `publications.version_stage` an
+enum of its own `VersionStage` cases (OJS and OMP AO, PMUR, VoR; OPS
+AO only), so the insert of any other value fails in the database. Since
+the version stages, pkp-lib `958592a159` (pkp/pkp-lib#10669,
+2025-05-30); `stable-3_5_0` has no stage fields, drops the value and
+adds the version. Live-probed 2026-10-21 on PKP's default dataset,
+freshly loaded before each run, as `rvaca`, OJS, OMP and OPS `main`
+(lib/pkp OJS `f37a174626`, OMP and OPS `042726ebf6`) and
+`stable-3_5_0` (`68512b5fda`), two runs per line, from a signed-in
+Settings › Website page with its CSRF token: `POST
+{context}/api/v1/submissions/{id}/publications` on a published
+submission (OJS 17, OMP 14, OPS 2), copying the current version's
+title, abstract and section, with `version: 2, versionMajor: 2,
+versionMinor: 0` and `versionStage` omitted, `null`, `AO`, `PMUR`,
+`VoR` and `XYZ`. On `main`: 200 and a new version for each stage the
+app has ("Unassigned version (2026-10-21)" for omitted and `null`,
+"Author's Original 2.0", "Published Manuscript Under Review 2.0",
+"Version of Record 2.0"); 500 and the version count unchanged for
+`XYZ` in every app and for `PMUR` and `VoR` on OPS. On `stable-3_5_0`
+200 for all six, each adding a version. The fix: `Rule::in` of the
+app's `VersionStage` values in the schema's validation, or
+`validateVersionStage()` in `addPublication()` when the stage is sent.
+Kept check `shared/playwright/checks/U49/H21/h21.js` (phase `stage`).
+
+<a id="fn-a15"></a>
+**f-a15** — `PKP\publication\Repository::edit()` and `add()` loop over
+the submission's publication languages and call `_saveFileParam()` for
+each. `validate()`'s `temporaryFilesExist()` checks each language's
+`temporaryFileId` before either loop, so one file named under two
+languages passes. The first language's `moveTemporaryFile()` copies the
+file into the context's public folder and deletes the temporary file;
+the second language's `getFile()` then returns null, and `throw new
+StoreTemporaryFileException($temporaryFile, …)` passes null to a
+constructor typed `TemporaryFile`, a PHP error the controllers'
+`catch (StoreTemporaryFileException)` does not catch. Since pkp-lib
+`07bc43fe67` (pkp/pkp-lib#13512, 2026-10-16; on `stable-3_5_0` as
+`092ec34b0f`, 2026-10-14, in no tag yet); before it,
+`_saveFileParam()` returned null quietly for a missing file. Carried by
+the open regression report `docs/reports/2026-10-19-pkp-lib-13512.md`,
+the same change as A12's. Live-probed 2026-10-21 on PKP's default
+dataset, as `rvaca`, OJS, OMP and OPS `main` (lib/pkp OJS
+`f37a174626`, OMP and OPS `042726ebf6`) and `stable-3_5_0`
+(`68512b5fda`), two runs per line, on each app's unpublished version
+(OJS submission 5 publication 6, OMP 4/4, OPS 1/1), context languages
+en and fr_CA, no cover before: `PUT
+{context}/api/v1/submissions/{id}/publications/{id}` with one PNG's
+`temporaryFileId` under both en and fr_CA: 500; the version's stored
+cover unchanged (none), the temporary file gone,
+`submission_<s>_<p>_coverImage_en.png` left in the public folder
+(the install's public files directory, under `journals/<id>/`, OMP
+`presses/<id>/`, OPS `contexts/<id>/`).
+Controls: the PNG under en only, 200 and stored (OMP also writes its
+`_t` thumbnail); two PNGs, one per language, 200 and both stored. `POST
+…/submissions/{id}/publications` with one PNG under both languages:
+500, yet versions 1 → 2, the new version's `coverImage` the request's
+`{"temporaryFileId":…}` under both languages, and an orphan
+`submission_<s>_<new p>_coverImage_en.png` on disk. The fix: throw
+only with a file in hand, for example refuse a `temporaryFileId` named
+twice in `validate()`, or check for a missing file before the exception
+and raise one that takes none. Kept check
+`shared/playwright/checks/U49/H21/h21.js` (phase `cover`).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — Live 2026-08-28 (metadata spec, register A1): with

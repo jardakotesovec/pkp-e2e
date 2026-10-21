@@ -20,6 +20,8 @@ _Suspicions another session met and handed over, one line each; the
 upstream session works them (MAINTENANCE upstream session step 3) and
 deletes each once it is a report, a register entry or dismissed._
 
+- 2026-10-21 · housekeeping (claim check cc21b) · U49 A15: one uploaded cover picture named under two languages through `PUT`/`POST …/publications` answers a server error on OJS, OMP, OPS `main` and 3.5, leaves a stray public copy, and on `POST` creates the version anyway; it is the shape the open regression report `docs/reports/2026-10-19-pkp-lib-13512.md` set aside as S2 ("a gone temporary file", not reproduced). Fold it into that report (kept `shared/playwright/checks/U49/H21/h21.js` phase `cover`); U49 A15's footnote already points at it.
+
 
 
 ## Sync log
