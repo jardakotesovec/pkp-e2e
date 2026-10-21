@@ -682,6 +682,12 @@ tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - with the audit log on, a session ended by a password change in
+    another browser logged as a forced sign-out whose reason is the
+    password change, with no IP addresses ([A17](#a17)): the guard the
+    issue report
+    (`docs/issues/U01-A17-password-change-logout-audited-as-ip-change.md`)
+    proposes, once fixed
   - the guard for A13, retired (Rule 16): with re-authentication on and
     the confirmation period run out, a Site Settings save, a journal's
     removal and its creation from an Administration page left open are
@@ -786,7 +792,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | "Keep me logged in" keeps no one signed in once the session ends: back after the idle limit, the user meets the Login page | 🐞 | minor | — |
 | [A15](#a15) | "Login As" ends and a save made as the user is silently lost when that user first signs in after an upgrade | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A16](#a16) | A back-office page left open after its session ended answers a search with an alert or an "Error" window that does not say the user is signed out, instead of the Login page | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
-| [A17](#a17) | With the audit log on, a session ended by a password change in another browser is logged as an IP address change, the same address given as old and new | 🐞 | invisible | — |
+| [A17](#a17) | Audit log records a session ended by a password change in another browser as an IP address change | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A5](#a5) | No journal-level users screen offers the "must change password" box, so a Journal Manager cannot require a forced change on an existing account; only the Site Administrator's Hosted Journals list offers it | ❓ | user-visible | Jarda 2026-08-25 · to triage |
 | [A9](#a9) | The last-login date is recorded on every sign-in, but no users screen shows it, so a manager cannot see when an account last signed in | ❓ | minor | — |
 | [A3](#a3) | Retired: the set-a-new-password page's browser tab showed a raw internal code; it now reads "Reset Password \| {journal name}" (Fields) | ✅ | retired | issues (claude), 2026-10-04 — fixed upstream (pkp/pkp-lib#13132) |
@@ -1065,17 +1071,19 @@ behaves as [User profile A25](U03-user-profile.md#a25) and
 Basis: probe, 2026-10-19. <sup>[f-a16](#fn-a16)</sup>
 
 <a id="a17"></a>
-**A17 — The audit log records a session ended by a password change as an IP address change** · 🐞 · invisible.
-With the audit log on (see *Settings*), a session the app ends
-because the account's password was changed in another browser (Profile
-› Password) is recorded as "User forcibly logged out after a session IP
-address change", with the same address given as both the old and the
-new one. The line should say that a password change ended the session;
-it reports an address change that did not happen. A plain "Logout" is
-recorded as "User logged out". When the Site Administrator sets a new
-password on "Edit User" (Rule 11a), only "User password reset by an administrator"
-is written, and the account's sessions it ends get no line of their own.
-Since: 2026-08-12 (pkp/pkp-lib#12336) · Basis: probe, 2026-10-19. <sup>[f-a17](#fn-a17)</sup>
+**A17 — Audit log records a session ended by a password change in another browser as an IP address change** · 🐞 · low.
+With the audit log on, a session ended by a password change in another
+browser is logged as an IP address change, the same address given as old
+and new. The user is signed out as expected; only the log line is wrong.
+It should say that the session ended because the password changed. The
+same line is written whenever a user's password changes while they are
+signed in elsewhere: on the Profile's "Password" tab, through an emailed
+reset link, at a forced change at sign-in, and when an administrator
+changes their own password on "Edit User". An administrator reading the
+log sees an IP check fire that did not fire, and the log has no line
+that gives the real reason. The audit log is new in `main` and in no
+release yet, so this can be put right before 3.6 ships.
+Since: 2026-08-12 (pkp/pkp-lib#12336) · Basis: probe, 2026-10-21. <sup>[f-a17](#fn-a17)</sup>
 
 ### Retired
 
@@ -2090,6 +2098,7 @@ only line was `NOTICE User password reset by an administrator`
 was the Login page with no line for it. Control: B's own "Logout" wrote
 `INFO User logged out` (`session_logout`). No server error beyond the
 known Plugin Gallery list behind the test configuration's dead proxy.
+Issue report: [docs/issues/U01-A17-password-change-logout-audited-as-ip-change.md](../issues/U01-A17-password-change-logout-audited-as-ip-change.md).
 
 ## Reference — entry points & surfaces
 

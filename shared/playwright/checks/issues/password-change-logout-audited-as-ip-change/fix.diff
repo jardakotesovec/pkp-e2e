@@ -1,0 +1,84 @@
+--- a/lib/pkp/classes/middleware/PKPAuthenticateSession.php
++++ b/lib/pkp/classes/middleware/PKPAuthenticateSession.php
+@@ -40,7 +40,7 @@
+             && ($loginIp = $request->session()->get('login_ip'))
+             && $loginIp !== $request->ip()
+         ) {
+-            $this->logout($request);
++            $this->logout($request, 'ip_changed');
+         }
+ 
+         return $response;
+@@ -49,17 +49,27 @@
+     /**
+      * Log the user out of the application.
+      *
++     * Laravel's AuthenticateSession::handle() calls this without a reason when the
++     * password hash the session (or the remember-me cookie) holds no longer matches
++     * the account's, usually because the password was changed or re-hashed since,
++     * or when a remember-me cookie carries no hash. handle() above passes 'ip_changed'.
++     *
+      * @param  \Illuminate\Http\Request  $request
++     * @param  string  $reason  'password_hash_mismatch' or 'ip_changed'
+      */
+-    protected function logout($request)
++    protected function logout($request, string $reason = 'password_hash_mismatch')
+     {
+-        // session terminated because the client IP changed mid-session. Capture the
+-        // actor + old/new IP before Auth::logout()/invalidate() tears the session down.
+-        AuditLog::log(AuditEvent::AUTH_LOGOUT_IP_CHANGE, LogLevel::WARNING, [
++        // Capture the actor (and, for an IP change, the old/new IP) before
++        // Auth::logout()/invalidate() tears the session down.
++        $details = [
+             'userId' => $request->user()?->getId(),
+-            'oldIp' => $request->session()->get('login_ip'),
+-            'newIp' => $request->ip(),
+-        ]);
++            'reason' => $reason,
++        ];
++        if ($reason === 'ip_changed') {
++            $details['oldIp'] = $request->session()->get('login_ip');
++            $details['newIp'] = $request->ip();
++        }
++        AuditLog::log(AuditEvent::AUTH_LOGOUT_FORCED, LogLevel::WARNING, $details);
+ 
+         Auth::logout();
+ 
+--- a/lib/pkp/classes/security/AuditEvent.php
++++ b/lib/pkp/classes/security/AuditEvent.php
+@@ -26,7 +26,7 @@
+     case AUTH_LOGIN_FAILED = 'authn_login_fail';
+     case AUTH_LOGIN_DISABLED = 'authn_login_lock';
+     case AUTH_LOGOUT = 'session_logout';
+-    case AUTH_LOGOUT_IP_CHANGE = 'session_expired';
++    case AUTH_LOGOUT_FORCED = 'session_expired';
+     case AUTH_RATE_LIMIT = 'excess_rate_limit_exceeded';
+     case AUTH_PASSWORD_RESET_REQUEST = 'authn_password_reset_request';
+     case AUTH_PASSWORD_RESET_COMPLETE = 'authn_password_reset';
+@@ -94,7 +94,7 @@
+             static::AUTH_LOGIN_FAILED => 'User login attempt failed',
+             static::AUTH_LOGIN_DISABLED => 'Login blocked for a disabled account',
+             static::AUTH_LOGOUT => 'User logged out',
+-            static::AUTH_LOGOUT_IP_CHANGE => 'User forcibly logged out after a session IP address change',
++            static::AUTH_LOGOUT_FORCED => 'User forcibly logged out',
+             static::AUTH_RATE_LIMIT => 'Request rate limit exceeded',
+             static::AUTH_PASSWORD_RESET_REQUEST => 'Password reset requested',
+             static::AUTH_PASSWORD_RESET_COMPLETE => 'Password reset completed',
+@@ -155,7 +155,7 @@
+      *
+      * - success = the action completed;
+      * - failure = it was attempted and failed (bad login, invalid token, failed re-authentication)
+-     * - denied = a control blocked it (disabled account, rate limit, forced-IP logout, impersonation refused).
++     * - denied = a control blocked it (disabled account, rate limit, forced logout, impersonation refused).
+      */
+     public function status(): string
+     {
+@@ -167,7 +167,7 @@
+ 
+             static::AUTH_LOGIN_DISABLED,
+             static::AUTH_RATE_LIMIT,
+-            static::AUTH_LOGOUT_IP_CHANGE,
++            static::AUTH_LOGOUT_FORCED,
+             static::SESSION_IMPERSONATE_DENIED => 'denied',
+ 
+             default => 'success',
