@@ -1,0 +1,43 @@
+--- a/lib/ui-library/src/components/Table/TableColumn.vue
++++ b/lib/ui-library/src/components/Table/TableColumn.vue
+@@ -1,7 +1,7 @@
+ <template>
+ 	<th
+ 		scope="col"
+-		:aria-sort="props.allowsSorting ? tableContext.sortDirection : undefined"
++		:aria-sort="ariaSort"
+ 		class="border-b border-t border-light px-2 py-4 text-start text-base-normal uppercase text-heading first:border-s first:ps-3 last:border-e last:pe-3"
+ 		:class="{
+ 			'whitespace-nowrap': props.noTextWrap,
+@@ -27,7 +27,7 @@
+ </template>
+ 
+ <script setup>
+-import {defineProps, inject, onMounted, onUnmounted} from 'vue';
++import {computed, defineProps, inject, onMounted, onUnmounted} from 'vue';
+ import Icon from '@/components/Icon/Icon.vue';
+ 
+ const props = defineProps({
+@@ -41,6 +41,22 @@
+ 
+ const tableContext = inject('tableContext');
+ 
++/**
++ * The sort state a screen reader announces. Only the column the table is
++ * sorted by carries it, as the WAI-ARIA sortable table pattern asks.
++ */
++const ariaSort = computed(() => {
++	const sortDescriptor = tableContext.sortDescriptor?.value;
++	if (
++		props.allowsSorting &&
++		sortDescriptor?.column === props.id &&
++		['ascending', 'descending'].includes(sortDescriptor.direction)
++	) {
++		return sortDescriptor.direction;
++	}
++	return undefined;
++});
++
+ onMounted(() => {
+ 	tableContext.columnsCount.value++;
+ });

@@ -811,6 +811,11 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - a click on "ID" (or "Days") on "Active submissions" giving that
+    column's header `aria-sort` "ascending", then "descending", and
+    the other header none ([A15](#a15)): the guard the issue report
+    (`docs/issues/U23-A15-dashboard-sorted-header-not-announced.md`)
+    proposes, once fixed
   - the "Section" field with inactive or editor-only sections (Fields)
   - the panel's own "Clear Filters", "Close" and unapplied changes (Rules 8b, 8c)
   - the "Loaded" a screen reader hears once the list has loaded (Rule 5)
@@ -865,7 +870,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A10](#a10) | Paged lists: a screen reader announces the pager's "Next" as plain "Next", unlike its "Go to …" neighbours | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A15](#a15) | A sorted column header never tells a screen reader that the list is sorted by it, or in which direction | 🐞 | minor | — |
+| [A15](#a15) | A screen reader is never told which column the submissions list is sorted by, or in which direction | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
 | [A1](#a1) | Section Editors and assistants have no view listing declined (or published-and-gone) submissions; global search is their only way back | ❓ | user-visible | — |
@@ -999,15 +1004,17 @@ Question: does it read as Rule 9e? Lean: yes, per the code.
 Basis: code. <sup>a14</sup>
 
 <a id="a15"></a>
-**A15 — A sorted header never tells a screen reader how the list is sorted** · 🐞 · minor.
-Clicking "ID" reorders the rows descending, then ascending, then back to
-the default order, and a sighted user sees each change. A screen reader
-is told none of it: in all three states, neither "ID" nor any other
-header announces that the list is sorted by it, or in which direction.
-Expected: the sorted header announces "ascending" or "descending".
-Nothing is lost; a screen-reader user can tell the order only by
-reading the rows.
-Basis: probe, 2026-10-04. <sup>a15</sup>
+**A15 — A screen reader is never told which column the submissions list is sorted by, or in which direction** · 🐞 · low.
+On the submissions dashboard, a click on the "ID" header sorts the rows
+by ID, highest first. A second click sorts them lowest first, and a
+third returns the default order. "Days" works the same way. These are
+the only two columns that sort. A screen reader is told none of this: in
+every state, no header says that the list is sorted by it, or in which
+direction. A screen-reader user learns the order only by reading the
+rows. The shared table header never sets the sort state, so every list
+of the dashboard has it: the editors' views, an author's "My
+Submissions" and a reviewer's list.
+Basis: probe, 2026-10-21. <sup>a15</sup>
 
 <a id="a16"></a>
 **A16 — Paging a view repeats some submissions and skips others** · 🐞 · medium.
