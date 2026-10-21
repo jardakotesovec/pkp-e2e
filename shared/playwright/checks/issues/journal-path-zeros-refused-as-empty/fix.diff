@@ -1,0 +1,15 @@
+--- a/lib/pkp/classes/services/PKPContextService.php
++++ b/lib/pkp/classes/services/PKPContextService.php
+@@ -321,9 +321,10 @@
+             }
+         });
+ 
+-        // Ensure that a urlPath is not 0, because this will cause router problems
++        // Ensure that a urlPath is not "0", because the router reads it as no path.
++        // A strict comparison: "00" and "0e5" == "0" as numbers, yet route as paths.
+         $validator->after(function ($validator) use ($props) {
+-            if (strlen($props['urlPath'] ?? '') && !$validator->errors()->get('urlPath') && $props['urlPath'] == '0') {
++            if (strlen($props['urlPath'] ?? '') && !$validator->errors()->get('urlPath') && $props['urlPath'] === '0') {
+                 $validator->errors()->add('urlPath', __('admin.contexts.form.pathRequired'));
+             }
+         });

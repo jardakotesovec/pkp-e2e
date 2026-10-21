@@ -906,7 +906,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Hosted Journals: closing the "Edit" or "Create Journal" window right after it opens makes the page's script fail | 🐞 | low · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Signing in at a journal not enabled publicly leads to the Dashboard or home page, not the page asked for | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | A press or preprint server that holds an institution cannot be removed and is left half deleted {OMP OPS} | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
-| [A11](#a11) | Journal form: the path "00" is refused with "A path is required." although a path was typed | 🐞 | minor | — |
+| [A11](#a11) | Journal form: a path of zeros such as "00" is refused with "A path is required." | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | Hosted Servers: a path of zeros ("0", "00") on a preprint server is refused with a raw code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A changed path leaves the default "For Readers" and "For Authors" texts linking to the old address {OJS OMP} | ❓ | minor | — |
 | [A9](#a9) | On the Login page of a journal not enabled publicly, "Register" and "Home" load the Login page again | ❓ | minor | — |
@@ -1065,15 +1065,22 @@ institutions' side.
 Basis: probe, 2026-10-02. <sup>f-a10</sup>
 
 <a id="a11"></a>
-**A11 — Journal form: the path "00" is refused with "A path is required." although a path was typed** · 🐞 · minor.
-The Site Administrator types "00" in "Path" on "Create Journal", which
-the field's rule (letters, digits, "_" and "-") allows, and presses
-"Save". The save is refused with "A path is required." under "Path", as
-if the box were empty, so the message gives the wrong reason. A
-preprint server refuses "00" the same way, its message showing as the
-raw code of [OPS1](#ops1). A press runs the same check; that was read
-from the code, not seen on screen.
-Basis: probe, 2026-10-02. <sup>f-a11</sup>
+**A11 — Journal form: a path of zeros such as "00" is refused with "A path is required."** · 🐞 · low.
+The Site Administrator types "00" in "Path" on "Create Journal"
+(Administration › "Hosted Journals"), which the field's rule (letters,
+digits, "_" and "-") allows, and presses "Save". The save is refused
+with "A path is required." under "Path", as if the box were empty.
+Changing a journal's path to "000" through its "Edit" in the same list
+is refused the same way. A single "0" is refused too, and rightly: the
+site cannot open a journal at that address, and the fix proposed below
+keeps that refusal. Nothing is stored, and an ordinary path saves. A
+press is refused the same way. A preprint server is too, and there the
+message shows as the raw code "##admin.contexts.form.pathRequired##" for
+these paths and for "0", while an empty "Path" is refused in words
+("This field is required."). That raw code is a missing message,
+reported apart in U59 OPS1's report
+([pkp-e2e#503](https://github.com/jardakotesovec/pkp-e2e/issues/503)).
+Basis: probe, 2026-10-21. <sup>f-a11</sup>
 
 ### OPS
 
@@ -1896,6 +1903,7 @@ is required." and OPS "##admin.contexts.form.pathRequired##" under
 "Path"; with "Path" left empty the browser refused the save with "This
 field is required." and sent nothing. OMP was read in the code only:
 the check is lib/pkp's, and OMP defines the key with OJS's sentence.
+Issue report: [docs/issues/U59-A11-journal-path-zeros-refused-as-empty.md](../issues/U59-A11-journal-path-zeros-refused-as-empty.md).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `PKPContextService::validate()` adds
