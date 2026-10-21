@@ -1,0 +1,54 @@
+--- a/lib/pkp/pages/dashboard/PKPDashboardHandler.php
++++ b/lib/pkp/pages/dashboard/PKPDashboardHandler.php
+@@ -370,10 +370,51 @@
+      */
+     public function editorial($args, $request)
+     {
++        $this->redirectAuthorToTheirView($request);
+         return $this->index($args, $request);
+     }
+ 
+     /**
++     * A user assigned to the submission only as its author, in no editorial
++     * role, does not open it in the editorial view (pkp/pkp-lib#10768): send
++     * them where Repo::submission()->getWorkflowUrlByUserRoles() sends an
++     * author, keeping the address's other query values.
++     */
++    protected function redirectAuthorToTheirView(PKPRequest $request): void
++    {
++        $submissionId = (int) $request->getUserVar('workflowSubmissionId');
++        $context = $request->getContext();
++        $user = $request->getUser();
++        if (!$submissionId || !$context || !$user) {
++            return;
++        }
++
++        $submission = Repo::submission()->get($submissionId, $context->getId());
++        if (!$submission) {
++            return;
++        }
++
++        // The roles the user holds on this submission by assignment (a role
++        // the user no longer holds in the context does not count); the
++        // manager roles alone when the user is not assigned to it at all.
++        $assignedRoleIds = collect(Repo::user()->getAccessibleWorkflowStages($user->getId(), $context->getId(), $submission))
++            ->flatten()
++            ->unique()
++            ->all();
++
++        if (
++            !in_array(Role::ROLE_ID_AUTHOR, $assignedRoleIds) ||
++            array_intersect([Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT], $assignedRoleIds)
++        ) {
++            return;
++        }
++
++        $request->redirectUrl(
++            Repo::submission()->getWorkflowUrlByUserRoles($submission, $user->getId(), $request->getQueryArray())
++        );
++    }
++
++    /**
+      * Display Review Assignments page.
+      *
+      * @param PKPRequest $request

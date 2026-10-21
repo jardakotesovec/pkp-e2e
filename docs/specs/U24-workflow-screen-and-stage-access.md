@@ -1221,11 +1221,11 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | Pressing "Review" in the workflow's side menu opens a page with no round: wrong status, no reviewers, "Add Reviewer" refused | 🐞 | medium · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Any dead link, reader pages and old workflow links alike, shows a bare "404 Not Found" page | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | In French the workflow screen names a staged version by a raw code, and a preprint server's "Preprint" heading, status line and "Post" and "Unpost" buttons show raw codes | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A12](#a12) | A manager who is the submission's Author gets an "Error" dialog, "You are not allowed to access these files.", over its review round | 🐞 | minor | — |
-| [A13](#a13) | A manager who is the submission's Author is offered its decision buttons, and the decision is then refused | 🐞 | minor | — |
+| [A12](#a12) | A manager who is the submission's Author gets an "Error" dialog, "You are not allowed to access these files.", over its review round | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
+| [A13](#a13) | A manager who is the submission's Author is offered its decision buttons, and the decision is then refused | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [OMP3](#omp3) | On a press, disabling the URN plugin leaves URNs on public book pages and an empty "Identifiers" workflow page | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server labels an unfinished submission "Production", not "Incomplete", in the lists and the workflow header | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [OPS6](#ops6) | "Post the preprint" does nothing for a manager who is the preprint's Author | 🐞 | minor | — |
+| [OPS6](#ops6) | "Post the preprint" does nothing for a manager who is the preprint's Author | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A1](#a1) | A bookmarked stage address opens the workflow at its usual landing entry, not at the stage the address names | ❓ | minor | — |
 | [A2](#a2) | An assigned assistant off the active stage, or a manager who is the submission's Author, sees the "Publication" heading with nothing under it | ❓ | minor | — |
 | [A3](#a3) | An incomplete submission's workflow opens by the dashboard address but is refused by the stage-naming address | ❓ | latent | — |
@@ -1439,7 +1439,7 @@ a preprint server's part with
 Basis: probe, 2026-10-02. <sup>[f-a11](#fn-a11)</sup>
 
 <a id="a12"></a>
-**A12 — A manager who is the submission's Author gets an "Error" dialog over its review round** · 🐞 · minor.
+**A12 — A manager who is the submission's Author gets an "Error" dialog over its review round** · 🐞 · medium.
 A Journal Manager or Editor who is one of a submission's Authors,
 assigned to it only as such, opens it by the dashboard address while it
 is in review (Rule 20). The panel opens on the review round with its
@@ -1451,10 +1451,10 @@ it. "OK" closes it and the panel stays usable, but "Files for Review"
 reads "No Items" where an Editor sees the round's file. Expected: either
 the author's view of the round, or editorial panels that do not ask for
 files the reader may not open.
-Basis: probe, 2026-10-19. <sup>[f-a12](#fn-a12)</sup>
+Basis: probe, 2026-10-21. <sup>[f-a12](#fn-a12)</sup>
 
 <a id="a13"></a>
-**A13 — A manager who is the submission's Author is offered its decision buttons, and the decision is then refused** · 🐞 · minor.
+**A13 — A manager who is the submission's Author is offered its decision buttons, and the decision is then refused** · 🐞 · medium.
 On their own submission, opened by the dashboard address (Rule 20), a
 Journal Manager or Editor assigned to it only as its Author finds the
 decision buttons an Editor finds: on a review round "Request
@@ -1466,7 +1466,7 @@ to record this decision on this submission.". Expected: no decision
 buttons for a reader the decision is refused to, or the author's view.
 A preprint server's "Post the preprint" fails differently for the same
 reader [OPS6](#ops6).
-Basis: probe, 2026-10-19. <sup>[f-a13](#fn-a13)</sup>
+Basis: probe, 2026-10-21. <sup>[f-a13](#fn-a13)</sup>
 
 ### OMP
 
@@ -1595,7 +1595,7 @@ hide them until the author finishes the submission, whichever way
 Basis: probe, 2026-10-02. <sup>[f-ops5](#fn-ops5)</sup>
 
 <a id="ops6"></a>
-**OPS6 — "Post the preprint" does nothing for a manager who is the preprint's Author** · 🐞 · minor.
+**OPS6 — "Post the preprint" does nothing for a manager who is the preprint's Author** · 🐞 · medium.
 On a preprint server, a Preprint Server Manager who is one of a
 preprint's Authors, assigned to it only as such, opens it by the
 dashboard address (Rule 20) and finds "Post the preprint" and "Decline
@@ -1608,7 +1608,7 @@ where posting starts; this reader's "Preprint" group is empty
 preprint" for a reader who cannot post, or a press that leads
 somewhere. On a journal or press the same reader's decision buttons
 end on a refusal instead [A13](#a13).
-Basis: probe, 2026-10-19. <sup>[f-ops6](#fn-ops6)</sup>
+Basis: probe, 2026-10-21. <sup>[f-ops6](#fn-ops6)</sup>
 
 ### Retired
 
@@ -1721,9 +1721,11 @@ Issue report (the staged version names): [pkp-e2e#228](https://github.com/jardak
 
 <a id="fn-a12"></a>
 **f-a12** — The editorial stage config's review-round "Files for Review" panel requests `GET api/v1/{context}/submissions/{id}/files?fileStages=4&reviewRoundIds={round}`; `PKPSubmissionFileController::getMany()` narrows the allowed file stages to `Repo::submissionFile()->getAssignedFileStages()` for the reader's stage assignments, which for an Author excludes review files (4), and answers 403 `api.submissionFiles.403.unauthorizedFileStageId` "You are not allowed to access these files.", shown through `useFetch` as the "Error" dialog (note c). Live-probed 2026-10-19 (Rule 20; OJS `ccorino` on submission 2, Review Round 1; OMP `afinkel` on submission 2, External Review Round 1; two runs each, as note r): the dialog on landing, on a reload, and before every press of "Review" / "External Review" and "Review Round 1", none on the other stages; the request answered 403 `{"error":"You are not allowed to access these files."}` (a refusal, no server error); after "OK" the panel stayed, "Files for Review" reading "No Items" where `dbarnes` saw the round's file (OJS file 14, OMP file 15 "chapter1.pdf"). OPS has no review stage and showed no dialog.
+Issue report: [docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md).
 
 <a id="fn-a13"></a>
 **f-a13** — `Schema::getAvailableEditorialDecisions()` → `checkDecisionPermissions()` (`lib/pkp/classes/submission/maps/Schema.php`) looks for the user's manager or sub-editor stage assignments on the stage and, finding none, falls back to the user's manager-level group, so the decision buttons render; `DecisionAllowedPolicy` (`classes/security/authorization/internal/`) finds the user's Author stage assignment on the stage, skips it as not editorial, and denies with `editor.submission.workflowDecision.disallowedDecision`. Live-probed 2026-10-19 (Rule 20; OJS, OMP, as note r, two runs each): on "Review Round 1" / "External Review" round 1 the buttons "Request Revisions", "Accept Submission", "Create New Review Round", "Cancel Review Round", "Decline Submission", and "Schedule For Publication" on OJS's "Submission" and "Production" entries; "Request Revisions" opened its window ("Require New Review Round", "Next") as it did for `dbarnes`; "Next" went to `user/authorizationDenied?message=editor.submission.workflowDecision.disallowedDecision`, "You do not have permission to record this decision on this submission.". Not pressed: the other decision buttons, "Add Reviewer", "Upload", "Request Response" and OJS's "Editor Recommendation".
+Issue report: [docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md).
 
 <a id="fn-omp2"></a>
 **f-omp2** — Note h: `useWorkflowNavigationConfigOMP.js::getPublicationItemsEditorial()` pushes `media` before the settings-gated pages and outside the `permissions.canAccessProduction` block; `…OJS.js` and `…OPS.js` push it inside that block. Live-probed 2026-09-02: `assistant.rita` as Funding Coordinator on a monograph in External Review Round 1 saw "Title & Abstract", "Contributors", "Chapters", "Metadata", "Publication Formats", "Media", "References", "Funding" and no "Catalog Entry" or "Permissions & Disclosure"; the same role on a journal article in Review Round 1 saw "Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML" and no "Media".
@@ -1747,6 +1749,7 @@ Issue report: [docs/issues/U24-OPS3-preprint-draft-labelled-production.md](../is
 
 <a id="fn-ops6"></a>
 **f-ops6** — On OPS the "Post the preprint" action moves the panel to the preprint's "Title & Abstract" page (`workflowMenuKey=publication_{id}_titleAbstract`), where posting starts; for this reader the editorial publication items are not built (`canAccessPublication` false, notes h and r), so the move has no page to land on and nothing happens. The decision buttons render through the manager fallback of note f-a13. Live-probed 2026-10-19 (Rule 20; OPS `main`, `ccorino` given "Preprint Server manager", preprint 1 in Production, assigned as its Author, with the moderators `dbuskins` and `sberardo`; two runs, as note r): "Post the preprint" and "Decline Submission" on "Production"; pressing "Post the preprint" opened no window and no notice and left `workflowMenuKey=workflow_5`; control `dbarnes` (Preprint Server manager, not an author of it): the same press went to `workflowMenuKey=publication_1_titleAbstract`, "Preprint: Title & Abstract". "Decline Submission" was not pressed. No request failed and no page error was logged.
+Issue report: [docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md).
 
 ## Reference — entry points & surfaces
 
