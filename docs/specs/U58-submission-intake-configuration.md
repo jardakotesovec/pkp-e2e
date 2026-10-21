@@ -955,7 +955,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | In French (Canada) a preprint server's "Components" list names seven components by internal text codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A component name of only spaces is refused with a raw text key | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A refused component delete leaves its confirmation window spinning | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | A press on the dimmed page beside the "Add a Component" window closes it without the question "Close" asks, and the "Name" just typed is lost | 🐞 | minor | — |
+| [A15](#a15) | A click beside the "Add a Component" window, or Escape, closes it without asking while the cursor is still in "Name" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OJS1](#ojs1) | LOCKSS and CLOCKSS pages show the "Copyright" row only when an unrelated Copyright Notice is set | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [OMP1](#omp1) | A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | A new component lands at the top of the list, sharing first place with the first component | ❓ | minor | — |
@@ -1119,16 +1119,23 @@ does "Cancel". The row stays, as it should.
 Basis: probe, 2026-10-02. <sup>f-a12</sup>
 
 <a id="a15"></a>
-**A15 — A press beside the "Add a Component" window closes it without the question "Close" asks** · 🐞 · minor.
-A manager who types a "Name" in the "Add a Component" window and presses
-its "Close" is asked "The data on this form has changed. Do you wish to
-continue without saving?". A press on the dimmed page beside the window,
-made while the cursor is still in "Name", closes the window at once with
-no question: the typed name is lost, and the list has no new row. The
-next time the manager reloads or leaves the page, the browser asks its
-leave-page question, though no window is open and nothing is left to
-lose. A stray press beside the window costs what was typed in it.
-Basis: probe, 2026-10-06. <sup>f-a15</sup>
+**A15 — A click beside the "Add a Component" window, or Escape, closes it without asking while the cursor is still in "Name"** · 🐞 · low.
+A manager types a name in the "Add a Component" window (Settings ›
+Workflow › "Submission" › "Components") and, with the cursor still in
+"Name", clicks the dimmed page beside the window or presses Escape. The
+window closes at once, without the question its "Close" asks ("The data
+on this form has changed. Do you wish to continue without saving?"). The
+typed name is lost, and the list has no new row. The next reload of the
+page then raises the browser's leave-page question, though no window is
+open and nothing is left to lose. Before 3.5.0-2 the click beside the
+window asked, as "Close" does. Escape with the cursor in the box has
+closed such windows without asking on every version. The same happens in
+every window drawn by the server's older forms, whenever the box being
+typed in is the only change: among them "Create New Role" and a role's
+"Edit" on Users & Roles › "Roles", "Edit User" and "Disable" on "Users",
+a component's "Edit", the file windows of Settings › Workflow ›
+"Library", and the review forms and their items (journals and presses).
+Basis: probe, 2026-10-21. <sup>f-a15</sup>
 
 ### OJS
 
@@ -1917,6 +1924,7 @@ the close with nothing left to clear it: no question at the press, one
 `f8285b0b8f` and ui-library `7503fab4`; the order of the two events was
 read, not traced in the browser, and the same read says the press asks
 once the box has been left.
+Issue report: [docs/issues/U58-A15-component-window-outside-press-loses-name.md](../issues/U58-A15-component-window-outside-press-loses-name.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `templates/gateway/lockss.tpl` and `clockss.tpl` test

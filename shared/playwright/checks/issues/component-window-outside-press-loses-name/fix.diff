@@ -1,0 +1,33 @@
+--- a/lib/pkp/js/controllers/form/FormHandler.js
++++ b/lib/pkp/js/controllers/form/FormHandler.js
+@@ -550,11 +550,29 @@
+ 	$.pkp.controllers.form.FormHandler.prototype.containerCloseHandler =
+ 			function(input, event, informationObject) {
+ 
+-		var $form = $(this.getHtmlElement());
++		var $form = $(this.getHtmlElement()),
++				activeElement = document.activeElement,
++				focusTaken = false;
+ 		// prevent orphaned date pickers that may be still open.
+ 		$form.find('.hasDatepicker').datepicker('hide');
++		// A field that still holds the focus has not sent its change event
++		// yet: a press beside the modal or Escape closes it before the field
++		// loses the focus. Take the focus out first, so that formChange()
++		// sees the edit and the question below is asked.
++		if (activeElement && $.contains($form[0], activeElement)) {
++			activeElement.blur();
++			focusTaken = true;
++		}
+ 		if (this.formChangesTracked) {
+ 			if (!confirm(pkp.localeKeys['form.dataHasChanged'])) {
++				// The modal stays open: give the focus back to the field, once
++				// the press that asked has moved it (a press beside the modal
++				// takes it to the page).
++				if (focusTaken) {
++					setTimeout(function() {
++						activeElement.focus();
++					}, 0);
++				}
+ 				if (informationObject) {
+ 					informationObject.closePermitted = false;
+ 				}
