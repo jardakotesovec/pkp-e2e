@@ -1,0 +1,47 @@
+--- a/plugins/importexport/native/filter/NativeXmlPublicationFilter.php
++++ b/plugins/importexport/native/filter/NativeXmlPublicationFilter.php
+@@ -17,7 +17,6 @@
+ use APP\core\Application;
+ use APP\facades\Repo;
+ use APP\file\PublicFileManager;
+-use APP\plugins\importexport\onix30\Onix30ExportDeployment;
+ use APP\publication\Publication;
+ use DOMDocument;
+ use DOMElement;
+@@ -108,12 +107,6 @@
+         $importFilter = $this->getImportFilter($n->tagName) ?? throw new Exception("Filter not found for \"{$n->tagName}\"");
+ 
+         $existingDeployment = $this->getDeployment();
+-        $request = Application::get()->getRequest();
+-
+-        $onixDeployment = new Onix30ExportDeployment($request->getContext(), $request->getUser());
+-        $onixDeployment->setPublication($existingDeployment->getPublication());
+-        $onixDeployment->setFileDBIds($existingDeployment->getFileDBIds());
+-        $onixDeployment->setAuthorDBIds($existingDeployment->getAuthorDBIds());
+         $importFilter->setDeployment($existingDeployment);
+         $formatDoc = new DOMDocument('1.0', 'utf-8');
+         $formatDoc->appendChild($formatDoc->importNode($n, true));
+--- a/plugins/importexport/native/filter/NativeXmlPublicationFormatFilter.php
++++ b/plugins/importexport/native/filter/NativeXmlPublicationFormatFilter.php
+@@ -141,8 +141,7 @@
+      */
+     public function _processProductNode($node, $deployment, &$representation)
+     {
+-        $request = Application::get()->getRequest();
+-        $onixDeployment = new Onix30ExportDeployment($request->getContext(), $request->getUser());
++        $onixDeployment = new Onix30ExportDeployment($deployment->getContext(), $deployment->getUser());
+ 
+         $submission = $deployment->getSubmission();
+ 
+--- a/plugins/importexport/native/filter/PublicationFormatNativeXmlFilter.php
++++ b/plugins/importexport/native/filter/PublicationFormatNativeXmlFilter.php
+@@ -59,8 +59,7 @@
+             assert(count($nativeExportFilters) == 1); // Assert only a single serialization filter
+             $exportFilter = array_shift($nativeExportFilters);
+ 
+-            $request = Application::get()->getRequest();
+-            $exportFilter->setDeployment(new Onix30ExportDeployment($request->getContext(), $request->getUser()));
++            $exportFilter->setDeployment(new Onix30ExportDeployment($this->getDeployment()->getContext(), $this->getDeployment()->getUser()));
+ 
+             $onixDoc = $exportFilter->execute($submission);
+             if ($onixDoc) { // we do this to ensure validation.

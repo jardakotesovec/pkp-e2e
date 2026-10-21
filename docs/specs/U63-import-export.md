@@ -1217,6 +1217,18 @@ journal to another) with throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - a press's export of a book in a series on the "Export" tab,
+    imported again on "Import", reading as a plain success with no
+    "Unknown element sequence" line {OMP} ([OMP5](#omp5)): the guard the
+    issue report
+    (`docs/issues/U63-OMP5-native-import-series-unknown-element-sequence.md`)
+    proposes, once fixed
+  - with the press's four ONIX details filled, the command-line export
+    of a book with a publication format writing its file, and that file
+    importing from the command line with the format kept {OMP}
+    ([OMP6](#omp6)): the guard the issue report
+    (`docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md`)
+    proposes, once fixed
   - the roles' masthead choices and start dates carried from one
     journal to another (Rules 24a, 24b, 28; A2 and A3 retired): in
     scenario 6, moss's
@@ -1481,8 +1493,8 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OJS10](#ojs10) | A journal manager's "Export Issues" list shows the issues in no set order | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP1](#omp1) | Pressing "Tab Delimited Content Import Plugin" on a press's Tools page opens a blank page | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | A press's command-line CSV import stops with a fatal error, imports nothing and leaves an empty submission | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
-| [OMP5](#omp5) | Importing a press's own exported file lists "Unknown element sequence" for every book in a series | 🐞 | minor | — |
-| [OMP6](#omp6) | From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled | 🐞 | user-visible | — |
+| [OMP5](#omp5) | A press importing an OMP Native XML export is warned "Unknown element sequence" for every book in a series | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [OMP6](#omp6) | From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled | 🐞 | medium · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A14](#a14) | "Export Users" with no row ticked ends on a blank page: the server fails | ❓ | minor · crash: server | — |
 | [A22](#a22) | "Export Users" leaves out an account whose only role starts on a later date | ❓ | minor | — |
 | [OJS8](#ojs8) | DOAJ "Register" checks nothing, "Validate XML before the export and registration." ticked or not | ❓ | minor | — |
@@ -1976,36 +1988,36 @@ first row that names an author.
 Since: 2025-11-20 · Basis: probe, 2026-10-01. <sup>f-omp4</sup>
 
 <a id="omp5"></a>
-**OMP5 — A press's own exported file is imported with "Unknown element sequence" warnings** · 🐞 · minor.
-Importing a file the press itself exported should read as a plain
-success. Instead the success text is followed by "Warnings
-encountered:", "Publication" and one line "Unknown element sequence"
-for each book that belongs to a series. Nothing is lost: the books are
-imported, each still in its series. But the lines name no book and
-nothing the manager could correct, and the manager cannot tell them
-from a real warning. Every press whose books belong to series gets
-them at each import of its own files.
-Basis: probe, 2026-10-09. <sup>f-omp5</sup>
+**OMP5 — A press importing an OMP Native XML export is warned "Unknown element sequence" for every book in a series** · 🐞 · low.
+Importing a Native XML file exported from OMP, the press's own or
+another press's, should read as a plain success. Instead the success
+text is followed by "Warnings encountered:", "Publication" and one line
+"Unknown element sequence" for each book that belongs to a series. The
+lines name no book and nothing the manager could correct, and the
+manager cannot tell them from a real warning. The books are imported,
+each in its series. The same unread element also carries the series'
+place in the press's list of series, so when the import has to create a
+series the press lacks, that series gets order 0 instead of the file's.
+One element the import does not read causes both, and one fix clears
+both.
+Basis: probe, 2026-10-21. <sup>f-omp5</sup>
 
 <a id="omp6"></a>
-**OMP6 — From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled** · 🐞 · user-visible.
-Run from the server's command line (Rule 20b), a press's Native XML
-import should do what the "Import" tab does. Instead a file with any
-book that has a publication format stops with "The process failed.
-Check below for errors/warnings." and "Cannot assign null to property
-PKP\plugins\importexport\PKPImportExportDeployment::$_context of type
-PKP\context\Context", and nothing from the file is imported. Once the
-press's four ONIX details are filled (Settings bullet 7), the
-command-line export of such a book stops with the same two lines and
-writes no file. Either way the tool ends as a success does (exit
-status 0), so a script that runs it is not told. The same file imports
-on the "Import" tab, and the same book exports on the "Export" tab,
-with its formats; from the command line a file imports only once its
-publication formats are taken out, and the books then have none. The
-way round is the screens, within the upload limit of Rule 8a. A
-journal's and a preprint server's command-line import and export work.
-The 3.5 release has the fault too.
-Basis: probe, 2026-10-19. <sup>f-omp6</sup>
+**OMP6 — From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled** · 🐞 · medium · crash: server.
+Run from the server's command line, a press's Native XML import should
+do what the "Import" tab does. Instead a file with any book that has a
+publication format stops with "The process failed. Check below for
+errors/warnings." and a PHP type error, and nothing from the file is
+imported. The export fails the same way once the press has filled its
+four ONIX details on Settings › Press › "Masthead" ("Press Publisher
+Name", "Geographical Location", "Publisher Code Type", "Publisher
+Code"): from then on, the command-line export of any book with a
+publication format writes no file. Either way the tool ends with a
+success status, so a script that runs it is not told. The same file
+imports on the "Import" tab, and the same book exports on the "Export"
+tab, with its formats; that is the way round, within the upload size the
+server allows. One change in OMP fixes both.
+Basis: probe, 2026-10-21. <sup>f-omp6</sup>
 
 ### Retired
 
@@ -3790,6 +3802,7 @@ database). Each such import also wrote "PHP Warning: Undefined
 property: stdClass::$section_id" to the server log
 (`omp/classes/section/DAO.php`, `getByPath()`), with nothing seen on
 screen. OJS and OPS have no series. Kept script: `shared/playwright/checks/U63/I09/native.js`.
+Issue report: [docs/issues/U63-OMP5-native-import-series-unknown-element-sequence.md](../issues/U63-OMP5-native-import-series-unknown-element-sequence.md).
 
 <a id="fn-f-omp6"></a>
 **f-omp6** — Note y. The import's `NativeXmlPublicationFilter::parsePublicationFormat()`
@@ -3840,6 +3853,7 @@ file imported from the command line failed the same way, and on the
 pkp/pkp-lib#12956 (open, reported on 3.4) names the import and the
 same two lines; the export half has no upstream issue found. Kept
 script: `shared/playwright/checks/U63/H19/h19.js`.
+Issue report: [docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md](../issues/U63-OMP6-command-line-native-import-export-formats-fail.md).
 
 ## Reference — entry points & surfaces
 
