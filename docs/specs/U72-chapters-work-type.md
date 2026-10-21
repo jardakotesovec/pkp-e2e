@@ -194,8 +194,14 @@ wizard on Review ⚠ [A5](#a5). <sup>h</sup>
      shows after a reload. A list no one has reordered reads in the
      order the chapters were added in. The chapter order is the book's
      table-of-contents order. A dragged chapter that has no authors
-     leaves its "No Items" line where the chapter was, until "Done" or
-     "Cancel ordering" ⚠ [A12](#a12). <sup>l</sup> <sup>td11</sup> <sup>td20</sup>
+     leaves its "No Items" line where the chapter was ⚠ [A12](#a12);
+     "Done" or "Cancel ordering" draws it back under that chapter, also
+     once loaded again. "Cancel ordering" pressed in any other case, with
+     no drag or after another chapter was dragged, puts the chapters
+     back in their order but leaves a chapter that has no authors with
+     nothing under its title until the page is loaded again
+     ⚠ [A14](#a14).
+     <sup>l</sup> <sup>td11</sup> <sup>td20</sup> <sup>td21</sup>
    - 8b. Dragging an author moves them among that chapter's authors, and
      "Done" saves the new order. An author who ends up n-th in the
      chapter while (n + 1)-th on the version's "Contributors" list
@@ -743,6 +749,8 @@ Left out of the scenarios above, by reason:
   - "Done" showing no notice, "Cancel ordering" after a chapter is
     dragged, and a drag left without "Done" gone once the Chapters page
     or the wizard is opened again (Rule 8c)
+  - "Cancel ordering" after a chapter that has no authors was dragged,
+    which draws its "No Items" line back under it (Rule 8a)
   - the guard for A7 (issue report
     `docs/issues/U72-A7-chapter-author-order-change-lost.md`): a
     chapter's authors dragged into a place the save used to skip keep
@@ -787,6 +795,8 @@ Left out of the scenarios above, by reason:
     Rule 8)
   - A12 (the "No Items" line of a dragged chapter that has no authors;
     Rule 8a)
+  - A14 (the "No Items" line taken away by "Cancel ordering" when the
+    chapter that has no authors was not dragged; Rule 8a)
   - A13 (a new order of the chapters, or of a chapter's authors, in the
     wizard's Review panel before a reload; Rule 16)
 - **Owned by another feature**:
@@ -807,7 +817,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-28; A11 to A13
-2026-10-08), unreviewed unless an entry notes otherwise; the team settles
+2026-10-08; A14 2026-10-21), unreviewed unless an entry notes otherwise; the team settles
 them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -822,6 +832,7 @@ them on spec review.
 | [A11](#a11) | Submission wizard: "Order" pressed again, or "Done" twice, while ordering chapters or galleys sends the author to the first step | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A12](#a12) | Ordering a book's chapters: a dragged chapter with no authors leaves its "No Items" line under another chapter | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A13](#a13) | Submission wizard: after "Order", the Review step lists a book's chapters in the old order until a reload | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A14](#a14) | Ordering a book's chapters: "Cancel ordering" takes away a chapter's "No Items" line | 🐞 | minor | — |
 | [A1](#a1) | The assistant roles may change a published version's chapters, though not an unpublished one's | ❓ | minor | — |
 | [A9](#a9) | A chapter added to a published Edited Volume may stay without a license | ❓ | minor | — |
 | [A6](#a6) | "Order" could not move a chapter: a dragged chapter stayed where it was | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453), walked on main |
@@ -1015,6 +1026,24 @@ and the book is submitted with it. But the last screen before "Submit"
 shows the author a table of contents that is not the one saved, with no
 hint why, until the page is reloaded.
 Basis: probe, 2026-10-19. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — Ordering a book's chapters: "Cancel ordering" takes away a chapter's "No Items" line** · 🐞 · minor.
+A book's chapter list shows "No Items" under a chapter that has no
+authors. A press editor on the Chapters page, or an author on the
+submission wizard's "Details" step, presses "Order" and then "Cancel
+ordering", either without dragging anything or after dragging another
+chapter. The chapters go back to their order, but the chapter with no
+authors now shows its title with nothing under it. The "No Items"
+line comes back only once the page is loaded again (the Chapters page
+by its address, the wizard by a reload and back to "Details"). Nothing
+is saved or lost. When the chapter with no authors is the one dragged,
+"Cancel ordering" draws back under the chapter the line its drag left
+behind ([A12](#a12)). The fault shows only on a book that has a chapter
+without authors.
+Expected: after "Cancel ordering" each chapter without authors still
+shows "No Items" under its title.
+Basis: probe, 2026-10-21. <sup>f-a14</sup>
 
 ### Retired
 
@@ -1562,8 +1591,10 @@ to the top left "No Items" at the bottom, under the authors of "Tides".
 `chapter-grid/save-sequence` request, answered 200 with
 `{"status":true,…,"events":[{"name":"dataChanged"}]}`, and no notice
 followed. "Cancel ordering" after a chapter drag (both lists, three
-runs) and after an author drag (both lists, two runs) put the list back
-at once and sent no request, and a reload showed the same. With a drag
+runs) and after an author drag (both lists, two runs) put the chapters
+and their authors back in their order at once and sent no request, and
+a reload showed the same order (what it does to a "No Items" line:
+note td21). With a drag
 pending on the Chapters page, the side menu's "Title & Abstract" opened
 with no question, and "Chapters" opened again read the saved order with
 no "Done" or "Cancel ordering" (three runs). In the wizard the rail's
@@ -1604,6 +1635,35 @@ fresh books of three moves each among them. The list reads a chapter's
 authors ordered by that stored place alone (OMP
 `classes/author/Collector.php`, `orderBy('sca.seq')`), so which of two
 authors at one place comes first is the database's choice.
+
+<a id="fn-td21"></a>
+**td21** — Live-probed 2026-10-21 (Rule 8a; A12, A14) on OMP `main`
+(omp `5777025be`, lib/pkp `042726ebf6`) and `stable-3_5_0` (omp
+`cce424e5e`, lib/pkp `68512b5fda`), two runs on each, on PKP's default
+dataset (kept script `shared/playwright/checks/U72/H21/h21.js`). On the
+Chapters page, as the Press editor (dbarnes), the dataset book's five
+chapters (each by Bob Barnetson) got a sixth, an appendix with no
+contributor, added last; in the wizard, as an author (aclark), a new
+book got "Tides" and "Deltas" (each by Ben Barrow) and "Harbours" (no
+author). Each case started from a freshly opened list and was read
+after the drag, right after the end of ordering, and after the page was
+opened again (the Chapters page: the workflow opened by its address;
+the wizard: reloaded, then "Continue" back to "Details").
+"Order", "Cancel ordering" with no drag: no "No Items" anywhere, the
+chapter with no authors showing its title alone; opened again, "No
+Items" under it. The chapter with no authors dragged above the first,
+"Cancel ordering": after the drag "No Items" stood under the author row
+of the chapter that had been above it ("Part Four…", "Deltas"; A12),
+after "Cancel ordering" back under its own chapter, the same once
+opened again. The chapter above it, which has an author, dragged above
+the first, "Cancel ordering": "No Items" stayed under its chapter
+through the drag, was gone once the order was restored, and showed
+again once the page was opened again. The chapter with no authors
+dragged above the first, "Done": it stood first with "No Items" under
+it, also once opened again. The same on both lists, both lines, every
+run. "Cancel ordering" sent no request in any case; each "Done" sent
+one `save-sequence`, answered 200 with `{"status":true,…"dataChanged"}`.
+No response answered a server error and no page error showed.
 
 <a id="fn-m"></a>
 **m** — `ChapterGridCategoryRow::initialize()`: `RemoteActionConfirmationModal`
@@ -1972,6 +2032,22 @@ loaded with, to which an added chapter is pushed last. Live-probed
 2026-10-08 (the chapters, the authors, a chapter added after a move),
 three runs: note td20.
 Issue report: [pkp-e2e#1019](https://github.com/jardakotesovec/pkp-e2e/issues/1019) ([docs/issues/U72-A13-wizard-review-chapters-old-order.md](../issues/U72-A13-wizard-review-chapters-old-order.md)).
+
+<a id="fn-f-a14"></a>
+**f-a14** — Note f-a12's grid. Code read 2026-10-21 on lib/pkp
+`042726ebf6`: "Cancel ordering" runs
+`OrderItemsFeature.cancelOrderHandler()`, which calls
+`GridHandler.resequenceRows()`; that adds every element again through
+`addElement()`, which hides an "empty" placeholder each time
+(`getEmptyElement()`, for a row `$row.parents('tbody:first').next('.empty')`),
+and `CategoryGridHandler.resequenceCategories()` then moves the chapter
+placeholders back under their chapters
+(`updateEmptyPlaceholderPosition()`) but shows none. After "Cancel
+ordering" the empty chapter's placeholder carried `style="display:
+none;"`; which of these calls hides it, and why not after the empty
+chapter's own drag, was not traced line by line. A code path other than
+A12's (no repositioning on a drop). Live-probed 2026-10-21 on OMP
+`main` and 3.5, two runs each, on both lists: note td21.
 
 ## Reference — entry points & surfaces
 

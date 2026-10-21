@@ -179,7 +179,12 @@ itself enforces before submission is Rule 13.
      accepting the file [OPS1](#ops1). On a draft that already had a
      galley when the wizard was opened, a further galley's upload window
      stays open after uploading, and "Files" lists the new label
-     without a file until a reload ⚠ [OPS8](#ops8).
+     without a file until a reload ⚠ [OPS8](#ops8). Pressing the list's
+     "Order" puts a drag handle on each galley and offers "Done" and
+     "Cancel ordering". The author drags the galleys into a new order, and
+     "Done" saves it: the list keeps it after a reload. "Cancel
+     ordering" leaves the order as it was.
+     <sup>[fn-ops11](#fn-ops11)</sup>
    - *Details*: title and abstract. The title arrives pre-filled from the
      start form. Keywords, a plain language summary, a references box,
      data citations, a data availability statement, and a Funders list
@@ -325,14 +330,17 @@ itself enforces before submission is Rule 13.
 12. <a id="review-step"></a>**The Review step.** Entering Review checks the
     whole submission. "Checking your submission" overlays the panels while
     the check runs. The step then shows one summary panel per earlier step:
-    Files (summarizing Upload Files; on a preprint server this same panel
-    lists the galleys [OPS1](#ops1), but only those uploaded since the
-    wizard page was last opened or reloaded ⚠ [OPS9](#ops9)), Details,
-    Contributors, For the Editors, Reviewer Suggestions when that step is
-    present (Rule 7) {OJS OMP}, and the app-specific panels (a License
-    panel on a preprint server [OPS1](#ops1); Chapters on a press
-    [OMP1](#omp1)). When several submission languages are supported, the
-    Details and For the Editors panels each appear once per language.
+    Files (summarizing Upload Files), Details, Contributors, For the
+    Editors, Reviewer Suggestions when that step is present (Rule 7)
+    {OJS OMP}, and the app-specific panels (a License panel on a preprint
+    server [OPS1](#ops1); Chapters on a press [OMP1](#omp1)). On a
+    preprint server the Files panel lists the galleys, but only those
+    uploaded since the wizard page was last opened or reloaded
+    ⚠ [OPS9](#ops9), and in the order they were uploaded: a new order
+    saved with "Order" on "Upload Files" does not show there
+    ⚠ [OPS11](#ops11). <sup>[fn-ops11](#fn-ops11)</sup> When several
+    submission languages are supported, the Details and For the Editors
+    panels each appear once per language.
     <sup>l</sup>
 12a. **"Edit" on a panel.** Each panel has an "Edit" button that jumps
      back to its step. On a preprint server the "License" and "Relation
@@ -1017,6 +1025,7 @@ Left out of the scenarios above, by reason:
   - the Review step after a language change asking for the new language's title, contributor names and typed institution names, the affiliation copied from the author's profile included, with "Submit" disabled until they are typed (Rule 11): likely bullets in scenario 5, which changes the language and reaches Review
   - the timer's minute counted from the last save, not from the end of typing: scenario 3's "Saving" coming as the footer reaches "Last saved 1 minute ago", and a step with no change sending nothing (Rule 9): the suites move the page's clock on a minute after the typing, which cannot tell the two readings apart
   - leaving the start screen with a title typed, for My Submissions, asking nothing (Rule 4): likely a bullet after scenario 1's "The start screen"
+  - "Order" on a preprint's "Upload Files": a galley dragged above another and "Done" keeping the new order in "Files", also after a reload, and "Cancel ordering" leaving the order as it was {OPS} (Rule 7): likely a bullet in scenario 15
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -1053,6 +1062,7 @@ Left out of the scenarios above, by reason:
   - OPS8 (a further galley on a draft that already listed one when the wizard was opened)
   - OPS9 (the Review step's "Files" panel after a reload)
   - OPS10 (a Moderator already on a preprint at its submission)
+  - OPS11 (the Review step's "Files" panel after "Order" on "Upload Files")
 - **No seed**:
   - a journal with a task template for the first workflow stage (Side effects, "Editorial task templates run")
   - a preprint server configured to register DOIs {OPS} (Side effects, "DOIs are assigned")
@@ -1081,7 +1091,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-25; additions
-2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05 and 2026-10-19), unreviewed unless an entry notes otherwise; the team settles
+2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19 and 2026-10-21), unreviewed unless an entry notes otherwise; the team settles
 them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
 are the source; badges, Impact and Basis:
 [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -1110,6 +1120,7 @@ are the source; badges, Impact and Basis:
 | [OPS7](#ops7) | A signed-in user who may not submit to a preprint server reads a raw translation key instead of the reason | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS8](#ops8) | A further galley on a reloaded draft gets stuck in its upload window and shows no file until a reload | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [OPS9](#ops9) | The Review step's "Files" panel says "No files have been uploaded" for galleys the draft already had when the page loaded | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
+| [OPS11](#ops11) | After "Order" on a preprint's "Upload Files", the Review step's "Files" panel lists the galleys in their old order | 🐞 | minor | — |
 | [A1](#a1) | Closing submissions does not stop drafts already started; they can still be filled and submitted | ❓ | latent | — |
 | [A2](#a2) | The save-for-later confirmation email goes to whoever pressed the button, not to the submitting author | ❓ | latent | — |
 | [A3](#a3) | The submissions-closed notice shown to would-be authors ends with an instruction meant for managers | ❓ | minor | — |
@@ -1687,6 +1698,20 @@ Question: should a preprint server tell the Moderators already on a
 preprint that it has been submitted? Lean: yes. The journal and the
 press send it for the same event.
 Basis: probe. <sup>[fn-ops10](#fn-ops10)</sup>
+
+<a id="ops11"></a>
+**OPS11 — After "Order" on "Upload Files", the Review step lists the galleys in their old order** · 🐞 · minor.
+On a preprint server an author starts a new submission and, without
+reloading, uploads two galleys on "Upload Files", presses "Order",
+drags the second above the first, presses "Done" and goes on to
+"Review". Its "Files" panel still lists them in upload order. Checked
+apart, "Files" on "Upload Files" keeps the new order after a reload, so
+the order is saved; a reload before "Review" empties that panel
+[OPS9](#ops9). So the last screen before "Submit" shows the author an
+order that is not the one saved; only that summary is wrong. A press's
+chapters go stale on "Review" the same way
+([→ Chapters & work type A13](U72-chapters-work-type.md#a13)).
+Basis: probe, 2026-10-21. <sup>[fn-ops11](#fn-ops11)</sup>
 
 ### Retired
 
@@ -2885,13 +2910,45 @@ the visit showed on "Review" as "PDF Preprint Text"; after a reload,
 "Review" read "No files have been uploaded for this submission." with
 "Submit" enabled while "Upload Files" still listed the galley. The same
 text showed on the first "Review" of all 14 drafts built with a galley
-by the scenario tooling, each of which passed the check.
+by the scenario tooling, each of which passed the check. Re-read
+2026-10-21 on PKP's default dataset, two runs each on OPS `main`
+`f048e747b4` and `stable-3_5_0` `5eca7fd603` (note fn-ops11's drive):
+after a reload, with "Upload Files" listing the two galleys "Poster"
+and "PDF", "Review" read "No files have been uploaded for this
+submission." on `main` and "Poster Preprint Text", "PDF Preprint Text"
+on 3.5, so the report's "3.5: none" holds.
 Issue report: [pkp-e2e#333](https://github.com/jardakotesovec/pkp-e2e/issues/333) ([docs/issues/U21-OPS8-OPS9-preprint-reloaded-draft-galley-list.md](../issues/U21-OPS8-OPS9-preprint-reloaded-draft-galley-list.md)).
 
 <a id="fn-ops10"></a>
 **fn-ops10** — OPS10. Mechanism and the 2026-09-28 drive: note q (the
 Submission-stage filter on the editor-assigned email matches no OPS
 group).
+
+<a id="fn-ops11"></a>
+**fn-ops11** — OPS11 and Rule 7's "Order". On "Upload Files" the
+legacy preprint-galley grid (`PreprintGalleyGridHandler` with
+`OrderGridItemsFeature`) saves an order with `save-sequence`, which
+answers only `dataChanged`: the grid redraws, but no galley event
+reaches `SubmissionWizardPageOPS.vue`, whose `galleys` copy (drawn by
+`review-galleys.tpl`, note l) follows `galley:added` (pushed at the
+end), `galley:edited` and `galley:deleted` alone. The same cause as
+[Chapters & work type A13](U72-chapters-work-type.md#a13), whose issue
+report ([docs/issues/U72-A13-wizard-review-chapters-old-order.md](../issues/U72-A13-wizard-review-chapters-old-order.md))
+names the galleys in its reach but not in its Affects. Live-probed
+2026-10-21, two runs each on OPS `main` `f048e747b4` (lib/pkp
+`042726ebf6`, ui-library `99abe252`) and `stable-3_5_0` `5eca7fd603`
+(lib/pkp `68512b5fda`), PKP's default dataset, `ccorino`: "New
+Submission", "Add File" "PDF" then "Poster", each a PDF as "Preprint
+Text"; "Review" "Files" read "PDF Preprint Text", "Poster Preprint
+Text". "Order" showed the drag handles with "Done" and "Cancel
+ordering"; "Poster" dragged above "PDF" and "Done" answered 200
+`{"status":true,…"events":[{"name":"dataChanged"}]}`, and "Upload
+Files" read "Poster", "PDF", also after a reload. "Review", reached by
+the step rail with no reload, still read "PDF", then "Poster", on both
+lines. After a reload and "Continue" to "Review": `main` "No files have
+been uploaded for this submission." (OPS9), 3.5 "Poster Preprint
+Text", "PDF Preprint Text". "Order", "Cancel ordering" with no drag left
+"Poster", "PDF". No page error and no server error in any run.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding. Use the seeded context (`publicknowledge`) and
