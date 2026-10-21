@@ -980,7 +980,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A19](#a19) | A category with one item reads "1 Items" ("1 Titles" on a press) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | With the "Browse" block in a journal's sidebar, every page's breadcrumb gets a grey bar | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A22](#a22) | The picture address of a category with no picture never finishes loading on a journal or preprint server | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
-| [A23](#a23) | A category page number typed past the last page opens a page with no articles, reading "26 - 1 of 1 items", instead of "404 Not Found" | 🐞 | minor | — |
+| [A23](#a23) | A category page number typed past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A24](#a24) | A damaged PNG as a category's "Cover Image" fails "Save" halfway, with "An unexpected error has occurred"; a new category is saved without the picture | 🐞 | medium · crash: server | — |
 | [A25](#a25) | A category's picture is stored as a file with no ending ("8-category", not "8-category.png"), and the full-size picture is offered under that name | 🐞 | minor | — |
 | [OMP1](#omp1) | A press's category page shows a broken-picture mark instead of the category's picture | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -1249,20 +1249,18 @@ first and answers an empty page. (Rule 12a)
 Basis: probe, 2026-10-07. <sup>f-a22</sup>
 
 <a id="a23"></a>
-**A23 — A category page number typed past the last page opens a page with no articles instead of "404 Not Found"** · 🐞 · minor.
+**A23 — A category page number typed past the last page opens an empty page instead of "404 Not Found"** · 🐞 · low.
 A visitor who opens a category's page at a page number past its last one
-should get the bare "404 Not Found" page, as a journal's "Archives" and
-a preprint server's section page give for a page they do not have.
-Instead the category's page opens with its heading and its count and
-lists no article. On a journal and a preprint server a category with one
-article then reads "26 - 1 of 1 items", a range that starts after the
-last article; on a press it reads "1 Titles" and "All Books" with
-nothing under it.
+should get the bare "404 Not Found" page. Instead the category's page
+opens with its heading and its count and lists no article. For a
+category holding one article, opened at page 2 with the default 25 items
+per page, a journal and a preprint server show "26 - 1 of 1 items", a
+range that starts after the last article; a press shows "1 Titles" and
+"All Books" with nothing under it. The page answers "200 OK", so a
+search engine that holds the address keeps an empty page in its index.
 No link leads to such an address: it is typed, bookmarked, or left
-behind when the category lost articles or "Items per page" grew. It is
-the same fault as a preprint server's "Archives" page past its last one
-([Sections](U17-sections.md#ops5), its OPS5). (Rule 9a)
-Basis: probe, 2026-10-02. <sup>f-a23</sup>
+behind when the category lost articles or "Items per page" grew.
+Basis: probe, 2026-10-21. <sup>f-a23</sup>
 
 <a id="a24"></a>
 **A24 — A damaged PNG as a category's "Cover Image" fails "Save" halfway, with "An unexpected error has occurred"** · 🐞 · medium · crash: server.
@@ -2285,6 +2283,7 @@ end: OJS `IssueHandler::archive()` (pkp/pkp-lib#10596) and OPS
 does not (U17 OPS5), nor OMP's catalog and series pages (U68 A10, an open
 question there). No issue report covers the category page: U17 OPS5's
 report names it as not read.
+Issue report: [docs/issues/U16-A23-category-page-past-last-not-404.md](../issues/U16-A23-category-page-past-last-not-404.md).
 
 <a id="fn-f-a24"></a>
 **f-a24** — Note d. lib/pkp `Category\Repository::validate()` accepts the

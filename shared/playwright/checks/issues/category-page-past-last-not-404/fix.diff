@@ -1,0 +1,14 @@
+--- a/lib/pkp/pages/catalog/PKPCatalogHandler.php
++++ b/lib/pkp/pages/catalog/PKPCatalogHandler.php
+@@ -81,6 +81,11 @@
+         }
+         $results = $builder->paginate($rangeInfo->getCount(), 'submissions', $rangeInfo->getPage());
+ 
++        // A page past the last one does not exist
++        if ($results->currentPage() > $results->lastPage()) {
++            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
++        }
++
+         // Provide the parent category and a list of subcategories
+         $parentCategory = $category->getParentId() ? Repo::category()->get($category->getParentId()) : null;
+         $subcategories = Repo::category()->getCollector()
