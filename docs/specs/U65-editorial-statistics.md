@@ -2295,7 +2295,7 @@ were. Not driven: the test installs' server date cannot be moved. The
 raw key is *Statistics — usage*'s A14, whose issue report
 ([docs/issues/U64-A14-stats-refusal-raw-code.md](../issues/U64-A14-stats-refusal-raw-code.md))
 already names this case.
-Issue report: [docs/issues/U65-A15-year-to-date-error-on-1-january.md](../issues/U65-A15-year-to-date-error-on-1-january.md).
+Issue report: [pkp-e2e#1053](https://github.com/jardakotesovec/pkp-e2e/issues/1053) ([docs/issues/U65-A15-year-to-date-error-on-1-january.md](../issues/U65-A15-year-to-date-error-on-1-january.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn l (`$agencies`). Live-probed 2026-09-28: td10, with the item switched off and on.
