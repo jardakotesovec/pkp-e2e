@@ -3221,7 +3221,7 @@ requests a run); no server log line and no 5xx. The same runs: the
 valid key 200, the key with its signature's first character changed
 400 `api.400.invalidApiToken` (also for the deleted key so changed: the
 signature is checked before the key is looked up), the deleted key 401.
-Issue report: [docs/issues/U03-A27-api-token-undecodable-error-unfilled.md](../issues/U03-A27-api-token-undecodable-error-unfilled.md).
+Issue report: [pkp-e2e#1040](https://github.com/jardakotesovec/pkp-e2e/issues/1040) ([docs/issues/U03-A27-api-token-undecodable-error-unfilled.md](../issues/U03-A27-api-token-undecodable-error-unfilled.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — `omp/registry/userGroups.xml`: `permitSelfRegistration="true"`
