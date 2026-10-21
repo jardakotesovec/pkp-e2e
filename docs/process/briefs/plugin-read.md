@@ -30,7 +30,7 @@ Task:
    - **What it does:** for a reviewer who has never seen it, in a few plain sentences: what it is for, what it adds to the app and where (screens, menus, workflow, public pages, emails, background work), and which roles use it.
    - **Gate:** `run` or `do not run`, with the reason. "Do not run" when it fetches and runs code from elsewhere, is obfuscated, or reaches past the app to the host; anything else runs, the sandbox is built for it.
    - **Outside contacts:** a table of host, when, what data, whether the site can turn it off.
-   - **Findings**, by lens (dodgy, security, fit): file and line, why it matters, a severity on REPORT.md's scale, and the fix you would suggest to the author.
+   - **Findings**, by lens (dodgy, security, fit): file and line, why it matters, a severity on REPORT.md's scale, and the fix you would suggest to the author. A fix that names a core class or method names one you found in the checkout on every line the release claims, and the one core itself uses for the same data. A fix that clears or resets data asks only for what is plainly wrong and lists the values the author may mean to keep apart, for them to consider. A missing translation of the plugin's own texts is not a finding.
    - **Faults in PKP's code** (step 5): core's file and line, how the plugin meets it, and what core does with the same data without the plugin; or "none".
    - **For the drive:** each suspicion as steps (the role, the screen or request, expected, suspected), and what the drive should watch for (an outside contact the code makes, a file it writes, a table it fills).
    - **Unverified hunches:** one line each, nothing more.

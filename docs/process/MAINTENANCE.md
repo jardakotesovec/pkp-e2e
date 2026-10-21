@@ -1124,7 +1124,12 @@ user can read.
    not be asked to work around it (maintainer, 2026-10-15). A plugin
    that trusts what core itself does not, or bypasses a check core
    makes, keeps the finding. The drive confirms which: the same request
-   without the plugin, and what core's own screens then show. It commits and pushes
+   without the plugin, and what core's own screens then show. A security
+   finding in a release the author has already made public goes in the
+   report's "Security report for the author", a private report the
+   maintainer files in the plugin's repository, and stays out of the
+   note; what the note asks for and leaves out is that folder's README
+   (maintainer, 2026-10-21). It commits and pushes
    the private repo and posts the report in full in the thread, its
    screenshots attached, untagged, and ends the post with the report's
    link in that repo (`https://github.com/jardakotesovec/pkp-e2e-sec/blob/main/plugin-reviews/<product>-<version>.md`,
