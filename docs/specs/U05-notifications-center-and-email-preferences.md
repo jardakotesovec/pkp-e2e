@@ -1213,6 +1213,7 @@ nowhere they can use; they have to find the submission on My Submissions
 themselves. A preprint's first-post email has the same kind of link
 ([Publish, schedule & versions OPS6](U49-publish-schedule-and-versions.md#ops6)).
 Basis: probe, 2026-10-20. <sup>[f-a16](#fn-a16)</sup>
+Report: paused — written and read 2026-10-21, held until a related item is settled before it is published (2026-10-21)
 
 ### OPS
 
