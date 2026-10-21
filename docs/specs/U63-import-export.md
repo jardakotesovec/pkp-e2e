@@ -3413,8 +3413,16 @@ ends its `switch` in `default: assert(false);`;
 AssertionError: assert(false)`) on OJS, OMP and OPS main, walked
 2026-10-01 as `dbarnes` on the default test dataset, whose installs run
 with `zend.assertions` on. Under PHP's production default
-(`zend.assertions = -1`) the assertion is compiled out and the address
-would likely answer an empty page with 200 (not driven). The issue
+(`zend.assertions = -1`) the assertion is compiled out: probed
+2026-10-20 on OJS, OMP and OPS main, two runs each, on installs set
+that way (U64 claim check UA1), `…/management/tools/u64ua1nosuchpath`
+and `…/management/tools/saveStatisticsSettings` answered 200 with an
+empty `<body>` (no heading, no menu) and no server log line, to the
+Journal (Press, Server) Manager, the Editor at manager level (OJS, OMP)
+and `admin`; the Section Editor (Series Editor, Moderator), Author and
+Reader got the access-denied page, and a signed-out visitor the Login
+page. So A19's "the server fails" holds only where assertions are on;
+the blank page is the same either way. The issue
 report's fix answers 404 at both addresses (tried 2026-10-01, three
 apps).
 Issue report: [pkp-e2e#255](https://github.com/jardakotesovec/pkp-e2e/issues/255) ([docs/issues/U63-A1-A19-tool-address-without-tool-raw-text.md](../issues/U63-A1-A19-tool-address-without-tool-raw-text.md)).
