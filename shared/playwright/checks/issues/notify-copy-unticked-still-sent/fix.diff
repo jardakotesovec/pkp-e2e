@@ -1,0 +1,11 @@
+--- a/lib/pkp/api/v1/_email/PKPEmailController.php
++++ b/lib/pkp/api/v1/_email/PKPEmailController.php
+@@ -113,7 +113,7 @@
+                     $params[$param] = $val;
+                     break;
+                 case 'copy':
+-                    $params[$param] = (bool) $val;
++                    $params[$param] = filter_var($val, FILTER_VALIDATE_BOOLEAN);
+                     break;
+             }
+         }

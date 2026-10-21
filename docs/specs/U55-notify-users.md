@@ -473,7 +473,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A2](#a2) | Users & Roles › "Notify": no field is marked required, and an empty form asks to email "0 users" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | Notify users: the "Send Email" window counts a person once per ticked role and leaves out the copy | 🐞 | low | issues (claude), 2026-10-14 — re-verified |
 | [A4](#a4) | Users & Roles › "Notify": an email to roles nobody holds is accepted with "Saved" and sent to no one | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A5](#a5) | Users & Roles › "Notify": "Copy" ticked and then unticked before "Save" still sends the manager a copy | 🐞 | minor | — |
+| [A5](#a5) | Users & Roles › "Notify": "Copy" ticked and then unticked before "Save" still sends the manager a copy | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 
 ### All apps
 
@@ -531,16 +531,17 @@ that copy goes out, which reads like proof that the roles were reached.
 Since: 2020-11-25 (the tab's first version; the silent "Saved" since 2023-03-22) · Basis: probe, 2026-10-04. <sup>f-a4</sup>
 
 <a id="a5"></a>
-**A5 — Users & Roles › "Notify": "Copy" ticked and then unticked before "Save" still sends the manager a copy** · 🐞 · minor.
+**A5 — Users & Roles › "Notify": "Copy" ticked and then unticked before "Save" still sends the manager a copy** · 🐞 · low.
 On Settings › Users & Roles › "Notify", a manager who ticks "Copy"
 ("Send a copy of this email to me at {email}.") and unticks it again
-before "Save" › "Send Email" still gets the email, once, besides the
-members of the ticked roles. The box shows unticked at "Save", and the
-window's total does not count the copy. A box never ticked sends no
-copy.
-The manager gets an email they chose not to receive; the recipients'
-emails are unaffected.
-Since: 2020-11-25 (the tab's first version) · Basis: probe, 2026-10-13. <sup>f-a5</sup>
+before pressing "Save" and then "Send Email" still gets the email, once,
+besides the members of the ticked roles. The box shows unticked at
+"Save", and the recipient count in the "Send Email" confirmation window
+leaves the copy out, so nothing warns the manager. A box never ticked
+sends no copy. The tab is there only for a journal, press or server the
+Site Administrator allows bulk email (Administration › Site Settings ›
+"Site Setup" › "Bulk Emails").
+Since: 2020-11-25 (the tab's first version) · Basis: probe, 2026-10-21. <sup>f-a5</sup>
 
 ---
 
@@ -928,6 +929,7 @@ runs per app) posted
 email; ticked posted `copy=true` and sent both, the window again "1
 users". Every send answered 200 `{"totalBulkJobs":1}` with the "queued"
 line.
+Issue report: [docs/issues/U55-A5-notify-copy-unticked-still-sent.md](../issues/U55-A5-notify-copy-unticked-still-sent.md).
 
 ## Reference — entry points & surfaces
 
