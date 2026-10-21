@@ -58,7 +58,7 @@ what a visitor may open is *Subscriptions & open access control*'s.
 | **Read a published version's page** (the current version, or an older one at its own address) | • anyone, signed in or not (Rules 1, 2) <sup>b</sup> <sup>q1</sup> |
 | **Open an unpublished version's page** | • the Journal Manager, the Site Administrator and a Section Editor assigned to the submission, whose workflow offers "Preview" ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), Rule 6), under the preview notice (Rule 4)<br>• the submission's Author, by typing the page's address; the Author's workflow offers no "Preview"<br>• a Section Editor, a Subscription Manager, or a Copyeditor, Layout Editor, Proofreader or other assistant role of the journal not assigned to the submission, by typing the page's address, once the submission has reached copyediting or production; it opens for them at every earlier stage too, a declined submission included ⚠ [A16](#a16)<br>• a visitor, a Reader and a Reviewer get the "404 Not Found" page (Rule 3) <sup>b</sup> <sup>q3</sup> |
 | **Open or download a galley** | • anyone who may read the page, on a journal whose content is open and on every preprint server (Rules 10, 11)<br>• on a journal with subscriptions, *Subscriptions & open access control* decides <sup>b</sup> |
-| **Show the citation in another format; download a citation** | • anyone who may read the page, while the "Citation Style Language" plugin is on (Rule 15) ⚠ [OJS1](#ojs1) <sup>h</sup> |
+| **Show the citation in another format; download a citation** | • anyone who may read the page, while the "Citation Style Language" plugin is on (Rule 15) <sup>h</sup> |
 | **Configure "How to Cite" and the journal's extra blocks** (the plugins' "Settings" windows, the chart choice) | • whoever opens the Settings pages ([→ settings access](U07-journal-identity-and-about-pages.md#settings-access)), on Settings › Website › "Plugins" and "Appearance" (Rules 16, 17, 19, 20) <sup>i</sup> |
 | **Comment on the article** {OJS} | • described in [Reader comments & moderation](U14-reader-comments-and-moderation.md) |
 
@@ -391,14 +391,11 @@ Top to bottom: <sup>j</sup>
       characters of the version's title, each space written "+", ending
       ".ris" or ".bib". The RIS file's dates carry a stray "%" ⚠ [A8](#a8).
     - 15c. **An article outside a published issue** {OJS}. On an article
-      published with no issue (continuous publication) the other formats
-      and the downloads work for everyone, as in a published issue. On one
-      published at once into an issue not yet published, the primary
-      citation shows. The other formats and the downloads work for the
-      Journal Manager and for a Section Editor or Copyeditor assigned to
-      the article; for a visitor, a Reader, the Author and an unassigned
-      Section Editor a format changes nothing and a download opens the
-      "404 Not Found" page [OJS1](#ojs1). <sup>[f-ojs1](#fn-f-ojs1)</sup>
+      published with no issue (continuous publication), and on one
+      published at once into an issue not yet published, the other
+      formats and the downloads work for everyone who may read the page,
+      as in a published issue; an unpublished article's stay with those
+      who may preview it (Rule 3). <sup>[f-ojs1](#fn-f-ojs1)</sup>
 16. **The "How to Cite" settings.** After "OK" (Fields), every article's
     page follows at once, the place aside (last bullet): <sup>i</sup> <sup>q12</sup>
     - the chosen "Primary Citation Format" is the citation shown first;
@@ -1091,14 +1088,9 @@ Left out of the scenarios above, by reason:
     preprint with a URL Path, its non-PDF galley link downloading the
     file, and its ID addresses with a galley and a version part
     forwarding to the URL Path address with that part kept
-  - the guard for OJS1 (Rule 15c; issue report
-    `docs/issues/U13-OJS1-citation-formats-fail-outside-published-issue.md`):
-    a reader on an article published at once into an unpublished
-    issue, signed out and signed in, gets another citation format and a
-    download {OJS}
-  - an article published with no issue: another citation format and a
-    download, signed out and as a Reader {OJS} (Rule 15c; the part of
-    OJS1 pkp/citationStyleLanguage#169 fixes)
+  - an article published with no issue, and one published at once into
+    an unpublished issue: another citation format and a download,
+    signed out and as a Reader {OJS} (Rule 15c; OJS1, retired)
   - the guard for OPS7 and OPS8 (Rule 21; issue report
     `docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md`): a preprint's
     page and its PDF reader shown in French, with no `##` code in the
@@ -1264,8 +1256,6 @@ Left out of the scenarios above, by reason:
     notices; Rule 4)
   - A13 (the PDF or HTML reader opened from a new version's preview,
     under the outdated notice; Rule 12a)
-  - OJS1 (other citation formats and downloads on an article published
-    into an unpublished issue, by who is signed in {OJS}; Rule 15c)
   - A7 and A8 (the "ABNT" citation and the RIS file's dates; Rules 15,
     15b)
   - A14 (the "ABNT" citation's initials, and a journal's without the
@@ -1372,7 +1362,6 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [A11](#a11) | Keywords on an article, book or preprint page can appear in another order than the editor typed | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A13](#a13) | The PDF or HTML reader opened from a new version's preview calls that version outdated | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A16](#a16) | Section editors and assistants not assigned to a submission open its article or book landing page before acceptance | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
-| [OJS1](#ojs1) | Readers get no other citation format or citation download on an article published into an issue not yet published | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | Publication Facts Label settings always warn "Funding Plugin Not Present", for a plugin that no longer exists | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS3](#ojs3) | In French (Canada) and every other language without its own labels, article pages show no "Publication Facts" panel | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | With "Recommend Articles by Author" on, article pages never show "Most read articles by the same author(s)" | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1399,6 +1388,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [OJS11](#ojs11) | The IEEE citation shown first opens with the number "[1]" | ❓ | minor | — |
 | [OJS13](#ojs13) | "Similar Articles" would leave out an article that shares only some of the keywords | ❓ | latent | — |
 | [OPS4](#ops4) | A preprint server has no HTML or XML reader: those galleys download | ✅ | — | — |
+| [OJS1](#ojs1) | Retired: readers got no other citation format or citation download on an article published outside a published issue | ✅ | retired | citationStyleLanguage#169 2026-10-21 · fixed |
 | [A15](#a15) | Retired: in Japanese, every "Versions" entry reads a raw translation key, with no date or version name | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
@@ -1664,24 +1654,6 @@ copyediting only to staff who are not assigned.
 Since: 2026-02-18 (the earlier-stage preview change) · Basis: probe, 2026-10-05. <sup>[f-a16](#fn-f-a16)</sup>
 
 ### OJS
-
-<a id="ojs1"></a>
-**OJS1 — Readers get no other citation format or citation download on an article published into an issue not yet published** · 🐞 · medium.
-On an article published at once into an issue that is not yet
-published ("Assign To Future Issue and Publish Immediately"), a
-visitor, a signed-in Reader, the article's Author or a Section Editor
-not assigned to the article who uses "How to Cite" gets nothing:
-choosing a format under "More Citation Formats" leaves the citation
-unchanged with no message, and the "BibTeX" and
-"Endnote/Zotero/Mendeley (RIS)" downloads show "404 Not Found". The
-article's page itself is open to all of them. A Journal Manager, and a
-Section Editor or Copyeditor assigned to the article, get the other
-formats and the files. On an article in a published issue, and on one
-published with no issue, all of it works, for everyone.
-It needs the "Citation Style Language" plugin turned on. No released
-version can publish an article outside a published issue, so only
-journals on the coming release meet it.
-Basis: probe, 2026-10-21. <sup>[f-ojs1](#fn-f-ojs1)</sup>
 
 <a id="ojs2"></a>
 **OJS2 — Publication Facts Label settings always warn "Funding Plugin Not Present", for a plugin that no longer exists** · 🐞 · low.
@@ -2024,6 +1996,9 @@ there with a second click.
 Basis: probe, 2026-10-01. <sup>[f-ops9](#fn-f-ops9)</sup>
 
 ### Retired
+
+<a id="ojs1"></a>
+**OJS1 — Readers got no other citation format or citation download on an article published outside a published issue** · ✅ · retired. Fixed by pkp/citationStyleLanguage#169 (pkp/pkp-lib#13595), reviewed before its merge on 2026-10-21 on `main` and `ore`: the article published with no issue and the one published at once into an unpublished issue give every reader the formats and the downloads, an unpublished article's stay refused, and a signed-out refusal is 404, not a server error (Rule 15c). <sup>[f-ojs1](#fn-f-ojs1)</sup>
 
 <a id="a15"></a>
 **A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a15](#fn-f-a15)</sup>
@@ -3230,25 +3205,26 @@ a signed-out visitor's fail with a server error, the log reading
 ($userRoles) must be of type array, null given`. `articleCitation.js`
 swallows the failed fetch. On OPS a posted preprint's formats and
 downloads work for every role. Live-probed 2026-09-25, note q11.
-Restated from the drive at the head 0f1553f of
-pkp/citationStyleLanguage#169 (pkp/pkp-lib#13595), before its merge,
-against its base d830140, on PKP's default dataset (2026-10-21; the
-issue walk `walk.js`, and `checks/sync/citationStyleLanguage-169/`):
-`isUnpublished()` now tests the publication's status, and the issue's
-only when one is passed, and `canUserAccess()` gets `[]` for a
-signed-out visitor. The article published with no issue now gives
-every role the formats and the file; the one published into the
-unpublished "Vol. 2 No. 1 (2015)" still answers 404 to a visitor, a
-Reader, the Author and an unassigned Section Editor (signed out no
-longer a server error), while the same
-download address with `issueId` left out answers 200, so the issue
-test turns away only the plugin's own links. On OMP and OPS a
-signed-out request for an unpublished item's citation answers 404
-instead of the server error. Dropping the issue test (OJS's
-`ArticleHandler` gates the page on the publication's status alone,
-and unpublishing an issue puts its articles back to Scheduled) gave
-article 6 the formats and the file for every role, the unpublished
-submission 9 staying refused (`fix-on-head.diff` there).
+Fixed by pkp/citationStyleLanguage#169 (pkp/pkp-lib#13595), driven
+before its merge on PKP's default dataset (2026-10-21; the issue walk
+`walk.js` and its neighbour, and `checks/sync/citationStyleLanguage-169/`).
+Round 1, at the head 0f1553f: `isUnpublished()` still tested the issue
+when one was passed, so the article published with no issue was fixed
+but the one in the unpublished "Vol. 2 No. 1 (2015)" still answered 404
+to readers (its download address without `issueId` answered 200);
+`fix-on-head.diff`, the issue test dropped, fixed it in a trial. Round 2,
+at the head c46ac76 (that change), with pkp/ojs#5968 on `main`
+(2f1bf897d4 on dde4cc70f4) and pkp/ojs#5967 on `ore` (c91e86bd8b on
+4c7d2b6090) pointing at it: at both bases articles 5 and 6 answer a
+signed-out visitor with a server error and `ccorino`, the Author and
+`minoue` with 404; at both heads all seven roles get "MLA" and the
+".bib" file, article 17 and the unpublished submission 9 (refused to
+its Author and signed out, previewed by `rvaca`) unchanged. On OMP and
+OPS a signed-out request for an unpublished item's citation answers 404
+instead of the server error; the Reader's 404 and the manager's 200 are
+unchanged. OJS's `ArticleHandler` gates the page on the publication's
+status alone, and unpublishing an issue puts its articles back to
+Scheduled, so the citation now follows the page.
 Issue report: [pkp-e2e#205](https://github.com/jardakotesovec/pkp-e2e/issues/205) ([docs/issues/U13-OJS1-citation-formats-fail-outside-published-issue.md](../issues/U13-OJS1-citation-formats-fail-outside-published-issue.md)).
 
 <a id="fn-f-ojs2"></a>
