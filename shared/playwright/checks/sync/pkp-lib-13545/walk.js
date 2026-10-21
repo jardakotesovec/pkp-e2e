@@ -11,10 +11,18 @@
 //      …/bodyText on the published version; its galleys, the article page a signed-out reader sees
 //      and the bytes of the PDF the reader downloads
 //   D. the author of submission 17: the same POST, refused
+// Round 2 adds (the heads now carry the Body Text's "Export" menu):
+//   E. a Production submission with no galleys, its "Body Text" page: text typed, a figure inserted, "Save";
+//      "Export" › "Export to HTML" twice (the HTML file, its figure copied beside it, no second copy), the
+//      editor's preview of the HTML galley (the figure loads); "Export" › "Preview: PDF" › "Create PDF"
+//      (Vivliostyle in the browser): the PDF galley and its bytes; the "Galleys" page
+//   F. the image rules of POST …/bodyText: an <img> naming another submission's file (refused), a file:
+//      address (refused), an outside https address (kept); files rows before and after a refusal
 // Run (side.sh does it):
 //   PROBE_FEATURE=pr-13543 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 // Facts: .reports/pr-13543/pr/walk-<side>-ojs.json, screenshots beside them.
 const path = require('path');
+const fs = require('fs');
 const {forEachApp, launch, signIn, signOut, record, sql, outDir} = require('../../../probe');
 
 const T = 30_000;
@@ -52,7 +60,7 @@ forEachApp(async (app) => {
         const r = await page.request.fetch(url, {method: 'POST', headers: {'X-Csrf-Token': csrfToken, 'Content-Type': contentType}, data: body, failOnStatusCode: false});
         let json = null;
         try { json = await r.json(); } catch { json = flat(await r.text(), 160); }
-        const pick = json && typeof json === 'object' ? Object.fromEntries(['id', 'label', 'locale', 'isApproved', 'generatedFrom', 'generatedFromLabel', 'revisionLabel', 'error'].filter((k) => k in json).map((k) => [k, json[k]])) : json;
+        const pick = json && typeof json === 'object' ? Object.fromEntries(['id', 'label', 'locale', 'isApproved', 'generatedFrom', 'generatedFromLabel', 'revisionLabel', 'revisionCount', 'error'].filter((k) => k in json).map((k) => [k, json[k]])) : json;
         return {status: r.status(), body: pick};
     };
     const galleyShot = async (name, sub) => {
@@ -130,6 +138,108 @@ forEachApp(async (app) => {
         fact('C2 POST html on the published version', await post(api(17), HTML(4), 'text/html; charset=UTF-8'));
         fact('C2 galleys', galleys(pub(17)));
         fact('C2 reader', await reader('C2-reader-17'));
+
+        // E (round 2): the Body Text's "Export" menu
+        await home();
+        const eSub = Number(String(sql(app, `select s.submission_id from submissions s where s.stage_id = 5 and s.status = 1
+            and s.submission_id not in (5, 9, 17) and not exists (select 1 from publication_galleys g where g.publication_id = s.current_publication_id)
+            order by s.submission_id limit 1`)).trim());
+        fact('E0 submission', {submission: eSub, publication: pub(eSub)});
+        {
+            const {BodyTextPage} = require('../../../pages/JatsBodyTextPages.js');
+            const frame = new WorkflowPage(page, app.contextPath);
+            const body = new BodyTextPage(page, frame);
+            await body.open(eSub, pub(eSub));
+            const exportButton = page.getByRole('button', {name: 'Export', exact: true});
+            fact('E0 "Export" buttons on the Body Text page', await exportButton.count());
+            if (await exportButton.count()) {
+                await body.typeAtEnd('pr13543 heading line');
+                await page.keyboard.press('Enter');
+                await page.keyboard.type('A paragraph typed in the Body Text for round 2.');
+                const fig = await body.insertFigure(path.join(FILES, 'figure.png'));
+                fact('E1 figure upload', fig.status());
+                await expect(body.figures()).toHaveCount(1, {timeout: T});
+                fact('E1 save', (await body.save()).status());
+                await exportButton.click();
+                const items = await page.getByRole('menuitem').allInnerTexts();
+                fact('E2 "Export" menu', items.map((i) => flat(i, 60)));
+                const exportHtml = async (label) => {
+                    if (!(await page.getByRole('menuitem').count())) await exportButton.click();
+                    const sent = page.waitForResponse((r) => /\/bodyText$/.test(r.url()) && r.request().method() === 'POST', {timeout: T});
+                    await page.getByRole('menuitem', {name: 'Export to HTML'}).click();
+                    const r = await sent;
+                    let j = null; try { j = await r.json(); } catch {}
+                    await page.waitForTimeout(1000);
+                    const status = await page.getByRole('status').allInnerTexts();
+                    fact(`${label} Export to HTML`, {status: r.status(), revisionCount: j && j.revisionCount, generatedFrom: j && j.generatedFrom, id: j && j.id, statusLine: status.map((x) => flat(x, 80))});
+                    return j;
+                };
+                const h1 = await exportHtml('E3');
+                fact('E3 galleys', galleys(pub(eSub)));
+                const configFile = path.isAbsolute(app.configFile) ? app.configFile : path.resolve(__dirname, '../../../../..', app.configFile);
+                const filesDir = (fs.readFileSync(configFile, 'utf8').match(/^files_dir\s*=\s*"?([^"\n]+?)"?\s*$/m) || [])[1];
+                const htmlFile = () => {
+                    const rel = String(sql(app, `select f.path from publication_galleys g join submission_files sf on sf.submission_file_id = g.submission_file_id join files f on f.file_id = sf.file_id where g.publication_id = ${pub(eSub)} and g.label = 'HTML'`)).trim();
+                    return rel ? fs.readFileSync(path.join(filesDir, rel), 'utf8') : null;
+                };
+                const deps = () => String(sql(app, `select coalesce(string_agg(d.submission_file_id || ' ' || f.mimetype || ' ' || coalesce((select setting_value from submission_file_settings s where s.submission_file_id = d.submission_file_id and s.setting_name = 'name' limit 1),'-'), ' | '), '(none)')
+                    from publication_galleys g join submission_files d on d.assoc_type = 515 and d.assoc_id = g.submission_file_id and d.file_stage = 17
+                    join files f on f.file_id = d.file_id where g.publication_id = ${pub(eSub)} and g.label = 'HTML'`)).trim();
+                const html1 = htmlFile();
+                fact('E3 HTML file', {size: html1 && html1.length, imgs: html1 && [...html1.matchAll(/<img[^>]*>/g)].map((m) => flat(m[0], 200)), figures: html1 && [...html1.matchAll(/<figure[^>]*>/g)].map((m) => flat(m[0], 200)), head: flat(html1, 300)});
+                fact('E3 dependent files of the HTML', deps());
+                await exportHtml('E4');
+                fact('E4 galleys', galleys(pub(eSub)));
+                fact('E4 dependent files of the HTML', deps());
+                // the editor's preview of the HTML galley: the figure loads
+                if (h1 && h1.id) {
+                    await page.goto(app.url(`/index.php/${app.contextPath}/article/view/${eSub}/${h1.id}`));
+                    const frameEl = page.frameLocator('iframe').first();
+                    await page.waitForTimeout(3000);
+                    const imgs = await frameEl.locator('img').evaluateAll((els) => els.map((e) => ({src: e.getAttribute('src'), loaded: e.complete && e.naturalWidth > 0}))).catch((e) => String(e.message).slice(0, 200));
+                    fact('E5 HTML galley view, images', imgs);
+                    await page.screenshot({path: path.join(outDir(), `${side}-E5-html-galley-view.png`)});
+                    await body.open(eSub, pub(eSub));
+                }
+                // PDF through Vivliostyle
+                await exportButton.click();
+                await page.getByRole('menuitem', {name: 'Preview: PDF'}).click();
+                const preview = page.frameLocator('iframe.body-text-pdf-preview');
+                await expect(preview.locator('#generate-pdf')).toBeVisible({timeout: T});
+                fact('E6 PDF preview', {header: flat(await preview.locator('.preview-header').innerText(), 120), button: flat(await preview.locator('#generate-pdf').innerText(), 40), imgs: await preview.locator('#html-preview img').count()});
+                await page.locator('iframe.body-text-pdf-preview').screenshot({path: path.join(outDir(), `${side}-E6-pdf-preview.png`)});
+                const sentPdf = page.waitForResponse((r) => /\/bodyText\/pdf$/.test(r.url()) && r.request().method() === 'POST', {timeout: 180_000});
+                const t0 = Date.now();
+                await preview.locator('#generate-pdf').click();
+                const rp = await sentPdf.catch((e) => null);
+                await expect.poll(async () => flat(await preview.locator('#pdf-status').innerText()), {timeout: 60_000}).toMatch(/saved|Unable/);
+                fact('E7 Create PDF', {status: rp && rp.status(), seconds: Math.round((Date.now() - t0) / 1000), statusLine: flat(await preview.locator('#pdf-status').innerText(), 100), viewerShown: await preview.locator('#pdf-viewer').isVisible()});
+                fact('E7 galleys', galleys(pub(eSub)));
+                const pdfRel = String(sql(app, `select f.path from publication_galleys g join submission_files sf on sf.submission_file_id = g.submission_file_id join files f on f.file_id = sf.file_id where g.publication_id = ${pub(eSub)} and g.label = 'PDF'`)).trim();
+                if (pdfRel) {
+                    const b = fs.readFileSync(path.join(filesDir, pdfRel));
+                    fs.writeFileSync(path.join(outDir(), `${side}-E7-generated.pdf`), b);
+                    const txt = b.toString('latin1');
+                    fact('E7 PDF file', {size: b.length, magic: txt.slice(0, 8), pages: (txt.match(/\/Type\s*\/Page[^s]/g) || []).length, images: (txt.match(/\/Subtype\s*\/Image/g) || []).length});
+                }
+                await page.locator('iframe.body-text-pdf-preview').screenshot({path: path.join(outDir(), `${side}-E7-pdf-created.png`)});
+                await preview.locator('#back-to-editor').click();
+                await expect(exportButton).toBeVisible({timeout: T});
+                fact('E8 Galleys page', await galleyShot('E8-galleys', eSub));
+            }
+        }
+        // F: image rules of POST …/bodyText (another submission's file, a file: address, an outside address)
+        await home();
+        {
+            const other = Number(String(sql(app, `select sf.submission_file_id from submission_files sf where sf.submission_id = 17 and sf.file_stage = 10 order by 1 limit 1`)).trim());
+            const otherUrl = app.url(`/index.php/${app.contextPath}/$$$call$$$/api/file/file-api/download-file?submissionFileId=${other}&submissionId=17&stageId=5`);
+            const files0 = Number(String(sql(app, 'select count(*) from files')).trim());
+            fact('F1 POST html, <img> of submission 17\'s file', await post(api(5), `<p>x</p><img src="${otherUrl}">`, 'text/html; charset=UTF-8'));
+            fact('F2 POST html, <img src="file:///etc/passwd">', await post(api(5), '<p>x</p><img src="file:///etc/passwd">', 'text/html; charset=UTF-8'));
+            fact('F3 files rows before/after the refusals', {before: files0, after: Number(String(sql(app, 'select count(*) from files')).trim())});
+            fact('F4 POST html, <img> of an outside https address', await post(api(5), '<p>x</p><img src="https://example.org/a.png">', 'text/html; charset=UTF-8'));
+            fact('F4 galleys of 5', galleys(pub(5)));
+        }
         // D
         const author = String(sql(app, `select u.username from stage_assignments sa join user_groups ug on ug.user_group_id = sa.user_group_id join users u on u.user_id = sa.user_id where sa.submission_id = 17 and ug.role_id = 65536 limit 1`)).trim();
         await signOut(page, {origin: app.url('')});
