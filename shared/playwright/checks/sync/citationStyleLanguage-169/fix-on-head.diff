@@ -1,0 +1,12 @@
+--- a/plugins/generic/citationStyleLanguage/pages/CitationStyleLanguageHandler.php
++++ b/plugins/generic/citationStyleLanguage/pages/CitationStyleLanguageHandler.php
+@@ -111,8 +111,7 @@
+         $applicationName = Application::get()->getName();
+ 
+         if ($applicationName === 'ojs2') {
+-            return $publication->getData('status') != PKPPublication::STATUS_PUBLISHED
+-                || ($issue && !$issue->getPublished());
++            return $publication->getData('status') != PKPPublication::STATUS_PUBLISHED;
+         }
+ 
+         return $submission->getData('status') != PKPSubmission::STATUS_PUBLISHED;
