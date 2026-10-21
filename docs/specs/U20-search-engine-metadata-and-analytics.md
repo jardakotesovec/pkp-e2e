@@ -1039,7 +1039,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP3](#omp3) | A press's chapter pages tell indexes they are books, and whole-book file pages that they are chapters | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP4](#omp4) | After "Create New Version", a press's sitemap lists the book's chapter pages at addresses that answer "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OMP5](#omp5) | A press's book file view page names the book's page as its address in Dublin Core tags | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [OMP7](#omp7) | A press's file view page never gives indexes the URN assigned to the file | 🐞 | minor | — |
+| [OMP7](#omp7) | A press's book file view page never names the URN assigned to the file in its Dublin Core tags | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | A preprint with a "URL Path" announces an HTML full-text address that ends on "404 Not Found" | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
 | [A3](#a3) | The site's own "Google Analytics Plugin" box can be ticked but changes nothing | ❓ | minor | — |
 | [A4](#a4) | The three apps' sitemaps list different kinds of listing pages: only a press lists its categories, and a press omits its Search page | ❓ | minor | — |
@@ -1264,14 +1264,17 @@ every new press.
 Basis: probe, 2026-10-03. <sup>f-omp5</sup>
 
 <a id="omp7"></a>
-**OMP7 — A press's file view page never gives indexes the URN assigned to the file** · 🐞 · minor.
-A press whose URN plugin has "Files" ticked assigns a book file its URN
-on the file's window, "Identifiers" tab. It expects the file's view page to
-name that URN in a "DC.Identifier.URN" tag, as the book's and a
-chapter's pages name theirs. The view page carries no URN tag at all,
-for a file of the whole book and for a chapter's file alike. Readers see
-nothing wrong, and the press is not told.
-Basis: probe, 2026-10-13. <sup>f-omp7</sup>
+**OMP7 — A press's book file view page never names the URN assigned to the file in its Dublin Core tags** · 🐞 · low.
+A press can give each book file its own URN: with the URN plugin's
+"Files" option ticked, an editor assigns it on the "Identifiers" tab of
+the file's edit window. The press expects the file's view page (the
+public page that opens when a reader clicks a PDF or HTML file's link on
+the book's or a chapter's page) to name that URN in a
+"DC.Identifier.URN" tag, as the book's and a chapter's pages name
+theirs. The view page carries no URN tag at all, for a file of the whole
+book and for a chapter's file alike. Readers see nothing wrong, and the
+press is not told.
+Basis: probe, 2026-10-21. <sup>f-omp7</sup>
 
 ### OPS
 
@@ -1476,6 +1479,7 @@ Issue report: [pkp-e2e#282](https://github.com/jardakotesovec/pkp-e2e/issues/282
 
 <a id="fn-f-omp7"></a>
 **f-omp7** — Note i: `DublinCoreMetaPlugin::monographFileView()` writes the pub-ID tags in a loop over the `pubIdPlugins` template variable, which `CatalogBookHandler::download()` (the view page's path) never assigns (only `CatalogBookHandler::book()` does), so the loop never runs. Its condition, `$submissionFile->getStoredPubId(…) ?? $chapter ? $chapter->getDoi() : $publication->getStoredPubId(…)`, groups as `($submissionFile->getStoredPubId(…) ?? $chapter) ? … : …`: assigning the variable alone would make the view page of a whole-book file with a stored URN fail with a server error (`getDoi()` on a null chapter), and would give a chapter's file its chapter's DOI under "DC.Identifier.URN"; a fix needs both. The same code is on `stable-3_5_0`. Live-probed 2026-10-13, OMP `main` (scratch press, two runs) and `stable-3_5_0` (PKP's default test dataset, book 14, two runs), with the URN plugin on for "Chapters", "Publication Formats" and "Files" and URNs assigned to chapter 1, a chapter's file and a whole-book file: chapter 1's page carried "DC.Identifier.URN" with the chapter's URN, and every file's view page answered 200 with no "DC.Identifier.URN" tag. Kept check `shared/playwright/checks/U20/H13D/h13d.js`.
+Issue report: [docs/issues/U20-OMP7-book-file-page-urn-missing.md](../issues/U20-OMP7-book-file-page-urn-missing.md).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Note h: OPS `citation_fulltext_html_url` names `preprint/view/{bestId}/{galleyBestId}`; with a "URL Path" set, the redirect to the download address drops the galley. Live-probed 2026-09-26: note q14.

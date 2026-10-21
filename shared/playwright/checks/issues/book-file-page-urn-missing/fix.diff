@@ -1,0 +1,22 @@
+--- a/pages/catalog/CatalogBookHandler.php
++++ b/pages/catalog/CatalogBookHandler.php
+@@ -485,6 +485,7 @@
+             'publicationFormat' => $publicationFormat,
+             'submissionFile' => $submissionFile,
+             'chapter' => $chapter,
++            'pubIdPlugins' => PluginRegistry::loadCategory('pubIds', true),
+             'downloadUrl' => $dispatcher->url($request, PKPApplication::ROUTE_PAGE, null, null, 'download', $urlPath, ['inline' => true]),
+         ]);
+ 
+--- a/plugins/generic/dublinCoreMeta/DublinCoreMetaPlugin.php
++++ b/plugins/generic/dublinCoreMeta/DublinCoreMetaPlugin.php
+@@ -290,7 +290,8 @@
+         }
+ 
+         foreach ((array) $templateMgr->getTemplateVars('pubIdPlugins') as $pubIdPlugin) {
+-            if ($pubId = $submissionFile->getStoredPubId($pubIdPlugin->getPubIdType()) ?? $chapter ? $chapter->getDoi() : $publication->getStoredPubId($pubIdPlugin->getPubIdType())) {
++            $pubIdType = $pubIdPlugin->getPubIdType();
++            if ($pubId = $submissionFile->getStoredPubId($pubIdType) ?? ($chapter ? $chapter->getStoredPubId($pubIdType) : $publication->getStoredPubId($pubIdType))) {
+                 $templateMgr->addHeader('dublinCorePubId' . $pubIdPlugin->getPubIdDisplayType(), '<meta name="DC.Identifier.' . htmlspecialchars($pubIdPlugin->getPubIdDisplayType()) . '" content="' . htmlspecialchars($pubId) . '"/>');
+             }
+         }
