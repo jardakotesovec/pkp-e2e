@@ -1,0 +1,68 @@
+--- a/lib/pkp/classes/observers/listeners/ApplyDoneWorkflowStage.php
++++ b/lib/pkp/classes/observers/listeners/ApplyDoneWorkflowStage.php
+@@ -20,6 +20,7 @@
+ use APP\decision\Decision;
+ use APP\facades\Repo;
+ use APP\publication\enums\VersionStage;
++use APP\submission\Submission;
+ use Illuminate\Events\Dispatcher;
+ use PKP\observers\events\PublicationPublished;
+ use PKP\observers\events\PublicationUnpublished;
+@@ -37,8 +38,16 @@
+ 
+     public function handle(PublicationPublished|PublicationUnpublished $event): void
+     {
+-        $submission = $event->submission;
++        $this->apply($event->submission);
++    }
+ 
++    /**
++     * Move a submission into Done when it has a published final version, or back
++     * to the workflow when it has none. Code that stores published publications
++     * without publishing them (an import) calls this to apply the same rule.
++     */
++    public function apply(Submission $submission): void
++    {
+         $publishedVoRCount = Repo::publication()->getCollector()
+             ->filterBySubmissionIds([$submission->getId()])
+             ->filterByVersionStage(VersionStage::finalVersionStage()->value)
+--- a/lib/pkp/plugins/importexport/native/filter/NativeXmlSubmissionFilter.php
++++ b/lib/pkp/plugins/importexport/native/filter/NativeXmlSubmissionFilter.php
+@@ -24,6 +24,7 @@
+ use PKP\filter\Filter;
+ use PKP\filter\FilterGroup;
+ use PKP\observers\events\BatchMetadataChanged;
++use PKP\observers\listeners\ApplyDoneWorkflowStage;
+ use PKP\submission\reviewRound\ReviewRound;
+ use PKP\workflow\WorkflowStageDAO;
+ 
+@@ -103,6 +104,11 @@
+             }
+         }
+ 
++        // A published submission belongs in Done, where publishing it moves it. The file
++        // cannot say so (its stage is "production", see SubmissionNativeXmlFilter) and
++        // the publications are stored without publishing them, so apply the rule here.
++        (new ApplyDoneWorkflowStage())->apply(Repo::submission()->get($submission->getId()));
++
+         $submission = Repo::submission()->get($submission->getId());
+ 
+         $deployment->addImportedRootEntity(Application::ASSOC_TYPE_SUBMISSION, $submission);
+--- a/lib/pkp/plugins/importexport/native/filter/NativeXmlPKPPublicationFilter.php
++++ b/lib/pkp/plugins/importexport/native/filter/NativeXmlPKPPublicationFilter.php
+@@ -87,6 +87,15 @@
+             ]);
+ 
+             $publication->setVersion($versionStageInfo);
++        } elseif ((int) $node->getAttribute('status') === Publication::STATUS_PUBLISHED) {
++            // A published publication always has a version: publish() and the upgrade
++            // (I4860_MigratePublicationVersion) give it the default one, so do the same
++            // for a file that names none
++            $publication->setVersion(Repo::submission()->getNextAvailableVersion(
++                Repo::submission()->get($submission->getId()),
++                Publication::DEFAULT_VERSION_STAGE,
++                false
++            ));
+         }
+ 
+         if ($sourcePublicationId = $node->getAttribute('source_publication_id')) {

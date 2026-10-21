@@ -1487,7 +1487,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A23](#a23) | A users file first imported on a 3.5.0 release and imported again after the update gives each ended role a second time | 🐞 | minor | — |
 | [A24](#a24) | Paging the export list, the dashboard or a preprint server's archive repeats some submissions and skips others | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A25](#a25) | Native XML import: a file over the upload limit is refused with "File size error." and no limit named | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
-| [A26](#a26) | On the development line, a published submission imported with the Native XML Plugin is on neither the Dashboard's "Published" nor "Active submissions" | 🐞 | minor | — |
+| [A26](#a26) | A published article, book or preprint imported with the Native XML Plugin is missing from the Dashboard's "Published" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OJS1](#ojs1) | DOAJ export list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | With "DOAJ Plugin" switched off, the Plugins list still shows its export tool as on | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Where NLM's site cannot be reached, every PubMed export fails with a "Validation errors:" page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1790,18 +1790,16 @@ wizard's file list do name the file's size and the limit.
 Basis: probe, 2026-10-21. <sup>f-a25</sup>
 
 <a id="a26"></a>
-**A26 — An imported published submission is on neither of the Dashboard's lists** · 🐞 · minor.
-A published article, book or preprint brought in with the Native XML
-Plugin (Rule 10, from the "Import" tab or the command line) should be
-listed under the Dashboard's "Published", as its source is. Instead
-the copy is published and its public page opens, but neither
-"Published" nor "Active submissions" lists it. Only the Dashboard's
-search box finds it, by its number, its row reading "Published"; its
-workflow screen reads "Published" too. Nothing is lost, but an editor
-who looks on the lists for content just imported does not find it. Every published submission imported this way is
-left off. Only the development line has the fault; the 3.5 release
-lists the copy under "Published".
-Basis: probe, 2026-10-19. <sup>f-a26</sup>
+**A26 — A published article, book or preprint imported with the Native XML Plugin is missing from the Dashboard's "Published"** · 🐞 · low.
+A manager imports a published article, book or preprint with the Native
+XML Plugin (Tools › "Import/Export", or the plugin's command line on the
+server). The copy is published and its public page opens, but no
+Dashboard list shows it: neither "Published", where the item sat on the
+install it came from, nor "Active submissions", nor any other view. The
+import leaves the copy in the Production stage with a published status,
+and "Published" now lists only the Done stage. Every published item
+imported this way is left off, for every Dashboard user.
+Basis: probe, 2026-10-21. <sup>f-a26</sup>
 
 ### OJS
 
@@ -3604,6 +3602,7 @@ screen, opened by address, read "Published". `stable-3_5_0` (lib/pkp
 (4)" (OJS, OMP) and "Published (19)" (OPS), the copies included. No
 upstream issue found. Kept script:
 `shared/playwright/checks/U63/H19/h19.js`.
+Issue report: [docs/issues/U63-A26-imported-published-submission-off-dashboard-lists.md](../issues/U63-A26-imported-published-submission-off-dashboard-lists.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`
