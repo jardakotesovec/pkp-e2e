@@ -2609,7 +2609,7 @@ log. Mechanism: OPS `locale/cs/locale.po` `about.aboutOPSSite` and
 (2023-05-02). Read in the code: stable-3_4_0 carries the same text and
 template; OPS stable-3_3_0 ships no Czech interface (only plugin
 `cs_CZ` files).
-Issue report: [docs/issues/U07-A14-software-page-version-placeholder-raw.md](../issues/U07-A14-software-page-version-placeholder-raw.md).
+Issue report: [pkp-e2e#1048](https://github.com/jardakotesovec/pkp-e2e/issues/1048) ([docs/issues/U07-A14-software-page-version-placeholder-raw.md](../issues/U07-A14-software-page-version-placeholder-raw.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `locale/en/locale.po` `manager.setup` "Setup" (OJS
