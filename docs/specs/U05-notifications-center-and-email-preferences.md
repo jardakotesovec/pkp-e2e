@@ -2207,7 +2207,7 @@ to the count. Not traced: `dashboardMenuItem.tpl`, the
 default theme's `head.less` and `getDisplayStatus()`'s title and role
 code are unchanged from `stable-3_5_0`, which therefore likely behaves
 the same (code read, not driven); a 3.5 drive settles it.
-Issue report: [docs/issues/U05-A15-unread-count-gone-with-french-forms.md](../issues/U05-A15-unread-count-gone-with-french-forms.md).
+Issue report: [pkp-e2e#1034](https://github.com/jardakotesovec/pkp-e2e/issues/1034) ([docs/issues/U05-A15-unread-count-gone-with-french-forms.md](../issues/U05-A15-unread-count-gone-with-french-forms.md)).
 
 <a id="fn-a16"></a>
 **f-a16** — The discussion footer's "#{number} {authors}" link

@@ -448,6 +448,18 @@ async function resetDataset(name, n, {log = console.log} = {}) {
     for (const dir of ['site', PUBLIC_CONTEXT_DIRS[fleet.name]]) {
         fs.mkdirSync(path.join(fleet.root, fleet.publicDir, dir), {recursive: true});
     }
+    // and each context's own folder, which adding a context creates, or a
+    // cover or category picture upload into it fails (claim check cc21b,
+    // 2026-10-21). The context table differs per app and line (OPS 3.3 keeps
+    // `journals`), so the first one present is read.
+    const contextTable = ['journals', 'presses', 'servers']
+        .map((table) => [table, {journals: 'journal_id', presses: 'press_id', servers: 'server_id'}[table]])
+        .find(([table]) => query(fleet, `SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '${table}'`).length);
+    if (contextTable) {
+        for (const [id] of query(fleet, `SELECT ${contextTable[1]} FROM ${contextTable[0]}`)) {
+            fs.mkdirSync(path.join(fleet.root, fleet.publicDir, PUBLIC_CONTEXT_DIRS[fleet.name], id), {recursive: true});
+        }
+    }
     log(`dataset: files → ${path.relative(REPO_ROOT, fleet.filesDir)}, public → ${path.relative(REPO_ROOT, path.join(fleet.root, fleet.publicDir))}`);
 
     // Caches: this fleet's own Laravel store, the stylesheets compiled for its

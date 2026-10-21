@@ -3578,7 +3578,7 @@ on an install whose requests end at 120 s. The same box serves the
 Users XML Plugin's "File" (Rule 22) and the other screens' "Upload
 File" boxes: read in the code, driven only here. Kept script:
 `shared/playwright/checks/U63/I09/native.js`.
-Issue report: [docs/issues/U63-A25-import-over-upload-limit-file-size-error.md](../issues/U63-A25-import-over-upload-limit-file-size-error.md).
+Issue report: [pkp-e2e#1035](https://github.com/jardakotesovec/pkp-e2e/issues/1035) ([docs/issues/U63-A25-import-over-upload-limit-file-size-error.md](../issues/U63-A25-import-over-upload-limit-file-size-error.md)).
 
 <a id="fn-f-a26"></a>
 **f-a26** — On export, `SubmissionNativeXmlFilter` (lib/pkp
