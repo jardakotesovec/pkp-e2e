@@ -237,8 +237,10 @@ typed. Nothing asks first. The one exception is an author row added in
        space, without the comma, full stop, semicolon, colon or closing
        bracket that follows it in the sentence: "(doi:10.1234/bravo)."
        gives "10.1234/bravo", and "hdl:10419/12345. Accessed 2020-01-01."
-       gives "10419/12345". A web address is kept as written, with
-       "http://" and a closing "/" when it has them; <sup>f-a12</sup>
+       gives "10419/12345". A web address keeps "http://" and a closing
+       "/" when it has them, but ends at an apostrophe in it:
+       "https://example.org/kilo's-page" gives "https://example.org/kilo"
+       ⚠ [A29](#a29); <sup>f-a12</sup> <sup>q26</sup>
     2. a reference with no DOI is looked up by its text in Crossref, which
        may supply the DOI and the bibliographic details;
     3. a reference with a DOI is looked up in OpenAlex, which may supply
@@ -459,16 +461,27 @@ typed. Nothing asks first. The one exception is an author row added in
     <sup>q22</sup>
 27. **What readers see.** On a published item's landing page, a
     **"References"** block lists the version's references, one paragraph
-    each, in list order, with any web address in a reference's text turned
-    into a link that opens in a new tab. The block appears whenever the
-    version has references, even after the journal switched the References
-    setting off. It shows each reference's own text, never the structured
+    each, in list order, with each web address in a reference's text
+    shown as written and turned into a link that opens in a new tab
+    (Rule 27a). The block appears whenever the version has references,
+    even after the journal switched the References setting off. It shows each reference's own text, never the structured
     details. Readers never see data citations on the landing page, though
     the editors' table promises they "appear alongside other references in
     the publication" ⚠ [A11](#a11). The page of a version with no
     references has no "References" block: no heading and no empty
     section. The page itself belongs to *Article landing page & reading*
     (on a press, *Monograph landing page*). <sup>p</sup> <sup>q23</sup>
+    - 27a. **Where an address's link leads.** A full stop or a comma
+      right after an address stays out of its link. Otherwise the link
+      leads to the address as shown, with two exceptions: <sup>q26</sup>
+      - an address with an apostrophe links only to its part before the
+        apostrophe: "https://example.org/kilo's-page" shows whole, but
+        its link opens "https://example.org/kilo" ([A29](#a29));
+        <sup>q26</sup>
+      - a closing bracket right after an address is taken into its link:
+        "(https://doi.org/10.1234/f8)." links to
+        "https://doi.org/10.1234/f8)", the bracket included
+        ⚠ [A30](#a30). <sup>p</sup> <sup>q26</sup>
 
 ## Side effects
 
@@ -986,6 +999,9 @@ Left out of the scenarios above, by reason:
     "Please correct {n} errors." and, for a screen reader, one "Go to
     {field}: {message}" button per refused field
     ([Fields & validation](#fields), the data citation panel)
+  - a reference whose web address is followed by a full stop, read on
+    the published page: the full stop outside the address's link, which
+    opens the address shown (Rule 27a)
 - **Rarely met**:
   - "Data Citations" at "Do not request data citation metadata from the
     author during submission.": the "Data" page without the wizard's
@@ -1042,6 +1058,10 @@ Left out of the scenarios above, by reason:
     lookup was under way; Rule 14a)
   - A27 (the foot's "Jump to next error" and "Go to" buttons leaving
     the cursor on the pressed button; [Fields & validation](#fields))
+  - A29 (an address with an apostrophe linked, and picked out, only up
+    to the apostrophe; Rules 11, 27a)
+  - A30 (a closing bracket taken into an address's link on the published
+    page; Rule 27a)
 - **No seed**:
   - a reference structured by the services: its identifier links,
     title, details and the "Wikidata" and "OpenAlex" badges (Rules 11,
@@ -1093,6 +1113,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A19](#a19) | The ordering arrows on the Data Citations table have no names for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A24](#a24) | Screen reader users hear a form field called invalid, but not the error message shown under it | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A25](#a25) | A DOI an editor corrects in "Edit citation" before the lookup starts is replaced by the reference text's DOI | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
+| [A29](#a29) | A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page | 🐞 | minor | — |
+| [A30](#a30) | On the published page, a web address in brackets in a reference links with the closing bracket included | 🐞 | minor | — |
 | [A11](#a11) | Readers never see data citations, though the editors' table says they appear alongside the references | ❓ | user-visible | — |
 | [A17](#a17) | "Edit" accepts a repeated reference that "Add" drops | ❓ | minor | — |
 | [A26](#a26) | Whether a lookup that finishes after an editor filled a reference in by hand replaces what was typed has not been seen | ❓ | user-visible | — |
@@ -1367,6 +1389,31 @@ question and its lean are
 *[Institutions](U66-institutions.md#a11)*'s A11, where the same was
 seen on "Add Institution".
 Basis: probe, 2026-10-07. <sup>f-a27</sup>
+
+<a id="a29"></a>
+**A29 — A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page** · 🐞 · minor.
+A reader who presses the address "https://example.org/kilo's-page" in
+a published item's "References" block expects that page. The text shows
+the whole address, but the link opens "https://example.org/kilo", the
+part before the apostrophe. Released versions link the whole address,
+so this is a regression. Editors meet the same cut on the "References"
+page: the address picked out of the reference's text ends at the
+apostrophe (Rule 11), so with metadata lookup on the row links
+"https://example.org/kilo" and the "URL" box of "Edit citation" holds
+it. The reference's text itself is stored and shown whole.
+Since: 2025-10-01 (about a year), on the published page · Basis: probe, 2026-10-21. <sup>f-a29</sup>
+
+<a id="a30"></a>
+**A30 — On the published page, a web address in brackets in a reference links with the closing bracket included** · 🐞 · minor.
+A reference that gives its address in brackets, such as "In brackets
+(https://doi.org/10.1234/f8).", shows on the published page as written,
+but the link covers the closing bracket and opens
+"https://doi.org/10.1234/f8)", an address with a bracket at its end
+that is not the one meant. The full stop after the bracket stays out of
+the link. With metadata lookup on, the same reference's row on the
+"References" page links the DOI correctly. Released versions do the
+same, so this is not a regression.
+Basis: probe, 2026-10-21. <sup>f-a30</sup>
 
 
 ### Retired
@@ -2084,8 +2131,12 @@ funder added on 1.1's "Funding" page also listed on 1.0's.
 `{if count($parsedCitations) || (string)
 $publication->getData('citationsRaw')}` → section `item references`, heading
 `submission.citations` "References", each citation as
-`getRawCitationWithLinks()` (http, https and ftp addresses wrapped in a link
-with `target='_blank'`) plus the `Templates::Article|Preprint::Details::Reference`
+`getRawCitationWithLinks()` (each match of
+`#(http|https|ftp)://[\d\w\.-]+\.[\w\.]{2,6}[^\s\]\[\<\>]*/?#`, less a
+trailing "." or ",", written as `<a href='{$url}' target='_blank'>`: the
+address goes into the link in single quotes as it is, so an apostrophe
+in it closes the link's address, and the match runs on through a ")";
+notes f-a29, f-a30; Rule 27a), printed through `strip_unsafe_html`, plus the `Templates::Article|Preprint::Details::Reference`
 hook. OPS `preprint_details.tpl` has the same block and, since ops
 `dafd9b3263` (pkp/ops#1443, commit `26031aac38`, merged 2026-10-09), the
 same condition; until then it tested `$publication->getData('citationsRaw')`
@@ -2352,6 +2403,42 @@ reference with no DOI in its text. "Edit citation" left by
 unchanged. "Reprocess all references": note j. Kept check
 `shared/playwright/checks/U42/I07b/i07b.js` (phases `l11`, `l13`,
 `forms`).
+
+<a id="fn-q26"></a>
+**q26** — Live-probed 2026-10-21 (Rule 11 step 1; Rules 12, 17, 27,
+27a; A29, A30), OJS, OMP and OPS, each on `main` (ojs `3109a59114` on
+lib/pkp `f37a174626`, omp `5777025be` and ops `f048e747b4` on lib/pkp
+`042726ebf6`, ui-library `99abe252`) and on `stable-3_5_0` (ojs
+`1e78ca0c2b`, omp `cce424e5e`, ops `5eca7fd603`, lib/pkp `68512b5fda`),
+two runs per app and line, each from a freshly reset copy of PKP's
+default test dataset (PostgreSQL), as `dbarnes`, on the dataset's
+published item (OJS article 17, OMP book 5, OPS preprint 2): unpublished
+(OPS: unposted) on screen, three references added on "References"
+(3.5: the "References" box and "Save"), "Kilo, K. (2011). A link with an
+apostrophe. https://example.org/kilo's-page", "Lima, L. (2012). In
+brackets (https://doi.org/10.1234/f8)." and "Alpha, A. (2020). A plain
+link. https://example.org/alpha"; on `main`, lookup then switched on,
+"Reprocess all references" › "OK", the jobs drained; published again on
+screen and read signed out. On `main`, with lookup off right after
+"Add", the stored web address of Kilo was `https://example.org/kilo`,
+Lima stored the DOI `10.1234/f8` and no web address, Alpha
+`https://example.org/alpha`; the rows showed the text alone, also after
+a reload, and the text was stored whole for all three. With lookup on,
+after a reload, the rows linked "https://example.org/kilo",
+"10.1234/f8" (to `https://doi.org/10.1234/f8`) and
+"https://example.org/alpha", and "Edit citation" (closed unsaved) held
+URL "https://example.org/kilo" with DOI empty for Kilo and DOI
+"10.1234/f8" with URL empty for Lima. The landing page's "References"
+block read each text as typed; the links (text → address) were
+"https://example.org/kilo's-page" → `https://example.org/kilo`, whose
+new tab opened `https://example.org/kilo`; "https://doi.org/10.1234/f8)"
+→ `https://doi.org/10.1234/f8)`, the full stop outside the link; and
+"https://example.org/alpha" → the same, each with `target="_blank"` and
+`rel="noreferrer noopener"`. On `stable-3_5_0` the Kilo link led to
+`https://example.org/kilo's-page` and the Lima link as on `main`, with
+no `target` (the same tab). No response of 500 or more, no page error,
+no dialog; the only response of 400 or more was example.org's own 404
+for the pressed link. Kept check `shared/playwright/checks/U42/H21/h21.js`.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding. The seeded journal (`publicknowledge`) keeps the
@@ -2958,6 +3045,36 @@ passes, and so does everything the old rule took ("3456.34567vx" and
 its base `63e9702f37`, OJS, OMP and OPS (`arxiv.js`): at the base the
 lookup's reference refused as above; at the head both references saved
 (200), the ID kept.
+
+<a id="fn-f-a29"></a>
+**f-a29 — A29 evidence.** Two causes. The published page: lib/pkp
+`Citation::getRawCitationWithLinks()` (note p) writes the matched
+address into `<a href='{$url}' target='_blank'>` in single quotes, so
+the address's apostrophe closes the link's address, while the link's
+text, written from the same match, shows the whole address. The single quotes came with
+pkp/pkp-lib#10692 "structured citations" (`4730f6707e`, 2025-10-01;
+kept in `8074222efe`), on `main` and `ore` (tag `ore-2026-10-13`), in no
+3.x release; `stable-3_5_0`'s `getCitationWithLinks()` has the same
+pattern and trim but double quotes, and the 3.4 and 3.3 `Citation.php` /
+`Citation.inc.php` read the same as 3.5 (code read 2026-10-21, not
+walked there). The templates print it through `strip_unsafe_html` (OJS
+`article_details.tpl`, OMP `monograph_full.tpl`, OPS
+`preprint_details.tpl`). The References page: `PKP\pid\Url::regexes`,
+used by the lookup's first step and by a lookup-off "Add" (note h), has
+the path class `[-a-zA-Z0-9@:%_\+.~\#?&//=]`, which holds no apostrophe,
+so the stored web address ends there; 3.5 picks no identifiers out of a
+reference. Live-probed 2026-10-21: note q26.
+
+<a id="fn-f-a30"></a>
+**f-a30 — A30 evidence.** `Citation::getRawCitationWithLinks()`'s
+pattern (note p) ends in `[^\s\]\[\<\>]*/?`, which takes a ")", and only
+a trailing "." or "," is trimmed, so "(https://doi.org/10.1234/f8)."
+links `https://doi.org/10.1234/f8)`. The same pattern and trim are in
+`stable-3_5_0`'s `getCitationWithLinks()` (walked) and in the 3.4 and
+3.3 `Citation.php` / `Citation.inc.php` (code read 2026-10-21). The
+lookup's first step drops the bracket (Rule 11), so the References row
+of the same reference links `https://doi.org/10.1234/f8`. Live-probed
+2026-10-21: note q26.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** Note p. Live-probed 2026-09-24: f-a20, where
