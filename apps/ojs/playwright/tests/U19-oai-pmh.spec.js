@@ -12,9 +12,10 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: no journal's unfiltered list is asserted complete or empty; S3
- *   reads "Tidal Patterns" as no longer live at the journal's address,
- *   never as missing there, and never reads the journal's GetRecord of it.
+ * - A1 (retired 2026-10-22, fixed by pkp/pkp-lib#13566): no journal's
+ *   unfiltered list is asserted complete or empty yet; S3 reads "Tidal
+ *   Patterns" as no longer live at the journal's address and does not read
+ *   its deleted record there; the guard is Planned in the spec's Coverage.
  * - A2 🐞, A3 🐞, A20 🐞: S5 gives whole days only, all in the calendar.
  * - A4 🐞, A24 🐞: no last part's "Resume" is read; S10's `driver` list is
  *   read on its first part, its token neither asserted nor followed.
@@ -59,8 +60,8 @@
  * visitor's page where a scenario reads the page itself (S1, the refusals
  * of S4, the Login pages of S6, the "Unknown Metadata Format" pages). A
  * journal's unfiltered list is walked through every part ("Resume"): it also
- * carries the first journal's deleted records (A1), so a scratch journal's
- * own records may sit on a later part. The site-wide address lists every
+ * carried the first journal's deleted records until A1's fix, so a scratch
+ * journal's own records may sit on a later part. The site-wide address lists every
  * context on the install: its reads are GetRecord and `set`-filtered lists
  * of the scenario's own journals. Every absence is read on a settled answer
  * (a whole server response) beside a positive control taken the same way

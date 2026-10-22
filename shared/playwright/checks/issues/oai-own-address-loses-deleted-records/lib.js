@@ -1,5 +1,6 @@
-// Helpers of walk.js (issue report docs/issues/U19-A1-oai-own-address-loses-deleted-records.md).
-// Requiring this file runs nothing. Every helper drives a screen a person uses, or reads an
+// OAI helpers first written for the walk of U19 A1's issue report (retired 2026-10-22, fixed by
+// pkp/pkp-lib#13566; the report and its walk are in git), kept for the other checks that require
+// them. Requiring this file runs nothing. Every helper drives a screen a person uses, or reads an
 // OAI address as a harvester does.
 const {idle} = require('../../../probe');
 const {readOai} = require('../../../pages/OaiPages.js');

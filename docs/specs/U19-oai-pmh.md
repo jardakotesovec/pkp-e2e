@@ -19,7 +19,7 @@ description, its sets (the journal and each of its sections), the
 metadata formats it offers, or its records, one per published article,
 each in a format such as Dublin Core. An article that stops being
 published stays in the list as a deleted record, so the harvester knows
-to drop it ⚠ [A1](#a1). No page of the app links to the address: a journal hands it
+to drop it. No page of the app links to the address: a journal hands it
 to the services it wants to be harvested by. A Journal Manager can
 withhold a journal's records with "Enable OAI" {OJS OPS}; on a journal
 the "JATS Metadata Format" and "DRIVER" plugins add a JATS format and an
@@ -123,7 +123,7 @@ The answer's parts, as the page shows them: <sup>a</sup>
 | Repository Name | the journal's name, in the language of the request (Rule 19) <sup>d</sup> |
 | Base URL | the OAI address that answered, with its language on a journal with more than one (Rule 19a) <sup>d</sup> |
 | Protocol Version | "2.0" <sup>d</sup> |
-| Earliest Datestamp | the datestamp of the oldest record the address lists, deleted records included (Rule 5); with none listed, the moment of the request ⚠ [A1](#a1) <sup>d</sup> |
+| Earliest Datestamp | the datestamp of the oldest record the address lists, deleted records included (Rule 5); with none listed, the moment of the request <sup>d</sup> |
 | Deleted Record Policy | "persistent" <sup>d</sup> |
 | Granularity | "YYYY-MM-DDThh:mm:ssZ" <sup>d</sup> |
 | Admin Email | the email address of the journal's "Principal Contact" (Settings › Journal › "Contact") <sup>d</sup> |
@@ -297,12 +297,13 @@ message. <sup>m</sup>
      one. Once a new version of a book is published, the press lists its
      formats under new identifiers and leaves no deleted record for the
      old ones ⚠ [OMP7](#omp7). <sup>n</sup>
-   - 4b. {OJS OMP} The address of every journal but the install's first
-     (created first, whatever the Hosted Journals order: the seeded
-     journal) leaves out its own deleted records ⚠ [A1](#a1); without
-     a `set`, it lists the first journal's instead. The site-wide
-     address lists every journal's, but not a journal's that `set`
-     names. <sup>n</sup> <sup>q8</sup>
+   - 4b. A journal's own address lists its own deleted records and no
+     other journal's, and answers them by GetRecord; the site-wide
+     address lists every journal's, and with a journal's `set`, that
+     journal's. Until pkp/pkp-lib#13566 (2026-10-22) every journal and
+     press but the install's first (created first: the seeded journal)
+     left its own out and listed the first one's ([A1](#a1), retired).
+     <sup>n</sup> <sup>q8</sup> <sup>q8a</sup>
    - 4c. {OMP OPS} "Return to Workflow" on a published book or a posted
      preprint leaves its version published ([→ Done](U24-workflow-screen-and-stage-access.md#done)),
      so its records should stay listed (Rule 3). They leave the lists
@@ -320,8 +321,7 @@ message. <sup>m</sup>
    deleted. <sup>e</sup> <sup>q9</sup>
 6. **Order.** A list gives a journal's records in the order of their
    submission ID, lowest first (on a press, of the format number).
-   {OMP} A press lists the first press's deleted records (Rule 4b)
-   before its own. The site-wide address lists the records journal by
+   The site-wide address lists the records journal by
    journal, then every journal's deleted records together at the end. <sup>e</sup> <sup>q8</sup> <sup>q9</sup>
 7. **Sets.** ListSets names the journal as a set, its `setSpec` the
    journal's path and its `setName` the journal's name, then each of its
@@ -346,9 +346,9 @@ message. <sup>m</sup>
    section. A set of another journal, or one the journal does not have,
    answers "No matching records in this repository". A press given a
    set it does not have lists other records instead ⚠ [OMP3](#omp3).
-   {OMP} On the first press (Rule 4b), `set` with the press's path may
-   leave out the deleted records of books in a series while listing
-   those of books in no series ⚠ [OMP9](#omp9). <sup>j</sup> <sup>q10</sup>
+   {OMP} `set` with the press's path leaves out the deleted records of
+   books in a series while listing those of books in no series ⚠
+   [OMP9](#omp9). <sup>j</sup> <sup>q10</sup> <sup>q8a</sup>
 9. **Dates.** `from` and `until` limit a list to the records whose
    datestamp falls between them, both days included; each is written
    "YYYY-MM-DD" or "YYYY-MM-DDThh:mm:ssZ", both the same way, and `until`
@@ -402,9 +402,7 @@ message. <sup>m</sup>
     the format asked for, a deleted one included. A journal's address
     answers "No matching identifier in this repository" for another
     journal's article and for an identifier of no published article; the
-    site-wide address answers for any journal's. {OJS OMP} A journal's
-    address also answers the first journal's deleted records (Rule 4b)
-    [A1](#a1). <sup>e</sup> <sup>q8</sup> <sup>q16</sup>
+    site-wide address answers for any journal's. <sup>e</sup> <sup>q8</sup> <sup>q16</sup>
 16. **The site-wide address.** It answers as one repository for the
     whole site: "Repository Name" is the site's "Site Name"
     (Administration › Site Settings › "Settings"; empty on the test
@@ -432,19 +430,18 @@ message. <sup>m</sup>
     - 17a. The journal's deleted records stay: the site-wide address
       still lists them and, on a preprint server, the server's own
       address too. The journal's lists answer "No matching records in
-      this repository" only when nothing deleted is left to show ({OJS}
-      never while the first journal (Rule 4b) has deleted records,
-      [A1](#a1)), and on a preprint server "Earliest Datestamp" becomes
+      this repository" only when nothing deleted is left to show, and on
+      a preprint server "Earliest Datestamp" becomes
       the oldest deleted record's. <sup>o</sup> <sup>q18</sup>
 18. **A journal closed to visitors.** On a journal whose "Site Access
     Options" require visitors to register and log in, or that is not
     enabled publicly, a signed-out request to the journal's address is
     sent to the Login page. A signed-in browser is answered instead,
     whatever its role in the journal, even with none. On a journal not
-    enabled publicly its lists then hold none of its own records: they
-    answer "No matching records in this repository", or show the
-    first journal's deleted records in their place (Rule 4b)
-    [A1](#a1). Identify and ListSets name it. <sup>b</sup> <sup>q1</sup>
+    enabled publicly its lists then hold none of its own live records:
+    before the fix of [A1](#a1) they answered "No matching records in
+    this repository"; whether they now list its deleted records (Rule
+    16b) is not walked. Identify and ListSets name it. <sup>b</sup> <sup>q1</sup>
 19. **Languages.** A record carries every language its item has (Rule
     11). The language the request is read in (the address's language
     segment, such as `…/fr_CA/oai`) decides "Repository Name", the set
@@ -518,9 +515,10 @@ message. <sup>m</sup>
       more results." even when it is complete ⚠ [A24](#a24). On the
       installation's first journal (ID 1), a member unpublished from its
       issue stays in the set as a deleted record, its header naming
-      "driver". <sup>q22</sup> Every other journal's address leaves out
-      its own deleted records [A1](#a1), so its set lists none;
-      journal 1's may show instead ⚠ [A25](#a25). The site-wide address
+      "driver". <sup>q22</sup> Another journal's set lists none of
+      journal 1's deleted records (until pkp/pkp-lib#13566 it did,
+      [A25](#a25), retired); its own such records were not walked there.
+      <sup>q8a</sup> The site-wide address
       has no `driver` set. An article in no issue unpublished with
       "DRIVER" enabled leaves a deleted record not naming "driver", so
       the set never lists it ⚠ [A11](#a11). <sup>i</sup> <sup>q21</sup>
@@ -721,10 +719,8 @@ footnote. <sup>s</sup>
      "oai:{repository identifier}:article/{ID}", `{ID}` being the number
      the Dashboard lists the article under ("…:preprint/{ID}" on a
      preprint server); its "OAI Record Header" has a "setSpec" row
-     "{journal path}:ART" ("…:PRE"; on a press, the press's path). On a
-     journal and a press the list may also hold the first journal's
-     deleted records [A1](#a1) (Rules 3, 4b, 7d; the table "A record's
-     header").
+     "{journal path}:ART" ("…:PRE"; on a press, the press's path) (Rules
+     3, 7d; the table "A record's header").
    - **A press's records** {OMP}: the list holds two records for "Tidal
      Patterns", one per format, each identified as
      "oai:{repository identifier}:publicationFormat/" and a number, and
@@ -802,9 +798,7 @@ footnote. <sup>s</sup>
    - **Before**: the visitor opens
      {journal address}/oai?verb=ListRecords&metadataPrefix=oai_dc
      ({journal address} being the address of the journal's home page):
-     it lists "Tidal Patterns", then "Coral Reefs" (Rules 4b, 6; on a
-     journal and a press, beside the first journal's deleted records,
-     [A1](#a1)). Note the "OAI Identifier" of "Tidal Patterns".
+     it lists "Tidal Patterns", then "Coral Reefs" (Rules 4b, 6). Note the "OAI Identifier" of "Tidal Patterns".
    - **Unpublished**: Journal Manager: open "Tidal Patterns" in its
      workflow and unpublish it, as [Publish, schedule &
      versions](U49-publish-schedule-and-versions.md) scenario 3 does. The
@@ -816,10 +810,8 @@ footnote. <sup>s</sup>
      Metadata (oai_dc)" (Rules 4, 4a).
    - **The journal's own address**: the visitor reloads the journal's
      ListRecords: "Coral Reefs" is listed and "Tidal Patterns" is not
-     live; a preprint server lists its deleted record, while on a journal
-     and a press it is missing and the journal's GetRecord with its
-     identifier answers "No matching identifier in this repository"
-     [A1](#a1) (Rule 4b).
+     live; it is listed as a deleted record, read on a preprint server
+     only (the journal's and the press's are Planned) (Rule 4b).
    - **Published again**: Journal Manager: publish "Tidal Patterns"
      again, as that spec's scenario 10 does. The visitor reloads the
      site-wide GetRecord: the Dublin Core record of "Tidal Patterns" shows
@@ -867,8 +859,7 @@ footnote. <sup>s</sup>
      "noRecordsMatch", "No matching records in this repository"; its
      Identify's "Earliest Datestamp" reads the moment of the request
      (Rule 3; Fields, "Identify"). An empty journal or press is not read
-     here: it lists any deleted records of the first journal, and
-     its "Earliest Datestamp" is the oldest of theirs [A1](#a1) (Rule 4b).
+     here yet (Planned) (Rule 4b).
    - **Control**: after the refusals,
      {journal address}/oai?verb=Identify still shows "Request was of type
      Identify." and "Repository Name" "Sea Letters" (Rule 14).
@@ -1141,12 +1132,20 @@ Left out of the scenarios above, by reason:
   - a book or a preprint published without an abstract (retired OMP4,
     OPS2): the press's or the server's ListRecords and GetRecord answer
     its record without a "Description" {OMP OPS} (the Dublin Core table)
-  - the guard for A1 (issue report
-    `docs/issues/U19-A1-oai-own-address-loses-deleted-records.md`): a second
-    journal's own address after it unpublishes an article: its lists and
-    GetRecord show its own deleted record and none of the first journal's,
-    and the site-wide `set` of that journal lists it {OJS OMP} (Rule 4b;
-    once fixed)
+  - the guard for retired [A1](#a1) and [A25](#a25) (fixed by
+    pkp/pkp-lib#13566): a second journal's (press's) own address after
+    it unpublishes an article: its lists and GetRecord show its own
+    deleted record and none of the first journal's, its "Earliest
+    Datestamp" is its own, the site-wide `set` of that journal lists it,
+    an empty journal or press answers "No matching records in this
+    repository" while the first journal has deleted records, and {OJS}
+    its `driver` set holds none of the first journal's {OJS OMP} (Rules
+    4b, 6, 15, 23a; scenario 3's journal and press reads, scenario 4's
+    empty journal)
+  - Rules 17a and 18 read again on a journal other than the first, now
+    that A1 is fixed: with "Enable OAI" off {OJS} and with the journal
+    not enabled publicly, whether its own address lists its deleted
+    records {OJS OMP}
   - the guard for A18 (issue report
     `docs/issues/U19-A18-oai-datestamp-stays-after-edit-republish.md`): a
     published book (preprint) edited, then unpublished and published again:
@@ -1252,8 +1251,7 @@ Left out of the scenarios above, by reason:
     23a; once fixed)
   - with "DRIVER" enabled, an article unpublished from its issue staying
     in the `driver` set as a deleted record, its header naming "driver"
-    {OJS} (Rule 23a; on a scratch journal once A1 is fixed, since only
-    the installation's first journal lists its own deleted records today)
+    {OJS} (Rule 23a; on a scratch journal, writable since A1's fix)
   - the guard for OMP8 and OPS5 (issue report
     `docs/issues/U15-OMP3-OPS4-returned-item-gone-search-still-lists.md`):
     a published book and a posted preprint returned with "Return to
@@ -1309,13 +1307,6 @@ Left out of the scenarios above, by reason:
     `{journal address}/en/oai` (Rule 19a): the same forwarding as
     scenario 2's site-wide address
 - **Register carries it**:
-  - A1 {OJS OMP} (a journal's own address leaving out its deleted
-    records and showing the first journal's in their place,
-    "Earliest Datestamp" and GetRecord included, so an empty journal
-    never answers "No matching records in this repository" while the
-    first journal has deleted records; the site-wide
-    `set` of one journal leaving them out; Rules 4b, 6, 15, 17a, 18;
-    scenarios 1, 3 and 4 pass it)
   - A2, A3, A20, OPS1 (the time of day ignored; an impossible date or
     time accepted; a section's set ignoring the dates for deleted
     records; `until` failing on a preprint server; Rules 9a–9d; scenario
@@ -1354,8 +1345,8 @@ Left out of the scenarios above, by reason:
   - OMP8, OPS5 (a book returned to the workflow leaving the lists with no
     deleted record; a preprint returned to the workflow turned into a
     deleted record; Rule 4c)
-  - OMP9 (the first press's set and the deleted records of books in a
-    series; Rule 8)
+  - OMP9 (a press's set and the deleted records of books in a series;
+    Rule 8)
   - OPS3 (a preprint server's "Identify items posted in this section as
     a(n)"; Settings bullet 11)
   - OPS4 (a removed preprint server leaving no deleted record; Side
@@ -1376,7 +1367,6 @@ an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
-| [A1](#a1) | A journal's own OAI address leaves out its deleted records and lists the first journal's instead {OJS OMP} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A2](#a2) | OAI-PMH lists ignore the time of day in "from" and "until" and return the whole day's records | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A3](#a3) | OAI-PMH lists accept a "from" or "until" date that is not in the calendar instead of refusing it | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A4](#a4) | The browser view of the last part of a long OAI-PMH list says "There are more results." and offers a "Resume" that is refused | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1398,6 +1388,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP3](#omp3) | Asked for a set it does not have, a press's OAI-PMH address lists every record of the press, or of every press | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP6](#omp6) | A press's OAI-PMH set list names every series that has no prefix with a leading space | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP8](#omp8) | A published book returned to the workflow leaves the press's OAI records with no deleted record | 🐞 | minor | — |
+| [OMP9](#omp9) | A press's set leaves out the deleted records of books in a series | 🐞 | user-visible | re-probe (claude), 2026-10-22 — confirmed (was ❓) |
 | [OPS1](#ops1) | A preprint server's OAI-PMH lists answer a server error whenever the harvester gives an "until" date | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | Removing a preprint server leaves no deleted records for its posted preprints at the site-wide OAI address | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OPS5](#ops5) | A posted preprint returned to the workflow is reported to harvesters as deleted | 🐞 | user-visible | — |
@@ -1405,41 +1396,23 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A journal that does not publish online still hands out records, the MARC ones with the article's address {OJS} | ❓ | minor | — |
 | [A14](#a14) | "Language" writes a galley's language with an underscore {OJS OPS} | ❓ | minor | — |
 | [A21](#a21) | A section has one set identifier per language {OJS OPS} | ❓ | minor | — |
-| [A25](#a25) | Other journals' `driver` OAI sets may list journal 1's deleted records {OJS} | ❓ | minor | — |
 | [A26](#a26) | On MySQL or MariaDB, an article in no issue may get no datestamp and be left out of lists with "from" or "until" {OJS} | ❓ | user-visible | — |
 | [A27](#a27) | An earlier version's OAI record gives the article's address, which shows the current version {OJS} | ❓ | minor | — |
 | [OMP2](#omp2) | A press cannot withhold its records: it has no "Enable OAI" | ❓ | minor | — |
 | [OMP7](#omp7) | A book's new version changes its format identifiers without leaving deleted records | ❓ | minor | — |
-| [OMP9](#omp9) | On the first press, the press's set may leave out the deleted records of books in a series | ❓ | user-visible | — |
 | [OPS3](#ops3) | "Identify items posted in this section as a(n)" reaches no record | ❓ | minor | — |
 | [OMP1](#omp1) | A press's record is a publication format, not a book | ✅ | invisible | — |
 | [OMP5](#omp5) | Retired: an address with no press answers as the whole site | ✅ | retired | — |
 | [OMP4](#omp4) | A press's OAI-PMH record lists answered a server error once one book was published without an abstract | ✅ | retired | PR review (claude), 2026-10-05 — fixed at pkp/omp#2490's head |
 | [OPS2](#ops2) | One preprint without an abstract made the server's record lists fail | ✅ | retired | PR review (claude), 2026-10-05 — fixed at pkp/ops#1430's head |
 | [A22](#a22) | Retired: once one journal set "DOI Versioning" to "Yes", every journal's OAI-PMH requests answered a server error; fixed by pkp/ojs#5947 | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/ojs#5947, merged 2026-10-16 |
+| [A1](#a1) | Retired: a journal's own OAI address left out its deleted records and listed the first journal's instead; fixed by pkp/pkp-lib#13566 | ✅ | retired | re-probe (claude), 2026-10-22 — fixed on `main`, 3.5 and 3.4 |
+| [A25](#a25) | Retired: other journals' `driver` OAI sets listed journal 1's deleted records; fixed by pkp/pkp-lib#13566 | ✅ | retired | re-probe (claude), 2026-10-22 — confirmed without the fix, fixed |
 
 ### All apps
 
 <a id="a1"></a>
-**A1 — A journal's own OAI address leaves out its deleted records and lists the first journal's instead** {OJS OMP} · 🐞 · medium.
-A harvester of one journal's OAI address expects an unpublished article
-to come back as a deleted record, so it can drop it. On every journal
-except the one with ID 1 (the first created on the installation), the
-record disappears instead: the journal's lists leave it out and
-GetRecord answers "No matching identifier in this repository". The
-site-wide address, when asked for that journal's set, leaves the
-journal's deleted records out too. The journal's published records are
-listed correctly throughout. In place of its own deleted records, such a
-journal's lists and GetRecord show those of journal 1. They carry
-journal 1's identifiers and its set, which the journal's own ListSets
-does not name, and the journal's "Earliest Datestamp" becomes the oldest
-of them. This half needs nothing unpublished in the journal itself: it
-shows even on a journal with nothing published, as soon as journal 1 has
-a deleted record. The harvester keeps showing the withdrawn article, and
-nothing tells the journal. The fault needs an installation with more
-than one journal. A press does the same with its publication formats; a
-preprint server is not affected.
-Since: 2021-06-08 · Basis: probe, 2026-10-01. <sup>f-a1</sup>
+**A1 — A journal's own OAI address leaves out its deleted records and lists the first journal's instead** {OJS OMP} · ✅ · retired. Fixed by pkp/pkp-lib#13566 (the issue report's proposed fix; ojs `3cf9aa91a8` on `main`, `0b1ae35f04` on `stable-3_5_0`, `3bedd21383` on `stable-3_4_0`; omp `178e8b34b2`, `a150eee76b`, `95fefd0cf0`), verified 2026-10-22 on PostgreSQL at each line's tip against the same tip with only the fix taken out: the report's Steps show the Expected with it and the Observed without. OJS `ore` is not fixed yet. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — OAI-PMH lists ignore the time of day in "from" and "until" and return the whole day's records** · 🐞 · low.
@@ -1580,7 +1553,7 @@ article that was published without an issue ("Don't Assign To An
 Issue"). The deleted record this leaves is stored without its place in
 the `driver` set, so a harvest of that set shows neither the article nor
 a notice that it was deleted. An article unpublished from an issue
-leaves one in journal 1's set only (Rule 23a). A harvester of the set
+leaves one (Rule 23a). A harvester of the set
 keeps the withdrawn article, and nothing on screen says so. It happens
 on every journal with the plugin enabled, each time such an article is
 unpublished.
@@ -1773,12 +1746,7 @@ that.
 Basis: probe, 2026-10-01. <sup>f-a24</sup>
 
 <a id="a25"></a>
-**A25 — Other journals' `driver` OAI sets may list journal 1's deleted records** {OJS} · ❓ · minor.
-A harvester of a journal other than journal 1 may find in its `driver`
-set journal 1's deleted records that name "driver", as in its other
-lists ([A1](#a1), Rule 23a); no walk has met one.
-Question: does the set list them? Lean: yes; it is cut from that list.
-Basis: code. <sup>f-a25</sup>
+**A25 — Other journals' `driver` OAI sets may list journal 1's deleted records** {OJS} · ✅ · retired. Confirmed and fixed with A1 by pkp/pkp-lib#13566, verified 2026-10-22 on OJS `main` (PostgreSQL): without the fix a second journal's `driver` set listed journal 1's deleted `article/17`; with it, nothing. <sup>f-a25</sup>
 
 <a id="a26"></a>
 **A26 — On MySQL or MariaDB, an article in no issue may get no datestamp and be left out of lists with "from" or "until"** {OJS} · ❓ · user-visible.
@@ -1887,26 +1855,18 @@ The readers' side, the book's page answering "404 Not Found", is
 Since: 2026-06-09 · Basis: probe, 2026-10-03. <sup>f-omp8</sup>
 
 <a id="omp9"></a>
-**OMP9 — On the first press, the press's set may leave out the deleted records of books in a series** · ❓ · user-visible.
-A harvester that asks the installation's first press (Rule 4b) for the
-press's set, at the press's OAI address or the site-wide one, expects
-the deleted record of every book unpublished in the press. A book in a
-series leaves a deleted record in the series' set, a book in no series
-one in the press's set (Rule 7d). Asked for the press's set, the press
-may list only the second kind, so a harvester of that set keeps a
-withdrawn book in a series and is not told. A preprint server lists a
-section's deleted record under the server's set. On every other press
-this cannot show, since the press's own deleted records are left out
-whatever the set ([A1](#a1)).
-Question: does the press's set leave out the deleted records of books in
-a series? Lean: yes; a press matches a deleted record's set against the
-press's set exactly, where a journal and a preprint server also take
-their sections' sets. One walk settles it: on a first press with
-published books (the test install's has none; that of an install loaded
-with PKP's default test data has), unpublish a book in a series and one
-in no series, then read ListIdentifiers with the press's set at the
-press's address and at the site-wide one.
-Basis: code. <sup>f-omp9</sup>
+**OMP9 — A press's set leaves out the deleted records of books in a series** · 🐞 · user-visible.
+A harvester that asks a press for the press's set, at the press's OAI
+address or the site-wide one, expects the deleted record of every book
+unpublished in the press. A book in a series leaves a deleted record in
+the series' set, a book in no series one in the press's set (Rule 7d).
+Asked for the press's set, the press lists only the second kind, so a
+harvester of that set keeps a withdrawn book in a series and is not
+told. A preprint server lists a section's deleted record under the
+server's set.
+Re-checked: re-probe (claude), 2026-10-22 — confirmed (was ❓) on a
+second press once A1 was fixed, on `main` and 3.5.
+Basis: probe, 2026-10-22. <sup>f-omp9</sup>
 
 ### OPS
 
@@ -2017,7 +1977,7 @@ Code read 2026-09-26 at the checkouts: ojs `71bb244152` (the working tree) and `
 **m** — `OAI::error($code, $message)`: for `badVerb` and `badArgument` the `<request>` element carries no attributes; for the others it repeats the request's parameters. "Multiple values are not allowed for the {argument} parameter" is never reached: `OAIUtils::parseStr()` makes a repeated key an array, and `OAI::getParam()`, typed `?string`, throws a TypeError before `checkParams()` can refuse it (A16). Messages as in the table, from `OAI.php` and `OAIMetadataFormat_JATS.php`. `listSets()` answers `noSetHierarchy` "This repository does not support sets" when no set exists, which a site with a journal never meets. `listMetadataFormats()` answers `noMetadataFormats` "No metadata formats are available" when no format plugin is enabled, which cannot happen (the DC format cannot be disabled). Live-probed 2026-09-26 (Errors; Rules 2, 14), all three apps, 35 refusals each: notes q15, q16, f-a16.
 
 <a id="fn-n"></a>
-**n** — Deleted records (tombstones, `data_object_tombstones` with their set objects). OJS `ArticleTombstoneManager`: `reconcileTombstonesOnUnpublish()` (from `Repo::publication()->unpublish()`, `delete()` of a published publication, and `IssueGridHandler::deleteIssue()`) inserts the bare identifier's tombstone when no published version is left; `reconcileTombstonesOnPublish()` deletes it; `IssueGridHandler::unpublishIssue()` unpublishes and re-publishes each article into the now-unpublished issue (status scheduled), leaving the tombstone; `insertTombstonesByContext()` / `deleteTombstonesByContextId()` on `enabled` changes and before a context is deleted. OPS `Repository::updateStatus()` inserts a `PreprintTombstoneManager` tombstone when the submission leaves `STATUS_PUBLISHED` and deletes it when it returns. OMP `PublicationFormatTombstoneManager`: on `unpublish()` for each format of the version, on a format's "Format Availability" or approval change (`PublicationFormatGridHandler::setAvailable()` / `setApproved()`), deleted on publish. The tombstone query (note e) joins the context's set objects with `->when(isset($journalId), function ($query, $journalId) { … use ($journalId) … (int) $journalId })` in OJS and `->when(isset($pressId), function ($query, $pressId) …)` in OMP: Laravel passes the condition (`true`) as the closure's second argument, so the join asks for context 1 (A1); OPS writes `function ($query) use ($serverId)`. Without a context (site-wide) no join applies; with a `set`, the site-wide query takes the journal's filter and loses its deleted records the same way (A1). The site-wide union lists the tombstones after every context's live rows (Rule 6); at an OMP press's own address the first press's tombstones, which carry its `press_id`, sort before the press's own rows (2026-09-29, note q8). A context removed under Hosted Journals leaves its tombstones on OJS and OMP and none on OPS (OPS4). On OMP and OPS, unpublishing, publishing again and saving a published version leave `submissions.last_modified` where it was (read in the database, A18). Live-probed 2026-09-26 (Rules 4, 4a, 4b, 16b; Side effects): notes q8, q17, f-ops4. Live-probed 2026-10-03 (Rule 4c; Side effects): "Return to Workflow" sets the submission's status to queued while its version stays published, which OPS `Repository::updateStatus()` answers with a tombstone and OMP's record query, reading `ms.status`, answers by leaving the formats out; notes f-omp8, f-ops5.
+**n** — Deleted records (tombstones, `data_object_tombstones` with their set objects). OJS `ArticleTombstoneManager`: `reconcileTombstonesOnUnpublish()` (from `Repo::publication()->unpublish()`, `delete()` of a published publication, and `IssueGridHandler::deleteIssue()`) inserts the bare identifier's tombstone when no published version is left; `reconcileTombstonesOnPublish()` deletes it; `IssueGridHandler::unpublishIssue()` unpublishes and re-publishes each article into the now-unpublished issue (status scheduled), leaving the tombstone; `insertTombstonesByContext()` / `deleteTombstonesByContextId()` on `enabled` changes and before a context is deleted. OPS `Repository::updateStatus()` inserts a `PreprintTombstoneManager` tombstone when the submission leaves `STATUS_PUBLISHED` and deletes it when it returns. OMP `PublicationFormatTombstoneManager`: on `unpublish()` for each format of the version, on a format's "Format Availability" or approval change (`PublicationFormatGridHandler::setAvailable()` / `setApproved()`), deleted on publish. The tombstone query (note e) joins the context's set objects with `->when(isset($journalId), function ($query, $journalId) { … use ($journalId) … (int) $journalId })` in OJS and `->when(isset($pressId), function ($query, $pressId) …)` in OMP: Laravel passes the condition (`true`) as the closure's second argument, so the join asks for context 1 (A1); OPS writes `function ($query) use ($serverId)`. Fixed by pkp/pkp-lib#13566 (2026-10-22): OJS and OMP now write `function ($query) use ($journalId)` (`$pressId`, `$seriesId`) on `main`, `stable-3_5_0` and `stable-3_4_0`; OJS `ore` keeps the old closure (note q8a). Without a context (site-wide) no join applies; with a `set`, the site-wide query takes the journal's filter and loses its deleted records the same way (A1). The site-wide union lists the tombstones after every context's live rows (Rule 6); at an OMP press's own address the first press's tombstones, which carry its `press_id`, sort before the press's own rows (2026-09-29, note q8). A context removed under Hosted Journals leaves its tombstones on OJS and OMP and none on OPS (OPS4). On OMP and OPS, unpublishing, publishing again and saving a published version leave `submissions.last_modified` where it was (read in the database, A18). Live-probed 2026-09-26 (Rules 4, 4a, 4b, 16b; Side effects): notes q8, q17, f-ops4. Live-probed 2026-10-03 (Rule 4c; Side effects): "Return to Workflow" sets the submission's status to queued while its version stays published, which OPS `Repository::updateStatus()` answers with a tombstone and OMP's record query, reading `ms.status`, answers by leaving the formats out; notes f-omp8, f-ops5.
 
 <a id="fn-o"></a>
 **o** — OJS `classes/components/forms/context/AccessForm.php` and OPS's: `FieldOptions('enableOai', type radio, options true "Enable" (`common.enable`) / false "Disable" (`common.disable`))`, label `manager.setup.enableOai` "Enable OAI", description `manager.setup.enableOai.description` (the Open Archives Initiative link). `schemas/context.json` `enableOai` boolean, `default: 1`, so a new context gets the row; the tab posts `enableOai=true` untouched (scenarios.md, the `publishingMode` key). OMP has no `enableOai` in its schema or forms and no "Access" tab (U51 note b). Live-probed 2026-09-26 (the "Enable OAI" field; Actors row 3; Rules 17, 17a; Settings bullet 1), OJS and OPS, two runs: notes q6, q18.
@@ -2063,6 +2023,9 @@ Code read 2026-09-26 at the checkouts: ojs `71bb244152` (the working tree) and `
 
 <a id="fn-q8"></a>
 **q8** — Live-probed 2026-09-26 (Rules 4, 4a, 4b; A1), all three apps, two sweep runs: "Unpublish" ("Unpost") on the workflow screen, and on OJS "Unpublish Issue" and "Delete" of a published issue, left at the site-wide address a record with the same identifier, a deleted header, the datestamp of the action, its set and no metadata, with "This record has been deleted." on the page; published again ("Schedule For Publication", "Publish", "Post"), the record was back with the same identifier. After "Unpublish" the workflow offered no "Delete" on any app. At the scratch journal's (press's) own address the deleted record was missing and GetRecord answered "No matching identifier in this repository" (OJS, OMP); OPS listed it at the server's address. OJS journals' own lists carried the three deleted records of `publicknowledge`, the install's first journal, and GetRecord at a scratch journal answered one of them; with a `set` (the journal's path, a section's, `nosuchset`, `publicknowledge`) its lists left them out; OPS showed none of them. The site-wide `set={journal path}` left the journal's deleted records out on OJS and OMP and listed them on OPS. 2026-09-29 (Rules 4b, 6, 15; A1), OMP and OPS, two runs, `publicknowledge` restored after each: with the only format of a `publicknowledge` book set "Not Available", an empty scratch press listed that deleted record in ListRecords and ListIdentifiers (setSpec `publicknowledge`, "This record has been deleted." on the page), answered it by GetRecord and gave its datestamp as "Earliest Datestamp", while its ListSets named only itself; a press with one published book listed it before its own record; with `set` of the press it was left out, and the empty press answered "No matching records in this repository" and the moment of the request before the format was changed and after the book was unpublished. OPS, with a `publicknowledge` preprint unposted, answered "No matching records in this repository" at an empty scratch server and "No matching identifier in this repository" for the preprint's identifier. OJS, with no deleted record on the install, answered "No matching records in this repository" and the moment of the request at an empty scratch journal. A format set "Not Available" in "Format Availability" became a deleted record; unpublishing a two-format book made two.
+
+<a id="fn-q8a"></a>
+**q8a** — Live-probed 2026-10-22 (Rules 4b, 8, 15, 23a; A1, A25, OMP9) after pkp/pkp-lib#13566, on PostgreSQL, each install freshly loaded from PKP's default test dataset, at each line's tip and again with only the fix taken out (`bin/try-fix.js` with the fix commit reversed): `main` OJS `3cf9aa91a8`, OMP `178e8b34b2`, OPS `5091e916d9`; `stable-3_5_0` OJS `0b1ae35f04`, OMP `a150eee76b`; the A1 issue report's kept walk (deleted with the report; in git). With the fix, a second journal `u19a1` given a copy of article 17 that it then unpublished listed `article/21` as deleted (setSpec `u19a1:ART`) in ListRecords and ListIdentifiers, with `set=u19a1` and `set=u19a1:ART`, and at the site-wide address with `set=u19a1`, and answered it by GetRecord; its "Earliest Datestamp" became that moment; after `publicknowledge` unpublished article 17, `u19a1` still listed only its own record and answered `article/17` with "No matching identifier in this repository". OMP the same with `publicationFormat/4` (setSpec `u19a1`); a copied book in the series `psy`, unpublished, was listed as `publicationFormat/5` under `set=u19a1:psy` at both addresses, while `set=u19a1` at both listed only `publicationFormat/4` (OMP9). Without the fix, both lines gave the report's Observed. OPS on `main` listed its own deleted `preprint/20` (the control); on 3.5 the OPS run stopped at the unpost, the workflow's Title & Abstract form answering 500 (docs/tracking/incidentals.md, U40). `stable-3_4_0` (OJS `3bedd21383`, OMP `95fefd0cf0`), a shorter walk: a second context made by the kit (`lineScratchContext()`), then `publicknowledge`'s article 17 (OMP book 14, `publicationFormat/3`, series `psy`) unpublished on the workflow screen; with the fix, the second context's ListRecords, ListIdentifiers and the site-wide list with its `set` answered "No matching records in this repository"; without it, its two lists gave the first context's deleted record and Identify its datestamp. A context's own deleted record was not built on 3.4. A25, OJS `main`: "DRIVER" ticked in `publicknowledge` and in a second journal `u19a25`, then article 17 unpublished. `publicknowledge`'s `set=driver` listed `article/1` and the deleted `article/17` naming `driver`; at `u19a25`, `set=driver` (ListRecords and ListIdentifiers) and the plain list answered "No matching records in this repository" with the fix, and listed that deleted `article/17` without it. The 3.4 and A25 scripts were one-off and are not kept. OJS `ore` (`c232e19d6f`) still had the old closure (read on GitHub).
 
 <a id="fn-q9"></a>
 **q9** — Live-probed 2026-09-26 (Rules 5, 6; A18), all three apps: a context lists by submission ID (OJS, OPS) or format number (OMP). OJS: an article's datestamp moved when its issue's "Number" was saved on "Issue Data", when "Prefix" was saved on its published version, and to the moment it was published again. OMP and OPS: the datestamp did not move after "Prefix" was saved on the published version, and an item published again came back with its first datestamp, older than its deleted record's (twice on each app). The site-wide ListIdentifiers, walked in full, listed the contexts one after another and every deleted record at the end (OJS 741 headers, the deleted ones at 728–740).
@@ -2111,7 +2074,8 @@ Code read 2026-09-26 at the checkouts: ojs `71bb244152` (the working tree) and `
 
 <a id="fn-f-a1"></a>
 **f-a1** — Live-probed 2026-09-26 and, on OMP, 2026-09-29: note q8. "Earliest Datestamp": OJS scratch journals with and without published items all gave 2026-09-26T05:20:08Z, a deleted record of `publicknowledge`; OMP gave the moment of the request, for an empty press and for one whose only book was unpublished, while `publicknowledge` held no deleted record; with one, the empty press gave that record's datestamp (2026-09-29); OPS gave the deleted record's datestamp. Code: note n; the OJS closure dates from `08c3cddc6c` (pkp/ojs#3134 for pkp/pkp-lib#6963, "Improve OAI performance", 2021-06-08), OMP's from its port `26edcaf788` (pkp/omp#983, 2021-06-11); the later `88aaa6b49f` (OJS) and `79302a1bd0` (OMP) only reformatted the line (git history, issue report A1 Evidence, 2026-10-01). The test installs' first context is `publicknowledge`.
-Issue report: [pkp-e2e#254](https://github.com/jardakotesovec/pkp-e2e/issues/254) ([docs/issues/U19-A1-oai-own-address-loses-deleted-records.md](../issues/U19-A1-oai-own-address-loses-deleted-records.md)).
+Fix verified 2026-10-22 on `main`, `stable-3_5_0` and `stable-3_4_0`, OJS and OMP, base and head: note q8a.
+Issue report: [pkp-e2e#254](https://github.com/jardakotesovec/pkp-e2e/issues/254), closed 2026-10-22 at the fix; the team's copy is `pkp/pkp-lib#13566`.
 
 <a id="fn-f-a2"></a>
 **f-a2** — Live-probed 2026-09-26: note q11, the reads with a time. Code: note l.
@@ -2202,7 +2166,7 @@ Issue report: [pkp-e2e#340](https://github.com/jardakotesovec/pkp-e2e/issues/340
 Issue report: [pkp-e2e#341](https://github.com/jardakotesovec/pkp-e2e/issues/341) ([docs/issues/U19-A24-oai-driver-list-says-more-results.md](../issues/U19-A24-oai-driver-list-says-more-results.md)).
 
 <a id="fn-f-a25"></a>
-**f-a25** — Not walked: note q21's scratch journals listed no deleted record in the set, and note q22 walked journal 1 itself. Code: note i (the `driver` answer filters the journal's own record query, whose deleted-record half asks for journal 1's); `DRIVERPlugin::isDRIVERRecord()` reads a deleted record's `driver` tombstone setting by its tombstone ID, whatever the journal. The question and lean are judgment.
+**f-a25** — Not walked: note q21's scratch journals listed no deleted record in the set, and note q22 walked journal 1 itself. Code: note i (the `driver` answer filters the journal's own record query, whose deleted-record half asks for journal 1's); `DRIVERPlugin::isDRIVERRecord()` reads a deleted record's `driver` tombstone setting by its tombstone ID, whatever the journal. The question and lean are judgment. Live-probed 2026-10-22, base and head of the A1 fix: note q8a.
 
 <a id="fn-f-a26"></a>
 **f-a26** — Not run: the test installs, and every install the campaign drives, run PostgreSQL; no MySQL or MariaDB was at hand on 2026-10-05. Code: note e; OJS `APP\oai\ojs\OAIDAO::getRecordsRecordSetQuery()` writes the datestamp as `GREATEST(a.last_modified, i.last_modified, p.last_modified)` over `leftJoin('issues AS i', …)`, so for an article in no issue `i.last_modified` is NULL; MySQL's and MariaDB's `GREATEST` returns NULL when any argument is NULL, PostgreSQL's ignores NULL arguments. Read 2026-10-01 for the issue report of A18 (its Cause and "Unverified", [docs/issues/U19-A18-oai-datestamp-stays-after-edit-republish.md](../issues/U19-A18-oai-datestamp-stays-after-edit-republish.md)), which does not copy the expression into its fix. What the record's datestamp then reads in a list without dates was not followed. The question and lean are judgment.
@@ -2239,7 +2203,7 @@ Issue report: [pkp-e2e#334](https://github.com/jardakotesovec/pkp-e2e/issues/334
 Issue report (the Search spec's OMP3 and OPS4, this entry under its "Reach"): [docs/issues/U15-OMP3-OPS4-returned-item-gone-search-still-lists.md](../issues/U15-OMP3-OPS4-returned-item-gone-search-still-lists.md), filed as [pkp-e2e#709](https://github.com/jardakotesovec/pkp-e2e/issues/709).
 
 <a id="fn-f-omp9"></a>
-**f-omp9** — Not walked on the first press: on the test installs `publicknowledge` holds no published book, and its own ListIdentifiers answered "No matching records in this repository" on all three apps before and after the walk below. Live-probed 2026-10-05 (Rules 4b, 7b, 7d, 8; A1), OMP `main`, two runs, each on a scratch press seeded with a series `ser` and two published books, one in the series and one in none, both then unpublished with "Unpublish" as the press's Press Manager: before, ListSets named `{press}` and `{press}:ser`, the headers read `[{press}:ser]` and `[{press}]`, `set={press}:ser` listed the series book only and `set={press}` both, at both addresses; after, the site-wide list without a set gave the two deleted records with the same sets, while the press's own lists, `set={press}` and `set={press}:ser` at both addresses, answered "No matching records in this repository" and GetRecord at the press's address "No matching identifier in this repository" (A1). OPS control the same day: an unposted preprint's deleted record, set `{server}:PRE`, was listed under `set={server}` at the server's address and the site-wide one. Code: omp `APP\oai\omp\OAIDAO::getRecordsRecordSetQuery()` compares the tombstone's set with `where('dot.set_spec', '=', $set)`; OJS and OPS add `orWhere(…, 'like', $set . ':%')`; OMP on `stable-3_5_0` has the same exact match. First noted in the A1 issue report's "Left out" (2026-10-01). Kept walk: `shared/playwright/checks/U19/I05/i05.js`. The question and lean are judgment.
+**f-omp9** — Live-probed 2026-10-22 on a second press once A1 was fixed, `main` and 3.5: note q8a (`set=u19a1` at the press's address and the site-wide one listed the deleted record of the book in no series and not that of the book in the series `psy`). Not walked on the first press: on the test installs `publicknowledge` holds no published book, and its own ListIdentifiers answered "No matching records in this repository" on all three apps before and after the walk below. Live-probed 2026-10-05 (Rules 4b, 7b, 7d, 8; A1), OMP `main`, two runs, each on a scratch press seeded with a series `ser` and two published books, one in the series and one in none, both then unpublished with "Unpublish" as the press's Press Manager: before, ListSets named `{press}` and `{press}:ser`, the headers read `[{press}:ser]` and `[{press}]`, `set={press}:ser` listed the series book only and `set={press}` both, at both addresses; after, the site-wide list without a set gave the two deleted records with the same sets, while the press's own lists, `set={press}` and `set={press}:ser` at both addresses, answered "No matching records in this repository" and GetRecord at the press's address "No matching identifier in this repository" (A1). OPS control the same day: an unposted preprint's deleted record, set `{server}:PRE`, was listed under `set={server}` at the server's address and the site-wide one. Code: omp `APP\oai\omp\OAIDAO::getRecordsRecordSetQuery()` compares the tombstone's set with `where('dot.set_spec', '=', $set)`; OJS and OPS add `orWhere(…, 'like', $set . ':%')`; OMP on `stable-3_5_0` has the same exact match. First noted in the A1 issue report's "Left out" (2026-10-01). Kept walk: `shared/playwright/checks/U19/I05/i05.js`.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-26: note q11, the preprint server part. Code: note l; the column name `a.last-modified` came with ops `5df1969511` "pkp/pkp-lib#6963 Port OAI rewrite to Laravel to OPS" (2021-06-11). Postgres answers "column … does not exist".

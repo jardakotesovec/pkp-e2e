@@ -8,8 +8,8 @@
  * publication format, "oai:{repository identifier}:publicationFormat/{n}",
  * Dublin Core the only format, the press its only set). The {OMP} bullets
  * ride inline: S1's two records of a book with two formats and none for a
- * book with no format (OMP1). S4's "Nothing to list" is {OPS}: a press's own
- * address lists the first press's deleted records (A1, Rule 4b).
+ * book with no format (OMP1). S4's "Nothing to list" is {OPS}; on a press it
+ * waits for A1's guard (A1 retired 2026-10-22; Planned in the spec).
  * S7 has no press analogue (a press has no "Enable OAI", OMP2); S8–S10 are
  * {OJS}. The {OJS OPS} bullets (keywords, "Publisher", "Relation", a
  * section's set, an unknown set) are not run here.
@@ -18,9 +18,10 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: no press's unfiltered list is asserted complete or empty; S3
- *   reads "Tidal Patterns" as no longer live at the press's address, never
- *   as missing there, and never reads the press's GetRecord of it.
+ * - A1 (retired 2026-10-22, fixed by pkp/pkp-lib#13566): no press's
+ *   unfiltered list is asserted complete or empty yet; S3 reads "Tidal
+ *   Patterns" as no longer live at the press's address and does not read
+ *   its deleted record there; the guard is Planned in the spec's Coverage.
  * - A2 🐞, A3 🐞, A20 🐞: S5 gives whole days only, all in the calendar.
  * - A4 🐞: no last part's "Resume" is read.
  * - A5 🐞: no ListMetadataFormats with an identifier is opened in the browser.

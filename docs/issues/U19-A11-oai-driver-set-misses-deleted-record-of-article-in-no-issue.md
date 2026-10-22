@@ -142,12 +142,11 @@ Reach:
   code); removing the journal (`beforeDeleteContext()`; code); and,
   with DOI versioning, the deleted records of an article's versions
   (`insertIdentifierTombstone()`; code).
-- Which journals show it: the setting is missing on every journal, but
-  a journal other than the installation's first lists none of its own
-  deleted records at its address
-  ([U19 A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U19-A1-oai-own-address-loses-deleted-records.md),
-  `jardakotesovec/pkp-e2e#254`), so there the gap is hidden behind
-  that fault until it is fixed (code).
+- Which journals show it: the setting is missing on every journal.
+  Until `pkp/pkp-lib#13566` (2026-10-22) a journal other than the
+  installation's first listed none of its own deleted records at its
+  address (U19 A1, `jardakotesovec/pkp-e2e#254`, closed at that fix),
+  which hid the gap there (code).
 - Other callers of `Repo::issue()->get()` with a publication's issue
   ID: eleven test the ID first. One does not,
   `controllers/grid/pubIds/PubIdExportRepresentationsListGridCellProvider.php`

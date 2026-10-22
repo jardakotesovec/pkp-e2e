@@ -12,7 +12,7 @@
  * Manager"; "Hosted Servers" and "…this preprint server to appear publicly
  * on the site" the Site Administrator's list and box; "Posting Mode" stands
  * before "Enable OAI". A preprint server keeps its own deleted records at
- * its own address (A1 is {OJS OMP}), so S3 and S7 read them there too.
+ * its own address (A1, retired, was {OJS OMP}), so S3 and S7 read them there too.
  * Spec: docs/specs/U19-oai-pmh.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;

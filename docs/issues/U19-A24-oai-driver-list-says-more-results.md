@@ -364,8 +364,9 @@ on a large journal has to be timed first, the test needs fixtures, and
   members (read in `lib/pkp/classes/oai/OAI.php`); more than 500
   identifiers on 3.5; a 3.5 list with records outside the set among its
   first hundred rows; a journal other than the installation's first,
-  whose lists also carry the first journal's deleted records
-  ([U19 A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U19-A1-oai-own-address-loses-deleted-records.md)).
+  whose lists also carried the first journal's deleted records until
+  `pkp/pkp-lib#13566` (U19 A1,
+  [pkp-e2e#254](https://github.com/jardakotesovec/pkp-e2e/issues/254)).
 - Unverified: which services harvest by this set today and whether
   they can use the journal's whole list; how a harvester treats a
   repeated record or "noRecordsMatch" as the last answer of a list; the
