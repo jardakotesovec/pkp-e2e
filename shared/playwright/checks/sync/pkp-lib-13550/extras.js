@@ -8,7 +8,9 @@
 // list; e3 (S5) with comments off, dbarnes opens the Comments page, with an extra path segment and with a
 // trailing slash; e4 (S8) refused comment requests (no body, a non-number id) and what the log took;
 // e6 (A14, the ui-library PR) lchristopher opens "Report" on an approved comment, types a reason, the
-// comment is deleted underneath (SQL), "Submit": what the page shows.
+// comment is deleted underneath (SQL), "Submit": what the page shows; e7 (round 3: the settings policy now
+// reads the first path argument) the "Journal editor" group loses "Permit changes to Settings" (SQL) and
+// dbarnes opens a Settings tab, Announcements and the Comments page, each bare and with one more segment.
 // Each step records rather than throws, so both sides are read.
 const {forEachApp, launch, signIn, signOut, record, sql, idle, screen, serverLog} = require('../../../probe');
 const A17 = require('../../issues/public-comment-list-exposes-reports/lib.js');
@@ -97,6 +99,13 @@ forEachApp(async (app) => {
         const dialogs = await page.getByRole('dialog').evaluateAll((ds) => ds.map((d) => ({name: d.getAttribute('aria-label') || (d.querySelector('h1,h2,h3') || {}).innerText, text: d.innerText.slice(0, 300), reason: (d.querySelector('textarea') || {}).value})));
         step('e6-refused-report', {status: r && r.status(), body: r && flat(await r.text().catch(() => ''), 200), dialogs});
         step('e6-screen', await screen(page));
+
+        // e7: comments are on here.
+        sql(app, `update user_groups set permit_settings = 0 where user_group_id = (select ug.user_group_id from user_groups ug join user_group_settings s on s.user_group_id = ug.user_group_id and s.setting_name = 'name' and s.locale = 'en' where ug.context_id = 1 and s.setting_value = 'Journal editor')`);
+        await signIn(page, 'dbarnes');
+        for (const tail of ['website', 'announcements', 'announcements/x', 'userComments', 'userComments/x']) {
+            await guard(`e7-no-settings-${tail.replace('/', '-')}`, () => open(page, app.url(`/index.php/${A}/en/management/settings/${tail}`)));
+        }
     } catch (e) {
         step('error', String((e && e.stack) || e).slice(0, 2000));
         throw e;

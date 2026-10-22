@@ -1,4 +1,4 @@
-// Prints the base and head records of matrix.sh side by side, one line per step: the status and the
+// Prints the records of matrix.sh per side (default base and head; or the sides named as arguments), one line per step: the status and the
 // fields that decide each walk (screens dropped). node shared/playwright/checks/sync/pkp-lib-13550/summary.js
 const fs = require('fs');
 const path = require('path');
@@ -11,7 +11,7 @@ const squeeze = (v, depth = 0) => {
     for (const [k, x] of Object.entries(v)) if (!DROP.has(k)) o[k] = squeeze(x, depth + 1);
     return o;
 };
-for (const side of ['base', 'head']) {
+for (const side of (process.argv.length > 2 ? process.argv.slice(2) : ['base', 'head'])) {
     const dir = path.join(root, side);
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir).filter((f) => /^(h15[fgh]|xctx|extras)-.*\.json$/.test(f)).sort()) {
