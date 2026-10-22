@@ -201,7 +201,9 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
     permission (Rule 14). ⚠ [A14](#a14) that email's link, back from
     ORCID, ends on a blank page because the app fails, so the deposit
     never resumes. Works deposited once are updated in place on later
-    publishes.
+    publishes. An edit of a published item's metadata ("Title &
+    Abstract", "Save") sends nothing, so the work keeps what was
+    published ⚠ [A23](#a23).
     [OMP1](#omp1) presses request and verify iDs identically but deposit
     nothing. <sup>j</sup>
 12. **Review deposits {OJS}.** On a journal with the member API, a completed
@@ -620,6 +622,7 @@ Left out of the scenarios above, by reason:
   - A6 (the toggle's label misdescribing when it fires; Rule 13)
   - OPS2 (the preprint server's Emails screen lacking the three ORCID rows; Rule 14)
   - A11 (the French interface: both ORCID tabs named after the old plugin; Rule 17)
+  - A23 (an edit of a published item re-sending the work to the contributors' records; Rule 11)
   - A13 (no "Delete" for the owner's unauthenticated iD on the Identity tab; Actors row 4, Rule 6c; scenario 3 marks it)
   - A14 (the re-authorization email's link failing with a server error; Rule 11)
   - A15 (the public ORCID pages' browser tab showing no page name; Rule 10)
@@ -683,6 +686,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A18](#a18) | The ORCID sign-in popup stays open on a blank page, saying nothing, when ORCID cannot be reached or fails | 🐞 | medium · crash: both | issues (claude), 2026-10-19 — re-verified |
 | [A21](#a21) | The "Requesting updated ORCID record access" email asks contributors for "updateded permissions" | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A22](#a22) | The ORCID authorization page never tells a contributor their published work is going to their record | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A23](#a23) | An edit to a published article's or preprint's metadata no longer reaches its contributors' ORCID records | 🐞 | medium | — |
 | [OJS1](#ojs1) | A review sent to ORCID by a journal with no country fails in the background instead of being skipped | 🐞 | low · crash: server | issues (claude), 2026-10-19 — re-verified |
 | [OJS2](#ojs2) | Verifying from the email for an article published without an issue ends on a blank page, though the iD is stored | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
 | [OPS2](#ops2) | The ORCID request emails have no rows on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -978,6 +982,22 @@ page showed that line for a published article (read in the plugin's
 code). The deposit still goes out, so nothing is lost: the contributor
 is only not told. (Side effects)
 Basis: probe, 2026-10-19. <sup>[f-a22](#fn-a22)</sup>
+
+<a id="a23"></a>
+**A23 — An edit to a published article's or preprint's metadata no longer reaches its contributors' ORCID records** · 🐞 · medium.
+On a journal or preprint server with the member API, publishing sends
+the item as a work to the ORCID record of each contributor with a
+verified iD (Rule 11). An editor who then corrects the published
+version's title or abstract ("Title & Abstract", the "Warning: This
+version has been published…" banner, "Save") sees the change on the
+item's page, but nothing is sent: the contributors' ORCID records keep
+the title and abstract that were published, with no message anywhere.
+The work is brought up to date only by publishing again (unpublishing
+and publishing, or a new version). 3.5 re-sends on such an edit, as
+pkp/pkp-lib#10744 asked; `main` lost the path with its search rewrite.
+A press deposits no works ([OMP1](#omp1)). The same edit also never
+reaches the search index ([Search](U15-search.md#a3)). (Rule 11)
+Basis: probe, 2026-10-22. <sup>[f-a23](#fn-a23)</sup>
 
 ### OJS
 
@@ -2050,6 +2070,26 @@ added to your ORCID record.") only under `$sendSubmission`, which
 (`VerifyIdentityWithOrcid` sets only `sendSubmissionSuccess`), on `main`
 and on `stable-3_5_0`.
 Issue report: [pkp-e2e#1009](https://github.com/jardakotesovec/pkp-e2e/issues/1009) ([docs/issues/U04-A22-orcid-landing-silent-on-deposit.md](../issues/U04-A22-orcid-landing-silent-on-deposit.md)).
+
+<a id="fn-a23"></a>
+**f-a23** — `PKPSubmissionController::editPublication()` still dispatches
+`MetadataChanged` after the save (lib/pkp `1f415a07ca`,
+`api/v1/submissions/PKPSubmissionController.php:1457`), but `main` has no
+listener for it: pkp/pkp-lib#8920's search rewrite (lib/pkp `b44cf27793`,
+OJS `71a7bfccec`, OPS `43359941c6`, 2025-08-01) deleted
+`MetadataChangedListener` and `MetadataChangedJob`, whose
+`submissionMetadataChanged()` on 3.5 (OJS `ArticleSearchIndex.php:81-83`,
+OPS `PreprintSearchIndex.php:80-83`) dispatched the ORCID send. The only
+senders left are the publish listener (`SendSubmissionToOrcid.php:46-49`)
+and the verification landing (`VerifyIdentityWithOrcid.php:205`).
+Live-probed 2026-10-22 on OJS and OPS `main` (ojs `d05d8078d3`, ops
+`5091e916d9`), scratch member-sandbox contexts, a published item whose
+contributor holds a verified iD: the publish queued `DepositOrcidSubmission`;
+the "Title & Abstract" save answered 200 and queued nothing (read from the
+`jobs` table; no ORCID stand-in on the slot fleet). On OJS
+`stable-3_5_0` the same save queued a `MetadataChangedJob`. Report:
+`docs/reports/2026-10-22-pkp-lib-8920.md`; kept script
+`shared/playwright/checks/sync/pkp-lib-8920/metadata-changed.js`.
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — Live-probed 2026-10-16 (OJS on `main`, two runs): Member

@@ -10,10 +10,10 @@ and no CI follows this branch. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `1e78ca0c2b` | 2026-10-21 | claude (daily maintenance session) |
-| omp | `cce424e5ef` | 2026-10-21 | claude (daily maintenance session) |
-| ops | `5eca7fd603` | 2026-10-21 | claude (daily maintenance session) |
-| pkp-lib | `68512b5fda` (ojs, omp and ops at it) | 2026-10-21 | claude (daily maintenance session; before it `f94e556856`, the merge of pkp/pkp-lib#13535, 2026-10-20; before it `092ec34b0f`, 2026-10-19); ui-library `2576e00afd` (ojs, omp, ops; 2026-10-09); ojs `plugins/generic/jatsTemplate` `96eacdab48` (2026-10-12, the pointer of pkp/ojs#5921); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
+| ojs | `cbf80495db` | 2026-10-22 | claude (daily maintenance session; before it `1e78ca0c2b`, 2026-10-21) |
+| omp | `60163fe0a` | 2026-10-22 | claude (daily maintenance session; before it `cce424e5ef`, 2026-10-21) |
+| ops | `71ad98eb83` | 2026-10-22 | claude (daily maintenance session; before it `5eca7fd603`, 2026-10-21) |
+| pkp-lib | `ce67d3f62b` (ojs, omp and ops at it) | 2026-10-22 | claude (daily maintenance session; before it `68512b5fda`, 2026-10-21; before it `f94e556856`, the merge of pkp/pkp-lib#13535, 2026-10-20; before it `092ec34b0f`, 2026-10-19); ui-library `2576e00afd` (ojs, omp, ops; 2026-10-09); ojs `plugins/generic/jatsTemplate` `96eacdab48` (2026-10-12, the pointer of pkp/ojs#5921); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
 
@@ -22,6 +22,13 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the
 regression verdict; what was filed)._
 
+- **2026-10-22 (daily session, VM s2) — ojs `1e78ca0c2b..cbf80495db` (4), omp `cce424e5ef..60163fe0a` (2), ops `5eca7fd603..71ad98eb83` (2), pkp-lib `68512b5fda..ce67d3f62b` (6), ui-library none. `main` first: synced today. Read in full; baselines advanced.**
+  - pkp-lib `e3ccc6ce47` (pkp/pkp-lib#13571) → `=main 94261a707d` (read today, `upstream-sync.md`): `main`'s verdict stands (the merge check of 2026-10-21 drove the line too).
+  - pkp-lib `86b52153c3` (revert of `f4f8fcdbc0`) + `c32510b84a` → `~main 1f54d43637` (together the same changed lines as `main`, the line's loop still without `?? []`), `1fdd5f582e` → `=main abe5d81425`: `main`'s read (rr1022a) stands, and the line shows the same: the OMP tip refuses an API contributor `PUT` whose affiliation rows leave out `authorId` with "The author for this affiliation could not be found." and a PHP warning (rr1022a's script, run `line35`, on the line's fleet), saving with the contributor's id; 3.5.0-5 refused the same bodies with "This field is required." (the schema), so no regression against the release. The line's own callers of `saveAffiliations()`: the author update alone, as on `main`. Security: the private item `main`'s read routed is on the line's tip too (verified there on OMP); it reaches 3.5.0-6 unless fixed first (said in the thread).
+  - pkp-lib `6468ef9569` → `~main 2ea65a9662`: read at its PR review (pkp/pkp-lib#13578, 2026-10-21, below; merged with the reviewed tree): no regression.
+  - pkp-lib `ce67d3f62b` → `=main d43737309c` (read today, rr1022b): `main`'s verdict stands; the line has no media files API, so `6aa7c14a79` has no twin and none is needed. 3.5's own callers of the files API's edit: the same as `main`'s (no screen sends the dropped fields).
+  - ojs `335738c0ba`, `d2201d73fd`, `05b63d459f`, `cbf80495db`, omp `7dea39dfc`, `60163fe0a`, ops `fb598e1313`, `71ad98eb83` → pointer bumps through the commits above to `ce67d3f62b`.
+  - `main`'s findings carried over: pkp/pkp-lib#8920's regression (`docs/reports/2026-10-22-pkp-lib-8920.md`) is not on the line, walked on OJS 3.5 as the report's before side (the edit queues `MetadataChangedJob`; the import queues `BatchMetadataChangedJob`, which indexes it). The other open stable-line rows not re-run: the range touches affiliations, the files API's edit and the LESS base URL, none of their code.
 - **2026-10-21 (PR review, VM s1; asked in the channel by @jarda.kotesovec) — pkp/pkp-lib#13578 (asmecher, `aca8890d5b`, one commit on the line tip `1fdd5f582e`), no app PRs. Not merged; baselines not advanced. No companion: no spec, suite or CI follows the line.**
   - Refs: OJS `335738c0ba`, OMP `7dea39dfc`, OPS `fb598e1313` (the line tips, pointers at `e3ccc6ce47`) with `lib/pkp` at `1fdd5f582e` for the "before" side and at the PR head; the default dataset freshly loaded for each side. The PR ref carries the unread line commits `e3ccc6ce47..1fdd5f582e` (pkp/pkp-lib#13495's follow-ups), left to the daily read.
   - pkp-lib `aca8890d5b` (`PKPSubmissionController`, two added lines): what the change is for is recorded privately. **No regression** on the line's three apps: the contributor and publication edits (the submission wizard's Details and Contributors saves, API edits) and the change of submission language store as at the base.

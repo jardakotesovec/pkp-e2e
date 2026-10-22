@@ -248,7 +248,10 @@ shared. <sup>b</sup>
     Date"; a press's Catalog Entry › "Date Published"; a server's Preprint
     Entry › "Date Posted") shows in the result, and the date filters
     (Rule 9) follow it, at once. When an article has several versions, the words of every
-    version, superseded ones included, find it ⚠ [A7](#a7). <sup>k</sup>
+    version, superseded ones included, find it ⚠ [A7](#a7). An article,
+    book or preprint brought in published by a Native XML import is on
+    the site at once but never enters the index: search does not find it
+    until the index is rebuilt from the command line ⚠ [A19](#a19). <sup>k</sup>
 13. **A journal that does not publish online** {OJS}. When the journal's
     Distribution settings set the publishing mode to "OJS will not be used
     to publish the journal's contents online.", the Search page is gated. A
@@ -744,6 +747,8 @@ Left out of the scenarios above, by reason:
   - A7 (a newer version unpublished: the older one listed again after the
     jobs, the newer one's words still finding it; Rule 12)
   - A3 (edits after publication never reaching the index; Rule 12)
+  - A19 (an item imported published by Native XML never reaching the
+    index; Rule 12)
   - A8 and A12 (the address-only refinements, paging keeping the sort
     alone, the date sort answering an error page; Rules 8, 14)
   - A17 (a sort the page does not know answering an empty error page;
@@ -807,6 +812,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A13](#a13) | A Search results address whose page number is not a number opens a completely blank page | 🐞 | low · crash: server | issues (claude), 2026-10-03 — re-verified |
 | [A17](#a17) | A Search link naming a sort that main does not know, such as a typo or 3.5's "publicationDate", shows an empty error page | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [A18](#a18) | On a site east of UTC, the Search page's "Published After" and "Published Before" apply the day before the chosen date | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A19](#a19) | An article, book or preprint imported already published with Native XML is never found by search | 🐞 | medium | — |
 | [OJS1](#ojs1) | Screen readers hear a raw code, or "Found one item.", when a search finds several items | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OJS2](#ojs2) | On the site-wide Search page, "By Journal" limits the first page only and never shows as chosen | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS4](#ojs4) | Rebuilding one journal's search index by its path leaves Search empty on every other journal until a full rebuild | 🐞 | medium | — |
@@ -1086,6 +1092,19 @@ the dates printed under the extra "Published After" items give it
 away. On a site at UTC or west of it, the default database search
 keeps the chosen day.
 Since: 2025-08 (about a year). Basis: probe, 2026-10-15. <sup>f-a18</sup>
+
+<a id="a19"></a>
+**A19 — An article, book or preprint imported already published with Native XML is never found by search** · 🐞 · medium.
+A journal, press or server that brings in its back catalogue with the
+Native XML import (Tools › Import/Export, or the command-line tool)
+gets each published item on the site at once: its page opens and the
+archive lists it. But the import never adds it to the search index, so
+search does not find it by its title or any other word ("No Results";
+on a press "No titles were found…"), and nothing tells the manager.
+Only a rebuild of the index from the command line brings the imported
+items into search. 3.5 queues the indexing at the end of the import;
+`main` lost that step with its search rewrite. (Rule 12)
+Since: 2025-08 (about a year). Basis: probe, 2026-10-22. <sup>f-a19</sup>
 
 ### OJS
 
@@ -2116,6 +2135,27 @@ date_default_timezone_get())`, in both engines (checked in PHP: all four
 zones give `2025-01-31`; not tried live). Upstream: none found (pkp/pkp-lib
 issue search "search date timezone", "publishedFrom", 2026-10-15).
 Issue report: [pkp-e2e#977](https://github.com/jardakotesovec/pkp-e2e/issues/977) ([docs/issues/U15-A18-search-date-filter-day-early-east-of-utc.md](../issues/U15-A18-search-date-filter-day-early-east-of-utc.md)).
+
+<a id="fn-f-a19"></a>
+**f-a19** — fn-k: `NativeXmlSubmissionFilter` still dispatches
+`BatchMetadataChanged` at the end of an import (lib/pkp `1f415a07ca`,
+`plugins/importexport/native/filter/NativeXmlSubmissionFilter.php:204`),
+and an imported publication is stored published without passing through
+`Repo::publication()->publish()`, so `PublicationPublished` (the only
+event `UpdateSubmissionInSearchIndex` hears) never fires. pkp/pkp-lib#8920
+(lib/pkp `b44cf27793`, OJS `71a7bfccec`, OMP `a25dff8b5`, OPS
+`43359941c6`, 2025-08-01) deleted `BatchMetadataChangedListener` and
+`BatchMetadataChangedJob`, which on 3.5 indexed the imported items.
+Live-probed 2026-10-22 on `main` (ojs `d05d8078d3`, omp `fad665a63`, ops
+`5091e916d9`), a scratch context per app: an exported published item
+imported back with `tools/importExport.php NativeImportExportPlugin
+import` answered "The import completed successfully", its page 200, no
+job queued, no `submissions_fulltext` row, search for its title "No
+Results"; indexing that one item by hand made search find it. On OJS
+`stable-3_5_0` the same import queued a `BatchMetadataChangedJob`, and
+with that job run search reported "Found one item." Report:
+`docs/reports/2026-10-22-pkp-lib-8920.md`; kept script
+`shared/playwright/checks/sync/pkp-lib-8920/metadata-changed.js`.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-g: `templates/frontend/pages/search.tpl` passes `count`
