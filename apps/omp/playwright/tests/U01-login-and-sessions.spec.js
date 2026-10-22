@@ -9,7 +9,7 @@
  *
  * Not covered, by register ID (the spec's Coverage section is the record
  * of everything else left out): A1, A2, A4, A5, A7, A8, A10, A11,
- * A13, A14.
+ * A14.
  *
  * Seeding: scenario endpoints only. Scratch submissions ride the read-only
  * `publicknowledge` press; S1 adds a scratch press with no users so the
