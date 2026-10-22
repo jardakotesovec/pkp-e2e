@@ -1,37 +1,43 @@
 // U21 A19 issue walk: after a save the server refuses, the submission wizard hangs on "Saving".
-// Steps (docs/issues/U21-A19-wizard-refused-save-hangs-saving.md), on the default dataset:
-//   rvaca: Settings › Workflow › Submission › Metadata, "Plain Language Summary" at require (one way to get a refusal, A20);
-//   the author (OJS/OPS ccorino, OMP aclark): Make a Submission, Continue past Upload Files, an abstract on Details with
-//   the summary empty, Continue (refused); OK; Back, the summary typed, Continue; on to Review; reload.
-// MODE=neighbour: the path a fix must leave alone. The same submission, abstract and summary both typed, the browser
-//   offline for the Continue (a lost connection), then online again: "Reconnecting", the retry, "Last saved".
+// Steps (docs/issues/U21-A19-wizard-refused-save-hangs-saving.md), on the default dataset. Each app has its own refused
+// save (REFUSAL, defaulting per app; a required plain language summary refuses no wizard save since pkp-lib#13585):
+//   OJS (REFUSAL=wordlimit): dbarnes enables the plain language summary ("Ask") and gives "Articles" a word count of
+//     10; ccorino: Make a Submission, Continue past Upload Files, on "Details" an abstract and a 20-word summary,
+//     Continue (refused); OK; Back, a short summary, Continue; on to Review; reload.
+//   OPS (REFUSAL=vordoi): ccorino, "For Readers", "This preprint has been published elsewhere." with a DOI typed
+//     without its web address, Continue (refused); OK; Back, the DOI as https://doi.org/…, Continue; on to Review; reload.
+//   OPS (REFUSAL=license, run alone): the same, with "Other license URL" given text that is not a web address.
+//   OMP (REFUSAL=chapter): admin gives skumar (a Proofreader) "Chapter Author", a role without the Submission stage;
+//     skumar submits; every save of that submission is refused (U21 OMP4). "Details" takes the title and the
+//     abstract, the step after the refusal a new abstract; the reload is answered "Yes".
+// MODE=neighbour: the path a fix must leave alone, no precondition. The author (ccorino, OMP aclark) types an abstract
+//   on "Details" and presses Continue with the browser offline (a lost connection), then online again:
+//   "Reconnecting", the retry, "Last saved".
 //
-//   npm run fleet-prep -- --feature issues-ir23 --dataset 1 --reset
-//   PROBE_FEATURE=issues-ir23 PROBE_AGENT=ir23 node bin/probe.js all shared/playwright/checks/issues/wizard-refused-save-hangs-saving/walk.js
-//   (MODE=neighbour in front for the neighbour check; PKP_E2E_LINE=stable-3_5_0 and the line's fleet for 3.5;
-//   REFUSAL=chapter ... node bin/probe.js omp ... for the Chapter Author refusal)
+//   npm run fleet-prep -- --feature issues-h22b --dataset 2 --reset
+//   PROBE_FEATURE=issues-h22b PROBE_AGENT=h22b node bin/probe.js all shared/playwright/checks/issues/wizard-refused-save-hangs-saving/walk.js
+//   (MODE=neighbour in front for the neighbour check; PKP_E2E_LINE=stable-3_5_0 and the line's fleet for 3.5)
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, idle} = require('../../../probe');
 const L = require('./lib.js');
 
 const MODE = process.env.MODE || 'walk';
-// REFUSAL=vordoi (OPS; used on 3.5, which has no plain language summary): the refused save is the "Relation status"
-// form's, "This preprint has been published elsewhere." with a DOI typed without its web address (U75 A7).
-// REFUSAL=chapter (OMP): admin gives skumar (a Proofreader) "Chapter Author", a role without the Submission stage, and
-// skumar submits; every save of that submission is refused (U21 OMP4). Step 5 types the title and the abstract on
-// "Details", step 7 a new abstract.
-const REFUSAL = process.env.REFUSAL || 'pls';
+const DEFAULT_REFUSAL = {ojs: 'wordlimit', omp: 'chapter', ops: 'vordoi'};
 const BARE_DOI = '10.1234/u21ir23';
 const DOI_URL = 'https://doi.org/10.1234/u21ir23';
+const BAD_LICENSE = 'u21ir23 licence of the author';
+const LICENSE_URL = 'https://example.org/u21ir23-licence';
 const ABSTRACT = 'u21ir23 abstract typed by the author.';
 const SUMMARY = 'u21ir23 summary typed after the refusal.';
+const LONG_SUMMARY = 'u21ir23 this plain language summary runs past the section word limit of ten words so the server refuses it.';
 const ABS_ID = 'titleAbstract-abstract-control-en';
 const TITLE_ID = 'titleAbstract-title-control-en';
 const ABSTRACT_AFTER = 'u21ir23 abstract typed after the refusal.';
 const PLS_ID = 'titleAbstract-plainLanguageSummary-control-en';
 
 forEachApp(async (app) => {
+    const REFUSAL = process.env.REFUSAL || DEFAULT_REFUSAL[app.name];
     if (REFUSAL === 'chapter' && app.name !== 'omp') return;
-    const author = REFUSAL === 'chapter' ? 'skumar' : app.name === 'omp' ? 'aclark' : 'ccorino';
+    const author = REFUSAL === 'chapter' && MODE !== 'neighbour' ? 'skumar' : app.name === 'omp' ? 'aclark' : 'ccorino';
     const o = {app: app.name, line: app.line || 'main', mode: MODE, author};
     const {page, close} = await launch(app);
     await page.addInitScript(L.watchFooter);
@@ -59,7 +65,7 @@ forEachApp(async (app) => {
     const snap = async (name, facts) => {
         const s = await screen(page).catch((e) => ({url: page.url(), error: L.flat(e.message)}));
         if (facts) s.facts = facts;
-        const id = `${MODE}${REFUSAL === 'pls' ? '' : '-' + REFUSAL}-${String(++n).padStart(2, '0')}-${name}`;
+        const id = `${MODE}${MODE === 'neighbour' ? '' : '-' + REFUSAL}-${String(++n).padStart(2, '0')}-${name}`;
         record(id, s);
         await shot(page, id).catch(() => {});
         return s;
@@ -67,15 +73,18 @@ forEachApp(async (app) => {
     const errDialog = () => page.getByRole('dialog').filter({hasText: /An unexpected error has occurred/});
     const richText = (id) => page.evaluate((i) => (window.tinymce && window.tinymce.get(i) ? window.tinymce.get(i).getContent({format: 'text'}) : null), id).catch(() => null);
     try {
-        // Precondition: the manager requires the plain language summary.
-        o.refusal = REFUSAL;
-        if (REFUSAL === 'pls') {
-            await signIn(page, 'rvaca');
-            o.settingsSave = await L.requirePlainLanguageSummary(page, app);
-            await snap('metadata-settings');
+        // Preconditions.
+        o.refusal = MODE === 'neighbour' ? null : REFUSAL;
+        if (REFUSAL === 'wordlimit' && MODE !== 'neighbour') {
+            await signIn(page, 'dbarnes');
+            o.plsSetting = await L.enablePlainLanguageSummary(page, app);
+            await snap('metadata-settings', o.plsSetting);
+            if (o.plsSetting.absent) { o.stopped = 'no plain language summary on this line'; return; }
+            o.wordCount = await L.setSectionWordCount(page, app, app.name === 'ops' ? 'Preprints' : 'Articles', 10);
+            await snap('section-word-count', o.wordCount);
             await signOut(page);
         }
-        if (REFUSAL === 'chapter') {
+        if (REFUSAL === 'chapter' && MODE !== 'neighbour') {
             await signIn(page, 'admin');
             o.roleRow = await L.giveRole(page, app, 'skumar', 'Chapter Author');
             await snap('chapter-author-given');
@@ -91,21 +100,9 @@ forEachApp(async (app) => {
         // 4: past "Upload Files".
         if (/Upload Files\s*$/.test(o.firstStep)) await L.pressContinue(page); // 3.5 OPS opens on "Details"
         o.detailsStep = await L.currentStep(page);
-        if (REFUSAL === 'chapter') await L.typeRich(page, TITLE_ID, 'u21ir23 refused save');
+        if (REFUSAL === 'chapter' && MODE !== 'neighbour') await L.typeRich(page, TITLE_ID, 'u21ir23 refused save');
         await L.typeRich(page, ABS_ID, ABSTRACT);
-        if (REFUSAL === 'pls') await loc(page, 'Details: the Plain Language Summary editor', page.locator(`#${PLS_ID}_ifr`));
-        const published = page.getByRole('radio', {name: 'This preprint has been published elsewhere.', exact: true});
-        const doiBox = page.getByRole('textbox', {name: 'DOI of the published preprint'});
-        if (REFUSAL === 'vordoi') {
-            for (let i = 0; i < 4 && !(await published.isVisible().catch(() => false)); i++) await L.pressContinue(page);
-            o.relationStep = await L.currentStep(page);
-            await published.check();
-            await doiBox.fill(BARE_DOI);
-        }
-        const refusedStep = (await L.currentStep(page)).replace(/^\d+\s*/, '');
-
         if (MODE === 'neighbour') {
-            await L.typeRich(page, PLS_ID, 'u21ir23 summary typed before the save.');
             await page.context().setOffline(true);
             t0 = Date.now();
             await L.pressContinue(page);
@@ -123,14 +120,36 @@ forEachApp(async (app) => {
             const unsaved = page.getByRole('dialog').filter({hasText: /Unsaved Changes/});
             o.reloadUnsavedDialog = await unsaved.waitFor({timeout: 4000}).then(() => true).catch(() => false);
             await page.locator('button.pkpSteps__step__label').filter({hasText: L.endAnchored('Details')}).first().click().catch(() => {});
-            await page.locator(`#${PLS_ID}_ifr`).waitFor({timeout: L.T}).catch(() => {});
+            await page.locator(`#${ABS_ID}_ifr`).waitFor({timeout: L.T}).catch(() => {});
             await L.sleep(1500);
-            o.readBack = {abstract: await richText(ABS_ID), summary: await richText(PLS_ID)};
+            o.readBack = {abstract: await richText(ABS_ID)};
             await snap('read-back', o.readBack);
             return;
         }
 
-        // 5: Continue with the summary empty: the server refuses the save.
+        if (REFUSAL === 'wordlimit') {
+            await loc(page, 'Details: the Plain Language Summary editor', page.locator(`#${PLS_ID}_ifr`));
+            await L.typeRich(page, PLS_ID, LONG_SUMMARY);
+        }
+        const published = page.getByRole('radio', {name: 'This preprint has been published elsewhere.', exact: true});
+        const doiBox = page.getByRole('textbox', {name: 'DOI of the published preprint'});
+        const otherLicense = page.locator('label.pkpFormField--options__option', {hasText: 'Other license URL'});
+        if (REFUSAL === 'license') {
+            for (let i = 0; i < 4 && !(await otherLicense.isVisible().catch(() => false)); i++) await L.pressContinue(page);
+            o.relationStep = await L.currentStep(page);
+            await loc(page, 'For Readers: the "Other license URL" option', otherLicense);
+            await otherLicense.locator('input[type="radio"]').check();
+            await otherLicense.locator('input[type="text"]').fill(BAD_LICENSE);
+        }
+        if (REFUSAL === 'vordoi') {
+            for (let i = 0; i < 4 && !(await published.isVisible().catch(() => false)); i++) await L.pressContinue(page);
+            o.relationStep = await L.currentStep(page);
+            await published.check();
+            await doiBox.fill(BARE_DOI);
+        }
+        const refusedStep = (await L.currentStep(page)).replace(/^\d+\s*/, '');
+
+        // 5: Continue: the server refuses the save.
         t0 = Date.now();
         o.step5next = await L.pressContinue(page);
         o.errorDialog = await errDialog().waitFor({timeout: 10_000}).then(() => true).catch(() => false);
@@ -146,8 +165,9 @@ forEachApp(async (app) => {
         // 7: Back to the refused step, the field corrected, Continue.
         await L.pressBack(page, refusedStep);
         if (REFUSAL === 'vordoi') await doiBox.fill(DOI_URL);
+        else if (REFUSAL === 'license') await otherLicense.locator('input[type="text"]').fill(LICENSE_URL);
         else if (REFUSAL === 'chapter') await L.typeRich(page, ABS_ID, ABSTRACT_AFTER);
-        else await L.typeRich(page, PLS_ID, SUMMARY);
+        else if (REFUSAL === 'wordlimit') await L.typeRich(page, PLS_ID, SUMMARY);
         const t1 = Date.now();
         await L.pressContinue(page);
         await L.sleep(8000);
@@ -185,7 +205,7 @@ forEachApp(async (app) => {
         await page.locator('button.pkpSteps__step__label').filter({hasText: L.endAnchored('Details')}).first().click().catch(() => {});
         await page.locator(`#${ABS_ID}_ifr`).waitFor({timeout: L.T}).catch(() => {});
         await L.sleep(1500);
-        o.reload.readBack = {abstract: await richText(ABS_ID), summary: REFUSAL === 'pls' ? await richText(PLS_ID) : undefined, title: REFUSAL === 'chapter' ? await richText(TITLE_ID) : undefined, controls: await L.readControls(page), footer: await footerLog(t2)};
+        o.reload.readBack = {abstract: await richText(ABS_ID), summary: REFUSAL === 'wordlimit' ? await richText(PLS_ID) : undefined, title: REFUSAL === 'chapter' ? await richText(TITLE_ID) : undefined, controls: await L.readControls(page), footer: await footerLog(t2)};
         if (REFUSAL === 'vordoi') {
             await page.locator('button.pkpSteps__step__label').filter({hasText: L.endAnchored(refusedStep)}).first().click().catch(() => {});
             await L.sleep(1500);
@@ -199,8 +219,8 @@ forEachApp(async (app) => {
     } finally {
         o.allWrites = writes(0);
         o.allPageErrors = errs.map((x) => x.text);
-        record(`facts-${MODE}${REFUSAL === 'pls' ? '' : '-' + REFUSAL}`, o);
-        console.log(`[ir23 ${app.name} ${MODE}]`, JSON.stringify(o).slice(0, 3000));
+        record(`facts-${MODE}${MODE === 'neighbour' ? '' : '-' + REFUSAL}`, o);
+        console.log(`[h22b ${app.name} ${MODE} ${o.refusal}]`, JSON.stringify(o).slice(0, 3000));
         await close();
     }
 });

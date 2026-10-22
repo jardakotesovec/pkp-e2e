@@ -594,7 +594,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | An Author cannot record that their posted preprint has been published elsewhere | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | "Relations" offers an active "Save" to someone who may not edit the version, and refuses it with an unexpected-error notice | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A3](#a3) | A preprint switched away from "published elsewhere" keeps the published version's DOI, and its Crossref record still names it | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [A7](#a7) | A DOI written on its own on the wizard's "For Readers" step ends in an unexpected-error window | 🐞 | medium · crash: script | issues (claude), 2026-10-03 — re-verified |
+| [A7](#a7) | A DOI written on its own on the wizard's "For Readers" step ends in an unexpected-error window | 🐞 | medium · crash: script | issues (claude), 2026-10-22 — re-verified |
 | [A8](#a8) | A preprint author can submit without answering the "Relation status" question marked required | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | A preprint's submission "Review" says "not published elsewhere" when the author never answered "Relation status" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | After a reload, the wizard's "For Readers" shows the saved relation unticked, and answering again erases the DOI | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -711,8 +711,7 @@ needs a full web address ([A4](#a4)). Neither is saved: after the reload
 the window asks for, "Review" reads "This preprint has not been
 published elsewhere." and "Submit" completes the submission with no
 relation at all.
-Basis: probe, 2026-10-03. <sup>f-a7</sup>
-Report: refresh owed — pkp/pkp-lib#13585 (merged as `1f415a07ca`, 2026-10-21; in the apps once their `lib/pkp` pointers pass it) changed `PKP\publication\Repository::validate()` and `ValidatorFactory::required()`: a required plain language summary no longer refuses saves that leave it out, and in the wizard it no longer refuses any save while the submission is in progress; the report's Reach lists a required summary left empty on "Details" among the saves that get the same generic window, which no longer happens (2026-10-21)
+Basis: probe, 2026-10-22. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — A preprint author can submit without answering the "Relation status" question marked required** · 🐞 · low.

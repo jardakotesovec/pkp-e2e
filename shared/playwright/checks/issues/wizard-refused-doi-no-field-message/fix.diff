@@ -26,7 +26,16 @@
  
  export default {
  	components: {
-@@ -359,17 +360,54 @@
+@@ -71,6 +72,8 @@
+ 			reconfigureSubmissionProps: [],
+ 			/** An array of ids of forms that have changed since the last save. Default: `[]` */
+ 			staleForms: [],
++			/** An array of ids of forms whose last save the server refused, unchanged since. Default: `[]` */
++			refusedForms: [],
+ 			/** An array of ids of steps that have been started. Default: `[]` */
+ 			startedSteps: [],
+ 			/** **Required** An array of steps. See "Steps and Sections" below. */
+@@ -359,17 +362,57 @@
  				return;
  			}
  
@@ -37,7 +46,6 @@
 -						this.autosavesKey,
 -						autosaves.filter((payload) => payload.id !== autosave.id),
 -					);
--				}
 +			if (xhr.status === 403) {
 +				this.isDisconnected = true;
 +				this.ajaxErrorCallback({});
@@ -77,6 +85,9 @@
 +			const names = Object.keys(errors);
 +			if (names.length && names.every((name) => fieldNames.includes(name))) {
 +				this.updateForm(autosave.id, {errors});
++				if (!this.refusedForms.includes(autosave.id)) {
++					this.refusedForms.push(autosave.id);
+ 				}
 +				this.openStep(step.id);
 +				pkp.eventBus.$emit(
 +					'notify',
@@ -90,3 +101,45 @@
  			this.ajaxErrorCallback({});
  		},
  
+@@ -465,6 +508,33 @@
+ 			if (!newStep) {
+ 				return;
+ 			}
++			// A form whose save the server refused holds the author on its step
++			// until they change it: moving on would leave the change unsaved.
++			const newIndex = this.steps.indexOf(newStep);
++			let refusedForm;
++			const heldStep = this.steps.slice(0, newIndex).find((step) =>
++				step.sections.some((section) => {
++					if (
++						section.type === 'form' &&
++						this.refusedForms.includes(section.form.id)
++					) {
++						refusedForm = section.form;
++						return true;
++					}
++					return false;
++				}),
++			);
++			if (heldStep) {
++				this.currentStepId = heldStep.id;
++				pkp.eventBus.$emit(
++					'notify',
++					this.t('form.errors', {
++						count: Object.keys(refusedForm.errors || {}).length || 1,
++					}),
++					'warning',
++				);
++				return;
++			}
+ 			this.currentStepId = stepId;
+ 		},
+ 
+@@ -758,6 +828,7 @@
+ 		 */
+ 		updateAutosaveForm(formId, data) {
+ 			this.updateForm(formId, data);
++			this.refusedForms = this.refusedForms.filter((id) => id !== formId);
+ 			if (this.staleForms.indexOf(formId) === -1) {
+ 				this.staleForms.push(formId);
+ 			}

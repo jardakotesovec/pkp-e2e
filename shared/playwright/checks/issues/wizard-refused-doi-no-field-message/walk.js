@@ -4,15 +4,18 @@
 //   elsewhere.", "10.1234/u75r3" in "DOI of the published preprint", Continue; OK in the dialog; Back to the step.
 // MODE=submit: the same refusal, then the reload the window asks for, "Review" and "Submit" (with a file and an
 //   abstract, so "Submit" can be offered); then dbarnes reads the submitted preprint's "Relations".
-// MODE=pls: a refusal naming a field the refused form does not hold (the fix must keep the window there): rvaca
-//   requires the plain language summary; ccorino leaves it empty on "Details" and answers "Relation status" with the
-//   full address, so the server refuses the "Relation status" save naming plainLanguageSummary (U21 A20).
+// MODE=wordlimit (OPS main): the fix's reach to another form, the "Details" save refused naming its own field: dbarnes
+//   enables the plain language summary ("Ask") and gives "Preprints" a word count of 10; ccorino types a summary over
+//   the limit on "Details" and presses Continue (U21 A16).
+// MODE=again: the refusal, then "Continue" pressed again with the box unchanged, then the rail's "Review" and, when
+//   offered, "Submit"; dbarnes reads the submitted preprint's "Relations" (with a file and an abstract).
 // MODE=neighbour: what a fix must leave alone. (a) The same wizard step with the full address
-//   "https://doi.org/10.1234/u75r3": saved, no dialog, no message. (b) The control: dbarnes, submission 1,
+//   "https://doi.org/10.1234/u75r3": saved, no dialog, no message; (c) then "Details" from the rail and Continue, with
+//   "Review"'s problems on that form: the wizard moves on. (b) The control: dbarnes, submission 1,
 //   "Relations", the same bare DOI, "Save": the panel's own field message.
 //
-//   npm run fleet-prep -- --feature issues-u75r3 --dataset 3 --apps ops --reset
-//   PROBE_FEATURE=issues-u75r3 PROBE_AGENT=u75r3 node bin/probe.js ops shared/playwright/checks/issues/wizard-refused-doi-no-field-message/walk.js
+//   npm run fleet-prep -- --feature issues-h22b --dataset 2 --apps ops --reset
+//   PROBE_FEATURE=issues-h22b PROBE_AGENT=h22b node bin/probe.js ops shared/playwright/checks/issues/wizard-refused-doi-no-field-message/walk.js
 //   (MODE=neighbour in front for the neighbour check; PKP_E2E_LINE=stable-3_5_0 and the line's fleet for 3.5)
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, idle} = require('../../../probe');
 const L = require('../wizard-refused-save-hangs-saving/lib.js');
@@ -23,6 +26,8 @@ const BARE_DOI = '10.1234/u75r3';
 const DOI_URL = 'https://doi.org/10.1234/u75r3';
 const PUBLISHED = 'This preprint has been published elsewhere.';
 const ABS_ID = 'titleAbstract-abstract-control-en';
+const PLS_ID = 'titleAbstract-plainLanguageSummary-control-en';
+const LONG_SUMMARY = 'u75r3 this plain language summary runs past the section word limit of ten words so the server refuses it.';
 
 forEachApp(async (app) => {
     const o = {app: app.name, line: app.line || 'main', mode: MODE};
@@ -146,42 +151,94 @@ forEachApp(async (app) => {
             return;
         }
 
-        if (MODE === 'pls') {
-            await signIn(page, 'rvaca');
-            o.settingsSave = await L.requirePlainLanguageSummary(page, app);
+        if (MODE === 'wordlimit') {
+            // A refusal of the "Details" form naming its own field: dbarnes enables the summary ("Ask") and gives
+            // "Preprints" a word count of 10; ccorino types a summary over that limit on "Details" and presses Continue.
+            await signIn(page, 'dbarnes');
+            o.plsSetting = await L.enablePlainLanguageSummary(page, app);
+            if (o.plsSetting.absent) { o.stopped = 'no plain language summary on this line'; return; }
+            o.wordCount = await L.setSectionWordCount(page, app, 'Preprints', 10);
             await signOut(page);
-            // "Details" leaves the summary empty (its own refusal, the summary's field on its form), then the
-            // relation answered with the full address.
             await signIn(page, 'ccorino');
-            o.submissionId = await L.beginSubmission(page, app, {title: 'u75r3 summary required'});
-            o.stepsPassed = [];
-            o.refusals = [];
-            for (let i = 0; i < 8 && !(await published.isVisible().catch(() => false)); i++) {
-                const cur = await L.currentStep(page);
-                if (/Details\s*$/.test(cur) && !o.abstractTyped) { await L.typeRich(page, ABS_ID, 'u75r3 abstract typed by the author.'); o.abstractTyped = true; }
-                const t = Date.now();
-                o.stepsPassed.push(await L.pressContinue(page));
-                await L.sleep(2500);
-                const dlg = await errDialog().isVisible().catch(() => false);
-                o.refusals.push({from: cur, at: await L.currentStep(page), errorDialog: dlg, writes: writes(t).filter((w) => w.status >= 400)});
-                if (dlg) await errDialog().getByRole('button', {name: 'OK', exact: true}).click().catch(() => {});
+            o.submissionId = await L.beginSubmission(page, app, {title: 'u75r3 summary over the limit'});
+            if (/Upload Files\s*$/.test(await L.currentStep(page))) await L.pressContinue(page);
+            await L.typeRich(page, ABS_ID, 'u75r3 abstract typed by the author.');
+            await L.typeRich(page, PLS_ID, LONG_SUMMARY);
+            t0 = Date.now();
+            o.details = {next: await L.pressContinue(page)};
+            o.details.errorDialog = await errDialog().waitFor({timeout: 10_000}).then(() => true).catch(() => false);
+            o.details.errorDialogText = o.details.errorDialog ? L.flat(await errDialog().innerText().catch(() => null), 200) : null;
+            await L.sleep(1500);
+            o.details.step = await L.currentStep(page);
+            o.details.writes = writes(t0);
+            o.details.summaryField = await page.evaluate(() => {
+                const f = document.querySelector('#titleAbstract-plainLanguageSummary-control-en_ifr')?.closest('.pkpFormField');
+                return f ? {errors: [...f.querySelectorAll('.pkpFormFieldError, .pkpFieldError, [id$="-error"]')].map((x) => x.innerText.replace(/\s+/g, ' ').trim()).filter(Boolean),
+                    visible: !!f.getClientRects().length} : null;
+            }).catch((e) => ({err: L.flat(e.message, 200)}));
+            o.details.notices = await page.locator('[role="status"], .pkpNotify, .vue-notification').allInnerTexts().then((a) => a.map((x) => L.flat(x, 200)).filter(Boolean)).catch(() => null);
+            await snap('wordlimit-continue', o.details);
+            if (o.details.errorDialog) await errDialog().getByRole('button', {name: 'OK', exact: true}).click().catch(() => {});
+            await L.sleep(6000);
+            o.details.after = {step: await L.currentStep(page), controls: await L.readControls(page), pageErrors: errsSince(t0), footer: await footerLog(t0)};
+            await snap('wordlimit-after', o.details.after);
+            return;
+        }
+
+        if (MODE === 'again') {
+            // The refusal, then "Continue" pressed again with the box left as it is, then on to "Review" and "Submit"
+            // (a file and an abstract, so that "Submit" can be offered); dbarnes reads the preprint's "Relations".
+            await toRelationStep('u75r3 Continue pressed again', BARE_DOI, {file: true, abstract: true});
+            t0 = Date.now();
+            o.first = {next: await L.pressContinue(page)};
+            o.first.errorDialog = await errDialog().waitFor({timeout: 8000}).then(() => true).catch(() => false);
+            if (o.first.errorDialog) await errDialog().getByRole('button', {name: 'OK', exact: true}).click().catch(() => {});
+            await L.sleep(3000);
+            o.first.step = await L.currentStep(page);
+            o.first.field = await readField();
+            o.first.writes = writes(t0);
+            await snap('again-refused', o.first);
+            // Back on the relation step (the fix brings the author there; without it, "Back").
+            if (!L.endAnchored(o.relationStep).test(await L.currentStep(page))) await L.pressBack(page, o.relationStep).catch((e) => { o.first.backError = L.flat(e.message, 200); });
+            // "Continue" again, the box unchanged.
+            const t1 = Date.now();
+            await L.footer(page).getByRole('button', {name: 'Continue', exact: true}).click({timeout: 10_000}).catch((e) => { o.againClickError = L.flat(e.message, 200); });
+            await L.sleep(4000);
+            o.again = {step: await L.currentStep(page), writes: writes(t1), field: await readField(), controls: await L.readControls(page),
+                errorDialog: await errDialog().isVisible().catch(() => false), pageErrors: errsSince(t1)};
+            await snap('again-continue', o.again);
+            if (o.again.errorDialog) await errDialog().getByRole('button', {name: 'OK', exact: true}).click().catch(() => {});
+            // The rail's "Review", as an author would try next.
+            await P.goToStep(page, 'Review').catch((e) => { o.railError = L.flat(e.message, 200); });
+            await page.locator('.submissionWizard__loadingReview').waitFor({state: 'hidden', timeout: 20_000}).catch(() => {});
+            await L.sleep(3000);
+            const rv = await snap('again-review');
+            const main = (rv.text && rv.text.main) || '';
+            o.review = {step: await L.currentStep(page), relationText: L.flat((main.match(/Relation status[\s\S]{0,120}/) || [])[0], 160),
+                problems: /one or more problems/.test(main), controls: await L.readControls(page), writes: writes(t1)};
+            const submit = L.footer(page).getByRole('button', {name: 'Submit', exact: true});
+            o.review.submitVisible = await submit.isVisible().catch(() => false);
+            o.review.submitDisabled = o.review.submitVisible ? await submit.isDisabled().catch(() => null) : null;
+            if (o.review.submitDisabled === false) {
+                await submit.click();
+                const d = page.getByRole('dialog').filter({hasText: /will be submitted to|Are you sure you want to (complete|submit)/});
+                await d.waitFor({timeout: L.T});
+                await d.getByRole('button', {name: 'Submit', exact: true}).click();
+                o.complete = await page.getByRole('heading', {name: 'Submission complete'}).waitFor({timeout: 45_000}).then(() => true).catch(() => false);
+                await snap('again-submitted', {complete: o.complete});
+                o.relationsAfter = await readRelations(o.submissionId);
+                await snap('again-relations', o.relationsAfter);
+                return;
             }
-            o.relationStep = (await L.currentStep(page)).replace(/^\d+\s*/, '');
-            if (await published.isVisible().catch(() => false)) {
-                await published.check();
+            // Held: the author corrects the box and goes on.
+            if (L.endAnchored(o.relationStep).test(await L.currentStep(page)) && (await doiBox.isVisible().catch(() => false))) {
                 await doiBox.fill(DOI_URL);
-                t0 = Date.now();
+                const t2 = Date.now();
                 await L.pressContinue(page);
-                o.relation = {errorDialog: await errDialog().waitFor({timeout: 10_000}).then(() => true).catch(() => false)};
-                o.relation.errorDialogText = o.relation.errorDialog ? L.flat(await errDialog().innerText().catch(() => null), 200) : null;
-                await L.sleep(1500);
-                o.relation.step = await L.currentStep(page);
-                o.relation.writes = writes(t0);
-                await snap('pls-relation-continue', o.relation);
-                if (o.relation.errorDialog) await errDialog().getByRole('button', {name: 'OK', exact: true}).click().catch(() => {});
-                await L.sleep(1000);
-                o.relation.formErrors = await page.locator('.pkpFormErrors, .pkpFieldError').allInnerTexts().catch(() => null);
-                o.relation.controls = await L.readControls(page);
+                await L.sleep(5000);
+                const rv2 = await snap('again-corrected');
+                o.corrected = {step: await L.currentStep(page), writes: writes(t2), controls: await L.readControls(page),
+                    relationText: L.flat((((rv2.text && rv2.text.main) || '').match(/Relation status[\s\S]{0,120}/) || [])[0], 160)};
             }
             return;
         }
@@ -203,6 +260,16 @@ forEachApp(async (app) => {
             await L.pressBack(page, o.relationStep).catch((e) => { o.full.backError = L.flat(e.message, 200); });
             o.full.field = await readField();
             await snap('full-address-back', o.full.field);
+            // (c) "Review" has copied its check's problems (no file, no abstract) onto the "Details" form: open
+            // "Details" from the rail and press Continue; the wizard must move on (a fix must hold only a refused form).
+            await P.goToStep(page, 'Details').catch((e) => { o.reviewErrorsMove = {railError: L.flat(e.message, 200)}; });
+            await L.sleep(800);
+            o.reviewErrorsMove = {...(o.reviewErrorsMove || {}), from: await L.currentStep(page),
+                fieldErrors: await page.locator('.pkpFormFieldError:visible, .pkpFieldError:visible').allInnerTexts().then((a) => a.map((x) => L.flat(x, 160))).catch(() => null)};
+            await L.pressContinue(page).catch((e) => { o.reviewErrorsMove.continueError = L.flat(e.message, 200); });
+            await L.sleep(1500);
+            o.reviewErrorsMove.to = await L.currentStep(page);
+            await snap('review-errors-continue', o.reviewErrorsMove);
             await signOut(page);
 
             // (b) the control: "Relations" on submission 1 in the workflow, as dbarnes.

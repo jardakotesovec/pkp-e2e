@@ -7,7 +7,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const flat = (s, n = 400) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const endAnchored = (name) => new RegExp(`${esc(name)}\\s*$`);
-const PLS_REQUIRE = 'Require the author to provide a plain language summary before accepting their submission.';
+const PLS_ASK = 'Ask the author to provide a plain language summary during submission.';
+const localeSeg = (app) => (app.line && /3_[34]/.test(app.line) ? '' : '/en');
 
 /** Init script: every change of the wizard footer's status line, with its time. */
 function watchFooter() {
@@ -22,24 +23,41 @@ function watchFooter() {
     if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 }
 
-/** As a manager: Settings › Workflow › Submission › Metadata, "Plain Language Summary" at require, Save. */
-async function requirePlainLanguageSummary(page, app) {
-    await page.goto(app.url(`/index.php/${app.contextPath}${app.line && /3_[34]/.test(app.line) ? '' : '/en'}/management/settings/workflow`));
+/**
+ * As a manager: Settings › Workflow › Submission › Metadata, "Plain Language Summary" enabled at "Ask …", Save.
+ * Copied from checks/issues/plain-summary-over-word-limit-refused/lib.js (U21 A16).
+ * Returns {status} or {absent: true} when the Metadata tab offers no plain language summary (3.5).
+ */
+async function enablePlainLanguageSummary(page, app, option = PLS_ASK) {
+    await page.goto(app.url(`/index.php/${app.contextPath}${localeSeg(app)}/management/settings/workflow`));
     await idle(page);
     await page.locator('#metadata-button').click();
     const panel = page.locator('#metadata');
     await panel.waitFor({state: 'visible', timeout: T});
     const box = panel.getByRole('checkbox', {name: 'Enable plain language summary metadata', exact: true});
-    await loc(page, 'Metadata: the "Enable plain language summary metadata" box', box);
+    if (!(await box.count())) return {absent: true};
     if (!(await box.isChecked())) await box.check();
-    const radio = panel.getByRole('radio', {name: PLS_REQUIRE, exact: true});
-    await radio.check();
+    await panel.getByRole('radio', {name: option, exact: true}).check();
     const form = panel.locator('form').first();
     const saved = page.waitForResponse((r) => r.request().method() !== 'GET' && /\/contexts\/\d+/.test(r.url()), {timeout: T});
     await form.getByRole('button', {name: 'Save', exact: true}).click();
     const r = await saved;
     await form.locator('.pkpFormPage__status', {hasText: 'Saved'}).waitFor({timeout: T}).catch(() => {});
-    return r.status();
+    return {status: r.status()};
+}
+
+/** As a manager: Settings › Journal (Server) › Sections, the row's arrow, "Edit", "Word Count" = n, "Save".
+ *  Copied from checks/issues/plain-summary-over-word-limit-refused/lib.js (U21 A16). */
+async function setSectionWordCount(page, app, title, n) {
+    const {SectionsTab} = require('../../../pages/SectionsPages.js');
+    const tab = new SectionsTab(page, app.contextPath, {locale: localeSeg(app).slice(1)});
+    await page.goto(app.url(tab.url()));
+    await tab.openTab();
+    const win = await tab.openEdit(title);
+    const before = await win.box('wordCount').inputValue();
+    await win.type('wordCount', String(n));
+    const r = await win.saveAndClose();
+    return {before, status: r.status()};
 }
 
 /** Type into a rich-text box of the wizard by its control id (replacing what it holds). */
@@ -130,4 +148,4 @@ async function giveRole(page, app, username, role) {
     return (await grid.rowCells(username).catch(() => [])).join(' | ');
 }
 
-module.exports = {giveRole, T, sleep, flat, endAnchored, watchFooter, requirePlainLanguageSummary, typeRich, beginSubmission, footer, current, currentStep, pressContinue, pressBack, readControls};
+module.exports = {giveRole, T, sleep, flat, endAnchored, watchFooter, enablePlainLanguageSummary, setSectionWordCount, typeRich, beginSubmission, footer, current, currentStep, pressContinue, pressBack, readControls};

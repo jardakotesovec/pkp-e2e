@@ -1104,7 +1104,7 @@ are the source; badges, Impact and Basis:
 | [A14](#a14) | A section editor who is also an author is offered "Submit As: Section editor", and "Begin Submission" refuses it | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | In the submission wizard, a plain language summary over the word limit is refused with an unexplained "Error" | 🐞 | medium · crash: script | issues (claude), 2026-10-22 — re-verified |
 | [A18](#a18) | Submission wizard saves a field cut off mid-typing when the author starts typing after a quiet minute | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [A19](#a19) | After the server refuses one save, the submission wizard hangs on "Saving" and the author cannot submit | 🐞 | medium · crash: script | issues (claude), 2026-10-19 — re-verified |
+| [A19](#a19) | After the server refuses one save, the submission wizard hangs on "Saving" and the author cannot submit | 🐞 | medium · crash: script | issues (claude), 2026-10-22 — re-verified |
 | [A21](#a21) | "Submit As" preselects another role for an editor who is also an author once their editorial role is saved | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A22](#a22) | On a phone, "Make a Submission" squeezes the "Title" box to nothing, so no submission can be started | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
@@ -1399,23 +1399,28 @@ Basis: probe, 2026-10-01. <sup>[fn-a18](#fn-a18)</sup>
 <a id="a19"></a>
 **A19 — After the server refuses one save, the submission wizard hangs on "Saving" and the author cannot submit** · 🐞 · medium · crash: script.
 When the server refuses one of a step's saves, whatever the field, the
-wizard shows its "Error" dialog, and about four seconds later the page's
-own script fails in the browser. From then on the footer reads "Saving",
-nothing more is sent, both "Save for Later" buttons and "Submit" stay
-disabled, and "Review" never gets past "Checking your submission". The
-author's only way on is to reload the page. The reload drops the refused
-change, and offers what was typed after it in an "Unsaved Changes"
-dialog. "Yes" sends it again; when it holds a form the server still
-refuses, the wizard hangs again. A lost connection or a server failure
-is retried and recovers; only a refusal hangs. Today the server refuses
-a wizard save in three cases: - `main` only, journals and preprint servers: the summary is longer than
-the section's abstract word limit; - preprint servers, `main`, 3.5 and
-3.4: "DOI of the published preprint" is typed without its web address; -
+wizard shows its "Error" dialog. Four seconds later, unless another
+change is already waiting to be sent, the page's own script fails in the
+browser. From then on the footer reads "Saving", nothing more is sent,
+both "Save for Later" buttons and "Submit" stay disabled, and "Review"
+never gets past "Checking your submission". The wizard should instead
+stay connected: show the refusal, keep "Last saved …", and save the
+author's next change. The author's only way on is to reload the page.
+The reload drops the refused change, and offers what was typed after it
+in an "Unsaved Changes" dialog. "Yes" sends it again; when it holds a
+form the server still refuses, the wizard hangs again. A lost connection
+or a server failure is retried and recovers; only a refusal hangs.
+Reading the server's checks on a submission still being made finds these
+refusals; the abstract's required text and word limit, for instance, are
+checked only once the submission is sent: - `main` only, journals and
+preprint servers: the plain language summary is longer than the
+section's abstract word limit; - preprint servers, `main`, 3.5 and 3.4:
+"DOI of the published preprint" is typed without its web address, or
+"Other license URL" holds something that is not a web address; -
 presses, `main` and 3.5: any save of a submission made as "Chapter
 Author". ([A16](#a16), [→ Preprint relations
 A7](U75-preprint-relations.md#a7), [OMP4](#omp4).)
-Basis: probe, 2026-10-19. <sup>[fn-a19](#fn-a19)</sup>
-Report: refresh owed — pkp/pkp-lib#13585 (merged as `1f415a07ca`, 2026-10-21; in the apps once their `lib/pkp` pointers pass it) changed `PKP\publication\Repository::validate()` and `ValidatorFactory::required()`: a required plain language summary no longer refuses saves that leave it out, and in the wizard it no longer refuses any save while the submission is in progress; the report's Preconditions use "Require" as the way to get a refused save on all three apps and its Impact names A20's refusal, so the Steps need another refused save on each app once the pointers carry the fix (2026-10-21)
+Basis: probe, 2026-10-22. <sup>[fn-a19](#fn-a19)</sup>
 
 <a id="a21"></a>
 **A21 — "Submit As" preselects another role for an editor who is also an author once their editorial role is saved** · 🐞 · low.
