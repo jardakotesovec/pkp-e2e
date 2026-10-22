@@ -1462,6 +1462,14 @@ trips.
   one may follow the query's row order (the class "Order asserted on lists
   the app does not order" above). **Watch condition**: a second
   sighting; then read the error context and the query behind the cell.
+  **Second sighting** 2026-10-21, OJS (pkp/ojs run 39647753315 on `ore`
+  at 10ca11dfaa, shard 2/3, job 119387718491, green on its retry; named in
+  the housekeeping flake brief of 2026-10-22): the same line in OJS's
+  twin (`U53-users-management.spec.js:567`, from `:518`), `rolesCell(adminRow)`
+  on the first row ("admin admin", its name cell passed) expected
+  "Journal manager" and read "Production editor" for the 10 s
+  (`expect(locator).toHaveText(expected) failed`). The condition is met;
+  not read further.
 
 - **Docker Hub pull limit: a job dead at "Initialize containers".** Not a
   test red. The job ends in its first 30 seconds, its failed steps
@@ -1484,7 +1492,33 @@ trips.
   window's "Close" and the `active-modal` holding the contributor's
   "Given Name" box was still there after 30 s; trace not read. Found by
   the housekeeping flake tally of 2026-10-20 (20 runs per repo).
-  **Watch condition**: a second sighting in any app.
+  Second sighting: pkp-e2e push run 39365299288 at d4ad831, 2026-10-20,
+  the second close (`U03-user-profile.spec.js:1497`). **Diagnosed and
+  fixed 2026-10-22** (housekeeping,
+  `.reports/flake-2026-10-22/omp-u03s12-contributor-close/diagnosis.md`):
+  the test's own `browser.newContext()` (`freshLogin()`) ran without the
+  fixtures' disable-motion sheet, so "Close" was pressed during the side
+  window's 450 ms slide-in and the button-up landed on the moved header;
+  red 5/28 under a stepped-animation lever, 0/38 after the fix, which
+  arms every context a test opens (`support/base-test.js` `browser`
+  fixture; 137 `newContext()` callers covered, none edited). Watch
+  condition: a sighting with the fix in; then keep the attempt's trace.
+
+- **OJS U51 S6's renewed row read a day early** (OJS, once, pkp-e2e push
+  run 39517151988 at 24dfcf75, 2026-10-20, shard 1/3, job 118951937654,
+  green on its retry; named in the housekeeping flake brief of
+  2026-10-22). "S6: an individual subscription by hand: refused, saved,
+  renewed and deleted" (`U51-subscriptions.spec.js:748`): after "Renew"
+  answered "OK", `expect.poll(… rowCells(tab, 'Reed') …).toEqual(['Active',
+  TODAY(), months(24)])` read `"2026-10-20"`, `"2028-10-20"` against
+  `"2026-10-21"`, `"2028-10-21"` for the 10 s (`expect(received).toEqual(expected)
+  // deep equality`). The attempt ran across midnight UTC (its ✘ at
+  2026-10-21T00:00:12Z after 29.4 s). Lead, not read: the renewal's date
+  and the test's `TODAY()` taken on two sides of midnight. No earlier
+  sighting at that line on any app. **Watch condition**: a second
+  sighting away from midnight UTC (then read where `TODAY()` and the
+  renewal's date come from), or another midnight-spanning red of a test
+  that compares a date with `TODAY()`.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

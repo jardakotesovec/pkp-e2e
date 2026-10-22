@@ -248,6 +248,15 @@ disables animations globally (see `harness.md`), so no ordinary action waits
 on a modal slide. Durations are 0.01ms rather than 0 because presence helpers
 wait on `animationend`, and a true 0 can mean the event never fires.
 
+- **A context a test opens itself is armed like the fixtures' own.**
+  `browser.newContext()` in a test or page object goes through
+  base-test's `browser` fixture, which disables motion and applies the
+  levers to it; never build a context from a browser of the test's own
+  (`chromium.launch()`, `browser.browserType().launch()`): that one runs
+  the app's real animations, and a side window's 450 ms slide-in under a
+  press loses the click without a sound (the button-down on "Close", the
+  button-up after the panel moved, Playwright reporting the click done),
+  so the window stays (OMP U03 S12 on CI, 2026-10-16 and 2026-10-20).
 - **A forced action or a geometry read in a window that has just opened
   waits for the window to stand in place.** Shortened is not gone: a side
   window (a legacy one included) is mounted at its slide's first keyframe,

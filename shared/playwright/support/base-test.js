@@ -27,6 +27,16 @@
  * - serverCrashWatch (auto): a failed test whose worker `php -S` died while
  *   it ran gets a `server-crash` annotation, the log lines around the death
  *   attached and one stderr line (support/server-crash.js).
+ * - browser (worker): Playwright's, with `newContext()` wrapped so that every
+ *   context a test or page object opens itself (`browser.newContext()`: a
+ *   fresh sign-in, an anonymous reader) gets the same treatment as the
+ *   fixtures' contexts: motion disabled (motion.js) and the flake-hunting
+ *   levers (throttle.js). Before this, such a context ran the app's real
+ *   animations, so a press on a side window that had just opened could land
+ *   while the window was still sliding in: the button-down on "Close", the
+ *   button-up a frame later on what slid under the pointer, no click, the
+ *   window left open (OMP U03 S12 on CI, 2026-10-16 and 2026-10-20;
+ *   `.reports/flake-2026-10-22/omp-u03s12-contributor-close/diagnosis.md`).
  */
 const path = require('path');
 const base = require('@playwright/test');
@@ -49,8 +59,42 @@ const suiteDir =
 // eslint-disable-next-line import/no-dynamic-require
 const appContext = require(path.join(suiteDir, 'support', 'app.context.js'));
 
+/**
+ * Disable motion and apply the levers once per context, whoever opened it.
+ *
+ * @param {import('@playwright/test').BrowserContext} context
+ */
+const armedContexts = new WeakSet();
+async function armContext(context) {
+    if (armedContexts.has(context)) {
+        return;
+    }
+    armedContexts.add(context);
+    await disableMotion(context);
+    await throttleCpu(context);
+}
+
 const test = base.test.extend({
     user: [null, {option: true}],
+
+    // Every context opened through the worker's browser is armed, the
+    // fixtures' and a test's own `browser.newContext()` alike (see the
+    // file header).
+    browser: [
+        async ({browser}, use) => {
+            if (!browser.__pkpArmedNewContext) {
+                const newContext = browser.newContext.bind(browser);
+                browser.newContext = async (...args) => {
+                    const context = await newContext(...args);
+                    await armContext(context);
+                    return context;
+                };
+                browser.__pkpArmedNewContext = true;
+            }
+            await use(browser);
+        },
+        {scope: 'worker'},
+    ],
 
     appContext: async ({}, use) => {
         await use(appContext);
@@ -88,8 +132,7 @@ const test = base.test.extend({
 
     // Kill animations in the default context (and thus `page`) — see motion.js.
     context: async ({context}, use) => {
-        await disableMotion(context);
-        await throttleCpu(context);
+        await armContext(context);
         await use(context);
     },
 
@@ -106,8 +149,7 @@ const test = base.test.extend({
         await use(async (username) => {
             const storageState = await ensureAuthStateFor(browser, username, {baseURL});
             const context = await browser.newContext({baseURL, storageState, reducedMotion: 'reduce'});
-            await disableMotion(context);
-            await throttleCpu(context);
+            await armContext(context);
             openedContexts.push(context);
             return context;
         });

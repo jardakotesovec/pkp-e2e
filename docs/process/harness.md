@@ -946,9 +946,8 @@ to spot: seeding succeeds and the browser step dies.
   fleet's probe, validation or worker servers (2026-09-26)
 - `PLAYWRIGHT_CPU_THROTTLE`: opt-in race amplifier for flake hunting
   (`shared/playwright/support/throttle.js`): every page of every context
-  the fixtures open (`page`'s and `asUser()`'s; like every lever below,
-  never a test's own `browser.newContext()`, so a fresh-login context
-  is out of reach, U03 and U05 diagnoses) runs its main thread that many
+  the fixtures open (`page`'s, `asUser()`'s and, since 2026-10-22, a
+  test's own `browser.newContext()`, like every lever below) runs its main thread that many
   times slower (DevTools protocol, Chromium
   only). A short probe at 6 reproduces the main-thread jank a loaded CI
   runner shows; a long scenario at 2–4 only runs into its own timeouts

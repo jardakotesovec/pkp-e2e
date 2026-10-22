@@ -33,7 +33,8 @@
  *
  * `PLAYWRIGHT_LEVER=<module path>` is the fifth, for a lever the four above
  * cannot place: the module's export, `async (context) => {}`, is called with
- * every context the fixtures open (the `context` fixture and `asUser`), in
+ * every context opened through the worker's browser (the `context` fixture,
+ * `asUser`, and a test's own `browser.newContext()`, base-test.js), in
  * every worker, so a diagnosis can hold a request until the test's next
  * press (U39 S2's download) or hold a rich-text box's sheets without
  * editing a test or patching modules (U31, U39, U40, 2026-09-30). Off
