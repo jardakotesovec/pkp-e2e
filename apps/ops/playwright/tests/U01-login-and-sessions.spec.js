@@ -9,11 +9,14 @@
  * Editor and `manager.maya` for scenario 8's). Scenario 6 is {OJS OMP}: its
  * Create New Reviewer path does not exist on a preprint server, so it costs
  * one absence test with positive controls (RUNBOOK multi-app rule 3), as
- * does scenario 8's Reviewers-table bullet.
+ * does scenario 8's Reviewers-table bullet. Scenario 10 (Confirm Access on
+ * the reauth-variant server) is in tests/serial/U01-login-and-sessions.spec.js,
+ * `@solo`: two of its answers are `admin`'s stored one-time notices, which
+ * any other session of `admin` could take first.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings
  * register): A1 🐞, A2 🐞, A4 🐞, A5 ❓, A6 ✅, A7 🐞, A8 🐞, A10 🐞, A11 🐞,
- * A13 🐞, A14 🐞, A15 🐞, A16 🐞, A17 🐞. The spec's Coverage section
+ * A14 🐞, A15 🐞, A16 🐞, A17 🐞. The spec's Coverage section
  * records everything else left out.
  *
  * Session hygiene: every sign-in, sign-out and impersonation flow runs in a

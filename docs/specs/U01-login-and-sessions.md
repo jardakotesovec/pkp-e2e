@@ -268,7 +268,8 @@ Login, the site's name stands in for the journal's), but after a refused
 16. **The Confirm Access gate.** When the installation's configuration sets a
     re-authentication window (in minutes), every Administration screen first
     shows the "Confirm Access" form (Fields above). The correct password
-    opens Administration for the window's duration. Moving between
+    leads on to the page the form interrupted and opens Administration for
+    the window's duration. Moving between
     Administration screens keeps refreshing the window, so the prompt returns only
     after the administrator has been away from it longer than the window.
     After the window lapsed, a press of one of the buttons that reload an
@@ -279,16 +280,22 @@ Login, the site's name stands in for the journal's), but after a refused
     retrying or deleting failed jobs answer "Your access to Administration
     has expired. Reload the page and confirm your password to continue."
     and change nothing; reloading the page brings the form (retired
-    [A13](#a13)). A request made with an API key alone is not asked, by
-    design. The page button's action is **not** replayed: after
+    [A13](#a13)). A journal's removal on "Hosted Journals" gets the
+    sentence in the browser's own alert box, and the "Confirm" window that
+    asked for the removal stays open behind it. A request made with an API
+    key alone is not asked, by design. The page button's action is **not** replayed: after
     confirming, a notice says "Your last action was not completed. Please
     try again." Opening the Confirm Access
     address directly, with nothing to continue to, never shows the form.
     That is the address trimmed of the interrupted page it carries in the
     address bar whenever the gate fires. The browser is sent straight home
-    without being asked for a password. While a confirmed window is still
-    active, it lands on Administration instead. Starting an impersonation
-    ends the confirmed window. <sup>k</sup>
+    without being asked for a password: to the site's homepage, which lists
+    the hosted journals, or, on a site where only one journal is enabled,
+    to that journal's home page. While a confirmed window is still active,
+    the Confirm Access address lands on Administration whether or not it
+    carries an interrupted page, so a tab left on the form reloads into
+    Administration once the password has been given in another tab.
+    Starting an impersonation ends the confirmed window. <sup>k</sup>
 17. **Access denied, signed in.** A signed-in user who reaches a screen their
     role does not allow is shown a message page stating the denial. The exact
     sentence varies with the screen; most commonly it is "The current role
@@ -419,9 +426,11 @@ Scenarios 1 to 3, 7 and 8 use ready accounts on the seeded journal (1 on a
 site that also hosts a scratch journal, 8 on a scratch submission);
 scenarios 4 to 6 act on throwaway accounts of a scratch journal, because
 each changes a password, and scenario 9 does too, because it disables
-one. Scenarios 2 and 4 keep the same account signed in in a second
-browser. The ready accounts and their passwords and the
-tooling recipe are in the footnote. <sup>s</sup>
+one. Scenario 10 has the Site Administrator, a ready account, act on a
+scratch journal on an installation configured to ask for the password
+again before Administration. Scenarios 2 and 4 keep the same account
+signed in in a second browser. The ready accounts and their passwords
+and the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Sign in and land on the Dashboard**
 
@@ -677,6 +686,65 @@ tooling recipe are in the footnote. <sup>s</sup>
      Please try again.", not the disabled sentence, which the correct
      password alone earns (Rule 2).
 
+10. **Confirm Access before Administration, and a page left open past
+    the window**
+
+    Given: Site Administrator, signed in, on an installation whose
+    configuration sets a re-authentication window of one minute, with a
+    scratch journal hosted beside the seeded journal. <sup>s</sup>
+
+    - **Administration, not yet confirmed**: open Administration ›
+      "Hosted Journals": the "Confirm Access" form shows instead, saying
+      "Signed in as **{the administrator's name}**. Please enter your
+      password to continue."; the address bar carries the interrupted
+      page (Rule 16).
+    - **The Confirm Access address alone, not yet confirmed**: open that
+      address trimmed of the interrupted page: the browser is sent
+      straight home, with no form and no password asked, not into
+      Administration. Home is the site's homepage, which lists the hosted
+      journals, the seeded journal and the scratch journal among them.
+    - **A wrong password**: open Administration › "Hosted Journals"
+      again, type not-the-password in "Password" and submit: the form
+      shows again with the generic sign-in error, "Invalid username/email
+      or password. Please try again." (Rule 2).
+    - **The correct password**: type the administrator's password and
+      submit: the browser lands back on "Hosted Journals", the page the
+      form interrupted, with no password asked, and it lists the scratch
+      journal.
+    - **Moving between screens inside the window**: in a second tab open
+      Administration › "Site Settings" › "Site Setup" › "Security": no
+      password is asked; "Minimum password length (characters)" reads 6.
+    - **The Confirm Access address alone, inside the window**: in a third
+      tab open the trimmed address again: Administration opens instead
+      of the form.
+    - **Pages left open past the window**: leave all three tabs untouched
+      for longer than the window, such as two minutes. On the Security
+      tab, type 12 in "Minimum password length (characters)" and press
+      "Save": the page answers "Your access to Administration has
+      expired. Reload the page and confirm your password to continue." On
+      the Hosted Journals tab, open the arrow at the start of the scratch
+      journal's row, press "Remove", and press "OK" in the "Confirm"
+      window, which asks "Are you sure you want to permanently delete
+      **{the journal's name}** and all of its contents?": the browser's
+      own alert box gives the same answer. Once the alert is closed, the
+      "Confirm" window is still open over the list, and the journal's row
+      is still listed.
+    - **Reloading**: reload the Security tab: the "Confirm Access" form
+      shows.
+    - **A button that reloads the page**: on the third tab press "Delete
+      Template Cache" and confirm: the "Confirm Access" form shows; type
+      the password and submit: a notice, the whole check that the press
+      was not replayed, says "Your last action was not completed. Please
+      try again."
+    - **Control**: reload the Security tab: no password is asked, the new
+      window being open, and Administration opens, not Site Settings: the
+      tab was left on the Confirm Access address, which sends an
+      administrator inside the window to Administration whatever page it
+      carries. Open "Site Settings" › "Site Setup" › "Security": "Minimum
+      password length (characters)" still reads 6. Reload the Hosted
+      Journals tab: the scratch journal's row is still there. The refused
+      changes changed nothing (Rule 16).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -688,11 +756,6 @@ Left out of the scenarios above, by reason:
     issue report
     (`docs/issues/U01-A17-password-change-logout-audited-as-ip-change.md`)
     proposes, once fixed
-  - the guard for A13, retired (Rule 16): with re-authentication on and
-    the confirmation period run out, a Site Settings save, a journal's
-    removal and its creation from an Administration page left open are
-    refused with "Your access to Administration has expired…" and change
-    nothing
   - a 40-character password chosen while accepting a role invitation,
     then the Login page's "Password" box taking all 40 and signing in
     ([A1](#a1)): the guard the issue report
@@ -746,13 +809,12 @@ Left out of the scenarios above, by reason:
   - roles held only in other journals landing on the journal home page (Rule 3; scenario 1's Reader)
   - a Production editor offered "Login As" (Actors row "Impersonate a user"; Rule 14): the same offer as scenario 8's Editor
   - a held address the user's roles do not allow ending on the access-denied page after sign-in (Rule 4): the page scenario 4 reads (Rule 17)
+  - the other changes Administration saves in place, refused the same way once the confirmed window has lapsed: adding a journal, saving the site's Languages, Plugins, Navigation and Highlights, the site's announcements, and retrying or deleting failed jobs (Rule 16): the same answer as scenario 10's Site Settings "Save" and journal removal
 - **Register carries it**:
   - A5 (no journal-level users screen offering the forced-change flag; Rule 11a)
   - A16 (a search on a page left open after its session ended refused with an alert or an "Error" window instead of the Login page; Rules 5a, 18)
   - A17 (a session ended by a password change in another browser logged as an IP address change; *Side effects*, "Audit lines")
 - **No seed**:
-  - the Site Administrator passing Confirm Access (Actors row "Pass the Confirm Access gate"): what is missing is a per-context way to set the re-authentication window; the configuration file's `password_timeout` is run-global
-  - Confirm Access's window lapse, no replay, and the direct address going home (Rule 16): the same missing window setting
   - other Site Administrators never offered Login As (Rule 14): what is missing is a second site administrator
   - the reset link expiring on the clock (Rule 8, `reset_seconds`)
   - a link whose username no longer exists landing on the lost-password page (Rule 10)
@@ -1486,7 +1548,23 @@ hosts → home), and on `isActionRequest` raises the
 `user.lastAction.incomplete` notice. No `source` → `redirectHome` before
 the form is ever rendered; opening the bare address live-checked
 2026-08-01 (window active — gate off, all three apps): a straight
-redirect into Administration, no form shown. Cancel:
+redirect into Administration, no form shown. With the window active,
+`confirmAccess()` redirects to `admin` before it reads `source` at all.
+Test run 2026-10-22 (scenario 10 on the reauth-variant server, OJS, OMP
+and OPS): the bare address before confirming ended on the site's
+homepage, `index/en/index`, listing `publicknowledge` and the scratch
+context (the harness probe the same day, with `publicknowledge` the only
+enabled context, saw `publicknowledge/en`; `site.redirect_context_id`
+empty); the correct password landed back on `admin/contexts`; the
+Security tab left on `admin/confirmAccess?source=…/admin/settings` and
+reloaded once the window was confirmed in another tab landed on
+`index/en/admin#security`, heading "Administration"; the lapsed removal's
+`…/delete-context` answered `{"status":false,"content":"Your access to
+Administration has expired…"}`, shown as a browser alert, and the
+"Confirm" modal stayed open behind it
+(`RemoteActionConfirmationModalHandler::remoteResponse()` closes it only
+when the shared handler has not refused the answer; a `status:false`
+answer is alerted and refused). Cancel:
 referer, but never an `/admin` address (loop guard) — falls back to the
 site index. Impersonation: `signInAs()` calls `stopElevatedSession()`.
 Live-probed 2026-08-01 (OJS deep; OMP gate + entry): the gate on entry,
@@ -1654,7 +1732,28 @@ empty (the key is refused on a roster account, which every worker
 shares); the scratch journal beside `publicknowledge` makes the site
 multi-journal, and the site-level Login page is `index/login`. The
 reason case is Users management's scenario 3, whose Journal Manager
-types the reason on screen.
+types the reason on screen. Scenario 10 `admin`/`admin` on a config
+variant server: a second config file on its own port with `[security]
+password_timeout = 1` (the suites' own config leaves it commented out),
+sharing the fleet's DB, files dir and mail catcher, the way the
+validation variant does (harness.md "The validation-variant server"), so
+the sign-in goes through the variant's own Login page; the scratch
+journal is a `POST scenarios/context` with the test's tag, made through
+the worker's server (the DB being shared). The gate's address is
+`admin/confirmAccess` with the interrupted address as `source` (footnote
+k), trimmed to `admin/confirmAccess` alone; the Security tab is Site Settings › "Site
+Setup" › "Security", whose "Minimum password length (characters)" reads
+6 on every test install, and a save that went through would be put back
+with `PUT index/api/v1/site` as the U03 suite does; the journal's
+removal is Hosted Journals' row action with its confirmation; the third
+tab is the site's `admin` index page, its "Delete Template Cache" answering the
+browser's confirmation box with "OK". Scenario 10 runs alone, in each
+app's `@solo` serial file, apart from every other test that signs in as
+`admin`: the wrong password's error and "Your last action was not
+completed…" are one-time notices stored for `admin`, which the next
+back-office page any `admin` session loads shows and deletes. The suites
+wait between 65 seconds and two minutes past the last Administration
+request.
 
 <a id="fn-a1"></a>
 **f-a1** — `maxlength="32"` hardcoded on the password inputs of

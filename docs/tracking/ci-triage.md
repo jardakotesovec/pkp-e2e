@@ -1320,6 +1320,20 @@ trips.
   first-tab press on the tab's own panel being shown, as `selectTab`
   reads do.
 
+- **OMP U55 S1's Users & Roles tabs read without "Notify"** (OMP, once,
+  pkp-e2e branch run 39721397031 on `U01` at 3d344f0b, 2026-10-22, shard
+  2/3, `omp-serial`, green on its retry). "S1: send an email to one role,
+  then to two with a copy" (`serial/U55-notify-users.spec.js:150`):
+  `notify.settings.topTabNames()` right after `notify.gotoPage()` read
+  "Users, Roles, Site Access Options, ORCID", so `indexOf('Notify')` was
+  -1; the tab list is read once, with no wait for the "Notify" tab (the
+  manager's role was seeded just before). The branch changes only U01's
+  suite and the harness's config variants. No earlier sighting at that
+  line on any app; found by the housekeeping session's CI watch.
+  **Watch condition**: a second sighting; then read its error context
+  (whether the tab is missing or late) and wait on the tab's own name
+  before reading the list.
+
 - **OMP U73 S2's count read, once** (OMP, pkp/omp run 37590116923 on the
   PR branch `13308` at `d0b7921`, 2026-10-07, shard 2/3, green on its
   retry). `U73-publication-formats-proof-terms.spec.js:147` "S2: A

@@ -11,18 +11,20 @@
  *   npm run probe-servers -- --status              # pid, liveness, HTTP probe
  *   npm run probe-servers -- --stop  [--app ojs]   # stop what --start began
  *
- * The validation variant (basePort + 90, harness.md "The validation-variant
- * server") is the runner's server, not a probe one, but the runner only
- * serves it during a run. So --start also brings it up when nothing answers
- * there, from the runner's own generated config.test.validation.inc.php
- * and with the runner's log name; a later Playwright run adopts it
- * (reuseExistingServer) and leaves it up. An answering +90 is never
- * replaced.
+ * The config variants (the validation variant at basePort + 90 and the
+ * reauth variant at + 91, harness.md "The validation-variant server" and
+ * "The reauth-variant server") are the runner's servers, not probe ones,
+ * but the runner only serves them during a run. So --start also brings
+ * each up when nothing answers there, from the variant config the runner
+ * generates (config-factory.js ensureVariantConfig, written here too, so a
+ * variant added since the last Playwright run still starts) and with the
+ * runner's log name; a later Playwright run adopts it (reuseExistingServer)
+ * and leaves it up. An answering variant port is never replaced.
  *
  * They stay up until --stop or until the slot is released (bin/slot.js
  * stopSlotServers(), at every bot release and `free`).
  *
- * Pids live in .reports/servers/probe-<app>[-validation].pid; logs in
+ * Pids live in .reports/servers/probe-<app>[-<variant>].pid; logs in
  * apps/<app>/playwright/.server-logs/. Only the pids this script wrote are
  * ever signalled; the runner's worker ports (basePort + 0 … + 19) are never
  * served or touched.
@@ -34,6 +36,7 @@ const {APPS, REPO_ROOT, resolveLine} = require('./apps.js');
 const {resolveProbeApp, PROBE_PORT_OFFSET} = require('../shared/playwright/probe/index.js');
 const {phpServerCommand, phpServerEnv, phpServerStatus} = require('../shared/playwright/php-server.js');
 const {parseDatasetFlag, DATASET_PORT_OFFSET} = require('../shared/playwright/dataset.js');
+const {VARIANTS, ensureVariantConfig} = require('../shared/playwright/config-factory.js');
 
 // `--dataset [n]` (or PKP_E2E_DATASET=n): the dataset fleet's one server
 // (basePort + 60 + n, harness.md "Dataset fleets") instead of the probe and
@@ -133,25 +136,26 @@ function servers(app) {
             logFile: path.join(logDir, `server-${app.port}-probe.log`),
             label: `probe server (base ${app.basePort} + ${PROBE_PORT_OFFSET})`,
         },
-        {
-            kind: 'validation',
-            port: app.validationPort,
-            configFile: app.validationConfigFile,
-            logFile: path.join(logDir, `server-${app.validationPort}-validation.log`),
-            label: "validation variant (the runner's +90; adopted by the next run)",
-        },
+        ...Object.entries(app.variantServers).map(([kind, {port, configFile}]) => ({
+            kind,
+            variant: true,
+            port,
+            configFile,
+            logFile: path.join(logDir, `server-${port}-${kind}.log`),
+            label: `${kind} variant (the runner's +${VARIANTS[kind].offset}; adopted by the next run)`,
+        })),
     ];
 }
 
 async function startOne(app, server) {
-    const {kind, port, configFile, logFile, label} = server;
+    const {kind, variant, port, configFile, logFile, label} = server;
     const existing = readPid(app.name, kind);
     if (existing && alive(existing)) {
         console.log(`probe-servers: ${app.name} ${kind}: already running (pid ${existing}, port ${port})`);
         return true;
     }
     if ((await phpServerStatus(port)) !== null) {
-        if (kind === 'validation') {
+        if (variant) {
             console.log(`probe-servers: ${app.name} ${kind}: something already serves ${port} — using it as is`);
             return true;
         }
@@ -161,10 +165,14 @@ async function startOne(app, server) {
         );
         return false;
     }
+    if (variant) {
+        // The runner's own derivation, so the file is the one a run writes.
+        ensureVariantConfig(app.configFile, kind, port);
+    }
     if (!fs.existsSync(configFile)) {
         console.error(
             `probe-servers: ${app.name} ${kind}: config file not found: ${configFile}` +
-                (kind === 'validation' ? ' — run the setup project once (npm run fleet-prep) to generate it' : '') +
+                (variant ? ' — the default config is missing too; run npm run fleet-prep' : '') +
                 (kind.startsWith('ds') ? ' — reset the dataset fleet first (npm run reset:<app> -- --dataset)' : ''),
         );
         return false;

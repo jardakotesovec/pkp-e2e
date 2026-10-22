@@ -3,13 +3,15 @@
  * @file playwright/tests/U01-login-and-sessions.spec.js
  *
  * Login & sessions — OJS suite, one test per canonical scenario the spec runs
- * on OJS (scenarios 1–9, all common).
+ * on OJS (scenarios 1–10, all common): 1–9 here, 10 (the Confirm Access
+ * gate on the reauth variant, `@solo`) in
+ * tests/serial/U01-login-and-sessions.spec.js.
  * Spec: docs/specs/U01-login-and-sessions.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A4 🐞, A5 ❓, A7 🐞, A8 🐞, A9 ❓, A10 🐞, A11 🐞, A13 🐞,
- * A14 🐞, A15 🐞, A16 🐞, A17 🐞. The spec's Coverage section records
+ * A2 🐞, A4 🐞, A5 ❓, A7 🐞, A8 🐞, A9 ❓, A10 🐞, A11 🐞, A14 🐞,
+ * A15 🐞, A16 🐞, A17 🐞. The spec's Coverage section records
  * everything else left out.
  *
  * Session hygiene: every sign-in, sign-out, forced-change and impersonation

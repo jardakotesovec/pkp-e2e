@@ -13,7 +13,8 @@
  * U03's S11), the top bar's initials (Rule 13), the Login page's own
  * region, the lost-password page's box and the public pages' user menu,
  * the disabled account's refusal (Rule 2) and the site-level Login page
- * reached from the site's own homepage (Rule 1).
+ * reached from the site's own homepage (Rule 1). S10's "Confirm Access"
+ * form is the shared `ConfirmAccessPage` (AdminPages.js).
  *
  * Function exports, the shape of `ReviewStagePages.js`; every function
  * takes the page (or a locator) it works on.

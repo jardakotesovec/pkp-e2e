@@ -15,11 +15,14 @@
  * one testDir, so the shared lib/pkp specs are a sibling project of the app
  * suite; the serial project runs alone at the end (globally-scanning specs).
  *
- * One extra, fixed server per fleet — the validation variant at basePort +
- * VALIDATION_PORT_OFFSET — serves the same install through a second config
- * file (config.test.validation.inc.php, derived here from the default one)
- * with email validation and the ALTCHA spam check switched on. Tests reach
- * it through the `variants.validation` fixture (PRINCIPLES.md D9).
+ * Two extra, fixed servers per fleet, the config variants, serve the same
+ * install through a second config file each, derived here from the default
+ * one (PRINCIPLES.md D9): the validation variant at basePort +
+ * VALIDATION_PORT_OFFSET (config.test.validation.inc.php: email validation
+ * and the ALTCHA spam check on) and the reauth variant at basePort +
+ * REAUTH_PORT_OFFSET (config.test.reauth.inc.php: the Site Administrator's
+ * Confirm Access gate on, a one-minute window). Tests reach them through
+ * the `variants.validation` and `variants.reauth` fixtures.
  */
 const {execSync} = require('child_process');
 const fs = require('fs');
@@ -76,37 +79,64 @@ function detectWorkers() {
 }
 
 /**
- * The validation variant: a second config file next to the default one with
- * the config-only switches that have no per-entity scenario key flipped on.
- * base_url must name the variant server — the app builds the activation
- * link in the validation email from it, and a link to worker 0's server
- * would validate against a server whose config says validation is off.
+ * The config variants: a second config file next to the default one per
+ * variant, with config-only switches that have no per-entity scenario key
+ * flipped on, served at a fixed port per fleet (workers +0…+19, the probe
+ * +50 and the dataset fleets +61…+69 never reach +90 or +91). base_url must
+ * name the variant's own server: the app builds absolute links from it (the
+ * activation link in the validation email; the Confirm Access form's action
+ * and its return address), and a link to worker 0's server lands on a config
+ * where the switch is off.
+ *
+ * - validation (+90): email validation and the ALTCHA check on registration.
+ * - reauth (+91): `[security] password_timeout = 1`, so a Site
+ *   Administrator re-enters their password ("Confirm Access") before
+ *   Administration and the confirmed window lapses after one minute.
  */
 const VALIDATION_PORT_OFFSET = 90;
-const VALIDATION_CONFIG_NAME = 'config.test.validation.inc.php';
-const validationPatches = (port) => ({
-    general: {base_url: `"http://127.0.0.1:${port}"`},
-    email: {require_validation: 'On'},
-    captcha: {
-        altcha: 'on',
-        altcha_hmackey: "'e2e-validation-hmac-key'",
-        altcha_on_register: 'on',
+const REAUTH_PORT_OFFSET = 91;
+const VARIANTS = {
+    validation: {
+        offset: VALIDATION_PORT_OFFSET,
+        file: 'config.test.validation.inc.php',
+        patches: (port) => ({
+            general: {base_url: `"http://127.0.0.1:${port}"`},
+            email: {require_validation: 'On'},
+            captcha: {
+                altcha: 'on',
+                altcha_hmackey: "'e2e-validation-hmac-key'",
+                altcha_on_register: 'on',
+            },
+        }),
     },
-});
+    reauth: {
+        offset: REAUTH_PORT_OFFSET,
+        file: 'config.test.reauth.inc.php',
+        patches: (port) => ({
+            general: {base_url: `"http://127.0.0.1:${port}"`},
+            security: {password_timeout: '1'},
+        }),
+    },
+};
+
+/** The variant config file's path, next to the default config. */
+function variantConfigFile(defaultConfigFile, name) {
+    if (!VARIANTS[name]) {
+        throw new Error(`config-factory: unknown config variant "${name}" (${Object.keys(VARIANTS).join(', ')})`);
+    }
+    return path.join(path.dirname(defaultConfigFile), VARIANTS[name].file);
+}
 
 /**
- * Derive the validation-variant config from the default test config and
- * write it next to it. Always regenerated, so it follows the default config
- * (CI generates that one fresh per run). Playwright loads this config in the
- * runner and again in every worker process, so the write is skipped when the
- * content is current and is otherwise atomic (temp file + rename): a running
- * server never reads a half-written file. Returns the variant's path.
+ * Derive a variant config from the default test config and write it next to
+ * it. Always regenerated, so it follows the default config (CI generates
+ * that one fresh per run). Playwright loads this config in the runner and
+ * again in every worker process, so the write is skipped when the content is
+ * current and is otherwise atomic (temp file + rename): a running server
+ * never reads a half-written file. Returns the variant's path.
  */
-function ensureValidationConfig(defaultConfigFile, port) {
-    const variantFile = path.join(
-        path.dirname(defaultConfigFile),
-        VALIDATION_CONFIG_NAME,
-    );
+function ensureVariantConfig(defaultConfigFile, name, port) {
+    const variantFile = variantConfigFile(defaultConfigFile, name);
     if (!fs.existsSync(defaultConfigFile)) {
         // No default config yet (see harness.md "config.test.inc.php"); the
         // servers cannot serve the install either way.
@@ -115,7 +145,7 @@ function ensureValidationConfig(defaultConfigFile, port) {
     const content =
         `; Generated by shared/playwright/config-factory.js from ${path.basename(defaultConfigFile)}\n` +
         `; — do not edit; it is rewritten on every Playwright config load.\n` +
-        patchIni(fs.readFileSync(defaultConfigFile, 'utf8'), validationPatches(port));
+        patchIni(fs.readFileSync(defaultConfigFile, 'utf8'), VARIANTS[name].patches(port));
     let current = null;
     try {
         current = fs.readFileSync(variantFile, 'utf8');
@@ -202,11 +232,10 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         configFile: process.env.PKP_CONFIG_FILE,
         testApiKey: process.env.TEST_API_KEY,
     });
-    const validationPort = basePort + VALIDATION_PORT_OFFSET;
-    const validationConfigFile = ensureValidationConfig(
-        process.env.PKP_CONFIG_FILE,
-        validationPort,
-    );
+    const variantServers = Object.entries(VARIANTS).map(([name, {offset}]) => {
+        const port = basePort + offset;
+        return {name, port, configFile: ensureVariantConfig(process.env.PKP_CONFIG_FILE, name, port)};
+    });
     const logDir = path.join(suiteDir, '.server-logs');
     fs.mkdirSync(logDir, {recursive: true});
     // Playwright stops its webServers when a run ends, fails or takes a
@@ -298,17 +327,27 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         // teardown Playwright kills the whole process tree, shell included,
         // so the loop can't respawn after a run.
         //
-        // The last entry is the validation variant: same install, second
-        // config file, fixed port (workers never reach the offset). Tests
-        // navigate to it explicitly through the `variants` fixture.
+        // The last entries are the config variants: same install, a config
+        // file of their own, fixed ports (workers never reach the offsets).
+        // Tests navigate to them explicitly through the `variants` fixture.
         webServer: [
             ...Array.from({length: workers}, (_, i) => phpServer(basePort + i)),
-            phpServer(validationPort, {
-                logName: `server-${validationPort}-validation.log`,
-                env: {...serverEnv, PKP_CONFIG_FILE: validationConfigFile},
-            }),
+            ...variantServers.map(({name, port, configFile}) =>
+                phpServer(port, {
+                    logName: `server-${port}-${name}.log`,
+                    env: {...serverEnv, PKP_CONFIG_FILE: configFile},
+                }),
+            ),
         ],
     });
 }
 
-module.exports = {definePkpConfig, VALIDATION_PORT_OFFSET, refuseSoloBesideOthersWithoutDeps};
+module.exports = {
+    definePkpConfig,
+    VALIDATION_PORT_OFFSET,
+    REAUTH_PORT_OFFSET,
+    VARIANTS,
+    variantConfigFile,
+    ensureVariantConfig,
+    refuseSoloBesideOthersWithoutDeps,
+};

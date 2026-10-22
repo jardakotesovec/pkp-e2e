@@ -30,7 +30,7 @@ const {readEnvFile} = require('./support/env.js');
 const {patchIni} = require('./ini.js');
 
 const DATASETS_DIR = path.join(REPO_ROOT, 'checkouts', 'datasets');
-const DATASET_PORT_OFFSET = 60; // + n: clear of the workers (+0…+19), the probe (+50) and the validation variant (+90)
+const DATASET_PORT_OFFSET = 60; // + n: clear of the workers (+0…+19), the probe (+50) and the config variants (+90 validation, +91 reauth)
 const PRODUCTS = {ojs: 'ojs2', omp: 'omp', ops: 'ops'};
 const PUBLIC_CONTEXT_DIRS = {ojs: 'journals', omp: 'presses', ops: 'contexts'}; // Application::getFileDirectories()['context']
 

@@ -27,6 +27,15 @@
  *   (`allRows`); Failed Jobs adds "Requeue All Failed Jobs", the row
  *   buttons, the success notice.
  * - FailedJobDetailsPage — index/admin/failedJobDetails/{id}.
+ * - ConfirmAccessPage — U01's "Confirm Access" gate (Rule 16), met only on
+ *   an install whose config sets `[security] password_timeout` (the reauth
+ *   variant, harness.md "The reauth-variant server"): the form, the
+ *   interrupted page its address carries (`source`), the trimmed address
+ *   `admin/confirmAccess`, "Submit" with a password; `adminNotice()` for
+ *   the top-right notices around it (the generic sign-in error, "Your last
+ *   action was not completed…", a refused save's "Your access to
+ *   Administration has expired…"); `waitPastWindow()` for the wall-clock
+ *   wait a lapsed window needs.
  * - The trail every page but Administration carries (`trail`, `trailItems`,
  *   `trailLink`), on the shared base `AdminScreen`.
  *
@@ -56,6 +65,18 @@
  *   markup: `table[aria-labelledby=versionHistory|serverInformation|
  *   systemConfiguration]`; each configuration section is its own tbody
  *   whose first row is one bold cell `td.app--admin__systemInfoGroup`.
+ *
+ * Confirm Access (U01 test authors, 2026-10-22, OJS on the reauth variant;
+ * `.reports/U01/screen-notes.md`): `form#confirmPassword` under the page's
+ * `h1` "Confirm Access", its `p` "Signed in as <strong>{full name}</strong>.
+ * Please enter your password to continue.", one password box, the link
+ * "Cancel" and the button "Submit" (posting `admin/confirmAccessSubmit`);
+ * a wrong password redraws the form there with no in-form error line, the
+ * generic sign-in sentence coming as a top-right notice; the last-action
+ * notice comes on the page "Submit" lands on. Both are the user's stored
+ * one-time notices, fetched by the next back-office page of that user in
+ * any browser (patterns.md parallel lesson 2), so a test reads them only
+ * where no other test is signed in as the same account.
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
@@ -247,6 +268,104 @@ class AdministrationPage extends AdminScreen {
     async mainText() {
         await this.expectOpen();
         return this.main.innerText();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Confirm Access (U01 Rule 16)
+// ---------------------------------------------------------------------------
+
+/** What a refused Administration save answers once the window has lapsed. */
+const CONFIRM_ACCESS_EXPIRED =
+    'Your access to Administration has expired. Reload the page and confirm your password to continue.';
+/** The notice after "Submit" when the interrupted press was not replayed. */
+const LAST_ACTION_INCOMPLETE = 'Your last action was not completed. Please try again.';
+
+/** A top-right page notice (`.app__notifications .pkpNotification`) holding `text`. */
+function adminNotice(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
+}
+
+/**
+ * Wait, by the wall clock, until `ms` have passed since `since` (a
+ * `Date.now()` taken at the last request that kept the window open). The
+ * Confirm Access window is wall time with no switch (harness.md "The
+ * reauth-variant server"), so a scenario that leaves pages open past it
+ * waits it out; this is that one wait, never a settle.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {number} since
+ * @param {number} ms
+ */
+async function waitPastWindow(page, since, ms) {
+    const left = since + ms - Date.now();
+    if (left > 0) {
+        await page.waitForTimeout(left);
+    }
+}
+
+class ConfirmAccessPage extends AdminScreen {
+    /** @param {import('@playwright/test').Page} page */
+    constructor(page) {
+        super(page);
+        this.form = page.locator('form#confirmPassword');
+        this.description = this.form.locator('p').first();
+        this.signedInName = this.description.locator('strong');
+        this.password = this.form.locator('input[type="password"]');
+        this.submitButton = this.form.getByRole('button', {name: 'Submit', exact: true});
+        this.cancelLink = this.form.getByRole('link', {name: 'Cancel', exact: true});
+    }
+
+    /** The trimmed address, `admin/confirmAccess` with nothing to continue to. */
+    url() {
+        return this.siteUrl('/en/admin/confirmAccess');
+    }
+
+    /** Type the trimmed address; the caller reads where it landed. */
+    async gotoTrimmed() {
+        await this.page.goto(this.url());
+    }
+
+    /**
+     * The form is on screen: the heading, "Signed in as {full name}. Please
+     * enter your password to continue." with the name in bold, one password
+     * box, "Cancel" and "Submit".
+     *
+     * @param {string} fullName the signed-in administrator's full name
+     */
+    async expectForm(fullName) {
+        await expect(this.heading).toHaveText('Confirm Access', {timeout: T});
+        await expect(this.form).toBeVisible({timeout: T});
+        await expect(this.description).toHaveText(`Signed in as ${fullName}. Please enter your password to continue.`);
+        await expect(this.signedInName).toHaveText(fullName);
+        await expect(this.password).toHaveCount(1);
+        await expect(this.cancelLink).toBeVisible();
+        await expect(this.submitButton).toBeVisible();
+    }
+
+    /** The address bar's `admin/confirmAccess`, its `source` (the interrupted page) and its other keys. */
+    gateAddress() {
+        const url = new URL(this.page.url());
+        return {
+            pathname: url.pathname,
+            source: url.searchParams.get('source'),
+            isActionRequest: url.searchParams.get('isActionRequest'),
+        };
+    }
+
+    /**
+     * Type a password and press "Submit"; resolves once the page it lands
+     * on (the redrawn form, or where the gate sends) has loaded.
+     *
+     * @param {string} password
+     */
+    async submit(password) {
+        await this.password.evaluate((el) => el.removeAttribute('maxlength'));
+        await this.password.fill(password);
+        await Promise.all([
+            this.page.waitForNavigation({waitUntil: 'load', timeout: T}),
+            this.submitButton.click(),
+        ]);
     }
 }
 
@@ -655,6 +774,11 @@ module.exports = {
     JobsPage,
     FailedJobsPage,
     FailedJobDetailsPage,
+    ConfirmAccessPage,
+    CONFIRM_ACCESS_EXPIRED,
+    LAST_ACTION_INCOMPLETE,
+    adminNotice,
+    waitPastWindow,
     isListLoad,
     isJobAction,
 };

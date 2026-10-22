@@ -19,15 +19,18 @@
  * - variants: base URLs of the fleet's fixed alternate servers — same DB,
  *   files dir and Mailpit, a different config file. `variants.validation`
  *   has email validation and the ALTCHA spam check on (harness.md "The
- *   validation-variant server"). Navigate to it explicitly; nothing else
- *   (storageState, pkpApi) is redirected there.
+ *   validation-variant server"); `variants.reauth` has the Site
+ *   Administrator's Confirm Access gate on with a one-minute window
+ *   (harness.md "The reauth-variant server"). Navigate to them explicitly
+ *   and sign in through their own Login page; nothing else (storageState,
+ *   pkpApi) is redirected there.
  * - serverCrashWatch (auto): a failed test whose worker `php -S` died while
  *   it ran gets a `server-crash` annotation, the log lines around the death
  *   attached and one stderr line (support/server-crash.js).
  */
 const path = require('path');
 const base = require('@playwright/test');
-const {VALIDATION_PORT_OFFSET} = require('../config-factory.js');
+const {VALIDATION_PORT_OFFSET, REAUTH_PORT_OFFSET} = require('../config-factory.js');
 const {ensureAuthStateFor} = require('./auth.js');
 const {disableMotion} = require('./motion.js');
 const {throttleCpu} = require('./throttle.js');
@@ -79,6 +82,7 @@ const test = base.test.extend({
         const basePort = parseInt(process.env.PLAYWRIGHT_BASE_PORT || '8000', 10);
         await use({
             validation: `http://127.0.0.1:${basePort + VALIDATION_PORT_OFFSET}`,
+            reauth: `http://127.0.0.1:${basePort + REAUTH_PORT_OFFSET}`,
         });
     },
 

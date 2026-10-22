@@ -4,12 +4,15 @@
  *
  * U01 — Login & sessions, OMP suite (spec:
  * docs/specs/U01-login-and-sessions.md). One test per canonical scenario
- * the spec runs on a press (common scenarios 1–9, in OMP vocabulary:
- * press, Press Manager, Series Editor — glossary substitution).
+ * the spec runs on a press (common scenarios 1–10, in OMP vocabulary:
+ * press, Press Manager, Series Editor, "Hosted Presses" — glossary
+ * substitution). S10 (the Confirm Access gate, on the reauth-variant
+ * server) waits out a wall-time window and reads the Site Administrator's
+ * notice, so it runs `@solo` in `serial/U01-login-and-sessions.spec.js`.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
  * of everything else left out): A1, A2, A4, A5, A6, A7, A8, A10, A11,
- * A13, A14, A15, A16, A17.
+ * A14, A15, A16, A17.
  *
  * Seeding: scenario endpoints only. Scratch submissions ride the read-only
  * `publicknowledge` press; S1 adds a scratch press with no users so the

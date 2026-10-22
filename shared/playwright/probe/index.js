@@ -15,8 +15,9 @@
  *
  * Ports: a probe talks to the app's detached probe server at basePort + 50
  * (`npm run probe-servers -- --start`), never to a worker's port; the
- * validation variant at basePort + 90 is shared with the runner and reached
- * through `app.variant('validation')`.
+ * config variants (the validation variant at basePort + 90, the reauth
+ * variant at + 91) are shared with the runner and reached through
+ * `app.variant('validation')` and `app.variant('reauth')`.
  */
 const fs = require('fs');
 const path = require('path');
@@ -31,7 +32,7 @@ const {disableMotion} = require('../support/motion.js');
 const {LoginPage} = require('../pages/LoginPage.js');
 const {readEnvFile} = require('../support/env.js');
 const users = require('../data/users.js');
-const {VALIDATION_PORT_OFFSET} = require('../config-factory.js');
+const {VALIDATION_PORT_OFFSET, VARIANTS, variantConfigFile} = require('../config-factory.js');
 const {datasetNumber, datasetFleet} = require('../dataset.js');
 
 const PROBE_PORT_OFFSET = 50;
@@ -131,7 +132,7 @@ function resolveProbeApp(name) {
     const datasetN = datasetNumber();
     const dataset = datasetN ? datasetFleet(name, datasetN) : null;
     const port = dataset ? dataset.port : basePort + PROBE_PORT_OFFSET;
-    if (port < basePort + WORKER_PORT_SPAN || port === basePort + VALIDATION_PORT_OFFSET) {
+    if (port < basePort + WORKER_PORT_SPAN || Object.values(VARIANTS).some(({offset}) => port === basePort + offset)) {
         throw new Error(`probe: port ${port} for ${name} collides with the runner's bands`);
     }
     let testApiKey = env.TEST_API_KEY || '';
@@ -145,9 +146,16 @@ function resolveProbeApp(name) {
     }
     const mailpitUrl = process.env.MAILPIT_URL || env.MAILPIT_URL || resolveSlot().mailpitUrl;
     const configFile = dataset ? dataset.configFile : env.PKP_CONFIG_FILE || path.join(app.root, 'config.test.inc.php');
-    // The runner generates this one next to the default config on every
-    // config load (config-factory.js); the kit only reads its location.
-    const validationConfigFile = path.join(path.dirname(configFile), 'config.test.validation.inc.php');
+    // The runner generates these next to the default config on every
+    // config load (config-factory.js), probe-servers --start too; the kit
+    // only reads their location.
+    const validationConfigFile = variantConfigFile(configFile, 'validation');
+    const variantServers = Object.fromEntries(
+        Object.entries(VARIANTS).map(([kind, {offset}]) => [
+            kind,
+            {port: basePort + offset, configFile: variantConfigFile(configFile, kind)},
+        ]),
+    );
     // eslint-disable-next-line import/no-dynamic-require
     const appContext = require(path.join(app.suiteDir, 'support', 'app.context.js'));
     const baseURL = `http://127.0.0.1:${port}`;
@@ -175,6 +183,8 @@ function resolveProbeApp(name) {
         configFile,
         validationConfigFile,
         validationPort: basePort + VALIDATION_PORT_OFFSET,
+        // Every config variant by name: {port, configFile} (validation, reauth).
+        variantServers,
         testApiKey,
         keySource,
         mailpitUrl,
@@ -190,15 +200,17 @@ function resolveProbeApp(name) {
         /**
          * Base URL of a fixed alternate server that the runner also uses.
          * 'validation' = basePort + 90: email validation and ALTCHA on.
+         * 'reauth' = basePort + 91: Confirm Access before Administration,
+         * a one-minute window (`[security] password_timeout = 1`).
          */
         variant: (kind) => {
             if (dataset) {
                 throw new Error('probe: a dataset fleet has no variant servers (harness.md "Dataset fleets")');
             }
-            if (kind !== 'validation') {
-                throw new Error(`probe: unknown variant "${kind}" (only "validation")`);
+            if (!variantServers[kind]) {
+                throw new Error(`probe: unknown variant "${kind}" (${Object.keys(variantServers).join(', ')})`);
             }
-            return `http://127.0.0.1:${basePort + VALIDATION_PORT_OFFSET}`;
+            return `http://127.0.0.1:${variantServers[kind].port}`;
         },
     };
 }
@@ -651,7 +663,8 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
 
 /**
  * Sign in through the real login form on the page's own server (the probe
- * server unless `origin` names another, e.g. app.variant('validation')).
+ * server unless `origin` names another, e.g. app.variant('validation') or
+ * app.variant('reauth')).
  * `contextPath` uses that journal's own login page instead of the site's,
  * which is what decides where the user lands afterwards. An open session is
  * signed out first (the login page would otherwise send it home silently).

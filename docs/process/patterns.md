@@ -671,20 +671,22 @@ name the output folder, `.reports/<PROBE_FEATURE>/<PROBE_AGENT>/`:
 Scripts run through `bin/probe.js`:
 
 ```bash
-npm run probe-servers -- --start                    # once per session: php -S per app at base+50, and +90
+npm run probe-servers -- --start                    # once per session: php -S per app at base+50, and the variants at +90, +91
 npm run fleet-prep -- --feature sync --apps ojs [--reset]   # instead, on a cold (just reset) database: the probe server answers 500 to `bootstrapProbe()` until the runner's setup project has installed it (sync 2026-09-10)
 PROBE_FEATURE=U03 PROBE_AGENT=g1 node bin/probe.js all my-probe.js   # or ojs|omp|ops; ONLY=ojs,omp narrows
 ```
 
 A script calls `forEachApp(fn)`; `fn` receives one app's bag: `{app,
 name, root, baseURL, port, api, mail, users, contextPath, url(path),
-variant('validation')}`. `api` is the `_test` client with that app's own
+variant('validation'|'reauth')}`. `api` is the `_test` client with that app's own
 key, `mail` the shared Mailpit (`find`, `count` and `expectNone` take a
 `since`, a Date taken before the action, for an address other walks on
 the slot also mail), `fleetMail` the same reads kept to the messages that
 name this fleet's own host (a dataset user's address is mailed by every
 fleet of the slot, both lines', within the same minute; so an email whose text names no address of the install, an unassign or cancel notice, is read with `mail` and a `since`), `baseURL` the probe server (base port + 50),
 `variant('validation')` the +90 server with email validation and ALTCHA on,
+`variant('reauth')` the +91 server with the Site Administrator's Confirm
+Access gate on (a one-minute window, harness.md "The reauth-variant server"),
 `db` the fleet's database, which `sql(app, query)` queries through psql
 (one string: rows as lines, so `.split('\n')` for several, columns
 joined by `|`; a `plugin_settings` row written

@@ -15,7 +15,7 @@
  * .reports/<feature>/fleet.json (apps, ports, probe ports, dates).
  *
  * The setup project brings the runner's own servers up and down (worker
- * ports and the validation variant), so nothing must be listening on those
+ * ports and the config variants), so nothing must be listening on those
  * ports first: a leftover manual server would be adopted through
  * reuseExistingServer. A start race right after a reset is known
  * (harness.md "Running"), so the setup project is retried once.
@@ -144,6 +144,7 @@ let ok = true;
             probePort: app.port,
             probeURL: app.baseURL,
             validationURL: dataset ? null : app.variant('validation'),
+            reauthURL: dataset ? null : app.variant('reauth'),
             contextPath: app.contextPath,
             keySource: app.keySource,
             steps: {},
@@ -237,7 +238,7 @@ let ok = true;
         console.log(
             (entry.validationURL === null
                 ? `fleet-prep:   ${name}: dataset fleet ${dataset} ${entry.probeURL}, db ${entry.db}`
-                : `fleet-prep:   ${name}: probe ${entry.probeURL}, validation ${entry.validationURL}, workers from ${entry.basePort}`) +
+                : `fleet-prep:   ${name}: probe ${entry.probeURL}, validation ${entry.validationURL}, reauth ${entry.reauthURL}, workers from ${entry.basePort}`) +
                 (apps.includes(name)
                     ? ` — ${Object.entries(entry.steps)
                           .map(([step, state]) => `${step} ${state}`)
