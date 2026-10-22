@@ -52,7 +52,7 @@ Comments page is refused (Rule 2b).
 | **Report a comment** | • any signed-in visitor, with or without a role in the journal, on another person's comment that is showing, through the comment's "…" menu (Rule 8); a moderator gets the same offer there and nothing more<br>• nobody on their own comment: its menu offers "Delete Comment" and no "Report" (Rule 7) <sup>g</sup> |
 | **Delete a comment from the landing page** | • the comment's own writer, signed in, through the comment's "…" menu (Rule 9); the menu on anyone else's comment offers no "Delete Comment", and a moderator deletes other people's comments on the Comments page only (Rule 14) <sup>h</sup> |
 | **Switch public comments on or off** | • a Journal Manager, an Editor whose role permits settings changes (the Roles screen's "Permit changes to Settings", ticked by default), and a Site Administrator working in the journal, on Settings › Website › Content › "Comments" (Rule 2) <sup>b</sup> |
-| **Open the Comments page** | • a Journal Manager and an Editor, whether or not their role permits settings changes: the Content › Comments menu entry and the page's address while the setting is on (Rule 3); with the setting off the address answers the access-denied page (Rule 2b)<br>• a Site Administrator holding no manager role in the journal: on a journal the page opens; on a press or a preprint server the menu entry is offered but the address answers the access-denied page ⚠ [OMP1](#omp1) ⚠ [OPS1](#ops1) (Rule 17)<br>• a Section Editor, an Assistant, an Author, a Reviewer or a Reader: no menu entry, and the address answers the access-denied page<br>• a visitor who is not signed in: the address answers the Login page<br>• anyone, signed in or not, the Site Administrator included, at the page's address with "index", the site, in place of the journal's path ("…/index.php/index/management/settings/userComments"): the server fails and the browser shows an empty page, where the Login page or the notice "No journal was found that matched your request." is expected ⚠ [A23](#a23) <sup>i</sup> <sup>m</sup> |
+| **Open the Comments page** | • a Journal Manager and an Editor, whether or not their role permits settings changes: the Content › Comments menu entry and the page's address while the setting is on (Rule 3); with the setting off the address answers the access-denied page (Rule 2b)<br>• a Site Administrator holding no manager role in the journal: on a journal the page opens; on a press or a preprint server the menu entry is offered but the address answers the access-denied page ⚠ [OMP1](#omp1) ⚠ [OPS1](#ops1) (Rule 17)<br>• a Section Editor, an Assistant, an Author, a Reviewer or a Reader: no menu entry, and the address answers the access-denied page<br>• a visitor who is not signed in: the address answers the Login page<br>• a visitor who is not signed in and the Site Administrator, at the page's address with "index", the site, in place of the journal's path ("…/index.php/index/management/settings/userComments"): the visitor gets the Login page, the Site Administrator the notice "No journal was found that matched your request." <sup>i</sup> <sup>m</sup> |
 | **Approve, hide or delete a comment; view or delete a report** | • whoever can open the Comments page (the row above), on every comment of the journal, their own included, while comments are on (Rules 12 to 16); nobody on another journal's comment <sup>j</sup> |
 | **Receive the moderation tasks** | • every Journal Manager and Editor of the journal, in the Tasks panel (Side effects); a Site Administrator holding no manager role in the journal gets none <sup>l</sup> |
 
@@ -107,10 +107,8 @@ Comments page is refused (Rule 2b).
      leaves the side menu. A moderator opening the Comments page by its
      address ("…/management/settings/userComments" after the journal's
      address) lands on the access-denied page, which reads "Access
-     denied.". With one more part after the address
-     ("…/management/settings/userComments/x") the page still opens,
-     headed "Comments", under an "Error" dialog and over "No Items"
-     ⚠ [A22](#a22).
+     denied.", and so does the address ending in "/" or carrying one more
+     part ("…/management/settings/userComments/x").
    - 2c. **While the setting is off.** Every request about comments is
      refused, a moderator's included, so nothing is listed, approved,
      hidden or deleted on any screen until the box is ticked again. The
@@ -863,6 +861,8 @@ Left out of the scenarios above, by reason:
   - an account holding no role in the journal, registered with another journal of the site, writing a comment that waits for approval and filing a report the Comments page lists (Actors rows 2 and 3; A20, retired)
   - a comment request made by hand in one journal naming another journal's published article, refused with nothing kept (Actors row 2; A21, retired)
   - a moderator's comment task and report task pressed while public comments are off, landing on the access-denied page (Rules 2b, 16)
+  - with public comments off, the Comments page's address ending in "/" and carrying one more part, both landing on the access-denied page like the bare address (Rule 2b; A22, retired)
+  - the Comments page's address at the site, with no journal: the Login page for a visitor who is not signed in, the notice "No journal was found that matched your request." for the Site Administrator (Actors row 6; A23, retired)
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
@@ -881,8 +881,6 @@ Left out of the scenarios above, by reason:
   - A8 (closing the report panel clearing both numbers from the address; Rule 15; scenario 3 marks it)
   - A9 (the Site Administrator with Reader as their only journal role: the "Error" dialog over the Comments page, and the page working after "OK"; Rule 17b)
   - A15 (the verified and the unverified ORCID icon under a comment sharing one name and no text; Rule 6b)
-  - A22 (with public comments off, the Comments page's address with one more part opening the page; Rule 2b)
-  - A23 (the Comments page's address at the site, with no journal, answering a server error; Actors row 6)
   - OMP1 and OPS1 (the Site Administrator holding no manager role: the Comments page open on a journal, refused on a press and a preprint server; Rules 17a, 17c)
 - **Owned by another feature**:
   - the Tasks panel's own controls on a comment task, Mark Read and Delete (Cross-feature interactions; *Notifications center & email preferences*, scenario 2)
@@ -906,9 +904,7 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | Comments page: the link to an unverified ORCID iD in the comment and report panels opens a wrong address | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A comment deleted with its article or its writer's merged account leaves blank, dead rows in every moderator's Tasks | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | On the editorial Comments page, the browser tab shows only the journal's name, not "Comments" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A14](#a14) | A report the server refuses shows an "Error" window, but the "Report Comment" window closes behind it and the typed reason is lost | 🐞 | minor | PR review (claude), 2026-10-21 — partly fixed by pkp/ui-library#1024 |
-| [A22](#a22) | With public comments off, the Comments page's address with one more part still opens the page, every list refused | 🐞 | low | — |
-| [A23](#a23) | The Comments page's address at the site, with no journal, answers a server error, signed in or not | 🐞 | low · crash: server | — |
+| [A14](#a14) | A report the server refuses shows an "Error" window, but the "Report Comment" window closes behind it and the typed reason is lost | 🐞 | minor | @jarda.kotesovec 2026-10-22 · handled separately |
 | [A1](#a1) | A hidden comment reads to its writer exactly like one awaiting approval | ❓ | minor | — |
 | [A2](#a2) | Approving or hiding a comment leaves every moderator's "pending review" task in place | ❓ | minor | — |
 | [A3](#a3) | The report dialog neither refuses an empty reason with a message nor confirms a filed report, and the same person can report the same comment again | ❓ | minor | — |
@@ -927,6 +923,8 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A4](#a4) | Retired: with public comments off, the Comments page still opened by address; it is now refused onto the access-denied page | ✅ | retired | PR review (claude), 2026-10-21 — answered by pkp/pkp-lib#13550 |
 | [A20](#a20) | Retired: an account holding no role in the journal was offered the comment box and "Report" and both were refused; both are accepted again | ✅ | retired | @jarda.kotesovec 2026-10-21 · overturned |
 | [A21](#a21) | Retired: a comment request made in one journal on another journal's published article answered a server error; it is now refused as not found | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13550 |
+| [A22](#a22) | Retired: with public comments off, the Comments page's address with one more part still opened the page; it is now refused like the bare address | ✅ | retired | PR review (claude), 2026-10-22 — fixed by pkp/pkp-lib#13550 |
+| [A23](#a23) | Retired: the Comments page's address at the site, with no journal, answered a server error; it now leads to the Login page or the "No journal" notice, as before the PR | ✅ | retired | PR review (claude), 2026-10-22 — fixed by pkp/pkp-lib#13550 |
 | [A11](#a11) | Retired: on a press and a preprint server, deleting a comment removed the task about an unrelated report or comment that shared its number; it now removes only its own tasks {OMP OPS} | ✅ | retired | upstream sync (claude), 2026-09-29 — fixed upstream |
 
 ### All apps
@@ -1085,8 +1083,12 @@ reason a second time. A refused new comment keeps its text in the box
 under its "Error" window. Expected the "Report Comment" window to stay
 open with the reason, as the box keeps a refused comment; observed the
 window closed and the reason lost.
-Since: 2026-09-29 · Basis: probe, 2026-10-21, at the PR head `26de0d0c` of pkp/ui-library#1024, before its merge. <sup>f-a14</sup>
+Since: 2026-09-29 · Basis: probe, 2026-10-22, at the PR head `f810cbba` of pkp/ui-library#1024, before its merge. <sup>f-a14</sup>
 Report: refresh owed — pkp/ui-library#1024 (head `26de0d0c`, before its merge) drops the `closeTopDialog()` call from `performCommentReport()` (`src/frontend/components/PkpComments/usePkpCommentsStore.js`), so the `openDialogNetworkError` window `usePkpFetch` opens now stays and names the failure, while the "Submit" callback's `close()` still closes the report window and the reason is still lost (2026-10-21)
+
+> **Reviewed — @jarda.kotesovec, 2026-10-22**: confirmed 🐞. Ruling:
+> "preserving the typed reason for a report on failure will be handled
+> separately."
 
 <a id="a15"></a>
 **A15 — Only the icon's fill tells an unverified ORCID iD under a comment from a verified one** · ❓ · minor.
@@ -1122,31 +1124,6 @@ over to the chosen account? Lean: oversight; the merge hands over
 everything else the account wrote, and two accounts merged are usually
 one person's, whose public comments should survive it.
 Basis: probe, 2026-10-04; code for what the merge hands over. <sup>f-a16</sup>
-
-<a id="a22"></a>
-**A22 — With public comments off, the Comments page still opens when its address carries one more part** · 🐞 · low.
-With "Enable Public Comments" unticked, a moderator who opens the
-Comments page's address lands on the access-denied page, "Access
-denied.", and so does the address ending in "/". With any further part
-after it ("…/management/settings/userComments/x") the page opens instead, headed
-"Comments" with its four tabs, under an "Error" dialog and over "No
-Items", since every request about comments is refused while the setting
-is off (Rule 2c). Nothing can be read or changed through it. Expected
-the access-denied page for every form of the address; observed the page
-open and empty.
-Basis: probe, 2026-10-21, at the PR head `9be1c9efb0`, before its merge. <sup>f-a22</sup>
-
-<a id="a23"></a>
-**A23 — The Comments page's address at the site, with no journal, answers a server error** · 🐞 · low · crash: server.
-The Comments page's address with "index", the site, in place of a
-journal's path ("…/index.php/index/management/settings/userComments")
-makes the server fail, and the browser shows an empty page, for a
-visitor who is not signed in and for the Site Administrator alike.
-Before pkp/pkp-lib#13550 the visitor was sent to the Login page and the
-Site Administrator to the notice "No journal was found that matched your
-request.". Expected those answers; observed the app failing. No screen
-links to that address.
-Basis: probe, 2026-10-21, at the PR head `9be1c9efb0`, before its merge. <sup>f-a23</sup>
 
 ### OMP
 
@@ -1205,6 +1182,13 @@ Basis: test run. <sup>f-ops1</sup>
 
 <a id="a21"></a>
 **A21 — A comment request naming another journal's published article answers a server error** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its head `9be1c9efb0`, before its merge, 2026-10-21): the request is refused with "The requested resource was not found." and nothing is kept (Actors row 2). <sup>f-a21</sup>
+
+<a id="a22"></a>
+**A22 — With public comments off, the Comments page still opened when its address carried one more part** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its head `035769b365`, before its merge, 2026-10-22): with "Enable Public Comments" unticked, the address ending in "/" and the address carrying one more part ("…/management/settings/userComments/x") land on the access-denied page, "Access denied.", like the bare address (Rule 2b). <sup>f-a22</sup>
+
+<a id="a23"></a>
+**A23 — The Comments page's address at the site, with no journal, answered a server error** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its head `035769b365`, before its merge, 2026-10-22): a visitor who is not signed in is sent to the Login page and the Site Administrator gets the notice "No journal was found that matched your request.", as before the PR (Actors row 6). <sup>f-a23</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -1281,15 +1265,16 @@ press) and Setup › Lists (server) forms, the control, showed "Saving" then
 and lost it the same way after an untick; the landing page's blocks
 behaved as Rules 2a and 2b say, and the page by address still opened
 with the comments written before listed after the untick (as built
-then; footnote f-a4). Since pkp/pkp-lib#13550 (head `9be1c9efb0`,
-before its merge) `ManagementHandler::authorize()` returns false for the
-`settings` op when the request's arguments are exactly
-`['userComments']` and the context's `enablePublicComments` is off,
-before the parent's policies run; `PKPPageRouter::handleAuthorizationFailure()`
+then; footnote f-a4). Since pkp/pkp-lib#13550 (heads `9be1c9efb0` and
+`035769b365`, before its merge) `ManagementHandler::authorize()` returns
+false, before the parent's policies run, when the request's first
+argument is `userComments` (`$requestedArgs[0] ?? null`; at `9be1c9efb0`
+the arguments had to be exactly `['userComments']`, A22) and there is a
+context whose `enablePublicComments` is off (at `9be1c9efb0` the context
+was not checked, A23); `PKPPageRouter::handleAuthorizationFailure()`
 sends the browser to
 "…/user/authorizationDenied?message=user.authorization.accessDenied",
-the context's public page reading "Home / Access denied." (A22 for the
-arguments' other forms). `UserCommentController::authorize()` refuses
+the context's public page reading "Home / Access denied.". `UserCommentController::authorize()` refuses
 every comments route while the setting is off (its comment: "All
 /comments endpoints should be inaccessible if comments are disabled"),
 the public list and a writer's own `DELETE comments/{id}` included
@@ -1544,7 +1529,21 @@ page", `context.json` default 25); `TablePagination` renders only past one
 page. Role gate: the app `SettingsHandler` constructors assign the
 `settings` op to `ROLE_ID_MANAGER` in all three apps and to
 `ROLE_ID_SITE_ADMIN` on OJS only (footnote m); everyone else meets
-`RoleBasedHandlerOperationPolicy`'s refusal, the access-denied page.
+`RoleBasedHandlerOperationPolicy`'s refusal, the access-denied page. A
+manager-level group without "Permit changes to Settings" is spared
+`CanAccessSettingsPolicy` for the `announcements` and `userComments`
+areas only (`ManagementHandler::authorize()`); since pkp/pkp-lib#13550
+at its head `035769b365`, before its merge, that exception reads the
+first argument, where the base `1f415a07ca` compared the whole list.
+Probe at that head, 2026-10-22 on OJS's default dataset
+(`checks/sync/pkp-lib-13550/extras.js`, e7), `dbarnes` with the
+"Journal editor" group's "Permit changes to Settings" off:
+"…/management/settings/userComments/x" and
+"…/management/settings/announcements/x" opened the same pages as their
+bare addresses ("Comments", "Announcements"), where at the base they
+answered the access-denied page
+("…?message=user.authorization.roleBasedAccessDenied"); Settings ›
+Website ("…/management/settings/website") was refused at both.
 Live-probed 2026-09-16 (Rule 10, Fields) on the three apps with seeded
 comments: the heading "Comments", the four tabs, the columns
 "Submission", "Comment", "User", "Status" and a screen-reader-only
@@ -2299,7 +2298,13 @@ dataset (`checks/sync/pkp-lib-13550/extras.js`): a report on a comment
 the server no longer finds answered `404`, and the page held one dialog,
 "Error" / "The requested resource was not found." / "OK", and no "Report
 Comment" window; at the base (ui-library `9cfb8987`, pkp-lib
-`d43737309c`) the same report left no dialog at all.
+`d43737309c`) the same report left no dialog at all. Round 3 (ui-library
+head `f810cbba`, the same patch on `e47a4887`, with pkp-lib
+`035769b365`), probe before their merge, 2026-10-22, the same walk: one
+"Error" / "The requested resource was not found." / "OK" dialog and no
+"Report Comment" window; at the bases (`e47a4887`, `1f415a07ca`) no
+dialog. Keeping the typed reason is left to a separate change (the
+ruling under the entry).
 
 <a id="fn-f-a15"></a>
 **f-a15 — A15.** pkp/pkp-lib#13422 ("For consistency the orcid is now
@@ -2474,46 +2479,54 @@ not-found error): both requests answer `422` "The requested resource was
 not found.", nothing kept.
 
 <a id="fn-f-a22"></a>
-**f-a22 — A22.** pkp/pkp-lib#13550 (head `9be1c9efb0`, before its merge)
-gates the page in `ManagementHandler::authorize()` with
-`$requestedArgs === ['userComments']`, while `settings()` routes on the
-first argument alone (`array_shift($args)`), so
-`['userComments', 'x']` passes the gate, meets `CanAccessSettingsPolicy`
-like any other settings tab (passed by a manager with settings
-permission) and renders the page; a trailing "/" yields
-`['userComments']` and is refused. Probe at that head, 2026-10-21 on
-OJS's default dataset as `dbarnes` with comments off
-(`checks/sync/pkp-lib-13550/extras.js`): "…/userComments/x" answered
-`200` at its own address with the heading "Comments", the four tabs and
-"No Items", the page's text ending in the "Error" dialog's title (the
-capture was cut there), and the list request `GET comments` answered
-`401`; "…/userComments/" and "…/userComments" landed on
-"…/user/authorizationDenied?message=user.authorization.accessDenied".
-OMP and OPS: the same lib/pkp code, not walked. Fix tried
+**f-a22 — A22 (retired).** Retired 2026-10-22 by pkp/pkp-lib#13550 at
+its head `035769b365` ("Minor improvement", on the round-2 patch
+`4c6d4d556b`, both on the tip `1f415a07ca`), before its merge, whose
+`ManagementHandler::authorize()` reads the first argument
+(`$firstPageArg = $requestedArgs[0] ?? null`) for the comments-off gate,
+as `settings()` routes on it (`array_shift($args)`). Probe at that head,
+2026-10-22 on OJS's default dataset, freshly loaded, as `dbarnes` with
+comments off (`checks/sync/pkp-lib-13550/extras.js`, e3):
+"…/userComments", "…/userComments/" and "…/userComments/x" all landed on
+"…/user/authorizationDenied?message=user.authorization.accessDenied"
+("Home / Access denied."); at the base `1f415a07ca`, which has no gate,
+all three opened the page headed "Comments" over "No Items". OMP and
+OPS: the same lib/pkp code, not walked. Round 2 (head `9be1c9efb0`): the
+gate compared `$requestedArgs === ['userComments']`, so
+`['userComments', 'x']` passed it, met `CanAccessSettingsPolicy` like any
+other settings tab (passed by a manager with settings permission) and
+rendered the page; a trailing "/" yields `['userComments']` and was
+refused. Probe at that head, 2026-10-21, the same account and setting:
+"…/userComments/x" answered `200` at its own address with the heading
+"Comments", the four tabs and "No Items", the page's text ending in the
+"Error" dialog's title (the capture was cut there), and the list request
+`GET comments` answered `401`. The fix tried then
 (`checks/sync/pkp-lib-13550/page-gate-fix.diff`: compare the first
-argument, `($requestedArgs[0] ?? null) === 'userComments'`): all three
-forms landed on the access-denied page.
+argument) is the one the head carries.
 
 <a id="fn-f-a23"></a>
-**f-a23 — A23.** The gate of footnote f-a22 calls
-`$request->getContext()->getData('enablePublicComments')` before the
-parent's `ContextAccessPolicy` runs, and at the site there is no
-context. Probe at the head `9be1c9efb0`, before its merge, 2026-10-21 on
-OJS (`checks/sync/pkp-lib-13550/extras.js`): `GET
-/index.php/index/en/management/settings/userComments` answered `500`
-with an empty body, signed out and as `admin`; the server log: "PHP
-Fatal error: Uncaught Error: Call to a member function getData() on
-null in …/lib/pkp/pages/management/ManagementHandler.php". At the base
-`d43737309c` the visitor landed on the Login page (`login?source=…`) and
-`admin` on "…/user/authorizationDenied?message=user.authorization.noContext"
-("Home / No journal was found that matched your request."), nothing
-logged. The fix tried for A22 skips the gate when there is no context
-and brings back the base answers. OMP and OPS: the same lib/pkp code,
-not walked. The site-level API address
+**f-a23 — A23 (retired).** Retired 2026-10-22 by pkp/pkp-lib#13550 at
+its head `035769b365`, before its merge, whose comments-off gate (footnote
+f-a22) runs only when `$request->getContext()` returns a context, so at
+the site the parent's `ContextAccessPolicy` answers as before. Probe at
+that head, 2026-10-22 on OJS (`checks/sync/pkp-lib-13550/extras.js`,
+e1): `GET /index.php/index/management/settings/userComments` signed out
+landed on the Login page (`login?source=…`), and as `admin` on
+"…/user/authorizationDenied?message=user.authorization.noContext"
+("Home / No journal was found that matched your request."), nothing in
+the server log; the base `1f415a07ca` the same. OMP and OPS: the same
+lib/pkp code, not walked. Round 2 (head `9be1c9efb0`): the gate called
+`$request->getContext()->getData('enablePublicComments')` before
+`ContextAccessPolicy` ran, and at the site there is no context; the
+address answered `500` with an empty body, signed out and as `admin`
+(2026-10-21), the server log reading "PHP Fatal error: Uncaught Error:
+Call to a member function getData() on null in
+…/lib/pkp/pages/management/ManagementHandler.php"; the base `d43737309c`
+gave the answers above. The site-level API address
 (`/index.php/index/api/v1/comments/public`) answers `401` "You are not
-authorized to access the requested resource." at the heads `08024165dd`
-and `9be1c9efb0`, where the base answered `404` "The requested resource
-was not found."; no screen calls it.
+authorized to access the requested resource." at the heads `08024165dd`,
+`9be1c9efb0` and `035769b365`, where the bases answered `404` "The
+requested resource was not found."; no screen calls it.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`
