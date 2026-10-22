@@ -20,6 +20,7 @@ _Suspicions another session met and handed over, one line each; the
 upstream session works them (MAINTENANCE upstream session step 3) and
 deletes each once it is a report, a register entry or dismissed._
 
+- 2026-10-22 (housekeeping, VM s1, from a code read): on OJS and OPS `main` a metadata edit of a published item no longer sends the updated work to its contributors' verified ORCID records: the search index's `submissionMetadataChanged()` call that queued it went with the old search framework (OPS `43359941c6`, Alec Smecher, 2025-08-01, pkp/pkp-lib#8920; 3.5 still re-sends). Read whether `main` re-sends it another way (U04 ORCID) and whether it is intended.
 
 
 
