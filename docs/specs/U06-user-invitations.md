@@ -37,7 +37,7 @@ Production Editor; on a preprint server the Preprint Server Manager).
 | **Cancel a pending invitation** | • Whoever opens Users & Roles: "Cancel Invite" on the invitation's row <sup>a</sup> |
 | **Propose roles for an existing member** | • Whoever opens Users & Roles: the user row's Edit action opens the same wizard (Rule 13), and so does "Invite to a role" once "Search User" finds them (Rule 13a) <sup>a</sup> <sup>c</sup> |
 | **Accept or decline** | • The recipient: via the emailed links, while the invitation is pending. This works signed out, and no credentials are asked (Rules 6–7) <sup>f</sup> |
-| **Customize the invitation email for one send** | • Whoever is sending: the wizard's compose step (subject, body, template choice) <sup>g</sup> |
+| **Customize the invitation email for one send** | • Whoever is sending: the wizard's compose step, which edits the subject and body (Fields) <sup>g</sup> |
 | **Edit the stored invitation email template** | • Journal Manager: on the Emails settings screen, which belongs to the emails-management feature. ⚠ [OPS1](#ops1) On a preprint server the template has no row there <sup>j</sup> |
 
 ## Fields & validation
@@ -56,12 +56,12 @@ user the personal fields show read-only.
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Search for a user by email address, username, or ORCID iD" | yes (to pass step 1) | Exact match on email, then username, then ORCID iD. A miss, even text that is no valid email address, advances to "Enter details" with "The user does not have a role in this journal". An email address with no account arrives typed into the Email field; other text is discarded (the Email field arrives empty) and the address is validated there instead <sup>h</sup> |
-| Email / Given Name / Family Name / Affiliation | email only | Names are optional; helper text notes the invitee can change them. On a journal with a second form language (Settings), a button named for it ("French") above the fields adds "Given Name in French" and "Family Name in French" boxes, and each name field counts its filled languages ("0/2 languages completed"). The email greets by the name in the journal's primary language, else in the site's, else in whichever language one was entered, on the "To" line too (Side effects). <sup>i</sup> If the address gains an account before the invitation is accepted, what the recipient then sees was not verified live <sup>o</sup> |
-| Role (per row, "Select a new role") | at least one row | Roles the person already holds, or already chosen in another row, are not offered. From the second row on, a row's fields lose their screen-reader names ⚠ [A8](#a8) <sup>i</sup> |
+| Email address / Given Name / Family Name | email only | "Enter details" has no Affiliation box, so the "Affiliation:" line of the "Cancel Invite" confirmation (Rule 16) stays empty for an invitation sent from this wizard. Names are optional; helper text notes the invitee can change them. On a journal with a second form language (Settings), a button named for it ("French") above the fields adds "Given Name in French" and "Family Name in French" boxes, and each name field counts its filled languages ("0/2 languages completed"). The email greets by the name in the journal's primary language, else in the site's, else in whichever language one was entered, on the "To" line too (Side effects). <sup>i</sup> If the address gains an account before the invitation is accepted, what the recipient then sees was not verified live <sup>o</sup> |
+| Role (per row, "Select a new role") | at least one row | Roles the person already holds are not offered. A role already chosen in another row is listed but cannot be picked. From the second row on, a row's fields lose their screen-reader names ⚠ [A8](#a8) <sup>i</sup> |
 | Start Date (per role row) | yes | A date in the past takes effect as "today" at acceptance (Rule 8) ⚠ [A8](#a8) |
 | End Date (per role row) | no | Cannot be entered when inviting. An added role row's END DATE cell shows "---" and holds no input. The column only displays dates on an existing member's current roles (Rule 13) <sup>i</sup> |
 | Journal Masthead (per role row) | yes | The select starts blank ("Appear on the masthead" / "Does not appear on the masthead"). Leaving it empty blocks the step with "This field is required." On a journal or press (a preprint server's role select offers no reviewer role), choosing Reviewer replaces the select with the fixed text "Appear on the masthead", so there is no choice to make ⚠ [A8](#a8) <sup>i</sup> |
-| Email subject & body (compose step) | prefilled | Freely editable for this send. A different stored template can be selected <sup>g</sup> |
+| Email subject & body (compose step) | prefilled | Freely editable for this send. On a default install the "Email Templates" › "Find Template" list offers "User Invited to Role Notification" alone, also after typing another email's template name such as "Password", and picking it leaves the subject as it was <sup>g</sup> |
 
 Accept wizard (new invitee):
 
@@ -117,10 +117,13 @@ Accept wizard (new invitee):
    session. <sup>l</sup>
 7. On the ORCID step the recipient either verifies their iD through the ORCID
    sign-in window ("Verify ORCID iD") or passes with "Skip ORCID
-   verification". This step has no other Continue button. <sup>k</sup>
+   verification". This step has no other Continue button; its "Cancel" works
+   as Rule 17 says. <sup>k</sup>
 8. Accepting grants every listed role from its start date, with the chosen
    masthead visibility, and marks the invitation accepted. A past start date
-   takes effect as the acceptance day. The final button reads "Accept And
+   takes effect as the acceptance day: the member's row under Current Users
+   and the page that row's Edit opens then show that day, and a future
+   date stays as typed ⚠ [A16](#a16). The final button reads "Accept And
    Continue to OJS". A closing dialog announces the new role, and its "View
    All Submissions" button leads out of the wizard (Rule 9). <sup>m</sup>
 9. A new invitee's account exists only from the moment they accept. They
@@ -185,8 +188,11 @@ Accept wizard (new invitee):
     disabled user, whose wording does not allow for a disabled account
     ⚠ [A9](#a9); on the search path they were seen active and were not
     pressed. <sup>i</sup>
-15. Wizard navigation (send side). "Back" returns one step, and returning to
-    the search step clears everything entered. "Cancel" asks for confirmation
+15. Wizard navigation (send side). "Back" returns one step. Returning to
+    the search step empties the search box, but the names and the role
+    row entered on "Enter details" stay (seen with one row): that step
+    shows them again after the next search, and the invitation then goes
+    out without the names ⚠ [A15](#a15). "Cancel" asks for confirmation
     only when something was changed: a "Cancel Invitation" dialog asks "Are
     you sure want to cancel this invitation?" ⚠ [A7](#a7), and its "Cancel
     Invite" returns to Users & Roles. Leaving the wizard any other way
@@ -201,9 +207,9 @@ Accept wizard (new invitee):
 16. Cancelling a pending invitation (from its row, behind a confirmation
     listing the invitee's details) deactivates the emailed links immediately.
     The recipient then sees the "Invitation Unavailable" page (Rule 4). <sup>q</sup>
-17. Wizard navigation (accept side). The "Create OJS account", "Enter
-    details" and every recipient's "Review & create account" steps also
-    offer "Cancel". It asks "Cancel Role Invitation Process?" ("Are you
+17. Wizard navigation (accept side). The "Verify ORCID iD", "Create OJS
+    account", "Enter details" and every recipient's "Review & create
+    account" steps also offer "Cancel". It asks "Cancel Role Invitation Process?" ("Are you
     sure you want to cancel? Canceling now will stop the role acceptance process, and you'll
     need to restart from the invitation email to accept the role again. …")
     with "Cancel Invitation Process" and "Go Back". "Go Back" returns to the
@@ -700,20 +706,29 @@ Left out of the scenarios above, by reason:
   - a newcomer who pressed "Save and continue" on "Create OJS account",
     then cancelled from "Enter details", finding the chosen username
     still in its box when the emailed link reopens that step (Rule 17)
+  - the guard for A15: after "Back" to "Search User" and a search for
+    another address, the names "Enter details" shows are the names the
+    invitation carries, in the Invitations row, the greeting and the "To"
+    line (Rule 15), once fixed
+  - "Cancel" on a newcomer's "Verify ORCID iD" step on a journal with
+    ORCID enabled, its "Cancel Role Invitation Process?" dialog and "Go
+    Back" returning to the step (Rule 17)
+  - the first email's decline link after "Edit" replaced the invitation,
+    which scenario 6's Control names beside its accept link (Rule 12,
+    A3): only the accept link is read today
 - **Rarely met**:
-  - a past start date taking effect as the acceptance day (Rule 8): a
-    manager rarely backdates a start date, and the body names no screen
-    where a role's start date is read back after acceptance
+  - a past start date taking effect as the acceptance day, read on the
+    member's Current Users row and Edit page (Rule 8): a manager rarely
+    backdates a start date
   - a journal with a second form language: the name boxes in that language
     on "Enter details" in both wizards, and the greeting by the name in the
     primary language only (Fields; Settings "Forms"; Side effects): the
     names are optional and nothing else on these screens changes, and
     scenario 1 reads the greeting by name on a one-language journal
 - **Nothing new to test**:
-  - the template choice on the compose step (Actors row 7): the body states
-    no outcome of the choice to read
-  - "Back" to the search step clearing everything entered (Rule 15): the
-    body names no screen where the cleared fields are read back
+  - the compose step's template list (Fields, send wizard): it offers the
+    invitation email's own template alone, and picking it changes nothing
+    on the step
   - "Cancel" asking for confirmation only when something changed, its
     "Cancel Invite" returning to Users & Roles (Rule 15): a way out of the
     wizard that sends nothing
@@ -759,6 +774,10 @@ Left out of the scenarios above, by reason:
     wizard)
   - A14 (the warnings each opening of the send wizard leaves in the
     server's error log; Rule 15)
+  - A15 (names left on "Enter details" after "Back" to "Search User",
+    shown but not sent; Rule 15)
+  - A16 (which day a past start date becomes when the invitation is
+    accepted on a later day than it was sent; Rule 8)
 - **No seed**:
   - a pending invitation past its deadline, the link stopped and no role
     granted (Rules 1, 2, 4): the test tooling cannot backdate a deadline
@@ -804,10 +823,12 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | The "Invite to a role" address with a wrong last word shows an empty page instead of "404 Not Found" | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | A newcomer whose chosen username was taken meanwhile presses "Accept And Continue" and nothing happens | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
+| [A15](#a15) | After "Back" to "Search User" and another address, "Enter details" still shows the first person's names, but the invitation goes out without them | 🐞 | minor | — |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
 | [A9](#a9) | The role-removal email tells a disabled user their account "is still active"; the active "Remove Role" and masthead select on their screen are intended | ❓ | minor | @beaug 2026-09-18 · controls intended, email wording open |
+| [A16](#a16) | A past start date reads as the acceptance day once accepted, while the email named the date typed; an acceptance on a later day than the send was not seen | ❓ | minor | — |
 | [A1](#a1) | Retired: the send wizard's address was gated more widely than the screen that offers it; it now lets in only those who open Users & Roles (Actors row 2) | ✅ | retired | upstream change + claim check (claude), 2026-10-02 — fixed upstream |
 | [A6](#a6) | Retired: Edit on a disabled member's row opened an error over an empty wizard; it now opens their details with the disabled-user warning (Rule 14) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
 | [A10](#a10) | Retired: some named newcomers were greeted "Dear {email},"; every name entered now reaches the greeting and the "To" line (Side effects) | ✅ | retired | PR review (claude), 2026-10-02 — fixed upstream (pkp/pkp-lib#13429) |
@@ -1009,6 +1030,37 @@ sent and edited as usual, and its email links carry the invitation's
 id. No setting in the app turns them off.
 Basis: probe, 2026-10-15. <sup>[f-a14](#fn-a14)</sup>
 
+<a id="a15"></a>
+**A15 — After "Back" to "Search User" and another address, "Enter details" still shows the first person's names, but the invitation goes out without them** · 🐞 · minor.
+A manager types a newcomer's Given Name and Family Name on "Enter
+details", fills a role row, presses "Back" and searches another address
+on "Search User". The search box is empty, but "Enter details" opens
+with the first person's names in their boxes and the role row (role,
+start date, masthead choice) as it was left. Sent as shown, the
+invitation carries the role, the start date (only today's tried) and the
+masthead choice but no name: its Invitations row shows no name, the
+email opens "Dear {email}," and its "To" line has no name. "Back"
+followed by a search for the same address brings the names and the role
+row back too. For an existing member found on the second search, "Enter
+details" has no name boxes and the role row comes back, its role empty
+if the member already holds it.
+Basis: probe, 2026-10-22. <sup>[f-a15](#fn-a15)</sup>
+
+<a id="a16"></a>
+**A16 — Which day a past start date becomes is not settled** · ❓ · minor.
+A manager who types a start date in the past on "Enter details" sends
+an email that names that date ("Starting from {date}"). Once the person
+accepts, the role's start date reads as the day of accepting, in their
+row under Current Users and on the page that row's Edit opens; a
+future date stays as typed. The invitation was sent and accepted on the same day, so whether
+a past date becomes the day of accepting or the day of sending has not
+been seen.
+Question: does a past start date become the day the invitation is
+accepted, also when that is days after it was sent? Lean: yes, Rule 8
+stands: the email still names the typed date, so the date is not
+replaced when the invitation is sent.
+Basis: probe, 2026-10-22. <sup>[f-a16](#fn-a16)</sup>
+
 ### OMP and OPS
 
 <a id="omp1"></a>
@@ -1023,7 +1075,9 @@ notified of this change." The change itself is saved. It happens on the
 user's roles page (Users & Roles, a user's "Edit") and on "Invite to a
 role" for an existing member, for every role that offers the select. On
 a press the email's text cannot be read or changed either: its "Edit" in
-Manage Emails leaves the page behind a spinner. The manager can tell the
+Manage Emails leaves the page behind a spinner. On a preprint server the
+email has no row in Manage Emails at all, for the cause of
+[OPS1](#ops1). The manager can tell the
 member through the users list's "Email"; running the migration the
 message names does not help. Presses and preprint servers installed from
 `main` have no template for this email, and so do those upgraded to it
@@ -1259,7 +1313,15 @@ the "Cancel Invitation" dialog, "Are you sure want to cancel this
 invitation?" with the buttons "Cancel Invite" and "Go Back" (finding A7),
 and "Cancel Invite" returned to Users & Roles; leaving the wizard by
 opening another address raised no browser question, and the Invitations
-table held the same rows afterwards.
+table held the same rows afterwards. Drift sweep 2026-10-22, OJS, OMP
+and OPS, two runs each: the compose step ("STEP 3 - Modify email shared
+with the user") showed "Email Templates" › "Find Template" listing one
+result, "User Invited to Role Notification" ("Invitation to New Role
+Dear {$recipientName}, In..."), and the same one after "Password" was
+typed into the finder, on OPS too, whose Manage Emails has no row for
+it (f-ops1); picking it opened no dialog and left the Subject "You are invited to new
+roles". A template a journal adds to this email was not tried. "Back"
+from "Enter details" to "Search User": f-a15.
 
 <a id="fn-h"></a>
 **h** — `UserInvitationSearchFormStep.vue`: `GET users?searchPhrase=…&status=all`,
@@ -1316,6 +1378,15 @@ English only were all delivered (their greetings: note j). Test run
 "Preprint Server manager", "Moderator", "Author", "Reader" and "Editorial
 Board Member", and an existing Author the same without "Author"; no
 reviewer role, so the fixed-text reviewer case is OJS and OMP only.
+Drift sweep 2026-10-22, OJS, OMP and OPS, two runs each on `main` (the
+missing Affiliation box also on `stable-3_5_0`): a newcomer's "Enter details" carried the
+labels "Email address * Required", "Given Name" and "Family Name" above
+the roles table, and no Affiliation label or box; the "Cancel Invite"
+confirmation of such an invitation read "Email address: {address} /
+Role: {role}, / Status: Invited 2026-10-22 / Affiliation:" with nothing
+after "Affiliation:". With Copyeditor (OJS), Author (OMP) or Moderator
+(OPS) chosen in row 1, row 2's role select listed that role marked
+disabled among the others; a member's held Author role was not listed.
 
 <a id="fn-j"></a>
 **j** — Mailable `PKP\mail\mailables\UserRoleAssignmentInvitationNotify`
@@ -1421,6 +1492,7 @@ header holding their username and "Tasks". The closing dialog "You've been
 assigned a new role in OJS" (OMP, OPS: the app's acronym) opened within
 0.2–1.1 s of every press of "Accept And Continue to OJS" (72 presses,
 signed out, signed in as the invitee, and newcomers at 1280 and 380 px wide).
+A past and a future start date read back after acceptance: f-a16.
 
 <a id="fn-n"></a>
 **n** — Decline: `declineInvitation.tpl` (AFFU-123) — POST + CSRF to
@@ -1570,6 +1642,13 @@ newcomer who pressed "Save and continue" on "Create OJS account" and
 then "Cancel Invitation Process" on "Enter details" found the chosen
 username in the Username box when the link reopened "Create OJS
 account"; one typed there and left by address was empty again.
+Drift sweep 2026-10-22, OJS, OMP and OPS, two runs each, on a scratch
+journal with ORCID enabled: a newcomer's "STEP 1 - Verify ORCID iD"
+offered "Verify ORCID iD", "Skip ORCID verification" and "Cancel";
+"Cancel" opened "Cancel Role Invitation Process?" with the same text and
+the buttons "Cancel Invitation Process" and "Go Back", and "Go Back"
+returned to "STEP 1 - Verify ORCID iD". "Cancel Invitation Process" was
+not pressed from that step.
 
 <a id="fn-a1"></a>
 **f-a1** — Role assignment vs screen gate: note b vs note a. The atlas route
@@ -1614,7 +1693,8 @@ the PR head `47eb5915` (ui-library#989), before its merge, one pass made one
 invitation, and a pass that went Back to Search for a newcomer left the
 first person's draft behind (all three apps, 2026-10-01,
 `checks/sync/ui-library-989/invite-race.js`). The cleanup run itself was not
-exercised.
+exercised: it has no screen (note t), so the deletion of drafts is known
+from code reading.
 
 <a id="fn-a3"></a>
 **f-a3** — Replacement path in note q: the old PENDING row is deleted by
@@ -1850,6 +1930,48 @@ Where the warnings are read: the test install's PHP server output,
 "Server output"; a probe server's is `server-<port>-probe.log`).
 Issue report: [pkp-e2e#976](https://github.com/jardakotesovec/pkp-e2e/issues/976) ([docs/issues/U06-A14-invitation-wizard-logs-php-warnings.md](../issues/U06-A14-invitation-wizard-logs-php-warnings.md)).
 
+<a id="fn-a15"></a>
+**f-a15** — Note g: going back to the search step resets the wizard's
+payload, while the details form keeps its fields on screen. Drift sweep
+2026-10-22, OJS, OMP and OPS, two runs each on `main` and two on
+`stable-3_5_0`, as a scratch Journal manager: on "Enter details" for
+`first<tag>@mail.test`, Given Name "Fey", Family Name "Firstperson" and
+a role row (Copyeditor on OJS, Author on OMP, Moderator on OPS; Start
+Date 2026-10-22; "Does not appear on the masthead"); "Back" to "Search
+User" showed an empty search box and no dialog; `second<tag>@mail.test`
+searched led to "STEP 2 - Enter details and invite for roles" with "The
+user does not have a role in this journal" (press, server), "Email
+address" holding the second address, Given Name "Fey", Family Name
+"Firstperson" and the role row as left. Sent from there ("Invitation
+Sent", "{address} has been invited to new role in OJS…", the app's
+acronym on OMP and OPS), the Invitations row read
+"second<tag>@mail.test Copyeditor Invited 2026-10-22" (Author on OMP,
+Moderator on OPS) with an empty Name cell, the email's "To" carried the
+address with an empty name, its greeting read "Dear
+second<tag>@mail.test,", and its roles read "Newly assigned roles …
+Copyeditor … Starting from 2026-10-22 Your name will not appear in
+{journal}'s masthead as a Copyeditor." (the row's role on OMP and OPS);
+the first address got no email.
+On `main`, the same "Back" with the same address searched again brought back
+"Fey" and the role row; with a member's address (found: "The user
+already exists in the journal", no name boxes) the role row came back on
+OJS and OPS, and on OMP, where the member held the row's Author, the
+row's role was empty. No response of 500 or more and no page error.
+
+<a id="fn-a16"></a>
+**f-a16** — `UserRoleAssignmentReceiveController::finalize()` clamps a
+past `dateStart` to the day it runs (note m). Drift sweep 2026-10-22,
+OJS, OMP and OPS, two runs each: a scratch Author invited to Copyeditor
+(Moderator on OPS) with Start Date 2026-10-01, and another with
+2026-12-01, both sent and accepted that day. The emails read "Starting
+from 2026-10-01" and "Starting from 2026-12-01" for the offered role.
+After accepting, the Current Users rows read "Author Copyeditor
+2026-10-22 2026-10-22" and "… 2026-10-22 2026-12-01", and the members'
+Edit pages "Copyeditor 2026-10-22 ---" and "Copyeditor 2026-12-01 ---"
+(OPS: "Moderator"). The observation that settles the question: an
+invitation with a past start date accepted on a later day than it was
+sent, its start date read on the member's Edit page.
+
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
 independent sessions; re-read word for word by the 2026-09-13 OMP and OPS
@@ -1880,6 +2002,11 @@ masthead". The same send with the held select untouched made no masthead
 request and showed no error, its email reading "Your name will appear in the
 {press or server}'s masthead as a Author." On OJS the change answered 200
 with no dialog, and the masthead email arrived beside the invitation.
+Drift sweep 2026-10-22, two runs each: Manage Emails searched for
+"masthead" listed "User Role Masthead Visibility Update Notification"
+with "Edit" on OMP, whose "Edit" opened no editor and left a spinner on
+the page, and on OJS, whose "Edit" opened "Edit Template"; on OPS the
+search answered "No items found.".
 Issue report: [pkp-e2e#447](https://github.com/jardakotesovec/pkp-e2e/issues/447) ([docs/issues/U53-A14-masthead-change-error-no-email.md](../issues/U53-A14-masthead-change-error-no-email.md)).
 
 <a id="fn-ops1"></a>

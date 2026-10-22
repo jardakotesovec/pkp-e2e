@@ -1,4 +1,5 @@
-// U06 Ks27 sweep, run after ks27.js (reads its facts-<app>.json for the
+// U06 Ks27 sweep, run after ks27.js under the same PROBE_RUN (reads its
+// facts[-<run>]-<app>.json, outFile('facts.json'), for the
 // French-only invitee's accept link):
 //   1. "Search User" with text that is no email address: what the Email box holds.
 //   2. The French-only invitee's accept wizard "Enter details": the name boxes.
@@ -8,14 +9,13 @@
 //      a typed address (goto) away from a second walk.
 // Run: PROBE_FEATURE=U06 PROBE_AGENT=ccInvs27 node bin/probe.js all shared/playwright/checks/U06/Ks27/sweep.js
 const fs = require('fs');
-const path = require('path');
-const {forEachApp, launch, signIn, screen, record, idle, outDir} = require('../../../probe');
+const {forEachApp, launch, signIn, screen, record, idle, outFile} = require('../../../probe');
 
 const ACR = {ojs: 'OJS', omp: 'OMP', ops: 'OPS'};
 
 forEachApp(async (app) => {
     const {expect} = require('@playwright/test');
-    const facts = JSON.parse(fs.readFileSync(path.join(outDir(), `facts-${app.name}.json`), 'utf8'));
+    const facts = JSON.parse(fs.readFileSync(outFile('facts.json'), 'utf8'));
     const S = facts.contexts.S;
     const T = facts.tag;
     const out = {app: app.name};
@@ -131,7 +131,8 @@ forEachApp(async (app) => {
         }
         record('sweep', out);
     } finally {
-        record('sweep', out);
+        // PART=2 keeps its own record: 'sweep' is the plain part's.
+        record(process.env.PART === '2' ? 'sweep2' : 'sweep', out);
         await close();
         await closeV();
     }

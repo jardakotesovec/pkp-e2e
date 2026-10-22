@@ -202,7 +202,8 @@ forEachApp(async (app) => {
             ['admin', 'admin'], ['manager', 'manager.maya'], ['editor', 'editor.diana'],
             ['sectionEditor', 'sectioneditor.ana'], ['assistant', 'assistant.rita'], ['copyeditor', 'copyeditor.carla'],
             ['author', 'author.alex'], ['reviewer', 'reviewer.julia'], ['reader', 'reader.rosa'],
-        ];
+        // OPS enrols no editor, copyeditor or reviewer account (users.md); their sign-in would time out.
+        ].filter(([k]) => app.name !== 'ops' || !['editor', 'copyeditor', 'reviewer'].includes(k));
         facts.roster = {};
         try {
             for (const [k, user] of roster) {
