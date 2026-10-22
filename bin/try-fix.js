@@ -53,7 +53,8 @@ function touchedFiles(diffText) {
 }
 
 function needsBuild(files) {
-    return files.some((f) => f.startsWith('lib/ui-library/') || f.startsWith('js/'));
+    // vite.config.js names the locale keys the build writes to registry/uiLocaleKeysBackend.json.
+    return files.some((f) => f.startsWith('lib/ui-library/') || f.startsWith('js/') || f === 'vite.config.js');
 }
 
 function build(app) {

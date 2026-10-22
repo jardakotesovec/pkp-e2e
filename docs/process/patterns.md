@@ -559,7 +559,8 @@ no cleanup fixture.
   boxes differ. The IN-PAGE box (accessible name `/Search submissions, ID/`)
   narrows the CURRENT view: the heading keeps the view's name and count. Only
   the SIDE-NAV global box (name prefix `Search submissions`; its accessible
-  name grows once a phrase is typed, so never match it `exact`) flips to the
+  name grows once a phrase is typed, so never match it `exact`; `main` only:
+  stable-3_5_0 has the in-page box alone) flips to the
   cross-status "Search Results" view (`currentViewId=search`), which removes
   the in-page box. A row outside the current view is invisible to the in-page
   search. Switch view first, or search globally.
@@ -709,8 +710,10 @@ page)` / `lineUser(app, {…})` build a scratch context with its manager
 instead (harness.md "The stable lines"). On a dataset fleet (PKP's
 default test dataset, `fleet-prep --dataset`; harness.md "Dataset
 fleets") `dataset` is the fleet's number, `baseURL` and `db` are its own,
-`signIn()` takes the dataset's usernames (`dataset.md`) and `variant()`
-throws.
+`signIn()` takes the dataset's usernames (`dataset.md`) and leaves the
+page where the app sends that account (an editor there lands on the
+journal's home page, where `window.pkp` is undefined: open a back-office
+page before a console request), and `variant()` throws.
 Everything per app travels in the bag, never in `process.env`, so one
 process holds all three apps. The exception is `PKP_APP_ROOT` and
 `PKP_SUITE_DIR`, which `withApp` exports for the app while `fn` runs

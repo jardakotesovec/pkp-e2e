@@ -575,6 +575,16 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
   core's, not the plugin's. So are `setup.sh`'s self-test drops (1.1.1.1:443,
   three connections of five SYNs, one per uid), logged whenever setup runs.
   A name or address the canary run also shows is core's, not the plugin's.
+- **Driving the pod's app.** Installed Plugins' "Enabled" box re-renders
+  its row, so Playwright's `check()` reports no change: click it and read
+  the row; switching it off first asks "Are you sure you want to disable
+  this plugin?". Plugin settings written by SQL stay unseen until the
+  `pluginSettings-<context>-<plugin>` cache entry (the Laravel file
+  cache, a day long) is forgotten. A PHP snippet through `php` needs a
+  command-line tool instance for its router (as `tools/jobs.php` makes),
+  since a bare `tools/bootstrap.php` makes every localized getter throw;
+  and `jobs.php run` returns while a retried job waits out its backoff,
+  so each retry is one more run.
 - **The canary** (`sandbox/canary/probe.php`) tries the ways out a
   plugin could: the bot's files, `/etc/shadow`, DNS over the pod's
   resolver, pasta's and an outside one, HTTP by name and by address, the

@@ -937,7 +937,10 @@ function locatorTable(rows = locatorRows) {
  * appends to (docs/process/briefs/claim-check.md). Created on first write.
  */
 function screenNotesPath() {
-    const feature = requireEnv('PROBE_FEATURE', 'the spec id, e.g. PROBE_FEATURE=U03');
+    // A dataset-fleet run names its fleet in PROBE_FEATURE (issues-cc21a); PROBE_NOTES_FEATURE
+    // then names the spec whose notes it reads and appends to.
+    const feature = process.env.PROBE_NOTES_FEATURE
+        || requireEnv('PROBE_FEATURE', 'the spec id, e.g. PROBE_FEATURE=U03');
     const dir = path.join(REPO_ROOT, '.reports', feature);
     fs.mkdirSync(dir, {recursive: true});
     return path.join(dir, 'screen-notes.md');
@@ -952,7 +955,7 @@ function appendScreenLocators(heading, body) {
     const file = path.join(path.dirname(screenNotesPath()), 'screen-locators.md');
     const header = fs.existsSync(file)
         ? ''
-        : `# ${process.env.PROBE_FEATURE} screen locators\n\nEvery \`loc()\` row from every agent, appended when its process exits; grep it by screen or element. The notes are in screen-notes.md.\n`;
+        : `# ${process.env.PROBE_NOTES_FEATURE || process.env.PROBE_FEATURE} screen locators\n\nEvery \`loc()\` row from every agent, appended when its process exits; grep it by screen or element. The notes are in screen-notes.md.\n`;
     fs.appendFileSync(file, `${header}\n## ${heading}\n\n${body.endsWith('\n') ? body : `${body}\n`}`);
 }
 
@@ -969,7 +972,7 @@ function note(text) {
     const file = screenNotesPath();
     const header = fs.existsSync(file)
         ? ''
-        : `# ${process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (docs/process/briefs/claim-check.md).\n`;
+        : `# ${process.env.PROBE_NOTES_FEATURE || process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (docs/process/briefs/claim-check.md).\n`;
     fs.appendFileSync(file, `${header}- ${agent}${app}: ${String(text).replace(/\s+/g, ' ').trim()}\n`);
 }
 
