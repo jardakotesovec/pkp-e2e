@@ -1,6 +1,6 @@
 --- a/classes/publication/Repository.php
 +++ b/classes/publication/Repository.php
-@@ -93,21 +93,21 @@
+@@ -94,21 +94,21 @@
                      }
                  }
              }

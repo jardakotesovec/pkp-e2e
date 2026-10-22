@@ -1102,7 +1102,7 @@ are the source; badges, Impact and Basis:
 | [A10](#a10) | Submission wizard opened in a narrow window can keep its full row of steps, running past the window's edge | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | After "Do not send an email." is saved, the Emails settings show no Submission Confirmation option selected | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A14](#a14) | A section editor who is also an author is offered "Submit As: Section editor", and "Begin Submission" refuses it | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A16](#a16) | In the submission wizard, a plain language summary over the word limit is refused with an unexplained "Error" | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
+| [A16](#a16) | In the submission wizard, a plain language summary over the word limit is refused with an unexplained "Error" | 🐞 | medium · crash: script | issues (claude), 2026-10-22 — re-verified |
 | [A18](#a18) | Submission wizard saves a field cut off mid-typing when the author starts typing after a quiet minute | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | After the server refuses one save, the submission wizard hangs on "Saving" and the author cannot submit | 🐞 | medium · crash: script | issues (claude), 2026-10-19 — re-verified |
 | [A21](#a21) | "Submit As" preselects another role for an editor who is also an author once their editorial role is saved | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
@@ -1352,17 +1352,17 @@ press "Continue", the wizard opens an "Error" dialog that names no field
 ("An unexpected error has occurred. Please reload the page and try
 again."). Every change on "Details" since its last save is lost, the
 abstract included. The wizard's script then fails in the browser, and
-the wizard stays on "Saving" until the page is reloaded [A19](#a19).
-The only hint is a small warning mark beside "Word Count: 20/10" under
-the summary. An abstract over the same limit gets the same mark, but it
-is saved, and "Review" says what to fix ("The abstract is too long…")
-before "Submit" is allowed.
-The limit applying to the summary is intended. The fault is that a save
-of a submission still in progress is refused. Editing the summary after
-submission is not affected: the editors' form refuses a long summary and
-names the field.
-Basis: probe, 2026-10-01. <sup>[fn-a16](#fn-a16)</sup>
-Report: refresh owed — pkp/pkp-lib#13585 (merged as `1f415a07ca`, 2026-10-21; in the apps once their `lib/pkp` pointers pass it) changed `PKP\publication\Repository::validate()` and `ValidatorFactory::required()`: a required plain language summary no longer refuses saves that leave it out, and in the wizard it no longer refuses any save while the submission is in progress; the report's Reach names A20's report as a separate fault on the same save path, now retired (pkp-e2e#323) (2026-10-21)
+the wizard stays on "Saving" until the page is reloaded [A19](#a19). The only hint
+is a small warning mark beside "Word Count: 20/10" under the summary. An
+abstract over the same limit gets the same mark, but it is saved, and
+"Review" says what to fix ("The abstract is too long…") before "Submit"
+is allowed. The limit applying to the summary is intended. The fault is
+that a save of a submission still in progress is refused. Editing the
+summary after submission is not affected: the editors' form refuses a
+long summary and names the field. The fault is on `main` only, in no
+release yet (the summary is new in `main`), so it can be fixed before
+the next release.
+Basis: probe, 2026-10-22. <sup>[fn-a16](#fn-a16)</sup>
 
 <a id="a17"></a>
 **A17 — "Needs an editor" goes out for a submission that already has one** · ❓ · minor.

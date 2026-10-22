@@ -3,17 +3,21 @@
 - **Severity** medium
 - **Effort** small
 - **Kind** defect
-- **Crash** script
+- **Crash** script (the wizard's own script fails in the browser after the refused save)
 - **Affects**
-  - main: OJS, OPS
+  - main: OJS, OPS (OMP has no word limit on its series)
   - 3.5: none (no plain language summary setting)
   - 3.4: none (code; no plain language summary setting)
   - 3.3: none (code; no plain language summary setting)
 - **Introduced** [cf6117cfe4](https://github.com/pkp/ojs/commit/cf6117cfe4daa01c53fd17d09226153c08b6713b) (OJS) and [6158ab4407](https://github.com/pkp/ops/commit/6158ab440790204cae78964b574880f834578d66) (OPS), the app side of `pkp/pkp-lib#11741`, for `pkp/pkp-lib#11540` · 2025-08-26 · Touhidur Rahman (touhidurabir)
-- **Upstream** none found (2026-10-01)
+- **Upstream** none found (2026-10-22)
 - **Tracked in** spec U21 [A16](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U21-submission-wizard.md#a16)
-- **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-22, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-22: [pkp/pkp-lib#13585](https://github.com/pkp/pkp-lib/pull/13585)
+(2026-10-21) changed the required-summary check; it does not reach the
+word count.
 
 ## Summary
 
@@ -33,7 +37,8 @@ before "Submit" is allowed.
 The limit applying to the summary is intended. The fault is that a save
 of a submission still in progress is refused. Editing the summary after
 submission is not affected: the editors' form refuses a long summary and
-names the field.
+names the field. The fault is on `main` only, in no release yet (the
+summary is new in `main`), so it can be fixed before the next release.
 
 ## Impact
 
@@ -70,8 +75,9 @@ Summary over the limit:
 
 1. Sign in as `ccorino`.
 2. "Make a Submission": title "u21ir26 summary over the limit", section
-   "Articles" (OJS), tick the requirements and privacy boxes, "Begin
-   Submission".
+   "Articles" [OPS: no section choice; the server's only section,
+   "Preprints", is taken], tick the requirements and privacy boxes,
+   "Begin Submission".
 3. "Upload Files": "Continue".
 4. "Details": type "u21ir26 abstract of eight words within the limit."
    in "Abstract" and this 20-word text in "Plain Language Summary":
@@ -100,7 +106,7 @@ disabled until the summary is shortened.
 **Observed**: in step 4, the summary's box reads "Word Count: 20/10"
 with a warning mark, and the form shows no message. Step 5's save is
 refused, the wizard still moves on to "Contributors", and the dialog
-opens:
+opens (OJS's request; on OPS the same to `submissions/20/publications/21`):
 
 ```
 PUT /index.php/publicknowledge/api/v1/submissions/21/publications/22  → 400
@@ -110,7 +116,7 @@ Error
 An unexpected error has occurred. Please reload the page and try again.
 ```
 
-The footer shows "Reconnecting". 4.2 seconds after the refusal the
+The footer shows "Reconnecting". About 4 seconds after the refusal the
 browser logs the script error `Cannot read properties of undefined
 (reading 'url')`, and from then on the footer reads "Saving". In step 6
 the "Continue" presses still move the wizard on. On "Review",
@@ -132,8 +138,8 @@ message is the one Expected quotes. What is wrong is that the same limit
 also refuses the wizard's saves.
 
 `APP\publication\Repository::validate()` in OJS
-(`classes/publication/Repository.php`, lines 100–115) and in OPS (the
-same method, lines 98–113) checks the summary's word count on every
+(`classes/publication/Repository.php`, lines 101–116) and in OPS (the
+same method, lines 99–114) checks the summary's word count on every
 save that sends it:
 
 ```php
@@ -146,15 +152,15 @@ if (isset($props['plainLanguageSummary'])) {
 
 The abstract's word count, a few lines above, sits inside
 `if ($section && !$submission->getData('submissionProgress'))` (OJS line
-66, OPS line 64), commented "Only validate section settings for
+67, OPS line 65), commented "Only validate section settings for
 completed submissions". The summary's check was placed after that block
 closes, so it also runs while the submission is in progress.
 
 The wizard cannot show a refused save's field errors. ui-library
-`SubmissionWizardPage.vue` `autosaveErrored()` handles any status but 0
-and 500 by dropping the refused save from the browser's store and
-calling `this.ajaxErrorCallback({})`. The response's errors are never
-read. So the author sees the generic dialog, and the step's changes are
+`src/components/Container/SubmissionWizardPage.vue` `autosaveErrored()`
+answers any status but 0 and 500 by calling `this.ajaxErrorCallback({})`,
+and any of those but 403, this 400 included, also by dropping the refused
+save from the browser's store. The response's errors are never read. So the author sees the generic dialog, and the step's changes are
 gone.
 
 Reach:
@@ -166,9 +172,11 @@ Reach:
   [U21-A19](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U21-A19-wizard-refused-save-hangs-saving.md).
   Fixing it stops the hang, but this refusal and its unexplained dialog
   remain.
-- pkp-lib's check for a required summary, on the same save path, is a
-  separate fault with its own report,
-  [U21-A20](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U21-A20-plain-summary-required-refuses-other-saves.md).
+- Whether the summary is optional or required makes no difference: the
+  word count refuses an over-limit summary either way (code). A
+  required summary's own check was a separate fault on the same save
+  ([pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323)),
+  fixed by pkp/pkp-lib#13585.
 - Editors' "Title & Abstract" on a submitted submission: a long summary
   is refused with "Go to Plain Language Summary: The plain language
   summary is too long. …". That is right, and the fix keeps it (on
@@ -185,17 +193,21 @@ Reach:
 A proposal, tried on `main`: move the summary's check inside the block
 that already holds the abstract's, so on save it runs only once the
 submission is submitted. The limit stays enforced at submission
-(`validateSubmit()`) and on every later edit. OJS's diff is below; OPS
+(`validateSubmit()`) and on every later edit. pkp/pkp-lib#13585 made the
+same move for a required summary in `PKP\publication\Repository::validate()`
+("A required plain language summary is checked by validateSubmit() while
+the submission is in progress"); this applies that rule to the word
+count. OJS's diff is below; OPS
 needs the same move, in
 [`fix-ops.diff`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/plain-summary-over-word-limit-refused/fix-ops.diff)
-(its hunk starts at line 93).
+(its hunk starts at line 94).
 
 [`fix-ojs.diff`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/plain-summary-over-word-limit-refused/fix-ojs.diff):
 
 ```diff
 --- a/classes/publication/Repository.php
 +++ b/classes/publication/Repository.php
-@@ -95,21 +95,21 @@
+@@ -96,21 +96,21 @@
                      }
                  }
              }
@@ -255,13 +267,20 @@ the block's `$section &&` guard.
 - API: an edit of an in-progress submission with a summary over the
   limit is accepted, as one with a long abstract already is.
   `PUT …/submit` still refuses it. No plugin hook changes.
-- Guard: an e2e scenario in which an author's summary over the section's
-  limit is saved on "Details" and reported on "Review". A unit test
-  would be new scaffolding: neither app tests its publication
-  Repository, and `validate()` needs a context, a section with a word
-  limit and a submission in progress from the database.
+- Guard: a small unit test in each app calling `validate()` with no
+  database, like pkp-lib's
+  `tests/classes/publication/PlainLanguageSummaryValidationTest.php`
+  (from pkp/pkp-lib#13585: a Mockery `Context` and an in-memory
+  `Submission` with `submissionProgress` set): a section with a word
+  limit mocked through `app()->instance()`, as OJS's
+  `tests/classes/publication/PublicationIdentityTest.php` mocks a
+  Repository; an over-limit summary passes while in progress and is
+  refused once submitted. Beside it, an e2e scenario in which an
+  author's summary over the limit is saved on "Details" and reported on
+  "Review".
 
-Small: one block moved in one method of each app, and the e2e scenario.
+Small: one block moved in one method of each app, a unit test and the
+e2e scenario.
 
 ## Evidence
 
@@ -271,23 +290,26 @@ Small: one block moved in one method of each app, and the e2e scenario.
   [`lib.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/plain-summary-over-word-limit-refused/lib.js),
   on an install freshly loaded from PKP's default test dataset:
   `ONLY=ojs,ops PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/plain-summary-over-word-limit-refused/walk.js`.
-  The fix was tried by applying the two diffs to the app checkouts and
-  running the script again.
+  The fix was tried on 2026-10-01 by applying the two diffs to the app
+  checkouts and running the script again (and `MODE=neighbour` with the
+  fix in and out). Not repeated on 2026-10-22: the code the diffs change
+  is the same on that day's tips, and both diffs apply there as they
+  are.
 - Database: PostgreSQL. The word count is PHP's (`PKPString::getWordCount()`),
   so the database plays no part.
-- Tips walked. main: OJS 4408b94def (pkp-lib f5bd392a69, ui-library
-  64d67363), OPS c8af945bb7 (pkp-lib 3dc90c81a6, ui-library 280f98c5).
-  3.5: OJS 18d097d94e, OPS 3f0919468c (pkp-lib 1fb843f491, ui-library
-  7a3c244b). pkp/datasets 27f1204 (2026-10-01).
+- Tips walked, 2026-10-22. main: OJS d05d8078d3, OPS 5091e916d9 (both
+  pkp-lib 1f415a07ca, ui-library e47a4887). 3.5: OJS cbf80495db, OPS
+  71ad98eb83 (both pkp-lib ce67d3f62b, ui-library 2576e00a). pkp/datasets
+  de96f3c2 (2026-10-21).
 - 3.5, walked: the "Metadata" tab of Settings › Workflow › "Submission"
   lists no plain language summary item on OJS or OPS, so the steps stop
   at the first precondition. `git grep plainLanguageSummary` finds
-  nothing in those apps' `classes` or in pkp-lib 1fb843f491.
+  nothing in those apps' `classes` or in pkp-lib ce67d3f62b.
 - 3.4 and 3.3 (code): `git grep plainLanguageSummary` finds nothing in
-  OJS `upstream/stable-3_4_0` 9571d8fde7 and `stable-3_3_0` 9fdb9bcf9a,
-  OPS acd8ae704b and c5532e2161, or pkp-lib `origin/stable-3_4_0`
-  df13621c2d and `stable-3_3_0` d446601ebe.
-- OMP (code, `main` 3b0ecf794): no word-count check in its publication
+  OJS `upstream/stable-3_4_0` f5315279c6 and `stable-3_3_0` 6616da8f2f,
+  OPS 47adbcd1e8 and e265883ba4, or pkp-lib `origin/stable-3_4_0`
+  366030b017 and `stable-3_3_0` 126b86bc2e (2026-10-22).
+- OMP (code, `main` fad665a63, 2026-10-22): no word-count check in its publication
   or submission Repository, and no word limit on the series form.
 - Introduced: `git log -S plainLanguageSummary` on both apps'
   `classes/publication/Repository.php` and
@@ -301,5 +323,9 @@ Small: one block moved in one method of each app, and the e2e scenario.
   "word" and "limit", "plain language" wizard error, `wordCountLong`,
   `validateWordCount`. Only `pkp/pkp-lib#11540`, `pkp/pkp-lib#11711`
   (release notes) and `pkp/pkp-lib#11741` came up; none reports this
-  refusal.
+  refusal. Again on 2026-10-22 ("plain language summary" with "word",
+  `wordCountLong` in pkp/pkp-lib; "plain language summary" in pkp/ojs and
+  pkp/ops; `autosaveErrored` in pkp/ui-library; pkp/pkp-lib issues and
+  PRs on the summary since 2026-09-30): new are only `pkp/pkp-lib#13584`
+  and its fix `pkp/pkp-lib#13585`, on the required summary.
 - Not driven: the timer save, and the reload after the hang.
