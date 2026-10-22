@@ -11,9 +11,9 @@ and no CI follows this branch. `main`'s baselines are in
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
 | ojs | `cbf80495db` | 2026-10-22 | claude (daily maintenance session; before it `1e78ca0c2b`, 2026-10-21) |
-| omp | `60163fe0a` | 2026-10-22 | claude (daily maintenance session; before it `cce424e5ef`, 2026-10-21) |
-| ops | `71ad98eb83` | 2026-10-22 | claude (daily maintenance session; before it `5eca7fd603`, 2026-10-21) |
-| pkp-lib | `ce67d3f62b` (ojs, omp and ops at it) | 2026-10-22 | claude (daily maintenance session; before it `68512b5fda`, 2026-10-21; before it `f94e556856`, the merge of pkp/pkp-lib#13535, 2026-10-20; before it `092ec34b0f`, 2026-10-19); ui-library `2576e00afd` (ojs, omp, ops; 2026-10-09); ojs `plugins/generic/jatsTemplate` `96eacdab48` (2026-10-12, the pointer of pkp/ojs#5921); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
+| omp | `77e3acd8e` | 2026-10-22 | claude (merge step of the pkp/pkp-lib#13565 PR review; before it `60163fe0a`, 2026-10-22; before it `cce424e5ef`, 2026-10-21) |
+| ops | `18506a5b4d` | 2026-10-22 | claude (merge step of the pkp/pkp-lib#13565 PR review; before it `71ad98eb83`, 2026-10-22; before it `5eca7fd603`, 2026-10-21) |
+| pkp-lib | `5b54f59ed7` (ojs, omp and ops at it; its merge `9cb93845fa` has the same tree) | 2026-10-22 | claude (merge step of the pkp/pkp-lib#13565 PR review; before it `ce67d3f62b`, the daily session, 2026-10-22; before it `68512b5fda`, 2026-10-21; before it `f94e556856`, the merge of pkp/pkp-lib#13535, 2026-10-20; before it `092ec34b0f`, 2026-10-19); ui-library `2576e00afd` (ojs, omp, ops; 2026-10-09); ojs `plugins/generic/jatsTemplate` `96eacdab48` (2026-10-12, the pointer of pkp/ojs#5921); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
 
@@ -22,6 +22,10 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the
 regression verdict; what was filed)._
 
+- **2026-10-22 (merge step of the pkp/pkp-lib#13565 PR review, VM s0) — pkp-lib `ce67d3f62b..9cb93845fa` (1 and its merge), ojs `cbf80495db..f521b56ec9` (2 of 4), omp `60163fe0a..77e3acd8e` (2), ops `71ad98eb83..18506a5b4d` (2). Baselines advanced for pkp-lib, omp and ops; ojs not (below).**
+  - pkp-lib `5b54f59ed7` (pkp/pkp-lib#13564, merged by bozana as `9cb93845fa`) → `stable-only`: the reviewed patch, rebased (`git range-diff f94e556856..e99f3e9c7b ce67d3f62b..5b54f59ed7` reads `=`). Re-walked at the new tips on the 3.5 dataset fleet, OJS and OMP: `checks/U36/H19/h19.js` read and copy, then `checks/sync/pkp-lib-10268/note-on-copy.js`; the copied file's Notes 200 with the form and "Earlier Revision Notes", a note added and deleted, no server error (`.reports/pr13565-merged/`). The pkp-lib#10268 row, the companion row and the report are deleted.
+  - ojs `4d17428f9b`, omp `6fcb74573`, ops `666b7b3727` → pointer bumps to `5b54f59ed7`; `f521b56ec9`, `77e3acd8e`, `18506a5b4d` → merges.
+  - ojs `3b1c50ae7d` (pkp/pkp-lib#13599, DOAJ JSON mapping) and its merge `f5bf7781e3` sit before the bump and are not read here: the ojs baseline stays at `cbf80495db` for the next daily session.
 - **2026-10-22 (daily session, VM s2) — ojs `1e78ca0c2b..cbf80495db` (4), omp `cce424e5ef..60163fe0a` (2), ops `5eca7fd603..71ad98eb83` (2), pkp-lib `68512b5fda..ce67d3f62b` (6), ui-library none. `main` first: synced today. Read in full; baselines advanced.**
   - pkp-lib `e3ccc6ce47` (pkp/pkp-lib#13571) → `=main 94261a707d` (read today, `upstream-sync.md`): `main`'s verdict stands (the merge check of 2026-10-21 drove the line too).
   - pkp-lib `86b52153c3` (revert of `f4f8fcdbc0`) + `c32510b84a` → `~main 1f54d43637` (together the same changed lines as `main`, the line's loop still without `?? []`), `1fdd5f582e` → `=main abe5d81425`: `main`'s read (rr1022a) stands, and the line shows the same: the OMP tip refuses an API contributor `PUT` whose affiliation rows leave out `authorId` with "The author for this affiliation could not be found." and a PHP warning (rr1022a's script, run `line35`, on the line's fleet), saving with the contributor's id; 3.5.0-5 refused the same bodies with "This field is required." (the schema), so no regression against the release. The line's own callers of `saveAffiliations()`: the author update alone, as on `main`. Security: the private item `main`'s read routed is on the line's tip too (verified there on OMP); it reaches 3.5.0-6 unless fixed first (said in the thread).
