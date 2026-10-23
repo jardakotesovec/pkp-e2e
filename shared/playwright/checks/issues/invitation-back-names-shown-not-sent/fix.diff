@@ -1,0 +1,43 @@
+--- a/lib/ui-library/src/pages/userInvitation/UserInvitationPageStore.js
++++ b/lib/ui-library/src/pages/userInvitation/UserInvitationPageStore.js
+@@ -4,6 +4,7 @@
+ import {useUrl} from '@/composables/useUrl';
+ import {computed, onMounted, ref, watch} from 'vue';
+ import {useModal} from '@/composables/useModal';
++import cloneDeep from 'clone-deep';
+ export const useUserInvitationPageStore = defineComponentStore(
+ 	'userInvitationPage',
+ 	(pageInitConfig) => {
+@@ -14,6 +15,15 @@
+ 		 */
+ 		const emailTemplatesApiUrl = ref(pageInitConfig.emailTemplatesApiUrl);
+ 		/**
++		 * Copies of the initial payload and steps, taken before any edit: the
++		 * details form and the role rows write into the objects they are given,
++		 * so going back to the search step restores these copies.
++		 */
++		const initialInvitationPayload = cloneDeep(
++			pageInitConfig.invitationPayload,
++		);
++		const initialSteps = cloneDeep(pageInitConfig.steps);
++		/**
+ 		 * Invitation payload, initial value
+ 		 */
+ 		const invitationPayload = ref({...pageInitConfig.invitationPayload});
+@@ -133,10 +143,13 @@
+ 		function previousStep() {
+ 			const previousIndex = currentStepIndex.value - 1;
+ 			if (previousIndex >= 0) {
+-				// when user search and go back agin to search reset payload to initial state
+-				if (previousIndex === 0) {
+-					invitationPayload.value = {...pageInitConfig.invitationPayload};
++				// going back to the search step starts a new invitation: clear what was
++				// entered for the previous one, in the forms as well as in the payload.
++				// Going back to any other step keeps what was entered.
++				if (steps.value[previousIndex].id === 'searchUser') {
++					invitationPayload.value = cloneDeep(initialInvitationPayload);
+ 					updatedPayload.value = {};
++					steps.value = cloneDeep(initialSteps);
+ 				}
+ 				openStep(steps.value[previousIndex].id);
+ 				userSearch.value = {

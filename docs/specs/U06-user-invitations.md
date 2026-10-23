@@ -823,7 +823,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | The "Invite to a role" address with a wrong last word shows an empty page instead of "404 Not Found" | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | A newcomer whose chosen username was taken meanwhile presses "Accept And Continue" and nothing happens | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A15](#a15) | After "Back" to "Search User" and another address, "Enter details" still shows the first person's names, but the invitation goes out without them | 🐞 | minor | — |
+| [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
@@ -1031,20 +1031,21 @@ id. No setting in the app turns them off.
 Basis: probe, 2026-10-15. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
-**A15 — After "Back" to "Search User" and another address, "Enter details" still shows the first person's names, but the invitation goes out without them** · 🐞 · minor.
-A manager types a newcomer's Given Name and Family Name on "Enter
-details", fills a role row, presses "Back" and searches another address
-on "Search User". The search box is empty, but "Enter details" opens
-with the first person's names in their boxes and the role row (role,
-start date, masthead choice) as it was left. Sent as shown, the
-invitation carries the role, the start date (only today's tried) and the
-masthead choice but no name: its Invitations row shows no name, the
-email opens "Dear {email}," and its "To" line has no name. "Back"
-followed by a search for the same address brings the names and the role
-row back too. For an existing member found on the second search, "Enter
-details" has no name boxes and the role row comes back, its role empty
-if the member already holds it.
-Basis: probe, 2026-10-22. <sup>[f-a15](#fn-a15)</sup>
+**A15 — After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without** · 🐞 · low.
+A manager inviting a newcomer to a role types a Given Name, a Family
+Name and a role on "Enter details", presses "Back" and searches an
+address again on "Search User", another one or the same. "Enter
+details" opens with the names typed before still in their boxes. Sent
+as shown, the invitation carries the role but no name: its row under
+Invitations has an empty Name, and the email opens "Dear <address>,".
+"Edit Invitation" on a sent invitation does the same when the manager
+types names, goes on to the email step and comes "Back" to "Enter
+details": the names stay on screen and the new invitation goes out
+without them.
+Nothing on screen says the names were dropped. The cause is in the
+wizard's browser code, which keeps typed names on screen but no longer
+sends them after such a "Back".
+Basis: probe, 2026-10-23. <sup>[f-a15](#fn-a15)</sup>
 
 <a id="a16"></a>
 **A16 — Which day a past start date becomes is not settled** · ❓ · minor.
