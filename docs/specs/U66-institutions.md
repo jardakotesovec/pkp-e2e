@@ -1417,6 +1417,7 @@ id 404 "The announcement you requested was not found.". Live-probed
 runs each (the runs of f-a12): `{journal}/api/v1/institutions/100001`
 answered the manager and the administrator 200
 `{"error":"The institution you requested was not found."}`.
+Issue report: [pkp-e2e#1063](https://github.com/jardakotesovec/pkp-e2e/issues/1063) ([docs/issues/U66-A13-institution-unknown-id-answers-success.md](../issues/U66-A13-institution-unknown-id-answers-success.md)).
 
 ## Reference — entry points & surfaces
 
