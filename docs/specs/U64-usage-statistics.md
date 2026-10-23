@@ -254,15 +254,15 @@ bottom, then "Save": <sup>q</sup>
    |------------------|------------|----------|
    | the journal's home page (on a press also the catalog page) | a journal view | "Journal" |
    | an article's page, any of its versions | an abstract view | "Articles": "Abstract Views" (the chart's switch reads "Catalog Entries" on a press) |
-   | a galley's file, downloaded or viewed in the page (HTML) | a file view, sorted by the file's format into "PDF", "HTML" or "Other" | "Articles": "File Views" and its three parts; "Download Files" as "Primary File" |
+   | a galley's file, downloaded or viewed in the page (HTML) | a file view, sorted by format into "PDF", "HTML" or "Other"; a Word file's view (.doc, .docx) is in none of the three, nor "File Views" or "Total" ⚠ [A17](#a17) | "Articles": "File Views" and its three parts, Word excepted ⚠ [A17](#a17); the chart's "Files" (Rule 10); "Download Files" as "Primary File" |
    | a galley's file whose component is a supplementary one or not a document (an image, a data set) | a file view of type "Supplementary File" | "Download Files" alone |
    | the article's "JATS XML" {OJS} | a JATS view, while "JATS Template Plugin" is on | "Articles": "JATS" |
    | an issue's table of contents {OJS} | an issue view | "Issues": "Views" |
    | an issue galley's file {OJS} | an issue download | "Issues": "Downloads" |
    | a series page {OMP} | a series view | no page [OMP1](#omp1) |
 
-   An article's "Total" is its abstract views plus its file views (plus
-   its JATS views {OJS}). Only published items are counted, so the pages
+   An article's "Total" is its "Abstract Views" plus its "File Views"
+   (plus its "JATS" {OJS}). Only published items are counted, so the pages
    list published articles and issues alone. On a press, an "Appendix"
    file counts as a "Supplementary File", except an HTML one opened in
    its view page while "HTML Monograph File" is on, which counts as an
@@ -333,8 +333,10 @@ bottom, then "Save": <sup>q</sup>
 10. **The chart.** The chart always shows the whole range, one point per
     day or per month, flat at zero where there were no visits. On
     "Articles" "Abstracts" (on arrival) shows abstract views and "Files"
-    file views; on "Issues" "Views" (on arrival) and "Downloads"; on
-    "Journal" there is no such choice. "Daily" can be pressed only while
+    the views of the galley files "Download Files" lists as "Primary
+    File" (Rule 1), Word files included, so its points can add up to
+    more than the table's "File Views" [A17](#a17); on "Issues" "Views"
+    (on arrival) and "Downloads"; on "Journal" there is no such choice. "Daily" can be pressed only while
     the range spans fewer than 91 days. "Monthly" cannot be pressed while
     the range spans fewer than 91 days and starts 31 days or less before
     yesterday. When the pressed one stops being available the other is
@@ -356,9 +358,9 @@ bottom, then "Save": <sup>q</sup>
     <sup>td14</sup>
 12. **The "Articles" table.** It lists each published article with at
     least one abstract or file view in the range (within the filters and
-    the search), most-viewed first, 30 to a page: the short author list in
-    bold, then the title, linking to the published article in a new tab,
-    and its figures over the range. Pressing the "Total" heading reverses
+    the search), most-viewed first ⚠ [A18](#a18), 30 to a page: the
+    short author list in bold, then the title, linking to the published
+    article in a new tab, and its figures over the range. Pressing the "Total" heading reverses
     the order, and pressing it again restores it; no other heading sorts.
     "{n} of {total} articles" counts the rows on the page and the articles
     in all. With no row the table reads "No articles were found with usage
@@ -594,7 +596,8 @@ bottom, then "Save": <sup>q</sup>
 - [Article landing page & reading](U13-article-landing-page-and-reading.md)
   owns the "Downloads" chart on an article's page, and
   [Appearance & theming](U10-appearance-and-theming.md) the option that
-  shows it; the downloads it charts are Rule 1's file views. <sup>x</sup>
+  shows it; the chart counts Rule 1's "PDF" and "HTML" file views (Word
+  downloads untried). <sup>x</sup>
 - [Institutions](U66-institutions.md) owns the institution list and its IP ranges that Rules
   4, 22 and 29 use.
 - [JATS & body text](U48-jats-and-body-text.md) owns "JATS Template
@@ -1186,6 +1189,7 @@ Left out of the scenarios above, by reason:
   - a "COUNTER Reports" year link's XML file names its report "JR1" (and "AR1") in its "Name" attribute (the guard for OJS6, once fixed) {OJS}
   - "Item Master Report (IR)" downloaded with "Authors" ticked, and "Journal Article Requests (IR_A1)" {OJS}, for a work with several authors: the IR file names "Authors" on its "Report_Attributes" line, and each file's "Authors" column lists every author in order, an ORCID iD after each who has one (Rule 20; the guard for A15, once fixed) {OJS OPS}
   - the SUSHI "Item Master Report (IR)" asked with the authors shown, for a work whose first author alone has an ORCID iD: only that author carries an iD (Rule 23; the guard for A16, once fixed) {OJS OPS}
+  - a reader downloading an article's Word galley and its PDF galley, the day processed: "File Views" and "Total" on "Articles" count both, as the chart's "Files" and "Download Files" do (Rule 1; the guard for A17, once fixed)
   - a reader opening a book's PDF and its "Appendix" file from the book page, each visit a line in the day's log <sup>j</sup>, of type PDF and "Supplementary File" (Rule 1; OMP3, retired) {OMP}
 - **Nothing new to test**:
   - the site as the COUNTER platform on an installation without a "Site
@@ -1228,6 +1232,8 @@ Left out of the scenarios above, by reason:
     Article Requests (IR_A1)" naming only the last author; Rule 20)
   - A16 (the SUSHI "Item Master Report (IR)" giving an author without
     an ORCID iD an earlier author's iD; Rule 23)
+  - A17 (a Word galley's downloads in no column of "Articles"; Rule 1)
+  - A18 (Word downloads in the "Articles" list and its order; Rule 12)
   - OJS1 (the Release 4 page beside "Counter R5"; Rule 25; scenario 12
     marks it)
   - OJS2 (one HTML galley view counted once more per missing file it
@@ -1278,6 +1284,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | Statistics: a refused date range shows a raw code like "api.stats.400.wrongDateFormat", not a sentence | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A15](#a15) | "Counter R5": the "Authors" column of the item reports names only each work's last author | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A16](#a16) | SUSHI "Item Master Report (IR)" gives authors without an ORCID iD the iD of an author listed before them | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A17](#a17) | Statistics › Articles: a Word galley's downloads are in no column, not "File Views", "Other" or "Total", while the chart's "Files" and "Download Files" count them | 🐞 | minor | — |
 | [OJS2](#ojs2) | One view of an HTML galley counts once more for each picture or style sheet it names that was never uploaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS4](#ojs4) | Statistics › Issues: "Download Issues" leaves out every issue after the first 30, without saying so | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS5](#ojs5) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1286,6 +1293,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | The downloaded spreadsheets carry no byte-order mark | ❓ | minor | — |
 | [A12](#a12) | The date range list does not close on Escape | ❓ | minor | — |
 | [A13](#a13) | After a preset, the "Custom Range" boxes still show the page's first range, and "Apply" on them undoes the preset | ❓ | minor | — |
+| [A18](#a18) | Statistics › Articles: Word downloads may place an article in the list, and above others, with no figure showing them | ❓ | minor | — |
 | [OJS1](#ojs1) | A journal still offers the retired COUNTER Release 4 reports beside "Counter R5" | ❓ | minor | — |
 | [OJS3](#ojs3) | The "Issues" search finds no issue by a bare volume or number | ❓ | minor | — |
 | [OJS7](#ojs7) | "COUNTER Reports": the XML file's "Created" time may read twelve hours early for a file made after noon | ❓ | minor | — |
@@ -1547,6 +1555,41 @@ they did not write. Nothing in the answer shows that the iDs are
 borrowed. The file "Download" gives is built separately and carries no
 borrowed iD.
 Basis: probe, 2026-10-15. <sup>f-a16</sup>
+
+<a id="a17"></a>
+**A17 — Statistics › Articles: a Word galley's downloads are in no column, not "File Views", "Other" or "Total", while the chart's "Files" and "Download Files" count them** · 🐞 · minor.
+A reader downloads an article's Word galley (a .doc or .docx file).
+Once the day is processed, Statistics › "Articles" should count the
+download in "File Views" and "Total", under one of "PDF", "HTML" or
+"Other", as it counts a PDF download under "PDF". Instead the download
+is in none of these columns, on the page or in "Download Articles". The
+chart's "Files" counts it, and "Download Files" lists the Word file as
+"Primary File" with its count. For an article with one abstract view,
+one PDF download and one Word download, the row reads "File Views" 1
+and "Total" 2, while "Files" reads 2 for that day.
+
+The manager sees the Word downloads in the chart and in the file list
+but not in the article's figures, and nothing on the page says that
+Word files are left out. A program that asks the statistics API for
+an article's figures gets the same omission. The page's columns were
+built after Word files were already counted as a type of their own,
+and none of them takes that type: an oversight, not a choice.
+Since: 2019-05-01 (pkp/pkp-lib#3673) · Basis: probe, 2026-10-23. <sup>f-a17</sup>
+
+<a id="a18"></a>
+**A18 — Statistics › Articles: Word downloads may place an article in the list, and above others, with no figure showing them** · ❓ · minor.
+The "Articles" table lists the articles with views in the range,
+most-viewed first. The list and its order count every download of a
+galley's file, Word files included, while the figures leave Word
+downloads out (A17). An article whose only visits are Word
+downloads would then be listed with every figure at 0, and an article
+with many Word downloads would sit above one whose "Total" is higher.
+This is read from the code and not yet seen on screen.
+Question: do Word downloads list an article and set its place while
+no figure on the row shows them? Lean: yes (🐞); it is the same
+omission as A17, and counting Word downloads in "File Views" would end
+both.
+Basis: code, 2026-10-23. <sup>f-a18</sup>
 
 ### OJS
 
@@ -2277,8 +2320,12 @@ first published 2026-07-01 charted August 3 and September 3, total 6,
 equal to its "File Views" on "Articles" at "Last 90 days" (PDF 5, HTML
 1), its "Supplementary File" downloads left out; a work published on
 the day of the probe charted 0 while "Articles" showed 3 file views. The
-chart counts PDF, HTML and Other file views from the work's first
-publication date on, by month.
+chart counted PDF, HTML and Other file views from the work's first
+publication date on, by month. No Word file was among them:
+`ThemePlugin::downloadStatsCacheMiss()` reads the
+`ASSOC_TYPE_SUBMISSION_FILE` records with no file-type filter, so the
+chart is expected to count a Word download that "File Views" leaves out
+(A17); not driven (code read 2026-10-23).
 
 <a id="fn-sc"></a>
 **sc** — Scenarios. Scenarios 1 to 10 run on OJS, OMP and OPS, 11 to 13
@@ -2675,6 +2722,54 @@ gave Alan Mwandenga, Amina Mansour and Nicolas Riouf each
 Kwantes and Urho Kekkonen the same; two runs per line with the iD on
 the last author: only that author carried it.
 Issue report: [pkp-e2e#988](https://github.com/jardakotesovec/pkp-e2e/issues/988) ([docs/issues/U64-A16-sushi-ir-authors-share-orcid.md](../issues/U64-A16-sushi-ir-authors-share-orcid.md)).
+
+<a id="fn-f-a17"></a>
+**f-a17** — `LogUsageEvent` stores each galley-file visit's type from
+`PKPStatisticsHelper::getDocumentType()`: `STATISTICS_FILE_TYPE_DOC`
+(4) for `application/msword`, `application/word` and
+`application/vnd.openxmlformats-officedocument.wordprocessingml.document`,
+beside PDF (2), HTML (1) and Other (3, every other type).
+`PKPStatsPublicationService::getTotalsByType()` keeps only the sums
+that `filterRecordPdf()`, `filterRecordHtml()` and `filterRecordOther()`
+pick, and none of them takes type 4; `PKPStatsPublicationController`'s
+`getItemForJSON()` and `getItemForCSV()` make `galleyViews` ("File
+Views") pdf + html + other, and "Total" adds it (fn-f). The "Files"
+timeline (`type=files`) and `getManyFiles()` ("Download Files") filter
+by `ASSOC_TYPE_SUBMISSION_FILE` alone. The same code on
+`stable-3_5_0`. OMP and OPS: each app's `StatsPublicationService` is
+an empty subclass of `PKPStatsPublicationService` on `main` and
+`stable-3_5_0`, and the type comes from the same `LogUsageEvent`; not
+driven there. Since: the Word type dates from lib/pkp `d5e5e6ce47`
+(2014), the three-type sums from `27a6196b8d` (pkp/pkp-lib#3673,
+2019-05-01). Live-probed 2026-10-23, OJS `main` and `stable-3_5_0`,
+two runs each on a freshly reset dataset fleet: the Journal Manager
+(`rvaca`) added a galley labelled "Word" (component "Article Text",
+`article.docx`) to submission 1's unpublished version and published
+it; signed out, with a desktop browser's user agent, a reader opened
+the article page, pressed "Word" (the browser saved `article.docx`)
+and opened "PDF Version 2" in its viewer. The day's usage log took a
+515 line of file type 4 for the Word download and one of type 2 for
+the PDF; after the "Usage statistics file loader task" and its jobs
+(fn-w), `metrics_submission` held one of each. At "Last 30 days" the
+row read "Abstract Views" 1, "File Views" 1, "PDF" 1, "HTML" 0,
+"Other" 0 (and "JATS" 0 on `main`), "Total" 2; the chart's "Files"
+read 2 for that day; "Download Articles" read the same as the row;
+"Download Files" listed `article.pdf` and `article.docx`, each
+"Primary File" 1; `GET /api/v1/stats/publications/1` with the page's
+range, as `rvaca`, gave `galleyViews` 1, `pdfViews` 1, `htmlViews` 0,
+`otherViews` 0. The PDF download counted under "File Views" and "PDF"
+in every run. No request failed. The article page's "Downloads" chart
+reads the same file records with no format filter: fn-x.
+
+<a id="fn-f-a18"></a>
+**f-a18** — Code read 2026-10-23, `main` and `stable-3_5_0`:
+`PKPStatsPublicationService::getTotals()` (the order, `orderBy=total`)
+sums, and `getCount()` (the list) counts the submissions with, every
+`ASSOC_TYPE_SUBMISSION_FILE` record whatever its file type, Word (4)
+included, while the row's figures leave type 4
+out (f-a17). Settles it: two published articles on one journal, one
+with two Word downloads and the other with one PDF download, then the
+row order and the first article's figures on "Articles".
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-p. Live-probed 2026-09-27: td11; the side menu offers
