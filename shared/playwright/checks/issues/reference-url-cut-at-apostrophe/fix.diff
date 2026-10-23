@@ -1,0 +1,38 @@
+--- a/lib/pkp/classes/pid/Url.php
++++ b/lib/pkp/classes/pid/Url.php
+@@ -20,12 +20,12 @@
+ {
+     /** @copydoc BasePid::regexes */
+     public const regexes = [
+-        '#https?://(www\.)?[-a-zA-Z0-9@:%._\+~\#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_\+.~\#?&//=]*)#i'
++        '#https?://(www\.)?[-a-zA-Z0-9@:%._\+~\#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_\+.~\#?&//=!$\'()*,;]*)#i'
+     ];
+ 
+     /** @copydoc BasePid::validationRegexes */
+     public const validationRegexes = [
+-        '/^https?:\/\/(www\.)?[-a-z0-9@:%._\+~#=]{2,256}\.[a-z]{2,}([-a-z0-9@:%_\+.~#?&\/=]*)$/i'
++        '/^https?:\/\/(www\.)?[-a-z0-9@:%._\+~#=]{2,256}\.[a-z]{2,}([-a-z0-9@:%_\+.~#?&\/=!$\'()*,;]*)$/i'
+     ];
+ 
+     /**
+@@ -34,4 +34,20 @@
+      * A trailing "/" is part of an address, e.g. a PURL namespace.
+      */
+     public const defaultTrimCharacters = ' ';
++
++    /**
++     * @copydoc BasePid::trimTrailingPunctuation
++     *
++     * An address may hold "'", "(", ")", "!", "$", "*", "," and ";" (RFC 3986 sub-delims), so the
++     * extraction pattern takes them. At the end of an address "'", "!" and "*" are taken off as well:
++     * a closing single quotation mark, an exclamation mark or Markdown emphasis, not part of it.
++     */
++    public static function trimTrailingPunctuation(string $string): string
++    {
++        do {
++            $before = $string;
++            $string = rtrim(parent::trimTrailingPunctuation($string), "'!*");
++        } while ($string !== $before);
++        return $string;
++    }
+ }

@@ -1113,7 +1113,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A19](#a19) | The ordering arrows on the Data Citations table have no names for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A24](#a24) | Screen reader users hear a form field called invalid, but not the error message shown under it | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A25](#a25) | A DOI an editor corrects in "Edit citation" before the lookup starts is replaced by the reference text's DOI | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
-| [A29](#a29) | A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page | 🐞 | minor | — |
+| [A29](#a29) | A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page | 🐞 | medium | issues (claude), 2026-10-23 — re-verified |
 | [A30](#a30) | On the published page, a web address in brackets in a reference links with the closing bracket included | 🐞 | minor | — |
 | [A11](#a11) | Readers never see data citations, though the editors' table says they appear alongside the references | ❓ | user-visible | — |
 | [A17](#a17) | "Edit" accepts a repeated reference that "Add" drops | ❓ | minor | — |
@@ -1391,7 +1391,7 @@ seen on "Add Institution".
 Basis: probe, 2026-10-07. <sup>f-a27</sup>
 
 <a id="a29"></a>
-**A29 — A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page** · 🐞 · minor.
+**A29 — A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page** · 🐞 · medium.
 A reader who presses the address "https://example.org/kilo's-page" in
 a published item's "References" block expects that page. The text shows
 the whole address, but the link opens "https://example.org/kilo", the
@@ -1401,7 +1401,8 @@ page: the address picked out of the reference's text ends at the
 apostrophe (Rule 11), so with metadata lookup on the row links
 "https://example.org/kilo" and the "URL" box of "Edit citation" holds
 it. The reference's text itself is stored and shown whole.
-Since: 2025-10-01 (about a year), on the published page · Basis: probe, 2026-10-21. <sup>f-a29</sup>
+Since: 2025-10-01 (about a year), on the published page · Basis: probe, 2026-10-23. <sup>f-a29</sup>
+Report: paused — the published-page half written and read 2026-10-23, held until a related item is settled before it is published (2026-10-23)
 
 <a id="a30"></a>
 **A30 — On the published page, a web address in brackets in a reference links with the closing bracket included** · 🐞 · minor.
@@ -1414,6 +1415,7 @@ the link. With metadata lookup on, the same reference's row on the
 "References" page links the DOI correctly. Released versions do the
 same, so this is not a regression.
 Basis: probe, 2026-10-21. <sup>f-a30</sup>
+Report: paused — written and read 2026-10-23, held until a related item is settled before it is published (2026-10-23)
 
 
 ### Retired
