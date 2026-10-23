@@ -240,7 +240,9 @@ typed. Nothing asks first. The one exception is an author row added in
        gives "10419/12345". A web address keeps "http://" and a closing
        "/" when it has them, but ends at an apostrophe in it:
        "https://example.org/kilo's-page" gives "https://example.org/kilo"
-       ⚠ [A29](#a29); <sup>f-a12</sup> <sup>q26</sup>
+       ⚠ [A29](#a29). It also ends at a double quote mark:
+       "https://example.org/a"b" gives "https://example.org/a";
+       <sup>f-a12</sup> <sup>q26</sup> <sup>q27</sup>
     2. a reference with no DOI is looked up by its text in Crossref, which
        may supply the DOI and the bibliographic details;
     3. a reference with a DOI is looked up in OpenAlex, which may supply
@@ -473,12 +475,23 @@ typed. Nothing asks first. The one exception is an author row added in
     (on a press, *Monograph landing page*). <sup>p</sup> <sup>q23</sup>
     - 27a. **Where an address's link leads.** Read in the code, the
       link runs to the next space or square or angle bracket, less a
-      full stop or comma at its end: a semicolon, colon, closing bracket
-      or double quote mark after an address goes into it
-      <sup>p</sup>. The drive showed: <sup>q26</sup>
+      full stop or comma at its end: a semicolon, colon or closing
+      bracket after an address goes into it <sup>p</sup>. The drive
+      showed: <sup>q26</sup> <sup>q27</sup>
       - an apostrophe in an address cuts its link there:
         "https://example.org/kilo's-page" shows whole but opens
-        "https://example.org/kilo" ([A29](#a29)); <sup>q26</sup>
+        "https://example.org/kilo" ([A29](#a29)). When "target='…'"
+        follows the apostrophe, the link also opens in the same tab
+        instead of a new one: "https://example.org/z'target='_self"
+        opens "https://example.org/z" there. The same text in the
+        address's query, as in "https://example.org/x?target=_self",
+        changes nothing: the whole address opens in a new tab;
+        <sup>q26</sup> <sup>q27</sup>
+      - a double quote mark in an address cuts its link there too:
+        "https://example.org/a"b" shows whole but opens
+        "https://example.org/a", in a new tab. A web address cannot hold
+        a double quote unless it is written "%22", and released versions
+        cut it the same way; <sup>q27</sup>
       - "(https://doi.org/10.1234/f8)." links to
         "https://doi.org/10.1234/f8)", the bracket included
         ⚠ [A30](#a30). <sup>p</sup> <sup>q26</sup>
@@ -1002,6 +1015,10 @@ Left out of the scenarios above, by reason:
   - a reference whose web address is followed by a full stop, read on
     the published page: the full stop outside the address's link, which
     opens the address shown (Rule 27a)
+  - a reference whose web address holds a double quote mark: shown
+    whole on the published page, its link opening the address up to the
+    quote in a new tab, and the same cut address linked from its row on
+    the References page with lookup on (Rules 11 step 1, 27a)
 - **Rarely met**:
   - "Data Citations" at "Do not request data citation metadata from the
     author during submission.": the "Data" page without the wizard's
@@ -1059,7 +1076,8 @@ Left out of the scenarios above, by reason:
   - A27 (the foot's "Jump to next error" and "Go to" buttons leaving
     the cursor on the pressed button; [Fields & validation](#fields))
   - A29 (an address with an apostrophe linked, and picked out, only up
-    to the apostrophe; Rules 11, 27a)
+    to the apostrophe, and opening in the same tab when "target='…'"
+    follows it; Rules 11, 27a)
   - A30 (a closing bracket taken into an address's link on the published
     page; Rule 27a)
 - **No seed**:
@@ -1395,8 +1413,10 @@ Basis: probe, 2026-10-07. <sup>f-a27</sup>
 A reader who presses the address "https://example.org/kilo's-page" in
 a published item's "References" block expects that page. The text shows
 the whole address, but the link opens "https://example.org/kilo", the
-part before the apostrophe. Released versions link the whole address,
-so this is a regression. Editors meet the same cut on the "References"
+part before the apostrophe. Text after the apostrophe can also change
+how the link opens: "https://example.org/z'target='_self" opens
+"https://example.org/z" in the same tab instead of a new one. Released
+versions link the whole address, so this is a regression. Editors meet the same cut on the "References"
 page: the address picked out of the reference's text ends at the
 apostrophe (Rule 11), so with metadata lookup on the row links
 "https://example.org/kilo" and the "URL" box of "Edit citation" holds
@@ -2139,7 +2159,13 @@ trailing "." or ",", written as `<a href='{$url}' target='_blank'>`: the
 address goes into the link in single quotes as it is, so an apostrophe
 in it closes the link's address, and the match runs on through a ")";
 notes f-a29, f-a30; Rule 27a), printed through `strip_unsafe_html`, plus the `Templates::Article|Preprint::Details::Reference`
-hook. OPS `preprint_details.tpl` has the same block and, since ops
+hook. The match also takes a `"`, but `strip_unsafe_html` (the bundled
+HTMLPurifier 4.18 with the app's settings, run offline 2026-10-23)
+writes the `href` out ending before it, and does the same with
+`&quot;`; only `%22` is kept, so escaping the quote marks would not
+change the cut (note q27). The sanitizer keeps only `href`, `title`
+and a `target` of `_blank` on a link; 3.5 writes the link in double
+quotes, where the `"` ends the address the same way. OPS `preprint_details.tpl` has the same block and, since ops
 `dafd9b3263` (pkp/ops#1443, commit `26031aac38`, merged 2026-10-09), the
 same condition; until then it tested `$publication->getData('citationsRaw')`
 without the `(string)` cast, so its condition held for a preprint with no
@@ -2441,6 +2467,43 @@ new tab opened `https://example.org/kilo`; "https://doi.org/10.1234/f8)"
 no `target` (the same tab). No response of 500 or more, no page error,
 no dialog; the only response of 400 or more was example.org's own 404
 for the pressed link. Kept check `shared/playwright/checks/U42/H21/h21.js`.
+
+<a id="fn-q27"></a>
+**q27** — Live-probed 2026-10-23 (Rule 11 step 1; Rules 27, 27a; A29),
+OJS, OMP and OPS, each on `main` (ojs `3cf9aa91a8`, omp `178e8b34b`,
+ops `5091e916d9`, lib/pkp `1f415a07ca`) and on `stable-3_5_0` (ojs
+`0b1ae35f04`, omp `a150eee76`, ops `18506a5b4d`, lib/pkp
+`5b54f59ed7`), two runs per app and line, each from a freshly reset
+copy of PKP's default test dataset (PostgreSQL), as `dbarnes` on the
+dataset's published item (OJS article 17, OMP book 5, OPS preprint 2),
+walked as in note q26 with six references: "Quote, Q. (2013). A double
+quote. https://example.org/a"b", "Query, R. (2014). Target in the
+query. https://example.org/x?target=_self", "After, S. (2015). Target
+text after. https://example.org/y target="_self"", "Apos, T. (2016).
+Apostrophe then target. https://example.org/z'target='_self", "Dquo,
+U. (2017). Double quote then target. https://example.org/w"target="_self"
+and "Plain, P. (2018). A plain link. https://example.org/plain". The
+landing page's block read the six texts as typed, in list order. On
+`main` the links (text → address) were "https://example.org/a"b" →
+`https://example.org/a` and "…/w"target="_self" →
+`https://example.org/w`, each with `target="_blank"` and
+`rel="noreferrer noopener"`, each pressed opening a new tab;
+"…/x?target=_self" → the whole address, new tab; "…/y" → itself, the
+words after the space plain text, new tab; "…/z'target='_self" →
+`https://example.org/z` with no `target` and no `rel`, opening in the
+same tab; the control → itself, new tab. On `stable-3_5_0` the double
+quote cut the same way (`https://example.org/a`,
+`https://example.org/w`), "…/z'target='_self" linked the whole address,
+and no link had a `target` (the same tab). The References page on
+`main`, lookup on, after "Reprocess all references" and a reload, linked
+`https://example.org/a`, `https://example.org/w` and
+`https://example.org/z`, each with `target="_blank"`; with lookup off
+right after "Add" the stored web addresses were the same. An entry left
+unsaved in the "Add" box (3.5: the "References" box) for "Title &
+Abstract" asked nothing and was gone on return. No response of 400 or
+more (example.org answered by a stub), no page error, no notice, no
+dialog in the 12 runs. Kept check
+`shared/playwright/checks/U42/I23D/i23d.js`.
 
 <a id="fn-s"></a>
 **s** — Scenario seeding. The seeded journal (`publicknowledge`) keeps the
@@ -3053,7 +3116,12 @@ lookup's reference refused as above; at the head both references saved
 `Citation::getRawCitationWithLinks()` (note p) writes the matched
 address into `<a href='{$url}' target='_blank'>` in single quotes, so
 the address's apostrophe closes the link's address, while the link's
-text, written from the same match, shows the whole address. The single quotes came with
+text, written from the same match, shows the whole address. A
+`target='…'` after the apostrophe becomes the link's first `target`
+attribute: `strip_unsafe_html` drops it, its value being other than
+`_blank`, and ignores the template's own `target='_blank'` written
+after it as a repeat, so the link has no `target` and no `rel` and
+opens in the same tab (note q27). The single quotes came with
 pkp/pkp-lib#10692 "structured citations" (`4730f6707e`, 2025-10-01;
 kept in `8074222efe`), on `main` and `ore` (tag `ore-2026-10-13`), in no
 3.x release; `stable-3_5_0`'s `getCitationWithLinks()` has the same
@@ -3065,7 +3133,8 @@ walked there). The templates print it through `strip_unsafe_html` (OJS
 used by the lookup's first step and by a lookup-off "Add" (note h), has
 the path class `[-a-zA-Z0-9@:%_\+.~\#?&//=]`, which holds no apostrophe,
 so the stored web address ends there; 3.5 picks no identifiers out of a
-reference. Live-probed 2026-10-21: note q26.
+reference. Live-probed 2026-10-21: note q26; the `target` case
+2026-10-23: note q27.
 Issue report: [pkp-e2e#1065](https://github.com/jardakotesovec/pkp-e2e/issues/1065) ([docs/issues/U42-A29-reference-url-cut-at-apostrophe.md](../issues/U42-A29-reference-url-cut-at-apostrophe.md)).
 
 <a id="fn-f-a30"></a>
