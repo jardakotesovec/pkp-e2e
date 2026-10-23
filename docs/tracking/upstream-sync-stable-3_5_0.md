@@ -17,6 +17,13 @@ and no CI follows this branch. `main`'s baselines are in
 
 ## Read log
 
+- **2026-10-23 (PR review, VM s2; asked in the channel by @jarda.kotesovec) — pkp/pkp-lib#13607: pkp/oaiJats#89 (kaitlinnewson `13607-3_5_0`, head `41d099818a`, one commit on the plugin's line tip `35d1f06867`) with the pointer bump pkp/ojs#5983 (head `5bd9a52bd5`, one commit on the line tip `95094f36be`). The line's jatsTemplate (`96eacdab48`) never wrote the editors; the 3.5 OAI-PMH `jats` format added them. Not merged; baselines not advanced. No companion: no spec, suite or CI follows the line.**
+  - oaiJats `41d099818a` (`_mungeMetadata()` no longer adds a `journal-meta` `contrib-group` of the journal's managers, editors and section editors; the `UserGroup` and unused `ControlledVocab` imports go, plus two whitespace and docblock lines) → as the issue asks. The same removal covers an uploaded JATS galley, since every record passes `_mungeMetadata()` (read in the code, not driven).
+  - Driven at OJS `5bd9a52bd5` (`lib/pkp` `f94e49dafb`), PKP's default dataset freshly loaded for each side (`checks/sync/jatsTemplate-127/editors.js` with `PKP_E2E_LINE=stable-3_5_0`; `.reports/sync-13607-3_5/base/` at `35d1f06`, `head/` and `head2/` at `41d0998`): the OAI `jats` record of submission 17 carries the six names (admin, rvaca, dbarnes, dbuskins, sberardo, minoue) at the base and none at the head; the 21 generated documents have no such group on either side (the line has no signed-out JATS download route); with the group cut from the base's record all 22 files are the same bytes at both sides, the head twice. No regression.
+  - Seen on both sides, nothing filed: the line's JATS is not valid against JATS 1.2 (`publisher` before `issn` in `journal-meta` in every document, and the OAI record's `dtd-version`), unchanged by the PR.
+  - pkp/ojs#5983's PHPUnit and upgrade matrix ([39963369473](https://github.com/pkp/ojs/actions/runs/39963369473)): all 6 jobs green (validate; PHPUnit on PHP 8.3 with MySQL and PostgreSQL; the upgrade jobs from 3.3 and 3.4 on PostgreSQL and MySQL, from 3.4 on MariaDB).
+  - Security: nothing.
+
 _Newest first; one entry per read: the date and the range per repo, then
 one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the

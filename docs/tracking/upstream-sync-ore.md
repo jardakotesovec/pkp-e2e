@@ -30,6 +30,11 @@ pkp-e2e `ore` tip: `e2fead0a` (2026-10-22, the daily step's carry-over of U30, U
 
 ## Read log
 
+- **2026-10-23 — PR review, pkp/pkp-lib#13607 into `ore` (asked in the channel by @jarda.kotesovec): pkp/ojs#5982 (kaitlinnewson `13607-ore`, head `a95be8302d`, one commit on the ore tip `c232e19d6f`: the jatsTemplate pointer `8a08fa7635` → `2e50adacaa`, the head of pkp/jatsTemplate#127, which `main` reviews today; the plugin has no `ore`). VM s2, the ore worktree (`lib/pkp` `6d2e143ee0`, `lib/ui-library` `5ddd525f9f`). Companion `13607-ore`, the `main` companion `13607-main`'s commit cherry-picked. Not merged; baselines not advanced.**
+  - The `main` drive again on the ore checkout, PKP's default dataset freshly loaded for each side (`.reports/sync-13607-ore/base/` at `8a08fa7`, `head/` at `2e50ada`): the same six names in `journal-meta` at the base, in the 21 generated documents, the "JATS XML" page, the signed-out download and the OAI `jats` record of submission 17; none at the head; the rest of all 23 files the same bytes; all valid against the JATS 1.2 DTD. No regression.
+  - Suites: pkp/ojs#5982's own e2e check [39961459210](https://github.com/pkp/ojs/actions/runs/39961459210) (pkp-e2e `ore`), 3/3 green.
+  - Security: nothing.
+
 _Newest first; one entry per read: the date and the range per repo, then
 one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `ore-only`; the verdict;
