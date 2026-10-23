@@ -2904,6 +2904,7 @@ it is refused the same way, and with it adds a version. The fix (code;
 not tried): drop `version` from `required` in lib/pkp
 `schemas/publication.json` on `main`. Kept check
 `shared/playwright/checks/U49/I23G/i23g.js` (`PART=api`).
+Issue report: [pkp-e2e#1071](https://github.com/jardakotesovec/pkp-e2e/issues/1071) ([docs/issues/U49-A17-api-new-version-version-field-required.md](../issues/U49-A17-api-new-version-version-field-required.md)).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — OJS1 (retired). Live 2026-08-28 (metadata spec, register A1): with
