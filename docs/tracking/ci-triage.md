@@ -1520,6 +1520,39 @@ trips.
   renewal's date come from), or another midnight-spanning red of a test
   that compares a date with `TODAY()`.
 
+- **pkp/omp's own Cypress: a proof file other than the newest assigned to
+  the publication format** (pkp/omp `omp-stable-3_5_0` and `omp-main`,
+  every DB job in turn, since at least 2026-09-24; investigated
+  2026-10-23, asked by @jarda.kotesovec). Two signatures:
+  `60-content/CallanSubmission.cy.js:168` waits for `epilogue.pdf` in the
+  publication format grid and the next test ("Book is not available when
+  unpublished", "Allan") follows it red;
+  `integration/Z_MonographViewDCMetadata.cy.js:501` waits for
+  `chapter3.pdf` in a before-all hook. Between them, 8 of the 10 red
+  `omp-stable-3_5_0` runs since 2026-10-14 (e.g. 39895462899, 39656904989);
+  `omp-main` shows both too (38982777309, 38279968910). Cause: both specs
+  tick `selectedFiles[]:first` in "Select Files" expecting the newest
+  upload, and the rows come from `Repo::submissionFile()->getCollector()`,
+  sorted by `sf.created_at` alone (one-second precision; unchanged since
+  2024). The data tests upload one file about every second (PKP's 3.5 OMP
+  dataset: Callan's six files exactly one second apart, 25 same-second
+  groups in the dump), so two files sometimes share a second and the
+  database picks their order; the failure screenshots show `chapter4.pdf`
+  and `chapter2.pdf` assigned instead. Fix drafted (a `submission_file_id`
+  tiebreaker, newest first): `shared/playwright/checks/sync/omp-proof-file-order/`
+  (`fix-main.diff`, `fix-stable-3_5_0.diff`, the commits as
+  `0001-main.patch`, `0001-stable-3_5_0.patch`; the bot's token cannot
+  push to the `jardakotesovec/pkp-lib` fork, 403). `order.php` (the
+  Collector's order with chapter4/epilogue or all six files tied, in a
+  rolled-back transaction, default dataset, PostgreSQL) reads `chapter4.pdf`
+  and `chapter3.pdf` first at the base on both lines and `epilogue.pdf`
+  with the fix. OMP's Cypress specs themselves not run with the fix. The
+  same runs' other reds are infrastructure: `pkp.sfu.ca/omp/xml/omp-version.xml`
+  503 in the upgrade step (39604355752), nodejs.org's version index reset
+  (39480881665), `setup-mariadb` (39810024130), Cypress's 120 s page load
+  (2026-10-09, 10-14). **Watch condition**: the patch merged upstream; then
+  a sighting of either signature is a new cause.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull
