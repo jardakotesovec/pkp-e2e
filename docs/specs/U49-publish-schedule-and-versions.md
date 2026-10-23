@@ -1220,7 +1220,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A program creating a version with a stage the app does not know gets a server error instead of a refusal | 🐞 | low · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
 | [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
-| [A17](#a17) | A program creating a version is refused unless it sends a version number the API reference does not list and the app throws away | 🐞 | minor | — |
+| [A17](#a17) | A program creating a version is refused unless it sends a version number the app throws away | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
@@ -1514,18 +1514,21 @@ OPS's neither), and 3.5 since 2026-10-20.
 Since: 2026-10-20 (pkp/pkp-lib#13560; on 3.5 the same day) · Basis: probe, 2026-10-21. <sup>[f-a16](#fn-a16)</sup>
 
 <a id="a17"></a>
-**A17 — A program creating a version must send a version number the app throws away** · 🐞 · minor.
-A program that creates a new version through the install's programming
-interface (Rule 11b), sending the fields OJS's API reference lists
-for that request, expects the version to be created. Instead it is
-refused with "This field is required." for a field named "version",
-which the reference does not list. Sending "version" with any number
-lets the version through, but the number is dropped: versions are now
-numbered by stage and revision (Rule 12), and no version keeps that
-field. OMP and OPS ship no API reference, and refuse the same request
-the same way. "Create New Version" sends another request and is not
-affected. Only `main` has this: on 3.5 the version number is still a
-field every version keeps, and the reference lists it.
+**A17 — A program creating a version is refused unless it sends a version number the app throws away** · 🐞 · low.
+A program that creates a new version of a submission with `POST
+…/submissions/{id}/publications`, sending a title, an abstract and a
+section, expects the version to be created. Instead it is refused with
+"This field is required." for a field named "version". OJS's API
+reference does not list that field, and marks none of the request's
+fields as required.
+Sending "version" with any number lets the version through, but the
+number is dropped: a version is now numbered by its version stage (such
+as Version of Record) and a major.minor number, and no version keeps
+that field. OMP and OPS ship no API reference.
+Only a program meets this: "Create New Version" on screen sends a
+different request, `POST …/publications/{id}/version`. No release
+carries this code yet, so it can be fixed before the first one that
+does.
 Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
 
 ### OJS
