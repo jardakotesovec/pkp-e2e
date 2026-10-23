@@ -2031,6 +2031,7 @@ four, the page reading "{address}" and "You are viewing {address}'s user
 details"; on the third, A14's four alone, the page reading "Ines Both"
 and "You are viewing Ines's user details". No response of 500 or more
 and no page error.
+Issue report: [pkp-e2e#1072](https://github.com/jardakotesovec/pkp-e2e/issues/1072) ([docs/issues/U06-A17-invitation-edit-nameless-php-warning.md](../issues/U06-A17-invitation-edit-nameless-php-warning.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
