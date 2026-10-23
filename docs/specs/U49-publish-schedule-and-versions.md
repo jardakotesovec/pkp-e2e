@@ -2735,6 +2735,7 @@ app has ("Unassigned version (2026-10-21)" for omitted and `null`,
 app's `VersionStage` values in the schema's validation, or
 `validateVersionStage()` in `addPublication()` when the stage is sent.
 Kept check `shared/playwright/checks/U49/H21/h21.js` (phase `stage`).
+Issue report: [pkp-e2e#1062](https://github.com/jardakotesovec/pkp-e2e/issues/1062) ([docs/issues/U49-A14-api-new-version-unknown-stage-server-error.md](../issues/U49-A14-api-new-version-unknown-stage-server-error.md)).
 
 <a id="fn-a15"></a>
 **f-a15** — `PKP\publication\Repository::edit()` and `add()` loop over
